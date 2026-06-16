@@ -1,0 +1,13 @@
+[build]
+  publish = "public"
+
+# Always serve fresh HTML so the installed PWA never runs a stale version
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store"

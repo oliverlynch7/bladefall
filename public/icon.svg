@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <rect width="256" height="256" rx="56" fill="#0b0c10"/>
+  <!-- blade -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M168 56 L196 84 L104 176 L86 178 L88 160 Z" fill="#e8a33d" stroke="#f7d79a" stroke-width="4"/>
+    <!-- crossguard -->
+    <path d="M70 150 L106 186" stroke="#cfd6df" stroke-width="12"/>
+    <!-- hilt -->
+    <path d="M64 176 L88 200" stroke="#8b8f9a" stroke-width="12"/>
+    <circle cx="60" cy="200" r="9" fill="#e8a33d"/>
+  </g>
+</svg>

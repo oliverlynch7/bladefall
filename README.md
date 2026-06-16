@@ -4,7 +4,7 @@ A 2D action-RPG built for Caleb — installs as an iPhone home-screen web app, s
 Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no dependencies.
 
 - **Live:** https://bladefall-caleb.netlify.app
-- **Netlify site:** `bladefall-caleb` (id `dc6e1c11-415f-4073-9dbc-a8022a883cb8`)
+- **Netlify site:** `bladefall-caleb` (id `3cd4cef1-15e8-4b91-a589-50ec69235f88`)
 - **Game code:** [`public/index.html`](public/index.html) — everything (HTML/CSS/JS) is in this one file.
 
 ## Install on iPhone
@@ -26,7 +26,7 @@ Manual equivalent (if the script ever fails). PowerShell needs the inner quotes 
 
 ```powershell
 netlify deploy --dir public            # prints a draft URL + deploy id
-netlify api restoreSiteDeploy --data '{\"site_id\":\"dc6e1c11-415f-4073-9dbc-a8022a883cb8\",\"deploy_id\":\"<DEPLOY_ID>\"}'
+netlify api restoreSiteDeploy --data '{\"site_id\":\"3cd4cef1-15e8-4b91-a589-50ec69235f88\",\"deploy_id\":\"<DEPLOY_ID>\"}'
 ```
 
 (In a bash shell, drop the backslashes and use normal single-quoted JSON.)

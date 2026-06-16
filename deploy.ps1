@@ -5,7 +5,7 @@
 # This two-step is the reliable path. Run this script after editing public/.
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
-$SITE = 'dc6e1c11-415f-4073-9dbc-a8022a883cb8'
+$SITE = '3cd4cef1-15e8-4b91-a589-50ec69235f88'
 
 Write-Host "Uploading draft..."
 $json = netlify deploy --dir public --json | Out-String

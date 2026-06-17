@@ -3,36 +3,41 @@
 A 2D action-RPG built for Caleb — installs as an iPhone home-screen web app, same as
 Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no dependencies.
 
-- **Live:** https://bladefall-caleb.netlify.app
-- **Netlify site:** `bladefall-caleb` (id `3cd4cef1-15e8-4b91-a589-50ec69235f88`)
+- **Live:** https://bladefall.netlify.app
+- **Netlify site:** `bladefall`, on Oliver's **second** Netlify account.
 - **Game code:** [`public/index.html`](public/index.html) — everything (HTML/CSS/JS) is in this one file.
+
+> ⚠️ **Account rule:** BLADEFALL must ONLY live on the second Netlify account, never on the
+> `theantianxietyacademy@gmail.com` account (that account is for The Work + coacholiverlynch.com).
+> `deploy.ps1` aborts if the CLI is signed into the antianxietyacademy account. The old
+> `bladefall-caleb` site on that account was deleted and must not be recreated.
 
 ## Install on iPhone
 Open the Live URL in **Safari** → Share → **Add to Home Screen**. Launches full-screen, no browser chrome.
 
 ## Gameplay
-Run ◀▶, **JUMP**, **DODGE** (i-frame dash), **SLASH** (hold to combo). Kill monsters → XP →
-level up → pick an upgrade. 6 stages, 2 minibosses, the Abyss King boss, then New Game+
-(harder, keep your build, unlock the Abyss skin). Progress saves to the phone (Continue on title).
+Run ◀▶, **JUMP**, **SLASH/FIRE** (hold to combo), **DODGE** (i-frame dash). Kill monsters → XP →
+level up → pick an upgrade. 14 stages, ranged bosses, the Abyss King and the Void Tyrant.
+Rarity loot (common→legendary) — physical & magical, melee & ranged weapons + **armor** (defense +
+bonus stats); rarer drops deeper in. **New Game+** keeps your weapon/armor/stats while enemies
+scale ~1.12× past your power on both axes. **Achievements unlock skins** (pick them in the pause
+menu or title). Progress saves to the phone (Continue on title).
+
+**Keyboard (desktop):** A/D or ←/→ move · W/Space/↑ jump · **J attack** · **K or Shift dodge** ·
+**Esc pause**. On phone, use the on-screen buttons.
 
 ## Edit & redeploy
-Edit `public/index.html`, then from this folder:
+First make sure the Netlify CLI is signed into the **second** account (the one that owns
+`bladefall.netlify.app`) — `netlify logout` then `netlify login` and pick it. Then from this folder:
 
 ```powershell
 ./deploy.ps1
 ```
 
-Manual equivalent (if the script ever fails). PowerShell needs the inner quotes `\"`-escaped:
-
-```powershell
-netlify deploy --dir public            # prints a draft URL + deploy id
-netlify api restoreSiteDeploy --data '{\"site_id\":\"3cd4cef1-15e8-4b91-a589-50ec69235f88\",\"deploy_id\":\"<DEPLOY_ID>\"}'
-```
-
-(In a bash shell, drop the backslashes and use normal single-quoted JSON.)
-
-> `netlify deploy --prod` currently returns **403 Forbidden** for this site. The draft-upload +
-> `restoreSiteDeploy` two-step is the working path and is what `deploy.ps1` does.
+`deploy.ps1` refuses to run if the CLI is signed into the antianxietyacademy account, resolves the
+`bladefall` site on the signed-in account, uploads a draft, and publishes it via
+`netlify api restoreSiteDeploy` (the draft+restore two-step avoids the `--prod` 403 seen on the old
+site). It writes the resolved site id into `.netlify/state.json`.
 
 ## Icons
 `public/icon.svg` is the source. Regenerate the PNG icons (`apple-touch-icon.png`, `icon-512.png`):

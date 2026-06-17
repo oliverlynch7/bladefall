@@ -1,5 +1,11 @@
-# Local Netlify link state (stale — points at the old deleted site)
+# Local Netlify link state (machine-specific; not needed for Git deploys)
 .netlify/
+
+# Build / preview artifacts (root-level temp files like _bladefall_deploy.zip, _preview.png, _uploader.js)
+/_*
+
+# Node
+node_modules/
 
 # OS / editor junk
 .DS_Store

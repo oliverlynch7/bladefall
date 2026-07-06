@@ -140,7 +140,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.2.0';
+const VERSION3D='1.2.1';
 
 /* ---------------- Persistence (own save; one-time import from 2D) ---------------- */
 const SAVE_KEY='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
@@ -743,6 +743,14 @@ window.addEventListener('keydown',e=>{
     if(e.code==='Backspace'||e.code==='Delete'||(e.code==='KeyK'&&fresh)){ e.preventDefault(); const kb=document.getElementById('keepBtn'); if(kb) kb.click(); return; }
     if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
   }
+  if(mode==='upgrade'){
+    // pick a level-up card with J/K/L or 1/2/3 (guarded like the loot popup)
+    const fresh=!e.repeat && (Date.now()-_offerT)>250;
+    const pickMap={KeyJ:0,KeyK:1,KeyL:2,Digit1:0,Digit2:1,Digit3:2,Numpad1:0,Numpad2:1,Numpad3:2};
+    if(pickMap[e.code]!=null){ e.preventDefault();
+      if(fresh){ const btns=document.querySelectorAll('.choice'); if(btns[pickMap[e.code]]) btns[pickMap[e.code]].click(); }
+      return; }
+  }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   const k=keymap[e.code]; if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
@@ -1111,10 +1119,10 @@ function pick3(){
   const out=[]; while(out.length<3 && pool.length) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); return out;
 }
 function openLevelUp(){
-  mode='upgrade'; const opts=pick3();
+  mode='upgrade'; _offerT=Date.now(); const opts=pick3(), KEYS=['J','K','L'];
   showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.22em;margin-bottom:2px;">LEVEL UP</p>
     <h2 class="ovh">You reached Level ${G.p.level}</h2><p class="ovsub">Choose an upgrade</p>
-    <div class="choices">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><div class="cname"><span>${o.icon}</span>${o.n}</div><div class="cdesc">${o.d}</div></button>`).join('')}</div></div>`);
+    <div class="choices">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><div class="cname"><span>${o.icon}</span>${o.n} <span style="opacity:.5;font-size:12px;margin-left:auto">(${KEYS[i]})</span></div><div class="cdesc">${o.d}</div></button>`).join('')}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
 }
 function fmt(n){ return Math.round(n*100)/100; }

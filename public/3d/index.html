@@ -60,7 +60,7 @@
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
   #bDodge.cooling{opacity:.4;}
-  .tog{width:48px;height:30px;border-radius:9px;font-size:10px;letter-spacing:.05em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
+  .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
@@ -125,7 +125,7 @@
   <button class="btn" id="bDodge">DODGE</button>
   <button class="btn" id="bJump"><svg viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></button>
   <button class="btn" id="bAttack">SLASH</button>
-  <button class="btn tog" id="bAuto">AUTO</button>
+  <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">KEEP</button>
 </div>
 <div id="toast"></div>
@@ -140,7 +140,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.0.0';
+const VERSION3D='1.1.0';
 
 /* ---------------- Persistence (own save; one-time import from 2D) ---------------- */
 const SAVE_KEY='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
@@ -160,8 +160,9 @@ const meta=Object.assign({
   ngPlus:0,bestStage:0,soundOn:true,unlockedSkins:['knight'],selectedSkin:'knight',
   achievements:{},totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,
   magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
-  lastNgHp:1,lastNgDmg:1,autoAttack:false,autoKeep:false,run:null
+  lastNgHp:1,lastNgDmg:1,autoAttack:false,autoKeep:false,showArmor:true,run:null
 },_loaded);
+if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
 if(!Array.isArray(meta.unlockedSkins)) meta.unlockedSkins=['knight'];
 if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
@@ -295,6 +296,21 @@ const SKINS={
   celestial:{name:'Celestial',armor:'#caa84a',armorLt:'#f0e0a0',trim:'#fffff0',cape:'#9a8030',glow:'#fff7c0',tone:'#fbeccd',head:'halo'},
   god:{name:'GOD',armor:'#d4a017',armorLt:'#ffe04a',trim:'#fffbe0',cape:'#a06a00',glow:'#fff2a0',tone:'#fff0d0',head:'crown',god:true}
 };
+/* skin passives — marginal, scaling with unlock difficulty. Knight = plain baseline, GOD = already god.
+   Crimson = the challenge skin: a handful of stacked debuffs for bragging rights. */
+const SKINPASS={
+  ranger:{label:'+5% move speed',speed:1.05},
+  frost:{label:'−8% dodge cooldown',dodge:0.92},
+  emerald:{label:'+5% attack speed',atkSpeed:1.05},
+  gold:{label:'+4% damage',power:1.04},
+  arcane:{label:'+7% magic weapon dmg',magPower:1.07},
+  shadow:{label:'+7% ranged weapon dmg',rngPower:1.07},
+  crimson:{label:'⚠ CHALLENGE: −12% HP · −10% dmg · −8% speed · +12% dodge CD',hpMul:0.88,power:0.90,speed:0.92,dodge:1.12},
+  abyss:{label:'+4% lifesteal',lifesteal:0.04},
+  void:{label:'+8% damage',power:1.08},
+  celestial:{label:'+6% dmg & +6% speed',power:1.06,speed:1.06}
+};
+function skinP(p){ return SKINPASS[p.skin]||null; }
 
 /* ---------------- Achievements (identical; unlock skins) ---------------- */
 const ACHIEVEMENTS=[
@@ -347,6 +363,7 @@ const STAGES=[
   {name:'Abyss King',theme:'void',sky:[0.07,0.04,0.11],ground:'#241431',aw:760,ad:560,grunts:0,flyers:0,type:'boss',boss:'king'},
   {name:'The Void Tyrant',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}
 ];
+STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); // roomier arenas (v1.1)
 
 /* ---------------- Enemies (same stats; r = w/2) ---------------- */
 const ENEMY={
@@ -501,12 +518,16 @@ function recomputeArmor(p){
   p.armorMods=m;
 }
 function isGod(p){ return p.skin==='god'; }
-function effMaxHp(p){ let v=p.maxHp+(p.armorMods?p.armorMods.hp:0); return isGod(p)?v+9000:v; }
-function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); return isGod(p)?v*1.4:v; }
-function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); return isGod(p)?v+0.6:v; }
-function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); return isGod(p)?v*0.5:v; }
+function effMaxHp(p){ let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; return isGod(p)?v+9000:v; }
+function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
+  if(sp){ if(sp.power) v*=sp.power;
+    if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
+    if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
+  return isGod(p)?v*6:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; return isGod(p)?v*1.4:v; }
+function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal; return isGod(p)?v+0.6:v; }
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
 function defenseR(p){ if(isGod(p)) return 0.85; return p.armorMods?Math.min(0.5,p.armorMods.defense):0; }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -561,8 +582,28 @@ function loadStage(i){
   const rnd=mulberry(i*7919+31); G.deco=[];
   for(let k=0;k<26;k++){ const ang=rnd()*6.283, rad=Math.max(s.aw,s.ad)*0.62+rnd()*160;
     G.deco.push({x:Math.cos(ang)*rad, z:Math.sin(ang)*rad*0.8, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
-  const spawnAt=(type)=>{ const ang=Math.random()*6.283, rad=0.42;
-    spawnEnemy(type, Math.cos(ang)*s.aw*rad, Math.sin(ang)*s.ad*rad); G.killGoal++; };
+  // arena obstacles: low platforms you can jump onto, tall columns you can't (they also block shots = cover)
+  const rnd2=mulberry(i*104729+7); G.obstacles=[];
+  const obCount=s.type==='boss'?0:(s.type==='miniboss'?3:7+Math.floor(rnd2()*3));
+  for(let k=0;k<obCount;k++){
+    for(let tries=0;tries<14;tries++){
+      const ox=(rnd2()*2-1)*(s.aw/2-90), oz=(rnd2()*2-1)*(s.ad/2-90);
+      if(Math.hypot(ox,oz-s.ad*0.30)<140) continue;                    // player spawn clear
+      if(Math.hypot(ox,oz+s.ad*0.36)<140) continue;                    // portal clear
+      if(s.type==='miniboss' && Math.hypot(ox,oz+s.ad*0.32)<180) continue; // boss spawn clear
+      let bad=false; for(const o of G.obstacles){ if(Math.abs(ox-o.x)<(o.w+95)/2 && Math.abs(oz-o.z)<(o.d+95)/2){bad=true;break;} }
+      if(bad) continue;
+      if(rnd2()<0.55) G.obstacles.push({x:ox,z:oz,w:66+rnd2()*52,d:66+rnd2()*52,h:24+rnd2()*10,kind:'plat'});
+      else G.obstacles.push({x:ox,z:oz,w:28+rnd2()*22,d:28+rnd2()*22,h:95+rnd2()*55,kind:'col'});
+      break;
+    }
+  }
+  const spawnAt=(type)=>{ let x=0,z=0;
+    for(let tries=0;tries<10;tries++){ const ang=Math.random()*6.283;
+      x=Math.cos(ang)*s.aw*0.42; z=Math.sin(ang)*s.ad*0.42;
+      let inside=false; for(const o of G.obstacles){ if(Math.abs(x-o.x)<o.w/2+20 && Math.abs(z-o.z)<o.d/2+20){inside=true;break;} }
+      if(!inside) break; }
+    spawnEnemy(type,x,z); G.killGoal++; };
   for(let k=0;k<(s.grunts||0);k++) spawnAt('grunt');
   for(let k=0;k<(s.flyers||0);k++) spawnAt('flyer');
   if(s.mix){ for(const t in s.mix) for(let k=0;k<s.mix[t];k++) spawnAt(t); }
@@ -620,7 +661,14 @@ updateToggles();
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
 window.addEventListener('keydown',e=>{
   if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); } return; }
-  if(mode==='weapon'){ if(e.code==='Enter'){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; } if(e.code==='Backspace'||e.code==='Delete'){ e.preventDefault(); const kb=document.getElementById('keepBtn'); if(kb) kb.click(); return; } }
+  if(mode==='weapon'){
+    // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
+    // so holding J to attack can't accidentally equip the moment a popup opens.
+    const fresh=!e.repeat && (Date.now()-_offerT)>250;
+    if(e.code==='Enter'||(e.code==='KeyJ'&&fresh)){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; }
+    if(e.code==='Backspace'||e.code==='Delete'||(e.code==='KeyK'&&fresh)){ e.preventDefault(); const kb=document.getElementById('keepBtn'); if(kb) kb.click(); return; }
+    if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
+  }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   const k=keymap[e.code]; if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
@@ -662,6 +710,24 @@ function burst(x,y,z,color,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.283
   G.particles.push({x,y:y+Math.random()*10,z,vx:Math.cos(a)*sp,vy:60+Math.random()*120,vz:Math.sin(a)*sp,life:0.4+Math.random()*0.3,color,sz:2.5+Math.random()*3}); } }
 function vOverlap(a,b){ return a.y<b.y+b.h && b.y<a.y+a.h; }
 function dXZ(ax,az,bx,bz){ return Math.hypot(ax-bx,az-bz); }
+/* obstacle physics: floor height under an entity (0 = ground, or a platform top it is above) */
+function obFloor(x,z,r,y){
+  let f=0; if(!G||!G.obstacles) return 0;
+  for(const ob of G.obstacles){ if(ob.h<=y+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
+  return f;
+}
+/* push an entity out of any obstacle whose top is above its feet.
+   yRef = height BEFORE this frame's vertical move, so descending across a top
+   counts as landing (handled by obFloor) instead of a sideways wall eject. */
+function resolveObstacles(ent,r,yRef){
+  if(!G||!G.obstacles) return;
+  const ey=(yRef==null?ent.y:yRef);
+  for(const ob of G.obstacles){
+    if(ey>=ob.h-2) continue;
+    const dx=ent.x-ob.x, dz=ent.z-ob.z, px=ob.w/2+r-Math.abs(dx), pz=ob.d/2+r-Math.abs(dz);
+    if(px>0&&pz>0){ if(px<pz) ent.x+=(dx>=0?1:-1)*px; else ent.z+=(dz>=0?1:-1)*pz; }
+  }
+}
 function applyElement(e,el,dmg){
   if(el==='fire'){ e.burnT=2.6; e.burnDps=Math.max(2,dmg*0.18); e.burnColor='#ff7a3a'; }
   else if(el==='poison'){ e.burnT=3.2; e.burnDps=Math.max(2,dmg*0.14); e.burnColor='#86e05a'; }
@@ -802,8 +868,14 @@ function update(dt){
   if((input.attack||meta.autoAttack) && p.atkCd<=0 && p.dodgeTimer<=0) playerAttack();
   if(p.atkTimer>0) resolveSwing();
   if(!p.onGround) p.vy-=1500*dt;
-  p.x+=p.vx*dt; p.z+=p.vz*dt; p.y+=p.vy*dt;
-  if(p.y<=0 && !p.onGround){ p.y=0; p.vy=0; burst(p.x,2,p.z,'#888',4); p.onGround=true; p.jumps=0; }
+  p.x+=p.vx*dt; p.z+=p.vz*dt;
+  const yPrev=p.y;
+  p.y+=p.vy*dt;
+  resolveObstacles(p,p.r,yPrev);                 // walls: obstacles whose top was above your feet
+  const floor=obFloor(p.x,p.z,p.r,yPrev);
+  if(!p.onGround && p.vy<=0 && p.y<=floor){ p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); p.onGround=true; p.jumps=0; }
+  else if(p.onGround && p.y>floor+0.5){ p.onGround=false; if(p.vy>0) p.vy=0; } // walked off an edge
+  else if(p.onGround) p.y=floor;
   const HW=s.aw/2, HD=s.ad/2;
   if(p.x<-HW) p.x=-HW; if(p.x>HW) p.x=HW; if(p.z<-HD) p.z=-HD; if(p.z>HD) p.z=HD;
   const spd2=Math.hypot(p.vx,p.vz);
@@ -829,6 +901,7 @@ function update(dt){
       e.y+=Math.sign(ty-e.y)*Math.min(Math.abs(ty-e.y),eff*1.5*dt); }
     else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; e.y=0; }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
+    resolveObstacles(e,e.r); // walkers/bosses collide with everything; flyers only with tall columns (y-check inside)
     if(e.x<-HW) e.x=-HW; if(e.x>HW) e.x=HW; if(e.z<-HD) e.z=-HD; if(e.z>HD) e.z=HD;
     if(!e.dead && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
       hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:e.dmg,e.x,e.z);
@@ -846,6 +919,10 @@ function update(dt){
       if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
     if(pr.y<-4) pr.life=0;
+    // columns & platforms block shots — use them as cover
+    if(pr.life>0) for(const ob of G.obstacles){
+      if(pr.y<ob.h && Math.abs(pr.x-ob.x)<ob.w/2+pr.size*0.4 && Math.abs(pr.z-ob.z)<ob.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
   }
   G.projectiles=G.projectiles.filter(pr=>pr.life>0);
   // pickups
@@ -948,9 +1025,10 @@ function openLevelUp(){
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
 }
 function fmt(n){ return Math.round(n*100)/100; }
+let _offerT=0;
 function offerWeapon(nw){
   if(meta.autoKeep){ toast('Kept · '+nw.name+' dropped'); return; }
-  mode='weapon'; const cur=G.p.weapon;
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
   const typ=w=>(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee');
   const row=(label,a,b,better)=>{ const up=better==='low'?b<a:b>a; const cls=(a===b)?'':(up?'up':'down');
     return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}</b></span></div>`; };
@@ -961,13 +1039,13 @@ function offerWeapon(nw){
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">Equip</button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name}</button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name} <span style="opacity:.6">(K)</span></button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
 }
 function offerArmor(na){
   if(meta.autoKeep){ toast('Kept · '+na.name+' dropped'); return; }
-  mode='weapon'; const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
   const reduc=d=>Math.round(d/(d+200)*100);
   const before=totalDefense(G.p), after=before-curDef+na.defense;
   const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
@@ -980,7 +1058,7 @@ function offerArmor(na){
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip</button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'}</button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'} <span style="opacity:.6">(K)</span></button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
 }
@@ -1048,8 +1126,8 @@ function openSkins(back){
     return `<div class="skintile ${sel?'sel':''} ${unlocked?'':'lock'} ${id==='god'?'godt':''}" data-id="${id}">
       <img class="av" src="${skinAv(id)}" alt="">
       <div class="sn" style="color:${unlocked?(id==='god'?'#ffd24a':s.trim):'var(--muted)'}">${unlocked?s.name:'🔒'}</div>
-      <div class="lk">${unlocked?(sel?'Equipped':'Tap to equip'):skinUnlockHint(id)}</div></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Unlocks are shared with the 2D game.</p>
+      <div class="lk">${unlocked?((SKINPASS[id]?SKINPASS[id].label:'No passive')+(sel?' · ✓':'')):skinUnlockHint(id)}</div></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Each skin has a small passive — Crimson is the challenge skin.</p>
     <div class="skingrid">${tiles}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.skintile').forEach(t=>t.onclick=()=>{ const id=t.dataset.id;
     if(registerCheatTap(id)){ openSkins(back); return; }
@@ -1087,8 +1165,10 @@ function openPause(){
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
+    <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
     <button class="bigbtn ghost" id="qmenu">Quit to Menu</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
+  document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
@@ -1127,6 +1207,14 @@ function drawArena(s,t){
   const wc=tint(s.ground,'#fff',0.10);
   bx(0,8,-HD-26, s.aw+80,16,14, wc); bx(0,8,HD+26, s.aw+80,16,14, wc);
   bx(-HW-26,8,0, 14,16,s.ad+80, wc); bx(HW+26,8,0, 14,16,s.ad+80, wc);
+  // obstacles: platforms (jumpable, light top) & columns (cover, capped)
+  if(G.obstacles) for(const ob of G.obstacles){
+    if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
+      bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
+    else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
+      bx(ob.x,ob.h*0.52,ob.z, ob.w*0.5,ob.h*0.9,ob.d*1.06, tint(s.ground,'#fff',0.06));
+      bx(ob.x,ob.h+2.5,ob.z, ob.w*1.35,5,ob.d*1.35, tint(s.ground,'#fff',0.13)); }
+  }
   // theme decorations
   for(const d of G.deco){
     if(d.theme==='forest'){ bx(d.x,d.h*0.3,d.z, d.w*0.35,d.h*0.6,d.w*0.35,'#3a2c1c');
@@ -1202,6 +1290,17 @@ function drawHero3(p,t,preview){
   else if(hd==='halo'){ pushM(); mv(0,55,0); rotY(t*1.5); box(15,1.4,15, sk.glow, sk.glow, 0.85); popM(); }
   else if(hd==='mask'){ bx(0,42.5,5.9, 12,10,1.6,'#0a0a0e'); bx(-2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); bx(2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); }
   else if(hd==='eldritch'){ bx(0,42,0, 12.6,12.6,11.6, A); bx(-3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(0,39.6,5.9, 2,2,1.2, sk.glow, sk.glow); }
+  // equipped armor shown on the character (toggle in pause menu)
+  if(!preview && p.gear && meta.showArmor){
+    const g=p.gear;
+    if(g.chest){ const rc=g.chest.color, st=tint('#8f99a8',rc,0.30);
+      bx(0,24,0, 18.8,15,11.6, st); bx(0,30.6,0, 19.2,2.2,12, rc, rc); bx(0,24,6.1, 3,10,0.8, rc, rc); }
+    if(g.helmet){ const rc=g.helmet.color, st=tint('#8f99a8',rc,0.30);
+      bx(0,49.6,0, 14,4.4,13, st); bx(0,47.2,6.2, 14,1.6,0.9, rc, rc); }
+    if(g.legs){ const rc=g.legs.color, st=tint('#8f99a8',rc,0.30);
+      bx(-4.5,7,3.8, 7,9.6,1.6, st); bx(4.5,7,3.8, 7,9.6,1.6, st);
+      bx(-4.5,11,3.9, 7.2,1.4,1.7, rc, rc); bx(4.5,11,3.9, 7.2,1.4,1.7, rc, rc); }
+  }
   // cape
   pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
   bx(0,-12,0, 15,24,1.8, sk.cape); popM();
@@ -1219,27 +1318,136 @@ function drawEnemy3(e,t){
     pushM(); mv(-W*0.42,H*0.62,0); rotZ(0.5+flap); bx(-W*0.34,0,0, W*0.7,2.2,W*0.42, tint(col,'#000',0.2)); popM();
     pushM(); mv(W*0.42,H*0.62,0); rotZ(-0.5-flap); bx(W*0.34,0,0, W*0.7,2.2,W*0.42, tint(col,'#000',0.2)); popM();
     bx(-3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC); bx(3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC);
+  } else if(e.boss){
+    drawBoss3(e,t,col,eyeC,en,W,H);
   } else {
     bx(0,H*0.5,0, W,H,W*0.82, col);
     bx(0,H*0.16,0, W*1.04,H*0.08,W*0.86, tint(col,'#000',0.25));
-    // horns
     pushM(); mv(-W*0.34,H+2,0); rotZ(0.42); box(3,7,3, tint(col,'#000',0.35)); popM();
     pushM(); mv(W*0.34,H+2,0); rotZ(-0.42); box(3,7,3, tint(col,'#000',0.35)); popM();
-    // eyes + fangs
     bx(-W*0.18,H*0.66,W*0.42, 3,3.2,1.2, eyeC, eyeC); bx(W*0.18,H*0.66,W*0.42, 3,3.2,1.2, eyeC, eyeC);
     bx(-W*0.10,H*0.40,W*0.44, 1.8,3.4,1,'#ffffff'); bx(W*0.10,H*0.40,W*0.44, 1.8,3.4,1,'#ffffff');
-    if(e.boss){
-      if(e.type==='brute'||e.type==='colossus'){ pushM(); mv(-W*0.5,H*0.98,0); rotZ(0.6); box(4.4,13,4.4,tint(col,'#000',0.4)); popM(); pushM(); mv(W*0.5,H*0.98,0); rotZ(-0.6); box(4.4,13,4.4,tint(col,'#000',0.4)); popM(); }
-      if(e.type==='colossus'){ for(let i=-1;i<=1;i++) bx(i*W*0.22,H*0.5,W*0.42, 3,H*0.5,1.2,'#ff9a4a','#ff9a4a'); }
-      if(e.type==='warden'){ bx(0,H+6,0, W*0.5,8,W*0.4, tint(col,'#000',0.3)); }
-      if(e.type==='archer'){ bx(0,H+4,0, W*0.8,5,W*0.66, tint(col,'#000',0.45)); pushM(); mv(-W*0.62,H*0.55,0); rotZ(0.1); bx(0,0,0, 2.6,26,2.6,'#cbb27a'); popM(); }
-      if(e.type==='sorcerer'){ bx(0,H+7,0, W*0.6,11,W*0.5, tint(col,'#000',0.35)); bx(W*0.6,H*0.62,0, 2.6,H*0.9,2.6,'#caa'); bx(W*0.6,H*1.12,0, 6,6,6,'#cdf3ff','#7fd6ff'); }
-      if(e.type==='king'){ for(let i=-2;i<=2;i++) bx(i*W*0.18,H+5,0, 3,7+(i===0?4:0),3,'#f7d79a','#f7d79a'); }
-      if(e.type==='tyrant'){ for(let i=-2;i<=2;i++){ pushM(); mv(i*W*0.2,H+4,0); rotZ(-i*0.18); box(3.4,10,3.4, tint(col,'#000',0.3)); popM(); }
-        bx(0,H*0.42,W*0.42, 3,3.2,1.2,'#c47bff','#c47bff'); }
-    }
   }
   popM();
+}
+/* ---- bosses: mythic-monster voxel builds (visual only; hitbox r/h unchanged) ---- */
+function drawBoss3(e,t,col,eyeC,en,W,H){
+  const dark=tint(col,'#000',0.35), darker=tint(col,'#000',0.55), lite=tint(col,'#fff',0.16);
+  if(en) rotX(0.12); // enraged/lunging lean
+  if(e.type==='brute'){
+    // hulking ape-stance brute: hunched torso, ground-dragging fists, tusked underbite
+    bx(-W*0.22,12,0, 15,24,16, dark); bx(W*0.22,12,0, 15,24,16, dark);
+    pushM(); mv(0,40,3); rotX(0.34);
+    bx(0,6,0, W*1.02,34,W*0.62, col);
+    bx(0,20,-4, W*0.8,12,W*0.4, lite); // shoulder hump
+    for(let i=0;i<3;i++){ pushM(); mv(0,24-i*10,-W*0.30+i*2); rotX(-0.5); box(5,11,5, darker); popM(); } // back spikes
+    popM();
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.56,46,8); rotX(0.12);
+      box(13,36,13, col); mv(0,-24,4); box(17,14,17, dark); popM(); } // arms → fists
+    bx(0,42,W*0.40, 17,14,13, col);                         // low-slung head
+    bx(0,35,W*0.50, 20,6.5,9, dark);                        // underbite jaw
+    bx(-6,39,W*0.54, 3,6,2.6,'#e8e0d0'); bx(6,39,W*0.54, 3,6,2.6,'#e8e0d0'); // tusks
+    bx(0,48,W*0.46, 18,3,3, darker);                        // brow
+    bx(-4.5,45,W*0.47, 3.6,2.6,1.4, eyeC, eyeC); bx(4.5,45,W*0.47, 3.6,2.6,1.4, eyeC, eyeC);
+  }
+  else if(e.type==='warden'){
+    // towering armored sentinel with visor glow and a planted greatsword
+    bx(-6,12,0, 9,24,10, dark); bx(6,12,0, 9,24,10, dark);
+    bx(0,27,0, W*0.72,8,W*0.5, darker);
+    bx(0,45,0, W*0.85,30,W*0.55, col); bx(0,52,W*0.29, 10,12,2, eyeC, eyeC); // chest rune
+    for(const s2 of [-1,1]){ bx(s2*W*0.5,60,0, 15,11,17, lite);
+      pushM(); mv(s2*W*0.5,68,0); rotZ(-s2*0.3); box(4,11,4, darker); popM(); }
+    bx(0,71,0, 13,13,12, col); bx(0,71,W*0.24, 11,2.6,1.4, eyeC, eyeC); // helm + visor slit
+    for(const s2 of [-1,1]){ pushM(); mv(s2*5.5,79,0); rotZ(s2*0.38); box(3,12,3, darker); mv(s2*1.5,9,0); rotZ(s2*0.5); box(2.4,9,2.4, darker); popM(); } // curved horns
+    pushM(); mv(W*0.62,34,6); box(4.6,52,6.5,'#cfd6df'); mv(0,-28,0); box(12,3,8,'#8a8f9a'); mv(0,-6,0); box(4,8,4,'#6b5430'); popM(); // greatsword
+  }
+  else if(e.type==='archer'){
+    // skeletal marksman: hooded cyclops, drawn bow, quiver
+    bx(-5,12,0, 6,24,7, dark); bx(5,12,0, 6,24,7, dark);
+    bx(0,28,0, W*0.5,8,W*0.4, darker);
+    bx(0,44,0, W*0.56,26,W*0.4, col);
+    for(let i=0;i<3;i++) bx(0,38+i*7,W*0.21, W*0.5,2.4,1.2, darker); // rib slats
+    pushM(); mv(0,44,-W*0.26); rotX(0.12); box(W*0.7,34,2, darker); popM(); // tattered cloak
+    bx(0,68,0, 14,12,12, dark); bx(0,74.5,0, 23,2.6,19, darker);   // hood + wide brim
+    bx(0,68,W*0.24, 6.5,3.4,1.4, eyeC, eyeC);                       // single cyclops eye
+    const drawn=e.shootT<0.6;
+    pushM(); mv(-W*0.5,52,10);
+    bx(0,12,0, 2.6,12,3,'#cbb27a'); bx(0,-12,0, 2.6,12,3,'#cbb27a'); bx(0,0,0, 3,4,3.4,'#cbb27a');
+    bx(0,0,-2.2, 0.8,26,0.8,'#e8e4da');                             // string
+    if(drawn) bx(0,0,3, 1.6,1.6,14, e.shot.color, e.shot.color);    // nocked arrow
+    popM();
+    bx(4,52,-W*0.3, 7,16,7, darker); for(let i=-1;i<=1;i++) bx(4+i*2.4,62,-W*0.3, 1.6,5,1.6,'#e6d28a'); // quiver
+  }
+  else if(e.type==='sorcerer'){
+    // levitating frost lich: no legs, tall hat, orbiting ice orbs
+    const yo=8+Math.sin(t*2)*4; pushM(); mv(0,yo,0);
+    bx(0,10,0, W*0.9,14,W*0.66, dark);                              // skirt
+    bx(0,26,0, W*0.74,22,W*0.5, col);
+    bx(0,36,W*0.26, 9,4,1.6, eyeC, eyeC);                           // belt rune
+    bx(0,52,0, 13,13,12, tint(col,'#fff',0.08));
+    bx(-3.4,53,W*0.23, 3,2.6,1.4, eyeC, eyeC); bx(3.4,53,W*0.23, 3,2.6,1.4, eyeC, eyeC);
+    bx(0,60.5,0, 21,2.6,21, dark); bx(0,66,0, 12,9,12, dark); bx(0,74,0, 7,8,7, dark); bx(0,81,0, 3.4,6,3.4, dark);
+    bx(0,86,0, 3,3,3, '#bff0ff','#7fd6ff');                          // hat tip star
+    pushM(); mv(W*0.55,34,4); box(3,44,3,'#b9a'); mv(0,26,0); box(8,9,8,'#cdf3ff','#7fd6ff'); popM(); // staff + crystal
+    popM();
+    for(let k=0;k<3;k++){ const a=t*1.6+k*2.09;
+      bx(Math.cos(a)*W*0.85, 46+yo*0.5+Math.sin(t*3+k)*7, Math.sin(a)*W*0.6, 6,6,6, '#bff0ff','#7fd6ff'); }
+  }
+  else if(e.type==='colossus'){
+    // magma golem: lava-cracked plates, huge fists, molten core
+    bx(-W*0.26,16,0, 20,32,22, dark); bx(W*0.26,16,0, 20,32,22, dark);
+    bx(0,36,0, W*0.9,12,W*0.6, darker);
+    bx(0,64,0, W*1.0,46,W*0.66, col);
+    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.335, 3.4,40,1.4,'#ffb35a','#ff8a3a'); // lava seams
+    bx(0,72,W*0.335, W*0.72,3,1.4,'#ffb35a','#ff8a3a');
+    bx(0,60,W*0.35, 15,15,3, '#ffd24a','#ff9a3a');                   // molten core
+    for(const s2 of [-1,1]){ bx(s2*W*0.58,84,0, 23,20,24, dark);
+      const raise=(e.shootT<0.5&&s2>0)?-0.9:0.12;
+      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(15,34,15, col); mv(0,-22,3); box(19,16,18, darker); popM(); }
+    bx(0,92,4, 17,13,14, dark);                                       // sunken head
+    bx(-4.5,93,W*0.14+6, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,93,W*0.14+6, 4,3,1.4,'#ffd24a','#ffd24a');
+    for(let i=-2;i<=2;i++){ pushM(); mv(i*10,104,-4); rotX(-0.35); box(4,9,4, darker); popM(); } // crown of rock shards
+  }
+  else if(e.type==='king'){
+    // the Abyss King: floating void royal, grand crown, scepter, orbiting shards
+    const yo=4+Math.sin(t*1.8)*3; pushM(); mv(0,yo,0);
+    bx(0,12,0, W*0.95,18,W*0.66, darker);                            // robe base
+    bx(0,34,0, W*0.8,26,W*0.55, col);
+    bx(0,42,W*0.29, 12,14,2.4, '#c47bff','#b06bff');                 // void core
+    for(const s2 of [-1,1]){ bx(s2*W*0.46,52,0, 15,10,16, lite);
+      for(let i=0;i<2;i++){ pushM(); mv(s2*(W*0.46+i*4),58+i*3,0); rotZ(s2*(0.3+i*0.25)); box(3.4,10-i*3,3.4, darker); popM(); } }
+    pushM(); mv(0,40,-W*0.3); rotX(0.1); box(W*0.9,42,2.4, darker); popM(); // royal cape
+    bx(0,66,0, 14,13,12, tint(col,'#fff',0.06));
+    bx(-3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC); bx(3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC);
+    bx(0,74,0, 15,3,13,'#caa23a');                                    // crown band
+    for(let i=-2;i<=2;i++) bx(i*5.4,79+(i===0?4:0),0, 2.8,8+(i===0?6:0),2.8, '#f7d79a', i===0?'#fff2a0':null);
+    pushM(); mv(W*0.56,38,4); box(3,40,3,'#8a76b0'); mv(0,24,0); box(8,8,8,'#c47bff','#b06bff'); popM(); // scepter
+    popM();
+    for(let k=0;k<3;k++){ const a=t*2+k*2.09;
+      bx(Math.cos(a)*26, 92+yo+Math.sin(t*4+k)*4, Math.sin(a)*20, 4.5,4.5,4.5, '#c47bff','#b06bff'); }
+  }
+  else if(e.type==='tyrant'){
+    // eldritch void tyrant: many eyes, toothed maw, writhing tentacles, star-flecked mass
+    bx(0,54,0, W*1.02,62,W*0.7, col);
+    bx(0,20,0, W*0.9,14,W*0.62, darker);
+    for(let i=0;i<9;i++){ const px=((i*53)%Math.round(W*0.8))-W*0.4, py=34+((i*37)%44);
+      bx(px,py,-W*0.34, 1.8,1.8,1, '#e8ddff','#c9a6ff'); }            // star flecks (back mass)
+    // maw with teeth (jaw drops when enraged/lunging)
+    const jaw=en?6:2;
+    bx(0,42,W*0.35, W*0.56,15,3,'#12060f');
+    for(let i=-2;i<=2;i++){ bx(i*W*0.11,48,W*0.36, 3,5,2,'#f0eadb'); bx(i*W*0.11+W*0.055,36-jaw,W*0.36, 3,5,2,'#f0eadb'); }
+    bx(0,31-jaw,W*0.35, W*0.6,4,4, dark);                             // dropping jaw
+    // five eyes, various sizes
+    bx(0,72,W*0.35, 8,5.5,1.6, en?'#ff3b6b':'#c47bff', en?'#ff3b6b':'#c47bff');
+    bx(-W*0.3,66,W*0.34, 4,4,1.4,'#c47bff','#c47bff'); bx(W*0.3,68,W*0.34, 4.5,4.5,1.4,'#c47bff','#c47bff');
+    bx(-W*0.18,80,W*0.34, 3.4,3.4,1.4,'#c47bff','#c47bff'); bx(W*0.16,58,W*0.34, 3,3,1.4,'#c47bff','#c47bff');
+    // writhing tentacles (two per side, two-segment, animated)
+    for(let k=0;k<4;k++){ const s2=k<2?-1:1, ph=Math.sin(t*2.2+k*1.7)*0.28;
+      pushM(); mv(s2*W*0.52,34+(k%2)*22,(k%2?-6:8)); rotZ(s2*(0.55+ph)); box(6.5,26,6.5, dark);
+      mv(s2*2,17,0); rotZ(s2*(0.5+ph)); box(5,20,5, darker);
+      mv(0,12,0); box(4,6,4, '#c47bff','#b06bff'); popM(); }
+    for(let i=-1;i<=1;i++){ pushM(); mv(i*14,88,-6); rotX(-0.3); rotZ(-i*0.2); box(5,16,5, darker); popM(); } // crown spikes
+  }
 }
 function drawHpBar3(e){
   if(e.boss||e.hp>=e.maxHp||e.dead) return;
@@ -1316,7 +1524,16 @@ function drawPickup3(pk,t){
   const it=pk.weapon||pk.armor, rc=RARITY[it.rarity].color;
   drawShadow(pk.x,pk.z,10,0.25);
   bx(pk.x,70,pk.z, 5,140,5, rc, rc, 0.14); // beam
-  pushM(); mv(pk.x,22+Math.sin(pk.bob)*5,pk.z); rotY(t*2.2); box(14,14,14, rc, rc, 0.96); popM();
+  pushM(); mv(pk.x,14+Math.sin(pk.bob)*5,pk.z); rotY(t*2.2);
+  bx(0,-6,0, 20,2.4,20, rc, rc, 0.55); // rarity ring base
+  if(pk.weapon){ pushM(); mv(0,2,0); weaponMesh(pk.weapon); popM(); }
+  else {
+    const st=tint('#aeb9c6',rc,0.25), a=pk.armor;
+    if(a.slot==='helmet'){ bx(0,14,0, 17,11,15, st); bx(0,20.5,0, 12,4,11, st); bx(0,10.5,6.5, 17,3.4,2.4, rc, rc); bx(0,10,0, 18,2,16, tint(st,'#000',0.2)); }
+    else if(a.slot==='chest'){ bx(0,14,0, 18,17,10, st); bx(-10,20,0, 5,5,9, st); bx(10,20,0, 5,5,9, st); bx(0,21.5,0, 18.6,2.4,10.6, rc, rc); bx(0,13,5.4, 3,9,1, rc, rc); }
+    else { bx(-4.6,12,0, 7,17,7, st); bx(4.6,12,0, 7,17,7, st); bx(0,20,0, 17,3.4,7.4, rc, rc); bx(-4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); bx(4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); }
+  }
+  popM();
 }
 function drawPortal3(po,t){
   for(let i=0;i<10;i++){ const a=t*1.4+i*0.628;

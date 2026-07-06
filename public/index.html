@@ -58,7 +58,7 @@
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
   #bDodge.cooling{opacity:.4;}
-  .tog{width:48px;height:30px;border-radius:9px;font-size:10px;letter-spacing:.05em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
+  .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
@@ -122,7 +122,7 @@
   <button class="btn" id="bDodge">DODGE</button>
   <button class="btn" id="bJump"><svg viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></button>
   <button class="btn" id="bAttack">SLASH</button>
-  <button class="btn tog" id="bAuto">AUTO</button>
+  <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">KEEP</button>
 </div>
 <div id="toast"></div>
@@ -136,7 +136,7 @@
    monsters, 3-slot armor (nerfed), faster bows, unique skins,
    detailed bosses, god-skin cheat. Hitboxes preserved.
    ============================================================ */
-const VERSION='4.0.1';
+const VERSION='4.0.2';
 const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
 let VW=0,VH=0,DPR=1,GROUND_FAR=0,GROUND_NEAR=0;
 const DEPTH=210; // walkable depth band (world units): z=0 far ... z=DEPTH near
@@ -321,6 +321,20 @@ const SKINS={
   celestial:{name:'Celestial',armor:'#caa84a',armorLt:'#f0e0a0',trim:'#fffff0',cape:'#9a8030',metal:'#fff0b0',glow:'#fff7c0',tone:'#fbeccd',back:'wings',head:'halo',body:'armor',accent:'none',aura:'rgba(255,250,200,0.22)'},
   god:{name:'GOD',armor:'#d4a017',armorLt:'#ffe04a',trim:'#fffbe0',cape:'#a06a00',metal:'#fff0a0',glow:'#fff2a0',tone:'#fff0d0',back:'wings',head:'crown',body:'armor',accent:'stars',aura:'rgba(255,215,0,0.32)',god:true}
 };
+/* skin passives — marginal, scaling with unlock difficulty. Knight = plain baseline; Crimson = challenge skin. */
+const SKINPASS={
+  ranger:{label:'+5% move speed',speed:1.05},
+  frost:{label:'−8% dodge cooldown',dodge:0.92},
+  emerald:{label:'+5% attack speed',atkSpeed:1.05},
+  gold:{label:'+4% damage',power:1.04},
+  arcane:{label:'+7% magic weapon dmg',magPower:1.07},
+  shadow:{label:'+7% ranged weapon dmg',rngPower:1.07},
+  crimson:{label:'⚠ CHALLENGE: −12% HP · −10% dmg · −8% speed · +12% dodge CD',hpMul:0.88,power:0.90,speed:0.92,dodge:1.12},
+  abyss:{label:'+4% lifesteal',lifesteal:0.04},
+  void:{label:'+8% damage',power:1.08},
+  celestial:{label:'+6% dmg & +6% speed',power:1.06,speed:1.06}
+};
+function skinP(p){ return SKINPASS[p.skin]||null; }
 
 /* ---------------- Achievements (unlock skins) ---------------- */
 const ACHIEVEMENTS=[
@@ -417,12 +431,16 @@ function recomputeArmor(p){
   p.armorMods=m;
 }
 function isGod(p){ return p.skin==='god'; }
-function effMaxHp(p){ let v=p.maxHp+(p.armorMods?p.armorMods.hp:0); return isGod(p)?v+9000:v; }
-function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); return isGod(p)?v*1.4:v; }
-function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); return isGod(p)?v+0.6:v; }
-function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); return isGod(p)?v*0.5:v; }
+function effMaxHp(p){ let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; return isGod(p)?v+9000:v; }
+function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
+  if(sp){ if(sp.power) v*=sp.power;
+    if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
+    if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
+  return isGod(p)?v*6:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; return isGod(p)?v*1.4:v; }
+function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal; return isGod(p)?v+0.6:v; }
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
 function defenseR(p){ if(isGod(p)) return 0.85; return p.armorMods?Math.min(0.5,p.armorMods.defense):0; }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -532,7 +550,12 @@ updateToggles();
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
 window.addEventListener('keydown',e=>{
   if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); } return; }
-  if(mode==='weapon'){ if(e.code==='Enter'){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; } if(e.code==='Backspace'||e.code==='Delete'){ e.preventDefault(); const kb=document.getElementById('keepBtn'); if(kb) kb.click(); return; } }
+  if(mode==='weapon'){
+    const fresh=!e.repeat && (Date.now()-_offerT)>250; // holding J to attack can't insta-equip
+    if(e.code==='Enter'||(e.code==='KeyJ'&&fresh)){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; }
+    if(e.code==='Backspace'||e.code==='Delete'||(e.code==='KeyK'&&fresh)){ e.preventDefault(); const kb=document.getElementById('keepBtn'); if(kb) kb.click(); return; }
+    if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
+  }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   const k=keymap[e.code]; if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
@@ -817,9 +840,10 @@ function openLevelUp(){
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
 }
 function fmt(n){ return Math.round(n*100)/100; }
+let _offerT=0;
 function offerWeapon(nw){
   if(meta.autoKeep){ toast('Kept · '+nw.name+' dropped'); resumePlay(); return; }
-  mode='weapon'; const cur=G.p.weapon;
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
   const typ=w=>(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee');
   const row=(label,a,b,better)=>{ const up=better==='low'?b<a:b>a; const cls=(a===b)?'':(up?'up':'down');
     return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}</b></span></div>`; };
@@ -830,13 +854,13 @@ function offerWeapon(nw){
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">Equip</button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name}</button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name} <span style="opacity:.6">(K)</span></button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
 }
 function offerArmor(na){
   if(meta.autoKeep){ toast('Kept · '+na.name+' dropped'); resumePlay(); return; }
-  mode='weapon'; const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
   const reduc=d=>Math.round(d/(d+200)*100);
   const before=totalDefense(G.p), after=before-curDef+na.defense;
   const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
@@ -849,7 +873,7 @@ function offerArmor(na){
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip</button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'}</button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'} <span style="opacity:.6">(K)</span></button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
 }
@@ -927,8 +951,8 @@ function openSkins(back){
     return `<div class="skintile ${sel?'sel':''} ${unlocked?'':'lock'} ${id==='god'?'godt':''}" data-id="${id}">
       <img class="av" src="${skinAv(id)}" alt="">
       <div class="sn" style="color:${unlocked?(id==='god'?'#ffd24a':s.trim):'var(--muted)'}">${unlocked?s.name:'🔒'}</div>
-      <div class="lk">${unlocked?(sel?'Equipped':'Tap to equip'):skinUnlockHint(id)}</div></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Each a unique hero — unlock via achievements.</p>
+      <div class="lk">${unlocked?((SKINPASS[id]?SKINPASS[id].label:'No passive')+(sel?' · ✓':'')):skinUnlockHint(id)}</div></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Each skin has a small passive — Crimson is the challenge skin.</p>
     <div class="skingrid">${tiles}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.skintile').forEach(t=>t.onclick=()=>{ const id=t.dataset.id;
     if(registerCheatTap(id)){ openSkins(back); return; }

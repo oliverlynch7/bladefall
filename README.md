@@ -3,9 +3,11 @@
 A 2D action-RPG built for Caleb — installs as an iPhone home-screen web app, same as
 Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no dependencies.
 
-- **Live:** https://bladefall.netlify.app
+- **Live (2.5D):** https://bladefall.netlify.app — `public/index.html` (single file)
+- **Live (TRUE 3D):** https://bladefall.netlify.app/3d/ — `public/3d/index.html` (single file,
+  raw WebGL, zero dependencies; own PWA manifest so it installs as a separate home-screen app;
+  skins/achievements import from the 2D save on first run; god cheat + all systems identical)
 - **Netlify site:** `bladefall`, on Oliver's **second** Netlify account.
-- **Game code:** [`public/index.html`](public/index.html) — everything (HTML/CSS/JS) is in this one file.
 
 > ⚠️ **Account rule:** BLADEFALL must ONLY live on the second Netlify account, never on the
 > `theantianxietyacademy@gmail.com` account (that account is for The Work + coacholiverlynch.com).

@@ -16,15 +16,19 @@ Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no de
 Open the Live URL in **Safari** → Share → **Add to Home Screen**. Launches full-screen, no browser chrome.
 
 ## Gameplay
-Run ◀▶, **JUMP**, **SLASH/FIRE** (hold to combo), **DODGE** (i-frame dash). Kill monsters → XP →
-level up → pick an upgrade. 14 stages, ranged bosses, the Abyss King and the Void Tyrant.
-Rarity loot (common→legendary) — physical & magical, melee & ranged weapons + **armor** (defense +
-bonus stats); rarer drops deeper in. **New Game+** keeps your weapon/armor/stats while enemies
-scale ~1.12× past your power on both axes. **Achievements unlock skins** (pick them in the pause
-menu or title). Progress saves to the phone (Continue on title).
+**v4: full 2.5D depth movement** — a virtual joystick moves you in every direction on the ground
+plane (left/right along the level **and up/down in depth**, beat-'em-up style) plus **JUMP** (height).
+Enemies flank you in depth; ranged shots travel in your depth lane, so line up your shots; boss
+projectiles aim across all three axes. **SLASH/FIRE** (hold to combo), **DODGE** (i-frame dash in any
+direction). Kill monsters → XP → level up → pick an upgrade. 14 stages, ranged bosses, the Abyss
+King and the Void Tyrant. Rarity loot (common→legendary) — physical & magical, melee & ranged
+weapons + 3-slot **armor**; rarer drops deeper in. **New Game+** keeps your gear/stats while enemies
+scale ~1.12× past your power. **Achievements unlock skins** (pause menu or title). Ambient weather
+per zone, combo counter, stage progress bar. Progress saves to the phone (Continue on title).
 
-**Keyboard (desktop):** A/D or ←/→ move · W/Space/↑ jump · **J attack** · **K or Shift dodge** ·
-**Esc pause**. On phone, use the on-screen buttons.
+**Keyboard (desktop):** WASD/arrows move (up/down = depth) · **Space jump** · **J attack** ·
+**K or Shift dodge** · **L auto-attack** · Enter/Backspace equip/keep loot · **Esc pause**.
+On phone: joystick + on-screen buttons (AUTO and KEEP toggles on the right edge).
 
 ## Edit & redeploy
 First make sure the Netlify CLI is signed into the **second** account (the one that owns

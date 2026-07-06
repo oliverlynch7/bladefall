@@ -136,7 +136,7 @@
    monsters, 3-slot armor (nerfed), faster bows, unique skins,
    detailed bosses, god-skin cheat. Hitboxes preserved.
    ============================================================ */
-const VERSION='4.1.1';
+const VERSION='4.1.2';
 const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
 let VW=0,VH=0,DPR=1,GROUND_FAR=0,GROUND_NEAR=0;
 const DEPTH=210; // walkable depth band (world units): z=0 far ... z=DEPTH near
@@ -504,9 +504,10 @@ function powerScore(p){
 }
 function offenseScore(p){ const w=p.weapon||startWeapon(); return Math.max(1,(w.dmg*effPower(p)*effAtkSpeed(p)/Math.max(0.14,w.cd))/(9/0.40)); }
 function toughnessScore(p){ return Math.max(1,(effMaxHp(p)/100)/(1-defenseR(p))); }
-function computeNgScales(p){
-  return { hp:Math.min(500,Math.max(offenseScore(p)*1.12,(meta.lastNgHp||1)*1.12)),
-           dmg:Math.min(500,Math.max(toughnessScore(p)*1.12,(meta.lastNgDmg||1)*1.12)) };
+function computeNgScales(p){ // softened: sub-linear tracking + smaller margin so NG+ ramps gentler
+  const off=Math.pow(offenseScore(p),0.85), tuf=Math.pow(toughnessScore(p),0.85);
+  return { hp:Math.min(500,Math.max(off*1.05,(meta.lastNgHp||1)*1.08)),
+           dmg:Math.min(500,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
 }
 /* run lifecycle */
 function cloneGear(g){ const o=freshGear(); if(g) for(const s of SLOTIDS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }

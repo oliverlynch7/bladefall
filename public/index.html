@@ -136,7 +136,7 @@
    monsters, 3-slot armor (nerfed), faster bows, unique skins,
    detailed bosses, god-skin cheat. Hitboxes preserved.
    ============================================================ */
-const VERSION='4.0.0';
+const VERSION='4.0.1';
 const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
 let VW=0,VH=0,DPR=1,GROUND_FAR=0,GROUND_NEAR=0;
 const DEPTH=210; // walkable depth band (world units): z=0 far ... z=DEPTH near
@@ -893,6 +893,7 @@ function titleScreen(){
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     <button class="bigbtn ghost" id="sndBtn">Sound: ${meta.soundOn?'On':'Off'}</button>
+    <button class="bigbtn" id="to3dBtn" style="background:linear-gradient(90deg,#b06bff,#e8a33d)">🎮 BLADEFALL 3D — NEW</button>
     <p class="hint"><b>NEW: full 3D movement</b> — joystick moves in all directions (depth too!)<br>
       <b>SLASH/FIRE</b> (hold) · <b>JUMP</b> · <b>DODGE</b> · Desktop: WASD/arrows move, Space jump, J/K/L, Esc<br>
       Loot weapons & 3-slot armor — neutral, elemental & ranged. Match elements to foes' weaknesses.<br>
@@ -902,6 +903,7 @@ function titleScreen(){
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
+  document.getElementById('to3dBtn').onclick=()=>{ location.href='3d/'; };
 }
 // secret god-skin cheat: tap tiles in this order (Voidborn ×3, Frost, Shadow)
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];

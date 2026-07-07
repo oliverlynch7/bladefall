@@ -120,6 +120,7 @@
 </div>
 <div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
+<div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
 <button id="pausebtn" class="hide">II</button>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
@@ -141,7 +142,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.3.0';
+const VERSION3D='1.4.0';
 
 /* ---------------- Persistence (own save; one-time import from 2D) ---------------- */
 const SAVE_KEY='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
@@ -449,6 +450,7 @@ const ENEMY={
   toxling:{hp:24,dmg:8,speed:56,r:15,h:38,xp:17,color:'#9fd84a',kind:'walk',element:'poison'},
   shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void'},
   sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'storm'},
+  goblin:{hp:26,dmg:0,speed:100,r:13,h:30,xp:40,color:'#ffd24a',kind:'goblin'}, // treasure goblin: flees, drops riches
   brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
   warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE WARDEN'},
   archer:{hp:300,dmg:16,speed:54,r:27,h:80,xp:230,color:'#a7b06a',kind:'boss',boss:true,ranged:true,kite:true,label:'HOLLOW MARKSMAN',shot:{count:3,spread:0.10,speed:560,size:5,color:'#e6d28a',shape:'arrow'},shootCd:2.0},
@@ -659,6 +661,8 @@ function loadStage(i){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false;
+  document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const rnd=mulberry(i*7919+31), rnd2=mulberry(i*104729+7);
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
@@ -672,9 +676,11 @@ function loadStage(i){
     const w=Math.max(140, 250-diff*6-rnd()*40), d=170+rnd()*190;
     let x=prevX+(rnd()*2-1)*130; x=Math.max(-(HALFW-w/2),Math.min(HALFW-w/2,x));
     const seg={x,z:cursorZ-gap-d/2,w,d}; G.segments.push(seg);
-    // bridge wide gaps with a moving platform
+    // bridge wide gaps with a moving platform; mid gaps get crumbling stepping stones (stage 2+)
     if(gap>60){ const mx=(prevX+x)/2;
       G.movers.push({x0:mx,z:cursorZ-gap/2,w:80,d:66,h:0,amp:34+rnd()*46,sp:0.9+rnd()*0.7,ph:rnd()*6.28,x:mx,px:mx}); }
+    else if(gap>40 && diff>=2 && rnd()<0.6){
+      G.crumbles.push({x:(prevX+x)/2,z:cursorZ-gap/2,w:70,d:60,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
     // per-segment features
     if(rnd()<0.5){
       const px2=seg.x+(rnd()*2-1)*(w/2-42), pz2=seg.z+(rnd()*2-1)*(d/2-42);
@@ -698,6 +704,17 @@ function loadStage(i){
       cy=h; }
     G.chests.push({x:cx,z:cz,y:cy,opened:false,bob:rnd2()*6.28});
   }
+  // world features: geysers (stage 3+), a one-use healing spring, the treasure goblin
+  if(!isBoss && diff>=3){
+    const nG=1+Math.floor(diff/5);
+    for(let g2=0;g2<nG;g2++){ const seg=G.segments[1+Math.floor(rnd2()*(G.segments.length-1))];
+      G.geysers.push({x:seg.x+(rnd2()*2-1)*Math.max(10,seg.w/2-40), z:seg.z+(rnd2()*2-1)*Math.max(10,seg.d/2-40),
+        r:26, period:3.4+rnd2()*1.8, phase:rnd2()*6.28}); }
+  }
+  if(!isBoss && rnd2()<0.5){ const seg=G.segments[2+Math.floor(rnd2()*Math.max(1,G.segments.length-2))]||G.segments[1];
+    G.springs.push({x:seg.x+(rnd2()*2-1)*Math.max(10,seg.w/2-44), z:seg.z+(rnd2()*2-1)*Math.max(10,seg.d/2-44), used:false}); }
+  if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.2)){ const seg=G.segments[2]||G.segments[1];
+    const gb=spawnEnemy('goblin', seg.x, seg.z); gb.despawnT=9; gb.dropT=0.2; }
   // finale: boss arena, or the exit portal
   if(isBoss||isMini){
     const aw=isBoss?640:560, ad=isBoss?560:500, gap=26+rnd()*18;
@@ -710,6 +727,8 @@ function loadStage(i){
   } else {
     const last=G.segments[G.segments.length-1];
     G.portal={x:last.x,z:last.z-last.d/2+60,t:0};
+    // golden bonus portal: a timed treasure sprint (stages 1,5,9)
+    if(i===1||i===5||i===9){ G.bonusPortal={x:last.x+(last.x<0?70:-70),z:last.z-last.d/2+70,t:0}; }
   }
   G.progressEnd=(G.portal?G.portal.z:G.portalPos.z);
   G.lastSafe={x:0,z:40};
@@ -718,6 +737,45 @@ function loadStage(i){
   for(let k2=0;k2<30;k2++){ const dz=(k2/30)*(G.progressEnd-60), side=k2%2?1:-1;
     G.deco.push({x:side*(360+rnd()*170), z:dz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
   document.getElementById('stagetag').textContent=s.name; hudUpdate();
+}
+/* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
+function startBonus(){
+  const ret=G.stageIndex+1;
+  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout}; persist();
+  loadBonus(ret);
+}
+function loadBonus(returnIdx){
+  const s=STAGES[G.stageIndex];
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
+  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=26; G.tookDamage=G.tookDamage; G.combo=0; G.comboT=0;
+  const rnd=mulberry(G.stageIndex*31337+911);
+  G.segments.push({x:0,z:-20,w:200,d:200});
+  let cursorZ=-120, prevX=0;
+  for(let k=0;k<8;k++){
+    const gap=52+rnd()*38, w=120+rnd()*50, d=110+rnd()*60;
+    let x=prevX+(rnd()*2-1)*150; x=Math.max(-200,Math.min(200,x));
+    const seg={x,z:cursorZ-gap-d/2,w,d}; G.segments.push(seg);
+    if(k%3===1){ const mx=(prevX+x)/2; G.movers.push({x0:mx,z:cursorZ-gap/2,w:74,d:60,h:0,amp:40+rnd()*40,sp:1.1+rnd()*0.6,ph:rnd()*6.28,x:mx,px:mx}); }
+    else if(k%3===2){ G.crumbles.push({x:(prevX+x)/2,z:cursorZ-gap/2,w:66,d:58,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+    if(k===4){ G.pads.push({x:seg.x,z:seg.z,r:20}); }
+    prevX=x; cursorZ=seg.z-d/2;
+  }
+  const fin={x:prevX,z:cursorZ-46-110,w:200,d:220}; G.segments.push(fin);
+  G.chests.push({x:fin.x,z:fin.z+fin.d/2-46,y:0,opened:false,bob:0,bonus:true}); // chest first...
+  G.portal={x:fin.x,z:fin.z-fin.d/2+44,t:0};                                     // ...exit at the far edge
+  G.progressEnd=G.portal.z;
+  G.lastSafe={x:0,z:20};
+  G.p.x=0; G.p.z=20; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  const bt=document.getElementById('bonustimer'); bt.style.display='block';
+  document.getElementById('stagetag').textContent='TREASURE SPRINT';
+  toast('✨ TREASURE SPRINT — beat the clock!'); SFX.achieve();
+  hudUpdate();
+}
+function endBonus(msg){
+  G.bonusActive=false; document.getElementById('bonustimer').style.display='none';
+  if(msg) toast(msg);
+  loadStage(G.bonusReturn); SFX.pickup();
 }
 function spawnEnemy(type,x,z,isBoss){
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale();
@@ -864,6 +922,7 @@ function floorAt(x,z,r,yRef){
   let f=-Infinity;
   for(const sg of G.segments){ if(Math.abs(x-sg.x)<sg.w/2+r*0.4 && Math.abs(z-sg.z)<sg.d/2+r*0.4){ f=0; break; } }
   for(const mv of G.movers){ if(mv.h<=yRef+2 && Math.abs(x-mv.x)<mv.w/2+r*0.4 && Math.abs(z-mv.z)<mv.d/2+r*0.4) f=Math.max(f,mv.h); }
+  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,0); }
   for(const ob of G.obstacles){ if(ob.h<=yRef+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
@@ -871,8 +930,33 @@ function enemySupport(e){
   let f=-Infinity;
   for(const sg of G.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=0; break; } }
   for(const mv of G.movers){ if(Math.abs(e.x-mv.x)<mv.w/2+e.r*0.4 && Math.abs(e.z-mv.z)<mv.d/2+e.r*0.4) f=Math.max(f,mv.h); }
+  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,0); }
   for(const ob of G.obstacles){ if(ob.h<=ECLIMB && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
+}
+function updateCrumbles(dt){
+  const p=G.p;
+  for(const cr of G.crumbles){
+    if(cr.state===2){ cr.fallY+=240*dt; cr.respawn-=dt;
+      if(cr.respawn<=0){ cr.state=0; cr.timer=0; cr.fallY=0; } continue; }
+    const stood=p.onGround && p.y<2 && Math.abs(p.x-cr.x)<cr.w/2+p.r*0.4 && Math.abs(p.z-cr.z)<cr.d/2+p.r*0.4;
+    if(cr.state===0 && stood){ cr.state=1; cr.timer=0.8; SFX.land(); }
+    if(cr.state===1){ cr.timer-=dt; cr.jit=(Math.random()-0.5)*3;
+      if(cr.timer<=0){ cr.state=2; cr.respawn=3.5; cr.fallY=0; burst(cr.x,2,cr.z,'#8a7a66',10); SFX.enemyDie(); } }
+  }
+}
+function updateGeysers(dt){
+  const p=G.p;
+  for(const gy2 of G.geysers){
+    const cyc=((G.time+gy2.phase)%gy2.period);
+    gy2.state=(cyc<0.6)?2:(cyc>gy2.period-0.9?1:0); // 2=erupting, 1=telegraph, 0=idle
+    if(gy2.state===1 && Math.random()<0.3) G.particles.push({x:gy2.x+(Math.random()-0.5)*30,y:2,z:gy2.z+(Math.random()-0.5)*30,vx:0,vy:60,vz:0,life:0.4,color:hazardCols(STAGES[G.stageIndex].theme)[1],sz:2.4});
+    if(gy2.state===2 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<95 && dXZ(p.x,p.z,gy2.x,gy2.z)<gy2.r+p.r*0.5){
+      const dmg=Math.max(1,Math.round(effMaxHp(p)*0.12));
+      hurtPlayer(dmg,gy2.x,gy2.z+1);
+      p.vy=700; p.onGround=false; // launched skyward
+    }
+  }
 }
 function updateMovers(dt){ for(const mv of G.movers){ mv.px=mv.x; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp; } }
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':'LAVA'; }
@@ -964,15 +1048,24 @@ function killEnemy(e){
     if(e.type==='tyrant') meta.tyrantKills=(meta.tyrantKills||0)+1;
     rollDrop(e); persist(); checkAchievements();
     if(G.stageIndex===STAGES.length-1){ winGame(); return; }
+  } else if(e.kind==='goblin'){ // caught the treasure goblin: premium loot burst
+    SFX.god(); toast('💰 Treasure goblin slain!');
+    for(let i=0;i<2;i++){
+      let rid=rollRarity(); while(RARITY[rid].tier<2) rid=RORDER[Math.min(4,RARITY[rid].tier+2)];
+      const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
+                                   :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
+      G.pickups.push(Object.assign({x:e.x+(i?26:-26),z:e.z+16,y0:0,bob:Math.random()*3},item));
+    }
   } else { SFX.enemyDie(); checkAchievements(); } // loot comes from chests now (bosses still drop)
   checkStageClear();
 }
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve();
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
-  const drops=1+(Math.random()<0.4?1:0); // chests hold an assortment
+  const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
-    const rid=rollRarity();
+    let rid=rollRarity();
+    if(ch.bonus){ rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; while(RARITY[rid].tier<2) rid=RORDER[RARITY[rid].tier+1]; }
     const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
                                  :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
     G.pickups.push(Object.assign({x:ch.x+(i?28:-28),z:ch.z+20,y0:ch.y,bob:Math.random()*3},item));
@@ -1057,6 +1150,19 @@ function update(dt){
   if(p.onGround && p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe.x=p.x; G.lastSafe.z=p.z; }
   // fell into the hazard
   if(p.y<-34){ lavaHit(); }
+  updateCrumbles(dt); updateGeysers(dt);
+  // healing spring (once per stage)
+  for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
+    sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+    addText(p.x,p.y+60,p.z,'+'+heal,'var(--good)',true); burst(p.x,10,p.z,'#7fe8c0',14); SFX.levelup(); hudUpdate(); } }
+  // golden bonus portal
+  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48){ startBonus(); return; }
+  // bonus sprint clock
+  if(G.bonusActive){ G.bonusTime-=dt;
+    const bt=document.getElementById('bonustimer');
+    bt.textContent='⏱ '+Math.max(0,G.bonusTime).toFixed(1)+'s';
+    bt.style.color=G.bonusTime<6?'#ff5e54':'#ffd24a';
+    if(G.bonusTime<=0){ endBonus('⏱ Too slow — the vault seals!'); return; } }
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
@@ -1082,9 +1188,20 @@ function update(dt){
       // flyers breach over anything in their way (columns included) instead of being walled
       for(const ob of G.obstacles){ if(ob.h>e.y-6 && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.6 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.6){ e.y+=300*dt; break; } }
     }
+    else if(e.kind==='goblin'){ // treasure goblin: flees, hugs the course, vanishes if not caught
+      e.despawnT-=dt;
+      if(e.despawnT<=0){ e.dead=true; burst(e.x,e.y+14,e.z,'#ffd24a',16); toast('The goblin escaped!'); continue; }
+      // run away from the player, steering toward the nearest island center so it doesn't dive into lava
+      let fx=-dirX, fz=-dirZ, best=null, bd=1e9;
+      for(const sg of G.segments){ const dd=dXZ(e.x,e.z,sg.x,sg.z); if(dd<bd && dXZ(p.x,p.z,sg.x,sg.z)>60){ bd=dd; best=sg; } }
+      if(best){ const bx2=best.x-e.x, bz2=best.z-e.z, bl=Math.hypot(bx2,bz2)||1; fx=fx*0.55+bx2/bl*0.45; fz=fz*0.55+bz2/bl*0.45; }
+      const fl2=Math.hypot(fx,fz)||1;
+      e.x+=fx/fl2*eff*dt; e.z+=fz/fl2*eff*dt; e.y=6+Math.abs(Math.sin(G.time*8))*4; e.yaw=Math.atan2(fx,fz);
+      if(Math.random()<0.2) G.particles.push({x:e.x,y:e.y+20,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#ffd24a',sz:2});
+    }
     else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
-    if(e.kind!=='fly'){
+    if(e.kind!=='fly'&&e.kind!=='goblin'){
       resolveObstacles(e,e.r,null,ECLIMB);            // columns wall them; platforms are climbable
       const sup=enemySupport(e);                      // ground/mover/platform under them
       if(sup<-1e8){                                   // over the hazard: they fall in and burn
@@ -1095,7 +1212,7 @@ function update(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
+    if(!e.dead && e.dmg>0 && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
       hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:e.dmg,e.x,e.z);
   }
   // projectiles
@@ -1180,6 +1297,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
 }
 function nextStage(){
+  if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
   if(!G.tookDamage){ meta.flawlessStages=(meta.flawlessStages||0)+1; }
   const ni=G.stageIndex+1; if(ni>=STAGES.length){ winGame(); return; }
   meta.bestStage=Math.max(meta.bestStage,ni); meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ni,p:snapOf(G.p),base:G.baseLoadout};
@@ -1420,6 +1538,37 @@ function drawCourse(s,t){
     bx(pd.x,1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
     bx(pd.x,2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
   }
+  // crumbling stepping stones (shake, drop, respawn)
+  for(const cr of G.crumbles){
+    if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
+    if(cr.state===2) continue;
+    const jx=cr.state===1?cr.jit:0;
+    bx(cr.x+jx,-6-(cr.state===2?cr.fallY:0),cr.z, cr.w,12,cr.d, tint('#8a7a66',s.ground,0.3));
+    bx(cr.x+jx,0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
+    bx(cr.x,-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
+  }
+  // hazard geysers: vent → telegraph glow → eruption column
+  const hzc=hazardCols(s.theme);
+  for(const gy2 of G.geysers){
+    bx(gy2.x,0.8,gy2.z, gy2.r*2,1.6,gy2.r*2, tint(s.ground,'#000',0.35));
+    bx(gy2.x,1.6,gy2.z, gy2.r*1.3,1.2,gy2.r*1.3, hzc[1], hzc[1], gy2.state===1?0.5+0.4*Math.sin(t*14):0.18);
+    if(gy2.state===2){ const hgt=95;
+      for(let k2=0;k2<4;k2++){ const yy=12+k2*(hgt/4);
+        bx(gy2.x,yy,gy2.z, gy2.r*(1.5-k2*0.22),hgt/4+4,gy2.r*(1.5-k2*0.22), hzc[1], hzc[1], 0.8-k2*0.12); } }
+  }
+  // healing springs
+  for(const sp2 of G.springs){
+    bx(sp2.x,0.9,sp2.z, 42,1.8,42, tint(s.ground,'#000',0.3));
+    bx(sp2.x,1.8,sp2.z, 32,1.6,32, sp2.used?'#3a5a50':'#7fe8c0', sp2.used?null:'#7fe8c0', sp2.used?0.6:0.55+0.25*Math.sin(t*3));
+    if(!sp2.used) bx(sp2.x,6+Math.sin(t*2.6)*3,sp2.z, 5,5,5,'#bfffe4','#7fe8c0',0.8);
+  }
+  // golden bonus portal
+  if(G.bonusPortal){ const bp=G.bonusPortal;
+    for(let k2=0;k2<8;k2++){ const a2=t*2.2+k2*0.785;
+      bx(bp.x+Math.cos(a2)*30, 48+Math.sin(a2)*30, bp.z, 8,8,8, k2%2?'#ffd24a':'#fff2a0','#ffd24a',0.95); }
+    bx(bp.x,48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
+    drawShadow(bp.x,bp.z,26,0.2);
+  }
   // chests
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
@@ -1535,6 +1684,17 @@ function drawEnemy3(e,t){
     bx(-3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC); bx(3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC);
   } else if(e.boss){
     drawBoss3(e,t,col,eyeC,en,W,H);
+  } else if(e.kind==='goblin'){
+    // scampering gold thief with a loot sack
+    const scam=Math.sin(G.time*14)*0.28;
+    bx(0,H*0.42,0, W*0.8,H*0.7,W*0.66, col);
+    pushM(); mv(-W*0.28,H*0.14,0); rotX(scam); bx(0,-4,0, 4,9,4,'#8a6a1e'); popM();
+    pushM(); mv(W*0.28,H*0.14,0); rotX(-scam); bx(0,-4,0, 4,9,4,'#8a6a1e'); popM();
+    bx(0,H*0.88,0, W*0.6,W*0.55,W*0.55, '#e8c24a');                    // head
+    bx(-2.6,H*0.9,W*0.29, 2.2,2.6,1.2,'#1a1a22'); bx(2.6,H*0.9,W*0.29, 2.2,2.6,1.2,'#1a1a22');
+    bx(0,H*1.1,0, 3,6,3, '#e8c24a');                                    // pointy ear tuft
+    pushM(); mv(0,H*0.5,-W*0.5); rotX(0.3); bx(0,4,-4, W*0.7,W*0.7,W*0.6,'#7a5836'); popM(); // loot sack
+    bx(0,H*0.52,-W*0.86, 4,4,4,'#ffd24a','#ffd24a');                    // gold spilling out
   } else {
     bx(0,H*0.5,0, W,H,W*0.82, col);
     bx(0,H*0.16,0, W*1.04,H*0.08,W*0.86, tint(col,'#000',0.25));
@@ -1865,6 +2025,9 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
     stage:G&&G.stageIndex, stageName:G&&STAGES[G.stageIndex].name, ngHp:G&&+G.ngHp.toFixed(2), ngDmg:G&&+G.ngDmg.toFixed(2),
     enemiesAlive:G&&G.enemies.filter(e=>!e.dead).length, killGoal:G&&G.killGoal, kills:G&&G.kills,
     projectiles:G&&G.projectiles.length, pickups:G&&G.pickups.length, portal:G&&!!G.portal,
+    crumbles:G&&G.crumbles.length, geysers:G&&G.geysers.length, springs:G&&G.springs.length,
+    bonusPortal:G&&!!G.bonusPortal, bonusActive:G&&!!G.bonusActive, bonusTime:G&&G.bonusActive?+G.bonusTime.toFixed(1):null,
+    goblin:G&&G.enemies.some(e=>e.kind==='goblin'&&!e.dead),
     queued:queueLevelUp, ngPlus:G&&G.ngPlus, combo:G&&G.combo,
     unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };
 })();

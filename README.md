@@ -5,8 +5,12 @@ Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no de
 
 - **Live (2.5D):** https://bladefall.netlify.app — `public/index.html` (single file)
 - **Live (TRUE 3D):** https://bladefall.netlify.app/3d/ — `public/3d/index.html` (single file,
-  raw WebGL, zero dependencies; own PWA manifest so it installs as a separate home-screen app;
-  skins/achievements import from the 2D save on first run; god cheat + all systems identical)
+  raw WebGL, zero dependencies; own PWA manifest so it installs as a separate home-screen app).
+  **v1.5+ is a procedurally-generated dungeon crawler:** seeded rooms, locking combat doors that
+  slam shut during encounters, key & 3-plate puzzles, hard parkour bridges (crumbling tiles /
+  moving platforms / geysers) over the drop, one guarded chest per dungeon, and a distinct bestiary
+  (skeletons, splitting slimes, hooded casters, charging beetles, treasure goblins). Enemies are
+  edge-aware and never fall into the hazard. Skins/achievements import from the 2D save; god cheat identical.
 - **Netlify site:** `bladefall`, on Oliver's **second** Netlify account.
 
 > ⚠️ **Account rule:** BLADEFALL must ONLY live on the second Netlify account, never on the

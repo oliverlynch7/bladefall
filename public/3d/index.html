@@ -142,7 +142,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.4.0';
+const VERSION3D='1.5.1';
 
 /* ---------------- Persistence (own save; one-time import from 2D) ---------------- */
 const SAVE_KEY='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
@@ -451,6 +451,28 @@ const ENEMY={
   shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void'},
   sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'storm'},
   goblin:{hp:26,dmg:0,speed:100,r:13,h:30,xp:40,color:'#ffd24a',kind:'goblin'}, // treasure goblin: flees, drops riches
+  // dungeon bestiary (v1.5) — distinct silhouettes, not palette swaps
+  bones:{hp:18,dmg:9,speed:84,r:13,h:40,xp:16,color:'#e8e4d8',kind:'walk',look:'bones'},
+  slime:{hp:32,dmg:7,speed:38,r:16,h:24,xp:18,color:'#6ee0a8',kind:'walk',look:'slime'},
+  slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
+  caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
+  charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#c8893a',kind:'charger'}
+};
+/* what haunts each biome (weighted picks for dungeon rooms) */
+const THEMEMOBS={
+  plains:['grunt','grunt','slime','flyer'],
+  forest:['grunt','toxling','slime','slime','flyer'],
+  badlands:['charger','grunt','charger','flyer'],
+  canyon:['charger','sparkling','grunt','bones'],
+  ruins:['bones','bones','caster','shadeling','flyer'],
+  dungeon:['bones','caster','bones','shadeling'],
+  frost:['frostling','bones','frostling','sparkling'],
+  volcano:['emberling','charger','emberling','flyer'],
+  void:['shadeling','caster','sparkling','bones'],
+  apex:['bones','caster','shadeling','shadeling']
+};
+const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'storm',badlands:'fire'};
+const _ENEMY_END={
   brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
   warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE WARDEN'},
   archer:{hp:300,dmg:16,speed:54,r:27,h:80,xp:230,color:'#a7b06a',kind:'boss',boss:true,ranged:true,kite:true,label:'HOLLOW MARKSMAN',shot:{count:3,spread:0.10,speed:560,size:5,color:'#e6d28a',shape:'arrow'},shootCd:2.0},
@@ -459,6 +481,7 @@ const ENEMY={
   king:{hp:680,dmg:26,speed:50,r:39,h:104,xp:600,color:'#b06bff',kind:'boss',boss:true,label:'ABYSS KING'},
   tyrant:{hp:900,dmg:28,speed:52,r:39,h:104,xp:800,color:'#8a4fd0',kind:'boss',boss:true,ranged:true,label:'VOID TYRANT',shot:{count:5,spread:0.16,speed:420,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1},shootCd:2.4}
 };
+Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
 /* ============================================================
    WEBGL RENDERER (raw, zero deps) — flat-shaded voxel cubes
    ============================================================ */
@@ -641,6 +664,7 @@ function beginRun(ngPlus,carrySnap,scales){
   G={p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
      shake:0,ngPlus:ngPlus||0,ngHp:scales.hp,ngDmg:scales.dmg,baseLoadout:snapOf(p),
      portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
+     runSeed:Math.floor(Math.random()*1e9), // every run rolls fresh dungeons
      cam:{x:0,y:0,z:0}};
   if((ngPlus||0)>0) meta.ngPlus=Math.max(meta.ngPlus,ngPlus);
   meta.lastNgHp=scales.hp; meta.lastNgDmg=scales.dmg; persist(); checkAchievements();
@@ -662,93 +686,165 @@ function loadStage(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
-  const rnd=mulberry(i*7919+31), rnd2=mulberry(i*104729+7);
+  const rnd=mulberry(i*7919+31+(G.runSeed||0)), rnd2=mulberry(i*104729+7+(G.runSeed||0));
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
-  const HALFW=260; // lateral course bound
-  // start island
-  G.segments.push({x:0,z:-40,w:300,d:280});
-  let cursorZ=-180, prevX=0;
-  const nSegs=isBoss?3:(isMini?4:6+Math.floor(rnd()*2));
-  for(let k=0;k<nSegs;k++){
-    const gap=Math.min(96, 18+diff*4+rnd()*26);
-    const w=Math.max(140, 250-diff*6-rnd()*40), d=170+rnd()*190;
-    let x=prevX+(rnd()*2-1)*130; x=Math.max(-(HALFW-w/2),Math.min(HALFW-w/2,x));
-    const seg={x,z:cursorZ-gap-d/2,w,d}; G.segments.push(seg);
-    // bridge wide gaps with a moving platform; mid gaps get crumbling stepping stones (stage 2+)
-    if(gap>60){ const mx=(prevX+x)/2;
-      G.movers.push({x0:mx,z:cursorZ-gap/2,w:80,d:66,h:0,amp:34+rnd()*46,sp:0.9+rnd()*0.7,ph:rnd()*6.28,x:mx,px:mx}); }
-    else if(gap>40 && diff>=2 && rnd()<0.6){
-      G.crumbles.push({x:(prevX+x)/2,z:cursorZ-gap/2,w:70,d:60,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
-    // per-segment features
-    if(rnd()<0.5){
-      const px2=seg.x+(rnd()*2-1)*(w/2-42), pz2=seg.z+(rnd()*2-1)*(d/2-42);
-      if(rnd()<0.6) G.obstacles.push({x:px2,z:pz2,w:64+rnd()*40,d:64+rnd()*40,h:26+rnd()*8,kind:'plat'});
-      else G.obstacles.push({x:px2,z:pz2,w:30+rnd()*18,d:30+rnd()*18,h:95+rnd()*50,kind:'col'});
+  const MOBS=THEMEMOBS[s.theme]||['grunt'];
+  const pick=()=>MOBS[Math.floor(rnd()*MOBS.length)];
+  const GW=92; // doorway width
+  const mkMonster=(type,x,z,room)=>{ const m=spawnEnemy(type,x,z); G.killGoal++;
+    if(m.kind==='caster'&&CASTER_EL[s.theme]){ m.shot.el=CASTER_EL[s.theme]; m.shot.color=elementColor(m.shot.el)||m.shot.color; }
+    if(room){ m.room=room; room.monsters.push(m); if(room.encounter) m.dropT=9999; }
+    return m; };
+  const doorAt=(x,z,type)=>{ const dr={x,z,w:GW,d:14,h:84,open:type==='combat',type,plates:[]}; G.doors.push(dr); return dr; };
+  const wallRoom=(r)=>{
+    const t2=14,h2=96,g=r._gaps||{};
+    const side=(fixed,isZ,start,end,cuts)=>{
+      let pts=[start]; (cuts||[]).slice().sort((a,b)=>a-b).forEach(c=>{ pts.push(c-GW/2,c+GW/2); }); pts.push(end);
+      for(let q=0;q<pts.length;q+=2){ const a=pts[q],b2=pts[q+1]; if(b2-a>12){
+        if(isZ) G.walls.push({x:(a+b2)/2,z:fixed,w:b2-a,d:t2,h:h2});
+        else G.walls.push({x:fixed,z:(a+b2)/2,w:t2,d:b2-a,h:h2}); } } };
+    side(r.z+r.d/2,true,r.x-r.w/2,r.x+r.w/2,g.front);
+    side(r.z-r.d/2,true,r.x-r.w/2,r.x+r.w/2,g.back);
+    side(r.x-r.w/2,false,r.z-r.d/2,r.z+r.d/2,g.w);
+    side(r.x+r.w/2,false,r.z-r.d/2,r.z+r.d/2,g.e);
+    [[r.x-r.w/2+20,r.z-r.d/2+20],[r.x+r.w/2-20,r.z-r.d/2+20],[r.x-r.w/2+20,r.z+r.d/2-20],[r.x+r.w/2-20,r.z+r.d/2-20]]
+      .forEach(c2=>G.torches.push({x:c2[0],z:c2[1],ph:rnd()*6.28}));
+  };
+  // === entry hall ===
+  const R0={x:0,z:-60,w:280,d:240,monsters:[],doors:[],cleared:true,_gaps:{back:[]}};
+  G.segments.push(R0); G.rooms.push(R0);
+  const roomsList=[R0];
+  let cursorZ=R0.z-R0.d/2;
+  const nRooms=isBoss?2:(isMini?3:4+Math.floor(rnd()*2)+Math.min(2,Math.floor(diff/4)));
+  const puzzleConn=(!isBoss&&diff>=1)?1+Math.floor(rnd()*Math.max(1,nRooms-1)):-1;
+  const puzzleType=rnd()<0.5?'plates':'key';
+  let keyDoor=null, plateDoor=null, plateRoom=null;
+  for(let k=0;k<nRooms;k++){
+    const lastRoom=roomsList[roomsList.length-1];
+    let connX=Math.max(lastRoom.x-lastRoom.w/2+70,Math.min(lastRoom.x+lastRoom.w/2-70,lastRoom.x+(rnd()*2-1)*90));
+    lastRoom._gaps.back=lastRoom._gaps.back||[]; lastRoom._gaps.back.push(connX);
+    if(lastRoom.encounter){ const dr=doorAt(connX,lastRoom.z-lastRoom.d/2,'combat'); lastRoom.doors.push(dr); }
+    const bridge=!isBoss && rnd()<(0.34+diff*0.03) && k!==puzzleConn;
+    if(bridge){
+      // HARD parkour: tiny islets, wide gaps, crumbles, movers, geysers — over the drop
+      let bz=cursorZ, bx2=connX;
+      const hops=2+Math.floor(rnd()*2)+(diff>6?1:0);
+      for(let h3=0;h3<hops;h3++){
+        const gap=Math.min(118,62+diff*4+rnd()*24);
+        const iw=58+rnd()*26, id2=54+rnd()*26;
+        bx2=Math.max(-240,Math.min(240,bx2+(rnd()*2-1)*95));
+        const r2=rnd();
+        if(r2<0.30&&diff>=2){ G.crumbles.push({x:bx2,z:bz-gap-id2/2,w:iw+10,d:id2+8,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+        else if(r2<0.5){ G.movers.push({x0:bx2,z:bz-gap-id2/2,w:iw,d:id2,h:0,amp:40+rnd()*50,sp:1.0+rnd()*0.8,ph:rnd()*6.28,x:bx2,px:bx2}); }
+        else { G.segments.push({x:bx2,z:bz-gap-id2/2,w:iw,d:id2});
+          if(diff>=4&&rnd()<0.3) G.geysers.push({x:bx2,z:bz-gap-id2/2,r:22,period:3.0+rnd()*1.6,phase:rnd()*6.28}); }
+        bz=bz-gap-id2;
+      }
+      cursorZ=bz-Math.min(112,60+diff*4+rnd()*20); connX=bx2;
+    } else {
+      const len=110+rnd()*110;
+      G.segments.push({x:connX,z:cursorZ-len/2,w:96,d:len+16});
+      G.walls.push({x:connX-55,z:cursorZ-len/2,w:14,d:len+16,h:96});
+      G.walls.push({x:connX+55,z:cursorZ-len/2,w:14,d:len+16,h:96});
+      G.torches.push({x:connX-38,z:cursorZ-len/2,ph:rnd()*6.28});
+      if(k===puzzleConn){ const dr=doorAt(connX,cursorZ-len/2,puzzleType); dr.open=false;
+        if(puzzleType==='key') keyDoor=dr; else { plateDoor=dr; plateRoom=lastRoom; } }
+      cursorZ-=len;
     }
-    if(rnd()<0.30){ G.pads.push({x:seg.x+(rnd()*2-1)*(w/2-34), z:seg.z+(rnd()*2-1)*(d/2-34), r:20}); }
-    // enemies hunt you along the course
-    const nE=isBoss?0:Math.min(3,1+Math.floor(rnd()*(1.3+diff*0.14)));
-    for(let m=0;m<nE;m++){ spawnEnemy(pickEnemyType(s,rnd), seg.x+(rnd()*2-1)*(w/2-30), seg.z+(rnd()*2-1)*(d/2-30)); G.killGoal++; }
-    prevX=x; cursorZ=seg.z-d/2;
+    // the room itself
+    const isArena=(isBoss||isMini)&&k===nRooms-1;
+    const w=isArena?(isBoss?620:540):(250+rnd()*170), d=isArena?(isBoss?540:480):(230+rnd()*150);
+    let x=connX+(rnd()*2-1)*Math.max(0,w/2-100);
+    x=Math.max(connX-(w/2-70),Math.min(connX+(w/2-70),x));
+    x=Math.max(-250+w/2>0?-260:x, x); // keep roughly centered
+    const room={x,z:cursorZ-d/2,w,d,monsters:[],doors:[],cleared:true,_gaps:{front:[connX],back:[]}};
+    G.segments.push(room); G.rooms.push(room); roomsList.push(room);
+    if(isArena){
+      room.encounter=true; room.cleared=false;
+      const b=mkMonster(s.boss,x,room.z-d*0.22,room); b.boss=true;
+      b.home={x:room.x,z:room.z,hw:w/2-34,hd:d/2-34};
+      if(isMini){ for(let m=0;m<2;m++) mkMonster(pick(),x+(m?90:-90),room.z+70,room); }
+      const dr=doorAt(connX,room.z+room.d/2,'combat'); room.doors.push(dr);
+      G.portalPos={x:room.x,z:room.z-d/2+70};
+    } else if(k<nRooms){
+      const lastMain=(k===nRooms-1)&&!isBoss&&!isMini;
+      room.encounter=!lastMain && rnd()<0.55;
+      room.cleared=!room.encounter;
+      const nM=Math.min(5,2+Math.floor(rnd()*(1.4+diff*0.16)));
+      for(let m=0;m<nM;m++) mkMonster(pick(),x+(rnd()*2-1)*(w/2-44),room.z+(rnd()*2-1)*(d/2-44),room);
+      if(room.encounter){ const dr=doorAt(connX,room.z+room.d/2,'combat'); room.doors.push(dr); }
+      if(rnd()<0.6) G.obstacles.push({x:x+(rnd()*2-1)*(w/2-60),z:room.z+(rnd()*2-1)*(d/2-60),w:36+rnd()*18,d:36+rnd()*18,h:96+rnd()*40,kind:'col'});
+      if(rnd()<0.4) G.obstacles.push({x:x+(rnd()*2-1)*(w/2-64),z:room.z+(rnd()*2-1)*(d/2-64),w:64+rnd()*34,d:64+rnd()*34,h:26+rnd()*8,kind:'plat'});
+      if(diff>=4&&rnd()<0.25) G.geysers.push({x:x+(rnd()*2-1)*(w/2-50),z:room.z+(rnd()*2-1)*(d/2-50),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
+    }
   }
-  // chests: loot now lives here — one on the path, extras gated behind a tower + jump pad
-  const nCh=isBoss?0:2+((rnd2()<0.5)?1:0);
-  for(let c=0;c<nCh;c++){
-    const seg=G.segments[1+Math.floor(rnd2()*(G.segments.length-1))];
-    let cy=0, cx=seg.x+(rnd2()*2-1)*Math.max(10,seg.w/2-52), cz=seg.z+(rnd2()*2-1)*Math.max(10,seg.d/2-52);
-    if(c>0){ const h=58+rnd2()*46;
-      G.obstacles.push({x:cx,z:cz,w:78,d:78,h:h,kind:'plat'});
-      G.pads.push({x:cx+(cx>seg.x?-72:72), z:cz, r:20});
-      cy=h; }
-    G.chests.push({x:cx,z:cz,y:cy,opened:false,bob:rnd2()*6.28});
+  // === treasure side-room: the dungeon's ONE chest (guarded); holds the key on key-puzzles ===
+  if(!isBoss){
+    // key-puzzle: the key lives in this room, so its host MUST sit before the locked door on the main path
+    // (door at connector `puzzleConn` gates rooms roomsList[puzzleConn+1..]; hosting there or later soft-locks the run)
+    const maxHostIdx=(puzzleType==='key'&&keyDoor&&puzzleConn>=1)?puzzleConn:roomsList.length-2;
+    const hostIdx=1+Math.floor(rnd2()*Math.max(1,maxHostIdx));
+    const host=roomsList[hostIdx]||roomsList[1]||R0;
+    G._dbg={puzzleConn,puzzleType,hostIdx,nRooms}; // solvability introspection (key host must be <= puzzleConn)
+    const sideDir=rnd2()<0.5?-1:1;
+    const gz=host.z+(rnd2()*2-1)*Math.max(0,host.d/2-80);
+    const corr=95;
+    G.segments.push({x:host.x+sideDir*(host.w/2+corr/2),z:gz,w:corr+18,d:96});
+    G.walls.push({x:host.x+sideDir*(host.w/2+corr/2),z:gz-55,w:corr+18,d:14,h:96});
+    G.walls.push({x:host.x+sideDir*(host.w/2+corr/2),z:gz+55,w:corr+18,d:14,h:96});
+    host._gaps[sideDir<0?'w':'e']=[gz];
+    const tw=190+rnd2()*60, td=175+rnd2()*50;
+    const troom={x:host.x+sideDir*(host.w/2+corr+tw/2),z:gz,w:tw,d:td,monsters:[],doors:[],cleared:true,
+      _gaps:{[sideDir<0?'e':'w']:[gz]}};
+    G.segments.push(troom); G.rooms.push(troom);
+    const gm=mkMonster(pick(),troom.x,troom.z+30,null); gm.hp=Math.round(gm.hp*1.9); gm.maxHp=gm.hp; gm.elite=true;
+    G.chests.push({x:troom.x,z:troom.z-td/2+46,y:0,opened:false,bob:0});
+    if(keyDoor) G.keys.push({x:troom.x+sideDir*30,z:troom.z,taken:false});
+    G.torches.push({x:troom.x,z:troom.z-td/2+20,ph:rnd2()*6.28});
+    wallRoom(troom);
   }
-  // world features: geysers (stage 3+), a one-use healing spring, the treasure goblin
-  if(!isBoss && diff>=3){
-    const nG=1+Math.floor(diff/5);
-    for(let g2=0;g2<nG;g2++){ const seg=G.segments[1+Math.floor(rnd2()*(G.segments.length-1))];
-      G.geysers.push({x:seg.x+(rnd2()*2-1)*Math.max(10,seg.w/2-40), z:seg.z+(rnd2()*2-1)*Math.max(10,seg.d/2-40),
-        r:26, period:3.4+rnd2()*1.8, phase:rnd2()*6.28}); }
+  if(plateDoor&&plateRoom){
+    for(let q=0;q<3;q++){ const pl={x:plateRoom.x+(rnd2()*2-1)*Math.max(20,plateRoom.w/2-60),
+      z:plateRoom.z+(rnd2()*2-1)*Math.max(20,plateRoom.d/2-60),lit:false,door:plateDoor};
+      plateDoor.plates.push(pl); G.plates.push(pl); }
   }
-  if(!isBoss && rnd2()<0.5){ const seg=G.segments[2+Math.floor(rnd2()*Math.max(1,G.segments.length-2))]||G.segments[1];
-    G.springs.push({x:seg.x+(rnd2()*2-1)*Math.max(10,seg.w/2-44), z:seg.z+(rnd2()*2-1)*Math.max(10,seg.d/2-44), used:false}); }
-  if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.2)){ const seg=G.segments[2]||G.segments[1];
-    const gb=spawnEnemy('goblin', seg.x, seg.z); gb.despawnT=9; gb.dropT=0.2; }
-  // finale: boss arena, or the exit portal
-  if(isBoss||isMini){
-    const aw=isBoss?640:560, ad=isBoss?560:500, gap=26+rnd()*18;
-    const seg={x:0,z:cursorZ-gap-ad/2,w:aw,d:ad}; G.segments.push(seg);
-    const b=spawnEnemy(s.boss,0,seg.z-ad*0.22,true); G.killGoal++;
-    b.home={x:seg.x,z:seg.z,hw:aw/2-34,hd:ad/2-34};
-    if(isMini){ for(let m=0;m<2;m++){ spawnEnemy(pickEnemyType(s,rnd), seg.x+(m?90:-90), seg.z+70); G.killGoal++; } }
-    G.portalPos={x:seg.x,z:seg.z-ad/2+60};
-    cursorZ=seg.z-ad/2;
-  } else {
-    const last=G.segments[G.segments.length-1];
-    G.portal={x:last.x,z:last.z-last.d/2+60,t:0};
-    // golden bonus portal: a timed treasure sprint (stages 1,5,9)
-    if(i===1||i===5||i===9){ G.bonusPortal={x:last.x+(last.x<0?70:-70),z:last.z-last.d/2+70,t:0}; }
+  // spring + goblin
+  if(!isBoss && rnd2()<0.35){ const r3=roomsList[1]||R0;
+    G.springs.push({x:r3.x+(rnd2()*2-1)*(r3.w/2-50),z:r3.z+(rnd2()*2-1)*(r3.d/2-50),used:false}); }
+  if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r4=roomsList[2]||roomsList[1]||R0;
+    const gb=spawnEnemy('goblin',r4.x,r4.z); gb.despawnT=9; gb.dropT=0.2; }
+  // === finale ===
+  const lastR=roomsList[roomsList.length-1];
+  if(isBoss||isMini){ /* portal opens on boss death at G.portalPos */ }
+  else {
+    G.portal={x:lastR.x,z:lastR.z-lastR.d/2+56,t:0};
+    if(i===1||i===5||i===9){ G.bonusPortal={x:lastR.x+(lastR.x<0?76:-76),z:lastR.z-lastR.d/2+64,t:0}; }
   }
+  // wall every main room (treasure room already walled)
+  roomsList.forEach(wallRoom);
   G.progressEnd=(G.portal?G.portal.z:G.portalPos.z);
-  G.lastSafe={x:0,z:40};
-  G.p.x=0; G.p.z=40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
-  // deco flanking the course
-  for(let k2=0;k2<30;k2++){ const dz=(k2/30)*(G.progressEnd-60), side=k2%2?1:-1;
-    G.deco.push({x:side*(360+rnd()*170), z:dz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
+  G.lastSafe={x:0,z:R0.z+80};
+  G.p.x=0; G.p.z=R0.z+80; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  // ruin silhouettes out in the dark
+  for(let k2=0;k2<26;k2++){ const dz=(k2/26)*(G.progressEnd-60), side2=k2%2?1:-1;
+    G.deco.push({x:side2*(430+rnd()*180), z:dz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
   document.getElementById('stagetag').textContent=s.name; hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
 function startBonus(){
   const ret=G.stageIndex+1;
-  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout}; persist();
+  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
   loadBonus(ret);
 }
 function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=26; G.tookDamage=G.tookDamage; G.combo=0; G.comboT=0;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
+  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=26; G.combo=0; G.comboT=0;
   const rnd=mulberry(G.stageIndex*31337+911);
   G.segments.push({x:0,z:-20,w:200,d:200});
   let cursorZ=-120, prevX=0;
@@ -783,6 +879,7 @@ function spawnEnemy(type,x,z,isBoss){
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:a.dmg*DIFFICULTY*G.ngDmg,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
+    look:a.look||null,noSplit:!!a.noSplit,windT:0,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
     atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0};
   if(e.boss) G.boss=e;
@@ -906,12 +1003,14 @@ const ECLIMB=44; // ground enemies can climb anything up to this height (all pla
 function resolveObstacles(ent,r,yRef,climbMax){
   if(!G||!G.obstacles) return;
   const ey=(yRef==null?ent.y:yRef);
-  for(const ob of G.obstacles){
-    if(climbMax && ob.h<=climbMax) continue;
-    if(ey>=ob.h-2) continue;
+  const push=(ob)=>{
+    if(ey>=ob.h-2) return;
     const dx=ent.x-ob.x, dz=ent.z-ob.z, px=ob.w/2+r-Math.abs(dx), pz=ob.d/2+r-Math.abs(dz);
     if(px>0&&pz>0){ if(px<pz) ent.x+=(dx>=0?1:-1)*px; else ent.z+=(dz>=0?1:-1)*pz; }
-  }
+  };
+  for(const ob of G.obstacles){ if(climbMax && ob.h<=climbMax) continue; push(ob); }
+  if(G.walls) for(const wl of G.walls) push(wl);
+  if(G.doors) for(const dr of G.doors){ if(!dr.open) push(dr); }
 }
 /* course floors: ground segments + moving platforms + obstacle tops. -Infinity = over the hazard. */
 function onSegment(x,z,r){
@@ -1056,7 +1155,10 @@ function killEnemy(e){
                                    :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
       G.pickups.push(Object.assign({x:e.x+(i?26:-26),z:e.z+16,y0:0,bob:Math.random()*3},item));
     }
-  } else { SFX.enemyDie(); checkAchievements(); } // loot comes from chests now (bosses still drop)
+  } else { SFX.enemyDie(); checkAchievements();
+    if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
+      for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
+        sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
   checkStageClear();
 }
 function openChest(ch){
@@ -1155,6 +1257,25 @@ function update(dt){
   for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
     sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
     addText(p.x,p.y+60,p.z,'+'+heal,'var(--good)',true); burst(p.x,10,p.z,'#7fe8c0',14); SFX.levelup(); hudUpdate(); } }
+  // dungeon logic: encounter rooms seal their doors; plates & keys open the locked ones
+  for(const r of G.rooms){
+    if(r.encounter && !r.triggered && Math.abs(p.x-r.x)<r.w/2-26 && Math.abs(p.z-r.z)<r.d/2-26 && p.y<40){
+      r.triggered=true; r.doors.forEach(dr=>dr.open=false);
+      r.monsters.forEach(m2=>{ if(!m2.dead) m2.dropT=0.25+Math.random()*0.6; });
+      toast('⚔ The doors slam shut!'); SFX.boss(); G.shake=Math.min(G.shake+8,14);
+    }
+    if(r.encounter && r.triggered && !r.cleared && r.monsters.length && r.monsters.every(m2=>m2.dead)){
+      r.cleared=true; r.doors.forEach(dr=>{ if(dr.type==='combat') dr.open=true; });
+      toast('✓ Room cleared'); SFX.achieve();
+    }
+  }
+  for(const pl of G.plates){ if(!pl.lit && p.onGround && p.y<4 && Math.abs(p.x-pl.x)<22 && Math.abs(p.z-pl.z)<22){
+    pl.lit=true; SFX.pickup(); burst(pl.x,4,pl.z,'#4aa3e0',10);
+    if(pl.door && pl.door.plates.every(q=>q.lit)){ pl.door.open=true; toast('🚪 Ancient stone grinds open!'); SFX.god(); } } }
+  for(const ky of G.keys){ if(!ky.taken && p.y<40 && dXZ(p.x,p.z,ky.x,ky.z)<34){
+    ky.taken=true; G.hasKey=true; toast('🗝 Ancient Key!'); SFX.achieve(); } }
+  if(G.hasKey) for(const dr of G.doors){ if(dr.type==='key'&&!dr.open&&dXZ(p.x,p.z,dr.x,dr.z)<74){
+    dr.open=true; G.hasKey=false; toast('🗝 The lock yields!'); SFX.god(); break; } }
   // golden bonus portal
   if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48){ startBonus(); return; }
   // bonus sprint clock
@@ -1199,21 +1320,36 @@ function update(dt){
       e.x+=fx/fl2*eff*dt; e.z+=fz/fl2*eff*dt; e.y=6+Math.abs(Math.sin(G.time*8))*4; e.yaw=Math.atan2(fx,fz);
       if(Math.random()<0.2) G.particles.push({x:e.x,y:e.y+20,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#ffd24a',sz:2});
     }
-    else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; }
+    else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+      if(e.look==='slime'){ e.bob+=dt*6; } }
+    else if(e.kind==='caster'){ // robed lobber: keeps range, hurls element orbs
+      const want=250;
+      if(d<want-40){ e.x-=dirX*eff*dt; e.z-=dirZ*eff*dt; }
+      else if(d>want+70){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; }
+      if(e.shootT>0) e.shootT-=dt;
+      if(e.shootT<=0 && d<560){ bossShoot(e,p); e.shootT=e.shootCd; }
+    }
+    else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
+      if(e.atkTimer>0) e.atkTimer-=dt;
+      if(e.chargeT>0){ e.chargeT-=dt; e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
+      else if(e.windT>0){ e.windT-=dt;
+        if(e.windT<=0){ e.chargeT=0.7; e.cdx=dirX; e.cdz=dirZ; SFX.growl(0.8); } }
+      else { e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+        if(d<300 && e.atkTimer<=0){ e.windT=0.55; e.atkTimer=2.8; } }
+    }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
     if(e.kind!=='fly'&&e.kind!=='goblin'){
-      resolveObstacles(e,e.r,null,ECLIMB);            // columns wall them; platforms are climbable
+      resolveObstacles(e,e.r,null,ECLIMB);            // columns/walls block them; platforms are climbable
       const sup=enemySupport(e);                      // ground/mover/platform under them
-      if(sup<-1e8){                                   // over the hazard: they fall in and burn
-        e.fvy=(e.fvy||0)-1500*dt; e.y+=e.fvy*dt;
-        if(e.y<-30){ burst(e.x,4,e.z,hazardCols(s.theme)[1],12); killEnemy(e); continue; }
-      } else { e.fvy=0;
+      if(sup<-1e8){                                   // edge-aware: never walk (or get shoved) into the hazard
+        e.x=e.sx; e.z=e.sz; e.hurtKbX=0; e.hurtKbZ=0; e.chargeT=0;
+      } else { e.sx=e.x; e.sz=e.z;
         if(e.y<sup) e.y=Math.min(sup,e.y+110*dt);     // clamber up — platform camping isn't safe
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
     if(!e.dead && e.dmg>0 && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
-      hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:e.dmg,e.x,e.z);
+      hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
   }
   // projectiles
   for(const pr of G.projectiles){
@@ -1228,9 +1364,15 @@ function update(dt){
       if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
     if(pr.y<-4) pr.life=0;
-    // columns & platforms block shots — use them as cover
+    // columns, platforms, walls & closed doors block shots — use them as cover
     if(pr.life>0) for(const ob of G.obstacles){
       if(pr.y<ob.h && Math.abs(pr.x-ob.x)<ob.w/2+pr.size*0.4 && Math.abs(pr.z-ob.z)<ob.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+    if(pr.life>0 && G.walls) for(const wl of G.walls){
+      if(pr.y<wl.h && Math.abs(pr.x-wl.x)<wl.w/2+pr.size*0.4 && Math.abs(pr.z-wl.z)<wl.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+    if(pr.life>0 && G.doors) for(const dr of G.doors){ if(dr.open) continue;
+      if(pr.y<dr.h && Math.abs(pr.x-dr.x)<dr.w/2+pr.size*0.4 && Math.abs(pr.z-dr.z)<dr.d/2+pr.size*0.4){
         pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
   }
   G.projectiles=G.projectiles.filter(pr=>pr.life>0);
@@ -1300,7 +1442,7 @@ function nextStage(){
   if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
   if(!G.tookDamage){ meta.flawlessStages=(meta.flawlessStages||0)+1; }
   const ni=G.stageIndex+1; if(ni>=STAGES.length){ winGame(); return; }
-  meta.bestStage=Math.max(meta.bestStage,ni); meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ni,p:snapOf(G.p),base:G.baseLoadout};
+  meta.bestStage=Math.max(meta.bestStage,ni); meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ni,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
   persist(); checkAchievements(); loadStage(ni); SFX.pickup();
 }
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
@@ -1311,6 +1453,7 @@ function continueRun(){
   if(!meta.run) return; initAudio(); queueLevelUp=0;
   G={p:freshPlayer(),stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
      shake:0,ngPlus:meta.run.ngPlus,ngHp:meta.run.ngHp||1,ngDmg:meta.run.ngDmg||1,baseLoadout:meta.run.base||null,
+     runSeed:meta.run.runSeed||0,
      portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,cam:{x:0,y:0,z:0}};
   restorePlayer(meta.run.p); loadStage(meta.run.stageIndex); restorePlayer(meta.run.p);
   if(!G.baseLoadout) G.baseLoadout=snapOf(G.p);
@@ -1511,6 +1654,7 @@ function hudUpdate(){
 /* ============================================================
    3D SCENE RENDERING
    ============================================================ */
+const LATE=[]; // near-front walls/doors deferred to a translucent pass so they never hide the hero
 let shadowEps=0;
 function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; // y sits just above the floor top (y=1)
   bx(x,1.45+shadowEps*0.03,z, r*2,0.3,r*1.7,'#000000',null,alpha==null?0.30:alpha); }
@@ -1569,6 +1713,42 @@ function drawCourse(s,t){
     bx(bp.x,48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
     drawShadow(bp.x,bp.z,26,0.2);
   }
+  // dungeon walls (near-front walls go translucent so they never hide you)
+  LATE.length=0;
+  const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
+  const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
+    bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
+    bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
+  if(G.walls) for(const wl of G.walls){
+    if(wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
+    else wallBox(wl);
+  }
+  // doors: sealed slabs glow by type; open ones become archways
+  const doorCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
+  if(G.doors) for(const dr of G.doors){
+    bx(dr.x-dr.w/2-8,48,dr.z, 16,96,20, stone); bx(dr.x+dr.w/2+8,48,dr.z, 16,96,20, stone);
+    bx(dr.x,92,dr.z, dr.w+32,10,20, stoneTop);
+    if(!dr.open){
+      if(dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) LATE.push({kind:'door',o:dr});
+      else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3));
+        bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
+    }
+  }
+  // torches: flickering flames along the halls
+  if(G.torches) for(const tc of G.torches){ const fl=0.7+0.3*Math.sin(t*9+tc.ph);
+    bx(tc.x,26,tc.z, 4,52,4,'#3a2c1c');
+    bx(tc.x,56,tc.z, 7,9,7,'#ffb35a','#ff9a3a',fl);
+    bx(tc.x,63,tc.z, 4,5,4,'#ffe9a8','#ffd24a',fl*0.9); }
+  // pressure plates
+  for(const pl of G.plates){
+    bx(pl.x,1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
+    bx(pl.x,2.2,pl.z, 24,1.4,24, pl.lit?'#9fd0ff':tint(s.ground,'#fff',0.1), pl.lit?'#4aa3e0':null, 1); }
+  // the ancient key
+  for(const ky of G.keys){ if(ky.taken) continue;
+    bx(ky.x,60,ky.z, 4,120,4,'#ffd24a','#ffd24a',0.10);
+    pushM(); mv(ky.x,26+Math.sin(t*2.4)*4,ky.z); rotY(t*2);
+    bx(0,0,0, 3,16,3,'#ffd24a','#ffd24a'); bx(0,10,0, 9,7,3,'#ffd24a','#ffd24a');
+    bx(2.6,-6,0, 5,3,3,'#ffd24a','#ffd24a'); bx(2.6,-1,0, 4,2.6,3,'#ffd24a','#ffd24a'); popM(); }
   // chests
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
@@ -1684,6 +1864,46 @@ function drawEnemy3(e,t){
     bx(-3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC); bx(3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC);
   } else if(e.boss){
     drawBoss3(e,t,col,eyeC,en,W,H);
+  } else if(e.kind==='caster'){
+    // robed cultist: hooded, glowing eyes, orb hovering at its palm
+    const oc=(e.shot&&e.shot.color)||'#c47bff';
+    bx(0,H*0.28,0, W*1.0,H*0.5,W*0.8, col);                 // skirt
+    bx(0,H*0.62,0, W*0.8,H*0.34,W*0.66, tint(col,'#fff',0.08));
+    bx(0,H*0.5,W*0.34, 7,4,1.6, oc, oc);                    // belt rune
+    bx(0,H*0.88,0, W*0.62,W*0.5,W*0.56, tint(col,'#000',0.25)); // hood
+    bx(0,H*0.86,W*0.24, W*0.44,W*0.34,2,'#0a0a12');         // hood shadow
+    bx(-2.6,H*0.87,W*0.30, 2.2,2.2,1.2, oc, oc); bx(2.6,H*0.87,W*0.30, 2.2,2.2,1.2, oc, oc);
+    pushM(); mv(W*0.55,H*0.55,4); bx(0,0,0, 3.4,12,3.4, tint(col,'#000',0.2));
+    bx(0,10+Math.sin(G.time*4)*2,2, 6.5,6.5,6.5, oc, oc); popM(); // hovering orb
+  } else if(e.kind==='charger'){
+    // armored beetle: head shield + horn; rears back winding up, leans in when ramming
+    pushM(); if(e.windT>0){ rotX(-0.18); mv((Math.random()-0.5)*2,0,0); } else if(e.chargeT>0) rotX(0.16);
+    bx(0,H*0.45,0, W*1.15,H*0.7,W*1.0, col);
+    bx(0,H*0.72,0, W*0.9,H*0.2,W*0.8, tint(col,'#fff',0.14)); // shell ridge
+    bx(0,H*0.5,W*0.55, W*0.8,H*0.6,6, tint(col,'#000',0.3));  // head plate
+    pushM(); mv(0,H*0.62,W*0.62); rotX(0.5); bx(0,5,0, 4,13,4,'#e8e4d8'); popM(); // horn
+    bx(-W*0.22,H*0.5,W*0.58, 2.6,2.6,1.2, eyeC, eyeC); bx(W*0.22,H*0.5,W*0.58, 2.6,2.6,1.2, eyeC, eyeC);
+    for(const s2 of [-1,1]){ bx(s2*W*0.5,H*0.14,W*0.3, 4,H*0.24,4, tint(col,'#000',0.3));
+      bx(s2*W*0.5,H*0.14,-W*0.3, 4,H*0.24,4, tint(col,'#000',0.3)); }
+    popM();
+  } else if(e.look==='bones'){
+    // skeleton: skull, ribs, stick limbs
+    const wob=Math.sin(G.time*10+e.bob)*0.16;
+    bx(-3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); bx(3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); // leg bones
+    bx(0,H*0.42,0, 3.4,H*0.24,3.4,'#e8e4d8');                                        // spine
+    for(let i2=0;i2<3;i2++) bx(0,H*0.4+i2*4.6,0, W*0.9-i2*2,2.2,W*0.6,'#e8e4d8');    // ribs
+    bx(0,H*0.32,0, W*0.7,3.4,W*0.5,'#d8d4c8');                                        // pelvis
+    pushM(); mv(-W*0.5,H*0.56,0); rotZ(0.4+wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); popM();
+    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.4-wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); popM();
+    bx(0,H*0.78,0, W*0.62,W*0.56,W*0.56,'#efece2');                                   // skull
+    bx(-2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e'); bx(2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e');
+    bx(0,H*0.68,W*0.26, W*0.4,2.4,1.2,'#0a0a0e');                                     // jaw shadow
+  } else if(e.look==='slime'){
+    // gelatinous blob: squashes and stretches as it oozes along
+    const sq=0.86+0.24*Math.abs(Math.sin(e.bob*1.6));
+    bx(0,H*0.5*sq,0, W*1.15/Math.sqrt(sq),H*sq,W*1.0/Math.sqrt(sq), col, null, 0.93);
+    bx(0,H*0.82*sq,-W*0.14, W*0.5,H*0.24,W*0.4, tint(col,'#fff',0.3), null, 0.8); // gloss
+    bx(-W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20'); bx(W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20');
   } else if(e.kind==='goblin'){
     // scampering gold thief with a loot sack
     const scam=Math.sin(G.time*14)*0.28;
@@ -1853,7 +2073,7 @@ function render(t){
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
   gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
   gl.uniform3f(U.uFog,sky[0],sky[1],sky[2]);
-  gl.uniform2f(U.uFogNF,520,1500);
+  gl.uniform2f(U.uFogNF,460,1320); // tighter fog: dungeon air
   CURM=mIdent();
   if(!G){ // title backdrop: rotating hero on an empty arena
     const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
@@ -1870,6 +2090,14 @@ function render(t){
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
   for(const a of G.ambient) bx(a.x,a.y,a.z, a.sz,a.sz,a.sz, a.c, a.c, Math.min(0.8,a.life*0.4));
+  // translucent pass: near-front walls & doors (drawn last, no depth write, so the hero shows through)
+  if(LATE.length){ gl.depthMask(false);
+    const stone2=tint(s.ground,'#fff',0.13), dCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
+    for(const L of LATE){ const o=L.o;
+      if(L.kind==='wall') bx(o.x,o.h/2,o.z, o.w,o.h,o.d, stone2, null, 0.30);
+      else { bx(o.x,o.h/2,o.z, o.w,o.h,10, stone2, null, 0.30);
+        bx(o.x,o.h/2,o.z, o.w*0.16,o.h*0.8,11, dCol[o.type]||'#fff', dCol[o.type], 0.5); } }
+    gl.depthMask(true); }
   drawHpBars();
   // combo DOM
   const cb=document.getElementById('combo');
@@ -2026,6 +2254,9 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
     enemiesAlive:G&&G.enemies.filter(e=>!e.dead).length, killGoal:G&&G.killGoal, kills:G&&G.kills,
     projectiles:G&&G.projectiles.length, pickups:G&&G.pickups.length, portal:G&&!!G.portal,
     crumbles:G&&G.crumbles.length, geysers:G&&G.geysers.length, springs:G&&G.springs.length,
+    rooms:G&&G.rooms.length, walls:G&&G.walls.length, doors:G&&G.doors.map(d2=>({t:d2.type,open:d2.open})),
+    plates:G&&G.plates.map(p2=>p2.lit), keys:G&&G.keys.length, hasKey:G&&!!G.hasKey,
+    encounters:G&&G.rooms.filter(r=>r.encounter).length, mobTypes:G&&[...new Set(G.enemies.map(e=>e.type))],
     bonusPortal:G&&!!G.bonusPortal, bonusActive:G&&!!G.bonusActive, bonusTime:G&&G.bonusActive?+G.bonusTime.toFixed(1):null,
     goblin:G&&G.enemies.some(e=>e.kind==='goblin'&&!e.dead),
     queued:queueLevelUp, ngPlus:G&&G.ngPlus, combo:G&&G.combo,

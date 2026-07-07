@@ -52,8 +52,11 @@ A **Gate** is one dungeon. Gates are presented in the Hub as glowing rank-sigil 
 - **Rank (E → D → C → B → A → S)** — drives floor count, enemy scaling, and loot rarity floor.
   Higher rank = deeper, deadlier, richer. This is the primary "which risk do I take" choice.
 - **Vertical orientation** — a gate is either a **descent** (basement floors going down) or an
-  **ascent** (tower floors going up). Cosmetic + framing; floors themselves reuse the 3D
-  dungeon generator. Direction shown in the gate card and the between-floor transition.
+  **ascent** (tower floors going up). Cosmetic + framing; floors themselves reuse the 3D dungeon
+  generator. **Between floors:** the player enters a **staircase** (up or down) which triggers a
+  **directional fade-to-black wipe** (downward wipe = descending, upward = ascending), then the
+  next floor loads fresh and the player appears on it. Only one floor is loaded at a time
+  (confirmed with Oliver — keeps rendering light; no literal stacked-in-3D geometry).
 - **Floor count** — **finite but randomized** per entry (e.g., E: 2–3 floors … S: 6–9),
   so the same gate is never the same layout twice, but it always ends and can be fully cleared.
 
@@ -148,9 +151,15 @@ ability registry.
 
 ## 9. Phased build (each phase ships & deploys)
 
-1. **Phase 1 — Foundation.** Mode Select + separate saves; the **Hub** screen; **gold**
-   currency; the **shop** (buy/sell/reroll); **amulet + ring** slots with **passives**.
-   *Ships as a playable Roguelite hub that launches the existing v1.5 dungeon as gate #1.*
+1. **Phase 1 — Foundation.** ✅ **SHIPPED as v1.6.0 (2026-07-07).** Mode Select (Roguelite +
+   Hardcore) with separate per-mode saves + a shared global store (skins/achievements migrated
+   from the old save); the **Hub** screen; **gold** currency (kills/chests/selling loot); the
+   **shop** selling **permanent per-mode perks** (Vigor/Might/Haste/Swiftness/Keen Edge/Greed) as
+   the growth engine; **amulet + ring** slots with passives folded into the stat pipeline; Hardcore
+   death wipes the save, Roguelite keeps gold+perks.
+   *Scoping:* the shop sells perks this phase — **buying gear items + a persistent bank/inventory
+   are deferred to Phase 2** (they pair with descend). Loot resale is a "Sell" button on drop
+   popups. "Enter Dungeon" launches the existing v1.5 dungeon as the stand-in gate until Phase 2.
 2. **Phase 2 — Gates & vertical floors.** Ranked themed gates; multi-floor procedural dungeons
    (ascent/descent) with finite random floor counts; limited-HP-between-floors; optional minor
    bosses; dungeon-boss-clears-the-gate; **descend-deeper** with stacking difficulty.

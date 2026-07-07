@@ -116,7 +116,7 @@
   <div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div></div>
   <div class="barwrap"><span class="barlabel">XP</span><div class="bar"><i id="xpfill"></i></div></div>
   <div class="barwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><span id="stagetag">Stage 1</span></div>
+  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
 </div>
 <div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
@@ -142,33 +142,45 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.5.1';
+const VERSION3D='1.6.0';
 
-/* ---------------- Persistence (own save; one-time import from 2D) ---------------- */
-const SAVE_KEY='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
-function loadSave(){ try{return JSON.parse(localStorage.getItem(SAVE_KEY))||null;}catch(e){return null;} }
-function persist(){ try{localStorage.setItem(SAVE_KEY,JSON.stringify(meta));}catch(e){} }
-let _loaded=loadSave();
-if(!_loaded){
-  // first run: import unlocks/progress counters from the 2D game so Caleb keeps his skins
-  let old={}; try{old=JSON.parse(localStorage.getItem(SAVE_KEY_2D))||{};}catch(e){}
-  _loaded={ unlockedSkins:Array.isArray(old.unlockedSkins)?old.unlockedSkins.slice():['knight'],
-    selectedSkin:old.selectedSkin||'knight', achievements:old.achievements?JSON.parse(JSON.stringify(old.achievements)):{},
-    totalKills:old.totalKills||0,bossKills:old.bossKills||0,kingKills:old.kingKills||0,tyrantKills:old.tyrantKills||0,
-    magicBossKills:old.magicBossKills||0,rangedBossKills:old.rangedBossKills||0,legendaryFound:old.legendaryFound||0,
-    flawlessStages:old.flawlessStages||0,maxLevel:old.maxLevel||1,soundOn:old.soundOn!==false };
+/* ---------------- Persistence: shared "global" store + per-mode saves ----------------
+   Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
+   ('rl' Roguelite | 'hc' Hardcore) has its OWN save (gold, run, stash, scaling), so a
+   hardcore death wipes only its save, and roguelite progress is untouched. ---------- */
+const GKEY='bladefall3d_global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
+const MKEY=m=>'bladefall3d_'+m;
+let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
+function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep',
+  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks'];
+let _g=loadJSON(GKEY);
+if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
+  let old=loadJSON(SAVE_KEY_OLD);
+  if(!old){ let t=loadJSON(SAVE_KEY_2D)||{}; old={}; GLOBAL_FIELDS.forEach(f=>{ if(t[f]!=null) old[f]=t[f]; }); }
+  _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  ngPlus:0,bestStage:0,soundOn:true,unlockedSkins:['knight'],selectedSkin:'knight',
-  achievements:{},totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,
-  magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
-  lastNgHp:1,lastNgDmg:1,autoAttack:false,autoKeep:false,showArmor:true,run:null
-},_loaded);
+  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,
+  unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
+  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{}
+},_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
 if(!Array.isArray(meta.unlockedSkins)) meta.unlockedSkins=['knight'];
 if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
-if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
+function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
+persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
+function persist(){ persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
+function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
+  meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
+  meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
+  if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
+}
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; } // hardcore death
 
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
 let actx=null, master=null, noiseBuf=null;
@@ -356,6 +368,30 @@ function makeArmor(rid,slot){
   for(let i=0;i<n;i++){ const a=p2.splice(Math.floor(Math.random()*p2.length),1)[0]; chosen.push({stat:a.stat,val:a.base[tier],label:a.f(a.base[tier])}); }
   return {slot,rarity:rid,defense:sl.def[tier],color:r.color,name:r.name+' '+sl.label,affixes:chosen};
 }
+
+/* ---------------- Trinkets: amulet + ring slots (passives now; active abilities in a later phase) ---------------- */
+const TRINKETS={amulet:{label:'Amulet'},ring:{label:'Ring'}};
+const TRINKETIDS=['amulet','ring'];
+const GEARSLOTS=SLOTIDS.concat(TRINKETIDS); // helmet, chest, legs, amulet, ring
+function makeTrinket(rid,slot){
+  const r=RARITY[rid],tier=r.tier;
+  const pool=[
+    {stat:'powerMul',base:[.05,.07,.10,.13,.17],f:v=>'+'+Math.round(v*100)+'% Damage'},
+    {stat:'atkSpeedMul',base:[.04,.06,.08,.10,.13],f:v=>'+'+Math.round(v*100)+'% Attack Speed'},
+    {stat:'speedMul',base:[.05,.07,.09,.11,.14],f:v=>'+'+Math.round(v*100)+'% Move Speed'},
+    {stat:'lifesteal',base:[.03,.04,.05,.07,.09],f:v=>'+'+Math.round(v*100)+'% Lifesteal'},
+    {stat:'crit',base:[.04,.06,.08,.11,.15],f:v=>'+'+Math.round(v*100)+'% Crit Chance'},
+    {stat:'goldFind',base:[.10,.15,.22,.30,.42],f:v=>'+'+Math.round(v*100)+'% Gold Find'},
+    {stat:'hp',base:[12,18,26,36,50],f:v=>'+'+v+' Max HP'},
+    {stat:'dodgeMul',base:[.06,.08,.11,.14,.18],f:v=>'-'+Math.round(v*100)+'% Dodge CD'}];
+  const n=tier>=3?2:1, chosen=[], p2=[...pool];
+  for(let i=0;i<n;i++){ const a=p2.splice(Math.floor(Math.random()*p2.length),1)[0]; chosen.push({stat:a.stat,val:a.base[tier],label:a.f(a.base[tier])}); }
+  return {slot,rarity:rid,color:r.color,name:r.name+' '+TRINKETS[slot].label,affixes:chosen,trinket:true};
+}
+/* gold value of any item (weapon/armor/trinket), driven by rarity tier */
+function itemGold(it){ const tier=RARITY[it.rarity]?RARITY[it.rarity].tier:0;
+  const base=[10,26,60,140,320][tier]; return Math.round(base*(it.trinket?1.25:1)); }
+function slotLabel(slot){ return (SLOTS[slot]&&SLOTS[slot].label)||(TRINKETS[slot]&&TRINKETS[slot].label)||slot; }
 
 /* ---------------- Skins (palettes; rendered as 3D voxel hero) ---------------- */
 const SKINS={
@@ -599,21 +635,45 @@ let G=null, mode='title', lastT=0, acc=0; const DT=1/60;
 let queueLevelUp=0;
 const DIFFICULTY=1.0;
 function stageScale(){ return 1+G.stageIndex*0.10; }
-function freshGear(){ return {helmet:null,chest:null,legs:null}; }
+function freshGear(){ return {helmet:null,chest:null,legs:null,amulet:null,ring:null}; }
+/* ---------------- Shop perks: permanent per-mode stat upgrades bought with gold ---------------- */
+const PERKS={
+  vigor:{name:'Vigor',per:20,unit:v=>'+'+v+' Max HP',base:40,max:20},
+  might:{name:'Might',per:0.05,unit:v=>'+'+Math.round(v*100)+'% Damage',base:60,max:12},
+  haste:{name:'Haste',per:0.04,unit:v=>'+'+Math.round(v*100)+'% Attack Speed',base:60,max:10},
+  swift:{name:'Swiftness',per:0.04,unit:v=>'+'+Math.round(v*100)+'% Move Speed',base:50,max:8},
+  edge:{name:'Keen Edge',per:0.03,unit:v=>'+'+Math.round(v*100)+'% Crit',base:70,max:10},
+  greed:{name:'Greed',per:0.08,unit:v=>'+'+Math.round(v*100)+'% Gold Find',base:50,max:12}
+};
+const PERKIDS=Object.keys(PERKS);
+function perkLevel(id){ return (meta.perks&&meta.perks[id])||0; }
+function perkCost(id){ return Math.round(PERKS[id].base*Math.pow(1.6,perkLevel(id))); }
+function applyPerks(p){
+  p.maxHp += PERKS.vigor.per*perkLevel('vigor');
+  p.stats.power *= 1+PERKS.might.per*perkLevel('might');
+  p.stats.atkSpeed *= 1+PERKS.haste.per*perkLevel('haste');
+  p.stats.speed *= 1+PERKS.swift.per*perkLevel('swift');
+  p.stats.crit = (p.stats.crit||0)+PERKS.edge.per*perkLevel('edge');
+  p.stats.goldFind = (p.stats.goldFind||0)+PERKS.greed.per*perkLevel('greed');
+}
 function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
-  return {x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
+  const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
     hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:startWeapon(),gear:freshGear(),armorMods:null,
-    stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75},skin:sk,
+    stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false};
+  applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
+  return p;
 }
 function recomputeArmor(p){
-  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,defense:0};
+  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,defense:0,crit:0,goldFind:0};
   let total=0;
-  if(p.gear) for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; total+=a.defense;
-    for(const af of a.affixes){ if(af.stat==='hp')m.hp+=af.val; else if(af.stat==='lifesteal')m.lifesteal+=af.val;
-      else if(af.stat==='speedMul')m.speedMul*=1+af.val; else if(af.stat==='atkSpeedMul')m.atkSpeedMul*=1+af.val;
-      else if(af.stat==='dodgeMul')m.dodgeMul*=1-af.val; else if(af.stat==='powerMul')m.powerMul*=1+af.val; } }
+  const fold=a=>{ for(const af of a.affixes){ const s=af.stat,v=af.val;
+    if(s==='hp')m.hp+=v; else if(s==='lifesteal')m.lifesteal+=v; else if(s==='crit')m.crit+=v; else if(s==='goldFind')m.goldFind+=v;
+    else if(s==='speedMul')m.speedMul*=1+v; else if(s==='atkSpeedMul')m.atkSpeedMul*=1+v;
+    else if(s==='dodgeMul')m.dodgeMul*=1-v; else if(s==='powerMul')m.powerMul*=1+v; } };
+  if(p.gear){ for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; total+=a.defense; fold(a); }
+    for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a) fold(a); } }
   m.defense=total/(total+200);
   p.armorMods=m;
 }
@@ -628,6 +688,8 @@ function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpee
 function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal; return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
+function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
+function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
 function defenseR(p){ if(isGod(p)) return 0.85; return p.armorMods?Math.min(0.5,p.armorMods.defense):0; }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -644,7 +706,7 @@ function computeNgScales(p){ // softened (v1.3): sub-linear tracking + smaller m
   return { hp:Math.min(500,Math.max(off*1.05,(meta.lastNgHp||1)*1.08)),
            dmg:Math.min(500,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
 }
-function cloneGear(g){ const o=freshGear(); if(g) for(const s of SLOTIDS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }
+function cloneGear(g){ const o=freshGear(); if(g) for(const s of GEARSLOTS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }
 function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,xpNext:p.xpNext,
   weapon:JSON.parse(JSON.stringify(p.weapon)),gear:cloneGear(p.gear),
   stats:JSON.parse(JSON.stringify(p.stats)),maxJumps:p.maxJumps,skin:p.skin}; }
@@ -1095,7 +1157,7 @@ function playerAttack(cdMul){
   else { p.atkTimer=0.26; SFX.slash(); }
 }
 function fireProjectile(p,w,target){
-  const pr=w.proj, crit=Math.random()<0.16?1.5:1, dmg=w.dmg*effPower(p)*crit;
+  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit;
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
@@ -1112,7 +1174,7 @@ function resolveSwing(){
     if(e.dead||e.lastHit===p.swingId) continue;
     if(dXZ(e.x,e.z,hx,hz)<(w.range*0.55+e.r) && vOverlap(e,p)){
       e.lastHit=p.swingId;
-      const dmg=w.dmg*effPower(p)*(1+(Math.random()<0.18?0.5:0));
+      const dmg=w.dmg*effPower(p)*(1+(Math.random()<0.18+effCrit(p)?0.5:0));
       hitEnemy(e,dmg,p,w.kb,Math.max(w.lifesteal||0,effLifesteal(p)),w.el);
     }
   }
@@ -1132,11 +1194,14 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(lifesteal>0){ const heal=Math.max(1,Math.round(dmg*lifesteal)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   if(e.hp<=0) killEnemy(e);
 }
+function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p))); meta.gold=(meta.gold||0)+n; return n; }
+function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return g; } // flat (no gold-find on sales)
 function killEnemy(e){
   if(e.dead) return;
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
   addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
+  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss){
     SFX.win(); document.getElementById('bosshpwrap').classList.remove('on');
@@ -1164,12 +1229,12 @@ function killEnemy(e){
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve();
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
+  const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
     let rid=rollRarity();
     if(ch.bonus){ rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; while(RARITY[rid].tier<2) rid=RORDER[RARITY[rid].tier+1]; }
-    const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
-                                 :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
+    const item=randomLoot(rid);
     G.pickups.push(Object.assign({x:ch.x+(i?28:-28),z:ch.z+20,y0:ch.y,bob:Math.random()*3},item));
   }
 }
@@ -1381,7 +1446,7 @@ function update(dt){
     if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36) openChest(ch); }
   // pickups
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
-    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){ if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); pk.taken=true; } }
+    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){ if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); pk.taken=true; } }
   G.pickups=G.pickups.filter(pk=>!pk.taken);
   // portal
   if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52) nextStage(); }
@@ -1499,9 +1564,10 @@ function offerWeapon(nw){
     <img class="itemav" src="${itemAv(nw)}" alt="">
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name} <span style="opacity:.6">(K)</span></button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">Keep ${cur.name} <span style="opacity:.6">(K)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
 function offerArmor(na){
   if(meta.autoKeep){ toast('Kept · '+na.name+' dropped'); return; }
@@ -1519,57 +1585,118 @@ function offerArmor(na){
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'} <span style="opacity:.6">(K)</span></button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'} <span style="opacity:.6">(K)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('keepBtn').onclick=()=>resumePlay();
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
+function offerTrinket(nt){
+  if(meta.autoKeep){ toast('Kept · '+nt.name+' dropped'); return; }
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
+  showOverlayHTML(`<div class="card">
+    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nt.rarity].name.toUpperCase()} · ${TRINKETS[nt.slot].label.toUpperCase()}</p>
+    <h2 class="ovh" style="color:${RARITY[nt.rarity].color}">${nt.name}</h2>
+    <div class="statgrid">
+      ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
+      ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
+    </div>
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="keepBtn">${cur?'Keep current':'Skip'} <span style="opacity:.6">(K)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g</button></div>`);
+  document.getElementById('equipBtn').onclick=()=>{ G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
+  document.getElementById('keepBtn').onclick=()=>resumePlay();
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+}
+/* one random loot item (weapon / armor / trinket) at a given rarity */
+function randomLoot(rid){ const r=Math.random();
+  if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
+  if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
+  return {weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)}; }
 function resumePlay(){ mode='play'; showOverlay(false); hudUpdate(); }
 function die(){
-  mode='dead'; SFX.hurt(); const ng=G.ngPlus, base=G.baseLoadout, sc={hp:G.ngHp,dmg:G.ngDmg}; meta.run=null; persist();
+  mode='dead'; SFX.hurt();
+  const wasHc=MODE==='hc';
+  if(wasHc) wipeMode('hc'); else meta.run=null;
+  persist();
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
-    <p class="ovsub">Reached ${STAGES[G.stageIndex].name} · Level ${G.p.level}${ng>0?' · NG+'+ng:''}</p>
-    <button class="bigbtn" id="retryBtn">Try Again</button><button class="bigbtn ghost" id="menuBtn">Main Menu</button></div>`);
-  document.getElementById('retryBtn').onclick=()=>beginRun(ng,ng>0?base:null,ng>0?sc:{hp:1,dmg:1});
-  document.getElementById('menuBtn').onclick=titleScreen;
+    <p class="ovsub">Reached ${STAGES[G.stageIndex]?STAGES[G.stageIndex].name:'the depths'} · Level ${G.p.level}${wasHc?'<br><b style="color:var(--danger)">Hardcore — this save is erased.</b>':'<br>Your gold &amp; perks are safe.'}</p>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
 }
 function winGame(){
-  mode='win'; SFX.win(); const ng=G.ngPlus+1;
-  const carry=snapOf(G.p), newScales=computeNgScales(G.p);
-  meta.ngPlus=Math.max(meta.ngPlus,ng); meta.run=null; persist(); checkAchievements();
+  mode='win'; SFX.win();
+  const bonus=awardGold(500); meta.run=null; persist(); checkAchievements();
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
-    <p class="ovsub">The Void Tyrant has fallen</p>
+    <p class="ovsub">You cleared the dungeon.</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
       <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
-      <div class="vsrow"><span>Difficulty</span><b>NG+${G.ngPlus}</b></div></div>
-    <p class="ovsub" style="margin-bottom:16px;">New Game+${ng} — keep your gear &amp; stats. Foes scale to <b style="color:var(--danger)">×${newScales.hp.toFixed(1)} HP</b> · <b style="color:var(--danger)">×${newScales.dmg.toFixed(1)} damage</b>, just ahead of you.</p>
-    <button class="bigbtn" id="ngBtn">Begin NG+${ng}</button><button class="bigbtn ghost" id="menuBtn2">Main Menu</button></div>`);
-  document.getElementById('ngBtn').onclick=()=>beginRun(ng,carry,newScales);
-  document.getElementById('menuBtn2').onclick=titleScreen;
+      <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
 }
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
 function showOverlay(v){ overlay.classList.toggle('hide',!v); }
 function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
 function titleScreen(){
-  mode='title'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
-  const hasRun=!!meta.run;
-  showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">True 3D · Arena Action</p>
-    ${hasRun?`<button class="bigbtn" id="contBtn">Continue — ${STAGES[meta.run.stageIndex].name}</button>`:''}
-    <button class="bigbtn ${hasRun?'ghost':''}" id="newBtn">${hasRun?'New Run':'Start'}</button>
+  mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
+  showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">Hardcore Dungeon Crawler</p>
+    <button class="bigbtn" id="playBtn">Play</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     <button class="bigbtn ghost" id="sndBtn">Sound: ${meta.soundOn?'On':'Off'}</button>
     <button class="bigbtn ghost" id="to2dBtn" style="opacity:.7">↩ Classic 2D BLADEFALL</button>
-    <p class="hint">Full 3D arenas — joystick moves in every direction · <b>SLASH/FIRE</b> auto-targets<br>
-      <b>JUMP</b> · <b>DODGE</b> dashes your movement direction · Desktop: WASD + Space, J/K/L, Esc<br>
-      Your skins &amp; achievements carry over from the 2D game.<br>
-      ${meta.ngPlus>0?`Best difficulty: <b>NG+${meta.ngPlus}</b> · `:''}Skins: <b>${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1}</b><br><span style="opacity:.5">v${VERSION3D}</span></p></div>`);
-  if(hasRun) document.getElementById('contBtn').onclick=continueRun;
-  document.getElementById('newBtn').onclick=()=>startRun(0);
+    <p class="hint">Joystick moves in every direction · <b>SLASH/FIRE</b> auto-targets · <b>JUMP</b> · <b>DODGE</b> dashes<br>
+      Desktop: WASD + Space, J/K/L, Esc · Skins &amp; achievements carry across modes.<br>
+      Skins: <b>${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1}</b><br><span style="opacity:.5">v${VERSION3D}</span></p></div>`);
+  document.getElementById('playBtn').onclick=modeSelect;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
   document.getElementById('to2dBtn').onclick=()=>{ location.href='../'; };
+}
+function modeSelect(){
+  mode='menu';
+  const card=(m,name,icon,desc)=>{ const mv=loadJSON(MKEY(m))||{}; const g=mv.gold||0, hasRun=!!(mv.run&&mv.run.p);
+    return `<button class="choice" data-m="${m}"><div class="cname"><span>${icon}</span>${name}</div>
+      <div class="cdesc">${desc}<br><b style="color:#ffd24a">${g}g</b> banked${hasRun?' · run in progress':''}</div></button>`; };
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Choose Your Path</h2><p class="ovsub">Each mode keeps its own save.</p>
+    <div class="choices">
+      ${card('rl','Roguelite','⚔','Gold &amp; perks persist. Death ends the run, not your progress.')}
+      ${card('hc','Hardcore','☠','One life. Death wipes the save to zero. The true test.')}
+    </div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); loadMode(b.dataset.m); openHub(); });
+  document.getElementById('backBtn').onclick=titleScreen;
+}
+function openHub(){
+  mode='menu'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
+  const hasRun=!!(meta.run&&meta.run.p), modeName=MODE==='hc'?'Hardcore':'Roguelite';
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Gate Hub</h2>
+    <p class="ovsub">${modeName} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    ${hasRun?`<button class="bigbtn" id="contBtn">Continue Run</button>`:''}
+    <button class="bigbtn ${hasRun?'ghost':''}" id="enterBtn">${hasRun?'Abandon &amp; Enter New':'Enter Dungeon'}</button>
+    <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
+    <button class="bigbtn ghost" id="skinBtn">Skins</button>
+    <button class="bigbtn ghost" id="modeBtn">Switch Mode</button>
+    ${MODE==='hc'?'<p class="hint" style="color:var(--danger)">⚠ Hardcore: dying erases this save.</p>':'<p class="hint">Roguelite: your gold &amp; perks survive death.</p>'}</div>`);
+  if(hasRun) document.getElementById('contBtn').onclick=continueRun;
+  document.getElementById('enterBtn').onclick=()=>{ meta.run=null; persist(); startRun(0); };
+  document.getElementById('shopBtn').onclick=()=>openShop(openHub);
+  document.getElementById('skinBtn').onclick=()=>openSkins(openHub);
+  document.getElementById('modeBtn').onclick=()=>{ persist(); titleScreen(); };
+}
+function openShop(back){
+  mode='menu';
+  const rows=PERKIDS.map(id=>{ const P=PERKS[id], lv=perkLevel(id), maxed=lv>=P.max, cost=perkCost(id), afford=meta.gold>=cost;
+    return `<div class="gearrow"><div class="gi">${P.name}</div>
+      <div style="flex:1"><div class="gn">Lv ${lv}${maxed?' · MAX':''} <span style="color:var(--good);font-weight:700">${lv>0?P.unit(P.per*lv):''}</span></div>
+        <div class="gd">${maxed?'fully upgraded':'next: '+P.unit(P.per*(lv+1))}</div></div>
+      <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
+    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
+    if(perkLevel(id)>=PERKS[id].max) return;
+    if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; if(!meta.perks) meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; SFX.levelup(); persist(); openShop(back); });
+  document.getElementById('backBtn').onclick=back;
 }
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];
 function registerCheatTap(id){
@@ -1609,13 +1736,14 @@ function openAchievements(back){
 function openGear(back){
   mode='menu'; const p=G?G.p:null; if(!p){ back(); return; }
   const w=p.weapon, wEl=w.el?(w.el==='void'?'Void (ignores resist + lifesteal)':w.el):'Neutral';
-  const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=SLOTS[slot].label;
-    return `<div class="gearrow"><div class="gi">${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">Defense ${a.defense} · ${a.affixes.map(x=>x.label).join(' · ')}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
+  const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=slotLabel(slot);
+    const detail=a?(a.trinket?a.affixes.map(x=>x.label).join(' · '):('Defense '+a.defense+' · '+a.affixes.map(x=>x.label).join(' · '))):'';
+    return `<div class="gearrow"><div class="gi">${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
   showOverlayHTML(`<div class="card"><h2 class="ovh">Gear</h2>
     <p class="ovsub">Total damage reduction: <b style="color:${bestGearRarity(p)}">${Math.round(defenseR(p)*100)}%</b></p>
     <div class="achlist">
       <div class="gearrow"><div class="gi">Weapon</div><div><div class="gn" style="color:${w.color}">${w.name}</div><div class="gd">Dmg ${fmt(w.dmg)} · ${w.cls==='ranged'?'Ranged':'Melee'} · ${wEl}</div></div></div>
-      ${gearRow('helmet')}${gearRow('chest')}${gearRow('legs')}
+      ${gearRow('helmet')}${gearRow('chest')}${gearRow('legs')}${gearRow('amulet')}${gearRow('ring')}
     </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
@@ -1627,13 +1755,13 @@ function openPause(){
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
-    <button class="bigbtn ghost" id="qmenu">Quit to Menu</button></div>`);
+    <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
-  document.getElementById('qmenu').onclick=titleScreen;
+  document.getElementById('qmenu').onclick=()=>{ persist(); openHub(); };
 }
 document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });
 function hudUpdate(){
@@ -1645,10 +1773,11 @@ function hudUpdate(){
   wt.textContent=p.weapon.name+(G.ngPlus>0?'  ·  NG+'+G.ngPlus:'');
   wt.style.color=RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)';
   const at=document.getElementById('armortag'), red=Math.round(defenseR(p)*100);
-  const pips=SLOTIDS.map(s=>{ const a=p.gear[s]; return `<span class="pip" style="background:${a?a.color:'#333'}"></span>`; }).join('');
+  const pips=GEARSLOTS.map(s=>{ const a=p.gear[s]; return `<span class="pip" style="background:${a?a.color:'#333'}"></span>`; }).join('');
   at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+red+'%</b> '+pips;
   document.getElementById('bAttack').classList.toggle('ranged',p.weapon.cls==='ranged');
   document.getElementById('bAttack').textContent=p.weapon.cls==='ranged'?'FIRE':'SLASH';
+  const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0)+'g';
   updateToggles();
 }
 /* ============================================================
@@ -2130,14 +2259,15 @@ function drawArmorMini(a,rc){
   else { bx(-4.6,12,0, 7,17,7, st); bx(4.6,12,0, 7,17,7, st); bx(0,20,0, 17,3.4,7.4, rc, rc); bx(-4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); bx(4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); }
 }
 function drawPickup3(pk,t){
-  const it=pk.weapon||pk.armor, rc=RARITY[it.rarity].color, y0=pk.y0||0;
+  const it=pk.weapon||pk.armor||pk.trinket, rc=RARITY[it.rarity].color, y0=pk.y0||0;
   pushM(); mv(0,y0,0);
   drawShadow(pk.x,pk.z,10,0.25);
   bx(pk.x,70,pk.z, 5,140,5, rc, rc, 0.14); // beam
   pushM(); mv(pk.x,14+Math.sin(pk.bob)*5,pk.z); rotY(t*2.2);
   bx(0,-6,0, 20,2.4,20, rc, rc, 0.55); // rarity ring base
   if(pk.weapon){ pushM(); mv(0,2,0); weaponMesh(pk.weapon); popM(); }
-  else drawArmorMini(pk.armor,rc);
+  else if(pk.armor) drawArmorMini(pk.armor,rc);
+  else { bx(0,2,0, 12,2,12, rc, rc, 0.5); bx(0,9,0, 7,7,7, tint(rc,'#fff',0.25), rc); } // trinket gem
   popM(); popM();
 }
 function drawChest(ch,t){
@@ -2243,10 +2373,16 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
-  makeWeapon, makeArmor, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
+  makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
+  loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
+  giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
+  buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },
+  addGold:n=>{ meta.gold=(meta.gold||0)+n; return meta.gold; }, wipeMode:m=>wipeMode(m||MODE),
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
   get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
   snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,
+    playMode:MODE, gold:meta.gold, perks:Object.assign({},meta.perks||{}),
+    crit:p&&+effCrit(p).toFixed(3), goldFind:p&&+effGoldFind(p).toFixed(2), amulet:p&&!!p.gear.amulet, ring:p&&!!p.gear.ring,
     p:p&&{x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z),yaw:+p.yaw.toFixed(2),onGround:p.onGround,hp:Math.round(p.hp),effMaxHp:Math.round(effMaxHp(p)),lvl:p.level,
       weapon:p.weapon&&{name:p.weapon.name,cls:p.weapon.cls,rarity:p.weapon.rarity},
       gear:p.gear&&{reduction:Math.round(defenseR(p)*100)},skin:p.skin},

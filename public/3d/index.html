@@ -50,6 +50,7 @@
   .btn.pressed{background:rgba(232,163,61,.55);border-color:#f3c272;transform:scale(.94);}
   .btn svg{width:46%;height:46%;fill:currentColor;}
   #joyzone{position:absolute;left:0;bottom:0;width:46%;height:46%;pointer-events:auto;}
+  #lookzone{position:absolute;right:0;top:0;width:54%;height:100%;pointer-events:auto;} /* shoulder-cam look-drag; buttons stack above it */
   #joy{position:absolute;width:104px;height:104px;border-radius:50%;background:rgba(28,30,38,.35);border:1.5px solid rgba(255,255,255,.12);display:none;pointer-events:none;}
   #joyknob{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(232,163,61,.5);border:1.5px solid #f3c272;left:29px;top:29px;pointer-events:none;}
   #bAttack{width:86px;height:86px;right:calc(env(safe-area-inset-right) + 16px);bottom:calc(env(safe-area-inset-bottom) + 26px);font-size:15px;background:rgba(232,69,61,.34);border-color:rgba(255,140,134,.4);}
@@ -124,6 +125,7 @@
 <button id="pausebtn" class="hide">II</button>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
+  <div id="lookzone"></div>
   <button class="btn" id="bDodge">DODGE</button>
   <button class="btn" id="bJump"><svg viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></button>
   <button class="btn" id="bAttack">SLASH</button>
@@ -142,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.0';
+const VERSION3D='1.7.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -880,6 +882,7 @@ function loadStage(i){
   G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
   G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
   G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
   document.getElementById('stagetag').textContent=s.name; hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
@@ -1001,6 +1004,20 @@ canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
 window.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse') return;
   if(e.button===0) input.attack=false; if(e.button===2) input.dodge=false; });
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
+/* ---- shoulder-cam camera control (only in 'shoulder' mode) ----
+   Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
+   (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
+canvas.addEventListener('click',()=>{ if(meta.camMode==='shoulder' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock) canvas.requestPointerLock(); });
+document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){
+  G.camYaw=(G.camYaw||0)-e.movementX*0.0032; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+e.movementY*0.0026)); } });
+(function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
+  zone.addEventListener('pointerdown',e=>{ if(pid!==null||meta.camMode!=='shoulder'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); });
+  zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+    G.camYaw=(G.camYaw||0)-dx*0.006; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+dy*0.005)); });
+  const end=e=>{ if(e.pointerId===pid) pid=null; };
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
+  zone.addEventListener('contextmenu',e=>e.preventDefault());
+})();
 let _lastTouchEnd=0;
 document.addEventListener('touchend',e=>{
   if(e.target.closest&&e.target.closest('#overlay')) return;
@@ -1270,7 +1287,9 @@ function update(dt){
   if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
-  const moveSpd=220*effSpeed(p), mx=moveX(), mz=moveZ();
+  const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
+  if(meta.camMode==='shoulder' && (mx||mz)){ // movement is relative to where the camera points
+    const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
   else {
     if(mx!==0) p.vx+=mx*moveSpd*dt*8; p.vx*=0.80; if(Math.abs(p.vx)<4) p.vx=0;
@@ -2186,14 +2205,15 @@ function render(t){
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10;
-    if(G.cam.yaw==null) G.cam.yaw=p.yaw; let dy=p.yaw-G.cam.yaw; while(dy>Math.PI)dy-=6.2832; while(dy<-Math.PI)dy+=6.2832; G.cam.yaw+=dy*0.09; }
+    if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0;
   const shx=G?(Math.random()-0.5)*G.shake*0.8:0, shy=G?(Math.random()-0.5)*G.shake*0.8:0;
-  if(meta.camMode==='shoulder'){ // over-the-shoulder: closer + lower + follows facing, so walls block the view ahead
-    const cyaw=G?G.cam.yaw:t*0.4, fx=Math.sin(cyaw), fz=Math.cos(cyaw);
-    PROJ=mPersp(60*Math.PI/180,VW/VH,6,2400);
-    VIEW=mLookAt([cx-fx*172+shx,132+shy,cz-fz*172],[cx+fx*130,42,cz+fz*130],[0,1,0]);
-    gl.uniform2f(U.uFogNF,300,860);
+  if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
+    const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
+    const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
+    PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
+    VIEW=mLookAt([cx-fx*hd+shx, eh+shy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72, cz+fz*120],[0,1,0]);
+    gl.uniform2f(U.uFogNF,300,880);
   } else { // classic high chase overview
     PROJ=mPersp(50*Math.PI/180,VW/VH,10,2400);
     VIEW=mLookAt([cx+shx,296+shy,cz+330],[cx,26,cz-4],[0,1,0]);
@@ -2382,7 +2402,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
   get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
   snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,
-    playMode:MODE, gold:meta.gold, perks:Object.assign({},meta.perks||{}), camMode:meta.camMode,
+    playMode:MODE, gold:meta.gold, perks:Object.assign({},meta.perks||{}), camMode:meta.camMode, camYaw:G&&+((G.camYaw||0).toFixed(2)), camPitch:G&&+((G.camPitch||0).toFixed(2)),
     doorways:G&&G.rooms.reduce((a,r)=>a+(r.doorways?r.doorways.length:0),0), mazeGoalD:G&&G._dbg&&G._dbg.goalD,
     crit:p&&+effCrit(p).toFixed(3), goldFind:p&&+effGoldFind(p).toFixed(2), amulet:p&&!!p.gear.amulet, ring:p&&!!p.gear.ring,
     p:p&&{x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z),yaw:+p.yaw.toFixed(2),onGround:p.onGround,hp:Math.round(p.hp),effMaxHp:Math.round(effMaxHp(p)),lvl:p.level,

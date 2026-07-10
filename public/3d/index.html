@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.4';
+const VERSION3D='1.7.5';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -811,39 +811,51 @@ function loadStage(i){
   const edges=treeEdges.slice(), eset=new Set(treeEdges.map(ekey)), tset=new Set(treeEdges.map(ekey));
   for(const c of order){ for(const d of [[1,0],[0,1]]){ const nx=c[0]+d[0],nz=c[1]+d[1];
     if(inSet.has(K(nx,nz))){ const e=[c,[nx,nz]]; if(!eset.has(ekey(e)) && rnd()<0.30){ edges.push(e); eset.add(ekey(e)); } } } }
-  // rooms (centered on cells; sizes vary but centre stays put so doorways align)
-  for(const c of order){ const gx=c[0],gz=c[1], big=rnd()<0.5;
-    const w=Math.min(PITCHX-120,(big?340:270)+rnd()*130), d=Math.min(PITCHZ-120,(big?310:255)+rnd()*120);
+  // graph distances FIRST (so the far "boss" room can be enlarged before corridors align to its walls)
+  const adj={}; order.forEach(c=>adj[K(c[0],c[1])]=[]);
+  edges.forEach(e=>{ const pk=K(e[0][0],e[0][1]),qk=K(e[1][0],e[1][1]); if(adj[pk].indexOf(qk)<0)adj[pk].push(qk); if(adj[qk].indexOf(pk)<0)adj[qk].push(pk); });
+  const dist={}, bfs=[K(startGX,startGZ)]; dist[bfs[0]]=0;
+  while(bfs.length){ const u=bfs.shift(); for(const v of adj[u]) if(dist[v]==null){ dist[v]=dist[u]+1; bfs.push(v); } }
+  let goalKey=K(startGX,startGZ), goalD=-1;
+  for(const k in dist){ if(k!==K(startGX,startGZ) && (dist[k]>goalD || (dist[k]===goalD && rnd()<0.4))){ goalD=dist[k]; goalKey=k; } }
+  // rooms (centered on cells so doorways always align). The boss/exit room is bigger.
+  for(const c of order){ const gx=c[0],gz=c[1], isGoal=K(gx,gz)===goalKey, big=rnd()<0.5;
+    let w,d;
+    if(isGoal && (isBoss||isMini)){ w=Math.min(PITCHX-54,402+rnd()*26); d=Math.min(PITCHZ-54,378+rnd()*24); } // roomier boss arena
+    else { w=Math.min(PITCHX-120,(big?330:262)+rnd()*118); d=Math.min(PITCHZ-120,(big?300:250)+rnd()*112); }
     const room={x:cellX(gx),z:cellZ(gz),w,d,gx,gz,monsters:[],doors:[],doorways:[],cleared:true,_gaps:{front:[],back:[],w:[],e:[]},deg:0};
     roomAt[K(gx,gz)]=room; G.rooms.push(room); G.segments.push({x:room.x,z:room.z,w,d});
   }
-  const entryRoom=roomAt[K(startGX,startGZ)];
+  const entryRoom=roomAt[K(startGX,startGZ)], goalRoom=roomAt[goalKey]||entryRoom;
   const CW=104; // corridor width matches doorway
+  // parkour corridor: stoops at both ends + jumpable stepping-stones over the drop (no side rails). Always crossable.
+  const bridgeSpan=(a0,a1,cross,horiz)=>{ const mn=Math.min(a0,a1),mx=Math.max(a0,a1);
+    const put=(cc,w2)=> horiz?{x:cc,z:cross,w:w2,d:CW}:{x:cross,z:cc,w:CW,d:w2};
+    G.segments.push(put(mn+18,42)); G.segments.push(put(mx-18,42));   // landing stoops at each doorway
+    const lo=mn+40, hi=mx-40, span=hi-lo; if(span<=46) return;        // short span: one clean jump over the drop
+    const cc=(lo+hi)/2, iw=46, r2=rnd();                             // one dynamic tile in the middle -> two jumpable gaps
+    if(r2<0.5 && diff>=2){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }        // crumbling stone
+    else if(horiz && diff>=1){ const amp=Math.min(span*0.3,34); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.8,h:0,amp,sp:1+rnd()*0.5,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform (x-corridors only)
+    else { G.segments.push(put(cc,iw)); }                            // static stepping stone
+    if(diff>=4&&rnd()<0.2) G.geysers.push({x:horiz?cc:cross,z:horiz?cross:cc,r:18,period:3+rnd()*1.5,phase:rnd()*6.28}); };
   for(const e of edges){ const ca=e[0],cb=e[1], ra=roomAt[K(ca[0],ca[1])], rb=roomAt[K(cb[0],cb[1])]; ra.deg++; rb.deg++;
+    const parkour=!isBoss && diff>=1 && rnd()<0.42; // ~40% of corridors become parkour bridges (still always jumpable)
     if(cb[0]!==ca[0]){ // horizontal corridor (rooms share the z row)
       const west=ca[0]<cb[0]?ra:rb, east=ca[0]<cb[0]?rb:ra, zc=ra.z;
       const x0=west.x+west.w/2-6, x1=east.x-east.w/2+6, cx=(x0+x1)/2, cwid=x1-x0;
       west._gaps.e.push(zc); east._gaps.w.push(zc);
       west.doorways.push({x:west.x+west.w/2,z:zc,ori:'z'}); east.doorways.push({x:east.x-east.w/2,z:zc,ori:'z'});
-      if(cwid>12){ G.segments.push({x:cx,z:zc,w:cwid,d:CW});
-        G.walls.push({x:cx,z:zc-CW/2,w:cwid,d:14,h:96}); G.walls.push({x:cx,z:zc+CW/2,w:cwid,d:14,h:96}); }
+      if(cwid>12){ if(parkour) bridgeSpan(x0,x1,zc,true);
+        else { G.segments.push({x:cx,z:zc,w:cwid,d:CW}); G.walls.push({x:cx,z:zc-CW/2,w:cwid,d:14,h:96}); G.walls.push({x:cx,z:zc+CW/2,w:cwid,d:14,h:96}); } }
     } else { // vertical corridor (rooms share the x column); higher gz = deeper (more -z) = "north"
       const south=ca[1]<cb[1]?ra:rb, north=ca[1]<cb[1]?rb:ra, xc=ra.x;
       const z0=south.z-south.d/2+6, z1=north.z+north.d/2-6, cz=(z0+z1)/2, cd=Math.abs(z0-z1);
       south._gaps.back.push(xc); north._gaps.front.push(xc);
       south.doorways.push({x:xc,z:south.z-south.d/2,ori:'x'}); north.doorways.push({x:xc,z:north.z+north.d/2,ori:'x'});
-      if(cd>12){ G.segments.push({x:xc,z:cz,w:CW,d:cd});
-        G.walls.push({x:xc-CW/2,z:cz,w:14,d:cd,h:96}); G.walls.push({x:xc+CW/2,z:cz,w:14,d:cd,h:96}); }
+      if(cd>12){ if(parkour) bridgeSpan(z0,z1,xc,false);
+        else { G.segments.push({x:xc,z:cz,w:CW,d:cd}); G.walls.push({x:xc-CW/2,z:cz,w:14,d:cd,h:96}); G.walls.push({x:xc+CW/2,z:cz,w:14,d:cd,h:96}); } }
     }
   }
-  // graph distances from entry → hidden goal room (farthest) + leaves (dead-ends)
-  const adj={}; order.forEach(c=>adj[K(c[0],c[1])]=[]);
-  edges.forEach(e=>{ const p=K(e[0][0],e[0][1]),q=K(e[1][0],e[1][1]); if(adj[p].indexOf(q)<0)adj[p].push(q); if(adj[q].indexOf(p)<0)adj[q].push(p); });
-  const dist={}, bfs=[K(startGX,startGZ)]; dist[bfs[0]]=0;
-  while(bfs.length){ const u=bfs.shift(); for(const v of adj[u]) if(dist[v]==null){ dist[v]=dist[u]+1; bfs.push(v); } }
-  let goalKey=K(startGX,startGZ), goalD=-1;
-  for(const k in dist){ if(k!==K(startGX,startGZ) && (dist[k]>goalD || (dist[k]===goalD && rnd()<0.4))){ goalD=dist[k]; goalKey=k; } }
-  const goalRoom=roomAt[goalKey]||entryRoom;
   const leaves=G.rooms.filter(r=>r.deg===1 && r!==entryRoom && r!==goalRoom);
   const vault=(!isBoss && leaves.length)?leaves[Math.floor(rnd2()*leaves.length)]:null;
   // boss / exit lives in the hidden goal room

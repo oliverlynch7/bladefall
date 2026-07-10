@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.5';
+const VERSION3D='1.7.6';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1030,11 +1030,12 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 /* ---- shoulder-cam camera control (only in 'shoulder' mode) ----
    Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
    (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
-canvas.addEventListener('click',()=>{ if(meta.camMode==='shoulder' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock) canvas.requestPointerLock(); });
+// desktop: ANY click in play captures the mouse, then moving it aims the camera hands-free (no click-hold). Esc releases.
+window.addEventListener('mousedown',e=>{ if(meta.camMode==='shoulder' && mode==='play' && document.pointerLockElement!==canvas && !(e.target&&e.target.closest&&e.target.closest('#overlay')) && canvas.requestPointerLock) canvas.requestPointerLock(); });
 document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
   G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
-  zone.addEventListener('pointerdown',e=>{ if(pid!==null||meta.camMode!=='shoulder'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); });
+  zone.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'||pid!==null||meta.camMode!=='shoulder'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); }); // mouse uses pointer-lock; drag is touch-only
   zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
     const sn=meta.lookSens||1; G.camYaw=(G.camYaw||0)-dx*0.006*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+dy*0.005*sn)); });
   const end=e=>{ if(e.pointerId===pid) pid=null; };

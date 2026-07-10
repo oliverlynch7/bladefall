@@ -83,8 +83,8 @@
   .choice .cdesc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4;}
   .statgrid{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 20px;}
   .hint{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;}
-  .vsrow{display:flex;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted);margin:3px 0;}
-  .vsrow b{color:var(--ink);}
+  .vsrow{display:flex;justify-content:space-between;gap:6px;font-size:14.5px;color:var(--muted);margin:5px 0;}
+  .vsrow b{color:var(--ink);font-size:15.5px;}
   .up{color:var(--good);} .down{color:var(--danger);}
   #toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);z-index:25;background:rgba(20,21,27,.92);border:1px solid var(--amber-dim);color:var(--amber);font-weight:800;font-size:13px;letter-spacing:.04em;padding:10px 18px;border-radius:12px;opacity:0;transition:opacity .2s,top .2s;pointer-events:none;text-align:center;max-width:80vw;}
   #toast.show{opacity:1;top:24%;}
@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.7';
+const VERSION3D='1.8.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -327,8 +327,8 @@ const ARCHES={
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane'},
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12},
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
-  crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:14,cd:.53,kb:170,art:'cross',proj:{speed:780,size:6,pierce:1,range:900,color:'#cfd6df',shape:'arrow'}}, // nerfed for 3D aim assist
-  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:6,cd:.16,kb:80,art:'dagger',proj:{speed:640,size:4,pierce:0,range:1000,color:'#9fe6c8',shape:'arrow'}},
+  crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun spread (per-shot dmg low; all 3 land up close)
+  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // rapid double-throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'spear',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}},
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',proj:{speed:470,size:10,pierce:0,range:360,color:'#ff7a3a',shape:'orb',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:11,cd:.32,kb:120,art:'wand',el:'ice',proj:{speed:560,size:7,pierce:0,range:520,color:'#7fd6ff',shape:'orb',glow:1}},
@@ -892,7 +892,7 @@ function loadStage(i){
   // build room walls (gaps already recorded on _gaps by carving)
   G.rooms.forEach(wallRoom);
   // spring + goblin
-  if(!isBoss && rnd2()<0.4){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
+  if(!isBoss && rnd2()<0.22){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
   if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r=G.rooms[Math.floor(rnd2()*G.rooms.length)]||entryRoom; const gb=spawnEnemy('goblin',r.x,r.z); gb.despawnT=9; gb.dropT=0.2; }
   if((i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
   // bounds (deco + culling)
@@ -919,23 +919,23 @@ function loadBonus(returnIdx){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
-  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=26; G.combo=0; G.comboT=0;
+  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=18; G.bonusSecured=false; G.combo=0; G.comboT=0; // shorter timer
   const rnd=mulberry(G.stageIndex*31337+911);
-  G.segments.push({x:0,z:-20,w:200,d:200});
-  let cursorZ=-120, prevX=0;
-  for(let k=0;k<8;k++){
-    const gap=52+rnd()*38, w=120+rnd()*50, d=110+rnd()*60;
-    let x=prevX+(rnd()*2-1)*150; x=Math.max(-200,Math.min(200,x));
+  G.segments.push({x:0,z:-20,w:186,d:186});
+  let cursorZ=-112, prevX=0;
+  for(let k=0;k<9;k++){                                        // harder: wider gaps, smaller platforms, a dynamic tile every hop
+    const gap=74+rnd()*48, w=94+rnd()*40, d=90+rnd()*44;
+    let x=prevX+(rnd()*2-1)*180; x=Math.max(-215,Math.min(215,x));
     const seg={x,z:cursorZ-gap-d/2,w,d}; G.segments.push(seg);
-    if(k%3===1){ const mx=(prevX+x)/2; G.movers.push({x0:mx,z:cursorZ-gap/2,w:74,d:60,h:0,amp:40+rnd()*40,sp:1.1+rnd()*0.6,ph:rnd()*6.28,x:mx,px:mx}); }
-    else if(k%3===2){ G.crumbles.push({x:(prevX+x)/2,z:cursorZ-gap/2,w:66,d:58,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
-    if(k===4){ G.pads.push({x:seg.x,z:seg.z,r:20}); }
+    const mid=(prevX+x)/2, mz=cursorZ-gap/2;
+    if(k%2===0) G.movers.push({x0:mid,z:mz,w:62,d:52,h:0,amp:50+rnd()*46,sp:1.2+rnd()*0.7,ph:rnd()*6.28,x:mid,px:mid});
+    else G.crumbles.push({x:mid,z:mz,w:54,d:50,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    if(k===5) G.pads.push({x:seg.x,z:seg.z,r:20});
     prevX=x; cursorZ=seg.z-d/2;
   }
-  const fin={x:prevX,z:cursorZ-46-110,w:200,d:220}; G.segments.push(fin);
-  G.chests.push({x:fin.x,z:fin.z+fin.d/2-46,y:0,opened:false,bob:0,bonus:true}); // chest first...
-  G.portal={x:fin.x,z:fin.z-fin.d/2+44,t:0};                                     // ...exit at the far edge
-  G.progressEnd=G.portal.z;
+  const fin={x:prevX,z:cursorZ-46-104,w:190,d:200}; G.segments.push(fin);
+  G.chests.push({x:fin.x,z:fin.z,y:0,opened:false,bob:0,bonus:true}); // the chest IS the finish — grabbing it stops the clock
+  G.progressEnd=fin.z;
   G.lastSafe={x:0,z:20};
   G.p.x=0; G.p.z=20; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   const bt=document.getElementById('bonustimer'); bt.style.display='block';
@@ -952,7 +952,7 @@ function spawnEnemy(type,x,z,isBoss){
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale();
   const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
-    dmg:a.dmg*DIFFICULTY*G.ngDmg,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
+    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,noSplit:!!a.noSplit,windT:0,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
@@ -1125,6 +1125,14 @@ function enemySupport(e){
   for(const ob of G.obstacles){ if(ob.h<=ECLIMB && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
+// true if a wall (or a closed door) blocks the straight line a->b — used so melee can't reach through walls
+function losBlocked(x0,z0,x1,z1){
+  const steps=Math.ceil(Math.hypot(x1-x0,z1-z0)/8);
+  for(let s=1;s<steps;s++){ const t=s/steps, x=x0+(x1-x0)*t, z=z0+(z1-z0)*t;
+    if(G.walls) for(const w of G.walls){ if(Math.abs(x-w.x)<w.w/2 && Math.abs(z-w.z)<w.d/2) return true; }
+    if(G.doors) for(const d of G.doors){ if(!d.open && Math.abs(x-d.x)<d.w/2 && Math.abs(z-d.z)<d.d/2) return true; } }
+  return false;
+}
 function updateCrumbles(dt){
   const p=G.p;
   for(const cr of G.crumbles){
@@ -1192,9 +1200,11 @@ function fireProjectile(p,w,target){
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
     vy=((target.y+target.h*0.5)-oy)/t + (pr.gravity?pr.gravity*0.5*t:0); }
-  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,
-    gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
-    dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[]});
+  const count=pr.count||1, spread=pr.spread||0;                 // multi-shot spread (crossbow, knives)
+  for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
+      gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
+      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[]}); }
 }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
@@ -1202,7 +1212,7 @@ function resolveSwing(){
   const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const crit=Math.random()<0.18+effCrit(p);
   const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0)), ls=Math.max(w.lifesteal||0,effLifesteal(p));
-  const hit=e=>{ e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); };
+  const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
   if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
     const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
     for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
@@ -1271,6 +1281,7 @@ function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve();
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('✓ Loot secured — grab it, then take the exit'); } // stop the clock the instant you grab it
   const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
     let rid=rollRarity();
@@ -1387,11 +1398,10 @@ function update(dt){
   // golden bonus portal
   if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48){ startBonus(); return; }
   // bonus sprint clock
-  if(G.bonusActive){ G.bonusTime-=dt;
-    const bt=document.getElementById('bonustimer');
-    bt.textContent='⏱ '+Math.max(0,G.bonusTime).toFixed(1)+'s';
-    bt.style.color=G.bonusTime<6?'#ff5e54':'#ffd24a';
-    if(G.bonusTime<=0){ endBonus('⏱ Too slow — the vault seals!'); return; } }
+  if(G.bonusActive){ const bt=document.getElementById('bonustimer');
+    if(G.bonusSecured){ bt.textContent='✓ SECURED'; bt.style.color='#3ad07f'; }
+    else { G.bonusTime-=dt; bt.textContent='⏱ '+Math.max(0,G.bonusTime).toFixed(1)+'s'; bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
+      if(G.bonusTime<=0){ endBonus('⏱ Too slow — the vault seals!'); return; } } }
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
@@ -1874,10 +1884,11 @@ function drawCourse(s,t){
         bx(gy2.x,yy,gy2.z, gy2.r*(1.5-k2*0.22),hgt/4+4,gy2.r*(1.5-k2*0.22), hzc[1], hzc[1], 0.8-k2*0.12); } }
   }
   // healing springs
-  for(const sp2 of G.springs){
-    bx(sp2.x,0.9,sp2.z, 42,1.8,42, tint(s.ground,'#000',0.3));
-    bx(sp2.x,1.8,sp2.z, 32,1.6,32, sp2.used?'#3a5a50':'#7fe8c0', sp2.used?null:'#7fe8c0', sp2.used?0.6:0.55+0.25*Math.sin(t*3));
-    if(!sp2.used) bx(sp2.x,6+Math.sin(t*2.6)*3,sp2.z, 5,5,5,'#bfffe4','#7fe8c0',0.8);
+  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;
+    bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                         // base pad
+    bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
+    if(!sp2.used){ const fy=13+Math.sin(t*2.6)*3;                                                      // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
+      bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
   }
   // golden bonus portal
   if(G.bonusPortal){ const bp=G.bonusPortal;

@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.8.0';
+const VERSION3D='1.9.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -674,7 +674,8 @@ function freshPlayer(){
   const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
     hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:startWeapon(),gear:freshGear(),armorMods:null,
     stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
-    atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false};
+    atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
+    charging:false,chargeAmt:0,holdT:0,attackHeld:false};
   applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
   return p;
 }
@@ -760,7 +761,7 @@ function loadStage(i){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false;
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
@@ -1194,6 +1195,17 @@ function playerAttack(cdMul){
   if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag') SFX.magic(w.el); else SFX.shoot(); }
   else { p.atkTimer=0.26; SFX.slash(); }
 }
+function isChargeWeapon(w){ return w && w.cls==='melee' && w.sch==='mag' && !!w.el; } // magic swords: tap=melee, hold=charged elemental blast
+function fireCharged(p,w,amt){
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6);                    // 1.4x at a flick up to 4x at full charge
+  const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=580, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const col=elementColor(w.el)||'#c9a6ff', ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx,vy,vz,gravity:0,size:9+amt*9,color:col,shape:'orb',glow:1,
+    dmg,kb:280,pierce:2,el:w.el,life:1150/sp,hitSet:[]});
+  SFX.magic(w.el); G.shake=Math.min(G.shake+5+amt*5,13); p.atkTimer=0.2; burst(ox,oy,oz,col,10);
+}
 function fireProjectile(p,w,target){
   const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit;
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
@@ -1351,7 +1363,13 @@ function update(dt){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.34); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }
   document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
-  if((input.attack||meta.autoAttack) && p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(input.attack?1:1.176); // auto = 15% slower rate
+  const _w=p.weapon;
+  if(isChargeWeapon(_w) && !meta.autoAttack){                    // magic sword: tap = melee swing, hold = charge an elemental blast
+    if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }
+      p.holdT+=dt; if(p.holdT>=0.28 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }
+    else { if(p.charging){ fireCharged(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
+  } else { p.charging=false; p.holdT=0; p.attackHeld=false;
+    if((input.attack||meta.autoAttack) && p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(input.attack?1:1.176); } // auto = 15% slower rate
   if(p.atkTimer>0) resolveSwing();
   updateMovers(dt);
   if(!p.onGround) p.vy-=1500*dt;
@@ -1372,6 +1390,9 @@ function update(dt){
   // fell into the hazard
   if(p.y<-34){ lavaHit(); }
   updateCrumbles(dt); updateGeysers(dt);
+  if(G.shockwaves){ for(const sw of G.shockwaves){ sw.life+=dt; sw.r+=270*dt;   // expanding boss slam ring
+      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
+    G.shockwaves=G.shockwaves.filter(sw=>sw.r<sw.maxR); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
     sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
@@ -1541,6 +1562,13 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
     if(!e.kite && dist<240 && e.atkTimer<=0){ e.lunge=0.45; e.atkTimer=1.8; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
+  }
+  if(e.type==='brute'){                                    // ground-slam shockwave (non-projectile — jump the ring to avoid it)
+    if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
+      G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SLAM!','var(--danger)',true);
+      for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
+    else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
+      if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=4.5+Math.random()*2.5; G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up
   }
   if(e.ranged && e.shootT<=0 && dist<2000){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
@@ -1884,6 +1912,9 @@ function drawCourse(s,t){
         bx(gy2.x,yy,gy2.z, gy2.r*(1.5-k2*0.22),hgt/4+4,gy2.r*(1.5-k2*0.22), hzc[1], hzc[1], 0.8-k2*0.12); } }
   }
   // healing springs
+  // boss slam shockwave — expanding warning ring on the ground (jump it to avoid)
+  if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR);
+    for(let i=0;i<20;i++){ const an=i/20*6.283; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, '#ff8a4a','#ff5a1e', 0.65*a); } }
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;
     bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                         // base pad
     bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
@@ -2044,6 +2075,8 @@ function drawHero3(p,t,preview){
 }
 /* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
 function drawSwing3(p,t){
+  if(p.charging && p.weapon){ const col=elementColor(p.weapon.el)||'#c9a6ff', s=6+p.chargeAmt*13, hx=p.x+Math.sin(p.yaw)*16, hz=p.z+Math.cos(p.yaw)*16;
+    bx(hx,p.y+30,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
   const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
   const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));

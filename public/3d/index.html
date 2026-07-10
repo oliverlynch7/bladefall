@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.3';
+const VERSION3D='1.7.4';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -314,18 +314,18 @@ function elemMod(wEl,eEl){
 
 /* ---------------- Weapons (identical stats; range = world units) ---------------- */
 const ARCHES={
-  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:11,cd:.38,kb:190,range:54,art:'sword'},
-  saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:13,cd:.34,kb:200,range:56,art:'sword'},
-  dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:7,cd:.18,kb:120,range:42,art:'dagger'},
-  spear:{disp:'Spear',cls:'melee',sch:'phys',dmg:15,cd:.50,kb:230,range:88,art:'spear'},
-  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:20,cd:.56,kb:300,range:58,art:'axe'},
-  great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:28,cd:.70,kb:340,range:66,art:'great'},
-  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:34,cd:.82,kb:430,range:60,art:'hammer'},
-  scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:22,cd:.52,kb:260,range:74,art:'scythe'},
-  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:16,cd:.40,kb:200,range:58,art:'sword',el:'fire'},
-  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:58,art:'sword',el:'ice'},
-  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:21,cd:.42,kb:240,range:62,art:'great',el:'arcane'},
-  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:24,cd:.50,kb:260,range:76,art:'scythe',el:'void',lifesteal:.12},
+  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:190,range:60,art:'sword'},
+  saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:60,art:'sword'},
+  dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:46,art:'dagger'},
+  spear:{disp:'Spear',cls:'melee',sch:'phys',dmg:15,cd:.52,kb:230,range:120,art:'spear'},
+  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe'},
+  great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great'},
+  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer'},
+  scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe'},
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'sword',el:'fire'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'sword',el:'ice'},
+  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane'},
+  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12},
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:14,cd:.53,kb:170,art:'cross',proj:{speed:780,size:6,pierce:1,range:900,color:'#cfd6df',shape:'arrow'}}, // nerfed for 3D aim assist
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:6,cd:.16,kb:80,art:'dagger',proj:{speed:640,size:4,pierce:0,range:1000,color:'#9fe6c8',shape:'arrow'}},
@@ -338,6 +338,17 @@ const ARCHES={
   holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'scepter',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'orb',glow:1}}
 };
 const ARCHEIDS=Object.keys(ARCHES);
+/* per-art melee hit shape: arc = front cone, thrust = long narrow lunge, slam = radial AoE.
+   reach here matches each weapon's ARCHES range; longer reach is paid for with lower DPS (tuned above). */
+const MELEE={
+  dagger:{shape:'thrust',reach:46,width:24},
+  sword:{shape:'arc',reach:60,arc:1.75},
+  spear:{shape:'thrust',reach:120,width:22},
+  axe:{shape:'arc',reach:64,arc:2.15},
+  great:{shape:'arc',reach:84,arc:2.70},
+  hammer:{shape:'slam',reach:70,radius:62,offset:42},
+  scythe:{shape:'arc',reach:90,arc:2.95}
+};
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
   const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,
@@ -1172,15 +1183,26 @@ function fireProjectile(p,w,target){
 }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
-  if(p.atkTimer<0.26*0.35) return;
-  const hx=p.x+Math.sin(p.yaw)*(p.r+w.range*0.55), hz=p.z+Math.cos(p.yaw)*(p.r+w.range*0.55);
-  for(const e of G.enemies){
-    if(e.dead||e.lastHit===p.swingId) continue;
-    if(dXZ(e.x,e.z,hx,hz)<(w.range*0.55+e.r) && vOverlap(e,p)){
-      e.lastHit=p.swingId;
-      const dmg=w.dmg*effPower(p)*(1+(Math.random()<0.18+effCrit(p)?0.5:0));
-      hitEnemy(e,dmg,p,w.kb,Math.max(w.lifesteal||0,effLifesteal(p)),w.el);
-    }
+  if(p.atkTimer<0.26*0.4) return;                       // active-hit window
+  const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  const crit=Math.random()<0.18+effCrit(p);
+  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0)), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  const hit=e=>{ e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); };
+  if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
+    const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      if(dXZ(e.x,e.z,cx,cz)<(M.radius+e.r) && vOverlap(e,p)) hit(e); }
+  } else if(M.shape==='thrust'){                          // long narrow lunge (spear / dagger)
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      const dx=e.x-p.x, dz=e.z-p.z, along=dx*fx+dz*fz; if(along<-e.r||along>M.reach+e.r) continue;
+      if(Math.abs(dx*fz-dz*fx)>M.width+e.r) continue;     // perpendicular distance to the thrust line
+      if(vOverlap(e,p)) hit(e); }
+  } else {                                                // front cone / arc (sword, axe, great, scythe)
+    const cosHalf=Math.cos(M.arc/2);
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      const dx=e.x-p.x, dz=e.z-p.z, d=Math.hypot(dx,dz); if(d>M.reach+e.r) continue;
+      if(d>e.r && (dx*fx+dz*fz)/d<cosHalf) continue;      // outside the front arc (point-blank always connects)
+      if(vOverlap(e,p)) hit(e); }
   }
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
@@ -1951,13 +1973,19 @@ function drawHero3(p,t,preview){
   // left arm
   pushM(); mv(-11,32,0); rotX(moving?leg*0.8:0.06); bx(0,-8,0, 4.6,15,4.6, AL); popM();
   // right arm + weapon
+  // right arm + weapon — attack style varies by weapon type (thrust / arc-sweep / overhead-slam)
   pushM(); mv(11,32,0);
   const w=p.weapon;
-  let armAng; if(w.cls==='melee'){ const sw=p.atkTimer>0?(1-(p.atkTimer/0.26)):0; armAng=p.atkTimer>0?(-2.3+sw*2.9):(-0.35+Math.sin(t*2)*0.06); }
-  else { armAng=p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1); }
-  rotX(armAng);
+  if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
+    if(prog<0) rotX(-0.35+Math.sin(t*2)*0.06);
+    else if(M.shape==='thrust') rotX(-1.5);                       // arm forward, weapon lunges
+    else if(M.shape==='slam') rotX(-2.5+prog*3.1);                // big overhead chop
+    else { rotY((0.5-prog)*1.5); rotX(-1.0-prog*0.35); rotZ(0.28); } // horizontal sweep across the arc
+  } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
-  pushM(); mv(0,-14,0); rotX(Math.PI); weaponMesh(w); popM();
+  pushM(); mv(0,-14,0); rotX(Math.PI);
+  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*11,0);
+  weaponMesh(w); popM();
   popM();
   // head
   bx(0,42,0, 12,12,11, sk.tone);
@@ -1987,6 +2015,24 @@ function drawHero3(p,t,preview){
   pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
   bx(0,-12,0, 15,24,1.8, sk.cape); popM();
   popM();
+}
+/* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
+function drawSwing3(p,t){
+  const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
+  const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));
+  if(M.shape==='slam'){
+    const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40), r=M.radius*(0.55+0.5*prog);
+    for(let k=0;k<14;k++){ const ang=k/14*6.283; bx(cx+Math.cos(ang)*r, y-16, cz+Math.sin(ang)*r, 9,5,9, col, col, a); }
+  } else if(M.shape==='thrust'){
+    const reach=M.reach*Math.min(1,prog*1.7);
+    for(let k=1;k<=5;k++){ const dd=reach*k/5; bx(p.x+fx*dd, y, p.z+fz*dd, M.width*1.1,6,M.width*1.1, col, col, a*(1-k*0.12)); }
+  } else { // arc fan swept up to the current blade angle
+    const half=M.arc/2, cur=-half+prog*M.arc, rr=M.reach*0.9;
+    for(let k=0;k<=8;k++){ const a0=-half+(k/8)*M.arc; if(a0>cur+0.05) break; const ang=p.yaw+a0;
+      const near=1-Math.min(1,Math.abs(a0-cur)/0.6);
+      bx(p.x+Math.sin(ang)*rr, y, p.z+Math.cos(ang)*rr, 11,6,11, col, col, a*(0.35+0.65*near)); }
+  }
 }
 function drawEnemy3(e,t){
   const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
@@ -2234,6 +2280,7 @@ function render(t){
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e); }
   drawShadow(p.x,p.z,13);
   drawHero3(p,t,false);
+  drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
   for(const a of G.ambient) bx(a.x,a.y,a.z, a.sz,a.sz,a.sz, a.c, a.c, Math.min(0.8,a.life*0.4));
@@ -2398,6 +2445,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },
   addGold:n=>{ meta.gold=(meta.gold||0)+n; return meta.gold; }, wipeMode:m=>wipeMode(m||MODE),
+  melee:MELEE, testSwing:(yaw)=>{ if(!G||!G.p) return -1; G.p.yaw=yaw; G.p.atkTimer=0.15; G.p.swingId=(G.p.swingId||0)+1; G.enemies.forEach(e=>{e.lastHit=-1;e.hp=99999;}); resolveSwing(); return G.enemies.filter(e=>e.lastHit===G.p.swingId).map(e=>e.tag); },
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
   get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
   snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,

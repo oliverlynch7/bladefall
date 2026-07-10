@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.10.2';
+const VERSION3D='1.11.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1186,6 +1186,19 @@ function nearestEnemy(maxDist,coneCos){
     bd=d; best=e; }
   return best;
 }
+// is there an enemy actually worth auto-attacking? (in weapon range, line-of-sight clear, roughly reachable) — gates auto-attack so it never swings/shoots at nothing
+function autoAtkTarget(p,w){
+  let reach;
+  if(w.cls==='ranged'){ reach=((w.proj&&w.proj.range)||760); }
+  else { const M=MELEE[w.art]||MELEE.sword; reach=(M.shape==='slam')?((M.offset||40)+M.radius):M.reach; }
+  let best=null, bd=reach+34;                                   // +34 ~ enemy radius margin
+  for(const e of G.enemies){ if(e.dead||!e.active) continue;
+    const d=dXZ(p.x,p.z,e.x,e.z); if(d>bd) continue;
+    if(w.cls==='melee' && !vOverlap(e,p)) continue;             // melee: skip enemies too far above/below to actually hit
+    if(losBlocked(p.x,p.z,e.x,e.z)) continue;                   // don't fire through walls / closed doors
+    bd=d; best=e; }
+  return best;
+}
 function playerAttack(cdMul){
   const p=G.p,w=p.weapon; if(p.atkCd>0) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
@@ -1369,7 +1382,9 @@ function update(dt){
       p.holdT+=dt; if(p.holdT>=0.28 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }
     else { if(p.charging){ fireCharged(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
   } else { p.charging=false; p.holdT=0; p.attackHeld=false;
-    if((input.attack||meta.autoAttack) && p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(input.attack?1:1.176); } // auto = 15% slower rate
+    if(p.atkCd<=0 && p.dodgeTimer<=0){
+      if(input.attack) playerAttack(1);                                              // manual: always swings/fires
+      else if(meta.autoAttack && autoAtkTarget(p,_w)) playerAttack(1.176); } }        // auto: only when a hittable enemy is in range + line of sight (15% slower)
   if(p.atkTimer>0) resolveSwing();
   updateMovers(dt);
   if(!p.onGround) p.vy-=1500*dt;
@@ -2106,14 +2121,19 @@ function drawFPWeapon(p,t){
   const rx=Math.cos(cy), rz=-Math.sin(cy);                          // camera right (horizontal)
   const ex=p.x, ey=p.y+40, ez=p.z, w=p.weapon;
   const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4;
-  const fwd=40, right=22, down=20;
+  const fwd=40, right=21, down=15;
   const wx=ex+fx*fwd+rx*right, wy=ey+fy*fwd-down+(atk?Math.sin(sw*Math.PI)*8:bob), wz=ez+fz*fwd+rz*right;
-  const sk=SKINS[p.skin]||SKINS.knight;
+  const sk=SKINS[p.skin]||SKINS.knight, AL=sk.armorLt||'#5d7da0', HAND=tint(sk.tone||'#c98d5a','#000',0.05);
   pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
-    pushM(); mv(3,-20,-15); rotX(0.35); rotZ(-0.18); box(6,24,6, sk.armorLt||'#5d7da0'); popM(); // forearm rising from the corner
-    rotY(-0.28); rotZ(-0.30); rotX(atk?(1.4-sw*2.1):1.32);                                        // blade angled up-across, chops down on attack
-    pushM(); mv(0,4,4); weaponMesh(w); popM();
-    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; bx(0,20,6, s,s,s, col,col,0.7); }
+    // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
+    rotY(-0.26); rotZ(-0.28); rotX(atk?(1.42-sw*2.05):1.30);                                // blade angled up-across, chops down on attack
+    pushM(); mv(0,-22,-3); rotX(0.22); box(8,22,8, AL); popM();                             // forearm sleeve trailing to the corner
+    bx(0,-10,-0.5, 8.5,10,8.5, AL);                                                          // wrist / gauntlet cuff
+    bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip
+    bx(0,3.5,5.2, 9.5,4,3.4, tint(HAND,'#000',0.18));                                        // fingers curling over the front of the grip
+    bx(0,-4,5.2, 9.5,3.4,3, tint(HAND,'#000',0.28));                                         // thumb
+    pushM(); mv(0,3,2.5); weaponMesh(w); popM();                                             // weapon grip sits inside the fist
+    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; bx(0,22,6, s,s,s, col,col,0.7); }
   popM();
 }
 /* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */

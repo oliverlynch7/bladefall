@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.10.1';
+const VERSION3D='1.10.2';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1927,17 +1927,10 @@ function drawCourse(s,t){
       for(let k2=0;k2<4;k2++){ const yy=12+k2*(hgt/4);
         bx(gy2.x,yy,gy2.z, gy2.r*(1.5-k2*0.22),hgt/4+4,gy2.r*(1.5-k2*0.22), hzc[1], hzc[1], 0.8-k2*0.12); } }
   }
-  // healing springs
   // boss slam shockwave — expanding warning ring on the ground (jump it to avoid)
   if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR), c1=sw.col||'#ff8a4a', c2=sw.col2||'#ff5a1e';
     const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
     for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
-  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;
-    bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                         // base pad
-    bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
-    if(!sp2.used){ const fy=13+Math.sin(t*2.6)*3;                                                      // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
-      bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
-  }
   // golden bonus portal
   if(G.bonusPortal){ const bp=G.bonusPortal;
     for(let k2=0;k2<8;k2++){ const a2=t*2.2+k2*0.785;
@@ -1949,6 +1942,12 @@ function drawCourse(s,t){
   LATE.length=0;
   const CAMX=G.cam.x, CAMZ=G.cam.z, shoulder=meta.camMode!=='far'; // shoulder + fps: solid walls occlude (no translucent pass)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
+  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;                                          // healing springs (drawn after cull is defined)
+    bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                          // base pad
+    bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
+    if(!sp2.used){ const fy=13+Math.sin(t*2.6)*3;                                                       // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
+      bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
+  }
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
   const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
     bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);

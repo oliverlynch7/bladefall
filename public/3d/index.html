@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.9.0';
+const VERSION3D='1.10.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1034,11 +1034,11 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
    Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
    (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
 // desktop: ANY click in play captures the mouse, then moving it aims the camera hands-free (no click-hold). Esc releases.
-window.addEventListener('mousedown',e=>{ if(meta.camMode==='shoulder' && mode==='play' && document.pointerLockElement!==canvas && !(e.target&&e.target.closest&&e.target.closest('#overlay')) && canvas.requestPointerLock) canvas.requestPointerLock(); });
+window.addEventListener('mousedown',e=>{ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && !(e.target&&e.target.closest&&e.target.closest('#overlay')) && canvas.requestPointerLock) canvas.requestPointerLock(); });
 document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
   G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
-  zone.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'||pid!==null||meta.camMode!=='shoulder'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); }); // mouse uses pointer-lock; drag is touch-only
+  zone.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'||pid!==null||meta.camMode==='far'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); }); // mouse uses pointer-lock; drag is touch-only
   zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
     const sn=meta.lookSens||1; G.camYaw=(G.camYaw||0)-dx*0.006*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+dy*0.005*sn)); });
   const end=e=>{ if(e.pointerId===pid) pid=null; };
@@ -1348,7 +1348,7 @@ function update(dt){
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
   const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
-  if(meta.camMode==='shoulder' && (mx||mz)){ // movement is relative to where the camera points
+  if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
     const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
   else {
@@ -1390,8 +1390,9 @@ function update(dt){
   // fell into the hazard
   if(p.y<-34){ lavaHit(); }
   updateCrumbles(dt); updateGeysers(dt);
-  if(G.shockwaves){ for(const sw of G.shockwaves){ sw.life+=dt; sw.r+=270*dt;   // expanding boss slam ring
-      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
+  if(G.shockwaves){ for(const sw of G.shockwaves){ sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
+      let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
     G.shockwaves=G.shockwaves.filter(sw=>sw.r<sw.maxR); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
@@ -1569,6 +1570,21 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
     else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
       if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=4.5+Math.random()*2.5; G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up
+  }
+  if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
+    if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){ const dl=Math.hypot(dirX,dirZ)||1;
+      (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:300,dmg:e.dmg*1.4,life:0,spd:340,arc:0.95,dirX:dirX/dl,dirZ:dirZ/dl,col:'#e2e8f0',col2:'#95a2b4'});
+      G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
+      for(let i=0;i<12;i++){ const a=Math.atan2(dirZ,dirX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
+    else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
+      if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.6; e.cleaveCd=5+Math.random()*2; e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+  }
+  if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
+    if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
+      G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'FROST NOVA!','#7fd6ff',true);
+      for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*20,y:6,z:e.z+Math.sin(a)*20,vx:Math.cos(a)*120,vy:40,vz:Math.sin(a)*120,life:0.5,color:'#bff0ff',sz:3}); } } }
+    else { if(e.novaCd==null) e.novaCd=5; e.novaCd-=dt;
+      if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=6+Math.random()*2.5; G.shake=Math.min(G.shake+2,7); } }
   }
   if(e.ranged && e.shootT<=0 && dist<2000){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
@@ -1832,12 +1848,12 @@ function openPause(){
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
-    <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':'Overhead'}</button>
-    ${meta.camMode==='shoulder'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
+    <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
+    ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
-  document.getElementById('camBtn').onclick=()=>{ meta.camMode=meta.camMode==='shoulder'?'far':'shoulder'; persist(); openPause(); };
+  document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
@@ -1913,8 +1929,9 @@ function drawCourse(s,t){
   }
   // healing springs
   // boss slam shockwave — expanding warning ring on the ground (jump it to avoid)
-  if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR);
-    for(let i=0;i<20;i++){ const an=i/20*6.283; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, '#ff8a4a','#ff5a1e', 0.65*a); } }
+  if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR), c1=sw.col||'#ff8a4a', c2=sw.col2||'#ff5a1e';
+    const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
+    for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;
     bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                         // base pad
     bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
@@ -1930,7 +1947,7 @@ function drawCourse(s,t){
   }
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
   LATE.length=0;
-  const CAMX=G.cam.x, CAMZ=G.cam.z, shoulder=meta.camMode==='shoulder';
+  const CAMX=G.cam.x, CAMZ=G.cam.z, shoulder=meta.camMode!=='far'; // shoulder + fps: solid walls occlude (no translucent pass)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
   const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
@@ -2006,6 +2023,16 @@ function weaponMesh(w,swing){
     case 'orb': bx(0,10,0, 8,8,8, blade,blade); break;
     default: bx(0,12,0, 3,24,4, blade,glow); bx(0,1,0, 9,2.4,4,'#9a8550'); // sword
   }
+  // equipped elemental flourish — animated aura keyed to the weapon's element (fire actually flickers)
+  const el=w.el, T=(typeof G!=='undefined'&&G&&G.time)||0;
+  if(el){ const ec=elementColor(el)||'#cfd6df';
+    const TIP={dagger:15,spear:42,axe:23,great:33,hammer:29,scythe:34,bow:22,cross:14,staff:41,rod:34,scepter:34,wand:20,orb:12}[w.art]||22;
+    if(el==='fire'){ for(let i=0;i<3;i++){ const f=Math.sin(T*13+i*2.1)*0.5+0.5; bx((i-1)*2.6, TIP+2+f*6, 0, 3.4-f*1.4, 5+f*4, 3.4-f*1.4, i&1?'#ffd257':'#ff6a24','#ff9a3b',0.9); } }
+    else if(el==='ice'){ bx(0,TIP,0, 5.5,9,5.5, ec,ec,0.5); bx(3,TIP+3,0, 2,7,2,'#eafaff','#bff0ff'); bx(-2.6,TIP-2,0, 2,6,2,'#eafaff','#bff0ff'); }
+    else if(el==='storm'){ const f=Math.sin(T*22)>0.3?1:0.25; bx(1.6,TIP+3,0, 1.8,6,1.8,'#ffffff',ec,f); bx(-1.6,TIP-1,0, 1.5,5,1.5,'#ffffff',ec,f*0.7); }
+    else if(el==='poison'){ const f=Math.sin(T*6)*0.5+0.5; bx(1.4,TIP+3+f*3,0, 2.4,2.4,2.4,'#c6ff7a',ec,0.75); bx(-1.6,TIP+f*2,0, 2,2,2,'#a6ef5a',ec,0.6); }
+    else { const f=Math.sin(T*5)*0.5+0.5; bx(0,TIP,0, 5+f*1.6,6+f*1.6,5+f*1.6, ec,ec,0.35+0.2*f); } // arcane / void / holy glow
+  }
 }
 function drawHero3(p,t,preview){
   const sk=SKINS[p.skin]||SKINS.knight;
@@ -2071,6 +2098,23 @@ function drawHero3(p,t,preview){
   // cape
   pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
   bx(0,-12,0, 15,24,1.8, sk.cape); popM();
+  popM();
+}
+/* first-person: the hero's arm + weapon hung in front of the camera, swinging on attack */
+function drawFPWeapon(p,t){
+  const cy=(G.camYaw!=null?G.camYaw:Math.PI), pit=(G.camPitch!=null?G.camPitch:0.06);
+  const fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+  const rx=Math.cos(cy), rz=-Math.sin(cy);                          // camera right (horizontal)
+  const ex=p.x, ey=p.y+40, ez=p.z, w=p.weapon;
+  const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4;
+  const fwd=34, right=15, down=13;
+  const wx=ex+fx*fwd+rx*right, wy=ey+fy*fwd-down+(atk?Math.sin(sw*Math.PI)*7:bob), wz=ez+fz*fwd+rz*right;
+  const sk=SKINS[p.skin]||SKINS.knight;
+  pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
+    pushM(); mv(-3,-17,-11); rotX(0.5); box(6.5,21,6.5, sk.armorLt||'#5d7da0'); popM(); // forearm from lower-right
+    rotX(atk?(1.15-sw*1.95):1.08); rotZ(atk?sw*0.3:0);                                  // weapon tilted forward, slashes down on attack
+    pushM(); mv(0,4,4); weaponMesh(w); popM();
+    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; bx(0,20,6, s,s,s, col,col,0.7); }
   popM();
 }
 /* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
@@ -2159,12 +2203,20 @@ function drawEnemy3(e,t){
     pushM(); mv(0,H*0.5,-W*0.5); rotX(0.3); bx(0,4,-4, W*0.7,W*0.7,W*0.6,'#7a5836'); popM(); // loot sack
     bx(0,H*0.52,-W*0.86, 4,4,4,'#ffd24a','#ffd24a');                    // gold spilling out
   } else {
-    bx(0,H*0.5,0, W,H,W*0.82, col);
-    bx(0,H*0.16,0, W*1.04,H*0.08,W*0.86, tint(col,'#000',0.25));
-    pushM(); mv(-W*0.34,H+2,0); rotZ(0.42); box(3,7,3, tint(col,'#000',0.35)); popM();
-    pushM(); mv(W*0.34,H+2,0); rotZ(-0.42); box(3,7,3, tint(col,'#000',0.35)); popM();
-    bx(-W*0.18,H*0.66,W*0.42, 3,3.2,1.2, eyeC, eyeC); bx(W*0.18,H*0.66,W*0.42, 3,3.2,1.2, eyeC, eyeC);
-    bx(-W*0.10,H*0.40,W*0.44, 1.8,3.4,1,'#ffffff'); bx(W*0.10,H*0.40,W*0.44, 1.8,3.4,1,'#ffffff');
+    // brute grunt: armored torso, hunched shoulders, tusked snarl, clawed fists
+    const dk=tint(col,'#000',0.32), lt=tint(col,'#fff',0.13), sw=Math.sin(G.time*7+e.bob)*0.12;
+    bx(-W*0.26,H*0.2,0, W*0.36,H*0.4,W*0.5, dk); bx(W*0.26,H*0.2,0, W*0.36,H*0.4,W*0.5, dk); // stout legs
+    bx(0,H*0.58,0, W*1.04,H*0.5,W*0.78, col);                                    // broad torso
+    bx(0,H*0.6,W*0.35, W*0.52,H*0.32,3, lt);                                      // chest plate
+    bx(0,H*0.42,W*0.34, W*0.72,3.4,4.4, dk);                                      // belt
+    bx(-W*0.52,H*0.82,0, W*0.32,H*0.16,W*0.52, lt); bx(W*0.52,H*0.82,0, W*0.32,H*0.16,W*0.52, lt); // shoulder pads
+    pushM(); mv(-W*0.52,H*0.66,0); rotZ(0.36+sw); box(4.6,H*0.4,4.6, col); mv(0,-H*0.24,3.5); box(6.5,6.5,6.5, dk); popM(); // L arm+claw
+    pushM(); mv(W*0.52,H*0.66,0); rotZ(-0.36-sw); box(4.6,H*0.4,4.6, col); mv(0,-H*0.24,3.5); box(6.5,6.5,6.5, dk); popM();  // R arm+claw
+    bx(0,H*0.92,W*0.04, W*0.56,W*0.5,W*0.5, col);                                 // head
+    bx(0,H*0.84,W*0.30, W*0.42,4.6,5, dk);                                        // heavy jaw
+    bx(-3,H*0.81,W*0.34, 2.4,4,2.4,'#e8e0d0'); bx(3,H*0.81,W*0.34, 2.4,4,2.4,'#e8e0d0'); // tusks
+    bx(0,H*1.0,W*0.0, W*0.5,3.6,4, dk);                                           // brow
+    bx(-W*0.15,H*0.94,W*0.28, 3,3.2,1.2, eyeC, eyeC); bx(W*0.15,H*0.94,W*0.28, 3,3.2,1.2, eyeC, eyeC);
   }
   popM();
 }
@@ -2312,7 +2364,13 @@ function render(t){
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0;
   const shx=G?(Math.random()-0.5)*G.shake*0.8:0, shy=G?(Math.random()-0.5)*G.shake*0.8:0;
-  if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
+  if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
+    const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
+    const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+    PROJ=mPersp(75*Math.PI/180,VW/VH,3,2400);
+    VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
+    gl.uniform2f(U.uFogNF,210,820);
+  } else if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
     const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
     PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
@@ -2338,7 +2396,7 @@ function render(t){
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e); }
   drawShadow(p.x,p.z,13);
-  drawHero3(p,t,false);
+  if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));

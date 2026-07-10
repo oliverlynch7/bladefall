@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.6';
+const VERSION3D='1.7.7';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -998,6 +998,8 @@ function toggleKeep(){ meta.autoKeep=!meta.autoKeep; persist(); updateToggles();
 ['bAuto','bKeep'].forEach((id,i)=>{ const el=document.getElementById(id); el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();i?toggleKeep():toggleAuto();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
+// fallback by typed character (e.key) so WASD works even if e.code is off (non-US layouts / some Mac browsers)
+const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
 window.addEventListener('keydown',e=>{
   if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); } return; }
   if(mode==='weapon'){
@@ -1017,9 +1019,9 @@ window.addEventListener('keydown',e=>{
       return; }
   }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
-  const k=keymap[e.code]; if(!k) return; e.preventDefault(); initAudio();
+  const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
-window.addEventListener('keyup',e=>{ const k=keymap[e.code]; if(k) input[k]=false; });
+window.addEventListener('keyup',e=>{ const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(k) input[k]=false; });
 // mouse combat (desktop): left-click = attack (hold to combo), right-click = dodge
 canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play') return; e.preventDefault(); initAudio();
   if(e.button===0) input.attack=true;

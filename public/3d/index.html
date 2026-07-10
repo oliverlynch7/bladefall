@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.7.1';
+const VERSION3D='1.7.2';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -154,7 +154,7 @@ const GKEY='bladefall3d_global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bla
 const MKEY=m=>'bladefall3d_'+m;
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks'];
 let _g=loadJSON(GKEY);
@@ -164,7 +164,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',
+  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{}
@@ -1008,12 +1008,12 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
    Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
    (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
 canvas.addEventListener('click',()=>{ if(meta.camMode==='shoulder' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock) canvas.requestPointerLock(); });
-document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){
-  G.camYaw=(G.camYaw||0)-e.movementX*0.0032; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+e.movementY*0.0026)); } });
+document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
+  G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
   zone.addEventListener('pointerdown',e=>{ if(pid!==null||meta.camMode!=='shoulder'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); });
   zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
-    G.camYaw=(G.camYaw||0)-dx*0.006; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+dy*0.005)); });
+    const sn=meta.lookSens||1; G.camYaw=(G.camYaw||0)-dx*0.006*sn; G.camPitch=Math.max(-0.32,Math.min(0.62,(G.camPitch||0)+dy*0.005*sn)); });
   const end=e=>{ if(e.pointerId===pid) pid=null; };
   zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
   zone.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1639,7 +1639,7 @@ function winGame(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
-function showOverlay(v){ overlay.classList.toggle('hide',!v); }
+function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); } // free the mouse to click menus
 function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
 function titleScreen(){
@@ -1761,10 +1761,12 @@ function openPause(){
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':'Overhead'}</button>
+    ${meta.camMode==='shoulder'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ meta.camMode=meta.camMode==='shoulder'?'far':'shoulder'; persist(); openPause(); };
+  var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);

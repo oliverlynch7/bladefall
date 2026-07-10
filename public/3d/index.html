@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.11.0';
+const VERSION3D='1.12.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -832,15 +832,18 @@ function loadStage(i){
   // parkour corridor: stoops at both ends + jumpable stepping-stones over the drop (no side rails). Always crossable.
   const bridgeSpan=(a0,a1,cross,horiz)=>{ const mn=Math.min(a0,a1),mx=Math.max(a0,a1);
     const put=(cc,w2)=> horiz?{x:cc,z:cross,w:w2,d:CW}:{x:cross,z:cc,w:CW,d:w2};
-    G.segments.push(put(mn+18,42)); G.segments.push(put(mx-18,42));   // landing stoops at each doorway
-    const lo=mn+40, hi=mx-40, span=hi-lo; if(span<=46) return;        // short span: one clean jump over the drop
-    const cc=(lo+hi)/2, iw=46, r2=rnd();                             // one dynamic tile in the middle -> two jumpable gaps
-    if(r2<0.5 && diff>=2){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }        // crumbling stone
-    else if(horiz && diff>=1){ const amp=Math.min(span*0.3,34); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.8,h:0,amp,sp:1+rnd()*0.5,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform (x-corridors only)
-    else { G.segments.push(put(cc,iw)); }                            // static stepping stone
-    if(diff>=4&&rnd()<0.2) G.geysers.push({x:horiz?cc:cross,z:horiz?cross:cc,r:18,period:3+rnd()*1.5,phase:rnd()*6.28}); };
+    const stoop=32; G.segments.push(put(mn+stoop/2+2,stoop)); G.segments.push(put(mx-stoop/2-2,stoop)); // tighter landing stoops (less resting room)
+    const lo=mn+stoop, hi=mx-stoop, span=hi-lo; if(span<=54) return;  // short span: one demanding jump, no foothold
+    const iw=32;                                                      // narrow footholds -> wider, more precise jumps
+    const F=Math.max(1, Math.ceil(span/150)-1), step=span/(F+1);      // fewest footholds that keep each gap crossable (~<=134)
+    for(let i=1;i<=F;i++){ const cc=lo+step*i, r2=rnd();              // mostly DYNAMIC tiles now -> can't dawdle
+      if(r2<0.5){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }               // crumbling stone
+      else if(r2<0.82 && horiz){ const amp=Math.min(step*0.34,42); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.7,h:0,amp,sp:1.1+rnd()*0.7,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform
+      else { G.segments.push(put(cc,iw)); }                          // static stepping stone (now the minority)
+    }
+    if(diff>=2 && rnd()<0.4){ const g=lo+step*(1+Math.floor(rnd()*F)); G.geysers.push({x:horiz?g:cross,z:horiz?cross:g,r:18,period:2.6+rnd()*1.4,phase:rnd()*6.28}); } }; // more frequent hazards, earlier
   for(const e of edges){ const ca=e[0],cb=e[1], ra=roomAt[K(ca[0],ca[1])], rb=roomAt[K(cb[0],cb[1])]; ra.deg++; rb.deg++;
-    const parkour=!isBoss && diff>=1 && rnd()<0.42; // ~40% of corridors become parkour bridges (still always jumpable)
+    const parkour=!isBoss && diff>=1 && rnd()<0.6; // ~60% of corridors become parkour bridges (still always jumpable)
     if(cb[0]!==ca[0]){ // horizontal corridor (rooms share the z row)
       const west=ca[0]<cb[0]?ra:rb, east=ca[0]<cb[0]?rb:ra, zc=ra.z;
       const x0=west.x+west.w/2-6, x1=east.x-east.w/2+6, cx=(x0+x1)/2, cwid=x1-x0;
@@ -1760,7 +1763,7 @@ function titleScreen(){
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
-  document.getElementById('to2dBtn').onclick=()=>{ location.href='../'; };
+  document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
 }
 function modeSelect(){
   mode='menu';

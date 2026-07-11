@@ -10,8 +10,15 @@
   #kicker{font-size:11px;letter-spacing:.24em;opacity:.55;font-weight:800}
   #name{font-size:30px;font-weight:900;letter-spacing:.04em;margin-top:6px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
   #sub{font-size:13px;letter-spacing:.14em;opacity:.65;font-weight:700;margin-top:2px;text-transform:uppercase}
-  #desc{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
+  #desc{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
     font-size:14px;line-height:1.5;opacity:.85;text-shadow:0 1px 8px #000;pointer-events:none}
+  #fbbar{position:absolute;left:50%;bottom:100px;transform:translateX(-50%);display:flex;gap:10px;align-items:center}
+  #recBtn{padding:11px 20px;border-radius:12px;border:1px solid #6a3242;background:#2a1620;color:#ffd0d6;font-weight:800;font-size:15px;cursor:pointer}
+  #recBtn.rec{background:#8e1620;color:#fff;border-color:#e05a5a;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,60,60,.55)}50%{box-shadow:0 0 0 9px rgba(224,60,60,0)}}
+  #playBtn{padding:11px 16px;border-radius:12px;border:1px solid #3a4152;background:#141824;color:#eaf0f7;font-weight:800;font-size:15px;cursor:pointer}
+  #recInfo{font-size:12px;opacity:.7;min-width:170px;text-align:left}
+  .dot.has{background:#5fe08a;box-shadow:0 0 6px rgba(95,224,138,.6)}
   .nav{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:84px;border-radius:14px;
     border:1px solid #3a4152;background:rgba(20,24,36,.7);color:#eaf0f7;font-size:26px;font-weight:900;cursor:pointer}
   #prev{left:12px} #next{right:12px}
@@ -25,9 +32,10 @@
 <canvas id="c"></canvas><div id="vig"></div>
 <div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div></div>
 <div id="desc"></div>
+<div id="fbbar"><button id="recBtn">🎙 Record feedback</button><button id="playBtn" style="display:none">▶</button><span id="recInfo"></span></div>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="dots"></div><div id="count"></div>
-<div id="foot">rarity drives the glow color in-game · designs shown with a sample glow</div>
+<div id="foot">drag to rotate · double-tap to reset · recordings auto-save to Downloads for Claude to transcribe</div>
 <script>
 const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
 let VW=0,VH=0; function resize(){ const d=Math.min(2,window.devicePixelRatio||1); VW=cvs.clientWidth*d|0; VH=cvs.clientHeight*d|0; cvs.width=VW; cvs.height=VH; } addEventListener('resize',resize);
@@ -208,20 +216,56 @@ function render(){ T+=0.016; if(cvs.width!==VW||cvs.height!==VH)resize();
   const it=W[idx];
   pushM(); mv(0,56-it.mid*it.sc,0);           // weapon floats above the pedestal, centered on screen
   CURM=mMul(CURM,mS(it.sc,it.sc,it.sc));
-  rotY(T*0.7);
+  rotX(manPitch); rotY(manYaw + (autospin? T*0.7 : 0));   // drag to rotate; gentle auto-spin until you grab it
   it.draw(T,it.glow);
   popM();
   requestAnimationFrame(render); }
-/* ---- UI ---- */
+/* ---- drag-to-rotate ---- */
+let manYaw=0, manPitch=0, autospin=true, dragging=false, lastX=0, lastY=0;
+cvs.style.cursor='grab';
+cvs.addEventListener('pointerdown',e=>{ dragging=true; autospin=false; lastX=e.clientX; lastY=e.clientY; cvs.style.cursor='grabbing'; try{cvs.setPointerCapture(e.pointerId);}catch(_){} });
+cvs.addEventListener('pointermove',e=>{ if(!dragging) return; manYaw+=(e.clientX-lastX)*0.011; manPitch+=(e.clientY-lastY)*0.011; manPitch=Math.max(-1.25,Math.min(1.25,manPitch)); lastX=e.clientX; lastY=e.clientY; });
+const endDrag=()=>{ dragging=false; cvs.style.cursor='grab'; };
+cvs.addEventListener('pointerup',endDrag); cvs.addEventListener('pointercancel',endDrag);
+cvs.addEventListener('dblclick',()=>{ manYaw=0; manPitch=0; autospin=true; }); // double-tap to reset + resume spin
+/* ---- UI + per-weapon voice feedback ---- */
 const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count');
+const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo');
 W.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); });
-function set(i){ idx=(i+W.length)%W.length; const it=W[idx];
+const fb={}; let mediaStream=null, mr=null, recKey=null, recT0=0, recTimer=0;
+function fmtT(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+async function toggleRec(){
+  if(recKey){ mr.stop(); return; }                       // stop the active recording
+  try{ if(!mediaStream) mediaStream=await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ recInfo.textContent='⚠ allow microphone access, then tap again'; return; }
+  const key=W[idx].key, n=idx+1, chunks=[];
+  let opt; if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm')) opt={mimeType:'audio/webm'};
+  mr=new MediaRecorder(mediaStream,opt);
+  mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+  mr.onstop=()=>{ const blob=new Blob(chunks,{type:(mr.mimeType||'audio/webm')});
+    if(fb[key]&&fb[key].url) URL.revokeObjectURL(fb[key].url);
+    fb[key]={blob,url:URL.createObjectURL(blob)};
+    const a=document.createElement('a'); a.href=fb[key].url; a.download='bladefall-fb-'+String(n).padStart(2,'0')+'-'+key+'.webm';
+    document.body.appendChild(a); a.click(); a.remove();   // auto-saves to Downloads for Claude to pick up
+    recKey=null; clearInterval(recTimer); paintRec(); };
+  recKey=key; recT0=Date.now(); mr.start(); recTimer=setInterval(paintRec,300); paintRec();
+}
+function paintRec(){ const key=W[idx].key;
+  if(recKey===key){ recBtn.classList.add('rec'); recBtn.textContent='⏹ Stop  '+fmtT(Math.floor((Date.now()-recT0)/1000)); recInfo.textContent='recording… speak your feedback'; }
+  else { recBtn.classList.remove('rec'); recBtn.textContent=fb[key]?'🎙 Re-record':'🎙 Record feedback'; recInfo.textContent=fb[key]?'✓ saved to Downloads · ▶ to review':'tap to record your take on this weapon'; }
+  playBtn.style.display=fb[key]?'inline-block':'none';
+  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('has',!!fb[W[k].key])); }
+recBtn.onclick=toggleRec;
+playBtn.onclick=()=>{ const f=fb[W[idx].key]; if(f) new Audio(f.url).play(); };
+function set(i){ if(recKey&&mr) mr.stop(); idx=(i+W.length)%W.length; const it=W[idx];
+  manYaw=0; manPitch=0; autospin=true;                    // fresh presentation per weapon
   nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
   countEl.textContent=(idx+1)+' / '+W.length;
-  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx)); }
+  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx));
+  paintRec(); }
 document.getElementById('prev').onclick=()=>set(idx-1);
 document.getElementById('next').onclick=()=>set(idx+1);
 addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
-window.__WS={set,get idx(){return idx;},count:W.length,names:W.map(w=>w.name)};
+window.__WS={set,get idx(){return idx;},count:W.length,names:W.map(w=>w.name),fb};
 resize(); set(0); render();
 </script></body></html>

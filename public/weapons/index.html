@@ -35,7 +35,7 @@
 <div id="fbbar"><button id="recBtn">🎙 Record feedback</button><button id="playBtn" style="display:none">▶</button><span id="recInfo"></span></div>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="dots"></div><div id="count"></div>
-<div id="foot">drag to rotate · double-tap to reset · recordings auto-save to Downloads for Claude to transcribe</div>
+<div id="foot">drag to rotate · double-tap to reset · recordings upload straight to Claude (no download)</div>
 <script>
 const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
 let VW=0,VH=0; function resize(){ const d=Math.min(2,window.devicePixelRatio||1); VW=cvs.clientWidth*d|0; VH=cvs.clientHeight*d|0; cvs.width=VW; cvs.height=VH; } addEventListener('resize',resize);
@@ -233,28 +233,46 @@ const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'
 const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo');
 W.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); });
 const fb={}; let mediaStream=null, mr=null, recKey=null, recT0=0, recTimer=0;
+const WORKAPP='https://theworkapp.netlify.app/.netlify/functions/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline → local Whisper transcribes → bladefall/_feedback
 function fmtT(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+async function uploadFb(key,n,name,blob,mime,secs){
+  const rec=fb[key]; if(rec){ rec.sending=true; rec.err=false; } paintRec();
+  try{
+    const b64=await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(String(fr.result).split(',')[1]||''); fr.onerror=rej; fr.readAsDataURL(blob); });
+    if(!b64) throw 0;
+    const id='wf-'+String(n).padStart(2,'0')+'-'+key+'-'+Date.now(), SLICE=3000000, parts=Math.max(1,Math.ceil(b64.length/SLICE));
+    for(let p=0;p<parts;p++){
+      const r=await fetch(WORKAPP,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+        body:JSON.stringify({password:FB_PW,action:'upload',id,part:p,parts,mime,secs,audioB64:b64.slice(p*SLICE,(p+1)*SLICE),ctx:{kind:'weaponFeedback',weapon:key,name,n},at:new Date().toISOString()})});
+      if(!r.ok) throw new Error('http '+r.status);
+    }
+    if(fb[key]){ fb[key].sent=true; fb[key].sending=false; }
+  }catch(e){ if(fb[key]){ fb[key].sent=false; fb[key].sending=false; fb[key].err=true; } }
+  paintRec();
+}
 async function toggleRec(){
   if(recKey){ mr.stop(); return; }                       // stop the active recording
   try{ if(!mediaStream) mediaStream=await navigator.mediaDevices.getUserMedia({audio:true}); }
   catch(e){ recInfo.textContent='⚠ allow microphone access, then tap again'; return; }
-  const key=W[idx].key, n=idx+1, chunks=[];
-  let opt; if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm')) opt={mimeType:'audio/webm'};
+  const key=W[idx].key, n=idx+1, name=W[idx].name, chunks=[];
+  let opt; if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) opt={mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:48000};
+  else if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm')) opt={mimeType:'audio/webm'};
   mr=new MediaRecorder(mediaStream,opt);
   mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
-  mr.onstop=()=>{ const blob=new Blob(chunks,{type:(mr.mimeType||'audio/webm')});
+  mr.onstop=()=>{ const mime=(mr.mimeType||'audio/mp4'), secs=Math.round((Date.now()-recT0)/1000), blob=new Blob(chunks,{type:mime});
     if(fb[key]&&fb[key].url) URL.revokeObjectURL(fb[key].url);
-    fb[key]={blob,url:URL.createObjectURL(blob)};
-    const a=document.createElement('a'); a.href=fb[key].url; a.download='bladefall-fb-'+String(n).padStart(2,'0')+'-'+key+'.webm';
-    document.body.appendChild(a); a.click(); a.remove();   // auto-saves to Downloads for Claude to pick up
-    recKey=null; clearInterval(recTimer); paintRec(); };
+    recKey=null; clearInterval(recTimer);
+    if(secs<1||!blob.size){ paintRec(); return; }
+    fb[key]={blob,url:URL.createObjectURL(blob),secs,sent:false}; paintRec();
+    uploadFb(key,n,name,blob,mime,secs); };                // → straight to Claude, no download
   recKey=key; recT0=Date.now(); mr.start(); recTimer=setInterval(paintRec,300); paintRec();
 }
-function paintRec(){ const key=W[idx].key;
+function paintRec(){ const key=W[idx].key, f=fb[key];
   if(recKey===key){ recBtn.classList.add('rec'); recBtn.textContent='⏹ Stop  '+fmtT(Math.floor((Date.now()-recT0)/1000)); recInfo.textContent='recording… speak your feedback'; }
-  else { recBtn.classList.remove('rec'); recBtn.textContent=fb[key]?'🎙 Re-record':'🎙 Record feedback'; recInfo.textContent=fb[key]?'✓ saved to Downloads · ▶ to review':'tap to record your take on this weapon'; }
-  playBtn.style.display=fb[key]?'inline-block':'none';
-  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('has',!!fb[W[k].key])); }
+  else { recBtn.classList.remove('rec'); recBtn.textContent=f?'🎙 Re-record':'🎙 Record feedback';
+    recInfo.textContent = !f?'tap to record your take on this weapon' : f.sending?'⤴ sending to Claude…' : f.err?'⚠ send failed — tap Re-record to retry' : f.sent?'✓ sent to Claude · ▶ to review':'saved · ▶ to review'; }
+  playBtn.style.display=f?'inline-block':'none';
+  [...dotsEl.children].forEach((d,k)=>{ const ff=fb[W[k].key]; d.classList.toggle('has',!!(ff&&ff.sent)); }); }
 recBtn.onclick=toggleRec;
 playBtn.onclick=()=>{ const f=fb[W[idx].key]; if(f) new Audio(f.url).play(); };
 function set(i){ if(recKey&&mr) mr.stop(); idx=(i+W.length)%W.length; const it=W[idx];

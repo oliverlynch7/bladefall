@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.15.0';
+const VERSION3D='1.15.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2219,7 +2219,8 @@ function drawFPWeapon(p,t){
   const sk=SKINS[p.skin]||SKINS.knight, AL=sk.armorLt||'#5d7da0', HAND=tint(sk.tone||'#c98d5a','#000',0.05);
   pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
     // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
-    rotY(-0.26); rotZ(-0.28); rotX(atk?(1.42-sw*2.05):1.30);                                // blade angled up-across, chops down on attack
+    const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;  // magic implements + bow held upright; blades angled across
+    rotY(-0.26); rotZ(-0.28); rotX(atk?(tilt+0.12-sw*2.05):tilt);                            // chops down on attack from its rest tilt
     pushM(); mv(0,-22,-3); rotX(0.22); box(8,22,8, AL); popM();                             // forearm sleeve trailing to the corner
     bx(0,-10,-0.5, 8.5,10,8.5, AL);                                                          // wrist / gauntlet cuff
     bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip

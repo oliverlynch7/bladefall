@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.12.0';
+const VERSION3D='1.13.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -572,15 +572,23 @@ function mLookAt(eye,ctr,up){
 /* ---- shader ---- */
 const VS=`attribute vec3 aP; attribute vec3 aN;
 uniform mat4 uP,uV,uM; uniform mat3 uR;
-varying vec3 vN; varying float vD;
-void main(){ vec4 w=uM*vec4(aP,1.0); vec4 e=uV*w; vD=-e.z; vN=uR*aN; gl_Position=uP*e; }`;
+varying vec3 vN; varying float vD; varying vec3 vW;
+void main(){ vec4 w=uM*vec4(aP,1.0); vW=w.xyz; vec4 e=uV*w; vD=-e.z; vN=uR*aN; gl_Position=uP*e; }`;
 const FS=`precision mediump float;
-varying vec3 vN; varying float vD;
+varying vec3 vN; varying float vD; varying vec3 vW;
 uniform vec3 uC; uniform vec3 uE; uniform float uA;
 uniform vec3 uFog; uniform vec2 uFogNF; uniform vec3 uL;
+uniform float uAmb; uniform float uDif; uniform vec3 uKey;      // ambient level, directional strength, key tint
+uniform vec3 uPL0,uPL1,uPL2,uPL3; uniform vec3 uPC0,uPC1,uPC2,uPC3; // point lights: player-carried + 3 nearest torches
 void main(){
-  float d=max(dot(normalize(vN),uL),0.0);
-  vec3 col=uC*(0.52+0.48*d)+uE;
+  vec3 n=normalize(vN);
+  vec3 lit=uC*(uAmb+uDif*max(dot(n,uL),0.0))*uKey;
+  vec3 L; float dd;
+  L=uPL0-vW; dd=dot(L,L); lit+=uC*uPC0*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.0000135); // player light: broad, keeps play area readable
+  L=uPL1-vW; dd=dot(L,L); lit+=uC*uPC1*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL2-vW; dd=dot(L,L); lit+=uC*uPC2*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL3-vW; dd=dot(L,L); lit+=uC*uPC3*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  vec3 col=lit+uE;
   float f=clamp((vD-uFogNF.x)/(uFogNF.y-uFogNF.x),0.0,1.0);
   gl_FragColor=vec4(mix(col,uFog,f),uA);
 }`;
@@ -590,7 +598,7 @@ const prog=gl.createProgram();
 gl.attachShader(prog,compile(VS,gl.VERTEX_SHADER)); gl.attachShader(prog,compile(FS,gl.FRAGMENT_SHADER));
 gl.linkProgram(prog); if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error('link: '+gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U={}; ['uP','uV','uM','uR','uC','uE','uA','uFog','uFogNF','uL'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+const U={}; ['uP','uV','uM','uR','uC','uE','uA','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','uPL2','uPL3','uPC0','uPC1','uPC2','uPC3'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
 // unit cube (centered, size 1) with per-face normals
 (function(){
   const P=[],N=[];
@@ -609,7 +617,7 @@ const U={}; ['uP','uV','uM','uR','uC','uE','uA','uFog','uFogNF','uL'].forEach(n=
   const aN=gl.getAttribLocation(prog,'aN'); gl.enableVertexAttribArray(aN); gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);
 })();
 gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-gl.uniform3f(U.uL,0.45,0.78,0.42);
+setFlatLights(); // bright neutral default (menus / previews / title); gameplay swaps to dark-fantasy lighting each frame
 
 const _colCache={};
 function col3(hex){ if(_colCache[hex]) return _colCache[hex];
@@ -640,6 +648,24 @@ function box(sx,sy,sz,color,emiss,alpha){
   gl.drawArrays(gl.TRIANGLES,0,36);
 }
 function bx(x,y,z,sx,sy,sz,color,emiss,alpha){ pushM(); mv(x,y,z); box(sx,sy,sz,color,emiss,alpha); popM(); }
+/* ---- lighting rigs (dark-fantasy in gameplay, bright-neutral for menus/previews) ---- */
+function setFlatLights(){ // menus, item/skin previews, title: even, readable
+  gl.uniform3f(U.uL,0.45,0.78,0.42); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.46); gl.uniform3f(U.uKey,1,1,1);
+  gl.uniform3f(U.uPC0,0,0,0); gl.uniform3f(U.uPC1,0,0,0); gl.uniform3f(U.uPC2,0,0,0); gl.uniform3f(U.uPC3,0,0,0); }
+function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + the nearest wall torches
+  gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06);
+  gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
+  const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
+  near.sort((a,b)=>a[0]-b[0]);
+  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.8+0.35*Math.sin(t*9+tc.ph); gl.uniform3f(pL,tc.x,60,tc.z); gl.uniform3f(cL,1.55*fl,0.74*fl,0.30*fl); } else gl.uniform3f(cL,0,0,0); };
+  setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
+function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
+  for(let i=3;i>=1;i--){ const s=r*i*0.7; bx(x,y,z,s,s,s,'#000000',color,a/(i*1.25)); }
+  gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); }
+(function(){ const v=document.createElement('div'); v.id='atmosVig';  // dungeon vignette over the game canvas (below the HUD)
+  v.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:3;mix-blend-mode:multiply;background:radial-gradient(128% 104% at 50% 45%, rgba(0,0,0,0) 40%, rgba(6,5,12,.42) 82%, rgba(3,2,7,.74) 100%);';
+  document.body.appendChild(v); })();
 
 /* ============================================================
    GAME STATE (systems identical to 2D)
@@ -1989,7 +2015,8 @@ function drawCourse(s,t){
   if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.7+0.3*Math.sin(t*9+tc.ph);
     bx(tc.x,26,tc.z, 4,52,4,'#3a2c1c');
     bx(tc.x,56,tc.z, 7,9,7,'#ffb35a','#ff9a3a',fl);
-    bx(tc.x,63,tc.z, 4,5,4,'#ffe9a8','#ffd24a',fl*0.9); }
+    bx(tc.x,63,tc.z, 4,5,4,'#ffe9a8','#ffd24a',fl*0.9);
+    glowFX(tc.x,60,tc.z, 22, '#ff9a3b', 0.5*fl); }                 // firelight bloom
   // pressure plates
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue;
     bx(pl.x,1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
@@ -2409,6 +2436,7 @@ function render(t){
   CURM=mIdent();
   if(!G){ // title backdrop: rotating hero on an empty arena
     const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
+  setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
   drawCourse(s,t);
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[];
@@ -2444,6 +2472,7 @@ function render(t){
   if(G.stageBanner<=0) render._bannered=null;
 }
 function G0BACKDROP(s0,t){
+  setFlatLights();
   gl.uniform2f(U.uFogNF,520,1500);
   bx(0,-10,0, 900,20,700, s0.ground);
   const fake={x:0,y:0,z:0,vx:0,vz:0,yaw:t*0.5,onGround:true,runAnim:0,atkTimer:0,dodgeTimer:0,invuln:0,hurtFlash:0,
@@ -2503,6 +2532,7 @@ function skinAv(id){
   if(_avCache[id]) return _avCache[id];
   try{
     gl.clearColor(0.082,0.086,0.11,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    setFlatLights();
     PROJ=mPersp(50*Math.PI/180,VW/VH,5,800);
     VIEW=mLookAt([26,58,104],[0,30,0],[0,1,0]);
     gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
@@ -2527,6 +2557,7 @@ function itemAv(item){
   if(_itemAvCache[key]) return _itemAvCache[key];
   try{
     gl.clearColor(0.075,0.078,0.10,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    setFlatLights();
     PROJ=mPersp(50*Math.PI/180,VW/VH,5,600);
     VIEW=mLookAt([26,40,84],[0,17,0],[0,1,0]);
     gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));

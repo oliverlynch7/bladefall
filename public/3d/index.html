@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.15.1';
+const VERSION3D='1.16.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2169,13 +2169,16 @@ function drawHero3(p,t,preview){
   const w=p.weapon;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
     if(prog<0) rotX(-0.35+Math.sin(t*2)*0.06);
-    else if(M.shape==='thrust') rotX(-1.5);                       // arm forward, weapon lunges
-    else if(M.shape==='slam') rotX(-2.5+prog*3.1);                // big overhead chop
-    else { rotY((0.5-prog)*1.5); rotX(-1.0-prog*0.35); rotZ(0.28); } // horizontal sweep across the arc
+    else if(M.shape==='thrust') rotX(w.art==='spear'?-1.6:-1.45);            // arm forward, weapon lunges (spear reaches deeper)
+    else if(M.shape==='slam') rotX(-2.6+prog*3.2);                            // maul: crash down from full height
+    else if(w.art==='great') { rotX(-2.3+prog*2.6); rotZ(0.2); }              // greatblade: towering overhead cleave
+    else if(w.art==='axe') { rotY((0.65-prog)*1.7); rotX(-0.9-prog*0.3); rotZ(0.35); } // axe: heavy sideways hack
+    else if(w.art==='scythe') { rotY((0.95-prog)*2.2); rotX(-0.75); rotZ(0.5); }       // scythe: widest horizontal reap
+    else { rotX(-2.0+prog*2.2); rotZ(0.5-prog*0.7); rotY((0.25-prog)*0.6); }  // sword: diagonal DOWN slash, high-left -> low-right
   } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0); rotX(Math.PI);
-  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*11,0);
+  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='spear'?17:10),0);
   weaponMesh(w); popM();
   popM();
   // head
@@ -2213,14 +2216,28 @@ function drawFPWeapon(p,t){
   const fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
   const rx=Math.cos(cy), rz=-Math.sin(cy);                          // camera right (horizontal)
   const ex=p.x, ey=p.y+40, ez=p.z, w=p.weapon;
-  const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4;
-  const fwd=40, right=21, down=15;
-  const wx=ex+fx*fwd+rx*right, wy=ey+fy*fwd-down+(atk?Math.sin(sw*Math.PI)*8:bob), wz=ez+fz*fwd+rz*right;
+  const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4, sS=Math.sin(sw*Math.PI);
+  const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;    // magic implements + bow held upright; blades angled across
+  // per-weapon-kind attack motion — every strike travels DOWN/FORWARD (raise first, then commit)
+  const KIND=w.cls!=='melee' ? ((w.art==='bow'||w.art==='cross')?'shoot':'cast')
+    : (w.art==='dagger'||w.art==='spear')?'stab' : (w.art==='great'||w.art==='axe')?'chop'
+    : (w.art==='hammer')?'slam' : (w.art==='scythe')?'reap' : 'slash';
+  let rxA=tilt, ryA=0, rzA=0, lunge=0, lift=0;
+  if(atk){
+    if(KIND==='stab'){ lunge=(w.art==='spear'?26:16)*sS; rxA=tilt+0.15*sS; }                 // straight jab along your aim
+    else if(KIND==='slash'){ rxA=tilt-1.05+sw*2.0; rzA=-0.55+sw*0.95; }                      // diagonal cut: high-left -> low-right
+    else if(KIND==='chop'){ rxA=tilt-1.5+sw*2.5; rzA=(w.art==='axe'?-0.3+sw*0.55:0); lift=(1-sw)*8; }  // heavy overhead chop
+    else if(KIND==='slam'){ rxA=tilt-1.8+sw*2.9; lift=(1-sw)*12; }                           // maul crash from full height
+    else if(KIND==='reap'){ ryA=0.85-sw*1.9; rxA=tilt-0.5; rzA=-0.5; }                       // wide horizontal reap across the view
+    else if(KIND==='shoot'){ rxA=tilt-0.3*sS; lunge=-6*sS; }                                 // recoil kick back into the shoulder
+    else { lunge=10*sS; rxA=tilt-0.35*sS; }                                                  // cast: push the focus forward
+  }
+  const fwd=40+lunge, right=21, down=15;
+  const wx=ex+fx*fwd+rx*right, wy=ey+fy*fwd-down+(atk?lift:bob), wz=ez+fz*fwd+rz*right;
   const sk=SKINS[p.skin]||SKINS.knight, AL=sk.armorLt||'#5d7da0', HAND=tint(sk.tone||'#c98d5a','#000',0.05);
   pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
     // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
-    const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;  // magic implements + bow held upright; blades angled across
-    rotY(-0.26); rotZ(-0.28); rotX(atk?(tilt+0.12-sw*2.05):tilt);                            // chops down on attack from its rest tilt
+    rotY(-0.26+ryA); rotZ(-0.28+rzA); rotX(rxA);
     pushM(); mv(0,-22,-3); rotX(0.22); box(8,22,8, AL); popM();                             // forearm sleeve trailing to the corner
     bx(0,-10,-0.5, 8.5,10,8.5, AL);                                                          // wrist / gauntlet cuff
     bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip

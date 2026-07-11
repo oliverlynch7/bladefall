@@ -1,0 +1,225 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>BLADEFALL · Weapon Redesign Proposals</title>
+<style>
+  html,body{margin:0;height:100%;background:#05060a;color:#cfd6df;font-family:system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #vig{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;
+    background:radial-gradient(120% 100% at 50% 42%, rgba(0,0,0,0) 36%, rgba(4,3,10,.5) 78%, rgba(2,1,6,.85) 100%)}
+  #top{position:absolute;left:0;right:0;top:0;padding:16px;text-align:center;pointer-events:none}
+  #kicker{font-size:11px;letter-spacing:.24em;opacity:.55;font-weight:800}
+  #name{font-size:30px;font-weight:900;letter-spacing:.04em;margin-top:6px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
+  #sub{font-size:13px;letter-spacing:.14em;opacity:.65;font-weight:700;margin-top:2px;text-transform:uppercase}
+  #desc{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
+    font-size:14px;line-height:1.5;opacity:.85;text-shadow:0 1px 8px #000;pointer-events:none}
+  .nav{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:84px;border-radius:14px;
+    border:1px solid #3a4152;background:rgba(20,24,36,.7);color:#eaf0f7;font-size:26px;font-weight:900;cursor:pointer}
+  #prev{left:12px} #next{right:12px}
+  #dots{position:absolute;left:0;right:0;bottom:74px;display:flex;gap:7px;justify-content:center}
+  .dot{width:9px;height:9px;border-radius:50%;background:#39404f;cursor:pointer}
+  .dot.on{background:#e8a33d}
+  #count{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:12px;opacity:.55;font-weight:700;letter-spacing:.1em}
+  #foot{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:11px;opacity:.4}
+</style></head>
+<body>
+<canvas id="c"></canvas><div id="vig"></div>
+<div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div></div>
+<div id="desc"></div>
+<button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
+<div id="dots"></div><div id="count"></div>
+<div id="foot">rarity drives the glow color in-game · designs shown with a sample glow</div>
+<script>
+const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
+let VW=0,VH=0; function resize(){ const d=Math.min(2,window.devicePixelRatio||1); VW=cvs.clientWidth*d|0; VH=cvs.clientHeight*d|0; cvs.width=VW; cvs.height=VH; } addEventListener('resize',resize);
+/* ---- mat4 (column-major, same conventions as the game) ---- */
+function mIdent(){return[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];}
+function mMul(a,b){const o=new Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;}
+function mT(x,y,z){const m=mIdent();m[12]=x;m[13]=y;m[14]=z;return m;}
+function mS(x,y,z){const m=mIdent();m[0]=x;m[5]=y;m[10]=z;return m;}
+function mRX(a){const c=Math.cos(a),s=Math.sin(a);return[1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1];}
+function mRY(a){const c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];}
+function mRZ(a){const c=Math.cos(a),s=Math.sin(a);return[c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1];}
+function mPersp(f,a,n,fr){const t=1/Math.tan(f/2);return[t/a,0,0,0,0,t,0,0,0,0,(fr+n)/(n-fr),-1,0,0,2*fr*n/(n-fr),0];}
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dt3=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nr=v=>{const l=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/l,v[1]/l,v[2]/l];};
+function mLook(e,c,u){const z=nr(sub(e,c)),x=nr(cr(u,z)),y=cr(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dt3(x,e),-dt3(y,e),-dt3(z,e),1];}
+/* ---- shader: dark-fantasy rig (cool ambient + 2 warm torch lights + emissive + fog) ---- */
+const VS=`attribute vec3 aP;attribute vec3 aN;uniform mat4 uP,uV,uM;uniform mat3 uR;
+varying vec3 vN;varying vec3 vW;varying float vD;
+void main(){vec4 w=uM*vec4(aP,1.0);vW=w.xyz;vec4 e=uV*w;vD=-e.z;vN=uR*aN;gl_Position=uP*e;}`;
+const FS=`precision mediump float;varying vec3 vN;varying vec3 vW;varying float vD;
+uniform vec3 uC;uniform vec3 uE;uniform float uA;
+void main(){vec3 n=normalize(vN);
+ vec3 lit=uC*(0.34+0.28*max(dot(n,vec3(0.35,0.82,0.45)),0.0))*vec3(0.82,0.86,1.05);
+ vec3 L0=vec3(-70.0,60.0,45.0)-vW;float d0=dot(L0,L0);lit+=uC*vec3(1.5,0.72,0.3)*max(dot(n,normalize(L0)),0.0)/(1.0+d0*0.00012);
+ vec3 L1=vec3(70.0,60.0,45.0)-vW;float d1=dot(L1,L1);lit+=uC*vec3(1.5,0.72,0.3)*max(dot(n,normalize(L1)),0.0)/(1.0+d1*0.00012);
+ vec3 col=lit+uE;float f=clamp((vD-170.0)/700.0,0.0,1.0);
+ gl_FragColor=vec4(mix(col,vec3(0.035,0.04,0.07),f),uA);}`;
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;}
+const prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+const U={};['uP','uV','uM','uR','uC','uE','uA'].forEach(k=>U[k]=gl.getUniformLocation(prog,k));
+(function(){const P=[],N=[];const F=[[[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5],[.5,-.5,.5],[1,0,0]],[[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5],[-.5,-.5,-.5],[-1,0,0]],[[-.5,.5,-.5],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[0,1,0]],[[-.5,-.5,.5],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[0,-1,0]],[[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5],[0,0,1]],[[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5],[0,0,-1]]];
+for(const f of F){const[a,b,c,d,n]=f;[[a,b,c],[a,c,d]].forEach(t=>t.forEach(v=>{P.push(v[0],v[1],v[2]);N.push(n[0],n[1],n[2]);}));}
+const pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
+const aP=gl.getAttribLocation(prog,'aP');gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);
+const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
+const aN=gl.getAttribLocation(prog,'aN');gl.enableVertexAttribArray(aN);gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);})();
+gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+const _cc={};function col3(h){if(_cc[h])return _cc[h];let c=h.replace('#','');if(c.length===3)c=c.split('').map(x=>x+x).join('');const v=[parseInt(c.substr(0,2),16)/255,parseInt(c.substr(2,2),16)/255,parseInt(c.substr(4,2),16)/255];_cc[h]=v;return v;}
+function tint(a,b,t){const A=col3(a),B=col3(b);const h=x=>('0'+Math.round(x*255).toString(16)).slice(-2);return '#'+h(A[0]+(B[0]-A[0])*t)+h(A[1]+(B[1]-A[1])*t)+h(A[2]+(B[2]-A[2])*t);}
+let CURM=mIdent();const ST=[];
+function pushM(){ST.push(CURM.slice());}function popM(){CURM=ST.pop();}
+function mv(x,y,z){CURM=mMul(CURM,mT(x,y,z));}function rotX(a){CURM=mMul(CURM,mRX(a));}function rotY(a){CURM=mMul(CURM,mRY(a));}function rotZ(a){CURM=mMul(CURM,mRZ(a));}
+function rot3(m){return[m[0],m[1],m[2],m[4],m[5],m[6],m[8],m[9],m[10]];}
+let PV;
+function box(sx,sy,sz,color,emiss,alpha){const m=mMul(CURM,mS(sx,sy,sz));
+ gl.uniformMatrix4fv(U.uM,false,new Float32Array(m));gl.uniformMatrix3fv(U.uR,false,new Float32Array(rot3(CURM)));
+ const c=col3(color);gl.uniform3f(U.uC,c[0],c[1],c[2]);
+ const e=emiss?col3(emiss):[0,0,0];gl.uniform3f(U.uE,e[0]*0.85,e[1]*0.85,e[2]*0.85);
+ gl.uniform1f(U.uA,alpha==null?1:alpha);gl.drawArrays(gl.TRIANGLES,0,36);}
+function bx(x,y,z,sx,sy,sz,color,emiss,alpha){pushM();mv(x,y,z);box(sx,sy,sz,color,emiss,alpha);popM();}
+/* ---- dark-artifact material kit (same palette the game would use) ---- */
+const bone='#d8cdb0',boneDk='#a08f6c',rust='#7c4a26',rustDk='#5a3116',iron='#3c4048',ironDk='#26282e',
+      blood='#8e1620',wrap='#453221',sinew='#cbb894',gold='#8a6f34',haft='#2e2620',steel='#7d8695',steelHi='#c8d2e0';
+/* ============ THE 14 PROPOSALS (drawn in hand space: grip ~y0, +y up — ports 1:1 into weaponMesh) ============ */
+const W=[
+{key:'dagger',name:'Ritual Fang',sub:'dagger',glow:'#ff4a3a',mid:9,sc:3.1,desc:'Obsidian shard blade with a hooked tip, bone pommel and iron guard. Fresh blood runs down the edge and beads below the guard.',
+ draw(T,g){ bx(0,-9.5,0,3,1.4,3,blood); bx(0,-7,0,4.6,4,4.6,bone);
+  bx(0,-1,0,3,8,3,wrap); bx(0,-3.4,1.6,3.2,1.2,0.6,bone); bx(0,1,1.6,3.2,1.2,0.6,bone);
+  bx(0,3.5,0,8,2,3.4,iron); bx(-4.6,3.5,0,1.6,3,3,ironDk); bx(4.6,3.5,0,1.6,3,3,ironDk);
+  bx(0,11,0,4.8,14,2.6,'#232028'); bx(0,19.5,0,3,5,2.2,'#232028'); bx(1,23.4,0,2,3.4,1.8,'#232028');
+  bx(1.9,11,0.7,1,13,1,'#6a5f78');
+  bx(1.8,13,1.5,1.2,6,0.9,blood); bx(1.8,8.2,1.5,1.5,2.4,1.2,blood); bx(-1.4,17,1.5,1,3.4,0.8,blood); bx(2.2,1,1.5,1.2,1.6,1,blood); }},
+{key:'sword',name:'Gravewrought Blade',sub:'longsword',glow:'#58e07a',mid:16,sc:2.2,desc:'Dark grave-iron with a jagged pixel edge and a burning rune line down the fuller. Bone-prong guard, skull pommel.',
+ draw(T,g){ bx(0,-9,0,5,4.6,4.6,bone); bx(-1.3,-8.6,2.4,1.2,1.3,0.6,'#17141c'); bx(1.3,-8.6,2.4,1.2,1.3,0.6,'#17141c');
+  bx(0,-2,0,3.4,10,3.4,wrap); bx(0,-2,1.8,3.6,1.2,0.6,gold);
+  bx(0,4.5,0,7,3,4.6,iron);
+  pushM(); mv(-4.5,5,0); rotZ(0.55); box(2.2,7,3,boneDk); popM();
+  pushM(); mv(4.5,5,0); rotZ(-0.55); box(2.2,7,3,boneDk); popM();
+  bx(0,24,0,6.4,32,3.2,'#4a505c'); bx(0,42.5,0,3.6,7,2.6,'#4a505c');
+  bx(3.6,14,0,1.6,3.6,2.8,'#4a505c'); bx(3.6,25,0,1.6,4.4,2.8,'#4a505c'); bx(3.6,34,0,1.4,3,2.6,'#4a505c');
+  bx(-2.9,24,0.4,1.2,30,2,steelHi);
+  bx(0,24,1.1,1.6,28,1,g,g); }},
+{key:'great',name:"Executioner's Greatblade",sub:'greatsword',glow:'#ff4a3a',mid:22,sc:1.9,desc:'A slab of rusted execution iron with one polished cutting edge. A carved eye stares from the blade and never blinks. Chain links swing from the pommel.',
+ draw(T,g){ bx(0,-4,0,4,14,4,wrap); bx(0,-11.5,0,5,3.4,5,iron);
+  bx(1.8,-14,0,1.8,2.6,1.4,ironDk); bx(3,-16.4,0,1.8,2.6,1.4,ironDk);
+  bx(0,4.5,0,18,4,5.5,iron); bx(-6,4.5,3,1.6,1.6,0.8,ironDk); bx(6,4.5,3,1.6,1.6,0.8,ironDk);
+  bx(0,27,0,11,42,3.8,'#4a4640'); bx(0,51,0,7,7,3.4,'#4a4640'); bx(2.2,55,0,4,4.4,3,'#4a4640');
+  bx(-2.4,20,2,3.4,6,0.6,rust); bx(1.8,38,2,4,4.6,0.6,rust); bx(-3,44,2,2.6,3.4,0.6,rustDk);
+  bx(4.9,27,0.4,1.6,40,2.4,steelHi);
+  bx(0,30,2,3.6,3.2,1,'#17141c'); bx(0,30,2.5,1.5,1.4,0.7,g,g);
+  bx(-2.6,33.5,2,2.8,0.9,0.6,ironDk); bx(2.6,26.5,2,2.8,0.9,0.6,ironDk); }},
+{key:'axe',name:"Butcher's Verdict",sub:'war axe',glow:'#ffb03a',mid:19,sc:2.0,desc:'The reference piece: a rusted executioner head with jagged spikes, a back hook, and three carved eyes that glow when it wakes. Blood never fully dries on the edge.',
+ draw(T,g){ bx(0,14,0,3.4,34,3.4,haft); for(let i=0;i<3;i++) bx(0,2+i*9,1.8,3.8,1.6,1,wrap);
+  bx(0,-4,0,4.2,3.4,4.2,bone);
+  bx(3,24,0,4,16,3.8,ironDk); bx(6.5,24,0,10,18,3.6,rust);
+  bx(12,24,0.2,2.4,18,2.6,steelHi);
+  bx(4,34.5,0,2.6,4,3,rust); bx(7.5,36,0,2.4,6,2.6,rust); bx(10.5,34,0,2,3.6,2.2,rust);
+  bx(-4.2,27,0,4.6,4,3,iron); bx(-6.8,29.5,0,2.6,4.4,2.6,iron); bx(-8.2,31,0,1.6,2.4,2,steelHi);
+  bx(6,28.5,1.9,2.4,2,0.8,'#17141c'); bx(6,28.5,2.3,1,0.9,0.6,g,g);
+  bx(8.3,23.5,1.9,2.4,2,0.8,'#17141c'); bx(8.3,23.5,2.3,1,0.9,0.6,g,g);
+  bx(6,18.5,1.9,2.4,2,0.8,'#17141c'); bx(6,18.5,2.3,1,0.9,0.6,g,g);
+  bx(9.5,15.8,0.6,3,2,2.8,blood); }},
+{key:'hammer',name:'Gravestone Maul',sub:'warhammer',glow:'#7fd6ff',mid:20,sc:2.0,desc:'A stolen headstone strapped to a haft with grave-iron. The epitaph rune still burns for whoever it was carved for. Studded corners crack armor like plaster.',
+ draw(T,g){ bx(0,12,0,3.6,30,3.6,haft); bx(0,-3.4,0,4.4,3.4,4.4,bone); bx(0,5,1.8,4,1.6,1,wrap);
+  bx(0,30,0,14,16,7,'#565a64'); bx(0,39.5,0,10,4,7,'#565a64'); bx(0,42,0,6,2,7,'#565a64');
+  bx(0,30,0,15.5,2.8,7.6,iron); bx(0,23.5,0,15,2.4,7.4,iron);
+  bx(-4.4,33,3.7,1,4.4,0.7,'#3c3f47'); bx(3.8,27,3.7,1,5.5,0.7,'#3c3f47');
+  bx(0,32.5,3.8,1.6,7,0.8,g,g); bx(0,34,3.8,5,1.4,0.8,g,g);
+  bx(-6,37,3.8,1.4,1.4,1,ironDk); bx(6,37,3.8,1.4,1.4,1,ironDk); bx(-6,25.5,3.8,1.4,1.4,1,ironDk); bx(6,25.5,3.8,1.4,1.4,1,ironDk); }},
+{key:'scythe',name:'Spinereaper',sub:'scythe',glow:'#58e07a',mid:24,sc:1.7,desc:'A harvested spine for a snath, still fused at the hips. The blade sweeps off the last vertebra with a soul-fire edge, and rib hooks catch what tries to flee.',
+ draw(T,g){ bx(0,-8,0,4.6,4,4.4,boneDk); bx(0,-4.5,1.8,4,1.6,1,wrap);
+  for(let i=0;i<9;i++){ bx(0,-1+i*5.4,0,i%2?4.4:3,4.8,3.2,i%2?bone:boneDk); if(i%2) { bx(2.9,-1+i*5.4,0,1.4,1.8,2,boneDk); bx(-2.9,-1+i*5.4,0,1.4,1.8,2,boneDk);} }
+  bx(0,47.5,0,4.8,5,4.2,bone); bx(3,51,0,6.5,3.6,3.6,boneDk);
+  bx(10,50.5,0,12,3.8,3,'#3f4450'); bx(18.5,47.5,0,8,3.4,2.6,'#3f4450'); bx(23.5,43.5,0,5,3.2,2.2,'#3f4450'); bx(26.5,39.5,0,2.6,4.4,2,steelHi);
+  bx(13,52.4,0,12,1.2,1.4,g,g); bx(21,49,0,6,1.1,1.2,g,g);
+  bx(9,47.5,0,1.6,4,2,bone); bx(15,45,0,1.5,3.6,1.8,bone); }},
+{key:'spear',name:"Heretic's Impaler",sub:'spear',glow:'#ff8a3a',mid:26,sc:1.6,desc:'A blackened pike with a polished killing spike and swept-down barbs. The last heretic is still on it — his skull rides just below the head as a warning.',
+ draw(T,g){ bx(0,16,0,2.8,52,2.8,haft); for(let i=0;i<4;i++) bx(0,-3+i*12,1.6,3.4,1.6,1,bone);
+  bx(0,-9.5,0,3.6,3,3.6,iron);
+  bx(0,42,0,6,5.5,5.5,bone); bx(-1.5,42.6,2.9,1.3,1.4,0.6,'#17141c'); bx(1.5,42.6,2.9,1.3,1.4,0.6,'#17141c');
+  bx(0,39.6,2.9,3.4,1,0.6,'#17141c'); bx(1.2,45,2.4,0.8,2.4,0.6,'#8a8070');
+  bx(2.4,39,2.4,1.4,2,0.9,blood);
+  bx(0,52,0,3.4,14,3,ironDk); bx(0,60,0,2,5,2,steelHi);
+  pushM(); mv(3,48,0); rotZ(2.6); box(1.8,5.5,2,iron); popM();
+  pushM(); mv(-3,48,0); rotZ(-2.6); box(1.8,5.5,2,iron); popM();
+  bx(0,52,1.7,1,10,0.8,g,g,0.8); }},
+{key:'bow',name:'Ribcage Bow',sub:'bow',glow:'#b06bff',mid:12,sc:2.2,desc:'Limbs of curved rib bone lashed to a vertebra grip, strung with dried sinew. Draws silent. The nock point glows where soul-arrows form.',
+ draw(T,g){ bx(0,6,0,3.6,4.4,3.4,boneDk); bx(0,10,0,4,4.4,3.6,bone); bx(0,14,0,3.6,4.4,3.4,boneDk); bx(0,10,1.9,3,7,1,wrap);
+  pushM(); mv(0,17,0); rotZ(0.3); box(2.8,12,2.8,bone); mv(0,7,0); rotZ(0.42); box(2.4,9,2.4,boneDk); mv(0,6,0); rotZ(0.5); box(1.8,6,1.8,bone); popM();
+  pushM(); mv(0,3,0); rotZ(-0.3); box(2.8,12,2.8,bone); mv(0,-7,0); rotZ(-0.42); box(2.4,9,2.4,boneDk); mv(0,-6,0); rotZ(-0.5); box(1.8,6,1.8,bone); popM();
+  bx(0,10,-2.2,0.8,52,0.8,sinew);
+  bx(0,10,-2.2,1.8,2.2,1.6,g,g,0.9); }},
+{key:'cross',name:"Inquisitor's Arbalest",sub:'crossbow',glow:'#ff4a3a',mid:13,sc:2.2,desc:'Black-iron arbalest with a bone prod and a screaming skull face-plate over the track. The loaded bolt burns — it marks its target before it lands.',
+ draw(T,g){ bx(0,7,0,3.6,24,3.6,haft); bx(0,-3,2,2,4.4,3,wrap); bx(0,16,1.3,2.6,18,2,iron);
+  bx(0,18,0,26,2.8,3,iron); bx(-13.5,18,0,2.6,5,4.6,bone); bx(13.5,18,0,2.6,5,4.6,bone);
+  bx(0,18,-1.7,23,0.8,0.8,sinew);
+  bx(0,22.5,1.4,5.5,5,2.6,bone); bx(-1.4,23.2,2.9,1.2,1.3,0.6,'#17141c'); bx(1.4,23.2,2.9,1.2,1.3,0.6,'#17141c'); bx(0,20.8,2.9,1.6,2,0.6,'#17141c');
+  bx(0,27.5,0,2,7,2,ironDk); bx(0,31.8,0,2.8,2.4,2,g,g); }},
+{key:'staff',name:"Warlock's Crook",sub:'staff',glow:'#b06bff',mid:26,sc:1.6,desc:'A gnarled black crook that curls around a captive witch-eye. The eye looks where you aim, and the whole staff leans into the cast.',
+ draw(T,g){ bx(0,18,0,3,50,3,'#3a2c1e'); bx(1.5,28,0,1.7,9,1.7,haft); bx(-1.4,10,0,1.6,8,1.6,haft); bx(0,-6,0,3.8,3,3.8,iron);
+  pushM(); mv(0,44,0); rotZ(-0.5); box(2.8,9,2.8,'#3a2c1e'); mv(1.5,5,0); rotZ(-1.0); box(2.5,8,2.5,'#3a2c1e'); mv(2,3.4,0); rotZ(-1.1); box(2.2,7,2.2,'#3a2c1e'); popM();
+  bx(4.5,49.5,0,6.5,6.5,6.5,'#1d1622');
+  bx(4.5,49.5,3.4,3,3,1,g,g); bx(4.5,49.5,4,1,2.2,0.6,'#17141c');
+  const f=Math.sin(T*3)*0.5+0.5; bx(4.5,55.5+f*2,0,1.8,1.8,1.8,g,g,0.5); }},
+{key:'rod',name:'Femur Rod',sub:'rod',glow:'#b06bff',mid:16,sc:2.3,desc:'A carved thighbone with a rune ring cut into the shaft. A dark crystal is socketed between the knuckles of the joint and pulses like a slow heartbeat.',
+ draw(T,g){ bx(0,-2,0,5,4,4.6,bone); bx(0,12,0,3,26,3,bone); bx(0.9,12,0.9,2.2,24,1.4,boneDk);
+  bx(0,18,1.7,3.4,1.4,0.8,g,g,0.55);
+  bx(-2.2,27,0,3.6,4.4,3.6,bone); bx(2.2,27,0,3.6,4.4,3.6,bone);
+  const f=Math.sin(T*2.4)*0.5+0.5; bx(0,30.5,0,4.4,5,4.4,g,g,0.75+f*0.25); }},
+{key:'scepter',name:"Tyrant's Scepter",sub:'scepter',glow:'#ff4a3a',mid:17,sc:2.2,desc:'A dead king’s skull, still wearing his crown, mounted on tarnished gold. The gem in the crown remembers the throne and burns about it.',
+ draw(T,g){ bx(0,12,0,3,32,3,gold); bx(0,-3,0,4,3,4,iron); for(let i=0;i<3;i++) bx(0,2+i*9,1.7,3.4,1.2,0.8,'#a8894a');
+  bx(0,31,0,6.5,6,6,bone); bx(-1.5,31.8,3.1,1.3,1.4,0.6,'#17141c'); bx(1.5,31.8,3.1,1.3,1.4,0.6,'#17141c'); bx(0,28.6,3.1,3.2,1,0.6,'#17141c');
+  bx(0,35,0,7.5,1.8,7,gold);
+  for(let i=0;i<4;i++){ const a=i*1.5708+0.785; bx(Math.cos(a)*3.4,37,Math.sin(a)*3.4,1.6,3.4,1.6,gold); }
+  const f=Math.sin(T*2.6)*0.5+0.5; bx(0,38.6,0,3.2,3.2,3.2,g,g,0.8+f*0.2); }},
+{key:'wand',name:'Witchfinger',sub:'wand',glow:'#b06bff',mid:11,sc:2.9,desc:'A witch’s severed finger, knuckles and all, capped with her own ring. The nail pinches a mote of soulfire that never goes out.',
+ draw(T,g){ bx(0,-2.5,0,3.4,3,3.4,gold); bx(0,0.5,0,3.2,3,3.2,wrap);
+  bx(0,4,0,3,6,3,boneDk); bx(0,7.6,0,3.5,2.2,3.5,bone);
+  pushM(); mv(0,9,0); rotZ(0.14); box(2.6,6,2.6,boneDk); mv(0,4.4,0); rotZ(-0.24); box(3.2,2.2,3.2,bone); mv(0,3,0); rotZ(-0.1); box(2.2,5,2.2,boneDk);
+  mv(0,3.6,0); box(2.6,1.8,2.6,bone); mv(0.6,2,0.6,0); box(1.4,2.6,1.4,'#c9b988');
+  popM();
+  const f=Math.sin(T*4)*0.5+0.5; bx(1.2,22.5,0.6,3.2,3.2,3.2,g,g,0.75+f*0.25); }},
+{key:'orb',name:'Demon Eye',sub:'orb (catalyst)',glow:'#ff8a3a',mid:13,sc:2.6,desc:'Replaces the soul lantern. A living demon’s eye held in an iron claw — the slit pupil tracks your target, horn crests flare when it casts, embers orbit it constantly.',
+ draw(T,g){ bx(0,-2,0,4.4,4,4.4,iron); bx(0,1.5,0,5.5,2.6,5.5,ironDk);
+  for(let i=0;i<3;i++){ const a=i*2.094; pushM(); mv(Math.cos(a)*4.4,4,Math.sin(a)*4.4); rotY(-a); rotX(-0.4); box(1.7,7,1.7,iron); popM(); }
+  bx(0,13,0,9.5,9.5,9.5,'#241d28');
+  bx(0,13,4.8,5,5,1.2,g,g); bx(0,13,5.6,1.3,4,0.7,'#17141c');
+  pushM(); mv(-4.4,19,0); rotZ(0.5); box(2,5.5,2,boneDk); mv(0,3.4,0); rotZ(0.5); box(1.5,3.4,1.5,bone); popM();
+  pushM(); mv(4.4,19,0); rotZ(-0.5); box(2,5.5,2,boneDk); mv(0,3.4,0); rotZ(-0.5); box(1.5,3.4,1.5,bone); popM();
+  for(let i=0;i<3;i++){ const a=T*1.8+i*2.094; bx(Math.cos(a)*8.5,13+Math.sin(T*2.4+i)*2,Math.sin(a)*8.5,1.8,1.8,1.8,g,g,0.8); } }},
+];
+/* ---- scene ---- */
+let idx=0,T=0;
+function drawBrazier(x,z,T){ bx(x,10,z,4,20,4,ironDk); bx(x,21,z,9,3,9,iron); bx(x,24,z,7,3.4,7,ironDk);
+  const f=0.8+0.25*Math.sin(T*8+x); bx(x,28,z,6*f,7*f,6*f,'#ff8a2a','#ff8a2a',0.95); bx(x,32,z,3.4*f,4.4*f,3.4*f,'#ffd257','#ffd257',0.9);
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
+  for(let i=3;i>=1;i--){ const s=13*i*0.7; bx(x,29,z,s,s,s,'#000000','#ff9a3b',0.5/(i*1.3)); }
+  gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); }
+function render(){ T+=0.016; if(cvs.width!==VW||cvs.height!==VH)resize();
+  gl.viewport(0,0,VW,VH); gl.clearColor(0.035,0.04,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const PROJ=mPersp(46*Math.PI/180,VW/VH,10,900), VIEW=mLook([0,86,190],[0,52,0],[0,1,0]); PV=null;
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  CURM=mIdent();
+  bx(0,-6,0,340,12,240,'#3c414c'); bx(0,-11,0,360,4,260,'#2c3038');
+  bx(0,2,0,56,10,56,'#4a4f5a'); bx(0,8,0,46,4,46,'#565b66'); bx(0,-2.6,0,62,3,62,'#33373f');
+  drawBrazier(-74,26,T); drawBrazier(74,26,T);
+  const it=W[idx];
+  pushM(); mv(0,56-it.mid*it.sc,0);           // weapon floats above the pedestal, centered on screen
+  CURM=mMul(CURM,mS(it.sc,it.sc,it.sc));
+  rotY(T*0.7);
+  it.draw(T,it.glow);
+  popM();
+  requestAnimationFrame(render); }
+/* ---- UI ---- */
+const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count');
+W.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); });
+function set(i){ idx=(i+W.length)%W.length; const it=W[idx];
+  nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
+  countEl.textContent=(idx+1)+' / '+W.length;
+  [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx)); }
+document.getElementById('prev').onclick=()=>set(idx-1);
+document.getElementById('next').onclick=()=>set(idx+1);
+addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
+window.__WS={set,get idx(){return idx;},count:W.length,names:W.map(w=>w.name)};
+resize(); set(0); render();
+</script></body></html>

@@ -10,32 +10,35 @@
   #kicker{font-size:11px;letter-spacing:.24em;opacity:.55;font-weight:800}
   #name{font-size:30px;font-weight:900;letter-spacing:.04em;margin-top:6px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
   #sub{font-size:13px;letter-spacing:.14em;opacity:.65;font-weight:700;margin-top:2px;text-transform:uppercase}
-  #desc{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
+  #desc{position:absolute;left:50%;bottom:164px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
     font-size:14px;line-height:1.5;opacity:.85;text-shadow:0 1px 8px #000;pointer-events:none}
-  #fbbar{position:absolute;left:50%;bottom:100px;transform:translateX(-50%);display:flex;gap:10px;align-items:center}
-  #recBtn{padding:11px 20px;border-radius:12px;border:1px solid #6a3242;background:#2a1620;color:#ffd0d6;font-weight:800;font-size:15px;cursor:pointer}
-  #recBtn.rec{background:#8e1620;color:#fff;border-color:#e05a5a;animation:pulse 1s infinite}
+  #fbbar{position:absolute;left:50%;bottom:106px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end;width:min(560px,92vw)}
+  #fbText{flex:1;min-height:42px;max-height:110px;padding:10px 12px;border-radius:12px;border:1px solid #3a4152;background:#11141d;color:#eaf0f7;font-size:14px;font-family:inherit;line-height:1.35;resize:none;outline:none}
+  #fbText:focus{border-color:#6a7488}
+  .iconbtn{width:46px;height:44px;flex:0 0 auto;border-radius:12px;border:1px solid #3a4152;background:#161a26;color:#eaf0f7;font-size:18px;cursor:pointer}
+  #recBtn.rec{width:auto;padding:0 14px;font-size:14px;font-weight:800;background:#8e1620;color:#fff;border-color:#e05a5a;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,60,60,.55)}50%{box-shadow:0 0 0 9px rgba(224,60,60,0)}}
-  #playBtn{padding:11px 16px;border-radius:12px;border:1px solid #3a4152;background:#141824;color:#eaf0f7;font-weight:800;font-size:15px;cursor:pointer}
-  #recInfo{font-size:12px;opacity:.7;min-width:170px;text-align:left}
+  #sendBtn{background:#2a2016;border-color:#6a5232;color:#ffd28a}
+  #recInfo{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);font-size:12px;opacity:.72;text-align:center;pointer-events:none;width:90vw}
   .dot.has{background:#5fe08a;box-shadow:0 0 6px rgba(95,224,138,.6)}
   .nav{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:84px;border-radius:14px;
     border:1px solid #3a4152;background:rgba(20,24,36,.7);color:#eaf0f7;font-size:26px;font-weight:900;cursor:pointer}
   #prev{left:12px} #next{right:12px}
-  #dots{position:absolute;left:0;right:0;bottom:74px;display:flex;gap:7px;justify-content:center}
+  #dots{position:absolute;left:0;right:0;bottom:62px;display:flex;gap:7px;justify-content:center}
   .dot{width:9px;height:9px;border-radius:50%;background:#39404f;cursor:pointer}
   .dot.on{background:#e8a33d}
-  #count{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:12px;opacity:.55;font-weight:700;letter-spacing:.1em}
+  #count{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-size:12px;opacity:.55;font-weight:700;letter-spacing:.1em}
   #foot{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:11px;opacity:.4}
 </style></head>
 <body>
 <canvas id="c"></canvas><div id="vig"></div>
 <div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div></div>
 <div id="desc"></div>
-<div id="fbbar"><button id="recBtn">🎙 Record feedback</button><button id="playBtn" style="display:none">▶</button><span id="recInfo"></span></div>
+<div id="fbbar"><textarea id="fbText" rows="1" placeholder="Type feedback on this weapon…"></textarea><button id="recBtn" class="iconbtn" title="Record voice feedback">🎙</button><button id="playBtn" class="iconbtn" title="Play recording" style="display:none">▶</button><button id="sendBtn" class="iconbtn" title="Send typed note">➤</button></div>
+<div id="recInfo"></div>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="dots"></div><div id="count"></div>
-<div id="foot">drag to rotate · double-tap to reset · recordings upload straight to Claude (no download)</div>
+<div id="foot">drag to rotate · double-tap to reset · type or record — both go straight to Claude</div>
 <script>
 const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
 let VW=0,VH=0; function resize(){ const d=Math.min(2,window.devicePixelRatio||1); VW=cvs.clientWidth*d|0; VH=cvs.clientHeight*d|0; cvs.width=VW; cvs.height=VH; } addEventListener('resize',resize);
@@ -230,10 +233,10 @@ cvs.addEventListener('pointerup',endDrag); cvs.addEventListener('pointercancel',
 cvs.addEventListener('dblclick',()=>{ manYaw=0; manPitch=0; autospin=true; }); // double-tap to reset + resume spin
 /* ---- UI + per-weapon voice feedback ---- */
 const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count');
-const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo');
+const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo'),fbText=document.getElementById('fbText'),sendBtn=document.getElementById('sendBtn');
 W.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); });
 const fb={}; let mediaStream=null, mr=null, recKey=null, recT0=0, recTimer=0;
-const WORKAPP='https://theworkapp.netlify.app/.netlify/functions/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline → local Whisper transcribes → bladefall/_feedback
+const WORKAPP='https://thework.pages.dev/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline (Cloudflare; old theworkapp.netlify.app is deleted) → local Whisper transcribes → bladefall/_feedback
 function fmtT(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 async function uploadFb(key,n,name,blob,mime,secs){
   const rec=fb[key]; if(rec){ rec.sending=true; rec.err=false; } paintRec();
@@ -263,27 +266,52 @@ async function toggleRec(){
     if(fb[key]&&fb[key].url) URL.revokeObjectURL(fb[key].url);
     recKey=null; clearInterval(recTimer);
     if(secs<1||!blob.size){ paintRec(); return; }
-    fb[key]={blob,url:URL.createObjectURL(blob),secs,sent:false}; paintRec();
+    fb[key]=Object.assign(fb[key]||{},{blob,url:URL.createObjectURL(blob),secs,sent:false}); paintRec();
     uploadFb(key,n,name,blob,mime,secs); };                // → straight to Claude, no download
   recKey=key; recT0=Date.now(); mr.start(); recTimer=setInterval(paintRec,300); paintRec();
 }
 function paintRec(){ const key=W[idx].key, f=fb[key];
-  if(recKey===key){ recBtn.classList.add('rec'); recBtn.textContent='⏹ Stop  '+fmtT(Math.floor((Date.now()-recT0)/1000)); recInfo.textContent='recording… speak your feedback'; }
-  else { recBtn.classList.remove('rec'); recBtn.textContent=f?'🎙 Re-record':'🎙 Record feedback';
-    recInfo.textContent = !f?'tap to record your take on this weapon' : f.sending?'⤴ sending to Claude…' : f.err?'⚠ send failed — tap Re-record to retry' : f.sent?'✓ sent to Claude · ▶ to review':'saved · ▶ to review'; }
-  playBtn.style.display=f?'inline-block':'none';
-  [...dotsEl.children].forEach((d,k)=>{ const ff=fb[W[k].key]; d.classList.toggle('has',!!(ff&&ff.sent)); }); }
+  if(recKey===key){ recBtn.classList.add('rec'); recBtn.textContent='⏹ '+fmtT(Math.floor((Date.now()-recT0)/1000)); }
+  else { recBtn.classList.remove('rec'); recBtn.textContent='🎙'; }
+  let msg;
+  if(recKey===key) msg='recording… speak your feedback';
+  else if(f&&f.sending) msg='⤴ sending voice to Claude…';
+  else if(f&&f.err) msg='⚠ voice send failed — tap 🎙 to retry';
+  else if(f&&f.textSending) msg='⤴ sending note…';
+  else if(f&&f.textErr) msg='⚠ note send failed — tap ➤ to retry';
+  else if(f&&f.sent&&f.textSent) msg='✓ voice + note sent to Claude';
+  else if(f&&f.sent) msg='✓ voice sent · ▶ to review';
+  else if(f&&f.textSent) msg='✓ note sent to Claude';
+  else msg='type a note or tap 🎙 to record — both reach Claude';
+  recInfo.textContent=msg;
+  playBtn.style.display=(f&&f.url)?'':'none';
+  [...dotsEl.children].forEach((d,k)=>{ const ff=fb[W[k].key]; d.classList.toggle('has',!!(ff&&(ff.sent||ff.textSent))); }); }
 recBtn.onclick=toggleRec;
-playBtn.onclick=()=>{ const f=fb[W[idx].key]; if(f) new Audio(f.url).play(); };
+playBtn.onclick=()=>{ const f=fb[W[idx].key]; if(f&&f.url) new Audio(f.url).play(); };
+function autoGrow(){ fbText.style.height='auto'; fbText.style.height=Math.min(110,fbText.scrollHeight)+'px'; }
+fbText.addEventListener('input',()=>{ (fb[W[idx].key]=fb[W[idx].key]||{}).draft=fbText.value; autoGrow(); });
+async function sendText(){ const key=W[idx].key, n=idx+1, name=W[idx].name, txt=fbText.value.trim(); if(!txt) return;
+  const f=(fb[key]=fb[key]||{}); f.textSending=true; f.textErr=false; paintRec();
+  try{
+    const id='wf-'+String(n).padStart(2,'0')+'-'+key+'-t'+Date.now();
+    const r=await fetch(WORKAPP,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+      body:JSON.stringify({password:FB_PW,action:'text',id,text:txt,ctx:{kind:'weaponFeedback',weapon:key,name,n},at:new Date().toISOString()})});
+    if(!r.ok) throw new Error('http '+r.status);
+    f.textSent=true; f.textSending=false; f.draft=''; fbText.value=''; autoGrow();
+  }catch(e){ f.textSending=false; f.textErr=true; }
+  paintRec(); }
+sendBtn.onclick=sendText;
+fbText.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendText(); } });
 function set(i){ if(recKey&&mr) mr.stop(); idx=(i+W.length)%W.length; const it=W[idx];
   manYaw=0; manPitch=0; autospin=true;                    // fresh presentation per weapon
   nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
   countEl.textContent=(idx+1)+' / '+W.length;
   [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx));
+  fbText.value=(fb[it.key]&&fb[it.key].draft)||''; autoGrow();
   paintRec(); }
 document.getElementById('prev').onclick=()=>set(idx-1);
 document.getElementById('next').onclick=()=>set(idx+1);
-addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
+addEventListener('keydown',e=>{ if(e.target&&(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'))return; if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
 window.__WS={set,get idx(){return idx;},count:W.length,names:W.map(w=>w.name),fb};
 resize(); set(0); render();
 </script></body></html>

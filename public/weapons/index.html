@@ -14,6 +14,8 @@
   .pill{font-size:11px;font-weight:800;letter-spacing:.05em;padding:3px 10px;border-radius:999px;border:1px solid #3a4152;background:rgba(18,22,32,.72);color:#cfd6df;white-space:nowrap}
   #bottom{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:9px;padding:0 12px calc(env(safe-area-inset-bottom) + 12px);pointer-events:none}
   #desc{width:min(560px,88vw);text-align:center;font-size:14px;line-height:1.45;opacity:.85;text-shadow:0 1px 8px #000}
+  #atkBtn{padding:9px 20px;border-radius:12px;border:1px solid #4a5a7a;background:#182234;color:#bfe0ff;font-weight:800;font-size:14px;letter-spacing:.03em;cursor:pointer;pointer-events:auto}
+  #atkBtn:active{transform:scale(.96)}
   #decide{display:flex;gap:14px;pointer-events:auto}
   #approveBtn,#rejectBtn{padding:12px 22px;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;border:2px solid;letter-spacing:.02em}
   #approveBtn{background:#123021;color:#7fffa8;border-color:#2f9a5a}
@@ -47,6 +49,7 @@
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="bottom">
 <div id="desc"></div>
+<button id="atkBtn">⚔ Preview attack</button>
 <div id="decide"><button id="approveBtn" title="Approve — ready to ship">✓ Approve</button><button id="rejectBtn" title="Reject — erase this design">✗ Reject</button></div>
 <div id="fbbar"><textarea id="fbText" rows="1" placeholder="Type feedback on this weapon…"></textarea><button id="recBtn" class="iconbtn" title="Record voice feedback">🎙</button><button id="playBtn" class="iconbtn" title="Play recording" style="display:none">▶</button><button id="sendBtn" class="iconbtn" title="Send typed note">➤</button></div>
 <div id="recInfo"></div>
@@ -268,14 +271,35 @@ function render(){ T+=0.016; if(cvs.width!==VW||cvs.height!==VH)resize();
   bx(0,2,0,56,10,56,'#4a4f5a'); bx(0,8,0,46,4,46,'#565b66'); bx(0,-2.6,0,62,3,62,'#33373f');
   drawBrazier(-74,26,T); drawBrazier(74,26,T);
   const it=vis[idx];
-  if(it){ pushM(); mv(0,56-it.mid*it.sc,0);   // weapon floats above the pedestal, centered on screen
+  if(it){
+    const art=it.key.replace(/_og$/,''), meta=(typeof ARTMETA!=='undefined'&&ARTMETA[art])||{}, melee=meta.cls==='Melee';
+    let ap=null; if(atk){ const el=(performance.now()-atk.t0)/1000; if(el>1.6) atk=null; else ap=el; }
+    pushM(); mv(0,56-it.mid*it.sc,0);           // weapon floats above the pedestal, centered on screen
     CURM=mMul(CURM,mS(it.sc,it.sc,it.sc));
     rotX(manPitch); rotY(manYaw + (autospin? T*0.7 : 0));   // drag to rotate; gentle auto-spin until you grab it
+    if(ap!=null && melee) meleeSwing(ap, MELEESHAPE[art]||'arc');
     it.draw(T,it.glow);
-    popM(); }
+    popM();
+    if(ap!=null && !melee){ CURM=mIdent(); rangedFX(ap, meta.sch, it.glow); }   // fire projectiles in world space
+  }
   requestAnimationFrame(render); }
-/* ---- drag-to-rotate ---- */
-let manYaw=0, manPitch=0, autospin=true, dragging=false, lastX=0, lastY=0;
+const MELEESHAPE={dagger:'thrust',spear:'thrust',hammer:'slam',sword:'arc',axe:'arc',great:'arc',scythe:'arc'};
+function meleeSwing(at, shape){                 // animate the weapon through a strike (pivots at the grip)
+  const p=Math.min(1, at/1.0), pulse=Math.sin(p*Math.PI), half=(p-0.5)*2;   // half: -1 wound back → +1 struck
+  if(shape==='slam'){ rotX(half*1.6); }                         // overhead → slam down
+  else if(shape==='thrust'){ mv(0, pulse*16, 0); rotX(-0.2); }  // jab forward along the blade
+  else { rotZ(-half*1.9); rotX(-0.25 - pulse*0.15); }           // arc: wind back → sweep across
+}
+function rangedFX(at, sch, col){                // projectiles flying out toward the viewer
+  const mag = sch==='Magical'; gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
+  for(let k=0;k<6;k++){ const pt=at - k*0.27; if(pt<0||pt>1.0) continue; const z=pt*225, y=56+pt*9;
+    if(mag){ bx(0,y,z, 7,7,7, col,col,0.95); bx(0,y,z, 12,12,12, col,col,0.22); }   // glowing orb
+    else { bx(0,y,z-3, 2.6,2.6,15, col,col,0.95); bx(0,y,z-9, 2,2,5, '#ffffff', col,0.7); } // arrow + bright tip
+  }
+  gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+}
+/* ---- drag-to-rotate + attack preview ---- */
+let manYaw=0, manPitch=0, autospin=true, dragging=false, lastX=0, lastY=0, atk=null;
 cvs.style.cursor='grab';
 cvs.addEventListener('pointerdown',e=>{ dragging=true; autospin=false; lastX=e.clientX; lastY=e.clientY; cvs.style.cursor='grabbing'; try{cvs.setPointerCapture(e.pointerId);}catch(_){} });
 cvs.addEventListener('pointermove',e=>{ if(!dragging) return; manYaw+=(e.clientX-lastX)*0.011; manPitch+=(e.clientY-lastY)*0.011; manPitch=Math.max(-1.25,Math.min(1.25,manPitch)); lastX=e.clientX; lastY=e.clientY; });
@@ -294,6 +318,10 @@ const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'
 function paintAttrs(){ const it=vis[idx]; if(!it){ attrsEl.innerHTML=''; return; } const a=attrsFor(it.key); attrsEl.innerHTML='';
   const pill=(txt,color)=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=txt; if(color){ s.style.borderColor=color; s.style.color=color; } attrsEl.appendChild(s); };
   pill(a.cls); pill(a.sch); pill(a.art); pill(a.el[0]+' '+a.el[1], a.el[2]); }
+const atkBtn=document.getElementById('atkBtn');
+atkBtn.onclick=()=>{ const it=vis[idx]; if(!it) return; const melee=(ARTMETA[it.key.replace(/_og$/,'')]||{}).cls==='Melee';
+  autospin=false; manYaw=melee?0.5:0.0; manPitch=0.04; atk={t0:performance.now()};       // face front + play the strike / fire
+  atkBtn.textContent='⚔ Playing…'; clearTimeout(window.__at); window.__at=setTimeout(()=>{ atkBtn.textContent='⚔ Preview attack'; },1600); };
 const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo'),fbText=document.getElementById('fbText'),sendBtn=document.getElementById('sendBtn');
 const approveBtn=document.getElementById('approveBtn'),rejectBtn=document.getElementById('rejectBtn'),undoBtn=document.getElementById('undoBtn');
 const WORKAPP='https://thework.pages.dev/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline (Cloudflare) → local Whisper transcribes → bladefall/_feedback

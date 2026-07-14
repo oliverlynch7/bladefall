@@ -10,9 +10,16 @@
   #kicker{font-size:11px;letter-spacing:.24em;opacity:.55;font-weight:800}
   #name{font-size:30px;font-weight:900;letter-spacing:.04em;margin-top:6px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
   #sub{font-size:13px;letter-spacing:.14em;opacity:.65;font-weight:700;margin-top:2px;text-transform:uppercase}
-  #desc{position:absolute;left:50%;bottom:164px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
-    font-size:14px;line-height:1.5;opacity:.85;text-shadow:0 1px 8px #000;pointer-events:none}
-  #fbbar{position:absolute;left:50%;bottom:106px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end;width:min(560px,92vw)}
+  #desc{position:absolute;left:50%;bottom:200px;transform:translateX(-50%);width:min(560px,88vw);text-align:center;
+    font-size:14px;line-height:1.45;opacity:.85;text-shadow:0 1px 8px #000;pointer-events:none}
+  #decide{position:absolute;left:50%;bottom:152px;transform:translateX(-50%);display:flex;gap:14px}
+  #approveBtn,#rejectBtn{padding:12px 22px;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;border:2px solid;letter-spacing:.02em}
+  #approveBtn{background:#123021;color:#7fffa8;border-color:#2f9a5a}
+  #approveBtn.on{background:#1f9a52;color:#eafff2;border-color:#9fffc0;box-shadow:0 0 16px rgba(95,224,138,.5)}
+  #rejectBtn{background:#3a1418;color:#ff9a9a;border-color:#b23a3a}
+  #approveBtn:active,#rejectBtn:active{transform:scale(.95)}
+  #undoBtn{position:absolute;left:50%;top:96px;transform:translateX(-50%);padding:8px 16px;border-radius:11px;border:1px solid #6a5232;background:rgba(42,32,22,.96);color:#ffd28a;font-weight:800;font-size:13px;cursor:pointer;z-index:8}
+  #fbbar{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);display:flex;gap:8px;align-items:flex-end;width:min(560px,92vw)}
   #fbText{flex:1;min-height:42px;max-height:110px;padding:10px 12px;border-radius:12px;border:1px solid #3a4152;background:#11141d;color:#eaf0f7;font-size:14px;font-family:inherit;line-height:1.35;resize:none;outline:none}
   #fbText:focus{border-color:#6a7488}
   .iconbtn{width:46px;height:44px;flex:0 0 auto;border-radius:12px;border:1px solid #3a4152;background:#161a26;color:#eaf0f7;font-size:18px;cursor:pointer}
@@ -21,6 +28,7 @@
   #sendBtn{background:#2a2016;border-color:#6a5232;color:#ffd28a}
   #recInfo{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);font-size:12px;opacity:.72;text-align:center;pointer-events:none;width:90vw}
   .dot.has{background:#5fe08a;box-shadow:0 0 6px rgba(95,224,138,.6)}
+  .dot.appr{background:#5fe08a;box-shadow:0 0 8px rgba(95,224,138,.95);outline:2px solid #cfffe0;outline-offset:1px}
   .nav{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:84px;border-radius:14px;
     border:1px solid #3a4152;background:rgba(20,24,36,.7);color:#eaf0f7;font-size:26px;font-weight:900;cursor:pointer}
   #prev{left:12px} #next{right:12px}
@@ -34,11 +42,13 @@
 <canvas id="c"></canvas><div id="vig"></div>
 <div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div></div>
 <div id="desc"></div>
+<button id="undoBtn" style="display:none">↩ undo</button>
+<div id="decide"><button id="approveBtn" title="Approve — ready to ship">✓ Approve</button><button id="rejectBtn" title="Reject — erase this design">✗ Reject</button></div>
 <div id="fbbar"><textarea id="fbText" rows="1" placeholder="Type feedback on this weapon…"></textarea><button id="recBtn" class="iconbtn" title="Record voice feedback">🎙</button><button id="playBtn" class="iconbtn" title="Play recording" style="display:none">▶</button><button id="sendBtn" class="iconbtn" title="Send typed note">➤</button></div>
 <div id="recInfo"></div>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="dots"></div><div id="count"></div>
-<div id="foot">drag to rotate · double-tap to reset · type or record — both go straight to Claude</div>
+<div id="foot">drag to rotate · ✓ Approve = ready to ship · ✗ Reject = erase it · type/record feedback — all go to Claude</div>
 <script>
 const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
 let VW=0,VH=0; function resize(){ const d=Math.min(2,window.devicePixelRatio||1); VW=cvs.clientWidth*d|0; VH=cvs.clientHeight*d|0; cvs.width=VW; cvs.height=VH; } addEventListener('resize',resize);
@@ -238,12 +248,12 @@ function render(){ T+=0.016; if(cvs.width!==VW||cvs.height!==VH)resize();
   bx(0,-6,0,340,12,240,'#3c414c'); bx(0,-11,0,360,4,260,'#2c3038');
   bx(0,2,0,56,10,56,'#4a4f5a'); bx(0,8,0,46,4,46,'#565b66'); bx(0,-2.6,0,62,3,62,'#33373f');
   drawBrazier(-74,26,T); drawBrazier(74,26,T);
-  const it=W[idx];
-  pushM(); mv(0,56-it.mid*it.sc,0);           // weapon floats above the pedestal, centered on screen
-  CURM=mMul(CURM,mS(it.sc,it.sc,it.sc));
-  rotX(manPitch); rotY(manYaw + (autospin? T*0.7 : 0));   // drag to rotate; gentle auto-spin until you grab it
-  it.draw(T,it.glow);
-  popM();
+  const it=vis[idx];
+  if(it){ pushM(); mv(0,56-it.mid*it.sc,0);   // weapon floats above the pedestal, centered on screen
+    CURM=mMul(CURM,mS(it.sc,it.sc,it.sc));
+    rotX(manPitch); rotY(manYaw + (autospin? T*0.7 : 0));   // drag to rotate; gentle auto-spin until you grab it
+    it.draw(T,it.glow);
+    popM(); }
   requestAnimationFrame(render); }
 /* ---- drag-to-rotate ---- */
 let manYaw=0, manPitch=0, autospin=true, dragging=false, lastX=0, lastY=0;
@@ -253,12 +263,17 @@ cvs.addEventListener('pointermove',e=>{ if(!dragging) return; manYaw+=(e.clientX
 const endDrag=()=>{ dragging=false; cvs.style.cursor='grab'; };
 cvs.addEventListener('pointerup',endDrag); cvs.addEventListener('pointercancel',endDrag);
 cvs.addEventListener('dblclick',()=>{ manYaw=0; manPitch=0; autospin=true; }); // double-tap to reset + resume spin
-/* ---- UI + per-weapon voice feedback ---- */
+/* ---- UI + per-weapon voice feedback + approve/reject decisions ---- */
 const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count');
 const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo'),fbText=document.getElementById('fbText'),sendBtn=document.getElementById('sendBtn');
-W.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); });
+const approveBtn=document.getElementById('approveBtn'),rejectBtn=document.getElementById('rejectBtn'),undoBtn=document.getElementById('undoBtn');
+const WORKAPP='https://thework.pages.dev/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline (Cloudflare) → local Whisper transcribes → bladefall/_feedback
+let decisions={}; try{ decisions=JSON.parse(localStorage.getItem('bf_wdecide')||'{}'); }catch(_){}
+function saveDec(){ try{ localStorage.setItem('bf_wdecide',JSON.stringify(decisions)); }catch(_){} }
+let vis=W.filter(w=>decisions[w.key]!=='rejected');      // rejected designs are erased from the board (persisted)
+function buildDots(){ dotsEl.innerHTML=''; vis.forEach((w,i)=>{ const d=document.createElement('div'); d.className='dot'; d.onclick=()=>set(i); dotsEl.appendChild(d); }); }
+buildDots();
 const fb={}; let mediaStream=null, mr=null, recKey=null, recT0=0, recTimer=0;
-const WORKAPP='https://thework.pages.dev/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline (Cloudflare; old theworkapp.netlify.app is deleted) → local Whisper transcribes → bladefall/_feedback
 function fmtT(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 async function uploadFb(key,n,name,blob,mime,secs){
   const rec=fb[key]; if(rec){ rec.sending=true; rec.err=false; } paintRec();
@@ -277,9 +292,10 @@ async function uploadFb(key,n,name,blob,mime,secs){
 }
 async function toggleRec(){
   if(recKey){ mr.stop(); return; }                       // stop the active recording
+  const it=vis[idx]; if(!it) return;
   try{ if(!mediaStream) mediaStream=await navigator.mediaDevices.getUserMedia({audio:true}); }
   catch(e){ recInfo.textContent='⚠ allow microphone access, then tap again'; return; }
-  const key=W[idx].key, n=idx+1, name=W[idx].name, chunks=[];
+  const key=it.key, n=W.findIndex(w=>w.key===key)+1, name=it.name, chunks=[];
   let opt; if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) opt={mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:48000};
   else if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported('audio/webm')) opt={mimeType:'audio/webm'};
   mr=new MediaRecorder(mediaStream,opt);
@@ -292,7 +308,7 @@ async function toggleRec(){
     uploadFb(key,n,name,blob,mime,secs); };                // → straight to Claude, no download
   recKey=key; recT0=Date.now(); mr.start(); recTimer=setInterval(paintRec,300); paintRec();
 }
-function paintRec(){ const key=W[idx].key, f=fb[key];
+function paintRec(){ const it=vis[idx]; if(!it) return; const key=it.key, f=fb[key];
   if(recKey===key){ recBtn.classList.add('rec'); recBtn.textContent='⏹ '+fmtT(Math.floor((Date.now()-recT0)/1000)); }
   else { recBtn.classList.remove('rec'); recBtn.textContent='🎙'; }
   let msg;
@@ -307,12 +323,12 @@ function paintRec(){ const key=W[idx].key, f=fb[key];
   else msg='type a note or tap 🎙 to record — both reach Claude';
   recInfo.textContent=msg;
   playBtn.style.display=(f&&f.url)?'':'none';
-  [...dotsEl.children].forEach((d,k)=>{ const ff=fb[W[k].key]; d.classList.toggle('has',!!(ff&&(ff.sent||ff.textSent))); }); }
+  [...dotsEl.children].forEach((d,k)=>{ const w=vis[k], ff=w&&fb[w.key]; d.classList.toggle('has',!!(ff&&(ff.sent||ff.textSent))); d.classList.toggle('appr', !!(w&&decisions[w.key]==='approved')); }); }
 recBtn.onclick=toggleRec;
-playBtn.onclick=()=>{ const f=fb[W[idx].key]; if(f&&f.url) new Audio(f.url).play(); };
+playBtn.onclick=()=>{ const it=vis[idx], f=it&&fb[it.key]; if(f&&f.url) new Audio(f.url).play(); };
 function autoGrow(){ fbText.style.height='auto'; fbText.style.height=Math.min(110,fbText.scrollHeight)+'px'; }
-fbText.addEventListener('input',()=>{ (fb[W[idx].key]=fb[W[idx].key]||{}).draft=fbText.value; autoGrow(); });
-async function sendText(){ const key=W[idx].key, n=idx+1, name=W[idx].name, txt=fbText.value.trim(); if(!txt) return;
+fbText.addEventListener('input',()=>{ const it=vis[idx]; if(!it) return; (fb[it.key]=fb[it.key]||{}).draft=fbText.value; autoGrow(); });
+async function sendText(){ const it=vis[idx]; if(!it) return; const key=it.key, n=W.findIndex(w=>w.key===key)+1, name=it.name, txt=fbText.value.trim(); if(!txt) return;
   const f=(fb[key]=fb[key]||{}); f.textSending=true; f.textErr=false; paintRec();
   try{
     const id='wf-'+String(n).padStart(2,'0')+'-'+key+'-t'+Date.now();
@@ -324,16 +340,44 @@ async function sendText(){ const key=W[idx].key, n=idx+1, name=W[idx].name, txt=
   paintRec(); }
 sendBtn.onclick=sendText;
 fbText.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendText(); } });
-function set(i){ if(recKey&&mr) mr.stop(); idx=(i+W.length)%W.length; const it=W[idx];
+/* ---- approve / reject decisions (persisted + sent to Claude) ---- */
+function sendDecision(it,decision){ const n=W.findIndex(w=>w.key===it.key)+1;
+  const label = decision==='approved'?('✅ APPROVED — ready to ship: '+it.name)
+    : decision==='rejected'?('❌ REJECTED / erased: '+it.name)
+    : decision==='unrejected'?('↩ restored (un-erased): '+it.name)
+    : ('↩ un-approved: '+it.name);
+  fetch(WORKAPP,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',
+    body:JSON.stringify({password:FB_PW,action:'text',id:'wf-'+String(n).padStart(2,'0')+'-'+it.key+'-dec'+Date.now(),text:label,ctx:{kind:'weaponFeedback',weapon:it.key,name:it.name,n,decision},at:new Date().toISOString()})}).catch(()=>{});
+}
+function paintDecide(){ const it=vis[idx];
+  if(!it){ approveBtn.textContent='✓ Approve'; approveBtn.classList.remove('on'); return; }
+  const ap=decisions[it.key]==='approved'; approveBtn.classList.toggle('on',ap); approveBtn.textContent=ap?'✓ Approved · ready to ship':'✓ Approve'; }
+approveBtn.onclick=()=>{ const it=vis[idx]; if(!it) return;
+  if(decisions[it.key]==='approved'){ delete decisions[it.key]; saveDec(); sendDecision(it,'unapproved'); }
+  else { decisions[it.key]='approved'; saveDec(); sendDecision(it,'approved'); }
+  paintDecide(); [...dotsEl.children].forEach((d,k)=>d.classList.toggle('appr', !!(vis[k]&&decisions[vis[k].key]==='approved'))); };
+let lastErased=null;
+rejectBtn.onclick=()=>{ const it=vis[idx]; if(!it) return; decisions[it.key]='rejected'; saveDec(); sendDecision(it,'rejected');
+  lastErased=it.key; vis=W.filter(w=>decisions[w.key]!=='rejected'); buildDots();
+  if(idx>=vis.length) idx=vis.length-1; if(idx<0) idx=0;
+  undoBtn.style.display='inline-block'; undoBtn.textContent='↩ undo erase · '+it.name;
+  clearTimeout(window.__ut); window.__ut=setTimeout(()=>{ undoBtn.style.display='none'; lastErased=null; },7000);
+  set(idx); };
+undoBtn.onclick=()=>{ if(!lastErased) return; const rk=lastErased; lastErased=null; undoBtn.style.display='none';
+  delete decisions[rk]; saveDec(); const w=W.find(x=>x.key===rk)||{key:rk,name:rk}; sendDecision(w,'unrejected');
+  vis=W.filter(x=>decisions[x.key]!=='rejected'); buildDots(); const ni=vis.findIndex(x=>x.key===rk); set(ni>=0?ni:idx); };
+function set(i){ if(recKey&&mr) mr.stop();
+  if(vis.length===0){ idx=0; nameEl.textContent='All designs erased'; subEl.textContent='tap ↩ undo, or tell Claude to bring them back'; descEl.textContent=''; countEl.textContent='0 / 0'; paintDecide(); return; }
+  idx=(i+vis.length)%vis.length; const it=vis[idx];
   manYaw=0; manPitch=0; autospin=true;                    // fresh presentation per weapon
   nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
-  countEl.textContent=(idx+1)+' / '+W.length;
+  countEl.textContent=(idx+1)+' / '+vis.length;
   [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx));
   fbText.value=(fb[it.key]&&fb[it.key].draft)||''; autoGrow();
-  paintRec(); }
+  paintRec(); paintDecide(); }
 document.getElementById('prev').onclick=()=>set(idx-1);
 document.getElementById('next').onclick=()=>set(idx+1);
 addEventListener('keydown',e=>{ if(e.target&&(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'))return; if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
-window.__WS={set,get idx(){return idx;},count:W.length,names:W.map(w=>w.name),fb};
+window.__WS={set,get idx(){return idx;},get count(){return vis.length;},names:()=>vis.map(w=>w.name),fb,decisions};
 resize(); set(0); render();
 </script></body></html>

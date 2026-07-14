@@ -93,141 +93,134 @@ const bone='#d8cdb0',boneDk='#a08f6c',rust='#7c4a26',rustDk='#5a3116',iron='#3c4
       blood='#8e1620',wrap='#453221',sinew='#cbb894',gold='#8a6f34',haft='#2e2620',steel='#7d8695',steelHi='#c8d2e0';
 /* ============ THE 14 PROPOSALS (drawn in hand space: grip ~y0, +y up — ports 1:1 into weaponMesh) ============ */
 const W=[
-{key:'dagger',name:'Soulfang',sub:'dagger',glow:'#ff4a3a',mid:15,sc:2.4,desc:'AQW-style energy dagger: a wicked curved obsidian fang with a glowing serrated edge, a winged demon guard and a burning gem pommel. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,-7,0, 5.4,5,5.4, gold); bx(0,-7,0, 2.8,2.8,2.8, g,g);
-  bx(0,-0.5,0, 3.4,10,3.4, wrap); bx(0,4,0, 4.2,2,4.4, gold);
-  bx(0,7,0, 13,2.8,4.4, iron);
-  for(const s of [1,-1]){ pushM(); mv(6.5*s,7.5,0); rotZ(-0.6*s); box(4.5,2.2,3.4, ironDk); popM(); bx(3*s,7.5,3, 1.6,1.8,0.7, g,g); bx(3*s,7.5,-3, 1.6,1.8,0.7, g,g); }
-  bx(0.6,15,0, 5.4,11,2.6, dk); bx(1.8,24,0, 4.4,9,2.3, dk); bx(3,31,0, 3,7,2, dk); bx(3.8,37,0, 2,5,1.7, dk);
-  bx(-2,15,0, 1.8,11,2.8, g,g); bx(-0.8,24,0, 1.7,9,2.5, g,g); bx(0.6,31,0, 1.5,7,2.2, g,g); bx(2,37,0, 1.4,5,1.9, g,g);
-  bx(4.2,41,0, 1.8,4,1.5, g,g); }},
-{key:'sword',name:'Doomedge',sub:'longsword',glow:'#58e07a',mid:23,sc:1.6,desc:'AQW-style broadsword: a big obsidian blade with a blazing energy fuller, a winged demon crossguard with burning eyes and a glowing soul-gem pommel. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,-11,0, 4,8,4, wrap); bx(0,-17,0, 6,5,6, gold); bx(0,-17,0, 3.2,3.2,3.2, g,g);
-  bx(0,-4,0, 8,7,7, dk);
-  for(const s of [1,-1]){ pushM(); mv(9*s,-4,0); rotZ(0.5*s); box(9,3.4,4.6, iron); mv(5*s,2,0); rotZ(0.6*s); box(4,2.6,3.4, ironDk); popM(); bx(2.6*s,-2,3.6, 1.7,2,0.7, g,g); bx(2.6*s,-2,-3.6, 1.7,2,0.7, g,g); }
-  bx(0,28,0, 9,56,4, dk); bx(0,58,0, 5.2,11,3, dk);
-  bx(0,28,0, 3.4,52,4.3, g,g);
-  for(const s of [1,-1]) bx(4.7*s,24,0, 1.3,46,3.4, steelHi);
-  bx(0,57,0, 2.6,15,2.2, g,g); }},
-{key:'great',name:'Doomreaver',sub:'greatsword',glow:'#ff4a3a',mid:28,sc:1.25,desc:'AQW-style greatsword: a colossal obsidian slab with blazing rune veins, a huge winged demon guard with a burning skull and a glowing gem pommel. Oversized and dramatic, styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,-6,0, 4.6,14,4.6, wrap); bx(0,-14,0, 7,5.5,7, gold); bx(0,-14,0, 3.6,3.6,3.6, g,g);
+{key:'dagger',name:'Venomfang',sub:'dagger',glow:'#8dff4a',mid:16,sc:2.3,desc:'Poison — a jade envenomed blade weeping toxin, with a fanged gold guard and a venom-gem pommel. Detailed on both faces.',
+ draw(T,g){ const bl='#2f7a52', hi='#7fe0a0', gd='#d8b24a', gr='#33281c';
+  bx(0,-7,0, 5,5,5, gd); bx(0,-7,0, 2.6,2.6,2.6, g,g);
+  bx(0,-0.5,0, 3.2,10,3.2, gr);
+  bx(0,6,0, 12,3,4.4, gd); for(const s of [1,-1]){ pushM(); mv(6*s,6,0); rotZ(-0.5*s); box(3.4,2.4,3.4, gd); popM(); }
+  bx(0,22,0, 6,26,2.8, bl); bx(0,37,0, 3.2,7,2, bl);
+  bx(0,22,0, 2,24,3.4, g,g);
+  for(const s of [1,-1]) bx(2.9*s,20,0, 1,22,2.9, hi);
+  for(const s of [1,-1]){ bx(2,14,1.5*s, 1.2,3,0.6, g,g); bx(-2,30,1.5*s, 1.1,3,0.6, g,g); }
+  bx(0,41,0, 1.8,4,1.6, g,g); }},
+{key:'sword',name:'Dawnbringer',sub:'longsword',glow:'#bfe8ff',mid:23,sc:1.6,desc:'Radiant — a broadsword of dawn: a bright blade with a glowing core, gold angel-wing guard and a sunburst pommel. Detailed on both faces.',
+ draw(T,g){ const bl='#e8eefc', edg='#ffffff', gd='#ffcf4a';
+  bx(0,-11,0, 4,8,4, '#c9a24a'); bx(0,-17,0, 6,5,6, gd); bx(0,-17,0, 3.2,3.2,3.2, g,g);
+  bx(0,-4,0, 8,6,6, gd);
+  for(const s of [1,-1]){ pushM(); mv(8*s,-4,0); rotZ(0.35*s); box(10,3,4.4, gd); mv(5*s,2,0); rotZ(0.5*s); box(5,2.4,3.4, '#fff2c0'); popM(); bx(2.6*s,-3,3.2, 1.6,1.8,0.7, g,g); bx(2.6*s,-3,-3.2, 1.6,1.8,0.7, g,g); }
+  bx(0,28,0, 9,56,3.6, bl); bx(0,58,0, 5,11,2.8, bl);
+  bx(0,28,0, 2.4,52,4, g,g);
+  for(const s of [1,-1]) bx(4.7*s,24,0, 1.3,48,3.4, edg);
+  bx(0,57,0, 2.4,14,2, g,g); }},
+{key:'great',name:'Infernal Edge',sub:'greatsword',glow:'#ff6a1e',mid:28,sc:1.25,desc:'Magma — a colossal molten greatblade: cooled black rock split by rivers of glowing lava, a fanged guard and an ember pommel. Detailed on both faces.',
+ draw(T,g){ const dk='#241c22';
+  bx(0,-6,0, 4.6,14,4.6, '#33281c'); bx(0,-14,0, 7,5.5,7, '#6a4a24'); bx(0,-14,0, 3.6,3.6,3.6, g,g);
   bx(0,4,0, 9,9,8, dk);
-  for(const s of [1,-1]){ bx(-2*s,5,4.4, 1.8,2.2,0.8, g,g); bx(-2*s,5,-4.4, 1.8,2.2,0.8, g,g);
-    pushM(); mv(11*s,3,0); rotZ(0.45*s); box(12,4,5, iron); mv(6*s,3,0); rotZ(0.55*s); box(5,3,4, ironDk); popM(); }
-  bx(0,42,0, 13,66,4.4, dk); bx(0,77,0, 7,13,3.2, dk);
-  bx(0,42,0, 4,60,4.7, g,g);
-  for(const s of [1,-1]) bx(6.7*s,38,0, 1.6,58,3.6, steelHi);
-  bx(5.5,25,0, 2,7,4, dk); bx(-5.5,50,0, 2,7,4, dk); bx(5.5,62,0, 2,6,4, dk);
-  bx(0,76,0, 3.2,18,2.4, g,g); }},
-{key:'axe',name:'Ravening Cleaver',sub:'war axe',glow:'#ffb03a',mid:20,sc:1.7,desc:'AQW-style demon axe: twin glowing crescent blades around a screaming skull, jagged spikes and a burning core. Oversized, styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,15,0, 4,38,4, haft); for(const s of [1,-1]) bx(0,4,2*s, 4.4,20,0.8, wrap);
-  bx(0,-6,0, 4.6,4,4.6, gold); bx(0,-6,0, 2.4,2.4,2.4, g,g);
-  bx(0,36,0, 6,6,6, iron);
-  for(const s of [1,-1]){
-    bx(s*8,36,0, 8,20,3.4, dk); bx(s*12,42,0, 5,10,3, dk); bx(s*12,30,0, 5,10,3, dk);
+  for(const s of [1,-1]){ pushM(); mv(11*s,3,0); rotZ(0.45*s); box(12,4,5, '#3a2a2a'); mv(6*s,3,0); rotZ(0.55*s); box(5,3,4, dk); popM(); bx(2*s,5,4.4, 1.8,2.2,0.8, g,g); bx(2*s,5,-4.4, 1.8,2.2,0.8, g,g); }
+  bx(0,42,0, 13,66,4.2, dk); bx(0,77,0, 7,13,3.2, dk);
+  bx(0,42,0, 3.6,60,4.5, g,g);
+  for(const s of [1,-1]){ bx(0,30,4.6*s, 7,2,0.7, g,g); bx(0,50,4.6*s, 9,2,0.7, g,g); bx(0,66,4.6*s, 6,2,0.7, g,g); }
+  bx(0,76,0, 3,18,2.2, g,g); }},
+{key:'axe',name:'Stormsplitter',sub:'war axe',glow:'#6fe0ff',mid:20,sc:1.7,desc:'Storm — twin steel crescents crackling with cyan lightning around a sapphire core, jagged spikes and a storm-gem butt. Detailed on both faces.',
+ draw(T,g){ const st='#3a4a66', edg='#cfeeff';
+  bx(0,15,0, 4,38,4, '#2a2e3a'); for(const s of [1,-1]) bx(0,4,2*s, 4.4,20,0.8, '#1e2028');
+  bx(0,-6,0, 4.6,4,4.6, '#c9c24a'); bx(0,-6,0, 2.4,2.4,2.4, g,g);
+  bx(0,36,0, 6,6,6, st); bx(0,36,0, 3,3,6.4, g,g);
+  for(const s of [1,-1]){ bx(s*8,36,0, 8,20,3.4, st); bx(s*12,42,0, 5,10,3, st); bx(s*12,30,0, 5,10,3, st);
     bx(s*11.5,36,0, 2,20,3.6, g,g); bx(s*13.5,44,0, 2,7,3, g,g); bx(s*13.5,28,0, 2,7,3, g,g);
-    bx(s*8,50,0, 2.4,4,3, dk); bx(s*8,22,0, 2.4,4,3, dk); }
-  for(const z of [1,-1]){ bx(0,36,3.6*z, 5,5,1.4, bone); bx(-1.4,37,4.4*z, 1.4,1.6,0.7, g,g); bx(1.4,37,4.4*z, 1.4,1.6,0.7, g,g); } }},
-{key:'hammer',name:'Doomquake Maul',sub:'warhammer',glow:'#7fd6ff',mid:22,sc:1.6,desc:'AQW-style warhammer: a colossal ornate head split by blazing rune-cracks, corner spikes and a glowing core. Oversized, styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,14,0, 4,34,4, haft); for(const s of [1,-1]) bx(0,4,2*s, 4.4,18,0.8, wrap);
-  bx(0,-6,0, 4.6,4,4.6, gold); bx(0,-6,0, 2.4,2.4,2.4, g,g);
-  bx(0,34,0, 17,18,10, dk); bx(0,34,0, 18.5,4,10.6, iron); bx(0,42,0, 18.5,4,10.6, iron);
-  for(const s of [1,-1]){ bx(8.5*s,34,0, 3,7,7, steelHi); bx(8.5*s,44.5,0, 2.6,3,3, iron); bx(8.5*s,23.5,0, 2.6,3,3, iron); }
-  for(const s of [1,-1]){ bx(0,34,5.2*s, 2,12,0.8, g,g); bx(0,40,5.2*s, 8,2,0.8, g,g); bx(0,28,5.2*s, 6,2,0.8, g,g); }
-  bx(0,52,0, 3,6,3, iron); bx(0,56,0, 2,4,2, g,g); }},
-{key:'scythe',name:'Soulharvester',sub:'scythe',glow:'#5affa0',mid:38,sc:1.2,desc:'AQW-style greatscythe: a towering obsidian curve with a blazing soul-fire edge, a demon-skull collar with burning eyes, a reverse hook, and runes orbiting the blade. Oversized and dramatic, styled on both faces.',
- draw(T,g){ const dk='#2b2733', dk2='#191620';
-  // gothic shaft + collars + spiked butt
-  bx(0,24,0, 3.8,58,3.8, dk); bx(0,24,0, 1.5,58,1.5, dk2);
-  for(const s of [1,-1]) bx(0,10,2*s, 4.2,11,0.8, wrap);
-  bx(0,2,0, 5,2.2,5, iron); bx(0,18,0, 4.8,2,4.8, iron); bx(0,40,0, 4.6,2,4.6, iron);
-  bx(0,-9,0, 2.6,8,2.6, iron); bx(0,-14,0, 1.8,5,1.8, g,g);
-  // demon-skull collar (blade mount) with burning eyes on BOTH faces
-  bx(0,48,0, 6.6,7,6, bone); bx(0,44.6,0, 7.6,2.6,7, iron);
+    bx(s*8,50,0, 2.4,4,3, st); bx(s*8,22,0, 2.4,4,3, st); }
+  for(const z of [1,-1]) bx(0,36,3.6*z, 4,4,0.8, edg); }},
+{key:'hammer',name:'Geode Crusher',sub:'warhammer',glow:'#c07bff',mid:22,sc:1.6,desc:'Crystal — a colossal amethyst geode maul: a violet crystal head, glowing striking faces and jutting shards. Detailed on both faces.',
+ draw(T,g){ const cr='#6a3ac0', cr2='#a06fff';
+  bx(0,14,0, 4,34,4, '#2a2434'); for(const s of [1,-1]) bx(0,4,2*s, 4.4,18,0.8, '#1c1826');
+  bx(0,-6,0, 4.6,4,4.6, '#c9c24a'); bx(0,-6,0, 2.4,2.4,2.4, g,g);
+  bx(0,34,0, 16,17,10, cr); bx(0,34,0, 17,4,10.6, cr2); bx(0,42,0, 17,4,10.6, cr2);
+  for(const s of [1,-1]){ bx(8.5*s,34,0, 3,8,8, g,g); pushM(); mv(6*s,46,0); rotZ(-0.3*s); box(3,6,4, cr2); popM(); pushM(); mv(6*s,22,0); rotZ(0.3*s); box(3,6,4, cr2); popM(); }
+  for(const s of [1,-1]){ bx(0,34,5.2*s, 4,10,0.8, g,g); bx(0,34,5.2*s, 10,4,0.8, g,g); }
+  bx(0,52,0, 3,7,3, cr2); bx(0,57,0, 2,4,2, g,g); }},
+{key:'scythe',name:'Astral Reaper',sub:'scythe',glow:'#9fe8ff',mid:38,sc:1.2,desc:'Astral — a towering greatscythe: a deep-indigo curve edged in starlight, a gold collar with glowing eyes, a reverse hook and stars orbiting the blade. Detailed on both faces.',
+ draw(T,g){ const dk='#241f52', dk2='#161238', gd='#d8b24a';
+  bx(0,24,0, 3.8,58,3.8, dk); bx(0,24,0, 1.5,58,1.5, g,g);
+  for(const s of [1,-1]) bx(0,10,2*s, 4.2,11,0.8, gd);
+  bx(0,2,0, 5,2.2,5, gd); bx(0,18,0, 4.8,2,4.8, gd); bx(0,40,0, 4.6,2,4.6, gd);
+  bx(0,-9,0, 2.6,8,2.6, gd); bx(0,-14,0, 1.8,5,1.8, g,g);
+  bx(0,48,0, 6.6,7,6, gd);
   for(const s of [1,-1]){ bx(-1.7,49,3.1*s, 1.7,2,0.7, g,g); bx(1.7,49,3.1*s, 1.7,2,0.7, g,g); bx(0,46.4,3.1*s, 2.6,1,0.7, dk2); }
-  bx(0,54,0, 2.4,5,2.4, iron); bx(-2.6,53,0, 2,4.4,2, iron); bx(2.6,53,0, 2,4.4,2, iron);
-  bx(4.6,50,0, 5,5,4.4, iron);
-  // MAIN BLADE — huge upward sweep, tapering to a point
+  bx(0,54,0, 2.4,5,2.4, gd); bx(-2.6,53,0, 2,4.4,2, gd); bx(2.6,53,0, 2,4.4,2, gd);
+  bx(4.6,50,0, 5,5,4.4, gd);
   bx(10,51,0, 11,8,3.2, dk); bx(18,55,0, 10,7,3, dk); bx(25,61,0, 9,6,2.8, dk);
   bx(30,68,0, 7,5.6,2.6, dk); bx(33,75,0, 5,5.2,2.4, dk); bx(34.6,81,0, 3.4,5,2.1, dk); bx(35.2,86,0, 2.2,5.2,1.8, dk);
-  // blazing soul-fire inner edge (spans the blade thickness → reads from both faces)
   bx(8.5,47.5,0, 10,1.9,3.4, g,g); bx(16.5,51.5,0, 9,1.8,3.2, g,g); bx(23.5,57.5,0, 8,1.7,3, g,g);
   bx(29,64.5,0, 6,1.6,2.8, g,g); bx(32.5,72,0, 4,1.6,2.4, g,g); bx(34.2,79,0, 2.6,1.6,2.1, g,g); bx(34.9,84.5,0, 1.9,3.4,1.8, g,g);
-  // reverse hook off the base
   bx(-4.6,52,0, 6,4.4,2.6, dk); bx(-9.2,54,0, 4.4,3.6,2.2, dk); bx(-11.8,51,0, 2.8,3,1.8, dk);
   bx(-5,53.6,0, 5.6,1.4,2.6, g,g); bx(-10.2,52,0, 2.6,1.3,2, g,g);
-  // orbiting soul embers
   for(let i=0;i<4;i++){ const a=T*1.4+i*1.571; bx(20+Math.cos(a)*11, 62+Math.sin(a)*11, 0, 2.2,2.2,2.2, g,g,0.85); } }},
-{key:'spear',name:'Voidpiercer',sub:'spear',glow:'#ff8a3a',mid:30,sc:1.35,desc:'AQW-style glaive: a long obsidian haft crowned with a huge glowing blade-head, swept side-wings and an ornate collar. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,20,0, 3.4,64,3.4, dk); for(const s of [1,-1]) bx(0,6,2*s, 3.8,14,0.8, wrap);
-  bx(0,-13,0, 2.6,8,2.6, iron); bx(0,-18,0, 1.8,5,1.8, g,g);
-  bx(0,50,0, 6.5,7,6.5, iron); bx(0,55,0, 5,4,5, gold);
-  for(const s of [1,-1]){ pushM(); mv(4.5*s,52,0); rotZ(-0.7*s); box(7,3,3, ironDk); popM(); bx(3.5*s,52,3.3, 1.4,1.6,0.7, g,g); bx(3.5*s,52,-3.3, 1.4,1.6,0.7, g,g); }
-  bx(0,70,0, 8,26,4, dk); bx(0,86,0, 4.6,10,3, dk);
-  bx(0,70,0, 3,24,4.3, g,g);
-  for(const s of [1,-1]) bx(4.2*s,66,0, 1.4,20,3.4, steelHi);
-  for(const s of [1,-1]){ pushM(); mv(4*s,64,0); rotZ(-0.5*s); box(3,7,2.4, dk); popM(); }
+{key:'spear',name:'Skylance',sub:'spear',glow:'#9fd8ff',mid:30,sc:1.35,desc:'Celestial — a silver-and-gold glaive with a huge glowing sky-blade, feathered wings and a radiant collar. Detailed on both faces.',
+ draw(T,g){ const bl='#dfe8f5', gd='#ffd24a';
+  bx(0,20,0, 3.4,64,3.4, '#cfd6e2'); for(const s of [1,-1]) bx(0,6,2*s, 3.8,14,0.8, gd);
+  bx(0,-13,0, 2.6,8,2.6, gd); bx(0,-18,0, 1.8,5,1.8, g,g);
+  bx(0,50,0, 6.5,7,6.5, gd); bx(0,55,0, 5,4,5, '#fff2c0');
+  for(const s of [1,-1]){ pushM(); mv(4.5*s,52,0); rotZ(-0.7*s); box(7,3,3, gd); popM(); bx(3.5*s,52,3.3, 1.4,1.6,0.7, g,g); bx(3.5*s,52,-3.3, 1.4,1.6,0.7, g,g); }
+  bx(0,70,0, 8,26,3.6, bl); bx(0,86,0, 4.6,10,2.8, bl);
+  bx(0,70,0, 2.6,24,4, g,g);
+  for(const s of [1,-1]) bx(4.2*s,66,0, 1.4,20,3.6, '#ffffff');
+  for(const s of [1,-1]){ pushM(); mv(4*s,64,0); rotZ(-0.5*s); box(3,7,2.4, bl); popM(); }
   bx(0,86,0, 2.4,12,2, g,g); }},
-{key:'bow',name:'Soulstring',sub:'bow',glow:'#b06bff',mid:12,sc:1.9,desc:'AQW-style energy bow: big ornate curved limbs tipped with blades, a glowing soul-string and a nocked energy arrow from a gem riser. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,10,1, 4,12,4, dk); bx(0,10,2.4, 4.4,7,1, wrap); bx(0,10,-1.6, 3,4,3, gold); bx(0,10,-1.6, 1.8,2.4,3, g,g);
+{key:'bow',name:'Verdant Longbow',sub:'bow',glow:'#4ae06a',mid:12,sc:1.9,desc:'Nature — a living-wood longbow with leaf-blade tips, emerald energy inlays on both faces and a glowing green string. Detailed on both faces.',
+ draw(T,g){ const wd='#5a3a1e', lf='#3ac060';
+  bx(0,10,1, 4,12,4, wd); bx(0,10,2.4, 4.4,7,1, '#3a2410'); bx(0,10,-1.6, 3,4,3, '#d8b24a'); bx(0,10,-1.6, 1.8,2.4,3, g,g);
   for(const d of [1,-1]){ pushM(); mv(0,10,0); rotZ(-0.28*d);
-    mv(0,d*13,0); box(3.4,18,3.4, dk); bx(0,0,1.6, 1.6,16,1, g,g);
-    mv(0,d*11,0); rotZ(-0.5*d); box(2.8,10,2.8, dk); mv(0,d*6,0); rotZ(-0.4*d); box(2,6,4, iron); popM(); }
+    mv(0,d*13,0); box(3.4,18,3.4, wd); bx(0,0,1.6, 1.6,16,1, g,g); bx(0,0,-1.6, 1.6,16,1, g,g);
+    mv(0,d*11,0); rotZ(-0.5*d); box(2.8,10,2.8, wd); mv(0,d*6,0); rotZ(-0.4*d); box(2,6,4, lf); popM(); }
   bx(0,10,-2.4, 0.9,58,0.9, g,g,0.9);
   bx(0,10,3, 1.8,3,10, g,g,0.85); }},
-{key:'cross',name:'Skullpiercer Arbalest',sub:'crossbow',glow:'#ff4a3a',mid:15,sc:1.9,desc:'AQW-style arbalest: an ornate black frame with a demon-skull housing, glowing energy prod and string, and a blazing loaded bolt. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,8,0, 4,26,4, dk); bx(0,-4,2, 2.4,5,3.4, wrap); bx(0,17,1.4, 3,20,2.2, iron);
-  bx(0,20,0, 30,3.4,3.4, dk);
-  for(const s of [1,-1]){ pushM(); mv(15*s,20,0); rotZ(0.3*s); box(6,3,4, ironDk); popM(); bx(13*s,20,0, 2,4.6,4.6, g,g); }
-  bx(0,20,-2, 26,1,1, g,g,0.9);
-  bx(0,25,1.6, 6,6,3, bone); bx(-1.6,25.6,3.2, 1.5,1.7,0.7, g,g); bx(1.6,25.6,3.2, 1.5,1.7,0.7, g,g); bx(0,25,-3.2, 5,5,0.8, dk);
-  bx(0,31,0, 2.4,9,2.4, dk); bx(0,37,0, 3,3,3, g,g); }},
-{key:'staff',name:'Nethergaze Staff',sub:'staff',glow:'#b06bff',mid:30,sc:1.35,desc:'AQW-style staff: an ornate obsidian shaft crowned by clawed wings cradling a huge glowing orb, with runes orbiting it. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,22,0, 3.4,60,3.4, dk); for(let i=0;i<4;i++) bx(0,2+i*15,0, 4.2,2,4.2, gold);
-  bx(0,-10,0, 2.6,7,2.6, iron); bx(0,-14,0, 1.8,4,1.8, g,g);
-  for(const s of [1,-1]){ pushM(); mv(4*s,50,0); rotZ(-0.55*s); box(3.4,12,3, dk); mv(0,7,0); rotZ(-0.6*s); box(2.6,7,2.4, iron); popM(); }
-  bx(0,54,0, 10,10,10, '#241d28'); bx(0,54,0, 6.5,6.5,6.5, g,g);
-  for(const s of [1,-1]) bx(0,54,5.4*s, 3,3,0.8, dk);
-  for(let i=0;i<4;i++){ const a=T*1.4+i*1.571; bx(Math.cos(a)*10,54+Math.sin(a)*10,0, 2,2,2, g,g,0.85); } }},
-{key:'rod',name:'Hexcrystal Rod',sub:'rod',glow:'#b06bff',mid:18,sc:2.0,desc:'AQW-style rod: an ornate black rod set with a huge glowing hex-crystal in a winged claw mount. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,12,0, 3.2,32,3.2, dk); for(let i=0;i<3;i++) bx(0,2+i*11,0, 4,1.8,4, gold);
-  bx(0,-6,0, 3.4,3,3.4, gold); bx(0,-6,0, 1.8,1.8,1.8, g,g);
-  for(const s of [1,-1]){ pushM(); mv(3.4*s,30,0); rotZ(-0.6*s); box(2.8,8,2.6, iron); popM(); }
-  bx(0,33,0, 5,4,5, gold);
+{key:'cross',name:'Arcane Repeater',sub:'crossbow',glow:'#b06bff',mid:15,sc:1.9,desc:'Arcane — an ornate blue-and-gold arbalest with a glowing rune-sigil (both faces), an energy prod and a bolt of pure arcana. Detailed on both faces.',
+ draw(T,g){ const bl='#2a3a7a', gd='#d8b24a';
+  bx(0,8,0, 4,26,4, bl); bx(0,-4,2, 2.4,5,3.4, '#3a2e22'); bx(0,17,1.4, 3,20,2.2, gd);
+  bx(0,20,0, 30,3.4,3.4, bl);
+  for(const s of [1,-1]){ pushM(); mv(15*s,20,0); rotZ(0.3*s); box(6,3,4, gd); popM(); bx(13*s,20,0, 2,4.6,4.6, g,g); }
+  bx(0,20,-2, 26,1,1, g,g,0.9); bx(0,20,2, 26,1,1, g,g,0.9);
+  bx(0,25,1.6, 6,6,3, gd); for(const z of [1,-1]){ bx(0,25,3.2*z, 4,4,0.7, g,g); bx(0,25,3.6*z, 1.4,4,0.5, bl); }
+  bx(0,31,0, 2.4,9,2.4, bl); bx(0,37,0, 3,3,3, g,g); }},
+{key:'staff',name:'Sunspire',sub:'staff',glow:'#ffb020',mid:30,sc:1.35,desc:'Solar — a gilded staff crowned with a radiant sun-orb ringed by rays and cradled in gold wings. Detailed on both faces.',
+ draw(T,g){ const gd='#e8a020', gd2='#ffcf4a';
+  bx(0,22,0, 3.4,60,3.4, gd); for(let i=0;i<4;i++) bx(0,2+i*15,0, 4.2,2,4.2, gd2);
+  bx(0,-10,0, 2.6,7,2.6, gd2); bx(0,-14,0, 1.8,4,1.8, g,g);
+  for(const s of [1,-1]){ pushM(); mv(4*s,50,0); rotZ(-0.55*s); box(3.4,12,3, gd); mv(0,7,0); rotZ(-0.6*s); box(2.6,7,2.4, gd2); popM(); }
+  bx(0,54,0, 9,9,9, gd2); bx(0,54,0, 6,6,6, g,g);
+  for(let i=0;i<8;i++){ const a=i*0.785; bx(Math.cos(a)*7.5,54+Math.sin(a)*7.5,0, 2,2,2.2, g,g,0.8); }
+  for(let i=0;i<4;i++){ const a=T*1.2+i*1.571; bx(Math.cos(a)*11,54+Math.sin(a)*11,0, 1.8,1.8,1.8, g,g,0.7); } }},
+{key:'rod',name:'Tidecaller',sub:'rod',glow:'#3ad0ff',mid:18,sc:2.0,desc:'Water — an ornate blue rod set with a flowing tide-gem in a gold fin-mount that surges as you cast. Detailed on both faces.',
+ draw(T,g){ const aq='#2a8ad0', aq2='#5fd0ff';
+  bx(0,12,0, 3.2,32,3.2, aq); for(let i=0;i<3;i++) bx(0,2+i*11,0, 4,1.8,4, '#d8b24a');
+  bx(0,-6,0, 3.4,3,3.4, '#d8b24a'); bx(0,-6,0, 1.8,1.8,1.8, g,g);
+  for(const s of [1,-1]){ pushM(); mv(3.4*s,30,0); rotZ(-0.6*s); box(2.8,8,2.6, aq2); popM(); }
+  bx(0,33,0, 5,4,5, '#d8b24a');
   const f=Math.sin(T*2.4)*0.5+0.5; bx(0,38,0, 8,9,8, g,g,0.8+f*0.2); bx(0,38,0, 4,12,4, g,g); }},
-{key:'scepter',name:"Tyrant's Scepter",sub:'scepter',glow:'#ff4a3a',mid:20,sc:1.9,desc:'AQW-style scepter: an ornate gold rod crowned with a winged skull cradling a huge burning gem. Styled on both faces.',
- draw(T,g){
-  bx(0,12,0, 3.4,34,3.4, gold); for(let i=0;i<4;i++) bx(0,0+i*10,0, 4.2,1.6,4.2, '#a8894a');
-  bx(0,-6,0, 4,3,4, iron); bx(0,-6,0, 2,2,2, g,g);
-  bx(0,32,0, 6.5,6,6, bone);
+{key:'scepter',name:'Regal Ember',sub:'scepter',glow:'#ff3a5a',mid:20,sc:1.9,desc:'Royal — a bright-gold scepter crowned by winged points cradling a huge burning ruby. Detailed on both faces.',
+ draw(T,g){ const gd='#e8b83a', gd2='#ffdd6a';
+  bx(0,12,0, 3.4,34,3.4, gd); for(let i=0;i<4;i++) bx(0,0+i*10,0, 4.2,1.6,4.2, gd2);
+  bx(0,-6,0, 4,3,4, gd2); bx(0,-6,0, 2,2,2, g,g);
+  bx(0,32,0, 6.5,6,6, gd2);
   for(const s of [1,-1]){ bx(-1.6*s,32.6,3.1, 1.4,1.6,0.7, g,g); bx(-1.6*s,32.6,-3.1, 1.4,1.6,0.7, g,g);
-    pushM(); mv(4*s,33,0); rotZ(-0.6*s); box(3,7,2.6, gold); popM(); }
-  bx(0,37,0, 8,2,7.5, gold);
-  for(let i=0;i<4;i++){ const a=i*1.5708+0.785; bx(Math.cos(a)*3.6,39,Math.sin(a)*3.6, 1.7,4,1.7, gold); }
+    pushM(); mv(4*s,33,0); rotZ(-0.6*s); box(3,7,2.6, gd2); popM(); }
+  bx(0,37,0, 8,2,7.5, gd);
+  for(let i=0;i<4;i++){ const a=i*1.5708+0.785; bx(Math.cos(a)*3.6,39,Math.sin(a)*3.6, 1.7,4,1.7, gd2); }
   const f=Math.sin(T*2.6)*0.5+0.5; bx(0,41,0, 4.5,5,4.5, g,g,0.85+f*0.15); }},
-{key:'wand',name:'Witchfire Wand',sub:'wand',glow:'#b06bff',mid:14,sc:2.4,desc:'AQW-style wand: an ornate black wand whose clawed tip cradles a big mote of witchfire. Styled on both faces.',
- draw(T,g){ const dk='#2b2733';
-  bx(0,8,0, 2.8,20,2.8, dk); for(let i=0;i<3;i++) bx(0,1+i*7,0, 3.4,1.4,3.4, gold);
-  bx(0,-3,0, 3.2,2.6,3.2, gold); bx(0,-3,0, 1.6,1.6,1.6, g,g);
-  for(const s of [1,-1]){ pushM(); mv(2.4*s,19,0); rotZ(-0.7*s); box(2.2,6,2, iron); popM(); }
-  bx(0,20,0, 3.4,3,3.4, gold);
-  const f=Math.sin(T*4)*0.5+0.5; bx(0,25,0, 6,6,6, g,g,0.8+f*0.2); bx(0,25,0, 3,9,3, g,g); }},
-{key:'orb',name:'Demon Eye',sub:'orb (catalyst)',glow:'#ff8a3a',mid:14,sc:2.2,desc:'AQW-style catalyst: a huge living demon eye in a winged iron claw-frame, slit pupil tracking, embers orbiting. Styled on both faces.',
- draw(T,g){ bx(0,-2,0, 5,4,5, iron); bx(0,2,0, 6,2.6,6, ironDk);
-  for(let i=0;i<4;i++){ const a=i*1.571; pushM(); mv(Math.cos(a)*5,4,Math.sin(a)*5); rotY(-a); rotX(-0.4); box(1.8,8,1.8, iron); popM(); }
-  bx(0,15,0, 12,12,12, '#241d28');
-  for(const s of [1,-1]){ bx(0,15,6.1*s, 6,6,0.9, g,g); bx(0,15,6.7*s, 1.5,5,0.7, '#17141c'); }
-  for(const s of [1,-1]){ pushM(); mv(6*s,23,0); rotZ(-0.6*s); box(2.4,7,2.4, iron); mv(0,4,0); rotZ(-0.5*s); box(1.8,4,1.8, ironDk); popM(); }
+{key:'wand',name:'Frostspark',sub:'wand',glow:'#7fe0ff',mid:14,sc:2.4,desc:'Frost — a crystal wand whose clawed silver tip cradles a jagged shard of everfrost. Detailed on both faces.',
+ draw(T,g){ const ic='#7fd0ff', si='#cfe8f5';
+  bx(0,8,0, 2.8,20,2.8, '#3a5a7a'); for(let i=0;i<3;i++) bx(0,1+i*7,0, 3.4,1.4,3.4, si);
+  bx(0,-3,0, 3.2,2.6,3.2, si); bx(0,-3,0, 1.6,1.6,1.6, g,g);
+  for(const s of [1,-1]){ pushM(); mv(2.4*s,19,0); rotZ(-0.7*s); box(2.2,6,2, ic); popM(); }
+  bx(0,20,0, 3.4,3,3.4, si);
+  const f=Math.sin(T*4)*0.5+0.5; bx(0,26,0, 5,10,5, g,g,0.8+f*0.2); bx(0,26,0, 2.6,13,2.6, g,g); }},
+{key:'orb',name:"Dragon's Eye",sub:'orb (catalyst)',glow:'#ff9a2a',mid:14,sc:2.2,desc:'Dragon — a great amber dragon-eye in a gold-scaled claw-frame, slit pupil tracking, horns crowning it and embers orbiting. Detailed on both faces.',
+ draw(T,g){ const gd='#c98a2a', sca='#e8b04a';
+  bx(0,-2,0, 5,4,5, gd); bx(0,2,0, 6,2.6,6, sca);
+  for(let i=0;i<4;i++){ const a=i*1.571; pushM(); mv(Math.cos(a)*5,4,Math.sin(a)*5); rotY(-a); rotX(-0.4); box(1.8,8,1.8, sca); popM(); }
+  bx(0,15,0, 12,12,12, '#3a2410');
+  for(const s of [1,-1]){ bx(0,15,6.1*s, 7,7,0.9, g,g); bx(0,15,6.8*s, 1.6,6,0.7, '#1a0e06'); }
+  for(const s of [1,-1]){ pushM(); mv(6*s,23,0); rotZ(-0.6*s); box(2.4,7,2.4, sca); mv(0,4,0); rotZ(-0.5*s); box(1.8,4,1.8, gd); popM(); }
   for(let i=0;i<4;i++){ const a=T*1.6+i*1.571; bx(Math.cos(a)*11,15+Math.sin(a)*11,0, 2.2,2.2,2.2, g,g,0.85); } }},
 ];
 /* ---- scene ---- */

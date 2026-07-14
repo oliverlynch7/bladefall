@@ -10,6 +10,8 @@
   #kicker{font-size:11px;letter-spacing:.24em;opacity:.55;font-weight:800}
   #name{font-size:30px;font-weight:900;letter-spacing:.04em;margin-top:6px;text-shadow:0 2px 18px rgba(0,0,0,.8)}
   #sub{font-size:13px;letter-spacing:.14em;opacity:.65;font-weight:700;margin-top:2px;text-transform:uppercase}
+  #attrs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:9px}
+  .pill{font-size:11px;font-weight:800;letter-spacing:.05em;padding:3px 10px;border-radius:999px;border:1px solid #3a4152;background:rgba(18,22,32,.72);color:#cfd6df;white-space:nowrap}
   #bottom{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:9px;padding:0 12px calc(env(safe-area-inset-bottom) + 12px);pointer-events:none}
   #desc{width:min(560px,88vw);text-align:center;font-size:14px;line-height:1.45;opacity:.85;text-shadow:0 1px 8px #000}
   #decide{display:flex;gap:14px;pointer-events:auto}
@@ -40,7 +42,7 @@
 </style></head>
 <body>
 <canvas id="c"></canvas><div id="vig"></div>
-<div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div></div>
+<div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div><div id="attrs"></div></div>
 <button id="undoBtn" style="display:none">↩ undo</button>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="bottom">
@@ -280,8 +282,18 @@ cvs.addEventListener('pointermove',e=>{ if(!dragging) return; manYaw+=(e.clientX
 const endDrag=()=>{ dragging=false; cvs.style.cursor='grab'; };
 cvs.addEventListener('pointerup',endDrag); cvs.addEventListener('pointercancel',endDrag);
 cvs.addEventListener('dblclick',()=>{ manYaw=0; manPitch=0; autospin=true; }); // double-tap to reset + resume spin
+/* ---- weapon attributes (class/school/art/element) — from the game's ARCHES ---- */
+const ARTMETA={dagger:{cls:'Melee',sch:'Physical'},sword:{cls:'Melee',sch:'Physical'},great:{cls:'Melee',sch:'Physical'},axe:{cls:'Melee',sch:'Physical'},hammer:{cls:'Melee',sch:'Physical'},scythe:{cls:'Melee',sch:'Physical'},spear:{cls:'Melee',sch:'Physical'},bow:{cls:'Ranged',sch:'Physical'},cross:{cls:'Ranged',sch:'Physical'},staff:{cls:'Ranged',sch:'Magical'},wand:{cls:'Ranged',sch:'Magical'},orb:{cls:'Ranged',sch:'Magical'},rod:{cls:'Ranged',sch:'Magical'},scepter:{cls:'Ranged',sch:'Magical'}};
+const ARTDISP={dagger:'Dagger',sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Warhammer',scythe:'Scythe',spear:'Spear',bow:'Bow',cross:'Crossbow',staff:'Staff',wand:'Wand',orb:'Orb',rod:'Rod',scepter:'Scepter'};
+const ELMETA={fire:['🔥','Fire','#ff8a4a'],ice:['❄️','Ice','#7fd6ff'],poison:['☠','Poison','#86e05a'],storm:['⚡','Storm','#9fe0ff'],arcane:['🔮','Arcane','#c47bff'],void:['🟣','Void','#b06bff'],holy:['✨','Holy','#ffe9a8'],any:['⚪','Any element','#aab2be']};
+const WEL={dagger:'poison',sword:'holy',great:'fire',axe:'storm',hammer:'arcane',scythe:'void',spear:'holy',bow:'poison',cross:'arcane',staff:'holy',rod:'ice',scepter:'fire',wand:'ice',orb:'fire'};  // per-design THEME element (in-game any weapon can roll any element)
+function attrsFor(key){ const art=key.replace(/_og$/,''), m=ARTMETA[art]||{cls:'—',sch:'—'};
+  const el=key.endsWith('_og')?'any':(WEL[art]||'any'); return {cls:m.cls,sch:m.sch,art:ARTDISP[art]||art,el:ELMETA[el]||ELMETA.any}; }
 /* ---- UI + per-weapon voice feedback + approve/reject decisions ---- */
-const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count');
+const nameEl=document.getElementById('name'),subEl=document.getElementById('sub'),descEl=document.getElementById('desc'),dotsEl=document.getElementById('dots'),countEl=document.getElementById('count'),attrsEl=document.getElementById('attrs');
+function paintAttrs(){ const it=vis[idx]; if(!it){ attrsEl.innerHTML=''; return; } const a=attrsFor(it.key); attrsEl.innerHTML='';
+  const pill=(txt,color)=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=txt; if(color){ s.style.borderColor=color; s.style.color=color; } attrsEl.appendChild(s); };
+  pill(a.cls); pill(a.sch); pill(a.art); pill(a.el[0]+' '+a.el[1], a.el[2]); }
 const recBtn=document.getElementById('recBtn'),playBtn=document.getElementById('playBtn'),recInfo=document.getElementById('recInfo'),fbText=document.getElementById('fbText'),sendBtn=document.getElementById('sendBtn');
 const approveBtn=document.getElementById('approveBtn'),rejectBtn=document.getElementById('rejectBtn'),undoBtn=document.getElementById('undoBtn');
 const WORKAPP='https://thework.pages.dev/rant', FB_PW='oliverNCA2026';  // uploads via the Work app voice pipeline (Cloudflare) → local Whisper transcribes → bladefall/_feedback
@@ -384,14 +396,14 @@ undoBtn.onclick=()=>{ if(!lastErased) return; const rk=lastErased; lastErased=nu
   delete decisions[rk]; saveDec(); const w=W.find(x=>x.key===rk)||{key:rk,name:rk}; sendDecision(w,'unrejected');
   vis=W.filter(x=>decisions[x.key]!=='rejected'); buildDots(); const ni=vis.findIndex(x=>x.key===rk); set(ni>=0?ni:idx); };
 function set(i){ if(recKey&&mr) mr.stop();
-  if(vis.length===0){ idx=0; nameEl.textContent='All designs erased'; subEl.textContent='tap ↩ undo, or tell Claude to bring them back'; descEl.textContent=''; countEl.textContent='0 / 0'; paintDecide(); return; }
+  if(vis.length===0){ idx=0; nameEl.textContent='All designs erased'; subEl.textContent='tap ↩ undo, or tell Claude to bring them back'; descEl.textContent=''; countEl.textContent='0 / 0'; attrsEl.innerHTML=''; paintDecide(); return; }
   idx=(i+vis.length)%vis.length; const it=vis[idx];
   manYaw=0; manPitch=0; autospin=true;                    // fresh presentation per weapon
   nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
   countEl.textContent=(idx+1)+' / '+vis.length;
   [...dotsEl.children].forEach((d,k)=>d.classList.toggle('on',k===idx));
   fbText.value=(fb[it.key]&&fb[it.key].draft)||''; autoGrow();
-  paintRec(); paintDecide(); }
+  paintRec(); paintDecide(); paintAttrs(); }
 document.getElementById('prev').onclick=()=>set(idx-1);
 document.getElementById('next').onclick=()=>set(idx+1);
 addEventListener('keydown',e=>{ if(e.target&&(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'))return; if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });

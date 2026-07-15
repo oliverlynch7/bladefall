@@ -144,7 +144,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.16.0';
+const VERSION3D='1.17.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -154,7 +154,7 @@ const GKEY='bladefall3d_global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bla
 const MKEY=m=>'bladefall3d_'+m;
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks'];
 let _g=loadJSON(GKEY);
@@ -164,7 +164,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,
+  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{}
@@ -638,10 +638,12 @@ function rotX(a){ CURM=mMul(CURM,mRX(a)); }
 function rotZ(a){ CURM=mMul(CURM,mRZ(a)); }
 function rot3(m){ // upper 3x3 (rotation-ish) for normals; scale is applied after, so CURM stays rotation+translation
   return [m[0],m[1],m[2], m[4],m[5],m[6], m[8],m[9],m[10]]; }
+let SIL=null, SILA=0.9;   // occlusion-silhouette pass: when set, every box draws as a flat unlit shape in this colour
 function box(sx,sy,sz,color,emiss,alpha){
   const model=mMul(CURM,mS(sx,sy,sz));
   gl.uniformMatrix4fv(U.uM,false,new Float32Array(model));
   gl.uniformMatrix3fv(U.uR,false,new Float32Array(rot3(CURM)));
+  if(SIL){ const s2=col3(SIL); gl.uniform3f(U.uC,0,0,0); gl.uniform3f(U.uE,s2[0],s2[1],s2[2]); gl.uniform1f(U.uA,SILA); gl.drawArrays(gl.TRIANGLES,0,36); return; }
   const c=col3(color); gl.uniform3f(U.uC,c[0],c[1],c[2]);
   const e=emiss?col3(emiss):[0,0,0]; gl.uniform3f(U.uE,e[0]*(typeof emiss==='string'?0.85:0),e[1]*0.85,e[2]*0.85);
   gl.uniform1f(U.uA,alpha==null?1:alpha);
@@ -1895,11 +1897,13 @@ function openPause(){
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
+    ${meta.camMode!=='fps'?`<button class="bigbtn ghost" id="silBtn">See yourself through walls: ${meta.silhouette!==false?'On':'Off'}</button>`:''}
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
+  var _sb=document.getElementById('silBtn'); if(_sb) _sb.onclick=()=>{ meta.silhouette=(meta.silhouette===false); persist(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
@@ -2528,6 +2532,14 @@ function render(t){
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e); }
   drawShadow(p.x,p.z,13);
   if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
+  if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
+    const sk0=SKINS[p.skin]||SKINS.knight;
+    gl.depthFunc(gl.GREATER); gl.depthMask(false);       // only fragments BEHIND something → the occluded part
+    SIL=sk0.glow||'#8fe0ff'; SILA=0.92;
+    drawHero3(p,t,true);                                  // preview=true so the invuln blink never hides the silhouette
+    SIL=null;
+    gl.depthFunc(gl.LESS); gl.depthMask(true);
+  }
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));

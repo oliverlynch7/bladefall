@@ -96,6 +96,18 @@
   .cosrow.cossel{border-color:var(--amber);background:rgba(255,210,74,.10);}
   .cosdot{width:15px;height:15px;border-radius:50%;flex:0 0 auto;}
   .choice.lockc{opacity:.45;cursor:default;}
+  #storyveil{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  #storytext{max-width:min(80vw,640px);text-align:center;color:#eef1f6;font-size:clamp(17px,3.4vw,26px);line-height:1.6;
+    letter-spacing:.01em;text-shadow:0 2px 18px #000;opacity:0;padding:0 24px;font-weight:600;}
+  @keyframes storyline{0%{opacity:0;transform:translateY(8px)}14%{opacity:1;transform:none}82%{opacity:1}100%{opacity:0}}
+  #storyskip{position:absolute;right:calc(env(safe-area-inset-right) + 20px);bottom:calc(env(safe-area-inset-bottom) + 22px);
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#cfd6df;border-radius:20px;
+    padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+  #storyskip:hover{background:rgba(255,255,255,.16);}
+  #storycard{position:absolute;left:50%;top:34%;transform:translateX(-50%);z-index:6;pointer-events:none;
+    max-width:min(78vw,520px);text-align:center;color:#eae4d6;font-size:clamp(14px,2.4vw,19px);line-height:1.55;
+    font-style:italic;letter-spacing:.01em;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .8s ease;}
+  #storycard.show{opacity:1;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
@@ -169,6 +181,8 @@
 </div>
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
+<div id="storycard" class="hide"></div>
+<div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script>
 (function(){
 "use strict";
@@ -179,7 +193,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.22.0';
+const VERSION3D='1.23.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -191,7 +205,8 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
-  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol'];
+  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol',
+  'introSeen','zoneSeen'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -204,7 +219,7 @@ const meta=Object.assign({
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
-  zonesCleared:0,elitesKilled:0,secretsFound:0,
+  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
 },_g);
@@ -235,6 +250,80 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
 }
 function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.classUnlocked={}; meta.trialsDone={}; meta.sideFound={}; meta.sideDone={}; } // hardcore death
 
+/* ---------------- Story (Classes & Quests update) ----------------
+   Built on Isaac's BLADEFALL-2D premise: the Abyss King's nightmares bent gravity,
+   the Wardens went down to keep him asleep and never came back, you are the last.
+   Delivery: a text intro cutscene once per save, a card the first time you enter a
+   zone, a line when a boss reveals, and endings that vary by difficulty. */
+const STORY={
+  intro:[
+    "For centuries the Abyss King slept beneath the world.",
+    "His nightmares soaked up through the rock — rotting the woods, souring the passes...",
+    "...and loosening the laws that hold a body down.",
+    "The Wardens went down in shifts to keep him sleeping. None came back up.",
+    "You took the same oath. You are the only one left to keep it.",
+    "Descend. Break the cycle."
+  ],
+  zone:{   // first-visit card, by zone id
+    outskirts:"The road ends here. Everything past it is already dreaming.",
+    hollow:"The wind comes up the canyon like it's trying to leave.",
+    keep:"The order held this place. Then the order became part of it.",
+    frost:"Cold this deep isn't weather. It's something refusing to move.",
+    ember:"The mountain's heat is escaping. The nightmare opened a way out.",
+    abyss:"You are below where anyone was ever posted.",
+    apex:"He is awake now. He has been waiting to be."
+  },
+  boss:{   // by boss stage index — one line when the health bar reveals
+    2:"It was something's livestock once. Now it's the nightmare's.",
+    4:"It has been watching you since the ridge.",
+    6:"He wore your oath. He got further than you have.",
+    8:"It stopped being a person somewhere around the fourth winter.",
+    10:"The mountain stood up.",
+    12:"You have finally reached the sleeper. He is not asleep.",
+    13:"This is what his dream wanted to be all along."
+  },
+  ending:[
+    "The Void Tyrant comes apart, and the world exhales.",
+    "The stone remembers itself. Far above, a waystone catches.",
+    "But the Abyss is patient, and an oath holds only while someone lives to keep it.",
+    "You climb out. You are still the last Warden.",
+    "The cycle is broken. Cycles are rebuilt."
+  ],
+  endLadder:{
+    hardcore:"One life. One descent. No shift to relieve you. The order would have called that the proper way.",
+    hitless:"Untouched, start to finish — the way the Wardens swore it could be done and never once managed. The oath is kept."
+  }
+};
+// A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
+function playStory(lines, onDone, opts){
+  opts=opts||{}; const veil=document.getElementById('storyveil'), tx=document.getElementById('storytext'), sk=document.getElementById('storyskip');
+  if(!veil){ if(onDone) onDone(); return; }
+  mode='story'; showGameUI(false); showOverlay(false);
+  veil.classList.remove('hide'); veil.style.background=opts.bg||'radial-gradient(ellipse at 50% 40%, #14101f 0%, #05060a 80%)';
+  let i=-1, killed=false;
+  const finish=()=>{ if(killed) return; killed=true; veil.classList.add('hide'); tx.textContent=''; if(onDone) onDone(); };
+  const advance=()=>{ i++; if(i>=lines.length){ finish(); return; }
+    tx.style.animation='none'; void tx.offsetWidth; tx.textContent=lines[i]; tx.style.animation='storyline 5.2s ease forwards';
+    story._t=setTimeout(advance, opts.dwell||4600); };
+  story._skip=()=>{ clearTimeout(story._t); finish(); };
+  sk.onclick=story._skip;
+  veil.onclick=()=>{ clearTimeout(story._t); advance(); };   // tap to advance faster
+  advance();
+}
+function story(){}   // namespace holder for _t/_skip
+function zoneCardMaybe(){                 // one card the FIRST time a zone is entered this save
+  if(!G||G.trial||G.side||G.area<0) return;
+  const Z=curZone(), line=STORY.zone[Z.id]; if(!line) return;
+  meta.zoneSeen=meta.zoneSeen||{}; if(meta.zoneSeen[Z.id]) return;
+  meta.zoneSeen[Z.id]=1; persistGlobal();
+  addText(G.p.x,G.p.y+96,G.p.z,'', '#fff'); // (spacer noop to keep timing consistent)
+  storyToast(line);
+}
+function storyToast(line){                // a slower, centered story line — distinct from the gameplay toast
+  const el=document.getElementById('storycard'); if(!el){ toast(line); return; }
+  el.textContent=line; el.classList.remove('hide'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  clearTimeout(storyToast._t); storyToast._t=setTimeout(()=>el.classList.remove('show'),5200);
+}
 /* ---------------- Music (streamed mp3, crossfaded) ----------------
    Separate from SFX on purpose: SFX stay procedural WebAudio, music is plain
    <audio> so the browser streams it instead of us holding 46MB in memory.
@@ -1178,7 +1267,7 @@ function enterZone(zi){
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
-  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); hazToast();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
 }
 function loadArea(){
   const Z=curZone();
@@ -1565,6 +1654,7 @@ const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Arrow
 // fallback by typed character (e.key) so WASD works even if e.code is off (non-US layouts / some Mac browsers)
 const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
 window.addEventListener('keydown',e=>{
+  if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); } return; }
   if(mode==='weapon'){
     // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
@@ -2316,7 +2406,8 @@ function updateAmbient(dt,s){
   for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*12*dt; a.y+=a.vy*dt; a.life-=dt; }
   G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
 }
-function onBossActivate(e){ SFX.boss(); document.getElementById('bossname').textContent=e.label; document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e); }
+function onBossActivate(e){ SFX.boss(); document.getElementById('bossname').textContent=e.label; document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
+  if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
 function updateBossBar(e){ document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function bossShoot(e,p){
   const cfg=e.shot, oy=e.y+e.h*0.62;
@@ -2498,11 +2589,16 @@ function die(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 function winGame(){
-  mode='win'; SFX.win(); showGameUI(false);
+  mode='win'; SFX.win(); showGameUI(false); musicStop(1200);
   const bonus=awardGold(500), D=curDiff();
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
   meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
   persist(); persistGlobal(); checkAchievements(); checkCosmetics();
+  const lines=STORY.ending.slice(); if(STORY.endLadder[D.id]) lines.push(STORY.endLadder[D.id]);
+  playStory(lines, ()=>winScreen(bonus,D));                        // the ending rolls, then the results card
+}
+function winScreen(bonus,D){
+  mode='win'; musicPlay('hub');
   const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
     <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Void Tyrant has fallen.
@@ -2562,6 +2658,10 @@ function openHub(){
   document.getElementById('questbox').classList.add('hide');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
   if(!Object.keys(meta.classUnlocked).length){ openClassPicker(); return; }   // brand-new save: choose your starter first
+  if(!meta.introSeen){                         // first time you reach the hub as a Warden: the story opens
+    meta.introSeen=true; persistGlobal();
+    playStory(STORY.intro, openHub); return;
+  }
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
   let rows='';
   ZONES.forEach((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
@@ -3648,6 +3748,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
+  STORY, playStory, zoneCardMaybe, storyToast, winScreen,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

@@ -1,5 +1,18 @@
 # BLADEFALL: Classes & Quests — Major Update Design
-**Date:** 2026-07-15 · **Status:** Approved by Oliver (pending two confirmations, see Open Items) · **Supersedes:** the roguelite/hardcore mode structure from `2026-07-07-hardcore-roguelike-design.md` (its hub/gold/shop/perks foundations carry forward)
+**Date:** 2026-07-15 · **Status:** ✅ ALL 4 PHASES SHIPPED (v1.18.0 → v1.21.0, live on bladefall.pages.dev) · **Supersedes:** the roguelite/hardcore mode structure from `2026-07-07-hardcore-roguelike-design.md` (its hub/gold/shop/perks foundations carry forward)
+
+## Build log
+| Phase | Version | Shipped |
+|---|---|---|
+| 1 · Combat core | v1.18.0 | 4-skill bar, 3 class kits, ranks 1-10, rank-3 subclasses, hybrid off-family penalty |
+| 2 · World | v1.19.0 | 7-zone chain, 16 quests + gating, elites, tier scaling + loot bands, armor sets, hub-snapshot save |
+| 3 · Secrets & classes | v1.20.0 | orb/rod retired, Reaper, starter tutorials + earned trials, 6 hidden side zones, trainer + shop ladder |
+| 4 · Hazards & ladder | v1.21.0 | 4 signature hazards, Normal→Hardcore→Hitless, 14 achievement cosmetics + wardrobe |
+
+**Deferred (deliberately, with reasons):**
+- **Walkable hub** — the menu hub delivers every function (shop, trainer, wardrobe, quest board, portal row). Walking between them is presentation, not capability; it can land any time without touching systems.
+- **Full enemy-telegraph pass** — moved from Phase 1 to a future pass so every monster gets authored wind-ups at once rather than being retrofitted twice. The Brute slam + Emberfall vents are the existing pattern.
+- **Full-set armor bonuses** — sets have distinct stat pools and defense multipliers; a wear-3-pieces bonus is still open.
 
 ## Vision
 Turn BLADEFALL from a run-based dungeon crawler into a zone-based action-RPG adventure: AQW-simple class combat (4 skills on cooldowns), themed zones with quests and bosses, hidden side zones, hard vertical platforming, and a walkable hub — with a Normal → Hardcore → Hitless difficulty ladder as the endgame.
@@ -78,6 +91,14 @@ Walkable hub containing:
 2. **World** — zone chain with quest gating, sub-areas, elites, zone bosses, tier scaling, chest/rarity bands, death→hub snapshot model, quest board.
 3. **Secrets & classes** — hidden side zones, starter tutorial trials, Reaper + its trial, weapon roster change (orb/rod retirement), shop starter weapons.
 4. **Hub world & polish** — walkable hub (trainer/wardrobe/dummies/portal row), zone signature hazards, achievement cosmetics, Hardcore + Hitless unlocks, balance pass.
+
+## Implementation notes (what the build settled)
+- **Zones** are 2 sub-areas + a boss room each (The Apex is boss-only). Areas reuse the existing generator with a per-area seed, so layouts differ every visit while the theme/enemy table stays authored.
+- **Quest gating** is per-area: the exit portal stays sealed until that area's quests are done. Because you must clear every area to reach the boss room, "all main quests → final quest" falls out naturally.
+- **Hazard/zone map:** Outskirts none (it's the tutorial zone) · Hollow Pass Gales · Ruined Keep Phasing · Frostfell Rime · Emberdeep Emberfall · The Abyss Phasing · The Apex Emberfall. Only mid-bridge stepping stones may phase — never a landing stoop — and no tile stays gone >3.5s, so nothing can strand you.
+- **Difficulty authority:** the rules derive from `MODE` (the loaded save key: `rl`/`hc`/`hl`), not from the global `meta.diff`, so the two can never desync into a hardcore save playing by Normal's rules.
+- **Trial skip rule (as built):** starter tutorials are skippable *and skipping still unlocks* — they teach, they don't gate. Earned trials (the Reaper's) refuse the skip; you can only leave. No trial is ever replayed once done or skipped.
+- **Legacy saves:** orb→scepter and rod→wand normalize on load, so no existing weapon becomes permanently off-class. A save with prior progress is never re-gated behind the starter picker.
 
 ## Resolved (2026-07-15, second pass)
 1. **Rod + orb retired** — confirmed (rod not differentiated enough vs staff/wand/scepter).

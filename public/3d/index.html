@@ -1422,8 +1422,8 @@ function loadStage(i){
       for(const sgn of [-1,1]){ const wx=cx2+sgn*(bw/2+16);
         G.walls.push({x:wx,z:cz2,w:30,d:bd+40,h:240});
         for(let L2=0;L2<4;L2++){ const hh=62+L2*4, yb=L2*62;
-          G.deco.push({x:wx+sgn*(4+L2*5),z:cz2,w:36+L2*9,h:hh,y0:yb,c:tint([DARKS,SAND,LITES,SAND][L2],(rnd()<0.5?'#000':'#fff'),0.05+rnd()*0.08),theme:'canyon'}); }
-        G.deco.push({x:wx+sgn*26,z:cz2,w:58,h:16,y0:248,c:LITES,theme:'canyon'}); }
+          G.deco.push({x:wx+sgn*(4+L2*5),z:cz2,w:36+L2*9,d:bd+40,h:hh,y0:yb,c:tint([DARKS,SAND,LITES,SAND][L2],(rnd()<0.5?'#000':'#fff'),0.05+rnd()*0.08),theme:'canyon'}); }
+        G.deco.push({x:wx+sgn*26,z:cz2,w:58,d:bd+52,h:16,y0:248,c:LITES,theme:'canyon'}); }
       // the switchback ledge climb (one wall per bowl, alternating): 3 steps up to a rim shelf
       const side=(b%2?1:-1), lx=cx2+side*(bw/2-42);
       for(let st2=0;st2<3;st2++){
@@ -1439,7 +1439,7 @@ function loadStage(i){
         G.segments.push({x:cx2+off,z:cz2-bd/2-clen/2,w:92,d:clen+36});
         for(const sgn of [-1,1]){ const wx2=cx2+off+sgn*(46+14);
           G.walls.push({x:wx2,z:cz2-bd/2-clen/2,w:26,d:clen+30,h:240});
-          for(let L2=0;L2<4;L2++) G.deco.push({x:wx2+sgn*(3+L2*5),z:cz2-bd/2-clen/2,w:30+L2*8,h:62,y0:L2*62,c:tint([DARKS,SAND,LITES,SAND][L2],'#000',rnd()*0.1),theme:'canyon'}); }
+          for(let L2=0;L2<4;L2++) G.deco.push({x:wx2+sgn*(3+L2*5),z:cz2-bd/2-clen/2,w:30+L2*8,d:clen+42,h:62,y0:L2*62,c:tint([DARKS,SAND,LITES,SAND][L2],'#000',rnd()*0.1),theme:'canyon'}); }
         cz2=cz2-bd/2-clen-(260/2)-20; cx2+=off*0.4; dir=-dir; }
     }
     const first=bowls[0], last=bowls[N-1];
@@ -1473,6 +1473,7 @@ function loadStage(i){
     for(let k2=0;k2<26;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);   // distant mesas
       G.deco.push({x:rnd()<0.5?mnX-140-rnd()*300:mxX+140+rnd()*300, z:zz, w:60+rnd()*120, h:120+rnd()*180, c:tint(SAND,'#000',0.3+rnd()*0.25), theme:'canyon'}); }
     hazSetup(rnd2);
+    G.p.x=first.x; G.p.z=first.z+first.d/2-50; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
     document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
     return;
   }

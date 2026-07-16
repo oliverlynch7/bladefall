@@ -59,6 +59,11 @@
   #bAttack.ranged.pressed{background:rgba(120,90,210,.62);}
   #bJump{width:66px;height:66px;right:calc(env(safe-area-inset-right) + 104px);bottom:calc(env(safe-area-inset-bottom) + 92px);}
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
+  .btn.skl{width:50px;height:50px;font-size:19px;bottom:calc(env(safe-area-inset-bottom) + 176px);background:rgba(96,72,160,.34);border-color:rgba(170,150,240,.45);}
+  #bSk0{right:calc(env(safe-area-inset-right) + 12px);} #bSk1{right:calc(env(safe-area-inset-right) + 68px);}
+  #bSk2{right:calc(env(safe-area-inset-right) + 124px);} #bSk3{right:calc(env(safe-area-inset-right) + 180px);}
+  .btn.skl.cooling{opacity:.45;font-size:16px;font-weight:900;}
+  .btn.skl.lock{opacity:.35;}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
   #bDodge.cooling{opacity:.4;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
@@ -131,6 +136,7 @@
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">SELL</button>
+  <button class="btn skl" id="bSk0"></button><button class="btn skl" id="bSk1"></button><button class="btn skl" id="bSk2"></button><button class="btn skl" id="bSk3"></button>
 </div>
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
@@ -144,7 +150,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.17.0';
+const VERSION3D='1.18.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -156,7 +162,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -167,7 +173,7 @@ const meta=Object.assign({
   soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
-  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{}
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -180,9 +186,11 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
+  meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
+  meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; } // hardcore death
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; } // hardcore death
 
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
 let actx=null, master=null, noiseBuf=null;
@@ -349,6 +357,56 @@ const MELEE={
   hammer:{shape:'slam',reach:70,radius:62,offset:42},
   scythe:{shape:'arc',reach:90,arc:2.95}
 };
+/* ---------------- Classes (Classes & Quests update, Phase 1) ----------------
+   4 skills per class on independent cooldowns (no mana). Ranks 1-10 per class;
+   skills unlock at ranks 1/2/4/7; subclass chosen at rank 3; capstone = the
+   subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
+   abilities lose their bonus effects (rider). */
+const CLASSES={
+  warrior:{disp:'Warrior',icon:'⚔️',family:['sword','great','axe','hammer','spear'],
+    subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
+          {id:'guardian',disp:'Guardian',blurb:'-15% damage taken (rank 10: -25%). Hold the line.'}],
+    skills:[
+      {id:'cleave',n:'Cleave',icon:'🗡️',cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
+      {id:'stomp',n:'Shockwave Stomp',icon:'💥',cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
+      {id:'wcharge',n:'Charge',icon:'🐗',cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
+      {id:'berserk',n:'Berserk',icon:'🔺',cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
+  ranger:{disp:'Ranger',icon:'🏹',family:['bow','cross','dagger'],
+    subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
+          {id:'assassin',disp:'Assassin',blurb:'+10% move speed (rank 10: +18%) and Tumble grants brief invulnerability.'}],
+    skills:[
+      {id:'deadeye',n:'Deadeye',icon:'🎯',cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
+      {id:'volley',n:'Volley',icon:'🌠',cd:8,rank:2,d:'A fan of projectiles across your front'},
+      {id:'tumble',n:'Tumble',icon:'🌀',cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
+      {id:'mark',n:'Hunter’s Mark',icon:'📍',cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
+  mage:{disp:'Mage',icon:'🔮',family:['staff','wand','scepter','orb','rod'],
+    subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
+          {id:'wizard',disp:'Wizard',blurb:'-20% skill cooldowns (rank 10: -30%). Always an answer.'}],
+    skills:[
+      {id:'bolt',n:'Elemental Bolt',icon:'☄️',cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
+      {id:'nova',n:'Nova',icon:'❄️',cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
+      {id:'blink',n:'Blink',icon:'✨',cd:14,rank:4,d:'Teleport forward'},
+      {id:'tempest',n:'Arcane Tempest',icon:'🌩️',cd:24,rank:7,d:'A storm rages around you for 4s'}]}
+};
+const CLASSIDS=Object.keys(CLASSES);
+const RANK_XP=r=>Math.round(60*Math.pow(r,1.7));          // class XP needed to go from rank r to r+1
+const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
+let queueSubclass=false;
+function classState(id){ const cs=(meta.classes[id]=meta.classes[id]||{xp:0,rank:1,sub:null});
+  if(!cs.rank) cs.rank=1; return cs; }
+function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
+function classFamilyOk(w){ return !w || curClass().family.includes(w.art); }
+function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
+function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
+function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
+function skillUnlocked(i){ return classState(meta.classId).rank>=curClass().skills[i].rank; }
+function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
+  cs.xp+=n; let up=false;
+  while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
+    const sk=curClass().skills.find(s=>s.rank===cs.rank);
+    toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
+  if(up){ SFX.levelup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
+  persist(); }
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
   const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,
@@ -703,7 +761,8 @@ function freshPlayer(){
     hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:startWeapon(),gear:freshGear(),armorMods:null,
     stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
-    charging:false,chargeAmt:0,holdT:0,attackHeld:false};
+    charging:false,chargeAmt:0,holdT:0,attackHeld:false,
+    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0};
   applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
   return p;
 }
@@ -725,9 +784,13 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
+  const cm=classMods();
+  if(cm.sub==='berserker') v*=cm.cap?1.2:1.12;
+  if(cm.sub==='sniper'&&p.weapon&&p.weapon.cls==='ranged') v*=cm.cap?1.25:1.15;
+  if(p.berserkT>0) v*=1.35;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; const cm=classMods(); if(cm.sub==='assassin') v*=cm.cap?1.18:1.10; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal; return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
@@ -1009,6 +1072,7 @@ function bindBtn(id,key){
   el.addEventListener('contextmenu',e=>e.preventDefault());
 }
 bindBtn('bJump','jump'); bindBtn('bAttack','attack'); bindBtn('bDodge','dodge');
+for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); useSkill(i); }); }
 (function(){
   const zone=document.getElementById('joyzone'), joy=document.getElementById('joy'), knob=document.getElementById('joyknob');
   let pid=null, ox=0, oy=0; const R=46;
@@ -1050,6 +1114,7 @@ window.addEventListener('keydown',e=>{
       if(fresh){ const btns=document.querySelectorAll('.choice'); if(btns[pickMap[e.code]]) btns[pickMap[e.code]].click(); }
       return; }
   }
+  if(mode==='play'&&!e.repeat&&/^Digit[1-4]$/.test(e.code)){ e.preventDefault(); useSkill(+e.code.slice(5)-1); return; }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
@@ -1241,7 +1306,7 @@ function playerAttack(cdMul){
 }
 function isChargeWeapon(w){ return w && w.cls==='melee' && w.sch==='mag' && !!w.el; } // magic swords: tap=melee, hold=charged elemental blast
 function fireCharged(p,w,amt){
-  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6);                    // 1.4x at a flick up to 4x at full charge
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p);     // 1.4x at a flick up to 4x at full charge
   const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=580, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
@@ -1251,7 +1316,7 @@ function fireCharged(p,w,amt){
   SFX.magic(w.el); G.shake=Math.min(G.shake+5+amt*5,13); p.atkTimer=0.2; burst(ox,oy,oz,col,10);
 }
 function fireProjectile(p,w,target){
-  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit;
+  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit*offclassMul(p);
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
@@ -1262,12 +1327,93 @@ function fireProjectile(p,w,target){
       gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
       dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[]}); }
 }
+/* ---------------- Class skills: execution (Phase 1) ---------------- */
+function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
+const SKILL_FX={
+  cleave(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    p.atkTimer=0.26; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>115+e.r) continue; if(d>e.r&&(dx*fx+dz*fz)/d<Math.cos(1.55)) continue;
+      if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,340,effLifesteal(p),ok?(w&&w.el):null); }
+    burst(p.x+fx*55,p.y+22,p.z+fz*55,'#ffd24a',14); },
+  stomp(p,ok,am){ const w=p.weapon, cm=classMods(), R=(cm.sub==='guardian'?210:150);
+    SFX.boss(); G.shake=Math.min(G.shake+9,15); skillRing(p.x,p.z,'#e8c27a','#b8863a',R+30);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>R+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,ok?520:200,effLifesteal(p),null); }
+    for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:p.x+Math.cos(a)*26,y:3,z:p.z+Math.sin(a)*26,vx:Math.cos(a)*160,vy:60,vz:Math.sin(a)*160,life:0.4,color:'#e8c27a',sz:3}); } },
+  wcharge(p,ok,am){ p.chargeDash=0.32; p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw);
+    p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies) e._chHit=false; p.invuln=Math.max(p.invuln,0.2); SFX.dodge(); },
+  berserk(p,ok,am){ p.berserkT=6; SFX.growl(1); toast('🔺 BERSERK!'); G.shake=Math.min(G.shake+5,10);
+    burst(p.x,p.y+30,p.z,'#ff5a3a',18); },
+  deadeye(p,ok,am){ const w=p.weapon, cm=classMods(), t=nearestEnemy(950,null);
+    if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const sp=900, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+    if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+      size:7,color:'#ffe9a8',shape:'arrow',glow:1,dmg:(w?w.dmg:8)*effPower(p)*3*am*(ok?1:OFFCLASS_MUL),
+      kb:220,pierce:ok?(cm.sub==='sniper'?99:3):0,el:ok?(w&&w.el):null,life:1.2,hitSet:[]});
+    p.atkTimer=0.18; SFX.shoot(); },
+  volley(p,ok,am){ const w=p.weapon, base=(w&&w.proj)?w.proj:{speed:660,size:4,color:'#9fe6c8',shape:'arrow'};
+    const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const oy=p.y+26, N=7, dmg=(w?w.dmg:8)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);
+    for(let i=0;i<N;i++){ const a=p.yaw+(i-(N-1)/2)*0.16;
+      G.projectiles.push({owner:'player',x:p.x+Math.sin(a)*16,y:oy,z:p.z+Math.cos(a)*16,vx:Math.sin(a)*base.speed,vy:0,vz:Math.cos(a)*base.speed,
+        gravity:0,size:base.size,color:base.color,shape:base.shape||'arrow',glow:base.glow||0,dmg,kb:120,pierce:0,el:ok?(w&&w.el):null,life:700/base.speed,hitSet:[]}); }
+    p.atkTimer=0.18; SFX.shoot(); },
+  tumble(p,ok,am){ const cm=classMods();
+    p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
+    p.invuln=Math.max(p.invuln,cm.sub==='assassin'?0.9:0.4); SFX.dodge();
+    if(ok){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
+      if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
+    burst(p.x,8,p.z,'#9fe0ff',10); },
+  mark(p,ok,am){ const t=nearestEnemy(800,null); if(!t){ toast('No target in range'); return 'refund'; }
+    t.markT=8; addText(t.x,t.h+22,t.z,'MARKED','#ffd24a',true); SFX.pickup(); },
+  bolt(p,ok,am){ const w=p.weapon, el=ok?(w&&w.el):null, col=elementColor(w&&w.el)||'#c9a6ff';
+    const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const sp=560, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+    if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*18,y:oy,z:p.z+Math.cos(p.yaw)*18,vx,vy,vz,gravity:0,
+      size:12,color:col,shape:'orb',glow:1,dmg:(w?w.dmg:10)*effPower(p)*2.4*am*(ok?1:OFFCLASS_MUL),kb:260,pierce:1,el,life:1.3,hitSet:[]});
+    p.atkTimer=0.2; SFX.magic(w&&w.el); G.shake=Math.min(G.shake+3,8); },
+  nova(p,ok,am){ const w=p.weapon; SFX.magic('ice'); skillRing(p.x,p.z,'#bff0ff','#7fd6ff',190);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.4*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>165+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,220,0,null); if(ok) e.slowT=Math.max(e.slowT||0,2.5); }
+    for(let i=0;i<14;i++){ const a=i/14*6.283; G.particles.push({x:p.x+Math.cos(a)*22,y:6,z:p.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:50,vz:Math.sin(a)*130,life:0.45,color:'#bff0ff',sz:3}); } },
+  blink(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    burst(p.x,p.y+20,p.z,'#c9a6ff',10);
+    for(const d of [150,110,70]){ const nx=p.x+fx*d, nz=p.z+fz*d;
+      if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
+    p.invuln=Math.max(p.invuln,0.35); burst(p.x,p.y+20,p.z,'#c9a6ff',14); SFX.magic('arcane'); },
+  tempest(p,ok,am){ p.tempestT=4; p.tempAcc=0; p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.55*am*(ok?1:OFFCLASS_MUL);
+    SFX.magic('storm'); toast('🌩️ Arcane Tempest!'); }
+};
+function useSkill(i){
+  if(mode!=='play'||!G) return; const p=G.p, C=curClass(), s=C.skills[i]; if(!s||p.dead) return;
+  if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
+  if(p.skillCd[i]>0) return;
+  initAudio();
+  const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
+  if(r==='refund') return;
+  const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
+  p.skillCd[i]=cd; skillbarUpdate();
+}
+function skillbarUpdate(){ const C=curClass(), cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=C.skills[i];
+    const locked=cs.rank<s.rank;
+    b.textContent=locked?'🔒':((p&&p.skillCd&&p.skillCd[i]>0)?Math.ceil(p.skillCd[i]):s.icon);
+    b.classList.toggle('lock',locked); b.classList.toggle('cooling',!!(p&&p.skillCd&&p.skillCd[i]>0));
+    b.title=s.n+' ('+(i+1)+') — '+s.d; } }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
   const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const crit=Math.random()<0.18+effCrit(p);
-  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0)), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
   if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
     const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
@@ -1288,6 +1434,7 @@ function resolveSwing(){
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
   const mod=elemMod(el,e.element);
+  if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
   e.hp-=dmg; e.hitFlash=0.12;
@@ -1360,6 +1507,7 @@ function rollDrop(e){
 }
 function gainXp(n){
   const p=G.p; p.xp+=n;
+  gainClassXp(Math.max(1,Math.round(n*0.8)));           // class XP flows alongside character XP while this class is equipped
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
     p.hp=Math.min(effMaxHp(p),p.hp+12); SFX.levelup(); queueLevelUp++; meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
     if(p.level>=8 && p.maxJumps<2){ p.maxJumps=2; toast('✦ Double Jump unlocked!'); } }
@@ -1375,6 +1523,7 @@ function checkStageClear(){
   }
 }
 function hurtPlayer(dmg,sx,sz){
+  { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
   const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
@@ -1402,6 +1551,16 @@ function update(dt){
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
+  // class-skill upkeep (cooldowns, berserk aura, charge dash, tempest ticks)
+  for(let i=0;i<4;i++) if(p.skillCd[i]>0) p.skillCd[i]=Math.max(0,p.skillCd[i]-dt);
+  if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
+  if(p.chargeDash>0){ p.chargeDash-=dt; p.x+=p.dashX*880*dt; p.z+=p.dashZ*880*dt;
+    for(const e of G.enemies){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
+  if(p.tempestT>0){ p.tempestT-=dt; p.tempAcc+=dt;
+    if(Math.random()<0.5){ const a2=Math.random()*6.283, rr=40+Math.random()*130; G.particles.push({x:p.x+Math.cos(a2)*rr,y:10+Math.random()*50,z:p.z+Math.sin(a2)*rr,vx:-Math.sin(a2)*120,vy:30,vz:Math.cos(a2)*120,life:0.5,color:'#c47bff',sz:2.8}); }
+    if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
+      for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,null); } } }
+  if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
   if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
@@ -1484,7 +1643,7 @@ function update(dt){
     if(e.burnT>0){ e.burnT-=dt; e.burnAcc+=e.burnDps*dt; if(e.burnAcc>=1){ const d=Math.floor(e.burnAcc); e.burnAcc-=d; e.hp-=d;
       if(Math.random()<0.4) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:e.burnColor||'#ff7a3a',sz:2});
       if(e.hp<=0){ killEnemy(e); continue; } } }
-    let eff=e.speed*(e.slowT>0?0.5:1); if(e.slowT>0) e.slowT-=dt;
+    let eff=e.speed*(e.slowT>0?0.5:1); if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
     const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
@@ -1576,6 +1735,7 @@ function update(dt){
   G.particles=G.particles.filter(pt=>pt.life>0);
   updateTexts(dt);
   if(queueLevelUp>0 && mode==='play'){ queueLevelUp--; openLevelUp(); }
+  else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }
 }
 const AMBIENT={frost:{c:'#e6f7ff',vy:-40,n:2},volcano:{c:'#ff9a4a',vy:40,n:2},forest:{c:'#9fd84a',vy:-16,n:1},void:{c:'#c9a6ff',vy:14,n:1},apex:{c:'#c9a6ff',vy:16,n:1}};
 function updateAmbient(dt,s){
@@ -1690,6 +1850,14 @@ function openLevelUp(){
     <h2 class="ovh">You reached Level ${G.p.level}</h2><p class="ovsub">Choose an upgrade</p>
     <div class="choices">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><div class="cname"><span>${o.icon}</span>${o.n} <span style="opacity:.5;font-size:12px;margin-left:auto">(${KEYS[i]})</span></div><div class="cdesc">${o.d}</div></button>`).join('')}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
+}
+function openSubclass(){
+  const C=curClass(), cs=classState(meta.classId);
+  mode='upgrade'; _offerT=Date.now();
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.22em;margin-bottom:2px;">${C.disp.toUpperCase()} · RANK 3</p>
+    <h2 class="ovh">Choose your path</h2><p class="ovsub">You can respec later for gold (never mid-run)</p>
+    <div class="choices">${C.subs.map((s,i)=>`<button class="choice" data-i="${i}"><div class="cname">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}</div></button>`).join('')}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.levelup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); resumePlay(); });
 }
 function fmt(n){ return Math.round(n*100)/100; }
 let _offerT=0;
@@ -1894,6 +2062,7 @@ function openPause(){
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
+    <button class="bigbtn ghost" id="classBtn">Class: ${curClass().icon} ${curClass().disp} · rank ${classState(meta.classId).rank}${classState(meta.classId).sub?' · '+classState(meta.classId).sub:''}</button>
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
@@ -1901,6 +2070,8 @@ function openPause(){
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
+  document.getElementById('classBtn').onclick=()=>{ meta.classId=CLASSIDS[(CLASSIDS.indexOf(meta.classId)+1)%CLASSIDS.length]; persist();
+    toast(curClass().icon+' '+curClass().disp+' — favors '+curClass().family.join(', ')); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   var _sb=document.getElementById('silBtn'); if(_sb) _sb.onclick=()=>{ meta.silhouette=(meta.silhouette===false); persist(); openPause(); };
@@ -1914,10 +2085,10 @@ function hudUpdate(){
   if(!G) return; const p=G.p;
   document.getElementById('hpfill').style.width=Math.max(0,p.hp/effMaxHp(p)*100)+'%';
   document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
-  document.getElementById('lvlbadge').textContent='LV '+p.level;
-  const wt=document.getElementById('weapontag');
-  wt.textContent=p.weapon.name+(G.ngPlus>0?'  ·  NG+'+G.ngPlus:'');
-  wt.style.color=RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)';
+  document.getElementById('lvlbadge').textContent=curClass().icon+' '+classState(meta.classId).rank+' · LV '+p.level;
+  const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
+  wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'')+(G.ngPlus>0?'  ·  NG+'+G.ngPlus:'');
+  wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
   const at=document.getElementById('armortag'), red=Math.round(defenseR(p)*100);
   const pips=GEARSLOTS.map(s=>{ const a=p.gear[s]; return `<span class="pip" style="background:${a?a.color:'#333'}"></span>`; }).join('');
   at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+red+'%</b> '+pips;
@@ -2529,7 +2700,8 @@ function render(t){
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
-    drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e); }
+    drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
+    if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); } }
   drawShadow(p.x,p.z,13);
   if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
   if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
@@ -2704,6 +2876,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
+  useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

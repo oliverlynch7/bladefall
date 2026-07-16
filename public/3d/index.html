@@ -86,6 +86,9 @@
   .zrow .zd{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .zrow .zgo{color:var(--amber);font-weight:900;font-size:13px;}
   .qbq{font-size:11px;color:var(--muted);line-height:1.6;}
+  .zrow.zside{margin-left:16px;background:rgba(196,123,255,.07);border-color:rgba(196,123,255,.28);}
+  .zrow.zside:hover{background:rgba(196,123,255,.16);border-color:rgba(196,123,255,.5);}
+  .zrow .zsec{color:#c47bff;font-size:9px;font-weight:900;letter-spacing:.12em;margin-left:4px;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
@@ -169,7 +172,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.19.0';
+const VERSION3D='1.20.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -181,7 +184,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel','beatNormal'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -193,7 +196,7 @@ const meta=Object.assign({
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,beatNormal:false,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
-  hero:null,bank:null,zoneMax:0,zoneDone:{}
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -211,9 +214,16 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null;
   meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
+  meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
+  meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
+  meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
+  meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
+  // an existing save already past the start never gets re-gated behind the starter picker
+  if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
+  if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; } // hardcore death
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.classUnlocked={}; meta.trialsDone={}; meta.sideFound={}; meta.sideDone={}; } // hardcore death
 
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
 let actx=null, master=null, noiseBuf=null;
@@ -363,8 +373,8 @@ const ARCHES={
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'spear',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}},
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',proj:{speed:470,size:10,pierce:0,range:360,color:'#ff7a3a',shape:'orb',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:11,cd:.32,kb:120,art:'wand',el:'ice',proj:{speed:560,size:7,pierce:0,range:520,color:'#7fd6ff',shape:'orb',glow:1}},
-  arcaneorb:{disp:'Arcane Orb',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'orb',el:'arcane',proj:{speed:430,size:11,pierce:2,range:420,color:'#c47bff',shape:'orb',glow:1}},
-  stormrod:{disp:'Storm Rod',cls:'ranged',sch:'mag',dmg:16,cd:.40,kb:140,art:'rod',el:'storm',proj:{speed:740,size:6,pierce:1,range:780,color:'#9fe0ff',shape:'bolt',glow:1}},
+  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'scepter',el:'arcane',proj:{speed:430,size:11,pierce:2,range:420,color:'#c47bff',shape:'orb',glow:1}},
+  stormrod:{disp:'Storm Wand',cls:'ranged',sch:'mag',dmg:16,cd:.40,kb:140,art:'wand',el:'storm',proj:{speed:740,size:6,pierce:1,range:780,color:'#9fe0ff',shape:'bolt',glow:1}},
   plaguestaff:{disp:'Plague Staff',cls:'ranged',sch:'mag',dmg:19,cd:.52,kb:130,art:'staff',el:'poison',proj:{speed:470,size:8,pierce:0,range:380,color:'#86e05a',shape:'orb',glow:1}},
   holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'scepter',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'orb',glow:1}}
 };
@@ -402,16 +412,37 @@ const CLASSES={
       {id:'volley',n:'Volley',icon:'🌠',cd:8,rank:2,d:'A fan of projectiles across your front'},
       {id:'tumble',n:'Tumble',icon:'🌀',cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
       {id:'mark',n:'Hunter’s Mark',icon:'📍',cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
-  mage:{disp:'Mage',icon:'🔮',family:['staff','wand','scepter','orb','rod'],
+  mage:{disp:'Mage',icon:'🔮',family:['staff','wand','scepter'],       // orb + rod retired — staff/wand/scepter cover the space
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
           {id:'wizard',disp:'Wizard',blurb:'-20% skill cooldowns (rank 10: -30%). Always an answer.'}],
     skills:[
       {id:'bolt',n:'Elemental Bolt',icon:'☄️',cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
       {id:'nova',n:'Nova',icon:'❄️',cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
       {id:'blink',n:'Blink',icon:'✨',cd:14,rank:4,d:'Teleport forward'},
-      {id:'tempest',n:'Arcane Tempest',icon:'🌩️',cd:24,rank:7,d:'A storm rages around you for 4s'}]}
+      {id:'tempest',n:'Arcane Tempest',icon:'🌩️',cd:24,rank:7,d:'A storm rages around you for 4s'}]},
+  reaper:{disp:'Reaper',icon:'💀',earned:true,family:['scythe'],
+    subs:[{id:'harvester',disp:'Harvester',blurb:'+12% lifesteal (rank 10: +20%). Every soul feeds you.'},
+          {id:'executioner',disp:'Executioner',blurb:'+30% damage to enemies under half health (rank 10: +50%).'}],
+    skills:[
+      {id:'reap',n:'Reap',icon:'🌙',cd:4,rank:1,d:'A wide 2.4x scythe arc that drains life'},
+      {id:'harvest',n:'Soul Harvest',icon:'👻',cd:8,rank:2,d:'Tear souls from everything near you and heal'},
+      {id:'shadowstep',n:'Shadowstep',icon:'🌑',cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
+      {id:'deathsdoor',n:'Death’s Door',icon:'⚰️',cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
+const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
+/* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
+   An earned class's trial is a real fight hidden in a side zone and must be won. */
+const TRIALS={
+  warrior:{cls:'warrior',stage:0,seed:501,name:'Trial of the Blade',kills:6,
+    tips:['Move with the stick (or WASD).','Tap SLASH to attack — hold it to keep swinging.','DODGE rolls you out of danger. Learn it.','Tap ① Cleave to hit everything in front of you.','Clear 6 foes, then take the portal.']},
+  ranger:{cls:'ranger',stage:1,seed:502,name:'Trial of the Bow',kills:6,
+    tips:['Move with the stick (or WASD).','Tap FIRE to loose an arrow — it aims for you.','DODGE rolls you out of danger. Keep your distance.','Tap ① Deadeye for a piercing shot.','Clear 6 foes, then take the portal.']},
+  mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
+    tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Tap ① Elemental Bolt for a heavy hit.','Clear 6 foes, then take the portal.']},
+  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:14,earned:true,tier:7,
+    tips:['The dead do not welcome you.','Survive. Reap all 14. Then claim the scythe.']}
+};
 const RANK_XP=r=>Math.round(60*Math.pow(r,1.7));          // class XP needed to go from rank r to r+1
 const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
 let queueSubclass=false;
@@ -430,6 +461,8 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
   if(up){ SFX.levelup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
   persist(); }
+const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
+function normWeapon(w){ if(w&&LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art]; return w; }
 function makeElite(e){                                    // elites: zone minibosses — same silhouette, far more menace
   e.elite=true; e.hp=Math.round(e.hp*2.4); e.maxHp=e.hp; e.dmg*=1.5;
   e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=0.94; e.label='Elite';
@@ -446,6 +479,18 @@ function makeWeapon(aid,rid,nameOverride){
   return w;
 }
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
+/* Hub shop stock: one plain weapon per class family at every rarity except legendary.
+   Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
+const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe'};   // archetype ids, not arts
+const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
+function shopWeapon(cid,rid){
+  const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
+  const w=makeWeapon(aid,rid,SHOPPLAIN[rid]+' '+a.disp);
+  w.dmg=+(w.dmg*0.82).toFixed(1);          // 18% under a rolled drop of the same rarity
+  w.lifesteal=0; w.shop=true;
+  return w;
+}
+function shopWeapCost(rid){ return {common:60,uncommon:220,rare:650,epic:1600}[rid]||9999; }
 
 /* ---------------- Armor (3 slots; identical to 2D) ---------------- */
 const SLOTS={
@@ -601,26 +646,32 @@ const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,blurb:'Where the road ends and the wild begins.',
     areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:8,d:'Slay 8 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
+    side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,blurb:'Dry canyons that swallow the careless.',
     areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:7,d:'Slay 7 Chargers'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Gather 5 Sun-Bleached Bones'},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
+    side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,blurb:'A fortress the dead never left.',
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:8,d:'Destroy 8 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
+    side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,blurb:'Cold deep enough to still the blood.',
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:8,d:'Slay 8 Frostlings'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
+    side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,blurb:'The mountain’s furnace, still burning.',
     areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:8,d:'Slay 8 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
+    side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus'}},
   {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,blurb:'Where the world thins and something looks back.',
     areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:8,d:'Banish 8 Shadelings'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
+    side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King'}},
   {id:'apex',name:'The Apex',icon:'👑',tier:7,blurb:'One throne. One tyrant. No quests — only the fight.',
     areas:[], boss:{stage:13,name:'The Void Tyrant'}}
@@ -632,7 +683,8 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
+function areaQuests(ai){ if(G&&(G.trial||G.side)) return [];    // trials and side zones run on their own objective
+  const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
 function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
 function questBump(id,by){
@@ -645,7 +697,11 @@ function questBump(id,by){
   }
   questUpdate();
 }
-function questKill(type){ for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
+function questKill(type){
+  if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
+    if(G.trialKills>=T.kills && !G.portal) openWay();
+    questUpdate(); return; }
+  for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
 function openWay(){ if(G.portal||!G.portalPos) return;
   G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
@@ -655,6 +711,14 @@ function questUpdate(){
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
   const Z=curZone();
   let rows;
+  if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
+    el.innerHTML=`<div class="qhead">${CLASSES[G.trial].icon} ${T.name}</div>
+      <div class="qrow ${d?'qdone':''}"><span class="qtick">${d?'☑':'☐'}</span> Defeat the keepers <b>${Math.min(T.kills,G.trialKills)}/${T.kills}</b></div>
+      ${d?'<div class="qrow"><span class="qtick">☐</span> Take the portal</div>':''}`;
+    el.classList.remove('hide'); return; }
+  if(G.side){ el.innerHTML=`<div class="qhead">${Z.side.icon} ${Z.side.name}</div>
+      <div class="qrow"><span class="qtick">☐</span> Reach the exit · <b>Tier ${G.zoneTier}</b></div>`;
+    el.classList.remove('hide'); return; }
   if(G.area<0){ rows=`<div class="qrow"><span class="qtick">☐</span> Slay ${Z.boss.name}</div>`; }
   else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
@@ -905,7 +969,9 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; return isGod(p)?v*1.7:v; }
 function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; const cm=classMods(); if(cm.sub==='assassin') v*=cm.cap?1.18:1.10; return isGod(p)?v*1.4:v; }
-function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal; return isGod(p)?v+0.6:v; }
+function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
+  const cm=classMods(); if(cm.sub==='harvester') v+=cm.cap?0.20:0.12;
+  return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
@@ -933,7 +999,7 @@ function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,xpNext:p
 function freshFromSnapshot(snap){
   const p=freshPlayer();
   p.stats=Object.assign(p.stats,snap.stats);
-  p.weapon=snap.weapon?JSON.parse(JSON.stringify(snap.weapon)):startWeapon();
+  p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):startWeapon();
   p.gear=cloneGear(snap.gear);
   p.maxHp=snap.maxHp||100; p.maxJumps=snap.maxJumps||1; p.level=snap.level||1;
   p.xp=0; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
@@ -960,28 +1026,99 @@ function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON
 function restoreBank(){ if(!meta.bank) return false;
   meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
   meta.bank=null; persist(); return true; }
+function newG(p,extra){
+  return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
+    shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
+    portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
+    runSeed:Math.floor(Math.random()*1e9),
+    zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,
+    side:false,trial:null,trialKills:0,tip:0,tipT:0,
+    cam:{x:0,y:0,z:0}},extra||{});
+}
 function enterZone(zi){
   const Z=zoneOf(zi);
   initAudio(); queueLevelUp=0; queueSubclass=false;
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
-  G={p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
-     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
-     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
-     runSeed:Math.floor(Math.random()*1e9),
-     zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,qs:{},areaSeed:0,areaName:null,waystone:null,
-     cam:{x:0,y:0,z:0}};
+  G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
   loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
 }
 function loadArea(){
   const Z=curZone();
+  if(G.trial){ const T=TRIALS[G.trial]; G.areaSeed=T.seed; G.areaName=T.name; loadStage(T.stage); return; }
+  if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
 }
+/* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
+function enterSide(zi){
+  const Z=zoneOf(zi), S=Z.side; if(!S) return;
+  if(S.trial && !meta.classUnlocked[S.trial]){ startTrial(S.trial,zi); return; }   // the Reaper's Gate IS his trial
+  initAudio(); queueLevelUp=0; queueSubclass=false; bankNow();
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{zone:zi,area:0,zoneTier:Math.min(7,Z.tier+1),side:true});
+  meta.run=null; persist();
+  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  toast(S.icon+' '+S.name+' — Tier '+G.zoneTier+'. Reach the exit alive.');
+}
+function sideClear(){
+  const Z=curZone(), S=Z.side;
+  meta.hero=snapOf(G.p); meta.bank=null; meta.sideDone[S.id]=true;
+  const bonus=awardGold(120+G.zoneTier*70); persist(); checkAchievements();
+  mode='menu'; SFX.win(); showGameUI(false);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--good);letter-spacing:.2em">SECRET CLEARED</p>
+    <h2 class="ovh">${S.icon} ${S.name}</h2>
+    <div class="statgrid"><div class="vsrow"><span>Tier</span><b>${G.zoneTier}</b></div>
+      <div class="vsrow"><span>Reward</span><b style="color:#ffd24a">+${bonus}g</b></div>
+      <div class="vsrow"><span>Progress banked</span><b>Level ${G.p.level}</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+/* ---- Trials: starter tutorials (skippable) and earned-class gauntlets (must be won) ---- */
+function startTrial(cid,fromZone){
+  const T=TRIALS[cid]; if(!T) return;
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const wasClass=meta.classId; meta.classId=cid;                 // you play the trial AS the class you're earning
+  if(!meta.classes[cid]) classState(cid);
+  bankNow();
+  const p=(T.earned&&meta.hero)?freshFromSnapshot(meta.hero):freshPlayer();
+  if(!T.earned){ p.weapon=trialWeapon(cid); }                     // starters get their family's weapon in hand
+  recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0});
+  meta.run=null; persist();
+  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
+}
+function trialWeapon(cid){
+  const fam=CLASSES[cid].family, aid=ARCHEIDS.find(a=>fam.includes(ARCHES[a].art));
+  return aid?makeWeapon(aid,'common'):startWeapon();
+}
+function trialComplete(){
+  const cid=G.trial, T=TRIALS[cid];
+  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
+  if(T.earned){ meta.hero=snapOf(G.p); meta.sideDone[curZone().side.id]=true; }
+  meta.bank=null; persist(); checkAchievements();
+  mode='menu'; SFX.win(); showGameUI(false);
+  const C=CLASSES[cid];
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">TRIAL COMPLETE</p>
+    <h2 class="title" style="font-size:34px">${C.icon} ${C.disp}</h2>
+    <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ')}</b>.</p>
+    <button class="bigbtn" id="hubBtn">Enter the Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function skipTrial(){
+  const cid=G?G.trial:null; if(!cid) return;
+  if(TRIALS[cid].earned){ toast('This one you have to earn.'); return; }
+  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid; meta.bank=null; persist();
+  toast(CLASSES[cid].icon+' '+CLASSES[cid].disp+' unlocked'); openHub();
+}
+function abandonTrial(){ restoreBank(); openHub(); }
 function nextArea(){
   if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
   if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
+  if(G.trial){ trialComplete(); return; }
+  if(G.side){ sideClear(); return; }
   if(G.area<0){ zoneClear(); return; }                        // cleared the boss room
   const Z=curZone(), na=G.area+1;
   if(na>=Z.areas.length){ G.area=-1; toast('⚔ '+Z.boss.name+' awaits'); }
@@ -1028,7 +1165,7 @@ function loadStage(i){
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
   const rnd=mulberry(i*7919+31+(G.runSeed||0)+so), rnd2=mulberry(i*104729+7+(G.runSeed||0)+so*3);
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
-  const eliteRate=Math.min(0.26,0.08+zoneTier()*0.025);   // elites get denser as the chain deepens
+  const eliteRate=Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
   const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
   const MOBS=THEMEMOBS[s.theme]||['grunt'];
   const pick=()=>MOBS[Math.floor(rnd()*MOBS.length)];
@@ -1125,7 +1262,7 @@ function loadStage(i){
     }
   }
   const leaves=G.rooms.filter(r=>r.deg===1 && r!==entryRoom && r!==goalRoom);
-  const vault=(!isBoss && leaves.length && rnd2()<0.5)?leaves[Math.floor(rnd2()*leaves.length)]:null;  // chests are now a find, not a guarantee
+  const vault=(!isBoss && leaves.length && (rnd2()<0.5||(G&&G.side)))?leaves[Math.floor(rnd2()*leaves.length)]:null;  // chests are a find, not a guarantee — but a side zone always pays
   // boss / exit lives in the hidden goal room
   if(isBoss||isMini){ goalRoom.encounter=true; goalRoom.cleared=false;
     const b=mkMonster(s.boss,goalRoom.x,goalRoom.z,goalRoom); b.boss=true;
@@ -1133,7 +1270,8 @@ function loadStage(i){
     if(isMini){ for(let m=0;m<2;m++) mkMonster(pick(),goalRoom.x+(m?90:-90),goalRoom.z+60,goalRoom); }
     G.portalPos={x:goalRoom.x,z:goalRoom.z};
   } else { G.portalPos={x:goalRoom.x,z:goalRoom.z};
-    if(!areaQuests().length) G.portal={x:goalRoom.x,z:goalRoom.z,t:0};   // quest-free areas keep the old "reach the exit" rule
+    // quest-free areas (and side zones) keep the old "reach the exit" rule; trials stay sealed until the keepers fall
+    if(!areaQuests().length && !G.trial) G.portal={x:goalRoom.x,z:goalRoom.z,t:0};
   }
   // populate rooms
   for(const room of G.rooms){ if(room===entryRoom) continue; if((isBoss||isMini)&&room===goalRoom) continue;
@@ -1161,6 +1299,14 @@ function loadStage(i){
     for(const dw of room.doorways){ const dr=sealDoor(dw.x,dw.z,dw.ori,'combat'); room.doors.push(dr); } }
   // build room walls (gaps already recorded on _gaps by carving)
   G.rooms.forEach(wallRoom);
+  // hidden side-zone entrance: a rift in the deepest dead-end room. Reasonably hidden — but it's there, every time.
+  { const Zc=curZone();
+    if(Zc.side && !G.side && !G.trial && !isBoss && !meta.sideFound[Zc.side.id] && G.area===0){
+      // prefer a dead-end room; fall back to any non-entry room so the rift ALWAYS exists (some layouts have no spare leaves)
+      const dead=leaves.filter(r=>r!==entryRoom&&r!==goalRoom&&r!==vault);
+      const pool=dead.length?dead:G.rooms.filter(r=>r!==entryRoom);
+      const room=pool[pool.length-1];
+      if(room) G.secret={x:room.x,z:room.z-room.d/2+46,y:0,t:0,id:Zc.side.id}; } }
   // quest waystone: the "find" objective, parked in a room away from the entrance
   { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
     if(fnd){ const cand=G.rooms.filter(r=>r!==entryRoom&&r!==goalRoom); const room=cand[Math.floor(rnd2()*cand.length)]||goalRoom;
@@ -1230,7 +1376,8 @@ function spawnEnemy(type,x,z,isBoss){
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,noSplit:!!a.noSplit,windT:0,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
-    atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0};
+    atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
+    markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
   if(e.boss) G.boss=e;
   G.enemies.push(e); return e;
 }
@@ -1569,7 +1716,33 @@ const SKILL_FX={
       if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
     p.invuln=Math.max(p.invuln,0.35); burst(p.x,p.y+20,p.z,'#c9a6ff',14); SFX.magic('arcane'); },
   tempest(p,ok,am){ p.tempestT=4; p.tempAcc=0; p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.55*am*(ok?1:OFFCLASS_MUL);
-    SFX.magic('storm'); toast('🌩️ Arcane Tempest!'); }
+    SFX.magic('storm'); toast('🌩️ Arcane Tempest!'); },
+  reap(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    p.atkTimer=0.28; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*2.4*am*(ok?1:OFFCLASS_MUL), ls=ok?Math.max(0.25,effLifesteal(p)):effLifesteal(p);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>130+e.r) continue; if(d>e.r&&(dx*fx+dz*fz)/d<Math.cos(1.75)) continue;
+      if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,300,ls,ok?(w&&w.el):null); }
+    for(let i=0;i<10;i++){ const a=p.yaw-1.5+i*0.33; G.particles.push({x:p.x+Math.sin(a)*80,y:p.y+20,z:p.z+Math.cos(a)*80,vx:0,vy:40,vz:0,life:0.35,color:'#b06bff',sz:3}); } },
+  harvest(p,ok,am){ const w=p.weapon; SFX.magic('void'); skillRing(p.x,p.z,'#b06bff','#6a2fa0',185);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL); let hit=0;
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>160+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,180,0,null); hit++;
+      for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*1.6,vy:60,vz:(p.z-e.z)*1.6,life:0.4,color:'#b06bff',sz:3}); }
+    if(hit&&ok){ const heal=Math.round(effMaxHp(p)*0.05*hit); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+      addText(p.x,p.y+70,p.z,'+'+heal,'var(--good)'); hudUpdate(); } },
+  shadowstep(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    burst(p.x,p.y+20,p.z,'#6a2fa0',12);
+    for(const d of [170,130,80]){ const nx=p.x+fx*d, nz=p.z+fz*d;
+      if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
+    p.invuln=Math.max(p.invuln,ok?0.55:0.3); burst(p.x,p.y+20,p.z,'#b06bff',16); SFX.dodge(); },
+  deathsdoor(p,ok,am){ let n=0;
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>230+e.r) continue;
+      e.doomT=4; e.doomDps=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.5*am*(ok?1:OFFCLASS_MUL); e.doomAcc=0; e.doomSrc=p; n++;
+      addText(e.x,e.y+e.h+16,e.z,'DOOMED','#b06bff',true); }
+    if(!n){ toast('Nothing near enough to doom'); return 'refund'; }
+    SFX.growl(1); G.shake=Math.min(G.shake+6,12); toast('⚰️ '+n+' marked for death'); }
 };
 function useSkill(i){
   if(mode!=='play'||!G) return; const p=G.p, C=curClass(), s=C.skills[i]; if(!s||p.dead) return;
@@ -1615,6 +1788,7 @@ function resolveSwing(){
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
   const mod=elemMod(el,e.element);
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
+  { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
   e.hp-=dmg; e.hitFlash=0.12;
@@ -1826,6 +2000,9 @@ function update(dt){
       if(Math.random()<0.4) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:e.burnColor||'#ff7a3a',sz:2});
       if(e.hp<=0){ killEnemy(e); continue; } } }
     let eff=e.speed*(e.slowT>0?0.5:1); if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
+    if(e.doomT>0){ e.doomT-=dt; e.doomAcc+=dt;                       // Death's Door burns them down over time
+      if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
+        G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
     const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
@@ -1916,6 +2093,16 @@ function update(dt){
   // quest waystone: touch it to complete a "find" objective
   if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
     if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } }
+  // hidden side-zone rift: walk into it and it's yours forever
+  if(G.secret){ const s=G.secret; s.t+=dt;
+    if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
+      const S=curZone().side; meta.sideFound[S.id]=true; persist();
+      G.secret=null; SFX.god(); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
+      addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
+      toast('🔓 '+S.icon+' '+S.name+' discovered — its portal now waits in the hub'); } }
+  // trial tutorial tips, paced out
+  if(G.trial){ const T=TRIALS[G.trial];
+    if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
   // portal
   if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52) nextStage(); }
   // particles
@@ -1996,7 +2183,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
 }
 function nextStage(){ nextArea(); }    // the portal now advances the ZONE's area chain, not a flat stage list
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
-  if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon();
+  if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
   p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
 function continueRun(){
@@ -2033,14 +2220,15 @@ function openLevelUp(){
     <div class="choices">${opts.map((o,i)=>`<button class="choice" data-i="${i}"><div class="cname"><span>${o.icon}</span>${o.n} <span style="opacity:.5;font-size:12px;margin-left:auto">(${KEYS[i]})</span></div><div class="cdesc">${o.d}</div></button>`).join('')}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
 }
-function openSubclass(){
+function openSubclassFrom(then){
   const C=curClass(), cs=classState(meta.classId);
   mode='upgrade'; _offerT=Date.now();
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.22em;margin-bottom:2px;">${C.disp.toUpperCase()} · RANK 3</p>
-    <h2 class="ovh">Choose your path</h2><p class="ovsub">You can respec later for gold (never mid-run)</p>
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.22em;margin-bottom:2px;">${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
+    <h2 class="ovh">Choose your path</h2><p class="ovsub">You can respec at the hub trainer for gold (never mid-zone)</p>
     <div class="choices">${C.subs.map((s,i)=>`<button class="choice" data-i="${i}"><div class="cname">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}</div></button>`).join('')}</div></div>`);
-  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.levelup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); resumePlay(); });
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.levelup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
 }
+function openSubclass(){ openSubclassFrom(resumePlay); }
 function fmt(n){ return Math.round(n*100)/100; }
 let _offerT=0;
 function offerWeapon(nw){
@@ -2153,27 +2341,75 @@ function openHub(){
   mode='menu'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   document.getElementById('questbox').classList.add('hide');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
+  if(!Object.keys(meta.classUnlocked).length){ openClassPicker(); return; }   // brand-new save: choose your starter first
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
-  const rows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
-    return `<div class="zrow ${open?'':'zlock'}" ${open?`data-z="${i}"`:''}>
+  let rows='';
+  ZONES.forEach((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    rows+=`<div class="zrow ${open?'':'zlock'}" ${open?`data-z="${i}"`:''}>
       <div class="zic">${open?Z.icon:'🔒'}</div>
       <div style="flex:1;min-width:0">
         <div class="zn">${Z.name} ${done?'<span class="zdone">✓ cleared</span>':''}</div>
         <div class="zd">${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'} · <b>Tier ${Z.tier}</b></div></div>
-      ${open?'<div class="zgo">▶</div>':''}</div>`; }).join('');
+      ${open?'<div class="zgo">▶</div>':''}</div>`;
+    if(Z.side && meta.sideFound[Z.side.id]){ const sd=!!meta.sideDone[Z.side.id];   // discovered secrets hang under their parent
+      rows+=`<div class="zrow zside" data-s="${i}">
+        <div class="zic">${Z.side.icon}</div>
+        <div style="flex:1;min-width:0"><div class="zn">${Z.side.name} <span class="zsec">SECRET</span> ${sd?'<span class="zdone">✓ cleared</span>':''}</div>
+          <div class="zd">${Z.side.blurb} · <b>Tier ${Math.min(7,Z.tier+1)}</b></div></div>
+        <div class="zgo">▶</div></div>`; } });
   showOverlayHTML(`<div class="card"><h2 class="ovh">The Hub</h2>
     <p class="ovsub">${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">Your progress is safe here. Anything you find in a zone only banks when you clear it.</p>
-    <div class="achlist" style="max-height:min(46vh,320px)">${rows}</div>
+    <div class="achlist" style="max-height:min(42vh,300px)">${rows}</div>
+    <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
+  document.querySelectorAll('.zrow[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
+  document.getElementById('trainBtn').onclick=()=>openTrainer(openHub);
   document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
   document.getElementById('shopBtn').onclick=()=>openShop(openHub);
   document.getElementById('skinBtn').onclick=()=>openSkins(openHub);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
+}
+function openClassPicker(){
+  mode='menu'; showGameUI(false); _offerT=Date.now();
+  const cards=STARTERS.map(cid=>{ const C=CLASSES[cid];
+    return `<button class="choice" data-c="${cid}"><div class="cname"><span>${C.icon}</span>${C.disp}</div>
+      <div class="cdesc">${C.family.join(', ')}<br>${C.skills.map(s=>s.n).join(' · ')}</div></button>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:36px">BLADEFALL</h2>
+    <p class="ovsub">Choose how you fight. Its trial teaches you the rest.<br><span style="opacity:.6">You can unlock the others later — and more besides.</span></p>
+    <div class="choices">${cards}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.c); });
+}
+function openTrainer(back){
+  mode='menu';
+  const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
+    const sub=cs.sub?C.subs.find(s=>s.id===cs.sub):null;
+    const hint=un?'':(C.earned?'Win the Trial of the Reaper, hidden in a secret of The Abyss':'Play its trial to unlock');
+    return `<div class="gearrow" style="${un?'':'opacity:.5'}">
+      <div class="gi">${un?C.icon:'🔒'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="gn">${C.disp} ${sel?'<span style="color:var(--amber);font-size:10px">· EQUIPPED</span>':''}</div>
+        <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(cs.rank>=3?' · choose a path!':''))+' · '+C.family.join(', ')):hint}</div></div>
+      ${un&&!sel?`<button class="bigbtn buybtn" data-eq="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Equip</button>`:''}
+      ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">Respec 300g</button>`:''}
+      ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
+    </div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Class Trainer</h2>
+    <p class="ovsub">Switch freely here. Never mid-zone.</p>
+    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
+  document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
+  document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.re;
+    if(meta.gold<300){ toast('Not enough gold'); return; }
+    meta.gold-=300; classState(cid).sub=null; if(classState(cid).rank>=3) queueSubclass=(cid===meta.classId);
+    persist(); SFX.levelup(); toast('Path forgotten — choose again'+(cid===meta.classId?' on your next zone':''));
+    if(cid===meta.classId&&classState(cid).rank>=3){ openSubclassFrom(()=>openTrainer(back)); return; }
+    openTrainer(back); });
+  document.getElementById('backBtn').onclick=back;
 }
 function openQuestBoard(back){
   mode='menu';
@@ -2197,12 +2433,28 @@ function openShop(back){
       <div style="flex:1"><div class="gn">Lv ${lv}${maxed?' · MAX':''} <span style="color:var(--good);font-weight:700">${lv>0?P.unit(P.per*lv):''}</span></div>
         <div class="gd">${maxed?'fully upgraded':'next: '+P.unit(P.per*(lv+1))}</div></div>
       <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');
+  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
+  const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
+    const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
+    return `<div class="gearrow"><div class="gi" style="color:${RARITY[rid].color}">⚔</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[rid].color}">${w.name}</div>
+        <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
+      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
   showOverlayHTML(`<div class="card"><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
-    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}</div>
+    <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
+    <div class="achlist" style="max-height:min(26vh,190px)">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.perks) meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; SFX.levelup(); persist(); openShop(back); });
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, cost=shopWeapCost(rid);
+    if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost;
+    const w=shopWeapon(meta.classId,rid);
+    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else meta.hero.weapon=w;
+    SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
   document.getElementById('backBtn').onclick=back;
 }
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];
@@ -2261,7 +2513,8 @@ function openPause(){
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
-    <button class="bigbtn ghost" id="classBtn">Class: ${curClass().icon} ${curClass().disp} · rank ${classState(meta.classId).rank}${classState(meta.classId).sub?' · '+classState(meta.classId).sub:''}</button>
+    ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
+    <button class="bigbtn ghost" id="classBtn" ${G&&G.trial?'style="opacity:.4"':''}>Class: ${curClass().icon} ${curClass().disp} · rank ${classState(meta.classId).rank}${classState(meta.classId).sub?' · '+classState(meta.classId).sub:''}</button>
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
@@ -2269,7 +2522,13 @@ function openPause(){
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
-  document.getElementById('classBtn').onclick=()=>{ meta.classId=CLASSIDS[(CLASSIDS.indexOf(meta.classId)+1)%CLASSIDS.length]; persist();
+  { const _st=document.getElementById('skipTrialBtn');
+    if(_st) _st.onclick=()=>{ if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
+  document.getElementById('classBtn').onclick=()=>{                    // switching mid-zone is a hub privilege; trials lock you in
+    if(G&&G.trial){ toast('Finish or skip the trial first'); return; }
+    if(G&&mode!=='menu'){ toast('Switch classes at the hub trainer'); return; }
+    const un=CLASSIDS.filter(c=>meta.classUnlocked[c]); if(un.length<2) return;
+    meta.classId=un[(un.indexOf(meta.classId)+1)%un.length]; persist();
     toast(curClass().icon+' '+curClass().disp+' — favors '+curClass().family.join(', ')); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
@@ -2896,6 +3155,12 @@ function render(t){
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
+  if(G.secret){                                        // the hidden rift: a dark seam in the wall, subtle but findable
+    const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7);
+    bx(s.x,26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
+    bx(s.x,26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);
+    bx(s.x,26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
+    for(let i=0;i<2;i++){ const yy=8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
     drawShadow(w.x,w.z,22,0.3);
@@ -3095,7 +3360,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
-  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy,
+  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
+  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

@@ -1117,7 +1117,10 @@ function setFlatLights(){ // menus, item/skin previews, title: even, readable
   gl.uniform3f(U.uL,0.45,0.78,0.42); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.46); gl.uniform3f(U.uKey,1,1,1);
   gl.uniform3f(U.uPC0,0,0,0); gl.uniform3f(U.uPC1,0,0,0); gl.uniform3f(U.uPC2,0,0,0); gl.uniform3f(U.uPC3,0,0,0); }
 function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + the nearest wall torches
-  gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06);
+  // Zone identity includes LIGHT: Hollow Pass is a sunlit desert canyon, not a torch-lit crypt.
+  if(G && !G.trial && !G.side && curZone().id==='hollow' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.42,0.80,0.42); gl.uniform1f(U.uAmb,0.62); gl.uniform1f(U.uDif,0.42); gl.uniform3f(U.uKey,1.18,1.02,0.78); }
+  else { gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06); }
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
   const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
   near.sort((a,b)=>a[0]-b[0]);

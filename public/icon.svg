@@ -1,12 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <rect width="256" height="256" rx="56" fill="#0b0c10"/>
-  <!-- blade -->
-  <g stroke-linecap="round" stroke-linejoin="round">
-    <path d="M168 56 L196 84 L104 176 L86 178 L88 160 Z" fill="#e8a33d" stroke="#f7d79a" stroke-width="4"/>
-    <!-- crossguard -->
-    <path d="M70 150 L106 186" stroke="#cfd6df" stroke-width="12"/>
-    <!-- hilt -->
-    <path d="M64 176 L88 200" stroke="#8b8f9a" stroke-width="12"/>
-    <circle cx="60" cy="200" r="9" fill="#e8a33d"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="iron" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#687486"/><stop offset="1" stop-color="#282e3a"/>
+    </linearGradient>
+    <linearGradient id="soul" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffecaa"/><stop offset="1" stop-color="#ff9628"/>
+    </linearGradient>
+    <linearGradient id="bone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8dcc0"/><stop offset="1" stop-color="#968a70"/>
+    </linearGradient>
+    <linearGradient id="amb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd478"/><stop offset="1" stop-color="#c67818"/>
+    </linearGradient>
+    <filter id="fire" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="13" result="x"/>
+      <feMerge><feMergeNode in="x"/><feMergeNode in="x"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0b0c10"/>
+  <circle cx="256" cy="60" r="34" fill="url(#amb)" filter="url(#fire)"/>
+  <rect x="232" y="60" width="48" height="96" rx="14" fill="#281f16"/>
+  <polygon points="196,182 316,182 310,368 256,466 202,368" fill="url(#iron)"/>
+  <polygon points="243,196 269,196 265,356 256,404 247,356" fill="url(#soul)" filter="url(#fire)"/>
+  <rect x="104" y="150" width="304" height="42" rx="21" fill="url(#bone)"/>
 </svg>

@@ -68,6 +68,24 @@
   #bDodge.cooling{opacity:.4;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
+  #questbox{position:absolute;left:calc(env(safe-area-inset-left) + 10px);top:calc(env(safe-area-inset-top) + 78px);z-index:4;pointer-events:none;
+    background:rgba(10,12,18,.55);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 10px;max-width:min(50vw,260px);
+    font-size:11px;line-height:1.5;letter-spacing:.01em;backdrop-filter:blur(3px);}
+  #questbox .qhead{font-weight:800;color:var(--amber);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
+  #questbox .qrow{color:#cfd6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #questbox .qrow b{color:#fff;}
+  #questbox .qdone{color:#6ee0a8;opacity:.75;text-decoration:line-through;}
+  #questbox .qtick{display:inline-block;width:12px;}
+  .zrow{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.07);margin-bottom:7px;cursor:pointer;text-align:left;}
+  .zrow:not(.zlock):hover{background:rgba(255,210,74,.10);border-color:rgba(255,210,74,.35);}
+  .zrow.zlock{opacity:.4;cursor:default;}
+  .zrow .zic{font-size:21px;width:26px;text-align:center;}
+  .zrow .zn{font-weight:800;font-size:14px;color:var(--ink);}
+  .zrow .zdone{color:var(--good);font-size:10px;font-weight:700;margin-left:5px;}
+  .zrow .zd{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .zrow .zgo{color:var(--amber);font-weight:900;font-size:13px;}
+  .qbq{font-size:11px;color:var(--muted);line-height:1.6;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
@@ -124,6 +142,7 @@
   <div class="barwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
   <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
 </div>
+<div id="questbox" class="hide"></div>
 <div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
@@ -150,7 +169,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.18.0';
+const VERSION3D='1.19.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -161,8 +180,8 @@ const MKEY=m=>'bladefall3d_'+m;
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
-  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes'];
+  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel','beatNormal'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -172,8 +191,9 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 const meta=Object.assign({
   soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
-  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
-  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{}
+  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,beatNormal:false,
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
+  hero:null,bank:null,zoneMax:0,zoneDone:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -188,9 +208,12 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
+  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null;
+  meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
+  meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; } // hardcore death
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; } // hardcore death
 
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
 let actx=null, master=null, noiseBuf=null;
@@ -407,6 +430,11 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
   if(up){ SFX.levelup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
   persist(); }
+function makeElite(e){                                    // elites: zone minibosses — same silhouette, far more menace
+  e.elite=true; e.hp=Math.round(e.hp*2.4); e.maxHp=e.hp; e.dmg*=1.5;
+  e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=0.94; e.label='Elite';
+  return e;
+}
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
   const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,
@@ -426,18 +454,34 @@ const SLOTS={
   legs:{label:'Leggings',def:[7,11,17,23,31]}
 };
 const SLOTIDS=['helmet','chest','legs'];
-function makeArmor(rid,slot){
+/* Armor sets (Phase 2): every piece belongs to a playstyle family aligned to a class.
+   The set decides which stats it can roll and how much raw defense it carries — Heavy
+   is a wall, Swift trades armor for mobility, Mystic feeds the skill bar. */
+const AFFIXDEFS={
+  hp:{base:[10,16,22,30,40],f:v=>'+'+v+' Max HP'},
+  speedMul:{base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Move Speed'},
+  atkSpeedMul:{base:[.03,.05,.06,.08,.10],f:v=>'+'+Math.round(v*100)+'% Attack Speed'},
+  lifesteal:{base:[.02,.03,.04,.05,.07],f:v=>'+'+Math.round(v*100)+'% Lifesteal'},
+  dodgeMul:{base:[.05,.07,.09,.11,.14],f:v=>'-'+Math.round(v*100)+'% Dodge CD'},
+  powerMul:{base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Damage'},
+  crit:{base:[.03,.04,.06,.08,.10],f:v=>'+'+Math.round(v*100)+'% Crit'},
+  cdr:{base:[.04,.06,.08,.10,.13],f:v=>'-'+Math.round(v*100)+'% Skill Cooldowns'}
+};
+const ARMORSETS={
+  heavy:{id:'heavy',name:'Heavy',cls:'warrior',defMul:1.25,pool:['hp','powerMul','lifesteal','hp']},
+  swift:{id:'swift',name:'Swift',cls:'ranger',defMul:0.8,pool:['speedMul','dodgeMul','atkSpeedMul','crit']},
+  mystic:{id:'mystic',name:'Mystic',cls:'mage',defMul:0.95,pool:['cdr','powerMul','hp','cdr']}
+};
+const SETIDS=Object.keys(ARMORSETS);
+function setForClass(cid){ return SETIDS.find(s=>ARMORSETS[s].cls===cid)||'heavy'; }
+function makeArmor(rid,slot,setId){
   const r=RARITY[rid],tier=r.tier,sl=SLOTS[slot];
-  const pool=[
-    {stat:'hp',base:[10,16,22,30,40],f:v=>'+'+v+' Max HP'},
-    {stat:'speedMul',base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Move Speed'},
-    {stat:'atkSpeedMul',base:[.03,.05,.06,.08,.10],f:v=>'+'+Math.round(v*100)+'% Attack Speed'},
-    {stat:'lifesteal',base:[.02,.03,.04,.05,.07],f:v=>'+'+Math.round(v*100)+'% Lifesteal'},
-    {stat:'dodgeMul',base:[.05,.07,.09,.11,.14],f:v=>'-'+Math.round(v*100)+'% Dodge CD'},
-    {stat:'powerMul',base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Damage'}];
-  const n=tier>=3?2:1, chosen=[], p2=[...pool];
-  for(let i=0;i<n;i++){ const a=p2.splice(Math.floor(Math.random()*p2.length),1)[0]; chosen.push({stat:a.stat,val:a.base[tier],label:a.f(a.base[tier])}); }
-  return {slot,rarity:rid,defense:sl.def[tier],color:r.color,name:r.name+' '+sl.label,affixes:chosen};
+  const st=ARMORSETS[setId]||ARMORSETS[SETIDS[Math.floor(Math.random()*SETIDS.length)]];
+  const n=tier>=3?2:1, chosen=[], p2=[...new Set(st.pool)];
+  for(let i=0;i<n&&p2.length;i++){ const k=p2.splice(Math.floor(Math.random()*p2.length),1)[0], a=AFFIXDEFS[k];
+    chosen.push({stat:k,val:a.base[tier],label:a.f(a.base[tier])}); }
+  return {slot,rarity:rid,set:st.id,defense:Math.round(sl.def[tier]*st.defMul),color:r.color,
+    name:r.name+' '+st.name+' '+sl.label,affixes:chosen};
 }
 
 /* ---------------- Trinkets: amulet + ring slots (passives now; active abilities in a later phase) ---------------- */
@@ -547,6 +591,76 @@ const STAGES=[
   {name:'The Void Tyrant',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}
 ];
 STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); // roomier arenas (v1.1)
+
+/* ---------------- Zones & Quests (Classes & Quests update, Phase 2) ----------------
+   The adventure spine. A linear chain of themed zones; each zone is a few sub-areas
+   (still procedurally generated — `stage` picks the theme/enemy table, `seed` varies
+   the layout) gated by main quests, then a boss room. Clearing the boss completes the
+   zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
+const ZONES=[
+  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,blurb:'Where the road ends and the wild begins.',
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:8,d:'Slay 8 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
+           {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
+    boss:{stage:2,name:'The Brute'}},
+  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,blurb:'Dry canyons that swallow the careless.',
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:7,d:'Slay 7 Chargers'}]},
+           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Gather 5 Sun-Bleached Bones'},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
+    boss:{stage:4,name:'Hollow Marksman'}},
+  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,blurb:'A fortress the dead never left.',
+    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:8,d:'Destroy 8 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
+           {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
+    boss:{stage:6,name:'The Warden'}},
+  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,blurb:'Cold deep enough to still the blood.',
+    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:8,d:'Slay 8 Frostlings'}]},
+           {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
+    boss:{stage:8,name:'Frost Sorcerer'}},
+  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,blurb:'The mountain’s furnace, still burning.',
+    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:8,d:'Slay 8 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
+           {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
+    boss:{stage:10,name:'Ember Colossus'}},
+  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,blurb:'Where the world thins and something looks back.',
+    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:8,d:'Banish 8 Shadelings'}]},
+           {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
+    boss:{stage:12,name:'Abyss King'}},
+  {id:'apex',name:'The Apex',icon:'👑',tier:7,blurb:'One throne. One tyrant. No quests — only the fight.',
+    areas:[], boss:{stage:13,name:'The Void Tyrant'}}
+];
+const TIERBAND=[1,1,2,2,3,3,4];                                  // max rarity INDEX (0=common..4=legendary) by zone tier
+function zoneOf(zi){ return ZONES[Math.max(0,Math.min(ZONES.length-1,zi|0))]; }
+function curZone(){ return zoneOf(G?G.zone:0); }
+function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
+function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
+function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
+  while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
+function areaQuests(ai){ const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
+function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
+function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
+function questBump(id,by){
+  const q=areaQuests().find(x=>x.id===id); if(!q||questDone(q)) return;
+  G.qs[id]=(G.qs[id]||0)+(by||1);
+  if(questDone(q)){ SFX.achieve(); toast('✓ Quest complete: '+q.d);
+    const rg=awardGold(40+zoneTier()*15); gainXp(20+zoneTier()*10); gainClassXp(25+zoneTier()*10);
+    addText(G.p.x,G.p.y+80,G.p.z,'QUEST COMPLETE +'+rg+'g','var(--amber)',true);
+    if(areaClear()) openWay();
+  }
+  questUpdate();
+}
+function questKill(type){ for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
+function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
+function openWay(){ if(G.portal||!G.portalPos) return;
+  G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); }
+function questUpdate(){
+  const el=document.getElementById('questbox'); if(!el) return;
+  if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
+  const Z=curZone();
+  let rows;
+  if(G.area<0){ rows=`<div class="qrow"><span class="qtick">☐</span> Slay ${Z.boss.name}</div>`; }
+  else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
+    rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
+      return `<div class="qrow ${done?'qdone':''}"><span class="qtick">${done?'☑':'☐'}</span> ${q.d}${(q.n>1)?` <b>${c}/${q.n}</b>`:''}</div>`; }).join(''); }
+  el.innerHTML=`<div class="qhead">${Z.icon} ${Z.name}</div>${rows}`; el.classList.remove('hide');
+}
 
 /* ---------------- Enemies (same stats; r = w/2) ---------------- */
 const ENEMY={
@@ -733,7 +847,7 @@ function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive ligh
 let G=null, mode='title', lastT=0, acc=0; const DT=1/60;
 let queueLevelUp=0;
 const DIFFICULTY=1.0;
-function stageScale(){ return 1+G.stageIndex*0.10; }
+function stageScale(){ return 1+(zoneTier()-1)*0.22+(G&&G.area>0?0.05:0); }   // one curve: zone tier drives enemy scaling AND the loot band
 function freshGear(){ return {helmet:null,chest:null,legs:null,amulet:null,ring:null}; }
 /* ---------------- Shop perks: permanent per-mode stat upgrades bought with gold ---------------- */
 const PERKS={
@@ -767,10 +881,10 @@ function freshPlayer(){
   return p;
 }
 function recomputeArmor(p){
-  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,defense:0,crit:0,goldFind:0};
+  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,defense:0,crit:0,goldFind:0,cdr:0};
   let total=0;
   const fold=a=>{ for(const af of a.affixes){ const s=af.stat,v=af.val;
-    if(s==='hp')m.hp+=v; else if(s==='lifesteal')m.lifesteal+=v; else if(s==='crit')m.crit+=v; else if(s==='goldFind')m.goldFind+=v;
+    if(s==='hp')m.hp+=v; else if(s==='lifesteal')m.lifesteal+=v; else if(s==='crit')m.crit+=v; else if(s==='goldFind')m.goldFind+=v; else if(s==='cdr')m.cdr+=v;
     else if(s==='speedMul')m.speedMul*=1+v; else if(s==='atkSpeedMul')m.atkSpeedMul*=1+v;
     else if(s==='dodgeMul')m.dodgeMul*=1-v; else if(s==='powerMul')m.powerMul*=1+v; } };
   if(p.gear){ for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; total+=a.defense; fold(a); }
@@ -795,6 +909,7 @@ function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifes
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
+function effCdr(p){ return Math.min(0.5,(p.armorMods?p.armorMods.cdr:0)); }                                          // Mystic armor cuts skill cooldowns
 function defenseR(p){ if(isGod(p)) return 0.85; return p.armorMods?Math.min(0.5,p.armorMods.defense):0; }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -832,12 +947,66 @@ function beginRun(ngPlus,carrySnap,scales){
      shake:0,ngPlus:ngPlus||0,ngHp:scales.hp,ngDmg:scales.dmg,baseLoadout:snapOf(p),
      portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
      runSeed:Math.floor(Math.random()*1e9), // every run rolls fresh dungeons
+     zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,
      cam:{x:0,y:0,z:0}};
   if((ngPlus||0)>0) meta.ngPlus=Math.max(meta.ngPlus,ngPlus);
   meta.lastNgHp=scales.hp; meta.lastNgDmg=scales.dmg; persist(); checkAchievements();
   loadStage(0); mode='play'; showOverlay(false); showGameUI(true); hudUpdate();
 }
-function startRun(ngPlus){ beginRun(ngPlus||0,null,{hp:1,dmg:1}); }
+function startRun(ngPlus){ enterZone(0); }
+/* ---- Zone flow (Phase 2): hub is the save point; a zone attempt is provisional ---- */
+function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON.stringify(meta.hero)):null,
+  classes:JSON.parse(JSON.stringify(meta.classes||{}))}; persist(); }
+function restoreBank(){ if(!meta.bank) return false;
+  meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
+  meta.bank=null; persist(); return true; }
+function enterZone(zi){
+  const Z=zoneOf(zi);
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  bankNow();                                                  // snapshot the hub state — this attempt is provisional
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G={p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
+     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
+     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
+     runSeed:Math.floor(Math.random()*1e9),
+     zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier,qs:{},areaSeed:0,areaName:null,waystone:null,
+     cam:{x:0,y:0,z:0}};
+  meta.run=null; persist(); checkAchievements();
+  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+}
+function loadArea(){
+  const Z=curZone();
+  if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
+  else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
+}
+function nextArea(){
+  if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
+  if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
+  if(G.area<0){ zoneClear(); return; }                        // cleared the boss room
+  const Z=curZone(), na=G.area+1;
+  if(na>=Z.areas.length){ G.area=-1; toast('⚔ '+Z.boss.name+' awaits'); }
+  else G.area=na;
+  loadArea(); SFX.pickup();
+}
+function zoneClear(){
+  const Z=curZone();
+  meta.hero=snapOf(G.p); meta.bank=null;                       // everything banks — new save point
+  meta.zoneDone[Z.id]=true;
+  meta.zoneMax=Math.max(meta.zoneMax||0, Math.min(ZONES.length-1, G.zone+1));
+  meta.bestStage=Math.max(meta.bestStage||0,G.stageIndex);
+  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements();
+  if(G.zone>=ZONES.length-1){ winGame(); return; }
+  mode='menu'; SFX.win(); showGameUI(false);
+  const NZ=zoneOf(G.zone+1);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--good);letter-spacing:.2em">ZONE CLEARED</p>
+    <h2 class="ovh">${Z.icon} ${Z.name}</h2>
+    <div class="statgrid"><div class="vsrow"><span>${Z.boss.name}</span><b style="color:var(--good)">slain</b></div>
+      <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div>
+      <div class="vsrow"><span>Progress banked</span><b>Level ${G.p.level}</b></div>
+      <div class="vsrow"><span>Now open</span><b>${NZ.icon} ${NZ.name}</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
 function showGameUI(v){ ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v)); }
 function mulberry(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed);
   t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
@@ -853,17 +1022,21 @@ function loadStage(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
-  const rnd=mulberry(i*7919+31+(G.runSeed||0)), rnd2=mulberry(i*104729+7+(G.runSeed||0));
+  const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
+  const rnd=mulberry(i*7919+31+(G.runSeed||0)+so), rnd2=mulberry(i*104729+7+(G.runSeed||0)+so*3);
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
+  const eliteRate=Math.min(0.26,0.08+zoneTier()*0.025);   // elites get denser as the chain deepens
+  const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
   const MOBS=THEMEMOBS[s.theme]||['grunt'];
   const pick=()=>MOBS[Math.floor(rnd()*MOBS.length)];
   const GW=104; // doorway width
   const mkMonster=(type,x,z,room)=>{ const m=spawnEnemy(type,x,z); G.killGoal++;
     if(m.kind==='caster'&&CASTER_EL[s.theme]){ m.shot.el=CASTER_EL[s.theme]; m.shot.color=elementColor(m.shot.el)||m.shot.color; }
     if(room){ m.room=room; room.monsters.push(m); if(room.encounter) m.dropT=9999; }
+    if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
     return m; };
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}
@@ -952,14 +1125,16 @@ function loadStage(i){
     }
   }
   const leaves=G.rooms.filter(r=>r.deg===1 && r!==entryRoom && r!==goalRoom);
-  const vault=(!isBoss && leaves.length)?leaves[Math.floor(rnd2()*leaves.length)]:null;
+  const vault=(!isBoss && leaves.length && rnd2()<0.5)?leaves[Math.floor(rnd2()*leaves.length)]:null;  // chests are now a find, not a guarantee
   // boss / exit lives in the hidden goal room
   if(isBoss||isMini){ goalRoom.encounter=true; goalRoom.cleared=false;
     const b=mkMonster(s.boss,goalRoom.x,goalRoom.z,goalRoom); b.boss=true;
     b.home={x:goalRoom.x,z:goalRoom.z,hw:goalRoom.w/2-34,hd:goalRoom.d/2-34};
     if(isMini){ for(let m=0;m<2;m++) mkMonster(pick(),goalRoom.x+(m?90:-90),goalRoom.z+60,goalRoom); }
     G.portalPos={x:goalRoom.x,z:goalRoom.z};
-  } else { G.portal={x:goalRoom.x,z:goalRoom.z,t:0}; }
+  } else { G.portalPos={x:goalRoom.x,z:goalRoom.z};
+    if(!areaQuests().length) G.portal={x:goalRoom.x,z:goalRoom.z,t:0};   // quest-free areas keep the old "reach the exit" rule
+  }
   // populate rooms
   for(const room of G.rooms){ if(room===entryRoom) continue; if((isBoss||isMini)&&room===goalRoom) continue;
     if(room===vault){ room.encounter=false; room.cleared=true;
@@ -986,6 +1161,10 @@ function loadStage(i){
     for(const dw of room.doorways){ const dr=sealDoor(dw.x,dw.z,dw.ori,'combat'); room.doors.push(dr); } }
   // build room walls (gaps already recorded on _gaps by carving)
   G.rooms.forEach(wallRoom);
+  // quest waystone: the "find" objective, parked in a room away from the entrance
+  { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
+    if(fnd){ const cand=G.rooms.filter(r=>r!==entryRoom&&r!==goalRoom); const room=cand[Math.floor(rnd2()*cand.length)]||goalRoom;
+      G.waystone={x:room.x,z:room.z,y:0,q:fnd.id,taken:false,t:0}; } }
   // spring + goblin
   if(!isBoss && rnd2()<0.22){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
   if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r=G.rooms[Math.floor(rnd2()*G.rooms.length)]||entryRoom; const gb=spawnEnemy('goblin',r.x,r.z); gb.despawnT=9; gb.dropT=0.2; }
@@ -1001,7 +1180,7 @@ function loadStage(i){
   G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
   G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
-  document.getElementById('stagetag').textContent=s.name; hudUpdate();
+  document.getElementById('stagetag').textContent=G.areaName||s.name; questUpdate(); hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
 function startBonus(){
@@ -1013,7 +1192,7 @@ function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=18; G.bonusSecured=false; G.combo=0; G.comboT=0; // shorter timer
   const rnd=mulberry(G.stageIndex*31337+911);
   G.segments.push({x:0,z:-20,w:186,d:186});
@@ -1400,6 +1579,7 @@ function useSkill(i){
   const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
   if(r==='refund') return;
   const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
+  cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; skillbarUpdate();
 }
 function skillbarUpdate(){ const C=curClass(), cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
@@ -1453,6 +1633,9 @@ function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return 
 function killEnemy(e){
   if(e.dead) return;
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  questKill(e.type);
+  { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods
+    if(fq && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
   addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
@@ -1487,8 +1670,7 @@ function openChest(ch){
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('✓ Loot secured — grab it, then take the exit'); } // stop the clock the instant you grab it
   const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
-    let rid=rollRarity();
-    if(ch.bonus){ rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; while(RARITY[rid].tier<2) rid=RORDER[RARITY[rid].tier+1]; }
+    const rid=bandedRarity(ch.bonus?1:0);      // chests stay random, but only within this zone tier's band
     const item=randomLoot(rid);
     G.pickups.push(Object.assign({x:ch.x+(i?28:-28),z:ch.z+20,y0:ch.y,bob:Math.random()*3},item));
   }
@@ -1497,8 +1679,8 @@ function rollDrop(e){
   if(e.type==='tyrant') return;
   if(e.type==='king'){ G.pickups.push({x:e.x,z:e.z,weapon:makeWeapon('voidscythe','legendary','Abyss Blade'),bob:0});
     G.pickups.push({x:e.x-40,z:e.z+20,armor:makeArmor('legendary','chest'),bob:0}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
-  let rid=rollRarity();
-  if(e.boss){ const min=(e.type==='colossus')?3:2; while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; if(Math.random()<0.25) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
+  let rid=bandedRarity(e.boss?1:(e.elite?1:0));   // bosses and elites reach one band above the zone's cap
+  if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
   if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
   if(!e.boss && Math.random()<0.45){ G.pickups.push({x:e.x,z:e.z,armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)]),bob:0}); }
   else { const aid=ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)];
@@ -1726,8 +1908,14 @@ function update(dt){
     if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36) openChest(ch); }
   // pickups
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
-    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){ if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); pk.taken=true; } }
+    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
+      if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
+      else if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket);
+      pk.taken=true; } }
   G.pickups=G.pickups.filter(pk=>!pk.taken);
+  // quest waystone: touch it to complete a "find" objective
+  if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
+    if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } }
   // portal
   if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52) nextStage(); }
   // particles
@@ -1806,13 +1994,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.x<e.home.x-e.home.hw) e.x=e.home.x-e.home.hw; if(e.x>e.home.x+e.home.hw) e.x=e.home.x+e.home.hw;
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
 }
-function nextStage(){
-  if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
-  if(!G.tookDamage){ meta.flawlessStages=(meta.flawlessStages||0)+1; }
-  const ni=G.stageIndex+1; if(ni>=STAGES.length){ winGame(); return; }
-  meta.bestStage=Math.max(meta.bestStage,ni); meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ni,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
-  persist(); checkAchievements(); loadStage(ni); SFX.pickup();
-}
+function nextStage(){ nextArea(); }    // the portal now advances the ZONE's area chain, not a flat stage list
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon();
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
@@ -1918,22 +2100,27 @@ function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
   if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
   return {weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)}; }
-function resumePlay(){ mode='play'; showOverlay(false); hudUpdate(); }
+function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); }
 function die(){
-  mode='dead'; SFX.hurt();
-  const wasHc=MODE==='hc';
-  if(wasHc) wipeMode('hc'); else meta.run=null;
+  mode='dead'; SFX.hurt(); showGameUI(false);
+  const Z=curZone(), wasHc=MODE==='hc';
+  const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
+  if(wasHc) wipeMode('hc'); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
   persist();
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
-    <p class="ovsub">Reached ${STAGES[G.stageIndex]?STAGES[G.stageIndex].name:'the depths'} · Level ${G.p.level}${wasHc?'<br><b style="color:var(--danger)">Hardcore — this save is erased.</b>':'<br>Your gold &amp; perks are safe.'}</p>
+    <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
+    ${wasHc?'<p class="hint" style="color:var(--danger)"><b>Hardcore — this save is erased.</b></p>'
+      :`<div class="statgrid"><div class="vsrow"><span>Lost this attempt</span><b style="color:var(--danger)">${lostGold}g + everything found</b></div>
+        <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
     <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
 function winGame(){
-  mode='win'; SFX.win();
-  const bonus=awardGold(500); meta.run=null; persist(); checkAchievements();
+  mode='win'; SFX.win(); showGameUI(false);
+  const bonus=awardGold(500);
+  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null; meta.beatNormal=true; persist(); checkAchievements();
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
-    <p class="ovsub">You cleared the dungeon.</p>
+    <p class="ovsub">Every zone cleared. The Void Tyrant has fallen.</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
       <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
       <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div></div>
@@ -1961,35 +2148,47 @@ function titleScreen(){
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
 }
-function modeSelect(){
-  mode='menu';
-  const card=(m,name,icon,desc)=>{ const mv=loadJSON(MKEY(m))||{}; const g=mv.gold||0, hasRun=!!(mv.run&&mv.run.p);
-    return `<button class="choice" data-m="${m}"><div class="cname"><span>${icon}</span>${name}</div>
-      <div class="cdesc">${desc}<br><b style="color:#ffd24a">${g}g</b> banked${hasRun?' · run in progress':''}</div></button>`; };
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Choose Your Path</h2><p class="ovsub">Each mode keeps its own save.</p>
-    <div class="choices">
-      ${card('rl','Roguelite','⚔','Gold &amp; perks persist. Death ends the run, not your progress.')}
-      ${card('hc','Hardcore','☠','One life. Death wipes the save to zero. The true test.')}
-    </div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
-  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); loadMode(b.dataset.m); openHub(); });
-  document.getElementById('backBtn').onclick=titleScreen;
-}
+function modeSelect(){ initAudio(); loadMode('rl'); openHub(); }   // no mode select any more — the adventure IS the game (Normal). Hardcore/Hitless return as unlockable difficulties.
 function openHub(){
   mode='menu'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
-  const hasRun=!!(meta.run&&meta.run.p), modeName=MODE==='hc'?'Hardcore':'Roguelite';
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Gate Hub</h2>
-    <p class="ovsub">${modeName} · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    ${hasRun?`<button class="bigbtn" id="contBtn">Continue Run</button>`:''}
-    <button class="bigbtn ${hasRun?'ghost':''}" id="enterBtn">${hasRun?'Abandon &amp; Enter New':'Enter Dungeon'}</button>
+  document.getElementById('questbox').classList.add('hide');
+  if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
+  const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
+  const rows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    return `<div class="zrow ${open?'':'zlock'}" ${open?`data-z="${i}"`:''}>
+      <div class="zic">${open?Z.icon:'🔒'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="zn">${Z.name} ${done?'<span class="zdone">✓ cleared</span>':''}</div>
+        <div class="zd">${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'} · <b>Tier ${Z.tier}</b></div></div>
+      ${open?'<div class="zgo">▶</div>':''}</div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">The Hub</h2>
+    <p class="ovsub">${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    <p class="hint" style="margin:0 0 8px">Your progress is safe here. Anything you find in a zone only banks when you clear it.</p>
+    <div class="achlist" style="max-height:min(46vh,320px)">${rows}</div>
+    <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
-    <button class="bigbtn ghost" id="modeBtn">Switch Mode</button>
-    ${MODE==='hc'?'<p class="hint" style="color:var(--danger)">⚠ Hardcore: dying erases this save.</p>':'<p class="hint">Roguelite: your gold &amp; perks survive death.</p>'}</div>`);
-  if(hasRun) document.getElementById('contBtn').onclick=continueRun;
-  document.getElementById('enterBtn').onclick=()=>{ meta.run=null; persist(); startRun(0); };
+    <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
+  document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
+  document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
   document.getElementById('shopBtn').onclick=()=>openShop(openHub);
   document.getElementById('skinBtn').onclick=()=>openSkins(openHub);
-  document.getElementById('modeBtn').onclick=()=>{ persist(); titleScreen(); };
+  document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
+}
+function openQuestBoard(back){
+  mode='menu';
+  const rows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    const qs=[].concat(...Z.areas.map(a=>a.quests));
+    const list=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No quests — just the fight.</div>';
+    return `<div class="gearrow" style="align-items:flex-start;${open?'':'opacity:.4'}">
+      <div class="gi">${open?Z.icon:'🔒'}</div>
+      <div style="flex:1;min-width:0"><div class="gn">${Z.name} ${done?'<span style="color:var(--good);font-size:10px">✓ cleared</span>':''}</div>
+        ${open?list:'<div class="gd">Locked</div>'}
+        <div class="gd" style="margin-top:3px">Final: slay <b>${Z.boss.name}</b></div></div></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Quest Board</h2>
+    <p class="ovsub">Complete a zone's main quests to open its boss room.</p>
+    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
 }
 function openShop(back){
   mode='menu';
@@ -2697,11 +2896,22 @@ function render(t){
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
+  if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
+    const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
+    drawShadow(w.x,w.z,22,0.3);
+    bx(w.x,4,w.z, 54,8,54, '#4a4f5e', null, 1);
+    bx(w.x,34,w.z, 26,60,26, '#6b7183', null, 1);
+    bx(w.x,68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
+    bx(w.x,150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
+    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, 60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
-    if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); } }
+    if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); }
+    if(e.elite&&!e.dead){ const ef=0.6+0.4*Math.sin(t*3.2), ey=e.y+e.h+11;   // elite crown: read the threat before it reaches you
+      for(let i=0;i<3;i++) bx(e.x+(i-1)*7, ey+(i===1?3:0), e.z, 4,(i===1?9:6),4, '#ffd24a','#ffb020',ef);
+      bx(e.x, ey-4, e.z, 20,3,4, '#ffd24a','#ffb020',ef*0.9); } }
   drawShadow(p.x,p.z,13);
   if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
   if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
@@ -2759,6 +2969,13 @@ function drawArmorMini(a,rc){
   else { bx(-4.6,12,0, 7,17,7, st); bx(4.6,12,0, 7,17,7, st); bx(0,20,0, 17,3.4,7.4, rc, rc); bx(-4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); bx(4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); }
 }
 function drawPickup3(pk,t){
+  if(pk.questItem){                                   // quest token: a small spinning amber shard
+    const qc='#ffd24a', yy=16+Math.sin(pk.bob)*4;
+    drawShadow(pk.x,pk.z,8,0.22);
+    bx(pk.x,50,pk.z, 4,100,4, qc, qc, 0.12);
+    pushM(); mv(pk.x,yy,pk.z); rotY(t*2.6); rotZ(0.5);
+    box(11,11,11, qc, qc, 0.95); box(15,4,4, qc, qc, 0.5); box(4,15,4, qc, qc, 0.5);
+    popM(); return; }
   const it=pk.weapon||pk.armor||pk.trinket, rc=RARITY[it.rarity].color, y0=pk.y0||0;
   pushM(); mv(0,y0,0);
   drawShadow(pk.x,pk.z,10,0.25);
@@ -2877,6 +3094,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul,
+  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
+  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

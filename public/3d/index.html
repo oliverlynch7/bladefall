@@ -193,7 +193,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.23.0';
+const VERSION3D='1.24.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -825,8 +825,8 @@ const ZONES=[
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
-    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:7,d:'Slay 7 Chargers'}]},
-           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Gather 5 Sun-Bleached Bones'},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:14,d:'Hunt 14 Chargers'}]},
+           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Climb for 5 Sun-Bleached Bones',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
@@ -914,6 +914,8 @@ function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
 function questBump(id,by){
   const q=areaQuests().find(x=>x.id===id); if(!q||questDone(q)) return;
   G.qs[id]=(G.qs[id]||0)+(by||1);
+  if(!questDone(q)&&(q.n||1)>1){ const k=(G.qs[id]||0)/q.n;   // audible progress: each tick climbs in pitch toward done
+    tone({f0:460+k*380,f1:540+k*430,dur:0.09,type:'square',vol:0.4}); }
   if(questDone(q)){ SFX.achieve(); toast('✓ Quest complete: '+q.d);
     const rg=awardGold(40+zoneTier()*15); gainXp(20+zoneTier()*10); gainClassXp(25+zoneTier()*10);
     addText(G.p.x,G.p.y+80,G.p.z,'QUEST COMPLETE +'+rg+'g','var(--amber)',true);
@@ -1387,7 +1389,7 @@ function loadStage(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -1405,6 +1407,75 @@ function loadStage(i){
     if(room){ m.room=room; room.monsters.push(m); if(room.encounter) m.dropT=9999; }
     if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
     return m; };
+  /* ---- ZONE GRAMMAR: Hollow Pass = a real canyon, not the maze (Zone Identity v1) ----
+     Switchbacking bowls between tall strata walls; ledge climbs up to rims that hold the
+     quest bones; respawning charger dens make the kill quest an actual hunt. */
+  if(!isBoss && !isMini && !G.trial && !G.side && curZone().id==='hollow'){
+    const SAND='#8a6a42', DARKS='#5e4527', LITES='#b08b56', N=5;
+    let cx2=0, cz2=0, dir=1; const bowls=[];
+    for(let b=0;b<N;b++){
+      const bw=300+rnd()*90, bd=250+rnd()*70;
+      const room={x:cx2,z:cz2,w:bw,d:bd,monsters:[],doorways:[],doors:[],_gaps:{n:[],s:[],e:[],w:[]},encounter:false,cleared:true};
+      bowls.push(room); G.rooms.push(room);
+      G.segments.push({x:cx2,z:cz2,w:bw,d:bd});
+      // strata canyon faces: collision walls + layered deco bands (the "texture")
+      for(const sgn of [-1,1]){ const wx=cx2+sgn*(bw/2+16);
+        G.walls.push({x:wx,z:cz2,w:30,d:bd+40,h:240});
+        for(let L2=0;L2<4;L2++){ const hh=62+L2*4, yb=L2*62;
+          G.deco.push({x:wx+sgn*(4+L2*5),z:cz2,w:36+L2*9,h:hh,y0:yb,c:tint([DARKS,SAND,LITES,SAND][L2],(rnd()<0.5?'#000':'#fff'),0.05+rnd()*0.08),theme:'canyon'}); }
+        G.deco.push({x:wx+sgn*26,z:cz2,w:58,h:16,y0:248,c:LITES,theme:'canyon'}); }
+      // the switchback ledge climb (one wall per bowl, alternating): 3 steps up to a rim shelf
+      const side=(b%2?1:-1), lx=cx2+side*(bw/2-42);
+      for(let st2=0;st2<3;st2++){
+        G.obstacles.push({kind:'plat',x:lx-side*st2*66, z:cz2-bd/2+60+st2*54, w:64,d:56,h:58+st2*58}); }
+      const rim={x:lx-side*66*2.6, z:cz2+14, w:110,d:88,h:224};
+      G.obstacles.push(Object.assign({kind:'plat'},rim));
+      room.rim=rim;
+      // scatter floor boulders (hoppable cover)
+      for(let o2=0;o2<3;o2++) G.obstacles.push({x:cx2+(rnd()*2-1)*(bw/2-80),z:cz2+(rnd()*2-1)*(bd/2-80),w:34+rnd()*26,d:34+rnd()*26,h:26+rnd()*30});
+      G.torches.push({x:cx2-bw/2+30,z:cz2,f:rnd()*6.28},{x:cx2+bw/2-30,z:cz2,f:rnd()*6.28});
+      if(b<N-1){ // connecting slot canyon, offset to force the snake
+        const off=(rnd()*2-1)*(bw/2-90), clen=150+rnd()*70, nz=cz2-bd/2-clen-((250+70/2)/2);
+        G.segments.push({x:cx2+off,z:cz2-bd/2-clen/2,w:92,d:clen+36});
+        for(const sgn of [-1,1]){ const wx2=cx2+off+sgn*(46+14);
+          G.walls.push({x:wx2,z:cz2-bd/2-clen/2,w:26,d:clen+30,h:240});
+          for(let L2=0;L2<4;L2++) G.deco.push({x:wx2+sgn*(3+L2*5),z:cz2-bd/2-clen/2,w:30+L2*8,h:62,y0:L2*62,c:tint([DARKS,SAND,LITES,SAND][L2],'#000',rnd()*0.1),theme:'canyon'}); }
+        cz2=cz2-bd/2-clen-(260/2)-20; cx2+=off*0.4; dir=-dir; }
+    }
+    const first=bowls[0], last=bowls[N-1];
+    // monsters: chargers + theme mobs on the floor; DENS in bowls 2 & 4 respawn chargers while the hunt is on
+    G.dens=[];
+    bowls.forEach((room,bi)=>{ if(bi===0) return;
+      mkMonster('charger',room.x-40,room.z,room); if(rnd()<0.7) mkMonster(pick(),room.x+60,room.z+40,room);
+      if(bi===1||bi===3){ G.dens.push({x:room.x+room.w/2-70,z:room.z+room.d/2-70,type:'charger',t:2.5,questId:'hp1'});
+        G.deco.push({x:room.x+room.w/2-70,z:room.z+room.d/2-70,w:44,h:30,c:'#3a2a18',theme:'canyon'}); } });
+    // the quest bones live on the RIMS — the climb is the quest
+    { const fq2=ZONES[1].areas[G.area]&&ZONES[1].areas[G.area].quests.find(q=>q.k==='fetch');
+      if(fq2&&!questDone(fq2)){ const spots=bowls.map(r=>r.rim);
+        for(let i2=0;i2<Math.min(5,spots.length);i2++){ const r2=spots[i2%spots.length];
+          G.pickups.push({x:r2.x,z:r2.z,y0:r2.h,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); }
+        if(spots.length<5) for(let i2=spots.length;i2<5;i2++){ const r2=bowls[i2%N];
+          G.pickups.push({x:r2.x,z:r2.z-30,y0:0,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); } } }
+    // find-quest shrine: a walled alcove off the last-but-one bowl
+    { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
+      if(fnd){ const r2=bowls[N-2]; G.waystone={x:r2.x,z:r2.z+r2.d/2-46,y:0,q:fnd.id,taken:false,t:0}; } }
+    // hidden rift (side zone) tucked behind the first bowl's rim wall
+    if(ZONES[1].side && !meta.sideFound[ZONES[1].side.id] && G.area===0){
+      const r2=bowls[1]; G.secret={x:r2.x,z:r2.z+r2.d/2-30,y:0,t:0,id:ZONES[1].side.id}; }
+    // exit portal at the head of the canyon (quest-gated as usual)
+    G.portalPos={x:last.x,z:last.z-last.d/2+70};
+    if(!areaQuests().length) G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+    G.startPos={x:first.x,z:first.z}; G.goalPos={x:last.x,z:last.z};
+    G.lastSafe={x:first.x,z:first.z+first.d/2-40};
+    let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
+    for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }
+    G.bounds={minX:mnX-80,maxX:mxX+80,minZ:mnZ-80,maxZ:mxZ+80}; G.progressEnd=mnZ;
+    for(let k2=0;k2<26;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);   // distant mesas
+      G.deco.push({x:rnd()<0.5?mnX-140-rnd()*300:mxX+140+rnd()*300, z:zz, w:60+rnd()*120, h:120+rnd()*180, c:tint(SAND,'#000',0.3+rnd()*0.25), theme:'canyon'}); }
+    hazSetup(rnd2);
+    document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
+    return;
+  }
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}
     :{x,z,w:16,d:GW,h:84,open:type==='combat',type,ori:'z',plates:[]}; G.doors.push(dr); return dr; };
@@ -1569,7 +1640,7 @@ function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[];
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=18; G.bonusSecured=false; G.combo=0; G.comboT=0; // shorter timer
   const rnd=mulberry(G.stageIndex*31337+911);
   G.segments.push({x:0,z:-20,w:186,d:186});
@@ -2084,8 +2155,8 @@ function killEnemy(e){
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   questKill(e.type);
-  { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods
-    if(fq && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
+  { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
+    if(fq && !fq.placed && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
   addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
@@ -2186,6 +2257,15 @@ function update(dt){
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
   hazUpdate(dt);
+  // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
+  if(G.dens&&G.dens.length){ for(const dn of G.dens){
+    const q=areaQuests().find(x=>x.id===dn.questId);
+    if(!q||questDone(q)) continue;
+    dn.t-=dt; if(dn.t>0) continue; dn.t=3.5+Math.random()*1.5;
+    const near=G.enemies.filter(e2=>!e2.dead&&e2.type===dn.type&&dXZ(e2.x,e2.z,dn.x,dn.z)<340).length;
+    if(near>=3 || dXZ(p.x,p.z,dn.x,dn.z)>900) continue;
+    const m=spawnEnemy(dn.type,dn.x+(Math.random()-0.5)*50,dn.z+(Math.random()-0.5)*50);
+    m.active=true; burst(m.x,10,m.z,'#c8893a',12); SFX.growl(0.6); } }
   { const tr=cosEquipped('trail');                     // cosmetic trail: only when you're actually moving
     if(tr){ G.trailT=(G.trailT||0)+dt;
       if(G.trailT>0.045 && Math.hypot(p.vx,p.vz)>70){ G.trailT=0;
@@ -3038,6 +3118,7 @@ function drawCourse(s,t){
   }
   // theme decorations
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    if(d.y0!=null){ bx(d.x,d.y0+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c); continue; }   // strata band: an exact box at a given base height
     if(d.theme==='forest'){ bx(d.x,d.h*0.3,d.z, d.w*0.35,d.h*0.6,d.w*0.35,'#3a2c1c');
       bx(d.x,d.h*0.72,d.z, d.w*1.9,d.h*0.62,d.w*1.9, tint('#2c5c34','#000',0.15)); }
     else if(d.theme==='frost'){ pushM(); mv(d.x,d.h*0.4,d.z); rotY(d.x*0.1); rotZ(0.16); box(d.w*0.55,d.h*0.85,d.w*0.55,'#7fd6ff','#7fd6ff',0.85); popM(); }

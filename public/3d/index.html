@@ -89,6 +89,13 @@
   .zrow.zside{margin-left:16px;background:rgba(196,123,255,.07);border-color:rgba(196,123,255,.28);}
   .zrow.zside:hover{background:rgba(196,123,255,.16);border-color:rgba(196,123,255,.5);}
   .zrow .zsec{color:#c47bff;font-size:9px;font-weight:900;letter-spacing:.12em;margin-left:4px;}
+  .cosrow{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:9px;background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);margin-bottom:5px;cursor:pointer;text-align:left;}
+  .cosrow:not(.coslock):hover{background:rgba(255,255,255,.08);}
+  .cosrow.coslock{opacity:.42;cursor:default;}
+  .cosrow.cossel{border-color:var(--amber);background:rgba(255,210,74,.10);}
+  .cosdot{width:15px;height:15px;border-radius:50%;flex:0 0 auto;}
+  .choice.lockc{opacity:.45;cursor:default;}
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
@@ -172,7 +179,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.20.0';
+const VERSION3D='1.21.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -183,7 +190,8 @@ const MKEY=m=>'bladefall3d_'+m;
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
-  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel','beatNormal'];
+  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
+  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -194,7 +202,9 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 const meta=Object.assign({
   soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
-  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,beatNormal:false,
+  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
+  beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
+  zonesCleared:0,elitesKilled:0,secretsFound:0,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
 },_g);
@@ -643,40 +653,88 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    the layout) gated by main quests, then a boss room. Clearing the boss completes the
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
-  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,blurb:'Where the road ends and the wild begins.',
+  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,blurb:'Where the road ends and the wild begins.',
     areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:8,d:'Slay 8 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute'}},
-  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,blurb:'Dry canyons that swallow the careless.',
+  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',blurb:'Dry canyons that swallow the careless.',
     areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:7,d:'Slay 7 Chargers'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Gather 5 Sun-Bleached Bones'},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman'}},
-  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,blurb:'A fortress the dead never left.',
+  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',blurb:'A fortress the dead never left.',
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:8,d:'Destroy 8 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Warden'}},
-  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,blurb:'Cold deep enough to still the blood.',
+  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',blurb:'Cold deep enough to still the blood.',
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:8,d:'Slay 8 Frostlings'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer'}},
-  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,blurb:'The mountain’s furnace, still burning.',
+  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',blurb:'The mountain’s furnace, still burning.',
     areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:8,d:'Slay 8 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
     side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus'}},
-  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,blurb:'Where the world thins and something looks back.',
+  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',blurb:'Where the world thins and something looks back.',
     areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:8,d:'Banish 8 Shadelings'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King'}},
-  {id:'apex',name:'The Apex',icon:'👑',tier:7,blurb:'One throne. One tyrant. No quests — only the fight.',
+  {id:'apex',name:'The Apex',icon:'👑',tier:7,haz:'lava',blurb:'One throne. One tyrant. No quests — only the fight.',
     areas:[], boss:{stage:13,name:'The Void Tyrant'}}
 ];
 const TIERBAND=[1,1,2,2,3,3,4];                                  // max rarity INDEX (0=common..4=legendary) by zone tier
+/* Signature hazards: one per zone, so each zone PLAYS different, not just looks different. */
+const HAZARDS={
+  slick:{name:'Rime',blurb:'The ice gives back nothing. Plan your stops.'},      // low friction
+  gusts:{name:'Gales',blurb:'The wind shoves you mid-air.'},                     // lateral push while airborne
+  phase:{name:'Phasing',blurb:'Some ground is only sometimes there.'},           // platforms blink out
+  lava:{name:'Emberfall',blurb:'The floor breathes fire on a rhythm.'}           // periodic ground pulse
+};
+/* Difficulty ladder: Normal -> Hardcore (beat Normal) -> Hitless (beat Hardcore). */
+const DIFFS={
+  normal:{id:'normal',name:'Normal',icon:'⚔',blurb:'The hub is your save point. Die and you lose only that attempt.'},
+  hardcore:{id:'hardcore',name:'Hardcore',icon:'☠',blurb:'One life for the whole chain. Death erases everything.',needs:'beatNormal'},
+  hitless:{id:'hitless',name:'Hitless',icon:'👁',blurb:'One hit — or one fall — and it is over. Everything resets.',needs:'beatHardcore'}
+};
+/* Cosmetics: pure swagger, earned by doing things. No stats attached, ever. */
+const COSMETICS={
+  cape:[
+    {id:'wanderer',name:'Wanderer’s Cape',col:'#6b7183',hint:'Clear your first zone',has:()=>(meta.zonesCleared||0)>=1},
+    {id:'delver',name:'Delver’s Cape',col:'#c47bff',hint:'Find 3 secrets',has:()=>(meta.secretsFound||0)>=3},
+    {id:'slayer',name:'Slayer’s Cape',col:'#e8453d',hint:'Kill 50 elites',has:()=>(meta.elitesKilled||0)>=50},
+    {id:'tyrant',name:'Tyrant’s Mantle',col:'#ffd24a',hint:'Beat Normal',has:()=>!!meta.beatNormal},
+    {id:'undying',name:'Undying Shroud',col:'#0f0f14',hint:'Beat Hardcore',has:()=>!!meta.beatHardcore}],
+  trail:[
+    {id:'dust',name:'Dust Trail',col:'#cfd6df',hint:'Reach level 10',has:()=>(meta.maxLevel||1)>=10},
+    {id:'ember',name:'Ember Trail',col:'#ff7a3a',hint:'Clear Emberdeep',has:()=>!!meta.zoneDone.ember},
+    {id:'frost',name:'Frost Trail',col:'#7fd6ff',hint:'Clear Frostfell',has:()=>!!meta.zoneDone.frost},
+    {id:'void',name:'Void Trail',col:'#b06bff',hint:'Clear The Abyss',has:()=>!!meta.zoneDone.abyss},
+    {id:'flawless',name:'Ghost Trail',col:'#ffffff',hint:'Clear 15 areas without taking a hit',has:()=>(meta.flawlessStages||0)>=15}],
+  glow:[
+    {id:'gold',name:'Gilded Edge',col:'#ffd24a',hint:'Find a legendary',has:()=>(meta.legendaryFound||0)>=1},
+    {id:'blood',name:'Bloodlit Edge',col:'#e8453d',hint:'1000 kills',has:()=>(meta.totalKills||0)>=1000},
+    {id:'soul',name:'Soulfire Edge',col:'#b06bff',hint:'Earn the Reaper',has:()=>!!(meta.classUnlocked&&meta.classUnlocked.reaper)},
+    {id:'perfect',name:'Hitless Edge',col:'#ffffff',hint:'Beat Hitless',has:()=>!!meta.beatHitless}]
+};
+const COSSLOTS=[{k:'cape',label:'Cape'},{k:'trail',label:'Trail'},{k:'glow',label:'Weapon Glow'}];
+function cosOwned(slot,id){ const c=COSMETICS[slot].find(x=>x.id===id); return !!(c&&c.has()); }
+function cosEquipped(slot){ const id=meta.cosEquipped&&meta.cosEquipped[slot]; return (id&&cosOwned(slot,id))?COSMETICS[slot].find(x=>x.id===id):null; }
+function checkCosmetics(){ let n=0;
+  for(const s of COSSLOTS) for(const c of COSMETICS[s.k]){
+    const key=s.k+':'+c.id;
+    if(c.has()&&!meta.cosmetics[key]){ meta.cosmetics[key]=1; n++; toast('✨ Cosmetic unlocked: '+c.name); } }
+  if(n) persistGlobal(); return n; }
+function diffOpen(id){ const d=DIFFS[id]; return !d.needs || !!meta[d.needs]; }
+function diffMode(id){ return id==='hardcore'?'hc':id==='hitless'?'hl':'rl'; }   // each difficulty keeps its own save
+// MODE (the save key actually loaded) is the single source of truth for the rules — meta.diff is only the menu's memory.
+// Deriving from MODE means a desync can never let a hardcore save quietly play by Normal's rules.
+function curDiff(){ return MODE==='hc'?DIFFS.hardcore:MODE==='hl'?DIFFS.hitless:DIFFS.normal; }
+function isHitless(){ return MODE==='hl'; }
+function isPermadeath(){ return MODE==='hc'||MODE==='hl'; }
 function zoneOf(zi){ return ZONES[Math.max(0,Math.min(ZONES.length-1,zi|0))]; }
 function curZone(){ return zoneOf(G?G.zone:0); }
 function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
@@ -957,7 +1015,8 @@ function recomputeArmor(p){
   p.armorMods=m;
 }
 function isGod(p){ return p.skin==='god'; }
-function effMaxHp(p){ let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; return isGod(p)?v+9000:v; }
+function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
+  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; return isGod(p)?v+9000:v; }
 function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
@@ -1042,7 +1101,7 @@ function enterZone(zi){
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
-  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); hazToast();
 }
 function loadArea(){
   const Z=curZone();
@@ -1062,6 +1121,8 @@ function enterSide(zi){
   loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   toast(S.icon+' '+S.name+' — Tier '+G.zoneTier+'. Reach the exit alive.');
 }
+function hazToast(){ const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
+  const H=HAZARDS[Z.haz]; toast('⚠ '+H.name+' — '+H.blurb); }
 function sideClear(){
   const Z=curZone(), S=Z.side;
   meta.hero=snapOf(G.p); meta.bank=null; meta.sideDone[S.id]=true;
@@ -1131,7 +1192,8 @@ function zoneClear(){
   meta.zoneDone[Z.id]=true;
   meta.zoneMax=Math.max(meta.zoneMax||0, Math.min(ZONES.length-1, G.zone+1));
   meta.bestStage=Math.max(meta.bestStage||0,G.stageIndex);
-  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements();
+  meta.zonesCleared=(meta.zonesCleared||0)+1;
+  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements(); checkCosmetics();
   if(G.zone>=ZONES.length-1){ winGame(); return; }
   mode='menu'; SFX.win(); showGameUI(false);
   const NZ=zoneOf(G.zone+1);
@@ -1167,6 +1229,8 @@ function loadStage(i){
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
   const eliteRate=Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
   const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
+  // Phasing zones bias their bridges toward static stones, because those are the only tiles the hazard may take.
+  const phz=!!(G && !G.side && !G.trial && curZone().haz==='phase');
   const MOBS=THEMEMOBS[s.theme]||['grunt'];
   const pick=()=>MOBS[Math.floor(rnd()*MOBS.length)];
   const GW=104; // doorway width
@@ -1238,9 +1302,9 @@ function loadStage(i){
     const iw=32;                                                      // narrow footholds -> wider, more precise jumps
     const F=Math.max(1, Math.ceil(span/150)-1), step=span/(F+1);      // fewest footholds that keep each gap crossable (~<=134)
     for(let i=1;i<=F;i++){ const cc=lo+step*i, r2=rnd();              // mostly DYNAMIC tiles now -> can't dawdle
-      if(r2<0.5){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }               // crumbling stone
-      else if(r2<0.82 && horiz){ const amp=Math.min(step*0.34,42); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.7,h:0,amp,sp:1.1+rnd()*0.7,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform
-      else { G.segments.push(put(cc,iw)); }                          // static stepping stone (now the minority)
+      if(r2<(phz?0.3:0.5)){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }      // crumbling stone
+      else if(r2<(phz?0.52:0.82) && horiz){ const amp=Math.min(step*0.34,42); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.7,h:0,amp,sp:1.1+rnd()*0.7,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform
+      else { G.segments.push(Object.assign(put(cc,iw),{phaseable:true})); }   // static stepping stone (the minority) — the only tiles Phasing may take
     }
     if(diff>=2 && rnd()<0.4){ const g=lo+step*(1+Math.floor(rnd()*F)); G.geysers.push({x:horiz?g:cross,z:horiz?cross:g,r:18,period:2.6+rnd()*1.4,phase:rnd()*6.28}); } }; // more frequent hazards, earlier
   for(const e of edges){ const ca=e[0],cb=e[1], ra=roomAt[K(ca[0],ca[1])], rb=roomAt[K(cb[0],cb[1])]; ra.deg++; rb.deg++;
@@ -1323,10 +1387,11 @@ function loadStage(i){
     G.deco.push({x: rnd()<0.5? mnX-40-rnd()*220 : mxX+40+rnd()*220, z:zz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
   G.startPos={x:entryRoom.x,z:entryRoom.z}; G.goalPos={x:goalRoom.x,z:goalRoom.z};
   G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
+  hazSetup(rnd2);
   G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
   G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
-  document.getElementById('stagetag').textContent=G.areaName||s.name; questUpdate(); hudUpdate();
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
 function startBonus(){
@@ -1581,10 +1646,53 @@ function updateGeysers(dt){
   }
 }
 function updateMovers(dt){ for(const mv of G.movers){ mv.px=mv.x; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp; } }
+/* ---- Zone signature hazards (Phase 4): one per zone, applied every frame ---- */
+function curHaz(){ return (G&&G.haz)?HAZARDS[G.haz]:null; }
+function hazUpdate(dt){
+  if(!G.haz) return; const p=G.p;
+  if(G.haz==='slick'){                                   // Rime: ice keeps your momentum — brake early
+    if(p.onGround){ p.slide=Math.min(1,(p.slide||0)+dt*3); } else p.slide=Math.max(0,(p.slide||0)-dt*2);
+  } else if(G.haz==='gusts'){                            // Gales: the wind shoves you mid-air
+    G.gustT=(G.gustT||0)+dt;
+    const ph=Math.sin(G.time*0.45), strong=Math.abs(ph)>0.55;
+    G.gustX=ph*1.0;
+    if(!p.onGround&&strong){ p.vx+=G.gustX*260*dt; }
+    if(strong&&Math.random()<0.25*60*dt) G.particles.push({x:p.x-G.gustX*180+(Math.random()-0.5)*160,y:20+Math.random()*80,z:p.z+(Math.random()-0.5)*220,vx:G.gustX*420,vy:0,vz:0,life:0.5,color:'#cfe6ff',sz:2});
+  } else if(G.haz==='phase'){                            // Phasing: some ground is only sometimes there
+    for(const ph of (G.phasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-0.15;
+      if(on!==ph.on){ ph.on=on;
+        if(!on){ const s=ph.seg; if(s&&G.segments.indexOf(s)>=0) G.segments.splice(G.segments.indexOf(s),1); }
+        else if(ph.seg && G.segments.indexOf(ph.seg)<0) G.segments.push(ph.seg); } }
+  } else if(G.haz==='lava'){                             // Emberfall: the floor breathes fire on a rhythm
+    G.emberT=(G.emberT||0)+dt;
+    if(G.emberT>=4.2){ G.emberT=0; G.emberWarn=1.1; }
+    if(G.emberWarn>0){ G.emberWarn-=dt;
+      if(G.emberWarn<=0){ G.emberBurn=0.5;
+        for(const v of (G.vents||[])){ burst(v.x,4,v.z,'#ff5a1e',9); } } }
+    if(G.emberBurn>0){ G.emberBurn-=dt;
+      for(const v of (G.vents||[])){ if(dXZ(v.x,v.z,p.x,p.z)<v.r+p.r && p.y<52){
+        hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.14)),v.x,v.z); break; } } }
+  }
+}
+function hazSetup(rnd){                                  // place whatever the zone's hazard needs
+  const Z=curZone(); G.haz=(G.side||G.trial)?null:(Z.haz||null);
+  G.phasers=[]; G.vents=[]; G.gustX=0; G.emberT=0; G.emberWarn=0; G.emberBurn=0;
+  if(!G.haz) return;
+  if(G.haz==='phase'){                                   // only mid-bridge stepping stones blink — never a landing stoop
+    const cand=G.segments.filter(s=>s.phaseable);
+    for(const s of cand){ if(rnd()<0.6) G.phasers.push({seg:s,sp:0.8+rnd()*0.7,off:rnd()*6.28,on:true}); }
+  } else if(G.haz==='lava'){                             // vents across the rooms
+    for(const r of G.rooms){ if(rnd()<0.75) G.vents.push({x:r.x+(rnd()*2-1)*(r.w/2-70),z:r.z+(rnd()*2-1)*(r.d/2-70),r:44}); }
+  }
+}
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':'LAVA'; }
 function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']:['#4a1206','#ff5a1e']; }
 function lavaHit(){
-  const p=G.p, dmg=Math.max(1,Math.round(effMaxHp(p)*0.22));
+  const p=G.p;
+  if(isHitless()){ p.hp=0; p.dead=true; G.tookDamage=true;      // Hitless: a fall is death, not a toll
+    burst(p.x,6,p.z,hazardCols(STAGES[G.stageIndex].theme)[1],22); SFX.hurt();
+    addText(p.x,50,p.z,'FELL','var(--danger)',true); die(); return; }
+  const dmg=Math.max(1,Math.round(effMaxHp(p)*0.22));
   p.hp-=dmg; G.tookDamage=true; G.combo=0; G.comboT=0;
   burst(p.x,6,p.z,hazardCols(STAGES[G.stageIndex].theme)[1],16);
   SFX.hurt(); SFX.magic('fire'); G.shake=Math.min(G.shake+12,18);
@@ -1807,6 +1915,7 @@ function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return 
 function killEnemy(e){
   if(e.dead) return;
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   questKill(e.type);
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods
     if(fq && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
@@ -1901,12 +2010,20 @@ function update(dt){
     const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
   else {
-    if(mx!==0) p.vx+=mx*moveSpd*dt*8; p.vx*=0.80; if(Math.abs(p.vx)<4) p.vx=0;
-    if(mz!==0) p.vz+=mz*moveSpd*dt*8; p.vz*=0.80; if(Math.abs(p.vz)<4) p.vz=0;
+    // Rime (Frostfell): the ice takes your grip — slower to build speed, much slower to shed it
+    const ice=(G.haz==='slick')?(p.slide||0):0, acc=8*(1-ice*0.55), fr=0.80+ice*0.175, cut=4-ice*3.7;
+    if(mx!==0) p.vx+=mx*moveSpd*dt*acc; p.vx*=fr; if(Math.abs(p.vx)<cut) p.vx=0;
+    if(mz!==0) p.vz+=mz*moveSpd*dt*acc; p.vz*=fr; if(Math.abs(p.vz)<cut) p.vz=0;
     const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
+  hazUpdate(dt);
+  { const tr=cosEquipped('trail');                     // cosmetic trail: only when you're actually moving
+    if(tr){ G.trailT=(G.trailT||0)+dt;
+      if(G.trailT>0.045 && Math.hypot(p.vx,p.vz)>70){ G.trailT=0;
+        G.particles.push({x:p.x+(Math.random()-0.5)*9,y:p.y+5+Math.random()*7,z:p.z+(Math.random()-0.5)*9,
+          vx:-p.vx*0.07,vy:22,vz:-p.vz*0.07,life:0.42,color:tr.col,sz:2.4}); } } }
   // class-skill upkeep (cooldowns, berserk aura, charge dash, tempest ticks)
   for(let i=0;i<4;i++) if(p.skillCd[i]>0) p.skillCd[i]=Math.max(0,p.skillCd[i]-dt);
   if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
@@ -2096,7 +2213,7 @@ function update(dt){
   // hidden side-zone rift: walk into it and it's yours forever
   if(G.secret){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
-      const S=curZone().side; meta.sideFound[S.id]=true; persist();
+      const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
       G.secret=null; SFX.god(); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
       addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
       toast('🔓 '+S.icon+' '+S.name+' discovered — its portal now waits in the hub'); } }
@@ -2291,13 +2408,13 @@ function randomLoot(rid){ const r=Math.random();
 function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); }
 function die(){
   mode='dead'; SFX.hurt(); showGameUI(false);
-  const Z=curZone(), wasHc=MODE==='hc';
+  const Z=curZone(), perma=isPermadeath(), D=curDiff();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
-  if(wasHc) wipeMode('hc'); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
+  if(perma) wipeMode(MODE); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
   persist();
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
-    ${wasHc?'<p class="hint" style="color:var(--danger)"><b>Hardcore — this save is erased.</b></p>'
+    ${perma?`<p class="hint" style="color:var(--danger)"><b>${D.name} — this save is erased. Back to the beginning.</b></p>`
       :`<div class="statgrid"><div class="vsrow"><span>Lost this attempt</span><b style="color:var(--danger)">${lostGold}g + everything found</b></div>
         <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
     <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
@@ -2305,10 +2422,14 @@ function die(){
 }
 function winGame(){
   mode='win'; SFX.win(); showGameUI(false);
-  const bonus=awardGold(500);
-  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null; meta.beatNormal=true; persist(); checkAchievements();
+  const bonus=awardGold(500), D=curDiff();
+  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
+  meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
+  persist(); persistGlobal(); checkAchievements(); checkCosmetics();
+  const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
-    <p class="ovsub">Every zone cleared. The Void Tyrant has fallen.</p>
+    <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Void Tyrant has fallen.
+      ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You have beaten BLADEFALL at its cruelest.</span>'}</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
       <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
       <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div></div>
@@ -2336,7 +2457,25 @@ function titleScreen(){
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
 }
-function modeSelect(){ initAudio(); loadMode('rl'); openHub(); }   // no mode select any more — the adventure IS the game (Normal). Hardcore/Hitless return as unlockable difficulties.
+function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
+  initAudio();
+  const open=Object.keys(DIFFS).filter(diffOpen);
+  if(open.length<2){ meta.diff='normal'; loadMode('rl'); openHub(); return; }
+  openDiffSelect();
+}
+function openDiffSelect(){
+  mode='menu'; showGameUI(false);
+  const cards=Object.keys(DIFFS).map(id=>{ const D=DIFFS[id], open=diffOpen(id), mv=loadJSON(MKEY(diffMode(id)))||{};
+    const beat=meta['beat'+id.charAt(0).toUpperCase()+id.slice(1)];
+    return `<button class="choice ${open?'':'lockc'}" ${open?`data-d="${id}"`:''}>
+      <div class="cname"><span>${open?D.icon:'🔒'}</span>${D.name}${beat?' <span style="color:var(--good);font-size:10px;margin-left:auto">✓ BEATEN</span>':''}</div>
+      <div class="cdesc">${open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock'}${open?`<br><b style="color:#ffd24a">${mv.gold||0}g</b> banked · zone ${(mv.zoneMax||0)+1}/${ZONES.length}`:''}</div></button>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Choose your risk</h2><p class="ovsub">Each difficulty keeps its own save.</p>
+    <div class="choices">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
+  document.querySelectorAll('.choice[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
+    meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
+  document.getElementById('backBtn').onclick=titleScreen;
+}
 function openHub(){
   mode='menu'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   document.getElementById('questbox').classList.add('hide');
@@ -2358,20 +2497,20 @@ function openHub(){
           <div class="zd">${Z.side.blurb} · <b>Tier ${Math.min(7,Z.tier+1)}</b></div></div>
         <div class="zgo">▶</div></div>`; } });
   showOverlayHTML(`<div class="card"><h2 class="ovh">The Hub</h2>
-    <p class="ovsub">${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <p class="hint" style="margin:0 0 8px">Your progress is safe here. Anything you find in a zone only banks when you clear it.</p>
+    <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="achlist" style="max-height:min(42vh,300px)">${rows}</div>
     <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
-    <button class="bigbtn ghost" id="skinBtn">Skins</button>
+    <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
   document.querySelectorAll('.zrow[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
   document.getElementById('trainBtn').onclick=()=>openTrainer(openHub);
   document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
   document.getElementById('shopBtn').onclick=()=>openShop(openHub);
-  document.getElementById('skinBtn').onclick=()=>openSkins(openHub);
+  document.getElementById('wardBtn').onclick=()=>openWardrobe(openHub);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
 function openClassPicker(){
@@ -2409,6 +2548,30 @@ function openTrainer(back){
     persist(); SFX.levelup(); toast('Path forgotten — choose again'+(cid===meta.classId?' on your next zone':''));
     if(cid===meta.classId&&classState(cid).rank>=3){ openSubclassFrom(()=>openTrainer(back)); return; }
     openTrainer(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+function openWardrobe(back){
+  mode='menu'; checkCosmetics();
+  const secs=COSSLOTS.map(s=>{
+    const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
+      return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
+        <div class="cosdot" style="background:${un?c.col:'#333'};box-shadow:${un?'0 0 10px '+c.col:'none'}"></div>
+        <div style="flex:1;min-width:0"><div class="gn">${un?c.name:'🔒 ???'}</div>
+          <div class="gd">${un?(sel?'equipped':'tap to wear'):c.hint}</div></div></div>`; }).join('');
+    const cur=cosEquipped(s.k);
+    return `<p class="hint" style="margin:8px 0 5px;text-align:left"><b>${s.label}</b>${cur?' · '+cur.name:' · none'}
+      ${cur?`<span class="cosoff" data-off="${s.k}" style="color:var(--muted);cursor:pointer;float:right">remove</span>`:''}</p>${tiles}`; }).join('');
+  const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Wardrobe</h2>
+    <p class="ovsub">Earned by doing, not buying. <b>${owned}/${total}</b> unlocked · no stats, pure swagger.</p>
+    <div class="achlist" style="max-height:min(52vh,380px)">${secs}</div>
+    <button class="bigbtn ghost" id="skinBtn2">Skins</button>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.cosrow[data-k]').forEach(r=>r.onclick=()=>{
+    const k=r.dataset.k; meta.cosEquipped[k]=(meta.cosEquipped[k]===r.dataset.i)?null:r.dataset.i;
+    persistGlobal(); SFX.pickup(); openWardrobe(back); });
+  document.querySelectorAll('.cosoff').forEach(b=>b.onclick=e=>{ e.stopPropagation(); meta.cosEquipped[b.dataset.off]=null; persistGlobal(); openWardrobe(back); });
+  document.getElementById('skinBtn2').onclick=()=>openSkins(()=>openWardrobe(back));
   document.getElementById('backBtn').onclick=back;
 }
 function openQuestBoard(back){
@@ -2682,8 +2845,9 @@ function drawCourse(s,t){
 }
 function weaponMesh(w,swing){
   // drawn in hand space: +y up along the blade
-  const blade=w.blade, mag=w.sch==='mag';
-  const glow=mag?blade:null;
+  const gcos=(G&&G.p&&G.p.weapon===w)?cosEquipped('glow'):null;    // cosmetic edge glow — only on YOUR equipped weapon
+  const blade=gcos?gcos.col:w.blade, mag=w.sch==='mag';
+  const glow=gcos?gcos.col:(mag?blade:null);
   const T=(typeof G!=='undefined'&&G&&G.time)||0;
   const edge=tint(blade,'#ffffff',0.45), dkb=tint(blade,'#000000',0.4);
   // dark-artifact material kit: bone, rust, blood, black iron, leather, sinew
@@ -3155,6 +3319,14 @@ function render(t){
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
+  if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
+    const warn=G.emberWarn>0, burn=G.emberBurn>0;
+    for(const v of (G.vents||[])){
+      const gl=burn?1:(warn?(0.35+0.45*Math.sin(t*22)):0.16);
+      bx(v.x,1.5,v.z, v.r*2,3,v.r*2, burn?'#ff5a1e':'#5a1d0a', burn?'#ff9a3a':'#ff5a1e', gl);
+      if(burn) for(let i=0;i<2;i++) bx(v.x+(Math.random()-0.5)*v.r, 12+Math.random()*46, v.z+(Math.random()-0.5)*v.r, 6,14,6, '#ff9a3a','#ffd24a',0.75); } }
+  if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
+    bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
   if(G.secret){                                        // the hidden rift: a dark seam in the wall, subtle but findable
     const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7);
     bx(s.x,26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
@@ -3178,6 +3350,15 @@ function render(t){
       for(let i=0;i<3;i++) bx(e.x+(i-1)*7, ey+(i===1?3:0), e.z, 4,(i===1?9:6),4, '#ffd24a','#ffb020',ef);
       bx(e.x, ey-4, e.z, 20,3,4, '#ffd24a','#ffb020',ef*0.9); } }
   drawShadow(p.x,p.z,13);
+  if(meta.camMode!=='fps'){                            // cosmetic cape: hangs off the shoulders, swings with your speed
+    const cp=cosEquipped('cape');
+    if(cp && !SIL){ const spd=Math.min(1,Math.hypot(p.vx,p.vz)/240), sw=Math.sin(t*7)*0.09*spd;
+      pushM(); mv(p.x,p.y,p.z); rotY(p.yaw);
+      pushM(); mv(0,34,-9); rotX(-0.22-spd*0.5+sw);
+      box(20,3,4, cp.col, cp.col, 0.95);
+      mv(0,-13,-3); box(18,26,2.5, cp.col, cp.col, 0.85);
+      mv(0,-12,-1); box(15,14,2, cp.col, cp.col, 0.7);
+      popM(); popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
   if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
     const sk0=SKINS[p.skin]||SKINS.knight;
@@ -3362,6 +3543,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
+  DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

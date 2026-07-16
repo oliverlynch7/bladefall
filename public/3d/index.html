@@ -179,7 +179,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.21.0';
+const VERSION3D='1.22.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -191,7 +191,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
-  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound'];
+  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -200,7 +200,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
+  soundOn:true,musicOn:true,musicVol:1,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -235,6 +235,75 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
 }
 function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.classUnlocked={}; meta.trialsDone={}; meta.sideFound={}; meta.sideDone={}; } // hardcore death
 
+/* ---------------- Music (streamed mp3, crossfaded) ----------------
+   Separate from SFX on purpose: SFX stay procedural WebAudio, music is plain
+   <audio> so the browser streams it instead of us holding 46MB in memory.
+   Tracks load lazily the first time a slot is asked for.
+   EVERY track is CC-BY — see CREDITS. The credits screen is not optional. */
+const MUSCREDITS=[
+  {who:'Matthew Pablo', url:'matthewpablo.com', lic:'CC BY 3.0', licUrl:'https://creativecommons.org/licenses/by/3.0/',
+   tracks:['Dark Descent','Pleasant Creek','Woodland Fantasy','Tactical Pursuit','Defying Commodus','The Dark Amulet','Colossal Boss Battle Theme','The Fall of Arcana','Lively Meadow (Victory Fanfare)']},
+  {who:'Kevin MacLeod', url:'incompetech.com', lic:'CC BY 4.0', licUrl:'https://creativecommons.org/licenses/by/4.0/',
+   tracks:['Arid Foothills','Land of the Dead','Frost Waltz','Firebrand','Ice Demon','Ancient Rite','Darkest Child','Undaunted']}
+];
+const MUSDIR='/music/';
+const MUSVOL={hub:0.55,fanfare:0.7};                  // per-track trims where a mix sits hot
+let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
+function musicOK(){ return meta.musicOn!==false && typeof Audio!=='undefined'; }
+function musEl(key){
+  if(typeof Audio==='undefined') return null;         // no audio in this environment — music is optional, never fatal
+  let a=musEls[key];
+  if(!a){ try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return null; }
+    a.loop=true; a.preload='none'; a.volume=0;
+    a.addEventListener('error',()=>{ /* a missing track must never break the game */ });
+    musEls[key]=a; }
+  return a;
+}
+function musFade(el,to,ms,stopAt){                    // volume ramp; el is parked (not destroyed) when it hits 0
+  if(!el) return;
+  const from=el.volume, t0=Date.now(), dur=Math.max(1,ms||900);
+  if(el._f) clearInterval(el._f);
+  el._f=setInterval(()=>{
+    const k=Math.min(1,(Date.now()-t0)/dur);
+    try{ el.volume=Math.max(0,Math.min(1,from+(to-from)*k)); }catch(e){}
+    if(k>=1){ clearInterval(el._f); el._f=null; if(stopAt&&el.volume<=0.001){ try{ el.pause(); el.currentTime=0; }catch(e){} } }
+  },40);
+}
+function musicPlay(key,opts){
+  if(!key) return musicStop();
+  opts=opts||{};
+  if(musCurKey===key && musCur && !musCur.paused) return;   // already on it — never restart a looping track
+  const prev=musCur;
+  const el=musEl(key); if(!el) return;
+  musCurKey=key; musCur=el;
+  if(!musicOK()){ if(prev) musFade(prev,0,300,true); return; }
+  const vol=(MUSVOL[key]!=null?MUSVOL[key]:0.42)*(meta.musicVol!=null?meta.musicVol:1);
+  if(prev&&prev!==el) musFade(prev,0,opts.fade||900,true);
+  el.loop=opts.loop!==false; el.volume=0;
+  const p=el.play();
+  if(p&&p.catch) p.catch(()=>{});                     // autoplay blocked until a gesture — we retry on the next call
+  musFade(el,vol,opts.fade||900);
+}
+function musicStop(fade){ if(musCur) musFade(musCur,0,fade||600,true); musCur=null; musCurKey=null; }
+function musicSting(key){                             // one-shot over the top of whatever's playing (victory fanfare)
+  if(!musicOK()) return;
+  let a; try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return; } a.loop=false;
+  a.volume=(MUSVOL[key]!=null?MUSVOL[key]:0.6)*(meta.musicVol!=null?meta.musicVol:1);
+  const p=a.play(); if(p&&p.catch) p.catch(()=>{});
+  if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
+}
+function musicForScene(){                             // one place decides what should be playing right now
+  if(!G) return musicPlay('hub');
+  if(G.trial) return musicPlay('trial');
+  if(G.side) return musicPlay('secret');
+  const Z=curZone();
+  if(G.area<0) return musicPlay((Z.boss&&Z.boss.mus)||'boss_brute');   // the boss arena gets its own track
+  musicPlay(Z.mus||'outskirts');
+}
+function musicRefresh(){                              // called when the toggle flips
+  if(!musicOK()){ for(const k in musEls){ const e=musEls[k]; if(e._f) clearInterval(e._f); try{ e.pause(); e.currentTime=0; }catch(x){} e.volume=0; } musCur=null; musCurKey=null; return; }
+  const k=musCurKey; musCurKey=null; if(k) musicPlay(k,{fade:400});
+}
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
 let actx=null, master=null, noiseBuf=null;
 function initAudio(){ if(!actx){ try{
@@ -653,38 +722,38 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    the layout) gated by main quests, then a boss room. Clearing the boss completes the
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
-  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,blurb:'Where the road ends and the wild begins.',
+  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
     areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:8,d:'Slay 8 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
-    boss:{stage:2,name:'The Brute'}},
-  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',blurb:'Dry canyons that swallow the careless.',
+    boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
+  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
     areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:7,d:'Slay 7 Chargers'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Gather 5 Sun-Bleached Bones'},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
-    boss:{stage:4,name:'Hollow Marksman'}},
-  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',blurb:'A fortress the dead never left.',
+    boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
+  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:8,d:'Destroy 8 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
-    boss:{stage:6,name:'The Warden'}},
-  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',blurb:'Cold deep enough to still the blood.',
+    boss:{stage:6,name:'The Warden',mus:'boss_warden'}},
+  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:8,d:'Slay 8 Frostlings'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
-    boss:{stage:8,name:'Frost Sorcerer'}},
-  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',blurb:'The mountain’s furnace, still burning.',
+    boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
+  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
     areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:8,d:'Slay 8 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
     side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
-    boss:{stage:10,name:'Ember Colossus'}},
-  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',blurb:'Where the world thins and something looks back.',
+    boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
+  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
     areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:8,d:'Banish 8 Shadelings'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
-    boss:{stage:12,name:'Abyss King'}},
-  {id:'apex',name:'The Apex',icon:'👑',tier:7,haz:'lava',blurb:'One throne. One tyrant. No quests — only the fight.',
-    areas:[], boss:{stage:13,name:'The Void Tyrant'}}
+    boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
+  {id:'apex',name:'The Apex',icon:'👑',tier:7,haz:'lava',mus:'apex_darkdescent',blurb:'One throne. One tyrant. No quests — only the fight.',
+    areas:[], boss:{stage:13,name:'The Void Tyrant',mus:'apex_darkdescent'}}
 ];
 const TIERBAND=[1,1,2,2,3,3,4];                                  // max rarity INDEX (0=common..4=legendary) by zone tier
 /* Signature hazards: one per zone, so each zone PLAYS different, not just looks different. */
@@ -1101,7 +1170,7 @@ function enterZone(zi){
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
-  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); hazToast();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); hazToast();
 }
 function loadArea(){
   const Z=curZone();
@@ -1118,7 +1187,7 @@ function enterSide(zi){
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:0,zoneTier:Math.min(7,Z.tier+1),side:true});
   meta.run=null; persist();
-  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   toast(S.icon+' '+S.name+' — Tier '+G.zoneTier+'. Reach the exit alive.');
 }
 function hazToast(){ const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
@@ -1148,7 +1217,7 @@ function startTrial(cid,fromZone){
   recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0});
   meta.run=null; persist();
-  loadArea(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
 }
 function trialWeapon(cid){
@@ -1184,7 +1253,7 @@ function nextArea(){
   const Z=curZone(), na=G.area+1;
   if(na>=Z.areas.length){ G.area=-1; toast('⚔ '+Z.boss.name+' awaits'); }
   else G.area=na;
-  loadArea(); SFX.pickup();
+  loadArea(); musicForScene(); SFX.pickup();
 }
 function zoneClear(){
   const Z=curZone();
@@ -1193,7 +1262,7 @@ function zoneClear(){
   meta.zoneMax=Math.max(meta.zoneMax||0, Math.min(ZONES.length-1, G.zone+1));
   meta.bestStage=Math.max(meta.bestStage||0,G.stageIndex);
   meta.zonesCleared=(meta.zonesCleared||0)+1;
-  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements(); checkCosmetics();
+  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements(); checkCosmetics(); musicSting('fanfare');
   if(G.zone>=ZONES.length-1){ winGame(); return; }
   mode='menu'; SFX.win(); showGameUI(false);
   const NZ=zoneOf(G.zone+1);
@@ -2407,7 +2476,7 @@ function randomLoot(rid){ const r=Math.random();
   return {weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)}; }
 function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); }
 function die(){
-  mode='dead'; SFX.hurt(); showGameUI(false);
+  mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
   const Z=curZone(), perma=isPermadeath(), D=curDiff();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
   if(perma) wipeMode(MODE); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
@@ -2440,13 +2509,15 @@ const overlay=document.getElementById('overlay'), ovcard=document.getElementById
 function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); } // free the mouse to click menus
 function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
-function titleScreen(){
+function titleScreen(){ musicPlay('hub');
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">Hardcore Dungeon Crawler</p>
     <button class="bigbtn" id="playBtn">Play</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     <button class="bigbtn ghost" id="sndBtn">Sound: ${meta.soundOn?'On':'Off'}</button>
+    <button class="bigbtn ghost" id="musBtn">Music: ${meta.musicOn!==false?'On':'Off'}</button>
+    <button class="bigbtn ghost" id="creditsBtn">Credits</button>
     <button class="bigbtn ghost" id="to2dBtn" style="opacity:.7">↩ Classic 2D BLADEFALL</button>
     <p class="hint">Joystick moves in every direction · <b>SLASH/FIRE</b> auto-targets · <b>JUMP</b> · <b>DODGE</b> dashes<br>
       Desktop: WASD + Space, J/K/L, Esc · Skins &amp; achievements carry across modes.<br>
@@ -2455,6 +2526,8 @@ function titleScreen(){
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
   document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
+  document.getElementById('musBtn').onclick=()=>{ meta.musicOn=(meta.musicOn===false); persistGlobal(); musicRefresh(); titleScreen(); };
+  document.getElementById('creditsBtn').onclick=()=>openCredits(titleScreen);
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
 }
 function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
@@ -2477,7 +2550,7 @@ function openDiffSelect(){
   document.getElementById('backBtn').onclick=titleScreen;
 }
 function openHub(){
-  mode='menu'; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
+  mode='menu'; showGameUI(false); musicPlay('hub'); document.getElementById('bosshpwrap').classList.remove('on');
   document.getElementById('questbox').classList.add('hide');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
   if(!Object.keys(meta.classUnlocked).length){ openClassPicker(); return; }   // brand-new save: choose your starter first
@@ -2504,6 +2577,7 @@ function openHub(){
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
+    <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
   document.querySelectorAll('.zrow[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
@@ -2511,6 +2585,7 @@ function openHub(){
   document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
   document.getElementById('shopBtn').onclick=()=>openShop(openHub);
   document.getElementById('wardBtn').onclick=()=>openWardrobe(openHub);
+  document.getElementById('credBtn2').onclick=()=>openCredits(openHub);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
 function openClassPicker(){
@@ -2548,6 +2623,24 @@ function openTrainer(back){
     persist(); SFX.levelup(); toast('Path forgotten — choose again'+(cid===meta.classId?' on your next zone':''));
     if(cid===meta.classId&&classState(cid).rank>=3){ openSubclassFrom(()=>openTrainer(back)); return; }
     openTrainer(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+function openCredits(back){
+  // CC-BY obligation: this screen is why we're allowed to use the music. Do not remove it.
+  mode='menu';
+  const blocks=MUSCREDITS.map(c=>`<div class="gearrow" style="align-items:flex-start">
+      <div class="gi">🎵</div>
+      <div style="flex:1;min-width:0">
+        <div class="gn">${c.who}</div>
+        <div class="gd"><a href="https://${c.url}" target="_blank" rel="noopener" style="color:var(--amber)">${c.url}</a>
+          · <a href="${c.licUrl}" target="_blank" rel="noopener" style="color:var(--muted)">${c.lic}</a></div>
+        <div class="gd" style="margin-top:4px;line-height:1.7">${c.tracks.map(t=>'“'+t+'”').join(' · ')}</div></div></div>`).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Credits</h2>
+    <p class="ovsub">BLADEFALL 3D v${VERSION3D}</p>
+    <p class="hint" style="text-align:left;margin:0 0 8px"><b>Music</b> — licensed under Creative Commons Attribution. Used with thanks.</p>
+    <div class="achlist" style="max-height:min(50vh,360px)">${blocks}</div>
+    <p class="hint" style="text-align:left;margin-top:10px"><b>Game</b> — built by Oliver Lynch with Claude.<br>Story premise inspired by Isaac's BLADEFALL 2D.</p>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
 function openWardrobe(back){
@@ -2681,6 +2774,7 @@ function openPause(){
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
+    <button class="bigbtn ghost" id="musBtn2">Music: ${meta.musicOn!==false?'On':'Off'}</button>
     ${meta.camMode!=='fps'?`<button class="bigbtn ghost" id="silBtn">See yourself through walls: ${meta.silhouette!==false?'On':'Off'}</button>`:''}
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
@@ -2696,6 +2790,7 @@ function openPause(){
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   var _sb=document.getElementById('silBtn'); if(_sb) _sb.onclick=()=>{ meta.silhouette=(meta.silhouette===false); persist(); openPause(); };
+  var _mb=document.getElementById('musBtn2'); if(_mb) _mb.onclick=()=>{ meta.musicOn=(meta.musicOn===false); persistGlobal(); musicRefresh(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
@@ -3544,6 +3639,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
+  MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

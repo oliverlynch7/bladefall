@@ -19,8 +19,8 @@ Turn BLADEFALL from a run-based dungeon crawler into a zone-based action-RPG adv
 ### Launch class kits (opener → AoE → mobility/utility → finisher)
 - ⚔️ **Warrior** — family: blades, axes, hammers, spears
   - Cleave · Shockwave Stomp · Charge (gap-close + brief stun) · Berserk (damage+speed burst)
-- 🏹 **Ranger** — family: bows, crossbows, thrown daggers
-  - Power Shot · Arrow Rain · Tumble (reposition + snare trap) · Hunter's Mark (target takes bonus damage)
+- 🏹 **Ranger** — family: bows, crossbows, daggers (thrown & melee)
+  - Deadeye (high-damage precision strike) · Volley (projectile AoE) · Tumble (reposition + snare) · Hunter's Mark (target takes bonus damage) — names deliberately weapon-agnostic (no arrow-only flavor)
 - 🔮 **Mage** — family: staves, wands, scepters
   - Elemental Bolt (uses weapon's element) · Nova (AoE slow) · Blink · Arcane Tempest (channelled storm)
 
@@ -34,6 +34,7 @@ Turn BLADEFALL from a run-based dungeon crawler into a zone-based action-RPG adv
 
 ### Class acquisition
 - **New save:** pick a starter class → play its **class-themed tutorial level** (teaches movement, combat, dodge, and that class's kit) → completing it unlocks the class and starts the game. The other two starters can be unlocked later the same way (their tutorial levels become their trials).
+- **Trials are always skippable.** A skip button is always available, and a save that has already completed (or skipped) a trial is never forced through it again — in particular, Hardcore/Hitless deaths never replay the tutorial.
 - **Earned classes:** unlocked by completing **class trials** hidden in side zones (first earned class: **Reaper** — scythes, dark powers). Trials are challenging, themed gauntlets.
 
 ## B · World: zones & quests
@@ -59,8 +60,10 @@ Walkable hub containing:
 
 ## E · Loot & weapons
 - **Chest pacing:** significantly fewer chests than earlier BLADEFALL. Chests keep randomness **within a rarity band set by zone tier** — early zones cap at low rarities; legendaries are late-game/side-zone territory. No legendary after zone 1.
-- **Weapon roster change:** **orb and rod are retired.** Magic family = **staff, wand, scepter** (Demon Eye concept survives as a scepter head). All other arts stay: dagger, sword, greatsword, axe, hammer, spear, scythe, bow, crossbow.
-- Rarity, elements, armor slots, trinkets, gold, perks all carry forward unchanged.
+- **Weapon roster change (CONFIRMED):** **orb and rod are retired.** Magic family = **staff, wand, scepter** (Demon Eye concept survives as a scepter head). All other arts stay: dagger, sword, greatsword, axe, hammer, spear, scythe, bow, crossbow.
+- **Hub shop weapon ladder:** the shop stocks **one basic weapon per class family at every rarity except legendary** — deliberately plain, with **below-average stats for their rarity**. They exist as bad-luck protection (a guaranteed base upgrade), never as the best-in-tier option.
+- **Armor stays, reworked into sets:** at each rarity tier there are a handful of **armor set families aligned to playstyles/classes** — e.g. **Heavy** (Warrior: defense, knockback resist), **Swift** (Ranger: speed, dodge), **Mystic** (Mage: ability cooldown/power). Pieces (helmet/chest/legs) roll within their set's stat identity; a full-set bonus is optional later. Built in Phase 2 with the loot bands.
+- Rarity, elements, trinkets, gold, perks all carry forward unchanged.
 
 ## F · Cosmetics & achievements
 - Achievements unlock **aesthetic customizables** — capes, weapon glow variants, trails, skins (extends the existing achievements→skins system). Titles possible on top, cosmetics are the priority.
@@ -76,7 +79,11 @@ Walkable hub containing:
 3. **Secrets & classes** — hidden side zones, starter tutorial trials, Reaper + its trial, weapon roster change (orb/rod retirement), shop starter weapons.
 4. **Hub world & polish** — walkable hub (trainer/wardrobe/dummies/portal row), zone signature hazards, achievement cosmetics, Hardcore + Hitless unlocks, balance pass.
 
-## Open items (need Oliver's confirmation)
-1. **Rod retirement** — specced as retired along with orb (magic = staff/wand/scepter). Confirm, or keep rod.
-2. **Subclass names** — Sorcerer/Wizard, Berserker/Guardian, Sniper/Assassin are proposals; rename freely.
-3. Zone names/order are placeholders until Phase 2 authoring.
+## Resolved (2026-07-15, second pass)
+1. **Rod + orb retired** — confirmed (rod not differentiated enough vs staff/wand/scepter).
+2. **Subclass names locked** — Sorcerer/Wizard, Berserker/Guardian, Sniper/Assassin.
+3. **Kits locked as proposed** (Oliver will playtest + iterate); Ranger skills renamed weapon-agnostic (Deadeye/Volley/Tumble/Hunter's Mark).
+4. **Trials always skippable**; never replayed on Hardcore/Hitless resets.
+5. **Armor kept + set rework** (class-aligned set families per rarity tier, Phase 2).
+6. **Shop weapon ladder** (basic below-par weapon per family per rarity, no legendary).
+Zone names/order remain placeholders until Phase 2 authoring.

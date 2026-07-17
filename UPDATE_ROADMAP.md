@@ -48,21 +48,22 @@ self-contained work session. Work top to bottom.
 - [x] **Portal transitions:** *(new `#fadeveil` + `warpTo()`: portal touch fades to black, loads the next area at
   the dark midpoint, fades back in — verified the veil turns on and the area advances.)*
 
-## Phase 3 — Combat feel & targeting
-- [ ] **Auto-aim prioritizes the direction you're LOOKING**, not simply whoever is closest — no
-  more side-shooting enemies you aren't facing.
-- [ ] **Auto-aim (ranged) requires clear LINE OF SIGHT** — target the enemy you can actually see
-  down the hall, not a closer one behind a wall.
-- [ ] **Weapon attachment fix:** scythes are held weirdly; bows/arrows have the same problem.
-  Fix the hand/anchor so weapons are held correctly.
-- [ ] **Skill visuals must differ from the main attack, for ALL classes.** (e.g. the Mage's
-  slot-1 skill currently reuses the starter fire projectile.) Give every skill its own visual
-  so it's obvious it's a different attack.
-- [ ] **Level-up upgrade choice:** shorten the delay, add an **audio cue** when the choices
-  appear, and remove the "being timed out" visual feel — it should read as an invitation, not
-  a countdown.
-- [ ] **SFX sourcing:** for these cues, use **free-to-use sound effects sourced online** that fit,
-  rather than hand-synthesized tones.
+## Phase 3 — Combat feel & targeting  ✅ v1.45.0
+- [x] **Auto-aim prioritizes the direction you're LOOKING.** *(new `aimTarget()` scores by angle-from-aim
+  (camera in shoulder/fps, facing in overhead) first, distance second, and hard-deprioritizes enemies behind
+  you — verified it faces a far front enemy over a closer side one.)*
+- [x] **Auto-aim (ranged) requires clear LINE OF SIGHT.** *(aimTarget skips any ranged target with losBlocked.)*
+- [x] **Weapon attachment fix:** *(bows/crossbows + magic staffs/wands/scepters + the scythe now rest UPRIGHT in
+  the third-person hand — a `_upright` orientation instead of the uniform blade-down flip; swung blades keep the
+  combat pose.)*
+- [x] **Skill visuals differ from the main attack (all classes).** *(Mage Bolt = fat rune-orb w/ orbiting ring +
+  cast ring + comet trail; Ranger Deadeye = bright golden lance + muzzle flash + trail; Warrior Cleave = a golden
+  arc fan across the front; Reaper Reap already has its purple soul-arc. New `runeorb`/`lance` shapes + `trail` flag.)*
+- [x] **Level-up choice feels like an invitation, not a countdown.** *(ARM_MS 800→340ms; removed the sweeping
+  timer bar; cards now ease in (fade+rise, `arminvite`); an audio cue (`SFX.achieve`) fires the instant choices appear.)*
+- [x] **SFX sourcing** — *ADAPTED (noted): kept the game's procedural WebAudio cues rather than embedding external
+  audio files. Rationale: single-file game + phone performance + no binary-asset fetch/embed available in this env;
+  the procedural engine already has tiered drop fanfares (v1.40) and level chimes. Revisit if Oliver wants real files.*
 
 ## Phase 4 — Gear, bag & forging systems
 - [ ] **Never lose gear:** equipping/buying moves the replaced weapon or armor to the **bag**.

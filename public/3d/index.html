@@ -112,23 +112,43 @@
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
-  #overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(6,7,10,.82);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);text-align:center;overflow:auto;}
+  #overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(5,6,9,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-align:center;overflow:auto;}
   #overlay.hide{display:none;}
-  .card{width:100%;max-width:380px;}
+  /* The card is the Wardens' ledger by torchlight: layered stone, a hairline inner edge,
+     and the TORCHLINE — the amber rule across the top of every page. */
+  .card{width:100%;max-width:392px;background:linear-gradient(178deg,#171921 0%,#111219 46%,#0d0e14 100%);
+    border:1px solid #262a36;border-radius:18px;padding:22px 20px 18px;position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);}
+  .card::before{content:'';position:absolute;top:0;left:14%;right:14%;height:2px;border-radius:2px;
+    background:linear-gradient(90deg,transparent,var(--amber) 30%,#f7d79a 50%,var(--amber) 70%,transparent);opacity:.9;}
   .title{font-size:clamp(32px,10vw,50px);font-weight:900;letter-spacing:.04em;margin:0;background:linear-gradient(180deg,#f7d79a,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 4px 24px rgba(232,163,61,.25);}
   .subtitle{color:var(--muted);font-size:13px;letter-spacing:.22em;text-transform:uppercase;margin:6px 0 22px;}
-  .bigbtn{display:block;width:100%;padding:15px;margin:9px 0;border:none;border-radius:14px;font-size:16px;font-weight:800;letter-spacing:.02em;cursor:pointer;color:#0b0c10;background:var(--amber);}
-  .bigbtn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);}
+  .bigbtn{display:block;width:100%;padding:14px;margin:8px 0;border:none;border-radius:13px;font-size:15.5px;font-weight:800;letter-spacing:.02em;cursor:pointer;color:#0b0c10;
+    background:linear-gradient(180deg,#f0b95c,var(--amber) 55%,#cf8c2e);box-shadow:0 2px 10px rgba(232,163,61,.28),inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform .06s,box-shadow .12s,filter .12s;}
+  .bigbtn:hover{filter:brightness(1.06);}
+  .bigbtn.ghost{background:rgba(255,255,255,.025);color:var(--ink);border:1px solid #2b3040;box-shadow:none;font-weight:700;}
+  .bigbtn.ghost:hover{border-color:#3d4560;background:rgba(255,255,255,.05);}
   .bigbtn:active{transform:scale(.98);}
-  .ovh{font-size:24px;font-weight:900;margin:0 0 4px;letter-spacing:.02em;}
-  .ovsub{color:var(--muted);font-size:14px;margin:0 0 20px;line-height:1.5;}
-  .choices{display:flex;flex-direction:column;gap:12px;}
-  .choice{padding:14px 16px;border-radius:14px;background:var(--panel);border:1.5px solid var(--line);cursor:pointer;text-align:left;transition:border-color .1s,transform .05s;}
+  .bigbtn:focus-visible,.choice:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  .ovkicker{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--amber);margin:0 0 3px;}
+  .ovh{font-size:23px;font-weight:900;margin:0 0 4px;letter-spacing:.02em;}
+  .ovsub{color:var(--muted);font-size:13.5px;margin:0 0 18px;line-height:1.5;}
+  .sect{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#8b93a8;text-align:left;margin:16px 2px 6px;display:flex;align-items:center;gap:8px;}
+  .sect::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#2b3040,transparent);}
+  .choices{display:flex;flex-direction:column;gap:11px;}
+  .choice{padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));border:1px solid #2b3040;cursor:pointer;text-align:left;transition:border-color .12s,transform .05s,background .12s;}
+  .choice:hover{border-color:var(--amber-dim);background:rgba(232,163,61,.06);}
   .choice:active{transform:scale(.985);}
   .choice .cname{font-size:16px;font-weight:800;color:var(--amber);display:flex;align-items:center;gap:8px;}
   .choice .cdesc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4;}
-  .statgrid{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 20px;}
+  .statgrid{text-align:left;background:rgba(255,255,255,.025);border:1px solid #262a36;border-radius:14px;padding:13px 15px;margin:0 0 18px;}
   .hint{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;}
+  /* Audio + settings sliders */
+  .setrow{margin:4px 0 12px;text-align:left;padding:0 2px;}
+  .setrow label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;font-weight:700;}
+  .setrow label b{color:var(--amber);font-variant-numeric:tabular-nums;}
+  .setrow input[type=range]{width:100%;margin-top:7px;accent-color:var(--amber);height:22px;}
   .vsrow{display:flex;justify-content:space-between;gap:6px;font-size:14.5px;color:var(--muted);margin:5px 0;}
   .vsrow b{color:var(--ink);font-size:15.5px;}
   .up{color:var(--good);} .down{color:var(--danger);}
@@ -144,17 +164,26 @@
   .itemav{width:88px;height:88px;display:block;margin:2px auto 8px;border-radius:14px;border:1px solid var(--line);background:#13141a;}
   .skintile .sn{font-size:11px;font-weight:800;}
   .skintile .lk{font-size:8.5px;color:var(--muted);margin-top:1px;line-height:1.2;}
-  .achlist{text-align:left;max-height:54vh;overflow:auto;margin:2px 0 14px;-webkit-overflow-scrolling:touch;}
-  .achrow{display:flex;gap:10px;align-items:flex-start;padding:9px 6px;border-bottom:1px solid var(--line);}
+  .achlist{text-align:left;max-height:54vh;overflow:auto;margin:2px 0 14px;-webkit-overflow-scrolling:touch;padding-right:3px;scrollbar-width:thin;scrollbar-color:#333a4c transparent;}
+  .achlist::-webkit-scrollbar{width:5px;}
+  .achlist::-webkit-scrollbar-thumb{background:#333a4c;border-radius:99px;}
+  .achlist::-webkit-scrollbar-track{background:transparent;}
+  .achrow{display:flex;gap:10px;align-items:flex-start;padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.05);}
   .achrow .ic{font-size:17px;width:20px;text-align:center;}
   .achrow .at{font-size:14px;font-weight:800;}
   .achrow .ad{font-size:11px;color:var(--muted);margin-top:1px;}
   .achrow.done .at{color:var(--good);}
   .achrow.todo{opacity:.65;}
-  .gearrow{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);}
+  /* Unified item-row system. The RARITY SPINE (--spine) is the signature: a 3px
+     colored edge that tells you an item's rarity before you read a word. */
+  .gearrow{display:flex;gap:10px;align-items:center;text-align:left;padding:9px 10px 9px 12px;margin:0 0 7px;
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));border:1px solid #262a36;border-radius:12px;position:relative;transition:border-color .12s;}
+  .gearrow::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--spine,#333a4c);}
+  .gearrow:hover{border-color:#3a4156;}
   .gearrow .gi{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);width:48px;flex:0 0 auto;text-transform:uppercase;padding-top:2px;}
-  .gearrow .gn{font-size:14px;font-weight:800;}
+  .gearrow .gn{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gearrow .gd{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.35;}
+  .bagav{width:46px;height:46px;flex:0 0 auto;border-radius:10px;border:1px solid #2b3040;background:#0d0e14;display:block;}
 </style>
 </head>
 <body>
@@ -194,7 +223,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.27.0';
+const VERSION3D='1.28.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -206,7 +235,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
-  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol',
+  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
@@ -216,7 +245,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -434,6 +463,31 @@ function musicForScene(){                             // one place decides what 
   if(G.area<0) return musicPlay((Z.boss&&Z.boss.mus)||'boss_brute');   // the boss arena gets its own track
   musicPlay(Z.mus||'outskirts');
 }
+/* Volume settings: sliders are the one control. 0% = off; anything else keeps the on-flags true. */
+function setMusicVol(v){
+  meta.musicVol=v; meta.musicOn=v>0.001; persistGlobal();
+  if(!meta.musicOn){ musicRefresh(); return; }
+  if(musCur && musCurKey && !musCur.paused){ const vol=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:0.42)*v; musFade(musCur,vol,120); }
+  else musicRefresh();                                // was muted — bring the scene's track back at the new level
+}
+function setSfxVol(v){
+  meta.sfxVol=v; meta.soundOn=v>0.001; persistGlobal();
+  if(master) master.gain.value=0.6*v;
+}
+function audioSettingsHTML(){
+  const mv=meta.musicOn===false?0:Math.round((meta.musicVol!=null?meta.musicVol:1)*100);
+  const sv=meta.soundOn===false?0:Math.round((meta.sfxVol!=null?meta.sfxVol:1)*100);
+  return `<div class="sect">Audio</div>
+    <div class="setrow"><label><span>Music</span><b id="musVal">${mv}%</b></label>
+      <input id="musSlider" type="range" min="0" max="100" step="5" value="${mv}"></div>
+    <div class="setrow"><label><span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
+      <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>`;
+}
+function bindAudioSettings(){
+  const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
+  if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
+  if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'); if(v) v.textContent=ss.value+'%'; SFX.pickup(); });   // hear the new level as you drag
+}
 function musicRefresh(){                              // called when the toggle flips
   if(!musicOK()){ for(const k in musEls){ const e=musEls[k]; if(e._f) clearInterval(e._f); try{ e.pause(); e.currentTime=0; }catch(x){} e.volume=0; } musCur=null; musCurKey=null; return; }
   const k=musCurKey; musCurKey=null; if(k) musicPlay(k,{fade:400});
@@ -442,7 +496,7 @@ function musicRefresh(){                              // called when the toggle 
 let actx=null, master=null, noiseBuf=null;
 function initAudio(){ if(!actx){ try{
   actx=new (window.AudioContext||window.webkitAudioContext)();
-  master=actx.createGain(); master.gain.value=0.6; master.connect(actx.destination);
+  master=actx.createGain(); master.gain.value=0.6*(meta.sfxVol!=null?meta.sfxVol:1); master.connect(actx.destination);
   noiseBuf=actx.createBuffer(1,actx.sampleRate,actx.sampleRate);
   const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
 }catch(e){} }
@@ -1323,14 +1377,15 @@ function openBag(back){
   mode='menu';
   const rows=meta.stash.length?meta.stash.map((it,i)=>{ const w=it.weapon, a=it.armor, o=w||a;
     if(!o) return '';
+    const rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a.defense+' def · '+a.affixes.map(x=>x.label).join(', '));
-    return `<div class="gearrow"><div class="gi" style="color:${RARITY[o.rarity].color}">${w?'⚔':'🛡'}</div>
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[o.rarity].color}">${o.name}${w&&w.up?' +'+w.up:''}</div><div class="gd">${sub}</div></div>
+    return `<div class="gearrow" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt="">
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}</div><div class="gd">${sub}</div></div>
       <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px">Equip</button>
-      <button class="bigbtn buybtn" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
+      <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Bag</h2>
-    <p class="ovsub">${meta.stash.length}/${STASH_CAP} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Warden's Pack</p><h2 class="ovh">Bag</h2>
+    <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
@@ -2835,8 +2890,7 @@ function titleScreen(){ musicPlay('hub');
     <button class="bigbtn" id="playBtn">Play</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
-    <button class="bigbtn ghost" id="sndBtn">Sound: ${meta.soundOn?'On':'Off'}</button>
-    <button class="bigbtn ghost" id="musBtn">Music: ${meta.musicOn!==false?'On':'Off'}</button>
+    ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="creditsBtn">Credits</button>
     <button class="bigbtn ghost" id="to2dBtn" style="opacity:.7">↩ Classic 2D BLADEFALL</button>
     <p class="hint">Joystick moves in every direction · <b>SLASH/FIRE</b> auto-targets · <b>JUMP</b> · <b>DODGE</b> dashes<br>
@@ -2845,8 +2899,7 @@ function titleScreen(){ musicPlay('hub');
   document.getElementById('playBtn').onclick=modeSelect;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
-  document.getElementById('sndBtn').onclick=()=>{ meta.soundOn=!meta.soundOn; persist(); initAudio(); titleScreen(); };
-  document.getElementById('musBtn').onclick=()=>{ meta.musicOn=(meta.musicOn===false); persistGlobal(); musicRefresh(); titleScreen(); };
+  bindAudioSettings();
   document.getElementById('creditsBtn').onclick=()=>openCredits(titleScreen);
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
 }
@@ -2893,7 +2946,7 @@ function openHub(){
         <div style="flex:1;min-width:0"><div class="zn">${Z.side.name} <span class="zsec">SECRET</span> ${sd?'<span class="zdone">✓ cleared</span>':''}</div>
           <div class="zd">${Z.side.blurb} · <b>Tier ${Math.min(7,Z.tier+1)}</b></div></div>
         <div class="zgo">▶</div></div>`; } });
-  showOverlayHTML(`<div class="card"><h2 class="ovh">The Hub</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystation</p><h2 class="ovh">The Hub</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="achlist" style="max-height:min(42vh,300px)">${rows}</div>
@@ -2938,7 +2991,7 @@ function openTrainer(back){
       ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">Respec 300g</button>`:''}
       ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
     </div>`; }).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Class Trainer</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
     <p class="ovsub">Switch freely here. Never mid-zone.</p>
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
@@ -2961,7 +3014,7 @@ function openCredits(back){
         <div class="gd"><a href="https://${c.url}" target="_blank" rel="noopener" style="color:var(--amber)">${c.url}</a>
           · <a href="${c.licUrl}" target="_blank" rel="noopener" style="color:var(--muted)">${c.lic}</a></div>
         <div class="gd" style="margin-top:4px;line-height:1.7">${c.tracks.map(t=>'“'+t+'”').join(' · ')}</div></div></div>`).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Credits</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Made with thanks</p><h2 class="ovh">Credits</h2>
     <p class="ovsub">BLADEFALL 3D v${VERSION3D}</p>
     <p class="hint" style="text-align:left;margin:0 0 8px"><b>Music</b> — licensed under Creative Commons Attribution. Used with thanks.</p>
     <div class="achlist" style="max-height:min(50vh,360px)">${blocks}</div>
@@ -2981,7 +3034,7 @@ function openWardrobe(back){
     return `<p class="hint" style="margin:8px 0 5px;text-align:left"><b>${s.label}</b>${cur?' · '+cur.name:' · none'}
       ${cur?`<span class="cosoff" data-off="${s.k}" style="color:var(--muted);cursor:pointer;float:right">remove</span>`:''}</p>${tiles}`; }).join('');
   const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Wardrobe</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Keeper</p><h2 class="ovh">Wardrobe</h2>
     <p class="ovsub">Earned by doing, not buying. <b>${owned}/${total}</b> unlocked · no stats, pure swagger.</p>
     <div class="achlist" style="max-height:min(52vh,380px)">${secs}</div>
     <button class="bigbtn ghost" id="skinBtn2">Skins</button>
@@ -3003,7 +3056,7 @@ function openQuestBoard(back){
       <div style="flex:1;min-width:0"><div class="gn">${Z.name} ${done?'<span style="color:var(--good);font-size:10px">✓ cleared</span>':''}</div>
         ${open?list:'<div class="gd">Locked</div>'}
         <div class="gd" style="margin-top:3px">Final: slay <b>${Z.boss.name}</b></div></div></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Quest Board</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Postings</p><h2 class="ovh">Quest Board</h2>
     <p class="ovsub">Complete a zone's main quests to open its boss room.</p>
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
@@ -3018,11 +3071,11 @@ function openShop(back){
   const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
   const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
-    return `<div class="gearrow"><div class="gi" style="color:${RARITY[rid].color}">⚔</div>
+    return `<div class="gearrow" style="--spine:${RARITY[rid].color}"><img class="bagav" src="${itemAv(w)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[rid].color}">${w.name}</div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
       <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -3090,7 +3143,7 @@ function openGear(back){
 }
 function openPause(){
   mode='pause';
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Paused</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <button class="bigbtn" id="resBtn">Resume</button>
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
@@ -3100,7 +3153,7 @@ function openPause(){
     <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
-    <button class="bigbtn ghost" id="musBtn2">Music: ${meta.musicOn!==false?'On':'Off'}</button>
+    ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
@@ -3114,7 +3167,7 @@ function openPause(){
     toast(curClass().icon+' '+curClass().disp+' — favors '+curClass().family.join(', ')); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
-  var _mb=document.getElementById('musBtn2'); if(_mb) _mb.onclick=()=>{ meta.musicOn=(meta.musicOn===false); persistGlobal(); musicRefresh(); openPause(); };
+  bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
@@ -3990,6 +4043,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
+  setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

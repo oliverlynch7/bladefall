@@ -264,7 +264,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.36.0';
+const VERSION3D='1.37.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1633,12 +1633,12 @@ function pickEnemyType(s,rnd){
    flush with the collision boundary, covering the full height and full length.
    `sgn` points from the wall toward the walkable space it faces. */
 const CANYON_STRATA=['#5e4527','#8a6a42','#b08b56','#8a6a42','#6e5433','#a07a48'];
-function canyonWall(wx,cz,len,sgn,rnd,ww){
-  ww=ww||30;
-  G.walls.push({x:wx,z:cz,w:ww,d:len,h:240,stand:ww>=30});   // collision (rims walkable when full-width)
-  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2);   // inFace = the collision face toward the bowl; band sits just inside it
-  for(let L2=0;L2<6;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
-  G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:256,c:'#c2a060',theme:'canyon'});   // rimrock cap
+function canyonWall(wx,cz,len,sgn,rnd,ww,topH){
+  ww=ww||30; topH=topH||240;
+  G.walls.push({x:wx,z:cz,w:ww,d:len,h:topH,stand:ww>=30});   // collision rises from the depths to topH
+  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2), courses=Math.ceil(topH/44);
+  for(let L2=0;L2<courses;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2%6],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
+  G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:topH+16,c:'#c2a060',theme:'canyon'});   // rimrock cap
 }
 function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
@@ -1664,79 +1664,84 @@ function loadStage(i){
     if(room){ m.room=room; room.monsters.push(m); if(room.encounter) m.dropT=9999; }
     if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
     return m; };
-  /* ---- ZONE GRAMMAR: Hollow Pass = a real canyon, not the maze (Zone Identity v1) ----
-     Switchbacking bowls between tall strata walls; ledge climbs up to rims that hold the
-     quest bones; respawning charger dens make the kill quest an actual hunt. */
+  /* ---- ZONE GRAMMAR: Hollow Pass = THE ASCENT (v1.37) ----
+     A mountain climb. Wide, open terraces rise one above the next; between them a
+     parkour scramble you must climb to advance, with flyers harassing you on the way
+     up. Staggered so you turn as you climb, topping out on a windswept plateau. */
   if(!isBoss && !isMini && !G.trial && !G.side && curZone().id==='hollow'){
-    const SAND='#8a6a42', DARKS='#5e4527', LITES='#b08b56', N=6;   // longer canyon (was 5 bowls)
-    let cx2=0, cz2=0, dir=1; const bowls=[];
+    const SAND='#8a6a42', N=5, RISE=100, APEX=104;   // each terrace RISE higher; steps stay under the jump apex
+    const terraces=[], climbs=[]; let cx2=0, cz2=0, baseY=0, dir=1;
     for(let b=0;b<N;b++){
-      const bw=300+rnd()*90, bd=250+rnd()*70;
-      const room={x:cx2,z:cz2,w:bw,d:bd,monsters:[],doorways:[],doors:[],_gaps:{n:[],s:[],e:[],w:[]},encounter:false,cleared:true};
-      bowls.push(room); G.rooms.push(room);
-      G.segments.push({x:cx2,z:cz2,w:bw,d:bd});
-      // strata canyon faces: the wall's INNER face is fully textured and flush with collision
-      canyonWall(cx2-(bw/2+16),cz2,bd+40,+1,rnd);   // left wall faces +x (into the bowl)
-      canyonWall(cx2+(bw/2+16),cz2,bd+40,-1,rnd);   // right wall faces -x
-      // the switchback ledge climb (one wall per bowl, alternating): 3 steps up to a rim shelf
-      const side=(b%2?1:-1), lx=cx2+side*(bw/2-42);
-      for(let st2=0;st2<3;st2++){
-        G.obstacles.push({kind:'plat',x:lx-side*st2*66, z:cz2-bd/2+60+st2*54, w:64,d:56,h:58+st2*58}); }
-      const rim={x:lx-side*66*2.6, z:cz2+14, w:110,d:88,h:224};
-      G.obstacles.push(Object.assign({kind:'plat'},rim));
-      room.rim=rim;
-      // scatter floor boulders (hoppable cover)
-      for(let o2=0;o2<3;o2++) G.obstacles.push({x:cx2+(rnd()*2-1)*(bw/2-80),z:cz2+(rnd()*2-1)*(bd/2-80),w:34+rnd()*26,d:34+rnd()*26,h:26+rnd()*30});
-      G.torches.push({x:cx2-bw/2+30,z:cz2,ph:rnd()*6.28},{x:cx2+bw/2-30,z:cz2,ph:rnd()*6.28});   // ph, NOT f — an undefined ph fed NaN into the light uniforms and blacked out the whole scene
-      if(b<N-1){ // connecting slot canyon, offset to force the snake
-        const off=(rnd()*2-1)*(bw/2-90), clen=150+rnd()*70, nz=cz2-bd/2-clen-((250+70/2)/2);
-        const ccx=cx2+off, ccz=cz2-bd/2-clen/2;
-        G.segments.push({x:ccx,z:ccz,w:92,d:clen+36});
-        canyonWall(ccx-60,ccz,clen+30,+1,rnd,26);   // corridor walls, inner faces toward the slot
-        canyonWall(ccx+60,ccz,clen+30,-1,rnd,26);
-        cz2=cz2-bd/2-clen-(260/2)-20; cx2+=off*0.4; dir=-dir; }
+      const isPlateau=(b===N-1);
+      const bw=isPlateau?560:(400+rnd()*110), bd=isPlateau?500:(330+rnd()*90);   // WIDE + open (old bowls were 300-390 — the cramped feeling)
+      const room={x:cx2,z:cz2,w:bw,d:bd,y:baseY,monsters:[],doorways:[],doors:[],_gaps:{n:[],s:[],e:[],w:[]},encounter:false,cleared:true};
+      terraces.push(room); G.rooms.push(room);
+      if(baseY<=1) G.segments.push({x:cx2,z:cz2,w:bw,d:bd});                       // ground-floor terrace
+      else G.obstacles.push({kind:'plat',terrace:true,x:cx2,z:cz2,w:bw,d:bd,h:baseY});   // elevated shelf you stand on
+      // strata walls frame the lower terraces (canyon); the plateau is open mountaintop
+      if(!isPlateau){ const topH=Math.max(240,baseY+240);
+        canyonWall(cx2-(bw/2+16),cz2,bd+40,+1,rnd,30,topH);
+        canyonWall(cx2+(bw/2+16),cz2,bd+40,-1,rnd,30,topH); }
+      // cover boulders on the terrace surface
+      for(let o2=0;o2<3;o2++) G.obstacles.push({x:cx2+(rnd()*2-1)*(bw/2-110),z:cz2+(rnd()*2-1)*(bd/2-110),w:34+rnd()*26,d:34+rnd()*26,h:baseY+24+rnd()*26});
+      G.torches.push({x:cx2-bw/2+34,z:cz2,ph:rnd()*6.28},{x:cx2+bw/2-34,z:cz2,ph:rnd()*6.28});
+      room.climbBase={x:cx2,z:cz2-bd/2+50,h:baseY};
+      if(!isPlateau){
+        // where the NEXT terrace sits: forward (-z) and staggered sideways so you turn as you scale
+        dir=(b%2?1:-1);
+        const nx=cx2+dir*(bw*0.16+90), nz=cz2-bd/2-260, ny=baseY+RISE;
+        // the SCRAMBLE: 3 stepping platforms rising ~RISE, arcing toward the next terrace
+        const sx=cx2+dir*(bw/2-90), sz=cz2-bd/2+30;
+        const chain=[];
+        for(let st=1;st<=3;st++){ const t2=st/3;
+          const pl={kind:'plat',x:sx+(nx-sx)*t2, z:sz-st*72, w:62,d:56, h:baseY+RISE*t2};
+          G.obstacles.push(pl); chain.push(pl); }
+        climbs.push(chain);
+        // a flyer harasses the climb (positioned over the scramble, up at climb height)
+        const har=mkMonster('sparkling',(sx+nx)/2,sz-120,room); har.y=baseY+80; har.sx=har.x; har.sz=har.z;
+        if(b>=1){ const h2=mkMonster(pick(),(sx+nx)/2-40,sz-190,room); h2.y=baseY+120; }
+        cx2=nx; cz2=nz; baseY=ny;
+      }
     }
-    const first=bowls[0], last=bowls[N-1];
-    // monsters: chargers + theme mobs on the floor; DENS in bowls 2 & 4 respawn chargers while the hunt is on
+    const first=terraces[0], last=terraces[N-1];
+    // the hunt: chargers on the terraces + dens (respawn while the quest is open)
     G.dens=[];
-    bowls.forEach((room,bi)=>{ if(bi===0) return;
-      mkMonster('charger',room.x-40,room.z,room); if(rnd()<0.7) mkMonster(pick(),room.x+60,room.z+40,room);
-      if(bi===1||bi===3){ G.dens.push({x:room.x+room.w/2-70,z:room.z+room.d/2-70,type:'charger',t:2.5,questId:'hp1'});
-        G.deco.push({x:room.x+room.w/2-70,z:room.z+room.d/2-70,w:44,h:30,c:'#3a2a18',theme:'canyon'}); } });
-    // the quest bones live on the RIMS — the climb is the quest
+    terraces.forEach((room,bi)=>{ if(bi===0){ if(rnd()<0.6) mkMonster('charger',room.x+60,room.z-30,room); return; }
+      mkMonster('charger',room.x-50,room.z,room); if(rnd()<0.7) mkMonster(pick(),room.x+70,room.z+40,room);
+      if(bi===1||bi===3){ G.dens.push({x:room.x+room.w/2-80,z:room.z-room.d/2+80,type:'charger',t:2.4,questId:'hp1'});
+        G.deco.push({x:room.x+room.w/2-80,z:room.z-room.d/2+80,y0:room.y,w:44,h:30,c:'#3a2a18',theme:'canyon'}); } });
+    // quest bones sit ON the climb platforms + terraces — you scale the mountain to collect them
     { const fq2=ZONES[1].areas[G.area]&&ZONES[1].areas[G.area].quests.find(q=>q.k==='fetch');
-      if(fq2&&!questDone(fq2)){ const spots=bowls.map(r=>r.rim);
-        for(let i2=0;i2<Math.min(5,spots.length);i2++){ const r2=spots[i2%spots.length];
-          G.pickups.push({x:r2.x,z:r2.z,y0:r2.h,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); }
-        if(spots.length<5) for(let i2=spots.length;i2<5;i2++){ const r2=bowls[i2%N];
-          G.pickups.push({x:r2.x,z:r2.z-30,y0:0,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); } } }
-    // find-quest shrine: a walled alcove off the last-but-one bowl
+      if(fq2&&!questDone(fq2)){ const spots=[];
+        climbs.forEach(ch=>{ const pl=ch[ch.length-1]; spots.push({x:pl.x,z:pl.z,y0:pl.h}); });   // top of each scramble
+        terraces.slice(1).forEach(r=>spots.push({x:r.x,z:r.z,y0:r.y}));
+        for(let i2=0;i2<5;i2++){ const s2=spots[i2%spots.length];
+          G.pickups.push({x:s2.x+(i2>=spots.length?30:0),z:s2.z,y0:s2.y0,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); } } }
+    // find-quest shrine on the plateau
     { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
-      if(fnd){ const r2=bowls[N-2]; G.waystone={x:r2.x,z:r2.z+r2.d/2-46,y:0,q:fnd.id,taken:false,t:0}; } }
-    // hidden rift (side zone): OUTSIDE the west wall of the middle bowl, at the end of a
-    // real parkour gauntlet — climb the inner steps, cross the rim wall, then descend
-    // hanging ledges over the void. Miss a jump out there and the fall costs you.
+      if(fnd){ G.waystone={x:last.x-90,z:last.z,y:last.y,q:fnd.id,taken:false,t:0}; } }
+    // hidden rift: a ledge chain descending OFF the plateau's edge over the void
     if(ZONES[1].side && !meta.sideFound[ZONES[1].side.id] && G.area===0){
-      const r2=bowls[2], wx=r2.x-(r2.w/2+16);
-      const IN=[[r2.x-r2.w/2+66,r2.z+r2.d/2-70,62],[r2.x-r2.w/2+52,r2.z+r2.d/2-160,124],[r2.x-r2.w/2+44,r2.z+r2.d/2-250,186],[wx+34,r2.z+r2.d/2-330,232]];
-      for(const st2 of IN) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:56,d:52,h:st2[2]});
-      const OUT=[[wx-72,r2.z-30,188],[wx-140,r2.z+42,128],[wx-206,r2.z-24,68]];
-      for(const st2 of OUT) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:52,d:48,h:st2[2]});
-      G.obstacles.push({kind:'plat',sec:true,x:wx-268,z:r2.z+40,w:78,d:70,h:30});
-      G.secret={x:wx-268,z:r2.z+40,y:30,t:0,id:ZONES[1].side.id}; }
-    // exit portal at the head of the canyon (quest-gated as usual)
-    G.portalPos={x:last.x,z:last.z-last.d/2+70};
+      const wx=last.x-(last.w/2+16), y0=last.y;
+      const OUT=[[wx-70,last.z-30,y0-20],[wx-138,last.z+44,y0-70],[wx-204,last.z-24,y0-120]];
+      for(const st2 of OUT) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:54,d:50,h:Math.max(10,st2[2])});
+      G.obstacles.push({kind:'plat',sec:true,x:wx-266,z:last.z+40,w:78,d:70,h:Math.max(10,y0-150)});
+      G.secret={x:wx-266,z:last.z+40,y:Math.max(10,y0-150),t:0,id:ZONES[1].side.id}; }
+    G.climbs=climbs; G.terraces=terraces;
+    // exit portal on the PLATEAU (top of the climb), quest-gated
+    G.portalPos={x:last.x,z:last.z-last.d/2+80};
     if(!areaQuests().length) G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
     G.startPos={x:first.x,z:first.z}; G.goalPos={x:last.x,z:last.z};
     G.lastSafe={x:first.x,z:first.z+first.d/2-40};
     placeShade(first.x-70,first.z+first.d/2-70);
     let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
-    for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }
+    for(const r of terraces){ mnX=Math.min(mnX,r.x-r.w/2); mxX=Math.max(mxX,r.x+r.w/2); mnZ=Math.min(mnZ,r.z-r.d/2); mxZ=Math.max(mxZ,r.z+r.d/2); }
     G.bounds={minX:mnX-80,maxX:mxX+80,minZ:mnZ-80,maxZ:mxZ+80}; G.progressEnd=mnZ;
-    for(let k2=0;k2<26;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);   // distant mesas
-      G.deco.push({x:rnd()<0.5?mnX-140-rnd()*300:mxX+140+rnd()*300, z:zz, w:60+rnd()*120, h:120+rnd()*180, c:tint(SAND,'#000',0.3+rnd()*0.25), theme:'canyon'}); }
+    for(let k2=0;k2<30;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);   // distant peaks, taller the higher you climb
+      G.deco.push({x:rnd()<0.5?mnX-160-rnd()*340:mxX+160+rnd()*340, z:zz, w:70+rnd()*140, h:180+rnd()*260, c:tint(SAND,'#000',0.3+rnd()*0.25), theme:'canyon'}); }
     hazSetup(rnd2);
     G.p.x=first.x; G.p.z=first.z+first.d/2-50; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+    if(G.cam) G.cam.y=0;
     document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
     return;
   }
@@ -4154,9 +4159,9 @@ function render(t){
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
-  if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10;
+  if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
-  const cx=G?G.cam.x:0, cz=G?G.cam.z:0;
+  const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0):0;
   const shx=G?(Math.random()-0.5)*G.shake*0.8:0, shy=G?(Math.random()-0.5)*G.shake*0.8:0;
   if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
@@ -4169,11 +4174,11 @@ function render(t){
     const pit=Math.max(-0.5,Math.min(0.9,pitR));   // over-the-shoulder keeps a sane frame even when the stored pitch is extreme
     const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
     PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
-    VIEW=mLookAt([cx-fx*hd+shx, eh+shy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72, cz+fz*120],[0,1,0]);
+    VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
     gl.uniform2f(U.uFogNF,300,880);
   } else { // classic high chase overview
     PROJ=mPersp(50*Math.PI/180,VW/VH,10,2400);
-    VIEW=mLookAt([cx+shx,296+shy,cz+330],[cx,26,cz-4],[0,1,0]);
+    VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
     gl.uniform2f(U.uFogNF,460,1320);
   }
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));

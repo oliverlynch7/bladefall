@@ -264,14 +264,28 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.35.0';
+const VERSION3D='1.36.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
    ('rl' Roguelite | 'hc' Hardcore) has its OWN save (gold, run, stash, scaling), so a
    hardcore death wipes only its save, and roguelite progress is untouched. ---------- */
-const GKEY='bladefall3d_global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
-const MKEY=m=>'bladefall3d_'+m;
+// Three independent character slots. Slot 0 keeps the original (unprefixed) keys so
+// existing saves carry over untouched; slots 1-2 get their own namespace.
+let SLOT=0; try{ SLOT=Math.max(0,Math.min(2,parseInt(localStorage.getItem('bf3_slot'))||0)); }catch(e){}
+const SLOTPFX=SLOT===0?'':('s'+SLOT+'_');
+const GKEY='bladefall3d_'+SLOTPFX+'global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
+const MKEY=m=>'bladefall3d_'+SLOTPFX+m;
+function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
+  let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
+  let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
+    if(mv.hero||mv.gold||mv.zoneMax){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
+  const cls=g.classId, has=best||g.classId||(g.achievements&&Object.keys(g.achievements).length);
+  return has?{empty:false,cls:cls,lvl:best&&best.hero?best.hero.level:1,gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal}:{empty:true};
+}
+function selectSlot(sl){ try{ localStorage.setItem('bf3_slot',sl); }catch(e){} location.reload(); }
+function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
+  for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','fpsFov','silhouette',
@@ -3028,10 +3042,36 @@ function fixSliders(){
   });
 }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
+function openSlots(){
+  mode='menu';
+  const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
+    const line=su.empty?'<span style="opacity:.6">Empty — start a new character</span>'
+      :`${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].icon+' '+CLASSES[su.cls].disp:su.cls):'No class yet'} · Lv ${su.lvl} · Zone ${su.zone} · <b style="color:#ffd24a">${su.gold}g</b>${su.beatN?' · ⚔ cleared':''}`;
+    return `<div class="gearrow" style="--spine:${on?'#e8a33d':'#333a4c'}">
+      <div class="gi" style="font-size:15px;color:${on?'#e8a33d':'#8b93a8'}">${on?'▶':''}${sl+1}</div>
+      <div style="flex:1;min-width:0"><div class="gn">Slot ${sl+1}${on?' <span style="color:var(--amber);font-size:10px">· ACTIVE</span>':''}</div><div class="gd">${line}</div></div>
+      ${on?'':`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:7px 11px;font-size:12px">Play</button>`}
+      ${su.empty?'':`<button class="bigbtn buybtn ghost" data-del="${sl}" style="width:auto;margin:0;padding:7px 9px;font-size:12px;color:var(--danger)">Delete</button>`}</div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Save Files</p><h2 class="ovh">Characters</h2>
+    <p class="ovsub">Three independent characters. Switching reloads the game.</p>
+    <div class="achlist">${rows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.sel));
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const sl=+b.dataset.del;
+    const su=slotSummary(sl);
+    showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Delete Slot ${sl+1}?</p>
+      <h2 class="ovh">Erase this character?</h2><p class="ovsub">${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].disp:su.cls)+' · Lv '+su.lvl:'this save'} will be gone for good.</p>
+      <button class="bigbtn" id="delYes" style="background:linear-gradient(180deg,#e8635a,#c33)">Erase it</button>
+      <button class="bigbtn ghost" id="delNo">Keep it</button></div>`);
+    document.getElementById('delYes').onclick=()=>{ deleteSlot(sl); if(sl===SLOT) selectSlot(0); else openSlots(); };
+    document.getElementById('delNo').onclick=openSlots; });
+  document.getElementById('backBtn').onclick=titleScreen;
+}
 function titleScreen(){ musicPlay('hub');
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">Hardcore Dungeon Crawler</p>
     <button class="bigbtn" id="playBtn">Play</button>
+    <button class="bigbtn ghost" id="slotsBtn">Characters · Slot ${SLOT+1}</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     ${audioSettingsHTML()}
@@ -3041,6 +3081,7 @@ function titleScreen(){ musicPlay('hub');
       Desktop: WASD + Space, J/K/L, Esc · Skins &amp; achievements carry across modes.<br>
       Skins: <b>${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1}</b><br><span style="opacity:.5">v${VERSION3D}</span></p></div>`);
   document.getElementById('playBtn').onclick=modeSelect;
+  document.getElementById('slotsBtn').onclick=openSlots;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
   bindAudioSettings();
@@ -4408,7 +4449,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS,
+  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

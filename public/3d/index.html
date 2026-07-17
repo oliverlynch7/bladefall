@@ -270,7 +270,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.41.0';
+const VERSION3D='1.42.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1913,7 +1913,10 @@ function loadStage(i){
   /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
   if(!isBoss && !isMini && !G.trial && !G.side && SCAPES[curZone().id]){
-    SCAPES[curZone().id]({rnd,rnd2,s,diff,mkMonster,pick,eliteRate}); return;
+    // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
+    // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); return;
   }
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}

@@ -73,6 +73,8 @@
   #bInteract{width:74px;height:74px;right:calc(env(safe-area-inset-right) + 22px);bottom:calc(env(safe-area-inset-bottom) + 120px);font-size:12px;font-weight:800;background:rgba(232,163,61,.34);border-color:rgba(255,210,120,.5);}
   #bInteract.pressed{background:rgba(232,163,61,.64);}
   #interactprompt{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-100%);background:rgba(12,13,18,.88);border:1px solid var(--amber);border-radius:9px;padding:4px 10px;font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;box-shadow:0 0 14px rgba(232,163,61,.45);}
+  #fadeveil{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity .17s ease;background:radial-gradient(circle at 50% 50%, #12183a 0%, #05060a 70%);}
+  #fadeveil.on{opacity:1;}
   #interactprompt .k{display:inline-block;background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
@@ -258,6 +260,7 @@
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
 <div id="interactprompt" class="hide"></div>
+<div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script>
@@ -270,7 +273,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.43.0';
+const VERSION3D='1.44.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2191,7 +2194,7 @@ const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Arrow
 const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
 window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
-  if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); } return; }
+  if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); } return; }
   if(mode==='weapon'){
     // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
     // so holding J to attack can't accidentally equip the moment a popup opens.
@@ -3225,7 +3228,14 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.x<e.home.x-e.home.hw) e.x=e.home.x-e.home.hw; if(e.x>e.home.x+e.home.hw) e.x=e.home.x+e.home.hw;
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
 }
-function nextStage(){ nextArea(); }    // the portal now advances the ZONE's area chain, not a flat stage list
+// a quick fade-warp instead of an instant snap: black out, load the next area at the dark midpoint, fade back in
+function warpTo(fn){ if(warpTo._busy) return; warpTo._busy=true;
+  const v=document.getElementById('fadeveil'); try{ SFX.magic('void'); }catch(e){}
+  if(v) v.classList.add('on');
+  const mid=()=>{ try{ fn(); } finally { if(v) v.classList.remove('on'); warpTo._busy=false; } };
+  if(v) setTimeout(mid,190); else mid();
+}
+function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
@@ -3338,7 +3348,10 @@ function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
   if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
   return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
-function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); }
+// Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
+// interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
+function regrabCam(){ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
+function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
   const Z=curZone(), perma=isPermadeath(), D=curDiff();
@@ -3481,9 +3494,10 @@ function enterWaystation(){
   G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.rooms=[]; G.doors=[]; G.plates=[];
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
-  // one warm stone island over the glow
-  G.segments.push({x:0,z:-40,w:820,d:640});
-  G.walls.push({x:0,z:-380,w:864,d:26,h:150},{x:-420,z:-40,w:26,d:664,h:150},{x:420,z:-40,w:26,d:664,h:150},{x:0,z:300,w:864,d:26,h:150});
+  // one warm stone island over the glow (deep enough that the over-the-shoulder camera stands on floor behind you)
+  G.segments.push({x:0,z:20,w:820,d:820});
+  // back (south) wall pushed well behind the spawn so the over-the-shoulder camera never sits behind it (side walls lengthened to match)
+  G.walls.push({x:0,z:-380,w:864,d:26,h:150},{x:-420,z:0,w:26,d:824,h:150},{x:420,z:0,w:26,d:824,h:150},{x:0,z:420,w:864,d:26,h:150});
   for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
   G.torches.push({x:-398,z:-200,ph:1},{x:398,z:-200,ph:2},{x:-398,z:120,ph:3},{x:398,z:120,ph:4});
   // the portal row: seven gates along the north wall; discovered rifts shimmer beside their parent
@@ -3503,7 +3517,7 @@ function enterWaystation(){
   // training dummies by the drillmaster — hit them as hard as you like
   for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
   G.lastSafe={x:0,z:214}; G.startPos={x:0,z:214}; G.goalPos={x:0,z:-322};
-  G.bounds={minX:-500,maxX:500,minZ:-460,maxZ:380}; G.progressEnd=-380;
+  G.bounds={minX:-500,maxX:500,minZ:-460,maxZ:500}; G.progressEnd=-380;
   G.p.x=0; G.p.z=214; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
@@ -3546,7 +3560,7 @@ function updateInteractPrompt(){ const pr=document.getElementById('interactpromp
 function wsResume(){
   if(G&&G.hub){
     if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
-    mode='play'; showOverlay(false); hudUpdate();               // re-sync: bag/shop changes made at a post appear in hand immediately
+    mode='play'; showOverlay(false); hudUpdate(); regrabCam();  // re-sync: bag/shop changes made at a post appear in hand immediately
   } else openHub();
 }
 function hubInteract(p,dt){
@@ -3857,7 +3871,7 @@ function openPause(){
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
     <button class="bigbtn ghost" id="titleBtnP">Title Screen</button></div>`);
   document.getElementById('titleBtnP').onclick=()=>{ persist(); titleScreen(); };
-  document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
+  document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); regrabCam(); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
   { const _st=document.getElementById('skipTrialBtn');
     if(_st) _st.onclick=()=>{ if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
@@ -3970,6 +3984,8 @@ function drawCourse(s,t){
   // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
   const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
     if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
+  // the surface you're STANDING on must never fade — the floor underfoot stays solid
+  const standingOn=(o)=>{ const oh=(o.h==null?96:o.h); return Math.abs((G.p.y||0)-oh)<12 && Math.abs(G.p.x-o.x)<o.w/2+10 && Math.abs(G.p.z-o.z)<(o.d||o.w)/2+10; };
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;                                          // healing springs (drawn after cull is defined)
     bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                          // base pad
     bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
@@ -3981,7 +3997,8 @@ function drawCourse(s,t){
     bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
   if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
-    if(!shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
+    if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
+    else if(!shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
     else if(shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through
     else wallBox(wl);
   }
@@ -4016,7 +4033,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
-    if(ob.h>=90 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20)){ LATE.push({kind:'ob',o:ob}); continue; }   // tall blockers fade too (canyon rims, mesas)
+    if(ob.h>=90 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // tall blockers fade too (canyon rims, mesas) — but never the one you stand on
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
     else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));

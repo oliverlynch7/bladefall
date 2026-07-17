@@ -36,17 +36,17 @@ self-contained work session. Work top to bottom.
 - [x] **Audit ALL objectives for completability.** *(zonescape.js verifies portal + every fetch/find/kill-den/secret
   reachable, both areas × seeds, all 6 zones; complete.js verifies kill counts are reachable.)*
 
-## Phase 2 — Camera, control & input feel (affects the whole game)
-- [ ] **Mouse/camera control:** using a menu with the mouse must NOT require re-clicking screen
-  center to regain camera control. Camera control only releases/returns on **ESC** — never
-  after a normal menu interaction.
-- [ ] **Hub over-the-shoulder camera:** the character spawns hidden behind the back wall. Apply
-  the existing transparent-wall fix to THIS camera mode too — always see your character.
-- [ ] **Wall/floor transparency (Hollow Pass, etc.):** transparency only triggers when geometry
-  actually blocks the view of your character. **The floor you're standing ON must ALWAYS stay
-  solid** — never see-through underfoot.
-- [ ] **Portal transitions:** add a quick, visually pleasing transition animation instead of an
-  instant snap-teleport, so movement feels real.
+## Phase 2 — Camera, control & input feel (affects the whole game)  ✅ v1.44.0
+- [x] **Mouse/camera control:** a menu no longer costs camera control. *(new `regrabCam()` re-captures the
+  mouse the instant a menu closes — inside the closing click's gesture — wired into resumePlay, pause resume,
+  Esc-unpause, and hub wsResume. Only Esc releases it.)*
+- [x] **Hub over-the-shoulder camera:** *(back wall pushed z:300→420 with the floor extended to match, so the
+  shoulder camera now stands on solid floor INSIDE the hub in front of the wall — verified geometrically. The
+  translucent LATE pass still fades any wall between camera and hero.)*
+- [x] **Wall/floor transparency — floor underfoot stays solid.** *(new `standingOn()` guard: a wall/obstacle the
+  player is standing on is never added to the translucent pass, so the surface under you never goes see-through.)*
+- [x] **Portal transitions:** *(new `#fadeveil` + `warpTo()`: portal touch fades to black, loads the next area at
+  the dark midpoint, fades back in — verified the veil turns on and the area advances.)*
 
 ## Phase 3 — Combat feel & targeting
 - [ ] **Auto-aim prioritizes the direction you're LOOKING**, not simply whoever is closest — no

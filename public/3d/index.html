@@ -223,6 +223,7 @@
   <div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div></div>
   <div class="barwrap"><span class="barlabel" id="xplabel">LV 1</span><div class="bar"><i id="xpfill"></i></div><span class="barnum" id="xpnum"></span></div>
   <div class="barwrap"><span class="barlabel" id="clslabel">⚔️ 1</span><div class="bar" style="height:9px"><i id="clsfill"></i></div><span class="barnum" id="clsnum"></span></div>
+  <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
   <div class="barwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
   <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
 </div>
@@ -256,7 +257,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.32.0';
+const VERSION3D='1.33.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -268,7 +269,7 @@ let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','fpsFov','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
-  'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
+  'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
@@ -281,7 +282,7 @@ const meta=Object.assign({
   soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
-  beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
+  beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
@@ -1042,6 +1043,8 @@ function diffMode(id){ return id==='hardcore'?'hc':id==='hitless'?'hl':'rl'; }  
 // Deriving from MODE means a desync can never let a hardcore save quietly play by Normal's rules.
 function curDiff(){ return MODE==='hc'?DIFFS.hardcore:MODE==='hl'?DIFFS.hitless:DIFFS.normal; }
 function isHitless(){ return MODE==='hl'; }
+function jetpackUnlocked(){ return !!meta.beatHitless; }
+function jetpackOn(){ return jetpackUnlocked() && meta.jetpack!==false && G && G.p && MODE!=='hl'; }   // earned reward; off in Hitless itself (no flying past its point)
 function isPermadeath(){ return MODE==='hc'||MODE==='hl'; }
 function zoneOf(zi){ return ZONES[Math.max(0,Math.min(ZONES.length-1,zi|0))]; }
 function curZone(){ return zoneOf(G?G.zone:0); }
@@ -1314,7 +1317,7 @@ function freshPlayer(){
     stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
-    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0};
+    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0};
   applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
   return p;
 }
@@ -2533,6 +2536,14 @@ function update(dt){
   // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
   if(p.varJump && !input.jump && p.vy>340) p.vy=340;
   if(p.onGround || p.vy<=0) p.varJump=false;
+  // JETPACK (Hitless-clear reward): hold jump in the air to fly; fuel drains, refills on landing.
+  p.jets=0;
+  if(jetpackOn()){
+    if(p.onGround){ p.jetFuel=Math.min(1,(p.jetFuel==null?1:p.jetFuel)+dt*0.5); }   // ~2s to a full tank
+    else if(input.jump && !p.varJump && (p.jetFuel||0)>0){
+      p.vy=Math.min(p.vy+2400*dt,430); p.jetFuel=Math.max(0,(p.jetFuel||0)-dt*0.4); p.jets=1;   // ~2.5s of flight
+      if(Math.random()<0.7) G.particles.push({x:p.x+(Math.random()-0.5)*13,y:p.y+2,z:p.z+(Math.random()-0.5)*13,vx:(Math.random()-0.5)*40,vy:-160,vz:(Math.random()-0.5)*40,life:0.3,color:Math.random()<0.5?'#9fe0ff':'#ffd24a',sz:2.6}); }
+  }
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
@@ -2942,7 +2953,7 @@ function winScreen(bonus,D){
   const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
     <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Void Tyrant has fallen.
-      ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You have beaten BLADEFALL at its cruelest.</span>'}</p>
+      ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You beat BLADEFALL at its cruelest.<br>🚀 The Jetpack is yours — fly free.</span>'}</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
       <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
       <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div></div>
@@ -3339,6 +3350,7 @@ function openPause(){
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
     ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
+    ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
@@ -3354,6 +3366,7 @@ function openPause(){
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
+  { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
@@ -4163,6 +4176,8 @@ function render(t){
   if(mode==='play'&&G.combo>=3){ cb.textContent=G.combo+' HITS'; cb.style.opacity=Math.min(1,G.comboT); cb.style.fontSize=(15+Math.min(6,G.combo*0.2))+'px'; }
   else cb.style.opacity=0;
   const pf=document.getElementById('progfill'); if(pf&&G.goalPos&&G.startPos){ const d0=Math.hypot(G.goalPos.x-G.startPos.x,G.goalPos.z-G.startPos.z)||1, dd=Math.hypot(G.goalPos.x-G.p.x,G.goalPos.z-G.p.z); pf.style.width=Math.min(100,Math.max(0,(1-dd/d0)*100))+'%'; }
+  const jw=document.getElementById('jetwrap'), jf=document.getElementById('jetfill');
+  if(jw){ if(jetpackUnlocked()&&meta.jetpack!==false){ jw.classList.remove('hide'); if(jf) jf.style.width=Math.round((G.p.jetFuel==null?1:G.p.jetFuel)*100)+'%'; jw.style.opacity=G.p.jets?1:0.7; } else jw.classList.add('hide'); }
   // stage banner via toast-style DOM (first 2.6s)
   if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name; toast(s.name.toUpperCase()+'  ·  STAGE '+(G.stageIndex+1)+'/'+STAGES.length); }
   if(G.stageBanner<=0) render._bannered=null;

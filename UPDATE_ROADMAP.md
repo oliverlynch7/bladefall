@@ -111,11 +111,12 @@ self-contained work session. Work top to bottom.
   the castle gates, ascend through the castle, and reach the **throne room** for the final boss.
 
 ## Phase 8 — Big feature work-orders (already spec'd; implement here)
-- [ ] **Weapon Identity Overhaul** — the full per-weapon spec (already written). Touches combat +
-  gear, so land it after Phases 3–4. Related items already folded above: forging (Phase 4),
-  armor combine (Phase 4), skill visuals (Phase 3).
-- [ ] **Loot-juice + Drop-rate + Mixed-encounters + NPC "press E" dialogue** — already written.
-  Pairs naturally with Phases 3 and 5.
+- [x] **Weapon Identity Overhaul** — SHIPPED **v1.41.0** (Appendix A): per-weapon charge/hybrid/seek/pull,
+  off-class disables specials, spear removed+folded, Void Scythe shop-only after Reaper, harder Reaper trial.
+  *(Note: forging slot-machine + armor-combine (Phase 4) and per-skill visuals (Phase 3) remain TODO.)*
+- [x] **Loot-juice + Drop-rate + Mixed-encounters + NPC "press E" dialogue** — SHIPPED **v1.40.0** (Appendix B):
+  rarity-tiered drop fanfare + colored beam/burst/toast, drop-rate lowered, mixed-composition dens, press-E hub dialogue.
+  *(Note: Appendix B item 1 asks for FREE-TO-USE sourced SFX; current drop/level SFX are procedural — see Phase 3 SFX item, still TODO.)*
 
 ---
 ### Conventions recap (every phase)

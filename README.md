@@ -1,61 +1,57 @@
 # BLADEFALL
 
-A 2D action-RPG built for Caleb — installs as an iPhone home-screen web app, same as
-Oliver's "The Work" PWA. Single self-contained canvas game; no build step, no dependencies.
+A voxel action-RPG by **Oliver Lynch**. Single self-contained HTML files — no build step,
+no dependencies — installable as an iPhone home-screen web app.
 
-- **Live (2.5D):** https://bladefall.netlify.app — `public/index.html` (single file)
-- **Live (TRUE 3D):** https://bladefall.netlify.app/3d/ — `public/3d/index.html` (single file,
-  raw WebGL, zero dependencies; own PWA manifest so it installs as a separate home-screen app).
-  **v1.5+ is a procedurally-generated dungeon crawler:** seeded rooms, locking combat doors that
-  slam shut during encounters, key & 3-plate puzzles, hard parkour bridges (crumbling tiles /
-  moving platforms / geysers) over the drop, one guarded chest per dungeon, and a distinct bestiary
-  (skeletons, splitting slimes, hooded casters, charging beetles, treasure goblins). Enemies are
-  edge-aware and never fall into the hazard. Skins/achievements import from the 2D save; god cheat identical.
-- **Netlify site:** `bladefall`, on Oliver's **second** Netlify account.
+- **Live (main game, TRUE 3D):** https://bladefall.pages.dev/3d/ — `public/3d/index.html`
+  (raw WebGL, zero dependencies; own PWA manifest so it installs as its own home-screen app).
+- **Live (2D classic):** https://bladefall.pages.dev/2d/ — `public/2d/index.html`
+- **Weapon design QA board:** https://bladefall.pages.dev/weapons/
+- **Hosting:** Cloudflare Pages, project `bladefall`, deployed from
+  `github.com/oliverlynch7/bladefall` — **`git push` to `main` IS the deploy** (~30s).
 
-> ⚠️ **Account rule:** BLADEFALL must ONLY live on the second Netlify account, never on the
-> `theantianxietyacademy@gmail.com` account (that account is for The Work + coacholiverlynch.com).
-> `deploy.ps1` aborts if the CLI is signed into the antianxietyacademy account. The old
-> `bladefall-caleb` site on that account was deleted and must not be recreated.
+> ⚠️ **Account rule:** BLADEFALL must never be deployed on the
+> `theantianxietyacademy@gmail.com` Netlify account (that account is for The Work +
+> coacholiverlynch.com). Netlify is retired for this project entirely — Cloudflare only.
 
-## Install on iPhone
-Open the Live URL in **Safari** → Share → **Add to Home Screen**. Launches full-screen, no browser chrome.
+## The game (Classes & Quests era, v1.24+)
 
-## Gameplay
-**v4: full 2.5D depth movement** — a virtual joystick moves you in every direction on the ground
-plane (left/right along the level **and up/down in depth**, beat-'em-up style) plus **JUMP** (height).
-Enemies flank you in depth; ranged shots travel in your depth lane, so line up your shots; boss
-projectiles aim across all three axes. **SLASH/FIRE** (hold to combo), **DODGE** (i-frame dash in any
-direction). Kill monsters → XP → level up → pick an upgrade. 14 stages, ranged bosses, the Abyss
-King and the Void Tyrant. Rarity loot (common→legendary) — physical & magical, melee & ranged
-weapons + 3-slot **armor**; rarer drops deeper in. **New Game+** keeps your gear/stats while enemies
-scale ~1.12× past your power. **Achievements unlock skins** (pause menu or title). Ambient weather
-per zone, combo counter, stage progress bar. Progress saves to the phone (Continue on title).
+- **Classes:** Warrior / Ranger / Mage starters (unlocked via themed, skippable tutorial
+  trials) + the earned **Reaper**. 4 skills each on cooldowns (keys 1–4), class ranks 1–10,
+  subclass choice at rank 3, off-family weapons at 0.6×. The Ranger is a mixed-style
+  attacker: shots at range, a knife swipe point-blank.
+- **World:** a 7-zone chain (Outskirts → The Apex), each zone = quest-gated areas + a boss
+  arena, with respawning spawner dens, hidden side zones behind parkour, a lore-giving
+  **Warden's Shade** at every zone mouth, per-zone signature hazards, and zone-tier loot
+  bands. Zones grow bigger and harder as the chain deepens.
+- **Economy:** the hub is the save point — die and you lose only that attempt. Bag/stash,
+  shop weapon ladder, armor sets, achievement cosmetics. Difficulty ladder:
+  Normal → Hardcore → Hitless.
+- **Music:** 17 CC-BY tracks (per-zone + per-boss, Dark Descent on the Void Tyrant) with a
+  mandatory in-game credits screen.
+- **Story:** the last Warden descends to break the Abyss King's cycle.
 
-**Keyboard (desktop):** WASD/arrows move (up/down = depth) · **Space jump** · **J attack** ·
-**K or Shift dodge** · **L auto-attack** · Enter/Backspace equip/keep loot · **Esc pause**.
-On phone: joystick + on-screen buttons (AUTO and KEEP toggles on the right edge).
+**Desktop keys:** WASD move · Space jump (tap = short hop, hold = full) · J attack ·
+K/Shift dodge · 1–4 skills · L auto-attack · Esc pause.
+Phone: joystick + on-screen buttons.
 
 ## Edit & redeploy
-First make sure the Netlify CLI is signed into the **second** account (the one that owns
-`bladefall.netlify.app`) — `netlify logout` then `netlify login` and pick it. Then from this folder:
 
 ```powershell
-./deploy.ps1
+git add -A ; git commit -m "..." ; git push
 ```
 
-`deploy.ps1` refuses to run if the CLI is signed into the antianxietyacademy account, resolves the
-`bladefall` site on the signed-in account, uploads a draft, and publishes it via
-`netlify api restoreSiteDeploy` (the draft+restore two-step avoids the `--prod` 403 seen on the old
-site). It writes the resolved site id into `.netlify/state.json`.
+Cloudflare Pages builds from `main` automatically. Verify with the version string:
+`curl https://bladefall.pages.dev/3d/ | grep VERSION3D`.
+
+## Testing
+
+Headless harnesses live in the Claude session scratchpad (`harness2b.js`, `zone.js`,
+`phase3/4.js`, `canyon.js`, `combatfeel.js`, `music.js`, `uivol.js`, `conn.js` and friends) —
+they boot the game in Node with a stubbed DOM/GL and assert systems end-to-end. The game
+exposes `window.__BF3` as the debug/testing hook. UI must additionally be verified against
+the real page DOM (stub canvases lie about rendering).
 
 ## Icons
-`public/icon.svg` is the source. Regenerate the PNG icons (`apple-touch-icon.png`, `icon-512.png`):
 
-```powershell
-python make_icon.py
-```
-
-## Local preview
-Served by the `bladefall` config in `../../.claude/launch.json` (python http.server on port 4310),
-or any static server pointed at `public/`. The game exposes a `window.__BF` debug hook for headless testing.
+`public/icon.svg` is the source. Regenerate PNGs: `python make_icon.py`.

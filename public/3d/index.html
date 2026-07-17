@@ -2882,7 +2882,22 @@ function winScreen(bonus,D){
 }
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
 function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); } // free the mouse to click menus
-function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); }
+function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); fixSliders(); }
+/* body has touch-action:none (the joystick needs it) — which silently kills native
+   range-slider dragging on touch. So every overlay slider gets pointer-driven:
+   we compute the value from the drag ourselves and fire 'input' like the real thing. */
+function fixSliders(){
+  ovcard.querySelectorAll('input[type=range]').forEach(el=>{
+    if(el._pfix) return; el._pfix=true;
+    el.style.touchAction='none';
+    const set=ev=>{ const r=el.getBoundingClientRect(), mn=+el.min||0, mx=+el.max||100, st=+el.step||1;
+      let v=mn+(mx-mn)*Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width));
+      v=Math.round(v/st)*st;
+      if(String(el.value)!==String(v)){ el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); } };
+    el.addEventListener('pointerdown',ev=>{ ev.stopPropagation(); try{ el.setPointerCapture(ev.pointerId); }catch(e){} set(ev); });
+    el.addEventListener('pointermove',ev=>{ if(ev.buttons>0 || ev.pointerType==='touch') { if(ev.pressure>0||ev.buttons>0) set(ev); } });
+  });
+}
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
 function titleScreen(){ musicPlay('hub');
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');

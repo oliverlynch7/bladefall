@@ -39,7 +39,7 @@ never mixes.
 "Unsecured" = loot/gold gathered on the current dive but not yet banked at the Hub (see §4).
 
 **Skins & achievements** remain global (shared across modes, as today), imported from the
-existing `bladefall3d_v1` save on first run so nothing Caleb unlocked is lost.
+existing `bladefall3d_v1` save on first run so nothing previously unlocked is lost.
 
 ---
 
@@ -168,7 +168,7 @@ ability registry.
    headless validation sweep.
 
 Each phase bumps `VERSION3D`, commits, pushes (auto-deploys via CD), and the in-app
-self-updater refreshes Caleb's phone.
+self-updater refreshes the installed PWA.
 
 ---
 

@@ -223,7 +223,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.28.1';
+const VERSION3D='1.29.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -456,7 +456,7 @@ function musicSting(key){                             // one-shot over the top o
   if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
 }
 function musicForScene(){                             // one place decides what should be playing right now
-  if(!G) return musicPlay('hub');
+  if(!G||G.hub) return musicPlay('hub');
   if(G.trial) return musicPlay('trial');
   if(G.side) return musicPlay('secret');
   const Z=curZone();
@@ -1015,7 +1015,7 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ if(G&&(G.trial||G.side)) return [];    // trials and side zones run on their own objective
+function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub)) return [];    // trials and side zones run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
 function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
@@ -1075,7 +1075,8 @@ const ENEMY={
   slime:{hp:32,dmg:7,speed:38,r:16,h:24,xp:18,color:'#6ee0a8',kind:'walk',look:'slime'},
   slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
   caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
-  charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#c8893a',kind:'charger'}
+  charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#c8893a',kind:'charger'},
+  dummy:{hp:400,dmg:0,speed:0,r:14,h:42,xp:0,color:'#c9b37e',kind:'walk',look:'bones'}   // waystation training dummy: hits land, nothing dies
 };
 /* what haunts each biome (weighted picks for dungeon rooms) */
 const THEMEMOBS={
@@ -1226,7 +1227,9 @@ function setFlatLights(){ // menus, item/skin previews, title: even, readable
   gl.uniform3f(U.uPC0,0,0,0); gl.uniform3f(U.uPC1,0,0,0); gl.uniform3f(U.uPC2,0,0,0); gl.uniform3f(U.uPC3,0,0,0); }
 function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + the nearest wall torches
   // Zone identity includes LIGHT: Hollow Pass is a sunlit desert canyon, not a torch-lit crypt.
-  if(G && !G.trial && !G.side && curZone().id==='hollow' && !(STAGES[G.stageIndex]||{}).boss){
+  if(G && G.hub){
+    gl.uniform3f(U.uL,0.3,0.85,0.42); gl.uniform1f(U.uAmb,0.50); gl.uniform1f(U.uDif,0.30); gl.uniform3f(U.uKey,1.10,0.94,0.72); }
+  else if(G && !G.trial && !G.side && curZone().id==='hollow' && !(STAGES[G.stageIndex]||{}).boss){
     gl.uniform3f(U.uL,0.42,0.80,0.42); gl.uniform1f(U.uAmb,0.62); gl.uniform1f(U.uDif,0.42); gl.uniform3f(U.uKey,1.18,1.02,0.78); }
   else { gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06); }
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
@@ -1402,7 +1405,7 @@ function newG(p,extra){
     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
     runSeed:Math.floor(Math.random()*1e9),
-    zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,
+    zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,hub:false,gates:[],hubNpcs:[],
     side:false,trial:null,trialKills:0,tip:0,tipT:0,
     cam:{x:0,y:0,z:0}},extra||{});
 }
@@ -2330,6 +2333,7 @@ function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p))); meta.gold=(
 function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return g; } // flat (no gold-find on sales)
 function killEnemy(e){
   if(e.dead) return;
+  if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   questKill(e.type);
@@ -2437,6 +2441,7 @@ function update(dt){
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
   hazUpdate(dt);
+  if(G.hub) hubInteract(p,dt);
   // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
   if(G.dens&&G.dens.length){ for(const dn of G.dens){
     const q=areaQuests().find(x=>x.id===dn.questId);
@@ -2937,15 +2942,80 @@ function openDiffSelect(){
     meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
   document.getElementById('backBtn').onclick=titleScreen;
 }
+/* ============================================================
+   THE WAYSTATION — the walkable hub (Firelink, not a menu)
+   ============================================================ */
 function openHub(){
-  mode='menu'; showGameUI(false); musicPlay('hub'); document.getElementById('bosshpwrap').classList.remove('on');
-  document.getElementById('questbox').classList.add('hide');
+  document.getElementById('bosshpwrap').classList.remove('on');
   if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
-  if(!Object.keys(meta.classUnlocked).length){ openClassPicker(); return; }   // brand-new save: choose your starter first
+  if(!Object.keys(meta.classUnlocked).length){ mode='menu'; showGameUI(false); musicPlay('hub'); openClassPicker(); return; }
   if(!meta.introSeen){                         // first time you reach the hub as a Warden: the story opens
     meta.introSeen=true; persistGlobal();
     playStory(STORY.intro, openHub); return;
   }
+  enterWaystation();
+}
+function enterWaystation(){
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
+  G.stageIndex=0;
+  // scene arrays normally come from loadStage — the waystation builds its own room
+  G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.rooms=[]; G.doors=[]; G.plates=[];
+  G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
+  // one warm stone island over the glow
+  G.segments.push({x:0,z:-40,w:820,d:640});
+  G.walls.push({x:0,z:-380,w:864,d:26,h:150},{x:-420,z:-40,w:26,d:664,h:150},{x:420,z:-40,w:26,d:664,h:150},{x:0,z:300,w:864,d:26,h:150});
+  for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
+  G.torches.push({x:-398,z:-200,ph:1},{x:398,z:-200,ph:2},{x:-398,z:120,ph:3},{x:398,z:120,ph:4});
+  // the portal row: seven gates along the north wall; discovered rifts shimmer beside their parent
+  G.gates=[];
+  ZONES.forEach((Z,i)=>{ const gx=-330+i*110;
+    G.gates.push({zi:i,x:gx,z:-322,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
+    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+42,z:-282,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
+  // the posts: each named screen becomes a person (or a thing) standing somewhere
+  G.hubNpcs=[
+    {id:'quartermaster',label:'Quartermaster · Shop',x:-320,z:-140,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'drillmaster',label:'Drillmaster · Classes',x:320,z:-140,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'keeper',label:'Keeper · Wardrobe',x:-320,z:90,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'board',label:'The Postings',prop:'board',x:-130,z:258,open:()=>openQuestBoard(wsResume)},
+    {id:'chest',label:'Your Pack',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
+    {id:'anvil',label:'The Forge',prop:'anvil',x:320,z:110,open:()=>{ toast('🔥 The forge is cold. The Smith returns with the weapon-upgrade update.'); }}
+  ];
+  // training dummies by the drillmaster — hit them as hard as you like
+  for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
+  G.lastSafe={x:0,z:214}; G.startPos={x:0,z:214}; G.goalPos={x:0,z:-322};
+  G.bounds={minX:-500,maxX:500,minZ:-460,maxZ:380}; G.progressEnd=-380;
+  G.p.x=0; G.p.z=214; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  meta.run=null; persist();
+  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
+  document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
+  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — the last warm place. Walk to a post to use it.'); }
+}
+function wsResume(){
+  if(G&&G.hub){
+    if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+    mode='play'; showOverlay(false); hudUpdate();               // re-sync: bag/shop changes made at a post appear in hand immediately
+  } else openHub();
+}
+function hubInteract(p,dt){
+  for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z);
+    if(d<40){ if(g._c) continue; g._c=true;
+      if(!g.open){ toast('🔒 '+g.name+' — clear '+(ZONES[g.zi-1]?ZONES[g.zi-1].name:'the road')+' first'); SFX.hurt(); }
+      else if(g.side){ enterSide(g.zi); return; }
+      else { enterZone(g.zi); return; } }
+    else if(d>72) g._c=false; }
+  for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z);
+    if(d<52){ if(n._c) continue; n._c=true; SFX.pickup(); n.open(); return; }
+    else if(d>84) n._c=false; }
+  const d0=dXZ(0,-60,p.x,p.z);                                   // the waystone: heal + the overview menu
+  if(d0<48){ if(!G._wsc){ G._wsc=true; SFX.achieve(); p.hp=effMaxHp(p); burst(0,40,-60,'#ffd24a',18); openHubMenu(); } }
+  else if(d0>84) G._wsc=false;
+}
+function openHubMenu(){
+  mode='menu'; musicPlay('hub');
+  document.getElementById('questbox').classList.add('hide');
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
   let rows='';
   ZONES.forEach((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
@@ -2961,10 +3031,11 @@ function openHub(){
         <div style="flex:1;min-width:0"><div class="zn">${Z.side.name} <span class="zsec">SECRET</span> ${sd?'<span class="zdone">✓ cleared</span>':''}</div>
           <div class="zd">${Z.side.blurb} · <b>Tier ${Math.min(7,Z.tier+1)}</b></div></div>
         <div class="zgo">▶</div></div>`; } });
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystation</p><h2 class="ovh">The Hub</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="achlist" style="max-height:min(42vh,300px)">${rows}</div>
+    <button class="bigbtn" id="riseBtn">Rise</button>
     <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
@@ -2972,14 +3043,15 @@ function openHub(){
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
+  document.getElementById('riseBtn').onclick=wsResume;
   document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
   document.querySelectorAll('.zrow[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
-  document.getElementById('trainBtn').onclick=()=>openTrainer(openHub);
-  document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
-  document.getElementById('shopBtn').onclick=()=>openShop(openHub);
-  document.getElementById('bagBtn').onclick=()=>openBag(openHub);
-  document.getElementById('wardBtn').onclick=()=>openWardrobe(openHub);
-  document.getElementById('credBtn2').onclick=()=>openCredits(openHub);
+  document.getElementById('trainBtn').onclick=()=>openTrainer(openHubMenu);
+  document.getElementById('questBtn').onclick=()=>openQuestBoard(openHubMenu);
+  document.getElementById('shopBtn').onclick=()=>openShop(openHubMenu);
+  document.getElementById('bagBtn').onclick=()=>openBag(openHubMenu);
+  document.getElementById('wardBtn').onclick=()=>openWardrobe(openHubMenu);
+  document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
 function openClassPicker(){
@@ -3557,6 +3629,54 @@ function drawSwing3(p,t){
       bx(p.x+Math.sin(ang)*rr, y, p.z+Math.cos(ang)*rr, 11,6,11, col, col, a*(0.35+0.65*near)); }
   }
 }
+/* The Waystation, drawn: waystone bonfire, seven gates, the posts and their keepers. */
+function drawWaystation(t){
+  const pu=0.72+0.28*Math.sin(t*2.2);
+  // the waystone: your bonfire. Touch it to heal and take stock.
+  drawShadow(0,-60,26,0.3);
+  bx(0,5,-60, 64,10,64, '#3a3f4e'); bx(0,14,-60, 48,10,48, '#4a4f5e');
+  bx(0,44,-60, 22,52,22, '#6b7183');
+  bx(0,76,-60, 15,15,15, '#ffd24a','#ffb020',pu);
+  bx(0,150,-60, 7,140,7, '#ffd24a','#ffd24a',0.14);
+  for(let i=0;i<5;i++){ const a=t*0.9+i*1.257; bx(Math.cos(a)*34, 55+Math.sin(t*1.8+i)*10, -60+Math.sin(a)*34, 4,4,4, '#ffd24a','#ffd24a',0.7); }
+  // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
+  for(const g of G.gates){
+    if(g.side){ // discovered rift: a violet seam beside its parent gate
+      bx(g.x,26,g.z, 22,52,8, '#120a1e','#4a2070',0.9);
+      bx(g.x,26,g.z, 10,38,10, g.done?'#3a5a45':'#c47bff', g.done?'#4be08a':'#c47bff', 0.5+0.3*Math.sin(t*3+g.x));
+      continue; }
+    const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
+    bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
+    bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
+    bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?0.30+0.18*Math.sin(t*2.6+g.zi):1);
+    if(open) for(let i=0;i<g.tier;i++) bx(g.x-18+i*6, 104, g.z, 3.6,5,3.6, '#e8a33d','#e8a33d',0.8);   // tier pips
+    if(g.done) bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
+    if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
+  }
+  // the keepers of the posts
+  for(const n of G.hubNpcs){
+    if(n.prop==='board'){ drawShadow(n.x,n.z,20,0.22);
+      bx(n.x-20,26,n.z, 5,52,5,'#4a3a26'); bx(n.x+20,26,n.z, 5,52,5,'#4a3a26');
+      bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
+      continue; }
+    if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
+      bx(n.x,10,n.z, 40,20,26,'#5a4426'); bx(n.x,22,n.z, 42,8,28,'#6e5430');
+      bx(n.x,16,n.z-13, 8,10,3,'#ffd24a','#ffd24a',0.7); continue; }
+    if(n.prop==='anvil'){ drawShadow(n.x,n.z,16,0.22);
+      bx(n.x,9,n.z, 26,18,26,'#3a2f26'); bx(n.x,24,n.z, 40,10,16,'#262a36','#4a5568',0.35);
+      bx(n.x,31,n.z, 12,6,12,'#30364a'); continue; }
+    // a living keeper: solid figure, trimmed in their post's color
+    drawShadow(n.x,n.z,13,0.25);
+    pushM(); mv(n.x,0,n.z); rotY(Math.sin(t*0.6+n.x)*0.25+(n.x>0?-1.2:1.2));
+    bx(0,9,0, 12,18,9, '#2c2f3a'); bx(0,26,0, 15,18,11, n.c1);
+    bx(0,26,6, 15,4,2, n.c2, n.c2, 0.4);                                              // sash in post colors
+    bx(0,41,0, 10,11,10, '#c9a380'); bx(0,48,0, 12,4,12, n.c2, n.c2, 0.35);           // head + trimmed hood
+    popM();
+    bx(n.x,66,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
+  }
+  // dummy corner rug
+  bx(300,0.8,-20, 130,1.4,90, '#3a3226');
+}
 function drawEnemy3(e,t){
   const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
   const en=e.lunge>0||e.phase>=2;
@@ -3826,6 +3946,7 @@ function render(t){
     bx(s.x,sy+26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);
     bx(s.x,sy+26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
+  if(G.hub) drawWaystation(t);
   if(G.npc){                                           // the Warden's Shade: a translucent figure in old armor, hovering at the zone mouth
     const n=G.npc, fl=0.5+0.18*Math.sin(t*2.1), fy=6+Math.sin(t*1.6)*3;
     pushM(); mv(n.x,fy,n.z); rotY(Math.sin(t*0.7)*0.3);
@@ -4059,6 +4180,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
+  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

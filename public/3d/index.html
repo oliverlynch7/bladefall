@@ -256,7 +256,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.31.0';
+const VERSION3D='1.32.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -962,7 +962,7 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
-    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:8,d:'Slay 8 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:12,d:'Slay 12 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
@@ -972,22 +972,22 @@ const ZONES=[
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
-    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:8,d:'Destroy 8 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
+    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:15,d:'Destroy 15 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Warden',mus:'boss_warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
-    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:8,d:'Slay 8 Frostlings'}]},
+    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:16,d:'Slay 16 Frostlings'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
-    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:8,d:'Slay 8 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
+    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:18,d:'Slay 18 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
     side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
   {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
-    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:8,d:'Banish 8 Shadelings'}]},
+    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:20,d:'Banish 20 Shadelings'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
@@ -1787,6 +1787,15 @@ function loadStage(i){
     if(rnd()<0.4) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-72),z:room.z+(rnd()*2-1)*(room.d/2-72),w:70+rnd()*40,d:70+rnd()*40,h:26+rnd()*8,kind:'plat'});
     if(diff>=4&&rnd()<0.22) G.geysers.push({x:room.x+(rnd()*2-1)*(room.w/2-56),z:room.z+(rnd()*2-1)*(room.d/2-56),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
   }
+  // SPAWNER NESTS: every zone's kill-quest gets 2 dens of that mob so the hunt is a real grind (not the canyon — it builds its own)
+  { const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q));
+    if(kq && curZone().id!=='hollow'){
+      const cand=G.rooms.filter(r=>r!==entryRoom&&(!isBoss&&!isMini||r!==goalRoom)&&r!==vault);
+      for(let d2=0;d2<Math.min(2,cand.length);d2++){ const room=cand[(d2*3+1)%cand.length];
+        const dx=room.x+(room.w/2-64)*(d2?1:-1), dz=room.z+(room.d/2-64)*(d2?1:-1);
+        G.dens.push({x:dx,z:dz,type:kq.mob,t:2.2+d2,questId:kq.id});
+        mkMonster(kq.mob,dx+30,dz,room); }
+    } }
   goalRoom.encounter=(isBoss||isMini)?goalRoom.encounter:false; if(!isBoss&&!isMini) goalRoom.cleared=true;
   // optional locked vault (dead-end ⇒ can never soft-lock the run)
   if(vault && diff>=2 && vault.doorways.length===1 && rnd2()<0.7){
@@ -3777,6 +3786,28 @@ function drawWaystation(t){
   // dummy corner rug
   bx(300,0.8,-20, 130,1.4,90, '#3a3226');
 }
+/* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
+const SPAWNER={
+  charger:{base:'#3a2210',glow:'#ff9a3a',draw:(x,z,t,g)=>{ bx(x,10,z,52,20,52,'#2a1a0c'); bx(x,26,z,34,16,34,'#3a2210','#ff9a3a',g*0.5); bx(x,40,z,16,14,16,'#c8893a','#ff9a3a',g);
+    for(const s of [-1,1]) bx(x+s*20,30,z-16, 4,18,4,'#e8e4d8'); }},   // twin horns (charger)
+  grunt:{base:'#2c4420',glow:'#7ec46a',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#25381c'); bx(x,22,z,32,16,32,'#2c4420','#7ec46a',g*0.5);
+    for(let i=0;i<4;i++){ const a=i*1.571+t*0.3; bx(x+Math.cos(a)*22,20,z+Math.sin(a)*22, 6,22,6,'#3a5a24','#7ec46a',g*0.6); } }},   // vine cluster
+  bones:{base:'#3a3830',glow:'#e8e4d8',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#2a2822'); bx(x,26,z,20,30,20,'#4a4740');
+    for(const s of [-1,1]) for(let i=0;i<3;i++) bx(x+s*(14+i*3),18+i*10,z, 4,8,4,'#d8d2c2','#e8e4d8',g*0.5); }},   // ribcage
+  frostling:{base:'#243a48',glow:'#7fd6ff',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#1e3340'); bx(x,30,z,18,44,18,'#bff0ff','#7fd6ff',g);
+    for(const s of [-1,1]) { pushM(); mv(x+s*16,22,z); rotZ(s*0.5); box(8,26,8,'#d8f6ff','#7fd6ff',g*0.7); popM(); } }},   // ice shards
+  emberling:{base:'#3d1a10',glow:'#ff7a3a',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#2a1108'); bx(x,22,z,30,18,30,'#5a2410','#ff7a3a',g*0.6);
+    bx(x,38,z,14,16,14,'#ff7a3a','#ffb060',0.7+0.3*Math.sin(t*6));
+    for(let i=0;i<3;i++){ const a=t*2+i*2.09; bx(x+Math.cos(a)*16,44+Math.sin(t*4+i)*8,z+Math.sin(a)*16, 4,6,4,'#ff9a4a','#ffd24a',0.8); } }},   // ember vent
+  shadeling:{base:'#241431',glow:'#b06bff',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#1a0e28'); pushM(); mv(x,28,z); rotY(t*0.8); box(22,40,22,'#3a2055','#b06bff',g*0.7); popM();
+    for(let i=0;i<3;i++){ const a=-t*1.4+i*2.09; bx(x+Math.cos(a)*24,20,z+Math.sin(a)*24, 5,5,5,'#c47bff','#c47bff',0.6); } }},   // void rift
+  _:{base:'#3a2210',glow:'#ff9a3a',draw:(x,z,t,g)=>{ bx(x,10,z,52,20,52,'#2a1a0c'); bx(x,30,z,20,20,20,'#c8893a','#ff9a3a',g); }}
+};
+function drawSpawner(dn,t){
+  const S=SPAWNER[dn.type]||SPAWNER['_'], g=0.45+0.3*Math.sin(t*2.2+dn.x);
+  drawShadow(dn.x,dn.z,26,0.25);
+  S.draw(dn.x,dn.z,t,g);
+}
 function drawEnemy3(e,t){
   const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
   const en=e.lunge>0||e.phase>=2;
@@ -4072,12 +4103,7 @@ function render(t){
     mv(0,-2,6); box(4,3,2,'#c47bff','#c47bff',fl);                          // eyes glint
     popM();
     if(!n.talked) bx(n.x,64,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
-  if(G.dens) for(const dn of G.dens){                  // spawner nests: you can SEE where the hunt lives
-    const gl2=0.45+0.3*Math.sin(t*2.2+dn.x);
-    bx(dn.x,10,dn.z, 52,20,52, '#2a1a0c', null, 1);
-    bx(dn.x,26,dn.z, 34,16,34, '#3a2210', '#c8893a', gl2*0.5);
-    bx(dn.x,40,dn.z, 16,14,16, '#c8893a', '#ff9a3a', gl2);
-    for(let i=0;i<3;i++){ const a=t*1.4+i*2.09; bx(dn.x+Math.cos(a)*30, 14+Math.sin(t*3+i)*6, dn.z+Math.sin(a)*30, 4,4,4, '#ff9a3a','#ff9a3a',0.6); } }
+  if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
     drawShadow(w.x,w.z,22,0.3);
@@ -4307,7 +4333,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP,
+  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

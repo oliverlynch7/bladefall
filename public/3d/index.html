@@ -70,6 +70,10 @@
   .btn.skl.lock{opacity:.35;}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
   #bDodge.cooling{opacity:.4;}
+  #bInteract{width:74px;height:74px;right:calc(env(safe-area-inset-right) + 22px);bottom:calc(env(safe-area-inset-bottom) + 120px);font-size:12px;font-weight:800;background:rgba(232,163,61,.34);border-color:rgba(255,210,120,.5);}
+  #bInteract.pressed{background:rgba(232,163,61,.64);}
+  #interactprompt{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-100%);background:rgba(12,13,18,.88);border:1px solid var(--amber);border-radius:9px;padding:4px 10px;font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;box-shadow:0 0 14px rgba(232,163,61,.45);}
+  #interactprompt .k{display:inline-block;background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
   #questbox{position:absolute;left:calc(env(safe-area-inset-left) + 10px);top:calc(env(safe-area-inset-top) + 78px);z-index:4;pointer-events:none;
@@ -248,10 +252,12 @@
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">SELL</button>
+  <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
+<div id="interactprompt" class="hide"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script>
@@ -264,7 +270,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.39.0';
+const VERSION3D='1.40.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -644,6 +650,18 @@ const SFX={
   // item pickup: soft two-note bell
   pickup(){ tone({f0:660,dur:0.1,type:'triangle',vol:0.05}); tone({f0:990,dur:0.16,type:'triangle',vol:0.05,at:0.07});
     tone({f0:1980,dur:0.12,type:'sine',vol:0.015,at:0.07}); },
+  // a DROP fanfare that escalates with rarity — obvious by ear which tier just fell (0 common .. 4 legendary)
+  drop(tier){ tier=Math.max(0,Math.min(4,tier|0));
+    if(tier===0){ tone({f0:590,dur:0.1,type:'triangle',vol:0.045}); tone({f0:880,dur:0.13,type:'triangle',vol:0.035,at:0.06}); return; }
+    const NOTES=[null,[523,784],[523,659,988],[440,587,740,988],[523,659,784,988,1319,1568]][tier];
+    const vol=0.05+tier*0.011, sp=tier>=4?0.095:0.07, dur=0.2+tier*0.03;
+    NOTES.forEach((f,i)=>{ tone({f0:f,dur,type:'triangle',vol,at:i*sp}); tone({f0:f*2,dur:dur*0.8,type:'sine',vol:vol*0.4,at:i*sp,detune:5}); });
+    noise({dur:0.28+tier*0.09,f0:5200,f1:9600,type:'highpass',vol:0.016+tier*0.008,a:0.02,at:tier>=3?0.12:0.05});  // shimmer, richer per tier
+    if(tier>=3){ tone({f0:196,f1:392,dur:0.55,type:'sine',vol:0.05,at:NOTES.length*sp*0.5}); }                     // low chord swell
+    if(tier>=4){ tone({f0:65,f1:52,dur:0.8,type:'sawtooth',vol:0.085});                                            // triumphant sub
+      tone({f0:98,dur:0.8,type:'sine',vol:0.05,detune:-8});
+      [1568,2093,2637].forEach((f,i)=>tone({f0:f,dur:0.5,type:'sine',vol:0.028,at:0.5+i*0.06})); }                 // sparkle tail
+  },
   achieve(){ [523,659,880].forEach((f,i)=>{ tone({f0:f,dur:0.18,type:'triangle',vol:0.055,at:i*0.09}); });
     noise({dur:0.35,f0:5200,f1:8800,type:'highpass',vol:0.03,a:0.03,at:0.18}); },
   god(){ tone({f0:65,f1:38,dur:0.6,type:'sawtooth',vol:0.12});
@@ -1518,7 +1536,7 @@ function newG(p,extra){
     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
     runSeed:Math.floor(Math.random()*1e9),
     zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,hub:false,gates:[],hubNpcs:[],
-    side:false,trial:null,trialKills:0,tip:0,tipT:0,meteors:[],
+    side:false,trial:null,trialKills:0,tip:0,tipT:0,meteors:[],fx:[],slowmo:0,interact:null,
     cam:{x:0,y:0,z:0}},extra||{});
 }
 function enterZone(zi){
@@ -1705,8 +1723,13 @@ function scapeFind(ctx,x,z,y){ const q=areaQuests().find(q=>q.k==='find'&&!quest
 function scapeKill(ctx,spots){ const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q)); if(!kq) return;
   spots.forEach((sp,i)=>{ G.dens.push({x:sp.x,z:sp.z,type:kq.mob,t:2.2+i*0.4,questId:kq.id});
     if(sp.deco) G.deco.push({x:sp.x,z:sp.z,y0:sp.y||0,w:44,h:30,c:'#2a2a33',theme:ctx.s.theme});
-    ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null); }); }
+    ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null);
+    const comp=saltMob(ctx.s.theme,kq.mob); if(comp!==kq.mob) ctx.mkMonster(comp,sp.x-34,sp.z+22,sp.room||null); }); }   // a complementary type guards each nest
 function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id}; }
+// a complementary enemy of a DIFFERENT kind than the majority (a caster/flyer among melee, etc.) so a fight forces you to prioritise
+function saltMob(theme,majority){ const pool=(THEMEMOBS[theme]||['grunt']).filter(m=>m!==majority&&ENEMY[m]);
+  const mk=(ENEMY[majority]||{}).kind, diff=pool.filter(m=>ENEMY[m].kind!==mk);
+  const arr=diff.length?diff:pool; return arr.length?arr[Math.floor(Math.random()*arr.length)]:majority; }
 const SCAPES={
   /* HOLLOW PASS — a real mountain climb: wide canyon floor -> scramble to a mesa -> a
      pillar field (the bone hunt) -> a wall you scale while flyers harass -> the summit. */
@@ -1860,6 +1883,7 @@ function loadStage(i){
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
+  G.fx=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -1990,7 +2014,8 @@ function loadStage(i){
       G.chests.push({x:room.x,z:room.z+room.d/2-50,y:0,opened:false,bob:0}); continue; }
     room.encounter=(room!==goalRoom)&&rnd()<0.5; room.cleared=!room.encounter;
     const nM=Math.min(6,2+Math.floor(rnd()*(1.6+diff*0.18)));
-    for(let m=0;m<nM;m++) mkMonster(pick(),room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room);
+    const maj=pick(); for(let m=0;m<nM;m++){ const ty=(m===nM-1&&nM>=3)?saltMob(s.theme,maj):(m===0?maj:pick());   // guarantee a mixed pack: a complementary type salted into any 3+ fight
+      mkMonster(ty,room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room); }
     if(rnd()<0.55) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-60),z:room.z+(rnd()*2-1)*(room.d/2-60),w:36+rnd()*20,d:36+rnd()*20,h:96+rnd()*40,kind:'col'});
     if(rnd()<0.4) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-72),z:room.z+(rnd()*2-1)*(room.d/2-72),w:70+rnd()*40,d:70+rnd()*40,h:26+rnd()*8,kind:'plat'});
     if(diff>=4&&rnd()<0.22) G.geysers.push({x:room.x+(rnd()*2-1)*(room.w/2-56),z:room.z+(rnd()*2-1)*(room.d/2-56),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
@@ -2120,6 +2145,7 @@ function bindBtn(id,key){
 }
 bindBtn('bJump','jump'); bindBtn('bAttack','attack'); bindBtn('bDodge','dodge');
 for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); useSkill(i); }); }
+{ const bi=document.getElementById('bInteract'); if(bi) bi.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); initAudio(); doInteract(); }); }
 (function(){
   const zone=document.getElementById('joyzone'), joy=document.getElementById('joy'), knob=document.getElementById('joyknob');
   let pid=null, ox=0, oy=0; const R=46;
@@ -2164,6 +2190,7 @@ window.addEventListener('keydown',e=>{
   }
   if(mode==='play'&&!e.repeat&&/^Digit[1-4]$/.test(e.code)){ e.preventDefault(); useSkill(+e.code.slice(5)-1); return; }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
+  if(e.code==='KeyE'){ e.preventDefault(); initAudio(); doInteract(); return; }   // interact / talk
   const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();
   if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
 window.addEventListener('keyup',e=>{ const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(k) input[k]=false; });
@@ -2683,9 +2710,11 @@ function killEnemy(e){
       let rid=rollRarity(); while(RARITY[rid].tier<2) rid=RORDER[Math.min(4,RARITY[rid].tier+2)];
       const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
                                    :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
-      G.pickups.push(Object.assign({x:e.x+(i?26:-26),z:e.z+16,y0:0,bob:Math.random()*3},item));
+      pushLoot(e.x+(i?26:-26),e.z+16,0,item);
     }
   } else { SFX.enemyDie(); checkAchievements();
+    // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
+    if(e.elite || Math.random()<0.16) rollDrop(e);
     if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
@@ -2700,20 +2729,32 @@ function openChest(ch){
   for(let i=0;i<drops;i++){
     const rid=bandedRarity(ch.bonus?1:0);      // chests stay random, but only within this zone tier's band
     const item=randomLoot(rid);
-    G.pickups.push(Object.assign({x:ch.x+(i?28:-28),z:ch.z+20,y0:ch.y,bob:Math.random()*3},item));
+    pushLoot(ch.x+(i?28:-28),ch.z+20,ch.y,item);
   }
+}
+// every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
+function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, tier=o?RARITY[o.rarity].tier:0, col=o?RARITY[o.rarity].color:'#fff';
+  G.pickups.push(Object.assign({x,z,y0:y0||0,bob:Math.random()*3},item));
+  SFX.drop(tier);
+  burst(x,(y0||0)+18,z,col,7+tier*7);
+  (G.fx=G.fx||[]).push({x,z,y0:y0||0,tier,col,t:0,life:tier>=4?1.7:tier>=2?1.0:0.7});   // rising beam / ring effect
+  if(tier>=2){ G.shake=Math.min(G.shake+2+tier,16);                                       // rare+ shakes + announces (common/uncommon stay silent)
+    const tag=tier>=4?'✦ LEGENDARY':tier>=3?'◆ EPIC':'✦ RARE';
+    toast(tag+(o&&o.name?' — '+o.name:''), col); }
+  if(tier>=4){ G.slowmo=Math.max(G.slowmo||0,0.32); }                                      // a brief triumphant hitch on a legendary
+  return o;
 }
 function rollDrop(e){
   if(e.type==='tyrant') return;
-  if(e.type==='king'){ G.pickups.push({x:e.x,z:e.z,weapon:makeWeapon('voidscythe','legendary','Abyss Blade'),bob:0});
-    G.pickups.push({x:e.x-40,z:e.z+20,armor:makeArmor('legendary','chest'),bob:0}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
+  if(e.type==='king'){ pushLoot(e.x,e.z,0,{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')});
+    pushLoot(e.x-40,e.z+20,0,{armor:makeArmor('legendary','chest')}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
   let rid=bandedRarity(e.boss?1:(e.elite?1:0));   // bosses and elites reach one band above the zone's cap
   if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
   if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
-  if(!e.boss && Math.random()<0.45){ G.pickups.push({x:e.x,z:e.z,armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)]),bob:0}); }
+  if(!e.boss && Math.random()<0.45){ pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
   else { const aid=ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)];
-    G.pickups.push({x:e.x,z:e.z,weapon:makeWeapon(aid,rid),bob:0});
-    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; G.pickups.push({x:e.x-40,z:e.z+20,armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)]),bob:0}); } }
+    pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
+    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
 }
 function gainXp(n){
   const p=G.p; p.xp+=n;
@@ -2748,6 +2789,9 @@ function hurtPlayer(dmg,sx,sz){
 }
 function update(dt){
   if(mode!=='play') return;
+  if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
+  if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
+  updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
   if(G.stageBanner>0) G.stageBanner-=dt;
   if(G.shake>0) G.shake=Math.max(0,G.shake-dt*40);
@@ -3239,7 +3283,8 @@ function winScreen(bonus,D){
   document.getElementById('hubBtn').onclick=openHub;
 }
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
-function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); } // free the mouse to click menus
+function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
+  if(v){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract'); if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); } }
 function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); fixSliders(); }
 /* body has touch-action:none (the joystick needs it) — which silently kills native
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
@@ -3256,7 +3301,7 @@ function fixSliders(){
     el.addEventListener('pointermove',ev=>{ if(ev.buttons>0 || ev.pointerType==='touch') { if(ev.pressure>0||ev.buttons>0) set(ev); } });
   });
 }
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
+function toast(msg,color){ const t=document.getElementById('toast'); t.textContent=msg; t.style.color=color||''; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
 function openSlots(){
   mode='menu';
   const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
@@ -3371,8 +3416,40 @@ function enterWaystation(){
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
-  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — the last warm place. Walk to a post to use it.'); }
+  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
 }
+/* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
+const NPCVOICE={
+  quartermaster:{cta:'Browse wares',lines:["Steel, leather, charms — I sell what keeps you breathing.","Bring gold, I bring the goods. Nothing here is charity. Nothing here will fail you either."]},
+  drillmaster:{cta:'Train & trials',lines:["You swing like no one ever taught you. I can change that.","Pick a discipline. Or step into a trial and earn a new one. The dead won't wait while you practise."]},
+  keeper:{cta:'Open wardrobe',lines:["Cloaks. Marks. The colors of those who fell before you.","They sharpen nothing. They only decide how the dark remembers you."]},
+  board:{cta:'Read the postings',lines:["The dead left their work unfinished. It's all here, if you can read it.","Take what you can carry. Come back alive to be paid."]},
+  chest:{cta:'Open your pack',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
+  anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]}
+};
+function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
+  mode='menu'; SFX.pickup();
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${n.c2||'#e8a33d'};letter-spacing:.16em">${n.ic||''} ${n.name.toUpperCase()}</p>
+    <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
+      ${v.lines.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}</div>
+    <button class="bigbtn" id="npcGo">${v.cta}</button>
+    <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
+  document.getElementById('npcGo').onclick=()=>n.open();
+  document.getElementById('npcLeave').onclick=resumePlay;
+}
+// what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
+function updateInteract(){
+  let it=null; const p=G.p;
+  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:'Talk to '+n.name,act:()=>openNpcTalk(n)}; } } }
+  else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Warden's Shade",act:()=>openShade()}; }
+  G.interact=it; updateInteractPrompt();
+}
+function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
+function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');
+  const it=(G&&G.interact&&mode==='play')?G.interact:null;
+  if(!it){ if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); return; }
+  if(btn) btn.classList.remove('hide');
+  if(pr){ const sp=project(it.x,it.y||40,it.z); if(sp){ pr.classList.remove('hide'); pr.style.left=(sp[0]/DPR)+'px'; pr.style.top=(sp[1]/DPR-8)+'px'; pr.innerHTML='<span class="k">E</span>'+it.label; } else pr.classList.add('hide'); } }
 function wsResume(){
   if(G&&G.hub){
     if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
@@ -3386,9 +3463,7 @@ function hubInteract(p,dt){
       else if(g.side){ enterSide(g.zi); return; }
       else { enterZone(g.zi); return; } }
     else if(d>72) g._c=false; }
-  for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z);
-    if(d<52){ if(n._c) continue; n._c=true; SFX.pickup(); n.open(); return; }
-    else if(d>84) n._c=false; }
+  // keepers are no longer auto-opened on touch — walk up and press E / TALK (see updateInteract)
   const d0=dXZ(0,-60,p.x,p.z);                                   // the waystone: heal + the overview menu
   if(d0<48){ if(!G._wsc){ G._wsc=true; SFX.achieve(); p.hp=effMaxHp(p); burst(0,40,-60,'#ffd24a',18); openHubMenu(); } }
   else if(d0>84) G._wsc=false;
@@ -4423,6 +4498,7 @@ function render(t){
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
+  if(G.fx&&G.fx.length) drawLootFx(t);
   if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
     const warn=G.emberWarn>0, burn=G.emberBurn>0;
     for(const v of (G.vents||[])){
@@ -4566,16 +4642,30 @@ function drawPickup3(pk,t){
     pushM(); mv(pk.x,yy,pk.z); rotY(t*1.6);
     q.draw(t);
     popM(); return; }
-  const it=pk.weapon||pk.armor||pk.trinket, rc=RARITY[it.rarity].color, y0=pk.y0||0;
+  const it=pk.weapon||pk.armor||pk.trinket, rc=RARITY[it.rarity].color, tier=RARITY[it.rarity].tier, y0=pk.y0||0;
   pushM(); mv(0,y0,0);
   drawShadow(pk.x,pk.z,10,0.25);
-  bx(pk.x,70,pk.z, 5,140,5, rc, rc, 0.14); // beam
+  const bh=120+tier*46;
+  bx(pk.x,bh/2,pk.z, 4+tier*1.3,bh,4+tier*1.3, rc, rc, 0.11+tier*0.05); // rarity beam — taller + brighter the rarer it is, so you SEE it across the room
+  if(tier>=2) glowFX(pk.x,16,pk.z, 9+tier*3, rc, 0.10+tier*0.045);
+  if(tier>=4) for(let i=0;i<5;i++){ const a=t*1.6+i*1.256, ry=28+((t*46+i*32)%150); bx(pk.x+Math.cos(a)*15,ry,pk.z+Math.sin(a)*15, 3,3,3, rc,rc,0.85); } // legendary sparkle motes
   pushM(); mv(pk.x,14+Math.sin(pk.bob)*5,pk.z); rotY(t*2.2);
   bx(0,-6,0, 20,2.4,20, rc, rc, 0.55); // rarity ring base
   if(pk.weapon){ pushM(); mv(0,2,0); weaponMesh(pk.weapon); popM(); }
   else if(pk.armor) drawArmorMini(pk.armor,rc);
   else { bx(0,2,0, 12,2,12, rc, rc, 0.5); bx(0,9,0, 7,7,7, tint(rc,'#fff',0.25), rc); } // trinket gem
   popM(); popM();
+}
+// the DROP moment: a rarity-colored pillar of light + expanding rings (rare+) + a legendary shockwave & sparkles
+function drawLootFx(t){
+  for(const f of G.fx){ const up=1-f.t/f.life, y0=f.y0||0;
+    const bh=(150+f.tier*95)*Math.min(1,f.t*6);
+    bx(f.x, y0+bh/2, f.z, 7+f.tier*3, bh, 7+f.tier*3, f.col, f.col, 0.5*up);
+    glowFX(f.x, y0+22, f.z, 15+f.tier*6, f.col, 0.5*up);
+    if(f.tier>=2){ const rr=(28+f.tier*24)+f.t*170; for(let i=0;i<16;i++){ const a=i/16*6.283; bx(f.x+Math.cos(a)*rr, y0+4, f.z+Math.sin(a)*rr, 7,7,7, f.col,f.col,0.6*up); } }
+    if(f.tier>=4){ const rr2=f.t*270; for(let i=0;i<20;i++){ const a=i/20*6.283; bx(f.x+Math.cos(a)*rr2, y0+8, f.z+Math.sin(a)*rr2, 6,6,6, '#ffffff',f.col,0.5*up); }
+      for(let i=0;i<8;i++){ const a=t*2+i*0.785, ry=y0+20+((t*130+i*40)%260)*up; bx(f.x+Math.cos(a)*(18+i*4), ry, f.z+Math.sin(a)*(18+i*4), 4,4,4, f.col,f.col,0.9*up); } }
+  }
 }
 function drawChest(ch,t){
   pushM(); mv(ch.x,ch.y,ch.z);
@@ -4684,6 +4774,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
+  pushLoot, saltMob, doInteract, updateInteract, openChest,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,

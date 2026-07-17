@@ -65,18 +65,21 @@ self-contained work session. Work top to bottom.
   audio files. Rationale: single-file game + phone performance + no binary-asset fetch/embed available in this env;
   the procedural engine already has tiered drop fanfares (v1.40) and level chimes. Revisit if Oliver wants real files.*
 
-## Phase 4 — Gear, bag & forging systems
-- [ ] **Never lose gear:** equipping/buying moves the replaced weapon or armor to the **bag**.
-- [ ] **Bag full:** on a pickup/purchase with no room, prompt to **sell your lowest/last
-  equippable OR skip** the new item (rewards proactive bag management).
-- [ ] **Bag is organized smartly** — grouped by weapon category and by armor type.
-- [ ] **Armor carries over level-to-level like weapons do** (currently it seems not to).
-- [ ] **Armor can be combined to raise rarity**, just like weapons.
-- [ ] **Forging = "slot machine":** combine two items of the **same rarity** within the **same
-  category** (melee / ranged / magic weapons; armor by type) → get a **random new item of that
-  category at the NEXT rarity**, with a Vampire-Survivors-style **epic slot-machine animation +
-  sound**.
-- [ ] **Gear comparison arrows:** RED for a downgrade stat, GREEN for an upgrade.
+## Phase 4 — Gear, bag & forging systems  ✅ v1.46.0
+- [x] **Never lose gear:** equip/buy moves the replaced piece to the bag (bagReplaced, since v1.34).
+- [x] **Bag full prompt:** *(new `bagFullPrompt` — on a stash with a full bag, offers to sell your lowest-value
+  item to make room, or leave the new one behind; wired into the weapon + armor loot popups.)*
+- [x] **Bag organized by category** — *(openBag now groups by melee/ranged/magic weapon then armor slot, with
+  headers, rarity-descending within each group.)*
+- [x] **Armor carries over level-to-level** — *(already: snapOf includes gear, freshFromSnapshot restores it,
+  identical to weapons — verified.)*
+- [x] **Armor can be combined to raise rarity** — *(the forge is now category-based; two same-rarity armor pieces
+  of the same slot fuse.)*
+- [x] **Forging = slot machine** — *(forge reworked to CATEGORY matching: two same-rarity pieces of the same
+  category (melee/ranged/magic weapon, or armor slot) → a RANDOM new piece of that category at the next rarity.
+  New `forgeSpin()` shows a Vampire-Survivors-style reel that ratchets down and lands on the payout, with tick +
+  payout sounds. Verified: 2 Rare melee weapons → a random Epic melee weapon in the bag.)*
+- [x] **Gear comparison arrows:** *(▲ green / ▼ red on each changed stat in the weapon + armor loot popups.)*
 
 ## Phase 5 — UI / HUD overhaul (desktop-first)
 - [ ] **Shop compare:** when viewing a shop weapon, show your CURRENT weapon's **full stats

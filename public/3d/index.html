@@ -270,7 +270,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.45.0';
+const VERSION3D='1.46.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1483,16 +1483,33 @@ function bagReplaced(old,isWeapon){
 }
 function stashItem(it){
   if(!Array.isArray(meta.stash)) meta.stash=[];
-  if(meta.stash.length>=STASH_CAP){ toast('Your bag is full — sell something at the hub'); return false; }
+  if(meta.stash.length>=STASH_CAP){ return false; }   // caller shows the bag-full prompt
   meta.stash.push(it); persist(); SFX.pickup(); return true;
+}
+function lowestBagIdx(){ let li=-1,lv=1e18; (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor; if(!o) return; const v=itemGold(o); if(v<lv){lv=v;li=i;} }); return li; }
+// bag full on a pickup/purchase: sell your lowest to make room, or leave the new item behind (rewards bag management)
+function bagFullPrompt(newItem,onDone){ mode='menu';
+  const li=lowestBagIdx(), lo=li>=0?(meta.stash[li].weapon||meta.stash[li].armor):null, no=newItem.weapon||newItem.armor;
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Bag Full · ${meta.stash.length}/${STASH_CAP}</p>
+    <h2 class="ovh">No room</h2>
+    <p class="ovsub">Nowhere to put <b style="color:${RARITY[no.rarity].color}">${no.name}</b>.</p>
+    ${lo?`<p class="hint">Sell your lowest — <b>${lo.name}</b> for <b style="color:#ffd24a">+${itemGold(lo)}g</b> — to make room?</p>
+    <button class="bigbtn" id="sellLow">Sell lowest &amp; keep ${no.name}</button>`:''}
+    <button class="bigbtn ghost" id="skipNew">Leave ${no.name} behind</button></div>`);
+  if(lo) document.getElementById('sellLow').onclick=()=>{ const g=sellItem(lo); meta.stash.splice(li,1); meta.stash.push(newItem); persist(); SFX.pickup(); toast('Sold '+lo.name+' +'+g+'g · kept '+no.name); onDone(); };
+  document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
 }
 function openBag(back){
   mode='menu';
-  const rows=meta.stash.length?meta.stash.map((it,i)=>{ const w=it.weapon, a=it.armor, o=w||a;
-    if(!o) return '';
-    const rc=RARITY[o.rarity].color;
+  // grouped by category (melee/ranged/magic weapons, then armor by slot), rarity-descending within each
+  const order=meta.stash.map((it,i)=>({it,i})).filter(x=>x.it.weapon||x.it.armor);
+  const catKey=x=>{ const o=x.it.weapon||x.it.armor; return x.it.weapon?('1'+weapCat(o)):('2'+o.slot); };
+  const catName=x=>{ const o=x.it.weapon||x.it.armor; return x.it.weapon?catLabel(true,weapCat(o)):catLabel(false,o.slot); };
+  order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; const oa=a.it.weapon||a.it.armor,ob=b.it.weapon||b.it.armor; return RARITY[ob.rarity].tier-RARITY[oa.rarity].tier; });
+  let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, o=w||a, rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a.defense+' def · '+a.affixes.map(x=>x.label).join(', '));
-    return `<div class="gearrow" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt="">
+    const hdr=(catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
+    return hdr+`<div class="gearrow" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}</div><div class="gd">${sub}</div></div>
       <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px">Equip</button>
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
@@ -1512,35 +1529,68 @@ function openBag(back){
     const g=sellItem(it.weapon||it.armor); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
   document.getElementById('backBtn').onclick=back;
 }
-/* The Smith's forge: fuse two matching pieces of the same rarity into one of the next. */
+/* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
+   or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
+function weapCat(w){ return w.sch==='mag'?'magic':(w.cls==='melee'?'melee':'ranged'); }
+function catLabel(isW,cat){ return isW?({magic:'Magic Weapon',melee:'Melee Weapon',ranged:'Ranged Weapon'}[cat]||cat):(SLOTS[cat]?SLOTS[cat].label:cat); }
+function catArches(cat){ return DROP_ARCHES.filter(a=>{ const A=ARCHES[a]; return A && weapCat(A)===cat; }); }
 function fuseGroups(){
   const groups={};
   (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor; if(!o||o.rarity==='legendary') return; const isW=!!it.weapon;
-    const k=isW?('w|'+o.arche+'|'+o.rarity):('a|'+o.slot+'|'+(o.set||'')+'|'+o.rarity);
-    (groups[k]=groups[k]||{isW,rarity:o.rarity,sample:o,idxs:[]}).idxs.push(i); });
+    const cat=isW?weapCat(o):o.slot;                                    // category, not exact type
+    const k=(isW?'w|':'a|')+cat+'|'+o.rarity;
+    (groups[k]=groups[k]||{isW,cat,rarity:o.rarity,sample:o,idxs:[]}).idxs.push(i); });
   return Object.values(groups).filter(g=>g.idxs.length>=2);
+}
+// the forged result: a RANDOM item of the category at the next rarity (the slot-machine payout)
+function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
+  if(g.isW){ const pool=catArches(g.cat); const aid=pool.length?pool[Math.floor(Math.random()*pool.length)]:g.sample.arche; return {weapon:makeWeapon(aid,nr)}; }
+  return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
 }
 function openForge(back){
   mode='menu';
   const fuseable=fuseGroups();
-  const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.isW?(ARCHES[o.arche]?ARCHES[o.arche].disp:o.arche):SLOTS[o.slot].label;
+  const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn">2× <span style="color:${rc}">${RARITY[g.rarity].name}</span> ${kind}</div>
-        <div class="gd">forge → <span style="color:${nc};font-weight:800">${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
-      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Fuse</button></div>`; }).join('')
-    :'<p class="hint">Bring me two of the same kind AND rarity and I\'ll forge them into one of the next rarity. Legendaries are already the peak.</p>';
+        <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
+      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Forge</button></div>`; }).join('')
+    :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">The Forge</h2>
-    <p class="ovsub">Two matching pieces → one of the next rarity.</p>
+    <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
-  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const g=fuseGroups()[+b.dataset.g]; if(!g) return;
-    const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample;
-    const result=g.isW?makeWeapon(o.arche,nr):makeArmor(nr,o.slot,o.set);
-    const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x);   // splice high index first so the low one doesn't shift
-    meta.stash.splice(hi,1); meta.stash.splice(lo,1);
-    meta.stash.push(g.isW?{weapon:result}:{armor:result});
-    persist(); SFX.classup(); toast('🔨 Forged a '+RARITY[nr].name+' '+(g.isW?(ARCHES[o.arche]?ARCHES[o.arche].disp:o.arche):SLOTS[o.slot].label)+'!'); openForge(back); });
+  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const g=fuseGroups()[+b.dataset.g]; if(!g) return; forgeSpin(g,back); });
   document.getElementById('backBtn').onclick=back;
+}
+/* Slot-machine forge reveal (Vampire-Survivors-style): the reel of category icons spins, ratchets down,
+   and lands on the random forged item — then it drops into your bag. */
+function forgeSpin(g,back){
+  mode='menu';
+  const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
+  const result=forgeResult(g), ro=result.weapon||result.armor;
+  // consume the two inputs up front
+  const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x); meta.stash.splice(hi,1); meta.stash.splice(lo,1);
+  // precompute a reel of preview icons for this category (fast to cycle)
+  const pool = g.isW ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : SETIDS.map(sid=>itemAv(makeArmor(nr,g.cat,sid)));
+  const finalIcon=itemAv(ro);
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:${nc}">The Forge</p><h2 class="ovh">Forging…</h2>
+    <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid ${nc};box-shadow:0 0 24px ${nc}66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]||finalIcon}"></div></div>
+    <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
+    <button class="bigbtn ghost hide" id="forgeGo">Take it</button></div>`);
+  const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), goBtn=document.getElementById('forgeGo'), box=document.getElementById('reelbox');
+  let i=0, delay=45; const t0=Date.now();
+  const step=()=>{ img.src=pool[i%pool.length]||finalIcon; i++;
+    try{ tone({f0:520+ (i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}    // ratchet tick
+    if(Date.now()-t0 < 1500 && delay<220){ delay*=1.12; setTimeout(step,delay); }
+    else { // land on the payout
+      img.src=finalIcon; box.style.borderColor=nc; box.style.boxShadow='0 0 40px '+nc;
+      nameEl.innerHTML=`<span style="color:${nc};font-weight:800">${ro.name}</span>`;
+      try{ SFX.god(); }catch(e){}
+      if(!stashItem(result)){ meta.stash.push(result); persist(); }   // ensure it lands in the bag
+      persist(); goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
+    } };
+  setTimeout(step,delay);
 }
 function newG(p,extra){
   return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
@@ -3308,8 +3358,8 @@ function offerWeapon(nw){
   if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
   const typ=w=>(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee');
-  const row=(label,a,b,better)=>{ const up=better==='low'?b<a:b>a; const cls=(a===b)?'':(up?'up':'down');
-    return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}</b></span></div>`; };
+  const row=(label,a,b,better)=>{ const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
+    return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}${arr}</b></span></div>`; };
   const reachRow=nw.cls==='ranged'?row('Range',(cur.proj&&cur.proj.range)||0,nw.proj.range||0):row('Range',cur.range||0,nw.range||0);
   const elDesc=nw.el?(nw.el==='void'?'Void · ignores resistances + lifesteal':(nw.el.charAt(0).toUpperCase()+nw.el.slice(1)+' · strong vs '+(Object.keys(WEAK).find(k=>WEAK[k]===nw.el)||'foes'))):'Neutral · flat damage to all';
   showOverlayHTML(`<div class="card">
@@ -3322,7 +3372,7 @@ function offerWeapon(nw){
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
-  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); } resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
 }
 function offerArmor(na){
   if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
@@ -3335,8 +3385,8 @@ function offerArmor(na){
     <h2 class="ovh" style="color:${RARITY[na.rarity].color}">${na.name}</h2>
     <img class="itemav" src="${itemAv(na)}" alt="">
     <div class="statgrid">
-      <div class="vsrow"><span>Piece defense</span><span><b>${curDef}</b> → <b class="${defCls}">${na.defense}</b></span></div>
-      <div class="vsrow"><span>Total reduction</span><span><b>${reduc(before)}%</b> → <b class="${after>before?'up':(after<before?'down':'')}">${reduc(after)}%</b></span></div>
+      <div class="vsrow"><span>Piece defense</span><span><b>${curDef}</b> → <b class="${defCls}">${na.defense}${defCls==='up'?' ▲':defCls==='down'?' ▼':''}</b></span></div>
+      <div class="vsrow"><span>Total reduction</span><span><b>${reduc(before)}%</b> → <b class="${after>before?'up':(after<before?'down':'')}">${reduc(after)}%${after>before?' ▲':after<before?' ▼':''}</b></span></div>
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
@@ -3344,7 +3394,7 @@ function offerArmor(na){
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
-  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); } resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
 }
 function offerTrinket(nt){
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }

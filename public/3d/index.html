@@ -270,7 +270,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.42.0';
+const VERSION3D='1.43.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -339,7 +339,12 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classId='warrior'; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.classUnlocked={}; meta.trialsDone={}; meta.sideFound={}; meta.sideDone={}; } // hardcore death
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={};
+  // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
+  // forces you back through a class trial you already beat.
+  if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
+  if(!meta.classUnlocked[meta.classId]){ const f=Object.keys(meta.classUnlocked)[0]; if(f) meta.classId=f; }
+} // permadeath death
 
 /* ---------------- Story (Classes & Quests update) ----------------
    Built on Isaac's BLADEFALL-2D premise: the Abyss King's nightmares bent gravity,
@@ -1764,7 +1769,7 @@ const SCAPES={
     mkMonster('charger',fl.w*0.2,-60,null); if(rnd()<0.7) mkMonster(pick(),-fl.w*0.2,40,null);
     mkMonster('charger',mx-60,mz,mid); const ar=mkMonster('sparkling',mx+80,mz+40,mid); ar.y=my+30;
     for(let f=0;f<2;f++){ const fly=mkMonster('sparkling',(mx+hx)/2+f*40,(mz+hz)/2,null); fly.y=(my+hy)/2+60; fly.sx=fly.x; fly.sz=fly.z; }
-    scapeKill(ctx,[{x:fl.w*0.3,z:-fl.d*0.3},{x:mx+520*0.28,z:mz+60,room:mid}]);
+    scapeKill(ctx,[{x:fl.w*0.28,z:-fl.d*0.26},{x:-fl.w*0.28,z:fl.d*0.14}]);   // both charger dens on the GROUND floor (ground mobs can't stand on the high mesa)
     scapeFetch(ctx, pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h})));
     scapeFind(ctx, hx-100, hz, hy);
     // hidden rift: a ledge chain dropping off the summit's edge over the void, ending on a rift shelf
@@ -2890,14 +2895,22 @@ function update(dt){
   hazUpdate(dt);
   if(G.hub) hubInteract(p,dt);
   // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
-  if(G.dens&&G.dens.length){ for(const dn of G.dens){
-    const q=areaQuests().find(x=>x.id===dn.questId);
-    if(!q||questDone(q)) continue;
-    dn.t-=dt; if(dn.t>0) continue; dn.t=2.6+Math.random()*1.2;
-    const near=G.enemies.filter(e2=>!e2.dead&&e2.type===dn.type&&dXZ(e2.x,e2.z,dn.x,dn.z)<340).length;
-    if(near>=3 || dXZ(p.x,p.z,dn.x,dn.z)>900) continue;
-    const m=spawnEnemy(dn.type,dn.x+(Math.random()-0.5)*50,dn.z+(Math.random()-0.5)*50);
-    m.active=true; burst(m.x,10,m.z,'#c8893a',12); SFX.growl(0.6); } }
+  // SPAWNERS (quest-driven): while a kill quest is open, refill its mob at the dens until the count is met.
+  // Driven by the quest + a global alive-count (one lookup, fixed cadence) so it can NEVER stall short of the goal.
+  if(G.dens&&G.dens.length){
+    const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q));
+    if(kq){ G._denT=(G._denT||0)-dt;
+      if(G._denT<=0){ G._denT=2.0;
+        const dens=G.dens.filter(d=>d.type===kq.mob), alive=G.enemies.filter(e2=>!e2.dead&&e2.type===kq.mob).length;
+        if(dens.length && alive<5){
+          let bi=0,bd=1e9; dens.forEach((d,i)=>{ const dd=dXZ(p.x,p.z,d.x,d.z); if(dd<bd){bd=dd;bi=i;} });   // spawn from the den nearest the player: the hunt comes to you
+          const n=Math.max(1,Math.min(dens.length,5-alive,3));
+          for(let s=0;s<n;s++){ const d=dens[(bi+s)%dens.length]; const m=spawnEnemy(kq.mob,d.x+(Math.random()-0.5)*50,d.z+(Math.random()-0.5)*50); m.active=true; burst(m.x,10,m.z,'#c8893a',12); }
+          SFX.growl(0.6);
+        }
+      }
+    }
+  }
   { const tr=cosEquipped('trail');                     // cosmetic trail: only when you're actually moving
     if(tr){ G.trailT=(G.trailT||0)+dt;
       if(G.trailT>0.045 && Math.hypot(p.vx,p.vz)>70){ G.trailT=0;
@@ -3841,7 +3854,9 @@ function openPause(){
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
     ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     ${audioSettingsHTML()}
-    <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
+    <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
+    <button class="bigbtn ghost" id="titleBtnP">Title Screen</button></div>`);
+  document.getElementById('titleBtnP').onclick=()=>{ persist(); titleScreen(); };
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
   { const _st=document.getElementById('skipTrialBtn');
@@ -4680,7 +4695,9 @@ function render(t){
   const jw=document.getElementById('jetwrap'), jf=document.getElementById('jetfill');
   if(jw){ if(jetpackUnlocked()&&meta.jetpack!==false){ jw.classList.remove('hide'); if(jf) jf.style.width=Math.round((G.p.jetFuel==null?1:G.p.jetFuel)*100)+'%'; jw.style.opacity=G.p.jets?1:0.7; } else jw.classList.add('hide'); }
   // stage banner via toast-style DOM (first 2.6s)
-  if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name; toast(s.name.toUpperCase()+'  ·  STAGE '+(G.stageIndex+1)+'/'+STAGES.length); }
+  if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name;   // banner reflects the real 7-zone world, not the retired 14-stage list
+    const nm=(G.areaName||s.name).toUpperCase(), sub=(G.hub||G.trial||G.side)?'':('  ·  ZONE '+((G.zone||0)+1)+'/'+ZONES.length);
+    toast(nm+sub); }
   if(G.stageBanner<=0) render._bannered=null;
 }
 function G0BACKDROP(s0,t){

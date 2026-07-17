@@ -21,21 +21,20 @@ self-contained work session. Work top to bottom.
 - [x] Spawners **never stop** spawning until a kill-quest's count is actually met.
   *(den loop runs while `!questDone`; the Frostfell early-stop is a placement bug fixed in Phase 1.)*
 
-## Phase 1 — Critical bugs & completability (do first; these block play)
-- [ ] **Hitless death** no longer forces a brand-new class trial from the beginning.
-- [ ] **Title Screen is always available in the ESC pause menu**, in every mode.
-- [ ] **Stage count bug:** entering the Outskirts shows "1/14" but there aren't 14 stages —
-  leftover from an old version. Make the count reflect the real current stage list.
-- [ ] **Ruined Keep — Sealed Vault is unreachable** (impossible jump). Make it reachable so the
-  objective can be completed.
-- [ ] **Frostfell — frostlings stop spawning before the goal of 16.** Spawners must keep
-  spawning until the quest count is met (global rule from Phase 0).
-- [ ] **Frostfell — plateau parkour is impossible** (can't climb to the top). Make the intended
-  route actually climbable.
-- [ ] **Collectibles/quest items sometimes sit INSIDE the ground** (pickable from above but
-  visually buried). Always place them ON TOP of their surface, fully visible.
-- [ ] **Audit ALL objectives, collectibles, and quests for completability** — every one must be
-  finishable.
+## Phase 1 — Critical bugs & completability (do first; these block play)  ✅ v1.43.0
+- [x] **Hitless death** no longer forces a brand-new class trial from the beginning.
+  *(wipeMode now KEEPS classUnlocked/trialsDone — permadeath wipes the run, not your earned classes.)*
+- [x] **Title Screen is always available in the ESC pause menu**, in every mode. *(added a Title Screen button.)*
+- [x] **Stage count bug** ("1/14"). *(banner now shows the area name + ZONE x/7, reflecting the real 7-zone world.)*
+- [x] **Ruined Keep — Sealed Vault reachable.** *(the maze-era level was replaced by the hand-tuned Keep
+  SCAPE; zonescape.js BFS-verifies the find-objective + portal are reachable with conservative jump reach.)*
+- [x] **Frostfell — frostlings spawn until 16.** *(root cause: a den on the high mesa spawned mobs into the
+  void — moved to ground; spawner rewritten to be quest-driven so it refills until the count is met. Verified
+  all 6 zones reliably reach their kill counts.)*
+- [x] **Frostfell — plateau climbable.** *(SCAPE glacier climb is a climbRun chain within jump reach; harness-verified.)*
+- [x] **Collectibles sit ON TOP of their surface.** *(SCAPE fetch items use the surface top as y0; harness checks 0 buried.)*
+- [x] **Audit ALL objectives for completability.** *(zonescape.js verifies portal + every fetch/find/kill-den/secret
+  reachable, both areas × seeds, all 6 zones; complete.js verifies kill counts are reachable.)*
 
 ## Phase 2 — Camera, control & input feel (affects the whole game)
 - [ ] **Mouse/camera control:** using a menu with the mouse must NOT require re-clicking screen

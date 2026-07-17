@@ -4000,7 +4000,7 @@ function itemAv(item){
     const sw=VH*0.30*DPR, sh=VH*0.30*DPR;
     c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,96,96);
     _itemAvCache[key]=c2.toDataURL();
-  }catch(e){ _itemAvCache[key]=''; }
+  }catch(e){ _itemAvCache[key]=''; window.__avErr=e; }   // keep the last failure inspectable — a silent '' hid a real bug once
   return _itemAvCache[key];
 }
 /* ============================================================

@@ -264,7 +264,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.38.0';
+const VERSION3D='1.39.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1297,6 +1297,10 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
     gl.uniform3f(U.uL,0.3,0.85,0.42); gl.uniform1f(U.uAmb,0.50); gl.uniform1f(U.uDif,0.30); gl.uniform3f(U.uKey,1.10,0.94,0.72); }
   else if(G && !G.trial && !G.side && curZone().id==='hollow' && !(STAGES[G.stageIndex]||{}).boss){
     gl.uniform3f(U.uL,0.42,0.80,0.42); gl.uniform1f(U.uAmb,0.62); gl.uniform1f(U.uDif,0.42); gl.uniform3f(U.uKey,1.18,1.02,0.78); }
+  else if(G && !G.trial && !G.side && curZone().id==='outskirts' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.34,0.86,0.40); gl.uniform1f(U.uAmb,0.60); gl.uniform1f(U.uDif,0.40); gl.uniform3f(U.uKey,1.06,1.08,0.86); }   // open meadow daylight
+  else if(G && !G.trial && !G.side && curZone().id==='frost' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.30,0.84,0.46); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.38); gl.uniform3f(U.uKey,0.92,1.00,1.18); }   // cold snow-glare
   else { gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06); }
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
   const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
@@ -1646,6 +1650,208 @@ function canyonWall(wx,cz,len,sgn,rnd,ww,topH){
   for(let L2=0;L2<courses;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2%6],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
   G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:topH+16,c:'#c2a060',theme:'canyon'});   // rimrock cap
 }
+/* ================= PER-ZONE TERRAIN GRAMMARS ("scapes") =================
+   Each explorable zone builds its OWN landscape here instead of the shared maze, so
+   every zone plays and looks distinct. Vertical scapes guarantee solvability by
+   construction — every climb step stays within jump reach — so conn.js skips them
+   (G.vertical) and zonescape.js verifies them structurally. */
+const JMPV=94, JMPH=150;   // max vertical / horizontal gap a generated climb step may span (jump apex ~104; margin kept)
+function vseg(x,z,w,d,ex){ const s=Object.assign({x,z,w,d},ex||{}); G.segments.push(s); return s; }
+function vplat(x,z,y,w,d,ex){ const o=Object.assign({kind:'plat',x,z,h:Math.round(y),w,d},ex||{}); G.obstacles.push(o); return o; }
+function vcol(x,z,w,d,h){ const o={kind:'col',x,z,w,d,h:Math.round(h)}; G.obstacles.push(o); return o; }
+function vtorch(x,z,rnd){ G.torches.push({x,z,ph:(rnd?rnd():0)*6.28}); }
+// a rising run of standable platforms A->B; step count auto-sized so no gap exceeds jump reach. returns the plats.
+function climbRun(x0,z0,y0,x1,z1,y1,w,ex){ w=w||62; const out=[];
+  const n=Math.max(1, Math.ceil(Math.max(Math.abs(y1-y0)/JMPV, Math.hypot(x1-x0,z1-z0)/JMPH)));
+  for(let k=1;k<=n;k++){ const t=k/n; out.push(vplat(x0+(x1-x0)*t, z0+(z1-z0)*t, y0+(y1-y0)*t, w, w, Object.assign({},ex||{}))); }
+  return out; }
+// ground-level stepping stones across a flat gap over the hazard floor between two points. phase -> phaseable (for Phasing zones).
+function gapStones(x0,z0,x1,z1,w,rnd,phase){ const d=Math.hypot(x1-x0,z1-z0), n=Math.max(1,Math.ceil(d/JMPH)-1); const out=[];
+  for(let k=1;k<=n;k++){ const t=k/(n+1), x=x0+(x1-x0)*t, z=z0+(z1-z0)*t;
+    if(!phase && rnd()<0.4){ const c={x,z,w,d:w,state:0,timer:0,respawn:0,fallY:0,jit:0}; G.crumbles.push(c); out.push(c); }
+    else if(phase && rnd()<0.6) out.push(vseg(x,z,w,w,{phaseable:true}));
+    else out.push(vseg(x,z,w,w)); }
+  return out; }
+// drifting platforms (movers) bridging a gap along x — floes/lifts.
+function gapMovers(x0,z0,x1,z1,w,rnd){ const d=Math.abs(x1-x0), n=Math.max(1,Math.ceil(d/JMPH)-1);
+  for(let k=1;k<=n;k++){ const t=k/(n+1), x=x0+(x1-x0)*t, z=z0+(z1-z0)*t, amp=Math.min(46,(d/(n+1))*0.34);
+    G.movers.push({x0:x,z,w,d:w*0.8,h:0,amp,sp:1.0+rnd()*0.7,ph:rnd()*6.28,x,px:x}); } }
+// the common wrap: bounds, start/goal/portal, checkpoints, shade, horizon deco, hazard, camera, player.
+function finishScape(ctx,o){
+  G.vertical=true;
+  let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
+  for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
+  for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);
+  for(const cr of G.crumbles) ext(cr.x,cr.z,cr.w,cr.d);
+  if(mnX>mxX){ mnX=-200;mxX=200;mnZ=-200;mxZ=200; }
+  G.bounds={minX:mnX-90,maxX:mxX+90,minZ:mnZ-90,maxZ:mxZ+90}; G.progressEnd=mnZ;
+  G.startPos={x:o.sx,z:o.sz}; G.goalPos={x:o.gx,z:o.gz}; G.lastSafe={x:o.sx,z:o.sz,y:o.sy||0};
+  G.portalPos={x:o.gx,z:o.gz};
+  if(!areaQuests().length && !G.trial) G.portal={x:o.gx,z:o.gz,t:0};
+  placeShade(o.sx-70,o.sz+50);
+  const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt=o.decoTall||200;
+  for(let k=0;k<28;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
+    G.deco.push({x:ctx.rnd()<0.5?mnX-150-ctx.rnd()*360:mxX+150+ctx.rnd()*360, z:zz, w:56+ctx.rnd()*140, h:dt*(0.55+ctx.rnd()*0.85), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
+  hazSetup(ctx.rnd2);
+  G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
+}
+// place the active fetch quest's items on the given [{x,z,y}] spots (climb to collect). placed:true skips mob drops.
+function scapeFetch(ctx,spots){ const fq=fetchQuest(); if(!fq||!spots.length) return; const n=fq.n||1;
+  for(let i=0;i<n;i++){ const sp=spots[i%spots.length]; G.pickups.push({x:sp.x+(i>=spots.length?34:0),z:sp.z,y0:sp.y||0,questItem:{id:fq.id,name:fq.item},bob:ctx.rnd()*3,placed:true}); } }
+function scapeFind(ctx,x,z,y){ const q=areaQuests().find(q=>q.k==='find'&&!questDone(q)); if(q) G.waystone={x,z,y:y||0,q:q.id,taken:false,t:0}; }
+// kill-quest spawner dens at [{x,z,room?,deco?}] + a seeded mob each
+function scapeKill(ctx,spots){ const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q)); if(!kq) return;
+  spots.forEach((sp,i)=>{ G.dens.push({x:sp.x,z:sp.z,type:kq.mob,t:2.2+i*0.4,questId:kq.id});
+    if(sp.deco) G.deco.push({x:sp.x,z:sp.z,y0:sp.y||0,w:44,h:30,c:'#2a2a33',theme:ctx.s.theme});
+    ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null); }); }
+function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id}; }
+const SCAPES={
+  /* HOLLOW PASS — a real mountain climb: wide canyon floor -> scramble to a mesa -> a
+     pillar field (the bone hunt) -> a wall you scale while flyers harass -> the summit. */
+  hollow(ctx){ const {rnd,mkMonster,pick}=ctx; const SAND='#8a6a42';
+    const sgn=rnd()<0.5?1:-1;                                  // the climb leans a different way each area/seed
+    const fl=vseg(0,0,660+rnd()*90,460); G.rooms.push({x:0,z:0,w:fl.w,d:fl.d,monsters:[],encounter:false,cleared:true});
+    canyonWall(-(fl.w/2+16),0,fl.d+40,+1,rnd,30,300); canyonWall(fl.w/2+16,0,fl.d+40,-1,rnd,30,300);
+    vtorch(-fl.w/2+34,0,rnd); vtorch(fl.w/2-34,0,rnd);
+    for(let o2=0;o2<3;o2++) vcol((rnd()*2-1)*fl.w*0.28,(rnd()*2-1)*fl.d*0.22,30+rnd()*28,30+rnd()*28,42+rnd()*40);
+    // scramble up to a WIDE mid mesa (checkpoint)
+    const mx=sgn*150, mz=-470, my=200;
+    climbRun(sgn*(fl.w/2-120), -170, 0, mx, mz+120, my, 66);
+    const mid=vplat(mx,mz,my,520,360,{terrace:true,checkpoint:true}); G.rooms.push({x:mx,z:mz,w:520,d:360,y:my,monsters:[],encounter:false,cleared:true});
+    canyonWall(mx-(520/2+16),mz,360+30,+1,rnd,26,my+230); vtorch(mx-520/2+30,mz,rnd); vtorch(mx+520/2-30,mz,rnd);
+    // the PILLAR field (the climb-the-pillars bone hunt) — ascending hoppable pillars off the mesa
+    const pil=[]; let ppx=mx-sgn*300, ppz=mz+40, py=my+30;
+    for(let k=0;k<6;k++){ pil.push(vplat(ppx,ppz,py,74,74,{pillar:true})); vcol(ppx,ppz,74,74,py-6); ppx-=sgn*126; ppz+=(k%2?70:-70); py+=44; }
+    // WALL-SCALE from the mesa up to the summit; flyers harass the climb
+    const hx=mx, hz=-940, hy=440;
+    climbRun(mx-sgn*40, mz-360/2+30, my, hx, hz+230, hy, 66);
+    vplat(hx,hz,hy,620,470,{terrace:true,checkpoint:true}); G.rooms.push({x:hx,z:hz,w:620,d:470,y:hy,monsters:[],encounter:false,cleared:true});
+    vtorch(hx-620/2+30,hz,rnd); vtorch(hx+620/2-30,hz,rnd);
+    mkMonster('charger',fl.w*0.2,-60,null); if(rnd()<0.7) mkMonster(pick(),-fl.w*0.2,40,null);
+    mkMonster('charger',mx-60,mz,mid); const ar=mkMonster('sparkling',mx+80,mz+40,mid); ar.y=my+30;
+    for(let f=0;f<2;f++){ const fly=mkMonster('sparkling',(mx+hx)/2+f*40,(mz+hz)/2,null); fly.y=(my+hy)/2+60; fly.sx=fly.x; fly.sz=fly.z; }
+    scapeKill(ctx,[{x:fl.w*0.3,z:-fl.d*0.3},{x:mx+520*0.28,z:mz+60,room:mid}]);
+    scapeFetch(ctx, pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h})));
+    scapeFind(ctx, hx-100, hz, hy);
+    // hidden rift: a ledge chain dropping off the summit's edge over the void, ending on a rift shelf
+    { const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
+        const ex=hx-(620/2+30); const chain=[[ex-70,hz-30,hy-30],[ex-150,hz+50,hy-90],[ex-232,hz-20,hy-150]];
+        for(const st of chain) vplat(st[0],st[1],Math.max(20,st[2]),58,54,{sec:true});
+        const rf=vplat(ex-300,hz+40,Math.max(16,hy-190),80,72,{sec:true});
+        G.secret={x:rf.x,z:rf.z,y:rf.h,t:0,id:Zc.side.id}; } }
+    finishScape(ctx,{sx:0,sz:fl.d/2-50,sy:0, gx:hx,gz:hz-470/2+80, decoCol:SAND,decoTheme:'canyon',decoTall:300});
+  },
+  /* THE OUTSKIRTS — the gentle opposite of the climb: wide open grass clearings joined in
+     a loose LOOP (wander, not a corridor), near-flat, one soft knoll for the overlook. */
+  outskirts(ctx){ const {rnd,mkMonster}=ctx;
+    const C=[ {x:0,z:0,w:520,d:440}, {x:340,z:-360,w:470,d:410}, {x:-320,z:-430,w:500,d:440}, {x:20,z:-840,w:560,d:480} ];
+    C.forEach(c=>{ vseg(c.x,c.z,c.w,c.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},c)); });
+    const linkL=(a,b,w)=>{ const cxz=(x0,x1,z)=>vseg((x0+x1)/2,z,Math.abs(x1-x0)+w,w), czz=(z0,z1,x)=>vseg(x,(z0+z1)/2,w,Math.abs(z1-z0)+w);
+      cxz(a.x,b.x,a.z); czz(a.z,b.z,b.x); };                    // L-shaped wide land bridge (always walkable)
+    linkL(C[0],C[1],150); linkL(C[0],C[2],150); linkL(C[1],C[3],150); linkL(C[2],C[3],150);  // a loop -> non-linear
+    // tree-line: low non-standable posts scattered along the openings (cover, not walls)
+    for(let k=0;k<10;k++){ const c=C[Math.floor(rnd()*C.length)]; vcol(c.x+(rnd()*2-1)*(c.w/2-40), c.z+(rnd()*2-1)*(c.d/2-40), 24+rnd()*18,24+rnd()*18, 60+rnd()*70); }
+    C.forEach((c,ci)=>{ vtorch(c.x-c.w/2+30,c.z,rnd); vtorch(c.x+c.w/2-30,c.z,rnd); });
+    // a soft knoll in the goal clearing: two gentle steps up to an overlook (the find shrine)
+    const kg=C[3], kx=kg.x-120, kz=kg.z+40; vplat(kx,kz,40,170,170); const ktop=vplat(kx,kz,78,96,96,{checkpoint:true});
+    // grunts across the meadows
+    C.forEach((c,ci)=>{ const n=1+Math.floor(rnd()*2); for(let m=0;m<n;m++) mkMonster('grunt',c.x+(rnd()*2-1)*(c.w/2-60),c.z+(rnd()*2-1)*(c.d/2-60),c); });
+    scapeKill(ctx,[{x:C[1].x,z:C[1].z,room:C[1]},{x:C[2].x,z:C[2].z,room:C[2]}]);
+    scapeFetch(ctx, C.map(c=>({x:c.x+(rnd()*2-1)*120,z:c.z+(rnd()*2-1)*120,y:0})));
+    scapeFind(ctx, ktop.x, ktop.z, 78);
+    scapeSecret(ctx, C[2].x, C[2].z-C[2].d/2+40, 0);
+    finishScape(ctx,{sx:C[0].x,sz:C[0].z+C[0].d/2-50,sy:0, gx:C[3].x,gz:C[3].z-C[3].d/2+80, decoCol:'#3a5a2e',decoTheme:ctx.s.theme,decoTall:170});
+  },
+  /* RUINED KEEP — a fortress in two halves split by a chasm. Cross HIGH on the ramparts
+     (climb, a swinging broken span) or LOW on a phasing causeway that blinks out under you. */
+  keep(ctx){ const {rnd,mkMonster}=ctx;
+    const court=vseg(0,0,600,460); G.rooms.push({x:0,z:0,w:600,d:460,monsters:[],encounter:false,cleared:true});
+    const hall=vseg(0,-1080,560,440); G.rooms.push({x:0,z:-1080,w:560,d:440,monsters:[],encounter:false,cleared:true});
+    vtorch(-260,0,rnd); vtorch(260,0,rnd); vtorch(-240,-1080,rnd); vtorch(240,-1080,rnd);
+    // corner towers you climb (quest perches)
+    const towers=[]; [[-250,-70],[250,-70],[-230,-1010],[230,-1010]].forEach((c,ti)=>{ const ty=170+ti*14;
+      climbRun(c[0]*0.7,c[1],0,c[0],c[1]-40,ty,60); towers.push(vplat(c[0],c[1]-40,ty,120,120,{terrace:true,checkpoint:true})); vcol(c[0],c[1]-40,120,120,ty-6); });
+    // HIGH ramparts across the chasm: stairs up, a walk with a broken span (elevated mover), stairs down
+    const ry=140; climbRun(0,-235,0, 0,-330,ry, 68);
+    vplat(0,-360,ry,160,110,{terrace:true,checkpoint:true}); vplat(0,-490,ry,150,110,{terrace:true});
+    G.movers.push({x0:0,z:-620,w:120,d:96,h:ry,amp:52,sp:1.1+rnd()*0.5,ph:rnd()*6.28,x:0,px:0});   // the broken span sways
+    vplat(0,-760,ry,150,110,{terrace:true,checkpoint:true}); climbRun(0,-830,ry, 0,-905,0, 68);
+    // LOW phasing causeway over the chasm (the Phasing hazard lives here)
+    gapStones(0,-250,0,-855,72,rnd,true);
+    // enemies: skeletons hold both baileys + patrol the ramparts
+    for(let m=0;m<2;m++) mkMonster('bones',(rnd()*2-1)*200,(rnd()*2-1)*140,court);
+    mkMonster('bones',0,-490,null); mkMonster('bones',(rnd()*2-1)*180,-1080-(rnd()*2-1)*120,hall);
+    scapeKill(ctx,[{x:-160,z:-60,room:court},{x:160,z:-1080,room:hall}]);
+    scapeFetch(ctx,[{x:towers[0].x,z:towers[0].z,y:towers[0].h},{x:towers[1].x,z:towers[1].z,y:towers[1].h},{x:0,z:-360,y:ry},{x:0,z:-760,y:ry},{x:towers[2].x,z:towers[2].z,y:towers[2].h}]);
+    scapeFind(ctx, towers[3].x, towers[3].z, towers[3].h);
+    scapeSecret(ctx, hall.x-hall.w/2+40, hall.z-hall.d/2+40, 0);
+    finishScape(ctx,{sx:0,sz:court.d/2-50,sy:0, gx:hall.x,gz:hall.z-hall.d/2+90, decoCol:STONE_C(),decoTheme:ctx.s.theme,decoTall:240});
+  },
+  /* FROSTFELL — a frozen lake: wide slick ice sheets separated by channels of freezing
+     water you cross on DRIFTING FLOES, then a glacier you climb to the frostwatch shelf. */
+  frost(ctx){ const {rnd,mkMonster}=ctx; const ICE='#bfe6ff';
+    const s1=vseg(0,0,560,440); G.rooms.push({x:0,z:0,w:560,d:440,monsters:[],encounter:false,cleared:true});
+    const s2=vseg(-40,-620,520,420); G.rooms.push({x:-40,z:-620,w:520,d:420,monsters:[],encounter:false,cleared:true});
+    gapMovers(-140,-300,120,-300,110,rnd);                         // floes drifting across the first channel
+    gapStones(-40,-410,-40,-410,96,rnd,false);                     // a static ice block mid-channel (extra footing)
+    // glacier: climb ice ledges from sheet 2 up to a high shelf (goal)
+    const gx=60, gz=-1080, gy=300; climbRun(-40,-820,0, gx,gz+150,gy, 70,{ice:true});
+    const shelf=vplat(gx,gz,gy,560,440,{terrace:true,checkpoint:true}); G.rooms.push({x:gx,z:gz,w:560,d:440,y:gy,monsters:[],encounter:false,cleared:true});
+    vtorch(-560/2+30,0,rnd); vtorch(560/2-30,0,rnd); vtorch(gx-260,gz,rnd); vtorch(gx+260,gz,rnd);
+    for(let o2=0;o2<3;o2++) vcol((rnd()*2-1)*200,(rnd()*2-1)*160,30+rnd()*30,30+rnd()*30,60+rnd()*70);   // ice spikes (cover)
+    for(let m=0;m<2;m++) mkMonster('frostling',(rnd()*2-1)*180,(rnd()*2-1)*120,s1);
+    mkMonster('frostling',-40+(rnd()*2-1)*160,-620,s2);
+    scapeKill(ctx,[{x:-150,z:-40,room:s1},{x:-40,z:-620,room:s2}]);
+    scapeFetch(ctx,[{x:gx-160,z:gz+60,y:gy},{x:gx+150,z:gz-40,y:gy},{x:gx,z:gz-140,y:gy},{x:-40,z:-620,y:0},{x:120,z:0,y:0}]);
+    scapeFind(ctx, gx, gz-160, gy);
+    scapeSecret(ctx, s2.x-s2.w/2+40, s2.z-s2.d/2+40, 0);
+    finishScape(ctx,{sx:0,sz:s1.d/2-50,sy:0, gx:shelf.x,gz:shelf.z-shelf.d/2+90, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:280});
+  },
+  /* EMBERDEEP — a lava lake dotted with obsidian islands linked by basalt causeways; rising
+     columns you climb to a vent-scoured ridge. Fall = the lava. Emberfall vents erupt. */
+  ember(ctx){ const {rnd,mkMonster}=ctx;
+    const i1=vseg(0,0,520,420); G.rooms.push({x:0,z:0,w:520,d:420,monsters:[],encounter:false,cleared:true});
+    const i2=vseg(30,-560,500,400); G.rooms.push({x:30,z:-560,w:500,d:400,monsters:[],encounter:false,cleared:true});
+    gapStones(0,-215,30,-360,86,rnd,false);                        // basalt causeway over the lava
+    // rising basalt columns from island 2 up to the high ridge (goal)
+    let cx2=-150, cz2=-560, cy=40; const cols=[];
+    for(let k=0;k<5;k++){ cols.push(vplat(cx2,cz2,cy,88,88,{pillar:true})); vcol(cx2,cz2,88,88,cy-6); cx2+=90; cz2-=64; cy+=48; }
+    const rx=cols[cols.length-1].x+60, rz=-1080, ryy=Math.max(cy,300);
+    climbRun(cols[cols.length-1].x,cols[cols.length-1].z, cols[cols.length-1].h, rx,rz+150,ryy, 70);
+    const ridge=vplat(rx,rz,ryy,540,420,{terrace:true,checkpoint:true}); G.rooms.push({x:rx,z:rz,w:540,d:420,y:ryy,monsters:[],encounter:false,cleared:true});
+    vtorch(-520/2+30,0,rnd); vtorch(520/2-30,0,rnd); vtorch(rx-250,rz,rnd); vtorch(rx+250,rz,rnd);
+    for(let m=0;m<2;m++) mkMonster('emberling',(rnd()*2-1)*170,(rnd()*2-1)*120,i1);
+    mkMonster('emberling',30+(rnd()*2-1)*150,-560,i2);
+    scapeKill(ctx,[{x:-140,z:-40,room:i1},{x:150,z:-560,room:i2}]);
+    scapeFind(ctx, rx, rz-150, ryy);
+    scapeFetch(ctx, cols.map(c=>({x:c.x,z:c.z,y:c.h})).concat([{x:rx,z:rz,y:ryy}]));
+    scapeSecret(ctx, i2.x-i2.w/2+40, i2.z-i2.d/2+40, 0);
+    finishScape(ctx,{sx:0,sz:i1.d/2-50,sy:0, gx:ridge.x,gz:ridge.z-ridge.d/2+90, decoCol:'#5a2418',decoTheme:'lava',decoTall:250});
+  },
+  /* THE ABYSS — shards of broken world floating in the void, joined only by PHASING stones
+     that blink out beneath you. Long, precise jumps; one wrong step is the dark. */
+  abyss(ctx){ const {rnd,mkMonster}=ctx;
+    const a1=vseg(0,0,480,400); G.rooms.push({x:0,z:0,w:480,d:400,monsters:[],encounter:false,cleared:true});
+    const a2=vseg(-60,-560,440,380); G.rooms.push({x:-60,z:-560,w:440,d:380,monsters:[],encounter:false,cleared:true});
+    const a3=vseg(80,-1120,500,420); G.rooms.push({x:80,z:-1120,w:500,d:420,monsters:[],encounter:false,cleared:true});
+    gapStones(0,-205,-60,-365,74,rnd,true);                        // phasing stones between shards
+    gapStones(-60,-755,80,-905,74,rnd,true);
+    // a floating high shard between a2 and a3 (a climb, for the fetch/find perch)
+    const hx=10, hz=-840, hy=180; climbRun(-60,-560-380/2+20, 0, hx,hz+120,hy, 62);
+    const shard=vplat(hx,hz,hy,300,240,{terrace:true,checkpoint:true});
+    vtorch(-200,0,rnd); vtorch(200,0,rnd); vtorch(hx,hz,rnd);
+    for(let m=0;m<2;m++) mkMonster('shadeling',(rnd()*2-1)*150,(rnd()*2-1)*110,a1);
+    mkMonster('shadeling',-60+(rnd()*2-1)*140,-560,a2);
+    scapeKill(ctx,[{x:-120,z:-40,room:a1},{x:-60,z:-560,room:a2}]);
+    scapeFetch(ctx,[{x:hx-90,z:hz+40,y:hy},{x:hx+90,z:hz-30,y:hy},{x:hx,z:hz-90,y:hy},{x:-60,z:-560,y:0},{x:80,z:-1120,y:0}]);
+    scapeFind(ctx, hx, hz-100, hy);
+    scapeSecret(ctx, a2.x-a2.w/2+30, a2.z, 0);
+    finishScape(ctx,{sx:0,sz:a1.d/2-50,sy:0, gx:a3.x,gz:a3.z-a3.d/2+90, decoCol:'#2a1a44',decoTheme:'void',decoTall:230});
+  },
+};
+function STONE_C(){ return '#6b6b73'; }
 function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
@@ -1653,6 +1859,7 @@ function loadStage(i){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.secret=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -1667,89 +1874,13 @@ function loadStage(i){
   const GW=104; // doorway width
   const mkMonster=(type,x,z,room)=>{ const m=spawnEnemy(type,x,z); G.killGoal++;
     if(m.kind==='caster'&&CASTER_EL[s.theme]){ m.shot.el=CASTER_EL[s.theme]; m.shot.color=elementColor(m.shot.el)||m.shot.color; }
-    if(room){ m.room=room; room.monsters.push(m); if(room.encounter) m.dropT=9999; }
+    if(room){ m.room=room; (room.monsters=room.monsters||[]).push(m); if(room.encounter) m.dropT=9999; }
     if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
     return m; };
-  /* ---- ZONE GRAMMAR: Hollow Pass = THE ASCENT (v1.37) ----
-     A mountain climb. Wide, open terraces rise one above the next; between them a
-     parkour scramble you must climb to advance, with flyers harassing you on the way
-     up. Staggered so you turn as you climb, topping out on a windswept plateau. */
-  if(!isBoss && !isMini && !G.trial && !G.side && curZone().id==='hollow'){
-    const SAND='#8a6a42', N=5, RISE=100, APEX=104;   // each terrace RISE higher; steps stay under the jump apex
-    const terraces=[], climbs=[]; let cx2=0, cz2=0, baseY=0, dir=1;
-    for(let b=0;b<N;b++){
-      const isPlateau=(b===N-1);
-      const bw=isPlateau?560:(400+rnd()*110), bd=isPlateau?500:(330+rnd()*90);   // WIDE + open (old bowls were 300-390 — the cramped feeling)
-      const room={x:cx2,z:cz2,w:bw,d:bd,y:baseY,monsters:[],doorways:[],doors:[],_gaps:{n:[],s:[],e:[],w:[]},encounter:false,cleared:true};
-      terraces.push(room); G.rooms.push(room);
-      if(baseY<=1) G.segments.push({x:cx2,z:cz2,w:bw,d:bd});                       // ground-floor terrace
-      else G.obstacles.push({kind:'plat',terrace:true,x:cx2,z:cz2,w:bw,d:bd,h:baseY});   // elevated shelf you stand on
-      // strata walls frame the lower terraces (canyon); the plateau is open mountaintop
-      if(!isPlateau){ const topH=Math.max(240,baseY+240);
-        canyonWall(cx2-(bw/2+16),cz2,bd+40,+1,rnd,30,topH);
-        canyonWall(cx2+(bw/2+16),cz2,bd+40,-1,rnd,30,topH); }
-      // cover boulders on the terrace surface
-      for(let o2=0;o2<3;o2++) G.obstacles.push({x:cx2+(rnd()*2-1)*(bw/2-110),z:cz2+(rnd()*2-1)*(bd/2-110),w:34+rnd()*26,d:34+rnd()*26,h:baseY+24+rnd()*26});
-      G.torches.push({x:cx2-bw/2+34,z:cz2,ph:rnd()*6.28},{x:cx2+bw/2-34,z:cz2,ph:rnd()*6.28});
-      room.climbBase={x:cx2,z:cz2-bd/2+50,h:baseY};
-      if(!isPlateau){
-        // where the NEXT terrace sits: forward (-z) and staggered sideways so you turn as you scale
-        dir=(b%2?1:-1);
-        const nx=cx2+dir*(bw*0.16+90), nz=cz2-bd/2-260, ny=baseY+RISE;
-        // the SCRAMBLE: 3 stepping platforms rising ~RISE, arcing toward the next terrace
-        const sx=cx2+dir*(bw/2-90), sz=cz2-bd/2+30;
-        const chain=[];
-        for(let st=1;st<=3;st++){ const t2=st/3;
-          const pl={kind:'plat',x:sx+(nx-sx)*t2, z:sz-st*72, w:62,d:56, h:baseY+RISE*t2};
-          G.obstacles.push(pl); chain.push(pl); }
-        climbs.push(chain);
-        // a flyer harasses the climb (positioned over the scramble, up at climb height)
-        const har=mkMonster('sparkling',(sx+nx)/2,sz-120,room); har.y=baseY+80; har.sx=har.x; har.sz=har.z;
-        if(b>=1){ const h2=mkMonster(pick(),(sx+nx)/2-40,sz-190,room); h2.y=baseY+120; }
-        cx2=nx; cz2=nz; baseY=ny;
-      }
-    }
-    const first=terraces[0], last=terraces[N-1];
-    // the hunt: chargers on the terraces + dens (respawn while the quest is open)
-    G.dens=[];
-    terraces.forEach((room,bi)=>{ if(bi===0){ if(rnd()<0.6) mkMonster('charger',room.x+60,room.z-30,room); return; }
-      mkMonster('charger',room.x-50,room.z,room); if(rnd()<0.7) mkMonster(pick(),room.x+70,room.z+40,room);
-      if(bi===1||bi===3){ G.dens.push({x:room.x+room.w/2-80,z:room.z-room.d/2+80,type:'charger',t:2.4,questId:'hp1'});
-        G.deco.push({x:room.x+room.w/2-80,z:room.z-room.d/2+80,y0:room.y,w:44,h:30,c:'#3a2a18',theme:'canyon'}); } });
-    // quest bones sit ON the climb platforms + terraces — you scale the mountain to collect them
-    { const fq2=ZONES[1].areas[G.area]&&ZONES[1].areas[G.area].quests.find(q=>q.k==='fetch');
-      if(fq2&&!questDone(fq2)){ const spots=[];
-        climbs.forEach(ch=>{ const pl=ch[ch.length-1]; spots.push({x:pl.x,z:pl.z,y0:pl.h}); });   // top of each scramble
-        terraces.slice(1).forEach(r=>spots.push({x:r.x,z:r.z,y0:r.y}));
-        for(let i2=0;i2<5;i2++){ const s2=spots[i2%spots.length];
-          G.pickups.push({x:s2.x+(i2>=spots.length?30:0),z:s2.z,y0:s2.y0,questItem:{id:fq2.id,name:fq2.item},bob:rnd()*3,placed:true}); } } }
-    // find-quest shrine on the plateau
-    { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
-      if(fnd){ G.waystone={x:last.x-90,z:last.z,y:last.y,q:fnd.id,taken:false,t:0}; } }
-    // hidden rift: a ledge chain descending OFF the plateau's edge over the void
-    if(ZONES[1].side && !meta.sideFound[ZONES[1].side.id] && G.area===0){
-      const wx=last.x-(last.w/2+16), y0=last.y;
-      const OUT=[[wx-70,last.z-30,y0-20],[wx-138,last.z+44,y0-70],[wx-204,last.z-24,y0-120]];
-      for(const st2 of OUT) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:54,d:50,h:Math.max(10,st2[2])});
-      G.obstacles.push({kind:'plat',sec:true,x:wx-266,z:last.z+40,w:78,d:70,h:Math.max(10,y0-150)});
-      G.secret={x:wx-266,z:last.z+40,y:Math.max(10,y0-150),t:0,id:ZONES[1].side.id}; }
-    G.climbs=climbs; G.terraces=terraces;
-    // exit portal on the PLATEAU (top of the climb), quest-gated
-    G.portalPos={x:last.x,z:last.z-last.d/2+80};
-    if(!areaQuests().length) G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
-    G.startPos={x:first.x,z:first.z}; G.goalPos={x:last.x,z:last.z};
-    G.lastSafe={x:first.x,z:first.z+first.d/2-40};
-    placeShade(first.x-70,first.z+first.d/2-70);
-    let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
-    for(const r of terraces){ mnX=Math.min(mnX,r.x-r.w/2); mxX=Math.max(mxX,r.x+r.w/2); mnZ=Math.min(mnZ,r.z-r.d/2); mxZ=Math.max(mxZ,r.z+r.d/2); }
-    G.bounds={minX:mnX-80,maxX:mxX+80,minZ:mnZ-80,maxZ:mxZ+80}; G.progressEnd=mnZ;
-    for(let k2=0;k2<30;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);   // distant peaks, taller the higher you climb
-      G.deco.push({x:rnd()<0.5?mnX-160-rnd()*340:mxX+160+rnd()*340, z:zz, w:70+rnd()*140, h:180+rnd()*260, c:tint(SAND,'#000',0.3+rnd()*0.25), theme:'canyon'}); }
-    hazSetup(rnd2);
-    G.p.x=first.x; G.p.z=first.z+first.d/2-50; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
-    if(G.cam) G.cam.y=0;
-    document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
-    return;
+  /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
+     Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
+  if(!isBoss && !isMini && !G.trial && !G.side && SCAPES[curZone().id]){
+    SCAPES[curZone().id]({rnd,rnd2,s,diff,mkMonster,pick,eliteRate}); return;
   }
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}
@@ -2239,7 +2370,7 @@ function lavaHit(){
   addText(p.x,50,p.z,'-'+dmg+' '+hazardName(STAGES[G.stageIndex].theme),'var(--danger)',true);
   hudUpdate();
   if(p.hp<=0){ p.hp=0; p.dead=true; die(); return; }
-  p.x=G.lastSafe.x; p.z=G.lastSafe.z; p.y=60; p.vx=0; p.vy=0; p.vz=0; p.onGround=false; p.invuln=1.2;
+  p.x=G.lastSafe.x; p.z=G.lastSafe.z; p.y=(G.lastSafe.y||0)+60; p.vx=0; p.vy=0; p.vz=0; p.onGround=false; p.invuln=1.2;
   p.recoverT=0.7;   // brief recovery: holding forward can't chain you straight back into the hazard
 }
 function applyElement(e,el,dmg){
@@ -2716,8 +2847,10 @@ function update(dt){
   if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<2 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; break; } }
   // jump pads launch you
   if(p.onGround) for(const pd of G.pads){ if(p.y<2 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
-  // checkpoint: last solid ground you stood on (not a moving platform)
-  if(p.onGround && p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe.x=p.x; G.lastSafe.z=p.z; }
+  // checkpoint: last solid ground you stood on (not a moving platform).
+  // vertical zones flag key plateaus `checkpoint` so a fall on a tall climb sends you back to the last shelf, not the base.
+  if(p.onGround){ if(p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe={x:p.x,z:p.z,y:0}; }
+    else if(G.obstacles) for(const ob of G.obstacles){ if(ob.checkpoint && Math.abs(p.y-ob.h)<3 && Math.abs(p.x-ob.x)<ob.w/2 && Math.abs(p.z-ob.z)<ob.d/2){ G.lastSafe={x:p.x,z:p.z,y:ob.h}; break; } } }
   // fell into the hazard
   if(p.y<-34){ lavaHit(); }
   updateCrumbles(dt); updateGeysers(dt);

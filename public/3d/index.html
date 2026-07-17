@@ -194,7 +194,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.26.0';
+const VERSION3D='1.26.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2020,6 +2020,8 @@ function hazSetup(rnd){                                  // place whatever the z
   if(G.haz==='phase'){                                   // only mid-bridge stepping stones blink — never a landing stoop
     const cand=G.segments.filter(s=>s.phaseable);
     for(const s of cand){ if(rnd()<0.6) G.phasers.push({seg:s,sp:0.8+rnd()*0.7,off:rnd()*6.28,on:true}); }
+    // a phase zone must actually PHASE: if the dice left it bare, arm the first couple of stones
+    if(cand.length && G.phasers.length<2) for(const s of cand.slice(0,2)){ if(!G.phasers.some(ph2=>ph2.seg===s)) G.phasers.push({seg:s,sp:0.9+rnd()*0.6,off:rnd()*6.28,on:true}); }
   } else if(G.haz==='lava'){                             // vents across the rooms
     for(const r of G.rooms){ if(rnd()<0.75) G.vents.push({x:r.x+(rnd()*2-1)*(r.w/2-70),z:r.z+(rnd()*2-1)*(r.d/2-70),r:44}); }
   }
@@ -2039,6 +2041,7 @@ function lavaHit(){
   hudUpdate();
   if(p.hp<=0){ p.hp=0; p.dead=true; die(); return; }
   p.x=G.lastSafe.x; p.z=G.lastSafe.z; p.y=60; p.vx=0; p.vy=0; p.vz=0; p.onGround=false; p.invuln=1.2;
+  p.recoverT=0.7;   // brief recovery: holding forward can't chain you straight back into the hazard
 }
 function applyElement(e,el,dmg){
   if(el==='fire'){ e.burnT=2.6; e.burnDps=Math.max(2,dmg*0.18); e.burnColor='#ff7a3a'; }
@@ -2363,6 +2366,8 @@ function update(dt){
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
   const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
+  if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
+    if(Math.random()<0.25) G.particles.push({x:p.x+(Math.random()-0.5)*16,y:p.y+8,z:p.z+(Math.random()-0.5)*16,vx:0,vy:50,vz:0,life:0.3,color:'#cfd6df',sz:2}); }
   if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
     const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
@@ -3095,7 +3100,6 @@ function openPause(){
     ${meta.camMode!=='far'?`<div style="margin:2px 0 10px;text-align:left;padding:0 6px"><label style="font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Look / mouse sensitivity</span><b id="sensVal" style="color:var(--amber)">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}" style="width:100%;margin-top:7px;accent-color:var(--amber)"></div>`:''}
     <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
     <button class="bigbtn ghost" id="musBtn2">Music: ${meta.musicOn!==false?'On':'Off'}</button>
-    ${meta.camMode!=='fps'?`<button class="bigbtn ghost" id="silBtn">See yourself through walls: ${meta.silhouette!==false?'On':'Off'}</button>`:''}
     <button class="bigbtn ghost" id="qmenu">Quit to Hub</button></div>`);
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
@@ -3109,7 +3113,6 @@ function openPause(){
     toast(curClass().icon+' '+curClass().disp+' — favors '+curClass().family.join(', ')); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persist(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
-  var _sb=document.getElementById('silBtn'); if(_sb) _sb.onclick=()=>{ meta.silhouette=(meta.silhouette===false); persist(); openPause(); };
   var _mb=document.getElementById('musBtn2'); if(_mb) _mb.onclick=()=>{ meta.musicOn=(meta.musicOn===false); persistGlobal(); musicRefresh(); openPause(); };
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
@@ -3197,6 +3200,9 @@ function drawCourse(s,t){
   LATE.length=0;
   const CAMX=G.cam.x, CAMZ=G.cam.z, shoulder=meta.camMode!=='far'; // shoulder + fps: solid walls occlude (no translucent pass)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
+  // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
+  const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
+    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;                                          // healing springs (drawn after cull is defined)
     bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                          // base pad
     bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
@@ -3209,6 +3215,7 @@ function drawCourse(s,t){
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
   if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
     if(!shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
+    else if(shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through
     else wallBox(wl);
   }
   // doors: sealed slabs glow by type; open ones become archways. ori 'z' = opening along z (side wall)
@@ -3217,7 +3224,7 @@ function drawCourse(s,t){
     if(zd){ bx(dr.x,48,dr.z-dr.d/2-8, 20,96,16, stone); bx(dr.x,48,dr.z+dr.d/2+8, 20,96,16, stone); bx(dr.x,92,dr.z, 20,10,dr.d+32, stoneTop); }
     else { bx(dr.x-dr.w/2-8,48,dr.z, 16,96,20, stone); bx(dr.x+dr.w/2+8,48,dr.z, 16,96,20, stone); bx(dr.x,92,dr.z, dr.w+32,10,20, stoneTop); }
     if(!dr.open){
-      if(!shoulder && dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) LATE.push({kind:'door',o:dr});
+      if((!shoulder && dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) || (shoulder && rayHits(dr,12))) LATE.push({kind:'door',o:dr});
       else if(zd){ bx(dr.x,dr.h/2,dr.z, 10,dr.h,dr.d, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, 11,dr.h*0.8,dr.d*0.16, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
       else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
     }
@@ -3242,6 +3249,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
+    if(ob.h>=90 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20)){ LATE.push({kind:'ob',o:ob}); continue; }   // tall blockers fade too (canyon rims, mesas)
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
     else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
@@ -3792,14 +3800,9 @@ function render(t){
       popM(); popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
-  if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
-    const sk0=SKINS[p.skin]||SKINS.knight;
-    gl.depthFunc(gl.GREATER); gl.depthMask(false);       // only fragments BEHIND something → the occluded part
-    SIL=sk0.glow||'#8fe0ff'; SILA=0.92;
-    drawHero3(p,t,true);                                  // preview=true so the invuln blink never hides the silhouette
-    SIL=null;
-    gl.depthFunc(gl.LESS); gl.depthMask(true);
-  }
+  // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
+  //  Its job is done properly now by the translucent LATE pass: anything between
+  //  the camera and the player fades instead.)
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
@@ -3808,7 +3811,7 @@ function render(t){
   if(LATE.length){ gl.depthMask(false);
     const stone2=tint(s.ground,'#fff',0.13), dCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
     for(const L of LATE){ const o=L.o;
-      if(L.kind==='wall') bx(o.x,o.h/2,o.z, o.w,o.h,o.d, stone2, null, 0.30);
+      if(L.kind==='wall'||L.kind==='ob') bx(o.x,o.h/2,o.z, o.w,o.h,(o.d||o.w), stone2, null, 0.30);
       else if(o.ori==='z'){ bx(o.x,o.h/2,o.z, 10,o.h,o.d, stone2, null, 0.30);
         bx(o.x,o.h/2,o.z, 11,o.h*0.8,o.d*0.16, dCol[o.type]||'#fff', dCol[o.type], 0.5); }
       else { bx(o.x,o.h/2,o.z, o.w,o.h,10, stone2, null, 0.30);

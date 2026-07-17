@@ -60,8 +60,9 @@
   #bJump{width:66px;height:66px;right:calc(env(safe-area-inset-right) + 104px);bottom:calc(env(safe-area-inset-bottom) + 92px);}
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
   .btn.skl{width:50px;height:50px;font-size:19px;bottom:calc(env(safe-area-inset-bottom) + 176px);background:rgba(96,72,160,.34);border-color:rgba(170,150,240,.45);}
-  #bSk0{right:calc(env(safe-area-inset-right) + 12px);} #bSk1{right:calc(env(safe-area-inset-right) + 68px);}
-  #bSk2{right:calc(env(safe-area-inset-right) + 124px);} #bSk3{right:calc(env(safe-area-inset-right) + 180px);}
+  #bSk0{right:calc(env(safe-area-inset-right) + 180px);} #bSk1{right:calc(env(safe-area-inset-right) + 124px);}
+  #bSk2{right:calc(env(safe-area-inset-right) + 68px);} #bSk3{right:calc(env(safe-area-inset-right) + 12px);}
+  .btn.skl::after{content:attr(data-n);position:absolute;top:2px;left:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
   .btn.skl.cooling{opacity:.45;font-size:16px;font-weight:900;}
   .btn.skl.lock{opacity:.35;}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
@@ -177,7 +178,7 @@
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">SELL</button>
-  <button class="btn skl" id="bSk0"></button><button class="btn skl" id="bSk1"></button><button class="btn skl" id="bSk2"></button><button class="btn skl" id="bSk3"></button>
+  <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
@@ -193,7 +194,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.24.0';
+const VERSION3D='1.24.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1124,7 +1125,7 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
   const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
   near.sort((a,b)=>a[0]-b[0]);
-  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.8+0.35*Math.sin(t*9+tc.ph); gl.uniform3f(pL,tc.x,60,tc.z); gl.uniform3f(cL,1.55*fl,0.74*fl,0.30*fl); } else gl.uniform3f(cL,0,0,0); };
+  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.8+0.35*Math.sin(t*9+(tc.ph||0)); gl.uniform3f(pL,tc.x,60,tc.z); gl.uniform3f(cL,1.55*fl,0.74*fl,0.30*fl); } else gl.uniform3f(cL,0,0,0); };   // (tc.ph||0): a malformed torch must never NaN the lights again
   setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
 function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
@@ -1436,7 +1437,7 @@ function loadStage(i){
       room.rim=rim;
       // scatter floor boulders (hoppable cover)
       for(let o2=0;o2<3;o2++) G.obstacles.push({x:cx2+(rnd()*2-1)*(bw/2-80),z:cz2+(rnd()*2-1)*(bd/2-80),w:34+rnd()*26,d:34+rnd()*26,h:26+rnd()*30});
-      G.torches.push({x:cx2-bw/2+30,z:cz2,f:rnd()*6.28},{x:cx2+bw/2-30,z:cz2,f:rnd()*6.28});
+      G.torches.push({x:cx2-bw/2+30,z:cz2,ph:rnd()*6.28},{x:cx2+bw/2-30,z:cz2,ph:rnd()*6.28});   // ph, NOT f — an undefined ph fed NaN into the light uniforms and blacked out the whole scene
       if(b<N-1){ // connecting slot canyon, offset to force the snake
         const off=(rnd()*2-1)*(bw/2-90), clen=150+rnd()*70, nz=cz2-bd/2-clen-((250+70/2)/2);
         G.segments.push({x:cx2+off,z:cz2-bd/2-clen/2,w:92,d:clen+36});

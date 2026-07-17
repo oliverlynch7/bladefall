@@ -194,7 +194,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.26.1';
+const VERSION3D='1.27.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -684,9 +684,9 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   persist(); }
 const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
 function normWeapon(w){ if(w&&LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art]; return w; }
-function makeElite(e){                                    // elites: zone minibosses — same silhouette, far more menace
-  e.elite=true; e.hp=Math.round(e.hp*2.4); e.maxHp=e.hp; e.dmg*=1.5;
-  e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=0.94; e.label='Elite';
+function makeElite(e){                                    // elites: zone minibosses — SCARIER, not spongier
+  e.elite=true; e.hp=Math.round(e.hp*1.8); e.maxHp=e.hp; e.dmg*=1.5;   // HP bump trimmed 2.4 -> 1.8 (no bullet-sponge)
+  e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=1.08; e.label='Elite';   // the budget goes to BEHAVIOR: faster, and (chargers) a tighter attack cadence via e.elite
   return e;
 }
 function makeWeapon(aid,rid,nameOverride){
@@ -1256,7 +1256,7 @@ function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); 
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   const cm=classMods(); if(cm.sub==='harvester') v+=cm.cap?0.20:0.12;
   return isGod(p)?v+0.6:v; }
-function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; return isGod(p)?v*0.5:v; }
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
 function effCdr(p){ return Math.min(0.5,(p.armorMods?p.armorMods.cdr:0)); }                                          // Mystic armor cuts skill cooldowns
@@ -1273,8 +1273,9 @@ function offenseScore(p){ const w=p.weapon||startWeapon(); return Math.max(1,(w.
 function toughnessScore(p){ return Math.max(1,(effMaxHp(p)/100)/(1-defenseR(p))); }
 function computeNgScales(p){ // softened (v1.3): sub-linear tracking + smaller margin so NG+ ramps gentler
   const off=Math.pow(offenseScore(p),0.85), tuf=Math.pow(toughnessScore(p),0.85);
-  return { hp:Math.min(500,Math.max(off*1.05,(meta.lastNgHp||1)*1.08)),
-           dmg:Math.min(500,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
+  // HP is CAPPED at 3x — past that, NG+ gets scarier through DAMAGE (dodge or die), never spongier.
+  return { hp:Math.min(3.0,Math.max(off*1.05,(meta.lastNgHp||1)*1.08)),
+           dmg:Math.min(5.0,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
 }
 function cloneGear(g){ const o=freshGear(); if(g) for(const s of GEARSLOTS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }
 function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,level:p.level,xp:p.xp,xpNext:p.xpNext,
@@ -1775,7 +1776,7 @@ function spawnEnemy(type,x,z,isBoss){
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
-    look:a.look||null,noSplit:!!a.noSplit,windT:0,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
+    look:a.look||null,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
     atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
     markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
@@ -2160,7 +2161,7 @@ const SKILL_FX={
     p.atkTimer=0.18; SFX.shoot(); },
   tumble(p,ok,am){ const cm=classMods();
     p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
-    p.invuln=Math.max(p.invuln,cm.sub==='assassin'?0.9:0.4); SFX.dodge();
+    p.invuln=Math.max(p.invuln,cm.sub==='assassin'?0.6:0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
     if(ok){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
@@ -2411,7 +2412,7 @@ function update(dt){
   if(p.onGround || p.vy<=0) p.varJump=false;
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
-    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.34); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }
+    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
   document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
   const _w=p.weapon;
   if(isChargeWeapon(_w) && !meta.autoAttack){                    // magic sword: tap = melee swing, hold = charge an elemental blast
@@ -2527,10 +2528,10 @@ function update(dt){
     else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
       if(e.atkTimer>0) e.atkTimer-=dt;
       if(e.chargeT>0){ e.chargeT-=dt; e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
-      else if(e.windT>0){ e.windT-=dt;
-        if(e.windT<=0){ e.chargeT=0.7; e.cdx=dirX; e.cdz=dirZ; SFX.growl(0.8); } }
+      else if(e.windT>0){ e.windMax=e.windMax||e.windT; e.teleX=dirX; e.teleZ=dirZ; e.windT-=dt;   // track aim so the danger-line follows you during the tell
+        if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=dirX; e.cdz=dirZ; } }
       else { e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
-        if(d<300 && e.atkTimer<=0){ e.windT=0.55; e.atkTimer=2.8; } }
+        if(d<300 && e.atkTimer<=0){ e.windT=e.elite?0.42:0.55; e.windMax=e.windT; e.atkTimer=e.elite?1.8:2.8; SFX.growl(1.1); } }   // AUDIO CUE at the START of the wind-up, not at launch
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
     if(e.kind!=='fly'&&e.kind!=='goblin'){
@@ -3784,6 +3785,13 @@ function render(t){
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
+    if(e.windT>0){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
+      const prog=1-(e.windT/(e.windMax||0.55)), flash=0.5+0.5*Math.sin(t*34);   // fast flash + a bar that fills toward the strike
+      const tx=e.teleX||0, tz=e.teleZ||1, reach=90+prog*230;
+      for(let s=0.15;s<1;s+=0.12){ const gx=e.x+tx*reach*s, gz=e.z+tz*reach*s;   // ground danger-line pointing where it will ram
+        bx(gx,1.5,gz, 20,3,20, '#ff2a1a','#ff5a3a', (0.2+prog*0.5)*flash); }
+      bx(e.x,e.y+e.h*0.55,e.z, e.r*2*(1.25+prog*0.4),e.h*(1.1+prog*0.35),e.r*2*(1.25+prog*0.4), '#ff3020','#ff6040', (0.15+prog*0.28)*flash);   // swelling red aura
+    }
     if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); }
     if(e.elite&&!e.dead){ const ef=0.6+0.4*Math.sin(t*3.2), ey=e.y+e.h+11;   // elite crown: read the threat before it reaches you
       for(let i=0;i<3;i++) bx(e.x+(i-1)*7, ey+(i===1?3:0), e.z, 4,(i===1?9:6),4, '#ffd24a','#ffb020',ef);
@@ -3973,7 +3981,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
-  makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, skinIds:Object.keys(SKINS),
+  makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

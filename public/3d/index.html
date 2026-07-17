@@ -31,6 +31,9 @@
   .bar > i{display:block;height:100%;width:0;border-radius:8px;transition:width .12s linear;}
   #hpfill{background:linear-gradient(90deg,#ff6a60,var(--hp));}
   #xpfill{background:linear-gradient(90deg,#56b6e6,var(--xp));}
+  #clsfill{background:linear-gradient(90deg,#c98cff,#e8a33d);}
+  .barlabel{transition:none;} #xplabel,#clslabel{color:var(--ink);opacity:.9;}
+  .barnum{font-size:8.5px;font-weight:700;color:var(--muted);min-width:38px;text-align:right;font-variant-numeric:tabular-nums;}
   #hud .meta{display:flex;justify-content:space-between;align-items:center;margin-top:2px;}
   #hud .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
   #lvlbadge{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--amber);background:var(--amber-dim);padding:3px 8px;border-radius:999px;}
@@ -190,16 +193,40 @@
   .gearrow .gn{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gearrow .gd{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.35;}
   .bagav{width:46px;height:46px;flex:0 0 auto;border-radius:10px;border:1px solid #2b3040;background:#0d0e14;display:block;}
+  /* Classes & Skills viewer */
+  .ctabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0 0 12px;}
+  .ctab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid #2b3040;color:var(--muted);font-size:15px;cursor:pointer;}
+  .ctab span{font-size:9px;font-weight:800;letter-spacing:.04em;}
+  .ctab.on{border-color:var(--amber);background:rgba(232,163,61,.12);color:var(--ink);}
+  .ctab.lock{opacity:.4;cursor:default;}
+  .snode,.sfork{display:flex;gap:11px;align-items:flex-start;padding:10px 11px;border-radius:12px;border:1px solid #262a36;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));text-align:left;}
+  .snode.shut,.sfork.shut{opacity:.5;}
+  .sfork{border-style:dashed;border-color:var(--amber-dim);background:rgba(232,163,61,.04);}
+  .snode .sic,.sfork .sic{font-size:20px;width:26px;text-align:center;flex:0 0 auto;}
+  .stitle{font-size:14px;font-weight:800;color:var(--ink);}
+  .srank{font-size:9.5px;font-weight:700;color:var(--amber);letter-spacing:.06em;margin-left:4px;}
+  .sdesc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .sconn{width:2px;height:9px;background:#333a4c;margin:0 auto;}
+  /* Hub NPC nameplates (projected over each keeper's head) */
+  #hubtags{position:absolute;inset:0;z-index:6;pointer-events:none;overflow:hidden;}
+  .htag{position:absolute;transform:translate(-50%,-100%);background:rgba(12,13,18,.82);border:1px solid var(--line);
+    border-radius:9px;padding:3px 9px;display:flex;align-items:center;gap:5px;white-space:nowrap;
+    box-shadow:0 3px 10px rgba(0,0,0,.5);}
+  .htag .hi{font-size:13px;} .htag .hn{font-size:11px;font-weight:800;color:var(--ink);}
+  .htag .hr{font-size:9.5px;color:var(--amber);font-weight:700;}
+  .htag.near{border-color:var(--amber);box-shadow:0 0 12px rgba(232,163,61,.4);}
 </style>
 </head>
 <body>
 <canvas id="gl"></canvas>
 <div id="hud" class="hide">
   <div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div></div>
-  <div class="barwrap"><span class="barlabel">XP</span><div class="bar"><i id="xpfill"></i></div></div>
+  <div class="barwrap"><span class="barlabel" id="xplabel">LV 1</span><div class="bar"><i id="xpfill"></i></div><span class="barnum" id="xpnum"></span></div>
+  <div class="barwrap"><span class="barlabel" id="clslabel">⚔️ 1</span><div class="bar" style="height:9px"><i id="clsfill"></i></div><span class="barnum" id="clsnum"></span></div>
   <div class="barwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
   <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
 </div>
+<div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
 <div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
@@ -229,7 +256,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.30.1';
+const VERSION3D='1.31.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -741,6 +768,7 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
     const sk=curClass().skills.find(s=>s.rank===cs.rank);
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
   if(up){ SFX.levelup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
+  if(G&&mode==='play') hudUpdate();
   persist(); }
 const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
 function normWeapon(w){ if(w&&LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art]; return w; }
@@ -1397,11 +1425,13 @@ function openBag(back){
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
-    if(!meta.hero){ toast('Enter a zone once first — no hero yet'); return; }
-    if(it.weapon){ const old=meta.hero.weapon; meta.hero.weapon=normWeapon(it.weapon); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
-    else { const old=meta.hero.gear[it.armor.slot]; meta.hero.gear[it.armor.slot]=it.armor; meta.stash.splice(i,1); if(old) meta.stash.push({armor:old}); }
-    persist(); SFX.pickup(); openBag(back); });
+    if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
+    if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
+    else { const old=HR.gear[it.armor.slot]; HR.gear[it.armor.slot]=it.armor; meta.stash.splice(i,1); if(old) meta.stash.push({armor:old}); }
+    if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+    persist(); SFX.pickup(); hudUpdate(); openBag(back); });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
     const g=sellItem(it.weapon||it.armor); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
   document.getElementById('backBtn').onclick=back;
@@ -3001,12 +3031,12 @@ function enterWaystation(){
     if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+42,z:-282,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
   // the posts: each named screen becomes a person (or a thing) standing somewhere
   G.hubNpcs=[
-    {id:'quartermaster',label:'Quartermaster · Shop',x:-320,z:-140,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
-    {id:'drillmaster',label:'Drillmaster · Classes',x:320,z:-140,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
-    {id:'keeper',label:'Keeper · Wardrobe',x:-320,z:90,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
-    {id:'board',label:'The Postings',prop:'board',x:-130,z:258,open:()=>openQuestBoard(wsResume)},
-    {id:'chest',label:'Your Pack',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
-    {id:'anvil',label:'The Forge',prop:'anvil',x:320,z:110,open:()=>{ toast('🔥 The forge is cold. The Smith returns with the weapon-upgrade update.'); }}
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-320,z:-140,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:320,z:-140,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-320,z:90,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-130,z:258,open:()=>openQuestBoard(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Forge',role:'Upgrades — soon',prop:'anvil',x:320,z:110,open:()=>{ toast('🔥 The forge is cold. The Smith returns with the weapon-upgrade update.'); }}
   ];
   // training dummies by the drillmaster — hit them as hard as you like
   for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
@@ -3088,6 +3118,38 @@ function openClassPicker(){
     <p class="ovsub">Choose how you fight. Its trial teaches you the rest.<br><span style="opacity:.6">You can unlock the others later — and more besides.</span></p>
     <div class="choices">${cards}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.c); });
+}
+/* Classes & Skills viewer — see every class, its rank, path, and skill tree with
+   unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
+function openClasses(back){
+  mode='menu';
+  const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
+  const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
+  const C=CLASSES[view], cs=classState(view), un=!!meta.classUnlocked[view];
+  const tabRow=tabs.map(c=>{ const on=c===view;
+    return `<button class="ctab ${on?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`; }).join('')
+    + CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(c=>`<button class="ctab lock" disabled>🔒</button>`).join('');
+  const subLine=cs.sub?C.subs.find(s=>s.id===cs.sub).disp:(cs.rank>=3?'<span style="color:var(--amber)">choose a path at the trainer</span>':'path chosen at rank 3');
+  // the tree: 4 skill nodes at ranks 1/2/4/7 with the rank-3 subclass fork between #2 and #3
+  const nodes=[];
+  C.skills.forEach((sk,i)=>{
+    const open=cs.rank>=sk.rank, isNext=!open&&C.skills.filter(s2=>s2.rank<=cs.rank).length===i;
+    nodes.push(`<div class="snode ${open?'open':'shut'}"><div class="sic">${open?sk.icon:'🔒'}</div>
+      <div class="sbody"><div class="stitle">${sk.n} <span class="srank">${open?'Rank '+sk.rank+' ✓':'Rank '+sk.rank}</span></div>
+        <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · key ${i+1}</span></div></div></div>`);
+    if(i===1){ const sc=cs.rank>=3;
+      nodes.push(`<div class="sfork ${sc?'open':'shut'}"><div class="sic">${cs.sub?CLASSES[view].subs.find(s=>s.id===cs.sub).blurb?'🜁':'🜁':'⑂'}</div>
+        <div class="sbody"><div class="stitle">Path — Rank 3 ${sc?'✓':''}</div>
+        <div class="sdesc">${C.subs.map(s=>'<b'+(cs.sub===s.id?' style="color:var(--amber)"':'')+'>'+s.disp+'</b> — '+s.blurb).join('<br>')}</div></div></div>`); }
+  });
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Classes &amp; Skills</p>
+    <h2 class="ovh">${C.icon} ${C.disp}</h2>
+    <p class="ovsub">${un?('Rank '+cs.rank+'/10 · '+subLine):(C.earned?'Locked — earn it in a hidden trial':'Locked — play its starter trial')}</p>
+    <div class="ctabs">${tabRow}</div>
+    <div class="achlist" style="max-height:min(50vh,400px)">${nodes.join('<div class="sconn"></div>')}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
+  document.getElementById('backBtn').onclick=back;
 }
 function openTrainer(back){
   mode='menu';
@@ -3258,6 +3320,8 @@ function openPause(){
   showOverlayHTML(`<div class="card"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <button class="bigbtn" id="resBtn">Resume</button>
     <button class="bigbtn ghost" id="gearBtn">Gear</button>
+    <button class="bigbtn ghost" id="bagBtnP">Bag · ${meta.stash.length}/${STASH_CAP}</button>
+    <button class="bigbtn ghost" id="classesBtn">Classes &amp; Skills</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
@@ -3283,6 +3347,8 @@ function openPause(){
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
+  document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
+  document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
   document.getElementById('qmenu').onclick=()=>{ persist(); openHub(); };
@@ -3291,8 +3357,15 @@ document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preven
 function hudUpdate(){
   if(!G) return; const p=G.p;
   document.getElementById('hpfill').style.width=Math.max(0,p.hp/effMaxHp(p)*100)+'%';
+  // AQW-style dual bars: character XP (blue) + class rank XP (violet→amber)
   document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
-  document.getElementById('lvlbadge').textContent=curClass().icon+' '+classState(meta.classId).rank+' · LV '+p.level;
+  document.getElementById('xplabel').textContent='LV '+p.level;
+  document.getElementById('xpnum').textContent=Math.floor(p.xp)+'/'+p.xpNext;
+  const cs=classState(meta.classId), atMax=cs.rank>=10, need=RANK_XP(cs.rank);
+  document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
+  document.getElementById('clslabel').textContent=curClass().icon+' '+cs.rank;
+  document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
+  document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
   wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'')+(G.ngPlus>0?'  ·  NG+'+G.ngPlus:'');
   wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
@@ -3915,6 +3988,21 @@ let hpBars=[];
 const hpCanvas=document.createElement('canvas'); // tiny 2D overlay for enemy hp bars
 hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;width:100%;height:100%;';
 document.body.appendChild(hpCanvas);
+/* Hub nameplates: a projected pill over each keeper telling you who they are + what they do. */
+function updateHubTags(){
+  const box=document.getElementById('hubtags'); if(!box) return;
+  if(!G||!G.hub||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
+  box.classList.remove('hide');
+  if(box.childElementCount!==G.hubNpcs.length){ box.innerHTML=G.hubNpcs.map(n=>
+    `<div class="htag"><span class="hi">${n.ic}</span><span class="hn">${n.name}</span><span class="hr">${n.role}</span></div>`).join(''); }
+  const tags=box.children;
+  G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
+    const sp=project(n.x,(n.prop?46:64),n.z);
+    if(!sp){ tg.style.display='none'; return; }
+    tg.style.display='';
+    tg.style.left=(sp[0]/DPR)+'px'; tg.style.top=(sp[1]/DPR-6)+'px';
+    tg.classList.toggle('near',dXZ(n.x,n.z,G.p.x,G.p.z)<64); });
+}
 function drawHpBars(){
   hpCanvas.width=VW; hpCanvas.height=VH;
   const c=hpCanvas.getContext('2d');
@@ -4043,6 +4131,7 @@ function render(t){
         bx(o.x,o.h/2,o.z, o.w*0.16,o.h*0.8,11, dCol[o.type]||'#fff', dCol[o.type], 0.5); } }
     gl.depthMask(true); }
   drawHpBars();
+  updateHubTags();
   // combo DOM
   const cb=document.getElementById('combo');
   if(mode==='play'&&G.combo>=3){ cb.textContent=G.combo+' HITS'; cb.style.opacity=Math.min(1,G.comboT); cb.style.fontSize=(15+Math.min(6,G.combo*0.2))+'px'; }
@@ -4218,7 +4307,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation,
+  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

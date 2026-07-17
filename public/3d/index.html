@@ -194,7 +194,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.25.0';
+const VERSION3D='1.26.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -700,6 +700,15 @@ function makeWeapon(aid,rid,nameOverride){
   return w;
 }
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
+/* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
+   (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe']};
+function classStartWeapon(cid){
+  const def=CLASSSTART[cid]||CLASSSTART.warrior;
+  const w=makeWeapon(def[0],'common',def[1]);
+  w.dmg=+(w.dmg*0.62).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
+  return w;
+}
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
    Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
 const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe'};   // archetype ids, not arts
@@ -1210,7 +1219,7 @@ function applyPerks(p){
 function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
   const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
-    hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:startWeapon(),gear:freshGear(),armorMods:null,
+    hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
     stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
@@ -1297,10 +1306,41 @@ function beginRun(ngPlus,carrySnap,scales){
 function startRun(ngPlus){ enterZone(0); }
 /* ---- Zone flow (Phase 2): hub is the save point; a zone attempt is provisional ---- */
 function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON.stringify(meta.hero)):null,
-  classes:JSON.parse(JSON.stringify(meta.classes||{}))}; persist(); }
+  classes:JSON.parse(JSON.stringify(meta.classes||{})), stash:JSON.parse(JSON.stringify(meta.stash||[]))}; persist(); }
 function restoreBank(){ if(!meta.bank) return false;
   meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
+  meta.stash=meta.bank.stash||[];                          // items stashed during a failed attempt are lost with it
   meta.bank=null; persist(); return true; }
+/* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
+const STASH_CAP=30;
+function stashItem(it){
+  if(!Array.isArray(meta.stash)) meta.stash=[];
+  if(meta.stash.length>=STASH_CAP){ toast('Your bag is full — sell something at the hub'); return false; }
+  meta.stash.push(it); persist(); SFX.pickup(); return true;
+}
+function openBag(back){
+  mode='menu';
+  const rows=meta.stash.length?meta.stash.map((it,i)=>{ const w=it.weapon, a=it.armor, o=w||a;
+    if(!o) return '';
+    const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a.defense+' def · '+a.affixes.map(x=>x.label).join(', '));
+    return `<div class="gearrow"><div class="gi" style="color:${RARITY[o.rarity].color}">${w?'⚔':'🛡'}</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[o.rarity].color}">${o.name}${w&&w.up?' +'+w.up:''}</div><div class="gd">${sub}</div></div>
+      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px">Equip</button>
+      <button class="bigbtn buybtn" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
+    :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Bag</h2>
+    <p class="ovsub">${meta.stash.length}/${STASH_CAP} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
+    if(!meta.hero){ toast('Enter a zone once first — no hero yet'); return; }
+    if(it.weapon){ const old=meta.hero.weapon; meta.hero.weapon=normWeapon(it.weapon); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
+    else { const old=meta.hero.gear[it.armor.slot]; meta.hero.gear[it.armor.slot]=it.armor; meta.stash.splice(i,1); if(old) meta.stash.push({armor:old}); }
+    persist(); SFX.pickup(); openBag(back); });
+  document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
+    const g=sellItem(it.weapon||it.armor); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
+  document.getElementById('backBtn').onclick=back;
+}
 function newG(p,extra){
   return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
     shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
@@ -1367,10 +1407,7 @@ function startTrial(cid,fromZone){
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
 }
-function trialWeapon(cid){
-  const fam=CLASSES[cid].family, aid=ARCHEIDS.find(a=>fam.includes(ARCHES[a].art));
-  return aid?makeWeapon(aid,'common'):startWeapon();
-}
+function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
 function trialComplete(){
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
@@ -1459,7 +1496,7 @@ function loadStage(i){
      Switchbacking bowls between tall strata walls; ledge climbs up to rims that hold the
      quest bones; respawning charger dens make the kill quest an actual hunt. */
   if(!isBoss && !isMini && !G.trial && !G.side && curZone().id==='hollow'){
-    const SAND='#8a6a42', DARKS='#5e4527', LITES='#b08b56', N=5;
+    const SAND='#8a6a42', DARKS='#5e4527', LITES='#b08b56', N=6;   // longer canyon (was 5 bowls)
     let cx2=0, cz2=0, dir=1; const bowls=[];
     for(let b=0;b<N;b++){
       const bw=300+rnd()*90, bd=250+rnd()*70;
@@ -1553,8 +1590,11 @@ function loadStage(i){
   /* ===== grid-graph maze: spanning tree (guarantees every room reachable) + a few loops =====
      Rooms sit centered on grid cells so every doorway lands on the shared cell centre-line and
      always aligns — walls can never seal another room's opening. Wide GX gives lots of L/R space. */
-  const GX=(isBoss?4:isMini?4:5)+(diff>=7?1:0);
-  const GZ=(isBoss?3:isMini?4:4)+(diff>=9?1:0);
+  // zones GROW with the chain: tier 1 = 5x4 (as ever), tier 4 = 6x5, tier 6+ = 7x6.
+  // Boss arenas stay compact — the fight is the content there.
+  const _tz=zoneTier();
+  const GX=(isBoss?4:isMini?4:Math.min(8,5+Math.floor(_tz/2)));
+  const GZ=(isBoss?3:isMini?4:Math.min(6,4+Math.floor((_tz-1)/2)));
   const PITCHX=490, PITCHZ=450;
   const cellX=gx=>(gx-(GX-1)/2)*PITCHX, cellZ=gz=>-gz*PITCHZ;
   const K=(a,b)=>a+'_'+b, inG=(a,b)=>a>=0&&a<GX&&b>=0&&b<GZ;
@@ -2034,12 +2074,30 @@ function playerAttack(cdMul){
   // auto-face the nearest viable target (mobile-friendly)
   const t=nearestEnemy(w.cls==='melee'?(w.range+40)*1.6:(w.proj.range*1.1),null);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
+  // Ranger is a MIXED-STYLE attacker: with a ranged weapon and an enemy in your face,
+  // the basic attack becomes a knife swipe (weaker than a Warrior's blade) instead of a shot.
+  if(meta.classId==='ranger' && w.cls==='ranged' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+58 && vOverlap(t,p)){
+    p.atkTimer=0.24; SFX.slash();
+    const dmg=w.dmg*effPower(p)*0.7*offclassMul(p);
+    if(!losBlocked(p.x,p.z,t.x,t.z)) hitEnemy(t,dmg,p,260,effLifesteal(p),null);
+    burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
+    return;
+  }
   if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag') SFX.magic(w.el); else SFX.shoot(); }
   else { p.atkTimer=0.26; SFX.slash(); }
 }
+/* Class combat styles: the Ranger trades peaks for versatility — his shots trail a
+   Mage's catalysts and his steel trails a Warrior's, but he owns both ranges. */
+function classStyleMul(p){
+  const w=p.weapon; if(!w||!classFamilyOk(w)) return 1;   // off-family already pays 0.6x; don't stack style math on it
+  if(meta.classId==='warrior' && w.cls==='melee') return 1.12;
+  if(meta.classId==='mage' && w.sch==='mag') return 1.12;
+  if(meta.classId==='ranger') return w.cls==='ranged'?0.92:0.85;
+  return 1;
+}
 function isChargeWeapon(w){ return w && w.cls==='melee' && w.sch==='mag' && !!w.el; } // magic swords: tap=melee, hold=charged elemental blast
 function fireCharged(p,w,amt){
-  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p);     // 1.4x at a flick up to 4x at full charge
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);   // 1.4x at a flick up to 4x at full charge
   const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=580, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
@@ -2049,7 +2107,7 @@ function fireCharged(p,w,amt){
   SFX.magic(w.el); G.shake=Math.min(G.shake+5+amt*5,13); p.atkTimer=0.2; burst(ox,oy,oz,col,10);
 }
 function fireProjectile(p,w,target){
-  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit*offclassMul(p);
+  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit*offclassMul(p)*classStyleMul(p);
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
@@ -2173,7 +2231,7 @@ function resolveSwing(){
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
   const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const crit=Math.random()<0.18+effCrit(p);
-  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
   if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
     const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
@@ -2678,9 +2736,11 @@ function offerWeapon(nw){
     <img class="itemav" src="${itemAv(nw)}" alt="">
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); } resumePlay(); };
 }
 function offerArmor(na){
   if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
@@ -2698,9 +2758,11 @@ function offerArmor(na){
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); } resumePlay(); };
 }
 function offerTrinket(nt){
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
@@ -2832,6 +2894,7 @@ function openHub(){
     <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
+    <button class="bigbtn ghost" id="bagBtn">Bag · ${meta.stash.length}/${STASH_CAP}</button>
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
@@ -2840,6 +2903,7 @@ function openHub(){
   document.getElementById('trainBtn').onclick=()=>openTrainer(openHub);
   document.getElementById('questBtn').onclick=()=>openQuestBoard(openHub);
   document.getElementById('shopBtn').onclick=()=>openShop(openHub);
+  document.getElementById('bagBtn').onclick=()=>openBag(openHub);
   document.getElementById('wardBtn').onclick=()=>openWardrobe(openHub);
   document.getElementById('credBtn2').onclick=()=>openCredits(openHub);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
@@ -3914,6 +3978,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
+  classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

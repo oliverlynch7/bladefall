@@ -229,7 +229,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.30.0';
+const VERSION3D='1.30.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -940,7 +940,7 @@ const ZONES=[
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
     areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:20,d:'Hunt 20 Chargers'}]},
-           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Climb for 5 Sun-Bleached Bones',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
+           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
@@ -1533,6 +1533,17 @@ function pickEnemyType(s,rnd){
   if(s.mix) for(const t in s.mix) for(let k=0;k<s.mix[t];k++) pool.push(t);
   return pool.length?pool[Math.floor(rnd()*pool.length)]:'grunt';
 }
+/* A canyon wall built right: collision + strata courses laid on the INNER face,
+   flush with the collision boundary, covering the full height and full length.
+   `sgn` points from the wall toward the walkable space it faces. */
+const CANYON_STRATA=['#5e4527','#8a6a42','#b08b56','#8a6a42','#6e5433','#a07a48'];
+function canyonWall(wx,cz,len,sgn,rnd,ww){
+  ww=ww||30;
+  G.walls.push({x:wx,z:cz,w:ww,d:len,h:240,stand:ww>=30});   // collision (rims walkable when full-width)
+  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2);   // inFace = the collision face toward the bowl; band sits just inside it
+  for(let L2=0;L2<6;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
+  G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:256,c:'#c2a060',theme:'canyon'});   // rimrock cap
+}
 function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
@@ -1568,12 +1579,9 @@ function loadStage(i){
       const room={x:cx2,z:cz2,w:bw,d:bd,monsters:[],doorways:[],doors:[],_gaps:{n:[],s:[],e:[],w:[]},encounter:false,cleared:true};
       bowls.push(room); G.rooms.push(room);
       G.segments.push({x:cx2,z:cz2,w:bw,d:bd});
-      // strata canyon faces: collision walls + layered deco bands (the "texture")
-      for(const sgn of [-1,1]){ const wx=cx2+sgn*(bw/2+16);
-        G.walls.push({x:wx,z:cz2,w:30,d:bd+40,h:240,stand:true});   // canyon rims are walkable — the wall-top IS the parkour layer
-        for(let L2=0;L2<4;L2++){ const hh=62+L2*4, yb=L2*62;
-          G.deco.push({x:wx+sgn*(4+L2*5),z:cz2,w:36+L2*9,d:bd+40,h:hh,y0:yb,c:tint([DARKS,SAND,LITES,SAND][L2],(rnd()<0.5?'#000':'#fff'),0.05+rnd()*0.08),theme:'canyon'}); }
-        G.deco.push({x:wx+sgn*26,z:cz2,w:58,d:bd+52,h:16,y0:248,c:LITES,theme:'canyon'}); }
+      // strata canyon faces: the wall's INNER face is fully textured and flush with collision
+      canyonWall(cx2-(bw/2+16),cz2,bd+40,+1,rnd);   // left wall faces +x (into the bowl)
+      canyonWall(cx2+(bw/2+16),cz2,bd+40,-1,rnd);   // right wall faces -x
       // the switchback ledge climb (one wall per bowl, alternating): 3 steps up to a rim shelf
       const side=(b%2?1:-1), lx=cx2+side*(bw/2-42);
       for(let st2=0;st2<3;st2++){
@@ -1586,10 +1594,10 @@ function loadStage(i){
       G.torches.push({x:cx2-bw/2+30,z:cz2,ph:rnd()*6.28},{x:cx2+bw/2-30,z:cz2,ph:rnd()*6.28});   // ph, NOT f — an undefined ph fed NaN into the light uniforms and blacked out the whole scene
       if(b<N-1){ // connecting slot canyon, offset to force the snake
         const off=(rnd()*2-1)*(bw/2-90), clen=150+rnd()*70, nz=cz2-bd/2-clen-((250+70/2)/2);
-        G.segments.push({x:cx2+off,z:cz2-bd/2-clen/2,w:92,d:clen+36});
-        for(const sgn of [-1,1]){ const wx2=cx2+off+sgn*(46+14);
-          G.walls.push({x:wx2,z:cz2-bd/2-clen/2,w:26,d:clen+30,h:240});
-          for(let L2=0;L2<4;L2++) G.deco.push({x:wx2+sgn*(3+L2*5),z:cz2-bd/2-clen/2,w:30+L2*8,d:clen+42,h:62,y0:L2*62,c:tint([DARKS,SAND,LITES,SAND][L2],'#000',rnd()*0.1),theme:'canyon'}); }
+        const ccx=cx2+off, ccz=cz2-bd/2-clen/2;
+        G.segments.push({x:ccx,z:ccz,w:92,d:clen+36});
+        canyonWall(ccx-60,ccz,clen+30,+1,rnd,26);   // corridor walls, inner faces toward the slot
+        canyonWall(ccx+60,ccz,clen+30,-1,rnd,26);
         cz2=cz2-bd/2-clen-(260/2)-20; cx2+=off*0.4; dir=-dir; }
     }
     const first=bowls[0], last=bowls[N-1];

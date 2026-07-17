@@ -270,7 +270,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.40.0';
+const VERSION3D='1.41.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -709,33 +709,33 @@ const ARCHES={
   sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:190,range:60,art:'sword'},
   saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:60,art:'sword'},
   dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:46,art:'dagger'},
-  spear:{disp:'Spear',cls:'melee',sch:'phys',dmg:15,cd:.52,kb:230,range:120,art:'spear'},
-  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe'},
-  great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great'},
-  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer'},
+  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
+  great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
+  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe'},
-  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'sword',el:'fire'},
-  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'sword',el:'ice'},
-  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane'},
-  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12},
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'sword',el:'fire',chg:'blast'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'sword',el:'ice',chg:'blast'},
+  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane',chg:'spin'},
+  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true}, // swing PULLS + reaps + heals on kill
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
-  crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun spread (per-shot dmg low; all 3 land up close)
-  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // rapid double-throw
-  javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'spear',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}},
-  firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',proj:{speed:470,size:10,pierce:0,range:360,color:'#ff7a3a',shape:'orb',glow:1}},
-  frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:11,cd:.32,kb:120,art:'wand',el:'ice',proj:{speed:560,size:7,pierce:0,range:520,color:'#7fd6ff',shape:'orb',glow:1}},
-  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'scepter',el:'arcane',proj:{speed:430,size:11,pierce:2,range:420,color:'#c47bff',shape:'orb',glow:1}},
-  stormrod:{disp:'Storm Wand',cls:'ranged',sch:'mag',dmg:16,cd:.40,kb:140,art:'wand',el:'storm',proj:{speed:740,size:6,pierce:1,range:780,color:'#9fe0ff',shape:'bolt',glow:1}},
-  plaguestaff:{disp:'Plague Staff',cls:'ranged',sch:'mag',dmg:19,cd:.52,kb:130,art:'staff',el:'poison',proj:{speed:470,size:8,pierce:0,range:380,color:'#86e05a',shape:'orb',glow:1}},
-  holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'scepter',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'orb',glow:1}}
+  crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
+  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
+  javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
+  firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
+  frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
+  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'scepter',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1}}, // seeks + pierces
+  stormrod:{disp:'Storm Wand',cls:'ranged',sch:'mag',dmg:12,cd:.24,kb:110,art:'wand',el:'storm',proj:{speed:820,size:4,pierce:1,range:780,color:'#9fe0ff',shape:'spark',glow:1}},          // rapid-fire
+  plaguestaff:{disp:'Plague Staff',cls:'ranged',sch:'mag',dmg:19,cd:.52,kb:130,art:'staff',el:'poison',chg:'bolt',proj:{speed:470,size:8,pierce:0,range:380,color:'#86e05a',shape:'glob',glow:1}},
+  holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'scepter',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'light',glow:1}}  // seeks + pierces
 };
 const ARCHEIDS=Object.keys(ARCHES);
+const DROP_ARCHES=ARCHEIDS.filter(a=>a!=='voidscythe');   // the Void Scythe is shop-only (after the Reaper is unlocked) — never a random drop
 /* per-art melee hit shape: arc = front cone, thrust = long narrow lunge, slam = radial AoE.
    reach here matches each weapon's ARCHES range; longer reach is paid for with lower DPS (tuned above). */
 const MELEE={
   dagger:{shape:'thrust',reach:46,width:24},
   sword:{shape:'arc',reach:60,arc:1.75},
-  spear:{shape:'thrust',reach:120,width:22},
+  javelin:{shape:'thrust',reach:82,width:22},   // the light stab when a foe is point-blank
   axe:{shape:'arc',reach:64,arc:2.15},
   great:{shape:'arc',reach:84,arc:2.70},
   hammer:{shape:'slam',reach:70,radius:62,offset:42},
@@ -747,7 +747,7 @@ const MELEE={
    subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
    abilities lose their bonus effects (rider). */
 const CLASSES={
-  warrior:{disp:'Warrior',icon:'⚔️',family:['sword','great','axe','hammer','spear'],
+  warrior:{disp:'Warrior',icon:'⚔️',family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
           {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:'🛡️',cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
@@ -755,7 +755,7 @@ const CLASSES={
       {id:'stomp',n:'Shockwave Stomp',icon:'💥',cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
       {id:'wcharge',n:'Charge',icon:'🐗',cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
       {id:'berserk',n:'Berserk',icon:'🔺',cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
-  ranger:{disp:'Ranger',icon:'🏹',family:['bow','cross','dagger'],
+  ranger:{disp:'Ranger',icon:'🏹',family:['bow','cross','dagger','javelin'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
           {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:'🗡️',cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:'💨',cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:'✖',cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
@@ -791,8 +791,8 @@ const TRIALS={
     tips:['Move with the stick (or WASD).','Tap FIRE to loose an arrow — it aims for you.','DODGE rolls you out of danger. Keep your distance.','Tap ① Deadeye for a piercing shot.','Clear 6 foes, then take the portal.']},
   mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
     tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Tap ① Elemental Bolt for a heavy hit.','Clear 6 foes, then take the portal.']},
-  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:14,earned:true,tier:7,
-    tips:['The dead do not welcome you.','Survive. Reap all 14. Then claim the scythe.']}
+  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
+    tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']}
 };
 const RANK_XP=r=>Math.round(60*Math.pow(r,1.7));          // class XP needed to go from rank r to r+1
 const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
@@ -818,8 +818,15 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   if(up){ SFX.classup(); if(cs.rank>=2&&!cs.sub) queueSubclass=true; skillbarUpdate(); }   // fork at rank 2, when skill 2 would unlock
   if(G&&mode==='play') hudUpdate();
   persist(); }
-const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
-function normWeapon(w){ if(w&&LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art]; return w; }
+const LEGACY_ART={orb:'scepter',rod:'wand',spear:'sword'};   // retired arts fold into a surviving one
+const LEGACY_ARCHE={spear:'sword'};                          // the retired Spear archetype -> a Sword (stays a warrior weapon)
+function normWeapon(w){ if(!w) return w;
+  if(LEGACY_ARCHE[w.arche]){ w.arche=LEGACY_ARCHE[w.arche]; }
+  const a=ARCHES[w.arche];
+  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false;   // re-derive art/charge from the (possibly remapped) archetype so old saves gain the new behavior
+    if(a.cls==='ranged'&&!w.proj) w.proj=Object.assign({},a.proj); }
+  else if(LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art];               // unknown archetype: at least fold a retired art
+  return w; }
 function makeElite(e){                                    // elites: zone minibosses — SCARIER, not spongier
   e.elite=true; e.hp=Math.round(e.hp*1.8); e.maxHp=e.hp; e.dmg*=1.5;   // HP bump trimmed 2.4 -> 1.8 (no bullet-sponge)
   e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=1.08; e.label='Elite';   // the budget goes to BEHAVIOR: faster, and (chargers) a tighter attack cadence via e.elite
@@ -827,7 +834,7 @@ function makeElite(e){                                    // elites: zone minibo
 }
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
-  const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,
+  const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,chg:a.chg||null,reaper:a.reaper||false,
     name:nameOverride||(r.name+' '+a.disp),
     dmg:+(a.dmg*r.mul).toFixed(1),cd:a.cd,kb:a.kb,
     lifesteal:(a.lifesteal||0)+(rid==='legendary'?0.05:0),
@@ -1601,12 +1608,14 @@ function trialComplete(){
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
   if(T.earned){ meta.hero=snapOf(G.p); meta.sideDone[curZone().side.id]=true; }
+  if(cid==='reaper') meta._scytheNotify=true;   // announce the Void Scythe when they reach the hub
   meta.bank=null; persist(); checkAchievements();
   mode='menu'; SFX.win(); showGameUI(false);
   const C=CLASSES[cid];
   showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">TRIAL COMPLETE</p>
     <h2 class="title" style="font-size:34px">${C.icon} ${C.disp}</h2>
     <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ')}</b>.</p>
+    ${cid==='reaper'?`<p class="ovsub" style="color:${elementColor('void')};font-weight:800">⚔ The Void Scythe is now available in the Shop.</p>`:''}
     <button class="bigbtn" id="hubBtn">Enter the Hub</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
@@ -2008,14 +2017,17 @@ function loadStage(i){
     if(!areaQuests().length && !G.trial) G.portal={x:goalRoom.x,z:goalRoom.z,t:0};
   }
   // populate rooms
+  const reaperTrial=G.trial==='reaper';   // the earned Reaper trial is a REAL fight: every room armed, denser packs, many elites
   for(const room of G.rooms){ if(room===entryRoom) continue; if((isBoss||isMini)&&room===goalRoom) continue;
     if(room===vault){ room.encounter=false; room.cleared=true;
       const gm=mkMonster(pick(),room.x,room.z-20,room); gm.hp=Math.round(gm.hp*1.9); gm.maxHp=gm.hp; gm.elite=true;
       G.chests.push({x:room.x,z:room.z+room.d/2-50,y:0,opened:false,bob:0}); continue; }
-    room.encounter=(room!==goalRoom)&&rnd()<0.5; room.cleared=!room.encounter;
-    const nM=Math.min(6,2+Math.floor(rnd()*(1.6+diff*0.18)));
+    room.encounter=reaperTrial?true:((room!==goalRoom)&&rnd()<0.5); room.cleared=!room.encounter;
+    const nM=reaperTrial?(4+Math.floor(rnd()*3)):Math.min(6,2+Math.floor(rnd()*(1.6+diff*0.18)));
     const maj=pick(); for(let m=0;m<nM;m++){ const ty=(m===nM-1&&nM>=3)?saltMob(s.theme,maj):(m===0?maj:pick());   // guarantee a mixed pack: a complementary type salted into any 3+ fight
-      mkMonster(ty,room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room); }
+      const mm=mkMonster(ty,room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room);
+      if(reaperTrial && !mm.boss && rnd()<0.45) makeElite(mm); }
+    if(reaperTrial){ mkMonster('caster',room.x+(rnd()*2-1)*(room.w/2-60),room.z-room.d/2+60,room); }   // a ranged threat in every trial room
     if(rnd()<0.55) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-60),z:room.z+(rnd()*2-1)*(room.d/2-60),w:36+rnd()*20,d:36+rnd()*20,h:96+rnd()*40,kind:'col'});
     if(rnd()<0.4) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-72),z:room.z+(rnd()*2-1)*(room.d/2-72),w:70+rnd()*40,d:70+rnd()*40,h:26+rnd()*8,kind:'plat'});
     if(diff>=4&&rnd()<0.22) G.geysers.push({x:room.x+(rnd()*2-1)*(room.w/2-56),z:room.z+(rnd()*2-1)*(room.d/2-56),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
@@ -2434,6 +2446,11 @@ function playerAttack(cdMul){
   // auto-face the nearest viable target (mobile-friendly)
   const t=nearestEnemy(w.cls==='melee'?(w.range+40)*1.6:(w.proj.range*1.1),null);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
+  // weapon-specific tap identities — own-class ONLY (off-class falls through to the plain base attack)
+  if(w.cls==='ranged' && classFamilyOk(w)){
+    if(w.arche==='javelin'){ stabHit(p,w,82,1.25); return; }                                              // javelin tap = a short spear stab (hold = the thrown lance)
+    if(w.arche==='knives' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+42 && vOverlap(t,p)){ stabHit(p,w,54,1.9); return; }  // knives point-blank = a fast bonus stab, else the double-throw below
+  }
   // Ranger is a MIXED-STYLE attacker: with a ranged weapon and an enemy in your face,
   // the basic attack becomes a knife swipe (weaker than a Warrior's blade) instead of a shot.
   if(meta.classId==='ranger' && w.cls==='ranged' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+58 && vOverlap(t,p)){
@@ -2455,7 +2472,54 @@ function classStyleMul(p){
   if(meta.classId==='ranger') return w.cls==='ranged'?0.92:0.85;
   return 1;
 }
-function isChargeWeapon(w){ return w && w.cls==='melee' && w.sch==='mag' && !!w.el; } // magic swords: tap=melee, hold=charged elemental blast
+// a weapon supports tap/hold charging ONLY for its own class family (off-class = plain base attack, GLOBAL RULE)
+function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
+// dispatch a charge release to the weapon's charged behavior (amt 0..1)
+function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
+  switch(w.chg){
+    case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
+    case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
+    case 'quake': chargeQuake(p,w,amt); break;         // hammer: radial shockwave + stun
+    case 'spin': spinCleave(p,w,amt); break;           // greatsword: spinning cleave
+    case 'javelin': throwJavelin(p,w,amt); break;      // javelin: heavy thrown lance
+    default: fireCharged(p,w,amt);                      // magic sword: elemental blast
+  }
+}
+// a short forward thrust (the light stab shared by javelin + point-blank knives)
+function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash();
+  const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw), dmg=w.dmg*effPower(p)*(mult||1)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x, dz=e.z-p.z, along=dx*fx+dz*fz;
+    if(along<-e.r||along>reach+e.r) continue; if(Math.abs(dx*fz-dz*fx)>24+e.r) continue;
+    if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; hitEnemy(e,dmg,p,w.kb,ls,w.el); }
+  burst(p.x+fx*reach*0.6,p.y+22,p.z+fz*reach*0.6,'#cfd6df',6); }
+function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=pr.speed||480, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+    size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[]});
+  SFX.magic(w.el); G.shake=Math.min(G.shake+4+amt*5,13); p.atkTimer=0.2; burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,pr.color||'#c9a6ff',9); }
+function hurlAxe(p,w,amt){ const t=nearestEnemy(700,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=520, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  const dmg=w.dmg*effPower(p)*(1.8+amt*2.2)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
+    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:3.2,hitSet:[],axe:true,ox,oz,range:170+amt*230,returning:false,spin:0});
+  SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
+function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+amt*1.8)*offclassMul(p)*classStyleMul(p);
+  skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+amt*0.6); } }
+  p.atkTimer=0.30; }
+function spinCleave(p,w,amt){ const R=(w.range||84)+42+amt*44, dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); G.shake=Math.min(G.shake+6+amt*5,15);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,w.kb,ls,w.el); }
+  burst(p.x,p.y+22,p.z,'#ffd24a',18); }
+function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(900,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=(pr.speed||600)+amt*140, oy=p.y+30; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=90;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt + (pr.gravity||300)*0.5*tt; }
+  const dmg=w.dmg*effPower(p)*(1.6+amt*2.4)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:pr.gravity||300,
+    size:(pr.size||6)+3,color:pr.color,shape:'arrow',glow:0,dmg,kb:(w.kb||210)+120,pierce:(pr.pierce||1)+2,el:null,life:(pr.range||680)*1.6/sp,hitSet:[]});
+  SFX.shoot(); p.atkTimer=0.22; G.shake=Math.min(G.shake+4,11); }
 function fireCharged(p,w,amt){
   const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);   // 1.4x at a flick up to 4x at full charge
   const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -2467,7 +2531,9 @@ function fireCharged(p,w,amt){
   SFX.magic(w.el); G.shake=Math.min(G.shake+5+amt*5,13); p.atkTimer=0.2; burst(ox,oy,oz,col,10);
 }
 function fireProjectile(p,w,target){
-  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, dmg=w.dmg*effPower(p)*crit*offclassMul(p)*classStyleMul(p);
+  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, ok=classFamilyOk(w); let dmg=w.dmg*effPower(p)*crit*offclassMul(p)*classStyleMul(p);
+  if(ok && w.arche==='crossbow' && target){ const d=dXZ(p.x,p.z,target.x,target.z); dmg*=(0.7+Math.max(0,1-d/620)*1.7); }   // shotgun: heavy up close, weak at range
+  const seek = ok && w.art==='scepter';                                                                                    // scepters loose smart-missiles
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
@@ -2476,7 +2542,7 @@ function fireProjectile(p,w,target){
   for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
     G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
       gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
-      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[]}); }
+      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek}); }
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
 function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
@@ -2642,6 +2708,9 @@ function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
   const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  if(w.reaper && classFamilyOk(w) && p._pullId!==p.swingId){ p._pullId=p.swingId;   // Void Scythe: gravity-yank the nearby dead inward to cluster them, then reap
+    for(const e of G.enemies){ if(e.dead||e.boss) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>62 && d<240){ const k=Math.min(130,240-d);
+      e.x+=(p.x-e.x)/d*k*0.5; e.z+=(p.z-e.z)/d*k*0.5; G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*0.6,vy:20,vz:(p.z-e.z)*0.6,life:0.25,color:'#b06bff',sz:2.4}); } } }
   const crit=Math.random()<0.18+effCrit(p);
   const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
@@ -2686,6 +2755,8 @@ function killEnemy(e){
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
+  { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
+    if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
   if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
     for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
   questKill(e.type);
@@ -2709,7 +2780,7 @@ function killEnemy(e){
     for(let i=0;i<2;i++){
       let rid=rollRarity(); while(RARITY[rid].tier<2) rid=RORDER[Math.min(4,RARITY[rid].tier+2)];
       const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
-                                   :{weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)};
+                                   :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
       pushLoot(e.x+(i?26:-26),e.z+16,0,item);
     }
   } else { SFX.enemyDie(); checkAchievements();
@@ -2752,7 +2823,7 @@ function rollDrop(e){
   if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
   if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
   if(!e.boss && Math.random()<0.45){ pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
-  else { const aid=ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)];
+  else { const aid=DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)];
     pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
     if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
 }
@@ -2871,7 +2942,7 @@ function update(dt){
   if(isChargeWeapon(_w) && !meta.autoAttack){                    // magic sword: tap = melee swing, hold = charge an elemental blast
     if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }
       p.holdT+=dt; if(p.holdT>=0.28 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }
-    else { if(p.charging){ fireCharged(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
+    else { if(p.charging){ chargeRelease(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
   } else { p.charging=false; p.holdT=0; p.attackHeld=false;
     if(p.atkCd<=0 && p.dodgeTimer<=0){
       if(input.attack) playerAttack(1);                                              // manual: always swings/fires
@@ -3005,6 +3076,11 @@ function update(dt){
   // projectiles
   for(const pr of G.projectiles){
     pr.life-=dt; if(pr.gravity) pr.vy-=pr.gravity*dt;
+    if(pr.seek && pr.owner==='player'){ let bt=null,bd=560; for(const e of G.enemies){ if(e.dead||!e.active) continue; const d=Math.hypot(e.x-pr.x,e.z-pr.z); if(d<bd){bd=d;bt=e;} }
+      if(bt){ const sp=Math.hypot(pr.vx,pr.vz)||1, bl=0.16; pr.vx=(pr.vx/sp*(1-bl)+(bt.x-pr.x)/bd*bl)*sp; pr.vz=(pr.vz/sp*(1-bl)+(bt.z-pr.z)/bd*bl)*sp; } }  // home toward the nearest enemy
+    if(pr.axe){ pr.spin=(pr.spin||0)+dt*22;                                                       // returning axe: fly out, then curve back to the player
+      if(!pr.returning && Math.hypot(pr.x-pr.ox,pr.z-pr.oz)>=pr.range) pr.returning=true;
+      if(pr.returning){ const dd=Math.hypot(p.x-pr.x,p.z-pr.z)||1, sp=Math.hypot(pr.vx,pr.vz)||1; pr.vx=(p.x-pr.x)/dd*sp; pr.vz=(p.z-pr.z)/dd*sp; if(dd<42) pr.life=0; } }
     pr.x+=pr.vx*dt; pr.y+=pr.vy*dt; pr.z+=pr.vz*dt;
     if(pr.owner==='player'){
       for(const e of G.enemies){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
@@ -3014,15 +3090,15 @@ function update(dt){
     } else {
       if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
-    if(pr.y<-4) pr.life=0;
-    // columns, platforms, walls & closed doors block shots — use them as cover
-    if(pr.life>0) for(const ob of G.obstacles){
+    if(pr.y<-4 && !pr.axe) pr.life=0;
+    // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
+    if(pr.life>0 && !pr.axe) for(const ob of G.obstacles){
       if(pr.y<ob.h && Math.abs(pr.x-ob.x)<ob.w/2+pr.size*0.4 && Math.abs(pr.z-ob.z)<ob.d/2+pr.size*0.4){
         pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
-    if(pr.life>0 && G.walls) for(const wl of G.walls){
+    if(pr.life>0 && !pr.axe && G.walls) for(const wl of G.walls){
       if(pr.y<wl.h && Math.abs(pr.x-wl.x)<wl.w/2+pr.size*0.4 && Math.abs(pr.z-wl.z)<wl.d/2+pr.size*0.4){
         pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
-    if(pr.life>0 && G.doors) for(const dr of G.doors){ if(dr.open) continue;
+    if(pr.life>0 && !pr.axe && G.doors) for(const dr of G.doors){ if(dr.open) continue;
       if(pr.y<dr.h && Math.abs(pr.x-dr.x)<dr.w/2+pr.size*0.4 && Math.abs(pr.z-dr.z)<dr.d/2+pr.size*0.4){
         pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
   }
@@ -3245,7 +3321,7 @@ function offerTrinket(nt){
 function randomLoot(rid){ const r=Math.random();
   if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
   if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
-  return {weapon:makeWeapon(ARCHEIDS[Math.floor(Math.random()*ARCHEIDS.length)],rid)}; }
+  return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
 function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); }
 function die(){
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
@@ -3417,6 +3493,7 @@ function enterWaystation(){
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
+  if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }
 }
 /* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
 const NPCVOICE={
@@ -3672,19 +3749,25 @@ function openShop(back){
       <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[rid].color}">${w.name}</div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
       <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
+  // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
+  const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
+  const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${elementColor('void')}">${vs.name}</div>
+        <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
+      <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${vsCost}g</button></div>`:'';
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.perks) meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; SFX.levelup(); persist(); openShop(back); });
-  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, cost=shopWeapCost(rid);
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', cost=isVS?2200:shopWeapCost(rid);
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
-    const w=shopWeapon(meta.classId,rid);
+    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
     if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
     SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
   document.getElementById('backBtn').onclick=back;
@@ -3948,7 +4031,7 @@ function weaponMesh(w,swing){
       bx(0,3.5,0, 7.5,2,3.2, iron);
       bx(0,11,0, 4.6,14,2.4, dkb,glow); bx(0,20,0, 2.6,6,1.8, dkb,glow);
       bx(1.6,14,1.2, 1.2,7,0.9, blood); bx(1.6,8.5,1.2, 1.5,2.2,1.2, blood); bx(-1.2,18,1.2, 1,3.4,0.8, blood); break;
-    case 'spear': // impaler — black shaft, bone bindings, barbed point
+    case 'javelin': // impaler — black shaft, bone bindings, barbed point
       bx(0,14,0, 2.8,44,2.8, haft);
       for(let i=0;i<4;i++) bx(0,-2+i*11,1.6, 3.4,1.6,1, bone);
       bx(0,40,0, 4.4,12,3, dkb,glow); bx(0,48,0, 2.4,7,2, edge,glow);
@@ -4059,7 +4142,7 @@ function drawHero3(p,t,preview){
   const w=p.weapon;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
     if(prog<0) rotX(-0.35+Math.sin(t*2)*0.06);
-    else if(M.shape==='thrust') rotX(w.art==='spear'?-1.6:-1.45);            // arm forward, weapon lunges (spear reaches deeper)
+    else if(M.shape==='thrust') rotX(w.art==='javelin'?-1.6:-1.45);            // arm forward, weapon lunges (spear reaches deeper)
     else if(M.shape==='slam') rotX(-2.6+prog*3.2);                            // maul: crash down from full height
     else if(w.art==='great') { rotX(-2.3+prog*2.6); rotZ(0.2); }              // greatblade: towering overhead cleave
     else if(w.art==='axe') { rotY((0.65-prog)*1.7); rotX(-0.9-prog*0.3); rotZ(0.35); } // axe: heavy sideways hack
@@ -4068,7 +4151,7 @@ function drawHero3(p,t,preview){
   } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0); rotX(Math.PI);
-  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='spear'?17:10),0);
+  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);
   weaponMesh(w); popM();
   popM();
   // head
@@ -4110,11 +4193,11 @@ function drawFPWeapon(p,t){
   const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;    // magic implements + bow held upright; blades angled across
   // per-weapon-kind attack motion — every strike travels DOWN/FORWARD (raise first, then commit)
   const KIND=w.cls!=='melee' ? ((w.art==='bow'||w.art==='cross')?'shoot':'cast')
-    : (w.art==='dagger'||w.art==='spear')?'stab' : (w.art==='great'||w.art==='axe')?'chop'
+    : (w.art==='dagger'||w.art==='javelin')?'stab' : (w.art==='great'||w.art==='axe')?'chop'
     : (w.art==='hammer')?'slam' : (w.art==='scythe')?'reap' : 'slash';
   let rxA=tilt, ryA=0, rzA=0, lunge=0, lift=0;
   if(atk){
-    if(KIND==='stab'){ lunge=(w.art==='spear'?26:16)*sS; rxA=tilt+0.15*sS; }                 // straight jab along your aim
+    if(KIND==='stab'){ lunge=(w.art==='javelin'?26:16)*sS; rxA=tilt+0.15*sS; }                 // straight jab along your aim
     else if(KIND==='slash'){ rxA=tilt-1.05+sw*2.0; rzA=-0.55+sw*0.95; }                      // diagonal cut: high-left -> low-right
     else if(KIND==='chop'){ rxA=tilt-1.5+sw*2.5; rzA=(w.art==='axe'?-0.3+sw*0.55:0); lift=(1-sw)*8; }  // heavy overhead chop
     else if(KIND==='slam'){ rxA=tilt-1.8+sw*2.9; lift=(1-sw)*12; }                           // maul crash from full height
@@ -4615,7 +4698,14 @@ function drawProjectile3(pr,t){
     pushM(); mv(0,0,8.4); box(3,3,3.5, tint(c,'#fff',0.25), g); box(1.3,1.3,3, c, g); popM();   // arrowhead
     pushM(); mv(0,0,-6.6); box(0.6,4.6,4, c, g); box(4.6,0.6,4, c, g); popM();                   // fletching vanes
   }
-  else { rotY(t*6); box(pr.size*1.6,pr.size*1.6,pr.size*1.6,pr.color,pr.color); }
+  else if(pr.shape==='axe'){ rotY(pr.spin||t*6); box(3,3,16,'#6a4a2a'); pushM(); mv(0,7,0); box(15,3,11,'#cfd6df','#ffffff',0.2); box(10,3,6,'#9aa4ad'); popM(); }   // the hurled axe
+  else { rotY(t*6); const s=pr.size, c=pr.color;   // caster projectiles styled to their element
+    if(pr.shape==='shard'){ box(s*0.8,s*0.8,s*2.6,c,c); }                                             // ice shard
+    else if(pr.shape==='spark'){ box(s*2.6,s*0.7,s*0.7,c,c); box(s*0.7,s*0.7,s*2.6,c,c); box(s*0.7,s*2.4,s*0.7,c,c); }  // storm spark
+    else if(pr.shape==='light'){ box(s*2.8,s*0.9,s*0.9,c,c); box(s*0.9,s*2.8,s*0.9,c,c); }             // holy light
+    else if(pr.shape==='fireball'){ box(s*1.7,s*1.7,s*1.7,c,c); pushM(); mv(0,0,-s*1.1); box(s,s,s*1.7,tint(c,'#ffe08a',0.35),c); popM(); }  // fire, trailing
+    else if(pr.shape==='glob'){ box(s*1.9,s*1.4,s*1.9,c,c); }                                          // poison glob
+    else box(s*1.6,s*1.6,s*1.6,c,c); }                                                                 // arcane / void orb
   popM();
 }
 function drawArmorMini(a,rc){
@@ -4774,7 +4864,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
-  pushLoot, saltMob, doInteract, updateInteract, openChest,
+  pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,

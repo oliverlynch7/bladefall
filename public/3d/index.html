@@ -264,7 +264,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.37.0';
+const VERSION3D='1.38.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -731,7 +731,7 @@ const MELEE={
 const CLASSES={
   warrior:{disp:'Warrior',icon:'⚔️',family:['sword','great','axe','hammer','spear'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
-          {id:'guardian',disp:'Guardian',blurb:'-15% damage taken (rank 10: -25%). Hold the line.'}],
+          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:'🛡️',cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
       {id:'cleave',n:'Cleave',icon:'🗡️',cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
       {id:'stomp',n:'Shockwave Stomp',icon:'💥',cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
@@ -739,7 +739,7 @@ const CLASSES={
       {id:'berserk',n:'Berserk',icon:'🔺',cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
   ranger:{disp:'Ranger',icon:'🏹',family:['bow','cross','dagger'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
-          {id:'assassin',disp:'Assassin',blurb:'+10% move speed (rank 10: +18%) and Tumble grants brief invulnerability.'}],
+          {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:'🗡️',cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:'💨',cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:'✖',cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
       {id:'deadeye',n:'Deadeye',icon:'🎯',cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
       {id:'volley',n:'Volley',icon:'🌠',cd:8,rank:2,d:'A fan of projectiles across your front'},
@@ -747,7 +747,7 @@ const CLASSES={
       {id:'mark',n:'Hunter’s Mark',icon:'📍',cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
   mage:{disp:'Mage',icon:'🔮',family:['staff','wand','scepter'],       // orb + rod retired — staff/wand/scepter cover the space
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
-          {id:'wizard',disp:'Wizard',blurb:'-20% skill cooldowns (rank 10: -30%). Always an answer.'}],
+          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:'🔵',cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
     skills:[
       {id:'bolt',n:'Elemental Bolt',icon:'☄️',cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
       {id:'nova',n:'Nova',icon:'❄️',cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
@@ -755,7 +755,7 @@ const CLASSES={
       {id:'tempest',n:'Arcane Tempest',icon:'🌩️',cd:24,rank:7,d:'A storm rages around you for 4s'}]},
   reaper:{disp:'Reaper',icon:'💀',earned:true,family:['scythe'],
     subs:[{id:'harvester',disp:'Harvester',blurb:'+12% lifesteal (rank 10: +20%). Every soul feeds you.'},
-          {id:'executioner',disp:'Executioner',blurb:'+30% damage to enemies under half health (rank 10: +50%).'}],
+          {id:'executioner',disp:'Executioner',blurb:'The reaper of the wounded: +30% damage under half HP (rank 10 +50%), plus a finisher kit — Execute, Grim Scythe, Reaping Storm.',skills:[{id:'execute',n:'Execute',icon:'🪓',cd:6,rank:2,d:'A brutal strike that instantly kills targets under 25% health'},{id:'grimscythe',n:'Grim Scythe',icon:'🌀',cd:14,rank:4,d:'A spinning cut that hits everything around you'},{id:'reapingstorm',n:'Reaping Storm',icon:'💀',cd:24,rank:7,d:'Become a whirlwind of blades for 4.5s'}]}],
     skills:[
       {id:'reap',n:'Reap',icon:'🌙',cd:4,rank:1,d:'A wide 2.4x scythe arc that drains life'},
       {id:'harvest',n:'Soul Harvest',icon:'👻',cd:8,rank:2,d:'Tear souls from everything near you and heal'},
@@ -786,13 +786,18 @@ function classFamilyOk(w){ return !w || curClass().family.includes(w.art); }
 function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
 function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
-function skillUnlocked(i){ return classState(meta.classId).rank>=curClass().skills[i].rank; }
+// The effective 4-skill kit: skill 1 is shared; skills 2-4 come from the path you chose
+// at the rank-2 fork (each subclass = a distinct kit). Unchosen -> path-A default for display.
+function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) return []; const cs=classState(cid), sub=cs.sub&&C.subs.find(s=>s.id===cs.sub);
+  if(sub&&sub.skills) return [C.skills[0]].concat(sub.skills);
+  return C.skills.slice(0,4); }
+function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
 function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
   cs.xp+=n; let up=false;
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
-    const sk=curClass().skills.find(s=>s.rank===cs.rank);
+    const sk=cs.sub?curSkills(meta.classId).find(s=>s&&s.rank===cs.rank):null;
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
-  if(up){ SFX.classup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
+  if(up){ SFX.classup(); if(cs.rank>=2&&!cs.sub) queueSubclass=true; skillbarUpdate(); }   // fork at rank 2, when skill 2 would unlock
   if(G&&mode==='play') hudUpdate();
   persist(); }
 const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
@@ -1341,7 +1346,8 @@ function freshPlayer(){
     stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
-    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0};
+    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
+    guardT:0,reflectT:0,shieldHp:0,shieldT:0,stormT:0,stormAcc:0};
   applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
   return p;
 }
@@ -1508,7 +1514,7 @@ function newG(p,extra){
     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
     runSeed:Math.floor(Math.random()*1e9),
     zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,hub:false,gates:[],hubNpcs:[],
-    side:false,trial:null,trialKills:0,tip:0,tipT:0,
+    side:false,trial:null,trialKills:0,tip:0,tipT:0,meteors:[],
     cam:{x:0,y:0,z:0}},extra||{});
 }
 function enterZone(zi){
@@ -2403,10 +2409,61 @@ const SKILL_FX={
       e.doomT=4; e.doomDps=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.5*am*(ok?1:OFFCLASS_MUL); e.doomAcc=0; e.doomSrc=p; n++;
       addText(e.x,e.y+e.h+16,e.z,'DOOMED','#b06bff',true); }
     if(!n){ toast('Nothing near enough to doom'); return 'refund'; }
-    SFX.growl(1); G.shake=Math.min(G.shake+6,12); toast('⚰️ '+n+' marked for death'); }
+    SFX.growl(1); G.shake=Math.min(G.shake+6,12); toast('⚰️ '+n+' marked for death'); },
+  // ===== PATH B skills (chosen at the rank-2 fork) — a fully different kit per subclass =====
+  // GUARDIAN (Warrior path B) — hold the line
+  bulwark(p,ok,am){ p.guardT=3.2; skillRing(p.x,p.z,'#9fd0ff','#4a7da0',110); SFX.magic('ice');
+    for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<260) e.taunt=3.2; }   // pull aggro
+    addText(p.x,p.y+70,p.z,'BULWARK','#9fd0ff',true); },
+  ironwave(p,ok,am){ const w=p.weapon; SFX.boss(); G.shake=Math.min(G.shake+8,15); skillRing(p.x,p.z,'#c8b06a','#8a6a3a',230);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>240+e.r||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,0,effLifesteal(p),null);
+      const nx=(p.x-e.x)/(d||1),nz=(p.z-e.z)/(d||1); e.hurtKbX=nx*260; e.hurtKbZ=nz*260; } },   // PULL inward, not away
+  laststand(p,ok,am){ p.guardT=Math.max(p.guardT||0,4); p.reflectT=4; p.invuln=Math.max(p.invuln,0.5);
+    SFX.growl(1); toast('🛡️ LAST STAND — damage reflected'); burst(p.x,p.y+30,p.z,'#ffd24a',20); },
+  // WIZARD (Mage path B) — control & protection
+  frostchains(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw); SFX.magic('ice'); let n=0;
+    const dmg=(w?w.dmg:10)*effPower(p)*1.2*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>360) continue; if((dx*fx+dz*fz)/(d||1)<Math.cos(0.6)) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,0,0,'ice'); e.stunT=Math.max(e.stunT||0,ok?2:1); e.slowT=Math.max(e.slowT||0,3.5); n++;
+      for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+i*10,z:e.z,vx:0,vy:20,vz:0,life:0.5,color:'#bff0ff',sz:3}); }
+    if(!n){ toast('No one in the frost'); return 'refund'; } },
+  barrier(p,ok,am){ p.shieldHp=Math.round(effMaxHp(p)*(ok?0.5:0.35)); p.shieldT=10; SFX.magic('arcane');
+    addText(p.x,p.y+70,p.z,'BARRIER','#c9a6ff',true); },
+  meteor(p,ok,am){ const t=nearestEnemy(700,null); const tx=t?t.x:p.x+Math.sin(p.yaw)*260, tz=t?t.z:p.z+Math.cos(p.yaw)*260;
+    (G.meteors=G.meteors||[]).push({x:tx,z:tz,t:1.3,r:150,dmg:(p.weapon?p.weapon.dmg:10)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),src:p});
+    SFX.magic('fire'); toast('☄️ Meteor incoming'); },
+  // ASSASSIN (Ranger path B) — mobility & burst
+  shadowstrike(p,ok,am){ const t=nearestEnemy(700,null); if(!t){ toast('No mark in reach'); return 'refund'; }
+    const a=Math.atan2(t.x-p.x,t.z-p.z); p.x=t.x-Math.sin(a)*(t.r+18); p.z=t.z-Math.cos(a)*(t.r+18); p.yaw=a; p.invuln=Math.max(p.invuln,0.3);
+    burst(p.x,p.y+16,p.z,'#6a2fa0',14); SFX.dodge();
+    const w=p.weapon; hitEnemy(t,(w?w.dmg:8)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),p,180,effLifesteal(p),ok?(w&&w.el):null); },
+  smokebomb(p,ok,am){ p.invuln=Math.max(p.invuln,ok?1.4:0.9); burst(p.x,p.y+14,p.z,'#8a8f9a',22);
+    for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200){ e.slowT=Math.max(e.slowT||0,3); e.taunt=0; } }
+    for(let i=0;i<10;i++) G.particles.push({x:p.x+(Math.random()-0.5)*80,y:8+Math.random()*40,z:p.z+(Math.random()-0.5)*80,vx:0,vy:14,vz:0,life:1.2,color:'#9aa0ac',sz:5});
+    SFX.dodge(); toast('💨 Vanished'); },
+  deathmark(p,ok,am){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>260+e.r) continue;
+      e.markExplode=(p.weapon?p.weapon.dmg:10)*effPower(p)*2*am; e.markT=8; n++; addText(e.x,e.y+e.h+14,e.z,'✖','#ff5a3a',true); }
+    if(!n){ toast('No targets to mark'); return 'refund'; } SFX.growl(1); toast('✖ '+n+' marked — they burst on death'); },
+  // EXECUTIONER (Reaper path B) — finish them
+  execute(p,ok,am){ const t=nearestEnemy(150,null); if(!t){ toast('Nothing in reach'); return 'refund'; }
+    const w=p.weapon; if(t.hp<t.maxHp*0.25){ t.hp=0; killEnemy(t); addText(t.x,t.y+40,t.z,'EXECUTED','#ff2a1a',true); G.shake=Math.min(G.shake+8,14); }
+    else hitEnemy(t,(w?w.dmg:10)*effPower(p)*4*am*(ok?1:OFFCLASS_MUL),p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);
+    SFX.slash(); burst(t.x,t.y+t.h*0.5,t.z,'#ff3020',12); },
+  grimscythe(p,ok,am){ const w=p.weapon; p.atkTimer=0.3; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.8*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>140+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,220,effLifesteal(p),ok?(w&&w.el):null); }
+    for(let i=0;i<12;i++){ const a=i/12*6.283; G.particles.push({x:p.x+Math.cos(a)*90,y:p.y+18,z:p.z+Math.sin(a)*90,vx:0,vy:30,vz:0,life:0.3,color:'#b06bff',sz:3}); } },
+  reapingstorm(p,ok,am){ p.stormT=4.5; p.stormAcc=0; p._stormDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.7*am*(ok?1:OFFCLASS_MUL);
+    SFX.growl(1); toast('🌀 REAPING STORM'); }
 };
 function useSkill(i){
-  if(mode!=='play'||!G) return; const p=G.p, C=curClass(), s=C.skills[i]; if(!s||p.dead) return;
+  if(mode!=='play'||!G) return; const p=G.p, C=curClass(), cs=classState(meta.classId); if(p.dead) return;
+  if(i>=1&&!cs.sub){ if(cs.rank>=2){ queueSubclass=true; toast('Choose your path first (rank 2)'); } else toast('🔒 Choose a path at rank 2 to unlock skills 2-4'); return; }
+  const s=curSkills()[i]; if(!s) return;
   if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
   if(p.skillCd[i]>0) return;
   initAudio();
@@ -2416,9 +2473,10 @@ function useSkill(i){
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; skillbarUpdate();
 }
-function skillbarUpdate(){ const C=curClass(), cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
-  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=C.skills[i];
-    const locked=cs.rank<s.rank;
+function skillbarUpdate(){ const cs=classState(meta.classId), S=curSkills(), p=(typeof G!=='undefined'&&G)?G.p:null;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue;
+    if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; continue; }
+    const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank;
     b.textContent=locked?'🔒':((p&&p.skillCd&&p.skillCd[i]>0)?Math.ceil(p.skillCd[i]):s.icon);
     b.classList.toggle('lock',locked); b.classList.toggle('cooling',!!(p&&p.skillCd&&p.skillCd[i]>0));
     b.title=s.n+' ('+(i+1)+') — '+s.d; } }
@@ -2470,6 +2528,8 @@ function killEnemy(e){
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
+  if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
+    for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
   questKill(e.type);
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
     if(fq && !fq.placed && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
@@ -2544,6 +2604,10 @@ function checkStageClear(){
 function hurtPlayer(dmg,sx,sz){
   { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
+  if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
+  if(p.reflectT>0){ for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
+  if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
+    burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
   const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
   p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
@@ -2599,6 +2663,18 @@ function update(dt){
     if(Math.random()<0.5){ const a2=Math.random()*6.283, rr=40+Math.random()*130; G.particles.push({x:p.x+Math.cos(a2)*rr,y:10+Math.random()*50,z:p.z+Math.sin(a2)*rr,vx:-Math.sin(a2)*120,vy:30,vz:Math.cos(a2)*120,life:0.5,color:'#c47bff',sz:2.8}); }
     if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
       for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,null); } } }
+  // path-B upkeep: Guardian braces, Wizard barrier + meteors, Reaper reaping-storm
+  if(p.guardT>0){ p.guardT-=dt; if(Math.random()<0.4) G.particles.push({x:p.x+(Math.random()-0.5)*24,y:p.y+10+Math.random()*30,z:p.z+(Math.random()-0.5)*24,vx:0,vy:40,vz:0,life:0.3,color:'#9fd0ff',sz:2.4}); }
+  if(p.reflectT>0) p.reflectT-=dt;
+  if(p.shieldT>0){ p.shieldT-=dt; if(p.shieldT<=0) p.shieldHp=0; }
+  if(p.stormT>0){ p.stormT-=dt; p.stormAcc=(p.stormAcc||0)+dt; p.atkTimer=Math.max(p.atkTimer,0.12); p.swingId+=(Math.random()<0.3?1:0);
+    if(Math.random()<0.6){ const a2=Math.random()*6.283,rr=30+Math.random()*110; G.particles.push({x:p.x+Math.cos(a2)*rr,y:p.y+10+Math.random()*30,z:p.z+Math.sin(a2)*rr,vx:0,vy:20,vz:0,life:0.3,color:'#b06bff',sz:3}); }
+    if(p.stormAcc>=0.28){ p.stormAcc-=0.28; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<150+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._stormDmg||10,p,120,effLifesteal(p),null); } } }
+  if(G.meteors&&G.meteors.length){ for(const mt of G.meteors){ mt.t-=dt;
+      if(mt.t<=0.6&&!mt.warned){ mt.warned=true; }
+      if(mt.t<=0){ mt.done=true; skillRing(mt.x,mt.z,'#ff7a3a','#c33',mt.r+40); G.shake=Math.min(G.shake+9,16); burst(mt.x,10,mt.z,'#ff7a3a',24);
+        for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,mt.x,mt.z)<mt.r+e.r) hitEnemy(e,mt.dmg,mt.src||p,300,0,'fire'); } } }
+    G.meteors=G.meteors.filter(m=>!m.done); }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
   if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
   // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
@@ -2925,7 +3001,8 @@ function openSubclassFrom(then){
   mode='upgrade'; _offerT=Date.now(); SFX.classup();
   showOverlayHTML(`<div class="card classcard"><p class="ovkicker" style="color:#c98cff">${C.icon} ${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
     <h2 class="ovh" style="color:#e6d2ff">Choose your path</h2><p class="ovsub">This choice shapes every skill you unlock after it. Respec later at the trainer.</p>
-    <div class="choices">${C.subs.map((s,i)=>`<button class="choice arm classchoice" data-i="${i}"><div class="cname" style="color:#c98cff">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}</div></button>`).join('')}</div></div>`);
+    <div class="choices">${C.subs.map((s,i)=>{ const nx=s.skills?s.skills[0]:C.skills[1];
+      return `<button class="choice arm classchoice" data-i="${i}"><div class="cname" style="color:#c98cff">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}<br><b style="color:#e6d2ff">Next: ${nx?nx.icon+' '+nx.n:'?'}</b> <span style="opacity:.6">— skills 3 &amp; 4 reveal as you rank up</span></div></button>`; }).join('')}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.classup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
 }
 function openSubclass(){ openSubclassFrom(resumePlay); }
@@ -3246,19 +3323,40 @@ function openClasses(back){
   const tabRow=tabs.map(c=>{ const on=c===view;
     return `<button class="ctab ${on?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`; }).join('')
     + CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(c=>`<button class="ctab lock" disabled>🔒</button>`).join('');
-  const subLine=cs.sub?C.subs.find(s=>s.id===cs.sub).disp:(cs.rank>=3?'<span style="color:var(--amber)">choose a path at the trainer</span>':'path chosen at rank 3');
-  // the tree: 4 skill nodes at ranks 1/2/4/7 with the rank-3 subclass fork between #2 and #3
+  const chosen=cs.sub&&C.subs.find(s=>s.id===cs.sub);
+  const subLine=chosen?('Path: '+chosen.disp):(cs.rank>=2?'<span style="color:var(--amber)">choose a path at the trainer</span>':'path chosen at rank 2');
+  const S=curSkills(view);   // effective kit for this class' current path (path-A default if unchosen)
+  // the tree: skill 1 shared, then the rank-2 FORK, then the path-specific 2/3/4 (later ones hidden until earned)
   const nodes=[];
-  C.skills.forEach((sk,i)=>{
-    const open=cs.rank>=sk.rank, isNext=!open&&C.skills.filter(s2=>s2.rank<=cs.rank).length===i;
-    nodes.push(`<div class="snode ${open?'open':'shut'}"><div class="sic">${open?sk.icon:'🔒'}</div>
-      <div class="sbody"><div class="stitle">${sk.n} <span class="srank">${open?'Rank '+sk.rank+' ✓':'Rank '+sk.rank}</span></div>
-        <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · key ${i+1}</span></div></div></div>`);
-    if(i===1){ const sc=cs.rank>=3;
-      nodes.push(`<div class="sfork ${sc?'open':'shut'}"><div class="sic">${cs.sub?CLASSES[view].subs.find(s=>s.id===cs.sub).blurb?'🜁':'🜁':'⑂'}</div>
-        <div class="sbody"><div class="stitle">Path — Rank 3 ${sc?'✓':''}</div>
-        <div class="sdesc">${C.subs.map(s=>'<b'+(cs.sub===s.id?' style="color:var(--amber)"':'')+'>'+s.disp+'</b> — '+s.blurb).join('<br>')}</div></div></div>`); }
-  });
+  const sk0=C.skills[0], open0=cs.rank>=1;
+  nodes.push(`<div class="snode open"><div class="sic">${sk0.icon}</div>
+    <div class="sbody"><div class="stitle">${sk0.n} <span class="srank">Rank 1 ✓ · shared</span></div>
+      <div class="sdesc">${sk0.d} · <span style="opacity:.7">key 1</span></div></div></div>`);
+  // the fork node
+  const forked=cs.rank>=2;
+  nodes.push(`<div class="sfork ${chosen?'open':(forked?'open':'shut')}"><div class="sic">⑂</div>
+    <div class="sbody"><div class="stitle">Choose your path <span class="srank">Rank 2${chosen?' ✓':(forked?' — pick now!':'')}</span></div>
+    <div class="sdesc">${C.subs.map(s=>{ const me=cs.sub===s.id; const next=s.skills?s.skills[0]:C.skills[1];
+      return '<b'+(me?' style="color:var(--amber)"':'')+'>'+s.disp+'</b>'+(me?' (chosen)':'')+' — unlocks '+(next?next.n:'?')+'. This choice decides your skills 2-4.'; }).join('<br>')}</div></div></div>`);
+  // the path-specific skills 2-4: unlocked shown fully, the NEXT one previewed, later ones HIDDEN
+  if(chosen){
+    for(let i=1;i<=3;i++){ const sk=S[i]; if(!sk) continue;
+      const unlocked=cs.rank>=sk.rank;
+      const isNext=!unlocked && S.slice(1,i).every(s2=>cs.rank>=s2.rank);   // the immediate next unlock
+      if(unlocked) nodes.push(`<div class="snode open"><div class="sic">${sk.icon}</div>
+        <div class="sbody"><div class="stitle">${sk.n} <span class="srank">Rank ${sk.rank} ✓</span></div>
+          <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · key ${i+1}</span></div></div></div>`);
+      else if(isNext) nodes.push(`<div class="snode shut" style="opacity:.75"><div class="sic">🔜</div>
+        <div class="sbody"><div class="stitle">${sk.n} <span class="srank" style="color:#8b93a8">next · Rank ${sk.rank}</span></div>
+          <div class="sdesc">${sk.d}</div></div></div>`);
+      else nodes.push(`<div class="snode shut"><div class="sic">❔</div>
+        <div class="sbody"><div class="stitle">??? <span class="srank" style="color:#8b93a8">Rank ${sk.rank}</span></div>
+          <div class="sdesc" style="opacity:.6">A hidden ${chosen.disp} skill — revealed when you reach rank ${sk.rank}.</div></div></div>`);
+    }
+  } else {
+    nodes.push(`<div class="snode shut"><div class="sic">🔒</div><div class="sbody"><div class="stitle">Skills 2-4</div>
+      <div class="sdesc" style="opacity:.7">Locked until you choose a path at rank 2. Each path is a completely different kit.</div></div></div>`);
+  }
   showOverlayHTML(`<div class="card"><p class="ovkicker">Classes &amp; Skills</p>
     <h2 class="ovh">${C.icon} ${C.disp}</h2>
     <p class="ovsub">${un?('Rank '+cs.rank+'/10 · '+subLine):(C.earned?'Locked — earn it in a hidden trial':'Locked — play its starter trial')}</p>
@@ -3277,7 +3375,7 @@ function openTrainer(back){
       <div class="gi">${un?C.icon:'🔒'}</div>
       <div style="flex:1;min-width:0">
         <div class="gn">${C.disp} ${sel?'<span style="color:var(--amber);font-size:10px">· EQUIPPED</span>':''}</div>
-        <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(cs.rank>=3?' · choose a path!':''))+' · '+C.family.join(', ')):hint}</div></div>
+        <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(cs.rank>=2?' · choose a path!':''))+' · '+C.family.join(', ')):hint}</div></div>
       ${un&&!sel?`<button class="bigbtn buybtn" data-eq="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Equip</button>`:''}
       ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">Respec 300g</button>`:''}
       ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
@@ -3289,9 +3387,9 @@ function openTrainer(back){
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
   document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.re;
     if(meta.gold<300){ toast('Not enough gold'); return; }
-    meta.gold-=300; classState(cid).sub=null; if(classState(cid).rank>=3) queueSubclass=(cid===meta.classId);
+    meta.gold-=300; classState(cid).sub=null; if(classState(cid).rank>=2) queueSubclass=(cid===meta.classId);
     persist(); SFX.levelup(); toast('Path forgotten — choose again'+(cid===meta.classId?' on your next zone':''));
-    if(cid===meta.classId&&classState(cid).rank>=3){ openSubclassFrom(()=>openTrainer(back)); return; }
+    if(cid===meta.classId&&classState(cid).rank>=2){ openSubclassFrom(()=>openTrainer(back)); return; }
     openTrainer(back); });
   document.getElementById('backBtn').onclick=back;
 }
@@ -4217,6 +4315,13 @@ function render(t){
     popM();
     if(!n.talked) bx(n.x,64,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
   if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
+  if(G.meteors) for(const mt of G.meteors){                // incoming-meteor telegraph on the ground
+    const f=0.4+0.5*Math.sin(t*22), close=mt.t<0.6;
+    for(let i=0;i<16;i++){ const a=i/16*6.283; bx(mt.x+Math.cos(a)*mt.r,2,mt.z+Math.sin(a)*mt.r, 12,3,12,'#ff5a1e','#ff8a3a',(close?0.7:0.3)*f); }
+    if(mt.t>0.15) bx(mt.x, 400-(1.3-mt.t)/1.3*380, mt.z, 22,30,22,'#ff7a3a','#ffd24a',0.9); }   // the falling rock
+  { const p2=G.p;
+    if(p2.shieldHp>0){ const s=0.4+0.2*Math.sin(t*4); bx(p2.x,p2.y+22,p2.z, 40,52,40,'#c9a6ff','#c9a6ff',0.14+0.08*Math.sin(t*3)); }
+    if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
     drawShadow(w.x,w.z,22,0.3);
@@ -4445,7 +4550,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
-  useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul,
+  useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,

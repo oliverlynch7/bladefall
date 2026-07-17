@@ -194,7 +194,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.24.1';
+const VERSION3D='1.25.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -207,7 +207,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','silhouette',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol',
-  'introSeen','zoneSeen'];
+  'introSeen','zoneSeen','shadeSeen'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -220,7 +220,7 @@ const meta=Object.assign({
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
-  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},
+  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
 },_g);
@@ -293,6 +293,29 @@ const STORY={
   endLadder:{
     hardcore:"One life. One descent. No shift to relieve you. The order would have called that the proper way.",
     hitless:"Untouched, start to finish — the way the Wardens swore it could be done and never once managed. The oath is kept."
+  },
+  npc:{  // the Warden's Shade: a dead predecessor still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
+    outskirts:{lore:["I held this road for eleven years. Now I only haunt it.","The dreaming spreads through everything that lives here — cut it back, or it follows you down."],
+      why:"Thin the grunts and light the old waystone. Every marker you wake weakens his reach up here.",
+      boss:"The Brute at the wood's end was a farmer's ox. Do not let what it has become reach you."},
+    hollow:{lore:["The wind you hear is the canyon trying to empty itself.","We posted watchers on the rims. The rims are why you'll live or die here."],
+      why:"The chargers breed in the nests — burn through them. The bones on the rims were our watchers. Bring them down for burial.",
+      boss:"The Marksman was our best archer. She still holds her post at the head of the pass. She will not miss twice."},
+    keep:{lore:["This keep was ours. The order that failed you built its failures a prison here.","What walks these halls wears armor you'd recognize."],
+      why:"Destroy the risen and recover the sigils — each one is an oath the dead are still bound by.",
+      boss:"The thing in the deep cell was a Warden. He descended further than any of us. Kill him like you'd want to be killed."},
+    frost:{lore:["Cold this old isn't weather. It's the dream refusing to let anything move on.","We lost the Frostwatch in a single night."],
+      why:"The frostlings carry cores of the old cold. Shatter them, and find the cairn we never finished raising.",
+      boss:"The Sorcerer came here to study the ice. Around the fourth winter, it started studying him back."},
+    ember:{lore:["The mountain's furnace should have died with the mountain. The nightmare keeps it fed.","Everything down here wants to be lava when it grows up."],
+      why:"The emberlings shed shards of the core-fire. Quench them, and mark the ash altar so the way stays open behind you.",
+      boss:"The Colossus is not guarding the deep. It IS the deep. Bring it down joint by joint."},
+    abyss:{lore:["You are below every post we ever held. Even my death doesn't reach much deeper.","The dark here isn't empty. It's attentive."],
+      why:"Banish what you can and take back the splinters — every shard of the rift you carry out is one he can't dream through.",
+      boss:"Past this point sleeps the King. He has been listening to you descend the whole way."},
+    apex:{lore:["There's nothing left to teach you. He's awake, and he knows your name.","Whatever you've become on the way down — be exactly that."],
+      why:"No more errands. Just him.",
+      boss:"Break the cycle, Warden. Or become the next thing I have to warn somebody about."}
   }
 };
 // A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
@@ -312,6 +335,27 @@ function playStory(lines, onDone, opts){
   advance();
 }
 function story(){}   // namespace holder for _t/_skip
+/* The Warden's Shade: a dead predecessor at every zone mouth — quest-giver + lore. */
+function placeShade(x,z){
+  if(!G || G.trial || G.side) return;
+  const Z=curZone(); if(!STORY.npc[Z.id]) return;
+  if(!(G.area===0 || (G.area<0 && Z.areas.length===0))) return;   // only at the zone's front door
+  G.npc={x,z,t:0,talked:false};
+}
+function openShade(){
+  const Z=curZone(), N=STORY.npc[Z.id]; if(!N) return;
+  G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
+  mode='menu'; SFX.magic('void');
+  const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No errands here. Only the fight ahead.</div>';
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.2em">THE WARDEN'S SHADE</p>
+    <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:6px 0 10px">
+      ${N.lore.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
+      <p style="margin:0 0 8px">"${N.why}"</p>
+      <p style="margin:0;color:#e8a0a0">"${N.boss}"</p></div>
+    <p class="hint" style="text-align:left;margin:0 0 4px"><b>Your orders</b></p>${qrows}
+    <button class="bigbtn" id="shadeGo" style="margin-top:12px">I'll see it done</button></div>`);
+  document.getElementById('shadeGo').onclick=resumePlay;
+}
 function zoneCardMaybe(){                 // one card the FIRST time a zone is entered this save
   if(!G||G.trial||G.side||G.area<0) return;
   const Z=curZone(), line=STORY.zone[Z.id]; if(!line) return;
@@ -826,7 +870,7 @@ const ZONES=[
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
-    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:14,d:'Hunt 14 Chargers'}]},
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'charger',n:20,d:'Hunt 20 Chargers'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Climb for 5 Sun-Bleached Bones',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
@@ -1393,7 +1437,7 @@ function loadStage(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -1424,7 +1468,7 @@ function loadStage(i){
       G.segments.push({x:cx2,z:cz2,w:bw,d:bd});
       // strata canyon faces: collision walls + layered deco bands (the "texture")
       for(const sgn of [-1,1]){ const wx=cx2+sgn*(bw/2+16);
-        G.walls.push({x:wx,z:cz2,w:30,d:bd+40,h:240});
+        G.walls.push({x:wx,z:cz2,w:30,d:bd+40,h:240,stand:true});   // canyon rims are walkable — the wall-top IS the parkour layer
         for(let L2=0;L2<4;L2++){ const hh=62+L2*4, yb=L2*62;
           G.deco.push({x:wx+sgn*(4+L2*5),z:cz2,w:36+L2*9,d:bd+40,h:hh,y0:yb,c:tint([DARKS,SAND,LITES,SAND][L2],(rnd()<0.5?'#000':'#fff'),0.05+rnd()*0.08),theme:'canyon'}); }
         G.deco.push({x:wx+sgn*26,z:cz2,w:58,d:bd+52,h:16,y0:248,c:LITES,theme:'canyon'}); }
@@ -1463,14 +1507,23 @@ function loadStage(i){
     // find-quest shrine: a walled alcove off the last-but-one bowl
     { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
       if(fnd){ const r2=bowls[N-2]; G.waystone={x:r2.x,z:r2.z+r2.d/2-46,y:0,q:fnd.id,taken:false,t:0}; } }
-    // hidden rift (side zone) tucked behind the first bowl's rim wall
+    // hidden rift (side zone): OUTSIDE the west wall of the middle bowl, at the end of a
+    // real parkour gauntlet — climb the inner steps, cross the rim wall, then descend
+    // hanging ledges over the void. Miss a jump out there and the fall costs you.
     if(ZONES[1].side && !meta.sideFound[ZONES[1].side.id] && G.area===0){
-      const r2=bowls[1]; G.secret={x:r2.x,z:r2.z+r2.d/2-30,y:0,t:0,id:ZONES[1].side.id}; }
+      const r2=bowls[2], wx=r2.x-(r2.w/2+16);
+      const IN=[[r2.x-r2.w/2+66,r2.z+r2.d/2-70,62],[r2.x-r2.w/2+52,r2.z+r2.d/2-160,124],[r2.x-r2.w/2+44,r2.z+r2.d/2-250,186],[wx+34,r2.z+r2.d/2-330,232]];
+      for(const st2 of IN) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:56,d:52,h:st2[2]});
+      const OUT=[[wx-72,r2.z-30,188],[wx-140,r2.z+42,128],[wx-206,r2.z-24,68]];
+      for(const st2 of OUT) G.obstacles.push({kind:'plat',sec:true,x:st2[0],z:st2[1],w:52,d:48,h:st2[2]});
+      G.obstacles.push({kind:'plat',sec:true,x:wx-268,z:r2.z+40,w:78,d:70,h:30});
+      G.secret={x:wx-268,z:r2.z+40,y:30,t:0,id:ZONES[1].side.id}; }
     // exit portal at the head of the canyon (quest-gated as usual)
     G.portalPos={x:last.x,z:last.z-last.d/2+70};
     if(!areaQuests().length) G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
     G.startPos={x:first.x,z:first.z}; G.goalPos={x:last.x,z:last.z};
     G.lastSafe={x:first.x,z:first.z+first.d/2-40};
+    placeShade(first.x-70,first.z+first.d/2-70);
     let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
     for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }
     G.bounds={minX:mnX-80,maxX:mxX+80,minZ:mnZ-80,maxZ:mxZ+80}; G.progressEnd=mnZ;
@@ -1631,6 +1684,7 @@ function loadStage(i){
   G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
   hazSetup(rnd2);
   G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
+  placeShade(entryRoom.x-60,entryRoom.z+entryRoom.d/2-60);
   G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
@@ -1645,7 +1699,7 @@ function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusTime=18; G.bonusSecured=false; G.combo=0; G.comboT=0; // shorter timer
   const rnd=mulberry(G.stageIndex*31337+911);
   G.segments.push({x:0,z:-20,w:186,d:186});
@@ -1843,6 +1897,8 @@ function onSegment(x,z,r){
 function floorAt(x,z,r,yRef){
   let f=-Infinity;
   for(const sg of G.segments){ if(Math.abs(x-sg.x)<sg.w/2+r*0.4 && Math.abs(z-sg.z)<sg.d/2+r*0.4){ f=0; break; } }
+  // stand-flagged walls are walkable on top (canyon rims etc.) — maze walls stay non-standable so rooms can't be sequence-broken
+  for(const wl of G.walls){ if(wl.stand && wl.h<=yRef+2 && Math.abs(x-wl.x)<wl.w/2+r*0.4 && Math.abs(z-wl.z)<wl.d/2+r*0.4) f=Math.max(f,wl.h); }
   for(const mv of G.movers){ if(mv.h<=yRef+2 && Math.abs(x-mv.x)<mv.w/2+r*0.4 && Math.abs(z-mv.z)<mv.d/2+r*0.4) f=Math.max(f,mv.h); }
   for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,0); }
   for(const ob of G.obstacles){ if(ob.h<=yRef+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
@@ -2266,7 +2322,7 @@ function update(dt){
   if(G.dens&&G.dens.length){ for(const dn of G.dens){
     const q=areaQuests().find(x=>x.id===dn.questId);
     if(!q||questDone(q)) continue;
-    dn.t-=dt; if(dn.t>0) continue; dn.t=3.5+Math.random()*1.5;
+    dn.t-=dt; if(dn.t>0) continue; dn.t=2.6+Math.random()*1.2;
     const near=G.enemies.filter(e2=>!e2.dead&&e2.type===dn.type&&dXZ(e2.x,e2.z,dn.x,dn.z)<340).length;
     if(near>=3 || dXZ(p.x,p.z,dn.x,dn.z)>900) continue;
     const m=spawnEnemy(dn.type,dn.x+(Math.random()-0.5)*50,dn.z+(Math.random()-0.5)*50);
@@ -2286,7 +2342,10 @@ function update(dt){
     if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
       for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,null); } } }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
-  if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
+  if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
+  // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
+  if(p.varJump && !input.jump && p.vy>340) p.vy=340;
+  if(p.onGround || p.vy<=0) p.varJump=false;
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.34); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }
@@ -2462,6 +2521,10 @@ function update(dt){
   // quest waystone: touch it to complete a "find" objective
   if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
     if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } }
+  // the Warden's Shade: auto-greets you once per zone per save; after that, step close to hear him again
+  if(G.npc && !G.npc.talked){ G.npc.t+=dt;
+    const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
+    if(d2<(seen?46:110)) openShade(); }
   // hidden side-zone rift: walk into it and it's yours forever
   if(G.secret){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
@@ -3616,12 +3679,27 @@ function render(t){
       if(burn) for(let i=0;i<2;i++) bx(v.x+(Math.random()-0.5)*v.r, 12+Math.random()*46, v.z+(Math.random()-0.5)*v.r, 6,14,6, '#ff9a3a','#ffd24a',0.75); } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
-  if(G.secret){                                        // the hidden rift: a dark seam in the wall, subtle but findable
-    const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7);
-    bx(s.x,26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
-    bx(s.x,26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);
-    bx(s.x,26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
-    for(let i=0;i<2;i++){ const yy=8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
+  if(G.secret){                                        // the hidden rift: a dark seam, now wherever the parkour ends (honors s.y)
+    const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7), sy=s.y||0;
+    bx(s.x,sy+26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
+    bx(s.x,sy+26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);
+    bx(s.x,sy+26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
+    for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
+  if(G.npc){                                           // the Warden's Shade: a translucent figure in old armor, hovering at the zone mouth
+    const n=G.npc, fl=0.5+0.18*Math.sin(t*2.1), fy=6+Math.sin(t*1.6)*3;
+    pushM(); mv(n.x,fy,n.z); rotY(Math.sin(t*0.7)*0.3);
+    box(15,3,15,'#b06bff','#b06bff',0.22);                                  // ground glow
+    mv(0,16,0); box(13,26,9,'#3a2a55','#6a4a9a',fl*0.75);                   // robed body
+    mv(0,20,0); box(9,9,9,'#4a3a66','#8a6ac0',fl*0.85);                     // hooded head
+    mv(0,-2,6); box(4,3,2,'#c47bff','#c47bff',fl);                          // eyes glint
+    popM();
+    if(!n.talked) bx(n.x,64,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
+  if(G.dens) for(const dn of G.dens){                  // spawner nests: you can SEE where the hunt lives
+    const gl2=0.45+0.3*Math.sin(t*2.2+dn.x);
+    bx(dn.x,10,dn.z, 52,20,52, '#2a1a0c', null, 1);
+    bx(dn.x,26,dn.z, 34,16,34, '#3a2210', '#c8893a', gl2*0.5);
+    bx(dn.x,40,dn.z, 16,14,16, '#c8893a', '#ff9a3a', gl2);
+    for(let i=0;i<3;i++){ const a=t*1.4+i*2.09; bx(dn.x+Math.cos(a)*30, 14+Math.sin(t*3+i)*6, dn.z+Math.sin(a)*30, 4,4,4, '#ff9a3a','#ff9a3a',0.6); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
     drawShadow(w.x,w.z,22,0.3);
@@ -3648,7 +3726,8 @@ function render(t){
       mv(0,-13,-3); box(18,26,2.5, cp.col, cp.col, 0.85);
       mv(0,-12,-1); box(15,14,2, cp.col, cp.col, 0.7);
       popM(); popM(); } }
-  if(meta.camMode!=='fps') drawHero3(p,t,false); else drawFPWeapon(p,t);
+  if(meta.camMode!=='fps') drawHero3(p,t,false);
+  else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   if(meta.camMode!=='fps' && meta.silhouette!==false){   // never lose yourself: redraw the hero where geometry hides him
     const sk0=SKINS[p.skin]||SKINS.knight;
     gl.depthFunc(gl.GREATER); gl.depthMask(false);       // only fragments BEHIND something → the occluded part
@@ -3834,7 +3913,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
-  STORY, playStory, zoneCardMaybe, storyToast, winScreen,
+  STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

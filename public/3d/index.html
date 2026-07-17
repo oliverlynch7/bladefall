@@ -106,6 +106,13 @@
   .choice.arm::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--amber);animation:armsweep 0.85s linear forwards;}
   @keyframes armlive{0%,92%{pointer-events:none;opacity:.5;} 100%{pointer-events:auto;opacity:1;}}
   @keyframes armsweep{0%{width:0} 100%{width:100%}}
+  /* class-level-up menu: violet + arcane, unmistakably different from the amber character level-up */
+  .card.classcard{background:linear-gradient(178deg,#1b1526 0%,#141019 48%,#0e0b14 100%);border-color:#3a2a55;
+    box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(201,140,255,.12),0 0 40px rgba(176,107,255,.18);}
+  .card.classcard::before{background:linear-gradient(90deg,transparent,#b06bff 30%,#e6d2ff 50%,#b06bff 70%,transparent);}
+  .choice.classchoice{border-color:#3a2a55;background:linear-gradient(180deg,rgba(176,107,255,.07),rgba(176,107,255,.015));}
+  .choice.classchoice:hover{border-color:#8a5ad0;background:rgba(176,107,255,.12);}
+  .choice.classchoice.arm::after{background:#b06bff;}
   #storyveil{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   #storytext{max-width:min(80vw,640px);text-align:center;color:#eef1f6;font-size:clamp(17px,3.4vw,26px);line-height:1.6;
     letter-spacing:.01em;text-shadow:0 2px 18px #000;opacity:0;padding:0 24px;font-weight:600;}
@@ -257,7 +264,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.33.0';
+const VERSION3D='1.34.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -617,6 +624,9 @@ const SFX={
   // level up: bright ascending motif
   levelup(){ [523,659,784].forEach((f,i)=>{ tone({f0:f,dur:0.16,type:'triangle',vol:0.06,at:i*0.085}); tone({f0:f*2,dur:0.14,type:'sine',vol:0.02,at:i*0.085}); });
     noise({dur:0.3,f0:5000,f1:9000,type:'highpass',vol:0.03,a:0.02,at:0.15}); },
+  // class rank-up: a deeper, brassier fanfare — clearly NOT the bright character-level chime
+  classup(){ [196,262,392,523].forEach((f,i)=>{ tone({f0:f,f1:f*1.01,dur:0.34,type:'sawtooth',vol:0.05,at:i*0.10}); tone({f0:f*1.5,dur:0.3,type:'triangle',vol:0.025,at:i*0.10}); });
+    tone({f0:523,f1:784,dur:0.5,type:'sine',vol:0.05,at:0.42}); },
   // item pickup: soft two-note bell
   pickup(){ tone({f0:660,dur:0.1,type:'triangle',vol:0.05}); tone({f0:990,dur:0.16,type:'triangle',vol:0.05,at:0.07});
     tone({f0:1980,dur:0.12,type:'sine',vol:0.015,at:0.07}); },
@@ -768,7 +778,7 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
     const sk=curClass().skills.find(s=>s.rank===cs.rank);
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
-  if(up){ SFX.levelup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
+  if(up){ SFX.classup(); if(cs.rank>=3&&!cs.sub) queueSubclass=true; skillbarUpdate(); }
   if(G&&mode==='play') hudUpdate();
   persist(); }
 const LEGACY_ART={orb:'scepter',rod:'wand'};             // retired arts: fold old saves' weapons into the surviving trio
@@ -1408,6 +1418,15 @@ function restoreBank(){ if(!meta.bank) return false;
   meta.bank=null; persist(); return true; }
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
 const STASH_CAP=30;
+// When you equip/buy something, the piece it replaced goes to your bag (not the void) —
+// unless it's throwaway starter/plain gear or the bag is full.
+const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
+function bagReplaced(old,isWeapon){
+  if(!old || THROWAWAY.test(old.name||'')) return;
+  if(!Array.isArray(meta.stash)) meta.stash=[];
+  if(meta.stash.length>=STASH_CAP){ toast('Bag full — '+old.name+' left behind'); return; }
+  meta.stash.push(isWeapon?{weapon:old}:{armor:old}); persist();
+}
 function stashItem(it){
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ toast('Your bag is full — sell something at the hub'); return false; }
@@ -2854,11 +2873,11 @@ function openLevelUp(){
 }
 function openSubclassFrom(then){
   const C=curClass(), cs=classState(meta.classId);
-  mode='upgrade'; _offerT=Date.now();
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.22em;margin-bottom:2px;">${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
-    <h2 class="ovh">Choose your path</h2><p class="ovsub">You can respec at the hub trainer for gold (never mid-zone)</p>
-    <div class="choices">${C.subs.map((s,i)=>`<button class="choice arm" data-i="${i}"><div class="cname">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}</div></button>`).join('')}</div></div>`);
-  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.levelup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
+  mode='upgrade'; _offerT=Date.now(); SFX.classup();
+  showOverlayHTML(`<div class="card classcard"><p class="ovkicker" style="color:#c98cff">${C.icon} ${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
+    <h2 class="ovh" style="color:#e6d2ff">Choose your path</h2><p class="ovsub">This choice shapes every skill you unlock after it. Respec later at the trainer.</p>
+    <div class="choices">${C.subs.map((s,i)=>`<button class="choice arm classchoice" data-i="${i}"><div class="cname" style="color:#c98cff">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}</div></button>`).join('')}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.classup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
 }
 function openSubclass(){ openSubclassFrom(resumePlay); }
 function fmt(n){ return Math.round(n*100)/100; }
@@ -2879,7 +2898,7 @@ function offerWeapon(nw){
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); } resumePlay(); };
 }
@@ -2901,7 +2920,7 @@ function offerArmor(na){
     </div>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); } resumePlay(); };
 }
@@ -2916,7 +2935,7 @@ function offerTrinket(nt){
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
 /* one random loot item (weapon / armor / trinket) at a given rarity */
@@ -3282,7 +3301,7 @@ function openShop(back){
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
     const w=shopWeapon(meta.classId,rid);
-    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else meta.hero.weapon=w;
+    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
     SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
   document.getElementById('backBtn').onclick=back;
 }
@@ -3573,11 +3592,14 @@ function weaponMesh(w,swing){
       bx(0,42,0, 4.6,5,4, bone); bx(2.5,45.5,0, 6,3.4,3.4, boneDk);
       bx(9,45,0, 12,3.6,3, dkb,glow); bx(17.5,42,0, 8,3.2,2.6, dkb,glow); bx(22.5,38,0, 5,3,2.2, dkb,glow); bx(25.5,34,0, 2.6,4,2, edge,glow);
       bx(12,46.8,0, 12,1.2,1.4, blade, blade); break;
-    case 'bow': // bone bow — vertebra limbs, sinew string
-      bx(0,10,1, 3,10,3, wrap);
-      pushM(); mv(0,15,0); rotZ(0.32); box(2.8,14,2.8, bone); mv(0,7.5,0); rotZ(0.5); box(2.2,8,2.2, boneDk); popM();
-      pushM(); mv(0,5,0); rotZ(-0.32); box(2.8,14,2.8, bone); mv(0,-7.5,0); rotZ(-0.5); box(2.2,8,2.2, boneDk); popM();
-      bx(0,10,-1.6, 0.8,46,0.8, sinew); bx(0,10,1.8, 2.4,4.6,1.4, boneDk); break;
+    case 'bow': // recurve bow — vertebra limbs curving forward, sinew string drawn to a nocked arrow
+      bx(0,10,1, 3.4,11,4, wrap);                                                                 // riser / grip
+      pushM(); mv(0,16,0); rotZ(0.30); box(2.8,15,2.8, bone); mv(0,8,2.2); rotZ(0.55); box(2.2,9,2.2, boneDk); popM();   // upper limb, tips curl forward
+      pushM(); mv(0,4,0); rotZ(-0.30); box(2.8,15,2.8, bone); mv(0,-8,2.2); rotZ(-0.55); box(2.2,9,2.2, boneDk); popM(); // lower limb
+      bx(0,10,4.0, 0.8,42,0.8, sinew);                                                            // string at the limb tips
+      bx(0,10,1.4, 0.8,16,0.8, sinew);                                                            // string drawn back to the nock (V shape)
+      pushM(); mv(0,10,1.4); rotX(1.571); box(1.3,34,1.3,'#c9a06a'); mv(0,17,0); box(3,3.4,3,'#8a7a5a'); popM();   // NOCKED ARROW pointing forward (+z), head at the front
+      break;
     case 'cross': // dark crossbow — iron prod, bone tips, loaded bolt
       bx(0,7,0, 3.6,22,3.6, haft); bx(0,2,3.2, 3.2,4,7, iron); bx(0,-2.5,2, 2,4,3, wrap);
       bx(0,15,0, 24,2.8,3, iron); bx(-12.6,15,0, 2.6,5,4.6, bone); bx(12.6,15,0, 2.6,5,4.6, bone);
@@ -4143,13 +4165,14 @@ function render(t){
   drawShadow(p.x,p.z,13);
   if(meta.camMode!=='fps'){                            // cosmetic cape: hangs off the shoulders, swings with your speed
     const cp=cosEquipped('cape');
-    if(cp && !SIL){ const spd=Math.min(1,Math.hypot(p.vx,p.vz)/240), sw=Math.sin(t*7)*0.09*spd;
+    if(cp && !SIL){ const spd=Math.min(1,Math.hypot(p.vx,p.vz)/240), sway=Math.sin(t*6)*3*spd, lift=spd*4;
       pushM(); mv(p.x,p.y,p.z); rotY(p.yaw);
-      pushM(); mv(0,34,-9); rotX(-0.22-spd*0.5+sw);
-      box(20,3,4, cp.col, cp.col, 0.95);
-      mv(0,-13,-3); box(18,26,2.5, cp.col, cp.col, 0.85);
-      mv(0,-12,-1); box(15,14,2, cp.col, cp.col, 0.7);
-      popM(); popM(); } }
+      // draped strictly BEHIND the body (all z<=-9) and stepping further back each panel — can't clip the character
+      const C=cp.col;
+      bx(0,35,-9, 20,4,3, C, C, 0.95);                                  // collar clasp on the upper back
+      bx(sway*0.4,25,-11-lift, 18,22,2.4, C, C, 0.9);                   // upper drape
+      bx(sway*0.7,11,-13-lift*1.6, 14,18,2.2, C, C, 0.78);             // lower taper, kicks out when running
+      popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
@@ -4194,7 +4217,12 @@ function drawProjectile3(pr,t){
   drawShadow(pr.x,pr.z,pr.size*0.7,0.16);
   const yaw=Math.atan2(pr.vx,pr.vz), pitch=Math.atan2(-(pr.vy||0),Math.hypot(pr.vx,pr.vz));
   pushM(); mv(pr.x,pr.y,pr.z); rotY(yaw); rotX(pitch);
-  if(pr.shape==='arrow'||pr.shape==='bolt'){ box(2.6,2.6,16,pr.color,pr.glow?pr.color:null); }
+  if(pr.shape==='arrow'||pr.shape==='bolt'){          // a real arrow: shaft + head + fletching, pointing along travel (+z)
+    const c=pr.color, g=pr.glow?pr.color:null;
+    box(1.4,1.4,15, c, g);                                          // shaft
+    pushM(); mv(0,0,8.4); box(3,3,3.5, tint(c,'#fff',0.25), g); box(1.3,1.3,3, c, g); popM();   // arrowhead
+    pushM(); mv(0,0,-6.6); box(0.6,4.6,4, c, g); box(4.6,0.6,4, c, g); popM();                   // fletching vanes
+  }
   else { rotY(t*6); box(pr.size*1.6,pr.size*1.6,pr.size*1.6,pr.color,pr.color); }
   popM();
 }
@@ -4348,7 +4376,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER,
+  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

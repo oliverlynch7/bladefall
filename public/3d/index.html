@@ -226,6 +226,14 @@
   body.t-title .bigbtn.ghost{background:linear-gradient(180deg,rgba(24,20,30,.82),rgba(14,12,18,.82));color:#e8d8b0;border:1px solid rgba(200,160,90,.32);box-shadow:0 2px 12px rgba(0,0,0,.5);backdrop-filter:blur(3px);}
   body.t-title .bigbtn.ghost:hover{border-color:rgba(240,200,120,.7);color:#fff;}
   .tver{text-align:center;color:rgba(220,200,160,.55);font-size:11px;letter-spacing:.14em;margin-top:9px;text-shadow:0 1px 4px #000;}
+  /* two-stage attract: the art is untouched on load; a tap reveals the menu (which then rises from the bottom) */
+  .tbegin{display:none;flex-direction:column;align-items:center;gap:8px;padding-bottom:8px;}
+  body.t-attract .tbegin{display:flex;}
+  body.t-attract #tmenu{display:none;}
+  .tbeginpulse{font-weight:900;letter-spacing:.24em;font-size:15px;color:#f7d79a;cursor:pointer;padding:13px 30px;border:1px solid rgba(232,163,61,.45);border-radius:40px;background:rgba(10,8,14,.32);backdrop-filter:blur(2px);text-shadow:0 2px 16px rgba(232,163,61,.75),0 1px 3px #000;animation:tbeginpulse 1.9s ease-in-out infinite;}
+  @keyframes tbeginpulse{0%,100%{opacity:.62;box-shadow:0 0 0 rgba(232,163,61,0)}50%{opacity:1;box-shadow:0 0 26px rgba(232,150,60,.5)}}
+  #tmenu{animation:tmenurise .5s cubic-bezier(.2,.9,.3,1);}
+  @keyframes tmenurise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
   .bigbtn.ghost{background:rgba(255,255,255,.025);color:var(--ink);border:1px solid #2b3040;box-shadow:none;font-weight:700;}
   .bigbtn.ghost:hover{border-color:#3d4560;background:rgba(255,255,255,.05);}
   .bigbtn:active{transform:scale(.98);}
@@ -358,7 +366,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.91.0';
+const VERSION3D='1.92.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5043,7 +5051,7 @@ function winScreen(bonus,D){
   mode='win'; musicPlay('hub');
   const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
   showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
-    <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Void Tyrant has fallen.
+    <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Abyss King is ended.
       ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You beat BLADEFALL at its cruelest.<br>🚀 The Jetpack is yours — fly free.</span>'}</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
       <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
@@ -5059,7 +5067,7 @@ function titleEmbers(){ const host=document.getElementById('tembers'); if(!host)
     h+=`<span style="left:${left}%;width:${sz}px;height:${sz}px;--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`; }
   host.innerHTML=h; }
 function showOverlayHTML(html){
-  if(mode!=='title') document.body.classList.remove('t-title');   // the full-bleed title art only shows on the title screen
+  if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
   const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
   ovcard.innerHTML=html; showOverlay(true); fixSliders();
@@ -5109,7 +5117,7 @@ function openSlots(){
 }
 function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
-  showOverlayHTML(`<div class="tmenu">
+  showOverlayHTML(`<div class="tmenu" id="tmenu">
     <button class="bigbtn tplay" id="playBtn">⚔ ENTER THE ABYSS</button>
     <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important">🕳️ Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
     <div class="trow">
@@ -5118,8 +5126,15 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
       <button class="bigbtn ghost" id="optBtn">⚙ More</button>
     </div>
     <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
-    </div>`);
-  document.body.classList.add('t-title'); titleEmbers();
+    </div>
+    <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ PRESS TO BEGIN</div><div class="tver">v${VERSION3D}</div></div>`);
+  document.body.classList.add('t-title'); document.body.classList.add('t-attract'); titleEmbers();
+  // STAGE 1: the art stands alone. First tap/key reveals the menu (STAGE 2) so nothing ever covers the logo on entry.
+  const revealMenu=()=>{ if(mode!=='title'||!document.body.classList.contains('t-attract')) return;
+    document.body.classList.remove('t-attract'); try{ initAudio(); SFX.pickup(); }catch(e){} window.removeEventListener('keydown',revealMenu); };
+  titleScreen._reveal=revealMenu;
+  document.getElementById('tbeginpulse').onclick=revealMenu;
+  window.addEventListener('keydown',revealMenu);
   document.getElementById('optBtn').onclick=openTitleOptions;
   document.getElementById('playBtn').onclick=modeSelect;
   document.getElementById('abyssBtn').onclick=enterEndlessFromTitle;

@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.65.0';
+const VERSION3D='1.66.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2197,25 +2197,80 @@ const SCAPES={
     scapeFind(ctx, towers[3].x, towers[3].z, towers[3].h);
     finishScape(ctx,{sx:0,sz:court.d/2-50,sy:0, gx:hall.x,gz:hall.z-hall.d/2+90, decoCol:STONE_C(),decoTheme:ctx.s.theme,decoTall:240});
   },
-  /* FROSTFELL — a frozen lake: wide slick ice sheets separated by channels of freezing
-     water you cross on DRIFTING FLOES, then a glacier you climb to the frostwatch shelf. */
-  frost(ctx){ const {rnd,mkMonster}=ctx; const ICE='#bfe6ff';
-    const s1=vseg(0,0,560,440); G.rooms.push({x:0,z:0,w:560,d:440,monsters:[],encounter:false,cleared:true});
-    const s2=vseg(-40,-620,520,420); G.rooms.push({x:-40,z:-620,w:520,d:420,monsters:[],encounter:false,cleared:true});
-    gapMovers(-140,-300,120,-300,110,rnd);                         // floes drifting across the first channel
-    gapStones(-40,-410,-40,-410,96,rnd,false);                     // a static ice block mid-channel (extra footing)
-    // glacier: climb ice ledges from sheet 2 up to a high shelf (goal)
-    const gx=60, gz=-1080, gy=300; climbRun(-40,-820,0, gx,gz+150,gy, 70,{ice:true});
-    const shelf=vplat(gx,gz,gy,560,440,{terrace:true,checkpoint:true}); G.rooms.push({x:gx,z:gz,w:560,d:440,y:gy,monsters:[],encounter:false,cleared:true});
-    vtorch(-560/2+30,0,rnd); vtorch(560/2-30,0,rnd); vtorch(gx-260,gz,rnd); vtorch(gx+260,gz,rnd);
-    for(let o2=0;o2<3;o2++) vcol((rnd()*2-1)*200,(rnd()*2-1)*160,30+rnd()*30,30+rnd()*30,60+rnd()*70);   // ice spikes (cover)
-    for(let m=0;m<2;m++) mkMonster('frostling',(rnd()*2-1)*180,(rnd()*2-1)*120,s1);
-    mkMonster('frostling',-40+(rnd()*2-1)*160,-620,s2);
-    scapeKill(ctx,[{x:-150,z:-40,room:s1},{x:-40,z:-620,room:s2}]);
-    scapeFetch(ctx,[{x:gx-160,z:gz+60,y:gy},{x:gx+150,z:gz-40,y:gy},{x:gx,z:gz-140,y:gy},{x:-40,z:-620,y:0},{x:120,z:0,y:0}]);
-    scapeFind(ctx, gx, gz-160, gy);
-    scapeSecret(ctx, s2.x-s2.w/2+40, s2.z-s2.d/2+40, 0);
-    finishScape(ctx,{sx:0,sz:s1.d/2-50,sy:0, gx:shelf.x,gz:shelf.z-shelf.d/2+90, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:280});
+  /* FROSTFELL (Phase 17 deep-dive) — an ascending GLACIER JOURNEY, minutes end to end:
+     Shorefall Camp (frozen Wardens in the ice) -> THE FROZEN LAKE (fork: the drifting
+     floe-line WEST — fast, risky — vs the long shore road EAST, rejoined by a ridge-island
+     loop) -> THE ICEFALL terraces -> THE CRYSTAL GALLERY (an enclosed ice-cave hall, the
+     zone's unique interior; the Glacier Vault hides off its west wall) -> the Frostwatch
+     Summit: the cairn and the portal under the aurora. All climbs stay in jump reach. */
+  frost(ctx){ const {rnd,mkMonster}=ctx; const ICE='#bfe6ff', SLATE='#8fa6b8', SNOW='#e8f4ff', PALE='#d8ecf8';
+    // ── 1) SHOREFALL CAMP (start): the last thawed ground ──
+    const camp=vseg(0,0,640,460); G.rooms.push({x:0,z:0,w:640,d:460,monsters:[],encounter:false,cleared:true});
+    vtorch(-270,150,rnd); vtorch(270,150,rnd); vtorch(-270,-160,rnd); vtorch(270,-160,rnd);
+    for(const s2 of [[-210,-120],[240,-60],[70,-185]]){                                 // the frozen dead Wardens (landmark statuary)
+      G.deco.push({x:s2[0],z:s2[1],y0:0,w:54,h:10,d:54,c:ICE});
+      G.deco.push({x:s2[0],z:s2[1],y0:10,w:24,h:40,d:20,c:SLATE}); G.deco.push({x:s2[0],z:s2[1],y0:50,w:16,h:14,d:16,c:'#aebecc'});
+      G.deco.push({x:s2[0]+30,z:s2[1]+18,w:26,h:72,c:ICE,theme:'frost'}); }
+    // ── 2) THE FROZEN LAKE: two sheets split by freezing channels ──
+    const lakeW=vseg(-250,-760,460,580); G.rooms.push({x:-250,z:-760,w:460,d:580,monsters:[],encounter:false,cleared:true});
+    const lakeE=vseg(330,-820,300,700); G.rooms.push({x:330,z:-820,w:300,d:700,monsters:[],encounter:false,cleared:true});
+    // FORK WEST — the floe-line: drifting ice straight across the channel (fast, risky)
+    G.movers.push({x0:-200,z:-320,w:110,d:88,h:0,amp:34,sp:1.05,ph:rnd()*6.28,x:-200,px:-200});
+    G.movers.push({x0:-240,z:-400,w:110,d:88,h:0,amp:40,sp:1.3,ph:rnd()*6.28,x:-240,px:-240});
+    G.crumbles.push({x:-120,z:-362,w:84,d:84,state:0,timer:0,respawn:0,fallY:0,jit:0});   // a cracking plate as alternate footing
+    // FORK EAST — the shore road: a solid ice isthmus (safe, longer, patrolled)
+    vseg(330,-350,220,240);
+    // the ridge island stitches the two sheets into a LOOP mid-lake
+    vseg(60,-880,180,140);
+    G.crumbles.push({x:165,z:-880,w:64,d:64,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    // pressure ridges + white cracks make the ice READ as ice
+    for(let k=0;k<8;k++){ const lx=(k<4?-250:330)+(rnd()*2-1)*(k<4?170:100), lz=(k<4?-760:-820)+(rnd()*2-1)*240;
+      G.deco.push({x:lx,z:lz,w:20+rnd()*14,h:34+rnd()*36,c:ICE,theme:'frost'}); }
+    for(let k=0;k<6;k++){ const lx=(k<3?-250:330)+(rnd()*2-1)*140, lz=(k<3?-700:-800)+(rnd()*2-1)*200, lr=rnd()<0.5;
+      G.deco.push({x:lx,z:lz,y0:0,w:lr?7:110+rnd()*120,h:1.6,d:lr?110+rnd()*120:7,c:SNOW}); }
+    for(let k=0;k<4;k++) vcol(-250+(rnd()*2-1)*180,-760+(rnd()*2-1)*220,26+rnd()*22,26+rnd()*22,40+rnd()*50);   // ice boulders (cover)
+    vtorch(-420,-560,rnd); vtorch(430,-560,rnd); vtorch(430,-1060,rnd);
+    // ── 3) THE ICEFALL: terraces climbing off the lake's north face ──
+    climbRun(-250,-1040,0, -190,-1200,140, 74,{ice:true});
+    const ter1=vplat(-190,-1290,140,320,220,{terrace:true,checkpoint:true});
+    climbRun(-190,-1390,140, -80,-1520,280, 70,{ice:true});
+    const ter2=vplat(-80,-1610,280,340,240,{terrace:true,checkpoint:true});
+    for(const c2 of [[-330,-1290],[-50,-1290],[-230,-1610],[70,-1610]]){ vcol(c2[0],c2[1],34,34,140+rnd()*80);
+      G.deco.push({x:c2[0],z:c2[1],w:24,h:60,c:ICE,theme:'frost'}); }                     // icefall pillars flanking the terraces
+    // ── 4) THE CRYSTAL GALLERY: an enclosed ice-cave hall (the zone's unique interior) ──
+    const gal=vplat(-60,-1960,280,480,380,{terrace:true,checkpoint:true});
+    G.walls.push({x:200,z:-1960,w:34,d:400,h:470});                                       // east wall
+    G.walls.push({x:-60-240-20,z:-1900,w:34,d:240,h:470});                                // west wall (south span)...
+    G.walls.push({x:-60-240-20,z:-2135,w:34,d:70,h:470});                                 // ...north span — the gap between them hides the Vault
+    for(let L2=0;L2<4;L2++){ const by=280+L2*46;                                          // glacial strata banding the walls (proud of the inner faces)
+      G.deco.push({x:174,z:-1960,y0:by,w:14,h:44,d:380,c:tint(PALE,(L2%2?'#fff':'#000'),0.06+rnd()*0.05)});
+      G.deco.push({x:-294,z:-1900,y0:by,w:14,h:44,d:220,c:tint(PALE,(L2%2?'#000':'#fff'),0.06+rnd()*0.05)}); }
+    for(const rz of [-1850,-1960,-2070]) G.deco.push({x:-60,z:rz,y0:470,w:500,h:16,d:90,c:tint(ICE,'#fff',0.18)});   // roof slabs — daylight slits between them
+    for(const cc of [[-180,-1880],[40,-1930],[-140,-2060],[60,-2090]]){                   // glowing crystal clusters
+      G.deco.push({x:cc[0],z:cc[1],y0:280,w:26,h:40,d:26,c:ICE});
+      G.deco.push({x:cc[0],z:cc[1],y0:320,w:18,h:26,d:18,c:PALE});
+      G.deco.push({x:cc[0],z:cc[1],y0:346,w:10,h:14,d:10,c:'#ffffff'}); }
+    { const cs=mkMonster('caster',-60,-1990,null); cs.y=280; cs.sx=cs.x; cs.sz=cs.z; }    // a rime-caster holds the gallery
+    // the GLACIER VAULT: a hidden shelf through the west-wall gap (walk-in secret)
+    vplat(-380,-2060,280,120,110,{sec:true});
+    scapeSecret(ctx,-380,-2060,280);
+    // ── 5) FROSTWATCH SUMMIT: the cairn + the portal under the aurora ──
+    climbRun(-60,-2140,280, 20,-2260,404, 72,{ice:true});
+    const smt=vplat(10,-2380,404,560,300,{terrace:true,checkpoint:true});
+    G.deco.push({x:10,z:-2440,y0:404,w:60,h:30,d:60,c:SLATE}); G.deco.push({x:10,z:-2440,y0:434,w:44,h:24,d:44,c:'#9db4c4'});
+    G.deco.push({x:10,z:-2440,y0:458,w:30,h:18,d:30,c:'#b8ccd8'}); G.deco.push({x:10,z:-2440,y0:476,w:16,h:12,d:16,c:SNOW});   // the Frostwatch Cairn
+    G.deco.push({x:10,z:-2400,y0:620,w:700,h:8,d:22,c:'#7fd6ff'});                        // the aurora, banded across the summit sky
+    G.deco.push({x:60,z:-2440,y0:660,w:620,h:8,d:20,c:'#b06bff'});
+    G.deco.push({x:-40,z:-2360,y0:700,w:660,h:8,d:20,c:'#86e05a'});
+    // ── mobs: frostlings on the sheets, sparklings drifting the channels ──
+    for(let m=0;m<2;m++) mkMonster('frostling',(rnd()*2-1)*200,(rnd()*2-1)*140,camp);
+    mkMonster('frostling',-250+(rnd()*2-1)*160,-760,null); mkMonster('frostling',330+(rnd()*2-1)*100,-820,null);
+    for(const fp of [[-170,-360],[90,-880]]){ const fl=mkMonster('sparkling',fp[0],fp[1],null); fl.y=70; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:-160,z:60},{x:-260,z:-700},{x:330,z:-700}]);                        // frostling dens: camp edge + both sheets (the east road earns its keep)
+    scapeFetch(ctx,[{x:ter1.x,z:ter1.z,y:140},{x:ter2.x,z:ter2.z,y:280},{x:-180,z:-1880,y:280},{x:60,z:-880,y:0},{x:150,z:-2330,y:404}]);
+    scapeFind(ctx, 10,-2450,404);
+    finishScape(ctx,{sx:0,sz:180,sy:0, gx:10,gz:-2470, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:300});
   },
   /* EMBERDEEP — a lava lake dotted with obsidian islands linked by basalt causeways; rising
      columns you climb to a vent-scoured ridge. Fall = the lava. Emberfall vents erupt. */
@@ -2305,6 +2360,113 @@ const SCAPES={
   },
 };
 function STONE_C(){ return '#6b6b73'; }
+/* ================= BOSS ARENAS (Phase 17) =================
+   Every zone boss fights on a purpose-built themed SET-PIECE instead of the shared maze.
+   bossFinish = finishScape minus the auto-portal: the way opens only when the boss falls
+   (checkStageClear sees G.portalPos + G.boss.dead). Arenas stay compact — the fight is
+   the content — and each reuses its zone's hazard + palette. */
+function bossFinish(ctx,o){
+  G.vertical=true;
+  let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
+  for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
+  for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);
+  for(const cr of G.crumbles) ext(cr.x,cr.z,cr.w,cr.d);
+  if(mnX>mxX){ mnX=-300;mxX=300;mnZ=-300;mxZ=300; }
+  G.bounds={minX:mnX-90,maxX:mxX+90,minZ:mnZ-90,maxZ:mxZ+90}; G.progressEnd=mnZ;
+  G.startPos={x:o.sx,z:o.sz}; G.goalPos={x:o.gx,z:o.gz}; G.lastSafe={x:o.sx,z:o.sz,y:o.sy||0};
+  G.portalPos={x:o.gx,z:o.gz};                                  // opens on the boss's death, never before
+  const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt2=o.decoTall||200;
+  for(let k=0;k<16;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
+    G.deco.push({x:ctx.rnd()<0.5?mnX-160-ctx.rnd()*300:mxX+160+ctx.rnd()*300, z:zz, w:56+ctx.rnd()*120, h:dt2*(0.5+ctx.rnd()*0.8), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
+  hazSetup(ctx.rnd2);
+  G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
+}
+// spawn the stage's boss centered in its arena (plus escorts on miniboss stages), homed to the ring
+function arenaBoss(ctx,bx2,bz2,hw,hd){
+  const b=ctx.mkMonster(ctx.s.boss,bx2,bz2,null); b.boss=true; b.home={x:bx2,z:bz2,hw,hd};
+  if(ctx.s.type==='miniboss'){ ctx.mkMonster(ctx.pick(),bx2-100,bz2+80,null); ctx.mkMonster(ctx.pick(),bx2+100,bz2+80,null); }
+  return b;
+}
+const BOSS_ARENAS={
+  /* FROST SORCERER — the Cracked Ring: a frozen arena over the freezing deep, ringed by
+     icefall columns; the ice is slick and split by white pressure-cracks. */
+  frost(ctx){ const {rnd}=ctx; const ICE='#bfe6ff', SNOW='#e8f4ff';
+    vseg(0,-40,660,660); G.rooms.push({x:0,z:-40,w:660,d:660,monsters:[],encounter:false,cleared:true});
+    vseg(0,340,200,180);                                                             // the entry tongue of ice
+    for(let k=0;k<8;k++){ const a=k/8*6.283, rr=360; const px=Math.cos(a)*rr, pz=-40+Math.sin(a)*rr;
+      vcol(px,pz,46,46,150+((k%2)?46:0));
+      G.deco.push({x:px,z:pz,y0:150+((k%2)?46:0),w:34,h:40,c:ICE,theme:'frost'});     // icefall column crowns
+      if(k%2===0) G.deco.push({x:px*0.82,z:-40+Math.sin(a)*rr*0.82,w:26,h:70,c:ICE,theme:'frost'}); }
+    for(let k=0;k<7;k++){ const a=rnd()*6.283, rr=60+rnd()*220;                       // pressure-cracks radiating from center
+      G.deco.push({x:Math.cos(a)*rr*0.6,z:-40+Math.sin(a)*rr*0.6,y0:0,w:8,h:1.6,d:120+rnd()*130,c:SNOW}); }
+    G.deco.push({x:0,z:-40,y0:0,w:150,h:2,d:150,c:tint(ICE,'#fff',0.3)});             // the frozen heart he stands on
+    vtorch(-150,300,rnd); vtorch(150,300,rnd);
+    arenaBoss(ctx,0,-140,270,270);
+    bossFinish(ctx,{sx:0,sz:390,sy:0, gx:0,gz:-300, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:300});
+  },
+  /* EMBER COLOSSUS — the Crucible: a basalt island alone in the lava sea; its rim crumbles,
+     its vents breathe fire, and there is nowhere else to stand. */
+  ember(ctx){ const {rnd}=ctx; const BAS='#241512';
+    vseg(0,-20,620,620); G.rooms.push({x:0,z:-20,w:620,d:620,monsters:[],encounter:false,cleared:true});
+    vseg(0,360,190,160);
+    for(const q of [[-1,-1],[1,-1],[-1,1],[1,1]]) G.rooms.push({x:q[0]*190,z:-20+q[1]*190,w:150,d:150,monsters:[],encounter:false,cleared:true});   // quadrant hearths -> Emberfall vents
+    for(let k=0;k<10;k++){ const a=k/10*6.283, rr=330;                                // the crumbling rim
+      G.crumbles.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:78,d:78,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+    for(let k=0;k<6;k++){ const a=k/6*6.283+0.5, rr=395; vcol(Math.cos(a)*rr,-20+Math.sin(a)*rr,40,40,60+rnd()*70); }   // obsidian teeth around the sea
+    G.deco.push({x:0,z:-260,y0:0,w:130,h:110,c:BAS,theme:'volcano'}); G.deco.push({x:0,z:-260,y0:110,w:60,h:34,c:'#3d1a10',theme:'volcano'});   // a half-sunk idol watches the fight
+    vtorch(-130,320,rnd); vtorch(130,320,rnd);
+    arenaBoss(ctx,0,-120,250,250);
+    bossFinish(ctx,{sx:0,sz:400,sy:0, gx:0,gz:-280, decoCol:'#5a2418',decoTheme:'volcano',decoTall:260});
+  },
+  /* ABYSS KING — the Throne Ring: his island alone in the dark, ringed by torn shards
+     and slow-turning void crystal; the throne watches you cross. */
+  abyss(ctx){ const {rnd}=ctx; const OBS='#241431';
+    vseg(0,-20,680,680); G.rooms.push({x:0,z:-20,w:680,d:680,monsters:[],encounter:false,cleared:true});
+    gapStones(0,390,0,330,80,rnd,true); vseg(0,450,180,160);                          // a phasing threshold — even walking in is a step of faith
+    vplat(0,-210,60,250,170,{terrace:true});                                          // the throne dais
+    G.deco.push({x:0,z:-260,y0:60,w:110,h:96,c:OBS}); G.deco.push({x:0,z:-260,y0:156,w:66,h:40,c:'#170a2c'});   // the black throne
+    for(let k=0;k<8;k++){ const a=k/8*6.283, rr=350; const px=Math.cos(a)*rr, pz=-20+Math.sin(a)*rr;
+      vcol(px,pz,42,42,110+((k%3)?0:60));
+      G.deco.push({x:px,z:pz,w:30,h:90,c:OBS,theme:'void'}); }                        // slow-turning crystals crown the ring
+    for(let k=0;k<5;k++){ const a=rnd()*6.283, rr=430+rnd()*80;                       // torn debris drifting beyond the edge
+      G.deco.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:24+rnd()*30,h:40+rnd()*60,c:OBS,theme:'void'}); }
+    arenaBoss(ctx,0,-60,280,280);
+    bossFinish(ctx,{sx:0,sz:490,sy:0, gx:0,gz:-300, decoCol:'#2a1a44',decoTheme:'void',decoTall:280});
+  },
+  /* MARBLE COLOSSUS — the Rotunda: a domed white circle whose pillars have started to fall;
+     the standing ones are your only cover from its thrown fire. */
+  palace(ctx){ const {rnd}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a';
+    vseg(0,-20,660,660); G.rooms.push({x:0,z:-20,w:660,d:660,monsters:[],encounter:false,cleared:true});
+    vseg(0,360,200,160);
+    for(let k=0;k<10;k++){ const a=k/10*6.283, rr=300; const px=Math.cos(a)*rr, pz=-20+Math.sin(a)*rr;
+      if(k===2||k===7){ G.deco.push({x:px,z:pz,y0:0,w:44,h:26,d:150,c:tint(MARBLE,'#000',0.15)}); continue; }   // the toppled two
+      vcol(px,pz,44,44,150); G.deco.push({x:px,z:pz,y0:150,w:54,h:15,c:GOLD}); }
+    for(let k=0;k<10;k++){ const a=k/10*6.283+0.31, rr=300;                          // the broken dome ring floats where the roof was
+      if(k%4===3) continue;
+      G.deco.push({x:Math.cos(a)*rr*0.92,z:-20+Math.sin(a)*rr*0.92,y0:186,w:74,h:16,d:26,c:tint(MARBLE,'#fff',0.2)}); }
+    G.deco.push({x:0,z:-250,y0:0,w:120,h:26,c:GOLD}); G.deco.push({x:0,z:-250,y0:26,w:84,h:14,c:tint(GOLD,'#fff',0.25)});   // the sun altar
+    vtorch(-140,320,rnd); vtorch(140,320,rnd);
+    arenaBoss(ctx,0,-100,260,260);
+    bossFinish(ctx,{sx:0,sz:400,sy:0, gx:0,gz:-290, decoCol:MARBLE,decoTheme:'marble',decoTall:260});
+  },
+  /* VOID TYRANT — the Summit of Duskmoor: an open-sky crown of the castle; the edges are
+     already falling away, and the last banners burn violet against the dark. */
+  castle(ctx){ const {rnd}=ctx; const STONE='#2c2e38';
+    vseg(0,-20,700,700); G.rooms.push({x:0,z:-20,w:700,d:700,monsters:[],encounter:false,cleared:true});
+    vseg(0,380,200,180);
+    for(let k=0;k<12;k++){ const a=k/12*6.283, rr=372;                                // the summit's rim is collapsing
+      G.crumbles.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+    for(const s2 of [[-1,-1],[1,-1],[-1,1],[1,1]]){ const px=s2[0]*250, pz=-20+s2[1]*250;
+      vcol(px,pz,40,40,170);
+      G.deco.push({x:px,z:pz,y0:170,w:48,h:30,c:'#3a1420'}); G.deco.push({x:px,z:pz,y0:118,w:8,h:52,d:34,c:'#6a2040'}); }   // burnt banner pylons
+    for(let k=0;k<4;k++) G.deco.push({x:(rnd()*2-1)*220,z:-20+(rnd()*2-1)*220,w:22+rnd()*22,h:36+rnd()*50,c:STONE,theme:'apex'});   // void shards breaking through the stone
+    G.deco.push({x:0,z:-20,y0:0,w:210,h:1.6,d:210,c:'#1c1029'});                      // the dark circle where he waits
+    arenaBoss(ctx,0,-80,290,290);
+    bossFinish(ctx,{sx:0,sz:420,sy:0, gx:0,gz:-320, decoCol:STONE,decoTheme:'apex',decoTall:320});
+  }
+};
 function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
@@ -2338,6 +2500,12 @@ function loadStage(i){
     // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); return;
+  }
+  /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
+     Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
+  if((isBoss||isMini) && !G.trial && !G.side && G.area<0 && BOSS_ARENAS[curZone().id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    BOSS_ARENAS[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); return;
   }
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}

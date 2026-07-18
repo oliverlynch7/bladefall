@@ -416,3 +416,45 @@ what they do, in BLADEFALL's grim/terse voice. Wire E into the existing key hand
   - Verified in-browser: buy/equip (one-at-a-time)/sell/train/rename/label-toggle; attacker chip
     (~5 hits/10s) + healer trickle (+4/pulse); persistence round-trip + old-save load + Hitless gate
     (0 pet damage); no console errors. Live at `/3d/`.
+
+## Phase 16 — Weapon / Damage / Element / Affinity / Status Overhaul (SHIPPED v1.64.0 + v1.65.0)
+Shipped in two rollback-safe batches (structural first, then the status layer).
+
+### Batch A — families + affinities + migrations (v1.64.0)
+- [x] **Finalized weapon families** enforced in generation: Warrior=Sword/Greatsword/Battle Axe/Warhammer,
+  Ranger=Throwing Knives/Longbow/Crossbow/Javelins, Mage=Staff/Wand/Spellblade, Reaper=Scythe.
+  - **Daggers merged into Throwing Knives** (melee `dagger` arche retired; art `dagger` now = knives only).
+  - **Saber retired** (→ sword) — not an active family.
+  - **Scepters folded into Wand**: `arcaneorb`/`holyscepter` art→`wand` (unique names kept, e.g. "Demon Eye
+    Scepter"); their homing moved to `proj.seek`.
+  - **Spellblade formalized as a Mage family**: `flameblade`/`frostbrand`/`runeblade` art→`spellblade`
+    (magic melee), removed from Warrior. Renders on the sword model fallback (no new art).
+  - **Scythe stays Reaper-exclusive.**
+- [x] **Damage type (physical/magic = `sch`) now cleanly separate from affinity (`el`)** in tooltips
+  (Family · Class · Physical/Magic · affinity icon+name · status).
+- [x] **6 affinities in locked opposition pairs**: Fire↔Frost, Poison↔Arcane, Holy↔Void. Removed the old
+  Void flat-1.15 special case. **Storm retired → Arcane** (weapons + sparkling/galewisp enemies + canyon
+  caster); survives only as a migration alias (`EL_ALIAS`).
+- [x] **Save migration**: `LEGACY_ARCHE` saber→sword, dagger→knives; `LEGACY_ART` scepter/orb/rod→wand;
+  `normWeapon` re-derives art/class/damage-type + normalizes affinity — old items migrate, never deleted.
+  Verified: every legacy identifier resolves to a finalized family/affinity.
+
+### Batch B — six-status stack system + Scythe specialization (v1.65.0)
+- [x] **Unified per-enemy status meters** (float meters, integer stacks), adapting the old burn/slow:
+  Fire→**Burn** (DoT, max=Ignite burst+splash), Frost→**Chill** (−10% move/stack, max freezes normals with
+  a 3s freeze-immunity; bosses deep-slow+stagger, never full-freeze), Poison→**Venom** (DoT, ≥3 halves enemy
+  healing), Arcane→**Rune Marks** (setup, consumed by designated attacks for mark-scaled burst),
+  Holy→**Radiance** (max purifies + Exposed +25% Holy; on-kill heal mote with 1s cooldown), Void→**Corruption**
+  (max primes → Reaper/charged-scythe/void attack Ruptures for burst + heal).
+- [x] **Scythe specialization**: buildup normalized by attack speed × a 2.2 Scythe multiplier → Reaper is the
+  best stack-applier without the highest direct damage (measured scythe ~5.5 buildup/s vs sword/wand ~2.5).
+- [x] **Safeguards**: per-(enemy,status) 0.12s buildup cooldown stops persistent/rapid multi-hits from stacking
+  every frame; bosses build at half rate; no infinite heal/CC loops. Pooled phone-readable stack pips on the
+  existing HP-bar overlay; no per-frame allocation.
+- [x] Verified in-browser: family generation, migrations, opposition pairs, all six payoffs, boss no-freeze,
+  DoT ticks, statusless-enemy safety, no console errors.
+
+**Deferred (future, clearly separated):** the full 6-affinity + Physical Scythe roster (Gravehook/Cinder
+Reaper/Hoarfang/Pestilent Harvester/Runic Crescent/Dawn Reaper) is design-referenced only — not added this
+pass (system supports them; only Scythe + Void Scythe ship today). Distinct per-Scythe silhouettes would be
+a new-art task.

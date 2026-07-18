@@ -279,6 +279,18 @@
   .ico-skill-reaper-gravebind{background-image:url('icons/reaper_gravebind.png');}
   .ico-skill-reaper-shadow-step{background-image:url('icons/reaper_shadow_step.png');}
   .ico-skill-reaper-death-vortex{background-image:url('icons/reaper_death_vortex.png');}
+  .ico-skill-warrior-shield-bash{background-image:url('icons/warrior_shield_bash.png');}
+  .ico-skill-warrior-whirlwind{background-image:url('icons/warrior_whirlwind.png');}
+  .ico-skill-warrior-iron-guard{background-image:url('icons/warrior_iron_guard.png');}
+  .ico-skill-warrior-execution{background-image:url('icons/warrior_execution.png');}
+  .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
+  .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
+  .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
+  .ico-skill-ranger-rapid-fire{background-image:url('icons/ranger_rapid_fire.png');}
+  .ico-skill-mage-elemental-beam{background-image:url('icons/mage_elemental_beam.png');}
+  .ico-skill-mage-gravity-well{background-image:url('icons/mage_gravity_well.png');}
+  .ico-skill-mage-rune-barrier{background-image:url('icons/mage_rune_barrier.png');}
+  .ico-skill-mage-elemental-overload{background-image:url('icons/mage_elemental_overload.png');}
   .ico-event{width:1.7em;height:1.7em;margin-right:.28em;vertical-align:-.5em;}
   .ico-damage-physical{background-image:url('icons/damage-physical.png');}
   .ico-damage-ranged{background-image:url('icons/damage-ranged.png');}
@@ -458,7 +470,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.103.0';
+const VERSION3D='1.104.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1131,7 +1143,7 @@ const MELEE={
 const CLASSES={
   warrior:{disp:'Warrior',icon:classIcon('warrior'),family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
-          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:'🛡️',cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
+          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
       {id:'cleave',n:'Cleave',icon:skillIcon('cleave'),cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
       {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
@@ -1147,7 +1159,7 @@ const CLASSES={
       {id:'mark',n:'Hunter’s Mark',icon:skillIcon('hunters-mark'),cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
   mage:{disp:'Mage',icon:classIcon('mage'),family:['staff','wand','spellblade'],     // finalized: Staff, Wand (scepters folded in), Spellblade (magic melee)
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
-          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:'🔵',cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
+          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
     skills:[
       {id:'bolt',n:'Elemental Bolt',icon:skillIcon('mage-elemental-bolt'),cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
       {id:'nova',n:'Nova',icon:skillIcon('mage-nova'),cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
@@ -4080,7 +4092,7 @@ function useSkillLegacy(i){
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; skillbarUpdate();
 }
-const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:'⚙',r_smoke:'💨',r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
+const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
 function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i];

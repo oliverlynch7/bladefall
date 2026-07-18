@@ -627,3 +627,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Replaced all four live Mage skill emojis. Reap and Shadowstep use their exact matching art, while the current life-draining Soul Harvest uses Soul Siphon artwork because its implemented damage-and-heal behavior matches that concept.
 - [x] Bundled Soul Cleave, Wraith Form, Void Pull, Gravebind, and Death Vortex for the planned expanded Reaper kit without incorrectly assigning them to unrelated current mechanics; in particular, Death Vortex remains distinct from pulling behavior.
 - [x] Real-browser verification passed: all twelve PNGs returned HTTP 200, the seven live mappings resolved to their intended icon classes, the full contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Missing Warrior, Ranger, and Mage skill icons (SHIPPED v1.104.0)
+
+- [x] Distinguished the requested twelve-image 3:32 PM class-skill batch from the separate ten-image 3:36 PM item/UI batch, then visually confirmed the supplied Warrior → Ranger → Mage ordering.
+- [x] Removed baked checkerboards, normalized all twelve images to transparent 256×256 PNGs, and saved them under the exact requested underscore filenames.
+- [x] Wired the four mechanically matching concepts into current skills: Iron Guard artwork on Guardian Bulwark, Snare Trap on Spike Trap, Camouflage on Smoke Bomb, and Rune Barrier on Wizard Barrier.
+- [x] Bundled Shield Bash, Whirlwind, Execution, Quickshot, Rapid Fire, Elemental Beam, Gravity Well, and Elemental Overload for their planned class-kit skills without misassigning them to unrelated current abilities.
+- [x] Real-browser verification passed: all twelve assets returned HTTP 200, the four live mappings resolved correctly, the normalized contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.

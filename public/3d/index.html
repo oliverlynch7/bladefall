@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.67.0';
+const VERSION3D='1.68.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2338,25 +2338,65 @@ const SCAPES={
     scapeFind(ctx, -200,-2360,0);
     finishScape(ctx,{sx:0,sz:170,sy:0, gx:0,gz:-2600, decoCol:'#5a2418',decoTheme:'volcano',decoTall:260});
   },
-  /* THE ABYSS — shards of broken world floating in the void, joined only by PHASING stones
-     that blink out beneath you. Long, precise jumps; one wrong step is the dark. */
-  abyss(ctx){ const {rnd,mkMonster}=ctx;
-    const a1=vseg(0,0,480,400); G.rooms.push({x:0,z:0,w:480,d:400,monsters:[],encounter:false,cleared:true});
-    const a2=vseg(-60,-560,440,380); G.rooms.push({x:-60,z:-560,w:440,d:380,monsters:[],encounter:false,cleared:true});
-    const a3=vseg(80,-1120,500,420); G.rooms.push({x:80,z:-1120,w:500,d:420,monsters:[],encounter:false,cleared:true});
-    gapStones(0,-205,-60,-365,74,rnd,true);                        // phasing stones between shards
-    gapStones(-60,-755,80,-905,74,rnd,true);
-    // a floating high shard between a2 and a3 (a climb, for the fetch/find perch)
-    const hx=10, hz=-840, hy=180; climbRun(-60,-560-380/2+20, 0, hx,hz+120,hy, 62);
-    const shard=vplat(hx,hz,hy,300,240,{terrace:true,checkpoint:true});
-    vtorch(-200,0,rnd); vtorch(200,0,rnd); vtorch(hx,hz,rnd);
-    for(let m=0;m<2;m++) mkMonster('shadeling',(rnd()*2-1)*150,(rnd()*2-1)*110,a1);
-    mkMonster('shadeling',-60+(rnd()*2-1)*140,-560,a2);
-    scapeKill(ctx,[{x:-120,z:-40,room:a1},{x:-60,z:-560,room:a2}]);
-    scapeFetch(ctx,[{x:hx-90,z:hz+40,y:hy},{x:hx+90,z:hz-30,y:hy},{x:hx,z:hz-90,y:hy},{x:-60,z:-560,y:0},{x:80,z:-1120,y:0}]);
-    scapeFind(ctx, hx, hz-100, hy);
-    scapeSecret(ctx, a2.x-a2.w/2+30, a2.z, 0);
-    finishScape(ctx,{sx:0,sz:a1.d/2-50,sy:0, gx:a3.x,gz:a3.z-a3.d/2+90, decoCol:'#2a1a44',decoTheme:'void',decoTall:230});
+  /* THE ABYSS (Phase 17 deep-dive) — gravity is loosening. Shards of the broken world float
+     in the dark, joined by PHASING stones and slow-DRIFTING islands: the Last Shore -> the
+     SHATTER FIELD fork (the phasing causeway low and direct, or the drift-path high across
+     swaying islands) -> THE INVERTED RUIN (a keep fallen upward: arch, hanging tower,
+     chains) -> the ANCHOR SPIRE (the Rift Anchor burns on its crown) -> the King's Door.
+     Splinter satellites orbit the route, each one brave jump off the line. */
+  abyss(ctx){ const {rnd,mkMonster}=ctx; const OBS='#241431', VIO='#8a3aff', DK='#170a2c';
+    // ── 1) THE LAST SHORE (start): the final piece of honest ground ──
+    const shore=vseg(0,0,520,420); G.rooms.push({x:0,z:0,w:520,d:420,monsters:[],encounter:false,cleared:true});
+    vtorch(-210,140,rnd); vtorch(210,140,rnd);
+    for(let k=0;k<6;k++){ const a=k/6*6.283; G.deco.push({x:Math.cos(a)*300,z:Math.sin(a)*230,w:20+rnd()*22,h:30+rnd()*44,c:OBS,theme:'void'}); }   // the shore's torn edge, breaking into the dark
+    // ── 2) THE SHATTER FIELD fork ──
+    // LOW — the phasing causeway: direct, but the stones are only sometimes there
+    gapStones(0,-215,-140,-520,78,rnd,true);
+    const west=vseg(-200,-660,400,320); G.rooms.push({x:-200,z:-660,w:400,d:320,monsters:[],encounter:false,cleared:true});
+    // HIGH — the drift path: climb, then cross three slow-swaying islands
+    climbRun(180,-140,0, 240,-300,88, 64);
+    G.movers.push({x0:240,z:-430,w:100,d:84,h:88,amp:34,sp:0.9,ph:rnd()*6.28,x:240,px:240});
+    G.movers.push({x0:200,z:-560,w:100,d:84,h:88,amp:40,sp:1.15,ph:rnd()*6.28,x:200,px:200});
+    G.movers.push({x0:240,z:-690,w:100,d:84,h:88,amp:34,sp:1.0,ph:rnd()*6.28,x:240,px:240});
+    const land=vplat(180,-820,88,180,150,{terrace:true,checkpoint:true});
+    climbRun(180,-880,88, 60,-960,0, 64);
+    // ── 3) THE INVERTED RUIN: a keep that fell upward ──
+    const ruin=vseg(60,-1120,540,380); G.rooms.push({x:60,z:-1120,w:540,d:380,monsters:[],encounter:false,cleared:true});
+    vcol(-60,-1150,40,40,150); vcol(120,-1150,40,40,150); G.deco.push({x:30,z:-1150,y0:150,w:240,h:22,d:46,c:OBS});   // the arch still stands
+    G.deco.push({x:200,z:-1230,y0:0,w:40,h:30,d:40,c:DK}); G.deco.push({x:200,z:-1230,y0:30,w:56,h:34,d:56,c:OBS});   // the hanging tower — wider the higher it goes
+    G.deco.push({x:200,z:-1230,y0:64,w:74,h:38,d:74,c:tint(OBS,'#000',0.2)}); G.deco.push({x:200,z:-1230,y0:102,w:92,h:30,d:92,c:DK});
+    for(const ch of [[160,-1270],[240,-1190],[164,-1192],[238,-1266]]) G.deco.push({x:ch[0],z:ch[1],y0:36,w:7,h:64,d:7,c:'#3a3444'});   // chains dangling into the void
+    for(let k=0;k<4;k++) G.deco.push({x:60+(rnd()*2-1)*220,z:-1120+(rnd()*2-1)*140,w:22+rnd()*20,h:36+rnd()*46,c:OBS,theme:'void'});
+    gapStones(-160,-825,-100,-925,74,rnd,true);                                             // west shard -> ruin (phasing)
+    // ── 4) THE ANCHOR SPIRE (east): the Rift Anchor burns on its crown ──
+    gapStones(340,-1120,480,-1240,70,rnd,true);
+    const base=vseg(520,-1300,200,180);
+    climbRun(520,-1330,0, 560,-1420,150, 60);
+    vcol(560,-1480,60,60,144); const spire=vplat(560,-1480,150,150,140,{terrace:true,checkpoint:true});
+    for(let k=0;k<4;k++) G.deco.push({x:560+(k%2?38:-38),z:-1480+(k<2?38:-38),y0:20+k*32,w:8,h:30,d:8,c:'#3a3444'});   // chain-wrapped core
+    G.deco.push({x:560,z:-1500,y0:150,w:70,h:8,d:70,c:OBS}); G.deco.push({x:560,z:-1500,y0:150,w:30,h:16,d:30,c:VIO}); // the Anchor: a black ring, violet heart
+    // ── 5) THE KING'S DOOR (portal) ──
+    const door=vseg(0,-1560,560,440); G.rooms.push({x:0,z:-1560,w:560,d:440,monsters:[],encounter:false,cleared:true});
+    vcol(-110,-1680,44,44,170); vcol(110,-1680,44,44,170);
+    G.deco.push({x:0,z:-1680,y0:176,w:280,h:20,d:48,c:OBS});
+    G.deco.push({x:0,z:-1720,y0:0,w:150,h:140,d:16,c:DK}); G.deco.push({x:0,z:-1720,y0:56,w:96,h:8,d:18,c:VIO});      // the sealed black door, veined violet
+    for(let k=0;k<3;k++) G.deco.push({x:(rnd()*2-1)*200,z:-1560+(rnd()*2-1)*160,w:24,h:40+rnd()*40,c:OBS,theme:'void'});
+    vtorch(-180,-1450,rnd); vtorch(180,-1450,rnd);
+    // splinter SATELLITES — every one is a single brave jump off the route
+    const s1=vplat(-460,-560,50,110,100,{sec:true}), s2=vplat(300,-780,60,110,100,{sec:true}), s3=vplat(-380,-1480,70,110,100,{sec:true});
+    // the hidden pocket beyond the Door's west rim — the Reaper's Gate rift waits there
+    vseg(-460,-1660,140,120);
+    scapeSecret(ctx,-480,-1680,0);
+    // ── mobs: shadelings hold the shards; a void-caster keeps the ruin; sparklings drift the gaps ──
+    for(let m=0;m<2;m++) mkMonster('shadeling',(rnd()*2-1)*180,(rnd()*2-1)*120,shore);
+    mkMonster('shadeling',-200+(rnd()*2-1)*150,-660,null); mkMonster('shadeling',60+(rnd()*2-1)*180,-1120,null);
+    { const cs=mkMonster('caster',160,-1060,null); cs.sx=cs.x; cs.sz=cs.z; }
+    for(const fp of [[-70,-390],[400,-1180]]){ const fl=mkMonster('sparkling',fp[0],fp[1],null); fl.y=70; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:120,z:60},{x:-200,z:-660},{x:60,z:-1120}]);                            // shadeling dens: shore, west shard, ruin
+    scapeFetch(ctx,[{x:s1.x,z:s1.z,y:50},{x:s2.x,z:s2.z,y:60},{x:s3.x,z:s3.z,y:70},{x:520,z:-1300,y:0},{x:180,z:-820,y:88}]);
+    scapeFind(ctx, 560,-1500,150);
+    finishScape(ctx,{sx:0,sz:160,sy:0, gx:0,gz:-1660, decoCol:'#2a1a44',decoTheme:'void',decoTall:280});
   },
   /* THE SUNSPIRE PALACE — a grand white-marble compound: an entry court, a long pillared colonnade,
      hanging-garden terraces, and a raised throne dais at the far end. Bright, open, ceremonial. */

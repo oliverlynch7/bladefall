@@ -321,7 +321,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.61.0';
+const VERSION3D='1.62.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -677,7 +677,15 @@ const FXDEF={
   frostclink:{f:'ice-clinking-in-glass',v:0.20}, bigland:{f:'jump-soft-landing',v:0.40},
   train:{f:'lifting-double-weight',v:0.50}, bag:{f:'pickpocket-snatch-soft',v:0.40},
   rain:{f:'rain-with-trickle-loopable',v:0.28,loop:true}, bonesdie:{f:'rocks-cliff-face-collapse',v:0.33},
-  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.40}, lever:{f:'switch-push',v:0.45}
+  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.40}, lever:{f:'switch-push',v:0.45},
+  // ---- batch 2 (Oliver-approved, placed per his notes) ----
+  axeswing:{f:'axeswing',v:0.34}, swordswing:{f:'swordswing',v:0.30}, spearswing:{f:'spearswing',v:0.32},
+  gruntdie:{f:'gruntdie',v:0.40}, forgedone:{f:'forgedone',v:0.5}, warskill1:{f:'warskill1',v:0.42}, warcharge:{f:'warcharge',v:0.34},
+  rustyhit:{f:'rustyhit',v:0.34}, portalopen:{f:'portalopen',v:0.5}, stabkill:{f:'stabkill',v:0.4}, heavyhit:{f:'heavyhit',v:0.34},
+  arcaneskill:{f:'arcaneskill',v:0.4}, secretget:{f:'secretget',v:0.5}, wandcharge:{f:'wandcharge',v:0.36}, wandfire:{f:'wandfire',v:0.3},
+  sell:{f:'sell',v:0.45}, lootpickup:{f:'lootpickup',v:0.42}, buy:{f:'buy',v:0.4},
+  mobvoice1:{f:'mobvoice1',v:0.36}, mobvoice2:{f:'mobvoice2',v:0.36},
+  bossroar1:{f:'bossroar1',v:0.5}, bossroar2:{f:'bossroar2',v:0.5}, bossroar3:{f:'bossroar3',v:0.5}, bossdie:{f:'bossdie',v:0.5}
 };
 const FXBUF={}; let _fxLoaded=false;
 function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
@@ -839,6 +847,15 @@ const ARCHES={
 };
 const ARCHEIDS=Object.keys(ARCHES);
 const DROP_ARCHES=ARCHEIDS.filter(a=>a!=='voidscythe');   // the Void Scythe is shop-only (after the Reaper is unlocked) — never a random drop
+// Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
+function weaponSwingFx(w){ if(!w) return null;
+  if(w.arche==='axe') return 'axeswing';                     // axes
+  if(w.art==='sword'&&w.sch==='phys') return 'swordswing';   // physical swords (sword, saber)
+  if(w.arche==='javelin') return 'spearswing';               // spears / javelins
+  return null; }
+function weaponFireFx(w){ if(!w) return null;
+  if(w.cls==='ranged'&&w.sch==='mag'&&(w.art==='wand'||w.art==='scepter')) return 'wandfire';   // wands / scepters
+  return null; }
 /* per-art melee hit shape: arc = front cone, thrust = long narrow lunge, slam = radial AoE.
    reach here matches each weapon's ARCHES range; longer reach is paid for with lower DPS (tuned above). */
 const MELEE={
@@ -1260,7 +1277,7 @@ function questKill(type){
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
 function openWay(){ if(G.portal||!G.portalPos) return;
   G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
-  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); }
+  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen'); }
 function questUpdate(){
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
@@ -1747,7 +1764,7 @@ function forgeSpin(g,back){
     else { // land on the payout
       img.src=finalIcon; box.style.borderColor=nc; box.style.boxShadow='0 0 40px '+nc;
       nameEl.innerHTML=`<span style="color:${nc};font-weight:800">${ro.name}</span>`;
-      try{ SFX.god(); }catch(e){}
+      try{ SFX.god(); playFx('forgedone'); }catch(e){}
       if(!stashItem(result)){ meta.stash.push(result); persist(); }   // ensure it lands in the bag
       persist(); goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
     } };
@@ -2849,8 +2866,8 @@ function playerAttack(cdMul){
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
     return;
   }
-  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag') SFX.magic(w.el); else SFX.shoot(); }
-  else { p.atkTimer=0.26; SFX.slash();
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); const _ff=weaponFireFx(w); if(_ff) playFx(_ff); } else SFX.shoot(); }
+  else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
     if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
       p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
       p._scytheT=G.time; p.swingCombo=p.scytheCombo;
@@ -2872,6 +2889,7 @@ function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
+  else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
   switch(w.chg){
     case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
     case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
@@ -2892,7 +2910,7 @@ function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.
   SFX.slash(); if(w.el) SFX.magic(w.el); p.atkTimer=0.26; G.shake=Math.min(G.shake+5,12);
   burst(ox,oy,oz,w.blade||'#cfd6df',8); }
 // a short forward thrust (the light stab shared by javelin + point-blank knives)
-function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash();
+function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
   const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw), dmg=w.dmg*effPower(p)*(mult||1)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x, dz=e.z-p.z, along=dx*fx+dz*fz;
     if(along<-e.r||along>reach+e.r) continue; if(Math.abs(dx*fz-dz*fx)>24+e.r) continue;
@@ -2954,7 +2972,7 @@ function fireProjectile(p,w,target){
 function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
 const SKILL_FX={
   cleave(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
-    p.atkTimer=0.26; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    p.atkTimer=0.26; p.swingId++; SFX.slash(); playFx('warskill1'); G.shake=Math.min(G.shake+4,10);
     const dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);
     for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
       if(d>115+e.r) continue; if(d>e.r&&(dx*fx+dz*fz)/d<Math.cos(1.55)) continue;
@@ -3020,7 +3038,7 @@ const SKILL_FX={
       if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
     p.invuln=Math.max(p.invuln,0.35); burst(p.x,p.y+20,p.z,'#c9a6ff',14); SFX.magic('arcane'); },
   tempest(p,ok,am){ p.tempestT=4; p.tempAcc=0; p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.55*am*(ok?1:OFFCLASS_MUL);
-    SFX.magic('storm'); toast('🌩️ Arcane Tempest!'); },
+    SFX.magic('storm'); playFx('arcaneskill'); toast('🌩️ Arcane Tempest!'); },
   reap(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     p.atkTimer=0.28; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
     const dmg=(w?w.dmg:10)*effPower(p)*2.4*am*(ok?1:OFFCLASS_MUL), ls=ok?Math.max(0.25,effLifesteal(p)):effLifesteal(p);
@@ -3173,11 +3191,14 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   burst(e.x,e.y+e.h*0.5,e.z,e.color,5);
   if(el) applyElement(e,el,dmg);
   G.shake=Math.min(G.shake+(e.boss?2:3),9); SFX.hit();
+  if(src===G.p && e.hp>0){ const w=G.p.weapon;                              // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
+    if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
+    else if((e.boss||e.elite) && Math.random()<0.4) playFx('heavyhit',0.85); } // meaty connect on the big foes
   if(lifesteal>0){ const heal=Math.max(1,Math.round(dmg*lifesteal)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   if(e.hp<=0) killEnemy(e);
 }
 function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p))); meta.gold=(meta.gold||0)+n; return n; }
-function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return g; } // flat (no gold-find on sales)
+function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e){
   if(e.dead) return;
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
@@ -3204,7 +3225,7 @@ function killEnemy(e){
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss){
-    SFX.win(); document.getElementById('bosshpwrap').classList.remove('on');
+    SFX.win(); playFx('bossdie'); document.getElementById('bosshpwrap').classList.remove('on');
     meta.bossKills=(meta.bossKills||0)+1; const w=G.p.weapon;
     if(w.sch==='mag') meta.magicBossKills=(meta.magicBossKills||0)+1;
     if(w.cls==='ranged') meta.rangedBossKills=(meta.rangedBossKills||0)+1;
@@ -3220,7 +3241,16 @@ function killEnemy(e){
                                    :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
       pushLoot(e.x+(i?26:-26),e.z+16,0,item);
     }
-  } else { SFX.enemyDie(); if(e.look==='bones'||e.type==='bones'){ playFx('bonesdie'); } else if(e.type==='frostling'){ playFx('frostdie'); } checkAchievements();
+  } else {
+    // per-mob death voice (batch-2): grunt + a couple of assigned mobs, else the procedural die
+    if(e.type==='grunt') playFx('gruntdie');
+    else if(e.type==='revenant') playFx('mobvoice1');
+    else if(e.type==='charger') playFx('mobvoice2');
+    else if(e.look==='bones'||e.type==='bones'){ SFX.enemyDie(); playFx('bonesdie'); }
+    else if(e.type==='frostling'){ SFX.enemyDie(); playFx('frostdie'); }
+    else SFX.enemyDie();
+    { const w=G.p.weapon; if(w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
+    checkAchievements();
     // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
     if(e.elite || Math.random()<0.16) rollDrop(e);
     if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
@@ -3288,7 +3318,7 @@ function checkStageClear(){
   if(G.portal) return;
   if(G.portalPos && G.boss && G.boss.dead){
     G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
-    addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true);
+    addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
 function hurtPlayer(dmg,sx,sz){
@@ -3363,7 +3393,7 @@ function update(dt){
   for(let i=0;i<4;i++) if(p.skillCd[i]>0) p.skillCd[i]=Math.max(0,p.skillCd[i]-dt);
   if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
   if(p.chargeDash>0){ p.chargeDash-=dt; p.x+=p.dashX*880*dt; p.z+=p.dashZ*880*dt;
-    for(const e of G.enemies){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
+    for(const e of G.enemies){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); playFx('warcharge'); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
   if(p.tempestT>0){ p.tempestT-=dt; p.tempAcc+=dt;
     if(Math.random()<0.5){ const a2=Math.random()*6.283, rr=40+Math.random()*130; G.particles.push({x:p.x+Math.cos(a2)*rr,y:10+Math.random()*50,z:p.z+Math.sin(a2)*rr,vx:-Math.sin(a2)*120,vy:30,vz:Math.cos(a2)*120,life:0.5,color:'#c47bff',sz:2.8}); }
     if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
@@ -3592,7 +3622,7 @@ function update(dt){
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
     if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
       if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
-      else if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket);
+      else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
       pk.taken=true; } }
   G.pickups=G.pickups.filter(pk=>!pk.taken);
   // quest waystone: touch it to complete a "find" objective
@@ -3611,7 +3641,7 @@ function update(dt){
   if(G.secret && !G.secret.hidden){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
       const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
-      G.secret=null; SFX.god(); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
+      G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
       addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
       toast('🔓 '+S.icon+' '+S.name+' discovered — its portal now waits in the hub'); } }
   // trial tutorial tips, paced out
@@ -3635,7 +3665,9 @@ function updateAmbient(dt,s){
   for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*12*dt; a.y+=a.vy*dt; a.life-=dt; }
   G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
 }
-function onBossActivate(e){ SFX.boss(); document.getElementById('bossname').textContent=e.label; document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
+function onBossActivate(e){ SFX.boss();
+  playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
+  document.getElementById('bossname').textContent=e.label; document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
   if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
 function updateBossBar(e){ document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function bossShoot(e,p){
@@ -3936,7 +3968,7 @@ function endlessTick(dt){
   } else if(alive===0 && !G.portal){
     G.floorCleared=true; G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
-    toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('bigreveal'); SFX.win(); questUpdate();
+    toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('portalopen'); SFX.win(); questUpdate();
   }
 }
 function endlessDescend(){
@@ -4599,7 +4631,7 @@ function shopCompare(w,cost,back){
     <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
   document.getElementById('buyC').onclick=()=>{ if(!canWield(w)){ toast('🔒 Requires Level '+rarityReq(w.rarity)+' to wield'); return; } if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
-    SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); };
+    SFX.levelup(); playFx('buy'); persist(); toast('Equipped: '+w.name); openShop(back); };
   document.getElementById('backC').onclick=()=>openShop(back);
 }
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];

@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.66.0';
+const VERSION3D='1.67.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2272,26 +2272,71 @@ const SCAPES={
     scapeFind(ctx, 10,-2450,404);
     finishScape(ctx,{sx:0,sz:180,sy:0, gx:10,gz:-2470, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:300});
   },
-  /* EMBERDEEP — a lava lake dotted with obsidian islands linked by basalt causeways; rising
-     columns you climb to a vent-scoured ridge. Fall = the lava. Emberfall vents erupt. */
-  ember(ctx){ const {rnd,mkMonster}=ctx;
-    const i1=vseg(0,0,520,420); G.rooms.push({x:0,z:0,w:520,d:420,monsters:[],encounter:false,cleared:true});
-    const i2=vseg(30,-560,500,400); G.rooms.push({x:30,z:-560,w:500,d:400,monsters:[],encounter:false,cleared:true});
-    gapStones(0,-215,30,-360,86,rnd,false);                        // basalt causeway over the lava
-    // rising basalt columns from island 2 up to the high ridge (goal)
-    let cx2=-150, cz2=-560, cy=40; const cols=[];
-    for(let k=0;k<5;k++){ cols.push(vplat(cx2,cz2,cy,88,88,{pillar:true})); vcol(cx2,cz2,88,88,cy-6); cx2+=90; cz2-=64; cy+=48; }
-    const rx=cols[cols.length-1].x+60, rz=-1080, ryy=Math.max(cy,300);
-    climbRun(cols[cols.length-1].x,cols[cols.length-1].z, cols[cols.length-1].h, rx,rz+150,ryy, 70);
-    const ridge=vplat(rx,rz,ryy,540,420,{terrace:true,checkpoint:true}); G.rooms.push({x:rx,z:rz,w:540,d:420,y:ryy,monsters:[],encounter:false,cleared:true});
-    vtorch(-520/2+30,0,rnd); vtorch(520/2-30,0,rnd); vtorch(rx-250,rz,rnd); vtorch(rx+250,rz,rnd);
-    for(let m=0;m<2;m++) mkMonster('emberling',(rnd()*2-1)*170,(rnd()*2-1)*120,i1);
-    mkMonster('emberling',30+(rnd()*2-1)*150,-560,i2);
-    scapeKill(ctx,[{x:-140,z:-40,room:i1},{x:150,z:-560,room:i2}]);
-    scapeFind(ctx, rx, rz-150, ryy);
-    scapeFetch(ctx, cols.map(c=>({x:c.x,z:c.z,y:c.h})).concat([{x:rx,z:rz,y:ryy}]));
-    scapeSecret(ctx, i2.x-i2.w/2+40, i2.z-i2.d/2+40, 0);
-    finishScape(ctx,{sx:0,sz:i1.d/2-50,sy:0, gx:ridge.x,gz:ridge.z-ridge.d/2+90, decoCol:'#5a2418',decoTheme:'lava',decoTall:250});
+  /* EMBERDEEP (Phase 17 deep-dive) — a DESCENT into the caldera, minutes end to end:
+     the Caldera Rim (the magma-fall pours beside you; the Magma Core hides behind it) ->
+     SWITCHBACK CAUSEWAYS over the lava -> a FORK (the VENT GAUNTLET west: straight, fast,
+     and breathing fire — vs the SPIRE CLIMB east: high basalt pillar-hops, slow but safe)
+     -> the BLACK BRIDGE past the Collapsed Titan -> the ASH SANCTUM (altar find, monolith
+     ring) -> the Furnace Gate portal. All lava-side; falling is the lava. */
+  ember(ctx){ const {rnd,mkMonster}=ctx; const BAS='#241512', OBS2='#17100e', EMB='#ff7a3a';
+    // ── 1) THE CALDERA RIM (start) ──
+    const rim=vseg(0,0,680,440); G.rooms.push({x:0,z:0,w:680,d:440,monsters:[],encounter:false,cleared:true});
+    vtorch(-290,150,rnd); vtorch(290,150,rnd);
+    for(let k=0;k<6;k++) vcol(-300+k*120,196,26+rnd()*20,26+rnd()*20,50+rnd()*80);        // obsidian teeth along the rim's back
+    for(let L2=0;L2<7;L2++) G.deco.push({x:-388,z:-40,y0:L2*46,w:26,h:44,d:210,c:L2%2?tint(EMB,'#000',0.25):OBS2});   // THE MAGMA-FALL, banded fire and stone
+    G.deco.push({x:-388,z:-40,y0:322,w:40,h:16,d:230,c:BAS});
+    // the MAGMA CORE hides in a pocket BEHIND the falls (walk-in secret)
+    vseg(-410,-60,120,90); vseg(-520,-120,160,140);
+    scapeSecret(ctx,-540,-150,0);
+    // ── 2) SWITCHBACK CAUSEWAYS over the lava ──
+    const cw1=vseg(-180,-380,360,130), cw2=vseg(140,-570,400,130), cw3=vseg(-160,-760,380,130);
+    G.crumbles.push({x:-140,z:-268,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.crumbles.push({x:0,z:-475,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.crumbles.push({x:-30,z:-665,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.rooms.push({x:140,z:-570,w:400,d:130,monsters:[],encounter:false,cleared:true});
+    for(const sp of [[-370,-380],[10,-330],[330,-570],[-350,-760],[30,-810]]){ vcol(sp[0],sp[1],30+rnd()*16,30+rnd()*16,60+rnd()*70);
+      G.deco.push({x:sp[0],z:sp[1],w:26+rnd()*16,h:40+rnd()*40,c:BAS,theme:'volcano'}); }  // obsidian spires shouldering the causeways
+    // ── 3) THE FORK ──
+    const jn=vseg(-160,-950,300,150); G.rooms.push({x:-160,z:-950,w:300,d:150,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-160,z:-950,y0:0,w:40,h:56,d:40,c:OBS2}); G.deco.push({x:-160,z:-950,y0:56,w:52,h:10,d:52,c:EMB});   // the fork cairn, ember-capped
+    // WEST — THE VENT GAUNTLET: three chambers that breathe fire on the Emberfall rhythm
+    const g1=vseg(-360,-1140,230,160), g2=vseg(-360,-1330,230,160), g3=vseg(-360,-1520,230,160);
+    [[-360,-1140],[-360,-1330],[-360,-1520]].forEach(gc=>G.rooms.push({x:gc[0],z:gc[1],w:230,d:160,monsters:[],encounter:false,cleared:true}));
+    for(const gc of [[-455,-1230],[-265,-1420]]) G.deco.push({x:gc[0],z:gc[1],y0:0,w:30,h:74,d:30,c:OBS2});
+    // EAST — THE SPIRE CLIMB: basalt pillar-hops high above the vents (slow, safe)
+    const spi=[[-40,-1080,54],[40,-1190,108],[-20,-1310,162],[60,-1430,210],[-20,-1550,190],[20,-1660,120]].map(sp=>{
+      vcol(sp[0],sp[1],76,76,sp[2]-6); return vplat(sp[0],sp[1],sp[2],76,76,{pillar:true}); });
+    climbRun(20,-1660,120, -120,-1700,0, 66);
+    // ── 4) BRIDGEHEAD -> THE BLACK BRIDGE (a collapsing span; the Collapsed Titan watches) ──
+    const bh=vseg(-240,-1720,320,140);
+    gapStones(-240,-1795,-240,-2080,88,rnd,false); vseg(-240,-1940,130,110);
+    G.deco.push({x:-460,z:-1960,y0:0,w:120,h:110,d:90,c:tint(BAS,'#000',0.2)});           // the Titan: torso half-sunk in the lava
+    G.deco.push({x:-462,z:-2062,y0:24,w:64,h:56,d:60,c:BAS}); G.deco.push({x:-448,z:-2054,y0:66,w:12,h:8,d:8,c:EMB});   // head + one ember eye
+    G.deco.push({x:-350,z:-1880,y0:0,w:150,h:36,d:46,c:BAS}); G.deco.push({x:-460,z:-1960,y0:52,w:126,h:8,d:94,c:tint(EMB,'#000',0.3)});   // reaching arm + the crack of heat across the chest
+    // ── 5) THE ASH SANCTUM: the altar in its monolith ring ──
+    const sanct=vseg(-200,-2260,560,340); G.rooms.push({x:-200,z:-2260,w:560,d:340,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-200,z:-2330,y0:0,w:110,h:22,d:110,c:OBS2}); G.deco.push({x:-200,z:-2330,y0:22,w:84,h:18,d:84,c:BAS});
+    G.deco.push({x:-200,z:-2330,y0:40,w:58,h:14,d:58,c:OBS2}); G.deco.push({x:-200,z:-2330,y0:54,w:70,h:6,d:70,c:EMB});   // the Ash Altar
+    for(let k=0;k<5;k++){ const a=k/5*6.283+0.6; const mx2=-200+Math.cos(a)*200, mz2=-2260+Math.sin(a)*130;
+      vcol(mx2,mz2,34,34,90+rnd()*60); G.deco.push({x:mx2,z:mz2,w:30,h:50,c:BAS,theme:'volcano'}); }
+    vtorch(-420,-2200,rnd); vtorch(20,-2200,rnd);
+    // ── 6) THE FURNACE GATE (portal) ──
+    climbRun(-60,-2380,0, 20,-2500,110, 70);
+    vplat(0,-2580,110,300,200,{terrace:true,checkpoint:true});
+    vcol(-90,-2600,36,36,190); vcol(90,-2600,36,36,190);
+    G.deco.push({x:0,z:-2600,y0:196,w:220,h:18,d:44,c:OBS2});
+    G.deco.push({x:-90,z:-2600,y0:190,w:26,h:14,d:26,c:'#ff9a4a'}); G.deco.push({x:90,z:-2600,y0:190,w:26,h:14,d:26,c:'#ff9a4a'});   // braziers burning on the pylons
+    // ── mobs: emberlings hold the ground, a charger runs the causeway, a flame-caster keeps the altar ──
+    for(let m=0;m<2;m++) mkMonster('emberling',(rnd()*2-1)*220,(rnd()*2-1)*130,rim);
+    mkMonster('charger',-180+(rnd()*2-1)*120,-380,null);
+    mkMonster('emberling',-200+(rnd()*2-1)*180,-2260,null);
+    { const cs=mkMonster('caster',-320,-2280,null); cs.sx=cs.x; cs.sz=cs.z; }
+    { const fl=mkMonster('flyer',-240,-1900,null); fl.y=80; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:150,z:60},{x:140,z:-570},{x:-320,z:-2200}]);                         // emberling dens: rim, mid-causeway, sanctum
+    scapeFetch(ctx,[{x:40,z:-1190,y:108},{x:60,z:-1430,y:210},{x:-360,z:-1330,y:0},{x:-240,z:-1940,y:0},{x:0,z:-2560,y:110}]);   // shards demand BOTH forks + the bridge
+    scapeFind(ctx, -200,-2360,0);
+    finishScape(ctx,{sx:0,sz:170,sy:0, gx:0,gz:-2600, decoCol:'#5a2418',decoTheme:'volcano',decoTall:260});
   },
   /* THE ABYSS — shards of broken world floating in the void, joined only by PHASING stones
      that blink out beneath you. Long, precise jumps; one wrong step is the dark. */

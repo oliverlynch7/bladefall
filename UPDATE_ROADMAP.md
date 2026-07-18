@@ -604,3 +604,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Added save-safe shared `damageTypeId()`, `damageTypeIcon()`, and `damageTypeHTML()` display helpers; combat calculations and stored weapon schemas are unchanged.
 - [x] Damage presentation now consistently distinguishes magic weapons, ranged physical weapons, and melee physical weapons across bag rows, comparisons, pickup details, Gear, shop details, and mirror stats.
 - [x] Real-browser verification passed with Rusty Sword → Physical, Longbow → Ranged, and Frost Wand → Magic; inline JavaScript syntax and `git diff --check` pass.
+
+## [Codex | 2026-07-18] Soul Essence, key, and class emblems (SHIPPED v1.101.0)
+
+- [x] Mapped the six-file 3:07 PM download batch to Soul Essence, Key, Warrior, Ranger, Mage, and Reaper; removed the baked checkerboards and normalized each to a transparent 256×256 PNG.
+- [x] Replaced the HUD XP emblem with Soul Essence, added the current class emblem to the class-rank bar, and replaced Ancient Key text emoji in pickup, unlock, and rarity-unlock notifications.
+- [x] Replaced the four class emoji identities throughout shared class presentation with the new voxel emblems, covering class selection, class tabs, save summaries, rank screens, trials, and Waystation displays.
+- [x] Real-browser verification passed at 1440×900 and 390×844: all six assets returned HTTP 200, HUD icons stayed inside their labels, all four class tabs rendered without horizontal overflow, no browser errors occurred, and `git diff --check` passed.

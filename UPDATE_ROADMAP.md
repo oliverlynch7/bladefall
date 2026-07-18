@@ -642,3 +642,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Removed baked checkerboards, normalized all ten icons to transparent 256×256 PNGs, and added a shared `actionIcon()` presentation helper.
 - [x] Wired the action artwork into loot decisions, bag equip/sell/sort rows, hub bag and forge controls, forge actions, Fortune's Bag, class equip/respec, shop purchase and compare affordances, and combat auto-sell/auto-bag toggles.
 - [x] Real-browser verification passed: every PNG returned HTTP 200, all ten CSS classes and UI references resolved, the normalized contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Canonical All Stats icon panel (SHIPPED v1.106.0)
+
+- [x] Audited the newest download batch and found ten new stat images rather than eleven: the missing artwork was Magic Damage. Visually mapped the remaining files without shifting their canonical order.
+- [x] Removed baked checkerboards and normalized Max HP, Damage/Power, Attack Speed, Move Speed, Critical Chance, Lifesteal, Defense, Dodge Cooldown, Skill Cooldown Reduction, and Gold Find to transparent 256×256 PNGs.
+- [x] Reused Bladefall's existing Magic Damage emblem for the missing eleventh slot and added one shared `statIcon()` presentation helper for the full set.
+- [x] Corrected All Stats to always render all eleven canonical rows in the supplied order, including zero-value Magic Damage and Skill Cooldown Reduction rows that were previously hidden.
+- [x] Real-browser verification passed: all eleven displayed assets returned HTTP 200, every label/icon mapping resolved in canonical order, the completed panel was visually checked, no browser errors occurred, and `git diff --check` passed.

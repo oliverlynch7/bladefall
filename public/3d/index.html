@@ -302,6 +302,18 @@
   .ico-action-auto-sell-bag{background-image:url('icons/action_auto_sell_bag.png');}
   .ico-action-sort{background-image:url('icons/action_sort.png');}
   .ico-action{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
+  .ico-stat-max-hp{background-image:url('icons/stat_max_hp.png');}
+  .ico-stat-damage-power{background-image:url('icons/stat_damage_power.png');}
+  .ico-stat-magic-damage{background-image:url('icons/damage-magic.png');}
+  .ico-stat-attack-speed{background-image:url('icons/stat_attack_speed.png');}
+  .ico-stat-move-speed{background-image:url('icons/stat_move_speed.png');}
+  .ico-stat-critical-chance{background-image:url('icons/stat_critical_chance.png');}
+  .ico-stat-lifesteal{background-image:url('icons/stat_lifesteal.png');}
+  .ico-stat-defense{background-image:url('icons/stat_defense.png');}
+  .ico-stat-dodge-cooldown{background-image:url('icons/stat_dodge_cooldown.png');}
+  .ico-stat-skill-cooldown-reduction{background-image:url('icons/stat_skill_cooldown_reduction.png');}
+  .ico-stat-gold-find{background-image:url('icons/stat_gold_find.png');}
+  .ico-stat{width:1.75em;height:1.75em;margin-right:.35em;vertical-align:-.52em;}
   .gearrow .gi .ico-action{display:block;width:38px;height:38px;margin:0 auto;vertical-align:middle;}
   #controls .btn .ico-action{display:block;width:23px;height:23px;margin:0 auto 1px;vertical-align:middle;}
   .ico-event{width:1.7em;height:1.7em;margin-right:.28em;vertical-align:-.5em;}
@@ -483,7 +495,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.105.0';
+const VERSION3D='1.106.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1064,6 +1076,7 @@ function eventIcon(name){ return name?`<span class="ico ico-event ico-${name}" a
 function classIcon(id){ return eventIcon('class-'+id); }
 function skillIcon(id){ return eventIcon('skill-'+id); }
 function actionIcon(id){ return id?`<span class="ico ico-action ico-action-${id}" aria-hidden="true"></span>`:''; }
+function statIcon(id){ return id?`<span class="ico ico-stat ico-stat-${id}" aria-hidden="true"></span>`:''; }
 function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
@@ -5699,17 +5712,17 @@ function mirrorStatsHTML(){
   const pct=v=>(v>=0?'+':'')+Math.round(v*100)+'%', mul=v=>'×'+(Math.round(v*100)/100);
   const cs=classState(meta.classId);
   let s=`<div class="mssect">Stats</div>`;
-  s+=row('Max HP', Math.round(effMaxHp(p)), '#ff8a82');
-  s+=row(damageTypeIcon(p.weapon)+'Damage', pct(effPower(p)-1), '#ffce6a');
-  if(typeof effMagPower==='function' && effMagPower(p)>1.001) s+=row('<span class="ico ico-damage ico-damage-magic"></span>Magic Damage', pct(effMagPower(p)-1), '#c47bff');
-  s+=row('Attack Speed', mul(effAtkSpeed(p)), '#ffb060');
-  s+=row('Move Speed', mul(effSpeed(p)), '#7ec46a');
-  s+=row('Crit Chance', Math.round(effCrit(p)*100)+'%', '#ffd24a');
-  s+=row('Lifesteal', Math.round(effLifesteal(p)*100)+'%', '#e0607a');
-  s+=row('<span class="ico ico-shield"></span> Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
-  s+=row('Dodge Cooldown', (Math.round(effDodgeCd(p)*100)/100)+'s', '#9fe0ff');
-  s+=row('Gold Find', mul(effGoldFind(p)), '#ffd24a');
-  if(effCdr(p)>0.001) s+=row('Skill Cooldowns', '-'+Math.round(effCdr(p)*100)+'%', '#c9a6ff');
+  s+=row(statIcon('max-hp')+'Max HP', Math.round(effMaxHp(p)), '#ff8a82');
+  s+=row(statIcon('damage-power')+'Damage / Power', pct(effPower(p)-1), '#ffce6a');
+  s+=row(statIcon('magic-damage')+'Magic Damage', pct(effMagPower(p)-1), '#c47bff');
+  s+=row(statIcon('attack-speed')+'Attack Speed', mul(effAtkSpeed(p)), '#ffb060');
+  s+=row(statIcon('move-speed')+'Move Speed', mul(effSpeed(p)), '#7ec46a');
+  s+=row(statIcon('critical-chance')+'Critical Chance', Math.round(effCrit(p)*100)+'%', '#ffd24a');
+  s+=row(statIcon('lifesteal')+'Lifesteal', Math.round(effLifesteal(p)*100)+'%', '#e0607a');
+  s+=row(statIcon('defense')+'Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
+  s+=row(statIcon('dodge-cooldown')+'Dodge Cooldown', (Math.round(effDodgeCd(p)*100)/100)+'s', '#9fe0ff');
+  s+=row(statIcon('skill-cooldown-reduction')+'Skill Cooldown Reduction', effCdr(p)>0?'-'+Math.round(effCdr(p)*100)+'%':'0%', '#c9a6ff');
+  s+=row(statIcon('gold-find')+'Gold Find', mul(effGoldFind(p)), '#ffd24a');
   // loadout
   s+=`<div class="mssect">Loadout</div>`;
   const w=p.weapon; s+=`<div class="msgear"><span class="msg-l">Weapon</span><span class="msg-r" style="color:${w?RARITY[w.rarity].color:'#5a6270'}">${w?w.name:'—'}</span></div>`;

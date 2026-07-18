@@ -180,6 +180,13 @@
   .msgear .msg-b{color:var(--good);font-weight:600;font-size:11px;}
   .msctrl{display:flex;gap:8px;margin-top:10px;} .msctrl .wsbig{flex:1;}
   .mshint{text-align:center;font-size:11px;color:var(--muted);margin-top:8px;opacity:.7;}
+  .bestportrait{width:92px;height:92px;margin:4px auto 12px;border-radius:18px;border:1px solid color-mix(in srgb,var(--mob) 65%,#2b3040);background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--mob) 22%,transparent),#0b0d14 72%);position:relative;box-shadow:inset 0 0 24px rgba(0,0,0,.7),0 0 18px color-mix(in srgb,var(--mob) 18%,transparent);}
+  .bestportrait .bphead{position:absolute;left:27px;top:20px;width:38px;height:35px;background:var(--mob);clip-path:polygon(16% 0,84% 0,100% 24%,92% 100%,8% 100%,0 24%);box-shadow:0 12px 0 color-mix(in srgb,var(--mob) 68%,#000);}
+  .bestportrait .bpeye{position:absolute;top:34px;width:7px;height:5px;background:#fff6c8;box-shadow:0 0 7px #fff;}.bestportrait .bpeye.l{left:34px}.bestportrait .bpeye.r{right:34px}
+  .bestportrait.fly .bphead{top:27px;transform:rotate(45deg);}.bestportrait.fly:before,.bestportrait.fly:after{content:'';position:absolute;top:31px;width:24px;height:34px;border:2px solid var(--mob);opacity:.7}.bestportrait.fly:before{left:10px;transform:skewY(-22deg)}.bestportrait.fly:after{right:10px;transform:skewY(22deg)}
+  .bestportrait.boss .bphead{left:20px;top:15px;width:52px;height:48px}.bestportrait.boss .bpeye.l{left:29px}.bestportrait.boss .bpeye.r{right:29px}
+  .bestiaryrow .gi{width:12px}.bestiaryrow{gap:7px;padding-left:10px}.bestiaryrow .bigbtn{flex:0 0 auto;}.bestiaryrow>div:nth-child(2){min-width:0}
+  @media(max-width:480px){.bestiaryrow{gap:5px;padding:8px 7px}.bestiaryrow .spawnword{display:none}.bestiaryrow .bigbtn{padding:8px 9px!important}.bestiaryrow .gn{font-size:13px}}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
   /* align-items:flex-start + margin:auto on the card = vertically centered WHEN it fits, top-reachable + scrollable when it doesn't (fixes the top-cutoff on tall menus). */
@@ -502,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.113.0';
+const VERSION3D='1.114.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -574,7 +581,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
   meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
   meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
-  // pets (migrates old saves cleanly — no pet fields => empty menagerie)
+  // pets (migrates old saves cleanly — no pet fields => an empty Pet Yard)
   meta.petOwned=Array.isArray(mv.petOwned)?mv.petOwned.filter(id=>PETS[id]):[];
   meta.petActive=(mv.petActive&&PETS[mv.petActive]&&meta.petOwned.includes(mv.petActive))?mv.petActive:null;
   meta.petNames=mv.petNames&&typeof mv.petNames==='object'?mv.petNames:{};
@@ -5542,7 +5549,7 @@ function enterWaystation(){
      A grand central plaza opens into five themed wings: the MARKET GARDEN west (shop +
      wardrobe under an awning, under a tree), the FORGE YARD east (the Smith among racks
      and braziers), the walled SPARRING ARENA south-east (practice stays inside), the
-     MENAGERIE NOOK south-west (the Beastkeeper — and something glinting behind the
+     PET YARD south-west (the Beastkeeper — and something glinting behind the
      crates...), the MIRROR PAVILION due south, and the DARK GROTTO north-east where the
      Abyssal Descent stone waits. The gate terrace still crowns the north. */
   // ---- floors ----
@@ -5550,7 +5557,7 @@ function enterWaystation(){
   G.segments.push({x:-560,z:-90,w:240,d:220});  G.segments.push({x:-810,z:-90,w:320,d:460});   // west neck + Market Garden
   G.segments.push({x:560,z:-90,w:240,d:220});   G.segments.push({x:810,z:-90,w:320,d:460});    // east neck + Forge Yard
   G.segments.push({x:500,z:420,w:200,d:240});   G.segments.push({x:760,z:520,w:400,d:360});    // SE neck + Sparring Arena
-  G.segments.push({x:-500,z:420,w:200,d:240});  G.segments.push({x:-660,z:520,w:360,d:320});   // SW neck + Menagerie Nook
+  G.segments.push({x:-500,z:420,w:200,d:240});  G.segments.push({x:-660,z:520,w:360,d:320});   // SW neck + Pet Yard
   G.segments.push({x:0,z:390,w:240,d:140});     G.segments.push({x:0,z:540,w:300,d:220});      // S neck + Mirror Pavilion
   G.segments.push({x:560,z:-360,w:300,d:200});  G.segments.push({x:760,z:-380,w:280,d:240});   // NE neck + Dark Grotto
   [[0,-40,900,760],[-810,-90,320,460],[810,-90,320,460],[760,520,400,360],[-660,520,360,320],[0,540,300,220],[760,-380,280,240]]
@@ -5564,7 +5571,7 @@ function enterWaystation(){
   G.walls.push({x:810,z:-332,w:344,d:24,h:150},{x:810,z:152,w:344,d:24,h:150},{x:982,z:-90,w:24,d:484,h:150});      // Forge Yard shell
   G.walls.push({x:760,z:332,w:420,d:24,h:130},{x:760,z:708,w:420,d:24,h:130},{x:968,z:520,w:24,d:400,h:130});       // Arena: north/south/east...
   G.walls.push({x:652,z:395,w:24,d:150,h:130},{x:652,z:645,w:24,d:150,h:130});                                       // ...west split — the arena GATE
-  G.walls.push({x:-852,z:520,w:24,d:344,h:150},{x:-660,z:692,w:384,d:24,h:150},{x:-745,z:348,w:190,d:24,h:150});    // Menagerie shell (north gap = neck)
+  G.walls.push({x:-852,z:520,w:24,d:344,h:150},{x:-660,z:692,w:384,d:24,h:150},{x:-745,z:348,w:190,d:24,h:150});    // Pet Yard shell (north gap = neck)
   G.walls.push({x:0,z:662,w:320,d:24,h:110});                                                                        // pavilion back rail
   G.walls.push({x:740,z:-512,w:304,d:24,h:150},{x:892,z:-380,w:24,d:264,h:150});                                     // Grotto shell
   // ---- the heart: waystone pool + lanterns; stone paths radiate to every wing ----
@@ -5614,7 +5621,7 @@ function enterWaystation(){
   G.deco.push({x:760,z:520,y0:0,w:250,h:1.2,d:250,c:'#4a4030'});                     // the sand circle
   G.deco.push({x:760,z:344,y0:96,w:120,h:26,d:6,c:'#5e2a24'});                        // the drill banner over the gate wall
   G.torches.push({x:660,z:360,ph:2},{x:860,z:680,ph:5});
-  // ---- THE MENAGERIE NOOK (SW): the Beastkeeper's yard ----
+  // ---- THE PET YARD (SW): the Beastkeeper's yard ----
   for(let k=0;k<5;k++) G.deco.push({x:-660+Math.cos(k*1.26)*140,z:520+Math.sin(k*1.26)*120,y0:0,w:8,h:26,d:8,c:'#4a3a26'});   // fence posts
   G.deco.push({x:-580,z:600,y0:0,w:60,h:14,d:44,c:'#8a7434'}); G.deco.push({x:-740,z:440,y0:0,w:26,h:8,d:18,c:'#d8cdb0'});     // hay + old bones
   G.torches.push({x:-560,z:420,ph:3});
@@ -5664,7 +5671,7 @@ const NPCVOICE={
   board:{cta:'Read the postings',lines:["The dead left their work unfinished. It's all here, if you can read it.","Take what you can carry. Come back alive to be paid."]},
   chest:{cta:'Open your pack',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
   anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]},
-  beastkeeper:{cta:'The menagerie',lines:["The deep breaks most things. A few, it makes loyal.","Take one down with you. It won't win your fights — but it'll be there when the dark closes in."]}
+  beastkeeper:{cta:'Open the Pet Yard',lines:["The deep breaks most things. A few, it makes loyal.","Take one down with you. It won't win your fights — but it'll be there when the dark closes in."]}
 };
 // Phase 12: a keeper's line that reacts to YOUR progress (gold, class/rank, gates cleared, last run)
 function npcReact(n){
@@ -5805,19 +5812,74 @@ function buildMirrorPanel(){
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
   for(let i=0;i<=maxZ;i++){ const A=ZONES[i].areas[0], st=A&&STAGES[A.stage], th=st&&st.theme;
     (THEMEMOBS[th]||[]).forEach(m=>{ if(!seen[m]&&ENEMY[m]&&!ENEMY[m].boss){ seen[m]=1; out.push(m); } }); }
+  for(let i=0;i<=maxZ;i++){ const st=STAGES[ZONES[i].boss.stage], m=st&&st.boss; if(m&&ENEMY[m]&&!seen[m]){ seen[m]=1; out.push(m); } }
   return out; }
+const BESTIARY_INFO={
+  grunt:{name:'Rotbound',tell:'Closes in for simple melee strikes.',lore:'A common victim of the King’s dream, with little left beyond hunger and motion.'},
+  flyer:{name:'Dreamwing',tell:'Hovers over obstacles and attacks from above.',lore:'A small airborne scavenger twisted by nightmare-soaked air.'},
+  thornboar:{name:'Thornboar',tell:'Lowers its tusks before a heavy charge.',lore:'Once ordinary meadow stock, now plated in bark and black thorns.'},
+  sporeback:{name:'Sporeback',tell:'Bursts into a poison cloud when slain.',lore:'The forest rot learned to walk by filling dead beasts with spores.'},
+  toxling:{name:'Toxling',tell:'Its attacks build Poison.',lore:'A knot of swamp poison held together by roots and spite.'},
+  slime:{name:'Slime',tell:'Slow and durable; may split into smaller slimes.',lore:'Runoff from the deep given a hungry, wobbling shape.'},
+  charger:{name:'Ravager',tell:'Pauses, lines up, then rushes straight ahead.',lore:'A rust-red beast bred by the badlands to break shield lines.'},
+  dustjackal:{name:'Dust Jackal',tell:'A fast pounce follows its brief crouch.',lore:'Canyon pack hunters that learned to follow the wind between ruined posts.'},
+  cragspitter:{name:'Crag Spitter',tell:'Lobs slow arcing rocks from long range.',lore:'A stone-fed canyon brute that grinds cliff fragments into ammunition.'},
+  galewisp:{name:'Gale Wisp',tell:'Rises before diving sharply at its target.',lore:'The last breath of travelers who never escaped Hollow Pass.'},
+  bones:{name:'Risen Bones',tell:'Fast, fragile melee attacker.',lore:'Old watchmen pulled upright when the dream rattled their graves.'},
+  revenant:{name:'Revenant',tell:'Signals a quick forward lunge.',lore:'A fallen soldier still trying to finish an order it no longer remembers.'},
+  sentinel:{name:'Sentinel',tell:'Blocks frontal attacks; strike from the side or rear.',lore:'An empty suit of keep armor animated by a duty that outlived its wearer.'},
+  caster:{name:'Hex Caster',tell:'Keeps distance and fires focused arcane bolts.',lore:'A ruined scholar whose final spell never stopped casting.'},
+  frostshell:{name:'Frostshell',tell:'Its ice shell blocks frontal hits until cracked.',lore:'A creature sealed inside old glacial armor, preserved but never resting.'},
+  frostlobber:{name:'Frost Lobber',tell:'Throws arcing shards that build Chill.',lore:'It gathers the cold that refuses to move and hurls it at anything warm.'},
+  frostling:{name:'Frostling',tell:'Its attacks build Chill.',lore:'A splinter of Frostfell’s ancient cold moving on borrowed legs.'},
+  magmaskit:{name:'Magma Skitter',tell:'Moves quickly and leaves burning ground behind it.',lore:'A furnace parasite that carries liquid fire in a cracked stone shell.'},
+  embertotem:{name:'Ember Totem',tell:'Stays still, then releases a wide fire burst.',lore:'A buried vent taught by the nightmare to recognize living prey.'},
+  emberling:{name:'Emberling',tell:'Its attacks build Burn.',lore:'A loose coal from the mountain’s heart that refuses to cool.'},
+  blinkstalker:{name:'Blink Stalker',tell:'Marks its destination before teleporting behind you.',lore:'An Abyss predator that hunts through gaps in space instead of corridors.'},
+  voidtether:{name:'Void Tether',tell:'Links to nearby allies and makes them more dangerous.',lore:'A living knot in the King’s dream, binding lesser nightmares together.'},
+  shadeling:{name:'Shadeling',tell:'Its attacks build Corruption.',lore:'A thin scrap of the Abyss King’s shadow that learned to move alone.'},
+  sunpriest:{name:'Sun Priest',tell:'Heals nearby allies while firing radiant bolts.',lore:'A palace keeper still serving a sun that has not shone here for ages.'},
+  marblestatue:{name:'Marble Statue',tell:'A slow frontal blocker with heavy strikes.',lore:'The palace carved its guards from stone; the dream supplied obedience.'},
+  siegeknight:{name:'Siege Knight',tell:'Raises its shield before a crushing overhead slam.',lore:'A Duskmoor gate-breaker condemned to defend the gate it once destroyed.'},
+  royalarcanist:{name:'Royal Arcanist',tell:'Fires spreading volleys of arcane bolts.',lore:'The court mage kept casting after the court—and then the world—went dark.'},
+  sparkling:{name:'Arc Spark',tell:'A quick flying attacker infused with Arcane power.',lore:'Loose palace magic condensed around a restless core.'},
+  brute:{name:'The Brute',tell:'Wide, heavy swings punish standing close.',lore:'It was livestock once. The nightmare made its anger larger than its body.'},
+  archer:{name:'Hollow Marksman',tell:'Keeps range and fires a three-arrow spread.',lore:'The finest watcher of Hollow Pass still holds her post, long after death.'},
+  warden:{name:'The Fallen',tell:'A fast Bladeborn boss that pressures at close range.',lore:'A former Bladeborn who descended farther than most and returned as a prison guard.'},
+  sorcerer:{name:'Frost Sorcerer',tell:'Kites away while firing a spread of freezing orbs.',lore:'A scholar who studied Frostfell until the ancient cold began studying him.'},
+  colossus:{name:'The Colossus',tell:'Slow, massive attacks and arcing elemental shots.',lore:'A mountain-sized guardian forced upright by heat, stone, and nightmare.'},
+  king:{name:'Abyss King',tell:'Relentless close pressure backed by the power of the deep.',lore:'The sleeping source of the dream that has poisoned every layer above him.'},
+  tyrant:{name:'Abyss King, Awakened',tell:'Combines crushing attacks with a five-bolt Void spread.',lore:'The King fully awake: not the dreamer beneath the world, but the dream given a body.'}
+};
+function bestiaryName(m){ const E=ENEMY[m], B=BESTIARY_INFO[m]; return (B&&B.name)||(E.label?E.label.replace(/^THE /,'The '):m.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/^./,c=>c.toUpperCase())); }
+function bestiaryPortrait(m){ const E=ENEMY[m], cls=E.boss?'boss':(E.kind==='fly'?'fly':''); return `<div class="bestportrait ${cls}" style="--mob:${E.color||'#cfd6df'}" aria-label="${bestiaryName(m)} portrait"><span class="bphead"></span><span class="bpeye l"></span><span class="bpeye r"></span></div>`; }
+function openBestiaryEntry(m,back){
+  const E=ENEMY[m], B=BESTIARY_INFO[m]||{}, el=normEl(E.element), weak=el&&WEAK[el], ranged=!!(E.ranged||E.shot||E.kind==='caster');
+  mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Bestiary Entry</p><h2 class="ovh">${bestiaryName(m)}</h2>${bestiaryPortrait(m)}
+    <p class="ovsub" style="margin-top:0">${B.lore||'A creature shaped by the spreading nightmare beneath the world.'}</p>
+    <div class="statgrid"><div class="vsrow"><span>Health</span><b>${E.hp}</b></div><div class="vsrow"><span>Damage</span><b>${E.dmg}</b></div>
+      <div class="vsrow"><span>Speed</span><b>${E.speed}</b></div><div class="vsrow"><span>Attack</span><b>${ranged?'Ranged':'Melee'}</b></div>
+      <div class="vsrow"><span>Element</span><b style="color:${elementColor(el)||'#cfd6df'}">${el?affName(el):'None'}</b></div>
+      <div class="vsrow"><span>Weak to</span><b style="color:${elementColor(weak)||'#cfd6df'}">${weak?affName(weak):'No elemental weakness'}</b></div></div>
+    <p style="text-align:left;color:#cfd6df;font-size:13px;line-height:1.55"><b style="color:var(--amber)">Watch for:</b> ${B.tell||'Watch its movement and strike after it commits.'}</p>
+    <button class="bigbtn ghost" id="bestBack">Back to Training &amp; Bestiary</button></div>`);
+  document.getElementById('bestBack').onclick=()=>openTrainingArena(back);
+}
 function openTrainingArena(back){ mode='menu';
   const mobs=trainRoster();
-  const rows=mobs.map(m=>{ const E=ENEMY[m]; return `<div class="gearrow"><div class="gi" style="color:${E.color||'#cfd6df'}">●</div>
-    <div style="flex:1"><div class="gn" style="text-transform:capitalize">${E.label||m}</div><div class="gd">${E.kind}${E.ranged?' · ranged':''}${E.element?' · '+E.element:''}</div></div>
-    <button class="bigbtn buybtn" data-m="${m}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Spawn ×2</button></div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">Sparring Post</p><h2 class="ovh">Training Arena</h2>
-    <p class="ovsub">Stakes-free — no death here, no loot. Just practice your build.</p>
+  const rows=mobs.map(m=>{ const E=ENEMY[m]; return `<div class="gearrow bestiaryrow"><div class="gi" style="color:${E.color||'#cfd6df'}">●</div>
+    <div style="flex:1"><div class="gn">${bestiaryName(m)}</div><div class="gd">${E.boss?'boss':E.kind}${E.ranged?' · ranged':''}${E.element?' · '+affName(E.element):''}</div></div>
+    <button class="bigbtn ghost" data-info="${m}" style="width:auto;margin:0 4px 0 0;padding:8px 10px;font-size:12px">Info</button>
+    <button class="bigbtn buybtn" data-m="${m}" style="width:auto;margin:0;padding:8px 10px;font-size:12px"><span class="spawnword">Spawn </span>×${E.boss?1:2}</button></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Sparring Post</p><h2 class="ovh">Training &amp; Bestiary</h2>
+    <p class="ovsub">Study discovered foes or summon real fighters. Practice gives no death penalty, XP, gold, or loot.</p>
     <div class="achlist" style="max-height:min(44vh,300px)">${rows||'<p class="hint">Clear a zone to unlock foes to spar with.</p>'}</div>
     <button class="bigbtn ghost" id="clearBtn">Clear practice foes</button>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
-  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ const m=b.dataset.m, sp=G.trainSpawn||{x:300,z:60};
-    for(let i=0;i<2;i++){ const e=spawnEnemy(m,sp.x+(i?46:-46),sp.z); e.active=true; e.dropT=0; e.practice=true; } SFX.pickup(); toast('Practice foes summoned'); wsResume(); });
+  document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>openBestiaryEntry(b.dataset.info,back));
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ const m=b.dataset.m, sp=G.trainSpawn||{x:300,z:60}, count=ENEMY[m].boss?1:2;
+    for(let i=0;i<count;i++){ const e=spawnEnemy(m,sp.x+(count===1?0:(i?46:-46)),sp.z); e.active=true; e.dropT=0; e.practice=true; } SFX.pickup(); toast('Practice foes summoned'); wsResume(); });
   document.getElementById('clearBtn').onclick=()=>{ let n=0; for(const e of G.enemies){ if(e.practice&&!e.dead){ e.dead=true; n++; } } toast(n?'Cleared '+n:'Nothing to clear'); openTrainingArena(back); };
   document.getElementById('backBtn').onclick=back;
 }
@@ -5825,12 +5887,12 @@ function openTrainingArena(back){ mode='menu';
 function updateInteract(){
   let it=null; const p=G.p;
   if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } }
-    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Menagerie crates — the Tinkerer's test bench
+    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
-// Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Menagerie crates.
+// Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Pet Yard crates.
 const STASH_LINES=[
   '💰 +1000g — shh. The Quartermaster doesn’t audit this corner.',
   '💰 +1000g — wealth beyond ethics. You’re getting so rich and it’s not even legal.',
@@ -5845,7 +5907,7 @@ function goldStash(){
   toast(STASH_LINES[goldStash._n],'#ffd24a'); hudUpdate();
 }
 /* ---------------- THE TINKERER'S TEST BENCH (Phase 20) ----------------
-   The '???' behind the Menagerie crates: everything you need to test the whole game without
+   The '???' behind the Pet Yard crates: everything you need to test the whole game without
    grinding — free gold + XP, a vault of EVERY weapon and armor type at any rarity, unlock-all,
    grant-all-pets, kit-me-out, full heal, and more. Hub-only; all changes bank + persist. */
 let _cheatRar='legendary';
@@ -6141,7 +6203,7 @@ function openBeastkeeper(back){
       <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${P.name} <span style="opacity:.5;font-size:10px;text-transform:uppercase">${RARITY[P.rarity].name}</span></div>
         <div class="gd">${petStatLine(id)}<br><span style="opacity:.7;font-style:italic">${P.flavor}</span></div></div>
       ${btn(P.price+'g','data-buy="'+id+'"')}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">The Menagerie</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Pet Yard</h2>
     <p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · one companion at a time · they help, they never carry.</p>
     <div class="achlist" style="max-height:min(52vh,420px)">
       ${activeBlock}

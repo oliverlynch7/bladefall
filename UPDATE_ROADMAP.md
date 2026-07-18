@@ -691,3 +691,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 
 - [x] Hide Auto-sell and Auto-bag side controls while walking around the Waystation; restore both automatically in dungeon gameplay.
 - [x] Define distinct, filename-ready icon assignments for all ten hub NPCs and activities without conflating Mirror, wardrobe, training, or descent concepts.
+
+## [Codex | 2026-07-18] Pet Yard naming and Training Bestiary (SHIPPED v1.114.0)
+
+- [x] Replace the unclear “Menagerie” name with the simpler “Pet Yard” in all player-facing Waystation text and current internal labels.
+- [x] Expand the Sparring Post into Training & Bestiary: every zone-discovered regular enemy and boss has a separate Info action while spawning remains available.
+- [x] Bestiary popups show a creature portrait emblem, base health/damage/speed, attack range, element, weakness, combat tell, and short lore entry.
+- [x] Preserve stakes-free practice behavior, including no death penalty, XP, gold, or loot, and spawn bosses singly instead of in pairs.

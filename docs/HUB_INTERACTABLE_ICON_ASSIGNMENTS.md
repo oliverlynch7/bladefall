@@ -13,6 +13,6 @@ Canonical set for floating Waystation title cards, interaction prompts, and thei
 | The Mirror | Character inspection | `hub_mirror.png` | Tall gothic mirror with a blue-silver reflected humanoid silhouette. |
 | Sparring Post | Training arena | `hub_sparring_post.png` | Straw training dummy struck by a wooden practice blade. |
 | Abyssal Descent | Endless survival | `hub_abyssal_descent.png` | Broken stone stair spiraling into a violet-black abyssal portal. |
-| Beastkeeper | Companions | `hub_beastkeeper.png` | Armored paw print beside a small lantern-lit beast silhouette. |
+| Beastkeeper | Pet Yard / companions | `hub_beastkeeper.png` | Armored paw print beside a small lantern-lit beast silhouette. |
 
 Do not merge concepts: the Mirror is inspection, not wardrobe; the Drillmaster is class training, not ordinary combat; and Abyssal Descent is endless survival, not a standard zone portal.

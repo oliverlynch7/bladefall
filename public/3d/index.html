@@ -75,6 +75,7 @@
   #bInteract{width:74px;height:74px;right:calc(env(safe-area-inset-right) + 22px);bottom:calc(env(safe-area-inset-bottom) + 120px);font-size:12px;font-weight:800;background:rgba(232,163,61,.34);border-color:rgba(255,210,120,.5);}
   #bInteract.pressed{background:rgba(232,163,61,.64);}
   #interactprompt{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-100%);background:rgba(12,13,18,.88);border:1px solid var(--amber);border-radius:9px;padding:4px 10px;font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;box-shadow:0 0 14px rgba(232,163,61,.45);}
+  #petlabel{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-100%);font-size:10.5px;font-weight:800;letter-spacing:.03em;white-space:nowrap;text-shadow:0 1px 3px #000,0 0 6px #000;}
   #fadeveil{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:0;transition:opacity .17s ease;background:radial-gradient(circle at 50% 50%, #12183a 0%, #05060a 70%);}
   #fadeveil.on{opacity:1;}
   #interactprompt .k{display:inline-block;background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900;}
@@ -308,6 +309,7 @@
 <div id="toast"></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
 <div id="interactprompt" class="hide"></div>
+<div id="petlabel" class="hide"></div>
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
@@ -321,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.62.0';
+const VERSION3D='1.63.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -349,7 +351,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -363,7 +365,8 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},endlessBest:0,
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{}
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
+  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -392,12 +395,18 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
   meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
   meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
+  // pets (migrates old saves cleanly — no pet fields => empty menagerie)
+  meta.petOwned=Array.isArray(mv.petOwned)?mv.petOwned.filter(id=>PETS[id]):[];
+  meta.petActive=(mv.petActive&&PETS[mv.petActive]&&meta.petOwned.includes(mv.petActive))?mv.petActive:null;
+  meta.petNames=mv.petNames&&typeof mv.petNames==='object'?mv.petNames:{};
+  meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
+  meta.petLabel=mv.petLabel!==false;
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={};
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true;
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -794,6 +803,28 @@ const RARITY={
   legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:22}
 };
 const RORDER=['common','uncommon','rare','epic','legendary'];
+/* ---------------- PETS / COMPANIONS ----------------
+   ONE active pet at a time (owned pets stored like the bag). Pets HELP, never CARRY:
+   attackers do chip damage on a slow cadence, the healer trickles a little HP, the
+   utility pet vacuums loot. Bought/sold/trained only at the Beastkeeper in the hub. */
+const PETS={
+  emberpup:  {name:'Ember Pup',   arch:'attacker',style:'melee', rarity:'common',   price:220,  dmg:5, cd:1.8, range:240, body:'#e0794a', accent:'#ffb060', flavor:'A stray from the Emberdeep. Bites what bites you.'},
+  stonewhelp:{name:'Stone Whelp', arch:'attacker',style:'melee', rarity:'common',   price:260,  dmg:8, cd:2.3, range:210, body:'#8a8f9e', accent:'#c7ccd6', flavor:'Slow, heavy, loyal. Headbutts like a landslide.'},
+  wisp:      {name:'Pale Wisp',   arch:'attacker',style:'ranged',rarity:'uncommon', price:620,  dmg:5, cd:1.5, range:520, body:'#9fe0ff', accent:'#e6faff', flavor:"A fallen Warden's lantern-light, still on watch."},
+  mender:    {name:'Mending Sprite',arch:'healer',              rarity:'uncommon', price:760,  heal:4, cd:3.4,          body:'#7de08a', accent:'#c8ffd4', flavor:'It cannot fight. It only refuses to let you fall.'},
+  coinsprite:{name:'Coin Sprite', arch:'utility',               rarity:'rare',     price:940,  pull:220,               body:'#ffd24a', accent:'#fff2b0', flavor:'Greedy, but it shares. Drags the gold to you.'},
+  gravewraith:{name:'Grave Wraith',arch:'attacker',style:'ranged',rarity:'rare',   price:1500, dmg:11, cd:1.7, range:560, body:'#b06bff', accent:'#e0b0ff', flavor:'It hungers with you. Its bolts find the throat.'}
+};
+const PETIDS=Object.keys(PETS);
+const PET_TRAIN_MAX=5;                                   // diminishing gold sink: +5% per level, 5 levels max
+function petTrainLvl(id){ return (meta.petTrain&&meta.petTrain[id])||0; }
+function petTrainCost(id){ return Math.round(180*Math.pow(1.7,petTrainLvl(id))); }
+function petTrainMul(id){ return 1+petTrainLvl(id)*0.05; }
+function petRarityCol(id){ const P=PETS[id]; return P?RARITY[P.rarity].color:'#fff'; }
+function petDisplayName(id){ return (meta.petNames&&meta.petNames[id])||(PETS[id]&&PETS[id].name)||'Pet'; }
+function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps chip relevant with level, never a spike
+function petAtkDmg(id){ const P=PETS[id]; return Math.max(1,Math.round((P.dmg||4)*petLevelScale()*petTrainMul(id))); }
+function petHealAmt(id){ const P=PETS[id]; return Math.max(1,Math.round((P.heal||3)*petTrainMul(id))); }
 // Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
 function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
 function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
@@ -3336,12 +3367,81 @@ function hurtPlayer(dmg,sx,sz){
   if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
   if(p.hp<=0){ p.hp=0; p.dead=true; die(); }
 }
+/* ---------------- PET runtime (follow / attack / heal / vacuum + draw) ----------------
+   ONE pet lives on G.pet, spawned lazily whenever an active pet is set. No per-frame
+   allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
+   one pooled DOM node. */
+function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
+  const p=G.p, ang=p.yaw+2.5;
+  G.pet={id,x:p.x+Math.sin(ang)*58,z:p.z+Math.cos(ang)*58,y:34,bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0}; }
+function petUpdate(dt){
+  const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
+  pet.t+=dt; pet.bob=Math.sin(pet.t*4)*3;
+  const fang=p.yaw+2.5, fx=p.x+Math.sin(fang)*62, fz=p.z+Math.cos(fang)*62;   // hover just off the hero's shoulder
+  pet.x+=(fx-pet.x)*Math.min(1,dt*4); pet.z+=(fz-pet.z)*Math.min(1,dt*4);
+  pet.yaw=Math.atan2(p.x-pet.x,p.z-pet.z);
+  if(mode!=='play') return;
+  if(isHitless()) return;                                   // Hitless: the pet follows but never fights or heals (mode stays pure player skill)
+  if(P.arch==='attacker'){ pet.atkT-=dt;
+    if(pet.atkT<=0){ let bt=null,bd=(P.range||240); for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){bd=d;bt=e;} }
+      if(bt){ pet.atkT=P.cd; petAttack(pet,P,bt); } else pet.atkT=0.35; } }
+  else if(P.arch==='healer'){ pet.healT-=dt;
+    if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
+      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h; addText(p.x,p.y+70,p.z,'+'+h,'#7de08a'); burst(pet.x,pet.y,pet.z,'#7de08a',6); hudUpdate(); } } }
+  else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
+    for(const pk of G.pickups){ if(pk.questItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
+}
+function petAttack(pet,P,e){
+  const dmg=petAtkDmg(pet.id);
+  if(P.style==='ranged'){ const oy=pet.y+pet.bob, sp=560, d=Math.max(1,dXZ(pet.x,pet.z,e.x,e.z));
+    G.projectiles.push({owner:'player',x:pet.x,y:oy,z:pet.z,vx:(e.x-pet.x)/d*sp,vy:((e.y+e.h*0.5)-oy)/d*sp,vz:(e.z-pet.z)/d*sp,
+      gravity:0,size:6,color:P.accent,shape:'orb',glow:1,dmg,kb:60,pierce:0,el:null,life:1.6,hitSet:[],seek:true});   // homes so the chip reliably lands on moving foes
+    burst(pet.x,oy,pet.z,P.accent,4); }
+  else { pet.x=e.x-Math.sin(pet.yaw)*22; pet.z=e.z-Math.cos(pet.yaw)*22;    // melee dart: hop in and strike
+    hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},90,0,null); burst(e.x,e.y+e.h*0.4,e.z,P.accent,5); }
+}
+function drawPet3(pet,t){
+  const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
+  if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
+  const glow=petRarityCol(pet.id);
+  pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw);
+  bx(0,0,0, 30,30,30, glow, glow, 0.10);                    // rarity aura
+  if(pet.id==='emberpup'){ bx(0,-6,0, 20,14,26,P.body); bx(0,2,15, 15,14,12,P.body,P.accent,0.3);   // body + head
+    bx(-5,10,17,4,7,3,P.accent); bx(5,10,17,4,7,3,P.accent);                                          // ears
+    for(const[dx,dz]of[[-7,10],[7,10],[-7,-10],[7,-10]]) bx(dx,-14,dz,4,8,4,P.body);                  // legs
+    bx(0,4,20,4,4,4,'#ffe0a0','#fff',0.6); }
+  else if(pet.id==='stonewhelp'){ bx(0,-2,0, 26,22,28,P.body,P.accent,0.25); bx(0,6,14,16,16,12,P.body,P.accent,0.25);
+    for(const[dx,dz]of[[-9,11],[9,11],[-9,-11],[9,-11]]) bx(dx,-15,dz,6,8,6,P.body);
+    bx(-5,9,18,3,3,3,'#ff5a3a','#ff5a3a',0.7); bx(5,9,18,3,3,3,'#ff5a3a','#ff5a3a',0.7); }
+  else if(pet.id==='wisp'){ bx(0,6,0, 16,20,16,P.body,P.accent,0.55); bx(0,14,0,9,9,9,P.accent,'#fff',0.7);
+    for(let i=0;i<3;i++){ const a=t*2+i*2.1; bx(Math.cos(a)*10,2+Math.sin(a*1.4)*6,Math.sin(a)*10,3,3,3,P.accent,P.accent,0.6); } }
+  else if(pet.id==='mender'){ bx(0,8,0,14,18,10,P.body,P.accent,0.5); bx(0,20,0,8,8,8,P.accent,'#fff',0.6);
+    bx(0,10,7,10,3,2,'#fff','#fff',0.85); bx(0,10,7,3,10,2,'#fff','#fff',0.85);                       // healing cross
+    for(let i=0;i<2;i++){ const a=t*1.6+i*3.14; bx(Math.cos(a)*11,6+Math.sin(a)*4,Math.sin(a)*11,3,3,3,P.body,P.body,0.6); } }
+  else if(pet.id==='coinsprite'){ rotY(t*3); bx(0,10,0,20,20,4,P.body,P.accent,0.5); bx(0,10,0,11,11,5,P.accent,'#fff',0.7);
+    bx(0,10,3,4,8,1,'#a8791a'); }
+  else if(pet.id==='gravewraith'){ bx(0,8,0,16,24,12,'#241436',glow,0.5); bx(0,20,0,11,11,11,'#0f0820',glow,0.6);
+    bx(-3,21,5,2,2,2,P.accent,P.accent,0.9); bx(3,21,5,2,2,2,P.accent,P.accent,0.9);                  // eyes
+    for(let i=0;i<3;i++){ const a=t*2.2+i*2.1; bx(Math.cos(a)*9,4+Math.sin(a*1.3)*7,Math.sin(a)*9,3,3,3,P.accent,P.accent,0.55); } }
+  else { bx(0,6,0,16,16,16,P.body,P.accent,0.4); }
+  popM();
+}
+function updatePetLabel(){
+  const el=document.getElementById('petlabel'); if(!el) return;
+  const pet=(G&&G.pet), show=pet&&meta.petLabel&&mode==='play';
+  if(!show){ el.classList.add('hide'); return; }
+  const sp=project(pet.x,pet.y+34,pet.z);
+  if(!sp){ el.classList.add('hide'); return; }
+  el.classList.remove('hide'); el.style.left=(sp[0]/DPR)+'px'; el.style.top=(sp[1]/DPR)+'px';
+  el.style.color=petRarityCol(pet.id); el.textContent=petDisplayName(pet.id);
+}
 function update(dt){
   if(mode==='studio'){ studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
+  if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
@@ -4167,7 +4267,8 @@ function enterWaystation(){
     {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:320,z:110,open:()=>openForge(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:-300,z:-20,open:()=>openMirror(wsResume)},
     {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:60,open:()=>openTrainingArena(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:150,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:150,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:150,z:-40,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)}
   ];
   // training dummies by the drillmaster — hit them as hard as you like
   for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
@@ -4192,7 +4293,8 @@ const NPCVOICE={
   keeper:{cta:'Open wardrobe',lines:["Cloaks. Marks. The colors of those who fell before you.","They sharpen nothing. They only decide how the dark remembers you."]},
   board:{cta:'Read the postings',lines:["The dead left their work unfinished. It's all here, if you can read it.","Take what you can carry. Come back alive to be paid."]},
   chest:{cta:'Open your pack',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
-  anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]}
+  anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]},
+  beastkeeper:{cta:'The menagerie',lines:["The deep breaks most things. A few, it makes loyal.","Take one down with you. It won't win your fights — but it'll be there when the dark closes in."]}
 };
 // Phase 12: a keeper's line that reacts to YOUR progress (gold, class/rank, gates cleared, last run)
 function npcReact(n){
@@ -4538,6 +4640,76 @@ function openQuestBoard(back){
     <p class="ovsub">Complete a zone's main quests to open its boss room.</p>
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
+}
+/* ---------------- The Beastkeeper: buy / sell / train / equip / name your pet ----------------
+   Hub-only (it's a hub NPC), so a pet can never be swapped mid-run. */
+const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
+function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'';
+  if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
+  if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
+  return `${PET_ARCH_TAG.utility} · pulls loot within ${P.pull}${tag}`; }
+function petEquip(id){ if(!meta.petOwned.includes(id)) return; meta.petActive=id; if(G) G.pet=null; persist(); SFX.pickup(); }
+function petUnequip(){ meta.petActive=null; if(G) G.pet=null; persist(); SFX.pickup(); }
+function petBuy(id){ const P=PETS[id]; if(!P||meta.petOwned.includes(id)) return; if(meta.gold<P.price){ toast('Not enough gold'); SFX.hurt(); return; }
+  meta.gold-=P.price; meta.petOwned.push(id); if(!meta.petActive){ meta.petActive=id; if(G) G.pet=null; }
+  playFx('buy'); SFX.achieve(); persist(); toast('🐾 '+petDisplayName(id)+' joins you'); }
+function petSell(id){ const P=PETS[id]; if(!P||!meta.petOwned.includes(id)) return; const refund=Math.round(P.price*0.4);
+  meta.petOwned=meta.petOwned.filter(x=>x!==id); if(meta.petActive===id){ meta.petActive=meta.petOwned[0]||null; if(G) G.pet=null; }
+  delete meta.petNames[id]; delete meta.petTrain[id]; meta.gold+=refund; playFx('sell'); persist(); toast('Sold · +'+refund+'g'); }
+function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('Already fully trained'); return; }
+  const cost=petTrainCost(id); if(meta.gold<cost){ toast('Not enough gold'); SFX.hurt(); return; }
+  meta.gold-=cost; meta.petTrain[id]=lv+1; playFx('forgedone'); SFX.levelup(); persist(); toast('▲ '+petDisplayName(id)+' grows a little stronger'); }
+function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
+function openBeastkeeper(back){
+  mode='menu';
+  const active=meta.petActive;
+  const owned=meta.petOwned.filter(id=>PETS[id]);
+  const unowned=PETIDS.filter(id=>!meta.petOwned.includes(id));
+  const petRow=(id,inner)=>{ const P=PETS[id];
+    return `<div class="gearrow" style="--spine:${petRarityCol(id)}"><div class="gi" style="color:${petRarityCol(id)};font-size:20px">${P.arch==='healer'?'✚':P.arch==='utility'?'💰':'⚔'}</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${petDisplayName(id)}${id===active?' <span style="color:var(--good);font-size:10px">· ACTIVE</span>':''}</div>
+        <div class="gd">${petStatLine(id)}</div></div>${inner}</div>`; };
+  const btn=(label,data,extra)=>`<button class="bigbtn buybtn ${extra||''}" ${data} style="width:auto;margin:0 0 0 5px;padding:7px 10px;font-size:12px">${label}</button>`;
+  const activeBlock = active ? `<div class="mssect" style="color:var(--amber);margin:2px 0 6px">Active companion</div>`+
+      petRow(active, btn(petTrainLvl(active)>=PET_TRAIN_MAX?'MAX':'Train '+petTrainCost(active)+'g','data-train="'+active+'"')+btn('Rename','data-name="'+active+'"','ghost')+btn('Stow','data-uneq="1"','ghost'))
+    : `<p class="ovsub" style="margin:4px 0 8px">No companion follows you. Buy one below.</p>`;
+  const bench = owned.filter(id=>id!==active).map(id=>petRow(id, btn('Equip','data-eq="'+id+'"')+btn('Sell +'+Math.round(PETS[id].price*0.4)+'g','data-sell="'+id+'"','ghost'))).join('');
+  const shop = unowned.map(id=>{ const P=PETS[id], afford=meta.gold>=P.price;
+    return `<div class="gearrow" style="--spine:${petRarityCol(id)}${afford?'':';opacity:.6'}"><div class="gi" style="color:${petRarityCol(id)};font-size:20px">${P.arch==='healer'?'✚':P.arch==='utility'?'💰':'⚔'}</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${P.name} <span style="opacity:.5;font-size:10px;text-transform:uppercase">${RARITY[P.rarity].name}</span></div>
+        <div class="gd">${petStatLine(id)}<br><span style="opacity:.7;font-style:italic">${P.flavor}</span></div></div>
+      ${btn(P.price+'g','data-buy="'+id+'"')}</div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">The Menagerie</h2>
+    <p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · one companion at a time · they help, they never carry.</p>
+    <div class="achlist" style="max-height:min(52vh,420px)">
+      ${activeBlock}
+      ${bench?`<div class="mssect" style="margin:10px 0 6px">Your other companions</div>${bench}`:''}
+      ${shop?`<div class="mssect" style="margin:10px 0 6px">For sale</div>${shop}`:''}
+    </div>
+    <button class="bigbtn ghost" id="lblBtn">Name tags: ${meta.petLabel?'On':'Off'}</button>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  const reopen=()=>openBeastkeeper(back);
+  document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ petEquip(b.dataset.eq); reopen(); });
+  document.querySelectorAll('[data-sell]').forEach(b=>b.onclick=()=>{ petSell(b.dataset.sell); reopen(); });
+  document.querySelectorAll('[data-train]').forEach(b=>b.onclick=()=>{ petTrain(b.dataset.train); reopen(); });
+  document.querySelectorAll('[data-uneq]').forEach(b=>b.onclick=()=>{ petUnequip(); reopen(); });
+  document.querySelectorAll('[data-name]').forEach(b=>b.onclick=()=>petRenameScreen(b.dataset.name,back));
+  document.getElementById('lblBtn').onclick=()=>{ petToggleLabel(); reopen(); };
+  document.getElementById('backBtn').onclick=back;
+}
+function petRenameScreen(id,back){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Name your companion</h2>
+    <p class="ovsub">${PETS[id].name} — ${PETS[id].flavor}</p>
+    <input id="petNameIn" maxlength="14" value="${(petDisplayName(id)).replace(/"/g,'&quot;')}" placeholder="A name…"
+      style="width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 13px;font-size:15px;text-align:center;margin:4px 0 12px">
+    <button class="bigbtn" id="nameSave">Save</button>
+    <button class="bigbtn ghost" id="nameReset">Reset to default</button>
+    <button class="bigbtn ghost" id="nameBack">Back</button></div>`);
+  const inp=document.getElementById('petNameIn'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },50);
+  document.getElementById('nameSave').onclick=()=>{ const v=(inp.value||'').trim().slice(0,14); if(v) meta.petNames[id]=v; else delete meta.petNames[id]; persist(); SFX.pickup(); openBeastkeeper(back); };
+  document.getElementById('nameReset').onclick=()=>{ delete meta.petNames[id]; persist(); SFX.pickup(); openBeastkeeper(back); };
+  document.getElementById('nameBack').onclick=()=>openBeastkeeper(back);
 }
 function openShop(back){
   mode='menu'; playFx('shopopen');
@@ -5282,6 +5454,12 @@ function drawWaystation(t){
       bx(n.x,48,n.z+2, 34,84,3,'#12202a','#8fd0ff',0.28+0.12*Math.sin(t*1.5));                   // reflective glass
       bx(n.x,48,n.z+3.4, 10,70,1, '#bfe6ff','#bfe6ff',0.12);                                      // sheen
       continue; }
+    if(n.prop==='beast'){ drawShadow(n.x,n.z,20,0.26);
+      bx(n.x,7,n.z, 44,14,30,'#3a2f1e','#5a4a2e',0.3);                                   // low kennel base
+      bx(n.x-16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x+16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x,50,n.z, 42,6,10,'#5a4426');   // perch frame
+      bx(n.x,34,n.z-2, 10,10,3,'#c9a86a','#ffe0a0',0.5);                                 // paw sigil plaque
+      { const gc=meta.petActive?petRarityCol(meta.petActive):'#c9a86a'; bx(n.x,20,n.z+4, 8,8,8, gc, gc, 0.4+0.25*Math.sin(t*3)); }  // a resident glow, tinted to your active pet
+      continue; }
     if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
       bx(n.x,32,n.z, 50,64,16,'#140a20','#6a2fa0',0.5);                                    // dark monolith
       bx(n.x,36,n.z+9, 30,46,4,'#0a0410','#b06bff',0.35+0.3*Math.sin(t*2));                // swirling void window
@@ -5790,6 +5968,8 @@ function render(t){
       popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
+  if(G.pet) drawPet3(G.pet,t);
+  updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
   //  Its job is done properly now by the translucent LATE pass: anything between
   //  the camera and the player fades instead.)
@@ -6023,6 +6203,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
+  PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BLADEFALL — SFX Review</title>
+<style>
+  :root{
+    --bg:#0a0e18; --bg2:#0f1626; --panel:#131c30; --line:#22304a;
+    --ink:#eaf0fb; --muted:#93a4c4; --amber:#ffb04a; --amber2:#ff8f3a;
+    --use:#5fd66a; --skip:#e05a5a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  body{padding:0 0 90px}
+  a{color:var(--amber)}
+  /* header */
+  .top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0a0e18ee,#0a0e18cc);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 14px calc(10px + env(safe-area-inset-top)) 14px}
+  .title{font-weight:800;letter-spacing:.08em;font-size:15px}
+  .title b{color:var(--amber)}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  input.search{flex:1;min-width:160px;background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:9px 12px;font-size:14px}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+  .chip.on{color:#0a0e18;background:var(--amber);border-color:var(--amber);font-weight:700}
+  .prog{color:var(--muted);font-size:12px}
+  .prog b{color:var(--amber)}
+  /* list */
+  .wrap{max-width:820px;margin:0 auto;padding:8px 12px}
+  .cat{font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--amber);
+    margin:18px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .row{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;
+    background:linear-gradient(180deg,#141d31,#101728);margin-bottom:7px}
+  .row.use{border-color:#2e6b36;background:linear-gradient(180deg,#12261a,#0f1c16)}
+  .row.skip{opacity:.5}
+  .play{flex:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+    color:var(--amber);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .play.playing{background:var(--amber);color:#0a0e18}
+  .mid{flex:1;min-width:0}
+  .nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .note{margin-top:5px;width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:6px 9px;font-size:12.5px;display:none}
+  .row.use .note{display:block}
+  .verd{flex:none;display:flex;gap:6px}
+  .vb{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+    font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .vb.yes.on{background:var(--use);border-color:var(--use);color:#062}
+  .vb.no.on{background:var(--skip);border-color:var(--skip);color:#400}
+  /* copy bar */
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#0a0e18ee;backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  .foot .wrap2{max-width:820px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .copy{flex:1;background:linear-gradient(95deg,var(--amber2),var(--amber));color:#0a0e18;font-weight:800;
+    border:0;border-radius:12px;padding:13px;font-size:15px;cursor:pointer;letter-spacing:.02em}
+  .mini{color:var(--muted);font-size:12px;white-space:nowrap}
+  #status{padding:40px 16px;text-align:center;color:var(--muted)}
+  textarea#dump{position:fixed;left:-9999px;top:0}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="title">BLADEFALL <b>SFX REVIEW</b></div>
+  <div class="sub">Play each sound, mark ✓ Use or ✗ Skip, add a note for where it goes. Then hit <b>Copy my decisions</b> and paste to Claude.</div>
+  <div class="bar">
+    <input class="search" id="q" placeholder="Search sounds…">
+    <span class="prog" id="prog"></span>
+  </div>
+  <div class="bar" id="chips"></div>
+</div>
+
+<div class="wrap" id="list"><div id="status">Loading sounds…</div></div>
+
+<div class="foot"><div class="wrap2">
+  <button class="copy" id="copy">Copy my decisions</button>
+  <span class="mini" id="copymini"></span>
+</div></div>
+<textarea id="dump"></textarea>
+
+<script>
+const LS='bf_sfx_review_v1';
+let DATA=[], store={}, packFilter='all', showOnly='all', audio=new Audio();
+try{ store=JSON.parse(localStorage.getItem(LS)||'{}') }catch(e){ store={} }
+
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(store)) }catch(e){} }
+function verd(f){ return store[f]&&store[f].d || '' }
+function note(f){ return store[f]&&store[f].n || '' }
+function setVerd(f,d){ store[f]=store[f]||{}; store[f].d=(store[f].d===d?'':d); save(); render(); refreshProg(); }
+function setNote(f,n){ store[f]=store[f]||{}; store[f].n=n; save(); }
+
+let playingEl=null;
+function play(f, btn){
+  if(playingEl){ playingEl.classList.remove('playing'); }
+  if(playingEl===btn && !audio.paused){ audio.pause(); playingEl=null; return; }
+  audio.src=f; audio.play().catch(()=>{}); btn.classList.add('playing'); playingEl=btn;
+}
+audio.addEventListener('ended',()=>{ if(playingEl){playingEl.classList.remove('playing');playingEl=null;} });
+
+function refreshProg(){
+  const done=DATA.filter(s=>verd(s.file)).length;
+  const use=DATA.filter(s=>verd(s.file)==='use').length;
+  document.getElementById('prog').innerHTML=`<b>${done}</b>/${DATA.length} reviewed · <b style="color:var(--use)">${use}</b> to use`;
+  document.getElementById('copymini').textContent=`${use} chosen`;
+}
+
+function render(){
+  const q=(document.getElementById('q').value||'').toLowerCase().trim();
+  const list=document.getElementById('list'); list.innerHTML='';
+  const shown=DATA.filter(s=>{
+    if(packFilter!=='all' && s.pack!==packFilter) return false;
+    if(showOnly==='unrev' && verd(s.file)) return false;
+    if(showOnly==='use' && verd(s.file)!=='use') return false;
+    if(q && !(s.label.toLowerCase().includes(q)||s.cat.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if(!shown.length){ list.innerHTML='<div id="status">No matches.</div>'; return; }
+  let curCat=null;
+  for(const s of shown){
+    const key=s.pack+' · '+s.cat;
+    if(key!==curCat){ curCat=key; const h=document.createElement('div'); h.className='cat'; h.textContent=key; list.appendChild(h); }
+    const v=verd(s.file);
+    const row=document.createElement('div'); row.className='row'+(v?(' '+v):'');
+    row.innerHTML=`
+      <button class="play" title="Play">▶</button>
+      <div class="mid">
+        <div class="nm">${s.label.replace(/</g,'&lt;')}</div>
+        <input class="note" placeholder="Where should this go? (e.g. gold pickup, sword hit, menu click)" value="${(note(s.file)).replace(/"/g,'&quot;')}">
+      </div>
+      <div class="verd">
+        <button class="vb yes${v==='use'?' on':''}" title="Use">✓</button>
+        <button class="vb no${v==='skip'?' on':''}" title="Skip">✗</button>
+      </div>`;
+    row.querySelector('.play').onclick=(e)=>play(s.file, e.currentTarget);
+    row.querySelector('.vb.yes').onclick=()=>setVerd(s.file,'use');
+    row.querySelector('.vb.no').onclick=()=>setVerd(s.file,'skip');
+    const nt=row.querySelector('.note'); nt.oninput=()=>setNote(s.file, nt.value);
+    list.appendChild(row);
+  }
+}
+
+function buildChips(){
+  const packs=[...new Set(DATA.map(s=>s.pack))];
+  const chips=document.getElementById('chips'); chips.innerHTML='';
+  const mk=(label,val,kind)=>{ const c=document.createElement('span'); c.className='chip'; c.textContent=label; c.dataset.v=val; c.dataset.k=kind;
+    c.onclick=()=>{ if(kind==='pack'){packFilter=val;} else {showOnly=(showOnly===val?'all':val);} syncChips(); render(); }; return c; };
+  chips.appendChild(mk('All packs','all','pack'));
+  packs.forEach(p=>chips.appendChild(mk(p,p,'pack')));
+  chips.appendChild(mk('Unreviewed only','unrev','only'));
+  chips.appendChild(mk('★ Chosen','use','only'));
+  syncChips();
+}
+function syncChips(){
+  document.querySelectorAll('.chip').forEach(c=>{
+    const on = c.dataset.k==='pack' ? c.dataset.v===packFilter : c.dataset.v===showOnly;
+    c.classList.toggle('on', on);
+  });
+}
+
+document.getElementById('q').addEventListener('input', render);
+document.getElementById('copy').addEventListener('click', ()=>{
+  const use=DATA.filter(s=>verd(s.file)==='use');
+  const skip=DATA.filter(s=>verd(s.file)==='skip').length;
+  let t=`BLADEFALL SFX picks — ${use.length} to USE, ${skip} skipped\n\n✓ USE:\n`;
+  use.forEach(s=>{ t+=`- [${s.pack}] ${s.label}${note(s.file)?('  →  '+note(s.file)):''}\n`; });
+  if(!use.length) t+='(none marked yet)\n';
+  const ta=document.getElementById('dump'); ta.value=t;
+  let ok=false;
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(()=>{ flash('Copied! Paste it to Claude.'); }).catch(()=>{ ta.style.left='0';ta.style.top='0';ta.select();document.execCommand('copy');ta.style.left='-9999px';flash('Copied! Paste it to Claude.'); }); }
+  else { ta.style.left='0';ta.select();document.execCommand('copy');ta.style.left='-9999px';flash('Copied!'); }
+});
+function flash(m){ const el=document.getElementById('copymini'); const old=el.textContent; el.textContent=m; setTimeout(()=>{refreshProg()},2200); }
+
+fetch('manifest.json').then(r=>r.json()).then(d=>{
+  DATA=d; buildChips(); render(); refreshProg();
+}).catch(e=>{ document.getElementById('list').innerHTML='<div id="status">Could not load manifest.json — is the audio prep finished?</div>'; });
+</script>
+</body>
+</html>

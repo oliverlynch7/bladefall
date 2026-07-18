@@ -214,6 +214,18 @@
   .ico-shield{background-image:url('icons/shield.png');}
   .ico-anvil{background-image:url('icons/anvil.png');}
   .ico-portal{background-image:url('icons/portal.png');}
+  .ico-resume{background-image:url('icons/resume.png');}
+  .ico-pause{background-image:url('icons/pause.png');}
+  .ico-settings{background-image:url('icons/settings.png');}
+  .ico-sound-on{background-image:url('icons/sound-on.png');}
+  .ico-sound-off{background-image:url('icons/sound-off.png');}
+  .ico-music{background-image:url('icons/music.png');}
+  .ico-fullscreen{background-image:url('icons/fullscreen.png');}
+  .ico-back{background-image:url('icons/back.png');}
+  .ico-title-leave{background-image:url('icons/title-leave.png');}
+  .ico-character-sheet{background-image:url('icons/character-sheet.png');}
+  .ico-menu{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
+  #pausebtn .ico{width:26px;height:26px;}
   .ico-lg{width:1.5em;height:1.5em;vertical-align:-0.4em;}
   /* ===== TITLE SCREEN — full-bleed BLADEFALL key art, drifting embers, molten CTA ===== */
   #titlebg{position:fixed;inset:0;z-index:19;display:none;overflow:hidden;background:#05060a;}
@@ -341,7 +353,7 @@
 <div id="bosshpwrap"><div id="bossname"><span class="ico ico-skull" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
-<button id="pausebtn" class="hide">II</button>
+<button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
   <div id="lookzone"></div>
@@ -375,7 +387,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.94.0';
+const VERSION3D='1.95.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -685,15 +697,15 @@ function audioSettingsHTML(){
   const mv=meta.musicOn===false?0:Math.round((meta.musicVol!=null?meta.musicVol:1)*100);
   const sv=meta.soundOn===false?0:Math.round((meta.sfxVol!=null?meta.sfxVol:1)*100);
   return `<div class="sect">Audio</div>
-    <div class="setrow"><label><span>Music</span><b id="musVal">${mv}%</b></label>
+    <div class="setrow"><label><span><span class="ico ico-menu ico-music"></span>Music</span><b id="musVal">${mv}%</b></label>
       <input id="musSlider" type="range" min="0" max="100" step="5" value="${mv}"></div>
-    <div class="setrow"><label><span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
+    <div class="setrow"><label><span><span id="sfxIcon" class="ico ico-menu ico-sound-${sv?'on':'off'}"></span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
       <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>`;
 }
 function bindAudioSettings(){
   const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
   if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
-  if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'); if(v) v.textContent=ss.value+'%'; SFX.pickup(); });   // hear the new level as you drag
+  if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'), i=document.getElementById('sfxIcon'); if(v) v.textContent=ss.value+'%'; if(i){ i.classList.toggle('ico-sound-on',+ss.value>0); i.classList.toggle('ico-sound-off',+ss.value===0); } SFX.pickup(); });   // hear the new level as you drag
 }
 function musicRefresh(){                              // called when the toggle flips
   if(!musicOK()){ for(const k in musEls){ const e=musEls[k]; if(e._f) clearInterval(e._f); try{ e.pause(); e.currentTime=0; }catch(x){} e.volume=0; } musCur=null; musCurKey=null; return; }
@@ -5200,9 +5212,14 @@ function showOverlayHTML(html){
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
   const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
-  ovcard.innerHTML=html; showOverlay(true); fixSliders();
+  ovcard.innerHTML=html; decorateMenuIcons(); showOverlay(true); fixSliders();
   const na=ovcard.querySelector('.achlist'); if(na&&psc) na.scrollTop=psc;
   if(pov) overlay.scrollTop=pov;
+}
+function decorateMenuIcons(){
+  const icons={backBtn:'back',backC:'back',descBack:'back',npcLeave:'back',nameBack:'back',cBack:'back',msBack:'back',delNo:'back',wsBack:'back',
+    resBtn:'resume',optBtn:'settings',fsBtn:'fullscreen',gearBtn:'character-sheet',slotsBtn:'character-sheet',titleBtnP:'title-leave',qmenu:'title-leave',to2dBtn:'back'};
+  for(const [id,name] of Object.entries(icons)){ const b=document.getElementById(id); if(b&&!b.querySelector('.ico-menu')) b.insertAdjacentHTML('afterbegin',`<span class="ico ico-menu ico-${name}" aria-hidden="true"></span>`); }
 }
 /* body has touch-action:none (the joystick needs it) — which silently kills native
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
@@ -5251,9 +5268,9 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
     <button class="bigbtn tplay" id="playBtn">⚔ ENTER THE ABYSS</button>
     <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important"><span class="ico ico-portal"></span> Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
     <div class="trow">
-      <button class="bigbtn ghost" id="slotsBtn">🗡 Characters</button>
+      <button class="bigbtn ghost" id="slotsBtn">Characters</button>
       <button class="bigbtn ghost" id="skinBtn">✦ Skins</button>
-      <button class="bigbtn ghost" id="optBtn">⚙ More</button>
+      <button class="bigbtn ghost" id="optBtn">More</button>
     </div>
     <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
     </div>
@@ -5277,7 +5294,7 @@ function openTitleOptions(){
     <button class="bigbtn ghost" id="achBtn">🏆 Achievements</button>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
-    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">↩ Classic 2D BLADEFALL</button>
+    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">Classic 2D BLADEFALL</button>
     <button class="bigbtn ghost" id="backBtn" style="margin-top:12px">Back</button></div>`);
   document.getElementById('achBtn').onclick=()=>openAchievements(openTitleOptions);
   bindAudioSettings();
@@ -6194,11 +6211,11 @@ function openPause(){
   mode='pause';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
-    <button class="bigbtn" id="resBtn">▶ Resume</button>
+    <button class="bigbtn" id="resBtn">Resume</button>
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
     <div class="pgrid">
-      <button class="bigbtn ghost" id="gearBtn">🛡 Gear</button>
+      <button class="bigbtn ghost" id="gearBtn">Gear</button>
       <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons</button>
       <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
       <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
@@ -6209,7 +6226,7 @@ function openPause(){
     <div class="sect">Settings</div>
     <div class="pgrid">
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
-      <button class="bigbtn ghost" id="fsBtn">⛶ Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -6219,8 +6236,8 @@ function openPause(){
     ${audioSettingsHTML()}
     <div class="sect">Leave</div>
     <div class="pgrid">
-      <button class="bigbtn ghost" id="qmenu">🚪 Quit to Hub</button>
-      <button class="bigbtn ghost" id="titleBtnP">🏳 Title Screen</button>
+      <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
+      <button class="bigbtn ghost" id="titleBtnP">Title Screen</button>
     </div></div>`);
   { const _fs=document.getElementById('fsBtn'); if(_fs) _fs.onclick=()=>{ toggleFullscreen(); setTimeout(openPause,120); }; }
   document.getElementById('titleBtnP').onclick=()=>{ persist(); titleScreen(); };

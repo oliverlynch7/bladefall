@@ -562,3 +562,10 @@ One session from `docs/MASTER_UPDATE_2026-07-18.md`, shipped batch by batch (eac
 - [x] **Batch 6 — v1.86.0 — small fixes:** Endless stage banner shows "FLOOR n" instead of the fake "ZONE 12/8"; corpse culling (dead non-boss enemies are spliced each frame so they can't pile up over a long Descent); death-screen button label is contextual ("Choose your class" when a class-less death routes to class select, else "Return to Hub").
 
 Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already have distinct signatures (slam/cleave/aimed volleys), so no lighter-version pass was needed. A full human-input traversal of the Treasure Sprint tower wasn't auto-verified (a naive autopilot can't ride the vertical mover) — solvability is proven geometrically instead.
+
+## [Codex | 2026-07-18] Menu navigation icon handoff (SHIPPED v1.95.0)
+
+- [x] Continued from Claude's clean v1.94.0 checkpoint after its usage cutoff; no partial game-file edit or generated asset needed reconciliation.
+- [x] Sliced the supplied 10-icon voxel sheet into transparent, caption-free 256px assets: Resume, Pause, Settings, Sound On/Off, Music, Fullscreen, Back, Title/Leave, and Character Sheet.
+- [x] Wired the icons into the title menu, HUD pause control, pause menu, audio settings, character entry, fullscreen, leave actions, and recurring Back controls while retaining clear text labels and existing behavior.
+- [x] Sound Effects switches between the on/off artwork at 0%; browser-tested at 1920px desktop and 390px mobile with no clipping or lost hit targets; inline JavaScript syntax and `git diff --check` pass.

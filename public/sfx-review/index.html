@@ -44,7 +44,9 @@
   .note{margin-top:5px;width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);
     border-radius:8px;padding:6px 9px;font-size:12.5px;display:none}
   .row.use .note{display:block}
-  .verd{flex:none;display:flex;gap:6px}
+  .forctx{margin-top:3px;font-size:12px;color:var(--amber)}
+  .forctx b{color:#ffd79a}
+  .verd{flex:none;display:flex;gap:6px;margin-right:4px}
   .vb{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
     font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .vb.yes.on{background:var(--use);border-color:var(--use);color:#062}
@@ -124,13 +126,14 @@ function render(){
     const row=document.createElement('div'); row.className='row'+(v?(' '+v):'');
     row.innerHTML=`
       <button class="play" title="Play">▶</button>
-      <div class="mid">
-        <div class="nm">${s.label.replace(/</g,'&lt;')}</div>
-        <input class="note" placeholder="Where should this go? (e.g. gold pickup, sword hit, menu click)" value="${(note(s.file)).replace(/"/g,'&quot;')}">
-      </div>
       <div class="verd">
         <button class="vb yes${v==='use'?' on':''}" title="Use">✓</button>
         <button class="vb no${v==='skip'?' on':''}" title="Skip">✗</button>
+      </div>
+      <div class="mid">
+        <div class="nm">${s.label.replace(/</g,'&lt;')}</div>
+        ${s.for?`<div class="forctx">→ proposed for: <b>${s.for.replace(/</g,'&lt;')}</b></div>`:''}
+        <input class="note" placeholder="Override / add a note (optional)" value="${(note(s.file)).replace(/"/g,'&quot;')}">
       </div>`;
     row.querySelector('.play').onclick=(e)=>play(s.file, e.currentTarget);
     row.querySelector('.vb.yes').onclick=()=>setVerd(s.file,'use');
@@ -163,7 +166,7 @@ document.getElementById('copy').addEventListener('click', ()=>{
   const use=DATA.filter(s=>verd(s.file)==='use');
   const skip=DATA.filter(s=>verd(s.file)==='skip').length;
   let t=`BLADEFALL SFX picks — ${use.length} to USE, ${skip} skipped\n\n✓ USE:\n`;
-  use.forEach(s=>{ t+=`- [${s.pack}] ${s.label}${note(s.file)?('  →  '+note(s.file)):''}\n`; });
+  use.forEach(s=>{ t+=`- [${s.file}] ${s.label}${s.for?('  ·  for: '+s.for):''}${note(s.file)?('  →  '+note(s.file)):''}\n`; });
   if(!use.length) t+='(none marked yet)\n';
   const ta=document.getElementById('dump'); ta.value=t;
   let ok=false;

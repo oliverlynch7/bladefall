@@ -375,7 +375,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.93.0';
+const VERSION3D='1.94.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1046,6 +1046,36 @@ const CLASSES={
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
+/* ============================================================================
+   CLASS SYSTEM v2 (finalized) — rank 1-10 choice progression.
+   Rank 1 = innate trait only. Ranks 2/4/6/8 = pick 1-of-2 SKILLS (slots 0-3).
+   Ranks 3/5/7/9 = pick 1-of-2 PASSIVES. Rank 10 = fixed capstone.
+   Classes present in CLASS2 use this engine; the rest fall back to the legacy
+   subclass kit until they're converted (then the legacy path is removed).
+   ============================================================================ */
+const CLASS2={
+  ranger:{ disp:'Ranger', icon:'🏹',
+    innate:{name:'Clear Aim', d:'After 3s without taking direct damage: +10% damage and +10% ability range. A hit disables it until you avoid damage for 3s again.'},
+    cap:{name:'Perfect Hunt', d:'Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s.'},
+    r2:{kind:'skill',slot:0, a:{id:'r_volley',n:'Volley',cd:5,role:'Group Damage',fx:'r_volley',d:'Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.'},
+                             b:{id:'r_pierce',n:'Piercing Shot',cd:5,role:'Boss Damage',fx:'r_pierce',d:'One shot through a line — 2.2x first (−10% its armor), 1.5x rest.'}},
+    r3:{kind:'passive', a:{id:'r_longshot',n:'Longshot',role:'Range',d:'+8% damage to enemies 7m+ away.'},
+                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Close',d:'+6% damage within 4m; +25% interrupt resistance up close.'}},
+    r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim.'},
+                             b:{id:'r_shadow',n:'Shadowstrike',cd:9,role:'Movement',fx:'r_shadow',d:'Dash through a target (2.0x) and appear behind it; tap again within 1s to return.'}},
+    r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:'After Tumble/Shadowstrike: −15% damage taken & −30% slows for 1.5s.'},
+                        b:{id:'r_ambush',n:'Ambusher',role:'Damage',d:'After Tumble/Shadowstrike: next click within 3s +20% (once per 6s).'}},
+    r6:{kind:'skill',slot:2, a:{id:'r_spike',n:'Spike Trap',cd:10,role:'Control',fx:'r_spike',d:'A 4m spike field for 5s: −35% slow, 0.25x/s (max 1.25x). Element once on entry.'},
+                             b:{id:'r_smoke',n:'Smoke Bomb',cd:11,role:'Support',fx:'r_smoke',d:'Smoke cloud: breaks targeting, −30% enemy accuracy, +20% your move speed.'}},
+    r7:{kind:'passive', a:{id:'r_patient',n:'Patient Hunter',role:'Damage',d:'Clear Aim 10%→14% damage, but needs 3.5s without a hit.'},
+                        b:{id:'r_quick',n:'Quickdraw',role:'Uptime',d:'Clear Aim activates after 2s instead of 3s.'}},
+    r8:{kind:'skill',slot:3, a:{id:'r_mark',n:"Hunter's Mark",cd:12,role:'Boss Damage',fx:'r_mark',d:'Mark one enemy: you deal +18% and +10% crit to it for 8s.'},
+                             b:{id:'r_deathmark',n:'Death Mark',cd:14,role:'Farming',fx:'r_deathmark',d:'Mark up to 5 enemies — they explode for 1.8x on death.'}},
+    r9:{kind:'passive', a:{id:'r_elem',n:'Elemental Archer',role:'Damage',d:'Your elemental reactions deal +10% and control lasts +10% longer.'},
+                        b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
+  }
+};
+const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
 const TRIALS={
@@ -1062,7 +1092,9 @@ const RANK_XP=r=>Math.round(60*Math.pow(r,1.7));          // class XP needed to 
 const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
 let queueSubclass=false;
 function classState(id){ const cs=(meta.classes[id]=meta.classes[id]||{xp:0,rank:1,sub:null});
-  if(!cs.rank) cs.rank=1; return cs; }
+  if(!cs.rank) cs.rank=1;
+  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // v2 finalized model: full reset once (legacy subclass discarded)
+  return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
 function classFamilyOk(w){ return !w || curClass().family.includes(w.art); }
 function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
@@ -1079,7 +1111,10 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
     const sk=cs.sub?curSkills(meta.classId).find(s=>s&&s.rank===cs.rank):null;
     toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
-  if(up){ SFX.classup(); if(cs.rank>=2&&!cs.sub) queueSubclass=true; skillbarUpdate(); }   // fork at rank 2, when skill 2 would unlock
+  if(up){ SFX.classup();
+    if(c2def()){ const nx=c2NextChoice(); if(nx) queueChoiceRank=nx; }   // v2: queue the next unmade rank choice
+    else if(cs.rank>=2&&!cs.sub) queueSubclass=true;                     // legacy fork at rank 2
+    skillbarUpdate(); }
   if(G&&mode==='play') hudUpdate();
   persist(); }
 const LEGACY_ART={orb:'wand',rod:'wand',scepter:'wand',spear:'sword'};   // retired arts fold into a surviving family art
@@ -1740,6 +1775,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(cm.sub==='berserker') v*=cm.cap?1.2:1.12;
   if(cm.sub==='sniper'&&p.weapon&&p.weapon.cls==='ranged') v*=cm.cap?1.25:1.15;
   if(p.berserkT>0) v*=1.35;
+  if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
@@ -2854,7 +2890,7 @@ function loadStage(i){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.beam=null; G.collapse=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.slowmo=0; G.interact=null;
@@ -3842,7 +3878,70 @@ const SKILL_FX={
   reapingstorm(p,ok,am){ p.stormT=4.5; p.stormAcc=0; p._stormDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.7*am*(ok?1:OFFCLASS_MUL);
     SFX.growl(1); toast('🌀 REAPING STORM'); }
 };
+/* ===== CLASS v2 ENGINE — progression, choices, innate traits, skill dispatch ===== */
+let queueChoiceRank=0;
+function c2def(id){ return CLASS2[id||meta.classId]; }
+function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
+function c2Passive(pid){ const ch=c2ch(); for(const r of [3,5,7,9]) if(ch[r]===pid) return true; return false; }
+function c2SkillOfSlot(slot){ const def=c2def(); if(!def) return null; const rank=[2,4,6,8][slot], R=def['r'+rank]; if(!R) return null;
+  const pick=c2ch()[rank]; if(pick==null) return null; return R.a.id===pick?R.a:(R.b.id===pick?R.b:null); }
+function c2CurSkills(){ return [0,1,2,3].map(c2SkillOfSlot); }
+function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classState(meta.classId), ch=c2ch();
+  for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
+function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
+  mode='menu'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill';
+  const card=o=>`<button class="bigbtn ghost c2opt" data-pick="${o.id}" style="text-align:left;padding:13px 16px">
+    <b style="font-size:16px">${o.n}</b> <span style="float:right;color:var(--amber);font-size:11px;letter-spacing:.06em">${(o.role||'').toUpperCase()}</span><br>
+    <span class="hint" style="display:block;margin-top:3px">${isSk?('<b style="color:#9fe0ff">CD '+o.cd+'s</b> · '):''}${o.d}</span></button>`;
+  showOverlayHTML(`<div class="card"><p class="ovkicker">${def.disp} · Rank ${rank}</p><h2 class="ovh">Choose a ${isSk?'Skill':'Passive'}</h2>
+    <p class="ovsub">${isSk?'Goes on key '+(([2,4,6,8].indexOf(rank))+1)+'.':'A permanent passive.'} Locks into your build — respec at the Drillmaster.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">${card(R.a)}${card(R.b)}</div></div>`);
+  document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
+    c2ch()[rank]=b.dataset.pick; persist(); SFX.classup();
+    const nx=c2NextChoice(); if(nx) openClassChoice(nx); else { skillbarUpdate(); resumePlay(); } });
+}
+// Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
+function class2Innate(p,dt){
+  if(meta.classId!=='ranger'||!c2def('ranger')){ p.clearAim=false; return; }
+  if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
+  const need=c2Passive('r_patient')?3.5:(c2Passive('r_quick')?2.0:3.0);
+  p._noHitT=(p._noHitT||0)+dt;
+  if(!p.clearAim && p._noHitT>=need){ p.clearAim=true; if(!p._caAnn){ p._caAnn=1; addText(p.x,p.y+70,p.z,'CLEAR AIM','#f7d79a'); } }
+}
+function class2OnHit(p){ // called from hurtPlayer — a direct hit breaks Clear Aim (Perfect Hunt grants a grace)
+  if(meta.classId!=='ranger') return;
+  const cap=classState('ranger').rank>=10;
+  if(cap && p.clearAim){ p._caGrace=0.75; return; }   // Perfect Aim: 0.75s grace before it drops
+  p.clearAim=false; p._noHitT=0; p._caAnn=0;
+}
+function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient Hunter 14→17)
+  if(meta.classId!=='ranger'||!p||!p.clearAim) return 1;
+  const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.14:0.10; if(cap) b+=0.03; return 1+b;
+}
+function c2OnKill(p){ // Perfect Hunt: a kill while Clear Aim active trims skill cooldowns
+  if(meta.classId==='ranger' && classState('ranger').rank>=10 && p&&p.clearAim && (G.time-(p._caCdT||-9))>=1){
+    p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
+}
+// new Ranger skills — reuse proven behaviors; Spike Trap is new
+SKILL_FX.r_volley=SKILL_FX.volley; SKILL_FX.r_pierce=SKILL_FX.deadeye;
+SKILL_FX.r_tumble=SKILL_FX.tumble; SKILL_FX.r_shadow=SKILL_FX.shadowstrike;
+SKILL_FX.r_smoke=SKILL_FX.smokebomb; SKILL_FX.r_mark=SKILL_FX.mark; SKILL_FX.r_deathmark=SKILL_FX.deathmark;
+SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160*ca;
+  const tx=p.x+Math.sin(p.yaw)*120, tz=p.z+Math.cos(p.yaw)*120;   // a spike field ahead of you (slow + element on entry)
+  (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(3,(w?w.dmg:10)*effPower(p)*0.25*am),hitSet:[]});
+  skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
+  addText(tx,40,tz,'SPIKE TRAP','#cfd6df',true); };
 function useSkill(i){
+  if(mode!=='play'||!G) return; const p=G.p; if(p.dead) return;
+  if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
+    if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
+    if(p.skillCd[i]>0) return; initAudio();
+    G._desig=true; const r=SKILL_FX[s.fx]?SKILL_FX[s.fx](p,classFamilyOk(p.weapon),1):null; G._desig=false;
+    if(r==='refund') return;
+    let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; skillbarUpdate(); return; }
+  return useSkillLegacy(i);
+}
+function useSkillLegacy(i){
   if(mode!=='play'||!G) return; const p=G.p, C=curClass(), cs=classState(meta.classId); if(p.dead) return;
   if(i>=1&&!cs.sub){ if(cs.rank>=2){ queueSubclass=true; toast('Choose your path first (rank 2)'); } else toast('🔒 Choose a path at rank 2 to unlock skills 2-4'); return; }
   const s=curSkills()[i]; if(!s) return;
@@ -3857,7 +3956,18 @@ function useSkill(i){
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; skillbarUpdate();
 }
-function skillbarUpdate(){ const cs=classState(meta.classId), S=curSkills(), p=(typeof G!=='undefined'&&G)?G.p:null;
+const C2_ICON={r_volley:'🌠',r_pierce:'🎯',r_tumble:'🌀',r_shadow:'🗡️',r_spike:'⚙',r_smoke:'💨',r_mark:'📍',r_deathmark:'✖'};
+function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+  if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
+    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i];
+      if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; continue; }
+      if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title='Choose your rank-'+slotRank[i]+' skill'; continue; }
+      const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
+      b.textContent=cool?Math.ceil(p.skillCd[i]):(C2_ICON[s.fx]||'✦');
+      b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
+      b.title=s.n+' ('+(i+1)+') — '+s.d; }
+    return; }
+  const S=curSkills();
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue;
     if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank;
@@ -3942,6 +4052,7 @@ function killEnemy(e){
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p);   // Perfect Hunt: kill-while-Clear-Aim trims cooldowns
   // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
   if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
     G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h);
@@ -4095,6 +4206,7 @@ function hurtPlayer(dmg,sx,sz){
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
+  if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
   const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
   p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
   G.tookDamage=true; G.combo=0; G.comboT=0;
@@ -4343,6 +4455,13 @@ function update(dt){
   if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
       if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z); } }
     G.trails=G.trails.filter(tr=>tr.life>0); }
+  if(G.spikefields && G.spikefields.length){ for(const sf of G.spikefields){ sf.life-=dt; sf.tick-=dt;   // Ranger Spike Trap: slow + DoT on enemies inside
+      const dot=sf.tick<=0; if(dot) sf.tick=1;
+      for(const e of G.enemies){ if(e.dead||!e.active) continue; if(dXZ(e.x,e.z,sf.x,sf.z)>sf.r+e.r) continue;
+        e.slowT=Math.max(e.slowT||0,0.4);
+        if(sf.hitSet.indexOf(e)<0){ sf.hitSet.push(e); const w=G.p.weapon; if(w&&w.el) applyElement(e,w.el,1); }   // element once, on first entry
+        if(dot) hitEnemy(e,sf.dmg,G.p,0,effLifesteal(G.p),null); } }
+    G.spikefields=G.spikefields.filter(sf=>sf.life>0); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
     sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
@@ -4537,7 +4656,9 @@ function update(dt){
   updateTexts(dt);
   // Phase 19: practice foes are ARENA property — applied after all movement, snapped WELL inside the walls
   if(G.hub) for(const e of G.enemies){ if(e.practice&&!e.dead){ e.x=Math.max(672,Math.min(936,e.x)); e.z=Math.max(370,Math.min(682,e.z)); } }
-  if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // Phase 9: level-ups are automatic now; only the class path-fork still opens a menu
+  if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
+  else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
+  class2Innate(G.p,dt);
 }
 const AMBIENT={frost:{c:'#e6f7ff',vy:-40,n:2},volcano:{c:'#ff9a4a',vy:40,n:2},forest:{c:'#9fd84a',vy:-16,n:1},void:{c:'#c9a6ff',vy:14,n:1},apex:{c:'#c9a6ff',vy:16,n:1}};
 function updateAmbient(dt,s){
@@ -4948,7 +5069,7 @@ function loadEndlessArena(n){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.beam=null; G.collapse=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
@@ -5206,7 +5327,7 @@ function enterWaystation(){
   G.stageIndex=0;
   // scene arrays normally come from loadStage — the waystation builds its own room
   G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.trails=[]; G.beam=null; G.collapse=[]; G.rooms=[]; G.doors=[]; G.plates=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[]; G.rooms=[]; G.doors=[]; G.plates=[];
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
   /* ============ THE WAYSTATION, rebuilt (Phase 19): a fortress QUARTER, not a box ============
      A grand central plaza opens into five themed wings: the MARKET GARDEN west (shop +
@@ -6223,6 +6344,9 @@ function drawCourse(s,t){
   if(G.trails) for(const tr of G.trails){ const a=Math.max(0,tr.life/tr.max), fl=0.5+0.5*Math.sin(t*9+tr.x*0.1);
     bx(tr.x,2,tr.z, tr.r*1.5,4,tr.r*1.5, '#ff6a2a','#c0331a', 0.5*a);
     bx(tr.x,6+fl*4,tr.z, tr.r*0.7,8,tr.r*0.7, '#ffb060','#ff7a2a', 0.4*a); }
+  if(G.spikefields) for(const sf of G.spikefields){ const a=Math.max(0,sf.life/sf.max);   // Ranger Spike Trap: low steel spikes with a clean edge
+    for(let i=0;i<10;i++){ const an=i/10*6.283; bx(sf.x+Math.cos(an)*sf.r*0.9, 5, sf.z+Math.sin(an)*sf.r*0.9, 4,1.5,4, '#8b93a8','#cfd6df',0.5*a); }
+    for(let i=0;i<7;i++){ const an=i*0.9+sf.x, rr=sf.r*(0.2+Math.random()*0.6); bx(sf.x+Math.cos(an)*rr, 6, sf.z+Math.sin(an)*rr, 3,9,3, '#b8bec8','#eef2f8',0.6*a); } }
   // Marble Colossus: the radiant sweep beam
   if(G.beam){ const b=G.beam, warn=b.warn>0, c=warn?'#fff2b0':'#fffbe6', op=warn?(0.14+0.14*Math.sin(t*20)):0.55;
     for(let r=40;r<640;r+=34){ bx(b.ex+Math.cos(b.ang)*r, 8, b.ez+Math.sin(b.ang)*r, 15,warn?4:12,15, c, '#ffe27a', op); } }

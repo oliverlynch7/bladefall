@@ -132,6 +132,7 @@
     font-style:italic;letter-spacing:.01em;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .8s ease;}
   #storycard.show{opacity:1;}
   #bKeep{top:calc(38% + 38px);}
+  #bBag{top:calc(38% + 76px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
   /* align-items:flex-start + margin:auto on the card = vertically centered WHEN it fits, top-reachable + scrollable when it doesn't (fixes the top-cutoff on tall menus). */
@@ -273,6 +274,7 @@
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">SELL</button>
+  <button class="btn tog" id="bBag">BAG</button>
   <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
@@ -292,7 +294,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.55.0';
+const VERSION3D='1.56.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -316,7 +318,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
@@ -328,7 +330,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -1061,7 +1063,7 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
-    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'grunt',n:12,d:'Slay 12 Grunts'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
@@ -1071,7 +1073,7 @@ const ZONES=[
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
-    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'bones',n:15,d:'Destroy 15 Skeletons'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
+    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Warden',mus:'boss_warden'}},
@@ -1223,16 +1225,22 @@ const ENEMY={
   cragspitter:{hp:46,dmg:13,speed:26,r:18,h:42,xp:28,color:'#9a8a6a',kind:'caster',look:'spitter',   // squat boulder-lobber: hurls ARCING rocks you sidestep; slow, tanky, kill-priority
     shot:{count:1,spread:0,speed:300,size:10,color:'#b0946a',shape:'rock',gravity:540,glow:0},shootCd:2.9},
   galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'storm',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
+  // ── Outskirts plains bestiary (Phase 14) ──
+  thornboar:{hp:42,dmg:13,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
+  sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
+  // ── Ruined Keep bestiary (Phase 14) ──
+  sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
+  revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
   dummy:{hp:400,dmg:0,speed:0,r:14,h:42,xp:0,color:'#c9b37e',kind:'walk',look:'bones'}   // waystation training dummy: hits land, nothing dies
 };
 /* what haunts each biome (weighted picks for dungeon rooms) */
 const THEMEMOBS={
-  plains:['grunt','grunt','slime','flyer'],
-  forest:['grunt','toxling','slime','slime','flyer'],
+  plains:['thornboar','sporeback','grunt','flyer'],          // Phase 14: plains natives; grunt/flyer reused sparingly
+  forest:['sporeback','thornboar','toxling','slime'],
   badlands:['charger','grunt','charger','flyer'],
   canyon:['dustjackal','galewisp','cragspitter','bones'],   // Phase 14: canyon-native pack — bones reused sparingly as on-theme filler
-  ruins:['bones','bones','caster','shadeling','flyer'],
-  dungeon:['bones','caster','bones','shadeling'],
+  ruins:['revenant','sentinel','caster','bones'],           // Phase 14 Keep: undead + animated armor; bones/caster reused sparingly
+  dungeon:['revenant','sentinel','bones','caster'],
   frost:['frostling','bones','frostling','sparkling'],
   volcano:['emberling','charger','emberling','flyer'],
   void:['shadeling','caster','sparkling','bones'],
@@ -1886,6 +1894,10 @@ function scapeKill(ctx,spots){ const kq=areaQuests().find(q=>q.k==='kill'&&!ques
     ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null);
     const comp=saltMob(ctx.s.theme,kq.mob); if(comp!==kq.mob) ctx.mkMonster(comp,sp.x-34,sp.z+22,sp.room||null); }); }   // a complementary type guards each nest
 function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id}; }
+// interaction-earned secret: the rift stays SEALED (hidden, unrenderable, unfindable) until the player steps on a hidden trigger rune tucked in a dead end
+function scapeSecretTriggered(ctx, sx,sz,sy, tx,tz,ty){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
+  G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,hidden:true};
+  G.secretTrigger={x:tx,z:tz,y:ty||0,r:34,done:false}; } }
 // a complementary enemy of a DIFFERENT kind than the majority (a caster/flyer among melee, etc.) so a fight forces you to prioritise
 function saltMob(theme,majority){ const pool=(THEMEMOBS[theme]||['grunt']).filter(m=>m!==majority&&ENEMY[m]);
   const mk=(ENEMY[majority]||{}).kind, diff=pool.filter(m=>ENEMY[m].kind!==mk);
@@ -1957,55 +1969,71 @@ const SCAPES={
   /* THE OUTSKIRTS — the gentle opposite of the climb: wide open grass clearings joined in
      a loose LOOP (wander, not a corridor), near-flat, one soft knoll for the overlook. */
   outskirts(ctx){ const {rnd,mkMonster}=ctx; const isWoods=ctx.s.theme==='forest';
-    // bigger, breezier field: wide grass clearings joined in a loop
-    const C=[ {x:0,z:0,w:640,d:520}, {x:430,z:-440,w:560,d:490}, {x:-410,z:-520,w:600,d:520}, {x:30,z:-1020,w:680,d:560} ];
+    // a large WANDERING meadow: six clearings in a loose loop + spur — minutes to roam, never a corridor
+    const C=[ {x:0,z:0,w:620,d:520}, {x:520,z:-360,w:560,d:480}, {x:-480,z:-420,w:600,d:520},
+              {x:120,z:-820,w:640,d:520}, {x:660,z:-980,w:520,d:460}, {x:-120,z:-1340,w:700,d:560} ];
     C.forEach(c=>{ vseg(c.x,c.z,c.w,c.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},c)); });
     const linkL=(a,b,w)=>{ const cxz=(x0,x1,z)=>vseg((x0+x1)/2,z,Math.abs(x1-x0)+w,w), czz=(z0,z1,x)=>vseg(x,(z0+z1)/2,w,Math.abs(z1-z0)+w);
       cxz(a.x,b.x,a.z); czz(a.z,b.z,b.x); };                    // L-shaped wide land bridge (always walkable)
-    linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],180); linkL(C[2],C[3],180);  // a loop -> non-linear
-    // trees: a trunk (cover) + a leafy canopy above it — a real field/woods, not a dungeon
-    const treeN=isWoods?16:9, leaf=isWoods?'#284f28':'#3a6b34', bark='#3a2c1c';
-    for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)], tx=c.x+(rnd()*2-1)*(c.w/2-30), tz=c.z+(rnd()*2-1)*(c.d/2-30), th=70+rnd()*70;
-      vcol(tx,tz,20+rnd()*10,20+rnd()*10,th);                                                  // trunk (collides)
-      G.deco.push({x:tx,z:tz,y0:th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});   // canopy
-      G.deco.push({x:tx,z:tz,y0:th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); }
-    // grass tufts + wildflowers scattered across the meadow (pure deco, on the ground)
-    for(let k=0;k<46;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
+    linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],170); linkL(C[2],C[3],170); linkL(C[1],C[4],160); linkL(C[3],C[5],180); linkL(C[4],C[5],160);
+    const leaf=isWoods?'#284f28':'#3a6b34';
+    const tree=(tx,tz,th)=>{ vcol(tx,tz,20+rnd()*10,20+rnd()*10,th);
+      G.deco.push({x:tx,z:tz,y0:th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});
+      G.deco.push({x:tx,z:tz,y0:th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); };
+    const treeN=isWoods?20:12;
+    for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)]; tree(c.x+(rnd()*2-1)*(c.w/2-30), c.z+(rnd()*2-1)*(c.d/2-30), 70+rnd()*70); }
+    for(let k=0;k<54;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
       G.deco.push({x:gx,z:gz,y0:0,w:8+rnd()*7,h:7+rnd()*10,c:rnd()<0.16?['#e6d24a','#e07ad0','#7fd6ff'][Math.floor(rnd()*3)]:tint(leaf,'#8fce6a',0.4),theme:'plains'}); }
-    C.forEach((c,ci)=>{ vtorch(c.x-c.w/2+30,c.z,rnd); vtorch(c.x+c.w/2-30,c.z,rnd); });
+    C.forEach(c=>{ vtorch(c.x-c.w/2+30,c.z,rnd); vtorch(c.x+c.w/2-30,c.z,rnd); });
     // a soft knoll in the goal clearing: two gentle steps up to an overlook (the find shrine)
-    const kg=C[3], kx=kg.x-120, kz=kg.z+40; vplat(kx,kz,40,170,170); const ktop=vplat(kx,kz,78,96,96,{checkpoint:true});
-    // grunts across the meadows
-    C.forEach((c,ci)=>{ const n=1+Math.floor(rnd()*2); for(let m=0;m<n;m++) mkMonster('grunt',c.x+(rnd()*2-1)*(c.w/2-60),c.z+(rnd()*2-1)*(c.d/2-60),c); });
-    scapeKill(ctx,[{x:C[1].x,z:C[1].z,room:C[1]},{x:C[2].x,z:C[2].z,room:C[2]}]);
+    const kg=C[5], kx=kg.x-140, kz=kg.z+40; vplat(kx,kz,40,170,170); const ktop=vplat(kx,kz,78,96,96,{checkpoint:true});
+    // ── EXPLORATION-EARNED SECRET: a HIDDEN GLADE off the far west, screened by a dense treeline,
+    //    reached only through a narrow gap you have to notice and slip through (no path, no marker) ──
+    const P={x:-1000,z:-720,w:280,d:250}; vseg(P.x,P.z,P.w,P.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},P));
+    vseg(-806,-700,96,120);                                                                   // the narrow neck bridging C2's west edge to the glade
+    for(let k=-1;k<=1;k++){ tree(-760, -700+k*70, 96+rnd()*30); }                               // a wall of trees hides the neck from the meadow
+    for(let k=0;k<6;k++){ const a=k/6*6.28; tree(P.x+Math.cos(a)*(P.w/2-18), P.z+Math.sin(a)*(P.d/2-18), 90+rnd()*40); }   // ring the glade so it reads as "off the map"
+    scapeSecret(ctx, P.x, P.z-40, 0);                                                          // the rift, deep in the hidden glade
+    // ── mobs: thornboars + sporebacks roam the meadows ──
+    C.forEach(c=>{ if(rnd()<0.7) mkMonster('sporeback',c.x+(rnd()*2-1)*(c.w/2-70),c.z+(rnd()*2-1)*(c.d/2-70),c); });
+    mkMonster('thornboar',C[0].x+120,C[0].z-40,C[0]);
+    scapeKill(ctx,[{x:C[1].x,z:C[1].z,room:C[1]},{x:C[3].x,z:C[3].z,room:C[3]},{x:C[4].x,z:C[4].z,room:C[4]}]);   // thornboar dens across the field
     scapeFetch(ctx, C.map(c=>({x:c.x+(rnd()*2-1)*120,z:c.z+(rnd()*2-1)*120,y:0})));
     scapeFind(ctx, ktop.x, ktop.z, 78);
-    scapeSecret(ctx, C[2].x, C[2].z-C[2].d/2+40, 0);
-    finishScape(ctx,{sx:C[0].x,sz:C[0].z+C[0].d/2-50,sy:0, gx:C[3].x,gz:C[3].z-C[3].d/2+80, decoCol:'#3a5a2e',decoTheme:ctx.s.theme,decoTall:170});
+    finishScape(ctx,{sx:C[0].x,sz:C[0].z+C[0].d/2-50,sy:0, gx:C[5].x,gz:C[5].z-C[5].d/2+80, decoCol:'#3a5a2e',decoTheme:ctx.s.theme,decoTall:170});
   },
   /* RUINED KEEP — a fortress in two halves split by a chasm. Cross HIGH on the ramparts
      (climb, a swinging broken span) or LOW on a phasing causeway that blinks out under you. */
   keep(ctx){ const {rnd,mkMonster}=ctx;
-    const court=vseg(0,0,600,460); G.rooms.push({x:0,z:0,w:600,d:460,monsters:[],encounter:false,cleared:true});
-    const hall=vseg(0,-1080,560,440); G.rooms.push({x:0,z:-1080,w:560,d:440,monsters:[],encounter:false,cleared:true});
-    vtorch(-260,0,rnd); vtorch(260,0,rnd); vtorch(-240,-1080,rnd); vtorch(240,-1080,rnd);
+    const court=vseg(0,0,660,500); G.rooms.push({x:0,z:0,w:660,d:500,monsters:[],encounter:false,cleared:true});
+    const hall=vseg(0,-1180,620,480); G.rooms.push({x:0,z:-1180,w:620,d:480,monsters:[],encounter:false,cleared:true});
+    vtorch(-290,0,rnd); vtorch(290,0,rnd); vtorch(-280,-1180,rnd); vtorch(280,-1180,rnd);
+    // ruined statues flanking the courtyard (landmarks)
+    for(const s2 of [-1,1]){ vcol(s2*250,180,30,30,70); G.deco.push({x:s2*250,z:180,y0:70,w:34,h:44,c:'#5a5f6e',theme:ctx.s.theme}); }
     // corner towers you climb (quest perches)
-    const towers=[]; [[-250,-70],[250,-70],[-230,-1010],[230,-1010]].forEach((c,ti)=>{ const ty=170+ti*14;
+    const towers=[]; [[-270,-80],[270,-80],[-250,-1100],[250,-1100]].forEach((c,ti)=>{ const ty=170+ti*14;
       climbRun(c[0]*0.7,c[1],0,c[0],c[1]-40,ty,60); towers.push(vplat(c[0],c[1]-40,ty,120,120,{terrace:true,checkpoint:true})); vcol(c[0],c[1]-40,120,120,ty-6); });
     // HIGH ramparts across the chasm: stairs up, a walk with a broken span (elevated mover), stairs down
-    const ry=140; climbRun(0,-235,0, 0,-330,ry, 68);
-    vplat(0,-360,ry,160,110,{terrace:true,checkpoint:true}); vplat(0,-490,ry,150,110,{terrace:true});
-    G.movers.push({x0:0,z:-620,w:120,d:96,h:ry,amp:52,sp:1.1+rnd()*0.5,ph:rnd()*6.28,x:0,px:0});   // the broken span sways
-    vplat(0,-760,ry,150,110,{terrace:true,checkpoint:true}); climbRun(0,-830,ry, 0,-905,0, 68);
+    const ry=140; climbRun(0,-255,0, 0,-350,ry, 68);
+    vplat(0,-380,ry,160,110,{terrace:true,checkpoint:true}); vplat(0,-520,ry,150,110,{terrace:true});
+    G.movers.push({x0:0,z:-660,w:120,d:96,h:ry,amp:54,sp:1.1+rnd()*0.5,ph:rnd()*6.28,x:0,px:0});   // the broken span sways
+    vplat(0,-810,ry,150,110,{terrace:true,checkpoint:true}); climbRun(0,-880,ry, 0,-955,0, 68);
     // LOW phasing causeway over the chasm (the Phasing hazard lives here)
-    gapStones(0,-250,0,-855,72,rnd,true);
-    // enemies: skeletons hold both baileys + patrol the ramparts
-    for(let m=0;m<2;m++) mkMonster('bones',(rnd()*2-1)*200,(rnd()*2-1)*140,court);
-    mkMonster('bones',0,-490,null); mkMonster('bones',(rnd()*2-1)*180,-1080-(rnd()*2-1)*120,hall);
-    scapeKill(ctx,[{x:-160,z:-60,room:court},{x:160,z:-1080,room:hall}]);
-    scapeFetch(ctx,[{x:towers[0].x,z:towers[0].z,y:towers[0].h},{x:towers[1].x,z:towers[1].z,y:towers[1].h},{x:0,z:-360,y:ry},{x:0,z:-760,y:ry},{x:towers[2].x,z:towers[2].z,y:towers[2].h}]);
+    gapStones(0,-270,0,-935,72,rnd,true);
+    // ── INTERACTION-EARNED SECRET: a dead-end CRYPT off the west wall; a dim rune on its floor
+    //    seals a rift you can't see until you step on it (stone grinds, the rift tears open) ──
+    const cry={x:-660,z:130,w:250,d:230}; vseg(cry.x,cry.z,cry.w,cry.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},cry));
+    vseg(-440,130,210,110);                                                                    // short passage from the court's west wall into the crypt
+    vtorch(cry.x-cry.w/2+28,cry.z,rnd); vtorch(cry.x+cry.w/2-28,cry.z,rnd);
+    for(const s2 of [-1,1]) G.deco.push({x:cry.x+s2*70,z:cry.z-60,y0:0,w:70,h:26,c:'#43485a',theme:ctx.s.theme});   // sarcophagi
+    scapeSecretTriggered(ctx, cry.x-60,cry.z+cry.d/2-40,0, cry.x+70,cry.z-cry.d/2+40,0);        // rune in one corner opens the rift in the far corner
+    // ── enemies: revenants hold both baileys, animated sentinels guard the ramparts ──
+    for(let m=0;m<2;m++) mkMonster('revenant',(rnd()*2-1)*220,(rnd()*2-1)*150,court);
+    { const st=mkMonster('sentinel',0,-520,null); st.y=ry; st.sx=st.x; st.sz=st.z; }
+    mkMonster('revenant',(rnd()*2-1)*200,-1180-(rnd()*2-1)*130,hall);
+    scapeKill(ctx,[{x:-180,z:-70,room:court},{x:180,z:-1180,room:hall},{x:200,z:120,room:court}]);
+    scapeFetch(ctx,[{x:towers[0].x,z:towers[0].z,y:towers[0].h},{x:towers[1].x,z:towers[1].z,y:towers[1].h},{x:0,z:-380,y:ry},{x:0,z:-810,y:ry},{x:towers[2].x,z:towers[2].z,y:towers[2].h}]);
     scapeFind(ctx, towers[3].x, towers[3].z, towers[3].h);
-    scapeSecret(ctx, hall.x-hall.w/2+40, hall.z-hall.d/2+40, 0);
     finishScape(ctx,{sx:0,sz:court.d/2-50,sy:0, gx:hall.x,gz:hall.z-hall.d/2+90, decoCol:STONE_C(),decoTheme:ctx.s.theme,decoTall:240});
   },
   /* FROSTFELL — a frozen lake: wide slick ice sheets separated by channels of freezing
@@ -2123,7 +2151,7 @@ function loadStage(i){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
-  G.secret=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
@@ -2367,7 +2395,7 @@ function spawnEnemy(type,x,z,isBoss){
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
-    look:a.look||null,dive:!!a.dive,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
+    look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
     atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
     markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
@@ -2380,6 +2408,7 @@ function spawnEnemy(type,x,z,isBoss){
     if(e.role==='exploder') e.speed*=1.28;                       // rushes you
     if(e.role==='flanker')  e.speed*=1.15;
   }
+  if(e.type==='sentinel'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }   // the animated armor ALWAYS guards its front
   G.enemies.push(e); return e;
 }
 
@@ -2416,10 +2445,11 @@ for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEvent
   zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
   zone.addEventListener('contextmenu',e=>e.preventDefault());
 })();
-function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); }
+function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); }
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
-function toggleKeep(){ meta.autoKeep=!meta.autoKeep; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }
-['bAuto','bKeep'].forEach((id,i)=>{ const el=document.getElementById(id); el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();i?toggleKeep():toggleAuto();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
+function toggleKeep(){ meta.autoKeep=!meta.autoKeep; if(meta.autoKeep) meta.autoBag=false; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }   // auto-sell + auto-bag are mutually exclusive
+function toggleBag(){ meta.autoBag=!meta.autoBag; if(meta.autoBag) meta.autoKeep=false; persist(); updateToggles(); toast('Auto-bag '+(meta.autoBag?'ON':'OFF')); }
+[['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
 // fallback by typed character (e.key) so WASD works even if e.code is off (non-US layouts / some Mac browsers)
@@ -3037,6 +3067,9 @@ function killEnemy(e){
   // Phase 11: kill crunch — a brief hitstop + a death pop / coin-spray so every kill has weight
   G.slowmo=Math.max(G.slowmo||0, e.boss?0.38:(e.elite?0.10:0.05));
   { const n=e.boss?20:(e.elite?9:6); for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=70+Math.random()*110; G.particles.push({x:e.x,y:e.y+e.h*0.45,z:e.z,vx:Math.cos(a)*sp,vy:130+Math.random()*90,vz:Math.sin(a)*sp,life:0.5,color:'#ffd24a',sz:2.3}); } }
+  if(e.deathpuff){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:132,dmg:e.dmg*0.85,life:0,spd:230,col:'#9fd84a',col2:'#6ea82e'});   // sporeback bursts a poison cloud on death
+    for(let i=0;i<14;i++){ const a=Math.random()*6.28, sp=40+Math.random()*70; G.particles.push({x:e.x,y:e.y+e.h*0.4,z:e.z,vx:Math.cos(a)*sp,vy:50+Math.random()*40,vz:Math.sin(a)*sp,life:0.7,color:'#9fd84a',sz:2.6}); }
+    addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
   addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
@@ -3433,8 +3466,13 @@ function update(dt){
   if(G.npc && !G.npc.talked){ G.npc.t+=dt;
     const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
     if(d2<(seen?46:110)) openShade(); }
-  // hidden side-zone rift: walk into it and it's yours forever
-  if(G.secret){ const s=G.secret; s.t+=dt;
+  // an unusual-interaction rift: a dim floor rune tucked in a dead end — step on it and the rift grinds open
+  if(G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
+    if(dXZ(tr.x,tr.z,p.x,p.z)<(tr.r||34) && Math.abs(p.y-(tr.y||0))<60){ tr.done=true;
+      if(G.secret){ G.secret.hidden=false; G.secret.t=0; burst(G.secret.x,G.secret.y+30,G.secret.z,'#c47bff',24); addText(G.secret.x,G.secret.y+82,G.secret.z,'A RIFT TEARS OPEN','#c47bff',true); }
+      SFX.god(); G.shake=Math.min(G.shake+11,17); toast('⚙ Stone grinds somewhere in the dark — something has opened'); } }
+  // hidden side-zone rift: walk into it and it's yours forever (a hidden:true rift stays sealed until its trigger fires)
+  if(G.secret && !G.secret.hidden){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
       const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
       G.secret=null; SFX.god(); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
@@ -3592,6 +3630,7 @@ function openSubclass(){ openSubclassFrom(resumePlay); }
 function fmt(n){ return Math.round(n*100)/100; }
 let _offerT=0;
 function offerWeapon(nw){
+  if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
   const typ=w=>(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee');
@@ -3612,6 +3651,7 @@ function offerWeapon(nw){
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
 }
 function offerArmor(na){
+  if(meta.autoBag){ if(stashItem({armor:na})) toast('🎒 Bagged · '+na.name); else { const g=sellItem(na); toast('Bag full — sold '+na.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
   const reduc=d=>Math.round(d/(d+200)*100);
@@ -3634,6 +3674,7 @@ function offerArmor(na){
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
 }
 function offerTrinket(nt){
+  if(meta.autoBag){ if(stashItem({trinket:nt})) toast('🎒 Bagged · '+nt.name); else { const g=sellItem(nt); toast('Bag full — sold '+nt.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
   showOverlayHTML(`<div class="card">
@@ -4904,6 +4945,48 @@ function drawEnemy3(e,t){
     for(let i=0;i<4;i++){ const a=i*1.571+0.4; bx(Math.cos(a)*W*0.5,H*0.2+i*3,Math.sin(a)*W*0.5, 4,4,4, tint(col,'#000',0.2)); }  // craggy chunks
     pushM(); mv(W*0.62,H*0.55,W*0.2); rotX(wind?-0.9:-0.2); bx(0,6,0, 5,14,5, tint(col,'#000',0.15));                            // cocked arm
     bx(0,15,0, 7,7,7, oc, oc); popM();                                                                                          // the rock in hand
+  } else if(e.look==='boar'){
+    // bulky tusked boar: low broad body, big shielded head, curved tusks; rears in the wind-up
+    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.1), gait=Math.sin(G.time*10+e.bob)*0.4;
+    pushM(); if(e.windT>0){ rotX(-0.22); } else if(e.chargeT>0){ rotX(0.18); }
+    bx(0,H*0.5,-2, W*0.95,H*0.6,W*1.5, col);                                    // barrel body
+    bx(0,H*0.78,-W*0.4, W*0.5,H*0.3,W*0.4, dk);                                 // bristled hump
+    pushM(); mv(0,H*0.5,W*0.9); bx(0,0,0, W*0.7,H*0.55,W*0.55, lt);             // big head
+    bx(0,-H*0.06,W*0.36, W*0.4,H*0.24,W*0.3, dk);                              // snout
+    bx(-W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8'); bx(W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8');   // tusks
+    bx(-W*0.2,H*0.14,W*0.3, 2.4,2.6,1.2, eyeC, eyeC); bx(W*0.2,H*0.14,W*0.3, 2.4,2.6,1.2, eyeC, eyeC); popM();
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.34,H*0.2,W*0.5); rotX(gait*s2); bx(0,-H*0.2,0, 4,H*0.42,4, dk); popM();
+      pushM(); mv(s2*W*0.34,H*0.2,-W*0.5); rotX(-gait*s2); bx(0,-H*0.2,0, 4,H*0.42,4, dk); popM(); }
+    popM();
+  } else if(e.look==='spore'){
+    // walking mushroom: a fat cap on a stubby stalk, spore motes puffing off it
+    const bob=Math.sin(e.bob*3)*0.1;
+    bx(0,H*0.36,0, W*0.7,H*0.5,W*0.7, tint(col,'#fff',0.12));                   // pale stalk/body
+    bx(-W*0.16,H*0.34,W*0.36, 2.4,2.6,1.2,'#2a3a1a'); bx(W*0.16,H*0.34,W*0.36, 2.4,2.6,1.2,'#2a3a1a');   // eyes
+    bx(0,H*0.78+bob*10,0, W*1.4,H*0.4,W*1.4, col);                             // the CAP
+    for(let i=0;i<6;i++){ const a=i/6*6.28; bx(Math.cos(a)*W*0.5,H*0.78,Math.sin(a)*W*0.5, 3,4,3, tint(col,'#fff',0.3)); }   // cap spots
+    for(let i=0;i<3;i++){ const a=G.time*2+i*2.1; bx(Math.cos(a)*W*0.6,H*0.9+((G.time*14+i*20)%30),Math.sin(a)*W*0.6, 2,2,2,'#9fd84a','#c6ff7a',0.5); }   // drifting spores
+  } else if(e.look==='sentinel'){
+    // animated plate armor: tall, broad-shouldered, hollow glowing visor (its shield plate draws via the shielder role)
+    const dk=tint(col,'#000',0.28), lt=tint(col,'#fff',0.16);
+    bx(-W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.4, dk); bx(W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.4, dk);   // greaves
+    bx(0,H*0.56,0, W*0.92,H*0.5,W*0.66, col);                                   // cuirass
+    bx(0,H*0.5,W*0.34, W*0.5,H*0.3,3, lt);                                      // breastplate sheen
+    bx(-W*0.58,H*0.74,0, W*0.4,W*0.4,W*0.5, lt); bx(W*0.58,H*0.74,0, W*0.4,W*0.4,W*0.5, lt);   // big pauldrons
+    bx(0,H*0.9,0, W*0.5,H*0.28,W*0.48, dk);                                     // great helm
+    bx(0,H*0.9,W*0.26, W*0.34,2.4,1.4, eyeC, eyeC);                             // glowing visor slit
+    bx(0,H*1.06,0, 3,7,3, lt);                                                   // helm crest
+  } else if(e.look==='revenant'){
+    // gaunt undead warrior: hunched tattered frame, glowing eyes, a broken blade
+    const dk=tint(col,'#000',0.3), sw=Math.sin(G.time*8+e.bob)*0.14;
+    pushM(); if(e.windT>0){ rotX(-0.2); } else if(e.chargeT>0){ rotX(0.2); }
+    bx(-3.2,H*0.16,0, 3,H*0.32,3, dk); bx(3.2,H*0.16,0, 3,H*0.32,3, dk);        // legs
+    bx(0,H*0.54,0, W*0.7,H*0.5,W*0.5, col);                                     // ribcage torso
+    bx(0,H*0.5,W*0.28, W*0.5,H*0.34,2, dk);                                     // tattered drape
+    bx(0,H*0.86,0, W*0.5,W*0.5,W*0.48, tint(col,'#fff',0.1));                   // skull head
+    bx(-2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC); bx(2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC);
+    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.5+sw); rotX(-0.6); bx(0,-6,0, 2.6,12,2.6, dk); bx(0,4,0, 3,14,1.4,'#c8ccd2'); popM();   // broken blade arm
+    popM();
   } else if(e.kind==='fly'){
     const flap=Math.sin(e.bob*2.4)*0.7;
     bx(0,H*0.5,0, W*0.72,H*0.9,W*0.62, col);
@@ -5197,7 +5280,12 @@ function render(t){
       if(burn) for(let i=0;i<2;i++) bx(v.x+(Math.random()-0.5)*v.r, 12+Math.random()*46, v.z+(Math.random()-0.5)*v.r, 6,14,6, '#ff9a3a','#ffd24a',0.75); } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
-  if(G.secret){                                        // the hidden rift: a dark seam, now wherever the parkour ends (honors s.y)
+  if(G.secretTrigger && !G.secretTrigger.done){        // the trigger rune: a dim, easily-missed floor glyph in a dead end
+    const tr=G.secretTrigger, ty=tr.y||0, gl=0.28+0.14*Math.sin(t*2.3);
+    bx(tr.x,ty+1.2,tr.z, 40,2.5,40, '#1a1226', '#4a2a6a', gl);
+    bx(tr.x,ty+2,tr.z, 20,3,20, '#2a1840', '#7a40b0', gl*1.2);
+    for(let i=0;i<4;i++){ const a=i*1.571; bx(tr.x+Math.cos(a)*15,ty+2.4,tr.z+Math.sin(a)*15, 4,3,4, '#8a50c0','#c47bff',gl); } }
+  if(G.secret && !G.secret.hidden){                    // the rift: a dark violet seam (parkour/exploration reward, or newly torn open by a trigger)
     const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7), sy=s.y||0;
     bx(s.x,sy+26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
     bx(s.x,sy+26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);

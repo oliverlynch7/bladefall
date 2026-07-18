@@ -243,7 +243,26 @@ self-contained work session. Work top to bottom.
 
 ## Phase 14 — Level depth & bestiary (MAJOR content bar — build zone-by-zone: ship one, judge, then the rest)
 
-> **Progress — ZONE 1 of 7: Hollow Pass — SHIPPED v1.55.0 (awaiting Oliver's judgment before the next zone).**
+> **Progress — ZONES 1–3 of 7 rebuilt (batch 1). Awaiting Oliver's playtest feedback before batch 2.**
+> **v1.56.0 — Outskirts + Ruined Keep rebuilt (like Hollow), + hard/varied purple secrets, + auto-bag.**
+> - **Purple-secret philosophy (per Oliver):** every rebuilt zone hides its rift a *different* hard way.
+>   New engine support: a rift can be `hidden:true` + gated by a `secretTrigger` rune (revealed only when
+>   stepped on). **Hollow = parkour-earned** (ledge chain off the summit). **Outskirts = exploration-earned**
+>   (a tree-screened hidden glade reached through a narrow gap off the far-west, no path/marker). **Keep =
+>   interaction-earned** (a dim floor rune in a dead-end crypt; step on it and the sealed rift grinds open).
+>   Verified: outskirts rift reachable + visible in the glade; keep rift stays hidden until the trigger fires.
+> - **Outskirts** — six wandering clearings in a loose loop + spur (minutes to roam), richer trees/flowers,
+>   knoll overlook. Plains bestiary: **Thornboar** (tusked charger, kill target — 12), **Sporeback** (slow
+>   poison walker that BURSTS a spore cloud on death). Verified: thornboar den reaches 14/12.
+> - **Ruined Keep** — larger twin baileys split by the chasm (high ramparts / low phasing causeway), corner
+>   towers, statues, + the crypt. Undead bestiary: **Revenant** (fast lunger, kill target — 15), **Sentinel**
+>   (animated armor that always BLOCKS from the front — flank it). Verified: revenant kill works, sentinel is a shielder.
+> - **Auto-bag toggle** (side button, like Auto-sell): loot auto-stashes (falls back to sell if the bag is
+>   full); mutually exclusive with Auto-sell. Verified: stashes on pickup.
+> - **Next batch (2):** Frostfell, Emberdeep, The Abyss — same treatment (size + unique bestiary + a hard
+>   varied secret each), plus theme-consistency passes and eventually the hub **Proving Grounds**.
+
+> **Batch 1 detail — Hollow Pass (SHIPPED v1.55.0):**
 > Rebuilt `SCAPES.hollow` into a multi-minute canyon JOURNEY: entry gorge (arch landmark) → north
 > corridor → a **FORK** (low slot-canyon road *or* a high ledge road that rejoins = a loop) → the **Mesa**
 > (bone-pile checkpoint, a cragspitter perched) → a chasm crossing → the expanded **pillar field** (bone

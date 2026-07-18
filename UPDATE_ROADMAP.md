@@ -497,3 +497,31 @@ reachable) before pushing, with regression sweeps of all prior zones each time.
 All within perf budget (deco ≤ ~90/zone vs Hollow's bar; combat on y=0 per engine rules;
 solvability by construction with JMPV/JMPH). Future (separated): side-zone interior identity
 pass; unique boss-fight MECHANICS per arena (geometry shipped, behaviors unchanged).
+
+## Phase 18 — Risk/Reward: Mimic Chests + Shop Gamble (SHIPPED v1.72.0 → v1.74.0)
+Executed from `docs/RISK_REWARD_PROMPT.md` in three rollback-safe deploys.
+
+- [x] **v1.72.0 — Charger restyle (mimic precondition).** The base charger was a squat
+  brown-gold box with a bright top strip — nearly the chest's silhouette + palette. Rebuilt
+  as a rust-red (#a84a2a) siege beetle: tucked abdomen + wedge thorax, dark carapace saddle,
+  two-segment ram horn, twitching antennae, six skittering legs; the wind-up now REARS UP
+  with a pulsing body-glow over the existing red ground telegraph. Chests own their look again.
+- [x] **v1.73.0 — Mimic chests.** ~1 in 6 chests (MIMIC_RATE=0.17, one constant) are lying —
+  decided AT SPAWN from the level's seeded rnd, so the same chest is the mimic across reloads
+  of the same run (the seed is the save: no new fields; resolved mimics regenerate exactly as
+  chests regenerate closed — existing behavior; bonus-vault chest exempt). Reach for it and it
+  SNAPS into a chest-skull monster (lid agape on fangs, tongue, gold eyes, spider legs) with
+  charger lunge AI at ~3.9x HP / ~1.8x damage vs the zone's own mobs — it can kill an unready
+  player. The risk pays: TWO elite-band drops + 150+tier*50 gold (vs a chest's one band-0 roll
+  + 70g). Fair-ish tell up close: the lid breathes, a rare shudder, the lock burns warmer.
+  Verified: rate 0.166/6k, deterministic across attempts, hoard +533g/+2 drops at tier 7.
+- [x] **v1.74.0 — Shop Gamble ("Fortune's Bag").** 480g a pull (~8x a common shop buy). Odds
+  junk-heavy by design: 52/30/13/4.2/0.8 (EV ~280g of shop value — the house wins), with a
+  real-but-thin tail vs the natural table. forgeSpin-style ratcheting reel reveal (triumph
+  audio on rare+, a thud on junk, slowmo toast on epic+); gold up front; item to the BAG via
+  the forge-payout pattern; above-level rarities sit locked (canWield gates equip, not owning).
+  Verified through the real UI incl. a 40k-roll odds sim matching the table exactly.
+
+Tuning knobs left for Oliver (single constants): MIMIC_RATE (0.17), mimic base stats
+(ENEMY.mimic 70hp/16dmg), hoard formula (150+tier*50, 2x bandedRarity(1)), GAMBLE_COST (480),
+GAMBLE_ODDS table.

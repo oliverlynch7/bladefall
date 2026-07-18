@@ -656,3 +656,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Confirmed the newest 3:55 PM download as the improved comparison artwork: two weapon cards with explicit green upgrade and red downgrade arrows.
 - [x] Removed the baked checkerboard, normalized the replacement to a transparent 256×256 PNG, and replaced only `action_compare.png`; all compare interactions and references remain unchanged.
 - [x] Real-browser asset verification and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Hub bag equip synchronization fix (SHIPPED v1.108.0)
+
+- [x] Fixed Pause → Bag equipment swaps at the Waystation updating only `meta.hero` while leaving the live `G.p` hub character on its previous weapon/gear.
+- [x] Hub equips now copy the banked weapon and gear into the live player immediately, recompute armor/HP, persist normally, and remain correct after closing the bag or resuming play.
+- [x] Verified the hub equip regression in a real browser and passed `git diff --check`.

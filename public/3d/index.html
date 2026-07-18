@@ -495,7 +495,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.107.0';
+const VERSION3D='1.108.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2061,7 +2061,13 @@ function openBag(back){
     const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
     if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
     else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
-    if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+    if(G&&G.hub&&HR===meta.hero){
+      // The Pause-menu bag edits the banked snapshot. Mirror that change into the live hub
+      // player immediately; otherwise Resume keeps showing/using the old weapon until a
+      // keeper exit or full hub reload happens to call wsResume().
+      G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon)));
+      G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p));
+    } else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
     persist(); SFX.pickup(); hudUpdate(); openBag(back); });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
     const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });

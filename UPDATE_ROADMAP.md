@@ -525,3 +525,27 @@ Executed from `docs/RISK_REWARD_PROMPT.md` in three rollback-safe deploys.
 Tuning knobs left for Oliver (single constants): MIMIC_RATE (0.17), mimic base stats
 (ENEMY.mimic 70hp/16dmg), hoard formula (150+tier*50, 2x bandedRarity(1)), GAMBLE_COST (480),
 GAMBLE_ODDS table.
+
+## Phase 19 — Oliver's playtest feedback batch (SHIPPED v1.75.0 → v1.77.0)
+- [x] **v1.75.0 — Hero always visible (the Hollow spawn bug, root-caused TWICE over):** the occlusion
+  ray started at `G.cam`, the smoothed follow-point AT the hero — a near-zero-length ray — so deco
+  (canyon strata bands etc.) never faded. Every camera now stores its TRUE eye (`G.eye`); the wall
+  LATE pass + a new 3D `occRay` (XZ + height band) cast from it; crossing deco goes ghost; obstacle
+  fade threshold 90→40; fps exempt by design. Proven by manual `render()` driving (the test pane
+  throttles RAF): crossers === ghosted in shoulder/buried/overhead at the exact reported spot.
+  PLUS: Abyssal Descent scales much faster (hp ×1.16^n, dmg ×1.10^n, NEW speed ×1+0.025n, waves
+  8+3n, cap→28, denser elites, rewards ×1+0.14n); damage numbers 19px / CRIT 32px golden shout
+  (crit threaded through sweeps, finishers, projectiles) / heals 22px ♥ + ring on pet heals, with a
+  Settings toggle; overhead cam: left-click anywhere = attack, right-click = dodge.
+- [x] **v1.76.0 — a real mirror + pets that look like themselves:** mirror goes phantom when orbited
+  behind; from the front a true REFLECTION (double beyond smoked glass, reflection-first draw
+  order); lingering talk-prompt hidden; clickable top-left "ESC — leave" chip; RENAME your character
+  (18 chars, `meta.heroName` per-slot); stats+loadout as a pull-down. All six pets rebuilt to match
+  their descriptions (pup with wagging tail + ember mouth, cairn-backed whelp, tapering flame wisp,
+  winged sprite with its cross, fat grinning coin with winglets, hooded wraith with chain).
+- [x] **v1.77.0 — the Waystation reborn:** a fortress QUARTER — plaza with waystone pool/lanterns/
+  paths + five themed wings (Market Garden, Forge Yard, walled Sparring Arena, Menagerie Nook,
+  Mirror Pavilion) + the Dark Grotto for the Abyss stone; 2000×1270 bounds. Arena confines practice
+  mobs (post-movement clamp; 0 XP/gold/drops), dummies = bolted 400hp skeleton sponges that reset
+  (dps checker). SECRET STASH behind the Menagerie crates: E → +1000g with rotating cheeky lines.
+  New trial-chamber music: 'Silent Descent' (Mixkit Free License). Full 24-layout regression GREEN.

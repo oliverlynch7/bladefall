@@ -392,3 +392,27 @@ identical. Keep the kill-quest mob as the majority.
 opens the NPC's dialogue (reuse storycard/storyToast); each hub NPC explains who they are and
 what they do, in BLADEFALL's grim/terse voice. Wire E into the existing key handling
 (WASD/Space/J/K/L/Esc) with no conflicts.
+
+## Phase 15 — Pets / Companions (SHIPPED v1.63.0)
+- [x] **Pet / companion system** — a new hub NPC, the **Beastkeeper**, sells / buys-back / trains
+  companions. **ONE active pet at a time**, equipped/swapped **only in the hub** (it's a hub NPC,
+  so it can't change mid-run). Pets **carry across levels like gear** and persist per save-slot.
+  - **Roster (6, started small):** Ember Pup + Stone Whelp (melee attacker, common), Pale Wisp
+    (homing ranged attacker, uncommon), **Mending Sprite** (passive healer — Oliver's requested
+    type, uncommon), Coin Sprite (loot-vacuum utility, rare), Grave Wraith (stronger ranged, rare).
+    Each has a distinct voxel silhouette, rarity glow, a name + flavor line; price scales with strength.
+  - **Balance — help, never carry:** attackers do chip damage on a slow cadence (~1.5–2.3s), homing
+    bolts / melee darts, damage scaled mildly by player level and by a **capped** training curve
+    (+5%/level, 5 levels). Healer trickles a few HP every ~3.4s. Utility pulls nearby drops. Pets deal
+    **plain damage** (no elemental status, so no stack-spam exploit).
+  - **UI:** name your pet (text input), toggle a floating rarity-colored name label on/off, train
+    (diminishing gold sink `base*1.7^lvl`, capped), buy/sell/equip/stow — all at the Beastkeeper.
+  - **Save:** new `meta.petOwned / petActive / petNames / petTrain / petLabel` behind the load/migrate
+    path; **old saves (no pet fields) load clean** to empty-menagerie defaults.
+  - **Hitless decision:** in Hitless the pet still **follows** (cosmetic — you earned it) but does
+    **not** attack or heal, so the earned no-hit mode stays pure player skill.
+  - **Perf:** enemy scans happen only on the pet's attack cadence, one pooled DOM label node, no
+    per-frame allocation.
+  - Verified in-browser: buy/equip (one-at-a-time)/sell/train/rename/label-toggle; attacker chip
+    (~5 hits/10s) + healer trickle (+4/pulse); persistence round-trip + old-save load + Hitless gate
+    (0 pet damage); no console errors. Live at `/3d/`.

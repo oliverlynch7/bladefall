@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.72.0';
+const VERSION3D='1.73.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1369,6 +1369,7 @@ const ENEMY={
   slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
   caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
   charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#a84a2a',kind:'charger'},   // rust-red (Phase 18: moved OFF the chest's brown-gold so mimics own that palette)
+  mimic:{hp:70,dmg:16,speed:74,r:16,h:30,xp:60,color:'#6b4a2a',kind:'charger',look:'mimic',noSplit:true},   // Phase 18: the chest that bites — 2-3x a zone mob's HP, charger lunge AI, scales per tier like everyone
   // ── Hollow Pass canyon bestiary (Phase 14) — distinct silhouettes + behaviours, not palette swaps ──
   dustjackal:{hp:24,dmg:11,speed:82,r:14,h:26,xp:19,color:'#caa46a',kind:'charger',look:'jackal'},   // lean pack hunter: fast, low HP, telegraphed POUNCE (charger ram) — space it or it bleeds you in numbers
   cragspitter:{hp:46,dmg:13,speed:26,r:18,h:42,xp:28,color:'#9a8a6a',kind:'caster',look:'spitter',   // squat boulder-lobber: hurls ARCING rocks you sidestep; slow, tanky, kill-priority
@@ -2453,14 +2454,14 @@ const SCAPES={
     const wing=vseg(-560,-770,360,300); G.rooms.push({x:-560,z:-770,w:360,d:300,monsters:[],encounter:false,cleared:true});
     for(let k=0;k<3;k++){ const wz=-690-k*80; vcol(-660,wz,26,26,30);
       G.deco.push({x:-660,z:wz,y0:30,w:22,h:26,d:18,c:MARBLE}); }                             // the quiet statue row
-    G.chests.push({x:-640,z:-860,y:0,opened:false,bob:0});                                    // the gallery keeps one gift
+    G.chests.push(chestMaybeMimic({x:-640,z:-860,y:0,opened:false,bob:0},rnd));               // the gallery keeps one gift (...usually)
     const lip=vseg(430,-770,140,140);                                                         // east lip — then the floor simply ends
     for(const cb of [[520,-770],[610,-820],[700,-770],[790,-820]]) G.crumbles.push({x:cb[0],z:cb[1],w:70,d:70,state:0,timer:0,respawn:0,fallY:0,jit:0});
     for(let k=0;k<3;k++) G.deco.push({x:560+k*120,z:-740+(k%2?60:-20),w:22,h:34+rnd()*30,c:'#241431',theme:'apex'});   // the corruption creeping in
     vcol(575,-820,24,24,40); vcol(745,-750,24,24,36);                                         // snapped pillar stubs
     const pocket=vseg(900,-790,220,200); G.rooms.push({x:900,z:-790,w:220,d:200,monsters:[],encounter:false,cleared:true});
     scapeSecret(ctx,920,-830,0);                                                              // the Sealed Reliquary, at the broken wing's dead end
-    G.chests.push({x:950,z:-740,y:0,opened:false,bob:0});
+    G.chests.push(chestMaybeMimic({x:950,z:-740,y:0,opened:false,bob:0},rnd));
     // ── 4) THE GRAND STAIR -> THE THRONE ANTECHAMBER ──
     climbRun(0,-1230,0, 0,-1360,96, 110);
     const dais=vplat(0,-1480,96,480,380,{terrace:true,checkpoint:true}); G.rooms.push({x:0,z:-1480,w:480,d:380,y:96,monsters:[],encounter:false,cleared:true});
@@ -2831,7 +2832,7 @@ function loadStage(i){
   for(const room of G.rooms){ if(room===entryRoom) continue; if((isBoss||isMini)&&room===goalRoom) continue;
     if(room===vault){ room.encounter=false; room.cleared=true;
       const gm=mkMonster(pick(),room.x,room.z-20,room); gm.hp=Math.round(gm.hp*1.9); gm.maxHp=gm.hp; gm.elite=true;
-      G.chests.push({x:room.x,z:room.z+room.d/2-50,y:0,opened:false,bob:0}); continue; }
+      G.chests.push(chestMaybeMimic({x:room.x,z:room.z+room.d/2-50,y:0,opened:false,bob:0},rnd2)); continue; }
     room.encounter=reaperTrial?true:((room!==goalRoom)&&rnd()<0.5); room.cleared=!room.encounter;
     const nM=reaperTrial?(4+Math.floor(rnd()*3)):Math.min(6,2+Math.floor(rnd()*(1.6+diff*0.18)));
     const maj=pick(); for(let m=0;m<nM;m++){ const ty=(m===nM-1&&nM>=3)?saltMob(s.theme,maj):(m===0?maj:pick());   // guarantee a mixed pack: a complementary type salted into any 3+ fight
@@ -3757,6 +3758,11 @@ function killEnemy(e){
                                    :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
       pushLoot(e.x+(i?26:-26),e.z+16,0,item);
     }
+  } else if(e.mimicE){ // Phase 18: the mimic's hoard — the risk PAYS: two elite-band drops + a fat purse (vs a chest's one band-0 roll + 70g)
+    SFX.enemyDie(); playFx('wallbreak'); SFX.god(); toast('💰 The mimic disgorges its hoard');
+    const mg=awardGold(150+zoneTier()*50); addText(e.x,e.y+e.h+8,e.z,'+'+mg+'g','#ffd24a');
+    for(let i=0;i<2;i++) pushLoot(e.x+(i?28:-28),e.z+18,0,randomLoot(bandedRarity(1)));
+    checkAchievements();
   } else {
     // per-mob death voice (batch-2): grunt + a couple of assigned mobs, else the procedural die
     if(e.type==='grunt') playFx('gruntdie');
@@ -3773,6 +3779,22 @@ function killEnemy(e){
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
   checkStageClear();
+}
+/* ---------------- MIMIC CHESTS (Phase 18) ----------------
+   A random subset of chests are lying. Mimic-ness is decided AT SPAWN from the level's
+   seeded rnd, so the same chest is the mimic across reloads of the same run (the seed is
+   the save — no new fields; resolved mimics regenerate exactly as normal chests regenerate
+   closed, the existing behavior). The bonus-vault sprint chest is never a mimic. */
+const MIMIC_RATE=0.17;                                   // ~1 in 6 chests are lying (tunable)
+function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE) ch.mimic=true; return ch; }
+function mimicReveal(ch){
+  const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
+  const m=spawnEnemy('mimic',ch.x,ch.z); m.active=true; m.mimicE=true; m.dropT=0;
+  burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
+  addText(ch.x,44,ch.z,'MIMIC!','var(--danger)',true);
+  SFX.growl(1.4); playFx('chestopen'); playFx('mobvoice1',0.9);
+  G.shake=Math.min(G.shake+12,18); G.slowmo=Math.max(G.slowmo||0,0.18);
+  toast('⚠ It was never a chest');
 }
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
@@ -4202,7 +4224,7 @@ function update(dt){
   G.projectiles=G.projectiles.filter(pr=>pr.life>0);
   // chests
   for(const ch of G.chests){ if(ch.opened) continue; ch.bob+=dt*3;
-    if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36) openChest(ch); }
+    if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
   // pickups
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
     if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
@@ -4527,7 +4549,7 @@ function loadEndlessArena(n){
   if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
   G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
   // reward beat: a loot cache every third floor (rarity still gated by character level via bandedRarity)
-  if(n>1 && n%3===0) G.chests.push({x:0,z:-40,y:0,opened:false,bob:0});
+  if(n>1 && n%3===0) G.chests.push(chestMaybeMimic({x:0,z:-40,y:0,opened:false,bob:0}));   // even the Abyss's gifts can lie
   G.stageBanner=2.2; G.areaName='Floor '+n;
   document.getElementById('stagetag').textContent='🕳️ FLOOR '+n;
   questUpdate(); hudUpdate();
@@ -6617,10 +6639,15 @@ function drawLootFx(t){
 function drawChest(ch,t){
   pushM(); mv(ch.x,ch.y,ch.z);
   if(!ch.opened){ const g=0.6+0.35*Math.sin(t*4+ch.bob);
+    // the mimic's TELL (Phase 18): identical at a glance, but up close it BREATHES — the lid
+    // rises a hair on a slow rhythm, it shudders once in a while, and the lock burns warmer.
+    const mim=!!ch.mimic, br=mim?Math.max(0,Math.sin(t*0.8+ch.bob))*1.1:0;
+    if(mim && Math.sin(t*0.47+ch.bob*2)>0.988) mv((Math.random()-0.5)*1.4,0,0);
     bx(0,9,0, 30,15,22,'#6b4a2a');
     bx(0,9.5,0, 31,3,23,'#caa23a','#caa23a',0.9);
-    bx(0,18.5,0, 30,7,22,'#7a5836');
-    bx(0,12.5,11.2, 5,6.5,1.8,'#ffd24a','#ffd24a',g);            // glowing lock
+    bx(0,18.5+br,0, 30,7,22,'#7a5836');
+    if(mim && br>0.6) bx(0,15.6,9.5, 22,1.4,2,'#1a0a0e');                          // the thinnest dark seam when it inhales
+    bx(0,12.5,11.2, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
     bx(0,26,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
   } else {
     bx(0,7,0, 30,12,22,'#5a3d22');
@@ -6725,6 +6752,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
+  chestMaybeMimic, mimicReveal, MIMIC_RATE,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.74.0';
+const VERSION3D='1.75.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -350,7 +350,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -359,7 +359,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -3092,6 +3092,13 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
    (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
 // desktop: ANY click in play captures the mouse, then moving it aims the camera hands-free (no click-hold). Esc releases.
 window.addEventListener('mousedown',e=>{ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && !(e.target&&e.target.closest&&e.target.closest('#overlay')) && canvas.requestPointerLock) canvas.requestPointerLock(); });
+// Phase 19: in the OVERHEAD camera the mouse is a weapon — left-click anywhere to attack
+// (auto-aim does the rest), right-click to dodge. Canvas only, so UI buttons stay buttons.
+canvas.addEventListener('mousedown',e=>{ if(mode!=='play'||meta.camMode!=='far'||!G) return;
+  initAudio();
+  if(e.button===0){ playerAttack(); }
+  else if(e.button===2){ e.preventDefault(); input.dodgeEdge=true; } });
+canvas.addEventListener('contextmenu',e=>{ if(meta.camMode==='far') e.preventDefault(); });
 // The Mirror: drag anywhere on the character to orbit the camera 360° around yourself
 (function(){ let md=null;
   const getX=e=>e.clientX!=null?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:null);
@@ -3123,11 +3130,15 @@ document.addEventListener('touchend',e=>{
    COMBAT + UPDATE (3D)
    ============================================================ */
 const worldTexts=[]; // DOM floating texts projected from world space
-function addText(wx,wy,wz,txt,color,big){
+function addText(wx,wy,wz,txt,color,big,kind){
+  // Phase 19: combat numbers read BIG — dmg 19px, heal 22px, CRIT 32px (with a shout of an
+  // outline); everything else 17/26. kind'd combat numbers respect the settings toggle.
+  if(kind && meta.dmgNumbers===false) return;
+  const sz=kind==='crit'?32:kind==='heal'?22:kind==='dmg'?19:(big?26:17);
   const el=document.createElement('div');
-  el.style.cssText='position:absolute;z-index:8;pointer-events:none;font-weight:800;text-align:center;transform:translate(-50%,-50%);text-shadow:0 1px 4px #000;font-size:'+(big?'20px':'14px')+';color:'+(color.startsWith('var')?getComputedStyle(document.documentElement).getPropertyValue(color.slice(4,-1)):color);
+  el.style.cssText='position:absolute;z-index:8;pointer-events:none;font-weight:900;text-align:center;transform:translate(-50%,-50%);text-shadow:0 2px 6px #000'+(kind==='crit'?',0 0 12px #ffb020':'')+';font-size:'+sz+'px;color:'+(color.startsWith('var')?getComputedStyle(document.documentElement).getPropertyValue(color.slice(4,-1)):color);
   el.textContent=txt; document.body.appendChild(el);
-  worldTexts.push({el,x:wx,y:wy,z:wz,life:0.9,vy:52});
+  worldTexts.push({el,x:wx,y:wy,z:wz,life:kind==='crit'?1.1:0.9,vy:kind==='crit'?60:52});
 }
 function updateTexts(dt){
   for(const t of worldTexts){ t.life-=dt; t.y+=t.vy*dt; t.vy*=0.92;
@@ -3512,7 +3523,7 @@ function fireProjectile(p,w,target){
   for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
     G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
       gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
-      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek}); }
+      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,pcrit:crit>1}); }
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
 function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
@@ -3694,10 +3705,10 @@ function resolveSwing(){
     const cr=Math.random()<0.18+effCrit(p), els=w.el||'void', ec=elementColor(els)||'#c47bff';
     const mdmg=Math.round(w.dmg*effPower(p)*(2.0+(cr?0.6:0))*effMagPower(p)*offclassMul(p)*classStyleMul(p));
     const R=M.reach+56, ls2=Math.max(w.lifesteal||0,effLifesteal(p));
-    G._desig=true;                                                     // the Reaper's magic finisher ruptures Corruption + spends Rune Marks
+    G._desig=true; G._crit=cr;                                         // the Reaper's magic finisher ruptures Corruption + spends Rune Marks
     for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue; const d=dXZ(e.x,e.z,p.x,p.z);
       if(d>R+e.r) continue; if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; e.lastHit=p.swingId; hitEnemy(e,mdmg,p,(w.kb||260)+90,ls2,els); }
-    G._desig=false;
+    G._desig=false; G._crit=false;
     if(p._burstId!==p.swingId){ p._burstId=p.swingId;                 // one-shot burst VFX (skillRing carries no damage — dmg:0)
       skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30); G.shake=Math.min(G.shake+7,15);
       for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
@@ -3705,7 +3716,7 @@ function resolveSwing(){
   }
   const crit=Math.random()<0.18+effCrit(p);
   const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
-  const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
+  const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; G._crit=crit; hitEnemy(e,dmg,p,w.kb,ls,w.el); G._crit=false; }; // no reaching through walls
   if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
     const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
     for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
@@ -3738,7 +3749,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=kb*(e.boss?0.25:1);
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
-  addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), tc);
+  addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
   burst(e.x,e.y+e.h*0.5,e.z,e.color,5);
   if(el) applyElement(e,el,dmg);
   G.shake=Math.min(G.shake+(e.boss?2:3),9); SFX.hit();
@@ -3759,7 +3770,7 @@ function killEnemy(e){
   // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
   if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
     G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h);
-    addText(G.p.x,G.p.y+70,G.p.z,'+'+h,'#ffe9a8'); burst(e.x,e.y+e.h*0.5,e.z,'#fff8d6',10); }
+    addText(G.p.x,G.p.y+80,G.p.z,'+'+h+' ♥','#ffe9a8',true,'heal'); burst(e.x,e.y+e.h*0.5,e.z,'#fff8d6',10); }
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
@@ -3933,7 +3944,9 @@ function petUpdate(dt){
       if(bt){ pet.atkT=P.cd; petAttack(pet,P,bt); } else pet.atkT=0.35; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
-      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h; addText(p.x,p.y+70,p.z,'+'+h,'#7de08a'); burst(pet.x,pet.y,pet.z,'#7de08a',6); hudUpdate(); } } }
+      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
+        addText(p.x,p.y+80,p.z,'+'+h+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
+        burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } }
   else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
     for(const pk of G.pickups){ if(pk.questItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
 }
@@ -4239,12 +4252,12 @@ function update(dt){
     pr.x+=pr.vx*dt; pr.y+=pr.vy*dt; pr.z+=pr.vz*dt;
     if(pr.trail && Math.random()<0.75) G.particles.push({x:pr.x,y:pr.y,z:pr.z,vx:0,vy:6,vz:0,life:0.26,color:pr.trail,sz:Math.max(2,pr.size*0.35)});   // skill-projectile comet trail
     if(pr.owner==='player'){
-      G._desig=!!pr.desig;                                 // charged bolts / thrown scythe spend Rune Marks + rupture Corruption
+      G._desig=!!pr.desig; G._crit=!!pr.pcrit;             // charged bolts / thrown scythe spend Rune Marks + rupture Corruption; crit shots shout their number
       for(const e of G.enemies){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
         if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){
           pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01},pr.kb,effLifesteal(G.p),pr.el);
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
-      G._desig=false;
+      G._desig=false; G._crit=false;
     } else {
       if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
@@ -4556,13 +4569,14 @@ function startEndless(){
 function loadEndlessArena(n){
   const stageIdx=endlessStageFor(n), s=STAGES[stageIdx];
   G.floor=n; G.stageIndex=stageIdx; G.haz=null;
-  G.zoneTier=Math.min(7,1+Math.floor((n-1)/4));        // slow tier climb feeds the loot band + a little enemy scaling
-  G.ngHp=Math.pow(1.11,n-1); G.ngDmg=Math.pow(1.06,n-1); // the core curve: HP ramps faster than damage
-  G.endReward=1+n*0.12;                                  // XP + gold scale with depth
-  G.endTarget=Math.min(60,6+Math.round(n*2));            // foes to clear this floor
-  G.endCap=Math.min(24,8+Math.floor(n*0.8));             // HARD concurrent-enemy cap (phones)
-  G.endBatch=Math.min(3,1+Math.floor(n/6));
-  G.endInt=Math.max(0.35,1.4-n*0.05);
+  G.zoneTier=Math.min(7,1+Math.floor((n-1)/3));          // faster tier climb feeds the loot band + enemy scaling
+  G.ngHp=Math.pow(1.16,n-1); G.ngDmg=Math.pow(1.10,n-1); // Phase 19: MUCH steeper — the dark closes in fast now
+  G.endSpd=Math.min(1.6,1+(n-1)*0.025);                  // and the dead get QUICKER with every floor
+  G.endReward=1+n*0.14;                                  // XP + gold scale with depth
+  G.endTarget=Math.min(70,8+Math.round(n*3));            // bigger waves per floor
+  G.endCap=Math.min(28,10+Math.floor(n*1.2));            // HARD concurrent-enemy cap (phones)
+  G.endBatch=Math.min(5,1+Math.floor(n/4));
+  G.endInt=Math.max(0.25,1.2-n*0.06);
   G.endSpawned=0; G.endSpawnT=0.6; G.floorCleared=false;
   meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
   // ---- reset scene arrays (mirrors loadStage) ----
@@ -4598,7 +4612,8 @@ function spawnEndlessMob(n,s){
   const type=pool.length?pool[Math.floor(Math.random()*pool.length)]:'grunt';
   const a=Math.random()*6.283, rad=380+Math.random()*70, x=Math.cos(a)*rad, z=Math.sin(a)*rad;
   const m=spawnEnemy(type,x,z); m.active=true; G.endSpawned++;
-  if(Math.random()<Math.min(0.5,0.05+n*0.02)) makeElite(m);   // deeper floors turn denser with elites
+  m.speed*=(G.endSpd||1);                                      // Phase 19: floor-scaled quickness
+  if(Math.random()<Math.min(0.6,0.05+n*0.03)) makeElite(m);   // deeper floors turn denser with elites
   burst(x,20,z,'#c47bff',10);
   return m;
 }
@@ -5500,6 +5515,7 @@ function openPause(){
       <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
       <button class="bigbtn ghost" id="fsBtn">⛶ Fullscreen: ${fsOn()?'On':'Off'}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
@@ -5525,6 +5541,7 @@ function openPause(){
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
+  { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
@@ -5563,6 +5580,21 @@ function hudUpdate(){
    3D SCENE RENDERING
    ============================================================ */
 const LATE=[]; // near-front walls/doors deferred to a translucent pass so they never hide the hero
+/* THE HERO IS ALWAYS VISIBLE (Phase 19 fix): a true 3D camera->hero ray test, usable by EVERY
+   drawn box — walls fade via LATE, but DECO (canyon strata bands, roofs, set dressing) used to
+   stay opaque and could wall off the hero (Hollow spawn bug). In fps the ray is zero-length, so
+   this naturally never fires there. Samples height too, so a band only fades when its y-span
+   actually crosses the sightline. */
+function occRay(o,m,y0,hh){
+  if(!G||!G.p||meta.camMode==='fps') return false;
+  const E=G.eye||G.cam; if(!E) return false;
+  const cx=E.x,cy=(E.y==null?60:E.y),cz=E.z, px=G.p.x, py=(G.p.y||0)+34, pz=G.p.z;
+  if(Math.abs(cx-px)<1&&Math.abs(cz-pz)<1) return false;
+  const bt=(y0||0), tp=bt+(hh==null?(o.h==null?96:o.h):hh);
+  for(let t2=0.05;t2<0.95;t2+=0.05){ const x=cx+(px-cx)*t2, y=cy+(py-cy)*t2, z=cz+(pz-cz)*t2;
+    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m && y>bt-6 && y<tp+8) return true; }
+  return false;
+}
 let shadowEps=0;
 function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; // y sits just above the floor top (y=1)
   bx(x,1.45+shadowEps*0.03,z, r*2,0.3,r*1.7,'#000000',null,alpha==null?0.30:alpha); }
@@ -5621,7 +5653,7 @@ function drawCourse(s,t){
   }
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
   LATE.length=0;
-  const CAMX=G.cam.x, CAMZ=G.cam.z, shoulder=meta.camMode!=='far'; // shoulder + fps: solid walls occlude (no translucent pass)
+  const CAMX=(G.eye?G.eye.x:G.cam.x), CAMZ=(G.eye?G.eye.z:G.cam.z), shoulder=meta.camMode!=='far'; // Phase 19: rays start at the TRUE eye (G.cam is the follow-point at the hero — a zero-length ray)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
   // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
   const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
@@ -5675,7 +5707,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
-    if(ob.h>=90 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // tall blockers fade too (canyon rims, mesas) — but never the one you stand on
+    if(ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
     else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
@@ -5684,6 +5716,10 @@ function drawCourse(s,t){
   }
   // theme decorations
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
+    // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
+    if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
+      gl.depthMask(false); bx(d.x,(d.y0!=null?d.y0:0)+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c, null, 0.2); gl.depthMask(true); continue; }
     if(d.y0!=null){ bx(d.x,d.y0+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c); continue; }   // strata band: an exact box at a given base height
     if(d.theme==='forest'){ bx(d.x,d.h*0.3,d.z, d.w*0.35,d.h*0.6,d.w*0.35,'#3a2c1c');
       bx(d.x,d.h*0.72,d.z, d.w*1.9,d.h*0.62,d.w*1.9, tint('#2c5c34','#000',0.15)); }
@@ -6457,6 +6493,7 @@ function render(t){
     const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
     PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
+    if(G) G.eye={x:ex,y:ey,z:ez};
     gl.uniform2f(U.uFogNF,210,820);
   } else if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pitR=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
@@ -6464,12 +6501,17 @@ function render(t){
     const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
     PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
     VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
+    if(G) G.eye={x:cx-fx*hd,y:eh+cyy,z:cz-fz*hd};
     gl.uniform2f(U.uFogNF,300,880);
   } else { // classic high chase overview
     PROJ=mPersp(50*Math.PI/180,VW/VH,10,2400);
     VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
+    if(G) G.eye={x:cx,y:296+cyy,z:cz+330};
     gl.uniform2f(U.uFogNF,460,1320);
   }
+  // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
+  // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
+  // whole walls of deco could hide the hero (the Hollow spawn bug). Every ray test uses G.eye now.
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
   gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
   gl.uniform3f(U.uFog,sky[0],sky[1],sky[2]);
@@ -6477,6 +6519,7 @@ function render(t){
   if(!G){ // title backdrop: rotating hero on an empty arena
     const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
   setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
+  G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
   drawCourse(s,t);
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[]; statPips=[];
@@ -6796,7 +6839,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
-  chestMaybeMimic, mimicReveal, MIMIC_RATE,
+  chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

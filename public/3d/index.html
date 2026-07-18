@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.52.0';
+const VERSION3D='1.53.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -306,7 +306,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -320,7 +320,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -336,6 +336,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
   meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
+  meta.hubUpgrades=mv.hubUpgrades&&typeof mv.hubUpgrades==='object'?mv.hubUpgrades:{};
   meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
   meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
@@ -347,7 +348,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap();
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={};
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -2977,6 +2978,7 @@ function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; return 
 function killEnemy(e){
   if(e.dead) return;
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
+  if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
@@ -3093,6 +3095,7 @@ function hurtPlayer(dmg,sx,sz){
   p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
+  if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
   if(p.hp<=0){ p.hp=0; p.dead=true; die(); }
 }
 function update(dt){
@@ -3755,8 +3758,9 @@ function enterWaystation(){
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
   // one warm stone island over the glow (deep enough that the over-the-shoulder camera stands on floor behind you)
   G.segments.push({x:0,z:20,w:820,d:820});
-  // back (south) wall pushed well behind the spawn so the over-the-shoulder camera never sits behind it (side walls lengthened to match)
-  G.walls.push({x:0,z:-380,w:864,d:26,h:150},{x:-420,z:0,w:26,d:824,h:150},{x:420,z:0,w:26,d:824,h:150},{x:0,z:420,w:864,d:26,h:150});
+  // Phase 12: the NORTH rampart is now LOW (66) so you see over it to the dying world beyond the gates;
+  // side + south walls stay tall to keep the over-the-shoulder camera boxed on solid floor.
+  G.walls.push({x:0,z:-380,w:864,d:26,h:66},{x:-420,z:0,w:26,d:824,h:150},{x:420,z:0,w:26,d:824,h:150},{x:0,z:420,w:864,d:26,h:150});
   for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
   G.torches.push({x:-398,z:-200,ph:1},{x:398,z:-200,ph:2},{x:-398,z:120,ph:3},{x:398,z:120,ph:4});
   // the portal row: one gate per zone along the north wall; discovered rifts shimmer beside their parent
@@ -3772,10 +3776,16 @@ function enterWaystation(){
     {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-320,z:90,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-130,z:258,open:()=>openQuestBoard(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
-    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:320,z:110,open:()=>openForge(wsResume)}
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:320,z:110,open:()=>openForge(wsResume)},
+    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:-300,z:-20,open:()=>openMirror(wsResume)},
+    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:60,open:()=>openTrainingArena(wsResume)}
   ];
   // training dummies by the drillmaster — hit them as hard as you like
   for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
+  // Phase 12 training arena: a target range (ranged practice) + a short stakes-free parkour course
+  for(const [dx,dz] of [[210,-330],[290,-338],[370,-326]]){ const d3=spawnEnemy('dummy',dx,dz); d3.dummy=true; d3.active=true; d3.dropT=0; d3.range=true; }
+  for(let i=0;i<5;i++) G.obstacles.push({kind:'plat',x:-300+i*34,z:280-i*40,w:58,d:58,h:38+i*30});
+  G.trainSpawn={x:300,z:60};   // where the Sparring Post drops practice mobs
   G.lastSafe={x:0,z:214}; G.startPos={x:0,z:214}; G.goalPos={x:0,z:-322};
   G.bounds={minX:-500,maxX:500,minZ:-460,maxZ:500}; G.progressEnd=-380;
   G.p.x=0; G.p.z=214; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
@@ -3795,15 +3805,79 @@ const NPCVOICE={
   chest:{cta:'Open your pack',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
   anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]}
 };
+// Phase 12: a keeper's line that reacts to YOUR progress (gold, class/rank, gates cleared, last run)
+function npcReact(n){
+  const cs=classState(meta.classId), lv=(meta.hero&&meta.hero.level)||1, cleared=Object.keys(meta.zoneDone||{}).length, kills=meta.bossKills||0;
+  const R={
+    quartermaster:[ meta.gold>=2500?`${meta.gold} gold on you — you can afford to be choosy now.`:`${meta.gold} gold. Come back when it's heavier.`, meta.socks?`Those Magic Socks carry you well.`:null ],
+    drillmaster:[ `${curClass().disp}, rank ${cs.rank}. ${cs.rank>=7?'The dead should be afraid.':'Keep drilling.'}`, `Level ${lv} — ${lv>=15?'seasoned':'still green'}.`, Object.keys(meta.classUnlocked||{}).length>1?`Three disciplines under one roof. Greedy.`:null ],
+    keeper:[ cleared>=6?`Six gates gone dark behind you. The colors remember them.`:`${cleared} cleared. The dark keeps its own count.` ],
+    board:[ cleared>=ZONES.length-2?`Little left unfinished down there now.`:`Work still waits below. It always does.` ],
+    chest:[ (meta.stash&&meta.stash.length>=STASH_CAP)?`That pack's fit to burst — feed the forge or sell the chaff.`:null ],
+    anvil:[ kills>=6?`You've felled enough. Bring me their leavings and I'll better them.`:null ]
+  };
+  const arr=(R[n.id]||[]).filter(Boolean); return arr.length?arr[Math.floor((G&&G.time||0)/4)%arr.length]:null;
+}
 function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
   mode='menu'; SFX.pickup();
+  const react=npcReact(n);
   showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${n.c2||'#e8a33d'};letter-spacing:.16em">${n.ic||''} ${n.name.toUpperCase()}</p>
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
-      ${v.lines.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}</div>
+      ${v.lines.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
+      ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div>
     <button class="bigbtn" id="npcGo">${v.cta}</button>
     <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
   document.getElementById('npcGo').onclick=()=>n.open();
   document.getElementById('npcLeave').onclick=resumePlay;
+}
+// Phase 12: the Mirror — inspect your own character (live gear/cosmetics), invaluable in first-person
+function heroPortrait(){ try{
+  gl.clearColor(0.06,0.065,0.09,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT); setFlatLights();
+  PROJ=mPersp(46*Math.PI/180,VW/VH,5,900); VIEW=mLookAt([30,62,124],[0,28,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,700,2200); CURM=mIdent();
+  const h=meta.hero; const fake=freshPlayer();
+  fake.skin=(h&&h.skin)||fake.skin; fake.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):fake.weapon;
+  fake.gear=h?cloneGear(h.gear):fake.gear; fake.x=0; fake.y=0; fake.z=0; fake.yaw=0.6; recomputeArmor(fake);
+  const so=meta.showArmor; meta.showArmor=true; drawHero3(fake,1.2,false); meta.showArmor=so; gl.finish();
+  const ctr=project(0,30,0)||[VW/2,VH/2], c2=document.createElement('canvas'); c2.width=160; c2.height=220;
+  const sw=VH*0.36*DPR, sh=VH*0.50*DPR;
+  c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,160,220);
+  return c2.toDataURL();
+}catch(e){ return ''; } }
+function openMirror(back){ mode='menu';
+  const h=meta.hero, C=curClass(), cs=classState(meta.classId), img=heroPortrait();
+  const w=h&&h.weapon, g=h?h.gear:null;
+  const gearLine=(slot,lbl)=>{ const a=g&&g[slot]; return `<div class="vsrow"><span>${lbl}</span><b style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'—'}</b></div>`; };
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Mirror</p><h2 class="ovh">${C.icon} ${C.disp}</h2>
+    <p class="ovsub">Level ${h?h.level:1} · rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</p>
+    ${img?`<img src="${img}" alt="you" style="display:block;margin:6px auto;height:210px;image-rendering:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))">`:''}
+    <div class="statgrid" style="text-align:left">
+      <div class="vsrow"><span>Weapon</span><b style="color:${w?RARITY[w.rarity].color:'#5a6270'}">${w?w.name:'—'}</b></div>
+      ${gearLine('helmet','Helmet')}${gearLine('chest','Chest')}${gearLine('legs','Legs')}${gearLine('amulet','Amulet')}${gearLine('ring','Ring')}
+    </div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
+}
+// Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
+function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
+  for(let i=0;i<=maxZ;i++){ const A=ZONES[i].areas[0], st=A&&STAGES[A.stage], th=st&&st.theme;
+    (THEMEMOBS[th]||[]).forEach(m=>{ if(!seen[m]&&ENEMY[m]&&!ENEMY[m].boss){ seen[m]=1; out.push(m); } }); }
+  return out; }
+function openTrainingArena(back){ mode='menu';
+  const mobs=trainRoster();
+  const rows=mobs.map(m=>{ const E=ENEMY[m]; return `<div class="gearrow"><div class="gi" style="color:${E.color||'#cfd6df'}">●</div>
+    <div style="flex:1"><div class="gn" style="text-transform:capitalize">${E.label||m}</div><div class="gd">${E.kind}${E.ranged?' · ranged':''}${E.element?' · '+E.element:''}</div></div>
+    <button class="bigbtn buybtn" data-m="${m}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Spawn ×2</button></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Sparring Post</p><h2 class="ovh">Training Arena</h2>
+    <p class="ovsub">Stakes-free — no death here, no loot. Just practice your build.</p>
+    <div class="achlist" style="max-height:min(44vh,300px)">${rows||'<p class="hint">Clear a zone to unlock foes to spar with.</p>'}</div>
+    <button class="bigbtn ghost" id="clearBtn">Clear practice foes</button>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ const m=b.dataset.m, sp=G.trainSpawn||{x:300,z:60};
+    for(let i=0;i<2;i++){ const e=spawnEnemy(m,sp.x+(i?46:-46),sp.z); e.active=true; e.dropT=0; e.practice=true; } SFX.pickup(); toast('Practice foes summoned'); wsResume(); });
+  document.getElementById('clearBtn').onclick=()=>{ let n=0; for(const e of G.enemies){ if(e.practice&&!e.dead){ e.dead=true; n++; } } toast(n?'Cleared '+n:'Nothing to clear'); openTrainingArena(back); };
+  document.getElementById('backBtn').onclick=back;
 }
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
@@ -4060,11 +4134,18 @@ function openShop(back){
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
   const northStar=`<div style="margin:2px 0 8px"><div class="gd" style="text-align:left;margin-bottom:3px"><b style="color:#ffd24a">${meta.gold}</b> / ${goal.cost} to <b>${goal.name}</b></div>
     <div style="height:7px;border-radius:5px;background:#1b1e26;overflow:hidden"><div style="height:100%;width:${gpct}%;background:linear-gradient(90deg,#ffd24a,#ff9a3a)"></div></div></div>`;
+  const hubRows=HUB_UPGRADES.map(u=>{ const owned=!!(meta.hubUpgrades&&meta.hubUpgrades[u.id]), afford=meta.gold>=u.cost;
+    return `<div class="gearrow" style="--spine:#caa23a${owned?';opacity:.6':''}"><div class="gi">🏰</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:#e8c86a">${u.name}</div><div class="gd">${u.desc}</div></div>
+      ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
+    <p class="hint" style="margin:10px 0 6px;text-align:left">🏰 <b>The Waystation</b> — restore your fortress (cosmetic, costly)</p>
+    <div class="achlist" style="max-height:min(22vh,160px)">${hubRows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
@@ -4083,6 +4164,9 @@ function openShop(back){
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
   const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
+  document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
+    if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
+    meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });
   document.getElementById('backBtn').onclick=back;
 }
 // full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
@@ -4595,6 +4679,15 @@ function drawSwing3(p,t){
   }
 }
 /* The Waystation, drawn: waystone bonfire, seven gates, the posts and their keepers. */
+// Phase 12 hub data
+const ZONE_TROPHY={outskirts:'#7ec46a',hollow:'#e8a33d',keep:'#8fb7ff',frost:'#7fd6ff',ember:'#ff7a3a',abyss:'#b06bff',palace:'#ffe9a8',castle:'#c47bff'};
+const CLASS_COL={warrior:'#e8453d',ranger:'#7ec46a',mage:'#b06bff',reaper:'#8a6ac0'};
+const HUB_UPGRADES=[
+  {id:'braziers',name:'Relit Braziers',cost:2500,desc:'Four great braziers roar back to life'},
+  {id:'banners',name:'War Banners',cost:4000,desc:'Order banners hang the length of the hall'},
+  {id:'ramparts',name:'Repaired Ramparts',cost:7000,desc:'The broken north wall is crowned with battlements'},
+  {id:'gild',name:'Gild the Waystone',cost:12000,desc:'Your bonfire burns molten gold'}
+];
 function drawWaystation(t){
   const pu=0.72+0.28*Math.sin(t*2.2);
   // the waystone: your bonfire. Touch it to heal and take stock.
@@ -4613,9 +4706,10 @@ function drawWaystation(t){
     const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
     bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
     bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
-    bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?0.30+0.18*Math.sin(t*2.6+g.zi):1);
+    bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?(g.done?0.55+0.25*Math.sin(t*3+g.zi):0.30+0.18*Math.sin(t*2.6+g.zi)):1);
     if(open) for(let i=0;i<g.tier;i++) bx(g.x-18+i*6, 104, g.z, 3.6,5,3.6, '#e8a33d','#e8a33d',0.8);   // tier pips
-    if(g.done) bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
+    if(g.done){ bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
+      for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
     if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
   }
   // the keepers of the posts
@@ -4629,18 +4723,54 @@ function drawWaystation(t){
       bx(n.x,16,n.z-13, 8,10,3,'#ffd24a','#ffd24a',0.7); continue; }
     if(n.prop==='anvil'){ drawShadow(n.x,n.z,16,0.22);
       bx(n.x,9,n.z, 26,18,26,'#3a2f26'); bx(n.x,24,n.z, 40,10,16,'#262a36','#4a5568',0.35);
-      bx(n.x,31,n.z, 12,6,12,'#30364a'); continue; }
+      bx(n.x,31,n.z, 12,6,12,'#30364a');
+      // idle life: a hammer rising and falling, sparks on the strike
+      const swing=Math.max(0,Math.sin(t*3)), hy=40+swing*22;
+      pushM(); mv(n.x-16,hy,n.z-6); rotZ(0.6-swing*1.2); bx(0,8,0, 3,16,3,'#4a3a26'); bx(0,16,0, 9,7,7,'#20242e','#4a5568',0.4); popM();
+      if(swing<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
+      continue; }
+    if(n.prop==='mirror'){ drawShadow(n.x,n.z,16,0.22);
+      bx(n.x,46,n.z, 6,92,20,'#3a2f26'); bx(n.x,88,n.z, 30,10,22,'#4a3a26');                    // ornate frame + top
+      bx(n.x,48,n.z+2, 34,84,3,'#12202a','#8fd0ff',0.28+0.12*Math.sin(t*1.5));                   // reflective glass
+      bx(n.x,48,n.z+3.4, 10,70,1, '#bfe6ff','#bfe6ff',0.12);                                      // sheen
+      continue; }
+    if(n.prop==='sparring'){ drawShadow(n.x,n.z,16,0.22);
+      bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
+      bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
+      continue; }
     // a living keeper: solid figure, trimmed in their post's color
     drawShadow(n.x,n.z,13,0.25);
     pushM(); mv(n.x,0,n.z); rotY(Math.sin(t*0.6+n.x)*0.25+(n.x>0?-1.2:1.2));
     bx(0,9,0, 12,18,9, '#2c2f3a'); bx(0,26,0, 15,18,11, n.c1);
     bx(0,26,6, 15,4,2, n.c2, n.c2, 0.4);                                              // sash in post colors
     bx(0,41,0, 10,11,10, '#c9a380'); bx(0,48,0, 12,4,12, n.c2, n.c2, 0.35);           // head + trimmed hood
+    if(n.id==='drillmaster'){ pushM(); mv(10,30,4); rotX(-0.5+Math.sin(t*4.5)*0.95); bx(0,11,0, 3,22,3,'#b8bec8'); bx(0,23,0, 4,10,4,'#eef2f8','#fff',0.5); popM(); }   // idle: drilling a practice cut
     popM();
     bx(n.x,66,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
   }
-  // dummy corner rug
+  // dummy corner rug + target-range mat
   bx(300,0.8,-20, 130,1.4,90, '#3a3226');
+  bx(290,0.8,-330, 220,1.4,60, '#2f2a22');
+  // ===== Phase 12: a hub that GROWS with your progress =====
+  // ITEM 1 — boss trophies mounted along the west wall, one per cleared zone, in the boss's colour
+  { let ti=0; ZONES.forEach((Z)=>{ if(!meta.zoneDone[Z.id]) return; const tz=-300+ti*82; ti++; const col=ZONE_TROPHY[Z.id]||'#e8a33d';
+      bx(-406,118,tz, 7,42,36,'#2a2f3a'); bx(-402,122,tz, 4,26,20, col, col, 0.85); bx(-402,122,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }
+  // ITEM 1 — a trainer figure stands for every class you've unlocked (behind the Drillmaster)
+  { const uc=CLASSIDS.filter(c=>meta.classUnlocked[c]); uc.forEach((c,k)=>{ const tx=250+k*44, tz=-214, col=CLASS_COL[c]||'#e8453d';
+      drawShadow(tx,tz,10,0.2); pushM(); mv(tx,0,tz); rotY(Math.sin(t*0.5+k)*0.2);
+      bx(0,8,0, 10,16,7,'#242730'); bx(0,22,0, 12,15,9, col); bx(0,34,0, 8,9,8,'#c9a380'); popM();
+      bx(tx,50,tz, 3.5,3.5,3.5, col, col, 0.5+0.3*Math.sin(t*3+k)); }); }
+  // ITEM 2 — the dying world on the horizon over the low north rampart, + the Apex throne looming
+  { const vista=[[-540,-760,240,300,'#2a2118'],[-210,-880,300,460,'#25303a'],[150,-800,230,300,'#3a1c14'],[470,-760,220,300,'#241431']];
+    for(const v of vista){ bx(v[0],v[3]/2,v[1], v[2],v[3],70, v[4], tint(v[4],'#000',0.3), 1); }
+    bx(0,320,-1080, 210,640,90, '#160f22','#3a2450',1); bx(0,600,-1080, 90,150,60,'#241431','#7a30c0',0.5);   // the Apex throne
+    for(let i=0;i<12;i++){ const ey=((t*26+i*70)%200); bx(-360+((i*151)%740), ey+8, -366-((i*47)%110), 3,3,3, '#ff9a4a','#ffd24a', 0.5*(1-ey/200)); } }   // drifting embers
+  // ITEM 6 — expensive cosmetic upgrades, purchased in the shop, that visibly transform the Waystation
+  const HU=meta.hubUpgrades||{};
+  if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ bx(b[0],20,b[1], 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b[0],46,b[1], 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b[0]+(Math.random()-0.5)*10,54+Math.random()*18,b[1], 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
+  if(HU.banners){ for(const s of [-1,1]) for(let k=0;k<3;k++){ const bz=-200+k*160; bx(s*406,112,bz, 3,72,34, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.6); } }
+  if(HU.ramparts){ for(let i=0;i<9;i++){ bx(-380+i*95,78,-380, 30,22,26,'#4a4f5e'); } }
+  if(HU.gild){ bx(0,76,-60, 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,-60, 9,150,9,'#ffe9a8','#ffd24a',0.22); }
 }
 /* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
 const SPAWNER={

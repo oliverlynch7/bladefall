@@ -194,27 +194,59 @@ self-contained work session. Work top to bottom.
   edge arrows pointing at nearby enemies that are off-screen or behind the camera (aiming cameras only).
   Verified: renders clean across all the role/boss frames.
 
-## Phase 12 — Hub 2.0 (make the Waystation a place worth being, not a menu lobby)
-- [ ] **The hub GROWS with your progress.** On zone clear, mount a **boss trophy** (the slain boss's
-  relic/emblem) on a hub wall; cleared gates burn permanently bright; unlocking a class makes its
-  **trainer appear** in the hub. By endgame the Waystation is a hall of your conquests.
-  *(NO cosmetic/skin mannequins — Oliver does not want those.)*
-- [ ] **Open it up with a VIEW of the world.** Replace the walled box with a vista: distant zones on
-  the horizon (Hollow canyon, Frostfell peaks, Emberdeep volcano, the Abyss) with the **Apex throne
-  looming** above; gates point toward what you can see. Ambient embers / wind / moody torchlight (build
-  on the v1.13 dark lighting) — the last Warden outpost overlooking a dying world.
-- [ ] **Training arena.** Upgrade the training dummies into a real combat sandbox: **spawn any unlocked
-  enemy to practice against**, test your build/skills stakes-free, a target range for ranged, optionally
-  a short parkour course. A reason to linger + where players learn their kit.
-- [ ] **A MIRROR in the hub.** Walk up to inspect your own character with currently-equipped
-  gear/cosmetics, reflecting live changes — especially valuable in first-person mode where you otherwise
-  can't see yourself.
-- [ ] **NPCs that are alive + react to you.** Keeper / Warden's-Shade dialogue reacts to your progress
-  (boss kills, your last run, your class); add idle life (Smith hammering, Drillmaster drilling). Lean on
-  the Warden's Shade as the hub's soul.
-- [ ] **Expensive cosmetic HUB upgrades in the shop.** Purchasable visual upgrades to the Waystation
-  itself (relit braziers, banners, repaired ramparts, decor) — **quite expensive** gold sinks that
-  visibly improve the hub. Gives gold a lasting home and turns the ruin into your fortress.
+## Phase 12 — Hub 2.0 (make the Waystation a place worth being, not a menu lobby) — SHIPPED v1.53.0
+- [x] **The hub GROWS with your progress.** `drawWaystation` now mounts a **boss trophy** (a relic in the
+  boss's colour, `ZONE_TROPHY`) on the west wall for each `meta.zoneDone` zone; **cleared gates burn
+  permanently bright** (higher glow + green flame motes); and a **class-trainer figure appears** for every
+  `meta.classUnlocked` class behind the Drillmaster. No mannequins. Verified with 3 cleared zones + 3 classes.
+- [x] **World VISTA.** The north rampart is lowered to 66 so you see over it to distant zone silhouettes
+  (canyon/peaks/volcano/abyss) with the **Apex throne looming** on the horizon, plus drifting ambient
+  **embers**. Verified: renders clean over the low wall.
+- [x] **Training arena.** New **Sparring Post** (E → `openTrainingArena`): spawn ×2 of any foe unlocked by
+  your `zoneMax` (10 types at zoneMax 4), **stakes-free** (hub `hurtPlayer` never kills; practice foes give
+  no XP/gold/loot), plus a **target range** (ranged dummies) and a **short parkour course**. Verified: spawns
+  2 practice foes, lethal hit does not kill in the hub.
+- [x] **A MIRROR** (E → `openMirror`): renders a **live portrait** of your character with equipped
+  gear/cosmetics (via `heroPortrait` → `drawHero3`), plus a full equipped-loadout sheet — invaluable in
+  first-person. Verified: portrait renders as a data-image.
+- [x] **NPCs alive + reactive.** `npcReact` appends a progress-aware line (gold / class+rank / gates cleared
+  / bag state) to each keeper's dialogue; idle life added — the **Smith hammers** (with sparks) and the
+  **Drillmaster drills** a practice cut. (Code-verified; runs on the existing E-to-talk path.)
+- [x] **Expensive cosmetic HUB upgrades in the shop.** A "🏰 The Waystation" shop section sells **Relit
+  Braziers (2500g)**, **War Banners (4000g)**, **Repaired Ramparts (7000g)**, **Gild the Waystone (12000g)** —
+  persistent (`meta.hubUpgrades`), each visibly transforming `drawWaystation`. Verified: buy → −2500g, decor
+  appears.
+
+## Phase 13 — Menus, HUD & visual fixes
+- [ ] **Title + pause backgrounds redesigned.** The current backdrop looks like "the back of a wall,
+  bobbing" — weird and off, on the title AND every pause/menu screen. Give them a proper, aesthetic,
+  **BLADEFALL-branded** dark-fantasy background (a real scene/art, not a bobbing wall).
+- [ ] **Pause menu clarity redesign.** It's uninspiring and every option looks identical, so navigating
+  means reading everything. Make options **visually distinct and instantly scannable** (icons + grouping
+  + hierarchy), on-brand — the eye should find things without reading each line.
+- [ ] **Persistent quest tracker on the main HUD.** Current quests always visible while playing; position
+  it so it does NOT overlap the other HUD elements.
+- [ ] **First-person arm distortion fix.** The FP arm/weapon must stay consistent when looking up/down —
+  it currently distorts based on look pitch.
+- [ ] **Hollow Pass wall flicker fix.** Walls there flicker / look glitchy (likely z-fighting) — fix.
+
+## Phase 14 — Level depth & bestiary (MAJOR content bar — build zone-by-zone: ship one, judge, then the rest)
+- [ ] **Theme consistency per zone.** Every sub-area of a zone keeps ONE biome the whole way through —
+  no breaks like Outskirts (plains) dropping into a lava dungeon. Fix the theme→color/hazard mapping so a
+  zone reads coherently start to finish.
+- [ ] **Levels much LARGER + more intricate.** Kill the "cross it in ~20 seconds" problem (most levels are
+  one interesting layout copy-pasted). Each explorable area should take **at least a few minutes** to fully
+  navigate and stay interesting throughout — branching paths, verticality, loops, landmarks, varied
+  navigation. Real content, not repetition.
+- [ ] **Per-zone unique bestiary.** Each zone gets its OWN set of unique monsters (distinct attack styles,
+  abilities, HP, behavior). Only SOME core mobs are reused, **sparingly**, and only where they fit the
+  zone's theme; vary which/when core mobs reappear.
+- [ ] **Hub "Proving Grounds" — endless escalating grind zone** (distinct from Phase 12's stakes-free
+  practice arena; may be a second mode of it). From the hub, for grinding XP + gold without replaying
+  low-spawn old missions. All mobs SUPER strong; **spawn rate ramps exponentially** over time (hard caps
+  to prevent overcrowding/crashes); mob HP + damage scale up so it stays useful at ANY level. A fresh
+  player dies fast; a geared veteran lasts much longer but is ALWAYS eventually outscaled and overwhelmed.
+  Reward XP/gold scaled to survival time.
 
 ---
 ### Conventions recap (every phase)

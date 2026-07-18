@@ -321,7 +321,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.60.0';
+const VERSION3D='1.61.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -348,7 +348,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -362,7 +362,7 @@ const meta=Object.assign({
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
-  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
@@ -1264,6 +1264,11 @@ function openWay(){ if(G.portal||!G.portalPos) return;
 function questUpdate(){
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
+  if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive);
+      el.innerHTML=`<div class="qhead">🕳️ Abyssal Descent</div>
+        <div class="qrow"><span class="qtick">▼</span> <b>Floor ${G.floor||1}</b>${meta.endlessBest?` · <span style="opacity:.7">Best ${meta.endlessBest}</span>`:''}</div>
+        <div class="qrow ${G.floorCleared?'qdone':''}"><span class="qtick">${G.floorCleared?'☑':'⚔'}</span> ${G.floorCleared?'The way opens — take the portal':`Clear the floor <b>${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}</b>`}</div>`;
+      el.classList.remove('hide'); return; }
   const Z=curZone();
   let rows;
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
@@ -1866,6 +1871,7 @@ function skipTrial(){
 }
 function abandonTrial(){ restoreBank(); openHub(); }
 function nextArea(){
+  if(G.endless){ endlessDescend(); return; }                  // Endless: the portal drops you a floor deeper
   if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
   if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
   if(G.trial){ trialComplete(); return; }
@@ -3192,8 +3198,10 @@ function killEnemy(e){
   if(e.deathpuff){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:132,dmg:e.dmg*0.85,life:0,spd:230,col:'#9fd84a',col2:'#6ea82e'});   // sporeback bursts a poison cloud on death
     for(let i=0;i<14;i++){ const a=Math.random()*6.28, sp=40+Math.random()*70; G.particles.push({x:e.x,y:e.y+e.h*0.4,z:e.z,vx:Math.cos(a)*sp,vy:50+Math.random()*40,vz:Math.sin(a)*sp,life:0.7,color:'#9fd84a',sz:2.6}); }
     addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
-  addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
-  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
+  const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
+  if(G.endless) G.endKillsTotal=(G.endKillsTotal||0)+1;
+  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+_xp+' XP','var(--xp)'); gainXp(_xp);
+  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss){
     SFX.win(); document.getElementById('bosshpwrap').classList.remove('on');
@@ -3303,6 +3311,7 @@ function update(dt){
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
+  if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
@@ -3827,6 +3836,7 @@ function randomLoot(rid){ const r=Math.random();
 function regrabCam(){ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
 function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
+  if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
   const Z=curZone(), perma=isPermadeath(), D=curDiff();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
@@ -3839,6 +3849,132 @@ function die(){
         <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
     <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
+}
+/* ============================================================
+   ENDLESS DESCENT  (Phase 11 endgame loop + Phase 14 "Proving Grounds")
+   An infinite, escalating survival mode. Descend floor after floor; each is harder
+   than the last; clear a floor's wave to open the portal down; die and you keep every-
+   thing earned (a grind, not permadeath). Deepest floor is a permanent personal best.
+   Each floor borrows an existing zone THEME for its look, biasing darker as you go deep.
+   ============================================================ */
+const ENDLESS_ROT=[0,1,3,5,7,9,11,13,15];   // themed (non-boss) stage indices, light -> dark
+function endlessStageFor(n){                  // advance a new (darker) theme every 2 floors, then rotate the dark half
+  const idx=Math.floor((n-1)/2);
+  if(idx<ENDLESS_ROT.length) return ENDLESS_ROT[idx];
+  const dark=ENDLESS_ROT.slice(4);            // frost/volcano/void/marble/apex
+  return dark[(n-1)%dark.length];
+}
+function startEndless(){
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{endless:true,floor:0,zone:11,area:0,zoneTier:1});
+  G.endGold0=meta.gold||0; G.endKillsTotal=0;
+  meta.run=null;
+  loadEndlessArena(1);
+  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate(); questUpdate();
+  if(!startEndless._greeted){ startEndless._greeted=true; storyToast('The Abyss has no floor. See how far you can fall.'); }
+}
+function loadEndlessArena(n){
+  const stageIdx=endlessStageFor(n), s=STAGES[stageIdx];
+  G.floor=n; G.stageIndex=stageIdx; G.haz=null;
+  G.zoneTier=Math.min(7,1+Math.floor((n-1)/4));        // slow tier climb feeds the loot band + a little enemy scaling
+  G.ngHp=Math.pow(1.11,n-1); G.ngDmg=Math.pow(1.06,n-1); // the core curve: HP ramps faster than damage
+  G.endReward=1+n*0.12;                                  // XP + gold scale with depth
+  G.endTarget=Math.min(60,6+Math.round(n*2));            // foes to clear this floor
+  G.endCap=Math.min(24,8+Math.floor(n*0.8));             // HARD concurrent-enemy cap (phones)
+  G.endBatch=Math.min(3,1+Math.floor(n/6));
+  G.endInt=Math.max(0.35,1.4-n*0.05);
+  G.endSpawned=0; G.endSpawnT=0.6; G.floorCleared=false;
+  meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
+  // ---- reset scene arrays (mirrors loadStage) ----
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
+  document.getElementById('bonustimer').style.display='none';
+  document.getElementById('bosshpwrap').classList.remove('on');
+  // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
+  const R=470;
+  G.segments.push({x:0,z:0,w:R*2,d:R*2});
+  G.walls.push({x:0,z:-R,w:R*2+40,d:26,h:120},{x:0,z:R,w:R*2+40,d:26,h:120},{x:-R,z:0,w:26,d:R*2+40,h:120},{x:R,z:0,w:26,d:R*2+40,h:120});
+  for(const [tx,tz] of [[-R+40,-R+40],[R-40,-R+40],[-R+40,R-40],[R-40,R-40],[0,-R+40],[0,R-40]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});
+  const dc=tint(s.ground,'#000',0.25);
+  for(let k=0;k<20;k++){ const a=k/20*6.283, rr=R-70; G.deco.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y0:0,w:40+Math.random()*30,h:90+Math.random()*80,c:tint(dc,'#000',Math.random()*0.2),theme:s.theme}); }
+  G.bounds={minX:-R+30,maxX:R-30,minZ:-R+30,maxZ:R-30}; G.progressEnd=-R;
+  G.portalPos={x:0,z:-R+110};                          // the way down sits at the far (north) edge
+  G.startPos={x:0,z:R-140}; G.goalPos={x:0,z:-R+110}; G.lastSafe={x:0,z:R-140,y:0};
+  G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
+  G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
+  // reward beat: a loot cache every third floor (rarity still gated by character level via bandedRarity)
+  if(n>1 && n%3===0) G.chests.push({x:0,z:-40,y:0,opened:false,bob:0});
+  G.stageBanner=2.2; G.areaName='Floor '+n;
+  document.getElementById('stagetag').textContent='🕳️ FLOOR '+n;
+  questUpdate(); hudUpdate();
+}
+function spawnEndlessMob(n,s){
+  const pool=(THEMEMOBS[s.theme]||['grunt']).filter(m=>ENEMY[m]&&!ENEMY[m].boss);
+  const type=pool.length?pool[Math.floor(Math.random()*pool.length)]:'grunt';
+  const a=Math.random()*6.283, rad=380+Math.random()*70, x=Math.cos(a)*rad, z=Math.sin(a)*rad;
+  const m=spawnEnemy(type,x,z); m.active=true; G.endSpawned++;
+  if(Math.random()<Math.min(0.5,0.05+n*0.02)) makeElite(m);   // deeper floors turn denser with elites
+  burst(x,20,z,'#c47bff',10);
+  return m;
+}
+function endlessTick(dt){
+  if(mode!=='play'||G.floorCleared) return;
+  const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length;
+  if(G.endSpawned<G.endTarget){
+    G.endSpawnT-=dt;
+    if(alive<G.endCap && G.endSpawnT<=0){
+      const batch=Math.min(G.endBatch,G.endTarget-G.endSpawned,G.endCap-alive);
+      for(let i=0;i<batch;i++) spawnEndlessMob(G.floor,STAGES[G.stageIndex]);
+      G.endSpawnT=G.endInt;
+    }
+  } else if(alive===0 && !G.portal){
+    G.floorCleared=true; G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+    addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
+    toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('bigreveal'); SFX.win(); questUpdate();
+  }
+}
+function endlessDescend(){
+  meta.hero=snapOf(G.p); meta.bank=null; persist();   // bank the run each floor so closing the tab keeps the gains
+  loadEndlessArena((G.floor||1)+1); SFX.pickup();
+}
+function endlessDie(){
+  mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
+  const floor=G.floor||1, kills=G.endKillsTotal||0, goldEarned=Math.max(0,(meta.gold||0)-(G.endGold0||0));
+  const newBest=floor>(meta.endlessBest||0);
+  meta.hero=snapOf(G.p); meta.bank=null; meta.endlessBest=Math.max(meta.endlessBest||0,floor);
+  persist(); persistGlobal(); checkAchievements();
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:40px;color:#c47bff">THE ABYSS TOOK YOU</h2>
+    <p class="ovsub">Abyssal Descent · Level ${G.p.level}</p>
+    ${newBest?`<p class="hint" style="color:#ffd24a;font-weight:800">✦ NEW BEST — Floor ${floor}</p>`:''}
+    <div class="statgrid"><div class="vsrow"><span>Floor reached</span><b style="color:#c47bff">${floor}</b></div>
+      <div class="vsrow"><span>Deepest ever</span><b>${meta.endlessBest}</b></div>
+      <div class="vsrow"><span>Foes slain</span><b>${kills}</b></div>
+      <div class="vsrow"><span>Gold earned</span><b style="color:#ffd24a">+${goldEarned}g</b></div>
+      <div class="vsrow"><span>Kept</span><b style="color:var(--good)">everything — level, gear, gold</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function openEndlessGate(){
+  mode='menu'; SFX.pickup();
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.16em">🕳️ ABYSSAL DESCENT</p>
+    <h2 class="ovh">The Endless Below</h2>
+    <p class="ovsub">Floors without end, each harder than the last. Grind the best XP and gold in the game — until the dark finally outscales you. Death sends you home with everything you earned.</p>
+    <div class="statgrid"><div class="vsrow"><span>Your deepest floor</span><b style="color:#ffd24a">${meta.endlessBest?('Floor '+meta.endlessBest):'—'}</b></div></div>
+    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#7a3fb0,#4a2070)">Descend</button>
+    <button class="bigbtn ghost" id="descBack">Not yet</button></div>`);
+  document.getElementById('descBtn').onclick=startEndless;
+  document.getElementById('descBack').onclick=wsResume;
+}
+function enterEndlessFromTitle(){
+  initAudio(); if(!meta.diff) meta.diff='normal'; loadMode(diffMode(meta.diff));
+  if(!meta.hero || !Object.keys(meta.classUnlocked||{}).length){ meta.diff='normal'; loadMode('rl'); openHub(); toast('Pick a class first, then find the Abyssal Descent stone in the hub.'); return; }
+  startEndless();
 }
 function winGame(){
   mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
@@ -3916,6 +4052,7 @@ function titleScreen(){ musicPlay('hub');
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">Hardcore Dungeon Crawler</p>
     <button class="bigbtn" id="playBtn">Play</button>
+    <button class="bigbtn ghost" id="abyssBtn" style="border-color:#6a2fa0;color:#d9b6ff">🕳️ Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
     <button class="bigbtn ghost" id="slotsBtn">Characters · Slot ${SLOT+1}</button>
     <button class="bigbtn ghost" id="skinBtn">Skins</button>
     <button class="bigbtn ghost" id="achBtn">Achievements</button>
@@ -3926,6 +4063,7 @@ function titleScreen(){ musicPlay('hub');
       Desktop: WASD + Space, J/K/L, Esc · Skins &amp; achievements carry across modes.<br>
       Skins: <b>${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1}</b><br><span style="opacity:.5">v${VERSION3D}</span></p></div>`);
   document.getElementById('playBtn').onclick=modeSelect;
+  document.getElementById('abyssBtn').onclick=enterEndlessFromTitle;
   document.getElementById('slotsBtn').onclick=openSlots;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
   document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
@@ -3996,7 +4134,8 @@ function enterWaystation(){
     {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
     {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:320,z:110,open:()=>openForge(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:-300,z:-20,open:()=>openMirror(wsResume)},
-    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:60,open:()=>openTrainingArena(wsResume)}
+    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:60,open:()=>openTrainingArena(wsResume)},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:150,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
   ];
   // training dummies by the drillmaster — hit them as hard as you like
   for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
@@ -4148,7 +4287,7 @@ function openTrainingArena(back){ mode='menu';
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
   let it=null; const p=G.p;
-  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:'Talk to '+n.name,act:()=>openNpcTalk(n)}; } } }
+  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } } }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Warden's Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }
@@ -5111,6 +5250,12 @@ function drawWaystation(t){
       bx(n.x,48,n.z+2, 34,84,3,'#12202a','#8fd0ff',0.28+0.12*Math.sin(t*1.5));                   // reflective glass
       bx(n.x,48,n.z+3.4, 10,70,1, '#bfe6ff','#bfe6ff',0.12);                                      // sheen
       continue; }
+    if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
+      bx(n.x,32,n.z, 50,64,16,'#140a20','#6a2fa0',0.5);                                    // dark monolith
+      bx(n.x,36,n.z+9, 30,46,4,'#0a0410','#b06bff',0.35+0.3*Math.sin(t*2));                // swirling void window
+      bx(n.x,68,n.z, 34,12,20,'#241436','#6a2fa0',0.5);                                    // capstone
+      for(let i=0;i<4;i++){ const a=t*1.4+i*1.6, rr=12+i*3; bx(n.x+Math.cos(a)*rr, 36+Math.sin(a*1.3)*16, n.z+11, 3.5,3.5,3.5, '#c47bff','#e0b0ff',0.75); }  // orbiting motes
+      continue; }
     if(n.prop==='sparring'){ drawShadow(n.x,n.z,16,0.22);
       bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
       bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
@@ -5845,6 +5990,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
+  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,

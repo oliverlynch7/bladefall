@@ -321,7 +321,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.58.0';
+const VERSION3D='1.59.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -622,6 +622,7 @@ function initAudio(){ if(!actx){ try{
   master=actx.createGain(); master.gain.value=0.6*(meta.sfxVol!=null?meta.sfxVol:1); master.connect(actx.destination);
   noiseBuf=actx.createBuffer(1,actx.sampleRate,actx.sampleRate);
   const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  loadFxFiles();
 }catch(e){} }
   musicUnlock(); }
 // The browser blocks audio until a real gesture. initAudio() runs on the FIRST gesture
@@ -651,6 +652,38 @@ function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
   const g=actx.createGain(); env(g,t,o.a||0.004,o.vol||0.1,o.dur);
   s.connect(f); f.connect(g); g.connect(master); s.start(t,Math.random()*0.5); s.stop(t+o.dur+0.03); }catch(e){}
 }
+/* ---- File-based SFX (v1.59): real sourced sounds layered on the procedural engine. Decoded to
+   WebAudio buffers on the first gesture, played through the same master gain so meta.sfxVol +
+   soundOn apply. Loopables (footstep/heartbeat/electric/rain) get start/stop handles. ---- */
+const SFXDIR='/sfx/';
+const FXDEF={
+  quest:{f:'fanfare-announcement-arrival',v:0.30}, levelcheer:{f:'fanfare-celebration',v:0.55},
+  footstep:{f:'footsteps-pair-soft-loopable',v:0.15,loop:true}, mobknock:{f:'bamboo-knock-loopable',v:0.22},
+  forgeopen:{f:'blade-sharpening-loopable',v:0.40}, bookflip:{f:'book-flip-page',v:0.40},
+  chestopen:{f:'box-open',v:0.50}, wallbreak:{f:'break-object-small',v:0.50},
+  click:{f:'button-press',v:0.30}, equip:{f:'cape-and-hood-drawn',v:0.42},
+  shopopen:{f:'cash-register-open-till',v:0.40}, wallslide:{f:'chair-pull-up-2',v:0.50},
+  bigreveal:{f:'clanging-pipes-loopable',v:0.26}, forgespin:{f:'coin-double-flip',v:0.40},
+  dice:{f:'dice-rolling',v:0.45}, doorslam:{f:'door-slam-heavy',v:0.26}, dooropen:{f:'doorknock-heavy',v:0.30},
+  drink:{f:'drink-2',v:0.50}, electric:{f:'fence-electric-hum-loopable',v:0.32,loop:true},
+  fireshot:{f:'fire-ignition-combustible-powder',v:0.26}, firecharge:{f:'fire-launch-jet',v:0.30},
+  fireball:{f:'fireball-launched',v:0.40}, heartbeat:{f:'heartbeat-rapid',v:0.42,loop:true},
+  frostclink:{f:'ice-clinking-in-glass',v:0.20}, bigland:{f:'jump-soft-landing',v:0.40},
+  train:{f:'lifting-double-weight',v:0.50}, bag:{f:'pickpocket-snatch-soft',v:0.40},
+  rain:{f:'rain-with-trickle-loopable',v:0.28,loop:true}, bonesdie:{f:'rocks-cliff-face-collapse',v:0.33},
+  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.40}, lever:{f:'switch-push',v:0.45}
+};
+const FXBUF={}; let _fxLoaded=false;
+function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
+  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;}).catch(()=>{}); })(k); } }
+const _fxLoop={};
+function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
+  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(master); s.start(); return {s,g}; }catch(e){ return null; } }
+function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
+  try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
+function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
 const SFX={
   // blade cutting air: airy whoosh sweeping down, faint steel sing
   slash(){ noise({dur:0.16,f0:2600,f1:320,q:1.4,vol:0.15,a:0.012});
@@ -661,7 +694,7 @@ const SFX={
   // magic cast, flavored by element
   magic(el){
     if(el==='fire'){ tone({f0:150,f1:46,dur:0.28,type:'sawtooth',vol:0.10});
-      noise({dur:0.30,f0:900,f1:180,type:'lowpass',vol:0.13,a:0.01}); }
+      noise({dur:0.30,f0:900,f1:180,type:'lowpass',vol:0.13,a:0.01}); playFx('fireshot'); }
     else if(el==='ice'){ tone({f0:1250,dur:0.26,type:'sine',vol:0.05}); tone({f0:1870,dur:0.3,type:'sine',vol:0.03,at:0.02,detune:6});
       noise({dur:0.22,f0:5200,f1:8200,type:'highpass',vol:0.045,a:0.008}); }
     else if(el==='storm'){ tone({f0:1900,f1:170,dur:0.08,type:'sawtooth',vol:0.07});
@@ -1589,7 +1622,7 @@ function bagReplaced(old,isWeapon){
 function stashItem(it){
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ return false; }   // caller shows the bag-full prompt
-  meta.stash.push(it); persist(); SFX.pickup(); return true;
+  meta.stash.push(it); persist(); SFX.pickup(); playFx('bag'); return true;
 }
 function lowestBagIdx(){ let li=-1,lv=1e18; (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor; if(!o) return; const v=itemGold(o); if(v<lv){lv=v;li=i;} }); return li; }
 // bag full on a pickup/purchase: sell your lowest to make room, or leave the new item behind (rewards bag management)
@@ -1665,7 +1698,7 @@ function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
   return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
 }
 function openForge(back){
-  mode='menu';
+  mode='menu'; playFx('forgeopen');
   const fuseable=fuseGroups();
   const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
@@ -1683,7 +1716,7 @@ function openForge(back){
 /* Slot-machine forge reveal (Vampire-Survivors-style): the reel of category icons spins, ratchets down,
    and lands on the random forged item — then it drops into your bag. */
 function forgeSpin(g,back){
-  mode='menu';
+  mode='menu'; playFx('forgespin');
   const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
   const result=forgeResult(g), ro=result.weapon||result.armor||result.trinket;
   // consume the two inputs up front
@@ -1726,6 +1759,7 @@ function enterZone(zi){
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
+  if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
   const Z=curZone();
@@ -2554,6 +2588,8 @@ window.addEventListener('mousedown',e=>{ if(meta.camMode!=='far' && mode==='play
   const up=()=>{ md=null; };
   window.addEventListener('pointerdown',dn); window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
 })();
+// menu click SFX: a soft button press on any overlay/menu control
+document.addEventListener('pointerdown',e=>{ const el=e.target; if(el&&el.closest&&el.closest('.bigbtn,.choice,.gearrow,.wsbtn,.wsbig,.zrow,.buybtn,.ctab,.skintile,.snode')) playFx('click'); },true);
 document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
   G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
@@ -2817,6 +2853,7 @@ function classStyleMul(p){
 function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
+  if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
   switch(w.chg){
     case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
     case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
@@ -3080,6 +3117,7 @@ function resolveSwing(){
   }
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   const mod=elemMod(el,e.element);
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
@@ -3141,7 +3179,7 @@ function killEnemy(e){
                                    :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
       pushLoot(e.x+(i?26:-26),e.z+16,0,item);
     }
-  } else { SFX.enemyDie(); checkAchievements();
+  } else { SFX.enemyDie(); if(e.look==='bones'||e.type==='bones'){ playFx('bonesdie'); } else if(e.type==='frostling'){ playFx('frostdie'); } checkAchievements();
     // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
     if(e.elite || Math.random()<0.16) rollDrop(e);
     if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
@@ -3150,7 +3188,7 @@ function killEnemy(e){
   checkStageClear();
 }
 function openChest(ch){
-  ch.opened=true; SFX.pickup(); SFX.achieve();
+  ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('✓ Loot secured — grab it, then take the exit'); } // stop the clock the instant you grab it
@@ -3195,7 +3233,7 @@ function gainXp(n){
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(44+p.level*30+p.level*p.level*1.7);
     autoLevelGrow(p); recomputeArmor(p);
     p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
-    SFX.levelup(); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
+    SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
     addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
     const unlocked=rarityUnlockedAt(p.level);
     if(unlocked) storyToast('🗝 Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.');
@@ -3334,9 +3372,12 @@ function update(dt){
   p.y+=p.vy*dt;
   resolveObstacles(p,p.r,yPrev);                 // walls: obstacles whose top was above your feet
   const floor=floorAt(p.x,p.z,p.r,yPrev);
-  if(!p.onGround && p.vy<=0 && floor>-1e8 && p.y<=floor){ p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); SFX.land(); p.onGround=true; p.jumps=0; }
+  if(!p.onGround && p.vy<=0 && floor>-1e8 && p.y<=floor){ if(p.vy<-640) playFx('bigland'); p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); SFX.land(); p.onGround=true; p.jumps=0; }
   else if(p.onGround && (floor<-1e8 || p.y>floor+0.5)){ p.onGround=false; if(p.vy>0) p.vy=0; } // walked off an edge
   else if(p.onGround) p.y=floor;
+  { const mv2=Math.hypot(p.vx||0,p.vz||0)>25 && p.onGround;   // file-SFX loops: footsteps while walking, heartbeat when critical
+    if(mv2 && mode==='play'){ loopFx('footstep'); } else { stopFx('footstep'); }
+    if(mode==='play' && p.hp>0 && p.hp<=effMaxHp(p)*0.15){ loopFx('heartbeat'); } else { stopFx('heartbeat'); } }
   // ride moving platforms
   if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<2 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; break; } }
   // jump pads launch you
@@ -3523,7 +3564,7 @@ function update(dt){
   if(G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
     if(dXZ(tr.x,tr.z,p.x,p.z)<(tr.r||34) && Math.abs(p.y-(tr.y||0))<60){ tr.done=true;
       if(G.secret){ G.secret.hidden=false; G.secret.t=0; burst(G.secret.x,G.secret.y+30,G.secret.z,'#c47bff',24); addText(G.secret.x,G.secret.y+82,G.secret.z,'A RIFT TEARS OPEN','#c47bff',true); }
-      SFX.god(); G.shake=Math.min(G.shake+11,17); toast('⚙ Stone grinds somewhere in the dark — something has opened'); } }
+      SFX.god(); playFx('lever'); playFx('wallslide',1); G.shake=Math.min(G.shake+11,17); toast('⚙ Stone grinds somewhere in the dark — something has opened'); } }
   // hidden side-zone rift: walk into it and it's yours forever (a hidden:true rift stays sealed until its trigger fires)
   if(G.secret && !G.secret.hidden){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
@@ -3699,7 +3740,7 @@ function offerWeapon(nw){
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); playFx('equip'); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
 }
@@ -3722,7 +3763,7 @@ function offerArmor(na){
     </div>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
 }
@@ -3740,7 +3781,7 @@ function offerTrinket(nt){
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({trinket:nt})){ toast(nt.name+' stashed'); resumePlay(); } else bagFullPrompt({trinket:nt},resumePlay); };
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(nt.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
 /* one random loot item (weapon / armor / trinket) at a given rarity */
@@ -3767,7 +3808,7 @@ function die(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 function winGame(){
-  mode='win'; SFX.win(); showGameUI(false); musicStop(1200);
+  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
   const bonus=awardGold(500), D=curDiff();
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
   meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
@@ -4295,7 +4336,7 @@ function openQuestBoard(back){
   document.getElementById('backBtn').onclick=back;
 }
 function openShop(back){
-  mode='menu';
+  mode='menu'; playFx('shopopen');
   const rows=PERKIDS.map(id=>{ const P=PERKS[id], lv=perkLevel(id), maxed=lv>=P.max, cost=perkCost(id), afford=meta.gold>=cost;
     return `<div class="gearrow"><div class="gi">${P.name}</div>
       <div style="flex:1"><div class="gn">Lv ${lv}${maxed?' · MAX':''} <span style="color:var(--good);font-weight:700">${lv>0?P.unit(P.per*lv):''}</span></div>

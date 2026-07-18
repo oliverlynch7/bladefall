@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.73.0';
+const VERSION3D='1.74.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1801,6 +1801,45 @@ function openForge(back){
 }
 /* Slot-machine forge reveal (Vampire-Survivors-style): the reel of category icons spins, ratchets down,
    and lands on the random forged item — then it drops into your bag. */
+/* ---------------- THE GAMBLE (Phase 18): Fortune's Bag ----------------
+   A deliberate gold sink: 480g (8x a common shop buy) for one random item whose odds are
+   HEAVILY junk-weighted — EV ~280g of shop value, so the house always wins. The tail is
+   real but thin (epic 4.2%, legendary 0.8% vs the natural drop table's 1.1%/0.19%). The
+   rolled item lands in the BAG like any loot (above-level rarities sit there locked —
+   canWield gates equipping, not owning — exactly the existing loot behavior). */
+const GAMBLE_COST=480;
+const GAMBLE_ODDS=[['common',0.52],['uncommon',0.30],['rare',0.13],['epic',0.042],['legendary',0.008]];
+function gambleRarity(){ let r=Math.random(); for(const q of GAMBLE_ODDS){ if(r<q[1]) return q[0]; r-=q[1]; } return 'common'; }
+function gambleSpin(back){
+  mode='menu'; playFx('dice'); playFx('forgespin',0.7);
+  const rid=gambleRarity(), item=randomLoot(rid), ro=item.weapon||item.armor||item.trinket, rc=RARITY[rid].color, tier=RARITY[rid].tier;
+  // a teaser reel that flashes every rarity — anything could happen (it won't)
+  const pool=[itemAv(makeWeapon('sword','common')),itemAv(makeArmor('uncommon','chest')),itemAv(makeWeapon('bow','rare')),
+              itemAv(makeArmor('epic','helmet')),itemAv(makeWeapon('firestaff','uncommon')),itemAv(makeWeapon('great','legendary'))];
+  const finalIcon=itemAv(ro);
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">🎲 Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
+    <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid #ffd24a;box-shadow:0 0 24px #ffd24a66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]}"></div></div>
+    <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
+    <button class="bigbtn hide" id="gamAgain">Again · ${GAMBLE_COST}g</button>
+    <button class="bigbtn ghost hide" id="gamDone">Back to the shop</button></div>`);
+  const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), box=document.getElementById('reelbox');
+  let i=0, delay=45; const t0=Date.now();
+  const step=()=>{ img.src=pool[i%pool.length]; i++;
+    try{ tone({f0:520+(i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}
+    if(Date.now()-t0 < 1400 && delay<220){ delay*=1.12; setTimeout(step,delay); }
+    else { // the landing — triumph or (usually) a thud
+      img.src=finalIcon; box.style.borderColor=rc; box.style.boxShadow='0 0 40px '+rc;
+      nameEl.innerHTML=`<span style="color:${rc};font-weight:800">${ro.name}</span> <span style="opacity:.6;font-size:12px">· ${RARITY[rid].name}</span>`;
+      try{ if(tier>=2){ SFX.god(); playFx('forgedone'); } else { SFX.hurt(); playFx('bag'); } }catch(e){}
+      if(tier>=3){ G&&(G.slowmo=Math.max(G.slowmo||0,0.2)); toast((tier>=4?'✦ LEGENDARY':'◆ EPIC')+' — the bag delivers', rc); }
+      if(!stashItem(item)){ meta.stash.push(item); persist(); }   // bag delivery, forge-payout pattern (force-past-cap parity)
+      persist();
+      const ag=document.getElementById('gamAgain'), dn=document.getElementById('gamDone');
+      dn.classList.remove('hide'); dn.onclick=()=>openShop(back);
+      if(meta.gold>=GAMBLE_COST){ ag.classList.remove('hide'); ag.onclick=()=>{ meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); }; }
+    } };
+  setTimeout(step,delay);
+}
 function forgeSpin(g,back){
   mode='menu'; playFx('forgespin');
   const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
@@ -5248,6 +5287,9 @@ function openShop(back){
   // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
   const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
   const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi">🎒</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
+  // Phase 18: Fortune's Bag — one pull, mostly junk, a thin real tail. The Quartermaster profits.
+  const gAfford=meta.gold>=GAMBLE_COST;
+  const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi">🎲</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${GAMBLE_COST}g</button></div>`;
   // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
   const goal = !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
@@ -5259,7 +5301,7 @@ function openShop(back){
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left">🏰 <b>The Waystation</b> — restore your fortress (cosmetic, costly)</p>
@@ -5283,6 +5325,8 @@ function openShop(back){
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
   const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
+  const gmb=document.querySelector('.gamblebuy'); if(gmb) gmb.onclick=()=>{ if(meta.gold<GAMBLE_COST){ toast('Not enough gold'); return; }
+    meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); };   // gold up front — the pull is the purchase
   document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
     if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
     meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });

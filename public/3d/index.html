@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.68.0';
+const VERSION3D='1.69.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2398,28 +2398,62 @@ const SCAPES={
     scapeFind(ctx, 560,-1500,150);
     finishScape(ctx,{sx:0,sz:160,sy:0, gx:0,gz:-1660, decoCol:'#2a1a44',decoTheme:'void',decoTall:280});
   },
-  /* THE SUNSPIRE PALACE — a grand white-marble compound: an entry court, a long pillared colonnade,
-     hanging-garden terraces, and a raised throne dais at the far end. Bright, open, ceremonial. */
-  palace(ctx){ const {rnd,mkMonster}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a';
-    const entry=vseg(0,0,660,470); G.rooms.push({x:0,z:0,w:660,d:470,monsters:[],encounter:false,cleared:true});
-    const hall=vseg(0,-660,460,820); G.rooms.push({x:0,z:-660,w:460,d:820,monsters:[],encounter:false,cleared:true});
-    // grand colonnade: rows of tall marble columns flanking the hall, gold capitals
-    for(let k=0;k<6;k++){ const z=-330-k*130; for(const sx of [-250,250]){ vcol(sx,z,44,44,152);
-      G.deco.push({x:sx,z,y0:152,w:56,h:16,c:GOLD,theme:'marble'}); G.deco.push({x:sx,z,y0:0,w:60,h:10,c:tint(MARBLE,'#fff',0.15),theme:'marble'}); } }
-    // hanging-garden terraces along the hall (relics rest here in area 1) — hoppable planters
-    const gard=[]; for(let k=0;k<5;k++){ const gx=(k%2?1:-1)*205, gz=-400-k*135, gy=58+k*7; gard.push(vplat(gx,gz,gy,100,100,{pillar:true})); vcol(gx,gz,100,100,gy-6);
-      G.deco.push({x:gx,z:gz,y0:gy,w:92,h:22,c:'#3a6b34',theme:'marble'}); }   // low planters over the hall floor — jump up to each
-    // throne dais: a raised marble platform at the far end (find + portal), reached by shallow steps
-    const dz=-1180, dy=96; climbRun(0,-1010,0, 0,dz+170,dy, 96);
-    const dais=vplat(0,dz,dy,440,360,{terrace:true,checkpoint:true}); G.rooms.push({x:0,z:dz,w:440,d:360,y:dy,monsters:[],encounter:false,cleared:true});
-    G.deco.push({x:0,z:dz-40,y0:dy,w:120,h:90,c:GOLD,theme:'marble'}); G.deco.push({x:0,z:dz-40,y0:dy+90,w:70,h:40,c:tint(GOLD,'#fff',0.2),theme:'marble'});  // the throne
-    vtorch(-210,0,rnd); vtorch(210,0,rnd); vtorch(-190,-660,rnd); vtorch(190,-660,rnd); vtorch(0,dz+50,rnd);
-    mkMonster('bones',-150,-90,entry); mkMonster('bones',150,-90,entry); const cs=mkMonster('caster',0,-600,hall); if(cs.shot){cs.shot.el='holy';cs.shot.color=elementColor('holy');}
-    scapeKill(ctx,[{x:-150,z:-560,room:hall},{x:150,z:-840,room:hall}]);      // marble sentinels patrol the hall floor
-    scapeFetch(ctx, gard.map(g=>({x:g.x,z:g.z,y:g.h})));                        // gilded relics on the garden terraces
-    scapeFind(ctx, 0, dz-90, dy);
-    scapeSecret(ctx, entry.x-entry.w/2+40, entry.z-entry.d/2+40, 0);
-    finishScape(ctx,{sx:0,sz:entry.d/2-50,sy:0, gx:0,gz:dz-360/2+90, decoCol:MARBLE,decoTheme:'marble',decoTall:230});
+  /* THE SUNSPIRE PALACE (Phase 17 deep-dive) — a grand CEREMONIAL AXIS in white marble:
+     the Sun Court (reflecting pools, twin colossi) -> the Processional colonnade cut by
+     god-ray light shafts, hanging-garden planters stepping alongside -> TWO WINGS: the
+     intact West Gallery (statues, a chest) vs the CORRUPTED EAST WING — the palace's one
+     broken symmetry, a shattered checkerboard over the fall with the Sealed Reliquary at
+     its dead end -> the Grand Stair -> the Throne Antechamber dais (find + portal). */
+  palace(ctx){ const {rnd,mkMonster}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a', WATER='#3d6a92', RAY='#fff8d6';
+    // ── 1) THE SUN COURT ──
+    const court=vseg(0,0,720,480); G.rooms.push({x:0,z:0,w:720,d:480,monsters:[],encounter:false,cleared:true});
+    for(const px of [-180,180]){ G.deco.push({x:px,z:60,y0:0,w:212,h:2,d:102,c:GOLD});
+      G.deco.push({x:px,z:60,y0:2,w:196,h:2.4,d:86,c:WATER}); }                              // twin reflecting pools, gold-rimmed
+    for(const sx of [-250,250]){ vcol(sx,-170,64,64,44);                                     // twin colossi flank the way north
+      G.deco.push({x:sx,z:-170,y0:44,w:52,h:90,d:40,c:MARBLE}); G.deco.push({x:sx,z:-170,y0:134,w:30,h:24,d:26,c:tint(MARBLE,'#fff',0.2)});
+      G.deco.push({x:sx,z:-170,y0:158,w:36,h:8,d:32,c:GOLD}); }
+    vtorch(-260,150,rnd); vtorch(260,150,rnd);
+    vseg(0,-290,300,120);                                                                     // the broad steps north
+    // ── 2) THE PROCESSIONAL: colonnade + god-ray light shafts ──
+    const hall=vseg(0,-770,540,860); G.rooms.push({x:0,z:-770,w:540,d:860,monsters:[],encounter:false,cleared:true});
+    for(let k=0;k<7;k++){ const z=-420-k*110; for(const sx of [-240,240]){ vcol(sx,z,44,44,158);
+      G.deco.push({x:sx,z,y0:158,w:56,h:16,d:56,c:GOLD}); } }
+    for(const rz of [-520,-770,-1020]){ G.deco.push({x:0,z:rz,y0:0,w:30,h:170,d:30,c:RAY});   // shafts of sun through the broken roof
+      G.deco.push({x:0,z:rz,y0:0,w:110,h:1.2,d:110,c:tint(GOLD,'#fff',0.35)}); }
+    // hanging-garden planters step along the hall (the relics rest here)
+    const gard=[]; for(let k=0;k<6;k++){ const gx=(k%2?220:-220), gz=-480-k*120, gy=56+k*6;
+      gard.push(vplat(gx,gz,gy,100,100,{pillar:true})); vcol(gx,gz,100,100,gy-6);
+      G.deco.push({x:gx,z:gz,y0:gy,w:92,h:20,d:92,c:'#3a6b34'}); G.deco.push({x:gx,z:gz,y0:gy+20,w:64,h:12,d:64,c:'#4d8842'}); }
+    vtorch(-230,-340,rnd); vtorch(230,-340,rnd); vtorch(-230,-1150,rnd); vtorch(230,-1150,rnd);
+    // ── 3) THE WINGS: intact west, corrupted east — the one broken symmetry ──
+    vseg(-325,-770,110,140);                                                                  // west corridor
+    const wing=vseg(-560,-770,360,300); G.rooms.push({x:-560,z:-770,w:360,d:300,monsters:[],encounter:false,cleared:true});
+    for(let k=0;k<3;k++){ const wz=-690-k*80; vcol(-660,wz,26,26,30);
+      G.deco.push({x:-660,z:wz,y0:30,w:22,h:26,d:18,c:MARBLE}); }                             // the quiet statue row
+    G.chests.push({x:-640,z:-860,y:0,opened:false,bob:0});                                    // the gallery keeps one gift
+    const lip=vseg(430,-770,140,140);                                                         // east lip — then the floor simply ends
+    for(const cb of [[520,-770],[610,-820],[700,-770],[790,-820]]) G.crumbles.push({x:cb[0],z:cb[1],w:70,d:70,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    for(let k=0;k<3;k++) G.deco.push({x:560+k*120,z:-740+(k%2?60:-20),w:22,h:34+rnd()*30,c:'#241431',theme:'apex'});   // the corruption creeping in
+    vcol(575,-820,24,24,40); vcol(745,-750,24,24,36);                                         // snapped pillar stubs
+    const pocket=vseg(900,-790,220,200); G.rooms.push({x:900,z:-790,w:220,d:200,monsters:[],encounter:false,cleared:true});
+    scapeSecret(ctx,920,-830,0);                                                              // the Sealed Reliquary, at the broken wing's dead end
+    G.chests.push({x:950,z:-740,y:0,opened:false,bob:0});
+    // ── 4) THE GRAND STAIR -> THE THRONE ANTECHAMBER ──
+    climbRun(0,-1230,0, 0,-1360,96, 110);
+    const dais=vplat(0,-1480,96,480,380,{terrace:true,checkpoint:true}); G.rooms.push({x:0,z:-1480,w:480,d:380,y:96,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:0,z:-1520,y0:96,w:200,h:10,d:130,c:tint(MARBLE,'#fff',0.15)});
+    G.deco.push({x:0,z:-1545,y0:106,w:110,h:56,d:60,c:GOLD}); G.deco.push({x:0,z:-1560,y0:162,w:130,h:64,d:14,c:tint(GOLD,'#fff',0.2)});   // the empty throne
+    for(const bx2 of [-150,150]){ vcol(bx2,-1560,20,20,60); G.deco.push({x:bx2,z:-1560,y0:60,w:26,h:12,d:26,c:'#ff9a4a'}); }               // twin braziers
+    // ── mobs: marble sentinels + a holy caster mid-hall; a sparkling drifts the broken wing ──
+    mkMonster('bones',-160,-90,court); mkMonster('bones',160,-90,court);
+    mkMonster('bones',-170,-620,null); mkMonster('bones',170,-950,null);
+    { const cs=mkMonster('caster',0,-720,null); if(cs.shot){cs.shot.el='holy';cs.shot.color=elementColor('holy');} cs.sx=cs.x; cs.sz=cs.z; }
+    { const fl=mkMonster('sparkling',650,-790,null); fl.y=60; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:170,z:70},{x:-170,z:-620},{x:170,z:-950}]);                             // sentinel dens: court + both hall reaches
+    scapeFetch(ctx, gard.slice(0,5).map(g=>({x:g.x,z:g.z,y:g.h})));                           // gilded relics on the garden planters
+    scapeFind(ctx, 0,-1590,96);
+    finishScape(ctx,{sx:0,sz:190,sy:0, gx:0,gz:-1610, decoCol:MARBLE,decoTheme:'marble',decoTall:240});
   },
   /* CASTLE DUSKMOOR — the final level: enter the gatehouse courtyard, then ASCEND the tower tiers
      (each a stair-climb) to the throne room at the top. Dark, torchlit, the hardest zone. */

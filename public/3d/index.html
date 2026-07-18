@@ -495,7 +495,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.108.0';
+const VERSION3D='1.109.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6621,7 +6621,10 @@ function drawCourse(s,t){
 function weaponMesh(w,swing){
   // drawn in hand space: +y up along the blade
   const gcos=(G&&G.p&&G.p.weapon===w)?cosEquipped('glow'):null;    // cosmetic edge glow — only on YOUR equipped weapon
-  const blade=gcos?gcos.col:w.blade, mag=w.sch==='mag';
+  // A cosmetic glow is an emissive outline, not a material replacement. Using its
+  // color as `blade` made every equipped weapon inherit the glow (commonly red) in
+  // the hub, while mirror copies happened to bypass the identity check and looked right.
+  const blade=w.blade||'#dfe5ec', mag=w.sch==='mag';
   const glow=gcos?gcos.col:(mag?blade:null);
   const T=(typeof G!=='undefined'&&G&&G.time)||0;
   const edge=tint(blade,'#ffffff',0.45), dkb=tint(blade,'#000000',0.4);
@@ -6742,6 +6745,8 @@ function drawHero3(p,t,preview){
   // right arm + weapon — attack style varies by weapon type (thrust / arc-sweep / overhead-slam)
   pushM(); mv(11,32,0);
   const w=p.weapon;
+  const _casterLong=['staff','rod','scepter'].includes(w.art), _casterWand=w.art==='wand'||w.art==='orb';
+  let _armPitch=0;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
     if(prog<0){ if(w.art==='scythe') rotX(-0.05+Math.sin(t*2)*0.04);   // idle: the scythe rests UPRIGHT (points up)...
       else rotX(-0.16+Math.sin(t*2)*0.05); }                            // ...physical blades rest arm-forward so the blade points AHEAD, never into the ground
@@ -6754,15 +6759,23 @@ function drawHero3(p,t,preview){
       if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it down
       else { const dir=(p.swingCombo===1)?-1:1; rotZ(0.35); rotX(-0.5); rotY((1.5-prog*3.0)*dir); } }
     else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
-  } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
+  } else if(_casterLong){
+    // Reach forward to a vertical focus instead of laying its shaft along the forearm.
+    _armPitch=p.atkTimer>0?(-0.82+(1-(p.atkTimer/0.18))*0.18):-0.55; rotX(_armPitch);
+  } else if(_casterWand){
+    // Wands/orbs are presented forward with a relaxed bent casting arm.
+    _armPitch=p.atkTimer>0?(-1.05+(1-(p.atkTimer/0.18))*0.16):-0.62; rotX(_armPitch);
+  } else { _armPitch=p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1); rotX(_armPitch); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0);
   // hold orientation: staffs/wands/scepters/rods + scythe + bows point UP; long hafts are gripped near their MIDDLE
   // (offset down so they read as carried, not planted); physical blades point FORWARD at rest and only flip to the
   // combat-ready down-base while actively swinging (the swing poses above are tuned around that base).
   const _upright = (w.cls!=='melee') || w.art==='scythe';
-  const _tallHaft = (w.art==='scythe'||w.art==='staff'||w.art==='rod'||w.art==='scepter');
-  if(_upright){ rotX(-0.08); if(_tallHaft && p.atkTimer<=0) mv(0,-16,0); }   // point up; grip the middle of the shaft at rest
+  const _tallHaft = (w.art==='scythe'||_casterLong);
+  if(_casterLong){ rotX(-_armPitch-0.08); mv(0,-18,2.5); }                    // world-upright, gripped at mid-shaft just ahead of the fist
+  else if(_casterWand){ rotX(-1.48-_armPitch); mv(0,-1,1.5); }               // point away from the hand, never back through the forearm
+  else if(_upright){ rotX(-0.08); if(_tallHaft && p.atkTimer<=0) mv(0,-16,0); }   // point up; grip the middle of the shaft at rest
   else if(p.atkTimer<=0) rotX(-1.5);                                          // IDLE physical blade points FORWARD, tip up-and-out — never into the ground
   else rotX(Math.PI);                                                        // swing keeps the blade-down base the swing poses expect
   if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);

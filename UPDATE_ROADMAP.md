@@ -662,3 +662,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Fixed Pause → Bag equipment swaps at the Waystation updating only `meta.hero` while leaving the live `G.p` hub character on its previous weapon/gear.
 - [x] Hub equips now copy the banked weapon and gear into the live player immediately, recompute armor/HP, persist normally, and remain correct after closing the bag or resuming play.
 - [x] Verified the hub equip regression in a real browser and passed `git diff --check`.
+
+## [Codex | 2026-07-18] Caster grip and equipped-weapon color fixes (SHIPPED v1.109.0)
+
+- [x] Separated cosmetic edge-glow color from the weapon's base blade/material color, fixing neutral swords and axes incorrectly rendering as red on the live hub character while appearing correct in the Mirror.
+- [x] Added dedicated held poses for staffs, legacy rods/scepters, wands, and orbs: long focuses stay upright ahead of a bent gripping arm, while compact focuses point outward instead of extending backward through the forearm.
+- [x] Verified neutral melee color plus staff, scepter, and wand idle/attack poses in the real browser; `git diff --check` passed.

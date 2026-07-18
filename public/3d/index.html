@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.76.0';
+const VERSION3D='1.77.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -596,7 +596,7 @@ function musicSting(key){                             // one-shot over the top o
 }
 function musicForScene(){                             // one place decides what should be playing right now
   if(!G||G.hub) return musicPlay('hub');
-  if(G.trial) return musicPlay('trial');
+  if(G.trial) return musicPlay('trial_chamber');   // Phase 19: the trial chambers earned their own song — 'Silent Descent' (Mixkit free license)
   if(G.side) return musicPlay('secret');
   const Z=curZone();
   if(G.area<0) return musicPlay((Z.boss&&Z.boss.mus)||'boss_brute');   // the boss arena gets its own track
@@ -3747,7 +3747,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
   e.hp-=dmg; e.hitFlash=0.12;
-  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=kb*(e.boss?0.25:1);
+  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=(e.dummy?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
@@ -4345,6 +4345,8 @@ function update(dt){
   for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
   G.particles=G.particles.filter(pt=>pt.life>0);
   updateTexts(dt);
+  // Phase 19: practice foes are ARENA property — applied after all movement, snapped WELL inside the walls
+  if(G.hub) for(const e of G.enemies){ if(e.practice&&!e.dead){ e.x=Math.max(672,Math.min(936,e.x)); e.z=Math.max(370,Math.min(682,e.z)); } }
   if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // Phase 9: level-ups are automatic now; only the class path-fork still opens a menu
 }
 const AMBIENT={frost:{c:'#e6f7ff',vy:-40,n:2},volcano:{c:'#ff9a4a',vy:40,n:2},forest:{c:'#9fd84a',vy:-16,n:1},void:{c:'#c9a6ff',vy:14,n:1},apex:{c:'#c9a6ff',vy:16,n:1}};
@@ -4839,40 +4841,98 @@ function enterWaystation(){
   G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.rooms=[]; G.doors=[]; G.plates=[];
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
-  // one warm stone island over the glow (deep enough that the over-the-shoulder camera stands on floor behind you)
-  G.segments.push({x:0,z:20,w:820,d:820});
-  // Phase 12: the NORTH rampart is now LOW (66) so you see over it to the dying world beyond the gates;
-  // side + south walls stay tall to keep the over-the-shoulder camera boxed on solid floor.
-  G.walls.push({x:0,z:-380,w:864,d:26,h:66},{x:-420,z:0,w:26,d:824,h:150},{x:420,z:0,w:26,d:824,h:150},{x:0,z:420,w:864,d:26,h:150});
+  /* ============ THE WAYSTATION, rebuilt (Phase 19): a fortress QUARTER, not a box ============
+     A grand central plaza opens into five themed wings: the MARKET GARDEN west (shop +
+     wardrobe under an awning, under a tree), the FORGE YARD east (the Smith among racks
+     and braziers), the walled SPARRING ARENA south-east (practice stays inside), the
+     MENAGERIE NOOK south-west (the Beastkeeper — and something glinting behind the
+     crates...), the MIRROR PAVILION due south, and the DARK GROTTO north-east where the
+     Abyssal Descent stone waits. The gate terrace still crowns the north. */
+  // ---- floors ----
+  G.segments.push({x:0,z:-40,w:900,d:760});                                          // the grand plaza
+  G.segments.push({x:-560,z:-90,w:240,d:220});  G.segments.push({x:-810,z:-90,w:320,d:460});   // west neck + Market Garden
+  G.segments.push({x:560,z:-90,w:240,d:220});   G.segments.push({x:810,z:-90,w:320,d:460});    // east neck + Forge Yard
+  G.segments.push({x:500,z:420,w:200,d:240});   G.segments.push({x:760,z:520,w:400,d:360});    // SE neck + Sparring Arena
+  G.segments.push({x:-500,z:420,w:200,d:240});  G.segments.push({x:-660,z:520,w:360,d:320});   // SW neck + Menagerie Nook
+  G.segments.push({x:0,z:390,w:240,d:140});     G.segments.push({x:0,z:540,w:300,d:220});      // S neck + Mirror Pavilion
+  G.segments.push({x:560,z:-360,w:300,d:200});  G.segments.push({x:760,z:-380,w:280,d:240});   // NE neck + Dark Grotto
+  [[0,-40,900,760],[-810,-90,320,460],[810,-90,320,460],[760,520,400,360],[-660,520,360,320],[0,540,300,220],[760,-380,280,240]]
+    .forEach(r2=>G.rooms.push({x:r2[0],z:r2[1],w:r2[2],d:r2[3],monsters:[],encounter:false,cleared:true}));
+  // ---- walls (tall = the shoulder camera stays boxed; the north stays LOW to see the dying world) ----
+  G.walls.push({x:0,z:-380,w:940,d:26,h:66});                                        // low north rampart behind the gates
+  G.walls.push({x:-462,z:-310,w:24,d:220,h:150},{x:-462,z:180,w:24,d:320,h:150});    // plaza west (gap = market neck)
+  G.walls.push({x:462,z:-310,w:24,d:140,h:150},{x:462,z:180,w:24,d:320,h:150});      // plaza east (gaps = forge + grotto necks)
+  G.walls.push({x:-265,z:352,w:290,d:24,h:150},{x:265,z:352,w:290,d:24,h:150});      // plaza south (gaps = SW / mirror / SE)
+  G.walls.push({x:-810,z:-332,w:344,d:24,h:150},{x:-810,z:152,w:344,d:24,h:150},{x:-982,z:-90,w:24,d:484,h:150});   // Market Garden shell
+  G.walls.push({x:810,z:-332,w:344,d:24,h:150},{x:810,z:152,w:344,d:24,h:150},{x:982,z:-90,w:24,d:484,h:150});      // Forge Yard shell
+  G.walls.push({x:760,z:332,w:420,d:24,h:130},{x:760,z:708,w:420,d:24,h:130},{x:968,z:520,w:24,d:400,h:130});       // Arena: north/south/east...
+  G.walls.push({x:652,z:395,w:24,d:150,h:130},{x:652,z:645,w:24,d:150,h:130});                                       // ...west split — the arena GATE
+  G.walls.push({x:-852,z:520,w:24,d:344,h:150},{x:-660,z:692,w:384,d:24,h:150},{x:-745,z:348,w:190,d:24,h:150});    // Menagerie shell (north gap = neck)
+  G.walls.push({x:0,z:662,w:320,d:24,h:110});                                                                        // pavilion back rail
+  G.walls.push({x:740,z:-512,w:304,d:24,h:150},{x:892,z:-380,w:24,d:264,h:150});                                     // Grotto shell
+  // ---- the heart: waystone pool + lanterns; stone paths radiate to every wing ----
+  G.deco.push({x:0,z:-60,y0:0,w:170,h:1.4,d:170,c:'#caa23a'}); G.deco.push({x:0,z:-60,y0:1.2,w:150,h:1.6,d:150,c:'#24304a'});   // the gold-rimmed pool
+  for(const la of [[-110,-150],[110,-150],[-110,30],[110,30]]){ vcol(la[0],la[1],10,10,54);
+    G.deco.push({x:la[0],z:la[1],y0:54,w:16,h:12,d:16,c:'#ffd88a'}); }               // four lantern posts
+  for(const pt2 of [[0,-210,60,240],[-330,-90,420,54],[330,-90,420,54],[0,240,60,220],[-350,300,300,54],[350,300,300,54]])
+    G.deco.push({x:pt2[0],z:pt2[1],y0:0,w:pt2[2],h:1.2,d:pt2[3],c:'#3a3f4e'});       // worn stone paths
+  for(let k=0;k<12;k++) G.deco.push({x:(Math.random()*2-1)*400,z:-40+(Math.random()*2-1)*300,y0:0,w:7+Math.random()*6,h:6+Math.random()*8,c:Math.random()<0.2?'#e6d24a':'#3a6b34',theme:'plains'});   // grass tufting the flagstones
   for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
-  G.torches.push({x:-398,z:-200,ph:1},{x:398,z:-200,ph:2},{x:-398,z:120,ph:3},{x:398,z:120,ph:4});
-  // the portal row: one gate per zone along the north wall; discovered rifts shimmer beside their parent
+  G.torches.push({x:-440,z:-200,ph:1},{x:440,z:-200,ph:2},{x:-440,z:250,ph:3},{x:440,z:250,ph:4});
+  // ---- the portal row: one gate per zone along the north wall; discovered rifts shimmer beside their parent ----
   G.gates=[];
-  const gSpan=760, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;                 // evenly spread the gates to fit however many zones
+  const gSpan=760, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;
   ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep);
     G.gates.push({zi:i,x:gx,z:-322,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
     if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+42,z:-282,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
-  // the posts: each named screen becomes a person (or a thing) standing somewhere
+  // ---- THE MARKET GARDEN (west): shop + wardrobe under canvas, under the old tree ----
+  vcol(-700,-280,24,24,88); G.deco.push({x:-700,z:-280,y0:88,w:96,h:52,c:'#3a6b34',theme:'plains'}); G.deco.push({x:-700,z:-280,y0:126,w:66,h:30,c:'#4d8842',theme:'plains'});
+  vcol(-920,-250,10,10,80); vcol(-800,-250,10,10,80); G.deco.push({x:-860,z:-250,y0:80,w:140,h:8,d:110,c:'#7a4a3a'});   // the awning
+  for(let k=0;k<8;k++) G.deco.push({x:-810+(Math.random()*2-1)*130,z:-90+(Math.random()*2-1)*180,y0:0,w:6,h:8+Math.random()*8,c:['#e07ad0','#e6d24a','#7fd6ff'][k%3],theme:'plains'});
+  G.torches.push({x:-700,z:60,ph:2},{x:-920,z:-90,ph:4});
+  // ---- THE FORGE YARD (east): racks, braziers, the quench trough ----
+  for(const rk of [[880,-280],[930,-160]]){ G.deco.push({x:rk[0],z:rk[1],y0:0,w:8,h:46,d:8,c:'#3a2c1c'}); G.deco.push({x:rk[0],z:rk[1],y0:40,w:52,h:6,d:8,c:'#3a2c1c'}); }
+  G.deco.push({x:760,z:40,y0:0,w:110,h:14,d:52,c:'#2a2e3a'}); G.deco.push({x:760,z:40,y0:12,w:96,h:4,d:40,c:'#24304a'});   // the trough
+  for(const bz2 of [[700,-290],[900,20]]){ vcol(bz2[0],bz2[1],16,16,38); G.deco.push({x:bz2[0],z:bz2[1],y0:38,w:22,h:12,d:22,c:'#ff9a4a'}); }
+  G.torches.push({x:700,z:60,ph:1},{x:920,z:-90,ph:3});
+  // ---- THE SPARRING ARENA (SE, walled): practice mobs stay INSIDE these walls ----
+  G.deco.push({x:760,z:520,y0:0,w:250,h:1.2,d:250,c:'#4a4030'});                     // the sand circle
+  G.deco.push({x:760,z:344,y0:96,w:120,h:26,d:6,c:'#5e2a24'});                        // the drill banner over the gate wall
+  G.torches.push({x:660,z:360,ph:2},{x:860,z:680,ph:5});
+  // ---- THE MENAGERIE NOOK (SW): the Beastkeeper's yard ----
+  for(let k=0;k<5;k++) G.deco.push({x:-660+Math.cos(k*1.26)*140,z:520+Math.sin(k*1.26)*120,y0:0,w:8,h:26,d:8,c:'#4a3a26'});   // fence posts
+  G.deco.push({x:-580,z:600,y0:0,w:60,h:14,d:44,c:'#8a7434'}); G.deco.push({x:-740,z:440,y0:0,w:26,h:8,d:18,c:'#d8cdb0'});     // hay + old bones
+  G.torches.push({x:-560,z:420,ph:3});
+  // ...and the something behind the crates (the SECRET STASH — walk in, press E)
+  G.deco.push({x:-806,z:640,y0:0,w:40,h:34,d:40,c:'#4a3a26'}); G.deco.push({x:-780,z:660,y0:0,w:30,h:24,d:30,c:'#3a2c1c'});
+  G.deco.push({x:-806,z:640,y0:34,w:30,h:22,d:30,c:'#4a3a26'}); G.deco.push({x:-812,z:646,y0:10,w:6,h:4,d:4,c:'#ffd24a'});     // a glint between the boards
+  // ---- THE MIRROR PAVILION (south): the glass under its own roof ----
+  for(const pc of [[-120,460],[120,460],[-120,630],[120,630]]) vcol(pc[0],pc[1],14,14,92);
+  G.deco.push({x:0,z:545,y0:96,w:320,h:10,d:250,c:'#232735'}); G.deco.push({x:0,z:545,y0:106,w:200,h:8,d:150,c:'#2c3244'});    // the roof
+  G.torches.push({x:-150,z:470,ph:1},{x:150,z:470,ph:4});
+  // ---- THE DARK GROTTO (NE): the Abyss stone in its pocket of night ----
+  G.deco.push({x:760,z:-380,y0:0,w:220,h:1.4,d:190,c:'#16101f'});
+  for(let k=0;k<4;k++) G.deco.push({x:760+(Math.random()*2-1)*100,z:-380+(Math.random()*2-1)*80,w:16+Math.random()*12,h:26+Math.random()*30,c:'#241431',theme:'void'});
+  // ---- the posts: everyone gets a home that fits them ----
   G.hubNpcs=[
-    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-320,z:-140,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
-    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:320,z:-140,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
-    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-320,z:90,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-130,z:258,open:()=>openQuestBoard(wsResume)},
-    {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:130,z:258,open:()=>openBag(wsResume)},
-    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:320,z:110,open:()=>openForge(wsResume)},
-    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:-300,z:-20,open:()=>openMirror(wsResume)},
-    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:60,open:()=>openTrainingArena(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:150,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:150,z:-40,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)}
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-860,z:-200,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-760,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:840,z:-170,open:()=>openForge(wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:540,z:360,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-170,z:290,open:()=>openQuestBoard(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:170,z:290,open:()=>openBag(wsResume)},
+    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:560,open:()=>openMirror(wsResume)},
+    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:760,z:520,open:()=>openTrainingArena(wsResume)},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:740,z:-390,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:-660,z:530,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)}
   ];
-  // training dummies by the drillmaster — hit them as hard as you like
-  for(const [dx,dz] of [[268,-30],[338,-6]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
-  // Phase 12 training arena: a target range (ranged practice) + a short stakes-free parkour course
-  for(const [dx,dz] of [[210,-330],[290,-338],[370,-326]]){ const d3=spawnEnemy('dummy',dx,dz); d3.dummy=true; d3.active=true; d3.dropT=0; d3.range=true; }
-  for(let i=0;i<5;i++) G.obstacles.push({kind:'plat',x:-300+i*34,z:280-i*40,w:58,d:58,h:38+i*30});
-  G.trainSpawn={x:300,z:60};   // where the Sparring Post drops practice mobs
+  // ---- skeleton training dummies: BOLTED sponges inside the arena — whittle them down, they respawn ----
+  for(const [dx,dz] of [[700,430],[840,470],[760,620]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
+  for(const [dx,dz] of [[860,600],[660,600]]){ const d3=spawnEnemy('dummy',dx,dz); d3.dummy=true; d3.active=true; d3.dropT=0; d3.range=true; }
+  for(let i=0;i<5;i++) G.obstacles.push({kind:'plat',x:-400+i*36,z:250-i*38,w:58,d:58,h:38+i*30});   // the parkour steps, west plaza
+  G.trainSpawn={x:760,z:520};                                   // practice mobs spawn INSIDE the arena walls
   G.lastSafe={x:0,z:214}; G.startPos={x:0,z:214}; G.goalPos={x:0,z:-322};
-  G.bounds={minX:-500,maxX:500,minZ:-460,maxZ:500}; G.progressEnd=-380;
+  G.bounds={minX:-1000,maxX:1000,minZ:-540,maxZ:730}; G.progressEnd=-380;
   G.p.x=0; G.p.z=214; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
@@ -5042,11 +5102,26 @@ function openTrainingArena(back){ mode='menu';
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
   let it=null; const p=G.p;
-  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } } }
+  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } }
+    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:goldStash}; }   // the glint behind the Menagerie crates
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Warden's Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
+// Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Menagerie crates.
+const STASH_LINES=[
+  '💰 +1000g — shh. The Quartermaster doesn’t audit this corner.',
+  '💰 +1000g — wealth beyond ethics. You’re getting so rich and it’s not even legal.',
+  '💰 +1000g — the economy weeps. You cheat beautifully.',
+  '💰 +1000g — “found” money. The quotation marks are doing heavy lifting.',
+  '💰 +1000g — at this point the crates are just your bank.'];
+function goldStash(){
+  meta.gold=(meta.gold||0)+1000; persist();
+  goldStash._n=((goldStash._n||0)+1)%STASH_LINES.length;
+  SFX.god(); playFx('buy'); burst(-806,30,644,'#ffd24a',22);
+  addText(G.p.x,G.p.y+80,G.p.z,'+1000g','#ffd24a',true);
+  toast(STASH_LINES[goldStash._n],'#ffd24a'); hudUpdate();
+}
 function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');
   const it=(G&&G.interact&&mode==='play')?G.interact:null;
   if(!it){ if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); return; }

@@ -576,3 +576,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Streamed music and active stings pause at their current playback positions; Resume restores them, while leaving for the Hub/title discards obsolete combat audio.
 - [x] Audio-setting interactions remain silent while paused, including the edge case where the audio context is first created from the pause menu.
 - [x] Real-browser verification: context transitioned `running → suspended → running`; `G.time` remained bit-for-bit unchanged across multiple paused seconds; inline JavaScript syntax and `git diff --check` pass.
+
+## [Codex | 2026-07-18] Status-effect + rarity icon set (SHIPPED v1.97.0)
+
+- [x] Identified the correct 11 downloaded files and preserved the unrelated five armor-piece downloads; removed their baked checkerboards and normalized each requested emblem to a transparent 256×256 PNG.
+- [x] Added Burn, Chill, Venom, Rune Mark, Radiance, and Corruption icons to affinity/status descriptions and the in-world enemy status-stack renderer.
+- [x] Added Common, Uncommon, Rare, Epic, and Legendary icons to the shared rarity badge helper, automatically covering item rows, pickup comparisons, gear details, and the test bench.
+- [x] Real-browser verification confirmed the rarity emblem renders at menu scale and all six status images preload for the canvas overlay; inline JavaScript syntax and `git diff --check` pass.

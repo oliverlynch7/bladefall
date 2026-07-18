@@ -224,6 +224,18 @@
   .ico-back{background-image:url('icons/back.png');}
   .ico-title-leave{background-image:url('icons/title-leave.png');}
   .ico-character-sheet{background-image:url('icons/character-sheet.png');}
+  .ico-status-burn{background-image:url('icons/status-burn.png');}
+  .ico-status-chill{background-image:url('icons/status-chill.png');}
+  .ico-status-venom{background-image:url('icons/status-venom.png');}
+  .ico-status-rune{background-image:url('icons/status-rune-mark.png');}
+  .ico-status-radiance{background-image:url('icons/status-radiance.png');}
+  .ico-status-corrupt{background-image:url('icons/status-corruption.png');}
+  .ico-rarity-common{background-image:url('icons/rarity-common.png');}
+  .ico-rarity-uncommon{background-image:url('icons/rarity-uncommon.png');}
+  .ico-rarity-rare{background-image:url('icons/rarity-rare.png');}
+  .ico-rarity-epic{background-image:url('icons/rarity-epic.png');}
+  .ico-rarity-legendary{background-image:url('icons/rarity-legendary.png');}
+  .ico-rarity{width:1.65em;height:1.65em;margin-left:.22em;vertical-align:-.48em;}
   .ico-menu{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
   #pausebtn .ico{width:26px;height:26px;}
   .ico-lg{width:1.5em;height:1.5em;vertical-align:-0.4em;}
@@ -387,7 +399,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.96.0';
+const VERSION3D='1.97.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -960,7 +972,8 @@ function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.h
 function canWieldRid(rid){ return heroLevel()>=rarityReq(rid); }
 function canWield(o){ return !o||!o.rarity||heroLevel()>=rarityReq(o.rarity); }
 // The rarity tier pip (1-5): an unmistakable numeric badge in the item's rarity color.
-function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:5px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
+function rarityIcon(rid){ return RARITY[rid]?`<span class="ico ico-rarity ico-rarity-${rid}" title="${RARITY[rid].name}" aria-label="${RARITY[rid].name}"></span>`:''; }
+function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
 function rollRarity(){
@@ -983,7 +996,8 @@ const AFFINITY={
   holy:{name:'Holy',icon:'☀',status:'Radiance'}, void:{name:'Void',icon:'◍',status:'Corruption'}
 };
 function affName(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].name:''; }
-function affIcon(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].icon:''; }
+function statusIcon(el){ el=normEl(el); const stat=EL_STAT[el]; return stat?`<span class="ico ico-status-${stat}" aria-hidden="true"></span>`:''; }
+function affIcon(el){ el=normEl(el); return AFFINITY[el]?statusIcon(el):''; }
 function affStatus(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].status:''; }
 // locked opposition pairs: Fire<->Frost, Poison<->Arcane, Holy<->Void
 const WEAK={fire:'ice',ice:'fire',poison:'arcane',arcane:'poison',holy:'void',void:'holy'};
@@ -3537,6 +3551,8 @@ function lavaHit(){
 const EL_STAT={fire:'burn',ice:'chill',poison:'venom',arcane:'rune',holy:'radiance',void:'corrupt'};
 const STCAP={burn:5,chill:5,venom:6,rune:5,radiance:5,corrupt:5};
 const STCOL={burn:'#ff7a3a',chill:'#7fd6ff',venom:'#86e05a',rune:'#c47bff',radiance:'#ffe9a8',corrupt:'#8f52d6'};
+const STATUS_ICON_SRC={burn:'icons/status-burn.png',chill:'icons/status-chill.png',venom:'icons/status-venom.png',rune:'icons/status-rune-mark.png',radiance:'icons/status-radiance.png',corrupt:'icons/status-corruption.png'};
+const STATUS_ICON_IMG={}; for(const k in STATUS_ICON_SRC){ const im=new Image(); im.src=STATUS_ICON_SRC[k]; STATUS_ICON_IMG[k]=im; }
 const STWIN={burn:2.5,chill:2.0,venom:4.0,rune:8.0,radiance:3.0,corrupt:12.0};   // grace before a meter decays
 const STDEC={burn:1.2,chill:1.5,venom:1.0,rune:0.5,radiance:1.5,corrupt:0.8};    // decay per second after the grace window
 function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,corrupt:0}); }
@@ -4956,7 +4972,7 @@ function offerWeapon(nw){
     <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <img class="itemav" src="${itemAv(nw)}" alt="">
-    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':'#b8b8b8'}">${dmgTypeName(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?((normEl(el2)==='fire'?'<span class="ico ico-flame"></span>':affIcon(el2))+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
+    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':'#b8b8b8'}">${dmgTypeName(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${statusIcon(el2)} ${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
@@ -5701,8 +5717,8 @@ function openCheatMenu(back){
     <p class="ovsub">Your dirty little secret behind the crates. Nothing here is earned — that's the point.</p>
     <div class="sect">Gold &amp; levels · <b style="color:#ffd24a">${meta.gold}g</b> · Lv ${p?p.level:1}</div>
     <div class="pgrid">${btn('cGold1','💰 +1,000g')}${btn('cGold10','💰 +10,000g')}${btn('cLv1','▲ +1 Level')}${btn('cLv5','▲ +5 Levels')}${btn('cLv10','▲ +10 Levels')}${btn('cRank','★ Rank 10')}</div>
-    <div class="sect">Gear vault — rarity: <b style="color:${rc}">${RARITY[_cheatRar].name}</b></div>
-    <div class="pgrid">${btn('cRar','🎚 Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
+    <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
+    <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
     <div class="sect">Unlocks &amp; conveniences</div>
     <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
     <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
@@ -7306,7 +7322,7 @@ function drawHpBar3(e){
   if(e.dead) return;
   if(!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+14,e.z); if(s) hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp}); }
   // elemental status pips (shown even at full HP + on bosses)
-  if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([STCOL[k],n]); }
+  if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
     if(keys.length){ const sp=project(e.x,e.y+e.h+(e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
 }
 let hpBars=[], statPips=[];
@@ -7333,13 +7349,14 @@ function drawHpBars(){
   const c=hpCanvas.getContext('2d');
   for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.5)'; c.fillRect(b.x-16,b.y,32,4);
     c.fillStyle='#e8453d'; c.fillRect(b.x-16,b.y,32*b.f,4); }
-  // elemental status pips: one small rounded square per active status, colored, with its stack count
+  // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
   c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
-  for(const sp of statPips){ const n=sp.keys.length, pw=11, tot=n*pw, x0=sp.x-tot/2, y=sp.y-3;
-    for(let i=0;i<n;i++){ const [col,cnt]=sp.keys[i], px=x0+i*pw;
-      c.fillStyle='rgba(0,0,0,0.55)'; c.fillRect(px,y,pw-1.5,9);
-      c.fillStyle=col; c.fillRect(px,y,pw-1.5,2.5);
-      c.fillStyle='#fff'; c.fillText(cnt, px+(pw-1.5)/2, y+6); } }
+  for(const sp of statPips){ const n=sp.keys.length, pw=19, tot=n*pw, x0=sp.x-tot/2, y=sp.y-9;
+    for(let i=0;i<n;i++){ const [key,cnt]=sp.keys[i], px=x0+i*pw, im=STATUS_ICON_IMG[key];
+      if(im&&im.complete&&im.naturalWidth) c.drawImage(im,px,y,17,17);
+      else { c.fillStyle=STCOL[key]; c.fillRect(px+2,y+2,13,13); }
+      c.fillStyle='rgba(5,6,10,.88)'; c.beginPath(); c.arc(px+15,y+15,4.5,0,Math.PI*2); c.fill();
+      c.fillStyle='#fff'; c.fillText(cnt,px+15,y+15); } }
   drawThreatArrows(c);
 }
 // Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see

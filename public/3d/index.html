@@ -329,7 +329,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.81.1';
+const VERSION3D='1.82.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1251,28 +1251,28 @@ const ZONES=[
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Warden',mus:'boss_warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
-    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostling',n:16,d:'Slay 16 Frostlings'}]},
+    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:12,d:'Crack 12 Frost-Shells'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
-    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'emberling',n:18,d:'Slay 18 Emberlings'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
+    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:16,d:'Snuff 16 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
     side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
   {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
-    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'shadeling',n:20,d:'Banish 20 Shadelings'}]},
+    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'blinkstalker',n:16,d:'Hunt down 16 Blink-Stalkers'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
   {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:null,mus:'keep',blurb:'White marble the long war never reached.',
-    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'bones',n:18,d:'Shatter 18 Marble Sentinels'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
+    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:12,d:'Shatter 12 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
            {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
     side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,blurb:'What a palace hides, it hides deep.'},
     boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
   {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
-    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'shadeling',n:22,d:'Cut down 22 of the King’s guard'}]},
-           {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'bones',n:20,d:'Fight up the towers: 20 wraiths'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
+    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
+           {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'royalarcanist',n:14,d:'Silence 14 Royal Arcanists'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
     boss:{stage:16,name:'The Void Tyrant',mus:'apex_darkdescent'}}
 ];
 const TIERBAND=[1,1,2,2,3,3,4,4];                               // max rarity INDEX (0=common..4=legendary) by zone tier (8 tiers now)
@@ -1436,11 +1436,11 @@ const THEMEMOBS={
   canyon:['dustjackal','galewisp','cragspitter','bones'],   // Phase 14: canyon-native pack — bones reused sparingly as on-theme filler
   ruins:['revenant','sentinel','caster','bones'],           // Phase 14 Keep: undead + animated armor; bones/caster reused sparingly
   dungeon:['revenant','sentinel','bones','caster'],
-  frost:['frostling','bones','frostling','sparkling'],
-  volcano:['emberling','charger','emberling','flyer'],
-  void:['shadeling','caster','sparkling','bones'],
-  apex:['bones','caster','shadeling','shadeling'],
-  marble:['bones','bones','caster','sparkling']                  // marble sentinels + gilded casters
+  frost:['frostshell','frostlobber','frostling','frostshell'],   // Batch 2: ice-shell cracker + freezing lobber lead; frostling sparing filler
+  volcano:['magmaskit','embertotem','emberling','magmaskit'],    // Batch 2: magma-trail skitter + eruption totem
+  void:['blinkstalker','voidtether','shadeling','blinkstalker'], // Batch 2: blink-stalker + void tether
+  apex:['siegeknight','royalarcanist','shadeling','siegeknight'],// Batch 2: siege knight + royal arcanist
+  marble:['marblestatue','sunpriest','bones','marblestatue']     // Batch 2: animated statue + corrupted sun-priest
 };
 const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'arcane',badlands:'fire',marble:'holy'};
 const _ENEMY_END={
@@ -2774,7 +2774,7 @@ function loadStage(i){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.slowmo=0; G.interact=null;
@@ -3809,7 +3809,10 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
-    if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff'); } }
+    if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
+      if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
+        if(e.shellHp<=0){ e.role=null; e.shieldYaw=null; e.shellCracked=1; addText(e.x,e.y+e.h+14,e.z,'SHELL BROKEN!','#bfe6ff'); playFx('frostclink'); burst(e.x,e.y+e.h*0.55,e.z,'#cfeeff',12); } } } }
+  if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
   e.hp-=dmg; e.hitFlash=0.12;
@@ -4224,6 +4227,9 @@ function update(dt){
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
       if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
     G.shockwaves=G.shockwaves.filter(sw=>sw.r<sw.maxR); }
+  if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
+      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z); } }
+    G.trails=G.trails.filter(tr=>tr.life>0); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
     sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
@@ -4288,6 +4294,8 @@ function update(dt){
       if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
     }
     if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
+    if(e.tethered>0) e.tethered-=dt;                  // void-tether buff decays once the tether dies
+    if(e.spec){ specBehavior(e,dt,p,dirX,dirZ,d); }   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
     if(e.kind==='fly'){ e.bob+=dt*2.4;
       let ty=Math.max(0,p.y+44+Math.sin(e.bob)*52-8), spd=eff;   // wave tracks YOUR height
       if(e.dive){                                                // galewisp: hover high, telegraphed swoop to your level, then climb back
@@ -4442,6 +4450,27 @@ function bossShoot(e,p){
     G.projectiles.push({owner:'enemy',x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
   }
   if(cfg.el) SFX.magic(cfg.el); else SFX.shoot(); // arrows thwip, spells cast by element
+}
+function specBehavior(e,dt,p,dirX,dirZ,d){
+  // ERUPTION TOTEM (Emberdeep): stationary vent, periodic fire ring — kill it first
+  if(e.spec==='totem'){ e.shootT=(e.shootT==null?1.8:e.shootT)-dt;
+    if(e.eruptW>0){ e.eruptW-=dt; if(e.eruptW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:16,maxR:210,dmg:e.dmg2||12,life:0,spd:250,col:'#ff8a3a',col2:'#c0331a'}); playFx('firewhoosh'); e.shootT=2.6; } }
+    else if(e.shootT<=0 && d<560){ e.eruptW=0.7; addText(e.x,e.y+e.h+8,e.z,'!','#ff8a3a',true); } }
+  // MAGMA-TRAIL SKITTER (Emberdeep): its path burns briefly
+  else if(e.spec==='trail'){ e.trailT=(e.trailT||0)-dt;
+    if(e.trailT<=0 && (Math.abs(dirX)+Math.abs(dirZ))>0.1){ (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:22,life:2.0,max:2.0,dmg:Math.max(4,e.dmg*0.4),hit:0}); e.trailT=0.18; } }
+  // BLINK-STALKER (The Abyss): telegraphed teleport behind you
+  else if(e.spec==='blink'){ e.blinkT=(e.blinkT==null?2.2:e.blinkT)-dt;
+    if(e.blinkFx>0){ e.blinkFx-=dt; if(e.blinkFx<=0){ const bx=p.x-dirX*72, bz=p.z-dirZ*72; burst(e.x,e.y+e.h*0.5,e.z,'#a86fe0',8); e.x=bx; e.z=bz; e.sx=bx; e.sz=bz; burst(bx,e.y+e.h*0.5,bz,'#a86fe0',10); e.blinkT=2.6+Math.random()*1.6; } }
+    else if(e.blinkT<=0 && d>110 && d<560){ e.blinkFx=0.35; addText(e.x,e.y+e.h+8,e.z,'blink','#c49bff',true); } }
+  // VOID TETHER (The Abyss): links to nearby allies, buffing them until it dies
+  else if(e.spec==='tether'){ e.tetherList=[]; e.tetherPulse=(e.tetherPulse||0)+dt;
+    for(const o of G.enemies){ if(o===e||o.dead||!o.active||o.boss) continue;
+      if(dXZ(e.x,e.z,o.x,o.z)<200){ e.tetherList.push(o); o.tethered=0.3; } } }
+  // SIEGE KNIGHT (Duskmoor): shield + telegraphed overhead crush
+  else if(e.spec==='knightslam'){ e.slamCd=(e.slamCd==null?2.0:e.slamCd)-dt;
+    if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
+    else if(e.slamCd<=0 && d<120){ e.knightW=0.6; addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true); } }
 }
 function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   updateBossBar(e); // y handled by the climb/support logic in the enemy loop
@@ -4685,7 +4714,7 @@ function loadEndlessArena(n){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
@@ -4909,7 +4938,7 @@ function enterWaystation(){
   G.stageIndex=0;
   // scene arrays normally come from loadStage — the waystation builds its own room
   G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
-  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.rooms=[]; G.doors=[]; G.plates=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.trails=[]; G.rooms=[]; G.doors=[]; G.plates=[];
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
   /* ============ THE WAYSTATION, rebuilt (Phase 19): a fortress QUARTER, not a box ============
      A grand central plaza opens into five themed wings: the MARKET GARDEN west (shop +
@@ -5922,6 +5951,10 @@ function drawCourse(s,t){
   if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR), c1=sw.col||'#ff8a4a', c2=sw.col2||'#ff5a1e';
     const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
     for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
+  // magma-trail patches (smouldering path)
+  if(G.trails) for(const tr of G.trails){ const a=Math.max(0,tr.life/tr.max), fl=0.5+0.5*Math.sin(t*9+tr.x*0.1);
+    bx(tr.x,2,tr.z, tr.r*1.5,4,tr.r*1.5, '#ff6a2a','#c0331a', 0.5*a);
+    bx(tr.x,6+fl*4,tr.z, tr.r*0.7,8,tr.r*0.7, '#ffb060','#ff7a2a', 0.4*a); }
   // golden bonus portal
   if(G.bonusPortal){ const bp=G.bonusPortal;
     for(let k2=0;k2<8;k2++){ const a2=t*2.2+k2*0.785;
@@ -6483,6 +6516,102 @@ function drawEnemy3(e,t){
     bx(-2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC); bx(2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC);
     pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.5+sw); rotX(-0.6); bx(0,-6,0, 2.6,12,2.6, dk); bx(0,4,0, 3,14,1.4,'#c8ccd2'); popM();   // broken blade arm
     popM();
+  } else if(e.look==='frostshell'){
+    // ICE-ARMORED SHELL-CRACKER: squat body under a thick frontal ice carapace; the shell shatters off once cracked
+    const dk=tint(col,'#000',0.24), ice='#cfeeff', cracked=e.shellCracked;
+    bx(-W*0.24,H*0.16,0, W*0.32,H*0.32,W*0.4, dk); bx(W*0.24,H*0.16,0, W*0.32,H*0.32,W*0.4, dk);   // stubby legs
+    bx(0,H*0.5,0, W*0.86,H*0.56,W*0.66, col);                                       // body
+    bx(0,H*0.82,0, W*0.5,W*0.44,W*0.46, tint(col,'#fff',0.12));                      // head
+    bx(-2.8,H*0.84,W*0.28, 2.4,2.6,1.2, eyeC, eyeC); bx(2.8,H*0.84,W*0.28, 2.4,2.6,1.2, eyeC, eyeC);
+    if(!cracked){ bx(0,H*0.52,W*0.5, W*0.9,H*0.72,7, ice, ice, 0.82);               // the frontal ice shell
+      for(let i=0;i<3;i++) bx(-W*0.28+i*W*0.28,H*0.3+i*8,W*0.58, 4,10,4, tint(ice,'#fff',0.3), null, 0.9); }   // jagged crystal spikes
+    else { for(let i=0;i<4;i++){ const a=i*1.571; bx(Math.cos(a)*W*0.5,H*0.3,Math.sin(a)*W*0.5, 3,4,3, ice, ice, 0.5); } }   // shattered shards
+  } else if(e.look==='lobber'){
+    // FREEZING LOBBER: hunched ice-caster that arcs shards; a shard hovers at its raised hand
+    const sc=(e.shot&&e.shot.color)||'#bfe6ff', wind=e.shootT<0.6;
+    bx(0,H*0.32,0, W*0.86,H*0.56,W*0.66, col);                                       // frosty robe body
+    bx(0,H*0.66,0, W*0.6,W*0.5,W*0.54, tint(col,'#fff',0.14));                        // hooded head
+    bx(-2.6,H*0.68,W*0.28, 2.2,2.4,1.2, sc, sc); bx(2.6,H*0.68,W*0.28, 2.2,2.4,1.2, sc, sc);
+    for(let i=0;i<3;i++) bx(-W*0.2+i*W*0.2,H*0.9,-W*0.1, 3,7-i,3, tint(col,'#fff',0.25), null, 0.9);   // ice crest
+    pushM(); mv(W*0.55,H*0.55,W*0.1); rotX(wind?-1.0:-0.3); bx(0,6,0, 3.4,12,3.4, tint(col,'#000',0.2));
+    bx(0,14,0, 7,7,7, sc, sc, 0.95); popM();                                          // hovering ice shard
+  } else if(e.look==='skitter'){
+    // MAGMA-TRAIL SKITTER: low fast ember-bug; its underside glows and it leaves fire behind
+    const gait=Math.sin(G.time*16+e.bob)*0.6, glow=0.5+0.5*Math.sin(G.time*10);
+    bx(0,H*0.42,0, W*0.8,H*0.44,W*1.1, col);                                          // segmented body
+    bx(0,H*0.2,0, W*0.7,H*0.16,W*0.9, '#ff8a3a','#ff5a1e', 0.5+0.3*glow);              // glowing molten underside
+    bx(0,H*0.5,W*0.5, W*0.4,H*0.3,4, tint(col,'#000',0.3));                            // face
+    bx(-W*0.14,H*0.52,W*0.52, 2.4,2.4,1.2, '#ffd24a','#ffd24a'); bx(W*0.14,H*0.52,W*0.52, 2.4,2.4,1.2, '#ffd24a','#ffd24a');
+    for(const s2 of [-1,1]) for(let i2=0;i2<3;i2++){ pushM(); mv(s2*W*0.42,H*0.24,-W*0.4+i2*W*0.4); rotZ(s2*(0.6+((i2%2)?gait:-gait)*0.3));
+      bx(s2*3,-H*0.2,0, 2.4,H*0.4,2.4, tint(col,'#000',0.3)); popM(); }                // six ember legs
+  } else if(e.look==='totem'){
+    // ERUPTION TOTEM: a stacked carved-stone vent; the mouth glows and flares before it erupts
+    const heat=e.eruptW>0?(0.6+0.4*Math.sin(G.time*30)):(0.3+0.2*Math.sin(G.time*4));
+    bx(0,H*0.16,0, W*1.0,H*0.32,W*1.0, tint(col,'#000',0.1));                          // base
+    bx(0,H*0.5,0, W*0.8,H*0.4,W*0.8, col);                                             // mid carving
+    bx(0,H*0.8,0, W*0.7,H*0.3,W*0.7, tint(col,'#fff',0.08));                           // top carving
+    bx(0,H*0.5,W*0.42, W*0.44,H*0.34,3, '#1a0a08');                                    // carved face hollow
+    bx(-W*0.14,H*0.52,W*0.46, 3,3,1.4, '#ff8a3a','#ffd24a'); bx(W*0.14,H*0.52,W*0.46, 3,3,1.4, '#ff8a3a','#ffd24a');   // glowing eyes
+    bx(0,H*1.0,0, W*0.5,W*0.4,W*0.5, '#ff6a2a','#ffb060', 0.4+0.5*heat);               // the venting mouth glow
+    if(e.eruptW>0){ bx(0,H*1.2+heat*10,0, W*0.7,H*0.5,W*0.7, '#ff8a3a','#ff5a1e', 0.3*heat); }
+  } else if(e.look==='stalker'){
+    // BLINK-STALKER: a thin void-shade; fades to a smear while it teleports
+    const fade=e.blinkFx>0?0.3:0.9, sway=Math.sin(G.time*7+e.bob)*0.3;
+    bx(0,H*0.5,0, W*0.5,H*0.95,W*0.44, col, col, fade);                                // slender body
+    bx(0,H*0.9,0, W*0.42,W*0.4,W*0.4, tint(col,'#000',0.2), null, fade);               // narrow head
+    bx(-2.4,H*0.92,W*0.24, 2.4,3.4,1.2, '#c49bff','#c49bff', Math.min(1,fade+0.3)); bx(2.4,H*0.92,W*0.24, 2.4,3.4,1.2, '#c49bff','#c49bff', Math.min(1,fade+0.3));
+    for(let i=0;i<3;i++){ const a=G.time*4+i*2.1; bx(Math.cos(a)*W*0.35,H*0.2,Math.sin(a)*W*0.35, 3,H*0.44,3, col, col, 0.3*fade); }   // void wisps
+    pushM(); mv(-W*0.4,H*0.6,0); rotZ(0.7+sway); bx(-W*0.24,0,0, 2.6,10,2.6, col, col, fade); popM();   // claw arms
+    pushM(); mv(W*0.4,H*0.6,0); rotZ(-0.7-sway); bx(W*0.24,0,0, 2.6,10,2.6, col, col, fade); popM();
+  } else if(e.look==='tether'){
+    // VOID TETHER: a floating rune-node trailing strands that link to its allies
+    const pulse=0.6+0.4*Math.sin(G.time*5+e.tetherPulse);
+    bx(0,H*0.6,0, W*0.6,W*0.6,W*0.6, col, col, 0.8);                                   // central orb
+    bx(0,H*0.6,0, W*0.9,W*0.9,W*0.9, tint(col,'#fff',0.3), null, 0.18*pulse);          // aura
+    for(let i=0;i<4;i++){ const a=G.time*1.6+i*1.571; bx(Math.cos(a)*W*0.7,H*0.6+Math.sin(a)*W*0.3,Math.sin(a)*W*0.7, 3.4,3.4,3.4, '#c49bff','#e0c8ff', 0.85); }   // orbiting rune motes
+    bx(-2.6,H*0.62,W*0.3, 2.2,2.6,1.2, eyeC, eyeC); bx(2.6,H*0.62,W*0.3, 2.2,2.6,1.2, eyeC, eyeC);
+    for(let i=0;i<3;i++) bx(0,H*0.3-i*H*0.1,0, 2,H*0.14,2, col, col, 0.4);             // dangling tail strands
+  } else if(e.look==='priest'){
+    // CORRUPTED SUN-PRIEST: robed radiance-caster with a broken halo; heals its kin
+    const halo=0.6+0.4*Math.sin(G.time*3);
+    bx(0,H*0.3,0, W*1.0,H*0.5,W*0.78, col);                                            // long robe
+    bx(0,H*0.5,W*0.36, W*0.5,H*0.3,3, tint(col,'#fff',0.2));                           // gold stole
+    bx(0,H*0.7,0, W*0.7,H*0.3,W*0.6, tint(col,'#fff',0.1));                            // chest
+    bx(0,H*0.92,0, W*0.5,W*0.42,W*0.46, tint(col,'#fff',0.16));                        // head
+    bx(-2.6,H*0.94,W*0.26, 2.2,2.2,1.2, '#fff6d0','#fff6d0'); bx(2.6,H*0.94,W*0.26, 2.2,2.2,1.2, '#fff6d0','#fff6d0');
+    for(let i=0;i<8;i++){ const a=i*0.785; bx(Math.cos(a)*W*0.5,H*1.2,Math.sin(a)*W*0.5, 3,3,3, '#ffe9a8','#fff', 0.5+0.4*halo); }   // the halo ring
+    pushM(); mv(W*0.55,H*0.5,4); bx(0,0,0, 3,14,3, tint(col,'#000',0.2)); bx(0,12,0, 5,5,5, '#ffe9a8','#fff', 0.9); popM();          // radiant staff
+  } else if(e.look==='statue'){
+    // ANIMATED MARBLE STATUE: a heavy pale sculpture, slow shielder with cracked seams
+    const dk=tint(col,'#000',0.2), lt=tint(col,'#fff',0.14);
+    bx(-W*0.26,H*0.18,0, W*0.34,H*0.36,W*0.44, dk); bx(W*0.26,H*0.18,0, W*0.34,H*0.36,W*0.44, dk);   // pillar legs
+    bx(0,H*0.56,0, W*1.0,H*0.52,W*0.72, col);                                          // massive torso
+    bx(0,H*0.6,W*0.36, W*0.5,H*0.32,3, lt);                                            // chest facet
+    bx(-W*0.56,H*0.8,0, W*0.36,W*0.4,W*0.5, lt); bx(W*0.56,H*0.8,0, W*0.36,W*0.4,W*0.5, lt);         // shoulders
+    bx(0,H*0.98,0, W*0.5,W*0.46,W*0.48, tint(col,'#fff',0.1));                          // stoic head
+    bx(-2.8,H*1.0,W*0.28, 2.4,2.6,1.2, eyeC, eyeC); bx(2.8,H*1.0,W*0.28, 2.4,2.6,1.2, eyeC, eyeC);
+    bx(0,H*0.5,W*0.3, 1.4,H*0.5,1.4, dk); bx(-W*0.3,H*0.55,W*0.28, 1.2,H*0.3,1.2, dk);  // cracked seams
+  } else if(e.look==='knight'){
+    // SIEGE KNIGHT: armored, a broad shield on one arm, a heavy maul it raises to crush
+    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.14), raise=e.knightW>0?(1-e.knightW/0.6):0;
+    bx(-W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.42, dk); bx(W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.42, dk);       // greaves
+    bx(0,H*0.56,0, W*0.9,H*0.5,W*0.64, col);                                           // plated body
+    bx(0,H*0.5,W*0.34, W*0.5,H*0.3,3, lt);                                             // breastplate
+    bx(0,H*0.9,0, W*0.5,H*0.3,W*0.46, dk);                                             // great helm
+    bx(0,H*0.9,W*0.26, W*0.34,2.4,1.4, eyeC, eyeC);                                    // visor slit
+    bx(0,H*1.08,0, 3,8,3, lt);                                                          // helm plume
+    pushM(); mv(-W*0.62,H*0.6,W*0.1); bx(0,0,0, 4,H*0.7,W*0.7, lt); bx(0,0,W*0.36, W*0.02+3,H*0.6,2, tint(col,'#fff',0.25)); popM();   // big shield
+    pushM(); mv(W*0.58,H*0.62,0); rotX(-0.4-raise*1.8); bx(0,10,0, 3.4,16,3.4, dk); bx(0,20,0, 8,8,8, tint(col,'#000',0.15)); popM(); // raised maul
+  } else if(e.look==='arcanist'){
+    // ROYAL ARCANIST: ornate mage, floating rune sigils, a crowned circlet
+    const oc=(e.shot&&e.shot.color)||'#c47bff', spin=G.time*2;
+    bx(0,H*0.3,0, W*1.0,H*0.52,W*0.78, col);                                           // regal robe
+    bx(0,H*0.5,W*0.36, W*0.5,H*0.3,3, tint(col,'#fff',0.2));                           // trim
+    bx(0,H*0.72,0, W*0.66,H*0.3,W*0.56, tint(col,'#fff',0.08));                        // shoulders
+    bx(0,H*0.94,0, W*0.5,W*0.42,W*0.46, tint(col,'#000',0.2));                         // hooded head
+    bx(-2.6,H*0.96,W*0.28, 2.2,2.4,1.2, oc, oc); bx(2.6,H*0.96,W*0.28, 2.2,2.4,1.2, oc, oc);
+    for(let i=0;i<3;i++) bx(-W*0.24+i*W*0.24,H*1.14,0, 3,6,3, '#ffd24a','#fff', 0.9);  // crown points
+    for(let i=0;i<3;i++){ const a=spin+i*2.094; bx(Math.cos(a)*W*0.75,H*0.7,Math.sin(a)*W*0.75, 5,5,1.6, oc, oc, 0.85); }   // orbiting arcane sigils
   } else if(e.kind==='fly'){
     const flap=Math.sin(e.bob*2.4)*0.7;
     bx(0,H*0.5,0, W*0.72,H*0.9,W*0.62, col);

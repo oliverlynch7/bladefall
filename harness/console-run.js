@@ -1,0 +1,2 @@
+/* Paste into BLADEFALL DevTools after loading core-driver.js, or paste both files together. */
+(async()=>{if(!window.BFHarness)throw new Error('Load harness/core-driver.js first');const data=await BFHarness.run({quick:true,rarity:'common'});data.runId=new Date().toISOString();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download=`${data.version}-${data.runId.replace(/[:.]/g,'-')}.json`;a.click();URL.revokeObjectURL(a.href);return data;})().then(console.log).catch(console.error);

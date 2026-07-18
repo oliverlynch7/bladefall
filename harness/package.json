@@ -1,0 +1,11 @@
+{
+  "name": "bladefall-playtest-harness",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "node runner.js",
+    "quick": "node runner.js --quick",
+    "regression": "node runner.js --baseline latest"
+  },
+  "dependencies": { "playwright": "^1.55.0" }
+}

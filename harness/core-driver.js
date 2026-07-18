@@ -58,7 +58,7 @@
   async function descent(cfg={}){ const h=api(), trials=cfg.trials||3,maxFloors=cfg.maxFloors||12, runs=[];
     for(let t=0;t<trials;t++){ setClass('warrior');h.startEndless();h.giveWeapon(t===0?'sword':'great',t===0?'common':'rare');const floors=[];
       for(let f=1;f<=maxFloors;f++){ const g=h.G,p=g.p,startHp=p.hp,start=g.time||0;let dealt=0,seenHp=[],seenDmg=[],elites=new Set(),guard=0;
-        while(!g.floorCleared&&!p.dead&&guard++<(cfg.floorSteps||24000)){ revive(); const foes=active(g); if(foes.length){const e=foes[0];seenHp.push(e.maxHp);seenDmg.push(e.dmg);if(e.elite)elites.add(e);face(e,p.weapon.cls==='ranged'?130:30);const hp=e.hp;if(p.atkCd<=0)h.playerAttack();h.update(STEP);dealt+=Math.max(0,hp-e.hp);}else h.update(STEP);dismissOverlay(); }
+        while(!g.floorCleared&&!p.dead&&guard++<(cfg.floorSteps||24000)){ revive(); const foes=active(g); if(foes.length){const e=foes[0];seenHp.push(e.maxHp);seenDmg.push(e.dmg);if(e.elite)elites.add(e);face(e,p.weapon.cls==='ranged'?130:30);if(p.dodgeCdT<=0){h.input.jz=1;h.input.dodgeEdge=true;}const hp=e.hp;if(p.atkCd<=0)h.playerAttack();h.update(STEP);h.input.jz=0;dealt+=Math.max(0,hp-e.hp);}else h.update(STEP);dismissOverlay(); }
         floors.push({floor:g.floor,hpScale:round(g.ngHp),damageScale:round(g.ngDmg),target:g.endTarget,cap:g.endCap,spawnInterval:g.endInt,meanEnemyHp:round(mean(seenHp)),meanEnemyDamage:round(mean(seenDmg)),eliteObserved:elites.size,clearSeconds:round((g.time||0)-start),damageDealt:round(dealt),damageTaken:round(startHp-p.hp),cleared:!!g.floorCleared});
         if(!g.floorCleared||p.dead)break; h.endlessDescend();pump(.05);
       } runs.push({trial:t+1,loadout:t===0?'fresh-common-sword':'good-rare-greatsword',floorReached:floors.at(-1)?.floor||0,floors}); }

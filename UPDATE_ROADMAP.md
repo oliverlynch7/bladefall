@@ -242,6 +242,21 @@ self-contained work session. Work top to bottom.
   sword = sweeping diagonal, thrust = forward lunge, slam/chop = overhead). Verified: renders clean.
 
 ## Phase 14 — Level depth & bestiary (MAJOR content bar — build zone-by-zone: ship one, judge, then the rest)
+
+> **Progress — ZONE 1 of 7: Hollow Pass — SHIPPED v1.55.0 (awaiting Oliver's judgment before the next zone).**
+> Rebuilt `SCAPES.hollow` into a multi-minute canyon JOURNEY: entry gorge (arch landmark) → north
+> corridor → a **FORK** (low slot-canyon road *or* a high ledge road that rejoins = a loop) → the **Mesa**
+> (bone-pile checkpoint, a cragspitter perched) → a chasm crossing → the expanded **pillar field** (bone
+> hunt, galewisps diving) → the **Summit / Hollow Shrine** (portal, skull-arch landmark). ~2000u south→north,
+> four checkpoints. Solvable-by-construction (climbRun) — zonescape verifies portal + every objective
+> reachable, both areas × 3 seeds. Canyon stays one biome the whole way (already theme-consistent).
+> **New canyon bestiary** (distinct silhouettes + behaviours, `dive` flag now propagated in spawnEnemy):
+> **Dust Jackal** (fast pounce-hunter, the kill target — 18), **Cragspitter** (lobs arcing rocks, kill-priority),
+> **Galewisp** (telegraphed dive-bomber). Core mobs reused sparingly (bones only). Verified in-browser:
+> dustjackal den reaches 20/18, rocks arc, galewisp dives, all render clean.
+> **Next:** await feel judgment, then apply the same treatment to one more zone (theme consistency matters
+> most for Outskirts/others), and separately the hub **Proving Grounds** endless-grind mode.
+
 - [ ] **Theme consistency per zone.** Every sub-area of a zone keeps ONE biome the whole way through —
   no breaks like Outskirts (plains) dropping into a lava dungeon. Fix the theme→color/hazard mapping so a
   zone reads coherently start to finish.

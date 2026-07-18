@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.75.0';
+const VERSION3D='1.76.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -351,7 +351,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -366,7 +366,7 @@ const meta=Object.assign({
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
-  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true
+  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:''
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -401,12 +401,13 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.petNames=mv.petNames&&typeof mv.petNames==='object'?mv.petNames:{};
   meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
   meta.petLabel=mv.petLabel!==false;
+  meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,18):'';
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true;
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -3964,24 +3965,56 @@ function drawPet3(pet,t){
   if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
   const glow=petRarityCol(pet.id);
   pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw);
-  bx(0,0,0, 30,30,30, glow, glow, 0.10);                    // rarity aura
-  if(pet.id==='emberpup'){ bx(0,-6,0, 20,14,26,P.body); bx(0,2,15, 15,14,12,P.body,P.accent,0.3);   // body + head
-    bx(-5,10,17,4,7,3,P.accent); bx(5,10,17,4,7,3,P.accent);                                          // ears
-    for(const[dx,dz]of[[-7,10],[7,10],[-7,-10],[7,-10]]) bx(dx,-14,dz,4,8,4,P.body);                  // legs
-    bx(0,4,20,4,4,4,'#ffe0a0','#fff',0.6); }
-  else if(pet.id==='stonewhelp'){ bx(0,-2,0, 26,22,28,P.body,P.accent,0.25); bx(0,6,14,16,16,12,P.body,P.accent,0.25);
-    for(const[dx,dz]of[[-9,11],[9,11],[-9,-11],[9,-11]]) bx(dx,-15,dz,6,8,6,P.body);
-    bx(-5,9,18,3,3,3,'#ff5a3a','#ff5a3a',0.7); bx(5,9,18,3,3,3,'#ff5a3a','#ff5a3a',0.7); }
-  else if(pet.id==='wisp'){ bx(0,6,0, 16,20,16,P.body,P.accent,0.55); bx(0,14,0,9,9,9,P.accent,'#fff',0.7);
-    for(let i=0;i<3;i++){ const a=t*2+i*2.1; bx(Math.cos(a)*10,2+Math.sin(a*1.4)*6,Math.sin(a)*10,3,3,3,P.accent,P.accent,0.6); } }
-  else if(pet.id==='mender'){ bx(0,8,0,14,18,10,P.body,P.accent,0.5); bx(0,20,0,8,8,8,P.accent,'#fff',0.6);
-    bx(0,10,7,10,3,2,'#fff','#fff',0.85); bx(0,10,7,3,10,2,'#fff','#fff',0.85);                       // healing cross
-    for(let i=0;i<2;i++){ const a=t*1.6+i*3.14; bx(Math.cos(a)*11,6+Math.sin(a)*4,Math.sin(a)*11,3,3,3,P.body,P.body,0.6); } }
-  else if(pet.id==='coinsprite'){ rotY(t*3); bx(0,10,0,20,20,4,P.body,P.accent,0.5); bx(0,10,0,11,11,5,P.accent,'#fff',0.7);
-    bx(0,10,3,4,8,1,'#a8791a'); }
-  else if(pet.id==='gravewraith'){ bx(0,8,0,16,24,12,'#241436',glow,0.5); bx(0,20,0,11,11,11,'#0f0820',glow,0.6);
-    bx(-3,21,5,2,2,2,P.accent,P.accent,0.9); bx(3,21,5,2,2,2,P.accent,P.accent,0.9);                  // eyes
-    for(let i=0;i<3;i++){ const a=t*2.2+i*2.1; bx(Math.cos(a)*9,4+Math.sin(a*1.3)*7,Math.sin(a)*9,3,3,3,P.accent,P.accent,0.55); } }
+  const dk=tint(P.body,'#000',0.28), lt=tint(P.body,'#fff',0.15), wob=Math.sin(t*7+pet.t)*0.4;
+  bx(0,4,0, 34,34,34, glow, glow, 0.07);                    // rarity aura (softer, larger)
+  if(pet.id==='emberpup'){ // "a stray from the Emberdeep" — an actual PUP: snout, floppy ears, wagging tail, ember mouth
+    bx(0,-4,-2, 16,13,22,P.body);                                                     // body
+    bx(0,-9,-1, 14,4,18, dk);                                                         // belly
+    pushM(); mv(0,4,11); rotX(-0.12); bx(0,0,0, 12,11,10,P.body); bx(0,-2,7, 7,5,6, lt);   // head + snout
+    bx(0,-4,10.4, 5,2.4,1.6,'#ff7a3a','#ffb060',0.85);                                // the ember-glow mouth
+    bx(-2.4,1.6,9.6, 1.8,1.8,1,'#2a1408'); bx(2.4,1.6,9.6, 1.8,1.8,1,'#2a1408');      // button eyes
+    pushM(); mv(-6,5,1); rotZ(0.7+wob*0.2); bx(0,-3,0, 3.4,7,2,dk); popM();           // floppy ears
+    pushM(); mv(6,5,1); rotZ(-0.7-wob*0.2); bx(0,-3,0, 3.4,7,2,dk); popM(); popM();
+    for(const[dx,dz]of[[-5.5,7],[5.5,7],[-5.5,-9],[5.5,-9]]) bx(dx,-13,dz,3.6,7,3.6,dk);   // legs
+    pushM(); mv(0,1,-13); rotX(0.5); rotZ(wob*1.6); bx(0,3,0, 2.6,9,2.6,P.accent); popM(); }  // the wag
+  else if(pet.id==='stonewhelp'){ // "slow, heavy, loyal" — a slab-backed stone whelp, head like a battering ram
+    bx(0,-5,0, 24,15,26,P.body);                                                      // low heavy body
+    bx(0,3,-1, 18,6,20, tint('#6a7080','#000',0.1));                                  // stone slab back...
+    bx(0,7.5,-1, 11,4,13, '#5a6070'); bx(0,10.5,-1, 6,3,7, '#4a505e');                // ...stacked like a cairn
+    bx(0,-2,15, 14,11,9, lt); bx(0,-6,19, 10,4,4, dk);                                // ram head + heavy jaw
+    bx(-3.4,0,19.2, 2,2,1,'#ffb060','#ffd07a',0.8); bx(3.4,0,19.2, 2,2,1,'#ffb060','#ffd07a',0.8);   // small warm eyes
+    for(const[dx,dz]of[[-9,9],[9,9],[-9,-9],[9,-9]]) bx(dx,-14,dz,5.5,6,5.5,'#4a505e');   // stumpy stone legs
+    bx(0,-3,-15, 5,5,4,'#5a6070'); }                                                  // a pebble of a tail
+  else if(pet.id==='wisp'){ // "a fallen Warden's lantern-light" — a tapering flame-wisp, no body at all
+    for(let i2=0;i2<4;i2++){ const s2=15-i2*3.4; bx(0,-6+i2*6.4, 0, s2,7,s2, P.body, P.accent, 0.32+i2*0.12); }   // stacked taper
+    bx(0,15,0, 7,8,7, '#ffffff', P.accent, 0.9);                                      // the burning core
+    bx(0,21,0, 3.4,4.6,3.4, P.accent, '#fff', 0.8);                                   // flame tip
+    for(let i2=0;i2<4;i2++){ const a=t*2.4+i2*1.57; bx(Math.cos(a)*11,Math.sin(a*1.3)*8, Math.sin(a)*11, 2.4,2.4,2.4, P.accent, P.accent, 0.55); } }   // circling motes
+  else if(pet.id==='mender'){ // "it cannot fight" — a tiny winged sprite with a healing cross
+    bx(0,2,0, 8,12,6, P.body); bx(0,11,0, 7,6,6, '#eafff0');                          // slim body + bright head
+    bx(-1.6,11.6,3.2, 1.6,1.6,1,'#2a4a34'); bx(1.6,11.6,3.2, 1.6,1.6,1,'#2a4a34');    // kind eyes
+    pushM(); mv(-5,6,-1); rotZ(0.9+Math.sin(t*16)*0.35); bx(-4,2,0, 9,7,1.4, '#ffffff', P.accent, 0.55); popM();   // beating wings
+    pushM(); mv(5,6,-1); rotZ(-0.9-Math.sin(t*16)*0.35); bx(4,2,0, 9,7,1.4, '#ffffff', P.accent, 0.55); popM();
+    bx(0,3,3.4, 6,1.8,1,'#ffffff','#fff',0.9); bx(0,3,3.4, 1.8,6,1,'#ffffff','#fff',0.9);   // the cross it carries
+    for(let i2=0;i2<2;i2++){ const a=t*1.8+i2*3.14; bx(Math.cos(a)*9,Math.sin(a)*5+4, Math.sin(a)*9, 2,2,2, P.accent, P.accent, 0.6); } }
+  else if(pet.id==='coinsprite'){ // "greedy, but it shares" — a fat coin with a FACE and buzzing winglets
+    pushM(); rotY(Math.sin(t*2.2)*0.5);
+    bx(0,8,0, 18,18,4.6, P.body, P.accent, 0.45); bx(0,8,0, 12,12,5.6, lt);           // the coin + inner stamp
+    bx(-3,10,3, 1.8,3,1,'#5a3c0e'); bx(3,10,3, 1.8,3,1,'#5a3c0e');                    // squinting rich-guy eyes
+    bx(0,5.4,3, 6,1.6,1,'#5a3c0e');                                                   // a satisfied little grin
+    popM();
+    pushM(); mv(-10,10,0); rotZ(0.8+Math.sin(t*22)*0.4); bx(-3,1,0, 6,4,1.2,'#fff8d6',null,0.6); popM();   // buzzing winglets
+    pushM(); mv(10,10,0); rotZ(-0.8-Math.sin(t*22)*0.4); bx(3,1,0, 6,4,1.2,'#fff8d6',null,0.6); popM();
+    if(Math.sin(t*3+pet.t)>0.7) bx(6,17,2, 2.4,2.4,2.4,'#fff2b0','#fff',0.9); }        // the occasional glint
+  else if(pet.id==='gravewraith'){ // "its bolts find the throat" — a hooded reaper-wisp, robe tattering to nothing
+    bx(0,10,0, 13,10,11, '#241436');                                                  // deep hood
+    bx(0,9,3.4, 9,7,4, '#0f0820');                                                    // the dark where a face should be
+    bx(-2.4,10,5.6, 2,2.6,1, P.accent, P.accent, 0.95); bx(2.4,10,5.6, 2,2.6,1, P.accent, P.accent, 0.95);   // burning eyes
+    for(let i2=0;i2<3;i2++){ const s2=12-i2*2.6; bx(0,3-i2*5, -1, s2,6,s2-2, tint('#241436','#000',0.12*i2), null, 0.85-i2*0.2); }   // robe tattering away
+    pushM(); mv(-8,6,2); rotZ(0.5+wob*0.3); bx(0,-3,0, 2.6,8,2.6,'#241436',null,0.8); popM();   // reaching arms
+    pushM(); mv(8,6,2); rotZ(-0.5-wob*0.3); bx(0,-3,0, 2.6,8,2.6,'#241436',null,0.8); popM();
+    for(let i2=0;i2<3;i2++) bx(-2+i2*2, -4-i2*3.4, -3, 1.8,3,1.8, '#3a3444');          // a dangling chain
+    for(let i2=0;i2<3;i2++){ const a=t*2.2+i2*2.1; bx(Math.cos(a)*10,2+Math.sin(a*1.3)*7, Math.sin(a)*10, 2.4,2.4,2.4, P.accent, P.accent, 0.5); } }
   else { bx(0,6,0,16,16,16,P.body,P.accent,0.4); }
   popM();
 }
@@ -4898,6 +4931,8 @@ function openMirror(back){
   mirror={ t:0, yaw:Math.PI, spin:true, back:back||openHubMenu, p };
   mode='mirror'; showOverlay(false); showGameUI(false);
   document.getElementById('questbox').classList.add('hide');
+  { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract');   // Phase 19: the 'Talk to the Mirror' prompt must not linger inside the mirror
+    if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); }
   buildMirrorPanel();
 }
 function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
@@ -4913,16 +4948,27 @@ function renderMirror(t){
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
   gl.uniform2f(U.uFogNF,600,2200); gl.uniform3f(U.uFog,0.055,0.05,0.07);
   CURM=mIdent();
-  // a great standing mirror behind the hero, pedestal underfoot
+  const behind=cz<-84;   // Phase 19: orbit BEHIND the glass and the mirror goes phantom — it never blocks your view of yourself
+  // pedestal + mirror base
   bx(0,-8,-70, 300,16,60,'#171922');
-  bx(0,90,-84, 150,190,10,'#2a2f3d'); bx(0,90,-79, 122,168,4,'#0f1622','#7fb0e0',0.16);   // reflective glass
-  bx(0,188,-84, 168,14,14,'#3a4152');
   bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
   const p=mirror.p; p.yaw=Math.PI;   // hero faces the camera-front consistently; the CAMERA orbits
   drawShadow(0,0,17,0.34);
-  drawHero3(p,t,false);
+  if(!behind){ p.z=-168; p.yaw=0; drawHero3(p,t,false); p.z=0; p.yaw=Math.PI; }   // Phase 19: your REFLECTION — the double beyond the glass, facing you back
+  if(behind){ gl.depthMask(false);   // phantom frame from the far side — never blocks the view
+    bx(0,90,-84, 150,190,10,'#2a2f3d',null,0.07); bx(0,188,-84, 168,14,14,'#3a4152',null,0.07);
+    gl.depthMask(true);
+  } else { gl.depthMask(false);      // smoked translucent glass OVER the double = it reads as a reflection
+    bx(0,90,-84, 150,190,10,'#10141f',null,0.5);
+    bx(0,90,-79, 122,168,4,'#0f1622','#7fb0e0',0.14);
+    gl.depthMask(true);
+    bx(0,188,-84, 168,14,14,'#3a4152');
+  }
+  drawHero3(p,t,false);              // the real you, drawn last — always visible
 }
-function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
+function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide');
+  const esc=document.getElementById('mirrorEsc'); if(esc) esc.style.display='none';
+  if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
 function mirrorStatsHTML(){
   const p=mirror.p, row=(lbl,val,accent)=>`<div class="msrow"><span>${lbl}</span><b${accent?` style="color:${accent}"`:''}>${val}</b></div>`;
   const pct=v=>(v>=0?'+':'')+Math.round(v*100)+'%', mul=v=>'×'+(Math.round(v*100)/100);
@@ -4951,14 +4997,27 @@ function mirrorStatsHTML(){
 }
 function buildMirrorPanel(){
   const pn=document.getElementById('mirrorui'); if(!pn) return;
-  const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1;
-  pn.innerHTML=`<div class="mstop"><div class="msttl">${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
-    <div class="msbody">${mirrorStatsHTML()}</div>
+  const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
+  pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?nm.replace(/</g,'&lt;')+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
+    <div style="display:flex;gap:6px;margin:6px 0">
+      <input id="msName" maxlength="18" value="${nm.replace(/"/g,'&quot;')}" placeholder="Name yourself…"
+        style="flex:1;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;font-size:13px">
+      <button class="wsbig" id="msNameGo" style="width:auto;padding:7px 12px">✏️</button></div>
+    <details class="msbody" style="margin:2px 0"><summary style="cursor:pointer;font-weight:800;color:var(--amber);font-size:12px;letter-spacing:.08em">▾ ALL STATS &amp; LOADOUT</summary>${mirrorStatsHTML()}</details>
     <div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: On</button><button class="wsbig ghost" id="msBack">Back</button></div>
     <div class="mshint">drag the character to look around</div>`;
   pn.classList.remove('hide');
+  // Phase 19: an always-visible, CLICKABLE way out, top-left
+  let esc=document.getElementById('mirrorEsc');
+  if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
+    esc.style.cssText='position:absolute;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:9;background:rgba(12,13,18,.85);border:1px solid var(--amber);border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:800;color:var(--ink);cursor:pointer;box-shadow:0 0 12px rgba(232,163,61,.35)';
+    document.body.appendChild(esc); }
+  esc.innerHTML='<span style="background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900">ESC</span>Leave the mirror';
+  esc.style.display='block'; esc.onclick=()=>exitMirror();
   document.getElementById('msSpin').onclick=()=>{ mirror.spin=!mirror.spin; document.getElementById('msSpin').textContent='🔄 Spin: '+(mirror.spin?'On':'Off'); };
   document.getElementById('msBack').onclick=()=>exitMirror();
+  const ni=document.getElementById('msName');
+  document.getElementById('msNameGo').onclick=()=>{ meta.heroName=(ni.value||'').trim().slice(0,18); persist(); SFX.pickup(); buildMirrorPanel(); };
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);

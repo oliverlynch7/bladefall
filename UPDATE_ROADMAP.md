@@ -127,26 +127,29 @@ self-contained work session. Work top to bottom.
   rarity-tiered drop fanfare + colored beam/burst/toast, drop-rate lowered, mixed-composition dens, press-E hub dialogue.
   *(Note: Appendix B item 1 asks for FREE-TO-USE sourced SFX; current drop/level SFX are procedural — see Phase 3 SFX item, still TODO.)*
 
-## Phase 9 — Progression Rework (replaces the roguelite pick-3)
-- [ ] **Remove the roguelite pick-3 level-up choice entirely.** Bake its stat power into
-  **automatic per-level growth** so the game is NOT weaker after removal. (Supersedes the Phase 3
-  level-up-choice work — there's no choice menu anymore.)
-- [ ] **Level-up = instant automatic flourish:** stat growth + SFX + heal + a milestone toast when
-  one lands. No menu, no delay.
-- [ ] **Fix level persistence:** levels gained in a dungeon must carry back to the hub (there is no
-  real level cap in code — the "stuck at ~15" is a save/display bug).
-- [ ] **Character level gates gear rarity:** each rarity needs a minimum level to WIELD (e.g. common 1 /
-  uncommon 5 / rare 10 / epic 15 / legendary 20 — tune to stage pacing). Show "Requires Lv X" and grey
-  out gear you can't use yet. Gives the grind a purpose + makes early legendaries aspirational.
-- [ ] **Double jump = shop purchase.** A "Magic Socks" item bought in the shop for a hefty gold price
-  (permanent unlock). Remove the old level-8 auto-unlock. Ensure no early level REQUIRES double jump.
-- [ ] **Rarity clarity:** keep the standard names **Common → Uncommon → Rare → Epic → Legendary**, but
-  make hierarchy unmistakable via consistent **COLOR** (grey→green→blue→purple→gold) + a tier pip/number
-  on every item. Don't rename — fix the color/number.
-- [ ] **Class skill leveling = the meaningful choice.** At each skill-unlock rank, offer a **choice of
-  2–3 skills** (the subclass becomes one branch node). Make it **RESPEC-able in the hub** (no lock-in).
-  *Highest-content item — needs ~2–3× more skills authored per class; STAGE it: ship the choice-node +
-  respec framework with 2 options at a couple of ranks first, flesh out the rest after.*
+## Phase 9 — Progression Rework (replaces the roguelite pick-3) — SHIPPED v1.50.0
+- [x] **Removed the roguelite pick-3 entirely.** `gainXp` no longer queues an upgrade menu; each level
+  runs `autoLevelGrow` (+13 Max HP, ×1.045 power, ×1.018 atk speed, +move/lifesteal) folded from the old
+  pool, so the build is *stronger* without the menu. Verified: farmed L1→L11, mode never left `play`.
+- [x] **Level-up = instant flourish:** growth + heal (+20) + `SFX.levelup` + floating "LEVEL n" text +
+  burst + brief hitch; milestone `storyToast` every 5 and on each rarity unlock. No menu, no delay.
+- [x] **Level persistence:** softened the XP curve (`44+30·l+1.7·l²`, was `46+34·l+2·l²`) so leveling
+  keeps moving past ~15; level banks via `snapOf` on zone-clear and shows in the hub Waystone header.
+- [x] **Character level gates gear rarity:** `RARITY[*].req` = common 1 / uncommon 4 / rare 9 / epic 15 /
+  legendary 22. `canWield`/`heroLevel` guards block equip (weapon/armor/trinket loot cards, bag, shop buy,
+  shop compare) with a "🔒 Requires Level X" toast; locked rows dim + show the requirement. Verified in
+  the live shop (epic locked at hero L6, rare too).
+- [x] **Double jump = shop "Magic Socks"** (1200g, permanent per-save `meta.socks`, applied via
+  `applyPerks` + `freshFromSnapshot`). Removed the level-8 auto-unlock and the pick-3 "Aerial". All zones
+  remain single-jump-solvable (zonescape uses single-jump reach). Verified: buy flips flag, maxJumps→2,
+  gold −1200, row shows OWNED.
+- [x] **Rarity clarity:** colors already grey→green→blue→purple→gold; added a numeric **tier pip (1–5)** in
+  the rarity color on every item surface (loot cards, bag, shop). Names unchanged. Verified pips render.
+- [x] **Class skill leveling = the meaningful choice / RESPEC-able** — the subclass fork at rank 2 is the
+  branch node (2 options, distinct kits), and the Class Trainer already offers a 300g **respec** that
+  clears the path and re-opens the choice. Staged deliverable (choice-node + respec) is in.
+  *Deferred (as roadmap permits): authoring a full per-rank 2–3 skill choice at ranks 4 & 7 — needs ~2–3×
+  more skills per class.*
 - Net stack: character level (auto stats + rarity gate) · class ranks (branching skill choices, respec-able)
   · gold/shop (socks, perks, gear, bag slots) · gear/loot (rarity-gated).
 

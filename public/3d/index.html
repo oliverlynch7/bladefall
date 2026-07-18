@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.49.0';
+const VERSION3D='1.50.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -306,7 +306,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -320,7 +320,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{}
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -335,7 +335,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
-  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null;
+  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks;
   meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
   meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
@@ -347,7 +347,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={};
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false;
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -696,13 +696,21 @@ const SFX={
 
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
-  common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0},
-  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1},
-  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2},
-  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3},
-  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4}
+  common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
+  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:4},
+  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:9},
+  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:15},
+  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:22}
 };
 const RORDER=['common','uncommon','rare','epic','legendary'];
+// Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
+function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
+function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
+function canWieldRid(rid){ return heroLevel()>=rarityReq(rid); }
+function canWield(o){ return !o||!o.rarity||heroLevel()>=rarityReq(o.rarity); }
+// The rarity tier pip (1-5): an unmistakable numeric badge in the item's rarity color.
+function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:5px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
+function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
 function rollRarity(){
   const luck=(G?G.stageIndex*0.5:0)+(G?G.ngPlus*2.5:0)+(G?Math.floor(G.p.level/2)*0.2:0);
@@ -1398,6 +1406,7 @@ function applyPerks(p){
   p.stats.speed *= 1+PERKS.swift.per*perkLevel('swift');
   p.stats.crit = (p.stats.crit||0)+PERKS.edge.per*perkLevel('edge');
   p.stats.goldFind = (p.stats.goldFind||0)+PERKS.greed.per*perkLevel('greed');
+  if(meta.socks) p.maxJumps=Math.max(p.maxJumps||1,2);   // Phase 9: double jump is the Magic Socks shop unlock (permanent, per-save)
 }
 function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
@@ -1470,7 +1479,7 @@ function freshFromSnapshot(snap){
   p.stats=Object.assign(p.stats,snap.stats);
   p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):startWeapon();
   p.gear=cloneGear(snap.gear);
-  p.maxHp=snap.maxHp||100; p.maxJumps=snap.maxJumps||1; p.level=snap.level||1;
+  p.maxHp=snap.maxHp||100; p.maxJumps=Math.max(snap.maxJumps||1, meta.socks?2:1); p.level=snap.level||1;
   p.xp=0; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
   recomputeArmor(p); p.hp=effMaxHp(p); return p;
 }
@@ -1535,9 +1544,10 @@ function openBag(back){
   let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, o=w||a, rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a.defense+' def · '+a.affixes.map(x=>x.label).join(', '));
     const hdr=(catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
-    return hdr+`<div class="gearrow" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt="">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}</div><div class="gd">${sub}</div></div>
-      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px">Equip</button>
+    const lock=!canWield(o);
+    return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
+      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):'Equip'}</button>
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Warden's Pack</p><h2 class="ovh">Bag</h2>
@@ -1547,6 +1557,7 @@ function openBag(back){
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
+    const io=it.weapon||it.armor; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
     if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
     else { const old=HR.gear[it.armor.slot]; HR.gear[it.armor.slot]=it.armor; meta.stash.splice(i,1); if(old) meta.stash.push({armor:old}); }
     if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
@@ -3012,12 +3023,22 @@ function rollDrop(e){
     pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
     if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
 }
+// Phase 9: no more roguelite pick-3. Every level bakes in automatic stat growth (folds the old
+// upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
+function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.004; }
+function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){
   const p=G.p; p.xp+=n;
   gainClassXp(Math.max(1,Math.round(n*0.8)));           // class XP flows alongside character XP while this class is equipped
-  while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
-    p.hp=Math.min(effMaxHp(p),p.hp+12); SFX.levelup(); queueLevelUp++; meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
-    if(p.level>=8 && p.maxJumps<2){ p.maxJumps=2; toast('✦ Double Jump unlocked!'); } }
+  while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(44+p.level*30+p.level*p.level*1.7);
+    autoLevelGrow(p); recomputeArmor(p);
+    p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
+    SFX.levelup(); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
+    addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
+    const unlocked=rarityUnlockedAt(p.level);
+    if(unlocked) storyToast('🗝 Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.');
+    else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
+    else toast('▲ Level '+p.level+' · +HP +Power'); }
   checkAchievements(); hudUpdate();
 }
 function checkStageClear(){
@@ -3330,8 +3351,7 @@ function update(dt){
   for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
   G.particles=G.particles.filter(pt=>pt.life>0);
   updateTexts(dt);
-  if(queueLevelUp>0 && mode==='play'){ queueLevelUp--; openLevelUp(); }
-  else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }
+  if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // Phase 9: level-ups are automatic now; only the class path-fork still opens a menu
 }
 const AMBIENT={frost:{c:'#e6f7ff',vy:-40,n:2},volcano:{c:'#ff9a4a',vy:40,n:2},forest:{c:'#9fd84a',vy:-16,n:1},void:{c:'#c9a6ff',vy:14,n:1},apex:{c:'#c9a6ff',vy:16,n:1}};
 function updateAmbient(dt,s){
@@ -3439,7 +3459,6 @@ const UPGRADE_POOL=[
 ];
 function pick3(){
   const pool=[...UPGRADE_POOL];
-  if(G.p.maxJumps<2 && Math.random()<0.35) pool.push({n:'Aerial',d:'Gain a double jump',icon:'⇈',apply:p=>{p.maxJumps=2;}});
   const out=[]; while(out.length<3 && pool.length) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); return out;
 }
 const ARM_MS=340;   // brief un-clickable window so you can't blind-tap through — short enough to feel like an invitation, not a timeout
@@ -3472,14 +3491,14 @@ function offerWeapon(nw){
   const reachRow=nw.cls==='ranged'?row('Range',(cur.proj&&cur.proj.range)||0,nw.proj.range||0):row('Range',cur.range||0,nw.range||0);
   const elDesc=nw.el?(nw.el==='void'?'Void · ignores resistances + lifesteal':(nw.el.charAt(0).toUpperCase()+nw.el.slice(1)+' · strong vs '+(Object.keys(WEAK).find(k=>WEAK[k]===nw.el)||'foes'))):'Neutral · flat damage to all';
   showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()} · ${typ(nw)}</p>
+    <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <img class="itemav" src="${itemAv(nw)}" alt="">
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
 }
@@ -3490,7 +3509,7 @@ function offerArmor(na){
   const before=totalDefense(G.p), after=before-curDef+na.defense;
   const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
   showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[na.rarity].name.toUpperCase()} · ${SLOTS[na.slot].label.toUpperCase()}</p>
+    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[na.rarity].name.toUpperCase()}${rpip(na.rarity)} · ${SLOTS[na.slot].label.toUpperCase()}${reqTag(na)}</p>
     <h2 class="ovh" style="color:${RARITY[na.rarity].color}">${na.name}</h2>
     <img class="itemav" src="${itemAv(na)}" alt="">
     <div class="statgrid">
@@ -3501,7 +3520,7 @@ function offerArmor(na){
     </div>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
 }
@@ -3509,14 +3528,14 @@ function offerTrinket(nt){
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
   showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nt.rarity].name.toUpperCase()} · ${TRINKETS[nt.slot].label.toUpperCase()}</p>
+    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nt.rarity].name.toUpperCase()}${rpip(nt.rarity)} · ${TRINKETS[nt.slot].label.toUpperCase()}${reqTag(nt)}</p>
     <h2 class="ovh" style="color:${RARITY[nt.rarity].color}">${nt.name}</h2>
     <div class="statgrid">
       ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
 /* one random loot item (weapon / armor / trinket) at a given rarity */
@@ -3959,19 +3978,25 @@ function openShop(back){
   const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
   const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
-    return `<div class="gearrow" style="--spine:${RARITY[rid].color}"><img class="bagav" src="${itemAv(w)}" alt="">
-      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name} <span style="opacity:.5;font-size:11px">— compare ›</span></div>
+    const lock=!canWieldRid(rid);
+    return `<div class="gearrow" style="--spine:${RARITY[rid].color}${lock?';opacity:.55':''}"><img class="bagav" src="${itemAv(w)}" alt="">
+      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name}${rpip(rid)}${lock?` <span style="color:#ff8a82;font-size:11px">🔒 Lv ${rarityReq(rid)}</span>`:' <span style="opacity:.5;font-size:11px">— compare ›</span>'}</div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
-      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
+      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford&&!lock?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
   // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
   const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
   const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
       <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.5;font-size:11px">— compare ›</span></div>
         <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
       <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${vsCost}g</button></div>`:'';
+  // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
+  const socksCost=1200, socksAfford=meta.gold>=socksCost;
+  const socksRow=meta.socks
+    ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
+    :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
@@ -3979,6 +4004,7 @@ function openShop(back){
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.perks) meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; SFX.levelup(); persist(); openShop(back); });
   document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', cost=isVS?2200:shopWeapCost(rid);
+    const gateR=isVS?'epic':rid; if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
     const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
@@ -3986,6 +4012,9 @@ function openShop(back){
     SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
   document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe';
     const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid), cost=isVS?2200:shopWeapCost(rid); shopCompare(w,cost,back); });
+  const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
+    meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
+    SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
   document.getElementById('backBtn').onclick=back;
 }
 // full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
@@ -4009,7 +4038,7 @@ function shopCompare(w,cost,back){
     </div>
     <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">Buy · ${cost}g</button>
     <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
-  document.getElementById('buyC').onclick=()=>{ if(meta.gold<cost){ toast('Not enough gold'); return; }
+  document.getElementById('buyC').onclick=()=>{ if(!canWield(w)){ toast('🔒 Requires Level '+rarityReq(w.rarity)+' to wield'); return; } if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
     SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); };
   document.getElementById('backC').onclick=()=>openShop(back);

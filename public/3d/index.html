@@ -502,7 +502,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.111.0';
+const VERSION3D='1.112.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3474,12 +3474,26 @@ canvas.addEventListener('contextmenu',e=>{ if(meta.camMode==='far') e.preventDef
 })();
 // menu click SFX: a soft button press on any overlay/menu control
 document.addEventListener('pointerdown',e=>{ const el=e.target; if(el&&el.closest&&el.closest('.bigbtn,.choice,.gearrow,.wsbtn,.wsbig,.zrow,.buybtn,.ctab,.skintile,.snode')) playFx('click'); },true);
-document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
-  G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
+// Apply look input without ever allowing one malformed/coalesced browser event to snap the camera.
+// The per-event angular cap still permits a very fast continuous turn, but rejects the rare huge movementX/Y spike.
+function applyCameraLook(dx,dy,xScale,yScale){
+  if(!G||!Number.isFinite(dx)||!Number.isFinite(dy)) return;
+  const sn=meta.lookSens||1, cap=0.14;
+  const yawStep=Math.max(-cap,Math.min(cap,-dx*xScale*sn));
+  const pitchStep=Math.max(-cap,Math.min(cap,dy*yScale*sn));
+  G.camYaw=(G.camYaw||0)+yawStep;
+  G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+pitchStep));
+}
+let mouseLookPrimed=false;
+document.addEventListener('pointerlockchange',()=>{ mouseLookPrimed=false; });
+document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){
+  // Pointer-lock acquisition can report one stale desktop-position delta; discard that acquisition event.
+  if(!mouseLookPrimed){ mouseLookPrimed=true; return; }
+  applyCameraLook(e.movementX,e.movementY,0.0032,0.0026); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
   zone.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'||pid!==null||meta.camMode==='far'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); }); // mouse uses pointer-lock; drag is touch-only
   zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
-    const sn=meta.lookSens||1; G.camYaw=(G.camYaw||0)-dx*0.006*sn; G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+dy*0.005*sn)); });
+    applyCameraLook(dx,dy,0.006,0.005); });
   const end=e=>{ if(e.pointerId===pid) pid=null; };
   zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
   zone.addEventListener('contextmenu',e=>e.preventDefault());
@@ -7912,7 +7926,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
-  openMirror, exitMirror, get mirror(){ return mirror; },
+  openMirror, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
   recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },

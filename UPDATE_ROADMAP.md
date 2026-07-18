@@ -680,3 +680,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 
 - [x] Hide floating hub interactable title cards outside a 230-unit discovery radius instead of displaying every label across the Waystation at once.
 - [x] Preserve the stronger highlighted state inside close interaction range and immediately hide stale highlights when the player walks away.
+
+## [Codex | 2026-07-18] Camera snap-spike guard (SHIPPED v1.112.0)
+
+- [x] Route desktop pointer-lock and mobile drag camera input through one finite, per-event angular guard so malformed or heavily coalesced deltas cannot abruptly whip the view.
+- [x] Discard the first mouse delta after pointer-lock acquisition, which browsers can report from the stale pre-lock cursor position.
+- [x] Preserve continuous fast turning and existing sensitivity settings without adding camera-follow latency.

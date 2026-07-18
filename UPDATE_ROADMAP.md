@@ -7,6 +7,13 @@ self-contained work session. Work top to bottom.
 - Game is the single file `public/3d/index.html` (live at `/3d/`).
 - After each phase: bump `VERSION3D`, `git push` (CD auto-deploys), and **verify in a
   browser** (`python -m http.server` in `public/`, open `/3d/`) before claiming done.
+- **MUTE THE GAME when you open it to test** — Oliver is often playing the live game at the
+  same time, and two audio streams sound terrible. **DO THIS FIRST, as a tiny standalone commit:
+  make the game auto-mute when `location.hostname` is `localhost`/`127.0.0.1` (how every test
+  build is served) AND honor a `?mute=1` URL param** — then every test instance is silent by
+  default with zero remembering, while the live `bladefall.pages.dev` stays normal. Until that
+  ships, manually set `meta.soundOn`/`meta.musicOn` false in the test tab. (This does NOT affect
+  Claude Code's own completion/notification sounds — those stay on so Oliver hears task-done.)
 - **Do not break saves** — fold removed content via the `normWeapon`/`LEGACY_ART` pattern.
 - Two detailed feature specs already exist and slot into Phase 8: the **Weapon Identity
   Overhaul** and the **Loot-juice + Drop-rate + Mixed-encounters + NPC "press E"** work-orders.
@@ -182,10 +189,17 @@ self-contained work session. Work top to bottom.
   guard `shieldYaw`; flank it), **Healer** (heals nearby allies), **Exploder** (rushes, fuses, detonates a
   shockwave), **Flanker** (circles in from the side). Role beacon above the head + shield plate render.
   Verified: all four run 200 frames clean, no extra HP. (`saltMob` mixes still feed the dens.)
-- [ ] **Endgame "one more run" loop (Endless Descent)** — DEFERRED. This is a whole new game mode
-  (infinite scaling floors + saved personal best + hub entry + HUD), too large to land + verify safely in
-  this session's remaining budget. Next session: reuse a zone SCAPE with rising `ngHp`/`ngDmg` per floor,
-  track a best-depth in `meta`, add a hub/title entry. (Cheaper alt if preferred: build-goal achievements.)
+- [x] **Endgame "one more run" loop (Endless Descent)** — SHIPPED v1.61.0. Infinite escalating survival
+  mode entered from the **Waystation's Abyssal Descent stone** (E) AND a **Title-screen button** (both show
+  best). Each floor loads a boxed themed arena (rotates zone palettes via `STAGES[..].theme`, biasing darker
+  deeper). Clear the floor's spawn wave → portal down (`warpTo`/`#fadeveil`). Scaling off the NG scalars:
+  `ngHp x1.11^floor`, `ngDmg x1.06^floor` + a slow `zoneTier` climb (feeds the loot band too). Spawn
+  count/rate ramp under a **hard concurrent cap (<=24)**; deeper floors add more elites. XP+gold scale with
+  depth; loot cache every 3rd floor (rarity still level-gated). **Not permadeath** — death banks everything
+  and returns to hub; deepest floor saved as `meta.endlessBest` (GLOBAL, per-slot). Verified in-browser:
+  entry (stone+title), floor advance, F20 scaling (ngHp 7.3 / hp 246 / dmg 32), cap held (24/24), reward
+  beat on F3, death banks gains + updates best, best survives reload, no console errors. **This is also the
+  Phase 14 "Proving Grounds" — same feature, both items done.**
 - [x] **Hitstop + kill crunch** — every kill now sets a brief `G.slowmo` freeze (boss 0.38 / elite 0.10 /
   trash 0.05, already scaling `dt`) + a gold death-pop particle spray. Verified: kill crunch fires in-loop.
 - [x] **Shop north-star** — the shop shows a progress **bar** toward the next big-ticket goal
@@ -286,7 +300,11 @@ self-contained work session. Work top to bottom.
 - [ ] **Per-zone unique bestiary.** Each zone gets its OWN set of unique monsters (distinct attack styles,
   abilities, HP, behavior). Only SOME core mobs are reused, **sparingly**, and only where they fit the
   zone's theme; vary which/when core mobs reappear.
-- [ ] **Hub "Proving Grounds" — endless escalating grind zone** (distinct from Phase 12's stakes-free
+- [x] **Hub "Proving Grounds" — endless escalating grind zone** — SHIPPED v1.61.0 **as Endless Descent**
+  (see Phase 11 item above; built once, both items done). All criteria met: hub entry, super-strong mobs,
+  spawn rate ramps under hard caps, HP+dmg scale so it's useful at any level, fresh players die fast while
+  veterans get deep but are always eventually outscaled. Original notes kept below for reference.
+  <!-- ORIGINAL SPEC: distinct from Phase 12's stakes-free
   practice arena; may be a second mode of it). From the hub, for grinding XP + gold without replaying
   low-spawn old missions. All mobs SUPER strong; **spawn rate ramps exponentially** over time (hard caps
   to prevent overcrowding/crashes); mob HP + damage scale up so it stays useful at ANY level. A fresh

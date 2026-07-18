@@ -91,12 +91,13 @@ self-contained work session. Work top to bottom.
 - [x] **Main HUD redesigned** — *(HUD is now an elegant glass corner PANEL (max 320px, not a full-width stretch):
   identity row (level/weapon/gold/zone) on top, then HP/XP/class/path bars — fixes the overlap and reads clean on desktop.)*
 
-## Phase 6 — Onboarding / tutorial
-- [ ] **First-time tutorial** (new save, first class trial): explain the controls, the
-  objectives, and how the game works. Always show a **"Skip Tutorial"** option so veterans can
-  bypass it.
-- [ ] **Tutorial continues into the hub** (if not skipped): after the trial is beaten, explain
-  how the hub works and what the player is meant to do there.
+## Phase 6 — Onboarding / tutorial  ✅ v1.48.0
+- [x] **First-time tutorial** — *(new `showTutorial()` on the first starter trial: controls (move/jump/attack/
+  dodge/skills/talk/pause) + the goal, with **Begin the trial** and **Skip tutorial & trial**. One-time via
+  `meta.tutDone`. Verified.)*
+- [x] **Tutorial continues into the hub** — *(new `hubTutorial()` fires once on first hub entry after a trial
+  (`meta.hubTutDone`): explains the keepers (E to use), the healing/banking waystone, and the Gates. Verified
+  it shows once and never again.)*
 
 ## Phase 7 — Levels & world (STATIC, hand-built)
 - [ ] **Convert main levels to static/hand-authored** designs (procedural stays only for the

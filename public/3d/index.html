@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.47.0';
+const VERSION3D='1.48.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -302,7 +302,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','fpsFov','silhouette',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
@@ -1664,7 +1664,33 @@ function startTrial(cid,fromZone){
   G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0});
   meta.run=null; persist();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
-  if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
+  if(!T.earned && !meta.tutDone){ meta.tutDone=true; persistGlobal(); showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
+  else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
+}
+// first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
+function showTutorial(cid){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Welcome, Warden</p><h2 class="ovh">How to survive</h2>
+    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
+      <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
+      <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
+      <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
+      <p><b>Talk / use</b> — walk up and press <b>E</b>. <b>Pause / camera</b> — Esc.</p>
+      <p style="color:var(--amber)"><b>Goal:</b> clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.</p></div>
+    <button class="bigbtn" id="tutGo">Begin the trial</button>
+    <button class="bigbtn ghost" id="tutSkip">Skip tutorial &amp; trial</button></div>`);
+  document.getElementById('tutGo').onclick=()=>{ resumePlay(); const T=TRIALS[cid]; if(T&&T.tips&&T.tips.length){ toast(T.tips[0]); if(G) G.tipT=4; } };
+  document.getElementById('tutSkip').onclick=()=>{ skipTrial(); };
+}
+// second-stage onboarding: how the hub works, shown once after the first trial is done
+function hubTutorial(){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The Waystation</p><h2 class="ovh">Your home base</h2>
+    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
+      <p>This is home between runs. Walk up to a keeper and press <b>E</b> (or TALK) to use them:</p>
+      <p>🛒 <b>Quartermaster</b> — weapons + perks · ⚔️ <b>Drillmaster</b> — swap class / trials · 🔨 <b>Smith</b> — forge gear<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🧥 <b>Keeper</b> — cosmetics.</p>
+      <p>The glowing <b>waystone</b> in the centre heals you and banks your progress.</p>
+      <p>The <b>Gates</b> along the far wall are the zones — walk into one to dive. Clear a zone to open the next.</p></div>
+    <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
+  document.getElementById('hubTutGo').onclick=()=>{ mode='play'; showOverlay(false); regrabCam(); };
 }
 function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
 function trialComplete(){
@@ -3605,6 +3631,7 @@ function enterWaystation(){
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
   if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }
+  if(!meta.hubTutDone && Object.keys(meta.trialsDone||{}).length){ meta.hubTutDone=true; persistGlobal(); hubTutorial(); }   // one-time hub onboarding after the first trial
 }
 /* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
 const NPCVOICE={

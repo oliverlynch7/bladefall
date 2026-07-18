@@ -198,6 +198,26 @@
     background:linear-gradient(180deg,#f0b95c,var(--amber) 55%,#cf8c2e);box-shadow:0 2px 10px rgba(232,163,61,.28),inset 0 1px 0 rgba(255,255,255,.35);
     transition:transform .06s,box-shadow .12s,filter .12s;}
   .bigbtn:hover{filter:brightness(1.06);}
+  /* ===== TITLE SCREEN — full-bleed BLADEFALL key art, drifting embers, molten CTA ===== */
+  #titlebg{position:fixed;inset:0;z-index:19;display:none;overflow:hidden;background:#05060a;}
+  body.t-title #titlebg{display:block;}
+  .tbimg{position:absolute;inset:-5%;background:url('title.jpg') center 42%/cover no-repeat;animation:tbken 30s ease-in-out infinite alternate;will-change:transform;}
+  @keyframes tbken{from{transform:scale(1.02)}to{transform:scale(1.11) translateY(-2%)}}
+  .tvign{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 96% at 50% 34%, transparent 52%, rgba(3,4,8,.5) 100%),linear-gradient(to top, rgba(3,4,8,.86) 0%, rgba(3,4,8,.25) 26%, transparent 52%);}
+  .tembers{position:absolute;inset:0;pointer-events:none;}
+  .tembers span{position:absolute;bottom:-12px;width:3px;height:3px;border-radius:50%;background:#ffbf6a;box-shadow:0 0 7px 2px rgba(255,150,45,.75);opacity:0;animation:tember linear infinite;}
+  @keyframes tember{0%{transform:translateY(0) translateX(0);opacity:0}12%{opacity:.85}88%{opacity:.7}100%{transform:translateY(-102vh) translateX(var(--dx,0));opacity:0}}
+  body.t-title #overlay{background:transparent;align-items:flex-end;padding:0 18px calc(env(safe-area-inset-bottom) + 20px);}
+  body.t-title #ovcard{background:none;border:none;box-shadow:none;max-width:540px;padding:0;margin:auto auto 4px;}
+  body.t-title #ovcard::before{display:none;}
+  .tmenu{display:flex;flex-direction:column;gap:9px;}
+  .tplay{font-size:18px!important;padding:16px!important;letter-spacing:.06em;position:relative;animation:tplayglow 2.6s ease-in-out infinite;}
+  @keyframes tplayglow{0%,100%{box-shadow:0 2px 14px rgba(232,163,61,.35),inset 0 1px 0 rgba(255,255,255,.4)}50%{box-shadow:0 4px 30px rgba(255,180,70,.75),0 0 44px rgba(232,140,40,.4),inset 0 1px 0 rgba(255,255,255,.5)}}
+  .trow{display:flex;gap:9px;}
+  .trow .bigbtn{margin:0;flex:1;padding:11px;font-size:13.5px;}
+  body.t-title .bigbtn.ghost{background:linear-gradient(180deg,rgba(24,20,30,.82),rgba(14,12,18,.82));color:#e8d8b0;border:1px solid rgba(200,160,90,.32);box-shadow:0 2px 12px rgba(0,0,0,.5);backdrop-filter:blur(3px);}
+  body.t-title .bigbtn.ghost:hover{border-color:rgba(240,200,120,.7);color:#fff;}
+  .tver{text-align:center;color:rgba(220,200,160,.55);font-size:11px;letter-spacing:.14em;margin-top:9px;text-shadow:0 1px 4px #000;}
   .bigbtn.ghost{background:rgba(255,255,255,.025);color:var(--ink);border:1px solid #2b3040;box-shadow:none;font-weight:700;}
   .bigbtn.ghost:hover{border-color:#3d4560;background:rgba(255,255,255,.05);}
   .bigbtn:active{transform:scale(.98);}
@@ -313,6 +333,7 @@
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
 <div id="toast"></div>
+<div id="titlebg"><div class="tbimg"></div><div class="tembers" id="tembers"></div><div class="tvign"></div></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
 <div id="interactprompt" class="hide"></div>
 <div id="petlabel" class="hide"></div>
@@ -329,7 +350,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.87.0';
+const VERSION3D='1.88.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2062,7 +2083,7 @@ function zoneClear(){
     <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
-function showGameUI(v){ ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v)); }
+function showGameUI(v){ if(v) document.body.classList.remove('t-title'); ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v)); }
 function mulberry(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed);
   t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
 function pickEnemyType(s,rnd){
@@ -4961,7 +4982,12 @@ function winScreen(bonus,D){
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
 function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
   if(v){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract'); if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); } }
+function titleEmbers(){ const host=document.getElementById('tembers'); if(!host) return; if(host.childElementCount) return;   // drifting embers behind the key art
+  let h=''; for(let i=0;i<16;i++){ const dur=(7+Math.random()*9).toFixed(1), delay=(-Math.random()*12).toFixed(1), left=(Math.random()*100).toFixed(1), dx=((Math.random()*2-1)*70).toFixed(0), sz=(2+Math.random()*2.5).toFixed(1);
+    h+=`<span style="left:${left}%;width:${sz}px;height:${sz}px;--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`; }
+  host.innerHTML=h; }
 function showOverlayHTML(html){
+  if(mode!=='title') document.body.classList.remove('t-title');   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
   const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
   ovcard.innerHTML=html; showOverlay(true); fixSliders();
@@ -5009,28 +5035,38 @@ function openSlots(){
     document.getElementById('delNo').onclick=openSlots; });
   document.getElementById('backBtn').onclick=titleScreen;
 }
-function titleScreen(){ musicPlay('hub');
+function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
-  showOverlayHTML(`<div class="card"><h1 class="title">BLADEFALL 3D</h1><p class="subtitle">Hardcore Dungeon Crawler</p>
-    <button class="bigbtn" id="playBtn">Play</button>
-    <button class="bigbtn ghost" id="abyssBtn" style="border-color:#6a2fa0;color:#d9b6ff">🕳️ Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
-    <button class="bigbtn ghost" id="slotsBtn">Characters · Slot ${SLOT+1}</button>
-    <button class="bigbtn ghost" id="skinBtn">Skins</button>
-    <button class="bigbtn ghost" id="achBtn">Achievements</button>
-    ${audioSettingsHTML()}
-    <button class="bigbtn ghost" id="creditsBtn">Credits</button>
-    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.7">↩ Classic 2D BLADEFALL</button>
-    <p class="hint">Joystick moves in every direction · <b>SLASH/FIRE</b> auto-targets · <b>JUMP</b> · <b>DODGE</b> dashes<br>
-      Desktop: WASD + Space, J/K/L, Esc · Skins &amp; achievements carry across modes.<br>
-      Skins: <b>${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1}</b><br><span style="opacity:.5">v${VERSION3D}</span></p></div>`);
+  showOverlayHTML(`<div class="tmenu">
+    <button class="bigbtn tplay" id="playBtn">⚔ ENTER THE ABYSS</button>
+    <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important">🕳️ Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
+    <div class="trow">
+      <button class="bigbtn ghost" id="slotsBtn">🗡 Characters</button>
+      <button class="bigbtn ghost" id="skinBtn">✦ Skins</button>
+      <button class="bigbtn ghost" id="optBtn">⚙ More</button>
+    </div>
+    <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
+    </div>`);
+  document.body.classList.add('t-title'); titleEmbers();
+  document.getElementById('optBtn').onclick=openTitleOptions;
   document.getElementById('playBtn').onclick=modeSelect;
   document.getElementById('abyssBtn').onclick=enterEndlessFromTitle;
   document.getElementById('slotsBtn').onclick=openSlots;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
-  document.getElementById('achBtn').onclick=()=>openAchievements(titleScreen);
+}
+function openTitleOptions(){
+  mode='menu'; showGameUI(false);
+  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Options</p><h2 class="ovh">More</h2>
+    <button class="bigbtn ghost" id="achBtn">🏆 Achievements</button>
+    ${audioSettingsHTML()}
+    <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
+    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">↩ Classic 2D BLADEFALL</button>
+    <button class="bigbtn ghost" id="backBtn" style="margin-top:12px">Back</button></div>`);
+  document.getElementById('achBtn').onclick=()=>openAchievements(openTitleOptions);
   bindAudioSettings();
-  document.getElementById('creditsBtn').onclick=()=>openCredits(titleScreen);
+  document.getElementById('creditsBtn').onclick=()=>openCredits(openTitleOptions);
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
+  document.getElementById('backBtn').onclick=titleScreen;
 }
 function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
   initAudio();

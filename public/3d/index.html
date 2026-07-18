@@ -206,6 +206,15 @@
     background:linear-gradient(180deg,#f0b95c,var(--amber) 55%,#cf8c2e);box-shadow:0 2px 10px rgba(232,163,61,.28),inset 0 1px 0 rgba(255,255,255,.35);
     transition:transform .06s,box-shadow .12s,filter .12s;}
   .bigbtn:hover{filter:brightness(1.06);}
+  /* ===== BLADEFALL icon set (transparent voxel emblems) — inline, sized to the surrounding text ===== */
+  .ico{display:inline-block;width:1.18em;height:1.18em;background-size:contain;background-repeat:no-repeat;background-position:center;vertical-align:-0.24em;filter:drop-shadow(0 1px 1px rgba(0,0,0,.55));}
+  .ico-coin{background-image:url('icons/coin.png');}
+  .ico-flame{background-image:url('icons/flame.png');}
+  .ico-skull{background-image:url('icons/skull.png');}
+  .ico-shield{background-image:url('icons/shield.png');}
+  .ico-anvil{background-image:url('icons/anvil.png');}
+  .ico-portal{background-image:url('icons/portal.png');}
+  .ico-lg{width:1.5em;height:1.5em;vertical-align:-0.4em;}
   /* ===== TITLE SCREEN — full-bleed BLADEFALL key art, drifting embers, molten CTA ===== */
   #titlebg{position:fixed;inset:0;z-index:19;display:none;overflow:hidden;background:#05060a;}
   body.t-title #titlebg{display:block;}
@@ -320,7 +329,7 @@
 <body>
 <canvas id="gl"></canvas>
 <div id="hud" class="hide"><div class="hudpanel">
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
+  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span style="display:inline-flex;align-items:center;gap:3px"><span class="ico ico-coin" style="width:14px;height:14px;vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div></div>
   <div class="barwrap"><span class="barlabel" id="xplabel">LV 1</span><div class="bar"><i id="xpfill"></i></div><span class="barnum" id="xpnum"></span></div>
   <div class="barwrap"><span class="barlabel" id="clslabel">⚔️ 1</span><div class="bar" style="height:9px"><i id="clsfill"></i></div><span class="barnum" id="clsnum"></span></div>
@@ -329,7 +338,7 @@
 </div></div>
 <div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
-<div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
+<div id="bosshpwrap"><div id="bossname"><span class="ico ico-skull" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
 <button id="pausebtn" class="hide">II</button>
@@ -366,7 +375,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.92.0';
+const VERSION3D='1.93.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1428,14 +1437,14 @@ function questUpdate(){
   if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive);
       const rows=qrow(false,'▼',`<b>Floor ${G.floor||1}</b>${meta.endlessBest?` · <span style="opacity:.7">Best ${meta.endlessBest}</span>`:''}`,null)
         + qrow(G.floorCleared,G.floorCleared?'☑':'⚔', G.floorCleared?'The way opens — take the portal':'Clear the floor', G.floorCleared?null:`${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`);
-      applyQuest(el,'🕳️ Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`); return; }
+      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`); return; }
   const Z=curZone();
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
     applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`); return; }
   if(G.side){ applyQuest(el,`${Z.side.icon} ${Z.side.name}`,qrow(false,'☐','Reach the exit',`Tier ${G.zoneTier}`),`side${Z.side.id}${G.zoneTier}`); return; }
   let rows,sig;
-  if(G.area<0){ rows=qrow(false,'☐',`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
+  if(G.area<0){ rows=qrow(false,'<span class="ico ico-skull"></span>',`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
   else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
@@ -1900,7 +1909,7 @@ function openForge(back){
         <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
       <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Forge</button></div>`; }).join('')
     :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">The Forge</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh"><span class="ico ico-anvil ico-lg"></span> The Forge</h2>
     <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
@@ -4542,7 +4551,7 @@ function updateAmbient(dt,s){
 }
 function onBossActivate(e){ SFX.boss();
   playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
-  document.getElementById('bossname').textContent=e.label; document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
+  { const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); bn.textContent=e.label; } document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
   if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
 function updateBossBar(e){ document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function bossShoot(e,p){
@@ -4787,7 +4796,7 @@ function offerWeapon(nw){
     <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <img class="itemav" src="${itemAv(nw)}" alt="">
-    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':'#b8b8b8'}">${dmgTypeName(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
+    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':'#b8b8b8'}">${dmgTypeName(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?((normEl(el2)==='fire'?'<span class="ico ico-flame"></span>':affIcon(el2))+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
@@ -5119,7 +5128,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   showOverlayHTML(`<div class="tmenu" id="tmenu">
     <button class="bigbtn tplay" id="playBtn">⚔ ENTER THE ABYSS</button>
-    <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important">🕳️ Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
+    <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important"><span class="ico ico-portal"></span> Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
     <div class="trow">
       <button class="bigbtn ghost" id="slotsBtn">🗡 Characters</button>
       <button class="bigbtn ghost" id="skinBtn">✦ Skins</button>
@@ -5417,7 +5426,7 @@ function mirrorStatsHTML(){
   s+=row('Move Speed', mul(effSpeed(p)), '#7ec46a');
   s+=row('Crit Chance', Math.round(effCrit(p)*100)+'%', '#ffd24a');
   s+=row('Lifesteal', Math.round(effLifesteal(p)*100)+'%', '#e0607a');
-  s+=row('Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
+  s+=row('<span class="ico ico-shield"></span> Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
   s+=row('Dodge Cooldown', (Math.round(effDodgeCd(p)*100)/100)+'s', '#9fe0ff');
   s+=row('Gold Find', mul(effGoldFind(p)), '#ffd24a');
   if(effCdr(p)>0.001) s+=row('Skill Cooldowns', '-'+Math.round(effCdr(p)*100)+'%', '#c9a6ff');
@@ -5592,7 +5601,7 @@ function openHubMenu(){
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
     <button class="bigbtn ghost" id="bagBtn">Bag · ${meta.stash.length}/${STASH_CAP}</button>
-    <button class="bigbtn ghost" id="forgeBtn">🔨 The Forge — fuse gear</button>
+    <button class="bigbtn ghost" id="forgeBtn"><span class="ico ico-anvil"></span> The Forge — fuse gear</button>
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
     <button class="bigbtn ghost" id="wstudioHub">🗡 Weapon Studio</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
@@ -5868,7 +5877,7 @@ function openShop(back){
     return `<div class="gearrow" style="--spine:#caa23a${owned?';opacity:.6':''}"><div class="gi">🏰</div>
       <div style="flex:1;min-width:0"><div class="gn" style="color:#e8c86a">${u.name}</div><div class="gd">${u.desc}</div></div>
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>${northStar}
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><span class="ico ico-coin"></span> <b style="color:#ffd24a">${meta.gold}</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -6139,7 +6148,7 @@ function hudUpdate(){
   at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+red+'%</b> '+pips;
   document.getElementById('bAttack').classList.toggle('ranged',p.weapon.cls==='ranged');
   document.getElementById('bAttack').textContent=p.weapon.cls==='ranged'?'FIRE':'SLASH';
-  const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0)+'g';
+  const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0);   // the coin icon beside it carries the currency meaning now
   updateToggles();
 }
 /* ============================================================

@@ -686,3 +686,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Route desktop pointer-lock and mobile drag camera input through one finite, per-event angular guard so malformed or heavily coalesced deltas cannot abruptly whip the view.
 - [x] Discard the first mouse delta after pointer-lock acquisition, which browsers can report from the stale pre-lock cursor position.
 - [x] Preserve continuous fast turning and existing sensitivity settings without adding camera-follow latency.
+
+## [Codex | 2026-07-18] Hub side-control cleanup and icon assignments (SHIPPED v1.113.0)
+
+- [x] Hide Auto-sell and Auto-bag side controls while walking around the Waystation; restore both automatically in dungeon gameplay.
+- [x] Define distinct, filename-ready icon assignments for all ten hub NPCs and activities without conflating Mirror, wardrobe, training, or descent concepts.

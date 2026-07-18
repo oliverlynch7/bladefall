@@ -502,7 +502,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.112.0';
+const VERSION3D='1.113.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2347,7 +2347,13 @@ function zoneClear(){
     <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
-function showGameUI(v){ if(v) document.body.classList.remove('t-title'); ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v)); }
+function showGameUI(v){
+  if(v) document.body.classList.remove('t-title');
+  ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v));
+  // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
+  const hideHubLoot=!v||!!(G&&G.hub);
+  ['bKeep','bBag'].forEach(id=>document.getElementById(id).classList.toggle('hide',hideHubLoot));
+}
 function mulberry(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed);
   t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
 function pickEnemyType(s,rnd){

@@ -675,3 +675,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Add a clear Mirror View dropdown with a dedicated All Live Stats & Loadout option covering the canonical eleven live stats and equipped gear.
 - [x] Promote character renaming into a labeled Save Name control with Enter-key support and persistent save behavior.
 - [x] Substitute the saved character name into player-specific story narration, with a lore-friendly fallback for unnamed saves.
+
+## [Codex | 2026-07-18] Proximity-based Waystation title cards (SHIPPED v1.111.0)
+
+- [x] Hide floating hub interactable title cards outside a 230-unit discovery radius instead of displaying every label across the Waystation at once.
+- [x] Preserve the stronger highlighted state inside close interaction range and immediately hide stale highlights when the player walks away.

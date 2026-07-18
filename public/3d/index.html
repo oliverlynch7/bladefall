@@ -502,7 +502,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.110.0';
+const VERSION3D='1.111.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7478,7 +7478,8 @@ let hpBars=[], statPips=[];
 const hpCanvas=document.createElement('canvas'); // tiny 2D overlay for enemy hp bars
 hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;width:100%;height:100%;';
 document.body.appendChild(hpCanvas);
-/* Hub nameplates: a projected pill over each keeper telling you who they are + what they do. */
+/* Hub nameplates: nearby projected pills over keepers/interactables, hidden across the plaza. */
+const HUB_TAG_REVEAL=230, HUB_TAG_NEAR=72;
 function updateHubTags(){
   const box=document.getElementById('hubtags'); if(!box) return;
   if(!G||!G.hub||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
@@ -7487,11 +7488,13 @@ function updateHubTags(){
     `<div class="htag"><span class="hi">${n.ic}</span><span class="hn">${n.name}</span><span class="hr">${n.role}</span></div>`).join(''); }
   const tags=box.children;
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
+    const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
+    if(dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
     const sp=project(n.x,(n.prop?46:64),n.z);
     if(!sp){ tg.style.display='none'; return; }
     tg.style.display='';
     tg.style.left=(sp[0]/DPR)+'px'; tg.style.top=(sp[1]/DPR-6)+'px';
-    tg.classList.toggle('near',dXZ(n.x,n.z,G.p.x,G.p.z)<64); });
+    tg.classList.toggle('near',dist<HUB_TAG_NEAR); });
 }
 function drawHpBars(){
   hpCanvas.width=VW; hpCanvas.height=VH;

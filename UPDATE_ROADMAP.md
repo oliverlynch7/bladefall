@@ -569,3 +569,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Sliced the supplied 10-icon voxel sheet into transparent, caption-free 256px assets: Resume, Pause, Settings, Sound On/Off, Music, Fullscreen, Back, Title/Leave, and Character Sheet.
 - [x] Wired the icons into the title menu, HUD pause control, pause menu, audio settings, character entry, fullscreen, leave actions, and recurring Back controls while retaining clear text labels and existing behavior.
 - [x] Sound Effects switches between the on/off artwork at 0%; browser-tested at 1920px desktop and 390px mobile with no clipping or lost hit targets; inline JavaScript syntax and `git diff --check` pass.
+
+## [Codex | 2026-07-18] True pause audio freeze (SHIPPED v1.96.0)
+
+- [x] Pause now suspends the Web Audio context, freezing procedural combat sounds, sourced weapon swings, and looped effects at the same instant as simulation state.
+- [x] Streamed music and active stings pause at their current playback positions; Resume restores them, while leaving for the Hub/title discards obsolete combat audio.
+- [x] Audio-setting interactions remain silent while paused, including the edge case where the audio context is first created from the pause menu.
+- [x] Real-browser verification: context transitioned `running → suspended → running`; `G.time` remained bit-for-bit unchanged across multiple paused seconds; inline JavaScript syntax and `git diff --check` pass.

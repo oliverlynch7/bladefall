@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.51.0';
+const VERSION3D='1.52.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2326,6 +2326,14 @@ function spawnEnemy(type,x,z,isBoss){
     atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
     markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
   if(e.boss) G.boss=e;
+  // Phase 11: enemy ROLES — a behavior archetype forcing a response (no extra HP). A minority of ground mobs.
+  if(!e.boss && e.kind!=='goblin' && !isBoss && Math.random()<0.22){
+    const opts = e.kind==='caster' ? ['healer'] : e.kind==='charger' ? ['exploder','flanker'] : ['shielder','exploder','flanker'];
+    e.role = opts[Math.floor(Math.random()*opts.length)];
+    e.roleCol = {shielder:'#8fb7ff',healer:'#7de08a',exploder:'#ff7a3a',flanker:'#c98cff'}[e.role];
+    if(e.role==='exploder') e.speed*=1.28;                       // rushes you
+    if(e.role==='flanker')  e.speed*=1.15;
+  }
   G.enemies.push(e); return e;
 }
 
@@ -2948,6 +2956,9 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   const mod=elemMod(el,e.element);
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
+  if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
+    const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
+    if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff'); } }
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
   e.hp-=dmg; e.hitFlash=0.12;
@@ -2976,6 +2987,9 @@ function killEnemy(e){
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
     if(fq && !fq.placed && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
+  // Phase 11: kill crunch — a brief hitstop + a death pop / coin-spray so every kill has weight
+  G.slowmo=Math.max(G.slowmo||0, e.boss?0.38:(e.elite?0.10:0.05));
+  { const n=e.boss?20:(e.elite?9:6); for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=70+Math.random()*110; G.particles.push({x:e.x,y:e.y+e.h*0.45,z:e.z,vx:Math.cos(a)*sp,vy:130+Math.random()*90,vz:Math.sin(a)*sp,life:0.5,color:'#ffd24a',sz:2.3}); } }
   addText(e.x,e.y+e.h+14,e.z,'+'+e.xp+' XP','var(--xp)'); gainXp(e.xp);
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
@@ -3253,8 +3267,22 @@ function update(dt){
       if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
         G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
-    const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
+    const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
+    if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
+      if(e.role==='flanker' && d>90){ const s=e._fs||(e._fs=Math.random()<0.5?1:-1), rx=-dirZ*s, rz=dirX*s;
+        dirX=dirX*0.55+rx*0.8; dirZ=dirZ*0.55+rz*0.8; const dl=Math.hypot(dirX,dirZ)||1; dirX/=dl; dirZ/=dl; }   // circle in from the side/behind
+      else if(e.role==='exploder'){
+        if(e.fuseT>0){ e.fuseT-=dt; eff=0; e.hitFlash=0.6; if(Math.floor(G.time*14)%2===0) burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',2);
+          if(e.fuseT<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:16,maxR:150,dmg:e.dmg*1.7,life:0,spd:340,col:'#ff7a3a',col2:'#c33'});
+            G.shake=Math.min(G.shake+8,14); SFX.boss(); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',22); killEnemy(e); continue; } }
+        else if(d<62){ e.fuseT=0.55; SFX.growl(1.3); addText(e.x,e.h+14,e.z,'!','#ff7a3a',true); }
+      }
+      else if(e.role==='healer'){ e.healT=(e.healT||0)-dt;
+        if(e.healT<=0){ e.healT=3; let n=0; for(const o of G.enemies){ if(o.dead||o===e||o.hp>=o.maxHp||o.boss) continue; if(dXZ(o.x,o.z,e.x,e.z)<220){ o.hp=Math.min(o.maxHp,o.hp+Math.round(o.maxHp*0.12)); burst(o.x,o.y+o.h*0.5,o.z,'#7de08a',5); n++; } }
+          if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
+      if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
+    }
     if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
     if(e.kind==='fly'){ e.bob+=dt*2.4; const ty=Math.max(0,p.y+44+Math.sin(e.bob)*52-8); // wave tracks YOUR height
       e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
@@ -3409,7 +3437,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SLAM!','var(--danger)',true);
       for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
     else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
-      if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=4.5+Math.random()*2.5; G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up
+      if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=(4.5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up (faster in phase 2)
   }
   if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
     if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){ const dl=Math.hypot(dirX,dirZ)||1;
@@ -3417,14 +3445,21 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
       for(let i=0;i<12;i++){ const a=Math.atan2(dirZ,dirX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
     else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
-      if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.6; e.cleaveCd=5+Math.random()*2; e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+      if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.6; e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
     if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'FROST NOVA!','#7fd6ff',true);
       for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*20,y:6,z:e.z+Math.sin(a)*20,vx:Math.cos(a)*120,vy:40,vz:Math.sin(a)*120,life:0.5,color:'#bff0ff',sz:3}); } } }
     else { if(e.novaCd==null) e.novaCd=5; e.novaCd-=dt;
-      if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=6+Math.random()*2.5; G.shake=Math.min(G.shake+2,7); } }
+      if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=(6+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+2,7); } }
+  }
+  if(e.type==='colossus'){                                 // seismic pound — a shockwave ring you jump (arena mechanic)
+    if(e.poundW>0){ e.poundW-=dt; if(e.poundW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:300,dmg:e.dmg*1.2,life:0,spd:300,col:'#ffb060',col2:'#c05a1e'});
+      G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SEISMIC POUND!','#ffb060',true);
+      for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*22,y:2,z:e.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:60,vz:Math.sin(a)*130,life:0.45,color:'#ffb060',sz:3}); } } }
+    else { if(e.poundCd==null) e.poundCd=3.5; e.poundCd-=dt;
+      if(e.poundCd<=0 && dist<380){ e.poundW=0.7; e.poundCd=(5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.ranged && e.shootT<=0 && dist<2000){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
@@ -3433,9 +3468,13 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       for(let i=0;i<2;i++){ const ne=spawnEnemy(Math.random()<0.5?'grunt':'flyer',e.x+(i?70:-70),e.z+30); ne.dropT=0.4; }
       addText(e.x,e.h+16,e.z,'SUMMON!','var(--danger)',true); }
   }
-  if(e.hp/e.maxHp<0.35 && e.phase<2){ e.phase=2; e.speed*=1.22;
+  if(e.hp/e.maxHp<0.5 && e.phase<2){ e.phase=2; e.speed*=1.22; e.dmg*=1.1;   // Phase 11: HP-threshold phase 2 — faster, harder, specials on a shorter fuse
+    for(const k of ['slamCd','cleaveCd','novaCd','poundCd']) if(e[k]!=null) e[k]=Math.min(e[k],1.2);   // a signature special comes almost immediately on the flip
+    if(e.ranged) e.shootT=Math.min(e.shootT,0.6);
     if(e.type==='king'){ e.ranged=true; e.shot={count:3,spread:0.22,speed:380,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=2.0; e.shootT=0.8; }
-    addText(e.x,e.h+24,e.z,'ENRAGED!','var(--danger)',true); }
+    if(e.type==='tyrant'){ e.ranged=true; e.shot={count:5,spread:0.2,speed:400,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=1.7; e.shootT=0.6; }
+    G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+24,e.z,'ENRAGED!','var(--danger)',true);
+    if(G&&!G.trial) storyToast('It stops holding back.'); }
   if(e.home){ // bosses never leave their arena (and never fall in the lava)
     if(e.x<e.home.x-e.home.hw) e.x=e.home.x-e.home.hw; if(e.x>e.home.x+e.home.hw) e.x=e.home.x+e.home.hw;
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
@@ -4016,7 +4055,12 @@ function openShop(back){
   // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
   const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
   const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi">🎒</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
+  // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
+  const goal = !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
+  const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
+  const northStar=`<div style="margin:2px 0 8px"><div class="gd" style="text-align:left;margin-bottom:3px"><b style="color:#ffd24a">${meta.gold}</b> / ${goal.cost} to <b>${goal.name}</b></div>
+    <div style="height:7px;border-radius:5px;background:#1b1e26;overflow:hidden"><div style="height:100%;width:${gpct}%;background:linear-gradient(90deg,#ffd24a,#ff9a3a)"></div></div></div>`;
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -4626,6 +4670,8 @@ function drawEnemy3(e,t){
   const eyeC=e.boss?(en?'#ff3b3b':(e.shot?(e.shot.color||'#ff9a3b'):'#ff9a3b')):(e.element?elementColor(e.element):'#eaffd0');
   pushM(); mv(e.x,e.y,e.z); rotY(e.yaw);
   const W=e.r*2, H=e.h;
+  if(e.role){ const rc=e.roleCol||'#fff'; bx(0,H+13+Math.sin(t*3)*1.5,0, 5,5,5, rc, rc, 0.9);   // Phase 11: role beacon above the head
+    if(e.role==='shielder'&&e.shieldYaw!=null){ const rel=e.shieldYaw-e.yaw; bx(Math.sin(rel)*(W*0.5+5),H*0.5,Math.cos(rel)*(W*0.5+5), 3,H*0.66,11, rc, rc, 0.85); } }   // a shield plate on the guarded side
   if(e.kind==='fly'){
     const flap=Math.sin(e.bob*2.4)*0.7;
     bx(0,H*0.5,0, W*0.72,H*0.9,W*0.62, col);
@@ -4851,6 +4897,25 @@ function drawHpBars(){
   const c=hpCanvas.getContext('2d');
   for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.5)'; c.fillRect(b.x-16,b.y,32,4);
     c.fillStyle='#e8453d'; c.fillRect(b.x-16,b.y,32*b.f,4); }
+  drawThreatArrows(c);
+}
+// Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see
+// (a 3D camera + auto-aim makes off-camera cheap-shots unfair; only in the aiming cameras where it matters)
+function drawThreatArrows(c){
+  if(!G||G.hub||meta.camMode==='far'||!G.enemies) return;
+  const cxp=VW/2, cyp=VH/2, mgx=VW/2-30, mgy=VH/2-30, cy=(G.camYaw!=null?G.camYaw:Math.PI);
+  for(const e of G.enemies){ if(e.dead||e.dummy) continue; const d=dXZ(e.x,e.z,G.p.x,G.p.z); if(d>820) continue;
+    const sp=project(e.x,e.y+e.h*0.5,e.z);
+    if(sp && sp[0]>=0 && sp[0]<=VW && sp[1]>=0 && sp[1]<=VH) continue;   // visible on screen — no arrow
+    let ang;
+    if(sp){ ang=Math.atan2(sp[1]-cyp, sp[0]-cxp); }
+    else { let rel=Math.atan2(e.x-G.p.x,e.z-G.p.z)-cy; while(rel>Math.PI)rel-=6.283; while(rel<-Math.PI)rel+=6.283; ang=rel>0?0.62:Math.PI-0.62; }  // behind the camera → bottom corners
+    const ex=cxp+Math.cos(ang)*mgx, ey=cyp+Math.sin(ang)*mgy, a=Math.max(0.35,1-d/820);
+    c.save(); c.translate(ex,ey); c.rotate(ang);
+    c.globalAlpha=a; c.fillStyle=e.boss?'#ff5a3a':(e.elite?'#ffb03a':'#ff6a4a');
+    c.beginPath(); c.moveTo(11,0); c.lineTo(-7,-7); c.lineTo(-7,7); c.closePath(); c.fill();
+    c.restore(); }
+  c.globalAlpha=1;
 }
 function render(t){
   const s=STAGES[G?G.stageIndex:0];

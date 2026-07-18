@@ -173,28 +173,48 @@ self-contained work session. Work top to bottom.
   rides the weapon's business end (blade/tip/head), offset by reach and raised for big/magic weapons,
   instead of sitting on the grip.
 
-## Phase 11 — Depth & Endgame (from the latest playtest — the fun-ceiling raisers)
-- [ ] **Boss fights get PHASES + signatures (biggest remaining fun lever).** Give each zone boss a
-  **HP-threshold phase 2** (flips to a new, more aggressive pattern), **1–2 signature telegraphed
-  special attacks** you learn to dodge (reuse the enemy wind-up tell system), and an **arena mechanic
-  tied to the zone's hazard** (the Marksman drives you across the wind-swept rims; the Colossus cracks
-  the lava floor). Turn HP-checks into fights you *learn*. Hooks already exist: `phase`, `summonT`,
-  boss shot patterns, `G.shockwaves`.
-- [ ] **Enemy ROLES, not just mixes.** Add 3–4 behavior archetypes that force a *response* (no extra
-  HP): **Shielder** (blocks from the front — flank it), **Healer/Buffer** (kill-priority), **Exploder**
-  (rushes then detonates — space it), **Flanker** (circles behind you). Slot them into the mixed dens
-  via `saltMob`.
-- [ ] **Endgame "one more run" loop.** There's a `descent` counter — if there's no **Endless Descent**
-  mode (infinite scaling floors chasing a saved personal best), add one. Alternative/additional: a
-  **daily-seed challenge** (same layout that day, chase a time/score) or **build-goal achievements**
-  ("clear a zone using only thrown weapons"). Give the game a reason to reopen after The Apex.
-- [ ] **Hitstop + kill crunch.** If heavy hits/kills don't already freeze for ~60–80ms, add hitstop
-  (the `G.slowmo` scaffolding from the loot slow-mo is the tool) + a death pop / coin-spray. The
-  cheapest "meat" you can add to combat feel.
-- [ ] **Shop north-star.** Surface a progress line toward the player's big-ticket goal
-  ("**340 / 1000** to the Magic Socks") so gold has a *pull*, not just a number.
-- [ ] **Off-screen threat arrows.** Small edge-of-screen indicators pointing at nearby enemies you
-  can't see (a 3D camera + auto-aim makes off-camera cheap-shots a real frustration). Cheap fairness win.
+## Phase 11 — Depth & Endgame (from the latest playtest — the fun-ceiling raisers) — 5/6 SHIPPED v1.52.0
+- [x] **Boss PHASES + signatures** — every boss now flips to **phase 2 at ≤50% HP** (faster, +10% dmg,
+  specials on a shortened fuse via `*(e.phase>=2?0.55:1)`, an immediate signature on the flip, an "ENRAGED"
+  + `storyToast` tell). The Colossus gained a **Seismic Pound** shockwave (arena mechanic you jump); the
+  Tyrant gains a 5-orb void barrage in phase 2. Verified: brute flips 1→2 at <50%, render clean.
+- [x] **Enemy ROLES** — ~22% of ground mobs spawn as **Shielder** (frontal block via a slowly-turning
+  guard `shieldYaw`; flank it), **Healer** (heals nearby allies), **Exploder** (rushes, fuses, detonates a
+  shockwave), **Flanker** (circles in from the side). Role beacon above the head + shield plate render.
+  Verified: all four run 200 frames clean, no extra HP. (`saltMob` mixes still feed the dens.)
+- [ ] **Endgame "one more run" loop (Endless Descent)** — DEFERRED. This is a whole new game mode
+  (infinite scaling floors + saved personal best + hub entry + HUD), too large to land + verify safely in
+  this session's remaining budget. Next session: reuse a zone SCAPE with rising `ngHp`/`ngDmg` per floor,
+  track a best-depth in `meta`, add a hub/title entry. (Cheaper alt if preferred: build-goal achievements.)
+- [x] **Hitstop + kill crunch** — every kill now sets a brief `G.slowmo` freeze (boss 0.38 / elite 0.10 /
+  trash 0.05, already scaling `dt`) + a gold death-pop particle spray. Verified: kill crunch fires in-loop.
+- [x] **Shop north-star** — the shop shows a progress **bar** toward the next big-ticket goal
+  (Magic Socks → Void Scythe → Magic Pack): "`gold / cost` to `<goal>`". Verified: 800/1200 = 66% bar.
+- [x] **Off-screen threat arrows** — `drawThreatArrows` on the 2D HUD canvas draws rarity/threat-colored
+  edge arrows pointing at nearby enemies that are off-screen or behind the camera (aiming cameras only).
+  Verified: renders clean across all the role/boss frames.
+
+## Phase 12 — Hub 2.0 (make the Waystation a place worth being, not a menu lobby)
+- [ ] **The hub GROWS with your progress.** On zone clear, mount a **boss trophy** (the slain boss's
+  relic/emblem) on a hub wall; cleared gates burn permanently bright; unlocking a class makes its
+  **trainer appear** in the hub. By endgame the Waystation is a hall of your conquests.
+  *(NO cosmetic/skin mannequins — Oliver does not want those.)*
+- [ ] **Open it up with a VIEW of the world.** Replace the walled box with a vista: distant zones on
+  the horizon (Hollow canyon, Frostfell peaks, Emberdeep volcano, the Abyss) with the **Apex throne
+  looming** above; gates point toward what you can see. Ambient embers / wind / moody torchlight (build
+  on the v1.13 dark lighting) — the last Warden outpost overlooking a dying world.
+- [ ] **Training arena.** Upgrade the training dummies into a real combat sandbox: **spawn any unlocked
+  enemy to practice against**, test your build/skills stakes-free, a target range for ranged, optionally
+  a short parkour course. A reason to linger + where players learn their kit.
+- [ ] **A MIRROR in the hub.** Walk up to inspect your own character with currently-equipped
+  gear/cosmetics, reflecting live changes — especially valuable in first-person mode where you otherwise
+  can't see yourself.
+- [ ] **NPCs that are alive + react to you.** Keeper / Warden's-Shade dialogue reacts to your progress
+  (boss kills, your last run, your class); add idle life (Smith hammering, Drillmaster drilling). Lean on
+  the Warden's Shade as the hub's soul.
+- [ ] **Expensive cosmetic HUB upgrades in the shop.** Purchasable visual upgrades to the Waystation
+  itself (relit braziers, banners, repaired ramparts, decor) — **quite expensive** gold sinks that
+  visibly improve the hub. Gives gold a lasting home and turns the ruin into your fortress.
 
 ---
 ### Conventions recap (every phase)

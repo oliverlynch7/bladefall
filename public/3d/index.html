@@ -144,6 +144,20 @@
   .wsctrl{display:flex;gap:8px;margin-top:8px;justify-content:center;flex-wrap:wrap;}
   .wsbig{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(180deg,#f0b95c,var(--amber));color:#0b0c10;font-weight:800;font-size:13px;cursor:pointer;}
   .wsbig.ghost{background:rgba(255,255,255,.04);color:var(--ink);border:1px solid #2b3040;}
+  /* The Mirror inspector — a right-side stats panel over the orbitable character */
+  #mirrorui{position:absolute;top:0;right:0;bottom:0;z-index:22;width:min(340px,86vw);background:linear-gradient(270deg,rgba(8,9,13,.96),rgba(8,9,13,.80));border-left:1px solid #2b3040;padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);display:flex;flex-direction:column;pointer-events:auto;}
+  #mirrorui.hide{display:none;}
+  .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
+  .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .msbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+  .mssect{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#8b93a8;margin:12px 0 5px;}
+  .msrow{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+  .msrow b{color:var(--ink);font-variant-numeric:tabular-nums;}
+  .msgear{font-size:12.5px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+  .msgear .msg-l{color:#8b93a8;font-weight:700;margin-right:8px;} .msgear .msg-r{font-weight:700;}
+  .msgear .msg-b{color:var(--good);font-weight:600;font-size:11px;}
+  .msctrl{display:flex;gap:8px;margin-top:10px;} .msctrl .wsbig{flex:1;}
+  .mshint{text-align:center;font-size:11px;color:var(--muted);margin-top:8px;opacity:.7;}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
   /* align-items:flex-start + margin:auto on the card = vertically centered WHEN it fits, top-reachable + scrollable when it doesn't (fixes the top-cutoff on tall menus). */
@@ -287,6 +301,7 @@
   <button class="btn tog" id="bKeep">SELL</button>
   <button class="btn tog" id="bBag">BAG</button>
   <div id="wstudio" class="hide"></div>
+  <div id="mirrorui" class="hide"></div>
   <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
@@ -306,7 +321,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.57.0';
+const VERSION3D='1.58.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -930,51 +945,62 @@ const SLOTIDS=['helmet','chest','legs'];
 /* Armor sets (Phase 2): every piece belongs to a playstyle family aligned to a class.
    The set decides which stats it can roll and how much raw defense it carries — Heavy
    is a wall, Swift trades armor for mobility, Mystic feeds the skill bar. */
-const AFFIXDEFS={
-  hp:{base:[10,16,22,30,40],f:v=>'+'+v+' Max HP'},
-  speedMul:{base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Move Speed'},
-  atkSpeedMul:{base:[.03,.05,.06,.08,.10],f:v=>'+'+Math.round(v*100)+'% Attack Speed'},
-  lifesteal:{base:[.02,.03,.04,.05,.07],f:v=>'+'+Math.round(v*100)+'% Lifesteal'},
-  dodgeMul:{base:[.05,.07,.09,.11,.14],f:v=>'-'+Math.round(v*100)+'% Dodge CD'},
-  powerMul:{base:[.04,.05,.07,.09,.11],f:v=>'+'+Math.round(v*100)+'% Damage'},
-  crit:{base:[.03,.04,.06,.08,.10],f:v=>'+'+Math.round(v*100)+'% Crit'},
-  cdr:{base:[.04,.06,.08,.10,.13],f:v=>'-'+Math.round(v*100)+'% Skill Cooldowns'}
+/* Armor TYPES (one per stat, consistent names): each piece carries ONE clearly-named attribute,
+   its signature bonus, an accent COLOUR and a signature visual motif so the type is obvious at a glance. */
+const ARMOR_TYPES={
+  vigor:   {name:'Vigor',    stat:'hp',          base:[12,20,30,42,58],       fmt:v=>'+'+v+' Max HP',              col:'#ff8a82', defMul:1.15},
+  might:   {name:'Might',    stat:'powerMul',    base:[.05,.07,.10,.13,.17],  fmt:v=>'+'+Math.round(v*100)+'% Damage',        col:'#ffce6a', defMul:0.92},
+  mystic:  {name:'Mystic',   stat:'magPowerMul', base:[.06,.09,.13,.17,.22],  fmt:v=>'+'+Math.round(v*100)+'% Magic Damage',  col:'#c47bff', defMul:0.86},
+  swift:   {name:'Swift',    stat:'speedMul',    base:[.05,.07,.09,.12,.15],  fmt:v=>'+'+Math.round(v*100)+'% Move Speed',    col:'#7ec46a', defMul:0.86},
+  haste:   {name:'Haste',    stat:'atkSpeedMul', base:[.04,.06,.08,.10,.13],  fmt:v=>'+'+Math.round(v*100)+'% Attack Speed',  col:'#ffb060', defMul:0.9},
+  keen:    {name:'Keen',     stat:'crit',        base:[.03,.05,.07,.09,.12],  fmt:v=>'+'+Math.round(v*100)+'% Crit',          col:'#ffd24a', defMul:0.9},
+  warding: {name:'Warding',  stat:'def',         base:[16,26,38,54,74],       fmt:v=>'+'+v+' Defense',             col:'#8fb7ff', defMul:1.1},
+  sanguine:{name:'Sanguine', stat:'lifesteal',   base:[.03,.04,.05,.07,.09],  fmt:v=>'+'+Math.round(v*100)+'% Lifesteal',     col:'#e0607a', defMul:0.95},
+  nimble:  {name:'Nimble',   stat:'dodgeMul',    base:[.05,.07,.10,.13,.17],  fmt:v=>'-'+Math.round(v*100)+'% Dodge CD',      col:'#9fe0ff', defMul:0.9},
+  focus:   {name:'Focus',    stat:'cdr',         base:[.04,.06,.08,.11,.14],  fmt:v=>'-'+Math.round(v*100)+'% Skill CD',      col:'#c9a6ff', defMul:0.9},
+  gilded:  {name:'Gilded',   stat:'goldFind',    base:[.12,.18,.26,.36,.50],  fmt:v=>'+'+Math.round(v*100)+'% Gold Find',     col:'#f0c24a', defMul:1.0}
 };
-const ARMORSETS={
-  heavy:{id:'heavy',name:'Heavy',cls:'warrior',defMul:1.25,pool:['hp','powerMul','lifesteal','hp']},
-  swift:{id:'swift',name:'Swift',cls:'ranger',defMul:0.8,pool:['speedMul','dodgeMul','atkSpeedMul','crit']},
-  mystic:{id:'mystic',name:'Mystic',cls:'mage',defMul:0.95,pool:['cdr','powerMul','hp','cdr']}
-};
-const SETIDS=Object.keys(ARMORSETS);
-function setForClass(cid){ return SETIDS.find(s=>ARMORSETS[s].cls===cid)||'heavy'; }
-function makeArmor(rid,slot,setId){
+const ARMOR_TYPE_IDS=Object.keys(ARMOR_TYPES);
+// legacy set names (heavy/swift/mystic) fold to a type so old saves still read + render
+const LEGACY_SET={heavy:'vigor',swift:'swift',mystic:'mystic'};
+function normArmor(a){ if(!a) return a;
+  if(!a.type){ a.type=LEGACY_SET[a.set]||(a.affixes&&a.affixes[0]&&ARMOR_TYPE_IDS.find(t=>ARMOR_TYPES[t].stat===a.affixes[0].stat))||'vigor'; }
+  if(!a.accent) a.accent=(ARMOR_TYPES[a.type]||ARMOR_TYPES.vigor).col;
+  return a; }
+function setForClass(cid){ return {warrior:'might',ranger:'swift',mage:'mystic',reaper:'sanguine'}[cid]||'vigor'; }
+function makeArmor(rid,slot,typeId){
   const r=RARITY[rid],tier=r.tier,sl=SLOTS[slot];
-  const st=ARMORSETS[setId]||ARMORSETS[SETIDS[Math.floor(Math.random()*SETIDS.length)]];
-  const n=tier>=3?2:1, chosen=[], p2=[...new Set(st.pool)];
-  for(let i=0;i<n&&p2.length;i++){ const k=p2.splice(Math.floor(Math.random()*p2.length),1)[0], a=AFFIXDEFS[k];
-    chosen.push({stat:k,val:a.base[tier],label:a.f(a.base[tier])}); }
-  return {slot,rarity:rid,set:st.id,defense:Math.round(sl.def[tier]*st.defMul),color:r.color,
-    name:r.name+' '+st.name+' '+sl.label,affixes:chosen};
+  const tId=(typeId&&ARMOR_TYPES[typeId])?typeId:ARMOR_TYPE_IDS[Math.floor(Math.random()*ARMOR_TYPE_IDS.length)];
+  const T=ARMOR_TYPES[tId], val=T.base[tier];
+  return {slot,rarity:rid,type:tId,accent:T.col,defense:Math.round(sl.def[tier]*(T.defMul||1)),color:r.color,
+    name:r.name+' '+T.name+' '+sl.label, affixes:[{stat:T.stat,val,label:T.fmt(val)}]};
 }
+/* Each armor TYPE has a signature emblem, drawn in its accent colour on every equipped piece so the
+   type reads at a glance (Swift = swept wings, Mystic = floating rune-crystal, Vigor = heart-stud, …). */
+const TYPE_MOTIF={
+  vigor:(ac,s)=>{ bx(0,0,0.4*s, 5.4*s,5.4*s,2.6*s, ac); bx(0,0,1.4*s, 2.6*s,2.6*s,1.6*s, tint(ac,'#fff',0.35)); },
+  might:(ac,s)=>{ bx(0,1.4*s,0.6*s, 1.9*s,7.4*s,1.9*s, ac,ac); bx(0,5.4*s,0.6*s, 1.1*s,2.6*s,1.1*s, tint(ac,'#fff',0.4)); },
+  mystic:(ac,s)=>{ const T=(typeof G!=='undefined'&&G&&G.time)||0; pushM(); mv(0,Math.sin(T*3)*1.3*s,1*s); rotY(T*1.5); box(2.6*s,4.6*s,2.6*s, ac, ac, 0.9); popM(); },
+  swift:(ac,s)=>{ pushM(); rotZ(0.62); bx(2.4*s,0,0.5*s, 8.4*s,1.3*s,2.4*s, ac,ac,0.85); popM(); pushM(); rotZ(-0.62); bx(-2.4*s,0,0.5*s, 8.4*s,1.3*s,2.4*s, ac,ac,0.85); popM(); },
+  haste:(ac,s)=>{ for(let i=0;i<3;i++) bx((i-1)*2.3*s,0,0.6*s, 1.1*s,6.4*s,1.1*s, ac,ac,0.85); },
+  keen:(ac,s)=>{ bx(0,0,1*s, 1.3*s,7.4*s,3*s, tint(ac,'#000',0.1), tint(ac,'#fff',0.5)); bx(0,4.2*s,1.4*s, 1*s,2.2*s,2.4*s, tint(ac,'#fff',0.6)); },
+  warding:(ac,s)=>{ bx(0,0.6*s,0.5*s, 6.4*s,7.4*s,1.6*s, ac); bx(0,0.6*s,1.4*s, 2.6*s,4.6*s,1*s, tint(ac,'#fff',0.35)); bx(0,-3.4*s,1.2*s, 2.8*s,1.8*s,1*s, ac); },
+  sanguine:(ac,s)=>{ bx(0,0.8*s,1.2*s, 3*s,3.6*s,3*s, ac, ac, 0.95); bx(0,-2.6*s,1.4*s, 1.3*s,3*s,1.3*s, ac,ac,0.7); bx(0,-4.8*s,1.4*s, 0.9*s,1.6*s,0.9*s, ac,ac,0.6); },
+  nimble:(ac,s)=>{ bx(-2.4*s,0,0.6*s, 1.2*s,7.6*s,1.2*s, ac); bx(2.4*s,0,0.6*s, 1.2*s,7.6*s,1.2*s, ac); bx(0,2.6*s,0.6*s, 5.6*s,1.1*s,1.1*s, ac); },
+  focus:(ac,s)=>{ const T=(typeof G!=='undefined'&&G&&G.time)||0; bx(0,0,0.8*s, 2.6*s,2.6*s,2.6*s, tint(ac,'#fff',0.2), ac, 0.9); for(let i=0;i<2;i++){ const a=T*3+i*Math.PI; bx(Math.cos(a)*4.6*s,Math.sin(a)*4.6*s,0.8*s, 1.3*s,1.3*s,1.3*s, ac,ac,0.85); } },
+  gilded:(ac,s)=>{ bx(0,0,1*s, 6.2*s,1.3*s,1*s, ac,ac); bx(0,0,1*s, 1.3*s,6.2*s,1*s, ac,ac); bx(0,0,1.3*s, 2.4*s,2.4*s,1*s, tint(ac,'#fff',0.4)); }
+};
+function motifAt(type,x,y,z,s){ const t2=(type&&TYPE_MOTIF[type])?type:'vigor'; const ac=(ARMOR_TYPES[t2]||ARMOR_TYPES.vigor).col; pushM(); mv(x,y,z); TYPE_MOTIF[t2](ac,s); popM(); }
 
 /* ---------------- Trinkets: amulet + ring slots (passives now; active abilities in a later phase) ---------------- */
 const TRINKETS={amulet:{label:'Amulet'},ring:{label:'Ring'}};
 const TRINKETIDS=['amulet','ring'];
 const GEARSLOTS=SLOTIDS.concat(TRINKETIDS); // helmet, chest, legs, amulet, ring
-function makeTrinket(rid,slot){
+function makeTrinket(rid,slot,typeId){
   const r=RARITY[rid],tier=r.tier;
-  const pool=[
-    {stat:'powerMul',base:[.05,.07,.10,.13,.17],f:v=>'+'+Math.round(v*100)+'% Damage'},
-    {stat:'atkSpeedMul',base:[.04,.06,.08,.10,.13],f:v=>'+'+Math.round(v*100)+'% Attack Speed'},
-    {stat:'speedMul',base:[.05,.07,.09,.11,.14],f:v=>'+'+Math.round(v*100)+'% Move Speed'},
-    {stat:'lifesteal',base:[.03,.04,.05,.07,.09],f:v=>'+'+Math.round(v*100)+'% Lifesteal'},
-    {stat:'crit',base:[.04,.06,.08,.11,.15],f:v=>'+'+Math.round(v*100)+'% Crit Chance'},
-    {stat:'goldFind',base:[.10,.15,.22,.30,.42],f:v=>'+'+Math.round(v*100)+'% Gold Find'},
-    {stat:'hp',base:[12,18,26,36,50],f:v=>'+'+v+' Max HP'},
-    {stat:'dodgeMul',base:[.06,.08,.11,.14,.18],f:v=>'-'+Math.round(v*100)+'% Dodge CD'}];
-  const n=tier>=3?2:1, chosen=[], p2=[...pool];
-  for(let i=0;i<n;i++){ const a=p2.splice(Math.floor(Math.random()*p2.length),1)[0]; chosen.push({stat:a.stat,val:a.base[tier],label:a.f(a.base[tier])}); }
-  return {slot,rarity:rid,color:r.color,name:r.name+' '+TRINKETS[slot].label,affixes:chosen,trinket:true};
+  const tId=(typeId&&ARMOR_TYPES[typeId])?typeId:ARMOR_TYPE_IDS[Math.floor(Math.random()*ARMOR_TYPE_IDS.length)];
+  const T=ARMOR_TYPES[tId], val=Math.round((T.base[tier]*(T.stat==='hp'||T.stat==='def'?1.3:1.25))*1000)/1000;   // trinkets roll a touch higher (no defense of their own)
+  return {slot,rarity:rid,type:tId,accent:T.col,color:r.color,name:r.name+' '+T.name+' '+TRINKETS[slot].label,affixes:[{stat:T.stat,val,label:T.fmt(val)}],trinket:true};
 }
 /* gold value of any item (weapon/armor/trinket), driven by rarity tier */
 function itemGold(it){ const tier=RARITY[it.rarity]?RARITY[it.rarity].tier:0;
@@ -1461,21 +1487,24 @@ function freshPlayer(){
   return p;
 }
 function recomputeArmor(p){
-  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,defense:0,crit:0,goldFind:0,cdr:0};
-  let total=0;
+  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,magPowerMul:1,defense:0,crit:0,goldFind:0,cdr:0};
+  let total=0, defBonus=0;
   const fold=a=>{ for(const af of a.affixes){ const s=af.stat,v=af.val;
     if(s==='hp')m.hp+=v; else if(s==='lifesteal')m.lifesteal+=v; else if(s==='crit')m.crit+=v; else if(s==='goldFind')m.goldFind+=v; else if(s==='cdr')m.cdr+=v;
+    else if(s==='def')defBonus+=v;
     else if(s==='speedMul')m.speedMul*=1+v; else if(s==='atkSpeedMul')m.atkSpeedMul*=1+v;
-    else if(s==='dodgeMul')m.dodgeMul*=1-v; else if(s==='powerMul')m.powerMul*=1+v; } };
-  if(p.gear){ for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; total+=a.defense; fold(a); }
-    for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a) fold(a); } }
-  m.defense=total/(total+200);
+    else if(s==='dodgeMul')m.dodgeMul*=1-v; else if(s==='powerMul')m.powerMul*=1+v; else if(s==='magPowerMul')m.magPowerMul*=1+v; } };
+  if(p.gear){ for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; normArmor(a); total+=a.defense; fold(a); }
+    for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a){ normArmor(a); fold(a); } } }
+  m.defense=(total+defBonus)/((total+defBonus)+200);
   p.armorMods=m;
 }
+function effMagPower(p){ return (p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
   let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; return isGod(p)?v+9000:v; }
 function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
+  if(p.armorMods&&p.weapon&&p.weapon.sch==='mag') v*=p.armorMods.magPowerMul;   // Mystic gear boosts magic weapons specifically
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
@@ -1660,7 +1689,7 @@ function forgeSpin(g,back){
   // consume the two inputs up front
   const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x); meta.stash.splice(hi,1); meta.stash.splice(lo,1);
   // precompute a reel of preview icons for this category (fast to cycle)
-  const pool = g.kind==='w' ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : g.kind==='t' ? [itemAv(makeTrinket(nr,g.cat)),itemAv(ro)] : SETIDS.map(sid=>itemAv(makeArmor(nr,g.cat,sid)));
+  const pool = g.kind==='w' ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : g.kind==='t' ? [itemAv(makeTrinket(nr,g.cat)),itemAv(ro)] : ARMOR_TYPE_IDS.slice(0,6).map(tid=>itemAv(makeArmor(nr,g.cat,tid)));
   const finalIcon=itemAv(ro);
   showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:${nc}">The Forge</p><h2 class="ovh">Forging…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid ${nc};box-shadow:0 0 24px ${nc}66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]||finalIcon}"></div></div>
@@ -2470,6 +2499,7 @@ window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
     if(mode==='studio'){ exitStudio(); return; }
+    if(mode==='mirror'){ exitMirror(); return; }
     if(mode==='play') openPause();
     else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); }
     else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
@@ -2516,6 +2546,14 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
    (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
 // desktop: ANY click in play captures the mouse, then moving it aims the camera hands-free (no click-hold). Esc releases.
 window.addEventListener('mousedown',e=>{ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && !(e.target&&e.target.closest&&e.target.closest('#overlay')) && canvas.requestPointerLock) canvas.requestPointerLock(); });
+// The Mirror: drag anywhere on the character to orbit the camera 360° around yourself
+(function(){ let md=null;
+  const getX=e=>e.clientX!=null?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:null);
+  const dn=e=>{ if(mode==='mirror'&&mirror&&!(e.target&&e.target.closest&&e.target.closest('#mirrorui'))){ md=getX(e); if(mirror.spin){ mirror.spin=false; const b=document.getElementById('msSpin'); if(b) b.textContent='🔄 Spin: Off'; } } };
+  const mv=e=>{ if(md==null||mode!=='mirror'||!mirror) return; const x=getX(e); if(x==null) return; mirror.yaw-=(x-md)*0.013; md=x; };
+  const up=()=>{ md=null; };
+  window.addEventListener('pointerdown',dn); window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
+})();
 document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){ const sn=meta.lookSens||1;
   G.camYaw=(G.camYaw||0)-e.movementX*0.0032*sn; G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+e.movementY*0.0026*sn)); } });
 (function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
@@ -3191,6 +3229,7 @@ function hurtPlayer(dmg,sx,sz){
 }
 function update(dt){
   if(mode==='studio'){ studioUpdate(dt); return; }
+  if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
@@ -3936,33 +3975,81 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
   document.getElementById('npcLeave').onclick=resumePlay;
 }
 // Phase 12: the Mirror — inspect your own character (live gear/cosmetics), invaluable in first-person
-function heroPortrait(){ try{
-  gl.clearColor(0.06,0.065,0.09,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT); setFlatLights();
-  PROJ=mPersp(46*Math.PI/180,VW/VH,5,900); VIEW=mLookAt([30,62,124],[0,28,0],[0,1,0]);
+/* ============================================================
+   THE MIRROR — stand before it and orbit 360° around your character (drag to rotate),
+   with EVERY stat listed and your full equipped loadout (each piece's TYPE + bonus).
+   ============================================================ */
+let mirror=null;
+function openMirror(back){
+  initAudio();
+  const h=meta.hero, p=freshPlayer();
+  p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
+  p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.hp=p.maxHp=9999; p.invuln=0;
+  p.level=(h&&h.level)||1; recomputeArmor(p);
+  mirror={ t:0, yaw:Math.PI, spin:true, back:back||openHubMenu, p };
+  mode='mirror'; showOverlay(false); showGameUI(false);
+  document.getElementById('questbox').classList.add('hide');
+  buildMirrorPanel();
+}
+function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
+  if(mirror.spin) mirror.yaw+=dt*0.45;
+  const p=mirror.p; if(p.hurtFlash>0) p.hurtFlash-=dt;
+}
+function renderMirror(t){
+  gl.clearColor(0.055,0.05,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(42*Math.PI/180,VW/VH,5,900);
+  const yaw=mirror.yaw, cx=Math.sin(yaw)*150, cz=Math.cos(yaw)*150;
+  VIEW=mLookAt([cx,66,cz],[0,26,0],[0,1,0]);
   gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
-  gl.uniform2f(U.uFogNF,700,2200); CURM=mIdent();
-  const h=meta.hero; const fake=freshPlayer();
-  fake.skin=(h&&h.skin)||fake.skin; fake.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):fake.weapon;
-  fake.gear=h?cloneGear(h.gear):fake.gear; fake.x=0; fake.y=0; fake.z=0; fake.yaw=0.6; recomputeArmor(fake);
-  const so=meta.showArmor; meta.showArmor=true; drawHero3(fake,1.2,false); meta.showArmor=so; gl.finish();
-  const ctr=project(0,30,0)||[VW/2,VH/2], c2=document.createElement('canvas'); c2.width=160; c2.height=220;
-  const sw=VH*0.36*DPR, sh=VH*0.50*DPR;
-  c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,160,220);
-  return c2.toDataURL();
-}catch(e){ return ''; } }
-function openMirror(back){ mode='menu';
-  const h=meta.hero, C=curClass(), cs=classState(meta.classId), img=heroPortrait();
-  const w=h&&h.weapon, g=h?h.gear:null;
-  const gearLine=(slot,lbl)=>{ const a=g&&g[slot]; return `<div class="vsrow"><span>${lbl}</span><b style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'—'}</b></div>`; };
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Mirror</p><h2 class="ovh">${C.icon} ${C.disp}</h2>
-    <p class="ovsub">Level ${h?h.level:1} · rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</p>
-    ${img?`<img src="${img}" alt="you" style="display:block;margin:6px auto;height:210px;image-rendering:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))">`:''}
-    <div class="statgrid" style="text-align:left">
-      <div class="vsrow"><span>Weapon</span><b style="color:${w?RARITY[w.rarity].color:'#5a6270'}">${w?w.name:'—'}</b></div>
-      ${gearLine('helmet','Helmet')}${gearLine('chest','Chest')}${gearLine('legs','Legs')}${gearLine('amulet','Amulet')}${gearLine('ring','Ring')}
-    </div>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
-  document.getElementById('backBtn').onclick=back;
+  gl.uniform2f(U.uFogNF,600,2200); gl.uniform3f(U.uFog,0.055,0.05,0.07);
+  CURM=mIdent();
+  // a great standing mirror behind the hero, pedestal underfoot
+  bx(0,-8,-70, 300,16,60,'#171922');
+  bx(0,90,-84, 150,190,10,'#2a2f3d'); bx(0,90,-79, 122,168,4,'#0f1622','#7fb0e0',0.16);   // reflective glass
+  bx(0,188,-84, 168,14,14,'#3a4152');
+  bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
+  const p=mirror.p; p.yaw=Math.PI;   // hero faces the camera-front consistently; the CAMERA orbits
+  drawShadow(0,0,17,0.34);
+  drawHero3(p,t,false);
+}
+function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
+function mirrorStatsHTML(){
+  const p=mirror.p, row=(lbl,val,accent)=>`<div class="msrow"><span>${lbl}</span><b${accent?` style="color:${accent}"`:''}>${val}</b></div>`;
+  const pct=v=>(v>=0?'+':'')+Math.round(v*100)+'%', mul=v=>'×'+(Math.round(v*100)/100);
+  const cs=classState(meta.classId);
+  let s=`<div class="mssect">Stats</div>`;
+  s+=row('Max HP', Math.round(effMaxHp(p)), '#ff8a82');
+  s+=row('Damage', pct(effPower(p)-1), '#ffce6a');
+  if(typeof effMagPower==='function' && effMagPower(p)>1.001) s+=row('Magic Damage', pct(effMagPower(p)-1), '#c47bff');
+  s+=row('Attack Speed', mul(effAtkSpeed(p)), '#ffb060');
+  s+=row('Move Speed', mul(effSpeed(p)), '#7ec46a');
+  s+=row('Crit Chance', Math.round(effCrit(p)*100)+'%', '#ffd24a');
+  s+=row('Lifesteal', Math.round(effLifesteal(p)*100)+'%', '#e0607a');
+  s+=row('Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
+  s+=row('Dodge Cooldown', (Math.round(effDodgeCd(p)*100)/100)+'s', '#9fe0ff');
+  s+=row('Gold Find', mul(effGoldFind(p)), '#ffd24a');
+  if(effCdr(p)>0.001) s+=row('Skill Cooldowns', '-'+Math.round(effCdr(p)*100)+'%', '#c9a6ff');
+  // loadout
+  s+=`<div class="mssect">Loadout</div>`;
+  const w=p.weapon; s+=`<div class="msgear"><span class="msg-l">Weapon</span><span class="msg-r" style="color:${w?RARITY[w.rarity].color:'#5a6270'}">${w?w.name:'—'}</span></div>`;
+  [['helmet','Helmet'],['chest','Chest'],['legs','Legs'],['amulet','Amulet'],['ring','Ring']].forEach(([sl,lbl])=>{
+    const a=p.gear&&p.gear[sl];
+    const bonus=a?(a.affixes||[]).map(x=>x.label).join(' · '):'';
+    s+=`<div class="msgear"><span class="msg-l">${lbl}</span><span class="msg-r" style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'— empty —'}${bonus?`<br><span class="msg-b">${bonus}</span>`:''}</span></div>`;
+  });
+  return s;
+}
+function buildMirrorPanel(){
+  const pn=document.getElementById('mirrorui'); if(!pn) return;
+  const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1;
+  pn.innerHTML=`<div class="mstop"><div class="msttl">${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
+    <div class="msbody">${mirrorStatsHTML()}</div>
+    <div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: On</button><button class="wsbig ghost" id="msBack">Back</button></div>
+    <div class="mshint">drag the character to look around</div>`;
+  pn.classList.remove('hide');
+  document.getElementById('msSpin').onclick=()=>{ mirror.spin=!mirror.spin; document.getElementById('msSpin').textContent='🔄 Spin: '+(mirror.spin?'On':'Off'); };
+  document.getElementById('msBack').onclick=()=>exitMirror();
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
@@ -4797,15 +4884,28 @@ function drawHero3(p,t,preview){
   // equipped armor shown on the character (toggle in pause menu)
   if(!preview && p.gear && meta.showArmor){
     const g=p.gear;
-    if(g.chest){ const rc=g.chest.color, st=tint('#8f99a8',rc,0.30);
-      bx(0,24,0, 18.8,15,11.6, st); bx(0,30.6,0, 19.2,2.2,12, rc, rc); bx(0,24,6.1, 3,10,0.8, rc, rc); }
-    if(g.helmet){ const rc=g.helmet.color, st=tint('#8f99a8',rc,0.30);
-      bx(0,49.6,0, 14,4.4,13, st); bx(0,47.2,6.2, 14,1.6,0.9, rc, rc); }
-    if(g.legs){ const rc=g.legs.color, st=tint('#8f99a8',rc,0.30);
-      bx(-4.5,7,3.8, 7,9.6,1.6, st); bx(4.5,7,3.8, 7,9.6,1.6, st);
-      bx(-4.5,11,3.9, 7.2,1.4,1.7, rc, rc); bx(4.5,11,3.9, 7.2,1.4,1.7, rc, rc); }
-    if(g.amulet){ const rc=g.amulet.color; bx(0,40,6.3, 1.2,5,0.8, tint(rc,'#000',0.3)); bx(0,35.5,6.7, 3.4,3.4,1.6, rc, rc, 1); }   // pendant chain + gem at the collar
-    if(g.ring){ const rc=g.ring.color; bx(9.5,2,4.4, 3.2,3.2,2.2, rc, rc, 1); }                                                      // band on the hand
+    if(g.chest){ const a=normArmor(g.chest), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32), lt=tint(st,'#fff',0.14);
+      bx(0,24,0, 19.2,16,12, st);                                    // layered cuirass
+      bx(0,31,0, 20,3,12.4, ac, ac, 0.92);                           // gorget rim (accent)
+      bx(0,17.6,0, 20,3.2,12.2, tint(rc,'#000',0.22));               // fauld/belt
+      bx(-9.6,29,0, 6.2,7,12.6, lt); bx(9.6,29,0, 6.2,7,12.6, lt);   // shoulder plates
+      bx(-9.6,32.6,0, 6.6,2,12.8, ac, ac); bx(9.6,32.6,0, 6.6,2,12.8, ac, ac);   // pauldron trim
+      bx(0,24,6.3, 4,13,0.8, tint(st,'#000',0.28));                  // center seam
+      motifAt(a.type,0,25,6.7,1.15); }                               // the TYPE emblem, front-centre chest
+    if(g.helmet){ const a=normArmor(g.helmet), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32);
+      bx(0,44,0, 14.6,12,13.6, st);                                  // skullcap
+      bx(0,50.6,0, 15,3,13.8, ac, ac, 0.92);                         // crown rim (accent)
+      bx(0,42,6.6, 13.8,4,1, tint(rc,'#000',0.25));                  // brow guard
+      bx(0,45,6.9, 3,7,1, tint(st,'#000',0.35));                     // nasal bar
+      motifAt(a.type,0,55,0.5,0.72); }                               // crest emblem on top
+    if(g.legs){ const a=normArmor(g.legs), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32);
+      bx(-4.5,8,3.9, 7.4,11,2.1, st); bx(4.5,8,3.9, 7.4,11,2.1, st); // thigh plates
+      bx(-4.5,12.6,4.1, 7.6,1.6,2.2, ac, ac); bx(4.5,12.6,4.1, 7.6,1.6,2.2, ac, ac);   // knee trim
+      motifAt(a.type,-4.5,7,4.6,0.58); motifAt(a.type,4.5,7,4.6,0.58); }               // emblem on each thigh
+    if(g.amulet){ const a=normArmor(g.amulet); bx(0,41.5,6.2, 1.2,6,0.8, tint(a.color,'#000',0.3));   // chain
+      motifAt(a.type,0,35,7,0.72); }                                 // the pendant IS the type emblem
+    if(g.ring){ const a=normArmor(g.ring); bx(9.5,2,4.4, 3.6,3.6,2.4, tint(a.color,'#000',0.1));      // band
+      motifAt(a.type,9.5,2.6,5.9,0.42); }                            // a tiny type gem on the hand
   }
   // cape
   pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
@@ -5319,6 +5419,7 @@ function drawThreatArrows(c){
 }
 function render(t){
   if(mode==='studio' && studio){ renderStudio(studio.t); return; }
+  if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
   const s=STAGES[G?G.stageIndex:0];
   const sky=s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
@@ -5656,7 +5757,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
-  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMORSETS, openHub, die,
+  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
@@ -5666,6 +5767,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
+  openMirror, exitMirror, get mirror(){ return mirror; },
+  recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

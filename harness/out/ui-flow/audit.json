@@ -1,0 +1,457 @@
+{
+  "version": "1.86.0",
+  "errors": [],
+  "stages": [
+    {
+      "label": "01-title",
+      "mode": "title",
+      "buttons": [
+        {
+          "id": "playBtn",
+          "tag": "BUTTON",
+          "text": "Play",
+          "x": 66,
+          "y": 236,
+          "w": 258,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "abyssBtn",
+          "tag": "BUTTON",
+          "text": "🕳️ Abyssal Descent",
+          "x": 66,
+          "y": 294,
+          "w": 258,
+          "h": 51,
+          "off": false
+        },
+        {
+          "id": "slotsBtn",
+          "tag": "BUTTON",
+          "text": "Characters · Slot 1",
+          "x": 66,
+          "y": 353,
+          "w": 258,
+          "h": 48,
+          "off": false
+        },
+        {
+          "id": "skinBtn",
+          "tag": "BUTTON",
+          "text": "Skins",
+          "x": 66,
+          "y": 409,
+          "w": 258,
+          "h": 48,
+          "off": false
+        },
+        {
+          "id": "achBtn",
+          "tag": "BUTTON",
+          "text": "Achievements",
+          "x": 66,
+          "y": 465,
+          "w": 258,
+          "h": 48,
+          "off": false
+        },
+        {
+          "id": "creditsBtn",
+          "tag": "BUTTON",
+          "text": "Credits",
+          "x": 66,
+          "y": 671,
+          "w": 258,
+          "h": 48,
+          "off": false
+        },
+        {
+          "id": "to2dBtn",
+          "tag": "BUTTON",
+          "text": "↩ Classic 2D BLADEFALL",
+          "x": 66,
+          "y": 727,
+          "w": 258,
+          "h": 51,
+          "off": false
+        }
+      ],
+      "offscreen": [
+        {
+          "id": "ovcard",
+          "tag": "DIV",
+          "text": "BLADEFALL 3D\n\nHARDCORE DUNGEON CRAWLER\n\nPlay\n🕳️ Abyssal Descent\nCharacters · Slot 1\nSkins\nAchieveme",
+          "x": 24,
+          "y": 24,
+          "w": 342,
+          "h": 923,
+          "off": true
+        },
+        {
+          "id": "",
+          "tag": "DIV",
+          "text": "BLADEFALL 3D\n\nHARDCORE DUNGEON CRAWLER\n\nPlay\n🕳️ Abyssal Descent\nCharacters · Slot 1\nSkins\nAchieveme",
+          "x": 45,
+          "y": 47,
+          "w": 300,
+          "h": 881,
+          "off": true
+        }
+      ],
+      "overlaps": [],
+      "overlay": "BLADEFALL 3D\n\nHARDCORE DUNGEON CRAWLER\n\nPlay\n🕳️ Abyssal Descent\nCharacters · Slot 1\nSkins\nAchievements\nAUDIO\nMusic\n0%\nSound effects\n0%\nCredits\n↩ Classic 2D BLADEFALL\n\nJoystick moves in every direction · SLASH/FIRE auto-targets · JUMP · DODGE dashes\nDesktop: WASD + Space, J/K/L, Esc · Skins & achievements carry across modes.\nSkins: 1/11\nv1.86.0",
+      "quest": ""
+    },
+    {
+      "label": "02-class-picker",
+      "mode": "menu",
+      "buttons": [
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "⚔️\nWarrior\nsword, great, axe, hammer\nCleave · Shockwave Stomp · Charge · Berserk",
+          "x": 66,
+          "y": 323,
+          "w": 258,
+          "h": 111,
+          "off": false
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "🏹\nRanger\nbow, cross, dagger, javelin\nDeadeye · Volley · Tumble · Hunter’s Mark",
+          "x": 66,
+          "y": 444,
+          "w": 258,
+          "h": 111,
+          "off": false
+        },
+        {
+          "id": "",
+          "tag": "BUTTON",
+          "text": "🔮\nMage\nstaff, wand, spellblade\nElemental Bolt · Nova · Blink · Arcane Tempest",
+          "x": 66,
+          "y": 566,
+          "w": 258,
+          "h": 111,
+          "off": false
+        }
+      ],
+      "offscreen": [],
+      "overlaps": [],
+      "overlay": "BLADEFALL\n\nChoose how you fight. Its trial teaches you the rest.\nYou can unlock the others later — and more besides.\n\n⚔️\nWarrior\nsword, great, axe, hammer\nCleave · Shockwave Stomp · Charge · Berserk\n🏹\nRanger\nbow, cross, dagger, javelin\nDeadeye · Volley · Tumble · Hunter’s Mark\n🔮\nMage\nstaff, wand, spellblade\nElemental Bolt · Nova · Blink · Arcane Tempest",
+      "quest": ""
+    },
+    {
+      "label": "03-tutorial",
+      "mode": "menu",
+      "buttons": [
+        {
+          "id": "pausebtn",
+          "tag": "BUTTON",
+          "text": "II",
+          "x": 344,
+          "y": 8,
+          "w": 34,
+          "h": 34,
+          "off": false
+        },
+        {
+          "id": "bDodge",
+          "tag": "BUTTON",
+          "text": "DODGE",
+          "x": 218,
+          "y": 764,
+          "w": 62,
+          "h": 62,
+          "off": false
+        },
+        {
+          "id": "bJump",
+          "tag": "BUTTON",
+          "text": "",
+          "x": 220,
+          "y": 686,
+          "w": 66,
+          "h": 66,
+          "off": false
+        },
+        {
+          "id": "bAttack",
+          "tag": "BUTTON",
+          "text": "SLASH",
+          "x": 288,
+          "y": 732,
+          "w": 86,
+          "h": 86,
+          "off": false
+        },
+        {
+          "id": "bAuto",
+          "tag": "BUTTON",
+          "text": "AUTO (L)",
+          "x": 322,
+          "y": 321,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bKeep",
+          "tag": "BUTTON",
+          "text": "SELL",
+          "x": 322,
+          "y": 359,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bBag",
+          "tag": "BUTTON",
+          "text": "BAG",
+          "x": 322,
+          "y": 397,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bSk0",
+          "tag": "BUTTON",
+          "text": "🗡️",
+          "x": 160,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk1",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 216,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk2",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 272,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk3",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 328,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "tutGo",
+          "tag": "BUTTON",
+          "text": "Begin the trial",
+          "x": 66,
+          "y": 669,
+          "w": 258,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "tutSkip",
+          "tag": "BUTTON",
+          "text": "Skip tutorial & trial",
+          "x": 66,
+          "y": 727,
+          "w": 258,
+          "h": 48,
+          "off": false
+        }
+      ],
+      "offscreen": [],
+      "overlaps": [
+        "hud / ovcard",
+        "hud / DIV",
+        "pausebtn / ovcard",
+        "bDodge / ovcard",
+        "bDodge / DIV",
+        "bDodge / tutSkip",
+        "bJump / ovcard",
+        "bJump / DIV",
+        "bJump / tutGo",
+        "bJump / tutSkip",
+        "bAttack / ovcard",
+        "bAttack / DIV",
+        "bAttack / tutSkip",
+        "bAuto / ovcard",
+        "bAuto / DIV",
+        "bKeep / ovcard",
+        "bKeep / DIV",
+        "bBag / ovcard",
+        "bBag / DIV",
+        "bSk0 / ovcard",
+        "bSk0 / DIV",
+        "bSk1 / ovcard",
+        "bSk1 / DIV",
+        "bSk2 / ovcard",
+        "bSk2 / DIV",
+        "bSk3 / ovcard",
+        "bSk3 / DIV"
+      ],
+      "overlay": "WELCOME, WARDEN\n\nThe Proving Chamber\n\nBefore the order lets a Warden descend, it sends them here — a sealed proving chamber beneath the keep. Survive it and the class is yours. Fail and no one below will ever know your name.\n\nMove — WASD / left stick. Jump — Space (tap = hop, hold = higher).\n\nAttack — J / the SLASH button; it auto-aims where you're looking. Dodge — K / Shift.\n\nSkills — keys 1–4 (they unlock as your class ranks up).\n\nTalk / use — walk up and press E. Pause / camera — Esc.\n\nGoal: clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.\n\nBegin the trial\nSkip tutorial & trial",
+      "quest": ""
+    },
+    {
+      "label": "04-trial",
+      "mode": "play",
+      "buttons": [
+        {
+          "id": "pausebtn",
+          "tag": "BUTTON",
+          "text": "II",
+          "x": 344,
+          "y": 8,
+          "w": 34,
+          "h": 34,
+          "off": false
+        },
+        {
+          "id": "bDodge",
+          "tag": "BUTTON",
+          "text": "DODGE",
+          "x": 218,
+          "y": 764,
+          "w": 62,
+          "h": 62,
+          "off": false
+        },
+        {
+          "id": "bJump",
+          "tag": "BUTTON",
+          "text": "",
+          "x": 220,
+          "y": 686,
+          "w": 66,
+          "h": 66,
+          "off": false
+        },
+        {
+          "id": "bAttack",
+          "tag": "BUTTON",
+          "text": "SLASH",
+          "x": 288,
+          "y": 732,
+          "w": 86,
+          "h": 86,
+          "off": false
+        },
+        {
+          "id": "bAuto",
+          "tag": "BUTTON",
+          "text": "AUTO (L)",
+          "x": 322,
+          "y": 321,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bKeep",
+          "tag": "BUTTON",
+          "text": "SELL",
+          "x": 322,
+          "y": 359,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bBag",
+          "tag": "BUTTON",
+          "text": "BAG",
+          "x": 322,
+          "y": 397,
+          "w": 58,
+          "h": 30,
+          "off": false
+        },
+        {
+          "id": "bSk0",
+          "tag": "BUTTON",
+          "text": "🗡️",
+          "x": 160,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk1",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 216,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk2",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 272,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        },
+        {
+          "id": "bSk3",
+          "tag": "BUTTON",
+          "text": "🔒",
+          "x": 328,
+          "y": 618,
+          "w": 50,
+          "h": 50,
+          "off": false
+        }
+      ],
+      "offscreen": [],
+      "overlaps": [
+        "hud / questbox"
+      ],
+      "overlay": "Welcome, WardenThe Proving Chamber\n    \n      Before the order lets a Warden descend, it sends them here — a sealed proving chamber beneath the keep. Survive it and the class is yours. Fail and no one below will ever know your name.\n      Move — WASD / left stick. Jump — Space (tap = hop, hold = higher).\n      Attack — J / the SLASH button; it auto-aims where you're looking. Dodge — K / Shift.\n      Skills — keys 1–4 (they unlock as your class ranks up).\n      Talk / use — walk up and press E. Pause / camera — Esc.\n      Goal: clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.\n    Begin the trial\n    Skip tutorial & trial",
+      "quest": "⚔️ TRIAL OF THE BLADE\n☐ Defeat the keepers 0/6"
+    },
+    {
+      "label": "05-death",
+      "mode": "dead",
+      "buttons": [
+        {
+          "id": "hubBtn",
+          "tag": "BUTTON",
+          "text": "Choose your class",
+          "x": 66,
+          "y": 517,
+          "w": 258,
+          "h": 50,
+          "off": false
+        }
+      ],
+      "offscreen": [],
+      "overlaps": [],
+      "overlay": "YOU FELL\n\n🌾 Trial of the Blade · Level 1\n\nLost this attempt\n0g + everything found\nKept\nall progress banked at the hub\nChoose your class",
+      "quest": "⚔️ TRIAL OF THE BLADE\n☐ Defeat the keepers 0/6"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e50]:
+    - heading "BLADEFALL 3D" [level=1] [ref=e51]
+    - paragraph [ref=e52]: Hardcore Dungeon Crawler
+    - button "Play" [ref=e53] [cursor=pointer]
+    - button "🕳️ Abyssal Descent" [ref=e54] [cursor=pointer]
+    - button "Characters · Slot 1" [ref=e55] [cursor=pointer]
+    - button "Skins" [ref=e56] [cursor=pointer]
+    - button "Achievements" [ref=e57] [cursor=pointer]
+    - generic [ref=e58]: Audio
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic [ref=e61]: Music
+        - generic [ref=e62]: 0%
+      - slider [ref=e63]: "0"
+    - generic [ref=e64]:
+      - generic [ref=e65]:
+        - generic [ref=e66]: Sound effects
+        - generic [ref=e67]: 0%
+      - slider [ref=e68]: "0"
+    - button "Credits" [ref=e69] [cursor=pointer]
+    - button "↩ Classic 2D BLADEFALL" [ref=e70] [cursor=pointer]
+    - paragraph [ref=e71]: "Joystick moves in every direction · SLASH/FIRE auto-targets · JUMP · DODGE dashes Desktop: WASD + Space, J/K/L, Esc · Skins & achievements carry across modes. Skins: 1/11v1.86.0"

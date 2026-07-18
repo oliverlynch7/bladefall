@@ -1,54 +1,223 @@
 {
   "version": "1.86.0",
-  "createdAt": "2026-07-18T20:08:26.772Z",
+  "createdAt": "2026-07-18T20:09:31.447Z",
   "errors": [],
   "bosses": [
     {
       "zone": "ember",
-      "error": "boss missing",
-      "stage": 0,
-      "types": [
-        "thornboar",
-        "sporeback",
-        "grunt",
-        "flyer",
-        "grunt",
-        "flyer",
-        "sporeback",
-        "flyer",
-        "flyer",
-        "flyer",
-        "flyer",
-        "grunt",
-        "thornboar",
-        "flyer",
-        "sporeback",
-        "thornboar",
-        "flyer",
-        "flyer",
-        "thornboar",
-        "sporeback",
-        "grunt"
+      "boss": "colossus",
+      "startHp": 100000,
+      "endHp": 99772,
+      "damageTaken": 228,
+      "max": {
+        "projectiles": 1,
+        "shockwaves": 5,
+        "trails": 22,
+        "collapse": 0,
+        "enemies": 3,
+        "particles": 43
+      },
+      "samples": [
+        {
+          "t": 0,
+          "hp": 100000,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 0,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 1,
+          "hp": 100000,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 0,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 2,
+          "hp": 99977,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 6,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 3,
+          "hp": 99977,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 18,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 4,
+          "hp": 99960,
+          "projectiles": 1,
+          "shockwaves": 0,
+          "trails": 22,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 5,
+          "hp": 99955,
+          "projectiles": 0,
+          "shockwaves": 3,
+          "trails": 22,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 6,
+          "hp": 99950,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 20,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 7,
+          "hp": 99940,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 14,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 8,
+          "hp": 99935,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 9,
+          "hp": 99905,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 1
+          }
+        },
+        {
+          "t": 10,
+          "hp": 99893,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        },
+        {
+          "t": 11,
+          "hp": 99863,
+          "projectiles": 1,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        },
+        {
+          "t": 12,
+          "hp": 99826,
+          "projectiles": 0,
+          "shockwaves": 3,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        },
+        {
+          "t": 13,
+          "hp": 99814,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        },
+        {
+          "t": 14,
+          "hp": 99784,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 11,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        }
       ]
     },
     {
       "zone": "abyss",
       "boss": "king",
-      "startHp": 9100,
-      "endHp": 9080,
-      "damageTaken": 20,
+      "startHp": 100000,
+      "endHp": 99982,
+      "damageTaken": 18,
       "max": {
         "projectiles": 3,
-        "shockwaves": 0,
+        "shockwaves": 1,
         "trails": 0,
         "collapse": 0,
         "enemies": 4,
-        "particles": 16
+        "particles": 84
       },
       "samples": [
         {
           "t": 0,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -60,7 +229,7 @@
         },
         {
           "t": 1,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -72,7 +241,7 @@
         },
         {
           "t": 2,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -84,7 +253,7 @@
         },
         {
           "t": 3,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -96,7 +265,7 @@
         },
         {
           "t": 4,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -108,7 +277,7 @@
         },
         {
           "t": 5,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -120,7 +289,7 @@
         },
         {
           "t": 6,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -132,7 +301,7 @@
         },
         {
           "t": 7,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -144,55 +313,55 @@
         },
         {
           "t": 8,
-          "hp": 9100,
+          "hp": 99982,
           "projectiles": 0,
-          "shockwaves": 0,
+          "shockwaves": 1,
           "trails": 0,
           "collapse": 0,
-          "enemies": 3,
+          "enemies": 2,
           "bossState": {
             "phase": 1
           }
         },
         {
           "t": 9,
-          "hp": 9098,
+          "hp": 99982,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
           "collapse": 0,
-          "enemies": 3,
+          "enemies": 2,
           "bossState": {
             "phase": 1
           }
         },
         {
           "t": 10,
-          "hp": 9094,
+          "hp": 99982,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
           "collapse": 0,
-          "enemies": 3,
+          "enemies": 2,
           "bossState": {
             "phase": 2
           }
         },
         {
           "t": 11,
-          "hp": 9092,
+          "hp": 99982,
           "projectiles": 3,
           "shockwaves": 0,
           "trails": 0,
           "collapse": 0,
-          "enemies": 3,
+          "enemies": 2,
           "bossState": {
             "phase": 2
           }
         },
         {
           "t": 12,
-          "hp": 9088,
+          "hp": 99982,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -204,7 +373,7 @@
         },
         {
           "t": 13,
-          "hp": 9086,
+          "hp": 99982,
           "projectiles": 2,
           "shockwaves": 0,
           "trails": 0,
@@ -216,7 +385,7 @@
         },
         {
           "t": 14,
-          "hp": 9084,
+          "hp": 99982,
           "projectiles": 2,
           "shockwaves": 0,
           "trails": 0,
@@ -231,9 +400,9 @@
     {
       "zone": "palace",
       "boss": "colossus",
-      "startHp": 9100,
-      "endHp": 9062,
-      "damageTaken": 38,
+      "startHp": 100000,
+      "endHp": 99833,
+      "damageTaken": 167,
       "max": {
         "projectiles": 1,
         "shockwaves": 1,
@@ -245,7 +414,7 @@
       "samples": [
         {
           "t": 0,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -257,7 +426,7 @@
         },
         {
           "t": 1,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -269,7 +438,7 @@
         },
         {
           "t": 2,
-          "hp": 9097,
+          "hp": 99977,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -281,7 +450,7 @@
         },
         {
           "t": 3,
-          "hp": 9097,
+          "hp": 99977,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -293,7 +462,7 @@
         },
         {
           "t": 4,
-          "hp": 9097,
+          "hp": 99977,
           "projectiles": 1,
           "shockwaves": 0,
           "trails": 0,
@@ -305,7 +474,7 @@
         },
         {
           "t": 5,
-          "hp": 9094,
+          "hp": 99954,
           "projectiles": 0,
           "shockwaves": 1,
           "trails": 0,
@@ -317,7 +486,7 @@
         },
         {
           "t": 6,
-          "hp": 9092,
+          "hp": 99954,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -329,8 +498,8 @@
         },
         {
           "t": 7,
-          "hp": 9090,
-          "projectiles": 1,
+          "hp": 99931,
+          "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
           "collapse": 0,
@@ -341,7 +510,7 @@
         },
         {
           "t": 8,
-          "hp": 9086,
+          "hp": 99931,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -353,7 +522,7 @@
         },
         {
           "t": 9,
-          "hp": 9084,
+          "hp": 99931,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -365,7 +534,7 @@
         },
         {
           "t": 10,
-          "hp": 9080,
+          "hp": 99908,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -377,9 +546,9 @@
         },
         {
           "t": 11,
-          "hp": 9078,
+          "hp": 99908,
           "projectiles": 1,
-          "shockwaves": 0,
+          "shockwaves": 1,
           "trails": 0,
           "collapse": 0,
           "enemies": 3,
@@ -389,7 +558,19 @@
         },
         {
           "t": 12,
-          "hp": 9074,
+          "hp": 99883,
+          "projectiles": 0,
+          "shockwaves": 0,
+          "trails": 0,
+          "collapse": 0,
+          "enemies": 3,
+          "bossState": {
+            "phase": 2
+          }
+        },
+        {
+          "t": 13,
+          "hp": 99858,
           "projectiles": 0,
           "shockwaves": 1,
           "trails": 0,
@@ -400,20 +581,8 @@
           }
         },
         {
-          "t": 13,
-          "hp": 9068,
-          "projectiles": 1,
-          "shockwaves": 0,
-          "trails": 0,
-          "collapse": 0,
-          "enemies": 3,
-          "bossState": {
-            "phase": 2
-          }
-        },
-        {
           "t": 14,
-          "hp": 9066,
+          "hp": 99858,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -428,9 +597,9 @@
     {
       "zone": "castle",
       "boss": "tyrant",
-      "startHp": 9100,
-      "endHp": 9068,
-      "damageTaken": 32,
+      "startHp": 100000,
+      "endHp": 99812,
+      "damageTaken": 188,
       "max": {
         "projectiles": 5,
         "shockwaves": 0,
@@ -442,7 +611,7 @@
       "samples": [
         {
           "t": 0,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -454,7 +623,7 @@
         },
         {
           "t": 1,
-          "hp": 9100,
+          "hp": 100000,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -466,7 +635,7 @@
         },
         {
           "t": 2,
-          "hp": 9096,
+          "hp": 99974,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -478,7 +647,7 @@
         },
         {
           "t": 3,
-          "hp": 9096,
+          "hp": 99974,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -490,7 +659,7 @@
         },
         {
           "t": 4,
-          "hp": 9096,
+          "hp": 99974,
           "projectiles": 5,
           "shockwaves": 0,
           "trails": 0,
@@ -502,7 +671,7 @@
         },
         {
           "t": 5,
-          "hp": 9092,
+          "hp": 99948,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -514,7 +683,7 @@
         },
         {
           "t": 6,
-          "hp": 9092,
+          "hp": 99948,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -526,7 +695,7 @@
         },
         {
           "t": 7,
-          "hp": 9088,
+          "hp": 99922,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -538,7 +707,7 @@
         },
         {
           "t": 8,
-          "hp": 9088,
+          "hp": 99922,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -550,7 +719,7 @@
         },
         {
           "t": 9,
-          "hp": 9086,
+          "hp": 99911,
           "projectiles": 5,
           "shockwaves": 0,
           "trails": 0,
@@ -562,7 +731,7 @@
         },
         {
           "t": 10,
-          "hp": 9082,
+          "hp": 99889,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -574,7 +743,7 @@
         },
         {
           "t": 11,
-          "hp": 9080,
+          "hp": 99878,
           "projectiles": 5,
           "shockwaves": 0,
           "trails": 0,
@@ -586,7 +755,7 @@
         },
         {
           "t": 12,
-          "hp": 9076,
+          "hp": 99856,
           "projectiles": 5,
           "shockwaves": 0,
           "trails": 0,
@@ -598,7 +767,7 @@
         },
         {
           "t": 13,
-          "hp": 9074,
+          "hp": 99845,
           "projectiles": 5,
           "shockwaves": 0,
           "trails": 0,
@@ -610,7 +779,7 @@
         },
         {
           "t": 14,
-          "hp": 9070,
+          "hp": 99823,
           "projectiles": 0,
           "shockwaves": 0,
           "trails": 0,
@@ -633,14 +802,14 @@
     {
       "zone": "outskirts",
       "area": 0,
-      "questText": "🌾 THE OUTSKIRTS\n☐ Cull 12 Thornboars 0/12\n☐ Find the Old Waystone",
+      "questText": "🏯 Castle Duskmoor☐ Slay The Void Tyrant",
       "questRect": {
-        "x": 1268,
-        "y": 50,
-        "width": 160,
-        "height": 71,
-        "right": 1428,
-        "bottom": 121
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "right": 0,
+        "bottom": 0
       },
       "enemies": 13
     },

@@ -329,7 +329,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.86.0';
+const VERSION3D='1.87.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6308,8 +6308,8 @@ function drawHero3(p,t,preview){
   pushM(); mv(11,32,0);
   const w=p.weapon;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
-    const longW=(w.art==='scythe'||w.art==='great'||w.art==='hammer');
-    if(prog<0){ rotX(-0.32+Math.sin(t*2)*0.05); if(longW){ rotZ(0.62); rotY(0.28); } }  // idle: cant long hafts OUT over the shoulder so they never clip the arm/head
+    if(prog<0){ if(w.art==='scythe') rotX(-0.05+Math.sin(t*2)*0.04);   // idle: the scythe rests UPRIGHT (points up)...
+      else rotX(-0.16+Math.sin(t*2)*0.05); }                            // ...physical blades rest arm-forward so the blade points AHEAD, never into the ground
     // SWING poses — each traces the SHAPE of its actual hitbox so the motion reads true
     else if(M.shape==='thrust'){ rotX(w.art==='javelin'?-1.6:-1.45); }                  // straight forward lunge (thrust hitbox)
     else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
@@ -6322,10 +6322,14 @@ function drawHero3(p,t,preview){
   } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0);
-  // hold orientation: bows/crossbows + magic staffs/wands/scepters + the scythe rest UPRIGHT (weapon points up
-  // along the arm, not flipped blade-down); actively-swung blades keep the combat-ready down-pose.
+  // hold orientation: staffs/wands/scepters/rods + scythe + bows point UP; long hafts are gripped near their MIDDLE
+  // (offset down so they read as carried, not planted); physical blades point FORWARD at rest and only flip to the
+  // combat-ready down-base while actively swinging (the swing poses above are tuned around that base).
   const _upright = (w.cls!=='melee') || w.art==='scythe';
-  if(_upright) rotX(-0.12); else rotX(Math.PI);
+  const _tallHaft = (w.art==='scythe'||w.art==='staff'||w.art==='rod'||w.art==='scepter');
+  if(_upright){ rotX(-0.08); if(_tallHaft && p.atkTimer<=0) mv(0,-16,0); }   // point up; grip the middle of the shaft at rest
+  else if(p.atkTimer<=0) rotX(-1.5);                                          // IDLE physical blade points FORWARD, tip up-and-out — never into the ground
+  else rotX(Math.PI);                                                        // swing keeps the blade-down base the swing poses expect
   if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);
   weaponMesh(w); popM();
   popM();
@@ -6500,10 +6504,22 @@ function drawWaystation(t){
       pushM(); mv(n.x-16,hy,n.z-6); rotZ(0.6-swing*1.2); bx(0,8,0, 3,16,3,'#4a3a26'); bx(0,16,0, 9,7,7,'#20242e','#4a5568',0.4); popM();
       if(swing<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
       continue; }
-    if(n.prop==='mirror'){ drawShadow(n.x,n.z,16,0.22);
-      bx(n.x,46,n.z, 6,92,20,'#3a2f26'); bx(n.x,88,n.z, 30,10,22,'#4a3a26');                    // ornate frame + top
-      bx(n.x,48,n.z+2, 34,84,3,'#12202a','#8fd0ff',0.28+0.12*Math.sin(t*1.5));                   // reflective glass
-      bx(n.x,48,n.z+3.4, 10,70,1, '#bfe6ff','#bfe6ff',0.12);                                      // sheen
+    if(n.prop==='mirror'){ drawShadow(n.x,n.z,20,0.26);
+      // a grand gilded standing mirror; the BRIGHT silvered face sits toward the camera (+z side), the frame behind it
+      const fw=46, fh=110, bk=n.z-3, gf=n.z+9;                                                     // frame plane (back, -z) vs glass plane (front, +z toward viewer)
+      bx(n.x,fh/2,bk, fw+14,fh+10,14, '#241c14');                                                 // dark wood frame body (behind)
+      bx(n.x,fh+9,n.z, fw+22,16,20, '#6a531f','#e6c25a',0.9);                                      // ornate gilded crown
+      for(const sx2 of [-1,1]) bx(n.x+sx2*(fw*0.5+7),fh/2,n.z+6, 5,fh,7,'#7a5f28','#c9a24a',0.8);   // gilded side pillars flanking the glass
+      bx(n.x,5,n.z, fw+24,12,24, '#3a2f26','#5a4a2e',0.4);                                         // base foot
+      bx(n.x,fh/2,n.z+6, fw+7,fh+4,2, '#8a6f34','#e6c25a',0.95);                                    // gilded inner trim framing the glass
+      // the SILVERED GLASS — bright, near-opaque, cool vertical gradient (frontmost so it always reads as a mirror)
+      bx(n.x,fh*0.74,gf, fw,fh*0.34,2, '#eef5ff','#ffffff',0.98);                                  // top band (brightest)
+      bx(n.x,fh*0.46,gf, fw,fh*0.30,2, '#c4d8ee','#e6f1ff',0.98);                                  // mid band
+      bx(n.x,fh*0.20,gf, fw,fh*0.30,2, '#9fbad8','#c6ddf3',0.98);                                  // lower band (deeper toward the floor)
+      bx(n.x-fw*0.22,fh*0.5,gf+0.5, fw*0.34,fh*0.7,1, '#fff8e6','#fff',0.14);                       // warm reflected torch-glow, for depth
+      { const sh=Math.sin(t*0.55)*0.5+0.5, ssx=n.x-fw*0.5+fw*sh;                                   // a sweeping diagonal specular streak
+        pushM(); mv(ssx,fh*0.5+(sh-0.5)*22,gf+1); rotZ(0.5); bx(0,0,0, 8,fh*0.82,1, '#ffffff','#ffffff',0.32); popM(); }
+      bx(n.x,fh*0.5,gf+1.4, fw+2,fh,0.5, '#dff0ff','#ffffff',0.07);                                // faint overall glass sheen
       continue; }
     if(n.prop==='beast'){ drawShadow(n.x,n.z,20,0.26);
       bx(n.x,7,n.z, 44,14,30,'#3a2f1e','#5a4a2e',0.3);                                   // low kennel base

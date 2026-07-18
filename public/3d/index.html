@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.77.0';
+const VERSION3D='1.78.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -549,7 +549,8 @@ const MUSCREDITS=[
    tracks:['Arid Foothills','Land of the Dead','Frost Waltz','Firebrand','Ice Demon','Ancient Rite','Darkest Child','Undaunted']}
 ];
 const MUSDIR='/music/';
-const MUSVOL={hub:0.55,fanfare:0.7};                  // per-track trims where a mix sits hot
+const MUSVOL={hub:0.36,fanfare:0.5};                  // per-track trims where a mix sits hot
+const MUS_DEFAULT=0.30;                               // Phase 20: music sits UNDER the SFX now (was 0.42) — Oliver: "music way louder than sfx"
 let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
 function musicOK(){ return meta.musicOn!==false && typeof Audio!=='undefined'; }
 function musEl(key){
@@ -579,7 +580,7 @@ function musicPlay(key,opts){
   const el=musEl(key); if(!el) return;
   musCurKey=key; musCur=el;
   if(!musicOK()){ if(prev) musFade(prev,0,300,true); return; }
-  const vol=(MUSVOL[key]!=null?MUSVOL[key]:0.42)*(meta.musicVol!=null?meta.musicVol:1);
+  const vol=(MUSVOL[key]!=null?MUSVOL[key]:MUS_DEFAULT)*(meta.musicVol!=null?meta.musicVol:1);
   if(prev&&prev!==el) musFade(prev,0,opts.fade||900,true);
   el.loop=opts.loop!==false; el.volume=0;
   const p=el.play();
@@ -590,7 +591,7 @@ function musicStop(fade){ if(musCur) musFade(musCur,0,fade||600,true); musCur=nu
 function musicSting(key){                             // one-shot over the top of whatever's playing (victory fanfare)
   if(!musicOK()) return;
   let a; try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return; } a.loop=false;
-  a.volume=(MUSVOL[key]!=null?MUSVOL[key]:0.6)*(meta.musicVol!=null?meta.musicVol:1);
+  a.volume=(MUSVOL[key]!=null?MUSVOL[key]:0.45)*(meta.musicVol!=null?meta.musicVol:1);
   const p=a.play(); if(p&&p.catch) p.catch(()=>{});
   if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
 }
@@ -606,7 +607,7 @@ function musicForScene(){                             // one place decides what 
 function setMusicVol(v){
   meta.musicVol=v; meta.musicOn=v>0.001; persistGlobal();
   if(!meta.musicOn){ musicRefresh(); return; }
-  if(musCur && musCurKey && !musCur.paused){ const vol=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:0.42)*v; musFade(musCur,vol,120); }
+  if(musCur && musCurKey && !musCur.paused){ const vol=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:MUS_DEFAULT)*v; musFade(musCur,vol,120); }
   else musicRefresh();                                // was muted — bring the scene's track back at the new level
 }
 function setSfxVol(v){
@@ -632,10 +633,14 @@ function musicRefresh(){                              // called when the toggle 
   const k=musCurKey; musCurKey=null; if(k) musicPlay(k,{fade:400});
 }
 /* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
-let actx=null, master=null, noiseBuf=null;
+let actx=null, master=null, noiseBuf=null, procBus=null, fxBus=null;
 function initAudio(){ if(!actx){ try{
   actx=new (window.AudioContext||window.webkitAudioContext)();
-  master=actx.createGain(); master.gain.value=0.6*(meta.sfxVol!=null?meta.sfxVol:1); master.connect(actx.destination);
+  master=actx.createGain(); master.gain.value=0.62*(meta.sfxVol!=null?meta.sfxVol:1); master.connect(actx.destination);
+  // Phase 20: two sub-buses so the mix is BALANCED — procedural combat cues (quiet by nature)
+  // come up, sourced one-shot files (loud + wildly varied) get tamed + per-file loudness-normalized.
+  procBus=actx.createGain(); procBus.gain.value=2.2; procBus.connect(master);
+  fxBus=actx.createGain();   fxBus.gain.value=0.9;   fxBus.connect(master);
   noiseBuf=actx.createBuffer(1,actx.sampleRate,actx.sampleRate);
   const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
   loadFxFiles();
@@ -657,7 +662,7 @@ function tone(o){ // {f0,f1,dur,type,vol,a,at,detune}
   os.frequency.setValueAtTime(Math.max(20,o.f0),t);
   if(o.f1) os.frequency.exponentialRampToValueAtTime(Math.max(20,o.f1),t+o.dur);
   env(g,t,o.a||0.006,o.vol||0.07,o.dur);
-  os.connect(g); g.connect(master); os.start(t); os.stop(t+o.dur+0.03); }catch(e){}
+  os.connect(g); g.connect(procBus||master); os.start(t); os.stop(t+o.dur+0.03); }catch(e){}
 }
 function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
   if(!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
@@ -666,47 +671,58 @@ function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
   f.frequency.setValueAtTime(o.f0||1000,t);
   if(o.f1) f.frequency.exponentialRampToValueAtTime(Math.max(40,o.f1),t+o.dur);
   const g=actx.createGain(); env(g,t,o.a||0.004,o.vol||0.1,o.dur);
-  s.connect(f); f.connect(g); g.connect(master); s.start(t,Math.random()*0.5); s.stop(t+o.dur+0.03); }catch(e){}
+  s.connect(f); f.connect(g); g.connect(procBus||master); s.start(t,Math.random()*0.5); s.stop(t+o.dur+0.03); }catch(e){}
 }
 /* ---- File-based SFX (v1.59): real sourced sounds layered on the procedural engine. Decoded to
    WebAudio buffers on the first gesture, played through the same master gain so meta.sfxVol +
    soundOn apply. Loopables (footstep/heartbeat/electric/rain) get start/stop handles. ---- */
 const SFXDIR='/sfx/';
+/* Phase 20: v = PROMINENCE only (per-file loudness is auto-normalized to FX_TARGET_RMS at
+   decode, so a hot source and a quiet source now sound equally loud before this trim). Ambient
+   loops sit low; combat/UI mid; the big moments up top. Forge start/complete files SWAPPED per
+   Oliver: the metal 'forgedone' clang opens the forge, the sharpening 'forgeopen' rings on finish. */
 const FXDEF={
-  quest:{f:'fanfare-announcement-arrival',v:0.30}, levelcheer:{f:'fanfare-celebration',v:0.55},
-  footstep:{f:'footsteps-pair-soft-loopable',v:0.15,loop:true}, mobknock:{f:'bamboo-knock-loopable',v:0.22},
-  forgeopen:{f:'blade-sharpening-loopable',v:0.40}, bookflip:{f:'book-flip-page',v:0.40},
-  chestopen:{f:'box-open',v:0.50}, wallbreak:{f:'break-object-small',v:0.50},
-  click:{f:'button-press',v:0.30}, equip:{f:'cape-and-hood-drawn',v:0.42},
-  shopopen:{f:'cash-register-open-till',v:0.40}, wallslide:{f:'chair-pull-up-2',v:0.50},
-  bigreveal:{f:'clanging-pipes-loopable',v:0.26}, forgespin:{f:'coin-double-flip',v:0.40},
-  dice:{f:'dice-rolling',v:0.45}, doorslam:{f:'door-slam-heavy',v:0.26}, dooropen:{f:'doorknock-heavy',v:0.30},
-  drink:{f:'drink-2',v:0.50}, electric:{f:'fence-electric-hum-loopable',v:0.32,loop:true},
-  fireshot:{f:'fire-ignition-combustible-powder',v:0.26}, firecharge:{f:'fire-launch-jet',v:0.30},
-  fireball:{f:'fireball-launched',v:0.40}, heartbeat:{f:'heartbeat-rapid',v:0.42,loop:true},
-  frostclink:{f:'ice-clinking-in-glass',v:0.20}, bigland:{f:'jump-soft-landing',v:0.40},
-  train:{f:'lifting-double-weight',v:0.50}, bag:{f:'pickpocket-snatch-soft',v:0.40},
-  rain:{f:'rain-with-trickle-loopable',v:0.28,loop:true}, bonesdie:{f:'rocks-cliff-face-collapse',v:0.33},
-  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.40}, lever:{f:'switch-push',v:0.45},
-  // ---- batch 2 (Oliver-approved, placed per his notes) ----
-  axeswing:{f:'axeswing',v:0.34}, swordswing:{f:'swordswing',v:0.30}, spearswing:{f:'spearswing',v:0.32},
-  gruntdie:{f:'gruntdie',v:0.40}, forgedone:{f:'forgedone',v:0.5}, warskill1:{f:'warskill1',v:0.42}, warcharge:{f:'warcharge',v:0.34},
-  rustyhit:{f:'rustyhit',v:0.34}, portalopen:{f:'portalopen',v:0.5}, stabkill:{f:'stabkill',v:0.4}, heavyhit:{f:'heavyhit',v:0.34},
-  arcaneskill:{f:'arcaneskill',v:0.4}, secretget:{f:'secretget',v:0.5}, wandcharge:{f:'wandcharge',v:0.36}, wandfire:{f:'wandfire',v:0.3},
-  sell:{f:'sell',v:0.45}, lootpickup:{f:'lootpickup',v:0.42}, buy:{f:'buy',v:0.4},
-  mobvoice1:{f:'mobvoice1',v:0.36}, mobvoice2:{f:'mobvoice2',v:0.36},
-  bossroar1:{f:'bossroar1',v:0.5}, bossroar2:{f:'bossroar2',v:0.5}, bossroar3:{f:'bossroar3',v:0.5}, bossdie:{f:'bossdie',v:0.5}
+  quest:{f:'fanfare-announcement-arrival',v:0.55}, levelcheer:{f:'fanfare-celebration',v:0.6},
+  footstep:{f:'footsteps-pair-soft-loopable',v:0.30,loop:true}, mobknock:{f:'bamboo-knock-loopable',v:0.32},
+  forgeopen:{f:'blade-sharpening-loopable',v:0.5}, bookflip:{f:'book-flip-page',v:0.40},
+  chestopen:{f:'box-open',v:0.52}, wallbreak:{f:'break-object-small',v:0.5},
+  click:{f:'button-press',v:0.4}, equip:{f:'cape-and-hood-drawn',v:0.46},
+  shopopen:{f:'cash-register-open-till',v:0.46}, wallslide:{f:'chair-pull-up-2',v:0.44},
+  bigreveal:{f:'clanging-pipes-loopable',v:0.6}, forgespin:{f:'coin-double-flip',v:0.44},
+  dice:{f:'dice-rolling',v:0.46}, doorslam:{f:'door-slam-heavy',v:0.5}, dooropen:{f:'doorknock-heavy',v:0.44},
+  drink:{f:'drink-2',v:0.48}, electric:{f:'fence-electric-hum-loopable',v:0.34,loop:true},
+  fireshot:{f:'fire-ignition-combustible-powder',v:0.46}, firecharge:{f:'fire-launch-jet',v:0.46},
+  fireball:{f:'fireball-launched',v:0.5}, heartbeat:{f:'heartbeat-rapid',v:0.4,loop:true},
+  frostclink:{f:'ice-clinking-in-glass',v:0.4}, bigland:{f:'jump-soft-landing',v:0.44},
+  train:{f:'lifting-double-weight',v:0.5}, bag:{f:'pickpocket-snatch-soft',v:0.42},
+  rain:{f:'rain-with-trickle-loopable',v:0.3,loop:true}, bonesdie:{f:'rocks-cliff-face-collapse',v:0.5},
+  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.5}, lever:{f:'switch-push',v:0.46},
+  // ---- combat + events (loudness auto-normalized; v = prominence) ----
+  axeswing:{f:'axeswing',v:0.44}, swordswing:{f:'swordswing',v:0.42}, spearswing:{f:'spearswing',v:0.42},
+  gruntdie:{f:'gruntdie',v:0.48}, forgedone:{f:'forgedone',v:0.52}, warskill1:{f:'warskill1',v:0.5}, warcharge:{f:'warcharge',v:0.4},
+  rustyhit:{f:'rustyhit',v:0.44}, portalopen:{f:'portalopen',v:0.6}, stabkill:{f:'stabkill',v:0.5}, heavyhit:{f:'heavyhit',v:0.46},
+  arcaneskill:{f:'arcaneskill',v:0.5}, secretget:{f:'secretget',v:0.6}, wandcharge:{f:'wandcharge',v:0.44}, wandfire:{f:'wandfire',v:0.42},
+  sell:{f:'sell',v:0.48}, lootpickup:{f:'lootpickup',v:0.48}, buy:{f:'buy',v:0.46},
+  mobvoice1:{f:'mobvoice1',v:0.44}, mobvoice2:{f:'mobvoice2',v:0.44},
+  bossroar1:{f:'bossroar1',v:0.62}, bossroar2:{f:'bossroar2',v:0.62}, bossroar3:{f:'bossroar3',v:0.62}, bossdie:{f:'bossdie',v:0.6}
 };
 const FXBUF={}; let _fxLoaded=false;
+// measure a decoded buffer's RMS loudness (sparse sample, up to 2 channels)
+function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
+  for(let c=0;c<ch;c++){ const d=buf.getChannelData(c), step=Math.max(1,(d.length/40000)|0);
+    for(let i=0;i<d.length;i+=step){ s+=d[i]*d[i]; n++; } }
+  return Math.sqrt(s/Math.max(1,n)); }
+const FX_TARGET_RMS=0.09;                                // Phase 20: every file SFX auto-levels to this
 function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
-  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;}).catch(()=>{}); })(k); } }
+  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;
+    const rms=bufRms(buf); FXDEF[key]._norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1; }).catch(()=>{}); })(k); } }
 const _fxLoop={};
 function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
-  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(volMul==null?1:volMul);
-    s.connect(g); g.connect(master); s.start(); return {s,g}; }catch(e){ return null; } }
+  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(fxBus||master); s.start(); return {s,g}; }catch(e){ return null; } }
 function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
-  try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(volMul==null?1:volMul);
-    s.connect(g); g.connect(master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
+  try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(d._norm||1)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(fxBus||master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
 function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
 const SFX={
   // blade cutting air: airy whoosh sweeping down, faint steel sing
@@ -1785,7 +1801,7 @@ function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
   return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
 }
 function openForge(back){
-  mode='menu'; playFx('forgeopen');
+  mode='menu'; playFx('forgedone');   // Phase 20: the metal clang opens the forge (swapped with the sharpening)
   const fuseable=fuseGroups();
   const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
@@ -1862,7 +1878,7 @@ function forgeSpin(g,back){
     else { // land on the payout
       img.src=finalIcon; box.style.borderColor=nc; box.style.boxShadow='0 0 40px '+nc;
       nameEl.innerHTML=`<span style="color:${nc};font-weight:800">${ro.name}</span>`;
-      try{ SFX.god(); playFx('forgedone'); }catch(e){}
+      try{ SFX.god(); playFx('forgeopen'); }catch(e){}   // Phase 20: the sharpening ring on the finished item (swapped with the clang)
       if(!stashItem(result)){ meta.stash.push(result); persist(); }   // ensure it lands in the bag
       persist(); goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
     } };
@@ -5103,7 +5119,7 @@ function openTrainingArena(back){ mode='menu';
 function updateInteract(){
   let it=null; const p=G.p;
   if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } }
-    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:goldStash}; }   // the glint behind the Menagerie crates
+    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Menagerie crates — the Tinkerer's test bench
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Warden's Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }
@@ -5121,6 +5137,50 @@ function goldStash(){
   SFX.god(); playFx('buy'); burst(-806,30,644,'#ffd24a',22);
   addText(G.p.x,G.p.y+80,G.p.z,'+1000g','#ffd24a',true);
   toast(STASH_LINES[goldStash._n],'#ffd24a'); hudUpdate();
+}
+/* ---------------- THE TINKERER'S TEST BENCH (Phase 20) ----------------
+   The '???' behind the Menagerie crates: everything you need to test the whole game without
+   grinding — free gold + XP, a vault of EVERY weapon and armor type at any rarity, unlock-all,
+   grant-all-pets, kit-me-out, full heal, and more. Hub-only; all changes bank + persist. */
+let _cheatRar='legendary';
+function cheatBank(){ if(G&&G.p){ meta.hero=snapOf(G.p); } persist(); }
+function cheatLevels(n){ const p=G.p; for(let i=0;i<n;i++){ p.xp=(p.xpNext||50)+1; gainXp(0.0001); } cheatBank(); hudUpdate(); SFX.levelup(); playFx('levelcheer'); toast('▲ +'+n+' level'+(n>1?'s':'')+' — now Level '+p.level); }
+function cheatGold(n){ meta.gold=(meta.gold||0)+n; persist(); SFX.god(); playFx('buy'); toast('💰 +'+n+'g — '+STASH_LINES[(goldStash._n=((goldStash._n||0)+1)%STASH_LINES.length)].split('— ')[1]); hudUpdate(); }
+function cheatBagRoom(){ meta.bagSlots=Math.max(meta.bagSlots||0,120); refreshBagCap(); }
+function cheatGiveWeapons(){ cheatBagRoom(); let n=0; for(const a of ARCHEIDS){ if(a==='saber'||a==='dagger') continue; meta.stash.push({weapon:makeWeapon(a,_cheatRar)}); n++; } persist(); SFX.achieve(); playFx('lootpickup'); toast('⚔ Bagged all '+n+' weapons ('+RARITY[_cheatRar].name+')'); }
+function cheatGiveArmor(){ cheatBagRoom(); let n=0; for(const t of ARMOR_TYPE_IDS){ for(const s of SLOTIDS){ meta.stash.push({armor:makeArmor(_cheatRar,s,t)}); n++; } for(const s of TRINKETIDS){ meta.stash.push({trinket:makeTrinket(_cheatRar,s,t)}); n++; } } persist(); SFX.achieve(); playFx('lootpickup'); toast('🛡 Bagged all '+n+' armor + trinket pieces ('+RARITY[_cheatRar].name+')'); }
+function cheatKitOut(){ const p=G.p; const fam=curClass().family[0]||'sword';
+  const aid=ARCHEIDS.find(a=>ARCHES[a].art===fam&&ARCHES[a].sch!=='mag')||ARCHEIDS.find(a=>ARCHES[a].art===fam)||'sword';
+  p.weapon=makeWeapon(aid,'legendary'); for(const s of GEARSLOTS) p.gear[s]=('amulet'==s||'ring'==s)?makeTrinket('legendary',s):makeArmor('legendary',s);
+  recomputeArmor(p); p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.god(); playFx('equip'); toast('✦ Kitted out — full Legendary '+curClass().disp+' loadout equipped'); }
+function cheatUnlockClasses(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; classState(c); }); persist(); SFX.achieve(); toast('⚔️ All classes unlocked — swap at the Drillmaster'); }
+function cheatAllPets(){ meta.petOwned=PETIDS.slice(); persist(); SFX.achieve(); toast('🐾 All '+PETIDS.length+' companions granted — equip at the Beastkeeper'); }
+function cheatHeal(){ const p=G.p; p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.achieve(); toast('❤️ Full heal'); }
+function cheatRankUp(){ const cs=classState(meta.classId); cs.rank=10; cs.sub=cs.sub||(curClass().subs&&curClass().subs[0]&&curClass().subs[0].id); persist(); skillbarUpdate(); SFX.levelup(); toast('★ '+curClass().disp+' rank 10 — all skills unlocked'); }
+function cheatOpenZones(){ meta.zoneMax=ZONES.length-1; persist(); SFX.achieve(); toast('🗺 Every Gate opened'); }
+function cheatEndlessBest(v){ meta.endlessBest=Math.max(meta.endlessBest||0,v); persistGlobal(); SFX.achieve(); toast('🕳️ Abyssal best set to Floor '+v); }
+function openCheatMenu(back){
+  mode='menu';
+  const p=G&&G.p, rc=RARITY[_cheatRar].color;
+  const btn=(id,label,style)=>`<button class="bigbtn ghost" id="${id}" style="width:auto;margin:0;padding:9px 12px;font-size:13px;${style||''}">${label}</button>`;
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">🔧 The Tinkerer's Bench</p><h2 class="ovh">Test everything</h2>
+    <p class="ovsub">Your dirty little secret behind the crates. Nothing here is earned — that's the point.</p>
+    <div class="sect">Gold &amp; levels · <b style="color:#ffd24a">${meta.gold}g</b> · Lv ${p?p.level:1}</div>
+    <div class="pgrid">${btn('cGold1','💰 +1,000g')}${btn('cGold10','💰 +10,000g')}${btn('cLv1','▲ +1 Level')}${btn('cLv5','▲ +5 Levels')}${btn('cLv10','▲ +10 Levels')}${btn('cRank','★ Rank 10')}</div>
+    <div class="sect">Gear vault — rarity: <b style="color:${rc}">${RARITY[_cheatRar].name}</b></div>
+    <div class="pgrid">${btn('cRar','🎚 Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
+    <div class="sect">Unlocks &amp; conveniences</div>
+    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
+    <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
+  const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
+  wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
+  wire('cLv1',()=>{cheatLevels(1);openCheatMenu(back);}); wire('cLv5',()=>{cheatLevels(5);openCheatMenu(back);}); wire('cLv10',()=>{cheatLevels(10);openCheatMenu(back);});
+  wire('cRank',()=>{cheatRankUp();openCheatMenu(back);});
+  wire('cRar',()=>{ _cheatRar=RORDER[(RORDER.indexOf(_cheatRar)+1)%RORDER.length]; openCheatMenu(back); });
+  wire('cWeap',()=>{cheatGiveWeapons();openCheatMenu(back);}); wire('cArmor',()=>{cheatGiveArmor();openCheatMenu(back);}); wire('cKit',()=>{cheatKitOut();openCheatMenu(back);});
+  wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
+  wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
+  wire('cBack',()=>{ if(back) back(); else wsResume(); });
 }
 function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');
   const it=(G&&G.interact&&mode==='play')?G.interact:null;
@@ -6974,6 +7034,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
+  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

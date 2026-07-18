@@ -358,7 +358,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.90.0';
+const VERSION3D='1.91.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -456,67 +456,82 @@ function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold
    zone, a line when a boss reveals, and endings that vary by difficulty. */
 const STORY={
   intro:[
-    "For centuries the Abyss King slept beneath the world.",
-    "His nightmares soaked up through the rock — rotting the woods, souring the passes...",
+    "For an age the Abyss King has slept beneath the world.",
+    "When he stirs, his nightmares soak up through the rock — rotting the woods, souring the passes...",
     "...and loosening the laws that hold a body down.",
-    "The Wardens went down in shifts to keep him sleeping. None came back up.",
-    "You took the same oath. You are the only one left to keep it.",
-    "Descend. Break the cycle."
+    "Once an age, when he wakes, the blood answers: one Bladeborn, born to go down and put him under again.",
+    "The last one went deeper than any before. He did not come back. None of them ever have.",
+    "You are no one. No blade, no blood you know of, no oath. But the rot is at your door, and someone has to go.",
+    "So you will. Descend. Break the cycle."
+  ],
+  awaken:[   // the awakening beat — first time the player reaches the edge of the descent
+    "Something in you straightens its back — something that was always there, waiting for its turn.",
+    "You don't have a name for it. You don't need one yet.",
+    "Down is the only direction left. Go."
   ],
   zone:{   // first-visit card, by zone id
     outskirts:"The road ends here. Everything past it is already dreaming.",
     hollow:"The wind comes up the canyon like it's trying to leave.",
-    keep:"The order held this place. Then the order became part of it.",
+    keep:"One of your blood held this place once. Then it held him.",
     frost:"Cold this deep isn't weather. It's something refusing to move.",
     ember:"The mountain's heat is escaping. The nightmare opened a way out.",
-    abyss:"You are below where anyone was ever posted.",
-    palace:"White marble, untouched. The war never found this place. Something else kept it.",
-    castle:"The last gate. He is awake now, and he has been waiting to be."
+    abyss:"You are below where anyone was ever posted. Below where he last fell.",
+    palace:"White marble, untouched. The rot never reached here. He was saving it.",
+    castle:"The last gate. He is awake now — you woke him — and he has been waiting to be."
   },
   boss:{   // by boss stage index — one line when the health bar reveals
     2:"It was something's livestock once. Now it's the nightmare's.",
     4:"It has been watching you since the ridge.",
-    6:"He wore your oath. He got further than you have.",
+    6:"He was Bladeborn, like the one you're chasing. He got further than most. Not far enough.",
     8:"It stopped being a person somewhere around the fourth winter.",
     10:"The mountain stood up.",
-    12:"You have finally reached the sleeper. He is not asleep.",
+    12:"You have reached the sleeper. Your blood carried you here. Strike, and he wakes.",
     14:"It was carved to guard the throne. The dream taught the marble to move.",
     16:"This is what his dream wanted to be all along."
   },
+  reveal:[   // fires when Ian's Blade is completed / at the summit — the one place his name is ever spoken
+    "The sword remembers itself in your hands, and it remembers its name. And his.",
+    "His name was Ian.",
+    "He was your brother. You were the one they lost — raised with no blade, no blood you were ever told of.",
+    "The power that woke in you was never luck. It was your turn. It was always going to be you.",
+    "He went down so you would never have to. You came down anyway. Finish what he started."
+  ],
   ending:[
-    "The Void Tyrant comes apart, and the world exhales.",
-    "The stone remembers itself. Far above, a waystone catches.",
-    "But the Abyss is patient, and an oath holds only while someone lives to keep it.",
-    "You climb out. You are still the last Warden.",
-    "The cycle is broken. Cycles are rebuilt."
+    "The King comes apart, and the world exhales.",
+    "You spend it all — every age the blood ever carried, everything Ian never got to — in one blow. And the power goes out of you with him.",
+    "No child will ever again be born marked to die in the dark. There is nothing left to be born into. That was the cost. That was the point.",
+    "Far above, a waystone catches light. The dark below is not sleeping now. It is empty.",
+    "Every one who ever fell at a post is let go at last — all your blood, and Ian last of all. They rest.",
+    "You climb out. You are the last of the Bladeborn, and now only a person, and that is a mercy.",
+    "You carry his name and his sword home. The cycle is broken. It stays broken."
   ],
   endLadder:{
-    hardcore:"One life. One descent. No shift to relieve you. The order would have called that the proper way.",
-    hitless:"Untouched, start to finish — the way the Wardens swore it could be done and never once managed. The oath is kept."
+    hardcore:"One life. One descent. No age to relieve you, no blood to follow. The line would have called that the proper way.",
+    hitless:"Untouched, start to finish — the way the Bladeborn always swore it could be done and never once managed. Ian would have wanted to see it."
   },
-  npc:{  // the Warden's Shade: a dead predecessor still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
-    outskirts:{lore:["I held this road for eleven years. Now I only haunt it.","The dreaming spreads through everything that lives here — cut it back, or it follows you down."],
+  npc:{  // the Shade: a Bladeborn of an age past, still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
+    outskirts:{lore:["I held this road for eleven years. My blood was the same as yours — that's why I could.","The dreaming spreads through everything that lives here — cut it back, or it follows you down."],
       why:"Thin the grunts and light the old waystone. Every marker you wake weakens his reach up here.",
       boss:"The Brute at the wood's end was a farmer's ox. Do not let what it has become reach you."},
-    hollow:{lore:["The wind you hear is the canyon trying to empty itself.","We posted watchers on the rims. The rims are why you'll live or die here."],
-      why:"The chargers breed in the nests — burn through them. The bones on the rims were our watchers. Bring them down for burial.",
-      boss:"The Marksman was our best archer. She still holds her post at the head of the pass. She will not miss twice."},
-    keep:{lore:["This keep was ours. The order that failed you built its failures a prison here.","What walks these halls wears armor you'd recognize."],
-      why:"Destroy the risen and recover the sigils — each one is an oath the dead are still bound by.",
-      boss:"The thing in the deep cell was a Warden. He descended further than any of us. Kill him like you'd want to be killed."},
-    frost:{lore:["Cold this old isn't weather. It's the dream refusing to let anything move on.","We lost the Frostwatch in a single night."],
-      why:"The frostlings carry cores of the old cold. Shatter them, and find the cairn we never finished raising.",
+    hollow:{lore:["The wind you hear is the canyon trying to empty itself.","I posted watchers on the rims in my age. The rims are still why you'll live or die here."],
+      why:"The chargers breed in the nests — burn through them. The bones on the rims were my watchers. Bring them down for burial.",
+      boss:"The Marksman was my best archer. She still holds her post at the head of the pass. She will not miss twice."},
+    keep:{lore:["This keep was held by one of us, long before you. The dark made his failure a prison.","What walks these halls wears armor you'll wear too, if you fall."],
+      why:"Destroy the risen and recover the sigils — each one is an oath one of our blood is still bound by.",
+      boss:"The thing in the deep cell was Bladeborn. He went further than any of us in his age. Kill him the way you'd want to be killed."},
+    frost:{lore:["Cold this old isn't weather. It's the dream refusing to let anything move on.","A whole watch froze here in a single night. I couldn't reach them in time."],
+      why:"The frostlings carry cores of the old cold. Shatter them, and finish the cairn I never raised.",
       boss:"The Sorcerer came here to study the ice. Around the fourth winter, it started studying him back."},
     ember:{lore:["The mountain's furnace should have died with the mountain. The nightmare keeps it fed.","Everything down here wants to be lava when it grows up."],
       why:"The emberlings shed shards of the core-fire. Quench them, and mark the ash altar so the way stays open behind you.",
       boss:"The Colossus is not guarding the deep. It IS the deep. Bring it down joint by joint."},
-    abyss:{lore:["You are below every post we ever held. Even my death doesn't reach much deeper.","The dark here isn't empty. It's attentive."],
+    abyss:{lore:["You are below every post any of us ever held. Even my death doesn't reach much deeper.","The last one — the one you've been following — fell past even this. The dark here isn't empty. It's attentive."],
       why:"Banish what you can and take back the splinters — every shard of the rift you carry out is one he can't dream through.",
-      boss:"Past this point sleeps the King. He has been listening to you descend the whole way."},
-    palace:{lore:["I never held this post. None of us did. The Sunspire kept itself.","The marble here remembers being carved. Do not turn your back on any of it."],
-      why:"Put down the risen guard and gather the gilded relics — the throne was hoarding them, and each one is a piece of the way forward.",
+      boss:"Past this point sleeps the King. He has been listening to you descend the whole way. Wake him, and there is no going back — only up, and through."},
+    palace:{lore:["None of us was ever posted here. The Sunspire kept itself — he kept it, for the day he woke.","The marble here remembers being carved. Do not turn your back on any of it."],
+      why:"Put down the risen guard and gather the gilded relics — the throne was hoarding them, and each is a piece of the way up.",
       boss:"The Colossus is the throne's own statue. It has had centuries to practice standing up. End it before it finishes."},
-    castle:{lore:["This is the last gate, Warden. Past the towers there is only him.","There's nothing left to teach you. Whatever you've become on the way down — be exactly that."],
+    castle:{lore:["This is the last gate. Past the towers there is only him — and only you, of all our blood, ever got this far.","There's nothing left to teach you. Whatever you've become on the way down — be exactly that."],
       why:"Clear the towers as you climb. Every shadeling you cut is one less thing at your back when you reach the top.",
       boss:"Break the cycle at the summit. Or become the next thing I have to warn somebody about."}
   }
@@ -550,7 +565,7 @@ function openShade(){
   G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
   mode='menu'; SFX.magic('void');
   const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No errands here. Only the fight ahead.</div>';
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.2em">THE WARDEN'S SHADE</p>
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.2em">A SHADE OF THE BLADEBORN</p>
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:6px 0 10px">
       ${N.lore.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
       <p style="margin:0 0 8px">"${N.why}"</p>
@@ -868,7 +883,7 @@ const RORDER=['common','uncommon','rare','epic','legendary'];
 const PETS={
   emberpup:  {name:'Ember Pup',   arch:'attacker',style:'melee', rarity:'common',   price:220,  dmg:5, cd:1.8, range:240, body:'#e0794a', accent:'#ffb060', flavor:'A stray from the Emberdeep. Bites what bites you.'},
   stonewhelp:{name:'Stone Whelp', arch:'attacker',style:'melee', rarity:'common',   price:260,  dmg:8, cd:2.3, range:210, body:'#8a8f9e', accent:'#c7ccd6', flavor:'Slow, heavy, loyal. Headbutts like a landslide.'},
-  wisp:      {name:'Pale Wisp',   arch:'attacker',style:'ranged',rarity:'uncommon', price:620,  dmg:5, cd:1.5, range:520, body:'#9fe0ff', accent:'#e6faff', flavor:"A fallen Warden's lantern-light, still on watch."},
+  wisp:      {name:'Pale Wisp',   arch:'attacker',style:'ranged',rarity:'uncommon', price:620,  dmg:5, cd:1.5, range:520, body:'#9fe0ff', accent:'#e6faff', flavor:"A fallen Bladeborn's lantern-light, still on watch."},
   mender:    {name:'Mending Sprite',arch:'healer',              rarity:'uncommon', price:760,  heal:4, cd:3.4,          body:'#7de08a', accent:'#c8ffd4', flavor:'It cannot fight. It only refuses to let you fall.'},
   coinsprite:{name:'Coin Sprite', arch:'utility',               rarity:'rare',     price:940,  pull:220,               body:'#ffd24a', accent:'#fff2b0', flavor:'Greedy, but it shares. Drags the gold to you.'},
   gravewraith:{name:'Grave Wraith',arch:'attacker',style:'ranged',rarity:'rare',   price:1500, dmg:11, cd:1.7, range:560, body:'#b06bff', accent:'#e0b0ff', flavor:'It hungers with you. Its bolts find the throat.'}
@@ -1213,7 +1228,7 @@ const ACHIEVEMENTS=[
   {id:'deadeye',name:'Deadeye',desc:'Defeat a boss with a ranged weapon',icon:'➶',skin:'shadow',check:m=>m.rangedBossKills>=1},
   {id:'slayer',name:'Slayer',desc:'Defeat 150 enemies total',icon:'⚑',skin:'crimson',check:m=>m.totalKills>=150},
   {id:'kingslayer',name:'Kingslayer',desc:'Defeat the Abyss King',icon:'♛',skin:'abyss',check:m=>m.kingKills>=1},
-  {id:'worldsend',name:"World's End",desc:'Defeat the Void Tyrant',icon:'✸',skin:'void',check:m=>m.tyrantKills>=1},
+  {id:'worldsend',name:"World's End",desc:'End the Abyss King, Awakened, at the summit',icon:'✸',skin:'void',check:m=>m.tyrantKills>=1},
   {id:'ascended',name:'Ascended',desc:'Reach Floor 12 of the Abyssal Descent — the deeper you fall, the higher you rise',icon:'⬢',skin:'celestial',check:m=>(m.endlessBest||0)>=12}
 ];
 function skinUnlockHint(id){ if(id==='god') return '???'; const a=ACHIEVEMENTS.find(x=>x.skin===id); return a?a.desc:'Locked'; }
@@ -1244,7 +1259,7 @@ const STAGES=[
   {name:'Hollow Pass',theme:'canyon',sky:[0.14,0.12,0.09],ground:'#352a1e',aw:820,ad:540,grunts:5,flyers:2,mix:{sparkling:3},type:'normal'},
   {name:'Hollow Marksman',theme:'canyon',sky:[0.12,0.10,0.07],ground:'#312718',aw:760,ad:540,grunts:2,flyers:2,type:'miniboss',boss:'archer'},
   {name:'Ruined Keep',theme:'ruins',sky:[0.11,0.09,0.19],ground:'#2a2440',aw:840,ad:560,grunts:5,flyers:3,mix:{shadeling:2,toxling:2},type:'normal'},
-  {name:'The Warden',theme:'dungeon',sky:[0.16,0.11,0.17],ground:'#3a2440',aw:720,ad:520,grunts:3,flyers:2,type:'miniboss',boss:'warden'},
+  {name:'The Fallen',theme:'dungeon',sky:[0.16,0.11,0.17],ground:'#3a2440',aw:720,ad:520,grunts:3,flyers:2,type:'miniboss',boss:'warden'},
   {name:'Frostfell',theme:'frost',sky:[0.08,0.13,0.17],ground:'#243240',aw:820,ad:560,grunts:3,flyers:3,mix:{frostling:5},type:'normal'},
   {name:'Frost Sorcerer',theme:'frost',sky:[0.06,0.13,0.17],ground:'#1e3340',aw:760,ad:540,grunts:2,flyers:2,mix:{frostling:2},type:'miniboss',boss:'sorcerer'},
   {name:'Emberdeep',theme:'volcano',sky:[0.16,0.08,0.06],ground:'#3a1c14',aw:820,ad:560,grunts:3,flyers:2,mix:{emberling:5},type:'normal'},
@@ -1254,7 +1269,7 @@ const STAGES=[
   {name:'The Sunspire Palace',theme:'marble',sky:[0.17,0.18,0.24],ground:'#565b6c',aw:840,ad:560,grunts:4,flyers:3,mix:{bones:4},type:'normal'},        // 13
   {name:'The Marble Colossus',theme:'marble',sky:[0.16,0.17,0.24],ground:'#525768',aw:780,ad:560,grunts:2,flyers:1,type:'miniboss',boss:'colossus'},     // 14
   {name:'Castle Duskmoor',theme:'apex',sky:[0.06,0.04,0.10],ground:'#1c1220',aw:860,ad:580,grunts:5,flyers:3,mix:{shadeling:4,bones:3},type:'normal'},    // 15
-  {name:'The Void Tyrant',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}                    // 16 (final)
+  {name:'The Abyss King, Awakened',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}                    // 16 (final)
 ];
 STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); // roomier arenas (v1.1)
 
@@ -1278,7 +1293,7 @@ const ZONES=[
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
-    boss:{stage:6,name:'The Warden',mus:'boss_warden'}},
+    boss:{stage:6,name:'The Fallen',mus:'boss_warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:12,d:'Crack 12 Frost-Shells'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
@@ -1302,7 +1317,7 @@ const ZONES=[
   {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
     areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
            {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'royalarcanist',n:14,d:'Silence 14 Royal Arcanists'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
-    boss:{stage:16,name:'The Void Tyrant',mus:'apex_darkdescent'}}
+    boss:{stage:16,name:'The Abyss King, Awakened',mus:'apex_darkdescent'}}
 ];
 const TIERBAND=[1,1,2,2,3,3,4,4];                               // max rarity INDEX (0=common..4=legendary) by zone tier (8 tiers now)
 /* Signature hazards: one per zone, so each zone PLAYS different, not just looks different. */
@@ -1484,12 +1499,12 @@ const THEMEMOBS={
 const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'arcane',badlands:'fire',marble:'holy'};
 const _ENEMY_END={
   brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
-  warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE WARDEN'},
+  warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE FALLEN'},   // a risen Bladeborn of an age past (type key kept 'warden' for save/music compat)
   archer:{hp:300,dmg:16,speed:54,r:27,h:80,xp:230,color:'#a7b06a',kind:'boss',boss:true,ranged:true,kite:true,label:'HOLLOW MARKSMAN',shot:{count:3,spread:0.10,speed:560,size:5,color:'#e6d28a',shape:'arrow'},shootCd:2.0},
   sorcerer:{hp:330,dmg:18,speed:62,r:27,h:80,xp:250,color:'#6aa0d0',kind:'boss',boss:true,ranged:true,kite:true,label:'FROST SORCERER',shot:{count:3,spread:0.20,speed:430,size:8,color:'#7fd6ff',shape:'orb',el:'ice',glow:1},shootCd:2.1},
   colossus:{hp:560,dmg:24,speed:40,r:39,h:104,xp:380,color:'#d06a3a',kind:'boss',boss:true,ranged:true,label:'EMBER COLOSSUS',shot:{count:1,spread:0,speed:380,size:13,color:'#ff7a3a',shape:'orb',el:'fire',glow:1,gravity:430},shootCd:2.6},
   king:{hp:680,dmg:26,speed:50,r:39,h:104,xp:600,color:'#b06bff',kind:'boss',boss:true,label:'ABYSS KING'},
-  tyrant:{hp:900,dmg:28,speed:52,r:39,h:104,xp:800,color:'#8a4fd0',kind:'boss',boss:true,ranged:true,label:'VOID TYRANT',shot:{count:5,spread:0.16,speed:420,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1},shootCd:2.4}
+  tyrant:{hp:900,dmg:28,speed:52,r:39,h:104,xp:800,color:'#8a4fd0',kind:'boss',boss:true,ranged:true,label:'THE ABYSS KING, AWAKENED',shot:{count:5,spread:0.16,speed:420,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1},shootCd:2.4}   // the final boss IS the Abyss King, awake (type key kept 'tyrant' for save/music compat)
 };
 Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
 /* ============================================================
@@ -1823,7 +1838,7 @@ function openBag(back){
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Warden's Pack</p><h2 class="ovh">Bag</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <button class="bigbtn ghost" id="sortBtn" style="padding:6px 10px;font-size:12px">Sort: ${SORTS[_bagSort]}</button>
     <div class="achlist" style="max-height:min(50vh,360px)">${rows}</div>
@@ -2022,9 +2037,9 @@ function startTrial(cid,fromZone){
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function showTutorial(cid){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Welcome, Warden</p><h2 class="ovh">The Proving Chamber</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The blood is awake in you</p><h2 class="ovh">The Proving Chamber</h2>
     <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
-      <p style="color:#e6d2ff">Before the order lets a Warden descend, it sends them here — a sealed proving chamber beneath the keep. Survive it and the class is yours. Fail and no one below will ever know your name.</p>
+      <p style="color:#e6d2ff">Before you make your Bladefall, what woke in you has to be proven. This sealed chamber is where the blood tests its own. Survive it and the way down is yours. Fail and no one below will ever know your name.</p>
       <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
       <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
       <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
@@ -5450,7 +5465,7 @@ function updateInteract(){
   let it=null; const p=G.p;
   if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:()=>openNpcTalk(n)}; } }
     if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Menagerie crates — the Tinkerer's test bench
-  else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Warden's Shade",act:()=>openShade()}; }
+  else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }

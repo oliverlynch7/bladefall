@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.69.0';
+const VERSION3D='1.70.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2455,27 +2455,61 @@ const SCAPES={
     scapeFind(ctx, 0,-1590,96);
     finishScape(ctx,{sx:0,sz:190,sy:0, gx:0,gz:-1610, decoCol:MARBLE,decoTheme:'marble',decoTall:240});
   },
-  /* CASTLE DUSKMOOR — the final level: enter the gatehouse courtyard, then ASCEND the tower tiers
-     (each a stair-climb) to the throne room at the top. Dark, torchlit, the hardest zone. */
-  castle(ctx){ const {rnd,mkMonster}=ctx; const STONE='#2c2e38';
-    const gate=vseg(0,0,620,460); G.rooms.push({x:0,z:0,w:620,d:460,monsters:[],encounter:false,cleared:true});
-    // the ascent: rising tower tiers, each reached by a stair-climb; the throne room is the top
-    let cx=0, cz=-500, cy=0; const tiers=[];
-    for(let k=1;k<=4;k++){ cy+=110; const tw=540-k*24, td=360;
-      climbRun(cx, cz+td/2+130, cy-110, cx, cz+td/2-10, cy, 82);
-      const tier=vplat(cx,cz,cy,tw,td,{terrace:true,checkpoint:true}); G.rooms.push({x:cx,z:cz,w:tw,d:td,y:cy,monsters:[],encounter:false,cleared:true}); tiers.push({x:cx,z:cz,y:cy});
-      vcol(cx-tw/2+30,cz,38,38,cy+64); vcol(cx+tw/2-30,cz,38,38,cy+64);
-      G.deco.push({x:cx-tw/2+30,z:cz,y0:cy+64,w:46,h:26,c:'#6a2020',theme:'apex'}); G.deco.push({x:cx+tw/2-30,z:cz,y0:cy+64,w:46,h:26,c:'#6a2020',theme:'apex'});   // dark banners
-      vtorch(cx-tw/2+40,cz,rnd); vtorch(cx+tw/2-40,cz,rnd);
-      cz-=td+180;
-    }
-    const top=tiers[tiers.length-1];
-    G.deco.push({x:top.x,z:top.z-40,y0:top.y,w:110,h:100,c:'#3a1420',theme:'apex'});   // the dark throne
-    mkMonster('shadeling',-130,-70,gate); mkMonster('shadeling',130,-70,gate); mkMonster('bones',0,-220,gate);
-    scapeKill(ctx,[{x:-150,z:-70,room:gate},{x:150,z:-220,room:gate}]);         // the King's guard hold the ground courtyard
-    scapeFind(ctx, top.x, top.z-70, top.y);                                     // the throne room at the top of the ascent
-    scapeSecret(ctx, gate.x-gate.w/2+40, gate.z-gate.d/2+40, 0);
-    finishScape(ctx,{sx:0,sz:gate.d/2-50,sy:0, gx:top.x,gz:top.z, decoCol:STONE,decoTheme:'apex',decoTall:300});
+  /* CASTLE DUSKMOOR (Phase 17 deep-dive) — the final SIEGE ASCENT: through THE BREACH in
+     the outer wall -> the Courtyard War (siege wreckage, murder-hole fire) -> a FORK: the
+     RAMPART RUN (climb the west wall and walk its crenellated top — above the fire) vs
+     the vented ground road below -> the BROKEN TOWER, a spiral of hanging steps around
+     its core -> THE LAST BRIDGE, two swaying spans at the sky -> the Keep Door and the
+     throne room, with everything you climbed falling away behind you. */
+  castle(ctx){ const {rnd,mkMonster}=ctx; const STONE='#2c2e38', DK2='#191b24', BLOOD='#6a2040';
+    // ── 1) THE BREACH: the outer wall is down — you enter through the wound ──
+    const breach=vseg(0,0,660,440); G.rooms.push({x:0,z:0,w:660,d:440,monsters:[],encounter:false,cleared:true});
+    G.walls.push({x:-220,z:-260,w:280,d:36,h:150}); G.walls.push({x:250,z:-260,w:240,d:36,h:130});   // the broken curtain wall — the gap is the way
+    G.deco.push({x:-220,z:-260,y0:150,w:290,h:14,d:42,c:DK2}); G.deco.push({x:250,z:-260,y0:130,w:250,h:14,d:42,c:DK2});
+    for(const rb of [[-40,-250],[90,-270],[30,-220]]) vcol(rb[0],rb[1],26+rnd()*18,26+rnd()*18,20+rnd()*30);   // rubble choking the gap
+    G.deco.push({x:40,z:-160,y0:0,w:150,h:12,d:90,c:tint(STONE,'#000',0.3)});                        // the fallen gate, face-down
+    vtorch(-260,120,rnd); vtorch(260,120,rnd);
+    vseg(30,-250,240,120);                                                                            // through the wound
+    // ── 2) THE COURTYARD WAR: the siege never ended ──
+    const yard=vseg(0,-560,760,560); G.rooms.push({x:0,z:-560,w:760,d:560,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-170,z:-460,y0:14,w:70,h:26,d:44,c:'#3a2c1c'}); G.deco.push({x:-140,z:-440,y0:0,w:14,h:14,d:14,c:DK2}); G.deco.push({x:-200,z:-480,y0:0,w:14,h:14,d:14,c:DK2});   // a burned cart
+    G.deco.push({x:120,z:-620,y0:0,w:90,h:1.2,d:90,c:'#12070c'}); G.deco.push({x:-240,z:-700,y0:0,w:70,h:1.2,d:70,c:'#12070c'});   // scorch rings
+    for(const rb of [[280,-420],[-320,-520],[60,-780]]) vcol(rb[0],rb[1],30+rnd()*20,30+rnd()*20,26+rnd()*40);
+    for(const bz of [[-300,-380],[300,-720]]){ vcol(bz[0],bz[1],18,18,40); G.deco.push({x:bz[0],z:bz[1],y0:40,w:24,h:12,d:24,c:'#ff9a4a'}); }   // war braziers still lit
+    vtorch(-350,-560,rnd); vtorch(350,-560,rnd);
+    // ── 3) THE FORK: the rampart run above, or the vented road below ──
+    climbRun(-300,-750,0, -390,-870,150, 64);
+    G.walls.push({x:-420,z:-1150,w:70,d:520,h:150,stand:true});                                       // the west wall's crenellated top — a walk above the fire
+    for(let k=0;k<6;k++) G.deco.push({x:-450,z:-930-k*88,y0:150,w:18,h:20,d:18,c:DK2});
+    const road=vseg(180,-1150,260,560); G.rooms.push({x:180,z:-1150,w:260,d:560,monsters:[],encounter:false,cleared:true});   // the low road — the murder-holes breathe on it
+    // ── 4) TOWER BASE: the routes rejoin ──
+    const base=vseg(-120,-1560,520,260); G.rooms.push({x:-120,z:-1560,w:520,d:260,monsters:[],encounter:false,cleared:true});
+    climbRun(-420,-1430,150, -300,-1500,0, 64);
+    // ── 5) THE BROKEN TOWER: a spiral of hanging steps around the core ──
+    vcol(-120,-1810,140,140,420);
+    for(let k=0;k<8;k++){ const a=k*0.85; vplat(-120+Math.cos(a)*150,-1810+Math.sin(a)*150,40+k*44,86,86,{pillar:true}); }
+    const deck=vplat(-120,-1810,392,300,300,{terrace:true,checkpoint:true});
+    for(const s2 of [[-1,-1],[1,1]]) G.deco.push({x:-120+s2[0]*120,z:-1810+s2[1]*120,y0:392,w:20,h:26,d:20,c:DK2});
+    // ── 6) THE LAST BRIDGE: two swaying spans at the sky -> THE KEEP DOOR ──
+    G.movers.push({x0:-120,z:-2040,w:110,d:90,h:392,amp:30,sp:0.95,ph:rnd()*6.28,x:-120,px:-120});
+    G.movers.push({x0:-120,z:-2170,w:110,d:90,h:392,amp:34,sp:1.2,ph:rnd()*6.28,x:-120,px:-120});
+    const keep=vplat(-120,-2320,392,440,340,{terrace:true,checkpoint:true});
+    for(const px of [-320,80]){ vcol(px,-2260,30,30,470); G.deco.push({x:px,z:-2260,y0:470,w:38,h:22,d:38,c:DK2}); G.deco.push({x:px,z:-2260,y0:404,w:9,h:66,d:30,c:BLOOD}); }   // banner pylons at the door
+    G.deco.push({x:-120,z:-2400,y0:392,w:150,h:14,d:100,c:DK2});
+    G.deco.push({x:-120,z:-2420,y0:406,w:96,h:64,d:40,c:'#3a1420'}); G.deco.push({x:-120,z:-2432,y0:470,w:110,h:36,d:14,c:'#241431'});   // the dark throne, waiting
+    G.deco.push({x:-120,z:-2510,y0:392,w:480,h:200,d:40,c:DK2});                                       // the keep face behind it
+    for(const wx of [-260,-120,20]) G.deco.push({x:wx,z:-2488,y0:492,w:26,h:40,d:8,c:BLOOD});          // three windows burning violet-red
+    G.deco.push({x:-120,z:-2320,y0:620,w:660,h:8,d:20,c:'#8a3aff'});                                   // the void, banded across the sky
+    for(let k=0;k<4;k++) G.deco.push({x:(rnd()*2-1)*260,z:-560+(rnd()*2-1)*200,w:20+rnd()*20,h:30+rnd()*44,c:STONE,theme:'apex'});   // corruption breaking through the yard
+    // ── mobs: the King's guard hold every step of the way ──
+    mkMonster('shadeling',-140,-80,breach); mkMonster('shadeling',140,-80,breach);
+    mkMonster('bones',-170,-560,null); mkMonster('bones',180,-1000,null); mkMonster('shadeling',180,-1300,null);
+    { const cs=mkMonster('caster',-420,-1100,null); cs.y=150; cs.sx=cs.x; cs.sz=cs.z; }               // a warlock walks the rampart
+    { const fl=mkMonster('sparkling',-120,-2100,null); fl.y=440; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:160,z:60},{x:-180,z:-560},{x:180,z:-1150}]);                                    // guard dens: breach, courtyard, the low road
+    scapeFind(ctx, -120,-2400,392);                                                                    // the Throne Room, at the very top
+    finishScape(ctx,{sx:0,sz:170,sy:0, gx:-120,gz:-2410, decoCol:STONE,decoTheme:'apex',decoTall:320});
   },
 };
 function STONE_C(){ return '#6b6b73'; }

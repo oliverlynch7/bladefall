@@ -369,6 +369,12 @@ if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
 if(!Array.isArray(meta.unlockedSkins)) meta.unlockedSkins=['knight'];
 if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
+// DEV AUTO-MUTE: keep test builds silent while Oliver plays the LIVE game. localhost/127.0.0.1
+// (a different origin, so its own localStorage) or an explicit ?mute=1 forces sound+music off.
+(function(){ try{
+  const h=(location.hostname||''), muted=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(h) || /[?&]mute=1\b/.test(location.search);
+  if(muted){ meta.soundOn=false; meta.musicOn=false; }
+}catch(e){} })();
 function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
 function persist(){ persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }

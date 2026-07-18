@@ -24,7 +24,9 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     touch-action:none;overscroll-behavior:none;position:fixed;width:100%;}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block;}
-  #hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 8px) 12px 0;pointer-events:none;z-index:5;}
+  #hud{position:absolute;left:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 0 0 12px;pointer-events:none;z-index:5;width:min(320px,74vw);}
+  .hudpanel{background:linear-gradient(158deg,rgba(18,20,28,.74),rgba(9,10,15,.5));border:1px solid var(--line);border-radius:13px;
+    padding:8px 12px 9px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);}
   .barwrap{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
   .barlabel{font-size:10px;font-weight:800;letter-spacing:.12em;width:26px;color:var(--muted);}
   .bar{flex:1;height:12px;background:#0006;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
@@ -34,7 +36,7 @@
   #clsfill{background:linear-gradient(90deg,#c98cff,#e8a33d);}
   .barlabel{transition:none;} #xplabel,#clslabel{color:var(--ink);opacity:.9;}
   .barnum{font-size:8.5px;font-weight:700;color:var(--muted);min-width:38px;text-align:right;font-variant-numeric:tabular-nums;}
-  #hud .meta{display:flex;justify-content:space-between;align-items:center;margin-top:2px;}
+  #hud .meta{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;}
   #hud .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
   #lvlbadge{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--amber);background:var(--amber-dim);padding:3px 8px;border-radius:999px;}
   #weapontag{font-size:11px;font-weight:700;color:var(--ink);opacity:.95;}
@@ -138,6 +140,12 @@
   .card{width:100%;max-width:392px;background:linear-gradient(178deg,#171921 0%,#111219 46%,#0d0e14 100%);
     border:1px solid #262a36;border-radius:18px;padding:22px 20px 18px;position:relative;
     box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);}
+  /* desktop: use the real estate — roomier cards + taller, less-cramped lists */
+  @media (min-width:840px) and (pointer:fine){
+    .card{max-width:600px;padding:26px 30px 22px;}
+    .achlist{max-height:min(66vh,600px)!important;}
+    .vsrow{font-size:15.5px;} .gearrow{padding:9px 12px;}
+  }
   .card::before{content:'';position:absolute;top:0;left:14%;right:14%;height:2px;border-radius:2px;
     background:linear-gradient(90deg,transparent,var(--amber) 30%,#f7d79a 50%,var(--amber) 70%,transparent);opacity:.9;}
   .title{font-size:clamp(32px,10vw,50px);font-weight:900;letter-spacing:.04em;margin:0;background:linear-gradient(180deg,#f7d79a,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 4px 24px rgba(232,163,61,.25);}
@@ -229,14 +237,14 @@
 </head>
 <body>
 <canvas id="gl"></canvas>
-<div id="hud" class="hide">
+<div id="hud" class="hide"><div class="hudpanel">
+  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
   <div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div></div>
   <div class="barwrap"><span class="barlabel" id="xplabel">LV 1</span><div class="bar"><i id="xpfill"></i></div><span class="barnum" id="xpnum"></span></div>
   <div class="barwrap"><span class="barlabel" id="clslabel">⚔️ 1</span><div class="bar" style="height:9px"><i id="clsfill"></i></div><span class="barnum" id="clsnum"></span></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
-  <div class="barwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0g</span><span id="stagetag">Stage 1</span></div></div>
-</div>
+  <div class="barwrap" style="margin-bottom:0"><span class="barlabel" style="font-size:8.5px">PATH</span><div class="bar" style="height:5px"><i id="progfill" style="background:#8b8f9a"></i></div></div>
+</div></div>
 <div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
 <div id="bosshpwrap"><div id="bossname">Boss</div><div id="bosshp"><i></i></div></div>
@@ -270,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.46.0';
+const VERSION3D='1.47.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3457,7 +3465,13 @@ function winScreen(bonus,D){
 const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
 function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
   if(v){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract'); if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); } }
-function showOverlayHTML(html){ ovcard.innerHTML=html; showOverlay(true); fixSliders(); }
+function showOverlayHTML(html){
+  // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
+  const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
+  ovcard.innerHTML=html; showOverlay(true); fixSliders();
+  const na=ovcard.querySelector('.achlist'); if(na&&psc) na.scrollTop=psc;
+  if(pov) overlay.scrollTop=pov;
+}
 /* body has touch-action:none (the joystick needs it) — which silently kills native
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
    we compute the value from the drag ourselves and fire 'input' like the real thing. */
@@ -3843,13 +3857,13 @@ function openShop(back){
   const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
     return `<div class="gearrow" style="--spine:${RARITY[rid].color}"><img class="bagav" src="${itemAv(w)}" alt="">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${RARITY[rid].color}">${w.name}</div>
+      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name} <span style="opacity:.5;font-size:11px">— compare ›</span></div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
       <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
   // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
   const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
   const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${elementColor('void')}">${vs.name}</div>
+      <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.5;font-size:11px">— compare ›</span></div>
         <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
       <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${vsCost}g</button></div>`:'';
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
@@ -3867,7 +3881,35 @@ function openShop(back){
     const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
     if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
     SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
+  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe';
+    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid), cost=isVS?2200:shopWeapCost(rid); shopCompare(w,cost,back); });
   document.getElementById('backBtn').onclick=back;
+}
+// full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
+function shopCompare(w,cost,back){
+  mode='menu'; const cur=(meta.hero&&meta.hero.weapon)?meta.hero.weapon:null, f=n=>Math.round(n*100)/100;
+  const row=(label,a,b,better)=>{ if(a==null) return `<div class="vsrow"><span>${label}</span><b>${f(b)}</b></div>`;
+    const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
+    return `<div class="vsrow"><span>${label}</span><span><b>${f(a)}</b> → <b class="${cls}">${f(b)}${arr}</b></span></div>`; };
+  const rA=cur?(cur.cls==='ranged'?((cur.proj&&cur.proj.range)||0):(cur.range||0)):null, rB=w.cls==='ranged'?(w.proj.range||0):(w.range||0);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${RARITY[w.rarity].color};letter-spacing:.16em">${RARITY[w.rarity].name.toUpperCase()} · ${(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee')}</p>
+    <h2 class="ovh" style="color:${RARITY[w.rarity].color}">${w.name}</h2>
+    <img class="itemav" src="${itemAv(w)}" alt="">
+    <p class="hint" style="margin:-6px 0 8px">vs your <b>${cur?cur.name:'—'}</b></p>
+    <div class="statgrid">
+      ${row('Damage',cur?cur.dmg:null,w.dmg)}
+      ${row('Range',cur?rA:null,rB)}
+      ${row('Attack speed',cur?cur.cd:null,w.cd,'low')}
+      ${row('Knockback',cur?cur.kb:null,w.kb)}
+      <div class="vsrow"><span>Element</span><b style="color:${elementColor(w.el)||'#cfd6df'};text-transform:capitalize">${w.el||'Neutral'}</b></div>
+      ${row('Lifesteal %',cur?(cur.lifesteal*100):null,(w.lifesteal||0)*100)}
+    </div>
+    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">Buy · ${cost}g</button>
+    <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
+  document.getElementById('buyC').onclick=()=>{ if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
+    SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); };
+  document.getElementById('backC').onclick=()=>openShop(back);
 }
 const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];
 function registerCheatTap(id){

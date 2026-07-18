@@ -81,16 +81,15 @@ self-contained work session. Work top to bottom.
   payout sounds. Verified: 2 Rare melee weapons → a random Epic melee weapon in the bag.)*
 - [x] **Gear comparison arrows:** *(▲ green / ▼ red on each changed stat in the weapon + armor loot popups.)*
 
-## Phase 5 — UI / HUD overhaul (desktop-first)
-- [ ] **Shop compare:** when viewing a shop weapon, show your CURRENT weapon's **full stats
-  (all of them) side-by-side** for easy comparison.
-- [ ] **Use the desktop screen real estate:** redesign the shop and all similar menus to be
-  spacious and readable — no cramped little scrolling sections. Prettier, easier to use, plus
-  any general improvements that help.
-- [ ] **Scroll position is preserved on click** — menus must NOT jump back to the top when you
-  click (e.g. leveling stats should stay where you scrolled).
-- [ ] **Main HUD:** fix the overlap between the HUD and the health/XP bars, and redesign the
-  whole HUD to be more **beautiful and elegant** (creative freedom granted).
+## Phase 5 — UI / HUD overhaul (desktop-first)  ✅ v1.47.0
+- [x] **Shop compare:** *(new `shopCompare()` — clicking a shop weapon opens a full side-by-side card: damage,
+  range, attack speed, knockback, element, lifesteal vs your CURRENT weapon, each with a green/red arrow, then Buy.)*
+- [x] **Use the desktop screen real estate:** *(desktop media query — cards widen to 600px, lists get taller
+  (66vh), rows/stat text scale up; no more cramped little scrollers on a wide screen.)*
+- [x] **Scroll position preserved on click** — *(showOverlayHTML now captures + restores the list's scrollTop
+  across a re-render, so equipping/selling doesn't jump the list back to the top — verified.)*
+- [x] **Main HUD redesigned** — *(HUD is now an elegant glass corner PANEL (max 320px, not a full-width stretch):
+  identity row (level/weapon/gold/zone) on top, then HP/XP/class/path bars — fixes the overlap and reads clean on desktop.)*
 
 ## Phase 6 — Onboarding / tutorial
 - [ ] **First-time tutorial** (new save, first class trial): explain the controls, the

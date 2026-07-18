@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.64.0';
+const VERSION3D='1.65.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2864,11 +2864,72 @@ function lavaHit(){
   p.x=G.lastSafe.x; p.z=G.lastSafe.z; p.y=(G.lastSafe.y||0)+60; p.vx=0; p.vy=0; p.vz=0; p.onGround=false; p.invuln=1.2;
   p.recoverT=0.7;   // brief recovery: holding forward can't chain you straight back into the hazard
 }
-function applyElement(e,el,dmg){
-  if(el==='fire'){ e.burnT=2.6; e.burnDps=Math.max(2,dmg*0.18); e.burnColor='#ff7a3a'; }
-  else if(el==='poison'){ e.burnT=3.2; e.burnDps=Math.max(2,dmg*0.14); e.burnColor='#86e05a'; }
-  else if(el==='ice'){ e.slowT=2.0; }
-  else if(el==='storm'){ if(Math.random()<0.3) e.stunT=0.45; }
+/* ================= ELEMENTAL STATUS STACKS (Burn/Chill/Venom/Rune/Radiance/Corruption) =================
+   One compact per-enemy meter system. Buildup scales with weapon speed (slow weapons build more per
+   hit, so fast weapons don't dominate) and gets a big Scythe multiplier — so Reaper is the strongest
+   at stack application without the highest direct damage. A per-(enemy,status) cooldown stops persistent
+   hitboxes/rapid multi-hits from applying full stacks every frame. Bosses build at half rate and never
+   fully freeze. Meters are floats; integer stacks = floor(meter). No per-tick entity allocation. */
+const EL_STAT={fire:'burn',ice:'chill',poison:'venom',arcane:'rune',holy:'radiance',void:'corrupt'};
+const STCAP={burn:5,chill:5,venom:6,rune:5,radiance:5,corrupt:5};
+const STCOL={burn:'#ff7a3a',chill:'#7fd6ff',venom:'#86e05a',rune:'#c47bff',radiance:'#ffe9a8',corrupt:'#8f52d6'};
+const STWIN={burn:2.5,chill:2.0,venom:4.0,rune:8.0,radiance:3.0,corrupt:12.0};   // grace before a meter decays
+const STDEC={burn:1.2,chill:1.5,venom:1.0,rune:0.5,radiance:1.5,corrupt:0.8};    // decay per second after the grace window
+function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,corrupt:0}); }
+function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st[k]; return n; }
+// buildup per hit: normalized by attack speed (cd), with the Scythe specialization + boss resistance
+function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
+function applyStatus(e,el,dmg,w){
+  el=normEl(el); const stat=EL_STAT[el]; if(!stat||e.dummy) return;
+  const now=(G&&G.time)||0; e.stcd=e.stcd||{};
+  if(now-(e.stcd[stat]||-9)<0.12) return;                    // per-target buildup rate limit (kills full-stack-every-frame)
+  e.stcd[stat]=now;
+  const st=estat(e); e.stFresh=e.stFresh||{}; e.stFresh[stat]=now;
+  e.stDmg=Math.max(e.stDmg||0,dmg||1);                       // representative hit for DoT scaling
+  st[stat]=Math.min(STCAP[stat], st[stat]+buildAmt(w,e.boss));
+  if(stat==='burn'   && st.burn>=STCAP.burn)         igniteBurn(e);
+  else if(stat==='chill' && st.chill>=STCAP.chill)   freezeChill(e);
+  else if(stat==='radiance' && st.radiance>=STCAP.radiance) purifyRadiance(e);
+  else if(stat==='venom' && st.venom>=3)             e.healCut=0.5;      // heavy Venom chokes enemy healing/regen
+  else if(stat==='corrupt' && st.corrupt>=STCAP.corrupt) e.primed=true;  // primed for Rupture (Reaper/void payoff)
+}
+// legacy entry point (skills/projectiles pass el here) -> routes into the stack system, scaled by the current weapon
+function applyElement(e,el,dmg){ applyStatus(e,el,dmg, (G&&G.p)?G.p.weapon:null); }
+function igniteBurn(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.2:2.2)); e.st.burn=0;
+  skillRing(e.x,e.z,'#ffd07a','#ff7a3a',110); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',16); addText(e.x,e.y+e.h+12,e.z,'IGNITE','#ff7a3a',true);
+  e.hp-=dmg; for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){ o.hp-=Math.round(dmg*0.4); estat(o).burn=Math.min(STCAP.burn,o.st.burn+1); } }   // combustion splash
+  if(e.hp<=0) killEnemy(e); }
+function freezeChill(e){
+  if(e.boss){ e.slowT=Math.max(e.slowT,2.2); e.stunT=Math.max(e.stunT,0.4); e.st.chill=2.5; addText(e.x,e.y+e.h+12,e.z,'DEEP CHILL','#7fd6ff'); }  // bosses stagger + heavy slow, never full-freeze
+  else if((e.freezeCd||0)<=0){ e.stunT=Math.max(e.stunT,1.2); e.slowT=Math.max(e.slowT,1.5); e.freezeCd=3.0; e.st.chill=1; addText(e.x,e.y+e.h+12,e.z,'FROZEN','#e3faff',true); burst(e.x,e.y+e.h*0.5,e.z,'#e3faff',12); }  // freeze-immunity window stops permanent CC loops
+  else e.st.chill=STCAP.chill-1; }
+function purifyRadiance(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.0:1.8)); e.st.radiance=0; e.exposed=4;
+  skillRing(e.x,e.z,'#fff8d6','#ffe9a8',115); burst(e.x,e.y+e.h*0.6,e.z,'#ffe9a8',16); addText(e.x,e.y+e.h+12,e.z,'PURIFY','#ffe9a8',true);
+  e.hp-=dmg; if(e.hp<=0) killEnemy(e); }
+// designated attacks (Reaper scythe finisher / charged scythe / void charge) rupture a primed target
+function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
+  const base=e.stDmg||10, dmg=Math.round(base*(e.boss?1.4:2.5)); e.primed=false; if(e.st) e.st.corrupt=0;
+  skillRing(e.x,e.z,'#d69bff','#8f52d6',120); burst(e.x,e.y+e.h*0.5,e.z,'#8f52d6',18); addText(e.x,e.y+e.h+12,e.z,'RUPTURE','#d69bff',true);
+  e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); p.hp=Math.min(effMaxHp(p),p.hp+heal); }   // predatory Reaper sustain
+  if(e.hp<=0) killEnemy(e); return dmg; }
+// consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff
+function consumeRunes(e){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5);
+  e.st.rune=0; skillRing(e.x,e.z,'#e1b9ff','#c47bff',90); addText(e.x,e.y+e.h+12,e.z,'RUNE ×'+marks,'#c47bff',true); e.hp-=dmg; if(e.hp<=0) killEnemy(e); return dmg; }
+// per-enemy status upkeep (DoT + decay + chill slow factor). Returns the movement-speed multiplier from Chill.
+function statusTick(e,dt){
+  if(!e.st){ return 1; } const now=(G&&G.time)||0, st=e.st;
+  if(e.freezeCd>0) e.freezeCd-=dt;
+  // DoT: Burn + Venom, scaled by stacks and the remembered hit
+  if(st.burn>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.burn)*(e.stDmg||6)*0.055*dt;
+    if(Math.random()<0.25) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:'#ff7a3a',sz:2}); }
+  if(st.venom>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.venom)*(e.stDmg||6)*0.04*dt;
+    if(Math.random()<0.18) G.particles.push({x:e.x,y:e.y+Math.random()*e.h*0.6,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#86e05a',sz:2}); }
+  if(e.stAcc>=1){ const d=Math.floor(e.stAcc); e.stAcc-=d; e.hp-=d; if(e.hp<=0){ killEnemy(e); return 1; } }
+  if(e.healCut && st.venom<3) e.healCut=0;
+  if(e.exposed>0) e.exposed-=dt;
+  // decay meters past their grace window
+  for(const k in st){ if(st[k]>0 && now-((e.stFresh&&e.stFresh[k])||0)>STWIN[k]){ st[k]=Math.max(0,st[k]-STDEC[k]*dt); if(k==='corrupt'&&st[k]<STCAP.corrupt) e.primed=false; } }
+  const ch=Math.floor(st.chill); return ch>0?(1-Math.min(0.5,ch*0.1)):1;   // each Chill stack -10% move speed, cap -50%
 }
 function nearestEnemy(maxDist,coneCos){
   const p=G.p; let best=null,bd=maxDist;
@@ -2947,6 +3008,7 @@ function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
   else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
+  G._desig=true;                                        // a charged release is a "designated" attack: spends Rune Marks + ruptures Corruption on its melee hits
   switch(w.chg){
     case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
     case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
@@ -2956,6 +3018,7 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     case 'scythethrow': throwScythe(p,w,amt); break;   // scythe: hurl the spinning scythe (ranged), it boomerangs back
     default: fireCharged(p,w,amt);                      // magic sword: elemental blast
   }
+  G._desig=false;
 }
 // the scythe's RANGED attack: fling it spinning, it pierces everything and curves back to you
 function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -2963,7 +3026,7 @@ function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.
   const dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p);   // ranged-type damage
   G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
     size:17,color:w.blade||'#cfd6df',shape:'scythespin',glow:w.el?1:0,el:w.el||null,dmg,kb:(w.kb||260),pierce:99,
-    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0});
+    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0,desig:true});
   SFX.slash(); if(w.el) SFX.magic(w.el); p.atkTimer=0.26; G.shake=Math.min(G.shake+5,12);
   burst(ox,oy,oz,w.blade||'#cfd6df',8); }
 // a short forward thrust (the light stab shared by javelin + point-blank knives)
@@ -2978,7 +3041,7 @@ function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(760,null)
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
   const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);
   G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
-    size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[]});
+    size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[],desig:true});
   SFX.magic(w.el); G.shake=Math.min(G.shake+4+amt*5,13); p.atkTimer=0.2; burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,pr.color||'#c9a6ff',9); }
 function hurlAxe(p,w,amt){ const t=nearestEnemy(700,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=520, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
@@ -3179,7 +3242,9 @@ function useSkill(i){
   if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
   if(p.skillCd[i]>0) return;
   initAudio();
+  G._desig=true;                                          // abilities are "designated" attacks: they spend Rune Marks + rupture Corruption
   const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
+  G._desig=false;
   if(r==='refund') return;
   const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
   cd*=(1-effCdr(p));                                     // Mystic armor
@@ -3203,8 +3268,10 @@ function resolveSwing(){
     const cr=Math.random()<0.18+effCrit(p), els=w.el||'void', ec=elementColor(els)||'#c47bff';
     const mdmg=Math.round(w.dmg*effPower(p)*(2.0+(cr?0.6:0))*effMagPower(p)*offclassMul(p)*classStyleMul(p));
     const R=M.reach+56, ls2=Math.max(w.lifesteal||0,effLifesteal(p));
+    G._desig=true;                                                     // the Reaper's magic finisher ruptures Corruption + spends Rune Marks
     for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue; const d=dXZ(e.x,e.z,p.x,p.z);
       if(d>R+e.r) continue; if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; e.lastHit=p.swingId; hitEnemy(e,mdmg,p,(w.kb||260)+90,ls2,els); }
+    G._desig=false;
     if(p._burstId!==p.swingId){ p._burstId=p.swingId;                 // one-shot burst VFX (skillRing carries no damage — dmg:0)
       skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30); G.shake=Math.min(G.shake+7,15);
       for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
@@ -3232,7 +3299,8 @@ function resolveSwing(){
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
-  const mod=elemMod(el,e.element);
+  let mod=elemMod(el,e.element);
+  if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
@@ -3251,6 +3319,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && e.hp>0){ const w=G.p.weapon;                              // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
     else if((e.boss||e.elite) && Math.random()<0.4) playFx('heavyhit',0.85); } // meaty connect on the big foes
+  if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
   if(lifesteal>0){ const heal=Math.max(1,Math.round(dmg*lifesteal)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   if(e.hp<=0) killEnemy(e);
 }
@@ -3261,6 +3330,10 @@ function killEnemy(e){
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
+  if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
+    G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h);
+    addText(G.p.x,G.p.y+70,G.p.z,'+'+h,'#ffe9a8'); burst(e.x,e.y+e.h*0.5,e.z,'#fff8d6',10); }
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
   { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
@@ -3632,10 +3705,8 @@ function update(dt){
       if(e.boss) onBossActivate(e); else if(e.kind==='fly') SFX.screech(0.5); else SFX.growl(0.5); } } continue; }
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
-    if(e.burnT>0){ e.burnT-=dt; e.burnAcc+=e.burnDps*dt; if(e.burnAcc>=1){ const d=Math.floor(e.burnAcc); e.burnAcc-=d; e.hp-=d;
-      if(Math.random()<0.4) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:e.burnColor||'#ff7a3a',sz:2});
-      if(e.hp<=0){ killEnemy(e); continue; } } }
-    let eff=e.speed*(e.slowT>0?0.5:1); if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
+    const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
+    let eff=e.speed*(e.slowT>0?0.5:1)*_chillMul; if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
     if(e.doomT>0){ e.doomT-=dt; e.doomAcc+=dt;                       // Death's Door burns them down over time
       if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
         G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
@@ -3652,7 +3723,7 @@ function update(dt){
         else if(d<62){ e.fuseT=0.55; SFX.growl(1.3); addText(e.x,e.h+14,e.z,'!','#ff7a3a',true); }
       }
       else if(e.role==='healer'){ e.healT=(e.healT||0)-dt;
-        if(e.healT<=0){ e.healT=3; let n=0; for(const o of G.enemies){ if(o.dead||o===e||o.hp>=o.maxHp||o.boss) continue; if(dXZ(o.x,o.z,e.x,e.z)<220){ o.hp=Math.min(o.maxHp,o.hp+Math.round(o.maxHp*0.12)); burst(o.x,o.y+o.h*0.5,o.z,'#7de08a',5); n++; } }
+        if(e.healT<=0){ e.healT=3; let n=0; for(const o of G.enemies){ if(o.dead||o===e||o.hp>=o.maxHp||o.boss) continue; if(dXZ(o.x,o.z,e.x,e.z)<220){ const hc=1-(o.healCut||0); o.hp=Math.min(o.maxHp,o.hp+Math.round(o.maxHp*0.12*hc)); if(hc<1) addText(o.x,o.y+o.h+8,o.z,'VENOM','#86e05a'); else burst(o.x,o.y+o.h*0.5,o.z,'#7de08a',5); n++; } }
           if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
       if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
     }
@@ -3721,10 +3792,12 @@ function update(dt){
     pr.x+=pr.vx*dt; pr.y+=pr.vy*dt; pr.z+=pr.vz*dt;
     if(pr.trail && Math.random()<0.75) G.particles.push({x:pr.x,y:pr.y,z:pr.z,vx:0,vy:6,vz:0,life:0.26,color:pr.trail,sz:Math.max(2,pr.size*0.35)});   // skill-projectile comet trail
     if(pr.owner==='player'){
+      G._desig=!!pr.desig;                                 // charged bolts / thrown scythe spend Rune Marks + rupture Corruption
       for(const e of G.enemies){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
         if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){
           pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01},pr.kb,effLifesteal(G.p),pr.el);
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
+      G._desig=false;
     } else {
       if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
@@ -5832,11 +5905,13 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
   }
 }
 function drawHpBar3(e){
-  if(e.boss||e.hp>=e.maxHp||e.dead) return;
-  const s=project(e.x,e.y+e.h+14,e.z); if(!s) return;
-  hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp});
+  if(e.dead) return;
+  if(!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+14,e.z); if(s) hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp}); }
+  // elemental status pips (shown even at full HP + on bosses)
+  if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([STCOL[k],n]); }
+    if(keys.length){ const sp=project(e.x,e.y+e.h+(e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
 }
-let hpBars=[];
+let hpBars=[], statPips=[];
 const hpCanvas=document.createElement('canvas'); // tiny 2D overlay for enemy hp bars
 hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;width:100%;height:100%;';
 document.body.appendChild(hpCanvas);
@@ -5860,6 +5935,13 @@ function drawHpBars(){
   const c=hpCanvas.getContext('2d');
   for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.5)'; c.fillRect(b.x-16,b.y,32,4);
     c.fillStyle='#e8453d'; c.fillRect(b.x-16,b.y,32*b.f,4); }
+  // elemental status pips: one small rounded square per active status, colored, with its stack count
+  c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
+  for(const sp of statPips){ const n=sp.keys.length, pw=11, tot=n*pw, x0=sp.x-tot/2, y=sp.y-3;
+    for(let i=0;i<n;i++){ const [col,cnt]=sp.keys[i], px=x0+i*pw;
+      c.fillStyle='rgba(0,0,0,0.55)'; c.fillRect(px,y,pw-1.5,9);
+      c.fillStyle=col; c.fillRect(px,y,pw-1.5,2.5);
+      c.fillStyle='#fff'; c.fillText(cnt, px+(pw-1.5)/2, y+6); } }
   drawThreatArrows(c);
 }
 // Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see
@@ -5919,7 +6001,7 @@ function render(t){
   setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
   drawCourse(s,t);
   if(G.portal){ drawPortal3(G.portal,t); }
-  hpBars=[];
+  hpBars=[]; statPips=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
   if(G.fx&&G.fx.length) drawLootFx(t);
   if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
@@ -6232,6 +6314,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
+  applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,

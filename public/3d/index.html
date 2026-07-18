@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.63.0';
+const VERSION3D='1.64.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -843,12 +843,26 @@ function rollRarity(){
   for(let i=0;i<pool.length;i++){ roll-=pool[i]; if(roll<=0) return RORDER[i]; }
   return 'common';
 }
-const WEAK={fire:'ice',ice:'fire',poison:'holy',storm:'arcane',void:'holy',arcane:'storm',holy:'void'};
+/* ---------------- Affinities (damage TYPE = sch phys/mag; AFFINITY = el) ----------------
+   Finalized 6 affinities in 3 opposition pairs. Frost's internal id stays 'ice' (save-safe);
+   Storm is retired — it survives only as a migration alias onto Arcane. */
+const EL_ALIAS={storm:'arcane',lightning:'arcane'};                 // retired affinities fold onto a surviving one (migration only)
+function normEl(el){ return el?(EL_ALIAS[el]||el):null; }
+const AFFINITY={
+  fire:{name:'Fire',icon:'🔥',status:'Burn'}, ice:{name:'Frost',icon:'❄',status:'Chill'},
+  poison:{name:'Poison',icon:'☠',status:'Venom'}, arcane:{name:'Arcane',icon:'✦',status:'Rune Marks'},
+  holy:{name:'Holy',icon:'☀',status:'Radiance'}, void:{name:'Void',icon:'◍',status:'Corruption'}
+};
+function affName(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].name:''; }
+function affIcon(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].icon:''; }
+function affStatus(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].status:''; }
+// locked opposition pairs: Fire<->Frost, Poison<->Arcane, Holy<->Void
+const WEAK={fire:'ice',ice:'fire',poison:'arcane',arcane:'poison',holy:'void',void:'holy'};
 function elemMod(wEl,eEl){
+  wEl=normEl(wEl); eEl=normEl(eEl);
   if(!wEl||!eEl) return 1;
-  if(wEl==='void') return 1.15;
-  if(wEl===eEl) return 0.6;
-  if(WEAK[eEl]===wEl) return 1.5;
+  if(wEl===eEl) return 0.6;          // an affinity-aligned enemy RESISTS its own affinity
+  if(WEAK[eEl]===wEl) return 1.5;    // ...and is WEAK to its opposite
   return 1;
 }
 
@@ -861,9 +875,9 @@ const ARCHES={
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
-  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'sword',el:'fire',chg:'blast'},
-  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'sword',el:'ice',chg:'blast'},
-  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane',chg:'spin'},
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'blast'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'blast'},
+  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'blast'},
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
@@ -871,13 +885,16 @@ const ARCHES={
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
-  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'scepter',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1}}, // seeks + pierces
-  stormrod:{disp:'Storm Wand',cls:'ranged',sch:'mag',dmg:12,cd:.24,kb:110,art:'wand',el:'storm',proj:{speed:820,size:4,pierce:1,range:780,color:'#9fe0ff',shape:'spark',glow:1}},          // rapid-fire
+  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'wand',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1,seek:true}}, // wand-family (behaves like one): seeks + pierces
+  stormrod:{disp:'Arcane Wand',cls:'ranged',sch:'mag',dmg:12,cd:.24,kb:110,art:'wand',el:'arcane',proj:{speed:820,size:4,pierce:1,range:780,color:'#c47bff',shape:'spark',glow:1}},          // Storm retired -> Arcane rapid-fire wand
   plaguestaff:{disp:'Plague Staff',cls:'ranged',sch:'mag',dmg:19,cd:.52,kb:130,art:'staff',el:'poison',chg:'bolt',proj:{speed:470,size:8,pierce:0,range:380,color:'#86e05a',shape:'glob',glow:1}},
-  holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'scepter',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'light',glow:1}}  // seeks + pierces
+  holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'wand',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'light',glow:1,seek:true}}  // wand-family: seeks + pierces
 };
 const ARCHEIDS=Object.keys(ARCHES);
-const DROP_ARCHES=ARCHEIDS.filter(a=>a!=='voidscythe');   // the Void Scythe is shop-only (after the Reaper is unlocked) — never a random drop
+// retired/removed archetypes never enter active generation: voidscythe is shop-only; saber + dagger
+// were merged away (saber->sword, daggers->throwing knives) and survive only as save-migration aliases.
+const RETIRED_ARCHES=['voidscythe','saber','dagger'];
+const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
   if(w.arche==='axe') return 'axeswing';                     // axes
@@ -920,7 +937,7 @@ const CLASSES={
       {id:'volley',n:'Volley',icon:'🌠',cd:8,rank:2,d:'A fan of projectiles across your front'},
       {id:'tumble',n:'Tumble',icon:'🌀',cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
       {id:'mark',n:'Hunter’s Mark',icon:'📍',cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
-  mage:{disp:'Mage',icon:'🔮',family:['staff','wand','scepter'],       // orb + rod retired — staff/wand/scepter cover the space
+  mage:{disp:'Mage',icon:'🔮',family:['staff','wand','spellblade'],     // finalized: Staff, Wand (scepters folded in), Spellblade (magic melee)
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
           {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:'🔵',cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
     skills:[
@@ -975,13 +992,15 @@ function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0
   if(up){ SFX.classup(); if(cs.rank>=2&&!cs.sub) queueSubclass=true; skillbarUpdate(); }   // fork at rank 2, when skill 2 would unlock
   if(G&&mode==='play') hudUpdate();
   persist(); }
-const LEGACY_ART={orb:'scepter',rod:'wand',spear:'sword'};   // retired arts fold into a surviving one
-const LEGACY_ARCHE={spear:'sword'};                          // the retired Spear archetype -> a Sword (stays a warrior weapon)
+const LEGACY_ART={orb:'wand',rod:'wand',scepter:'wand',spear:'sword'};   // retired arts fold into a surviving family art
+const LEGACY_ARCHE={spear:'sword',saber:'sword',dagger:'knives'};        // retired archetypes -> their surviving family (saber->sword, daggers->throwing knives)
 function normWeapon(w){ if(!w) return w;
   if(LEGACY_ARCHE[w.arche]){ w.arche=LEGACY_ARCHE[w.arche]; }
+  if(w.el){ w.el=normEl(w.el); }                                    // retired affinities (storm) migrate onto a surviving one
   const a=ARCHES[w.arche];
-  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false;   // re-derive art/charge from the (possibly remapped) archetype so old saves gain the new behavior
-    if(a.cls==='ranged'&&!w.proj) w.proj=Object.assign({},a.proj); }
+  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false; w.cls=a.cls; w.sch=a.sch;   // re-derive art/charge/class/damage-type from the (possibly remapped) archetype so old saves gain the finalized behavior
+    if(a.el && !w.el) w.el=a.el;
+    if(a.cls==='ranged') w.proj=Object.assign({},a.proj); }   // refresh proj from the archetype so migrated items gain finalized behavior (e.g. wand seek)
   else if(LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art];               // unknown archetype: at least fold a retired art
   return w; }
 function makeElite(e){                                    // elites: zone minibosses — SCARIER, not spongier
@@ -1342,7 +1361,7 @@ const ENEMY={
   frostling:{hp:28,dmg:8,speed:50,r:15,h:38,xp:17,color:'#7fd6ff',kind:'walk',element:'ice'},
   toxling:{hp:24,dmg:8,speed:56,r:15,h:38,xp:17,color:'#9fd84a',kind:'walk',element:'poison'},
   shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void'},
-  sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'storm'},
+  sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'arcane'},
   goblin:{hp:26,dmg:0,speed:100,r:13,h:30,xp:40,color:'#ffd24a',kind:'goblin'}, // treasure goblin: flees, drops riches
   // dungeon bestiary (v1.5) — distinct silhouettes, not palette swaps
   bones:{hp:18,dmg:9,speed:84,r:13,h:40,xp:16,color:'#e8e4d8',kind:'walk',look:'bones'},
@@ -1354,7 +1373,7 @@ const ENEMY={
   dustjackal:{hp:24,dmg:11,speed:82,r:14,h:26,xp:19,color:'#caa46a',kind:'charger',look:'jackal'},   // lean pack hunter: fast, low HP, telegraphed POUNCE (charger ram) — space it or it bleeds you in numbers
   cragspitter:{hp:46,dmg:13,speed:26,r:18,h:42,xp:28,color:'#9a8a6a',kind:'caster',look:'spitter',   // squat boulder-lobber: hurls ARCING rocks you sidestep; slow, tanky, kill-priority
     shot:{count:1,spread:0,speed:300,size:10,color:'#b0946a',shape:'rock',gravity:540,glow:0},shootCd:2.9},
-  galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'storm',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
+  galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'arcane',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
   // ── Outskirts plains bestiary (Phase 14) ──
   thornboar:{hp:42,dmg:13,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
   sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
@@ -1377,7 +1396,7 @@ const THEMEMOBS={
   apex:['bones','caster','shadeling','shadeling'],
   marble:['bones','bones','caster','sparkling']                  // marble sentinels + gilded casters
 };
-const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'storm',badlands:'fire',marble:'holy'};
+const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'arcane',badlands:'fire',marble:'holy'};
 const _ENEMY_END={
   brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
   warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE WARDEN'},
@@ -1709,7 +1728,7 @@ function openBag(back){
   else order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; return RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier; });
   const showHdr=(_bagSort==='type');
   let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
-    const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
+    const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
     const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
     const lock=!canWield(o);
     return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
@@ -1739,6 +1758,13 @@ function openBag(back){
 /* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
    or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
 function weapCat(w){ return w.sch==='mag'?'magic':(w.cls==='melee'?'melee':'ranged'); }
+// finalized weapon FAMILY (by art) + owning class, for tooltips
+const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Throwing Knives',javelin:'Javelins',staff:'Staff',wand:'Wand'};
+function weapFamily(w){ return (w&&ART_FAMILY[w.art])||'Weapon'; }
+function weapClassName(w){ if(!w) return ''; for(const c of CLASSIDS){ if(CLASSES[c].family.includes(w.art)) return CLASSES[c].disp; } return ''; }
+function dmgTypeName(w){ return w&&w.sch==='mag'?'Magic':'Physical'; }
+// compact one-liner: Family · DamageType · Affinity(+status)
+function weapInfoLine(w){ if(!w) return ''; const aff=w.el?(' · '+affIcon(w.el)+' '+affName(w.el)):''; return weapFamily(w)+' · '+dmgTypeName(w)+aff; }
 function catLabel(isW,cat){ return isW?({magic:'Magic Weapon',melee:'Melee Weapon',ranged:'Ranged Weapon'}[cat]||cat):(SLOTS[cat]?SLOTS[cat].label:cat); }
 function catArches(cat){ return DROP_ARCHES.filter(a=>{ const A=ARCHES[a]; return A && weapCat(A)===cat; }); }
 function fuseGroups(){
@@ -2988,7 +3014,7 @@ function fireCharged(p,w,amt){
 function fireProjectile(p,w,target){
   const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, ok=classFamilyOk(w); let dmg=w.dmg*effPower(p)*crit*offclassMul(p)*classStyleMul(p);
   if(ok && w.arche==='crossbow' && target){ const d=dXZ(p.x,p.z,target.x,target.z); dmg*=(0.7+Math.max(0,1-d/620)*1.7); }   // shotgun: heavy up close, weak at range
-  const seek = ok && w.art==='scepter';                                                                                    // scepters loose smart-missiles
+  const seek = ok && !!pr.seek;                                                                                            // smart-missile wands (Demon Eye / Holy Scepter) home in
   const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
@@ -3901,16 +3927,17 @@ function offerWeapon(nw){
   if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
-  const typ=w=>(w.sch==='mag'?'Magical ':'Physical ')+(w.cls==='ranged'?'Ranged':'Melee');
+  const typ=w=>weapFamily(w)+' · '+weapClassName(w);
   const row=(label,a,b,better)=>{ const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
     return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}${arr}</b></span></div>`; };
   const reachRow=nw.cls==='ranged'?row('Range',(cur.proj&&cur.proj.range)||0,nw.proj.range||0):row('Range',cur.range||0,nw.range||0);
-  const elDesc=nw.el?(nw.el==='void'?'Void · ignores resistances + lifesteal':(nw.el.charAt(0).toUpperCase()+nw.el.slice(1)+' · strong vs '+(Object.keys(WEAK).find(k=>WEAK[k]===nw.el)||'foes'))):'Neutral · flat damage to all';
+  const el2=normEl(nw.el);
+  const elDesc=el2?(affName(el2)+' affinity · applies '+affStatus(el2)+' · strong vs '+affName(WEAK[el2])+', resisted by '+affName(el2)):('No affinity · flat '+dmgTypeName(nw).toLowerCase()+' damage');
   showOverlayHTML(`<div class="card">
     <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
     <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
     <img class="itemav" src="${itemAv(nw)}" alt="">
-    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Element</span><b style="color:${elementColor(nw.el)||'#cfd6df'};text-transform:capitalize">${nw.el||'Neutral'}</b></div>${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
+    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':'#b8b8b8'}">${dmgTypeName(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
     <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
     <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
@@ -6204,6 +6231,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
+  ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,

@@ -99,20 +99,25 @@ self-contained work session. Work top to bottom.
   (`meta.hubTutDone`): explains the keepers (E to use), the healing/banking waystone, and the Gates. Verified
   it shows once and never again.)*
 
-## Phase 7 — Levels & world (STATIC, hand-built)
-- [ ] **Convert main levels to static/hand-authored** designs (procedural stays only for the
-  purple-secret trial rooms).
-- [ ] **Outskirts:** keep a consistent **"plains / field"** vibe the whole way — no abrupt jump
-  into the old legacy dungeon layout. Style it like walking through a field. Make the **arena
-  bigger**, **remove the lava** (it's a field now), and give it **richer, more interesting
-  graphics**.
-- [ ] **Hollow Pass:** route the **main path through the pillar-parkour section to where the
-  portal is** (it currently dead-ends into nothing). Keep the **side-wall parkour purple-secret
-  as the TEMPLATE** for how purple secrets are hidden — Oliver loved that one; make more like it.
-- [ ] **Palace level:** a **white-marble palace/compound** level — the feel of entering an epic
-  grand compound.
-- [ ] **Final level — dark-fantasy CASTLE:** significantly harder than everything before. Enter
-  the castle gates, ascend through the castle, and reach the **throne room** for the final boss.
+## Phase 7 — Levels & world (STATIC, hand-built) — SHIPPED v1.49.0
+- [x] **Convert main levels to static/hand-authored** designs — every explorable zone now has its
+  own hand-authored SCAPE grammar (`SCAPES[zone.id]`); procedural stays only for purple-secret trial
+  rooms. All 8 zones verified solvable + clean (zonescape harness: portal + every quest target
+  reachable, 160 clean frames per area/seed).
+- [x] **Outskirts:** rebuilt as a green **plains/field** — theme `plains`, green sky+ground,
+  hazard renamed "THE WILDS" with no lava under-glow; **bigger clearings** (up to 680×560), wider
+  180-unit links, and **richer graphics** (tree trunks + canopies, ~46 grass tufts + wildflowers).
+- [x] **Hollow Pass:** the **pillar climb is now the MAIN path** — 6 pillars carry you from the mesa
+  front edge up to the summit + portal (no more dead-end). The **side-wall parkour purple-secret**
+  is kept as the TEMPLATE (rift chain off the summit).
+- [x] **Palace level:** new **Sunspire Palace** (zone `palace`, tier 7) — white-marble colonnade,
+  garden terraces (gilded-relic fetch), throne dais; bright-marble lighting branch; Marble Colossus
+  miniboss (stage 14).
+- [x] **Final level — dark-fantasy CASTLE:** new **Castle Duskmoor** (zone `castle`, tier 8) —
+  ascend 4 tower tiers via climb-runs to the top-tier throne room; lava hazard, apex lighting;
+  final boss **The Void Tyrant** (stage 16 = last stage → clearing it triggers winGame + ending).
+  World chain expanded 7→8 zones, STAGES 14→17; TIERBAND / THEMEMOBS / CASTER_EL / gate spacing /
+  STORY (zone cards, boss lines, Shade lore) all extended for both new zones.
 
 ## Phase 8 — Big feature work-orders (already spec'd; implement here)
 - [x] **Weapon Identity Overhaul** — SHIPPED **v1.41.0** (Appendix A): per-weapon charge/hybrid/seek/pull,
@@ -121,6 +126,66 @@ self-contained work session. Work top to bottom.
 - [x] **Loot-juice + Drop-rate + Mixed-encounters + NPC "press E" dialogue** — SHIPPED **v1.40.0** (Appendix B):
   rarity-tiered drop fanfare + colored beam/burst/toast, drop-rate lowered, mixed-composition dens, press-E hub dialogue.
   *(Note: Appendix B item 1 asks for FREE-TO-USE sourced SFX; current drop/level SFX are procedural — see Phase 3 SFX item, still TODO.)*
+
+## Phase 9 — Progression Rework (replaces the roguelite pick-3)
+- [ ] **Remove the roguelite pick-3 level-up choice entirely.** Bake its stat power into
+  **automatic per-level growth** so the game is NOT weaker after removal. (Supersedes the Phase 3
+  level-up-choice work — there's no choice menu anymore.)
+- [ ] **Level-up = instant automatic flourish:** stat growth + SFX + heal + a milestone toast when
+  one lands. No menu, no delay.
+- [ ] **Fix level persistence:** levels gained in a dungeon must carry back to the hub (there is no
+  real level cap in code — the "stuck at ~15" is a save/display bug).
+- [ ] **Character level gates gear rarity:** each rarity needs a minimum level to WIELD (e.g. common 1 /
+  uncommon 5 / rare 10 / epic 15 / legendary 20 — tune to stage pacing). Show "Requires Lv X" and grey
+  out gear you can't use yet. Gives the grind a purpose + makes early legendaries aspirational.
+- [ ] **Double jump = shop purchase.** A "Magic Socks" item bought in the shop for a hefty gold price
+  (permanent unlock). Remove the old level-8 auto-unlock. Ensure no early level REQUIRES double jump.
+- [ ] **Rarity clarity:** keep the standard names **Common → Uncommon → Rare → Epic → Legendary**, but
+  make hierarchy unmistakable via consistent **COLOR** (grey→green→blue→purple→gold) + a tier pip/number
+  on every item. Don't rename — fix the color/number.
+- [ ] **Class skill leveling = the meaningful choice.** At each skill-unlock rank, offer a **choice of
+  2–3 skills** (the subclass becomes one branch node). Make it **RESPEC-able in the hub** (no lock-in).
+  *Highest-content item — needs ~2–3× more skills authored per class; STAGE it: ship the choice-node +
+  respec framework with 2 options at a couple of ranks first, flesh out the rest after.*
+- Net stack: character level (auto stats + rarity gate) · class ranks (branching skill choices, respec-able)
+  · gold/shop (socks, perks, gear, bag slots) · gear/loot (rarity-gated).
+
+## Phase 10 — Batch-2 additions (bag, trinkets, menus, onboarding, visuals)
+- [ ] **ESC closes any open menu.** If a menu is open, Esc closes it; only open the pause menu when none is open.
+- [ ] **Bag sort toggle:** each section (weapon categories, armor slots) can be sorted by **TYPE** (default),
+  **RARITY**, or **RECENCY**. (Extends the Phase-4 `openBag` grouping.)
+- [ ] **Amulets & rings — baggable + forgeable.** Add trinkets as forge categories (two same-rarity trinkets
+  of a type → next rarity), same slot-machine as weapons/armor.
+- [ ] **Equipped trinkets are VISIBLE on the character:** rings render around the hand like a bracelet;
+  amulets on the neck/chest.
+- [ ] **Buy more BAG SLOTS in the shop** (gold, scaling cost).
+- [ ] **First-trial intro popup:** the instant the first trial chamber starts (right after picking your first
+  class), a text popup explains WHERE you are and WHY. (Extends the Phase-6 `showTutorial`.)
+- [ ] **Charge-glow anchor:** the charge-up highlight must sit on the weapon's BUSINESS END (axe blade,
+  staff tip, spear point) — it's on the handle now, which looks wrong.
+
+## Phase 11 — Depth & Endgame (from the latest playtest — the fun-ceiling raisers)
+- [ ] **Boss fights get PHASES + signatures (biggest remaining fun lever).** Give each zone boss a
+  **HP-threshold phase 2** (flips to a new, more aggressive pattern), **1–2 signature telegraphed
+  special attacks** you learn to dodge (reuse the enemy wind-up tell system), and an **arena mechanic
+  tied to the zone's hazard** (the Marksman drives you across the wind-swept rims; the Colossus cracks
+  the lava floor). Turn HP-checks into fights you *learn*. Hooks already exist: `phase`, `summonT`,
+  boss shot patterns, `G.shockwaves`.
+- [ ] **Enemy ROLES, not just mixes.** Add 3–4 behavior archetypes that force a *response* (no extra
+  HP): **Shielder** (blocks from the front — flank it), **Healer/Buffer** (kill-priority), **Exploder**
+  (rushes then detonates — space it), **Flanker** (circles behind you). Slot them into the mixed dens
+  via `saltMob`.
+- [ ] **Endgame "one more run" loop.** There's a `descent` counter — if there's no **Endless Descent**
+  mode (infinite scaling floors chasing a saved personal best), add one. Alternative/additional: a
+  **daily-seed challenge** (same layout that day, chase a time/score) or **build-goal achievements**
+  ("clear a zone using only thrown weapons"). Give the game a reason to reopen after The Apex.
+- [ ] **Hitstop + kill crunch.** If heavy hits/kills don't already freeze for ~60–80ms, add hitstop
+  (the `G.slowmo` scaffolding from the loot slow-mo is the tool) + a death pop / coin-spray. The
+  cheapest "meat" you can add to combat feel.
+- [ ] **Shop north-star.** Surface a progress line toward the player's big-ticket goal
+  ("**340 / 1000** to the Magic Socks") so gold has a *pull*, not just a number.
+- [ ] **Off-screen threat arrows.** Small edge-of-screen indicators pointing at nearby enemies you
+  can't see (a 3D camera + auto-aim makes off-camera cheap-shots a real frustration). Cheap fairness win.
 
 ---
 ### Conventions recap (every phase)

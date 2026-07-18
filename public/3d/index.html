@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.48.0';
+const VERSION3D='1.49.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -375,7 +375,8 @@ const STORY={
     frost:"Cold this deep isn't weather. It's something refusing to move.",
     ember:"The mountain's heat is escaping. The nightmare opened a way out.",
     abyss:"You are below where anyone was ever posted.",
-    apex:"He is awake now. He has been waiting to be."
+    palace:"White marble, untouched. The war never found this place. Something else kept it.",
+    castle:"The last gate. He is awake now, and he has been waiting to be."
   },
   boss:{   // by boss stage index — one line when the health bar reveals
     2:"It was something's livestock once. Now it's the nightmare's.",
@@ -384,7 +385,8 @@ const STORY={
     8:"It stopped being a person somewhere around the fourth winter.",
     10:"The mountain stood up.",
     12:"You have finally reached the sleeper. He is not asleep.",
-    13:"This is what his dream wanted to be all along."
+    14:"It was carved to guard the throne. The dream taught the marble to move.",
+    16:"This is what his dream wanted to be all along."
   },
   ending:[
     "The Void Tyrant comes apart, and the world exhales.",
@@ -416,9 +418,12 @@ const STORY={
     abyss:{lore:["You are below every post we ever held. Even my death doesn't reach much deeper.","The dark here isn't empty. It's attentive."],
       why:"Banish what you can and take back the splinters — every shard of the rift you carry out is one he can't dream through.",
       boss:"Past this point sleeps the King. He has been listening to you descend the whole way."},
-    apex:{lore:["There's nothing left to teach you. He's awake, and he knows your name.","Whatever you've become on the way down — be exactly that."],
-      why:"No more errands. Just him.",
-      boss:"Break the cycle, Warden. Or become the next thing I have to warn somebody about."}
+    palace:{lore:["I never held this post. None of us did. The Sunspire kept itself.","The marble here remembers being carved. Do not turn your back on any of it."],
+      why:"Put down the risen guard and gather the gilded relics — the throne was hoarding them, and each one is a piece of the way forward.",
+      boss:"The Colossus is the throne's own statue. It has had centuries to practice standing up. End it before it finishes."},
+    castle:{lore:["This is the last gate, Warden. Past the towers there is only him.","There's nothing left to teach you. Whatever you've become on the way down — be exactly that."],
+      why:"Clear the towers as you climb. Every shadeling you cut is one less thing at your back when you reach the top.",
+      boss:"Break the cycle at the summit. Or become the next thing I have to warn somebody about."}
   }
 };
 // A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
@@ -1006,7 +1011,7 @@ function flushAch(){
 
 /* ---------------- Stages → 3D arenas ---------------- */
 const STAGES=[
-  {name:'The Outskirts',theme:'plains',sky:[0.10,0.13,0.20],ground:'#2a3340',aw:760,ad:520,grunts:6,flyers:0,type:'normal'},
+  {name:'The Outskirts',theme:'plains',sky:[0.12,0.17,0.13],ground:'#33512f',aw:760,ad:520,grunts:6,flyers:0,type:'normal'},
   {name:'Black Woods',theme:'forest',sky:[0.07,0.13,0.10],ground:'#1d3026',aw:800,ad:540,grunts:5,flyers:3,mix:{toxling:2},type:'normal'},
   {name:'The Brute',theme:'badlands',sky:[0.14,0.10,0.10],ground:'#33231f',aw:700,ad:500,grunts:2,flyers:1,type:'miniboss',boss:'brute'},
   {name:'Hollow Pass',theme:'canyon',sky:[0.14,0.12,0.09],ground:'#352a1e',aw:820,ad:540,grunts:5,flyers:2,mix:{sparkling:3},type:'normal'},
@@ -1019,7 +1024,10 @@ const STAGES=[
   {name:'Ember Colossus',theme:'volcano',sky:[0.17,0.07,0.05],ground:'#3d1a10',aw:780,ad:560,grunts:2,flyers:1,mix:{emberling:2},type:'miniboss',boss:'colossus'},
   {name:'Abyss Approach',theme:'void',sky:[0.08,0.04,0.13],ground:'#241431',aw:840,ad:560,grunts:4,flyers:3,mix:{shadeling:4,sparkling:2},type:'normal'},
   {name:'Abyss King',theme:'void',sky:[0.07,0.04,0.11],ground:'#241431',aw:760,ad:560,grunts:0,flyers:0,type:'boss',boss:'king'},
-  {name:'The Void Tyrant',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}
+  {name:'The Sunspire Palace',theme:'marble',sky:[0.17,0.18,0.24],ground:'#565b6c',aw:840,ad:560,grunts:4,flyers:3,mix:{bones:4},type:'normal'},        // 13
+  {name:'The Marble Colossus',theme:'marble',sky:[0.16,0.17,0.24],ground:'#525768',aw:780,ad:560,grunts:2,flyers:1,type:'miniboss',boss:'colossus'},     // 14
+  {name:'Castle Duskmoor',theme:'apex',sky:[0.06,0.04,0.10],ground:'#1c1220',aw:860,ad:580,grunts:5,flyers:3,mix:{shadeling:4,bones:3},type:'normal'},    // 15
+  {name:'The Void Tyrant',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}                    // 16 (final)
 ];
 STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); // roomier arenas (v1.1)
 
@@ -1059,10 +1067,17 @@ const ZONES=[
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
-  {id:'apex',name:'The Apex',icon:'👑',tier:7,haz:'lava',mus:'apex_darkdescent',blurb:'One throne. One tyrant. No quests — only the fight.',
-    areas:[], boss:{stage:13,name:'The Void Tyrant',mus:'apex_darkdescent'}}
+  {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:null,mus:'keep',blurb:'White marble the long war never reached.',
+    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'bones',n:18,d:'Shatter 18 Marble Sentinels'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
+           {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
+    side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,blurb:'What a palace hides, it hides deep.'},
+    boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
+  {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
+    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'shadeling',n:22,d:'Cut down 22 of the King’s guard'}]},
+           {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'bones',n:20,d:'Fight up the towers: 20 wraiths'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
+    boss:{stage:16,name:'The Void Tyrant',mus:'apex_darkdescent'}}
 ];
-const TIERBAND=[1,1,2,2,3,3,4];                                  // max rarity INDEX (0=common..4=legendary) by zone tier
+const TIERBAND=[1,1,2,2,3,3,4,4];                               // max rarity INDEX (0=common..4=legendary) by zone tier (8 tiers now)
 /* Signature hazards: one per zone, so each zone PLAYS different, not just looks different. */
 const HAZARDS={
   slick:{name:'Rime',blurb:'The ice gives back nothing. Plan your stops.'},      // low friction
@@ -1193,9 +1208,10 @@ const THEMEMOBS={
   frost:['frostling','bones','frostling','sparkling'],
   volcano:['emberling','charger','emberling','flyer'],
   void:['shadeling','caster','sparkling','bones'],
-  apex:['bones','caster','shadeling','shadeling']
+  apex:['bones','caster','shadeling','shadeling'],
+  marble:['bones','bones','caster','sparkling']                  // marble sentinels + gilded casters
 };
-const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'storm',badlands:'fire'};
+const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'storm',badlands:'fire',marble:'holy'};
 const _ENEMY_END={
   brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
   warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE WARDEN'},
@@ -1339,6 +1355,8 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
     gl.uniform3f(U.uL,0.34,0.86,0.40); gl.uniform1f(U.uAmb,0.60); gl.uniform1f(U.uDif,0.40); gl.uniform3f(U.uKey,1.06,1.08,0.86); }   // open meadow daylight
   else if(G && !G.trial && !G.side && curZone().id==='frost' && !(STAGES[G.stageIndex]||{}).boss){
     gl.uniform3f(U.uL,0.30,0.84,0.46); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.38); gl.uniform3f(U.uKey,0.92,1.00,1.18); }   // cold snow-glare
+  else if(G && !G.trial && !G.side && curZone().id==='palace' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.30,0.86,0.40); gl.uniform1f(U.uAmb,0.66); gl.uniform1f(U.uDif,0.40); gl.uniform3f(U.uKey,1.10,1.06,0.94); }   // bright sunlit marble
   else { gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06); }
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
   const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
@@ -1838,42 +1856,53 @@ const SCAPES={
     vtorch(-fl.w/2+34,0,rnd); vtorch(fl.w/2-34,0,rnd);
     for(let o2=0;o2<3;o2++) vcol((rnd()*2-1)*fl.w*0.28,(rnd()*2-1)*fl.d*0.22,30+rnd()*28,30+rnd()*28,42+rnd()*40);
     // scramble up to a WIDE mid mesa (checkpoint)
-    const mx=sgn*150, mz=-470, my=200;
+    const mx=sgn*130, mz=-470, my=200;
     climbRun(sgn*(fl.w/2-120), -170, 0, mx, mz+120, my, 66);
     const mid=vplat(mx,mz,my,520,360,{terrace:true,checkpoint:true}); G.rooms.push({x:mx,z:mz,w:520,d:360,y:my,monsters:[],encounter:false,cleared:true});
     canyonWall(mx-(520/2+16),mz,360+30,+1,rnd,26,my+230); vtorch(mx-520/2+30,mz,rnd); vtorch(mx+520/2-30,mz,rnd);
-    // the PILLAR field (the climb-the-pillars bone hunt) — ascending hoppable pillars off the mesa
-    const pil=[]; let ppx=mx-sgn*300, ppz=mz+40, py=my+30;
-    for(let k=0;k<6;k++){ pil.push(vplat(ppx,ppz,py,74,74,{pillar:true})); vcol(ppx,ppz,74,74,py-6); ppx-=sgn*126; ppz+=(k%2?70:-70); py+=44; }
-    // WALL-SCALE from the mesa up to the summit; flyers harass the climb
-    const hx=mx, hz=-940, hy=440;
-    climbRun(mx-sgn*40, mz-360/2+30, my, hx, hz+230, hy, 66);
-    vplat(hx,hz,hy,620,470,{terrace:true,checkpoint:true}); G.rooms.push({x:hx,z:hz,w:620,d:470,y:hy,monsters:[],encounter:false,cleared:true});
-    vtorch(hx-620/2+30,hz,rnd); vtorch(hx+620/2-30,hz,rnd);
+    // the summit (portal) sits at the TOP of the pillar climb
+    const hx=mx, hz=-1060, hy=440;
+    // THE MAIN PATH is the PILLAR CLIMB: hoppable pillars rise from the mesa front edge up to the summit's front edge.
+    // Every step stays within jump reach, so the pillars are the intended route to the portal (not a dead-end detour).
+    const pil=[]; const p0x=mx, p0z=mz+360/2-40, p0y=my;                 // mesa front edge
+    const p1x=hx, p1z=hz+480/2-30, p1y=hy;                                // summit front edge
+    const N=6; for(let k=1;k<=N;k++){ const t=k/(N+1), zig=Math.sin(k*1.7)*70;
+      const px=p0x+(p1x-p0x)*t+zig, pz=p0z+(p1z-p0z)*t, py=Math.round(p0y+(p1y-p0y)*t);
+      pil.push(vplat(px,pz,py,82,82,{pillar:true})); vcol(px,pz,82,82,py-6); }
+    vplat(hx,hz,hy,640,480,{terrace:true,checkpoint:true}); G.rooms.push({x:hx,z:hz,w:640,d:480,y:hy,monsters:[],encounter:false,cleared:true});
+    vtorch(hx-640/2+30,hz,rnd); vtorch(hx+640/2-30,hz,rnd);
     mkMonster('charger',fl.w*0.2,-60,null); if(rnd()<0.7) mkMonster(pick(),-fl.w*0.2,40,null);
     mkMonster('charger',mx-60,mz,mid); const ar=mkMonster('sparkling',mx+80,mz+40,mid); ar.y=my+30;
-    for(let f=0;f<2;f++){ const fly=mkMonster('sparkling',(mx+hx)/2+f*40,(mz+hz)/2,null); fly.y=(my+hy)/2+60; fly.sx=fly.x; fly.sz=fly.z; }
-    scapeKill(ctx,[{x:fl.w*0.28,z:-fl.d*0.26},{x:-fl.w*0.28,z:fl.d*0.14}]);   // both charger dens on the GROUND floor (ground mobs can't stand on the high mesa)
-    scapeFetch(ctx, pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h})));
+    for(let f=0;f<3;f++){ const pv=pil[Math.min(pil.length-1,1+f*2)]; const fly=mkMonster('sparkling',pv.x+40,pv.z,null); fly.y=pv.h+70; fly.sx=fly.x; fly.sz=fly.z; }  // flyers harass the pillar climb
+    scapeKill(ctx,[{x:fl.w*0.28,z:-fl.d*0.26},{x:-fl.w*0.28,z:fl.d*0.14}]);   // both charger dens on the GROUND floor
+    scapeFetch(ctx, pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h})));                    // bones sit ON the pillars — collected AS you climb the main path
     scapeFind(ctx, hx-100, hz, hy);
-    // hidden rift: a ledge chain dropping off the summit's edge over the void, ending on a rift shelf
+    // hidden rift (the purple-secret TEMPLATE): a ledge chain dropping off the summit's SIDE wall over the void
     { const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
-        const ex=hx-(620/2+30); const chain=[[ex-70,hz-30,hy-30],[ex-150,hz+50,hy-90],[ex-232,hz-20,hy-150]];
+        const ex=hx-(640/2-12); const chain=[[ex-56,hz-30,hy-30],[ex-134,hz+50,hy-90],[ex-212,hz-20,hy-150]];
         for(const st of chain) vplat(st[0],st[1],Math.max(20,st[2]),58,54,{sec:true});
-        const rf=vplat(ex-300,hz+40,Math.max(16,hy-190),80,72,{sec:true});
+        const rf=vplat(ex-280,hz+40,Math.max(16,hy-190),80,72,{sec:true});
         G.secret={x:rf.x,z:rf.z,y:rf.h,t:0,id:Zc.side.id}; } }
-    finishScape(ctx,{sx:0,sz:fl.d/2-50,sy:0, gx:hx,gz:hz-470/2+80, decoCol:SAND,decoTheme:'canyon',decoTall:300});
+    finishScape(ctx,{sx:0,sz:fl.d/2-50,sy:0, gx:hx,gz:hz-480/2+90, decoCol:SAND,decoTheme:'canyon',decoTall:300});
   },
   /* THE OUTSKIRTS — the gentle opposite of the climb: wide open grass clearings joined in
      a loose LOOP (wander, not a corridor), near-flat, one soft knoll for the overlook. */
-  outskirts(ctx){ const {rnd,mkMonster}=ctx;
-    const C=[ {x:0,z:0,w:520,d:440}, {x:340,z:-360,w:470,d:410}, {x:-320,z:-430,w:500,d:440}, {x:20,z:-840,w:560,d:480} ];
+  outskirts(ctx){ const {rnd,mkMonster}=ctx; const isWoods=ctx.s.theme==='forest';
+    // bigger, breezier field: wide grass clearings joined in a loop
+    const C=[ {x:0,z:0,w:640,d:520}, {x:430,z:-440,w:560,d:490}, {x:-410,z:-520,w:600,d:520}, {x:30,z:-1020,w:680,d:560} ];
     C.forEach(c=>{ vseg(c.x,c.z,c.w,c.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},c)); });
     const linkL=(a,b,w)=>{ const cxz=(x0,x1,z)=>vseg((x0+x1)/2,z,Math.abs(x1-x0)+w,w), czz=(z0,z1,x)=>vseg(x,(z0+z1)/2,w,Math.abs(z1-z0)+w);
       cxz(a.x,b.x,a.z); czz(a.z,b.z,b.x); };                    // L-shaped wide land bridge (always walkable)
-    linkL(C[0],C[1],150); linkL(C[0],C[2],150); linkL(C[1],C[3],150); linkL(C[2],C[3],150);  // a loop -> non-linear
-    // tree-line: low non-standable posts scattered along the openings (cover, not walls)
-    for(let k=0;k<10;k++){ const c=C[Math.floor(rnd()*C.length)]; vcol(c.x+(rnd()*2-1)*(c.w/2-40), c.z+(rnd()*2-1)*(c.d/2-40), 24+rnd()*18,24+rnd()*18, 60+rnd()*70); }
+    linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],180); linkL(C[2],C[3],180);  // a loop -> non-linear
+    // trees: a trunk (cover) + a leafy canopy above it — a real field/woods, not a dungeon
+    const treeN=isWoods?16:9, leaf=isWoods?'#284f28':'#3a6b34', bark='#3a2c1c';
+    for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)], tx=c.x+(rnd()*2-1)*(c.w/2-30), tz=c.z+(rnd()*2-1)*(c.d/2-30), th=70+rnd()*70;
+      vcol(tx,tz,20+rnd()*10,20+rnd()*10,th);                                                  // trunk (collides)
+      G.deco.push({x:tx,z:tz,y0:th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});   // canopy
+      G.deco.push({x:tx,z:tz,y0:th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); }
+    // grass tufts + wildflowers scattered across the meadow (pure deco, on the ground)
+    for(let k=0;k<46;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
+      G.deco.push({x:gx,z:gz,y0:0,w:8+rnd()*7,h:7+rnd()*10,c:rnd()<0.16?['#e6d24a','#e07ad0','#7fd6ff'][Math.floor(rnd()*3)]:tint(leaf,'#8fce6a',0.4),theme:'plains'}); }
     C.forEach((c,ci)=>{ vtorch(c.x-c.w/2+30,c.z,rnd); vtorch(c.x+c.w/2-30,c.z,rnd); });
     // a soft knoll in the goal clearing: two gentle steps up to an overlook (the find shrine)
     const kg=C[3], kx=kg.x-120, kz=kg.z+40; vplat(kx,kz,40,170,170); const ktop=vplat(kx,kz,78,96,96,{checkpoint:true});
@@ -1970,6 +1999,51 @@ const SCAPES={
     scapeFind(ctx, hx, hz-100, hy);
     scapeSecret(ctx, a2.x-a2.w/2+30, a2.z, 0);
     finishScape(ctx,{sx:0,sz:a1.d/2-50,sy:0, gx:a3.x,gz:a3.z-a3.d/2+90, decoCol:'#2a1a44',decoTheme:'void',decoTall:230});
+  },
+  /* THE SUNSPIRE PALACE — a grand white-marble compound: an entry court, a long pillared colonnade,
+     hanging-garden terraces, and a raised throne dais at the far end. Bright, open, ceremonial. */
+  palace(ctx){ const {rnd,mkMonster}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a';
+    const entry=vseg(0,0,660,470); G.rooms.push({x:0,z:0,w:660,d:470,monsters:[],encounter:false,cleared:true});
+    const hall=vseg(0,-660,460,820); G.rooms.push({x:0,z:-660,w:460,d:820,monsters:[],encounter:false,cleared:true});
+    // grand colonnade: rows of tall marble columns flanking the hall, gold capitals
+    for(let k=0;k<6;k++){ const z=-330-k*130; for(const sx of [-250,250]){ vcol(sx,z,44,44,152);
+      G.deco.push({x:sx,z,y0:152,w:56,h:16,c:GOLD,theme:'marble'}); G.deco.push({x:sx,z,y0:0,w:60,h:10,c:tint(MARBLE,'#fff',0.15),theme:'marble'}); } }
+    // hanging-garden terraces along the hall (relics rest here in area 1) — hoppable planters
+    const gard=[]; for(let k=0;k<5;k++){ const gx=(k%2?1:-1)*205, gz=-400-k*135, gy=58+k*7; gard.push(vplat(gx,gz,gy,100,100,{pillar:true})); vcol(gx,gz,100,100,gy-6);
+      G.deco.push({x:gx,z:gz,y0:gy,w:92,h:22,c:'#3a6b34',theme:'marble'}); }   // low planters over the hall floor — jump up to each
+    // throne dais: a raised marble platform at the far end (find + portal), reached by shallow steps
+    const dz=-1180, dy=96; climbRun(0,-1010,0, 0,dz+170,dy, 96);
+    const dais=vplat(0,dz,dy,440,360,{terrace:true,checkpoint:true}); G.rooms.push({x:0,z:dz,w:440,d:360,y:dy,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:0,z:dz-40,y0:dy,w:120,h:90,c:GOLD,theme:'marble'}); G.deco.push({x:0,z:dz-40,y0:dy+90,w:70,h:40,c:tint(GOLD,'#fff',0.2),theme:'marble'});  // the throne
+    vtorch(-210,0,rnd); vtorch(210,0,rnd); vtorch(-190,-660,rnd); vtorch(190,-660,rnd); vtorch(0,dz+50,rnd);
+    mkMonster('bones',-150,-90,entry); mkMonster('bones',150,-90,entry); const cs=mkMonster('caster',0,-600,hall); if(cs.shot){cs.shot.el='holy';cs.shot.color=elementColor('holy');}
+    scapeKill(ctx,[{x:-150,z:-560,room:hall},{x:150,z:-840,room:hall}]);      // marble sentinels patrol the hall floor
+    scapeFetch(ctx, gard.map(g=>({x:g.x,z:g.z,y:g.h})));                        // gilded relics on the garden terraces
+    scapeFind(ctx, 0, dz-90, dy);
+    scapeSecret(ctx, entry.x-entry.w/2+40, entry.z-entry.d/2+40, 0);
+    finishScape(ctx,{sx:0,sz:entry.d/2-50,sy:0, gx:0,gz:dz-360/2+90, decoCol:MARBLE,decoTheme:'marble',decoTall:230});
+  },
+  /* CASTLE DUSKMOOR — the final level: enter the gatehouse courtyard, then ASCEND the tower tiers
+     (each a stair-climb) to the throne room at the top. Dark, torchlit, the hardest zone. */
+  castle(ctx){ const {rnd,mkMonster}=ctx; const STONE='#2c2e38';
+    const gate=vseg(0,0,620,460); G.rooms.push({x:0,z:0,w:620,d:460,monsters:[],encounter:false,cleared:true});
+    // the ascent: rising tower tiers, each reached by a stair-climb; the throne room is the top
+    let cx=0, cz=-500, cy=0; const tiers=[];
+    for(let k=1;k<=4;k++){ cy+=110; const tw=540-k*24, td=360;
+      climbRun(cx, cz+td/2+130, cy-110, cx, cz+td/2-10, cy, 82);
+      const tier=vplat(cx,cz,cy,tw,td,{terrace:true,checkpoint:true}); G.rooms.push({x:cx,z:cz,w:tw,d:td,y:cy,monsters:[],encounter:false,cleared:true}); tiers.push({x:cx,z:cz,y:cy});
+      vcol(cx-tw/2+30,cz,38,38,cy+64); vcol(cx+tw/2-30,cz,38,38,cy+64);
+      G.deco.push({x:cx-tw/2+30,z:cz,y0:cy+64,w:46,h:26,c:'#6a2020',theme:'apex'}); G.deco.push({x:cx+tw/2-30,z:cz,y0:cy+64,w:46,h:26,c:'#6a2020',theme:'apex'});   // dark banners
+      vtorch(cx-tw/2+40,cz,rnd); vtorch(cx+tw/2-40,cz,rnd);
+      cz-=td+180;
+    }
+    const top=tiers[tiers.length-1];
+    G.deco.push({x:top.x,z:top.z-40,y0:top.y,w:110,h:100,c:'#3a1420',theme:'apex'});   // the dark throne
+    mkMonster('shadeling',-130,-70,gate); mkMonster('shadeling',130,-70,gate); mkMonster('bones',0,-220,gate);
+    scapeKill(ctx,[{x:-150,z:-70,room:gate},{x:150,z:-220,room:gate}]);         // the King's guard hold the ground courtyard
+    scapeFind(ctx, top.x, top.z-70, top.y);                                     // the throne room at the top of the ascent
+    scapeSecret(ctx, gate.x-gate.w/2+40, gate.z-gate.d/2+40, 0);
+    finishScape(ctx,{sx:0,sz:gate.d/2-50,sy:0, gx:top.x,gz:top.z, decoCol:STONE,decoTheme:'apex',decoTall:300});
   },
 };
 function STONE_C(){ return '#6b6b73'; }
@@ -2487,8 +2561,9 @@ function hazSetup(rnd){                                  // place whatever the z
     for(const r of G.rooms){ if(rnd()<0.75) G.vents.push({x:r.x+(rnd()*2-1)*(r.w/2-70),z:r.z+(rnd()*2-1)*(r.d/2-70),r:44}); }
   }
 }
-function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':'LAVA'; }
-function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']:['#4a1206','#ff5a1e']; }
+function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
+function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
+  :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
 function lavaHit(){
   const p=G.p;
   if(isHitless()){ p.hp=0; p.dead=true; G.tookDamage=true;      // Hitless: a fall is death, not a toll
@@ -3607,9 +3682,10 @@ function enterWaystation(){
   G.walls.push({x:0,z:-380,w:864,d:26,h:150},{x:-420,z:0,w:26,d:824,h:150},{x:420,z:0,w:26,d:824,h:150},{x:0,z:420,w:864,d:26,h:150});
   for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
   G.torches.push({x:-398,z:-200,ph:1},{x:398,z:-200,ph:2},{x:-398,z:120,ph:3},{x:398,z:120,ph:4});
-  // the portal row: seven gates along the north wall; discovered rifts shimmer beside their parent
+  // the portal row: one gate per zone along the north wall; discovered rifts shimmer beside their parent
   G.gates=[];
-  ZONES.forEach((Z,i)=>{ const gx=-330+i*110;
+  const gSpan=760, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;                 // evenly spread the gates to fit however many zones
+  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep);
     G.gates.push({zi:i,x:gx,z:-322,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
     if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+42,z:-282,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
   // the posts: each named screen becomes a person (or a thing) standing somewhere

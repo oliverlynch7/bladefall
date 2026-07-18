@@ -323,7 +323,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.79.0';
+const VERSION3D='1.80.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -732,6 +732,12 @@ const SFX={
   shoot(){ tone({f0:1500,f1:280,dur:0.07,type:'triangle',vol:0.06});
     noise({dur:0.05,f0:3200,f1:1100,q:2.4,vol:0.09,a:0.001}); },
   // magic cast, flavored by element
+  // Phase 20: a fresh WAND-FIRE — a crisp descending magic zap + a bright sparkle tail. ~0.14s so
+  // it layers cleanly at rapid fire rates (unlike a 1s+ sourced laser, which piles into mud).
+  wand(){ tone({f0:1820,f1:540,dur:0.13,type:'triangle',vol:0.16});
+    tone({f0:2700,f1:1350,dur:0.09,type:'sine',vol:0.06,at:0.004});
+    noise({dur:0.08,f0:5400,f1:1700,q:2.2,vol:0.05,a:0.001});
+    tone({f0:3300,dur:0.06,type:'sine',vol:0.035,at:0.085}); },
   magic(el){
     if(el==='fire'){ tone({f0:150,f1:46,dur:0.28,type:'sawtooth',vol:0.10});
       noise({dur:0.30,f0:900,f1:180,type:'lowpass',vol:0.13,a:0.01}); playFx('fireshot'); }
@@ -892,11 +898,11 @@ const ARCHES={
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
-  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'blast'},
-  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'blast'},
-  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'blast'},
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
+  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
-  bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
+  bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
@@ -3437,7 +3443,7 @@ function playerAttack(cdMul){
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
     return;
   }
-  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); const _ff=weaponFireFx(w); if(_ff) playFx(_ff); } else SFX.shoot(); }
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else SFX.shoot(); }   // Phase 20: wands use the new procedural zap (weaponFireFx still gates which weapons get it)
   else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
     if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
       p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
@@ -3469,7 +3475,9 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     case 'spin': spinCleave(p,w,amt); break;           // greatsword: spinning cleave
     case 'javelin': throwJavelin(p,w,amt); break;      // javelin: heavy thrown lance
     case 'scythethrow': throwScythe(p,w,amt); break;   // scythe: hurl the spinning scythe (ranged), it boomerangs back
-    default: fireCharged(p,w,amt);                      // magic sword: elemental blast
+    case 'powershot': fireChargedBow(p,w,amt); break;  // longbow: a piercing power arrow
+    case 'spellsweep': spellSweep(p,w,amt); break;     // spellblade: a wide magic sweep that stacks its affinity
+    default: fireCharged(p,w,amt);                      // fallback elemental blast
   }
   G._desig=false;
 }
@@ -3506,6 +3514,22 @@ function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+a
   skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
   for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+amt*0.6); } }
   p.atkTimer=0.30; }
+// longbow charged POWER ARROW — a fat golden lance that pierces everything, scaling hard with charge
+function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(1200,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=(pr.speed||680)+amt*280, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const dmg=w.dmg*effPower(p)*(1.8+amt*3.4)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+    size:(pr.size||5)+3+amt*5,color:'#ffe9a8',shape:'lance',glow:1,trail:'#ffe9a8',dmg,kb:(w.kb||110)+180,pierce:99,el:w.el,life:(pr.range||1150)*1.2/sp,hitSet:[]});
+  SFX.shoot(); burst(p.x+Math.sin(p.yaw)*18,oy,p.z+Math.cos(p.yaw)*18,'#ffe9a8',12); skillRing(p.x,p.z,'#ffe9a8','#e8c060',56); G.shake=Math.min(G.shake+3+amt*5,12); p.atkTimer=0.24; }
+// spellblade charged SPELL SWEEP — a wide arc of the blade's affinity: less raw damage than a
+// greatsword's spin, MAGIC damage, and it stacks the spellblade's element twice (its signature).
+function spellSweep(p,w,amt){ const R=(w.range||60)+58+amt*52, els=w.el, ec=elementColor(els)||'#c9a6ff';
+  const dmg=Math.round(w.dmg*effPower(p)*(1.3+amt*1.7)*effMagPower(p)*offclassMul(p)*classStyleMul(p)), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); if(els) SFX.magic(els); G.shake=Math.min(G.shake+5+amt*5,14);
+  skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+18);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)){ hitEnemy(e,dmg,p,w.kb,ls,els); if(els) applyStatus(e,els,dmg,p.weapon); } }   // the extra applyStatus = double affinity buildup
+  for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:p.x+Math.cos(a)*26,y:p.y+22,z:p.z+Math.sin(a)*26,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.45,color:ec,sz:2.8}); } }
 function spinCleave(p,w,amt){ const R=(w.range||84)+42+amt*44, dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); G.shake=Math.min(G.shake+6+amt*5,15);
   for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,w.kb,ls,w.el); }
@@ -3926,6 +3950,7 @@ function checkStageClear(){
   }
 }
 function hurtPlayer(dmg,sx,sz){
+  if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
@@ -4136,8 +4161,8 @@ function update(dt){
   document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
   const _w=p.weapon;
   if(isChargeWeapon(_w) && !meta.autoAttack){                    // magic sword: tap = melee swing, hold = charge an elemental blast
-    if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }
-      p.holdT+=dt; if(p.holdT>=0.28 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }
+    if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }   // press = an instant quick attack...
+      p.holdT+=dt; if(p.holdT>=0.14 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }   // ...then keep holding and it goes STRAIGHT into the charge (snappier: 0.28->0.14)
     else { if(p.charging){ chargeRelease(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
   } else { p.charging=false; p.holdT=0; p.attackHeld=false;
     if(p.atkCd<=0 && p.dodgeTimer<=0){

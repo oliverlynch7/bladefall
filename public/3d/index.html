@@ -329,7 +329,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.85.0';
+const VERSION3D='1.86.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4381,6 +4381,8 @@ function update(dt){
     if(!e.dead && e.dmg>0 && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
       hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
   }
+  // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
+  for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
   // projectiles
   for(const pr of G.projectiles){
     pr.life-=dt; if(pr.gravity) pr.vy-=pr.gravity*dt;
@@ -4753,9 +4755,10 @@ function die(){
     ${perma?`<p class="hint" style="color:var(--danger)"><b>${D.name} — this save is erased. Back to the beginning.</b></p>`
       :`<div class="statgrid"><div class="vsrow"><span>Lost this attempt</span><b style="color:var(--danger)">${lostGold}g + everything found</b></div>
         <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
-    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+    <button class="bigbtn" id="hubBtn">${hubBtnLabel()}</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
+function hubBtnLabel(){ return Object.keys(meta.classUnlocked||{}).length ? 'Return to Hub' : 'Choose your class'; }   // a class-less death routes to class select — say so
 /* ============================================================
    ENDLESS DESCENT  (Phase 11 endgame loop + Phase 14 "Proving Grounds")
    An infinite, escalating survival mode. Descend floor after floor; each is harder
@@ -4915,7 +4918,7 @@ function endlessDie(){
       <div class="vsrow"><span>Foes slain</span><b>${kills}</b></div>
       <div class="vsrow"><span>Gold earned</span><b style="color:#ffd24a">+${goldEarned}g</b></div>
       <div class="vsrow"><span>Kept</span><b style="color:var(--good)">everything — level, gear, gold</b></div></div>
-    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+    <button class="bigbtn" id="hubBtn">${hubBtnLabel()}</button></div>`);
   document.getElementById('hubBtn').onclick=openHub;
 }
 function openEndlessGate(){
@@ -7184,7 +7187,7 @@ function render(t){
   if(jw){ if(jetpackUnlocked()&&meta.jetpack!==false){ jw.classList.remove('hide'); if(jf) jf.style.width=Math.round((G.p.jetFuel==null?1:G.p.jetFuel)*100)+'%'; jw.style.opacity=G.p.jets?1:0.7; } else jw.classList.add('hide'); }
   // stage banner via toast-style DOM (first 2.6s)
   if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name;   // banner reflects the real 7-zone world, not the retired 14-stage list
-    const nm=(G.areaName||s.name).toUpperCase(), sub=(G.hub||G.trial||G.side)?'':('  ·  ZONE '+((G.zone||0)+1)+'/'+ZONES.length);
+    const nm=(G.areaName||s.name).toUpperCase(), sub=G.endless?('  ·  FLOOR '+(G.floor||1)):((G.hub||G.trial||G.side)?'':('  ·  ZONE '+((G.zone||0)+1)+'/'+ZONES.length));
     toast(nm+sub); }
   if(G.stageBanner<=0) render._bannered=null;
 }

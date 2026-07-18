@@ -321,7 +321,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.59.0';
+const VERSION3D='1.60.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -815,11 +815,11 @@ const ARCHES={
   axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
-  scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe'},
+  scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
   flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'sword',el:'fire',chg:'blast'},
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'sword',el:'ice',chg:'blast'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'great',el:'arcane',chg:'spin'},
-  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true}, // swing PULLS + reaps + heals on kill
+  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
@@ -2838,7 +2838,13 @@ function playerAttack(cdMul){
     return;
   }
   if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag') SFX.magic(w.el); else SFX.shoot(); }
-  else { p.atkTimer=0.26; SFX.slash(); }
+  else { p.atkTimer=0.26; SFX.slash();
+    if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
+      p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
+      p._scytheT=G.time; p.swingCombo=p.scytheCombo;
+      if(p.scytheCombo===2){ p.atkTimer=0.34; p.atkCd*=1.12; SFX.magic(w.el||'void'); G.shake=Math.min(G.shake+6,14); }   // the finisher costs a beat more
+    } else p.swingCombo=-1;
+  }
 }
 /* Class combat styles: the Ranger trades peaks for versatility — his shots trail a
    Mage's catalysts and his steel trails a Warrior's, but he owns both ranges. */
@@ -2860,9 +2866,19 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
     case 'quake': chargeQuake(p,w,amt); break;         // hammer: radial shockwave + stun
     case 'spin': spinCleave(p,w,amt); break;           // greatsword: spinning cleave
     case 'javelin': throwJavelin(p,w,amt); break;      // javelin: heavy thrown lance
+    case 'scythethrow': throwScythe(p,w,amt); break;   // scythe: hurl the spinning scythe (ranged), it boomerangs back
     default: fireCharged(p,w,amt);                      // magic sword: elemental blast
   }
 }
+// the scythe's RANGED attack: fling it spinning, it pierces everything and curves back to you
+function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=560, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  const dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p);   // ranged-type damage
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
+    size:17,color:w.blade||'#cfd6df',shape:'scythespin',glow:w.el?1:0,el:w.el||null,dmg,kb:(w.kb||260),pierce:99,
+    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0});
+  SFX.slash(); if(w.el) SFX.magic(w.el); p.atkTimer=0.26; G.shake=Math.min(G.shake+5,12);
+  burst(ox,oy,oz,w.blade||'#cfd6df',8); }
 // a short forward thrust (the light stab shared by javelin + point-blank knives)
 function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash();
   const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw), dmg=w.dmg*effPower(p)*(mult||1)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
@@ -3096,6 +3112,17 @@ function resolveSwing(){
   if(w.reaper && classFamilyOk(w) && p._pullId!==p.swingId){ p._pullId=p.swingId;   // Void Scythe: gravity-yank the nearby dead inward to cluster them, then reap
     for(const e of G.enemies){ if(e.dead||e.boss) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>62 && d<240){ const k=Math.min(130,240-d);
       e.x+=(p.x-e.x)/d*k*0.5; e.z+=(p.z-e.z)/d*k*0.5; G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*0.6,vy:20,vz:(p.z-e.z)*0.6,life:0.25,color:'#b06bff',sz:2.4}); } } }
+  if(w.art==='scythe' && p.swingCombo===2 && classFamilyOk(w)){       // SCYTHE FINISHER (3rd hit): a MAGIC burst — scales with magic damage, wider + harder
+    const cr=Math.random()<0.18+effCrit(p), els=w.el||'void', ec=elementColor(els)||'#c47bff';
+    const mdmg=Math.round(w.dmg*effPower(p)*(2.0+(cr?0.6:0))*effMagPower(p)*offclassMul(p)*classStyleMul(p));
+    const R=M.reach+56, ls2=Math.max(w.lifesteal||0,effLifesteal(p));
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue; const d=dXZ(e.x,e.z,p.x,p.z);
+      if(d>R+e.r) continue; if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; e.lastHit=p.swingId; hitEnemy(e,mdmg,p,(w.kb||260)+90,ls2,els); }
+    if(p._burstId!==p.swingId){ p._burstId=p.swingId;                 // one-shot burst VFX (skillRing carries no damage — dmg:0)
+      skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30); G.shake=Math.min(G.shake+7,15);
+      for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
+    return;
+  }
   const crit=Math.random()<0.18+effCrit(p);
   const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
   const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; hitEnemy(e,dmg,p,w.kb,ls,w.el); }; // no reaching through walls
@@ -4897,7 +4924,9 @@ function drawHero3(p,t,preview){
     else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
     else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
     else if(w.art==='axe'){ rotY((0.75-prog)*1.9); rotX(-0.9-prog*0.3); rotZ(0.35); }    // wide sideways hack
-    else if(w.art==='scythe'){ rotZ(0.35); rotX(-0.5); rotY(1.5-prog*3.0); }             // FULL horizontal reap: sweeps right→left across the front, matching the wide arc hitbox
+    else if(w.art==='scythe'){                                                            // 3-hit combo: alternating horizontal reaps, then an overhead magic chop
+      if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it down
+      else { const dir=(p.swingCombo===1)?-1:1; rotZ(0.35); rotX(-0.5); rotY((1.5-prog*3.0)*dir); } }
     else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
   } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
@@ -5008,9 +5037,14 @@ function drawSwing3(p,t){
   } else if(M.shape==='thrust'){
     const reach=M.reach*Math.min(1,prog*1.7);
     for(let k=1;k<=5;k++){ const dd=reach*k/5; bx(p.x+fx*dd, y, p.z+fz*dd, M.width*1.1,6,M.width*1.1, col, col, a*(1-k*0.12)); }
-  } else { // arc fan swept up to the current blade angle
-    const half=M.arc/2, cur=-half+prog*M.arc, rr=M.reach*0.9;
-    for(let k=0;k<=8;k++){ const a0=-half+(k/8)*M.arc; if(a0>cur+0.05) break; const ang=p.yaw+a0;
+  } else if(w.art==='scythe' && p.swingCombo===2){    // scythe FINISHER: an expanding elemental ring + core flash
+    const els=w.el||'void', ec=elementColor(els)||'#c47bff', rr=(M.reach+56)*(0.45+0.65*prog);
+    for(let k=0;k<20;k++){ const ang=k/20*6.283; bx(p.x+Math.cos(ang)*rr, y+2, p.z+Math.sin(ang)*rr, 12,7,12, ec, tint(ec,'#fff',0.4), a*1.4); }
+    bx(p.x,y+8,p.z, 16,16,16, ec, ec, a*0.9);
+  } else { // arc fan swept up to the current blade angle (scythe hits 0/1 sweep alternate directions)
+    const rev=(w.art==='scythe' && p.swingCombo===1), half=M.arc/2, rr=M.reach*0.9;
+    const cur=rev?(half-prog*M.arc):(-half+prog*M.arc);
+    for(let k=0;k<=8;k++){ const a0=-half+(k/8)*M.arc; if(rev?(a0<cur-0.05):(a0>cur+0.05)) continue; const ang=p.yaw+a0;
       const near=1-Math.min(1,Math.abs(a0-cur)/0.6);
       bx(p.x+Math.sin(ang)*rr, y, p.z+Math.cos(ang)*rr, 11,6,11, col, col, a*(0.35+0.65*near)); }
   }
@@ -5624,6 +5658,12 @@ function drawProjectile3(pr,t){
     pushM(); mv(0,0,-6.6); box(0.6,4.6,4, c, g); box(4.6,0.6,4, c, g); popM();                   // fletching vanes
   }
   else if(pr.shape==='axe'){ rotY(pr.spin||t*6); box(3,3,16,'#6a4a2a'); pushM(); mv(0,7,0); box(15,3,11,'#cfd6df','#ffffff',0.2); box(10,3,6,'#9aa4ad'); popM(); }   // the hurled axe
+  else if(pr.shape==='scythespin'){ const c=pr.color||'#cfd6df', g=pr.glow?c:null;   // the thrown scythe, whirling flat
+    rotY((pr.spin||0)*3+t*10);
+    box(3,3,4,'#3a2c1e');                                                              // hub
+    for(const s of [-1,1]){ pushM(); rotY(s>0?0:Math.PI);                              // two curved blades so it reads as a scythe wheel
+      box(3,2,20,'#2e2620'); mv(0,0,11); box(11,2,3, c, g); mv(5,0,-2); box(7,2,3, c, g); mv(3,0,-3); box(4,2,3, tint(c,'#fff',0.4), g); popM(); }
+    for(let i=0;i<3;i++){ const a=(pr.spin||0)*3+i*2.09; pushM(); mv(Math.cos(a)*14,0,Math.sin(a)*14); box(2,2,2, c, g, 0.5); popM(); } }   // motion sparks
   else if(pr.shape==='rock'){ rotY(t*7+pr.x*0.1); rotX(t*5); const s=pr.size||9;   // cragspitter's hurled boulder — a tumbling stone
     box(s*1.5,s*1.4,s*1.5,'#7a6a52','#3a2f22'); box(s*1.0,s*1.0,s*1.0,'#5a4c38'); box(s*0.6,s*1.6,s*0.5,'#4a3e2c'); }
   else if(pr.shape==='lance'){ const c=pr.color;    // Deadeye: a long bright piercing lance (clearly a skill, not an arrow)

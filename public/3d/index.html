@@ -291,6 +291,19 @@
   .ico-skill-mage-gravity-well{background-image:url('icons/mage_gravity_well.png');}
   .ico-skill-mage-rune-barrier{background-image:url('icons/mage_rune_barrier.png');}
   .ico-skill-mage-elemental-overload{background-image:url('icons/mage_elemental_overload.png');}
+  .ico-action-equip{background-image:url('icons/action_equip.png');}
+  .ico-action-sell{background-image:url('icons/action_sell.png');}
+  .ico-action-bag-stash{background-image:url('icons/action_bag_stash.png');}
+  .ico-action-buy{background-image:url('icons/action_buy.png');}
+  .ico-action-forge-fuse{background-image:url('icons/action_forge_fuse.png');}
+  .ico-action-fortunes-bag{background-image:url('icons/action_fortunes_bag.png');}
+  .ico-action-respec{background-image:url('icons/action_respec.png');}
+  .ico-action-compare{background-image:url('icons/action_compare.png');}
+  .ico-action-auto-sell-bag{background-image:url('icons/action_auto_sell_bag.png');}
+  .ico-action-sort{background-image:url('icons/action_sort.png');}
+  .ico-action{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
+  .gearrow .gi .ico-action{display:block;width:38px;height:38px;margin:0 auto;vertical-align:middle;}
+  #controls .btn .ico-action{display:block;width:23px;height:23px;margin:0 auto 1px;vertical-align:middle;}
   .ico-event{width:1.7em;height:1.7em;margin-right:.28em;vertical-align:-.5em;}
   .ico-damage-physical{background-image:url('icons/damage-physical.png');}
   .ico-damage-ranged{background-image:url('icons/damage-ranged.png');}
@@ -444,8 +457,8 @@
   <button class="btn" id="bJump"><svg viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></button>
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
-  <button class="btn tog" id="bKeep">SELL</button>
-  <button class="btn tog" id="bBag">BAG</button>
+  <button class="btn tog" id="bKeep"><span class="ico ico-action ico-action-auto-sell-bag"></span>SELL</button>
+  <button class="btn tog" id="bBag"><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
   <div id="mirrorui" class="hide"></div>
@@ -470,7 +483,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.104.0';
+const VERSION3D='1.105.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1050,6 +1063,7 @@ function rarityIcon(rid){ return RARITY[rid]?`<span class="ico ico-rarity ico-ra
 function eventIcon(name){ return name?`<span class="ico ico-event ico-${name}" aria-hidden="true"></span>`:''; }
 function classIcon(id){ return eventIcon('class-'+id); }
 function skillIcon(id){ return eventIcon('skill-'+id); }
+function actionIcon(id){ return id?`<span class="ico ico-action ico-action-${id}" aria-hidden="true"></span>`:''; }
 function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
@@ -2018,13 +2032,13 @@ function openBag(back){
     const lock=!canWield(o);
     return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
-      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):'Equip'}</button>
-      <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
+      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
+      <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <button class="bigbtn ghost" id="sortBtn" style="padding:6px 10px;font-size:12px">Sort: ${SORTS[_bagSort]}</button>
+    <button class="bigbtn ghost" id="sortBtn" style="padding:6px 10px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
     <div class="achlist" style="max-height:min(50vh,360px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
@@ -2077,9 +2091,9 @@ function openForge(back){
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn">2× <span style="color:${rc}">${RARITY[g.rarity].name}</span> ${kind}</div>
         <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
-      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Forge</button></div>`; }).join('')
+      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('forge-fuse')}Forge</button></div>`; }).join('')
     :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh"><span class="ico ico-anvil ico-lg"></span> The Forge</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">${actionIcon('forge-fuse')}The Forge</h2>
     <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
@@ -2104,7 +2118,7 @@ function gambleSpin(back){
   const pool=[itemAv(makeWeapon('sword','common')),itemAv(makeArmor('uncommon','chest')),itemAv(makeWeapon('bow','rare')),
               itemAv(makeArmor('epic','helmet')),itemAv(makeWeapon('firestaff','uncommon')),itemAv(makeWeapon('great','legendary'))];
   const finalIcon=itemAv(ro);
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">🎲 Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">${actionIcon('fortunes-bag')}Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid #ffd24a;box-shadow:0 0 24px #ffd24a66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]}"></div></div>
     <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
     <button class="bigbtn hide" id="gamAgain">Again · ${GAMBLE_COST}g</button>
@@ -5056,8 +5070,8 @@ function offerWeapon(nw){
     <img class="itemav" src="${itemAv(nw)}" alt="">
     <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':nw.cls==='ranged'?'#e5c997':'#b8b8b8'}">${damageTypeHTML(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${statusIcon(el2)} ${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
     <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); playFx('equip'); toast(nw.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
@@ -5079,8 +5093,8 @@ function offerArmor(na){
       ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(na.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
@@ -5096,8 +5110,8 @@ function offerTrinket(nt){
       ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
   document.getElementById('stashBtn').onclick=()=>{ if(stashItem({trinket:nt})){ toast(nt.name+' stashed'); resumePlay(); } else bagFullPrompt({trinket:nt},resumePlay); };
   document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(nt.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
@@ -5866,8 +5880,8 @@ function openHubMenu(){
     <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
     <button class="bigbtn ghost" id="questBtn">Quest Board</button>
     <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
-    <button class="bigbtn ghost" id="bagBtn">Bag · ${meta.stash.length}/${STASH_CAP}</button>
-    <button class="bigbtn ghost" id="forgeBtn"><span class="ico ico-anvil"></span> The Forge — fuse gear</button>
+    <button class="bigbtn ghost" id="bagBtn">${actionIcon('bag-stash')}Bag · ${meta.stash.length}/${STASH_CAP}</button>
+    <button class="bigbtn ghost" id="forgeBtn">${actionIcon('forge-fuse')}The Forge — fuse gear</button>
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
     <button class="bigbtn ghost" id="wstudioHub">🗡 Weapon Studio</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
@@ -5958,8 +5972,8 @@ function openTrainer(back){
       <div style="flex:1;min-width:0">
         <div class="gn">${C.disp} ${sel?'<span style="color:var(--amber);font-size:10px">· EQUIPPED</span>':''}</div>
         <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(cs.rank>=2?' · choose a path!':''))+' · '+C.family.join(', ')):hint}</div></div>
-      ${un&&!sel?`<button class="bigbtn buybtn" data-eq="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Equip</button>`:''}
-      ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">Respec 300g</button>`:''}
+      ${un&&!sel?`<button class="bigbtn buybtn" data-eq="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('equip')}Equip</button>`:''}
+      ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">${actionIcon('respec')}Respec 300g</button>`:''}
       ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
     </div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
@@ -6114,15 +6128,15 @@ function openShop(back){
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
     const lock=!canWieldRid(rid);
     return `<div class="gearrow" style="--spine:${RARITY[rid].color}${lock?';opacity:.55':''}"><img class="bagav" src="${itemAv(w)}" alt="">
-      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name}${rpip(rid)}${lock?` <span style="color:#ff8a82;font-size:11px">🔒 Lv ${rarityReq(rid)}</span>`:' <span style="opacity:.5;font-size:11px">— compare ›</span>'}</div>
+      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name}${rpip(rid)}${lock?` <span style="color:#ff8a82;font-size:11px">🔒 Lv ${rarityReq(rid)}</span>`:` <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span>`}</div>
         <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
-      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford&&!lock?'':'opacity:.5'}">${cost}g</button></div>`; }).join('');
+      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford&&!lock?'':'opacity:.5'}">${actionIcon('buy')}${cost}g</button></div>`; }).join('');
   // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
   const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
   const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
-      <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.5;font-size:11px">— compare ›</span></div>
+      <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
         <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
-      <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${vsCost}g</button></div>`:'';
+      <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${actionIcon('buy')}${vsCost}g</button></div>`:'';
   // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
   const socksCost=1200, socksAfford=meta.gold>=socksCost;
   const socksRow=meta.socks
@@ -6133,7 +6147,7 @@ function openShop(back){
   const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi eventgi">${eventIcon('reward-bag-slots')}</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
   // Phase 18: Fortune's Bag — one pull, mostly junk, a thin real tail. The Quartermaster profits.
   const gAfford=meta.gold>=GAMBLE_COST;
-  const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi">🎲</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${GAMBLE_COST}g</button></div>`;
+  const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi eventgi">${actionIcon('fortunes-bag')}</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${actionIcon('buy')}${GAMBLE_COST}g</button></div>`;
   // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
   const goal = !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
@@ -6195,7 +6209,7 @@ function shopCompare(w,cost,back){
       <div class="vsrow"><span>Element</span><b style="color:${elementColor(w.el)||'#cfd6df'};text-transform:capitalize">${w.el||'Neutral'}</b></div>
       ${row('Lifesteal %',cur?(cur.lifesteal*100):null,(w.lifesteal||0)*100)}
     </div>
-    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">Buy · ${cost}g</button>
+    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">${actionIcon('buy')}Buy · ${cost}g</button>
     <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
   document.getElementById('buyC').onclick=()=>{ if(!canWield(w)){ toast('🔒 Requires Level '+rarityReq(w.rarity)+' to wield'); return; } if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }

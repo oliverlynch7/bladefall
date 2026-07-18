@@ -635,3 +635,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Wired the four mechanically matching concepts into current skills: Iron Guard artwork on Guardian Bulwark, Snare Trap on Spike Trap, Camouflage on Smoke Bomb, and Rune Barrier on Wizard Barrier.
 - [x] Bundled Shield Bash, Whirlwind, Execution, Quickshot, Rapid Fire, Elemental Beam, Gravity Well, and Elemental Overload for their planned class-kit skills without misassigning them to unrelated current abilities.
 - [x] Real-browser verification passed: all twelve assets returned HTTP 200, the four live mappings resolved correctly, the normalized contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Item-action icon set (SHIPPED v1.105.0)
+
+- [x] Visually confirmed the separate ten-image 3:36 PM batch in supplied order as Equip, Sell, Bag/Stash, Buy, Forge/Fuse, Fortune's Bag/Gamble, Respec, Compare, Auto-sell/Auto-bag, and Sort.
+- [x] Removed baked checkerboards, normalized all ten icons to transparent 256×256 PNGs, and added a shared `actionIcon()` presentation helper.
+- [x] Wired the action artwork into loot decisions, bag equip/sell/sort rows, hub bag and forge controls, forge actions, Fortune's Bag, class equip/respec, shop purchase and compare affordances, and combat auto-sell/auto-bag toggles.
+- [x] Real-browser verification passed: every PNG returned HTTP 200, all ten CSS classes and UI references resolved, the normalized contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.

@@ -458,3 +458,42 @@ Shipped in two rollback-safe batches (structural first, then the status layer).
 Reaper/Hoarfang/Pestilent Harvester/Runic Crescent/Dawn Reaper) is design-referenced only — not added this
 pass (system supports them; only Scythe + Void Scythe ship today). Distinct per-Scythe silhouettes would be
 a new-art task.
+
+## Phase 17 — Zone Identity Overhaul: ALL remaining levels (SHIPPED v1.66.0 → v1.71.0)
+Executed from `docs/ZONE_OVERHAUL_PROMPT.md` in six ship-per-batch deploys; every batch
+BFS-verified in-browser (portal + every quest objective/den/fetch/find/secret/chest
+reachable) before pushing, with regression sweeps of all prior zones each time.
+
+- [x] **v1.66.0 — FROSTFELL** rebuilt to the Hollow Pass bar: Shorefall Camp (frozen dead
+  Wardens) → the Frozen Lake **fork** (drifting floe-line vs the shore road, looped by a
+  ridge island) → Icefall terraces → **THE CRYSTAL GALLERY** (enclosed ice-cave hall — banded
+  walls, roof-slab light slits, glowing crystals, a pinned rime-caster; the Glacier Vault
+  hides through a wall gap) → Frostwatch Summit: cairn + portal under a 3-band **aurora**.
+  PLUS the new **boss-arena system** (`bossFinish` + `BOSS_ARENAS` dispatch; portals open on
+  the boss's death) with all five late arenas: Sorcerer's Cracked Ring, Colossus's Crucible,
+  King's Throne Ring, Marble Colossus's Rotunda, Tyrant's Summit of Duskmoor.
+- [x] **v1.67.0 — EMBERDEEP**: caldera descent — Rim under a banded **magma-fall** (Magma Core
+  rift hidden BEHIND the falls) → switchback causeways → **fork**: the Vent Gauntlet (three
+  chambers breathing Emberfall fire) vs the Spire Climb (six basalt pillar-hops) → the Black
+  Bridge past the **Collapsed Titan** → Ash Sanctum (altar find, monolith ring) → Furnace Gate.
+- [x] **v1.68.0 — THE ABYSS**: floating shards — Last Shore → Shatter Field **fork** (phasing
+  causeway vs the elevated **drift path** across three swaying islands) → the **INVERTED RUIN**
+  (arch, hanging tower, chains into the void) → Anchor Spire (Rift Anchor find on its crown)
+  → the King's Door. Five splinter satellites, each one brave jump off the route.
+- [x] **v1.69.0 — SUNSPIRE PALACE**: ceremonial axis — Sun Court (gold-rimmed reflecting
+  pools, twin colossi) → Processional colonnade with **god-ray light shafts** + hanging-garden
+  planters → the one broken symmetry: intact West Gallery (chest) vs the **CORRUPTED EAST
+  WING** (crumbling checkerboard over the fall; Sealed Reliquary + second chest at the dead
+  end) → Grand Stair → Throne Antechamber.
+- [x] **v1.70.0 — CASTLE DUSKMOOR**: the siege ascent — THE BREACH → Courtyard War → **fork**:
+  the crenellated Rampart Run above vs the murder-hole road below → the **BROKEN TOWER**
+  spiral (8 hanging steps, 390 up) → the Last Bridge (two swaying spans) → the Keep Door:
+  throne, burning windows, the void banded across the sky.
+- [x] **v1.71.0 — early arenas + polish + sweep**: Brute's Trampled Field, Marksman's
+  Shooting Gallery, Warden's Yard (every boss now on a custom set-piece); Outskirts gains
+  the Waystone **henge**/pond/fallen-log walk/scarecrow; Keep gains gargoyles/banners/chapel
+  ruin/rubble; full-game sweep — **24 layouts, zero failures**, sides + trials intact.
+
+All within perf budget (deco ≤ ~90/zone vs Hollow's bar; combat on y=0 per engine rules;
+solvability by construction with JMPV/JMPH). Future (separated): side-zone interior identity
+pass; unique boss-fight MECHANICS per arena (geometry shipped, behaviors unchanged).

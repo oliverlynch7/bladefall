@@ -133,6 +133,17 @@
   #storycard.show{opacity:1;}
   #bKeep{top:calc(38% + 38px);}
   #bBag{top:calc(38% + 76px);}
+  /* Weapon Studio control dock */
+  #wstudio{position:absolute;left:0;right:0;bottom:0;z-index:22;background:linear-gradient(0deg,rgba(8,9,13,.97),rgba(8,9,13,.82));border-top:1px solid #2b3040;padding:10px 12px calc(env(safe-area-inset-bottom) + 12px);pointer-events:auto;}
+  #wstudio.hide{display:none;}
+  .wshead{font-size:13px;color:var(--amber);font-weight:800;margin-bottom:8px;text-align:center;}
+  .wshead span{color:#cfd6df;font-weight:600;font-size:12px;margin-left:8px;text-transform:capitalize;}
+  .wslist{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+  .wsbtn{flex:0 0 auto;padding:8px 12px;border-radius:9px;border:1px solid #2b3040;background:rgba(255,255,255,.03);color:var(--ink);font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;}
+  .wsbtn.sel{border-color:var(--amber);background:rgba(232,163,61,.16);color:var(--amber);}
+  .wsctrl{display:flex;gap:8px;margin-top:8px;justify-content:center;flex-wrap:wrap;}
+  .wsbig{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(180deg,#f0b95c,var(--amber));color:#0b0c10;font-weight:800;font-size:13px;cursor:pointer;}
+  .wsbig.ghost{background:rgba(255,255,255,.04);color:var(--ink);border:1px solid #2b3040;}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
   /* align-items:flex-start + margin:auto on the card = vertically centered WHEN it fits, top-reachable + scrollable when it doesn't (fixes the top-cutoff on tall menus). */
@@ -275,6 +286,7 @@
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep">SELL</button>
   <button class="btn tog" id="bBag">BAG</button>
+  <div id="wstudio" class="hide"></div>
   <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
@@ -294,7 +306,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.56.0';
+const VERSION3D='1.57.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2457,6 +2469,7 @@ const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dod
 window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
+    if(mode==='studio'){ exitStudio(); return; }
     if(mode==='play') openPause();
     else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); }
     else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
@@ -3177,6 +3190,7 @@ function hurtPlayer(dmg,sx,sz){
   if(p.hp<=0){ p.hp=0; p.dead=true; die(); }
 }
 function update(dt){
+  if(mode==='studio'){ studioUpdate(dt); return; }
   if(mode!=='play') return;
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
@@ -4030,6 +4044,7 @@ function openHubMenu(){
     <button class="bigbtn ghost" id="bagBtn">Bag · ${meta.stash.length}/${STASH_CAP}</button>
     <button class="bigbtn ghost" id="forgeBtn">🔨 The Forge — fuse gear</button>
     <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
+    <button class="bigbtn ghost" id="wstudioHub">🗡 Weapon Studio</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.getElementById('riseBtn').onclick=wsResume;
@@ -4041,6 +4056,7 @@ function openHubMenu(){
   document.getElementById('bagBtn').onclick=()=>openBag(openHubMenu);
   document.getElementById('forgeBtn').onclick=()=>openForge(openHubMenu);
   document.getElementById('wardBtn').onclick=()=>openWardrobe(openHubMenu);
+  { const _wh=document.getElementById('wstudioHub'); if(_wh) _wh.onclick=()=>openWeaponStudio(openHubMenu); }
   document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
@@ -4335,6 +4351,73 @@ function openGear(back){
     </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
+/* ============================================================
+   WEAPON STUDIO — inspect EVERY weapon held by the character + play its attack animation live
+   ============================================================ */
+let studio=null;
+function openWeaponStudio(back){
+  initAudio();
+  studio={ t:0, arche:'scythe', atkLoop:true, atkT:0.4, spin:true, back:back||openPause, proj:[], p:null };
+  const p=freshPlayer(); p.gear=freshGear(); p.x=0; p.y=0; p.z=0; p.yaw=0.4; p.hp=p.maxHp=9999; p.invuln=0; p.atkTimer=0;
+  studio.p=p;
+  mode='studio'; showOverlay(false); showGameUI(false);
+  document.getElementById('questbox').classList.add('hide');
+  buildStudioPanel();
+  studioSetWeapon('scythe');
+}
+function studioSetWeapon(arche){ if(!studio) return; studio.arche=arche;
+  const w=makeWeapon(arche,'epic'); normWeapon(w); studio.p.weapon=w; studio.p.atkTimer=0; studio.proj.length=0;
+  const nm=document.getElementById('wsName'); if(nm) nm.textContent=(ARCHES[arche]?ARCHES[arche].disp:arche)+' — '+(w.cls==='ranged'?'Ranged':'Melee')+(w.el?' · '+w.el:'');
+  document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',b.dataset.a===arche));
+}
+function studioSwing(){ if(!studio) return; const p=studio.p; if(p.atkTimer>0) return; p.swingId=(p.swingId||0)+1;
+  const w=p.weapon;
+  if(w.cls==='melee'){ p.atkTimer=0.26; try{SFX.slash();}catch(e){} }
+  else { p.atkTimer=0.18; try{ w.sch==='mag'?SFX.magic(w.el):SFX.shoot(); }catch(e){}
+    const pr=w.proj||{}, ang=p.yaw, cnt=pr.count||1;
+    for(let i=0;i<cnt;i++){ const a=ang+(cnt>1?(i-(cnt-1)/2)*(pr.spread||0.1):0);
+      studio.proj.push({x:p.x+Math.sin(a)*22,y:p.y+30,z:p.z+Math.cos(a)*22,vx:Math.sin(a)*(pr.speed||500)*0.32,vy:0,vz:Math.cos(a)*(pr.speed||500)*0.32,size:pr.size||7,color:w.blade||pr.color||'#cfd6df',glow:1,shape:pr.shape||'arrow',life:1.6,gravity:(pr.gravity||0)*0.3}); } }
+}
+function studioUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt;
+  const p=studio.p;
+  if(studio.spin) p.yaw+=dt*0.5;
+  if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
+  if(studio.atkLoop){ studio.atkT-=dt; if(studio.atkT<=0){ studioSwing(); studio.atkT=1.5; } }
+  for(const pr of studio.proj){ pr.x+=pr.vx*dt; pr.z+=pr.vz*dt; pr.y+=(pr.vy||0)*dt; if(pr.gravity) pr.vy=(pr.vy||0)-pr.gravity*dt; pr.life-=dt; }
+  studio.proj=studio.proj.filter(pr=>pr.life>0);
+}
+function renderStudio(t){
+  gl.clearColor(0.05,0.055,0.075,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,900);
+  VIEW=mLookAt([Math.sin(0.7)*160,80,Math.cos(0.7)*160],[0,26,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,600,2000); gl.uniform3f(U.uFog,0.05,0.055,0.075);
+  CURM=mIdent();
+  bx(0,-8,0, 260,16,260,'#181b22'); bx(0,2,0, 120,6,120,'#242833'); bx(0,6.4,0, 96,3,96,'#2c313d');   // pedestal
+  const p=studio.p; drawShadow(0,0,17,0.34);
+  drawHero3(p,t,false); drawSwing3(p,t);
+  for(const pr of studio.proj) drawProjectile3(pr,t);
+}
+function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
+function buildStudioPanel(){
+  const pn=document.getElementById('wstudio'); if(!pn) return;
+  const list=ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('');
+  pn.innerHTML=`<div class="wshead">⚒ Weapon Studio <span id="wsName"></span></div>
+    <div id="wsList" class="wslist">${list}</div>
+    <div class="wsctrl">
+      <button class="wsbig" id="wsSwing">⚔ Swing</button>
+      <button class="wsbig" id="wsAuto">↻ Auto: On</button>
+      <button class="wsbig" id="wsSpin">🔄 Spin: On</button>
+      <button class="wsbig ghost" id="wsBack">Back</button>
+    </div>`;
+  pn.classList.remove('hide');
+  pn.querySelectorAll('.wsbtn').forEach(b=>b.onclick=()=>studioSetWeapon(b.dataset.a));
+  document.getElementById('wsSwing').onclick=()=>studioSwing();
+  document.getElementById('wsAuto').onclick=()=>{ studio.atkLoop=!studio.atkLoop; document.getElementById('wsAuto').textContent='↻ Auto: '+(studio.atkLoop?'On':'Off'); };
+  document.getElementById('wsSpin').onclick=()=>{ studio.spin=!studio.spin; document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin?'On':'Off'); };
+  document.getElementById('wsBack').onclick=()=>exitStudio();
+}
 function fsOn(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
 function toggleFullscreen(){ try{
   if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
@@ -4349,6 +4432,7 @@ function openPause(){
     <div class="sect">Character</div>
     <div class="pgrid">
       <button class="bigbtn ghost" id="gearBtn">🛡 Gear</button>
+      <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons</button>
       <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
       <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
       <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
@@ -4388,6 +4472,7 @@ function openPause(){
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
+  { const _ws=document.getElementById('wstudioBtn'); if(_ws) _ws.onclick=()=>openWeaponStudio(openPause); }
   document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
   document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
@@ -5233,6 +5318,7 @@ function drawThreatArrows(c){
   c.globalAlpha=1;
 }
 function render(t){
+  if(mode==='studio' && studio){ renderStudio(studio.t); return; }
   const s=STAGES[G?G.stageIndex:0];
   const sky=s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
@@ -5579,6 +5665,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
   buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },

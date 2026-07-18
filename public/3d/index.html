@@ -242,8 +242,25 @@
   .ico-slot-amulet{background-image:url('icons/slot-amulet.png');}
   .ico-slot-ring{background-image:url('icons/slot-ring.png');}
   .ico-slot{width:1.75em;height:1.75em;margin-right:.28em;vertical-align:-.52em;}
+  .ico-event-treasure-chest{background-image:url('icons/event-treasure-chest.png');}
+  .ico-event-mimic{background-image:url('icons/event-mimic.png');}
+  .ico-event-secret-rift{background-image:url('icons/event-secret-rift.png');}
+  .ico-event-boss-skull{background-image:url('icons/event-boss-skull.png');}
+  .ico-event-trophy{background-image:url('icons/event-trophy.png');}
+  .ico-event-quest-marker{background-image:url('icons/event-quest-marker.png');}
+  .ico-reward-magic-socks{background-image:url('icons/reward-magic-socks.png');}
+  .ico-reward-bag-slots{background-image:url('icons/reward-bag-slots.png');}
+  .ico-event-level-up{background-image:url('icons/event-level-up.png');}
+  .ico-event-achievement{background-image:url('icons/event-achievement.png');}
+  .ico-event{width:1.7em;height:1.7em;margin-right:.28em;vertical-align:-.5em;}
+  #questbox .ico-event{width:22px;height:22px;vertical-align:-7px;}
+  #questbox .qtick .ico-event{width:18px;height:18px;margin:0;vertical-align:-5px;}
+  #xplabel{width:42px;white-space:nowrap;}
+  #xplabel .ico-event{width:16px;height:16px;margin-right:1px;vertical-align:-5px;}
   .gearrow .gi.slotgi{width:68px;text-align:center;}
   .gearrow .gi .ico-slot{display:block;width:34px;height:34px;margin:0 auto 3px;vertical-align:middle;}
+  .gearrow .gi.eventgi{width:58px;text-align:center;}
+  .gearrow .gi .ico-event{display:block;width:38px;height:38px;margin:0 auto;vertical-align:middle;}
   .ico-menu{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
   #pausebtn .ico{width:26px;height:26px;}
   .ico-lg{width:1.5em;height:1.5em;vertical-align:-0.4em;}
@@ -370,7 +387,7 @@
 </div></div>
 <div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
-<div id="bosshpwrap"><div id="bossname"><span class="ico ico-skull" style="width:16px;height:16px;vertical-align:-3px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
+<div id="bosshpwrap"><div id="bossname"><span class="ico ico-event-boss-skull" style="width:20px;height:20px;vertical-align:-5px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
@@ -407,7 +424,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.98.0';
+const VERSION3D='1.99.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -981,6 +998,7 @@ function canWieldRid(rid){ return heroLevel()>=rarityReq(rid); }
 function canWield(o){ return !o||!o.rarity||heroLevel()>=rarityReq(o.rarity); }
 // The rarity tier pip (1-5): an unmistakable numeric badge in the item's rarity color.
 function rarityIcon(rid){ return RARITY[rid]?`<span class="ico ico-rarity ico-rarity-${rid}" title="${RARITY[rid].name}" aria-label="${RARITY[rid].name}"></span>`:''; }
+function eventIcon(name){ return name?`<span class="ico ico-event ico-${name}" aria-hidden="true"></span>`:''; }
 function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
@@ -1361,7 +1379,7 @@ function checkAchievements(){
 function flushAch(){
   if(!achQueue.length) return;
   const a=achQueue.shift(); SFX.achieve();
-  toast('🏆 '+a.name+(a.skin?' · Skin: '+SKINS[a.skin].name:''));
+  toast(a.name+(a.skin?' · Skin: '+SKINS[a.skin].name:''),null,'event-achievement');
   if(achQueue.length) setTimeout(flushAch,1700);
 }
 
@@ -1499,7 +1517,7 @@ function questBump(id,by){
   G.qs[id]=(G.qs[id]||0)+(by||1);
   if(!questDone(q)&&(q.n||1)>1){ const k=(G.qs[id]||0)/q.n;   // audible progress: each tick climbs in pitch toward done
     tone({f0:460+k*380,f1:540+k*430,dur:0.09,type:'square',vol:0.4}); }
-  if(questDone(q)){ SFX.achieve(); toast('✓ Quest complete: '+q.d);
+  if(questDone(q)){ SFX.achieve(); toast('Quest complete: '+q.d,null,'event-quest-marker');
     const rg=awardGold(40+zoneTier()*15); gainXp(20+zoneTier()*10); gainClassXp(25+zoneTier()*10);
     addText(G.p.x,G.p.y+80,G.p.z,'QUEST COMPLETE +'+rg+'g','var(--amber)',true);
     if(areaClear()) openWay();
@@ -1539,14 +1557,14 @@ function questUpdate(){
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
     applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`); return; }
-  if(G.side){ applyQuest(el,`${Z.side.icon} ${Z.side.name}`,qrow(false,'☐','Reach the exit',`Tier ${G.zoneTier}`),`side${Z.side.id}${G.zoneTier}`); return; }
+  if(G.side){ applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name}`,qrow(false,'☐','Reach the exit',`Tier ${G.zoneTier}`),`side${Z.side.id}${G.zoneTier}`); return; }
   let rows,sig;
-  if(G.area<0){ rows=qrow(false,'<span class="ico ico-skull"></span>',`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
+  if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
   else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
     sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(','); }
-  applyQuest(el,`${Z.icon} ${Z.name}`,rows,sig);
+  applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig);
 }
 
 /* ---------------- Enemies (same stats; r = w/2) ---------------- */
@@ -4195,13 +4213,14 @@ function mimicReveal(ch){
   addText(ch.x,44,ch.z,'MIMIC!','var(--danger)',true);
   SFX.growl(1.4); playFx('chestopen'); playFx('mobvoice1',0.9);
   G.shake=Math.min(G.shake+12,18); G.slowmo=Math.max(G.slowmo||0,0.18);
-  toast('⚠ It was never a chest');
+  toast('It was never a chest','var(--danger)','event-mimic');
 }
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
-  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('✓ Loot secured — grab it, then take the exit'); } // stop the clock the instant you grab it
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
+  else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
   const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
     const rid=bandedRarity(ch.bonus?1:0);      // chests stay random, but only within this zone tier's band
@@ -4248,7 +4267,7 @@ function gainXp(n){
     const unlocked=rarityUnlockedAt(p.level);
     if(unlocked) storyToast('🗝 Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.');
     else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
-    else toast('▲ Level '+p.level+' · +HP +Power'); }
+    else toast('Level '+p.level+' · +HP +Power',null,'event-level-up'); }
   checkAchievements(); hudUpdate();
 }
 function checkStageClear(){
@@ -4553,8 +4572,8 @@ function update(dt){
   if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48){ startBonus(); return; }
   // bonus sprint clock
   if(G.bonusActive){ const bt=document.getElementById('bonustimer');
-    if(G.bonusSecured){ bt.textContent='✓ SECURED'; bt.style.color='#3ad07f'; }
-    else { G.bonusTime-=dt; bt.textContent='⏱ '+Math.max(0,G.bonusTime).toFixed(1)+'s'; bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
+    if(G.bonusSecured){ bt.innerHTML=eventIcon('event-treasure-chest')+' SECURED'; bt.style.color='#3ad07f'; }
+    else { G.bonusTime-=dt; bt.innerHTML=eventIcon('event-treasure-chest')+' '+Math.max(0,G.bonusTime).toFixed(1)+'s'; bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
       if(G.bonusTime<=0){ endBonus('⏱ Too slow — the vault seals!'); return; } } }
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
@@ -4708,7 +4727,7 @@ function update(dt){
       const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
       G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
       addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
-      toast('🔓 '+S.icon+' '+S.name+' discovered — its portal now waits in the hub'); } }
+      toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
   // trial tutorial tips, paced out
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
@@ -5244,7 +5263,7 @@ function winGame(){
 function winScreen(bonus,D){
   mode='win'; musicPlay('hub');
   const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
-  showOverlayHTML(`<div class="card"><h2 class="title">VICTORY</h2>
+  showOverlayHTML(`<div class="card"><h2 class="title">${eventIcon('event-trophy')} VICTORY</h2>
     <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Abyss King is ended.
       ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You beat BLADEFALL at its cruelest.<br>🚀 The Jetpack is yours — fly free.</span>'}</p>
     <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
@@ -5288,7 +5307,10 @@ function fixSliders(){
     el.addEventListener('pointermove',ev=>{ if(ev.buttons>0 || ev.pointerType==='touch') { if(ev.pressure>0||ev.buttons>0) set(ev); } });
   });
 }
-function toast(msg,color){ const t=document.getElementById('toast'); t.textContent=msg; t.style.color=color||''; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
+function toast(msg,color,icon){ const t=document.getElementById('toast'); t.textContent='';
+  if(icon){ const i=document.createElement('span'); i.className='ico ico-event ico-'+icon; i.setAttribute('aria-hidden','true'); t.append(i,document.createTextNode(' '+msg)); }
+  else t.textContent=msg;
+  t.style.color=color||''; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
 function openSlots(){
   mode='menu';
   const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
@@ -5343,7 +5365,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
 function openTitleOptions(){
   mode='menu'; showGameUI(false);
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Options</p><h2 class="ovh">More</h2>
-    <button class="bigbtn ghost" id="achBtn">🏆 Achievements</button>
+    <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
     <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">Classic 2D BLADEFALL</button>
@@ -6050,11 +6072,11 @@ function openShop(back){
   // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
   const socksCost=1200, socksAfford=meta.gold>=socksCost;
   const socksRow=meta.socks
-    ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
-    :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
+    ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
+    :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
   // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
   const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
-  const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi">🎒</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
+  const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi eventgi">${eventIcon('reward-bag-slots')}</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
   // Phase 18: Fortune's Bag — one pull, mostly junk, a thin real tail. The Quartermaster profits.
   const gAfford=meta.gold>=GAMBLE_COST;
   const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi">🎲</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${GAMBLE_COST}g</button></div>`;
@@ -6157,7 +6179,7 @@ function openAchievements(back){
     return `<div class="achrow ${done?'done':'todo'}"><div class="ic">${done?a.icon:'🔒'}</div>
       <div><div class="at">${a.name}</div><div class="ad">${a.desc}${a.skin?` · unlocks ${SKINS[a.skin].name} skin`:''}</div></div></div>`; }).join('');
   const n=ACHIEVEMENTS.filter(a=>meta.achievements[a.id]).length;
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Achievements</h2><p class="ovsub">${n}/${ACHIEVEMENTS.length} complete</p>
+  showOverlayHTML(`<div class="card"><h2 class="ovh">${eventIcon('event-achievement')} Achievements</h2><p class="ovsub">${n}/${ACHIEVEMENTS.length} complete</p>
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
@@ -6273,7 +6295,7 @@ function openPause(){
       <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
       <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
       <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
-      <button class="bigbtn ghost" id="achBtn">🏆 Achievements</button>
+      <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
       <button class="bigbtn ghost" id="classBtn" ${G&&G.trial?'style="opacity:.4"':''}>⚔️ ${curClass().disp} · r${classState(meta.classId).rank}</button>
     </div>
     <div class="sect">Settings</div>
@@ -6324,7 +6346,7 @@ function hudUpdate(){
   document.getElementById('hpfill').style.width=Math.max(0,p.hp/effMaxHp(p)*100)+'%';
   // AQW-style dual bars: character XP (blue) + class rank XP (violet→amber)
   document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
-  document.getElementById('xplabel').textContent='LV '+p.level;
+  document.getElementById('xplabel').innerHTML=eventIcon('event-level-up')+p.level;
   document.getElementById('xpnum').textContent=Math.floor(p.xp)+'/'+p.xpNext;
   const cs=classState(meta.classId), atMax=cs.rank>=10, need=RANK_XP(cs.rank);
   document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';

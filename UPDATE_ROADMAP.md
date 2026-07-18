@@ -590,3 +590,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Added one shared `slotIcon()` helper and wired it into the Gear screen, bag category headings, armor/trinket pickup comparisons, and mirror/loadout panel.
 - [x] Expanded the Gear slot label column for a readable 34px emblem while keeping the existing item information and hit targets intact.
 - [x] Real-browser verification passed at desktop and 390×844 mobile widths with all five icons visible, correctly ordered, and unclipped; inline JavaScript syntax and `git diff --check` pass.
+
+## [Codex | 2026-07-18] Event + reward icon set (SHIPPED v1.99.0)
+
+- [x] Mapped the ten-file 2:57 PM download batch in the supplied order; preserved the separate 3:01 PM batch; removed baked checkerboards and normalized all artwork to transparent 256×256 PNGs.
+- [x] Added Treasure Chest, Mimic, Secret Rift, Boss Skull, Trophy, Quest Marker, Magic Socks, Bag Slots Pack, Level Up, and Achievement Badge icons through one shared `eventIcon()` helper.
+- [x] Wired the set into chest/mimic/secret/quest/level/achievement notifications, the quest tracker, boss health display, Treasure Sprint timer, Victory and Achievements screens, HUD XP label, and Quartermaster upgrade rows.
+- [x] Extended `toast()` with a safe optional icon node while retaining text-node rendering for all messages; real-browser HUD verification passed, all ten assets returned HTTP 200, and inline JavaScript syntax plus `git diff --check` pass.

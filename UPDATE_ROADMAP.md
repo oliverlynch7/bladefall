@@ -153,19 +153,25 @@ self-contained work session. Work top to bottom.
 - Net stack: character level (auto stats + rarity gate) · class ranks (branching skill choices, respec-able)
   · gold/shop (socks, perks, gear, bag slots) · gear/loot (rarity-gated).
 
-## Phase 10 — Batch-2 additions (bag, trinkets, menus, onboarding, visuals)
-- [ ] **ESC closes any open menu.** If a menu is open, Esc closes it; only open the pause menu when none is open.
-- [ ] **Bag sort toggle:** each section (weapon categories, armor slots) can be sorted by **TYPE** (default),
-  **RARITY**, or **RECENCY**. (Extends the Phase-4 `openBag` grouping.)
-- [ ] **Amulets & rings — baggable + forgeable.** Add trinkets as forge categories (two same-rarity trinkets
-  of a type → next rarity), same slot-machine as weapons/armor.
-- [ ] **Equipped trinkets are VISIBLE on the character:** rings render around the hand like a bracelet;
-  amulets on the neck/chest.
-- [ ] **Buy more BAG SLOTS in the shop** (gold, scaling cost).
-- [ ] **First-trial intro popup:** the instant the first trial chamber starts (right after picking your first
-  class), a text popup explains WHERE you are and WHY. (Extends the Phase-6 `showTutorial`.)
-- [ ] **Charge-glow anchor:** the charge-up highlight must sit on the weapon's BUSINESS END (axe blade,
-  staff tip, spear point) — it's on the handle now, which looks wrong.
+## Phase 10 — Batch-2 additions (bag, trinkets, menus, onboarding, visuals) — SHIPPED v1.51.0
+- [x] **ESC closes any open menu.** The key handler now backs out of `menu` mode (clicks the overlay's
+  Back/Rise/Resume) and stashes on a loot card, instead of only toggling the pause menu. Verified: Esc on
+  the bag fires its back callback.
+- [x] **Bag sort toggle** — `openBag` has a Sort button cycling **Type** (grouped, default) / **Rarity**
+  (flat, rarity-desc) / **Recent** (newest first) via `_bagSort`. Verified button present + cycles.
+- [x] **Amulets & rings — baggable + forgeable.** Trinkets now stash (offer card + bag rows) and are a
+  forge category (`fuseGroups`/`forgeResult`/`forgeSpin` handle `kind:'t'`; two same-rarity rings →
+  next-rarity trinket). Verified: rings show in bag, `fuseGroups` yields a `t:ring` group.
+- [x] **Equipped trinkets VISIBLE on the character** — `drawHero3` renders an amulet (chain + gem at the
+  collar) and a ring (band on the hand) in the item's rarity color. Verified: 90 render frames clean with
+  both equipped.
+- [x] **Buy more BAG SLOTS in the shop** — "Magic Pack" (+5 slots, `meta.bagSlots`, cost ×1.55 each). Cap
+  is a live `let STASH_CAP` refreshed on load + purchase. Verified: buy → cap 30→35, gold −260.
+- [x] **First-trial intro popup** — `showTutorial` now opens with a "Proving Chamber" where/why paragraph
+  (sealed chamber beneath the keep; survive to earn the class) before the controls.
+- [x] **Charge-glow anchor** — the charge orb (3rd-person `drawSwing3` + 1st-person `drawFPWeapon`) now
+  rides the weapon's business end (blade/tip/head), offset by reach and raised for big/magic weapons,
+  instead of sitting on the grip.
 
 ## Phase 11 — Depth & Endgame (from the latest playtest — the fun-ceiling raisers)
 - [ ] **Boss fights get PHASES + signatures (biggest remaining fun lever).** Give each zone boss a

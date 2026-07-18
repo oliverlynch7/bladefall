@@ -278,7 +278,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.50.0';
+const VERSION3D='1.51.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -306,7 +306,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -320,7 +320,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -335,7 +335,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
-  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks;
+  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
   meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
   meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
@@ -347,7 +347,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false;
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap();
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -1506,7 +1506,8 @@ function restoreBank(){ if(!meta.bank) return false;
   meta.stash=meta.bank.stash||[];                          // items stashed during a failed attempt are lost with it
   meta.bank=null; persist(); return true; }
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
-const STASH_CAP=30;
+let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
+function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; }
 // When you equip/buy something, the piece it replaced goes to your bag (not the void) —
 // unless it's throwaway starter/plain gear or the bag is full.
 const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
@@ -1534,36 +1535,44 @@ function bagFullPrompt(newItem,onDone){ mode='menu';
   if(lo) document.getElementById('sellLow').onclick=()=>{ const g=sellItem(lo); meta.stash.splice(li,1); meta.stash.push(newItem); persist(); SFX.pickup(); toast('Sold '+lo.name+' +'+g+'g · kept '+no.name); onDone(); };
   document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
 }
+let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
 function openBag(back){
   mode='menu';
-  // grouped by category (melee/ranged/magic weapons, then armor by slot), rarity-descending within each
-  const order=meta.stash.map((it,i)=>({it,i})).filter(x=>x.it.weapon||x.it.armor);
-  const catKey=x=>{ const o=x.it.weapon||x.it.armor; return x.it.weapon?('1'+weapCat(o)):('2'+o.slot); };
-  const catName=x=>{ const o=x.it.weapon||x.it.armor; return x.it.weapon?catLabel(true,weapCat(o)):catLabel(false,o.slot); };
-  order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; const oa=a.it.weapon||a.it.armor,ob=b.it.weapon||b.it.armor; return RARITY[ob.rarity].tier-RARITY[oa.rarity].tier; });
-  let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, o=w||a, rc=RARITY[o.rarity].color;
-    const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a.defense+' def · '+a.affixes.map(x=>x.label).join(', '));
-    const hdr=(catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
+  // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
+  const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
+  const order=meta.stash.map((it,i)=>({it,i})).filter(x=>oOf(x));
+  const catKey=x=>{ const o=oOf(x); return x.it.weapon?('1'+weapCat(o)):x.it.trinket?('3'+o.slot):('2'+o.slot); };
+  const catName=x=>{ const o=oOf(x); return x.it.weapon?catLabel(true,weapCat(o)):x.it.trinket?TRINKETS[o.slot].label:catLabel(false,o.slot); };
+  if(_bagSort==='rarity') order.sort((a,b)=>(RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier)||b.i-a.i);
+  else if(_bagSort==='recency') order.sort((a,b)=>b.i-a.i);
+  else order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; return RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier; });
+  const showHdr=(_bagSort==='type');
+  let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
+    const sub=w?(w.dmg+' dmg · '+(w.sch==='mag'?'magic':'physical')+' '+(w.cls==='ranged'?'ranged':'melee')+(w.el?' · '+w.el:'')):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
+    const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
     const lock=!canWield(o);
     return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
       <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):'Equip'}</button>
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
+  const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Warden's Pack</p><h2 class="ovh">Bag</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
+    <button class="bigbtn ghost" id="sortBtn" style="padding:6px 10px;font-size:12px">Sort: ${SORTS[_bagSort]}</button>
+    <div class="achlist" style="max-height:min(50vh,360px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
-    const io=it.weapon||it.armor; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
+    const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
     if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
-    else { const old=HR.gear[it.armor.slot]; HR.gear[it.armor.slot]=it.armor; meta.stash.splice(i,1); if(old) meta.stash.push({armor:old}); }
+    else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
     if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
     persist(); SFX.pickup(); hudUpdate(); openBag(back); });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
-    const g=sellItem(it.weapon||it.armor); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
+    const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
   document.getElementById('backBtn').onclick=back;
 }
 /* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
@@ -1573,21 +1582,23 @@ function catLabel(isW,cat){ return isW?({magic:'Magic Weapon',melee:'Melee Weapo
 function catArches(cat){ return DROP_ARCHES.filter(a=>{ const A=ARCHES[a]; return A && weapCat(A)===cat; }); }
 function fuseGroups(){
   const groups={};
-  (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor; if(!o||o.rarity==='legendary') return; const isW=!!it.weapon;
-    const cat=isW?weapCat(o):o.slot;                                    // category, not exact type
-    const k=(isW?'w|':'a|')+cat+'|'+o.rarity;
-    (groups[k]=groups[k]||{isW,cat,rarity:o.rarity,sample:o,idxs:[]}).idxs.push(i); });
+  (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor||it.trinket; if(!o||o.rarity==='legendary') return;
+    const kind=it.weapon?'w':it.trinket?'t':'a', isW=kind==='w';
+    const cat=isW?weapCat(o):o.slot;                                    // category, not exact type (armor slot / trinket slot)
+    const k=kind+'|'+cat+'|'+o.rarity;
+    (groups[k]=groups[k]||{kind,isW,cat,rarity:o.rarity,sample:o,idxs:[]}).idxs.push(i); });
   return Object.values(groups).filter(g=>g.idxs.length>=2);
 }
 // the forged result: a RANDOM item of the category at the next rarity (the slot-machine payout)
 function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
-  if(g.isW){ const pool=catArches(g.cat); const aid=pool.length?pool[Math.floor(Math.random()*pool.length)]:g.sample.arche; return {weapon:makeWeapon(aid,nr)}; }
+  if(g.kind==='w'){ const pool=catArches(g.cat); const aid=pool.length?pool[Math.floor(Math.random()*pool.length)]:g.sample.arche; return {weapon:makeWeapon(aid,nr)}; }
+  if(g.kind==='t') return {trinket:makeTrinket(nr,g.cat)};
   return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
 }
 function openForge(back){
   mode='menu';
   const fuseable=fuseGroups();
-  const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=catLabel(g.isW,g.cat);
+  const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn">2× <span style="color:${rc}">${RARITY[g.rarity].name}</span> ${kind}</div>
         <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
@@ -1605,11 +1616,11 @@ function openForge(back){
 function forgeSpin(g,back){
   mode='menu';
   const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
-  const result=forgeResult(g), ro=result.weapon||result.armor;
+  const result=forgeResult(g), ro=result.weapon||result.armor||result.trinket;
   // consume the two inputs up front
   const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x); meta.stash.splice(hi,1); meta.stash.splice(lo,1);
   // precompute a reel of preview icons for this category (fast to cycle)
-  const pool = g.isW ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : SETIDS.map(sid=>itemAv(makeArmor(nr,g.cat,sid)));
+  const pool = g.kind==='w' ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : g.kind==='t' ? [itemAv(makeTrinket(nr,g.cat)),itemAv(ro)] : SETIDS.map(sid=>itemAv(makeArmor(nr,g.cat,sid)));
   const finalIcon=itemAv(ro);
   showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:${nc}">The Forge</p><h2 class="ovh">Forging…</h2>
     <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid ${nc};box-shadow:0 0 24px ${nc}66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]||finalIcon}"></div></div>
@@ -1698,8 +1709,9 @@ function startTrial(cid,fromZone){
 }
 // first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
 function showTutorial(cid){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Welcome, Warden</p><h2 class="ovh">How to survive</h2>
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Welcome, Warden</p><h2 class="ovh">The Proving Chamber</h2>
     <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
+      <p style="color:#e6d2ff">Before the order lets a Warden descend, it sends them here — a sealed proving chamber beneath the keep. Survive it and the class is yours. Fail and no one below will ever know your name.</p>
       <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
       <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
       <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
@@ -2360,7 +2372,12 @@ const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Arrow
 const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
 window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
-  if(e.code==='Escape'){ e.preventDefault(); if(mode==='play') openPause(); else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); } return; }
+  if(e.code==='Escape'){ e.preventDefault();
+    if(mode==='play') openPause();
+    else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); }
+    else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
+    else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
+    return; }
   if(mode==='weapon'){
     // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
     // so holding J to attack can't accidentally equip the moment a popup opens.
@@ -3534,7 +3551,9 @@ function offerTrinket(nt){
       ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
       ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
     </div>
-    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button></div>`);
+    <button class="bigbtn" id="equipBtn">Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({trinket:nt})){ toast(nt.name+' stashed'); resumePlay(); } else bagFullPrompt({trinket:nt},resumePlay); };
   document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); toast(nt.name+' equipped'); resumePlay(); };
   document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
 }
@@ -3994,9 +4013,12 @@ function openShop(back){
   const socksRow=meta.socks
     ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
     :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi">🧦</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
+  // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
+  const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
+  const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi">🎒</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · permanent upgrades for this save</p>
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
@@ -4015,6 +4037,8 @@ function openShop(back){
   const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
     meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
+  const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
   document.getElementById('backBtn').onclick=back;
 }
 // full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
@@ -4457,6 +4481,8 @@ function drawHero3(p,t,preview){
     if(g.legs){ const rc=g.legs.color, st=tint('#8f99a8',rc,0.30);
       bx(-4.5,7,3.8, 7,9.6,1.6, st); bx(4.5,7,3.8, 7,9.6,1.6, st);
       bx(-4.5,11,3.9, 7.2,1.4,1.7, rc, rc); bx(4.5,11,3.9, 7.2,1.4,1.7, rc, rc); }
+    if(g.amulet){ const rc=g.amulet.color; bx(0,40,6.3, 1.2,5,0.8, tint(rc,'#000',0.3)); bx(0,35.5,6.7, 3.4,3.4,1.6, rc, rc, 1); }   // pendant chain + gem at the collar
+    if(g.ring){ const rc=g.ring.color; bx(9.5,2,4.4, 3.2,3.2,2.2, rc, rc, 1); }                                                      // band on the hand
   }
   // cape
   pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
@@ -4497,13 +4523,17 @@ function drawFPWeapon(p,t){
     bx(0,3.5,5.2, 9.5,4,3.4, tint(HAND,'#000',0.18));                                        // fingers curling over the front of the grip
     bx(0,-4,5.2, 9.5,3.4,3, tint(HAND,'#000',0.28));                                         // thumb
     pushM(); mv(0,3,2.5); weaponMesh(w); popM();                                             // weapon grip sits inside the fist
-    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; bx(0,22,6, s,s,s, col,col,0.7); }
+    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
   popM();
 }
 /* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
 function drawSwing3(p,t){
-  if(p.charging && p.weapon){ const col=elementColor(p.weapon.el)||'#c9a6ff', s=6+p.chargeAmt*13, hx=p.x+Math.sin(p.yaw)*16, hz=p.z+Math.cos(p.yaw)*16;
-    bx(hx,p.y+30,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
+  if(p.charging && p.weapon){ const w=p.weapon, col=elementColor(w.el)||'#c9a6ff', s=6+p.chargeAmt*13;
+    // Phase 10: the charge orb sits on the weapon's BUSINESS END (blade/tip/head), not the hand
+    const reach=(w.cls==='melee')?((MELEE[w.art]&&MELEE[w.art].reach)||46):40;
+    const fwd=reach*0.6+16, up=(w.art==='hammer'||w.art==='great'||w.art==='axe')?50:(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?46:36;
+    const hx=p.x+Math.sin(p.yaw)*fwd, hz=p.z+Math.cos(p.yaw)*fwd;
+    bx(hx,p.y+up,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
   const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
   const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));

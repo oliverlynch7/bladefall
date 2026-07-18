@@ -597,3 +597,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Added Treasure Chest, Mimic, Secret Rift, Boss Skull, Trophy, Quest Marker, Magic Socks, Bag Slots Pack, Level Up, and Achievement Badge icons through one shared `eventIcon()` helper.
 - [x] Wired the set into chest/mimic/secret/quest/level/achievement notifications, the quest tracker, boss health display, Treasure Sprint timer, Victory and Achievements screens, HUD XP label, and Quartermaster upgrade rows.
 - [x] Extended `toast()` with a safe optional icon node while retaining text-node rendering for all messages; real-browser HUD verification passed, all ten assets returned HTTP 200, and inline JavaScript syntax plus `git diff --check` pass.
+
+## [Codex | 2026-07-18] Damage-type icon set (SHIPPED v1.100.0)
+
+- [x] Mapped the preserved three-file 3:01 PM batch in the supplied order to Physical, Ranged, and Magic; removed baked checkerboards and normalized each to a transparent 256×256 PNG.
+- [x] Added save-safe shared `damageTypeId()`, `damageTypeIcon()`, and `damageTypeHTML()` display helpers; combat calculations and stored weapon schemas are unchanged.
+- [x] Damage presentation now consistently distinguishes magic weapons, ranged physical weapons, and melee physical weapons across bag rows, comparisons, pickup details, Gear, shop details, and mirror stats.
+- [x] Real-browser verification passed with Rusty Sword → Physical, Longbow → Ranged, and Frost Wand → Magic; inline JavaScript syntax and `git diff --check` pass.

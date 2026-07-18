@@ -165,6 +165,13 @@
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
   .msbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+  .mslabel{display:block;margin:8px 0 4px;color:#8b93a8;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:left;}
+  .msselect,.msname{width:100%;box-sizing:border-box;background:#0c1220;border:1px solid #2b3040;color:var(--ink);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;}
+  .msselect:focus,.msname:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(232,163,61,.12);}
+  .msnamebar{display:flex;gap:6px;align-items:stretch;}
+  .msnamebar .msname{flex:1;min-width:0;}
+  .msnamebar .wsbig{width:auto;padding:7px 12px;white-space:nowrap;}
+  .msnamehint{font-size:10.5px;color:var(--muted);margin:4px 0 2px;text-align:left;}
   .mssect{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#8b93a8;margin:12px 0 5px;}
   .msrow{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
   .msrow b{color:var(--ink);font-variant-numeric:tabular-nums;}
@@ -473,10 +480,10 @@
   <button class="btn tog" id="bBag"><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
-  <div id="mirrorui" class="hide"></div>
   <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
 </div>
+<div id="mirrorui" class="hide"></div>
 <div id="toast"></div>
 <div id="titlebg"><div class="tbimg"></div><div class="tembers" id="tembers"></div><div class="tvign"></div></div>
 <div id="overlay"><div class="card" id="ovcard"></div></div>
@@ -495,7 +502,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.109.0';
+const VERSION3D='1.110.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -598,7 +605,7 @@ const STORY={
     "...and loosening the laws that hold a body down.",
     "Once an age, when he wakes, the blood answers: one Bladeborn, born to go down and put him under again.",
     "The last one went deeper than any before. He did not come back. None of them ever have.",
-    "You are no one. No blade, no blood you know of, no oath. But the rot is at your door, and someone has to go.",
+    "The blood found {player}. No blade, no blood you know of, no oath. But the rot is at your door, and someone has to go.",
     "So you will. Descend. Break the cycle."
   ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
@@ -639,7 +646,7 @@ const STORY={
     "No child will ever again be born marked to die in the dark. There is nothing left to be born into. That was the cost. That was the point.",
     "Far above, a waystone catches light. The dark below is not sleeping now. It is empty.",
     "Every one who ever fell at a post is let go at last — all your blood, and Ian last of all. They rest.",
-    "You climb out. You are the last of the Bladeborn, and now only a person, and that is a mercy.",
+    "{player} climbs out — the last of the Bladeborn, and now only a person, and that is a mercy.",
     "You carry his name and his sword home. The cycle is broken. It stays broken."
   ],
   endLadder:{
@@ -673,6 +680,10 @@ const STORY={
       boss:"Break the cycle at the summit. Or become the next thing I have to warn somebody about."}
   }
 };
+function storyText(line){
+  const name=(meta.heroName||'').trim()||'the last Bladeborn';
+  return String(line).replace(/\{player\}/g,name);
+}
 // A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
 function playStory(lines, onDone, opts){
   opts=opts||{}; const veil=document.getElementById('storyveil'), tx=document.getElementById('storytext'), sk=document.getElementById('storyskip');
@@ -682,7 +693,7 @@ function playStory(lines, onDone, opts){
   let i=-1, killed=false;
   const finish=()=>{ if(killed) return; killed=true; veil.classList.add('hide'); tx.textContent=''; if(onDone) onDone(); };
   const advance=()=>{ i++; if(i>=lines.length){ finish(); return; }
-    tx.style.animation='none'; void tx.offsetWidth; tx.textContent=lines[i]; tx.style.animation='storyline 5.2s ease forwards';
+    tx.style.animation='none'; void tx.offsetWidth; tx.textContent=storyText(lines[i]); tx.style.animation='storyline 5.2s ease forwards';
     story._t=setTimeout(advance, opts.dwell||4600); };
   story._skip=()=>{ clearTimeout(story._t); finish(); };
   sk.onclick=story._skip;
@@ -5665,9 +5676,10 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
    THE MIRROR — stand before it and orbit 360° around your character (drag to rotate),
    with EVERY stat listed and your full equipped loadout (each piece's TYPE + bonus).
    ============================================================ */
-let mirror=null;
+let mirror=null, mirrorView='overview';
 function openMirror(back){
   initAudio();
+  if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
   const h=meta.hero, p=freshPlayer();
   p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
   p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.hp=p.maxHp=9999; p.invuln=0;
@@ -5742,12 +5754,15 @@ function mirrorStatsHTML(){
 function buildMirrorPanel(){
   const pn=document.getElementById('mirrorui'); if(!pn) return;
   const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
-  pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?nm.replace(/</g,'&lt;')+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
-    <div style="display:flex;gap:6px;margin:6px 0">
-      <input id="msName" maxlength="18" value="${nm.replace(/"/g,'&quot;')}" placeholder="Name yourself…"
-        style="flex:1;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px 10px;font-size:13px">
-      <button class="wsbig" id="msNameGo" style="width:auto;padding:7px 12px">✏️</button></div>
-    <details class="msbody" style="margin:2px 0"><summary style="cursor:pointer;font-weight:800;color:var(--amber);font-size:12px;letter-spacing:.08em">▾ ALL STATS &amp; LOADOUT</summary>${mirrorStatsHTML()}</details>
+  const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
+    <label class="mslabel" for="msName">Character name</label>
+    <div class="msnamebar"><input class="msname" id="msName" maxlength="18" value="${escText(nm)}" placeholder="Name your character…">
+      <button class="wsbig" id="msNameGo">Save Name</button></div>
+    <div class="msnamehint">Your saved name appears in story narration.</div>
+    <label class="mslabel" for="msView">Mirror view</label>
+    <select class="msselect" id="msView"><option value="overview"${mirrorView==='overview'?' selected':''}>Character Overview</option><option value="stats"${mirrorView==='stats'?' selected':''}>All Live Stats &amp; Loadout</option></select>
+    <div id="msLiveStats" class="msbody${mirrorView==='stats'?'':' hide'}">${mirrorStatsHTML()}</div>
     <div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: On</button><button class="wsbig ghost" id="msBack">Back</button></div>
     <div class="mshint">drag the character to look around</div>`;
   pn.classList.remove('hide');
@@ -5761,7 +5776,10 @@ function buildMirrorPanel(){
   document.getElementById('msSpin').onclick=()=>{ mirror.spin=!mirror.spin; document.getElementById('msSpin').textContent='🔄 Spin: '+(mirror.spin?'On':'Off'); };
   document.getElementById('msBack').onclick=()=>exitMirror();
   const ni=document.getElementById('msName');
-  document.getElementById('msNameGo').onclick=()=>{ meta.heroName=(ni.value||'').trim().slice(0,18); persist(); SFX.pickup(); buildMirrorPanel(); };
+  const saveName=()=>{ meta.heroName=(ni.value||'').trim().slice(0,18); persist(); SFX.pickup(); buildMirrorPanel(); };
+  document.getElementById('msNameGo').onclick=saveName;
+  ni.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); saveName(); } };
+  document.getElementById('msView').onchange=e=>{ mirrorView=e.target.value; document.getElementById('msLiveStats').classList.toggle('hide',mirrorView!=='stats'); };
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
@@ -7886,7 +7904,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
-  STORY, playStory, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
+  STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,

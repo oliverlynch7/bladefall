@@ -668,3 +668,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Separated cosmetic edge-glow color from the weapon's base blade/material color, fixing neutral swords and axes incorrectly rendering as red on the live hub character while appearing correct in the Mirror.
 - [x] Added dedicated held poses for staffs, legacy rods/scepters, wands, and orbs: long focuses stay upright ahead of a bent gripping arm, while compact focuses point outward instead of extending backward through the forearm.
 - [x] Verified neutral melee color plus staff, scepter, and wand idle/attack poses in the real browser; `git diff --check` passed.
+
+## [Codex | 2026-07-18] Mirror controls, live stats, and character naming (SHIPPED v1.110.0)
+
+- [x] Release pointer lock immediately when entering the Mirror so the mouse is available for its controls without an extra click or Escape press.
+- [x] Add a clear Mirror View dropdown with a dedicated All Live Stats & Loadout option covering the canonical eleven live stats and equipped gear.
+- [x] Promote character renaming into a labeled Save Name control with Enter-key support and persistent save behavior.
+- [x] Substitute the saved character name into player-specific story narration, with a lore-friendly fallback for unnamed saves.

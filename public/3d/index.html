@@ -65,6 +65,7 @@
   #bJump{width:66px;height:66px;right:calc(env(safe-area-inset-right) + 104px);bottom:calc(env(safe-area-inset-bottom) + 92px);}
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
   .btn.skl{width:50px;height:50px;font-size:19px;bottom:calc(env(safe-area-inset-bottom) + 176px);background:rgba(96,72,160,.34);border-color:rgba(170,150,240,.45);}
+  .btn.skl>.ico-event{width:34px;height:34px;margin:0;vertical-align:middle;}
   #bSk0{right:calc(env(safe-area-inset-right) + 180px);} #bSk1{right:calc(env(safe-area-inset-right) + 124px);}
   #bSk2{right:calc(env(safe-area-inset-right) + 68px);} #bSk3{right:calc(env(safe-area-inset-right) + 12px);}
   .btn.skl::after{content:attr(data-n);position:absolute;top:2px;left:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
@@ -258,6 +259,14 @@
   .ico-class-ranger{background-image:url('icons/class-ranger.png');}
   .ico-class-mage{background-image:url('icons/class-mage.png');}
   .ico-class-reaper{background-image:url('icons/class-reaper.png');}
+  .ico-skill-cleave{background-image:url('icons/skill-cleave.png');}
+  .ico-skill-stomp{background-image:url('icons/skill-stomp.png');}
+  .ico-skill-charge{background-image:url('icons/skill-charge.png');}
+  .ico-skill-berserk{background-image:url('icons/skill-berserk.png');}
+  .ico-skill-deadeye{background-image:url('icons/skill-deadeye.png');}
+  .ico-skill-volley{background-image:url('icons/skill-volley.png');}
+  .ico-skill-tumble{background-image:url('icons/skill-tumble.png');}
+  .ico-skill-hunters-mark{background-image:url('icons/skill-hunters-mark.png');}
   .ico-event{width:1.7em;height:1.7em;margin-right:.28em;vertical-align:-.5em;}
   .ico-damage-physical{background-image:url('icons/damage-physical.png');}
   .ico-damage-ranged{background-image:url('icons/damage-ranged.png');}
@@ -372,6 +381,8 @@
   .snode.shut,.sfork.shut{opacity:.5;}
   .sfork{border-style:dashed;border-color:var(--amber-dim);background:rgba(232,163,61,.04);}
   .snode .sic,.sfork .sic{font-size:20px;width:26px;text-align:center;flex:0 0 auto;}
+  .snode .sic .ico-event,.sfork .sic .ico-event{width:26px;height:26px;margin:0;vertical-align:middle;}
+  .c2opt .ico-event{width:30px;height:30px;margin-right:7px;vertical-align:-9px;}
   .stitle{font-size:14px;font-weight:800;color:var(--ink);}
   .srank{font-size:9.5px;font-weight:700;color:var(--amber);letter-spacing:.06em;margin-left:4px;}
   .sdesc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
@@ -435,7 +446,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.101.0';
+const VERSION3D='1.102.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1014,6 +1025,7 @@ function canWield(o){ return !o||!o.rarity||heroLevel()>=rarityReq(o.rarity); }
 function rarityIcon(rid){ return RARITY[rid]?`<span class="ico ico-rarity ico-rarity-${rid}" title="${RARITY[rid].name}" aria-label="${RARITY[rid].name}"></span>`:''; }
 function eventIcon(name){ return name?`<span class="ico ico-event ico-${name}" aria-hidden="true"></span>`:''; }
 function classIcon(id){ return eventIcon('class-'+id); }
+function skillIcon(id){ return eventIcon('skill-'+id); }
 function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
@@ -1109,18 +1121,18 @@ const CLASSES={
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
           {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:'🛡️',cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
-      {id:'cleave',n:'Cleave',icon:'🗡️',cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
-      {id:'stomp',n:'Shockwave Stomp',icon:'💥',cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
-      {id:'wcharge',n:'Charge',icon:'🐗',cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
-      {id:'berserk',n:'Berserk',icon:'🔺',cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
+      {id:'cleave',n:'Cleave',icon:skillIcon('cleave'),cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
+      {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
+      {id:'wcharge',n:'Charge',icon:skillIcon('charge'),cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
+      {id:'berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
   ranger:{disp:'Ranger',icon:classIcon('ranger'),family:['bow','cross','dagger','javelin'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
           {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:'🗡️',cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:'💨',cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:'✖',cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
-      {id:'deadeye',n:'Deadeye',icon:'🎯',cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
-      {id:'volley',n:'Volley',icon:'🌠',cd:8,rank:2,d:'A fan of projectiles across your front'},
-      {id:'tumble',n:'Tumble',icon:'🌀',cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
-      {id:'mark',n:'Hunter’s Mark',icon:'📍',cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
+      {id:'deadeye',n:'Deadeye',icon:skillIcon('deadeye'),cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
+      {id:'volley',n:'Volley',icon:skillIcon('volley'),cd:8,rank:2,d:'A fan of projectiles across your front'},
+      {id:'tumble',n:'Tumble',icon:skillIcon('tumble'),cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
+      {id:'mark',n:'Hunter’s Mark',icon:skillIcon('hunters-mark'),cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
   mage:{disp:'Mage',icon:classIcon('mage'),family:['staff','wand','spellblade'],     // finalized: Staff, Wand (scepters folded in), Spellblade (magic melee)
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
           {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:'🔵',cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
@@ -2232,7 +2244,7 @@ function skipTrial(){
   const cid=G?G.trial:null; if(!cid) return;
   if(TRIALS[cid].earned){ toast('This one you have to earn.'); return; }
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid; meta.bank=null; persist();
-  toast(CLASSES[cid].icon+' '+CLASSES[cid].disp+' unlocked'); openHub();
+  toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
 }
 function abandonTrial(){ restoreBank(); openHub(); }
 function nextArea(){
@@ -3991,7 +4003,7 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='menu'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill';
   const card=o=>`<button class="bigbtn ghost c2opt" data-pick="${o.id}" style="text-align:left;padding:13px 16px">
-    <b style="font-size:16px">${o.n}</b> <span style="float:right;color:var(--amber);font-size:11px;letter-spacing:.06em">${(o.role||'').toUpperCase()}</span><br>
+    <b style="font-size:16px">${isSk?(C2_ICON[o.fx]||''):''}${o.n}</b> <span style="float:right;color:var(--amber);font-size:11px;letter-spacing:.06em">${(o.role||'').toUpperCase()}</span><br>
     <span class="hint" style="display:block;margin-top:3px">${isSk?('<b style="color:#9fe0ff">CD '+o.cd+'s</b> · '):''}${o.d}</span></button>`;
   showOverlayHTML(`<div class="card"><p class="ovkicker">${def.disp} · Rank ${rank}</p><h2 class="ovh">Choose a ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?'Goes on key '+(([2,4,6,8].indexOf(rank))+1)+'.':'A permanent passive.'} Locks into your build — respec at the Drillmaster.</p>
@@ -4056,23 +4068,23 @@ function useSkillLegacy(i){
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; skillbarUpdate();
 }
-const C2_ICON={r_volley:'🌠',r_pierce:'🎯',r_tumble:'🌀',r_shadow:'🗡️',r_spike:'⚙',r_smoke:'💨',r_mark:'📍',r_deathmark:'✖'};
+const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:'⚙',r_smoke:'💨',r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
 function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i];
       if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; continue; }
       if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title='Choose your rank-'+slotRank[i]+' skill'; continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
-      b.textContent=cool?Math.ceil(p.skillCd[i]):(C2_ICON[s.fx]||'✦');
+      if(cool) b.textContent=Math.ceil(p.skillCd[i]); else b.innerHTML=C2_ICON[s.fx]||'✦';
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
       b.title=s.n+' ('+(i+1)+') — '+s.d; }
     return; }
   const S=curSkills();
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue;
     if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; continue; }
-    const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank;
-    b.textContent=locked?'🔒':((p&&p.skillCd&&p.skillCd[i]>0)?Math.ceil(p.skillCd[i]):s.icon);
-    b.classList.toggle('lock',locked); b.classList.toggle('cooling',!!(p&&p.skillCd&&p.skillCd[i]>0));
+    const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
+    if(locked||cooling) b.textContent=locked?'🔒':Math.ceil(p.skillCd[i]); else b.innerHTML=s.icon;
+    b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
     b.title=s.n+' ('+(i+1)+') — '+s.d; } }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
@@ -6343,7 +6355,7 @@ function openPause(){
     if(G&&mode!=='menu'){ toast('Switch classes at the hub trainer'); return; }
     const un=CLASSIDS.filter(c=>meta.classUnlocked[c]); if(un.length<2) return;
     meta.classId=un[(un.indexOf(meta.classId)+1)%un.length]; persist();
-    toast(curClass().icon+' '+curClass().disp+' — favors '+curClass().family.join(', ')); skillbarUpdate(); hudUpdate(); openPause(); };
+    toast(curClass().disp+' — favors '+curClass().family.join(', '),null,'class-'+meta.classId); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };

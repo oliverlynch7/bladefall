@@ -611,3 +611,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Replaced the HUD XP emblem with Soul Essence, added the current class emblem to the class-rank bar, and replaced Ancient Key text emoji in pickup, unlock, and rarity-unlock notifications.
 - [x] Replaced the four class emoji identities throughout shared class presentation with the new voxel emblems, covering class selection, class tabs, save summaries, rank screens, trials, and Waystation displays.
 - [x] Real-browser verification passed at 1440×900 and 390×844: all six assets returned HTTP 200, HUD icons stayed inside their labels, all four class tabs rendered without horizontal overflow, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Warrior + Ranger skill icon batch (SHIPPED v1.102.0)
+
+- [x] Mapped the eight-file 3:11 PM download batch in supplied order to Cleave, Shockwave Stomp, Charge, Berserk, Deadeye, Volley, Tumble, and Hunter's Mark; removed baked checkerboards and normalized each to a transparent 256×256 PNG.
+- [x] Replaced the eight legacy skill emojis across the class tree and combat skill buttons, retaining numeric cooldowns and lock states over the artwork.
+- [x] Wired Volley, Piercing Shot/Deadeye, Tumble, and Hunter's Mark artwork into Ranger's current rank-choice engine and its live HUD; skill-choice cards now show the matching voxel emblem too.
+- [x] Fixed class-unlock and class-switch toasts to pass the recently added class artwork as an icon rather than rendering its trusted HTML helper as literal text.
+- [x] Real-browser verification passed at 1440×900 and 390×844: all eight assets returned HTTP 200, every Warrior icon and the matching active Ranger icons rendered in 50px combat buttons, class-tree icons stayed readable without horizontal overflow, no browser errors occurred, and `git diff --check` passed.

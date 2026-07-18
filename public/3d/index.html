@@ -320,10 +320,10 @@
    BLADEFALL 3D — true-3D arena action-RPG.
    Raw WebGL (zero deps), voxel/flat-shaded aesthetic,
    Hades-style fixed chase camera. All BLADEFALL systems
-   (rarity loot, elements, 3-slot armor, NG+, achievements,
+   (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.78.0';
+const VERSION3D='1.79.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -852,7 +852,7 @@ function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `<span style="
 function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
 function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
 function rollRarity(){
-  const luck=(G?G.stageIndex*0.5:0)+(G?G.ngPlus*2.5:0)+(G?Math.floor(G.p.level/2)*0.2:0);
+  const luck=(G?G.stageIndex*0.5:0)+(G?Math.floor(G.p.level/2)*0.2:0);   // Phase 20: NG+ luck term removed
   const boost=1+Math.min(luck,22)*0.085;
   let pool=[],total=0;
   RORDER.forEach((r,i)=>{ const w=RARITY[r].base*Math.pow(boost,i); pool.push(w); total+=w; });
@@ -1173,7 +1173,7 @@ const ACHIEVEMENTS=[
   {id:'slayer',name:'Slayer',desc:'Defeat 150 enemies total',icon:'⚑',skin:'crimson',check:m=>m.totalKills>=150},
   {id:'kingslayer',name:'Kingslayer',desc:'Defeat the Abyss King',icon:'♛',skin:'abyss',check:m=>m.kingKills>=1},
   {id:'worldsend',name:"World's End",desc:'Defeat the Void Tyrant',icon:'✸',skin:'void',check:m=>m.tyrantKills>=1},
-  {id:'ascended',name:'Ascended',desc:'Reach New Game+3',icon:'⬢',skin:'celestial',check:m=>m.ngPlus>=3}
+  {id:'ascended',name:'Ascended',desc:'Reach Floor 15 of the Abyssal Descent — the deeper you fall, the higher you rise',icon:'⬢',skin:'celestial',check:m=>(m.endlessBest||0)>=15}
 ];
 function skinUnlockHint(id){ if(id==='god') return '???'; const a=ACHIEVEMENTS.find(x=>x.skin===id); return a?a.desc:'Locked'; }
 let achQueue=[];
@@ -1691,8 +1691,7 @@ function beginRun(ngPlus,carrySnap,scales){
      runSeed:Math.floor(Math.random()*1e9), // every run rolls fresh dungeons
      zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,
      cam:{x:0,y:0,z:0}};
-  if((ngPlus||0)>0) meta.ngPlus=Math.max(meta.ngPlus,ngPlus);
-  meta.lastNgHp=scales.hp; meta.lastNgDmg=scales.dmg; persist(); checkAchievements();
+  meta.lastNgHp=scales.hp; meta.lastNgDmg=scales.dmg; persist(); checkAchievements();   // Phase 20: no longer writes meta.ngPlus (NG+ removed)
   loadStage(0); mode='play'; showOverlay(false); showGameUI(true); hudUpdate();
 }
 function startRun(ngPlus){ enterZone(0); }
@@ -5760,7 +5759,7 @@ function hudUpdate(){
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
-  wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'')+(G.ngPlus>0?'  ·  NG+'+G.ngPlus:'');
+  wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
   wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
   const at=document.getElementById('armortag'), red=Math.round(defenseR(p)*100);
   const pips=GEARSLOTS.map(s=>{ const a=p.gear[s]; return `<span class="pip" style="background:${a?a.color:'#333'}"></span>`; }).join('');

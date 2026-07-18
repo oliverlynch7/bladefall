@@ -650,3 +650,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Reused Bladefall's existing Magic Damage emblem for the missing eleventh slot and added one shared `statIcon()` presentation helper for the full set.
 - [x] Corrected All Stats to always render all eleven canonical rows in the supplied order, including zero-value Magic Damage and Skill Cooldown Reduction rows that were previously hidden.
 - [x] Real-browser verification passed: all eleven displayed assets returned HTTP 200, every label/icon mapping resolved in canonical order, the completed panel was visually checked, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Weapon Compare icon replacement (SHIPPED v1.107.0)
+
+- [x] Confirmed the newest 3:55 PM download as the improved comparison artwork: two weapon cards with explicit green upgrade and red downgrade arrows.
+- [x] Removed the baked checkerboard, normalized the replacement to a transparent 256×256 PNG, and replaced only `action_compare.png`; all compare interactions and references remain unchanged.
+- [x] Real-browser asset verification and `git diff --check` passed.

@@ -358,7 +358,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.89.0';
+const VERSION3D='1.90.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1449,6 +1449,7 @@ const ENEMY={
   sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
   revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
   dummy:{hp:400,dmg:0,speed:0,r:14,h:42,xp:0,color:'#c9b37e',kind:'walk',look:'bones'},   // waystation training dummy: hits land, nothing dies
+  bosscrystal:{hp:100,dmg:0,speed:0,r:15,h:56,xp:6,color:'#7fd6ff',kind:'walk',look:'bosscrystal',noSplit:true},   // boss shield anchor — destroy all to break the ward
   // ── Phase 20: unique bestiary for zones 4-8 (2 signature mobs each) ──
   // FROSTFELL
   frostshell:{hp:64,dmg:11,speed:30,r:18,h:40,xp:30,color:'#8fb8d8',kind:'walk',element:'ice',look:'frostshell',spec:'shell'},   // ice shell BLOCKS frontal hits until cracked — flank or shatter it
@@ -2678,6 +2679,13 @@ function bossFinish(ctx,o){
   const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt2=o.decoTall||200;
   for(let k=0;k<16;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
     G.deco.push({x:ctx.rnd()<0.5?mnX-160-ctx.rnd()*300:mxX+160+ctx.rnd()*300, z:zz, w:56+ctx.rnd()*120, h:dt2*(0.5+ctx.rnd()*0.8), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
+  // Boss v2 — a GRAND outer frame so every arena reads as an event on entry: a ring of crowned monoliths + a glowing floor rim
+  { const cxA=(mnX+mxX)/2, czA=(mnZ+mxZ)/2, rmax=Math.max((mxX-mnX)/2,(mxZ-mnZ)/2), RR=rmax+150, rimC=tint(dc,'#fff',0.4);
+    for(let i=0;i<12;i++){ const a=i/12*6.283, px=cxA+Math.cos(a)*RR, pz=czA+Math.sin(a)*RR, hh=dt2*(1.5+((i%2)?0.55:0));
+      G.deco.push({x:px,z:pz,y0:0,w:46,h:hh,d:46,c:tint(dc,'#000',0.28),theme:dth});
+      G.deco.push({x:px,z:pz,y0:hh,w:60,h:22,d:60,c:tint(dc,'#fff',0.12),theme:dth}); }        // crowned monoliths
+    for(let i=0;i<24;i++){ const a=i/24*6.283; G.deco.push({x:cxA+Math.cos(a)*rmax*0.97,z:czA+Math.sin(a)*rmax*0.97,y0:0,w:16,h:1.6,d:16,c:rimC}); }   // glowing rune rim
+  }
   hazSetup(ctx.rnd2);
   G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
@@ -3865,8 +3873,10 @@ function resolveSwing(){
   }
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  if(e.shielded && e.boss){ e.hitFlash=0.1; if(Math.random()<0.5) addText(e.x,e.y+e.h+12,e.z,'WARDED','#7fd6ff'); return; }   // the boss ward absorbs everything until its crystals fall
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   let mod=elemMod(el,e.element);
+  if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
@@ -3925,6 +3935,7 @@ function killEnemy(e){
   const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss){
+    if(e._crystals) for(const c of e._crystals){ if(c&&!c.dead){ c.dead=true; burst(c.x,c.y+c.h*0.5,c.z,'#7fd6ff',8); } }   // the ward's crystals fall with their master
     SFX.win(); playFx('bossdie'); document.getElementById('bosshpwrap').classList.remove('on');
     meta.bossKills=(meta.bossKills||0)+1; const w=G.p.weapon;
     if(w.sch==='mag') meta.magicBossKills=(meta.magicBossKills||0)+1;
@@ -4591,8 +4602,30 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
       addText(e.x,e.h+16,e.z,'THE FLOOR FAILS!','#c47bff',true); }
   }
 }
+// ===== Boss v2: multi-phase "miniature raid" — a shield/healing-crystal interrupt + a weak-point stagger + a phase-3 enrage =====
+function bossRaid(e){ return e.boss && e.type!=='brute' && e.type!=='archer'; }   // the two earliest bosses stay a straight fight; the rest get the raid mechanic
+function spawnBossCrystals(e){
+  e._crystals=[]; const n=3, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:300), hd=(e.home?e.home.hd:300);
+  for(let i=0;i<n;i++){ const a=(i/n)*6.283+0.6;
+    const cx=hx+Math.cos(a)*hw*0.74, cz=hz+Math.sin(a)*hd*0.74;
+    const c=spawnEnemy('bosscrystal',cx,cz); c.active=true; c.dropT=0; c.role=null; c.spec=null;
+    c.hp=c.maxHp=Math.max(60,Math.round(e.maxHp*0.14)); c._crystalOf=e; e._crystals.push(c); }
+}
+function bossEnterShield(e){ if(!bossRaid(e)) return;
+  e.shielded=true; e.shieldHeal=0; spawnBossCrystals(e);
+  G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
+  toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
 function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   updateBossBar(e); // y handled by the climb/support logic in the enemy loop
+  if(e.staggerT>0) e.staggerT-=dt;
+  if(e.shielded){                                                    // invulnerable + slowly self-healing until the crystals fall
+    const alive=(e._crystals||[]).filter(c=>c&&!c.dead).length;
+    if(alive===0){ e.shielded=false; e.staggerT=5; e.hitFlash=0.3; G.shake=Math.min(G.shake+14,18); SFX.boss();
+      addText(e.x,e.h+26,e.z,'SHIELD SHATTERED — STRIKE!','#ffd24a',true); toast('The ward breaks — strike now!'); }
+    else { e.shieldHeal=(e.shieldHeal||0)+dt; if(e.shieldHeal>=1){ e.shieldHeal=0; e.hp=Math.min(e.maxHp,e.hp+Math.round(e.maxHp*0.012)); updateBossBar(e); }
+      // a warding link to each living crystal (visual)
+    }
+  }
   if(e.atkTimer>0) e.atkTimer-=dt; if(e.shootT>0) e.shootT-=dt;
   if(e.lunge>0){ e.lunge-=dt; e.x+=dirX*eff*2.6*dt; e.z+=dirZ*eff*2.6*dt; }
   else {
@@ -4646,7 +4679,14 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.type==='king'){ e.ranged=true; e.shot={count:3,spread:0.22,speed:380,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=2.0; e.shootT=0.8; }
     if(e.type==='tyrant'){ e.ranged=true; e.shot={count:5,spread:0.2,speed:400,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=1.7; e.shootT=0.6; }
     G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+24,e.z,'ENRAGED!','var(--danger)',true);
-    if(G&&!G.trial) storyToast('It stops holding back.'); }
+    if(G&&!G.trial) storyToast('It stops holding back.');
+    bossEnterShield(e); }                                            // phase 2 raises the ward + healing crystals (major bosses)
+  // PHASE 3 — the final stand: at 25% it enrages again, specials on a hair-trigger, a burst nova (never mid-shield)
+  if(e.hp/e.maxHp<0.25 && e.phase<3 && !e.shielded){ e.phase=3; e.speed*=1.14; e.dmg*=1.12;
+    for(const k of ['slamCd','cleaveCd','novaCd','poundCd','quakeCd','beamCd','tpCd','tileCd','summonT']) if(e[k]!=null) e[k]=Math.min(e[k],0.8);
+    (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:340,dmg:e.dmg*1.15,life:0,spd:320,col:'#ff5a3a',col2:'#c33'});
+    G.shake=Math.min(G.shake+14,18); SFX.boss(); addText(e.x,e.h+24,e.z,'FINAL STAND!','#ff5a3a',true);
+    if(G&&!G.trial) storyToast('Now it fights with nothing held back.'); }
   if(e.home){ // bosses never leave their arena (and never fall in the lava)
     if(e.x<e.home.x-e.home.hw) e.x=e.home.x-e.home.hw; if(e.x>e.home.x+e.home.hw) e.x=e.home.x+e.home.hw;
     if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
@@ -6728,6 +6768,14 @@ function drawEnemy3(e,t){
     bx(-2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC); bx(2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC);
     pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.5+sw); rotX(-0.6); bx(0,-6,0, 2.6,12,2.6, dk); bx(0,4,0, 3,14,1.4,'#c8ccd2'); popM();   // broken blade arm
     popM();
+  } else if(e.look==='bosscrystal'){
+    // BOSS WARD CRYSTAL — a floating faceted shard on a rune base; destroy all to break the boss's shield
+    const glc=0.6+0.4*Math.sin(G.time*3+e.x*0.1), cc=e.hitFlash>0?'#ffffff':'#7fd6ff', by=20+Math.sin(G.time*2+e.z*0.1)*3;
+    bx(0,4,0, 18,8,18, '#2a3550','#4a6a9a',0.6);                                    // rune base
+    bx(0,by,0, 14,22,14, cc,'#bff0ff',0.92);                                        // crystal core
+    bx(0,by+17,0, 8,14,8, cc,'#dffbff',0.96);                                       // upper facet
+    bx(0,by-13,0, 8,13,8, cc,'#bff0ff',0.86);                                       // lower facet
+    for(let i=0;i<3;i++){ const a=G.time*1.5+i*2.1; bx(Math.cos(a)*17,by,Math.sin(a)*17, 3.2,3.2,3.2,'#dffbff','#fff',0.55*glc); }   // orbiting motes
   } else if(e.look==='frostshell'){
     // ICE-ARMORED SHELL-CRACKER: squat body under a thick frontal ice carapace; the shell shatters off once cracked
     const dk=tint(col,'#000',0.24), ice='#cfeeff', cracked=e.shellCracked;
@@ -7202,6 +7250,13 @@ function render(t){
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
+    if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
+      const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;
+      gl.depthMask(false);
+      for(let i=0;i<12;i++){ const a=i/12*6.283+t*0.4; bx(e.x+Math.cos(a)*R2, e.h*0.55, e.z+Math.sin(a)*R2, 5,e.h*1.15,5, '#7fd6ff','#bff0ff',0.35+0.18*pu); }
+      bx(e.x,e.h+14,e.z, 10,10,10, '#bff0ff','#dffbff',0.6+0.3*pu);   // a ward sigil hovering overhead
+      gl.depthMask(true);
+    }
     if(e.windT>0){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
       const prog=1-(e.windT/(e.windMax||0.55)), flash=0.5+0.5*Math.sin(t*34);   // fast flash + a bar that fills toward the strike
       const tx=e.teleX||0, tz=e.teleZ||1, reach=90+prog*230;

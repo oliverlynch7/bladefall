@@ -619,3 +619,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Wired Volley, Piercing Shot/Deadeye, Tumble, and Hunter's Mark artwork into Ranger's current rank-choice engine and its live HUD; skill-choice cards now show the matching voxel emblem too.
 - [x] Fixed class-unlock and class-switch toasts to pass the recently added class artwork as an icon rather than rendering its trusted HTML helper as literal text.
 - [x] Real-browser verification passed at 1440×900 and 390×844: all eight assets returned HTTP 200, every Warrior icon and the matching active Ranger icons rendered in 50px combat buttons, class-tree icons stayed readable without horizontal overflow, no browser errors occurred, and `git diff --check` passed.
+
+## [Codex | 2026-07-18] Mage + Reaper skill icon batch (SHIPPED v1.103.0)
+
+- [x] Double-checked the twelve-file 3:24–3:25 PM download batch visually and mapped it in supplied order to Elemental Bolt, Nova, Blink, Arcane Tempest, Reap, Soul Cleave, Wraith Form, Void Pull, Soul Siphon, Gravebind, Shadow Step, and Death Vortex.
+- [x] Removed baked checkerboards, normalized the art to transparent 256×256 PNGs, and honored the requested underscore filenames; the newer Wraith Form and Death Vortex files are the retained replacement versions.
+- [x] Replaced all four live Mage skill emojis. Reap and Shadowstep use their exact matching art, while the current life-draining Soul Harvest uses Soul Siphon artwork because its implemented damage-and-heal behavior matches that concept.
+- [x] Bundled Soul Cleave, Wraith Form, Void Pull, Gravebind, and Death Vortex for the planned expanded Reaper kit without incorrectly assigning them to unrelated current mechanics; in particular, Death Vortex remains distinct from pulling behavior.
+- [x] Real-browser verification passed: all twelve PNGs returned HTTP 200, the seven live mappings resolved to their intended icon classes, the full contact sheet was visually checked, no browser errors occurred, and `git diff --check` passed.

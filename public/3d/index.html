@@ -145,6 +145,11 @@
   .wsctrl{display:flex;gap:8px;margin-top:8px;justify-content:center;flex-wrap:wrap;}
   .wsbig{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(180deg,#f0b95c,var(--amber));color:#0b0c10;font-weight:800;font-size:13px;cursor:pointer;}
   .wsbig.ghost{background:rgba(255,255,255,.04);color:var(--ink);border:1px solid #2b3040;}
+  #wsIconCard{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;z-index:23;width:132px;background:linear-gradient(180deg,rgba(14,18,30,.94),rgba(10,12,22,.9));border:1px solid #2b3040;border-radius:12px;padding:8px;text-align:center;pointer-events:none;}
+  #wsIconCard.hide{display:none;}
+  #wsIconCard .lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+  #wsIconCard img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;image-rendering:auto;background:rgba(0,0,0,.25);border-radius:8px;}
+  #wsIconCard .cap{font-size:10px;color:#cfd6df;margin-top:5px;}
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
   #mirrorui{position:absolute;top:0;right:0;bottom:0;z-index:22;width:min(340px,86vw);background:linear-gradient(270deg,rgba(8,9,13,.96),rgba(8,9,13,.80));border-left:1px solid #2b3040;padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);display:flex;flex-direction:column;pointer-events:auto;}
   #mirrorui.hide{display:none;}
@@ -302,6 +307,7 @@
   <button class="btn tog" id="bKeep">SELL</button>
   <button class="btn tog" id="bBag">BAG</button>
   <div id="wstudio" class="hide"></div>
+  <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
   <div id="mirrorui" class="hide"></div>
   <button class="btn hide" id="bInteract">TALK</button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
@@ -323,7 +329,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.81.0';
+const VERSION3D='1.81.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1404,7 +1410,23 @@ const ENEMY={
   // ── Ruined Keep bestiary (Phase 14) ──
   sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
   revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
-  dummy:{hp:400,dmg:0,speed:0,r:14,h:42,xp:0,color:'#c9b37e',kind:'walk',look:'bones'}   // waystation training dummy: hits land, nothing dies
+  dummy:{hp:400,dmg:0,speed:0,r:14,h:42,xp:0,color:'#c9b37e',kind:'walk',look:'bones'},   // waystation training dummy: hits land, nothing dies
+  // ── Phase 20: unique bestiary for zones 4-8 (2 signature mobs each) ──
+  // FROSTFELL
+  frostshell:{hp:64,dmg:11,speed:30,r:18,h:40,xp:30,color:'#8fb8d8',kind:'walk',element:'ice',look:'frostshell',spec:'shell'},   // ice shell BLOCKS frontal hits until cracked — flank or shatter it
+  frostlobber:{hp:30,dmg:11,speed:32,r:15,h:40,xp:26,color:'#bfe6ff',kind:'caster',element:'ice',look:'lobber',shot:{count:1,spread:0,speed:300,size:9,color:'#bfe6ff',shape:'shard',gravity:520,el:'ice',glow:1},shootCd:2.7},   // lobs arcing Chill shards
+  // EMBERDEEP
+  magmaskit:{hp:26,dmg:10,speed:98,r:13,h:22,xp:24,color:'#ff6a2a',kind:'charger',element:'fire',look:'skitter',spec:'trail'},   // fast skitterer whose path BURNS briefly
+  embertotem:{hp:74,dmg:0,speed:0,r:16,h:48,xp:34,color:'#3a1a12',kind:'walk',element:'fire',look:'totem',spec:'totem'},   // stationary vent, periodic FIRE BURST — kill it first
+  // THE ABYSS
+  blinkstalker:{hp:34,dmg:14,speed:58,r:14,h:40,xp:30,color:'#6a3fa0',kind:'walk',element:'void',look:'stalker',spec:'blink'},   // telegraphed TELEPORT behind you
+  voidtether:{hp:44,dmg:8,speed:38,r:14,h:42,xp:36,color:'#8f52d6',kind:'walk',element:'void',look:'tether',spec:'tether'},   // LINKS to allies, hastening them until it dies — kill first
+  // SUNSPIRE PALACE
+  sunpriest:{hp:36,dmg:11,speed:36,r:14,h:44,xp:34,color:'#ffe9a8',kind:'caster',element:'holy',look:'priest',shot:{count:1,spread:0,speed:520,size:8,color:'#ffe9a8',shape:'light',el:'holy',glow:1},shootCd:2.5,spec:'sunpriest'},   // radiance healer-caster
+  marblestatue:{hp:96,dmg:14,speed:22,r:19,h:48,xp:40,color:'#9aa0b0',kind:'walk',look:'statue',spec:'shell'},   // slow heavy marble SHIELDER
+  // CASTLE DUSKMOOR
+  siegeknight:{hp:84,dmg:16,speed:36,r:17,h:46,xp:42,color:'#3c4048',kind:'walk',look:'knight',spec:'knightslam'},   // shield + telegraphed overhead CRUSH
+  royalarcanist:{hp:46,dmg:12,speed:32,r:14,h:46,xp:42,color:'#c47bff',kind:'caster',element:'arcane',look:'arcanist',shot:{count:3,spread:0.18,speed:440,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.3}   // rune-mark caster, arcane VOLLEYS
 };
 /* what haunts each biome (weighted picks for dungeon rooms) */
 const THEMEMOBS={
@@ -3018,6 +3040,11 @@ function spawnEnemy(type,x,z,isBoss){
     if(e.role==='flanker')  e.speed*=1.15;
   }
   if(e.type==='sentinel'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }   // the animated armor ALWAYS guards its front
+  // Phase 20 signature-mob roles/state
+  e.spec=(ENEMY[type]||{}).spec||null;
+  if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
+  if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
+  if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
   G.enemies.push(e); return e;
 }
 
@@ -5675,10 +5702,22 @@ function openWeaponStudio(back){
   buildStudioPanel();
   studioSetWeapon('scythe');
 }
+// weapon ART -> reference-icon file (bundled in /3d/weapon-icons/). Fire/frost/etc. swords use the affinity refs.
+const ART_ICON={sword:'sword',great:'greatsword',axe:'battleaxe',hammer:'warhammer',knives:'knives',dagger:'knives',
+  bow:'longbow',cross:'crossbow',javelin:'javelins',staff:'staff',rod:'staff',wand:'wand',scepter:'wand',orb:'wand',
+  spellblade:'spellblade',scythe:'scythe'};
+function studioIconFor(w){
+  if(!w) return null;
+  if(w.art==='sword'&&w.el){ const m={fire:'aff_fire_sword',ice:'aff_frost_sword',poison:'aff_venom_sword',arcane:'aff_arcane_sword',holy:'aff_holy_sword',void:'aff_void_sword'}; if(m[w.el]) return m[w.el]; }
+  return ART_ICON[w.art]||null;
+}
 function studioSetWeapon(arche){ if(!studio) return; studio.arche=arche;
   const w=makeWeapon(arche,'epic'); normWeapon(w); studio.p.weapon=w; studio.p.atkTimer=0; studio.proj.length=0;
   const nm=document.getElementById('wsName'); if(nm) nm.textContent=(ARCHES[arche]?ARCHES[arche].disp:arche)+' — '+(w.cls==='ranged'?'Ranged':'Melee')+(w.el?' · '+w.el:'');
   document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',b.dataset.a===arche));
+  const card=document.getElementById('wsIconCard'), img=document.getElementById('wsIconImg'), cap=document.getElementById('wsIconCap');
+  const ic=studioIconFor(w);
+  if(card&&img){ if(ic){ img.src='weapon-icons/'+ic+'.png'; if(cap) cap.textContent=ARCHES[arche]?ARCHES[arche].disp:arche; card.classList.remove('hide'); } else { card.classList.add('hide'); } }
 }
 function studioSwing(){ if(!studio) return; const p=studio.p; if(p.atkTimer>0) return; p.swingId=(p.swingId||0)+1;
   const w=p.weapon;
@@ -5709,7 +5748,7 @@ function renderStudio(t){
   drawHero3(p,t,false); drawSwing3(p,t);
   for(const pr of studio.proj) drawProjectile3(pr,t);
 }
-function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
+function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
 function buildStudioPanel(){
   const pn=document.getElementById('wstudio'); if(!pn) return;
   const list=ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('');

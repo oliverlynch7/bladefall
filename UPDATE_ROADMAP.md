@@ -217,18 +217,29 @@ self-contained work session. Work top to bottom.
   persistent (`meta.hubUpgrades`), each visibly transforming `drawWaystation`. Verified: buy → −2500g, decor
   appears.
 
-## Phase 13 — Menus, HUD & visual fixes
-- [ ] **Title + pause backgrounds redesigned.** The current backdrop looks like "the back of a wall,
-  bobbing" — weird and off, on the title AND every pause/menu screen. Give them a proper, aesthetic,
-  **BLADEFALL-branded** dark-fantasy background (a real scene/art, not a bobbing wall).
-- [ ] **Pause menu clarity redesign.** It's uninspiring and every option looks identical, so navigating
-  means reading everything. Make options **visually distinct and instantly scannable** (icons + grouping
-  + hierarchy), on-brand — the eye should find things without reading each line.
-- [ ] **Persistent quest tracker on the main HUD.** Current quests always visible while playing; position
-  it so it does NOT overlap the other HUD elements.
-- [ ] **First-person arm distortion fix.** The FP arm/weapon must stay consistent when looking up/down —
-  it currently distorts based on look pitch.
-- [ ] **Hollow Pass wall flicker fix.** Walls there flicker / look glitchy (likely z-fighting) — fix.
+## Phase 13 — Menus, HUD & visual fixes — SHIPPED v1.54.0
+- [x] **Title + pause backgrounds redesigned.** `#overlay` is now an opaque **BLADEFALL-branded** backdrop
+  (amber torch-glow above, void-violet below, deep vignette) — the live 3D scene / "bobbing wall" no longer
+  shows through any title/pause/menu screen. Verified: overlay bg is the branded gradient.
+- [x] **Pause menu clarity redesign.** Rebuilt with **icons + grouped sections** (Continue / Character /
+  Settings / Leave) in a scannable 2-column `.pgrid`; the eye finds options without reading each line.
+- [x] **Persistent quest tracker on the HUD.** Moved to the **top-right** (right-aligned, under the pause
+  button) so it never overlaps the left HUD panel; stays visible the whole run. Verified: right side, no overlap.
+- [x] **First-person arm distortion fix.** The FP weapon pitch is now **clamped to ±0.42** so the arm/weapon
+  no longer skews at extreme look-up/down (the camera still pitches fully).
+- [x] **Hollow Pass wall flicker fix.** The canyon strata bands were **coplanar** with the wall face
+  (z-fighting); pulled them ~2u proud of the face so their planes never coincide. Verified: Hollow renders clean.
+
+### Also shipped in v1.54.0 (Oliver's direct feedback on the screenshot)
+- [x] **Menu top-cutoff fixed** — `#overlay` uses `align-items:flex-start` + `.card{margin:auto}`, so tall
+  menus (the Shop) are vertically centered when they fit and fully scrollable-to-top when they don't. Verified.
+- [x] **Fullscreen toggle** added to the pause Settings (`toggleFullscreen`, requestFullscreen/exit).
+- [x] **Widescreen menus** — desktop cards widen to `min(1080px,94vw)` and lists become **multi-column grids**
+  (`.achlist` auto-fill 340px cols; skill trees opt out via `.solo`); `.pgrid`/`.choices` also 2-col. Verified:
+  1080px card + 2-col shop list at 1280px.
+- [x] **Weapon visuals** — long hafts (scythe/greatsword/hammer) **cant out over the shoulder at rest** so they
+  no longer clip the arm; **swing poses now trace their hitbox** (scythe = full horizontal reap right→left,
+  sword = sweeping diagonal, thrust = forward lunge, slam/chop = overhead). Verified: renders clean.
 
 ## Phase 14 — Level depth & bestiary (MAJOR content bar — build zone-by-zone: ship one, judge, then the rest)
 - [ ] **Theme consistency per zone.** Every sub-area of a zone keeps ONE biome the whole way through —

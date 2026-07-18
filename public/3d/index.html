@@ -80,9 +80,10 @@
   #interactprompt .k{display:inline-block;background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
   #bAuto{top:38%;}
-  #questbox{position:absolute;left:calc(env(safe-area-inset-left) + 10px);top:calc(env(safe-area-inset-top) + 78px);z-index:4;pointer-events:none;
-    background:rgba(10,12,18,.55);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 10px;max-width:min(50vw,260px);
-    font-size:11px;line-height:1.5;letter-spacing:.01em;backdrop-filter:blur(3px);}
+  /* persistent quest tracker — top-RIGHT under the pause button so it never overlaps the left HUD panel */
+  #questbox{position:absolute;right:calc(env(safe-area-inset-right) + 12px);top:calc(env(safe-area-inset-top) + 50px);z-index:4;pointer-events:none;text-align:right;
+    background:rgba(10,12,18,.62);border:1px solid rgba(232,163,61,.22);border-radius:10px;padding:8px 11px;max-width:min(46vw,260px);
+    font-size:11px;line-height:1.55;letter-spacing:.01em;backdrop-filter:blur(3px);box-shadow:0 6px 18px rgba(0,0,0,.35);}
   #questbox .qhead{font-weight:800;color:var(--amber);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
   #questbox .qrow{color:#cfd6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #questbox .qrow b{color:#fff;}
@@ -133,17 +134,28 @@
   #bKeep{top:calc(38% + 38px);}
   .tog.on{background:rgba(232,163,61,.62);border-color:#f3c272;color:#0b0c10;}
   .hide{display:none !important;}
-  #overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(5,6,9,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-align:center;overflow:auto;}
+  /* align-items:flex-start + margin:auto on the card = vertically centered WHEN it fits, top-reachable + scrollable when it doesn't (fixes the top-cutoff on tall menus). */
+  /* Phase 13: a proper opaque BLADEFALL-branded dark-fantasy backdrop (amber torch-glow above, void-violet below, deep vignette) — no more live scene / "bobbing wall" showing through. */
+  #overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:24px;text-align:center;overflow:auto;
+    background:
+      radial-gradient(130% 90% at 50% -12%, rgba(232,163,61,.14), transparent 58%),
+      radial-gradient(120% 90% at 50% 118%, rgba(122,48,192,.12), transparent 55%),
+      radial-gradient(90% 70% at 50% 45%, rgba(20,22,32,.15), transparent 70%),
+      linear-gradient(162deg,#0f0b13 0%,#0a0b10 52%,#050609 100%);}
   #overlay.hide{display:none;}
   /* The card is the Wardens' ledger by torchlight: layered stone, a hairline inner edge,
      and the TORCHLINE — the amber rule across the top of every page. */
-  .card{width:100%;max-width:392px;background:linear-gradient(178deg,#171921 0%,#111219 46%,#0d0e14 100%);
-    border:1px solid #262a36;border-radius:18px;padding:22px 20px 18px;position:relative;
-    box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);}
-  /* desktop: use the real estate — roomier cards + taller, less-cramped lists */
+  .card{width:100%;max-width:392px;margin:auto;background:linear-gradient(178deg,#171921 0%,#111219 46%,#0d0e14 100%);
+    border:1px solid #2b3040;border-radius:18px;padding:22px 20px 18px;position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);}
+  /* desktop: use the widescreen real estate — wide cards + MULTI-COLUMN lists */
   @media (min-width:840px) and (pointer:fine){
-    .card{max-width:600px;padding:26px 30px 22px;}
-    .achlist{max-height:min(66vh,600px)!important;}
+    .card{max-width:min(1080px,94vw);padding:28px 40px 24px;}
+    .card.narrow{max-width:600px;}
+    .achlist{max-height:min(64vh,640px)!important;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:6px 18px;align-content:start;}
+    .achlist.solo{display:block;}                          /* skill trees / single-column lists opt out */
+    .achlist .gd[style*="text-align:left"]{grid-column:1/-1;}  /* category headers span all columns */
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .vsrow{font-size:15.5px;} .gearrow{padding:9px 12px;}
   }
   .card::before{content:'';position:absolute;top:0;left:14%;right:14%;height:2px;border-radius:2px;
@@ -164,6 +176,8 @@
   .sect{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#8b93a8;text-align:left;margin:16px 2px 6px;display:flex;align-items:center;gap:8px;}
   .sect::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#2b3040,transparent);}
   .choices{display:flex;flex-direction:column;gap:11px;}
+  .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 4px;}
+  .pgrid .bigbtn{margin:0;font-size:14px;padding:12px 10px;text-align:left;}
   .choice{padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));border:1px solid #2b3040;cursor:pointer;text-align:left;transition:border-color .12s,transform .05s,background .12s;}
   .choice:hover{border-color:var(--amber-dim);background:rgba(232,163,61,.06);}
   .choice:active{transform:scale(.985);}
@@ -278,7 +292,7 @@
    (rarity loot, elements, 3-slot armor, NG+, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.53.0';
+const VERSION3D='1.54.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1804,7 +1818,8 @@ const CANYON_STRATA=['#5e4527','#8a6a42','#b08b56','#8a6a42','#6e5433','#a07a48'
 function canyonWall(wx,cz,len,sgn,rnd,ww,topH){
   ww=ww||30; topH=topH||240;
   G.walls.push({x:wx,z:cz,w:ww,d:len,h:topH,stand:ww>=30});   // collision rises from the depths to topH
-  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2), courses=Math.ceil(topH/44);
+  // pull the strata bands ~2u proud of the wall's inner face so their front plane never coincides with the wall face (kills the z-fighting flicker)
+  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2)+sgn*2, courses=Math.ceil(topH/44);
   for(let L2=0;L2<courses;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2%6],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
   G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:topH+16,c:'#c2a060',theme:'canyon'});   // rimrock cap
 }
@@ -4011,7 +4026,7 @@ function openClasses(back){
     <h2 class="ovh">${C.icon} ${C.disp}</h2>
     <p class="ovsub">${un?('Rank '+cs.rank+'/10 · '+subLine):(C.earned?'Locked — earn it in a hidden trial':'Locked — play its starter trial')}</p>
     <div class="ctabs">${tabRow}</div>
-    <div class="achlist" style="max-height:min(50vh,400px)">${nodes.join('<div class="sconn"></div>')}</div>
+    <div class="achlist solo" style="max-height:min(50vh,400px)">${nodes.join('<div class="sconn"></div>')}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
   document.getElementById('backBtn').onclick=back;
@@ -4244,25 +4259,42 @@ function openGear(back){
     </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
 }
+function fsOn(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+function toggleFullscreen(){ try{
+  if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
+  else { const el=document.documentElement; (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+}catch(e){} }
 function openPause(){
   mode='pause';
-  showOverlayHTML(`<div class="card"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
-    <button class="bigbtn" id="resBtn">Resume</button>
-    <button class="bigbtn ghost" id="gearBtn">Gear</button>
-    <button class="bigbtn ghost" id="bagBtnP">Bag · ${meta.stash.length}/${STASH_CAP}</button>
-    <button class="bigbtn ghost" id="classesBtn">Classes &amp; Skills</button>
-    <button class="bigbtn ghost" id="skinBtn">Skins</button>
-    <button class="bigbtn ghost" id="achBtn">Achievements</button>
-    ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
-    <button class="bigbtn ghost" id="classBtn" ${G&&G.trial?'style="opacity:.4"':''}>Class: ${curClass().icon} ${curClass().disp} · rank ${classState(meta.classId).rank}${classState(meta.classId).sub?' · '+classState(meta.classId).sub:''}</button>
-    <button class="bigbtn ghost" id="camBtn">Camera: ${meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead'}</button>
+  const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
+  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
+    <button class="bigbtn" id="resBtn">▶ Resume</button>
+    ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
+    <div class="sect">Character</div>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="gearBtn">🛡 Gear</button>
+      <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
+      <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
+      <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
+      <button class="bigbtn ghost" id="achBtn">🏆 Achievements</button>
+      <button class="bigbtn ghost" id="classBtn" ${G&&G.trial?'style="opacity:.4"':''}>⚔️ ${curClass().disp} · r${classState(meta.classId).rank}</button>
+    </div>
+    <div class="sect">Settings</div>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
+      <button class="bigbtn ghost" id="fsBtn">⛶ Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
+      ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
+    </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
     ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
-    <button class="bigbtn ghost" id="armFxBtn">Armor on character: ${meta.showArmor?'On':'Off'}</button>
-    ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     ${audioSettingsHTML()}
-    <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
-    <button class="bigbtn ghost" id="titleBtnP">Title Screen</button></div>`);
+    <div class="sect">Leave</div>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="qmenu">🚪 Quit to Hub</button>
+      <button class="bigbtn ghost" id="titleBtnP">🏳 Title Screen</button>
+    </div></div>`);
+  { const _fs=document.getElementById('fsBtn'); if(_fs) _fs.onclick=()=>{ toggleFullscreen(); setTimeout(openPause,120); }; }
   document.getElementById('titleBtnP').onclick=()=>{ persist(); titleScreen(); };
   document.getElementById('resBtn').onclick=()=>{ mode='play'; showOverlay(false); regrabCam(); };
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
@@ -4569,13 +4601,15 @@ function drawHero3(p,t,preview){
   pushM(); mv(11,32,0);
   const w=p.weapon;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
-    if(prog<0) rotX(-0.35+Math.sin(t*2)*0.06);
-    else if(M.shape==='thrust') rotX(w.art==='javelin'?-1.6:-1.45);            // arm forward, weapon lunges (spear reaches deeper)
-    else if(M.shape==='slam') rotX(-2.6+prog*3.2);                            // maul: crash down from full height
-    else if(w.art==='great') { rotX(-2.3+prog*2.6); rotZ(0.2); }              // greatblade: towering overhead cleave
-    else if(w.art==='axe') { rotY((0.65-prog)*1.7); rotX(-0.9-prog*0.3); rotZ(0.35); } // axe: heavy sideways hack
-    else if(w.art==='scythe') { rotY((0.95-prog)*2.2); rotX(-0.75); rotZ(0.5); }       // scythe: widest horizontal reap
-    else { rotX(-2.0+prog*2.2); rotZ(0.5-prog*0.7); rotY((0.25-prog)*0.6); }  // sword: diagonal DOWN slash, high-left -> low-right
+    const longW=(w.art==='scythe'||w.art==='great'||w.art==='hammer');
+    if(prog<0){ rotX(-0.32+Math.sin(t*2)*0.05); if(longW){ rotZ(0.62); rotY(0.28); } }  // idle: cant long hafts OUT over the shoulder so they never clip the arm/head
+    // SWING poses — each traces the SHAPE of its actual hitbox so the motion reads true
+    else if(M.shape==='thrust'){ rotX(w.art==='javelin'?-1.6:-1.45); }                  // straight forward lunge (thrust hitbox)
+    else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
+    else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
+    else if(w.art==='axe'){ rotY((0.75-prog)*1.9); rotX(-0.9-prog*0.3); rotZ(0.35); }    // wide sideways hack
+    else if(w.art==='scythe'){ rotZ(0.35); rotX(-0.5); rotY(1.5-prog*3.0); }             // FULL horizontal reap: sweeps right→left across the front, matching the wide arc hitbox
+    else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
   } else { rotX(p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1)); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0);
@@ -4619,7 +4653,8 @@ function drawHero3(p,t,preview){
 }
 /* first-person: the hero's arm + weapon hung in front of the camera, swinging on attack */
 function drawFPWeapon(p,t){
-  const cy=(G.camYaw!=null?G.camYaw:Math.PI), pit=(G.camPitch!=null?G.camPitch:0.06);
+  const cy=(G.camYaw!=null?G.camYaw:Math.PI), rawpit=(G.camPitch!=null?G.camPitch:0.06);
+  const pit=Math.max(-0.42,Math.min(0.42,rawpit));   // Phase 13: clamp the FP weapon's pitch so the arm/weapon never skews at extreme look-up/down
   const fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
   const rx=Math.cos(cy), rz=-Math.sin(cy);                          // camera right (horizontal)
   const ex=p.x, ey=p.y+40, ez=p.z, w=p.weapon;

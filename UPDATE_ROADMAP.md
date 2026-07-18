@@ -583,3 +583,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Added Burn, Chill, Venom, Rune Mark, Radiance, and Corruption icons to affinity/status descriptions and the in-world enemy status-stack renderer.
 - [x] Added Common, Uncommon, Rare, Epic, and Legendary icons to the shared rarity badge helper, automatically covering item rows, pickup comparisons, gear details, and the test bench.
 - [x] Real-browser verification confirmed the rarity emblem renders at menu scale and all six status images preload for the canvas overlay; inline JavaScript syntax and `git diff --check` pass.
+
+## [Codex | 2026-07-18] Equipment-slot icon set (SHIPPED v1.98.0)
+
+- [x] Mapped the five downloaded files in the supplied order to Helmet, Chestplate, Leggings, Amulet, and Ring; removed baked checkerboards and normalized them to transparent 256×256 PNGs.
+- [x] Added one shared `slotIcon()` helper and wired it into the Gear screen, bag category headings, armor/trinket pickup comparisons, and mirror/loadout panel.
+- [x] Expanded the Gear slot label column for a readable 34px emblem while keeping the existing item information and hit targets intact.
+- [x] Real-browser verification passed at desktop and 390×844 mobile widths with all five icons visible, correctly ordered, and unclipped; inline JavaScript syntax and `git diff --check` pass.

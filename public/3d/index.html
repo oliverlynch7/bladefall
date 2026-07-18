@@ -236,6 +236,14 @@
   .ico-rarity-epic{background-image:url('icons/rarity-epic.png');}
   .ico-rarity-legendary{background-image:url('icons/rarity-legendary.png');}
   .ico-rarity{width:1.65em;height:1.65em;margin-left:.22em;vertical-align:-.48em;}
+  .ico-slot-helmet{background-image:url('icons/slot-helmet.png');}
+  .ico-slot-chest{background-image:url('icons/slot-chest.png');}
+  .ico-slot-legs{background-image:url('icons/slot-legs.png');}
+  .ico-slot-amulet{background-image:url('icons/slot-amulet.png');}
+  .ico-slot-ring{background-image:url('icons/slot-ring.png');}
+  .ico-slot{width:1.75em;height:1.75em;margin-right:.28em;vertical-align:-.52em;}
+  .gearrow .gi.slotgi{width:68px;text-align:center;}
+  .gearrow .gi .ico-slot{display:block;width:34px;height:34px;margin:0 auto 3px;vertical-align:middle;}
   .ico-menu{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
   #pausebtn .ico{width:26px;height:26px;}
   .ico-lg{width:1.5em;height:1.5em;vertical-align:-0.4em;}
@@ -399,7 +407,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.97.0';
+const VERSION3D='1.98.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1290,6 +1298,7 @@ function makeTrinket(rid,slot,typeId){
 function itemGold(it){ const tier=RARITY[it.rarity]?RARITY[it.rarity].tier:0;
   const base=[10,26,60,140,320][tier]; return Math.round(base*(it.trinket?1.25:1)); }
 function slotLabel(slot){ return (SLOTS[slot]&&SLOTS[slot].label)||(TRINKETS[slot]&&TRINKETS[slot].label)||slot; }
+function slotIcon(slot){ return GEARSLOTS.includes(slot)?`<span class="ico ico-slot ico-slot-${slot}" title="${slotLabel(slot)}" aria-label="${slotLabel(slot)}"></span>`:''; }
 
 /* ---------------- Skins (palettes; rendered as 3D voxel hero) ---------------- */
 const SKINS={
@@ -1936,7 +1945,7 @@ function openBag(back){
   const showHdr=(_bagSort==='type');
   let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
     const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
-    const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${_lc}s</div>`):'';
+    const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${w?'':slotIcon(o.slot)}${_lc}s</div>`):'';
     const lock=!canWield(o);
     return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
@@ -4988,7 +4997,7 @@ function offerArmor(na){
   const before=totalDefense(G.p), after=before-curDef+na.defense;
   const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
   showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[na.rarity].name.toUpperCase()}${rpip(na.rarity)} · ${SLOTS[na.slot].label.toUpperCase()}${reqTag(na)}</p>
+    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(na.slot)} ${RARITY[na.rarity].name.toUpperCase()}${rpip(na.rarity)} · ${SLOTS[na.slot].label.toUpperCase()}${reqTag(na)}</p>
     <h2 class="ovh" style="color:${RARITY[na.rarity].color}">${na.name}</h2>
     <img class="itemav" src="${itemAv(na)}" alt="">
     <div class="statgrid">
@@ -5008,7 +5017,7 @@ function offerTrinket(nt){
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
   mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
   showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nt.rarity].name.toUpperCase()}${rpip(nt.rarity)} · ${TRINKETS[nt.slot].label.toUpperCase()}${reqTag(nt)}</p>
+    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(nt.slot)} ${RARITY[nt.rarity].name.toUpperCase()}${rpip(nt.rarity)} · ${TRINKETS[nt.slot].label.toUpperCase()}${reqTag(nt)}</p>
     <h2 class="ovh" style="color:${RARITY[nt.rarity].color}">${nt.name}</h2>
     <div class="statgrid">
       ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
@@ -5617,7 +5626,7 @@ function mirrorStatsHTML(){
   [['helmet','Helmet'],['chest','Chest'],['legs','Legs'],['amulet','Amulet'],['ring','Ring']].forEach(([sl,lbl])=>{
     const a=p.gear&&p.gear[sl];
     const bonus=a?(a.affixes||[]).map(x=>x.label).join(' · '):'';
-    s+=`<div class="msgear"><span class="msg-l">${lbl}</span><span class="msg-r" style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'— empty —'}${bonus?`<br><span class="msg-b">${bonus}</span>`:''}</span></div>`;
+    s+=`<div class="msgear"><span class="msg-l">${slotIcon(sl)}${lbl}</span><span class="msg-r" style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'— empty —'}${bonus?`<br><span class="msg-b">${bonus}</span>`:''}</span></div>`;
   });
   return s;
 }
@@ -6157,7 +6166,7 @@ function openGear(back){
   const w=p.weapon, wEl=w.el?(w.el==='void'?'Void (ignores resist + lifesteal)':w.el):'Neutral';
   const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=slotLabel(slot);
     const detail=a?(a.trinket?a.affixes.map(x=>x.label).join(' · '):('Defense '+a.defense+' · '+a.affixes.map(x=>x.label).join(' · '))):'';
-    return `<div class="gearrow"><div class="gi">${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
+    return `<div class="gearrow"><div class="gi slotgi">${slotIcon(slot)}${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
   showOverlayHTML(`<div class="card"><h2 class="ovh">Gear</h2>
     <p class="ovsub">Total damage reduction: <b style="color:${bestGearRarity(p)}">${Math.round(defenseR(p)*100)}%</b></p>
     <div class="achlist">

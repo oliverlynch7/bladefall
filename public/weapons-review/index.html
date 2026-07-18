@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BLADEFALL — Weapons QA</title>
+<style>
+  :root{
+    --bg:#0a0e18; --panel:#131c30; --line:#22304a; --ink:#eaf0fb; --muted:#93a4c4;
+    --amber:#ffb04a; --amber2:#ff8f3a; --good:#5fd66a; --bad:#e05a5a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  body{padding:0 0 90px}
+  .top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#0a0e18f2,#0a0e18d8);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 14px calc(10px + env(safe-area-inset-top))}
+  .title{font-weight:800;letter-spacing:.08em;font-size:15px}
+  .title b{color:var(--amber)}
+  .sub{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:9px}
+  .chip{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+  .chip.on{color:#0a0e18;background:var(--amber);border-color:var(--amber);font-weight:700}
+  .wrap{max-width:1200px;margin:0 auto;padding:10px 12px}
+  .fam{margin:22px 0 8px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;
+    font-size:12px;color:var(--amber);border-bottom:1px solid var(--line);padding-bottom:6px}
+  .fam small{color:var(--muted);letter-spacing:.04em;text-transform:none;margin-left:8px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .cell{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#141d31,#101728);
+    padding:8px;display:flex;flex-direction:column;gap:6px}
+  .cell.good{border-color:#2e6b36}.cell.bad{border-color:#6b2e2e;opacity:.75}
+  .cmpx{display:flex;gap:6px}
+  .pane{flex:1;min-width:0;background:#0c1220;border:1px solid var(--line);border-radius:8px;
+    aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+  .pane canvas,.pane img{width:100%;height:100%;object-fit:contain;display:block}
+  .plabel{position:absolute;top:3px;left:5px;font-size:9px;letter-spacing:.06em;color:var(--muted);
+    text-transform:uppercase;background:#0009;padding:1px 4px;border-radius:4px}
+  .nm{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rate{display:flex;gap:5px}
+  .rb{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:7px;
+    padding:5px;font-size:13px;cursor:pointer}
+  .rb.up.on{background:var(--good);border-color:var(--good);color:#062}
+  .rb.dn.on{background:var(--bad);border-color:var(--bad);color:#400}
+  .note{width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:7px;
+    padding:5px 7px;font-size:11.5px;resize:vertical;min-height:26px;font-family:inherit}
+  .placeholder{font-size:9px;color:var(--muted);text-align:center;padding:4px}
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#0a0e18ee;backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  .foot .w2{max-width:1200px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .copy{flex:1;background:linear-gradient(95deg,var(--amber2),var(--amber));color:#0a0e18;font-weight:800;
+    border:0;border-radius:12px;padding:13px;font-size:15px;cursor:pointer}
+  .mini{color:var(--muted);font-size:12px;white-space:nowrap}
+  textarea#dump{position:fixed;left:-9999px;top:0}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="title">BLADEFALL <b>WEAPONS QA</b></div>
+  <div class="sub">Left pane = <b>my voxel recreation</b> (the in-game model I'll build). Right pane = <b>your GPT reference icon</b> (the shop/bag art). Judge how close my voxel matches, mark 👍/👎, and note what to fix. Then <b>Copy feedback</b>.</div>
+  <div class="bar" id="chips"></div>
+</div>
+<div class="wrap" id="list"></div>
+<div class="foot"><div class="w2">
+  <button class="copy" id="copy">Copy feedback</button>
+  <span class="mini" id="cmini"></span>
+</div></div>
+<textarea id="dump"></textarea>
+
+<script>
+/* ---------- data ---------- */
+const AFF = [
+  {k:'none',  main:'#c2c9d6', core:'#e6ecf5', glow:null},
+  {k:'fire',  main:'#FF7A3A', core:'#FFD07A', glow:'#FF7A3A'},
+  {k:'frost', main:'#7FD6FF', core:'#E3FAFF', glow:'#7FD6FF'},
+  {k:'poison',main:'#86E05A', core:'#D9FF9A', glow:'#86E05A'},
+  {k:'arcane',main:'#C47BFF', core:'#E1B9FF', glow:'#C47BFF'},
+  {k:'holy',  main:'#FFE9A8', core:'#FFF8D6', glow:'#FFE9A8'},
+  {k:'void',  main:'#8F52D6', core:'#D69BFF', glow:'#8F52D6'},
+];
+const REFSUF = {fire:'fire',frost:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
+// family id, base icon, class tag, and the 7 display names (index = AFF index)
+const FAMS = [
+  {id:'sword', cls:'Warrior · Physical', names:['Sword','Flame Sword','Frost Sword','Venom Sword','Runic Sword','Holy Sword','Void Sword']},
+  {id:'greatsword', cls:'Warrior · Physical', names:['Greatsword','Ember Greatsword','Ice Greatsword','Poison Greatsword','Arcane Greatsword','Light Greatsword','Abyss Greatsword']},
+  {id:'battleaxe', cls:'Warrior · Physical', names:['Battle Axe','Cinder Battle Axe','Frozen Battle Axe','Viper Battle Axe','Mystic Battle Axe','Sacred Battle Axe','Shadow Battle Axe']},
+  {id:'warhammer', cls:'Warrior · Physical', names:['Warhammer','Inferno Warhammer','Glacier Warhammer','Toxic Warhammer','Enchanted Warhammer','Blessed Warhammer','Rift Warhammer']},
+  {id:'knives', cls:'Ranger · Ranged', names:['Throwing Knives','Flame Throwing Knives','Frost Throwing Knives','Venom Throwing Knives','Runic Throwing Knives','Holy Throwing Knives','Void Throwing Knives']},
+  {id:'longbow', cls:'Ranger · Ranged', names:['Longbow','Ember Longbow','Ice Longbow','Poison Longbow','Arcane Longbow','Light Longbow','Abyss Longbow']},
+  {id:'crossbow', cls:'Ranger · Ranged', names:['Crossbow','Cinder Crossbow','Frozen Crossbow','Viper Crossbow','Mystic Crossbow','Sacred Crossbow','Shadow Crossbow']},
+  {id:'javelins', cls:'Ranger · Ranged', names:['Javelins','Inferno Javelins','Glacier Javelins','Toxic Javelins','Enchanted Javelins','Blessed Javelins','Rift Javelins']},
+  {id:'staff', cls:'Mage · Magic', names:['Staff','Flame Staff','Frost Staff','Venom Staff','Arcane Staff','Holy Staff','Void Staff']},
+  {id:'wand', cls:'Mage · Magic', names:['Wand','Ember Wand','Ice Wand','Poison Wand','Runic Wand','Light Wand','Shadow Wand']},
+  {id:'spellblade', cls:'Mage · Magic', names:['Spellblade','Cinder Spellblade','Frozen Spellblade','Viper Spellblade','Mystic Spellblade','Sacred Spellblade','Abyss Spellblade']},
+  {id:'scythe', cls:'Reaper · Mixed', names:['Scythe','Flame Scythe','Frost Scythe','Venom Scythe','Runic Scythe','Holy Scythe','Void Scythe']},
+];
+
+/* ---------- voxel models: [mat,x,y,z,w,h,d] ; y up, weapon vertical ---------- */
+const MAT = {steel:'#c2c9d6',darksteel:'#454c5e',wood:'#6a4a2c',leather:'#33291f',gold:'#d6a23e',bone:'#d9c9a8',string:'#d8cba0'};
+function b(m,x,y,z,w,h,d){return {m,x,y,z,w,h,d};}
+const M = {};
+M.sword=()=>[b('leather',-1,-11,-1,2,5,2),b('gold',-1.6,-12.6,-1.6,3.2,1.6,3.2),b('gold',-4,-6.6,-1,8,1.6,2),b('gem',-0.8,-6.5,-1.25,1.6,1.4,0.6),
+ b('blade',-1.5,-5,-0.6,3,7,1.2),b('blade',-1.2,2,-0.5,2.4,6,1),b('blade',-0.9,8,-0.45,1.8,4,0.9),b('blade',-0.5,12,-0.35,1,2.4,0.7)];
+M.greatsword=()=>[b('leather',-1.2,-13,-1.2,2.4,6,2.4),b('gold',-2,-14.6,-2,4,2,4),b('gold',-5,-7,-1.2,10,2,2.4),b('gem',-1,-6.9,-1.5,2,1.8,0.7),
+ b('blade',-2.5,-5,-0.8,5,9,1.6),b('blade',-2,4,-0.7,4,7,1.4),b('blade',-1.3,11,-0.6,2.6,4,1),b('blade',-0.7,15,-0.5,1.4,2.4,0.8)];
+M.battleaxe=()=>[b('wood',-0.9,-13,-0.9,1.8,23,1.8),b('gold',-1,-13.6,-1,2,1.3,2),b('darksteel',-1.7,3,-1.7,3.4,8,3.4),
+ b('blade',1.6,3.5,-1.8,4.6,6.6,3.6),b('blade',-6.2,3.5,-1.8,4.6,6.6,3.6),b('gold',-1.9,2.4,-1.9,3.8,1.2,3.8),b('gold',-1.9,9.6,-1.9,3.8,1.2,3.8)];
+M.warhammer=()=>[b('wood',-0.9,-13,-0.9,1.8,23,1.8),b('gold',-1,-13.6,-1,2,1.3,2),b('darksteel',-4.8,4.2,-3.8,9.6,7.4,7.6),
+ b('gold',-4.4,5.4,-3.4,8.8,0.9,6.8),b('gold',-4.4,8.6,-3.4,8.8,0.9,6.8),b('darksteel',-1.6,2.6,-1.6,3.2,2,3.2)];
+M.knives=()=>{let a=[];[[-3.4,-.6],[0,1.1],[3.4,-.6]].forEach(([ox,oy])=>{a.push(b('leather',ox-0.6,oy-4,-0.6,1.2,3,1.2),b('gold',ox-1.4,oy-1.4,-0.6,2.8,1,1.2),
+ b('blade',ox-0.7,oy-0.4,-0.5,1.4,6.5,1),b('blade',ox-0.4,oy+6,-0.35,0.8,1.8,0.7));});return a;};
+M.longbow=()=>{let a=[];for(let i=0;i<=13;i++){let t=(i-6.5)/6.5,y=t*12.5,bulge=3.4*(1-t*t),x=2.4-bulge;a.push(b('wood',x-0.55,y-0.7,-0.55,1.1,1.5,1.1));}
+ for(let i=0;i<=13;i++){let t=(i-6.5)/6.5,y=t*12.5;a.push(b('string',2.1,y-0.5,-0.18,0.36,1.1,0.36));}
+ a.push(b('gold',1.5,-1,-0.7,1.4,2,1.4));return a;};
+M.crossbow=()=>{let a=[b('wood',-0.9,-1,-9,1.8,2.2,15),b('darksteel',-0.9,-1.2,4,1.8,1,4),
+ b('wood',-8,-0.4,2.4,16,1.6,1.6),b('gold',-1,-0.6,-9.5,2,1.4,2),b('darksteel',-0.7,-2.2,-4,1.4,1.4,3)];
+ for(let i=0;i<=10;i++){let t=(i-5)/5;a.push(b('string',t*7.5-0.2,-0.2,3.4,0.5,0.5,0.5));}a.push(b('blade',-0.4,-0.2,-8,0.8,0.8,5));return a;};
+M.javelins=()=>{let a=[];[-2.2,2.2].forEach(ox=>{a.push(b('wood',ox-0.4,-13,-0.4,0.8,21,0.8),b('gold',ox-0.7,6.5,-0.7,1.4,1.2,1.4),
+ b('blade',ox-0.8,7.5,-0.8,1.6,4,1.6),b('blade',ox-0.4,11.4,-0.4,0.8,1.8,0.8),b('gold',ox-0.7,-11,-0.7,1.4,1.1,1.4));});return a;};
+M.staff=()=>[b('wood',-0.7,-13,-0.7,1.4,22,1.4),b('gold',-0.9,-3,-0.9,1.8,1.1,1.8),b('gold',-0.9,4,-0.9,1.8,1.1,1.8),
+ b('darksteel',-2.2,8,-1.4,4.4,4,2.8),b('darksteel',-2.6,9,-1,5.2,3,1),b('darksteel',2,9,-1,1,3,1),b('bone',-1.5,10,-1.5,3,3,3),b('gem',-1,12.6,-1,2,2,2)];
+M.wand=()=>[b('wood',-0.6,-9,-0.6,1.2,13,1.2),b('gold',-0.8,-8,-0.8,1.6,1.1,1.6),b('gold',-1.6,3,-1.6,3.2,3,3.2),
+ b('gold',-1.9,3.2,-1.9,3.8,0.9,3.8),b('gem',-1.1,3.6,-1.1,2.2,3.2,2.2)];
+M.spellblade=()=>[b('leather',-0.9,-11,-0.9,1.8,5,1.8),b('gold',-1.5,-12.6,-1.5,3,1.6,3),b('gem',-0.7,-12,-0.9,1.4,1.2,0.5),
+ b('gold',-3.6,-6.6,-1,7.2,1.6,2),b('gem',-0.9,-6.7,-1.3,1.8,1.6,0.7),b('blade',-1.2,-5,-0.5,2.4,8,1),b('blade',-0.9,3.5,-0.42,1.8,6,0.85),b('blade',-0.45,9.5,-0.32,0.9,3,0.65)];
+M.scythe=()=>{let a=[b('wood',-0.7,-13,-0.7,1.4,26,1.4),b('gold',-0.9,-4,-0.9,1.8,1.1,1.8),b('gold',-0.9,6,-0.9,1.8,1.1,1.8),b('bone',-1.4,10,-1.4,2.8,2.8,2.8)];
+ for(let i=0;i<=9;i++){let A=i/9,x=A*A*9.5,y=13+A*7-A*A*2.4,w=1.5-A*0.7;a.push(b('blade',x-w/2,y-0.6,-0.5,w,1.5,1));}return a;};
+
+/* ---------- iso renderer ---------- */
+const K=5.2, OX=95, OY=150;
+function P(x,y,z){return [OX+(x-z)*K, OY+(x+z)*(K*0.55)-y*K];}
+function shade(hex,f){let n=parseInt(hex.slice(1),16),r=(n>>16&255)*f,g=(n>>8&255)*f,bl=(n&255)*f;
+ return 'rgb('+(r>255?255:r|0)+','+(g>255?255:g|0)+','+(bl>255?255:bl|0)+')';}
+function poly(ctx,pts,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fill();}
+function drawBox(ctx,bx,mats){
+  const x0=bx.x,y0=bx.y,z0=bx.z,x1=x0+bx.w,y1=y0+bx.h,z1=z0+bx.d;
+  const col=mats[bx.m]||MAT[bx.m]||'#888';
+  poly(ctx,[P(x0,y1,z0),P(x1,y1,z0),P(x1,y1,z1),P(x0,y1,z1)],shade(col,1.15)); // top
+  poly(ctx,[P(x1,y1,z0),P(x1,y1,z1),P(x1,y0,z1),P(x1,y0,z0)],shade(col,0.92)); // +x
+  poly(ctx,[P(x0,y1,z1),P(x1,y1,z1),P(x1,y0,z1),P(x0,y0,z1)],shade(col,0.72)); // +z
+}
+function render(cv,famId,affIdx){
+  const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height);
+  const aff=AFF[affIdx];
+  const mats=Object.assign({},MAT);
+  mats.blade = affIdx? aff.main : MAT.steel;
+  mats.gem   = affIdx? aff.core : '#4a7fe0';
+  const boxes=(M[famId]||M.sword)();
+  if(aff.glow){ // soft glow behind
+    const g=ctx.createRadialGradient(cv.width/2,cv.height*0.42,4,cv.width/2,cv.height*0.42,cv.width*0.55);
+    g.addColorStop(0,aff.glow+'55');g.addColorStop(1,aff.glow+'00');ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+  }
+  boxes.sort((p,q)=>((p.x+p.w/2)+(p.z+p.d/2))-((q.x+q.w/2)+(q.z+q.d/2)) || (p.y-q.y));
+  boxes.forEach(bx=>drawBox(ctx,bx,mats));
+}
+function refSrc(famId,affIdx){
+  if(affIdx===0) return 'icons/'+famId+'.png';
+  if(famId==='sword') return 'icons/aff_'+REFSUF[AFF[affIdx].k]+'_sword.png';
+  return null; // no per-variant art yet
+}
+
+/* ---------- build ---------- */
+const LS='bf_weapons_qa_v1'; let store={}; try{store=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
+let filt='all';
+function build(){
+  const list=document.getElementById('list'); list.innerHTML='';
+  FAMS.forEach(f=>{
+    const h=document.createElement('div');h.className='fam';h.innerHTML=f.names[0].replace(/s$/,'')+' family <small>'+f.cls+'</small>';
+    if(filt!=='all'){const ai=AFF.findIndex(a=>a.k===filt);}
+    list.appendChild(h);
+    const g=document.createElement('div');g.className='grid';list.appendChild(g);
+    f.names.forEach((nm,ai)=>{
+      if(filt==='base' && ai!==0) return;
+      if(filt!=='all' && filt!=='base' && AFF[ai].k!==filt) return;
+      const id=f.id+':'+AFF[ai].k, st=store[id]||{};
+      const c=document.createElement('div');c.className='cell'+(st.r==='up'?' good':st.r==='dn'?' bad':'');
+      const cmp=document.createElement('div');cmp.className='cmpx';
+      const p1=document.createElement('div');p1.className='pane';p1.innerHTML='<span class="plabel">voxel</span>';
+      const cv=document.createElement('canvas');cv.width=190;cv.height=230;p1.appendChild(cv);
+      const p2=document.createElement('div');p2.className='pane';p2.innerHTML='<span class="plabel">ref</span>';
+      const rs=refSrc(f.id,ai);
+      if(rs){const im=document.createElement('img');im.src=rs;im.loading='lazy';p2.appendChild(im);}
+      else{p2.innerHTML+='<div class="placeholder">base art + '+AFF[ai].k+' tint<br>(no per-variant art yet)</div>';}
+      cmp.appendChild(p1);cmp.appendChild(p2);
+      const nmEl=document.createElement('div');nmEl.className='nm';nmEl.textContent=nm;
+      const rate=document.createElement('div');rate.className='rate';
+      const up=document.createElement('button');up.className='rb up'+(st.r==='up'?' on':'');up.textContent='👍';
+      const dn=document.createElement('button');dn.className='rb dn'+(st.r==='dn'?' on':'');dn.textContent='👎';
+      up.onclick=()=>{st.r=st.r==='up'?'':'up';store[id]=st;save();build();};
+      dn.onclick=()=>{st.r=st.r==='dn'?'':'dn';store[id]=st;save();build();};
+      rate.appendChild(up);rate.appendChild(dn);
+      const nt=document.createElement('textarea');nt.className='note';nt.placeholder='what to fix…';nt.value=st.n||'';
+      nt.oninput=()=>{st.n=nt.value;store[id]=st;save();};
+      c.appendChild(cmp);c.appendChild(nmEl);c.appendChild(rate);c.appendChild(nt);
+      g.appendChild(c);
+      render(cv,f.id,ai);
+    });
+  });
+  refreshMini();
+}
+function refreshMini(){const r=Object.values(store).filter(s=>s.r).length;document.getElementById('cmini').textContent=r+' rated';}
+function chips(){
+  const c=document.getElementById('chips');
+  const opts=[['all','All 84'],['base','Base shapes'],['fire','Fire'],['frost','Frost'],['poison','Poison'],['arcane','Arcane'],['holy','Holy'],['void','Void']];
+  opts.forEach(([v,l])=>{const s=document.createElement('span');s.className='chip'+(filt===v?' on':'');s.textContent=l;
+    s.onclick=()=>{filt=v;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));s.classList.add('on');build();};c.appendChild(s);});
+}
+document.getElementById('copy').onclick=()=>{
+  let t='BLADEFALL weapon voxel QA\n\n';
+  FAMS.forEach(f=>f.names.forEach((nm,ai)=>{const st=store[f.id+':'+AFF[ai].k];if(st&&(st.r||st.n))t+=`[${st.r==='up'?'GOOD':st.r==='dn'?'FIX ':'    '}] ${nm}${st.n?' — '+st.n:''}\n`;}));
+  const ta=document.getElementById('dump');ta.value=t;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>flash()).catch(()=>{ta.style.left='0';ta.select();document.execCommand('copy');ta.style.left='-9999px';flash();});}
+  else{ta.style.left='0';ta.select();document.execCommand('copy');ta.style.left='-9999px';flash();}
+};
+function flash(){const m=document.getElementById('cmini');m.textContent='Copied — paste to Claude';setTimeout(refreshMini,2200);}
+chips();build();
+</script>
+</body>
+</html>

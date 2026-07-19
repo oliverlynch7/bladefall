@@ -594,7 +594,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.150.0';
+const VERSION3D='1.151.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4037,7 +4037,7 @@ function autoAtkTarget(p,w){
   return t;
 }
 function playerAttack(cdMul){
-  const p=G.p,w=p.weapon; if(p.atkCd>0) return;
+  const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
   const t=aimTarget(p,w, w.cls==='melee'?(w.range+40)*1.6:(w.proj.range*1.1));
@@ -4076,6 +4076,12 @@ function classStyleMul(p){
 }
 // a weapon supports tap/hold charging ONLY for its own class family (off-class = plain base attack, GLOBAL RULE)
 function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
+const THROWN_CHARGES=['hurl','javelin','scythethrow'];
+function thrownWeaponHidden(p,w){ return !!(p&&w&&p.throwHideT>0&&p.throwHideArche===w.arche&&THROWN_CHARGES.includes(w.chg)); }
+function beginThrownWeapon(p,w,returns){
+  p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
+  p.throwHideT=returns?3.5:0.36; return p.throwToken;
+}
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
   if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
@@ -4098,9 +4104,10 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
 function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=560, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
   const dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p);   // ranged-type damage
+  const throwToken=beginThrownWeapon(p,w,true);
   G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
     size:17,color:w.blade||'#cfd6df',shape:'scythespin',glow:w.el?1:0,el:w.el||null,dmg,kb:(w.kb||260),pierce:99,
-    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0,desig:true});
+    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0,desig:true,throwToken});
   SFX.slash(); if(w.el) SFX.magic(w.el); p.atkTimer=0.26; G.shake=Math.min(G.shake+5,12);
   burst(ox,oy,oz,w.blade||'#cfd6df',8); }
 // a short forward thrust (the light stab shared by javelin + point-blank knives)
@@ -4120,8 +4127,9 @@ function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(760,null)
 function hurlAxe(p,w,amt){ const t=nearestEnemy(700,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=520, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
   const dmg=w.dmg*effPower(p)*(1.8+amt*2.2)*offclassMul(p)*classStyleMul(p);
+  const throwToken=beginThrownWeapon(p,w,true);
   G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
-    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:3.2,hitSet:[],axe:true,ox,oz,range:170+amt*230,returning:false,spin:0});
+    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:3.2,hitSet:[],axe:true,ox,oz,range:170+amt*230,returning:false,spin:0,throwToken});
   SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
 function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+amt*1.8)*offclassMul(p)*classStyleMul(p);
   skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
@@ -4151,8 +4159,9 @@ function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(900,null); i
   const sp=(pr.speed||600)+amt*140, oy=p.y+30; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=90;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt + (pr.gravity||300)*0.5*tt; }
   const dmg=w.dmg*effPower(p)*(1.6+amt*2.4)*offclassMul(p)*classStyleMul(p);
+  const throwToken=beginThrownWeapon(p,w,false);
   G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:pr.gravity||300,
-    size:(pr.size||6)+3,color:pr.color,shape:'arrow',glow:0,dmg,kb:(w.kb||210)+120,pierce:(pr.pierce||1)+2,el:null,life:(pr.range||680)*1.6/sp,hitSet:[]});
+    size:(pr.size||6)+3,color:pr.color,shape:'javelin',glow:0,dmg,kb:(w.kb||210)+120,pierce:(pr.pierce||1)+2,el:null,life:(pr.range||680)*1.6/sp,hitSet:[],throwToken});
   SFX.shoot(); p.atkTimer=0.22; G.shake=Math.min(G.shake+4,11); }
 function fireCharged(p,w,amt){
   const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);   // 1.4x at a flick up to 4x at full charge
@@ -4888,7 +4897,8 @@ function update(dt){
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
   document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
   const _w=p.weapon;
-  if(isChargeWeapon(_w) && !meta.autoAttack){                    // magic sword: tap = melee swing, hold = charge an elemental blast
+  if(thrownWeaponHidden(p,_w)){ p.charging=false; p.chargeAmt=0; p.attackHeld=false; p.holdT=0; }
+  else if(isChargeWeapon(_w) && !meta.autoAttack){                // charge-capable weapon: tap attacks, hold builds its signature release
     if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }   // press = an instant quick attack...
       p.holdT+=dt; if(p.holdT>=0.14 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }   // ...then keep holding and it goes STRAIGHT into the charge (snappier: 0.28->0.14)
     else { if(p.charging){ chargeRelease(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
@@ -5095,6 +5105,11 @@ function update(dt){
         pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
   }
   G.projectiles=G.projectiles.filter(pr=>pr.life>0);
+  if(p.throwHideT>0){
+    if(p.throwHideReturn && !G.projectiles.some(pr=>pr.throwToken===p.throwToken)) p.throwHideT=0;   // returning axe/scythe is back in hand
+    else p.throwHideT=Math.max(0,p.throwHideT-dt);                                                   // javelin replacement + safety timeout
+    if(p.throwHideT<=0){ p.throwHideReturn=false; p.throwHideArche=null; }
+  }
   // chests
   for(const ch of G.chests){ if(ch.opened) continue; ch.bob+=dt*3;
     if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
@@ -7303,7 +7318,7 @@ function drawHero3(p,t,preview){
   else if(p.atkTimer<=0) rotX(1.5);                                           // idle sword/dagger/axe/maul projects forward, tip up-and-out
   else rotX(Math.PI);                                                        // swing keeps the blade-down base the swing poses expect
   if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);
-  weaponMesh(w); popM();
+  if(preview||!thrownWeaponHidden(p,w)) weaponMesh(w); popM();
   popM();
   // head
   bx(0,42,0, 12,12,11, sk.tone);
@@ -7392,7 +7407,7 @@ function drawFPWeapon(p,t){
     bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip
     bx(0,3.5,5.2, 9.5,4,3.4, tint(HAND,'#000',0.18));                                        // fingers curling over the front of the grip
     bx(0,-4,5.2, 9.5,3.4,3, tint(HAND,'#000',0.28));                                         // thumb
-    pushM(); mv(0,3,2.5); weaponMesh(w); popM();                                             // weapon grip sits inside the fist
+    pushM(); mv(0,3,2.5); if(!thrownWeaponHidden(p,w)) weaponMesh(w); popM();                  // thrown charge weapons visibly leave the fist
     if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
   popM();
 }
@@ -8560,7 +8575,13 @@ function drawProjectile3(pr,t){
   drawShadow(pr.x,pr.z,pr.size*0.7,0.16);
   const yaw=Math.atan2(pr.vx,pr.vz), pitch=Math.atan2(-(pr.vy||0),Math.hypot(pr.vx,pr.vz));
   pushM(); mv(pr.x,pr.y,pr.z); rotY(yaw); rotX(pitch);
-  if(pr.shape==='arrow'||pr.shape==='bolt'){          // a real arrow: shaft + head + fletching, pointing along travel (+z)
+  if(pr.shape==='javelin'){                            // charged javelin: the full spear visibly leaves the Warden's hand
+    const c=pr.color||'#d8c27a';
+    box(2.5,2.5,46,'#5a4025');
+    pushM(); mv(0,0,25); box(5.8,5.8,9,tint(c,'#fff',0.25)); mv(0,0,6); box(2.2,2.2,5,'#eef2f4'); popM();
+    pushM(); mv(0,0,-20); box(5.5,1.1,9,'#8b3d32'); box(1.1,5.5,9,'#8b3d32'); popM();
+  }
+  else if(pr.shape==='arrow'||pr.shape==='bolt'){     // a real arrow: shaft + head + fletching, pointing along travel (+z)
     const c=pr.color, g=pr.glow?pr.color:null;
     box(1.4,1.4,15, c, g);                                          // shaft
     pushM(); mv(0,0,8.4); box(3,3,3.5, tint(c,'#fff',0.25), g); box(1.3,1.3,3, c, g); popM();   // arrowhead

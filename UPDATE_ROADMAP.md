@@ -839,3 +839,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Ranger now exposes all 16 rank 2-9 skill/passive options in one staged build screen; Warrior, Mage, and Reaper show both complete combat paths and every ability contained in each path.
 - Respec choices are staged without changing saves or spending gold; one 300g charge applies only on final confirmation, while Back leaves the existing build untouched. Ranger's previously missing Respec entry now appears correctly.
 - Muted real-browser QA at 1600x900 and 1366x768 verified no page scrolling, persistent footer actions, all four class trees, locked/selected states, free preview/back behavior, single-charge confirmation, and save-compatible class-state updates.
+
+## [Codex | 2026-07-19] v1.151.0 - physical thrown-weapon handoff
+- Charged javelins, battle axes, and scythes now visibly leave both third-person and first-person hands at release instead of remaining duplicated on the Warden.
+- Returning axes and scythes stay absent until their matching projectile reaches the player; javelins ready a replacement after 0.36s so their thrown spear can remain visible in flight without blocking continued play.
+- Added a dedicated full-length javelin projectile model (shaft, spearhead, and fletching) instead of reusing the small arrow mesh, and blocked ghost attacks during each empty-hand interval.
+- Muted real-browser QA verified all three charge families, return-token synchronization, fixed javelin re-equip timing while its projectile remains airborne, first/third-person empty-hand rendering, and normal attack availability after recovery.

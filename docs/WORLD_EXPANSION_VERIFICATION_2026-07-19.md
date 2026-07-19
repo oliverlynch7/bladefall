@@ -24,11 +24,23 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- Frostfell + Glacier Vault
 - Emberdeep + Magma Core
 - The Abyss + Reaper's Gate
 - Sunspire Palace + Sealed Reliquary
 - Castle Duskmoor final expansion and full-chain regression
+
+## Pair 4 — Frostfell + Glacier Vault (v1.175.0)
+
+| Area | Authored districts | Bounds | Start-to-goal | Objective |
+|---|---:|---:|---:|---|
+| Frostfell | 6 | 1910 × 5140 | 4690 | 12 Frost-Shells |
+| The Rime Shelf | 6 | 1940 × 5000 | 4660 | 5 Frozen Cores + cairn |
+| Glacier Vault | 7 | 1910 × 5670 | 5240 | Restore 3 thermal conduits |
+
+- Frostfell now crosses a cracking frozen lake, buried village, climbable ice gorge, expedition shelter, Aurora Caverns, and a summit approach with recoverable and optional high routes.
+- Rime Shelf adds whiteout shelter landmarks, a moving blue-ice ravine, Avalanche Crown, a long descending avalanche route with recovery shelves, thawed-cavern shortcut, and Frostwatch Cairn.
+- Glacier Vault now has specimen galleries with visible cracked ice, a thermal conduit maze, mirror-ice zigzag parkour, Crystal Archive, Sealed Treasury, and a dedicated refreeze escape route.
+- Required paths pass full structural connectivity. Five Frozen Cores and three Thermal Cores surface-snap correctly; the Vault opens only after all conduits are restored. Muted browser console: zero errors.
 
 ## Pair 3 — Ruined Keep + Oubliette (v1.174.0)
 

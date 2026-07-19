@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.174.0';
+const VERSION3D='1.175.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3384,6 +3384,36 @@ const EXPANDED_SCAPES={
       scapeFetch(ctx,[{x:-620,z:-760,y:0},{x:420,z:-1440,y:68},{x:-580,z:-2220,y:100},{x:420,z:-2900,y:210},{x:0,z:-3800,y:330}]);
       finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:STONE,decoTheme:'dungeon',decoTall:430});
     }
+  },
+  frost(ctx){ const {rnd,mkMonster}=ctx,upper=G.area===1,ICE='#9eddf2',SNOW='#d9eff5',DARK='#31536a',AUR='#75f0d2';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const icePine=(x,z,h)=>{vcol(x,z,20,20,h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};
+    const brazier=(x,z,y=0)=>{vcol(x,z,22,22,y+36);G.deco.push({x,z,y0:y+36,w:34,h:18,d:34,c:'#ffb04d'});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!upper){
+      const lake=room('Frozen Lake',0,0,980,760),village=room('Buried Village',-520,-900,760,680),gorge=room('Ice Gorge',420,-1700,760,700),shelter=room('Expedition Shelter',-420,-2460,680,620,120),cavern=room('Aurora Caverns',420,-3150,820,720,220),summit=room('Summit Approach',0,-4200,980,760,220);
+      // Cracking lake: two braided lines, with broad recovery ice between them.
+      for(let k=0;k<12;k++){const x=(k%2?-170:170),z=250-k*105;G.crumbles.push({x,z,w:120,d:92,h:0,state:0,timer:0,respawn:0,fallY:0,jit:0});}road(lake,village,170);road(village,gorge,150);
+      for(const h of [[-700,-820],[-450,-1040],[-250,-820]]){G.deco.push({x:h[0],z:h[1],y0:0,w:190,h:56,d:150,c:'#718b96'});G.deco.push({x:h[0],z:h[1],y0:56,w:220,h:24,d:175,c:SNOW});}
+      // Gorge climbs alternate wall shelves and a central ice spine.
+      climbRun(120,-1350,0,420,-1700,80,72);for(let k=0;k<9;k++){const x=120+(k%3)*150,z=-1850-k*72;vcol(x,z,58,58,70+k*18);vplat(x,z,82+k*18,86,76,{ice:true});}
+      climbRun(420,-2100,220,-420,-2460,120,76);vplat(-420,-2460,120,680,620,{checkpoint:true,terrace:true});brazier(-420,-2460,120);chest(-650,-2500,120);
+      // Aurora cavern floats over a safe snow floor; an optional crystal ladder rises above the main route.
+      climbRun(-120,-2700,120,420,-3150,220,74);for(let k=0;k<8;k++){const a=k/8*6.28;vplat(420+Math.cos(a)*250,-3150+Math.sin(a)*220,220+(k%3)*34,84,84,{crystal:true});G.deco.push({x:420+Math.cos(a)*250,z:-3150+Math.sin(a)*220,y0:220,w:18,h:90,d:18,c:AUR});}
+      climbRun(420,-3150,220,0,-4200,220,84,{snowbridge:true});for(let k=0;k<14;k++){const a=k/14*6.28;icePine(Math.cos(a)*410,-4200+Math.sin(a)*310,70+rnd()*70);}chest(650,-3150,254);
+      for(const p of [[0,-180,lake],[-520,-900,village],[420,-1700,gorge],[-420,-2460,shelter],[420,-3150,cavern]]){mkMonster('frostshell',p[0]-55,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1]-20,p[2]);}
+      scapeKill(ctx,[{x:0,z:-180,room:lake},{x:-520,z:-900,room:village},{x:420,z:-1700,room:gorge},{x:-420,z:-2460,room:shelter},{x:420,z:-3150,room:cavern}]);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4410,decoCol:DARK,decoTheme:'frost',decoTall:350});
+    }else{
+      const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
+      road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
+      climbRun(100,-1250,0,420,-1600,120,72);for(let k=0;k<7;k++)G.movers.push({x0:420+(k%2?120:-120),z:-1750-k*100,w:96,d:74,h:120+k*20,amp:30+(k%3)*8,sp:.8+k*.08,ph:rnd()*6.28,x:420,px:420});
+      climbRun(420,-2050,220,-420,-2350,250,74);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
+      // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
+      for(let k=0;k<14;k++){const t=k/13,x=-420+920*t,z=-2500-600*t,y=250-170*t;vplat(x,z,y,100,82,{slide:true});if(k%4===0)vplat(x-170,z,y,130,110,{shelter:true});}
+      vplat(500,-3100,80,760,700,{terrace:true});road(cave,cairn,170);climbRun(500,-3100,80,0,-4100,180,78);brazier(0,-4140,180);chest(650,-3100,80);chest(-650,-2350,250);
+      for(const p of [[-500,-850,white],[420,-1600,ravine],[-420,-2350,slide],[500,-3100,cave]]){mkMonster('frostshell',p[0]-45,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
+      scapeFetch(ctx,[{x:-500,z:-850,y:0},{x:420,z:-1600,y:120},{x:-420,z:-2350,y:250},{x:500,z:-3100,y:80},{x:0,z:-4100,y:180}]);scapeFind(ctx,0,-4140,180);finishScape(ctx,{sx:0,sz:280,sy:0,gx:0,gz:-4380,decoCol:DARK,decoTheme:'frost',decoTall:390});
+    }
   }
 };
 const SIDE_SCAPES={
@@ -3451,6 +3481,22 @@ const SIDE_SCAPES={
     localMission('prisonRecords','Recover the prisoners’ records','collect',3,150);G.portal=null;chest(-680,-2300,150);chest(210,-3900,360);scapeSecret(ctx,0,-2140,0);
     for(const p of [[0,-200,intake],[-500,-800,chains],[420,-1500,pit],[-420,-2300,records],[430,-3020,walk]]){mkMonster('revenant',p[0]-50,p[1],p[2]);mkMonster('bones',p[0]+55,p[1],p[2]);}
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4800,decoCol:STONE,decoTheme:'dungeon',decoTall:480});G.portal=null;questUpdate();
+  },
+  glaciervault(ctx){const {rnd,mkMonster}=ctx,ICE='#a9e5f5',CRYSTAL='#78d7ef',METAL='#3f5968',HEAT='#ff9b4a';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=130)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const vest=room('Shattered Vestibule',0,0,820,620),spec=room('Specimen Galleries',-500,-820,760,680),thermal=room('Thermal Conduits',420,-1580,760,700),mirror=room('Mirror-Ice Hall',-420,-2380,740,660,120),archive=room('Crystal Archive',450,-3100,800,720,210),treasury=room('Sealed Treasury',0,-4140,980,780,210),escape=room('Refreeze Escape',0,-4900,820,560,210);
+    path(vest,spec,150);path(spec,thermal,140);for(let k=0;k<8;k++){const x=-720+k*72;G.deco.push({x,z:-820,y0:0,w:50,h:90+(k%3)*30,d:50,c:ICE});if(k%2===0)G.deco.push({x,z:-820,y0:90,w:36,h:28,d:36,c:'#456b78'});}
+    // Thermal conduits wind between heat pylons; cracks telegraph which frozen specimens will wake.
+    for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1440-Math.floor(k/5)*220;vcol(x,z,34,34,72);G.deco.push({x,z,y0:72,w:46,h:14,d:46,c:k%2?HEAT:CRYSTAL});}
+    climbRun(160,-1900,0,-420,-2380,120,72);vplat(-420,-2380,120,740,660,{checkpoint:true,terrace:true});
+    // Mirror-ice zigzag forces changing approach angles, with a broad floor below as recovery.
+    for(let k=0;k<10;k++){const x=-620+(k%2?360:80),z=-2550-k*90;vplat(x,z,120+(k%3)*28,92,68,{mirror:true});G.deco.push({x,z,y0:150,w:7,h:100,d:70,c:'#dff9ff'});}
+    climbRun(-260,-2750,120,450,-3100,210,74);for(let k=0;k<12;k++){const a=k/12*6.28;G.deco.push({x:450+Math.cos(a)*270,z:-3100+Math.sin(a)*240,y0:210,w:22,h:110+(k%4)*28,d:22,c:CRYSTAL});}
+    climbRun(450,-3100,210,0,-4140,210,84,{archive:true});climbRun(0,-4140,210,0,-4900,210,82,{escape:true});
+    const cores=[{x:-500,z:-820,y:0},{x:420,z:-1580,y:72},{x:450,z:-3100,y:210}];for(const p of cores)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'thermalCores',name:'Thermal Core'},bob:rnd()*3,placed:true});localMission('thermalCores','Restore the three thermal conduits','activate',3,180);G.portal=null;
+    chest(-700,-2380,120);chest(600,-4140,210);scapeSecret(ctx,720,-3100,210);for(const p of [[-500,-820,spec],[420,-1580,thermal],[-420,-2380,mirror],[450,-3100,archive]]){mkMonster('frostshell',p[0]-50,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4980,decoCol:METAL,decoTheme:'frost',decoTall:440});G.portal=null;questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }

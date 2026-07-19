@@ -845,3 +845,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Returning axes and scythes stay absent until their matching projectile reaches the player; javelins ready a replacement after 0.36s so their thrown spear can remain visible in flight without blocking continued play.
 - Added a dedicated full-length javelin projectile model (shaft, spearhead, and fletching) instead of reusing the small arrow mesh, and blocked ghost attacks during each empty-hand interval.
 - Muted real-browser QA verified all three charge families, return-token synchronization, fixed javelin re-equip timing while its projectile remains airborne, first/third-person empty-hand rendering, and normal attack availability after recovery.
+
+## [Codex | 2026-07-19] v1.152.0 - cinematic class rank-choice cards
+- Rebuilt the rank-up skill/passive choice overlay as a wide, class-colored two-card comparison screen instead of two sparse text rows.
+- Increased approved skill artwork from 30px inline marks to 112px illuminated emblems inside dedicated 132px portrait frames, with clearer names, roles, cooldowns, combat-bar slots, descriptions, and choice affordances.
+- Added stronger hierarchy, class crest/rank framing, responsive hover depth, side-by-side desktop comparison, stacked compact layout below 820px, and J/K keyboard labels plus functional J/K selection.
+- Muted real-browser QA at 1600x900 and 1366x768 verified skill and passive variants, exact icon sizing, two-card layout, zero overlay/page scrolling, and responsive fit.

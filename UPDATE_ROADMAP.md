@@ -710,3 +710,13 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Warden's Shade base: mournful spectral knight-woman — tattered purple gown/cuirass, glowing visor, dissolving cloak fragments, silver sword point-down (replaces the old generic hooded box).
 - No changes to AI, dialogue, quests, drops, IDs, or save schema. Parse-clean; drawWaystation + run/update pump verified error-free in-browser (WebGL screenshots time out headless).
 - Next: Batch 3 pets, Batch 4 bosses, Batches 5-6 mobs. Shade zone variants (Batch 7) still pending art.
+
+## [Claude | 2026-07-18] Voxel-art Batch 3 — six pets aligned to approved art (SHIPPED v1.116.0)
+
+- [x] Ember Pup: charcoal body with glowing lava veins, TALL pointed ears (ember-lit), ember maw, gold collar-tag, flame tail (was floppy-eared plain pup).
+- [x] Stone Whelp: layered plated stone back, small back horns, teal glowing eyes, gold collar-tag (eyes were warm/orange).
+- [x] Pale Wisp: rebuilt as the hooded blue spirit-LANTERN it is in art + flavor ("lantern-light") — caged blue flame, finial, watching eyes, ghost-fire (was a generic flame taper).
+- [x] Mending Sprite: now a green leaf-fairy — leaf cap, fairy ears, satchel + potion vial, a cupped healing spark (dropped the medical-cross reinterpretation).
+- [x] Coin Sprite: rebuilt as a hooded coin-golem — blue eyes, coin-crescent staff, coin purse, orbiting coins (was a coin-with-a-face).
+- [x] Grave Wraith: added the pale SKULL face + a swinging soul-censer + purple tendril wings (was a faceless hooded wisp with a chain).
+- Palettes still driven by each pet's data body/accent; rarity aura + shadow + label logic untouched. No stat/AI/save changes. All six drawPet3 branches render error-free in-browser.

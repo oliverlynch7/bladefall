@@ -15,6 +15,8 @@ npm run run
 
 `quick` is a smoke/baseline pass (one Descent trial, three floors, short zone samples). The full run uses three Descent trials and up to twelve floors. Results are written to `out/<VERSION>-<runid>.json` and `out/REPORT.md`. Each run automatically compares weapon metrics with the most recent prior JSON and flags changes over 15%.
 
+The reviewed v1.126.0 baseline, harness corrections, limits, and subjective tuning docket are summarized in [`AUDIT_1.126.0.md`](AUDIT_1.126.0.md).
+
 ## Console fallback
 
 In the live game's DevTools, paste `core-driver.js`, then paste `console-run.js`. It performs a quick suite and downloads JSON. This fallback does not write Markdown or perform baseline discovery.

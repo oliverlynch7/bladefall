@@ -19,17 +19,18 @@
     for(let i=0;i<n;i++){ dismissOverlay(); if(tick) tick(h.G,i); h.update(STEP); }
   }
   function revive() { const h=api(),g=h.G,p=g?.p;if(!p)return; p.dead=false;p.hp=Math.max(1,p.maxHp||100);p.invuln=0;if(p.y<-10){const w=g.waystone||g.lastSafe||{x:0,z:0};p.x=w.x;p.z=w.z;p.y=0;} }
-  function face(e, distance=28) { const p=api().G.p; p.x=e.x; p.z=e.z+distance; p.y=0; p.vx=p.vy=p.vz=0; p.yaw=Math.atan2(e.x-p.x,e.z-p.z); if('face' in p)p.face=p.yaw; e.y=0;e.speed=0;e.dmg=0;e.active=true; }
+  function face(e, distance=28, controlled=false) { const p=api().G.p; p.x=e.x; p.z=e.z+distance; p.y=0; p.vx=p.vy=p.vz=0; p.yaw=Math.atan2(e.x-p.x,e.z-p.z); if('face' in p)p.face=p.yaw; e.y=0;e.active=true;if(controlled){e.speed=0;e.dmg=0;} }
   function setClass(id){ const h=api(); h.meta.classId=id; h.meta.classUnlocked[id]=true; h.classState(id); }
   function freshArena(cls='warrior'){ const h=api(); setClass(cls); h.startEndless(); pump(.1); const g=h.G; g.enemies.length=0; g.endTarget=1e9; g.endSpawned=0; return g; }
+  function botAttack(){ const h=api(),p=h.G.p,w=p.weapon;if(h.isChargeWeapon(w)){h.playerAttack();p.chargeT=Math.max(.2,p.chargeT||0);h.chargeRelease(p,w,1);}else h.playerAttack(); }
 
   function controlledHit(arche, rarity, cls, enemyElement) {
     const h=api(), g=freshArena(cls), p=g.p; h.giveWeapon(arche,rarity); const w=p.weapon;
-    const e=h.spawnEnemy('grunt',0,0); e.element=enemyElement||null;e.hp=e.maxHp=1e7;e.speed=0;e.dmg=0;e.active=true; face(e,w.cls==='ranged'?120:Math.min(45,w.range||45));
+    const e=h.spawnEnemy('grunt',0,0); e.element=enemyElement||null;e.hp=e.maxHp=1e7;e.speed=0;e.dmg=0;e.active=true; face(e,w.cls==='ranged'?120:Math.min(45,w.range||45),true);
     const before=e.hp, st0={...h.estat(e)}; p.atkCd=0;
     if(h.isChargeWeapon(w)){ h.playerAttack(); pump(.16); h.chargeRelease(p,w,1); }
     else h.playerAttack();
-    pump(1.3,()=>face(e,w.cls==='ranged'?120:Math.min(45,w.range||45)));
+    pump(1.3,()=>face(e,w.cls==='ranged'?120:Math.min(45,w.range||45),true));
     const st1={...h.estat(e)}, status={}; for(const k of Object.keys(st1)) status[k]=round(st1[k]-st0[k]);
     return {damage:round(before-e.hp),status,weapon:w,onClass:h.classFamilyOk(w)};
   }
@@ -48,26 +49,29 @@
   }
 
   function killAllBot(limit=25){ const h=api(), g=h.G,p=g.p; let elapsed=0,damage=0,uptime=0;
-    while(elapsed<limit && active(g).length && !p.dead){ const e=active(g)[0]; face(e,p.weapon.cls==='ranged'?130:30); const hp=e.hp; if(p.atkCd<=0){h.playerAttack();uptime+=STEP;} h.update(STEP); damage+=Math.max(0,hp-e.hp);elapsed+=STEP; dismissOverlay(); }
+    while(elapsed<limit && active(g).length && !p.dead){ const e=active(g)[0]; face(e,p.weapon.cls==='ranged'?130:30); const hp=e.hp; if(p.atkCd<=0){botAttack();uptime+=STEP;} h.update(STEP); damage+=Math.max(0,hp-e.hp);elapsed+=STEP; dismissOverlay(); }
     return {elapsed:round(elapsed),damage:round(damage),uptime:round(uptime),alive:active(g).length}; }
+  function killTargetBot(target,limit=30){ const h=api(),g=h.G,p=g.p;let elapsed=0,damage=0,uptime=0;
+    while(elapsed<limit&&!p.dead&&!target.dead&&target.hp>0){face(target,p.weapon.cls==='ranged'?130:30);const hp=target.hp;if(p.atkCd<=0){botAttack();uptime+=STEP;}h.update(STEP);damage+=Math.max(0,hp-target.hp);elapsed+=STEP;dismissOverlay();}
+    return {elapsed:round(elapsed),damage:round(damage),uptime:round(uptime),bossHpRemaining:round(Math.max(0,target.hp)),playerDied:!!p.dead,alive:active(g).length}; }
 
   async function zoneProfiles(cfg={}){ const h=api(), classes=['warrior','ranger','mage','reaper'], load={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe'}, rows=[];
     for(const cls of classes) for(let zi=0;zi<h.ZONES.length;zi++){ setClass(cls);h.openHub();pump(.1);h.enterZone(zi);pump(.2);h.giveWeapon(load[cls],cfg.rarity||'rare');const g=h.G,p=g.p,hp0=p.hp;const combat=killAllBot(cfg.zoneSeconds||8);rows.push({class:cls,zone:h.ZONES[zi].id,tier:h.ZONES[zi].tier,area:g.area,netHpLost:round(Math.max(0,hp0-p.hp)),deaths:p.dead?1:0,...combat}); }
     return {rows,mode:'sampled opening-area combat profile'}; }
 
   async function descent(cfg={}){ const h=api(), trials=cfg.trials||3,maxFloors=cfg.maxFloors||12, runs=[];
-    for(let t=0;t<trials;t++){ setClass('warrior');h.startEndless();h.giveWeapon(t===0?'sword':'great',t===0?'common':'rare');const floors=[];
-      for(let f=1;f<=maxFloors;f++){ const g=h.G,p=g.p,startHp=p.hp,start=g.time||0;let dealt=0,seenHp=[],seenDmg=[],elites=new Set(),guard=0;
-        while(!g.floorCleared&&!p.dead&&guard++<(cfg.floorSteps||24000)){ revive(); const foes=active(g); if(foes.length){const e=foes[0];seenHp.push(e.maxHp);seenDmg.push(e.dmg);if(e.elite)elites.add(e);face(e,p.weapon.cls==='ranged'?130:30);if(p.dodgeCdT<=0){h.input.jz=1;h.input.dodgeEdge=true;}const hp=e.hp;if(p.atkCd<=0)h.playerAttack();h.update(STEP);h.input.jz=0;dealt+=Math.max(0,hp-e.hp);}else h.update(STEP);dismissOverlay(); }
-        floors.push({floor:g.floor,hpScale:round(g.ngHp),damageScale:round(g.ngDmg),target:g.endTarget,cap:g.endCap,spawnInterval:g.endInt,meanEnemyHp:round(mean(seenHp)),meanEnemyDamage:round(mean(seenDmg)),eliteObserved:elites.size,clearSeconds:round((g.time||0)-start),damageDealt:round(dealt),damageTaken:round(startHp-p.hp),cleared:!!g.floorCleared});
+    for(let t=0;t<trials;t++){ setClass('warrior');h.openHub();pump(.1);h.startEndless();pump(.2);revive();h.giveWeapon(t===0?'sword':'great',t===0?'common':'rare');const floors=[];
+      for(let f=1;f<=maxFloors;f++){ const g=h.G,p=g.p,startHp=p.hp,start=g.time||0;let minHp=p.hp,dealt=0,seenHp=[],seenDmg=[],elites=new Set(),guard=0;
+        while(!g.floorCleared&&!p.dead&&guard++<(cfg.floorSteps||24000)){ const foes=active(g); if(foes.length){const e=foes[0];seenHp.push(e.maxHp);seenDmg.push(e.dmg);if(e.elite)elites.add(e);face(e,p.weapon.cls==='ranged'?130:30);if(p.dodgeCdT<=0){h.input.jz=1;h.input.dodgeEdge=true;}const hp=e.hp;if(p.atkCd<=0)botAttack();h.update(STEP);h.input.jz=0;dealt+=Math.max(0,hp-e.hp);}else h.update(STEP);minHp=Math.min(minHp,p.hp);dismissOverlay(); }
+        floors.push({floor:g.floor,hpScale:round(g.ngHp),damageScale:round(g.ngDmg),target:g.endTarget,cap:g.endCap,spawnInterval:g.endInt,meanEnemyHp:round(mean(seenHp)),meanEnemyDamage:round(mean(seenDmg)),eliteObserved:elites.size,clearSeconds:round((g.time||0)-start),damageDealt:round(dealt),damageTaken:round(Math.max(0,startHp-minHp)),cleared:!!g.floorCleared,playerDied:!!p.dead,stepLimit:guard>=(cfg.floorSteps||24000)});
         if(!g.floorCleared||p.dead)break; h.endlessDescend();pump(.05);
-      } runs.push({trial:t+1,loadout:t===0?'fresh-common-sword':'good-rare-greatsword',floorReached:floors.at(-1)?.floor||0,floors}); }
+      } runs.push({trial:t+1,loadout:t===0?'fresh-common-sword':'good-rare-greatsword',floorReached:floors.filter(x=>x.cleared).length,floors}); }
     return {runs,distribution:{mean:round(mean(runs.map(r=>r.floorReached))),median:round(median(runs.map(r=>r.floorReached))),min:Math.min(...runs.map(r=>r.floorReached)),max:Math.max(...runs.map(r=>r.floorReached))}}; }
 
   async function completability(){ const h=api(), rows=[]; setClass('warrior');
     for(let zi=0;zi<h.ZONES.length;zi++){ const Z=h.ZONES[zi], objectives=[]; for(let ai=0;ai<Z.areas.length;ai++){ h.openHub();pump(.05);h.enterZone(zi);pump(.1);if(ai) {h.G.area=ai;h.loadArea(ai);pump(.1);} for(const q of Z.areas[ai].quests){ try{h.questBump(q.id,q.n||1);objectives.push({id:q.id,kind:q.k,ok:(h.G.qs[q.id]||0)>=(q.n||1)});}catch(e){objectives.push({id:q.id,kind:q.k,ok:false,error:e.message});} }
       }
-      h.openHub();pump(.05);h.enterZone(zi);pump(.1);h.G.area=-1;h.loadArea(-1);pump(.2);h.giveWeapon('great','legendary');const bosses=active(h.G).filter(e=>e.boss);const fight=killAllBot(30);rows.push({zone:Z.id,objectives,bossSpawned:bosses.length>0,bossKillable:bosses.length>0&&bosses.every(e=>e.dead||e.hp<=0),fight}); }
+      h.openHub();pump(.05);h.enterZone(zi);pump(.1);h.G.area=-1;h.loadArea(-1);pump(.2);h.giveWeapon('great','legendary');const bosses=active(h.G).filter(e=>e.boss),boss=bosses[0];const fight=boss?killTargetBot(boss,30):{elapsed:0,damage:0,uptime:0,bossHpRemaining:null,playerDied:false,alive:active(h.G).length};rows.push({zone:Z.id,objectives,bossSpawned:!!boss,bossKillable:!!boss&&(boss.dead||boss.hp<=0),fight}); }
     return {rows,mode:'accelerated objective API + real boss combat'}; }
 
   function regression(current, baseline, threshold=.15){ if(!baseline)return {baseline:null,threshold,flags:[]}; const flags=[]; const old=new Map((baseline.weaponDps?.rows||[]).map(x=>[x.arche,x])); for(const row of current.weaponDps?.rows||[]){const b=old.get(row.arche);if(!b)continue;for(const key of ['onHit','offHit','theoreticalDps']){const pct=b[key]?(row[key]-b[key])/b[key]:0;if(Math.abs(pct)>threshold)flags.push({suite:'weaponDps',id:row.arche,metric:key,before:b[key],after:row[key],changePct:round(pct*100,1)});}} return {baseline:baseline.runId||baseline.version,threshold,flags}; }

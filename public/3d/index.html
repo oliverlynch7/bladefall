@@ -509,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.116.0';
+const VERSION3D='1.117.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7501,50 +7501,66 @@ function drawEnemy3(e,t){
 /* ---- bosses: mythic-monster voxel builds (visual only; hitbox r/h unchanged) ---- */
 function drawBoss3(e,t,col,eyeC,en,W,H){
   const dark=tint(col,'#000',0.35), darker=tint(col,'#000',0.55), lite=tint(col,'#fff',0.16);
+  const GOLD='#c9a24a', GOLDL='#ffd77a', bth=(STAGES[G.stageIndex]||{}).theme;
   if(en) rotX(0.12); // enraged/lunging lean
   if(e.type==='brute'){
-    // hulking ape-stance brute: hunched torso, ground-dragging fists, tusked underbite
+    // The Brute — a mountain of red-iron plate hefting a chiselled stone slab greatsword
     bx(-W*0.22,12,0, 15,24,16, dark); bx(W*0.22,12,0, 15,24,16, dark);
-    pushM(); mv(0,40,3); rotX(0.34);
-    bx(0,6,0, W*1.02,34,W*0.62, col);
-    bx(0,20,-4, W*0.8,12,W*0.4, lite); // shoulder hump
-    for(let i=0;i<3;i++){ pushM(); mv(0,24-i*10,-W*0.30+i*2); rotX(-0.5); box(5,11,5, darker); popM(); } // back spikes
+    bx(0,10,W*0.3, W*0.7,7,4, darker);                      // waist guard
+    pushM(); mv(0,40,3); rotX(0.30);
+      bx(0,6,0, W*1.02,34,W*0.62, col);                     // broad plated torso
+      bx(0,8,W*0.31, W*0.6,20,3, lite); bx(0,8,W*0.32, W*0.26,10,3, darker);   // chestplate + rivet emblem
+      bx(0,22,-4, W*0.8,12,W*0.4, dark);                    // shoulder hump
     popM();
-    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.56,46,8); rotX(0.12);
-      box(13,36,13, col); mv(0,-24,4); box(17,14,17, dark); popM(); } // arms → fists
-    bx(0,42,W*0.40, 17,14,13, col);                         // low-slung head
-    bx(0,35,W*0.50, 20,6.5,9, dark);                        // underbite jaw
-    bx(-6,39,W*0.54, 3,6,2.6,'#e8e0d0'); bx(6,39,W*0.54, 3,6,2.6,'#e8e0d0'); // tusks
-    bx(0,48,W*0.46, 18,3,3, darker);                        // brow
-    bx(-4.5,45,W*0.47, 3.6,2.6,1.4, eyeC, eyeC); bx(4.5,45,W*0.47, 3.6,2.6,1.4, eyeC, eyeC);
+    for(const s2 of [-1,1]) bx(s2*W*0.56,60,4, 20,16,20, lite);   // huge pauldrons
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.56,52,8); rotX(0.12);
+      box(13,32,13, col); mv(0,-22,4); box(16,14,16, dark); popM(); } // arms → fists
+    bx(0,58,W*0.40, 16,13,12, col);                         // head, sunk between the shoulders
+    bx(0,52,W*0.50, 19,6.5,9, dark);                        // underbite jaw
+    bx(-6,56,W*0.54, 3,6,2.6,'#e8e0d0'); bx(6,56,W*0.54, 3,6,2.6,'#e8e0d0'); // tusks
+    bx(0,65,W*0.46, 17,3,3, darker);                        // brow
+    bx(-4.5,62,W*0.47, 3.6,2.6,1.4, eyeC, eyeC); bx(4.5,62,W*0.47, 3.6,2.6,1.4, eyeC, eyeC);
+    // the stone slab greatsword, hoisted over the right shoulder
+    pushM(); mv(W*0.72,58,12); rotZ(-0.5); rotX(-0.18);
+      bx(0,0,0, 5,12,5,'#4a3a2a');                          // wrapped grip
+      bx(0,42,0, 17,64,10,'#6a6f7e'); bx(0,42,5.6, 13,58,1,tint('#6a6f7e','#fff',0.12));   // massive stone blade
+      for(let i=0;i<3;i++) bx(-6+i*6,26+i*17,5.7, 2,12,1,'#3a3f4a');   // chiselled cracks
+    popM();
   }
   else if(e.type==='warden'){
-    // towering armored sentinel with visor glow and a planted greatsword
-    bx(-6,12,0, 9,24,10, dark); bx(6,12,0, 9,24,10, dark);
-    bx(0,27,0, W*0.72,8,W*0.5, darker);
-    bx(0,45,0, W*0.85,30,W*0.55, col); bx(0,52,W*0.29, 10,12,2, eyeC, eyeC); // chest rune
-    for(const s2 of [-1,1]){ bx(s2*W*0.5,60,0, 15,11,17, lite);
-      pushM(); mv(s2*W*0.5,68,0); rotZ(-s2*0.3); box(4,11,4, darker); popM(); }
-    bx(0,71,0, 13,13,12, col); bx(0,71,W*0.24, 11,2.6,1.4, eyeC, eyeC); // helm + visor slit
-    for(const s2 of [-1,1]){ pushM(); mv(s2*5.5,79,0); rotZ(s2*0.38); box(3,12,3, darker); mv(s2*1.5,9,0); rotZ(s2*0.5); box(2.4,9,2.4, darker); popM(); } // curved horns
-    pushM(); mv(W*0.62,34,6); box(4.6,52,6.5,'#cfd6df'); mv(0,-28,0); box(12,3,8,'#8a8f9a'); mv(0,-6,0); box(4,8,4,'#6b5430'); popM(); // greatsword
+    // The Fallen — a corrupted Bladeborn: black-and-gold plate, purple corruption erupting from one shoulder, blade point-down
+    const cf=0.5+0.3*Math.sin(t*3);
+    bx(-6,12,0, 9,24,10,'#1a1620'); bx(6,12,0, 9,24,10,'#1a1620');                 // legs
+    bx(0,27,0, W*0.72,8,W*0.5,'#0f0c14'); bx(0,27,W*0.28, W*0.5,4,2, GOLD);         // waist + gilt trim
+    bx(0,45,0, W*0.85,30,W*0.55,'#241a30'); bx(0,50,W*0.29, W*0.5,14,2, GOLD, GOLDL,0.3);   // cuirass + gilt filigree
+    bx(0,52,W*0.31, 8,10,2, '#c47bff','#b06bff',0.85);                             // the corrupted heart-core
+    bx(-W*0.5,60,0, 14,11,16,'#2a2038'); bx(W*0.5,60,0, 16,13,17,'#2a2038');        // pauldrons
+    for(let i=0;i<5;i++){ const a=t*2+i; bx(W*0.5+Math.cos(a)*8, 66+((t*22+i*6)%26), 4+Math.sin(a)*8, 4,5,4,'#a24fe0','#c47bff',0.5*cf); }   // corruption fire off the sword-arm shoulder
+    bx(0,71,0, 13,13,12,'#1a1620'); bx(0,71,W*0.24, 11,2.6,1.4, eyeC, eyeC);        // helm + visor
+    for(let i=-2;i<=2;i++) bx(i*4.5,79+(i===0?7:Math.abs(i)===1?3:0),0, 2.6,7+(i===0?7:0),2.6, i===0?GOLD:'#3a2f4a', i===0?GOLDL:null);   // spiked crown-helm
+    pushM(); mv(-W*0.58,30,11);                                                     // the great blade, held point-DOWN in mourning
+      bx(0,22,0, 5,9,5,'#3a2f4a'); bx(0,15,0, 13,3,4, GOLD);                        // pommel + crossguard
+      bx(0,-12,0, 5,44,3,'#cfd6df'); bx(0,-36,0, 3,8,2,'#eef2ff');                  // blade descending to the point
+    popM();
   }
   else if(e.type==='archer'){
     // skeletal marksman: hooded cyclops, drawn bow, quiver
     bx(-5,12,0, 6,24,7, dark); bx(5,12,0, 6,24,7, dark);
     bx(0,28,0, W*0.5,8,W*0.4, darker);
-    bx(0,44,0, W*0.56,26,W*0.4, col);
+    bx(0,44,0, W*0.56,26,W*0.4, col); bx(0,50,W*0.21, W*0.4,3,1.4, GOLD, GOLDL,0.25);  // torso + gilt breastplate rim
     for(let i=0;i<3;i++) bx(0,38+i*7,W*0.21, W*0.5,2.4,1.2, darker); // rib slats
     pushM(); mv(0,44,-W*0.26); rotX(0.12); box(W*0.7,34,2, darker); popM(); // tattered cloak
-    bx(0,68,0, 14,12,12, dark); bx(0,74.5,0, 23,2.6,19, darker);   // hood + wide brim
+    bx(0,68,0, 14,12,12, dark); bx(0,74.5,0, 23,2.6,19, darker); bx(0,72,W*0.16, 15,2,2, GOLD);   // hood + wide brim + gilt band
     bx(0,68,W*0.24, 6.5,3.4,1.4, eyeC, eyeC);                       // single cyclops eye
     const drawn=e.shootT<0.6;
     pushM(); mv(-W*0.5,52,10);
-    bx(0,12,0, 2.6,12,3,'#cbb27a'); bx(0,-12,0, 2.6,12,3,'#cbb27a'); bx(0,0,0, 3,4,3.4,'#cbb27a');
-    bx(0,0,-2.2, 0.8,26,0.8,'#e8e4da');                             // string
+    bx(0,13,0, 2.6,14,3, GOLD); bx(0,-13,0, 2.6,14,3, GOLD); bx(0,0,0, 3.4,5,3.8, GOLDL);   // ornate golden longbow limbs
+    bx(0,20,0, 2,3,2, GOLDL); bx(0,-20,0, 2,3,2, GOLDL);           // recurve tips
+    bx(0,0,-2.2, 0.8,30,0.8,'#e8e4da');                            // string
     if(drawn) bx(0,0,3, 1.6,1.6,14, e.shot.color, e.shot.color);    // nocked arrow
     popM();
-    bx(4,52,-W*0.3, 7,16,7, darker); for(let i=-1;i<=1;i++) bx(4+i*2.4,62,-W*0.3, 1.6,5,1.6,'#e6d28a'); // quiver
+    bx(4,52,-W*0.3, 8,18,8, darker); bx(4,60,-W*0.3, 9,3,9, GOLD);  // quiver + gilt rim
+    for(let i=-2;i<=2;i++) bx(4+i*2.2,64,-W*0.3, 1.4,6,1.4,'#e6d28a');   // a full sheaf of arrows
   }
   else if(e.type==='sorcerer'){
     // levitating frost lich: no legs, tall hat, orbiting ice orbs
@@ -7554,27 +7570,51 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
     bx(0,36,W*0.26, 9,4,1.6, eyeC, eyeC);                           // belt rune
     bx(0,52,0, 13,13,12, tint(col,'#fff',0.08));
     bx(-3.4,53,W*0.23, 3,2.6,1.4, eyeC, eyeC); bx(3.4,53,W*0.23, 3,2.6,1.4, eyeC, eyeC);
-    bx(0,60.5,0, 21,2.6,21, dark); bx(0,66,0, 12,9,12, dark); bx(0,74,0, 7,8,7, dark); bx(0,81,0, 3.4,6,3.4, dark);
-    bx(0,86,0, 3,3,3, '#bff0ff','#7fd6ff');                          // hat tip star
-    pushM(); mv(W*0.55,34,4); box(3,44,3,'#b9a'); mv(0,26,0); box(8,9,8,'#cdf3ff','#7fd6ff'); popM(); // staff + crystal
+    // a jagged crown of ice crystals rising from the brow
+    bx(0,60,0, 15,3,14, '#8fd0ee','#7fd6ff',0.4);                    // crown band
+    for(let i=-2;i<=2;i++){ const hh=8+(2-Math.abs(i))*7; bx(i*5,60+hh*0.5,4, 2.8,hh,2.8,'#cdf3ff','#7fd6ff',0.8); }   // front spikes, tallest center
+    for(const s2 of [-1,1]) bx(s2*7,66,-4, 2.6,9,2.6,'#bff0ff','#7fd6ff',0.75);    // rear spikes
+    pushM(); mv(W*0.55,34,4); box(3,44,3,'#b9a'); mv(0,26,0); box(8,9,8,'#cdf3ff','#7fd6ff'); mv(0,7,0); box(3,4,3,'#eafaff','#fff'); popM(); // staff + faceted crystal
     popM();
     for(let k=0;k<3;k++){ const a=t*1.6+k*2.09;
       bx(Math.cos(a)*W*0.85, 46+yo*0.5+Math.sin(t*3+k)*7, Math.sin(a)*W*0.6, 6,6,6, '#bff0ff','#7fd6ff'); }
   }
-  else if(e.type==='colossus'){
-    // magma golem: lava-cracked plates, huge fists, molten core
-    bx(-W*0.26,16,0, 20,32,22, dark); bx(W*0.26,16,0, 20,32,22, dark);
-    bx(0,36,0, W*0.9,12,W*0.6, darker);
-    bx(0,64,0, W*1.0,46,W*0.66, col);
-    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.335, 3.4,40,1.4,'#ffb35a','#ff8a3a'); // lava seams
-    bx(0,72,W*0.335, W*0.72,3,1.4,'#ffb35a','#ff8a3a');
-    bx(0,60,W*0.35, 15,15,3, '#ffd24a','#ff9a3a');                   // molten core
-    for(const s2 of [-1,1]){ bx(s2*W*0.58,84,0, 23,20,24, dark);
+  else if(e.type==='colossus' && bth==='marble'){
+    // Marble Colossus — a radiant palace guardian of white marble and gold, NOT an ember recolor
+    const flash=e.hitFlash>0, M=flash?col:'#e6e4ec', MD=flash?col:'#bcbccc', G2=flash?col:GOLD;
+    bx(-W*0.26,16,0, 20,32,22, MD); bx(W*0.26,16,0, 20,32,22, MD);
+    bx(0,36,0, W*0.9,12,W*0.6, MD); bx(0,42,W*0.3, W*0.7,4,2, G2);    // hips + gold band
+    bx(0,64,0, W*1.0,46,W*0.66, M);
+    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.335, 2.6,40,1.4, G2, GOLDL,0.3);   // gilt filigree channels
+    bx(0,60,W*0.35, 15,15,4, GOLDL,'#fff8d6',0.9);                   // glowing gold heart-core
+    // column-shoulders: fluted marble pillars integrated into each shoulder
+    for(const s2 of [-1,1]){ bx(s2*W*0.58,84,0, 22,26,24, M); bx(s2*W*0.58,98,0, 26,5,28, MD); bx(s2*W*0.58,70,0, 26,5,28, MD);
       const raise=(e.shootT<0.5&&s2>0)?-0.9:0.12;
-      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(15,34,15, col); mv(0,-22,3); box(19,16,18, darker); popM(); }
-    bx(0,92,4, 17,13,14, dark);                                       // sunken head
-    bx(-4.5,93,W*0.14+6, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,93,W*0.14+6, 4,3,1.4,'#ffd24a','#ffd24a');
-    for(let i=-2;i<=2;i++){ pushM(); mv(i*10,104,-4); rotX(-0.35); box(4,9,4, darker); popM(); } // crown of rock shards
+      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(15,34,15, M); mv(0,-22,3); box(19,16,18, MD); popM(); }
+    bx(0,92,4, 17,13,14, M);                                          // serene head
+    bx(-4.5,93,W*0.14+6, 4,3,1.4, GOLDL, GOLDL); bx(4.5,93,W*0.14+6, 4,3,1.4, GOLDL, GOLDL);   // gold eyes
+    for(let i=0;i<9;i++){ const a=(i/9)*6.283; bx(Math.cos(a)*22,108,-6+Math.sin(a)*10, 3,3,3, G2, GOLDL,0.55); }   // a sunburst halo behind the head
+  }
+  else if(e.type==='colossus'){
+    // Ember Colossus — a basalt furnace siege engine: black rock, molten seams, a furnace-lit maw, smokestacks
+    const flash=e.hitFlash>0, B=flash?col:'#241d1c', BD=flash?col:'#150f0f';
+    bx(-W*0.26,16,0, 21,32,23, BD); bx(W*0.26,16,0, 21,32,23, BD);
+    bx(-W*0.26,28,0, 22,6,24,'#ff7a2a','#ff9a4a',0.5+0.2*Math.sin(t*4)); bx(W*0.26,28,0, 22,6,24,'#ff7a2a','#ff9a4a',0.5+0.2*Math.sin(t*4+1));  // knee vents
+    bx(0,36,0, W*0.9,12,W*0.6, BD);
+    bx(0,64,0, W*1.02,46,W*0.68, B);
+    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.34, 3.6,40,1.6,'#ff8a3a','#ffb35a',0.8);   // vertical lava seams
+    bx(0,72,W*0.34, W*0.74,3.4,1.6,'#ff8a3a','#ffb35a',0.8);
+    bx(0,58,W*0.36, 17,20,4, '#ffb020','#ff7a1a',0.95);              // the open furnace maw (chest)
+    for(let i=-1;i<=1;i++) bx(i*6,58,W*0.38, 3,16,2,'#160a06');       // furnace grate bars
+    for(const s2 of [-1,1]){ bx(s2*W*0.58,86,0, 24,22,25, BD);
+      bx(s2*W*0.5,102,-6, 8,16,8,'#0f0a09'); for(let i=0;i<2;i++) bx(s2*W*0.5,112+((t*24+i*8)%16),-6, 4,5,4,'#555','#888',0.4);   // shoulder smokestacks + smoke
+      const raise=(e.shootT<0.5&&s2>0)?-0.9:0.12;
+      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(16,34,16, B); mv(0,-22,3); box(20,17,19, BD);
+        bx(0,0,6, 14,4,2,'#ff8a3a','#ffb35a',0.7); popM(); }          // arms → glowing-knuckle fists
+    bx(0,92,4, 18,14,15, BD);                                         // sunken furnace head
+    bx(0,90,W*0.14+7, 12,5,2,'#ffb020','#ff7a1a',0.95);               // glowing mouth-slot
+    bx(-4.5,95,W*0.14+7, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,95,W*0.14+7, 4,3,1.4,'#ffd24a','#ffd24a');
+    for(let i=-2;i<=2;i++){ pushM(); mv(i*10,104,-4); rotX(-0.35); box(4,9,4, BD); popM(); }   // crown of basalt shards
   }
   else if(e.type==='king'){
     // the Abyss King: floating void royal, grand crown, scepter, orbiting shards
@@ -7583,8 +7623,10 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
     bx(0,34,0, W*0.8,26,W*0.55, col);
     bx(0,42,W*0.29, 12,14,2.4, '#c47bff','#b06bff');                 // void core
     for(const s2 of [-1,1]){ bx(s2*W*0.46,52,0, 15,10,16, lite);
-      for(let i=0;i<2;i++){ pushM(); mv(s2*(W*0.46+i*4),58+i*3,0); rotZ(s2*(0.3+i*0.25)); box(3.4,10-i*3,3.4, darker); popM(); } }
+      pushM(); mv(s2*W*0.5,44,6); rotZ(s2*0.2); box(6,16,6, col);     // long forearm
+        for(let i=-1;i<=1;i++){ pushM(); mv(i*2.4,-10,2); rotZ(i*0.3); box(1.8,9,1.8, darker); popM(); } popM(); }   // reaching clawed fingers
     pushM(); mv(0,40,-W*0.3); rotX(0.1); box(W*0.9,42,2.4, darker); popM(); // royal cape
+    for(let i=0;i<5;i++){ const a=t*0.7+i*1.257; bx(Math.cos(a)*W*0.5, 6+((t*8+i*7)%30), -W*0.3+Math.sin(a)*4, 3,3,3,'#8a4fd0','#c47bff',0.45); }   // cloak dissolving into motes
     bx(0,66,0, 14,13,12, tint(col,'#fff',0.06));
     bx(-3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC); bx(3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC);
     bx(0,74,0, 15,3,13,'#caa23a');                                    // crown band
@@ -7595,26 +7637,32 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
       bx(Math.cos(a)*26, 92+yo+Math.sin(t*4+k)*4, Math.sin(a)*20, 4.5,4.5,4.5, '#c47bff','#b06bff'); }
   }
   else if(e.type==='tyrant'){
-    // eldritch void tyrant: many eyes, toothed maw, writhing tentacles, star-flecked mass
-    bx(0,54,0, W*1.02,62,W*0.7, col);
-    bx(0,20,0, W*0.9,14,W*0.62, darker);
-    for(let i=0;i<9;i++){ const px=((i*53)%Math.round(W*0.8))-W*0.4, py=34+((i*37)%44);
-      bx(px,py,-W*0.34, 1.8,1.8,1, '#e8ddff','#c9a6ff'); }            // star flecks (back mass)
-    // maw with teeth (jaw drops when enraged/lunging)
-    const jaw=en?6:2;
-    bx(0,42,W*0.35, W*0.56,15,3,'#12060f');
-    for(let i=-2;i<=2;i++){ bx(i*W*0.11,48,W*0.36, 3,5,2,'#f0eadb'); bx(i*W*0.11+W*0.055,36-jaw,W*0.36, 3,5,2,'#f0eadb'); }
-    bx(0,31-jaw,W*0.35, W*0.6,4,4, dark);                             // dropping jaw
-    // five eyes, various sizes
-    bx(0,72,W*0.35, 8,5.5,1.6, en?'#ff3b6b':'#c47bff', en?'#ff3b6b':'#c47bff');
-    bx(-W*0.3,66,W*0.34, 4,4,1.4,'#c47bff','#c47bff'); bx(W*0.3,68,W*0.34, 4.5,4.5,1.4,'#c47bff','#c47bff');
-    bx(-W*0.18,80,W*0.34, 3.4,3.4,1.4,'#c47bff','#c47bff'); bx(W*0.16,58,W*0.34, 3,3,1.4,'#c47bff','#c47bff');
-    // writhing tentacles (two per side, two-segment, animated)
-    for(let k=0;k<4;k++){ const s2=k<2?-1:1, ph=Math.sin(t*2.2+k*1.7)*0.28;
-      pushM(); mv(s2*W*0.52,34+(k%2)*22,(k%2?-6:8)); rotZ(s2*(0.55+ph)); box(6.5,26,6.5, dark);
-      mv(s2*2,17,0); rotZ(s2*(0.5+ph)); box(5,20,5, darker);
-      mv(0,12,0); box(4,6,4, '#c47bff','#b06bff'); popM(); }
-    for(let i=-1;i<=1;i++){ pushM(); mv(i*14,88,-6); rotX(-0.3); rotZ(-i*0.2); box(5,16,5, darker); popM(); } // crown spikes
+    // The Abyss King, AWAKENED — the king ascended: a black-hole heart, a radiant sun-crown of gold and void, floating blades, and a storm of purple lightning
+    const yo=6+Math.sin(t*1.6)*4, pulse=0.6+0.4*Math.sin(t*4);
+    pushM(); mv(0,yo,0);
+      // a larger, grander version of the king's royal silhouette
+      bx(0,14,0, W*1.0,22,W*0.7, darker);                            // robe base
+      for(let i=0;i<6;i++){ const a=t*0.6+i*1.047; bx(Math.cos(a)*W*0.55, 4+((t*10+i*6)%34), -W*0.32+Math.sin(a)*5, 3.4,3.4,3.4,'#8a4fd0','#c47bff',0.5); }   // layered cloak dissolving
+      bx(0,44,0, W*0.85,32,W*0.58, col);
+      bx(0,50,W*0.31, 16,18,4,'#0a0410','#000',1); bx(0,50,W*0.33, 11,11,2, en?'#ff3b6b':'#c47bff', en?'#ff3b6b':'#b06bff',pulse);   // the black-hole void heart
+      for(let i=0;i<10;i++){ const a=t*2.4+i*0.628; bx(Math.cos(a)*13,50+Math.sin(a)*13,W*0.34, 2,2,1,'#e0b0ff','#fff',0.7*pulse); }   // accretion ring around the heart
+      // shoulders + long reaching clawed arms
+      for(const s2 of [-1,1]){ bx(s2*W*0.5,58,0, 17,12,18, lite);
+        pushM(); mv(s2*W*0.56,50,6); rotZ(s2*0.22); box(7,20,7, col);
+          for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-13,2); rotZ(i*0.3); box(2,11,2, darker); popM(); } popM(); }
+      pushM(); mv(0,40,-W*0.34); rotX(0.1); box(W*1.05,50,2.6, darker); popM();   // vast royal cape
+      // head + the radiant sun-crown (gold rays + void spikes)
+      bx(0,76,0, 15,14,13, tint(col,'#fff',0.06));
+      bx(-4,77,W*0.2, 3.4,3,1.4, en?'#ff3b6b':'#e0b0ff', en?'#ff3b6b':'#e0b0ff'); bx(4,77,W*0.2, 3.4,3,1.4, en?'#ff3b6b':'#e0b0ff', en?'#ff3b6b':'#e0b0ff');
+      bx(0,85,0, 17,3,15, GOLD);                                     // crown band
+      for(let i=0;i<9;i++){ const a=(i/9)*6.283, r=9+(i%2)*4; bx(Math.cos(a)*r,90+(i%2?7:2),Math.sin(a)*r*0.5, 2.6,(i%2?12:7),2.6, i%2?GOLDL:'#4a2f7a', i%2?'#fff2a0':'#b06bff',0.8); }   // alternating gold rays + void spikes
+    popM();
+    // a halo of floating blades orbiting the Awakened
+    for(let k=0;k<6;k++){ const a=t*1.2+k*1.047, r=W*0.95;
+      pushM(); mv(Math.cos(a)*r, 60+yo+Math.sin(t*2+k)*8, Math.sin(a)*r*0.7); rotY(-a); rotZ(0.4);
+        bx(0,0,0, 2.6,22,2,'#d8d0e8','#eef2ff',0.7); bx(0,-13,0, 6,3,3, GOLD); popM(); }
+    // purple lightning crackling upward
+    for(let i=0;i<3;i++){ const lx=(Math.sin(t*7+i*2)*W*0.6); for(let j=0;j<4;j++) bx(lx+(j%2?4:-4), 30+j*22, W*0.2, 2,10,2,'#c47bff','#e0b0ff',0.5*pulse); }
   }
 }
 function drawHpBar3(e){

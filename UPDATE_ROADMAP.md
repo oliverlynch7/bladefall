@@ -720,3 +720,14 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Coin Sprite: rebuilt as a hooded coin-golem — blue eyes, coin-crescent staff, coin purse, orbiting coins (was a coin-with-a-face).
 - [x] Grave Wraith: added the pale SKULL face + a swinging soul-censer + purple tendril wings (was a faceless hooded wisp with a chain).
 - Palettes still driven by each pet's data body/accent; rarity aura + shadow + label logic untouched. No stat/AI/save changes. All six drawPet3 branches render error-free in-browser.
+
+## [Claude | 2026-07-18] Voxel-art Batch 4 — eight bosses aligned to concept art (SHIPPED v1.117.0)
+
+- [x] The Brute: red-iron plate, huge pauldrons, and the signature chiselled STONE SLAB greatsword over the shoulder.
+- [x] The Fallen (type key 'warden'): now a tragic corrupted Bladeborn — black-and-gold plate, purple corruption fire off the sword shoulder, spiked gilt crown-helm, blade held point-DOWN.
+- [x] Hollow Marksman (type key 'archer'): ornate GOLDEN recurve longbow, gilt breastplate/hood band, a full quiver sheaf.
+- [x] Frost Sorcerer: wizard hat replaced with a jagged ICE-CRYSTAL crown; faceted crystal staff.
+- [x] Ember Colossus + Marble Colossus split — they shared the 'colossus' key and rendered identically. Ember is now a basalt FURNACE SIEGE ENGINE (black rock, molten seams, furnace maw, shoulder smokestacks); Marble is a radiant white-and-gold PALACE GUARDIAN with column-shoulders, a glowing gold core, and a sunburst halo — never an ember recolor (branches on stage theme).
+- [x] Abyss King: added long reaching clawed arms + a cloak dissolving into motes.
+- [x] The Abyss King, Awakened (type key 'tyrant'): fully redesigned from the old eldritch tentacle-mass into the ASCENDED king — a black-hole void heart with an accretion ring, a radiant gold+void sun-crown, six floating blades orbiting, and purple lightning. Now visually related to the Abyss King and clearly surpasses every other boss.
+- Hitboxes (r/h), AI, shot data, type keys, save/music compat all unchanged — visual only. hitFlash feedback preserved on the colossus split. All eight branches render error-free in-browser.

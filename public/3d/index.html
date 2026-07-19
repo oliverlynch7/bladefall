@@ -3487,7 +3487,7 @@ window.addEventListener('keydown',e=>{
     if(mode==='studio'){ exitStudio(); return; }
     if(mode==='mirror'){ exitMirror(); return; }
     if(mode==='play') openPause();
-    else if(mode==='pause'){ mode='play'; showOverlay(false); regrabCam(); }
+    else if(mode==='pause'){ mode='play'; resumeGameAudio(true); showOverlay(false); regrabCam(); }
     else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
     else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
     return; }
@@ -7720,27 +7720,66 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
   const GOLD='#c9a24a', GOLDL='#ffd77a', bth=(STAGES[G.stageIndex]||{}).theme;
   if(en) rotX(0.12); // enraged/lunging lean
   if(e.type==='brute'){
-    // The Brute — a mountain of red-iron plate hefting a chiselled stone slab greatsword
-    bx(-W*0.22,12,0, 15,24,16, dark); bx(W*0.22,12,0, 15,24,16, dark);
-    bx(0,10,W*0.3, W*0.7,7,4, darker);                      // waist guard
+    // The Brute — a mountain of battered red-iron plate: layered armour, rivets, brutish face, chiselled stone slab greatsword. (HIGH-DETAIL showcase for the batched renderer.)
+    const sk='#b07a4a', skD=tint(sk,'#000',0.3), lea='#2e2016', leaD='#1c130a', st='#6a6f7e', stD='#3a3f4a', stH='#8a909e', riv=tint(lite,'#fff',0.25);
+    // ---- legs: layered greaves, knee cops, plated boots, hip rivets ----
+    for(const s of [-1,1]){
+      bx(s*13,18,0, 16,28,17, dark);                                   // thigh
+      bx(s*13,24,8.5, 13,20,3, col); bx(s*13,24,10, 11,16,1.6, lite);  // thigh plate + edge
+      bx(s*13,6,8, 12,8,7, lite); bx(s*13,6,11, 8,6,2, GOLD);          // knee cop + gold trim
+      bx(s*13,-1,3, 14,8,10, darker);                                  // shin
+      bx(s*13,3,10, 16,7,20, dark); bx(s*13,6,18, 14,4,5, col);        // armoured boot + toe cap
+      for(let i=0;i<3;i++) bx(s*13-6+i*6,34,9, 2,2,1.5, riv);          // hip rivets
+    }
+    bx(0,10,W*0.3, W*0.72,8,5, darker);                                // belt
+    bx(0,10,W*0.34, W*0.5,5,2, lea); bx(0,10,W*0.34, 8,8,2, GOLD); bx(0,10,W*0.36, 4,4,1.4, GOLDL);   // strap + gold buckle
+    for(let i=0;i<5;i++){ const x=(i-2)*W*0.17; bx(x,4,W*0.3, W*0.13,12,3, dark); bx(x,4,W*0.32, W*0.1,10,1.4, tint(col,'#000',0.15)); }  // fauld tassets
+    // ---- torso: leaning, layered breastplate + abs + rivets + gold emblem ----
     pushM(); mv(0,40,3); rotX(0.30);
-      bx(0,6,0, W*1.02,34,W*0.62, col);                     // broad plated torso
-      bx(0,8,W*0.31, W*0.6,20,3, lite); bx(0,8,W*0.32, W*0.26,10,3, darker);   // chestplate + rivet emblem
-      bx(0,22,-4, W*0.8,12,W*0.4, dark);                    // shoulder hump
+      bx(0,6,0, W*1.04,36,W*0.64, col);                                // barrel torso
+      bx(0,18,W*0.31, W*0.66,16,3.5, lite);                            // upper breastplate
+      bx(0,4,W*0.32, W*0.6,14,3, tint(col,'#000',0.08));               // lower plate
+      for(let i=0;i<3;i++) bx(0,-2-i*5,W*0.33, W*0.5-i*6,3.4,2, dark); // ab ridges
+      bx(0,20,W*0.34, 10,10,2, GOLD); bx(0,20,W*0.36, 6,6,1.4, darker); bx(0,20,W*0.37, 3,5,1, GOLDL);   // chest emblem
+      for(const s of [-1,1]) for(let i=0;i<3;i++) bx(s*W*0.24,16-i*8,W*0.33, 2.2,2.2,1.6, riv);          // breastplate rivets
+      bx(0,24,-5, W*0.82,14,W*0.42, dark); bx(0,30,-5, W*0.6,5,W*0.36, darker);   // back / shoulder hump
+      bx(0,-8,W*0.2, W*0.5,6,W*0.3, lea);                              // gut strap
     popM();
-    for(const s2 of [-1,1]) bx(s2*W*0.56,60,4, 20,16,20, lite);   // huge pauldrons
-    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.56,52,8); rotX(0.12);
-      box(13,32,13, col); mv(0,-22,4); box(16,14,16, dark); popM(); } // arms → fists
-    bx(0,58,W*0.40, 16,13,12, col);                         // head, sunk between the shoulders
-    bx(0,52,W*0.50, 19,6.5,9, dark);                        // underbite jaw
-    bx(-6,56,W*0.54, 3,6,2.6,'#e8e0d0'); bx(6,56,W*0.54, 3,6,2.6,'#e8e0d0'); // tusks
-    bx(0,65,W*0.46, 17,3,3, darker);                        // brow
-    bx(-4.5,62,W*0.47, 3.6,2.6,1.4, eyeC, eyeC); bx(4.5,62,W*0.47, 3.6,2.6,1.4, eyeC, eyeC);
-    // the stone slab greatsword, hoisted over the right shoulder
-    pushM(); mv(W*0.72,58,12); rotZ(-0.5); rotX(-0.18);
-      bx(0,0,0, 5,12,5,'#4a3a2a');                          // wrapped grip
-      bx(0,42,0, 17,64,10,'#6a6f7e'); bx(0,42,5.6, 13,58,1,tint('#6a6f7e','#fff',0.12));   // massive stone blade
-      for(let i=0;i<3;i++) bx(-6+i*6,26+i*17,5.7, 2,12,1,'#3a3f4a');   // chiselled cracks
+    // ---- pauldrons: tiered layered shoulder plates + studs + spikes ----
+    for(const s of [-1,1]){
+      bx(s*W*0.56,60,4, 22,10,22, lite); bx(s*W*0.56,53,5, 24,8,23, col); bx(s*W*0.56,46,6, 20,7,20, dark);   // three tiers
+      bx(s*W*0.56,64,4, 16,4,16, GOLD);                                // gold rim
+      for(let i=0;i<4;i++){ const a=i*1.571; bx(s*W*0.56+Math.cos(a)*9,58,4+Math.sin(a)*9, 2.4,2.4,2.4, riv); }   // studs
+      pushM(); mv(s*W*0.56,66,-3); rotX(-0.4); bx(0,4,0, 4,10,4, darker); popM();   // spike
+    }
+    // ---- arms: upper plate, elbow cop, forearm gauntlet, knuckled fists ----
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.56,52,8); rotX(0.12);
+      box(14,20,14, col); bx(0,2,7, 10,14,2, lite);                    // upper arm + plate
+      mv(0,-16,2); box(11,9,11, dark); bx(0,0,6, 9,7,2, GOLD);         // elbow cop + trim
+      mv(0,-14,2); box(15,15,15, darker);                             // forearm gauntlet
+      for(let i=0;i<4;i++) bx(-6+i*4,-8,8, 3,4,3, dark);               // knuckles
+      for(let i=0;i<3;i++) bx(-4+i*4,2,8, 2,2,1.6, riv);               // rivets
+      popM(); }
+    // ---- head: brow, deep-set glowing eyes, broad nose, underbite + tusks, scar, matted mane ----
+    bx(0,58,W*0.40, 17,14,13, sk); bx(0,63,W*0.38, 15,5,12, skD);      // head + brow shadow
+    bx(0,66,W*0.44, 18,4,4, darker);                                   // heavy brow ridge
+    bx(0,52,W*0.50, 20,7,10, sk); bx(0,49,W*0.52, 16,4,6, skD);        // jaw + underbite
+    for(const s of [-1,1]) bx(s*6,55,W*0.55, 3.2,7,2.8,'#efe8d6');     // tusks
+    bx(0,57,W*0.56, 5,5,5, skD);                                       // broad nose
+    bx(-4.6,61,W*0.44, 5,5,3, '#1a0f0a'); bx(4.6,61,W*0.44, 5,5,3, '#1a0f0a');   // eye sockets
+    bx(-4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC); bx(4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC);   // glowing eyes
+    bx(3,64,W*0.5, 1.6,7,1, skD);                                      // scar
+    for(let i=0;i<5;i++) bx(-8+i*4,70,-1, 4,6,10, leaD);               // matted mane (top/back)
+    for(const s of [-1,1]) bx(s*8,60,-2, 5,10,8, leaD);                // mane sides
+    bx(0,50,-3, W*0.4,10,6, sk);                                       // thick neck
+    // ---- the chiselled stone slab greatsword ----
+    pushM(); mv(W*0.74,58,12); rotZ(-0.5); rotX(-0.18);
+      bx(0,-6,0, 5,14,5, lea); for(let i=0;i<4;i++) bx(0,-10+i*4,0, 6,1.6,6, leaD);   // bound leather grip
+      bx(0,3,0, 16,4,7, st); bx(0,3,0, 4,7,9, stD);                    // crossguard + pommel
+      bx(0,42,0, 18,66,11, st); bx(0,42,6, 14,60,1.5, stH); bx(0,44,-6, 16,58,1.5, stD);   // stone blade + lit/shadow faces
+      for(let i=0;i<5;i++) bx(-6+(i%3)*6,18+i*11,6.2, 2,10,1, stD);    // chiselled cracks
+      for(let i=0;i<3;i++) bx(7,20+i*18,5, 3,5,3, stD);                // chipped edge
+      bx(0,76,0, 8,8,8, st); bx(0,80,0, 4,5,4, stH);                   // blunt tip
     popM();
   }
   else if(e.type==='warden'){

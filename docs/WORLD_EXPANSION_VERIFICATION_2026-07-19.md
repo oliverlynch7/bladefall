@@ -24,7 +24,6 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- Emberdeep + Magma Core
 - The Abyss + Reaper's Gate
 - Sunspire Palace + Sealed Reliquary
 - Castle Duskmoor final expansion and full-chain regression
@@ -72,3 +71,16 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 - Sunken Wash: high-water rooftop route, low-water settlement route, sluice channels, fossil shelf, recoverable descending bone-slide, Bone Basin, and Floodline Gate.
 - Added the reusable local-mission collection primitive and HUD tracking. All three Flood Relics are surface-snapped, the exit starts sealed, and collecting all three opens it with the configured reward.
 - All three required routes pass the structural `JMPH 150` / `JMPV 94` connectivity sweep. Muted Chromium reported zero console errors.
+
+## Pair 5 — Emberdeep + Magma Core (v1.176.0)
+
+| Area | Authored districts | Structural reach | Objective |
+|---|---:|---:|---|
+| Emberdeep | 6 | 71/71 | Magma Skitters + Ash Altar |
+| The Cinder Vents | 6 | 49/50; goal reachable | Existing area objectives |
+| The Magma Core | 7 | 85/91; goal reachable | Stabilize 3 core valves |
+
+- Emberdeep now climbs through Ash Mine, Chain Lift Shaft, Slagworks, Ancient Forge City rooftops, Caldera Rim, and the Heart-Forge approach.
+- Cinder Vents adds minecart galleries, a suspended refinery, cooling channels, a forge-routing hall, and Ash Altar approach.
+- Magma Core introduces vent-field stepping, moving ore lifts, circular refinery machinery, a forgiving basalt causeway versus a faster high crane-line, a three-band core ascent, and a controlled cooling descent with recovery floor.
+- All required goals pass the structural jump-connectivity sweep. The three Core Valves surface-snap, the Trial Chamber exit starts sealed, and activating all three opens it. Muted Chromium reported zero console errors.

@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.175.0';
+const VERSION3D='1.176.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3414,6 +3414,22 @@ const EXPANDED_SCAPES={
       for(const p of [[-500,-850,white],[420,-1600,ravine],[-420,-2350,slide],[500,-3100,cave]]){mkMonster('frostshell',p[0]-45,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
       scapeFetch(ctx,[{x:-500,z:-850,y:0},{x:420,z:-1600,y:120},{x:-420,z:-2350,y:250},{x:500,z:-3100,y:80},{x:0,z:-4100,y:180}]);scapeFind(ctx,0,-4140,180);finishScape(ctx,{sx:0,sz:280,sy:0,gx:0,gz:-4380,decoCol:DARK,decoTheme:'frost',decoTall:390});
     }
+  },
+  ember(ctx){const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=145)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!vents){const mine=room('Ash Mine',0,0,860,660),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks',420,-1580,820,720,120),city=room('Ancient Forge City',-400,-2380,820,720,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,980,780,280);
+      road(mine,slag,160);climbRun(-180,-350,0,-480,-850,120,74);for(let k=0;k<6;k++)G.movers.push({x0:-480+(k%2?120:-120),z:-900-k*100,w:100,d:80,h:120+k*34,amp:28,sp:.75+k*.1,ph:rnd()*6.28,x:-480,px:-480});
+      climbRun(-300,-1150,120,420,-1580,120,78);for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1450-Math.floor(k/5)*220;vcol(x,z,48,48,90);G.deco.push({x,z,y0:90,w:70,h:20,d:70,c:k%2?LAVA:GOLD});}
+      climbRun(180,-1900,120,-400,-2380,180,74);for(const h of [[-650,-2280],[-400,-2500],[-160,-2260]]){G.deco.push({x:h[0],z:h[1],y0:180,w:200,h:86,d:160,c:ROCK});vplat(h[0],h[1],280,190,150,{roof:true});}climbRun(-720,-2200,180,-650,-2280,280,68);chest(-160,-2260,280);
+      // Caldera crossing: basalt pillars rise above a broad recovery shelf; eruptions remain visible through geyser tells.
+      climbRun(-160,-2700,180,450,-3200,280,72);for(let k=0;k<11;k++){const a=k/11*6.28,rr=250+(k%3)*70;vcol(450+Math.cos(a)*rr,-3200+Math.sin(a)*rr,70,70,180+(k%4)*34);G.geysers.push({x:450+Math.cos(a)*rr,z:-3200+Math.sin(a)*rr,r:22,period:2.8+(k%3)*.4,phase:rnd()*6.28});}
+      climbRun(450,-3200,280,0,-4300,280,84,{mantle:true});vplat(0,-4300,280,980,780,{checkpoint:true,terrace:true});for(let k=0;k<12;k++)G.deco.push({x:-420+k*76,z:-4420,y0:280,w:38,h:100+(k%3)*35,d:38,c:k%2?IRON:LAVA});
+      for(const p of [[0,-150,mine],[-480,-850,lift],[420,-1580,slag],[-400,-2380,city],[450,-3200,rim]]){mkMonster('magmaskit',p[0]-50,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:0,z:-150,room:mine},{x:-480,z:-850,room:lift},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city},{x:450,z:-3200,room:rim}]);scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
+    }else{const ventsR=room('Cinder Vents',0,0,860,660),cart=room('Minecart Gallery',-500,-820,720,650),refine=room('Suspended Refinery',420,-1560,780,700,140),channels=room('Cooling Channels',-420,-2360,760,680),forge=room('Forge-Routing Hall',450,-3100,820,720,220),altar=room('Ash Altar',0,-4180,980,760,220);
+      road(ventsR,cart,150);for(let k=0;k<12;k++){const t=k/11;vplat(-500+920*t,-900-650*t,20+120*t,88,72,{rail:true});if(k%3===0)G.movers.push({x0:-500+920*t,z:-900-650*t,w:96,d:76,h:20+120*t,amp:36,sp:1+rnd()*.4,ph:rnd()*6.28,x:0,px:0});}
+      vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}
+      climbRun(160,-2700,0,450,-3100,220,72);for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
+      for(const p of [[-500,-820,cart],[420,-1560,refine],[-420,-2360,channels],[450,-3100,forge]]){mkMonster('magmaskit',p[0]-45,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:420,z:-1560,y:140},{x:-420,z:-2360,y:0},{x:450,z:-3100,y:220},{x:0,z:-4180,y:220}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4400,decoCol:ROCK,decoTheme:'volcano',decoTall:450});}
   }
 };
 const SIDE_SCAPES={
@@ -3497,6 +3513,25 @@ const SIDE_SCAPES={
     const cores=[{x:-500,z:-820,y:0},{x:420,z:-1580,y:72},{x:450,z:-3100,y:210}];for(const p of cores)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'thermalCores',name:'Thermal Core'},bob:rnd()*3,placed:true});localMission('thermalCores','Restore the three thermal conduits','activate',3,180);G.portal=null;
     chest(-700,-2380,120);chest(600,-4140,210);scapeSecret(ctx,720,-3100,210);for(const p of [[-500,-820,spec],[420,-1580,thermal],[-420,-2380,mirror],[450,-3100,archive]]){mkMonster('frostshell',p[0]-50,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
     finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4980,decoCol:METAL,decoTheme:'frost',decoTall:440});G.portal=null;questUpdate();
+  },
+  magmacore(ctx){const {rnd,mkMonster}=ctx,BASALT='#29252b',IRON='#55444a',MAGMA='#ff5b19',GOLD='#e7a633',COOL='#386a73';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const shelf=room('Fractured Crust',0,0,860,620),vents=room('Vent Maze',-520,-820,820,700),refinery=room('Suspended Refinery',500,-1740,850,720,150),mantle=room('Mantle Bridge',-430,-2720,760,700,300),core=room('Core Chamber',430,-3660,900,780,430),cool=room('Cooling Tunnels',-260,-4520,820,650,260),escape=room('Pressure Escape',0,-5200,900,540,260);
+    path(shelf,vents,150);for(let k=0;k<12;k++){const x=-780+(k%4)*175,z=-650-Math.floor(k/4)*210;vplat(x,z,(k%3)*32,96,88,{vent:true,recovery:k%4===0});G.deco.push({x,z,y0:(k%3)*32,w:34,h:78,d:34,c:k%2?MAGMA:GOLD});}
+    // A rising chain of ore lifts opens into a suspended refinery; missed jumps land on the broad vent floor.
+    climbRun(-260,-1120,0,500,-1740,150,74);for(let k=0;k<6;k++)G.movers.push({x:180+k*105,z:-1550-(k%2)*150,y0:55+k*20,w:78,d:70,axis:k%2?'x':'z',range:75,speed:.55+k*.04,phase:k*.8,c:IRON});
+    vplat(500,-1740,150,850,720,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const a=k/8*6.28;vplat(500+Math.cos(a)*290,-1740+Math.sin(a)*225,190+(k%2)*45,92,74,{refinery:true});}
+    // Twin routes cross the mantle: a generous lower basalt causeway and a faster high crane-line.
+    climbRun(280,-2070,150,-430,-2720,300,82,{safeRoute:true});for(let k=0;k<9;k++){const t=k/8,x=520+( -430-520)*t,z=-2050+(-2720+2050)*t;vplat(x,z,250+k*27,68,62,{fastRoute:true});if(k%2===0)G.deco.push({x,z,y0:0,w:24,h:250+k*27,d:24,c:BASALT});}
+    vplat(-430,-2720,300,760,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;vplat(-430+Math.cos(a)*250,-2720+Math.sin(a)*220,330+(k%3)*38,82,70,{basaltPillar:true});}
+    climbRun(-220,-3040,300,430,-3660,430,76);vplat(430,-3660,430,900,780,{district:'Core Chamber',checkpoint:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.deco.push({x:430+Math.cos(a)*310,z:-3660+Math.sin(a)*270,y0:430,w:28,h:120+(k%4)*35,d:28,c:k%3?BASALT:MAGMA});}
+    // Cooling descent reverses the rhythm: controlled drops through pipe rings, then one final climb out.
+    for(let k=0;k<8;k++){const a=k*.82;vplat(120+Math.cos(a)*210,-4090-k*75,430-k*24,84,76,{coolingDrop:true});G.deco.push({x:120+Math.cos(a)*210,z:-4090-k*75,y0:0,w:20,h:430-k*24,d:20,c:COOL});}
+    vplat(-260,-4520,260,820,650,{recovery:true,checkpoint:true});climbRun(-260,-4520,260,0,-5200,260,84,{escape:true});
+    const valves=[{x:-610,z:-820,y:32},{x:500,z:-1740,y:235},{x:430,z:-3660,y:430}];for(const p of valves)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'coreValves',name:'Core Valve'},bob:rnd()*3,placed:true});localMission('coreValves','Stabilize the three core valves','activate',3,220);G.portal=null;
+    chest(-720,-2720,300);chest(700,-3660,430);chest(-520,-4520,260);scapeSecret(ctx,760,-1740,235);for(const p of [[-520,-820,vents],[500,-1740,refinery],[-430,-2720,mantle],[430,-3660,core]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-5280,decoCol:BASALT,decoTheme:'ember',decoTall:520});G.portal=null;questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }

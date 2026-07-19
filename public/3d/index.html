@@ -380,8 +380,8 @@
   .tbegin{display:none;flex-direction:column;align-items:center;gap:8px;padding-bottom:8px;}
   body.t-attract .tbegin{display:flex;}
   body.t-attract #tmenu{display:none;}
-  .tbeginpulse{font-weight:900;letter-spacing:.24em;font-size:15px;color:#f7d79a;cursor:pointer;padding:13px 30px;border:1px solid rgba(232,163,61,.45);border-radius:40px;background:rgba(10,8,14,.32);backdrop-filter:blur(2px);text-shadow:0 2px 16px rgba(232,163,61,.75),0 1px 3px #000;animation:tbeginpulse 1.9s ease-in-out infinite;}
-  @keyframes tbeginpulse{0%,100%{opacity:.62;box-shadow:0 0 0 rgba(232,163,61,0)}50%{opacity:1;box-shadow:0 0 26px rgba(232,150,60,.5)}}
+  .tbeginpulse{font-weight:900;letter-spacing:.27em;font-size:clamp(17px,2vw,23px);color:#ffe2a3;cursor:pointer;padding:10px 18px;border:0;background:none;text-shadow:0 2px 5px #000,0 0 18px rgba(255,176,65,.82),0 0 38px rgba(232,120,35,.42);animation:tbeginpulse 1.9s ease-in-out infinite;}
+  @keyframes tbeginpulse{0%,100%{opacity:.58;transform:scale(.985);filter:drop-shadow(0 0 0 rgba(255,174,62,0))}50%{opacity:1;transform:scale(1.035);filter:drop-shadow(0 0 14px rgba(255,174,62,.85))}}
   #tmenu{animation:tmenurise .5s cubic-bezier(.2,.9,.3,1);}
   @keyframes tmenurise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
   .bigbtn.ghost{background:rgba(255,255,255,.025);color:var(--ink);border:1px solid #2b3040;box-shadow:none;font-weight:700;}
@@ -561,7 +561,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.145.0';
+const VERSION3D='1.146.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5737,14 +5737,15 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
     <button class="bigbtn ghost" id="optBtn">More &amp; Settings</button>
     <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
     </div>
-    <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ PRESS TO BEGIN</div><div class="tver">v${VERSION3D}</div></div>`);
+    <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ CLICK ANYWHERE TO BEGIN</div><div class="tver">v${VERSION3D}</div></div>`);
   document.body.classList.add('t-title'); document.body.classList.add('t-attract'); titleEmbers();
   // STAGE 1: the art stands alone. First tap/key reveals the menu (STAGE 2) so nothing ever covers the logo on entry.
   const revealMenu=()=>{ if(mode!=='title'||!document.body.classList.contains('t-attract')) return;
-    document.body.classList.remove('t-attract'); try{ initAudio(); SFX.pickup(); }catch(e){} window.removeEventListener('keydown',revealMenu); };
+    document.body.classList.remove('t-attract'); try{ initAudio(); SFX.pickup(); }catch(e){}
+    window.removeEventListener('keydown',revealMenu); window.removeEventListener('pointerdown',revealMenu); };
   titleScreen._reveal=revealMenu;
-  document.getElementById('tbeginpulse').onclick=revealMenu;
   window.addEventListener('keydown',revealMenu);
+  window.addEventListener('pointerdown',revealMenu);
   document.getElementById('optBtn').onclick=openTitleOptions;
   document.getElementById('playBtn').onclick=modeSelect;
   document.getElementById('slotsBtn').onclick=openSlots;

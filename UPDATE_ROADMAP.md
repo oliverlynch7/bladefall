@@ -812,3 +812,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Replaced the reused Hitless trophy with a dedicated transparent 512px violet void-skull: horned obsidian crown, predatory fangs, third-eye rune, and purple energy fractures, deliberately more threatening than Hardcore.
 - Added a restrained purple final-tier card treatment for Hitless while preserving locked/selected behavior.
 - Real-browser muted QA at 1600×900: all three cards render, Hitless remains readable at UI scale, WebGL active, console 0 errors/warnings.
+
+## [Codex | 2026-07-19] v1.146.0 — full-screen title reveal
+- The entire opening title screen now responds to pointer/touch input; players no longer need to hit the prompt itself. Keyboard reveal remains supported.
+- Replaced the bordered prompt pill with larger unboxed “CLICK ANYWHERE TO BEGIN” typography, using a warm text glow, breathing scale, and pulsing luminosity.
+- Real-browser muted QA verified a pointer event in the upper corner reveals the menu, computed border/background are absent, WebGL remains active, and console reports no errors/warnings.

@@ -648,7 +648,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.163.0';
+const VERSION3D='1.164.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5122,6 +5122,7 @@ function update(dt){
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
+  { const mm=p.maxMana||100; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035); }  // slow passive mana regen (~28s empty→full)
   updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
   // enemies

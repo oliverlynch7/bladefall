@@ -485,6 +485,23 @@
   .gearrow .gd{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.35;}
   .bagav{width:64px;height:64px;object-fit:contain;flex:0 0 auto;border-radius:12px;border:1px solid #2b3040;background:#0d0e14;display:block;}
   .petav{width:74px;height:74px;object-fit:contain;flex:0 0 auto;border-radius:14px;border:1px solid #343b50;background:radial-gradient(circle,#24283a,#0c0e15 72%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));}
+  /* Pet Yard has its own hierarchy: one hero companion, then a readable collection grid. */
+  .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
+  .petyardhead{text-align:center;margin-bottom:8px}.petyardhead .ovsub{margin-bottom:0}.petyardhead .ovh{font-size:30px;}
+  .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
+  .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
+  .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
+  .petheroart{width:122px;height:122px;object-fit:contain;border-radius:18px;border:1px solid color-mix(in srgb,var(--petcol) 45%,#303648);background:radial-gradient(circle,color-mix(in srgb,var(--petcol) 18%,#1a1d29),#090b11 72%);filter:drop-shadow(0 10px 12px rgba(0,0,0,.5));}
+  .pettitle{font-size:25px;font-weight:950;color:var(--petcol);line-height:1.05}.petbase{font-size:10px;color:#8089a0;text-transform:uppercase;letter-spacing:.14em;margin-top:5px}.petflavor{font-size:13px;color:#c8cedb;font-style:italic;line-height:1.45;margin:9px 0 11px;max-width:680px}.petbadges{display:flex;gap:7px;flex-wrap:wrap}.petbadge{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #343b50;border-radius:999px;background:rgba(5,7,12,.42);color:#c8cedb;font-size:10.5px;font-weight:800;white-space:nowrap}.petbadge.role{color:var(--petcol);border-color:color-mix(in srgb,var(--petcol) 45%,#343b50)}
+  .pettraining{display:flex;align-items:center;gap:4px;margin-top:10px;color:#7f8799;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}.petpip{width:17px;height:5px;border-radius:4px;background:#303544}.petpip.on{background:var(--petcol);box-shadow:0 0 7px color-mix(in srgb,var(--petcol) 60%,transparent)}
+  .petactions{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap;min-width:205px}.petactions .bigbtn{width:auto;margin:0;padding:9px 12px;font-size:12px;white-space:nowrap;}
+  .petgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;max-height:min(43vh,430px);overflow:auto;padding:1px 4px 4px 1px;scrollbar-width:thin;scrollbar-color:#3a4053 transparent;}
+  .petcard{--petcol:#b9c0cc;min-width:0;grid-column:span 2;display:grid;grid-template-columns:92px minmax(0,1fr);grid-template-rows:auto auto;gap:10px 13px;padding:13px;border:1px solid #2d3342;border-radius:16px;background:linear-gradient(155deg,color-mix(in srgb,var(--petcol) 8%,#1b1e27),#0d0f16 74%);position:relative;box-shadow:0 9px 20px rgba(0,0,0,.24);transition:transform .1s,border-color .12s}.petcard:nth-last-child(2):nth-child(3n+1){grid-column:2/span 2}.petcard:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--petcol) 65%,#343b50)}.petcard::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--petcol)}
+  .petcardart{width:90px;height:90px;object-fit:contain;border-radius:14px;border:1px solid color-mix(in srgb,var(--petcol) 35%,#303648);background:radial-gradient(circle,color-mix(in srgb,var(--petcol) 15%,#1b1e2a),#090b11 74%)}
+  .petcardinfo{min-width:0}.petcardname{font-size:16px;font-weight:900;line-height:1.1;color:var(--petcol);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.petcard .petflavor{font-size:10.5px;margin:6px 0 8px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.petcard .petbadges{gap:4px}.petcard .petbadge{font-size:9px;padding:4px 6px}.petcard .pettraining{margin-top:7px}.petcardactions{grid-column:1/-1;display:flex;gap:7px}.petcardactions .bigbtn{flex:1;width:auto;margin:0;padding:8px 9px;font-size:11.5px;white-space:nowrap}.petcard.dim{opacity:.68;filter:saturate(.72)}
+  .petfooter{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.petfooter .bigbtn{margin:0;}
+  @media(max-width:1050px){.petgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.petcard,.petcard:nth-last-child(2):nth-child(3n+1){grid-column:auto}.pethero{grid-template-columns:120px minmax(0,1fr)}.petheroart{width:116px;height:116px}.pethero>.petactions{grid-column:1/-1;justify-content:flex-start}}
+  @media(max-width:620px){.petyardhead .ovh{font-size:25px}.pethero{display:block;padding:14px}.petheroart{width:112px;height:112px;float:left;margin:0 13px 8px 0}.pethero>.petactions{clear:both;padding-top:10px}.petgrid{grid-template-columns:1fr;max-height:48vh}.petfooter{grid-template-columns:1fr}.pettitle{font-size:20px}}
   /* Classes & Skills viewer */
   .ctabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0 0 12px;}
   .ctab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid #2b3040;color:var(--muted);font-size:15px;cursor:pointer;}
@@ -561,7 +578,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.147.0';
+const VERSION3D='1.148.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6460,29 +6477,26 @@ function openBeastkeeper(back){
   const active=meta.petActive;
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!meta.petOwned.includes(id));
-  const petRow=(id,inner)=>{ const P=PETS[id];
-    return `<div class="gearrow" style="--spine:${petRarityCol(id)}"><img class="petav" src="${petIcon(id)}" alt="${P.name}">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${petDisplayName(id)}${id===active?' <span style="color:var(--good);font-size:10px">· ACTIVE</span>':''}</div>
-        <div class="gd">${petStatLine(id)}</div></div>${inner}</div>`; };
-  const btn=(label,data,extra)=>`<button class="bigbtn buybtn ${extra||''}" ${data} style="width:auto;margin:0 0 0 5px;padding:7px 10px;font-size:12px">${label}</button>`;
-  const activeBlock = active ? `<div class="mssect" style="color:var(--amber);margin:2px 0 6px">Active companion</div>`+
-      petRow(active, btn(petTrainLvl(active)>=PET_TRAIN_MAX?'MAX':'Train '+petTrainCost(active)+'g','data-train="'+active+'"')+btn('Rename','data-name="'+active+'"','ghost')+btn('Stow','data-uneq="1"','ghost'))
-    : `<p class="ovsub" style="margin:4px 0 8px">No companion follows you. Buy one below.</p>`;
-  const bench = owned.filter(id=>id!==active).map(id=>petRow(id, btn('Equip','data-eq="'+id+'"')+btn('Sell +'+Math.round(PETS[id].price*0.4)+'g','data-sell="'+id+'"','ghost'))).join('');
-  const shop = unowned.map(id=>{ const P=PETS[id], afford=meta.gold>=P.price;
-    return `<div class="gearrow" style="--spine:${petRarityCol(id)}${afford?'':';opacity:.6'}"><img class="petav" src="${petIcon(id)}" alt="${P.name}">
-      <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${P.name} <span style="opacity:.5;font-size:10px;text-transform:uppercase">${RARITY[P.rarity].name}</span></div>
-        <div class="gd">${petStatLine(id)}<br><span style="opacity:.7;font-style:italic">${P.flavor}</span></div></div>
-      ${btn(P.price+'g','data-buy="'+id+'"')}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Pet Yard</h2>
-    <p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · one companion at a time · they help, they never carry.</p>
-    <div class="achlist" style="max-height:min(52vh,420px)">
-      ${activeBlock}
-      ${bench?`<div class="mssect" style="margin:10px 0 6px">Your other companions</div>${bench}`:''}
-      ${shop?`<div class="mssect" style="margin:10px 0 6px">For sale</div>${shop}`:''}
-    </div>
-    <button class="bigbtn ghost" id="lblBtn">Name tags: ${meta.petLabel?'On':'Off'}</button>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  const role=id=>{ const a=PETS[id].arch; return a.charAt(0).toUpperCase()+a.slice(1); };
+  const badges=id=>{ const P=PETS[id], out=[`<span class="petbadge role">${role(id)}</span>`];
+    if(P.arch==='attacker') out.push(`<span class="petbadge">${petAtkDmg(id)} damage</span>`,`<span class="petbadge">Every ${P.cd}s</span>`,`<span class="petbadge">${P.style==='ranged'?'Ranged':'Melee'}</span>`);
+    else if(P.arch==='healer') out.push(`<span class="petbadge">+${petHealAmt(id)} HP</span>`,`<span class="petbadge">Every ${P.cd}s</span>`);
+    else out.push(`<span class="petbadge">${P.pull} pickup range</span>`);
+    return out.join(''); };
+  const training=id=>{ const lv=petTrainLvl(id); return `<div class="pettraining"><span>Training</span>${Array.from({length:PET_TRAIN_MAX},(_,i)=>`<i class="petpip ${i<lv?'on':''}"></i>`).join('')}<span>${lv}/${PET_TRAIN_MAX}</span></div>`; };
+  const btn=(label,data,extra='',disabled=false)=>`<button class="bigbtn buybtn ${extra}" ${data||''} ${disabled?'disabled style="opacity:.42;cursor:default"':''}>${label}</button>`;
+  const petCard=(id,kind)=>{ const P=PETS[id], col=petRarityCol(id), afford=meta.gold>=P.price, display=kind==='shop'?P.name:petDisplayName(id);
+    const actions=kind==='shop'?btn(`${P.price}g`,`data-buy="${id}"`,'',!afford):btn('Equip',`data-eq="${id}"`)+btn(`Sell · +${Math.round(P.price*.4)}g`,`data-sell="${id}"`,'ghost');
+    return `<article class="petcard ${kind==='shop'&&!afford?'dim':''}" style="--petcol:${col}" title="${htmlSafe(display)}">
+      <img class="petcardart" src="${petIcon(id)}" alt="${htmlSafe(P.name)}"><div class="petcardinfo"><div class="petcardname">${htmlSafe(display)}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(id)}</div>${training(id)}</div><div class="petcardactions">${actions}</div></article>`; };
+  const activeBlock=active?(()=>{ const P=PETS[active],col=petRarityCol(active),lv=petTrainLvl(active),max=lv>=PET_TRAIN_MAX;
+    return `<div class="petsection">Active companion</div><section class="pethero" style="--petcol:${col}"><img class="petheroart" src="${petIcon(active)}" alt="${htmlSafe(P.name)}"><div><div class="pettitle">${htmlSafe(petDisplayName(active))}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(active)}</div>${training(active)}</div><div class="petactions">${btn(max?'Fully trained':`Train · ${petTrainCost(active)}g`,max?'':`data-train="${active}"`,'',max)}${btn('Rename',`data-name="${active}"`,'ghost')}${btn('Stow','data-uneq="1"','ghost')}</div></section>`; })()
+    :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
+  const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
+  const shop=unowned.map(id=>petCard(id,'shop')).join('');
+  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
+    ${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
+    <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);
   document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ petEquip(b.dataset.eq); reopen(); });

@@ -822,3 +822,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Reduced torch point-light energy to roughly one quarter of its previous peak and narrowed flicker amplitude, preventing stacked nearby torches from bleaching material colors.
 - Shrunk additive flame halos from radius 22 to 10, reduced bloom opacity by 80%, and darkened emissive flame cores while preserving warm navigation readability.
 - Real-browser muted QA in the 18-torch Waystation view verified local colors remain visible, flames still read clearly, WebGL stays active, and console reports no errors/warnings.
+
+## [Codex | 2026-07-19] v1.148.0 — Pet Yard visual rebuild
+- Replaced the generic item-row layout with a dedicated Pet Yard: large rarity-lit active-companion hero panel, full portrait, species/rarity identity, flavor text, role/stat badges, five-step training track, and grouped actions.
+- Rebuilt owned and purchasable companions as spacious responsive cards with full unclipped names, readable combat roles and cadence, rarity accents, complete portraits, flavor, training progress, and aligned Equip/Sell/Buy controls.
+- Centered incomplete collection rows, separated Name Tags/Back into a balanced footer, and confined overflow to the collection pane when needed.
+- Real-browser muted QA at 1600×900 with all six pets owned and fully trained: 0 clipped names, balanced 3+2 collection, zero page scroll, all actions present, WebGL active, console 0 errors/warnings.

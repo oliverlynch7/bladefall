@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.178.0';
+const VERSION3D='1.179.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3407,7 +3407,7 @@ const EXPANDED_SCAPES={
       const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
       road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
       climbRun(100,-1250,0,420,-1600,120,72);for(let k=0;k<7;k++)G.movers.push({x0:420+(k%2?120:-120),z:-1750-k*100,w:96,d:74,h:120+k*20,amp:30+(k%3)*8,sp:.8+k*.08,ph:rnd()*6.28,x:420,px:420});
-      climbRun(420,-2050,220,-420,-2350,250,74);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
+      climbRun(420,-1600,0,-420,-2350,250,82);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
       // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
       for(let k=0;k<14;k++){const t=k/13,x=-420+920*t,z=-2500-600*t,y=250-170*t;vplat(x,z,y,100,82,{slide:true});if(k%4===0)vplat(x-170,z,y,130,110,{shelter:true});}
       vplat(500,-3100,80,760,700,{terrace:true});road(cave,cairn,170);climbRun(500,-3100,80,0,-4100,180,78);brazier(0,-4140,180);chest(650,-3100,80);chest(-650,-2350,250);
@@ -3463,6 +3463,28 @@ const EXPANDED_SCAPES={
       climbRun(430,-1600,130,-420,-2420,250,82);vplat(-420,-2420,250,780,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;vplat(-420+Math.cos(a)*250,-2420+Math.sin(a)*220,280+(k%4)*25,76,66,{perch:true});G.deco.push({x:-420+Math.cos(a)*250,z:-2420+Math.sin(a)*220,y0:250,w:8,h:150,d:8,c:GOLD});}
       climbRun(-160,-2780,250,450,-3260,360,80);vplat(450,-3260,360,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const x=120+(k%4)*210,z=-3500+Math.floor(k/4)*170;vplat(x,z,360+(k%3)*28,170,120,{glass:true});G.deco.push({x,z,y0:360,w:150,h:5,d:100,c:k%2?GLASS:'#e7a2c9'});}
       climbRun(450,-3260,360,0,-4340,360,84);chest(-650,-2420,300);chest(720,-3260,388);for(const p of [[-500,-820,orchard],[430,-1600,falls],[-420,-2420,aviary],[450,-3260,roof]]){mkMonster('marblestatue',p[0]-50,p[1],p[2]);mkMonster('sparkling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:430,z:-1600,y:130},{x:-420,z:-2420,y:300},{x:450,z:-3260,y:388},{x:0,z:-4340,y:360}]);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4560,decoCol:MARBLE,decoTheme:'marble',decoTall:500});}
+  },
+  castle(ctx){const {rnd,mkMonster}=ctx,ascent=G.area===1,STONE='#353541',IRON='#211f28',BLOOD='#702742',STORM='#8751b5',FIRE='#d65a2e';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const tower=(x,z,y,h)=>{vcol(x,z,130,130,y+h);vplat(x,z,y+h,160,160,{tower:true});for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?62:-62),z:z+(k<2?62:-62),y0:y+h,w:28,h:34,d:28,c:IRON});};
+    if(!ascent){const field=room('Ashen Siegefield',0,0,980,760),gate=room('Fallen Gatehouse',-500,-900,820,720),yard=room('Black Courtyard',430,-1740,900,760,120),wall=room('Murderwall',-430,-2580,800,720,260),storm=room('Stormbridge',450,-3440,820,720,400),keep=room('Inner Keep',0,-4580,1040,820,400);
+      road(field,gate,180);for(let k=0;k<10;k++){const x=-400+(k%5)*200,z=-200-Math.floor(k/5)*260;G.deco.push({x,z,y0:0,w:150,h:65,d:90,c:k%2?STONE:IRON});G.deco.push({x,z,y0:65,w:20,h:70,d:20,c:BLOOD});}
+      // The shattered gatehouse becomes a climb through its own collapse, with the open breach as recovery.
+      for(let k=0;k<12;k++){const t=k/11;G.crumbles.push({x:-760+520*t,z:-700-420*t,w:92,d:76,h:12+k*12,state:0,timer:0,respawn:0,fallY:0,jit:0});}climbRun(-500,-900,0,430,-1740,120,82);vplat(430,-1740,120,900,760,{checkpoint:true,terrace:true});
+      for(const p of [[140,-1560],[700,-1900],[-20,-1900]])tower(p[0],p[1],120,150);climbRun(160,-2100,120,-430,-2580,260,80);vplat(-430,-2580,260,800,720,{checkpoint:true,terrace:true});
+      // Murderwall alternates parapet blocks, arrow-slit cover, and a faster narrow crenellation line.
+      for(let k=0;k<12;k++){const x=-740+(k%6)*125,z=-2800+Math.floor(k/6)*260;vplat(x,z,260+(k%3)*35,100,78,{battlement:true});G.deco.push({x,z,y0:260,w:20,h:100,d:20,c:BLOOD});}
+      climbRun(-160,-2940,260,450,-3440,400,80);for(let k=0;k<10;k++)G.movers.push({x0:120+k*85,z:-3230-k*85,w:96,d:70,h:325+k*9,amp:42,sp:.7+k*.07,ph:k*.55,x:120,px:120});vplat(450,-3440,400,820,720,{checkpoint:true,terrace:true});
+      climbRun(450,-3440,400,0,-4580,400,84);for(let k=0;k<9;k++)G.crumbles.push({x:360-k*80,z:-3900-k*72,w:74,d:68,h:400,state:0,timer:0,respawn:0,fallY:0,jit:0});chest(-680,-2580,330);chest(700,-3440,430);scapeSecret(ctx,760,-1740,120);
+      for(const p of [[-500,-900,gate],[430,-1740,yard],[-430,-2580,wall],[450,-3440,storm]]){mkMonster('siegeknight',p[0]-55,p[1],p[2]);mkMonster('royalarcanist',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-500,z:-900,room:gate},{x:430,z:-1740,room:yard},{x:-430,z:-2580,room:wall},{x:450,z:-3440,room:storm}]);finishScape(ctx,{sx:0,sz:310,sy:0,gx:0,gz:-4820,decoCol:STONE,decoTheme:'apex',decoTall:620});
+    }else{const hall=room('Hall of Broken Oaths',0,0,900,700),spire=room('West Tower Spiral',-480,-850,760,680,150),gallery=room('Royal Gallery',430,-1680,840,720,290),cross=room('Lightning Crossing',-430,-2520,800,700,430),crown=room('Crown Tower',450,-3380,820,720,580),throne=room('Throne of the Awakened',0,-4580,1040,840,580);
+      // A continuous three-dimensional spiral is the level's spine; side chambers branch for loot and fights.
+      climbRun(0,-260,0,-480,-850,150,80);for(let k=0;k<16;k++){const a=k*.68,y=150+k*22;vplat(-480+Math.cos(a)*250,-850+Math.sin(a)*220,y,78,68,{towerSpiral:true});if(k%4===0)G.deco.push({x:-480+Math.cos(a)*250,z:-850+Math.sin(a)*220,y0:0,w:14,h:y,d:14,c:IRON});}
+      climbRun(-480,-850,150,430,-1680,290,82);vplat(430,-1680,290,840,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*165,z=-1900+Math.floor(k/5)*260;G.deco.push({x,z,y0:290,w:100,h:120,d:80,c:STONE});G.deco.push({x,z,y0:410,w:80,h:12,d:60,c:BLOOD});}
+      climbRun(430,-1680,290,-430,-2520,430,82);for(let k=0;k<11;k++){const t=k/10,x=430-860*t,z=-2100-420*t,y=340+(k%4)*30;vplat(x,z,y,78,66,{lightning:true});G.deco.push({x,z,y0:y,w:12,h:120,d:12,c:STORM});}
+      climbRun(-430,-2520,430,450,-3380,580,82);vplat(450,-3380,580,820,720,{checkpoint:true,terrace:true});for(let k=0;k<14;k++){const a=k*.64,y=580+k*23;vplat(450+Math.cos(a)*245,-3380+Math.sin(a)*220,y,74,66,{crownSpiral:true});}
+      // The last approach crosses three wide sanctuary landings between aggressive collapsing ribbons.
+      climbRun(450,-3380,580,0,-4580,580,82);for(let band=0;band<3;band++){vplat(300-band*300,-3800-band*300,580,180,150,{sanctuary:true});for(let k=0;k<5;k++)G.crumbles.push({x:360-band*300-k*65,z:-3680-band*300-k*65,w:68,d:62,h:580,state:0,timer:0,respawn:0,fallY:0,jit:0});}
+      chest(-690,-850,260);chest(700,-1680,410);chest(-680,-2520,460);for(const p of [[-480,-850,spire],[430,-1680,gallery],[-430,-2520,cross],[450,-3380,crown]]){mkMonster('royalarcanist',p[0]-55,p[1],p[2]);mkMonster('siegeknight',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-480,z:-850,room:spire},{x:430,z:-1680,room:gallery},{x:-430,z:-2520,room:cross},{x:450,z:-3380,room:crown}]);scapeFind(ctx,0,-4640,580);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4860,decoCol:STONE,decoTheme:'apex',decoTall:720});}
   }
 };
 const SIDE_SCAPES={

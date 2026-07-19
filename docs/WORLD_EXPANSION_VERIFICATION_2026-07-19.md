@@ -24,7 +24,7 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- Castle Duskmoor final expansion and full-chain regression
+- Complete — all eight Main Levels and seven exploration Trial Chambers are expanded and verified.
 
 ## Pair 4 — Frostfell + Glacier Vault (v1.175.0)
 
@@ -108,3 +108,16 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 - Hanging Gardens adds citrus terraces, waterfall stairs, gilded aviary perches, stained-glass rooftop traversal, and Garden Crown.
 - Sealed Reliquary descends through royal ledgers, opposed counterweight lifts, a prismatic treasury, circular Sun-Lock mechanism, and a three-key vault mission.
 - All required goals pass the base-movement structural sweep; unreachable Colonnade pieces are intentionally optional upper beams. The Reliquary gate works and muted Chromium reported zero console errors.
+
+## Pair 8 — Castle Duskmoor + full-chain regression (v1.179.0)
+
+| Area | Authored districts | Structural reach | Objective |
+|---|---:|---:|---|
+| Castle Gates | 6 | 74/90; goal reachable | 16 Siege Knights |
+| Long Ascent | 6 | 109/109 | 14 Royal Arcanists + Throne Room |
+
+- Castle Gates now advances through an Ashen Siegefield, climbable collapsed gatehouse, tower-filled Black Courtyard, Murderwall battlements, moving Stormbridge, and Inner Keep.
+- Long Ascent forms a continuous vertical finale through a tower spiral, Royal Gallery rooftops, lightning crossing, Crown Tower spiral, sanctuary landings, and collapsing ribbons to the final throne.
+- The complete regression sweep covered all 16 campaign areas and all 7 exploration Trial Chambers. Every required start-to-goal path is reachable with base movement; all six local-mission Trial Chamber gates complete and open correctly, alongside Thornwood's guardian gate.
+- The Rime Shelf regression discovered by the sweep was repaired with a readable ravine-to-avalanche switchback and now passes 63/63 structural reach.
+- Muted Chromium reported zero console errors. The quick harness completed; its four late-boss combat-budget warnings are pre-existing balance-budget flags, not traversal or geometry failures.

@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.177.0';
+const VERSION3D='1.178.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3447,6 +3447,22 @@ const EXPANDED_SCAPES={
       climbRun(420,-1650,180,-420,-2480,330,82);for(let k=0;k<11;k++){const t=k/10,x=-420+840*t,z=-2600-450*t,y=330+(k%4)*38;vplat(x,z,y,76,70,{chain:true});G.deco.push({x,z,y0:y+20,w:8,h:190,d:8,c:CHAIN});}
       climbRun(-420,-2480,330,450,-3300,470,82);vplat(450,-3300,470,800,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3300+Math.sin(a)*240,w:88,d:72,h:470+(k%3)*32,amp:36,sp:.65+k*.05,ph:rnd()*6.28,x:450,px:450});}
       climbRun(450,-3300,470,0,-4380,470,82);chest(-650,-2480,368);chest(700,-3300,502);for(const p of [[-450,-850,well],[420,-1650,inside],[-420,-2480,chains],[450,-3300,rift]]){mkMonster('blinkstalker',p[0]-50,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-450,z:-850,y:120},{x:420,z:-1650,y:300},{x:-420,z:-2480,y:368},{x:450,z:-3300,y:470},{x:0,z:-4380,y:470}]);scapeFind(ctx,450,-3300,470);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4580,decoCol:VOID,decoTheme:'void',decoTall:570});}
+  },
+  palace(ctx){const {rnd,mkMonster}=ctx,gardens=G.area===1,MARBLE='#d8d5c7',GOLD='#d4a83e',WATER='#4b8eaa',GLASS='#75c8d2',VINE='#497b4c';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const col=(x,z,y=0,h=180)=>{vcol(x,z,34,34,y+h);G.deco.push({x,z,y0:y+h,w:58,h:18,d:58,c:GOLD});};
+    if(!gardens){const court=room('Sun Court',0,0,960,720),process=room('Grand Processional',-460,-900,760,720),gallery=room('Hall of Statues',420,-1700,820,720,100),aqueduct=room('Sky Aqueduct',-420,-2520,760,680,220),oculus=room('Solar Oculus',450,-3340,840,740,340),throne=room('Throne Antechamber',0,-4420,1020,800,340);
+      road(court,process,180);for(const x of [-280,280])G.deco.push({x,z:40,y0:0,w:250,h:3,d:130,c:WATER});for(let k=0;k<8;k++)col(-760+k*180,-900);
+      climbRun(-180,-1250,0,420,-1700,100,82);vplat(420,-1700,100,820,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*150,z=-1920+Math.floor(k/5)*260;G.deco.push({x,z,y0:100,w:70,h:150,d:70,c:MARBLE});G.deco.push({x,z,y0:250,w:90,h:18,d:90,c:GOLD});}
+      // The aqueduct offers a broad watercourse below and a faster balance-beam route above the arches.
+      climbRun(160,-2050,100,-420,-2520,220,80);vplat(-420,-2520,220,760,680,{checkpoint:true,terrace:true});G.deco.push({x:-420,z:-2520,y0:220,w:620,h:5,d:110,c:WATER});for(let k=0;k<9;k++)vplat(-720+k*75,-2690-(k%2)*80,300+(k%3)*26,66,52,{beam:true});
+      climbRun(-160,-2860,220,450,-3340,340,80);vplat(450,-3340,340,840,740,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3340+Math.sin(a)*240,w:92,d:70,h:340+(k%3)*30,amp:26,sp:.55+k*.04,ph:k*.5,x:450,px:450});G.deco.push({x:450+Math.cos(a)*175,z:-3340+Math.sin(a)*155,y0:340,w:18,h:140,d:18,c:GOLD});}
+      climbRun(450,-3340,340,0,-4420,340,84);chest(-680,-2520,300);chest(720,-3340,370);scapeSecret(ctx,720,-1700,100);for(const p of [[-460,-900,process],[420,-1700,gallery],[-420,-2520,aqueduct],[450,-3340,oculus]]){mkMonster('marblestatue',p[0]-55,p[1],p[2]);mkMonster('sunpriest',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-460,z:-900,room:process},{x:420,z:-1700,room:gallery},{x:-420,z:-2520,room:aqueduct},{x:450,z:-3340,room:oculus}]);scapeFind(ctx,0,-4480,340);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4640,decoCol:MARBLE,decoTheme:'marble',decoTall:510});
+    }else{const terrace=room('Lower Terraces',0,0,920,700),orchard=room('Citrus Arcade',-500,-820,760,680),falls=room('Waterfall Stairs',430,-1600,780,700,130),aviary=room('Gilded Aviary',-420,-2420,780,700,250),roof=room('Stained-Glass Roofs',450,-3260,820,720,360),crown=room('Garden Crown',0,-4340,1000,780,360);
+      road(terrace,orchard,170);for(let k=0;k<18;k++){const x=-760+(k%6)*105,z=-1020+Math.floor(k/6)*190;G.deco.push({x,z,y0:0,w:70,h:55,d:70,c:VINE});G.deco.push({x,z,y0:55,w:18,h:18,d:18,c:'#e9a83e'});}
+      climbRun(-200,-1180,0,430,-1600,130,80);for(let k=0;k<10;k++){const t=k/9;vplat(120+310*t,-1370-230*t,20+110*t,100,76,{waterStep:true});G.deco.push({x:120+310*t,z:-1370-230*t,y0:20+110*t,w:78,h:4,d:62,c:WATER});}
+      climbRun(430,-1600,130,-420,-2420,250,82);vplat(-420,-2420,250,780,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;vplat(-420+Math.cos(a)*250,-2420+Math.sin(a)*220,280+(k%4)*25,76,66,{perch:true});G.deco.push({x:-420+Math.cos(a)*250,z:-2420+Math.sin(a)*220,y0:250,w:8,h:150,d:8,c:GOLD});}
+      climbRun(-160,-2780,250,450,-3260,360,80);vplat(450,-3260,360,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const x=120+(k%4)*210,z=-3500+Math.floor(k/4)*170;vplat(x,z,360+(k%3)*28,170,120,{glass:true});G.deco.push({x,z,y0:360,w:150,h:5,d:100,c:k%2?GLASS:'#e7a2c9'});}
+      climbRun(450,-3260,360,0,-4340,360,84);chest(-650,-2420,300);chest(720,-3260,388);for(const p of [[-500,-820,orchard],[430,-1600,falls],[-420,-2420,aviary],[450,-3260,roof]]){mkMonster('marblestatue',p[0]-50,p[1],p[2]);mkMonster('sparkling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:430,z:-1600,y:130},{x:-420,z:-2420,y:300},{x:450,z:-3260,y:388},{x:0,z:-4340,y:360}]);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4560,decoCol:MARBLE,decoTheme:'marble',decoTall:500});}
   }
 };
 const SIDE_SCAPES={
@@ -3563,6 +3579,17 @@ const SIDE_SCAPES={
     climbRun(450,-3380,440,0,-4520,440,82);for(let k=0;k<10;k++)G.crumbles.push({x:360-k*72,z:-3900-k*68,w:72,d:66,h:440,state:0,timer:0,respawn:0,fallY:0,jit:0});
     const seals=[{x:-480,z:-820,y:0},{x:430,z:-1650,y:210},{x:-420,z:-2500,y:444}];for(const p of seals)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'reaperSeals',name:'Reaper Seal'},bob:rnd()*3,placed:true});localMission('reaperSeals','Break the three Reaper seals','activate',3,240);G.portal=null;
     chest(680,-1650,210);chest(-650,-2500,420);scapeSecret(ctx,700,-3380,440);for(const p of [[-480,-820,harvest],[430,-1650,pendulum],[-420,-2500,ossuary],[450,-3380,choir]]){mkMonster('shadeling',p[0]-50,p[1],p[2]);mkMonster('blinkstalker',p[0]+55,p[1],p[2]);}finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4740,decoCol:STONE,decoTheme:'void',decoTall:590});G.portal=null;questUpdate();
+  },
+  reliquary(ctx){const {rnd,mkMonster}=ctx,MARBLE='#b9b5aa',GOLD='#d4aa42',JEWEL='#58c4c9',DARK='#343442';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const path=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const seal=room('Outer Seal',0,0,840,640),ledger=room('Royal Ledger Hall',-480,-820,760,680),weights=room('Counterweight Vault',430,-1640,800,720,150),prism=room('Prismatic Treasury',-420,-2480,780,700,290),lock=room('Sun-Lock Mechanism',450,-3340,820,720,430),heart=room('Reliquary Heart',0,-4480,1000,800,430);
+    path(seal,ledger,150);for(let k=0;k<12;k++){const x=-760+(k%4)*180,z=-1040+Math.floor(k/4)*190;G.deco.push({x,z,y0:0,w:100,h:70,d:80,c:DARK});G.deco.push({x,z,y0:70,w:86,h:10,d:66,c:GOLD});}
+    // Counterweight lifts travel in opposed pairs; the surrounding stairs guarantee a readable recovery path.
+    climbRun(-480,-820,0,430,-1640,150,82);for(let k=0;k<8;k++)G.movers.push({x0:120+k*90,z:-1430-k*85,w:96,d:72,h:55+k*13,amp:45,sp:.65+k*.08,ph:k%2?3.14:0,x:120,px:120});vplat(430,-1640,150,800,720,{checkpoint:true,terrace:true});
+    climbRun(430,-1640,150,-420,-2480,290,82);for(let k=0;k<12;k++){const a=k/12*6.28;vplat(-420+Math.cos(a)*260,-2480+Math.sin(a)*230,290+(k%4)*30,82,72,{prism:true});G.deco.push({x:-420+Math.cos(a)*170,z:-2480+Math.sin(a)*150,y0:290,w:28,h:130,d:28,c:k%2?JEWEL:'#d58bd5'});}
+    climbRun(-420,-2480,290,450,-3340,430,82);vplat(450,-3340,430,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;vplat(450+Math.cos(a)*280,-3340+Math.sin(a)*245,430+(k%3)*34,88,66,{sunGear:true});G.deco.push({x:450+Math.cos(a)*170,z:-3340+Math.sin(a)*150,y0:430,w:16,h:150,d:16,c:GOLD});}
+    climbRun(450,-3340,430,0,-4480,430,84);const keys=[{x:-480,z:-820,y:0},{x:-420,z:-2480,y:350},{x:450,z:-3340,y:464}];for(const p of keys)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'sunKeys',name:'Sun Key'},bob:rnd()*3,placed:true});localMission('sunKeys','Recover the three Sun Keys','collect',3,260);G.portal=null;
+    chest(680,-1640,190);chest(-680,-2480,350);chest(700,-3340,464);scapeSecret(ctx,720,-1640,150);for(const p of [[-480,-820,ledger],[430,-1640,weights],[-420,-2480,prism],[450,-3340,lock]]){mkMonster('marblestatue',p[0]-50,p[1],p[2]);mkMonster('sunpriest',p[0]+55,p[1],p[2]);}finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4700,decoCol:MARBLE,decoTheme:'marble',decoTall:560});G.portal=null;questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }

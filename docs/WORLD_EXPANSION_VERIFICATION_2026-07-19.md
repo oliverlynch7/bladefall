@@ -24,7 +24,6 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- Sunspire Palace + Sealed Reliquary
 - Castle Duskmoor final expansion and full-chain regression
 
 ## Pair 4 — Frostfell + Glacier Vault (v1.175.0)
@@ -96,3 +95,16 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 - Hollow Deep uses a gravity-well spiral, roof traversal across an inside-out keep, a hanging chain sea, and moving observatory rings above the World Scar.
 - Reaper’s Gate is a separate authored expedition after the existing Reaper unlock trial: scythe-like moving slabs, a spiral ossuary, Soul Choir, disappearing final approach, and a three-seal exit mission.
 - Every required goal passes base-movement structural connectivity. The Reaper seals open their exit correctly, and muted Chromium reported zero console errors.
+
+## Pair 7 — Sunspire Palace + Sealed Reliquary (v1.178.0)
+
+| Area | Authored districts | Structural reach | Objective |
+|---|---:|---:|---|
+| Grand Colonnade | 6 | 44/64; goal reachable | Statues + Throne Antechamber |
+| Hanging Gardens | 6 | 70/70 | 5 Gilded Relics |
+| Sealed Reliquary | 6 | 77/77 | Recover 3 Sun Keys |
+
+- The palace route now moves through reflecting courts, a monumental processional, statue hall, upper aqueduct, rotating Solar Oculus, and Throne Antechamber.
+- Hanging Gardens adds citrus terraces, waterfall stairs, gilded aviary perches, stained-glass rooftop traversal, and Garden Crown.
+- Sealed Reliquary descends through royal ledgers, opposed counterweight lifts, a prismatic treasury, circular Sun-Lock mechanism, and a three-key vault mission.
+- All required goals pass the base-movement structural sweep; unreachable Colonnade pieces are intentionally optional upper beams. The Reliquary gate works and muted Chromium reported zero console errors.

@@ -505,12 +505,14 @@
   .achlist::-webkit-scrollbar{width:5px;}
   .achlist::-webkit-scrollbar-thumb{background:#333a4c;border-radius:99px;}
   .achlist::-webkit-scrollbar-track{background:transparent;}
-  .achrow{display:flex;gap:10px;align-items:flex-start;padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.05);}
-  .achrow .ic{font-size:17px;width:20px;text-align:center;}
-  .achrow .at{font-size:14px;font-weight:800;}
-  .achrow .ad{font-size:11px;color:var(--muted);margin-top:1px;}
+  .achrow{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:center;padding:10px 12px;border:1px solid #2e3341;border-radius:13px;background:linear-gradient(145deg,rgba(31,34,44,.96),rgba(13,15,21,.98));}
+  .achrow .ic{position:relative;width:76px;height:76px;text-align:center;}
+  .achart{width:76px;height:76px;display:block;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.52));}
+  .achlock{position:absolute;right:1px;bottom:1px;width:21px;height:21px;display:flex;align-items:center;justify-content:center;border:1px solid #454b5b;border-radius:50%;background:#11131a;color:#8e96a7;font-size:10px;box-shadow:0 3px 8px #0008}
+  .achrow .at{font-size:16px;font-weight:900;}
+  .achrow .ad{font-size:11.5px;color:#a7afbf;margin-top:3px;line-height:1.35;}
   .achrow.done .at{color:var(--good);}
-  .achrow.todo{opacity:.65;}
+  .achrow.todo{opacity:.66;}.achrow.todo .achart{filter:grayscale(1) brightness(.48) drop-shadow(0 5px 7px rgba(0,0,0,.5));}
   /* Unified item-row system. The RARITY SPINE (--spine) is the signature: a 3px
      colored edge that tells you an item's rarity before you read a word. */
   .gearrow{display:flex;gap:10px;align-items:center;text-align:left;padding:9px 10px 9px 12px;margin:0 0 7px;
@@ -648,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.165.0';
+const VERSION3D='1.166.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4728,7 +4730,7 @@ function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
-  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; G.portal={x:ch.x,z:ch.z-64,t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
   else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
   const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
   for(let i=0;i<drops;i++){
@@ -4784,7 +4786,7 @@ function checkStageClear(){
   // boss stages: the portal opens when the boss falls.
   if(G.portal) return;
   if(G.portalPos && G.boss && G.boss.dead){
-    G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+    snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
@@ -5092,7 +5094,7 @@ function update(dt){
         if(dot) hitEnemy(e,sf.dmg,G.p,0,effLifesteal(G.p),null); } }
     G.spikefields=G.spikefields.filter(sf=>sf.life>0); }
   // healing spring (once per stage)
-  for(const sp2 of G.springs){ if(!sp2.used && p.y<10 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
+  for(const sp2 of G.springs){ if(!sp2.used && Math.abs(p.y-(sp2.y||0))<18 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
     sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
     addText(p.x,p.y+60,p.z,'+'+heal,'var(--good)',true); burst(p.x,10,p.z,'#7fe8c0',14); SFX.levelup(); hudUpdate(); } }
   // dungeon logic: encounter rooms seal their doors; plates & keys open the locked ones
@@ -5107,15 +5109,15 @@ function update(dt){
       toast('✓ Room cleared'); SFX.achieve();
     }
   }
-  for(const pl of G.plates){ if(!pl.lit && p.onGround && p.y<4 && Math.abs(p.x-pl.x)<22 && Math.abs(p.z-pl.z)<22){
+  for(const pl of G.plates){ if(!pl.lit && p.onGround && Math.abs(p.y-(pl.y||0))<5 && Math.abs(p.x-pl.x)<22 && Math.abs(p.z-pl.z)<22){
     pl.lit=true; SFX.pickup(); burst(pl.x,4,pl.z,'#4aa3e0',10);
     if(pl.door && pl.door.plates.every(q=>q.lit)){ pl.door.open=true; toast('🚪 Ancient stone grinds open!'); SFX.god(); } } }
-  for(const ky of G.keys){ if(!ky.taken && p.y<40 && dXZ(p.x,p.z,ky.x,ky.z)<34){
+  for(const ky of G.keys){ if(!ky.taken && Math.abs(p.y-(ky.y||0))<40 && dXZ(p.x,p.z,ky.x,ky.z)<34){
     ky.taken=true; G.hasKey=true; toast('Ancient Key!',null,'item-key'); SFX.achieve(); } }
   if(G.hasKey) for(const dr of G.doors){ if(dr.type==='key'&&!dr.open&&dXZ(p.x,p.z,dr.x,dr.z)<74){
     dr.open=true; G.hasKey=false; toast('The lock yields!',null,'item-key'); SFX.god(); break; } }
   // golden bonus portal
-  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48){ startBonus(); return; }
+  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ startBonus(); return; }
   // bonus sprint clock
   if(G.bonusActive){ const bt=document.getElementById('bonustimer');
     if(G.bonusSecured){ bt.innerHTML=eventIcon('event-treasure-chest')+' SECURED'; bt.style.color='#3ad07f'; }
@@ -5288,7 +5290,7 @@ function update(dt){
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
   // portal
-  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52) nextStage(); }
+  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72) nextStage(); }
   // particles
   for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
   G.particles=G.particles.filter(pt=>pt.life>0);
@@ -5778,7 +5780,7 @@ function endlessTick(dt){
       G.endSpawnT=G.endInt;
     }
   } else if(alive===0 && !G.portal){
-    G.floorCleared=true; G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+    G.floorCleared=true; snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
     toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('portalopen'); SFX.win(); questUpdate();
   }
@@ -6028,110 +6030,74 @@ function enterWaystation(){
      PET YARD south-west (the Beastkeeper — and something glinting behind the
      crates...), the MIRROR PAVILION due south, and the DARK GROTTO north-east where the
      Abyssal Descent stone waits. The gate terrace still crowns the north. */
-  // ---- floors ----
-  G.segments.push({x:0,z:-40,w:900,d:760});                                          // the grand plaza
-  G.segments.push({x:-560,z:-90,w:240,d:220});  G.segments.push({x:-810,z:-90,w:320,d:460});   // west neck + Market Garden
-  G.segments.push({x:560,z:-90,w:240,d:220});   G.segments.push({x:810,z:-90,w:320,d:460});    // east neck + Forge Yard
-  G.segments.push({x:500,z:420,w:200,d:240});   G.segments.push({x:760,z:520,w:400,d:360});    // SE neck + Sparring Arena
-  G.segments.push({x:-500,z:420,w:200,d:240});  G.segments.push({x:-660,z:520,w:360,d:320});   // SW neck + Pet Yard
-  G.segments.push({x:0,z:390,w:240,d:140});     G.segments.push({x:0,z:540,w:300,d:220});      // S neck + Mirror Pavilion
-  G.segments.push({x:560,z:-360,w:300,d:200});  G.segments.push({x:760,z:-380,w:280,d:240});   // NE neck + Dark Grotto
-  [[0,-40,900,760],[-810,-90,320,460],[810,-90,320,460],[760,520,400,360],[-660,520,360,320],[0,540,300,220],[760,-380,280,240]]
-    .forEach(r2=>G.rooms.push({x:r2[0],z:r2[1],w:r2[2],d:r2[3],monsters:[],encounter:false,cleared:true}));
-  // ---- walls (tall = the shoulder camera stays boxed; the north stays LOW to see the dying world) ----
-  G.walls.push({x:0,z:-380,w:940,d:26,h:66});                                        // low north rampart behind the gates
-  G.walls.push({x:-462,z:-310,w:24,d:220,h:150},{x:-462,z:180,w:24,d:320,h:150});    // plaza west (gap = market neck)
-  G.walls.push({x:462,z:-310,w:24,d:140,h:150},{x:462,z:180,w:24,d:320,h:150});      // plaza east (gaps = forge + grotto necks)
-  G.walls.push({x:-265,z:352,w:290,d:24,h:150},{x:265,z:352,w:290,d:24,h:150});      // plaza south (gaps = SW / mirror / SE)
-  G.walls.push({x:-810,z:-332,w:344,d:24,h:150},{x:-810,z:152,w:344,d:24,h:150},{x:-982,z:-90,w:24,d:484,h:150});   // Market Garden shell
-  G.walls.push({x:810,z:-332,w:344,d:24,h:150},{x:810,z:152,w:344,d:24,h:150},{x:982,z:-90,w:24,d:484,h:150});      // Forge Yard shell
-  G.walls.push({x:760,z:332,w:420,d:24,h:130},{x:760,z:708,w:420,d:24,h:130},{x:968,z:520,w:24,d:400,h:130});       // Arena: north/south/east...
-  G.walls.push({x:652,z:395,w:24,d:150,h:130},{x:652,z:645,w:24,d:150,h:130});                                       // ...west split — the arena GATE
-  G.walls.push({x:-852,z:520,w:24,d:344,h:150},{x:-660,z:692,w:384,d:24,h:150},{x:-745,z:348,w:190,d:24,h:150});    // Pet Yard shell (north gap = neck)
-  G.walls.push({x:0,z:662,w:320,d:24,h:110});                                                                        // pavilion back rail
-  G.walls.push({x:740,z:-512,w:304,d:24,h:150},{x:892,z:-380,w:24,d:264,h:150});                                     // Grotto shell
-  // ---- the heart: waystone pool + lanterns; stone paths radiate to every wing ----
-  G.deco.push({x:0,z:-60,y0:0,w:170,h:1.4,d:170,c:'#caa23a'}); G.deco.push({x:0,z:-60,y0:1.2,w:150,h:1.6,d:150,c:'#24304a'});   // the gold-rimmed pool
-  // a warm FOUNTAIN basin ringing the waystone (which rises from the water as the centerpiece)
-  G.deco.push({x:0,z:-60,y0:0,w:200,h:6,d:200,c:'#8a7452'}); G.deco.push({x:0,z:-60,y0:6,w:180,h:4,d:180,c:'#6e5a44'});   // basin lip
-  G.deco.push({x:0,z:-60,y0:8,w:160,h:2,d:160,c:'#2f6a7a'});                          // the water (animated glint in drawWaystation)
-  for(const la of [[-140,-160],[140,-160],[-140,40],[140,40]]){ vcol(la[0],la[1],9,9,62);
-    G.deco.push({x:la[0],z:la[1],y0:62,w:15,h:14,d:15,c:'#3a2c1c'}); G.deco.push({x:la[0],z:la[1],y0:66,w:11,h:9,d:11,c:'#ffd88a'});   // warm lantern posts (with a hood)
-    G.deco.push({x:la[0],z:la[1],y0:44,w:20,h:12,d:20,c:'#4d8842'}); }               // a hanging flower basket on each
-  // warm honey flagstone paths radiating to every wing
-  for(const pt2 of [[0,-210,64,240],[-330,-90,420,58],[330,-90,420,58],[0,240,64,220],[-350,300,300,58],[350,300,300,58]])
+  // ---- floor: ONE grand plaza (compact hub-and-spoke; -z = north/forward toward the gates) ----
+  G.segments.push({x:0,z:-40,w:1300,d:840});
+  G.rooms.push({x:0,z:-40,w:1300,d:840,monsters:[],encounter:false,cleared:true});
+  // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
+  G.walls.push({x:0,z:-430,w:1320,d:26,h:64});                       // low north rampart behind the gate arc (see the sky/gates)
+  G.walls.push({x:0,z:372,w:1320,d:26,h:120});                       // south wall (behind spawn)
+  G.walls.push({x:-640,z:-30,w:26,d:830,h:120});                     // west wall
+  G.walls.push({x:640,z:-30,w:26,d:830,h:120});                      // east wall
+  // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
+  G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
+  G.deco.push({x:0,z:30,y0:7,w:96,h:2,d:96,c:'#2f6a7a'});                             // the water (animated glint in drawWaystation)
+  for(const la of [[-90,-40],[90,-40],[-90,100],[90,100]]){ vcol(la[0],la[1],9,9,62);
+    G.deco.push({x:la[0],z:la[1],y0:62,w:15,h:14,d:15,c:'#3a2c1c'}); G.deco.push({x:la[0],z:la[1],y0:66,w:11,h:9,d:11,c:'#ffd88a'});
+    G.deco.push({x:la[0],z:la[1],y0:44,w:20,h:12,d:20,c:'#4d8842'}); }               // lantern posts + hanging flower baskets
+  // honey flagstone paths: spawn -> waystone -> gate arc, and out to the two bays
+  for(const pt2 of [[0,150,84,300],[0,-160,96,260],[-380,40,520,66],[380,40,520,66]])
     G.deco.push({x:pt2[0],z:pt2[1],y0:0,w:pt2[2],h:1.4,d:pt2[3],c:'#9a7c52'});
-  // FLOWER PLANTERS ring the plaza — cheerful colour instead of scrubby grass
+  // FLOWER PLANTERS around the plaza edge (kept clear of the spawn->gate lanes)
   const bloom=['#e8607a','#f0a93a','#7cc6ff','#e07ad0','#ffd24a','#8fdf6a'];
-  for(const fb of [[-300,-220],[300,-220],[-300,120],[300,120],[-180,180],[180,180],[-360,-40],[360,-40]]){
-    G.deco.push({x:fb[0],z:fb[1],y0:0,w:52,h:12,d:30,c:'#6e4a2e'});                    // the box
-    for(let k=0;k<5;k++) G.deco.push({x:fb[0]-18+k*9,z:fb[1]+(k%2?4:-4),y0:12,w:6,h:8+Math.random()*5,d:6,c:bloom[(k*7+Math.abs(fb[0]))%6]}); }   // the blooms
-  // a cozy WELCOME BANNER strung over the south entrance (where you arrive)
-  vcol(-150,214,7,7,120); vcol(150,214,7,7,120);
-  G.deco.push({x:0,z:214,y0:104,w:300,h:6,d:5,c:'#5a4426'});
-  G.deco.push({x:0,z:214,y0:72,w:150,h:30,d:5,c:'#c46a4a'}); G.deco.push({x:0,z:214,y0:72,w:130,h:22,d:6,c:'#e6c48a'});   // the little sign, warm cloth
-  // a HEARTH gathering-circle with benches, east of the fountain — the homely heart
-  G.deco.push({x:250,z:120,y0:0,w:80,h:2,d:80,c:'#7a5f46'}); G.deco.push({x:250,z:120,y0:2,w:30,h:10,d:30,c:'#2a2018'});
-  G.deco.push({x:250,z:120,y0:12,w:20,h:14,d:20,c:'#ff8a3a'}); G.deco.push({x:250,z:120,y0:24,w:11,h:10,d:11,c:'#ffd07a'});   // a warm little campfire
-  for(const bn of [[250,60],[250,180],[190,120],[310,120]]) G.deco.push({x:bn[0],z:bn[1],y0:0,w:44,h:12,d:16,c:'#6e5233'});   // benches around it
-  G.torches.push({x:0,z:214,ph:0});
-  for(const tx of [-330,-110,110,330]) G.torches.push({x:tx,z:-352,ph:Math.random()*6.28});
-  G.torches.push({x:-440,z:-200,ph:1},{x:440,z:-200,ph:2},{x:-440,z:250,ph:3},{x:440,z:250,ph:4});
-  // ---- the portal row: one gate per zone along the north wall; discovered rifts shimmer beside their parent ----
+  for(const fb of [[-250,-160],[250,-160],[-250,210],[250,210],[-160,250],[160,250]]){
+    G.deco.push({x:fb[0],z:fb[1],y0:0,w:50,h:12,d:30,c:'#6e4a2e'});
+    for(let k=0;k<5;k++) G.deco.push({x:fb[0]-18+k*9,z:fb[1]+(k%2?4:-4),y0:12,w:6,h:8+Math.random()*5,d:6,c:bloom[(k*7+Math.abs(fb[0]))%6]}); }
+  // WELCOME BANNER over the spawn (south)
+  vcol(-130,250,7,7,116); vcol(130,250,7,7,116);
+  G.deco.push({x:0,z:250,y0:100,w:260,h:6,d:5,c:'#5a4426'});
+  G.deco.push({x:0,z:250,y0:70,w:140,h:28,d:5,c:'#c46a4a'}); G.deco.push({x:0,z:250,y0:70,w:120,h:20,d:6,c:'#e6c48a'});
+  // torches: gate arc + both bays + spawn
+  G.torches.push({x:0,z:250,ph:0});
+  for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
+  G.torches.push({x:-470,z:-60,ph:1},{x:-470,z:160,ph:2},{x:470,z:-60,ph:3},{x:470,z:160,ph:4});
+  // ---- the gate ARC: one per zone across the north; centre gates drawn deeper so the eye is pulled forward ----
   G.gates=[];
-  const gSpan=760, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;
-  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep);
-    G.gates.push({zi:i,x:gx,z:-322,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
-    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+42,z:-282,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
-  // ---- THE MARKET GARDEN (west): shop + wardrobe under canvas, under the old tree ----
-  vcol(-700,-280,24,24,88); G.deco.push({x:-700,z:-280,y0:88,w:96,h:52,c:'#3a6b34',theme:'plains'}); G.deco.push({x:-700,z:-280,y0:126,w:66,h:30,c:'#4d8842',theme:'plains'});
-  vcol(-920,-250,10,10,80); vcol(-800,-250,10,10,80); G.deco.push({x:-860,z:-250,y0:80,w:140,h:8,d:110,c:'#7a4a3a'});   // the awning
-  for(let k=0;k<8;k++) G.deco.push({x:-810+(Math.random()*2-1)*130,z:-90+(Math.random()*2-1)*180,y0:0,w:6,h:8+Math.random()*8,c:['#e07ad0','#e6d24a','#7fd6ff'][k%3],theme:'plains'});
-  G.torches.push({x:-700,z:60,ph:2},{x:-920,z:-90,ph:4});
-  // ---- THE FORGE YARD (east): racks, braziers, the quench trough ----
-  for(const rk of [[880,-280],[930,-160]]){ G.deco.push({x:rk[0],z:rk[1],y0:0,w:8,h:46,d:8,c:'#3a2c1c'}); G.deco.push({x:rk[0],z:rk[1],y0:40,w:52,h:6,d:8,c:'#3a2c1c'}); }
-  G.deco.push({x:760,z:40,y0:0,w:110,h:14,d:52,c:'#2a2e3a'}); G.deco.push({x:760,z:40,y0:12,w:96,h:4,d:40,c:'#24304a'});   // the trough
-  for(const bz2 of [[700,-290],[900,20]]){ vcol(bz2[0],bz2[1],16,16,38); G.deco.push({x:bz2[0],z:bz2[1],y0:38,w:22,h:12,d:22,c:'#ff9a4a'}); }
-  G.torches.push({x:700,z:60,ph:1},{x:920,z:-90,ph:3});
-  // ---- THE SPARRING ARENA (SE, walled): practice mobs stay INSIDE these walls ----
-  G.deco.push({x:760,z:520,y0:0,w:250,h:1.2,d:250,c:'#4a4030'});                     // the sand circle
-  G.deco.push({x:760,z:344,y0:96,w:120,h:26,d:6,c:'#5e2a24'});                        // the drill banner over the gate wall
-  G.torches.push({x:660,z:360,ph:2},{x:860,z:680,ph:5});
-  // ---- THE PET YARD (SW): the Beastkeeper's yard ----
-  for(let k=0;k<5;k++) G.deco.push({x:-660+Math.cos(k*1.26)*140,z:520+Math.sin(k*1.26)*120,y0:0,w:8,h:26,d:8,c:'#4a3a26'});   // fence posts
-  G.deco.push({x:-580,z:600,y0:0,w:60,h:14,d:44,c:'#8a7434'}); G.deco.push({x:-740,z:440,y0:0,w:26,h:8,d:18,c:'#d8cdb0'});     // hay + old bones
-  G.torches.push({x:-560,z:420,ph:3});
-  // ...and the something behind the crates (the SECRET STASH — walk in, press E)
-  G.deco.push({x:-806,z:640,y0:0,w:40,h:34,d:40,c:'#4a3a26'}); G.deco.push({x:-780,z:660,y0:0,w:30,h:24,d:30,c:'#3a2c1c'});
-  G.deco.push({x:-806,z:640,y0:34,w:30,h:22,d:30,c:'#4a3a26'}); G.deco.push({x:-812,z:646,y0:10,w:6,h:4,d:4,c:'#ffd24a'});     // a glint between the boards
-  // ---- THE MIRROR PAVILION (south): the glass under its own roof ----
-  for(const pc of [[-120,460],[120,460],[-120,630],[120,630]]) vcol(pc[0],pc[1],14,14,92);
-  G.deco.push({x:0,z:545,y0:96,w:320,h:10,d:250,c:'#232735'}); G.deco.push({x:0,z:545,y0:106,w:200,h:8,d:150,c:'#2c3244'});    // the roof
-  G.torches.push({x:-150,z:470,ph:1},{x:150,z:470,ph:4});
-  // ---- THE DARK GROTTO (NE): the Abyss stone in its pocket of night ----
-  G.deco.push({x:760,z:-380,y0:0,w:220,h:1.4,d:190,c:'#16101f'});
-  for(let k=0;k<4;k++) G.deco.push({x:760+(Math.random()*2-1)*100,z:-380+(Math.random()*2-1)*80,w:16+Math.random()*12,h:26+Math.random()*30,c:'#241431',theme:'void'});
+  const gSpan=640, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;
+  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-250-40*(1-Math.abs(gx)/(gSpan/2||1)));
+    G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
+    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+40,z:gz+40,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
+  // ABYSSAL DESCENT — the centrepiece: an elevated dark dais behind the arc's centre (promoted from a hidden corner)
+  G.obstacles.push({kind:'plat',x:0,z:-352,w:150,d:110,h:22});
+  G.deco.push({x:0,z:-352,y0:0,w:184,h:1.4,d:152,c:'#16101f'});
+  for(let k=0;k<4;k++) G.deco.push({x:(Math.random()*2-1)*70,z:-352+(Math.random()*2-1)*48,w:14+Math.random()*10,h:24+Math.random()*26,c:'#241431',theme:'void'});
+  // WEST BAY — THE EXCHANGE (gear & gold): a shallow open alcove, signposted
+  G.deco.push({x:-470,z:40,y0:0,w:300,h:1.1,d:360,c:'#5a4632'});
+  G.deco.push({x:-470,z:-158,y0:80,w:230,h:22,d:6,c:'#3a2a55'});
+  vcol(-470,150,16,16,36); G.deco.push({x:-470,z:150,y0:36,w:22,h:12,d:22,c:'#ff9a4a'});   // forge brazier
+  // EAST BAY — THE WAR YARD (combat prep): a shallow open alcove
+  G.deco.push({x:470,z:40,y0:0,w:300,h:1.1,d:360,c:'#4a4030'});
+  G.deco.push({x:470,z:-158,y0:80,w:230,h:22,d:6,c:'#5e2a24'});
   // ---- the posts: everyone gets a home that fits them ----
+  // grouped by purpose: WEST BAY = the Exchange (gear/gold), EAST BAY = the War Yard (combat prep), centre = quests+mirror, north dais = the Abyss
   G.hubNpcs=[
-    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-860,z:-200,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
-    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-760,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
-    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:840,z:-170,open:()=>openForge(wsResume)},
-    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:540,z:360,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-170,z:290,open:()=>openQuestBoard(wsResume)},
-    {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:170,z:290,open:()=>openBag(wsResume)},
-    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:560,open:()=>openMirror(wsResume)},
-    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:760,z:520,open:()=>openTrainingArena(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:740,z:-390,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:-660,z:530,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)}
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-470,z:-30,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-360,z:120,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-470,z:130,open:()=>openForge(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Pack',role:'Bag',prop:'chest',x:-280,z:40,open:()=>openBag(wsResume)},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-140,z:110,open:()=>openQuestBoard(wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:470,z:-30,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:470,z:130,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
+    {id:'sparring',ic:'🎯',name:'Sparring Post',role:'Training arena',prop:'sparring',x:300,z:150,open:()=>openTrainingArena(wsResume)},
+    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:290,open:()=>openMirror(wsResume)},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:-338,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
   ];
-  // ---- skeleton training dummies: BOLTED sponges inside the arena — whittle them down, they respawn ----
-  for(const [dx,dz] of [[700,430],[840,470],[760,620]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
-  for(const [dx,dz] of [[860,600],[660,600]]){ const d3=spawnEnemy('dummy',dx,dz); d3.dummy=true; d3.active=true; d3.dropT=0; d3.range=true; }
-  for(let i=0;i<5;i++) G.obstacles.push({kind:'plat',x:-400+i*36,z:250-i*38,w:58,d:58,h:38+i*30});   // the parkour steps, west plaza
-  G.trainSpawn={x:760,z:520};                                   // practice mobs spawn INSIDE the arena walls
-  G.lastSafe={x:0,z:214}; G.startPos={x:0,z:214}; G.goalPos={x:0,z:-322};
-  G.bounds={minX:-1000,maxX:1000,minZ:-540,maxZ:730}; G.progressEnd=-380;
-  G.p.x=0; G.p.z=214; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  // ---- skeleton training dummies: clustered around the Sparring Post in the east War Yard ----
+  for(const [dx,dz] of [[300,190],[380,205],[345,115]]){ const d2=spawnEnemy('dummy',dx,dz); d2.dummy=true; d2.active=true; d2.dropT=0; }
+  for(const [dx,dz] of [[420,165],[245,150]]){ const d3=spawnEnemy('dummy',dx,dz); d3.dummy=true; d3.active=true; d3.dropT=0; d3.range=true; }
+  G.trainSpawn={x:345,z:165};                                   // practice mobs spawn in the War Yard
+  G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
+  G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:360}; G.progressEnd=-350;
+  G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
@@ -6875,7 +6841,7 @@ function openSkins(back){
 function openAchievements(back){
   mode='menu';
   const rows=ACHIEVEMENTS.map(a=>{ const done=!!meta.achievements[a.id];
-    return `<div class="achrow ${done?'done':'todo'}"><div class="ic">${done?a.icon:'🔒'}</div>
+    return `<div class="achrow ${done?'done':'todo'}"><div class="ic"><img class="achart" src="icons/achievements/achievement-${a.id}.png" alt="${a.name}">${done?'':'<span class="achlock">🔒</span>'}</div>
       <div><div class="at">${a.name}</div><div class="ad">${a.desc}${a.skin?` · unlocks ${SKINS[a.skin].name} skin`:''}</div></div></div>`; }).join('');
   const n=ACHIEVEMENTS.filter(a=>meta.achievements[a.id]).length;
   showOverlayHTML(`<div class="card"><h2 class="ovh">${eventIcon('event-achievement')} Achievements</h2><p class="ovsub">${n}/${ACHIEVEMENTS.length} complete</p>
@@ -7222,10 +7188,10 @@ function drawCourse(s,t){
     if(tl.warn>0){ const pl=0.3+0.5*Math.abs(Math.sin(t*16)); bx(tl.x,3,tl.z, tl.r*1.8,3,tl.r*1.8, '#c47bff','#8a4fd0', 0.2+0.3*pl); }
     else { bx(tl.x,-14,tl.z, tl.r*1.8,26,tl.r*1.8, '#120820','#000', 0.9); } }   // a dark hole where the floor dropped
   // golden bonus portal
-  if(G.bonusPortal){ const bp=G.bonusPortal;
+  if(G.bonusPortal){ const bp=G.bonusPortal, by=bp.y||0;
     for(let k2=0;k2<8;k2++){ const a2=t*2.2+k2*0.785;
-      bx(bp.x+Math.cos(a2)*30, 48+Math.sin(a2)*30, bp.z, 8,8,8, k2%2?'#ffd24a':'#fff2a0','#ffd24a',0.95); }
-    bx(bp.x,48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
+      bx(bp.x+Math.cos(a2)*30, by+48+Math.sin(a2)*30, bp.z, 8,8,8, k2%2?'#ffd24a':'#fff2a0','#ffd24a',0.95); }
+    bx(bp.x,by+48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
     drawShadow(bp.x,bp.z,26,0.2);
   }
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
@@ -7237,10 +7203,10 @@ function drawCourse(s,t){
     if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
   // the surface you're STANDING on must never fade — the floor underfoot stays solid
   const standingOn=(o)=>{ const oh=(o.h==null?96:o.h); return Math.abs((G.p.y||0)-oh)<12 && Math.abs(G.p.x-o.x)<o.w/2+10 && Math.abs(G.p.z-o.z)<(o.d||o.w)/2+10; };
-  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue;                                          // healing springs (drawn after cull is defined)
-    bx(sp2.x,0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                          // base pad
-    bx(sp2.x,2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
-    if(!sp2.used){ const fy=13+Math.sin(t*2.6)*3;                                                       // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
+  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue; const sy=sp2.y||0;                       // healing springs (drawn after cull is defined)
+    bx(sp2.x,sy+0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                       // base pad
+    bx(sp2.x,sy+2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
+    if(!sp2.used){ const fy=sy+13+Math.sin(t*2.6)*3;                                                    // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
       bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
   }
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
@@ -7273,13 +7239,13 @@ function drawCourse(s,t){
     bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
     glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
   // pressure plates
-  for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue;
-    bx(pl.x,1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
-    bx(pl.x,2.2,pl.z, 24,1.4,24, pl.lit?'#9fd0ff':tint(s.ground,'#fff',0.1), pl.lit?'#4aa3e0':null, 1); }
+  for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue; const py=pl.y||0;
+    bx(pl.x,py+1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
+    bx(pl.x,py+2.2,pl.z, 24,1.4,24, pl.lit?'#9fd0ff':tint(s.ground,'#fff',0.1), pl.lit?'#4aa3e0':null, 1); }
   // the ancient key
-  for(const ky of G.keys){ if(ky.taken) continue;
-    bx(ky.x,60,ky.z, 4,120,4,'#ffd24a','#ffd24a',0.10);
-    pushM(); mv(ky.x,26+Math.sin(t*2.4)*4,ky.z); rotY(t*2);
+  for(const ky of G.keys){ if(ky.taken) continue; const ky0=ky.y||0;
+    bx(ky.x,ky0+60,ky.z, 4,120,4,'#ffd24a','#ffd24a',0.10);
+    pushM(); mv(ky.x,ky0+26+Math.sin(t*2.4)*4,ky.z); rotY(t*2);
     bx(0,0,0, 3,16,3,'#ffd24a','#ffd24a'); bx(0,10,0, 9,7,3,'#ffd24a','#ffd24a');
     bx(2.6,-6,0, 5,3,3,'#ffd24a','#ffd24a'); bx(2.6,-1,0, 4,2.6,3,'#ffd24a','#ffd24a'); popM(); }
   // chests
@@ -7746,20 +7712,20 @@ function drawWaystation(t){
   const pu=0.72+0.28*Math.sin(t*2.2);
   // Phase 20 — HOMELY WARMTH: string lights strung between the plaza lanterns, drifting warm
   // fireflies, and a shimmer on the fountain. This is home; it should feel alive and kind.
-  const posts=[[-140,-160],[140,-160],[140,40],[-140,40]];
+  const posts=[[-90,-40],[90,-40],[90,100],[-90,100]];
   for(let i=0;i<4;i++){ const a=posts[i], b=posts[(i+1)%4];
     for(let s=0.12;s<0.9;s+=0.13){ const lx=a[0]+(b[0]-a[0])*s, lz=a[1]+(b[1]-a[1])*s, droop=Math.sin(s*Math.PI)*10;
-      bx(lx,74-droop,lz, 4,4,4, '#ffd88a','#ffd88a', 0.55+0.35*Math.sin(t*3+i+s*7)); } }   // warm bulbs on a sagging line
-  for(let i=0;i<14;i++){ const a=t*0.5+i*1.7, r=90+((i*53)%260); const fx=Math.cos(a)*r, fz=-40+Math.sin(a*0.8+i)*r*0.7, fy=24+18*Math.sin(t*1.3+i);
+      bx(lx,72-droop,lz, 4,4,4, '#ffd88a','#ffd88a', 0.55+0.35*Math.sin(t*3+i+s*7)); } }   // warm bulbs on a sagging line
+  for(let i=0;i<14;i++){ const a=t*0.5+i*1.7, r=90+((i*53)%260); const fx=Math.cos(a)*r, fz=30+Math.sin(a*0.8+i)*r*0.7, fy=24+18*Math.sin(t*1.3+i);
     bx(fx,fy,fz, 2.4,2.4,2.4, '#ffe6a0','#ffd24a', 0.4+0.4*Math.sin(t*4+i)); }                // fireflies drifting the plaza
-  for(let i=0;i<5;i++){ const a=t*1.6+i*1.26; bx(Math.cos(a)*54,11+Math.sin(t*3+i)*3,-60+Math.sin(a)*54, 3,3,3, '#bfe6ff','#eaffff',0.5+0.3*Math.sin(t*5+i)); }   // fountain water sparkle
-  // the waystone: your bonfire. Touch it to heal and take stock.
-  drawShadow(0,-60,26,0.3);
-  bx(0,5,-60, 64,10,64, '#3a3f4e'); bx(0,14,-60, 48,10,48, '#4a4f5e');
-  bx(0,44,-60, 22,52,22, '#6b7183');
-  bx(0,76,-60, 15,15,15, '#ffd24a','#ffb020',pu);
-  bx(0,150,-60, 7,140,7, '#ffd24a','#ffd24a',0.14);
-  for(let i=0;i<5;i++){ const a=t*0.9+i*1.257; bx(Math.cos(a)*34, 55+Math.sin(t*1.8+i)*10, -60+Math.sin(a)*34, 4,4,4, '#ffd24a','#ffd24a',0.7); }
+  for(let i=0;i<5;i++){ const a=t*1.6+i*1.26; bx(Math.cos(a)*44,11+Math.sin(t*3+i)*3,30+Math.sin(a)*44, 3,3,3, '#bfe6ff','#eaffff',0.5+0.3*Math.sin(t*5+i)); }   // fountain water sparkle
+  // the waystone: your bonfire, at plaza centre. Touch it to heal and take stock.
+  drawShadow(0,30,26,0.3);
+  bx(0,5,30, 64,10,64, '#3a3f4e'); bx(0,14,30, 48,10,48, '#4a4f5e');
+  bx(0,44,30, 22,52,22, '#6b7183');
+  bx(0,76,30, 15,15,15, '#ffd24a','#ffb020',pu);
+  bx(0,150,30, 7,140,7, '#ffd24a','#ffd24a',0.14);
+  for(let i=0;i<5;i++){ const a=t*0.9+i*1.257; bx(Math.cos(a)*34, 55+Math.sin(t*1.8+i)*10, 30+Math.sin(a)*34, 4,4,4, '#ffd24a','#ffd24a',0.7); }
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
   for(const g of G.gates){
     if(g.side){ // discovered rift: a violet seam beside its parent gate
@@ -7858,7 +7824,7 @@ function drawWaystation(t){
   if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ bx(b[0],20,b[1], 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b[0],46,b[1], 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b[0]+(Math.random()-0.5)*10,54+Math.random()*18,b[1], 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
   if(HU.banners){ for(const s of [-1,1]) for(let k=0;k<3;k++){ const bz=-200+k*160; bx(s*406,112,bz, 3,72,34, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.6); } }
   if(HU.ramparts){ for(let i=0;i<9;i++){ bx(-380+i*95,78,-380, 30,22,26,'#4a4f5e'); } }
-  if(HU.gild){ bx(0,76,-60, 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,-60, 9,150,9,'#ffe9a8','#ffd24a',0.22); }
+  if(HU.gild){ bx(0,76,30, 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,30, 9,150,9,'#ffe9a8','#ffd24a',0.22); }
 }
 /* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
 const SPAWNER={

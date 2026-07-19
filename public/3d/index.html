@@ -546,7 +546,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.126.0';
+const VERSION3D='1.127.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4505,19 +4505,38 @@ function hurtPlayer(dmg,sx,sz){
    allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
    one pooled DOM node. */
 function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
-  const p=G.p, ang=p.yaw+2.5;
-  G.pet={id,x:p.x+Math.sin(ang)*58,z:p.z+Math.cos(ang)*58,y:34,bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0}; }
+  const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.arch==='attacker'&&P.style==='melee');
+  G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:grounded?0:20,bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28}; }
 function petUpdate(dt){
   const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
-  pet.t+=dt; pet.bob=Math.sin(pet.t*4)*3;
-  const fang=p.yaw+2.5, fx=p.x+Math.sin(fang)*62, fz=p.z+Math.cos(fang)*62;   // hover just off the hero's shoulder
-  pet.x+=(fx-pet.x)*Math.min(1,dt*4); pet.z+=(fz-pet.z)*Math.min(1,dt*4);
-  pet.yaw=Math.atan2(p.x-pet.x,p.z-pet.z);
-  if(mode!=='play') return;
-  if(isHitless()) return;                                   // Hitless: the pet follows but never fights or heals (mode stays pure player skill)
+  pet.t+=dt;
+  const grounded=(P.arch==='attacker'&&P.style==='melee');
+  pet.bob=grounded?Math.abs(Math.sin(pet.t*7))*2 : Math.sin(pet.t*3)*3;       // grounded: a little gait hop; ethereal: gentle hover bob
+  const floatY=grounded?0:20, playing=(mode==='play'&&!isHitless());
+  // ---- pick a target: break off to engage a nearby enemy on its own, else follow the hero LOOSELY ----
+  let tx=pet.x, tz=pet.z, engaging=false, tgt=null;
+  if(playing && P.arch==='attacker'){
+    let bd=(P.range||240)+140;
+    for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue;
+      if(dXZ(e.x,e.z,p.x,p.z)>460) continue;                                  // leash: only foes near the hero, so it never wanders off across the map
+      const d=dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){ bd=d; tgt=e; } }
+    if(tgt){ engaging=true; const want=P.style==='ranged'?Math.max(120,(P.range||240)*0.6):34;
+      const d=Math.max(1,dXZ(tgt.x,tgt.z,pet.x,pet.z));
+      tx=tgt.x-(tgt.x-pet.x)/d*want; tz=tgt.z-(tgt.z-pet.z)/d*want; }
+  }
+  if(!engaging){                                                             // idle: only reposition when it has DRIFTED past the radius (breaks the linear tether; gives roaming wiggle room)
+    pet.wanderA=(pet.wanderA||0)+dt*0.7; const dh=dXZ(pet.x,pet.z,p.x,p.z);
+    if(dh>64){ tx=p.x-Math.sin(p.yaw)*40+Math.cos(pet.wanderA)*26; tz=p.z-Math.cos(p.yaw)*40+Math.sin(pet.wanderA)*26; }
+    if(dh>560){ pet.x=p.x-Math.sin(p.yaw)*50; pet.z=p.z-Math.cos(p.yaw)*50; } // hard catch-up if left way behind (e.g. after an area warp)
+  }
+  const spd=engaging?300:170, dd=Math.hypot(tx-pet.x,tz-pet.z);
+  if(dd>2){ const step=Math.min(dd,spd*dt); pet.x+=(tx-pet.x)/dd*step; pet.z+=(tz-pet.z)/dd*step; }
+  pet.y+=(floatY-pet.y)*Math.min(1,dt*4);
+  const fy=(engaging&&tgt)?Math.atan2(tgt.x-pet.x,tgt.z-pet.z):(dd>6?Math.atan2(tx-pet.x,tz-pet.z):pet.yaw);
+  let dyaw=fy-pet.yaw; while(dyaw>Math.PI)dyaw-=6.283; while(dyaw<-Math.PI)dyaw+=6.283; pet.yaw+=dyaw*Math.min(1,dt*8);
+  if(!playing) return;
   if(P.arch==='attacker'){ pet.atkT-=dt;
-    if(pet.atkT<=0){ let bt=null,bd=(P.range||240); for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){bd=d;bt=e;} }
-      if(bt){ pet.atkT=P.cd; petAttack(pet,P,bt); } else pet.atkT=0.35; } }
+    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ pet.atkT=P.cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
       if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
@@ -4539,9 +4558,9 @@ function drawPet3(pet,t){
   const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
   if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
   const glow=petRarityCol(pet.id);
-  pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw);
+  pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw); CURM=mMul(CURM,mS(0.8,0.8,0.8));   // sized to the icon art (uniform scale keeps normals valid under the batched renderer)
   const dk=tint(P.body,'#000',0.28), lt=tint(P.body,'#fff',0.15), wob=Math.sin(t*7+pet.t)*0.4;
-  bx(0,4,0, 34,34,34, glow, glow, 0.07);                    // rarity aura (softer, larger)
+  bx(0,-12,0, 13,2.4,13, glow, glow, 0.16);                 // small rarity glow at the feet (replaces the big floating aura box)
   if(pet.id==='emberpup'){ // charcoal pup veined with lava — tall pointed ears, ember maw, gold collar-tag, flame tail
     bx(0,-4,-2, 16,13,22,'#241a1a');                                                  // charcoal body
     bx(0,2,-2, 3,2,18,P.body,P.accent,0.55+0.2*Math.sin(t*4));                        // glowing lava spine

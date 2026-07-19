@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.172.0';
+const VERSION3D='1.173.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1790,6 +1790,13 @@ function questBump(id,by){
   }
   questUpdate();
 }
+/* Small data-driven expedition objective. More step types are authored pair-by-pair;
+   the state lives on G, so it survives checkpoints/area updates but never leaks into saves. */
+function localMission(id,name,type,total,reward){ G.localMission={id,name,type,total,progress:0,done:false,reward:reward||0}; return G.localMission; }
+function localBump(id,by){ const m=G.localMission; if(!m||m.id!==id||m.done) return;
+  m.progress=Math.min(m.total,m.progress+(by||1)); SFX.pickup();
+  if(m.progress>=m.total){ m.done=true; const gold=awardGold(m.reward||40+zoneTier()*15); SFX.achieve(); toast('Local mission complete: '+m.name+(gold?' · +'+gold+'g':''),null,'event-quest-marker'); openWay(); }
+  questUpdate(); }
 function questKill(type){
   if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
     if(G.trialKills>=T.kills && !G.portal) openWay();
@@ -1824,8 +1831,8 @@ function questUpdate(){
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
     applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`,d); return; }
-  if(G.side){ const gd=G.sideGuardian, hunt=!!gd, done=hunt&&gd.dead, task=G.sideTask||'Reach the exit';
-    let rows=qrow(done,done?'☑':(hunt?'⚔':'☐'),done?'Trial guardian defeated':task,null);
+  if(G.side){ const gd=G.sideGuardian, hunt=!!gd, lm=G.localMission, done=lm?lm.done:(hunt&&gd.dead), task=lm?lm.name:(G.sideTask||'Reach the exit');
+    let rows=qrow(done,done?'☑':(hunt?'⚔':'☐'),done?(lm?'Local mission complete':'Trial guardian defeated'):task,lm&&!done?`${lm.progress}/${lm.total}`:null);
     if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
     applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
   let rows,sig;
@@ -3306,6 +3313,44 @@ const EXPANDED_SCAPES={
       scapeFetch(ctx,[{x:-620,z:-2250,y:206},{x:690,z:-2650,y:188},{x:-440,z:-650,y:18},{x:40,z:-3300,y:0},{x:0,z:-3970,y:0}]);
       finishScape(ctx,{sx:0,sz:220,sy:0,gx:0,gz:-4240,decoCol:'#25432e',decoTheme:'forest',decoTall:250});
     }
+  },
+  hollow(ctx){ const {rnd,mkMonster}=ctx, upper=G.area===1, SAND='#9a7445', DARK='#553c25', BONE='#e1d5b7', SKY='#d4a85c';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const floorRoad=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
+    const wallPair=(r,h=300)=>{ canyonWall(r.x-r.w/2-18,r.z,r.d+40,+1,rnd,32,h); canyonWall(r.x+r.w/2+18,r.z,r.d+40,-1,rnd,32,h); };
+    const beacon=(x,z,y)=>{ vcol(x,z,24,24,y+62); G.deco.push({x,z,y0:y+62,w:36,h:14,d:36,c:'#ffb34d'}); G.deco.push({x,z,y0:y+76,w:12,h:74,d:12,c:'#fff0a0'}); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!upper){
+      const wash=room('Lower Wash',0,0,820,650),narrows=room('Breathing Narrows',-360,-760,620,650),fork=room('Split Mesa',280,-1420,760,620),switches=room('Switchback Ascent',-480,-2140,620,620),rim=room('Watcher Rim',-420,-2860,720,560,210),basin=room('Suspended Bridge Basin',380,-3300,760,700,210),gate=room('Wind-Carved Gate',0,-4300,980,760,210);
+      floorRoad(wash,narrows,170); floorRoad(narrows,fork,145); floorRoad(fork,switches,145);
+      wallPair(wash,280); wallPair(narrows,380); wallPair(fork,430);
+      // The low road stays forgiving; the high switchback is faster and exposes a reward.
+      climbRun(-120,-1760,0,-480,-2140,210,78,{switchback:true}); vplat(-260,-2380,210,240,130,{checkpoint:true}); climbRun(-260,-2380,210,-420,-2860,210,76);
+      const cave=room('Smuggler Cave',500,-2220,360,300); floorRoad(fork,cave,110); chest(540,-2260); scapeSecret(ctx,610,-2220,0);
+      // A real high-altitude bridge basin: stable outside landings, then swaying and crumbling spans.
+      climbRun(-420,-2860,210,-120,-3140,210,74); G.movers.push({x0:0,z:-3200,w:100,d:72,h:210,amp:42,sp:1.0,ph:rnd()*6.28,x:0,px:0});
+      G.crumbles.push({x:150,z:-3250,w:84,d:72,h:210,state:0,timer:0,respawn:0,fallY:0,jit:0}); G.movers.push({x0:270,z:-3300,w:96,d:72,h:210,amp:36,sp:1.25,ph:rnd()*6.28,x:270,px:270});
+      // Optional premium rim route climbs higher, but the required route never needs Magic Socks.
+      climbRun(-520,-2860,210,-650,-3140,350,70); for(let k=0;k<5;k++) vplat(-650+k*130,-3140-k*70,350+(k%2)*34,76,76,{rim:true}); chest(-140,-3420,384);
+      floorRoad(basin,gate,170); climbRun(380,-3300,210,0,-4300,210,82,{bridge:true}); beacon(0,-4260,210); beacon(-300,-2860,210); beacon(330,-3300,210);
+      // Telegraph the rockfall corridor with cracked shelves and rubble before enemies engage.
+      for(let k=0;k<12;k++){ const x=-180+(k%4)*120,z=-620-Math.floor(k/4)*130; G.deco.push({x,z,y0:0,w:34+(k%3)*12,h:20+(k%2)*14,d:30,c:DARK,theme:'canyon'}); }
+      for(const p of [[0,-180,wash],[-360,-760,narrows],[280,-1420,fork],[-480,-2140,switches],[-420,-2860,rim],[380,-3300,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster(p[2]===rim?'cragspitter':'sparkling',p[0]+60,p[1]-20,p[2]); }
+      scapeKill(ctx,[{x:0,z:-180,room:wash},{x:-360,z:-760,room:narrows},{x:280,z:-1420,room:fork},{x:-480,z:-2140,room:switches},{x:-420,z:-2860,room:rim},{x:380,z:-3300,room:basin}]);
+      finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4490,sy:0,decoCol:SAND,decoTheme:'canyon',decoTall:390});
+    } else {
+      const dry=room('Dry Wash',0,0,820,620),fossils=room('Fossil Steps',-480,-760,660,620),needle=room('Needle Forest',420,-1280,720,680),shelf=room('High Bone Shelf',-300,-2080,760,620,160),arch=room('Gale Arch',480,-2700,700,620,160),shrine=room('Hollow Shrine',0,-3600,980,760,160),exit=room('Marksman Approach',0,-4380,840,620,160);
+      floorRoad(dry,fossils,160); floorRoad(fossils,needle,140); wallPair(dry,300); wallPair(fossils,410); wallPair(needle,460);
+      // Bone-step climb, a narrow high shelf, and gust-facing pillar weave.
+      climbRun(120,-1640,0,-300,-2080,160,72); vplat(-300,-2080,160,760,620,{terrace:true,checkpoint:true});
+      for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }
+      climbRun(300,-2500,160,480,-2700,160,74); G.movers.push({x0:250,z:-2960,w:100,d:76,h:160,amp:58,sp:.9,ph:rnd()*6.28,x:250,px:250}); G.movers.push({x0:80,z:-3100,w:100,d:76,h:160,amp:44,sp:1.2,ph:rnd()*6.28,x:80,px:80});
+      floorRoad(arch,shrine,170); floorRoad(shrine,exit,180); climbRun(480,-2700,160,0,-3600,160,82,{bridge:true}); climbRun(0,-3600,160,0,-4380,160,84,{bridge:true}); beacon(0,-3640,160); chest(520,-2760,160); chest(-620,-2080,160);
+      for(let k=0;k<18;k++){ const a=k/18*6.28,rr=270+(k%3)*34; G.deco.push({x:Math.cos(a)*rr,z:-3600+Math.sin(a)*rr,y0:160,w:24,h:90+(k%4)*30,d:24,c:k%3?SAND:BONE,theme:'canyon'}); }
+      mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',480,-2700,arch); mkMonster('dustjackal',0,-3600,shrine);
+      scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
+      finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
+    }
   }
 };
 const SIDE_SCAPES={
@@ -3327,6 +3372,32 @@ const SIDE_SCAPES={
     let guardian; {guardian=mkMonster('toxling',0,-3660,heart);makeElite(guardian);guardian.maxHp=guardian.hp=Math.round(guardian.hp*2.4);guardian.name='The Thornheart';} {const e=mkMonster('sporeback',-600,-2530,canopy);e.y=352;e.sx=e.x;e.sz=e.z;makeElite(e);}
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4680,decoCol:'#223c29',decoTheme:'forest',decoTall:300});
     G.portal=null; G.sideGuardian=guardian; G.sideTask='Track and defeat the Thornheart'; G.sideTaskDone=false; questUpdate();
+  },
+  sunkenwash(ctx){ const {rnd,mkMonster}=ctx,SAND='#8c6a43',WATER='#315b68',BONE='#dfd3b5',STONE='#554737';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const path=(a,b,w=130)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const collapsed=room('Collapsed Wash',0,0,820,620),fossil=room('Fossil Shelf',-520,-760,700,620,90),settle=room('Drowned Settlement',420,-1320,820,720),sluice=room('Sluice Tunnels',-260,-2140,760,680),slide=room('Bone Slide',520,-2700,700,620,150),basin=room('Bone Basin',0,-3540,1040,820),gate=room('Floodline Gate',0,-4460,860,620);
+    path(collapsed,settle,150); climbRun(-220,-360,0,-520,-760,90,72); climbRun(-520,-1040,90,180,-1320,0,72); path(settle,sluice,140);
+    // High-water lane: rooftops and fossil ledges. Low-water lane: broad floor with visible ambush holes.
+    G.deco.push({x:420,z:-1320,y0:0,w:700,h:2,d:600,c:WATER}); for(const h of [[180,-1180],[420,-1420],[650,-1200]]){ vcol(h[0],h[1],180,140,74); vplat(h[0],h[1],78,190,150,{roof:true}); }
+    climbRun(40,-1250,0,180,-1180,78,68); climbRun(180,-1180,78,420,-1420,78,72); climbRun(420,-1420,78,650,-1200,78,72); chest(650,-1200,78);
+    // Sluice teeth visually divide three timed-dry channels; side alcoves are recovery pockets.
+    for(let k=0;k<7;k++){ const x=-520+k*86; G.walls.push({x,z:-2140,w:26,d:220,h:110}); G.deco.push({x,z:-2140,y0:110,w:38,h:18,d:238,c:STONE}); }
+    for(const z of [-1940,-2140,-2340]) G.deco.push({x:-260,z,y0:0,w:680,h:2,d:90,c:WATER});
+    path(sluice,basin,150); climbRun(40,-2440,0,520,-2700,150,72);
+    // A long descending bone-slide set piece with side landings; every miss returns to the basin route.
+    for(let k=0;k<11;k++){ const t=k/10,x=520*(1-t),z=-2700-650*t,y=150*(1-t); G.crumbles.push({x,z,w:82,d:68,h:y,state:0,timer:0,respawn:0,fallY:0,jit:0}); if(k%3===0)vplat(x+150,z,y,100,90,{recovery:true}); }
+    path(basin,gate,170); vplat(0,-3540,0,1040,820,{checkpoint:true});
+    // Fossil landmark and scavenger holes telegraph attacks before anything emerges.
+    for(let k=0;k<14;k++){ const a=k/14*6.28; G.deco.push({x:-520+Math.cos(a)*240,z:-760+Math.sin(a)*210,y0:90,w:18,h:70+(k%4)*26,d:16,c:BONE}); }
+    for(const h of [[-300,-340],[260,-520],[-520,-3400],[380,-3700]]) G.deco.push({x:h[0],z:h[1],y0:0,w:70,h:3,d:54,c:'#211b16'});
+    const relics=[{x:-520,z:-760,y:90},{x:420,z:-1420,y:78},{x:-260,z:-2260,y:0}]; for(const p of relics) G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'washRelics',name:'Flood Relic'},bob:rnd()*3,placed:true});
+    localMission('washRelics','Recover the three Flood Relics','collect',3,120); G.portal=null;
+    chest(-720,-760,90); chest(360,-3540); scapeSecret(ctx,-760,-2260,0);
+    for(const p of [[0,-180,collapsed],[-520,-760,fossil],[420,-1320,settle],[-260,-2140,sluice],[0,-3540,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster('sparkling',p[0]+55,p[1]-20,p[2]); }
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:SAND,decoTheme:'canyon',decoTall:420});
+    G.portal=null; questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }
@@ -4976,7 +5047,7 @@ function petUpdate(dt){
         addText(p.x,p.y+80,p.z,'+'+h+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
         burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } }
   else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
-    for(const pk of G.pickups){ if(pk.questItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
+    for(const pk of G.pickups){ if(pk.questItem||pk.localItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
 }
 function petAttack(pet,P,e){
   const dmg=petAtkDmg(pet.id);
@@ -5384,6 +5455,7 @@ function update(dt){
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
     if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
       if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
+      else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); localBump(pk.localItem.id,1); }
       else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
       pk.taken=true; } }
   G.pickups=G.pickups.filter(pk=>!pk.taken);
@@ -8674,7 +8746,7 @@ function drawThreatArrows(c){
 // points the player to the nearest uncollected PLACED quest item (climb-fetch bones/relics) + shows how many remain
 function drawQuestPointer(c){
   if(!G||G.hub||!G.pickups) return;
-  const placed=G.pickups.filter(pk=>pk.placed&&pk.questItem); if(!placed.length) return;
+  const placed=G.pickups.filter(pk=>pk.placed&&(pk.questItem||pk.localItem)); if(!placed.length) return;
   let best=null,bd=1e9; for(const pk of placed){ const d=dXZ(pk.x,pk.z,G.p.x,G.p.z); if(d<bd){bd=d;best=pk;} }
   const cxp=VW/2,cyp=VH/2,mgx=VW/2-40,mgy=VH/2-40,cy=(G.camYaw!=null?G.camYaw:Math.PI),col='#ffe07a';
   const sp=project(best.x,(best.y0||0)+16,best.z), onScreen=sp&&sp[0]>=0&&sp[0]<=VW&&sp[1]>=0&&sp[1]<=VH;
@@ -8684,7 +8756,7 @@ function drawQuestPointer(c){
     c.beginPath(); c.moveTo(14,0); c.lineTo(-9,-9); c.lineTo(-9,9); c.closePath(); c.fill();
     c.restore(); c.globalAlpha=1; }
   // "N left" pill, top-centre under the quest card
-  const label=best.questItem.name+' · '+placed.length+' left'; c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+  const label=(best.questItem||best.localItem).name+' · '+placed.length+' left'; c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
   const w=c.measureText(label).width+26, x=VW/2, y=86;
   c.fillStyle='rgba(12,10,16,0.72)'; c.beginPath(); if(c.roundRect) c.roundRect(x-w/2,y-13,w,26,13); else c.rect(x-w/2,y-13,w,26); c.fill();
   c.fillStyle=col; c.beginPath(); c.arc(x-w/2+13,y,4,0,6.283); c.fill();
@@ -8930,8 +9002,8 @@ const QITEM={
   '_':{c:'#ffd24a',beam:'#ffd24a',draw:()=>{ box(11,11,11,'#ffd24a','#ffb020',0.9); box(15,4,4,'#ffd24a','#ffb020',0.5); box(4,15,4,'#ffd24a','#ffb020',0.5); }}
 };
 function drawPickup3(pk,t){
-  if(pk.questItem){                                   // quest item: a model that matches what it is
-    const q=QITEM[pk.questItem.name]||QITEM['_'], py=pk.y0||0, yy=py+16+Math.sin(pk.bob)*4;   // sit on its real surface (pillar top etc.), not buried at ground
+  if(pk.questItem||pk.localItem){                                   // objective item: a model that matches what it is
+    const qi=pk.questItem||pk.localItem, q=QITEM[qi.name]||QITEM['_'], py=pk.y0||0, yy=py+16+Math.sin(pk.bob)*4;   // sit on its real surface (pillar top etc.), not buried at ground
     drawShadow(pk.x,pk.z,9,0.22);
     // BEACON — a tall bright pillar of light + rising motes so a placed item is findable from across the area
     bx(pk.x,py+150,pk.z, 8,300,8, q.beam, q.beam, 0.42);

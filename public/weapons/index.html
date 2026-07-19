@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BLADEFALL · Weapon Redesign Proposals</title>
+<title>BLADEFALL · Design Review</title>
 <style>
   html,body{margin:0;height:100%;background:#05060a;color:#cfd6df;font-family:system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none}
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -44,7 +44,7 @@
 </style></head>
 <body>
 <canvas id="c"></canvas><div id="vig"></div>
-<div id="top"><div id="kicker">BLADEFALL · WEAPON REDESIGN PROPOSALS</div><div id="name"></div><div id="sub"></div><div id="attrs"></div></div>
+<div id="top"><div id="kicker">BLADEFALL · DESIGN REVIEW</div><div id="name"></div><div id="sub"></div><div id="attrs"></div></div>
 <button id="undoBtn" style="display:none">↩ undo</button>
 <button class="nav" id="prev">‹</button><button class="nav" id="next">›</button>
 <div id="bottom">
@@ -55,6 +55,7 @@
 <div id="recInfo"></div>
 <div id="dots"></div><div id="count"></div>
 <div id="foot">drag to rotate · ✓ Approve = ready to ship · ✗ Reject = erase it · type/record feedback — all go to Claude</div>
+<div id="foot" style="margin-top:2px">NPCs · pets · bosses · mobs — pulled live from the game</div>
 </div>
 <script>
 const cvs=document.getElementById('c'); const gl=cvs.getContext('webgl',{antialias:true,alpha:false});
@@ -109,7 +110,8 @@ function bx(x,y,z,sx,sy,sz,color,emiss,alpha){pushM();mv(x,y,z);box(sx,sy,sz,col
 const bone='#d8cdb0',boneDk='#a08f6c',rust='#7c4a26',rustDk='#5a3116',iron='#3c4048',ironDk='#26282e',
       blood='#8e1620',wrap='#453221',sinew='#cbb894',gold='#8a6f34',haft='#2e2620',steel='#7d8695',steelHi='#c8d2e0';
 /* ============ THE 14 PROPOSALS (drawn in hand space: grip ~y0, +y up — ports 1:1 into weaponMesh) ============ */
-const W=[
+const W=[];   /* weapons removed from the review board — this is now a creatures-only design QA page. The old weapon proposals are kept below as _OLDW (unused) for reference/history. */
+const _OLDW=[
 {key:'dagger',name:'Venomfang',sub:'dagger',glow:'#8dff4a',mid:16,sc:2.3,desc:'Poison — a jade envenomed blade weeping toxin, with a fanged gold guard and a venom-gem pommel. Detailed on both faces.',
  draw(T,g){ const bl='#2f7a52', hi='#7fe0a0', gd='#d8b24a', gr='#33281c';
   bx(0,-7,0, 5,5,5, gd); bx(0,-7,0, 2.6,2.6,2.6, g,g);
@@ -475,7 +477,8 @@ undoBtn.onclick=()=>{ if(!lastErased) return; const rk=lastErased; lastErased=nu
   delete decisions[rk]; saveDec(); const w=W.find(x=>x.key===rk)||{key:rk,name:rk}; sendDecision(w,'unrejected');
   vis=W.filter(x=>decisions[x.key]!=='rejected'); buildDots(); const ni=vis.findIndex(x=>x.key===rk); set(ni>=0?ni:idx); };
 function set(i){ if(recKey&&mr) mr.stop();
-  if(vis.length===0){ idx=0; nameEl.textContent='All designs erased'; subEl.textContent='tap ↩ undo, or tell Claude to bring them back'; descEl.textContent=''; countEl.textContent='0 / 0'; attrsEl.innerHTML=''; paintDecide(); return; }
+  if(vis.length===0){ idx=0; const rdy=window.__designsReady;
+    nameEl.textContent=rdy?'All designs erased':'Loading designs…'; subEl.textContent=rdy?'tap ↩ undo, or tell Claude to bring them back':'pulling the latest models from the game'; descEl.textContent=''; countEl.textContent='0 / 0'; attrsEl.innerHTML=''; paintDecide(); return; }
   idx=(i+vis.length)%vis.length; const it=vis[idx];
   manYaw=0; manPitch=0; autospin=true;                    // fresh presentation per weapon
   nameEl.textContent=it.name; subEl.textContent=it.sub+' · glow shown: sample (rarity-driven in game)'; descEl.textContent=it.desc;
@@ -528,7 +531,8 @@ function addDesignCards(){
   ['grunt','flyer','emberling','frostling','toxling','shadeling','sparkling','goblin','bones','slime','slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant','sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
     .filter(k=>ENEMY[k]).forEach(k=>{ const e=mkE(k,false), nm=(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k; D.push({key:'mob_'+k,name:nm,sub:'mob',glow:'#7ec46a',mid:20,sc:1.5,desc:'Enemy — approved concept art. Drag to rotate.',draw:safe(T=>drawEnemy3(e,T))}); });
   for(const d of D) W.push(d);
-  vis=W.filter(w=>decisions[w.key]!=='rejected'); buildDots(); set(idx);
+  window.__designsReady=true;
+  vis=W.filter(w=>decisions[w.key]!=='rejected'); buildDots(); set(0);
 }
 resize(); set(0); render();
 </script></body></html>

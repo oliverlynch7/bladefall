@@ -24,12 +24,25 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- Ruined Keep + Oubliette
 - Frostfell + Glacier Vault
 - Emberdeep + Magma Core
 - The Abyss + Reaper's Gate
 - Sunspire Palace + Sealed Reliquary
 - Castle Duskmoor final expansion and full-chain regression
+
+## Pair 3 — Ruined Keep + Oubliette (v1.174.0)
+
+| Area | Authored districts | Bounds | Start-to-goal | Objective |
+|---|---:|---:|---:|---|
+| Ruined Keep | 7 | 1960 × 4960 | 4420 | Revenants + Sealed Vault |
+| The Undercroft | 7 | 1790 × 5260 | 4830 | 5 Keep Sigils |
+| The Oubliette | 7 | 1850 × 5480 | 5050 | Recover 3 Prison Records |
+
+- Ruined Keep now travels from siege camp through the wall breach, prison yard, collapsing siege tower, battlements, drainage infiltration, great-hall approach, and sealed-vault court.
+- Added distinct high battlement and low drainage routes, crossfire positions, recoverable collapsing-tower traversal, and optional route chests.
+- The Undercroft uses prison galleries, a punishment-pit ring, records vault, suspended chain route, Warden Walk, spiral escape shaft, and final door.
+- The Oubliette is a separate vertical prison expedition with crawlspace fallback, chain galleries, testimony/records route, Warden Walk, and a long escape ascent.
+- All three paths pass structural jump connectivity. Five Keep Sigils spawn; the Oubliette exit remains sealed until all three surface-snapped Prison Records are collected. Muted browser console: zero errors.
 
 ## Pair 2 — Hollow Pass + Sunken Wash (v1.173.0)
 

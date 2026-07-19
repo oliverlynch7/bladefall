@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.173.0';
+const VERSION3D='1.174.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3351,6 +3351,39 @@ const EXPANDED_SCAPES={
       scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
       finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     }
+  },
+  keep(ctx){ const {rnd,mkMonster}=ctx, under=G.area===1, STONE='#555969',IRON='#292d36',BANNER='#702c45';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const tower=(x,z,h)=>{vcol(x,z,100,100,h);for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?38:-38),z:z+(k<2?38:-38),y0:h,w:26,h:28,d:26,c:IRON});};
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!under){
+      const camp=room('Outer Siege Camp',0,0,900,700),breach=room('Breached Curtain Wall',-360,-850,760,650),yard=room('Prison Yard',360,-1550,880,720),ramp=room('West Battlements',-500,-2320,680,620,190),hall=room('Great Hall Approach',280,-3000,900,760,190),vault=room('Sealed Vault Court',0,-4050,980,760,190);
+      road(camp,breach,180);road(breach,yard,160);G.walls.push({x:-730,z:-850,w:60,d:700,h:220,stand:true});G.walls.push({x:20,z:-850,w:60,d:700,h:220,stand:true});
+      // Siege camp silhouettes: ballista, broken carts, tents, and a climbable collapsed siege tower.
+      for(const t of [[-280,80],[250,-100],[-40,-220]])G.deco.push({x:t[0],z:t[1],y0:0,w:150,h:55,d:100,c:'#49392e'});
+      G.deco.push({x:-330,z:-600,y0:20,w:230,h:28,d:60,c:'#3b2d24'});for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      // High route: battlement crossfire and a broken-wall jump line. Low route: drainage infiltration under the yard.
+      climbRun(-520,-1650,0,-500,-2320,190,76);tower(-760,-2280,250);for(let k=0;k<7;k++)vplat(-500+k*115,-2320-(k%2)*90,190+(k%3)*26,78,78,{battlement:true});
+      const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);scapeSecret(ctx,850,-2520,0);
+      climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});
+      for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
+      chest(-720,-2320,190);chest(360,-3150,190);
+      for(const p of [[0,-120,camp],[-360,-850,breach],[360,-1550,yard],[-500,-2320,ramp],[280,-3000,hall]]){mkMonster('revenant',p[0]-55,p[1],p[2]);mkMonster(p[2]===ramp?'caster':'bones',p[0]+60,p[1]-20,p[2]);}
+      scapeKill(ctx,[{x:0,z:-120,room:camp},{x:-360,z:-850,room:breach},{x:360,z:-1550,room:yard},{x:-500,z:-2320,room:ramp},{x:280,z:-3000,room:hall}]);scapeFind(ctx,0,-4140,190);
+      finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4240,decoCol:STONE,decoTheme:'ruins',decoTall:380});
+    }else{
+      const intake=room('Undercroft Intake',0,0,760,600),cells=room('Prison Galleries',-460,-760,700,680),pit=room('Punishment Pit',420,-1440,760,700),records=room('Records Vault',-380,-2220,720,660,100),walk=room('Warden Walk',420,-2900,720,620,210),shaft=room('Escape Shaft',0,-3800,820,760,330),door=room('Fallen Warden Door',0,-4500,760,560,330);
+      road(intake,cells,140);road(cells,pit,130);for(let k=0;k<10;k++)G.deco.push({x:-720+k*58,z:-760,y0:0,w:8,h:110,d:8,c:IRON});
+      for(let k=0;k<8;k++){const a=k/8*6.28;vplat(420+Math.cos(a)*220,-1440+Math.sin(a)*210,20+(k%4)*34,84,72,{chain:true});}
+      climbRun(120,-1740,0,-380,-2220,100,72);vplat(-380,-2220,100,720,660,{checkpoint:true,terrace:true});
+      // Suspended-chain route rises to the Warden Walk; wide landings keep it fair without Socks.
+      for(let k=0;k<9;k++){const t=k/8;vplat(-380+800*t,-2460-440*t,100+110*t,78,78,{chain:true});G.deco.push({x:-380+800*t,z:-2460-440*t,y0:210+110*t,w:7,h:120,d:7,c:IRON});}
+      climbRun(420,-2900,210,0,-3800,330,76);for(let k=0;k<6;k++){const a=k*1.05;vplat(Math.cos(a)*190,-3800+Math.sin(a)*190,330+k*32,80,80,{shaft:true});}road(shaft,door,170);
+      chest(-620,-2220,100);chest(180,-3800,330);for(const p of [[-460,-760,cells],[420,-1440,pit],[-380,-2220,records],[420,-2900,walk]]){mkMonster('revenant',p[0]-45,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}
+      scapeFetch(ctx,[{x:-620,z:-760,y:0},{x:420,z:-1440,y:68},{x:-580,z:-2220,y:100},{x:420,z:-2900,y:210},{x:0,z:-3800,y:330}]);
+      finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:STONE,decoTheme:'dungeon',decoTall:430});
+    }
   }
 };
 const SIDE_SCAPES={
@@ -3398,6 +3431,26 @@ const SIDE_SCAPES={
     for(const p of [[0,-180,collapsed],[-520,-760,fossil],[420,-1320,settle],[-260,-2140,sluice],[0,-3540,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster('sparkling',p[0]+55,p[1]-20,p[2]); }
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     G.portal=null; questUpdate();
+  },
+  oubliette(ctx){ const {rnd,mkMonster}=ctx,STONE='#404654',IRON='#20242c',GLOW='#7ea8d8';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=120)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const intake=room('Intake Cells',0,0,760,600),chains=room('Chain Galleries',-500,-800,700,660,90),pit=room('Punishment Pit',420,-1500,800,720),records=room('Forgotten Records',-420,-2300,720,660,150),walk=room('Warden Walk',430,-3020,720,620,250),shaft=room('Escape Shaft',0,-3900,900,820,360),gate=room('Surface Seal',0,-4720,780,560,360);
+    path(intake,pit,140);climbRun(-200,-360,0,-500,-800,90,72);climbRun(-500,-1100,90,150,-1500,0,72);
+    // Chains are broad standable links, while low crawlspaces provide a slower no-fall alternative.
+    for(let k=0;k<10;k++){const t=k/9;vplat(420-840*t,-1680-620*t,20+130*t,78,78,{chain:true});G.deco.push({x:420-840*t,z:-1680-620*t,y0:160+130*t,w:7,h:150,d:7,c:IRON});}
+    vseg(0,-2140,150,900,{crawl:true});vseg(-260,-2580,520,120,{crawl:true});
+    climbRun(-420,-2300,150,430,-3020,250,76);for(let k=0;k<8;k++){const a=k/8*6.28;vplat(430+Math.cos(a)*230,-3020+Math.sin(a)*210,250+(k%3)*34,78,78,{chain:true});}
+    climbRun(430,-3020,250,0,-3900,360,74);for(let k=0;k<7;k++){const a=k*.9;vplat(Math.cos(a)*220,-3900+Math.sin(a)*220,360+k*34,80,80,{shaft:true});}
+    climbRun(0,-3900,360,0,-4720,360,84,{bridge:true});
+    // Bar grids, testimony cells, and a visible lights-out gallery silhouette.
+    for(const z of [-200,-800,-1500,-2300])for(let k=0;k<8;k++)G.deco.push({x:-250+k*72,z,y0:0,w:7,h:115,d:7,c:IRON});
+    for(let k=0;k<6;k++)G.deco.push({x:-420+(k%3)*140,z:-2300+Math.floor(k/3)*170,y0:150,w:100,h:70,d:80,c:k%2?STONE:'#252936'});
+    const recordsItems=[{x:-500,z:-790,y:90},{x:-420,z:-2300,y:150},{x:430,z:-3020,y:250}];for(const p of recordsItems)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'prisonRecords',name:'Prison Record'},bob:rnd()*3,placed:true});
+    localMission('prisonRecords','Recover the prisoners’ records','collect',3,150);G.portal=null;chest(-680,-2300,150);chest(210,-3900,360);scapeSecret(ctx,0,-2140,0);
+    for(const p of [[0,-200,intake],[-500,-800,chains],[420,-1500,pit],[-420,-2300,records],[430,-3020,walk]]){mkMonster('revenant',p[0]-50,p[1],p[2]);mkMonster('bones',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4800,decoCol:STONE,decoTheme:'dungeon',decoTall:480});G.portal=null;questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }

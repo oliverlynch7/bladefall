@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.181.0';
+const VERSION3D='1.182.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4078,7 +4078,7 @@ function spawnEnemy(type,x,z,isBoss){
   if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
   if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
   if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
-  G.enemies.push(e); return e;
+  snapEnemyToSurface(e); G.enemies.push(e); return e;
 }
 
 /* ---------------- Input (joystick + keys; identical bindings) ---------------- */
@@ -4320,6 +4320,14 @@ function highestSurfaceAt(x,z,r=8){
   for(const ob of (G.obstacles||[])){ if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0); }
   return f>-1e8?f:0;
 }
+function snapEnemyToSurface(e){
+  if(!e||e.kind==='fly') return;
+  // Spawn on the highest walkable surface at this footprint. This is intentionally
+  // different from movement climbing: a creature authored on a plateau begins on
+  // that plateau even when its wall is too tall to climb from the ground below.
+  e.y=Math.max(Number(e.y)||0,highestSurfaceAt(e.x,e.z,e.r||8));
+  e.sx=e.x; e.sz=e.z;
+}
 // per-frame safety net: lift any collectible/exit that ended up below the surface it sits over (covers objects
 // created AFTER build-time snapping — e.g. the exit portal that only opens on clear — and terrain that changed).
 function reconcileWorldHeights(){ if(!G) return;
@@ -4336,13 +4344,15 @@ function snapWorldInteractables(){ if(!G) return;
   for(const o of (G.keys||[])) snap(o);
   for(const o of (G.plates||[])) snap(o);
   for(const o of (G.springs||[])) snap(o);
+  for(const e of (G.enemies||[])) snapEnemyToSurface(e);
 }
 function enemySupport(e){
   let f=-Infinity;
   for(const sg of G.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=0; break; } }
   for(const mv of G.movers){ if(Math.abs(e.x-mv.x)<mv.w/2+e.r*0.4 && Math.abs(e.z-mv.z)<mv.d/2+e.r*0.4) f=Math.max(f,mv.h); }
-  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,0); }
-  for(const ob of G.obstacles){ if(ob.h<=ECLIMB && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
+  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,cr.h||0); }
+  for(const wl of (G.walls||[])){ if(wl.stand && e.y>=(wl.h||0)-3 && Math.abs(e.x-wl.x)<wl.w/2+e.r*0.4 && Math.abs(e.z-wl.z)<wl.d/2+e.r*0.4) f=Math.max(f,wl.h||0); }
+  for(const ob of G.obstacles){ if((ob.h<=ECLIMB||e.y>=ob.h-3) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
 // true if a wall (or a closed door) blocks the straight line a->b — used so melee can't reach through walls

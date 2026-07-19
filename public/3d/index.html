@@ -556,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.136.0';
+const VERSION3D='1.137.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1875,6 +1875,8 @@ gl.linkProgram(prog); if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new
 gl.useProgram(prog);
 const U={}; ['uP','uV','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','uPL2','uPL3','uPC0','uPC1','uPC2','uPC3'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
 // unit cube (centered, size 1) with per-face normals
+let cubePB, cubeNB;
+const A_P=gl.getAttribLocation(prog,'aP'), A_N=gl.getAttribLocation(prog,'aN');
 (function(){
   const P=[],N=[];
   const faces=[
@@ -1886,10 +1888,8 @@ const U={}; ['uP','uV','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','
     [[ .5,-.5,-.5],[-.5,-.5,-.5],[-.5, .5,-.5],[ .5, .5,-.5],[0,0,-1]]];
   for(const f of faces){ const [a,b,c,d,n]=f;
     [[a,b,c],[a,c,d]].forEach(tri=>tri.forEach(v=>{ P.push(v[0],v[1],v[2]); N.push(n[0],n[1],n[2]); })); }
-  const pb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,pb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
-  const aP=gl.getAttribLocation(prog,'aP'); gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);
-  const nb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,nb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
-  const aN=gl.getAttribLocation(prog,'aN'); gl.enableVertexAttribArray(aN); gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);
+  cubePB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubePB); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
+  cubeNB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubeNB); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
 })();
 // ---- instance buffer: one record per box = mat4(16) + scale(3) + colour&alpha(4) + emissive(3) = 26 floats ----
 const INST=gl.getExtension('ANGLE_instanced_arrays');
@@ -1897,10 +1897,53 @@ if(!INST) throw new Error('This game needs the ANGLE_instanced_arrays WebGL exte
 const ISTRIDE=26;
 let instCap=8192, instData=new Float32Array(instCap*ISTRIDE), instCount=0;
 const instVBO=gl.createBuffer();
-(function setupInstAttribs(){ gl.bindBuffer(gl.ARRAY_BUFFER,instVBO); const F=4, S=ISTRIDE*F;
-  const set=(name,size,off)=>{ const l=gl.getAttribLocation(prog,name); if(l<0) return; gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,size,gl.FLOAT,false,S,off*F); INST.vertexAttribDivisorANGLE(l,1); };
-  set('iM0',4,0); set('iM1',4,4); set('iM2',4,8); set('iM3',4,12); set('iS',3,16); set('iCA',4,19); set('iE',3,23); })();
+const I_LOC=['iM0','iM1','iM2','iM3','iS','iCA','iE'].map(n=>gl.getAttribLocation(prog,n)), I_SZ=[4,4,4,4,3,4,3], I_OFF=[0,4,8,12,16,19,23];
+function bindSceneVA(){ gl.useProgram(prog);   // (re)establish scene vertex-array state — at init and after each post pass
+  gl.bindBuffer(gl.ARRAY_BUFFER,cubePB); gl.enableVertexAttribArray(A_P); gl.vertexAttribPointer(A_P,3,gl.FLOAT,false,0,0); INST.vertexAttribDivisorANGLE(A_P,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,cubeNB); gl.enableVertexAttribArray(A_N); gl.vertexAttribPointer(A_N,3,gl.FLOAT,false,0,0); INST.vertexAttribDivisorANGLE(A_N,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO); const F=4, S=ISTRIDE*F;
+  I_LOC.forEach((l,i)=>{ if(l<0) return; gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,I_SZ[i],gl.FLOAT,false,S,I_OFF[i]*F); INST.vertexAttribDivisorANGLE(l,1); }); }
+bindSceneVA();
 gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+// ======= PostFX: render the scene to a texture, then add a blurred bright-pass (bloom) so glows/embers/gems radiate =======
+const PostFX=(function(){
+  const BLOOM_OFF=/[?&]nobloom/.test(location.search);
+  let W=0,H=0, sTex,sFBO,sDepth, bTex=[],bFBO=[];
+  const QVS=`attribute vec2 aPos; varying vec2 vUv; void main(){ vUv=aPos*0.5+0.5; gl_Position=vec4(aPos,0.0,1.0); }`;
+  function mkProg(fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(QVS,gl.VERTEX_SHADER)); gl.attachShader(p,compile(fsSrc,gl.FRAGMENT_SHADER)); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error('post link: '+gl.getProgramInfoLog(p)); return p; }
+  const brightP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; void main(){ vec3 c=texture2D(uT,vUv).rgb; float l=max(max(c.r,c.g),c.b); gl_FragColor=vec4(c*smoothstep(0.64,0.98,l),1.0); }`);
+  const blurP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; uniform vec2 uDir; void main(){ vec3 s=texture2D(uT,vUv).rgb*0.227; s+=(texture2D(uT,vUv+uDir*1.384).rgb+texture2D(uT,vUv-uDir*1.384).rgb)*0.316; s+=(texture2D(uT,vUv+uDir*3.23).rgb+texture2D(uT,vUv-uDir*3.23).rgb)*0.070; gl_FragColor=vec4(s,1.0); }`);
+  const compP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uScene,uBloom; uniform float uAmt; void main(){ vec3 c=texture2D(uScene,vUv).rgb + texture2D(uBloom,vUv).rgb*uAmt; vec3 tm=(c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14); gl_FragColor=vec4(clamp(mix(c,tm,0.45),0.0,1.0),1.0); }`);
+  const U_bT=gl.getUniformLocation(brightP,'uT'), U_blT=gl.getUniformLocation(blurP,'uT'), U_blD=gl.getUniformLocation(blurP,'uDir'),
+        U_cS=gl.getUniformLocation(compP,'uScene'), U_cB=gl.getUniformLocation(compP,'uBloom'), U_cA=gl.getUniformLocation(compP,'uAmt'),
+        A_bright=gl.getAttribLocation(brightP,'aPos'), A_blur=gl.getAttribLocation(blurP,'aPos'), A_comp=gl.getAttribLocation(compP,'aPos');
+  const qb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 3,-1, -1,3]),gl.STATIC_DRAW);
+  function tex(w,h){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); return t; }
+  function fboFor(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
+  function alloc(){ W=VW; H=VH; const hw=Math.max(1,W>>1), hh=Math.max(1,H>>1);
+    sTex=tex(W,H); sFBO=fboFor(sTex); sDepth=gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER,sDepth); gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,W,H);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,sDepth);
+    for(let i=0;i<2;i++){ bTex[i]=tex(hw,hh); bFBO[i]=fboFor(bTex[i]); }
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null); }
+  function drawTri(loc){ gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0); gl.drawArrays(gl.TRIANGLES,0,3); }
+  return { get on(){ return !BLOOM_OFF; },
+    begin(){ if(BLOOM_OFF) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
+    end(){ if(BLOOM_OFF) return; flushBatch();
+      const hw=Math.max(1,VW>>1), hh=Math.max(1,VH>>1);
+      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.activeTexture(gl.TEXTURE0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[0]); gl.viewport(0,0,hw,hh); gl.useProgram(brightP); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_bT,0); drawTri(A_bright);
+      let src=0,dst=1; gl.useProgram(blurP); gl.uniform1i(U_blT,0);
+      for(let i=0;i<4;i++){ const hor=(i%2===0); gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[dst]); gl.viewport(0,0,hw,hh); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform2f(U_blD, hor?1/hw:0, hor?0:1/hh); drawTri(A_blur); const s=src; src=dst; dst=s; }
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,VW,VH); gl.useProgram(compP);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_cS,0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform1i(U_cB,1); gl.uniform1f(U_cA,0.72);
+      drawTri(A_comp); gl.activeTexture(gl.TEXTURE0);
+      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); bindSceneVA(); }
+  };
+})();
 setFlatLights(); // bright neutral default (menus / previews / title); gameplay swaps to dark-fantasy lighting each frame
 
 const _colCache={};
@@ -8540,8 +8583,10 @@ function frame(ts){
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
   acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
+  PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
   render((G?G.time:ts/1000));
   flushBatch();                       // draw whatever boxes are still pending at frame end
+  PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

@@ -487,5 +487,48 @@ document.getElementById('prev').onclick=()=>set(idx-1);
 document.getElementById('next').onclick=()=>set(idx+1);
 addEventListener('keydown',e=>{ if(e.target&&(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'))return; if(e.key==='ArrowLeft')set(idx-1); if(e.key==='ArrowRight')set(idx+1); });
 window.__WS={set,get idx(){return idx;},get count(){return vis.length;},names:()=>vis.map(w=>w.name),fb,decisions};
+/* ===== DESIGN REVIEW: import the live in-world models from the game (/3d) so NPCs, pets, bosses & mobs
+   can be reviewed + approved/rejected here on mobile, always in sync with what ships ===== */
+window.G={get time(){return T;}, stageIndex:0};
+window.STAGES=[{theme:'volcano'},{theme:'marble'}];
+window.drawShadow=function(){};
+window.petRarityCol=function(){return '#c9a86a';};
+window.PETS={emberpup:{body:'#e0794a',accent:'#ffb060',arch:'attacker',style:'melee'},stonewhelp:{body:'#8a8f9e',accent:'#c7ccd6',arch:'attacker',style:'melee'},wisp:{body:'#9fe0ff',accent:'#e6faff',arch:'attacker',style:'ranged'},mender:{body:'#7de08a',accent:'#c8ffd4',arch:'healer'},coinsprite:{body:'#ffd24a',accent:'#fff2b0',arch:'utility'},gravewraith:{body:'#b06bff',accent:'#e0b0ff',arch:'attacker',style:'ranged'}};
+window.elementColor=function(el){ return ({fire:'#ff8a4a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',holy:'#ffe9a8',storm:'#9fe0ff'})[el]||'#eaffd0'; };
+(function patchDesignUI(){                                   // show a category pill + hide the weapon-attack button for design cards
+  const isCr=k=>/^(npc|pet|boss|mob)_/.test(k||'');
+  const _pa=paintAttrs; paintAttrs=function(){ const it=vis[idx]; if(it&&isCr(it.key)){ attrsEl.innerHTML=''; const s=document.createElement('span'); s.className='pill'; s.textContent=(it.sub||'design').toUpperCase(); s.style.borderColor='#8a6f34'; s.style.color='#ffd28a'; attrsEl.appendChild(s); return; } return _pa(); };
+  const _set=set; set=function(i){ _set(i); const it=vis[idx]; atkBtn.style.display=(it&&isCr(it.key))?'none':''; };
+})();
+(async function importModels(){
+  try{
+    const src=await (await fetch('../3d/index.html',{cache:'no-store'})).text();
+    const carve=(startTok)=>{ const i=src.indexOf(startTok); if(i<0) throw new Error('missing '+startTok); let d=0,on=false; for(let k=src.indexOf('{',i);k<src.length;k++){ const c=src[k]; if(c==='{'){d++;on=true;} else if(c==='}'){ d--; if(on&&d===0) return src.slice(i,k+1); } } throw new Error('unbalanced '+startTok); };
+    const blob=[
+      'window.ENEMY='+carve('const ENEMY={').replace(/^const ENEMY=/,'')+';',
+      'Object.assign(window.ENEMY,'+carve('const _ENEMY_END={').replace(/^const _ENEMY_END=/,'')+');',   // boss stats live in a second object
+      'window.BESTIARY_INFO='+carve('const BESTIARY_INFO={').replace(/^const BESTIARY_INFO=/,'')+';',
+      carve('function hubNpcModel('), carve('function drawShadeModel('),
+      carve('function drawPet3('), carve('function drawBoss3('), carve('function drawEnemy3(')
+    ].join('\n');
+    (0,eval)(blob);
+    addDesignCards();
+  }catch(e){ console.warn('design import failed',e); const k=document.getElementById('kicker'); if(k) k.textContent='BLADEFALL · WEAPON REVIEW  ·  (designs unavailable: '+e.message+')'; }
+})();
+function addDesignCards(){
+  const D=[], safe=fn=>((T,g)=>{ try{ fn(T,g); }catch(_){ } });
+  const npc=(id,name)=>({key:'npc_'+id,name,sub:'cast',glow:'#c9a24a',mid:33,sc:1.12,desc:'Hub NPC — approved concept art. Drag to rotate.',draw:safe(T=>hubNpcModel({id,x:0},T))});
+  D.push(npc('quartermaster','Quartermaster'),npc('keeper','Keeper'),npc('drillmaster','Drillmaster'),npc('smith','Smith'),npc('beastkeeper','Beastkeeper'));
+  D.push({key:'npc_shade',name:"Warden's Shade",sub:'cast',glow:'#b06bff',mid:33,sc:1.12,desc:'Mournful spectral knight-woman. Drag to rotate.',draw:safe(T=>drawShadeModel(T))});
+  const petNames={emberpup:'Ember Pup',stonewhelp:'Stone Whelp',wisp:'Pale Wisp',mender:'Mending Sprite',coinsprite:'Coin Sprite',gravewraith:'Grave Wraith'};
+  for(const id in petNames) D.push({key:'pet_'+id,name:petNames[id],sub:'pet',glow:(PETS[id]||{}).accent||'#c9a86a',mid:8,sc:1.7,desc:'Companion pet — approved concept art.',draw:safe(T=>drawPet3({id,x:0,y:0,z:0,bob:0,t:0,yaw:0},T))});
+  const mkE=(key,boss)=>{ const d=ENEMY[key]||{}; return {type:key,look:d.look,kind:d.kind||'walk',boss:!!boss,color:d.color||'#8a8f9e',r:d.r||15,h:d.h||38,x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,hitFlash:0,bob:1.2,shot:d.shot,element:d.element,slowT:0,lunge:0,phase:0,st:null,shootT:1}; };
+  [['brute','The Brute'],['warden','The Fallen'],['archer','Hollow Marksman'],['sorcerer','Frost Sorcerer'],['colossus','Ember Colossus','volcano'],['colossus','Marble Colossus','marble'],['king','Abyss King'],['tyrant','Abyss King, Awakened']]
+    .forEach(([k,name,theme])=>{ const e=mkE(k,true); if(name==='Marble Colossus') e.color='#9aa0b0'; D.push({key:'boss_'+name.replace(/\W+/g,'_'),name,sub:'boss',glow:'#e8a33d',mid:52,sc:0.78,desc:'Boss — approved concept art. Drag to rotate.',draw:safe(T=>{ G.stageIndex=(theme==='marble')?1:0; drawEnemy3(e,T); })}); });
+  ['grunt','flyer','emberling','frostling','toxling','shadeling','sparkling','goblin','bones','slime','slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant','sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
+    .filter(k=>ENEMY[k]).forEach(k=>{ const e=mkE(k,false), nm=(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k; D.push({key:'mob_'+k,name:nm,sub:'mob',glow:'#7ec46a',mid:20,sc:1.5,desc:'Enemy — approved concept art. Drag to rotate.',draw:safe(T=>drawEnemy3(e,T))}); });
+  for(const d of D) W.push(d);
+  vis=W.filter(w=>decisions[w.key]!=='rejected'); buildDots(); set(idx);
+}
 resize(); set(0); render();
 </script></body></html>

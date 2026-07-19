@@ -828,3 +828,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt owned and purchasable companions as spacious responsive cards with full unclipped names, readable combat roles and cadence, rarity accents, complete portraits, flavor, training progress, and aligned Equip/Sell/Buy controls.
 - Centered incomplete collection rows, separated Name Tags/Back into a balanced footer, and confined overflow to the collection pane when needed.
 - Real-browser muted QA at 1600×900 with all six pets owned and fully trained: 0 clipped names, balanced 3+2 collection, zero page scroll, all actions present, WebGL active, console 0 errors/warnings.
+
+## [Codex | 2026-07-19] v1.149.0 - forward weapon carry poses
+- Corrected the shared third-person hand transform so idle swords, daggers, axes, mauls, wands, orbs, staffs, rods, and scepters project their business end in front of the Warden instead of behind the body.
+- Kept long casting implements on a readable forward/upward lean and preserved the established bow, scythe, first-person, and active attack-animation rigs.
+- Real-browser muted QA covered sword, axe, greatblade, hammer, staff, rod/scepter-family, wand/orb-family, and bow states; all attack timers completed normally and player transforms remained finite.

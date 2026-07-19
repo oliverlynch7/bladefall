@@ -578,7 +578,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.148.0';
+const VERSION3D='1.149.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7247,15 +7247,14 @@ function drawHero3(p,t,preview){
   } else { _armPitch=p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1); rotX(_armPitch); }
   bx(0,-8,0, 4.6,15,4.6, AL);
   pushM(); mv(0,-14,0);
-  // hold orientation: staffs/wands/scepters/rods + scythe + bows point UP; long hafts are gripped near their MIDDLE
-  // (offset down so they read as carried, not planted); physical blades point FORWARD at rest and only flip to the
-  // combat-ready down-base while actively swinging (the swing poses above are tuned around that base).
+  // Weapon geometry grows along local +Y. A positive X rotation sends its business end toward local +Z,
+  // the hero's facing direction. Compensate arm pitch for casting implements and project idle blades forward.
   const _upright = (w.cls!=='melee') || w.art==='scythe';
   const _tallHaft = (w.art==='scythe'||_casterLong);
-  if(_casterLong){ rotX(-_armPitch-0.08); mv(0,-18,2.5); }                    // world-upright, gripped at mid-shaft just ahead of the fist
-  else if(_casterWand){ rotX(-1.48-_armPitch); mv(0,-1,1.5); }               // point away from the hand, never back through the forearm
+  if(_casterLong){ rotX(0.58-_armPitch); mv(0,-18,2.5); }                     // staff/rod/scepter leans forward, gripped at mid-shaft
+  else if(_casterWand){ rotX(1.42-_armPitch); mv(0,-1,1.5); }                 // wand/orb focus projects forward, clear of the body
   else if(_upright){ rotX(-0.08); if(_tallHaft && p.atkTimer<=0) mv(0,-16,0); }   // point up; grip the middle of the shaft at rest
-  else if(p.atkTimer<=0) rotX(-1.5);                                          // IDLE physical blade points FORWARD, tip up-and-out — never into the ground
+  else if(p.atkTimer<=0) rotX(1.5);                                           // idle sword/dagger/axe/maul projects forward, tip up-and-out
   else rotX(Math.PI);                                                        // swing keeps the blade-down base the swing poses expect
   if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);
   weaponMesh(w); popM();

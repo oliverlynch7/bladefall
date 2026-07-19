@@ -861,3 +861,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 ## [Codex | 2026-07-19] v1.154.0 - Hardcore difficulty identity
 - Added a deep red background, border, glow, hover treatment, and title color to the Hardcore difficulty card while preserving Hitless as the more intense purple final tier.
 - Verified the complete Normal / Hardcore / Hitless visual progression in a real muted browser at 1600x900.
+
+## [Codex | 2026-07-19] v1.158.0 - Illustrated Wardrobe overhaul
+- Rebuilt the Wardrobe as three spacious illustrated galleries for Capes, Trails, and Weapon Glows, with clear equipped, wear, remove, locked, and unlock-goal states.
+- Generated, background-extracted, optimized, and integrated 14 distinct premium voxel cosmetic icons: five capes, five trails, and four weapon glows. Hitless Edge remains the visual apex with a white-violet skull-and-lightning treatment.
+- Verified all assets load, equip/remove persists, locked rewards cannot be selected, and the complete menu needs no scrolling at 1600x900 or 1366x768 in a real muted browser.

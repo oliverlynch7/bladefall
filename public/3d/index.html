@@ -126,12 +126,15 @@
   .zrow.zside{margin-left:16px;background:rgba(196,123,255,.07);border-color:rgba(196,123,255,.28);}
   .zrow.zside:hover{background:rgba(196,123,255,.16);border-color:rgba(196,123,255,.5);}
   .zrow .zsec{color:#c47bff;font-size:9px;font-weight:900;letter-spacing:.12em;margin-left:4px;}
-  .cosrow{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:9px;background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);margin-bottom:5px;cursor:pointer;text-align:left;}
-  .cosrow:not(.coslock):hover{background:rgba(255,255,255,.08);}
-  .cosrow.coslock{opacity:.42;cursor:default;}
-  .cosrow.cossel{border-color:var(--amber);background:rgba(255,210,74,.10);}
-  .cosdot{width:15px;height:15px;border-radius:50%;flex:0 0 auto;}
+  .card.wardrobe-card{background:radial-gradient(circle at 50% 0,rgba(151,75,216,.11),transparent 32%),linear-gradient(178deg,#171923,#0d0f15);border-color:#3a3345;box-shadow:0 24px 70px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04)}
+  .wardrobe-body{display:grid;gap:11px;margin:13px 0}.cossection{padding:10px;border:1px solid #2b2e3a;border-radius:13px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(0,0,0,.14));text-align:left}
+  .cossection-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 8px}.cossection-title{font-size:11px;font-weight:950;letter-spacing:.16em;text-transform:uppercase;color:var(--slot,#e8a33d)}.cossection-current{font-size:9px;color:#8f96a8}.cossection-current b{color:#dce1eb}.cosoff{color:#e2a94b;cursor:pointer;font-weight:850;margin-left:7px}
+  .cosgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}.cosrow{position:relative;display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:8px;min-height:104px;padding:7px;border-radius:11px;background:linear-gradient(145deg,rgba(31,34,45,.96),rgba(15,17,24,.98));border:1px solid #303441;cursor:pointer;text-align:left;overflow:hidden;transition:.16s transform,.16s border-color,.16s box-shadow}
+  .cosrow::before{content:'';position:absolute;inset:auto 8% 0;height:1px;background:linear-gradient(90deg,transparent,var(--cos),transparent);opacity:.42}.cosrow:not(.coslock):hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--cos) 58%,#4b5060);box-shadow:0 10px 23px rgba(0,0,0,.34),0 0 15px color-mix(in srgb,var(--cos) 18%,transparent)}
+  .cosart{width:78px;height:84px;object-fit:contain;border-radius:9px;background:radial-gradient(circle,color-mix(in srgb,var(--cos) 15%,transparent),transparent 68%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.55))}.cosrow .gn{font-size:12px;line-height:1.15}.cosrow .gd{font-size:9px;line-height:1.3;margin-top:5px}.cosstate{display:inline-block;margin-top:6px;padding:2px 6px;border:1px solid #3b4050;border-radius:999px;font-size:7.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:#9aa2b4}
+  .cosrow.coslock{cursor:default;background:#11131a;border-color:#252832}.cosrow.coslock .cosart{filter:grayscale(1) brightness(.28);opacity:.55}.cosrow.coslock .gn{color:#777d8b}.cosrow.cossel{border-color:var(--amber);background:radial-gradient(circle at 30% 50%,color-mix(in srgb,var(--cos) 15%,transparent),transparent 65%),linear-gradient(145deg,#29251d,#171820);box-shadow:0 0 18px color-mix(in srgb,var(--cos) 22%,transparent),inset 0 0 0 1px rgba(255,210,74,.12)}.cosrow.cossel .cosstate{border-color:#9b6f27;background:#4a3212;color:#ffd680}.wardrobe-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.wardrobe-actions .bigbtn{margin:0}
+  @media(max-width:1100px){.cosgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.wardrobe-body{max-height:58vh;overflow:auto;padding-right:4px}}
+  @media(max-width:650px){.cosgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.cosrow{grid-template-columns:62px minmax(0,1fr);min-height:88px}.cosart{width:62px;height:68px}.cossection-head{align-items:flex-start;flex-direction:column;gap:3px}.wardrobe-actions{grid-template-columns:1fr}}
   .choice.lockc{opacity:.45;cursor:default;}
   /* Read-guard reframed as an INVITATION, not a countdown: the cards ease in (fade + rise), then go live.
      No sweeping timer bar — nothing implies you're being timed out. */
@@ -619,7 +622,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.157.0';
+const VERSION3D='1.158.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6528,19 +6531,18 @@ function openWardrobe(back){
   mode='menu'; checkCosmetics();
   const secs=COSSLOTS.map(s=>{
     const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
-      return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
-        <div class="cosdot" style="background:${un?c.col:'#333'};box-shadow:${un?'0 0 10px '+c.col:'none'}"></div>
-        <div style="flex:1;min-width:0"><div class="gn">${un?c.name:'🔒 ???'}</div>
-          <div class="gd">${un?(sel?'equipped':'tap to wear'):c.hint}</div></div></div>`; }).join('');
+      return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" style="--cos:${c.col}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
+        <img class="cosart" src="icons/cosmetics/${s.k}-${c.id}.png" alt="${un?c.name:'Locked cosmetic'}">
+        <div style="min-width:0"><div class="gn">${un?c.name:'🔒 Hidden Reward'}</div>
+          <div class="gd">${c.hint}</div><span class="cosstate">${un?(sel?'Equipped':'Wear'):'Locked'}</span></div></div>`; }).join('');
     const cur=cosEquipped(s.k);
-    return `<p class="hint" style="margin:8px 0 5px;text-align:left"><b>${s.label}</b>${cur?' · '+cur.name:' · none'}
-      ${cur?`<span class="cosoff" data-off="${s.k}" style="color:var(--muted);cursor:pointer;float:right">remove</span>`:''}</p>${tiles}`; }).join('');
+    const slotCol=s.k==='cape'?'#e8a33d':s.k==='trail'?'#64d9ff':'#c47bff';
+    return `<section class="cossection" style="--slot:${slotCol}"><div class="cossection-head"><span class="cossection-title">${s.label}</span><span class="cossection-current">Equipped: <b>${cur?cur.name:'None'}</b>${cur?`<span class="cosoff" data-off="${s.k}">Remove</span>`:''}</span></div><div class="cosgrid">${tiles}</div></section>`; }).join('');
   const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Keeper</p><h2 class="ovh">Wardrobe</h2>
-    <p class="ovsub">Earned by doing, not buying. <b>${owned}/${total}</b> unlocked · no stats, pure swagger.</p>
-    <div class="achlist" style="max-height:min(52vh,380px)">${secs}</div>
-    <button class="bigbtn ghost" id="skinBtn2">Skins</button>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  showOverlayHTML(`<div class="card wardrobe-card"><p class="ovkicker">The Keeper · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
+    <p class="ovsub">Wear the victories you earned. Cosmetics change your legend—not your stats.</p>
+    <div class="wardrobe-body">${secs}</div>
+    <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">Skins</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
   document.querySelectorAll('.cosrow[data-k]').forEach(r=>r.onclick=()=>{
     const k=r.dataset.k; meta.cosEquipped[k]=(meta.cosEquipped[k]===r.dataset.i)?null:r.dataset.i;
     persistGlobal(); SFX.pickup(); openWardrobe(back); });
@@ -8889,7 +8891,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
-  openMirror, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
+  openMirror, openWardrobe, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
   recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },

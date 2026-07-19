@@ -619,7 +619,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.155.0';
+const VERSION3D='1.156.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8068,7 +8068,10 @@ function drawEnemy3(e,t){
     bx(0,H*0.86,0, W*0.5,W*0.44,W*0.44,'#3a1a12'); bx(0,H*0.96,0, W*0.4,W*0.3,W*0.4, col,'#ffb060',fl);   // rock head + fire crown
     for(let i=0;i<3;i++){ const a=G.time*3+i*2.09; bx(Math.cos(a)*W*0.24, H*1.05+Math.sin(G.time*5+i)*3, Math.sin(a)*W*0.2, 3,5,3,'#ff9a4a','#ffd24a',0.8); }  // flame plume
     bx(-2.4,H*0.86,W*0.24, 2,2,1,'#fff2b0','#ffd24a',0.95); bx(2.4,H*0.86,W*0.24, 2,2,1,'#fff2b0','#ffd24a',0.95);
-    bx(0,H*0.28,-W*0.3, W*0.14,W*0.14,W*0.14,'#3a3f4a');   // a dragging chain link
+    for(const s of [-1,1]) bx(s*W*0.32,H*0.66,-W*0.14, W*0.16,W*0.14,W*0.16, tint(rk,'#ff5a20',0.4),'#ff7a3a',fl*0.8);  // molten shoulder vents
+    bx(0,H*0.4,-W*0.24, W*0.34,W*0.3,2,'#ff6a2a','#ffb060',fl*0.7);                                                    // back magma seam
+    for(const s of [-1,1]) bx(s*W*0.16,H*0.03,1, W*0.24,3,W*0.34, tint(rk,'#000',0.2));                                // rocky feet
+    bx(0,H*0.28,-W*0.3, W*0.14,W*0.14,W*0.14,'#3a3f4a'); bx(0,H*0.22,-W*0.42, W*0.12,W*0.12,W*0.12,'#3a3f4a');         // dragging chain
   } else if(e.look==='frostbeast'){
     // Frostling — a low ice beast on all fours, crystal spines, glowing eyes, fangs
     const ic='#bfe6ff', icd='#7fb0d8', g2=Math.sin(G.time*10+e.bob)*0.3;
@@ -8078,7 +8081,9 @@ function drawEnemy3(e,t){
     bx(0,H*0.5,W*0.92, W*0.4,W*0.24,W*0.3, icd);                    // snout
     bx(-2.6,H*0.62,W*0.88, 2.2,2,1,'#7fe0ff','#bff0ff',0.95); bx(2.6,H*0.62,W*0.88, 2.2,2,1,'#7fe0ff','#bff0ff',0.95);  // eyes
     for(let i=-1;i<=1;i+=2) bx(i*3,H*0.44,W*1.0, 1.6,4,1.6,'#eafaff');   // fangs
-    for(const p of [[-W*0.28,W*0.5],[W*0.28,W*0.5],[-W*0.28,-W*0.4],[W*0.28,-W*0.4]]){ pushM(); mv(p[0],H*0.2,p[1]); rotX(g2*(p[1]>0?1:-1)); bx(0,-H*0.2,0, 4,H*0.4,4, icd); popM(); }  // four legs
+    for(const p of [[-W*0.28,W*0.5],[W*0.28,W*0.5],[-W*0.28,-W*0.4],[W*0.28,-W*0.4]]){ pushM(); mv(p[0],H*0.2,p[1]); rotX(g2*(p[1]>0?1:-1)); bx(0,-H*0.2,0, 4,H*0.4,4, icd); bx(0,-H*0.4,2, 2.2,3,2.2,'#eafaff','#bff0ff',0.8); popM(); }  // four legs + ice claws
+    for(let i=0;i<3;i++) bx((i-1)*W*0.18,H*0.34,-W*0.5, 2.4,5+i%2*3,2.4, ic,'#7fd6ff',0.7);        // frozen tail spines
+    bx(0,H*0.4,W*1.06, W*0.3,W*0.2,W*0.2,'#dff4ff','#bff0ff',0.28+0.15*Math.sin(G.time*3));         // cold breath
   } else if(e.look==='toxbeast'){
     // Toxling — a hunched swamp beast with a glowing poison belly-sac and mushrooms on its back
     const gr='#5a7a2e', grd='#3a5a1e', sac=0.6+0.3*Math.sin(G.time*3+e.bob);
@@ -8088,7 +8093,10 @@ function drawEnemy3(e,t){
     for(const s of [-1,1]){ pushM(); mv(s*W*0.42,H*0.5,2); rotZ(-s*0.3); bx(0,-H*0.24,0, W*0.18,H*0.44,W*0.18, gr); popM(); }  // long arms
     bx(0,H*0.8,W*0.06, W*0.5,W*0.4,W*0.46, gr);                      // head
     bx(-2.6,H*0.82,W*0.24, 2.2,2,1,'#c8ff6a','#eaffb0',0.9); bx(2.6,H*0.82,W*0.24, 2.2,2,1,'#c8ff6a','#eaffb0',0.9);
-    for(let i=0;i<3;i++){ const mx=(i-1)*W*0.2; bx(mx,H*0.98,-W*0.12, 3,4,3,'#8a5a3a'); bx(mx,H*1.04,-W*0.12, 6,3,6,'#b07a4a'); }  // mushroom caps
+    for(let i=0;i<3;i++){ const mx=(i-1)*W*0.2; bx(mx,H*0.98,-W*0.12, 3,4,3,'#8a5a3a'); bx(mx,H*1.04,-W*0.12, 6,3,6,'#b07a4a'); bx(mx-1.4,H*1.05,-W*0.06, 1.2,1.2,1.2,'#eaffb0','#c8ff6a',0.8); }  // mushroom caps + spore dots
+    for(const s of [-1,1]) bx(s*W*0.42,H*0.28,2, W*0.16,W*0.14,W*0.16, grd);                          // clawed hands
+    { const dr=(G.time*0.8+e.bob)%1; bx(0,H*0.34-dr*10,W*0.34, 1.6,2.4,1.6,'#c8ff6a','#eaffb0',0.7*(1-dr)); }  // dripping venom
+    bx(0,H*0.72,-W*0.14, W*0.4,W*0.12,W*0.3, grd);                                                      // hunched back ridge
   } else if(e.look==='shadewraith'){
     // Shadeling — a purple skeletal wraith with glowing ribs and reaching claws, tattering to nothing
     const sh='#2a1840', gl='#c47bff', fl=0.6+0.3*Math.sin(G.time*4+e.bob);
@@ -8098,7 +8106,9 @@ function drawEnemy3(e,t){
     for(const s of [-1,1]){ pushM(); mv(s*W*0.4,H*0.6,2); rotZ(-s*(0.5+Math.sin(G.time*3+e.bob)*0.15));
       bx(0,-H*0.2,0, 2.6,H*0.4,2.6, sh); bx(0,-H*0.42,0, 3,4,3, gl, gl, fl); popM(); }   // reaching glowing-claw arms
     bx(0,H*0.86,0, W*0.4,W*0.4,W*0.4, sh); bx(0,H*0.84,W*0.22, W*0.28,W*0.2,1.4,'#0a0410');   // skull + face void
+    for(const s of [-1,1]) bx(s*W*0.22,H*1.02,-W*0.05, W*0.12,W*0.24,W*0.1, sh,null,0.7);          // ragged horns/hood peaks
     bx(-2.4,H*0.87,W*0.24, 2,2.4,1, gl, gl, 0.95); bx(2.4,H*0.87,W*0.24, 2,2.4,1, gl, gl, 0.95);   // burning eyes
+    for(let i=0;i<3;i++){ const a=G.time*2+i*2.1; bx(Math.cos(a)*W*0.4,H*(0.7+0.2*Math.sin(a)),Math.sin(a)*W*0.3, 2,2,2, gl, gl, 0.4*fl); }  // drifting soul wisps
   } else if(e.look==='sparkstar'){
     // Sparkling — a floating faceted arcane diamond with radiating crystal shards
     const spin=G.time*1.5+e.bob;
@@ -8117,8 +8127,9 @@ function drawEnemy3(e,t){
     for(const s of [-1,1]) bx(s*3.4,H*0.78,W*0.32, 2.4,2.8,1.2, eyeC, eyeC);   // eyes
     for(const s of [-1,1]) bx(s*W*0.2,H*0.94,0, 2,5,2, dk);         // ears
     for(const s of [-1,1]){ pushM(); mv(s*W*0.34,H*0.6,0); rotZ(-s*(0.4+flap)); rotY(s*0.2);
-      bx(s*W*0.5,0,0, W*1.0,2,W*0.5, dk); for(let i=1;i<=2;i++) bx(s*W*(0.2+i*0.28),-W*0.16,0, 1.6,W*0.3,1.4, tint(col,'#000',0.4)); popM(); }  // membrane wings
-    for(const s of [-1,1]) bx(s*3,H*0.2,W*0.1, 2.4,W*0.3,2.4, dk);   // clawed feet
+      bx(s*W*0.5,0,0, W*1.0,2,W*0.5, dk); for(let i=1;i<=3;i++) bx(s*W*(0.16+i*0.24),-W*0.16,0, 1.4,W*0.32,1.3, tint(col,'#000',0.4)); bx(s*W*0.98,W*0.12,0, 2,2,2, tint(col,'#000',0.5)); popM(); }  // membrane wings + finger struts + wingtip claw
+    for(const s of [-1,1]){ bx(s*3,H*0.2,W*0.1, 2.4,W*0.3,2.4, dk); for(let i=-1;i<=1;i++) bx(s*3+i*1.4,H*0.04,W*0.22, 1,1.4,2, tint(col,'#000',0.5)); }  // clawed feet + talons
+    bx(0,H*0.34,-W*0.34, W*0.12,W*0.12,W*0.4, dk); bx(0,H*0.3,-W*0.56, 2,2,4, tint(col,'#000',0.4));   // barbed tail
   } else {
     // brute grunt: armored torso, hunched shoulders, tusked snarl, clawed fists
     const dk=tint(col,'#000',0.32), lt=tint(col,'#fff',0.13), sw=Math.sin(G.time*7+e.bob)*0.12;

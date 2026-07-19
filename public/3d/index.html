@@ -558,6 +558,7 @@
   .c2opt.bigbtn:hover{transform:translateY(-4px);filter:none;border-color:var(--pick);background:radial-gradient(circle at 68px 48%,color-mix(in srgb,var(--pick) 22%,transparent),transparent 34%),linear-gradient(150deg,color-mix(in srgb,var(--pick) 9%,#20232e),#101219 72%);box-shadow:0 20px 45px rgba(0,0,0,.42),0 0 24px color-mix(in srgb,var(--pick) 14%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--pick) 20%,transparent)}
   .c2art{grid-row:1/3;width:132px;height:132px;align-self:center;border-radius:22px;border:1px solid color-mix(in srgb,var(--pick) 48%,#394052);display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,color-mix(in srgb,var(--pick) 19%,#202531),#090b11 72%);box-shadow:inset 0 0 28px rgba(0,0,0,.55),0 10px 25px rgba(0,0,0,.36),0 0 24px color-mix(in srgb,var(--pick) 12%,transparent)}
   .c2art .ico-event{width:112px;height:112px;margin:0;vertical-align:middle;filter:drop-shadow(0 9px 8px rgba(0,0,0,.55))}.c2art.glyph{font-size:70px;color:var(--pick);text-shadow:0 0 18px color-mix(in srgb,var(--pick) 55%,transparent)}
+  .passiveart{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 8px rgba(0,0,0,.58));pointer-events:none}.c2art .passiveart{width:116px;height:116px}.buildopt .boicon .passiveart{width:46px;height:46px}.buildroot .bticon .passiveart,.buildcap .bticon .passiveart{width:74px;height:74px;margin:0 auto}.legacypath .boicon{width:58px;height:58px}.legacypath .boicon .passiveart{width:58px;height:58px}
   .c2copy{align-self:center;min-width:0}.c2top{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:7px}.c2name{font-size:clamp(20px,2vw,29px);font-weight:950;line-height:1.05}.c2role{flex:0 0 auto;padding:5px 8px;border:1px solid color-mix(in srgb,var(--pick) 42%,#384052);border-radius:999px;color:var(--pick);font-size:9px;font-weight:950;letter-spacing:.11em;text-transform:uppercase;background:rgba(0,0,0,.2)}
   .c2meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.c2badge{padding:5px 8px;border-radius:8px;background:rgba(7,9,14,.58);border:1px solid #303648;color:#b8c1d1;font-size:10px;font-weight:850}.c2badge.cd{color:#9fe0ff}.c2desc{font-size:13px;line-height:1.55;color:#bdc5d3;max-width:580px}
   .c2choose{grid-column:2;margin-top:16px;padding-top:12px;border-top:1px solid #303648;color:var(--pick);font-size:10px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;text-align:right}.c2choose::after{content:'  ›';font-size:17px;vertical-align:-2px}
@@ -642,7 +643,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.159.0';
+const VERSION3D='1.160.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1387,6 +1388,16 @@ const CLASS2={
                         b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
   }
 };
+const PASSIVE_ART={
+  berserker:'warrior-berserker',guardian:'warrior-guardian',
+  sorcerer:'mage-sorcerer',wizard:'mage-wizard',
+  harvester:'reaper-harvester',executioner:'reaper-executioner',
+  r_clear_aim:'ranger-clear-aim',r_longshot:'ranger-longshot',r_closeq:'ranger-close-quarters',
+  r_escape:'ranger-escape-artist',r_ambush:'ranger-ambusher',r_patient:'ranger-patient-hunter',
+  r_quick:'ranger-quickdraw',r_elem:'ranger-elemental-archer',r_bounty:'ranger-bounty-hunter',
+  r_perfect_hunt:'ranger-perfect-hunt'
+};
+function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png" alt="" aria-hidden="true">`:'✦'; }
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -4396,7 +4407,7 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
   for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
-  const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):'✦';
+  const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   showOverlayHTML(`<div class="card classpick" style="--pick:#8fd56d"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
@@ -6496,21 +6507,21 @@ function openRespecTree(cid,back){
   mode='menu'; showGameUI(false);
   let staged=def?Object.assign({},cs.ch||{}):cs.sub;
   const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
-  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(o.icon||'✦');
+  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
   function render(){
     const changed=def?CLASS2_CHOICE_RANKS.some(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)):staged!==cs.sub;
     let tree='';
     if(def){
-      tree=`<div class="buildroot"><div class="bticon">${C.icon}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
+      tree=`<div class="buildroot"><div class="bticon">${passiveIcon('r_clear_aim')}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
       tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, isSkill=R.kind==='skill';
-        const opt=o=>`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}" ${reached?'':'disabled'}><span class="boicon">${isSkill?iconOf(o):(o.id.endsWith('bounty')?'◆':'✦')}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s cooldown':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
+        const opt=o=>`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}" ${reached?'':'disabled'}><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s cooldown':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
         return `<div class="buildrank ${reached?'reached':''}">${opt(R.a)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(R.b)}</div><div class="buildspine"></div>`; }).join('');
-      tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`;
+      tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">${passiveIcon('r_perfect_hunt')}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`;
     }else{
       const root=C.skills[0];
       tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d}</div></div><div class="buildspine"></div>`;
       const paths=C.subs.map((sub,i)=>{ const skills=sub.skills||C.skills.slice(1,4);
-        return `<div class="legacypath"><button class="buildopt ${staged===sub.id?'sel':''}" data-path="${sub.id}" ${cs.rank>=2?'':'disabled'}><span class="boicon">${i?'◆':'✦'}</span><div class="boname">${sub.disp}</div><span class="borole">Complete combat path</span><div class="bodesc">${sub.blurb}</div><div class="pathskills">${skills.map((s,n)=>`<div class="pathskill ${cs.rank<s.rank?'locked':''}"><b>${s.icon||'✦'} ${s.n}</b> · Rank ${s.rank} · ${s.cd}s<br>${s.d}</div>`).join('')}</div></button></div>`; });
+        return `<div class="legacypath"><button class="buildopt ${staged===sub.id?'sel':''}" data-path="${sub.id}" ${cs.rank>=2?'':'disabled'}><span class="boicon">${passiveIcon(sub.id)}</span><div class="boname">${sub.disp}</div><span class="borole">Complete combat path</span><div class="bodesc">${sub.blurb}</div><div class="pathskills">${skills.map((s,n)=>`<div class="pathskill ${cs.rank<s.rank?'locked':''}"><b>${s.icon||'✦'} ${s.n}</b> · Rank ${s.rank} · ${s.cd}s<br>${s.d}</div>`).join('')}</div></button></div>`; });
       tree+=`<div class="buildrank ${cs.rank>=2?'reached':''}" style="grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr)">${paths[0]}<div class="rankorb"><span>PATH</span><b>2</b></div>${paths[1]}</div>`;
       tree+=`<div class="buildspine"></div><div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Path <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your chosen path's defining passive reaches its final strength.</div></div>`;
     }

@@ -872,3 +872,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Preserved bespoke title, Mirror, and studio identities while normalizing Pause, Bag, Gear, Shop, Forge, Wardrobe, Achievements, Classes, Trainer, Quest Board, Pet Yard, Bestiary, Waystation, save/difficulty, Credits, and dialogs.
 - Made Pause Resume a full-width primary action and confined long Shop and Waystation content to dedicated internal panes rather than scrolling the whole page.
 - Verified representative menu families in a muted real browser at 1920x1080, 1600x900, and 1366x768 with no console errors or save/gameplay logic changes.
+
+## [Codex | 2026-07-19] v1.160.0 - Illustrated class passive progression
+- Generated and integrated 16 individual transparent voxel passive icons grounded in the real class definitions: two Warrior paths, ten Ranger innate/branch/capstone upgrades, two Mage paths, and two Reaper paths.
+- Replaced generic passive diamonds and stars in rank-up choices and Drillmaster trees with readable, class-colored gameplay emblems; rank-10 legacy path upgrades intentionally retain the same learned path identity.
+- Optimized all masters to 256px transparent PNGs (about 1.2 MB total) and verified every asset loads in its correct node at 1600x900 and 1366x768 with no console errors.

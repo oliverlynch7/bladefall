@@ -698,3 +698,15 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Expand the Sparring Post into Training & Bestiary: every zone-discovered regular enemy and boss has a separate Info action while spawning remains available.
 - [x] Bestiary popups show a creature portrait emblem, base health/damage/speed, attack range, element, weakness, combat tell, and short lore entry.
 - [x] Preserve stakes-free practice behavior, including no death penalty, XP, gold, or loot, and spawn bosses singly instead of in pairs.
+
+## [Claude | 2026-07-18] Voxel-art Batch 2 — six base hub NPCs (SHIPPED v1.115.0)
+
+- [x] Added shared `hubNpcModel(n,t)` helper — one distinct voxel model per approved NPC, no palette-swap reuse.
+- [x] Quartermaster: gold diamond tabard, held ledger + gold key-ring, scroll backpack, white spiky hair (sharp/skeptical).
+- [x] Keeper: white mask, layered purple/black robe + gold hem, shoulder mantle, scissors + draped cloth (elegant/eccentric).
+- [x] Drillmaster: dark-red + gold cuirass, pauldrons, crossed arms, dark hair+beard, sheathed sword at the hip (stern).
+- [x] Smith: now a real figure beside the forge — white hair+beard, orange scarf, leather apron, glowing ember gauntlet, hammer over the shoulder (warm/boisterous).
+- [x] Beastkeeper: dreadlocks, gold circlet, fur mantle, tall golden crook, with a black panther at her side (glamorous/dangerous).
+- [x] Warden's Shade base: mournful spectral knight-woman — tattered purple gown/cuirass, glowing visor, dissolving cloak fragments, silver sword point-down (replaces the old generic hooded box).
+- No changes to AI, dialogue, quests, drops, IDs, or save schema. Parse-clean; drawWaystation + run/update pump verified error-free in-browser (WebGL screenshots time out headless).
+- Next: Batch 3 pets, Batch 4 bosses, Batches 5-6 mobs. Shade zone variants (Batch 7) still pending art.

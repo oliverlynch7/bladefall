@@ -509,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.114.0';
+const VERSION3D='1.115.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7002,6 +7002,61 @@ const HUB_UPGRADES=[
   {id:'ramparts',name:'Repaired Ramparts',cost:7000,desc:'The broken north wall is crowned with battlements'},
   {id:'gild',name:'Gild the Waystone',cost:12000,desc:'Your bonfire burns molten gold'}
 ];
+// ===== Approved hub-NPC voxel models (distinct silhouette + signature prop + palette per the reference art) =====
+// Drawn in a frame already translated to the NPC's feet and rotated to face; +y up, +z toward the viewer.
+function hubNpcModel(n,t){
+  const sw=Math.sin(t*1.4+(n.x||0))*0.06, id=n.id;
+  if(id==='quartermaster'){                                   // sharp/skeptical: gold tabard, ledger + key-ring, backpack, white spiky hair
+    bx(-3.5,8,0, 6,16,8,'#2a2620'); bx(3.5,8,0, 6,16,8,'#2a2620');                 // legs
+    bx(0,30,-7, 13,20,6,'#5a4326','#8a6a3a',0.2); bx(-4,42,-8, 3,7,3,'#e8e0c8'); bx(3,44,-8, 3,6,3,'#d8cdb0');  // backpack + scrolls
+    bx(0,28,0, 15,22,10,'#a8842e','#e8c25a',0.10);                                  // gold tabard body
+    bx(0,30,5.4, 5,7,1.6,'#e8c25a','#ffd24a',0.4);                                  // diamond crest
+    bx(0,18,4, 15.6,3,3,'#3a2e1e');                                                 // belt
+    pushM(); mv(7,24,4); rotX(-0.2+sw); bx(0,6,4, 6,4,8,'#6a4a2a','#c9a24a',0.15); popM();  // ledger held out
+    bx(9,16,3, 2,3,2,'#3a2e1e'); for(const k of [0,1,2]) bx(9+k*1.2,11-k*2,3, 3.4,5,1,'#e8a33d','#ffd24a',0.5);   // key-ring of gold keys
+    bx(0,44,0, 9,10,9,'#c9a380'); bx(0,42,4.6, 7,5,1.6,'#b8895a');                  // head
+    bx(0,51,0, 10.5,5,10.5,'#e8e4d8','#fff',0.15); bx(3,55,2, 2.4,4,2.4,'#eef2f8'); bx(-3,55,1, 2,3.4,2,'#eef2f8');  // white spiky hair
+  } else if(id==='keeper'){                                   // elegant/eccentric: white mask, layered purple-black robe, gold trim, scissors + draped cloth
+    bx(0,20,0, 16,38,12,'#241a2e');                                                 // long layered robe
+    bx(0,10,6.2, 14,16,1.6,'#3a2a55','#b06bff',0.14); bx(0,8,6.6, 14,3,1,'#c9a24a','#ffd24a',0.4);   // front panel + gold hem
+    bx(0,41,0, 19,7,14,'#3a2a55','#b06bff',0.18);                                   // shoulder mantle
+    pushM(); mv(-9,30,3); rotZ(0.12); bx(0,-2,2, 5,22,4,'#5a2a70','#b06bff',0.16); popM();           // draped purple cloth over the arm
+    pushM(); mv(9,30,6); rotX(-0.35+sw); bx(0,7,0, 2,11,2,'#cfd6df','#fff',0.35); bx(-1.6,13,0, 4,4,2,'#8b93a8'); bx(1.6,13,0, 4,4,2,'#8b93a8'); popM();  // scissors
+    bx(0,48,0, 9,10,9,'#c9a380'); bx(0,54,-1, 11,6,11,'#1a1420');                   // head + dark curly hair
+    bx(0,48,5.2, 8,8,1.8,'#eef2f8','#fff',0.28); bx(-2,49,6, 1.6,1.6,1,'#1a1a22'); bx(2,49,6, 1.6,1.6,1,'#1a1a22');   // white mask
+  } else if(id==='drillmaster'){                              // stern/disciplined: red+gold armor, dark hair+beard, crossed arms, sheathed sword
+    bx(-3.6,8,0, 6.4,17,9,'#241a18'); bx(3.6,8,0, 6.4,17,9,'#241a18');              // legs
+    bx(0,28,0, 15,21,11,'#7a2a24','#e8453d',0.06); bx(0,31,5.6, 12,3,1.6,'#e8a33d','#ffd24a',0.4);   // red cuirass + gold trim
+    bx(-9,39,0, 6,7,10,'#5a2018','#e8453d',0.1); bx(9,39,0, 6,7,10,'#5a2018','#e8453d',0.1);         // pauldrons
+    bx(0,30,7, 16,5,4,'#3a1a16'); bx(0,26,8, 13,4,3,'#4a201a');                     // crossed arms
+    bx(0,44,0, 9,10,9,'#b8895a'); bx(0,40,4.6, 7,5,3,'#2a2018'); bx(0,50,0, 10,5,10,'#2a2018');      // head + beard + hair
+    bx(11,20,-2, 3,30,3,'#3a3a42','#8b93a8',0.1); bx(11,37,-2, 6.5,3,3,'#e8a33d','#ffd24a',0.4);     // sheathed sword at the hip
+  } else if(id==='smith'){                                    // warm/boisterous: white hair+beard, orange scarf, huge hammer, brown apron, ember gauntlet
+    bx(-4,8,0, 7,16,9,'#3a2410'); bx(4,8,0, 7,16,9,'#3a2410');                      // stout legs
+    bx(0,29,0, 18,22,13,'#5a3a1e','#7a5024',0.1); bx(0,28,6.6, 11,16,1.6,'#4a3018'); bx(0,28,7, 3,10,1,'#8a6a3a');   // barrel torso + leather apron + cross emblem
+    bx(0,42,3, 12,4,10,'#ff7a3a','#ffb060',0.5);                                    // orange scarf
+    bx(11,26,0, 8,15,9,'#3a2410'); for(let i=0;i<3;i++) bx(11,20+i*4,4.6, 6,2,1,'#ff7a3a','#ffd24a',0.6+0.2*Math.sin(t*5+i));  // glowing ember forge-gauntlet
+    pushM(); mv(-11,40,-2); rotZ(0.5+sw*2); bx(0,10,0, 4,22,4,'#4a3a26'); bx(0,22,0, 10,8,8,'#20242e','#4a5568',0.3); popM();   // huge hammer over the shoulder
+    bx(0,50,0, 10,10,10,'#d8b48a'); bx(0,46,5, 8,7,3,'#e8e4d8'); bx(0,57,0, 11,5,11,'#e8e4d8');       // head + white beard + white hair
+  } else if(id==='beastkeeper'){                              // glamorous/dangerous: dark skin, black dreadlocks, fur shoulder, gold crook, black panther
+    bx(-3.4,8,0, 6,17,7,'#3a2a1e'); bx(3.4,8,0, 6,17,7,'#3a2a1e');                  // legs
+    bx(0,30,0, 12,20,8,'#2a2420','#c9a86a',0.12); bx(0,22,4, 12,3,3,'#c9a86a','#ffd24a',0.4);         // dark outfit + gold belt
+    bx(-8,42,-1, 9,7,11,'#1a1712'); bx(8,42,-1, 6,6,10,'#1a1712');                  // fur shoulder mantle (asymmetric)
+    bx(0,45,0, 8.5,10,8.5,'#6a4a32'); for(let i=0;i<5;i++){ const a=i*1.256; bx(Math.cos(a)*6,52+i*0.5,Math.sin(a)*6-2, 2.6,10,2.6,'#141014'); }   // dark-skin head + long dreadlocks
+    bx(-3,49,4.4, 2,1.6,1,'#141014'); bx(3,49,4.4, 2,1.6,1,'#141014'); bx(0,52,4.4, 4,1.4,1,'#e8c25a','#ffd24a',0.4);   // eyes + gold circlet
+    pushM(); mv(9,30,2); bx(0,10,0, 2.4,40,2.4,'#8a6f34','#e6c25a',0.5); bx(2,28,0, 6,6,3,'#c9a24a','#ffd24a',0.5); popM();   // tall golden crook
+    // the black panther at her side
+    pushM(); mv(-16,0,6); rotY(0.4);
+      bx(0,10,0, 10,10,26,'#120f0f'); bx(0,13,15, 8,9,10,'#161212'); bx(-2.2,15,20, 1.6,1.6,1,'#ffd24a','#ffd24a',0.8); bx(2.2,15,20, 1.6,1.6,1,'#ffd24a','#ffd24a',0.8);
+      for(const s of [-1,1]){ bx(s*4,4,9, 3,10,3,'#0e0c0c'); bx(s*4,4,-9, 3,10,3,'#0e0c0c'); }
+      bx(0,10,-16, 3,3,10,'#0e0c0c');
+    popM();
+  } else {                                                    // safe fallback for any unlisted keeper
+    bx(0,9,0, 12,18,9,'#2c2f3a'); bx(0,26,0, 15,18,11, n.c1||'#3a3a44');
+    bx(0,26,6, 15,4,2, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.4);
+    bx(0,41,0, 10,11,10,'#c9a380'); bx(0,48,0, 12,4,12, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.35);
+  }
+}
 function drawWaystation(t){
   const pu=0.72+0.28*Math.sin(t*2.2);
   // Phase 20 — HOMELY WARMTH: string lights strung between the plaza lanterns, drifting warm
@@ -7047,10 +7102,11 @@ function drawWaystation(t){
     if(n.prop==='anvil'){ drawShadow(n.x,n.z,16,0.22);
       bx(n.x,9,n.z, 26,18,26,'#3a2f26'); bx(n.x,24,n.z, 40,10,16,'#262a36','#4a5568',0.35);
       bx(n.x,31,n.z, 12,6,12,'#30364a');
-      // idle life: a hammer rising and falling, sparks on the strike
-      const swing=Math.max(0,Math.sin(t*3)), hy=40+swing*22;
-      pushM(); mv(n.x-16,hy,n.z-6); rotZ(0.6-swing*1.2); bx(0,8,0, 3,16,3,'#4a3a26'); bx(0,16,0, 9,7,7,'#20242e','#4a5568',0.4); popM();
-      if(swing<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
+      // the Smith himself, working the forge (approved art: white beard, orange scarf, hammer, ember gauntlet)
+      const sx=n.x-30, sz=n.z+10; drawShadow(sx,sz,12,0.24);
+      pushM(); mv(sx,0,sz); rotY(0.9); hubNpcModel({id:'smith',c1:n.c1,c2:n.c2},t); popM();
+      // restrained sparks off the anvil as he works
+      if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
       continue; }
     if(n.prop==='mirror'){ drawShadow(n.x,n.z,20,0.26);
       // a grand gilded standing mirror; the BRIGHT silvered face sits toward the camera (+z side), the frame behind it
@@ -7074,6 +7130,9 @@ function drawWaystation(t){
       bx(n.x-16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x+16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x,50,n.z, 42,6,10,'#5a4426');   // perch frame
       bx(n.x,34,n.z-2, 10,10,3,'#c9a86a','#ffe0a0',0.5);                                 // paw sigil plaque
       { const gc=meta.petActive?petRarityCol(meta.petActive):'#c9a86a'; bx(n.x,20,n.z+4, 8,8,8, gc, gc, 0.4+0.25*Math.sin(t*3)); }  // a resident glow, tinted to your active pet
+      // the Beastkeeper stands with her panther (approved art: dreadlocks, gold crook, fur mantle)
+      { const bx0=n.x+34, bz0=n.z+6; drawShadow(bx0,bz0,12,0.24);
+        pushM(); mv(bx0,0,bz0); rotY(-0.7); hubNpcModel({id:'beastkeeper',c1:n.c1,c2:n.c2},t); popM(); }
       continue; }
     if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
       bx(n.x,32,n.z, 50,64,16,'#140a20','#6a2fa0',0.5);                                    // dark monolith
@@ -7085,15 +7144,12 @@ function drawWaystation(t){
       bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
       bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
       continue; }
-    // a living keeper: solid figure, trimmed in their post's color
+    // a living hub keeper — a DISTINCT voxel model per character (approved art), not a palette swap
     drawShadow(n.x,n.z,13,0.25);
-    pushM(); mv(n.x,0,n.z); rotY(Math.sin(t*0.6+n.x)*0.25+(n.x>0?-1.2:1.2));
-    bx(0,9,0, 12,18,9, '#2c2f3a'); bx(0,26,0, 15,18,11, n.c1);
-    bx(0,26,6, 15,4,2, n.c2, n.c2, 0.4);                                              // sash in post colors
-    bx(0,41,0, 10,11,10, '#c9a380'); bx(0,48,0, 12,4,12, n.c2, n.c2, 0.35);           // head + trimmed hood
-    if(n.id==='drillmaster'){ pushM(); mv(10,30,4); rotX(-0.5+Math.sin(t*4.5)*0.95); bx(0,11,0, 3,22,3,'#b8bec8'); bx(0,23,0, 4,10,4,'#eef2f8','#fff',0.5); popM(); }   // idle: drilling a practice cut
+    pushM(); mv(n.x,0,n.z); rotY(Math.sin(t*0.6+n.x)*0.22+(n.x>0?-1.2:1.2));
+    hubNpcModel(n,t);
     popM();
-    bx(n.x,66,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
+    bx(n.x,72,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
   }
   // dummy corner rug + target-range mat
   bx(300,0.8,-20, 130,1.4,90, '#3a3226');
@@ -7680,15 +7736,20 @@ function render(t){
     bx(s.x,sy+26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
   if(G.hub) drawWaystation(t);
-  if(G.npc){                                           // the Warden's Shade: a translucent figure in old armor, hovering at the zone mouth
-    const n=G.npc, fl=0.5+0.18*Math.sin(t*2.1), fy=6+Math.sin(t*1.6)*3;
-    pushM(); mv(n.x,fy,n.z); rotY(Math.sin(t*0.7)*0.3);
-    box(15,3,15,'#b06bff','#b06bff',0.22);                                  // ground glow
-    mv(0,16,0); box(13,26,9,'#3a2a55','#6a4a9a',fl*0.75);                   // robed body
-    mv(0,20,0); box(9,9,9,'#4a3a66','#8a6ac0',fl*0.85);                     // hooded head
-    mv(0,-2,6); box(4,3,2,'#c47bff','#c47bff',fl);                          // eyes glint
+  if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman: tattered purple, glowing visor, silver sword point-down
+    const n=G.npc, fl=0.42+0.16*Math.sin(t*2.1), fy=8+Math.sin(t*1.5)*3.5;
+    bx(n.x,1,n.z, 16,2,16,'#b06bff','#b06bff',0.18);                                                  // spectral pool on the floor
+    for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(n.x+Math.cos(a)*10, fy+2+((t*6+i*5)%16), n.z+Math.sin(a)*10, 2.5,2.5,2.5,'#8a4fd0','#c47bff',0.4*fl); }  // cloak fragments dissolving upward
+    pushM(); mv(n.x,fy,n.z); rotY(Math.sin(t*0.6)*0.28);
+      bx(0,10,0, 12,22,7,'#3a2a55','#7a4fc0',fl*0.7);                                                 // tattered gown (tapers — she hovers, no legs)
+      bx(0,7,4, 11,14,2,'#2a1f42','#6a3fb0',fl*0.55);                                                 // ragged front hem
+      bx(0,26,0, 14,10,10,'#4a3a66','#8a6ac0',fl*0.85);                                               // spectral cuirass
+      bx(-8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); bx(8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8);    // pauldrons
+      bx(0,39,0, 9,10,9,'#4a3a66','#8a6ac0',fl*0.9); bx(0,45,0, 10,4,10,'#3a2a55','#6a4a9a',fl*0.85); // helmed head + crest
+      bx(0,39,4.6, 7,2,1.5,'#d0a0ff','#e0b8ff',0.85+0.1*Math.sin(t*3));                               // glowing visor slit
+      bx(6,6,7, 3.5,44,3,'#cdd4e0','#eef2ff',0.6); bx(6,29,7, 12,3,3,'#8b93a8','#c9d2e0',0.7); bx(6,34,7, 4,7,4,'#6a5a8a','#b090e0',0.7);  // great silver sword, point-down
     popM();
-    if(!n.talked) bx(n.x,64,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
+    if(!n.talked) bx(n.x,66,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
   if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
   if(G.meteors) for(const mt of G.meteors){                // incoming-meteor telegraph on the ground
     const f=0.4+0.5*Math.sin(t*22), close=mt.t<0.6;

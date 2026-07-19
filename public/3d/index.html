@@ -391,6 +391,32 @@
   .choice:active{transform:scale(.985);}
   .choice .cname{font-size:16px;font-weight:800;color:var(--amber);display:flex;align-items:center;gap:8px;}
   .choice .cdesc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4;}
+  /* Primary navigation is visual and thumb-sized. Settings, Back, Leave, and other
+     utility actions intentionally remain compact .bigbtn controls. */
+  .navgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 14px;}
+  .navcard{min-width:0;min-height:138px;padding:13px 10px 11px;border:1px solid #333a4c;border-radius:16px;
+    background:linear-gradient(165deg,rgba(38,42,55,.92),rgba(14,15,22,.98));color:var(--ink);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.05);
+    transition:transform .08s,border-color .12s,background .12s,box-shadow .12s;}
+  .navcard:hover{transform:translateY(-2px);border-color:var(--amber);background:linear-gradient(165deg,rgba(68,53,31,.95),rgba(16,16,22,.98));box-shadow:0 14px 30px rgba(0,0,0,.42),0 0 20px rgba(232,163,61,.12);}
+  .navcard:active{transform:scale(.98)} .navcard:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  .navcard.lock{opacity:.38;cursor:default;filter:saturate(.45)} .navcard.lock:hover{transform:none;border-color:#333a4c;box-shadow:0 10px 24px rgba(0,0,0,.3);}
+  .navart{width:78px;height:78px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 7px 8px rgba(0,0,0,.55));}
+  .navname{font-size:15px;font-weight:900;line-height:1.12;color:#f5ead5;}
+  .navdesc{font-size:10.5px;line-height:1.3;color:var(--muted);margin-top:4px;}
+  .navmeta{color:var(--amber);font-weight:800}.navdone{color:var(--good);font-size:9px;letter-spacing:.08em;}
+  .destgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;text-align:left;margin:8px 0 14px;}
+  .destcard{min-height:178px;justify-content:flex-start;padding:8px 9px 11px;}
+  .destcard .navart{width:118px;height:108px;margin-bottom:2px}.destcard.side{border-color:rgba(196,123,255,.38);background:linear-gradient(165deg,rgba(48,30,65,.9),rgba(13,14,21,.98));}
+  .destcard.side .navmeta{color:#c98cff}.destcard .navdesc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .npcaction{max-width:300px;margin:12px auto 10px;min-height:164px}.npcaction .navart{width:92px;height:92px;}
+  .titlecards .navcard{min-height:150px;background:linear-gradient(180deg,rgba(24,20,30,.9),rgba(10,9,14,.92));border-color:rgba(200,160,90,.35)}
+  .titlecards .navart{width:86px;height:86px}.titlecards .navname{font-size:16px;color:#f3ddb0;}
+  @media (min-width:840px) and (pointer:fine){
+    .navgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.navcard{min-height:164px}.navart{width:96px;height:96px}.navname{font-size:17px}.navdesc{font-size:11.5px}
+    .destgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.destcard{min-height:230px}.destcard .navart{width:174px;height:158px}.titlecards{grid-template-columns:repeat(2,minmax(0,1fr));max-width:540px;margin-left:auto;margin-right:auto}
+  }
+  @media(max-width:390px){.navgrid,.destgrid{gap:7px}.navcard{min-height:126px;padding:9px 7px}.navart{width:68px;height:68px}.destcard{min-height:204px}.destcard .navart{width:100px;height:92px}.navname{font-size:13px}}
   .statgrid{text-align:left;background:rgba(255,255,255,.025);border:1px solid #262a36;border-radius:14px;padding:13px 15px;margin:0 0 18px;}
   .hint{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;}
   /* Audio + settings sliders */
@@ -509,7 +535,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.121.0-batch';
+const VERSION3D='1.122.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5468,6 +5494,12 @@ function decorateMenuIcons(){
 /* body has touch-action:none (the joystick needs it) — which silently kills native
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
    we compute the value from the drag ourselves and fire 'input' like the real thing. */
+function navCard(id,art,name,desc='',cls='',attrs=''){
+  return `<button class="navcard ${cls}" id="${id}" ${attrs}><img class="navart" src="${art}" alt=""><span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
+}
+const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:'icons/class-warrior.png',
+  board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
+  abyss:'icons/portal.png',beastkeeper:'icons/event-trophy.png'};
 function fixSliders(){
   ovcard.querySelectorAll('input[type=range]').forEach(el=>{
     if(el._pfix) return; el._pfix=true;
@@ -5512,13 +5544,15 @@ function openSlots(){
 function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
   showOverlayHTML(`<div class="tmenu" id="tmenu">
-    <button class="bigbtn tplay" id="playBtn">⚔ ENTER THE ABYSS</button>
-    <button class="bigbtn ghost" id="abyssBtn" style="border-color:rgba(150,90,200,.5)!important;color:#d9b6ff!important"><span class="ico ico-portal"></span> Abyssal Descent${meta.endlessBest?` · Best: Floor ${meta.endlessBest}`:''}</button>
-    <div class="trow">
-      <button class="bigbtn ghost" id="slotsBtn">Characters</button>
-      <button class="bigbtn ghost" id="skinBtn">✦ Skins</button>
-      <button class="bigbtn ghost" id="optBtn">More</button>
+    <div class="navgrid titlecards">
+      ${navCard('playBtn','icons/class-warrior.png','ENTER THE ABYSS','Begin or continue the adventure')}
+      ${navCard('abyssBtn','icons/event-secret-rift.png','ABYSSAL DESCENT',meta.endlessBest?`Personal best: Floor ${meta.endlessBest}`:'Endless survival')}
     </div>
+    <div class="navgrid titlecards">
+      ${navCard('slotsBtn','icons/character-sheet.png','CHARACTERS','Choose or manage a save slot')}
+      ${navCard('skinBtn','icons/event-trophy.png','SKINS','Change your Warden’s appearance')}
+    </div>
+    <button class="bigbtn ghost" id="optBtn">More &amp; Settings</button>
     <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
     </div>
     <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ PRESS TO BEGIN</div><div class="tver">v${VERSION3D}</div></div>`);
@@ -5559,12 +5593,12 @@ function openDiffSelect(){
   mode='menu'; showGameUI(false);
   const cards=Object.keys(DIFFS).map(id=>{ const D=DIFFS[id], open=diffOpen(id), mv=loadJSON(MKEY(diffMode(id)))||{};
     const beat=meta['beat'+id.charAt(0).toUpperCase()+id.slice(1)];
-    return `<button class="choice ${open?'':'lockc'}" ${open?`data-d="${id}"`:''}>
-      <div class="cname"><span>${open?D.icon:'🔒'}</span>${D.name}${beat?' <span style="color:var(--good);font-size:10px;margin-left:auto">✓ BEATEN</span>':''}</div>
-      <div class="cdesc">${open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock'}${open?`<br><b style="color:#ffd24a">${mv.gold||0}g</b> banked · zone ${(mv.zoneMax||0)+1}/${ZONES.length}`:''}</div></button>`; }).join('');
+    const art=id==='normal'?'icons/class-warrior.png':id==='hardcore'?'icons/event-boss-skull.png':'icons/event-trophy.png';
+    const desc=(open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock')+(open?`<br><span class="navmeta">${mv.gold||0}g · zone ${(mv.zoneMax||0)+1}/${ZONES.length}</span>`:'')+(beat?' <span class="navdone">✓ BEATEN</span>':'');
+    return navCard('',art,open?D.name:'Locked',desc,open?'':'lock',open?`data-d="${id}"`:'disabled'); }).join('');
   showOverlayHTML(`<div class="card"><h2 class="ovh">Choose your risk</h2><p class="ovsub">Each difficulty keeps its own save.</p>
-    <div class="choices">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
-  document.querySelectorAll('.choice[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
+    <div class="navgrid">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
+  document.querySelectorAll('.navcard[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
     meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
   document.getElementById('backBtn').onclick=titleScreen;
 }
@@ -5741,7 +5775,7 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
       ${v.lines.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
       ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div>
-    <button class="bigbtn" id="npcGo">${v.cta}</button>
+    ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}
     <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
   document.getElementById('npcGo').onclick=()=>n.open();
   document.getElementById('npcLeave').onclick=resumePlay;
@@ -6027,35 +6061,30 @@ function openHubMenu(){
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
   let rows='';
   ZONES.forEach((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
-    rows+=`<div class="zrow ${open?'':'zlock'}" ${open?`data-z="${i}"`:''}>
-      <div class="zic">${open?Z.icon:'🔒'}</div>
-      <div style="flex:1;min-width:0">
-        <div class="zn">${Z.name} ${done?'<span class="zdone">✓ cleared</span>':''}</div>
-        <div class="zd">${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'} · <b>Tier ${Z.tier}</b></div></div>
-      ${open?'<div class="zgo">▶</div>':''}</div>`;
+    const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Tier ${Z.tier}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
+    rows+=navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled');
     if(Z.side && meta.sideFound[Z.side.id]){ const sd=!!meta.sideDone[Z.side.id];   // discovered secrets hang under their parent
-      rows+=`<div class="zrow zside" data-s="${i}">
-        <div class="zic">${Z.side.icon}</div>
-        <div style="flex:1;min-width:0"><div class="zn">${Z.side.name} <span class="zsec">SECRET</span> ${sd?'<span class="zdone">✓ cleared</span>':''}</div>
-          <div class="zd">${Z.side.blurb} · <b>Tier ${Math.min(7,Z.tier+1)}</b></div></div>
-        <div class="zgo">▶</div></div>`; } });
+      rows+=navCard('',`icons/destinations/${Z.side.id}.png`,Z.side.name,`${Z.side.blurb}<br><span class="navmeta">Secret · Tier ${Math.min(7,Z.tier+1)}</span>${sd?' <span class="navdone">✓ CLEARED</span>':''}`,'destcard side',`data-s="${i}"`); } });
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
-    <div class="achlist" style="max-height:min(42vh,300px)">${rows}</div>
+    <div class="destgrid">${rows}</div>
+    <div class="sect">Waystation keepers</div>
+    <div class="navgrid">
+      ${navCard('trainBtn','icons/class-warrior.png','Class Trainer','Classes, skills, and trials')}
+      ${navCard('questBtn','icons/event-quest-marker.png','Quest Board','Review active postings')}
+      ${navCard('shopBtn','icons/action_buy.png','Shop','Spend gold')}
+      ${navCard('bagBtn','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
+      ${navCard('forgeBtn','icons/action_forge_fuse.png','The Forge','Fuse gear')}
+      ${navCard('wardBtn','icons/class-mage.png','Wardrobe','Skins and cosmetics')}
+      ${navCard('wstudioHub','icons/damage-physical.png','Weapon Studio','Weapons and designs')}
+    </div>
     <button class="bigbtn" id="riseBtn">Rise</button>
-    <button class="bigbtn ghost" id="trainBtn">Class Trainer</button>
-    <button class="bigbtn ghost" id="questBtn">Quest Board</button>
-    <button class="bigbtn ghost" id="shopBtn">Shop — spend gold</button>
-    <button class="bigbtn ghost" id="bagBtn">${actionIcon('bag-stash')}Bag · ${meta.stash.length}/${STASH_CAP}</button>
-    <button class="bigbtn ghost" id="forgeBtn">${actionIcon('forge-fuse')}The Forge — fuse gear</button>
-    <button class="bigbtn ghost" id="wardBtn">Wardrobe</button>
-    <button class="bigbtn ghost" id="wstudioHub">🗡 Weapon Studio</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.getElementById('riseBtn').onclick=wsResume;
-  document.querySelectorAll('.zrow[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
-  document.querySelectorAll('.zrow[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
+  document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
+  document.querySelectorAll('.destcard[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
   document.getElementById('trainBtn').onclick=()=>openTrainer(openHubMenu);
   document.getElementById('questBtn').onclick=()=>openQuestBoard(openHubMenu);
   document.getElementById('shopBtn').onclick=()=>openShop(openHubMenu);
@@ -6587,17 +6616,17 @@ function openPause(){
   mode='pause';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
-    <button class="bigbtn" id="resBtn">Resume</button>
+    ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
-    <div class="pgrid">
-      <button class="bigbtn ghost" id="gearBtn">Gear</button>
-      <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons &amp; Designs</button>
-      <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
-      <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
-      <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
-      <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
-      <button class="bigbtn ghost" id="classBtn" ${G&&G.trial?'style="opacity:.4"':''}>⚔️ ${curClass().disp} · r${classState(meta.classId).rank}</button>
+    <div class="navgrid">
+      ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
+      ${navCard('wstudioBtn','icons/damage-physical.png','Weapons & Designs','Open the studio')}
+      ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
+      ${navCard('classesBtn',`icons/class-${meta.classId}.png`,'Classes & Skills','Ranks, paths, and skills')}
+      ${navCard('skinBtn','icons/class-mage.png','Skins','Change your look')}
+      ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
+      ${navCard('classBtn',`icons/class-${meta.classId}.png`,curClass().disp,`Rank ${classState(meta.classId).rank}`,G&&G.trial?'lock':'',G&&G.trial?'disabled':'')}
     </div>
     <div class="sect">Settings</div>
     <div class="pgrid">
@@ -8291,7 +8320,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
@@ -8304,7 +8333,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
   get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
   snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,
-    playMode:MODE, gold:meta.gold, perks:Object.assign({},meta.perks||{}), camMode:meta.camMode, camYaw:G&&+((G.camYaw||0).toFixed(2)), camPitch:G&&+((G.camPitch||0).toFixed(2)),
+    playMode:MODE, time:G&&G.time, audioPaused:gameAudioPaused, audioContext:actx&&actx.state,
+    gold:meta.gold, perks:Object.assign({},meta.perks||{}), camMode:meta.camMode, camYaw:G&&+((G.camYaw||0).toFixed(2)), camPitch:G&&+((G.camPitch||0).toFixed(2)),
     doorways:G&&G.rooms.reduce((a,r)=>a+(r.doorways?r.doorways.length:0),0), mazeGoalD:G&&G._dbg&&G._dbg.goalD,
     crit:p&&+effCrit(p).toFixed(3), goldFind:p&&+effGoldFind(p).toFixed(2), amulet:p&&!!p.gear.amulet, ring:p&&!!p.gear.ring,
     p:p&&{x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z),yaw:+p.yaw.toFixed(2),onGround:p.onGround,hp:Math.round(p.hp),effMaxHp:Math.round(effMaxHp(p)),lvl:p.level,

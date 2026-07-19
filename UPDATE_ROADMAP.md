@@ -1,5 +1,12 @@
 # BLADEFALL — Master Update Roadmap
 
+## [Codex | 2026-07-18] Waystation destination art + prominent navigation cards (SHIPPED v1.122.0)
+
+- [x] Integrated all 15 approved Waystation destination designs: eight main-route gates and seven side zones, with the corrected two-icon sheet used exclusively for The Outskirts and Hollow Pass.
+- [x] Rebuilt the Waystone picker around large responsive destination cards and introduced one reusable prominent navigation-card system across title, difficulty, pause/character, and keeper interaction surfaces.
+- [x] Kept Back, settings, audio sliders, leave actions, and other utility controls compact so primary navigation remains visually dominant.
+- [x] Verified muted desktop and mobile browser flows, destination selection, NPC interaction, and true pause simulation/SFX freezing; existing saves and trial tuning remain untouched.
+
 Everything below is organized in a sensible **build order** (phases). Each phase is a
 self-contained work session. Work top to bottom.
 

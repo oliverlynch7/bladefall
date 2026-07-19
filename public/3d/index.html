@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.171.0';
+const VERSION3D='1.172.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1651,8 +1651,8 @@ function flushAch(){
 
 /* ---------------- Stages → 3D arenas ---------------- */
 const STAGES=[
-  {name:'The Outskirts',theme:'plains',sky:[0.12,0.17,0.13],ground:'#33512f',aw:760,ad:520,grunts:6,flyers:0,type:'normal'},
-  {name:'Black Woods',theme:'forest',sky:[0.07,0.13,0.10],ground:'#1d3026',aw:800,ad:540,grunts:5,flyers:3,mix:{toxling:2},type:'normal'},
+  {name:'The Outskirts',theme:'plains',sky:[0.32,0.46,0.62],ground:'#8a8445',aw:760,ad:520,grunts:6,flyers:0,type:'normal'},
+  {name:'Black Woods',theme:'forest',sky:[0.10,0.18,0.16],ground:'#263c28',aw:800,ad:540,grunts:5,flyers:3,mix:{toxling:2},type:'normal'},
   {name:'The Brute',theme:'badlands',sky:[0.14,0.10,0.10],ground:'#33231f',aw:700,ad:500,grunts:2,flyers:1,type:'miniboss',boss:'brute'},
   {name:'Hollow Pass',theme:'canyon',sky:[0.14,0.12,0.09],ground:'#352a1e',aw:820,ad:540,grunts:5,flyers:2,mix:{sparkling:3},type:'normal'},
   {name:'Hollow Marksman',theme:'canyon',sky:[0.12,0.10,0.07],ground:'#312718',aw:760,ad:540,grunts:2,flyers:2,type:'miniboss',boss:'archer'},
@@ -1824,7 +1824,10 @@ function questUpdate(){
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
     applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`,d); return; }
-  if(G.side){ applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name}`,qrow(false,'☐','Reach the exit',`Tier ${G.zoneTier}`),`side${Z.side.id}${G.zoneTier}`); return; }
+  if(G.side){ const gd=G.sideGuardian, hunt=!!gd, done=hunt&&gd.dead, task=G.sideTask||'Reach the exit';
+    let rows=qrow(done,done?'☑':(hunt?'⚔':'☐'),done?'Trial guardian defeated':task,null);
+    if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
+    applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
   let rows,sig;
   if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
   else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
@@ -3252,6 +3255,80 @@ const SCAPES={
     finishScape(ctx,{sx:0,sz:170,sy:0, gx:-120,gz:-2410, decoCol:STONE,decoTheme:'apex',decoTall:320});
   },
 };
+/* World Expansion: authored replacements ship pair-by-pair without disturbing the proven
+   scapes below. Each replacement is a real journey made from named, visually distinct districts. */
+const EXPANDED_SCAPES={
+  outskirts(ctx){ const {rnd,mkMonster}=ctx, woods=G.area===1;
+    const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
+    const room=(name,x,z,w,d)=>{ const r={name,x,z,w,d,monsters:[],encounter:false,cleared:true}; vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const road=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
+    const tree=(x,z,h=92)=>{ vcol(x,z,22,22,h); G.deco.push({x,z,y0:h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains'}); G.deco.push({x:x-16,z:z+6,y0:h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains'}); };
+    const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
+    const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!woods){
+      const gate=room('Old South Road',0,0,760,560),caravan=room('Broken Caravan',-420,-620,680,520),acres=room('Golden Acres',420,-720,760,680),farm=room('Miller Farmstead',80,-1320,900,600),orchard=room('Whisper Orchard',-650,-1720,660,620),ridge=room('Windmill Ridge',480,-1920,720,620),hamlet=room('Sunward Hamlet',40,-2600,980,700),dream=room('Dreaming Field',-430,-3340,800,660),henge=room('Old Waystone Hill',120,-4080,900,720);
+      road(gate,caravan,170); road(gate,acres,170); road(caravan,farm); road(acres,farm,190); road(farm,orchard,140); road(farm,ridge); road(orchard,hamlet,140); road(ridge,hamlet,160); road(hamlet,dream,180); road(dream,henge,180);
+      // Blue pond, a wrecked caravan and broad golden fields establish a sunny pastoral identity immediately.
+      G.deco.push({x:210,z:120,y0:0,w:230,h:2,d:150,c:'#3d708d'}); for(let k=0;k<12;k++) G.deco.push({x:110+k*19,z:190,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
+      G.deco.push({x:-430,z:-630,y0:12,w:150,h:30,d:72,c:'#6b4827'}); for(const x of [-500,-360]) vcol(x,-610,26,26,28); G.deco.push({x:-430,z:-650,y0:42,w:130,h:8,d:62,c:'#372719'});
+      field(420,-720,13,13); field(190,-1320,10,7); fence(420,-390,700,0); fence(760,-720,0,610);
+      // Farmhouse and barn loft: the first optional vertical treasure route.
+      G.deco.push({x:-90,z:-1340,y0:0,w:250,h:95,d:180,c:'#8b5d35'}); G.deco.push({x:-90,z:-1340,y0:95,w:280,h:28,d:205,c:'#5a2e24'});
+      climbRun(-210,-1230,0,-210,-1370,82,66); vplat(-90,-1340,108,250,170,{terrace:true,checkpoint:true}); chest(-40,-1360,108);
+      // A shaded orchard is the safe scenic branch. Windmill Ridge is the faster, exposed parkour branch.
+      for(let k=0;k<22;k++){ const ix=k%5,iz=Math.floor(k/5); tree(-820+ix*86,-1890+iz*92,76+(k%4)*9); }
+      vcol(480,-1980,110,110,185); G.deco.push({x:480,z:-1980,y0:185,w:150,h:24,d:150,c:'#eee0b8'}); G.deco.push({x:480,z:-1980,y0:209,w:18,h:118,d:18,c:WOOD});
+      for(let k=0;k<4;k++){ const a=k*1.57; G.deco.push({x:480+Math.cos(a)*52,z:-1980+Math.sin(a)*52,y0:240,w:k%2?12:110,h:k%2?110:12,d:12,c:'#e8d4a7'}); }
+      climbRun(310,-1810,0,480,-1980,185,72); chest(480,-1980,185);
+      // The occupied hamlet provides alleys and a continuous rooftop traversal line.
+      for(const h of [[-260,-2500,230,170],[60,-2710,260,180],[320,-2490,210,160]]){ G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:82,d:h[3],c:'#8d6039'}); G.deco.push({x:h[0],z:h[1],y0:82,w:h[2]+24,h:24,d:h[3]+22,c:'#543126'}); }
+      climbRun(-380,-2450,0,-260,-2500,104,68); vplat(60,-2710,104,240,160,{terrace:true}); climbRun(60,-2710,104,320,-2490,104,72);
+      field(-430,-3340,15,12); for(const sx of [-650,-430,-210]){ vcol(sx,-3470,8,8,48); G.deco.push({x:sx,z:-3470,y0:42,w:58,h:7,d:8,c:WOOD}); G.deco.push({x:sx,z:-3470,y0:49,w:16,h:16,d:14,c:'#d9c08c'}); }
+      const kx=120,kz=-4140; vplat(kx,kz,42,210,210); const top=vplat(kx,kz,82,128,128,{checkpoint:true}); for(let k=0;k<7;k++){ const a=k/7*6.283; G.deco.push({x:kx+Math.cos(a)*86,z:kz+Math.sin(a)*82,y0:42,w:20,h:40+(k%3)*8,d:14,c:'#626879'}); } G.deco.push({x:kx,z:kz,y0:82,w:30,h:54,d:20,c:'#7c8498'});
+      // Forest edges frame open farmland instead of tinting the entire world green.
+      for(let k=0;k<42;k++){ const R=[gate,caravan,acres,farm,orchard,ridge,hamlet,dream,henge][Math.floor(rnd()*9)],edge=rnd()<.5?-1:1; tree(R.x+edge*(R.w/2-20),R.z+(rnd()*2-1)*(R.d/2-20),72+rnd()*64); }
+      const glade=room('Hidden Copse',-1120,-2300,330,300); vseg(-760,-2300,720,100); for(let k=0;k<8;k++){ const a=k/8*6.28; tree(glade.x+Math.cos(a)*145,glade.z+Math.sin(a)*130,95+rnd()*34); } scapeSecret(ctx,glade.x,glade.z,0); chest(glade.x-60,glade.z+40);
+      mkMonster('sporeback',-650,-1720,orchard); mkMonster('sporeback',-300,-3340,dream); mkMonster('thornboar',-420,-620,caravan);
+      scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:farm.x,z:farm.z,room:farm},{x:hamlet.x,z:hamlet.z,room:hamlet},{x:dream.x,z:dream.z,room:dream}]);
+      scapeFind(ctx,top.x,top.z,82); finishScape(ctx,{sx:0,sz:220,sy:0,gx:120,gz:-4220,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:190});
+    } else {
+      const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
+      road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);
+      for(let k=0;k<82;k++){ const R=[edge,creek,camp,grove,hollow,roots,shrine,gate][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.33+rnd()*.18); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,92+rnd()*90); }
+      G.deco.push({x:-440,z:-650,y0:0,w:620,h:2,d:90,c:'#315f68'}); for(let k=0;k<12;k++) vplat(-700+k*48,-650,10+(k%3)*7,38,48,{root:true});
+      for(const t of [[240,-850],[490,-970],[520,-780]]) G.deco.push({x:t[0],z:t[1],y0:0,w:110,h:44,d:70,c:'#5b4028'});
+      for(let k=0;k<8;k++){ const a=k/8*6.28; G.deco.push({x:Math.cos(a)*250,z:-1580+Math.sin(a)*230,y0:80,w:12,h:12,d:12,c:'#ffd26b'}); }
+      vcol(-620,-2250,150,150,280); climbRun(-760,-2100,0,-620,-2250,190,72); vplat(-620,-2250,206,250,230,{checkpoint:true}); chest(-620,-2250,206);
+      for(let k=0;k<8;k++) vplat(160+k*96,-2440,18+Math.sin(k)*8,82,66,{root:true}); climbRun(220,-2250,0,500,-2440,160,70); for(let k=0;k<5;k++) vplat(500+(k-2)*112,-2440-k*68,160+(k%2)*28,78,78,{root:true}); chest(690,-2650,188);
+      G.deco.push({x:40,z:-3300,y0:0,w:300,h:2,d:250,c:'#456c78'}); for(let k=0;k<6;k++){ const a=k/6*6.28; G.deco.push({x:40+Math.cos(a)*190,z:-3300+Math.sin(a)*160,y0:0,w:24,h:70,d:18,c:'#6a7180'}); }
+      mkMonster('sporeback',-440,-650,creek); mkMonster('toxling',390,-900,camp); mkMonster('sporeback',0,-1580,grove); mkMonster('toxling',500,-2440,roots);
+      scapeFetch(ctx,[{x:-620,z:-2250,y:206},{x:690,z:-2650,y:188},{x:-440,z:-650,y:18},{x:40,z:-3300,y:0},{x:0,z:-3970,y:0}]);
+      finishScape(ctx,{sx:0,sz:220,sy:0,gx:0,gz:-4240,decoCol:'#25432e',decoTheme:'forest',decoTall:250});
+    }
+  }
+};
+const SIDE_SCAPES={
+  thornwood(ctx){ const {rnd,mkMonster}=ctx,BARK='#493020',ROOT='#69472a',LEAF='#24462b',GLOW='#b56cff';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const tree=(x,z,h)=>{ vcol(x,z,26,26,h); G.deco.push({x,z,y0:h,w:68,h:46,d:68,c:tint(LEAF,'#000',rnd()*.2),theme:'forest'}); };
+    const rootRun=(x0,z0,x1,z1,y0=18,y1=18)=>{ const n=Math.ceil(Math.hypot(x1-x0,z1-z0)/105); for(let k=1;k<n;k++){ const t=k/n; vplat(x0+(x1-x0)*t,z0+(z1-z0)*t,y0+(y1-y0)*t,86,62,{root:true}); } };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const verge=room('Hunter Verge',0,0,760,600),snares=room('Snarewood',-480,-720,720,660),burrow=room('Burrowed Road',440,-1040,720,620),cathedral=room('Root Cathedral',0,-1780,980,760),canopy=room('High Canopy',-600,-2530,420,360,190),mire=room('Thorn Mire',520,-2740,760,700),heart=room('Heart Grove',0,-3660,1040,820),exit=room('Old Hunter Gate',0,-4560,820,620);
+    rootRun(0,-260,-480,-460); rootRun(0,-260,440,-730); rootRun(-480,-1040,0,-1450); rootRun(440,-1350,0,-1450); rootRun(0,-2150,-600,-2530,70,190); rootRun(0,-2150,520,-2740,24,24); rootRun(-600,-2530,0,-3300,190,0); rootRun(520,-2740,0,-3300,24,0); rootRun(0,-4070,0,-4310);
+    for(let k=0;k<52;k++){ const R=[verge,snares,burrow,cathedral,canopy,mire,heart,exit][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.52+rnd()*.12); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,100+rnd()*120); }
+    for(let k=0;k<10;k++){ const a=k/10*6.28; G.deco.push({x:Math.cos(a)*300,z:-1780+Math.sin(a)*260,y0:0,w:32,h:220+(k%3)*60,d:32,c:BARK}); G.deco.push({x:Math.cos(a)*300,z:-1780+Math.sin(a)*260,y0:220+(k%3)*60,w:42,h:18,d:42,c:GLOW}); }
+    for(let k=0;k<7;k++){ const x=-700+k*74; G.deco.push({x,z:-720,y0:0,w:8,h:50+(k%2)*24,d:8,c:ROOT}); G.deco.push({x,z:-720,y0:42,w:38,h:7,d:8,c:ROOT}); }
+    vcol(-600,-2530,210,210,188); for(let k=0;k<7;k++){ const a=k*.86; vplat(-600+Math.cos(a)*210,-2530+Math.sin(a)*210,190+k*28,84,84,{root:true}); } vplat(-600,-2530,352,260,240,{checkpoint:true,terrace:true}); chest(-600,-2530,352);
+    G.deco.push({x:520,z:-2740,y0:0,w:660,h:2,d:590,c:'#263d35'}); for(let k=0;k<16;k++){ const a=k/16*6.28,rr=120+(k%3)*80; vplat(520+Math.cos(a)*rr,-2740+Math.sin(a)*rr,12+(k%4)*8,88,72,{root:true}); }
+    for(let k=0;k<12;k++){ const a=k/12*6.28; G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:0,w:22,h:110+(k%4)*35,d:22,c:ROOT}); G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:110+(k%4)*35,w:38,h:18,d:38,c:GLOW}); }
+    room('Forgotten Hunter Cache',-880,-3650,280,260); rootRun(-520,-3660,-740,-3650); chest(-880,-3650); chest(420,-3820);
+    for(const p of [[-480,-720,snares],[440,-1040,burrow],[0,-1780,cathedral],[520,-2740,mire],[0,-3660,heart]]){ mkMonster('thornboar',p[0]-45,p[1],p[2]); mkMonster('sporeback',p[0]+55,p[1]+30,p[2]); }
+    let guardian; {guardian=mkMonster('toxling',0,-3660,heart);makeElite(guardian);guardian.maxHp=guardian.hp=Math.round(guardian.hp*2.4);guardian.name='The Thornheart';} {const e=mkMonster('sporeback',-600,-2530,canopy);e.y=352;e.sx=e.x;e.sz=e.z;makeElite(e);}
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4680,decoCol:'#223c29',decoTheme:'forest',decoTall:300});
+    G.portal=null; G.sideGuardian=guardian; G.sideTask='Track and defeat the Thornheart'; G.sideTaskDone=false; questUpdate();
+  }
+};
 function STONE_C(){ return '#6b6b73'; }
 /* ================= BOSS ARENAS (Phase 17) =================
    Every zone boss fights on a purpose-built themed SET-PIECE instead of the shared maze.
@@ -3437,11 +3514,19 @@ function loadStage(i){
     return m; };
   /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
+  if(!isBoss && !isMini && !G.trial && !G.side && EXPANDED_SCAPES[curZone().id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
   if(!isBoss && !isMini && !G.trial && !G.side && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
     // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
+  if(!isBoss && !isMini && !G.trial && G.side && curZone().side && SIDE_SCAPES[curZone().side.id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    SIDE_SCAPES[curZone().side.id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
   }
   /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
      Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
@@ -4674,6 +4759,7 @@ function killEnemy(e,weaponKill){
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   if(weaponKill) gainMana(G.p,12,true);
   if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p);   // Perfect Hunt: kill-while-Clear-Aim trims cooldowns
   // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)

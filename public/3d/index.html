@@ -546,7 +546,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.128.0';
+const VERSION3D='1.129.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7943,89 +7943,98 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
     for(let k=0;k<4;k++){ const a=t*1.6+k*1.57; bx(Math.cos(a)*W*0.85, 46+yo*0.5+Math.sin(t*3+k)*8, Math.sin(a)*W*0.6, 5,9,5, ice,iceD,0.85); }   // orbiting shards
   }
   else if(e.type==='colossus' && bth==='marble'){
-    // Marble Colossus — a radiant palace guardian of white marble and gold, NOT an ember recolor
-    const flash=e.hitFlash>0, M=flash?col:'#e6e4ec', MD=flash?col:'#bcbccc', G2=flash?col:GOLD;
-    bx(-W*0.26,16,0, 20,32,22, MD); bx(W*0.26,16,0, 20,32,22, MD);
-    bx(0,36,0, W*0.9,12,W*0.6, MD); bx(0,42,W*0.3, W*0.7,4,2, G2);    // hips + gold band
-    bx(0,64,0, W*1.0,46,W*0.66, M);
-    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.335, 2.6,40,1.4, G2, GOLDL,0.3);   // gilt filigree channels
-    bx(0,60,W*0.35, 15,15,4, GOLDL,'#fff8d6',0.9);                   // glowing gold heart-core
-    // column-shoulders: fluted marble pillars integrated into each shoulder
-    for(const s2 of [-1,1]){ bx(s2*W*0.58,84,0, 22,26,24, M); bx(s2*W*0.58,98,0, 26,5,28, MD); bx(s2*W*0.58,70,0, 26,5,28, MD);
-      const raise=(e.shootT<0.5&&s2>0)?-0.9:0.12;
-      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(15,34,15, M); mv(0,-22,3); box(19,16,18, MD); popM(); }
-    bx(0,92,4, 17,13,14, M);                                          // serene head
-    bx(-4.5,93,W*0.14+6, 4,3,1.4, GOLDL, GOLDL); bx(4.5,93,W*0.14+6, 4,3,1.4, GOLDL, GOLDL);   // gold eyes
-    for(let i=0;i<9;i++){ const a=(i/9)*6.283; bx(Math.cos(a)*22,108,-6+Math.sin(a)*10, 3,3,3, G2, GOLDL,0.55); }   // a sunburst halo behind the head
+    // Marble Colossus — a radiant palace guardian of white marble and gold: fluted columns, gilt filigree, sunburst halo. (HIGH-DETAIL)
+    const flash=e.hitFlash>0, M=flash?col:'#e6e4ec', MD=flash?col:'#bcbccc', MShad=flash?col:'#9a9ab0', G2=flash?col:GOLD, glo=0.6+0.3*Math.sin(t*2);
+    for(const s of [-1,1]){ bx(s*W*0.26,16,0, 22,32,24, MD);
+      for(let i=-1;i<=1;i++) bx(s*W*0.26+i*7,16,12.5, 2.4,30,1.4, MShad);          // column flutes
+      bx(s*W*0.26,2,0, 28,6,30, M); bx(s*W*0.26,6,0, 24,3,26, G2);                  // plinth + gilt base
+      bx(s*W*0.26,32,0, 26,5,28, M); }                                              // knee capital
+    bx(0,36,0, W*0.92,12,W*0.62, MD); bx(0,42,W*0.3, W*0.72,4,2, G2,GOLDL,0.3);
+    bx(0,64,0, W*1.0,46,W*0.66, M); bx(0,64,W*0.32, W*0.7,40,2, MShad);             // torso + recessed panel
+    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.34, 2.6,40,1.4, G2, GOLDL,0.35); for(const s of [-1,1]) bx(s*W*0.36,64,W*0.33, 3,40,1.4, G2,GOLDL,0.3);   // gilt channels
+    bx(0,60,W*0.35, 15,15,4, GOLDL,'#fff8d6',glo); bx(0,60,W*0.37, 8,8,2,'#fffbe8','#fff',glo);
+    for(let i=0;i<8;i++){ const a=i*0.785; bx(Math.cos(a)*11,60+Math.sin(a)*11,W*0.36, 2.4,2.4,1, G2,GOLDL,0.5*glo); }   // radiant cracks
+    for(const s of [-1,1]){ bx(s*W*0.58,84,0, 22,26,24, M);
+      for(let i=-1;i<=1;i++) bx(s*W*0.58+i*7,84,12, 2.4,24,1.4, MShad);             // shoulder flutes
+      bx(s*W*0.58,98,0, 28,6,30, M); bx(s*W*0.58,101,0, 24,3,26, G2); bx(s*W*0.58,70,0, 28,5,30, MD);
+      const raise=(e.shootT<0.5&&s>0)?-0.9:0.12;
+      pushM(); mv(s*W*0.62,72,2); rotX(raise); box(15,34,15, M); bx(0,0,8, 11,26,1.4, MShad); mv(0,-22,3); box(19,16,18, MD);
+        for(let i=0;i<3;i++) bx(-5+i*5,-2,9, 3,4,3, M); popM(); }
+    bx(0,92,4, 17,14,15, M); bx(0,88,W*0.14+8, 13,5,4, MShad);
+    bx(-4.5,93,W*0.14+7, 4,3,1.4, GOLDL, GOLDL); bx(4.5,93,W*0.14+7, 4,3,1.4, GOLDL, GOLDL);
+    for(let i=-2;i<=2;i++) bx(i*4,102,2, 3,5,3, G2,GOLDL,0.4);                       // laurel crown
+    for(let i=0;i<12;i++){ const a=(i/12)*6.283, r=20+(i%2)*6; bx(Math.cos(a)*r,110,-8+Math.sin(a)*9, 2.6,(i%2?9:5),2.6, G2,GOLDL,0.5*glo); }   // sunburst halo
   }
   else if(e.type==='colossus'){
-    // Ember Colossus — a basalt furnace siege engine: black rock, molten seams, a furnace-lit maw, smokestacks
-    const flash=e.hitFlash>0, B=flash?col:'#241d1c', BD=flash?col:'#150f0f';
-    bx(-W*0.26,16,0, 21,32,23, BD); bx(W*0.26,16,0, 21,32,23, BD);
-    bx(-W*0.26,28,0, 22,6,24,'#ff7a2a','#ff9a4a',0.5+0.2*Math.sin(t*4)); bx(W*0.26,28,0, 22,6,24,'#ff7a2a','#ff9a4a',0.5+0.2*Math.sin(t*4+1));  // knee vents
+    // Ember Colossus — a basalt furnace siege engine: chained plating, molten seams, furnace maw, smokestacks, rising embers. (HIGH-DETAIL)
+    const flash=e.hitFlash>0, B=flash?col:'#241d1c', BD=flash?col:'#150f0f', BL=flash?col:'#3a2a24', lav='#ff8a3a', lavB='#ffb35a', em=0.5+0.3*Math.sin(t*4);
+    for(const s of [-1,1]){ bx(s*W*0.26,16,0, 22,32,24, BD); bx(s*W*0.26,20,12, 16,22,2, BL);
+      for(let i=0;i<3;i++) bx(s*W*0.26-6+i*6,16,13, 1.6,26,1, lav,lavB,0.7*em);
+      bx(s*W*0.26,28,0, 24,6,26, lav,lavB,0.45+0.2*Math.sin(t*4+s)); bx(s*W*0.26,2,0, 26,6,28, BD); }
     bx(0,36,0, W*0.9,12,W*0.6, BD);
     bx(0,64,0, W*1.02,46,W*0.68, B);
-    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.34, 3.6,40,1.6,'#ff8a3a','#ffb35a',0.8);   // vertical lava seams
-    bx(0,72,W*0.34, W*0.74,3.4,1.6,'#ff8a3a','#ffb35a',0.8);
-    bx(0,58,W*0.36, 17,20,4, '#ffb020','#ff7a1a',0.95);              // the open furnace maw (chest)
-    for(let i=-1;i<=1;i++) bx(i*6,58,W*0.38, 3,16,2,'#160a06');       // furnace grate bars
-    for(const s2 of [-1,1]){ bx(s2*W*0.58,86,0, 24,22,25, BD);
-      bx(s2*W*0.5,102,-6, 8,16,8,'#0f0a09'); for(let i=0;i<2;i++) bx(s2*W*0.5,112+((t*24+i*8)%16),-6, 4,5,4,'#555','#888',0.4);   // shoulder smokestacks + smoke
-      const raise=(e.shootT<0.5&&s2>0)?-0.9:0.12;
-      pushM(); mv(s2*W*0.62,72,2); rotX(raise); box(16,34,16, B); mv(0,-22,3); box(20,17,19, BD);
-        bx(0,0,6, 14,4,2,'#ff8a3a','#ffb35a',0.7); popM(); }          // arms → glowing-knuckle fists
-    bx(0,92,4, 18,14,15, BD);                                         // sunken furnace head
-    bx(0,90,W*0.14+7, 12,5,2,'#ffb020','#ff7a1a',0.95);               // glowing mouth-slot
-    bx(-4.5,95,W*0.14+7, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,95,W*0.14+7, 4,3,1.4,'#ffd24a','#ffd24a');
-    for(let i=-2;i<=2;i++){ pushM(); mv(i*10,104,-4); rotX(-0.35); box(4,9,4, BD); popM(); }   // crown of basalt shards
+    for(let i=-2;i<=2;i++) bx(i*W*0.2,64,W*0.34, 3,42,1.6, lav,lavB,0.7*em); bx(0,74,W*0.34, W*0.76,3,1.6, lav,lavB,0.7);
+    bx(0,58,W*0.36, 18,22,4, '#ffb020','#ff7a1a',0.5+0.4*em);
+    for(let i=-1;i<=1;i++) bx(i*6,58,W*0.39, 3,18,2,'#160a06');
+    for(let i=0;i<4;i++) bx((i-1.5)*W*0.16, 90+((t*30+i*9)%40), W*0.1, 3,4,3, lav,lavB,0.6*(1-((t*30+i*9)%40)/40));   // rising embers
+    for(const s of [-1,1]){ bx(s*W*0.58,86,0, 24,22,26, BD); bx(s*W*0.58,90,13, 18,16,2, BL);
+      bx(s*W*0.5,104,-6, 9,18,9,'#0f0a09'); bx(s*W*0.5,113,-6, 11,3,11,'#2a2018');
+      for(let i=0;i<2;i++) bx(s*W*0.5,118+((t*24+i*8)%18),-6, 4,5,4,'#666','#999',0.35);
+      const raise=(e.shootT<0.5&&s>0)?-0.9:0.12;
+      pushM(); mv(s*W*0.62,72,2); rotX(raise); box(16,34,16, B); for(let i=0;i<3;i++) bx(0,8-i*10,9, 12,1.6,1, lav,lavB,0.6*em);
+        mv(0,-22,3); box(20,17,19, BD); bx(0,0,7, 15,5,2, lav,lavB,0.7*em); popM(); }
+    bx(0,92,4, 18,15,16, BD); bx(0,88,W*0.14+8, 13,4,3,'#0f0a09');
+    bx(0,90,W*0.14+8, 12,5,2, '#ffb020','#ff7a1a',0.5+0.4*em);
+    bx(-4.5,96,W*0.14+8, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,96,W*0.14+8, 4,3,1.4,'#ffd24a','#ffd24a');
+    for(let i=-2;i<=2;i++){ pushM(); mv(i*9,105,-3); rotX(-0.35); box(4,10,4, BD); popM(); }
   }
   else if(e.type==='king'){
-    // the Abyss King: floating void royal, grand crown, scepter, orbiting shards
-    const yo=4+Math.sin(t*1.8)*3; pushM(); mv(0,yo,0);
-    bx(0,12,0, W*0.95,18,W*0.66, darker);                            // robe base
-    bx(0,34,0, W*0.8,26,W*0.55, col);
-    bx(0,42,W*0.29, 12,14,2.4, '#c47bff','#b06bff');                 // void core
-    for(const s2 of [-1,1]){ bx(s2*W*0.46,52,0, 15,10,16, lite);
-      pushM(); mv(s2*W*0.5,44,6); rotZ(s2*0.2); box(6,16,6, col);     // long forearm
-        for(let i=-1;i<=1;i++){ pushM(); mv(i*2.4,-10,2); rotZ(i*0.3); box(1.8,9,1.8, darker); popM(); } popM(); }   // reaching clawed fingers
-    pushM(); mv(0,40,-W*0.3); rotX(0.1); box(W*0.9,42,2.4, darker); popM(); // royal cape
-    for(let i=0;i<5;i++){ const a=t*0.7+i*1.257; bx(Math.cos(a)*W*0.5, 6+((t*8+i*7)%30), -W*0.3+Math.sin(a)*4, 3,3,3,'#8a4fd0','#c47bff',0.45); }   // cloak dissolving into motes
-    bx(0,66,0, 14,13,12, tint(col,'#fff',0.06));
-    bx(-3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC); bx(3.6,67,W*0.20, 3.2,2.8,1.4, eyeC, eyeC);
-    bx(0,74,0, 15,3,13,'#caa23a');                                    // crown band
-    for(let i=-2;i<=2;i++) bx(i*5.4,79+(i===0?4:0),0, 2.8,8+(i===0?6:0),2.8, '#f7d79a', i===0?'#fff2a0':null);
-    pushM(); mv(W*0.56,38,4); box(3,40,3,'#8a76b0'); mv(0,24,0); box(8,8,8,'#c47bff','#b06bff'); popM(); // scepter
+    // the Abyss King — floating void royal: layered robe, tiered crown, void tendrils, scepter, orbiting shards. (HIGH-DETAIL)
+    const yo=4+Math.sin(t*1.8)*3, vc='#c47bff', vcD='#8a4fd0', gld='#caa23a'; pushM(); mv(0,yo,0);
+    bx(0,10,0, W*0.98,20,W*0.68, darker); bx(0,22,0, W*0.86,16,W*0.58, tint(col,'#000',0.2));
+    for(let i=-2;i<=2;i++) bx(i*W*0.17,0,W*0.24, W*0.11,10,3, darker);
+    bx(0,36,0, W*0.8,26,W*0.55, col);
+    for(let i=0;i<3;i++) bx(0,26+i*8,W*0.3, W*0.5-i*4,2.4,1.4, gld,GOLDL,0.3);
+    bx(0,42,W*0.3, 13,16,3, '#1a0824','#000',1); bx(0,42,W*0.32, 8,10,1.6, vc,vcD,0.9);
+    for(let i=0;i<8;i++){ const a=t*2+i*0.785; bx(Math.cos(a)*9,42+Math.sin(a)*10,W*0.33, 1.8,1.8,1, '#e0b0ff','#fff',0.7); }
+    for(const s of [-1,1]){ bx(s*W*0.48,54,0, 16,11,17, lite); bx(s*W*0.48,58,0, 12,4,14, gld,GOLDL,0.3);
+      pushM(); mv(s*W*0.52,46,6); rotZ(s*0.2); box(6,18,6, col); bx(0,-2,4, 4,14,1.4, darker);
+        mv(0,-16,2); for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-4,2); rotZ(i*0.35); box(1.8,11,1.8, tint(col,'#000',0.3)); bx(0,-6,0, 1.4,3,1.4, vc,vc,0.6); popM(); } popM(); }
+    pushM(); mv(0,40,-W*0.32); rotX(0.1); box(W*0.94,44,2.4, darker); for(let i=-2;i<=2;i++) bx(i*W*0.18,-24,0, W*0.12,10,1.6, tint(col,'#000',0.3)); popM();
+    for(let i=0;i<6;i++){ const a=t*0.7+i*1.047; bx(Math.cos(a)*W*0.5, 6+((t*8+i*7)%30), -W*0.3+Math.sin(a)*4, 3,3,3,vcD,vc,0.45); }
+    bx(0,66,0, 14,13,12, tint(col,'#fff',0.06)); bx(0,62,W*0.22, 9,5,3, tint(col,'#000',0.2));
+    bx(-3.6,67,W*0.22, 3.2,3,1.4, eyeC, eyeC); bx(3.6,67,W*0.22, 3.2,3,1.4, eyeC, eyeC);
+    bx(0,74,0, 16,4,14, gld,GOLDL,0.3); bx(0,77,0, 12,3,10, gld);
+    for(let i=-2;i<=2;i++) bx(i*4.6,80+(i===0?7:Math.abs(i)===1?3:0),0, 2.8,9+(i===0?7:0),2.8, i===0?GOLDL:gld, i===0?'#fff2a0':GOLDL,0.3);
+    for(let i=-2;i<=2;i++) bx(i*3.6,79,W*0.16, 1.8,4,1.4, vc,vc,0.6);
+    pushM(); mv(W*0.56,36,4); box(3,44,3, tint(gld,'#000',0.2)); for(let i=0;i<4;i++) bx(0,-16+i*11,0, 4,2,4, gld); mv(0,26,0); box(9,9,9, vc,vcD,0.9); mv(0,6,0); box(3,4,3,'#eecbff','#fff'); popM();
     popM();
-    for(let k=0;k<3;k++){ const a=t*2+k*2.09;
-      bx(Math.cos(a)*26, 92+yo+Math.sin(t*4+k)*4, Math.sin(a)*20, 4.5,4.5,4.5, '#c47bff','#b06bff'); }
+    for(let k=0;k<4;k++){ const a=t*2+k*1.57; bx(Math.cos(a)*26, 92+yo+Math.sin(t*4+k)*4, Math.sin(a)*20, 4,7,4, vc,vcD,0.85); }
   }
   else if(e.type==='tyrant'){
-    // The Abyss King, AWAKENED — the king ascended: a black-hole heart, a radiant sun-crown of gold and void, floating blades, and a storm of purple lightning
-    const yo=6+Math.sin(t*1.6)*4, pulse=0.6+0.4*Math.sin(t*4);
+    // The Abyss King, AWAKENED — the ascended king: black-hole heart, gold+void sun-crown, void tendrils, floating blades, lightning. (HIGH-DETAIL — surpasses all)
+    const yo=6+Math.sin(t*1.6)*4, pulse=0.6+0.4*Math.sin(t*4), vc='#c47bff', vcD='#8a4fd0', hot=en?'#ff3b6b':vc;
     pushM(); mv(0,yo,0);
-      // a larger, grander version of the king's royal silhouette
-      bx(0,14,0, W*1.0,22,W*0.7, darker);                            // robe base
-      for(let i=0;i<6;i++){ const a=t*0.6+i*1.047; bx(Math.cos(a)*W*0.55, 4+((t*10+i*6)%34), -W*0.32+Math.sin(a)*5, 3.4,3.4,3.4,'#8a4fd0','#c47bff',0.5); }   // layered cloak dissolving
-      bx(0,44,0, W*0.85,32,W*0.58, col);
-      bx(0,50,W*0.31, 16,18,4,'#0a0410','#000',1); bx(0,50,W*0.33, 11,11,2, en?'#ff3b6b':'#c47bff', en?'#ff3b6b':'#b06bff',pulse);   // the black-hole void heart
-      for(let i=0;i<10;i++){ const a=t*2.4+i*0.628; bx(Math.cos(a)*13,50+Math.sin(a)*13,W*0.34, 2,2,1,'#e0b0ff','#fff',0.7*pulse); }   // accretion ring around the heart
-      // shoulders + long reaching clawed arms
-      for(const s2 of [-1,1]){ bx(s2*W*0.5,58,0, 17,12,18, lite);
-        pushM(); mv(s2*W*0.56,50,6); rotZ(s2*0.22); box(7,20,7, col);
-          for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-13,2); rotZ(i*0.3); box(2,11,2, darker); popM(); } popM(); }
-      pushM(); mv(0,40,-W*0.34); rotX(0.1); box(W*1.05,50,2.6, darker); popM();   // vast royal cape
-      // head + the radiant sun-crown (gold rays + void spikes)
-      bx(0,76,0, 15,14,13, tint(col,'#fff',0.06));
-      bx(-4,77,W*0.2, 3.4,3,1.4, en?'#ff3b6b':'#e0b0ff', en?'#ff3b6b':'#e0b0ff'); bx(4,77,W*0.2, 3.4,3,1.4, en?'#ff3b6b':'#e0b0ff', en?'#ff3b6b':'#e0b0ff');
-      bx(0,85,0, 17,3,15, GOLD);                                     // crown band
-      for(let i=0;i<9;i++){ const a=(i/9)*6.283, r=9+(i%2)*4; bx(Math.cos(a)*r,90+(i%2?7:2),Math.sin(a)*r*0.5, 2.6,(i%2?12:7),2.6, i%2?GOLDL:'#4a2f7a', i%2?'#fff2a0':'#b06bff',0.8); }   // alternating gold rays + void spikes
+      bx(0,12,0, W*1.04,22,W*0.72, darker); bx(0,26,0, W*0.9,16,W*0.6, tint(col,'#000',0.15));
+      for(let i=0;i<8;i++){ const a=t*0.6+i*0.785; bx(Math.cos(a)*W*0.56, 4+((t*10+i*6)%38), -W*0.32+Math.sin(a)*5, 3.4,3.4,3.4,vcD,vc,0.5); }
+      bx(0,44,0, W*0.88,32,W*0.6, col);
+      for(let i=0;i<3;i++) bx(0,34+i*9,W*0.32, W*0.56-i*5,2.6,1.4, GOLD,GOLDL,0.35);
+      bx(0,50,W*0.31, 17,19,4,'#0a0410','#000',1); bx(0,50,W*0.33, 11,12,2, hot, en?'#ff3b6b':vcD,pulse);
+      for(let i=0;i<12;i++){ const a=t*2.4+i*0.523; bx(Math.cos(a)*13,50+Math.sin(a)*13,W*0.34, 2,2,1,'#e0b0ff','#fff',0.7*pulse); }
+      for(let i=0;i<4;i++){ const a=i*1.57+t; bx(Math.cos(a)*W*0.42,50,W*0.34+Math.sin(a)*4, 2.4,2.4,6, vcD,vc,0.5); }
+      for(const s of [-1,1]){ bx(s*W*0.5,58,0, 18,13,19, lite); for(let i=0;i<3;i++){ pushM(); mv(s*W*0.5+(i-1)*5,66,0); rotZ((i-1)*0.3); box(3,10,3, vcD); popM(); }
+        pushM(); mv(s*W*0.56,50,6); rotZ(s*0.22); box(7,22,7, col); bx(0,-2,4, 5,16,1.4, darker);
+          for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-15,2); rotZ(i*0.32); box(2,12,2, darker); bx(0,-6,0, 1.6,3,1.6, hot,hot,0.6); popM(); } popM(); }
+      pushM(); mv(0,40,-W*0.36); rotX(0.1); box(W*1.1,52,2.6, darker); for(let i=-3;i<=3;i++) bx(i*W*0.14,-28,0, W*0.1,12,1.6, tint(col,'#000',0.25)); popM();
+      bx(0,78,0, 15,15,13, tint(col,'#fff',0.06)); bx(0,74,W*0.2, 9,5,3, tint(col,'#000',0.2));
+      bx(-4,79,W*0.2, 3.4,3.4,1.4, hot, hot); bx(4,79,W*0.2, 3.4,3.4,1.4, hot, hot);
+      bx(0,87,0, 18,3,16, GOLD);
+      for(let i=0;i<12;i++){ const a=(i/12)*6.283, r=9+(i%2)*5; bx(Math.cos(a)*r,92+(i%2?9:3),Math.sin(a)*r*0.5, 2.6,(i%2?14:8),2.6, i%2?GOLDL:vcD, i%2?'#fff2a0':vc,0.85); }
     popM();
-    // a halo of floating blades orbiting the Awakened
-    for(let k=0;k<6;k++){ const a=t*1.2+k*1.047, r=W*0.95;
-      pushM(); mv(Math.cos(a)*r, 60+yo+Math.sin(t*2+k)*8, Math.sin(a)*r*0.7); rotY(-a); rotZ(0.4);
-        bx(0,0,0, 2.6,22,2,'#d8d0e8','#eef2ff',0.7); bx(0,-13,0, 6,3,3, GOLD); popM(); }
-    // purple lightning crackling upward
-    for(let i=0;i<3;i++){ const lx=(Math.sin(t*7+i*2)*W*0.6); for(let j=0;j<4;j++) bx(lx+(j%2?4:-4), 30+j*22, W*0.2, 2,10,2,'#c47bff','#e0b0ff',0.5*pulse); }
+    for(let k=0;k<8;k++){ const a=t*1.2+k*0.785, r=W*1.05;
+      pushM(); mv(Math.cos(a)*r, 60+yo+Math.sin(t*2+k)*9, Math.sin(a)*r*0.7); rotY(-a); rotZ(0.4);
+        bx(0,0,0, 2.8,26,2,'#d8d0e8','#eef2ff',0.75); bx(0,-15,0, 7,3.4,3, GOLD); bx(0,14,0, 2,4,1.4, vc,vc,0.6); popM(); }
+    for(let i=0;i<4;i++){ const lx=(Math.sin(t*7+i*1.7)*W*0.7); for(let j=0;j<5;j++) bx(lx+(j%2?4:-4), 26+j*22, W*0.22, 2,11,2, vc,'#e0b0ff',0.5*pulse); }
   }
 }
 function drawHpBar3(e){

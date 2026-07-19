@@ -519,6 +519,22 @@
   .srank{font-size:9.5px;font-weight:700;color:var(--amber);letter-spacing:.06em;margin-left:4px;}
   .sdesc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;}
   .sconn{width:2px;height:9px;background:#333a4c;margin:0 auto;}
+  /* Drillmaster respec tree — a dedicated build-crafting screen, not another inventory list. */
+  .buildtree{--class:#c98cff;max-width:1320px!important;height:min(800px,calc(100vh - 112px));box-sizing:border-box;display:flex;flex-direction:column;text-align:left;overflow:hidden;background:radial-gradient(circle at 50% 12%,color-mix(in srgb,var(--class) 12%,transparent),transparent 34%),linear-gradient(165deg,#171925,#0b0c12 72%);}
+  .buildhead{text-align:center;padding:0 8px 13px;border-bottom:1px solid #303545}.buildhead .ovh{font-size:clamp(28px,3vw,42px);margin-bottom:3px}.buildhead .ovsub{margin-bottom:0}
+  .buildlegend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:9px;color:#9199ac;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.buildlegend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:#353b4b}.buildlegend .owned i{background:var(--class);box-shadow:0 0 8px var(--class)}.buildlegend .locked i{background:#20232d;border:1px solid #555d70}
+  .buildscroll{flex:1;min-height:0;overflow:auto;padding:18px 15px 12px;scrollbar-width:thin;scrollbar-color:#444b60 transparent;background:radial-gradient(ellipse at center,rgba(255,255,255,.018),transparent 65%)}
+  .buildroot,.buildcap{width:min(620px,88%);margin:0 auto;padding:12px 16px;border:1px solid color-mix(in srgb,var(--class) 45%,#343a4b);border-radius:15px;text-align:center;background:linear-gradient(180deg,color-mix(in srgb,var(--class) 10%,#1d202b),#11131a);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .buildroot .bticon,.buildcap .bticon{font-size:26px;margin-bottom:3px}.buildcap.locked{opacity:.46;filter:saturate(.35)}
+  .buildspine{width:2px;height:19px;margin:0 auto;background:linear-gradient(var(--class),#41485b);box-shadow:0 0 8px color-mix(in srgb,var(--class) 45%,transparent)}
+  .buildrank{display:grid;grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:16px;align-items:stretch;position:relative;max-width:1120px;margin:0 auto}
+  .buildrank::before{content:'';position:absolute;left:25%;right:25%;top:50%;height:2px;background:#343a4c;z-index:0}.buildrank.reached::before{background:color-mix(in srgb,var(--class) 55%,#343a4c);box-shadow:0 0 8px color-mix(in srgb,var(--class) 28%,transparent)}
+  .rankorb{z-index:1;align-self:center;justify-self:center;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#11131b;border:2px solid #3b4254;color:#788196;font-size:8px;font-weight:900;letter-spacing:.05em;box-shadow:0 0 0 6px #0d0f16}.rankorb b{font-size:17px;line-height:15px}.buildrank.reached .rankorb{border-color:var(--class);color:#d9ddeb;box-shadow:0 0 0 6px #0d0f16,0 0 15px color-mix(in srgb,var(--class) 35%,transparent)}
+  .buildopt{z-index:1;appearance:none;width:100%;min-height:92px;padding:12px 14px;border:1px solid #303648;border-radius:14px;background:linear-gradient(155deg,#1a1d27,#11131a);color:#dfe4ed;text-align:left;cursor:pointer;position:relative;transition:.12s transform,.12s border-color,.12s background,.12s box-shadow}.buildopt:hover:not(:disabled){transform:translateY(-2px);border-color:color-mix(in srgb,var(--class) 70%,#40485a);background:linear-gradient(155deg,color-mix(in srgb,var(--class) 10%,#1a1d27),#11131a)}.buildopt.sel{border-color:var(--class);background:linear-gradient(145deg,color-mix(in srgb,var(--class) 18%,#20232e),#11131a);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--class) 35%,transparent),0 0 18px color-mix(in srgb,var(--class) 15%,transparent)}.buildopt.sel::after{content:'SELECTED';position:absolute;right:10px;top:9px;color:var(--class);font-size:8px;font-weight:950;letter-spacing:.12em}.buildopt:disabled{opacity:.34;cursor:default;filter:saturate(.25)}
+  .buildopt .boname{font-size:15px;font-weight:900;padding-right:64px}.buildopt .borole{display:inline-block;margin:5px 0 4px;color:var(--class);font-size:9px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.buildopt .bodesc{font-size:10.5px;line-height:1.42;color:#a8b0c0}.buildopt .boicon{float:left;width:38px;height:38px;margin:0 10px 6px 0;display:flex;align-items:center;justify-content:center;font-size:24px}.buildopt .boicon .ico-event{width:38px;height:38px;margin:0}
+  .buildfoot{display:grid;grid-template-columns:1fr minmax(260px,1.3fr);gap:12px;padding-top:14px;border-top:1px solid #303545}.buildfoot .bigbtn{margin:0}.buildcost{text-align:center;color:#9da5b6;font-size:11px;margin:9px 0 0}.buildcost b{color:var(--amber)}
+  .legacypath{align-self:stretch}.legacypath .buildopt{height:100%;min-height:190px}.pathskills{display:grid;gap:5px;margin-top:9px}.pathskill{padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.22);font-size:10px;color:#b8c0cf}.pathskill b{color:#edf0f6}.pathskill.locked{opacity:.43}
+  @media(max-width:760px){.buildscroll{padding:14px 2px}.buildrank{grid-template-columns:1fr 40px 1fr;gap:6px}.buildrank::before{left:22%;right:22%}.rankorb{width:34px;height:34px;box-shadow:0 0 0 4px #0d0f16}.rankorb b{font-size:13px}.buildopt{padding:9px;min-height:108px}.buildopt .boname{font-size:12px;padding-right:0}.buildopt.sel::after{display:none}.buildopt .boicon{float:none;width:30px;height:30px;margin:0 0 4px}.buildopt .boicon .ico-event{width:30px;height:30px}.buildopt .bodesc{font-size:9px}.buildfoot{grid-template-columns:1fr}.legacypath .buildopt{min-height:240px}}
   /* Hub NPC nameplates (projected over each keeper's head) */
   #hubtags{position:absolute;inset:0;z-index:6;pointer-events:none;overflow:hidden;}
   .htag{position:absolute;transform:translate(-50%,-100%);background:rgba(12,13,18,.82);border:1px solid var(--line);
@@ -578,7 +594,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.149.0';
+const VERSION3D='1.150.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6368,6 +6384,41 @@ function openClasses(back){
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
   document.getElementById('backBtn').onclick=back;
 }
+function openRespecTree(cid,back){
+  const C=CLASSES[cid], cs=classState(cid), def=c2def(cid), COST=300;
+  if(!C||!meta.classUnlocked[cid]){ back(); return; }
+  mode='menu'; showGameUI(false);
+  let staged=def?Object.assign({},cs.ch||{}):cs.sub;
+  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
+  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(o.icon||'✦');
+  function render(){
+    const changed=def?CLASS2_CHOICE_RANKS.some(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)):staged!==cs.sub;
+    let tree='';
+    if(def){
+      tree=`<div class="buildroot"><div class="bticon">${C.icon}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
+      tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, isSkill=R.kind==='skill';
+        const opt=o=>`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}" ${reached?'':'disabled'}><span class="boicon">${isSkill?iconOf(o):(o.id.endsWith('bounty')?'◆':'✦')}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s cooldown':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
+        return `<div class="buildrank ${reached?'reached':''}">${opt(R.a)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(R.b)}</div><div class="buildspine"></div>`; }).join('');
+      tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`;
+    }else{
+      const root=C.skills[0];
+      tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d}</div></div><div class="buildspine"></div>`;
+      const paths=C.subs.map((sub,i)=>{ const skills=sub.skills||C.skills.slice(1,4);
+        return `<div class="legacypath"><button class="buildopt ${staged===sub.id?'sel':''}" data-path="${sub.id}" ${cs.rank>=2?'':'disabled'}><span class="boicon">${i?'◆':'✦'}</span><div class="boname">${sub.disp}</div><span class="borole">Complete combat path</span><div class="bodesc">${sub.blurb}</div><div class="pathskills">${skills.map((s,n)=>`<div class="pathskill ${cs.rank<s.rank?'locked':''}"><b>${s.icon||'✦'} ${s.n}</b> · Rank ${s.rank} · ${s.cd}s<br>${s.d}</div>`).join('')}</div></button></div>`; });
+      tree+=`<div class="buildrank ${cs.rank>=2?'reached':''}" style="grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr)">${paths[0]}<div class="rankorb"><span>PATH</span><b>2</b></div>${paths[1]}</div>`;
+      tree+=`<div class="buildspine"></div><div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Path <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your chosen path's defining passive reaches its final strength.</div></div>`;
+    }
+    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Choose the abilities and passives that define this class. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<COST)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm New Build · ${COST}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · Reviewing and leaving costs nothing.</p></div>`);
+    document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
+    document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{ staged=b.dataset.path; SFX.pickup(); render(); });
+    document.getElementById('treeBack').onclick=back;
+    const confirm=document.getElementById('treeConfirm');
+    confirm.onclick=()=>{ if(!changed||meta.gold<COST) return; meta.gold-=COST;
+      if(def) cs.ch=Object.assign({},staged); else cs.sub=staged;
+      persist(); if(cid===meta.classId) skillbarUpdate(); SFX.levelup(); toast(C.disp+' build reforged'); back(); };
+  }
+  render();
+}
 function openTrainer(back){
   mode='menu';
   const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
@@ -6377,9 +6428,9 @@ function openTrainer(back){
       <div class="gi">${un?C.icon:'🔒'}</div>
       <div style="flex:1;min-width:0">
         <div class="gn">${C.disp} ${sel?'<span style="color:var(--amber);font-size:10px">· EQUIPPED</span>':''}</div>
-        <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(cs.rank>=2?' · choose a path!':''))+' · '+C.family.join(', ')):hint}</div></div>
+        <div class="gd">${un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(c2def(cid)?' · '+Object.keys(cs.ch||{}).length+' choices configured':(cs.rank>=2?' · choose a path!':'')))+' · '+C.family.join(', ')):hint}</div></div>
       ${un&&!sel?`<button class="bigbtn buybtn" data-eq="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('equip')}Equip</button>`:''}
-      ${un&&sub?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px;${meta.gold>=300?'':'opacity:.5'}">${actionIcon('respec')}Respec 300g</button>`:''}
+      ${un&&cs.rank>=2&&(sub||c2def(cid))?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px">${actionIcon('respec')}Respec</button>`:''}
       ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
     </div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
@@ -6387,12 +6438,7 @@ function openTrainer(back){
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
-  document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.re;
-    if(meta.gold<300){ toast('Not enough gold'); return; }
-    meta.gold-=300; classState(cid).sub=null; if(classState(cid).rank>=2) queueSubclass=(cid===meta.classId);
-    persist(); SFX.levelup(); toast('Path forgotten — choose again'+(cid===meta.classId?' on your next zone':''));
-    if(cid===meta.classId&&classState(cid).rank>=2){ openSubclassFrom(()=>openTrainer(back)); return; }
-    openTrainer(back); });
+  document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>openRespecTree(b.dataset.re,()=>openTrainer(back)));
   document.getElementById('backBtn').onclick=back;
 }
 function openCredits(back){
@@ -8736,7 +8782,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, exitMirror, get mirror(){ return mirror; }, applyCameraLook,

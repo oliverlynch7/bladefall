@@ -833,3 +833,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Corrected the shared third-person hand transform so idle swords, daggers, axes, mauls, wands, orbs, staffs, rods, and scepters project their business end in front of the Warden instead of behind the body.
 - Kept long casting implements on a readable forward/upward lean and preserved the established bow, scythe, first-person, and active attack-animation rigs.
 - Real-browser muted QA covered sword, axe, greatblade, hammer, staff, rod/scepter-family, wand/orb-family, and bow states; all attack timers completed normally and player transforms remained finite.
+
+## [Codex | 2026-07-19] v1.150.0 - Class Trainer respec skill trees
+- Replaced the destructive one-click Respec flow with a dedicated full-screen RPG skill-tree builder featuring connected rank nodes, class-colored branches, selected alternatives, future-rank locks, innate roots, and capstone endpoints.
+- Ranger now exposes all 16 rank 2-9 skill/passive options in one staged build screen; Warrior, Mage, and Reaper show both complete combat paths and every ability contained in each path.
+- Respec choices are staged without changing saves or spending gold; one 300g charge applies only on final confirmation, while Back leaves the existing build untouched. Ranger's previously missing Respec entry now appears correctly.
+- Muted real-browser QA at 1600x900 and 1366x768 verified no page scrolling, persistent footer actions, all four class trees, locked/selected states, free preview/back behavior, single-charge confirmation, and save-compatible class-state updates.

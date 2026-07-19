@@ -561,7 +561,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.146.0';
+const VERSION3D='1.147.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2051,7 +2051,8 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
   gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
   const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
   near.sort((a,b)=>a[0]-b[0]);
-  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.8+0.35*Math.sin(t*9+(tc.ph||0)); gl.uniform3f(pL,tc.x,60,tc.z); gl.uniform3f(cL,1.55*fl,0.74*fl,0.30*fl); } else gl.uniform3f(cL,0,0,0); };   // (tc.ph||0): a malformed torch must never NaN the lights again
+  // Torches are navigation accents, not floodlights: restrained intensity preserves local material colour.
+  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.72+0.18*Math.sin(t*9+(tc.ph||0)); gl.uniform3f(pL,tc.x,58,tc.z); gl.uniform3f(cL,0.38*fl,0.21*fl,0.10*fl); } else gl.uniform3f(cL,0,0,0); };   // (tc.ph||0): a malformed torch must never NaN the lights again
   setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
 function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
@@ -7019,11 +7020,11 @@ function drawCourse(s,t){
     }
   }
   // torches: flickering flames along the halls
-  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.7+0.3*Math.sin(t*9+tc.ph);
+  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph);
     bx(tc.x,26,tc.z, 4,52,4,'#3a2c1c');
-    bx(tc.x,56,tc.z, 7,9,7,'#ffb35a','#ff9a3a',fl);
-    bx(tc.x,63,tc.z, 4,5,4,'#ffe9a8','#ffd24a',fl*0.9);
-    glowFX(tc.x,60,tc.z, 22, '#ff9a3b', 0.5*fl); }                 // firelight bloom
+    bx(tc.x,56,tc.z, 7,9,7,'#c9783b','#713418',fl*0.84);
+    bx(tc.x,63,tc.z, 4,5,4,'#f0bd68','#a65e22',fl*0.78);
+    glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
   // pressure plates
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue;
     bx(pl.x,1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);

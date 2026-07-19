@@ -817,3 +817,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - The entire opening title screen now responds to pointer/touch input; players no longer need to hit the prompt itself. Keyboard reveal remains supported.
 - Replaced the bordered prompt pill with larger unboxed “CLICK ANYWHERE TO BEGIN” typography, using a warm text glow, breathing scale, and pulsing luminosity.
 - Real-browser muted QA verified a pointer event in the upper corner reveals the menu, computed border/background are absent, WebGL remains active, and console reports no errors/warnings.
+
+## [Codex | 2026-07-19] v1.147.0 — restrained torch lighting
+- Reduced torch point-light energy to roughly one quarter of its previous peak and narrowed flicker amplitude, preventing stacked nearby torches from bleaching material colors.
+- Shrunk additive flame halos from radius 22 to 10, reduced bloom opacity by 80%, and darkened emissive flame cores while preserving warm navigation readability.
+- Real-browser muted QA in the 18-torch Waystation view verified local colors remain visible, flames still read clearly, WebGL stays active, and console reports no errors/warnings.

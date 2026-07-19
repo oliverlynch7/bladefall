@@ -559,7 +559,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.142.0';
+const VERSION3D='1.143.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7863,23 +7863,32 @@ function drawEnemy3(e,t){
     if(wind){ const pf=0.5+0.5*Math.sin(G.time*26); bx(0,H*0.56,W*0.1, W*1.1,H*0.8,W*0.95, '#ff3020','#ff6040', 0.12+0.14*pf); }   // rearing body-glow joins the ground telegraph
     popM();
   } else if(e.look==='bones'){
-    // skeleton: skull, ribs, stick limbs
-    const wob=Math.sin(G.time*10+e.bob)*0.16;
+    // skeleton: skull, ribs, stick limbs — now with glowing sockets, clavicles, finger bones
+    const wob=Math.sin(G.time*10+e.bob)*0.16, ge=0.6+0.3*Math.sin(G.time*4+e.bob);
     bx(-3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); bx(3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); // leg bones
+    bx(-3.4,H*0.02,1, 3.4,2.4,4,'#c8c4b6'); bx(3.4,H*0.02,1, 3.4,2.4,4,'#c8c4b6');   // bony feet
     bx(0,H*0.42,0, 3.4,H*0.24,3.4,'#e8e4d8');                                        // spine
-    for(let i2=0;i2<3;i2++) bx(0,H*0.4+i2*4.6,0, W*0.9-i2*2,2.2,W*0.6,'#e8e4d8');    // ribs
+    for(let i2=0;i2<4;i2++) bx(0,H*0.36+i2*4.4,0, W*0.92-i2*2.2,2.0,W*0.62,'#e8e4d8'); // ribs (one more)
     bx(0,H*0.32,0, W*0.7,3.4,W*0.5,'#d8d4c8');                                        // pelvis
-    pushM(); mv(-W*0.5,H*0.56,0); rotZ(0.4+wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); popM();
-    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.4-wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); popM();
+    bx(-W*0.34,H*0.6,W*0.08, W*0.34,2,2,'#e8e4d8'); bx(W*0.34,H*0.6,W*0.08, W*0.34,2,2,'#e8e4d8'); // clavicles
+    pushM(); mv(-W*0.5,H*0.56,0); rotZ(0.4+wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); bx(0,-14,1, 2,3,3,'#c8c4b6'); popM();  // arm + hand
+    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.4-wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); bx(0,-14,1, 2,3,3,'#c8c4b6'); popM();
     bx(0,H*0.78,0, W*0.62,W*0.56,W*0.56,'#efece2');                                   // skull
+    bx(0,H*0.86,W*0.02, W*0.5,W*0.16,W*0.5,'#f4f1e8');                                // cranium dome
     bx(-2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e'); bx(2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e');
+    bx(-2.8,H*0.8,W*0.28, 1.6,1.8,1,'#ff5a3a','#ff7a4a',ge); bx(2.8,H*0.8,W*0.28, 1.6,1.8,1,'#ff5a3a','#ff7a4a',ge);  // glowing socket embers
     bx(0,H*0.68,W*0.26, W*0.4,2.4,1.2,'#0a0a0e');                                     // jaw shadow
+    for(let i2=0;i2<3;i2++) bx(-3+i2*3,H*0.71,W*0.27, 1,1.6,0.8,'#d8d4c8');           // teeth
   } else if(e.look==='slime'){
     // gelatinous blob: squashes and stretches as it oozes along
     const sq=0.86+0.24*Math.abs(Math.sin(e.bob*1.6));
     bx(0,H*0.5*sq,0, W*1.15/Math.sqrt(sq),H*sq,W*1.0/Math.sqrt(sq), col, null, 0.93);
-    bx(0,H*0.82*sq,-W*0.14, W*0.5,H*0.24,W*0.4, tint(col,'#fff',0.3), null, 0.8); // gloss
+    bx(0,H*0.5*sq,0, W*0.45,W*0.45,W*0.45, tint(col,'#fff',0.25), tint(col,'#fff',0.2), 0.5);  // suspended inner core
+    bx(0,H*0.82*sq,-W*0.14, W*0.5,H*0.24,W*0.4, tint(col,'#fff',0.3), null, 0.8); // gloss highlight
+    bx(-W*0.28,H*0.7*sq,W*0.1, W*0.14,W*0.14,W*0.14, tint(col,'#fff',0.4), null,0.7);           // trapped bubbles
+    bx(W*0.22,H*0.34*sq,-W*0.1, W*0.1,W*0.1,W*0.1, tint(col,'#fff',0.4), null,0.7);
     bx(-W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20'); bx(W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20');
+    bx(-W*0.16,H*0.52*sq,W*0.42, 1.4,1.6,1,'#eafff4','#eafff4',0.9); bx(W*0.16,H*0.52*sq,W*0.42, 1.4,1.6,1,'#eafff4','#eafff4',0.9); // eye glints
   } else if(e.kind==='goblin'){
     // scampering gold thief with a loot sack
     const scam=Math.sin(G.time*14)*0.28;
@@ -7895,9 +7904,14 @@ function drawEnemy3(e,t){
     // Grunt — a helmeted footsoldier with a sword and a round wooden shield
     const dk=tint(col,'#000',0.3), sw=Math.sin(G.time*6+e.bob)*0.14;
     bx(-W*0.2,H*0.16,0, W*0.3,H*0.32,W*0.4, dk); bx(W*0.2,H*0.16,0, W*0.3,H*0.32,W*0.4, dk);   // legs
+    bx(-W*0.2,H*0.02,1, W*0.32,3,W*0.5, tint(dk,'#000',0.3)); bx(W*0.2,H*0.02,1, W*0.32,3,W*0.5, tint(dk,'#000',0.3));  // boots
     bx(0,H*0.5,0, W*0.7,H*0.4,W*0.5, col); bx(0,H*0.42,W*0.28, W*0.5,4,2, dk);                  // torso + belt
+    bx(0,H*0.58,0, W*0.78,W*0.2,W*0.56,'#9aa2b6'); for(const s2 of [-1,1]) bx(s2*W*0.38,H*0.6,0, W*0.16,W*0.16,W*0.5,'#aeb6c8'); // pauldrons
+    bx(0,H*0.5,W*0.27, W*0.34,H*0.28,2, tint(col,'#fff',0.12)); bx(0,H*0.5,W*0.28, 2,H*0.3,1, '#c9a24a');  // breastplate + gilt line
     bx(0,H*0.78,0, W*0.5,W*0.42,W*0.46,'#8b93a8'); bx(0,H*0.9,0, W*0.42,W*0.2,W*0.44,'#6b7183'); // helmeted head + dome
+    bx(0,H*0.98,0, W*0.08,W*0.16,W*0.4,'#c9a24a');                                                // helmet crest
     bx(0,H*0.76,W*0.24, W*0.3,3,1.4,'#12121a'); bx(-2.4,H*0.78,W*0.25, 2,2,1, eyeC, eyeC); bx(2.4,H*0.78,W*0.25, 2,2,1, eyeC, eyeC);  // visor + eyes
+    bx(0,H*0.7,W*0.22, W*0.34,3,1.2,'#6b7183');                                                   // gorget
     pushM(); mv(-W*0.5,H*0.55,6); rotZ(0.2); bx(0,0,1, W*0.55,W*0.55,1.5,'#7a5836'); bx(0,0,2, W*0.5,W*0.5,1,'#6a4a2a'); bx(0,0,3, 3,3,1,'#c9a24a'); popM();   // round wooden shield
     pushM(); mv(W*0.5,H*0.5,4); rotZ(-0.3-sw); bx(0,W*0.5,0, 2.4,W*1.1,2.4,'#cfd6df'); bx(0,-2,0, 6,3,3,'#3a2f24'); popM();   // sword
   } else if(e.look==='emberimp'){

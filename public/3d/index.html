@@ -648,7 +648,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.164.0';
+const VERSION3D='1.165.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2816,7 +2816,8 @@ const SCAPES={
     for(let f=0;f<4;f++){ const pv=pil[Math.min(pil.length-1,1+f*2)]; const fly=mkMonster('galewisp',pv.x+46,pv.z,null); fly.y=pv.h+80; fly.sx=fly.x; fly.sz=fly.z; }
     // ── objectives ──
     scapeKill(ctx,[{x:220,z:-140},{x:-210,z:-150},{x:0,z:-470}]);                          // dustjackal dens on the GROUND (three, across entry + corridor)
-    scapeFetch(ctx, [{x:mx-60,z:mz+40,y:my}].concat(pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h}))));// bones on the mesa + up the pillars
+    // FRONT-LOADED: first two bones sit on the low road at ground level (progress starts obvious), then the mesa, then the lowest pillars — the climb is capped mid-height, not a punishing y=380 summit run
+    scapeFetch(ctx, [{x:-300,z:-1230,y:0},{x:160,z:-360,y:0},{x:mx-60,z:mz+40,y:my}].concat(pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h}))));
     scapeFind(ctx, hx-110, hz, hy);                                                        // the Hollow Shrine on the summit
     // ── hidden rift (purple-secret TEMPLATE): a ledge chain off the summit's side wall ──
     { const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
@@ -3173,7 +3174,8 @@ const SCAPES={
     { const fl=mkMonster('sparkling',650,-790,null); fl.y=60; fl.sx=fl.x; fl.sz=fl.z; }
     // ── objectives ──
     scapeKill(ctx,[{x:170,z:70},{x:-170,z:-620},{x:170,z:-950}]);                             // sentinel dens: court + both hall reaches
-    scapeFetch(ctx, gard.slice(0,5).map(g=>({x:g.x,z:g.z,y:g.h})));                           // gilded relics on the garden planters
+    // FRONT-LOADED: first two relics on the court floor (progress starts obvious), then the garden planters at height
+    scapeFetch(ctx, [{x:140,z:0,y:0},{x:-150,z:-150,y:0}].concat(gard.slice(0,3).map(g=>({x:g.x,z:g.z,y:g.h}))));
     scapeFind(ctx, 0,-1590,96);
     finishScape(ctx,{sx:0,sz:190,sy:0, gx:0,gz:-1610, decoCol:MARBLE,decoTheme:'marble',decoTall:240});
   },
@@ -3994,7 +3996,7 @@ function hazUpdate(dt){
     G.gustT=(G.gustT||0)+dt;
     const ph=Math.sin(G.time*0.45), strong=Math.abs(ph)>0.55;
     G.gustX=ph*1.0;
-    if(!p.onGround&&strong){ p.vx+=G.gustX*260*dt; }
+    if(!p.onGround&&strong){ const onClimb=highestSurfaceAt(p.x,p.z,16)>40; p.vx+=G.gustX*(onClimb?95:260)*dt; }  // over an elevated climb the wind only nudges — it can't fling you off a narrow ledge into the pit
     if(strong&&Math.random()<0.25*60*dt) G.particles.push({x:p.x-G.gustX*180+(Math.random()-0.5)*160,y:20+Math.random()*80,z:p.z+(Math.random()-0.5)*220,vx:G.gustX*420,vy:0,vz:0,life:0.5,color:'#cfe6ff',sz:2});
   } else if(G.haz==='phase'){                            // Phasing: some ground is only sometimes there
     for(const ph of (G.phasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-0.15;
@@ -8560,6 +8562,7 @@ function drawHpBars(){
       c.fillStyle='rgba(5,6,10,.88)'; c.beginPath(); c.arc(px+15,y+15,4.5,0,Math.PI*2); c.fill();
       c.fillStyle='#fff'; c.fillText(cnt,px+15,y+15); } }
   drawThreatArrows(c);
+  drawQuestPointer(c);
 }
 // Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see
 // (a 3D camera + auto-aim makes off-camera cheap-shots unfair; only in the aiming cameras where it matters)
@@ -8578,6 +8581,25 @@ function drawThreatArrows(c){
     c.beginPath(); c.moveTo(11,0); c.lineTo(-7,-7); c.lineTo(-7,7); c.closePath(); c.fill();
     c.restore(); }
   c.globalAlpha=1;
+}
+// points the player to the nearest uncollected PLACED quest item (climb-fetch bones/relics) + shows how many remain
+function drawQuestPointer(c){
+  if(!G||G.hub||!G.pickups) return;
+  const placed=G.pickups.filter(pk=>pk.placed&&pk.questItem); if(!placed.length) return;
+  let best=null,bd=1e9; for(const pk of placed){ const d=dXZ(pk.x,pk.z,G.p.x,G.p.z); if(d<bd){bd=d;best=pk;} }
+  const cxp=VW/2,cyp=VH/2,mgx=VW/2-40,mgy=VH/2-40,cy=(G.camYaw!=null?G.camYaw:Math.PI),col='#ffe07a';
+  const sp=project(best.x,(best.y0||0)+16,best.z), onScreen=sp&&sp[0]>=0&&sp[0]<=VW&&sp[1]>=0&&sp[1]<=VH;
+  if(!onScreen){ let ang; if(sp) ang=Math.atan2(sp[1]-cyp,sp[0]-cxp); else { let rel=Math.atan2(best.x-G.p.x,best.z-G.p.z)-cy; while(rel>Math.PI)rel-=6.283; while(rel<-Math.PI)rel+=6.283; ang=rel>0?0.62:Math.PI-0.62; }
+    const ex=cxp+Math.cos(ang)*mgx, ey=cyp+Math.sin(ang)*mgy;
+    c.save(); c.translate(ex,ey); c.rotate(ang); c.globalAlpha=0.92; c.fillStyle=col;
+    c.beginPath(); c.moveTo(14,0); c.lineTo(-9,-9); c.lineTo(-9,9); c.closePath(); c.fill();
+    c.restore(); c.globalAlpha=1; }
+  // "N left" pill, top-centre under the quest card
+  const label=best.questItem.name+' · '+placed.length+' left'; c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+  const w=c.measureText(label).width+26, x=VW/2, y=86;
+  c.fillStyle='rgba(12,10,16,0.72)'; c.beginPath(); if(c.roundRect) c.roundRect(x-w/2,y-13,w,26,13); else c.rect(x-w/2,y-13,w,26); c.fill();
+  c.fillStyle=col; c.beginPath(); c.arc(x-w/2+13,y,4,0,6.283); c.fill();
+  c.fillStyle='#fff'; c.fillText(label,x+6,y+1);
 }
 // per-theme sky: z = zenith darkening (top=sky*z), p = sun screen pos (0..1), c = sun glow colour
 const SKYSUN={
@@ -8820,9 +8842,13 @@ const QITEM={
 };
 function drawPickup3(pk,t){
   if(pk.questItem){                                   // quest item: a model that matches what it is
-    const q=QITEM[pk.questItem.name]||QITEM['_'], yy=16+Math.sin(pk.bob)*4;
+    const q=QITEM[pk.questItem.name]||QITEM['_'], py=pk.y0||0, yy=py+16+Math.sin(pk.bob)*4;   // sit on its real surface (pillar top etc.), not buried at ground
     drawShadow(pk.x,pk.z,9,0.22);
-    bx(pk.x,50,pk.z, 4,100,4, q.beam, q.beam, 0.12);
+    // BEACON — a tall bright pillar of light + rising motes so a placed item is findable from across the area
+    bx(pk.x,py+150,pk.z, 8,300,8, q.beam, q.beam, 0.42);
+    bx(pk.x,py+150,pk.z, 3.4,300,3.4, '#ffffff', q.beam, 0.5);
+    for(let i=0;i<5;i++){ const a=t*1.7+i*1.256, ry=py+18+((t*44+i*30)%150); bx(pk.x+Math.cos(a)*13,ry,pk.z+Math.sin(a)*13, 3,3,3, q.beam,q.beam,0.85); }
+    glowFX(pk.x,py+18,pk.z, 15, q.beam, 0.22);
     pushM(); mv(pk.x,yy,pk.z); rotY(t*1.6);
     q.draw(t);
     popM(); return; }

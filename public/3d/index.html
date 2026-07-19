@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.184.0';
+const VERSION3D='1.185.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6930,7 +6930,6 @@ function openHubMenu(){
       ${navCard('bagBtn','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
       ${navCard('forgeBtn','icons/action_forge_fuse.png','The Forge','Fuse gear')}
       ${navCard('wardBtn','icons/skins/skin-knight.png','Wardrobe','Skins and cosmetics')}
-      ${navCard('wstudioHub','icons/damage-physical.png','Weapon Studio','Weapons and designs')}
     </div>
     <button class="bigbtn" id="riseBtn">Rise</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
@@ -6944,7 +6943,6 @@ function openHubMenu(){
   document.getElementById('bagBtn').onclick=()=>openBag(openHubMenu);
   document.getElementById('forgeBtn').onclick=()=>openForge(openHubMenu);
   document.getElementById('wardBtn').onclick=()=>openWardrobe(openHubMenu);
-  { const _wh=document.getElementById('wstudioHub'); if(_wh) _wh.onclick=()=>openWeaponStudio(openHubMenu); }
   document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }

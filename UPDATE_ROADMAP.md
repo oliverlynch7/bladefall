@@ -806,3 +806,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - The primary action now identifies the selected save slot, Warden name, character level, and equipped class; corrected slot summaries to read the class from the selected mode save.
 - Preserved and completed the queued gradient-sky/sun shader work already present in the game file.
 - Real-browser muted QA covered populated/empty save summaries, title hierarchy, absent Descent shortcut, gameplay render, WebGL, and console health at 1600×900.
+
+## [Codex | 2026-07-19] v1.145.0 — Hitless difficulty identity
+- Renamed “Choose your risk” to “Choose Your Difficulty.”
+- Replaced the reused Hitless trophy with a dedicated transparent 512px violet void-skull: horned obsidian crown, predatory fangs, third-eye rune, and purple energy fractures, deliberately more threatening than Hardcore.
+- Added a restrained purple final-tier card treatment for Hitless while preserving locked/selected behavior.
+- Real-browser muted QA at 1600×900: all three cards render, Hitless remains readable at UI scale, WebGL active, console 0 errors/warnings.

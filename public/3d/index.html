@@ -619,7 +619,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.154.0';
+const VERSION3D='1.155.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7226,38 +7226,42 @@ function weaponMesh(w,swing){
   const bone='#d8cdb0', boneDk='#a08f6c', rust='#7c4a26', iron='#3c4048', blood='#8e1620', wrap='#453221', sinew='#cbb894', gold='#8a6f34', haft='#2e2620';
   switch(w.art){
     case 'dagger': // ritual dagger — bone pommel, wrapped grip, dark blade dripping blood
-      bx(0,-6,0, 4.4,4,4.4, bone); bx(0,-1,0, 3,7,3, wrap);
-      bx(0,3.5,0, 7.5,2,3.2, iron);
+      bx(0,-6,0, 4.4,4,4.4, bone); bx(0,-8,0, 5,1.6,5, boneDk); bx(0,-6,0, 2,2,2, blade,glow);   // pommel + cap + gem
+      bx(0,-1,0, 3,7,3, wrap); for(let i=0;i<3;i++) bx(0,-3.4+i*2.8,1.7, 3.3,0.9,0.6, boneDk);     // grip wrap rings
+      bx(0,3.5,0, 8,2,3.4, iron); bx(0,3.5,0, 8.8,0.9,1.2, edge); bx(0,4.5,1.9, 2,1.2,0.8, gold);   // crossguard + rim + rivet
       bx(0,11,0, 4.6,14,2.4, dkb,glow); bx(0,20,0, 2.6,6,1.8, dkb,glow);
+      bx(0,13,1.25, 0.9,15,0.8, edge); bx(-2,12,0, 0.7,14,2, edge); bx(2,12,0, 0.7,14,2, edge);      // fuller groove + twin edge bevels
       bx(1.6,14,1.2, 1.2,7,0.9, blood); bx(1.6,8.5,1.2, 1.5,2.2,1.2, blood); bx(-1.2,18,1.2, 1,3.4,0.8, blood); break;
     case 'javelin': // impaler — black shaft, bone bindings, barbed point
-      bx(0,14,0, 2.8,44,2.8, haft);
-      for(let i=0;i<4;i++) bx(0,-2+i*11,1.6, 3.4,1.6,1, bone);
-      bx(0,40,0, 4.4,12,3, dkb,glow); bx(0,48,0, 2.4,7,2, edge,glow);
-      bx(3.2,37,0, 3,5,2, dkb,glow); bx(-3.2,37,0, 3,5,2, dkb,glow); break;
+      bx(0,14,0, 2.8,44,2.8, haft); bx(0,14,1.5, 0.8,44,0.6, tint(haft,'#000',0.4));               // shaft + seam
+      for(let i=0;i<4;i++){ bx(0,-2+i*11,1.6, 3.4,1.6,1, bone); bx(0,-2+i*11,-1.6, 3.4,1.6,1, bone); } // bone bindings both sides
+      bx(0,40,0, 4.4,12,3, dkb,glow); bx(0,48,0, 2.4,7,2, edge,glow); bx(0,42,1.5, 0.8,12,0.7, edge); // leaf point + fuller
+      bx(3.4,37,0, 3.4,5,2, dkb,glow); bx(-3.4,37,0, 3.4,5,2, dkb,glow); bx(4.8,37,0, 1.6,2,1.4, edge); bx(-4.8,37,0, 1.6,2,1.4, edge); break;   // barbs + tips
     case 'axe': // executioner's ax — rusted jagged head, carved eyes that glow
-      bx(0,12,0, 3.4,30,3.4, haft); for(let i=0;i<3;i++) bx(0,1+i*8,1.8, 3.8,1.6,1, wrap);
+      bx(0,12,0, 3.4,30,3.4, haft); for(let i=0;i<4;i++) bx(0,0+i*7,1.8, 3.8,1.4,1, wrap); bx(0,-3,0, 4,3,4, iron);   // hafts wraps + butt cap
       bx(5,22,0, 6,15,3.6, rust);
-      bx(10.5,21,0, 8,17,3.4, dkb,glow); bx(14.2,21,0.2, 1.8,17,2.2, edge);
+      bx(10.5,21,0, 8,17,3.4, dkb,glow); bx(14.2,21,0.2, 1.8,17,2.2, edge); bx(14.2,21,0, 1.2,17,3.6, tint(edge,'#fff',0.3));   // bit + honed edge
       bx(6,30.5,0, 3,4,3, rust); bx(9.5,31.5,0, 2.4,5,2.6, rust); bx(12.5,30,0, 2,3.4,2.2, rust);
-      bx(-4.5,24,0, 4.4,5,3, rust); bx(-7.4,24,0, 2.6,3,2.2, edge);
+      bx(-4.5,24,0, 4.4,5,3, rust); bx(-7.4,24,0, 2.6,3,2.2, edge); bx(-6,24,0, 2,7,2.4, rust);      // rear spike + cheek
       bx(9,25,1.9, 2.6,2.2,0.8, '#17141c'); bx(9,25,2.2, 1.1,1,0.6, blade, blade);
       bx(10.5,17,1.8, 2.4,2,0.8, '#17141c'); bx(10.5,17,2.1, 1,0.9,0.6, blade, blade); break;
     case 'great': // cursed greatblade — notched dark blade, burning rune line, bone pommel
-      bx(0,-3,0, 4,12,4, wrap); bx(0,-10,0, 5.4,4.6,5.4, bone);
-      bx(0,4,0, 20,3.6,5, iron); bx(0,5,0, 6,4.6,6, rust);
+      bx(0,-3,0, 4,12,4, wrap); bx(0,-10,0, 5.4,4.6,5.4, bone); bx(0,-13,0, 4,2.6,4, boneDk); bx(0,-10,0, 2,2,2, blade,glow);   // pommel stack + gem
+      for(let i=0;i<3;i++) bx(0,-6+i*3,2.1, 4,0.9,0.6, boneDk);                                       // grip wraps
+      bx(0,4,0, 20,3.6,5, iron); bx(0,4,0, 21,1.4,1.6, gold); bx(0,5,0, 6,4.6,6, rust);                 // guard + gilt line + collar
       bx(0,25,0, 9,40,3.8, dkb,glow); bx(0,46,0, 5,9,3, dkb,glow);
-      bx(0,25,1.2, 1.8,36,1.2, blade, blade);
-      bx(5.2,15,0, 1.8,5,3, dkb); bx(5.2,29,0, 1.8,6,3, dkb); bx(-5.2,22,0, 1.8,5,3, dkb); break;
+      bx(0,25,1.3, 1.8,36,1.1, blade, blade); bx(-4.4,25,0, 0.9,38,2.2, edge); bx(4.4,25,0, 0.9,38,2.2, edge);   // fuller + twin bevels
+      bx(5.2,15,0, 1.8,5,3, dkb); bx(5.2,29,0, 1.8,6,3, dkb); bx(-5.2,22,0, 1.8,5,3, dkb); break;      // silhouette notches
     case 'hammer': // dread maul — black iron head, rust straps, face spikes
-      bx(0,12,0, 3.6,30,3.6, haft); bx(0,-3.4,0, 4.4,3.4,4.4, bone);
-      bx(0,28,0, 13,12,12, iron); bx(0,28,0, 14.5,3,3, rust); bx(0,31.5,0, 3,3,14.5, rust);
-      bx(8,28,0, 3.4,4,4, edge); bx(-8,28,0, 3.4,4,4, edge); bx(0,35.5,0, 3,3.4,3, edge); break;
+      bx(0,12,0, 3.6,30,3.6, haft); for(let i=0;i<4;i++) bx(0,0+i*7,2, 4,1,0.6, wrap); bx(0,-3.4,0, 4.4,3.4,4.4, bone);
+      bx(0,28,0, 13,12,12, iron); bx(0,28,0, 14.5,3,3, rust); bx(0,31.5,0, 3,3,14.5, rust); bx(0,24.5,0, 3,3,14.5, rust);  // head + banding
+      for(const s of [-1,1]) for(const z of [-1,1]) bx(s*6.2,28,z*6.2, 1.6,12.4,1.6, tint(iron,'#000',0.3));   // corner ribs
+      bx(8.2,28,0, 3.4,4,4, edge); bx(-8.2,28,0, 3.4,4,4, edge); bx(0,35.6,0, 3,3.4,3, edge); bx(0,28,6.5, 3,3,2, edge); break;  // striking studs
     case 'scythe': // necromancer's scythe — vertebra spine shaft, sweeping blade, glowing soul edge
-      for(let i=0;i<8;i++){ bx(0,-4+i*5.6,0, i%2?4.2:3, 5,3.2, i%2?bone:boneDk); }
+      for(let i=0;i<8;i++){ bx(0,-4+i*5.6,0, i%2?4.2:3, 5,3.2, i%2?bone:boneDk); bx(0,-4+i*5.6,2, i%2?2:1.4,2,0.8, tint(boneDk,'#000',0.2)); }  // vertebrae + discs
       bx(0,42,0, 4.6,5,4, bone); bx(2.5,45.5,0, 6,3.4,3.4, boneDk);
       bx(9,45,0, 12,3.6,3, dkb,glow); bx(17.5,42,0, 8,3.2,2.6, dkb,glow); bx(22.5,38,0, 5,3,2.2, dkb,glow); bx(25.5,34,0, 2.6,4,2, edge,glow);
-      bx(12,46.8,0, 12,1.2,1.4, blade, blade); break;
+      bx(12,46.8,0, 12,1.2,1.4, blade, blade); bx(19,44,0, 7,1,1.2, blade, blade); break;             // soul edge glint runs the curve
     case 'bow': // recurve bow — vertebra limbs curving forward, sinew string drawn to a nocked arrow
       bx(0,10,1, 3.4,11,4, wrap);                                                                 // riser / grip
       pushM(); mv(0,16,0); rotZ(0.30); box(2.8,15,2.8, bone); mv(0,8,2.2); rotZ(0.55); box(2.2,9,2.2, boneDk); popM();   // upper limb, tips curl forward
@@ -7267,40 +7271,43 @@ function weaponMesh(w,swing){
       pushM(); mv(0,10,1.4); rotX(1.571); box(1.3,34,1.3,'#c9a06a'); mv(0,17,0); box(3,3.4,3,'#8a7a5a'); popM();   // NOCKED ARROW pointing forward (+z), head at the front
       break;
     case 'cross': // dark crossbow — iron prod, bone tips, loaded bolt
-      bx(0,7,0, 3.6,22,3.6, haft); bx(0,2,3.2, 3.2,4,7, iron); bx(0,-2.5,2, 2,4,3, wrap);
-      bx(0,15,0, 24,2.8,3, iron); bx(-12.6,15,0, 2.6,5,4.6, bone); bx(12.6,15,0, 2.6,5,4.6, bone);
-      bx(0,15,-1.6, 22,0.8,0.8, sinew); bx(0,21,0, 2,9,2, dkb,glow); bx(0,26,0, 3,2.2,2, blade,glow); break;
+      bx(0,7,0, 3.6,22,3.6, haft); bx(0,2,3.2, 3.2,4,7, iron); bx(0,-2.5,2, 2,4,3, wrap); bx(0,7,1.9, 3.8,10,0.8, gold);   // stock + gilt inlay
+      bx(0,15,0, 24,2.8,3, iron); bx(0,15,0, 24,1.2,1.4, tint(iron,'#fff',0.2)); bx(-12.6,15,0, 2.6,5,4.6, bone); bx(12.6,15,0, 2.6,5,4.6, bone);  // prod + limb tips
+      for(const s of [-1,1]) bx(s*7,15,0, 2,3.4,3.6, tint(iron,'#000',0.3));                                      // prod bindings
+      bx(0,15,-1.6, 22,0.8,0.8, sinew); bx(0,21,0, 2,9,2, dkb,glow); bx(0,26,0, 3,2.2,2, blade,glow); bx(0,25,1.4, 0.8,7,0.6, edge); break;   // string + bolt + fletch glint
     case 'staff': // necro staff — gnarled shaft, skull with glowing sockets, floating crystal
-      bx(0,16,0, 3,44,3, '#3a2c1e'); bx(1.4,26,0, 1.6,10,1.6, haft); bx(-1.3,10,0, 1.5,9,1.5, haft);
-      bx(0,41,0, 7,7.5,6.5, bone); bx(0,38.6,3.3, 3.4,1.6,0.6, '#17141c');
+      bx(0,16,0, 3,44,3, '#3a2c1e'); bx(1.4,26,0, 1.6,10,1.6, haft); bx(-1.3,10,0, 1.5,9,1.5, haft); bx(0,-4,0, 3.6,3,3.6, iron);  // shaft knots + ferrule
+      for(let i=0;i<3;i++) bx(0,4+i*6,1.9, 3.2,0.8,0.6, boneDk);                                                   // sinew bindings
+      bx(0,41,0, 7,7.5,6.5, bone); bx(0,43.5,0, 6,2.4,6, boneDk); bx(0,38.6,3.3, 3.4,1.6,0.6, '#17141c'); bx(0,44,3.2, 3,1.4,0.6,'#17141c');  // skull + brow + jaw + crack
       bx(-1.8,42,3.3, 1.8,2,0.8, blade, blade); bx(1.8,42,3.3, 1.8,2,0.8, blade, blade);
-      bx(0,49,0, 6,6,6, blade,blade); break;
+      bx(0,49,0, 6,6,6, blade,blade); bx(0,49,0, 2,8,2, tint(blade,'#fff',0.4), blade); break;                     // floating crystal + inner light
     case 'rod': // soul-cage rod — twisted haft, caged burning core
-      bx(0,12,0, 2.8,30,2.8, '#3a2c1e'); bx(0,-2,0, 3.6,3,3.6, iron);
+      bx(0,12,0, 2.8,30,2.8, '#3a2c1e'); bx(0,-2,0, 3.6,3,3.6, iron); for(let i=0;i<4;i++) bx(0,2+i*6,1.7, 3,0.8,0.5, gold);   // gilt rings up the haft
       bx(0,29,0, 7,2.4,7, iron); bx(0,38.6,0, 6,2.2,6, iron);
-      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.4,33.8,Math.sin(a)*3.4, 1.4,8.4,1.4, iron); }
-      bx(0,33.8,0, 4.6,4.6,4.6, blade, blade); break;
+      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.4,33.8,Math.sin(a)*3.4, 1.4,8.4,1.4, iron); bx(Math.cos(a)*3.4,33.8,Math.sin(a)*3.4, 0.8,8.6,0.8, tint(iron,'#fff',0.2)); }  // cage bars + shine
+      bx(0,33.8,0, 4.6,4.6,4.6, blade, blade); bx(0,33.8,0, 2,6,2, tint(blade,'#fff',0.4), blade); break;          // caged soul + flare
     case 'scepter': // profane scepter — tarnished gold, bone crown, dark gem
-      bx(0,14,0, 3,34,3, gold); bx(0,-2,0, 4,3,4, iron);
-      bx(0,32,0, 7.5,3.6,7.5, boneDk); for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*4,35.4,Math.sin(a)*4, 1.8,4.4,1.8, bone); }
-      bx(0,38.5,0, 6.5,6.5,6.5, blade,blade); break;
+      bx(0,14,0, 3,34,3, gold); bx(0,-2,0, 4,3,4, iron); for(let i=0;i<3;i++) bx(0,4+i*8,1.7, 3.2,1,0.6, tint(gold,'#fff',0.25));   // shaft + polished rings
+      bx(0,32,0, 7.5,3.6,7.5, boneDk); bx(0,30,0, 6,1.8,6, gold); for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*4,35.4,Math.sin(a)*4, 1.8,4.4,1.8, bone); bx(Math.cos(a)*4,37.8,Math.sin(a)*4, 1.4,1.6,1.4, blade,glow); }  // crown + gilt band + tipped prongs
+      bx(0,38.5,0, 6.5,6.5,6.5, blade,blade); bx(0,38.5,0, 2.4,8,2.4, tint(blade,'#fff',0.4), blade); break;       // dark gem + core
     case 'wand': // skeletal wand — bone fingers clawing a dark orb
-      bx(0,7,0, 2.6,16,2.6, boneDk); bx(0,-2,0, 3.2,2.6,3.2, wrap);
-      bx(0,14.5,0, 3.6,3,3.6, bone);
-      for(let i=0;i<3;i++){ const a=i*2.094+0.5; pushM(); mv(Math.cos(a)*3.6,17.5,Math.sin(a)*3.6); rotY(-a); rotX(-0.35); box(1.5,6.5,1.5, bone); popM(); }
-      bx(0,19.5,0, 5.5,5.5,5.5, tint(blade,'#000',0.3), blade); break;
+      bx(0,7,0, 2.6,16,2.6, boneDk); bx(0,-2,0, 3.2,2.6,3.2, wrap); for(let i=0;i<2;i++) bx(0,2+i*6,1.6, 2.8,0.8,0.5, wrap);   // grip wraps
+      bx(0,14.5,0, 3.6,3,3.6, bone); bx(0,12.5,0, 4,1.4,4, boneDk);                                                // knuckle collar
+      for(let i=0;i<4;i++){ const a=i*1.5708+0.4; pushM(); mv(Math.cos(a)*3.6,17.5,Math.sin(a)*3.6); rotY(-a); rotX(-0.35); box(1.4,6.5,1.4, bone); mv(0,4,1); rotX(-0.5); box(1.1,2.6,1.1, boneDk); popM(); }  // 4 clawed fingers, curling
+      bx(0,19.5,0, 5.5,5.5,5.5, tint(blade,'#000',0.3), blade); bx(0,19.5,0, 2,7,2, tint(blade,'#fff',0.3), blade); break;
     case 'orb': // soul lantern — chained iron cage, burning core, rising wisps
-      bx(0,22,0, 1.8,2.4,1.8, iron); bx(1.2,25,0, 1.8,2.4,1.8, iron); bx(0,28,0, 1.6,2.2,1.6, iron);
-      bx(0,19,0, 6.5,2.2,6.5, iron); bx(0,3,0, 7.5,2.4,7.5, iron); bx(0,1,0, 4,2,4, iron);
-      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.8,11,Math.sin(a)*3.8, 1.5,14.5,1.5, iron); }
+      bx(0,22,0, 1.8,2.4,1.8, iron); bx(1.2,25,0, 1.8,2.4,1.8, iron); bx(0,28,0, 1.6,2.2,1.6, iron); bx(-1,31,0, 1.6,2.2,1.6, iron);   // hanging chain
+      bx(0,19,0, 6.5,2.2,6.5, iron); bx(0,3,0, 7.5,2.4,7.5, iron); bx(0,1,0, 4,2,4, iron); bx(0,19,0, 4,1.2,4, gold); bx(0,3,0, 5,1.2,5, gold);   // cap + base + gilt rims
+      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.8,11,Math.sin(a)*3.8, 1.5,14.5,1.5, iron); bx(Math.cos(a+0.785)*4.2,11,Math.sin(a+0.785)*4.2, 1,14.5,1, tint(iron,'#000',0.3)); }  // 8 cage bars
       bx(0,11,0, 5,6.5,5, blade, blade);
       { const wf=Math.sin(T*4)*0.5+0.5; bx(2,16+wf*3,1, 2,2.6,2, blade, blade, 0.55); bx(-1.8,14+wf*4,-1, 1.7,2.2,1.7, blade, blade, 0.4); } break;
     default: // cursed longsword — wrapped grip, bone pommel, notched dark blade, rune glow
-      bx(0,-2,0, 3.4,13,3.4, wrap); bx(0,-9,0, 4.6,4.2,4.6, bone);
-      bx(0,5,0, 14,3,4.4, iron); bx(0,5,0, 4.6,3.6,5, rust);
+      bx(0,-2,0, 3.4,13,3.4, wrap); bx(0,-9,0, 4.6,4.2,4.6, bone); bx(0,-11.5,0, 3.4,2,3.4, boneDk); bx(0,-9,0, 1.8,1.8,1.8, blade,glow);  // pommel + gem
+      for(let i=0;i<3;i++) bx(0,-6+i*3,2, 3.6,0.9,0.6, boneDk);                                                    // grip wraps
+      bx(0,5,0, 14,3,4.4, iron); bx(0,5,0, 14.8,1.2,1.4, gold); bx(0,5,0, 4.6,3.6,5, rust);                          // guard + gilt + collar
       bx(0,24,0, 6.4,32,3.4, dkb,glow); bx(0,42,0, 3.6,8,2.6, dkb,glow);
-      bx(0,25,1.05, 1.6,28,1.1, blade, blade);
-      bx(3.9,17,0, 1.6,4,3, dkb); bx(-3.9,28,0, 1.6,4.6,3, dkb); break;
+      bx(0,25,1.15, 1.4,28,1, blade, blade); bx(-3.1,24,0, 0.8,30,2.2, edge); bx(3.1,24,0, 0.8,30,2.2, edge);        // fuller + twin bevels
+      bx(3.9,17,0, 1.6,4,3, dkb); bx(-3.9,28,0, 1.6,4.6,3, dkb); break;                                            // silhouette notches
   }
   // equipped elemental flourish — animated aura keyed to the weapon's element (fire actually flickers)
   const el=w.el;

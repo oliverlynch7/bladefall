@@ -919,3 +919,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added extra screen-space clearance so labels do not visually cover faces, tools, or workstation art.
 - QA: muted real Chromium at the Smith/Exchange cluster; verified label anchors and zero console errors.
 
+
+## [Codex | 2026-07-19] v1.171.0 - Exact 10% mimic rule
+- Set every eligible world chest to an exact 10% mimic chance; bonus sprint reward chests remain protected.
+- QA: muted real Chromium verified 0.099 becomes a mimic, the 0.100 boundary does not, bonus chests never convert, and zero console errors.
+

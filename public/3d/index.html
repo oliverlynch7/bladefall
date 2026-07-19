@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.170.0';
+const VERSION3D='1.171.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4748,7 +4748,7 @@ function killEnemy(e,weaponKill){
    seeded rnd, so the same chest is the mimic across reloads of the same run (the seed is
    the save — no new fields; resolved mimics regenerate exactly as normal chests regenerate
    closed, the existing behavior). The bonus-vault sprint chest is never a mimic. */
-const MIMIC_RATE=0.17;                                   // ~1 in 6 chests are lying (tunable)
+const MIMIC_RATE=0.10;                                   // exactly 1 in 10 eligible chests are mimics
 function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE) ch.mimic=true; return ch; }
 function mimicReveal(ch){
   const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);

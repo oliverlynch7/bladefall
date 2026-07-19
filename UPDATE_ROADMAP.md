@@ -24,6 +24,12 @@
 - [x] Character conversations now open with a portrait-led identity header, clear role, and personality line; activity props retain their focused activity icons.
 - [x] In-world NPCs remain the simplified voxel models, and all NPC services, prices, state, dialogue behavior, saves, and trials are unchanged.
 
+## [Codex | 2026-07-18] Objective-driven quest tracker completion (SHIPPED v1.126.0)
+
+- [x] Preserved the already-landed larger 14–18px objective/progress hierarchy and explicit portrait placement below the player HUD after auditing all target viewport geometry.
+- [x] Normal-area completion now adds a clear “The way opens — take the portal” next objective, matching the explicit completion flow already used by trials and Abyssal Descent.
+- [x] Completed trackers gain a stronger green border/header state, while the existing one-shot progress pulse remains stable and portrait pulses expand away from the safe-area edge.
+
 Everything below is organized in a sensible **build order** (phases). Each phase is a
 self-contained work session. Work top to bottom.
 

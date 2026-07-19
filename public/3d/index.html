@@ -87,6 +87,8 @@
     background:linear-gradient(180deg,rgba(15,17,25,.9),rgba(9,10,16,.86));border:1px solid rgba(232,163,61,.4);border-right:3px solid var(--amber);border-radius:12px;padding:10px 13px;max-width:min(74vw,336px);
     font-size:14px;line-height:1.46;letter-spacing:.01em;backdrop-filter:blur(4px);box-shadow:0 8px 24px rgba(0,0,0,.5);transition:box-shadow .2s;}
   #questbox.qflash{animation:qpulse .55s ease;}
+  #questbox.qcomplete{border-color:rgba(90,224,145,.72);box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 20px rgba(75,224,138,.14);}
+  #questbox.qcomplete .qhead{color:#8ce8b2;text-shadow:0 1px 7px rgba(75,224,138,.32);}
   @keyframes qpulse{0%{transform:scale(1);box-shadow:0 8px 24px rgba(0,0,0,.5)}28%{transform:scale(1.045);box-shadow:0 0 0 2px rgba(255,210,74,.7),0 10px 30px rgba(0,0,0,.55)}100%{transform:scale(1);box-shadow:0 8px 24px rgba(0,0,0,.5)}}
   #questbox .qhead{font-weight:800;color:var(--amber);font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;text-shadow:0 1px 7px rgba(232,163,61,.35);}
   #questbox .qrow{color:#e6ebf2;display:flex;gap:7px;justify-content:flex-end;align-items:baseline;margin-top:3px;}
@@ -98,7 +100,7 @@
   #questbox .qdone .qtx{text-decoration:line-through;}
   #questbox .qdone .qn{color:#7ce0a8;text-shadow:none;}
   @media (min-width:840px) and (pointer:fine){ #questbox{max-width:360px;font-size:15px;padding:12px 15px;} #questbox .qhead{font-size:13px;} #questbox .qn{font-size:18px;} }
-  @media (orientation:portrait){ #questbox{right:auto;left:calc(env(safe-area-inset-left) + 10px);top:calc(env(safe-area-inset-top) + 160px);text-align:left;max-width:min(94vw,440px);border-right:1px solid rgba(232,163,61,.4);border-left:3px solid var(--amber);} #questbox .qrow{justify-content:flex-start;} }
+  @media (orientation:portrait){ #questbox{right:auto;left:calc(env(safe-area-inset-left) + 10px);top:calc(env(safe-area-inset-top) + 160px);text-align:left;max-width:min(94vw,440px);border-right:1px solid rgba(232,163,61,.4);border-left:3px solid var(--amber);transform-origin:top left;} #questbox .qrow{justify-content:flex-start;} }
   .zrow{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.03);
     border:1px solid rgba(255,255,255,.07);margin-bottom:7px;cursor:pointer;text-align:left;}
   .zrow:not(.zlock):hover{background:rgba(255,210,74,.10);border-color:rgba(255,210,74,.35);}
@@ -544,7 +546,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.125.0';
+const VERSION3D='1.126.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1668,13 +1670,14 @@ function openWay(){ if(G.portal||!G.portalPos) return;
   G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen'); }
 // render only when the content changes; pulse once on a progress change, hold a stronger state on completion
-function applyQuest(el,head,rows,sig){
+function applyQuest(el,head,rows,sig,complete=false){
   const html=`<div class="qhead">${head}</div>${rows}`;
   el.classList.remove('hide');
   if(applyQuest._sig===sig && el.innerHTML) return;              // unchanged — no DOM thrash, no re-pulse each frame
   const hadPrev=applyQuest._sig!=null && applyQuest._head===head;  // a change WITHIN the same objective set = progress moved
   applyQuest._sig=sig; applyQuest._head=head;
   el.innerHTML=html;
+  el.classList.toggle('qcomplete',complete);
   if(hadPrev){ el.classList.remove('qflash'); void el.offsetWidth; el.classList.add('qflash');
     clearTimeout(applyQuest._t); applyQuest._t=setTimeout(()=>el.classList.remove('qflash'),600); }
 }
@@ -1686,19 +1689,20 @@ function questUpdate(){
   if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive);
       const rows=qrow(false,'▼',`<b>Floor ${G.floor||1}</b>${meta.endlessBest?` · <span style="opacity:.7">Best ${meta.endlessBest}</span>`:''}`,null)
         + qrow(G.floorCleared,G.floorCleared?'☑':'⚔', G.floorCleared?'The way opens — take the portal':'Clear the floor', G.floorCleared?null:`${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`);
-      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`); return; }
+      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`,G.floorCleared); return; }
   const Z=curZone();
   if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
     const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
-    applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`); return; }
+    applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`,d); return; }
   if(G.side){ applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name}`,qrow(false,'☐','Reach the exit',`Tier ${G.zoneTier}`),`side${Z.side.id}${G.zoneTier}`); return; }
   let rows,sig;
   if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
   else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
-    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(','); }
-  applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig);
+    if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
+    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed'); }
+  applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
 }
 
 /* ---------------- Enemies (same stats; r = w/2) ---------------- */
@@ -8392,7 +8396,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
-  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
+  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,

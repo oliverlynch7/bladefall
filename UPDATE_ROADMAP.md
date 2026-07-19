@@ -793,3 +793,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Integrated 31 approved weapon icons, 33 armor icons, and all 6 pet portraits into Bag/Shop/Forge/Pet Yard paths with legacy runtime-render fallbacks.
 - Browser QA: WebGL compiled with the concurrent v1.134 lighting overhaul preserved; no console errors; name input, 11 perk rows, rank cap, +50% Arcana, legacy refund, asset HTTP responses, and pet natural dimensions verified.
 
+
+## [Codex | 2026-07-19] v1.136.0 — Treasure Sprint modular parkour director
+- Replaced the fixed dash/spiral/drop recipe with 11 authored section families, selecting 5–7 unique families per visit plus two treasure-tower finales.
+- Added multi-band vertical routes, ascents/descents, recovery shelves, safe/fast forks, elevated spring chains, moving elevators, elevated crumbles, phasing platforms, checkpoints, and section-derived timers.
+- Added recent-run opener avoidance and deterministic course telemetry (seed, family order, finale, peak, bands, budget).
+- Real-browser muted QA: 20/20 samples had unique in-run families, 3+ elevation bands, 5–7 sections, and no consecutive repeated opener/finale pair; observed peak range 427–1351. Elevated pads, vertical mover carry, and phase on/off states verified in the active update loop. Console: 0 errors, 0 warnings.

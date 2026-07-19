@@ -556,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.135.0';
+const VERSION3D='1.136.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3426,51 +3426,50 @@ function loadBonus(returnIdx){
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
-  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0;
-  // TRUE RANDOMIZATION: fold in the run seed + a per-visit counter, so every sprint differs (deterministic within one attempt)
+  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
   G.bonusVisits=(G.bonusVisits||0)+1;
-  const seed=(((G.runSeed||0)>>>0) ^ (((G.stageIndex+1)*2654435761)>>>0) ^ ((G.bonusVisits*40503)>>>0))>>>0;
-  const rnd=mulberry(seed||1);
-  const R=(lo,hi)=>lo+rnd()*(hi-lo);
-  // reach budget: JMPH=150 single jump, air-dash adds ~112 → dash-gaps up to 205 always clear on base stats + one dash
-  const NORM=140, DASHLO=170, DASHHI=205, CLIMB=Math.min(88,JMPV-6);
-  let cx=0, cz=0, cy=0, pathLen=0, dashHops=0;
-  G.bonusPath=[];   // ordered platform centers, for the solvability harness
-  const put=(x,z,y,w,d,extra)=>{ let o; if(y<=1){ o=Object.assign({x,z,w,d},extra||{}); G.segments.push(o); } else { o=vplat(x,z,y,w,d,extra); } G.bonusPath.push({x,z,y,w,d,dash:!!(extra&&extra._dash)}); return o; };
-  // START pad
+  const seed=(((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0;
+  const rnd=mulberry(seed||1), R=(lo,hi)=>lo+rnd()*(hi-lo), CLIMB=Math.min(72,JMPV-18);
+  let cx=0,cz=0,cy=0,peak=0,budget=0;
+  G.bonusPath=[];
+  const put=(x,z,y,w,d,extra)=>{peak=Math.max(peak,y);let o;if(y<=1){o=Object.assign({x,z,w,d},extra||{});G.segments.push(o);}else{o=vplat(x,z,y,w,d,extra);}G.bonusPath.push({x,z,y,w,d,dash:!!(extra&&extra._dash)});return o;};
+  const hop=(dx,dz,dy,w=96,d=86,ex)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);return put(cx,cz,cy,w,d,ex);};
+  const mark=()=>put(cx,cz,cy,150,126,{checkpoint:true});
+  const mover=(dx,dz,dy,vamp=0)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy+vamp);const m={x0:cx,z:cz,w:92,d:82,h:cy,h0:cy,amp:R(18,38),sp:R(.55,.78),ph:R(0,6.28),vamp,vsp:R(.55,.78),vph:R(0,6.28),x:cx,px:cx,py:cy};G.movers.push(m);G.bonusPath.push({x:cx,z:cz,y:cy,w:m.w,d:m.d,mover:true});return m;};
+  const crumble=(dx,dz,dy)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy);const c={x:cx,z:cz,h:cy,w:86,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0};G.crumbles.push(c);G.bonusPath.push({x:cx,z:cz,y:cy,w:c.w,d:c.d,crumble:true});};
+  const families={
+    spiral(){const dir=rnd()<.5?1:-1,ox=cx,oz=cz-100;for(let k=0;k<5;k++){const a=dir*(k+1)*.9;cx=ox+Math.sin(a)*82;cz=oz+Math.cos(a)*82;cy+=R(38,CLIMB);put(cx,cz,cy,k%2?88:116,k%2?82:104,k===2?{checkpoint:true}:null);}budget+=8;},
+    switchback(){const dir=rnd()<.5?1:-1;for(let k=0;k<5;k++)hop(dir*(k%2?145:-145),-78,R(32,54),112,74,k===2?{checkpoint:true}:null);budget+=7;},
+    elevator(){mark();mover(R(-55,55),-118,CLIMB*.7,R(30,46));hop(R(-55,55),-116,CLIMB,142,104,{checkpoint:true});budget+=8;},
+    crumble(){for(let k=0;k<5;k++)crumble((k%2?1:-1)*R(24,62),-R(86,112),R(18,38));mark();budget+=7;},
+    springs(){for(let k=0;k<3;k++){G.pads.push({x:cx,z:cz,y:cy,r:24});hop(R(-90,90),-R(105,130),R(72,104),132,116,k===2?{checkpoint:true}:null);}budget+=7;},
+    cascade(){for(let k=0;k<5;k++)hop((k%2?1:-1)*R(30,88),-R(88,118),-R(38,66),108,94,k===2?{checkpoint:true}:null);budget+=6;},
+    beams(){const base=Math.max(0,cy-70);for(let k=0;k<5;k++){hop((k%2?1:-1)*R(82,122),-R(82,108),R(-8,18),k%2?48:72,k%2?126:68);put(cx,cz,base,170,92,{recovery:true});}mark();budget+=8;},
+    phase(){for(let k=0;k<4;k++){const p=hop((k%2?1:-1)*R(45,85),-R(92,118),R(-8,24),100,88);const ph={ob:p,on:true,sp:R(.65,.85),off:k*1.35};G.bonusPhasers.push(ph);p.phase=ph;}mark();budget+=9;},
+    fork(){const sx=cx,sz=cz,sy=cy;for(let k=0;k<4;k++)hop(-76,-92,R(22,38),104,90);const ex=cx,ez=cz,ey=cy;cx=sx;cz=sz;cy=sy;for(let k=0;k<3;k++)hop(92,-123,R(30,48),82,72,{_dash:k===1});put(ex,ez,ey,168,126,{checkpoint:true});cx=ex;cz=ez;cy=ey;budget+=8;},
+    shaft(){mark();for(let k=0;k<5;k++){if(k===2)mover((k%2?1:-1)*72,-72,CLIMB*.8,28);else hop((k%2?1:-1)*72,-72,R(42,CLIMB),98,72);}mark();budget+=9;},
+    arches(){for(let k=0;k<5;k++){const dir=k%2?1:-1;hop(dir*R(70,112),-R(82,108),R(-22,28),54,132);hop(dir*22,-38,0,116,42);}mark();budget+=8;}
+  };
   put(0,0,0,168,168);
-  G.p.x=0; G.p.z=0; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
-  G.lastSafe={x:0,z:0,y:0};
-  // ── SECTION A — ground DASH GAUNTLET (y=0): alternate normal hops and dash-gaps; a crumbling stair mid-run ──
-  for(let k=0;k<4;k++){ const dash=(k%2===1);           // hops 1 & 3 are dash-gaps (never two in a row → dodge CD is back)
-    const gap=dash?R(DASHLO,DASHHI):R(110,NORM); if(dash) dashHops++;
-    cz-=gap; cx=Math.max(-230,Math.min(230,cx+R(-70,70))); pathLen+=gap;
-    const w=dash?R(96,120):R(84,108), d=R(90,118);
-    if(!dash && k===2){ G.crumbles.push({x:cx,z:cz,w:w,d:d,state:0,timer:0,respawn:0,fallY:0,jit:0}); G.bonusPath.push({x:cx,z:cz,y:0,w,d,dash:false}); }   // a crumbling stair — don't dawdle
-    else put(cx,cz,0,w,d,dash?{_dash:1}:null);
-  }
-  // ── SECTION B — the SPIRAL TOWER: 4 ascending vplat steps circling a core + one VERTICAL-BOB mover ──
-  { const coreX=Math.max(-110,Math.min(110,cx)), coreZ=cz-110, rad=62, dir=(rnd()<0.5?1:-1), a0=Math.atan2(cx-coreX,cz-coreZ);
-    for(let k=0;k<4;k++){ const a=a0+dir*(k+1)*0.82, dy=R(42,58);   // small spiral chord + gentle climb keep every step well within one jump
-      cx=coreX+Math.sin(a)*rad; cz=coreZ+Math.cos(a)*rad; cy+=dy; pathLen+=Math.hypot(rad*0.9,dy)+dy;
-      if(k===2){ // a vertical-bob mover bridges this ring — ride it up (small bob keeps its top always within a jump of the last shelf)
-        const h0=cy, vamp=R(18,28); G.movers.push({x0:cx,z:cz,w:78,d:70,h:h0,h0:h0,amp:0,sp:1,ph:0,vamp:vamp,vsp:R(0.8,1.1),vph:rnd()*6.28,x:cx,px:cx});
-        G.bonusPath.push({x:cx,z:cz,y:h0,w:78,d:70,dash:false,vbob:vamp}); }
-      else put(cx,cz,cy,R(94,112),R(94,112),{checkpoint:true}); }   // key shelves check-point a fall back to here, not the base
-  }
-  // ── SECTION C — the DROP-DOWN + run to the chest ──
-  cz-=R(150,190); cy=Math.max(0,cy-R(90,150)); pathLen+=200; put(cx,cz,cy,R(100,120),R(100,120),cy>1?{checkpoint:true}:null);
-  cz-=R(115,NORM); cx=Math.max(-220,Math.min(220,cx+R(-60,60))); cy=Math.max(0,cy-R(40,90)); pathLen+=130; put(cx,cz,cy,R(100,120),R(100,120));
-  // FINISH: the chest platform (grab the chest to stop the clock)
-  cz-=R(120,150); cy=0; pathLen+=140; const fin=put(cx,cz,0,196,200);
-  G.chests.push({x:fin.x,z:fin.z,y:0,opened:false,bob:0,bonus:true});
+  G.p.x=0;G.p.z=0;G.p.y=0;G.p.vx=0;G.p.vy=0;G.p.vz=0;G.p.yaw=Math.PI;G.p.onGround=true;G.lastSafe={x:0,z:0,y:0};
+  const names=Object.keys(families),recent=G.bonusRecentFamilies||[],count=5+Math.floor(rnd()*3);
+  for(let i=names.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[names[i],names[j]]=[names[j],names[i]];}
+  let chosen=names.slice(0,count);
+  if(recent.length&&chosen[0]===recent[0]){const j=chosen.findIndex((n,k)=>k&&n!==recent[0]);if(j>0)[chosen[0],chosen[j]]=[chosen[j],chosen[0]];}
+  if(!chosen.some(n=>['spiral','switchback','shaft','springs'].includes(n)))chosen[1]='shaft';
+  chosen.forEach(n=>families[n]());
+  const finale=rnd()<.5?'crown':'orbit';
+  if(finale==='crown'){for(let k=0;k<3;k++)hop((k%2?1:-1)*55,-78,42,124-k*12,104-k*8,k===1?{checkpoint:true}:null);}
+  else{mark();mover(80,-95,52,24);hop(-80,-105,58,126,112,{checkpoint:true});}
+  const fin=hop(0,-92,0,210,200,{checkpoint:true});
+  G.chests.push({x:fin.x,z:fin.z,y:cy,opened:false,bob:0,bonus:true});
   G.progressEnd=fin.z;
-  // TIMER computed from the generated course length — tight (it's a sprint), with a small floor
-  G.bonusTime=Math.max(16,Math.round(pathLen/150 + dashHops*1.5 + 7));   // climbing is slower than flat running, so budget a touch more — still tight
-  const bt=document.getElementById('bonustimer'); bt.style.display='block';
+  G.bonusTime=Math.max(34,Math.round(budget+12));
+  G.bonusCourse={seed,families:chosen,finale,peak:Math.round(peak),budget:G.bonusTime,bands:new Set(G.bonusPath.map(p=>Math.floor(p.y/100))).size};
+  G.bonusRecentFamilies=chosen.slice();
+  const bt=document.getElementById('bonustimer');bt.style.display='block';
   document.getElementById('stagetag').textContent='TREASURE SPRINT';
-  toast('✨ TREASURE SPRINT — climb fast, beat the clock!'); SFX.achieve();
-  hudUpdate();
+  toast('✨ TREASURE SPRINT — read the gold route, climb fast!');SFX.achieve();hudUpdate();
 }
 function endBonus(msg){
   G.bonusActive=false; document.getElementById('bonustimer').style.display='none';
@@ -3718,7 +3717,7 @@ function floorAt(x,z,r,yRef){
   // stand-flagged walls are walkable on top (canyon rims etc.) — maze walls stay non-standable so rooms can't be sequence-broken
   for(const wl of G.walls){ if(wl.stand && wl.h<=yRef+2 && Math.abs(x-wl.x)<wl.w/2+r*0.4 && Math.abs(z-wl.z)<wl.d/2+r*0.4) f=Math.max(f,wl.h); }
   for(const mv of G.movers){ if(mv.h<=yRef+2 && Math.abs(x-mv.x)<mv.w/2+r*0.4 && Math.abs(z-mv.z)<mv.d/2+r*0.4) f=Math.max(f,mv.h); }
-  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,0); }
+  for(const cr of G.crumbles){ const ch=cr.h||0; if(cr.state<2 && ch<=yRef+2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,ch); }
   for(const ob of G.obstacles){ if(ob.h<=yRef+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
   return f;
 }
@@ -3743,7 +3742,7 @@ function updateCrumbles(dt){
   for(const cr of G.crumbles){
     if(cr.state===2){ cr.fallY+=240*dt; cr.respawn-=dt;
       if(cr.respawn<=0){ cr.state=0; cr.timer=0; cr.fallY=0; } continue; }
-    const stood=p.onGround && p.y<2 && Math.abs(p.x-cr.x)<cr.w/2+p.r*0.4 && Math.abs(p.z-cr.z)<cr.d/2+p.r*0.4;
+    const stood=p.onGround && Math.abs(p.y-(cr.h||0))<3 && Math.abs(p.x-cr.x)<cr.w/2+p.r*0.4 && Math.abs(p.z-cr.z)<cr.d/2+p.r*0.4;
     if(cr.state===0 && stood){ cr.state=1; cr.timer=0.8; SFX.land(); }
     if(cr.state===1){ cr.timer-=dt; cr.jit=(Math.random()-0.5)*3;
       if(cr.timer<=0){ cr.state=2; cr.respawn=3.5; cr.fallY=0; burst(cr.x,2,cr.z,'#8a7a66',10); SFX.enemyDie(); } }
@@ -3762,8 +3761,9 @@ function updateGeysers(dt){
     }
   }
 }
-function updateMovers(dt){ for(const mv of G.movers){ mv.px=mv.x; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
-  if(mv.vamp){ mv.ph2=(mv.ph2||0); mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
+function updateMovers(dt){ for(const mv of G.movers){ mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
+  if(mv.vamp){ mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; } } }
+function updateBonusPhasers(){ for(const ph of (G.bonusPhasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-.25; if(on!==ph.on){ ph.on=on; const ob=ph.ob,i=G.obstacles.indexOf(ob); if(on&&i<0)G.obstacles.push(ob); else if(!on&&i>=0)G.obstacles.splice(i,1); } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
 /* ---- Zone signature hazards (Phase 4): one per zone, applied every frame ---- */
 function curHaz(){ return (G&&G.haz)?HAZARDS[G.haz]:null; }
 function hazUpdate(dt){
@@ -4800,16 +4800,16 @@ function update(dt){
     if(mv2 && mode==='play'){ loopFx('footstep'); } else { stopFx('footstep'); }
     if(mode==='play' && p.hp>0 && p.hp<=effMaxHp(p)*0.15){ loopFx('heartbeat'); } else { stopFx('heartbeat'); } }
   // ride moving platforms
-  if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<2 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; break; } }
+  if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
   // jump pads launch you
-  if(p.onGround) for(const pd of G.pads){ if(p.y<2 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
+  if(p.onGround) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
   // checkpoint: last solid ground you stood on (not a moving platform).
   // vertical zones flag key plateaus `checkpoint` so a fall on a tall climb sends you back to the last shelf, not the base.
   if(p.onGround){ if(p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe={x:p.x,z:p.z,y:0}; }
     else if(G.obstacles) for(const ob of G.obstacles){ if(ob.checkpoint && Math.abs(p.y-ob.h)<3 && Math.abs(p.x-ob.x)<ob.w/2 && Math.abs(p.z-ob.z)<ob.d/2){ G.lastSafe={x:p.x,z:p.z,y:ob.h}; break; } } }
   // fell into the hazard
   if(p.y<-34){ lavaHit(); }
-  updateCrumbles(dt); updateGeysers(dt);
+  updateCrumbles(dt); updateGeysers(dt); updateBonusPhasers();
   if(G.shockwaves){ for(const sw of G.shockwaves){ if(sw.delay>0){ sw.delay-=dt; continue; }   // staggered quake rings hold, then march
       sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
@@ -6834,17 +6834,17 @@ function drawCourse(s,t){
   }
   // jump pads
   for(const pd of G.pads){
-    bx(pd.x,1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
-    bx(pd.x,2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
+    const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
+    bx(pd.x,py+2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
   }
   // crumbling stepping stones (shake, drop, respawn)
   for(const cr of G.crumbles){
     if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
     if(cr.state===2) continue;
-    const jx=cr.state===1?cr.jit:0;
-    bx(cr.x+jx,-6-(cr.state===2?cr.fallY:0),cr.z, cr.w,12,cr.d, tint('#8a7a66',s.ground,0.3));
-    bx(cr.x+jx,0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
-    bx(cr.x,-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
+    const jx=cr.state===1?cr.jit:0, chy=cr.h||0;
+    bx(cr.x+jx,chy-6-(cr.state===2?cr.fallY:0),cr.z, cr.w,12,cr.d, tint('#8a7a66',s.ground,0.3));
+    bx(cr.x+jx,chy+0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
+    bx(cr.x,chy-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
   }
   // hazard geysers: vent → telegraph glow → eruption column
   const hzc=hazardCols(s.theme);
@@ -8608,7 +8608,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
     rooms:G&&G.rooms.length, walls:G&&G.walls.length, doors:G&&G.doors.map(d2=>({t:d2.type,open:d2.open})),
     plates:G&&G.plates.map(p2=>p2.lit), keys:G&&G.keys.length, hasKey:G&&!!G.hasKey,
     encounters:G&&G.rooms.filter(r=>r.encounter).length, mobTypes:G&&[...new Set(G.enemies.map(e=>e.type))],
-    bonusPortal:G&&!!G.bonusPortal, bonusActive:G&&!!G.bonusActive, bonusTime:G&&G.bonusActive?+G.bonusTime.toFixed(1):null,
+    bonusPortal:G&&!!G.bonusPortal, bonusActive:G&&!!G.bonusActive, bonusTime:G&&G.bonusActive?+G.bonusTime.toFixed(1):null, bonusCourse:G&&G.bonusCourse?Object.assign({},G.bonusCourse):null,
     goblin:G&&G.enemies.some(e=>e.kind==='goblin'&&!e.dead),
     queued:queueLevelUp, ngPlus:G&&G.ngPlus, combo:G&&G.combo,
     unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };

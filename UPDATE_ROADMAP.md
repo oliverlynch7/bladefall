@@ -857,3 +857,7 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added a save-safe 100-point mana system. Skill slots cost 20/30/40/50 mana; insufficient mana blocks use and is shown on the skill controls.
 - Mana never regenerates from waiting. Ordinary weapon hits restore 4 mana and weapon kills restore an additional 12; skill/designated attacks and training targets cannot farm it.
 - Verified in a real muted browser at 1600x900 and 1366x768, including skill spending, insufficient-mana blocking, hit/kill recovery, no idle regeneration, and old-save migration.
+
+## [Codex | 2026-07-19] v1.154.0 - Hardcore difficulty identity
+- Added a deep red background, border, glow, hover treatment, and title color to the Hardcore difficulty card while preserving Hitless as the more intense purple final tier.
+- Verified the complete Normal / Hardcore / Hitless visual progression in a real muted browser at 1600x900.

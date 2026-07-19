@@ -442,6 +442,8 @@
   .titlecards.primaryrow{grid-template-columns:1fr!important;margin-bottom:5px;}
   .titlecards .titleprimary{min-height:218px;border-color:#d69a3d;background:radial-gradient(circle at 50% 20%,rgba(232,163,61,.22),transparent 48%),linear-gradient(165deg,rgba(63,42,22,.96),rgba(13,11,17,.98));box-shadow:0 18px 46px rgba(0,0,0,.52),0 0 34px rgba(232,143,46,.22),inset 0 1px rgba(255,239,190,.18);animation:tplayglow 2.6s ease-in-out infinite;}
   .titlecards .titleprimary .navart{width:122px;height:122px;margin-bottom:4px;}.titlecards .titleprimary .navname{font-size:23px;letter-spacing:.09em;color:#fff1c8;text-shadow:0 2px 12px rgba(255,170,55,.5);}.titlecards .titleprimary .navdesc{font-size:12px;color:#dfcda9;line-height:1.45;}
+  .diffcard.diff-hardcore{border-color:rgba(220,62,62,.64);background:radial-gradient(circle at 50% 32%,rgba(205,42,42,.19),transparent 54%),linear-gradient(165deg,rgba(60,19,23,.96),rgba(13,9,13,.98));box-shadow:0 14px 32px rgba(0,0,0,.45),0 0 22px rgba(205,42,42,.16),inset 0 1px rgba(255,188,188,.1);}
+  .diffcard.diff-hardcore:not(.lock):hover{border-color:#ef6767;box-shadow:0 16px 34px rgba(0,0,0,.5),0 0 30px rgba(220,55,55,.3);}.diffcard.diff-hardcore .navname{color:#ff8a85;text-shadow:0 0 10px rgba(220,50,50,.48);}
   .diffcard.diff-hitless{border-color:rgba(190,72,255,.72);background:radial-gradient(circle at 50% 32%,rgba(155,35,255,.22),transparent 52%),linear-gradient(165deg,rgba(42,20,60,.96),rgba(10,9,16,.98));box-shadow:0 14px 32px rgba(0,0,0,.45),0 0 25px rgba(153,45,255,.18),inset 0 1px rgba(235,190,255,.12);}
   .diffcard.diff-hitless:not(.lock):hover{border-color:#dc83ff;box-shadow:0 16px 34px rgba(0,0,0,.5),0 0 34px rgba(173,55,255,.38);}.diffcard.diff-hitless .navname{color:#e4a2ff;text-shadow:0 0 12px rgba(178,55,255,.6);}
   @media (min-width:840px) and (pointer:fine){
@@ -617,7 +619,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.153.0';
+const VERSION3D='1.154.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE

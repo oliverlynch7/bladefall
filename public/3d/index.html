@@ -556,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.138.0';
+const VERSION3D='1.139.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6854,8 +6854,11 @@ function occRay(o,m,y0,hh){
   return false;
 }
 let shadowEps=0;
-function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; // y sits just above the floor top (y=1)
-  bx(x,1.45+shadowEps*0.03,z, r*2,0.3,r*1.7,'#000000',null,alpha==null?0.30:alpha); }
+function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shadowEps*0.03; const a=alpha==null?0.34:alpha;
+  // soft layered contact shadow: dark tight core fading to a diffuse outer penumbra so entities read as planted
+  bx(x,y,z,      r*1.35,0.34,r*1.15,'#000000',null,a);       // core
+  bx(x,y+0.02,z, r*2.0, 0.30,r*1.7, '#000000',null,a*0.55);  // mid
+  bx(x,y+0.04,z, r*2.7, 0.26,r*2.3, '#000000',null,a*0.26); }// penumbra
 function drawCourse(s,t){
   const hz=hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
   // the hazard lake below everything

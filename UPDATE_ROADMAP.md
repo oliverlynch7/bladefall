@@ -799,3 +799,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added multi-band vertical routes, ascents/descents, recovery shelves, safe/fast forks, elevated spring chains, moving elevators, elevated crumbles, phasing platforms, checkpoints, and section-derived timers.
 - Added recent-run opener avoidance and deterministic course telemetry (seed, family order, finale, peak, bands, budget).
 - Real-browser muted QA: 20/20 samples had unique in-run families, 3+ elevation bands, 5–7 sections, and no consecutive repeated opener/finale pair; observed peak range 427–1351. Elevated pads, vertical mover carry, and phase on/off states verified in the active update loop. Console: 0 errors, 0 warnings.
+
+## [Codex | 2026-07-19] v1.142.0 — selected-Warden title action
+- Removed the direct Abyssal Descent shortcut from the title screen; the endless mode remains available from its in-world Waystation monument.
+- Promoted ENTER THE ABYSS into the largest, animated primary title action.
+- The primary action now identifies the selected save slot, Warden name, character level, and equipped class; corrected slot summaries to read the class from the selected mode save.
+- Preserved and completed the queued gradient-sky/sun shader work already present in the game file.
+- Real-browser muted QA covered populated/empty save summaries, title hierarchy, absent Descent shortcut, gameplay render, WebGL, and console health at 1600×900.

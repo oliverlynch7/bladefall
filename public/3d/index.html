@@ -430,6 +430,9 @@
   .npcidentity .ovsub{font-size:12px;letter-spacing:.18em}
   .titlecards .navcard{min-height:150px;background:linear-gradient(180deg,rgba(24,20,30,.9),rgba(10,9,14,.92));border-color:rgba(200,160,90,.35)}
   .titlecards .navart{width:86px;height:86px}.titlecards .navname{font-size:16px;color:#f3ddb0;}
+  .titlecards.primaryrow{grid-template-columns:1fr!important;margin-bottom:5px;}
+  .titlecards .titleprimary{min-height:218px;border-color:#d69a3d;background:radial-gradient(circle at 50% 20%,rgba(232,163,61,.22),transparent 48%),linear-gradient(165deg,rgba(63,42,22,.96),rgba(13,11,17,.98));box-shadow:0 18px 46px rgba(0,0,0,.52),0 0 34px rgba(232,143,46,.22),inset 0 1px rgba(255,239,190,.18);animation:tplayglow 2.6s ease-in-out infinite;}
+  .titlecards .titleprimary .navart{width:122px;height:122px;margin-bottom:4px;}.titlecards .titleprimary .navname{font-size:23px;letter-spacing:.09em;color:#fff1c8;text-shadow:0 2px 12px rgba(255,170,55,.5);}.titlecards .titleprimary .navdesc{font-size:12px;color:#dfcda9;line-height:1.45;}
   @media (min-width:840px) and (pointer:fine){
     .navgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.navcard{min-height:164px}.navart{width:96px;height:96px}.navname{font-size:17px}.navdesc{font-size:11.5px}
     .navgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.navgrid.three>.navcard:last-child:nth-child(odd){grid-column:auto;width:auto;justify-self:stretch}
@@ -556,7 +559,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.141.0';
+const VERSION3D='1.142.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -572,8 +575,8 @@ function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
   let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
   let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
     if(mv.hero||mv.gold||mv.zoneMax){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
-  const cls=g.classId, has=best||g.classId||(g.achievements&&Object.keys(g.achievements).length);
-  return has?{empty:false,cls:cls,lvl:best&&best.hero?best.hero.level:1,gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal}:{empty:true};
+  const cls=(best&&best.classId)||g.classId, has=best||cls||(g.achievements&&Object.keys(g.achievements).length);
+  return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal}:{empty:true};
 }
 function selectSlot(sl){ try{ localStorage.setItem('bf3_slot',sl); }catch(e){} location.reload(); }
 function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
@@ -1926,6 +1929,18 @@ const PostFX=(function(){
     float dth=fract(sin(dot(vUv*vec2(1024.0,768.0),vec2(12.9898,78.233)))*43758.5453);
     col+=(dth-0.5)*0.012;                                      // subtle dither kills fog banding
     gl_FragColor=vec4(clamp(col,0.0,1.0),1.0); }`);
+  // gradient skybox + soft sun glow and faint god-rays, drawn as a fullscreen quad behind the scene
+  const skyP=mkProg(`precision mediump float; varying vec2 vUv; uniform vec3 uTop,uBot,uSunC; uniform vec2 uSun; uniform float uAsp;
+    void main(){
+      float g=pow(clamp(vUv.y,0.0,1.0),0.9);
+      vec3 col=mix(uBot,uTop,g);
+      vec2 d=vec2((vUv.x-uSun.x)*uAsp,(vUv.y-uSun.y)); float r=length(d);
+      float glow=exp(-r*3.0)*0.85 + exp(-r*8.0)*0.55;
+      float rays=(0.5+0.5*sin(atan(d.y,d.x)*14.0))*exp(-r*2.1)*0.20;
+      col+=uSunC*(glow+rays);
+      gl_FragColor=vec4(col,1.0); }`);
+  const U_skTop=gl.getUniformLocation(skyP,'uTop'), U_skBot=gl.getUniformLocation(skyP,'uBot'), U_skSunC=gl.getUniformLocation(skyP,'uSunC'),
+        U_skSun=gl.getUniformLocation(skyP,'uSun'), U_skAsp=gl.getUniformLocation(skyP,'uAsp'), A_sky=gl.getAttribLocation(skyP,'aPos');
   const U_bT=gl.getUniformLocation(brightP,'uT'), U_blT=gl.getUniformLocation(blurP,'uT'), U_blD=gl.getUniformLocation(blurP,'uDir'),
         U_cS=gl.getUniformLocation(compP,'uScene'), U_cB=gl.getUniformLocation(compP,'uBloom'), U_cA=gl.getUniformLocation(compP,'uAmt'),
         A_bright=gl.getAttribLocation(brightP,'aPos'), A_blur=gl.getAttribLocation(blurP,'aPos'), A_comp=gl.getAttribLocation(compP,'aPos');
@@ -1941,6 +1956,12 @@ const PostFX=(function(){
     gl.bindFramebuffer(gl.FRAMEBUFFER,null); }
   function drawTri(loc){ gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0); gl.drawArrays(gl.TRIANGLES,0,3); }
   return { get on(){ return !BLOOM_OFF; },
+    // draw the gradient sky + sun into whatever framebuffer is currently bound (called right after clear, before geometry)
+    sky(top,bot,sun,sunC){ flushBatch(); gl.depthMask(false); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+      gl.useProgram(skyP); gl.uniform3f(U_skTop,top[0],top[1],top[2]); gl.uniform3f(U_skBot,bot[0],bot[1],bot[2]);
+      gl.uniform3f(U_skSunC,sunC[0],sunC[1],sunC[2]); gl.uniform2f(U_skSun,sun[0],sun[1]); gl.uniform1f(U_skAsp,VW/Math.max(1,VH));
+      drawTri(A_sky);
+      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(true); bindSceneVA(); },
     begin(){ if(BLOOM_OFF) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
     end(){ if(BLOOM_OFF) return; flushBatch();
       const hw=Math.max(1,VW>>1), hh=Math.max(1,VH>>1);
@@ -5651,6 +5672,7 @@ function decorateMenuIcons(){
 function navCard(id,art,name,desc='',cls='',attrs=''){
   return `<button class="navcard ${cls}" id="${id}" ${attrs}><img class="navart" src="${art}" alt=""><span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
 }
+function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
 function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
 const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:'icons/class-warrior.png',
@@ -5699,10 +5721,12 @@ function openSlots(){
 }
 function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
+  const active=slotSummary(SLOT), activeClass=active.cls&&CLASSES[active.cls]?CLASSES[active.cls]:null;
+  const activeLine=active.empty?`Slot ${SLOT+1} · New Warden · Choose a class to begin`
+    :`Slot ${SLOT+1} · ${htmlSafe(active.name)} · Level ${active.lvl} · ${activeClass?activeClass.icon+' '+activeClass.disp:htmlSafe(active.cls||'No class equipped')}`;
   showOverlayHTML(`<div class="tmenu" id="tmenu">
-    <div class="navgrid titlecards">
-      ${navCard('playBtn','icons/class-warrior.png','ENTER THE ABYSS','Begin or continue the adventure')}
-      ${navCard('abyssBtn','icons/event-secret-rift.png','ABYSSAL DESCENT',meta.endlessBest?`Personal best: Floor ${meta.endlessBest}`:'Endless survival')}
+    <div class="navgrid titlecards primaryrow">
+      ${navCard('playBtn','icons/class-warrior.png','ENTER THE ABYSS',activeLine,'titleprimary')}
     </div>
     <div class="navgrid titlecards">
       ${navCard('slotsBtn','icons/character-sheet.png','CHARACTERS','Choose or manage a save slot')}
@@ -5721,7 +5745,6 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   window.addEventListener('keydown',revealMenu);
   document.getElementById('optBtn').onclick=openTitleOptions;
   document.getElementById('playBtn').onclick=modeSelect;
-  document.getElementById('abyssBtn').onclick=enterEndlessFromTitle;
   document.getElementById('slotsBtn').onclick=openSlots;
   document.getElementById('skinBtn').onclick=()=>openSkins(titleScreen);
 }
@@ -8271,6 +8294,16 @@ function drawThreatArrows(c){
     c.restore(); }
   c.globalAlpha=1;
 }
+// per-theme sky: z = zenith darkening (top=sky*z), p = sun screen pos (0..1), c = sun glow colour
+const SKYSUN={
+  plains:{z:0.55,p:[0.52,0.82],c:[0.95,0.85,0.6]},   forest:{z:0.50,p:[0.60,0.85],c:[0.82,0.86,0.55]},
+  frost:{z:0.60,p:[0.50,0.86],c:[0.72,0.84,0.98]},   volcano:{z:0.38,p:[0.32,0.60],c:[1.0,0.42,0.16]},
+  canyon:{z:0.50,p:[0.40,0.70],c:[1.0,0.72,0.36]},   badlands:{z:0.50,p:[0.45,0.68],c:[0.96,0.66,0.36]},
+  void:{z:0.72,p:[0.50,0.90],c:[0.36,0.20,0.56]},    apex:{z:0.66,p:[0.50,0.88],c:[0.62,0.46,0.86]},
+  marble:{z:0.55,p:[0.50,0.80],c:[1.0,0.86,0.52]},   ruins:{z:0.55,p:[0.40,0.75],c:[0.72,0.68,0.60]},
+  dungeon:{z:0.70,p:[0.50,0.86],c:[0.42,0.44,0.52]}, hub:{z:0.55,p:[0.55,0.82],c:[1.0,0.80,0.50]},
+  _def:{z:0.60,p:[0.50,0.85],c:[0.60,0.60,0.72]}
+};
 function render(t){
   if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
@@ -8278,6 +8311,10 @@ function render(t){
   const sky=s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
+  if(G){ const sc=SKYSUN[s.theme]||SKYSUN._def;
+    const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
+    PostFX.sky(top,bot,sc.p,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }

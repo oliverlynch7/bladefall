@@ -744,3 +744,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
   - Flyer → fanged purple bat-demon with broad membrane wings.
 - Bones, Slime, and the Treasure Goblin already had faithful distinct models (unchanged). Element/status/AI/stats/save untouched — visual only via a new `look` field. All ten core mobs render error-free in-browser.
 - Note: the 21 zone-specific mobs (mob sheets 2-3) ALREADY have unique per-mob look models from the earlier bestiary work (jackal, spitter, boar, spore, sentinel, revenant, frostshell, lobber, skitter, totem, stalker, tether, priest, statue, knight, arcanist, mimic, wraith, caster, slimelet). Batch 6 will spot-check those against the concept sheets rather than rebuild.
+
+## [Claude | 2026-07-18] Design Studio — in-game review turntable for every voxel model (SHIPPED v1.119.0)
+
+- [x] New Pause → Character → "🎨 Design Studio": a turntable (reuses the Weapon Studio pedestal/camera) that spins any approved model on a plinth, with a grouped picker (Cast / Pets / Bosses / Mobs), Prev/Next, and a Spin toggle.
+- [x] Covers all 50 in-world designs: 6 hub NPCs (incl. the Warden's Shade, whose body was factored into reusable `drawShadeModel`), 6 pets, 8 bosses (Ember + Marble Colossus shown separately via a temporary stage-theme override), and 31 mobs.
+- [x] Per-group camera framing (pets close, bosses pulled back). No save/AI/balance impact — pure viewer. Exposed `openDesignStudio`/`designSet`/`DESIGNS` on `__BF3`. All 50 entries render error-free.

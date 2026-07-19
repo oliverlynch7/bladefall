@@ -509,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.118.0';
+const VERSION3D='1.119.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4537,7 +4537,7 @@ function updatePetLabel(){
   el.style.color=petRarityCol(pet.id); el.textContent=petDisplayName(pet.id);
 }
 function update(dt){
-  if(mode==='studio'){ studioUpdate(dt); return; }
+  if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
@@ -6457,6 +6457,75 @@ function renderStudio(t){
   for(const pr of studio.proj) drawProjectile3(pr,t);
 }
 function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
+// ===== Design Studio — a turntable to review every approved voxel model (reuses the Weapon Studio pedestal) =====
+const DGROUP_CAM={Cast:{h:34,d:150},Pets:{h:12,d:70},Bosses:{h:60,d:270},Mobs:{h:24,d:120}};
+function designEnemy(key,boss){ const d=ENEMY[key]||{}; return {type:key,look:d.look,kind:d.kind||'walk',boss:!!boss,color:d.color||'#8a8f9e',r:d.r||15,h:d.h||38,x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,hitFlash:0,bob:1.2,shot:d.shot,element:d.element,slowT:0,lunge:0,phase:0,st:null,shootT:1}; }
+const DESIGNS=[
+  {g:'Cast',k:'Quartermaster',d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'quartermaster',x:0},t); popM(); }},
+  {g:'Cast',k:'Keeper',       d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'keeper',x:0},t); popM(); }},
+  {g:'Cast',k:'Drillmaster',  d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'drillmaster',x:0},t); popM(); }},
+  {g:'Cast',k:'Smith',        d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'smith',x:0},t); popM(); }},
+  {g:'Cast',k:'Beastkeeper',  d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'beastkeeper',x:0},t); popM(); }},
+  {g:'Cast',k:"Warden's Shade",d:(t,s)=>{ pushM(); rotY(s); drawShadeModel(t); popM(); }},
+  {g:'Pets',k:'Ember Pup',    d:(t,s)=>drawPet3({id:'emberpup',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Stone Whelp',  d:(t,s)=>drawPet3({id:'stonewhelp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Pale Wisp',    d:(t,s)=>drawPet3({id:'wisp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Mending Sprite',d:(t,s)=>drawPet3({id:'mender',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Coin Sprite',  d:(t,s)=>drawPet3({id:'coinsprite',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Grave Wraith', d:(t,s)=>drawPet3({id:'gravewraith',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Bosses',k:'The Brute',       d:(t,s)=>{ const e=designEnemy('brute',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'The Fallen',      d:(t,s)=>{ const e=designEnemy('warden',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Hollow Marksman', d:(t,s)=>{ const e=designEnemy('archer',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Frost Sorcerer',  d:(t,s)=>{ const e=designEnemy('sorcerer',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Ember Colossus',  stageTheme:'volcano', d:(t,s)=>{ const e=designEnemy('colossus',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Marble Colossus', stageTheme:'marble',  d:(t,s)=>{ const e=designEnemy('colossus',1); e.color='#9aa0b0'; e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Abyss King',      d:(t,s)=>{ const e=designEnemy('king',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Abyss King, Awakened', d:(t,s)=>{ const e=designEnemy('tyrant',1); e.yaw=s; drawEnemy3(e,t); }},
+];
+['grunt','flyer','emberling','frostling','toxling','shadeling','sparkling','goblin','bones','slime',
+ 'slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant',
+ 'sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
+  .filter(k=>ENEMY[k]).forEach(k=>DESIGNS.push({g:'Mobs',k:(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k,d:(t,s)=>{ const e=designEnemy(k,0); e.yaw=s; drawEnemy3(e,t); }}));
+function openDesignStudio(back){ initAudio(); studio={t:0,design:true,di:0,spin:true,back:back||openPause}; mode='studio'; showOverlay(false); showGameUI(false); const q=document.getElementById('questbox'); if(q) q.classList.add('hide'); buildDesignPanel(); }
+function designSet(i){ if(!studio) return; studio.di=i; const e=DESIGNS[i]; const nm=document.getElementById('wsName'); if(nm) nm.textContent=e.g+' · '+e.k;
+  document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
+function designUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt; }
+function renderDesign(t){
+  const e=DESIGNS[studio.di]||DESIGNS[0], cam=DGROUP_CAM[e.g]||{h:34,d:150};
+  gl.clearColor(0.05,0.055,0.075,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,1600);
+  VIEW=mLookAt([Math.sin(0.7)*cam.d,cam.h+42,Math.cos(0.7)*cam.d],[0,cam.h,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,1000,3200); gl.uniform3f(U.uFog,0.05,0.055,0.075);
+  CURM=mIdent();
+  bx(0,-8,0, 320,16,320,'#181b22'); bx(0,2,0, 140,6,140,'#242833'); bx(0,6.4,0, 112,3,112,'#2c313d');   // pedestal
+  drawShadow(0,0,22,0.3);
+  const spin=studio.spin?studio.t*0.5:0.6, savedSi=G?G.stageIndex:undefined;
+  if(e.stageTheme!=null && G){ const si=STAGES.findIndex(s=>s&&s.theme===e.stageTheme); if(si>=0) G.stageIndex=si; }
+  try{ e.d(t,spin); }catch(err){}
+  if(e.stageTheme!=null && G) G.stageIndex=savedSi;
+}
+function buildDesignPanel(){
+  const pn=document.getElementById('wstudio'); if(!pn) return;
+  let html='', lastG='';
+  DESIGNS.forEach((e,i)=>{ if(e.g!==lastG){ html+=`<div style="grid-column:1/-1;font-size:11px;opacity:.6;margin:7px 0 2px;text-transform:uppercase;letter-spacing:.08em">${e.g}</div>`; lastG=e.g; } html+=`<button class="wsbtn" data-i="${i}">${e.k}</button>`; });
+  pn.innerHTML=`<div class="wshead">🎨 Design Studio <span id="wsName"></span></div>
+    <div id="wsList" class="wslist">${html}</div>
+    <div class="wsctrl">
+      <button class="wsbig" id="dPrev">‹ Prev</button>
+      <button class="wsbig" id="dNext">Next ›</button>
+      <button class="wsbig" id="wsSpin">🔄 Spin: On</button>
+      <button class="wsbig ghost" id="wsBack">Back</button>
+    </div>`;
+  pn.classList.remove('hide');
+  pn.querySelectorAll('.wsbtn').forEach(b=>b.onclick=()=>designSet(+b.dataset.i));
+  document.getElementById('dPrev').onclick=()=>designSet((studio.di-1+DESIGNS.length)%DESIGNS.length);
+  document.getElementById('dNext').onclick=()=>designSet((studio.di+1)%DESIGNS.length);
+  document.getElementById('wsSpin').onclick=()=>{ studio.spin=!studio.spin; document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin?'On':'Off'); };
+  document.getElementById('wsBack').onclick=()=>exitStudio();
+  designSet(0);
+}
 function buildStudioPanel(){
   const pn=document.getElementById('wstudio'); if(!pn) return;
   const list=ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('');
@@ -6491,6 +6560,7 @@ function openPause(){
     <div class="pgrid">
       <button class="bigbtn ghost" id="gearBtn">Gear</button>
       <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons</button>
+      <button class="bigbtn ghost" id="dstudioBtn">🎨 Design Studio</button>
       <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
       <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
       <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
@@ -6533,6 +6603,7 @@ function openPause(){
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   { const _ws=document.getElementById('wstudioBtn'); if(_ws) _ws.onclick=()=>openWeaponStudio(openPause); }
+  { const _ds=document.getElementById('dstudioBtn'); if(_ds) _ds.onclick=()=>openDesignStudio(openPause); }
   document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
   document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
@@ -7068,6 +7139,21 @@ function hubNpcModel(n,t){
     bx(0,26,6, 15,4,2, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.4);
     bx(0,41,0, 10,11,10,'#c9a380'); bx(0,48,0, 12,4,12, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.35);
   }
+}
+// the Warden's Shade base model, drawn at the origin of the current frame (hovers, no legs)
+function drawShadeModel(t){
+  const fl=0.42+0.16*Math.sin(t*2.1), fy=8+Math.sin(t*1.5)*3.5;
+  bx(0,1,0, 16,2,16,'#b06bff','#b06bff',0.18);                                                  // spectral pool
+  for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(Math.cos(a)*10, fy+2+((t*6+i*5)%16), Math.sin(a)*10, 2.5,2.5,2.5,'#8a4fd0','#c47bff',0.4*fl); }  // dissolving cloak fragments
+  pushM(); mv(0,fy,0); rotY(Math.sin(t*0.6)*0.28);
+    bx(0,10,0, 12,22,7,'#3a2a55','#7a4fc0',fl*0.7);                                              // tattered gown
+    bx(0,7,4, 11,14,2,'#2a1f42','#6a3fb0',fl*0.55);                                              // ragged front hem
+    bx(0,26,0, 14,10,10,'#4a3a66','#8a6ac0',fl*0.85);                                            // spectral cuirass
+    bx(-8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); bx(8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); // pauldrons
+    bx(0,39,0, 9,10,9,'#4a3a66','#8a6ac0',fl*0.9); bx(0,45,0, 10,4,10,'#3a2a55','#6a4a9a',fl*0.85); // helmed head + crest
+    bx(0,39,4.6, 7,2,1.5,'#d0a0ff','#e0b8ff',0.85+0.1*Math.sin(t*3));                            // glowing visor slit
+    bx(6,6,7, 3.5,44,3,'#cdd4e0','#eef2ff',0.6); bx(6,29,7, 12,3,3,'#8b93a8','#c9d2e0',0.7); bx(6,34,7, 4,7,4,'#6a5a8a','#b090e0',0.7);  // silver sword, point-down
+  popM();
 }
 function drawWaystation(t){
   const pu=0.72+0.28*Math.sin(t*2.2);
@@ -7798,7 +7884,7 @@ function drawThreatArrows(c){
   c.globalAlpha=1;
 }
 function render(t){
-  if(mode==='studio' && studio){ renderStudio(studio.t); return; }
+  if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
   const s=(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette
   const sky=s.sky;
@@ -7866,19 +7952,9 @@ function render(t){
     bx(s.x,sy+26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
   if(G.hub) drawWaystation(t);
-  if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman: tattered purple, glowing visor, silver sword point-down
-    const n=G.npc, fl=0.42+0.16*Math.sin(t*2.1), fy=8+Math.sin(t*1.5)*3.5;
-    bx(n.x,1,n.z, 16,2,16,'#b06bff','#b06bff',0.18);                                                  // spectral pool on the floor
-    for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(n.x+Math.cos(a)*10, fy+2+((t*6+i*5)%16), n.z+Math.sin(a)*10, 2.5,2.5,2.5,'#8a4fd0','#c47bff',0.4*fl); }  // cloak fragments dissolving upward
-    pushM(); mv(n.x,fy,n.z); rotY(Math.sin(t*0.6)*0.28);
-      bx(0,10,0, 12,22,7,'#3a2a55','#7a4fc0',fl*0.7);                                                 // tattered gown (tapers — she hovers, no legs)
-      bx(0,7,4, 11,14,2,'#2a1f42','#6a3fb0',fl*0.55);                                                 // ragged front hem
-      bx(0,26,0, 14,10,10,'#4a3a66','#8a6ac0',fl*0.85);                                               // spectral cuirass
-      bx(-8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); bx(8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8);    // pauldrons
-      bx(0,39,0, 9,10,9,'#4a3a66','#8a6ac0',fl*0.9); bx(0,45,0, 10,4,10,'#3a2a55','#6a4a9a',fl*0.85); // helmed head + crest
-      bx(0,39,4.6, 7,2,1.5,'#d0a0ff','#e0b8ff',0.85+0.1*Math.sin(t*3));                               // glowing visor slit
-      bx(6,6,7, 3.5,44,3,'#cdd4e0','#eef2ff',0.6); bx(6,29,7, 12,3,3,'#8b93a8','#c9d2e0',0.7); bx(6,34,7, 4,7,4,'#6a5a8a','#b090e0',0.7);  // great silver sword, point-down
-    popM();
+  if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
+    const n=G.npc;
+    pushM(); mv(n.x,0,n.z); drawShadeModel(t); popM();
     if(!n.talked) bx(n.x,66,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
   if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
   if(G.meteors) for(const mt of G.meteors){                // incoming-meteor telegraph on the ground
@@ -8185,6 +8261,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, drawWaystation, openClasses, openPause, updateHubTags, RANK_XP, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
+  openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
   recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,

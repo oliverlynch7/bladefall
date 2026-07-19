@@ -556,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.140.0';
+const VERSION3D='1.141.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5082,14 +5082,28 @@ function update(dt){
   else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
   class2Innate(G.p,dt);
 }
-const AMBIENT={frost:{c:'#e6f7ff',vy:-40,n:2},volcano:{c:'#ff9a4a',vy:40,n:2},forest:{c:'#9fd84a',vy:-16,n:1},void:{c:'#c9a6ff',vy:14,n:1},apex:{c:'#c9a6ff',vy:16,n:1}};
+const AMBIENT={
+  frost:{c:'#e6f7ff',vy:-40,n:2.4,g:1},           // snow drifting down
+  volcano:{c:'#ff9a4a',vy:46,n:2.4,g:1,e:1},       // embers rising, glowing
+  forest:{c:'#9fd84a',vy:-14,n:1.6},               // spores/pollen
+  plains:{c:'#d6e6a4',vy:-12,n:1.4},               // Hollow Pass pollen drifting up
+  void:{c:'#c9a6ff',vy:14,n:1.6,e:1},              // arcane motes
+  apex:{c:'#dcc0ff',vy:16,n:1.6,e:1},
+  marble:{c:'#ffe6a0',vy:12,n:1.8,e:1},            // Sunspire golden light motes
+  canyon:{c:'#d8b488',vy:-8,n:1.6,g:1},            // wind-blown dust
+  badlands:{c:'#d0a878',vy:-8,n:1.6,g:1},          // grit
+  ruins:{c:'#c0b6a4',vy:-6,n:1.2,g:1},             // settling dust
+  dungeon:{c:'#b8b0a4',vy:-6,n:1.2,g:1},
+  hub:{c:'#ffd98a',vy:8,n:1.0,e:1}                 // warm hearth fireflies
+};
 function updateAmbient(dt,s){
   const cfg=AMBIENT[s.theme]; if(!cfg) return;
-  if(G.ambient.length<48 && Math.random()<cfg.n*0.5){
-    G.ambient.push({x:G.p.x+(Math.random()-0.5)*700, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*700,
-      vy:cfg.vy*(0.6+Math.random()*0.8), ph:Math.random()*6.28, life:6+Math.random()*4, c:cfg.c, sz:1.6+Math.random()*2});
+  if(G.ambient.length<80 && Math.random()<cfg.n*0.6){
+    G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
+      vy:cfg.vy*(0.6+Math.random()*0.8), ph:Math.random()*6.28, sw:(cfg.g?7:14)+Math.random()*8, life:6+Math.random()*4,
+      c:cfg.c, e:cfg.e?cfg.c:null, sz:1.4+Math.random()*(cfg.e?2.4:1.8), tw:cfg.e?Math.random()*6.28:0});
   }
-  for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*12*dt; a.y+=a.vy*dt; a.life-=dt; }
+  for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*a.sw*dt; a.y+=a.vy*dt; if(a.tw)a.tw+=dt*6; a.life-=dt; }
   G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
 }
 function onBossActivate(e){ SFX.boss();
@@ -8389,7 +8403,7 @@ function render(t){
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
-  for(const a of G.ambient) bx(a.x,a.y,a.z, a.sz,a.sz,a.sz, a.c, a.c, Math.min(0.8,a.life*0.4));
+  for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
   // translucent pass: near-front walls & doors (drawn last, no depth write, so the hero shows through)
   if(LATE.length){ gl.depthMask(false);
     const stone2=tint(s.ground,'#fff',0.13), dCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};

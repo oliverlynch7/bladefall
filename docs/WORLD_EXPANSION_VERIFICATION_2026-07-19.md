@@ -24,7 +24,6 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 
 ## Remaining pairs
 
-- The Abyss + Reaper's Gate
 - Sunspire Palace + Sealed Reliquary
 - Castle Duskmoor final expansion and full-chain regression
 
@@ -84,3 +83,16 @@ The former baseline was one 760 × 520 plains arena, one 800 × 540 forest arena
 - Cinder Vents adds minecart galleries, a suspended refinery, cooling channels, a forge-routing hall, and Ash Altar approach.
 - Magma Core introduces vent-field stepping, moving ore lifts, circular refinery machinery, a forgiving basalt causeway versus a faster high crane-line, a three-band core ascent, and a controlled cooling descent with recovery floor.
 - All required goals pass the structural jump-connectivity sweep. The three Core Valves surface-snap, the Trial Chamber exit starts sealed, and activating all three opens it. Muted Chromium reported zero console errors.
+
+## Pair 6 — The Abyss + Reaper’s Gate (v1.177.0)
+
+| Area | Authored districts | Structural reach | Objective |
+|---|---:|---:|---|
+| Abyss Approach | 6 | 87/87 | Blink-Stalker hunt |
+| The Hollow Deep | 6 | 76/86; goal reachable | 5 Void Splinters + Rift Anchor |
+| Reaper’s Gate | 6 | 90/90 | Break 3 Reaper Seals |
+
+- Abyss Approach now crosses a Shatter Field, horizontally drifting islands, inverted ruins, a four-band Anchor Spire, and a crumbling phase bridge to the King’s Door.
+- Hollow Deep uses a gravity-well spiral, roof traversal across an inside-out keep, a hanging chain sea, and moving observatory rings above the World Scar.
+- Reaper’s Gate is a separate authored expedition after the existing Reaper unlock trial: scythe-like moving slabs, a spiral ossuary, Soul Choir, disappearing final approach, and a three-seal exit mission.
+- Every required goal passes base-movement structural connectivity. The Reaper seals open their exit correctly, and muted Chromium reported zero console errors.

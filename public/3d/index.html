@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.176.0';
+const VERSION3D='1.177.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3430,6 +3430,23 @@ const EXPANDED_SCAPES={
       vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}
       climbRun(160,-2700,0,450,-3100,220,72);for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
       for(const p of [[-500,-820,cart],[420,-1560,refine],[-420,-2360,channels],[450,-3100,forge]]){mkMonster('magmaskit',p[0]-45,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:420,z:-1560,y:140},{x:-420,z:-2360,y:0},{x:450,z:-3100,y:220},{x:0,z:-4180,y:220}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4400,decoCol:ROCK,decoTheme:'volcano',decoTall:450});}
+  },
+  abyss(ctx){const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!deep){const shore=room('Last Shore',0,0,820,620),field=room('Shatter Field',-480,-820,760,680),drift=room('Drifting Archipelago',420,-1600,780,700,120),ruin=room('Inverted Ruin',-420,-2420,780,700,250),anchor=room('Anchor Spire',450,-3260,760,680,390),door=room('King’s Door',0,-4380,980,780,390);
+      road(shore,field,160);for(let k=0;k<12;k++){const a=k/12*6.28,r=190+(k%3)*80;vplat(-480+Math.cos(a)*r,-820+Math.sin(a)*r,20+(k%4)*28,88,74,{phase:true});}
+      climbRun(-180,-1120,0,420,-1600,120,74,{safeRoute:true});for(let k=0;k<7;k++)G.movers.push({x0:120+k*95,z:-1380-k*95,w:92,d:76,h:55+k*12,amp:42,sp:.72+k*.09,ph:rnd()*6.28,x:120,px:120});
+      vplat(420,-1600,120,780,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k*.82;vplat(420+Math.cos(a)*250,-1600+Math.sin(a)*230,140+(k%3)*45,84,76,{drift:true});}
+      climbRun(160,-1950,120,-420,-2420,250,72);vplat(-420,-2420,250,780,700,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const x=-690+(k%4)*180,z=-2600+Math.floor(k/4)*260;G.deco.push({x,z,y0:250,w:120,h:90+(k%3)*55,d:100,c:VOID});G.deco.push({x,z,y0:340+(k%3)*55,w:150,h:18,d:130,c:VIO});}
+      climbRun(-160,-2760,250,450,-3260,390,70);for(let k=0;k<12;k++){const a=k/12*12.56,y=390+k*25;vplat(450+Math.cos(a)*230,-3260+Math.sin(a)*210,y,80,68,{anchorRing:true});G.deco.push({x:450+Math.cos(a)*230,z:-3260+Math.sin(a)*210,y0:0,w:12,h:y,d:12,c:CHAIN});}
+      climbRun(450,-3260,390,0,-4380,390,82,{phaseBridge:true});vplat(0,-4380,390,980,780,{district:'King’s Door',checkpoint:true});for(let k=0;k<9;k++)G.crumbles.push({x:-320+k*80,z:-4050-k*55,w:70,d:68,h:390,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      chest(650,-1600,210);chest(-680,-2420,340);scapeSecret(ctx,720,-3260,440);for(const p of [[-480,-820,field],[420,-1600,drift],[-420,-2420,ruin],[450,-3260,anchor]]){mkMonster('blinkstalker',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-480,z:-820,room:field},{x:420,z:-1600,room:drift},{x:-420,z:-2420,room:ruin},{x:450,z:-3260,room:anchor}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4600,decoCol:VOID,decoTheme:'void',decoTall:520});
+    }else{const lip=room('Hollow Lip',0,0,820,620),well=room('Gravity Well',-450,-850,740,680),inside=room('Inside-Out Keep',420,-1650,820,720,180),chains=room('Hanging Chain Sea',-420,-2480,760,700,330),rift=room('Rift Observatory',450,-3300,800,720,470),scar=room('World Scar',0,-4380,980,780,470);
+      road(lip,well,150);for(let k=0;k<14;k++){const a=k*.72,r=280-k*9,y=20+k*15;vplat(-450+Math.cos(a)*r,-850+Math.sin(a)*r,y,86,70,{gravitySpiral:true});}
+      climbRun(-450,-850,0,420,-1650,180,82);vplat(420,-1650,180,820,720,{checkpoint:true,terrace:true});for(let k=0;k<9;k++){const x=100+(k%3)*250,z=-1880+Math.floor(k/3)*220,y=180+(k%3)*50;G.deco.push({x,z,y0:y,w:150,h:110,d:130,c:k%2?VOID:CHAIN});vplat(x,z,y+120,140,120,{roof:true});}
+      climbRun(420,-1650,180,-420,-2480,330,82);for(let k=0;k<11;k++){const t=k/10,x=-420+840*t,z=-2600-450*t,y=330+(k%4)*38;vplat(x,z,y,76,70,{chain:true});G.deco.push({x,z,y0:y+20,w:8,h:190,d:8,c:CHAIN});}
+      climbRun(-420,-2480,330,450,-3300,470,82);vplat(450,-3300,470,800,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3300+Math.sin(a)*240,w:88,d:72,h:470+(k%3)*32,amp:36,sp:.65+k*.05,ph:rnd()*6.28,x:450,px:450});}
+      climbRun(450,-3300,470,0,-4380,470,82);chest(-650,-2480,368);chest(700,-3300,502);for(const p of [[-450,-850,well],[420,-1650,inside],[-420,-2480,chains],[450,-3300,rift]]){mkMonster('blinkstalker',p[0]-50,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-450,z:-850,y:120},{x:420,z:-1650,y:300},{x:-420,z:-2480,y:368},{x:450,z:-3300,y:470},{x:0,z:-4380,y:470}]);scapeFind(ctx,450,-3300,470);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4580,decoCol:VOID,decoTheme:'void',decoTall:570});}
   }
 };
 const SIDE_SCAPES={
@@ -3532,6 +3549,20 @@ const SIDE_SCAPES={
     const valves=[{x:-610,z:-820,y:32},{x:500,z:-1740,y:235},{x:430,z:-3660,y:430}];for(const p of valves)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'coreValves',name:'Core Valve'},bob:rnd()*3,placed:true});localMission('coreValves','Stabilize the three core valves','activate',3,220);G.portal=null;
     chest(-720,-2720,300);chest(700,-3660,430);chest(-520,-4520,260);scapeSecret(ctx,760,-1740,235);for(const p of [[-520,-820,vents],[500,-1740,refinery],[-430,-2720,mantle],[430,-3660,core]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}
     finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-5280,decoCol:BASALT,decoTheme:'ember',decoTall:520});G.portal=null;questUpdate();
+  },
+  reapersgate(ctx){const {rnd,mkMonster}=ctx,STONE='#27202f',BONE='#b7a7c5',SOUL='#9d54e8',IRON='#403746';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const path=(a,b,w=135)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const vestibule=room('Bone Vestibule',0,0,820,620),harvest=room('Harvest Galleries',-480,-820,760,680),pendulum=room('Pendulum Nave',430,-1650,800,720,140),ossuary=room('Spiral Ossuary',-420,-2500,760,700,300),choir=room('Soul Choir',450,-3380,820,720,440),gate=room('Reaper’s Gate',0,-4520,980,780,440);
+    path(vestibule,harvest,150);for(let k=0;k<10;k++){const a=k/10*6.28;G.deco.push({x:-480+Math.cos(a)*260,z:-820+Math.sin(a)*230,y0:0,w:34,h:90+(k%3)*30,d:34,c:BONE});}
+    // Scythe-blade stepping stones sweep across the nave on offset rhythms; a wider side aisle is the recovery route.
+    climbRun(-480,-820,0,430,-1650,140,82);for(let k=0;k<8;k++)G.movers.push({x0:120+k*95,z:-1450-k*92,w:100,d:66,h:70+k*10,amp:48,sp:.8+k*.08,ph:k*.7,x:120,px:120});vplat(430,-1650,140,800,720,{checkpoint:true,terrace:true});
+    for(let k=0;k<12;k++){const a=k*.72,y=160+k*14;vplat(430+Math.cos(a)*260,-1650+Math.sin(a)*230,y,82,68,{scytheArc:true});G.deco.push({x:430+Math.cos(a)*260,z:-1650+Math.sin(a)*230,y0:y,w:70,h:8,d:18,c:SOUL});}
+    climbRun(430,-1650,140,-420,-2500,300,82);for(let k=0;k<14;k++){const a=k*.68,y=300+k*24;vplat(-420+Math.cos(a)*230,-2500+Math.sin(a)*210,y,76,68,{ossuary:true});if(k%3===0)G.deco.push({x:-420+Math.cos(a)*230,z:-2500+Math.sin(a)*210,y0:0,w:12,h:y,d:12,c:IRON});}
+    climbRun(-420,-2500,300,450,-3380,440,82);vplat(450,-3380,440,820,720,{checkpoint:true,terrace:true});for(let k=0;k<9;k++){const x=160+(k%3)*290,z=-3600+Math.floor(k/3)*220;G.deco.push({x,z,y0:440,w:90,h:120,d:70,c:k%2?SOUL:BONE});}
+    // Final reaping line alternates disappearing slabs and broad sanctuary landings.
+    climbRun(450,-3380,440,0,-4520,440,82);for(let k=0;k<10;k++)G.crumbles.push({x:360-k*72,z:-3900-k*68,w:72,d:66,h:440,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    const seals=[{x:-480,z:-820,y:0},{x:430,z:-1650,y:210},{x:-420,z:-2500,y:444}];for(const p of seals)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'reaperSeals',name:'Reaper Seal'},bob:rnd()*3,placed:true});localMission('reaperSeals','Break the three Reaper seals','activate',3,240);G.portal=null;
+    chest(680,-1650,210);chest(-650,-2500,420);scapeSecret(ctx,700,-3380,440);for(const p of [[-480,-820,harvest],[430,-1650,pendulum],[-420,-2500,ossuary],[450,-3380,choir]]){mkMonster('shadeling',p[0]-50,p[1],p[2]);mkMonster('blinkstalker',p[0]+55,p[1],p[2]);}finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4740,decoCol:STONE,decoTheme:'void',decoTall:590});G.portal=null;questUpdate();
   }
 };
 function STONE_C(){ return '#6b6b73'; }

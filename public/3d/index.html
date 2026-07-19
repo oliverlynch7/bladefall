@@ -648,7 +648,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.162.0';
+const VERSION3D='1.163.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1781,7 +1781,7 @@ function questKill(type){
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
 function openWay(){ if(G.portal||!G.portalPos) return;
-  G.portal={x:G.portalPos.x,z:G.portalPos.z,t:0};
+  snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
   addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen'); }
 // render only when the content changes; pulse once on a progress change, hold a stronger state on completion
 function applyQuest(el,head,rows,sig,complete=false){
@@ -3423,13 +3423,13 @@ function loadStage(i){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
     // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
-    SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); return;
+    SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
   }
   /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
      Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
   if((isBoss||isMini) && !G.trial && !G.side && G.area<0 && BOSS_ARENAS[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
-    BOSS_ARENAS[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); return;
+    BOSS_ARENAS[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
   }
   // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
   const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}
@@ -3600,6 +3600,7 @@ function loadStage(i){
   placeShade(entryRoom.x-60,entryRoom.z+entryRoom.d/2-60);
   G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
+  snapWorldInteractables();
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
@@ -3907,6 +3908,38 @@ function floorAt(x,z,r,yRef){
   for(const cr of G.crumbles){ const ch=cr.h||0; if(cr.state<2 && ch<=yRef+2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,ch); }
   for(const ob of G.obstacles){ if(ob.h<=yRef+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
   return f;
+}
+/* Placement resolver for world objects. Player collision deliberately limits floorAt to
+   surfaces the player is already high enough to land on; spawners need the opposite rule:
+   find the HIGHEST walkable top at X/Z so an exit, chest or drop can never live under a mesa. */
+function highestSurfaceAt(x,z,r=8){
+  if(!G) return 0; let f=-Infinity;
+  // footprint is INCLUSIVE (matches floorAt's +r reach) so a drop/portal anywhere the player could stand — including a
+  // plateau's edge — snaps to that top instead of falling to ground level under the mesa.
+  const m=r*0.4;
+  for(const sg of (G.segments||[])){ if(Math.abs(x-sg.x)<sg.w/2+m && Math.abs(z-sg.z)<sg.d/2+m) f=Math.max(f,0); }
+  for(const wl of (G.walls||[])){ if(wl.stand && Math.abs(x-wl.x)<wl.w/2+m && Math.abs(z-wl.z)<wl.d/2+m) f=Math.max(f,wl.h||0); }
+  for(const mv of (G.movers||[])){ if(Math.abs(x-mv.x)<mv.w/2+m && Math.abs(z-mv.z)<mv.d/2+m) f=Math.max(f,mv.h||0); }
+  for(const cr of (G.crumbles||[])){ if(cr.state!==2 && Math.abs(x-cr.x)<cr.w/2+m && Math.abs(z-cr.z)<cr.d/2+m) f=Math.max(f,cr.h||0); }
+  for(const ob of (G.obstacles||[])){ if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0); }
+  return f>-1e8?f:0;
+}
+// per-frame safety net: lift any collectible/exit that ended up below the surface it sits over (covers objects
+// created AFTER build-time snapping — e.g. the exit portal that only opens on clear — and terrain that changed).
+function reconcileWorldHeights(){ if(!G) return;
+  if(G.portal) G.portal.y=Math.max(G.portal.y||0, highestSurfaceAt(G.portal.x,G.portal.z,16));
+  if(G.bonusPortal) G.bonusPortal.y=Math.max(G.bonusPortal.y||0, highestSurfaceAt(G.bonusPortal.x,G.bonusPortal.z,16));
+  for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
+  for(const ch of (G.chests||[])) if(!ch.opened) ch.y=Math.max(ch.y||0, highestSurfaceAt(ch.x,ch.z,14));
+}
+function snapWorldInteractables(){ if(!G) return;
+  const snap=(o,k='y',r=8)=>{ if(o) o[k]=Math.max(Number(o[k])||0,highestSurfaceAt(o.x,o.z,r)); };
+  snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); snap(G.secret); snap(G.secretTrigger);
+  for(const o of (G.pickups||[])) snap(o,'y0');
+  for(const o of (G.chests||[])) snap(o,'y',14);
+  for(const o of (G.keys||[])) snap(o);
+  for(const o of (G.plates||[])) snap(o);
+  for(const o of (G.springs||[])) snap(o);
 }
 function enemySupport(e){
   let f=-Infinity;
@@ -4619,7 +4652,7 @@ function killEnemy(e,weaponKill){
     for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
   questKill(e.type);
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
-    if(fq && !fq.placed && !e.boss && Math.random()<0.62) G.pickups.push({x:e.x+10,z:e.z+10,questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); }
+    if(fq && !fq.placed && !e.boss && Math.random()<0.62){ const x=e.x+10,z=e.z+10; G.pickups.push({x,z,y0:highestSurfaceAt(x,z),questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); } }
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
   // Phase 11: kill crunch — a brief hitstop + a death pop / coin-spray so every kill has weight
   G.slowmo=Math.max(G.slowmo||0, e.boss?0.38:(e.elite?0.10:0.05));
@@ -4704,7 +4737,7 @@ function openChest(ch){
 }
 // every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
 function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, tier=o?RARITY[o.rarity].tier:0, col=o?RARITY[o.rarity].color:'#fff';
-  G.pickups.push(Object.assign({x,z,y0:y0||0,bob:Math.random()*3},item));
+  y0=Math.max(y0||0,highestSurfaceAt(x,z)); G.pickups.push(Object.assign({x,z,y0,bob:Math.random()*3},item));
   SFX.drop(tier);
   burst(x,(y0||0)+18,z,col,7+tier*7);
   (G.fx=G.fx||[]).push({x,z,y0:y0||0,tier,col,t:0,life:tier>=4?1.7:tier>=2?1.0:0.7});   // rising beam / ring effect
@@ -5090,6 +5123,7 @@ function update(dt){
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
   updateAmbient(dt,s);
+  reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
   // enemies
   for(const e of G.enemies){
     if(e.dead) continue;
@@ -8841,14 +8875,15 @@ function drawChest(ch,t){
   popM();
 }
 function drawPortal3(po,t){
+  const py=po.y||0;   // sit on the surface it was snapped to (plateau top, platform, etc.) — never buried at ground
   // carved stone archway framing the swirling gate
-  for(let i=0;i<8;i++){ const a=Math.PI*(0.12+i/7*0.76); bx(po.x+Math.cos(a)*46, 20+Math.sin(a)*54, po.z, 9,9,11,'#4a4552'); }  // arch voussoirs
-  for(const s of [-1,1]){ bx(po.x+s*46,18,po.z, 11,44,11,'#413c48'); bx(po.x+s*46,40,po.z, 13,6,13,'#524c5a'); bx(po.x+s*46,-2,po.z, 14,6,14,'#524c5a'); }  // side pillars + caps/bases
-  for(let i=0;i<3;i++) bx(po.x+(i-1)*22,74,po.z, 12,7,12,'#4a4552');                                     // keystone lintel
-  for(const s of [-1,1]) bx(po.x+s*46,58,po.z, 3,3,3,'#e8a33d','#e8a33d',0.9);                            // rune lamps on the pillars
+  for(let i=0;i<8;i++){ const a=Math.PI*(0.12+i/7*0.76); bx(po.x+Math.cos(a)*46, py+20+Math.sin(a)*54, po.z, 9,9,11,'#4a4552'); }  // arch voussoirs
+  for(const s of [-1,1]){ bx(po.x+s*46,py+18,po.z, 11,44,11,'#413c48'); bx(po.x+s*46,py+40,po.z, 13,6,13,'#524c5a'); bx(po.x+s*46,py-2,po.z, 14,6,14,'#524c5a'); }  // side pillars + caps/bases
+  for(let i=0;i<3;i++) bx(po.x+(i-1)*22,py+74,po.z, 12,7,12,'#4a4552');                                  // keystone lintel
+  for(const s of [-1,1]) bx(po.x+s*46,py+58,po.z, 3,3,3,'#e8a33d','#e8a33d',0.9);                         // rune lamps on the pillars
   for(let i=0;i<10;i++){ const a=t*1.4+i*0.628;
-    bx(po.x+Math.cos(a)*34, 54+Math.sin(a)*34, po.z, 9,9,9, '#e8a33d','#e8a33d',0.92); }                  // swirling motes
-  bx(po.x,54,po.z, 52,72,4,'#e8a33d','#e8a33d',0.22); bx(po.x,54,po.z-1, 30,44,2,'#ffd88a','#ffd88a',0.16);  // gate sheet + bright core
+    bx(po.x+Math.cos(a)*34, py+54+Math.sin(a)*34, po.z, 9,9,9, '#e8a33d','#e8a33d',0.92); }               // swirling motes
+  bx(po.x,py+54,po.z, 52,72,4,'#e8a33d','#e8a33d',0.22); bx(po.x,py+54,po.z-1, 30,44,2,'#ffd88a','#ffd88a',0.16);  // gate sheet + bright core
   drawShadow(po.x,po.z,34,0.2);
 }
 /* ---- skin preview (rendered on the main GL canvas, cropped) ---- */

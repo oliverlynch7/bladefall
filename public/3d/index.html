@@ -546,7 +546,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.130.0';
+const VERSION3D='1.131.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6892,12 +6892,34 @@ function drawCourse(s,t){
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
       gl.depthMask(false); bx(d.x,(d.y0!=null?d.y0:0)+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c, null, 0.2); gl.depthMask(true); continue; }
     if(d.y0!=null){ bx(d.x,d.y0+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c); continue; }   // strata band: an exact box at a given base height
-    if(d.theme==='forest'){ bx(d.x,d.h*0.3,d.z, d.w*0.35,d.h*0.6,d.w*0.35,'#3a2c1c');
-      bx(d.x,d.h*0.72,d.z, d.w*1.9,d.h*0.62,d.w*1.9, tint('#2c5c34','#000',0.15)); }
-    else if(d.theme==='frost'){ pushM(); mv(d.x,d.h*0.4,d.z); rotY(d.x*0.1); rotZ(0.16); box(d.w*0.55,d.h*0.85,d.w*0.55,'#7fd6ff','#7fd6ff',0.85); popM(); }
-    else if(d.theme==='void'||d.theme==='apex'){ pushM(); mv(d.x,d.h*0.45,d.z); rotY(t*0.15+d.x); box(d.w*0.5,d.h*0.9,d.w*0.5,'#4a2f7a','#b06bff',0.9); popM(); }
-    else if(d.theme==='volcano'){ bx(d.x,d.h*0.3,d.z, d.w,d.h*0.6,d.w,'#3d1a10'); bx(d.x,d.h*0.62,d.z, d.w*0.5,d.h*0.14,d.w*0.5,'#ff7a3a','#ff9a4a'); }
-    else { bx(d.x,d.h*0.45,d.z, d.w,d.h*0.9,d.w, d.c); bx(d.x,d.h*0.94,d.z, d.w*1.5,d.h*0.10,d.w*1.5, d.c); }
+    if(d.theme==='forest'){ const bk='#3a2c1c', bkD='#2a2014', lf=tint('#2c5c34','#000',0.1), lfD=tint('#2c5c34','#000',0.28), lfL=tint('#2c5c34','#fff',0.12);
+      bx(d.x,d.h*0.3,d.z, d.w*0.34,d.h*0.62,d.w*0.34, bk);                                    // trunk
+      for(const s of [-1,1]) bx(d.x+s*d.w*0.22,d.h*0.05,d.z, d.w*0.16,d.h*0.1,d.w*0.5, bkD);  // buttress roots
+      for(const s of [-1,1]){ pushM(); mv(d.x,d.h*0.5,d.z); rotZ(-s*0.5); bx(s*d.w*0.4,d.h*0.12,0, d.w*0.5,d.w*0.16,d.w*0.16, bk); popM(); }   // limbs
+      bx(d.x,d.h*0.78,d.z, d.w*1.9,d.h*0.6,d.w*1.9, lfD); bx(d.x,d.h*0.9,d.z, d.w*1.5,d.h*0.4,d.w*1.5, lf); bx(d.x,d.h*1.02,d.z, d.w*0.9,d.h*0.3,d.w*0.9, lfL);   // layered canopy
+      for(let i=0;i<4;i++){ const a=i*1.571+d.x; bx(d.x+Math.cos(a)*d.w*0.9,d.h*0.8,d.z+Math.sin(a)*d.w*0.9, d.w*0.7,d.w*0.6,d.w*0.7, i%2?lf:lfD); } }   // outer clumps
+    else if(d.theme==='frost'){ const ic='#bff0ff', icD='#7fd6ff', icDk='#4a7fa8';
+      bx(d.x,d.h*0.08,d.z, d.w*0.9,d.h*0.14,d.w*0.9, tint(icDk,'#fff',0.2));                  // frosted base
+      pushM(); mv(d.x,d.h*0.45,d.z); rotY(d.x*0.1); rotZ(0.12); box(d.w*0.5,d.h*0.85,d.w*0.5, ic,icD,0.85); popM();
+      for(const p of [[-0.5,0.3,0.5],[0.6,0.25,-0.4],[0.3,0.35,0.6]]){ pushM(); mv(d.x+p[0]*d.w,d.h*p[1],d.z+p[2]*d.w); rotZ(p[0]*0.5); box(d.w*0.28,d.h*p[1]*1.6,d.w*0.28, ic,icD,0.8); popM(); }   // side shards
+      bx(d.x,d.h*0.82,d.z, d.w*0.2,d.h*0.3,d.w*0.2,'#eafcff','#fff',0.7); }                   // bright tip
+    else if(d.theme==='void'||d.theme==='apex'){ const vr='#4a2f7a', vg='#b06bff';
+      bx(d.x,d.h*0.2,d.z, d.w*0.8,d.h*0.4,d.w*0.8,'#1a1226');                                 // eroded base
+      pushM(); mv(d.x,d.h*0.55,d.z); rotY(t*0.15+d.x); box(d.w*0.46,d.h*0.9,d.w*0.46, vr,vg,0.85); bx(0,d.h*0.4,0, d.w*0.2,d.h*0.3,d.w*0.2, vr,vg,0.95); popM();
+      for(let i=0;i<3;i++){ const a=t*0.6+i*2.09; bx(d.x+Math.cos(a)*d.w*0.7,d.h*(0.5+0.2*Math.sin(t+i)),d.z+Math.sin(a)*d.w*0.7, d.w*0.14,d.w*0.14,d.w*0.14, vg,vg,0.7); } }   // floating shards
+    else if(d.theme==='volcano'){ const rk='#2a160e', rkD='#1a0e08', lav='#ff7a3a', lavB='#ff9a4a', em=0.6+0.3*Math.sin(t*3+d.x);
+      bx(d.x,d.h*0.32,d.z, d.w,d.h*0.64,d.w, rk); bx(d.x,d.h*0.1,d.z, d.w*1.2,d.h*0.2,d.w*1.2, rkD);   // basalt + base
+      for(let i=0;i<3;i++) bx(d.x+(i-1)*d.w*0.25,d.h*0.35,d.z+d.w*0.5, 2,d.h*0.5,1.4, lav,lavB,0.6*em);   // lava veins
+      bx(d.x,d.h*0.66,d.z, d.w*0.5,d.h*0.16,d.w*0.5, lav,lavB,0.5+0.3*em);                     // molten crown
+      for(let i=0;i<2;i++) bx(d.x+Math.sin(t*2+i)*d.w*0.3,d.h*0.8+((t*20+i*10)%(d.h*0.4)),d.z, 2.4,3,2.4, lav,lavB,0.6); }   // embers
+    else { const st=d.c, stD=tint(d.c,'#000',0.25), stL=tint(d.c,'#fff',0.1), ms='#3a5a2e';
+      bx(d.x,d.h*0.06,d.z, d.w*1.5,d.h*0.12,d.w*1.5, stD);                                    // plinth
+      bx(d.x,d.h*0.5,d.z, d.w,d.h*0.86,d.w, st);
+      for(let i=-1;i<=1;i++) bx(d.x+i*d.w*0.34,d.h*0.5,d.z+d.w*0.5, d.w*0.12,d.h*0.8,1.4, stD);   // flutes
+      bx(d.x,d.h*0.94,d.z, d.w*1.4,d.h*0.12,d.w*1.4, stL);                                    // capital
+      bx(d.x+d.w*0.4,d.h*0.3,d.z, d.w*0.2,d.h*0.4,1.4, stD);                                  // crack
+      for(const s of [-1,1]) bx(d.x+s*d.w*0.7,d.h*0.08,d.z+s*d.w*0.3, d.w*0.4,d.h*0.14,d.w*0.4, stD);   // rubble
+      bx(d.x,d.h*0.9,d.z+d.w*0.5, d.w*0.6,d.h*0.08,1.4, ms,ms,0.4); }                         // moss
   }
 }
 function weaponMesh(w,swing){

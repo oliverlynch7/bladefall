@@ -556,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.139.0';
+const VERSION3D='1.140.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1914,7 +1914,18 @@ const PostFX=(function(){
     if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error('post link: '+gl.getProgramInfoLog(p)); return p; }
   const brightP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; void main(){ vec3 c=texture2D(uT,vUv).rgb; float l=max(max(c.r,c.g),c.b); gl_FragColor=vec4(c*smoothstep(0.64,0.98,l),1.0); }`);
   const blurP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; uniform vec2 uDir; void main(){ vec3 s=texture2D(uT,vUv).rgb*0.227; s+=(texture2D(uT,vUv+uDir*1.384).rgb+texture2D(uT,vUv-uDir*1.384).rgb)*0.316; s+=(texture2D(uT,vUv+uDir*3.23).rgb+texture2D(uT,vUv-uDir*3.23).rgb)*0.070; gl_FragColor=vec4(s,1.0); }`);
-  const compP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uScene,uBloom; uniform float uAmt; void main(){ vec3 c=texture2D(uScene,vUv).rgb + texture2D(uBloom,vUv).rgb*uAmt; vec3 tm=(c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14); gl_FragColor=vec4(clamp(mix(c,tm,0.45),0.0,1.0),1.0); }`);
+  const compP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uScene,uBloom; uniform float uAmt; void main(){
+    vec3 c=texture2D(uScene,vUv).rgb + texture2D(uBloom,vUv).rgb*uAmt;
+    vec3 tm=(c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14);
+    vec3 col=clamp(mix(c,tm,0.45),0.0,1.0);
+    col=mix(vec3(0.5),col,1.07);                               // gentle contrast S-curve around mid-grey
+    float lum=dot(col,vec3(0.299,0.587,0.114));
+    col=mix(vec3(lum),col,1.13);                               // +13% saturation so the palette pops like the icon art
+    vec2 d=vUv-0.5; float vig=smoothstep(0.85,0.28,dot(d,d)*2.0);
+    col*=mix(0.80,1.0,vig);                                    // soft in-shader vignette (interacts with bloom)
+    float dth=fract(sin(dot(vUv*vec2(1024.0,768.0),vec2(12.9898,78.233)))*43758.5453);
+    col+=(dth-0.5)*0.012;                                      // subtle dither kills fog banding
+    gl_FragColor=vec4(clamp(col,0.0,1.0),1.0); }`);
   const U_bT=gl.getUniformLocation(brightP,'uT'), U_blT=gl.getUniformLocation(blurP,'uT'), U_blD=gl.getUniformLocation(blurP,'uDir'),
         U_cS=gl.getUniformLocation(compP,'uScene'), U_cB=gl.getUniformLocation(compP,'uBloom'), U_cA=gl.getUniformLocation(compP,'uAmt'),
         A_bright=gl.getAttribLocation(brightP,'aPos'), A_blur=gl.getAttribLocation(blurP,'aPos'), A_comp=gl.getAttribLocation(compP,'aPos');

@@ -230,7 +230,7 @@
     .achlist .gd[style*="text-align:left"]{grid-column:1/-1;}  /* category headers span all columns */
     .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .vsrow{font-size:15.5px;} .gearrow{padding:9px 12px;}
-    .pausecard #resBtn{min-height:82px;display:grid;grid-template-columns:68px auto;grid-template-rows:auto auto;column-gap:16px;text-align:left;padding:8px 24px;}
+    .pausecard #resBtn{max-width:100%;width:100%;min-height:88px;display:grid;grid-template-columns:74px auto;grid-template-rows:auto auto;column-gap:18px;text-align:left;padding:8px 26px;}
     .pausecard #resBtn .navart{grid-row:1/3;width:62px;height:62px;margin:0;}.pausecard #resBtn .navname{align-self:end}.pausecard #resBtn .navdesc{align-self:start}
     .pausecard>.navgrid{grid-template-columns:repeat(6,minmax(0,1fr));}.pausecard>.navgrid .navcard{min-height:150px}
     .pausecard .pgrid{grid-template-columns:repeat(4,minmax(0,1fr));}.pausecard .sect{margin-top:10px}.pausecard .setrow{margin:7px 0}
@@ -403,6 +403,26 @@
   .ovkicker{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--amber);margin:0 0 3px;}
   .ovh{font-size:23px;font-weight:900;margin:0 0 4px;letter-spacing:.02em;}
   .ovsub{color:var(--muted);font-size:13.5px;margin:0 0 18px;line-height:1.5;}
+  /* Unified RPG menu language: every overlay inherits the same hierarchy, forged frame,
+     themed accent and interaction states. Bespoke screens can still layer their own art on top. */
+  .card.rpgmenu{--menu-accent:#e8a33d;--menu-rgb:232,163,61;isolation:isolate;border-color:color-mix(in srgb,var(--menu-accent) 30%,#29303d);box-shadow:0 30px 80px rgba(0,0,0,.64),0 0 0 1px #050609,inset 0 1px rgba(255,255,255,.06),inset 0 0 45px rgba(var(--menu-rgb),.025)}
+  .card.rpgmenu::before{left:7%;right:7%;height:3px;background:linear-gradient(90deg,transparent,var(--menu-accent) 18%,#fff0c6 50%,var(--menu-accent) 82%,transparent);box-shadow:0 0 13px rgba(var(--menu-rgb),.4)}
+  .card.rpgmenu::after{content:'';position:absolute;inset:7px;z-index:-1;pointer-events:none;border:1px solid rgba(var(--menu-rgb),.08);border-radius:13px;background:linear-gradient(135deg,rgba(var(--menu-rgb),.04),transparent 22%,transparent 78%,rgba(var(--menu-rgb),.025))}
+  .card.rpgmenu[data-theme="void"]{--menu-accent:#bd75ff;--menu-rgb:189,117,255}.card.rpgmenu[data-theme="danger"]{--menu-accent:#f15c57;--menu-rgb:241,92,87}.card.rpgmenu[data-theme="frost"]{--menu-accent:#6fd9ff;--menu-rgb:111,217,255}.card.rpgmenu[data-theme="nature"]{--menu-accent:#65d58b;--menu-rgb:101,213,139}.card.rpgmenu[data-theme="steel"]{--menu-accent:#aeb9cc;--menu-rgb:174,185,204}
+  .rpgmenu>.ovkicker:first-child,.rpgmenu>header .ovkicker{color:var(--menu-accent)!important;text-shadow:0 0 12px rgba(var(--menu-rgb),.25)}
+  .rpgmenu>.ovh,.rpgmenu>header .ovh{font-size:clamp(26px,2.7vw,38px);line-height:1.05;color:#faf7ed;text-shadow:0 3px 14px rgba(0,0,0,.65);margin-bottom:7px}.rpgmenu>.ovh::after,.rpgmenu>header .ovh::after{content:'';display:block;width:min(190px,38%);height:1px;margin:9px auto 0;background:linear-gradient(90deg,transparent,var(--menu-accent),transparent);opacity:.7}
+  .rpgmenu>.ovsub,.rpgmenu>header .ovsub{max-width:780px;margin-left:auto;margin-right:auto;color:#aeb5c4}.rpgmenu .sect{color:var(--menu-accent);margin-top:14px}.rpgmenu .sect::before{content:'◆';font-size:7px;color:var(--menu-accent);text-shadow:0 0 8px rgba(var(--menu-rgb),.6)}.rpgmenu .sect::after{background:linear-gradient(90deg,rgba(var(--menu-rgb),.45),transparent)}
+  .rpgmenu .bigbtn{position:relative;border:1px solid color-mix(in srgb,var(--menu-accent) 72%,#493019);border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--menu-accent) 86%,white),var(--menu-accent) 52%,color-mix(in srgb,var(--menu-accent) 76%,#5b3513));box-shadow:0 6px 16px rgba(0,0,0,.3),0 0 13px rgba(var(--menu-rgb),.12),inset 0 1px rgba(255,255,255,.38),inset 0 -2px rgba(0,0,0,.22)}
+  .rpgmenu .bigbtn:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 9px 20px rgba(0,0,0,.38),0 0 18px rgba(var(--menu-rgb),.22),inset 0 1px rgba(255,255,255,.42)}
+  .rpgmenu .bigbtn.ghost{background:linear-gradient(180deg,rgba(37,40,52,.94),rgba(16,18,25,.98));color:#e6e9ef;border-color:#363c4c;box-shadow:0 5px 14px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.045)}.rpgmenu .bigbtn.ghost:hover{border-color:color-mix(in srgb,var(--menu-accent) 58%,#465064);background:linear-gradient(180deg,rgba(var(--menu-rgb),.13),rgba(17,19,27,.98));color:#fff}
+  .rpgmenu .bigbtn.utility{min-height:48px;color:#cfd4de}.rpgmenu .bigbtn:disabled{filter:grayscale(.45);box-shadow:none!important}
+  .rpgmenu .gearrow,.rpgmenu .achrow,.rpgmenu .zrow,.rpgmenu .choice{border-color:#303543;background:linear-gradient(135deg,rgba(38,42,54,.72),rgba(14,16,23,.9));box-shadow:inset 0 1px rgba(255,255,255,.025);border-radius:11px}.rpgmenu .gearrow:hover,.rpgmenu .zrow:not(.zlock):hover,.rpgmenu .choice:not(.lockc):hover{border-color:color-mix(in srgb,var(--menu-accent) 48%,#3c4558);background:linear-gradient(135deg,rgba(var(--menu-rgb),.09),rgba(16,18,25,.94))}
+  .rpgmenu .navcard{border-radius:13px;border-color:#343a4a;background:radial-gradient(circle at 50% 25%,rgba(var(--menu-rgb),.075),transparent 44%),linear-gradient(160deg,#252936,#101219 76%)}.rpgmenu .navcard:hover{border-color:var(--menu-accent);background:radial-gradient(circle at 50% 25%,rgba(var(--menu-rgb),.17),transparent 48%),linear-gradient(160deg,#2b2f3c,#11131a 76%);box-shadow:0 14px 30px rgba(0,0,0,.42),0 0 20px rgba(var(--menu-rgb),.15)}
+  .rpgmenu .navname,.rpgmenu .choice .cname{color:#f3ead7}.rpgmenu .navmeta,.rpgmenu a{color:var(--menu-accent)!important}.rpgmenu .hint{color:#949cad}.rpgmenu .statgrid{border-color:#303543;background:linear-gradient(145deg,rgba(var(--menu-rgb),.035),rgba(8,10,15,.42))}
+  .rpgmenu .achlist,.rpgmenu .buildscroll,.rpgmenu .petgrid{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--menu-accent) 55%,#343946) #101219}.rpgmenu input[type="range"]{accent-color:var(--menu-accent)}
+  .rpgmenu .menuiconlead{width:46px;height:46px;display:block;margin:0 auto 6px;filter:drop-shadow(0 7px 8px rgba(0,0,0,.55))}
+  @media(min-width:840px){.rpgmenu.menu-shop,.rpgmenu.menu-waystation{max-height:calc(100vh - 70px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--menu-accent) 55%,#343946) #101219}}
+  @media(max-width:650px){.rpgmenu>.ovh,.rpgmenu>header .ovh{font-size:25px}.card.rpgmenu{border-radius:14px}.card.rpgmenu::after{inset:5px;border-radius:10px}.rpgmenu .bigbtn{min-height:46px}}
   .sect{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#8b93a8;text-align:left;margin:16px 2px 6px;display:flex;align-items:center;gap:8px;}
   .sect::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#2b3040,transparent);}
   .choices{display:flex;flex-direction:column;gap:11px;}
@@ -622,7 +642,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.158.0';
+const VERSION3D='1.159.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5757,11 +5777,29 @@ function titleEmbers(){ const host=document.getElementById('tembers'); if(!host)
   let h=''; for(let i=0;i<16;i++){ const dur=(7+Math.random()*9).toFixed(1), delay=(-Math.random()*12).toFixed(1), left=(Math.random()*100).toFixed(1), dx=((Math.random()*2-1)*70).toFixed(0), sz=(2+Math.random()*2.5).toFixed(1);
     h+=`<span style="left:${left}%;width:${sz}px;height:${sz}px;--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`; }
   host.innerHTML=h; }
+function enhanceMenuShell(){
+  const card=ovcard.querySelector('.card'); if(!card) return;
+  card.classList.add('rpgmenu');
+  const heads=[...card.querySelectorAll('.ovkicker,.ovh,.title')].slice(0,3).map(x=>x.textContent||'').join(' ').toLowerCase(); let theme='amber';
+  if(/abyss|void|reaper|shade|soulfire|shrine/.test(heads)) theme='void';
+  else if(/you fell|delete|death|bag full|hardcore/.test(heads)) theme='danger';
+  else if(/class|skill|trainer|bestiary|training|options|characters|save files|gear|paused/.test(heads)) theme='steel';
+  else if(/pet yard|companion|quest|postings/.test(heads)) theme='nature';
+  else if(/frost|glacier|chill/.test(heads)) theme='frost';
+  card.dataset.theme=theme;
+  if(/shop/.test(heads)) card.classList.add('menu-shop');
+  else if(/waystation/.test(heads)) card.classList.add('menu-waystation');
+  else if(/paused/.test(heads)) card.classList.add('menu-pause');
+  else if(/bag/.test(heads)) card.classList.add('menu-bag');
+  else if(/pet yard/.test(heads)) card.classList.add('menu-pets');
+  card.querySelectorAll('.bigbtn').forEach(b=>{ const t=(b.textContent||'').trim().toLowerCase();
+    if(/^(back|leave|cancel|not now|keep old|return|close|remove|title screen)/.test(t)||/back$/i.test(b.id||'')) b.classList.add('utility','ghost'); });
+}
 function showOverlayHTML(html){
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
   const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
-  ovcard.innerHTML=html; decorateMenuIcons(); showOverlay(true); fixSliders();
+  ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
   const na=ovcard.querySelector('.achlist'); if(na&&psc) na.scrollTop=psc;
   if(pov) overlay.scrollTop=pov;
 }

@@ -866,3 +866,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt the Wardrobe as three spacious illustrated galleries for Capes, Trails, and Weapon Glows, with clear equipped, wear, remove, locked, and unlock-goal states.
 - Generated, background-extracted, optimized, and integrated 14 distinct premium voxel cosmetic icons: five capes, five trails, and four weapon glows. Hitless Edge remains the visual apex with a white-violet skull-and-lightning treatment.
 - Verified all assets load, equip/remove persists, locked rewards cannot be selected, and the complete menu needs no scrolling at 1600x900 or 1366x768 in a real muted browser.
+
+## [Codex | 2026-07-19] v1.159.0 - Unified RPG menu design system
+- Applied a forged Bladefall frame, semantic color themes, stronger typography and section hierarchy, ornamented controls, clearer selected/locked/disabled states, and consistent hover/focus feedback to every overlay menu.
+- Preserved bespoke title, Mirror, and studio identities while normalizing Pause, Bag, Gear, Shop, Forge, Wardrobe, Achievements, Classes, Trainer, Quest Board, Pet Yard, Bestiary, Waystation, save/difficulty, Credits, and dialogs.
+- Made Pause Resume a full-width primary action and confined long Shop and Waystation content to dedicated internal panes rather than scrolling the whole page.
+- Verified representative menu families in a muted real browser at 1920x1080, 1600x900, and 1366x768 with no console errors or save/gameplay logic changes.

@@ -731,3 +731,16 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Abyss King: added long reaching clawed arms + a cloak dissolving into motes.
 - [x] The Abyss King, Awakened (type key 'tyrant'): fully redesigned from the old eldritch tentacle-mass into the ASCENDED king — a black-hole void heart with an accretion ring, a radiant gold+void sun-crown, six floating blades orbiting, and purple lightning. Now visually related to the Abyss King and clearly surpasses every other boss.
 - Hitboxes (r/h), AI, shot data, type keys, save/music compat all unchanged — visual only. hitFlash feedback preserved on the colossus split. All eight branches render error-free in-browser.
+
+## [Claude | 2026-07-18] Voxel-art Batch 5 — core mobs aligned to concept art (SHIPPED v1.118.0)
+
+- [x] Gave distinct `look` models to the seven core mobs that previously shared the generic recolored-brute / winged-blob fallback:
+  - Grunt → helmeted footsoldier with sword + round wooden shield.
+  - Emberling → flaming rock imp, fire-crowned head, dragging chain.
+  - Frostling → low ice beast on all fours with crystal spines + glowing eyes + fangs.
+  - Toxling → hunched swamp beast with a glowing poison belly-sac + mushroom back.
+  - Shadeling → purple skeletal wraith, glowing ribs, reaching claws, tattering to nothing.
+  - Sparkling → floating faceted arcane diamond with radiating crystal shards.
+  - Flyer → fanged purple bat-demon with broad membrane wings.
+- Bones, Slime, and the Treasure Goblin already had faithful distinct models (unchanged). Element/status/AI/stats/save untouched — visual only via a new `look` field. All ten core mobs render error-free in-browser.
+- Note: the 21 zone-specific mobs (mob sheets 2-3) ALREADY have unique per-mob look models from the earlier bestiary work (jackal, spitter, boar, spore, sentinel, revenant, frostshell, lobber, skitter, totem, stalker, tether, priest, statue, knight, arcanist, mimic, wraith, caster, slimelet). Batch 6 will spot-check those against the concept sheets rather than rebuild.

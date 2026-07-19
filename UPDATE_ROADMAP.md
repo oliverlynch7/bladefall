@@ -904,3 +904,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Organic regular/elite kills are hard-capped at Epic and can never drop Legendary; bosses, chests, mimics, treasure goblins, and authored rewards retain their distinct reward tables.
 - QA: muted real Chromium, v1.167.0 loaded, 100,000 organic rarity rolls produced zero Legendary results, zero console errors.
 
+
+## [Codex | 2026-07-19] v1.169.0 - Per-skill mana balance
+- Replaced slot-based 20/30/40/50 mana costs with individual 8-26 mana costs based on each ability's damage, cooldown, mobility, control, sustain, immunity, and encounter impact.
+- Balanced every current Warrior, Ranger, Mage, and Reaper ability, all legacy alternate-path skills, and all eight Ranger v2 skill-tree choices.
+- Added mana costs to skill-choice cards, class skill descriptions, combat tooltips, and both modern and legacy respec trees so tradeoffs are visible before committing a build.
+- Reference principle: AQW-style cheap repeatable attacks, moderate control/sustain, premium major defenses and finishers, translated to Bladefall's 100-mana pool and regeneration model.
+- QA: muted real Chromium; verified full cost matrix, Ranger tree labels, an actual Volley cast consuming exactly 11 mana and starting its 5s cooldown, and zero console errors.
+

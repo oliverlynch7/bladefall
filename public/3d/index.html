@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.168.0';
+const VERSION3D='1.169.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1337,7 +1337,7 @@ const MELEE={
   scythe:{shape:'arc',reach:90,arc:2.95}
 };
 /* ---------------- Classes (Classes & Quests update, Phase 1) ----------------
-   4 skills per class on independent cooldowns (no mana). Ranks 1-10 per class;
+   4 skills per class on independent cooldowns and individually balanced mana costs. Ranks 1-10 per class;
    skills unlock at ranks 1/2/4/7; subclass chosen at rank 3; capstone = the
    subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
    abilities lose their bonus effects (rider). */
@@ -4474,7 +4474,7 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
-    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
+    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   showOverlayHTML(`<div class="card classpick" style="--pick:#8fd56d"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
     <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
     <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div></div>`);
@@ -4508,8 +4508,25 @@ function c2OnKill(p){ // Perfect Hunt: a kill while Clear Aim active trims skill
 SKILL_FX.r_volley=SKILL_FX.volley; SKILL_FX.r_pierce=SKILL_FX.deadeye;
 SKILL_FX.r_tumble=SKILL_FX.tumble; SKILL_FX.r_shadow=SKILL_FX.shadowstrike;
 SKILL_FX.r_smoke=SKILL_FX.smokebomb; SKILL_FX.r_mark=SKILL_FX.mark; SKILL_FX.r_deathmark=SKILL_FX.deathmark;
-const SKILL_MANA=[20,30,40,50];
-function skillManaCost(i){ return SKILL_MANA[i]||20; }
+/* Per-ability mana economy. Costs reflect actual power/utility rather than bar slot:
+   repeatable attacks are cheap, mobility is cheapest, control/sustain sits mid-band,
+   and major immunity/burst/room-clearing effects carry the premium. */
+const SKILL_MANA={
+  cleave:12,stomp:16,wcharge:14,berserk:22,
+  bulwark:14,ironwave:18,laststand:26,
+  deadeye:14,volley:12,tumble:8,mark:16,
+  shadowstrike:13,smokebomb:12,deathmark:20,
+  bolt:13,nova:16,blink:8,tempest:24,
+  frostchains:15,barrier:18,meteor:26,
+  reap:14,harvest:18,shadowstep:9,deathsdoor:24,
+  execute:18,grimscythe:17,reapingstorm:25,
+  r_volley:11,r_pierce:14,r_tumble:8,r_shadow:12,
+  r_spike:13,r_smoke:11,r_mark:16,r_deathmark:20
+};
+function skillManaCost(i,s){
+  s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
+  return (s&&SKILL_MANA[s.id])||12;
+}
 function gainMana(p,n,announce){
   if(!p) return 0;
   const max=p.maxMana||100, before=p.mana==null?max:p.mana;
@@ -4521,8 +4538,8 @@ function gainMana(p,n,announce){
   }
   return gained;
 }
-function spendSkillMana(p,i){
-  const cost=skillManaCost(i), cur=p.mana==null?(p.maxMana||100):p.mana;
+function spendSkillMana(p,i,s){
+  const cost=skillManaCost(i,s), cur=p.mana==null?(p.maxMana||100):p.mana;
   if(cur<cost){ toast('Not enough mana · '+Math.floor(cur)+' / '+cost); return 0; }
   p.mana=cur-cost; hudUpdate(); skillbarUpdate(); return cost;
 }
@@ -4535,7 +4552,7 @@ function useSkill(i){
   if(mode!=='play'||!G) return; const p=G.p; if(p.dead) return;
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
-    if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i); if(!manaSpent) return; initAudio();
+    if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
     G._desig=true; const r=SKILL_FX[s.fx]?SKILL_FX[s.fx](p,classFamilyOk(p.weapon),1):null; G._desig=false;
     if(r==='refund'){ gainMana(p,manaSpent,false); return; }
     let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; skillbarUpdate(); return; }
@@ -4547,7 +4564,7 @@ function useSkillLegacy(i){
   const s=curSkills()[i]; if(!s) return;
   if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
   if(p.skillCd[i]>0) return;
-  const manaSpent=spendSkillMana(p,i); if(!manaSpent) return;
+  const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return;
   initAudio();
   G._desig=true;                                          // abilities are "designated" attacks: they spend Rune Marks + rupture Corruption
   const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
@@ -4560,7 +4577,7 @@ function useSkillLegacy(i){
 const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
 function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
-    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i); b.dataset.m=manaCost;
+    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
       if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; continue; }
       if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Choose your rank-'+slotRank[i]+' skill'; continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
@@ -4570,7 +4587,7 @@ function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='und
       b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; }
     return; }
   const S=curSkills();
-  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i); b.dataset.m=manaCost;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
     if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
     if(locked||cooling) b.textContent=locked?'🔒':Math.ceil(p.skillCd[i]); else b.innerHTML=s.icon;
@@ -6514,7 +6531,7 @@ function openClasses(back){
   const sk0=C.skills[0], open0=cs.rank>=1;
   nodes.push(`<div class="snode open"><div class="sic">${sk0.icon}</div>
     <div class="sbody"><div class="stitle">${sk0.n} <span class="srank">Rank 1 ✓ · shared</span></div>
-      <div class="sdesc">${sk0.d} · <span style="opacity:.7">key 1</span></div></div></div>`);
+      <div class="sdesc">${sk0.d} · <span style="opacity:.7">${skillManaCost(0,sk0)} mana · key 1</span></div></div></div>`);
   // the fork node
   const forked=cs.rank>=2;
   nodes.push(`<div class="sfork ${chosen?'open':(forked?'open':'shut')}"><div class="sic">⑂</div>
@@ -6528,7 +6545,7 @@ function openClasses(back){
       const isNext=!unlocked && S.slice(1,i).every(s2=>cs.rank>=s2.rank);   // the immediate next unlock
       if(unlocked) nodes.push(`<div class="snode open"><div class="sic">${sk.icon}</div>
         <div class="sbody"><div class="stitle">${sk.n} <span class="srank">Rank ${sk.rank} ✓</span></div>
-          <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · key ${i+1}</span></div></div></div>`);
+          <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · ${skillManaCost(i,sk)} mana · key ${i+1}</span></div></div></div>`);
       else if(isNext) nodes.push(`<div class="snode shut" style="opacity:.75"><div class="sic">🔜</div>
         <div class="sbody"><div class="stitle">${sk.n} <span class="srank" style="color:#8b93a8">next · Rank ${sk.rank}</span></div>
           <div class="sdesc">${sk.d}</div></div></div>`);
@@ -6563,16 +6580,16 @@ function openRespecTree(cid,back){
     if(def){
       tree=`<div class="buildroot"><div class="bticon">${passiveIcon('r_clear_aim')}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
       tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, isSkill=R.kind==='skill';
-        const opt=o=>`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}" ${reached?'':'disabled'}><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s cooldown':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
+        const opt=o=>`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}" ${reached?'':'disabled'}><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s · '+skillManaCost(R.slot,o)+' mana':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
         return `<div class="buildrank ${reached?'reached':''}">${opt(R.a)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(R.b)}</div><div class="buildspine"></div>`; }).join('');
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">${passiveIcon('r_perfect_hunt')}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`;
     }else{
       const root=C.skills[0], pA=C.subs[0], pB=C.subs[1];
       const skA=(pA&&pA.skills)||C.skills.slice(1,4), skB=(pB&&pB.skills)||C.skills.slice(1,4);
-      tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d}</div></div><div class="buildspine"></div>`;
+      tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d} · ${skillManaCost(0,root)} mana</div></div><div class="buildspine"></div>`;
       // one row per skill SLOT — pick either discipline's ability for that slot, fully mix-and-match (e.g. Guardian skill 2 + Berserker skill 3)
       for(let i=0;i<3;i++){ const a=skA[i], b=skB[i], rank=(a&&a.rank)||(b&&b.rank)||[2,4,7][i], reached=cs.rank>=rank;
-        const opt=(o,pid,disp)=>o?`<button class="buildopt ${staged[i+1]===pid?'sel':''}" data-mixslot="${i+1}" data-mixpath="${pid}" ${reached?'':'disabled'}><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s cd · ${disp}</span><div class="bodesc">${o.d}</div></button>`:'';
+        const opt=(o,pid,disp)=>o?`<button class="buildopt ${staged[i+1]===pid?'sel':''}" data-mixslot="${i+1}" data-mixpath="${pid}" ${reached?'':'disabled'}><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s cd · ${skillManaCost(i+1,o)} mana · ${disp}</span><div class="bodesc">${o.d}</div></button>`:'';
         tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
     }

@@ -394,6 +394,7 @@
   /* Primary navigation is visual and thumb-sized. Settings, Back, Leave, and other
      utility actions intentionally remain compact .bigbtn controls. */
   .navgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 14px;}
+  .navgrid.three>.navcard:last-child:nth-child(odd){grid-column:1/-1;width:calc(50% - 5px);justify-self:center;}
   .navcard{min-width:0;min-height:138px;padding:13px 10px 11px;border:1px solid #333a4c;border-radius:16px;
     background:linear-gradient(165deg,rgba(38,42,55,.92),rgba(14,15,22,.98));color:var(--ink);cursor:pointer;
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.05);
@@ -414,6 +415,7 @@
   .titlecards .navart{width:86px;height:86px}.titlecards .navname{font-size:16px;color:#f3ddb0;}
   @media (min-width:840px) and (pointer:fine){
     .navgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.navcard{min-height:164px}.navart{width:96px;height:96px}.navname{font-size:17px}.navdesc{font-size:11.5px}
+    .navgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.navgrid.three>.navcard:last-child:nth-child(odd){grid-column:auto;width:auto;justify-self:stretch}
     .destgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.destcard{min-height:230px}.destcard .navart{width:174px;height:158px}.titlecards{grid-template-columns:repeat(2,minmax(0,1fr));max-width:540px;margin-left:auto;margin-right:auto}
   }
   @media(max-width:390px){.navgrid,.destgrid{gap:7px}.navcard{min-height:126px;padding:9px 7px}.navart{width:68px;height:68px}.destcard{min-height:204px}.destcard .navart{width:100px;height:92px}.navname{font-size:13px}}
@@ -535,7 +537,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.122.0';
+const VERSION3D='1.123.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5597,7 +5599,7 @@ function openDiffSelect(){
     const desc=(open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock')+(open?`<br><span class="navmeta">${mv.gold||0}g · zone ${(mv.zoneMax||0)+1}/${ZONES.length}</span>`:'')+(beat?' <span class="navdone">✓ BEATEN</span>':'');
     return navCard('',art,open?D.name:'Locked',desc,open?'':'lock',open?`data-d="${id}"`:'disabled'); }).join('');
   showOverlayHTML(`<div class="card"><h2 class="ovh">Choose your risk</h2><p class="ovsub">Each difficulty keeps its own save.</p>
-    <div class="navgrid">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
+    <div class="navgrid three">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
   document.querySelectorAll('.navcard[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
     meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
   document.getElementById('backBtn').onclick=titleScreen;

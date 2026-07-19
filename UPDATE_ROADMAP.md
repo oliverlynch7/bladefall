@@ -7,6 +7,12 @@
 - [x] Kept Back, settings, audio sliders, leave actions, and other utility controls compact so primary navigation remains visually dominant.
 - [x] Verified muted desktop and mobile browser flows, destination selection, NPC interaction, and true pause simulation/SFX freezing; existing saves and trial tuning remain untouched.
 
+## [Codex | 2026-07-18] v1.122 menu/icon audit (SHIPPED v1.123.0)
+
+- [x] Audited title, difficulty, Waystation destinations/keepers, pause, settings, and NPC interaction navigation in muted real-browser sessions at 1440×1000 and 390×844.
+- [x] Confirmed all menu art loads, primary navigation remains prominent, compact utility controls remain usable, existing saves load, and pause still freezes simulation while suspending game audio.
+- [x] Fixed the objective mobile difficulty-layout defect by centering the odd third card; desktop now uses a balanced three-column difficulty row.
+
 Everything below is organized in a sensible **build order** (phases). Each phase is a
 self-contained work session. Work top to bottom.
 

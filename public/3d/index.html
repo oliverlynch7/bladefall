@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.183.0';
+const VERSION3D='1.184.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4310,8 +4310,8 @@ function floorAt(x,z,r,yRef){
 /* Placement resolver for world objects. Player collision deliberately limits floorAt to
    surfaces the player is already high enough to land on; spawners need the opposite rule:
    find the HIGHEST walkable top at X/Z so an exit, chest or drop can never live under a mesa. */
-function highestSurfaceAt(x,z,r=8){
-  if(!G) return 0; let f=-Infinity;
+function surfaceHeightAt(x,z,r=8){
+  if(!G) return -Infinity; let f=-Infinity;
   // footprint is INCLUSIVE (matches floorAt's +r reach) so a drop/portal anywhere the player could stand — including a
   // plateau's edge — snaps to that top instead of falling to ground level under the mesa.
   const m=r*0.4;
@@ -4320,7 +4320,33 @@ function highestSurfaceAt(x,z,r=8){
   for(const mv of (G.movers||[])){ if(Math.abs(x-mv.x)<mv.w/2+m && Math.abs(z-mv.z)<mv.d/2+m) f=Math.max(f,mv.h||0); }
   for(const cr of (G.crumbles||[])){ if(cr.state!==2 && Math.abs(x-cr.x)<cr.w/2+m && Math.abs(z-cr.z)<cr.d/2+m) f=Math.max(f,cr.h||0); }
   for(const ob of (G.obstacles||[])){ if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0); }
-  return f>-1e8?f:0;
+  return f;
+}
+function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e8?f:0; }
+function nearestSurfacePoint(x,z,r=14){
+  if(!G) return null; let best=null,bd=Infinity;
+  const consider=(o,y)=>{ const hw=Math.max(1,o.w/2-r),hd=Math.max(1,o.d/2-r),px=Math.max(o.x-hw,Math.min(o.x+hw,x)),pz=Math.max(o.z-hd,Math.min(o.z+hd,z)),d=Math.hypot(px-x,pz-z);
+    if(d<bd){ bd=d; best={x:px,z:pz,y:y||0}; } };
+  for(const sg of (G.segments||[])) consider(sg,0);
+  for(const wl of (G.walls||[])) if(wl.stand) consider(wl,wl.h||0);
+  for(const mv of (G.movers||[])) consider(mv,mv.h||0);
+  for(const cr of (G.crumbles||[])) if(cr.state!==2) consider(cr,cr.h||0);
+  for(const ob of (G.obstacles||[])) consider(ob,ob.h||0);
+  return best;
+}
+function seatChest(ch){
+  if(!ch) return;
+  let h=surfaceHeightAt(ch.x,ch.z,14);
+  if(h<-1e8){ const safe=nearestSurfacePoint(ch.x,ch.z,14); if(safe){ ch.x=safe.x; ch.z=safe.z; h=safe.y; } }
+  ch.y=h>-1e8?h:0; // exact seating: stale authored heights may move DOWN as well as up
+}
+function dressHiddenChest(ch){
+  if(!ch||ch._dressed||ch.bonus||G.side||G.trial||G.hub||G.endless||curZone().id==='outskirts') return;
+  ch._dressed=true; ch.hiddenTreasure=true;
+  const th=(STAGES[G.stageIndex]&&STAGES[G.stageIndex].theme)||'ruins', cols=th==='frost'?['#8acde4','#d9eff5']:th==='volcano'?['#29252b','#61352b']:th==='void'||th==='apex'?['#30233e','#69418d']:th==='marble'?['#b9b5aa','#d4aa42']:th==='forest'?['#294b31','#4d6b38']:['#555969','#343844'];
+  const a=((Math.abs(Math.round(ch.x))*17+Math.abs(Math.round(ch.z))*31)%628)/100, y=ch.y||0;
+  // Three asymmetric pieces hide the reward from the main approach while leaving a clear opening.
+  for(let k=0;k<3;k++){ const aa=a+(k-1)*.72,rr=k===1?31:38; G.deco.push({x:ch.x+Math.cos(aa)*rr,z:ch.z+Math.sin(aa)*rr,y0:y,w:th==='forest'?34:18+(k%2)*9,h:th==='forest'?28+(k%2)*18:34+k*12,d:th==='forest'?30:16+(k%2)*8,c:cols[k%2],theme:th}); }
 }
 function snapEnemyToSurface(e){
   if(!e||e.kind==='fly') return;
@@ -4336,13 +4362,13 @@ function reconcileWorldHeights(){ if(!G) return;
   if(G.portal) G.portal.y=Math.max(G.portal.y||0, highestSurfaceAt(G.portal.x,G.portal.z,16));
   if(G.bonusPortal) G.bonusPortal.y=Math.max(G.bonusPortal.y||0, highestSurfaceAt(G.bonusPortal.x,G.bonusPortal.z,16));
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
-  for(const ch of (G.chests||[])) if(!ch.opened) ch.y=Math.max(ch.y||0, highestSurfaceAt(ch.x,ch.z,14));
+  for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
 }
 function snapWorldInteractables(){ if(!G) return;
   const snap=(o,k='y',r=8)=>{ if(o) o[k]=Math.max(Number(o[k])||0,highestSurfaceAt(o.x,o.z,r)); };
   snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); snap(G.secret); snap(G.secretTrigger);
   for(const o of (G.pickups||[])) snap(o,'y0');
-  for(const o of (G.chests||[])) snap(o,'y',14);
+  for(const o of (G.chests||[])){ seatChest(o); dressHiddenChest(o); }
   for(const o of (G.keys||[])) snap(o);
   for(const o of (G.plates||[])) snap(o);
   for(const o of (G.springs||[])) snap(o);

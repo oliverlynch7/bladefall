@@ -411,6 +411,12 @@
   .destcard .navart{width:118px;height:108px;margin-bottom:2px}.destcard.side{border-color:rgba(196,123,255,.38);background:linear-gradient(165deg,rgba(48,30,65,.9),rgba(13,14,21,.98));}
   .destcard.side .navmeta{color:#c98cff}.destcard .navdesc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .npcaction{max-width:300px;margin:12px auto 10px;min-height:164px}.npcaction .navart{width:92px;height:92px;}
+  .npcintro{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:center;margin:8px 0 16px;text-align:left;}
+  .npcportrait{width:210px;height:286px;border:1px solid color-mix(in srgb,var(--npc-accent,#e8a33d) 55%,#303644);border-radius:16px;
+    background-image:url('icons/npcs/approved-cast.png');background-size:300% 200%;background-position:var(--npc-pos);background-repeat:no-repeat;background-color:#030305;
+    box-shadow:inset 0 0 30px rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.35);}
+  .npcidentity .ovsub{margin:0 0 4px}.npcidentity .ovh{font-size:30px}.npcidentity .npcrole{color:var(--npc-accent,#e8a33d);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;margin:4px 0 12px;}
+  .npcidentity .npcline{color:#d9dde6;font-size:14px;font-style:italic;line-height:1.55;margin:0;}
   .titlecards .navcard{min-height:150px;background:linear-gradient(180deg,rgba(24,20,30,.9),rgba(10,9,14,.92));border-color:rgba(200,160,90,.35)}
   .titlecards .navart{width:86px;height:86px}.titlecards .navname{font-size:16px;color:#f3ddb0;}
   @media (min-width:840px) and (pointer:fine){
@@ -418,6 +424,7 @@
     .navgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.navgrid.three>.navcard:last-child:nth-child(odd){grid-column:auto;width:auto;justify-self:stretch}
     .destgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.destcard{min-height:230px}.destcard .navart{width:174px;height:158px}.titlecards{grid-template-columns:repeat(2,minmax(0,1fr));max-width:540px;margin-left:auto;margin-right:auto}
   }
+  @media(max-width:560px){.npcintro{display:block}.npcportrait{width:100%;height:160px;margin-bottom:12px}.npcidentity .ovh{font-size:25px}.npcidentity .npcline{font-size:12px}}
   @media(max-width:390px){.navgrid,.destgrid{gap:7px}.navcard{min-height:126px;padding:9px 7px}.navart{width:68px;height:68px}.destcard{min-height:204px}.destcard .navart{width:100px;height:92px}.navname{font-size:13px}}
   .statgrid{text-align:left;background:rgba(255,255,255,.025);border:1px solid #262a36;border-radius:14px;padding:13px 15px;margin:0 0 18px;}
   .hint{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;}
@@ -537,7 +544,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.124.0';
+const VERSION3D='1.125.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -745,12 +752,15 @@ function placeShade(x,z){
 }
 function openShade(){
   const Z=curZone(), N=STORY.npc[Z.id]; if(!N) return;
+  document.getElementById('toast').classList.remove('show');
   G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
   mode='menu'; SFX.magic('void');
   const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No errands here. Only the fight ahead.</div>';
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.2em">A SHADE OF THE BLADEBORN</p>
+  showOverlayHTML(`<div class="card" style="--npc-accent:#c47bff"><div class="npcintro">
+    ${npcPortrait('shade')}<div class="npcidentity"><p class="ovsub">A SHADE OF THE BLADEBORN</p><h2 class="ovh">Warden’s Shade</h2>
+    <p class="npcrole">${Z.name} · Fallen Warden</p><p class="npcline">“${N.lore[0]}”</p></div></div>
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:6px 0 10px">
-      ${N.lore.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
+      ${N.lore.slice(1).map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
       <p style="margin:0 0 8px">"${N.why}"</p>
       <p style="margin:0;color:#e8a0a0">"${N.boss}"</p></div>
     <p class="hint" style="text-align:left;margin:0 0 4px"><b>Your orders</b></p>${qrows}
@@ -5499,6 +5509,8 @@ function decorateMenuIcons(){
 function navCard(id,art,name,desc='',cls='',attrs=''){
   return `<button class="navcard ${cls}" id="${id}" ${attrs}><img class="navart" src="${art}" alt=""><span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
 }
+const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
+function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
 const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:'icons/class-warrior.png',
   board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
   abyss:'icons/portal.png',beastkeeper:'icons/event-trophy.png'};
@@ -5772,10 +5784,12 @@ function npcReact(n){
 }
 function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
   mode='menu'; SFX.pickup();
+  document.getElementById('toast').classList.remove('show');
   const react=npcReact(n);
-  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${n.c2||'#e8a33d'};letter-spacing:.16em">${n.ic||''} ${n.name.toUpperCase()}</p>
+  showOverlayHTML(`<div class="card" style="--npc-accent:${n.c2||'#e8a33d'}"><div class="npcintro">${npcPortrait(n.id)}
+    <div class="npcidentity"><p class="ovsub">WAYSTATION KEEPER</p><h2 class="ovh">${n.name}</h2><p class="npcrole">${n.role||''}</p><p class="npcline">“${v.lines[0]}”</p></div></div>
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
-      ${v.lines.map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
+      ${v.lines.slice(NPC_PORTRAIT_POS[n.id]?1:0).map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
       ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div>
     ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}
     <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);

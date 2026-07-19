@@ -18,6 +18,12 @@
 - [x] Reworked the shared Shade renderer into eight approved zone identities while preserving one coherent silhouette: Outskirts lantern, Hollow chained talisman, Keep standard, Frost rime crown, Ember molten cracks, Abyss void halo, Palace sun halo, and Castle crescent/wing spars.
 - [x] Variants are presentation-only and derive from the active zone; Shade AI, collision, dialogue, quest state, saves, and trial behavior are unchanged.
 
+## [Codex | 2026-07-18] Detailed NPC interaction portraits (SHIPPED v1.125.0)
+
+- [x] Added the approved revised cast sheet directly as the shared portrait source for Warden’s Shade, Smith, Beastkeeper, Quartermaster, Keeper, and Drillmaster interaction menus.
+- [x] Character conversations now open with a portrait-led identity header, clear role, and personality line; activity props retain their focused activity icons.
+- [x] In-world NPCs remain the simplified voxel models, and all NPC services, prices, state, dialogue behavior, saves, and trials are unchanged.
+
 Everything below is organized in a sensible **build order** (phases). Each phase is a
 self-contained work session. Work top to bottom.
 

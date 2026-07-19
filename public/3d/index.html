@@ -4713,7 +4713,7 @@ function killEnemy(e,weaponKill){
     else SFX.enemyDie();
     { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
     checkAchievements();
-    // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
+    // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
     // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
     // Bosses, chests, mimics, and goblins remain the reliable gear sources.
     if(Math.random()<(e.elite?0.33:0.053)) rollDrop(e);

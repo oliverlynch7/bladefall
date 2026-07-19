@@ -509,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.119.0';
+const VERSION3D='1.120.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6402,7 +6402,7 @@ function openGear(back){
 let studio=null;
 function openWeaponStudio(back){
   initAudio();
-  studio={ t:0, arche:'scythe', atkLoop:true, atkT:0.4, spin:true, back:back||openPause, proj:[], p:null };
+  studio={ t:0, arche:'scythe', atkLoop:true, atkT:0.4, spin:true, back:back||openPause, proj:[], p:null, cat:'Weapons', design:false, di:0 };
   const p=freshPlayer(); p.gear=freshGear(); p.x=0; p.y=0; p.z=0; p.yaw=0.4; p.hp=p.maxHp=9999; p.invuln=0; p.atkTimer=0;
   studio.p=p;
   mode='studio'; showOverlay(false); showGameUI(false);
@@ -6486,8 +6486,10 @@ const DESIGNS=[
  'slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant',
  'sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
   .filter(k=>ENEMY[k]).forEach(k=>DESIGNS.push({g:'Mobs',k:(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k,d:(t,s)=>{ const e=designEnemy(k,0); e.yaw=s; drawEnemy3(e,t); }}));
-function openDesignStudio(back){ initAudio(); studio={t:0,design:true,di:0,spin:true,back:back||openPause}; mode='studio'; showOverlay(false); showGameUI(false); const q=document.getElementById('questbox'); if(q) q.classList.add('hide'); buildDesignPanel(); }
+// opens the Weapon/Design studio straight onto a design category (used by __BF3 tooling)
+function openDesignStudio(back,cat){ openWeaponStudio(back); studioSetCat(cat||'Cast'); }
 function designSet(i){ if(!studio) return; studio.di=i; const e=DESIGNS[i]; const nm=document.getElementById('wsName'); if(nm) nm.textContent=e.g+' · '+e.k;
+  const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide');
   document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
 function designUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt; }
 function renderDesign(t){
@@ -6506,44 +6508,39 @@ function renderDesign(t){
   try{ e.d(t,spin); }catch(err){}
   if(e.stageTheme!=null && G) G.stageIndex=savedSi;
 }
-function buildDesignPanel(){
-  const pn=document.getElementById('wstudio'); if(!pn) return;
-  let html='', lastG='';
-  DESIGNS.forEach((e,i)=>{ if(e.g!==lastG){ html+=`<div style="grid-column:1/-1;font-size:11px;opacity:.6;margin:7px 0 2px;text-transform:uppercase;letter-spacing:.08em">${e.g}</div>`; lastG=e.g; } html+=`<button class="wsbtn" data-i="${i}">${e.k}</button>`; });
-  pn.innerHTML=`<div class="wshead">🎨 Design Studio <span id="wsName"></span></div>
-    <div id="wsList" class="wslist">${html}</div>
-    <div class="wsctrl">
-      <button class="wsbig" id="dPrev">‹ Prev</button>
-      <button class="wsbig" id="dNext">Next ›</button>
-      <button class="wsbig" id="wsSpin">🔄 Spin: On</button>
-      <button class="wsbig ghost" id="wsBack">Back</button>
-    </div>`;
-  pn.classList.remove('hide');
-  pn.querySelectorAll('.wsbtn').forEach(b=>b.onclick=()=>designSet(+b.dataset.i));
-  document.getElementById('dPrev').onclick=()=>designSet((studio.di-1+DESIGNS.length)%DESIGNS.length);
-  document.getElementById('dNext').onclick=()=>designSet((studio.di+1)%DESIGNS.length);
-  document.getElementById('wsSpin').onclick=()=>{ studio.spin=!studio.spin; document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin?'On':'Off'); };
-  document.getElementById('wsBack').onclick=()=>exitStudio();
-  designSet(0);
-}
+const STUDIO_CATS=['Weapons','Cast','Pets','Bosses','Mobs'];
 function buildStudioPanel(){
   const pn=document.getElementById('wstudio'); if(!pn) return;
-  const list=ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('');
-  pn.innerHTML=`<div class="wshead">⚒ Weapon Studio <span id="wsName"></span></div>
+  const cat=studio.cat||'Weapons', isW=(cat==='Weapons'), spinOn=(studio.spin!==false);
+  const tabs=STUDIO_CATS.map(c=>`<button class="wsbtn wscat${c===cat?' sel':''}" data-c="${c}" style="opacity:${c===cat?1:0.6}">${c}</button>`).join('');
+  const list=isW ? ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('')
+                 : DESIGNS.map((e,i)=>e.g===cat?`<button class="wsbtn" data-i="${i}">${e.k}</button>`:'').join('');
+  pn.innerHTML=`<div class="wshead">${isW?'⚒ Weapon Studio':'🎨 Design Studio'} <span id="wsName"></span></div>
+    <div class="wslist" style="margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:6px">${tabs}</div>
     <div id="wsList" class="wslist">${list}</div>
     <div class="wsctrl">
-      <button class="wsbig" id="wsSwing">⚔ Swing</button>
-      <button class="wsbig" id="wsAuto">↻ Auto: On</button>
-      <button class="wsbig" id="wsSpin">🔄 Spin: On</button>
+      ${isW?`<button class="wsbig" id="wsSwing">⚔ Swing</button><button class="wsbig" id="wsAuto">↻ Auto: ${studio.atkLoop?'On':'Off'}</button>`
+           :`<button class="wsbig" id="dPrev">‹ Prev</button><button class="wsbig" id="dNext">Next ›</button>`}
+      <button class="wsbig" id="wsSpin">🔄 Spin: ${spinOn?'On':'Off'}</button>
       <button class="wsbig ghost" id="wsBack">Back</button>
     </div>`;
   pn.classList.remove('hide');
-  pn.querySelectorAll('.wsbtn').forEach(b=>b.onclick=()=>studioSetWeapon(b.dataset.a));
-  document.getElementById('wsSwing').onclick=()=>studioSwing();
-  document.getElementById('wsAuto').onclick=()=>{ studio.atkLoop=!studio.atkLoop; document.getElementById('wsAuto').textContent='↻ Auto: '+(studio.atkLoop?'On':'Off'); };
-  document.getElementById('wsSpin').onclick=()=>{ studio.spin=!studio.spin; document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin?'On':'Off'); };
+  pn.querySelectorAll('.wscat').forEach(b=>b.onclick=()=>studioSetCat(b.dataset.c));
+  if(isW){ pn.querySelectorAll('#wsList .wsbtn').forEach(b=>b.onclick=()=>studioSetWeapon(b.dataset.a));
+    document.getElementById('wsSwing').onclick=()=>studioSwing();
+    document.getElementById('wsAuto').onclick=()=>{ studio.atkLoop=!studio.atkLoop; document.getElementById('wsAuto').textContent='↻ Auto: '+(studio.atkLoop?'On':'Off'); };
+  } else { pn.querySelectorAll('#wsList .wsbtn').forEach(b=>b.onclick=()=>designSet(+b.dataset.i));
+    const gi=DESIGNS.map((e,i)=>e.g===cat?i:-1).filter(i=>i>=0);
+    document.getElementById('dPrev').onclick=()=>{ const p=Math.max(0,gi.indexOf(studio.di)); designSet(gi[(p-1+gi.length)%gi.length]); };
+    document.getElementById('dNext').onclick=()=>{ const p=Math.max(0,gi.indexOf(studio.di)); designSet(gi[(p+1)%gi.length]); };
+  }
+  document.getElementById('wsSpin').onclick=()=>{ studio.spin=(studio.spin===false); document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin!==false?'On':'Off'); };
   document.getElementById('wsBack').onclick=()=>exitStudio();
 }
+function studioSetCat(cat){ if(!studio) return; studio.cat=cat; studio.design=(cat!=='Weapons'); buildStudioPanel();
+  const ic=document.getElementById('wsIconCard');
+  if(cat==='Weapons'){ studioSetWeapon(studio.arche||'scythe'); }
+  else { if(ic) ic.classList.add('hide'); const first=DESIGNS.findIndex(e=>e.g===cat); designSet(first>=0?first:0); } }
 function fsOn(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
 function toggleFullscreen(){ try{
   if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
@@ -6559,8 +6556,7 @@ function openPause(){
     <div class="sect">Character</div>
     <div class="pgrid">
       <button class="bigbtn ghost" id="gearBtn">Gear</button>
-      <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons</button>
-      <button class="bigbtn ghost" id="dstudioBtn">🎨 Design Studio</button>
+      <button class="bigbtn ghost" id="wstudioBtn">🗡 Weapons &amp; Designs</button>
       <button class="bigbtn ghost" id="bagBtnP">🎒 Bag · ${meta.stash.length}/${STASH_CAP}</button>
       <button class="bigbtn ghost" id="classesBtn">✦ Classes &amp; Skills</button>
       <button class="bigbtn ghost" id="skinBtn">🎭 Skins</button>
@@ -6603,7 +6599,6 @@ function openPause(){
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);
   { const _ws=document.getElementById('wstudioBtn'); if(_ws) _ws.onclick=()=>openWeaponStudio(openPause); }
-  { const _ds=document.getElementById('dstudioBtn'); if(_ds) _ds.onclick=()=>openDesignStudio(openPause); }
   document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
   document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);

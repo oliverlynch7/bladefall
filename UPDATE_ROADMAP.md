@@ -750,3 +750,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] New Pause → Character → "🎨 Design Studio": a turntable (reuses the Weapon Studio pedestal/camera) that spins any approved model on a plinth, with a grouped picker (Cast / Pets / Bosses / Mobs), Prev/Next, and a Spin toggle.
 - [x] Covers all 50 in-world designs: 6 hub NPCs (incl. the Warden's Shade, whose body was factored into reusable `drawShadeModel`), 6 pets, 8 bosses (Ember + Marble Colossus shown separately via a temporary stage-theme override), and 31 mobs.
 - [x] Per-group camera framing (pets close, bosses pulled back). No save/AI/balance impact — pure viewer. Exposed `openDesignStudio`/`designSet`/`DESIGNS` on `__BF3`. All 50 entries render error-free.
+
+## [Claude | 2026-07-18] Folded Design Studio into the Weapon Studio QA page (SHIPPED v1.120.0)
+
+- [x] Per Oliver: the standalone Design Studio button is gone; the Weapon Studio (Pause → Character → "🗡 Weapons & Designs") now has a category tab row — Weapons / Cast / Pets / Bosses / Mobs.
+- [x] Weapons tab keeps the full weapon turntable (Swing/Auto/Spin). The four design tabs swap the same plinth to spin any NPC/pet/boss/mob model, with Prev/Next + Spin, reusing one QA surface.
+- [x] Removed the dead buildDesignPanel/openDesignStudio-panel path; openDesignStudio is now a thin alias (opens the studio on a design category, used by __BF3 tooling). Verified all category switches render error-free.

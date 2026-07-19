@@ -165,7 +165,7 @@
   #wsIconCard img{width:100%;aspect-ratio:1/1;object-fit:contain;display:block;image-rendering:auto;background:rgba(0,0,0,.25);border-radius:8px;}
   #wsIconCard .cap{font-size:10px;color:#cfd6df;margin-top:5px;}
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
-  #mirrorui{position:absolute;top:0;right:0;bottom:0;z-index:22;width:min(340px,86vw);background:linear-gradient(270deg,rgba(8,9,13,.96),rgba(8,9,13,.80));border-left:1px solid #2b3040;padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);display:flex;flex-direction:column;pointer-events:auto;}
+  #mirrorui{position:absolute;left:50%;top:50%;z-index:22;width:min(920px,92vw);max-height:min(88vh,820px);transform:translate(-50%,-50%);box-sizing:border-box;background:linear-gradient(178deg,rgba(23,25,33,.98),rgba(10,11,17,.98));border:1px solid #3a4152;border-radius:18px;padding:22px 26px;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.06);}
   #mirrorui.hide{display:none;}
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
@@ -210,13 +210,18 @@
     box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);}
   /* desktop: use the widescreen real estate — wide cards + MULTI-COLUMN lists */
   @media (min-width:840px) and (pointer:fine){
-    .card{max-width:min(1080px,94vw);padding:28px 40px 24px;}
-    .card.narrow{max-width:600px;}
-    .achlist{max-height:min(64vh,640px)!important;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:6px 18px;align-content:start;}
+    #overlay{padding:28px 36px;}
+    .card{max-width:min(1420px,94vw);padding:26px 38px 22px;}
+    .card.narrow{max-width:min(1280px,92vw);}
+    .achlist{max-height:min(66vh,680px)!important;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:7px 18px;align-content:start;}
     .achlist.solo{display:block;}                          /* skill trees / single-column lists opt out */
     .achlist .gd[style*="text-align:left"]{grid-column:1/-1;}  /* category headers span all columns */
     .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .vsrow{font-size:15.5px;} .gearrow{padding:9px 12px;}
+    .pausecard #resBtn{min-height:82px;display:grid;grid-template-columns:68px auto;grid-template-rows:auto auto;column-gap:16px;text-align:left;padding:8px 24px;}
+    .pausecard #resBtn .navart{grid-row:1/3;width:62px;height:62px;margin:0;}.pausecard #resBtn .navname{align-self:end}.pausecard #resBtn .navdesc{align-self:start}
+    .pausecard>.navgrid{grid-template-columns:repeat(6,minmax(0,1fr));}.pausecard>.navgrid .navcard{min-height:150px}
+    .pausecard .pgrid{grid-template-columns:repeat(4,minmax(0,1fr));}.pausecard .sect{margin-top:10px}.pausecard .setrow{margin:7px 0}
   }
   .card::before{content:'';position:absolute;top:0;left:14%;right:14%;height:2px;border-radius:2px;
     background:linear-gradient(90deg,transparent,var(--amber) 30%,#f7d79a 50%,var(--amber) 70%,transparent);opacity:.9;}
@@ -550,7 +555,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.133.0';
+const VERSION3D='1.134.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1827,25 +1832,36 @@ const VS=`attribute vec3 aP; attribute vec3 aN;
 attribute vec4 iM0; attribute vec4 iM1; attribute vec4 iM2; attribute vec4 iM3;   // instance model mat4 (rot+trans, no scale)
 attribute vec3 iS; attribute vec4 iCA; attribute vec3 iE;                          // scale, colour+alpha, emissive
 uniform mat4 uP,uV;
-varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE; varying vec3 vCam;
 void main(){ mat4 M=mat4(iM0,iM1,iM2,iM3);
   vec4 w=M*vec4(aP*iS,1.0); vW=w.xyz; vec4 e=uV*w; vD=-e.z;
   vN=mat3(M)*aN;                                       // M has no scale, so its 3x3 is pure rotation → correct normals
+  vec3 tt=vec3(uV[3][0],uV[3][1],uV[3][2]);            // camera world pos = -(mat3(uV)^T * translation), derived so no extra uniform is needed
+  vCam=-vec3(dot(vec3(uV[0][0],uV[0][1],uV[0][2]),tt), dot(vec3(uV[1][0],uV[1][1],uV[1][2]),tt), dot(vec3(uV[2][0],uV[2][1],uV[2][2]),tt));
   vCA=iCA; vE=iE; gl_Position=uP*e; }`;
 const FS=`precision mediump float;
-varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE; varying vec3 vCam;
 uniform vec3 uFog; uniform vec2 uFogNF; uniform vec3 uL;
 uniform float uAmb; uniform float uDif; uniform vec3 uKey;      // ambient level, directional strength, key tint
 uniform vec3 uPL0,uPL1,uPL2,uPL3; uniform vec3 uPC0,uPC1,uPC2,uPC3; // point lights: player-carried + 3 nearest torches
 void main(){
-  vec3 n=normalize(vN); vec3 C=vCA.rgb;
-  vec3 lit=C*(uAmb+uDif*max(dot(n,uL),0.0))*uKey;
+  vec3 n=normalize(vN); vec3 C=vCA.rgb; vec3 V=normalize(vCam-vW);
+  // hemispheric ambient: cooler/darker from below, sky-tinted from above (gives voxels a sculpted, GI-like base)
+  float up=n.y*0.5+0.5;
+  vec3 lit=C*uAmb*mix(uKey*vec3(0.72,0.78,0.92), uKey, up);
+  // key directional + a soft wrap so shadowed sides aren't dead flat
+  float nl=max(dot(n,uL),0.0), wrap=max(dot(n,uL)*0.5+0.5,0.0);
+  lit+=C*uDif*uKey*(nl*0.82+wrap*0.18);
+  // specular sheen — metal/gems catch the key light
+  vec3 H=normalize(uL+V); lit+=uKey*pow(max(dot(n,H),0.0),26.0)*uDif*0.55;
   vec3 L; float dd;
   L=uPL0-vW; dd=dot(L,L); lit+=C*uPC0*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.0000135); // player light: broad, keeps play area readable
   L=uPL1-vW; dd=dot(L,L); lit+=C*uPC1*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
   L=uPL2-vW; dd=dot(L,L); lit+=C*uPC2*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
   L=uPL3-vW; dd=dot(L,L); lit+=C*uPC3*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
-  vec3 col=lit+vE;
+  // rim light — cool edge glow that pops silhouettes off the background (a signature of the icon art)
+  float rim=pow(1.0-max(dot(n,V),0.0),3.5); lit+=uKey*rim*0.34*(0.45+0.55*up);
+  vec3 col=lit+vE*1.15;
   float f=clamp((vD-uFogNF.x)/(uFogNF.y-uFogNF.x),0.0,1.0);
   gl_FragColor=vec4(mix(col,uFog,f),vCA.a);
 }`;
@@ -3511,6 +3527,7 @@ window.addEventListener('keydown',e=>{
     else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
     else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
     return; }
+  const _kt=e.target; if(_kt&&((_kt.matches&&_kt.matches('input,textarea,select'))||_kt.isContentEditable)) return;
   if(mode==='weapon'){
     // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
     // so holding J to attack can't accidentally equip the moment a popup opens.
@@ -6098,20 +6115,28 @@ function hubInteract(p,dt){
   if(d0<48){ if(!G._wsc){ G._wsc=true; SFX.achieve(); p.hp=effMaxHp(p); burst(0,40,-60,'#ffd24a',18); openHubMenu(); } }
   else if(d0>84) G._wsc=false;
 }
+function hubNpcFacing(n,x,z){
+  const hx=n.faceX==null?0:n.faceX, hz=n.faceZ==null?120:n.faceZ;
+  let target=Math.atan2(hx-x,hz-z);
+  if(G&&G.p&&dXZ(x,z,G.p.x,G.p.z)<175) target=Math.atan2(G.p.x-x,G.p.z-z);
+  if(!Number.isFinite(n._yaw)) n._yaw=target;
+  const delta=Math.atan2(Math.sin(target-n._yaw),Math.cos(target-n._yaw));
+  n._yaw+=delta*0.11;
+  return n._yaw;
+}
 function openHubMenu(){
   mode='menu'; musicPlay('hub');
   document.getElementById('questbox').classList.add('hide');
   const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
-  let rows='';
-  ZONES.forEach((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
-    const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Tier ${Z.tier}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
-    rows+=navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled');
-    if(Z.side && meta.sideFound[Z.side.id]){ const sd=!!meta.sideDone[Z.side.id];   // discovered secrets hang under their parent
-      rows+=navCard('',`icons/destinations/${Z.side.id}.png`,Z.side.name,`${Z.side.blurb}<br><span class="navmeta">Secret · Tier ${Math.min(7,Z.tier+1)}</span>${sd?' <span class="navdone">✓ CLEARED</span>':''}`,'destcard side',`data-s="${i}"`); } });
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
+  const mainRows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Level ${i+1}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
+    return navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled'); }).join('');
+  const chamberRows=ZONES.map((Z,i)=>{ if(!Z.side||!meta.sideFound[Z.side.id]) return ''; const sd=!!meta.sideDone[Z.side.id];
+    return navCard('',`icons/destinations/${Z.side.id}.png`,Z.side.name,`${Z.side.blurb}<br><span class="navmeta">Trial Chamber</span>${sd?' <span class="navdone">✓ CLEARED</span>':''}`,'destcard side',`data-s="${i}"`); }).join('');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
     <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
-    <div class="destgrid">${rows}</div>
+    <div class="sect">Main Levels</div><div class="destgrid">${mainRows}</div>
+    <div class="sect">Trial Chambers</div><div class="destgrid trialgrid">${chamberRows||'<p class="hint">Discover Trial Chambers while exploring the Main Levels.</p>'}</div>
     <div class="sect">Waystation keepers</div>
     <div class="navgrid">
       ${navCard('trainBtn','icons/class-warrior.png','Class Trainer','Classes, skills, and trials')}
@@ -6658,7 +6683,7 @@ function openPause(){
   pauseGameAudio();
   mode='pause';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
-  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
+  showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
@@ -7368,7 +7393,7 @@ function drawWaystation(t){
       bx(n.x,31,n.z, 12,6,12,'#30364a');
       // the Smith himself, working the forge (approved art: white beard, orange scarf, hammer, ember gauntlet)
       const sx=n.x-30, sz=n.z+10; drawShadow(sx,sz,12,0.24);
-      pushM(); mv(sx,0,sz); rotY(0.9); hubNpcModel({id:'smith',c1:n.c1,c2:n.c2},t); popM();
+      pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel({id:'smith',c1:n.c1,c2:n.c2},t); popM();
       // restrained sparks off the anvil as he works
       if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
       continue; }
@@ -7396,7 +7421,7 @@ function drawWaystation(t){
       { const gc=meta.petActive?petRarityCol(meta.petActive):'#c9a86a'; bx(n.x,20,n.z+4, 8,8,8, gc, gc, 0.4+0.25*Math.sin(t*3)); }  // a resident glow, tinted to your active pet
       // the Beastkeeper stands with her panther (approved art: dreadlocks, gold crook, fur mantle)
       { const bx0=n.x+34, bz0=n.z+6; drawShadow(bx0,bz0,12,0.24);
-        pushM(); mv(bx0,0,bz0); rotY(-0.7); hubNpcModel({id:'beastkeeper',c1:n.c1,c2:n.c2},t); popM(); }
+        pushM(); mv(bx0,0,bz0); rotY(hubNpcFacing(n,bx0,bz0)); hubNpcModel({id:'beastkeeper',c1:n.c1,c2:n.c2},t); popM(); }
       continue; }
     if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
       bx(n.x,32,n.z, 50,64,16,'#140a20','#6a2fa0',0.5);                                    // dark monolith
@@ -7410,7 +7435,7 @@ function drawWaystation(t){
       continue; }
     // a living hub keeper — a DISTINCT voxel model per character (approved art), not a palette swap
     drawShadow(n.x,n.z,13,0.25);
-    pushM(); mv(n.x,0,n.z); rotY(Math.sin(t*0.6+n.x)*0.22+(n.x>0?-1.2:1.2));
+    pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));
     hubNpcModel(n,t);
     popM();
     bx(n.x,72,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker

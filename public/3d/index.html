@@ -478,7 +478,8 @@
   .gearrow .gi{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);width:48px;flex:0 0 auto;text-transform:uppercase;padding-top:2px;}
   .gearrow .gn{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gearrow .gd{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.35;}
-  .bagav{width:46px;height:46px;flex:0 0 auto;border-radius:10px;border:1px solid #2b3040;background:#0d0e14;display:block;}
+  .bagav{width:64px;height:64px;object-fit:contain;flex:0 0 auto;border-radius:12px;border:1px solid #2b3040;background:#0d0e14;display:block;}
+  .petav{width:74px;height:74px;object-fit:contain;flex:0 0 auto;border-radius:14px;border:1px solid #343b50;background:radial-gradient(circle,#24283a,#0c0e15 72%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));}
   /* Classes & Skills viewer */
   .ctabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0 0 12px;}
   .ctab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid #2b3040;color:var(--muted);font-size:15px;cursor:pointer;}
@@ -555,7 +556,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.134.0';
+const VERSION3D='1.135.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -583,7 +584,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -596,7 +597,7 @@ const meta=Object.assign({
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
-  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},classId:'warrior',classes:{},endlessBest:0,
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:''
 },_g);
@@ -616,7 +617,8 @@ function persist(){ persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
-  meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{};
+  meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{}; meta.perkV2=!!mv.perkV2;
+  if(!meta.perkV2){ const oldBase={vigor:40,might:60,haste:60,swift:50,edge:70,greed:50}; let refund=0; for(const id in oldBase){ const lv=meta.perks[id]||0; if(lv>10){ for(let rank=10;rank<lv;rank++) refund+=Math.round(oldBase[id]*Math.pow(1.6,rank)); meta.perks[id]=10; } } meta.gold+=refund; meta.perkV2=true; meta._perkRefund=refund; }
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
   meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
@@ -639,7 +641,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
 }
-function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -1992,30 +1994,58 @@ function stageScale(){ return 1+(zoneTier()-1)*0.22+(G&&G.area>0?0.05:0); }   //
 function freshGear(){ return {helmet:null,chest:null,legs:null,amulet:null,ring:null}; }
 /* ---------------- Shop perks: permanent per-mode stat upgrades bought with gold ---------------- */
 const PERKS={
-  vigor:{name:'Vigor',per:20,unit:v=>'+'+v+' Max HP',base:40,max:20},
-  might:{name:'Might',per:0.05,unit:v=>'+'+Math.round(v*100)+'% Damage',base:60,max:12},
-  haste:{name:'Haste',per:0.04,unit:v=>'+'+Math.round(v*100)+'% Attack Speed',base:60,max:10},
-  swift:{name:'Swiftness',per:0.04,unit:v=>'+'+Math.round(v*100)+'% Move Speed',base:50,max:8},
-  edge:{name:'Keen Edge',per:0.03,unit:v=>'+'+Math.round(v*100)+'% Crit',base:70,max:10},
-  greed:{name:'Greed',per:0.08,unit:v=>'+'+Math.round(v*100)+'% Gold Find',base:50,max:12}
+  vigor:{name:'Vigor',icon:'max-hp',per:20,cap:50,unit:v=>'+'+Math.round(v)+' Max HP',base:40,max:10},
+  might:{name:'Might',icon:'damage-power',per:0.05,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Damage',base:60,max:10},
+  arcana:{name:'Arcana',icon:'magic-damage',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Magic Damage',base:70,max:10},
+  haste:{name:'Haste',icon:'attack-speed',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Attack Speed',base:60,max:10},
+  swift:{name:'Swiftness',icon:'move-speed',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Move Speed',base:50,max:10},
+  edge:{name:'Keen Edge',icon:'critical-chance',per:0.03,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Crit',base:70,max:10},
+  sanguine:{name:'Sanguine',icon:'lifesteal',per:0.01,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Lifesteal',base:75,max:10},
+  bulwark:{name:'Bulwark',icon:'defense',per:0.012,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Defense',base:75,max:10},
+  evasion:{name:'Evasion',icon:'dodge-cooldown',per:0.02,cap:0.05,unit:v=>'-'+Math.round(v*100)+'% Dodge Cooldown',base:80,max:10},
+  focus:{name:'Focus',icon:'skill-cooldown-reduction',per:0.02,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Skill CDR',base:80,max:10},
+  greed:{name:'Greed',icon:'gold-find',per:0.08,cap:0.20,unit:v=>'+'+Math.round(v*100)+'% Gold Find',base:50,max:10}
 };
 const PERKIDS=Object.keys(PERKS);
 function perkLevel(id){ return (meta.perks&&meta.perks[id])||0; }
-function perkCost(id){ return Math.round(PERKS[id].base*Math.pow(1.6,perkLevel(id))); }
-function applyPerks(p){
-  p.maxHp += PERKS.vigor.per*perkLevel('vigor');
-  p.stats.power *= 1+PERKS.might.per*perkLevel('might');
-  p.stats.atkSpeed *= 1+PERKS.haste.per*perkLevel('haste');
-  p.stats.speed *= 1+PERKS.swift.per*perkLevel('swift');
-  p.stats.crit = (p.stats.crit||0)+PERKS.edge.per*perkLevel('edge');
-  p.stats.goldFind = (p.stats.goldFind||0)+PERKS.greed.per*perkLevel('greed');
-  if(meta.socks) p.maxJumps=Math.max(p.maxJumps||1,2);   // Phase 9: double jump is the Magic Socks shop unlock (permanent, per-save)
+function perkValue(id,lv){ const P=PERKS[id]; lv=Math.max(0,Math.min(P.max,lv==null?perkLevel(id):lv)); return P.per*lv+(lv>=P.max?P.cap:0); }
+function perkCost(id){ return Math.round(PERKS[id].base*Math.pow(1.6,Math.min(PERKS[id].max-1,perkLevel(id)))); }
+function applyPerkRank(p,id,newLv){
+  const P=PERKS[id], add=P.per+(newLv===P.max?P.cap:0);
+  if(id==='vigor') p.maxHp+=add;
+  else if(id==='might') p.stats.power*=1+add;
+  else if(id==='arcana') p.stats.magPower=(p.stats.magPower||1)*(1+add);
+  else if(id==='haste') p.stats.atkSpeed*=1+add;
+  else if(id==='swift') p.stats.speed*=1+add;
+  else if(id==='edge') p.stats.crit=(p.stats.crit||0)+add;
+  else if(id==='sanguine') p.stats.lifesteal=(p.stats.lifesteal||0)+add;
+  else if(id==='bulwark') p.stats.defense=(p.stats.defense||0)+add;
+  else if(id==='evasion') p.stats.dodgeCd*=1-add;
+  else if(id==='focus') p.stats.cdr=(p.stats.cdr||0)+add;
+  else if(id==='greed') p.stats.goldFind=(p.stats.goldFind||0)+add;
 }
-function freshPlayer(){
+function applyPerks(p){
+  p.maxHp += perkValue('vigor');
+  p.stats.power *= 1+perkValue('might');
+  p.stats.magPower = (p.stats.magPower||1)*(1+perkValue('arcana'));
+  p.stats.atkSpeed *= 1+perkValue('haste');
+  p.stats.speed *= 1+perkValue('swift');
+  p.stats.crit = (p.stats.crit||0)+perkValue('edge');
+  p.stats.lifesteal = (p.stats.lifesteal||0)+perkValue('sanguine');
+  p.stats.defense = (p.stats.defense||0)+perkValue('bulwark');
+  p.stats.dodgeCd *= 1-perkValue('evasion');
+  p.stats.cdr = (p.stats.cdr||0)+perkValue('focus');
+  p.stats.goldFind = (p.stats.goldFind||0)+perkValue('greed');
+  if(meta.socks) p.maxJumps=Math.max(p.maxJumps||1,2);
+}
+function upgradeStoredHeroPerk(id,newLv){
+  if(!meta.hero) return;
+  const p=freshFromSnapshot(meta.hero); applyPerkRank(p,id,newLv); recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
+}function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
   const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
     hp:100,maxHp:100,level:1,xp:0,xpNext:46,weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
-    stats:{power:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
+    stats:{power:1.0,magPower:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,defense:0,cdr:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
     skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
@@ -2036,7 +2066,7 @@ function recomputeArmor(p){
   m.defense=(total+defBonus)/((total+defBonus)+200);
   p.armorMods=m;
 }
-function effMagPower(p){ return (p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
+function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
   let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
@@ -2061,8 +2091,8 @@ function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifes
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
-function effCdr(p){ return Math.min(0.5,(p.armorMods?p.armorMods.cdr:0)); }                                          // Mystic armor cuts skill cooldowns
-function defenseR(p){ if(isGod(p)) return 0.85; return p.armorMods?Math.min(0.5,p.armorMods.defense):0; }
+function effCdr(p){ return Math.min(0.5,(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0)); }                                          // Mystic armor cuts skill cooldowns
+function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
 function powerScore(p){
@@ -6313,6 +6343,7 @@ function openQuestBoard(back){
 /* ---------------- The Beastkeeper: buy / sell / train / equip / name your pet ----------------
    Hub-only (it's a hub NPC), so a pet can never be swapped mid-run. */
 const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
+function petIcon(id){ return 'icons/pets/pet-'+id+'.png'; }
 function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'';
   if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
   if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
@@ -6335,7 +6366,7 @@ function openBeastkeeper(back){
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!meta.petOwned.includes(id));
   const petRow=(id,inner)=>{ const P=PETS[id];
-    return `<div class="gearrow" style="--spine:${petRarityCol(id)}"><div class="gi" style="color:${petRarityCol(id)};font-size:20px">${P.arch==='healer'?'✚':P.arch==='utility'?'💰':'⚔'}</div>
+    return `<div class="gearrow" style="--spine:${petRarityCol(id)}"><img class="petav" src="${petIcon(id)}" alt="${P.name}">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${petDisplayName(id)}${id===active?' <span style="color:var(--good);font-size:10px">· ACTIVE</span>':''}</div>
         <div class="gd">${petStatLine(id)}</div></div>${inner}</div>`; };
   const btn=(label,data,extra)=>`<button class="bigbtn buybtn ${extra||''}" ${data} style="width:auto;margin:0 0 0 5px;padding:7px 10px;font-size:12px">${label}</button>`;
@@ -6344,7 +6375,7 @@ function openBeastkeeper(back){
     : `<p class="ovsub" style="margin:4px 0 8px">No companion follows you. Buy one below.</p>`;
   const bench = owned.filter(id=>id!==active).map(id=>petRow(id, btn('Equip','data-eq="'+id+'"')+btn('Sell +'+Math.round(PETS[id].price*0.4)+'g','data-sell="'+id+'"','ghost'))).join('');
   const shop = unowned.map(id=>{ const P=PETS[id], afford=meta.gold>=P.price;
-    return `<div class="gearrow" style="--spine:${petRarityCol(id)}${afford?'':';opacity:.6'}"><div class="gi" style="color:${petRarityCol(id)};font-size:20px">${P.arch==='healer'?'✚':P.arch==='utility'?'💰':'⚔'}</div>
+    return `<div class="gearrow" style="--spine:${petRarityCol(id)}${afford?'':';opacity:.6'}"><img class="petav" src="${petIcon(id)}" alt="${P.name}">
       <div style="flex:1;min-width:0"><div class="gn" style="color:${petRarityCol(id)}">${P.name} <span style="opacity:.5;font-size:10px;text-transform:uppercase">${RARITY[P.rarity].name}</span></div>
         <div class="gd">${petStatLine(id)}<br><span style="opacity:.7;font-style:italic">${P.flavor}</span></div></div>
       ${btn(P.price+'g','data-buy="'+id+'"')}</div>`; }).join('');
@@ -6383,11 +6414,11 @@ function petRenameScreen(id,back){ mode='menu';
 function openShop(back){
   mode='menu'; playFx('shopopen');
   const rows=PERKIDS.map(id=>{ const P=PERKS[id], lv=perkLevel(id), maxed=lv>=P.max, cost=perkCost(id), afford=meta.gold>=cost;
-    return `<div class="gearrow"><div class="gi">${P.name}</div>
-      <div style="flex:1"><div class="gn">Lv ${lv}${maxed?' · MAX':''} <span style="color:var(--good);font-weight:700">${lv>0?P.unit(P.per*lv):''}</span></div>
-        <div class="gd">${maxed?'fully upgraded':'next: '+P.unit(P.per*(lv+1))}</div></div>
-      <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');
-  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
+    const cur=perkValue(id,lv), next=perkValue(id,Math.min(P.max,lv+1)), cap=P.unit(perkValue(id,P.max));
+    return `<div class="gearrow perkrow" style="--spine:${maxed?'#ffd24a':'#58647b'}"><div class="gi">${statIcon(P.icon)}</div>
+      <div style="flex:1;min-width:0"><div class="gn">${P.name} <span style="color:${maxed?'#ffd24a':'var(--muted)'}">Lv ${Math.min(lv,P.max)}/${P.max}${maxed?' · MAX':''}</span></div>
+        <div class="gd">Current: <b style="color:var(--good)">${P.unit(cur)}</b>${maxed?'':` · Next: ${P.unit(next)}`}<br><span style="color:#ffd24a">Rank 10 capstone: ${cap}</span></div></div>
+      <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:9px 14px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
   const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
     const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
     const lock=!canWieldRid(rid);
@@ -6432,7 +6463,7 @@ function openShop(back){
   document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
-    meta.gold-=cost; if(!meta.perks) meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; SFX.levelup(); persist(); openShop(back); });
+    meta.gold-=cost; if(!meta.perks) meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); SFX.levelup(); persist(); openShop(back); });
   document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', cost=isVS?2200:shopWeapCost(rid);
     const gateR=isVS?'epic':rid; if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }
@@ -8459,9 +8490,22 @@ function skinAv(id){
   }catch(e){ _avCache[id]=''; }
   return _avCache[id];
 }
-/* ---- item preview (rendered on the main GL canvas, cropped; cached per archetype+rarity) ---- */
+function itemStaticAv(item){
+  if(!item) return null;
+  if(item.cls){
+    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
+    const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
+    const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
+    return file?'icons/items/weapons/'+file+'.png':null;
+  }
+  if(item.slot==='amulet'||item.slot==='ring') return 'icons/slot-'+item.slot+'.png';
+  if(item.slot&&item.type) return 'icons/items/armor/'+item.slot+'-'+item.type+'.png';
+  return null;
+}
+/* ---- item preview (approved static art first; deterministic 3D crop remains the legacy fallback) ---- */
 const _itemAvCache={};
 function itemAv(item){
+  const staticAv=itemStaticAv(item); if(staticAv) return staticAv;
   const key=(item.slot||item.arche)+'_'+item.rarity;
   if(_itemAvCache[key]) return _itemAvCache[key];
   try{
@@ -8544,7 +8588,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
   loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
   giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
-  buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; meta.perks[id]=(meta.perks[id]||0)+1; persist(); return {id,lv:perkLevel(id),goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },
+  buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); persist(); return {id,lv:newLv,goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },
   addGold:n=>{ meta.gold=(meta.gold||0)+n; return meta.gold; }, wipeMode:m=>wipeMode(m||MODE),
   melee:MELEE, testSwing:(yaw)=>{ if(!G||!G.p) return -1; G.p.yaw=yaw; G.p.atkTimer=0.15; G.p.swingId=(G.p.swingId||0)+1; G.enemies.forEach(e=>{e.lastHit=-1;e.hp=99999;}); resolveSwing(); return G.enemies.filter(e=>e.lastHit===G.p.swingId).map(e=>e.tag); },
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },

@@ -786,3 +786,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - [x] Per Oliver: the standalone Design Studio button is gone; the Weapon Studio (Pause → Character → "🗡 Weapons & Designs") now has a category tab row — Weapons / Cast / Pets / Bosses / Mobs.
 - [x] Weapons tab keeps the full weapon turntable (Swing/Auto/Spin). The four design tabs swap the same plinth to spin any NPC/pet/boss/mob model, with Prev/Next + Spin, reusing one QA surface.
 - [x] Removed the dead buildDesignPanel/openDesignStudio-panel path; openDesignStudio is now a thin alias (opens the studio on a design category, used by __BF3 tooling). Verified all category switches render error-free.
+
+## [Codex | 2026-07-19] v1.135.0 � desktop navigation, complete perks, and equipment/pet art
+- Shipped wide desktop Pause layout (zero overlay scroll at 1600x900), centered Mirror stats, focused-input J/K/L protection, intentional NPC facing, and separate Main Levels / Trial Chambers Waystation navigation with player-facing Level numbering.
+- Expanded permanent shop perks to all 11 live character stats, standardized ten ranks, added numerical rank-10 capstones and stat icons, enforced existing safety caps, and migrated/refunded legacy over-cap purchases.
+- Integrated 31 approved weapon icons, 33 armor icons, and all 6 pet portraits into Bag/Shop/Forge/Pet Yard paths with legacy runtime-render fallbacks.
+- Browser QA: WebGL compiled with the concurrent v1.134 lighting overhaul preserved; no console errors; name input, 11 perk rows, rank cap, +50% Arcana, legacy refund, asset HTTP responses, and pet natural dimensions verified.
+

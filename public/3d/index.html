@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.182.0';
+const VERSION3D='1.183.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1301,6 +1301,7 @@ const ARCHES={
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
+  iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:38,cd:.38,kb:360,range:88,art:'sword',el:'holy',anyClass:true,ians:true}, // final capstone: fastest heavy blade, radiant execute, full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
@@ -1313,9 +1314,9 @@ const ARCHES={
   holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'wand',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'light',glow:1,seek:true}}  // wand-family: seeks + pierces
 };
 const ARCHEIDS=Object.keys(ARCHES);
-// retired/removed archetypes never enter active generation: voidscythe is shop-only; saber + dagger
+// retired/removed archetypes never enter active generation: voidscythe + iansblade are shop-only; saber + dagger
 // were merged away (saber->sword, daggers->throwing knives) and survive only as save-migration aliases.
-const RETIRED_ARCHES=['voidscythe','saber','dagger'];
+const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger'];
 const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
@@ -1438,7 +1439,7 @@ function classState(id){ const cs=(meta.classes[id]=meta.classes[id]||{xp:0,rank
   if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // v2 finalized model: full reset once (legacy subclass discarded)
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
-function classFamilyOk(w){ return !w || curClass().family.includes(w.art); }
+function classFamilyOk(w){ return !w || w.anyClass || curClass().family.includes(w.art); }
 function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
 function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
@@ -1469,7 +1470,7 @@ function normWeapon(w){ if(!w) return w;
   if(LEGACY_ARCHE[w.arche]){ w.arche=LEGACY_ARCHE[w.arche]; }
   if(w.el){ w.el=normEl(w.el); }                                    // retired affinities (storm) migrate onto a surviving one
   const a=ARCHES[w.arche];
-  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false; w.cls=a.cls; w.sch=a.sch;   // re-derive art/charge/class/damage-type from the (possibly remapped) archetype so old saves gain the finalized behavior
+  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false; w.anyClass=!!a.anyClass; w.ians=!!a.ians; w.cls=a.cls; w.sch=a.sch;   // re-derive art/charge/class/damage-type from the (possibly remapped) archetype so old saves gain the finalized behavior
     if(a.el && !w.el) w.el=a.el;
     if(a.cls==='ranged') w.proj=Object.assign({},a.proj); }   // refresh proj from the archetype so migrated items gain finalized behavior (e.g. wand seek)
   else if(LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art];               // unknown archetype: at least fold a retired art
@@ -1481,11 +1482,12 @@ function makeElite(e){                                    // elites: zone minibo
 }
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
-  const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,chg:a.chg||null,reaper:a.reaper||false,
+  const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,chg:a.chg||null,reaper:a.reaper||false,anyClass:!!a.anyClass,ians:!!a.ians,
     name:nameOverride||(r.name+' '+a.disp),
     dmg:+(a.dmg*r.mul).toFixed(1),cd:a.cd,kb:a.kb,
     lifesteal:(a.lifesteal||0)+(rid==='legendary'?0.05:0),
     color:r.color, blade:(a.sch==='mag'?(elementColor(a.el)||'#c9a6ff'):'#dfe5ec')};
+  if(a.ians){ w.name="Ian's Blade"; w.blade='#fff4ae'; w.color='#ffd24a'; }
   if(a.cls==='melee'){ w.range=a.range; } else { w.proj=Object.assign({},a.proj); }
   return w;
 }
@@ -5038,6 +5040,13 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
+  const iansHit=src===G.p&&G.p.weapon&&G.p.weapon.ians;
+  if(iansHit){
+    const execute=!e.boss&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.15;
+    if(execute){ dmg=Math.max(dmg,e.hp); addText(e.x,e.y+e.h+24,e.z,'IAN\'S JUDGMENT','#fff4ae',true); skillRing(e.x,e.z,'#fff4ae','#ffd24a',105); }
+    burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?18:8);
+    for(let i=0;i<(execute?10:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
+  }
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=(e.dummy?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
@@ -6251,6 +6260,11 @@ function winGame(){
   mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
   const bonus=awardGold(500), D=curDiff();
   meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
+  // Final-boss completion must be authoritative even when a caller bypasses zoneClear().
+  // These writes are idempotent, so the normal zoneClear -> winGame route remains safe.
+  meta.zoneDone[curZone().id]=true;
+  meta.zoneMax=Math.max(meta.zoneMax||0,ZONES.length-1);
+  if(!meta._iansBladeAnnounced) meta._iansBladeNotify=true;
   meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
   persist(); persistGlobal(); checkAchievements(); checkCosmetics();
   const lines=STORY.ending.slice(); if(STORY.endLadder[D.id]) lines.push(STORY.endLadder[D.id]);
@@ -6525,6 +6539,7 @@ function enterWaystation(){
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
   if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }
+  if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
   if(!meta.hubTutDone && Object.keys(meta.trialsDone||{}).length){ meta.hubTutDone=true; persistGlobal(); hubTutorial(); }   // one-time hub onboarding after the first trial
 }
 /* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
@@ -7176,6 +7191,12 @@ function openShop(back){
       <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
         <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
       <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${actionIcon('buy')}${vsCost}g</button></div>`:'';
+  // Ian's Blade — the last Bladeborn's relic, revealed only after Castle Duskmoor falls.
+  const ib=makeWeapon('iansblade','legendary'), ibCost=1000000, ibAfford=meta.gold>=ibCost;
+  const ibRow=meta.zoneDone&&meta.zoneDone.castle?`<div class="gearrow" style="--spine:#ffd24a;background:linear-gradient(90deg,#33270f88,#171923)"><img class="bagav" src="${itemAv(ib)}" alt="">
+      <div class="cmpinfo" data-cmp="iansblade" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:#fff4ae;text-shadow:0 0 12px #ffd24a99">${ib.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
+        <div class="gd">${ib.dmg} dmg · radiant execute · <b>full power for every class</b></div></div>
+      <button class="bigbtn wbuy" data-r="iansblade" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${ibAfford?'':'opacity:.5'}">${actionIcon('buy')}${ibCost.toLocaleString()}g</button></div>`:'';
   // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
   const socksCost=1200, socksAfford=meta.gold>=socksCost;
   const socksRow=meta.socks
@@ -7188,7 +7209,7 @@ function openShop(back){
   const gAfford=meta.gold>=GAMBLE_COST;
   const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi eventgi">${actionIcon('fortunes-bag')}</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${actionIcon('buy')}${GAMBLE_COST}g</button></div>`;
   // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
-  const goal = !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
+  const goal = meta.zoneDone&&meta.zoneDone.castle&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='iansblade') ? {name:"Ian's Blade",cost:ibCost} : !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
   const northStar=`<div style="margin:2px 0 8px"><div class="gd" style="text-align:left;margin-bottom:3px"><b style="color:#ffd24a">${meta.gold}</b> / ${goal.cost} to <b>${goal.name}</b></div>
     <div style="height:7px;border-radius:5px;background:#1b1e26;overflow:hidden"><div style="height:100%;width:${gpct}%;background:linear-gradient(90deg,#ffd24a,#ff9a3a)"></div></div></div>`;
@@ -7198,7 +7219,7 @@ function openShop(back){
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><span class="ico ico-coin"></span> <b style="color:#ffd24a">${meta.gold}</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${socksRow}${packRow}${gambleRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left">🏰 <b>The Waystation</b> — restore your fortress (cosmetic, costly)</p>
@@ -7208,15 +7229,16 @@ function openShop(back){
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.perks) meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); SFX.levelup(); persist(); openShop(back); });
-  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', cost=isVS?2200:shopWeapCost(rid);
-    const gateR=isVS?'epic':rid; if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', isIan=rid==='iansblade', cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid));
+    const gateR=isIan?'legendary':(isVS?'epic':rid); if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
-    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
+    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid));
     if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
-    SFX.levelup(); persist(); toast('Equipped: '+w.name); openShop(back); });
-  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe';
-    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid), cost=isVS?2200:shopWeapCost(rid); shopCompare(w,cost,back); });
+    if(isIan){ SFX.god(); playFx('bigreveal'); if(G&&G.p) burst(G.p.x,G.p.y+35,G.p.z,'#fff4ae',28); } else SFX.levelup();
+    persist(); toast('Equipped: '+w.name); openShop(back); });
+  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe', isIan=rid==='iansblade';
+    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid)), cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid)); shopCompare(w,cost,back); });
   const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
     meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };

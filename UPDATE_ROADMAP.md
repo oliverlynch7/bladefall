@@ -877,3 +877,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Generated and integrated 16 individual transparent voxel passive icons grounded in the real class definitions: two Warrior paths, ten Ranger innate/branch/capstone upgrades, two Mage paths, and two Reaper paths.
 - Replaced generic passive diamonds and stars in rank-up choices and Drillmaster trees with readable, class-colored gameplay emblems; rank-10 legacy path upgrades intentionally retain the same learned path identity.
 - Optimized all masters to 256px transparent PNGs (about 1.2 MB total) and verified every asset loads in its correct node at 1600x900 and 1366x768 with no console errors.
+
+## [Codex | 2026-07-19] v1.161.0 - Bag equipment paper-doll
+- Rebuilt Bag as a two-pane equipment screen: inventory on the left, current Warden and vertically aligned equipped slots on the right.
+- Added a voxel paper-doll assembled from the actual equipped weapon, helmet, chestplate, and leggings art, plus correct weapon/armor/amulet/ring slot icons and names; Inspect Character opens the full 3D Mirror model.
+- Removed bag item-name ellipsis and enabled clean multi-line wrapping. Verified six equipped slots, all art loads, a 74-item long-name stress test has zero clipped names, and 1600x900 / 1366x768 produce no console errors.

@@ -518,6 +518,8 @@
   .gearrow .gn{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gearrow .gd{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.35;}
   .bagav{width:64px;height:64px;object-fit:contain;flex:0 0 auto;border-radius:12px;border:1px solid #2b3040;background:#0d0e14;display:block;}
+  .baglayout{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(390px,.78fr);gap:18px;align-items:stretch;margin-top:12px}.baginventory{min-width:0;display:flex;flex-direction:column}.baginventory .achlist{max-height:min(59vh,540px)!important;margin-bottom:0}.baginventory .gearrow{align-items:center}.baginventory .gn{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.22;overflow-wrap:anywhere}.bagequip{position:relative;min-height:540px;border:1px solid #3a4152;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 70% 38%,rgba(232,163,61,.13),transparent 34%),linear-gradient(155deg,#1c202b,#0b0d13);box-shadow:inset 0 0 42px rgba(0,0,0,.58)}.bagportrait{position:absolute;inset:0;background-position:35% center;background-size:cover;background-repeat:no-repeat;filter:saturate(1.08) contrast(1.04)}.bagequip::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(8,10,15,.96) 0%,rgba(8,10,15,.70) 31%,rgba(8,10,15,.13) 55%,transparent 72%),linear-gradient(0deg,rgba(8,10,15,.76),transparent 23%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}.bagequiphead{position:absolute;z-index:2;left:18px;top:16px;right:18px}.bagequiphead b{display:block;font-size:19px;color:#fff}.bagequiphead span{font-size:9px;color:var(--amber);font-weight:900;letter-spacing:.14em;text-transform:uppercase}.bagslots{position:absolute;z-index:3;left:16px;top:72px;bottom:18px;width:min(58%,245px);display:flex;flex-direction:column;justify-content:center;gap:7px}.bagslot{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:9px;min-height:59px;padding:6px 9px;border:1px solid color-mix(in srgb,var(--slotcol,#778093) 52%,#303645);border-radius:12px;background:linear-gradient(100deg,rgba(25,29,39,.97),rgba(13,15,21,.84));box-shadow:0 5px 16px rgba(0,0,0,.32),inset 3px 0 0 var(--slotcol,#778093)}.bagslotimg{width:48px;height:48px;object-fit:contain;border-radius:9px;background:#090b10;border:1px solid #343a49}.bagslotempty{width:48px;height:48px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#090b10;border:1px dashed #343a49}.bagslotempty .ico-slot{width:32px;height:32px}.bagslotcopy{min-width:0}.bagslotlabel{display:block;color:#858da0;font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.bagslotname{display:block;margin-top:2px;color:var(--slotcol,#cdd3df);font-size:11px;font-weight:900;line-height:1.15;white-space:normal;overflow-wrap:anywhere}.bagfoot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.bagfoot .bigbtn{margin:0}@media(max-width:980px){.baglayout{grid-template-columns:1fr}.bagequip{min-height:480px}.baginventory .achlist{max-height:46vh!important}}@media(max-width:620px){.bagequip{min-height:450px}.bagslots{width:62%}.bagslot{grid-template-columns:44px minmax(0,1fr)}.bagslotimg,.bagslotempty{width:40px;height:40px}.bagfoot{grid-template-columns:1fr}}
+  .bagportrait{background-position:center;}.bagdoll{position:absolute;z-index:2;right:12px;top:102px;width:168px;height:350px;filter:drop-shadow(0 20px 18px rgba(0,0,0,.7))}.bagdollbody{position:absolute;left:48px;top:78px;width:76px;height:122px;border-radius:12px 12px 8px 8px;background:linear-gradient(90deg,#272b35,#565d69 48%,#1a1d25);border:2px solid #777f8d;box-shadow:inset 0 0 18px #090a0e}.bagdollhead{position:absolute;left:60px;top:18px;width:52px;height:62px;background:linear-gradient(90deg,#8c6848,#d6a36f 48%,#66472f);border:2px solid #33261d;border-radius:7px}.bagdolllegs{position:absolute;left:54px;top:196px;width:64px;height:118px;background:linear-gradient(90deg,#20242c 0 44%,#090a0e 45% 55%,#303640 56%);border:2px solid #525966;border-radius:5px}.bagdollarm{position:absolute;top:88px;width:25px;height:122px;background:#373d48;border:2px solid #626b78;border-radius:7px}.bagdollarm.left{left:25px;transform:rotate(7deg)}.bagdollarm.right{right:19px;transform:rotate(-7deg)}.bagdollgear{position:absolute;z-index:2;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}.bagdollgear.helmet{left:42px;top:0;width:88px;height:88px}.bagdollgear.chest{left:31px;top:67px;width:108px;height:142px}.bagdollgear.legs{left:40px;top:184px;width:90px;height:136px}.bagdollgear.weapon{right:-8px;top:74px;width:82px;height:190px;transform:rotate(-12deg);transform-origin:center}.bagdollclass{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.13em;text-transform:uppercase;color:var(--amber);white-space:nowrap;text-shadow:0 2px 4px #000}
   .petav{width:74px;height:74px;object-fit:contain;flex:0 0 auto;border-radius:14px;border:1px solid #343b50;background:radial-gradient(circle,#24283a,#0c0e15 72%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));}
   /* Pet Yard has its own hierarchy: one hero companion, then a readable collection grid. */
   .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
@@ -643,7 +645,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.160.0';
+const VERSION3D='1.161.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2348,6 +2350,7 @@ function bagFullPrompt(newItem,onDone){ mode='menu';
 let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
 function openBag(back){
   mode='menu';
+  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
   const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
   const order=meta.stash.map((it,i)=>({it,i})).filter(x=>oOf(x));
@@ -2367,13 +2370,19 @@ function openBag(back){
       <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
     :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
   const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag</h2>
+  const eq=HR||{weapon:null,gear:{}};
+  const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
+    return `<div class="bagslot" style="--slotcol:${col}">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${item?item.name:'Empty'}</span></span></div>`; };
+  const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s]))].join('');
+  const C=CLASSES[meta.classId]||CLASSES.warrior, heroName=meta.heroName||'Your Warden';
+  const doll=`<div class="bagdoll"><span class="bagdollhead"></span><span class="bagdollbody"></span><span class="bagdollarm left"></span><span class="bagdollarm right"></span><span class="bagdolllegs"></span>${eq.gear&&eq.gear.helmet?`<img class="bagdollgear helmet" src="${itemAv(eq.gear.helmet)}" alt="">`:''}${eq.gear&&eq.gear.chest?`<img class="bagdollgear chest" src="${itemAv(eq.gear.chest)}" alt="">`:''}${eq.gear&&eq.gear.legs?`<img class="bagdollgear legs" src="${itemAv(eq.gear.legs)}" alt="">`:''}${eq.weapon?`<img class="bagdollgear weapon" src="${itemAv(eq.weapon)}" alt="">`:''}<span class="bagdollclass">${C.disp} · Level ${eq.level||1}</span></div>`;
+  showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
-    <button class="bigbtn ghost" id="sortBtn" style="padding:6px 10px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
-    <div class="achlist" style="max-height:min(50vh,360px)">${rows}</div>
-    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
+      <div class="achlist">${rows}</div></section>
+      <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
+    <div class="bagfoot"><button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
-  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
     const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
@@ -2390,6 +2399,7 @@ function openBag(back){
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
     const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
   document.getElementById('backBtn').onclick=back;
+  document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));
 }
 /* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
    or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */

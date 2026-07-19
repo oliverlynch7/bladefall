@@ -179,7 +179,7 @@
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
   #mirrorui{position:absolute;left:50%;top:50%;z-index:22;width:min(920px,92vw);max-height:min(88vh,820px);transform:translate(-50%,-50%);box-sizing:border-box;background:linear-gradient(178deg,rgba(23,25,33,.98),rgba(10,11,17,.98));border:1px solid #3a4152;border-radius:18px;padding:22px 26px;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.06);}
   #mirrorui.hide{display:none;}
-  #mirrorToggle{position:absolute;right:18px;top:50%;z-index:24;transform:translateY(-50%);display:none;align-items:center;gap:10px;padding:12px 15px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.96),rgba(12,14,20,.96));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle:hover{border-color:#ffd47a;transform:translateY(-50%) scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i{width:10px;height:10px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle{right:8px;padding:10px;font-size:9px}}
+  #mirrorToggle,#mirrorNameToggle{position:absolute;right:18px;z-index:24;width:176px;display:none;align-items:center;justify-content:flex-start;gap:11px;padding:14px 16px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.97),rgba(12,14,20,.97));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle{top:calc(50% - 42px)}#mirrorNameToggle{top:calc(50% + 26px)}#mirrorToggle:hover,#mirrorNameToggle:hover{border-color:#ffd47a;transform:scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i,#mirrorNameToggle i{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle,#mirrorNameToggle{right:8px;width:142px;padding:11px;font-size:9px}}
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
   .msbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.179.0';
+const VERSION3D='1.180.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6553,16 +6553,18 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
    THE MIRROR — stand before it and orbit 360° around your character (drag to rotate),
    with EVERY stat listed and your full equipped loadout (each piece's TYPE + bonus).
    ============================================================ */
-let mirror=null, mirrorView='overview', mirrorUiHidden=false;
+let mirror=null, mirrorPanelMode=null;
 function openMirror(back){
   initAudio();
   if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
   const h=meta.hero, p=freshPlayer();
   p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
-  p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.hp=p.maxHp=9999; p.invuln=0;
-  p.level=(h&&h.level)||1; recomputeArmor(p);
-  mirror={ t:0, yaw:Math.PI, spin:true, back:back||openHubMenu, p };
+  p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.invuln=0;
+  p.level=(h&&h.level)||1; recomputeArmor(p); p.hp=effMaxHp(p);
+  const pet=meta.petActive&&PETS[meta.petActive]?{id:meta.petActive,x:46,y:16,z:24,bob:0,t:0,yaw:Math.PI}:null;
+  mirror={ t:0, yaw:0, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
   mode='mirror'; showOverlay(false); showGameUI(false);
+  hpBars=[]; statPips=[]; drawHpBars(); updatePetLabel();
   document.getElementById('questbox').classList.add('hide');
   { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract');   // Phase 19: the 'Talk to the Mirror' prompt must not linger inside the mirror
     if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); }
@@ -6570,9 +6572,11 @@ function openMirror(back){
 }
 function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
   if(mirror.spin) mirror.yaw+=dt*0.45;
+  if(mirror.pet){ mirror.pet.t=mirror.t; mirror.pet.bob=Math.sin(mirror.t*3)*3; }
   const p=mirror.p; if(p.hurtFlash>0) p.hurtFlash-=dt;
 }
 function renderMirror(t){
+  hpBars=[]; statPips=[]; drawHpBars();
   gl.clearColor(0.055,0.05,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   setFlatLights();
   PROJ=mPersp(42*Math.PI/180,VW/VH,5,900);
@@ -6587,7 +6591,7 @@ function renderMirror(t){
   bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
   const p=mirror.p; p.yaw=Math.PI;   // hero faces the camera-front consistently; the CAMERA orbits
   drawShadow(0,0,17,0.34);
-  if(!behind){ p.z=-168; p.yaw=0; drawHero3(p,t,false); p.z=0; p.yaw=Math.PI; }   // Phase 19: your REFLECTION — the double beyond the glass, facing you back
+  if(!behind){ p.z=-168; p.yaw=0; drawHero3(p,t,false); if(mirror.pet){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=Math.PI; }   // reflected hero and companion
   if(behind){ gl.depthMask(false);   // phantom frame from the far side — never blocks the view
     bx(0,90,-84, 150,190,10,'#2a2f3d',null,0.07); bx(0,188,-84, 168,14,14,'#3a4152',null,0.07);
     gl.depthMask(true);
@@ -6598,9 +6602,11 @@ function renderMirror(t){
     bx(0,188,-84, 168,14,14,'#3a4152');
   }
   drawHero3(p,t,false);              // the real you, drawn last — always visible
+  if(mirror.pet) drawPet3(mirror.pet,t); // equipped companion poses just behind the hero; drawPet3 supplies its unique idle
 }
 function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide');
   const mt=document.getElementById('mirrorToggle'); if(mt) mt.style.display='none';
+  const mn=document.getElementById('mirrorNameToggle'); if(mn) mn.style.display='none';
   const esc=document.getElementById('mirrorEsc'); if(esc) esc.style.display='none';
   if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
 function mirrorStatsHTML(){
@@ -6633,17 +6639,10 @@ function buildMirrorPanel(){
   const pn=document.getElementById('mirrorui'); if(!pn) return;
   const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
   const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-  pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div>
-    <label class="mslabel" for="msName">Character name</label>
-    <div class="msnamebar"><input class="msname" id="msName" maxlength="18" value="${escText(nm)}" placeholder="Name your character…">
-      <button class="wsbig" id="msNameGo">Save Name</button></div>
-    <div class="msnamehint">Your saved name appears in story narration.</div>
-    <label class="mslabel" for="msView">Mirror view</label>
-    <select class="msselect" id="msView"><option value="overview"${mirrorView==='overview'?' selected':''}>Character Overview</option><option value="stats"${mirrorView==='stats'?' selected':''}>All Live Stats &amp; Loadout</option></select>
-    <div id="msLiveStats" class="msbody${mirrorView==='stats'?'':' hide'}">${mirrorStatsHTML()}</div>
-    <div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: On</button><button class="wsbig ghost" id="msBack">Back</button></div>
-    <div class="mshint">drag the character to look around</div>`;
-  pn.classList.toggle('hide',mirrorUiHidden);
+  if(mirrorPanelMode==='stats') pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div><div class="msbody">${mirrorStatsHTML()}</div><div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: ${mirror.spin?'On':'Off'}</button><button class="wsbig ghost" id="msClose">Close</button></div>`;
+  else if(mirrorPanelMode==='name') pn.innerHTML=`<div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" maxlength="18" value="${escText(nm)}" placeholder="Name your character…"><button class="wsbig" id="msNameGo">Save Name</button></div><div class="msctrl"><button class="wsbig ghost" id="msClose">Cancel</button></div>`;
+  else pn.innerHTML='';
+  pn.classList.toggle('hide',!mirrorPanelMode);
   // Phase 19: an always-visible, CLICKABLE way out, top-left
   let esc=document.getElementById('mirrorEsc');
   if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
@@ -6652,15 +6651,13 @@ function buildMirrorPanel(){
   esc.innerHTML='<span style="background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900">ESC</span>Leave the mirror';
   esc.style.display='block'; esc.onclick=()=>exitMirror();
   let mt=document.getElementById('mirrorToggle'); if(!mt){ mt=document.createElement('button'); mt.id='mirrorToggle'; document.body.appendChild(mt); }
-  const syncToggle=()=>{ mt.innerHTML=`<i></i>${mirrorUiHidden?'Show Character Menu':'Hide Character Menu'}`; pn.classList.toggle('hide',mirrorUiHidden); };
-  mt.style.display='flex'; syncToggle(); mt.onclick=()=>{ mirrorUiHidden=!mirrorUiHidden; SFX.pickup(); syncToggle(); };
-  document.getElementById('msSpin').onclick=()=>{ mirror.spin=!mirror.spin; document.getElementById('msSpin').textContent='🔄 Spin: '+(mirror.spin?'On':'Off'); };
-  document.getElementById('msBack').onclick=()=>exitMirror();
-  const ni=document.getElementById('msName');
-  const saveName=()=>{ meta.heroName=(ni.value||'').trim().slice(0,18); persist(); SFX.pickup(); buildMirrorPanel(); };
-  document.getElementById('msNameGo').onclick=saveName;
-  ni.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); saveName(); } };
-  document.getElementById('msView').onchange=e=>{ mirrorView=e.target.value; document.getElementById('msLiveStats').classList.toggle('hide',mirrorView!=='stats'); };
+  let mn=document.getElementById('mirrorNameToggle'); if(!mn){ mn=document.createElement('button'); mn.id='mirrorNameToggle'; document.body.appendChild(mn); }
+  mt.innerHTML='<i></i>Character Stats'; mn.innerHTML='<i></i>Rename Character'; mt.style.display=mn.style.display='flex';
+  mt.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='stats'?null:'stats';SFX.pickup();buildMirrorPanel();};
+  mn.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='name'?null:'name';SFX.pickup();buildMirrorPanel();};
+  const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
+  const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
+  const ni=document.getElementById('msName'); if(ni){const saveName=()=>{meta.heroName=(ni.value||'').trim().slice(0,18);persist();SFX.pickup();mirrorPanelMode=null;buildMirrorPanel();};document.getElementById('msNameGo').onclick=saveName;ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}};}
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
@@ -8162,13 +8159,13 @@ function drawWaystation(t){
       if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
       continue; }
     if(n.prop==='mirror'){ drawShadow(n.x,n.z,20,0.26);
-      // a grand gilded standing mirror; the BRIGHT silvered face sits toward the camera (+z side), the frame behind it
-      const fw=46, fh=110, bk=n.z-3, gf=n.z+9;                                                     // frame plane (back, -z) vs glass plane (front, +z toward viewer)
+      // A grand gilded standing mirror facing inward toward the Waystation's main room (-z).
+      const fw=46, fh=110, bk=n.z+3, gf=n.z-9;                                                     // backing south, reflective face north toward the room
       bx(n.x,fh/2,bk, fw+14,fh+10,14, '#241c14');                                                 // dark wood frame body (behind)
       bx(n.x,fh+9,n.z, fw+22,16,20, '#6a531f','#e6c25a',0.9);                                      // ornate gilded crown
-      for(const sx2 of [-1,1]) bx(n.x+sx2*(fw*0.5+7),fh/2,n.z+6, 5,fh,7,'#7a5f28','#c9a24a',0.8);   // gilded side pillars flanking the glass
+      for(const sx2 of [-1,1]) bx(n.x+sx2*(fw*0.5+7),fh/2,n.z-6, 5,fh,7,'#7a5f28','#c9a24a',0.8);   // gilded side pillars flanking the glass
       bx(n.x,5,n.z, fw+24,12,24, '#3a2f26','#5a4a2e',0.4);                                         // base foot
-      bx(n.x,fh/2,n.z+6, fw+7,fh+4,2, '#8a6f34','#e6c25a',0.95);                                    // gilded inner trim framing the glass
+      bx(n.x,fh/2,n.z-6, fw+7,fh+4,2, '#8a6f34','#e6c25a',0.95);                                    // gilded inner trim framing the glass
       // the SILVERED GLASS — bright, near-opaque, cool vertical gradient (frontmost so it always reads as a mirror)
       bx(n.x,fh*0.74,gf, fw,fh*0.34,2, '#eef5ff','#ffffff',0.98);                                  // top band (brightest)
       bx(n.x,fh*0.46,gf, fw,fh*0.30,2, '#c4d8ee','#e6f1ff',0.98);                                  // mid band

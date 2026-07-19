@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.166.0';
+const VERSION3D='1.167.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1251,6 +1251,16 @@ function rollRarity(){
   RORDER.forEach((r,i)=>{ const w=RARITY[r].base*Math.pow(boost,i); pool.push(w); total+=w; });
   let roll=Math.random()*total;
   for(let i=0;i<pool.length;i++){ roll-=pool[i]; if(roll<=0) return RORDER[i]; }
+  return 'common';
+}
+/* Enemy kills use a deliberately leaner economy than chests and authored rewards.
+   Each rarity step falls off harder, and regular/elite mobs never roll Legendary. */
+function rollOrganicRarity(){
+  const luck=(G?G.stageIndex*0.25:0)+(G?Math.floor(G.p.level/2)*0.08:0);
+  const boost=1+Math.min(luck,18)*0.045;
+  const weights=[1000,180*Math.pow(boost,1),30*Math.pow(boost,2),3*Math.pow(boost,3)];
+  let total=weights.reduce((a,b)=>a+b,0), roll=Math.random()*total;
+  for(let i=0;i<weights.length;i++){ roll-=weights[i]; if(roll<=0) return RORDER[i]; }
   return 'common';
 }
 /* ---------------- Affinities (damage TYPE = sch phys/mag; AFFINITY = el) ----------------
@@ -4704,7 +4714,9 @@ function killEnemy(e,weaponKill){
     { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
     checkAchievements();
     // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
-    if(e.elite || Math.random()<0.16) rollDrop(e);
+    // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
+    // Bosses, chests, mimics, and goblins remain the reliable gear sources.
+    if(Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
     if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
@@ -4755,7 +4767,8 @@ function rollDrop(e){
   if(e.type==='tyrant') return;
   if(e.type==='king'){ pushLoot(e.x,e.z,0,{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')});
     pushLoot(e.x-40,e.z+20,0,{armor:makeArmor('legendary','chest')}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
-  let rid=bandedRarity(e.boss?1:(e.elite?1:0));   // bosses and elites reach one band above the zone's cap
+  let rid=e.boss?bandedRarity(1):rollOrganicRarity();
+  if(!e.boss){ const cap=Math.min(3,rarityCap(e.elite?1:0)); while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; } // organic mob kills cap at Epic
   if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
   if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
   if(!e.boss && Math.random()<0.45){ pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
@@ -8979,7 +8992,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
-  makeWeapon, makeArmor, makeTrinket, rollRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
+  makeWeapon, makeArmor, makeTrinket, rollRarity, rollOrganicRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

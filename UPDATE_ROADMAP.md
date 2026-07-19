@@ -897,3 +897,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt achievement cards around 76px artwork with locked grayscale treatment, compact lock badges, clearer typography, and responsive two-column presentation.
 - QA: muted real Chromium at desktop viewport; verified 0/11 and 11/11 states, all image loads, menu scrolling, and zero console errors.
 
+
+## [Codex | 2026-07-19] v1.167.0 - Organic mob loot economy
+- Reduced ordinary enemy gear-drop chance from 16% to 5.3% and elite drop chance from guaranteed to 33%, including Abyssal Descent.
+- Added a steeper organic rarity curve (~82.3% Common / 15.1% Uncommon / 2.4% Rare / 0.24% Epic in a 100k-roll baseline QA sample).
+- Organic regular/elite kills are hard-capped at Epic and can never drop Legendary; bosses, chests, mimics, treasure goblins, and authored rewards retain their distinct reward tables.
+- QA: muted real Chromium, v1.167.0 loaded, 100,000 organic rarity rolls produced zero Legendary results, zero console errors.
+

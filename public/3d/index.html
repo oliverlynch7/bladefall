@@ -619,7 +619,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.156.0';
+const VERSION3D='1.157.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7149,10 +7149,12 @@ function drawCourse(s,t){
     }
   }
   // torches: flickering flames along the halls
-  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph);
-    bx(tc.x,26,tc.z, 4,52,4,'#3a2c1c');
+  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
+    bx(tc.x,26,tc.z, 4,52,4,'#3a2c1c'); bx(tc.x,26,tc.z, 5,4,5,'#241a10'); bx(tc.x,44,tc.z, 5,4,5,'#241a10');  // shaft + iron bands
+    bx(tc.x,50,tc.z, 8,4,8,'#241c14'); for(let i=0;i<4;i++){ const a=i*1.571; bx(tc.x+Math.cos(a)*3.4,52,tc.z+Math.sin(a)*3.4, 1.4,7,1.4,'#2a2018'); }  // sconce bowl + cage prongs
     bx(tc.x,56,tc.z, 7,9,7,'#c9783b','#713418',fl*0.84);
-    bx(tc.x,63,tc.z, 4,5,4,'#f0bd68','#a65e22',fl*0.78);
+    bx(tc.x+fk*1.2,63,tc.z, 4,6,4,'#f0bd68','#a65e22',fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,'#ffe39a','#f0bd68',fl*0.9);  // flickering flame tongues
+    bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
     glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
   // pressure plates
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue;
@@ -8739,11 +8741,15 @@ function drawChest(ch,t){
     // rises a hair on a slow rhythm, it shudders once in a while, and the lock burns warmer.
     const mim=!!ch.mimic, br=mim?Math.max(0,Math.sin(t*0.8+ch.bob))*1.1:0;
     if(mim && Math.sin(t*0.47+ch.bob*2)>0.988) mv((Math.random()-0.5)*1.4,0,0);
-    bx(0,9,0, 30,15,22,'#6b4a2a');
-    bx(0,9.5,0, 31,3,23,'#caa23a','#caa23a',0.9);
-    bx(0,18.5+br,0, 30,7,22,'#7a5836');
+    bx(0,9,0, 30,15,22,'#6b4a2a'); bx(0,9,11.05, 30,15,0.6, tint('#6b4a2a','#000',0.25));   // body + front plank shade
+    for(const px of [-9,0,9]) bx(px,9,11.2, 1.2,15,0.6, '#4a3218');                          // plank seams
+    for(const s of [-1,1]) for(const z of [-1,1]) bx(s*14.4,9,z*10.4, 1.6,15.6,1.6,'#2a2018');  // corner iron brackets
+    bx(0,9.5,0, 31,3,23,'#caa23a','#caa23a',0.9);                                             // gilt band
+    bx(0,18.5+br,0, 30,7,22,'#7a5836'); bx(0,21.5+br,0, 26,3,20,'#8a6842');                    // domed lid + crown
+    for(const s of [-1,1]) bx(s*10,18.5+br,11, 4,2.4,2,'#2a2018');                             // hinges
     if(mim && br>0.6) bx(0,15.6,9.5, 22,1.4,2,'#1a0a0e');                          // the thinnest dark seam when it inhales
     bx(0,12.5,11.2, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
+    bx(0,11,11.6, 1.6,2.4,1, '#1a0a0e');                                                       // keyhole
     bx(0,26,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
   } else {
     bx(0,7,0, 30,12,22,'#5a3d22');
@@ -8753,9 +8759,14 @@ function drawChest(ch,t){
   popM();
 }
 function drawPortal3(po,t){
+  // carved stone archway framing the swirling gate
+  for(let i=0;i<8;i++){ const a=Math.PI*(0.12+i/7*0.76); bx(po.x+Math.cos(a)*46, 20+Math.sin(a)*54, po.z, 9,9,11,'#4a4552'); }  // arch voussoirs
+  for(const s of [-1,1]){ bx(po.x+s*46,18,po.z, 11,44,11,'#413c48'); bx(po.x+s*46,40,po.z, 13,6,13,'#524c5a'); bx(po.x+s*46,-2,po.z, 14,6,14,'#524c5a'); }  // side pillars + caps/bases
+  for(let i=0;i<3;i++) bx(po.x+(i-1)*22,74,po.z, 12,7,12,'#4a4552');                                     // keystone lintel
+  for(const s of [-1,1]) bx(po.x+s*46,58,po.z, 3,3,3,'#e8a33d','#e8a33d',0.9);                            // rune lamps on the pillars
   for(let i=0;i<10;i++){ const a=t*1.4+i*0.628;
-    bx(po.x+Math.cos(a)*38, 58+Math.sin(a)*38, po.z, 9,9,9, '#e8a33d','#e8a33d',0.92); }
-  bx(po.x,58,po.z, 52,76,4,'#e8a33d','#e8a33d',0.22);
+    bx(po.x+Math.cos(a)*34, 54+Math.sin(a)*34, po.z, 9,9,9, '#e8a33d','#e8a33d',0.92); }                  // swirling motes
+  bx(po.x,54,po.z, 52,72,4,'#e8a33d','#e8a33d',0.22); bx(po.x,54,po.z-1, 30,44,2,'#ffd88a','#ffd88a',0.16);  // gate sheet + bright core
   drawShadow(po.x,po.z,34,0.2);
 }
 /* ---- skin preview (rendered on the main GL canvas, cropped) ---- */

@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.167.0';
+const VERSION3D='1.168.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1443,9 +1443,13 @@ function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:
 function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
 // The effective 4-skill kit: skill 1 is shared; skills 2-4 come from the path you chose
 // at the rank-2 fork (each subclass = a distinct kit). Unchosen -> path-A default for display.
-function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) return []; const cs=classState(cid), sub=cs.sub&&C.subs.find(s=>s.id===cs.sub);
-  if(sub&&sub.skills) return [C.skills[0]].concat(sub.skills);
-  return C.skills.slice(0,4); }
+function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) return []; const cs=classState(cid);
+  if(!cs.sub) return C.skills.slice(0,4);                                   // no path chosen yet: shared kit only
+  // MIX-AND-MATCH: each skill slot (2/3/4) can be drawn from EITHER path independently (cs.mix[slot]=pathId); defaults to cs.sub
+  const skillsOf=id=>{ const s=C.subs.find(x=>x.id===id); return (s&&s.skills)?s.skills:C.skills.slice(1,4); };
+  const out=[C.skills[0]];
+  for(let i=0;i<3;i++){ const pid=(cs.mix&&cs.mix[i+1])||cs.sub; out.push(skillsOf(pid)[i]||C.skills[1+i]); }
+  return out; }
 function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
 function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
   cs.xp+=n; let up=false;
@@ -6549,11 +6553,12 @@ function openRespecTree(cid,back){
   const C=CLASSES[cid], cs=classState(cid), def=c2def(cid), COST=300;
   if(!C||!meta.classUnlocked[cid]){ back(); return; }
   mode='menu'; showGameUI(false);
-  let staged=def?Object.assign({},cs.ch||{}):cs.sub;
+  const _baseSub=cs.sub||(C.subs&&C.subs[0]&&C.subs[0].id);
+  let staged=def?Object.assign({},cs.ch||{}):{1:(cs.mix&&cs.mix[1])||_baseSub,2:(cs.mix&&cs.mix[2])||_baseSub,3:(cs.mix&&cs.mix[3])||_baseSub};
   const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
   const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
   function render(){
-    const changed=def?CLASS2_CHOICE_RANKS.some(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)):staged!==cs.sub;
+    const changed=def?CLASS2_CHOICE_RANKS.some(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)):[1,2,3].some(i=>(staged[i]||null)!==(((cs.mix&&cs.mix[i])||cs.sub)||null));
     let tree='';
     if(def){
       tree=`<div class="buildroot"><div class="bticon">${passiveIcon('r_clear_aim')}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
@@ -6562,20 +6567,22 @@ function openRespecTree(cid,back){
         return `<div class="buildrank ${reached?'reached':''}">${opt(R.a)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(R.b)}</div><div class="buildspine"></div>`; }).join('');
       tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">${passiveIcon('r_perfect_hunt')}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`;
     }else{
-      const root=C.skills[0];
+      const root=C.skills[0], pA=C.subs[0], pB=C.subs[1];
+      const skA=(pA&&pA.skills)||C.skills.slice(1,4), skB=(pB&&pB.skills)||C.skills.slice(1,4);
       tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d}</div></div><div class="buildspine"></div>`;
-      const paths=C.subs.map((sub,i)=>{ const skills=sub.skills||C.skills.slice(1,4);
-        return `<div class="legacypath"><button class="buildopt ${staged===sub.id?'sel':''}" data-path="${sub.id}" ${cs.rank>=2?'':'disabled'}><span class="boicon">${passiveIcon(sub.id)}</span><div class="boname">${sub.disp}</div><span class="borole">Complete combat path</span><div class="bodesc">${sub.blurb}</div><div class="pathskills">${skills.map((s,n)=>`<div class="pathskill ${cs.rank<s.rank?'locked':''}"><b>${s.icon||'✦'} ${s.n}</b> · Rank ${s.rank} · ${s.cd}s<br>${s.d}</div>`).join('')}</div></button></div>`; });
-      tree+=`<div class="buildrank ${cs.rank>=2?'reached':''}" style="grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr)">${paths[0]}<div class="rankorb"><span>PATH</span><b>2</b></div>${paths[1]}</div>`;
-      tree+=`<div class="buildspine"></div><div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Path <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your chosen path's defining passive reaches its final strength.</div></div>`;
+      // one row per skill SLOT — pick either discipline's ability for that slot, fully mix-and-match (e.g. Guardian skill 2 + Berserker skill 3)
+      for(let i=0;i<3;i++){ const a=skA[i], b=skB[i], rank=(a&&a.rank)||(b&&b.rank)||[2,4,7][i], reached=cs.rank>=rank;
+        const opt=(o,pid,disp)=>o?`<button class="buildopt ${staged[i+1]===pid?'sel':''}" data-mixslot="${i+1}" data-mixpath="${pid}" ${reached?'':'disabled'}><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s cd · ${disp}</span><div class="bodesc">${o.d}</div></button>`:'';
+        tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
+      tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
     }
     showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Choose the abilities and passives that define this class. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<COST)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm New Build · ${COST}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · Reviewing and leaving costs nothing.</p></div>`);
     document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
-    document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{ staged=b.dataset.path; SFX.pickup(); render(); });
+    document.querySelectorAll('[data-mixslot]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.mixslot]=b.dataset.mixpath; SFX.pickup(); render(); });
     document.getElementById('treeBack').onclick=back;
     const confirm=document.getElementById('treeConfirm');
     confirm.onclick=()=>{ if(!changed||meta.gold<COST) return; meta.gold-=COST;
-      if(def) cs.ch=Object.assign({},staged); else cs.sub=staged;
+      if(def) cs.ch=Object.assign({},staged); else { cs.mix=Object.assign({},staged); if(!cs.sub) cs.sub=staged[1]; }
       persist(); if(cid===meta.classId) skillbarUpdate(); SFX.levelup(); toast(C.disp+' build reforged'); back(); };
   }
   render();
@@ -7039,7 +7046,6 @@ function openPause(){
       ${navCard('classesBtn',`icons/class-${meta.classId}.png`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
-      ${navCard('classBtn',`icons/class-${meta.classId}.png`,curClass().disp,`Rank ${classState(meta.classId).rank}`,G&&G.trial?'lock':'',G&&G.trial?'disabled':'')}
     </div>
     <div class="sect">Settings</div>
     <div class="pgrid">
@@ -7063,12 +7069,6 @@ function openPause(){
   document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
   { const _st=document.getElementById('skipTrialBtn');
     if(_st) _st.onclick=()=>{ resumeGameAudio(false); if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
-  document.getElementById('classBtn').onclick=()=>{                    // switching mid-zone is a hub privilege; trials lock you in
-    if(G&&G.trial){ toast('Finish or skip the trial first'); return; }
-    if(G&&mode!=='menu'){ toast('Switch classes at the hub trainer'); return; }
-    const un=CLASSIDS.filter(c=>meta.classUnlocked[c]); if(un.length<2) return;
-    meta.classId=un[(un.indexOf(meta.classId)+1)%un.length]; persist();
-    toast(curClass().disp+' — favors '+curClass().family.join(', '),null,'class-'+meta.classId); skillbarUpdate(); hudUpdate(); openPause(); };
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };

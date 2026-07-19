@@ -851,3 +851,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Increased approved skill artwork from 30px inline marks to 112px illuminated emblems inside dedicated 132px portrait frames, with clearer names, roles, cooldowns, combat-bar slots, descriptions, and choice affordances.
 - Added stronger hierarchy, class crest/rank framing, responsive hover depth, side-by-side desktop comparison, stacked compact layout below 820px, and J/K keyboard labels plus functional J/K selection.
 - Muted real-browser QA at 1600x900 and 1366x768 verified skill and passive variants, exact icon sizing, two-card layout, zero overlay/page scrolling, and responsive fit.
+
+## [Codex | 2026-07-19] v1.153.0 — Compact HUD + combat-earned mana
+- Shipped the approved compact dark-fantasy HUD: prominent HP and mana bars, with character XP and class-rank XP balanced side-by-side in distinct cyan and violet/amber treatments.
+- Added a save-safe 100-point mana system. Skill slots cost 20/30/40/50 mana; insufficient mana blocks use and is shown on the skill controls.
+- Mana never regenerates from waiting. Ordinary weapon hits restore 4 mana and weapon kills restore an additional 12; skill/designated attacks and training targets cannot farm it.
+- Verified in a real muted browser at 1600x900 and 1366x768, including skill spending, insufficient-mana blocking, hit/kill recovery, no idle regeneration, and old-save migration.

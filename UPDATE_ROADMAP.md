@@ -882,3 +882,12 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt Bag as a two-pane equipment screen: inventory on the left, current Warden and vertically aligned equipped slots on the right.
 - Added a voxel paper-doll assembled from the actual equipped weapon, helmet, chestplate, and leggings art, plus correct weapon/armor/amulet/ring slot icons and names; Inspect Character opens the full 3D Mirror model.
 - Removed bag item-name ellipsis and enabled clean multi-line wrapping. Verified six equipped slots, all art loads, a 74-item long-name stress test has zero clipped names, and 1600x900 / 1366x768 produce no console errors.
+
+## [Codex | 2026-07-19] v1.162.0 - Companion stakes, presentation, and save safety
+- Added vertically aware companion following, independent scalable pet HP, enemy/projectile damage against pets, and expedition-long pet defeat that clears only after returning to the Waystation. Each Pet Yard training rank now improves companion HP as well as its role stat.
+- Shortened the thrown axe's outbound range and increased its flight speed so it visibly returns to the hand much faster.
+- Added a polished right-edge Mirror control that independently hides or restores the character menu, leaving the full model unobstructed when desired.
+- Made the sun world-relative with a slow orbit instead of pinning it to the camera, preserved all surviving trial gear on the transition into the Waystation, and replaced the Spore creature's mismatched sword-kill accent with a toxic collapse sound.
+- Rewrote the opening setup in direct language: the Abyss King's corruption, the danger to humanity, Ian as the last fallen Bladeborn and humanity's former final hope, and the player's goal are now explicit.
+- Generated and integrated twelve transparent illustrated skin emblems, used Knight as the global change-your-look icon, expanded the skin gallery, and refined the HUD's forged frame while preserving its side-by-side character/class progression and mana system.
+- Verified transparent assets, skin layout, trial-gear banking, vertical pet catch-up, pet defeat persistence and hub revival, Mirror toggle behavior, syntax, and muted desktop presentation at 1600x900.

@@ -24,14 +24,14 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     touch-action:none;overscroll-behavior:none;position:fixed;width:100%;}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block;}
-  #hud{position:absolute;left:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 0 0 12px;pointer-events:none;z-index:5;width:min(438px,86vw);}
-  .hudpanel{position:relative;background:radial-gradient(circle at 8% 0,rgba(232,163,61,.10),transparent 34%),linear-gradient(158deg,rgba(19,21,30,.91),rgba(8,9,14,.82));border:1px solid #3a3540;border-radius:15px;
-    padding:10px 13px 10px;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);box-shadow:0 10px 28px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 24px rgba(0,0,0,.18);}
-  .hudpanel::before{content:'';position:absolute;top:-1px;left:12%;right:12%;height:2px;background:linear-gradient(90deg,transparent,var(--amber),#f5d598,var(--amber),transparent)}
-  .hudpanel::after{content:'';position:absolute;inset:5px;border:1px solid rgba(232,163,61,.08);border-radius:11px;pointer-events:none}
+  #hud{position:absolute;left:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 0 0 14px;pointer-events:none;z-index:5;width:min(470px,88vw);filter:drop-shadow(0 12px 18px rgba(0,0,0,.45))}
+  .hudpanel{position:relative;background:radial-gradient(circle at 8% 0,rgba(246,183,72,.16),transparent 34%),linear-gradient(158deg,rgba(22,23,31,.94),rgba(7,8,13,.86));border:1px solid #7b5928;border-radius:8px 17px 17px 8px;
+    padding:12px 15px 11px 17px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,238,196,.11),inset 0 0 28px rgba(0,0,0,.28);clip-path:polygon(0 0,95% 0,100% 16%,100% 84%,95% 100%,0 100%,0 73%,5px 68%,5px 32%,0 27%)}
+  .hudpanel::before{content:'';position:absolute;top:0;left:7%;right:8%;height:2px;background:linear-gradient(90deg,transparent,#a66a22,var(--amber),#fff0b7,var(--amber),#a66a22,transparent);box-shadow:0 0 9px rgba(232,163,61,.5)}
+  .hudpanel::after{content:'';position:absolute;inset:6px 7px;border:1px solid rgba(232,163,61,.13);border-radius:5px 12px 12px 5px;pointer-events:none;clip-path:polygon(0 0,96% 0,100% 18%,100% 82%,96% 100%,0 100%)}
   .barwrap{display:flex;align-items:center;gap:8px;margin-bottom:5px;position:relative;z-index:1}
   .barlabel{font-size:9px;font-weight:900;letter-spacing:.13em;width:28px;color:var(--muted);}
-  .bar{flex:1;height:13px;background:#05060a;border:1px solid #303442;border-radius:5px;overflow:hidden;box-shadow:inset 0 2px 5px rgba(0,0,0,.7)}
+  .bar{flex:1;height:14px;background:#030409;border:1px solid #3c4050;border-radius:3px;overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.85),0 1px rgba(255,255,255,.04)}
   .bar > i{display:block;height:100%;width:0;border-radius:8px;transition:width .12s linear;}
   #hpfill{background:linear-gradient(90deg,#7d151d,#ff554d 72%,#ff8d78);box-shadow:0 0 9px rgba(255,70,62,.35)}
   #manafill{background:linear-gradient(90deg,#342178,#7655e9 62%,#b69aff);box-shadow:0 0 9px rgba(117,83,232,.38)}
@@ -46,8 +46,8 @@
   #armortag .pip{width:7px;height:7px;border-radius:2px;display:inline-block;background:#333;}
   #stagetag{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
   .hudvitals{position:relative;z-index:1}.hudvitals .barwrap:last-child{margin-bottom:8px}
-  .progpair{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:1;margin-bottom:7px}.progbox{min-width:0;padding:6px 7px 7px;border:1px solid #2d3140;border-radius:8px;background:rgba(5,7,11,.42)}
-  .proghead{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:4px}.progtitle{min-width:0;font-size:8px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;color:#aeb5c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progtitle .ico-event{width:14px;height:14px;margin:0 3px 0 0;vertical-align:-4px}.prognum{font-size:8px;color:#81899a;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}.progbox .bar{height:7px;border-radius:3px}
+  .progpair{display:grid;grid-template-columns:1fr 1fr;gap:9px;position:relative;z-index:1;margin-bottom:8px}.progbox{min-width:0;padding:7px 8px 8px;border:1px solid #3c3b47;border-radius:5px 9px 9px 5px;background:linear-gradient(145deg,rgba(24,27,37,.82),rgba(5,7,11,.62));box-shadow:inset 0 1px rgba(255,255,255,.04)}
+  .proghead{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:4px}.progtitle{flex:1 1 auto;min-width:0;font-size:8px;font-weight:950;letter-spacing:.07em;text-transform:uppercase;color:#aeb5c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progtitle .ico-event{width:12px;height:12px;margin:0 3px 0 0;vertical-align:-3px}.prognum{flex:0 0 auto;font-size:8px;color:#81899a;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}.progbox .bar{height:7px;border-radius:3px}
   .pathrow{margin:0!important}.pathrow .bar{height:4px;border:0;background:#05060a}.pathrow .barlabel{font-size:7px;width:28px}.pathrow .barnum{font-size:7px;min-width:0;color:#6f7686}
   @media(max-width:560px){#hud{width:min(390px,91vw);padding-left:8px}.hudpanel{padding:8px 10px}.progtitle{letter-spacing:.05em}.vitalnum{min-width:52px;font-size:8px}#weapontag{max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
   #bosshpwrap{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translateX(-50%);width:min(560px,86vw);display:none;z-index:5;pointer-events:none;}
@@ -179,6 +179,7 @@
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
   #mirrorui{position:absolute;left:50%;top:50%;z-index:22;width:min(920px,92vw);max-height:min(88vh,820px);transform:translate(-50%,-50%);box-sizing:border-box;background:linear-gradient(178deg,rgba(23,25,33,.98),rgba(10,11,17,.98));border:1px solid #3a4152;border-radius:18px;padding:22px 26px;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.06);}
   #mirrorui.hide{display:none;}
+  #mirrorToggle{position:absolute;right:18px;top:50%;z-index:24;transform:translateY(-50%);display:none;align-items:center;gap:10px;padding:12px 15px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.96),rgba(12,14,20,.96));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle:hover{border-color:#ffd47a;transform:translateY(-50%) scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i{width:10px;height:10px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle{right:8px;padding:10px;font-size:9px}}
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
   .msbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
@@ -489,15 +490,17 @@
   #toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);z-index:25;background:rgba(20,21,27,.92);border:1px solid var(--amber-dim);color:var(--amber);font-weight:800;font-size:13px;letter-spacing:.04em;padding:10px 18px;border-radius:12px;opacity:0;transition:opacity .2s,top .2s;pointer-events:none;text-align:center;max-width:80vw;}
   #toast.show{opacity:1;top:24%;}
   #pausebtn{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:12px;z-index:7;width:34px;height:34px;border-radius:9px;background:rgba(28,30,38,.5);border:1px solid var(--line);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
-  .skingrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 16px;}
-  .skintile{border:1.5px solid var(--line);border-radius:14px;padding:8px 4px 9px;background:var(--panel);cursor:pointer;text-align:center;}
+  .skingrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px;}
+  .skintile{position:relative;overflow:hidden;border:1.5px solid #353a48;border-radius:14px;padding:10px 8px 12px;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--skin) 18%,transparent),transparent 58%),linear-gradient(155deg,#1d202a,#0e1017);cursor:pointer;text-align:center;transition:.16s transform,.16s border-color,.16s box-shadow;}
+  .skintile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--skin) 62%,#62697b);box-shadow:0 12px 24px rgba(0,0,0,.35),0 0 18px color-mix(in srgb,var(--skin) 18%,transparent)}
   .skintile.sel{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber) inset;}
   .skintile.lock{opacity:.6;}
   .skintile.godt{border-color:#ffd24a;box-shadow:0 0 14px #ffd24a66;}
-  .skintile .av{width:46px;height:55px;display:block;margin:0 auto 2px;border:none;background:none;}
+  .skintile .av{width:clamp(84px,8vw,132px);height:clamp(84px,8vw,132px);object-fit:contain;display:block;margin:0 auto 4px;border:none;background:none;filter:drop-shadow(0 8px 9px rgba(0,0,0,.55));}
   .itemav{width:88px;height:88px;display:block;margin:2px auto 8px;border-radius:14px;border:1px solid var(--line);background:#13141a;}
-  .skintile .sn{font-size:11px;font-weight:800;}
-  .skintile .lk{font-size:8.5px;color:var(--muted);margin-top:1px;line-height:1.2;}
+  .skintile .sn{font-size:14px;font-weight:900;}
+  .skintile .lk{font-size:10px;color:#aab1c0;margin-top:3px;line-height:1.3;}
+  @media(max-width:900px){.skingrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:620px){.skingrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .achlist{text-align:left;max-height:54vh;overflow:auto;margin:2px 0 14px;-webkit-overflow-scrolling:touch;padding-right:3px;scrollbar-width:thin;scrollbar-color:#333a4c transparent;}
   .achlist::-webkit-scrollbar{width:5px;}
   .achlist::-webkit-scrollbar-thumb{background:#333a4c;border-radius:99px;}
@@ -645,7 +648,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.161.0';
+const VERSION3D='1.162.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -744,13 +747,13 @@ function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold
    zone, a line when a boss reveals, and endings that vary by difficulty. */
 const STORY={
   intro:[
-    "For an age the Abyss King has slept beneath the world.",
-    "When he stirs, his nightmares soak up through the rock — rotting the woods, souring the passes...",
-    "...and loosening the laws that hold a body down.",
-    "Once an age, when he wakes, the blood answers: one Bladeborn, born to go down and put him under again.",
-    "The last one went deeper than any before. He did not come back. None of them ever have.",
-    "The blood found {player}. No blade, no blood you know of, no oath. But the rot is at your door, and someone has to go.",
-    "So you will. Descend. Break the cycle."
+    "The Abyss King is waking beneath the world.",
+    "His power is spreading upward. It corrupts animals, raises the dead, and twists every land it reaches.",
+    "If nobody stops him, the corruption will reach the last human settlements.",
+    "For generations, warriors called the Bladeborn entered the Abyss to keep him contained.",
+    "Ian was the last Bladeborn. He was humanity's final hope, but he fell before he could finish the fight.",
+    "Now the Bladeborn power has awakened in {player}. You are the only person left who can follow Ian's path.",
+    "Enter the Abyss, defeat the King, and save what remains of humanity."
   ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
     "Something in you straightens its back — something that was always there, waiting for its turn.",
@@ -1223,6 +1226,7 @@ function petDisplayName(id){ return (meta.petNames&&meta.petNames[id])||(PETS[id
 function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps chip relevant with level, never a spike
 function petAtkDmg(id){ const P=PETS[id]; return Math.max(1,Math.round((P.dmg||4)*petLevelScale()*petTrainMul(id))); }
 function petHealAmt(id){ const P=PETS[id]; return Math.max(1,Math.round((P.heal||3)*petTrainMul(id))); }
+function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); return Math.round(base*petLevelScale()*(1+petTrainLvl(id)*.12)); }
 // Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
 function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
 function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
@@ -2613,7 +2617,8 @@ function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the
 function trialComplete(){
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
-  if(T.earned){ meta.hero=snapOf(G.p); meta.sideDone[curZone().side.id]=true; }
+  meta.hero=snapOf(G.p);                                  // surviving a trial banks every weapon/armor swap and pickup
+  if(T.earned){ meta.sideDone[curZone().side.id]=true; }
   if(cid==='reaper') meta._scytheNotify=true;   // announce the Void Scythe when they reach the hub
   meta.bank=null; persist(); checkAchievements();
   mode='menu'; SFX.win(); showGameUI(false);
@@ -4151,7 +4156,7 @@ const THROWN_CHARGES=['hurl','javelin','scythethrow'];
 function thrownWeaponHidden(p,w){ return !!(p&&w&&p.throwHideT>0&&p.throwHideArche===w.arche&&THROWN_CHARGES.includes(w.chg)); }
 function beginThrownWeapon(p,w,returns){
   p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
-  p.throwHideT=returns?3.5:0.36; return p.throwToken;
+  p.throwHideT=returns?2.25:0.36; return p.throwToken;
 }
 // dispatch a charge release to the weapon's charged behavior (amt 0..1)
 function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
@@ -4196,11 +4201,11 @@ function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(760,null)
     size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[],desig:true});
   SFX.magic(w.el); G.shake=Math.min(G.shake+4+amt*5,13); p.atkTimer=0.2; burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,pr.color||'#c9a6ff',9); }
 function hurlAxe(p,w,amt){ const t=nearestEnemy(700,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
-  const sp=520, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  const sp=660, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
   const dmg=w.dmg*effPower(p)*(1.8+amt*2.2)*offclassMul(p)*classStyleMul(p);
   const throwToken=beginThrownWeapon(p,w,true);
   G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
-    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:3.2,hitSet:[],axe:true,ox,oz,range:170+amt*230,returning:false,spin:0,throwToken});
+    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:2.15,hitSet:[],axe:true,ox,oz,range:120+amt*155,returning:false,spin:0,throwToken});
   SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
 function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+amt*1.8)*offclassMul(p)*classStyleMul(p);
   skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
@@ -4655,10 +4660,11 @@ function killEnemy(e,weaponKill){
     if(e.type==='grunt') playFx('gruntdie');
     else if(e.type==='revenant') playFx('mobvoice1');
     else if(e.type==='charger') playFx('mobvoice2');
+    else if(e.deathpuff){ SFX.magic('poison'); noise({dur:.32,f0:900,f1:180,type:'lowpass',vol:.045,a:.01}); }
     else if(e.look==='bones'||e.type==='bones'){ SFX.enemyDie(); playFx('bonesdie'); }
     else if(e.type==='frostling'){ SFX.enemyDie(); playFx('frostdie'); }
     else SFX.enemyDie();
-    { const w=G.p.weapon; if(w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
+    { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
     checkAchievements();
     // FEWER, MEANINGFUL drops: elites always pay out; ordinary kills only rarely — so a drop feels earned and the rarity juice lands
     if(e.elite || Math.random()<0.16) rollDrop(e);
@@ -4770,14 +4776,19 @@ function hurtPlayer(dmg,sx,sz){
    allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
    one pooled DOM node. */
 function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
+  if(G.petLost){ G.pet=null; return; }                         // a fallen companion returns only when a new hub session resets G
   const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.arch==='attacker'&&P.style==='melee');
-  G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:grounded?0:15,bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28}; }
+  const mh=petMaxHp(id); G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:p.y+(grounded?0:15),bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28,hp:mh,maxHp:mh,hurtT:0}; }
+function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead) return false; pet.hp=Math.max(0,pet.hp-Math.max(1,Math.round(dmg))); pet.hurtT=.28;
+  addText(pet.x,pet.y+34,pet.z,'-'+Math.round(dmg),'#ff8a82',true); burst(pet.x,pet.y+12,pet.z,'#ff6b62',6);
+  if(pet.hp<=0){ pet.dead=true; G.petLost=true; toast(petDisplayName(pet.id)+' has fallen — protect them until you return to the hub.'); SFX.enemyDie(); G.pet=null; }
+  return true; }
 function petUpdate(dt){
   const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
-  pet.t+=dt;
+  pet.t+=dt; pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);
   const grounded=(P.arch==='attacker'&&P.style==='melee');
   pet.bob=grounded?Math.abs(Math.sin(pet.t*7))*2 : Math.sin(pet.t*3)*3;       // grounded: a little gait hop; ethereal: gentle hover bob
-  const floatY=grounded?0:15, playing=(mode==='play'&&!isHitless());
+  const floatY=p.y+(grounded?0:15), playing=(mode==='play'&&!isHitless());
   // ---- pick a target: break off to engage a nearby enemy on its own, else follow the hero LOOSELY ----
   let tx=pet.x, tz=pet.z, engaging=false, tgt=null;
   if(playing && P.arch==='attacker'){
@@ -4792,11 +4803,11 @@ function petUpdate(dt){
   if(!engaging){                                                             // idle: only reposition when it has DRIFTED past the radius (breaks the linear tether; gives roaming wiggle room)
     pet.wanderA=(pet.wanderA||0)+dt*0.7; const dh=dXZ(pet.x,pet.z,p.x,p.z);
     if(dh>64){ tx=p.x-Math.sin(p.yaw)*40+Math.cos(pet.wanderA)*26; tz=p.z-Math.cos(p.yaw)*40+Math.sin(pet.wanderA)*26; }
-    if(dh>560){ pet.x=p.x-Math.sin(p.yaw)*50; pet.z=p.z-Math.cos(p.yaw)*50; } // hard catch-up if left way behind (e.g. after an area warp)
+    if(dh>560 || Math.abs(pet.y-floatY)>105){ pet.x=p.x-Math.sin(p.yaw)*50; pet.z=p.z-Math.cos(p.yaw)*50; pet.y=floatY; } // vertical/horizontal catch-up after climbs and warps
   }
   const spd=engaging?300:170, dd=Math.hypot(tx-pet.x,tz-pet.z);
   if(dd>2){ const step=Math.min(dd,spd*dt); pet.x+=(tx-pet.x)/dd*step; pet.z+=(tz-pet.z)/dd*step; }
-  pet.y+=(floatY-pet.y)*Math.min(1,dt*4);
+  const targetY=(engaging&&tgt)?Math.max(floatY,tgt.y+(grounded?0:15)):floatY; pet.y+=(targetY-pet.y)*Math.min(1,dt*(grounded?8:5));
   const fy=(engaging&&tgt)?Math.atan2(tgt.x-pet.x,tgt.z-pet.z):(dd>6?Math.atan2(tx-pet.x,tz-pet.z):pet.yaw);
   let dyaw=fy-pet.yaw; while(dyaw>Math.PI)dyaw-=6.283; while(dyaw<-Math.PI)dyaw+=6.283; pet.yaw+=dyaw*Math.min(1,dt*8);
   if(!playing) return;
@@ -5161,8 +5172,9 @@ function update(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && e.dmg>0 && dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p))
-      hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
+    if(!e.dead && e.dmg>0){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+      if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
+      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z); }
   }
   // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
   for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
@@ -5184,7 +5196,9 @@ function update(dt){
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
     } else {
-      if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
+      const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
+      if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
+      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
     }
     if(pr.y<-4 && !pr.axe) pr.life=0;
     // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
@@ -5893,7 +5907,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
     </div>
     <div class="navgrid titlecards">
       ${navCard('slotsBtn','icons/character-sheet.png','CHARACTERS','Choose or manage a save slot')}
-      ${navCard('skinBtn','icons/event-trophy.png','SKINS','Change your Warden’s appearance')}
+      ${navCard('skinBtn','icons/skins/skin-knight.png','SKINS','Change your Warden’s appearance')}
     </div>
     <button class="bigbtn ghost" id="optBtn">More &amp; Settings</button>
     <div class="tver">SKINS ${meta.unlockedSkins.filter(s=>s!=='god').length}/${Object.keys(SKINS).length-1} · v${VERSION3D}</div>
@@ -6130,7 +6144,7 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
    THE MIRROR — stand before it and orbit 360° around your character (drag to rotate),
    with EVERY stat listed and your full equipped loadout (each piece's TYPE + bonus).
    ============================================================ */
-let mirror=null, mirrorView='overview';
+let mirror=null, mirrorView='overview', mirrorUiHidden=false;
 function openMirror(back){
   initAudio();
   if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
@@ -6177,6 +6191,7 @@ function renderMirror(t){
   drawHero3(p,t,false);              // the real you, drawn last — always visible
 }
 function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide');
+  const mt=document.getElementById('mirrorToggle'); if(mt) mt.style.display='none';
   const esc=document.getElementById('mirrorEsc'); if(esc) esc.style.display='none';
   if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
 function mirrorStatsHTML(){
@@ -6219,7 +6234,7 @@ function buildMirrorPanel(){
     <div id="msLiveStats" class="msbody${mirrorView==='stats'?'':' hide'}">${mirrorStatsHTML()}</div>
     <div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: On</button><button class="wsbig ghost" id="msBack">Back</button></div>
     <div class="mshint">drag the character to look around</div>`;
-  pn.classList.remove('hide');
+  pn.classList.toggle('hide',mirrorUiHidden);
   // Phase 19: an always-visible, CLICKABLE way out, top-left
   let esc=document.getElementById('mirrorEsc');
   if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
@@ -6227,6 +6242,9 @@ function buildMirrorPanel(){
     document.body.appendChild(esc); }
   esc.innerHTML='<span style="background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900">ESC</span>Leave the mirror';
   esc.style.display='block'; esc.onclick=()=>exitMirror();
+  let mt=document.getElementById('mirrorToggle'); if(!mt){ mt=document.createElement('button'); mt.id='mirrorToggle'; document.body.appendChild(mt); }
+  const syncToggle=()=>{ mt.innerHTML=`<i></i>${mirrorUiHidden?'Show Character Menu':'Hide Character Menu'}`; pn.classList.toggle('hide',mirrorUiHidden); };
+  mt.style.display='flex'; syncToggle(); mt.onclick=()=>{ mirrorUiHidden=!mirrorUiHidden; SFX.pickup(); syncToggle(); };
   document.getElementById('msSpin').onclick=()=>{ mirror.spin=!mirror.spin; document.getElementById('msSpin').textContent='🔄 Spin: '+(mirror.spin?'On':'Off'); };
   document.getElementById('msBack').onclick=()=>exitMirror();
   const ni=document.getElementById('msName');
@@ -6429,7 +6447,7 @@ function openHubMenu(){
       ${navCard('shopBtn','icons/action_buy.png','Shop','Spend gold')}
       ${navCard('bagBtn','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
       ${navCard('forgeBtn','icons/action_forge_fuse.png','The Forge','Fuse gear')}
-      ${navCard('wardBtn','icons/class-mage.png','Wardrobe','Skins and cosmetics')}
+      ${navCard('wardBtn','icons/skins/skin-knight.png','Wardrobe','Skins and cosmetics')}
       ${navCard('wstudioHub','icons/damage-physical.png','Weapon Studio','Weapons and designs')}
     </div>
     <button class="bigbtn" id="riseBtn">Rise</button>
@@ -6629,9 +6647,9 @@ function openQuestBoard(back){
 const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
 function petIcon(id){ return 'icons/pets/pet-'+id+'.png'; }
 function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'';
-  if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
-  if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
-  return `${PET_ARCH_TAG.utility} · pulls loot within ${P.pull}${tag}`; }
+  if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petMaxHp(id)} HP · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
+  if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · ${petMaxHp(id)} HP · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
+  return `${PET_ARCH_TAG.utility} · ${petMaxHp(id)} HP · pulls loot within ${P.pull}${tag}`; }
 function petEquip(id){ if(!meta.petOwned.includes(id)) return; meta.petActive=id; if(G) G.pet=null; persist(); SFX.pickup(); }
 function petUnequip(){ meta.petActive=null; if(G) G.pet=null; persist(); SFX.pickup(); }
 function petBuy(id){ const P=PETS[id]; if(!P||meta.petOwned.includes(id)) return; if(meta.gold<P.price){ toast('Not enough gold'); SFX.hurt(); return; }
@@ -6805,8 +6823,8 @@ function openSkins(back){
   mode='menu';
   const ids=Object.keys(SKINS).filter(id=> id!=='god' || meta.unlockedSkins.includes('god'));
   const tiles=ids.map(id=>{ const s=SKINS[id], unlocked=meta.unlockedSkins.includes(id), sel=meta.selectedSkin===id;
-    return `<div class="skintile ${sel?'sel':''} ${unlocked?'':'lock'} ${id==='god'?'godt':''}" data-id="${id}">
-      <img class="av" src="${skinAv(id)}" alt="">
+    return `<div class="skintile ${sel?'sel':''} ${unlocked?'':'lock'} ${id==='god'?'godt':''}" style="--skin:${s.trim}" data-id="${id}">
+      <img class="av" src="icons/skins/skin-${id}.png" alt="${s.name} skin icon">
       <div class="sn" style="color:${unlocked?(id==='god'?'#ffd24a':s.trim):'var(--muted)'}">${unlocked?s.name:'🔒'}</div>
       <div class="lk">${unlocked?((SKINPASS[id]?SKINPASS[id].label:'No passive')+(sel?' · ✓':'')):skinUnlockHint(id)}</div></div>`; }).join('');
   showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Each skin has a small passive — Crimson is the challenge skin.</p>
@@ -7003,7 +7021,7 @@ function openPause(){
       ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
       ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
       ${navCard('classesBtn',`icons/class-${meta.classId}.png`,'Classes & Skills','Ranks, paths, and skills')}
-      ${navCard('skinBtn','icons/class-mage.png','Skins','Change your look')}
+      ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
       ${navCard('classBtn',`icons/class-${meta.classId}.png`,curClass().disp,`Rank ${classState(meta.classId).rank}`,G&&G.trial?'lock':'',G&&G.trial?'disabled':'')}
     </div>
@@ -8496,8 +8514,8 @@ function updateHubTags(){
 function drawHpBars(){
   hpCanvas.width=VW; hpCanvas.height=VH;
   const c=hpCanvas.getContext('2d');
-  for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.5)'; c.fillRect(b.x-16,b.y,32,4);
-    c.fillStyle='#e8453d'; c.fillRect(b.x-16,b.y,32*b.f,4); }
+  for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.62)'; c.fillRect(b.x-17,b.y,34,5);
+    c.fillStyle=b.pet?'#55d78b':'#e8453d'; c.fillRect(b.x-16,b.y+1,32*b.f,3); }
   // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
   c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
   for(const sp of statPips){ const n=sp.keys.length, pw=19, tot=n*pw, x0=sp.x-tot/2, y=sp.y-9;
@@ -8546,7 +8564,10 @@ function render(t){
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
   if(G){ const sc=SKYSUN[s.theme]||SKYSUN._def;
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
-    PostFX.sky(top,bot,sc.p,sc.c); }
+    // The sun lives in world-space: turning the camera moves it across/off the screen,
+    // while a very slow azimuth gives each map a restrained day-cycle instead of a HUD-like glow that follows your view.
+    const worldSun=(G.time||t)*.006, rel=worldSun-(G.camYaw==null?0:G.camYaw), sun=[.5+Math.sin(rel)*.72,sc.p[1]+Math.cos(rel)*.055];
+    PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
@@ -8664,7 +8685,7 @@ function render(t){
       popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
-  if(G.pet) drawPet3(G.pet,t);
+  if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
   updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
   //  Its job is done properly now by the translucent LATE pass: anything between
@@ -8935,7 +8956,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
-  PETS, PETIDS, spawnPet, petUpdate, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
+  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,

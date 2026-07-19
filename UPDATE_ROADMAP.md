@@ -13,6 +13,11 @@
 - [x] Confirmed all menu art loads, primary navigation remains prominent, compact utility controls remain usable, existing saves load, and pause still freezes simulation while suspending game audio.
 - [x] Fixed the objective mobile difficulty-layout defect by centering the odd third card; desktop now uses a balanced three-column difficulty row.
 
+## [Codex | 2026-07-18] Zone-specific Warden’s Shade variants (SHIPPED v1.124.0)
+
+- [x] Reworked the shared Shade renderer into eight approved zone identities while preserving one coherent silhouette: Outskirts lantern, Hollow chained talisman, Keep standard, Frost rime crown, Ember molten cracks, Abyss void halo, Palace sun halo, and Castle crescent/wing spars.
+- [x] Variants are presentation-only and derive from the active zone; Shade AI, collision, dialogue, quest state, saves, and trial behavior are unchanged.
+
 Everything below is organized in a sensible **build order** (phases). Each phase is a
 self-contained work session. Work top to bottom.
 

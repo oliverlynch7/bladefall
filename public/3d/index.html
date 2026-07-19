@@ -537,7 +537,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.123.0';
+const VERSION3D='1.124.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7202,19 +7202,50 @@ function hubNpcModel(n,t){
     bx(0,41,0, 10,11,10,'#c9a380'); bx(0,48,0, 12,4,12, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.35);
   }
 }
-// the Warden's Shade base model, drawn at the origin of the current frame (hovers, no legs)
-function drawShadeModel(t){
+// the Warden's Shade: one shared silhouette with eight zone-specific palettes + relics.
+// Draw-only identity; no AI, collision, dialogue, trial, or persistence state changes.
+function drawShadeModel(t,zoneId){
+  const id=zoneId||'outskirts', V={
+    outskirts:{cloth:'#322d2a',armor:'#594f46',edge:'#d49a45',glow:'#ffbd58'},
+    hollow:{cloth:'#26333b',armor:'#445968',edge:'#62b9c8',glow:'#8feaff'},
+    keep:{cloth:'#382a30',armor:'#55474d',edge:'#9e4754',glow:'#c47bff'},
+    frost:{cloth:'#293747',armor:'#536a82',edge:'#a8d8ff',glow:'#d7f4ff'},
+    ember:{cloth:'#2d2020',armor:'#51332e',edge:'#d4512e',glow:'#ff843d'},
+    abyss:{cloth:'#241c35',armor:'#443365',edge:'#8b4fce',glow:'#c47bff'},
+    palace:{cloth:'#e0ddd1',armor:'#b9b4a5',edge:'#d6a94e',glow:'#fff1a8'},
+    castle:{cloth:'#311d2c',armor:'#4d3049',edge:'#8b3f7a',glow:'#d778ff'}
+  }[id]||{cloth:'#3a2a55',armor:'#4a3a66',edge:'#8a6ac0',glow:'#c47bff'};
   const fl=0.42+0.16*Math.sin(t*2.1), fy=8+Math.sin(t*1.5)*3.5;
-  bx(0,1,0, 16,2,16,'#b06bff','#b06bff',0.18);                                                  // spectral pool
-  for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(Math.cos(a)*10, fy+2+((t*6+i*5)%16), Math.sin(a)*10, 2.5,2.5,2.5,'#8a4fd0','#c47bff',0.4*fl); }  // dissolving cloak fragments
+  bx(0,1,0, 16,2,16,V.glow,V.glow,0.18);                                                  // spectral pool
+  for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(Math.cos(a)*10, fy+2+((t*6+i*5)%16), Math.sin(a)*10, 2.5,2.5,2.5,V.edge,V.glow,0.4*fl); }  // dissolving cloak fragments
   pushM(); mv(0,fy,0); rotY(Math.sin(t*0.6)*0.28);
-    bx(0,10,0, 12,22,7,'#3a2a55','#7a4fc0',fl*0.7);                                              // tattered gown
-    bx(0,7,4, 11,14,2,'#2a1f42','#6a3fb0',fl*0.55);                                              // ragged front hem
-    bx(0,26,0, 14,10,10,'#4a3a66','#8a6ac0',fl*0.85);                                            // spectral cuirass
-    bx(-8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); bx(8,29,0, 5,6,9,'#5a4a7a','#9a7ad0',fl*0.8); // pauldrons
-    bx(0,39,0, 9,10,9,'#4a3a66','#8a6ac0',fl*0.9); bx(0,45,0, 10,4,10,'#3a2a55','#6a4a9a',fl*0.85); // helmed head + crest
-    bx(0,39,4.6, 7,2,1.5,'#d0a0ff','#e0b8ff',0.85+0.1*Math.sin(t*3));                            // glowing visor slit
-    bx(6,6,7, 3.5,44,3,'#cdd4e0','#eef2ff',0.6); bx(6,29,7, 12,3,3,'#8b93a8','#c9d2e0',0.7); bx(6,34,7, 4,7,4,'#6a5a8a','#b090e0',0.7);  // silver sword, point-down
+    bx(0,10,0, 12,22,7,V.cloth,V.edge,fl*0.7);                                              // tattered gown
+    bx(0,7,4, 11,14,2,tint(V.cloth,'#000',0.22),V.edge,fl*0.55);                            // ragged front hem
+    bx(0,26,0, 14,10,10,V.armor,V.edge,fl*0.85);                                            // spectral cuirass
+    bx(-8,29,0, 5,6,9,tint(V.armor,'#fff',0.10),V.edge,fl*0.8); bx(8,29,0, 5,6,9,tint(V.armor,'#fff',0.10),V.edge,fl*0.8); // pauldrons
+    bx(0,39,0, 9,10,9,V.armor,V.edge,fl*0.9); bx(0,45,0, 10,4,10,V.cloth,V.edge,fl*0.85); // helmed head + crest
+    bx(0,39,4.6, 7,2,1.5,V.glow,'#ffffff',0.85+0.1*Math.sin(t*3));                         // glowing visor slit
+    bx(6,6,7, 3.5,44,3,tint(V.edge,'#fff',0.48),V.glow,0.6); bx(6,29,7, 12,3,3,V.edge,V.glow,0.7); bx(6,34,7, 4,7,4,V.armor,V.glow,0.7);  // sword, point-down
+    if(id==='outskirts'){ // warm road lantern dangling from a crook
+      bx(-11,31,0, 2,26,2,'#4a3926',V.glow,0.25); bx(-8,18,0, 8,9,8,'#4a3018',V.glow,0.75+0.2*Math.sin(t*5));
+    } else if(id==='hollow'){ // chained canyon talisman
+      for(let i=0;i<4;i++) bx(-11+i*2,34-i*5,1, 2,6,2,'#50626b',V.glow,0.35); bx(-5,13,1, 7,10,3,'#294751',V.glow,0.7);
+    } else if(id==='keep'){ // the fallen keep's torn standard
+      bx(13,34,-4, 2.5,58,2.5,'#4a382e'); bx(7,43,-4, 12,22,2,'#5a2028',V.glow,0.22); bx(3,32,-4, 5,7,2,'#5a2028');
+    } else if(id==='frost'){ // rime crown + drifting ice splinters
+      for(let i=-2;i<=2;i++) bx(i*4,49+Math.abs(i)*2,0, 3,10-Math.abs(i),3,'#b9dcf4',V.glow,0.65);
+      for(let i=0;i<3;i++) bx(-13+i*13,12+((t*8+i*11)%30),-2, 3,7,3,'#9fd7ff',V.glow,0.45);
+    } else if(id==='ember'){ // molten cracks crawling across armor and blade
+      bx(0,28,5.5, 3,10,1,V.glow,V.glow,0.8); bx(-5,24,5.5, 4,2,1,V.glow,V.glow,0.7); bx(6,15,8.7, 2,22,1,V.glow,V.glow,0.75);
+    } else if(id==='abyss'){ // broken void halo
+      for(let i=0;i<9;i++){ const a=i/11*6.283+t*0.08; bx(Math.cos(a)*17,38+Math.sin(a)*17,-5, 3,6,3,V.edge,V.glow,0.58); }
+    } else if(id==='palace'){ // Sunspire halo and hanging gold chain
+      for(let i=0;i<12;i++){ const a=i/12*6.283; bx(Math.cos(a)*18,40+Math.sin(a)*18,-5, 3,8,3,V.edge,V.glow,0.62); }
+      for(let i=0;i<5;i++) bx(13,35-i*5,0, 2,4,2,V.edge,V.glow,0.38);
+    } else if(id==='castle'){ // Duskmoor crescent and ragged wing spars
+      for(let i=0;i<7;i++){ const a=-1.15+i*0.35; bx(15+Math.cos(a)*13,42+Math.sin(a)*13,-5, 3,7,3,V.edge,V.glow,0.55); }
+      for(let i=0;i<3;i++){ pushM(); mv(-12-i*4,34-i*5,-3); rotZ(-0.55-i*0.12); bx(0,0,0, 3,22+i*5,3,V.cloth,V.edge,0.42); popM(); }
+    }
   popM();
 }
 function drawWaystation(t){
@@ -8055,7 +8086,7 @@ function render(t){
   if(G.hub) drawWaystation(t);
   if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
     const n=G.npc;
-    pushM(); mv(n.x,0,n.z); drawShadeModel(t); popM();
+    pushM(); mv(n.x,0,n.z); drawShadeModel(t,curZone().id); popM();
     if(!n.talked) bx(n.x,66,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
   if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
   if(G.meteors) for(const mt of G.meteors){                // incoming-meteor telegraph on the ground
@@ -8355,7 +8386,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
-  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
+  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,

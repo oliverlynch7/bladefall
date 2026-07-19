@@ -891,3 +891,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rewrote the opening setup in direct language: the Abyss King's corruption, the danger to humanity, Ian as the last fallen Bladeborn and humanity's former final hope, and the player's goal are now explicit.
 - Generated and integrated twelve transparent illustrated skin emblems, used Knight as the global change-your-look icon, expanded the skin gallery, and refined the HUD's forged frame while preserving its side-by-side character/class progression and mana system.
 - Verified transparent assets, skin layout, trial-gear banking, vertical pet catch-up, pet defeat persistence and hub revival, Mirror toggle behavior, syntax, and muted desktop presentation at 1600x900.
+
+## [Codex | 2026-07-19] v1.166.0 - Achievement icon suite
+- Generated and integrated 11 unique transparent voxel achievement emblems: First Blood, Boss Hunter, Veteran, Untouchable, Arsenal, Archmage, Deadeye, Slayer, Kingslayer, World's End, and Ascended.
+- Rebuilt achievement cards around 76px artwork with locked grayscale treatment, compact lock badges, clearer typography, and responsive two-column presentation.
+- QA: muted real Chromium at desktop viewport; verified 0/11 and 11/11 states, all image loads, menu scrolling, and zero console errors.
+

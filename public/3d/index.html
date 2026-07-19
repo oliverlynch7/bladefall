@@ -509,7 +509,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.120.0';
+const VERSION3D='1.121.0-batch';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1774,27 +1774,34 @@ function mLookAt(eye,ctr,up){
 }
 
 /* ---- shader ---- */
+// Instanced renderer: geometry is a shared unit cube; every box() is one INSTANCE carrying its own
+// model matrix (rotation+translation), per-axis scale, colour+alpha, and emissive — so thousands of
+// boxes flush in a handful of GPU draw calls instead of one call each. Detail is effectively free.
 const VS=`attribute vec3 aP; attribute vec3 aN;
-uniform mat4 uP,uV,uM; uniform mat3 uR;
-varying vec3 vN; varying float vD; varying vec3 vW;
-void main(){ vec4 w=uM*vec4(aP,1.0); vW=w.xyz; vec4 e=uV*w; vD=-e.z; vN=uR*aN; gl_Position=uP*e; }`;
+attribute vec4 iM0; attribute vec4 iM1; attribute vec4 iM2; attribute vec4 iM3;   // instance model mat4 (rot+trans, no scale)
+attribute vec3 iS; attribute vec4 iCA; attribute vec3 iE;                          // scale, colour+alpha, emissive
+uniform mat4 uP,uV;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE;
+void main(){ mat4 M=mat4(iM0,iM1,iM2,iM3);
+  vec4 w=M*vec4(aP*iS,1.0); vW=w.xyz; vec4 e=uV*w; vD=-e.z;
+  vN=mat3(M)*aN;                                       // M has no scale, so its 3x3 is pure rotation → correct normals
+  vCA=iCA; vE=iE; gl_Position=uP*e; }`;
 const FS=`precision mediump float;
-varying vec3 vN; varying float vD; varying vec3 vW;
-uniform vec3 uC; uniform vec3 uE; uniform float uA;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE;
 uniform vec3 uFog; uniform vec2 uFogNF; uniform vec3 uL;
 uniform float uAmb; uniform float uDif; uniform vec3 uKey;      // ambient level, directional strength, key tint
 uniform vec3 uPL0,uPL1,uPL2,uPL3; uniform vec3 uPC0,uPC1,uPC2,uPC3; // point lights: player-carried + 3 nearest torches
 void main(){
-  vec3 n=normalize(vN);
-  vec3 lit=uC*(uAmb+uDif*max(dot(n,uL),0.0))*uKey;
+  vec3 n=normalize(vN); vec3 C=vCA.rgb;
+  vec3 lit=C*(uAmb+uDif*max(dot(n,uL),0.0))*uKey;
   vec3 L; float dd;
-  L=uPL0-vW; dd=dot(L,L); lit+=uC*uPC0*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.0000135); // player light: broad, keeps play area readable
-  L=uPL1-vW; dd=dot(L,L); lit+=uC*uPC1*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
-  L=uPL2-vW; dd=dot(L,L); lit+=uC*uPC2*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
-  L=uPL3-vW; dd=dot(L,L); lit+=uC*uPC3*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
-  vec3 col=lit+uE;
+  L=uPL0-vW; dd=dot(L,L); lit+=C*uPC0*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.0000135); // player light: broad, keeps play area readable
+  L=uPL1-vW; dd=dot(L,L); lit+=C*uPC1*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL2-vW; dd=dot(L,L); lit+=C*uPC2*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL3-vW; dd=dot(L,L); lit+=C*uPC3*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  vec3 col=lit+vE;
   float f=clamp((vD-uFogNF.x)/(uFogNF.y-uFogNF.x),0.0,1.0);
-  gl_FragColor=vec4(mix(col,uFog,f),uA);
+  gl_FragColor=vec4(mix(col,uFog,f),vCA.a);
 }`;
 function compile(src,type){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error('shader: '+gl.getShaderInfoLog(s)); return s; }
@@ -1802,7 +1809,7 @@ const prog=gl.createProgram();
 gl.attachShader(prog,compile(VS,gl.VERTEX_SHADER)); gl.attachShader(prog,compile(FS,gl.FRAGMENT_SHADER));
 gl.linkProgram(prog); if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error('link: '+gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U={}; ['uP','uV','uM','uR','uC','uE','uA','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','uPL2','uPL3','uPC0','uPC1','uPC2','uPC3'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+const U={}; ['uP','uV','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','uPL2','uPL3','uPC0','uPC1','uPC2','uPC3'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
 // unit cube (centered, size 1) with per-face normals
 (function(){
   const P=[],N=[];
@@ -1820,6 +1827,15 @@ const U={}; ['uP','uV','uM','uR','uC','uE','uA','uFog','uFogNF','uL','uAmb','uDi
   const nb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,nb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
   const aN=gl.getAttribLocation(prog,'aN'); gl.enableVertexAttribArray(aN); gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);
 })();
+// ---- instance buffer: one record per box = mat4(16) + scale(3) + colour&alpha(4) + emissive(3) = 26 floats ----
+const INST=gl.getExtension('ANGLE_instanced_arrays');
+if(!INST) throw new Error('This game needs the ANGLE_instanced_arrays WebGL extension.');
+const ISTRIDE=26;
+let instCap=8192, instData=new Float32Array(instCap*ISTRIDE), instCount=0;
+const instVBO=gl.createBuffer();
+(function setupInstAttribs(){ gl.bindBuffer(gl.ARRAY_BUFFER,instVBO); const F=4, S=ISTRIDE*F;
+  const set=(name,size,off)=>{ const l=gl.getAttribLocation(prog,name); if(l<0) return; gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,size,gl.FLOAT,false,S,off*F); INST.vertexAttribDivisorANGLE(l,1); };
+  set('iM0',4,0); set('iM1',4,4); set('iM2',4,8); set('iM3',4,12); set('iS',3,16); set('iCA',4,19); set('iE',3,23); })();
 gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
 setFlatLights(); // bright neutral default (menus / previews / title); gameplay swaps to dark-fantasy lighting each frame
 
@@ -1843,17 +1859,37 @@ function rotZ(a){ CURM=mMul(CURM,mRZ(a)); }
 function rot3(m){ // upper 3x3 (rotation-ish) for normals; scale is applied after, so CURM stays rotation+translation
   return [m[0],m[1],m[2], m[4],m[5],m[6], m[8],m[9],m[10]]; }
 let SIL=null, SILA=0.9;   // occlusion-silhouette pass: when set, every box draws as a flat unlit shape in this colour
+// accumulate one instance record (CURM is rotation+translation only; scale rides separately)
+function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
+  if(instCount>=instCap){ instCap*=2; const n=new Float32Array(instCap*ISTRIDE); n.set(instData); instData=n; }
+  let o=instCount*ISTRIDE, m=CURM;
+  instData[o]=m[0];instData[o+1]=m[1];instData[o+2]=m[2];instData[o+3]=m[3];
+  instData[o+4]=m[4];instData[o+5]=m[5];instData[o+6]=m[6];instData[o+7]=m[7];
+  instData[o+8]=m[8];instData[o+9]=m[9];instData[o+10]=m[10];instData[o+11]=m[11];
+  instData[o+12]=m[12];instData[o+13]=m[13];instData[o+14]=m[14];instData[o+15]=m[15];
+  instData[o+16]=sx;instData[o+17]=sy;instData[o+18]=sz;
+  instData[o+19]=cr;instData[o+20]=cg;instData[o+21]=cb;instData[o+22]=ca;
+  instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
+  instCount++;
+}
+function flushBatch(){ if(instCount===0) return;
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
+  INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,instCount);
+  instCount=0;
+}
 function box(sx,sy,sz,color,emiss,alpha){
-  const model=mMul(CURM,mS(sx,sy,sz));
-  gl.uniformMatrix4fv(U.uM,false,new Float32Array(model));
-  gl.uniformMatrix3fv(U.uR,false,new Float32Array(rot3(CURM)));
-  if(SIL){ const s2=col3(SIL); gl.uniform3f(U.uC,0,0,0); gl.uniform3f(U.uE,s2[0],s2[1],s2[2]); gl.uniform1f(U.uA,SILA); gl.drawArrays(gl.TRIANGLES,0,36); return; }
-  const c=col3(color); gl.uniform3f(U.uC,c[0],c[1],c[2]);
-  const e=emiss?col3(emiss):[0,0,0]; gl.uniform3f(U.uE,e[0]*(typeof emiss==='string'?0.85:0),e[1]*0.85,e[2]*0.85);
-  gl.uniform1f(U.uA,alpha==null?1:alpha);
-  gl.drawArrays(gl.TRIANGLES,0,36);
+  if(SIL){ const s2=col3(SIL); pushInst(sx,sy,sz, 0,0,0,SILA, s2[0],s2[1],s2[2]); return; }
+  const c=col3(color);
+  let er=0,eg=0,eb=0; if(typeof emiss==='string'){ const e=col3(emiss); er=e[0]*0.85; eg=e[1]*0.85; eb=e[2]*0.85; }
+  pushInst(sx,sy,sz, c[0],c[1],c[2], (alpha==null?1:alpha), er,eg,eb);
 }
 function bx(x,y,z,sx,sy,sz,color,emiss,alpha){ pushM(); mv(x,y,z); box(sx,sy,sz,color,emiss,alpha); popM(); }
+// preserve exact draw order/transparency: any blend/depth/clear state change flushes the pending batch first
+(function(){ const _bf=gl.blendFunc.bind(gl), _dm=gl.depthMask.bind(gl), _cl=gl.clear.bind(gl);
+  gl.blendFunc=(a,b)=>{ flushBatch(); _bf(a,b); };
+  gl.depthMask=(b)=>{ flushBatch(); _dm(b); };
+  gl.clear=(m)=>{ flushBatch(); _cl(m); }; })();
 /* ---- lighting rigs (dark-fantasy in gameplay, bright-neutral for menus/previews) ---- */
 function setFlatLights(){ // menus, item/skin previews, title: even, readable
   gl.uniform3f(U.uL,0.45,0.78,0.42); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.46); gl.uniform3f(U.uKey,1,1,1);
@@ -8215,6 +8251,7 @@ function frame(ts){
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
   acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
   render((G?G.time:ts/1000));
+  flushBatch();                       // draw whatever boxes are still pending at frame end
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

@@ -912,3 +912,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Reference principle: AQW-style cheap repeatable attacks, moderate control/sustain, premium major defenses and finishers, translated to Bladefall's 100-mana pool and regeneration model.
 - QA: muted real Chromium; verified full cost matrix, Ranger tree labels, an actual Volley cast consuming exactly 11 mana and starting its 5s cooldown, and zero console errors.
 
+
+## [Codex | 2026-07-19] v1.170.0 - Waystation label head clearance
+- Raised every nearby Waystation NPC/station label above its visible head or prop silhouette instead of projecting from a low generic origin.
+- Added prop-aware height anchors for boards, chests, mirrors, sparring posts, the Abyss monument, and the Beastkeeper; the Smith label now follows the Smith's actual offset position beside the anvil.
+- Added extra screen-space clearance so labels do not visually cover faces, tools, or workstation art.
+- QA: muted real Chromium at the Smith/Exchange cluster; verified label anchors and zero console errors.
+

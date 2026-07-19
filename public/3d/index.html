@@ -650,7 +650,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.169.0';
+const VERSION3D='1.170.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8528,6 +8528,13 @@ hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;
 document.body.appendChild(hpCanvas);
 /* Hub nameplates: nearby projected pills over keepers/interactables, hidden across the plaza. */
 const HUB_TAG_REVEAL=230, HUB_TAG_NEAR=72;
+const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,abyss:122,beast:108};
+function hubTagAnchor(n){
+  // Station labels belong above the visible character/prop silhouette—not at its world origin.
+  // The Smith stands left of his anvil, so his label follows his actual head as well.
+  if(n.prop==='anvil') return {x:n.x-30,y:HUB_TAG_HEIGHT.anvil,z:n.z+10};
+  return {x:n.x,y:HUB_TAG_HEIGHT[n.prop]||106,z:n.z};
+}
 function updateHubTags(){
   const box=document.getElementById('hubtags'); if(!box) return;
   if(!G||!G.hub||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
@@ -8538,10 +8545,10 @@ function updateHubTags(){
   G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
     const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
     if(dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
-    const sp=project(n.x,(n.prop?46:64),n.z);
+    const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
     if(!sp){ tg.style.display='none'; return; }
     tg.style.display='';
-    tg.style.left=(sp[0]/DPR)+'px'; tg.style.top=(sp[1]/DPR-6)+'px';
+    tg.style.left=(sp[0]/DPR)+'px'; tg.style.top=(sp[1]/DPR-14)+'px';
     tg.classList.toggle('near',dist<HUB_TAG_NEAR); });
 }
 function drawHpBars(){
@@ -9026,7 +9033,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
-  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, openWardrobe, exitMirror, get mirror(){ return mirror; }, applyCameraLook,

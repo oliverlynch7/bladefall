@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.185.0';
+const VERSION3D='1.186.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4555,19 +4555,31 @@ function nearestEnemy(maxDist,coneCos){
     bd=d; best=e; }
   return best;
 }
-// Auto-aim that PRIORITIZES THE DIRECTION YOU'RE LOOKING (camera in shoulder/fps, facing in overhead), not just
-// whoever is closest — so you don't side-shoot enemies you aren't facing. Ranged requires clear line of sight.
+const PLAYER_SIGHT_COS=Math.SQRT1_2; // 90° total view cone: 45° left/right of the player's gaze
+function playerAimYaw(p){ return (meta.camMode!=='far'&&G.camYaw!=null)?G.camYaw:p.yaw; }
+function targetInPlayerSight(p,e,maxDist){
+  if(!e||e.dead||!e.active) return false;
+  const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz); if(d>maxDist) return false;
+  const aim=playerAimYaw(p),dot=d>1?(dx/d)*Math.sin(aim)+(dz/d)*Math.cos(aim):1;
+  return dot>=PLAYER_SIGHT_COS&&!losBlocked(p.x,p.z,e.x,e.z);
+}
+// Auto-aim follows the direction you are LOOKING (camera in shoulder/fps, facing in overhead).
+// Projectile targets must be inside the 90° sight cone and have an unobstructed line of sight.
 function aimTarget(p,w,maxDist){
   const ranged=w&&w.cls==='ranged';
-  const aim=(meta.camMode!=='far'&&G.camYaw!=null)?G.camYaw:p.yaw, ax=Math.sin(aim), az=Math.cos(aim);
+  const aim=playerAimYaw(p), ax=Math.sin(aim), az=Math.cos(aim);
   let best=null,bestScore=1e18;
   for(const e of G.enemies){ if(e.dead||!e.active) continue;
     const dx=e.x-p.x, dz=e.z-p.z, d=Math.hypot(dx,dz); if(d>maxDist) continue;
-    if(ranged && losBlocked(p.x,p.z,e.x,e.z)) continue;                                   // must actually SEE the target down the hall
-    const ang=d>1?Math.acos(Math.max(-1,Math.min(1,(dx/d)*ax+(dz/d)*az))):0;              // 0 = dead ahead
-    const score=ang*180 + d*0.35 + (ang>2.0?5000:0);                                      // angle dominates; enemies behind you are a last resort
+    const dot=d>1?(dx/d)*ax+(dz/d)*az:1;
+    if(ranged && !targetInPlayerSight(p,e,maxDist)) continue;
+    const ang=Math.acos(Math.max(-1,Math.min(1,dot))), score=ang*180+d*.35;               // angle dominates among visible targets
     if(score<bestScore){ bestScore=score; best=e; } }
   return best;
+}
+function projectileAimTarget(p,maxDist){
+  const aim=playerAimYaw(p); if(meta.camMode!=='far') p.yaw=aim;                         // no target: fire straight through the reticle
+  return aimTarget(p,{cls:'ranged'},maxDist);
 }
 // is there an enemy actually worth auto-attacking? (in weapon range + LOS + roughly ahead) — gates auto-attack so it never swings/shoots at nothing behind you
 function autoAtkTarget(p,w){
@@ -4583,7 +4595,7 @@ function playerAttack(cdMul){
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
   p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
-  const t=aimTarget(p,w, w.cls==='melee'?(w.range+40)*1.6:(w.proj.range*1.1));
+  const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
   // weapon-specific tap identities — own-class ONLY (off-class falls through to the plain base attack)
   if(w.cls==='ranged' && classFamilyOk(w)){
@@ -4644,7 +4656,7 @@ function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
   G._desig=false;
 }
 // the scythe's RANGED attack: fling it spinning, it pierces everything and curves back to you
-function throwScythe(p,w,amt){ const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+function throwScythe(p,w,amt){ const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=560, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
   const dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p);   // ranged-type damage
   const throwToken=beginThrownWeapon(p,w,true);
@@ -4660,14 +4672,14 @@ function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash(); { c
     if(along<-e.r||along>reach+e.r) continue; if(Math.abs(dx*fz-dz*fx)>24+e.r) continue;
     if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; hitEnemy(e,dmg,p,w.kb,ls,w.el); }
   burst(p.x+fx*reach*0.6,p.y+22,p.z+fz*reach*0.6,'#cfd6df',6); }
-function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=pr.speed||480, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
   const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);
   G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
     size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[],desig:true});
   SFX.magic(w.el); G.shake=Math.min(G.shake+4+amt*5,13); p.atkTimer=0.2; burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,pr.color||'#c9a6ff',9); }
-function hurlAxe(p,w,amt){ const t=nearestEnemy(700,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+function hurlAxe(p,w,amt){ const t=projectileAimTarget(p,700); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=660, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
   const dmg=w.dmg*effPower(p)*(1.8+amt*2.2)*offclassMul(p)*classStyleMul(p);
   const throwToken=beginThrownWeapon(p,w,true);
@@ -4679,7 +4691,7 @@ function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+a
   for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+amt*0.6); } }
   p.atkTimer=0.30; }
 // longbow charged POWER ARROW — a fat golden lance that pierces everything, scaling hard with charge
-function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(1200,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,1200); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=(pr.speed||680)+amt*280, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
   const dmg=w.dmg*effPower(p)*(1.8+amt*3.4)*offclassMul(p)*classStyleMul(p);
@@ -4698,7 +4710,7 @@ function spinCleave(p,w,amt){ const R=(w.range||84)+42+amt*44, dmg=w.dmg*effPowe
   p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); G.shake=Math.min(G.shake+6+amt*5,15);
   for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,w.kb,ls,w.el); }
   burst(p.x,p.y+22,p.z,'#ffd24a',18); }
-function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(900,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,900); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=(pr.speed||600)+amt*140, oy=p.y+30; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=90;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt + (pr.gravity||300)*0.5*tt; }
   const dmg=w.dmg*effPower(p)*(1.6+amt*2.4)*offclassMul(p)*classStyleMul(p);
@@ -4708,7 +4720,7 @@ function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=nearestEnemy(900,null); i
   SFX.shoot(); p.atkTimer=0.22; G.shake=Math.min(G.shake+4,11); }
 function fireCharged(p,w,amt){
   const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);   // 1.4x at a flick up to 4x at full charge
-  const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=580, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
   if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
   const col=elementColor(w.el)||'#c9a6ff', ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
@@ -4728,7 +4740,7 @@ function fireProjectile(p,w,target){
   for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
     G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
       gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
-      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,pcrit:crit>1}); }
+      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,seekTarget:seek?target:null,pcrit:crit>1}); }
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
 function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
@@ -4755,7 +4767,7 @@ const SKILL_FX={
     for(const e of G.enemies) e._chHit=false; p.invuln=Math.max(p.invuln,0.2); SFX.dodge(); },
   berserk(p,ok,am){ p.berserkT=6; SFX.growl(1); toast('🔺 BERSERK!'); G.shake=Math.min(G.shake+5,10);
     burst(p.x,p.y+30,p.z,'#ff5a3a',18); },
-  deadeye(p,ok,am){ const w=p.weapon, cm=classMods(), t=nearestEnemy(950,null);
+  deadeye(p,ok,am){ const w=p.weapon, cm=classMods(), t=projectileAimTarget(p,950);
     if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
     const sp=900, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
     if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
@@ -4766,7 +4778,7 @@ const SKILL_FX={
       kb:220,pierce:ok?(cm.sub==='sniper'?99:3):0,el:ok?(w&&w.el):null,life:1.2,hitSet:[]});
     p.atkTimer=0.18; SFX.shoot(); G.shake=Math.min(G.shake+4,9); },
   volley(p,ok,am){ const w=p.weapon, base=(w&&w.proj)?w.proj:{speed:660,size:4,color:'#9fe6c8',shape:'arrow'};
-    const t=nearestEnemy(760,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
     const oy=p.y+26, N=7, dmg=(w?w.dmg:8)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);
     for(let i=0;i<N;i++){ const a=p.yaw+(i-(N-1)/2)*0.16;
       G.projectiles.push({owner:'player',x:p.x+Math.sin(a)*16,y:oy,z:p.z+Math.cos(a)*16,vx:Math.sin(a)*base.speed,vy:0,vz:Math.cos(a)*base.speed,
@@ -4778,10 +4790,10 @@ const SKILL_FX={
     if(ok){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
-  mark(p,ok,am){ const t=nearestEnemy(800,null); if(!t){ toast('No target in range'); return 'refund'; }
+  mark(p,ok,am){ const t=projectileAimTarget(p,800); if(!t){ toast('No target in sight'); return 'refund'; }
     t.markT=8; addText(t.x,t.h+22,t.z,'MARKED','#ffd24a',true); SFX.pickup(); },
   bolt(p,ok,am){ const w=p.weapon, el=ok?(w&&w.el):null, col=elementColor(w&&w.el)||'#c9a6ff';
-    const t=nearestEnemy(820,null); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
     const sp=560, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
     if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
     // a SKILL bolt reads bigger + charged than the basic shot: a cast ring + a fat glowing rune-orb that trails
@@ -4849,11 +4861,11 @@ const SKILL_FX={
     if(!n){ toast('No one in the frost'); return 'refund'; } },
   barrier(p,ok,am){ p.shieldHp=Math.round(effMaxHp(p)*(ok?0.5:0.35)); p.shieldT=10; SFX.magic('arcane');
     addText(p.x,p.y+70,p.z,'BARRIER','#c9a6ff',true); },
-  meteor(p,ok,am){ const t=nearestEnemy(700,null); const tx=t?t.x:p.x+Math.sin(p.yaw)*260, tz=t?t.z:p.z+Math.cos(p.yaw)*260;
+  meteor(p,ok,am){ const t=projectileAimTarget(p,700); const tx=t?t.x:p.x+Math.sin(p.yaw)*260, tz=t?t.z:p.z+Math.cos(p.yaw)*260;
     (G.meteors=G.meteors||[]).push({x:tx,z:tz,t:1.3,r:150,dmg:(p.weapon?p.weapon.dmg:10)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),src:p});
     SFX.magic('fire'); toast('☄️ Meteor incoming'); },
   // ASSASSIN (Ranger path B) — mobility & burst
-  shadowstrike(p,ok,am){ const t=nearestEnemy(700,null); if(!t){ toast('No mark in reach'); return 'refund'; }
+  shadowstrike(p,ok,am){ const t=projectileAimTarget(p,700); if(!t){ toast('No target in sight'); return 'refund'; }
     const a=Math.atan2(t.x-p.x,t.z-p.z); p.x=t.x-Math.sin(a)*(t.r+18); p.z=t.z-Math.cos(a)*(t.r+18); p.yaw=a; p.invuln=Math.max(p.invuln,0.3);
     burst(p.x,p.y+16,p.z,'#6a2fa0',14); SFX.dodge();
     const w=p.weapon; hitEnemy(t,(w?w.dmg:8)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),p,180,effLifesteal(p),ok?(w&&w.el):null); },
@@ -4865,7 +4877,7 @@ const SKILL_FX={
       e.markExplode=(p.weapon?p.weapon.dmg:10)*effPower(p)*2*am; e.markT=8; n++; addText(e.x,e.y+e.h+14,e.z,'✖','#ff5a3a',true); }
     if(!n){ toast('No targets to mark'); return 'refund'; } SFX.growl(1); toast('✖ '+n+' marked — they burst on death'); },
   // EXECUTIONER (Reaper path B) — finish them
-  execute(p,ok,am){ const t=nearestEnemy(150,null); if(!t){ toast('Nothing in reach'); return 'refund'; }
+  execute(p,ok,am){ const t=projectileAimTarget(p,150); if(!t){ toast('Nothing in sight'); return 'refund'; }
     const w=p.weapon; if(t.hp<t.maxHp*0.25){ t.hp=0; killEnemy(t); addText(t.x,t.y+40,t.z,'EXECUTED','#ff2a1a',true); G.shake=Math.min(G.shake+8,14); }
     else hitEnemy(t,(w?w.dmg:10)*effPower(p)*4*am*(ok?1:OFFCLASS_MUL),p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);
     SFX.slash(); burst(t.x,t.y+t.h*0.5,t.z,'#ff3020',12); },
@@ -5320,7 +5332,7 @@ function petAttack(pet,P,e){
   const dmg=petAtkDmg(pet.id);
   if(P.style==='ranged'){ const oy=pet.y+pet.bob, sp=560, d=Math.max(1,dXZ(pet.x,pet.z,e.x,e.z));
     G.projectiles.push({owner:'player',x:pet.x,y:oy,z:pet.z,vx:(e.x-pet.x)/d*sp,vy:((e.y+e.h*0.5)-oy)/d*sp,vz:(e.z-pet.z)/d*sp,
-      gravity:0,size:6,color:P.accent,shape:'orb',glow:1,dmg,kb:60,pierce:0,el:null,life:1.6,hitSet:[],seek:true});   // homes so the chip reliably lands on moving foes
+      gravity:0,size:6,color:P.accent,shape:'orb',glow:1,dmg,kb:60,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true});   // pet shots home independently; player sight-cone rules do not constrain companions
     burst(pet.x,oy,pet.z,P.accent,4); }
   else { pet.x=e.x-Math.sin(pet.yaw)*22; pet.z=e.z-Math.cos(pet.yaw)*22;    // melee dart: hop in and strike
     hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},90,0,null); burst(e.x,e.y+e.h*0.4,e.z,P.accent,5); }
@@ -5678,8 +5690,11 @@ function update(dt){
   // projectiles
   for(const pr of G.projectiles){
     pr.life-=dt; if(pr.gravity) pr.vy-=pr.gravity*dt;
-    if(pr.seek && pr.owner==='player'){ let bt=null,bd=560; for(const e of G.enemies){ if(e.dead||!e.active) continue; const d=Math.hypot(e.x-pr.x,e.z-pr.z); if(d<bd){bd=d;bt=e;} }
-      if(bt){ const sp=Math.hypot(pr.vx,pr.vz)||1, bl=0.16; pr.vx=(pr.vx/sp*(1-bl)+(bt.x-pr.x)/bd*bl)*sp; pr.vz=(pr.vz/sp*(1-bl)+(bt.z-pr.z)/bd*bl)*sp; } }  // home toward the nearest enemy
+    if(pr.seek && pr.owner==='player'){
+      let bt=pr.seekTarget||null,bd=bt?Math.hypot(bt.x-pr.x,bt.z-pr.z):1e9;
+      if(pr.petSeek){ bt=null;bd=560;for(const e of G.enemies){if(e.dead||!e.active)continue;const d=Math.hypot(e.x-pr.x,e.z-pr.z);if(d<bd){bd=d;bt=e;}} }
+      else if(!bt||!targetInPlayerSight(G.p,bt,Math.max(560,dXZ(G.p.x,G.p.z,bt.x,bt.z)+1))||losBlocked(pr.x,pr.z,bt.x,bt.z)) bt=null;
+      if(bt){ const sp=Math.hypot(pr.vx,pr.vz)||1, bl=.16; pr.vx=(pr.vx/sp*(1-bl)+(bt.x-pr.x)/Math.max(1,bd)*bl)*sp; pr.vz=(pr.vz/sp*(1-bl)+(bt.z-pr.z)/Math.max(1,bd)*bl)*sp; } }
     if(pr.axe){ pr.spin=(pr.spin||0)+dt*22;                                                       // returning axe: fly out, then curve back to the player
       if(!pr.returning && Math.hypot(pr.x-pr.ox,pr.z-pr.oz)>=pr.range) pr.returning=true;
       if(pr.returning){ const dd=Math.hypot(p.x-pr.x,p.z-pr.z)||1, sp=Math.hypot(pr.vx,pr.vz)||1; pr.vx=(p.x-pr.x)/dd*sp; pr.vz=(p.z-pr.z)/dd*sp; if(dd<42) pr.life=0; } }

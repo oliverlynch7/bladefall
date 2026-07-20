@@ -786,7 +786,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.226.0';
+const VERSION3D='1.227.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2606,8 +2606,9 @@ function bagDollRender(){
   gl.uniform2f(U.uFogNF,1400,5000); gl.uniform3f(U.uFog,0.06,0.06,0.08);
   CURM=mIdent();
   drawShadow(0,0,18,0.32);
-  p.z=0; p.yaw=0; drawHero3(p,t,false);
+  p.x=0; p.z=0; p.y=0; p.yaw=0; drawHero3(p,t,true);
   if(pet){ pet.x=44; pet.z=18; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
+  flushBatch(); gl.finish();          // draw the accumulated hero+pet cubes before we grab the pixels
   const ctx=cnv.getContext('2d'); ctx.clearRect(0,0,cnv.width,cnv.height);
   const ctr=(typeof project==='function'?project(0,26,0):null)||[VW/2,VH/2];
   const sw=VH*0.54*DPR, sh=VH*0.93*DPR;

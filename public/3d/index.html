@@ -651,7 +651,7 @@
     /* the two XP bars flank the skill rail in the bottom corners (no longer a single strip UNDER the skills,
        so they can't visually collide with it); each reaches from near its corner in to meet the skill frame,
        its inner end tucking just under the frame so the three read as one continuous bottom rail */
-    #hudprogress{position:fixed;left:0;right:0;top:auto;bottom:16px;transform:none;width:auto;display:block;gap:0;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;z-index:5}
+    #hudprogress{position:fixed;left:0;right:0;top:auto;bottom:66px;transform:none;width:auto;display:block;gap:0;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;z-index:5}  /* bottom set so each bar's vertical centre lines up with the skill rail's equator (frame bottom:40 + 106/2) */
     .progbox{position:absolute;bottom:0;height:54px;padding:8px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:linear-gradient(180deg,rgba(23,19,27,.88),rgba(6,7,11,.9));border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 10px 24px #000b}
     .progbox.charprog{left:22px;right:calc(50% + 292px);border-radius:12px 4px 4px 12px;clip-path:polygon(1.5% 0,100% 0,100% 100%,1.5% 100%,0 66%,0 34%)}
     .progbox.classprog{right:22px;left:calc(50% + 292px);border-radius:4px 12px 12px 4px;clip-path:polygon(0 0,98.5% 0,100% 34%,100% 66%,98.5% 100%,0 100%)}
@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.203.0';
+const VERSION3D='1.204.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3439,6 +3439,9 @@ const EXPANDED_SCAPES={
     if(!woods){
       const gate=room('Old South Road',0,0,760,560),caravan=room('Broken Caravan',-420,-620,680,520),acres=room('Golden Acres',420,-720,760,680),farm=room('Miller Farmstead',80,-1320,900,600),orchard=room('Whisper Orchard',-650,-1720,660,620),ridge=room('Windmill Ridge',480,-1920,720,620),hamlet=room('Sunward Hamlet',40,-2600,980,700),dream=room('Dreaming Field',-430,-3340,800,660),henge=room('Old Waystone Hill',120,-4080,900,720);
       road(gate,caravan,170); road(gate,acres,170); road(caravan,farm); road(acres,farm,190); road(farm,orchard,140); road(farm,ridge); road(orchard,hamlet,140); road(ridge,hamlet,160); road(hamlet,dream,180); road(dream,henge,180);
+      // The worn Sunward Trail is the unmistakable golden path; the caravan/orchard loop remains optional.
+      { const main=[gate,acres,farm,ridge,hamlet,dream,henge]; for(let i=0;i<main.length-1;i++){ const a=main[i],b=main[i+1],steps=Math.max(3,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/150));
+        for(let k=1;k<steps;k++){ const t=k/steps,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t; G.deco.push({x,z,y0:.2,w:46,h:.8,d:46,c:'#c9a85b'}); if(k%3===0){ G.deco.push({x:x-34,z,y0:0,w:6,h:34,d:6,c:WOOD}); G.deco.push({x:x-34,z,y0:34,w:10,h:8,d:10,c:'#ffd36a'}); } } } }
       // Blue pond, a wrecked caravan and broad golden fields establish a sunny pastoral identity immediately.
       G.deco.push({x:210,z:120,y0:0,w:230,h:2,d:150,c:'#3d708d'}); for(let k=0;k<12;k++) G.deco.push({x:110+k*19,z:190,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
       G.deco.push({x:-430,z:-630,y0:12,w:150,h:30,d:72,c:'#6b4827'}); for(const x of [-500,-360]) vcol(x,-610,26,26,28); G.deco.push({x:-430,z:-650,y0:42,w:130,h:8,d:62,c:'#372719'});
@@ -3455,12 +3458,14 @@ const EXPANDED_SCAPES={
       for(const h of [[-260,-2500,230,170],[60,-2710,260,180],[320,-2490,210,160]]){ G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:82,d:h[3],c:'#8d6039'}); G.deco.push({x:h[0],z:h[1],y0:82,w:h[2]+24,h:24,d:h[3]+22,c:'#543126'}); }
       climbRun(-380,-2450,0,-260,-2500,104,68); vplat(60,-2710,104,240,160,{terrace:true}); climbRun(60,-2710,104,320,-2490,104,72);
       field(-430,-3340,15,12); for(const sx of [-650,-430,-210]){ vcol(sx,-3470,8,8,48); G.deco.push({x:sx,z:-3470,y0:42,w:58,h:7,d:8,c:WOOD}); G.deco.push({x:sx,z:-3470,y0:49,w:16,h:16,d:14,c:'#d9c08c'}); }
-      const kx=120,kz=-4140; vplat(kx,kz,42,210,210); const top=vplat(kx,kz,82,128,128,{checkpoint:true}); for(let k=0;k<7;k++){ const a=k/7*6.283; G.deco.push({x:kx+Math.cos(a)*86,z:kz+Math.sin(a)*82,y0:42,w:20,h:40+(k%3)*8,d:14,c:'#626879'}); } G.deco.push({x:kx,z:kz,y0:82,w:30,h:54,d:20,c:'#7c8498'});
+      const kx=120,kz=-4140; vplat(kx,kz,42,260,260); const top=vplat(kx,kz,82,150,150,{checkpoint:true,breather:true}); for(let k=0;k<7;k++){ const a=k/7*6.283; G.deco.push({x:kx+Math.cos(a)*100,z:kz+Math.sin(a)*96,y0:42,w:20,h:52+(k%3)*8,d:14,c:'#626879'}); } G.deco.push({x:kx,z:kz,y0:82,w:34,h:150,d:24,c:'#fff0a0'}); chest(kx+96,kz+70,42);
       // Forest edges frame open farmland instead of tinting the entire world green.
       for(let k=0;k<42;k++){ const R=[gate,caravan,acres,farm,orchard,ridge,hamlet,dream,henge][Math.floor(rnd()*9)],edge=rnd()<.5?-1:1; tree(R.x+edge*(R.w/2-20),R.z+(rnd()*2-1)*(R.d/2-20),72+rnd()*64); }
       const glade=room('Hidden Copse',-1120,-2300,330,300); vseg(-760,-2300,720,100); for(let k=0;k<8;k++){ const a=k/8*6.28; tree(glade.x+Math.cos(a)*145,glade.z+Math.sin(a)*130,95+rnd()*34); } scapeSecret(ctx,glade.x,glade.z,0); chest(glade.x-60,glade.z+40);
-      mkMonster('sporeback',-650,-1720,orchard); mkMonster('sporeback',-300,-3340,dream); mkMonster('thornboar',-420,-620,caravan);
-      scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:farm.x,z:farm.z,room:farm},{x:hamlet.x,z:hamlet.z,room:hamlet},{x:dream.x,z:dream.z,room:dream}]);
+      // Pacing: lone warm-up, then three increasingly salted open-field dens with quiet districts between.
+      mkMonster('thornboar',-420,-620,caravan);
+      scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:hamlet.x,z:hamlet.z,room:hamlet},{x:dream.x,z:dream.z,room:dream}]);
+      mkMonster('sporeback',hamlet.x+120,hamlet.z-70,hamlet); mkMonster('sporeback',dream.x+110,dream.z-60,dream); mkMonster('thornboar',dream.x-120,dream.z+80,dream);
       scapeFind(ctx,top.x,top.z,82); finishScape(ctx,{sx:0,sz:220,sy:0,gx:120,gz:-4220,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:190});
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);

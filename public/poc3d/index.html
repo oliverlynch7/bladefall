@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>BLADEFALL — True-3D Proof of Concept</title>
+<style>
+  :root{ --amber:#e8a33d; --panel:rgba(14,12,18,.72); }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; overflow:hidden; background:#0b0a10; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:#f4f1ea; }
+  #c{ position:fixed; inset:0; display:block; touch-action:none; }
+  #load{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; background:#0b0a10; z-index:20; transition:opacity .5s; }
+  #load.hide{ opacity:0; pointer-events:none; }
+  .spin{ width:46px; height:46px; border:4px solid #2a2636; border-top-color:var(--amber); border-radius:50%; animation:sp 1s linear infinite; }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
+  #load p{ opacity:.7; font-size:14px; letter-spacing:.03em; }
+  .tag{ position:fixed; top:calc(env(safe-area-inset-top) + 12px); left:12px; z-index:10; background:var(--panel); backdrop-filter:blur(8px); padding:8px 13px; border-radius:12px; font-size:12px; line-height:1.5; border:1px solid rgba(255,255,255,.08); }
+  .tag b{ color:var(--amber); letter-spacing:.06em; }
+  .tag span{ opacity:.62; }
+  #ui{ position:fixed; left:0; right:0; bottom:0; z-index:10; padding:12px 12px calc(env(safe-area-inset-bottom) + 12px); display:flex; flex-direction:column; gap:9px; align-items:center;
+       background:linear-gradient(0deg, rgba(9,8,13,.86), rgba(9,8,13,0)); }
+  .row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:640px; }
+  .lbl{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; opacity:.5; margin-bottom:-2px; }
+  button{ font:inherit; cursor:pointer; border:1px solid rgba(255,255,255,.12); background:var(--panel); backdrop-filter:blur(8px); color:#f4f1ea;
+          padding:10px 15px; border-radius:12px; font-size:13.5px; font-weight:600; transition:transform .08s, border-color .12s, background .12s; }
+  button:active{ transform:scale(.94); }
+  button.on{ border-color:var(--amber); background:rgba(232,163,61,.18); color:#ffdf9a; }
+  button.anim{ padding:9px 13px; font-weight:500; font-size:12.5px; opacity:.92; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="tag"><b>BLADEFALL</b> · true-3D proof of concept<br><span>drag to orbit · pinch to zoom · real rigged + animated character</span></div>
+<div id="ui">
+  <div class="lbl">Character</div>
+  <div class="row" id="charRow"></div>
+  <div class="lbl">Animation</div>
+  <div class="row" id="animRow"></div>
+</div>
+<div id="load"><div class="spin"></div><p>Loading true-3D scene…</p></div>
+
+<script type="importmap">
+{ "imports": { "three": "./three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
+
+const CHARS = [
+  { id:'Knight',       label:'Knight → Warrior' },
+  { id:'Barbarian',    label:'Barbarian → Reaper' },
+  { id:'Rogue_Hooded', label:'Rogue → Ranger' },
+  { id:'Mage',         label:'Mage → Mage' },
+];
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.06;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#8fb7d6');
+scene.fog = new THREE.Fog('#8fb7d6', 26, 62);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
+camera.position.set(4.6, 3.4, 6.4);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 3; controls.maxDistance = 20;
+controls.maxPolarAngle = Math.PI*0.5 - 0.03;   // don't go under the ground
+controls.autoRotate = true; controls.autoRotateSpeed = 0.9;
+controls.target.set(0, 1.7, 0);
+canvas.addEventListener('pointerdown', ()=>{ controls.autoRotate=false; });
+
+// ---- lighting: warm key + cool sky fill + rim, tuned for a stylised fantasy look ----
+const hemi = new THREE.HemisphereLight('#cfe4ff', '#5a4a34', 1.15); scene.add(hemi);
+const key = new THREE.DirectionalLight('#ffe6b8', 2.7);
+key.position.set(7, 11, 5); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.near=1; key.shadow.camera.far=45;
+key.shadow.camera.left=-14; key.shadow.camera.right=14; key.shadow.camera.top=14; key.shadow.camera.bottom=-14;
+key.shadow.bias=-0.0004; key.shadow.normalBias=0.02;
+scene.add(key);
+const rim = new THREE.DirectionalLight('#a9c6ff', 0.7); rim.position.set(-6,5,-7); scene.add(rim);
+
+// ---- ground: a soft mossy meadow disc ----
+const groundMat = new THREE.MeshStandardMaterial({ color:'#5f7b43', roughness:1, metalness:0 });
+const ground = new THREE.Mesh(new THREE.CircleGeometry(40, 64), groundMat);
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+// a paler footpath ring under the hero
+const ring = new THREE.Mesh(new THREE.RingGeometry(0.1, 3.2, 48), new THREE.MeshStandardMaterial({ color:'#7d8a5a', roughness:1 }));
+ring.rotation.x = -Math.PI/2; ring.position.y = 0.01; ring.receiveShadow = true; scene.add(ring);
+
+// ---- stylised environment props (trees + rocks) to frame the scene and cast shadows ----
+function tree(x,z,s){
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16*s,0.22*s,1.3*s,7), new THREE.MeshStandardMaterial({color:'#6b4a2c',roughness:1}));
+  trunk.position.y=0.65*s; trunk.castShadow=true; g.add(trunk);
+  const cols=['#3f7d46','#4f8a4a','#356b3e'];
+  for(let i=0;i<3;i++){ const f=new THREE.Mesh(new THREE.ConeGeometry((1.0-i*0.22)*s,(1.05-i*0.1)*s,8), new THREE.MeshStandardMaterial({color:cols[i%3],roughness:1}));
+    f.position.y=(1.35+i*0.62)*s; f.castShadow=true; g.add(f); }
+  g.position.set(x,0,z); g.rotation.y=Math.random()*6.28; scene.add(g);
+}
+function rock(x,z,s){
+  const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0), new THREE.MeshStandardMaterial({color:'#7c7f88',roughness:1,flatShading:true}));
+  m.position.set(x,s*0.5,z); m.rotation.set(Math.random(),Math.random(),Math.random()); m.castShadow=true; m.receiveShadow=true; scene.add(m);
+}
+for(let i=0;i<9;i++){ const a=i/9*6.28, r=11+Math.random()*8; tree(Math.cos(a)*r, Math.sin(a)*r, 0.9+Math.random()*0.7); }
+for(let i=0;i<7;i++){ const a=Math.random()*6.28, r=5+Math.random()*10; rock(Math.cos(a)*r, Math.sin(a)*r, 0.4+Math.random()*0.7); }
+
+// ---- character loading + animation ----
+const loader = new GLTFLoader();
+let current=null, mixer=null, clips=[], action=null;
+const clock = new THREE.Clock();
+const cache = {};
+
+function pickIdle(){ return clips.find(c=>/idle/i.test(c.name)) || clips[0]; }
+function playClip(clip){
+  if(!mixer||!clip) return;
+  const next = mixer.clipAction(clip);
+  next.reset().fadeIn(0.25).play();
+  if(action && action!==next) action.fadeOut(0.25);
+  action = next;
+  document.querySelectorAll('#animRow button').forEach(b=>b.classList.toggle('on', b.dataset.n===clip.name));
+}
+
+function buildAnimRow(){
+  const row=document.getElementById('animRow'); row.innerHTML='';
+  // surface the most useful clips first (idle / move / attack / hit / die), then the rest
+  const order=(n)=>{ n=n.toLowerCase(); if(n.includes('idle'))return 0; if(n.includes('walk'))return 1; if(n.includes('run'))return 2;
+    if(n.includes('attack')||n.includes('melee')||n.includes('spell')||n.includes('shoot')||n.includes('cast'))return 3;
+    if(n.includes('hit')||n.includes('block')||n.includes('dodge')||n.includes('roll'))return 4; if(n.includes('death')||n.includes('die'))return 5; return 6; };
+  const sorted=[...clips].sort((a,b)=>order(a.name)-order(b.name)).slice(0,10);
+  for(const c of sorted){ const b=document.createElement('button'); b.className='anim'; b.dataset.n=c.name;
+    b.textContent=c.name.replace(/_/g,' ').replace(/\b(1H|2H)\b/gi,m=>m.toUpperCase()); b.onclick=()=>playClip(c); row.appendChild(b); }
+}
+
+function frameModel(root){
+  const box=new THREE.Box3().setFromObject(root); const size=box.getSize(new THREE.Vector3()); const center=box.getCenter(new THREE.Vector3());
+  const targetH=2.6, s=targetH/(size.y||1); root.scale.setScalar(s);
+  const box2=new THREE.Box3().setFromObject(root); const c2=box2.getCenter(new THREE.Vector3()); const min2=box2.min;
+  root.position.x -= c2.x; root.position.z -= c2.z; root.position.y -= min2.y;   // feet on ground, centred
+  controls.target.set(0, targetH*0.55, 0);
+}
+
+function show(id){
+  document.querySelectorAll('#charRow button').forEach(b=>b.classList.toggle('on', b.dataset.id===id));
+  const swap=(gltf)=>{
+    if(current){ scene.remove(current); }
+    if(mixer){ mixer.stopAllAction(); }
+    const root = gltf.scene;
+    root.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; if(o.material){ o.material.roughness=Math.min(1,(o.material.roughness??1)); } } });
+    frameModel(root);
+    scene.add(root); current=root;
+    mixer = new THREE.AnimationMixer(root); clips = gltf.animations||[]; action=null;
+    buildAnimRow(); playClip(pickIdle());
+  };
+  if(cache[id]){ swap(cache[id]); return; }
+  loader.load('assets/'+id+'.glb', g=>{ cache[id]=g; swap(g); document.getElementById('load').classList.add('hide'); },
+    undefined, err=>{ document.getElementById('load').innerHTML='<p style="color:#ff8a6a">Failed to load '+id+'.glb<br>'+err+'</p>'; });
+}
+
+// character buttons
+const cr=document.getElementById('charRow');
+for(const c of CHARS){ const b=document.createElement('button'); b.dataset.id=c.id; b.textContent=c.label; b.onclick=()=>show(c.id); cr.appendChild(b); }
+
+show('Knight');
+
+function resize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); }
+addEventListener('resize', resize); resize();
+
+renderer.setAnimationLoop(()=>{ const dt=clock.getDelta(); if(mixer) mixer.update(dt); controls.update(); renderer.render(scene,camera); });
+</script>
+</body>
+</html>

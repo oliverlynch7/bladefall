@@ -651,12 +651,12 @@
     /* the two XP bars flank the skill rail in the bottom corners (no longer a single strip UNDER the skills,
        so they can't visually collide with it); each reaches from near its corner in to meet the skill frame,
        its inner end tucking just under the frame so the three read as one continuous bottom rail */
-    #hudprogress{position:fixed;left:0;right:0;top:auto;bottom:66px;transform:none;width:auto;display:block;gap:0;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;z-index:5}  /* bottom set so each bar's vertical centre lines up with the skill rail's equator (frame bottom:40 + 106/2) */
-    .progbox{position:absolute;bottom:0;height:54px;padding:8px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:linear-gradient(180deg,rgba(23,19,27,.88),rgba(6,7,11,.9));border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 10px 24px #000b}
-    .progbox.charprog{left:22px;right:calc(50% + 292px);border-radius:12px 4px 4px 12px;clip-path:polygon(1.5% 0,100% 0,100% 100%,1.5% 100%,0 66%,0 34%)}
-    .progbox.classprog{right:22px;left:calc(50% + 292px);border-radius:4px 12px 12px 4px;clip-path:polygon(0 0,98.5% 0,100% 34%,100% 66%,98.5% 100%,0 100%)}
+    #hudprogress{position:fixed;left:0;right:0;top:auto;bottom:71px;transform:none;width:auto;display:block;gap:0;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;z-index:5}  /* bottom set so each bar's vertical centre lines up with the skill rail's equator (frame bottom:40 + 122/2) */
+    .progbox{position:absolute;bottom:0;height:60px;padding:9px 24px;display:flex;flex-direction:column;justify-content:center;gap:7px;background:linear-gradient(180deg,rgba(23,19,27,.88),rgba(6,7,11,.9));border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 10px 24px #000b}
+    .progbox.charprog{left:22px;right:calc(50% + 326px);border-radius:12px 4px 4px 12px;clip-path:polygon(1.5% 0,100% 0,100% 100%,1.5% 100%,0 66%,0 34%)}
+    .progbox.classprog{right:22px;left:calc(50% + 326px);border-radius:4px 12px 12px 4px;clip-path:polygon(0 0,98.5% 0,100% 34%,100% 66%,98.5% 100%,0 100%)}
     .progbox:first-child{border:1px solid #9a6c30}
-    .proghead{margin-bottom:0}.progtitle{font-family:Georgia,serif;color:#e0d3b8;font-size:10px;letter-spacing:.1em;font-weight:800}.prognum{font-family:Georgia,serif;font-size:10px;color:#c3b9a8;font-weight:700}.progbox .bar{height:9px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
+    .proghead{margin-bottom:0}.progtitle{font-family:Georgia,serif;color:#e0d3b8;font-size:10px;letter-spacing:.1em;font-weight:800}.prognum{font-family:Georgia,serif;font-size:10px;color:#c3b9a8;font-weight:700}.progbox .bar{height:13px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
     .pathrow{position:absolute;left:104px;right:18px;bottom:9px}.pathrow .barlabel{color:#817766}.pathrow .bar{height:3px!important;box-shadow:none}
     #jetwrap{position:absolute;left:104px;right:18px;bottom:9px}
     #bosshpwrap{top:22px;width:min(610px,42vw)}
@@ -670,19 +670,19 @@
     #joyzone,#lookzone{z-index:0}
     .btn{font-family:Georgia,serif;text-shadow:0 2px 3px #000}
     #bJump,#bDodge,#bAttack,#bInteract{display:none!important}
-    .btn.skl{bottom:58px;width:72px;height:72px;border-radius:10px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none}
-    .btn.skl .ico-event{width:57px;height:57px;filter:drop-shadow(0 0 6px #9d51d3aa)}
-    .btn.skl::after{top:auto;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 7px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font-family:Georgia,serif}
+    .btn.skl{bottom:60px;width:82px;height:82px;border-radius:11px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none}
+    .btn.skl .ico-event{width:64px;height:64px;filter:drop-shadow(0 0 6px #9d51d3aa)}
+    .btn.skl::after{top:auto;bottom:-19px;left:50%;transform:translateX(-50%);padding:2px 10px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font:800 14px Georgia,serif;border-radius:2px}
     .btn.skl::before{right:2px;bottom:2px;border:1px solid #7d55a4;background:#160e20;color:#e1c8ff}
-    #bSk0{right:calc(50% + 114px)}#bSk1{right:calc(50% + 38px)}#bSk2{right:calc(50% - 38px)}#bSk3{right:calc(50% - 114px)}
-    /* the LMB (basic attack) + SPACE (dodge) slots flank the 4 skills, and one ornate plate frames the whole rail */
-    #bLMB,#bSpace{display:flex;bottom:58px;width:72px;height:72px;border-radius:10px;background:radial-gradient(circle,#241d29,#0e0d12 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none;overflow:visible}
-    #bLMB{right:calc(50% + 200px)}#bSpace{right:calc(50% - 200px)}
+    #bSk0{right:calc(50% + 91px)}#bSk1{right:calc(50% + 3px)}#bSk2{right:calc(50% - 85px)}#bSk3{right:calc(50% - 173px)}
+    /* LMB (basic attack) + SPACE (dodge) flank the 4 skills; the whole 6-slot row is centred symmetrically in the plate */
+    #bLMB,#bSpace{display:flex;bottom:60px;width:82px;height:82px;border-radius:11px;background:radial-gradient(circle,#241d29,#0e0d12 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none;overflow:visible}
+    #bLMB{right:calc(50% + 191px)}#bSpace{right:calc(50% - 273px)}
     #bLMB.pressed,#bSpace.pressed{background:radial-gradient(circle,#3a2d18,#0e0d12 72%);border-color:#f3c272}
-    .btn.sklaux .auxico{display:flex;align-items:center;justify-content:center;font-size:30px;filter:drop-shadow(0 2px 4px #000)}
-    .btn.sklaux .auxico .ico-event{width:46px;height:46px}
-    .btn.sklaux::after{content:attr(data-k);position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 8px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font:800 8.5px Georgia,serif;letter-spacing:.04em;border-radius:2px;white-space:nowrap}
-    #skillframe{display:block;position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:600px;height:106px;pointer-events:none;
+    .btn.sklaux .auxico{display:flex;align-items:center;justify-content:center;font-size:34px;filter:drop-shadow(0 2px 4px #000)}
+    .btn.sklaux .auxico .ico-event{width:52px;height:52px}
+    .btn.sklaux::after{content:attr(data-k);position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);padding:2px 9px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font:800 11px Georgia,serif;letter-spacing:.04em;border-radius:2px;white-space:nowrap}
+    #skillframe{display:block;position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:664px;height:122px;pointer-events:none;
       background:radial-gradient(circle at 50% 0,rgba(120,60,180,.12),transparent 46%),linear-gradient(180deg,rgba(23,19,27,.78),rgba(6,7,11,.85));
       border:1px solid #9a6c30;border-radius:12px;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 12px 28px #000b;
       clip-path:polygon(2.5% 0,97.5% 0,100% 28%,100% 72%,97.5% 100%,2.5% 100%,0 72%,0 28%)}
@@ -701,7 +701,7 @@
     #pausebtn{top:18px;right:18px;border-radius:4px;border-color:#8e6530;background:#101015e8;box-shadow:inset 0 0 0 2px #08090c,0 6px 16px #0008}
   }
   @media (min-width:900px) and (max-height:800px) and (pointer:fine){
-    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:10px}.progbox{height:48px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:46px}#skillframe{bottom:30px;height:98px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
+    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:58px}.progbox{height:54px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:44px}#skillframe{bottom:30px;height:110px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
 </style>
 </head>

@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.195.0';
+const VERSION3D='1.196.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6684,8 +6684,12 @@ function enterWaystation(){
   // FLOWER PLANTERS around the plaza edge (kept clear of the spawn->gate lanes)
   const bloom=['#e8607a','#f0a93a','#7cc6ff','#e07ad0','#ffd24a','#8fdf6a'];
   for(const fb of [[-250,-160],[250,-160],[-250,210],[250,210],[-160,250],[160,250]]){
-    G.deco.push({x:fb[0],z:fb[1],y0:0,w:50,h:12,d:30,c:'#6e4a2e'});
-    for(let k=0;k<5;k++) G.deco.push({x:fb[0]-18+k*9,z:fb[1]+(k%2?4:-4),y0:12,w:6,h:8+Math.random()*5,d:6,c:bloom[(k*7+Math.abs(fb[0]))%6]}); }
+    G.deco.push({x:fb[0],z:fb[1],y0:0,w:54,h:10,d:32,c:'#6e4a2e'});
+    G.deco.push({x:fb[0],z:fb[1],y0:10,w:46,h:3,d:24,c:'#241b14'});
+    for(let k=0;k<5;k++){ const fx=fb[0]-18+k*9, fz=fb[1]+(k%2?4:-4), fh=10+(k%3)*3;
+      G.deco.push({x:fx,z:fz,y0:13,w:2.5,h:fh,d:2.5,c:'#3f7d3b'});
+      G.deco.push({x:fx+(k%2?3:-3),z:fz,y0:17,w:5,h:2.5,d:3,c:'#559b49'});
+      G.deco.push({x:fx,z:fz,y0:13+fh,w:5.5,h:5.5,d:5.5,c:bloom[(k*7+Math.abs(fb[0]))%6]}); } }
   // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
   // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
   for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
@@ -8607,10 +8611,6 @@ function drawWaystation(t){
   { let ti=0; ZONES.forEach((Z)=>{ if(!meta.zoneDone[Z.id]) return; const tz=-300+ti*82; ti++; const col=ZONE_TROPHY[Z.id]||'#e8a33d';
       bx(-406,118,tz, 7,42,36,'#2a2f3a'); bx(-402,122,tz, 4,26,20, col, col, 0.85); bx(-402,122,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }
   // ITEM 1 — a trainer figure stands for every class you've unlocked (behind the Drillmaster)
-  { const uc=CLASSIDS.filter(c=>meta.classUnlocked[c]); uc.forEach((c,k)=>{ const tx=250+k*44, tz=-214, col=CLASS_COL[c]||'#e8453d';
-      drawShadow(tx,tz,10,0.2); pushM(); mv(tx,0,tz); rotY(Math.sin(t*0.5+k)*0.2);
-      bx(0,8,0, 10,16,7,'#242730'); bx(0,22,0, 12,15,9, col); bx(0,34,0, 8,9,8,'#c9a380'); popM();
-      bx(tx,50,tz, 3.5,3.5,3.5, col, col, 0.5+0.3*Math.sin(t*3+k)); }); }
   // ITEM 2 — the dying world on the horizon over the low north rampart, + the Apex throne looming
   { const vista=[[-540,-760,240,300,'#2a2118'],[-210,-880,300,460,'#25303a'],[150,-800,230,300,'#3a1c14'],[470,-760,220,300,'#241431']];
     for(const v of vista){ bx(v[0],v[3]/2,v[1], v[2],v[3],70, v[4], tint(v[4],'#000',0.3), 1); }

@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.207.0';
+const VERSION3D='1.208.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4158,6 +4158,7 @@ function loadStage(i){
 }
 /* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
 function startBonus(){
+  G.sprintFun=false; G.sprintReturnHub=false;   // an in-zone sprint keeps its loot + returns to the zone
   const ret=G.stageIndex+1;
   meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
   loadBonus(ret);
@@ -5397,6 +5398,7 @@ function mimicReveal(ch){
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
+  if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
   if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
   else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
@@ -5792,7 +5794,7 @@ function update(dt){
   if(G.bonusActive){ const bt=document.getElementById('bonustimer');
     if(G.bonusSecured){ bt.innerHTML=eventIcon('event-treasure-chest')+' SECURED'; bt.style.color='#3ad07f'; }
     else { G.bonusTime-=dt; bt.innerHTML=eventIcon('event-treasure-chest')+' '+Math.max(0,G.bonusTime).toFixed(1)+'s'; bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
-      if(G.bonusTime<=0){ endBonus('⏱ Too slow — the vault seals!'); return; } } }
+      if(G.bonusTime<=0){ endBonus(G.sprintFun?'⏱ Out of time — give it another go!':'⏱ Too slow — the vault seals!'); return; } } }
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }

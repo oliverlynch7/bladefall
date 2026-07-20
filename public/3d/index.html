@@ -604,6 +604,18 @@
   .cclockhint{flex:1;text-align:center;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#6f7789;padding:11px 0;}
   @media(max-width:1000px){.trainergrid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:560px){.trainergrid{grid-template-columns:1fr;}}
+  .skilltut{max-width:520px;text-align:center;}
+  .skilltut .ovh{color:var(--tut);}
+  .tutbody{display:flex;gap:16px;align-items:center;text-align:left;margin:14px 0 18px;}
+  .tuticon{flex:0 0 auto;width:88px;height:88px;display:flex;align-items:center;justify-content:center;font-size:46px;border-radius:18px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--tut) 30%,#1c2130),#0b0d14);border:1px solid color-mix(in srgb,var(--tut) 45%,#2b3040);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+  .tuticon .ico{width:60px;height:60px;}
+  .tutcopy{flex:1;min-width:0;}
+  .tutdesc{font-size:14px;line-height:1.5;color:#e6e9f0;margin:0 0 11px;}
+  .tutkeyrow{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .tutkey{flex:0 0 auto;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#0c0d12;background:var(--tut);border-radius:9px;box-shadow:0 3px 0 color-mix(in srgb,var(--tut) 55%,#000);}
+  .tutkeymsg{font-size:13px;line-height:1.4;color:#cdd3df;}.tutkeymsg b{color:var(--tut);}
+  .tuthint{font-size:12px;line-height:1.45;color:#8a93a6;margin:0;}
+  .skilltut .bigbtn{margin:0;}
   .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
   .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
   .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
@@ -821,7 +833,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.236.0';
+const VERSION3D='1.237.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1603,12 +1615,13 @@ const TRIALS={
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
     tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']}
 };
-const RANK_XP=r=>Math.round(60*Math.pow(r,1.7));          // class XP needed to go from rank r to r+1
+const RANK_XP=r=>r<=0?16:Math.round(60*Math.pow(r,1.7));  // rank 0->1 ≈ two starter kills (onboarding); then the normal curve
 const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
 let queueSubclass=false;
-function classState(id){ const cs=(meta.classes[id]=meta.classes[id]||{xp:0,rank:1,sub:null});
-  if(!cs.rank) cs.rank=1;
-  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // v2 finalized model: full reset once (legacy subclass discarded)
+function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
+  if(fresh) cs=meta.classes[id]={xp:0,rank:0,sub:null,v2:1};   // a NEW class begins at rank 0 — its first skill unlocks after ~2 kills
+  if(cs.rank==null) cs.rank=fresh?0:1;
+  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // legacy pre-v2 save: one-time reset (keeps rank 1)
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
 function classFamilyOk(w){ return !w || w.anyClass || curClass().family.includes(w.art); }
@@ -1628,8 +1641,10 @@ function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) 
 function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
   cs.xp+=n; let up=false;
   while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
-    const sk=cs.sub?curSkills(meta.classId).find(s=>s&&s.rank===cs.rank):null;
-    toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':''))); }
+    const S=curSkills(meta.classId);
+    const sk=S.find((s,idx)=>s&&s.rank===cs.rank&&(idx===0||cs.sub));   // slot 0 (the shared skill) unlocks regardless of a chosen path
+    toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':'')));
+    if(!c2def()&&cs.rank===1&&S[0]&&!(meta.tut&&meta.tut.skill)) queueSkillTut=S[0]; }   // first rank-up teaches the shared skill, once
   if(up){ SFX.classup();
     if(c2def()){ const nx=c2NextChoice(); if(nx) queueChoiceRank=nx; }   // v2: queue the next unmade rank choice
     else if(cs.rank>=2&&!cs.sub) queueSubclass=true;                     // legacy fork at rank 2
@@ -5234,6 +5249,21 @@ const SKILL_FX={
 };
 /* ===== CLASS v2 ENGINE — progression, choices, innate traits, skill dispatch ===== */
 let queueChoiceRank=0;
+let queueSkillTut=null;
+// A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
+function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
+  mode='upgrade'; showGameUI(false); _offerT=Date.now();
+  const acc={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#e8a33d';
+  const art=s.icon||(s.fx&&typeof C2_ICON!=='undefined'&&C2_ICON[s.fx])||'✦';
+  showOverlayHTML(`<div class="card skilltut" style="--tut:${acc}">
+    <p class="ovkicker">Skill Unlocked</p><h2 class="ovh">${s.n}</h2>
+    <div class="tutbody"><div class="tuticon">${art}</div>
+      <div class="tutcopy"><p class="tutdesc">${s.d}</p>
+        <div class="tutkeyrow"><span class="tutkey">1</span><span class="tutkeymsg">Press <b>1</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
+        <p class="tuthint">It recharges over ${s.cd}s, then it's ready again. Keep fighting to rank up and earn more skills.</p></div></div>
+    <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
+  document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); };
+}
 function c2def(id){ return CLASS2[id||meta.classId]; }
 function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
 function c2Passive(pid){ const ch=c2ch(); for(const r of [3,5,7,9]) if(ch[r]===pid) return true; return false; }
@@ -5251,7 +5281,10 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
     <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div></div>`);
   document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
     c2ch()[rank]=b.dataset.pick; persist(); SFX.classup();
-    const nx=c2NextChoice(); if(nx) openClassChoice(nx); else { skillbarUpdate(); resumePlay(); } });
+    const nx=c2NextChoice(); if(nx) openClassChoice(nx);
+    else { skillbarUpdate(); const first=c2CurSkills()[0];
+      if(rank===2 && first && !(meta.tut&&meta.tut.skill)) openSkillTutorial(first);   // v2 classes learn the mechanic when their first skill is picked
+      else resumePlay(); } });
 }
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
@@ -6145,7 +6178,8 @@ function update(dt){
   if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
     for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
       e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
-  if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
+  if(queueSkillTut && mode==='play'){ const s=queueSkillTut; queueSkillTut=null; openSkillTutorial(s); }   // first-skill lesson takes priority
+  else if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
   else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
   class2Innate(G.p,dt);
 }

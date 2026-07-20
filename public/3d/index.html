@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.188.0';
+const VERSION3D='1.189.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -668,7 +668,8 @@ function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
   let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
     if(mv.hero||mv.gold||mv.zoneMax){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
   const cls=(best&&best.classId)||g.classId, has=best||cls||(g.achievements&&Object.keys(g.achievements).length);
-  return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal}:{empty:true};
+  return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal,
+    hero:(best&&best.hero)||null,skin:(best&&best.hero&&best.hero.skin)||g.selectedSkin||'knight',rank:(best&&best.classes&&cls&&best.classes[cls]&&best.classes[cls].rank)||1}:{empty:true};
 }
 function selectSlot(sl){ try{ localStorage.setItem('bf3_slot',sl); }catch(e){} location.reload(); }
 function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
@@ -679,7 +680,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -694,7 +695,7 @@ const meta=Object.assign({
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
-  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:''
+  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c'
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -731,6 +732,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
   meta.petLabel=mv.petLabel!==false;
   meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,18):'';
+  meta.eyeColor=mv.eyeColor||'#8fd0ff'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
@@ -6428,17 +6430,38 @@ function toast(msg,color,icon){ const t=document.getElementById('toast'); t.text
 function openSlots(){
   mode='menu';
   const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
-    const line=su.empty?'<span style="opacity:.6">Empty — start a new character</span>'
-      :`${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].icon+' '+CLASSES[su.cls].disp:su.cls):'No class yet'} · Lv ${su.lvl} · Zone ${su.zone} · <b style="color:#ffd24a">${su.gold}g</b>${su.beatN?' · ⚔ cleared':''}`;
-    return `<div class="gearrow" style="--spine:${on?'#e8a33d':'#333a4c'}">
-      <div class="gi" style="font-size:15px;color:${on?'#e8a33d':'#8b93a8'}">${on?'▶':''}${sl+1}</div>
-      <div style="flex:1;min-width:0"><div class="gn">Slot ${sl+1}${on?' <span style="color:var(--amber);font-size:10px">· ACTIVE</span>':''}</div><div class="gd">${line}</div></div>
-      ${on?'':`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:7px 11px;font-size:12px">Play</button>`}
-      ${su.empty?'':`<button class="bigbtn buybtn ghost" data-del="${sl}" style="width:auto;margin:0;padding:7px 9px;font-size:12px;color:var(--danger)">Delete</button>`}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">Save Files</p><h2 class="ovh">Characters</h2>
-    <p class="ovsub">Three independent characters. Switching reloads the game.</p>
+    if(su.empty) return `<div class="wowslot empty"><div class="wowport empty">＋</div>
+      <div class="wowmid"><div class="wowname" style="opacity:.85">Empty Slot ${sl+1}</div><div class="wowsub" style="opacity:.55">No Warden — start a new one here</div></div>
+      <div class="wowbtns"><button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Create</button></div></div>`;
+    const C=CLASSES[su.cls], zbar=Math.min(100,Math.round((su.zone-1)/Math.max(1,ZONES.length)*100));
+    return `<div class="wowslot ${on?'on':''}">
+      <div class="wowport" style="background-image:url('icons/skins/skin-${su.skin}.png')">${on?'<span class="wowactive">ACTIVE</span>':''}</div>
+      <div class="wowmid">
+        <div class="wowname">${htmlSafe(su.name)}</div>
+        <div class="wowsub">${C?C.icon+' '+C.disp:'No class yet'} · <b>Level ${su.lvl}</b>${su.rank>1?' · Rank '+su.rank:''}</div>
+        <div class="wowstats"><span>${su.beatN?'⚔ Realm cleared':'⚑ Zone '+su.zone+'/'+ZONES.length}</span><span style="color:#ffd24a">◆ ${su.gold}g</span></div>
+        <div class="wowzbar"><i style="width:${su.beatN?100:zbar}%"></i></div>
+      </div>
+      <div class="wowbtns">${on?`<button class="bigbtn buybtn" data-play="1" style="width:auto;margin:0;padding:8px 13px;font-size:12px">▶ Play</button>`:`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Play</button>`}
+        <button class="bigbtn buybtn ghost" data-del="${sl}" style="width:auto;margin:0;padding:8px 10px;font-size:12px;color:var(--danger)">✕</button></div></div>`; }).join('');
+  showOverlayHTML(`<style>
+    .wowslot{display:flex;align-items:center;gap:12px;padding:11px;margin-bottom:10px;border:1px solid #2d3342;border-radius:14px;background:linear-gradient(150deg,rgba(30,26,40,.72),rgba(12,12,18,.86));box-shadow:0 6px 16px rgba(0,0,0,.3)}
+    .wowslot.on{border-color:var(--amber);box-shadow:0 6px 20px rgba(232,163,61,.2)}
+    .wowport{width:66px;height:66px;flex:0 0 66px;border-radius:11px;background:#0c0c12 center/cover no-repeat;border:1px solid #3a3f52;position:relative;overflow:hidden}
+    .wowport.empty{display:flex;align-items:center;justify-content:center;font-size:30px;color:#4a5468;background:#12131a}
+    .wowactive{position:absolute;left:0;right:0;bottom:0;font-size:8px;text-align:center;background:rgba(232,163,61,.92);color:#1a1206;font-weight:800;letter-spacing:.1em;padding:1px 0}
+    .wowmid{flex:1;min-width:0}
+    .wowname{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wowsub{font-size:12px;opacity:.85;margin-top:1px}
+    .wowstats{display:flex;gap:13px;font-size:11px;opacity:.72;margin-top:3px}
+    .wowzbar{height:4px;border-radius:3px;background:#22242e;margin-top:5px;overflow:hidden}.wowzbar i{display:block;height:100%;background:linear-gradient(90deg,#7a5cff,#b69aff)}
+    .wowbtns{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  </style>
+  <div class="card"><p class="ovkicker">Your Wardens</p><h2 class="ovh">Load Character</h2>
+    <p class="ovsub">Three independent Wardens — choose one to play. Switching reloads the realm.</p>
     <div class="achlist">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  { const pb=document.querySelector('[data-play]'); if(pb) pb.onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} modeSelect(); }; }
   document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.sel));
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const sl=+b.dataset.del;
     const su=slotSummary(sl);
@@ -6489,7 +6512,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   titleScreen._reveal=revealMenu;
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
-  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} active.empty?modeSelect():openSlots(); };   // new char: empty slot -> create/play; else pick a slot
+  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} active.empty?openCharCreate():openSlots(); };   // new char: empty slot -> creation; else pick/free a slot
   document.getElementById('mmCont').onclick=()=>{ if(active.empty) return; try{initAudio();SFX.pickup();}catch(e){} modeSelect(); };  // resume last-accessed save
   document.getElementById('mmLoad').onclick=()=>{ try{SFX.pickup();}catch(e){} openSlots(); };
   document.getElementById('mmSet').onclick=()=>{ try{SFX.pickup();}catch(e){} openTitleOptions(); };
@@ -7023,6 +7046,57 @@ function openClassPicker(){
     <p class="ovsub">Choose how you fight. Its trial teaches you the rest.<br><span style="opacity:.6">You can unlock the others later — and more besides.</span></p>
     <div class="choices">${cards}</div></div>`);
   document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.c); });
+}
+// NEW GAME -> character creation: name, class, and appearance (eye colour, hair style + colour), then the class trial
+function openCharCreate(){
+  mode='menu'; showGameUI(false); _offerT=Date.now();
+  const EYES=['#8fd0ff','#5affc8','#ffd24a','#ff7a3a','#c47bff','#e8e8e8','#ff4a8a','#4be08a'];
+  const HAIRS=[['short','Short'],['long','Long'],['topknot','Top-knot'],['mohawk','Mohawk'],['bald','Bald']];
+  const HCOLS=['#3a2a1c','#141010','#6b4a2c','#c8a24a','#dcd6c8','#b0402c','#3a4048','#7a5cff'];
+  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff',hair:meta.hairStyle||'short',hcol:meta.hairColor||'#3a2a1c'};
+  function render(){
+    const classCards=STARTERS.map(cid=>{ const C=CLASSES[cid],on=st.cls===cid;
+      return `<button class="ccpick ${on?'on':''}" data-cls="${cid}"><b>${C.icon} ${C.disp}</b><span>${C.family.join(' · ')}</span></button>`; }).join('');
+    const eyeSw=EYES.map(c=>`<button class="ccsw ${st.eye===c?'on':''}" data-eye="${c}" style="background:${c}"></button>`).join('');
+    const hairPills=HAIRS.map(h=>`<button class="ccpill ${st.hair===h[0]?'on':''}" data-hair="${h[0]}">${h[1]}</button>`).join('');
+    const hcolSw=HCOLS.map(c=>`<button class="ccsw ${st.hcol===c?'on':''}" data-hcol="${c}" style="background:${c}"></button>`).join('');
+    showOverlayHTML(`<style>
+      .cc .cclbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin:12px 0 5px}
+      .cc .ccrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+      .ccname input{width:100%;padding:11px 14px;font-size:16px;text-align:center;background:rgba(10,9,14,.7);border:1px solid #3d3123;border-radius:10px;color:#ffe6ad;letter-spacing:.06em}
+      .ccname input:focus{outline:none;border-color:var(--amber)}
+      .ccpick{flex:1;min-width:96px;display:flex;flex-direction:column;gap:2px;align-items:center;padding:9px 8px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:11px;cursor:pointer;color:#e7dbc2}
+      .ccpick b{font-size:14px}.ccpick span{font-size:10px;opacity:.6}
+      .ccpick.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad;box-shadow:0 0 16px rgba(232,163,61,.2)}
+      .ccsw{width:30px;height:30px;border-radius:8px;border:2px solid #2a2a34;cursor:pointer;padding:0}.ccsw.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.4)}
+      .ccpill{padding:8px 13px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:9px;cursor:pointer;color:#e7dbc2;font-size:13px}
+      .ccpill.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad}
+      .ccprev{width:88px;height:88px;margin:2px auto 0;border-radius:14px;background:linear-gradient(160deg,#2a2230,#141018);border:1px solid #3a3f52;position:relative;overflow:hidden}
+      .cphair{position:absolute;left:14px;right:14px;top:12px;height:${st.hair==='bald'?'0':'20px'};border-radius:10px 10px 4px 4px}
+      .cpface{position:absolute;left:20px;right:20px;top:30px;bottom:14px;background:#caa27e;border-radius:8px;display:flex;gap:9px;align-items:center;justify-content:center}
+      .cpeye{width:9px;height:9px;border-radius:50%;box-shadow:0 0 6px currentColor}
+    </style>
+    <div class="card cc"><p class="ovkicker">New Warden</p><h2 class="ovh">Create Your Warden</h2>
+      <div class="ccprev"><div class="cphair" style="background:${st.hcol}"></div><div class="cpface"><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span></div></div>
+      <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="18" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
+      <div class="cclbl">Class</div><div class="ccrow">${classCards}</div>
+      <div class="cclbl">Eye Colour</div><div class="ccrow">${eyeSw}</div>
+      <div class="cclbl">Hair</div><div class="ccrow">${hairPills}</div>
+      <div class="cclbl">Hair Colour</div><div class="ccrow">${hcolSw}</div>
+      <button class="bigbtn" id="ccBegin" style="margin-top:15px">⚔ Begin Your Legend</button>
+      <button class="bigbtn ghost" id="ccBack">Back</button></div>`);
+    const ni=document.getElementById('ccName'); if(ni) ni.oninput=()=>{ st.name=ni.value; };
+    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ st.cls=b.dataset.cls; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ st.eye=b.dataset.eye; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-hair]').forEach(b=>b.onclick=()=>{ st.hair=b.dataset.hair; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-hcol]').forEach(b=>b.onclick=()=>{ st.hcol=b.dataset.hcol; try{SFX.pickup();}catch(e){} render(); });
+    document.getElementById('ccBack').onclick=titleScreen;
+    document.getElementById('ccBegin').onclick=()=>{ try{initAudio();}catch(e){}
+      meta.heroName=(st.name||'').trim().slice(0,18)||'Warden';
+      meta.eyeColor=st.eye; meta.hairStyle=st.hair; meta.hairColor=st.hcol; persist();
+      try{SFX.classup();}catch(e){} startTrial(st.cls); };
+  }
+  render();
 }
 /* Classes & Skills viewer — see every class, its rank, path, and skill tree with
    unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
@@ -8020,7 +8094,17 @@ function drawHero3(p,t,preview){
   popM();
   // head
   bx(0,42,0, 12,12,11, sk.tone);
-  bx(-2.6,42.5,5.6, 2.2,2.4,1.2,'#1a1a22'); bx(2.6,42.5,5.6, 2.2,2.4,1.2,'#1a1a22'); // eyes
+  // customisable HAIR (sits on the head, tucked under any headgear) + EYE COLOUR
+  const _hs=(p.hairStyle||meta.hairStyle||'short'), _hc=(p.hairColor||meta.hairColor||'#3a2a1c');
+  if(_hs!=='bald'){
+    bx(0,47.6,-0.5, 12.4,3.4,11.4, _hc);                                  // crown cap
+    bx(0,44,-5.4, 12,7,2.6, _hc);                                         // back of the head
+    if(_hs==='long'){ bx(0,37,-5.6, 11,10,2.4, _hc); bx(-6,38,-3, 2.4,9,7, _hc); bx(6,38,-3, 2.4,9,7, _hc); }   // long: down the back + sides
+    else if(_hs==='topknot'){ bx(0,51.5,-1, 3.2,4,3.2, _hc); bx(0,54,-1, 2.2,3,2.2, _hc); }                     // bun on top
+    else if(_hs==='mohawk'){ bx(0,50.2,-0.5, 2.6,4.6,11, tint(_hc,'#ff5a2a',0.15)); }                            // ridge
+  }
+  const _eye=(p.eyeColor||meta.eyeColor||'#8fd0ff');
+  bx(-2.6,42.5,5.6, 2.2,2.4,1.2,_eye,_eye,0.9); bx(2.6,42.5,5.6, 2.2,2.4,1.2,_eye,_eye,0.9); // eyes (custom colour, faint glow)
   // headgear
   const hd=sk.head;
   if(hd==='helm'){ bx(0,48.6,0, 13,5.4,12, A,godGlow); bx(0,45,-0.5, 13,3,12.6, A); bx(0,52,-2, 2.6,5,9, sk.glow, sk.glow); }

@@ -995,3 +995,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Preserved the approved pause-menu layout and large artwork.
 - Hid only the redundant decorator icons above Gear, Settings, and Quit to Hub.
 - Muted browser QA passed with all three duplicates hidden and zero console errors.
+
+## [Codex | 2026-07-20] Pause icon restoration and sizing - shipped v1.244.0
+
+- Restored the framed knight `character-sheet.png` Gear artwork from the approved pause-menu design.
+- Standardized all eight pause-card artwork boxes to 88x88 desktop and 68x68 narrow-screen.
+- Preserved the menu structure, cards, labels, spacing, and duplicate-icon cleanup.
+- Muted browser QA confirmed all eight computed sizes and zero console errors.

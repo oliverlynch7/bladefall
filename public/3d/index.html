@@ -532,6 +532,10 @@
   }
   @media(max-width:560px){.npcintro{display:block}.npcportrait{width:100%;height:160px;margin-bottom:12px}.npcidentity .ovh{font-size:25px}.npcidentity .npcline{font-size:12px}}
   @media(max-width:390px){.navgrid,.destgrid{gap:7px}.navcard{min-height:126px;padding:9px 7px}.navart{width:68px;height:68px}.destcard{min-height:204px}.destcard .navart{width:100px;height:92px}.navname{font-size:13px}.pausegroup{padding:10px 8px 1px;margin-top:10px}.pauseutility{margin-top:13px}.pauseutility .navart{width:56px;height:56px}}
+  /* Pause artwork shares one optical box; individual PNG alpha bounds are already closely matched. */
+  .pausecard .pausegroup .navart{width:88px;height:88px;margin:-4px auto 1px;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6));}
+  .pausecard #optBtn .navart,.pausecard #qmenu .navart,.pausecard #titleBtnP .navart{width:88px;height:88px;margin:-4px auto 1px;}
+  @media(max-width:390px){.pausecard .pausegroup .navart{width:68px;height:68px;margin:0 auto 2px}}
   .statgrid{text-align:left;background:rgba(255,255,255,.025);border:1px solid #262a36;border-radius:14px;padding:13px 15px;margin:0 0 18px;}
   .hint{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;}
   /* Audio + settings sliders */
@@ -840,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.243.0';
+const VERSION3D='1.244.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8191,7 +8195,7 @@ function openPause(){
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
     <div class="navgrid">
-      ${navCard('gearBtn','icons/armor_chest_legendary.png','Gear','Inspect equipment')}
+      ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
       ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
       ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
@@ -8271,7 +8275,7 @@ function openPauseV2(){
   pauseGameAudio(); mode='pause';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
-        ${navCard('gearBtn','icons/armor_chest_legendary.png','Gear','Inspect equipment')}
+        ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
         ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
         ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes','Skills, ranks, and paths')}
         ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}

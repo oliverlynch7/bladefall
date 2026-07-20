@@ -564,6 +564,7 @@
   /* Pet Yard has its own hierarchy: one hero companion, then a readable collection grid. */
   .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
   .petyardhead{text-align:center;margin-bottom:8px}.petyardhead .ovsub{margin-bottom:0}.petyardhead .ovh{font-size:30px;}
+  .petyardbrand{display:block;width:112px;height:112px;object-fit:contain;margin:0 auto -4px;filter:drop-shadow(0 8px 10px #0009)}
   .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
   .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
   .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
@@ -774,7 +775,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.221.0';
+const VERSION3D='1.222.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6648,7 +6649,7 @@ const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quart
 function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
 const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:'icons/class-all.png',
   board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
-  abyss:'icons/portal.png',beastkeeper:'icons/pet-collar.png'};
+  abyss:'icons/portal.png',beastkeeper:`icons/beastkeeper.png?v=${VERSION3D}`};
 function fixSliders(){
   ovcard.querySelectorAll('input[type=range]').forEach(el=>{
     if(el._pfix) return; el._pfix=true;
@@ -7558,7 +7559,7 @@ function openBeastkeeper(back){
     :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
   const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
   const shop=unowned.map(id=>petCard(id,'shop')).join('');
-  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
+  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
     ${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
     <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
   const reopen=()=>openBeastkeeper(back);

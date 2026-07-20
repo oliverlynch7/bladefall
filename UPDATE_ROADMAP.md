@@ -970,3 +970,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Replaced the abstract universal Basic Attack emblem with four simple class-family variants: Warrior sword slash, Ranger arrow shot, Mage arcane bolt, and Reaper scythe sweep.
 - Added an explicit `attackStyle` field to class definitions so future classes can inherit one of the four core HUD identities without new HUD branching logic.
 - Updated the LMB slot live whenever the active class changes while preserving RMB Dodge as the universal right-side action.
+
+## [Codex | 2026-07-20] Beastkeeper menu icon restoration - shipped v1.222.0
+
+- Recovered the previously designed black-and-gold spiked collar and bone-paw Beastkeeper artwork from the downloaded hub-interactable icon batch.
+- Removed its baked checkerboard background and exported a clean transparent 256x256 game asset.
+- Replaced the generic pet-collar placeholder on the Beastkeeper hub action card and added the approved artwork prominently to the Pet Yard menu header.

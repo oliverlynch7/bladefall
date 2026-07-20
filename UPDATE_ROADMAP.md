@@ -982,3 +982,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added a unified transparent voxel crest representing the three starting classes: Warrior sword, Ranger bow and arrow, and Mage staff with arcane orb.
 - Replaced the placeholder artwork on both pause-menu Classes buttons and the Drillmaster hub interaction card.
 - Added the emblem prominently to the Class Trainer menu header, with versioned URLs to prevent stale cached artwork.
+
+## [Codex | 2026-07-20] Read-only class build showcase - shipped v1.226.0
+
+- Rebuilt the pause-menu Classes viewer with a full two-choice progression tree inspired by, but visually distinct from, the Drillmaster respec screen.
+- Highlighted every chosen skill and passive, dimmed the rejected alternative, marked pending choices, and grayed future-rank nodes for every class.
+- Added complete Ranger rank 1-10 skill/passive visualization and equivalent discipline, skill-slot, passive, and capstone treatment for Warrior, Mage, and Reaper.
+- Kept the entire viewer read-only: it contains no equip, respec, cost, stat-edit, or confirmation controls; build changes remain exclusive to the Drillmaster.

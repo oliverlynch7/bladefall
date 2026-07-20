@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.195.0';
+const VERSION3D='1.196.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6695,40 +6695,39 @@ function enterWaystation(){
   // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
   // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
   for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
-  G.torches.push({x:-470,z:-60,ph:1},{x:-470,z:160,ph:2},{x:470,z:-60,ph:3},{x:470,z:160,ph:4});
+  G.torches.push({x:-548,z:-150,ph:1},{x:-548,z:240,ph:2},{x:548,z:-150,ph:3},{x:548,z:240,ph:4},{x:0,z:352,ph:5});
   // ---- the gate ARC: one per zone across the north; centre gates drawn deeper so the eye is pulled forward ----
   G.gates=[];
-  const gSpan=640, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;
-  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-250-40*(1-Math.abs(gx)/(gSpan/2||1)));
+  const gSpan=1040, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;   // WIDE spacing — each portal gets real side-to-side room
+  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-262-26*(1-Math.abs(gx)/(gSpan/2||1)));   // gentle arc
     G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
-    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx+40,z:gz+40,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });
-  // ABYSSAL DESCENT — the centrepiece: an elevated dark dais behind the arc's centre (promoted from a hidden corner)
-  G.obstacles.push({kind:'plat',x:0,z:-352,w:150,d:110,h:22});
-  G.deco.push({x:0,z:-352,y0:0,w:184,h:1.4,d:152,c:'#16101f'});
-  for(let k=0;k<4;k++) G.deco.push({x:(Math.random()*2-1)*70,z:-352+(Math.random()*2-1)*48,w:14+Math.random()*10,h:24+Math.random()*26,c:'#241431',theme:'void'});
-  // WEST BAY — THE EXCHANGE (gear & gold): a shallow open alcove, signposted
-  G.deco.push({x:-470,z:40,y0:0,w:300,h:1.1,d:360,c:'#5a4632'});
-  G.deco.push({x:-470,z:-158,y0:80,w:230,h:22,d:6,c:'#3a2a55'});
-  vcol(-470,150,16,16,36); G.deco.push({x:-470,z:150,y0:36,w:22,h:12,d:22,c:'#ff9a4a'});   // forge brazier
-  // EAST BAY — THE WAR YARD (combat prep): a shallow open alcove
-  G.deco.push({x:470,z:40,y0:0,w:300,h:1.1,d:360,c:'#4a4030'});
-  G.deco.push({x:470,z:-158,y0:80,w:230,h:22,d:6,c:'#5e2a24'});
+    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx,z:gz+64,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });   // secret rift sits IN FRONT of its parent, its own room
+  // ABYSSAL DESCENT — its OWN dark grotto in the north-west corner (no longer tucked behind the gate arc)
+  G.obstacles.push({kind:'plat',x:-548,z:-300,w:150,d:120,h:20});
+  G.deco.push({x:-548,z:-300,y0:0,w:190,h:1.4,d:170,c:'#16101f'});
+  for(const s of [-1,1]){ vcol(-548+s*74,-300,20,20,150); G.deco.push({x:-548+s*74,z:-300,y0:150,w:26,h:10,d:26,c:'#2a1840'}); }   // grotto pillars
+  for(let k=0;k<5;k++) G.deco.push({x:-548+(Math.random()*2-1)*72,z:-300+(Math.random()*2-1)*54,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
+  // WEST BAY — THE EXCHANGE (gear & gold): signpost banner only, NO floor carpet
+  G.deco.push({x:-548,z:70,y0:88,w:230,h:24,d:6,c:'#3a2a55'});
+  // EAST BAY — THE WAR YARD (combat prep): signpost banner only, NO floor carpet
+  G.deco.push({x:548,z:70,y0:88,w:230,h:24,d:6,c:'#5e2a24'});
   // ---- the posts: everyone gets a home that fits them ----
   // grouped by purpose: WEST BAY = the Exchange (gear/gold), EAST BAY = the War Yard (combat prep), centre = quests+mirror, north dais = the Abyss
+  // WEST column = the Exchange · EAST column = the War Yard · SOUTH back-wall = bag/postings/mirror · NW grotto = the Abyss
   G.hubNpcs=[
-    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',x:-470,z:-30,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
-    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',x:-360,z:120,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
-    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-470,z:130,open:()=>openForge(wsResume)},
-    {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-280,z:40,open:()=>openBag(wsResume)},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-140,z:110,open:()=>openQuestBoard(wsResume)},
-    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',x:470,z:-30,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
-    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:470,z:130,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
-    {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:300,z:150,open:()=>enterSparringRoom()},
-    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:290,open:()=>openMirror(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:-338,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:()=>openForge(wsResume)},
+    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
+    {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:360,z:150,open:()=>enterSparringRoom()},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-200,z:322,open:()=>openQuestBoard(wsResume)},
+    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:330,open:()=>openMirror(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:200,z:322,open:()=>openBag(wsResume)},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-548,z:-284,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
   ];
   // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
-  { const d2=spawnEnemy('dummy',588,72); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
+  { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
   G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
   G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:360}; G.progressEnd=-350;
   G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
@@ -8536,14 +8535,22 @@ function drawWaystation(t){
     if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
       bx(n.x,10,n.z, 40,20,26,'#5a4426'); bx(n.x,22,n.z, 42,8,28,'#6e5430');
       bx(n.x,16,n.z-13, 8,10,3,'#ffd24a','#ffd24a',0.7); continue; }
-    if(n.prop==='anvil'){ drawShadow(n.x,n.z,16,0.22);
-      bx(n.x,9,n.z, 26,18,26,'#3a2f26'); bx(n.x,24,n.z, 40,10,16,'#262a36','#4a5568',0.35);
-      bx(n.x,31,n.z, 12,6,12,'#30364a');
-      // the Smith himself, working the forge (approved art: white beard, orange scarf, hammer, ember gauntlet)
-      const sx=n.x-30, sz=n.z+10; drawShadow(sx,sz,12,0.24);
+    if(n.prop==='anvil'){ drawShadow(n.x,n.z,26,0.24);
+      // BIGGER anvil on a stump
+      bx(n.x,13,n.z, 30,26,30,'#2a231c'); bx(n.x,30,n.z, 52,14,22,'#20242e','#4a5568',0.4); bx(n.x+22,34,n.z, 14,9,16,'#262a36');  // stump + anvil body + horn
+      bx(n.x,40,n.z, 40,4,18,tint('#4a5568','#fff',0.15));
+      // a stone FORGE with live fire, to the smith's far side
+      const fx=n.x-4, fz=n.z-30; bx(fx,18,fz, 46,36,34,'#2c2420','#3a2f26',0.5); bx(fx,40,fz, 40,8,28,'#1a1512');
+      { const fl=0.6+0.35*Math.sin(t*7); bx(fx,30,fz+4, 22,16,10,'#ff6a24','#ff9a3b',fl); bx(fx,38,fz+4, 12,12,7,'#ffd257','#ffe39a',fl*0.9); }  // forge fire
+      for(let i=0;i<3;i++){ const f=Math.sin(t*9+i*2)*0.5+0.5; bx(fx+(i-1)*6,44+f*12,fz+4, 2.4,3,2.4,'#ff9a4a','#ffd24a',0.7*f); }   // rising embers
+      // a quench trough + a tool rack with hammers/tongs
+      bx(n.x+34,10,n.z+18, 26,12,16,'#2a2e3a'); bx(n.x+34,15,n.z+18, 22,2,12,'#2f6a7a',null,0.7);   // trough + water
+      bx(n.x-34,44,n.z+10, 4,44,4,'#3a2c1c'); bx(n.x-34,64,n.z+10, 30,4,4,'#3a2c1c');                // rack frame
+      for(let i=0;i<3;i++) bx(n.x-46+i*12,54,n.z+10, 3,18,3,i%2?'#8b93a8':'#6b4a2c');                 // hanging tools
+      // the Smith himself, working the forge
+      const sx=n.x-26, sz=n.z+16; drawShadow(sx,sz,12,0.24);
       pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel({id:'smith',c1:n.c1,c2:n.c2},t); popM();
-      // restrained sparks off the anvil as he works
-      if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*14, 32+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);
+      if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*16, 38+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);   // hammer sparks
       continue; }
     if(n.prop==='mirror'){ drawShadow(n.x,n.z,20,0.26);
       // A grand gilded standing mirror facing inward toward the Waystation's main room (-z).
@@ -8562,13 +8569,17 @@ function drawWaystation(t){
         pushM(); mv(ssx,fh*0.5+(sh-0.5)*22,gf+1); rotZ(0.5); bx(0,0,0, 8,fh*0.82,1, '#ffffff','#ffffff',0.32); popM(); }
       bx(n.x,fh*0.5,gf+1.4, fw+2,fh,0.5, '#dff0ff','#ffffff',0.07);                                // faint overall glass sheen
       continue; }
-    if(n.prop==='beast'){ drawShadow(n.x,n.z,20,0.26);
-      bx(n.x,7,n.z, 44,14,30,'#3a2f1e','#5a4a2e',0.3);                                   // low kennel base
-      bx(n.x-16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x+16,30,n.z, 5,42,5,'#4a3a26'); bx(n.x,50,n.z, 42,6,10,'#5a4426');   // perch frame
-      bx(n.x,34,n.z-2, 10,10,3,'#c9a86a','#ffe0a0',0.5);                                 // paw sigil plaque
-      { const gc=meta.petActive?petRarityCol(meta.petActive):'#c9a86a'; bx(n.x,20,n.z+4, 8,8,8, gc, gc, 0.4+0.25*Math.sin(t*3)); }  // a resident glow, tinted to your active pet
-      // the Beastkeeper stands with her panther (approved art: dreadlocks, gold crook, fur mantle)
-      { const bx0=n.x+34, bz0=n.z+6; drawShadow(bx0,bz0,12,0.24);
+    if(n.prop==='beast'){ drawShadow(n.x,n.z,26,0.26);
+      // THREE cages of different sizes, each with a little resident critter behind the bars
+      const cages=[[n.x-40,n.z-8,34,'#8fdf6a'],[n.x-2,n.z-14,48,'#7cc6ff'],[n.x+36,n.z-6,28,'#e07ad0']];
+      for(const [cxx,czz,ch,pc] of cages){ const cw=ch*0.82;
+        bx(cxx,ch/2,czz, cw,ch,cw*0.8,'#2a241c','#3a2f1e',0.5);                          // cage body (dark)
+        for(let b=-2;b<=2;b++) bx(cxx+b*(cw*0.2),ch/2,czz+cw*0.42, 1.6,ch-4,1.6,'#5a4a2e');   // vertical bars
+        bx(cxx,ch+3,czz, cw+4,4,cw*0.8+4,'#4a3a26');                                     // cage roof
+        bx(cxx,ch*0.34,czz+1, cw*0.4,ch*0.3,cw*0.3, pc, pc, 0.55+0.25*Math.sin(t*3+cxx));   // the critter glow inside
+        bx(cxx-2,ch*0.42,czz+cw*0.36, 1.6,1.6,1, '#fff','#fff',0.8); bx(cxx+2,ch*0.42,czz+cw*0.36, 1.6,1.6,1, '#fff','#fff',0.8); }  // its eyes
+      bx(n.x,3,n.z, 120,5,60,'#3a2f1e','#5a4a2e',0.25);                                   // pen floor tint (under the cages, small)
+      { const bx0=n.x+8, bz0=n.z+30; drawShadow(bx0,bz0,12,0.24);
         pushM(); mv(bx0,0,bz0); rotY(hubNpcFacing(n,bx0,bz0)); hubNpcModel({id:'beastkeeper',c1:n.c1,c2:n.c2},t); popM(); }
       continue; }
     if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
@@ -8584,6 +8595,26 @@ function drawWaystation(t){
       bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
       bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
       continue; }
+    if(n.prop==='counter'){ drawShadow(n.x,n.z,24,0.24);   // Quartermaster's shop stall
+      bx(n.x,44,n.z-16, 84,64,8,'#4a3826'); for(let i=0;i<3;i++) bx(n.x-28+i*28,52+((i%2)?8:0),n.z-13, 18,4,5,'#3a2c1c');   // back shelf + shelves
+      for(let i=0;i<6;i++){ const c=['#c9a24a','#8b93a8','#b06bff','#e8453d','#5affc8','#ffd24a'][i]; bx(n.x-32+i*13,56+((i%2)?7:0),n.z-11, 6,8,4, c, c, 0.55); }   // colourful wares
+      bx(n.x,16,n.z+16, 80,32,16,'#5a4028','#7a5836',0.35); bx(n.x,34,n.z+16, 88,5,22,'#6e5030'); bx(n.x,34,n.z+27, 88,3,3,'#caa23a','#ffd24a',0.6);   // counter + gilt lip
+      { const sx=n.x, sz=n.z-4; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      continue; }
+    if(n.prop==='booth'){ drawShadow(n.x,n.z,24,0.24);     // Drillmaster's booth + class-insignia banner
+      bx(n.x,18,n.z+16, 84,36,18,'#3a2420','#5e2a24',0.4); bx(n.x,38,n.z+16, 92,5,22,'#4a2e28');   // booth front + top
+      for(const s of [-1,1]) bx(n.x+s*48,74,n.z-8, 8,148,8,'#2a2028');                              // banner poles
+      bx(n.x,140,n.z-8, 104,44,4,'#5e2a24','#7a2a24',0.92);                                          // the banner
+      bx(n.x,140,n.z-6, 4,28,2,'#dfe5ec'); bx(n.x-6,127,n.z-6, 17,4,2,'#e8a33d','#ffd24a',0.8);      // SWORD insignia (centre)
+      bx(n.x-34,140,n.z-6, 3,26,2,'#6b4a2c'); bx(n.x-34,155,n.z-6, 9,9,2,'#e8a33d','#ffd24a',0.85);  // STAFF insignia (left)
+      for(let k=-4;k<=4;k++) bx(n.x+34+Math.round(Math.abs(k)*0.7),140+k*3.2,n.z-6, 2.6,3,2,'#e8a33d','#ffd24a',0.85);   // BOW insignia (right)
+      { const sx=n.x, sz=n.z-4; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      continue; }
+    if(n.prop==='barber'){ drawShadow(n.x,n.z,20,0.24);    // Keeper + a styling chair
+      { const sx=n.x-14, sz=n.z; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      const cx=n.x+26; bx(cx,8,n.z, 28,16,28,'#3a2a55'); bx(cx,24,n.z-12, 26,34,7,'#4a3a66'); bx(cx,20,n.z, 24,4,24,'#7a5f9c');
+      bx(cx,2,n.z, 9,4,9,'#b06bff','#b06bff',0.5); for(const s of [-1,1]) bx(cx+s*17,27,n.z, 4,3,11,'#6b5a8a'); bx(cx,46,n.z, 12,8,7,'#5a4a7a');   // headrest
+      continue; }
     // a living hub keeper — a DISTINCT voxel model per character (approved art), not a palette swap
     drawShadow(n.x,n.z,13,0.25);
     pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));
@@ -8591,9 +8622,6 @@ function drawWaystation(t){
     popM();
     bx(n.x,72,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
   }
-  // dummy corner rug + target-range mat
-  bx(300,0.8,-20, 130,1.4,90, '#3a3226');
-  bx(290,0.8,-330, 220,1.4,60, '#2f2a22');
   // ===== Phase 12: a hub that GROWS with your progress =====
   // ITEM 1 — boss trophies mounted along the west wall, one per cleared zone, in the boss's colour
   { let ti=0; ZONES.forEach((Z)=>{ if(!meta.zoneDone[Z.id]) return; const tz=-300+ti*82; ti++; const col=ZONE_TROPHY[Z.id]||'#e8a33d';

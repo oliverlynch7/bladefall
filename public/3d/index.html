@@ -632,26 +632,31 @@
     .hudpanel::before{left:8%;right:7%;height:3px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 12px #d8953d66}
     .hudpanel::after{inset:7px;border:1px solid #c8944338;border-radius:2px 12px 12px 2px;clip-path:polygon(0 8%,5% 0,95% 0,100% 18%,100% 82%,95% 100%,5% 100%,0 92%)}
     .hudportrait{display:block;position:absolute;left:-8px;top:-8px;width:116px;height:116px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
-    .hudportrait::before,.hudportrait::after{content:'';position:absolute;inset:-9px;border:2px solid #725024;transform:rotate(45deg);clip-path:polygon(0 0,34% 0,34% 4%,66% 4%,66% 0,100% 0,100% 34%,96% 34%,96% 66%,100% 66%,100% 100%,66% 100%,66% 96%,34% 96%,34% 100%,0 100%,0 66%,4% 66%,4% 34%,0 34%)}
-    .hudportrait::after{inset:8px;border-color:#a765d2;opacity:.65;filter:drop-shadow(0 0 5px #984bd3);transform:rotate(22.5deg)}
+    /* (removed the rotated gold/purple diamond filigree — it overlapped the name text) */
     .hudportrait img{position:absolute;inset:13px;width:90px;height:90px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
     #hud .meta{display:grid;grid-template-columns:minmax(0,1fr) 164px;gap:18px;margin:0 0 15px;min-height:38px;align-items:start}
     #hud .left{display:grid;gap:2px;align-items:start}
     #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}
     #weapontag{display:block;max-width:235px;font-family:Georgia,serif;font-size:10px;line-height:1.3;letter-spacing:.055em;text-transform:uppercase;white-space:normal}
-    #armortag{position:absolute;left:-106px;top:126px;font-size:9px;white-space:nowrap}
+    #armortag{position:static;left:auto;top:auto;font-family:Georgia,serif;font-size:12px;color:#cbd3de;white-space:nowrap}
     #stagetag{position:absolute;left:auto;right:0;top:23px;max-width:164px;color:#d6b06c;font-family:Georgia,serif;font-size:8px;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 5px #000}
     #goldtag{font-family:Georgia,serif;font-size:12px!important}
-    .hudvitals .barwrap{gap:6px;margin-bottom:5px}
-    .barlabel{width:34px;color:#c9b58f;font-family:Georgia,serif;font-size:8px}
-    .bar{height:13px;border-radius:1px;border:1px solid #6f5129;background:#020204;box-shadow:inset 0 2px 5px #000,0 0 0 1px #08090c,0 0 0 2px #342613}
+    .hudvitals{margin-top:4px}
+    .hudvitals .barwrap{gap:10px;margin-bottom:12px}.hudvitals .barwrap:last-child{margin-bottom:4px}
+    .barlabel{width:38px;color:#c9b58f;font-family:Georgia,serif;font-size:10px;letter-spacing:.06em}
+    .bar{height:22px;border-radius:2px;border:1px solid #6f5129;background:#020204;box-shadow:inset 0 2px 6px #000,0 0 0 1px #08090c,0 0 0 2px #342613}
     .bar>i{border-radius:0;position:relative;overflow:hidden}
-    .bar>i::after{content:'';position:absolute;inset:1px 0 auto;height:2px;background:#fff5;box-shadow:0 0 4px #fff5}
-    .vitalnum{min-width:57px;font-family:Georgia,serif;color:#eadfc9}
-    #hudprogress{position:fixed;left:50%;top:auto;bottom:12px;transform:translateX(-50%);width:min(900px,66vw);gap:2px;margin:0;padding:6px 10px;background:linear-gradient(180deg,#161319f2,#050609f2);border:1px solid #765323;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #362613,0 10px 24px #000a;clip-path:polygon(2% 0,98% 0,100% 50%,98% 100%,52% 100%,50% 82%,48% 100%,2% 100%,0 50%);z-index:8}
-    .progbox{padding:5px 10px 6px;border:0;border-radius:0;background:transparent;box-shadow:none}
-    .progbox:first-child{border-right:1px solid #744e7e}
-    .proghead{margin-bottom:4px}.progtitle{font-family:Georgia,serif;color:#d8cab0;font-size:9px;letter-spacing:.09em}.prognum{font-family:Georgia,serif;font-size:8px;color:#b5ab9c}.progbox .bar{height:8px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
+    .bar>i::after{content:'';position:absolute;inset:2px 0 auto;height:3px;background:#fff6;box-shadow:0 0 5px #fff6}
+    .vitalnum{min-width:92px;font-family:Georgia,serif;font-size:15px;font-weight:800;color:#f2e7d0}
+    /* the two XP bars flank the skill rail in the bottom corners (no longer a single strip UNDER the skills,
+       so they can't visually collide with it); each reaches from near its corner in to meet the skill frame,
+       its inner end tucking just under the frame so the three read as one continuous bottom rail */
+    #hudprogress{position:fixed;left:0;right:0;top:auto;bottom:16px;transform:none;width:auto;display:block;gap:0;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;z-index:5}
+    .progbox{position:absolute;bottom:0;height:54px;padding:8px 22px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:linear-gradient(180deg,rgba(23,19,27,.88),rgba(6,7,11,.9));border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 10px 24px #000b}
+    .progbox.charprog{left:22px;right:calc(50% + 292px);border-radius:12px 4px 4px 12px;clip-path:polygon(1.5% 0,100% 0,100% 100%,1.5% 100%,0 66%,0 34%)}
+    .progbox.classprog{right:22px;left:calc(50% + 292px);border-radius:4px 12px 12px 4px;clip-path:polygon(0 0,98.5% 0,100% 34%,100% 66%,98.5% 100%,0 100%)}
+    .progbox:first-child{border:1px solid #9a6c30}
+    .proghead{margin-bottom:0}.progtitle{font-family:Georgia,serif;color:#e0d3b8;font-size:10px;letter-spacing:.1em;font-weight:800}.prognum{font-family:Georgia,serif;font-size:10px;color:#c3b9a8;font-weight:700}.progbox .bar{height:9px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
     .pathrow{position:absolute;left:104px;right:18px;bottom:9px}.pathrow .barlabel{color:#817766}.pathrow .bar{height:3px!important;box-shadow:none}
     #jetwrap{position:absolute;left:104px;right:18px;bottom:9px}
     #bosshpwrap{top:22px;width:min(610px,42vw)}
@@ -696,19 +701,19 @@
     #pausebtn{top:18px;right:18px;border-radius:4px;border-color:#8e6530;background:#101015e8;box-shadow:inset 0 0 0 2px #08090c,0 6px 16px #0008}
   }
   @media (min-width:900px) and (max-height:800px) and (pointer:fine){
-    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:8px;transform:translateX(-50%) scale(.9);transform-origin:bottom center}#pethud{transform:scale(.86);transform-origin:bottom left}.btn.skl{bottom:43px;transform:scale(.88)}#bDodge,#bJump,#bAttack{transform:scale(.88)}
+    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:10px}.progbox{height:48px}#pethud{transform:scale(.86);transform-origin:bottom left}.btn.skl,#bLMB,#bSpace{bottom:46px}#skillframe{bottom:30px;height:98px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
 </style>
 </head>
 <body>
 <canvas id="gl"></canvas>
-<div id="hud" class="hide"><div class="hudpanel">
+<div id="hud" class="hide">
   <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
+  <div class="hudpanel">
+  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
-  <div class="barwrap pathrow"><span class="barlabel">PATH</span><div class="bar"><i id="progfill" style="background:linear-gradient(90deg,#555d70,#aab1bf)"></i></div></div>
 </div></div>
 <div class="progpair hide" id="hudprogress"><div class="progbox charprog"><div class="proghead"><span class="progtitle" id="xplabel">CHARACTER · LV 1</span><span class="prognum" id="xpnum"></span></div><div class="bar"><i id="xpfill"></i></div></div>
   <div class="progbox classprog"><div class="proghead"><span class="progtitle" id="clslabel">CLASS · RANK 1</span><span class="prognum" id="clsnum"></span></div><div class="bar"><i id="clsfill"></i></div></div></div>
@@ -755,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.202.0';
+const VERSION3D='1.203.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE

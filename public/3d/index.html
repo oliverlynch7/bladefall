@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.193.0';
+const VERSION3D='1.194.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2433,7 +2433,9 @@ function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; }
 // unless it's throwaway starter/plain gear or the bag is full.
 const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
 function bagReplaced(old,isWeapon){
-  if(!old || THROWAWAY.test(old.name||'')) return;
+  // Only the free STARTER weapons are discarded when replaced; every real drop you had equipped
+  // (including plain commons) is auto-sent to the bag so you never lose gear on an equip.
+  if(!old || /^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'')) return;
   if(!Array.isArray(meta.stash)) meta.stash=[];
   if(meta.stash.length>=STASH_CAP){ toast('Bag full — '+old.name+' left behind'); return; }
   meta.stash.push(isWeapon?{weapon:old}:{armor:old}); persist();

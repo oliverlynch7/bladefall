@@ -695,13 +695,13 @@
     #bAttack{right:calc(50% - 174px);bottom:50px;width:66px;height:66px;border-radius:5px;background:radial-gradient(circle,#48201e,#151014 72%);border-color:#aa7432;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
     #bInteract{right:22px;bottom:42px;width:96px;height:44px;border-radius:3px;background:linear-gradient(#1d1816,#09090d);border:1px solid #9c6d2e;clip-path:polygon(10% 0,90% 0,100% 25%,100% 75%,90% 100%,10% 100%,0 75%,0 25%)}
     .tog{right:15px;border-radius:3px;border-color:#6e522d;background:#0d0e12bb}.tog#bAuto{top:42%}
-    #pethud{display:grid;left:20px;bottom:28px;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,#171419ed,#07080ced);border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
+    #pethud{display:grid;left:18px;top:204px;bottom:auto;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,#171419ed,#07080ced);border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
     #pethud img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}
     #pethud .petname{font:700 11px Georgia,serif;letter-spacing:.08em;color:#e7d7b7;text-transform:uppercase}.pethplabel{font-size:8px;color:#aaa;margin:3px 0}.pethpbar{height:6px;background:#020304;border:1px solid #5e4927}.pethpbar i{display:block;height:100%;background:linear-gradient(90deg,#286d32,#74d64b);box-shadow:0 0 5px #6bd24b66}
     #pausebtn{top:18px;right:18px;border-radius:4px;border-color:#8e6530;background:#101015e8;box-shadow:inset 0 0 0 2px #08090c,0 6px 16px #0008}
   }
   @media (min-width:900px) and (max-height:800px) and (pointer:fine){
-    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:10px}.progbox{height:48px}#pethud{transform:scale(.86);transform-origin:bottom left}.btn.skl,#bLMB,#bSpace{bottom:46px}#skillframe{bottom:30px;height:98px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
+    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:10px}.progbox{height:48px}#pethud{transform:scale(.86);transform-origin:top left}.btn.skl,#bLMB,#bSpace{bottom:46px}#skillframe{bottom:30px;height:98px}#bDodge,#bJump,#bAttack{transform:scale(.88)}
   }
 </style>
 </head>
@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.204.0';
+const VERSION3D='1.205.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3489,7 +3489,7 @@ const EXPANDED_SCAPES={
     const beacon=(x,z,y)=>{ vcol(x,z,24,24,y+62); G.deco.push({x,z,y0:y+62,w:36,h:14,d:36,c:'#ffb34d'}); G.deco.push({x,z,y0:y+76,w:12,h:74,d:12,c:'#fff0a0'}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!upper){
-      const wash=room('Lower Wash',0,0,820,650),narrows=room('Breathing Narrows',-360,-760,620,650),fork=room('Split Mesa',280,-1420,760,620),switches=room('Switchback Ascent',-480,-2140,620,620),rim=room('Watcher Rim',-420,-2860,720,560,210),basin=room('Suspended Bridge Basin',380,-3300,760,700,210),gate=room('Wind-Carved Gate',0,-4300,980,760,210);
+      const wash=room('Lower Wash',0,0,860,680),narrows=room('Breathing Narrows',-360,-760,780,700),fork=room('Split Mesa',280,-1420,920,760),switches=room('Switchback Ascent',-480,-2140,620,620),rim=room('Watcher Rim',-420,-2860,900,720,210),basin=room('Suspended Bridge Basin',380,-3300,760,700,210),gate=room('Wind-Carved Gate',0,-4300,1080,820,210);
       floorRoad(wash,narrows,170); floorRoad(narrows,fork,145); floorRoad(fork,switches,145);
       wallPair(wash,280); wallPair(narrows,380); wallPair(fork,430);
       // The low road stays forgiving; the high switchback is faster and exposes a reward.
@@ -3500,11 +3500,11 @@ const EXPANDED_SCAPES={
       G.crumbles.push({x:150,z:-3250,w:84,d:72,h:210,state:0,timer:0,respawn:0,fallY:0,jit:0}); G.movers.push({x0:270,z:-3300,w:96,d:72,h:210,amp:36,sp:1.25,ph:rnd()*6.28,x:270,px:270});
       // Optional premium rim route climbs higher, but the required route never needs Magic Socks.
       climbRun(-520,-2860,210,-650,-3140,350,70); for(let k=0;k<5;k++) vplat(-650+k*130,-3140-k*70,350+(k%2)*34,76,76,{rim:true}); chest(-140,-3420,384);
-      floorRoad(basin,gate,170); climbRun(380,-3300,210,0,-4300,210,82,{bridge:true}); beacon(0,-4260,210); beacon(-300,-2860,210); beacon(330,-3300,210);
+      floorRoad(basin,gate,170); climbRun(380,-3300,210,0,-4300,210,82,{bridge:true});vplat(0,-4300,210,1080,820,{checkpoint:true,breather:true}); beacon(0,-4260,210); beacon(-300,-2860,210); beacon(330,-3300,210);
       // Telegraph the rockfall corridor with cracked shelves and rubble before enemies engage.
       for(let k=0;k<12;k++){ const x=-180+(k%4)*120,z=-620-Math.floor(k/4)*130; G.deco.push({x,z,y0:0,w:34+(k%3)*12,h:20+(k%2)*14,d:30,c:DARK,theme:'canyon'}); }
-      for(const p of [[0,-180,wash],[-360,-760,narrows],[280,-1420,fork],[-480,-2140,switches],[-420,-2860,rim],[380,-3300,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster(p[2]===rim?'cragspitter':'sparkling',p[0]+60,p[1]-20,p[2]); }
-      scapeKill(ctx,[{x:0,z:-180,room:wash},{x:-360,z:-760,room:narrows},{x:280,z:-1420,room:fork},{x:-480,z:-2140,room:switches},{x:-420,z:-2860,room:rim},{x:380,z:-3300,room:basin}]);
+      mkMonster('dustjackal',0,-180,wash);for(const p of [[-360,-760,narrows],[280,-1420,fork],[-420,-2860,rim]]){ mkMonster('dustjackal',p[0]-65,p[1],p[2]); mkMonster(p[2]===rim?'cragspitter':'sparkling',p[0]+65,p[1]-20,p[2]); }mkMonster('cragspitter',-350,-2920,rim);
+      scapeKill(ctx,[{x:-360,z:-760,room:narrows},{x:280,z:-1420,room:fork},{x:-420,z:-2860,room:rim}]);
       finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4490,sy:0,decoCol:SAND,decoTheme:'canyon',decoTall:390});
     } else {
       const dry=room('Dry Wash',0,0,820,620),fossils=room('Fossil Steps',-480,-760,660,620),needle=room('Needle Forest',420,-1280,720,680),shelf=room('High Bone Shelf',-300,-2080,760,620,160),arch=room('Gale Arch',480,-2700,700,620,160),shrine=room('Hollow Shrine',0,-3600,980,760,160),exit=room('Marksman Approach',0,-4380,840,620,160);
@@ -3515,7 +3515,7 @@ const EXPANDED_SCAPES={
       climbRun(300,-2500,160,480,-2700,160,74); G.movers.push({x0:250,z:-2960,w:100,d:76,h:160,amp:58,sp:.9,ph:rnd()*6.28,x:250,px:250}); G.movers.push({x0:80,z:-3100,w:100,d:76,h:160,amp:44,sp:1.2,ph:rnd()*6.28,x:80,px:80});
       floorRoad(arch,shrine,170); floorRoad(shrine,exit,180); climbRun(480,-2700,160,0,-3600,160,82,{bridge:true}); climbRun(0,-3600,160,0,-4380,160,84,{bridge:true}); beacon(0,-3640,160); chest(520,-2760,160); chest(-620,-2080,160);
       for(let k=0;k<18;k++){ const a=k/18*6.28,rr=270+(k%3)*34; G.deco.push({x:Math.cos(a)*rr,z:-3600+Math.sin(a)*rr,y0:160,w:24,h:90+(k%4)*30,d:24,c:k%3?SAND:BONE,theme:'canyon'}); }
-      mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',480,-2700,arch); mkMonster('dustjackal',0,-3600,shrine);
+      mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',120,-3600,shrine); mkMonster('dustjackal',-120,-3600,shrine);
       scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
       finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     }
@@ -3526,19 +3526,19 @@ const EXPANDED_SCAPES={
     const tower=(x,z,h)=>{vcol(x,z,100,100,h);for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?38:-38),z:z+(k<2?38:-38),y0:h,w:26,h:28,d:26,c:IRON});};
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!under){
-      const camp=room('Outer Siege Camp',0,0,900,700),breach=room('Breached Curtain Wall',-360,-850,760,650),yard=room('Prison Yard',360,-1550,880,720),ramp=room('West Battlements',-500,-2320,680,620,190),hall=room('Great Hall Approach',280,-3000,900,760,190),vault=room('Sealed Vault Court',0,-4050,980,760,190);
+      const camp=room('Outer Siege Camp',0,0,900,700),breach=room('Breached Curtain Wall',-360,-850,760,650),yard=room('Prison Yard',360,-1550,980,820),ramp=room('Broken West Span',-500,-2320,820,700,190),hall=room('Great Hall Approach',280,-3000,1020,840,190),vault=room('Sealed Vault Court',0,-4050,1080,840,190);
       road(camp,breach,180);road(breach,yard,160);G.walls.push({x:-730,z:-850,w:60,d:700,h:220,stand:true});G.walls.push({x:20,z:-850,w:60,d:700,h:220,stand:true});
       // Siege camp silhouettes: ballista, broken carts, tents, and a climbable collapsed siege tower.
       for(const t of [[-280,80],[250,-100],[-40,-220]])G.deco.push({x:t[0],z:t[1],y0:0,w:150,h:55,d:100,c:'#49392e'});
       G.deco.push({x:-330,z:-600,y0:20,w:230,h:28,d:60,c:'#3b2d24'});for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
       // High route: battlement crossfire and a broken-wall jump line. Low route: drainage infiltration under the yard.
-      climbRun(-520,-1650,0,-500,-2320,190,76);tower(-760,-2280,250);for(let k=0;k<7;k++)vplat(-500+k*115,-2320-(k%2)*90,190+(k%3)*26,78,78,{battlement:true});
+      climbRun(-520,-1650,0,-500,-2320,190,88);tower(-820,-2280,250);for(let k=0;k<7;k++){vplat(-500+k*125,-2320-(k%2)*82,190+(k%3)*22,110,100,{battlement:true,setpiece:true});G.deco.push({x:-500+k*125,z:-2320-(k%2)*82-44,y0:190+(k%3)*22,w:90,h:30,d:16,c:IRON});}
       const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);scapeSecret(ctx,850,-2520,0);
-      climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});
+      climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});vplat(0,-4050,190,1080,840,{checkpoint:true,breather:true});
       for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
       chest(-720,-2320,190);chest(360,-3150,190);
-      for(const p of [[0,-120,camp],[-360,-850,breach],[360,-1550,yard],[-500,-2320,ramp],[280,-3000,hall]]){mkMonster('revenant',p[0]-55,p[1],p[2]);mkMonster(p[2]===ramp?'caster':'bones',p[0]+60,p[1]-20,p[2]);}
-      scapeKill(ctx,[{x:0,z:-120,room:camp},{x:-360,z:-850,room:breach},{x:360,z:-1550,room:yard},{x:-500,z:-2320,room:ramp},{x:280,z:-3000,room:hall}]);scapeFind(ctx,0,-4140,190);
+      mkMonster('revenant',0,-120,camp);for(const p of [[360,-1550,yard],[-500,-2320,ramp],[280,-3000,hall]]){mkMonster('revenant',p[0]-70,p[1],p[2]);mkMonster(p[2]===ramp?'caster':'bones',p[0]+70,p[1]-20,p[2]);}mkMonster('bones',340,-3070,hall);
+      scapeKill(ctx,[{x:360,z:-1550,room:yard},{x:-500,z:-2320,room:ramp},{x:280,z:-3000,room:hall}]);scapeFind(ctx,0,-4140,190);
       finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4240,decoCol:STONE,decoTheme:'ruins',decoTall:380});
     }else{
       const intake=room('Undercroft Intake',0,0,760,600),cells=room('Prison Galleries',-460,-760,700,680),pit=room('Punishment Pit',420,-1440,760,700),records=room('Records Vault',-380,-2220,720,660,100),walk=room('Warden Walk',420,-2900,720,620,210),shaft=room('Escape Shaft',0,-3800,820,760,330),door=room('Fallen Warden Door',0,-4500,760,560,330);
@@ -3559,7 +3559,7 @@ const EXPANDED_SCAPES={
     const icePine=(x,z,h)=>{vcol(x,z,20,20,h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};
     const brazier=(x,z,y=0)=>{vcol(x,z,22,22,y+36);G.deco.push({x,z,y0:y+36,w:34,h:18,d:34,c:'#ffb04d'});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!upper){
-      const lake=room('Frozen Lake',0,0,980,760),village=room('Buried Village',-520,-900,760,680),gorge=room('Ice Gorge',420,-1700,760,700),shelter=room('Expedition Shelter',-420,-2460,680,620,120),cavern=room('Aurora Caverns',420,-3150,820,720,220),summit=room('Summit Approach',0,-4200,980,760,220);
+      const lake=room('Frozen Lake',0,0,980,760),village=room('Buried Village',-520,-900,940,800),gorge=room('Ice Gorge Arena',420,-1700,940,820),shelter=room('Expedition Shelter',-420,-2460,880,740,120),cavern=room('Aurora Caverns',420,-3150,820,720,220),summit=room('Summit Approach',0,-4200,1080,840,220);
       // Cracking lake: two braided lines, with broad recovery ice between them.
       for(let k=0;k<12;k++){const x=(k%2?-170:170),z=250-k*105;G.crumbles.push({x,z,w:120,d:92,h:0,state:0,timer:0,respawn:0,fallY:0,jit:0});}road(lake,village,170);road(village,gorge,150);
       for(const h of [[-700,-820],[-450,-1040],[-250,-820]]){G.deco.push({x:h[0],z:h[1],y0:0,w:190,h:56,d:150,c:'#718b96'});G.deco.push({x:h[0],z:h[1],y0:56,w:220,h:24,d:175,c:SNOW});}
@@ -3568,9 +3568,9 @@ const EXPANDED_SCAPES={
       climbRun(420,-2100,220,-420,-2460,120,76);vplat(-420,-2460,120,680,620,{checkpoint:true,terrace:true});brazier(-420,-2460,120);chest(-650,-2500,120);
       // Aurora cavern floats over a safe snow floor; an optional crystal ladder rises above the main route.
       climbRun(-120,-2700,120,420,-3150,220,74);for(let k=0;k<8;k++){const a=k/8*6.28;vplat(420+Math.cos(a)*250,-3150+Math.sin(a)*220,220+(k%3)*34,84,84,{crystal:true});G.deco.push({x:420+Math.cos(a)*250,z:-3150+Math.sin(a)*220,y0:220,w:18,h:90,d:18,c:AUR});}
-      climbRun(420,-3150,220,0,-4200,220,84,{snowbridge:true});for(let k=0;k<14;k++){const a=k/14*6.28;icePine(Math.cos(a)*410,-4200+Math.sin(a)*310,70+rnd()*70);}chest(650,-3150,254);
-      for(const p of [[0,-180,lake],[-520,-900,village],[420,-1700,gorge],[-420,-2460,shelter],[420,-3150,cavern]]){mkMonster('frostshell',p[0]-55,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1]-20,p[2]);}
-      scapeKill(ctx,[{x:0,z:-180,room:lake},{x:-520,z:-900,room:village},{x:420,z:-1700,room:gorge},{x:-420,z:-2460,room:shelter},{x:420,z:-3150,room:cavern}]);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4410,decoCol:DARK,decoTheme:'frost',decoTall:350});
+      climbRun(420,-3150,220,0,-4200,220,84,{snowbridge:true});vplat(0,-4200,220,1080,840,{checkpoint:true,breather:true});for(let k=0;k<14;k++){const a=k/14*6.28;icePine(Math.cos(a)*410,-4200+Math.sin(a)*310,70+rnd()*70);}chest(650,-3150,254);
+      mkMonster('frostling',0,-180,lake);for(const p of [[-520,-900,village],[420,-1700,gorge],[-420,-2460,shelter]]){mkMonster('frostshell',p[0]-65,p[1],p[2]);mkMonster('frostling',p[0]+65,p[1]-20,p[2]);}mkMonster('frostshell',-360,-2520,shelter);
+      scapeKill(ctx,[{x:-520,z:-900,room:village},{x:420,z:-1700,room:gorge},{x:-420,z:-2460,room:shelter}]);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4410,decoCol:DARK,decoTheme:'frost',decoTall:350});
     }else{
       const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
       road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
@@ -3579,20 +3579,20 @@ const EXPANDED_SCAPES={
       // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
       for(let k=0;k<14;k++){const t=k/13,x=-420+920*t,z=-2500-600*t,y=250-170*t;vplat(x,z,y,100,82,{slide:true});if(k%4===0)vplat(x-170,z,y,130,110,{shelter:true});}
       vplat(500,-3100,80,760,700,{terrace:true});road(cave,cairn,170);climbRun(500,-3100,80,0,-4100,180,78);brazier(0,-4140,180);chest(650,-3100,80);chest(-650,-2350,250);
-      for(const p of [[-500,-850,white],[420,-1600,ravine],[-420,-2350,slide],[500,-3100,cave]]){mkMonster('frostshell',p[0]-45,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
+      for(const p of [[-500,-850,white],[500,-3100,cave],[0,-4100,cairn]]){mkMonster('frostshell',p[0]-55,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
       scapeFetch(ctx,[{x:-500,z:-850,y:0},{x:420,z:-1600,y:120},{x:-420,z:-2350,y:250},{x:500,z:-3100,y:80},{x:0,z:-4100,y:180}]);scapeFind(ctx,0,-4140,180);finishScape(ctx,{sx:0,sz:280,sy:0,gx:0,gz:-4380,decoCol:DARK,decoTheme:'frost',decoTall:390});
     }
   },
   ember(ctx){const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=145)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
-    if(!vents){const mine=room('Ash Mine',0,0,860,660),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks',420,-1580,820,720,120),city=room('Ancient Forge City',-400,-2380,820,720,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,980,780,280);
+    if(!vents){const mine=room('Ash Mine',0,0,940,720),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks Arena',420,-1580,1020,860,120),city=room('Ancient Forge City',-400,-2380,1040,880,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,1100,860,280);
       road(mine,slag,160);climbRun(-180,-350,0,-480,-850,120,74);for(let k=0;k<6;k++)G.movers.push({x0:-480+(k%2?120:-120),z:-900-k*100,w:100,d:80,h:120+k*34,amp:28,sp:.75+k*.1,ph:rnd()*6.28,x:-480,px:-480});
       climbRun(-300,-1150,120,420,-1580,120,78);for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1450-Math.floor(k/5)*220;vcol(x,z,48,48,90);G.deco.push({x,z,y0:90,w:70,h:20,d:70,c:k%2?LAVA:GOLD});}
       climbRun(180,-1900,120,-400,-2380,180,74);for(const h of [[-650,-2280],[-400,-2500],[-160,-2260]]){G.deco.push({x:h[0],z:h[1],y0:180,w:200,h:86,d:160,c:ROCK});vplat(h[0],h[1],280,190,150,{roof:true});}climbRun(-720,-2200,180,-650,-2280,280,68);chest(-160,-2260,280);
       // Caldera crossing: basalt pillars rise above a broad recovery shelf; eruptions remain visible through geyser tells.
       climbRun(-160,-2700,180,450,-3200,280,72);for(let k=0;k<11;k++){const a=k/11*6.28,rr=250+(k%3)*70;vcol(450+Math.cos(a)*rr,-3200+Math.sin(a)*rr,70,70,180+(k%4)*34);G.geysers.push({x:450+Math.cos(a)*rr,z:-3200+Math.sin(a)*rr,r:22,period:2.8+(k%3)*.4,phase:rnd()*6.28});}
-      climbRun(450,-3200,280,0,-4300,280,84,{mantle:true});vplat(0,-4300,280,980,780,{checkpoint:true,terrace:true});for(let k=0;k<12;k++)G.deco.push({x:-420+k*76,z:-4420,y0:280,w:38,h:100+(k%3)*35,d:38,c:k%2?IRON:LAVA});
-      for(const p of [[0,-150,mine],[-480,-850,lift],[420,-1580,slag],[-400,-2380,city],[450,-3200,rim]]){mkMonster('magmaskit',p[0]-50,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:0,z:-150,room:mine},{x:-480,z:-850,room:lift},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city},{x:450,z:-3200,room:rim}]);scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
+      climbRun(450,-3200,280,0,-4300,280,84,{mantle:true});vplat(0,-4300,280,1100,860,{checkpoint:true,terrace:true,breather:true});for(let k=0;k<12;k++)G.deco.push({x:-420+k*76,z:-4420,y0:280,w:38,h:100+(k%3)*35,d:38,c:k%2?IRON:LAVA});
+      for(const p of [[0,-150,mine],[420,-1580,slag],[-400,-2380,city]]){mkMonster('magmaskit',p[0]-65,p[1],p[2]);mkMonster('emberling',p[0]+65,p[1],p[2]);}mkMonster('emberling',-340,-2450,city);scapeKill(ctx,[{x:0,z:-150,room:mine},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city}]);scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
     }else{const ventsR=room('Cinder Vents',0,0,860,660),cart=room('Minecart Gallery',-500,-820,720,650),refine=room('Suspended Refinery',420,-1560,780,700,140),channels=room('Cooling Channels',-420,-2360,760,680),forge=room('Forge-Routing Hall',450,-3100,820,720,220),altar=room('Ash Altar',0,-4180,980,760,220);
       road(ventsR,cart,150);for(let k=0;k<12;k++){const t=k/11;vplat(-500+920*t,-900-650*t,20+120*t,88,72,{rail:true});if(k%3===0)G.movers.push({x0:-500+920*t,z:-900-650*t,w:96,d:76,h:20+120*t,amp:36,sp:1+rnd()*.4,ph:rnd()*6.28,x:0,px:0});}
       vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}
@@ -3601,14 +3601,16 @@ const EXPANDED_SCAPES={
   },
   abyss(ctx){const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
-    if(!deep){const shore=room('Last Shore',0,0,820,620),field=room('Shatter Field',-480,-820,760,680),drift=room('Drifting Archipelago',420,-1600,780,700,120),ruin=room('Inverted Ruin',-420,-2420,780,700,250),anchor=room('Anchor Spire',450,-3260,760,680,390),door=room('King’s Door',0,-4380,980,780,390);
+    if(!deep){const shore=room('Last Shore',0,0,920,700),field=room('Shatter Arena',-480,-820,980,860),drift=room('Drifting Archipelago',420,-1600,720,620,120),ruin=room('Inverted Ruin',-420,-2420,1020,880,250),anchor=room('Anchor Spire',450,-3260,700,600,390),door=room('King’s Door',0,-4380,1120,900,390);
+      const beacon=(x,z,y=0)=>{G.deco.push({x,z,y0:y,w:18,h:78,d:18,c:VIO});G.deco.push({x,z,y0:y+78,w:34,h:12,d:34,c:'#e7c56b'});};const rim=(r)=>{const hw=r.w/2-32,hd=r.d/2-32;for(let k=-2;k<=2;k++){G.deco.push({x:r.x+k*150,z:r.z-hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x+k*150,z:r.z+hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x-hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});G.deco.push({x:r.x+hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});}};
       road(shore,field,160);for(let k=0;k<12;k++){const a=k/12*6.28,r=190+(k%3)*80;vplat(-480+Math.cos(a)*r,-820+Math.sin(a)*r,20+(k%4)*28,88,74,{phase:true});}
       climbRun(-180,-1120,0,420,-1600,120,74,{safeRoute:true});for(let k=0;k<7;k++)G.movers.push({x0:120+k*95,z:-1380-k*95,w:92,d:76,h:55+k*12,amp:42,sp:.72+k*.09,ph:rnd()*6.28,x:120,px:120});
-      vplat(420,-1600,120,780,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k*.82;vplat(420+Math.cos(a)*250,-1600+Math.sin(a)*230,140+(k%3)*45,84,76,{drift:true});}
-      climbRun(160,-1950,120,-420,-2420,250,72);vplat(-420,-2420,250,780,700,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const x=-690+(k%4)*180,z=-2600+Math.floor(k/4)*260;G.deco.push({x,z,y0:250,w:120,h:90+(k%3)*55,d:100,c:VOID});G.deco.push({x,z,y0:340+(k%3)*55,w:150,h:18,d:130,c:VIO});}
+      vplat(420,-1600,120,720,620,{checkpoint:true,breather:true,terrace:true});for(let k=0;k<10;k++){const a=k*.82;vplat(420+Math.cos(a)*250,-1600+Math.sin(a)*230,140+(k%3)*45,84,76,{drift:true});}
+      climbRun(160,-1950,120,-420,-2420,250,72);vplat(-420,-2420,250,1020,880,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const x=-750+(k%4)*220,z=-2660+Math.floor(k/4)*300;G.deco.push({x,z,y0:250,w:120,h:90+(k%3)*55,d:100,c:VOID});G.deco.push({x,z,y0:340+(k%3)*55,w:150,h:18,d:130,c:VIO});}
       climbRun(-160,-2760,250,450,-3260,390,70);for(let k=0;k<12;k++){const a=k/12*12.56,y=390+k*25;vplat(450+Math.cos(a)*230,-3260+Math.sin(a)*210,y,80,68,{anchorRing:true});G.deco.push({x:450+Math.cos(a)*230,z:-3260+Math.sin(a)*210,y0:0,w:12,h:y,d:12,c:CHAIN});}
-      climbRun(450,-3260,390,0,-4380,390,82,{phaseBridge:true});vplat(0,-4380,390,980,780,{district:'King’s Door',checkpoint:true});for(let k=0;k<9;k++)G.crumbles.push({x:-320+k*80,z:-4050-k*55,w:70,d:68,h:390,state:0,timer:0,respawn:0,fallY:0,jit:0});
-      chest(650,-1600,210);chest(-680,-2420,340);scapeSecret(ctx,720,-3260,440);for(const p of [[-480,-820,field],[420,-1600,drift],[-420,-2420,ruin],[450,-3260,anchor]]){mkMonster('blinkstalker',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-480,z:-820,room:field},{x:420,z:-1600,room:drift},{x:-420,z:-2420,room:ruin},{x:450,z:-3260,room:anchor}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4600,decoCol:VOID,decoTheme:'void',decoTall:520});
+      climbRun(450,-3260,390,0,-4380,390,82,{phaseBridge:true});vplat(0,-4380,390,1120,900,{district:'King’s Door',checkpoint:true,breather:true});for(let k=0;k<9;k++)G.crumbles.push({x:-320+k*80,z:-4050-k*55,w:70,d:68,h:390,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      for(const r of [field,ruin,door])rim(r);for(const p of [[0,-300,0],[-220,-560,0],[-160,-1190,35],[120,-1380,65],[180,-2020,145],[-150,-2200,210],[-150,-2870,280],[170,-3050,335],[300,-3700,390],[120,-4050,390]])beacon(...p);
+      chest(650,-1600,210);chest(-780,-2420,340);scapeSecret(ctx,720,-3260,440);mkMonster('shadeling',0,-180,shore);for(const p of [[-480,-820,field],[-420,-2420,ruin],[0,-4380,door]]){mkMonster('blinkstalker',p[0]-70,p[1],p[2]);mkMonster('shadeling',p[0]+70,p[1],p[2]);}mkMonster('shadeling',-420,-2500,ruin);mkMonster('blinkstalker',90,-4440,door);scapeKill(ctx,[{x:-480,z:-820,room:field},{x:-420,z:-2420,room:ruin},{x:0,z:-4380,room:door}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4600,decoCol:VOID,decoTheme:'void',decoTall:520});
     }else{const lip=room('Hollow Lip',0,0,820,620),well=room('Gravity Well',-450,-850,740,680),inside=room('Inside-Out Keep',420,-1650,820,720,180),chains=room('Hanging Chain Sea',-420,-2480,760,700,330),rift=room('Rift Observatory',450,-3300,800,720,470),scar=room('World Scar',0,-4380,980,780,470);
       road(lip,well,150);for(let k=0;k<14;k++){const a=k*.72,r=280-k*9,y=20+k*15;vplat(-450+Math.cos(a)*r,-850+Math.sin(a)*r,y,86,70,{gravitySpiral:true});}
       climbRun(-450,-850,0,420,-1650,180,82);vplat(420,-1650,180,820,720,{checkpoint:true,terrace:true});for(let k=0;k<9;k++){const x=100+(k%3)*250,z=-1880+Math.floor(k/3)*220,y=180+(k%3)*50;G.deco.push({x,z,y0:y,w:150,h:110,d:130,c:k%2?VOID:CHAIN});vplat(x,z,y+120,140,120,{roof:true});}

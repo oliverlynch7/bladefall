@@ -194,6 +194,19 @@
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
   #mirrorui{position:absolute;left:50%;top:50%;z-index:22;width:min(920px,92vw);max-height:min(88vh,820px);transform:translate(-50%,-50%);box-sizing:border-box;background:linear-gradient(178deg,rgba(23,25,33,.98),rgba(10,11,17,.98));border:1px solid #3a4152;border-radius:18px;padding:22px 26px;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.06);}
   #mirrorui.hide{display:none;}
+  #mirrorInfo{position:absolute;right:16px;top:calc(env(safe-area-inset-top) + 16px);z-index:12;width:300px;box-sizing:border-box;padding:16px 18px 14px;background:radial-gradient(circle at 80% 0,rgba(120,60,180,.10),transparent 40%),linear-gradient(178deg,rgba(20,17,26,.97),rgba(9,8,13,.98));border:1px solid #7a5a2a;border-radius:14px;box-shadow:inset 0 0 0 2px #0a0a10,inset 0 0 0 3px #3a2a14,0 22px 54px rgba(0,0,0,.62);color:#e8dcc6;font-family:Georgia,serif;pointer-events:none;}
+  #mirrorInfo .miName2{font-size:23px;font-weight:800;color:#f4ead2;letter-spacing:.02em;line-height:1.1;text-shadow:0 1px 4px #000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #mirrorInfo .miClass{font-size:12px;color:#d9a441;font-weight:700;margin-top:3px;letter-spacing:.08em;text-transform:uppercase;}
+  #mirrorInfo .miLvls{display:flex;gap:7px;margin-top:10px;}
+  #mirrorInfo .miPill{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 10px;border-radius:6px;background:rgba(212,168,74,.14);border:1px solid #7a5a2a;color:#f0d9a8;}
+  #mirrorInfo .miPill.cls{background:rgba(150,90,220,.15);border-color:#5a3f7a;color:#d7b8ff;}
+  #mirrorInfo .miDiv{height:2px;background:linear-gradient(90deg,transparent,#a97e35,transparent);margin:13px 0 11px;box-shadow:0 0 8px rgba(212,168,74,.3);}
+  #mirrorInfo .miGearHdr{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#9a8a6a;margin-bottom:9px;}
+  #mirrorInfo .miRow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  #mirrorInfo .miIco{width:38px;height:38px;object-fit:contain;border-radius:8px;background:rgba(0,0,0,.32);border:1px solid #3a3020;flex:0 0 auto;}
+  #mirrorInfo .miTxt{display:flex;flex-direction:column;min-width:0;}
+  #mirrorInfo .miSlot{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#8a806e;}
+  #mirrorInfo .miName{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;}
   #mirrorToggle,#mirrorNameToggle{position:absolute;right:18px;z-index:24;width:176px;display:none;align-items:center;justify-content:flex-start;gap:11px;padding:14px 16px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.97),rgba(12,14,20,.97));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle{top:calc(50% - 42px)}#mirrorNameToggle{top:calc(50% + 26px)}#mirrorToggle:hover,#mirrorNameToggle:hover{border-color:#ffd47a;transform:scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i,#mirrorNameToggle i{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle,#mirrorNameToggle{right:8px;width:142px;padding:11px;font-size:9px}}
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
@@ -760,7 +773,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.211.0';
+const VERSION3D='1.212.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6805,7 +6818,7 @@ function enterWaystation(){
   G.hubNpcs=[
     {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
     {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:()=>openForge(wsResume)},
-    {id:'keeper',ic:'🧥',name:'Keeper',role:'Wardrobe',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'keeper',ic:'🧥',name:'The Stylist',role:'Style & appearance',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:360,z:150,open:()=>enterSparringRoom()},
@@ -6885,7 +6898,21 @@ function openMirror(back){
   document.getElementById('questbox').classList.add('hide');
   { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract');   // Phase 19: the 'Talk to the Mirror' prompt must not linger inside the mirror
     if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); }
-  buildMirrorPanel();
+  buildMirrorPanel(); buildMirrorInfo();
+}
+/* Always-on top-right character card in the Mirror: name, level, class, class rank, and equipped gear. */
+function buildMirrorInfo(){
+  if(!mirror) return; const p=mirror.p, C=curClass(), cs=classState(meta.classId), nm=meta.heroName||'Nameless';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const rc=it=>it?(RARITY[it.rarity]?RARITY[it.rarity].color:'#cfd6df'):'#5a6070';
+  const row=(label,it)=>`<div class="miRow"><img class="miIco" src="${it?(itemAv(it)||''):''}" alt="" style="${it&&itemAv(it)?'':'visibility:hidden'}"><div class="miTxt"><span class="miSlot">${label}</span><span class="miName" style="color:${rc(it)}">${it?esc(it.name):'— empty —'}</span></div></div>`;
+  const g=p.gear||{};
+  let info=document.getElementById('mirrorInfo'); if(!info){ info=document.createElement('div'); info.id='mirrorInfo'; document.body.appendChild(info); }
+  info.innerHTML=`<div class="miName2">${esc(nm)}</div><div class="miClass">${C.icon} ${C.disp}</div>`
+    +`<div class="miLvls"><span class="miPill">LEVEL ${p.level||1}</span><span class="miPill cls">${C.disp.toUpperCase()} · RANK ${cs.rank}</span></div>`
+    +`<div class="miDiv"></div><div class="miGearHdr">Equipped Gear</div>`
+    +row('Weapon',p.weapon)+row('Helmet',g.helmet)+row('Chestplate',g.chest)+row('Leggings',g.legs)+row('Amulet',g.amulet)+row('Ring',g.ring);
+  info.style.display='block';
 }
 function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
   if(mirror.spin) mirror.yaw+=dt*0.45;
@@ -6925,6 +6952,7 @@ function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=docume
   const mt=document.getElementById('mirrorToggle'); if(mt) mt.style.display='none';
   const mn=document.getElementById('mirrorNameToggle'); if(mn) mn.style.display='none';
   const esc=document.getElementById('mirrorEsc'); if(esc) esc.style.display='none';
+  const info=document.getElementById('mirrorInfo'); if(info) info.style.display='none';
   if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
 function mirrorStatsHTML(){
   const p=mirror.p, row=(lbl,val,accent)=>`<div class="msrow"><span>${lbl}</span><b${accent?` style="color:${accent}"`:''}>${val}</b></div>`;
@@ -7078,7 +7106,7 @@ function openTrainingArena(back){ mode='menu';
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
   let it=null; const p=G.p;
-  if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
+  if(G.hub && G.hubNpcs){ let bd=110; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
     if(!it && dXZ(0,30,p.x,p.z)<72) it={x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone};
     if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }

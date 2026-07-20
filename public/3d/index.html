@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.191.0';
+const VERSION3D='1.192.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7096,27 +7096,13 @@ function openHubMenu(){
     <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
     <div class="sect">Main Levels</div><div class="destgrid">${mainRows}</div>
     <div class="sect">Trial Chambers</div><div class="destgrid trialgrid">${chamberRows||'<p class="hint">Discover Trial Chambers while exploring the Main Levels.</p>'}</div>
-    <div class="sect">Waystation keepers</div>
-    <div class="navgrid">
-      ${navCard('trainBtn','icons/class-warrior.png','Class Trainer','Classes, skills, and trials')}
-      ${navCard('questBtn','icons/event-quest-marker.png','Quest Board','Review active postings')}
-      ${navCard('shopBtn','icons/action_buy.png','Shop','Spend gold')}
-      ${navCard('bagBtn','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
-      ${navCard('forgeBtn','icons/action_forge_fuse.png','The Forge','Fuse gear')}
-      ${navCard('wardBtn','icons/skins/skin-knight.png','Wardrobe','Skins and cosmetics')}
-    </div>
-    <button class="bigbtn" id="riseBtn">Rise</button>
+    <p class="hint" style="margin:8px 0 2px;opacity:.7">Walk up to a keeper in the Waystation to shop, forge, train, and more.</p>
+    <button class="bigbtn" id="riseBtn">Exit</button>
     <button class="bigbtn ghost" id="credBtn2">Credits</button>
     <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
   document.getElementById('riseBtn').onclick=wsResume;
   document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
   document.querySelectorAll('.destcard[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
-  document.getElementById('trainBtn').onclick=()=>openTrainer(openHubMenu);
-  document.getElementById('questBtn').onclick=()=>openQuestBoard(openHubMenu);
-  document.getElementById('shopBtn').onclick=()=>openShop(openHubMenu);
-  document.getElementById('bagBtn').onclick=()=>openBag(openHubMenu);
-  document.getElementById('forgeBtn').onclick=()=>openForge(openHubMenu);
-  document.getElementById('wardBtn').onclick=()=>openWardrobe(openHubMenu);
   document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
   document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
 }
@@ -9399,7 +9385,10 @@ function render(t){
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // The sun lives in world-space: turning the camera moves it across/off the screen,
     // while a very slow azimuth gives each map a restrained day-cycle instead of a HUD-like glow that follows your view.
-    const worldSun=(G.time||t)*.006, rel=worldSun-(G.camYaw==null?0:G.camYaw), sun=[.5+Math.sin(rel)*.72,sc.p[1]+Math.cos(rel)*.055];
+    const worldSun=(G.time||t)*.006; let rel=worldSun-(G.camYaw==null?0:G.camYaw);
+    rel=((rel+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;   // normalise to [-PI,PI]
+    // LINEAR screen mapping: the sun slides off the edge as you turn away and STAYS off (no sin() whip-around); the sign flip at PI happens fully off-screen
+    const sun=[.5+rel*0.46, sc.p[1]-Math.abs(rel)*0.05];
     PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)

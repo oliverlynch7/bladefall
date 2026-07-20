@@ -93,7 +93,13 @@
   .btn.skl .sk-cd{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:3;
     font:800 17px Georgia,serif;color:#fff;text-shadow:0 1px 4px #000,0 0 9px rgba(150,110,240,.65);pointer-events:none;}
   .btn.skl.cooling .sk-cd{display:flex;}
-  .btn.skl.lock{opacity:.35;}
+  .btn.skl.lock{opacity:.62;}
+  .btn.skl.lock::before{display:none;}                       /* hide the mana badge on locked slots — the unlock label takes that space */
+  .btn.skl.lock .sk-ico{align-items:flex-start;padding-top:20%;font-size:.6em;opacity:.7;}
+  .btn.skl .sk-unlock{display:none;}
+  .btn.skl.lock .sk-unlock{display:flex;flex-direction:column;align-items:center;position:absolute;left:0;right:0;bottom:11%;z-index:4;line-height:1.05;pointer-events:none;}
+  .btn.skl.lock .sk-unlock i{font-size:6.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#b9a05c;font-style:normal;}
+  .btn.skl.lock .sk-unlock b{font-size:11px;font-weight:900;color:#f0d89a;text-shadow:0 1px 2px #000;}
   .btn.skl.nomana{border-color:rgba(186,128,255,.65);box-shadow:inset 0 0 0 2px rgba(94,44,154,.25);filter:saturate(.55);opacity:.58}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
   #bDodge.cooling{opacity:.4;}
@@ -833,7 +839,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.237.0';
+const VERSION3D='1.238.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5383,6 +5389,11 @@ function useSkillLegacy(i){
 function skIco(b){ let s=b.querySelector('.sk-ico'); if(!s){ s=document.createElement('span'); s.className='sk-ico'; b.insertBefore(s,b.firstChild);
     if(!b.querySelector('.sk-wheel')){ const w=document.createElement('span'); w.className='sk-wheel'; b.appendChild(w); const n=document.createElement('span'); n.className='sk-cd'; b.appendChild(n); } }
   return s; }
+/* locked skill slots show which rank unlocks them ("Unlocks / Rank 4") */
+function skUnlockLabel(b,rank){ let u=b.querySelector('.sk-unlock');
+  if(!rank){ if(u) u.remove(); return; }
+  if(!u){ u=document.createElement('span'); u.className='sk-unlock'; b.appendChild(u); }
+  u.innerHTML='<i>Unlocks</i><b>Rank '+rank+'</b>'; }
 /* per-frame: fill each cooling slot's wheel + tenth-second number; when one finishes, rebuild the bar once */
 function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b||b.classList.contains('lock')) continue;
@@ -5405,19 +5416,19 @@ function auxSlotsUpdate(){
 function skillbarUpdate(){ auxSlotsUpdate(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
-      if(!reached){ skIco(b).textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
-      if(!s){ skIco(b).textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
+      if(!reached){ skIco(b).textContent='🔒'; skUnlockLabel(b,slotRank[i]); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
+      if(!s){ skIco(b).textContent='❔'; skUnlockLabel(b,null); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
-      skIco(b).innerHTML=C2_ICON[s.fx]||'✦';
+      skIco(b).innerHTML=C2_ICON[s.fx]||'✦'; skUnlockLabel(b,null);
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
       b.classList.toggle('nomana',!!(p&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
       b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
     return; }
   const S=curSkills();
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
-    if(i>=1&&!cs.sub){ skIco(b).textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
+    if(i>=1&&!cs.sub){ skIco(b).textContent=cs.rank>=2?'🔀':'🔒'; skUnlockLabel(b,cs.rank>=2?null:((S[i]&&S[i].rank)||2)); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
-    skIco(b).innerHTML=locked?'🔒':s.icon;
+    skIco(b).innerHTML=locked?'🔒':s.icon; skUnlockLabel(b,locked?s.rank:null);
     b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
     b.classList.toggle('nomana',!!(p&&!locked&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
     b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }

@@ -924,3 +924,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Set every eligible world chest to an exact 10% mimic chance; bonus sprint reward chests remain protected.
 - QA: muted real Chromium verified 0.099 becomes a mimic, the 0.100 boundary does not, bonus chests never convert, and zero console errors.
 
+
+## [Codex | 2026-07-20] v1.206.0 - Eight-zone navigation and combat-space pass
+- Executed the locked level critique and design principles across all eight Main Levels and both campaign areas per zone: combat now lives on broad, stable, readable floors, while movers, phasing shards, crumbling runs, spirals, floes, aqueduct beams, and similar traversal tests are combat-free.
+- Re-authored pacing around warmups, three escalating arena beats where appropriate, quiet traversal gaps, and protected pre-boss breathers. The only deliberate edge-combat set-pieces are Ruined Keep's widened Broken West Span and Castle Duskmoor's broad Last Bridge sanctuary.
+- Strengthened golden-path readability and destinations: The Outskirts remains an open sunny meadow with a worn Sunward Trail, exactly three escalating dens, and a dramatically taller Old Waystone; The Abyss gained lit beacons, three large rimmed combat islands, and traversal-only drifting/anchor sequences.
+- Expanded or clarified signature arenas and safe approaches throughout Hollow Pass, Ruined Keep, Frostfell, Emberdeep, The Sunspire Palace, and Castle Duskmoor without changing tutorial/class-trial difficulty or save data.
+- QA: muted real Chromium generated and inspected all 16 campaign area variants. Every enemy is room-assigned, no traversal-hazard room retains enemies, required arena widths are generally 780-1140 units, and the browser reports zero console errors or warnings.

@@ -964,3 +964,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Replaced the weapon-dependent attack emoji and running-person dodge emoji in the desktop skill rail with the canonical new icons.
 - Corrected the Dodge input label from SPACE to RMB to match right-click dodge controls; Space remains Jump.
 - Versioned both icon requests so updated artwork bypasses stale browser caches.
+
+## [Codex | 2026-07-20] Class-family Basic Attack icons - shipped v1.221.0
+
+- Replaced the abstract universal Basic Attack emblem with four simple class-family variants: Warrior sword slash, Ranger arrow shot, Mage arcane bolt, and Reaper scythe sweep.
+- Added an explicit `attackStyle` field to class definitions so future classes can inherit one of the four core HUD identities without new HUD branching logic.
+- Updated the LMB slot live whenever the active class changes while preserving RMB Dodge as the universal right-side action.

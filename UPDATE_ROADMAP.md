@@ -957,3 +957,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt the Uncommon helmet with substantially stronger green coverage, layered cheek guards, a raised green crown stripe, and an emerald centerpiece.
 - Preserved the gray steel equipment family while creating a clearer visual step above Common and below the more elaborate blue Rare helmet.
 - Added the game version to rarity-icon URLs so returning players receive replacement artwork immediately instead of a cached older icon.
+
+## [Codex | 2026-07-20] Basic Attack and Dodge HUD icons - shipped v1.219.0
+
+- Added transparent voxel HUD artwork for the universal Basic Attack and Dodge actions, matching the existing class-skill icon style.
+- Replaced the weapon-dependent attack emoji and running-person dodge emoji in the desktop skill rail with the canonical new icons.
+- Corrected the Dodge input label from SPACE to RMB to match right-click dodge controls; Space remains Jump.
+- Versioned both icon requests so updated artwork bypasses stale browser caches.

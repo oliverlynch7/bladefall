@@ -774,7 +774,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.219.0';
+const VERSION3D='1.220.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -854,7 +854,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.petNames=mv.petNames&&typeof mv.petNames==='object'?mv.petNames:{};
   meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
   meta.petLabel=mv.petLabel!==false;
-  meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,18):'';
+  meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,20):'';
   meta.eyeColor=mv.eyeColor||'#8fd0ff'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
@@ -2588,7 +2588,7 @@ function openBag(back){
     return `<div class="bagslot" style="--slotcol:${col}">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${item?item.name:'Empty'}</span></span></div>`; };
   const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s]))].join('');
   const C=CLASSES[meta.classId]||CLASSES.warrior, heroName=meta.heroName||'Your Warden';
-  const doll=`<div class="bagdoll"><span class="bagdollhead"></span><span class="bagdollbody"></span><span class="bagdollarm left"></span><span class="bagdollarm right"></span><span class="bagdolllegs"></span>${eq.gear&&eq.gear.helmet?`<img class="bagdollgear helmet" src="${itemAv(eq.gear.helmet)}" alt="">`:''}${eq.gear&&eq.gear.chest?`<img class="bagdollgear chest" src="${itemAv(eq.gear.chest)}" alt="">`:''}${eq.gear&&eq.gear.legs?`<img class="bagdollgear legs" src="${itemAv(eq.gear.legs)}" alt="">`:''}${eq.weapon?`<img class="bagdollgear weapon" src="${itemAv(eq.weapon)}" alt="">`:''}<span class="bagdollclass">${C.disp} · Level ${eq.level||1}</span></div>`;
+  const doll=`<div class="bagdoll"><span class="bagdollhead"></span><span class="bagdollbody"></span><span class="bagdollarm left"></span><span class="bagdollarm right"></span><span class="bagdolllegs"></span>${eq.gear&&eq.gear.helmet?`<img class="bagdollgear helmet" src="${itemAv(eq.gear.helmet)}" alt="">`:''}${eq.gear&&eq.gear.chest?`<img class="bagdollgear chest" src="${itemAv(eq.gear.chest)}" alt="">`:''}${eq.gear&&eq.gear.legs?`<img class="bagdollgear legs" src="${itemAv(eq.gear.legs)}" alt="">`:''}${eq.weapon?`<img class="bagdollgear weapon" src="${itemAv(eq.weapon)}" alt="">`:''}</div>`;
   showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
@@ -7039,7 +7039,7 @@ function buildMirrorPanel(){
   const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
   const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   if(mirrorPanelMode==='stats') pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div><div class="msbody">${mirrorStatsHTML()}</div><div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: ${mirror.spin?'On':'Off'}</button><button class="wsbig ghost" id="msClose">Close</button></div>`;
-  else if(mirrorPanelMode==='name') pn.innerHTML=`<div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" maxlength="18" value="${escText(nm)}" placeholder="Name your character…"><button class="wsbig" id="msNameGo">Save Name</button></div><div class="msctrl"><button class="wsbig ghost" id="msClose">Cancel</button></div>`;
+  else if(mirrorPanelMode==='name') pn.innerHTML=`<div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" maxlength="20" value="${escText(nm)}" placeholder="Name your character…"><button class="wsbig" id="msNameGo">Save Name</button></div><div class="msctrl"><button class="wsbig ghost" id="msClose">Cancel</button></div>`;
   else pn.innerHTML='';
   pn.classList.toggle('hide',!mirrorPanelMode);
   // Phase 19: an always-visible, CLICKABLE way out, top-left
@@ -7056,7 +7056,7 @@ function buildMirrorPanel(){
   mn.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='name'?null:'name';SFX.pickup();buildMirrorPanel();};
   const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
   const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
-  const ni=document.getElementById('msName'); if(ni){const saveName=()=>{meta.heroName=(ni.value||'').trim().slice(0,18);persist();SFX.pickup();mirrorPanelMode=null;buildMirrorPanel();};document.getElementById('msNameGo').onclick=saveName;ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}};}
+  const ni=document.getElementById('msName'); if(ni){const saveName=()=>{meta.heroName=(ni.value||'').trim().slice(0,20);persist();SFX.pickup();mirrorPanelMode=null;buildMirrorPanel();};document.getElementById('msNameGo').onclick=saveName;ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}};}
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
@@ -7324,7 +7324,7 @@ function openCharCreate(){
     </style>
     <div class="card cc"><p class="ovkicker">New Warden</p><h2 class="ovh">Create Your Warden</h2>
       <div class="ccprev"><div class="cphair" style="background:${st.hcol}"></div><div class="cpface"><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span></div></div>
-      <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="18" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
+      <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="20" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
       <div class="cclbl">Class</div><div class="ccrow">${classCards}</div>
       <div class="cclbl">Eye Colour</div><div class="ccrow">${eyeSw}</div>
       <div class="cclbl">Hair</div><div class="ccrow">${hairPills}</div>
@@ -7338,7 +7338,7 @@ function openCharCreate(){
     document.querySelectorAll('[data-hcol]').forEach(b=>b.onclick=()=>{ st.hcol=b.dataset.hcol; try{SFX.pickup();}catch(e){} render(); });
     document.getElementById('ccBack').onclick=titleScreen;
     document.getElementById('ccBegin').onclick=()=>{ try{initAudio();}catch(e){}
-      meta.heroName=(st.name||'').trim().slice(0,18)||'Warden';
+      meta.heroName=(st.name||'').trim().slice(0,20)||'Warden';
       meta.eyeColor=st.eye; meta.hairStyle=st.hair; meta.hairColor=st.hcol; persist();
       try{SFX.classup();}catch(e){} startTrial(st.cls); };
   }

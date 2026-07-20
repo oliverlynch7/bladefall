@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.186.0';
+const VERSION3D='1.187.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -675,7 +675,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
@@ -2641,6 +2641,42 @@ function hubTutorial(){ mode='menu';
       <p>The <b>Gates</b> along the far wall are the zones — walk into one to dive. Clear a zone to open the next.</p></div>
     <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
   document.getElementById('hubTutGo').onclick=()=>{ mode='play'; showOverlay(false); regrabCam(); };
+}
+/* ---- Tutorial / Help foundation: a one-time contextual teach primitive + a persistent Help/Codex ---- */
+const HELP_ENTRIES=[
+  {cat:'Controls', title:'Move & Jump', body:'Move with WASD / the left stick. Jump with Space — tap for a hop, hold for a higher jump.'},
+  {cat:'Controls', title:'Attack & Dodge', body:'Attack with J / SLASH — it auto-aims where you look. Dodge with K / Shift; the roll has brief invulnerability, so roll THROUGH a blow to escape it.'},
+  {cat:'Controls', title:'Skills', body:'Use skills with keys 1–4 or the skill buttons. They unlock as your class ranks up, and each has its own cooldown.'},
+  {cat:'Controls', title:'Talk / Pause', body:'Walk up to a keeper and press E to use them. Esc pauses and frees the camera.'},
+  {cat:'Combat', title:'Elements & weakness', body:'Weapons carry an affinity. Each element beats its opposite — Fire↔Frost, Poison↔Arcane, Holy↔Void — and applies a status (Burn, Chill, Venom, Rune, Radiance, Corruption).'},
+  {cat:'Combat', title:'Loot & rarity', body:'Foes and chests drop gear. Rarity runs grey → green → blue → purple → gold. Stronger gear needs a higher character level to equip — the 🔒 shows the requirement.'},
+  {cat:'Combat', title:'Compare before you equip', body:'On a loot card the green ▲ / red ▼ arrows show how a new piece compares to what you carry. Equip it, Stash it in your bag, or Sell it for gold.'},
+  {cat:'Combat', title:'Chests & mimics', body:'Chests hold loot — but some are MIMICS that spring to life and bite back. A mimic hits hard, but drops well.'},
+  {cat:'Gear', title:'The Forge (Smith)', body:'Give the Smith two pieces of the SAME category and rarity and he fuses them into a random piece of the next rarity up. A gold sink that climbs your gear.'},
+  {cat:'Gear', title:'Your Pack (bag)', body:'Stash spare gear in your bag. Sort it, toggle Auto-sell / Auto-bag for drops, and buy more slots at the shop.'},
+  {cat:'Classes & Skills', title:'The skill fork', body:'At rank 2 you choose your path. Skills 2, 3 and 4 can each be picked from EITHER discipline, independently — mix and match your own kit.'},
+  {cat:'Classes & Skills', title:'Respec', body:'Changed your mind? The Drillmaster lets you respec — re-pick your skill slots for a gold fee.'},
+  {cat:'Classes & Skills', title:'Companions (pets)', body:'The Beastkeeper sells pets. Equip one at a time; some fight for chip damage, one only heals you slowly. Train the active pet for small gains.'},
+  {cat:'The Hub', title:'The Waystation', body:'Home between runs. The central waystone heals you and BANKS your progress. Keepers ring the plaza; the Gates on the far wall are the zones.'},
+  {cat:'The Hub', title:'The Abyssal Descent', body:'An endless survival mode that gets harder every floor. See how deep you can fall — your best depth is saved.'},
+  {cat:'Progress', title:'The difficulty ladder', body:'Beat the game on Normal to unlock Hardcore (permadeath), then Hitless (one hit ends the run). The same journey, mastered at rising stakes.'}
+];
+// teachOnce(id, body[, opts]) — shows a contextual tip ONCE per concept (tracked in meta.tutSeen), then never again. Non-blocking. Honors the Tutorials toggle.
+function teachOnce(id, body, opts){
+  meta.tutSeen = meta.tutSeen || {};
+  if(meta.tutOff || meta.tutSeen[id]) return;
+  meta.tutSeen[id] = true; persistGlobal();
+  try{ storyToast(body, (opts&&opts.icon)||'📖'); }catch(e){ toast(body); }
+}
+function openHelp(back){
+  mode='menu';
+  const cats=[...new Set(HELP_ENTRIES.map(e=>e.cat))];
+  const body=cats.map(c=>`<div class="sect">${c}</div>`+HELP_ENTRIES.filter(e=>e.cat===c).map(e=>
+    `<div class="setrow" style="display:block"><b style="color:var(--amber)">${e.title}</b><div style="color:#cfd6df;font-size:12.5px;line-height:1.5;margin-top:3px">${e.body}</div></div>`).join('')).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Field manual</p><h2 class="ovh">❔ Help &amp; Tutorials</h2>
+    <div style="text-align:left;max-height:58vh;overflow:auto;margin:6px 0 12px">${body}</div>
+    <button class="bigbtn ghost" id="helpBack">Back</button></div>`);
+  document.getElementById('helpBack').onclick=back||openPause;
 }
 function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
 function trialComplete(){
@@ -7536,6 +7572,8 @@ function openPause(){
       <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
+      <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
@@ -7556,6 +7594,8 @@ function openPause(){
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
+  { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
+  { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
   bindAudioSettings();
   document.getElementById('gearBtn').onclick=()=>openGear(openPause);

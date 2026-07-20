@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.196.0';
+const VERSION3D='1.191.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4474,8 +4474,8 @@ function snapEnemyToSurface(e){
 // per-frame safety net: lift any collectible/exit that ended up below the surface it sits over (covers objects
 // created AFTER build-time snapping — e.g. the exit portal that only opens on clear — and terrain that changed).
 function reconcileWorldHeights(){ if(!G) return;
-  if(G.portal) G.portal.y=Math.max(G.portal.y||0, highestSurfaceAt(G.portal.x,G.portal.z,16));
-  if(G.bonusPortal) G.bonusPortal.y=Math.max(G.bonusPortal.y||0, highestSurfaceAt(G.bonusPortal.x,G.bonusPortal.z,16));
+  const lift=(o,r=16)=>{ if(o&&!o.taken&&!o.done) o.y=Math.max(o.y||0, highestSurfaceAt(o.x,o.z,r)); };
+  lift(G.portal); lift(G.bonusPortal); lift(G.waystone); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
   for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
 }
@@ -5864,7 +5864,7 @@ function update(dt){
   // the Warden's Shade: auto-greets you once per zone per save; after that, step close to hear him again
   if(G.npc && !G.npc.talked){ G.npc.t+=dt;
     const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
-    if(d2<(seen?46:110)) openShade(); }
+    if(d2<(seen?44:62)) openShade(); }   // only greet within a sensible range (was 110 — popped from way too far in the bigger levels)
   // an unusual-interaction rift: a dim floor rune tucked in a dead end — step on it and the rift grinds open
   if(G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
     if(dXZ(tr.x,tr.z,p.x,p.z)<(tr.r||34) && Math.abs(p.y-(tr.y||0))<60){ tr.done=true;
@@ -9476,13 +9476,13 @@ function render(t){
     if(p2.shieldHp>0){ const s=0.4+0.2*Math.sin(t*4); bx(p2.x,p2.y+22,p2.z, 40,52,40,'#c9a6ff','#c9a6ff',0.14+0.08*Math.sin(t*3)); }
     if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
-    const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4);
+    const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4), wy=w.y||0;   // sit on its real surface (raised vault court etc.), never buried under the platform
     drawShadow(w.x,w.z,22,0.3);
-    bx(w.x,4,w.z, 54,8,54, '#4a4f5e', null, 1);
-    bx(w.x,34,w.z, 26,60,26, '#6b7183', null, 1);
-    bx(w.x,68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
-    bx(w.x,150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
-    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, 60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
+    bx(w.x,wy+4,w.z, 54,8,54, '#4a4f5e', null, 1);
+    bx(w.x,wy+34,w.z, 26,60,26, '#6b7183', null, 1);
+    bx(w.x,wy+68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
+    bx(w.x,wy+150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
+    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }

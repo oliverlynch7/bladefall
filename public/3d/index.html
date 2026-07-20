@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.210.0';
+const VERSION3D='1.211.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1457,7 +1457,7 @@ const MELEE={
 const CLASSES={
   warrior:{disp:'Warrior',icon:classIcon('warrior'),family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
-          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:'🌊',cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:'⛨',cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
+          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
       {id:'cleave',n:'Cleave',icon:skillIcon('cleave'),cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
       {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
@@ -1465,7 +1465,7 @@ const CLASSES={
       {id:'berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
   ranger:{disp:'Ranger',icon:classIcon('ranger'),family:['bow','cross','dagger','javelin'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
-          {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:'🗡️',cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:'💨',cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:'✖',cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
+          {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:skillIcon('ranger-quickshot'),cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
       {id:'deadeye',n:'Deadeye',icon:skillIcon('deadeye'),cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
       {id:'volley',n:'Volley',icon:skillIcon('volley'),cd:8,rank:2,d:'A fan of projectiles across your front'},
@@ -1473,7 +1473,7 @@ const CLASSES={
       {id:'mark',n:'Hunter’s Mark',icon:skillIcon('hunters-mark'),cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
   mage:{disp:'Mage',icon:classIcon('mage'),family:['staff','wand','spellblade'],     // finalized: Staff, Wand (scepters folded in), Spellblade (magic melee)
     subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
-          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:'❄️',cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:'☄️',cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
+          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:skillIcon('mage-gravity-well'),cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:skillIcon('mage-elemental-overload'),cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
     skills:[
       {id:'bolt',n:'Elemental Bolt',icon:skillIcon('mage-elemental-bolt'),cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
       {id:'nova',n:'Nova',icon:skillIcon('mage-nova'),cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
@@ -1481,12 +1481,12 @@ const CLASSES={
       {id:'tempest',n:'Arcane Tempest',icon:skillIcon('mage-arcane-tempest'),cd:24,rank:7,d:'A storm rages around you for 4s'}]},
   reaper:{disp:'Reaper',icon:classIcon('reaper'),earned:true,family:['scythe'],
     subs:[{id:'harvester',disp:'Harvester',blurb:'+12% lifesteal (rank 10: +20%). Every soul feeds you.'},
-          {id:'executioner',disp:'Executioner',blurb:'The reaper of the wounded: +30% damage under half HP (rank 10 +50%), plus a finisher kit — Execute, Grim Scythe, Reaping Storm.',skills:[{id:'execute',n:'Execute',icon:'🪓',cd:6,rank:2,d:'A brutal strike that instantly kills targets under 25% health'},{id:'grimscythe',n:'Grim Scythe',icon:'🌀',cd:14,rank:4,d:'A spinning cut that hits everything around you'},{id:'reapingstorm',n:'Reaping Storm',icon:'💀',cd:24,rank:7,d:'Become a whirlwind of blades for 4.5s'}]}],
+          {id:'executioner',disp:'Executioner',blurb:'The reaper of the wounded: +30% damage under half HP (rank 10 +50%), plus a finisher kit — Execute, Grim Scythe, Reaping Storm.',skills:[{id:'execute',n:'Execute',icon:skillIcon('reaper-soul-cleave'),cd:6,rank:2,d:'A brutal strike that instantly kills targets under 25% health'},{id:'grimscythe',n:'Grim Scythe',icon:skillIcon('reaper-death-vortex'),cd:14,rank:4,d:'A spinning cut that hits everything around you'},{id:'reapingstorm',n:'Reaping Storm',icon:skillIcon('reaper-wraith-form'),cd:24,rank:7,d:'Become a whirlwind of blades for 4.5s'}]}],
     skills:[
       {id:'reap',n:'Reap',icon:skillIcon('reaper-reap'),cd:4,rank:1,d:'A wide 2.4x scythe arc that drains life'},
       {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
       {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
-      {id:'deathsdoor',n:'Death’s Door',icon:'⚰️',cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]}
+      {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1498,7 +1498,7 @@ const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
    subclass kit until they're converted (then the legacy path is removed).
    ============================================================================ */
 const CLASS2={
-  ranger:{ disp:'Ranger', icon:'🏹',
+  ranger:{ disp:'Ranger', icon:classIcon('ranger'),
     innate:{name:'Clear Aim', d:'After 3s without taking direct damage: +10% damage and +10% ability range. A hit disables it until you avoid damage for 3s again.'},
     cap:{name:'Perfect Hunt', d:'Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s.'},
     r2:{kind:'skill',slot:0, a:{id:'r_volley',n:'Volley',cd:5,role:'Group Damage',fx:'r_volley',d:'Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.'},
@@ -5195,7 +5195,7 @@ function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
       const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
     else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
   if(finished) skillbarUpdate(); }
-const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
+const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire')};
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
 /* desktop rail: fill the LMB (weapon) + SPACE (dodge) display slots that flank the 4 skills */

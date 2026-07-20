@@ -931,3 +931,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Strengthened golden-path readability and destinations: The Outskirts remains an open sunny meadow with a worn Sunward Trail, exactly three escalating dens, and a dramatically taller Old Waystone; The Abyss gained lit beacons, three large rimmed combat islands, and traversal-only drifting/anchor sequences.
 - Expanded or clarified signature arenas and safe approaches throughout Hollow Pass, Ruined Keep, Frostfell, Emberdeep, The Sunspire Palace, and Castle Duskmoor without changing tutorial/class-trial difficulty or save data.
 - QA: muted real Chromium generated and inspected all 16 campaign area variants. Every enemy is room-assigned, no traversal-hazard room retains enemies, required arena widths are generally 780-1140 units, and the browser reports zero console errors or warnings.
+
+## [Codex | 2026-07-20] v1.207.0 - Outskirts macro-layout rebuild
+- Replaced the preserved Outskirts room graph with a new 11-district branching valley: central Sunward Prairie, distant West Cornlands and Eastwood Orchard routes, a major Miller River crossing, North Bank combat commons, separate Riverside Hamlet and Windmill Rise skylines, the Dreaming Expanse, and a three-tier Old Waystone Crown.
+- Increased the authored traversal network from 31 to 127 connected floor segments, roughly 3,400 units of lateral spread and 5,700 units of forward travel. Added a safe ford plus optional stepping-stone line, farm-loft and windmill climbs, an orchard canopy route, and the hidden Foxglove Copse.
+- Kept exactly three escalating dens on broad safe floors. The river, orchard canopy, windmill climb, and side glade are traversal/exploration spaces without required combat.
+- QA: muted real Chromium verified all 11 rooms, all 3 dens, 5 chests, 127 segments, no enemies in traversal-hazard districts, and zero console errors or warnings.

@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.206.0';
+const VERSION3D='1.207.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3437,36 +3437,31 @@ const EXPANDED_SCAPES={
     const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!woods){
-      const gate=room('Old South Road',0,0,760,560),caravan=room('Broken Caravan',-420,-620,680,520),acres=room('Golden Acres',420,-720,760,680),farm=room('Miller Farmstead',80,-1320,900,600),orchard=room('Whisper Orchard',-650,-1720,660,620),ridge=room('Windmill Ridge',480,-1920,720,620),hamlet=room('Sunward Hamlet',40,-2600,980,700),dream=room('Dreaming Field',-430,-3340,800,660),henge=room('Old Waystone Hill',120,-4080,900,720);
-      road(gate,caravan,170); road(gate,acres,170); road(caravan,farm); road(acres,farm,190); road(farm,orchard,140); road(farm,ridge); road(orchard,hamlet,140); road(ridge,hamlet,160); road(hamlet,dream,180); road(dream,henge,180);
-      // The worn Sunward Trail is the unmistakable golden path; the caravan/orchard loop remains optional.
-      { const main=[gate,acres,farm,ridge,hamlet,dream,henge]; for(let i=0;i<main.length-1;i++){ const a=main[i],b=main[i+1],steps=Math.max(3,Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/150));
-        for(let k=1;k<steps;k++){ const t=k/steps,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t; G.deco.push({x,z,y0:.2,w:46,h:.8,d:46,c:'#c9a85b'}); if(k%3===0){ G.deco.push({x:x-34,z,y0:0,w:6,h:34,d:6,c:WOOD}); G.deco.push({x:x-34,z,y0:34,w:10,h:8,d:10,c:'#ffd36a'}); } } } }
-      // Blue pond, a wrecked caravan and broad golden fields establish a sunny pastoral identity immediately.
-      G.deco.push({x:210,z:120,y0:0,w:230,h:2,d:150,c:'#3d708d'}); for(let k=0;k<12;k++) G.deco.push({x:110+k*19,z:190,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
-      G.deco.push({x:-430,z:-630,y0:12,w:150,h:30,d:72,c:'#6b4827'}); for(const x of [-500,-360]) vcol(x,-610,26,26,28); G.deco.push({x:-430,z:-650,y0:42,w:130,h:8,d:62,c:'#372719'});
-      field(420,-720,13,13); field(190,-1320,10,7); fence(420,-390,700,0); fence(760,-720,0,610);
-      // Farmhouse and barn loft: the first optional vertical treasure route.
-      G.deco.push({x:-90,z:-1340,y0:0,w:250,h:95,d:180,c:'#8b5d35'}); G.deco.push({x:-90,z:-1340,y0:95,w:280,h:28,d:205,c:'#5a2e24'});
-      climbRun(-210,-1230,0,-210,-1370,82,66); vplat(-90,-1340,108,250,170,{terrace:true,checkpoint:true}); chest(-40,-1360,108);
-      // A shaded orchard is the safe scenic branch. Windmill Ridge is the faster, exposed parkour branch.
-      for(let k=0;k<22;k++){ const ix=k%5,iz=Math.floor(k/5); tree(-820+ix*86,-1890+iz*92,76+(k%4)*9); }
-      vcol(480,-1980,110,110,185); G.deco.push({x:480,z:-1980,y0:185,w:150,h:24,d:150,c:'#eee0b8'}); G.deco.push({x:480,z:-1980,y0:209,w:18,h:118,d:18,c:WOOD});
-      for(let k=0;k<4;k++){ const a=k*1.57; G.deco.push({x:480+Math.cos(a)*52,z:-1980+Math.sin(a)*52,y0:240,w:k%2?12:110,h:k%2?110:12,d:12,c:'#e8d4a7'}); }
-      climbRun(310,-1810,0,480,-1980,185,72); chest(480,-1980,185);
-      // The occupied hamlet provides alleys and a continuous rooftop traversal line.
-      for(const h of [[-260,-2500,230,170],[60,-2710,260,180],[320,-2490,210,160]]){ G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:82,d:h[3],c:'#8d6039'}); G.deco.push({x:h[0],z:h[1],y0:82,w:h[2]+24,h:24,d:h[3]+22,c:'#543126'}); }
-      climbRun(-380,-2450,0,-260,-2500,104,68); vplat(60,-2710,104,240,160,{terrace:true}); climbRun(60,-2710,104,320,-2490,104,72);
-      field(-430,-3340,15,12); for(const sx of [-650,-430,-210]){ vcol(sx,-3470,8,8,48); G.deco.push({x:sx,z:-3470,y0:42,w:58,h:7,d:8,c:WOOD}); G.deco.push({x:sx,z:-3470,y0:49,w:16,h:16,d:14,c:'#d9c08c'}); }
-      const kx=120,kz=-4140; vplat(kx,kz,42,260,260); const top=vplat(kx,kz,82,150,150,{checkpoint:true,breather:true}); for(let k=0;k<7;k++){ const a=k/7*6.283; G.deco.push({x:kx+Math.cos(a)*100,z:kz+Math.sin(a)*96,y0:42,w:20,h:52+(k%3)*8,d:14,c:'#626879'}); } G.deco.push({x:kx,z:kz,y0:82,w:34,h:150,d:24,c:'#fff0a0'}); chest(kx+96,kz+70,42);
-      // Forest edges frame open farmland instead of tinting the entire world green.
-      for(let k=0;k<42;k++){ const R=[gate,caravan,acres,farm,orchard,ridge,hamlet,dream,henge][Math.floor(rnd()*9)],edge=rnd()<.5?-1:1; tree(R.x+edge*(R.w/2-20),R.z+(rnd()*2-1)*(R.d/2-20),72+rnd()*64); }
-      const glade=room('Hidden Copse',-1120,-2300,330,300); vseg(-760,-2300,720,100); for(let k=0;k<8;k++){ const a=k/8*6.28; tree(glade.x+Math.cos(a)*145,glade.z+Math.sin(a)*130,95+rnd()*34); } scapeSecret(ctx,glade.x,glade.z,0); chest(glade.x-60,glade.z+40);
-      // Pacing: lone warm-up, then three increasingly salted open-field dens with quiet districts between.
-      mkMonster('thornboar',-420,-620,caravan);
-      scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:hamlet.x,z:hamlet.z,room:hamlet},{x:dream.x,z:dream.z,room:dream}]);
-      mkMonster('sporeback',hamlet.x+120,hamlet.z-70,hamlet); mkMonster('sporeback',dream.x+110,dream.z-60,dream); mkMonster('thornboar',dream.x-120,dream.z+80,dream);
-      scapeFind(ctx,top.x,top.z,82); finishScape(ctx,{sx:0,sz:220,sy:0,gx:120,gz:-4220,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:190});
+      // A new macro layout: one immense central prairie opens into two distant regional loops,
+      // reconverges at a river crossing, then climbs through a final field to the Waystone crown.
+      const gate=room('Old South Road',0,260,720,520),prairie=room('Sunward Prairie',0,-520,1280,900),acres=room('West Cornlands',-1120,-1450,1040,860),orchard=room('Eastwood Orchard',1120,-1500,980,880),crossing=room('Miller River Crossing',0,-2320,1120,760),bank=room('North Bank Commons',0,-2820,920,500),hamlet=room('Riverside Hamlet',-980,-3350,1040,820),ridge=room('Windmill Rise',980,-3420,980,820),dream=room('Dreaming Expanse',0,-4340,1380,920),henge=room('Old Waystone Crown',0,-5520,1120,900);
+      const trail=(a,b,w=132)=>{const n=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/120);for(let k=1;k<n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;vseg(x,z,w,w,{path:true});G.deco.push({x,z,y0:.2,w:52,h:.8,d:52,c:'#c9a85b'});if(k%4===0){G.deco.push({x:x-38,z,y0:0,w:7,h:38,d:7,c:WOOD});G.deco.push({x:x-38,z,y0:38,w:12,h:9,d:12,c:'#ffd36a'});}}};
+      trail(gate,prairie,170);trail(prairie,acres,150);trail(prairie,orchard,150);trail(acres,crossing,145);trail(orchard,crossing,145);trail(crossing,bank,170);trail(bank,hamlet,145);trail(bank,ridge,145);trail(hamlet,dream,150);trail(ridge,dream,150);trail(dream,henge,180);
+      // The opening view is a genuine prairie: pond and caravan near the road, distant cornland and windmill silhouettes framing the choice ahead.
+      G.deco.push({x:330,z:-260,y0:0,w:330,h:2,d:210,c:'#3d708d'});for(let k=0;k<16;k++)G.deco.push({x:170+k*22,z:-150+(k%2)*26,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
+      G.deco.push({x:-360,z:-400,y0:12,w:170,h:34,d:82,c:'#6b4827'});for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
+      field(-1120,-1450,20,16);field(-820,-1780,10,6);fence(-1120,-1015,960,0);fence(-1600,-1450,0,780);
+      // West: a working farm complex and two-stage barn climb, with its loft chest visible from the corn rows.
+      G.deco.push({x:-1180,z:-1540,y0:0,w:300,h:105,d:220,c:'#8b5d35'});G.deco.push({x:-1180,z:-1540,y0:105,w:340,h:32,d:250,c:'#5a2e24'});climbRun(-1370,-1390,0,-1300,-1540,92,70);vplat(-1180,-1540,120,300,210,{terrace:true,checkpoint:true});chest(-1110,-1570,120);
+      // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
+      for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
+      const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}scapeSecret(ctx,glade.x,glade.z,0);chest(glade.x-70,glade.z+50);
+      // The river is a major transverse landmark. A broad stone ford is safe; stepping stones form a faster parkour line beside it.
+      G.deco.push({x:0,z:-2310,y0:0,w:2500,h:3,d:180,c:'#3b718c'});vseg(0,-2320,420,250,{ford:true});for(let k=0;k<9;k++)vplat(-420+k*105,-2250-(k%2)*105,12+(k%3)*5,82,72,{riverStone:true});
+      // West village rooftops and east windmill give the back half two unmistakably different skylines.
+      for(const h of [[-1260,-3290,240,180],[-960,-3500,280,190],[-650,-3270,230,170]]){G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:88,d:h[3],c:'#8d6039'});G.deco.push({x:h[0],z:h[1],y0:88,w:h[2]+26,h:25,d:h[3]+24,c:'#543126'});}climbRun(-1430,-3160,0,-1260,-3290,110,70);vplat(-960,-3500,110,260,170,{terrace:true});
+      vcol(980,-3470,140,140,230);G.deco.push({x:980,z:-3470,y0:230,w:190,h:28,d:190,c:'#eee0b8'});G.deco.push({x:980,z:-3470,y0:258,w:20,h:150,d:20,c:WOOD});for(let k=0;k<4;k++){const a=k*1.57;G.deco.push({x:980+Math.cos(a)*68,z:-3470+Math.sin(a)*68,y0:310,w:k%2?14:145,h:k%2?145:14,d:14,c:'#e8d4a7'});}climbRun(760,-3200,0,980,-3470,230,74);chest(980,-3470,230);
+      field(0,-4340,24,18);for(const sx of [-360,0,360]){vcol(sx,-4520,8,8,52);G.deco.push({x:sx,z:-4520,y0:46,w:62,h:8,d:8,c:WOOD});G.deco.push({x:sx,z:-4520,y0:54,w:18,h:18,d:15,c:'#d9c08c'});}
+      const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
+      // Forest walls frame the valley's outside perimeter while leaving the immense central sightlines open.
+      for(let k=0;k<70;k++){const R=[gate,prairie,acres,orchard,crossing,bank,hamlet,ridge,dream,henge][Math.floor(rnd()*10)],side=rnd()<.5?-1:1;tree(R.x+side*(R.w/2-18),R.z+(rnd()*2-1)*(R.d/2-25),76+rnd()*78);}
+      mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
+      scapeFind(ctx,top.x,top.z,165);finishScape(ctx,{sx:0,sz:470,sy:0,gx:0,gz:-5710,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240});
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
       road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);
@@ -4220,7 +4215,21 @@ function loadBonus(returnIdx){
 function endBonus(msg){
   G.bonusActive=false; document.getElementById('bonustimer').style.display='none';
   if(msg) toast(msg);
+  if(G.sprintReturnHub){ G.sprintReturnHub=false; G.sprintFun=false; enterWaystation(); SFX.pickup(); return; }   // for-fun hub sprint returns to the Waystation
   loadStage(G.bonusReturn); SFX.pickup();
+}
+/* HUB Treasure Sprint — the exact same random parkour course, launched from the Waystation portal purely
+   for fun: NO loot, NO gold, just a time trial. Reaching the finale chest records your best time. */
+function startHubSprint(){
+  G.hub=false; G.sprintFun=true; G.sprintReturnHub=true; G.sprintStartT=G.time||0;
+  loadBonus(0);
+  toast('🏁 TREASURE SPRINT — race the clock! Best: '+(meta.sprintBest?meta.sprintBest.toFixed(1)+'s':'—'));
+}
+function finishHubSprint(){
+  const s=Math.max(0,(G.time||0)-(G.sprintStartT||0)), prev=meta.sprintBest||0, best=(!prev||s<prev);
+  if(best){ meta.sprintBest=+s.toFixed(1); persistGlobal(); }
+  SFX.achieve();
+  endBonus('🏁 Finished in '+s.toFixed(1)+'s'+(best?' · NEW BEST!':' · best '+prev.toFixed(1)+'s'));
 }
 function spawnEnemy(type,x,z,isBoss){
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale();
@@ -6798,7 +6807,8 @@ function enterWaystation(){
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-200,z:322,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:330,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:200,z:322,open:()=>openBag(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-548,z:-284,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-548,z:-284,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:548,z:-284,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
   ];
   // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
   { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
@@ -8671,6 +8681,12 @@ function drawWaystation(t){
     if(n.prop==='sparringdoor'){ drawShadow(n.x,n.z,24,0.24);
       bx(n.x-38,54,n.z, 12,108,18,'#36313a');bx(n.x+38,54,n.z, 12,108,18,'#36313a');bx(n.x,112,n.z, 90,12,20,'#4b4651');
       bx(n.x,52,n.z+5, 62,96,10,'#56381f');bx(n.x+20,52,n.z+12, 6,6,4,'#e8a33d','#ffd24a',.7);continue; }
+    if(n.prop==='sprintgate'){ drawShadow(n.x,n.z,24,0.30);                                   // Treasure Sprint — a bright gold run-portal
+      for(const s of [-1,1]) bx(n.x+s*30,46,n.z, 12,92,14,'#3a2e12','#caa23a',0.45);          // gilt pillars
+      bx(n.x,94,n.z, 84,14,18,'#4a3a16','#ffd24a',0.55);                                       // lintel
+      bx(n.x,46,n.z+8, 44,78,4,'#12240f','#7ce07a',0.30+0.28*Math.sin(t*2.2));                 // shimmering green run-portal
+      for(let i=0;i<5;i++){ const a=t*1.9+i*1.26, rr=9+i*3; bx(n.x+Math.cos(a)*rr, 46+Math.sin(a*1.4)*22, n.z+10, 3,3,3, '#ffe07a','#fff2b0',0.8); }  // speed motes
+      continue; }
     if(n.prop==='sparring'){ drawShadow(n.x,n.z,16,0.22);
       bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
       bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target

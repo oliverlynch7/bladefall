@@ -755,7 +755,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.201.0';
+const VERSION3D='1.202.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9481,12 +9481,11 @@ function render(t){
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
   if(G){ const sc=SKYSUN[s.theme]||SKYSUN._def;
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
-    // The sun lives in world-space: turning the camera moves it across/off the screen,
-    // while a very slow azimuth gives each map a restrained day-cycle instead of a HUD-like glow that follows your view.
-    const worldSun=(G.time||t)*.006; let rel=worldSun-(G.camYaw==null?0:G.camYaw);
-    rel=((rel+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;   // normalise to [-PI,PI]
-    // LINEAR screen mapping: the sun slides off the edge as you turn away and STAYS off (no sin() whip-around); the sign flip at PI happens fully off-screen
-    const sun=[.5+rel*0.46, sc.p[1]-Math.abs(rel)*0.05];
+    // The sun is anchored to the MAP, not the camera: turning your view never moves it (no whip-around).
+    // It sits at the theme's fixed cardinal spot and only drifts on a very slow day-orbit — camera yaw is
+    // deliberately NOT part of this so where you look can't push the sun around.
+    const orbit=Math.sin((G.time||t)*.006)*0.17;                    // slow ± drift around the anchor (≈17-min cycle)
+    const sun=[sc.p[0]+orbit, sc.p[1]-Math.abs(orbit)*0.35];        // gentle rise toward the centre of its arc
     PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)

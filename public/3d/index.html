@@ -760,7 +760,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.209.0';
+const VERSION3D='1.210.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2942,11 +2942,12 @@ function scapeKill(ctx,spots){ const kq=areaQuests().find(q=>q.k==='kill'&&!ques
     if(sp.deco) G.deco.push({x:sp.x,z:sp.z,y0:sp.y||0,w:44,h:30,c:'#2a2a33',theme:ctx.s.theme});
     ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null);
     const comp=saltMob(ctx.s.theme,kq.mob); if(comp!==kq.mob) ctx.mkMonster(comp,sp.x-34,sp.z+22,sp.room||null); }); }   // a complementary type guards each nest
-function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id}; }
+function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; }   // already found -> a spent (greyed) echo that pays gold
 // interaction-earned secret: the rift stays SEALED (hidden, unrenderable, unfindable) until the player steps on a hidden trigger rune tucked in a dead end
-function scapeSecretTriggered(ctx, sx,sz,sy, tx,tz,ty){ const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
+function scapeSecretTriggered(ctx, sx,sz,sy, tx,tz,ty){ const Zc=curZone(); if(!(Zc.side && G.area===0)) return;
+  if(meta.sideFound[Zc.side.id]){ G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,spent:true}; return; }   // already found -> spent echo, shown openly (no need to re-solve the trigger)
   G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,hidden:true};
-  G.secretTrigger={x:tx,z:tz,y:ty||0,r:34,done:false}; } }
+  G.secretTrigger={x:tx,z:tz,y:ty||0,r:34,done:false}; }
 // a complementary enemy of a DIFFERENT kind than the majority (a caster/flyer among melee, etc.) so a fight forces you to prioritise
 function saltMob(theme,majority){ const pool=(THEMEMOBS[theme]||['grunt']).filter(m=>m!==majority&&ENEMY[m]);
   const mk=(ENEMY[majority]||{}).kind, diff=pool.filter(m=>ENEMY[m].kind!==mk);
@@ -3009,11 +3010,11 @@ const SCAPES={
     scapeFetch(ctx, [{x:-300,z:-1230,y:0},{x:160,z:-360,y:0},{x:mx-60,z:mz+40,y:my}].concat(pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h}))));
     scapeFind(ctx, hx-110, hz, hy);                                                        // the Hollow Shrine on the summit
     // ── hidden rift (purple-secret TEMPLATE): a ledge chain off the summit's side wall ──
-    { const Zc=curZone(); if(Zc.side && !meta.sideFound[Zc.side.id] && G.area===0){
+    { const Zc=curZone(); if(Zc.side && G.area===0){
         const ex=hx-(640/2-12), chain=[[ex-56,hz-30,hy-30],[ex-134,hz+50,hy-90],[ex-212,hz-20,hy-150]];
         for(const st of chain) vplat(st[0],st[1],Math.max(20,st[2]),58,54,{sec:true});
         const rf=vplat(ex-280,hz+40,Math.max(16,hy-190),80,72,{sec:true});
-        G.secret={x:rf.x,z:rf.z,y:rf.h,t:0,id:Zc.side.id}; } }
+        G.secret={x:rf.x,z:rf.z,y:rf.h,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; } }
     finishScape(ctx,{sx:0,sz:500/2-50,sy:0, gx:hx,gz:hz-480/2+90, decoCol:SAND,decoTheme:'canyon',decoTall:320});
   },
   /* THE OUTSKIRTS — the gentle opposite of the climb: wide open grass clearings joined in
@@ -4126,12 +4127,12 @@ function loadStage(i){
   G.rooms.forEach(wallRoom);
   // hidden side-zone entrance: a rift in the deepest dead-end room. Reasonably hidden — but it's there, every time.
   { const Zc=curZone();
-    if(Zc.side && !G.side && !G.trial && !isBoss && !meta.sideFound[Zc.side.id] && G.area===0){
+    if(Zc.side && !G.side && !G.trial && !isBoss && G.area===0){
       // prefer a dead-end room; fall back to any non-entry room so the rift ALWAYS exists (some layouts have no spare leaves)
       const dead=leaves.filter(r=>r!==entryRoom&&r!==goalRoom&&r!==vault);
       const pool=dead.length?dead:G.rooms.filter(r=>r!==entryRoom);
       const room=pool[pool.length-1];
-      if(room) G.secret={x:room.x,z:room.z-room.d/2+46,y:0,t:0,id:Zc.side.id}; } }
+      if(room) G.secret={x:room.x,z:room.z-room.d/2+46,y:0,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; } }
   // quest waystone: the "find" objective, parked in a room away from the entrance
   { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
     if(fnd){ const cand=G.rooms.filter(r=>r!==entryRoom&&r!==goalRoom); const room=cand[Math.floor(rnd2()*cand.length)]||goalRoom;
@@ -5958,10 +5959,12 @@ function update(dt){
   // hidden side-zone rift: walk into it and it's yours forever (a hidden:true rift stays sealed until its trigger fires)
   if(G.secret && !G.secret.hidden){ const s=G.secret; s.t+=dt;
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
-      const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
-      G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
-      addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
-      toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
+      if(s.spent){ const g=awardGold(120); G.secret=null; SFX.pickup(); playFx('loot'); burst(s.x,s.y+40,s.z,'#9a86b0',18);   // already-claimed rift: a spent echo that just yields gold
+        addText(p.x,p.y+90,p.z,'+'+g+'g','#c9b6ff'); toast('A spent rift — its echo yields '+g+' gold','#c9b6ff','event-secret-rift'); }
+      else { const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
+        G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
+        addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
+        toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift'); } } }
   // trial tutorial tips, paced out
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
@@ -8055,6 +8058,7 @@ function drawCourse(s,t){
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
   LATE.length=0;
   const CAMX=(G.eye?G.eye.x:G.cam.x), CAMZ=(G.eye?G.eye.z:G.cam.z), shoulder=meta.camMode!=='far'; // Phase 19: rays start at the TRUE eye (G.cam is the follow-point at the hero — a zero-length ray)
+  const noFade=meta.camMode==='fps';   // first-person: the camera IS the eye and the hero isn't drawn, so NOTHING should ever go see-through (fixes platforms turning translucent when you jump off them)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
   // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
   const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
@@ -8073,8 +8077,8 @@ function drawCourse(s,t){
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
   if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
     if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
-    else if(!shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
-    else if(shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through
+    else if(!noFade && !shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
+    else if(!noFade && shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through
     else wallBox(wl);
   }
   // doors: sealed slabs glow by type; open ones become archways. ori 'z' = opening along z (side wall)
@@ -8083,7 +8087,7 @@ function drawCourse(s,t){
     if(zd){ bx(dr.x,48,dr.z-dr.d/2-8, 20,96,16, stone); bx(dr.x,48,dr.z+dr.d/2+8, 20,96,16, stone); bx(dr.x,92,dr.z, 20,10,dr.d+32, stoneTop); }
     else { bx(dr.x-dr.w/2-8,48,dr.z, 16,96,20, stone); bx(dr.x+dr.w/2+8,48,dr.z, 16,96,20, stone); bx(dr.x,92,dr.z, dr.w+32,10,20, stoneTop); }
     if(!dr.open){
-      if((!shoulder && dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) || (shoulder && rayHits(dr,12))) LATE.push({kind:'door',o:dr});
+      if(!noFade && ((!shoulder && dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) || (shoulder && rayHits(dr,12)))) LATE.push({kind:'door',o:dr});
       else if(zd){ bx(dr.x,dr.h/2,dr.z, 10,dr.h,dr.d, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, 11,dr.h*0.8,dr.d*0.16, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
       else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
     }
@@ -8110,7 +8114,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
-    if(ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on
+    if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
     else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
@@ -9513,11 +9517,16 @@ function render(t){
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
   if(G){ const sc=SKYSUN[s.theme]||SKYSUN._def;
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
-    // The sun is anchored to the MAP, not the camera: turning your view never moves it (no whip-around).
-    // It sits at the theme's fixed cardinal spot and only drifts on a very slow day-orbit — camera yaw is
-    // deliberately NOT part of this so where you look can't push the sun around.
-    const orbit=Math.sin((G.time||t)*.006)*0.17;                    // slow ± drift around the anchor (≈17-min cycle)
-    const sun=[sc.p[0]+orbit, sc.p[1]-Math.abs(orbit)*0.35];        // gentle rise toward the centre of its arc
+    // The sun sits at a FIXED cardinal direction in the WORLD (not the screen). Its screen position is that
+    // world direction seen through the camera, so as you turn, it slides across the sky and off the edge like
+    // a real distant sun — but where it lives in the world never depends on your view. A slow drift = day-orbit.
+    // When it is behind you it is shoved fully off-screen in one step, so there is no whip at the antipode.
+    const camYaw=(G.camYaw==null?Math.PI:G.camYaw);
+    const worldAz=(Math.PI-0.30)+Math.sin((G.time||t)*.006)*0.28;   // fixed cardinal bearing + very slow azimuth drift
+    let rel=worldAz-camYaw; rel=((rel+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;   // signed angle to view, [-PI,PI]
+    const HALF=1.05;                                                 // angular half-width the sun spans across the screen
+    const sx=Math.abs(rel)>1.9 ? -3 : 0.5+(rel/HALF)*0.5;           // in front → project to screen; behind → off-screen
+    const sun=[sx, sc.p[1]];
     PostFX.sky(top,bot,sun,sc.c); }
   const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
@@ -9574,12 +9583,13 @@ function render(t){
     bx(tr.x,ty+1.2,tr.z, 40,2.5,40, '#1a1226', '#4a2a6a', gl);
     bx(tr.x,ty+2,tr.z, 20,3,20, '#2a1840', '#7a40b0', gl*1.2);
     for(let i=0;i<4;i++){ const a=i*1.571; bx(tr.x+Math.cos(a)*15,ty+2.4,tr.z+Math.sin(a)*15, 4,3,4, '#8a50c0','#c47bff',gl); } }
-  if(G.secret && !G.secret.hidden){                    // the rift: a dark violet seam (parkour/exploration reward, or newly torn open by a trigger)
-    const s=G.secret, pu=0.42+0.22*Math.sin(s.t*1.7), sy=s.y||0;
-    bx(s.x,sy+26,s.z, 30,52,7, '#120a1e', '#4a2070', 0.9);
-    bx(s.x,sy+26,s.z, 16,40,9, '#2a1040', '#7a30c0', pu);
-    bx(s.x,sy+26,s.z, 5,30,11, '#c47bff', '#c47bff', pu*0.9);
-    for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, '#c47bff','#c47bff',0.5); } }
+  if(G.secret && !G.secret.hidden){                    // the rift: a dark violet seam (parkour/exploration reward). Once claimed it returns as a SPENT grey, semi-transparent echo that pays gold.
+    const s=G.secret, sp=s.spent, sy=s.y||0, pu=(sp?0.14:0.42)+(sp?0.05:0.22)*Math.sin(s.t*1.7);
+    const c1=sp?'#15141a':'#120a1e', c2=sp?'#37343e':'#4a2070', c3=sp?'#2a2832':'#2a1040', c4=sp?'#5a5666':'#7a30c0', c5=sp?'#8a86a0':'#c47bff';
+    bx(s.x,sy+26,s.z, 30,52,7, c1, c2, sp?0.4:0.9);
+    bx(s.x,sy+26,s.z, 16,40,9, c3, c4, pu);
+    bx(s.x,sy+26,s.z, 5,30,11, c5, c5, pu*0.9);
+    for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, c5,c5,sp?0.22:0.5); } }
   if(G.hub) drawWaystation(t);
   if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
     const n=G.npc;

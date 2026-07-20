@@ -78,6 +78,7 @@
   #bSk2{right:calc(env(safe-area-inset-right) + 68px);} #bSk3{right:calc(env(safe-area-inset-right) + 12px);}
   .btn.skl::after{content:attr(data-n);position:absolute;top:2px;left:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
   .btn.skl::before{content:attr(data-m);position:absolute;right:3px;bottom:2px;min-width:17px;padding:1px 3px;border-radius:6px;background:rgba(21,12,55,.9);color:#cbbcff;font-size:7.5px;font-weight:950;line-height:1.25;box-shadow:0 0 5px rgba(126,89,240,.35)}
+  .btn.sklaux,#skillframe{display:none;}  /* desktop-only rail extras (LMB / SPACE slots + the framing plate) */
   .btn.skl.cooling{opacity:1;}
   /* AQW-style radial cooldown: the icon greys out, a dark conic wedge covers the still-charging portion and
      sweeps away (revealing the colour icon) in tempo with the timer, and a 0.1s countdown sits centred. */
@@ -669,6 +670,19 @@
     .btn.skl::after{top:auto;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 7px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font-family:Georgia,serif}
     .btn.skl::before{right:2px;bottom:2px;border:1px solid #7d55a4;background:#160e20;color:#e1c8ff}
     #bSk0{right:calc(50% + 114px)}#bSk1{right:calc(50% + 38px)}#bSk2{right:calc(50% - 38px)}#bSk3{right:calc(50% - 114px)}
+    /* the LMB (basic attack) + SPACE (dodge) slots flank the 4 skills, and one ornate plate frames the whole rail */
+    #bLMB,#bSpace{display:flex;bottom:58px;width:72px;height:72px;border-radius:10px;background:radial-gradient(circle,#241d29,#0e0d12 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none;overflow:visible}
+    #bLMB{right:calc(50% + 200px)}#bSpace{right:calc(50% - 200px)}
+    #bLMB.pressed,#bSpace.pressed{background:radial-gradient(circle,#3a2d18,#0e0d12 72%);border-color:#f3c272}
+    .btn.sklaux .auxico{display:flex;align-items:center;justify-content:center;font-size:30px;filter:drop-shadow(0 2px 4px #000)}
+    .btn.sklaux .auxico .ico-event{width:46px;height:46px}
+    .btn.sklaux::after{content:attr(data-k);position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 8px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font:800 8.5px Georgia,serif;letter-spacing:.04em;border-radius:2px;white-space:nowrap}
+    #skillframe{display:block;position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:600px;height:106px;pointer-events:none;
+      background:radial-gradient(circle at 50% 0,rgba(120,60,180,.12),transparent 46%),linear-gradient(180deg,rgba(23,19,27,.78),rgba(6,7,11,.85));
+      border:1px solid #9a6c30;border-radius:12px;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #45311a,0 12px 28px #000b;
+      clip-path:polygon(2.5% 0,97.5% 0,100% 28%,100% 72%,97.5% 100%,2.5% 100%,0 72%,0 28%)}
+    #skillframe::before{content:'';position:absolute;left:6%;right:6%;top:0;height:2px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 10px #d8953d55}
+    #skillframe::after{content:'';position:absolute;inset:5px;border:1px solid #c8944333;border-radius:9px;clip-path:polygon(2.5% 0,97.5% 0,100% 28%,100% 72%,97.5% 100%,2.5% 100%,0 72%,0 28%)}
     .skilltip{display:none;position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:250px;padding:12px 14px;text-align:left;white-space:normal;background:linear-gradient(160deg,#1b1720f7,#07080cf7);border:1px solid #9c7134;box-shadow:inset 0 0 0 2px #09090d,0 12px 28px #000c;color:#c7c0b4;font:11px/1.4 Georgia,serif;clip-path:polygon(5% 0,95% 0,100% 12%,100% 88%,95% 100%,55% 100%,50% calc(100% - 5px),45% 100%,5% 100%,0 88%,0 12%);z-index:20;pointer-events:none}
     .skilltip b{display:block;margin-bottom:5px;color:#f2d392;font-size:14px;letter-spacing:.06em}.skilltip em{display:block;margin-top:7px;color:#c9a2ef;font-style:normal;font-weight:700;letter-spacing:.04em}.btn.skl:hover .skilltip,.btn.skl:focus-visible .skilltip{display:block}
     #bDodge{right:calc(50% + 175px);bottom:50px;width:58px;height:58px;border-radius:5px;background:linear-gradient(145deg,#26232a,#0c0d11);border-color:#98703a;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
@@ -717,7 +731,10 @@
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
   <button class="btn hide" id="bInteract">TALK</button>
+  <div id="skillframe"></div>
+  <button class="btn sklaux" id="bLMB" data-k="LMB" aria-label="Attack"></button>
   <button class="btn skl" id="bSk0" data-n="1"></button><button class="btn skl" id="bSk1" data-n="2"></button><button class="btn skl" id="bSk2" data-n="3"></button><button class="btn skl" id="bSk3" data-n="4"></button>
+  <button class="btn sklaux" id="bSpace" data-k="SPACE" aria-label="Dodge"></button>
 </div>
 <div id="mirrorui" class="hide"></div>
 <div id="toast"></div>
@@ -738,7 +755,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.199.0';
+const VERSION3D='1.200.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4237,6 +4254,7 @@ function bindBtn(id,key){
   el.addEventListener('contextmenu',e=>e.preventDefault());
 }
 bindBtn('bJump','jump'); bindBtn('bAttack','attack'); bindBtn('bDodge','dodge');
+bindBtn('bLMB','attack'); bindBtn('bSpace','dodge');   // desktop rail: LMB basic-attack + SPACE dodge slots
 for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); useSkill(i); }); }
 { const bi=document.getElementById('bInteract'); if(bi) bi.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); initAudio(); doInteract(); }); }
 (function(){
@@ -5157,7 +5175,13 @@ function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
 const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
-function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+/* desktop rail: fill the LMB (weapon) + SPACE (dodge) display slots that flank the 4 skills */
+function auxSlotsUpdate(){ const p=(typeof G!=='undefined'&&G)?G.p:null;
+  const lmb=document.getElementById('bLMB'), spc=document.getElementById('bSpace'); if(!lmb||!spc) return;
+  let wI='⚔'; if(p&&p.weapon){ wI=(p.weapon.cls==='ranged')?'🏹':((p.weapon.sch==='mag')?'✦':'⚔'); }
+  if(lmb.dataset.i!==wI){ lmb.dataset.i=wI; lmb.innerHTML='<span class="auxico">'+wI+'</span>'; }
+  if(!spc.dataset.i){ spc.dataset.i='1'; spc.innerHTML='<span class="auxico">🏃</span>'; } }
+function skillbarUpdate(){ auxSlotsUpdate(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
       if(!reached){ skIco(b).textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }

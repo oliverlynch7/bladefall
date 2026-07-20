@@ -48,11 +48,13 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
 const CHARS = [
-  { id:'Knight',       label:'Knight → Warrior' },
-  { id:'Barbarian',    label:'Barbarian → Reaper' },
-  { id:'Rogue_Hooded', label:'Rogue → Ranger' },
-  { id:'Mage',         label:'Mage → Mage' },
+  { id:'Knight',       label:'Knight' },
+  { id:'Rogue_Hooded', label:'Rogue' },
+  { id:'Mage',         label:'Mage' },
+  { id:'Barbarian',    label:'Barbarian' },
 ];
+// KayKit characters ship EVERY optional weapon/accessory baked in — hide them so there's no phasing clutter
+const WEAP = /sword|axe|dagger|crossbow|bow|quiver|arrow|mug|spellbook|smoke|shield|staff|wand|knife|mace|hammer|spear|badge/i;
 
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
@@ -64,8 +66,8 @@ renderer.toneMappingExposure = 1.06;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#8fb7d6');
-scene.fog = new THREE.Fog('#8fb7d6', 26, 62);
+scene.background = new THREE.Color('#12141b');
+scene.fog = new THREE.Fog('#0e1016', 14, 50);
 
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
 camera.position.set(4.6, 3.4, 6.4);
@@ -79,37 +81,44 @@ controls.autoRotate = true; controls.autoRotateSpeed = 0.9;
 controls.target.set(0, 1.7, 0);
 canvas.addEventListener('pointerdown', ()=>{ controls.autoRotate=false; });
 
-// ---- lighting: warm key + cool sky fill + rim, tuned for a stylised fantasy look ----
-const hemi = new THREE.HemisphereLight('#cfe4ff', '#5a4a34', 1.15); scene.add(hemi);
-const key = new THREE.DirectionalLight('#ffe6b8', 2.7);
-key.position.set(7, 11, 5); key.castShadow = true;
+// ---- CINEMATIC DARK-FANTASY lighting: low moody ambient, a dramatic warm key, a strong cold backlight, an ember fill ----
+const hemi = new THREE.HemisphereLight('#39465e', '#14100c', 0.55); scene.add(hemi);
+const key = new THREE.DirectionalLight('#ffcf8f', 2.35);
+key.position.set(6, 9, 4); key.castShadow = true;
 key.shadow.mapSize.set(2048,2048);
 key.shadow.camera.near=1; key.shadow.camera.far=45;
 key.shadow.camera.left=-14; key.shadow.camera.right=14; key.shadow.camera.top=14; key.shadow.camera.bottom=-14;
 key.shadow.bias=-0.0004; key.shadow.normalBias=0.02;
 scene.add(key);
-const rim = new THREE.DirectionalLight('#a9c6ff', 0.7); rim.position.set(-6,5,-7); scene.add(rim);
+const rim = new THREE.DirectionalLight('#5f9bff', 1.7); rim.position.set(-7, 5, -8); scene.add(rim);   // cold cinematic edge-light from behind
+const emberFill = new THREE.PointLight('#ff6a2a', 0.75, 26, 2); emberFill.position.set(2.4, 2.2, 4.2); scene.add(emberFill);  // low warm ember glow
 
-// ---- ground: a soft mossy meadow disc ----
-const groundMat = new THREE.MeshStandardMaterial({ color:'#5f7b43', roughness:1, metalness:0 });
+// ---- ground: dark ashen stone ----
+const groundMat = new THREE.MeshStandardMaterial({ color:'#22232b', roughness:1, metalness:0 });
 const ground = new THREE.Mesh(new THREE.CircleGeometry(40, 64), groundMat);
 ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
-// a paler footpath ring under the hero
-const ring = new THREE.Mesh(new THREE.RingGeometry(0.1, 3.2, 48), new THREE.MeshStandardMaterial({ color:'#7d8a5a', roughness:1 }));
-ring.rotation.x = -Math.PI/2; ring.position.y = 0.01; ring.receiveShadow = true; scene.add(ring);
+// a faintly glowing rune-circle under the hero
+const ring = new THREE.Mesh(new THREE.RingGeometry(2.9, 3.2, 48), new THREE.MeshBasicMaterial({ color:'#c76a2a', transparent:true, opacity:0.5 }));
+ring.rotation.x = -Math.PI/2; ring.position.y = 0.02; scene.add(ring);
+// drifting embers for atmosphere
+const emberN=90, emberPos=new Float32Array(emberN*3), emberVel=[];
+for(let i=0;i<emberN;i++){ emberPos[i*3]=(Math.random()-0.5)*24; emberPos[i*3+1]=Math.random()*10; emberPos[i*3+2]=(Math.random()-0.5)*24; emberVel.push(0.3+Math.random()*0.9); }
+const emberGeo=new THREE.BufferGeometry(); emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPos,3));
+const embers=new THREE.Points(emberGeo, new THREE.PointsMaterial({ color:'#ff8a3a', size:0.09, transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false }));
+scene.add(embers);
 
 // ---- stylised environment props (trees + rocks) to frame the scene and cast shadows ----
 function tree(x,z,s){
   const g = new THREE.Group();
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16*s,0.22*s,1.3*s,7), new THREE.MeshStandardMaterial({color:'#6b4a2c',roughness:1}));
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16*s,0.22*s,1.3*s,7), new THREE.MeshStandardMaterial({color:'#2c2018',roughness:1}));
   trunk.position.y=0.65*s; trunk.castShadow=true; g.add(trunk);
-  const cols=['#3f7d46','#4f8a4a','#356b3e'];
+  const cols=['#1d3025','#24382a','#172619'];
   for(let i=0;i<3;i++){ const f=new THREE.Mesh(new THREE.ConeGeometry((1.0-i*0.22)*s,(1.05-i*0.1)*s,8), new THREE.MeshStandardMaterial({color:cols[i%3],roughness:1}));
     f.position.y=(1.35+i*0.62)*s; f.castShadow=true; g.add(f); }
   g.position.set(x,0,z); g.rotation.y=Math.random()*6.28; scene.add(g);
 }
 function rock(x,z,s){
-  const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0), new THREE.MeshStandardMaterial({color:'#7c7f88',roughness:1,flatShading:true}));
+  const m=new THREE.Mesh(new THREE.IcosahedronGeometry(s,0), new THREE.MeshStandardMaterial({color:'#33353d',roughness:1,flatShading:true}));
   m.position.set(x,s*0.5,z); m.rotation.set(Math.random(),Math.random(),Math.random()); m.castShadow=true; m.receiveShadow=true; scene.add(m);
 }
 for(let i=0;i<9;i++){ const a=i/9*6.28, r=11+Math.random()*8; tree(Math.cos(a)*r, Math.sin(a)*r, 0.9+Math.random()*0.7); }
@@ -156,7 +165,7 @@ function show(id){
     if(current){ scene.remove(current); }
     if(mixer){ mixer.stopAllAction(); }
     const root = gltf.scene;
-    root.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; if(o.material){ o.material.roughness=Math.min(1,(o.material.roughness??1)); } } });
+    root.traverse(o=>{ if(o.name&&WEAP.test(o.name)) o.visible=false; if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
     frameModel(root);
     scene.add(root); current=root;
     mixer = new THREE.AnimationMixer(root); clips = gltf.animations||[]; action=null;
@@ -176,7 +185,9 @@ show('Knight');
 function resize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); }
 addEventListener('resize', resize); resize();
 
-renderer.setAnimationLoop(()=>{ const dt=clock.getDelta(); if(mixer) mixer.update(dt); controls.update(); renderer.render(scene,camera); });
+renderer.setAnimationLoop(()=>{ const dt=clock.getDelta(); if(mixer) mixer.update(dt);
+  const ep=embers.geometry.attributes.position; for(let i=0;i<emberN;i++){ let y=ep.array[i*3+1]+emberVel[i]*dt; if(y>10){ y=0; ep.array[i*3]=(Math.random()-0.5)*24; ep.array[i*3+2]=(Math.random()-0.5)*24; } ep.array[i*3+1]=y; } ep.needsUpdate=true;
+  controls.update(); renderer.render(scene,camera); });
 </script>
 </body>
 </html>

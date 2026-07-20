@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.194.0';
+const VERSION3D='1.195.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6686,12 +6686,8 @@ function enterWaystation(){
   for(const fb of [[-250,-160],[250,-160],[-250,210],[250,210],[-160,250],[160,250]]){
     G.deco.push({x:fb[0],z:fb[1],y0:0,w:50,h:12,d:30,c:'#6e4a2e'});
     for(let k=0;k<5;k++) G.deco.push({x:fb[0]-18+k*9,z:fb[1]+(k%2?4:-4),y0:12,w:6,h:8+Math.random()*5,d:6,c:bloom[(k*7+Math.abs(fb[0]))%6]}); }
-  // WELCOME BANNER over the spawn (south)
-  vcol(-130,250,7,7,116); vcol(130,250,7,7,116);
-  G.deco.push({x:0,z:250,y0:100,w:260,h:6,d:5,c:'#5a4426'});
-  G.deco.push({x:0,z:250,y0:70,w:140,h:28,d:5,c:'#c46a4a'}); G.deco.push({x:0,z:250,y0:70,w:120,h:20,d:6,c:'#e6c48a'});
-  // torches: gate arc + both bays + spawn
-  G.torches.push({x:0,z:250,ph:0});
+  // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
+  // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
   for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
   G.torches.push({x:-470,z:-60,ph:1},{x:-470,z:160,ph:2},{x:470,z:-60,ph:3},{x:470,z:160,ph:4});
   // ---- the gate ARC: one per zone across the north; centre gates drawn deeper so the eye is pulled forward ----
@@ -6984,6 +6980,7 @@ function openTrainingArena(back){ mode='menu';
 function updateInteract(){
   let it=null; const p=G.p;
   if(G.hub && G.hubNpcs){ let bd=64; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
+    if(!it && dXZ(0,30,p.x,p.z)<72) it={x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone};
     if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
@@ -7058,6 +7055,11 @@ function wsResume(){
     mode='play'; showOverlay(false); hudUpdate(); regrabCam();  // re-sync: bag/shop changes made at a post appear in hand immediately
   } else openHub();
 }
+function activateHubWaystone(){
+  if(!G||!G.hub) return;
+  const p=G.p; p.hp=effMaxHp(p); meta.hero=snapOf(p); persist();
+  SFX.achieve(); burst(0,76,30,'#ffd24a',18); hudUpdate(); openHubMenu();
+}
 function hubInteract(p,dt){
   for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z);
     if(d<40){ if(g._c) continue; g._c=true;
@@ -7066,9 +7068,7 @@ function hubInteract(p,dt){
       else { enterZone(g.zi); return; } }
     else if(d>72) g._c=false; }
   // keepers are no longer auto-opened on touch — walk up and press E / TALK (see updateInteract)
-  const d0=dXZ(0,-60,p.x,p.z);                                   // the waystone: heal + the overview menu
-  if(d0<48){ if(!G._wsc){ G._wsc=true; SFX.achieve(); p.hp=effMaxHp(p); burst(0,40,-60,'#ffd24a',18); openHubMenu(); } }
-  else if(d0>84) G._wsc=false;
+  // The central Waystone is handled by updateInteract/doInteract, never by proximity alone.
 }
 function hubNpcFacing(n,x,z){
   const hx=n.faceX==null?0:n.faceX, hz=n.faceZ==null?120:n.faceZ;

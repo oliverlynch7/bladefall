@@ -937,3 +937,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Increased the authored traversal network from 31 to 127 connected floor segments, roughly 3,400 units of lateral spread and 5,700 units of forward travel. Added a safe ford plus optional stepping-stone line, farm-loft and windmill climbs, an orchard canopy route, and the hidden Foxglove Copse.
 - Kept exactly three escalating dens on broad safe floors. The river, orchard canopy, windmill climb, and side glade are traversal/exploration spaces without required combat.
 - QA: muted real Chromium verified all 11 rooms, all 3 dens, 5 chests, 127 segments, no enemies in traversal-hazard districts, and zero console errors or warnings.
+
+## [Codex | 2026-07-20] Plan A voxel-detail foundation + vertical slice - shipped v1.215.0
+
+- Added semantic material registry, reusable instanced voxel assemblies, deterministic variation, three-distance LOD, and live geometry/draw-call metrics.
+- Rebuilt shared torches, chests/mimics, and portals through the assembly pipeline.
+- Upgraded the Knight, Rusty Sword, Coin Sprite, Quartermaster, Thornboar, Abyss Brute, and an Outskirts farmhouse as the first end-to-end production slice.
+- Kept collision/gameplay/save structures unchanged; muted browser QA passed with no console errors.

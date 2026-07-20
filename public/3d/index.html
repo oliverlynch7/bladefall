@@ -773,7 +773,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.214.0';
+const VERSION3D='1.215.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3506,6 +3506,13 @@ const EXPANDED_SCAPES={
       field(-1120,-1450,20,16);field(-820,-1780,10,6);fence(-1120,-1015,960,0);fence(-1600,-1450,0,780);
       // West: a working farm complex and two-stage barn climb, with its loft chest visible from the corn rows.
       G.deco.push({x:-1180,z:-1540,y0:0,w:300,h:105,d:220,c:'#8b5d35'});G.deco.push({x:-1180,z:-1540,y0:105,w:340,h:32,d:250,c:'#5a2e24'});climbRun(-1370,-1390,0,-1300,-1540,92,70);vplat(-1180,-1540,120,300,210,{terrace:true,checkpoint:true});chest(-1110,-1570,120);
+      // Plan A farmhouse pass: timber frame, inset entry, loft shutters, chimney, layered eaves. Collision stays on the original authored mass.
+      for(const x of [-1320,-1180,-1040]){G.deco.push({x,z:-1432,y0:6,w:14,h:98,d:12,c:'#3b2819'});G.deco.push({x,z:-1648,y0:6,w:14,h:98,d:12,c:'#3b2819'});}
+      for(const z of [-1642,-1540,-1438]){G.deco.push({x:-1324,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});G.deco.push({x:-1036,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});}
+      G.deco.push({x:-1180,z:-1427,y0:4,w:52,h:72,d:8,c:'#34251b'});G.deco.push({x:-1180,z:-1422,y0:62,w:70,h:7,d:6,c:'#b87922'});
+      for(const x of [-1260,-1100]){G.deco.push({x,z:-1424,y0:48,w:42,h:34,d:7,c:'#8fc4d0'});G.deco.push({x,z:-1419,y0:46,w:5,h:38,d:5,c:'#e7d6a5'});G.deco.push({x,z:-1419,y0:61,w:46,h:5,d:5,c:'#e7d6a5'});}
+      G.deco.push({x:-1180,z:-1418,y0:110,w:62,h:42,d:8,c:'#49301f'});G.deco.push({x:-1180,z:-1413,y0:120,w:7,h:43,d:5,c:'#b87922'});
+      G.deco.push({x:-1280,z:-1580,y0:132,w:34,h:66,d:34,c:'#57402d'});G.deco.push({x:-1280,z:-1580,y0:195,w:46,h:10,d:46,c:'#30251d'});
       // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
       for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
       const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}scapeSecret(ctx,glade.x,glade.z,0);chest(glade.x-70,glade.z+50);
@@ -5598,6 +5605,7 @@ function petAttack(pet,P,e){
 }
 function drawPet3(pet,t){
   const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
+  const _vl=voxLod(pet.x,pet.z);
   if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
   const glow=petRarityCol(pet.id);
   pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw); CURM=mMul(CURM,mS(0.62,0.62,0.62));   // small companion, sized to the icon art (uniform scale keeps normals valid under the batched renderer)
@@ -5654,7 +5662,8 @@ function drawPet3(pet,t){
     pushM(); mv(-9,10,2); rotZ(0.2); bx(0,10,0, 2.4,20,2.4,'#8a6f34'); bx(0,20,0, 7,7,2,P.body,P.accent,0.6); bx(2,20,0, 3,3,2,'#0f1424'); popM();  // coin-crescent staff
     bx(9,2,2, 6,7,5,'#6a4a2a'); bx(9,5,3.4, 4,3,1,P.body,P.accent,0.6);                 // coin purse
     for(const[dx,dz]of[[-3.5,3],[3.5,3]]) bx(dx,-6,dz,4,6,4,tint(P.body,'#000',0.25));  // stubby legs
-    for(let i2=0;i2<4;i2++){ const a=t*2.2+i2*1.571; bx(Math.cos(a)*13,10+Math.sin(t*3+i2)*5,Math.sin(a)*13, 3,3,1.4,P.body,P.accent,0.7); } }   // orbiting coins
+    if(_vl<2) for(let i2=0;i2<(_vl===0?6:3);i2++){ const a=t*2.2+i2*6.283/(_vl===0?6:3); bx(Math.cos(a)*13,10+Math.sin(t*3+i2)*5,Math.sin(a)*13, 3,3,1.4,P.body,P.accent,0.7); }
+    if(_vl===0){ bx(-4,5,4.7,2.4,1.2,1,'#fff2a0','#ffd24a',.7); bx(4,5,4.7,2.4,1.2,1,'#fff2a0','#ffd24a',.7); bx(9,0,4.8,4,1,1,'#d9a52f','#ffd24a',.5); } } // stamped coin glints + purse clasp
   else if(pet.id==='gravewraith'){ // a skull-faced reaper-spirit — bone mask, tattered hood, a soul-censer, purple tendrils
     bx(0,10,0, 13,11,11,'#241436');                                                   // deep hood
     bx(0,9,4.4, 8,9,3,'#d8d2e0'); bx(0,7,5.6, 6,4,2,'#0f0820');                         // the pale SKULL face + jaw shadow
@@ -8324,7 +8333,9 @@ function weaponMesh(w,swing){
       bx(0,5,0, 14,3,4.4, iron); bx(0,5,0, 14.8,1.2,1.4, gold); bx(0,5,0, 4.6,3.6,5, rust);                          // guard + gilt + collar
       bx(0,24,0, 6.4,32,3.4, dkb,glow); bx(0,42,0, 3.6,8,2.6, dkb,glow);
       bx(0,25,1.15, 1.4,28,1, blade, blade); bx(-3.1,24,0, 0.8,30,2.2, edge); bx(3.1,24,0, 0.8,30,2.2, edge);        // fuller + twin bevels
-      bx(3.9,17,0, 1.6,4,3, dkb); bx(-3.9,28,0, 1.6,4.6,3, dkb); break;                                            // silhouette notches
+      bx(3.9,17,0, 1.6,4,3, dkb); bx(-3.9,28,0, 1.6,4.6,3, dkb);
+      if(w.name==='Rusty Sword'){ bx(-1.8,14,1.8,1.2,5,.7,'#8d4f28'); bx(1.6,31,1.8,1,7,.7,'#6f3d23'); bx(0,38,1.7,2.2,2,.8,'#b66b35'); bx(-5.6,5,0,2.2,2.2,5,'#76512e'); }
+      break;                                            // silhouette notches
   }
   // equipped elemental flourish — animated aura keyed to the weapon's element (fire actually flickers)
   const el=w.el;
@@ -8339,6 +8350,7 @@ function weaponMesh(w,swing){
 }
 function drawHero3(p,t,preview){
   const sk=SKINS[p.skin]||SKINS.knight;
+  const _vl=preview?0:voxLod(p.x,p.z);
   const hurt=p.hurtFlash>0, A=hurt?'#ff8a82':sk.armor, AL=hurt?'#ffb0aa':sk.armorLt;
   const godGlow=sk.god?sk.glow:null;
   const moving=Math.hypot(p.vx||0,p.vz||0)>20&&p.onGround;
@@ -8422,7 +8434,7 @@ function drawHero3(p,t,preview){
   else if(hd==='mask'){ bx(0,42.5,5.9, 12,10,1.6,'#0a0a0e'); bx(-2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); bx(2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); }
   else if(hd==='eldritch'){ bx(0,42,0, 12.6,12.6,11.6, A); bx(-3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(0,39.6,5.9, 2,2,1.2, sk.glow, sk.glow); }
   // ---- base-body detail: layered plating, rivets, face, gorget, cape (fixed to the body; sits under any equipped-armor overlay) ----
-  { const Ad=tint(A,'#000',0.24), Al=tint(AL,'#fff',0.12), riv=tint(AL,'#fff',0.35), skD=tint(sk.tone,'#000',0.2);
+  if(_vl<2){ const Ad=tint(A,'#000',0.24), Al=tint(AL,'#fff',0.12), riv=tint(AL,'#fff',0.35), skD=tint(sk.tone,'#000',0.2);
     bx(0,27,-5, 16,22,3, Ad);                                                    // backplate
     pushM(); mv(0,32,-5.6); rotX(0.14); box(15,28,2, tint(A,'#000',0.3)); for(let i=-1;i<=1;i++) bx(i*5,-16,0, 4,9,1.6, tint(A,'#000',0.4)); popM();   // cape + frayed hem
     for(let i=0;i<3;i++) bx(0,22-i*4,5.3, 12-i*2.4,2.2,1.2, Al);                  // ab ridges
@@ -8430,6 +8442,13 @@ function drawHero3(p,t,preview){
     bx(0,20,5.6, 15,3,2, sk.trim); bx(0,20,6.2, 4,3,1.2, sk.glow, sk.glow, 0.7);  // belt + glowing buckle
     bx(0,35,4.4, 10,4,4, sk.trim); bx(0,37.5,0, 8,4.5,8, skD);                    // gorget + neck
     bx(0,44.6,5.7, 3,2,1.3, skD); bx(-2.6,44.4,5.9, 3.2,1,1, '#33281f'); bx(2.6,44.4,5.9, 3.2,1,1, '#33281f'); bx(0,39.4,5.7, 3.4,1,1, '#6a5648'); }   // nose + brows + mouth
+  if(_vl===0 && p.skin==='knight'){
+    const steel=VOXMAT.steel, gilt=VOXMAT.gold, ink=tint(A,'#000',.42);
+    bx(0,30,6.35,11.5,1.1,.8,steel.light,steel.edge,.28);
+    for(const s of [-1,1]){ bx(s*6.2,29,6.15,1.1,9,.8,gilt.base,gilt.edge,.25); bx(s*11,34,5.2,2.2,1.4,1.2,gilt.base,gilt.edge,.3); }
+    bx(0,25,6.4,3.8,4.5,.9,ink,gilt.edge,.25); bx(0,24,6.9,1.2,7,.6,gilt.light,gilt.edge,.5);
+    for(let i=-1;i<=1;i++) bx(i*4.4,17.2,5.7,3.2,1.1,.8,steel.dark);
+  }
   // equipped armor shown on the character (toggle in pause menu)
   if(!preview && p.gear && meta.showArmor){
     const g=p.gear;
@@ -8542,19 +8561,21 @@ const HUB_UPGRADES=[
 // Drawn in a frame already translated to the NPC's feet and rotated to face; +y up, +z toward the viewer.
 function hubNpcModel(n,t){
   const sw=Math.sin(t*1.4+(n.x||0))*0.06, id=n.id;
+  const _vl=voxLod(n.x||0,n.z||0);
   const face=(y,z,sk,skD)=>{ bx(-2.4,y+1,z, 1.5,1.5,1,'#2a2018'); bx(2.4,y+1,z, 1.5,1.5,1,'#2a2018');   // shared face helper: eyes, brows, nose, mouth
     bx(-2.6,y+3,z, 2.4,1,1, skD||'#5a4638'); bx(2.6,y+3,z, 2.4,1,1, skD||'#5a4638'); bx(0,y,z+0.3, 1.6,2,1.4, skD||sk); bx(0,y-2.4,z, 3,1,1,'#6a4638'); };
   if(id==='quartermaster'){                                   // sharp/skeptical: gold diamond tabard, ledger + keys, scroll pack, white spiky hair
     const cl='#a8842e', clD='#7a5e20', gd='#e8c25a', gdL='#ffd24a', sk='#c9a380', skD='#a87f5e', hr='#eef2f8';
     bx(-3.5,7,0, 6,15,8, clD); bx(3.5,7,0, 6,15,8, clD); bx(-3.5,1,2, 7,4,10,'#2a2620'); bx(3.5,1,2, 7,4,10,'#2a2620');   // legs + boots
     bx(0,30,-7, 13,20,6,'#5a4326','#8a6a3a',0.2); for(const dz of [-4,4]) bx(dz,42,-8, 3,7,3,'#e8e0c8'); bx(2,44,-8, 3,6,3,'#d8cdb0'); for(const s of [-1,1]) bx(s*6,30,3, 2,20,2, clD);   // pack + scrolls + straps
-    bx(0,28,0, 15,22,10, cl, gd,0.08); for(let i=0;i<3;i++) for(const s of [-1,0,1]) bx(s*4,20+i*7,5.4, 3,3,1.4, gd,gdL,0.3);   // tabard + diamond studs
+    bx(0,28,0, 15,22,10, cl, gd,0.08); if(_vl<2) for(let i=0;i<3;i++) for(const s of [-1,0,1]) bx(s*4,20+i*7,5.4, 3,3,1.4, gd,gdL,0.3);   // tabard + diamond studs
     bx(0,30,5.6, 5,7,1.6, gd,gdL,0.4); bx(0,18,4, 15.6,3,3,'#3a2e1e'); bx(0,18,5.6, 5,4,1.4, gd);   // crest + belt + buckle
     pushM(); mv(-8,28,2); rotZ(0.2); box(4.6,16,5, cl); mv(0,-9,3); box(4.6,4,4.6, sk); popM();
     pushM(); mv(7,24,4); rotX(-0.2+sw); box(4.6,14,5, cl); bx(0,-8,5, 4.6,4,4.6, sk); bx(0,6,4, 6,4,8,'#6a4a2a','#c9a24a',0.15); popM();   // ledger arm
-    bx(10,16,3, 2,3,2,'#3a2e1e'); for(const k of [0,1,2]) bx(10+k*1.4,11-k*2,3, 3.4,5,1, '#e8a33d',gdL,0.5);   // keys
+    if(_vl<2){ bx(10,16,3, 2,3,2,'#3a2e1e'); for(const k of [0,1,2]) bx(10+k*1.4,11-k*2,3, 3.4,5,1, '#e8a33d',gdL,0.5); }   // keys
     bx(0,44,0, 9,10,9, sk); bx(0,41,4.7, 8,5,1.4, skD); bx(0,37,0, 10,4,10, clD); face(45,4.6,sk,skD);
-    bx(0,51,0, 10.5,5,10.5, hr,'#fff',0.12); for(const p of [[3,55,2],[-3,55,1],[0,56,-1],[4,54,-2],[-4,55,0]]) bx(p[0],p[1],p[2], 2.4,4,2.4, hr);   // white spiky hair
+    bx(0,51,0, 10.5,5,10.5, hr,'#fff',0.12); if(_vl<2) for(const p of [[3,55,2],[-3,55,1],[0,56,-1],[4,54,-2],[-4,55,0]]) bx(p[0],p[1],p[2], 2.4,4,2.4, hr);   // white spiky hair
+    if(_vl===0){ bx(0,31,6.45,4.2,4.2,.7,gdL,gdL,.45); bx(0,31,6.9,1.5,6,.55,'#fff0a0',gdL,.55); bx(0,25,-10.2,9,1.2,.8,'#cbb894'); }
   } else if(id==='keeper'){                                   // elegant/eccentric: white mask, layered purple-black robe, gold trim, scissors + draped cloth
     const rb='#241a2e', rb2='#3a2a55', gd='#c9a24a', gdL='#ffd24a', sk='#c9a380';
     bx(0,4,3, 14,8,10, rb);                                                          // robe hem pooling
@@ -8884,10 +8905,12 @@ function drawEnemy3(e,t){
     bx(0,15,0, 7,7,7, oc, oc); popM();                                                                                          // the rock in hand
   } else if(e.look==='boar'){
     // bulky tusked boar: low broad body, big shielded head, curved tusks; rears in the wind-up
-    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.1), gait=Math.sin(G.time*10+e.bob)*0.4;
+    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.1), gait=Math.sin(G.time*10+e.bob)*0.4, _vl=voxLod(e.x,e.z);
     pushM(); if(e.windT>0){ rotX(-0.22); } else if(e.chargeT>0){ rotX(0.18); }
     bx(0,H*0.5,-2, W*0.95,H*0.6,W*1.5, col);                                    // barrel body
     bx(0,H*0.78,-W*0.4, W*0.5,H*0.3,W*0.4, dk);                                 // bristled hump
+    if(_vl<2) for(let i=-2;i<=2;i++){ pushM(); mv(i*W*.14,H*.9,-W*.38); rotZ(i*.08); bx(0,4,0,2.2,9-Math.abs(i),2.2,'#31261c'); popM(); }
+    if(_vl===0){ for(const s2 of [-1,1]){ bx(s2*W*.34,H*.58,-W*.12,W*.18,H*.32,W*.42,dk); bx(s2*W*.36,H*.62,W*.1,1.2,H*.25,1.1,'#9a7141'); } bx(0,H*.48,-W*.77,W*.45,2,3,tint(col,'#000',.5)); }
     pushM(); mv(0,H*0.5,W*0.9); bx(0,0,0, W*0.7,H*0.55,W*0.55, lt);             // big head
     bx(0,-H*0.06,W*0.36, W*0.4,H*0.24,W*0.3, dk);                              // snout
     bx(-W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8'); bx(W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8');   // tusks
@@ -9233,7 +9256,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
   if(en) rotX(0.12); // enraged/lunging lean
   if(e.type==='brute'){
     // The Brute — a mountain of battered red-iron plate: layered armour, rivets, brutish face, chiselled stone slab greatsword. (HIGH-DETAIL showcase for the batched renderer.)
-    const sk='#b07a4a', skD=tint(sk,'#000',0.3), lea='#2e2016', leaD='#1c130a', st='#6a6f7e', stD='#3a3f4a', stH='#8a909e', riv=tint(lite,'#fff',0.25);
+    const sk='#b07a4a', skD=tint(sk,'#000',0.3), lea='#2e2016', leaD='#1c130a', st='#6a6f7e', stD='#3a3f4a', stH='#8a909e', riv=tint(lite,'#fff',0.25), _vl=voxLod(e.x,e.z);
     // ---- legs: layered greaves, knee cops, plated boots, hip rivets ----
     for(const s of [-1,1]){
       bx(s*13,18,0, 16,28,17, dark);                                   // thigh
@@ -9281,6 +9304,7 @@ function drawBoss3(e,t,col,eyeC,en,W,H){
     bx(-4.6,61,W*0.44, 5,5,3, '#1a0f0a'); bx(4.6,61,W*0.44, 5,5,3, '#1a0f0a');   // eye sockets
     bx(-4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC); bx(4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC);   // glowing eyes
     bx(3,64,W*0.5, 1.6,7,1, skD);                                      // scar
+    if(_vl===0){ for(let i=0;i<4;i++) bx(-7+i*4.5,56+(i%2)*3,W*.565,1.1,1.1,.7,'#6f2d24'); bx(-10,41,W*.31,5,1.2,1,'#d9b25f',GOLDL,.3); }
     for(let i=0;i<5;i++) bx(-8+i*4,70,-1, 4,6,10, leaD);               // matted mane (top/back)
     for(const s of [-1,1]) bx(s*8,60,-2, 5,10,8, leaD);                // mane sides
     bx(0,50,-3, W*0.4,10,6, sk);                                       // thick neck

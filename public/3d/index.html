@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.192.0';
+const VERSION3D='1.193.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6725,8 +6725,8 @@ function enterWaystation(){
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:290,open:()=>openMirror(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:0,z:-338,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()}
   ];
-  // One harmless straw dummy remains in the main hall for instant damage-number checks.
-  { const d2=spawnEnemy('dummy',390,145); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
+  // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
+  { const d2=spawnEnemy('dummy',588,72); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
   G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
   G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:360}; G.progressEnd=-350;
   G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
@@ -8520,7 +8520,7 @@ function drawWaystation(t){
     bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
     bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
     bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?(g.done?0.55+0.25*Math.sin(t*3+g.zi):0.30+0.18*Math.sin(t*2.6+g.zi)):1);
-    if(open) for(let i=0;i<g.tier;i++) bx(g.x-18+i*6, 104, g.z, 3.6,5,3.6, '#e8a33d','#e8a33d',0.8);   // tier pips
+    if(open) for(let i=0;i<g.tier;i++) bx(g.x-((g.tier-1)*8)/2+i*8, 94, g.z+9.2, 4.4,4.4,1.4, '#ffd24a','#ffd24a',0.95);   // tier pips on the FRONT face of the top frame
     if(g.done){ bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
       for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
     if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate

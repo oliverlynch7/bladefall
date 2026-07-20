@@ -951,3 +951,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Established a consistent visual progression from plain gray steel through green, blue, and purple trim to elaborate gold Legendary equipment.
 - Keyed equipment artwork only to slot and rarity, so stat affixes retain their gameplay identity without producing inconsistent item thumbnails.
 - Wired the new artwork through the shared item-avatar resolver so inventory, equipped gear, loot, shops, comparisons, and reward displays use the same canonical icons.
+
+## [Codex | 2026-07-20] Uncommon helmet progression revision - shipped v1.217.0
+
+- Rebuilt the Uncommon helmet with substantially stronger green coverage, layered cheek guards, a raised green crown stripe, and an emerald centerpiece.
+- Preserved the gray steel equipment family while creating a clearer visual step above Common and below the more elaborate blue Rare helmet.
+- Added the game version to rarity-icon URLs so returning players receive replacement artwork immediately instead of a cached older icon.

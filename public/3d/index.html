@@ -207,7 +207,7 @@
   #mirrorInfo .miTxt{display:flex;flex-direction:column;min-width:0;}
   #mirrorInfo .miSlot{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#8a806e;}
   #mirrorInfo .miName{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px;}
-  #mirrorToggle,#mirrorNameToggle{position:absolute;right:18px;z-index:24;width:176px;display:none;align-items:center;justify-content:flex-start;gap:11px;padding:14px 16px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.97),rgba(12,14,20,.97));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle{top:calc(50% - 42px)}#mirrorNameToggle{top:calc(50% + 26px)}#mirrorToggle:hover,#mirrorNameToggle:hover{border-color:#ffd47a;transform:scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i,#mirrorNameToggle i{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle,#mirrorNameToggle{right:8px;width:142px;padding:11px;font-size:9px}}
+  #mirrorToggle,#mirrorNameToggle{position:absolute;right:18px;z-index:24;width:176px;display:none;align-items:center;justify-content:flex-start;gap:11px;padding:14px 16px;border:1px solid #d89a3b;border-radius:14px;background:linear-gradient(145deg,rgba(35,30,25,.97),rgba(12,14,20,.97));color:#ffe0a3;font-size:11px;font-weight:950;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 22px rgba(232,163,61,.18),inset 0 1px rgba(255,255,255,.08)}#mirrorToggle{top:auto;bottom:86px}#mirrorNameToggle{top:auto;bottom:20px}#mirrorToggle:hover,#mirrorNameToggle:hover{border-color:#ffd47a;transform:scale(1.04);box-shadow:0 12px 34px rgba(0,0,0,.62),0 0 30px rgba(232,163,61,.34)}#mirrorToggle i,#mirrorNameToggle i{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;box-shadow:0 0 10px currentColor}@media(max-width:720px){#mirrorToggle,#mirrorNameToggle{right:8px;width:142px;padding:11px;font-size:9px}}
   .mstop{border-bottom:1px solid #2b3040;padding-bottom:9px;margin-bottom:8px;}
   .msttl{font-size:19px;font-weight:900;color:var(--amber);} .mssub{font-size:12px;color:var(--muted);margin-top:2px;}
   .msbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
@@ -773,7 +773,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.212.0';
+const VERSION3D='1.213.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2262,12 +2262,13 @@ function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
   instData[o+16]=sx;instData[o+17]=sy;instData[o+18]=sz;
   instData[o+19]=cr;instData[o+20]=cg;instData[o+21]=cb;instData[o+22]=ca;
   instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
-  instCount++;
+  instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
 }
 function flushBatch(){ if(instCount===0) return;
   gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
   gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
   INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,instCount);
+  if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
   instCount=0;
 }
 function box(sx,sy,sz,color,emiss,alpha){
@@ -2277,6 +2278,49 @@ function box(sx,sy,sz,color,emiss,alpha){
   pushInst(sx,sy,sz, c[0],c[1],c[2], (alpha==null?1:alpha), er,eg,eb);
 }
 function bx(x,y,z,sx,sy,sz,color,emiss,alpha){ pushM(); mv(x,y,z); box(sx,sy,sz,color,emiss,alpha); popM(); }
+/* ---- Plan A: semantic voxel assemblies, materials, LOD, and live render budgets ----
+   Assemblies remain instanced cubes, so richer art does not create a draw call per voxel.
+   All detail is visual-only unless an existing gameplay primitive supplies collision. */
+const VOXMAT={
+  iron:{base:'#343943',light:'#5b626e',dark:'#20242b',edge:'#8a929e'},steel:{base:'#78818d',light:'#c1c9d1',dark:'#424953',edge:'#eef3f6'},
+  gold:{base:'#b87922',light:'#ffd36a',dark:'#644018',edge:'#fff0a0'},wood:{base:'#654629',light:'#916539',dark:'#392719',edge:'#bd8a4e'},
+  stone:{base:'#555b68',light:'#777f8f',dark:'#343943',edge:'#9aa2b0'},leather:{base:'#543522',light:'#805437',dark:'#2c1d16',edge:'#b47a4d'},
+  cloth:{base:'#352842',light:'#5a416e',dark:'#1e1727',edge:'#9369b5'},bone:{base:'#c9c2aa',light:'#eee8d5',dark:'#787463',edge:'#fffbed'},
+  grass:{base:'#47733c',light:'#719a55',dark:'#29472c',edge:'#a8c873'},void:{base:'#2c173b',light:'#73409a',dark:'#160d20',edge:'#c47bff'},
+  fire:{base:'#d85122',light:'#ffd257',dark:'#712417',edge:'#fff0a0',emiss:'#ff8a32'},ice:{base:'#78cce5',light:'#dff8ff',dark:'#35677f',edge:'#ffffff',emiss:'#8eeaff'}
+};
+const VOXASM=Object.create(null),VOXMET={frame:0,submitted:0,peak:0,drawCalls:0,lod:[0,0,0],assemblies:0,culled:0,lastMs:0};
+function voxDefine(id,parts){VOXASM[id]=parts;return parts;}
+function voxLod(x,z,force){if(force!=null)return force;const p=G&&G.p;if(!p)return 0;const d=Math.hypot(x-p.x,z-p.z);return d<260?0:d<720?1:2;}
+function voxSeed(n){let x=(n|0)+0x6D2B79F5;x=Math.imul(x^(x>>>15),x|1);x^=x+Math.imul(x^(x>>>7),x|61);return((x^(x>>>14))>>>0)/4294967296;}
+function voxDraw(id,opt){const ps=VOXASM[id];if(!ps)return;opt=opt||{};const lod=voxLod(opt.x||0,opt.z||0,opt.lod);VOXMET.assemblies++;VOXMET.lod[lod]++;pushM();mv(opt.x||0,opt.y||0,opt.z||0);if(opt.yaw)rotY(opt.yaw);const seed=opt.seed||0;
+  for(let i=0;i<ps.length;i++){const q=ps[i];if((q.lod==null?0:q.lod)<lod)continue;const M=VOXMAT[q.mat]||VOXMAT.stone,v=q.var?(voxSeed(seed+i)-.5)*q.var:0,col=q.c||tint(M.base,v<0?'#000':'#fff',Math.abs(v));bx(q.x||0,q.y||0,q.z||0,q.w,q.h,q.d,col,q.e||(q.glow&&M.emiss),q.a);}popM();}
+function voxPart(x,y,z,w,h,d,mat,lod,extra){return Object.assign({x,y,z,w,h,d,mat,lod:lod==null?2:lod},extra||{});}
+function voxMetrics(){return {frame:VOXMET.frame,submitted:VOXMET.submitted,peak:VOXMET.peak,drawCalls:VOXMET.drawCalls,lod:VOXMET.lod.slice(),assemblies:VOXMET.assemblies,culled:VOXMET.culled,lastMs:+VOXMET.lastMs.toFixed(2)};}
+voxDefine('torch.post',[
+  voxPart(0,25,0,5,50,5,'wood',2),voxPart(0,5,0,9,4,9,'iron',2),voxPart(0,24,0,7,4,7,'iron',2),voxPart(0,43,0,7,4,7,'iron',2),
+  voxPart(0,50,0,13,4,13,'iron',2),voxPart(0,47,0,9,4,9,'gold',1),
+  ...[-1,1].flatMap(s=>[voxPart(s*5,53,0,2,10,2,'iron',1),voxPart(0,53,s*5,2,10,2,'iron',1)]),
+  ...[-1,1].flatMap(s=>[voxPart(s*3,14,3,2,2,2,'gold',0),voxPart(s*3,34,3,2,2,2,'gold',0)])
+]);
+voxDefine('chest.base',[
+  voxPart(0,9,0,34,16,25,'wood',2),voxPart(0,9,11.8,32,16,2,'wood',2,{c:'#4b301b'}),voxPart(0,4,0,36,5,27,'iron',2),voxPart(0,13,0,36,4,27,'gold',2),
+  ...[-1,1].flatMap(s=>[-1,1].map(z=>voxPart(s*16,9,z*11.5,3,17,3,'iron',2))),
+  ...[-10,0,10].map(x=>voxPart(x,9,12.3,1.4,15,1,'leather',0)),
+  voxPart(0,11.5,12.8,8,9,3,'gold',2),voxPart(0,10.5,14.4,2,3,1,'iron',1)
+]);
+voxDefine('chest.lid',[
+  voxPart(0,3,0,34,7,25,'wood',2),voxPart(0,6,0,30,4,23,'wood',2,{c:'#936840'}),voxPart(0,2,0,36,3,27,'gold',2),
+  ...[-12,-4,4,12].map(x=>voxPart(x,5,11.8,2,5,2,'iron',1)),...[-1,1].map(s=>voxPart(s*12,-1,-11.8,5,3,3,'iron',1)),
+  voxPart(0,8,0,10,2,8,'gold',0),voxPart(0,9,0,5,2,4,'steel',0)
+]);
+voxDefine('portal.arch',[
+  ...[-1,1].flatMap(s=>[voxPart(s*50,24,0,16,48,16,'stone',2),voxPart(s*50,2,0,22,7,22,'stone',2),voxPart(s*50,48,0,21,8,21,'stone',2),voxPart(s*50,59,0,5,5,5,'gold',1,{glow:true})]),
+  ...[-2,-1,0,1,2].map(i=>voxPart(i*21,82-Math.abs(i)*7,0,20,15,17,'stone',2,{var:.08})),
+  voxPart(0,86,0,24,18,20,'stone',2,{c:'#777f8f'}),voxPart(0,91,0,10,10,22,'gold',1,{glow:true}),
+  ...[-1,1].flatMap(s=>[voxPart(s*42,30,9,5,18,4,'gold',0),voxPart(s*42,30,-9,5,18,4,'gold',0)]),
+  ...[-28,0,28].map(x=>voxPart(x,72,9,5,5,3,'void',0,{glow:true}))
+]);
 // preserve exact draw order/transparency: any blend/depth/clear state change flushes the pending batch first
 (function(){ const _bf=gl.blendFunc.bind(gl), _dm=gl.depthMask.bind(gl), _cl=gl.clear.bind(gl);
   gl.blendFunc=(a,b)=>{ flushBatch(); _bf(a,b); };
@@ -9916,6 +9960,7 @@ function itemAv(item){
    ============================================================ */
 function ensureSize(){ if(VW!==window.innerWidth||VH!==window.innerHeight||canvas.width===0) resize(); }
 function frame(ts){
+  const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();
   if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
   acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
@@ -9923,6 +9968,7 @@ function frame(ts){
   render((G?G.time:ts/1000));
   flushBatch();                       // draw whatever boxes are still pending at frame end
   PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
+  VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

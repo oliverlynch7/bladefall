@@ -48,10 +48,11 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
 const CHARS = [
-  { id:'Knight',       label:'Knight' },
-  { id:'Rogue_Hooded', label:'Rogue' },
-  { id:'Mage',         label:'Mage' },
-  { id:'Barbarian',    label:'Barbarian' },
+  { id:'ai_knight',    label:'★ Your Knight (AI-3D from your art)', ai:true },
+  { id:'Knight',       label:'Knight (KayKit)' },
+  { id:'Rogue_Hooded', label:'Rogue (KayKit)' },
+  { id:'Mage',         label:'Mage (KayKit)' },
+  { id:'Barbarian',    label:'Barbarian (KayKit)' },
 ];
 // KayKit characters ship EVERY optional weapon/accessory baked in — hide them so there's no phasing clutter
 const WEAP = /sword|axe|dagger|crossbow|bow|quiver|arrow|mug|spellbook|smoke|shield|staff|wand|knife|mace|hammer|spear|badge/i;
@@ -160,12 +161,18 @@ function frameModel(root){
 }
 
 function show(id){
+  const cm = CHARS.find(c=>c.id===id)||{};
   document.querySelectorAll('#charRow button').forEach(b=>b.classList.toggle('on', b.dataset.id===id));
   const swap=(gltf)=>{
     if(current){ scene.remove(current); }
     if(mixer){ mixer.stopAllAction(); }
     const root = gltf.scene;
-    root.traverse(o=>{ if(o.name&&WEAP.test(o.name)) o.visible=false; if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+    if(cm.ai){ // AI-generated mesh: untextured, give it a steel material
+      root.traverse(o=>{ if(o.isMesh){ if(o.geometry) o.geometry.computeVertexNormals(); o.material=new THREE.MeshStandardMaterial({color:'#9aa6b8', metalness:0.08, roughness:0.62}); o.castShadow=true; o.receiveShadow=true; } });
+      root.rotation.y = Math.PI;   // Hunyuan meshes face away by default; turn to camera
+    } else {
+      root.traverse(o=>{ if(o.name&&WEAP.test(o.name)) o.visible=false; if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+    }
     frameModel(root);
     scene.add(root); current=root;
     mixer = new THREE.AnimationMixer(root); clips = gltf.animations||[]; action=null;
@@ -180,7 +187,7 @@ function show(id){
 const cr=document.getElementById('charRow');
 for(const c of CHARS){ const b=document.createElement('button'); b.dataset.id=c.id; b.textContent=c.label; b.onclick=()=>show(c.id); cr.appendChild(b); }
 
-show('Knight');
+show('ai_knight');
 
 function resize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); }
 addEventListener('resize', resize); resize();

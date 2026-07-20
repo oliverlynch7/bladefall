@@ -457,6 +457,9 @@
   .destcard .navart{width:118px;height:108px;margin-bottom:2px}.destcard.side{border-color:rgba(196,123,255,.38);background:linear-gradient(165deg,rgba(48,30,65,.9),rgba(13,14,21,.98));}
   .destcard.side .navmeta{color:#c98cff}.destcard .navdesc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .npcaction{max-width:300px;margin:12px auto 10px;min-height:164px}.npcaction .navart{width:92px;height:92px;}
+  .npctalkbody{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:stretch}
+  .npcchat .npcaction{width:100%;max-width:none;margin:0;min-height:190px}
+  .npcchat .npcaction .navart{width:108px;height:108px}.npcchat .npcaction .navname{font-size:19px}.npcchat .npcaction .navdesc{font-size:12px}
   .npcintro{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:center;margin:8px 0 16px;text-align:left;}
   .npcportrait{width:210px;height:286px;border:1px solid color-mix(in srgb,var(--npc-accent,#e8a33d) 55%,#303644);border-radius:16px;
     background-image:url('icons/npcs/approved-cast.png');background-size:300% 200%;background-position:var(--npc-pos);background-repeat:no-repeat;background-color:#030305;
@@ -477,6 +480,7 @@
     .navgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.navcard{min-height:164px}.navart{width:96px;height:96px}.navname{font-size:17px}.navdesc{font-size:11.5px}
     .navgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.navgrid.three>.navcard:last-child:nth-child(odd){grid-column:auto;width:auto;justify-self:stretch}
     .destgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.destcard{min-height:230px}.destcard .navart{width:174px;height:158px}.titlecards{grid-template-columns:repeat(2,minmax(0,1fr));max-width:540px;margin-left:auto;margin-right:auto}
+    .npctalkbody{grid-template-columns:minmax(0,1.45fr) minmax(330px,.75fr);gap:28px}.npcchat .npcaction{min-height:100%;padding:24px}.npcchat .npcaction .navart{width:150px;height:150px}.npcchat .npcaction .navname{font-size:23px}.npcchat .npcaction .navdesc{font-size:13px}
   }
   @media(max-width:560px){.npcintro{display:block}.npcportrait{width:100%;height:160px;margin-bottom:12px}.npcidentity .ovh{font-size:25px}.npcidentity .npcline{font-size:12px}}
   @media(max-width:390px){.navgrid,.destgrid{gap:7px}.navcard{min-height:126px;padding:9px 7px}.navart{width:68px;height:68px}.destcard{min-height:204px}.destcard .navart{width:100px;height:92px}.navname{font-size:13px}}
@@ -721,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.193.0';
+const VERSION3D='1.194.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6761,12 +6765,12 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
   mode='menu'; SFX.pickup();
   document.getElementById('toast').classList.remove('show');
   const react=npcReact(n);
-  showOverlayHTML(`<div class="card" style="--npc-accent:${n.c2||'#e8a33d'}"><div class="npcintro">${npcPortrait(n.id)}
+  showOverlayHTML(`<div class="card npcchat" style="--npc-accent:${n.c2||'#e8a33d'}"><div class="npctalkbody"><div class="npctalkcopy"><div class="npcintro">${npcPortrait(n.id)}
     <div class="npcidentity"><p class="ovsub">WAYSTATION KEEPER</p><h2 class="ovh">${n.name}</h2><p class="npcrole">${n.role||''}</p><p class="npcline">“${v.lines[0]}”</p></div></div>
     <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
       ${v.lines.slice(NPC_PORTRAIT_POS[n.id]?1:0).map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
-      ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div>
-    ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}
+      ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div></div>
+    ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}</div>
     <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
   document.getElementById('npcGo').onclick=()=>n.open();
   document.getElementById('npcLeave').onclick=resumePlay;

@@ -248,6 +248,7 @@
   /* ===== BLADEFALL icon set (transparent voxel emblems) — inline, sized to the surrounding text ===== */
   .ico{display:inline-block;width:1.18em;height:1.18em;background-size:contain;background-repeat:no-repeat;background-position:center;vertical-align:-0.24em;filter:drop-shadow(0 1px 1px rgba(0,0,0,.55));}
   .ico-coin{background-image:url('icons/coin.png');}
+  .ico-coin{width:1.28em!important;height:1.28em!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7)) drop-shadow(0 0 4px rgba(255,194,64,.2))}
   .ico-flame{background-image:url('icons/flame.png');}
   .ico-skull{background-image:url('icons/skull.png');}
   .ico-shield{background-image:url('icons/shield.png');}
@@ -607,20 +608,20 @@
   .hudportrait{display:none}
   #pethud{display:none;position:absolute;z-index:5;pointer-events:none}
   @media (min-width:900px) and (pointer:fine){
-    #hud{left:18px;top:18px;padding:0;width:390px;filter:drop-shadow(0 15px 20px #000a)}
-    .hudpanel{min-height:154px;padding:18px 18px 14px 104px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.97),rgba(4,5,8,.94));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
+    #hud{left:18px;top:18px;padding:0;width:560px;filter:drop-shadow(0 15px 20px #000a)}
+    .hudpanel{min-height:178px;padding:22px 24px 18px 126px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.97),rgba(4,5,8,.94));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
     .hudpanel::before{left:8%;right:7%;height:3px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 12px #d8953d66}
     .hudpanel::after{inset:7px;border:1px solid #c8944338;border-radius:2px 12px 12px 2px;clip-path:polygon(0 8%,5% 0,95% 0,100% 18%,100% 82%,95% 100%,5% 100%,0 92%)}
-    .hudportrait{display:block;position:absolute;left:-8px;top:-10px;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
+    .hudportrait{display:block;position:absolute;left:-8px;top:-8px;width:116px;height:116px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
     .hudportrait::before,.hudportrait::after{content:'';position:absolute;inset:-9px;border:2px solid #725024;transform:rotate(45deg);clip-path:polygon(0 0,34% 0,34% 4%,66% 4%,66% 0,100% 0,100% 34%,96% 34%,96% 66%,100% 66%,100% 100%,66% 100%,66% 96%,34% 96%,34% 100%,0 100%,0 66%,4% 66%,4% 34%,0 34%)}
     .hudportrait::after{inset:8px;border-color:#a765d2;opacity:.65;filter:drop-shadow(0 0 5px #984bd3);transform:rotate(22.5deg)}
-    .hudportrait img{position:absolute;inset:12px;width:80px;height:80px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
-    #hud .meta{margin:0 0 9px;min-height:28px;align-items:flex-start}
+    .hudportrait img{position:absolute;inset:13px;width:90px;height:90px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
+    #hud .meta{display:grid;grid-template-columns:minmax(0,1fr) 164px;gap:18px;margin:0 0 15px;min-height:38px;align-items:start}
     #hud .left{display:grid;gap:2px;align-items:start}
     #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}
-    #weapontag{font-family:Georgia,serif;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
-    #armortag{position:absolute;left:-87px;top:108px;font-size:9px;white-space:nowrap}
-    #stagetag{position:absolute;left:auto;right:0;top:18px;color:#d6b06c;font-family:Georgia,serif;font-size:9px;letter-spacing:.15em;white-space:nowrap;text-shadow:0 2px 5px #000}
+    #weapontag{display:block;max-width:235px;font-family:Georgia,serif;font-size:10px;line-height:1.3;letter-spacing:.055em;text-transform:uppercase;white-space:normal}
+    #armortag{position:absolute;left:-106px;top:126px;font-size:9px;white-space:nowrap}
+    #stagetag{position:absolute;left:auto;right:0;top:23px;max-width:164px;color:#d6b06c;font-family:Georgia,serif;font-size:8px;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 5px #000}
     #goldtag{font-family:Georgia,serif;font-size:12px!important}
     .hudvitals .barwrap{gap:6px;margin-bottom:5px}
     .barlabel{width:34px;color:#c9b58f;font-family:Georgia,serif;font-size:8px}
@@ -628,10 +629,10 @@
     .bar>i{border-radius:0;position:relative;overflow:hidden}
     .bar>i::after{content:'';position:absolute;inset:1px 0 auto;height:2px;background:#fff5;box-shadow:0 0 4px #fff5}
     .vitalnum{min-width:57px;font-family:Georgia,serif;color:#eadfc9}
-    #hudprogress{position:fixed;left:50%;top:auto;bottom:12px;transform:translateX(-50%);width:min(660px,52vw);gap:2px;margin:0;padding:5px 8px;background:linear-gradient(180deg,#161319f2,#050609f2);border:1px solid #765323;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #362613,0 10px 24px #000a;clip-path:polygon(2% 0,98% 0,100% 50%,98% 100%,52% 100%,50% 82%,48% 100%,2% 100%,0 50%);z-index:8}
+    #hudprogress{position:fixed;left:50%;top:auto;bottom:12px;transform:translateX(-50%);width:min(900px,66vw);gap:2px;margin:0;padding:6px 10px;background:linear-gradient(180deg,#161319f2,#050609f2);border:1px solid #765323;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #362613,0 10px 24px #000a;clip-path:polygon(2% 0,98% 0,100% 50%,98% 100%,52% 100%,50% 82%,48% 100%,2% 100%,0 50%);z-index:8}
     .progbox{padding:5px 10px 6px;border:0;border-radius:0;background:transparent;box-shadow:none}
     .progbox:first-child{border-right:1px solid #744e7e}
-    .proghead{margin-bottom:3px}.progtitle{font-family:Georgia,serif;color:#d8cab0;font-size:9px;letter-spacing:.09em}.prognum{font-family:Georgia,serif;font-size:8px;color:#b5ab9c}.progbox .bar{height:6px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c}
+    .proghead{margin-bottom:4px}.progtitle{font-family:Georgia,serif;color:#d8cab0;font-size:9px;letter-spacing:.09em}.prognum{font-family:Georgia,serif;font-size:8px;color:#b5ab9c}.progbox .bar{height:8px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
     .pathrow{position:absolute;left:104px;right:18px;bottom:9px}.pathrow .barlabel{color:#817766}.pathrow .bar{height:3px!important;box-shadow:none}
     #jetwrap{position:absolute;left:104px;right:18px;bottom:9px}
     #bosshpwrap{top:22px;width:min(610px,42vw)}
@@ -644,11 +645,14 @@
     #controls{z-index:7}
     #joyzone,#lookzone{z-index:0}
     .btn{font-family:Georgia,serif;text-shadow:0 2px 3px #000}
-    .btn.skl{bottom:50px;width:62px;height:62px;border-radius:5px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
-    .btn.skl>.ico-event{width:48px;height:48px;filter:drop-shadow(0 0 6px #9d51d3aa)}
+    #bJump,#bDodge,#bAttack,#bInteract{display:none!important}
+    .btn.skl{bottom:58px;width:72px;height:72px;border-radius:10px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none}
+    .btn.skl>.ico-event{width:57px;height:57px;filter:drop-shadow(0 0 6px #9d51d3aa)}
     .btn.skl::after{top:auto;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 7px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font-family:Georgia,serif}
     .btn.skl::before{right:2px;bottom:2px;border:1px solid #7d55a4;background:#160e20;color:#e1c8ff}
-    #bSk0{right:calc(50% + 101px)}#bSk1{right:calc(50% + 35px)}#bSk2{right:calc(50% - 31px)}#bSk3{right:calc(50% - 97px)}
+    #bSk0{right:calc(50% + 114px)}#bSk1{right:calc(50% + 38px)}#bSk2{right:calc(50% - 38px)}#bSk3{right:calc(50% - 114px)}
+    .skilltip{display:none;position:absolute;left:50%;bottom:calc(100% + 13px);transform:translateX(-50%);width:250px;padding:12px 14px;text-align:left;white-space:normal;background:linear-gradient(160deg,#1b1720f7,#07080cf7);border:1px solid #9c7134;box-shadow:inset 0 0 0 2px #09090d,0 12px 28px #000c;color:#c7c0b4;font:11px/1.4 Georgia,serif;clip-path:polygon(5% 0,95% 0,100% 12%,100% 88%,95% 100%,55% 100%,50% calc(100% - 5px),45% 100%,5% 100%,0 88%,0 12%);z-index:20;pointer-events:none}
+    .skilltip b{display:block;margin-bottom:5px;color:#f2d392;font-size:14px;letter-spacing:.06em}.skilltip em{display:block;margin-top:7px;color:#c9a2ef;font-style:normal;font-weight:700;letter-spacing:.04em}.btn.skl:hover .skilltip,.btn.skl:focus-visible .skilltip{display:block}
     #bDodge{right:calc(50% + 175px);bottom:50px;width:58px;height:58px;border-radius:5px;background:linear-gradient(145deg,#26232a,#0c0d11);border-color:#98703a;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
     #bJump{right:calc(50% + 239px);bottom:54px;width:50px;height:50px;border-radius:50%;background:#15131a;border-color:#8d6530}
     #bAttack{right:calc(50% - 174px);bottom:50px;width:66px;height:66px;border-radius:5px;background:radial-gradient(circle,#48201e,#151014 72%);border-color:#aa7432;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
@@ -668,7 +672,7 @@
 <canvas id="gl"></canvas>
 <div id="hud" class="hide"><div class="hudpanel">
   <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span style="display:inline-flex;align-items:center;gap:3px"><span class="ico ico-coin" style="width:14px;height:14px;vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
+  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
@@ -716,7 +720,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.191.0';
+const VERSION3D='1.192.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5109,25 +5113,27 @@ function useSkillLegacy(i){
   p.skillCd[i]=cd; skillbarUpdate();
 }
 const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
+function attachSkillTip(b,name,desc,cd,mana){ const tip=document.createElement('span'); tip.className='skilltip';
+  tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
 function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
-      if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; continue; }
-      if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Choose your rank-'+slotRank[i]+' skill'; continue; }
+      if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
+      if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
       if(cool) b.textContent=Math.ceil(p.skillCd[i]); else b.innerHTML=C2_ICON[s.fx]||'✦';
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
       b.classList.toggle('nomana',!!(p&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
-      b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; }
+      b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
     return; }
   const S=curSkills();
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
-    if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; continue; }
+    if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
     if(locked||cooling) b.textContent=locked?'🔒':Math.ceil(p.skillCd[i]); else b.innerHTML=s.icon;
     b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
     b.classList.toggle('nomana',!!(p&&!locked&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
-    b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; } }
+    b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }
 function resolveSwing(){
   const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
@@ -7786,8 +7792,7 @@ function hudUpdate(){
   wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
   wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
   const at=document.getElementById('armortag'), red=Math.round(defenseR(p)*100);
-  const pips=GEARSLOTS.map(s=>{ const a=p.gear[s]; return `<span class="pip" style="background:${a?a.color:'#333'}"></span>`; }).join('');
-  at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+red+'%</b> '+pips;
+  at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+red+'% armor</b>';
   document.getElementById('bAttack').classList.toggle('ranged',p.weapon.cls==='ranged');
   document.getElementById('bAttack').textContent=p.weapon.cls==='ranged'?'FIRE':'SLASH';
   const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0);   // the coin icon beside it carries the currency meaning now

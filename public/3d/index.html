@@ -773,7 +773,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.215.0';
+const VERSION3D='1.216.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9929,14 +9929,17 @@ function skinAv(id){
 }
 function itemStaticAv(item){
   if(!item) return null;
+  // Equipment art is intentionally keyed only by slot + rarity. Affixes still
+  // affect stats and names, but no longer replace the item's visual identity.
+  if(GEARSLOTS.includes(item.slot)&&RARITY[item.rarity]){
+    return 'icons/armor_'+item.slot+'_'+item.rarity+'.png';
+  }
   if(item.cls){
     const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
     const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
     return file?'icons/items/weapons/'+file+'.png':null;
   }
-  if(item.slot==='amulet'||item.slot==='ring') return 'icons/slot-'+item.slot+'.png';
-  if(item.slot&&item.type) return 'icons/items/armor/'+item.slot+'-'+item.type+'.png';
   return null;
 }
 /* ---- item preview (approved static art first; deterministic 3D crop remains the legacy fallback) ---- */
@@ -10005,7 +10008,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
-  makeWeapon, makeArmor, makeTrinket, rollRarity, rollOrganicRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
+  makeWeapon, makeArmor, makeTrinket, itemAv, itemStaticAv, rollRarity, rollOrganicRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   VOXMAT,VOXASM,voxMetrics,voxLod,voxSeed,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,

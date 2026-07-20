@@ -944,3 +944,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt shared torches, chests/mimics, and portals through the assembly pipeline.
 - Upgraded the Knight, Rusty Sword, Coin Sprite, Quartermaster, Thornboar, Abyss Brute, and an Outskirts farmhouse as the first end-to-end production slice.
 - Kept collision/gameplay/save structures unchanged; muted browser QA passed with no console errors.
+
+## [Codex | 2026-07-20] Armor rarity icon families - shipped v1.216.0
+
+- Added 25 transparent voxel equipment icons: helmet, chestplate, leggings, amulet, and ring across Common, Uncommon, Rare, Epic, and Legendary rarities.
+- Established a consistent visual progression from plain gray steel through green, blue, and purple trim to elaborate gold Legendary equipment.
+- Keyed equipment artwork only to slot and rarity, so stat affixes retain their gameplay identity without producing inconsistent item thumbnails.
+- Wired the new artwork through the shared item-avatar resolver so inventory, equipped gear, loot, shops, comparisons, and reward displays use the same canonical icons.

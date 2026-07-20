@@ -73,12 +73,25 @@
   #bJump{width:66px;height:66px;right:calc(env(safe-area-inset-right) + 104px);bottom:calc(env(safe-area-inset-bottom) + 92px);}
   #bDodge{width:62px;height:62px;right:calc(env(safe-area-inset-right) + 110px);bottom:calc(env(safe-area-inset-bottom) + 18px);font-size:11px;background:rgba(58,157,208,.3);border-color:rgba(120,200,235,.4);}
   .btn.skl{width:50px;height:50px;font-size:19px;bottom:calc(env(safe-area-inset-bottom) + 176px);background:rgba(96,72,160,.34);border-color:rgba(170,150,240,.45);}
-  .btn.skl>.ico-event{width:34px;height:34px;margin:0;vertical-align:middle;}
+  .btn.skl .ico-event{width:34px;height:34px;margin:0;vertical-align:middle;}
   #bSk0{right:calc(env(safe-area-inset-right) + 180px);} #bSk1{right:calc(env(safe-area-inset-right) + 124px);}
   #bSk2{right:calc(env(safe-area-inset-right) + 68px);} #bSk3{right:calc(env(safe-area-inset-right) + 12px);}
   .btn.skl::after{content:attr(data-n);position:absolute;top:2px;left:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
   .btn.skl::before{content:attr(data-m);position:absolute;right:3px;bottom:2px;min-width:17px;padding:1px 3px;border-radius:6px;background:rgba(21,12,55,.9);color:#cbbcff;font-size:7.5px;font-weight:950;line-height:1.25;box-shadow:0 0 5px rgba(126,89,240,.35)}
-  .btn.skl.cooling{opacity:.45;font-size:16px;font-weight:900;}
+  .btn.skl.cooling{opacity:1;}
+  /* AQW-style radial cooldown: the icon greys out, a dark conic wedge covers the still-charging portion and
+     sweeps away (revealing the colour icon) in tempo with the timer, and a 0.1s countdown sits centred. */
+  .btn.skl .sk-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:inherit;line-height:1;}
+  .btn.skl .sk-ico>.ico-event{position:static;}
+  .btn.skl.cooling .sk-ico{filter:grayscale(1) brightness(.42);}
+  .btn.skl .sk-wheel{position:absolute;inset:0;border-radius:inherit;pointer-events:none;display:none;z-index:2;
+    background:conic-gradient(from 0deg, rgba(3,3,7,.76) calc(var(--cdf,0)*360deg), rgba(3,3,7,0) 0);}
+  .btn.skl .sk-wheel::after{content:'';position:absolute;inset:0;border-radius:inherit;
+    background:conic-gradient(from 0deg, transparent calc(var(--cdf,0)*360deg - 2.5deg), rgba(190,150,255,.9) calc(var(--cdf,0)*360deg), transparent 0);}
+  .btn.skl.cooling .sk-wheel{display:block;}
+  .btn.skl .sk-cd{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:3;
+    font:800 17px Georgia,serif;color:#fff;text-shadow:0 1px 4px #000,0 0 9px rgba(150,110,240,.65);pointer-events:none;}
+  .btn.skl.cooling .sk-cd{display:flex;}
   .btn.skl.lock{opacity:.35;}
   .btn.skl.nomana{border-color:rgba(186,128,255,.65);box-shadow:inset 0 0 0 2px rgba(94,44,154,.25);filter:saturate(.55);opacity:.58}
   #bDodge.pressed{background:rgba(58,157,208,.6);}
@@ -652,7 +665,7 @@
     .btn{font-family:Georgia,serif;text-shadow:0 2px 3px #000}
     #bJump,#bDodge,#bAttack,#bInteract{display:none!important}
     .btn.skl{bottom:58px;width:72px;height:72px;border-radius:10px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:none}
-    .btn.skl>.ico-event{width:57px;height:57px;filter:drop-shadow(0 0 6px #9d51d3aa)}
+    .btn.skl .ico-event{width:57px;height:57px;filter:drop-shadow(0 0 6px #9d51d3aa)}
     .btn.skl::after{top:auto;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 7px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font-family:Georgia,serif}
     .btn.skl::before{right:2px;bottom:2px;border:1px solid #7d55a4;background:#160e20;color:#e1c8ff}
     #bSk0{right:calc(50% + 114px)}#bSk1{right:calc(50% + 38px)}#bSk2{right:calc(50% - 38px)}#bSk3{right:calc(50% - 114px)}
@@ -725,7 +738,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.198.0';
+const VERSION3D='1.199.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2329,7 +2342,7 @@ function upgradeStoredHeroPerk(id,newLv){
     stats:{power:1.0,magPower:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,defense:0,cdr:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
-    skillCd:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
+    skillCd:[0,0,0,0],skillCdMax:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
     guardT:0,reflectT:0,shieldHp:0,shieldT:0,stormT:0,stormAcc:0};
   applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
   return p;
@@ -5109,7 +5122,7 @@ function useSkill(i){
     if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
     G._desig=true; const r=SKILL_FX[s.fx]?SKILL_FX[s.fx](p,classFamilyOk(p.weapon),1):null; G._desig=false;
     if(r==='refund'){ gainMana(p,manaSpent,false); return; }
-    let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; skillbarUpdate(); return; }
+    let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate(); return; }
   return useSkillLegacy(i);
 }
 function useSkillLegacy(i){
@@ -5126,27 +5139,40 @@ function useSkillLegacy(i){
   if(r==='refund'){ gainMana(p,manaSpent,false); return; }
   const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
   cd*=(1-effCdr(p));                                     // Mystic armor
-  p.skillCd[i]=cd; skillbarUpdate();
+  p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate();
 }
+/* the icon lives in its own span so the cooldown wheel (conic overlay) + 0.1s countdown can layer over a
+   greyed copy of it without skillbarUpdate having to redraw them every frame */
+function skIco(b){ let s=b.querySelector('.sk-ico'); if(!s){ s=document.createElement('span'); s.className='sk-ico'; b.insertBefore(s,b.firstChild);
+    if(!b.querySelector('.sk-wheel')){ const w=document.createElement('span'); w.className='sk-wheel'; b.appendChild(w); const n=document.createElement('span'); n.className='sk-cd'; b.appendChild(n); } }
+  return s; }
+/* per-frame: fill each cooling slot's wheel + tenth-second number; when one finishes, rebuild the bar once */
+function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b||b.classList.contains('lock')) continue;
+    const cd=p.skillCd[i]||0;
+    if(cd>0){ const mx=Math.max(cd,(p.skillCdMax&&p.skillCdMax[i])||cd); b.style.setProperty('--cdf',(cd/mx).toFixed(3));
+      const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
+    else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
+  if(finished) skillbarUpdate(); }
 const C2_ICON={r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:'🗡️',r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:'✖'};
-function attachSkillTip(b,name,desc,cd,mana){ const tip=document.createElement('span'); tip.className='skilltip';
+function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
 function skillbarUpdate(){ const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
-      if(!reached){ b.textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
-      if(!s){ b.textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
+      if(!reached){ skIco(b).textContent='🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
+      if(!s){ skIco(b).textContent='❔'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
       const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
-      if(cool) b.textContent=Math.ceil(p.skillCd[i]); else b.innerHTML=C2_ICON[s.fx]||'✦';
+      skIco(b).innerHTML=C2_ICON[s.fx]||'✦';
       b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
       b.classList.toggle('nomana',!!(p&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
       b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
     return; }
   const S=curSkills();
   for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
-    if(i>=1&&!cs.sub){ b.textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
+    if(i>=1&&!cs.sub){ skIco(b).textContent=cs.rank>=2?'🔀':'🔒'; b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
     const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
-    if(locked||cooling) b.textContent=locked?'🔒':Math.ceil(p.skillCd[i]); else b.innerHTML=s.icon;
+    skIco(b).innerHTML=locked?'🔒':s.icon;
     b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
     b.classList.toggle('nomana',!!(p&&!locked&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
     b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }
@@ -5600,6 +5626,7 @@ function update(dt){
           vx:-p.vx*0.07,vy:22,vz:-p.vz*0.07,life:0.42,color:tr.col,sz:2.4}); } } }
   // class-skill upkeep (cooldowns, berserk aura, charge dash, tempest ticks)
   for(let i=0;i<4;i++) if(p.skillCd[i]>0) p.skillCd[i]=Math.max(0,p.skillCd[i]-dt);
+  skillCoolPaint(p);
   if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
   if(p.chargeDash>0){ p.chargeDash-=dt; p.x+=p.dashX*880*dt; p.z+=p.dashZ*880*dt;
     for(const e of G.enemies){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); playFx('warcharge'); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }

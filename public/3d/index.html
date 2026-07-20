@@ -839,7 +839,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.238.0';
+const VERSION3D='1.239.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6784,7 +6784,7 @@ function decorateMenuIcons(){
    range-slider dragging on touch. So every overlay slider gets pointer-driven:
    we compute the value from the drag ourselves and fire 'input' like the real thing. */
 function navCard(id,art,name,desc='',cls='',attrs=''){
-  return `<button class="navcard ${cls}" id="${id}" ${attrs}><img class="navart" src="${art}" alt=""><span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
+  return `<button class="navcard ${cls}${art?'':' noart'}" id="${id}" ${attrs}>${art?`<img class="navart" src="${art}" alt="">`:''}<span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
 }
 function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
@@ -8084,7 +8084,7 @@ function openPause(){
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
     <div class="navgrid">
-      ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
+      ${navCard('gearBtn',null,'Gear','Inspect equipment')}
       ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
       ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
@@ -8164,15 +8164,15 @@ function openPauseV2(){
   pauseGameAudio(); mode='pause';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
-        ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
+        ${navCard('gearBtn',null,'Gear','Inspect equipment')}
         ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
         ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes','Skills, ranks, and paths')}
         ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       </div></section>
     <section class="pausegroup pauseutility"><div class="pausegrouplabel">Menu &amp; Navigation</div><div class="navgrid">
         ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
-        ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}
-        ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
+        ${navCard('optBtn',null,'Settings','Audio, view, and controls')}
+        ${navCard('qmenu',null,'Quit to Hub','Return to the Waystation')}
         ${navCard('titleBtnP',`icons/title-screen-exit.png?v=${VERSION3D}`,'Title Screen','Save and leave the game')}
       </div></section>
     ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}

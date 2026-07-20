@@ -47,6 +47,7 @@
   #stagetag{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
   .hudvitals{position:relative;z-index:1}.hudvitals .barwrap:last-child{margin-bottom:8px}
   .progpair{display:grid;grid-template-columns:1fr 1fr;gap:9px;position:relative;z-index:1;margin-bottom:8px}.progbox{min-width:0;padding:7px 8px 8px;border:1px solid #3c3b47;border-radius:5px 9px 9px 5px;background:linear-gradient(145deg,rgba(24,27,37,.82),rgba(5,7,11,.62));box-shadow:inset 0 1px rgba(255,255,255,.04)}
+  #hudprogress{position:absolute;left:14px;top:150px;width:min(470px,88vw);z-index:5}
   .proghead{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:4px}.progtitle{flex:1 1 auto;min-width:0;font-size:8px;font-weight:950;letter-spacing:.07em;text-transform:uppercase;color:#aeb5c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progtitle .ico-event{width:12px;height:12px;margin:0 3px 0 0;vertical-align:-3px}.prognum{flex:0 0 auto;font-size:8px;color:#81899a;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}.progbox .bar{height:7px;border-radius:3px}
   .pathrow{margin:0!important}.pathrow .bar{height:4px;border:0;background:#05060a}.pathrow .barlabel{font-size:7px;width:28px}.pathrow .barnum{font-size:7px;min-width:0;color:#6f7686}
   @media(max-width:560px){#hud{width:min(390px,91vw);padding-left:8px}.hudpanel{padding:8px 10px}.progtitle{letter-spacing:.05em}.vitalnum{min-width:52px;font-size:8px}#weapontag{max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
@@ -599,19 +600,83 @@
   .htag .hi{font-size:13px;} .htag .hn{font-size:11px;font-weight:800;color:var(--ink);}
   .htag .hr{font-size:9.5px;color:var(--amber);font-weight:700;}
   .htag.near{border-color:var(--amber);box-shadow:0 0 12px rgba(232,163,61,.4);}
+
+  /* v1.191 — locked-reference HUD.  The approved compact concept is the specification:
+     carved blackened-metal silhouettes, restrained gold filigree, violet class energy,
+     a bottom-centre combat rail, and paired progression bars. */
+  .hudportrait{display:none}
+  #pethud{display:none;position:absolute;z-index:5;pointer-events:none}
+  @media (min-width:900px) and (pointer:fine){
+    #hud{left:18px;top:18px;padding:0;width:390px;filter:drop-shadow(0 15px 20px #000a)}
+    .hudpanel{min-height:154px;padding:18px 18px 14px 104px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.97),rgba(4,5,8,.94));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
+    .hudpanel::before{left:8%;right:7%;height:3px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 12px #d8953d66}
+    .hudpanel::after{inset:7px;border:1px solid #c8944338;border-radius:2px 12px 12px 2px;clip-path:polygon(0 8%,5% 0,95% 0,100% 18%,100% 82%,95% 100%,5% 100%,0 92%)}
+    .hudportrait{display:block;position:absolute;left:-8px;top:-10px;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
+    .hudportrait::before,.hudportrait::after{content:'';position:absolute;inset:-9px;border:2px solid #725024;transform:rotate(45deg);clip-path:polygon(0 0,34% 0,34% 4%,66% 4%,66% 0,100% 0,100% 34%,96% 34%,96% 66%,100% 66%,100% 100%,66% 100%,66% 96%,34% 96%,34% 100%,0 100%,0 66%,4% 66%,4% 34%,0 34%)}
+    .hudportrait::after{inset:8px;border-color:#a765d2;opacity:.65;filter:drop-shadow(0 0 5px #984bd3);transform:rotate(22.5deg)}
+    .hudportrait img{position:absolute;inset:12px;width:80px;height:80px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
+    #hud .meta{margin:0 0 9px;min-height:28px;align-items:flex-start}
+    #hud .left{display:grid;gap:2px;align-items:start}
+    #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}
+    #weapontag{font-family:Georgia,serif;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+    #armortag{position:absolute;left:-87px;top:108px;font-size:9px;white-space:nowrap}
+    #stagetag{position:absolute;left:auto;right:0;top:18px;color:#d6b06c;font-family:Georgia,serif;font-size:9px;letter-spacing:.15em;white-space:nowrap;text-shadow:0 2px 5px #000}
+    #goldtag{font-family:Georgia,serif;font-size:12px!important}
+    .hudvitals .barwrap{gap:6px;margin-bottom:5px}
+    .barlabel{width:34px;color:#c9b58f;font-family:Georgia,serif;font-size:8px}
+    .bar{height:13px;border-radius:1px;border:1px solid #6f5129;background:#020204;box-shadow:inset 0 2px 5px #000,0 0 0 1px #08090c,0 0 0 2px #342613}
+    .bar>i{border-radius:0;position:relative;overflow:hidden}
+    .bar>i::after{content:'';position:absolute;inset:1px 0 auto;height:2px;background:#fff5;box-shadow:0 0 4px #fff5}
+    .vitalnum{min-width:57px;font-family:Georgia,serif;color:#eadfc9}
+    #hudprogress{position:fixed;left:50%;top:auto;bottom:12px;transform:translateX(-50%);width:min(660px,52vw);gap:2px;margin:0;padding:5px 8px;background:linear-gradient(180deg,#161319f2,#050609f2);border:1px solid #765323;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #362613,0 10px 24px #000a;clip-path:polygon(2% 0,98% 0,100% 50%,98% 100%,52% 100%,50% 82%,48% 100%,2% 100%,0 50%);z-index:8}
+    .progbox{padding:5px 10px 6px;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .progbox:first-child{border-right:1px solid #744e7e}
+    .proghead{margin-bottom:3px}.progtitle{font-family:Georgia,serif;color:#d8cab0;font-size:9px;letter-spacing:.09em}.prognum{font-family:Georgia,serif;font-size:8px;color:#b5ab9c}.progbox .bar{height:6px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c}
+    .pathrow{position:absolute;left:104px;right:18px;bottom:9px}.pathrow .barlabel{color:#817766}.pathrow .bar{height:3px!important;box-shadow:none}
+    #jetwrap{position:absolute;left:104px;right:18px;bottom:9px}
+    #bosshpwrap{top:22px;width:min(610px,42vw)}
+    #bossname{font-family:Georgia,serif;font-size:15px;color:#e1c28e;letter-spacing:.15em;margin-bottom:7px}
+    #bosshp{height:13px;border:1px solid #8d6530;border-radius:1px;box-shadow:0 0 0 2px #08090d,0 0 0 3px #4a341a,0 7px 20px #0009;clip-path:polygon(3% 0,97% 0,100% 50%,97% 100%,3% 100%,0 50%)}
+    #questbox{top:58px;right:20px;max-width:300px;padding:20px 22px 17px;text-align:left;border:1px solid #98703a;border-right:1px solid #98703a;border-radius:3px;background:radial-gradient(circle at 80% 0,#42266133,transparent 38%),linear-gradient(160deg,#171419f2,#07080cf2);box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #46341d,0 14px 28px #000a;clip-path:polygon(8% 0,92% 0,100% 16%,100% 84%,92% 100%,8% 100%,0 84%,0 16%)}
+    #questbox::before{content:'✦';display:block;text-align:center;color:#d7a744;font-size:20px;line-height:12px;margin-bottom:8px;text-shadow:0 0 8px #b15ee3}
+    #questbox .qhead{justify-content:center;font-family:Georgia,serif;font-size:13px;color:#ecc56f;letter-spacing:.12em}
+    #questbox .qrow{justify-content:flex-start;font-family:Georgia,serif;font-size:13px;line-height:1.35}
+    #controls{z-index:7}
+    #joyzone,#lookzone{z-index:0}
+    .btn{font-family:Georgia,serif;text-shadow:0 2px 3px #000}
+    .btn.skl{bottom:50px;width:62px;height:62px;border-radius:5px;background:radial-gradient(circle,#35223f,#111016 72%);border:1px solid #9a6c30;box-shadow:inset 0 0 0 2px #08090d,inset 0 0 0 3px #4a3420,0 8px 18px #000a;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
+    .btn.skl>.ico-event{width:48px;height:48px;filter:drop-shadow(0 0 6px #9d51d3aa)}
+    .btn.skl::after{top:auto;bottom:-16px;left:50%;transform:translateX(-50%);padding:1px 7px;border:1px solid #765323;background:#0a090d;color:#e9cf9b;font-family:Georgia,serif}
+    .btn.skl::before{right:2px;bottom:2px;border:1px solid #7d55a4;background:#160e20;color:#e1c8ff}
+    #bSk0{right:calc(50% + 101px)}#bSk1{right:calc(50% + 35px)}#bSk2{right:calc(50% - 31px)}#bSk3{right:calc(50% - 97px)}
+    #bDodge{right:calc(50% + 175px);bottom:50px;width:58px;height:58px;border-radius:5px;background:linear-gradient(145deg,#26232a,#0c0d11);border-color:#98703a;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
+    #bJump{right:calc(50% + 239px);bottom:54px;width:50px;height:50px;border-radius:50%;background:#15131a;border-color:#8d6530}
+    #bAttack{right:calc(50% - 174px);bottom:50px;width:66px;height:66px;border-radius:5px;background:radial-gradient(circle,#48201e,#151014 72%);border-color:#aa7432;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
+    #bInteract{right:22px;bottom:42px;width:96px;height:44px;border-radius:3px;background:linear-gradient(#1d1816,#09090d);border:1px solid #9c6d2e;clip-path:polygon(10% 0,90% 0,100% 25%,100% 75%,90% 100%,10% 100%,0 75%,0 25%)}
+    .tog{right:15px;border-radius:3px;border-color:#6e522d;background:#0d0e12bb}.tog#bAuto{top:42%}
+    #pethud{display:grid;left:20px;bottom:28px;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,#171419ed,#07080ced);border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
+    #pethud img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}
+    #pethud .petname{font:700 11px Georgia,serif;letter-spacing:.08em;color:#e7d7b7;text-transform:uppercase}.pethplabel{font-size:8px;color:#aaa;margin:3px 0}.pethpbar{height:6px;background:#020304;border:1px solid #5e4927}.pethpbar i{display:block;height:100%;background:linear-gradient(90deg,#286d32,#74d64b);box-shadow:0 0 5px #6bd24b66}
+    #pausebtn{top:18px;right:18px;border-radius:4px;border-color:#8e6530;background:#101015e8;box-shadow:inset 0 0 0 2px #08090c,0 6px 16px #0008}
+  }
+  @media (min-width:900px) and (max-height:800px) and (pointer:fine){
+    #hud{transform:scale(.88);transform-origin:top left}#hudprogress{bottom:8px;transform:translateX(-50%) scale(.9);transform-origin:bottom center}#pethud{transform:scale(.86);transform-origin:bottom left}.btn.skl{bottom:43px;transform:scale(.88)}#bDodge,#bJump,#bAttack{transform:scale(.88)}
+  }
 </style>
 </head>
 <body>
 <canvas id="gl"></canvas>
 <div id="hud" class="hide"><div class="hudpanel">
+  <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
   <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span><span id="armortag"></span></div><div style="display:flex;align-items:center;gap:9px"><span style="display:inline-flex;align-items:center;gap:3px"><span class="ico ico-coin" style="width:14px;height:14px;vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
-  <div class="progpair"><div class="progbox charprog"><div class="proghead"><span class="progtitle" id="xplabel">CHARACTER · LV 1</span><span class="prognum" id="xpnum"></span></div><div class="bar"><i id="xpfill"></i></div></div>
-  <div class="progbox classprog"><div class="proghead"><span class="progtitle" id="clslabel">CLASS · RANK 1</span><span class="prognum" id="clsnum"></span></div><div class="bar"><i id="clsfill"></i></div></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
   <div class="barwrap pathrow"><span class="barlabel">PATH</span><div class="bar"><i id="progfill" style="background:linear-gradient(90deg,#555d70,#aab1bf)"></i></div></div>
 </div></div>
+<div class="progpair hide" id="hudprogress"><div class="progbox charprog"><div class="proghead"><span class="progtitle" id="xplabel">CHARACTER · LV 1</span><span class="prognum" id="xpnum"></span></div><div class="bar"><i id="xpfill"></i></div></div>
+  <div class="progbox classprog"><div class="proghead"><span class="progtitle" id="clslabel">CLASS · RANK 1</span><span class="prognum" id="clsnum"></span></div><div class="bar"><i id="clsfill"></i></div></div></div>
+<div id="pethud" class="hide"><img id="pethudimg" alt=""><div><div class="petname" id="pethudname">Companion</div><div class="pethplabel" id="pethudhp">100 / 100 HP</div><div class="pethpbar"><i id="pethudfill"></i></div></div></div>
 <div id="hubtags" class="hide"></div>
 <div id="questbox" class="hide"></div>
 <div id="bosshpwrap"><div id="bossname"><span class="ico ico-event-boss-skull" style="width:20px;height:20px;vertical-align:-5px;margin-right:5px"></span><span id="bossnametx">Boss</span></div><div id="bosshp"><i></i></div></div>
@@ -651,7 +716,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.190.0';
+const VERSION3D='1.191.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2738,7 +2803,9 @@ function zoneClear(){
 }
 function showGameUI(v){
   if(v) document.body.classList.remove('t-title');
-  ['hud','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v));
+  ['hud','hudprogress','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v));
+  if(!v) document.getElementById('pethud').classList.add('hide');
+  else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
   // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
   const hideHubLoot=!v||!!(G&&G.hub);
   ['bKeep','bBag'].forEach(id=>document.getElementById(id).classList.toggle('hide',hideHubLoot));
@@ -7713,6 +7780,7 @@ function hudUpdate(){
   document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
+  const portrait=document.getElementById('hudportraitimg'); if(portrait) portrait.src='icons/class-'+meta.classId+'.png';
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
   wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
@@ -7723,6 +7791,16 @@ function hudUpdate(){
   document.getElementById('bAttack').classList.toggle('ranged',p.weapon.cls==='ranged');
   document.getElementById('bAttack').textContent=p.weapon.cls==='ranged'?'FIRE':'SLASH';
   const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0);   // the coin icon beside it carries the currency meaning now
+  const ph=document.getElementById('pethud');
+  if(ph){ const pet=G.pet, pid=pet&&pet.id;
+    ph.classList.toggle('hide',!pid);
+    if(pid){ const php=Math.max(0,pet.hp||0), pmax=Math.max(1,pet.maxHp||petMaxHp(pid));
+      document.getElementById('pethudimg').src=petIcon(pid);
+      document.getElementById('pethudname').textContent=petDisplayName(pid);
+      document.getElementById('pethudhp').textContent=Math.ceil(php)+' / '+Math.ceil(pmax)+' HP';
+      document.getElementById('pethudfill').style.width=Math.max(0,Math.min(100,php/pmax*100))+'%';
+    }
+  }
   updateToggles();
 }
 /* ============================================================

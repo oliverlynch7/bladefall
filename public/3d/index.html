@@ -755,7 +755,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.200.0';
+const VERSION3D='1.201.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2412,7 +2412,7 @@ function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLO
    100%; missing pieces or lower rarities read proportionally less. This is what the HUD shield % now shows. */
 function armorRating(p){ if(!p||!p.gear) return 0; let sum=0; const n=SLOTIDS.length;
   for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; normArmor(a);
-    const T=ARMOR_TYPES[a.type]||ARMOR_TYPES.vigor, max=(SLOTS[slot].def[4]||1)*(T.defMul||1);
+    const T=ARMOR_TYPES[a.type]||ARMOR_TYPES.vigor, max=Math.round((SLOTS[slot].def[4]||1)*(T.defMul||1));  // match makeArmor's rounding so a legendary piece == exactly 1
     sum+=Math.min(1,(a.defense||0)/Math.max(1,max)); }
   return Math.round(sum/n*100); }
 function powerScore(p){

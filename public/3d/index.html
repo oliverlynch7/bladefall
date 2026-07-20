@@ -651,7 +651,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.189.0';
+const VERSION3D='1.190.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4143,7 +4143,8 @@ for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEvent
   const zone=document.getElementById('joyzone'), joy=document.getElementById('joy'), knob=document.getElementById('joyknob');
   let pid=null, ox=0, oy=0; const R=46;
   function setKnob(dx,dy){ knob.style.left=(29+dx)+'px'; knob.style.top=(29+dy)+'px'; }
-  zone.addEventListener('pointerdown',e=>{ if(pid!==null) return; e.preventDefault(); initAudio(); pid=e.pointerId; ox=e.clientX; oy=e.clientY;
+  zone.addEventListener('pointerdown',e=>{ if(pid!==null) return; if(e.pointerType&&e.pointerType!=='touch') return;   // touch-only: never spawn the joystick for a mouse/desktop pointer
+    e.preventDefault(); initAudio(); pid=e.pointerId; ox=e.clientX; oy=e.clientY;
     joy.style.display='block'; joy.style.left=(ox-zone.getBoundingClientRect().left-52)+'px'; joy.style.top=(oy-zone.getBoundingClientRect().top-52)+'px';
     setKnob(0,0); zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); });
   zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid) return; e.preventDefault();

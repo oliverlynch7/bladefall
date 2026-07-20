@@ -725,7 +725,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.196.0';
+const VERSION3D='1.197.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5889,7 +5889,9 @@ function update(dt){
   G.particles=G.particles.filter(pt=>pt.life>0);
   updateTexts(dt);
   // Phase 19: practice foes are ARENA property — applied after all movement, snapped WELL inside the walls
-  if(G.hub) for(const e of G.enemies){ if(e.practice&&!e.dead){ e.x=Math.max(672,Math.min(936,e.x)); e.z=Math.max(370,Math.min(682,e.z)); } }
+  if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
+    for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
+      e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
   if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
   else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
   class2Innate(G.p,dt);
@@ -6899,11 +6901,16 @@ function enterSparringRoom(){
   G.segments=[{x:0,z:0,w:940,d:760}]; G.rooms=[{x:0,z:0,w:940,d:760,monsters:[],encounter:false,cleared:true}];
   G.walls=[{x:0,z:-380,w:960,d:28,h:150},{x:0,z:380,w:960,d:28,h:150},{x:-470,z:0,w:28,d:760,h:150},{x:470,z:0,w:28,d:760,h:150}];
   G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.portalPos=null;G.haz=null;G.gates=[];
-  // Sanded combat floor, protected spectator ledges, weapon racks, and strong wall lighting.
-  G.deco.push({x:0,z:-70,y0:0,w:650,h:2,d:430,c:'#6c5137'});G.deco.push({x:0,z:-70,y0:2,w:610,h:1,d:390,c:'#8b6a46'});
-  for(const x of [-380,380]){G.obstacles.push({kind:'plat',x,z:-40,w:110,d:520,h:22});G.deco.push({x,z:-40,y0:22,w:90,h:5,d:500,c:'#3a3030'});}
-  for(const x of [-300,-150,150,300])G.torches.push({x,z:-330,ph:Math.random()*6.28});
-  for(const x of [-260,260])for(let k=0;k<4;k++)G.deco.push({x,z:180-k*35,y0:0,w:10,h:72,d:10,c:k%2?'#586274':'#733145'});
+  // ===== THE RING: a boxing-ring arena. Practice foes stay inside the ropes and only wake once you step in. =====
+  const PIT={minX:-260,maxX:260,minZ:-260,maxZ:20}; G.pit=PIT;
+  G.deco.push({x:0,z:-120,y0:0,w:(PIT.maxX-PIT.minX)+30,h:2,d:(PIT.maxZ-PIT.minZ)+30,c:'#6c5137'});   // ring canvas
+  G.deco.push({x:0,z:-120,y0:2,w:(PIT.maxX-PIT.minX)-12,h:1,d:(PIT.maxZ-PIT.minZ)-12,c:'#8b6a46'});
+  const cor=[[PIT.minX,PIT.minZ],[PIT.maxX,PIT.minZ],[PIT.maxX,PIT.maxZ],[PIT.minX,PIT.maxZ]];
+  for(const [cx,cz] of cor){ G.deco.push({x:cx,z:cz,y0:0,w:11,h:70,d:11,c:'#2a2028'}); G.deco.push({x:cx,z:cz,y0:70,w:15,h:8,d:15,c:'#e8a33d'}); }   // corner posts + gold caps
+  for(let i=0;i<4;i++){ const a=cor[i],b=cor[(i+1)%4]; for(const ry of [26,48]){ const seg=8; for(let s=1;s<seg;s++){ const rx=a[0]+(b[0]-a[0])*s/seg, rz=a[1]+(b[1]-a[1])*s/seg; G.deco.push({x:rx,z:rz,y0:ry,w:5,h:3.4,d:5,c:'#c0392b'}); } } }   // double ropes (all collisionless deco)
+  for(const x of [-360,360]){G.obstacles.push({kind:'plat',x,z:-40,w:110,d:520,h:22});G.deco.push({x,z:-40,y0:22,w:90,h:5,d:500,c:'#3a3030'});}   // spectator ledges
+  for(const x of [-320,320])for(let k=0;k<3;k++)G.deco.push({x,z:180-k*40,y0:0,w:10,h:72,d:10,c:k%2?'#586274':'#733145'});   // weapon racks
+  for(const x of [-300,0,300])G.torches.push({x,z:-350,ph:Math.random()*6.28});
   G.hubNpcs=[
     {id:'sparringcontrol',ic:'⚔️',name:'Sparring Controls',role:'Choose practice foes',prop:'sparring',verb:'Choose practice foes',direct:true,x:0,z:230,open:()=>openTrainingArena(wsResume)},
     {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:0,z:335,open:()=>enterWaystation()}
@@ -6977,7 +6984,7 @@ function openTrainingArena(back){ mode='menu';
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>openBestiaryEntry(b.dataset.info,back));
   document.querySelectorAll('[data-trainmob]').forEach(b=>b.onclick=()=>{ const m=b.dataset.trainmob, sp=G.trainSpawn||{x:300,z:60}, count=ENEMY[m].boss?1:2;
-    for(let i=0;i<count;i++){ const e=spawnEnemy(m,sp.x+(count===1?0:(i?46:-46)),sp.z); e.active=true; e.dropT=0; e.practice=true; } SFX.pickup(); toast('Practice foes summoned'); wsResume(); });
+    for(let i=0;i<count;i++){ const e=spawnEnemy(m,sp.x+(count===1?0:(i?46:-46)),sp.z); e.active=true; e.dropT=0; e.practice=true; if(G.pit){e.x=Math.max(G.pit.minX+20,Math.min(G.pit.maxX-20,e.x));e.z=Math.max(G.pit.minZ+20,Math.min(G.pit.maxZ-20,e.z));e.sx=e.x;e.sz=e.z;} } SFX.pickup(); toast('Practice foes summoned — enter the ring to spar'); openTrainingArena(back); });   // menu stays OPEN until you close it
   document.getElementById('clearBtn').onclick=()=>{ let n=0; for(const e of G.enemies){ if(e.practice&&!e.dead){ e.dead=true; n++; } } toast(n?'Cleared '+n:'Nothing to clear'); openTrainingArena(back); };
   document.getElementById('backBtn').onclick=back;
 }

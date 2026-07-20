@@ -560,6 +560,9 @@
   .bagav{width:64px;height:64px;object-fit:contain;flex:0 0 auto;border-radius:12px;border:1px solid #2b3040;background:#0d0e14;display:block;}
   .baglayout{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(390px,.78fr);gap:18px;align-items:stretch;margin-top:12px}.baginventory{min-width:0;display:flex;flex-direction:column}.baginventory .achlist{max-height:min(59vh,540px)!important;margin-bottom:0}.baginventory .gearrow{align-items:center}.baginventory .gn{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.22;overflow-wrap:anywhere}.bagequip{position:relative;min-height:540px;border:1px solid #3a4152;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 70% 38%,rgba(232,163,61,.13),transparent 34%),linear-gradient(155deg,#1c202b,#0b0d13);box-shadow:inset 0 0 42px rgba(0,0,0,.58)}.bagportrait{position:absolute;inset:0;background-position:35% center;background-size:cover;background-repeat:no-repeat;filter:saturate(1.08) contrast(1.04)}.bagequip::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(8,10,15,.96) 0%,rgba(8,10,15,.70) 31%,rgba(8,10,15,.13) 55%,transparent 72%),linear-gradient(0deg,rgba(8,10,15,.76),transparent 23%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}.bagequiphead{position:absolute;z-index:2;left:18px;top:16px;right:18px}.bagequiphead b{display:block;font-size:19px;color:#fff}.bagequiphead span{font-size:9px;color:var(--amber);font-weight:900;letter-spacing:.14em;text-transform:uppercase}.bagslots{position:absolute;z-index:3;left:16px;top:72px;bottom:18px;width:min(58%,245px);display:flex;flex-direction:column;justify-content:center;gap:7px}.bagslot{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:9px;min-height:59px;padding:6px 9px;border:1px solid color-mix(in srgb,var(--slotcol,#778093) 52%,#303645);border-radius:12px;background:linear-gradient(100deg,rgba(25,29,39,.97),rgba(13,15,21,.84));box-shadow:0 5px 16px rgba(0,0,0,.32),inset 3px 0 0 var(--slotcol,#778093)}.bagslotimg{width:48px;height:48px;object-fit:contain;border-radius:9px;background:#090b10;border:1px solid #343a49}.bagslotempty{width:48px;height:48px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#090b10;border:1px dashed #343a49}.bagslotempty .ico-slot{width:32px;height:32px}.bagslotcopy{min-width:0}.bagslotlabel{display:block;color:#858da0;font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.bagslotname{display:block;margin-top:2px;color:var(--slotcol,#cdd3df);font-size:11px;font-weight:900;line-height:1.15;white-space:normal;overflow-wrap:anywhere}.bagfoot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.bagfoot .bigbtn{margin:0}@media(max-width:980px){.baglayout{grid-template-columns:1fr}.bagequip{min-height:480px}.baginventory .achlist{max-height:46vh!important}}@media(max-width:620px){.bagequip{min-height:450px}.bagslots{width:62%}.bagslot{grid-template-columns:44px minmax(0,1fr)}.bagslotimg,.bagslotempty{width:40px;height:40px}.bagfoot{grid-template-columns:1fr}}
   .bagportrait{background-position:center;}.bagdoll{position:absolute;z-index:2;right:12px;top:102px;width:168px;height:350px;filter:drop-shadow(0 20px 18px rgba(0,0,0,.7))}.bagdollbody{position:absolute;left:48px;top:78px;width:76px;height:122px;border-radius:12px 12px 8px 8px;background:linear-gradient(90deg,#272b35,#565d69 48%,#1a1d25);border:2px solid #777f8d;box-shadow:inset 0 0 18px #090a0e}.bagdollhead{position:absolute;left:60px;top:18px;width:52px;height:62px;background:linear-gradient(90deg,#8c6848,#d6a36f 48%,#66472f);border:2px solid #33261d;border-radius:7px}.bagdolllegs{position:absolute;left:54px;top:196px;width:64px;height:118px;background:linear-gradient(90deg,#20242c 0 44%,#090a0e 45% 55%,#303640 56%);border:2px solid #525966;border-radius:5px}.bagdollarm{position:absolute;top:88px;width:25px;height:122px;background:#373d48;border:2px solid #626b78;border-radius:7px}.bagdollarm.left{left:25px;transform:rotate(7deg)}.bagdollarm.right{right:19px;transform:rotate(-7deg)}.bagdollgear{position:absolute;z-index:2;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}.bagdollgear.helmet{left:42px;top:0;width:88px;height:88px}.bagdollgear.chest{left:31px;top:67px;width:108px;height:142px}.bagdollgear.legs{left:40px;top:184px;width:90px;height:136px}.bagdollgear.weapon{right:-8px;top:74px;width:82px;height:190px;transform:rotate(-12deg);transform-origin:center}.bagdollclass{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.13em;text-transform:uppercase;color:var(--amber);white-space:nowrap;text-shadow:0 2px 4px #000}
+  .bagdoll3d{position:absolute;z-index:2;right:2px;top:56px;width:220px;height:380px;touch-action:none;cursor:grab;filter:drop-shadow(0 18px 16px rgba(0,0,0,.6))}
+  .bagdoll3d:active{cursor:grabbing}
+  .bagdollhint{position:absolute;z-index:3;right:20px;bottom:14px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6f7789;pointer-events:none;opacity:.8}
   .petav{width:74px;height:74px;object-fit:contain;flex:0 0 auto;border-radius:14px;border:1px solid #343b50;background:radial-gradient(circle,#24283a,#0c0e15 72%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));}
   /* Pet Yard has its own hierarchy: one hero companion, then a readable collection grid. */
   .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
@@ -624,6 +627,13 @@
   .rankorb{z-index:1;align-self:center;justify-self:center;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#11131b;border:2px solid #3b4254;color:#788196;font-size:8px;font-weight:900;letter-spacing:.05em;box-shadow:0 0 0 6px #0d0f16}.rankorb b{font-size:17px;line-height:15px}.buildrank.reached .rankorb{border-color:var(--class);color:#d9ddeb;box-shadow:0 0 0 6px #0d0f16,0 0 15px color-mix(in srgb,var(--class) 35%,transparent)}
   .buildopt{z-index:1;appearance:none;width:100%;min-height:92px;padding:12px 14px;border:1px solid #303648;border-radius:14px;background:linear-gradient(155deg,#1a1d27,#11131a);color:#dfe4ed;text-align:left;cursor:pointer;position:relative;transition:.12s transform,.12s border-color,.12s background,.12s box-shadow}.buildopt:hover:not(:disabled){transform:translateY(-2px);border-color:color-mix(in srgb,var(--class) 70%,#40485a);background:linear-gradient(155deg,color-mix(in srgb,var(--class) 10%,#1a1d27),#11131a)}.buildopt.sel{border-color:var(--class);background:linear-gradient(145deg,color-mix(in srgb,var(--class) 18%,#20232e),#11131a);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--class) 35%,transparent),0 0 18px color-mix(in srgb,var(--class) 15%,transparent)}.buildopt.sel::after{content:'SELECTED';position:absolute;right:10px;top:9px;color:var(--class);font-size:8px;font-weight:950;letter-spacing:.12em}.buildopt:disabled{opacity:.34;cursor:default;filter:saturate(.25)}
   .buildopt .boname{font-size:15px;font-weight:900;padding-right:64px}.buildopt .borole{display:inline-block;margin:5px 0 4px;color:var(--class);font-size:9px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.buildopt .bodesc{font-size:10.5px;line-height:1.42;color:#a8b0c0}.buildopt .boicon{float:left;width:38px;height:38px;margin:0 10px 6px 0;display:flex;align-items:center;justify-content:center;font-size:24px}.buildopt .boicon .ico-event{width:38px;height:38px;margin:0}
+  .classviewer{background:radial-gradient(circle at 18% 8%,color-mix(in srgb,var(--class) 13%,transparent),transparent 32%),radial-gradient(circle at 82% 15%,rgba(220,174,82,.07),transparent 28%),linear-gradient(160deg,#151925,#090b11 76%)}
+  .classviewer .buildhead{padding-bottom:10px}.classviewer .ctabs{margin:9px 0 0}.classviewer .buildscroll{padding-top:14px}
+  .classviewer .buildopt.viewer{cursor:default}.classviewer .buildopt.viewer:hover{transform:none;border-color:#303648;background:linear-gradient(155deg,#1a1d27,#11131a)}
+  .classviewer .buildopt.viewer.sel:hover{border-color:var(--class);background:linear-gradient(145deg,color-mix(in srgb,var(--class) 18%,#20232e),#11131a)}
+  .buildopt.viewer.rejected{opacity:.3;filter:grayscale(.72) saturate(.3)}.buildopt.viewer.future{opacity:.24;filter:grayscale(.85) saturate(.18)}
+  .buildopt.viewer.pending{border-style:dashed;opacity:.72}.buildopt.viewer .pickstate{position:absolute;right:10px;top:9px;font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#7f8798}
+  .buildopt.viewer.sel .pickstate{color:var(--class)}.buildopt.viewer.sel::after{display:none}.viewerfoot{display:grid;grid-template-columns:1fr;gap:8px;padding-top:10px}
   .buildfoot{display:grid;grid-template-columns:1fr minmax(260px,1.3fr);gap:12px;padding-top:14px;border-top:1px solid #303545}.buildfoot .bigbtn{margin:0}.buildcost{text-align:center;color:#9da5b6;font-size:11px;margin:9px 0 0}.buildcost b{color:var(--amber)}
   .legacypath{align-self:stretch}.legacypath .buildopt{height:100%;min-height:190px}.pathskills{display:grid;gap:5px;margin-top:9px}.pathskill{padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.22);font-size:10px;color:#b8c0cf}.pathskill b{color:#edf0f6}.pathskill.locked{opacity:.43}
   @media(max-width:760px){.buildscroll{padding:14px 2px}.buildrank{grid-template-columns:1fr 40px 1fr;gap:6px}.buildrank::before{left:22%;right:22%}.rankorb{width:34px;height:34px;box-shadow:0 0 0 4px #0d0f16}.rankorb b{font-size:13px}.buildopt{padding:9px;min-height:108px}.buildopt .boname{font-size:12px;padding-right:0}.buildopt.sel::after{display:none}.buildopt .boicon{float:none;width:30px;height:30px;margin:0 0 4px}.buildopt .boicon .ico-event{width:30px;height:30px}.buildopt .bodesc{font-size:9px}.buildfoot{grid-template-columns:1fr}.legacypath .buildopt{min-height:240px}}
@@ -776,7 +786,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.224.0';
+const VERSION3D='1.225.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2563,6 +2573,46 @@ function bagFullPrompt(newItem,onDone){ mode='menu';
   document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
 }
 let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
+/* Bag equipment doll: a LIVE 3D voxel render of the hero (+ companion by the leg), drag to rotate.
+   Rendered on demand into the WebGL canvas, then captured into the bag's 2D canvas (like item previews). */
+let bagDoll=null;
+function setupBagDoll(HR){
+  const cnv=document.getElementById('bagDollCanvas'); if(!cnv||typeof gl==='undefined'||!gl) return;
+  const src=HR||meta.hero||{}; const p=freshPlayer();
+  if(src.skin) p.skin=src.skin;
+  if(src.weapon) p.weapon=normWeapon(JSON.parse(JSON.stringify(src.weapon)));
+  if(src.gear) p.gear=cloneGear(src.gear);
+  p.level=src.level||1; ['eyeColor','hairStyle','hairColor'].forEach(k=>{ if(src[k]!=null) p[k]=src[k]; });
+  recomputeArmor(p); p.hp=effMaxHp(p);
+  const pet=(meta.petActive&&PETS[meta.petActive])?{id:meta.petActive,x:0,y:0,z:0,bob:0,t:0,yaw:0,hp:1,maxHp:1}:null;
+  bagDoll={p,pet,yaw:0.6,t:1.2};
+  bagDollRender();
+  let dragX=null;
+  const dn=e=>{ dragX=(e.touches?e.touches[0].clientX:e.clientX); e.preventDefault(); };
+  const mv=e=>{ if(dragX==null||!bagDoll) return; const x=(e.touches?e.touches[0].clientX:e.clientX); bagDoll.yaw-=(x-dragX)*0.012; dragX=x; bagDollRender(); e.preventDefault(); };
+  const up=()=>{ dragX=null; };
+  cnv.addEventListener('pointerdown',dn); window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
+  cnv.addEventListener('touchstart',dn,{passive:false}); cnv.addEventListener('touchmove',mv,{passive:false}); window.addEventListener('touchend',up);
+}
+function bagDollRender(){
+  if(!bagDoll) return; const cnv=document.getElementById('bagDollCanvas'); if(!cnv) return;
+  const p=bagDoll.p, pet=bagDoll.pet, yaw=bagDoll.yaw, t=bagDoll.t;
+  gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,900);
+  const cx=Math.sin(yaw)*172, cz=Math.cos(yaw)*172;
+  VIEW=mLookAt([cx,60,cz],[0,28,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,1400,5000); gl.uniform3f(U.uFog,0.06,0.06,0.08);
+  CURM=mIdent();
+  drawShadow(0,0,18,0.32);
+  p.z=0; p.yaw=0; drawHero3(p,t,false);
+  if(pet){ pet.x=44; pet.z=18; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
+  const ctx=cnv.getContext('2d'); ctx.clearRect(0,0,cnv.width,cnv.height);
+  const ctr=(typeof project==='function'?project(0,26,0):null)||[VW/2,VH/2];
+  const sw=VH*0.54*DPR, sh=VH*0.93*DPR;
+  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*0.52, sw, sh, 0,0, cnv.width, cnv.height);
+}
 function openBag(back){
   mode='menu';
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
@@ -2588,15 +2638,18 @@ function openBag(back){
   const eq=HR||{weapon:null,gear:{}};
   const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
     return `<div class="bagslot" style="--slotcol:${col}">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${item?item.name:'Empty'}</span></span></div>`; };
-  const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s]))].join('');
+  const petId=meta.petActive&&PETS[meta.petActive]?meta.petActive:null;
+  const petRow=`<div class="bagslot" style="--slotcol:${petId?(RARITY[PETS[petId].rarity]?RARITY[PETS[petId].rarity].color:'#c9a86a'):'#6e778b'}">${petId?`<img class="bagslotimg" src="${petIcon(petId)}" alt="">`:`<span class="bagslotempty"><span class="ico ico-pet-collar" style="width:30px;height:30px"></span></span>`}<span class="bagslotcopy"><span class="bagslotlabel">Companion</span><span class="bagslotname">${petId?petDisplayName(petId):'None'}</span></span></div>`;
+  const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s])),petRow].join('');
   const C=CLASSES[meta.classId]||CLASSES.warrior, heroName=meta.heroName||'Your Warden';
-  const doll=`<div class="bagdoll"><span class="bagdollhead"></span><span class="bagdollbody"></span><span class="bagdollarm left"></span><span class="bagdollarm right"></span><span class="bagdolllegs"></span>${eq.gear&&eq.gear.helmet?`<img class="bagdollgear helmet" src="${itemAv(eq.gear.helmet)}" alt="">`:''}${eq.gear&&eq.gear.chest?`<img class="bagdollgear chest" src="${itemAv(eq.gear.chest)}" alt="">`:''}${eq.gear&&eq.gear.legs?`<img class="bagdollgear legs" src="${itemAv(eq.gear.legs)}" alt="">`:''}${eq.weapon?`<img class="bagdollgear weapon" src="${itemAv(eq.weapon)}" alt="">`:''}</div>`;
+  const doll=`<canvas id="bagDollCanvas" class="bagdoll3d" width="440" height="760"></canvas><div class="bagdollhint">drag to rotate</div>`;
   showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
     <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
     <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
     <div class="bagfoot"><button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+  setupBagDoll(HR);
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
     if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
@@ -7350,7 +7403,7 @@ function openCharCreate(){
 }
 /* Classes & Skills viewer — see every class, its rank, path, and skill tree with
    unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
-function openClasses(back){
+function openClassesLegacy(back){
   mode='menu';
   const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
   const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
@@ -7398,6 +7451,42 @@ function openClasses(back){
     <div class="ctabs">${tabRow}</div>
     <div class="achlist solo" style="max-height:min(50vh,400px)">${nodes.join('<div class="sconn"></div>')}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+/* Pause-menu build showcase. It shares the Drillmaster's visual language, but
+   every build node is inert: this screen can never mutate a class. */
+function openClasses(back){
+  mode='menu'; showGameUI(false);
+  const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
+  const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
+  const C=CLASSES[view], cs=classState(view), def=c2def(view);
+  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[view]||'#c98cff';
+  const tabRow=tabs.map(c=>`<button class="ctab ${c===view?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`).join('')
+    +CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(()=>`<button class="ctab lock" disabled>🔒<span>Locked</span></button>`).join('');
+  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
+  const choiceState=(picked,id,reached)=>!reached?'future':!picked?'pending':picked===id?'sel':'rejected';
+  const stateText=s=>({sel:'Chosen',rejected:'Not chosen',pending:'Choice pending',future:'Future rank'}[s]);
+  const option=(o,metaLine,picked,reached)=>{ const st=choiceState(picked,o.id,reached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${metaLine}</span><div class="bodesc">${o.d}</div></div>`; };
+  let tree='';
+  if(def){
+    tree=`<div class="buildroot"><div class="bticon">${passiveIcon('r_clear_aim')}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE · ACTIVE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
+    tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, picked=(cs.ch||{})[rank], isSkill=R.kind==='skill';
+      const line=o=>(isSkill?`Skill ${R.slot+1} · ${o.cd}s · ${skillManaCost(R.slot,o)} mana`:'Passive')+` · ${o.role||'Build'}`;
+      return `<div class="buildrank ${reached?'reached':''}">${option(R.a,line(R.a),picked,reached)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${option(R.b,line(R.b),picked,reached)}</div><div class="buildspine"></div>`; }).join('');
+    tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">${passiveIcon('r_perfect_hunt')}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">${def.cap.d}</div></div>`;
+  }else{
+    const root=C.skills[0], pA=C.subs[0], pB=C.subs[1], skA=(pA&&pA.skills)||C.skills.slice(1,4), skB=(pB&&pB.skills)||C.skills.slice(1,4);
+    tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL · ACTIVE</span></div><div class="sdesc">${root.d} · ${skillManaCost(0,root)} mana</div></div><div class="buildspine"></div>`;
+    const pathReached=cs.rank>=2, pathPicked=cs.sub;
+    const pathOpt=p=>{ const st=choiceState(pathPicked,p.id,pathReached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${passiveIcon(p.id)}</span><div class="boname">${p.disp}</div><span class="borole">Core passive · Discipline</span><div class="bodesc">${p.blurb}</div></div>`; };
+    tree+=`<div class="buildrank ${pathReached?'reached':''}">${pathOpt(pA)}<div class="rankorb"><span>PATH</span><b>2</b></div>${pathOpt(pB)}</div><div class="buildspine"></div>`;
+    for(let i=0;i<3;i++){ const a=skA[i],b=skB[i],rank=(a&&a.rank)||(b&&b.rank)||[2,4,7][i],reached=cs.rank>=rank,picked=(cs.mix&&cs.mix[i+1])||cs.sub;
+      const opt=(o,p)=>{ if(!o) return '<div></div>'; const st=choiceState(picked,p.id,reached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s · ${skillManaCost(i+1,o)} mana · ${p.disp}</span><div class="bodesc">${o.d}</div></div>`; };
+      tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(b,pB)}</div><div class="buildspine"></div>`; }
+    tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">Your chosen discipline's defining passive reaches its final strength.</div></div>`;
+  }
+  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · Chosen skills and passives are highlighted. Changes are made only with the Drillmaster.</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="viewerfoot"><button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
   document.getElementById('backBtn').onclick=back;
 }

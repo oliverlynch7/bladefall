@@ -976,3 +976,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Recovered the previously designed black-and-gold spiked collar and bone-paw Beastkeeper artwork from the downloaded hub-interactable icon batch.
 - Removed its baked checkerboard background and exported a clean transparent 256x256 game asset.
 - Replaced the generic pet-collar placeholder on the Beastkeeper hub action card and added the approved artwork prominently to the Pet Yard menu header.
+
+## [Codex | 2026-07-20] Three core classes emblem - shipped v1.223.0
+
+- Added a unified transparent voxel crest representing the three starting classes: Warrior sword, Ranger bow and arrow, and Mage staff with arcane orb.
+- Replaced the placeholder artwork on both pause-menu Classes buttons and the Drillmaster hub interaction card.
+- Added the emblem prominently to the Class Trainer menu header, with versioned URLs to prevent stale cached artwork.

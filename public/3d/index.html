@@ -565,6 +565,7 @@
   .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
   .petyardhead{text-align:center;margin-bottom:8px}.petyardhead .ovsub{margin-bottom:0}.petyardhead .ovh{font-size:30px;}
   .petyardbrand{display:block;width:112px;height:112px;object-fit:contain;margin:0 auto -4px;filter:drop-shadow(0 8px 10px #0009)}
+  .trainerbrand{display:block;width:118px;height:118px;object-fit:contain;margin:0 auto -4px;filter:drop-shadow(0 8px 10px #0009)}
   .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
   .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
   .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
@@ -775,7 +776,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.222.0';
+const VERSION3D='1.223.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6647,7 +6648,7 @@ function navCard(id,art,name,desc='',cls='',attrs=''){
 function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
 function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
-const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:'icons/class-all.png',
+const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:`icons/class-core.png?v=${VERSION3D}`,
   board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
   abyss:'icons/portal.png',beastkeeper:`icons/beastkeeper.png?v=${VERSION3D}`};
 function fixSliders(){
@@ -7453,7 +7454,7 @@ function openTrainer(back){
       ${un&&cs.rank>=2&&(sub||c2def(cid))?`<button class="bigbtn buybtn" data-re="${cid}" style="width:auto;margin:0;padding:8px 10px;font-size:11px">${actionIcon('respec')}Respec</button>`:''}
       ${!un&&!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn buybtn" data-tr="${cid}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">Trial</button>`:''}
     </div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
+  showOverlayHTML(`<div class="card"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
     <p class="ovsub">Switch freely here. Never mid-zone.</p>
     <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
@@ -7902,7 +7903,7 @@ function openPause(){
     <div class="navgrid">
       ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
       ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
-      ${navCard('classesBtn',`icons/class-all.png`,'Classes & Skills','Ranks, paths, and skills')}
+      ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
     </div>
@@ -7982,7 +7983,7 @@ function openPauseV2(){
     <div class="navgrid">
       ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}
       ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
-      ${navCard('classesBtn',`icons/class-all.png`,'Classes','Skills, ranks, and paths')}
+      ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes','Skills, ranks, and paths')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
       ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}

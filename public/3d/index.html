@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.293.0';
+const VERSION3D='1.294.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -906,7 +906,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -980,13 +980,26 @@ function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold
    Delivery: a text intro cutscene once per save, a card the first time you enter a
    zone, a line when a boss reveals, and endings that vary by difficulty. */
 const STORY={
+  // The OPENING — plays once at New Game, before you choose a class. Sets up the world, the threat,
+  // Ian's fall, and who you are: an ordinary guardian stepping up because no one else will.
+  origin:[
+    "Something has been waking beneath the world for a long time. People call it the Abyss King.",
+    "His corruption creeps upward — it twists animals into monsters, raises the dead, and rots every land it touches.",
+    "The towns are losing ground. Every year there is a little less left to protect.",
+    "There used to be an answer. Rare warriors called the Bladeborn carried a power that could hold the King back.",
+    "The last of them was Ian. He was humanity's best hope — and he fell in the Abyss before the fight was finished.",
+    "That was years ago. No new Bladeborn has risen since. The bloodline seems lost, and the world keeps waiting for a hero who isn't coming.",
+    "You are no one special. A guardian from a small town, sword in hand, watching it all get worse.",
+    "But someone has to act. People can't keep waiting on a legend. So you take the road down — because no one else will.",
+    "First, decide how you fight."
+  ],
   intro:[
     "The Abyss King is waking beneath the world.",
     "His power is spreading upward. It corrupts animals, raises the dead, and twists every land it reaches.",
     "If nobody stops him, the corruption will reach the last human settlements.",
     "For generations, warriors called the Bladeborn entered the Abyss to keep him contained.",
     "Ian was the last Bladeborn. He was humanity's final hope, but he fell before he could finish the fight.",
-    "Now the Bladeborn power has awakened in {player}. You are the only person left who can follow Ian's path.",
+    "No trained warden is coming, {player}. So you go where they won't — down, to finish what Ian started.",
     "Enter the Abyss, defeat the King, and save what remains of humanity."
   ],
   awaken:[   // the awakening beat — first time the player reaches the edge of the descent
@@ -2865,6 +2878,7 @@ function bagDollRender(){
 }
 function openBag(back){
   mode='menu';
+  menuTip('tip_bag','your <b>Pack</b>. Spare gear lives here. Sort it, toggle <b>Auto-sell</b> or <b>Auto-bag</b> to handle future drops automatically, and buy more slots from the Quartermaster when it fills up.');
   const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
   // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
   const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
@@ -2954,6 +2968,7 @@ function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
 }
 function openForge(back){
   mode='menu'; playFx('forgedone');   // Phase 20: the metal clang opens the forge (swapped with the sharpening)
+  menuTip('tip_forge','the <b>Forge</b>. Give the Smith <b>two pieces of the same type and rarity</b> and he fuses them into one random piece of the next rarity up. It is the main way to climb your gear — a gold-free upgrade path.');
   const fuseable=fuseGroups();
   const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
     return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
@@ -3145,12 +3160,14 @@ function showTutorial(cid){ mode='menu';
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
 function hubTutorial(){ mode='menu';
-  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The Waystation</p><h2 class="ovh">Your home base</h2>
-    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
-      <p>This is home between runs. Walk up to a keeper and press <b>E</b> (or TALK) to use them:</p>
-      <p>🛒 <b>Quartermaster</b> — weapons + perks · ⚔️ <b>Drillmaster</b> — swap class / trials · 🔨 <b>Smith</b> — forge gear<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🧥 <b>Keeper</b> — cosmetics.</p>
-      <p>The glowing <b>waystone</b> in the centre heals you and banks your progress.</p>
-      <p>The <b>Gates</b> along the far wall are the zones — walk into one to dive. Clear a zone to open the next.</p></div>
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The Waystation</p><h2 class="ovh">Welcome home</h2>
+    <div style="text-align:left;font-size:14px;line-height:1.75;color:#cfd6df;margin:6px 0 12px">
+      <p>You proved yourself — this is the <b>Waystation</b>, your home base. You'll come back here after every dive to spend what you earned and grow stronger.</p>
+      <p>Ringing the plaza are the <b>keepers</b>. Walk up to one and press <b>E</b> (or the TALK button) to use them — each one explains itself the first time you visit:</p>
+      <p style="opacity:.9">🛒 <b>Quartermaster</b> — gear &amp; upgrades · 🔨 <b>Smith</b> — forge gear · ⚔️ <b>Drillmaster</b> — classes &amp; respec<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🐾 <b>Beastkeeper</b> — pets · 🪞 <b>Mirror</b> · 🧥 <b>Keeper</b> — looks · ⚔️ <b>Arena</b>.</p>
+      <p>The glowing <b>Waystone</b> in the centre <b>heals you and banks your progress</b> — touch it anytime.</p>
+      <p>The <b>Gates</b> along the far wall are the zones. Walk into one and press <b>E</b> to descend. Clear a zone's quests and beat its boss to open the next Gate.</p>
+      <p style="color:var(--amber);font-weight:600">The loop is simple: dive → clear → return → upgrade → dive deeper.</p></div>
     <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
   document.getElementById('hubTutGo').onclick=resumePlay;
 }
@@ -3173,6 +3190,10 @@ const HELP_ENTRIES=[
   {cat:'The Hub', title:'The Abyssal Descent', body:'An endless survival mode that gets harder every floor. See how deep you can fall — your best depth is saved.'},
   {cat:'Progress', title:'The difficulty ladder', body:'Beat the game on Normal to unlock Hardcore (permadeath), then Hitless (one hit ends the run). The same journey, mastered at rising stakes.'}
 ];
+// menuTip(id, body) — queues a ONE-TIME explainer banner to be injected into the next menu that opens
+// (showOverlayHTML consumes it). Used to teach each interactable the first time you open it.
+var _pendingMenuTip=null;
+function menuTip(id, body){ meta.tutSeen=meta.tutSeen||{}; if(meta.tutOff||meta.tutSeen[id]) return; meta.tutSeen[id]=1; persistGlobal(); _pendingMenuTip=body; }
 // teachOnce(id, body[, opts]) — shows a contextual tip ONCE per concept (tracked in meta.tutSeen), then never again. Non-blocking. Honors the Tutorials toggle.
 function teachOnce(id, body, opts){
   meta.tutSeen = meta.tutSeen || {};
@@ -5631,7 +5652,9 @@ function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tu
     <div class="tutbody"><div class="tuticon">${art}</div>
       <div class="tutcopy"><p class="tutdesc">${s.d}</p>
         <div class="tutkeyrow"><span class="tutkey">1</span><span class="tutkeymsg">Press <b>1</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
-        <p class="tuthint">It recharges over ${s.cd}s, then it's ready again. Keep fighting to rank up and earn more skills.</p></div></div>
+        <p class="tuthint"><b>Why use it:</b> skills are your strongest tools — far bigger than a basic attack. Save them for the moments that matter: a tough foe, a crowd to clear, or getting out of trouble.</p>
+        <p class="tuthint"><b>The cost:</b> after you use it, it recharges over ${s.cd}s${meta.classId==='mage'||meta.classId==='reaper'?' and spends mana':''}, so you can\'t spam it — time it well.</p>
+        <p class="tuthint"><b>What\'s next:</b> keep fighting to rank up. Each rank lets you pick another <b>skill or passive</b>, filling out combat slots <b>1–4</b> — you\'re building your own kit as you grow.</p></div></div>
     <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); };
 }
@@ -5645,6 +5668,7 @@ function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classSta
   for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
 function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
   mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
+  menuTip('tip_choice','every rank you gain gives you a <b>choice</b> — a new active <b>skill</b> or a permanent <b>passive</b>. This is how you build your own Warden; there is no single right path. Pick what fits how you want to fight — and you can re-pick <b>any</b> choice later at the Drillmaster, so nothing here is permanent.');
   const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
     return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
   const pickCol={warrior:'#e8a33d',ranger:'#8fd56d',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#8fd56d';
@@ -7760,6 +7784,10 @@ function showOverlayHTML(html){
   const pov=overlay.scrollTop, pcard=ovcard.scrollTop;
   const prevScroll=[...ovcard.querySelectorAll('*')].map(e=>[e.scrollTop,e.scrollLeft]);
   ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
+  if(_pendingMenuTip){ const card=ovcard.querySelector('.card')||ovcard.firstElementChild;   // first-time interactable explainer, injected once
+    if(card){ const d=document.createElement('div'); d.style.cssText='text-align:left;background:linear-gradient(90deg,#2a2416,#191922);border:1px solid #5a4a20;border-left:3px solid #e8a33d;border-radius:8px;padding:9px 12px;margin:8px 0 4px;font-size:12.5px;line-height:1.5;color:#e9dcbb';
+      d.innerHTML='<b style="color:#ffd24a">💡 First time here — </b>'+_pendingMenuTip; const h=card.querySelector('.ovh'); if(h&&h.parentNode) h.insertAdjacentElement('afterend',d); else card.insertBefore(d,card.firstChild); }
+    _pendingMenuTip=null; }
   { const now=ovcard.querySelectorAll('*'); const m=Math.min(now.length,prevScroll.length);
     for(let i=0;i<m;i++){ const s=prevScroll[i]; if(s[0]) now[i].scrollTop=s[0]; if(s[1]) now[i].scrollLeft=s[1]; } }
   if(pov) overlay.scrollTop=pov;
@@ -7893,7 +7921,9 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   titleScreen._reveal=revealMenu;
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
-  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} currentSlot.empty?openCharCreate():openSlots(); };   // new char: empty slot -> creation; else pick/free a slot
+  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){}
+    if(currentSlot.empty){ if(!meta.originSeen){ meta.originSeen=true; persistGlobal(); playStory(STORY.origin, openCharCreate); } else openCharCreate(); }   // first time: the opening cutscene sets up the world, then class select
+    else openSlots(); };   // else pick/free a slot
   const cont=document.getElementById('mmCont'), contSave=document.getElementById('mmContSave'), contWrap=document.getElementById('mmContinueWrap');
   const paintPreview=dir=>{ const su=slotSummary(previewSlot), C=su.cls&&CLASSES[su.cls]?CLASSES[su.cls]:null;
     contSave.innerHTML=`Slot ${previewSlot+1} · ${htmlSafe(su.name)} · Level ${su.lvl} · ${C?C.icon+' '+C.disp:htmlSafe(su.cls||'No class equipped')}`;
@@ -8136,6 +8166,7 @@ function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
 let mirror=null, mirrorPanelMode=null;
 function openMirror(back){
   initAudio();
+  menuTip('tip_mirror','the <b>Mirror</b>. Inspect your Warden up close — every stat, your full loadout, and your appearance in detail. A read-only look at exactly how strong you are.');
   if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
   const h=meta.hero, p=freshPlayer();
   p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
@@ -8692,6 +8723,7 @@ function trainerEquipClass(cid){
 }
 function openTrainer(back){
   mode='menu';
+  menuTip('tip_trainer','the <b>Drillmaster</b>. Switch your active class, take another class\'s <b>Trial</b> to unlock it, and <b>Respec</b> — re-pick every skill and passive choice you have made, for gold. This is where you reshape your build whenever you like.');
   const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
   const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe'};
   const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
@@ -8738,6 +8770,7 @@ function openCredits(back){
 }
 function openWardrobe(back){
   mode='menu'; checkCosmetics();
+  menuTip('tip_wardrobe','the <b>Keeper</b>. Change your look — skins and appearance. Purely cosmetic: it never changes your stats, so wear whatever you like.');
   const secs=COSSLOTS.map(s=>{
     const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
       return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" style="--cos:${c.col}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
@@ -8761,6 +8794,7 @@ function openWardrobe(back){
 }
 function openQuestBoard(back){
   mode='menu';
+  menuTip('tip_quests','the <b>Postings</b>. These are your objectives for the current zone. Clearing them opens the way forward — the zone\'s boss waits past them. Your active quest also shows on the HUD as you play.');
   const rows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
     const qs=[].concat(...Z.areas.map(a=>a.quests));
     const list=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No quests — just the fight.</div>';
@@ -8796,6 +8830,7 @@ function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('A
 function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
 function openBeastkeeper(back){
   mode='menu';
+  menuTip('tip_beast','the <b>Beastkeeper</b>. Buy a companion and equip <b>one</b> at a time. Most fight alongside you for chip damage; one only heals you. Train your active pet for small, permanent gains.');
   const active=meta.petActive;
   const owned=meta.petOwned.filter(id=>PETS[id]);
   const unowned=PETIDS.filter(id=>!meta.petOwned.includes(id));
@@ -8844,6 +8879,7 @@ function petRenameScreen(id,back){ mode='menu';
 }
 function openShop(back){
   mode='menu'; playFx('shopopen');
+  menuTip('tip_shop','the <b>Quartermaster</b>. Spend gold on class weapons and <b>Perks</b> — permanent stat upgrades for this save. Also here: the double-jump, bigger bags, a gold gamble, and fortress upgrades. Scroll — there are several sections.');
   const rows=PERKIDS.map(id=>{ const P=PERKS[id], lv=perkLevel(id), maxed=lv>=P.max, cost=perkCost(id), afford=meta.gold>=cost;
     const cur=perkValue(id,lv), next=perkValue(id,Math.min(P.max,lv+1)), cap=P.unit(perkValue(id,P.max));
     return `<div class="gearrow perkrow" style="--spine:${maxed?'#ffd24a':'#58647b'}"><div class="gi">${statIcon(P.icon)}</div>

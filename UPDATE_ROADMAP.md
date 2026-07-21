@@ -1295,3 +1295,24 @@ teaching that introduces each core verb the moment it first matters (via the exi
   (compare ▲/▼ → equip/stash/sell; rarity colours + level lock).
 - VERIFIED: syntax OK, new-game→char-create path intact, 0 console errors.
 - NOTE: fires during an actual playthrough (needs char-create → class pick → trial to see live).
+
+
+## [Claude | 2026-07-21] Deep tutorial pass — onboarding for a total newcomer — shipped v1.294.0
+Taught every major system so a brand-new player learns the game seamlessly.
+- **Opening cutscene (STORY.origin):** New Game now plays a straightforward, non-flowery setup BEFORE class
+  select — the Abyss King's corruption, the Bladeborn, Ian the last Bladeborn falling years ago, the
+  bloodline seemingly lost, and YOU as an ordinary town guardian stepping up because no one else will.
+  Aligned STORY.intro so it no longer prematurely spoils the you-are-Bladeborn reveal. `originSeen` flag,
+  plays once. Verified in-browser: fresh save → cutscene cycles → class select.
+- **Per-interactable first-open explainers** via a new `menuTip(id,body)` primitive (queues a one-time
+  banner that showOverlayHTML injects into the menu — guaranteed visible, shown once, honors the tutorial
+  toggle): Quartermaster/Shop, Forge, Drillmaster (classes + respec), Pack/Bag, Beastkeeper, Postings,
+  Mirror, Keeper/Wardrobe. Verified: opening the shop injects its banner.
+- **Rank-up CHOICE teaching:** first time openClassChoice fires (rank 2, reached fast in the trial), a banner
+  explains each rank gives a skill-or-passive choice, it's how you build your Warden, and any choice is
+  re-pickable at the Drillmaster.
+- **Skill teaching enriched:** openSkillTutorial now explains WHY (skills are your biggest tools — save for
+  tough foes/crowds/escapes), the COST (cooldown + mana for casters), and PREFRAMES filling slots 1-4 as you rank.
+- **First hub return** (hubTutorial) rewritten: what the Waystation is, the keepers + press E, the Waystone
+  heals+banks, the Gates are zones, and the core loop (dive → clear → return → upgrade → dive deeper).
+- VERIFIED: syntax OK, opening cutscene + menu-tip injection work in-browser, 0 console errors.

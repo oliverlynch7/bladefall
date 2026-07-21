@@ -1084,3 +1084,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added a gameplay-only Q shortcut that cycles Off -> Auto Sell -> Auto Bag -> Off while preserving the existing mutually exclusive saved settings and drop behavior.
 - Added compact Q key badges beside both loot-mode HUD controls and retained clear active-state highlighting.
 - Muted browser QA verified all three keyboard transitions, pause-menu isolation, persistence after reload, clean desktop layout, and zero console errors.
+
+
+## [Codex | 2026-07-20] Mirror entry and rename UX - shipped v1.260.0
+- The Mirror now opens at a rear three-quarter camera angle so the character's back remains primary while the face is visible in the reflection.
+- Rebuilt Rename Character as a compact prompt with a top-left cancel control, full-width name field, 2-20 character guidance, and a full-width Save button that remains disabled until the trimmed name is valid.
+- Saving by click or Enter now refreshes the Mirror character card and gameplay HUD immediately; cancel and Escape discard edits without leaving the Mirror.
+- Muted browser QA verified camera composition, validation, click/keyboard save, cancel behavior, immediate name refresh, and zero console errors.

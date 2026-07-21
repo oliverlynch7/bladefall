@@ -204,6 +204,10 @@
   /* The Mirror inspector — a right-side stats panel over the orbitable character */
   #mirrorui{position:absolute;left:50%;top:50%;z-index:22;width:min(920px,92vw);max-height:min(88vh,820px);transform:translate(-50%,-50%);box-sizing:border-box;background:linear-gradient(178deg,rgba(23,25,33,.98),rgba(10,11,17,.98));border:1px solid #3a4152;border-radius:18px;padding:22px 26px;display:flex;flex-direction:column;pointer-events:auto;box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.06);}
   #mirrorui.hide{display:none;}
+  #mirrorui.rename{width:min(520px,92vw);padding:24px 28px 26px;overflow:visible;}
+  #mirrorui.rename .mstop{padding-left:42px;}
+  .msmodalclose{position:absolute;left:14px;top:14px;width:32px;height:32px;border-radius:8px;border:1px solid #41495c;background:rgba(255,255,255,.045);color:#cbd2df;font:800 20px/1 Arial,sans-serif;cursor:pointer;}
+  .msmodalclose:hover{border-color:#d89a3b;color:#ffd47a;background:rgba(232,163,61,.1);}
   #mirrorInfo{position:absolute;right:16px;top:calc(env(safe-area-inset-top) + 16px);z-index:12;width:300px;box-sizing:border-box;padding:16px 18px 14px;background:radial-gradient(circle at 80% 0,rgba(120,60,180,.10),transparent 40%),linear-gradient(178deg,rgba(20,17,26,.97),rgba(9,8,13,.98));border:1px solid #7a5a2a;border-radius:14px;box-shadow:inset 0 0 0 2px #0a0a10,inset 0 0 0 3px #3a2a14,0 22px 54px rgba(0,0,0,.62);color:#e8dcc6;font-family:Georgia,serif;pointer-events:none;}
   #mirrorInfo .miName2{font-size:23px;font-weight:800;color:#f4ead2;letter-spacing:.02em;line-height:1.1;text-shadow:0 1px 4px #000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   #mirrorInfo .miClass{font-size:12px;color:#d9a441;font-weight:700;margin-top:3px;letter-spacing:.08em;text-transform:uppercase;}
@@ -224,9 +228,10 @@
   .mslabel{display:block;margin:8px 0 4px;color:#8b93a8;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:left;}
   .msselect,.msname{width:100%;box-sizing:border-box;background:#0c1220;border:1px solid #2b3040;color:var(--ink);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;}
   .msselect:focus,.msname:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(232,163,61,.12);}
-  .msnamebar{display:flex;gap:6px;align-items:stretch;}
+  .msnamebar{display:flex;flex-direction:column;gap:10px;align-items:stretch;}
   .msnamebar .msname{flex:1;min-width:0;}
-  .msnamebar .wsbig{width:auto;padding:7px 12px;white-space:nowrap;}
+  .msnamebar .wsbig{width:100%;padding:11px 16px;white-space:nowrap;}
+  .msnamebar .wsbig:disabled{cursor:not-allowed;background:linear-gradient(180deg,#555b66,#383d47);color:#949aa5;box-shadow:none;filter:saturate(.15);}
   .msnamehint{font-size:10.5px;color:var(--muted);margin:4px 0 2px;text-align:left;}
   .mssect{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#8b93a8;margin:12px 0 5px;}
   .msrow{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
@@ -848,7 +853,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.259.0';
+const VERSION3D='1.260.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4701,7 +4706,7 @@ window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
     if(mode==='studio'){ exitStudio(); return; }
-    if(mode==='mirror'){ exitMirror(); return; }
+    if(mode==='mirror'){ if(mirrorPanelMode){ mirrorPanelMode=null; buildMirrorPanel(); } else exitMirror(); return; }
     if(mode==='play') openPause();
     else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); }
     else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
@@ -7383,7 +7388,7 @@ function openMirror(back){
   p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.invuln=0;
   p.level=(h&&h.level)||1; recomputeArmor(p); p.hp=effMaxHp(p);
   const pet=meta.petActive&&PETS[meta.petActive]?{id:meta.petActive,x:46,y:16,z:24,bob:0,t:0,yaw:Math.PI}:null;
-  mirror={ t:0, yaw:0, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
+  mirror={ t:0, yaw:0.49, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
   mode='mirror'; showOverlay(false); showGameUI(false);
   hpBars=[]; statPips=[]; drawHpBars(); updatePetLabel();
   document.getElementById('questbox').classList.add('hide');
@@ -7476,9 +7481,10 @@ function buildMirrorPanel(){
   const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
   const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   if(mirrorPanelMode==='stats') pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div><div class="msbody">${mirrorStatsHTML()}</div><div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: ${mirror.spin?'On':'Off'}</button><button class="wsbig ghost" id="msClose">Close</button></div>`;
-  else if(mirrorPanelMode==='name') pn.innerHTML=`<div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" maxlength="20" value="${escText(nm)}" placeholder="Name your character…"><button class="wsbig" id="msNameGo">Save Name</button></div><div class="msctrl"><button class="wsbig ghost" id="msClose">Cancel</button></div>`;
+  else if(mirrorPanelMode==='name') pn.innerHTML=`<button class="msmodalclose" id="msClose" aria-label="Cancel rename" title="Cancel">×</button><div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" minlength="2" maxlength="20" value="${escText(nm)}" placeholder="Name your character…"><div class="msnamehint">2–20 characters</div><button class="wsbig" id="msNameGo">Save Name</button></div>`;
   else pn.innerHTML='';
   pn.classList.toggle('hide',!mirrorPanelMode);
+  pn.classList.toggle('rename',mirrorPanelMode==='name');
   // Phase 19: an always-visible, CLICKABLE way out, top-left
   let esc=document.getElementById('mirrorEsc');
   if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
@@ -7493,7 +7499,10 @@ function buildMirrorPanel(){
   mn.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='name'?null:'name';SFX.pickup();buildMirrorPanel();};
   const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
   const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
-  const ni=document.getElementById('msName'); if(ni){const saveName=()=>{meta.heroName=(ni.value||'').trim().slice(0,20);persist();SFX.pickup();mirrorPanelMode=null;buildMirrorPanel();};document.getElementById('msNameGo').onclick=saveName;ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}};}
+  const ni=document.getElementById('msName'); if(ni){ const save=document.getElementById('msNameGo');
+    const valid=()=>((ni.value||'').trim().length>=2); const sync=()=>{ save.disabled=!valid(); }; sync(); ni.addEventListener('input',sync);
+    const saveName=()=>{ if(!valid()) return; meta.heroName=(ni.value||'').trim().slice(0,20); persist(); hudUpdate(); buildMirrorInfo(); SFX.pickup(); mirrorPanelMode=null; buildMirrorPanel(); };
+    save.onclick=saveName; ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}}; ni.focus(); ni.select(); }
 }
 // Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
 function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);

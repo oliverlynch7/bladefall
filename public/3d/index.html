@@ -40,7 +40,7 @@
   .barlabel{transition:none}.vitalnum{font-size:9px;font-weight:800;color:#d7dbe5;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
   #hud .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 8px;position:relative;z-index:1}
   #hud .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
-  #lvlbadge{font-size:10px;font-weight:900;letter-spacing:.08em;color:#f5c778;background:linear-gradient(#493317,#271d0e);border:1px solid #795526;padding:4px 9px;border-radius:6px;}
+  #lvlbadge{font-size:10px;font-weight:900;letter-spacing:.08em;color:#f5c778;background:linear-gradient(#493317,#271d0e);border:1px solid #795526;padding:4px 9px;border-radius:6px;}.hudidentity{display:flex;align-items:baseline;gap:7px;min-width:0;margin-bottom:3px}.hudplayername{color:#fff;font:900 12px Georgia,serif;letter-spacing:.055em;text-shadow:0 1px 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hudidentitydot{color:#947342;font-weight:900}
   #weapontag{font-size:11px;font-weight:700;color:var(--ink);opacity:.95;}
   #armortag{font-size:11px;font-weight:700;color:#aeb9c6;display:flex;align-items:center;gap:4px;}
   #armortag .pip{width:7px;height:7px;border-radius:2px;display:inline-block;background:#333;}
@@ -82,17 +82,17 @@
   .btn.skl.cooling{opacity:1;}
   /* AQW-style radial cooldown: the icon greys out, a dark conic wedge covers the still-charging portion and
      sweeps away (revealing the colour icon) in tempo with the timer, and a 0.1s countdown sits centred. */
-  .btn.skl .sk-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:inherit;line-height:1;}
-  .btn.skl .sk-ico>.ico-event{position:static;}
-  .btn.skl.cooling .sk-ico{filter:grayscale(1) brightness(.42);}
-  .btn.skl .sk-wheel{position:absolute;inset:0;border-radius:inherit;pointer-events:none;display:none;z-index:2;
+  .btn:is(.skl,.sklaux) .sk-ico{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:inherit;line-height:1;}
+  .btn:is(.skl,.sklaux) .sk-ico>.ico-event{position:static;}
+  .btn:is(.skl,.sklaux).cooling .sk-ico{filter:grayscale(1) brightness(.42);}
+  .btn:is(.skl,.sklaux) .sk-wheel{position:absolute;inset:0;border-radius:inherit;pointer-events:none;display:none;z-index:2;
     background:conic-gradient(from 0deg, rgba(3,3,7,.76) calc(var(--cdf,0)*360deg), rgba(3,3,7,0) 0);}
-  .btn.skl .sk-wheel::after{content:'';position:absolute;inset:0;border-radius:inherit;
+  .btn:is(.skl,.sklaux) .sk-wheel::after{content:'';position:absolute;inset:0;border-radius:inherit;
     background:conic-gradient(from 0deg, transparent calc(var(--cdf,0)*360deg - 2.5deg), rgba(190,150,255,.9) calc(var(--cdf,0)*360deg), transparent 0);}
-  .btn.skl.cooling .sk-wheel{display:block;}
-  .btn.skl .sk-cd{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:3;
+  .btn:is(.skl,.sklaux).cooling .sk-wheel{display:block;}
+  .btn:is(.skl,.sklaux) .sk-cd{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:3;
     font:800 17px Georgia,serif;color:#fff;text-shadow:0 1px 4px #000,0 0 9px rgba(150,110,240,.65);pointer-events:none;}
-  .btn.skl.cooling .sk-cd{display:flex;}
+  .btn:is(.skl,.sklaux).cooling .sk-cd{display:flex;}
   .btn.skl.lock{opacity:.62;}
   .btn.skl.lock::before{display:none;}                       /* hide the mana badge on locked slots — the unlock label takes that space */
   .btn.skl.lock .sk-ico{align-items:flex-start;padding-top:20%;font-size:.6em;opacity:.7;}
@@ -719,7 +719,7 @@
     .hudportrait img{position:absolute;inset:13px;width:90px;height:90px;object-fit:contain;z-index:2;filter:drop-shadow(0 5px 5px #000)}
     #hud .meta{display:grid;grid-template-columns:minmax(0,1fr) 164px;gap:18px;margin:0 0 15px;min-height:38px;align-items:start}
     #hud .left{display:grid;gap:2px;align-items:start}
-    #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}
+    #lvlbadge{padding:0;border:0;background:none;color:#f1d6a0;font-family:Georgia,serif;font-size:13px;letter-spacing:.1em;text-shadow:0 1px 4px #000}.hudplayername{font-size:15px}
     #weapontag{display:block;max-width:235px;font-family:Georgia,serif;font-size:10px;line-height:1.3;letter-spacing:.055em;text-transform:uppercase;white-space:normal}
     #armortag{position:static;left:auto;top:auto;font-family:Georgia,serif;font-size:12px;color:#cbd3de;white-space:nowrap}
     #stagetag{position:absolute;left:auto;right:0;top:23px;max-width:164px;color:#d6b06c;font-family:Georgia,serif;font-size:8px;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 5px #000}
@@ -794,7 +794,7 @@
 <div id="hud" class="hide">
   <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
   <div class="hudpanel">
-  <div class="meta"><div class="left"><span id="lvlbadge">LV 1</span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
+  <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span><span class="hudidentitydot">·</span><span id="lvlbadge">Warrior</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.249.0';
+const VERSION3D='1.250.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5134,7 +5134,7 @@ function autoAtkTarget(p,w){
 }
 function playerAttack(cdMul){
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
-  p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
+  p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
   const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
@@ -5620,7 +5620,7 @@ function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
     if(cd>0){ const mx=Math.max(cd,(p.skillCdMax&&p.skillCdMax[i])||cd); b.style.setProperty('--cdf',(cd/mx).toFixed(3));
       const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
     else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
-  if(finished) skillbarUpdate(); }
+  auxCoolPaint(p); if(finished) skillbarUpdate(); }
 const C2_ICON={
   w_cleave:skillIcon('cleave'),w_bash:skillIcon('warrior-shield-bash'),w_charge:skillIcon('charge'),w_whirl:skillIcon('warrior-whirlwind'),w_guard:skillIcon('warrior-iron-guard'),w_stomp:skillIcon('stomp'),w_berserk:skillIcon('berserk'),w_execute:skillIcon('warrior-execution'),
   r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire'),
@@ -5635,8 +5635,13 @@ function classAttackStyle(cid){ const s=(CLASSES[cid]||{}).attackStyle; return B
 function auxSlotsUpdate(){
   const lmb=document.getElementById('bLMB'), spc=document.getElementById('bSpace'); if(!lmb||!spc) return;
   const v='?v='+VERSION3D, attackStyle=classAttackStyle(meta.classId), attackKey=attackStyle+'-'+VERSION3D;
-  if(lmb.dataset.i!==attackKey){ lmb.dataset.i=attackKey; lmb.innerHTML='<span class="auxico"><img src="icons/hud-basic-attack-'+attackStyle+'.png'+v+'" alt=""></span>'; }
-  if(spc.dataset.i!==VERSION3D){ spc.dataset.i=VERSION3D; spc.innerHTML='<span class="auxico"><img src="icons/hud-dodge.png'+v+'" alt=""></span>'; } }
+  if(lmb.dataset.i!==attackKey){ lmb.dataset.i=attackKey; lmb.innerHTML=''; skIco(lmb).innerHTML='<span class="auxico"><img src="icons/hud-basic-attack-'+attackStyle+'.png'+v+'" alt=""></span>'; }
+  if(spc.dataset.i!==VERSION3D){ spc.dataset.i=VERSION3D; spc.innerHTML=''; skIco(spc).innerHTML='<span class="auxico"><img src="icons/hud-dodge.png'+v+'" alt=""></span>'; } }
+function auxCoolPaint(p){
+  const paint=(b,cd,mx)=>{if(!b)return;if(cd>0){b.style.setProperty('--cdf',(cd/Math.max(cd,mx||cd)).toFixed(3));const n=b.querySelector('.sk-cd');if(n)n.textContent=cd.toFixed(1);b.classList.add('cooling');}else{b.classList.remove('cooling');b.style.setProperty('--cdf','0');}};
+  paint(document.getElementById('bLMB'),p.atkCd||0,p.atkCdMax||Math.max(p.atkCd||0,(p.weapon?.cd||.7)/effAtkSpeed(p)));
+  paint(document.getElementById('bSpace'),p.dodgeCdT||0,effDodgeCd(p));
+}
 function skillbarUpdate(){ auxSlotsUpdate(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
   if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
     for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
@@ -5661,7 +5666,7 @@ function resolveSwing(){
   if(p.atkTimer<0.26*0.4) return;                       // active-hit window
   const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
   if(w.reaper && classFamilyOk(w) && p._pullId!==p.swingId){ p._pullId=p.swingId;   // Void Scythe: gravity-yank the nearby dead inward to cluster them, then reap
-    for(const e of G.enemies){ if(e.dead||e.boss) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>62 && d<240){ const k=Math.min(130,240-d);
+    for(const e of G.enemies){ if(e.dead||e.boss||e.practice||e.dummy||e.immobile) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>62 && d<240){ const k=Math.min(130,240-d);   // training dummies are bolted down — never yanked
       e.x+=(p.x-e.x)/d*k*0.5; e.z+=(p.z-e.z)/d*k*0.5; G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*0.6,vy:20,vz:(p.z-e.z)*0.6,life:0.25,color:'#b06bff',sz:2.4}); } } }
   if(w.art==='scythe' && p.swingCombo===2 && classFamilyOk(w)){       // SCYTHE FINISHER (3rd hit): a MAGIC burst — scales with magic damage, wider + harder
     const cr=Math.random()<0.18+effCrit(p), els=w.el||'void', ec=elementColor(els)||'#c47bff';
@@ -5722,7 +5727,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     for(let i=0;i<(execute?10:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
   }
   e.hp-=dmg; e.hitFlash=0.12;
-  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=(e.dummy?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies are BOLTED DOWN — no knockback, ever
+  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
@@ -7183,8 +7188,6 @@ function openHub(){
 const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:900,ad:760};
 function enterWaystation(){
   initAudio(); queueLevelUp=0; queueSubclass=false;
-  if(G){ G.sprintFun=false; G.sprintReturnHub=false; G.bonusActive=false; }   // never carry a sprint state into the hub
-  { const _bt=document.getElementById('bonustimer'); if(_bt) _bt.style.display='none'; }   // kill any frozen Treasure Sprint timer on the way in
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
   G.stageIndex=0;
@@ -8438,6 +8441,7 @@ function hudUpdate(){
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
   const portrait=document.getElementById('hudportraitimg'); if(portrait) portrait.src='icons/class-'+meta.classId+'.png';
+  const playerName=document.getElementById('playername'); if(playerName) playerName.textContent=(meta.heroName||'').trim()||'Player';
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
   wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
@@ -9127,6 +9131,15 @@ function drawWaystation(t){
   bx(0,76,30, 15,15,15, '#ffd24a','#ffb020',pu);
   bx(0,150,30, 7,140,7, '#ffd24a','#ffd24a',0.14);
   for(let i=0;i<5;i++){ const a=t*0.9+i*1.257; bx(Math.cos(a)*34, 55+Math.sin(t*1.8+i)*10, 30+Math.sin(a)*34, 4,4,4, '#ffd24a','#ffd24a',0.7); }
+  // the Tinkerer's cardboard boxes — the dev cheat ('???') hides behind this pile in the SW glade corner
+  { const boxes=[[-806,644,0,48,44],[-838,662,0,40,36],[-778,664,0,36,30],[-812,628,44,38,32]];
+    drawShadow(-806,650,44,0.28);
+    for(const b of boxes){ const x=b[0],z=b[1],y0=b[2],w=b[3],h=b[4];
+      bx(x,y0+h/2,z, w,h,w, '#c49b5d');                         // cardboard box
+      bx(x,y0+h*0.5,z, w*0.32,h*0.98,w*1.02, '#e6bf7c');        // packing-tape band
+      bx(x,y0+h-1.5,z, w*1.02,3,w*0.34, '#e6bf7c');             // tape across the top
+      bx(x,y0+h*0.5,z-w*0.5-0.5, w*0.9,h*0.9,1, '#a9833f'); }   // front flap seam
+    bx(-806,96,644, 3.4,3.4,3.4, '#ffe6a0','#ffd24a', 0.4+0.42*Math.sin(t*4)); }   // the glint that hints at the secret
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
   for(const g of G.gates){
     if(g.side){ // discovered rift: a violet seam beside its parent gate

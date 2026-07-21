@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.283.0';
+const VERSION3D='1.284.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3037,6 +3037,7 @@ function enterZone(zi){
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   meta.run=null; persist(); checkAchievements();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
+  if(MP.active) MP.onEnter(zi);                                 // co-op: host tells guests which zone to load (opt-in)
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
 function loadArea(){
@@ -6207,10 +6208,133 @@ function updatePetLabel(){
   el.classList.remove('hide'); el.style.left=(sp[0]/DPR)+'px'; el.style.top=(sp[1]/DPR)+'px';
   el.style.color=petRarityCol(pet.id); el.textContent=petDisplayName(pet.id);
 }
+/* ============================================================================
+   MULTIPLAYER — Phase 1.1 (in-game lobby + presence). FULLY OPT-IN & ISOLATED.
+   Single-player is byte-for-byte unaffected: nothing here runs unless MP.active,
+   and PeerJS is lazy-loaded from a CDN only when the player opens a co-op game.
+   Topology: host = star hub; guests connect to host; host relays everyone's
+   position. P1.1 = presence only (see each other move); enemies/loot stay local.
+   ============================================================================ */
+const MP={
+  active:false, isHost:false, peer:null, conns:[], hostConn:null,
+  myId:null, name:'Warden', code:'', zone:-1, seed:0, ping:0,
+  peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
+  _lib:false, _loading:null, _sendT:0, _pingT:0,
+  ROOMPFX:'bladefall-mp-',
+  rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
+  // lazy-load PeerJS once, on first co-op entry; resolves true on success
+  loadLib(){ return new Promise(res=>{ if(window.Peer){ this._lib=true; return res(true); }
+    if(this._loading){ this._loading.push(res); return; } this._loading=[res];
+    const s=document.createElement('script'); s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload=()=>{ this._lib=!!window.Peer; const q=this._loading; this._loading=null; q.forEach(r=>r(this._lib)); };
+    s.onerror=()=>{ this._lib=false; const q=this._loading; this._loading=null; q.forEach(r=>r(false)); };
+    document.head.appendChild(s); }); },
+  selfState(){ const p=G&&G.p; return { id:this.myId, name:this.name, zone:this.zone,
+    x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight', hp:p?Math.round(p.hp):0 }; },
+  mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,
+    x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw}; },
+  // ---- HOST ----
+  async host(cb){ if(this.active){ cb&&cb(true,this.code); return; }
+    if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
+    this.code=this.rndCode(); this.isHost=true; this.myId='h';
+    this.peer=new Peer(this.ROOMPFX+this.code,{debug:0});
+    this.peer.on('open',()=>{ this.active=true; cb&&cb(true,this.code); });
+    this.peer.on('connection',c=>this.wireGuest(c));
+    this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
+  wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
+    if(this.zone>=0) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){}
+    c.on('data',d=>{
+      if(d.t==='hello'){ this.peers[d.p.id]=this.mkPeer(d.p); if(this.zone>=0) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){} }
+      else if(d.t==='pos'){ const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
+      else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
+    });
+    c.on('close',()=>{ this.conns=this.conns.filter(x=>x!==c); }); }); },
+  broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
+    const msg={t:'state',players:all}; this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
+  // ---- GUEST ----
+  async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
+    code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
+    this.isHost=false; this.myId=Math.random().toString(36).slice(2,7);
+    this.peer=new Peer({debug:0});
+    this.peer.on('open',()=>{ const c=this.peer.connect(this.ROOMPFX+code,{reliable:false}); this.hostConn=c;
+      c.on('open',()=>{ this.active=true; this.code=code; try{c.send({t:'hello',p:this.selfState()});}catch(e){} cb&&cb(true,code); });
+      c.on('data',d=>this.onGuestData(d));
+      c.on('close',()=>{ if(this.active) this.leave('Host left the game — back to single-player.'); });
+    });
+    this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
+  onGuestData(d){
+    if(d.t==='zone'){ this.zone=d.zone; this.seed=d.seed;
+      if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } }
+    else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
+        if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
+      for(const id in this.peers){ if(!live[id]) delete this.peers[id]; } }
+    else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
+  // ---- called from enterZone (both roles) ----
+  onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0;
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed});}catch(e){}}); },
+  // ---- per-frame: interpolate peers, age out stale ones, send our state ----
+  tick(dt){
+    for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
+      if(q.last>3){ delete this.peers[id]; continue; }
+      const k=Math.min(1,dt*12); q.x+=(q.tx-q.x)*k; q.y+=(q.ty-q.y)*k; q.z+=(q.tz-q.z)*k;
+      let dy=q.tyaw-q.yaw; while(dy>Math.PI)dy-=2*Math.PI; while(dy<-Math.PI)dy+=2*Math.PI; q.yaw+=dy*k; }
+    this._sendT+=dt;
+    if(this._sendT>=0.07){ this._sendT=0;                       // ~14 Hz presence
+      if(this.isHost){ this.broadcast(); }
+      else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send({t:'pos',p:this.selfState()});}catch(e){}
+        this._pingT+=0.07; if(this._pingT>=1){ this._pingT=0; try{this.hostConn.send({t:'ping',ts:performance.now()});}catch(e){} } } } },
+  // ---- render remote players in the same zone (simple safe voxel avatar) ----
+  drawPeers(t){ if(!G) return;
+    for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==G.zone) continue; this.drawPeer(q,t); } },
+  drawPeer(q,t){
+    const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null;
+    const body=sk?sk.armor:'#6f86c9', bodyLt=sk?sk.armorLt:'#9fb4e6', skinc=sk&&sk.skin?sk.skin:'#d9b08c';
+    let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
+    const tint='hsl('+(h%360)+',70%,60%)';
+    pushM(); mv(q.x,(q.y||0)+Math.sin(t*2+ (h%6))*0.6,q.z); rotY(q.yaw||0);
+    bx(0,25,0, 17,22,10, body);          // torso
+    bx(0,38,0, 12,12,12, skinc);         // head
+    bx(-11,24,0, 5,18,5, bodyLt);        // arms
+    bx(11,24,0, 5,18,5, bodyLt);
+    bx(-5,7,0, 6,16,6, body);            // legs
+    bx(5,7,0, 6,16,6, body);
+    bx(0,52,0, 5,5,5, tint, tint);       // id beacon above the head so allies are distinguishable
+    popM(); },
+  leave(msg){
+    try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
+    try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
+    try{ if(this.peer) this.peer.destroy(); }catch(e){}
+    this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
+    if(msg){ try{ toast(msg); }catch(e){} } }
+};
+function openMPLobby(){
+  mode='menu'; showGameUI(false);
+  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Co-op · beta</p><h2 class="ovh">Multiplayer</h2>
+    <p class="ovsub">Run a zone together. Needs an internet connection. One player <b>hosts</b> and shares the code; the other <b>joins</b> and drops into the host's zone. Your single-player save is untouched.</p>
+    <button class="bigbtn" id="mpHost">🌐 Host a game</button>
+    <div id="mpHostInfo" style="display:none;margin:6px 0"><p class="ovsub">Share this code, then start a game and pick a zone — friends who join land in it with you.</p><div id="mpCode" style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--amber,#e8a33d);letter-spacing:.18em;text-align:center;margin:4px 0">····</div></div>
+    <div style="display:flex;gap:8px;margin:10px 0"><input id="mpJoinCode" placeholder="ROOM CODE" maxlength="6" style="flex:1;background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:10px;padding:11px 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase"><button class="bigbtn ghost" id="mpJoin" style="width:auto;margin:0">Join</button></div>
+    <p class="ovsub" id="mpStatus" style="min-height:18px"></p>
+    <button class="bigbtn ghost" id="mpBack" style="margin-top:6px">Back</button></div>`);
+  const st=(m,ok)=>{ const e=document.getElementById('mpStatus'); if(e){ e.textContent=m; e.style.color=ok?'var(--good,#3ad07f)':'var(--muted,#8b8f9a)'; } };
+  document.getElementById('mpBack').onclick=titleScreen;
+  document.getElementById('mpHost').onclick=()=>{ st('Connecting…'); try{SFX.pickup();}catch(e){}
+    MP.host((ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
+      const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
+      const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
+      st('Hosting. Now press Back and start a game — friends who join will land in your zone.',true); }); };
+  document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
+    if(!c){ st('Enter a room code.'); return; } st('Connecting…'); try{SFX.pickup();}catch(e){}
+    MP.join(c,(ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not join ('+info+'). Check the code.'); return; }
+      st('Connected! Waiting for the host to enter a zone…',true); }); };
+}
 function update(dt){
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
+  if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
@@ -7311,6 +7435,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
       <button class="mmbtn" id="mmNew"><span class="mmtx">New Game</span><span class="mmsub">Forge a new Warden</span></button>
       <div class="mmcontinue" id="mmContinueWrap"><button class="mmbtn ${hasSave?'':'mmdis'}" id="mmCont" ${hasSave?'':'disabled'}><span class="mmtx">Continue</span><span class="mmsub" id="mmContSave">${hasSave?activeLine:'No saved Warden yet'}</span></button><button class="mmslotedge prev" id="mmSlotPrev" aria-label="Previous saved Warden" ${savedSlots.length>1?'':'disabled'}>‹</button><button class="mmslotedge next" id="mmSlotNext" aria-label="Next saved Warden" ${savedSlots.length>1?'':'disabled'}>›</button></div>
       <button class="mmbtn" id="mmLoad"><span class="mmtx">Load Character</span><span class="mmsub">View &amp; choose your saved Wardens</span></button>
+      <button class="mmbtn" id="mmMP"><span class="mmtx">Multiplayer <span style="font-size:.7em;opacity:.7;letter-spacing:.1em">BETA</span></span><span class="mmsub">Play a zone co-op with a friend</span></button>
       <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; skins</span></button>
       <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
     </div>
@@ -7337,6 +7462,7 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   cont.onkeydown=ev=>{ if(ev.key==='ArrowLeft'||ev.key==='ArrowRight'){ ev.preventDefault(); cyclePreview(ev.key==='ArrowLeft'?-1:1); } };
   cont.onclick=()=>{ if(!hasSave) return; try{initAudio();SFX.pickup();}catch(e){} continueSlot(previewSlot); };  // center resumes the previewed save; edges only switch the preview
   document.getElementById('mmLoad').onclick=()=>{ try{SFX.pickup();}catch(e){} openSlots(); };
+  document.getElementById('mmMP').onclick=()=>{ try{SFX.pickup();}catch(e){} openMPLobby(); };
   document.getElementById('mmSet').onclick=()=>{ try{SFX.pickup();}catch(e){} openTitleOptions(); };
   document.getElementById('mmExit').onclick=()=>{ try{SFX.pickup();}catch(e){} titleScreen(); };   // back to the attract logo (web has no OS-quit)
 }
@@ -10470,6 +10596,7 @@ function render(t){
       popM(); } }
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
+  if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
   if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
   updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.

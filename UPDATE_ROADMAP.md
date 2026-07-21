@@ -1137,3 +1137,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Replaced the hidden, unreachable Forge-Routing Hall climb with a broad grounded basalt stair on the plateau's west face.
 - The five approach landings remain outside the solid plateau wall; the final landing crosses onto the plateau only at its full 220-unit height.
 - Muted browser QA verified every hop against base movement limits, all five Ember Shards, the completion portal at the Ash Altar, 1600x900 presentation, and zero console errors.
+
+## [Claude | 2026-07-21] Multiplayer P1.1 — in-game lobby + presence co-op — shipped v1.284.0
+- New "Multiplayer (BETA)" main-menu entry → lobby overlay (Host a game / Join with code). Builds on the proven mp-lab WebRTC/PeerJS layer, now inside the game.
+- Host generates a 4-char room code; when the host enters any zone it broadcasts {zone,seed} so guests auto-load the SAME zone (static seeds = identical layout). Guests render as live voxel allies with a per-player id beacon, position interpolated ~14 Hz, host = star relay.
+- HARD ISOLATION (all verified in a real browser): single-player NEVER loads PeerJS — confirmed peerLoaded:false on the title screen and even after opening the lobby; the script injects only on Host/Join click. All netcode lives in one `MP` object; update()/render()/enterZone() only touch it behind `if(MP.active)`. No save-schema change. Verified: v1.284.0 title has 0 console errors, mmMP button renders, lobby opens, Host lazy-loaded PeerJS and produced code KR2Z with signaling connected.
+- SCOPE: presence only. Each client still runs its own local enemies/loot. NEXT: P1.2 host-authoritative shared enemies, P1.3 shared loot/quests/death-revive, P1.4 join/leave polish + lag smoothing + nametags.

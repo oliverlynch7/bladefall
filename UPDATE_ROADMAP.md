@@ -1367,3 +1367,14 @@ Reorganized the Waystation per Oliver's feedback so nothing feels cramped.
   reduction + slow self-heal (stands in for defensive/healing skills) instead of kiting forever.
 - VERIFIED: enter lava arena w/ 2 hard bots, 3s sim — bots stay in the combat area, 0 console errors, save
   protected, clean exit.
+
+
+## [Claude | 2026-07-21] Realistic mirror surface — shipped v1.298.0
+The hub Mirror's surface read like a glowing portal (bright emissive glass bands). Reworked it to look like
+a real silvered mirror.
+- Removed the emissive GLOW (the cause of the "ton of light / portal" look). The glass is now a matte
+  translucent SILVERED pane (subtle cool tint + top gradient + faint dark edge vignette + one very soft
+  diagonal sheen) so you see the reflection THROUGH lightly-tinted glass, not a shining panel.
+- The live reflection is more realistic: it tracks your horizontal position more strongly, rises when you
+  jump, and MIRRORS your facing (mh.yaw = π − your yaw) so turning turns your reflection — true mirror behavior.
+- VERIFIED: hub builds with 0 console errors. (Visual — review in the SE court by walking up to the Mirror.)

@@ -868,7 +868,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.274.0';
+const VERSION3D='1.275.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6527,7 +6527,7 @@ function update(dt){
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
   // portal
-  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72) nextStage(); }
+  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72){ if(G.portal.win) winFinale(); else nextStage(); } }
   // particles
   for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
   G.particles=G.particles.filter(pt=>pt.life>0);
@@ -7093,18 +7093,27 @@ function enterEndlessFromTitle(){
   startEndless();
 }
 function winGame(){
-  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
-  const bonus=awardGold(500), D=curDiff();
-  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
-  // Final-boss completion must be authoritative even when a caller bypasses zoneClear().
-  // These writes are idempotent, so the normal zoneClear -> winGame route remains safe.
+  if(G._winPending) return; G._winPending=true;                    // guard: only start the ending once
+  const D=curDiff();
+  // Victory is earned the moment the boss falls (authoritative + idempotent, even if a caller bypasses zoneClear).
   meta.zoneDone[curZone().id]=true;
   meta.zoneMax=Math.max(meta.zoneMax||0,ZONES.length-1);
   if(!meta._iansBladeAnnounced) meta._iansBladeNotify=true;
   meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
-  persist(); persistGlobal(); checkAchievements(); checkCosmetics();
+  persistGlobal(); checkAchievements(); checkCosmetics(); SFX.win();
   const lines=STORY.ending.slice(); if(STORY.endLadder[D.id]) lines.push(STORY.endLadder[D.id]);
-  playStory(lines, ()=>winScreen(bonus,D));                        // the ending rolls, then the results card
+  playStory(lines, ()=>{                                            // the ending dialogue rolls, THEN you get control back
+    mode='play'; showOverlay(false); showGameUI(true); if(typeof regrabCam==='function') regrabCam();
+    const px=G.p.x, pz=G.p.z-150, py=(typeof highestSurfaceAt==='function'?highestSurfaceAt(px,pz,20):0);
+    G.portal={x:px,z:pz,y:py,t:0,win:true};                        // the HOMEWARD portal — claim your spoils, then step through to play the finale
+    toast('Claim your spoils, then step through the portal home.','#ffd24a','event-portal-open');
+  });
+}
+function winFinale(){                                               // entering the home portal → the finale cutscene + results
+  const D=curDiff(), bonus=awardGold(500);
+  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null; persist();  // snapshot with all the loot you grabbed
+  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
+  winScreen(bonus,D);
 }
 function winScreen(bonus,D){
   mode='win'; musicPlay('hub');

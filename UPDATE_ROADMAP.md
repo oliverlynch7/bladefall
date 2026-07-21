@@ -1034,3 +1034,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Deepened the Keep with a broken-parapet mastered shortcut, shaft recovery line, and named Gaol Captain elite.
 - Deepened the Oubliette with testimony-cell exploration and the named Nameless Jailer encounter while preserving all required prisoner records.
 - Muted WebGL QA validated zero unsupported placements, optional/required objective independence, and 1920x1080, 1600x900, and 1366x768 renders with zero console errors.
+
+
+## [Codex | 2026-07-20] HUD player identity and action cooldown wheels - finalized in v1.250.0
+- The top-left HUD now displays the chosen character name in larger white type, followed by a dot and the equipped class; unnamed characters safely fall back to `Player`.
+- Basic Attack and Dodge now reuse the Skills 1-4 radial cooldown wheel and decimal countdown treatment, while preserving each action's existing gameplay cooldown.
+- Browser QA passed muted at 1920x1080, 1600x900, and 1366x768: identity stayed inside the HUD, Attack and Dodge fractions visibly counted down, and the console reported zero errors.

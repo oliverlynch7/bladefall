@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.248.0';
+const VERSION3D='1.249.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7183,6 +7183,8 @@ function openHub(){
 const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:900,ad:760};
 function enterWaystation(){
   initAudio(); queueLevelUp=0; queueSubclass=false;
+  if(G){ G.sprintFun=false; G.sprintReturnHub=false; G.bonusActive=false; }   // never carry a sprint state into the hub
+  { const _bt=document.getElementById('bonustimer'); if(_bt) _bt.style.display='none'; }   // kill any frozen Treasure Sprint timer on the way in
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
   G.stageIndex=0;

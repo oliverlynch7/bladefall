@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.281.0';
+const VERSION3D='1.282.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2570,6 +2570,27 @@ const PERKIDS=Object.keys(PERKS);
 function perkLevel(id){ return (meta.perks&&meta.perks[id])||0; }
 function perkValue(id,lv){ const P=PERKS[id]; lv=Math.max(0,Math.min(P.max,lv==null?perkLevel(id):lv)); return P.per*lv+(lv>=P.max?P.cap:0); }
 function perkCost(id){ return Math.round(PERKS[id].base*Math.pow(1.6,Math.min(PERKS[id].max-1,perkLevel(id)))); }
+// total gold sunk into one perk = the sum of every rank's cost you paid to reach its current level (exact inverse of perkCost)
+function perkSpent(id){ const P=PERKS[id], lv=perkLevel(id); let s=0; for(let r=0;r<lv;r++) s+=Math.round(P.base*Math.pow(1.6,Math.min(P.max-1,r))); return s; }
+function perkRefundTotal(){ let s=0; for(const id of PERKIDS) s+=perkSpent(id); return s; }
+// Refund EVERY perk: give back exactly what was spent, zero all perk levels, and rebuild the hero's stats
+// without any perk bonuses (perks are baked into the snapshot's stats, so we reconstruct base + level growth).
+function refundAllPerks(){
+  const total=perkRefundTotal(); if(total<=0) return 0;
+  meta.perks={};
+  if(meta.hero){ const snap=meta.hero, lvl=snap.level||1;
+    const p=freshPlayer();                                   // base stats with NO perks (meta.perks just cleared)
+    for(let l=1;l<lvl;l++) autoLevelGrow(p);                 // replay per-level growth so the reset keeps your level power
+    p.level=lvl; p.xp=Math.max(0,snap.xp||0); p.xpNext=CHARACTER_XP(lvl);
+    p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):p.weapon;
+    p.gear=cloneGear(snap.gear); p.maxMana=snap.maxMana||100; p.mana=p.maxMana;
+    recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
+  }
+  meta.gold+=total;
+  if(G&&G.p&&meta.hero){ const np=freshFromSnapshot(meta.hero); G.p.stats=Object.assign({},np.stats); G.p.maxHp=np.maxHp; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); hudUpdate&&hudUpdate(); }
+  persist();
+  return total;
+}
 function applyPerkRank(p,id,newLv){
   const P=PERKS[id], add=P.per+(newLv===P.max?P.cap:0);
   if(id==='vigor') p.maxHp+=add;
@@ -8299,6 +8320,7 @@ function openShop(back){
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
+    ${perkRefundTotal()>0?`<button class="bigbtn ghost" id="refundPerks" style="margin:6px 0 0;padding:9px 14px;font-size:13px;color:#ffd24a;border-color:#5a4a20">↩ Refund all perks — get back <b>${perkRefundTotal()}g</b> &amp; reset every stat</button>`:''}
     <p class="hint" style="margin:10px 0 6px;text-align:left">🏰 <b>The Waystation</b> — restore your fortress (cosmetic, costly)</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${hubRows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
@@ -8306,6 +8328,9 @@ function openShop(back){
     if(perkLevel(id)>=PERKS[id].max) return;
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; if(!meta.perks) meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); SFX.levelup(); persist(); openShop(back); });
+  { const rb=document.getElementById('refundPerks'); if(rb) rb.onclick=()=>{
+      if(rb.dataset.armed!=='1'){ rb.dataset.armed='1'; rb.innerHTML='↩ Tap again to confirm — refund <b>'+perkRefundTotal()+'g</b> &amp; reset all perks'; rb.style.borderColor='#c0392b'; rb.style.color='#ff9a82'; return; }
+      const back2=perkRefundTotal(); const got=refundAllPerks(); SFX.pickup(); toast('Refunded '+got+'g — all perks reset.'); openShop(back); }; }
   document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', isIan=rid==='iansblade', cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid));
     const gateR=isIan?'legendary':(isVS?'epic':rid); if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }

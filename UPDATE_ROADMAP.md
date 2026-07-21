@@ -1337,3 +1337,14 @@ Reorganized the Waystation per Oliver's feedback so nothing feels cramped.
 - VERIFIED in-browser: hub builds with 0 console errors, screenshot shows a roomier plaza, and a geometry
   probe confirms bounds scaled, 8 main gates span -812..812, arena prop='arenagate', annex plazas spread,
   and everything sits inside bounds. Debug: __BF3.hubInfo().
+
+
+## [Claude | 2026-07-21] CRITICAL floor fixes (hub + arena) — shipped v1.296.0
+- **Hub floor was broken by the v1.295 space pass:** the walkable floor uses G.segments, but the space pass
+  scaled everything EXCEPT segments — so the scaled-out gates (±812) and annex (z:858+) sat off the plaza
+  floor and you'd fall walking to them. Fix: the space pass now scales G.segments (position + extent) too.
+- **Arena maps had NO floor** (G.segments was empty) → nothing to stand on → fall & die (the "Proving Ground
+  is just lava", "Gauntlet spawns you on lava" reports). Fix: enterArena now pushes a solid 1560×1560 floor;
+  lava map = that floor IS the lava surface (islands are plats above it); spawn drops onto safe ground/island.
+- VERIFIED: floor probe returns solid ground (0) at hub spawn + both end gates + the arena gate, and at
+  center/off-center on all three arena maps; 0 console errors.

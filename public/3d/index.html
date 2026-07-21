@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.295.0';
+const VERSION3D='1.296.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6608,8 +6608,10 @@ function enterArena(){ const cfg=ARENA_LOADOUT;
   G.segments=[];G.walls=[];G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.rooms=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.enemies=[];G.pickups=[];G.projectiles=[];G.gates=[];G.hubNpcs=[];G.arenaLava=null;
   G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:740};
   try{ map.build(); }catch(e){}
-  const sy=(cfg.map==='lava')?70:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
-  p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=true;p.vx=0;p.vy=0;p.vz=0;
+  G.segments.push({x:0,z:0,w:1560,d:1560});   // SOLID arena floor at y=0 — without this there's nothing to stand on. For the lava map this floor IS the lava surface (islands are plats above it); for flat/parkour it's plain ground.
+  // Spawn on SAFE ground: lava map -> drop onto the central island; flat/parkour -> the ground plane.
+  const sy=(cfg.map==='lava')?80:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
+  p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=(sy===0);p.vx=0;p.vy=0;p.vz=0;
   G.arenaPk=[]; G._pkT=4; G.arenaScore={p:0,b:0}; G.arenaTarget=(MP.active)?5:(cfg.bots>0?10:0);
   if(cfg.bots>0 && !MP.active){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI bots are a solo feature (MP arena = player duel)
   updateArenaHud();
@@ -8119,6 +8121,7 @@ function enterWaystation(){
   // walls (h===300) stretch to enclose the bigger bowl; collision footprints (h 108/112) keep their size. =====
   { const SX=1.45, SZ=1.30, R=Math.round;
     const pos=o=>{ if(o.x!=null)o.x=R(o.x*SX); if(o.z!=null)o.z=R(o.z*SZ); };
+    G.segments.forEach(o=>{ pos(o); o.w=R(o.w*SX); o.d=R(o.d*SZ); });   // CRITICAL: the walkable FLOOR must scale with everything, or the outer gates/annex sit off the floor
     G.hubNpcs.forEach(pos); G.gates.forEach(pos); G.torches.forEach(pos);
     G.obstacles.forEach(o=>{ pos(o); if(o.w>60)o.w=R(o.w*SX); if(o.d>60)o.d=R(o.d*SZ); });
     G.deco.forEach(o=>{ pos(o); if(o.w>60)o.w=R(o.w*SX); if(o.d>60)o.d=R(o.d*SZ); });
@@ -11410,6 +11413,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,
+  floorAt:(x,z)=>G?floorAt(x,z,13,0):null,   // debug: walkable floor height at x/z (-Infinity = void/no ground)
   botKillFirst:()=>{ if(!G) return 'no G'; const b=G.enemies.find(e=>e.bot&&!e.dead); if(!b) return 'no bot'; b.hp=0; killEnemy(b,true); return G.arenaScore; },
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },

@@ -1348,3 +1348,22 @@ Reorganized the Waystation per Oliver's feedback so nothing feels cramped.
   lava map = that floor IS the lava surface (islands are plats above it); spawn drops onto safe ground/island.
 - VERIFIED: floor probe returns solid ground (0) at hub spawn + both end gates + the arena gate, and at
   center/off-center on all three arena maps; 0 console errors.
+
+
+## [Claude | 2026-07-21] Arena = separate room + NPC/door + bulletproof save-protection + bot fixes — shipped v1.297.0
+- **The Arena is now a proper SEPARATE ROOM** (modeled on the Sparring Room). The hub portal teleports you
+  straight in (no menu gate). Inside: an **⚔️ Arena Master NPC** (press E → loadout/map/bots menu) and a
+  **🚪 exit door** (press E → back to the Waystation). A hazard-free ENTRANCE PLATFORM (south) is where you
+  spawn and both NPCs live; bots spawn at the combat centre away from you. Interaction now works in G.arena
+  (updateInteract extended); a small drawArenaProps renders the master podium + door.
+- **Save-protection LEAK fixed:** enterArena refactored into enter (snapshot + freeze persist, never
+  double-enters) + buildArenaRoom (rebuild for a new map/loadout). "Apply Loadout" now rebuilds the room so
+  a new MAP takes effect. SAFETY NET: enterWaystation force-restores the campaign snapshot if we ever reach
+  the hub while still flagged in-arena — so an arena loadout can NEVER leak into the campaign. Verified:
+  campaign localStorage byte-identical through enter→exit.
+- **Bot AI fixed:** (1) no longer flees off the map — when low or on lava it heads to a reachable safe island/
+  centre and is clamped 70u inside bounds; (2) takes LAVA damage like the player and respawns on land
+  (botRespawn, no player KO); (3) hops toward islands to escape lava; (4) at low HP it TURTLES — 45% damage
+  reduction + slow self-heal (stands in for defensive/healing skills) instead of kiting forever.
+- VERIFIED: enter lava arena w/ 2 hard bots, 3s sim — bots stay in the combat area, 0 console errors, save
+  protected, clean exit.

@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.296.0';
+const VERSION3D='1.297.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5949,6 +5949,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?18:8);
     for(let i=0;i<(execute?10:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
   }
+  if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
@@ -6595,30 +6596,44 @@ function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.clas
   try{ p.weapon=makeWeapon(L.wArch,L.wRid); }catch(e){}
   for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(L.aRid,slot); }catch(e){} }
   p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
-function enterArena(){ const cfg=ARENA_LOADOUT;
-  // ---- SAVE PROTECTION: snapshot everything we might mutate; persist() is frozen while IN_ARENA ----
+// ENTER the Arena — a fully SEPARATE, save-protected room (like the Sparring Room). Snapshot the campaign,
+// freeze persist(), then build the room. NEVER double-enters (that would drop the real backup).
+function enterArena(){ if(IN_ARENA){ buildArenaRoom(); return; }
   ARENA_BACKUP={ classId:meta.classId, hero:meta.hero, classes:JSON.parse(JSON.stringify(meta.classes||{})),
     perks:JSON.parse(JSON.stringify(meta.perks||{})), gold:meta.gold, stash:meta.stash, run:meta.run, bank:meta.bank,
     classUnlocked:JSON.parse(JSON.stringify(meta.classUnlocked||{})) };
   IN_ARENA=true; meta.perks={}; meta.gold=9999999;                 // clean stat base + free respec inside the arena
   meta.classUnlocked=meta.classUnlocked||{}; for(const cid of Object.keys(CLASSES)) meta.classUnlocked[cid]=true;   // sandbox: every class available
+  buildArenaRoom();
+  toast('⚔ THE ARENA — talk to the ⚔️ Arena Master to set your loadout & map. The 🚪 door takes you home. Nothing here touches your campaign.');
+}
+// (re)build the arena room for the current ARENA_LOADOUT — used on entry AND when you change loadout/map.
+function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   const map=ARENA_MAPS[cfg.map]||ARENA_MAPS.flat; ARENA_STAGE={name:map.name,theme:'arena',sky:map.sky,ground:map.ground,aw:1600,ad:1600};
   const p=buildArenaPlayer(cfg);
   G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;
   G.segments=[];G.walls=[];G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.rooms=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.enemies=[];G.pickups=[];G.projectiles=[];G.gates=[];G.hubNpcs=[];G.arenaLava=null;
-  G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:740};
+  G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:820};
   try{ map.build(); }catch(e){}
-  G.segments.push({x:0,z:0,w:1560,d:1560});   // SOLID arena floor at y=0 — without this there's nothing to stand on. For the lava map this floor IS the lava surface (islands are plats above it); for flat/parkour it's plain ground.
-  // Spawn on SAFE ground: lava map -> drop onto the central island; flat/parkour -> the ground plane.
-  const sy=(cfg.map==='lava')?80:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
-  p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=(sy===0);p.vx=0;p.vy=0;p.vz=0;
+  G.segments.push({x:0,z:0,w:1560,d:1560});   // SOLID arena floor at y=0 (for lava this floor IS the lava surface; islands are plats above it).
+  // SAFE ENTRANCE STAGING PLATFORM (south) — always hazard-free — where you spawn and the Arena Master + exit door live.
+  const eh=(cfg.map==='lava')?34:0; G.obstacles.push({kind:'plat',x:0,z:340,w:560,d:230,h:eh});
+  G.deco.push({x:0,z:340,y0:eh,w:560,h:2.4,d:230,c:'#241a22'}); if(eh) G.deco.push({x:0,z:340,y0:0,w:560,h:eh,d:230,c:'#140e14'});
+  for(const s of [-1,1]) G.torches.push({x:s*230,z:300,ph:Math.random()*6.28});
+  const sy=eh; G.arenaSpawn={x:0,z:340,y:sy}; G.startPos={x:0,z:340}; G.lastSafe={x:0,z:340,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
+  G.arenaCombat={x:0,z:-80,y:(cfg.map==='lava'?26:0)};   // where bots spawn — the combat heart, away from the entrance
+  p.x=0;p.z=340;p.y=sy;p.yaw=Math.PI;p.onGround=true;p.vx=0;p.vy=0;p.vz=0;
+  // The Arena Master (opens loadout/maps) + the exit door — interactable like the Sparring Room's controls & door.
+  G.hubNpcs=[
+    {id:'arenamaster',ic:'⚔️',name:'Arena Master',role:'Loadout, maps & bots',prop:'arenamaster',verb:'Set loadout & map',direct:true,x:-150,z:400,c1:'#3a1618',c2:'#e8453d',open:()=>openArenaSetup(resumePlay)},
+    {id:'arenaexit',ic:'🚪',name:'Leave the Arena',role:'Return to the Waystation',prop:'sparringdoor',verb:'Leave the Arena',direct:true,x:150,z:400,open:()=>exitArena()}
+  ];
   G.arenaPk=[]; G._pkT=4; G.arenaScore={p:0,b:0}; G.arenaTarget=(MP.active)?5:(cfg.bots>0?10:0);
   if(cfg.bots>0 && !MP.active){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI bots are a solo feature (MP arena = player duel)
   updateArenaHud();
   mode='play'; showOverlay(false); showGameUI(true); try{musicForScene();}catch(e){} skillbarUpdate(); hudUpdate();
   { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
   if(MP.active){ MP.pvp=true; MP.zone=MP.ARENA; if(MP.isHost) MP.broadcastArena(cfg); }   // co-op: shared PvP arena — sync the map to guests
-  toast('⚔ '+map.name+' — Pause (Esc) to reconfigure or leave. Nothing here affects your save.');
 }
 function exitArena(){ IN_ARENA=false;
   if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; }
@@ -6647,6 +6662,18 @@ function applyArenaPickup(kind,p){
   else if(kind==='dmg'){ p.stats.power*=1.5; try{ addText(p.x,p.y+60,p.z,'⚔ DAMAGE UP','#ff9a3a',true); burst(p.x,p.y+30,p.z,'#ff9a3a',12); SFX.levelup&&SFX.levelup(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.power/=1.5; },9000); }
   else if(kind==='speed'){ p.stats.speed*=1.5; try{ addText(p.x,p.y+60,p.z,'💨 SPEED UP','#7fd6ff',true); burst(p.x,p.y+30,p.z,'#7fd6ff',12); SFX.dodge&&SFX.dodge(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.speed/=1.5; },9000); }
 }
+function drawArenaProps(t){ if(!G||!G.arena||!G.hubNpcs) return;
+  for(const n of G.hubNpcs){ const yb=(()=>{ try{ return highestSurfaceAt(n.x,n.z); }catch(e){ return 0; } })();
+    if(n.prop==='arenamaster'){ drawShadow(n.x,n.z,20,0.3);
+      bx(n.x,yb+10,n.z, 46,20,46,'#2a1216'); bx(n.x,yb+22,n.z, 52,6,52,'#3a1a1e','#c0392b',0.4);      // crimson podium
+      bx(n.x,yb+62,n.z-18, 6,92,6,'#2a2028'); bx(n.x,yb+98,n.z-15, 62,34,4,'#5e2320','#7a2a24',0.9);   // banner
+      bx(n.x,yb+98,n.z-12, 40,5,2,'#dfe5ec'); bx(n.x,yb+98,n.z-12, 5,40,2,'#dfe5ec');                  // crossed-swords crest
+      bx(n.x+16,yb+34,n.z, 15,26,11,'#3a1618','#c0392b',0.4); bx(n.x+16,yb+52,n.z, 11,11,11,'#d9b08c'); // attendant
+      bx(n.x,yb+74,n.z, 5,5,5,'#ff5e54','#ff5e54',0.65); continue; }
+    if(n.prop==='sparringdoor'){ drawShadow(n.x,n.z,22,0.28);                                          // stone door back to the Waystation
+      for(const s of [-1,1]) bx(n.x+s*24,yb+44,n.z, 12,88,14,'#4a4f5e'); bx(n.x,yb+90,n.z, 62,12,16,'#565c6e');
+      bx(n.x,yb+44,n.z, 42,76,5,'#12140f','#7ce07a',0.42+0.2*Math.sin(t*2.4)); continue; } }
+}
 function drawArenaPickups(t){ if(!G||!G.arena||!G.arenaPk) return; for(const pk of G.arenaPk){ const c=pk.kind==='heal'?'#7de08a':pk.kind==='dmg'?'#ff9a3a':'#7fd6ff'; const yy=(pk.y||0)+26+Math.sin(pk.bob)*4;
   bx(pk.x,yy,pk.z, 13,13,13, c, c, 0.92); bx(pk.x,yy,pk.z, 22,3,22, c, c, 0.28); bx(pk.x,yy+11,pk.z, 4,4,4, '#fff','#fff',0.8); } }
 // ---- Arena live scoreboard (solo KOs/deaths or PvP frags) + round target ----
@@ -6670,7 +6697,7 @@ const BOT_DIFF={
 };
 const BOT_DIFFS=['easy','normal','hard','brutal'];
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
-  const a=Math.random()*6.283, rad=220+Math.random()*160, sp=G.arenaSpawn||{x:0,z:0,y:0};
+  const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const b={ bot:true, botDiff:diffKey, type:'bot', kind:'bot', element:null,
     x:sp.x+Math.cos(a)*rad, z:sp.z+Math.sin(a)*rad, y:(sp.y||0), yaw:0, r:14, h:44,
     hp:D.hp, maxHp:D.hp, dmg:D.dmg, speed:D.speed, color:D.color, xp:0,
@@ -6682,28 +6709,43 @@ function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_D
 }
 function refreshArenaBots(cfg){ if(!G) return; G.enemies=G.enemies.filter(e=>!e.bot);
   const n=Math.max(0,Math.min(4,cfg.bots|0)); for(let i=0;i<n;i++) spawnBot(cfg.botDiff||'normal'); }
+function nearestArenaGround(x,z){ if(!G) return {x:0,z:0};   // nearest safe standing spot (an island plat, else the combat centre)
+  let best=null,bd=1e9; for(const ob of (G.obstacles||[])){ if(ob.kind!=='plat') continue; const d=Math.hypot(ob.x-x,ob.z-z); if(d<bd){ bd=d; best=ob; } }
+  return best?{x:best.x,z:best.z}:(G.arenaCombat||{x:0,z:0}); }
+function botRespawn(e){ if(!G) return; e.hp=e.maxHp; e._lavaT=0; e._def=false; const c=G.arenaCombat||{x:0,z:0,y:0};
+  const a=Math.random()*6.28, r=50+Math.random()*70; e.x=c.x+Math.cos(a)*r; e.z=c.z+Math.sin(a)*r; e.y=(c.y||0)+22; e.vy=0;
+  try{ burst(e.x,e.y+10,e.z,e.color,10); }catch(_){} }   // lava/void death just resets the bot — no player KO credit
 function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
   if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
   const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
   e.yaw=Math.atan2(nx,nz);
   const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
-  // gravity so bots sit on islands / the ground
+  // gravity + footing on islands / ground
   e.vy-=1900*dt; e.y+=e.vy*dt; if(e.y<0){ e.y=0; e.vy=0; }
-  try{ const gy=(typeof highestSurfaceAt==='function')?highestSurfaceAt(e.x,e.z):0; if(e.y<=gy+1){ e.y=gy; e.vy=0; e.onGround=true; } }catch(_){}
-  // reactive dodge when the player is swinging close (chance + cooldown scale with difficulty)
+  let gy=0; try{ gy=highestSurfaceAt(e.x,e.z); }catch(_){}
+  if(e.y<=gy+1){ e.y=gy; e.vy=0; e.onGround=true; } else if(e.vy<0 && e.y>gy+1) e.onGround=false;
+  // LAVA: bots burn like the player, and try to get back onto an island (respawn if they die to it)
+  let onLava=false;
+  if(G.arenaLava && gy<15){ for(const L of G.arenaLava){ if(Math.abs(e.x-L.x)<L.w/2 && Math.abs(e.z-L.z)<L.d/2){ onLava=true; break; } } }
+  if(onLava){ e._lavaT=(e._lavaT||0)+dt; if(e._lavaT>=0.4){ e._lavaT=0; e.hp-=Math.max(4,Math.round(e.maxHp*0.05)); e.hitFlash=0.3; try{burst(e.x,4,e.z,'#ff7a3a',5);}catch(_){} if(e.hp<=0){ botRespawn(e); return; } } } else e._lavaT=0;
+  // LOW HP: turtle — prioritise defence + self-heal (stands in for a defensive/healing skill) and fall back to safe ground
+  const low=e.hp<e.maxHp*0.30 && D.flee; e._def=low;
+  if(low){ e.hp=Math.min(e.maxHp, e.hp+e.maxHp*0.03*dt); }
+  // reactive dodge when the player is swinging close
   if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
     e.vx=(-nz*e.strafe)*560; e.vz=(nx*e.strafe)*560; try{ burst(e.x,10,e.z,'#7fd6ff',6); }catch(_){} }
-  let mvx=0, mvz=0;
+  // MOVE TARGET: to safety when on lava or low (a reachable island/centre, never off the map); else chase the player
+  let mvx=0, mvz=0, seekSafe=(onLava||low);
   if(e.dodgeTimer>0){ e.x+=e.vx*dt; e.z+=e.vz*dt; }
   else {
-    const low=e.hp<e.maxHp*0.26 && D.flee;
-    if(low){ mvx=-nx; mvz=-nz; }                          // flee when low
-    else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }   // approach / spacing
-      if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }      // orbit-strafe
-    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul;
+    if(seekSafe){ const g=nearestArenaGround(e.x,e.z); const tdx=g.x-e.x, tdz=g.z-e.z, td=Math.max(1,Math.hypot(tdx,tdz)); mvx=tdx/td; mvz=tdz/td;
+      if(onLava && e.onGround){ e.vy=560; e.onGround=false; } }   // hop toward the island
+    else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
+      if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }
+    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1);
     e.x+=(mvx/ml)*spd*dt; e.z+=(mvz/ml)*spd*dt; e.runAnim=(e.runAnim||0)+dt*11;
   }
-  if(G.bounds){ e.x=Math.max(G.bounds.minX+12,Math.min(G.bounds.maxX-12,e.x)); e.z=Math.max(G.bounds.minZ+12,Math.min(G.bounds.maxZ-12,e.z)); }
+  if(G.bounds){ const m=70; e.x=Math.max(G.bounds.minX+m,Math.min(G.bounds.maxX-m,e.x)); e.z=Math.max(G.bounds.minZ+m,Math.min(G.bounds.maxZ-m,e.z)); }   // never wander to the far edges
   // attack: telegraph (reaction delay) then land the hit if still in range and the player isn't i-framed
   if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
   if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
@@ -6774,7 +6816,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
-    if(inA){ const np=buildArenaPlayer(cfg); const o=G.p; np.x=o.x;np.z=o.z;np.y=o.y;np.yaw=o.yaw;np.onGround=o.onGround; G.p=np; refreshArenaBots(cfg); skillbarUpdate(); hudUpdate(); mode='play'; showOverlay(false); showGameUI(true); toast('Loadout applied.'); }
+    if(inA){ buildArenaRoom(); toast('Loadout applied — fresh arena.'); }   // rebuild the room so a new MAP + loadout + bots all take effect (still fully save-protected)
     else enterArena(); };
   g('arBack').onclick=back||titleScreen;
 }
@@ -7993,6 +8035,9 @@ function openHub(){
    Outskirts it borrowed. Soft plum-warm sky, honeyed lantern haze, warm cobblestone. */
 const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:900,ad:760};
 function enterWaystation(){
+  // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
+  // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
+  if(IN_ARENA){ IN_ARENA=false; if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; } if(MP.active){ MP.pvp=false; MP.arenaMsg=null; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} }
   initAudio(); queueLevelUp=0; queueSubclass=false;
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
@@ -8094,7 +8139,7 @@ function enterWaystation(){
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-548,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:300,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
-    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>openArenaSetup(wsResume)}
+    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()}
   ];
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
@@ -8415,7 +8460,7 @@ function openTrainingArena(back){ mode='menu';
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
   let it=null; const p=G.p;
-  if(G.hub && G.hubNpcs){
+  if((G.hub||G.arena) && G.hubNpcs){   // interactables (keepers / arena master + door) work in the hub AND the arena room
     // Pick by what you're LOOKING AT, not just what's nearest: a big facing bonus lets the object you face
     // win even if another is closer. If nothing is in front, this falls back to the nearest thing in range.
     const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
@@ -11117,7 +11162,7 @@ function render(t){
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
-  if(G.arena) drawArenaPickups(t);                             // arena powerup orbs
+  if(G.arena){ drawArenaProps(t); drawArenaPickups(t); }        // arena master + door, then powerup orbs
   if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
   updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.

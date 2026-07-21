@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.306.0';
+const VERSION3D='1.307.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3391,10 +3391,18 @@ function finishScape(ctx,o){
 // and the double-jump is NEVER required. Called from finishScape so EVERY main level + area variant that ends on a
 // breather gets one automatically. Skips trials/sides (no breather tag) and zones whose exit already sits far out.
 function dashGate(o){
-  if(o.dashGate===false || G.trial) return;
-  let bp=null; for(const ob of G.obstacles) if(ob.breather && (!bp||ob.z<bp.z)) bp=ob;   // northmost breather = the last one
-  if(!bp) return;
-  const y=bp.h||0, hEdge=bp.z-bp.d/2, landZ=hEdge-290, landX=(o.gx||0);                   // 195 gap + 95 half-depth
+  if(o.dashGate===false || G.trial || G.side) return;   // main levels only; trials/side chambers keep their bespoke layouts
+  // find the final rest platform the exit sits on: prefer a tagged breather, else the largest-footprint standable
+  // surface whose footprint contains the exit point. Works for every main level + area/side variant.
+  const gx=(o.gx||0), gz=(o.gz||0);
+  const cont=(s)=>{ const hw=(s.w||0)/2, hd=(s.d||0)/2; return gx>=s.x-hw-30 && gx<=s.x+hw+30 && gz>=s.z-hd-30 && gz<=s.z+hd+30; };
+  const cands=[];
+  for(const ob of G.obstacles) if((ob.kind==='plat'||ob.h!=null) && cont(ob)) cands.push({z:ob.z,d:ob.d,h:ob.h||0,br:ob.breather?1:0,area:(ob.w||0)*(ob.d||0)});
+  for(const sg of G.segments) if(cont(sg)) cands.push({z:sg.z,d:sg.d,h:0,br:0,area:(sg.w||0)*(sg.d||0)});
+  if(!cands.length) return;                                                               // exit floats free -> nothing to gate off
+  cands.sort((a,b)=> (b.br-a.br) || (b.area-a.area));                                      // breather first, then biggest pad
+  const bp=cands[0];
+  const y=bp.h||0, hEdge=bp.z-bp.d/2, landZ=hEdge-290, landX=gx;                           // 195 gap + 95 half-depth
   if(o.gz <= landZ+40) return;                                                            // exit already past the gap -> leave it
   G.obstacles.push({kind:'plat',x:landX,z:landZ,h:Math.round(y),w:340,d:190,checkpoint:true});   // landing island (new checkpoint)
   G.deco.push({x:landX,z:landZ,y0:y-0.2,w:352,h:1,d:206,c:tint(o.decoCol||'#4a4a55','#fff',0.14)});
@@ -3980,7 +3988,7 @@ const EXPANDED_SCAPES={
         G.deco.push({x:signX,z:signZ,y0:54,w:72,h:40,d:6,c:'#7a5a30'});       // board frame
         G.deco.push({x:signX,z:signZ-4,y0:54,w:62,h:32,d:2,c:'#d8c48a'});     // board face
         G.deco.push({x:signX,z:signZ-6,y0:60,w:46,h:6,d:2,c:'#3a9dd0'});      // a painted dash-arrow hint
-        finishScape(ctx,{sx:0,sz:470,sy:0,gx:landX,gz:landZ,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240}); }
+        finishScape(ctx,{sx:0,sz:470,sy:0,gx:landX,gz:landZ,dashGate:false,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240}); }
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
       road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);

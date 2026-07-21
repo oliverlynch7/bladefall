@@ -1454,3 +1454,9 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Verified live (all 8 zones, area 0): Outskirts keeps its hand-built henge chasm; Hollow/Keep/Frost/Ember/Abyss/Palace/Castle each got a clean 195-void gate with 0 platforms bridging it. Added a final breather pad to the Hollow canyon area-1 variant so it gates too.
 - Sneakier secret: the Palace trial-rift (720,-1700,100) sat openly on the big terrace. Moved it to a hidden perch (1260,-1700) out over the void east of the terrace — 190u gap, dash-only, flanked by two marble spires that partly screen it. (Keep's rift already needs a 211u dash-up; Abyss is a pillar-top; Outskirts is the Foxglove stepping-stone perch — all left as-is.)
 - No double-jump required anywhere; 0 console errors.
+
+## v1.307.0 — dash gate on EVERY area variant (both areas of all 8 zones)
+- Generalized `dashGate`: when a zone has no `{breather:true}` tag it now finds the final rest platform by locating the largest-footprint standable surface whose footprint contains the exit point, and gates off that. Result: all 16 main-level area variants (area 0 + area 1 of every zone) now carry a required ~195u jump+dash gap.
+- Verified live (all 16): exactly 1 gate each, gap 195, 0 bridging platforms, launch height == landing height (pure horizontal — double-jump never required).
+- Exempted the Outskirts area-0 (`dashGate:false`) so it keeps only its hand-built tutorial chasm + signpost instead of double-gating.
+- `dashGate` now also skips `G.side` (trial/secret chambers keep their bespoke parkour), in addition to `G.trial`.

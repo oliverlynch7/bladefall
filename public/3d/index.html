@@ -869,7 +869,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.276.0';
+const VERSION3D='1.277.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1331,6 +1331,7 @@ function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key]
   try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(d._norm||1)*(volMul==null?1:volMul);
     s.connect(g); g.connect(fxBus||master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
 function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
+function stopAllLoops(){ for(const k in _fxLoop) if(_fxLoop[k]) stopFx(k); }   // kill every looping sfx (footsteps/heartbeat/etc) — used when a menu opens
 const SFX={
   // blade cutting air: airy whoosh sweeping down, faint steel sing
   slash(){ noise({dur:0.16,f0:2600,f1:320,q:1.4,vol:0.15,a:0.012});
@@ -7155,6 +7156,7 @@ function enhanceMenuShell(){
     if(/^(back|leave|cancel|not now|keep old|return|close|remove|title screen)/.test(t)||/back$/i.test(b.id||'')) b.classList.add('utility','ghost'); });
 }
 function showOverlayHTML(html){
+  if(typeof stopAllLoops==='function') stopAllLoops();   // opening any menu silences looping sfx (footsteps/heartbeat) that would otherwise hang while paused
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
   const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;

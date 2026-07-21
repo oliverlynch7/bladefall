@@ -1078,3 +1078,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - The Warhammer's charged quake now scales its visible and damaging AoE linearly with charge duration instead of giving short charges most of the full radius.
 - Quick, half, and full charges use 84, 166, and 248-unit radii respectively; the prior 248-unit full-charge maximum is unchanged.
 - Muted browser QA verified matching ring and hit boundaries at all three charge levels with zero console errors.
+
+
+## [Codex | 2026-07-20] Q loot-mode cycle - shipped v1.259.0
+- Added a gameplay-only Q shortcut that cycles Off -> Auto Sell -> Auto Bag -> Off while preserving the existing mutually exclusive saved settings and drop behavior.
+- Added compact Q key badges beside both loot-mode HUD controls and retained clear active-state highlighting.
+- Muted browser QA verified all three keyboard transitions, pause-menu isolation, persistence after reload, clean desktop layout, and zero console errors.

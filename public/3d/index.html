@@ -111,6 +111,9 @@
   #fadeveil.on{opacity:1;}
   #interactprompt .k{display:inline-block;background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900;}
   .tog{width:58px;height:30px;border-radius:9px;font-size:9.5px;letter-spacing:.04em;right:calc(env(safe-area-inset-right) + 10px);background:rgba(28,30,38,.5);}
+  .tog .togkey{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-right:3px;border-radius:4px;
+    border:1px solid rgba(255,210,74,.45);background:rgba(8,9,13,.82);color:#f5d887;font:900 9px/1 Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);}
+  .tog.on .togkey{background:#e8a33d;color:#171006;border-color:#ffd878;}
   #bAuto{top:38%;}
   /* persistent quest tracker — top-RIGHT under the pause button so it never overlaps the left HUD panel */
   #questbox{position:absolute;right:calc(env(safe-area-inset-right) + 12px);top:calc(env(safe-area-inset-top) + 52px);z-index:4;pointer-events:none;text-align:right;
@@ -179,6 +182,7 @@
     max-width:min(78vw,520px);text-align:center;color:#eae4d6;font-size:clamp(14px,2.4vw,19px);line-height:1.55;
     font-style:italic;letter-spacing:.01em;text-shadow:0 2px 14px #000;opacity:0;transition:opacity .8s ease;}
   #storycard.show{opacity:1;}
+  #bKeep,#bBag{width:78px;}
   #bKeep{top:calc(38% + 38px);}
   #bBag{top:calc(38% + 76px);}
   /* Weapon Studio control dock */
@@ -815,8 +819,8 @@
   <button class="btn" id="bJump"><svg viewBox="0 0 24 24"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></button>
   <button class="btn" id="bAttack">SLASH</button>
   <button class="btn tog" id="bAuto">AUTO (L)</button>
-  <button class="btn tog" id="bKeep"><span class="ico ico-action ico-action-auto-sell-bag"></span>SELL</button>
-  <button class="btn tog" id="bBag"><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
+  <button class="btn tog" id="bKeep" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>SELL</button>
+  <button class="btn tog" id="bBag" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
   <button class="btn hide" id="bInteract">TALK</button>
@@ -844,7 +848,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.258.0';
+const VERSION3D='1.259.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4682,6 +4686,12 @@ function updateToggles(){ const a=document.getElementById('bAuto'),k=document.ge
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
 function toggleKeep(){ meta.autoKeep=!meta.autoKeep; if(meta.autoKeep) meta.autoBag=false; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }   // auto-sell + auto-bag are mutually exclusive
 function toggleBag(){ meta.autoBag=!meta.autoBag; if(meta.autoBag) meta.autoKeep=false; persist(); updateToggles(); toast('Auto-bag '+(meta.autoBag?'ON':'OFF')); }
+function cycleLootMode(){
+  if(meta.autoKeep){ meta.autoKeep=false; meta.autoBag=true; }
+  else if(meta.autoBag){ meta.autoBag=false; meta.autoKeep=false; }
+  else { meta.autoKeep=true; meta.autoBag=false; }
+  persist(); updateToggles(); toast(meta.autoKeep?'Auto-sell ON':meta.autoBag?'Auto-bag ON':'Auto loot OFF');
+}
 [['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
 const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
@@ -4715,6 +4725,7 @@ window.addEventListener('keydown',e=>{
       return; }
   }
   if(mode==='play'&&!e.repeat&&/^Digit[1-4]$/.test(e.code)){ e.preventDefault(); useSkill(+e.code.slice(5)-1); return; }
+  if(mode==='play'&&!e.repeat&&e.code==='KeyQ'){ e.preventDefault(); initAudio(); cycleLootMode(); return; }
   if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(e.code==='KeyE'){ e.preventDefault(); initAudio(); doInteract(); return; }   // interact / talk
   const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();

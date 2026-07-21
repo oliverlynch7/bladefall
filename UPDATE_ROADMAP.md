@@ -1072,3 +1072,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Switching classes at the Drillmaster now banks the authoritative live Waystation hero before changing class, preventing the menu return path from restoring an older weapon or armor snapshot.
 - Equipped weapon, helmet, chestplate, leggings, amulet, ring, and active pet remain unchanged; only the active class and its skill bar change.
 - Muted browser QA switched a deliberately stale save snapshot through Ranger, Mage, Reaper, and Warrior, then returned to gameplay with the full live and saved loadouts identical, the HUD visible, and zero console errors.
+
+
+## [Codex | 2026-07-20] Warhammer charge-scaled shockwave - shipped v1.258.0
+- The Warhammer's charged quake now scales its visible and damaging AoE linearly with charge duration instead of giving short charges most of the full radius.
+- Quick, half, and full charges use 84, 166, and 248-unit radii respectively; the prior 248-unit full-charge maximum is unchanged.
+- Muted browser QA verified matching ring and hit boundaries at all three charge levels with zero console errors.

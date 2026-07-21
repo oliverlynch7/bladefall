@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.257.0';
+const VERSION3D='1.258.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5252,9 +5252,9 @@ function hurlAxe(p,w,amt){ const t=projectileAimTarget(p,700); if(t) p.yaw=Math.
   G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
     size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:2.15,hitSet:[],axe:true,ox,oz,range:120+amt*155,returning:false,spin:0,throwToken});
   SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
-function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+amt*1.8)*offclassMul(p)*classStyleMul(p);
-  skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
-  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+amt*0.6); } }
+function chargeQuake(p,w,amt){ const charge=Math.max(0,Math.min(1,amt||0)), R=84+charge*164, dmg=w.dmg*effPower(p)*(1.4+charge*1.8)*offclassMul(p)*classStyleMul(p);
+  skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+charge*6,16);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+charge*0.6); } }
   p.atkTimer=0.30; }
 // longbow charged POWER ARROW — a fat golden lance that pierces everything, scaling hard with charge
 function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,1200); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);

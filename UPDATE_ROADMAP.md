@@ -1226,3 +1226,20 @@ the foundation for PvP. Increment 1 of a multi-part build.
 - Debug hooks on __BF3: enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena.
 - NEXT increments: AI bots w/ difficulty settings (Oliver wants these improvable), MP arena sync so
   co-op/PvP share the arena, scoreboard+rounds, team modes (2v2), arena pickups/powerups.
+
+
+## [Claude | 2026-07-21] Arena AI bots (Increment 2) — shipped v1.290.0
+Player-like AI practice opponents for the Arena, with difficulty settings built to keep improving.
+- **BOT_DIFF table** = the tuning knobs (Easy/Normal/Hard/Brutal): hp, dmg, move speed, attack cadence,
+  reaction delay, dodge chance + cooldown, flee-when-low, weapon+rarity, colour. Easy to iterate.
+- **botAI:** chase to weapon range, orbit-strafe, keep spacing, reactively DODGE the player's swings
+  (chance/cooldown scale with difficulty), flee when low HP (except Brutal), telegraph→land melee hits
+  via hurtPlayer. Bots ride the existing enemy pipeline so every weapon/skill damages them normally.
+- **Rendering:** humanoid voxel fighter tinted by difficulty, sword arm swings on attack, HP bar.
+- **Respawn, not death:** a defeated bot bursts, scores a KO (G.arenaScore.p, toast), and respawns after
+  1.8s — endless sparring. Bots never truly die or drop loot/xp.
+- **Setup UI:** Practice Bots — Count (0-4) slider + Easy/Normal/Hard/Brutal picker. Applying a loadout
+  in-arena refreshes the bots. The PvP-duel enemy-clear now KEEPS bots.
+- VERIFIED in-browser: 2 Hard bots spawn, move and approach the player (AI runs), a kill scores +1 and
+  schedules respawn, exit is clean, 0 console errors. Debug hooks: __BF3.botInfo(), botKillFirst().
+- NEXT: MP arena sync (share map + fair-mode + bots in co-op/PvP), scoreboard+rounds UI, team modes, pickups.

@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.289.0';
+const VERSION3D='1.290.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5899,6 +5899,9 @@ function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGold
 function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e,weaponKill){
   if(e.dead) return;
+  if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
+    G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++; try{ toast('⚔ Bot defeated — '+G.arenaScore.p+' KO'+(G.arenaScore.p===1?'':'s')); }catch(_){}
+    const diff=e.botDiff; setTimeout(()=>{ if(G&&G.arena&&IN_ARENA) spawnBot(diff); }, 1800); return; }   // Arena bots respawn, never truly die
   // CO-OP: a guest never kills on its own — the host is authoritative and drives death via kill events
   // (MP._authKill is set only when the guest is applying a host-sanctioned kill).
   if(MP.active && !MP.isHost && !MP._authKill && !e.dummy && !e.practice) return;
@@ -6479,7 +6482,7 @@ function openMPLobby(){
    entry and restored on exit, and persist() is frozen while inside.
    ============================================================================ */
 var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
-const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary' };
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal' };
 const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
 const ARENA_MAPS={
   flat:{ name:'Proving Ground', desc:'A clean flat arena — pure skill, no cover.', sky:[0.10,0.11,0.15], ground:'#3b4254',
@@ -6518,6 +6521,7 @@ function enterArena(){ const cfg=ARENA_LOADOUT;
   try{ map.build(); }catch(e){}
   const sy=(cfg.map==='lava')?70:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
   p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=true;p.vx=0;p.vy=0;p.vz=0;
+  G.arenaScore={p:0,b:0}; if(cfg.bots>0){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI practice opponents
   mode='play'; showOverlay(false); showGameUI(true); try{musicForScene();}catch(e){} skillbarUpdate(); hudUpdate();
   { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
   if(MP.active){ MP.pvp=true; }
@@ -6533,6 +6537,69 @@ function arenaHazardTick(dt){ if(!G||!G.arena||!G.p) return; const p=G.p;
   if(G.arenaLava && p.y<15 && !(p.invuln>0)){ let inLava=false; for(const L of G.arenaLava){ if(Math.abs(p.x-L.x)<L.w/2 && Math.abs(p.z-L.z)<L.d/2){ inLava=true; break; } }
     if(inLava){ p._lavaT=(p._lavaT||0)+dt; if(p._lavaT>=0.3){ p._lavaT=0; p.hp-=Math.max(5,Math.round((effMaxHp(p))*0.07)); p.hurtFlash=0.3;
       try{ addText(p.x,p.y+42,p.z,'🔥','#ff7a3a'); burst(p.x,4,p.z,'#ff7a3a',6); SFX.hurt(); }catch(e){} if(p.hp<=0){ p.hp=0; arenaRespawn(); } } } else p._lavaT=0; }
+}
+/* ---- ARENA AI BOTS — player-like practice opponents. BOT_DIFF is the tuning table:
+   every knob here is meant to be iterated on to make bots genuinely challenging. ---- */
+const BOT_DIFF={
+  easy:  {label:'Easy',   color:'#7de08a', hp:90,  dmg:6,  speed:150, moveMul:0.85, atkCd:1.50, react:0.50, dodge:0.05, dodgeCdT:3.5, flee:true,  weapon:'sword', rarity:'common'},
+  normal:{label:'Normal', color:'#7fd6ff', hp:150, dmg:11, speed:185, moveMul:1.00, atkCd:1.10, react:0.32, dodge:0.18, dodgeCdT:2.4, flee:true,  weapon:'sword', rarity:'rare'},
+  hard:  {label:'Hard',   color:'#e8a33d', hp:230, dmg:17, speed:210, moveMul:1.12, atkCd:0.85, react:0.20, dodge:0.35, dodgeCdT:1.6, flee:true,  weapon:'axe',   rarity:'epic'},
+  brutal:{label:'Brutal', color:'#ff5e54', hp:340, dmg:24, speed:235, moveMul:1.25, atkCd:0.62, react:0.12, dodge:0.55, dodgeCdT:1.0, flee:false, weapon:'great', rarity:'legendary'}
+};
+const BOT_DIFFS=['easy','normal','hard','brutal'];
+function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
+  const a=Math.random()*6.283, rad=220+Math.random()*160, sp=G.arenaSpawn||{x:0,z:0,y:0};
+  const b={ bot:true, botDiff:diffKey, type:'bot', kind:'bot', element:null,
+    x:sp.x+Math.cos(a)*rad, z:sp.z+Math.sin(a)*rad, y:(sp.y||0), yaw:0, r:14, h:44,
+    hp:D.hp, maxHp:D.hp, dmg:D.dmg, speed:D.speed, color:D.color, xp:0,
+    active:true, dead:false, dropT:0, hitFlash:0, lastHit:-1, mid:null, boss:false,
+    weapon:(()=>{ try{ return makeWeapon(D.weapon,D.rarity); }catch(e){ return {range:60,kb:190}; } })(),
+    vx:0, vz:0, vy:0, onGround:true, runAnim:Math.random()*6, atkTimer:0,
+    atkCd:0.6+Math.random(), dodgeCd:1, dodgeTimer:0, invuln:0, reactT:0, strafe:Math.random()<0.5?1:-1, _pendingHit:null };
+  try{ snapEnemyToSurface(b); }catch(e){} G.enemies.push(b); return b;
+}
+function refreshArenaBots(cfg){ if(!G) return; G.enemies=G.enemies.filter(e=>!e.bot);
+  const n=Math.max(0,Math.min(4,cfg.bots|0)); for(let i=0;i<n;i++) spawnBot(cfg.botDiff||'normal'); }
+function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
+  if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
+  const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
+  e.yaw=Math.atan2(nx,nz);
+  const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
+  // gravity so bots sit on islands / the ground
+  e.vy-=1900*dt; e.y+=e.vy*dt; if(e.y<0){ e.y=0; e.vy=0; }
+  try{ const gy=(typeof highestSurfaceAt==='function')?highestSurfaceAt(e.x,e.z):0; if(e.y<=gy+1){ e.y=gy; e.vy=0; e.onGround=true; } }catch(_){}
+  // reactive dodge when the player is swinging close (chance + cooldown scale with difficulty)
+  if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
+    e.vx=(-nz*e.strafe)*560; e.vz=(nx*e.strafe)*560; try{ burst(e.x,10,e.z,'#7fd6ff',6); }catch(_){} }
+  let mvx=0, mvz=0;
+  if(e.dodgeTimer>0){ e.x+=e.vx*dt; e.z+=e.vz*dt; }
+  else {
+    const low=e.hp<e.maxHp*0.26 && D.flee;
+    if(low){ mvx=-nx; mvz=-nz; }                          // flee when low
+    else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }   // approach / spacing
+      if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }      // orbit-strafe
+    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul;
+    e.x+=(mvx/ml)*spd*dt; e.z+=(mvz/ml)*spd*dt; e.runAnim=(e.runAnim||0)+dt*11;
+  }
+  if(G.bounds){ e.x=Math.max(G.bounds.minX+12,Math.min(G.bounds.maxX-12,e.x)); e.z=Math.max(G.bounds.minZ+12,Math.min(G.bounds.maxZ-12,e.z)); }
+  // attack: telegraph (reaction delay) then land the hit if still in range and the player isn't i-framed
+  if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
+  if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
+    const dd=Math.hypot(p.x-e.x,p.z-e.z);
+    if(dd<reach+16 && !(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg), e.x, e.z);
+    try{ burst(e.x+nx*30,e.y+24,e.z+nz*30,e.color,6); }catch(_){} } }
+}
+function drawBotHero(e,t){ const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal, body=D.color, dark=tint(D.color,'#0a0a0a',0.5), lt=tint(D.color,'#ffffff',0.35);
+  const moving=Math.hypot(e.vx||0,e.vz||0)>10, leg=Math.sin(e.runAnim||0)*(moving?0.5:0.12), sw=e.atkTimer>0?1:0;
+  pushM(); mv(e.x,(e.y||0),e.z); rotY(e.yaw||0);
+  pushM(); mv(-4.5,14,0); rotX(leg); bx(0,-7,0,6.5,14,6.5,dark); popM();
+  pushM(); mv(4.5,14,0); rotX(-leg); bx(0,-7,0,6.5,14,6.5,dark); popM();
+  bx(0,25,0, 17,22,10, e.hitFlash>0?'#ffd9d9':body); bx(0,30,3.5, 12,9,5, lt);
+  bx(0,40,0, 12,12,12, '#d9b08c');
+  pushM(); mv(11,28,0); rotX(-0.35-sw*1.0); bx(0,-8,0,5,17,5,lt); bx(0,-19,5,4,17,4,'#cfd6df'); popM();   // sword arm
+  pushM(); mv(-11,28,0); rotX(0.2); bx(0,-8,0,5,17,5,lt); popM();
+  bx(0,52,0, 5,5,5, body, body);
+  popM();
 }
 // ---- The Arena setup / loadout menu (used pre-entry AND re-openable in-arena) ----
 function openArenaSetup(back){ mode='menu'; showGameUI(false);
@@ -6555,6 +6622,10 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
       <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" style="${sel};width:100%">${archOpts}</select></label>
       <label style="flex:1;min-width:110px">Weapon rarity<br><select id="arWRid" style="${sel};width:100%">${ridOpts}</select></label>
       <label style="flex:1;min-width:110px">Armor rarity<br><select id="arARid" style="${sel};width:100%">${aridOpts}</select></label></div>
+    <p class="hint" style="text-align:left;margin:12px 0 4px"><b>Practice Bots</b> · AI opponents (respawn on defeat)</p>
+    <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
+      <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
+      <div style="flex:2;display:flex;gap:5px">${BOT_DIFFS.map(dk=>`<button class="bigbtn ghost arbd" data-bd="${dk}" style="flex:1;margin:0;padding:7px 3px;font-size:12px;${cfg.botDiff===dk?'border-color:'+BOT_DIFF[dk].color+';color:'+BOT_DIFF[dk].color:''}">${BOT_DIFF[dk].label}</button>`).join('')}</div></div>
     <div style="display:flex;gap:8px;margin:12px 0">
       <button class="bigbtn ghost" id="arFair" style="flex:1;margin:0">⚖️ Fair Mode</button>
       <button class="bigbtn ghost" id="arRand" style="flex:1;margin:0">🎲 Randomize</button>
@@ -6570,12 +6641,14 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arArch').onchange=e=>{ cfg.wArch=e.target.value; };
   g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
   g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
+  g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
+  document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
   g('arFair').onclick=()=>{ Object.assign(cfg,ARENA_FAIR); try{SFX.pickup();}catch(e){} toast('⚖️ Fair Mode — standardized loadout for a level playing field.'); openArenaSetup(back); };
   g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); try{SFX.pickup();}catch(e){} toast('🎲 Randomized loadout!'); openArenaSetup(back); };
   if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
-    if(inA){ const np=buildArenaPlayer(cfg); const o=G.p; np.x=o.x;np.z=o.z;np.y=o.y;np.yaw=o.yaw;np.onGround=o.onGround; G.p=np; skillbarUpdate(); hudUpdate(); mode='play'; showOverlay(false); showGameUI(true); toast('Loadout applied.'); }
+    if(inA){ const np=buildArenaPlayer(cfg); const o=G.p; np.x=o.x;np.z=o.z;np.y=o.y;np.yaw=o.yaw;np.onGround=o.onGround; G.p=np; refreshArenaBots(cfg); skillbarUpdate(); hudUpdate(); mode='play'; showOverlay(false); showGameUI(true); toast('Loadout applied.'); }
     else enterArena(); };
   g('arBack').onclick=back||titleScreen;
 }
@@ -6584,7 +6657,7 @@ function update(dt){
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
-  if(MP.active && MP.pvp && G.enemies && G.enemies.length){ G.enemies.length=0; G.boss=null; }   // PvP is an enemy-free duel arena
+  if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
   if(G.arena) arenaHazardTick(dt);                             // Arena: lava/hazard damage -> respawn (never a real death)
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
@@ -6775,6 +6848,7 @@ function update(dt){
   // enemies
   for(const e of G.enemies){
     if(e.dead) continue;
+    if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.dropT>0){ if(dXZ(e.x,e.z,p.x,p.z)<640){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else if(e.kind==='fly') SFX.screech(0.5); else SFX.growl(0.5); } } continue; }
     if(!e.active) continue;
@@ -10837,6 +10911,7 @@ function render(t){
     bx(w.x,wy+150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
     for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
   for(const e of G.enemies){ if(e.dead) continue;
+    if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters
     if(e.dropT>0){ // spawn-in: falling shadow marker
       drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
@@ -11165,6 +11240,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
+  botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
+  botKillFirst:()=>{ if(!G) return 'no G'; const b=G.enemies.find(e=>e.bot&&!e.dead); if(!b) return 'no bot'; b.hp=0; killEnemy(b,true); return G.arenaScore; },
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, openWardrobe, exitMirror, get mirror(){ return mirror; }, applyCameraLook,

@@ -1435,3 +1435,16 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
   tutorial fires with heading "The Mid-Air Dash", 0 console errors.
 - NEXT (deferred per Oliver): the creative secret-hiding pass (place trial-chamber secrets in hidden/hard,
   single-jump-reachable spots), starting with the too-open Outskirts & Ruined Keep.
+
+
+## [Claude | 2026-07-21] Dash-chasm signpost + hidden-but-reachable secret placement — shipped v1.304-v1.305.0
+- **Interactable signpost** at the Outskirts dash chasm (v1.304.0): press E to RE-OPEN the mid-air-dash
+  tutorial anytime (if the auto-popup was dismissed or a refresher is wanted). Verified: prompt shows +
+  interact reopens the lesson even after it was seen.
+- **Secret placement pass** (v1.305.0): the three secrets that sat OPEN at ground level (Outskirts glade,
+  Hollow Smuggler Cave, Keep Drainage) are now tucked on HIDDEN elevated ledges — behind the copse treeline
+  (y74), on the cave's back shelf (y80), in the drainage corner (y86). Each is a single hop up (all < the
+  ~105 single-jump apex) and standable — hidden/harder to grab but reachable WITHOUT the double-jump.
+- Verified with the reachability scanner: all three reachable+standable (hopGap 74/34/86 ≤ 105), 0 errors.
+  The remaining zone secrets (Abyss y440, Frostfell y210, Emberdeep y235, Palace y100) are already elevated
+  on climbs and confirmed reachable earlier.

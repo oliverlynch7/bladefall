@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.304.0';
+const VERSION3D='1.305.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3932,7 +3932,10 @@ const EXPANDED_SCAPES={
       G.deco.push({x:-1280,z:-1580,y0:132,w:34,h:66,d:34,c:'#57402d'});G.deco.push({x:-1280,z:-1580,y0:195,w:46,h:10,d:46,c:'#30251d'});
       // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
       for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
-      const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}scapeSecret(ctx,glade.x,glade.z,0);chest(glade.x-70,glade.z+50);
+      const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}
+      // the rift hides on a mossy stump-ledge behind the copse — a single hop up (~74), screened by the treeline
+      vplat(glade.x+120,glade.z-80,74,150,130,{checkpoint:true}); G.deco.push({x:glade.x+120,z:glade.z-80,y0:74,w:158,h:5,d:138,c:'#4a3a26'});
+      scapeSecret(ctx,glade.x+120,glade.z-80,74);chest(glade.x-70,glade.z+50);
       // Foxglove's high rootway is a risky mastered-route shortcut to the northern fields; falling returns players to the normal road.
       climbRun(1620,-2720,0,1220,-3210,92,70,{shortcut:true}); climbRun(1220,-3210,92,520,-4070,28,72,{shortcut:true});
       G.deco.push({x:1500,z:-2860,y0:100,w:22,h:92,d:22,c:'#6f5431'}); G.deco.push({x:1500,z:-2860,y0:188,w:120,h:8,d:34,c:'#e2c36a'});
@@ -4000,7 +4003,9 @@ const EXPANDED_SCAPES={
       wallPair(wash,280); wallPair(narrows,380); wallPair(fork,430);
       // The low road stays forgiving; the high switchback is faster and exposes a reward.
       climbRun(-120,-1760,0,-480,-2140,210,78,{switchback:true}); vplat(-260,-2380,210,240,130,{checkpoint:true}); climbRun(-260,-2380,210,-420,-2860,210,76);
-      const cave=room('Smuggler Cave',500,-2220,360,300); floorRoad(fork,cave,110); chest(540,-2260); scapeSecret(ctx,610,-2220,0);
+      const cave=room('Smuggler Cave',500,-2220,360,300); floorRoad(fork,cave,110); chest(540,-2260);
+      vplat(620,-2290,80,140,110,{checkpoint:true}); G.deco.push({x:620,z:-2290,y0:80,w:148,h:5,d:118,c:'#3f4a55'});   // the rift tucked on a raised shelf at the cave's back (single hop ~80)
+      scapeSecret(ctx,620,-2290,80);
       // Optional survey route: three old brass beacons sit off the safe road and teach the canyon's high-line language.
       const survey=optionalMission('hollowSurvey','Relight the three lost survey beacons','activate',3,'surveyorEye',{hint:'Look for brass cages above the wash and smuggler road.'});
       if(survey){ const marks=[{x:-520,z:-910,y:72},{x:610,z:-2220,y:46},{x:-420,z:-2860,y:210}];
@@ -4064,7 +4069,9 @@ const EXPANDED_SCAPES={
       G.deco.push({x:-330,z:-600,y0:20,w:230,h:28,d:60,c:'#3b2d24'});for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
       // High route: battlement crossfire and a broken-wall jump line. Low route: drainage infiltration under the yard.
       climbRun(-520,-1650,0,-500,-2320,190,88);tower(-820,-2280,250);for(let k=0;k<7;k++){vplat(-500+k*125,-2320-(k%2)*82,190+(k%3)*22,110,100,{battlement:true,setpiece:true});G.deco.push({x:-500+k*125,z:-2320-(k%2)*82-44,y0:190+(k%3)*22,w:90,h:30,d:16,c:IRON});}
-      const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);scapeSecret(ctx,850,-2520,0);
+      const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);
+      vplat(870,-2560,86,140,110,{checkpoint:true}); G.deco.push({x:870,z:-2560,y0:86,w:148,h:5,d:118,c:'#43403a'});   // the rift on a raised drain-ledge in the far corner (single hop ~86)
+      scapeSecret(ctx,870,-2560,86);
       climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});vplat(0,-4050,190,1080,840,{checkpoint:true,breather:true});
       for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
       chest(-720,-2320,190);chest(360,-3150,190);

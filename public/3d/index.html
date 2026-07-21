@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.286.0';
+const VERSION3D='1.287.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4742,6 +4742,7 @@ function spawnEnemy(type,x,z,isBoss){
   if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
   if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
   if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
+  e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)
   snapEnemyToSurface(e); G.enemies.push(e); return e;
 }
 
@@ -5838,6 +5839,15 @@ function resolveSwing(){
   }
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
+  // but never reduce hp or kill locally — the host applies it and drives death for everyone.
+  if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && src===G.p){
+    MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
+    e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
+    burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
+    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3, heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+    return;
+  }
   if(e.shielded && e.boss){ e.hitFlash=0.1; if(Math.random()<0.5) addText(e.x,e.y+e.h+12,e.z,'WARDED','#7fd6ff'); return; }   // the boss ward absorbs everything until its crystals fall
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   let mod=elemMod(el,e.element);
@@ -5885,8 +5895,12 @@ function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGold
 function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e,weaponKill){
   if(e.dead) return;
+  // CO-OP: a guest never kills on its own — the host is authoritative and drives death via kill events
+  // (MP._authKill is set only when the guest is applying a host-sanctioned kill).
+  if(MP.active && !MP.isHost && !MP._authKill && !e.dummy && !e.practice) return;
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
+  if(MP.host_()) MP.noteKill(e);   // host records the kill so guests mirror the death + earn instanced rewards
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   if(weaponKill) gainMana(G.p,12,true);
@@ -5954,7 +5968,7 @@ function killEnemy(e,weaponKill){
     // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
     // Bosses, chests, mimics, and goblins remain the reliable gear sources.
     if(Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
-    if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
+    if(e.look==='slime' && !e.noSplit && !(MP.active&&!MP.isHost)){ // slimes split into two slimelets (host-authoritative in co-op)
       for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
         sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
   checkStageClear();
@@ -5967,6 +5981,7 @@ function killEnemy(e,weaponKill){
 const MIMIC_RATE=0.10;                                   // exactly 1 in 10 eligible chests are mimics
 function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE) ch.mimic=true; return ch; }
 function mimicReveal(ch){
+  if(MP.active && !MP.isHost) return;   // co-op: the host reveals mimics; guests receive them via the enemy mirror
   const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
   const m=spawnEnemy('mimic',ch.x,ch.z); m.active=true; m.mimicE=true; m.dropT=0;
   burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
@@ -6220,6 +6235,7 @@ const MP={
   myId:null, name:'Warden', code:'', zone:-1, seed:0, ping:0,
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
+  kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
   ROOMPFX:'bladefall-mp-',
   rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
   // lazy-load PeerJS once, on first co-op entry; resolves true on success
@@ -6248,11 +6264,14 @@ const MP={
     c.on('data',d=>{
       if(d.t==='hello'){ this.peers[d.p.id]=this.mkPeer(d.p); if(this.zone>=0) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){} }
       else if(d.t==='pos'){ const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
+      else if(d.t==='hit'){ this.hostApplyHit(d); }
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
     });
     c.on('close',()=>{ this.conns=this.conns.filter(x=>x!==c); }); }); },
   broadcast(){ const all=[this.selfState()]; for(const id in this.peers) all.push(this.snap(this.peers[id]));
-    const msg={t:'state',players:all}; this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
+    const now=G?G.time:0; this.kills=this.kills.filter(k=>now-k.ts<1.5);   // keep a short kill window so a dropped packet is still caught
+    const ek=this.kills.map(k=>[k.m,k.t,k.el,k.bo,k.xp]);
+    const msg={t:'state',players:all, en:this.enemySnap(), ek}; this.conns.forEach(c=>{try{c.send(msg)}catch(e){}}); },
   // ---- GUEST ----
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
@@ -6269,7 +6288,8 @@ const MP={
       if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } }
     else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
-      for(const id in this.peers){ if(!live[id]) delete this.peers[id]; } }
+      for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
+      if(d.en) this.applyEnemies(d.en, d.ek); }
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
   onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0;
@@ -6302,11 +6322,47 @@ const MP={
     bx(5,7,0, 6,16,6, body);
     bx(0,52,0, 5,5,5, tint, tint);       // id beacon above the head so allies are distinguishable
     popM(); },
+  // ================= P1.2 SHARED ENEMIES (host-authoritative existence/HP/death) =================
+  guest(){ return this.active && !this.isHost; },
+  host_(){ return this.active && this.isHost; },
+  typeIdx(t){ if(!this._ek) this._ek=Object.keys(ENEMY); const i=this._ek.indexOf(t); return i<0?0:i; },
+  ekey(i){ if(!this._ek) this._ek=Object.keys(ENEMY); return this._ek[i]; },
+  byMid(mid){ if(!G) return null; const es=G.enemies; for(let i=0;i<es.length;i++){ if(es[i].mid===mid && !es[i].dead) return es[i]; } return null; },
+  // host: compact snapshot of live enemies [mid,typeId,x,z,hp,maxHp] (capped) + recent kills
+  enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
+    for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp)]); }
+    return out; },
+  noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
+    this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },
+  hostApplyHit(d){ if(!this.host_()||!G) return; const e=this.byMid(d.m); if(!e||e.dead) return;   // apply a guest's relayed hit authoritatively
+    const src={x:d.sx||e.x,z:d.sz||e.z,_guest:true};
+    try{ hitEnemy(e, d.d||1, src, d.kb||0, 0, d.el||null); }catch(err){} },
+  sendHit(mid,dmg,kb,el,sx,sz){ if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'hit',m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0)}); }catch(e){} } },
+  // guest: reconcile local enemy list to the host's authoritative set + process kills
+  applyEnemies(en,ek){ if(!this.guest()||!G) return; this._gotEn=true;
+    const seen={};
+    for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
+      if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
+        if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; } }
+      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); } }
+    if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
+      const e=this.byMid(mid);
+      if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
+      else { const type=this.ekey(k[1]); this.creditKill(type,k[4],!!k[2],!!k[3]); } }
+    // cull mirror enemies the host no longer reports (despawned/removed), after a grace window
+    if(this._gotEn) for(const e of G.enemies){ if(e.dead||e.mid==null||e.practice||e.dummy) continue;
+      if(seen[e.mid]){ e._miss=0; } else { e._miss=(e._miss||0)+1; if(e._miss>120){ e.dead=true; } } } },
+  // guest: a host kill for an enemy we never had locally — still grant instanced XP/loot/quest credit
+  creditKill(type,xp,elite,boss){ if(!G||!G.p) return; try{ if(xp>0) gainXp(xp); }catch(e){}
+    try{ if(type) questKill(type); }catch(e){}
+    try{ const e={type,elite,boss,xp,x:G.p.x,z:G.p.z,y:0,h:20,color:'#fff'}; if(typeof rollDrop==='function' && Math.random()<(elite?0.33:0.053)) rollDrop(e); }catch(e){} },
   leave(msg){
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
     try{ if(this.peer) this.peer.destroy(); }catch(e){}
     this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
+    this.kills=[]; this._killed={}; this._gotEn=false;
     if(msg){ try{ toast(msg); }catch(e){} } }
 };
 function openMPLobby(){
@@ -6813,7 +6869,7 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
 function bossRaid(e){ return e.boss && e.type!=='brute' && e.type!=='archer'; }   // the two earliest bosses stay a straight fight; the rest get the raid mechanic
 function spawnBossCrystals(e){
   e._crystals=[]; const n=3, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:300), hd=(e.home?e.home.hd:300);
-  for(let i=0;i<n;i++){ const a=(i/n)*6.283+0.6;
+  if(!(MP.active&&!MP.isHost)) for(let i=0;i<n;i++){ const a=(i/n)*6.283+0.6;   // co-op: host spawns the ward crystals; guests mirror them
     const cx=hx+Math.cos(a)*hw*0.74, cz=hz+Math.sin(a)*hd*0.74;
     const c=spawnEnemy('bosscrystal',cx,cz); c.active=true; c.dropT=0; c.role=null; c.spec=null;
     c.hp=c.maxHp=Math.max(60,Math.round(e.maxHp*0.14)); c._crystalOf=e; e._crystals.push(c); }
@@ -6877,7 +6933,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.summonT<=0 && e.hp/e.maxHp<0.7){ e.summonT=e.type==='tyrant'?5:6;
       // Abyss King / Void Tyrant: summon SHADES at phase 2 — capped so they never flood the arena
       const shades=G.enemies.filter(o=>!o.dead&&o._shade).length, room=Math.max(0,3-shades);
-      for(let i=0;i<Math.min(2,room);i++){ const ne=spawnEnemy('shadeling',e.x+(i?70:-70),e.z+30); ne.dropT=0.4; ne._shade=true; }
+      if(!(MP.active&&!MP.isHost)) for(let i=0;i<Math.min(2,room);i++){ const ne=spawnEnemy('shadeling',e.x+(i?70:-70),e.z+30); ne.dropT=0.4; ne._shade=true; }   // co-op: host summons; guests mirror
       if(room>0) addText(e.x,e.h+16,e.z,'SUMMON SHADES!','var(--danger)',true); }
   }
   if(e.hp/e.maxHp<0.5 && e.phase<2){ e.phase=2; e.speed*=1.22; e.dmg*=1.1;   // Phase 11: HP-threshold phase 2 — faster, harder, specials on a shorter fuse

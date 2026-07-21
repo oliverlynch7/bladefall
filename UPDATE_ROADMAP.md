@@ -1162,3 +1162,24 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
   covers every current AND future menu — no per-class enumeration to keep in sync.
 - Verified in-browser: a mixed .buildscroll + .petgrid menu preserved both scroll positions exactly
   across a re-render (buildscroll_preserved:true, petgrid_preserved:true); real game loads 0 errors.
+
+
+## [Claude | 2026-07-21] Multiplayer P1.2 — shared enemies (host-authoritative) — shipped v1.287.0
+- Enemies are now SHARED in co-op: same foes, same HP, they die together, and BOTH players earn XP/loot.
+- Model: host is authoritative for enemy existence, HP, and death; each client still simulates enemy
+  movement/attacks locally (so each player gets chased & hit via its own hurtPlayer — no divergence
+  that matters). Enemy identity via a stable `mid` assigned in spawnEnemy (host & guest spawn in the
+  same seeded order, so initial ids align; host-driven dynamic spawns get new ids the guest mirrors).
+- Guest combat: hitEnemy RELAYS the hit to the host (shows a local number + own lifesteal) instead of
+  reducing HP; the host applies it authoritatively and drives death. killEnemy is blocked on the guest
+  except when applying a host-sanctioned kill (MP._authKill). Guest dynamic spawns (slime split, boss
+  summon, mimic reveal, ward crystals) are suppressed and arrive via the host mirror.
+- Rewards are INSTANCED: on a host kill event the guest kills that enemy locally and runs its OWN xp +
+  loot roll + questKill — no loot contention, both players progress the quest in parallel.
+- Netcode: the presence 'state' message now also carries `en` (compact live-enemy snapshot [mid,type,
+  x,z,hp,maxHp], capped 60) and `ek` (recent kills, kept in a 1.5s window so a dropped packet is still
+  caught). Guest reconciles by mid: overwrite HP, create host-only enemies, cull despawned after grace.
+- SAFETY: single-player & the HOST are byte-for-byte unchanged (every guest path guards on
+  MP.active&&!MP.isHost). Verified: v1.287.0 loads 0 console errors, PeerJS NOT loaded in single-player,
+  and a loopback reconciliation test passed all assertions (HP overwrite, mirrored split, kill+XP, cull).
+- NEXT: P1.3 shared world loot pickups + downed/revive; then shared hub (Phase 2) and PvP (Phase 3).

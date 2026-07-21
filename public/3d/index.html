@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.285.0';
+const VERSION3D='1.286.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7318,14 +7318,21 @@ function enhanceMenuShell(){
 function showOverlayHTML(html){
   if(typeof stopAllLoops==='function') stopAllLoops();   // opening any menu silences looping sfx (footsteps/heartbeat) that would otherwise hang while paused
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
-  // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top).
-  // The shop has MULTIPLE .achlist scroll boxes (weapons / perks / hub upgrades) — save & restore
-  // EVERY one by index, not just the first, or buying a perk/hub-upgrade snaps that list to the top.
-  const pscAll=[...ovcard.querySelectorAll('.achlist')].map(e=>e.scrollTop), pov=overlay.scrollTop, pcard=ovcard.scrollTop;
+  // Preserve scroll across a re-render for EVERY scrollable box in the menu — not just .achlist —
+  // so NO menu ever snaps to the top when you click a button inside it. Different menus scroll on
+  // different containers (shop = .achlist boxes, Drillmaster/respec = .buildscroll, Beastkeeper =
+  // .petgrid, Stylist = .wardrobe-body, waystation = .menu-waystation, etc.). Rather than enumerate
+  // classes (which breaks the next time a new menu is added), we snapshot the scroll offset of every
+  // descendant by document-order index and restore it after innerHTML. A re-render of the same menu
+  // (openShop/openTrainer call themselves) reproduces an identical node order, so index i maps back
+  // to the same box; setting scrollTop on a non-scrollable node is a harmless no-op.
+  const pov=overlay.scrollTop, pcard=ovcard.scrollTop;
+  const prevScroll=[...ovcard.querySelectorAll('*')].map(e=>[e.scrollTop,e.scrollLeft]);
   ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
-  { const naAll=ovcard.querySelectorAll('.achlist'); naAll.forEach((e,i)=>{ if(pscAll[i]) e.scrollTop=pscAll[i]; }); }
+  { const now=ovcard.querySelectorAll('*'); const m=Math.min(now.length,prevScroll.length);
+    for(let i=0;i<m;i++){ const s=prevScroll[i]; if(s[0]) now[i].scrollTop=s[0]; if(s[1]) now[i].scrollLeft=s[1]; } }
   if(pov) overlay.scrollTop=pov;
-  if(pcard) ovcard.scrollTop=pcard;   // shop/waystation/trainer menus scroll on the card itself — keep the reader's place on re-render (respec etc.)
+  if(pcard) ovcard.scrollTop=pcard;   // the card/overlay itself (waystation etc.) — keep the reader's place too
 }
 function decorateMenuIcons(){
   const icons={backBtn:'back',backC:'back',descBack:'back',npcLeave:'back',nameBack:'back',cBack:'back',msBack:'back',delNo:'back',wsBack:'back',

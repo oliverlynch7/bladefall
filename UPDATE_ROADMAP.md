@@ -1150,3 +1150,15 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - **Your Bag moved** from the SE court (x:200,z:322) to the WEST wall between the Quartermaster (z:-60) and the Smith (z:150) at x:-548,z:45 — both model + collision box moved.
 - **Abyssal Descent damage ramps much harder.** Per-floor damage 1.10→1.135 base with an accelerating kicker past floor 10 (×1.065^(n-10)). Floor 10 ~3.1x (was 2.4x), Floor 20 ~21x (was ~6x) — deep floors now hit like a truck. HP curve unchanged.
 - **Drillmaster banner insignia now double-sided.** The sword/staff/bow class marks render on BOTH banner faces (front z-6 and back z-10), readable from either side of the hall.
+
+
+## [Claude | 2026-07-21] Scroll-preservation made GLOBAL (all menus) — shipped v1.286.0
+- The v1.285.0 shop fix only preserved `.achlist` boxes. Other menus scroll on their OWN containers
+  and still snapped to the top: `.buildscroll` (Drillmaster skill/respec — the one Oliver flagged),
+  `.petgrid` (Beastkeeper), `.wardrobe-body` (Stylist), `.wslist`, `.menu-waystation`, `.msbody`.
+- Fix generalized in `showOverlayHTML`: snapshot the scroll offset of EVERY descendant by document-
+  order index before innerHTML, restore after. Same-menu re-renders reproduce identical node order so
+  index maps back to the same box; setting scrollTop on a non-scroll node is a harmless no-op. This
+  covers every current AND future menu — no per-class enumeration to keep in sync.
+- Verified in-browser: a mixed .buildscroll + .petgrid menu preserved both scroll positions exactly
+  across a re-render (buildscroll_preserved:true, petgrid_preserved:true); real game loads 0 errors.

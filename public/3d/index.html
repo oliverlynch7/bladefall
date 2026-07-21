@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.263.0';
+const VERSION3D='1.264.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3962,7 +3962,15 @@ const EXPANDED_SCAPES={
   ember(ctx){const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=145)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!vents){const mine=room('Ash Mine',0,0,940,720),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks Arena',420,-1580,1020,860,120),city=room('Ancient Forge City',-400,-2380,1040,880,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,1100,860,280);
-      road(mine,slag,160);climbRun(-180,-350,0,-480,-850,120,74);for(let k=0;k<6;k++)G.movers.push({x0:-480+(k%2?120:-120),z:-900-k*100,w:100,d:80,h:120+k*34,amp:28,sp:.75+k*.1,ph:rnd()*6.28,x:-480,px:-480});
+      road(mine,slag,160);
+      // The Chain Lift cliff used to offer only four small, visually ambiguous slabs. Make the
+      // required base-movement route an unmistakable grounded basalt switchback; the moving lifts
+      // beyond it remain the faster spectacle route, never the only way onto the plateau.
+      for(let k=1;k<=6;k++){const t=k/6,x=-180-300*t,z=-350-500*t,y=20*k;
+        vcol(x,z,104,88,Math.max(8,y-4));vplat(x,z,y,116,100,{safeRoute:true,recovery:true,basaltStep:true});
+        if(k===2||k===4||k===6)G.deco.push({x:x+42,z,y0:y,w:12,h:26,d:12,c:k===6?GOLD:LAVA,theme:'ember'});
+      }
+      for(let k=0;k<6;k++)G.movers.push({x0:-480+(k%2?120:-120),z:-900-k*100,w:100,d:80,h:120+k*34,amp:28,sp:.75+k*.1,ph:rnd()*6.28,x:-480,px:-480});
       climbRun(-300,-1150,120,420,-1580,120,78);for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1450-Math.floor(k/5)*220;vcol(x,z,48,48,90);G.deco.push({x,z,y0:90,w:70,h:20,d:70,c:k%2?LAVA:GOLD});}
       climbRun(180,-1900,120,-400,-2380,180,74);for(const h of [[-650,-2280],[-400,-2500],[-160,-2260]]){G.deco.push({x:h[0],z:h[1],y0:180,w:200,h:86,d:160,c:ROCK});vplat(h[0],h[1],280,190,150,{roof:true});}climbRun(-720,-2200,180,-650,-2280,280,68);chest(-160,-2260,280);
       // Caldera crossing: basalt pillars rise above a broad recovery shelf; eruptions remain visible through geyser tells.

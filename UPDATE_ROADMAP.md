@@ -1110,3 +1110,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 ## [Codex | 2026-07-20] HUD bag capacity readout - shipped v1.263.0
 - Added a compact bag icon and live used / total slot count to the open space beneath the class portrait in the top-left gameplay HUD.
 - The count refreshes with inventory and capacity changes, and gains a restrained red full-state treatment when every slot is occupied.
+
+
+## [Codex | 2026-07-20] Emberdeep Chain Lift ascent fix - shipped v1.264.0
+- Replaced the ambiguous four-slab opening climb with a grounded six-step basalt switchback leading clearly onto the Chain Lift plateau.
+- Required hops are now only 97 units horizontally and 20 units vertically, with 116x100 recovery landings and ember guide posts; the optional moving-lift spectacle remains intact.

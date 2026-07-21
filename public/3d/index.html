@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.254.0';
+const VERSION3D='1.255.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2996,10 +2996,13 @@ function startTrial(cid,fromZone){
   const wasClass=meta.classId; meta.classId=cid;                 // you play the trial AS the class you're earning
   if(!meta.classes[cid]) classState(cid);
   bankNow();
-  const p=(T.earned&&meta.hero)?freshFromSnapshot(meta.hero):freshPlayer();
-  if(!T.earned){ p.weapon=trialWeapon(cid); }                     // starters get their family's weapon in hand
+  // A class trial borrows progression, never equipment. Existing level/stat growth carries in,
+  // while the real loadout stays escrowed in meta.bank until completion, abandonment, or death.
+  const hadHero=!!meta.hero, p=hadHero?freshFromSnapshot(meta.hero):freshPlayer(), issued=trialWeapon(cid);
+  p.weapon=issued; p.gear=freshGear();                            // deliberately naked, with only the trial-class weapon
   recomputeArmor(p); p.hp=effMaxHp(p);
-  G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0});
+  G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0,
+    trialHadHero:hadHero,trialReturnHero:hadHero?JSON.parse(JSON.stringify(meta.hero)):null,trialIssuedWeapon:JSON.parse(JSON.stringify(issued))});
   meta.run=null; persist();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(!T.earned && !meta.tutDone){ meta.tutDone=true; persistGlobal(); showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
@@ -3068,10 +3071,21 @@ function openHelp(back){
   document.getElementById('helpBack').onclick=back||openPause;
 }
 function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
+function sameTrialItem(a,b){ try{return !!a&&!!b&&JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;} }
+function keepTrialFind(it){ if(!it) return; if(!Array.isArray(meta.stash)) meta.stash=[]; meta.stash.push(it); }
 function trialComplete(){
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
-  meta.hero=snapOf(G.p);                                  // surviving a trial banks every weapon/armor swap and pickup
+  const protectedHero=G.trialReturnHero||((meta.bank&&meta.bank.hero)||null);
+  const trialHero=snapOf(G.p), escrow=G.trialHadHero&&protectedHero?JSON.parse(JSON.stringify(protectedHero)):null;
+  if(escrow){
+    // Anything genuinely equipped during the trial is a find, not a replacement for the protected loadout.
+    if(G.p.weapon&&!sameTrialItem(G.p.weapon,G.trialIssuedWeapon)) keepTrialFind({weapon:JSON.parse(JSON.stringify(G.p.weapon))});
+    for(const slot of GEARSLOTS){ const it=G.p.gear&&G.p.gear[slot]; if(it) keepTrialFind({[TRINKETIDS.includes(slot)?'trinket':'armor']:JSON.parse(JSON.stringify(it))}); }
+    // Keep all character growth earned in the chamber, but restore every pre-trial equipment slot exactly.
+    for(const k of ['hp','maxHp','mana','maxMana','level','xp','xpNext','stats','maxJumps','skin']) if(trialHero[k]!=null) escrow[k]=JSON.parse(JSON.stringify(trialHero[k]));
+    meta.hero=escrow;
+  } else meta.hero=trialHero;                              // first-ever class trial establishes the initial loadout normally
   if(T.earned){ meta.sideDone[curZone().side.id]=true; }
   if(cid==='reaper') meta._scytheNotify=true;   // announce the Void Scythe when they reach the hub
   meta.bank=null; persist(); checkAchievements();

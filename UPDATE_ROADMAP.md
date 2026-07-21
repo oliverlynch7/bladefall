@@ -1053,3 +1053,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Fixed the shared menu-to-game return path so active gameplay always restores the player HUD, progression bars, controls, pause button, skill bar, quest tracker, and live pet panel.
 - Routed class skill/passive choices, the first-skill tutorial, pause resume, hub tutorial, and Waystation service returns through the same authoritative restoration path.
 - Muted browser QA reproduced the Ranger rank-up choice flow and verified both tutorial and later passive returns restore every gameplay UI surface with zero console errors.
+
+
+## [Codex | 2026-07-20] Class-trial equipment escrow - shipped v1.255.0
+- Class trials now carry character level and permanent stat growth into the chamber while temporarily stripping all armor, amulets, and rings and issuing only the tested class's starter weapon.
+- Existing equipped weapon and all five equipment slots are protected before the trial and restored exactly on completion with the newly earned class equipped.
+- Genuine equipment found during the trial is preserved in the bag, even when the normal bag capacity has already been reached; first-ever class trials retain their normal starter-loadout behavior.
+- Muted browser QA verified a full five-slot Warrior loadout through Ranger and Mage trials, retained level/stat gains, trial-loot preservation, first-save behavior, and zero console errors.

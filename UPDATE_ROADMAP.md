@@ -1120,3 +1120,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 ## [Codex | 2026-07-20] Equipped-skin HUD portrait - shipped v1.265.0
 - The top-left HUD portrait now shows the player's equipped skin artwork instead of the current class icon, with Knight as a safe missing-art fallback.
 - Skin changes refresh the portrait immediately while class identity remains visible in text beside it.
+
+
+## [Codex | 2026-07-20] Waystation repeatable-activity annex - shipped v1.266.0
+- Added a dedicated south annex behind the unobstructed Mirror Pavilion, expanding the hub with a wide connected hall for repeatable activities.
+- Moved Abyssal Descent and Treasure Sprint onto paired violet/gold dais and removed them from the campaign portal concourse.
+- Relocated every discovered exploration Trial Chamber into a scalable annex row; one chamber centers itself and up to all seven spread evenly without overlapping the eight Main Level gates.
+- Muted browser QA verified the one- and seven-chamber layouts, annex connectivity, wide portal separation, 1600x900 and 1366x768 rendering, and zero console errors.

@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.265.0';
+const VERSION3D='1.266.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7291,11 +7291,18 @@ function enterWaystation(){
   // ---- floor: ONE grand plaza (compact hub-and-spoke; -z = north/forward toward the gates) ----
   G.segments.push({x:0,z:-40,w:1300,d:840});
   G.rooms.push({x:0,z:-40,w:1300,d:840,monsters:[],encounter:false,cleared:true});
+  // SOUTH ACTIVITY ANNEX — new real estate for the two repeatable challenge gates. It opens
+  // around both sides of the Mirror Pavilion, keeping the campaign portal concourse uncluttered.
+  G.segments.push({x:0,z:600,w:660,d:500});
+  G.rooms.push({x:0,z:600,w:660,d:500,monsters:[],encounter:false,cleared:true,activityAnnex:true});
   // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
   G.walls.push({x:0,z:-430,w:1320,d:26,h:64});                       // low north rampart behind the gate arc (see the sky/gates)
-  G.walls.push({x:0,z:372,w:1320,d:26,h:120});                       // south wall (behind spawn)
+  G.walls.push({x:-495,z:372,w:330,d:26,h:120});                     // south wall wings; centre opens into the annex
+  G.walls.push({x:495,z:372,w:330,d:26,h:120});
   G.walls.push({x:-640,z:-30,w:26,d:830,h:120});                     // west wall
   G.walls.push({x:640,z:-30,w:26,d:830,h:120});                      // east wall
+  G.walls.push({x:0,z:850,w:680,d:26,h:120});                        // annex outer wall
+  G.walls.push({x:-330,z:610,w:26,d:500,h:120}); G.walls.push({x:330,z:610,w:26,d:500,h:120});
   // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
   G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
   G.deco.push({x:0,z:30,y0:7,w:96,h:2,d:96,c:'#2f6a7a'});                             // the water (animated glint in drawWaystation)
@@ -7318,24 +7325,32 @@ function enterWaystation(){
   // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
   for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
   G.torches.push({x:-548,z:-150,ph:1},{x:-548,z:240,ph:2},{x:548,z:-150,ph:3},{x:548,z:240,ph:4},{x:0,z:352,ph:5});
+  G.torches.push({x:-286,z:430,ph:1.5},{x:286,z:430,ph:3.5},{x:-286,z:790,ph:2.5},{x:286,z:790,ph:4.5});
   // ---- the gate ARC: one per zone across the north; centre gates drawn deeper so the eye is pulled forward ----
   G.gates=[];
   const gSpan=1040, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;   // WIDE spacing — each portal gets real side-to-side room
   ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-262-26*(1-Math.abs(gx)/(gSpan/2||1)));   // gentle arc
-    G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
-    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx,z:gz+64,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });   // secret rift sits IN FRONT of its parent, its own room
-  // ABYSSAL DESCENT — its OWN dark grotto in the north-west corner (no longer tucked behind the gate arc)
-  G.obstacles.push({kind:'plat',x:-548,z:-300,w:150,d:120,h:20});
-  G.deco.push({x:-548,z:-300,y0:0,w:190,h:1.4,d:170,c:'#16101f'});
-  for(const s of [-1,1]){ vcol(-548+s*74,-300,20,20,150); G.deco.push({x:-548+s*74,z:-300,y0:150,w:26,h:10,d:26,c:'#2a1840'}); }   // grotto pillars
-  for(let k=0;k<5;k++) G.deco.push({x:-548+(Math.random()*2-1)*72,z:-300+(Math.random()*2-1)*54,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
+    G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name}); });
+  // Discovered Trial Chambers get their own scalable row in the activity annex instead of
+  // occupying the same coordinates as their parent campaign portals.
+  {const sideGates=[];ZONES.forEach((Z,i)=>{if(Z.side&&meta.sideFound[Z.side.id])sideGates.push({Z,i});});
+    const step=sideGates.length>1?Math.min(82,500/(sideGates.length-1)):0;
+    sideGates.forEach(({Z,i},j)=>G.gates.push({zi:i,side:true,x:Math.round((j-(sideGates.length-1)/2)*step),z:470,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}));}
+  // REPEATABLE ACTIVITY ANNEX — paired challenge gates, completely separate from the campaign arc.
+  G.deco.push({x:0,z:600,y0:0,w:510,h:1.4,d:84,c:'#8f744e'});
+  G.obstacles.push({kind:'plat',x:-150,z:650,w:170,d:140,h:20});
+  G.deco.push({x:-150,z:650,y0:0,w:210,h:1.4,d:190,c:'#16101f'});
+  G.obstacles.push({kind:'plat',x:150,z:650,w:170,d:140,h:20});
+  G.deco.push({x:150,z:650,y0:0,w:210,h:1.4,d:190,c:'#302911'});
+  for(const x of [-150,150])for(const s of [-1,1]){vcol(x+s*84,650,18,18,132);G.deco.push({x:x+s*84,z:650,y0:132,w:24,h:10,d:24,c:x<0?'#2a1840':'#6a531c'});}
+  for(let k=0;k<5;k++)G.deco.push({x:-150+(Math.random()*2-1)*76,z:650+(Math.random()*2-1)*62,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
   // WEST BAY — THE EXCHANGE (gear & gold): signpost banner only, NO floor carpet
   G.deco.push({x:-548,z:70,y0:88,w:230,h:24,d:6,c:'#3a2a55'});
   // EAST BAY — THE WAR YARD (combat prep): signpost banner only, NO floor carpet
   G.deco.push({x:548,z:70,y0:88,w:230,h:24,d:6,c:'#5e2a24'});
   // ---- the posts: everyone gets a home that fits them ----
-  // grouped by purpose: WEST BAY = the Exchange (gear/gold), EAST BAY = the War Yard (combat prep), centre = quests+mirror, north dais = the Abyss
-  // WEST column = the Exchange · EAST column = the War Yard · SOUTH back-wall = bag/postings/mirror · NW grotto = the Abyss
+  // grouped by purpose: WEST BAY = Exchange, EAST BAY = War Yard, centre = quests/mirror,
+  // and the new SOUTH ANNEX = the Abyss plus the repeatable parkour trial.
   G.hubNpcs=[
     {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
     {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:()=>openForge(wsResume)},
@@ -7346,13 +7361,13 @@ function enterWaystation(){
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-200,z:322,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:330,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:200,z:322,open:()=>openBag(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-548,z:-284,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:548,z:-284,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-150,z:650,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
   ];
   // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
   { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
   G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
-  G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:360}; G.progressEnd=-350;
+  G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:850}; G.progressEnd=-350;
   G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
@@ -9244,9 +9259,11 @@ function drawWaystation(t){
     bx(-806,96,644, 3.4,3.4,3.4, '#ffe6a0','#ffd24a', 0.4+0.42*Math.sin(t*4)); }   // the glint that hints at the secret
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
   for(const g of G.gates){
-    if(g.side){ // discovered rift: a violet seam beside its parent gate
-      bx(g.x,26,g.z, 22,52,8, '#120a1e','#4a2070',0.9);
-      bx(g.x,26,g.z, 10,38,10, g.done?'#3a5a45':'#c47bff', g.done?'#4be08a':'#c47bff', 0.5+0.3*Math.sin(t*3+g.x));
+    if(g.side){ // discovered Trial Chamber: a compact but grounded rift monument in the annex
+      bx(g.x-18,28,g.z, 8,56,12,'#30283d');bx(g.x+18,28,g.z, 8,56,12,'#30283d');
+      bx(g.x,59,g.z,44,8,14,'#443452','#7b53a0',0.45);
+      bx(g.x,28,g.z+2, 28,48,7,'#120a1e','#4a2070',0.9);
+      bx(g.x,28,g.z+7, 15,38,6, g.done?'#3a5a45':'#c47bff', g.done?'#4be08a':'#c47bff', 0.5+0.3*Math.sin(t*3+g.x));
       continue; }
     const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
     bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts

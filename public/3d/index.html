@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.300.0';
+const VERSION3D='1.301.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8059,16 +8059,16 @@ function enterWaystation(){
   // ---- floor: ONE grand plaza (compact hub-and-spoke; -z = north/forward toward the gates) ----
   // A BIG base floor that reaches the perimeter walls everywhere (scaled with the hub by the space pass),
   // so there are no bare gaps between the floor and the walls after the widening.
-  G.segments.push({x:0,z:210,w:1400,d:1420});
-  G.segments.push({x:0,z:-40,w:1300,d:840});
+  G.segments.push({x:0,z:210,w:1400,d:1420});   // the ONE base floor slab that renders (reaches the walls)
+  G.segments.push({x:0,z:-40,w:1300,d:840,nofloor:true});
   G.rooms.push({x:0,z:-40,w:1300,d:840,monsters:[],encounter:false,cleared:true});
   // SOUTH ACTIVITY ANNEX — new real estate for the two repeatable challenge gates. It opens
   // around both sides of the Mirror Pavilion, keeping the campaign portal concourse uncluttered.
-  G.segments.push({x:0,z:600,w:660,d:500});
+  G.segments.push({x:0,z:600,w:660,d:500,nofloor:true});
   G.rooms.push({x:0,z:600,w:660,d:500,monsters:[],encounter:false,cleared:true,activityAnnex:true});
   // SOUTH-EAST REFLECTION & TRAINING COURT — new real estate so the Mirror + Sparring Room get their
   // own flush wall and the practice dummy has open ground, instead of being wedged among the keepers.
-  G.segments.push({x:470,z:455,w:360,d:150});
+  G.segments.push({x:470,z:455,w:360,d:150,nofloor:true});
   G.rooms.push({x:470,z:455,w:360,d:150,monsters:[],encounter:false,cleared:true});
   // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
   // Tall boundary walls — high enough that even a double jump can't clear them (no escaping the hub bowl).
@@ -8124,9 +8124,11 @@ function enterWaystation(){
   // REPEATABLE ACTIVITY ANNEX — three distinct plazas so each activity has its own room to breathe:
   // the Abyss (west), the Treasure Sprint (east), and the Arena (deep centre). Further widened by the space pass.
   G.deco.push({x:0,z:610,y0:0,w:720,h:1.4,d:96,c:'#8f744e'});                                   // annex approach walk
-  const annexPads=[{x:-300,z:660,f:'#16101f',p:'#2a1840'},{x:300,z:660,f:'#2e2610',p:'#6a531c'},{x:0,z:800,f:'#2a1216',p:'#5e2320'}];
+  // each activity plaza gets a SOLID themed floor pad in its portal's colour, raised just ABOVE the base floor
+  // (y0:2) so the two coplanar surfaces never z-fight/flicker. Abyss=violet, Sprint=gold, Arena=crimson.
+  const annexPads=[{x:-300,z:660,f:'#3a1a5e',p:'#2a1840'},{x:300,z:660,f:'#4a3810',p:'#6a531c'},{x:0,z:800,f:'#4a1618',p:'#5e2320'}];
   for(const a of annexPads){ G.obstacles.push({kind:'plat',x:a.x,z:a.z,w:180,d:150,h:20});
-    G.deco.push({x:a.x,z:a.z,y0:0,w:240,h:1.4,d:210,c:a.f});
+    G.deco.push({x:a.x,z:a.z,y0:2,w:236,h:1.6,d:206,c:a.f});
     for(const s of [-1,1]){ vcol(a.x+s*96,a.z,18,18,132); G.deco.push({x:a.x+s*96,z:a.z,y0:132,w:24,h:10,d:24,c:a.p}); } }   // a pair of corner pillars per plaza
   // Void crystals belong to the ABYSSAL DESCENT portal only — ring them around it as its signature (they scale + stay together with the annex).
   for(let k=0;k<8;k++){ const a=k/8*6.283, rr=76+Math.random()*40; G.deco.push({x:-300+Math.cos(a)*rr,z:660+Math.sin(a)*rr,w:14+Math.random()*11,h:26+Math.random()*34,c:'#241431',theme:'void'}); }
@@ -9456,6 +9458,7 @@ function drawCourse(s,t){
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
   // floating course islands
   for(const sg of G.segments){
+    if(sg.nofloor) continue;   // hub: redundant sub-segments (kept for collision) skip the floor slab so coplanar slabs don't z-fight/flicker
     bx(sg.x,-14,sg.z, sg.w,28,sg.d, s.ground);
     bx(sg.x,-25,sg.z, sg.w*0.86,8,sg.d*0.86, tint(s.ground,'#000',0.35));   // dark underside
     bx(sg.x,0.6,sg.z, sg.w,1.4,sg.d, tint(s.ground,'#fff',0.12));           // lit top edge
@@ -11475,6 +11478,11 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,
   floorAt:(x,z)=>G?floorAt(x,z,13,0):null,   // debug: walkable floor height at x/z (-Infinity = void/no ground)
+  // PLAYTEST CAMERA: teleport the hero to a vantage point + aim the overhead camera + force a render, so an
+  // automated harness (or a person) can screenshot any spot in the world for visual verification.
+  look:(x,z,yaw,pitch)=>{ if(!G||!G.p) return null; const p=G.p; p.x=x; p.z=z; p.y=0; p.vx=p.vy=p.vz=0;
+    if(yaw!=null){ p.yaw=yaw; G.camYaw=yaw; } if(pitch!=null) G.camPitch=pitch; if(G.cam) G.cam.y=0;
+    for(let i=0;i<3;i++) update(1/60); render(8); return {x:p.x,z:p.z,mode}; },
   botKillFirst:()=>{ if(!G) return 'no G'; const b=G.enemies.find(e=>e.bot&&!e.dead); if(!b) return 'no bot'; b.hp=0; killEnemy(b,true); return G.arenaScore; },
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },

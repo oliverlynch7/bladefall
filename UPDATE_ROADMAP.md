@@ -1406,3 +1406,17 @@ a real silvered mirror.
 The boxing-ring perimeter ropes had been drawn with alpha 0 (base colour transparent, only a faint emissive)
 so they washed out and blended into the warm floor. Restored them to BOLD SOLID red/blue/red stacked ropes
 (alpha 1 + a matching emissive glow), slightly thicker, so they read clearly against the floor. 0 console errors.
+
+
+## [Claude | 2026-07-21] Annex flicker (z-fighting) fix + playtest camera hook — shipped v1.301.0
+- **Flickering around the Abyss/Sprint/Arena portals FIXED.** Root cause = z-fighting: (a) my big base
+  floor segment overlapped the old plaza/annex/court segments, so multiple coplanar floor slabs rendered
+  on top of each other; and (b) the dark annex tint decals sat exactly on the floor. Fix: the base floor
+  is now the ONLY slab that renders (redundant sub-segments flagged `nofloor`, kept for collision), and
+  each activity plaza gets a SOLID themed floor pad in its portal's colour (Abyss violet / Sprint gold /
+  Arena crimson) raised just above the base floor so nothing is coplanar. Verified: floor renders clean.
+- **Playtest camera hook** `__BF3.look(x,z,yaw,pitch)` — teleports the hero to a vantage point, aims the
+  overhead camera, and forces a render, so an automated harness (or a person in DevTools) can screenshot
+  any spot for visual verification. Mirrors how Codex's Playwright harness drives the game via __BF3.
+  Used it to confirm the bag sits on the west wall between shop & smith, banners hang behind them, and the
+  floor is clean.

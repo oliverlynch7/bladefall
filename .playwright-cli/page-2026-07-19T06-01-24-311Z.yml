@@ -1,0 +1,48 @@
+- generic [active] [ref=f12e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: The Outskirts
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - generic:
+    - generic: The Outskirts
+    - generic:
+      - generic: ☑
+      - generic: Cull 12 Thornboars
+      - generic: 12/12
+    - generic:
+      - generic: ☑
+      - generic: Find the Old Waystone
+    - generic: The way opens — take the portal
+  - button "Pause" [ref=f12e10]
+  - generic:
+    - button "DODGE" [ref=f12e14]
+    - button [ref=f12e15]
+    - button "SLASH" [ref=f12e18]
+    - button "AUTO (L)" [ref=f12e19]
+    - button "SELL" [ref=f12e20]
+    - button "BAG" [ref=f12e22]
+    - button "TALK" [ref=f12e45]
+    - button "1" [ref=f12e24]
+    - button "🔒 2" [ref=f12e26]
+    - button "🔒 3" [ref=f12e27]
+    - button "🔒 4" [ref=f12e28]
+  - generic: THE OUTSKIRTS · ZONE 1/8
+  - generic:
+    - generic: E
+    - text: Talk to the Shade

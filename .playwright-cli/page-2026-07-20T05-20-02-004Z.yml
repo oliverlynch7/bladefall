@@ -1,0 +1,45 @@
+- generic [active] [ref=f3e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0% armor
+        - generic:
+          - generic: "0"
+          - generic: Trial of the Blade
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 99999 / 99999
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic: PATH
+  - generic [ref=f3e46]:
+    - generic [ref=f3e48]:
+      - generic [ref=f3e49]: CHARACTER · LV 1
+      - generic [ref=f3e51]: 0/46
+    - generic [ref=f3e54]:
+      - generic [ref=f3e55]: WARRIOR · RANK 1
+      - generic [ref=f3e57]: 0/60
+  - text: ✦
+  - button "Pause" [ref=f3e59]
+  - generic:
+    - button "AUTO (L)" [ref=f3e63]
+    - button "SELL" [ref=f3e64]
+    - button "BAG" [ref=f3e66]
+    - 'button "12 Cleave Sweeping strike: 2.2x damage in a wide arc 4s recharge · 12 mana 1" [ref=f3e76]':
+      - text: "12"
+      - generic:
+        - generic: Cleave
+        - text: "Sweeping strike: 2.2x damage in a wide arc"
+        - emphasis: 4s recharge · 12 mana
+      - text: "1"
+    - button "16 🔒 2" [ref=f3e70]
+    - button "14 🔒 3" [ref=f3e71]
+    - button "22 🔒 4" [ref=f3e72]
+  - generic: DODGE rolls you out of danger. Learn it.

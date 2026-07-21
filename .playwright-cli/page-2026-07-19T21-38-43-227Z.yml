@@ -1,0 +1,20 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e26]:
+    - paragraph [ref=e27]: Options
+    - heading "More" [level=2] [ref=e28]
+    - button "Achievements" [ref=e29] [cursor=pointer]
+    - generic [ref=e31]: ◆ Audio
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Music
+        - generic [ref=e36]: 0%
+      - slider [ref=e37]: "0"
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - generic [ref=e40]: Sound effects
+        - generic [ref=e42]: 0%
+      - slider [ref=e43]: "0"
+    - button "♪ Music & Credits" [ref=e44] [cursor=pointer]
+    - button "Classic 2D BLADEFALL" [ref=e45] [cursor=pointer]
+    - button "Back" [ref=e47] [cursor=pointer]

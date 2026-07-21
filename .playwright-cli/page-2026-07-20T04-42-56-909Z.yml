@@ -1,0 +1,50 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: Trial of the Blade
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic:
+        - generic:
+          - generic:
+            - generic: CHARACTER · LV 1
+            - generic: 0/46
+        - generic:
+          - generic:
+            - generic: WARRIOR · RANK 1
+            - generic: 0/60
+      - generic: PATH
+  - generic:
+    - text: ✦
+    - generic: Trial of the Blade
+    - generic:
+      - generic: ☐
+      - generic: Defeat the keepers
+      - generic: 0/6
+  - button "Pause" [ref=e81]
+  - generic:
+    - button "DODGE" [ref=e85]
+    - button [ref=e86]
+    - button "SLASH" [ref=e89]
+    - button "AUTO (L)" [ref=e90]
+    - button "SELL" [ref=e91]
+    - button "BAG" [ref=e93]
+    - button "12 1" [ref=e95]
+    - button "16 🔒 2" [ref=e97]
+    - button "14 🔒 3" [ref=e98]
+    - button "22 🔒 4" [ref=e99]
+  - generic: Move with the stick (or WASD).

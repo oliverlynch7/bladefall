@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e10]:
+    - button "ENTER THE ABYSS Slot 1 · New Warden · Choose a class to begin" [ref=e12] [cursor=pointer]:
+      - generic [ref=e13]: ENTER THE ABYSS
+      - generic [ref=e14]: Slot 1 · New Warden · Choose a class to begin
+    - generic [ref=e15]:
+      - button "CHARACTERS Choose or manage a save slot" [ref=e16] [cursor=pointer]:
+        - generic [ref=e18]: CHARACTERS
+        - generic [ref=e19]: Choose or manage a save slot
+      - button "SKINS Change your Warden’s appearance" [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: SKINS
+        - generic [ref=e22]: Change your Warden’s appearance
+    - button "More & Settings" [ref=e23] [cursor=pointer]
+    - generic [ref=e25]: SKINS 1/11 · v1.166.0

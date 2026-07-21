@@ -1,0 +1,110 @@
+- generic [active] [ref=f1e1]:
+  - text: 1 2 3 4
+  - generic: "✨ Cosmetic unlocked: Hitless Edge"
+  - generic [ref=f1e118]:
+    - paragraph [ref=f1e119]: The Keeper · 14/14 Discovered
+    - heading "Wardrobe" [level=2] [ref=f1e120]
+    - paragraph [ref=f1e121]: Wear the victories you earned. Cosmetics change your legend—not your stats.
+    - generic [ref=f1e122]:
+      - generic [ref=f1e123]:
+        - generic [ref=f1e124]:
+          - generic [ref=f1e125]: Cape
+          - generic [ref=f1e126]: "Equipped: Wanderer’s CapeRemove"
+        - generic [ref=f1e127]:
+          - generic [ref=f1e128] [cursor=pointer]:
+            - img "Wanderer’s Cape" [ref=f1e129]
+            - generic [ref=f1e130]:
+              - generic [ref=f1e131]: Wanderer’s Cape
+              - generic [ref=f1e132]: Clear your first zone
+              - generic [ref=f1e133]: Equipped
+          - generic [ref=f1e134] [cursor=pointer]:
+            - img "Delver’s Cape" [ref=f1e135]
+            - generic [ref=f1e136]:
+              - generic [ref=f1e137]: Delver’s Cape
+              - generic [ref=f1e138]: Find 3 secrets
+              - generic [ref=f1e139]: Wear
+          - generic [ref=f1e140] [cursor=pointer]:
+            - img "Slayer’s Cape" [ref=f1e141]
+            - generic [ref=f1e142]:
+              - generic [ref=f1e143]: Slayer’s Cape
+              - generic [ref=f1e144]: Kill 50 elites
+              - generic [ref=f1e145]: Wear
+          - generic [ref=f1e146] [cursor=pointer]:
+            - img "Tyrant’s Mantle" [ref=f1e147]
+            - generic [ref=f1e148]:
+              - generic [ref=f1e149]: Tyrant’s Mantle
+              - generic [ref=f1e150]: Beat Normal
+              - generic [ref=f1e151]: Wear
+          - generic [ref=f1e152] [cursor=pointer]:
+            - img "Undying Shroud" [ref=f1e153]
+            - generic [ref=f1e154]:
+              - generic [ref=f1e155]: Undying Shroud
+              - generic [ref=f1e156]: Beat Hardcore
+              - generic [ref=f1e157]: Wear
+      - generic [ref=f1e158]:
+        - generic [ref=f1e159]:
+          - generic [ref=f1e160]: Trail
+          - generic [ref=f1e161]: "Equipped: None"
+        - generic [ref=f1e162]:
+          - generic [ref=f1e163] [cursor=pointer]:
+            - img "Dust Trail" [ref=f1e164]
+            - generic [ref=f1e165]:
+              - generic [ref=f1e166]: Dust Trail
+              - generic [ref=f1e167]: Reach level 10
+              - generic [ref=f1e168]: Wear
+          - generic [ref=f1e169] [cursor=pointer]:
+            - img "Ember Trail" [ref=f1e170]
+            - generic [ref=f1e171]:
+              - generic [ref=f1e172]: Ember Trail
+              - generic [ref=f1e173]: Clear Emberdeep
+              - generic [ref=f1e174]: Wear
+          - generic [ref=f1e175] [cursor=pointer]:
+            - img "Frost Trail" [ref=f1e176]
+            - generic [ref=f1e177]:
+              - generic [ref=f1e178]: Frost Trail
+              - generic [ref=f1e179]: Clear Frostfell
+              - generic [ref=f1e180]: Wear
+          - generic [ref=f1e181] [cursor=pointer]:
+            - img "Void Trail" [ref=f1e182]
+            - generic [ref=f1e183]:
+              - generic [ref=f1e184]: Void Trail
+              - generic [ref=f1e185]: Clear The Abyss
+              - generic [ref=f1e186]: Wear
+          - generic [ref=f1e187] [cursor=pointer]:
+            - img "Ghost Trail" [ref=f1e188]
+            - generic [ref=f1e189]:
+              - generic [ref=f1e190]: Ghost Trail
+              - generic [ref=f1e191]: Clear 15 areas without taking a hit
+              - generic [ref=f1e192]: Wear
+      - generic [ref=f1e193]:
+        - generic [ref=f1e194]:
+          - generic [ref=f1e195]: Weapon Glow
+          - generic [ref=f1e196]: "Equipped: None"
+        - generic [ref=f1e197]:
+          - generic [ref=f1e198] [cursor=pointer]:
+            - img "Gilded Edge" [ref=f1e199]
+            - generic [ref=f1e200]:
+              - generic [ref=f1e201]: Gilded Edge
+              - generic [ref=f1e202]: Find a legendary
+              - generic [ref=f1e203]: Wear
+          - generic [ref=f1e204] [cursor=pointer]:
+            - img "Bloodlit Edge" [ref=f1e205]
+            - generic [ref=f1e206]:
+              - generic [ref=f1e207]: Bloodlit Edge
+              - generic [ref=f1e208]: 1000 kills
+              - generic [ref=f1e209]: Wear
+          - generic [ref=f1e210] [cursor=pointer]:
+            - img "Soulfire Edge" [ref=f1e211]
+            - generic [ref=f1e212]:
+              - generic [ref=f1e213]: Soulfire Edge
+              - generic [ref=f1e214]: Earn the Reaper
+              - generic [ref=f1e215]: Wear
+          - generic [ref=f1e216] [cursor=pointer]:
+            - img "Hitless Edge" [ref=f1e217]
+            - generic [ref=f1e218]:
+              - generic [ref=f1e219]: Hitless Edge
+              - generic [ref=f1e220]: Beat Hitless
+              - generic [ref=f1e221]: Wear
+    - generic [ref=f1e222]:
+      - button "Skins" [ref=f1e223] [cursor=pointer]
+      - button "Back" [ref=f1e224] [cursor=pointer]

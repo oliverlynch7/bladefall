@@ -1,0 +1,65 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "12"
+          - generic: The Outskirts
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 91 / 100
+        - generic:
+          - generic: MANA
+          - generic: 63 / 100
+      - generic:
+        - generic:
+          - generic:
+            - generic: CHARACTER · LV 1
+            - generic: 21/46
+        - generic:
+          - generic:
+            - generic: WARRIOR · RANK 1
+            - generic: 17/60
+      - generic: PATH
+  - generic:
+    - generic: The Outskirts
+    - generic:
+      - generic: ☐
+      - generic: Cull 12 Thornboars
+      - generic: 0/12
+    - generic:
+      - generic: ☐
+      - generic: Find the Old Waystone
+  - generic: 3 HITS
+  - button "Pause" [ref=e10]
+  - generic:
+    - button "DODGE" [ref=e14]
+    - button [ref=e15]
+    - button "SLASH" [ref=e18]
+    - button "AUTO (L)" [ref=e19]
+    - button "SELL" [ref=e20]
+    - button "BAG" [ref=e22]
+    - button "TALK" [ref=e51]
+    - button "20 1" [ref=e49]
+    - button "30 🔒 2" [ref=e25]
+    - button "40 🔒 3" [ref=e26]
+    - button "50 🔒 4" [ref=e27]
+  - generic: First Blood
+  - generic:
+    - generic: E
+    - text: Talk to the Shade
+  - generic: "16"
+  - generic: "1"
+  - generic: "2"
+  - generic: +12 MANA
+  - generic: SPORE BURST
+  - generic: +21 XP
+  - generic: +12g
+  - generic: "-9"

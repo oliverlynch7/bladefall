@@ -1,0 +1,58 @@
+- generic [active] [ref=f6e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=f6e10]
+  - generic:
+    - button "DODGE" [ref=f6e14]
+    - button [ref=f6e15]
+    - button "SLASH" [ref=f6e18]
+    - button "AUTO (L)" [ref=f6e19]
+    - button "1" [ref=f6e20]
+    - button "🔒 2" [ref=f6e22]
+    - button "🔒 3" [ref=f6e23]
+    - button "🔒 4" [ref=f6e24]
+  - generic: 🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.
+  - generic [ref=f6e252]:
+    - paragraph [ref=f6e253]: Bestiary Entry
+    - heading "Blink Stalker" [level=2] [ref=f6e254]
+    - generic "Blink Stalker portrait" [ref=f6e255]
+    - paragraph [ref=f6e259]: An Abyss predator that hunts through gaps in space instead of corridors.
+    - generic [ref=f6e260]:
+      - generic [ref=f6e261]:
+        - generic [ref=f6e262]: Health
+        - generic [ref=f6e263]: "34"
+      - generic [ref=f6e264]:
+        - generic [ref=f6e265]: Damage
+        - generic [ref=f6e266]: "14"
+      - generic [ref=f6e267]:
+        - generic [ref=f6e268]: Speed
+        - generic [ref=f6e269]: "58"
+      - generic [ref=f6e270]:
+        - generic [ref=f6e271]: Attack
+        - generic [ref=f6e272]: Melee
+      - generic [ref=f6e273]:
+        - generic [ref=f6e274]: Element
+        - generic [ref=f6e275]: Void
+      - generic [ref=f6e276]:
+        - generic [ref=f6e277]: Weak to
+        - generic [ref=f6e278]: Holy
+    - paragraph [ref=f6e279]: "Watch for: Marks its destination before teleporting behind you."
+    - button "Back to Training & Bestiary" [ref=f6e280] [cursor=pointer]

@@ -1,0 +1,68 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=e40]
+  - generic:
+    - button "DODGE" [ref=e44]
+    - button [ref=e45]
+    - button "SLASH" [ref=e48]
+    - button "AUTO (L)" [ref=e49]
+    - button "SELL" [ref=e50]
+    - button "BAG" [ref=e52]
+    - button "1" [ref=e54]
+    - button "🔒 2" [ref=e56]
+    - button "🔒 3" [ref=e57]
+    - button "🔒 4" [ref=e58]
+  - generic: 🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.
+  - generic [ref=e87]:
+    - paragraph [ref=e88]: Catch your breath
+    - heading "Paused" [level=2] [ref=e89]
+    - button "Resume" [ref=e90] [cursor=pointer]
+    - generic [ref=e92]: Character
+    - generic [ref=e93]:
+      - button "Gear" [ref=e94] [cursor=pointer]
+      - button "🗡 Weapons" [ref=e96] [cursor=pointer]
+      - button "🎒 Bag · 0/30" [ref=e97] [cursor=pointer]
+      - button "✦ Classes & Skills" [ref=e98] [cursor=pointer]
+      - button "🎭 Skins" [ref=e99] [cursor=pointer]
+      - button "Achievements" [ref=e100] [cursor=pointer]
+      - button "⚔️ Warrior · r1" [ref=e102] [cursor=pointer]
+    - generic [ref=e103]: Settings
+    - generic [ref=e104]:
+      - button "🎥 Overhead" [ref=e105] [cursor=pointer]
+      - 'button "Fullscreen: Off" [ref=e106] [cursor=pointer]'
+      - 'button "🩻 Armor shown: On" [ref=e108] [cursor=pointer]'
+      - 'button "🔢 Damage numbers: On" [ref=e109] [cursor=pointer]'
+    - generic [ref=e110]: Audio
+    - generic [ref=e111]:
+      - generic [ref=e112]:
+        - generic [ref=e113]: Music
+        - generic [ref=e115]: 0%
+      - slider [ref=e116]: "0"
+    - generic [ref=e117]:
+      - generic [ref=e118]:
+        - generic [ref=e119]: Sound effects
+        - generic [ref=e121]: 0%
+      - slider [ref=e122]: "0"
+    - generic [ref=e123]: Leave
+    - generic [ref=e124]:
+      - button "Quit to Hub" [ref=e125] [cursor=pointer]
+      - button "Title Screen" [ref=e127] [cursor=pointer]

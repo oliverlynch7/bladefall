@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: Trial of the Blade
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic:
+        - generic:
+          - generic:
+            - generic: CHARACTER · LV 1
+            - generic: 0/46
+        - generic:
+          - generic:
+            - generic: WARRIOR · RANK 1
+            - generic: 0/60
+      - generic: PATH
+  - text: ✦
+  - button "Pause" [ref=e81]
+  - generic:
+    - button "DODGE" [ref=e85]
+    - button [ref=e86]
+    - button "SLASH" [ref=e89]
+    - button "AUTO (L)" [ref=e90]
+    - button "SELL" [ref=e91]
+    - button "BAG" [ref=e93]
+    - button "12 1" [ref=e95]
+    - button "16 🔒 2" [ref=e97]
+    - button "14 🔒 3" [ref=e98]
+    - button "22 🔒 4" [ref=e99]
+  - generic: TRIAL OF THE BLADE
+  - generic [ref=e100]:
+    - paragraph [ref=e101]: The blood is awake in you
+    - heading "The Proving Chamber" [level=2] [ref=e102]
+    - generic [ref=e103]:
+      - paragraph [ref=e104]: Before you make your Bladefall, what woke in you has to be proven. This sealed chamber is where the blood tests its own. Survive it and the way down is yours. Fail and no one below will ever know your name.
+      - paragraph [ref=e105]: Move — WASD / left stick. Jump — Space (tap = hop, hold = higher).
+      - paragraph [ref=e106]: Attack — J / the SLASH button; it auto-aims where you're looking. Dodge — K / Shift.
+      - paragraph [ref=e107]: Skills — keys 1–4 (they unlock as your class ranks up).
+      - paragraph [ref=e108]: Talk / use — walk up and press E. Pause / camera — Esc.
+      - paragraph [ref=e109]: "Goal: clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss."
+    - button "Begin the trial" [ref=e110] [cursor=pointer]
+    - button "Skip tutorial & trial" [ref=e111] [cursor=pointer]

@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Player
+            - generic: ·
+            - generic: Ranger
+          - generic: Cracked Shortbow
+        - generic:
+          - generic "0% armor rating (full legendary = 100%) · 0% damage reduction":
+            - text: 🛡
+            - generic: 0%
+          - generic: "0"
+          - generic: The Outskirts
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+  - generic:
+    - generic [ref=e56]:
+      - generic [ref=e57]: CHARACTER · LV 1
+      - generic [ref=e59]: 0/46
+    - generic [ref=e62]:
+      - generic [ref=e63]: RANGER · RANK 3
+      - generic [ref=e65]: 0/388
+  - generic:
+    - text: ✦
+    - generic: The Outskirts
+    - generic:
+      - generic: ☐
+      - generic: Cull 12 Thornboars
+      - generic: 0/12
+    - generic:
+      - generic: ☐
+      - generic: Find the Old Waystone
+  - button "Pause" [ref=e67]
+  - generic:
+    - button "AUTO (L)" [ref=e71]
+    - button "SELL" [ref=e72]
+    - button "BAG" [ref=e74]
+    - button "Attack" [ref=e76]: ATTACK
+    - button [ref=e79]
+    - button "🔒 Unlocks Rank 4 2" [ref=e82]:
+      - generic [ref=e83]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 4
+      - text: "2"
+    - button "🔒 Unlocks Rank 6 3" [ref=e84]:
+      - generic [ref=e85]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 6
+      - text: "3"
+    - button "🔒 Unlocks Rank 8 4" [ref=e86]:
+      - generic [ref=e87]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 8
+      - text: "4"
+    - button "Dodge" [ref=e88]: DODGE
+  - generic: THE OUTSKIRTS · ZONE 1/8
+  - text: › ›
+  - generic:
+    - generic: E
+    - text: Talk to the Shade
+  - generic: The road ends here. Everything past it is already dreaming.

@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=e40]
+  - generic:
+    - button "DODGE" [ref=e44]
+    - button [ref=e45]
+    - button "SLASH" [ref=e48]
+    - button "AUTO (L)" [ref=e49]
+    - button "SELL" [ref=e50]
+    - button "BAG" [ref=e52]
+    - button "1" [ref=e54]
+    - button "🔒 2" [ref=e56]
+    - button "🔒 3" [ref=e57]
+    - button "🔒 4" [ref=e58]
+  - generic: 🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.
+  - generic [ref=e75]:
+    - paragraph [ref=e76]: The Waystation
+    - heading "Your home base" [level=2] [ref=e77]
+    - generic [ref=e78]:
+      - paragraph [ref=e79]: "This is home between runs. Walk up to a keeper and press E (or TALK) to use them:"
+      - paragraph [ref=e80]: 🛒 Quartermaster — weapons + perks · ⚔️ Drillmaster — swap class / trials · 🔨 Smith — forge gear🎒 Pack — your bag · 📜 Postings — quests · 🧥 Keeper — cosmetics.
+      - paragraph [ref=e81]: The glowing waystone in the centre heals you and banks your progress.
+      - paragraph [ref=e82]: The Gates along the far wall are the zones — walk into one to dive. Clear a zone to open the next.
+    - button "Got it" [ref=e83] [cursor=pointer]

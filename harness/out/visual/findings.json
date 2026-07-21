@@ -11,7 +11,7 @@
       "mode": "title",
       "VW": 1440,
       "VH": 900,
-      "version": "1.85.0",
+      "version": "1.98.0",
       "webgl": true,
       "playMode": null,
       "gold": 0,
@@ -67,23 +67,12 @@
       "height": 844
     },
     "errors": [],
-    "overflow": [
-      {
-        "tag": "DIV",
-        "id": "ovcard",
-        "text": "BLADEFALL 3DHardcore Dungeon Crawler\n    Play\n    🕳️ Abyssal Descent\n    Charac",
-        "x": 24,
-        "y": 24,
-        "w": 342,
-        "h": 923,
-        "overflow": true
-      }
-    ],
+    "overflow": [],
     "snap": {
       "mode": "title",
       "VW": 390,
       "VH": 844,
-      "version": "1.85.0",
+      "version": "1.98.0",
       "webgl": true,
       "playMode": null,
       "gold": 0,
@@ -144,7 +133,7 @@
       "mode": "play",
       "VW": 1440,
       "VH": 900,
-      "version": "1.85.0",
+      "version": "1.98.0",
       "webgl": true,
       "playMode": null,
       "gold": 0,
@@ -158,12 +147,12 @@
       "amulet": false,
       "ring": false,
       "p": {
-        "x": -6,
-        "y": 0,
-        "z": 222,
+        "x": -5,
+        "y": 7,
+        "z": 220,
         "yaw": 3.14,
-        "onGround": true,
-        "hp": 84,
+        "onGround": false,
+        "hp": 89,
         "effMaxHp": 100,
         "lvl": 1,
         "weapon": {
@@ -199,6 +188,7 @@
       "mobTypes": [
         "sporeback",
         "thornboar",
+        "flyer",
         "grunt"
       ],
       "bonusPortal": false,
@@ -225,10 +215,10 @@
       {
         "tag": "DIV",
         "id": "interactprompt",
-        "text": "ETalk to the Warden's Shade",
-        "x": -99,
-        "y": 529,
-        "w": 216,
+        "text": "ETalk to the Shade",
+        "x": -68,
+        "y": 547,
+        "w": 154,
         "h": 26,
         "overflow": true
       }
@@ -237,10 +227,10 @@
       "mode": "play",
       "VW": 390,
       "VH": 844,
-      "version": "1.85.0",
+      "version": "1.98.0",
       "webgl": true,
       "playMode": null,
-      "gold": 0,
+      "gold": 12,
       "perks": {},
       "camMode": "far",
       "camYaw": 3.14,
@@ -251,12 +241,12 @@
       "amulet": false,
       "ring": false,
       "p": {
-        "x": -4,
-        "y": 7,
-        "z": 217,
+        "x": -6,
+        "y": 0,
+        "z": 222,
         "yaw": 3.14,
-        "onGround": false,
-        "hp": 84,
+        "onGround": true,
+        "hp": 82,
         "effMaxHp": 100,
         "lvl": 1,
         "weapon": {
@@ -273,9 +263,9 @@
       "stageName": "The Outskirts",
       "ngHp": 1,
       "ngDmg": 1,
-      "enemiesAlive": 13,
+      "enemiesAlive": 12,
       "killGoal": 12,
-      "kills": 0,
+      "kills": 1,
       "projectiles": 0,
       "pickups": 0,
       "portal": false,
@@ -302,8 +292,8 @@
       "combo": 0,
       "unlockedSkins": 1,
       "godUnlocked": false,
-      "achievements": 0,
-      "totalKills": 0
+      "achievements": 1,
+      "totalKills": 1
     }
   },
   {
@@ -318,7 +308,7 @@
       "mode": "play",
       "VW": 844,
       "VH": 390,
-      "version": "1.85.0",
+      "version": "1.98.0",
       "webgl": true,
       "playMode": null,
       "gold": 0,
@@ -373,7 +363,6 @@
       "mobTypes": [
         "sporeback",
         "thornboar",
-        "grunt",
         "flyer"
       ],
       "bonusPortal": false,
@@ -401,7 +390,7 @@
       "mode": "play",
       "VW": 1440,
       "VH": 900,
-      "version": "1.85.0",
+      "version": "1.99.0",
       "webgl": true,
       "playMode": null,
       "gold": 0,
@@ -415,12 +404,12 @@
       "amulet": false,
       "ring": false,
       "p": {
-        "x": 0,
+        "x": -9,
         "y": 0,
-        "z": 330,
+        "z": 322,
         "yaw": 3.14,
         "onGround": true,
-        "hp": 100,
+        "hp": 82,
         "effMaxHp": 100,
         "lvl": 1,
         "weapon": {
@@ -454,10 +443,10 @@
       "hasKey": false,
       "encounters": 0,
       "mobTypes": [
-        "sporeback",
-        "flyer",
         "thornboar",
-        "grunt"
+        "grunt",
+        "sporeback",
+        "flyer"
       ],
       "bonusPortal": false,
       "bonusActive": false,

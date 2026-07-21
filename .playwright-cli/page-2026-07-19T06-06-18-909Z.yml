@@ -1,0 +1,93 @@
+- generic [active] [ref=f13e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: The Outskirts
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - generic:
+    - generic: The Outskirts
+    - generic:
+      - generic: ☐
+      - generic: Cull 12 Thornboars
+      - generic: 1/12
+    - generic:
+      - generic: ☐
+      - generic: Find the Old Waystone
+  - button "Pause" [ref=f13e10]
+  - generic:
+    - button "DODGE" [ref=f13e14]
+    - button [ref=f13e15]
+    - button "SLASH" [ref=f13e18]
+    - button "AUTO (L)" [ref=f13e19]
+    - button "SELL" [ref=f13e20]
+    - button "BAG" [ref=f13e22]
+    - button "1" [ref=f13e25]
+    - button "🔒 2" [ref=f13e27]
+    - button "🔒 3" [ref=f13e28]
+    - button "🔒 4" [ref=f13e29]
+  - generic: THE OUTSKIRTS · ZONE 1/8
+  - generic [ref=f13e44]:
+    - paragraph [ref=f13e45]: Catch your breath
+    - heading "Paused" [level=2] [ref=f13e46]
+    - button "Resume Return to the fight" [ref=f13e47] [cursor=pointer]:
+      - generic [ref=f13e49]: Resume
+      - generic [ref=f13e50]: Return to the fight
+    - generic [ref=f13e51]: Character
+    - generic [ref=f13e52]:
+      - button "Gear Inspect equipment" [ref=f13e53] [cursor=pointer]:
+        - generic [ref=f13e55]: Gear
+        - generic [ref=f13e56]: Inspect equipment
+      - button "Weapons & Designs Open the studio" [ref=f13e57] [cursor=pointer]:
+        - generic [ref=f13e58]: Weapons & Designs
+        - generic [ref=f13e59]: Open the studio
+      - button "Bag 0/30 slots used" [ref=f13e60] [cursor=pointer]:
+        - generic [ref=f13e61]: Bag
+        - generic [ref=f13e62]: 0/30 slots used
+      - button "Classes & Skills Ranks, paths, and skills" [ref=f13e63] [cursor=pointer]:
+        - generic [ref=f13e64]: Classes & Skills
+        - generic [ref=f13e65]: Ranks, paths, and skills
+      - button "Skins Change your look" [ref=f13e66] [cursor=pointer]:
+        - generic [ref=f13e67]: Skins
+        - generic [ref=f13e68]: Change your look
+      - button "Achievements Review your feats" [ref=f13e69] [cursor=pointer]:
+        - generic [ref=f13e70]: Achievements
+        - generic [ref=f13e71]: Review your feats
+      - button "Warrior Rank 1" [ref=f13e72] [cursor=pointer]:
+        - generic [ref=f13e73]: Warrior
+        - generic [ref=f13e74]: Rank 1
+    - generic [ref=f13e75]: Settings
+    - generic [ref=f13e76]:
+      - button "🎥 Overhead" [ref=f13e77] [cursor=pointer]
+      - 'button "Fullscreen: Off" [ref=f13e78] [cursor=pointer]'
+      - 'button "🩻 Armor shown: On" [ref=f13e80] [cursor=pointer]'
+      - 'button "🔢 Damage numbers: On" [ref=f13e81] [cursor=pointer]'
+    - generic [ref=f13e82]: Audio
+    - generic [ref=f13e83]:
+      - generic [ref=f13e84]:
+        - generic [ref=f13e85]: Music
+        - generic [ref=f13e87]: 0%
+      - slider [ref=f13e88]: "0"
+    - generic [ref=f13e89]:
+      - generic [ref=f13e90]:
+        - generic [ref=f13e91]: Sound effects
+        - generic [ref=f13e93]: 0%
+      - slider [ref=f13e94]: "0"
+    - generic [ref=f13e95]: Leave
+    - generic [ref=f13e96]:
+      - button "Quit to Hub" [ref=f13e97] [cursor=pointer]
+      - button "Title Screen" [ref=f13e99] [cursor=pointer]

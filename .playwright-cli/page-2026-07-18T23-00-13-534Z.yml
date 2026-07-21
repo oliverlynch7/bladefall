@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: Trial of the Blade
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=e40]
+  - generic:
+    - button "DODGE" [ref=e44]
+    - button [ref=e45]
+    - button "SLASH" [ref=e48]
+    - button "AUTO (L)" [ref=e49]
+    - button "SELL" [ref=e50]
+    - button "BAG" [ref=e52]
+    - button "1" [ref=e54]
+    - button "🔒 2" [ref=e56]
+    - button "🔒 3" [ref=e57]
+    - button "🔒 4" [ref=e58]
+  - generic: TRIAL OF THE BLADE
+  - generic [ref=e59]:
+    - paragraph [ref=e60]: The blood is awake in you
+    - heading "The Proving Chamber" [level=2] [ref=e61]
+    - generic [ref=e62]:
+      - paragraph [ref=e63]: Before you make your Bladefall, what woke in you has to be proven. This sealed chamber is where the blood tests its own. Survive it and the way down is yours. Fail and no one below will ever know your name.
+      - paragraph [ref=e64]: Move — WASD / left stick. Jump — Space (tap = hop, hold = higher).
+      - paragraph [ref=e65]: Attack — J / the SLASH button; it auto-aims where you're looking. Dodge — K / Shift.
+      - paragraph [ref=e66]: Skills — keys 1–4 (they unlock as your class ranks up).
+      - paragraph [ref=e67]: Talk / use — walk up and press E. Pause / camera — Esc.
+      - paragraph [ref=e68]: "Goal: clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss."
+    - button "Begin the trial" [ref=e69] [cursor=pointer]
+    - button "Skip tutorial & trial" [ref=e70] [cursor=pointer]

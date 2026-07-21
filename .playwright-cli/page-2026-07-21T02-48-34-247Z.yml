@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Player
+            - generic: ·
+            - generic: Ranger
+          - generic: Legendary Battle Axe ⚠ off-class
+        - generic:
+          - generic "56% armor rating (full legendary = 100%) · 20% damage reduction":
+            - text: 🛡
+            - generic: 56%
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+  - generic:
+    - generic [ref=e11]:
+      - generic [ref=e12]: CHARACTER · LV 1
+      - generic [ref=e14]: 0/46
+    - generic [ref=e17]:
+      - generic [ref=e18]: RANGER · RANK 1
+      - generic [ref=e20]: 0/60
+  - generic:
+    - generic:
+      - generic: Ember Pup
+      - generic: 75 / 75 HP
+  - text: ✦
+  - button "Pause" [ref=e22]
+  - generic:
+    - button "AUTO (L)" [ref=e26]
+    - button "Attack" [ref=e27]: ATTACK
+    - button "🔒 Unlocks Rank 2 1" [ref=e30]:
+      - generic [ref=e31]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 2
+      - text: "1"
+    - button "🔒 Unlocks Rank 4 2" [ref=e32]:
+      - generic [ref=e33]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 4
+      - text: "2"
+    - button "🔒 Unlocks Rank 6 3" [ref=e34]:
+      - generic [ref=e35]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 6
+      - text: "3"
+    - button "🔒 Unlocks Rank 8 4" [ref=e36]:
+      - generic [ref=e37]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 8
+      - text: "4"
+    - button "Dodge" [ref=e38]: DODGE
+  - generic: ⚔️ All classes unlocked — swap at the Drillmaster
+  - generic [ref=e102]:
+    - paragraph [ref=e103]: The Drillmaster
+    - heading "Class Trainer" [level=2] [ref=e104]
+    - paragraph [ref=e105]: Switch freely here. Never mid-zone.
+    - generic [ref=e106]:
+      - generic [ref=e107]:
+        - generic [ref=e108]: Warrior
+        - generic [ref=e112]: Rank 1/10 · 0 choices set
+        - generic [ref=e113]:
+          - generic [ref=e114]: Sword
+          - generic [ref=e115]: Greatsword
+          - generic [ref=e116]: Axe
+          - generic [ref=e117]: Hammer
+        - button "Equip" [ref=e119] [cursor=pointer]
+      - generic [ref=e120]:
+        - generic [ref=e124]:
+          - text: Ranger
+          - generic [ref=e125]: Equipped
+        - generic [ref=e126]: Rank 1/10 · 0 choices set
+        - generic [ref=e127]:
+          - generic [ref=e128]: Bow
+          - generic [ref=e129]: Crossbow
+          - generic [ref=e130]: Dagger
+          - generic [ref=e131]: Javelin
+      - generic [ref=e133]:
+        - generic [ref=e134]: Mage
+        - generic [ref=e138]: Rank 1/10 · 0 choices set
+        - generic [ref=e139]:
+          - generic [ref=e140]: Staff
+          - generic [ref=e141]: Wand
+          - generic [ref=e142]: Spellblade
+        - button "Equip" [ref=e144] [cursor=pointer]
+      - generic [ref=e145]:
+        - generic [ref=e146]: Reaper
+        - generic [ref=e150]: Rank 1/10 · 0 choices set
+        - generic [ref=e151]: Scythe
+        - button "Equip" [ref=e154] [cursor=pointer]
+    - button "Back" [ref=e155] [cursor=pointer]

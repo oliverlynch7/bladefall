@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e10]:
+    - button "⚔ ENTER THE ABYSS" [ref=e11] [cursor=pointer]
+    - button "Abyssal Descent" [ref=e12] [cursor=pointer]
+    - generic [ref=e14]:
+      - button "Characters" [ref=e15] [cursor=pointer]
+      - button "✦ Skins" [ref=e17] [cursor=pointer]
+      - button "More" [ref=e18] [cursor=pointer]
+    - generic [ref=e20]: SKINS 1/11 · v1.107.0

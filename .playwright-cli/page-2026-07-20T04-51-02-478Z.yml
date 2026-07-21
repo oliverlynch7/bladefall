@@ -1,0 +1,18 @@
+- generic [active] [ref=f1e1]:
+  - text: ✦ 12 1 16 2 14 3 22 4
+  - generic: DODGE rolls you out of danger. Learn it.
+  - generic [ref=f1e159]:
+    - heading "BLADEFALL" [level=2] [ref=f1e160]
+    - paragraph [ref=f1e161]: Choose how you fight. Its trial teaches you the rest.You can unlock the others later — and more besides.
+    - generic [ref=f1e162]:
+      - button [ref=f1e163] [cursor=pointer]:
+        - generic [ref=f1e164]: Warrior
+        - generic [ref=f1e167]: sword, great, axe, hammerCleave · Shockwave Stomp · Charge · Berserk
+      - button [ref=f1e168] [cursor=pointer]:
+        - generic [ref=f1e169]: Ranger
+        - generic [ref=f1e172]: bow, cross, dagger, javelinDeadeye · Volley · Tumble · Hunter’s Mark
+      - button [ref=f1e173] [cursor=pointer]:
+        - generic [ref=f1e174]: Mage
+        - generic [ref=f1e177]: staff, wand, spellbladeElemental Bolt · Nova · Blink · Arcane Tempest
+  - generic: "-15"
+  - generic: "-23"

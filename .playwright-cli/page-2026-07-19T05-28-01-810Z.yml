@@ -1,0 +1,38 @@
+- generic [active] [ref=f2e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: The Outskirts
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/46
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=f2e69]
+  - generic:
+    - button "DODGE" [ref=f2e73]
+    - button [ref=f2e74]
+    - button "SLASH" [ref=f2e77]
+    - button "AUTO (L)" [ref=f2e78]
+    - button "SELL" [ref=f2e79]
+    - button "BAG" [ref=f2e81]
+    - button "TALK" [ref=f2e83]
+    - button "1" [ref=f2e84]
+    - button "🔒 2" [ref=f2e86]
+    - button "🔒 3" [ref=f2e87]
+    - button "🔒 4" [ref=f2e88]
+  - generic: THE OUTSKIRTS · ZONE 1/8
+  - generic:
+    - generic: E
+    - text: Talk to the Shade

@@ -1,0 +1,42 @@
+- generic [active] [ref=f1e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: Trial of the Blade
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic: PATH
+  - generic [ref=f1e81]:
+    - generic [ref=f1e83]:
+      - generic [ref=f1e84]: CHARACTER · LV 1
+      - generic [ref=f1e86]: 0/46
+    - generic [ref=f1e89]:
+      - generic [ref=f1e90]: WARRIOR · RANK 1
+      - generic [ref=f1e92]: 0/60
+  - text: ✦
+  - button "Pause" [ref=f1e94]
+  - generic:
+    - button "DODGE" [ref=f1e98]
+    - button [ref=f1e99]
+    - button "SLASH" [ref=f1e102]
+    - button "AUTO (L)" [ref=f1e103]
+    - button "SELL" [ref=f1e104]
+    - button "BAG" [ref=f1e106]
+    - button "12 1" [ref=f1e108]
+    - button "16 🔒 2" [ref=f1e110]
+    - button "14 🔒 3" [ref=f1e111]
+    - button "22 🔒 4" [ref=f1e112]
+  - generic: TRIAL OF THE BLADE

@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e25]:
+    - heading "BLADEFALL" [level=2] [ref=e26]
+    - paragraph [ref=e27]: Choose how you fight. Its trial teaches you the rest.You can unlock the others later — and more besides.
+    - generic [ref=e28]:
+      - button [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: Warrior
+        - generic [ref=e33]: sword, great, axe, hammerCleave · Shockwave Stomp · Charge · Berserk
+      - button [ref=e34] [cursor=pointer]:
+        - generic [ref=e35]: Ranger
+        - generic [ref=e38]: bow, cross, dagger, javelinDeadeye · Volley · Tumble · Hunter’s Mark
+      - button [ref=e39] [cursor=pointer]:
+        - generic [ref=e40]: Mage
+        - generic [ref=e43]: staff, wand, spellbladeElemental Bolt · Nova · Blink · Arcane Tempest

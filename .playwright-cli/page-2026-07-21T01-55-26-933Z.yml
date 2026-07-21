@@ -1,0 +1,21 @@
+- generic [ref=f1e1]:
+  - text: ✦ ATTACK 1 2 3 4 DODGE
+  - generic [ref=f1e10]:
+    - generic [ref=f1e11]:
+      - button "New Game Forge a new Warden" [ref=f1e12] [cursor=pointer]:
+        - generic [ref=f1e13]: New Game
+        - generic [ref=f1e14]: Forge a new Warden
+      - generic [ref=f1e15]:
+        - button "Continue Slot 2 · Briar · Level 14 · Ranger" [ref=f1e31] [cursor=pointer]:
+          - generic [ref=f1e17]: Continue
+          - generic [ref=f1e18]: Slot 2 · Briar · Level 14 · Ranger
+        - button "Previous saved Warden" [ref=f1e20] [cursor=pointer]: ‹
+        - button "Next saved Warden" [active] [ref=f1e21] [cursor=pointer]: ›
+      - button "Load Character View & choose your saved Wardens" [ref=f1e22] [cursor=pointer]:
+        - generic [ref=f1e23]: Load Character
+        - generic [ref=f1e24]: View & choose your saved Wardens
+      - button "Settings Audio, controls & skins" [ref=f1e25] [cursor=pointer]:
+        - generic [ref=f1e26]: Settings
+        - generic [ref=f1e27]: Audio, controls & skins
+      - button "Exit" [ref=f1e28] [cursor=pointer]
+    - generic [ref=f1e30]: v1.252.0

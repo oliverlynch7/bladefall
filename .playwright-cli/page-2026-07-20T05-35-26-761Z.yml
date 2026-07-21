@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - text: ✦ 1 2 3 4
+  - generic [ref=e81]:
+    - paragraph [ref=e82]: New Warden
+    - heading "Create Your Warden" [level=2] [ref=e83]
+    - generic [ref=e89]: Name
+    - textbox "Name your Warden" [ref=e91]: Tester
+    - generic [ref=e92]: Class
+    - generic [ref=e93]:
+      - button "Warrior sword · great · axe · hammer" [ref=e94] [cursor=pointer]:
+        - generic [ref=e95]: Warrior
+        - generic [ref=e97]: sword · great · axe · hammer
+      - button "Ranger bow · cross · dagger · javelin" [ref=e98] [cursor=pointer]:
+        - generic [ref=e99]: Ranger
+        - generic [ref=e101]: bow · cross · dagger · javelin
+      - button "Mage staff · wand · spellblade" [ref=e102] [cursor=pointer]:
+        - generic [ref=e103]: Mage
+        - generic [ref=e105]: staff · wand · spellblade
+    - generic [ref=e106]: Eye Colour
+    - generic [ref=e107]:
+      - button [ref=e108] [cursor=pointer]
+      - button [ref=e109] [cursor=pointer]
+      - button [ref=e110] [cursor=pointer]
+      - button [ref=e111] [cursor=pointer]
+      - button [ref=e112] [cursor=pointer]
+      - button [ref=e113] [cursor=pointer]
+      - button [ref=e114] [cursor=pointer]
+      - button [ref=e115] [cursor=pointer]
+    - generic [ref=e116]: Hair
+    - generic [ref=e117]:
+      - button "Short" [ref=e118] [cursor=pointer]
+      - button "Long" [ref=e119] [cursor=pointer]
+      - button "Top-knot" [ref=e120] [cursor=pointer]
+      - button "Mohawk" [ref=e121] [cursor=pointer]
+      - button "Bald" [ref=e122] [cursor=pointer]
+    - generic [ref=e123]: Hair Colour
+    - generic [ref=e124]:
+      - button [ref=e125] [cursor=pointer]
+      - button [ref=e126] [cursor=pointer]
+      - button [ref=e127] [cursor=pointer]
+      - button [ref=e128] [cursor=pointer]
+      - button [ref=e129] [cursor=pointer]
+      - button [ref=e130] [cursor=pointer]
+      - button [ref=e131] [cursor=pointer]
+      - button [ref=e132] [cursor=pointer]
+    - button "⚔ Begin Your Legend" [ref=e133] [cursor=pointer]
+    - button "Back" [ref=e134] [cursor=pointer]

@@ -1,0 +1,190 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Reaper
+          - generic: Notched Scythe
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic:
+        - generic:
+          - generic:
+            - generic: CHARACTER · LV 1
+            - generic: 0/46
+        - generic:
+          - generic:
+            - generic: REAPER · RANK 1
+            - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=e29]
+  - generic:
+    - button "DODGE" [ref=e33]
+    - button [ref=e34]
+    - button "SLASH" [ref=e37]
+    - button "AUTO (L)" [ref=e38]
+    - button "14 1" [ref=e39]
+    - button "18 🔒 2" [ref=e41]
+    - button "9 🔒 3" [ref=e42]
+    - button "24 🔒 4" [ref=e43]
+  - generic: "Equipped: Ian's Blade"
+  - generic [ref=e612]:
+    - paragraph [ref=e613]: The Quartermaster
+    - heading "Shop" [level=2] [ref=e614]
+    - paragraph [ref=e615]: 100 · permanent upgrades for this save
+    - generic [ref=e617]: 100 / 1200 to Magic Socks
+    - paragraph [ref=e621]: Reaper weapons — below-par for their rarity. Insurance, not a prize.
+    - generic [ref=e623]:
+      - generic [ref=e624]:
+        - generic [ref=e625] [cursor=pointer]:
+          - generic [ref=e626]:
+            - text: Plain Scythe
+            - generic "Common" [ref=e627]
+            - generic [ref=e628]: "1"
+            - generic [ref=e629]: compare ›
+          - generic [ref=e631]: "13.9 dmg · yours: 114 · plain, but reliable"
+        - button "60g" [ref=e632] [cursor=pointer]
+      - generic [ref=e634]:
+        - generic [ref=e635] [cursor=pointer]:
+          - generic [ref=e636]:
+            - text: Serviceable Scythe
+            - generic "Uncommon" [ref=e637]
+            - generic [ref=e638]: "2"
+            - generic [ref=e639]: compare ›
+          - generic [ref=e641]: "18.1 dmg · yours: 114 · plain, but reliable"
+        - button "220g" [ref=e642] [cursor=pointer]
+      - generic [ref=e644]:
+        - generic [ref=e645] [cursor=pointer]:
+          - generic [ref=e646]:
+            - text: Standard Scythe
+            - generic "Rare" [ref=e647]
+            - generic [ref=e648]: "3"
+            - generic [ref=e649]: compare ›
+          - generic [ref=e651]: "23.7 dmg · yours: 114 · plain, but reliable"
+        - button "650g" [ref=e652] [cursor=pointer]
+      - generic [ref=e654]:
+        - generic [ref=e655] [cursor=pointer]:
+          - generic [ref=e656]:
+            - text: Reliable Scythe
+            - generic "Epic" [ref=e657]
+            - generic [ref=e658]: "4"
+            - generic [ref=e659]: compare ›
+          - generic [ref=e661]: "31.4 dmg · yours: 114 · plain, but reliable"
+        - button "1600g" [ref=e662] [cursor=pointer]
+      - generic [ref=e664]:
+        - generic [ref=e665] [cursor=pointer]:
+          - generic [ref=e666]:
+            - text: Ian's Blade
+            - generic [ref=e667]: compare ›
+          - generic [ref=e669]: 114 dmg · radiant execute · full power for every class
+        - button "1,000,000g" [ref=e670] [cursor=pointer]
+      - generic [ref=e672]:
+        - generic [ref=e675]:
+          - generic [ref=e676]: Magic Socks
+          - generic [ref=e677]: Unlock a permanent double jump
+        - button "1200g" [ref=e678] [cursor=pointer]
+      - generic [ref=e679]:
+        - generic [ref=e682]:
+          - generic [ref=e683]: Magic Pack
+          - generic [ref=e684]: +5 bag slots · now 30
+        - button "260g" [ref=e685] [cursor=pointer]
+      - generic [ref=e686]:
+        - generic [ref=e689]:
+          - generic [ref=e690]: Fortune's Bag
+          - generic [ref=e691]: One random item. Mostly junk. Occasionally not.
+        - button "480g" [ref=e692] [cursor=pointer]
+    - paragraph [ref=e694]: Perks — permanent for this save
+    - generic [ref=e695]:
+      - generic [ref=e696]:
+        - generic [ref=e699]:
+          - generic [ref=e700]: Vigor Lv 0/10
+          - generic [ref=e701]: "Current: +0 Max HP · Next: +20 Max HPRank 10 capstone: +250 Max HP"
+        - button "40g" [ref=e702] [cursor=pointer]
+      - generic [ref=e703]:
+        - generic [ref=e706]:
+          - generic [ref=e707]: Might Lv 0/10
+          - generic [ref=e708]: "Current: +0% Damage · Next: +5% DamageRank 10 capstone: +60% Damage"
+        - button "60g" [ref=e709] [cursor=pointer]
+      - generic [ref=e710]:
+        - generic [ref=e713]:
+          - generic [ref=e714]: Arcana Lv 0/10
+          - generic [ref=e715]: "Current: +0% Magic Damage · Next: +4% Magic DamageRank 10 capstone: +50% Magic Damage"
+        - button "70g" [ref=e716] [cursor=pointer]
+      - generic [ref=e717]:
+        - generic [ref=e720]:
+          - generic [ref=e721]: Haste Lv 0/10
+          - generic [ref=e722]: "Current: +0% Attack Speed · Next: +4% Attack SpeedRank 10 capstone: +50% Attack Speed"
+        - button "60g" [ref=e723] [cursor=pointer]
+      - generic [ref=e724]:
+        - generic [ref=e727]:
+          - generic [ref=e728]: Swiftness Lv 0/10
+          - generic [ref=e729]: "Current: +0% Move Speed · Next: +4% Move SpeedRank 10 capstone: +50% Move Speed"
+        - button "50g" [ref=e730] [cursor=pointer]
+      - generic [ref=e731]:
+        - generic [ref=e734]:
+          - generic [ref=e735]: Keen Edge Lv 0/10
+          - generic [ref=e736]: "Current: +0% Crit · Next: +3% CritRank 10 capstone: +35% Crit"
+        - button "70g" [ref=e737] [cursor=pointer]
+      - generic [ref=e738]:
+        - generic [ref=e741]:
+          - generic [ref=e742]: Sanguine Lv 0/10
+          - generic [ref=e743]: "Current: +0% Lifesteal · Next: +1% LifestealRank 10 capstone: +13% Lifesteal"
+        - button "75g" [ref=e744] [cursor=pointer]
+      - generic [ref=e745]:
+        - generic [ref=e748]:
+          - generic [ref=e749]: Bulwark Lv 0/10
+          - generic [ref=e750]: "Current: +0% Defense · Next: +1% DefenseRank 10 capstone: +15% Defense"
+        - button "75g" [ref=e751] [cursor=pointer]
+      - generic [ref=e752]:
+        - generic [ref=e755]:
+          - generic [ref=e756]: Evasion Lv 0/10
+          - generic [ref=e757]: "Current: -0% Dodge Cooldown · Next: -2% Dodge CooldownRank 10 capstone: -25% Dodge Cooldown"
+        - button "80g" [ref=e758] [cursor=pointer]
+      - generic [ref=e759]:
+        - generic [ref=e762]:
+          - generic [ref=e763]: Focus Lv 0/10
+          - generic [ref=e764]: "Current: +0% Skill CDR · Next: +2% Skill CDRRank 10 capstone: +25% Skill CDR"
+        - button "80g" [ref=e765] [cursor=pointer]
+      - generic [ref=e766]:
+        - generic [ref=e769]:
+          - generic [ref=e770]: Greed Lv 0/10
+          - generic [ref=e771]: "Current: +0% Gold Find · Next: +8% Gold FindRank 10 capstone: +100% Gold Find"
+        - button "50g" [ref=e772] [cursor=pointer]
+    - paragraph [ref=e773]: 🏰 The Waystation — restore your fortress (cosmetic, costly)
+    - generic [ref=e774]:
+      - generic [ref=e775]:
+        - generic [ref=e776]: 🏰
+        - generic [ref=e777]:
+          - generic [ref=e778]: Relit Braziers
+          - generic [ref=e779]: Four great braziers roar back to life
+        - button "2500g" [ref=e780] [cursor=pointer]
+      - generic [ref=e781]:
+        - generic [ref=e782]: 🏰
+        - generic [ref=e783]:
+          - generic [ref=e784]: War Banners
+          - generic [ref=e785]: Order banners hang the length of the hall
+        - button "4000g" [ref=e786] [cursor=pointer]
+      - generic [ref=e787]:
+        - generic [ref=e788]: 🏰
+        - generic [ref=e789]:
+          - generic [ref=e790]: Repaired Ramparts
+          - generic [ref=e791]: The broken north wall is crowned with battlements
+        - button "7000g" [ref=e792] [cursor=pointer]
+      - generic [ref=e793]:
+        - generic [ref=e794]: 🏰
+        - generic [ref=e795]:
+          - generic [ref=e796]: Gild the Waystone
+          - generic [ref=e797]: Your bonfire burns molten gold
+        - button "12000g" [ref=e798] [cursor=pointer]
+    - button "Back" [ref=e799] [cursor=pointer]

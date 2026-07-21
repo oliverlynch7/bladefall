@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - text: ✦ 1 2 3 4
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - button "New Game Forge a new Warden" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: New Game
+        - generic [ref=e14]: Forge a new Warden
+      - button "Continue No saved Warden yet" [disabled] [ref=e15]:
+        - generic [ref=e16]: Continue
+        - generic [ref=e17]: No saved Warden yet
+      - button "Load Character View & choose your saved Wardens" [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: Load Character
+        - generic [ref=e20]: View & choose your saved Wardens
+      - button "Settings Audio, controls & skins" [ref=e21] [cursor=pointer]:
+        - generic [ref=e22]: Settings
+        - generic [ref=e23]: Audio, controls & skins
+      - button "Exit" [ref=e24] [cursor=pointer]
+    - generic [ref=e26]: v1.194.0

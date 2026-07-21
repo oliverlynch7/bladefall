@@ -1,0 +1,19 @@
+- generic [active] [ref=f6e1]:
+  - text: 1 2 3 4
+  - generic [ref=f6e10]:
+    - generic [ref=f6e11]:
+      - button "ENTER THE ABYSS Begin or continue the adventure" [ref=f6e12] [cursor=pointer]:
+        - generic [ref=f6e13]: ENTER THE ABYSS
+        - generic [ref=f6e14]: Begin or continue the adventure
+      - button "ABYSSAL DESCENT Endless survival" [ref=f6e15] [cursor=pointer]:
+        - generic [ref=f6e16]: ABYSSAL DESCENT
+        - generic [ref=f6e17]: Endless survival
+    - generic [ref=f6e18]:
+      - button "CHARACTERS Choose or manage a save slot" [ref=f6e19] [cursor=pointer]:
+        - generic [ref=f6e21]: CHARACTERS
+        - generic [ref=f6e22]: Choose or manage a save slot
+      - button "SKINS Change your Warden’s appearance" [ref=f6e23] [cursor=pointer]:
+        - generic [ref=f6e24]: SKINS
+        - generic [ref=f6e25]: Change your Warden’s appearance
+    - button "More & Settings" [ref=f6e26] [cursor=pointer]
+    - generic [ref=f6e28]: SKINS 1/11 · v1.122.0

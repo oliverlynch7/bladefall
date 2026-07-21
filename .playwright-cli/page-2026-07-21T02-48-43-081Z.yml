@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Player
+            - generic: ·
+            - generic: Mage
+          - generic: Legendary Battle Axe ⚠ off-class
+        - generic:
+          - generic "56% armor rating (full legendary = 100%) · 20% damage reduction":
+            - text: 🛡
+            - generic: 56%
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+  - generic:
+    - generic [ref=e11]:
+      - generic [ref=e12]: CHARACTER · LV 1
+      - generic [ref=e14]: 0/46
+    - generic [ref=e17]:
+      - generic [ref=e18]: MAGE · RANK 1
+      - generic [ref=e20]: 0/60
+  - generic:
+    - generic:
+      - generic: Ember Pup
+      - generic: 75 / 75 HP
+  - text: ✦
+  - button "Pause" [ref=e22]
+  - generic:
+    - button "AUTO (L)" [ref=e26]
+    - button "Attack" [ref=e27]: ATTACK
+    - button "🔒 Unlocks Rank 2 1" [ref=e30]:
+      - generic [ref=e31]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 2
+      - text: "1"
+    - button "🔒 Unlocks Rank 4 2" [ref=e32]:
+      - generic [ref=e33]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 4
+      - text: "2"
+    - button "🔒 Unlocks Rank 6 3" [ref=e34]:
+      - generic [ref=e35]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 6
+      - text: "3"
+    - button "🔒 Unlocks Rank 8 4" [ref=e36]:
+      - generic [ref=e37]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 8
+      - text: "4"
+    - button "Dodge" [ref=e38]: DODGE
+  - generic: ⚔️ All classes unlocked — swap at the Drillmaster
+  - generic [ref=e161]:
+    - paragraph [ref=e162]: The Drillmaster
+    - heading "Class Trainer" [level=2] [ref=e163]
+    - paragraph [ref=e164]: Switch freely here. Never mid-zone.
+    - generic [ref=e165]:
+      - generic [ref=e166]:
+        - generic [ref=e167]: Warrior
+        - generic [ref=e171]: Rank 1/10 · 0 choices set
+        - generic [ref=e172]:
+          - generic [ref=e173]: Sword
+          - generic [ref=e174]: Greatsword
+          - generic [ref=e175]: Axe
+          - generic [ref=e176]: Hammer
+        - button "Equip" [ref=e178] [cursor=pointer]
+      - generic [ref=e179]:
+        - generic [ref=e180]: Ranger
+        - generic [ref=e184]: Rank 1/10 · 0 choices set
+        - generic [ref=e185]:
+          - generic [ref=e186]: Bow
+          - generic [ref=e187]: Crossbow
+          - generic [ref=e188]: Dagger
+          - generic [ref=e189]: Javelin
+        - button "Equip" [ref=e191] [cursor=pointer]
+      - generic [ref=e192]:
+        - generic [ref=e196]:
+          - text: Mage
+          - generic [ref=e197]: Equipped
+        - generic [ref=e198]: Rank 1/10 · 0 choices set
+        - generic [ref=e199]:
+          - generic [ref=e200]: Staff
+          - generic [ref=e201]: Wand
+          - generic [ref=e202]: Spellblade
+      - generic [ref=e204]:
+        - generic [ref=e205]: Reaper
+        - generic [ref=e209]: Rank 1/10 · 0 choices set
+        - generic [ref=e210]: Scythe
+        - button "Equip" [ref=e213] [cursor=pointer]
+    - button "Back" [ref=e214] [cursor=pointer]

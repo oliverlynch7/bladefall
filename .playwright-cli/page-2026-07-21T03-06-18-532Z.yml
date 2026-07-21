@@ -1,0 +1,49 @@
+- generic [ref=e1]:
+  - text: ✦ ATTACK 1 2 3 4 DODGE
+  - generic [ref=e15]:
+    - button "Cancel rename" [ref=e29] [cursor=pointer]: ×
+    - generic [ref=e30]:
+      - generic [ref=e31]: Name Your Character
+      - generic [ref=e32]: This name appears in story narration.
+    - generic [ref=e33]: Character name
+    - generic [ref=e34]:
+      - textbox "Character name" [active] [ref=e35]:
+        - /placeholder: Name your character…
+        - text: Nova Warden
+      - generic [ref=e36]: 2–20 characters
+      - button "Save Name" [ref=e37] [cursor=pointer]
+  - generic: 🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.
+  - generic [ref=e10] [cursor=pointer]: ESCLeave the mirror
+  - button "Character Stats" [ref=e11] [cursor=pointer]
+  - button "Rename Character" [ref=e13] [cursor=pointer]
+  - generic:
+    - generic: Nova Warden
+    - generic: Warrior
+    - generic:
+      - generic: LEVEL 1
+      - generic: WARRIOR · RANK 1
+    - generic: Equipped Gear
+    - generic:
+      - generic:
+        - generic: Weapon
+        - generic: Rusty Sword
+    - generic:
+      - generic:
+        - generic: Helmet
+        - generic: — empty —
+    - generic:
+      - generic:
+        - generic: Chestplate
+        - generic: — empty —
+    - generic:
+      - generic:
+        - generic: Leggings
+        - generic: — empty —
+    - generic:
+      - generic:
+        - generic: Amulet
+        - generic: — empty —
+    - generic:
+      - generic:
+        - generic: Ring
+        - generic: — empty —

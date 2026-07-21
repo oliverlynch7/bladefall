@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - text: 1 2 3 4
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - button "ENTER THE ABYSS Begin or continue the adventure" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: ENTER THE ABYSS
+        - generic [ref=e14]: Begin or continue the adventure
+      - button "ABYSSAL DESCENT Endless survival" [ref=e15] [cursor=pointer]:
+        - generic [ref=e16]: ABYSSAL DESCENT
+        - generic [ref=e17]: Endless survival
+    - generic [ref=e18]:
+      - button "Characters" [ref=e19] [cursor=pointer]
+      - button "✦ Skins" [ref=e21] [cursor=pointer]
+      - button "More" [ref=e22] [cursor=pointer]
+    - generic [ref=e24]: SKINS 1/11 · v1.122.0

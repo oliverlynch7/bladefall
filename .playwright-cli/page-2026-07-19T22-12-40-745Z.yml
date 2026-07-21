@@ -1,0 +1,57 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Rusty Sword
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: The Outskirts
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+      - generic:
+        - generic:
+          - generic:
+            - generic: CHARACTER · LV 1
+            - generic: 0/46
+        - generic:
+          - generic:
+            - generic: WARRIOR · RANK 1
+            - generic: 0/60
+      - generic: PATH
+  - generic:
+    - generic: The Outskirts
+    - generic:
+      - generic: ☐
+      - generic: Cull 12 Thornboars
+      - generic: 0/12
+    - generic:
+      - generic: ☐
+      - generic: Find the Old Waystone
+  - button "Pause" [ref=e26]
+  - generic:
+    - button "DODGE" [ref=e30]
+    - button [ref=e31]
+    - button "SLASH" [ref=e34]
+    - button "AUTO (L)" [ref=e35]
+    - button "SELL" [ref=e36]
+    - button "BAG" [ref=e38]
+    - button "TALK" [ref=e66]
+    - button "12 1" [ref=e40]
+    - button "16 🔒 2" [ref=e42]
+    - button "14 🔒 3" [ref=e43]
+    - button "22 🔒 4" [ref=e44]
+  - generic: THE OUTSKIRTS · ZONE 1/8
+  - generic:
+    - generic: E
+    - text: Talk to the Shade
+  - generic: The road ends here. Everything past it is already dreaming.

@@ -1,0 +1,71 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic: Player
+            - generic: ·
+            - generic: Warrior
+          - generic: Legendary Battle Axe
+        - generic:
+          - generic "56% armor rating (full legendary = 100%) · 20% damage reduction":
+            - text: 🛡
+            - generic: 56%
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic:
+        - generic:
+          - generic: HP
+          - generic: 100 / 100
+        - generic:
+          - generic: MANA
+          - generic: 100 / 100
+  - generic:
+    - generic [ref=e11]:
+      - generic [ref=e12]: CHARACTER · LV 1
+      - generic [ref=e14]: 0/46
+    - generic [ref=e17]:
+      - generic [ref=e18]: WARRIOR · RANK 1
+      - generic [ref=e20]: 0/60
+  - generic:
+    - generic:
+      - generic: Ember Pup
+      - generic: 75 / 75 HP
+  - generic:
+    - generic:
+      - generic: 🪞
+      - generic: The Mirror
+      - generic: Inspect yourself
+  - text: ✦
+  - button "Pause" [ref=e22]
+  - generic:
+    - button "AUTO (L)" [ref=e26]
+    - button "Attack" [ref=e27]: ATTACK
+    - button "🔒 Unlocks Rank 2 1" [ref=e30]:
+      - generic [ref=e31]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 2
+      - text: "1"
+    - button "🔒 Unlocks Rank 4 2" [ref=e32]:
+      - generic [ref=e33]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 4
+      - text: "2"
+    - button "🔒 Unlocks Rank 6 3" [ref=e34]:
+      - generic [ref=e35]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 6
+      - text: "3"
+    - button "🔒 Unlocks Rank 8 4" [ref=e36]:
+      - generic [ref=e37]: 🔒
+      - generic:
+        - generic: Unlocks
+        - generic: Rank 8
+      - text: "4"
+    - button "Dodge" [ref=e38]: DODGE
+  - generic: ⚔️ All classes unlocked — swap at the Drillmaster
+  - generic: Ember Pup

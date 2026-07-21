@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.305.0';
+const VERSION3D='1.306.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3367,6 +3367,7 @@ function gapMovers(x0,z0,x1,z1,w,rnd){ const d=Math.abs(x1-x0), n=Math.max(1,Mat
 // the common wrap: bounds, start/goal/portal, checkpoints, shade, horizon deco, hazard, camera, player.
 function finishScape(ctx,o){
   G.vertical=true;
+  dashGate(o);   // required jump+dash gap before the exit (main levels with a breather platform)
   let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
   for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
   for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);
@@ -3384,6 +3385,21 @@ function finishScape(ctx,o){
   G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
+}
+// A REQUIRED mid-air-dash gate: move the exit onto a landing island across a ~195u void from the final breather
+// platform (tagged {breather:true}). Single-jump reach (~164) falls short; a jump+dash (~235) clears it with margin,
+// and the double-jump is NEVER required. Called from finishScape so EVERY main level + area variant that ends on a
+// breather gets one automatically. Skips trials/sides (no breather tag) and zones whose exit already sits far out.
+function dashGate(o){
+  if(o.dashGate===false || G.trial) return;
+  let bp=null; for(const ob of G.obstacles) if(ob.breather && (!bp||ob.z<bp.z)) bp=ob;   // northmost breather = the last one
+  if(!bp) return;
+  const y=bp.h||0, hEdge=bp.z-bp.d/2, landZ=hEdge-290, landX=(o.gx||0);                   // 195 gap + 95 half-depth
+  if(o.gz <= landZ+40) return;                                                            // exit already past the gap -> leave it
+  G.obstacles.push({kind:'plat',x:landX,z:landZ,h:Math.round(y),w:340,d:190,checkpoint:true});   // landing island (new checkpoint)
+  G.deco.push({x:landX,z:landZ,y0:y-0.2,w:352,h:1,d:206,c:tint(o.decoCol||'#4a4a55','#fff',0.14)});
+  for(const zz of [hEdge-6, landZ+101]) G.deco.push({x:landX,z:zz,y0:y,w:406,h:9,d:16,c:tint(o.decoCol||'#4a4a55','#000',0.30)}); // lip both sides
+  o.gx=landX; o.gz=landZ;
 }
 // place the active fetch quest's items on the given [{x,z,y}] spots (climb to collect). placed:true skips mob drops.
 function scapeFetch(ctx,spots){ const fq=fetchQuest(); if(!fq||!spots.length) return; const n=fq.n||1;
@@ -4053,6 +4069,7 @@ const EXPANDED_SCAPES={
       mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',120,-3600,shrine); mkMonster('dustjackal',-120,-3600,shrine);
       for(const e of G.enemies) if(dXZ(e.x,e.z,-300,-2080)<230){ e.y=160; e.sx=e.x; e.sz=e.z; }
       scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
+      vplat(0,-4380,160,900,680,{checkpoint:true,breather:true});   // final pad so the dash gate has a launch platform
       finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     }
   },
@@ -4187,7 +4204,7 @@ const EXPANDED_SCAPES={
       // The aqueduct offers a broad watercourse below and a faster balance-beam route above the arches.
       climbRun(160,-2050,100,-420,-2520,220,80);vplat(-420,-2520,220,760,680,{checkpoint:true,terrace:true});G.deco.push({x:-420,z:-2520,y0:220,w:620,h:5,d:110,c:WATER});for(let k=0;k<9;k++)vplat(-720+k*75,-2690-(k%2)*80,300+(k%3)*26,66,52,{beam:true});
       climbRun(-160,-2860,220,450,-3340,340,80);vplat(450,-3340,340,840,740,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3340+Math.sin(a)*240,w:92,d:70,h:340+(k%3)*30,amp:26,sp:.55+k*.04,ph:k*.5,x:450,px:450});G.deco.push({x:450+Math.cos(a)*175,z:-3340+Math.sin(a)*155,y0:340,w:18,h:140,d:18,c:GOLD});}
-      climbRun(450,-3340,340,0,-4420,340,84);vplat(0,-4420,340,1120,880,{checkpoint:true,breather:true});chest(-680,-2520,300);chest(720,-3340,370);scapeSecret(ctx,720,-1700,100);for(const p of [[0,-160,court],[-460,-900,process],[420,-1700,gallery]]){mkMonster('marblestatue',p[0]-65,p[1],p[2]);mkMonster('sunpriest',p[0]+65,p[1],p[2]);}mkMonster('sunpriest',470,-1770,gallery);scapeKill(ctx,[{x:0,z:-160,room:court},{x:-460,z:-900,room:process},{x:420,z:-1700,room:gallery}]);scapeFind(ctx,0,-4480,340);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4640,decoCol:MARBLE,decoTheme:'marble',decoTall:510});
+      climbRun(450,-3340,340,0,-4420,340,84);vplat(0,-4420,340,1120,880,{checkpoint:true,breather:true});chest(-680,-2520,300);chest(720,-3340,370);vplat(1260,-1700,100,300,240,{checkpoint:true});for(const zz of [-1610,-1790])G.deco.push({x:1150,z:zz,y0:100,w:14,h:174,d:14,c:MARBLE});G.deco.push({x:1260,z:-1700,y0:98,w:312,h:1,d:252,c:tint(MARBLE,'#fff',0.16)});scapeSecret(ctx,1260,-1700,100);for(const p of [[0,-160,court],[-460,-900,process],[420,-1700,gallery]]){mkMonster('marblestatue',p[0]-65,p[1],p[2]);mkMonster('sunpriest',p[0]+65,p[1],p[2]);}mkMonster('sunpriest',470,-1770,gallery);scapeKill(ctx,[{x:0,z:-160,room:court},{x:-460,z:-900,room:process},{x:420,z:-1700,room:gallery}]);scapeFind(ctx,0,-4480,340);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4640,decoCol:MARBLE,decoTheme:'marble',decoTall:510});
     }else{const terrace=room('Lower Terraces',0,0,920,700),orchard=room('Citrus Arcade',-500,-820,760,680),falls=room('Waterfall Stairs',430,-1600,780,700,130),aviary=room('Gilded Aviary',-420,-2420,780,700,250),roof=room('Stained-Glass Roofs',450,-3260,820,720,360),crown=room('Garden Crown',0,-4340,1000,780,360);
       road(terrace,orchard,170);for(let k=0;k<18;k++){const x=-760+(k%6)*105,z=-1020+Math.floor(k/6)*190;G.deco.push({x,z,y0:0,w:70,h:55,d:70,c:VINE});G.deco.push({x,z,y0:55,w:18,h:18,d:18,c:'#e9a83e'});}
       climbRun(-200,-1180,0,430,-1600,130,80);for(let k=0;k<10;k++){const t=k/9;vplat(120+310*t,-1370-230*t,20+110*t,100,76,{waterStep:true});G.deco.push({x:120+310*t,z:-1370-230*t,y0:20+110*t,w:78,h:4,d:62,c:WATER});}

@@ -1448,3 +1448,9 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Verified with the reachability scanner: all three reachable+standable (hopGap 74/34/86 ≤ 105), 0 errors.
   The remaining zone secrets (Abyss y440, Frostfell y210, Emberdeep y235, Palace y100) are already elevated
   on climbs and confirmed reachable earlier.
+
+## v1.306.0 — required jump+dash gates across every zone + sneakier palace secret
+- Added `dashGate(o)` inside `finishScape`: auto-inserts a REQUIRED ~195u void from the final breather platform's north edge to a landing island holding the exit portal. Single-jump reach (~164) falls short; jump+dash (~235) clears with ~40 margin; the double-jump (Magic Socks) is NEVER required. Keyed off the `{breather:true}` tag so it applies to every main level + area variant that ends on a breather; skips trials/sides and zones whose exit already sits past the gap.
+- Verified live (all 8 zones, area 0): Outskirts keeps its hand-built henge chasm; Hollow/Keep/Frost/Ember/Abyss/Palace/Castle each got a clean 195-void gate with 0 platforms bridging it. Added a final breather pad to the Hollow canyon area-1 variant so it gates too.
+- Sneakier secret: the Palace trial-rift (720,-1700,100) sat openly on the big terrace. Moved it to a hidden perch (1260,-1700) out over the void east of the terrace — 190u gap, dash-only, flanked by two marble spires that partly screen it. (Keep's rift already needs a 211u dash-up; Abyss is a pillar-top; Outskirts is the Foxglove stepping-stone perch — all left as-is.)
+- No double-jump required anywhere; 0 console errors.

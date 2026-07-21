@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: Warrior
+          - generic: Hub Sync Axe
+          - generic:
+            - text: 🛡
+            - generic: 0%
+        - generic:
+          - generic: "0"
+          - generic: THE WAYSTATION
+      - generic: HP
+      - generic:
+        - generic: "1"
+        - generic: 0/82
+      - generic:
+        - generic: "1"
+        - generic: 0/60
+      - generic: PATH
+  - button "Pause" [ref=e13]
+  - generic:
+    - button "DODGE" [ref=e17]
+    - button [ref=e18]
+    - button "SLASH" [ref=e21]
+    - button "AUTO (L)" [ref=e22]
+    - button "SELL" [ref=e23]
+    - button "BAG" [ref=e25]
+    - button "1" [ref=e27]
+    - button "🔒 2" [ref=e29]
+    - button "🔒 3" [ref=e30]
+    - button "🔒 4" [ref=e31]
+  - generic: 🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.
+  - generic [ref=e96]:
+    - paragraph [ref=e97]: The Bladeborn's Pack
+    - heading "Bag" [level=2] [ref=e98]
+    - paragraph [ref=e99]: 0/30 slots · 0g
+    - 'button "Sort: Type" [ref=e100] [cursor=pointer]'
+    - paragraph [ref=e103]: Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.
+    - button "Back" [ref=e104] [cursor=pointer]

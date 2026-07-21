@@ -1,0 +1,9521 @@
+﻿
+(function(){
+"use strict";
+/* ============================================================
+   BLADEFALL 3D — true-3D arena action-RPG.
+   Raw WebGL (zero deps), voxel/flat-shaded aesthetic,
+   Hades-style fixed chase camera. All BLADEFALL systems
+   (rarity loot, elements, 3-slot armor, achievements,
+   skins + god cheat) ported 1:1 from the 2D game.
+   ============================================================ */
+const VERSION3D='1.242.0';
+
+/* ---------------- Persistence: shared "global" store + per-mode saves ----------------
+   Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
+   ('rl' Roguelite | 'hc' Hardcore) has its OWN save (gold, run, stash, scaling), so a
+   hardcore death wipes only its save, and roguelite progress is untouched. ---------- */
+// Three independent character slots. Slot 0 keeps the original (unprefixed) keys so
+// existing saves carry over untouched; slots 1-2 get their own namespace.
+let SLOT=0; try{ SLOT=Math.max(0,Math.min(2,parseInt(localStorage.getItem('bf3_slot'))||0)); }catch(e){}
+const SLOTPFX=SLOT===0?'':('s'+SLOT+'_');
+const GKEY='bladefall3d_'+SLOTPFX+'global', SAVE_KEY_OLD='bladefall3d_v1', SAVE_KEY_2D='bladefall_v1';
+const MKEY=m=>'bladefall3d_'+SLOTPFX+m;
+function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
+  let g={}; try{ g=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+'global')||'{}'); }catch(e){}
+  let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=JSON.parse(localStorage.getItem('bladefall3d_'+pfx+m)||'{}'); }catch(e){}
+    if(mv.hero||mv.gold||mv.zoneMax){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
+  const cls=(best&&best.classId)||g.classId, has=best||cls||(g.achievements&&Object.keys(g.achievements).length);
+  return has?{empty:false,cls,lvl:best&&best.hero?best.hero.level:1,name:(best&&best.heroName)||'Unnamed Warden',gold:best?best.gold||0:0,zone:best?(best.zoneMax||0)+1:1,beatN:g.beatNormal,
+    hero:(best&&best.hero)||null,skin:(best&&best.hero&&best.hero.skin)||g.selectedSkin||'knight',rank:(best&&best.classes&&cls&&best.classes[cls]&&best.classes[cls].rank)||1}:{empty:true};
+}
+function selectSlot(sl){ try{ localStorage.setItem('bf3_slot',sl); }catch(e){} location.reload(); }
+function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
+  for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
+let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
+function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone','tutSeen','tutOff',
+  'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
+  'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor'];
+let _g=loadJSON(GKEY);
+if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
+  let old=loadJSON(SAVE_KEY_OLD);
+  if(!old){ let t=loadJSON(SAVE_KEY_2D)||{}; old={}; GLOBAL_FIELDS.forEach(f=>{ if(t[f]!=null) old[f]=t[f]; }); }
+  _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
+}
+const meta=Object.assign({
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,dmgNumbers:true,
+  unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
+  totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
+  beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
+  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
+  gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
+  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c'
+},_g);
+if(meta.showArmor==null) meta.showArmor=true;
+if(!meta.achievements) meta.achievements={};
+if(!Array.isArray(meta.unlockedSkins)) meta.unlockedSkins=['knight'];
+if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
+// DEV AUTO-MUTE: keep test builds silent while Oliver plays the LIVE game. localhost/127.0.0.1
+// (a different origin, so its own localStorage) or an explicit ?mute=1 forces sound+music off.
+(function(){ try{
+  const h=(location.hostname||''), muted=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(h) || /[?&]mute=1\b/.test(location.search);
+  if(muted){ meta.soundOn=false; meta.musicOn=false; }
+}catch(e){} })();
+function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
+persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
+function persist(){ persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
+function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
+  meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
+  meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{}; meta.perkV2=!!mv.perkV2;
+  if(!meta.perkV2){ const oldBase={vigor:40,might:60,haste:60,swift:50,edge:70,greed:50}; let refund=0; for(const id in oldBase){ const lv=meta.perks[id]||0; if(lv>10){ for(let rank=10;rank<lv;rank++) refund+=Math.round(oldBase[id]*Math.pow(1.6,rank)); meta.perks[id]=10; } } meta.gold+=refund; meta.perkV2=true; meta._perkRefund=refund; }
+  meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
+  meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
+  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
+  meta.hubUpgrades=mv.hubUpgrades&&typeof mv.hubUpgrades==='object'?mv.hubUpgrades:{};
+  meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
+  meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
+  meta.classUnlocked=mv.classUnlocked&&typeof mv.classUnlocked==='object'?mv.classUnlocked:{};
+  meta.trialsDone=mv.trialsDone&&typeof mv.trialsDone==='object'?mv.trialsDone:{};
+  meta.sideFound=mv.sideFound&&typeof mv.sideFound==='object'?mv.sideFound:{};
+  meta.sideDone=mv.sideDone&&typeof mv.sideDone==='object'?mv.sideDone:{};
+  // pets (migrates old saves cleanly — no pet fields => an empty Pet Yard)
+  meta.petOwned=Array.isArray(mv.petOwned)?mv.petOwned.filter(id=>PETS[id]):[];
+  meta.petActive=(mv.petActive&&PETS[mv.petActive]&&meta.petOwned.includes(mv.petActive))?mv.petActive:null;
+  meta.petNames=mv.petNames&&typeof mv.petNames==='object'?mv.petNames:{};
+  meta.petTrain=mv.petTrain&&typeof mv.petTrain==='object'?mv.petTrain:{};
+  meta.petLabel=mv.petLabel!==false;
+  meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,20):'';
+  meta.eyeColor=mv.eyeColor||'#8fd0ff'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
+  // an existing save already past the start never gets re-gated behind the starter picker
+  if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
+  if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
+  if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
+}
+function wipeMode(m){ try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+  // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
+  // forces you back through a class trial you already beat.
+  if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
+  if(!meta.classUnlocked[meta.classId]){ const f=Object.keys(meta.classUnlocked)[0]; if(f) meta.classId=f; }
+} // permadeath death
+
+/* ---------------- Story (Classes & Quests update) ----------------
+   Built on Isaac's BLADEFALL-2D premise: the Abyss King's nightmares bent gravity,
+   the Wardens went down to keep him asleep and never came back, you are the last.
+   Delivery: a text intro cutscene once per save, a card the first time you enter a
+   zone, a line when a boss reveals, and endings that vary by difficulty. */
+const STORY={
+  intro:[
+    "The Abyss King is waking beneath the world.",
+    "His power is spreading upward. It corrupts animals, raises the dead, and twists every land it reaches.",
+    "If nobody stops him, the corruption will reach the last human settlements.",
+    "For generations, warriors called the Bladeborn entered the Abyss to keep him contained.",
+    "Ian was the last Bladeborn. He was humanity's final hope, but he fell before he could finish the fight.",
+    "Now the Bladeborn power has awakened in {player}. You are the only person left who can follow Ian's path.",
+    "Enter the Abyss, defeat the King, and save what remains of humanity."
+  ],
+  awaken:[   // the awakening beat — first time the player reaches the edge of the descent
+    "Something in you straightens its back — something that was always there, waiting for its turn.",
+    "You don't have a name for it. You don't need one yet.",
+    "Down is the only direction left. Go."
+  ],
+  zone:{   // first-visit card, by zone id
+    outskirts:"The road ends here. Everything past it is already dreaming.",
+    hollow:"The wind comes up the canyon like it's trying to leave.",
+    keep:"One of your blood held this place once. Then it held him.",
+    frost:"Cold this deep isn't weather. It's something refusing to move.",
+    ember:"The mountain's heat is escaping. The nightmare opened a way out.",
+    abyss:"You are below where anyone was ever posted. Below where he last fell.",
+    palace:"White marble, untouched. The rot never reached here. He was saving it.",
+    castle:"The last gate. He is awake now — you woke him — and he has been waiting to be."
+  },
+  boss:{   // by boss stage index — one line when the health bar reveals
+    2:"It was something's livestock once. Now it's the nightmare's.",
+    4:"It has been watching you since the ridge.",
+    6:"He was Bladeborn, like the one you're chasing. He got further than most. Not far enough.",
+    8:"It stopped being a person somewhere around the fourth winter.",
+    10:"The mountain stood up.",
+    12:"You have reached the sleeper. Your blood carried you here. Strike, and he wakes.",
+    14:"It was carved to guard the throne. The dream taught the marble to move.",
+    16:"This is what his dream wanted to be all along."
+  },
+  reveal:[   // fires when Ian's Blade is completed / at the summit — the one place his name is ever spoken
+    "The sword remembers itself in your hands, and it remembers its name. And his.",
+    "His name was Ian.",
+    "He was your brother. You were the one they lost — raised with no blade, no blood you were ever told of.",
+    "The power that woke in you was never luck. It was your turn. It was always going to be you.",
+    "He went down so you would never have to. You came down anyway. Finish what he started."
+  ],
+  ending:[
+    "The King comes apart, and the world exhales.",
+    "You spend it all — every age the blood ever carried, everything Ian never got to — in one blow. And the power goes out of you with him.",
+    "No child will ever again be born marked to die in the dark. There is nothing left to be born into. That was the cost. That was the point.",
+    "Far above, a waystone catches light. The dark below is not sleeping now. It is empty.",
+    "Every one who ever fell at a post is let go at last — all your blood, and Ian last of all. They rest.",
+    "{player} climbs out — the last of the Bladeborn, and now only a person, and that is a mercy.",
+    "You carry his name and his sword home. The cycle is broken. It stays broken."
+  ],
+  endLadder:{
+    hardcore:"One life. One descent. No age to relieve you, no blood to follow. The line would have called that the proper way.",
+    hitless:"Untouched, start to finish — the way the Bladeborn always swore it could be done and never once managed. Ian would have wanted to see it."
+  },
+  npc:{  // the Shade: a Bladeborn of an age past, still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
+    outskirts:{lore:["I held this road for eleven years. My blood was the same as yours — that's why I could.","The dreaming spreads through everything that lives here — cut it back, or it follows you down."],
+      why:"Thin the grunts and light the old waystone. Every marker you wake weakens his reach up here.",
+      boss:"The Brute at the wood's end was a farmer's ox. Do not let what it has become reach you."},
+    hollow:{lore:["The wind you hear is the canyon trying to empty itself.","I posted watchers on the rims in my age. The rims are still why you'll live or die here."],
+      why:"The chargers breed in the nests — burn through them. The bones on the rims were my watchers. Bring them down for burial.",
+      boss:"The Marksman was my best archer. She still holds her post at the head of the pass. She will not miss twice."},
+    keep:{lore:["This keep was held by one of us, long before you. The dark made his failure a prison.","What walks these halls wears armor you'll wear too, if you fall."],
+      why:"Destroy the risen and recover the sigils — each one is an oath one of our blood is still bound by.",
+      boss:"The thing in the deep cell was Bladeborn. He went further than any of us in his age. Kill him the way you'd want to be killed."},
+    frost:{lore:["Cold this old isn't weather. It's the dream refusing to let anything move on.","A whole watch froze here in a single night. I couldn't reach them in time."],
+      why:"The frostlings carry cores of the old cold. Shatter them, and finish the cairn I never raised.",
+      boss:"The Sorcerer came here to study the ice. Around the fourth winter, it started studying him back."},
+    ember:{lore:["The mountain's furnace should have died with the mountain. The nightmare keeps it fed.","Everything down here wants to be lava when it grows up."],
+      why:"The emberlings shed shards of the core-fire. Quench them, and mark the ash altar so the way stays open behind you.",
+      boss:"The Colossus is not guarding the deep. It IS the deep. Bring it down joint by joint."},
+    abyss:{lore:["You are below every post any of us ever held. Even my death doesn't reach much deeper.","The last one — the one you've been following — fell past even this. The dark here isn't empty. It's attentive."],
+      why:"Banish what you can and take back the splinters — every shard of the rift you carry out is one he can't dream through.",
+      boss:"Past this point sleeps the King. He has been listening to you descend the whole way. Wake him, and there is no going back — only up, and through."},
+    palace:{lore:["None of us was ever posted here. The Sunspire kept itself — he kept it, for the day he woke.","The marble here remembers being carved. Do not turn your back on any of it."],
+      why:"Put down the risen guard and gather the gilded relics — the throne was hoarding them, and each is a piece of the way up.",
+      boss:"The Colossus is the throne's own statue. It has had centuries to practice standing up. End it before it finishes."},
+    castle:{lore:["This is the last gate. Past the towers there is only him — and only you, of all our blood, ever got this far.","There's nothing left to teach you. Whatever you've become on the way down — be exactly that."],
+      why:"Clear the towers as you climb. Every shadeling you cut is one less thing at your back when you reach the top.",
+      boss:"Break the cycle at the summit. Or become the next thing I have to warn somebody about."}
+  }
+};
+function storyText(line){
+  const name=(meta.heroName||'').trim()||'the last Bladeborn';
+  return String(line).replace(/\{player\}/g,name);
+}
+// A simple fading text cutscene over a dark veil. Skippable. onDone fires after the last line.
+function playStory(lines, onDone, opts){
+  opts=opts||{}; const veil=document.getElementById('storyveil'), tx=document.getElementById('storytext'), sk=document.getElementById('storyskip');
+  if(!veil){ if(onDone) onDone(); return; }
+  mode='story'; showGameUI(false); showOverlay(false);
+  veil.classList.remove('hide'); veil.style.background=opts.bg||'radial-gradient(ellipse at 50% 40%, #14101f 0%, #05060a 80%)';
+  let i=-1, killed=false;
+  const finish=()=>{ if(killed) return; killed=true; veil.classList.add('hide'); tx.textContent=''; if(onDone) onDone(); };
+  const advance=()=>{ i++; if(i>=lines.length){ finish(); return; }
+    tx.style.animation='none'; void tx.offsetWidth; tx.textContent=storyText(lines[i]); tx.style.animation='storyline 5.2s ease forwards';
+    story._t=setTimeout(advance, opts.dwell||4600); };
+  story._skip=()=>{ clearTimeout(story._t); finish(); };
+  sk.onclick=story._skip;
+  veil.onclick=()=>{ clearTimeout(story._t); advance(); };   // tap to advance faster
+  advance();
+}
+function story(){}   // namespace holder for _t/_skip
+/* The Warden's Shade: a dead predecessor at every zone mouth — quest-giver + lore. */
+function placeShade(x,z){
+  if(!G || G.trial || G.side) return;
+  const Z=curZone(); if(!STORY.npc[Z.id]) return;
+  if(!(G.area===0 || (G.area<0 && Z.areas.length===0))) return;   // only at the zone's front door
+  G.npc={x,z,t:0,talked:false};
+}
+function openShade(){
+  const Z=curZone(), N=STORY.npc[Z.id]; if(!N) return;
+  document.getElementById('toast').classList.remove('show');
+  G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
+  mode='menu'; SFX.magic('void');
+  const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq"><span class="qbico"></span><span>${q.d}</span></div>`).join(''):'<div class="qbq" style="opacity:.6"><span class="qbico"></span><span>No errands here — only the fight ahead.</span></div>';
+  showOverlayHTML(`<div class="card" style="--npc-accent:#c47bff"><div class="npcintro">
+    ${npcPortrait('shade')}<div class="npcidentity"><p class="ovsub">A SHADE OF THE BLADEBORN</p><h2 class="ovh">Warden’s Shade</h2>
+    <p class="npcrole">${Z.name} · Fallen Warden</p><p class="npcline">“${N.lore[0]}”</p></div></div>
+    <div style="text-align:left;font-size:16px;line-height:1.78;color:#dfe4ec;margin:8px 0 4px">
+      ${N.lore.slice(1).map(l=>`<p style="margin:0 0 12px;font-style:italic;color:#c9cfda">“${l}”</p>`).join('')}
+      <p style="margin:0 0 12px">“${N.why}”</p>
+      <p style="margin:0;color:#f0a6a6;font-weight:600">“${N.boss}”</p></div>
+    <div class="qhead"><span class="qbico"></span>Your Orders</div>${qrows}
+    <button class="bigbtn" id="shadeGo" style="margin-top:16px">I'll see it done</button></div>`);
+  document.getElementById('shadeGo').onclick=resumePlay;
+}
+function zoneCardMaybe(){                 // one card the FIRST time a zone is entered this save
+  if(!G||G.trial||G.side||G.area<0) return;
+  const Z=curZone(), line=STORY.zone[Z.id]; if(!line) return;
+  meta.zoneSeen=meta.zoneSeen||{}; if(meta.zoneSeen[Z.id]) return;
+  meta.zoneSeen[Z.id]=1; persistGlobal();
+  addText(G.p.x,G.p.y+96,G.p.z,'', '#fff'); // (spacer noop to keep timing consistent)
+  storyToast(line);
+}
+function storyToast(line,icon){           // a slower, centered story line — distinct from the gameplay toast
+  const el=document.getElementById('storycard'); if(!el){ toast(line); return; }
+  el.textContent='';
+  if(icon){ const i=document.createElement('span'); i.className='ico ico-event ico-'+icon; i.setAttribute('aria-hidden','true'); el.append(i,document.createTextNode(' '+line)); }
+  else el.textContent=line;
+  el.classList.remove('hide'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  clearTimeout(storyToast._t); storyToast._t=setTimeout(()=>el.classList.remove('show'),5200);
+}
+/* ---------------- Music (streamed mp3, crossfaded) ----------------
+   Separate from SFX on purpose: SFX stay procedural WebAudio, music is plain
+   <audio> so the browser streams it instead of us holding 46MB in memory.
+   Tracks load lazily the first time a slot is asked for.
+   EVERY track is CC-BY — see CREDITS. The credits screen is not optional. */
+const MUSCREDITS=[
+  {who:'Matthew Pablo', url:'matthewpablo.com', lic:'CC BY 3.0', licUrl:'https://creativecommons.org/licenses/by/3.0/',
+   tracks:['Dark Descent','Pleasant Creek','Woodland Fantasy','Tactical Pursuit','Defying Commodus','The Dark Amulet','Colossal Boss Battle Theme','The Fall of Arcana','Lively Meadow (Victory Fanfare)']},
+  {who:'Kevin MacLeod', url:'incompetech.com', lic:'CC BY 4.0', licUrl:'https://creativecommons.org/licenses/by/4.0/',
+   tracks:['Arid Foothills','Land of the Dead','Frost Waltz','Firebrand','Ice Demon','Ancient Rite','Darkest Child','Undaunted']}
+];
+const MUSDIR='/music/';
+const MUSVOL={hub:0.36,fanfare:0.5};                  // per-track trims where a mix sits hot
+const MUS_DEFAULT=0.30;                               // Phase 20: music sits UNDER the SFX now (was 0.42) — Oliver: "music way louder than sfx"
+let musEls={}, musCur=null, musCurKey=null, musFadeT=null;
+let gameAudioPaused=false, pausedHtmlAudio=[];
+const musicStings=new Set();
+function musicOK(){ return meta.musicOn!==false && typeof Audio!=='undefined'; }
+function musEl(key){
+  if(typeof Audio==='undefined') return null;         // no audio in this environment — music is optional, never fatal
+  let a=musEls[key];
+  if(!a){ try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return null; }
+    a.loop=true; a.preload='none'; a.volume=0;
+    a.addEventListener('error',()=>{ /* a missing track must never break the game */ });
+    musEls[key]=a; }
+  return a;
+}
+function musFade(el,to,ms,stopAt){                    // volume ramp; el is parked (not destroyed) when it hits 0
+  if(!el) return;
+  const from=el.volume, t0=Date.now(), dur=Math.max(1,ms||900);
+  if(el._f) clearInterval(el._f);
+  el._f=setInterval(()=>{
+    const k=Math.min(1,(Date.now()-t0)/dur);
+    try{ el.volume=Math.max(0,Math.min(1,from+(to-from)*k)); }catch(e){}
+    if(k>=1){ clearInterval(el._f); el._f=null; if(stopAt&&el.volume<=0.001){ try{ el.pause(); el.currentTime=0; }catch(e){} } }
+  },40);
+}
+function musicPlay(key,opts){
+  if(!key) return musicStop();
+  opts=opts||{};
+  if(musCurKey===key && musCur && !musCur.paused) return;   // already on it — never restart a looping track
+  const prev=musCur;
+  const el=musEl(key); if(!el) return;
+  musCurKey=key; musCur=el;
+  if(!musicOK()){ if(prev) musFade(prev,0,300,true); return; }
+  const vol=(MUSVOL[key]!=null?MUSVOL[key]:MUS_DEFAULT)*(meta.musicVol!=null?meta.musicVol:1);
+  if(gameAudioPaused){ el.volume=vol; return; }
+  if(prev&&prev!==el) musFade(prev,0,opts.fade||900,true);
+  el.loop=opts.loop!==false; el.volume=0;
+  const p=el.play();
+  if(p&&p.catch) p.catch(()=>{});                     // autoplay blocked until a gesture — we retry on the next call
+  musFade(el,vol,opts.fade||900);
+}
+function musicStop(fade){ if(musCur) musFade(musCur,0,fade||600,true); musCur=null; musCurKey=null; }
+function musicSting(key){                             // one-shot over the top of whatever's playing (victory fanfare)
+  if(!musicOK()||gameAudioPaused) return;
+  let a; try{ a=new Audio(MUSDIR+key+'.mp3'); }catch(e){ return; } a.loop=false;
+  musicStings.add(a); a.addEventListener('ended',()=>musicStings.delete(a),{once:true});
+  a.volume=(MUSVOL[key]!=null?MUSVOL[key]:0.45)*(meta.musicVol!=null?meta.musicVol:1);
+  const p=a.play(); if(p&&p.catch) p.catch(()=>{});
+  if(musCur){ const back=musCur.volume; musFade(musCur,back*0.25,400); setTimeout(()=>{ if(musCur) musFade(musCur,back,900); },2600); }
+}
+function musicForScene(){                             // one place decides what should be playing right now
+  if(!G||G.hub) return musicPlay('hub');
+  if(G.trial) return musicPlay('trial_chamber');   // Phase 19: the trial chambers earned their own song — 'Silent Descent' (Mixkit free license)
+  if(G.side) return musicPlay('secret');
+  const Z=curZone();
+  if(G.area<0) return musicPlay((Z.boss&&Z.boss.mus)||'boss_brute');   // the boss arena gets its own track
+  musicPlay(Z.mus||'outskirts');
+}
+/* Volume settings: sliders are the one control. 0% = off; anything else keeps the on-flags true. */
+function setMusicVol(v){
+  meta.musicVol=v; meta.musicOn=v>0.001; persistGlobal();
+  if(!meta.musicOn){ musicRefresh(); return; }
+  if(gameAudioPaused){ if(musCur) musCur.volume=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:MUS_DEFAULT)*v; return; }
+  if(musCur && musCurKey && !musCur.paused){ const vol=(MUSVOL[musCurKey]!=null?MUSVOL[musCurKey]:MUS_DEFAULT)*v; musFade(musCur,vol,120); }
+  else musicRefresh();                                // was muted — bring the scene's track back at the new level
+}
+function setSfxVol(v){
+  meta.sfxVol=v; meta.soundOn=v>0.001; persistGlobal();
+  if(master) master.gain.value=0.6*v;
+}
+function audioSettingsHTML(){
+  const mv=meta.musicOn===false?0:Math.round((meta.musicVol!=null?meta.musicVol:1)*100);
+  const sv=meta.soundOn===false?0:Math.round((meta.sfxVol!=null?meta.sfxVol:1)*100);
+  return `<div class="sect">Audio</div>
+    <div class="setrow"><label><span><span class="ico ico-menu ico-music"></span>Music</span><b id="musVal">${mv}%</b></label>
+      <input id="musSlider" type="range" min="0" max="100" step="5" value="${mv}"></div>
+    <div class="setrow"><label><span><span id="sfxIcon" class="ico ico-menu ico-sound-${sv?'on':'off'}"></span>Sound effects</span><b id="sfxVal">${sv}%</b></label>
+      <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>`;
+}
+function bindAudioSettings(){
+  const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
+  if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
+  if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'), i=document.getElementById('sfxIcon'); if(v) v.textContent=ss.value+'%'; if(i){ i.classList.toggle('ico-sound-on',+ss.value>0); i.classList.toggle('ico-sound-off',+ss.value===0); } SFX.pickup(); });   // hear the new level as you drag
+}
+function musicRefresh(){                              // called when the toggle flips
+  if(!musicOK()){ for(const k in musEls){ const e=musEls[k]; if(e._f) clearInterval(e._f); try{ e.pause(); e.currentTime=0; }catch(x){} e.volume=0; } musCur=null; musCurKey=null; return; }
+  const k=musCurKey; musCurKey=null; if(k) musicPlay(k,{fade:400});
+}
+/* ---------------- Audio (procedural WebAudio: noise + filters + sweeps) ---------------- */
+let actx=null, master=null, noiseBuf=null, procBus=null, fxBus=null;
+function initAudio(){ if(!actx){ try{
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  master=actx.createGain(); master.gain.value=0.62*(meta.sfxVol!=null?meta.sfxVol:1); master.connect(actx.destination);
+  // Phase 20: two sub-buses so the mix is BALANCED — procedural combat cues (quiet by nature)
+  // come up, sourced one-shot files (loud + wildly varied) get tamed + per-file loudness-normalized.
+  procBus=actx.createGain(); procBus.gain.value=2.2; procBus.connect(master);
+  fxBus=actx.createGain();   fxBus.gain.value=0.9;   fxBus.connect(master);
+  noiseBuf=actx.createBuffer(1,actx.sampleRate,actx.sampleRate);
+  const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  loadFxFiles();
+}catch(e){} }
+  if(gameAudioPaused&&actx&&actx.state==='running'){ const p=actx.suspend(); if(p&&p.catch) p.catch(()=>{}); }
+  musicUnlock(); }
+// The browser blocks audio until a real gesture. initAudio() runs on the FIRST gesture
+// (every control funnels through it), so this is where a track requested before that
+// gesture — or one whose play() was rejected — finally starts.
+function musicUnlock(){
+  if(gameAudioPaused) return;
+  if(musCur && musCur.paused && musicOK()){ const p=musCur.play(); if(p&&p.catch) p.catch(()=>{}); }
+  else if(!musCur && musCurKey){ const k=musCurKey; musCurKey=null; musicPlay(k,{fade:400}); }
+}
+function pauseGameAudio(){
+  if(gameAudioPaused) return;
+  gameAudioPaused=true; pausedHtmlAudio=[];
+  const all=[...Object.values(musEls),...musicStings];
+  for(const a of all){
+    if(a._f){ clearInterval(a._f); a._f=null; }
+    if(!a.paused){ pausedHtmlAudio.push(a); try{ a.pause(); }catch(e){} }
+  }
+  if(actx&&actx.state==='running'){ const p=actx.suspend(); if(p&&p.catch) p.catch(()=>{}); }
+}
+function resumeGameAudio(resumeExisting=true){
+  if(!gameAudioPaused) return;
+  gameAudioPaused=false;
+  if(actx&&actx.state==='suspended'){ const p=actx.resume(); if(p&&p.catch) p.catch(()=>{}); }
+  const resume=pausedHtmlAudio; pausedHtmlAudio=[];
+  if(resumeExisting&&musicOK()) for(const a of resume){
+    if(a===musCur||musicStings.has(a)){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }
+  }
+  if(resumeExisting&&musicOK()&&!musCur&&G) musicForScene();
+}
+function sOn(){ return meta.soundOn && actx && !gameAudioPaused; }
+function env(g,t,a,peak,dur){ g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); }
+function tone(o){ // {f0,f1,dur,type,vol,a,at,detune}
+  if(!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
+  const os=actx.createOscillator(),g=actx.createGain();
+  os.type=o.type||'sine'; if(o.detune) os.detune.value=o.detune;
+  os.frequency.setValueAtTime(Math.max(20,o.f0),t);
+  if(o.f1) os.frequency.exponentialRampToValueAtTime(Math.max(20,o.f1),t+o.dur);
+  env(g,t,o.a||0.006,o.vol||0.07,o.dur);
+  os.connect(g); g.connect(procBus||master); os.start(t); os.stop(t+o.dur+0.03); }catch(e){}
+}
+function noise(o){ // {dur,vol,f0,f1,type,q,a,at}
+  if(!sOn()) return; try{ const t=actx.currentTime+(o.at||0);
+  const s=actx.createBufferSource(); s.buffer=noiseBuf;
+  const f=actx.createBiquadFilter(); f.type=o.type||'bandpass'; f.Q.value=o.q||1;
+  f.frequency.setValueAtTime(o.f0||1000,t);
+  if(o.f1) f.frequency.exponentialRampToValueAtTime(Math.max(40,o.f1),t+o.dur);
+  const g=actx.createGain(); env(g,t,o.a||0.004,o.vol||0.1,o.dur);
+  s.connect(f); f.connect(g); g.connect(procBus||master); s.start(t,Math.random()*0.5); s.stop(t+o.dur+0.03); }catch(e){}
+}
+/* ---- File-based SFX (v1.59): real sourced sounds layered on the procedural engine. Decoded to
+   WebAudio buffers on the first gesture, played through the same master gain so meta.sfxVol +
+   soundOn apply. Loopables (footstep/heartbeat/electric/rain) get start/stop handles. ---- */
+const SFXDIR='/sfx/';
+/* Phase 20: v = PROMINENCE only (per-file loudness is auto-normalized to FX_TARGET_RMS at
+   decode, so a hot source and a quiet source now sound equally loud before this trim). Ambient
+   loops sit low; combat/UI mid; the big moments up top. Forge start/complete files SWAPPED per
+   Oliver: the metal 'forgedone' clang opens the forge, the sharpening 'forgeopen' rings on finish. */
+const FXDEF={
+  quest:{f:'fanfare-announcement-arrival',v:0.55}, levelcheer:{f:'fanfare-celebration',v:0.6},
+  footstep:{f:'footsteps-pair-soft-loopable',v:0.30,loop:true}, mobknock:{f:'bamboo-knock-loopable',v:0.32},
+  forgeopen:{f:'blade-sharpening-loopable',v:0.5}, bookflip:{f:'book-flip-page',v:0.40},
+  chestopen:{f:'box-open',v:0.52}, wallbreak:{f:'break-object-small',v:0.5},
+  click:{f:'button-press',v:0.4}, equip:{f:'cape-and-hood-drawn',v:0.46},
+  shopopen:{f:'cash-register-open-till',v:0.46}, wallslide:{f:'chair-pull-up-2',v:0.44},
+  bigreveal:{f:'clanging-pipes-loopable',v:0.6}, forgespin:{f:'coin-double-flip',v:0.44},
+  dice:{f:'dice-rolling',v:0.46}, doorslam:{f:'door-slam-heavy',v:0.5}, dooropen:{f:'doorknock-heavy',v:0.44},
+  drink:{f:'drink-2',v:0.48}, electric:{f:'fence-electric-hum-loopable',v:0.34,loop:true},
+  fireshot:{f:'fire-ignition-combustible-powder',v:0.46}, firecharge:{f:'fire-launch-jet',v:0.46},
+  fireball:{f:'fireball-launched',v:0.5}, heartbeat:{f:'heartbeat-rapid',v:0.4,loop:true},
+  frostclink:{f:'ice-clinking-in-glass',v:0.4}, bigland:{f:'jump-soft-landing',v:0.44},
+  train:{f:'lifting-double-weight',v:0.5}, bag:{f:'pickpocket-snatch-soft',v:0.42},
+  rain:{f:'rain-with-trickle-loopable',v:0.3,loop:true}, bonesdie:{f:'rocks-cliff-face-collapse',v:0.5},
+  frostdie:{f:'snowball-hitting-surface-and-falling',v:0.5}, lever:{f:'switch-push',v:0.46},
+  // ---- combat + events (loudness auto-normalized; v = prominence) ----
+  axeswing:{f:'axeswing',v:0.44}, swordswing:{f:'swordswing',v:0.42}, spearswing:{f:'spearswing',v:0.42},
+  gruntdie:{f:'gruntdie',v:0.48}, forgedone:{f:'forgedone',v:0.52}, warskill1:{f:'warskill1',v:0.5}, warcharge:{f:'warcharge',v:0.4},
+  rustyhit:{f:'rustyhit',v:0.44}, portalopen:{f:'portalopen',v:0.6}, stabkill:{f:'stabkill',v:0.5}, heavyhit:{f:'heavyhit',v:0.46},
+  arcaneskill:{f:'arcaneskill',v:0.5}, secretget:{f:'secretget',v:0.6}, wandcharge:{f:'wandcharge',v:0.44}, wandfire:{f:'wandfire',v:0.42},
+  sell:{f:'sell',v:0.48}, lootpickup:{f:'lootpickup',v:0.48}, buy:{f:'buy',v:0.46},
+  mobvoice1:{f:'mobvoice1',v:0.44}, mobvoice2:{f:'mobvoice2',v:0.44},
+  bossroar1:{f:'bossroar1',v:0.62}, bossroar2:{f:'bossroar2',v:0.62}, bossroar3:{f:'bossroar3',v:0.62}, bossdie:{f:'bossdie',v:0.6}
+};
+const FXBUF={}; let _fxLoaded=false;
+// measure a decoded buffer's RMS loudness (sparse sample, up to 2 channels)
+function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
+  for(let c=0;c<ch;c++){ const d=buf.getChannelData(c), step=Math.max(1,(d.length/40000)|0);
+    for(let i=0;i<d.length;i+=step){ s+=d[i]*d[i]; n++; } }
+  return Math.sqrt(s/Math.max(1,n)); }
+const FX_TARGET_RMS=0.09;                                // Phase 20: every file SFX auto-levels to this
+function loadFxFiles(){ if(_fxLoaded||!actx) return; _fxLoaded=true;
+  for(const k in FXDEF){ (function(key){ fetch(SFXDIR+FXDEF[key].f+'.mp3').then(r=>r.arrayBuffer()).then(b=>actx.decodeAudioData(b)).then(buf=>{FXBUF[key]=buf;
+    const rms=bufRms(buf); FXDEF[key]._norm=rms>0.0004?Math.max(0.35,Math.min(3.0,FX_TARGET_RMS/rms)):1; }).catch(()=>{}); })(k); } }
+const _fxLoop={};
+function playFx(key,volMul){ if(!sOn()) return null; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return null;
+  try{ const s=actx.createBufferSource(); s.buffer=buf; const g=actx.createGain(); g.gain.value=(d.v||0.4)*(d._norm||1)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(fxBus||master); s.start(); return {s,g}; }catch(e){ return null; } }
+function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key],buf=FXBUF[key]; if(!d||!buf) return;
+  try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(d._norm||1)*(volMul==null?1:volMul);
+    s.connect(g); g.connect(fxBus||master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
+function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
+const SFX={
+  // blade cutting air: airy whoosh sweeping down, faint steel sing
+  slash(){ noise({dur:0.16,f0:2600,f1:320,q:1.4,vol:0.15,a:0.012});
+    tone({f0:1050,f1:260,dur:0.1,type:'triangle',vol:0.018}); },
+  // physical shot: taut "thwip" + string snap
+  shoot(){ tone({f0:1500,f1:280,dur:0.07,type:'triangle',vol:0.06});
+    noise({dur:0.05,f0:3200,f1:1100,q:2.4,vol:0.09,a:0.001}); },
+  // magic cast, flavored by element
+  // Phase 20: a fresh WAND-FIRE — a crisp descending magic zap + a bright sparkle tail. ~0.14s so
+  // it layers cleanly at rapid fire rates (unlike a 1s+ sourced laser, which piles into mud).
+  wand(){ tone({f0:1820,f1:540,dur:0.13,type:'triangle',vol:0.16});
+    tone({f0:2700,f1:1350,dur:0.09,type:'sine',vol:0.06,at:0.004});
+    noise({dur:0.08,f0:5400,f1:1700,q:2.2,vol:0.05,a:0.001});
+    tone({f0:3300,dur:0.06,type:'sine',vol:0.035,at:0.085}); },
+  magic(el){
+    if(el==='fire'){ tone({f0:150,f1:46,dur:0.28,type:'sawtooth',vol:0.10});
+      noise({dur:0.30,f0:900,f1:180,type:'lowpass',vol:0.13,a:0.01}); playFx('fireshot'); }
+    else if(el==='ice'){ tone({f0:1250,dur:0.26,type:'sine',vol:0.05}); tone({f0:1870,dur:0.3,type:'sine',vol:0.03,at:0.02,detune:6});
+      noise({dur:0.22,f0:5200,f1:8200,type:'highpass',vol:0.045,a:0.008}); }
+    else if(el==='storm'){ tone({f0:1900,f1:170,dur:0.08,type:'sawtooth',vol:0.07});
+      noise({dur:0.05,f0:3400,q:5,vol:0.1,a:0.001}); noise({dur:0.04,f0:2600,q:5,vol:0.08,at:0.05,a:0.001}); }
+    else if(el==='void'){ tone({f0:170,f1:52,dur:0.32,type:'sine',vol:0.10});
+      noise({dur:0.28,f0:340,f1:1900,q:1.6,vol:0.06,a:0.02}); }
+    else if(el==='poison'){ tone({f0:520,f1:300,dur:0.12,type:'sine',vol:0.06}); tone({f0:390,f1:230,dur:0.13,type:'sine',vol:0.05,at:0.06});
+      noise({dur:0.2,f0:600,f1:240,type:'lowpass',vol:0.06,a:0.01}); }
+    else if(el==='holy'){ tone({f0:660,dur:0.3,type:'sine',vol:0.05}); tone({f0:990,dur:0.34,type:'sine',vol:0.035,at:0.02});
+      noise({dur:0.26,f0:6000,f1:9000,type:'highpass',vol:0.035,a:0.01}); }
+    else { // arcane / default: rising shimmer
+      tone({f0:520,f1:1040,dur:0.16,type:'sine',vol:0.05}); tone({f0:780,f1:1560,dur:0.16,type:'sine',vol:0.035,at:0.05});
+      noise({dur:0.2,f0:4200,f1:7800,type:'highpass',vol:0.04,a:0.01}); }
+  },
+  // weapon connects: meaty thump + crack + faint ring
+  hit(){ tone({f0:190,f1:65,dur:0.12,type:'sine',vol:0.14,a:0.002});
+    noise({dur:0.06,f0:950,f1:480,q:0.9,vol:0.16,a:0.001});
+    tone({f0:2100,dur:0.045,type:'square',vol:0.014,at:0.004}); },
+  // creature death: falling growl + wet splat
+  enemyDie(){ tone({f0:250,f1:52,dur:0.34,type:'sawtooth',vol:0.08}); tone({f0:236,f1:48,dur:0.34,type:'sawtooth',vol:0.05,detune:-14});
+    noise({dur:0.14,f0:750,f1:210,type:'lowpass',vol:0.13,a:0.004,at:0.02}); },
+  // player takes a hit: dull body thud + descending pain tone
+  hurt(){ tone({f0:310,f1:110,dur:0.2,type:'sawtooth',vol:0.075});
+    tone({f0:150,f1:60,dur:0.14,type:'sine',vol:0.12,a:0.002});
+    noise({dur:0.08,f0:500,f1:200,type:'lowpass',vol:0.1,a:0.002}); },
+  // effort "hup" + puff of air
+  jump(){ tone({f0:230,f1:540,dur:0.13,type:'sine',vol:0.06,a:0.012});
+    noise({dur:0.07,f0:700,f1:1300,q:1,vol:0.035,a:0.004}); },
+  // landing thud
+  land(){ tone({f0:150,f1:55,dur:0.1,type:'sine',vol:0.08,a:0.002});
+    noise({dur:0.06,f0:420,f1:170,type:'lowpass',vol:0.07,a:0.002}); },
+  // quick swish, sweeping up
+  dodge(){ noise({dur:0.17,f0:900,f1:4200,q:1.1,vol:0.11,a:0.008});
+    tone({f0:420,f1:940,dur:0.12,type:'sine',vol:0.02}); },
+  // low creature growl (monster aggro / boss lunge); v scales intensity
+  growl(v){ v=v||1; const f=95+Math.random()*40;
+    tone({f0:f,f1:f*0.62,dur:0.3,type:'sawtooth',vol:0.05*v}); tone({f0:f*1.02,f1:f*0.6,dur:0.3,type:'sawtooth',vol:0.035*v,detune:-16});
+    noise({dur:0.26,f0:300,f1:130,type:'lowpass',vol:0.06*v,a:0.02}); },
+  // flyer screech
+  screech(v){ v=v||1; tone({f0:1150,f1:1900,dur:0.12,type:'sawtooth',vol:0.028*v});
+    tone({f0:1500,f1:800,dur:0.1,type:'square',vol:0.02*v,at:0.09}); },
+  // level up: bright ascending motif
+  levelup(){ [523,659,784].forEach((f,i)=>{ tone({f0:f,dur:0.16,type:'triangle',vol:0.06,at:i*0.085}); tone({f0:f*2,dur:0.14,type:'sine',vol:0.02,at:i*0.085}); });
+    noise({dur:0.3,f0:5000,f1:9000,type:'highpass',vol:0.03,a:0.02,at:0.15}); },
+  // class rank-up: a deeper, brassier fanfare — clearly NOT the bright character-level chime
+  classup(){ [196,262,392,523].forEach((f,i)=>{ tone({f0:f,f1:f*1.01,dur:0.34,type:'sawtooth',vol:0.05,at:i*0.10}); tone({f0:f*1.5,dur:0.3,type:'triangle',vol:0.025,at:i*0.10}); });
+    tone({f0:523,f1:784,dur:0.5,type:'sine',vol:0.05,at:0.42}); },
+  // item pickup: soft two-note bell
+  pickup(){ tone({f0:660,dur:0.1,type:'triangle',vol:0.05}); tone({f0:990,dur:0.16,type:'triangle',vol:0.05,at:0.07});
+    tone({f0:1980,dur:0.12,type:'sine',vol:0.015,at:0.07}); },
+  // a DROP fanfare that escalates with rarity — obvious by ear which tier just fell (0 common .. 4 legendary)
+  drop(tier){ tier=Math.max(0,Math.min(4,tier|0));
+    if(tier===0){ tone({f0:590,dur:0.1,type:'triangle',vol:0.045}); tone({f0:880,dur:0.13,type:'triangle',vol:0.035,at:0.06}); return; }
+    const NOTES=[null,[523,784],[523,659,988],[440,587,740,988],[523,659,784,988,1319,1568]][tier];
+    const vol=0.05+tier*0.011, sp=tier>=4?0.095:0.07, dur=0.2+tier*0.03;
+    NOTES.forEach((f,i)=>{ tone({f0:f,dur,type:'triangle',vol,at:i*sp}); tone({f0:f*2,dur:dur*0.8,type:'sine',vol:vol*0.4,at:i*sp,detune:5}); });
+    noise({dur:0.28+tier*0.09,f0:5200,f1:9600,type:'highpass',vol:0.016+tier*0.008,a:0.02,at:tier>=3?0.12:0.05});  // shimmer, richer per tier
+    if(tier>=3){ tone({f0:196,f1:392,dur:0.55,type:'sine',vol:0.05,at:NOTES.length*sp*0.5}); }                     // low chord swell
+    if(tier>=4){ tone({f0:65,f1:52,dur:0.8,type:'sawtooth',vol:0.085});                                            // triumphant sub
+      tone({f0:98,dur:0.8,type:'sine',vol:0.05,detune:-8});
+      [1568,2093,2637].forEach((f,i)=>tone({f0:f,dur:0.5,type:'sine',vol:0.028,at:0.5+i*0.06})); }                 // sparkle tail
+  },
+  achieve(){ [523,659,880].forEach((f,i)=>{ tone({f0:f,dur:0.18,type:'triangle',vol:0.055,at:i*0.09}); });
+    noise({dur:0.35,f0:5200,f1:8800,type:'highpass',vol:0.03,a:0.03,at:0.18}); },
+  god(){ tone({f0:65,f1:38,dur:0.6,type:'sawtooth',vol:0.12});
+    [523,659,784,1047,1319].forEach((f,i)=>{ tone({f0:f,dur:0.22,type:'sawtooth',vol:0.045,at:0.1+i*0.095}); tone({f0:f,dur:0.22,type:'sine',vol:0.04,at:0.1+i*0.095,detune:8}); });
+    noise({dur:0.8,f0:3000,f1:9500,type:'highpass',vol:0.045,a:0.1,at:0.15}); },
+  // boss roar: layered detuned growl, breath, sub-drop
+  boss(){ tone({f0:105,f1:48,dur:0.85,type:'sawtooth',vol:0.11,a:0.03});
+    tone({f0:99,f1:44,dur:0.85,type:'sawtooth',vol:0.08,a:0.03,detune:-18});
+    tone({f0:52,f1:30,dur:0.7,type:'sine',vol:0.12,a:0.02});
+    noise({dur:0.7,f0:600,f1:140,type:'lowpass',vol:0.12,a:0.05}); },
+  win(){ [523,659,784,1047].forEach((f,i)=>{ tone({f0:f,dur:0.2,type:'triangle',vol:0.06,at:i*0.115}); tone({f0:f/2,dur:0.2,type:'sine',vol:0.04,at:i*0.115}); });
+    noise({dur:0.5,f0:5000,f1:9000,type:'highpass',vol:0.035,a:0.05,at:0.35}); }
+};
+
+/* ---------------- Rarity / elements (identical to 2D) ---------------- */
+const RARITY={
+  common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
+  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:4},
+  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:9},
+  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:15},
+  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:22}
+};
+const RORDER=['common','uncommon','rare','epic','legendary'];
+/* ---------------- PETS / COMPANIONS ----------------
+   ONE active pet at a time (owned pets stored like the bag). Pets HELP, never CARRY:
+   attackers do chip damage on a slow cadence, the healer trickles a little HP, the
+   utility pet vacuums loot. Bought/sold/trained only at the Beastkeeper in the hub. */
+const PETS={
+  emberpup:  {name:'Ember Pup',   arch:'attacker',style:'melee', rarity:'common',   price:220,  dmg:5, cd:1.8, range:240, body:'#e0794a', accent:'#ffb060', flavor:'A stray from the Emberdeep. Bites what bites you.'},
+  stonewhelp:{name:'Stone Whelp', arch:'attacker',style:'melee', rarity:'common',   price:260,  dmg:8, cd:2.3, range:210, body:'#8a8f9e', accent:'#c7ccd6', flavor:'Slow, heavy, loyal. Headbutts like a landslide.'},
+  wisp:      {name:'Pale Wisp',   arch:'attacker',style:'ranged',rarity:'uncommon', price:620,  dmg:5, cd:1.5, range:520, body:'#9fe0ff', accent:'#e6faff', flavor:"A fallen Bladeborn's lantern-light, still on watch."},
+  mender:    {name:'Mending Sprite',arch:'healer',              rarity:'uncommon', price:760,  heal:4, cd:3.4,          body:'#7de08a', accent:'#c8ffd4', flavor:'It cannot fight. It only refuses to let you fall.'},
+  coinsprite:{name:'Coin Sprite', arch:'utility',               rarity:'rare',     price:940,  pull:220,               body:'#ffd24a', accent:'#fff2b0', flavor:'Greedy, but it shares. Drags the gold to you.'},
+  gravewraith:{name:'Grave Wraith',arch:'attacker',style:'ranged',rarity:'rare',   price:1500, dmg:11, cd:1.7, range:560, body:'#b06bff', accent:'#e0b0ff', flavor:'It hungers with you. Its bolts find the throat.'}
+};
+const PETIDS=Object.keys(PETS);
+const PET_TRAIN_MAX=5;                                   // diminishing gold sink: +5% per level, 5 levels max
+function petTrainLvl(id){ return (meta.petTrain&&meta.petTrain[id])||0; }
+function petTrainCost(id){ return Math.round(180*Math.pow(1.7,petTrainLvl(id))); }
+function petTrainMul(id){ return 1+petTrainLvl(id)*0.05; }
+function petRarityCol(id){ const P=PETS[id]; return P?RARITY[P.rarity].color:'#fff'; }
+function petDisplayName(id){ return (meta.petNames&&meta.petNames[id])||(PETS[id]&&PETS[id].name)||'Pet'; }
+function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps chip relevant with level, never a spike
+function petAtkDmg(id){ const P=PETS[id]; return Math.max(1,Math.round((P.dmg||4)*petLevelScale()*petTrainMul(id))); }
+function petHealAmt(id){ const P=PETS[id]; return Math.max(1,Math.round((P.heal||3)*petTrainMul(id))); }
+function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); return Math.round(base*petLevelScale()*(1+petTrainLvl(id)*.12)); }
+// Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
+function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
+function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
+function canWieldRid(rid){ return heroLevel()>=rarityReq(rid); }
+function canWield(o){ return !o||!o.rarity||heroLevel()>=rarityReq(o.rarity); }
+// The rarity tier pip (1-5): an unmistakable numeric badge in the item's rarity color.
+function rarityIcon(rid){ return RARITY[rid]?`<span class="ico ico-rarity ico-rarity-${rid}" title="${RARITY[rid].name}" aria-label="${RARITY[rid].name}"></span>`:''; }
+function eventIcon(name){ return name?`<span class="ico ico-event ico-${name}" aria-hidden="true"></span>`:''; }
+function classIcon(id){ return eventIcon('class-'+id); }
+function skillIcon(id){ return eventIcon('skill-'+id); }
+function actionIcon(id){ return id?`<span class="ico ico-action ico-action-${id}" aria-hidden="true"></span>`:''; }
+function statIcon(id){ return id?`<span class="ico ico-stat ico-stat-${id}" aria-hidden="true"></span>`:''; }
+function rpip(rid){ const R=RARITY[rid]; if(!R) return ''; return `${rarityIcon(rid)}<span style="display:inline-block;min-width:15px;text-align:center;font-size:10px;font-weight:800;line-height:15px;border-radius:4px;background:${R.color};color:#0d0f14;margin-left:2px;padding:0 3px;vertical-align:middle">${R.tier+1}</span>`; }
+function reqTag(o){ return (o&&o.rarity&&!canWield(o))?`<span style="color:#ff8a82;font-weight:700;font-size:11px;margin-left:6px">🔒 Lv ${rarityReq(o.rarity)}</span>`:''; }
+function elementColor(el){ return {fire:'#ff7a3a',ice:'#7fd6ff',poison:'#86e05a',arcane:'#c47bff',void:'#b06bff',storm:'#9fe0ff',holy:'#ffe9a8'}[el]||null; }
+function rollRarity(){
+  const luck=(G?G.stageIndex*0.5:0)+(G?Math.floor(G.p.level/2)*0.2:0);   // Phase 20: NG+ luck term removed
+  const boost=1+Math.min(luck,22)*0.085;
+  let pool=[],total=0;
+  RORDER.forEach((r,i)=>{ const w=RARITY[r].base*Math.pow(boost,i); pool.push(w); total+=w; });
+  let roll=Math.random()*total;
+  for(let i=0;i<pool.length;i++){ roll-=pool[i]; if(roll<=0) return RORDER[i]; }
+  return 'common';
+}
+/* Enemy kills use a deliberately leaner economy than chests and authored rewards.
+   Each rarity step falls off harder, and regular/elite mobs never roll Legendary. */
+function rollOrganicRarity(){
+  const luck=(G?G.stageIndex*0.25:0)+(G?Math.floor(G.p.level/2)*0.08:0);
+  const boost=1+Math.min(luck,18)*0.045;
+  const weights=[1000,180*Math.pow(boost,1),30*Math.pow(boost,2),3*Math.pow(boost,3)];
+  let total=weights.reduce((a,b)=>a+b,0), roll=Math.random()*total;
+  for(let i=0;i<weights.length;i++){ roll-=weights[i]; if(roll<=0) return RORDER[i]; }
+  return 'common';
+}
+/* ---------------- Affinities (damage TYPE = sch phys/mag; AFFINITY = el) ----------------
+   Finalized 6 affinities in 3 opposition pairs. Frost's internal id stays 'ice' (save-safe);
+   Storm is retired — it survives only as a migration alias onto Arcane. */
+const EL_ALIAS={storm:'arcane',lightning:'arcane'};                 // retired affinities fold onto a surviving one (migration only)
+function normEl(el){ return el?(EL_ALIAS[el]||el):null; }
+const AFFINITY={
+  fire:{name:'Fire',icon:'🔥',status:'Burn'}, ice:{name:'Frost',icon:'❄',status:'Chill'},
+  poison:{name:'Poison',icon:'☠',status:'Venom'}, arcane:{name:'Arcane',icon:'✦',status:'Rune Marks'},
+  holy:{name:'Holy',icon:'☀',status:'Radiance'}, void:{name:'Void',icon:'◍',status:'Corruption'}
+};
+function affName(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].name:''; }
+function statusIcon(el){ el=normEl(el); const stat=EL_STAT[el]; return stat?`<span class="ico ico-status-${stat}" aria-hidden="true"></span>`:''; }
+function affIcon(el){ el=normEl(el); return AFFINITY[el]?statusIcon(el):''; }
+function affStatus(el){ el=normEl(el); return AFFINITY[el]?AFFINITY[el].status:''; }
+// locked opposition pairs: Fire<->Frost, Poison<->Arcane, Holy<->Void
+const WEAK={fire:'ice',ice:'fire',poison:'arcane',arcane:'poison',holy:'void',void:'holy'};
+function elemMod(wEl,eEl){
+  wEl=normEl(wEl); eEl=normEl(eEl);
+  if(!wEl||!eEl) return 1;
+  if(wEl===eEl) return 0.6;          // an affinity-aligned enemy RESISTS its own affinity
+  if(WEAK[eEl]===wEl) return 1.5;    // ...and is WEAK to its opposite
+  return 1;
+}
+
+/* ---------------- Weapons (identical stats; range = world units) ---------------- */
+const ARCHES={
+  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:190,range:60,art:'sword'},
+  saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:60,art:'sword'},
+  dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:46,art:'dagger'},
+  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
+  great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
+  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
+  scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
+  runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
+  voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
+  iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:38,cd:.38,kb:360,range:88,art:'sword',el:'holy',anyClass:true,ians:true}, // final capstone: fastest heavy blade, radiant execute, full power for every class
+  bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
+  crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
+  knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
+  javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
+  firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
+  frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
+  arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'wand',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1,seek:true}}, // wand-family (behaves like one): seeks + pierces
+  stormrod:{disp:'Arcane Wand',cls:'ranged',sch:'mag',dmg:12,cd:.24,kb:110,art:'wand',el:'arcane',proj:{speed:820,size:4,pierce:1,range:780,color:'#c47bff',shape:'spark',glow:1}},          // Storm retired -> Arcane rapid-fire wand
+  plaguestaff:{disp:'Plague Staff',cls:'ranged',sch:'mag',dmg:19,cd:.52,kb:130,art:'staff',el:'poison',chg:'bolt',proj:{speed:470,size:8,pierce:0,range:380,color:'#86e05a',shape:'glob',glow:1}},
+  holyscepter:{disp:'Holy Scepter',cls:'ranged',sch:'mag',dmg:22,cd:.56,kb:160,art:'wand',el:'holy',proj:{speed:560,size:9,pierce:1,range:560,color:'#ffe9a8',shape:'light',glow:1,seek:true}}  // wand-family: seeks + pierces
+};
+const ARCHEIDS=Object.keys(ARCHES);
+// retired/removed archetypes never enter active generation: voidscythe + iansblade are shop-only; saber + dagger
+// were merged away (saber->sword, daggers->throwing knives) and survive only as save-migration aliases.
+const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger'];
+const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
+// Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
+function weaponSwingFx(w){ if(!w) return null;
+  if(w.arche==='axe') return 'axeswing';                     // axes
+  if(w.art==='sword'&&w.sch==='phys') return 'swordswing';   // physical swords (sword, saber)
+  if(w.arche==='javelin') return 'spearswing';               // spears / javelins
+  return null; }
+function weaponFireFx(w){ if(!w) return null;
+  if(w.cls==='ranged'&&w.sch==='mag'&&(w.art==='wand'||w.art==='scepter')) return 'wandfire';   // wands / scepters
+  return null; }
+/* per-art melee hit shape: arc = front cone, thrust = long narrow lunge, slam = radial AoE.
+   reach here matches each weapon's ARCHES range; longer reach is paid for with lower DPS (tuned above). */
+const MELEE={
+  dagger:{shape:'thrust',reach:46,width:24},
+  sword:{shape:'arc',reach:60,arc:1.75},
+  javelin:{shape:'thrust',reach:82,width:22},   // the light stab when a foe is point-blank
+  axe:{shape:'arc',reach:64,arc:2.15},
+  great:{shape:'arc',reach:84,arc:2.70},
+  hammer:{shape:'slam',reach:70,radius:62,offset:42},
+  scythe:{shape:'arc',reach:90,arc:2.95}
+};
+/* ---------------- Classes (Classes & Quests update, Phase 1) ----------------
+   4 skills per class on independent cooldowns and individually balanced mana costs. Ranks 1-10 per class;
+   skills unlock at ranks 1/2/4/7; subclass chosen at rank 3; capstone = the
+   subclass passive strengthens at rank 10. Off-family weapons: -40% damage and
+   abilities lose their bonus effects (rider). */
+const CLASSES={
+  warrior:{disp:'Warrior',icon:classIcon('warrior'),attackStyle:'warrior',family:['sword','great','axe','hammer'],
+    subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
+          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
+    skills:[
+      {id:'cleave',n:'Cleave',icon:skillIcon('cleave'),cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
+      {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
+      {id:'wcharge',n:'Charge',icon:skillIcon('charge'),cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
+      {id:'berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
+  ranger:{disp:'Ranger',icon:classIcon('ranger'),attackStyle:'ranger',family:['bow','cross','dagger','javelin'],
+    subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
+          {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:skillIcon('ranger-quickshot'),cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
+    skills:[
+      {id:'deadeye',n:'Deadeye',icon:skillIcon('deadeye'),cd:4,rank:1,d:'A precise 3x damage strike that pierces'},
+      {id:'volley',n:'Volley',icon:skillIcon('volley'),cd:8,rank:2,d:'A fan of projectiles across your front'},
+      {id:'tumble',n:'Tumble',icon:skillIcon('tumble'),cd:14,rank:4,d:'Roll backward and snare nearby enemies'},
+      {id:'mark',n:'Hunter’s Mark',icon:skillIcon('hunters-mark'),cd:24,rank:7,d:'Mark a target: it takes +40% damage from you for 8s'}]},
+  mage:{disp:'Mage',icon:classIcon('mage'),attackStyle:'mage',family:['staff','wand','spellblade'],     // finalized: Staff, Wand (scepters folded in), Spellblade (magic melee)
+    subs:[{id:'sorcerer',disp:'Sorcerer',blurb:'+15% ability damage (rank 10: +25%). Pure destruction.'},
+          {id:'wizard',disp:'Wizard',blurb:'The scholar: -20% skill cooldowns (rank 10 -30%), plus a control kit — Frost Chains, Barrier, Meteor.',skills:[{id:'frostchains',n:'Frost Chains',icon:skillIcon('mage-gravity-well'),cd:8,rank:2,d:'Freeze and root every enemy in a cone ahead'},{id:'barrier',n:'Barrier',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'A shield that absorbs up to 35% of your max HP'},{id:'meteor',n:'Meteor',icon:skillIcon('mage-elemental-overload'),cd:24,rank:7,d:'Call a meteor onto your target after a short delay'}]}],
+    skills:[
+      {id:'bolt',n:'Elemental Bolt',icon:skillIcon('mage-elemental-bolt'),cd:4,rank:1,d:'Hurl a heavy bolt of your weapon’s element'},
+      {id:'nova',n:'Nova',icon:skillIcon('mage-nova'),cd:8,rank:2,d:'A freezing burst: damage + slow all around you'},
+      {id:'blink',n:'Blink',icon:skillIcon('mage-blink'),cd:14,rank:4,d:'Teleport forward'},
+      {id:'tempest',n:'Arcane Tempest',icon:skillIcon('mage-arcane-tempest'),cd:24,rank:7,d:'A storm rages around you for 4s'}]},
+  reaper:{disp:'Reaper',icon:classIcon('reaper'),attackStyle:'reaper',earned:true,family:['scythe'],
+    subs:[{id:'harvester',disp:'Harvester',blurb:'+12% lifesteal (rank 10: +20%). Every soul feeds you.'},
+          {id:'executioner',disp:'Executioner',blurb:'The reaper of the wounded: +30% damage under half HP (rank 10 +50%), plus a finisher kit — Execute, Grim Scythe, Reaping Storm.',skills:[{id:'execute',n:'Execute',icon:skillIcon('reaper-soul-cleave'),cd:6,rank:2,d:'A brutal strike that instantly kills targets under 25% health'},{id:'grimscythe',n:'Grim Scythe',icon:skillIcon('reaper-death-vortex'),cd:14,rank:4,d:'A spinning cut that hits everything around you'},{id:'reapingstorm',n:'Reaping Storm',icon:skillIcon('reaper-wraith-form'),cd:24,rank:7,d:'Become a whirlwind of blades for 4.5s'}]}],
+    skills:[
+      {id:'reap',n:'Reap',icon:skillIcon('reaper-reap'),cd:4,rank:1,d:'A wide 2.4x scythe arc that drains life'},
+      {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
+      {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
+      {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]}
+};
+const CLASSIDS=Object.keys(CLASSES);
+const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
+/* ============================================================================
+   CLASS SYSTEM v2 (finalized) — rank 1-10 choice progression.
+   Rank 1 = innate trait only. Ranks 2/4/6/8 = pick 1-of-2 SKILLS (slots 0-3).
+   Ranks 3/5/7/9 = pick 1-of-2 PASSIVES. Rank 10 = fixed capstone.
+   Classes present in CLASS2 use this engine; the rest fall back to the legacy
+   subclass kit until they're converted (then the legacy path is removed).
+   ============================================================================ */
+const CLASS2={
+  warrior:{ disp:'Warrior', icon:classIcon('warrior'),
+    innate:{name:'Battle Ready', d:'Basic attacks deal +8% damage and gain +15% interrupt resistance while attacking.'},
+    cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Skill hits restore 2% max HP.'},
+    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'w_cleave',d:'A broad 2.2x blade sweep that cuts every enemy in front of you.'},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
+    r3:{kind:'passive',a:{id:'w_heavy',n:'Heavy Hand',role:'Damage',d:'Basic attacks deal +12% damage but attack 5% slower.'},b:{id:'w_swift',n:'Swift Steel',role:'Speed',d:'+10% attack speed; every fourth basic hit deals +25% damage.'}},
+    r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:'Spin through a full circle twice, dealing 1.1x damage per sweep.'}},
+    r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:'Gain 12% damage reduction while below 50% HP.'}},
+    r6:{kind:'skill',slot:2,a:{id:'w_guard',n:'Iron Guard',cd:13,role:'Defense',fx:'w_guard',d:'Brace for 3s, reducing incoming damage by 60%.'},b:{id:'w_stomp',n:'Shockwave Stomp',cd:12,role:'Control',fx:'w_stomp',d:'Slam the ground for 1.5x damage and heavy knockback all around.'}},
+    r7:{kind:'passive',a:{id:'w_bloodlust',n:'Bloodlust',role:'Offense',d:'A kill grants +12% damage and attack speed for 4s.'},b:{id:'w_tactical',n:'Tactical Guard',role:'Defense',d:'After dodging, gain 20% damage reduction for 2s.'}},
+    r8:{kind:'skill',slot:3,a:{id:'w_berserk',n:'Berserk',cd:22,role:'Offense',fx:'w_berserk',d:'+35% damage and +30% attack speed for 6s.'},b:{id:'w_execute',n:'Execution',cd:20,role:'Finisher',fx:'w_execute',d:'A crushing 4x strike that executes normal enemies below 20% HP.'}},
+    r9:{kind:'passive',a:{id:'w_master',n:'Weapon Master',role:'Damage',d:'Warrior-family weapons deal +10% damage and skills cost 10% less mana.'},b:{id:'w_juggernaut',n:'Juggernaut',role:'Defense',d:'+15% knockback resistance and +8% damage reduction while moving.'}}
+  },
+  ranger:{ disp:'Ranger', icon:classIcon('ranger'),
+    innate:{name:'Clear Aim', d:'After 3s without taking direct damage: +10% damage and +10% ability range. A hit disables it until you avoid damage for 3s again.'},
+    cap:{name:'Perfect Hunt', d:'Clear Aim becomes Perfect Aim: +3% more damage, survives a 0.75s grace after a hit, and a kill while active cuts skill cooldowns by 0.5s.'},
+    r2:{kind:'skill',slot:0, a:{id:'r_volley',n:'Volley',cd:5,role:'Group Damage',fx:'r_volley',d:'Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.'},
+                             b:{id:'r_pierce',n:'Piercing Shot',cd:5,role:'Boss Damage',fx:'r_pierce',d:'One shot through a line — 2.2x first (−10% its armor), 1.5x rest.'}},
+    r3:{kind:'passive', a:{id:'r_longshot',n:'Longshot',role:'Range',d:'+8% damage to enemies 7m+ away.'},
+                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Close',d:'+6% damage within 4m; +25% interrupt resistance up close.'}},
+    r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim.'},
+                             b:{id:'r_shadow',n:'Shadowstrike',cd:9,role:'Movement',fx:'r_shadow',d:'Dash through a target (2.0x) and appear behind it; tap again within 1s to return.'}},
+    r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:'After Tumble/Shadowstrike: −15% damage taken & −30% slows for 1.5s.'},
+                        b:{id:'r_ambush',n:'Ambusher',role:'Damage',d:'After Tumble/Shadowstrike: next click within 3s +20% (once per 6s).'}},
+    r6:{kind:'skill',slot:2, a:{id:'r_spike',n:'Spike Trap',cd:10,role:'Control',fx:'r_spike',d:'A 4m spike field for 5s: −35% slow, 0.25x/s (max 1.25x). Element once on entry.'},
+                             b:{id:'r_smoke',n:'Smoke Bomb',cd:11,role:'Support',fx:'r_smoke',d:'Smoke cloud: breaks targeting, −30% enemy accuracy, +20% your move speed.'}},
+    r7:{kind:'passive', a:{id:'r_patient',n:'Patient Hunter',role:'Damage',d:'Clear Aim 10%→14% damage, but needs 3.5s without a hit.'},
+                        b:{id:'r_quick',n:'Quickdraw',role:'Uptime',d:'Clear Aim activates after 2s instead of 3s.'}},
+    r8:{kind:'skill',slot:3, a:{id:'r_mark',n:"Hunter's Mark",cd:12,role:'Boss Damage',fx:'r_mark',d:'Mark one enemy: you deal +18% and +10% crit to it for 8s.'},
+                             b:{id:'r_deathmark',n:'Death Mark',cd:14,role:'Farming',fx:'r_deathmark',d:'Mark up to 5 enemies — they explode for 1.8x on death.'}},
+    r9:{kind:'passive', a:{id:'r_elem',n:'Elemental Archer',role:'Damage',d:'Your elemental reactions deal +10% and control lasts +10% longer.'},
+                        b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
+  },
+  mage:{ disp:'Mage', icon:classIcon('mage'),
+    innate:{name:'Arcane Attunement',d:'Magic weapons deal +8% damage and restore 2 mana whenever a basic attack hits.'},
+    cap:{name:'Archmage',d:'+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost.'},
+    r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'Launch a heavy 2.4x projectile carrying your weapon element.'},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
+    r3:{kind:'passive',a:{id:'m_potent',n:'Potent Weave',role:'Damage',d:'+12% skill damage, but skills cost 8% more mana.'},b:{id:'m_efficient',n:'Efficient Casting',role:'Economy',d:'Skills cost 15% less mana.'}},
+    r4:{kind:'skill',slot:1,a:{id:'m_blink',n:'Blink',cd:8,role:'Movement',fx:'m_blink',d:'Teleport forward and become untouchable during the displacement.'},b:{id:'m_nova',n:'Nova',cd:9,role:'Control',fx:'m_nova',d:'Detonate a 1.4x freezing burst that slows nearby enemies.'}},
+    r5:{kind:'passive',a:{id:'m_glass',n:'Glass Cannon',role:'Damage',d:'+15% magic damage, but take 8% more damage.'},b:{id:'m_ward',n:'Arcane Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP for 3s.'}},
+    r6:{kind:'skill',slot:2,a:{id:'m_gravity',n:'Gravity Well',cd:13,role:'Control',fx:'m_gravity',d:'Create an implosion that pulls enemies inward and deals 1.3x damage.'},b:{id:'m_barrier',n:'Rune Barrier',cd:14,role:'Defense',fx:'m_barrier',d:'Create a shield that absorbs 35% of max HP.'}},
+    r7:{kind:'passive',a:{id:'m_savant',n:'Elemental Savant',role:'Elements',d:'Element buildup and reaction damage increase by 15%.'},b:{id:'m_temporal',n:'Temporal Focus',role:'Uptime',d:'Standing still for 1.5s grants 15% cooldown recovery until you move.'}},
+    r8:{kind:'skill',slot:3,a:{id:'m_tempest',n:'Arcane Tempest',cd:22,role:'Group Damage',fx:'m_tempest',d:'A 4s storm repeatedly damages enemies around you.'},b:{id:'m_overload',n:'Elemental Overload',cd:24,role:'Burst',fx:'m_overload',d:'Release a massive 3.4x elemental explosion around your target.'}},
+    r9:{kind:'passive',a:{id:'m_echo',n:'Spell Echo',role:'Burst',d:'Every fourth skill repeats at 35% power without extra mana.'},b:{id:'m_manafont',n:'Manafont',role:'Sustain',d:'+30% mana regeneration and +10 maximum mana.'}}
+  },
+  reaper:{ disp:'Reaper', icon:classIcon('reaper'),
+    innate:{name:'Soul Hunger',d:'Scythe damage heals 3% of damage dealt and slain enemies restore 2 mana.'},
+    cap:{name:'Avatar of Death',d:'+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s.'},
+    r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:5,role:'Sustain',fx:'x_reap',d:'A broad 2.4x scythe arc with strong lifesteal.'},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
+    r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Damage',d:'Each kill grants +2% damage for 6s, stacking five times.'},b:{id:'x_doom',n:'Lingering Doom',role:'Damage Over Time',d:'Your damage-over-time effects last 20% longer.'}},
+    r4:{kind:'skill',slot:1,a:{id:'x_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'},b:{id:'x_wraith',n:'Wraith Form',cd:10,role:'Defense',fx:'x_wraith',d:'Become spectral for 3s: faster movement and 65% damage reduction.'}},
+    r5:{kind:'passive',a:{id:'x_armor',n:'Soul Armor',role:'Defense',d:'Collecting a kill grants a 3% max-HP shield for 5s.'},b:{id:'x_wraithwalk',n:'Wraithwalk',role:'Movement',d:'After using mobility, gain +18% move speed for 2.5s.'}},
+    r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Gravebind',cd:12,role:'Control',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
+    r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Lifesteal is 25% stronger while below half HP.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies are slowed by 18%.'}},
+    r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:'Drain nearby enemies for 4s, damaging them and restoring health.'},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
+    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Damage',d:'Corruption builds 25% faster and Rupture deals +15% damage.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
+  }
+};
+const PASSIVE_ART={
+  berserker:'warrior-berserker',guardian:'warrior-guardian',
+  sorcerer:'mage-sorcerer',wizard:'mage-wizard',
+  harvester:'reaper-harvester',executioner:'reaper-executioner',
+  w_battle_ready:'warrior-battle-ready',w_heavy:'warrior-heavy-hand',w_swift:'warrior-swift-steel',w_second:'warrior-second-wind',w_unyield:'warrior-unyielding',
+  w_bloodlust:'warrior-bloodlust',w_tactical:'warrior-tactical-guard',w_master:'warrior-weapon-master',w_juggernaut:'warrior-juggernaut',w_unbroken:'warrior-unbroken-champion',
+  r_clear_aim:'ranger-clear-aim',r_longshot:'ranger-longshot',r_closeq:'ranger-close-quarters',
+  r_escape:'ranger-escape-artist',r_ambush:'ranger-ambusher',r_patient:'ranger-patient-hunter',
+  r_quick:'ranger-quickdraw',r_elem:'ranger-elemental-archer',r_bounty:'ranger-bounty-hunter',
+  r_perfect_hunt:'ranger-perfect-hunt',
+  m_attunement:'mage-arcane-attunement',m_potent:'mage-potent-weave',m_efficient:'mage-efficient-casting',m_glass:'mage-glass-cannon',m_ward:'mage-arcane-ward',
+  m_savant:'mage-elemental-savant',m_temporal:'mage-temporal-focus',m_echo:'mage-spell-echo',m_manafont:'mage-manafont',m_archmage:'mage-archmage',
+  x_hunger:'reaper-soul-hunger',x_strength:'reaper-harvested-strength',x_doom:'reaper-lingering-doom',x_armor:'reaper-soul-armor',x_wraithwalk:'reaper-wraithwalk',
+  x_crimson:'reaper-crimson-harvest',x_chill:'reaper-grave-chill',x_corrupt:'reaper-corruption-mastery',x_favor:'reaper-deaths-favor',x_avatar:'reaper-avatar-of-death'
+};
+function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png" alt="" aria-hidden="true">`:'✦'; }
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar'};
+const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
+/* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
+   An earned class's trial is a real fight hidden in a side zone and must be won. */
+const TRIALS={
+  warrior:{cls:'warrior',stage:0,seed:501,name:'Trial of the Blade',kills:6,
+    tips:['Move with the stick (or WASD).','Tap SLASH to attack — hold it to keep swinging.','DODGE rolls you out of danger. Learn it.','Tap ① Cleave to hit everything in front of you.','Clear 6 foes, then take the portal.']},
+  ranger:{cls:'ranger',stage:1,seed:502,name:'Trial of the Bow',kills:6,
+    tips:['Move with the stick (or WASD).','Tap FIRE to loose an arrow — it aims for you.','DODGE rolls you out of danger. Keep your distance.','Tap ① Deadeye for a piercing shot.','Clear 6 foes, then take the portal.']},
+  mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
+    tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Tap ① Elemental Bolt for a heavy hit.','Clear 6 foes, then take the portal.']},
+  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
+    tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']}
+};
+const RANK_XP=r=>Math.round(60*Math.pow(Math.max(1,r),1.7));
+const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
+let queueSubclass=false;
+function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
+  if(fresh) cs=meta.classes[id]={xp:0,rank:1,sub:null,v2:1};
+  if(cs.rank==null||cs.rank<1) cs.rank=1;
+  if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // legacy pre-v2 save: one-time reset (keeps rank 1)
+  return cs; }
+function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
+function classFamilyOk(w){ return !w || w.anyClass || curClass().family.includes(w.art); }
+function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
+function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
+function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
+// The effective 4-skill kit: skill 1 is shared; skills 2-4 come from the path you chose
+// at the rank-2 fork (each subclass = a distinct kit). Unchosen -> path-A default for display.
+function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) return []; const cs=classState(cid);
+  if(!cs.sub) return C.skills.slice(0,4);                                   // no path chosen yet: shared kit only
+  // MIX-AND-MATCH: each skill slot (2/3/4) can be drawn from EITHER path independently (cs.mix[slot]=pathId); defaults to cs.sub
+  const skillsOf=id=>{ const s=C.subs.find(x=>x.id===id); return (s&&s.skills)?s.skills:C.skills.slice(1,4); };
+  const out=[C.skills[0]];
+  for(let i=0;i<3;i++){ const pid=(cs.mix&&cs.mix[i+1])||cs.sub; out.push(skillsOf(pid)[i]||C.skills[1+i]); }
+  return out; }
+function skillUnlocked(i){ const cs=classState(meta.classId); if(i>=1&&!cs.sub) return false; const S=curSkills(); return S[i]?cs.rank>=S[i].rank:false; }
+function gainClassXp(n){ const cs=classState(meta.classId); if(cs.rank>=10||n<=0) return;
+  cs.xp+=n; let up=false;
+  while(cs.rank<10 && cs.xp>=RANK_XP(cs.rank)){ cs.xp-=RANK_XP(cs.rank); cs.rank++; up=true;
+    const S=curSkills(meta.classId);
+    const sk=S.find((s,idx)=>s&&s.rank===cs.rank&&(idx===0||cs.sub));   // slot 0 (the shared skill) unlocks regardless of a chosen path
+    toast('✦ '+curClass().disp+' rank '+cs.rank+(sk?(' — '+sk.n+' unlocked!'):(cs.rank>=10?' — capstone!':'')));
+    if(!c2def()&&cs.rank===1&&S[0]&&!(meta.tut&&meta.tut.skill)) queueSkillTut=S[0]; }   // first rank-up teaches the shared skill, once
+  if(up){ SFX.classup();
+    if(c2def()){ const nx=c2NextChoice(); if(nx) queueChoiceRank=nx; }   // v2: queue the next unmade rank choice
+    else if(cs.rank>=2&&!cs.sub) queueSubclass=true;                     // legacy fork at rank 2
+    skillbarUpdate(); }
+  if(G&&mode==='play') hudUpdate();
+  persist(); }
+const LEGACY_ART={orb:'wand',rod:'wand',scepter:'wand',spear:'sword'};   // retired arts fold into a surviving family art
+const LEGACY_ARCHE={spear:'sword',saber:'sword',dagger:'knives'};        // retired archetypes -> their surviving family (saber->sword, daggers->throwing knives)
+function normWeapon(w){ if(!w) return w;
+  if(LEGACY_ARCHE[w.arche]){ w.arche=LEGACY_ARCHE[w.arche]; }
+  if(w.el){ w.el=normEl(w.el); }                                    // retired affinities (storm) migrate onto a surviving one
+  const a=ARCHES[w.arche];
+  if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false; w.anyClass=!!a.anyClass; w.ians=!!a.ians; w.cls=a.cls; w.sch=a.sch;   // re-derive art/charge/class/damage-type from the (possibly remapped) archetype so old saves gain the finalized behavior
+    if(a.el && !w.el) w.el=a.el;
+    if(a.cls==='ranged') w.proj=Object.assign({},a.proj); }   // refresh proj from the archetype so migrated items gain finalized behavior (e.g. wand seek)
+  else if(LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art];               // unknown archetype: at least fold a retired art
+  return w; }
+function makeElite(e){                                    // elites: zone minibosses — SCARIER, not spongier
+  e.elite=true; e.hp=Math.round(e.hp*1.8); e.maxHp=e.hp; e.dmg*=1.5;   // HP bump trimmed 2.4 -> 1.8 (no bullet-sponge)
+  e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=1.08; e.label='Elite';   // the budget goes to BEHAVIOR: faster, and (chargers) a tighter attack cadence via e.elite
+  return e;
+}
+function makeWeapon(aid,rid,nameOverride){
+  const a=ARCHES[aid],r=RARITY[rid];
+  const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,chg:a.chg||null,reaper:a.reaper||false,anyClass:!!a.anyClass,ians:!!a.ians,
+    name:nameOverride||(r.name+' '+a.disp),
+    dmg:+(a.dmg*r.mul).toFixed(1),cd:a.cd,kb:a.kb,
+    lifesteal:(a.lifesteal||0)+(rid==='legendary'?0.05:0),
+    color:r.color, blade:(a.sch==='mag'?(elementColor(a.el)||'#c9a6ff'):'#dfe5ec')};
+  if(a.ians){ w.name="Ian's Blade"; w.blade='#fff4ae'; w.color='#ffd24a'; }
+  if(a.cls==='melee'){ w.range=a.range; } else { w.proj=Object.assign({},a.proj); }
+  return w;
+}
+function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
+/* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
+   (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe']};
+function classStartWeapon(cid){
+  const def=CLASSSTART[cid]||CLASSSTART.warrior;
+  const w=makeWeapon(def[0],'common',def[1]);
+  w.dmg=+(w.dmg*0.62).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
+  return w;
+}
+/* Hub shop stock: one plain weapon per class family at every rarity except legendary.
+   Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
+const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe'};   // archetype ids, not arts
+const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
+function shopWeapon(cid,rid){
+  const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
+  const w=makeWeapon(aid,rid,SHOPPLAIN[rid]+' '+a.disp);
+  w.dmg=+(w.dmg*0.82).toFixed(1);          // 18% under a rolled drop of the same rarity
+  w.lifesteal=0; w.shop=true;
+  return w;
+}
+function shopWeapCost(rid){ return {common:60,uncommon:220,rare:650,epic:1600}[rid]||9999; }
+
+/* ---------------- Armor (3 slots; identical to 2D) ---------------- */
+const SLOTS={
+  helmet:{label:'Helmet',def:[6,10,15,21,28]},
+  chest:{label:'Chestplate',def:[9,15,22,30,40]},
+  legs:{label:'Leggings',def:[7,11,17,23,31]}
+};
+const SLOTIDS=['helmet','chest','legs'];
+/* Armor sets (Phase 2): every piece belongs to a playstyle family aligned to a class.
+   The set decides which stats it can roll and how much raw defense it carries — Heavy
+   is a wall, Swift trades armor for mobility, Mystic feeds the skill bar. */
+/* Armor TYPES (one per stat, consistent names): each piece carries ONE clearly-named attribute,
+   its signature bonus, an accent COLOUR and a signature visual motif so the type is obvious at a glance. */
+const ARMOR_TYPES={
+  vigor:   {name:'Vigor',    stat:'hp',          base:[12,20,30,42,58],       fmt:v=>'+'+v+' Max HP',              col:'#ff8a82', defMul:1.15},
+  might:   {name:'Might',    stat:'powerMul',    base:[.05,.07,.10,.13,.17],  fmt:v=>'+'+Math.round(v*100)+'% Damage',        col:'#ffce6a', defMul:0.92},
+  mystic:  {name:'Mystic',   stat:'magPowerMul', base:[.06,.09,.13,.17,.22],  fmt:v=>'+'+Math.round(v*100)+'% Magic Damage',  col:'#c47bff', defMul:0.86},
+  swift:   {name:'Swift',    stat:'speedMul',    base:[.05,.07,.09,.12,.15],  fmt:v=>'+'+Math.round(v*100)+'% Move Speed',    col:'#7ec46a', defMul:0.86},
+  haste:   {name:'Haste',    stat:'atkSpeedMul', base:[.04,.06,.08,.10,.13],  fmt:v=>'+'+Math.round(v*100)+'% Attack Speed',  col:'#ffb060', defMul:0.9},
+  keen:    {name:'Keen',     stat:'crit',        base:[.03,.05,.07,.09,.12],  fmt:v=>'+'+Math.round(v*100)+'% Crit',          col:'#ffd24a', defMul:0.9},
+  warding: {name:'Warding',  stat:'def',         base:[16,26,38,54,74],       fmt:v=>'+'+v+' Defense',             col:'#8fb7ff', defMul:1.1},
+  sanguine:{name:'Sanguine', stat:'lifesteal',   base:[.03,.04,.05,.07,.09],  fmt:v=>'+'+Math.round(v*100)+'% Lifesteal',     col:'#e0607a', defMul:0.95},
+  nimble:  {name:'Nimble',   stat:'dodgeMul',    base:[.05,.07,.10,.13,.17],  fmt:v=>'-'+Math.round(v*100)+'% Dodge CD',      col:'#9fe0ff', defMul:0.9},
+  focus:   {name:'Focus',    stat:'cdr',         base:[.04,.06,.08,.11,.14],  fmt:v=>'-'+Math.round(v*100)+'% Skill CD',      col:'#c9a6ff', defMul:0.9},
+  gilded:  {name:'Gilded',   stat:'goldFind',    base:[.12,.18,.26,.36,.50],  fmt:v=>'+'+Math.round(v*100)+'% Gold Find',     col:'#f0c24a', defMul:1.0}
+};
+const ARMOR_TYPE_IDS=Object.keys(ARMOR_TYPES);
+// legacy set names (heavy/swift/mystic) fold to a type so old saves still read + render
+const LEGACY_SET={heavy:'vigor',swift:'swift',mystic:'mystic'};
+function normArmor(a){ if(!a) return a;
+  if(!a.type){ a.type=LEGACY_SET[a.set]||(a.affixes&&a.affixes[0]&&ARMOR_TYPE_IDS.find(t=>ARMOR_TYPES[t].stat===a.affixes[0].stat))||'vigor'; }
+  if(!a.accent) a.accent=(ARMOR_TYPES[a.type]||ARMOR_TYPES.vigor).col;
+  return a; }
+function setForClass(cid){ return {warrior:'might',ranger:'swift',mage:'mystic',reaper:'sanguine'}[cid]||'vigor'; }
+function makeArmor(rid,slot,typeId){
+  const r=RARITY[rid],tier=r.tier,sl=SLOTS[slot];
+  const tId=(typeId&&ARMOR_TYPES[typeId])?typeId:ARMOR_TYPE_IDS[Math.floor(Math.random()*ARMOR_TYPE_IDS.length)];
+  const T=ARMOR_TYPES[tId], val=T.base[tier];
+  return {slot,rarity:rid,type:tId,accent:T.col,defense:Math.round(sl.def[tier]*(T.defMul||1)),color:r.color,
+    name:r.name+' '+T.name+' '+sl.label, affixes:[{stat:T.stat,val,label:T.fmt(val)}]};
+}
+/* Each armor TYPE has a signature emblem, drawn in its accent colour on every equipped piece so the
+   type reads at a glance (Swift = swept wings, Mystic = floating rune-crystal, Vigor = heart-stud, …). */
+const TYPE_MOTIF={
+  vigor:(ac,s)=>{ bx(0,0,0.4*s, 5.4*s,5.4*s,2.6*s, ac); bx(0,0,1.4*s, 2.6*s,2.6*s,1.6*s, tint(ac,'#fff',0.35)); },
+  might:(ac,s)=>{ bx(0,1.4*s,0.6*s, 1.9*s,7.4*s,1.9*s, ac,ac); bx(0,5.4*s,0.6*s, 1.1*s,2.6*s,1.1*s, tint(ac,'#fff',0.4)); },
+  mystic:(ac,s)=>{ const T=(typeof G!=='undefined'&&G&&G.time)||0; pushM(); mv(0,Math.sin(T*3)*1.3*s,1*s); rotY(T*1.5); box(2.6*s,4.6*s,2.6*s, ac, ac, 0.9); popM(); },
+  swift:(ac,s)=>{ pushM(); rotZ(0.62); bx(2.4*s,0,0.5*s, 8.4*s,1.3*s,2.4*s, ac,ac,0.85); popM(); pushM(); rotZ(-0.62); bx(-2.4*s,0,0.5*s, 8.4*s,1.3*s,2.4*s, ac,ac,0.85); popM(); },
+  haste:(ac,s)=>{ for(let i=0;i<3;i++) bx((i-1)*2.3*s,0,0.6*s, 1.1*s,6.4*s,1.1*s, ac,ac,0.85); },
+  keen:(ac,s)=>{ bx(0,0,1*s, 1.3*s,7.4*s,3*s, tint(ac,'#000',0.1), tint(ac,'#fff',0.5)); bx(0,4.2*s,1.4*s, 1*s,2.2*s,2.4*s, tint(ac,'#fff',0.6)); },
+  warding:(ac,s)=>{ bx(0,0.6*s,0.5*s, 6.4*s,7.4*s,1.6*s, ac); bx(0,0.6*s,1.4*s, 2.6*s,4.6*s,1*s, tint(ac,'#fff',0.35)); bx(0,-3.4*s,1.2*s, 2.8*s,1.8*s,1*s, ac); },
+  sanguine:(ac,s)=>{ bx(0,0.8*s,1.2*s, 3*s,3.6*s,3*s, ac, ac, 0.95); bx(0,-2.6*s,1.4*s, 1.3*s,3*s,1.3*s, ac,ac,0.7); bx(0,-4.8*s,1.4*s, 0.9*s,1.6*s,0.9*s, ac,ac,0.6); },
+  nimble:(ac,s)=>{ bx(-2.4*s,0,0.6*s, 1.2*s,7.6*s,1.2*s, ac); bx(2.4*s,0,0.6*s, 1.2*s,7.6*s,1.2*s, ac); bx(0,2.6*s,0.6*s, 5.6*s,1.1*s,1.1*s, ac); },
+  focus:(ac,s)=>{ const T=(typeof G!=='undefined'&&G&&G.time)||0; bx(0,0,0.8*s, 2.6*s,2.6*s,2.6*s, tint(ac,'#fff',0.2), ac, 0.9); for(let i=0;i<2;i++){ const a=T*3+i*Math.PI; bx(Math.cos(a)*4.6*s,Math.sin(a)*4.6*s,0.8*s, 1.3*s,1.3*s,1.3*s, ac,ac,0.85); } },
+  gilded:(ac,s)=>{ bx(0,0,1*s, 6.2*s,1.3*s,1*s, ac,ac); bx(0,0,1*s, 1.3*s,6.2*s,1*s, ac,ac); bx(0,0,1.3*s, 2.4*s,2.4*s,1*s, tint(ac,'#fff',0.4)); }
+};
+function motifAt(type,x,y,z,s){ const t2=(type&&TYPE_MOTIF[type])?type:'vigor'; const ac=(ARMOR_TYPES[t2]||ARMOR_TYPES.vigor).col; pushM(); mv(x,y,z); TYPE_MOTIF[t2](ac,s); popM(); }
+
+/* ---------------- Trinkets: amulet + ring slots (passives now; active abilities in a later phase) ---------------- */
+const TRINKETS={amulet:{label:'Amulet'},ring:{label:'Ring'}};
+const TRINKETIDS=['amulet','ring'];
+const GEARSLOTS=SLOTIDS.concat(TRINKETIDS); // helmet, chest, legs, amulet, ring
+function makeTrinket(rid,slot,typeId){
+  const r=RARITY[rid],tier=r.tier;
+  const tId=(typeId&&ARMOR_TYPES[typeId])?typeId:ARMOR_TYPE_IDS[Math.floor(Math.random()*ARMOR_TYPE_IDS.length)];
+  const T=ARMOR_TYPES[tId], val=Math.round((T.base[tier]*(T.stat==='hp'||T.stat==='def'?1.3:1.25))*1000)/1000;   // trinkets roll a touch higher (no defense of their own)
+  return {slot,rarity:rid,type:tId,accent:T.col,color:r.color,name:r.name+' '+T.name+' '+TRINKETS[slot].label,affixes:[{stat:T.stat,val,label:T.fmt(val)}],trinket:true};
+}
+/* gold value of any item (weapon/armor/trinket), driven by rarity tier */
+function itemGold(it){ const tier=RARITY[it.rarity]?RARITY[it.rarity].tier:0;
+  const base=[10,26,60,140,320][tier]; return Math.round(base*(it.trinket?1.25:1)); }
+function slotLabel(slot){ return (SLOTS[slot]&&SLOTS[slot].label)||(TRINKETS[slot]&&TRINKETS[slot].label)||slot; }
+function slotIcon(slot){ return GEARSLOTS.includes(slot)?`<span class="ico ico-slot ico-slot-${slot}" title="${slotLabel(slot)}" aria-label="${slotLabel(slot)}"></span>`:''; }
+
+/* ---------------- Skins (palettes; rendered as 3D voxel hero) ---------------- */
+const SKINS={
+  knight:{name:'Knight',armor:'#3f566f',armorLt:'#5d7da0',trim:'#cfe0ef',cape:'#28384e',glow:'#9fc4ff',tone:'#f1d9c2',head:'helm',god:false},
+  crimson:{name:'Crimson',armor:'#7a2b2b',armorLt:'#b3413a',trim:'#ffb9a0',cape:'#4a1818',glow:'#ff8a6a',tone:'#f0d2bd',head:'horns'},
+  ranger:{name:'Ranger',armor:'#33502f',armorLt:'#4c7d52',trim:'#dfe8a0',cape:'#243a1c',glow:'#bfe07a',tone:'#ecd2ba',head:'hood'},
+  frost:{name:'Frost',armor:'#3a6273',armorLt:'#5fa0b8',trim:'#e6f7ff',cape:'#243f4c',glow:'#bff0ff',tone:'#eadccd',head:'crown'},
+  gold:{name:'Champion',armor:'#7a5a1e',armorLt:'#caa23a',trim:'#fff0c0',cape:'#4a3812',glow:'#ffe69a',tone:'#f0d8bd',head:'crown'},
+  arcane:{name:'Arcanist',armor:'#33356e',armorLt:'#5a5fb0',trim:'#d6b0ff',cape:'#20224a',glow:'#b0a0ff',tone:'#e7d6cc',head:'hat'},
+  shadow:{name:'Shadow',armor:'#1c1d24',armorLt:'#33353f',trim:'#ff6a5e',cape:'#111216',glow:'#ff7a6a',tone:'#cdb8a6',head:'mask'},
+  emerald:{name:'Emerald',armor:'#1f6a52',armorLt:'#3fb088',trim:'#d0ffe6',cape:'#143f33',glow:'#9fffd0',tone:'#e7d6c6',head:'hood'},
+  abyss:{name:'Abyss',armor:'#4a2f7a',armorLt:'#7a52c0',trim:'#cdb0ff',cape:'#281a48',glow:'#caa6ff',tone:'#e9d6c6',head:'helm'},
+  void:{name:'Voidborn',armor:'#241a3e',armorLt:'#3d2c66',trim:'#c9a6ff',cape:'#120a22',glow:'#c08bff',tone:'#cbb6f0',head:'eldritch'},
+  celestial:{name:'Celestial',armor:'#caa84a',armorLt:'#f0e0a0',trim:'#fffff0',cape:'#9a8030',glow:'#fff7c0',tone:'#fbeccd',head:'halo'},
+  god:{name:'GOD',armor:'#d4a017',armorLt:'#ffe04a',trim:'#fffbe0',cape:'#a06a00',glow:'#fff2a0',tone:'#fff0d0',head:'crown',god:true}
+};
+/* skin passives — marginal, scaling with unlock difficulty. Knight = plain baseline, GOD = already god.
+   Crimson = the challenge skin: a handful of stacked debuffs for bragging rights. */
+const SKINPASS={
+  ranger:{label:'+5% move speed',speed:1.05},
+  frost:{label:'−8% dodge cooldown',dodge:0.92},
+  emerald:{label:'+5% attack speed',atkSpeed:1.05},
+  gold:{label:'+4% damage',power:1.04},
+  arcane:{label:'+7% magic weapon dmg',magPower:1.07},
+  shadow:{label:'+7% ranged weapon dmg',rngPower:1.07},
+  crimson:{label:'⚠ CHALLENGE: −12% HP · −10% dmg · −8% speed · +12% dodge CD',hpMul:0.88,power:0.90,speed:0.92,dodge:1.12},
+  abyss:{label:'+4% lifesteal',lifesteal:0.04},
+  void:{label:'+8% damage',power:1.08},
+  celestial:{label:'+6% dmg & +6% speed',power:1.06,speed:1.06}
+};
+function skinP(p){ return SKINPASS[p.skin]||null; }
+
+/* ---------------- Achievements (identical; unlock skins) ---------------- */
+const ACHIEVEMENTS=[
+  {id:'first_blood',name:'First Blood',desc:'Defeat your first enemy',icon:'⚔',skin:null,check:m=>m.totalKills>=1},
+  {id:'bosshunter',name:'Boss Hunter',desc:'Defeat any boss',icon:'☠',skin:'ranger',check:m=>m.bossKills>=1},
+  {id:'veteran',name:'Veteran',desc:'Reach character Level 12',icon:'★',skin:'emerald',check:m=>m.maxLevel>=12},
+  {id:'flawless',name:'Untouchable',desc:'Clear a stage taking no damage',icon:'❖',skin:'frost',check:m=>m.flawlessStages>=1},
+  {id:'arsenal',name:'Arsenal',desc:'Find a Legendary item',icon:'✦',skin:'gold',check:m=>m.legendaryFound>=1},
+  {id:'archmage',name:'Archmage',desc:'Defeat a boss with a magical weapon',icon:'✷',skin:'arcane',check:m=>m.magicBossKills>=1},
+  {id:'deadeye',name:'Deadeye',desc:'Defeat a boss with a ranged weapon',icon:'➶',skin:'shadow',check:m=>m.rangedBossKills>=1},
+  {id:'slayer',name:'Slayer',desc:'Defeat 150 enemies total',icon:'⚑',skin:'crimson',check:m=>m.totalKills>=150},
+  {id:'kingslayer',name:'Kingslayer',desc:'Defeat the Abyss King',icon:'♛',skin:'abyss',check:m=>m.kingKills>=1},
+  {id:'worldsend',name:"World's End",desc:'End the Abyss King, Awakened, at the summit',icon:'✸',skin:'void',check:m=>m.tyrantKills>=1},
+  {id:'ascended',name:'Ascended',desc:'Reach Floor 12 of the Abyssal Descent — the deeper you fall, the higher you rise',icon:'⬢',skin:'celestial',check:m=>(m.endlessBest||0)>=12}
+];
+function skinUnlockHint(id){ if(id==='god') return '???'; const a=ACHIEVEMENTS.find(x=>x.skin===id); return a?a.desc:'Locked'; }
+let achQueue=[];
+function checkAchievements(){
+  let changed=false;
+  for(const a of ACHIEVEMENTS){
+    if(!meta.achievements[a.id] && a.check(meta)){
+      meta.achievements[a.id]=true; changed=true;
+      if(a.skin && !meta.unlockedSkins.includes(a.skin)) meta.unlockedSkins.push(a.skin);
+      achQueue.push(a);
+    }
+  }
+  if(changed){ persist(); if(achQueue.length===1||!toast._t) flushAch(); }
+}
+function flushAch(){
+  if(!achQueue.length) return;
+  const a=achQueue.shift(); SFX.achieve();
+  toast(a.name+(a.skin?' · Skin: '+SKINS[a.skin].name:''),null,'event-achievement');
+  if(achQueue.length) setTimeout(flushAch,1700);
+}
+
+/* ---------------- Stages → 3D arenas ---------------- */
+const STAGES=[
+  {name:'The Outskirts',theme:'plains',sky:[0.32,0.46,0.62],ground:'#8a8445',aw:760,ad:520,grunts:6,flyers:0,type:'normal'},
+  {name:'Black Woods',theme:'forest',sky:[0.10,0.18,0.16],ground:'#263c28',aw:800,ad:540,grunts:5,flyers:3,mix:{toxling:2},type:'normal'},
+  {name:'The Brute',theme:'badlands',sky:[0.14,0.10,0.10],ground:'#33231f',aw:700,ad:500,grunts:2,flyers:1,type:'miniboss',boss:'brute'},
+  {name:'Hollow Pass',theme:'canyon',sky:[0.14,0.12,0.09],ground:'#352a1e',aw:820,ad:540,grunts:5,flyers:2,mix:{sparkling:3},type:'normal'},
+  {name:'Hollow Marksman',theme:'canyon',sky:[0.12,0.10,0.07],ground:'#312718',aw:760,ad:540,grunts:2,flyers:2,type:'miniboss',boss:'archer'},
+  {name:'Ruined Keep',theme:'ruins',sky:[0.11,0.09,0.19],ground:'#2a2440',aw:840,ad:560,grunts:5,flyers:3,mix:{shadeling:2,toxling:2},type:'normal'},
+  {name:'The Fallen',theme:'dungeon',sky:[0.16,0.11,0.17],ground:'#3a2440',aw:720,ad:520,grunts:3,flyers:2,type:'miniboss',boss:'warden'},
+  {name:'Frostfell',theme:'frost',sky:[0.08,0.13,0.17],ground:'#243240',aw:820,ad:560,grunts:3,flyers:3,mix:{frostling:5},type:'normal'},
+  {name:'Frost Sorcerer',theme:'frost',sky:[0.06,0.13,0.17],ground:'#1e3340',aw:760,ad:540,grunts:2,flyers:2,mix:{frostling:2},type:'miniboss',boss:'sorcerer'},
+  {name:'Emberdeep',theme:'volcano',sky:[0.16,0.08,0.06],ground:'#3a1c14',aw:820,ad:560,grunts:3,flyers:2,mix:{emberling:5},type:'normal'},
+  {name:'Ember Colossus',theme:'volcano',sky:[0.17,0.07,0.05],ground:'#3d1a10',aw:780,ad:560,grunts:2,flyers:1,mix:{emberling:2},type:'miniboss',boss:'colossus'},
+  {name:'Abyss Approach',theme:'void',sky:[0.08,0.04,0.13],ground:'#241431',aw:840,ad:560,grunts:4,flyers:3,mix:{shadeling:4,sparkling:2},type:'normal'},
+  {name:'Abyss King',theme:'void',sky:[0.07,0.04,0.11],ground:'#241431',aw:760,ad:560,grunts:0,flyers:0,type:'boss',boss:'king'},
+  {name:'The Sunspire Palace',theme:'marble',sky:[0.17,0.18,0.24],ground:'#565b6c',aw:840,ad:560,grunts:4,flyers:3,mix:{bones:4},type:'normal'},        // 13
+  {name:'The Marble Colossus',theme:'marble',sky:[0.16,0.17,0.24],ground:'#525768',aw:780,ad:560,grunts:2,flyers:1,type:'miniboss',boss:'colossus'},     // 14
+  {name:'Castle Duskmoor',theme:'apex',sky:[0.06,0.04,0.10],ground:'#1c1220',aw:860,ad:580,grunts:5,flyers:3,mix:{shadeling:4,bones:3},type:'normal'},    // 15
+  {name:'The Abyss King, Awakened',theme:'apex',sky:[0.05,0.03,0.09],ground:'#1c1029',aw:800,ad:580,grunts:0,flyers:0,type:'boss',boss:'tyrant'}                    // 16 (final)
+];
+STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); // roomier arenas (v1.1)
+
+/* ---------------- Zones & Quests (Classes & Quests update, Phase 2) ----------------
+   The adventure spine. A linear chain of themed zones; each zone is a few sub-areas
+   (still procedurally generated — `stage` picks the theme/enemy table, `seed` varies
+   the layout) gated by main quests, then a boss room. Clearing the boss completes the
+   zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
+const ZONES=[
+  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
+           {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
+    side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
+    boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
+  {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'dustjackal',n:18,d:'Cull 18 Dust Jackals'}]},
+           {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
+    side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
+    boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
+  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
+    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
+           {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
+    side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
+    boss:{stage:6,name:'The Fallen',mus:'boss_warden'}},
+  {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
+    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:12,d:'Crack 12 Frost-Shells'}]},
+           {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
+    side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
+    boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
+  {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
+    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:16,d:'Snuff 16 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
+           {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
+    side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
+    boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
+  {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
+    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'blinkstalker',n:16,d:'Hunt down 16 Blink-Stalkers'}]},
+           {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
+    side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
+    boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
+  {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:null,mus:'keep',blurb:'White marble the long war never reached.',
+    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:12,d:'Shatter 12 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
+           {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
+    side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,blurb:'What a palace hides, it hides deep.'},
+    boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
+  {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
+    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
+           {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'royalarcanist',n:14,d:'Silence 14 Royal Arcanists'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
+    boss:{stage:16,name:'The Abyss King, Awakened',mus:'apex_darkdescent'}}
+];
+const TIERBAND=[1,1,2,2,3,3,4,4];                               // max rarity INDEX (0=common..4=legendary) by zone tier (8 tiers now)
+/* Signature hazards: one per zone, so each zone PLAYS different, not just looks different. */
+const HAZARDS={
+  slick:{name:'Rime',blurb:'The ice gives back nothing. Plan your stops.'},      // low friction
+  gusts:{name:'Gales',blurb:'The wind shoves you mid-air.'},                     // lateral push while airborne
+  phase:{name:'Phasing',blurb:'Some ground is only sometimes there.'},           // platforms blink out
+  lava:{name:'Emberfall',blurb:'The floor breathes fire on a rhythm.'}           // periodic ground pulse
+};
+/* Difficulty ladder: Normal -> Hardcore (beat Normal) -> Hitless (beat Hardcore). */
+const DIFFS={
+  normal:{id:'normal',name:'Normal',icon:'⚔',blurb:'The hub is your save point. Die and you lose only that attempt.'},
+  hardcore:{id:'hardcore',name:'Hardcore',icon:'☠',blurb:'One life for the whole chain. Death erases everything.',needs:'beatNormal'},
+  hitless:{id:'hitless',name:'Hitless',icon:'👁',blurb:'One hit — or one fall — and it is over. Everything resets.',needs:'beatHardcore'}
+};
+/* Cosmetics: pure swagger, earned by doing things. No stats attached, ever. */
+const COSMETICS={
+  cape:[
+    {id:'wanderer',name:'Wanderer’s Cape',col:'#6b7183',hint:'Clear your first zone',has:()=>(meta.zonesCleared||0)>=1},
+    {id:'delver',name:'Delver’s Cape',col:'#c47bff',hint:'Find 3 secrets',has:()=>(meta.secretsFound||0)>=3},
+    {id:'slayer',name:'Slayer’s Cape',col:'#e8453d',hint:'Kill 50 elites',has:()=>(meta.elitesKilled||0)>=50},
+    {id:'tyrant',name:'Tyrant’s Mantle',col:'#ffd24a',hint:'Beat Normal',has:()=>!!meta.beatNormal},
+    {id:'undying',name:'Undying Shroud',col:'#0f0f14',hint:'Beat Hardcore',has:()=>!!meta.beatHardcore}],
+  trail:[
+    {id:'dust',name:'Dust Trail',col:'#cfd6df',hint:'Reach level 10',has:()=>(meta.maxLevel||1)>=10},
+    {id:'ember',name:'Ember Trail',col:'#ff7a3a',hint:'Clear Emberdeep',has:()=>!!meta.zoneDone.ember},
+    {id:'frost',name:'Frost Trail',col:'#7fd6ff',hint:'Clear Frostfell',has:()=>!!meta.zoneDone.frost},
+    {id:'void',name:'Void Trail',col:'#b06bff',hint:'Clear The Abyss',has:()=>!!meta.zoneDone.abyss},
+    {id:'flawless',name:'Ghost Trail',col:'#ffffff',hint:'Clear 15 areas without taking a hit',has:()=>(meta.flawlessStages||0)>=15}],
+  glow:[
+    {id:'gold',name:'Gilded Edge',col:'#ffd24a',hint:'Find a legendary',has:()=>(meta.legendaryFound||0)>=1},
+    {id:'blood',name:'Bloodlit Edge',col:'#e8453d',hint:'1000 kills',has:()=>(meta.totalKills||0)>=1000},
+    {id:'soul',name:'Soulfire Edge',col:'#b06bff',hint:'Earn the Reaper',has:()=>!!(meta.classUnlocked&&meta.classUnlocked.reaper)},
+    {id:'perfect',name:'Hitless Edge',col:'#ffffff',hint:'Beat Hitless',has:()=>!!meta.beatHitless}]
+};
+const COSSLOTS=[{k:'cape',label:'Cape'},{k:'trail',label:'Trail'},{k:'glow',label:'Weapon Glow'}];
+function cosOwned(slot,id){ const c=COSMETICS[slot].find(x=>x.id===id); return !!(c&&c.has()); }
+function cosEquipped(slot){ const id=meta.cosEquipped&&meta.cosEquipped[slot]; return (id&&cosOwned(slot,id))?COSMETICS[slot].find(x=>x.id===id):null; }
+function checkCosmetics(){ let n=0;
+  for(const s of COSSLOTS) for(const c of COSMETICS[s.k]){
+    const key=s.k+':'+c.id;
+    if(c.has()&&!meta.cosmetics[key]){ meta.cosmetics[key]=1; n++; toast('✨ Cosmetic unlocked: '+c.name); } }
+  if(n) persistGlobal(); return n; }
+function diffOpen(id){ const d=DIFFS[id]; return !d.needs || !!meta[d.needs]; }
+function diffMode(id){ return id==='hardcore'?'hc':id==='hitless'?'hl':'rl'; }   // each difficulty keeps its own save
+// MODE (the save key actually loaded) is the single source of truth for the rules — meta.diff is only the menu's memory.
+// Deriving from MODE means a desync can never let a hardcore save quietly play by Normal's rules.
+function curDiff(){ return MODE==='hc'?DIFFS.hardcore:MODE==='hl'?DIFFS.hitless:DIFFS.normal; }
+function isHitless(){ return MODE==='hl'; }
+function jetpackUnlocked(){ return !!meta.beatHitless; }
+function jetpackOn(){ return jetpackUnlocked() && meta.jetpack!==false && G && G.p && MODE!=='hl'; }   // earned reward; off in Hitless itself (no flying past its point)
+function isPermadeath(){ return MODE==='hc'||MODE==='hl'; }
+function zoneOf(zi){ return ZONES[Math.max(0,Math.min(ZONES.length-1,zi|0))]; }
+function curZone(){ return zoneOf(G?G.zone:0); }
+function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
+function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
+function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
+  while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
+function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub)) return [];    // trials and side zones run on their own objective
+  const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
+function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
+function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
+function questBump(id,by){
+  const q=areaQuests().find(x=>x.id===id); if(!q||questDone(q)) return;
+  G.qs[id]=(G.qs[id]||0)+(by||1);
+  if(!questDone(q)&&(q.n||1)>1){ const k=(G.qs[id]||0)/q.n;   // audible progress: each tick climbs in pitch toward done
+    tone({f0:460+k*380,f1:540+k*430,dur:0.09,type:'square',vol:0.4}); }
+  if(questDone(q)){ SFX.achieve(); toast('Quest complete: '+q.d,null,'event-quest-marker');
+    const rg=awardGold(40+zoneTier()*15); gainXp(20+zoneTier()*10); gainClassXp(25+zoneTier()*10);
+    addText(G.p.x,G.p.y+80,G.p.z,'QUEST COMPLETE +'+rg+'g','var(--amber)',true);
+    if(areaClear()) openWay();
+  }
+  questUpdate();
+}
+/* Small data-driven expedition objective. More step types are authored pair-by-pair;
+   the state lives on G, so it survives checkpoints/area updates but never leaks into saves. */
+function localMission(id,name,type,total,reward){ G.localMission={id,name,type,total,progress:0,done:false,reward:reward||0}; return G.localMission; }
+function localBump(id,by){ const m=G.localMission; if(!m||m.id!==id||m.done) return;
+  m.progress=Math.min(m.total,m.progress+(by||1)); SFX.pickup();
+  if(m.progress>=m.total){ m.done=true; const gold=awardGold(m.reward||40+zoneTier()*15); SFX.achieve(); toast('Local mission complete: '+m.name+(gold?' · +'+gold+'g':''),null,'event-quest-marker'); openWay(); }
+  questUpdate(); }
+function questKill(type){
+  if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
+    if(G.trialKills>=T.kills && !G.portal) openWay();
+    questUpdate(); return; }
+  for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
+function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
+function openWay(){ if(G.portal||!G.portalPos) return;
+  snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
+  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen'); }
+// render only when the content changes; pulse once on a progress change, hold a stronger state on completion
+function applyQuest(el,head,rows,sig,complete=false){
+  const html=`<div class="qhead">${head}</div>${rows}`;
+  el.classList.remove('hide');
+  if(applyQuest._sig===sig && el.innerHTML) return;              // unchanged — no DOM thrash, no re-pulse each frame
+  const hadPrev=applyQuest._sig!=null && applyQuest._head===head;  // a change WITHIN the same objective set = progress moved
+  applyQuest._sig=sig; applyQuest._head=head;
+  el.innerHTML=html;
+  el.classList.toggle('qcomplete',complete);
+  if(hadPrev){ el.classList.remove('qflash'); void el.offsetWidth; el.classList.add('qflash');
+    clearTimeout(applyQuest._t); applyQuest._t=setTimeout(()=>el.classList.remove('qflash'),600); }
+}
+function qrow(done,tick,text,num){ return `<div class="qrow ${done?'qdone':''}"><span class="qtick">${tick}</span><span class="qtx">${text}</span>${num!=null?`<span class="qn">${num}</span>`:''}</div>`; }
+function questUpdate(){
+  const el=document.getElementById('questbox'); if(!el) return;
+  if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
+  if(document.body.classList.contains('briefing')){ el.classList.add('hide'); return; }   // don't collide with a zone briefing overlay
+  if(G.endless){ const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length, killed=Math.max(0,(G.endSpawned||0)-alive);
+      const rows=qrow(false,'▼',`<b>Floor ${G.floor||1}</b>${meta.endlessBest?` · <span style="opacity:.7">Best ${meta.endlessBest}</span>`:''}`,null)
+        + qrow(G.floorCleared,G.floorCleared?'☑':'⚔', G.floorCleared?'The way opens — take the portal':'Clear the floor', G.floorCleared?null:`${Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`);
+      applyQuest(el,'<span class="ico ico-portal"></span> Abyssal Descent',rows,`end${G.floor}|${G.floorCleared?'c':Math.min(G.endTarget||0,killed)}/${G.endTarget||0}`,G.floorCleared); return; }
+  const Z=curZone();
+  if(G.trial){ const T=TRIALS[G.trial], d=G.trialKills>=T.kills;
+    const rows=qrow(d,d?'☑':'☐','Defeat the keepers',`${Math.min(T.kills,G.trialKills)}/${T.kills}`)+(d?qrow(false,'☐','Take the portal',null):'');
+    applyQuest(el,`${CLASSES[G.trial].icon} ${T.name}`,rows,`trial${G.trial}|${Math.min(T.kills,G.trialKills)}/${T.kills}`,d); return; }
+  if(G.side){ const gd=G.sideGuardian, hunt=!!gd, lm=G.localMission, done=lm?lm.done:(hunt&&gd.dead), task=lm?lm.name:(G.sideTask||'Reach the exit');
+    let rows=qrow(done,done?'☑':(hunt?'⚔':'☐'),done?(lm?'Local mission complete':'Trial guardian defeated'):task,lm&&!done?`${lm.progress}/${lm.total}`:null);
+    if(done) rows+=qrow(false,eventIcon('event-secret-rift'),'Take the opened gate',null);
+    applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
+  let rows,sig;
+  if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
+  else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
+    rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
+      return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
+    if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
+    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed'); }
+  applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
+}
+
+/* ---------------- Enemies (same stats; r = w/2) ---------------- */
+const ENEMY={
+  grunt:{hp:22,dmg:8,speed:62,r:15,h:38,xp:13,color:'#7ec46a',kind:'walk',look:'soldier'},
+  flyer:{hp:16,dmg:7,speed:52,r:15,h:26,xp:15,color:'#d07ad0',kind:'fly',look:'batwing'},
+  emberling:{hp:24,dmg:9,speed:58,r:15,h:38,xp:17,color:'#ff7a3a',kind:'walk',element:'fire',look:'emberimp'},
+  frostling:{hp:28,dmg:8,speed:50,r:15,h:38,xp:17,color:'#7fd6ff',kind:'walk',element:'ice',look:'frostbeast'},
+  toxling:{hp:24,dmg:8,speed:56,r:15,h:38,xp:17,color:'#9fd84a',kind:'walk',element:'poison',look:'toxbeast'},
+  shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void',look:'shadewraith'},
+  sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'arcane',look:'sparkstar'},
+  goblin:{hp:26,dmg:0,speed:100,r:13,h:30,xp:40,color:'#ffd24a',kind:'goblin'}, // treasure goblin: flees, drops riches
+  // dungeon bestiary (v1.5) — distinct silhouettes, not palette swaps
+  bones:{hp:18,dmg:9,speed:84,r:13,h:40,xp:16,color:'#e8e4d8',kind:'walk',look:'bones'},
+  slime:{hp:32,dmg:7,speed:38,r:16,h:24,xp:18,color:'#6ee0a8',kind:'walk',look:'slime'},
+  slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
+  caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
+  charger:{hp:34,dmg:12,speed:58,r:17,h:30,xp:20,color:'#a84a2a',kind:'charger'},   // rust-red (Phase 18: moved OFF the chest's brown-gold so mimics own that palette)
+  mimic:{hp:70,dmg:16,speed:74,r:16,h:30,xp:60,color:'#6b4a2a',kind:'charger',look:'mimic',noSplit:true},   // Phase 18: the chest that bites — 2-3x a zone mob's HP, charger lunge AI, scales per tier like everyone
+  // ── Hollow Pass canyon bestiary (Phase 14) — distinct silhouettes + behaviours, not palette swaps ──
+  dustjackal:{hp:24,dmg:11,speed:82,r:14,h:26,xp:19,color:'#caa46a',kind:'charger',look:'jackal'},   // lean pack hunter: fast, low HP, telegraphed POUNCE (charger ram) — space it or it bleeds you in numbers
+  cragspitter:{hp:46,dmg:13,speed:26,r:18,h:42,xp:28,color:'#9a8a6a',kind:'caster',look:'spitter',   // squat boulder-lobber: hurls ARCING rocks you sidestep; slow, tanky, kill-priority
+    shot:{count:1,spread:0,speed:300,size:10,color:'#b0946a',shape:'rock',gravity:540,glow:0},shootCd:2.9},
+  galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'arcane',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
+  // ── Outskirts plains bestiary (Phase 14) ──
+  thornboar:{hp:42,dmg:13,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
+  sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
+  // ── Ruined Keep bestiary (Phase 14) ──
+  sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
+  revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
+  dummy:{hp:400,dmg:0,speed:0,r:14,h:54,xp:0,color:'#c9b37e',kind:'walk',look:'dummy'},   // straw-and-hay damage checker: hits land, nothing dies
+  bosscrystal:{hp:100,dmg:0,speed:0,r:15,h:56,xp:6,color:'#7fd6ff',kind:'walk',look:'bosscrystal',noSplit:true},   // boss shield anchor — destroy all to break the ward
+  // ── Phase 20: unique bestiary for zones 4-8 (2 signature mobs each) ──
+  // FROSTFELL
+  frostshell:{hp:64,dmg:11,speed:30,r:18,h:40,xp:30,color:'#8fb8d8',kind:'walk',element:'ice',look:'frostshell',spec:'shell'},   // ice shell BLOCKS frontal hits until cracked — flank or shatter it
+  frostlobber:{hp:30,dmg:11,speed:32,r:15,h:40,xp:26,color:'#bfe6ff',kind:'caster',element:'ice',look:'lobber',shot:{count:1,spread:0,speed:300,size:9,color:'#bfe6ff',shape:'shard',gravity:520,el:'ice',glow:1},shootCd:2.7},   // lobs arcing Chill shards
+  // EMBERDEEP
+  magmaskit:{hp:26,dmg:10,speed:98,r:13,h:22,xp:24,color:'#ff6a2a',kind:'charger',element:'fire',look:'skitter',spec:'trail'},   // fast skitterer whose path BURNS briefly
+  embertotem:{hp:74,dmg:0,speed:0,r:16,h:48,xp:34,color:'#3a1a12',kind:'walk',element:'fire',look:'totem',spec:'totem'},   // stationary vent, periodic FIRE BURST — kill it first
+  // THE ABYSS
+  blinkstalker:{hp:34,dmg:14,speed:58,r:14,h:40,xp:30,color:'#6a3fa0',kind:'walk',element:'void',look:'stalker',spec:'blink'},   // telegraphed TELEPORT behind you
+  voidtether:{hp:44,dmg:8,speed:38,r:14,h:42,xp:36,color:'#8f52d6',kind:'walk',element:'void',look:'tether',spec:'tether'},   // LINKS to allies, hastening them until it dies — kill first
+  // SUNSPIRE PALACE
+  sunpriest:{hp:36,dmg:11,speed:36,r:14,h:44,xp:34,color:'#ffe9a8',kind:'caster',element:'holy',look:'priest',shot:{count:1,spread:0,speed:520,size:8,color:'#ffe9a8',shape:'light',el:'holy',glow:1},shootCd:2.5,spec:'sunpriest'},   // radiance healer-caster
+  marblestatue:{hp:96,dmg:14,speed:22,r:19,h:48,xp:40,color:'#9aa0b0',kind:'walk',look:'statue',spec:'shell'},   // slow heavy marble SHIELDER
+  // CASTLE DUSKMOOR
+  siegeknight:{hp:84,dmg:16,speed:36,r:17,h:46,xp:42,color:'#3c4048',kind:'walk',look:'knight',spec:'knightslam'},   // shield + telegraphed overhead CRUSH
+  royalarcanist:{hp:46,dmg:12,speed:32,r:14,h:46,xp:42,color:'#c47bff',kind:'caster',element:'arcane',look:'arcanist',shot:{count:3,spread:0.18,speed:440,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.3}   // rune-mark caster, arcane VOLLEYS
+};
+/* what haunts each biome (weighted picks for dungeon rooms) */
+const THEMEMOBS={
+  plains:['thornboar','sporeback','grunt','flyer'],          // Phase 14: plains natives; grunt/flyer reused sparingly
+  forest:['sporeback','thornboar','toxling','slime'],
+  badlands:['charger','grunt','charger','flyer'],
+  canyon:['dustjackal','galewisp','cragspitter','bones'],   // Phase 14: canyon-native pack — bones reused sparingly as on-theme filler
+  ruins:['revenant','sentinel','caster','bones'],           // Phase 14 Keep: undead + animated armor; bones/caster reused sparingly
+  dungeon:['revenant','sentinel','bones','caster'],
+  frost:['frostshell','frostlobber','frostling','frostshell'],   // Batch 2: ice-shell cracker + freezing lobber lead; frostling sparing filler
+  volcano:['magmaskit','embertotem','emberling','magmaskit'],    // Batch 2: magma-trail skitter + eruption totem
+  void:['blinkstalker','voidtether','shadeling','blinkstalker'], // Batch 2: blink-stalker + void tether
+  apex:['siegeknight','royalarcanist','shadeling','siegeknight'],// Batch 2: siege knight + royal arcanist
+  marble:['marblestatue','sunpriest','bones','marblestatue']     // Batch 2: animated statue + corrupted sun-priest
+};
+const CASTER_EL={frost:'ice',volcano:'fire',forest:'poison',void:'void',apex:'void',canyon:'arcane',badlands:'fire',marble:'holy'};
+const _ENEMY_END={
+  brute:{hp:190,dmg:18,speed:46,r:30,h:74,xp:140,color:'#e0794a',kind:'boss',boss:true,label:'THE BRUTE'},
+  warden:{hp:270,dmg:22,speed:58,r:27,h:80,xp:200,color:'#c060c8',kind:'boss',boss:true,label:'THE FALLEN'},   // a risen Bladeborn of an age past (type key kept 'warden' for save/music compat)
+  archer:{hp:300,dmg:16,speed:54,r:27,h:80,xp:230,color:'#a7b06a',kind:'boss',boss:true,ranged:true,kite:true,label:'HOLLOW MARKSMAN',shot:{count:3,spread:0.10,speed:560,size:5,color:'#e6d28a',shape:'arrow'},shootCd:2.0},
+  sorcerer:{hp:330,dmg:18,speed:62,r:27,h:80,xp:250,color:'#6aa0d0',kind:'boss',boss:true,ranged:true,kite:true,label:'FROST SORCERER',shot:{count:3,spread:0.20,speed:430,size:8,color:'#7fd6ff',shape:'orb',el:'ice',glow:1},shootCd:2.1},
+  colossus:{hp:560,dmg:24,speed:40,r:39,h:104,xp:380,color:'#d06a3a',kind:'boss',boss:true,ranged:true,label:'EMBER COLOSSUS',shot:{count:1,spread:0,speed:380,size:13,color:'#ff7a3a',shape:'orb',el:'fire',glow:1,gravity:430},shootCd:2.6},
+  king:{hp:680,dmg:26,speed:50,r:39,h:104,xp:600,color:'#b06bff',kind:'boss',boss:true,label:'ABYSS KING'},
+  tyrant:{hp:900,dmg:28,speed:52,r:39,h:104,xp:800,color:'#8a4fd0',kind:'boss',boss:true,ranged:true,label:'THE ABYSS KING, AWAKENED',shot:{count:5,spread:0.16,speed:420,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1},shootCd:2.4}   // the final boss IS the Abyss King, awake (type key kept 'tyrant' for save/music compat)
+};
+Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
+/* ============================================================
+   WEBGL RENDERER (raw, zero deps) — flat-shaded voxel cubes
+   ============================================================ */
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+let VW=0,VH=0,DPR=1;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  VW=window.innerWidth; VH=window.innerHeight;
+  canvas.width=Math.round(VW*DPR); canvas.height=Math.round(VH*DPR);
+  canvas.style.width=VW+'px'; canvas.style.height=VH+'px';
+  if(gl) gl.viewport(0,0,canvas.width,canvas.height);
+}
+window.addEventListener('resize',resize);
+window.addEventListener('orientationchange',()=>setTimeout(resize,120));
+resize();
+
+/* ---- mat4 (column-major) ---- */
+function mIdent(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function mMul(a,b){ const o=new Array(16);
+  for(let c=0;c<4;c++) for(let r=0;r<4;r++){ let s=0; for(let k=0;k<4;k++) s+=a[k*4+r]*b[c*4+k]; o[c*4+r]=s; }
+  return o; }
+function mT(x,y,z){ const m=mIdent(); m[12]=x; m[13]=y; m[14]=z; return m; }
+function mS(x,y,z){ const m=mIdent(); m[0]=x; m[5]=y; m[10]=z; return m; }
+function mRY(a){ const c=Math.cos(a),s=Math.sin(a); return [c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]; }
+function mRX(a){ const c=Math.cos(a),s=Math.sin(a); return [1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]; }
+function mRZ(a){ const c=Math.cos(a),s=Math.sin(a); return [c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]; }
+function mPersp(fovy,asp,n,f){ const t=1/Math.tan(fovy/2), m=new Array(16).fill(0);
+  m[0]=t/asp; m[5]=t; m[10]=(f+n)/(n-f); m[11]=-1; m[14]=2*f*n/(n-f); return m; }
+function vSub(a,b){ return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
+function vCross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+function vNorm(a){ const l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; }
+function mLookAt(eye,ctr,up){
+  const z=vNorm(vSub(eye,ctr)), x=vNorm(vCross(up,z)), y=vCross(z,x);
+  return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+    -(x[0]*eye[0]+x[1]*eye[1]+x[2]*eye[2]), -(y[0]*eye[0]+y[1]*eye[1]+y[2]*eye[2]), -(z[0]*eye[0]+z[1]*eye[1]+z[2]*eye[2]), 1];
+}
+
+/* ---- shader ---- */
+// Instanced renderer: geometry is a shared unit cube; every box() is one INSTANCE carrying its own
+// model matrix (rotation+translation), per-axis scale, colour+alpha, and emissive — so thousands of
+// boxes flush in a handful of GPU draw calls instead of one call each. Detail is effectively free.
+const VS=`attribute vec3 aP; attribute vec3 aN;
+attribute vec4 iM0; attribute vec4 iM1; attribute vec4 iM2; attribute vec4 iM3;   // instance model mat4 (rot+trans, no scale)
+attribute vec3 iS; attribute vec4 iCA; attribute vec3 iE;                          // scale, colour+alpha, emissive
+uniform mat4 uP,uV;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE; varying vec3 vCam;
+void main(){ mat4 M=mat4(iM0,iM1,iM2,iM3);
+  vec4 w=M*vec4(aP*iS,1.0); vW=w.xyz; vec4 e=uV*w; vD=-e.z;
+  vN=mat3(M)*aN;                                       // M has no scale, so its 3x3 is pure rotation → correct normals
+  vec3 tt=vec3(uV[3][0],uV[3][1],uV[3][2]);            // camera world pos = -(mat3(uV)^T * translation), derived so no extra uniform is needed
+  vCam=-vec3(dot(vec3(uV[0][0],uV[0][1],uV[0][2]),tt), dot(vec3(uV[1][0],uV[1][1],uV[1][2]),tt), dot(vec3(uV[2][0],uV[2][1],uV[2][2]),tt));
+  vCA=iCA; vE=iE; gl_Position=uP*e; }`;
+const FS=`precision mediump float;
+varying vec3 vN; varying float vD; varying vec3 vW; varying vec4 vCA; varying vec3 vE; varying vec3 vCam;
+uniform vec3 uFog; uniform vec2 uFogNF; uniform vec3 uL;
+uniform float uAmb; uniform float uDif; uniform vec3 uKey;      // ambient level, directional strength, key tint
+uniform vec3 uPL0,uPL1,uPL2,uPL3; uniform vec3 uPC0,uPC1,uPC2,uPC3; // point lights: player-carried + 3 nearest torches
+void main(){
+  vec3 n=normalize(vN); vec3 C=vCA.rgb; vec3 V=normalize(vCam-vW);
+  // hemispheric ambient: cooler/darker from below, sky-tinted from above (gives voxels a sculpted, GI-like base)
+  float up=n.y*0.5+0.5;
+  vec3 lit=C*uAmb*mix(uKey*vec3(0.72,0.78,0.92), uKey, up);
+  // key directional + a soft wrap so shadowed sides aren't dead flat
+  float nl=max(dot(n,uL),0.0), wrap=max(dot(n,uL)*0.5+0.5,0.0);
+  lit+=C*uDif*uKey*(nl*0.82+wrap*0.18);
+  // specular sheen — metal/gems catch the key light
+  vec3 H=normalize(uL+V); lit+=uKey*pow(max(dot(n,H),0.0),26.0)*uDif*0.55;
+  vec3 L; float dd;
+  L=uPL0-vW; dd=dot(L,L); lit+=C*uPC0*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.0000135); // player light: broad, keeps play area readable
+  L=uPL1-vW; dd=dot(L,L); lit+=C*uPC1*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL2-vW; dd=dot(L,L); lit+=C*uPC2*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  L=uPL3-vW; dd=dot(L,L); lit+=C*uPC3*max(dot(n,normalize(L)),0.0)/(1.0+dd*0.00006);
+  // rim light — cool edge glow that pops silhouettes off the background (a signature of the icon art)
+  float rim=pow(1.0-max(dot(n,V),0.0),3.5); lit+=uKey*rim*0.34*(0.45+0.55*up);
+  vec3 col=lit+vE*1.15;
+  float f=clamp((vD-uFogNF.x)/(uFogNF.y-uFogNF.x),0.0,1.0);
+  gl_FragColor=vec4(mix(col,uFog,f),vCA.a);
+}`;
+function compile(src,type){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error('shader: '+gl.getShaderInfoLog(s)); return s; }
+const prog=gl.createProgram();
+gl.attachShader(prog,compile(VS,gl.VERTEX_SHADER)); gl.attachShader(prog,compile(FS,gl.FRAGMENT_SHADER));
+gl.linkProgram(prog); if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error('link: '+gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+const U={}; ['uP','uV','uFog','uFogNF','uL','uAmb','uDif','uKey','uPL0','uPL1','uPL2','uPL3','uPC0','uPC1','uPC2','uPC3'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+// unit cube (centered, size 1) with per-face normals
+let cubePB, cubeNB;
+const A_P=gl.getAttribLocation(prog,'aP'), A_N=gl.getAttribLocation(prog,'aN');
+(function(){
+  const P=[],N=[];
+  const faces=[
+    [[ .5,-.5,-.5],[ .5, .5,-.5],[ .5, .5, .5],[ .5,-.5, .5],[1,0,0]],
+    [[-.5,-.5, .5],[-.5, .5, .5],[-.5, .5,-.5],[-.5,-.5,-.5],[-1,0,0]],
+    [[-.5, .5,-.5],[-.5, .5, .5],[ .5, .5, .5],[ .5, .5,-.5],[0,1,0]],
+    [[-.5,-.5, .5],[-.5,-.5,-.5],[ .5,-.5,-.5],[ .5,-.5, .5],[0,-1,0]],
+    [[-.5,-.5, .5],[ .5,-.5, .5],[ .5, .5, .5],[-.5, .5, .5],[0,0,1]],
+    [[ .5,-.5,-.5],[-.5,-.5,-.5],[-.5, .5,-.5],[ .5, .5,-.5],[0,0,-1]]];
+  for(const f of faces){ const [a,b,c,d,n]=f;
+    [[a,b,c],[a,c,d]].forEach(tri=>tri.forEach(v=>{ P.push(v[0],v[1],v[2]); N.push(n[0],n[1],n[2]); })); }
+  cubePB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubePB); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);
+  cubeNB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubeNB); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
+})();
+// ---- instance buffer: one record per box = mat4(16) + scale(3) + colour&alpha(4) + emissive(3) = 26 floats ----
+const INST=gl.getExtension('ANGLE_instanced_arrays');
+if(!INST) throw new Error('This game needs the ANGLE_instanced_arrays WebGL extension.');
+const ISTRIDE=26;
+let instCap=8192, instData=new Float32Array(instCap*ISTRIDE), instCount=0;
+const instVBO=gl.createBuffer();
+const I_LOC=['iM0','iM1','iM2','iM3','iS','iCA','iE'].map(n=>gl.getAttribLocation(prog,n)), I_SZ=[4,4,4,4,3,4,3], I_OFF=[0,4,8,12,16,19,23];
+function bindSceneVA(){ gl.useProgram(prog);   // (re)establish scene vertex-array state — at init and after each post pass
+  gl.bindBuffer(gl.ARRAY_BUFFER,cubePB); gl.enableVertexAttribArray(A_P); gl.vertexAttribPointer(A_P,3,gl.FLOAT,false,0,0); INST.vertexAttribDivisorANGLE(A_P,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,cubeNB); gl.enableVertexAttribArray(A_N); gl.vertexAttribPointer(A_N,3,gl.FLOAT,false,0,0); INST.vertexAttribDivisorANGLE(A_N,0);
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO); const F=4, S=ISTRIDE*F;
+  I_LOC.forEach((l,i)=>{ if(l<0) return; gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,I_SZ[i],gl.FLOAT,false,S,I_OFF[i]*F); INST.vertexAttribDivisorANGLE(l,1); }); }
+bindSceneVA();
+gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+// ======= PostFX: render the scene to a texture, then add a blurred bright-pass (bloom) so glows/embers/gems radiate =======
+const PostFX=(function(){
+  const BLOOM_OFF=/[?&]nobloom/.test(location.search);
+  let W=0,H=0, sTex,sFBO,sDepth, bTex=[],bFBO=[];
+  const QVS=`attribute vec2 aPos; varying vec2 vUv; void main(){ vUv=aPos*0.5+0.5; gl_Position=vec4(aPos,0.0,1.0); }`;
+  function mkProg(fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(QVS,gl.VERTEX_SHADER)); gl.attachShader(p,compile(fsSrc,gl.FRAGMENT_SHADER)); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error('post link: '+gl.getProgramInfoLog(p)); return p; }
+  const brightP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; void main(){ vec3 c=texture2D(uT,vUv).rgb; float l=max(max(c.r,c.g),c.b); gl_FragColor=vec4(c*smoothstep(0.64,0.98,l),1.0); }`);
+  const blurP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uT; uniform vec2 uDir; void main(){ vec3 s=texture2D(uT,vUv).rgb*0.227; s+=(texture2D(uT,vUv+uDir*1.384).rgb+texture2D(uT,vUv-uDir*1.384).rgb)*0.316; s+=(texture2D(uT,vUv+uDir*3.23).rgb+texture2D(uT,vUv-uDir*3.23).rgb)*0.070; gl_FragColor=vec4(s,1.0); }`);
+  const compP=mkProg(`precision mediump float; varying vec2 vUv; uniform sampler2D uScene,uBloom; uniform float uAmt; void main(){
+    vec3 c=texture2D(uScene,vUv).rgb + texture2D(uBloom,vUv).rgb*uAmt;
+    vec3 tm=(c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14);
+    vec3 col=clamp(mix(c,tm,0.45),0.0,1.0);
+    col=mix(vec3(0.5),col,1.07);                               // gentle contrast S-curve around mid-grey
+    float lum=dot(col,vec3(0.299,0.587,0.114));
+    col=mix(vec3(lum),col,1.13);                               // +13% saturation so the palette pops like the icon art
+    vec2 d=vUv-0.5; float vig=smoothstep(0.85,0.28,dot(d,d)*2.0);
+    col*=mix(0.80,1.0,vig);                                    // soft in-shader vignette (interacts with bloom)
+    float dth=fract(sin(dot(vUv*vec2(1024.0,768.0),vec2(12.9898,78.233)))*43758.5453);
+    col+=(dth-0.5)*0.012;                                      // subtle dither kills fog banding
+    gl_FragColor=vec4(clamp(col,0.0,1.0),1.0); }`);
+  // gradient skybox + soft sun glow and faint god-rays, drawn as a fullscreen quad behind the scene
+  const skyP=mkProg(`precision mediump float; varying vec2 vUv; uniform vec3 uTop,uBot,uSunC; uniform vec2 uSun; uniform float uAsp;
+    void main(){
+      float g=pow(clamp(vUv.y,0.0,1.0),0.9);
+      vec3 col=mix(uBot,uTop,g);
+      vec2 d=vec2((vUv.x-uSun.x)*uAsp,(vUv.y-uSun.y)); float r=length(d);
+      float glow=exp(-r*3.0)*0.85 + exp(-r*8.0)*0.55;
+      float rays=(0.5+0.5*sin(atan(d.y,d.x)*14.0))*exp(-r*2.1)*0.20;
+      col+=uSunC*(glow+rays);
+      gl_FragColor=vec4(col,1.0); }`);
+  const U_skTop=gl.getUniformLocation(skyP,'uTop'), U_skBot=gl.getUniformLocation(skyP,'uBot'), U_skSunC=gl.getUniformLocation(skyP,'uSunC'),
+        U_skSun=gl.getUniformLocation(skyP,'uSun'), U_skAsp=gl.getUniformLocation(skyP,'uAsp'), A_sky=gl.getAttribLocation(skyP,'aPos');
+  const U_bT=gl.getUniformLocation(brightP,'uT'), U_blT=gl.getUniformLocation(blurP,'uT'), U_blD=gl.getUniformLocation(blurP,'uDir'),
+        U_cS=gl.getUniformLocation(compP,'uScene'), U_cB=gl.getUniformLocation(compP,'uBloom'), U_cA=gl.getUniformLocation(compP,'uAmt'),
+        A_bright=gl.getAttribLocation(brightP,'aPos'), A_blur=gl.getAttribLocation(blurP,'aPos'), A_comp=gl.getAttribLocation(compP,'aPos');
+  const qb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 3,-1, -1,3]),gl.STATIC_DRAW);
+  function tex(w,h){ const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); return t; }
+  function fboFor(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
+  function alloc(){ W=VW; H=VH; const hw=Math.max(1,W>>1), hh=Math.max(1,H>>1);
+    sTex=tex(W,H); sFBO=fboFor(sTex); sDepth=gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER,sDepth); gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,W,H);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,sDepth);
+    for(let i=0;i<2;i++){ bTex[i]=tex(hw,hh); bFBO[i]=fboFor(bTex[i]); }
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null); }
+  function drawTri(loc){ gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0); gl.drawArrays(gl.TRIANGLES,0,3); }
+  return { get on(){ return !BLOOM_OFF; },
+    // draw the gradient sky + sun into whatever framebuffer is currently bound (called right after clear, before geometry)
+    sky(top,bot,sun,sunC){ flushBatch(); gl.depthMask(false); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+      gl.useProgram(skyP); gl.uniform3f(U_skTop,top[0],top[1],top[2]); gl.uniform3f(U_skBot,bot[0],bot[1],bot[2]);
+      gl.uniform3f(U_skSunC,sunC[0],sunC[1],sunC[2]); gl.uniform2f(U_skSun,sun[0],sun[1]); gl.uniform1f(U_skAsp,VW/Math.max(1,VH));
+      drawTri(A_sky);
+      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(true); bindSceneVA(); },
+    begin(){ if(BLOOM_OFF) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
+    end(){ if(BLOOM_OFF) return; flushBatch();
+      const hw=Math.max(1,VW>>1), hh=Math.max(1,VH>>1);
+      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.activeTexture(gl.TEXTURE0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[0]); gl.viewport(0,0,hw,hh); gl.useProgram(brightP); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_bT,0); drawTri(A_bright);
+      let src=0,dst=1; gl.useProgram(blurP); gl.uniform1i(U_blT,0);
+      for(let i=0;i<4;i++){ const hor=(i%2===0); gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[dst]); gl.viewport(0,0,hw,hh); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform2f(U_blD, hor?1/hw:0, hor?0:1/hh); drawTri(A_blur); const s=src; src=dst; dst=s; }
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,VW,VH); gl.useProgram(compP);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_cS,0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform1i(U_cB,1); gl.uniform1f(U_cA,0.72);
+      drawTri(A_comp); gl.activeTexture(gl.TEXTURE0);
+      gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); bindSceneVA(); }
+  };
+})();
+setFlatLights(); // bright neutral default (menus / previews / title); gameplay swaps to dark-fantasy lighting each frame
+
+const _colCache={};
+function col3(hex){ if(_colCache[hex]) return _colCache[hex];
+  let c=hex.replace('#',''); if(c.length===3) c=c.split('').map(x=>x+x).join('');
+  const v=[parseInt(c.substr(0,2),16)/255,parseInt(c.substr(2,2),16)/255,parseInt(c.substr(4,2),16)/255];
+  _colCache[hex]=v; return v; }
+function tint(hex,hex2,t){ const a=col3(hex),b=col3(hex2);
+  const h=x=>('0'+Math.round(x*255).toString(16)).slice(-2);
+  return '#'+h(a[0]+(b[0]-a[0])*t)+h(a[1]+(b[1]-a[1])*t)+h(a[2]+(b[2]-a[2])*t); }
+
+/* ---- matrix stack + box drawing ---- */
+let CURM=mIdent(); const MSTACK=[];
+function pushM(){ MSTACK.push(CURM.slice()); }
+function popM(){ CURM=MSTACK.pop(); }
+function mv(x,y,z){ CURM=mMul(CURM,mT(x,y,z)); }
+function rotY(a){ CURM=mMul(CURM,mRY(a)); }
+function rotX(a){ CURM=mMul(CURM,mRX(a)); }
+function rotZ(a){ CURM=mMul(CURM,mRZ(a)); }
+function rot3(m){ // upper 3x3 (rotation-ish) for normals; scale is applied after, so CURM stays rotation+translation
+  return [m[0],m[1],m[2], m[4],m[5],m[6], m[8],m[9],m[10]]; }
+let SIL=null, SILA=0.9;   // occlusion-silhouette pass: when set, every box draws as a flat unlit shape in this colour
+// accumulate one instance record (CURM is rotation+translation only; scale rides separately)
+function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
+  if(instCount>=instCap){ instCap*=2; const n=new Float32Array(instCap*ISTRIDE); n.set(instData); instData=n; }
+  let o=instCount*ISTRIDE, m=CURM;
+  instData[o]=m[0];instData[o+1]=m[1];instData[o+2]=m[2];instData[o+3]=m[3];
+  instData[o+4]=m[4];instData[o+5]=m[5];instData[o+6]=m[6];instData[o+7]=m[7];
+  instData[o+8]=m[8];instData[o+9]=m[9];instData[o+10]=m[10];instData[o+11]=m[11];
+  instData[o+12]=m[12];instData[o+13]=m[13];instData[o+14]=m[14];instData[o+15]=m[15];
+  instData[o+16]=sx;instData[o+17]=sy;instData[o+18]=sz;
+  instData[o+19]=cr;instData[o+20]=cg;instData[o+21]=cb;instData[o+22]=ca;
+  instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
+  instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
+}
+function flushBatch(){ if(instCount===0) return;
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
+  INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,instCount);
+  if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
+  instCount=0;
+}
+function box(sx,sy,sz,color,emiss,alpha){
+  if(SIL){ const s2=col3(SIL); pushInst(sx,sy,sz, 0,0,0,SILA, s2[0],s2[1],s2[2]); return; }
+  const c=col3(color);
+  let er=0,eg=0,eb=0; if(typeof emiss==='string'){ const e=col3(emiss); er=e[0]*0.85; eg=e[1]*0.85; eb=e[2]*0.85; }
+  pushInst(sx,sy,sz, c[0],c[1],c[2], (alpha==null?1:alpha), er,eg,eb);
+}
+function bx(x,y,z,sx,sy,sz,color,emiss,alpha){ pushM(); mv(x,y,z); box(sx,sy,sz,color,emiss,alpha); popM(); }
+/* ---- Plan A: semantic voxel assemblies, materials, LOD, and live render budgets ----
+   Assemblies remain instanced cubes, so richer art does not create a draw call per voxel.
+   All detail is visual-only unless an existing gameplay primitive supplies collision. */
+const VOXMAT={
+  iron:{base:'#343943',light:'#5b626e',dark:'#20242b',edge:'#8a929e'},steel:{base:'#78818d',light:'#c1c9d1',dark:'#424953',edge:'#eef3f6'},
+  gold:{base:'#b87922',light:'#ffd36a',dark:'#644018',edge:'#fff0a0'},wood:{base:'#654629',light:'#916539',dark:'#392719',edge:'#bd8a4e'},
+  stone:{base:'#555b68',light:'#777f8f',dark:'#343943',edge:'#9aa2b0'},leather:{base:'#543522',light:'#805437',dark:'#2c1d16',edge:'#b47a4d'},
+  cloth:{base:'#352842',light:'#5a416e',dark:'#1e1727',edge:'#9369b5'},bone:{base:'#c9c2aa',light:'#eee8d5',dark:'#787463',edge:'#fffbed'},
+  grass:{base:'#47733c',light:'#719a55',dark:'#29472c',edge:'#a8c873'},void:{base:'#2c173b',light:'#73409a',dark:'#160d20',edge:'#c47bff'},
+  fire:{base:'#d85122',light:'#ffd257',dark:'#712417',edge:'#fff0a0',emiss:'#ff8a32'},ice:{base:'#78cce5',light:'#dff8ff',dark:'#35677f',edge:'#ffffff',emiss:'#8eeaff'}
+};
+const VOXASM=Object.create(null),VOXMET={frame:0,submitted:0,peak:0,drawCalls:0,lod:[0,0,0],assemblies:0,culled:0,lastMs:0};
+function voxDefine(id,parts){VOXASM[id]=parts;return parts;}
+function voxLod(x,z,force){if(force!=null)return force;const p=G&&G.p;if(!p)return 0;const d=Math.hypot(x-p.x,z-p.z);return d<260?0:d<720?1:2;}
+function voxSeed(n){let x=(n|0)+0x6D2B79F5;x=Math.imul(x^(x>>>15),x|1);x^=x+Math.imul(x^(x>>>7),x|61);return((x^(x>>>14))>>>0)/4294967296;}
+function voxDraw(id,opt){const ps=VOXASM[id];if(!ps)return;opt=opt||{};const lod=voxLod(opt.x||0,opt.z||0,opt.lod);VOXMET.assemblies++;VOXMET.lod[lod]++;pushM();mv(opt.x||0,opt.y||0,opt.z||0);if(opt.yaw)rotY(opt.yaw);const seed=opt.seed||0;
+  for(let i=0;i<ps.length;i++){const q=ps[i];if((q.lod==null?0:q.lod)<lod)continue;const M=VOXMAT[q.mat]||VOXMAT.stone,v=q.var?(voxSeed(seed+i)-.5)*q.var:0,col=q.c||tint(M.base,v<0?'#000':'#fff',Math.abs(v));bx(q.x||0,q.y||0,q.z||0,q.w,q.h,q.d,col,q.e||(q.glow&&M.emiss),q.a);}popM();}
+function voxPart(x,y,z,w,h,d,mat,lod,extra){return Object.assign({x,y,z,w,h,d,mat,lod:lod==null?2:lod},extra||{});}
+function voxMetrics(){return {frame:VOXMET.frame,submitted:VOXMET.submitted,peak:VOXMET.peak,drawCalls:VOXMET.drawCalls,lod:VOXMET.lod.slice(),assemblies:VOXMET.assemblies,culled:VOXMET.culled,lastMs:+VOXMET.lastMs.toFixed(2)};}
+voxDefine('torch.post',[
+  voxPart(0,25,0,5,50,5,'wood',2),voxPart(0,5,0,9,4,9,'iron',2),voxPart(0,24,0,7,4,7,'iron',2),voxPart(0,43,0,7,4,7,'iron',2),
+  voxPart(0,50,0,13,4,13,'iron',2),voxPart(0,47,0,9,4,9,'gold',1),
+  ...[-1,1].flatMap(s=>[voxPart(s*5,53,0,2,10,2,'iron',1),voxPart(0,53,s*5,2,10,2,'iron',1)]),
+  ...[-1,1].flatMap(s=>[voxPart(s*3,14,3,2,2,2,'gold',0),voxPart(s*3,34,3,2,2,2,'gold',0)])
+]);
+voxDefine('chest.base',[
+  voxPart(0,9,0,34,16,25,'wood',2),voxPart(0,9,11.8,32,16,2,'wood',2,{c:'#4b301b'}),voxPart(0,4,0,36,5,27,'iron',2),voxPart(0,13,0,36,4,27,'gold',2),
+  ...[-1,1].flatMap(s=>[-1,1].map(z=>voxPart(s*16,9,z*11.5,3,17,3,'iron',2))),
+  ...[-10,0,10].map(x=>voxPart(x,9,12.3,1.4,15,1,'leather',0)),
+  voxPart(0,11.5,12.8,8,9,3,'gold',2),voxPart(0,10.5,14.4,2,3,1,'iron',1)
+]);
+voxDefine('chest.lid',[
+  voxPart(0,3,0,34,7,25,'wood',2),voxPart(0,6,0,30,4,23,'wood',2,{c:'#936840'}),voxPart(0,2,0,36,3,27,'gold',2),
+  ...[-12,-4,4,12].map(x=>voxPart(x,5,11.8,2,5,2,'iron',1)),...[-1,1].map(s=>voxPart(s*12,-1,-11.8,5,3,3,'iron',1)),
+  voxPart(0,8,0,10,2,8,'gold',0),voxPart(0,9,0,5,2,4,'steel',0)
+]);
+voxDefine('portal.arch',[
+  ...[-1,1].flatMap(s=>[voxPart(s*50,24,0,16,48,16,'stone',2),voxPart(s*50,2,0,22,7,22,'stone',2),voxPart(s*50,48,0,21,8,21,'stone',2),voxPart(s*50,59,0,5,5,5,'gold',1,{glow:true})]),
+  ...[-2,-1,0,1,2].map(i=>voxPart(i*21,82-Math.abs(i)*7,0,20,15,17,'stone',2,{var:.08})),
+  voxPart(0,86,0,24,18,20,'stone',2,{c:'#777f8f'}),voxPart(0,91,0,10,10,22,'gold',1,{glow:true}),
+  ...[-1,1].flatMap(s=>[voxPart(s*42,30,9,5,18,4,'gold',0),voxPart(s*42,30,-9,5,18,4,'gold',0)]),
+  ...[-28,0,28].map(x=>voxPart(x,72,9,5,5,3,'void',0,{glow:true}))
+]);
+// preserve exact draw order/transparency: any blend/depth/clear state change flushes the pending batch first
+(function(){ const _bf=gl.blendFunc.bind(gl), _dm=gl.depthMask.bind(gl), _cl=gl.clear.bind(gl);
+  gl.blendFunc=(a,b)=>{ flushBatch(); _bf(a,b); };
+  gl.depthMask=(b)=>{ flushBatch(); _dm(b); };
+  gl.clear=(m)=>{ flushBatch(); _cl(m); }; })();
+/* ---- lighting rigs (dark-fantasy in gameplay, bright-neutral for menus/previews) ---- */
+function setFlatLights(){ // menus, item/skin previews, title: even, readable
+  gl.uniform3f(U.uL,0.45,0.78,0.42); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.46); gl.uniform3f(U.uKey,1,1,1);
+  gl.uniform3f(U.uPC0,0,0,0); gl.uniform3f(U.uPC1,0,0,0); gl.uniform3f(U.uPC2,0,0,0); gl.uniform3f(U.uPC3,0,0,0); }
+function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + the nearest wall torches
+  // Zone identity includes LIGHT: Hollow Pass is a sunlit desert canyon, not a torch-lit crypt.
+  if(G && G.hub){
+    gl.uniform3f(U.uL,0.3,0.85,0.42); gl.uniform1f(U.uAmb,0.50); gl.uniform1f(U.uDif,0.30); gl.uniform3f(U.uKey,1.10,0.94,0.72); }
+  else if(G && !G.trial && !G.side && curZone().id==='hollow' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.42,0.80,0.42); gl.uniform1f(U.uAmb,0.62); gl.uniform1f(U.uDif,0.42); gl.uniform3f(U.uKey,1.18,1.02,0.78); }
+  else if(G && !G.trial && !G.side && curZone().id==='outskirts' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.34,0.86,0.40); gl.uniform1f(U.uAmb,0.60); gl.uniform1f(U.uDif,0.40); gl.uniform3f(U.uKey,1.06,1.08,0.86); }   // open meadow daylight
+  else if(G && !G.trial && !G.side && curZone().id==='frost' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.30,0.84,0.46); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.38); gl.uniform3f(U.uKey,0.92,1.00,1.18); }   // cold snow-glare
+  else if(G && !G.trial && !G.side && curZone().id==='palace' && !(STAGES[G.stageIndex]||{}).boss){
+    gl.uniform3f(U.uL,0.30,0.86,0.40); gl.uniform1f(U.uAmb,0.66); gl.uniform1f(U.uDif,0.40); gl.uniform3f(U.uKey,1.10,1.06,0.94); }   // bright sunlit marble
+  else { gl.uniform3f(U.uL,0.35,0.82,0.45); gl.uniform1f(U.uAmb,0.30); gl.uniform1f(U.uDif,0.24); gl.uniform3f(U.uKey,0.80,0.85,1.06); }
+  gl.uniform3f(U.uPL0,p.x,p.y+46,p.z); gl.uniform3f(U.uPC0,0.82,0.78,0.60);   // player-carried light (broad, warm-white)
+  const near=[]; if(G.torches) for(const tc of G.torches){ const dx=tc.x-p.x,dz=tc.z-p.z; near.push([dx*dx+dz*dz,tc]); }
+  near.sort((a,b)=>a[0]-b[0]);
+  // Torches are navigation accents, not floodlights: restrained intensity preserves local material colour.
+  const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.72+0.18*Math.sin(t*9+(tc.ph||0)); gl.uniform3f(pL,tc.x,58,tc.z); gl.uniform3f(cL,0.38*fl,0.21*fl,0.10*fl); } else gl.uniform3f(cL,0,0,0); };   // (tc.ph||0): a malformed torch must never NaN the lights again
+  setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
+function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
+  gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
+  for(let i=3;i>=1;i--){ const s=r*i*0.7; bx(x,y,z,s,s,s,'#000000',color,a/(i*1.25)); }
+  gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); }
+(function(){ const v=document.createElement('div'); v.id='atmosVig';  // dungeon vignette over the game canvas (below the HUD)
+  v.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:3;mix-blend-mode:multiply;background:radial-gradient(128% 104% at 50% 45%, rgba(0,0,0,0) 40%, rgba(6,5,12,.42) 82%, rgba(3,2,7,.74) 100%);';
+  document.body.appendChild(v); })();
+
+/* ============================================================
+   GAME STATE (systems identical to 2D)
+   ============================================================ */
+let G=null, mode='title', lastT=0, acc=0; const DT=1/60;
+let queueLevelUp=0;
+const DIFFICULTY=1.0;
+function stageScale(){ return 1+(zoneTier()-1)*0.22+(G&&G.area>0?0.05:0); }   // one curve: zone tier drives enemy scaling AND the loot band
+function freshGear(){ return {helmet:null,chest:null,legs:null,amulet:null,ring:null}; }
+/* ---------------- Shop perks: permanent per-mode stat upgrades bought with gold ---------------- */
+const PERKS={
+  vigor:{name:'Vigor',icon:'max-hp',per:20,cap:50,unit:v=>'+'+Math.round(v)+' Max HP',base:40,max:10},
+  might:{name:'Might',icon:'damage-power',per:0.05,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Damage',base:60,max:10},
+  arcana:{name:'Arcana',icon:'magic-damage',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Magic Damage',base:70,max:10},
+  haste:{name:'Haste',icon:'attack-speed',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Attack Speed',base:60,max:10},
+  swift:{name:'Swiftness',icon:'move-speed',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Move Speed',base:50,max:10},
+  edge:{name:'Keen Edge',icon:'critical-chance',per:0.03,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Crit',base:70,max:10},
+  sanguine:{name:'Sanguine',icon:'lifesteal',per:0.01,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Lifesteal',base:75,max:10},
+  bulwark:{name:'Bulwark',icon:'defense',per:0.012,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Defense',base:75,max:10},
+  evasion:{name:'Evasion',icon:'dodge-cooldown',per:0.02,cap:0.05,unit:v=>'-'+Math.round(v*100)+'% Dodge Cooldown',base:80,max:10},
+  focus:{name:'Focus',icon:'skill-cooldown-reduction',per:0.02,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Skill CDR',base:80,max:10},
+  greed:{name:'Greed',icon:'gold-find',per:0.08,cap:0.20,unit:v=>'+'+Math.round(v*100)+'% Gold Find',base:50,max:10}
+};
+const PERKIDS=Object.keys(PERKS);
+function perkLevel(id){ return (meta.perks&&meta.perks[id])||0; }
+function perkValue(id,lv){ const P=PERKS[id]; lv=Math.max(0,Math.min(P.max,lv==null?perkLevel(id):lv)); return P.per*lv+(lv>=P.max?P.cap:0); }
+function perkCost(id){ return Math.round(PERKS[id].base*Math.pow(1.6,Math.min(PERKS[id].max-1,perkLevel(id)))); }
+function applyPerkRank(p,id,newLv){
+  const P=PERKS[id], add=P.per+(newLv===P.max?P.cap:0);
+  if(id==='vigor') p.maxHp+=add;
+  else if(id==='might') p.stats.power*=1+add;
+  else if(id==='arcana') p.stats.magPower=(p.stats.magPower||1)*(1+add);
+  else if(id==='haste') p.stats.atkSpeed*=1+add;
+  else if(id==='swift') p.stats.speed*=1+add;
+  else if(id==='edge') p.stats.crit=(p.stats.crit||0)+add;
+  else if(id==='sanguine') p.stats.lifesteal=(p.stats.lifesteal||0)+add;
+  else if(id==='bulwark') p.stats.defense=(p.stats.defense||0)+add;
+  else if(id==='evasion') p.stats.dodgeCd*=1-add;
+  else if(id==='focus') p.stats.cdr=(p.stats.cdr||0)+add;
+  else if(id==='greed') p.stats.goldFind=(p.stats.goldFind||0)+add;
+}
+function applyPerks(p){
+  p.maxHp += perkValue('vigor');
+  p.stats.power *= 1+perkValue('might');
+  p.stats.magPower = (p.stats.magPower||1)*(1+perkValue('arcana'));
+  p.stats.atkSpeed *= 1+perkValue('haste');
+  p.stats.speed *= 1+perkValue('swift');
+  p.stats.crit = (p.stats.crit||0)+perkValue('edge');
+  p.stats.lifesteal = (p.stats.lifesteal||0)+perkValue('sanguine');
+  p.stats.defense = (p.stats.defense||0)+perkValue('bulwark');
+  p.stats.dodgeCd *= 1-perkValue('evasion');
+  p.stats.cdr = (p.stats.cdr||0)+perkValue('focus');
+  p.stats.goldFind = (p.stats.goldFind||0)+perkValue('greed');
+  if(meta.socks) p.maxJumps=Math.max(p.maxJumps||1,2);
+}
+function upgradeStoredHeroPerk(id,newLv){
+  if(!meta.hero) return;
+  const p=freshFromSnapshot(meta.hero); applyPerkRank(p,id,newLv); recomputeArmor(p); p.hp=effMaxHp(p); meta.hero=snapOf(p);
+}function freshPlayer(){
+  const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
+  const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
+    hp:100,maxHp:100,mana:100,maxMana:100,level:1,xp:0,xpNext:46,weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
+    stats:{power:1.0,magPower:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,defense:0,cdr:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
+    atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
+    charging:false,chargeAmt:0,holdT:0,attackHeld:false,
+    skillCd:[0,0,0,0],skillCdMax:[0,0,0,0],berserkT:0,chargeDash:0,tempestT:0,tempAcc:0,jetFuel:1,jets:0,
+    guardT:0,reflectT:0,shieldHp:0,shieldT:0,stormT:0,stormAcc:0};
+  applyPerks(p); recomputeArmor(p); p.hp=effMaxHp(p);
+  return p;
+}
+function recomputeArmor(p){
+  const m={hp:0,speedMul:1,atkSpeedMul:1,lifesteal:0,dodgeMul:1,powerMul:1,magPowerMul:1,defense:0,crit:0,goldFind:0,cdr:0};
+  let total=0, defBonus=0;
+  const fold=a=>{ for(const af of a.affixes){ const s=af.stat,v=af.val;
+    if(s==='hp')m.hp+=v; else if(s==='lifesteal')m.lifesteal+=v; else if(s==='crit')m.crit+=v; else if(s==='goldFind')m.goldFind+=v; else if(s==='cdr')m.cdr+=v;
+    else if(s==='def')defBonus+=v;
+    else if(s==='speedMul')m.speedMul*=1+v; else if(s==='atkSpeedMul')m.atkSpeedMul*=1+v;
+    else if(s==='dodgeMul')m.dodgeMul*=1-v; else if(s==='powerMul')m.powerMul*=1+v; else if(s==='magPowerMul')m.magPowerMul*=1+v; } };
+  if(p.gear){ for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; normArmor(a); total+=a.defense; fold(a); }
+    for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a){ normArmor(a); fold(a); } } }
+  m.defense=(total+defBonus)/((total+defBonus)+200);
+  p.armorMods=m;
+}
+function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
+function isGod(p){ return p.skin==='god'; }
+function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
+  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
+function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
+  if(p.armorMods&&p.weapon&&p.weapon.sch==='mag') v*=p.armorMods.magPowerMul;   // Mystic gear boosts magic weapons specifically
+  if(sp){ if(sp.power) v*=sp.power;
+    if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
+    if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
+  const cm=classMods();
+  if(cm.sub==='berserker') v*=cm.cap?1.2:1.12;
+  if(cm.sub==='sniper'&&p.weapon&&p.weapon.cls==='ranged') v*=cm.cap?1.25:1.15;
+  if(p.berserkT>0) v*=1.35;
+  if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
+  if(meta.classId==='warrior'&&c2def('warrior')){ v*=1.08; if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
+  if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){ if(c2Passive('m_glass'))v*=1.15; if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
+  if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
+  if(G&&G.endDmgMul) v*=G.endDmgMul;
+  return isGod(p)?v*6:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; const cm=classMods(); if(cm.sub==='assassin') v*=cm.cap?1.18:1.10; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
+  const cm=classMods(); if(cm.sub==='harvester') v+=cm.cap?0.20:0.12;
+  if(meta.classId==='reaper'&&c2def('reaper')){v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
+  if(G&&G.endLifesteal) v+=G.endLifesteal;
+  return isGod(p)?v+0.6:v; }
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
+function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
+function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
+function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} return Math.min(0.5,v); }
+function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
+function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
+function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
+/* ARMOR RATING (0-100) — a gear-completeness score, NOT damage reduction (that stays defenseR, capped 0.5).
+   Each of the 3 armour slots contributes up to 1/3: a piece's share = its defense vs the best a LEGENDARY of
+   its type can roll in that slot (def[4]*defMul), capped at 1. So a full legendary set of ANY type = exactly
+   100%; missing pieces or lower rarities read proportionally less. This is what the HUD shield % now shows. */
+function armorRating(p){ if(!p||!p.gear) return 0; let sum=0; const n=SLOTIDS.length;
+  for(const slot of SLOTIDS){ const a=p.gear[slot]; if(!a) continue; normArmor(a);
+    const T=ARMOR_TYPES[a.type]||ARMOR_TYPES.vigor, max=Math.round((SLOTS[slot].def[4]||1)*(T.defMul||1));  // match makeArmor's rounding so a legendary piece == exactly 1
+    sum+=Math.min(1,(a.defense||0)/Math.max(1,max)); }
+  return Math.round(sum/n*100); }
+function powerScore(p){
+  const w=p.weapon||startWeapon();
+  const dps=w.dmg*effPower(p)*effAtkSpeed(p)/Math.max(0.14,w.cd), startDps=9/0.40;
+  const offense=dps/startDps, toughness=(effMaxHp(p)/100)/(1-defenseR(p));
+  return Math.sqrt(Math.max(0.2,offense)*Math.max(0.5,toughness));
+}
+function offenseScore(p){ const w=p.weapon||startWeapon(); return Math.max(1,(w.dmg*effPower(p)*effAtkSpeed(p)/Math.max(0.14,w.cd))/(9/0.40)); }
+function toughnessScore(p){ return Math.max(1,(effMaxHp(p)/100)/(1-defenseR(p))); }
+function computeNgScales(p){ // softened (v1.3): sub-linear tracking + smaller margin so NG+ ramps gentler
+  const off=Math.pow(offenseScore(p),0.85), tuf=Math.pow(toughnessScore(p),0.85);
+  // HP is CAPPED at 3x — past that, NG+ gets scarier through DAMAGE (dodge or die), never spongier.
+  return { hp:Math.min(3.0,Math.max(off*1.05,(meta.lastNgHp||1)*1.08)),
+           dmg:Math.min(5.0,Math.max(tuf*1.05,(meta.lastNgDmg||1)*1.08)) };
+}
+function cloneGear(g){ const o=freshGear(); if(g) for(const s of GEARSLOTS){ if(g[s]) o[s]=JSON.parse(JSON.stringify(g[s])); } return o; }
+function snapOf(p){ return {hp:p.hp,maxHp:p.maxHp,mana:p.mana,maxMana:p.maxMana,level:p.level,xp:p.xp,xpNext:p.xpNext,
+  weapon:JSON.parse(JSON.stringify(p.weapon)),gear:cloneGear(p.gear),
+  stats:JSON.parse(JSON.stringify(p.stats)),maxJumps:p.maxJumps,skin:p.skin}; }
+function freshFromSnapshot(snap){
+  const p=freshPlayer();
+  p.stats=Object.assign(p.stats,snap.stats);
+  p.weapon=snap.weapon?normWeapon(JSON.parse(JSON.stringify(snap.weapon))):startWeapon();
+  p.gear=cloneGear(snap.gear);
+  p.maxHp=snap.maxHp||100; p.maxMana=snap.maxMana||100;
+  p.mana=Math.max(0,Math.min(p.maxMana,snap.mana==null?p.maxMana:snap.mana));
+  p.maxJumps=Math.max(snap.maxJumps||1, meta.socks?2:1); p.level=snap.level||1;
+  p.xp=0; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
+  recomputeArmor(p); p.hp=effMaxHp(p); return p;
+}
+function beginRun(ngPlus,carrySnap,scales){
+  initAudio(); queueLevelUp=0;
+  const p=carrySnap?freshFromSnapshot(carrySnap):freshPlayer(); recomputeArmor(p);
+  if(scales==null) scales=carrySnap?computeNgScales(p):{hp:1,dmg:1};
+  G={p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
+     shake:0,ngPlus:ngPlus||0,ngHp:scales.hp,ngDmg:scales.dmg,baseLoadout:snapOf(p),
+     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
+     runSeed:Math.floor(Math.random()*1e9), // every run rolls fresh dungeons
+     zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,
+     cam:{x:0,y:0,z:0}};
+  meta.lastNgHp=scales.hp; meta.lastNgDmg=scales.dmg; persist(); checkAchievements();   // Phase 20: no longer writes meta.ngPlus (NG+ removed)
+  loadStage(0); mode='play'; showOverlay(false); showGameUI(true); hudUpdate();
+}
+function startRun(ngPlus){ enterZone(0); }
+/* ---- Zone flow (Phase 2): hub is the save point; a zone attempt is provisional ---- */
+function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON.stringify(meta.hero)):null,
+  classes:JSON.parse(JSON.stringify(meta.classes||{})), stash:JSON.parse(JSON.stringify(meta.stash||[]))}; persist(); }
+function restoreBank(){ if(!meta.bank) return false;
+  meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
+  meta.stash=meta.bank.stash||[];                          // items stashed during a failed attempt are lost with it
+  meta.bank=null; persist(); return true; }
+/* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
+let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
+function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; }
+// When you equip/buy something, the piece it replaced goes to your bag (not the void) —
+// unless it's throwaway starter/plain gear or the bag is full.
+const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
+function bagReplaced(old,isWeapon){
+  // Only the free STARTER weapons are discarded when replaced; every real drop you had equipped
+  // (including plain commons) is auto-sent to the bag so you never lose gear on an equip.
+  if(!old || /^(Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe)$/.test(old.name||'')) return;
+  if(!Array.isArray(meta.stash)) meta.stash=[];
+  if(meta.stash.length>=STASH_CAP){ toast('Bag full — '+old.name+' left behind'); return; }
+  meta.stash.push(isWeapon?{weapon:old}:{armor:old}); persist();
+}
+function stashItem(it){
+  if(!Array.isArray(meta.stash)) meta.stash=[];
+  if(meta.stash.length>=STASH_CAP){ return false; }   // caller shows the bag-full prompt
+  meta.stash.push(it); persist(); SFX.pickup(); playFx('bag'); return true;
+}
+function lowestBagIdx(){ let li=-1,lv=1e18; (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor; if(!o) return; const v=itemGold(o); if(v<lv){lv=v;li=i;} }); return li; }
+// bag full on a pickup/purchase: sell your lowest to make room, or leave the new item behind (rewards bag management)
+function bagFullPrompt(newItem,onDone){ mode='menu';
+  const li=lowestBagIdx(), lo=li>=0?(meta.stash[li].weapon||meta.stash[li].armor):null, no=newItem.weapon||newItem.armor;
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Bag Full · ${meta.stash.length}/${STASH_CAP}</p>
+    <h2 class="ovh">No room</h2>
+    <p class="ovsub">Nowhere to put <b style="color:${RARITY[no.rarity].color}">${no.name}</b>.</p>
+    ${lo?`<p class="hint">Sell your lowest — <b>${lo.name}</b> for <b style="color:#ffd24a">+${itemGold(lo)}g</b> — to make room?</p>
+    <button class="bigbtn" id="sellLow">Sell lowest &amp; keep ${no.name}</button>`:''}
+    <button class="bigbtn ghost" id="skipNew">Leave ${no.name} behind</button></div>`);
+  if(lo) document.getElementById('sellLow').onclick=()=>{ const g=sellItem(lo); meta.stash.splice(li,1); meta.stash.push(newItem); persist(); SFX.pickup(); toast('Sold '+lo.name+' +'+g+'g · kept '+no.name); onDone(); };
+  document.getElementById('skipNew').onclick=()=>{ toast(no.name+' left behind'); onDone(); };
+}
+let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
+/* Bag equipment doll: a LIVE 3D voxel render of the hero (+ companion by the leg), drag to rotate.
+   Rendered on demand into the WebGL canvas, then captured into the bag's 2D canvas (like item previews). */
+let bagDoll=null;
+function setupBagDoll(HR){
+  const cnv=document.getElementById('bagDollCanvas'); if(!cnv||typeof gl==='undefined'||!gl) return;
+  const src=HR||meta.hero||{}; const p=freshPlayer();
+  if(src.skin) p.skin=src.skin;
+  if(src.weapon) p.weapon=normWeapon(JSON.parse(JSON.stringify(src.weapon)));
+  if(src.gear) p.gear=cloneGear(src.gear);
+  p.level=src.level||1; ['eyeColor','hairStyle','hairColor'].forEach(k=>{ if(src[k]!=null) p[k]=src[k]; });
+  recomputeArmor(p); p.hp=effMaxHp(p);
+  const pet=(meta.petActive&&PETS[meta.petActive])?{id:meta.petActive,x:0,y:0,z:0,bob:0,t:0,yaw:0,hp:1,maxHp:1}:null;
+  bagDoll={p,pet,yaw:0.6,t:1.2};
+  bagDollRender();
+  let dragX=null;
+  const dn=e=>{ dragX=(e.touches?e.touches[0].clientX:e.clientX); e.preventDefault(); };
+  const mv=e=>{ if(dragX==null||!bagDoll) return; const x=(e.touches?e.touches[0].clientX:e.clientX); bagDoll.yaw-=(x-dragX)*0.012; dragX=x; bagDollRender(); e.preventDefault(); };
+  const up=()=>{ dragX=null; };
+  cnv.addEventListener('pointerdown',dn); window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
+  cnv.addEventListener('touchstart',dn,{passive:false}); cnv.addEventListener('touchmove',mv,{passive:false}); window.addEventListener('touchend',up);
+}
+function bagDollRender(){
+  if(!bagDoll) return; const cnv=document.getElementById('bagDollCanvas'); if(!cnv) return;
+  const p=bagDoll.p, pet=bagDoll.pet, yaw=bagDoll.yaw, t=bagDoll.t;
+  gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,900);
+  const cx=Math.sin(yaw)*172, cz=Math.cos(yaw)*172;
+  VIEW=mLookAt([cx,60,cz],[0,28,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,1400,5000); gl.uniform3f(U.uFog,0.06,0.06,0.08);
+  CURM=mIdent();
+  drawShadow(0,0,18,0.32);
+  p.x=0; p.z=0; p.y=0; p.yaw=0; drawHero3(p,t,true);
+  if(pet){ pet.x=30; pet.z=14; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
+  flushBatch(); gl.finish();          // draw the accumulated hero+pet cubes before we grab the pixels
+  const ctx=cnv.getContext('2d'); ctx.clearRect(0,0,cnv.width,cnv.height);
+  // frame the pair pushed to the right of the canvas so the hero clears the equip cards on the left
+  const ctr=(typeof project==='function'?project(-12,30,0):null)||[VW/2,VH/2];
+  const sw=VH*0.60*DPR, sh=VH*1.02*DPR;
+  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*0.46, sw, sh, 0,0, cnv.width, cnv.height);
+  // GL context is alpha:false, so the clear reads back as opaque black — key it out to float on the panel
+  try{ const id=ctx.getImageData(0,0,cnv.width,cnv.height), px=id.data;
+    for(let i=0;i<px.length;i+=4){ const m=Math.max(px[i],px[i+1],px[i+2]);
+      if(m<14) px[i+3]=0; else if(m<36) px[i+3]=Math.round(px[i+3]*(m-14)/22); }
+    ctx.putImageData(id,0,0);
+  }catch(e){}
+}
+function openBag(back){
+  mode='menu';
+  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero;   // live in a zone -> swap in hand now; at the hub -> the banked hero
+  // grouped by category (weapons by melee/ranged/magic, then armor by slot, then trinkets), sortable
+  const oOf=x=>x.it.weapon||x.it.armor||x.it.trinket;
+  const order=meta.stash.map((it,i)=>({it,i})).filter(x=>oOf(x));
+  const catKey=x=>{ const o=oOf(x); return x.it.weapon?('1'+weapCat(o)):x.it.trinket?('3'+o.slot):('2'+o.slot); };
+  const catName=x=>{ const o=oOf(x); return x.it.weapon?catLabel(true,weapCat(o)):x.it.trinket?TRINKETS[o.slot].label:catLabel(false,o.slot); };
+  if(_bagSort==='rarity') order.sort((a,b)=>(RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier)||b.i-a.i);
+  else if(_bagSort==='recency') order.sort((a,b)=>b.i-a.i);
+  else order.sort((a,b)=>{ const ka=catKey(a),kb=catKey(b); if(ka!==kb) return ka<kb?-1:1; return RARITY[oOf(b).rarity].tier-RARITY[oOf(a).rarity].tier; });
+  const showHdr=(_bagSort==='type');
+  let _lc=''; const rows=order.length?order.map(x=>{ const it=x.it, i=x.i, w=it.weapon, a=it.armor, t=it.trinket, o=w||a||t, rc=RARITY[o.rarity].color;
+    const sub=w?(w.dmg+' dmg · '+weapInfoLine(w)):(a?(a.defense+' def · '+a.affixes.map(x=>x.label).join(', ')):(t.affixes.map(x=>x.label).join(', ')));
+    const hdr=(showHdr&&catName(x)!==_lc)?(_lc=catName(x), `<div class="gd" style="text-align:left;margin:9px 0 2px;color:var(--amber);font-weight:800;letter-spacing:.05em">${w?'':slotIcon(o.slot)}${_lc}s</div>`):'';
+    const lock=!canWield(o);
+    return hdr+`<div class="gearrow" style="--spine:${rc}${lock?';opacity:.5':''}"><img class="bagav" src="${itemAv(o)}" alt="">
+      <div style="flex:1;min-width:0"><div class="gn" style="color:${rc}">${o.name}${w&&w.up?' +'+w.up:''}${rpip(o.rarity)}${reqTag(o)}</div><div class="gd">${sub}</div></div>
+      <button class="bigbtn buybtn" data-eq="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px${lock?';opacity:.4':''}">${lock?'Lv '+rarityReq(o.rarity):actionIcon('equip')+'Equip'}</button>
+      <button class="bigbtn buybtn ghost" data-sl="${i}" style="width:auto;margin:0;padding:7px 10px;font-size:12px;color:#ffd24a">${actionIcon('sell')}+${itemGold(o)}g</button></div>`; }).join('')
+    :'<p class="hint">Empty. Stash weapons and armor from pickups — for class swaps, or to fuse maxed gear later.</p>';
+  const SORTS={type:'Type',rarity:'Rarity',recency:'Recent'};
+  const eq=HR||{weapon:null,gear:{}};
+  const slotRow=(id,label,item)=>{ const col=item&&item.rarity?RARITY[item.rarity].color:'#6e778b', fallback=id==='weapon'?`<span class="ico ico-damage ico-damage-physical"></span>`:slotIcon(id);
+    return `<div class="bagslot" style="--slotcol:${col}">${item?`<img class="bagslotimg" src="${itemAv(item)}" alt="">`:`<span class="bagslotempty">${fallback}</span>`}<span class="bagslotcopy"><span class="bagslotlabel">${label}</span><span class="bagslotname">${item?item.name:'Empty'}</span></span></div>`; };
+  const petId=meta.petActive&&PETS[meta.petActive]?meta.petActive:null;
+  const petRow=`<div class="bagslot" style="--slotcol:${petId?(RARITY[PETS[petId].rarity]?RARITY[PETS[petId].rarity].color:'#c9a86a'):'#6e778b'}">${petId?`<img class="bagslotimg" src="${petIcon(petId)}" alt="">`:`<span class="bagslotempty"><span class="ico ico-pet-collar" style="width:30px;height:30px"></span></span>`}<span class="bagslotcopy"><span class="bagslotlabel">Companion</span><span class="bagslotname">${petId?petDisplayName(petId):'None'}</span></span></div>`;
+  const equipped=[slotRow('weapon','Weapon',eq.weapon),...GEARSLOTS.map(s=>slotRow(s,slotLabel(s),eq.gear&&eq.gear[s])),petRow].join('');
+  const C=CLASSES[meta.classId]||CLASSES.warrior, heroName=meta.heroName||'Your Warden';
+  const doll=`<canvas id="bagDollCanvas" class="bagdoll3d" width="440" height="760"></canvas><div class="bagdollhint">drag to rotate</div>`;
+  showOverlayHTML(`<div class="card bagmenu"><p class="ovkicker">The Bladeborn's Pack</p><h2 class="ovh">Bag &amp; Equipment</h2>
+    <p class="ovsub">${meta.stash.length}/${STASH_CAP} slots · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
+      <div class="achlist">${rows}</div></section>
+      <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
+    <div class="bagfoot"><button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+  setupBagDoll(HR);
+  document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
+    if(!HR){ toast('Enter a zone once first — no hero yet'); return; }
+    const io=it.weapon||it.armor||it.trinket; if(io&&io.rarity&&(HR.level||1)<rarityReq(io.rarity)){ toast('🔒 Requires Level '+rarityReq(io.rarity)); return; }
+    if(it.weapon){ const old=HR.weapon; HR.weapon=normWeapon(JSON.parse(JSON.stringify(it.weapon))); meta.stash.splice(i,1); if(old&&!/Rusty|Cracked|Splintered|Notched/.test(old.name)) meta.stash.push({weapon:old}); }
+    else { const g=it.armor||it.trinket, isT=TRINKETIDS.includes(g.slot); const old=HR.gear[g.slot]; HR.gear[g.slot]=g; meta.stash.splice(i,1); if(old) meta.stash.push(isT?{trinket:old}:{armor:old}); }
+    if(G&&G.hub&&HR===meta.hero){
+      // The Pause-menu bag edits the banked snapshot. Mirror that change into the live hub
+      // player immediately; otherwise Resume keeps showing/using the old weapon until a
+      // keeper exit or full hub reload happens to call wsResume().
+      G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon)));
+      G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p));
+    } else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+    persist(); SFX.pickup(); hudUpdate(); openBag(back); });
+  document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
+    const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
+  document.getElementById('backBtn').onclick=back;
+  document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));
+}
+/* The Smith's forge: fuse two SAME-RARITY pieces of the same CATEGORY (melee/ranged/magic weapon,
+   or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
+function weapCat(w){ return w.sch==='mag'?'magic':(w.cls==='melee'?'melee':'ranged'); }
+// finalized weapon FAMILY (by art) + owning class, for tooltips
+const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Throwing Knives',javelin:'Javelins',staff:'Staff',wand:'Wand'};
+function weapFamily(w){ return (w&&ART_FAMILY[w.art])||'Weapon'; }
+function weapClassName(w){ if(!w) return ''; for(const c of CLASSIDS){ if(CLASSES[c].family.includes(w.art)) return CLASSES[c].disp; } return ''; }
+function damageTypeId(w){ return w&&w.sch==='mag'?'magic':(w&&w.cls==='ranged'?'ranged':'physical'); }
+function dmgTypeName(w){ return {physical:'Physical',ranged:'Ranged',magic:'Magic'}[damageTypeId(w)]; }
+function damageTypeIcon(w){ const id=damageTypeId(w); return `<span class="ico ico-damage ico-damage-${id}" title="${dmgTypeName(w)} damage" aria-label="${dmgTypeName(w)} damage"></span>`; }
+function damageTypeHTML(w){ return damageTypeIcon(w)+dmgTypeName(w); }
+// compact one-liner: Family · DamageType · Affinity(+status)
+function weapInfoLine(w){ if(!w) return ''; const aff=w.el?(' · '+affIcon(w.el)+' '+affName(w.el)):''; return weapFamily(w)+' · '+damageTypeHTML(w)+aff; }
+function catLabel(isW,cat){ return isW?({magic:'Magic Weapon',melee:'Melee Weapon',ranged:'Ranged Weapon'}[cat]||cat):(SLOTS[cat]?SLOTS[cat].label:cat); }
+function catArches(cat){ return DROP_ARCHES.filter(a=>{ const A=ARCHES[a]; return A && weapCat(A)===cat; }); }
+function fuseGroups(){
+  const groups={};
+  (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor||it.trinket; if(!o||o.rarity==='legendary') return;
+    const kind=it.weapon?'w':it.trinket?'t':'a', isW=kind==='w';
+    const cat=isW?weapCat(o):o.slot;                                    // category, not exact type (armor slot / trinket slot)
+    const k=kind+'|'+cat+'|'+o.rarity;
+    (groups[k]=groups[k]||{kind,isW,cat,rarity:o.rarity,sample:o,idxs:[]}).idxs.push(i); });
+  return Object.values(groups).filter(g=>g.idxs.length>=2);
+}
+// the forged result: a RANDOM item of the category at the next rarity (the slot-machine payout)
+function forgeResult(g){ const nr=RORDER[RARITY[g.rarity].tier+1];
+  if(g.kind==='w'){ const pool=catArches(g.cat); const aid=pool.length?pool[Math.floor(Math.random()*pool.length)]:g.sample.arche; return {weapon:makeWeapon(aid,nr)}; }
+  if(g.kind==='t') return {trinket:makeTrinket(nr,g.cat)};
+  return {armor:makeArmor(nr,g.cat)};   // makeArmor picks a random set for the slot
+}
+function openForge(back){
+  mode='menu'; playFx('forgedone');   // Phase 20: the metal clang opens the forge (swapped with the sharpening)
+  const fuseable=fuseGroups();
+  const rows=fuseable.length?fuseable.map((g,gi)=>{ const nr=RORDER[RARITY[g.rarity].tier+1], o=g.sample, rc=RARITY[g.rarity].color, nc=RARITY[nr].color, kind=g.kind==='t'?TRINKETS[g.cat].label:catLabel(g.isW,g.cat);
+    return `<div class="gearrow" style="--spine:${nc}"><img class="bagav" src="${itemAv(o)}" alt="">
+      <div style="flex:1;min-width:0"><div class="gn">2× <span style="color:${rc}">${RARITY[g.rarity].name}</span> ${kind}</div>
+        <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
+      <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('forge-fuse')}Forge</button></div>`; }).join('')
+    :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">${actionIcon('forge-fuse')}The Forge</h2>
+    <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
+    <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const g=fuseGroups()[+b.dataset.g]; if(!g) return; forgeSpin(g,back); });
+  document.getElementById('backBtn').onclick=back;
+}
+/* Slot-machine forge reveal (Vampire-Survivors-style): the reel of category icons spins, ratchets down,
+   and lands on the random forged item — then it drops into your bag. */
+/* ---------------- THE GAMBLE (Phase 18): Fortune's Bag ----------------
+   A deliberate gold sink: 480g (8x a common shop buy) for one random item whose odds are
+   HEAVILY junk-weighted — EV ~280g of shop value, so the house always wins. The tail is
+   real but thin (epic 4.2%, legendary 0.8% vs the natural drop table's 1.1%/0.19%). The
+   rolled item lands in the BAG like any loot (above-level rarities sit there locked —
+   canWield gates equipping, not owning — exactly the existing loot behavior). */
+const GAMBLE_COST=480;
+const GAMBLE_ODDS=[['common',0.52],['uncommon',0.30],['rare',0.13],['epic',0.042],['legendary',0.008]];
+function gambleRarity(){ let r=Math.random(); for(const q of GAMBLE_ODDS){ if(r<q[1]) return q[0]; r-=q[1]; } return 'common'; }
+function gambleSpin(back){
+  mode='menu'; playFx('dice'); playFx('forgespin',0.7);
+  const rid=gambleRarity(), item=randomLoot(rid), ro=item.weapon||item.armor||item.trinket, rc=RARITY[rid].color, tier=RARITY[rid].tier;
+  // a teaser reel that flashes every rarity — anything could happen (it won't)
+  const pool=[itemAv(makeWeapon('sword','common')),itemAv(makeArmor('uncommon','chest')),itemAv(makeWeapon('bow','rare')),
+              itemAv(makeArmor('epic','helmet')),itemAv(makeWeapon('firestaff','uncommon')),itemAv(makeWeapon('great','legendary'))];
+  const finalIcon=itemAv(ro);
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">${actionIcon('fortunes-bag')}Fortune's Bag</p><h2 class="ovh">Shaking it…</h2>
+    <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid #ffd24a;box-shadow:0 0 24px #ffd24a66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]}"></div></div>
+    <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
+    <button class="bigbtn hide" id="gamAgain">Again · ${GAMBLE_COST}g</button>
+    <button class="bigbtn ghost hide" id="gamDone">Back to the shop</button></div>`);
+  const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), box=document.getElementById('reelbox');
+  let i=0, delay=45; const t0=Date.now();
+  const step=()=>{ img.src=pool[i%pool.length]; i++;
+    try{ tone({f0:520+(i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}
+    if(Date.now()-t0 < 1400 && delay<220){ delay*=1.12; setTimeout(step,delay); }
+    else { // the landing — triumph or (usually) a thud
+      img.src=finalIcon; box.style.borderColor=rc; box.style.boxShadow='0 0 40px '+rc;
+      nameEl.innerHTML=`<span style="color:${rc};font-weight:800">${ro.name}</span> <span style="opacity:.6;font-size:12px">· ${RARITY[rid].name}</span>`;
+      try{ if(tier>=2){ SFX.god(); playFx('forgedone'); } else { SFX.hurt(); playFx('bag'); } }catch(e){}
+      if(tier>=3){ G&&(G.slowmo=Math.max(G.slowmo||0,0.2)); toast((tier>=4?'✦ LEGENDARY':'◆ EPIC')+' — the bag delivers', rc); }
+      if(!stashItem(item)){ meta.stash.push(item); persist(); }   // bag delivery, forge-payout pattern (force-past-cap parity)
+      persist();
+      const ag=document.getElementById('gamAgain'), dn=document.getElementById('gamDone');
+      dn.classList.remove('hide'); dn.onclick=()=>openShop(back);
+      if(meta.gold>=GAMBLE_COST){ ag.classList.remove('hide'); ag.onclick=()=>{ meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); }; }
+    } };
+  setTimeout(step,delay);
+}
+function forgeSpin(g,back){
+  mode='menu'; playFx('forgespin');
+  const nr=RORDER[RARITY[g.rarity].tier+1], nc=RARITY[nr].color;
+  const result=forgeResult(g), ro=result.weapon||result.armor||result.trinket;
+  // consume the two inputs up front
+  const [hi,lo]=g.idxs.slice(0,2).sort((x,y)=>y-x); meta.stash.splice(hi,1); meta.stash.splice(lo,1);
+  // precompute a reel of preview icons for this category (fast to cycle)
+  const pool = g.kind==='w' ? catArches(g.cat).map(a=>itemAv(makeWeapon(a,nr))) : g.kind==='t' ? [itemAv(makeTrinket(nr,g.cat)),itemAv(ro)] : ARMOR_TYPE_IDS.slice(0,6).map(tid=>itemAv(makeArmor(nr,g.cat,tid)));
+  const finalIcon=itemAv(ro);
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:${nc}">The Forge</p><h2 class="ovh">Forging…</h2>
+    <div style="display:flex;justify-content:center;margin:10px 0"><div id="reelbox" style="width:120px;height:120px;border-radius:16px;border:2px solid ${nc};box-shadow:0 0 24px ${nc}66;background:#0b0c10;display:flex;align-items:center;justify-content:center;overflow:hidden"><img id="reelimg" style="width:104px;height:104px;image-rendering:auto" src="${pool[0]||finalIcon}"></div></div>
+    <p id="reelname" class="ovsub" style="min-height:22px">&nbsp;</p>
+    <button class="bigbtn ghost hide" id="forgeGo">Take it</button></div>`);
+  const img=document.getElementById('reelimg'), nameEl=document.getElementById('reelname'), goBtn=document.getElementById('forgeGo'), box=document.getElementById('reelbox');
+  let i=0, delay=45; const t0=Date.now();
+  const step=()=>{ img.src=pool[i%pool.length]||finalIcon; i++;
+    try{ tone({f0:520+ (i%5)*40, dur:0.03, type:'square', vol:0.03}); }catch(e){}    // ratchet tick
+    if(Date.now()-t0 < 1500 && delay<220){ delay*=1.12; setTimeout(step,delay); }
+    else { // land on the payout
+      img.src=finalIcon; box.style.borderColor=nc; box.style.boxShadow='0 0 40px '+nc;
+      nameEl.innerHTML=`<span style="color:${nc};font-weight:800">${ro.name}</span>`;
+      try{ SFX.god(); playFx('forgeopen'); }catch(e){}   // Phase 20: the sharpening ring on the finished item (swapped with the clang)
+      if(!stashItem(result)){ meta.stash.push(result); persist(); }   // ensure it lands in the bag
+      persist(); goBtn.classList.remove('hide'); goBtn.onclick=()=>openForge(back);
+    } };
+  setTimeout(step,delay);
+}
+function newG(p,extra){
+  return Object.assign({p,stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
+    shake:0,ngPlus:0,ngHp:1,ngDmg:1,baseLoadout:snapOf(p),
+    portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,
+    runSeed:Math.floor(Math.random()*1e9),
+    zone:0,area:0,zoneTier:1,qs:{},areaSeed:0,areaName:null,waystone:null,secret:null,hub:false,gates:[],hubNpcs:[],
+    side:false,trial:null,trialKills:0,tip:0,tipT:0,meteors:[],fx:[],slowmo:0,interact:null,
+    cam:{x:0,y:0,z:0}},extra||{});
+}
+function enterZone(zi){
+  const Z=zoneOf(zi);
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  bankNow();                                                  // snapshot the hub state — this attempt is provisional
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
+  meta.run=null; persist(); checkAchievements();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
+  if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
+}
+function loadArea(){
+  const Z=curZone();
+  if(G.trial){ const T=TRIALS[G.trial]; G.areaSeed=T.seed; G.areaName=T.name; loadStage(T.stage); return; }
+  if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
+  if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
+  else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
+}
+/* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
+function enterSide(zi){
+  const Z=zoneOf(zi), S=Z.side; if(!S) return;
+  if(S.trial && !meta.classUnlocked[S.trial]){ startTrial(S.trial,zi); return; }   // the Reaper's Gate IS his trial
+  initAudio(); queueLevelUp=0; queueSubclass=false; bankNow();
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{zone:zi,area:0,zoneTier:Math.min(7,Z.tier+1),side:true});
+  meta.run=null; persist();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  toast(S.icon+' '+S.name+' — Tier '+G.zoneTier+'. Reach the exit alive.');
+}
+function hazToast(){ const Z=curZone(); if(!Z.haz||G.side||G.trial) return;
+  const H=HAZARDS[Z.haz]; toast('⚠ '+H.name+' — '+H.blurb); }
+function sideClear(){
+  const Z=curZone(), S=Z.side;
+  meta.hero=snapOf(G.p); meta.bank=null; meta.sideDone[S.id]=true;
+  const bonus=awardGold(120+G.zoneTier*70); persist(); checkAchievements();
+  mode='menu'; SFX.win(); showGameUI(false);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--good);letter-spacing:.2em">SECRET CLEARED</p>
+    <h2 class="ovh">${S.icon} ${S.name}</h2>
+    <div class="statgrid"><div class="vsrow"><span>Tier</span><b>${G.zoneTier}</b></div>
+      <div class="vsrow"><span>Reward</span><b style="color:#ffd24a">+${bonus}g</b></div>
+      <div class="vsrow"><span>Progress banked</span><b>Level ${G.p.level}</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+/* ---- Trials: starter tutorials (skippable) and earned-class gauntlets (must be won) ---- */
+function startTrial(cid,fromZone){
+  const T=TRIALS[cid]; if(!T) return;
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const wasClass=meta.classId; meta.classId=cid;                 // you play the trial AS the class you're earning
+  if(!meta.classes[cid]) classState(cid);
+  bankNow();
+  const p=(T.earned&&meta.hero)?freshFromSnapshot(meta.hero):freshPlayer();
+  if(!T.earned){ p.weapon=trialWeapon(cid); }                     // starters get their family's weapon in hand
+  recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0});
+  meta.run=null; persist();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  if(!T.earned && !meta.tutDone){ meta.tutDone=true; persistGlobal(); showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
+  else if(T.tips&&T.tips.length){ toast(T.tips[0]); G.tipT=4; }
+}
+// first-time onboarding: explains the controls + goal before the first class trial. Always skippable.
+function showTutorial(cid){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The blood is awake in you</p><h2 class="ovh">The Proving Chamber</h2>
+    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
+      <p style="color:#e6d2ff">Before you make your Bladefall, what woke in you has to be proven. This sealed chamber is where the blood tests its own. Survive it and the way down is yours. Fail and no one below will ever know your name.</p>
+      <p><b>Move</b> — WASD / left stick. <b>Jump</b> — Space (tap = hop, hold = higher).</p>
+      <p><b>Attack</b> — J / the SLASH button; it auto-aims where you're looking. <b>Dodge</b> — K / Shift.</p>
+      <p><b>Skills</b> — keys 1–4 (they unlock as your class ranks up).</p>
+      <p><b>Talk / use</b> — walk up and press <b>E</b>. <b>Pause / camera</b> — Esc.</p>
+      <p style="color:var(--amber)"><b>Goal:</b> clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.</p></div>
+    <button class="bigbtn" id="tutGo">Begin the trial</button>
+    <button class="bigbtn ghost" id="tutSkip">Skip tutorial &amp; trial</button></div>`);
+  document.getElementById('tutGo').onclick=()=>{ resumePlay(); const T=TRIALS[cid]; if(T&&T.tips&&T.tips.length){ toast(T.tips[0]); if(G) G.tipT=4; } };
+  document.getElementById('tutSkip').onclick=()=>{ skipTrial(); };
+}
+// second-stage onboarding: how the hub works, shown once after the first trial is done
+function hubTutorial(){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">The Waystation</p><h2 class="ovh">Your home base</h2>
+    <div style="text-align:left;font-size:14px;line-height:1.8;color:#cfd6df;margin:6px 0 12px">
+      <p>This is home between runs. Walk up to a keeper and press <b>E</b> (or TALK) to use them:</p>
+      <p>🛒 <b>Quartermaster</b> — weapons + perks · ⚔️ <b>Drillmaster</b> — swap class / trials · 🔨 <b>Smith</b> — forge gear<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🧥 <b>Keeper</b> — cosmetics.</p>
+      <p>The glowing <b>waystone</b> in the centre heals you and banks your progress.</p>
+      <p>The <b>Gates</b> along the far wall are the zones — walk into one to dive. Clear a zone to open the next.</p></div>
+    <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
+  document.getElementById('hubTutGo').onclick=()=>{ mode='play'; showOverlay(false); regrabCam(); };
+}
+/* ---- Tutorial / Help foundation: a one-time contextual teach primitive + a persistent Help/Codex ---- */
+const HELP_ENTRIES=[
+  {cat:'Controls', title:'Move & Jump', body:'Move with WASD / the left stick. Jump with Space — tap for a hop, hold for a higher jump.'},
+  {cat:'Controls', title:'Attack & Dodge', body:'Attack with J / SLASH — it auto-aims where you look. Dodge with K / Shift; the roll has brief invulnerability, so roll THROUGH a blow to escape it.'},
+  {cat:'Controls', title:'Skills', body:'Use skills with keys 1–4 or the skill buttons. They unlock as your class ranks up, and each has its own cooldown.'},
+  {cat:'Controls', title:'Talk / Pause', body:'Walk up to a keeper and press E to use them. Esc pauses and frees the camera.'},
+  {cat:'Combat', title:'Elements & weakness', body:'Weapons carry an affinity. Each element beats its opposite — Fire↔Frost, Poison↔Arcane, Holy↔Void — and applies a status (Burn, Chill, Venom, Rune, Radiance, Corruption).'},
+  {cat:'Combat', title:'Loot & rarity', body:'Foes and chests drop gear. Rarity runs grey → green → blue → purple → gold. Stronger gear needs a higher character level to equip — the 🔒 shows the requirement.'},
+  {cat:'Combat', title:'Compare before you equip', body:'On a loot card the green ▲ / red ▼ arrows show how a new piece compares to what you carry. Equip it, Stash it in your bag, or Sell it for gold.'},
+  {cat:'Combat', title:'Chests & mimics', body:'Chests hold loot — but some are MIMICS that spring to life and bite back. A mimic hits hard, but drops well.'},
+  {cat:'Gear', title:'The Forge (Smith)', body:'Give the Smith two pieces of the SAME category and rarity and he fuses them into a random piece of the next rarity up. A gold sink that climbs your gear.'},
+  {cat:'Gear', title:'Your Pack (bag)', body:'Stash spare gear in your bag. Sort it, toggle Auto-sell / Auto-bag for drops, and buy more slots at the shop.'},
+  {cat:'Classes & Skills', title:'The skill fork', body:'At rank 2 you choose your path. Skills 2, 3 and 4 can each be picked from EITHER discipline, independently — mix and match your own kit.'},
+  {cat:'Classes & Skills', title:'Respec', body:'Changed your mind? The Drillmaster lets you respec — re-pick your skill slots for a gold fee.'},
+  {cat:'Classes & Skills', title:'Companions (pets)', body:'The Beastkeeper sells pets. Equip one at a time; some fight for chip damage, one only heals you slowly. Train the active pet for small gains.'},
+  {cat:'The Hub', title:'The Waystation', body:'Home between runs. The central waystone heals you and BANKS your progress. Keepers ring the plaza; the Gates on the far wall are the zones.'},
+  {cat:'The Hub', title:'The Abyssal Descent', body:'An endless survival mode that gets harder every floor. See how deep you can fall — your best depth is saved.'},
+  {cat:'Progress', title:'The difficulty ladder', body:'Beat the game on Normal to unlock Hardcore (permadeath), then Hitless (one hit ends the run). The same journey, mastered at rising stakes.'}
+];
+// teachOnce(id, body[, opts]) — shows a contextual tip ONCE per concept (tracked in meta.tutSeen), then never again. Non-blocking. Honors the Tutorials toggle.
+function teachOnce(id, body, opts){
+  meta.tutSeen = meta.tutSeen || {};
+  if(meta.tutOff || meta.tutSeen[id]) return;
+  meta.tutSeen[id] = true; persistGlobal();
+  try{ storyToast(body, (opts&&opts.icon)||'📖'); }catch(e){ toast(body); }
+}
+function openHelp(back){
+  mode='menu';
+  const cats=[...new Set(HELP_ENTRIES.map(e=>e.cat))];
+  const body=cats.map(c=>`<div class="sect">${c}</div>`+HELP_ENTRIES.filter(e=>e.cat===c).map(e=>
+    `<div class="setrow" style="display:block"><b style="color:var(--amber)">${e.title}</b><div style="color:#cfd6df;font-size:12.5px;line-height:1.5;margin-top:3px">${e.body}</div></div>`).join('')).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--amber)">Field manual</p><h2 class="ovh">❔ Help &amp; Tutorials</h2>
+    <div style="text-align:left;max-height:58vh;overflow:auto;margin:6px 0 12px">${body}</div>
+    <button class="bigbtn ghost" id="helpBack">Back</button></div>`);
+  document.getElementById('helpBack').onclick=back||openPause;
+}
+function trialWeapon(cid){ return classStartWeapon(cid); }   // you learn on the same battered thing you'll carry out
+function trialComplete(){
+  const cid=G.trial, T=TRIALS[cid];
+  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
+  meta.hero=snapOf(G.p);                                  // surviving a trial banks every weapon/armor swap and pickup
+  if(T.earned){ meta.sideDone[curZone().side.id]=true; }
+  if(cid==='reaper') meta._scytheNotify=true;   // announce the Void Scythe when they reach the hub
+  meta.bank=null; persist(); checkAchievements();
+  mode='menu'; SFX.win(); showGameUI(false);
+  const C=CLASSES[cid];
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">TRIAL COMPLETE</p>
+    <h2 class="title" style="font-size:34px">${C.icon} ${C.disp}</h2>
+    <p class="ovsub">${C.disp} unlocked and equipped.<br>Favors <b>${C.family.join(', ')}</b>.</p>
+    ${cid==='reaper'?`<p class="ovsub" style="color:${elementColor('void')};font-weight:800">⚔ The Void Scythe is now available in the Shop.</p>`:''}
+    <button class="bigbtn" id="hubBtn">Enter the Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function skipTrial(){
+  const cid=G?G.trial:null; if(!cid) return;
+  if(TRIALS[cid].earned){ toast('This one you have to earn.'); return; }
+  meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid; meta.bank=null; persist();
+  toast(CLASSES[cid].disp+' unlocked',null,'class-'+cid); openHub();
+}
+function abandonTrial(){ restoreBank(); openHub(); }
+function nextArea(){
+  if(G.endless){ endlessDescend(); return; }                  // Endless: the portal drops you a floor deeper
+  if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
+  if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
+  if(G.trial){ trialComplete(); return; }
+  if(G.side){ sideClear(); return; }
+  if(G.area<0){ zoneClear(); return; }                        // cleared the boss room
+  const Z=curZone(), na=G.area+1;
+  if(na>=Z.areas.length){ G.area=-1; toast('⚔ '+Z.boss.name+' awaits'); }
+  else G.area=na;
+  loadArea(); musicForScene(); SFX.pickup();
+}
+function zoneClear(){
+  const Z=curZone();
+  meta.hero=snapOf(G.p); meta.bank=null;                       // everything banks — new save point
+  meta.zoneDone[Z.id]=true;
+  meta.zoneMax=Math.max(meta.zoneMax||0, Math.min(ZONES.length-1, G.zone+1));
+  meta.bestStage=Math.max(meta.bestStage||0,G.stageIndex);
+  meta.zonesCleared=(meta.zonesCleared||0)+1;
+  const bonus=awardGold(150+Z.tier*80); persist(); checkAchievements(); checkCosmetics(); musicSting('fanfare');
+  if(G.zone>=ZONES.length-1){ winGame(); return; }
+  mode='menu'; SFX.win(); showGameUI(false);
+  const NZ=zoneOf(G.zone+1);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--good);letter-spacing:.2em">ZONE CLEARED</p>
+    <h2 class="ovh">${Z.icon} ${Z.name}</h2>
+    <div class="statgrid"><div class="vsrow"><span>${Z.boss.name}</span><b style="color:var(--good)">slain</b></div>
+      <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div>
+      <div class="vsrow"><span>Progress banked</span><b>Level ${G.p.level}</b></div>
+      <div class="vsrow"><span>Now open</span><b>${NZ.icon} ${NZ.name}</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function showGameUI(v){
+  if(v) document.body.classList.remove('t-title');
+  ['hud','hudprogress','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v));
+  if(!v) document.getElementById('pethud').classList.add('hide');
+  else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
+  // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
+  const hideHubLoot=!v||!!(G&&G.hub);
+  ['bKeep','bBag'].forEach(id=>document.getElementById(id).classList.toggle('hide',hideHubLoot));
+}
+function mulberry(seed){ return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed);
+  t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function pickEnemyType(s,rnd){
+  const pool=[]; for(let k=0;k<(s.grunts||0);k++) pool.push('grunt');
+  for(let k=0;k<(s.flyers||0);k++) pool.push('flyer');
+  if(s.mix) for(const t in s.mix) for(let k=0;k<s.mix[t];k++) pool.push(t);
+  return pool.length?pool[Math.floor(rnd()*pool.length)]:'grunt';
+}
+/* A canyon wall built right: collision + strata courses laid on the INNER face,
+   flush with the collision boundary, covering the full height and full length.
+   `sgn` points from the wall toward the walkable space it faces. */
+const CANYON_STRATA=['#5e4527','#8a6a42','#b08b56','#8a6a42','#6e5433','#a07a48'];
+function canyonWall(wx,cz,len,sgn,rnd,ww,topH){
+  ww=ww||30; topH=topH||240;
+  G.walls.push({x:wx,z:cz,w:ww,d:len,h:topH,stand:ww>=30});   // collision rises from the depths to topH
+  // pull the strata bands ~2u proud of the wall's inner face so their front plane never coincides with the wall face (kills the z-fighting flicker)
+  const bandW=16, inFace=wx+sgn*(ww/2), inx=inFace-sgn*(bandW/2)+sgn*2, courses=Math.ceil(topH/44);
+  for(let L2=0;L2<courses;L2++) G.deco.push({x:inx,z:cz,w:bandW,d:len,h:44,y0:L2*44,c:tint(CANYON_STRATA[L2%6],(L2%2?'#fff':'#000'),0.05+rnd()*0.06),theme:'canyon'});
+  G.deco.push({x:inx,z:cz,w:bandW+8,d:len+10,h:14,y0:topH+16,c:'#c2a060',theme:'canyon'});   // rimrock cap
+}
+/* ================= PER-ZONE TERRAIN GRAMMARS ("scapes") =================
+   Each explorable zone builds its OWN landscape here instead of the shared maze, so
+   every zone plays and looks distinct. Vertical scapes guarantee solvability by
+   construction — every climb step stays within jump reach — so conn.js skips them
+   (G.vertical) and zonescape.js verifies them structurally. */
+const JMPV=94, JMPH=150;   // max vertical / horizontal gap a generated climb step may span (jump apex ~104; margin kept)
+function vseg(x,z,w,d,ex){ const s=Object.assign({x,z,w,d},ex||{}); G.segments.push(s); return s; }
+function vplat(x,z,y,w,d,ex){ const o=Object.assign({kind:'plat',x,z,h:Math.round(y),w,d},ex||{}); G.obstacles.push(o); return o; }
+function vcol(x,z,w,d,h){ const o={kind:'col',x,z,w,d,h:Math.round(h)}; G.obstacles.push(o); return o; }
+function vtorch(x,z,rnd){ G.torches.push({x,z,ph:(rnd?rnd():0)*6.28}); }
+// a rising run of standable platforms A->B; step count auto-sized so no gap exceeds jump reach. returns the plats.
+function climbRun(x0,z0,y0,x1,z1,y1,w,ex){ w=w||62; const out=[];
+  const n=Math.max(1, Math.ceil(Math.max(Math.abs(y1-y0)/JMPV, Math.hypot(x1-x0,z1-z0)/JMPH)));
+  for(let k=1;k<=n;k++){ const t=k/n; out.push(vplat(x0+(x1-x0)*t, z0+(z1-z0)*t, y0+(y1-y0)*t, w, w, Object.assign({},ex||{}))); }
+  return out; }
+// ground-level stepping stones across a flat gap over the hazard floor between two points. phase -> phaseable (for Phasing zones).
+function gapStones(x0,z0,x1,z1,w,rnd,phase){ const d=Math.hypot(x1-x0,z1-z0), n=Math.max(1,Math.ceil(d/JMPH)-1); const out=[];
+  for(let k=1;k<=n;k++){ const t=k/(n+1), x=x0+(x1-x0)*t, z=z0+(z1-z0)*t;
+    if(!phase && rnd()<0.4){ const c={x,z,w,d:w,state:0,timer:0,respawn:0,fallY:0,jit:0}; G.crumbles.push(c); out.push(c); }
+    else if(phase && rnd()<0.6) out.push(vseg(x,z,w,w,{phaseable:true}));
+    else out.push(vseg(x,z,w,w)); }
+  return out; }
+// drifting platforms (movers) bridging a gap along x — floes/lifts.
+function gapMovers(x0,z0,x1,z1,w,rnd){ const d=Math.abs(x1-x0), n=Math.max(1,Math.ceil(d/JMPH)-1);
+  for(let k=1;k<=n;k++){ const t=k/(n+1), x=x0+(x1-x0)*t, z=z0+(z1-z0)*t, amp=Math.min(46,(d/(n+1))*0.34);
+    G.movers.push({x0:x,z,w,d:w*0.8,h:0,amp,sp:1.0+rnd()*0.7,ph:rnd()*6.28,x,px:x}); } }
+// the common wrap: bounds, start/goal/portal, checkpoints, shade, horizon deco, hazard, camera, player.
+function finishScape(ctx,o){
+  G.vertical=true;
+  let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
+  for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
+  for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);
+  for(const cr of G.crumbles) ext(cr.x,cr.z,cr.w,cr.d);
+  if(mnX>mxX){ mnX=-200;mxX=200;mnZ=-200;mxZ=200; }
+  G.bounds={minX:mnX-90,maxX:mxX+90,minZ:mnZ-90,maxZ:mxZ+90}; G.progressEnd=mnZ;
+  G.startPos={x:o.sx,z:o.sz}; G.goalPos={x:o.gx,z:o.gz}; G.lastSafe={x:o.sx,z:o.sz,y:o.sy||0};
+  G.portalPos={x:o.gx,z:o.gz};
+  if(!areaQuests().length && !G.trial) G.portal={x:o.gx,z:o.gz,t:0};
+  placeShade(o.sx-70,o.sz+50);
+  const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt=o.decoTall||200;
+  for(let k=0;k<28;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
+    G.deco.push({x:ctx.rnd()<0.5?mnX-150-ctx.rnd()*360:mxX+150+ctx.rnd()*360, z:zz, w:56+ctx.rnd()*140, h:dt*(0.55+ctx.rnd()*0.85), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
+  hazSetup(ctx.rnd2);
+  G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
+}
+// place the active fetch quest's items on the given [{x,z,y}] spots (climb to collect). placed:true skips mob drops.
+function scapeFetch(ctx,spots){ const fq=fetchQuest(); if(!fq||!spots.length) return; const n=fq.n||1;
+  for(let i=0;i<n;i++){ const sp=spots[i%spots.length]; G.pickups.push({x:sp.x+(i>=spots.length?34:0),z:sp.z,y0:sp.y||0,questItem:{id:fq.id,name:fq.item},bob:ctx.rnd()*3,placed:true}); } }
+function scapeFind(ctx,x,z,y){ const q=areaQuests().find(q=>q.k==='find'&&!questDone(q)); if(q) G.waystone={x,z,y:y||0,q:q.id,taken:false,t:0}; }
+// kill-quest spawner dens at [{x,z,room?,deco?}] + a seeded mob each
+function scapeKill(ctx,spots){ const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q)); if(!kq) return;
+  spots.forEach((sp,i)=>{ G.dens.push({x:sp.x,z:sp.z,type:kq.mob,t:2.2+i*0.4,questId:kq.id});
+    if(sp.deco) G.deco.push({x:sp.x,z:sp.z,y0:sp.y||0,w:44,h:30,c:'#2a2a33',theme:ctx.s.theme});
+    ctx.mkMonster(kq.mob,sp.x+30,sp.z,sp.room||null);
+    const comp=saltMob(ctx.s.theme,kq.mob); if(comp!==kq.mob) ctx.mkMonster(comp,sp.x-34,sp.z+22,sp.room||null); }); }   // a complementary type guards each nest
+function scapeSecret(ctx,x,z,y){ const Zc=curZone(); if(Zc.side && G.area===0) G.secret={x,z,y:y||0,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; }   // already found -> a spent (greyed) echo that pays gold
+// interaction-earned secret: the rift stays SEALED (hidden, unrenderable, unfindable) until the player steps on a hidden trigger rune tucked in a dead end
+function scapeSecretTriggered(ctx, sx,sz,sy, tx,tz,ty){ const Zc=curZone(); if(!(Zc.side && G.area===0)) return;
+  if(meta.sideFound[Zc.side.id]){ G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,spent:true}; return; }   // already found -> spent echo, shown openly (no need to re-solve the trigger)
+  G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,hidden:true};
+  G.secretTrigger={x:tx,z:tz,y:ty||0,r:34,done:false}; }
+// a complementary enemy of a DIFFERENT kind than the majority (a caster/flyer among melee, etc.) so a fight forces you to prioritise
+function saltMob(theme,majority){ const pool=(THEMEMOBS[theme]||['grunt']).filter(m=>m!==majority&&ENEMY[m]);
+  const mk=(ENEMY[majority]||{}).kind, diff=pool.filter(m=>ENEMY[m].kind!==mk);
+  const arr=diff.length?diff:pool; return arr.length?arr[Math.floor(Math.random()*arr.length)]:majority; }
+const SCAPES={
+  /* HOLLOW PASS (Phase 14 deep-dive) — a real canyon JOURNEY, several minutes end to end:
+     entry gorge (arch landmark) -> north corridor -> a FORK (low slot-canyon road OR a high
+     ledge road, rejoining = a loop) -> the Mesa (bone-pile checkpoint, a cragspitter perched)
+     -> a chasm crossing -> the expanded PILLAR field (bone hunt, galewisps diving) -> the
+     Summit / Hollow Shrine (portal). Every climb uses climbRun so it stays solvable by construction. */
+  hollow(ctx){ const {rnd,mkMonster}=ctx; const SAND='#8a6a42', SAND2='#a07a48', BONE='#d8cdb0';
+    // ── 1) ENTRY GORGE (ground) ──
+    vseg(0,0,760,500); G.rooms.push({x:0,z:0,w:760,d:500,monsters:[],encounter:false,cleared:true});
+    canyonWall(-(760/2+16),0,560,+1,rnd,30,320); canyonWall(760/2+16,0,560,-1,rnd,30,320);
+    vtorch(-760/2+34,140,rnd); vtorch(760/2-34,140,rnd); vtorch(-760/2+34,-160,rnd); vtorch(760/2-34,-160,rnd);
+    vcol(-150,205,40,40,132); vcol(150,205,40,40,132);                                   // the ENTRANCE ARCH landmark
+    G.deco.push({x:0,z:205,y0:128,w:346,h:40,c:SAND2,theme:'canyon'}); G.deco.push({x:0,z:205,y0:162,w:150,h:24,c:tint(SAND2,'#000',0.2),theme:'canyon'});
+    for(const b of [[-230,-40],[250,70],[-90,-200],[180,-210]]) vcol(b[0],b[1],34+rnd()*18,34+rnd()*18,34+rnd()*28);   // boulders (cover)
+    // ── 2) NORTH CORRIDOR + FORK ──
+    const cor=vseg(0,-470,420,470); G.rooms.push({x:0,z:-470,w:420,d:470,monsters:[],encounter:false,cleared:true});
+    canyonWall(-(420/2+16),-470,470,+1,rnd,26,300); canyonWall(420/2+16,-470,470,-1,rnd,26,300);
+    vtorch(-420/2+28,-470,rnd); vtorch(420/2-28,-470,rnd);
+    vseg(0,-720,300,120); vcol(0,-690,24,24,92); G.deco.push({x:0,z:-690,y0:74,w:72,h:16,c:SAND2,theme:'canyon'});     // fork signpost cairn
+    // ── 2a) WEST LOW ROAD (ground slot-canyon) ──
+    vseg(-320,-760,300,300); const w2=vseg(-560,-1010,320,340); G.rooms.push({x:-560,z:-1010,w:320,d:340,monsters:[],encounter:false,cleared:true});
+    canyonWall(-560-(320/2+16),-1010,340,+1,rnd,24,280); vtorch(-560+320/2-28,-1010,rnd);
+    gapStones(-560,-1200, -300,-1300, 74, rnd, false);                                   // a dry-wash crumble crossing toward the mesa base
+    // ── 3) THE MESA (checkpoint + landmark) ──
+    const mx=-120, mz=-1330, my=192;
+    climbRun(-330,-1270,0, mx-150,mz+150,my, 66);                                         // scramble up from the low road
+    const mesa=vplat(mx,mz,my,560,420,{terrace:true,checkpoint:true}); G.rooms.push({x:mx,z:mz,w:560,d:420,y:my,monsters:[],encounter:false,cleared:true});
+    canyonWall(mx-(560/2+16),mz,420,+1,rnd,24,my+240); vtorch(mx-560/2+30,mz,rnd); vtorch(mx+560/2-30,mz,rnd);
+    for(let i=0;i<8;i++){ const a=i/8*6.28; G.deco.push({x:mx+Math.cos(a)*46,z:mz+Math.sin(a)*34,y0:my,w:12+rnd()*9,h:28+rnd()*44,c:BONE,theme:'canyon'}); }   // BONE-PILE landmark
+    G.deco.push({x:mx,z:mz,y0:my,w:62,h:74,c:'#c2b48c',theme:'canyon'});
+    // ── 2b) EAST HIGH ROAD (alt ledge branch, rejoins the mesa = a loop) ──
+    climbRun(cor.x+420/2-24, -560, 0, mx+250, mz+30, my-24, 58);
+    // ── 4) CHASM CROSSING (mesa -> shelf) ──
+    const shx=mx+30, shz=-1650, shy=304;
+    climbRun(mx+90, mz-420/2+20, my, shx, shz+150, shy, 60);
+    const shelf=vplat(shx,shz,shy,380,300,{terrace:true,checkpoint:true}); G.rooms.push({x:shx,z:shz,w:380,d:300,y:shy,monsters:[],encounter:false,cleared:true});
+    vtorch(shx-380/2+26,shz,rnd); vtorch(shx+380/2-26,shz,rnd);
+    // ── 5) THE PILLAR FIELD (signature, expanded) -> SUMMIT ──
+    const hx=mx, hz=-2040, hy=474;
+    const pil=[]; const p0x=shx, p0z=shz-300/2+30, p0y=shy, p1x=hx, p1z=hz+480/2-30, p1y=hy;
+    const N=8; for(let k=1;k<=N;k++){ const t=k/(N+1), zig=Math.sin(k*1.6)*82;
+      const px=p0x+(p1x-p0x)*t+zig, pz=p0z+(p1z-p0z)*t, py=Math.round(p0y+(p1y-p0y)*t);
+      pil.push(vplat(px,pz,py,84,84,{pillar:true})); vcol(px,pz,84,84,py-6); }
+    // ── 6) SUMMIT / HOLLOW SHRINE (portal) ──
+    vplat(hx,hz,hy,640,480,{terrace:true,checkpoint:true}); G.rooms.push({x:hx,z:hz,w:640,d:480,y:hy,monsters:[],encounter:false,cleared:true});
+    vtorch(hx-640/2+30,hz,rnd); vtorch(hx+640/2-30,hz,rnd);
+    vcol(hx-150,hz,42,42,120); vcol(hx+150,hz,42,42,120);                                 // SKULL-ARCH landmark over the shrine
+    G.deco.push({x:hx,z:hz,y0:hy+116,w:352,h:40,c:BONE,theme:'canyon'}); G.deco.push({x:hx,z:hz,y0:hy+150,w:120,h:60,c:'#efece2',theme:'canyon'});
+    // ── mobs: dustjackals on the ground, a cragspitter lobbing from the mesa, galewisps diving the climb ──
+    mkMonster('dustjackal',180,-60,null); if(rnd()<0.8) mkMonster('dustjackal',-200,60,null);
+    { const sp=mkMonster('cragspitter',mx+140,mz-50,mesa); sp.y=my; sp.sx=sp.x; sp.sz=sp.z; }
+    for(let f=0;f<4;f++){ const pv=pil[Math.min(pil.length-1,1+f*2)]; const fly=mkMonster('galewisp',pv.x+46,pv.z,null); fly.y=pv.h+80; fly.sx=fly.x; fly.sz=fly.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:220,z:-140},{x:-210,z:-150},{x:0,z:-470}]);                          // dustjackal dens on the GROUND (three, across entry + corridor)
+    // FRONT-LOADED: first two bones sit on the low road at ground level (progress starts obvious), then the mesa, then the lowest pillars — the climb is capped mid-height, not a punishing y=380 summit run
+    scapeFetch(ctx, [{x:-300,z:-1230,y:0},{x:160,z:-360,y:0},{x:mx-60,z:mz+40,y:my}].concat(pil.map(p2=>({x:p2.x,z:p2.z,y:p2.h}))));
+    scapeFind(ctx, hx-110, hz, hy);                                                        // the Hollow Shrine on the summit
+    // ── hidden rift (purple-secret TEMPLATE): a ledge chain off the summit's side wall ──
+    { const Zc=curZone(); if(Zc.side && G.area===0){
+        const ex=hx-(640/2-12), chain=[[ex-56,hz-30,hy-30],[ex-134,hz+50,hy-90],[ex-212,hz-20,hy-150]];
+        for(const st of chain) vplat(st[0],st[1],Math.max(20,st[2]),58,54,{sec:true});
+        const rf=vplat(ex-280,hz+40,Math.max(16,hy-190),80,72,{sec:true});
+        G.secret={x:rf.x,z:rf.z,y:rf.h,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; } }
+    finishScape(ctx,{sx:0,sz:500/2-50,sy:0, gx:hx,gz:hz-480/2+90, decoCol:SAND,decoTheme:'canyon',decoTall:320});
+  },
+  /* THE OUTSKIRTS — the gentle opposite of the climb: wide open grass clearings joined in
+     a loose LOOP (wander, not a corridor), near-flat, one soft knoll for the overlook. */
+  outskirts(ctx){ const {rnd,mkMonster}=ctx; const isWoods=ctx.s.theme==='forest';
+    // a large WANDERING meadow: six clearings in a loose loop + spur — minutes to roam, never a corridor
+    const C=[ {x:0,z:0,w:620,d:520}, {x:520,z:-360,w:560,d:480}, {x:-480,z:-420,w:600,d:520},
+              {x:120,z:-820,w:640,d:520}, {x:660,z:-980,w:520,d:460}, {x:-120,z:-1340,w:700,d:560} ];
+    C.forEach(c=>{ vseg(c.x,c.z,c.w,c.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},c)); });
+    const linkL=(a,b,w)=>{ const cxz=(x0,x1,z)=>vseg((x0+x1)/2,z,Math.abs(x1-x0)+w,w), czz=(z0,z1,x)=>vseg(x,(z0+z1)/2,w,Math.abs(z1-z0)+w);
+      cxz(a.x,b.x,a.z); czz(a.z,b.z,b.x); };                    // L-shaped wide land bridge (always walkable)
+    linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],170); linkL(C[2],C[3],170); linkL(C[1],C[4],160); linkL(C[3],C[5],180); linkL(C[4],C[5],160);
+    const leaf=isWoods?'#284f28':'#3a6b34';
+    const tree=(tx,tz,th)=>{ vcol(tx,tz,20+rnd()*10,20+rnd()*10,th);
+      G.deco.push({x:tx,z:tz,y0:th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});
+      G.deco.push({x:tx,z:tz,y0:th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); };
+    const treeN=isWoods?20:12;
+    for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)]; tree(c.x+(rnd()*2-1)*(c.w/2-30), c.z+(rnd()*2-1)*(c.d/2-30), 70+rnd()*70); }
+    for(let k=0;k<54;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
+      G.deco.push({x:gx,z:gz,y0:0,w:8+rnd()*7,h:7+rnd()*10,c:rnd()<0.16?['#e6d24a','#e07ad0','#7fd6ff'][Math.floor(rnd()*3)]:tint(leaf,'#8fce6a',0.4),theme:'plains'}); }
+    C.forEach(c=>{ vtorch(c.x-c.w/2+30,c.z,rnd); vtorch(c.x+c.w/2-30,c.z,rnd); });
+    // a soft knoll in the goal clearing: two gentle steps up to an overlook (the find shrine)
+    const kg=C[5], kx=kg.x-140, kz=kg.z+40; vplat(kx,kz,40,170,170); const ktop=vplat(kx,kz,78,96,96,{checkpoint:true});
+    // (Phase 17 polish) the OLD WAYSTONE stands in a henge: five leaning stones ring the knoll
+    for(let k=0;k<5;k++){ const a=k/5*6.283+0.5; G.deco.push({x:kx+Math.cos(a)*66,z:kz+Math.sin(a)*62,y0:40,w:18,h:36+rnd()*18,d:12,c:'#5a5f6e'}); }
+    G.deco.push({x:kx,z:kz,y0:78,w:26,h:40,d:18,c:'#6b7183'}); G.deco.push({x:kx,z:kz,y0:118,w:32,h:8,d:24,c:'#8a93a8'});   // the waystone itself
+    // a still pond in the first clearing, ringed with reeds
+    G.deco.push({x:160,z:150,y0:0,w:170,h:1.6,d:120,c:'#33556e'});
+    for(let k=0;k<5;k++) G.deco.push({x:160+(rnd()*2-1)*95,z:150+(rnd()*2-1)*68,y0:0,w:4,h:14+rnd()*10,d:4,c:'#4d7a42'});
+    // a fallen giant of a tree bridges the meadow gap — a mossy vantage walk
+    vplat(-180,-620,26,300,54); G.deco.push({x:-180,z:-620,y0:26,w:304,h:8,d:58,c:'#4a3a26'});
+    vcol(-340,-620,34,34,24); vcol(-20,-620,30,30,20); G.deco.push({x:-340,z:-620,y0:24,w:44,h:12,d:44,c:'#3a2c1c'});
+    // a scarecrow keeps the far field
+    vcol(560,-1000,8,8,44); G.deco.push({x:560,z:-1000,y0:40,w:52,h:7,d:8,c:'#5a4426'});
+    G.deco.push({x:560,z:-1000,y0:47,w:14,h:14,d:12,c:'#c9b37e'}); G.deco.push({x:560,z:-1000,y0:24,w:22,h:18,d:10,c:'#6a5436'});
+    // ── EXPLORATION-EARNED SECRET: a HIDDEN GLADE off the far west, screened by a dense treeline,
+    //    reached only through a narrow gap you have to notice and slip through (no path, no marker) ──
+    const P={x:-1000,z:-720,w:280,d:250}; vseg(P.x,P.z,P.w,P.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},P));
+    vseg(-806,-700,96,120);                                                                   // the narrow neck bridging C2's west edge to the glade
+    for(let k=-1;k<=1;k++){ tree(-760, -700+k*70, 96+rnd()*30); }                               // a wall of trees hides the neck from the meadow
+    for(let k=0;k<6;k++){ const a=k/6*6.28; tree(P.x+Math.cos(a)*(P.w/2-18), P.z+Math.sin(a)*(P.d/2-18), 90+rnd()*40); }   // ring the glade so it reads as "off the map"
+    scapeSecret(ctx, P.x, P.z-40, 0);                                                          // the rift, deep in the hidden glade
+    // ── mobs: thornboars + sporebacks roam the meadows ──
+    C.forEach(c=>{ if(rnd()<0.7) mkMonster('sporeback',c.x+(rnd()*2-1)*(c.w/2-70),c.z+(rnd()*2-1)*(c.d/2-70),c); });
+    mkMonster('thornboar',C[0].x+120,C[0].z-40,C[0]);
+    scapeKill(ctx,[{x:C[1].x,z:C[1].z,room:C[1]},{x:C[3].x,z:C[3].z,room:C[3]},{x:C[4].x,z:C[4].z,room:C[4]}]);   // thornboar dens across the field
+    scapeFetch(ctx, C.map(c=>({x:c.x+(rnd()*2-1)*120,z:c.z+(rnd()*2-1)*120,y:0})));
+    scapeFind(ctx, ktop.x, ktop.z, 78);
+    finishScape(ctx,{sx:C[0].x,sz:C[0].z+C[0].d/2-50,sy:0, gx:C[5].x,gz:C[5].z-C[5].d/2+80, decoCol:'#3a5a2e',decoTheme:ctx.s.theme,decoTall:170});
+  },
+  /* RUINED KEEP — a fortress in two halves split by a chasm. Cross HIGH on the ramparts
+     (climb, a swinging broken span) or LOW on a phasing causeway that blinks out under you. */
+  keep(ctx){ const {rnd,mkMonster}=ctx;
+    const court=vseg(0,0,660,500); G.rooms.push({x:0,z:0,w:660,d:500,monsters:[],encounter:false,cleared:true});
+    const hall=vseg(0,-1180,620,480); G.rooms.push({x:0,z:-1180,w:620,d:480,monsters:[],encounter:false,cleared:true});
+    vtorch(-290,0,rnd); vtorch(290,0,rnd); vtorch(-280,-1180,rnd); vtorch(280,-1180,rnd);
+    // ruined statues flanking the courtyard (landmarks)
+    for(const s2 of [-1,1]){ vcol(s2*250,180,30,30,70); G.deco.push({x:s2*250,z:180,y0:70,w:34,h:44,c:'#5a5f6e',theme:ctx.s.theme}); }
+    // corner towers you climb (quest perches)
+    const towers=[]; [[-270,-80],[270,-80],[-250,-1100],[250,-1100]].forEach((c,ti)=>{ const ty=170+ti*14;
+      climbRun(c[0]*0.7,c[1],0,c[0],c[1]-40,ty,60); towers.push(vplat(c[0],c[1]-40,ty,120,120,{terrace:true,checkpoint:true})); vcol(c[0],c[1]-40,120,120,ty-6);
+      // (Phase 17 polish) a gargoyle crouches on every tower's outer lip
+      G.deco.push({x:c[0]+(c[0]<0?-52:52),z:c[1]-40,y0:ty,w:20,h:16,d:24,c:'#3a3f4e'});
+      G.deco.push({x:c[0]+(c[0]<0?-60:60),z:c[1]-40,y0:ty+16,w:12,h:10,d:12,c:'#2c3040'}); });
+    // faded war-banners hang along the high rampart walk
+    for(const bz of [-380,-520,-810]) G.deco.push({x:44,z:bz,y0:140+42,w:9,h:56,d:30,c:'#5a3040'});
+    // the chapel ruin in the far bailey: a broken arch, an altar, one candle still lit
+    vcol(-190,-1280,26,26,84); vcol(-90,-1280,26,26,60);
+    G.deco.push({x:-165,z:-1280,y0:84,w:78,h:14,d:30,c:'#5a5f6e'});
+    G.deco.push({x:-140,z:-1220,y0:0,w:56,h:24,d:34,c:'#43485a'}); G.deco.push({x:-126,z:-1220,y0:24,w:8,h:10,d:8,c:'#ffd88a'});
+    // rubble shed from the ramparts chokes the chasm's edges
+    for(const rb of [[-120,-270],[130,-250],[-110,-940],[120,-960]]) G.deco.push({x:rb[0],z:rb[1],y0:0,w:26+rnd()*20,h:12+rnd()*14,d:22+rnd()*16,c:'#4e5364'});
+    // HIGH ramparts across the chasm: stairs up, a walk with a broken span (elevated mover), stairs down
+    const ry=140; climbRun(0,-255,0, 0,-350,ry, 68);
+    vplat(0,-380,ry,160,110,{terrace:true,checkpoint:true}); vplat(0,-520,ry,150,110,{terrace:true});
+    G.movers.push({x0:0,z:-660,w:120,d:96,h:ry,amp:54,sp:1.1+rnd()*0.5,ph:rnd()*6.28,x:0,px:0});   // the broken span sways
+    vplat(0,-810,ry,150,110,{terrace:true,checkpoint:true}); climbRun(0,-880,ry, 0,-955,0, 68);
+    // LOW phasing causeway over the chasm (the Phasing hazard lives here)
+    gapStones(0,-270,0,-935,72,rnd,true);
+    // ── INTERACTION-EARNED SECRET: a dead-end CRYPT off the west wall; a dim rune on its floor
+    //    seals a rift you can't see until you step on it (stone grinds, the rift tears open) ──
+    const cry={x:-660,z:130,w:250,d:230}; vseg(cry.x,cry.z,cry.w,cry.d); G.rooms.push(Object.assign({monsters:[],encounter:false,cleared:true},cry));
+    vseg(-440,130,210,110);                                                                    // short passage from the court's west wall into the crypt
+    vtorch(cry.x-cry.w/2+28,cry.z,rnd); vtorch(cry.x+cry.w/2-28,cry.z,rnd);
+    for(const s2 of [-1,1]) G.deco.push({x:cry.x+s2*70,z:cry.z-60,y0:0,w:70,h:26,c:'#43485a',theme:ctx.s.theme});   // sarcophagi
+    scapeSecretTriggered(ctx, cry.x-60,cry.z+cry.d/2-40,0, cry.x+70,cry.z-cry.d/2+40,0);        // rune in one corner opens the rift in the far corner
+    // ── enemies: revenants hold both baileys, animated sentinels guard the ramparts ──
+    for(let m=0;m<2;m++) mkMonster('revenant',(rnd()*2-1)*220,(rnd()*2-1)*150,court);
+    { const st=mkMonster('sentinel',0,-520,null); st.y=ry; st.sx=st.x; st.sz=st.z; }
+    mkMonster('revenant',(rnd()*2-1)*200,-1180-(rnd()*2-1)*130,hall);
+    scapeKill(ctx,[{x:-180,z:-70,room:court},{x:180,z:-1180,room:hall},{x:200,z:120,room:court}]);
+    scapeFetch(ctx,[{x:towers[0].x,z:towers[0].z,y:towers[0].h},{x:towers[1].x,z:towers[1].z,y:towers[1].h},{x:0,z:-380,y:ry},{x:0,z:-810,y:ry},{x:towers[2].x,z:towers[2].z,y:towers[2].h}]);
+    scapeFind(ctx, towers[3].x, towers[3].z, towers[3].h);
+    finishScape(ctx,{sx:0,sz:court.d/2-50,sy:0, gx:hall.x,gz:hall.z-hall.d/2+90, decoCol:STONE_C(),decoTheme:ctx.s.theme,decoTall:240});
+  },
+  /* FROSTFELL (Phase 17 deep-dive) — an ascending GLACIER JOURNEY, minutes end to end:
+     Shorefall Camp (frozen Wardens in the ice) -> THE FROZEN LAKE (fork: the drifting
+     floe-line WEST — fast, risky — vs the long shore road EAST, rejoined by a ridge-island
+     loop) -> THE ICEFALL terraces -> THE CRYSTAL GALLERY (an enclosed ice-cave hall, the
+     zone's unique interior; the Glacier Vault hides off its west wall) -> the Frostwatch
+     Summit: the cairn and the portal under the aurora. All climbs stay in jump reach. */
+  frost(ctx){ const {rnd,mkMonster}=ctx; const ICE='#bfe6ff', SLATE='#8fa6b8', SNOW='#e8f4ff', PALE='#d8ecf8';
+    // ── 1) SHOREFALL CAMP (start): the last thawed ground ──
+    const camp=vseg(0,0,640,460); G.rooms.push({x:0,z:0,w:640,d:460,monsters:[],encounter:false,cleared:true});
+    vtorch(-270,150,rnd); vtorch(270,150,rnd); vtorch(-270,-160,rnd); vtorch(270,-160,rnd);
+    for(const s2 of [[-210,-120],[240,-60],[70,-185]]){                                 // the frozen dead Wardens (landmark statuary)
+      G.deco.push({x:s2[0],z:s2[1],y0:0,w:54,h:10,d:54,c:ICE});
+      G.deco.push({x:s2[0],z:s2[1],y0:10,w:24,h:40,d:20,c:SLATE}); G.deco.push({x:s2[0],z:s2[1],y0:50,w:16,h:14,d:16,c:'#aebecc'});
+      G.deco.push({x:s2[0]+30,z:s2[1]+18,w:26,h:72,c:ICE,theme:'frost'}); }
+    // ── 2) THE FROZEN LAKE: two sheets split by freezing channels ──
+    const lakeW=vseg(-250,-760,460,580); G.rooms.push({x:-250,z:-760,w:460,d:580,monsters:[],encounter:false,cleared:true});
+    const lakeE=vseg(330,-820,300,700); G.rooms.push({x:330,z:-820,w:300,d:700,monsters:[],encounter:false,cleared:true});
+    // FORK WEST — the floe-line: drifting ice straight across the channel (fast, risky)
+    G.movers.push({x0:-200,z:-320,w:110,d:88,h:0,amp:34,sp:1.05,ph:rnd()*6.28,x:-200,px:-200});
+    G.movers.push({x0:-240,z:-400,w:110,d:88,h:0,amp:40,sp:1.3,ph:rnd()*6.28,x:-240,px:-240});
+    G.crumbles.push({x:-120,z:-362,w:84,d:84,state:0,timer:0,respawn:0,fallY:0,jit:0});   // a cracking plate as alternate footing
+    // FORK EAST — the shore road: a solid ice isthmus (safe, longer, patrolled)
+    vseg(330,-350,220,240);
+    // the ridge island stitches the two sheets into a LOOP mid-lake
+    vseg(60,-880,180,140);
+    G.crumbles.push({x:165,z:-880,w:64,d:64,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    // pressure ridges + white cracks make the ice READ as ice
+    for(let k=0;k<8;k++){ const lx=(k<4?-250:330)+(rnd()*2-1)*(k<4?170:100), lz=(k<4?-760:-820)+(rnd()*2-1)*240;
+      G.deco.push({x:lx,z:lz,w:20+rnd()*14,h:34+rnd()*36,c:ICE,theme:'frost'}); }
+    for(let k=0;k<6;k++){ const lx=(k<3?-250:330)+(rnd()*2-1)*140, lz=(k<3?-700:-800)+(rnd()*2-1)*200, lr=rnd()<0.5;
+      G.deco.push({x:lx,z:lz,y0:0,w:lr?7:110+rnd()*120,h:1.6,d:lr?110+rnd()*120:7,c:SNOW}); }
+    for(let k=0;k<4;k++) vcol(-250+(rnd()*2-1)*180,-760+(rnd()*2-1)*220,26+rnd()*22,26+rnd()*22,40+rnd()*50);   // ice boulders (cover)
+    vtorch(-420,-560,rnd); vtorch(430,-560,rnd); vtorch(430,-1060,rnd);
+    // ── 3) THE ICEFALL: terraces climbing off the lake's north face ──
+    climbRun(-250,-1040,0, -190,-1200,140, 74,{ice:true});
+    const ter1=vplat(-190,-1290,140,320,220,{terrace:true,checkpoint:true});
+    climbRun(-190,-1390,140, -80,-1520,280, 70,{ice:true});
+    const ter2=vplat(-80,-1610,280,340,240,{terrace:true,checkpoint:true});
+    for(const c2 of [[-330,-1290],[-50,-1290],[-230,-1610],[70,-1610]]){ vcol(c2[0],c2[1],34,34,140+rnd()*80);
+      G.deco.push({x:c2[0],z:c2[1],w:24,h:60,c:ICE,theme:'frost'}); }                     // icefall pillars flanking the terraces
+    // ── 4) THE CRYSTAL GALLERY: an enclosed ice-cave hall (the zone's unique interior) ──
+    const gal=vplat(-60,-1960,280,480,380,{terrace:true,checkpoint:true});
+    G.walls.push({x:200,z:-1960,w:34,d:400,h:470});                                       // east wall
+    G.walls.push({x:-60-240-20,z:-1900,w:34,d:240,h:470});                                // west wall (south span)...
+    G.walls.push({x:-60-240-20,z:-2135,w:34,d:70,h:470});                                 // ...north span — the gap between them hides the Vault
+    for(let L2=0;L2<4;L2++){ const by=280+L2*46;                                          // glacial strata banding the walls (proud of the inner faces)
+      G.deco.push({x:174,z:-1960,y0:by,w:14,h:44,d:380,c:tint(PALE,(L2%2?'#fff':'#000'),0.06+rnd()*0.05)});
+      G.deco.push({x:-294,z:-1900,y0:by,w:14,h:44,d:220,c:tint(PALE,(L2%2?'#000':'#fff'),0.06+rnd()*0.05)}); }
+    for(const rz of [-1850,-1960,-2070]) G.deco.push({x:-60,z:rz,y0:470,w:500,h:16,d:90,c:tint(ICE,'#fff',0.18)});   // roof slabs — daylight slits between them
+    for(const cc of [[-180,-1880],[40,-1930],[-140,-2060],[60,-2090]]){                   // glowing crystal clusters
+      G.deco.push({x:cc[0],z:cc[1],y0:280,w:26,h:40,d:26,c:ICE});
+      G.deco.push({x:cc[0],z:cc[1],y0:320,w:18,h:26,d:18,c:PALE});
+      G.deco.push({x:cc[0],z:cc[1],y0:346,w:10,h:14,d:10,c:'#ffffff'}); }
+    { const cs=mkMonster('caster',-60,-1990,null); cs.y=280; cs.sx=cs.x; cs.sz=cs.z; }    // a rime-caster holds the gallery
+    // the GLACIER VAULT: a hidden shelf through the west-wall gap (walk-in secret)
+    vplat(-380,-2060,280,120,110,{sec:true});
+    scapeSecret(ctx,-380,-2060,280);
+    // ── 5) FROSTWATCH SUMMIT: the cairn + the portal under the aurora ──
+    climbRun(-60,-2140,280, 20,-2260,404, 72,{ice:true});
+    const smt=vplat(10,-2380,404,560,300,{terrace:true,checkpoint:true});
+    G.deco.push({x:10,z:-2440,y0:404,w:60,h:30,d:60,c:SLATE}); G.deco.push({x:10,z:-2440,y0:434,w:44,h:24,d:44,c:'#9db4c4'});
+    G.deco.push({x:10,z:-2440,y0:458,w:30,h:18,d:30,c:'#b8ccd8'}); G.deco.push({x:10,z:-2440,y0:476,w:16,h:12,d:16,c:SNOW});   // the Frostwatch Cairn
+    G.deco.push({x:10,z:-2400,y0:620,w:700,h:8,d:22,c:'#7fd6ff'});                        // the aurora, banded across the summit sky
+    G.deco.push({x:60,z:-2440,y0:660,w:620,h:8,d:20,c:'#b06bff'});
+    G.deco.push({x:-40,z:-2360,y0:700,w:660,h:8,d:20,c:'#86e05a'});
+    // ── mobs: frostlings on the sheets, sparklings drifting the channels ──
+    for(let m=0;m<2;m++) mkMonster('frostling',(rnd()*2-1)*200,(rnd()*2-1)*140,camp);
+    mkMonster('frostling',-250+(rnd()*2-1)*160,-760,null); mkMonster('frostling',330+(rnd()*2-1)*100,-820,null);
+    for(const fp of [[-170,-360],[90,-880]]){ const fl=mkMonster('sparkling',fp[0],fp[1],null); fl.y=70; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:-160,z:60},{x:-260,z:-700},{x:330,z:-700}]);                        // frostling dens: camp edge + both sheets (the east road earns its keep)
+    scapeFetch(ctx,[{x:ter1.x,z:ter1.z,y:140},{x:ter2.x,z:ter2.z,y:280},{x:-180,z:-1880,y:280},{x:60,z:-880,y:0},{x:150,z:-2330,y:404}]);
+    scapeFind(ctx, 10,-2450,404);
+    finishScape(ctx,{sx:0,sz:180,sy:0, gx:10,gz:-2470, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:300});
+  },
+  /* EMBERDEEP (Phase 17 deep-dive) — a DESCENT into the caldera, minutes end to end:
+     the Caldera Rim (the magma-fall pours beside you; the Magma Core hides behind it) ->
+     SWITCHBACK CAUSEWAYS over the lava -> a FORK (the VENT GAUNTLET west: straight, fast,
+     and breathing fire — vs the SPIRE CLIMB east: high basalt pillar-hops, slow but safe)
+     -> the BLACK BRIDGE past the Collapsed Titan -> the ASH SANCTUM (altar find, monolith
+     ring) -> the Furnace Gate portal. All lava-side; falling is the lava. */
+  ember(ctx){ const {rnd,mkMonster}=ctx; const BAS='#241512', OBS2='#17100e', EMB='#ff7a3a';
+    // ── 1) THE CALDERA RIM (start) ──
+    const rim=vseg(0,0,680,440); G.rooms.push({x:0,z:0,w:680,d:440,monsters:[],encounter:false,cleared:true});
+    vtorch(-290,150,rnd); vtorch(290,150,rnd);
+    for(let k=0;k<6;k++) vcol(-300+k*120,196,26+rnd()*20,26+rnd()*20,50+rnd()*80);        // obsidian teeth along the rim's back
+    for(let L2=0;L2<7;L2++) G.deco.push({x:-388,z:-40,y0:L2*46,w:26,h:44,d:210,c:L2%2?tint(EMB,'#000',0.25):OBS2});   // THE MAGMA-FALL, banded fire and stone
+    G.deco.push({x:-388,z:-40,y0:322,w:40,h:16,d:230,c:BAS});
+    // the MAGMA CORE hides in a pocket BEHIND the falls (walk-in secret)
+    vseg(-410,-60,120,90); vseg(-520,-120,160,140);
+    scapeSecret(ctx,-540,-150,0);
+    // ── 2) SWITCHBACK CAUSEWAYS over the lava ──
+    const cw1=vseg(-180,-380,360,130), cw2=vseg(140,-570,400,130), cw3=vseg(-160,-760,380,130);
+    G.crumbles.push({x:-140,z:-268,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.crumbles.push({x:0,z:-475,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.crumbles.push({x:-30,z:-665,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    G.rooms.push({x:140,z:-570,w:400,d:130,monsters:[],encounter:false,cleared:true});
+    for(const sp of [[-370,-380],[10,-330],[330,-570],[-350,-760],[30,-810]]){ vcol(sp[0],sp[1],30+rnd()*16,30+rnd()*16,60+rnd()*70);
+      G.deco.push({x:sp[0],z:sp[1],w:26+rnd()*16,h:40+rnd()*40,c:BAS,theme:'volcano'}); }  // obsidian spires shouldering the causeways
+    // ── 3) THE FORK ──
+    const jn=vseg(-160,-950,300,150); G.rooms.push({x:-160,z:-950,w:300,d:150,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-160,z:-950,y0:0,w:40,h:56,d:40,c:OBS2}); G.deco.push({x:-160,z:-950,y0:56,w:52,h:10,d:52,c:EMB});   // the fork cairn, ember-capped
+    // WEST — THE VENT GAUNTLET: three chambers that breathe fire on the Emberfall rhythm
+    const g1=vseg(-360,-1140,230,160), g2=vseg(-360,-1330,230,160), g3=vseg(-360,-1520,230,160);
+    [[-360,-1140],[-360,-1330],[-360,-1520]].forEach(gc=>G.rooms.push({x:gc[0],z:gc[1],w:230,d:160,monsters:[],encounter:false,cleared:true}));
+    for(const gc of [[-455,-1230],[-265,-1420]]) G.deco.push({x:gc[0],z:gc[1],y0:0,w:30,h:74,d:30,c:OBS2});
+    // EAST — THE SPIRE CLIMB: basalt pillar-hops high above the vents (slow, safe)
+    const spi=[[-40,-1080,54],[40,-1190,108],[-20,-1310,162],[60,-1430,210],[-20,-1550,190],[20,-1660,120]].map(sp=>{
+      vcol(sp[0],sp[1],76,76,sp[2]-6); return vplat(sp[0],sp[1],sp[2],76,76,{pillar:true}); });
+    climbRun(20,-1660,120, -120,-1700,0, 66);
+    // ── 4) BRIDGEHEAD -> THE BLACK BRIDGE (a collapsing span; the Collapsed Titan watches) ──
+    const bh=vseg(-240,-1720,320,140);
+    gapStones(-240,-1795,-240,-2080,88,rnd,false); vseg(-240,-1940,130,110);
+    G.deco.push({x:-460,z:-1960,y0:0,w:120,h:110,d:90,c:tint(BAS,'#000',0.2)});           // the Titan: torso half-sunk in the lava
+    G.deco.push({x:-462,z:-2062,y0:24,w:64,h:56,d:60,c:BAS}); G.deco.push({x:-448,z:-2054,y0:66,w:12,h:8,d:8,c:EMB});   // head + one ember eye
+    G.deco.push({x:-350,z:-1880,y0:0,w:150,h:36,d:46,c:BAS}); G.deco.push({x:-460,z:-1960,y0:52,w:126,h:8,d:94,c:tint(EMB,'#000',0.3)});   // reaching arm + the crack of heat across the chest
+    // ── 5) THE ASH SANCTUM: the altar in its monolith ring ──
+    const sanct=vseg(-200,-2260,560,340); G.rooms.push({x:-200,z:-2260,w:560,d:340,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-200,z:-2330,y0:0,w:110,h:22,d:110,c:OBS2}); G.deco.push({x:-200,z:-2330,y0:22,w:84,h:18,d:84,c:BAS});
+    G.deco.push({x:-200,z:-2330,y0:40,w:58,h:14,d:58,c:OBS2}); G.deco.push({x:-200,z:-2330,y0:54,w:70,h:6,d:70,c:EMB});   // the Ash Altar
+    for(let k=0;k<5;k++){ const a=k/5*6.283+0.6; const mx2=-200+Math.cos(a)*200, mz2=-2260+Math.sin(a)*130;
+      vcol(mx2,mz2,34,34,90+rnd()*60); G.deco.push({x:mx2,z:mz2,w:30,h:50,c:BAS,theme:'volcano'}); }
+    vtorch(-420,-2200,rnd); vtorch(20,-2200,rnd);
+    // ── 6) THE FURNACE GATE (portal) ──
+    climbRun(-60,-2380,0, 20,-2500,110, 70);
+    vplat(0,-2580,110,300,200,{terrace:true,checkpoint:true});
+    vcol(-90,-2600,36,36,190); vcol(90,-2600,36,36,190);
+    G.deco.push({x:0,z:-2600,y0:196,w:220,h:18,d:44,c:OBS2});
+    G.deco.push({x:-90,z:-2600,y0:190,w:26,h:14,d:26,c:'#ff9a4a'}); G.deco.push({x:90,z:-2600,y0:190,w:26,h:14,d:26,c:'#ff9a4a'});   // braziers burning on the pylons
+    // ── mobs: emberlings hold the ground, a charger runs the causeway, a flame-caster keeps the altar ──
+    for(let m=0;m<2;m++) mkMonster('emberling',(rnd()*2-1)*220,(rnd()*2-1)*130,rim);
+    mkMonster('charger',-180+(rnd()*2-1)*120,-380,null);
+    mkMonster('emberling',-200+(rnd()*2-1)*180,-2260,null);
+    { const cs=mkMonster('caster',-320,-2280,null); cs.sx=cs.x; cs.sz=cs.z; }
+    { const fl=mkMonster('flyer',-240,-1900,null); fl.y=80; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:150,z:60},{x:140,z:-570},{x:-320,z:-2200}]);                         // emberling dens: rim, mid-causeway, sanctum
+    scapeFetch(ctx,[{x:40,z:-1190,y:108},{x:60,z:-1430,y:210},{x:-360,z:-1330,y:0},{x:-240,z:-1940,y:0},{x:0,z:-2560,y:110}]);   // shards demand BOTH forks + the bridge
+    scapeFind(ctx, -200,-2360,0);
+    finishScape(ctx,{sx:0,sz:170,sy:0, gx:0,gz:-2600, decoCol:'#5a2418',decoTheme:'volcano',decoTall:260});
+  },
+  /* THE ABYSS (Phase 17 deep-dive) — gravity is loosening. Shards of the broken world float
+     in the dark, joined by PHASING stones and slow-DRIFTING islands: the Last Shore -> the
+     SHATTER FIELD fork (the phasing causeway low and direct, or the drift-path high across
+     swaying islands) -> THE INVERTED RUIN (a keep fallen upward: arch, hanging tower,
+     chains) -> the ANCHOR SPIRE (the Rift Anchor burns on its crown) -> the King's Door.
+     Splinter satellites orbit the route, each one brave jump off the line. */
+  abyss(ctx){ const {rnd,mkMonster}=ctx; const OBS='#241431', VIO='#8a3aff', DK='#170a2c';
+    // ── 1) THE LAST SHORE (start): the final piece of honest ground ──
+    const shore=vseg(0,0,520,420); G.rooms.push({x:0,z:0,w:520,d:420,monsters:[],encounter:false,cleared:true});
+    vtorch(-210,140,rnd); vtorch(210,140,rnd);
+    for(let k=0;k<6;k++){ const a=k/6*6.283; G.deco.push({x:Math.cos(a)*300,z:Math.sin(a)*230,w:20+rnd()*22,h:30+rnd()*44,c:OBS,theme:'void'}); }   // the shore's torn edge, breaking into the dark
+    // ── 2) THE SHATTER FIELD fork ──
+    // LOW — the phasing causeway: direct, but the stones are only sometimes there
+    gapStones(0,-215,-140,-520,78,rnd,true);
+    const west=vseg(-200,-660,400,320); G.rooms.push({x:-200,z:-660,w:400,d:320,monsters:[],encounter:false,cleared:true});
+    // HIGH — the drift path: climb, then cross three slow-swaying islands
+    climbRun(180,-140,0, 240,-300,88, 64);
+    G.movers.push({x0:240,z:-430,w:100,d:84,h:88,amp:34,sp:0.9,ph:rnd()*6.28,x:240,px:240});
+    G.movers.push({x0:200,z:-560,w:100,d:84,h:88,amp:40,sp:1.15,ph:rnd()*6.28,x:200,px:200});
+    G.movers.push({x0:240,z:-690,w:100,d:84,h:88,amp:34,sp:1.0,ph:rnd()*6.28,x:240,px:240});
+    const land=vplat(180,-820,88,180,150,{terrace:true,checkpoint:true});
+    climbRun(180,-880,88, 60,-960,0, 64);
+    // ── 3) THE INVERTED RUIN: a keep that fell upward ──
+    const ruin=vseg(60,-1120,540,380); G.rooms.push({x:60,z:-1120,w:540,d:380,monsters:[],encounter:false,cleared:true});
+    vcol(-60,-1150,40,40,150); vcol(120,-1150,40,40,150); G.deco.push({x:30,z:-1150,y0:150,w:240,h:22,d:46,c:OBS});   // the arch still stands
+    G.deco.push({x:200,z:-1230,y0:0,w:40,h:30,d:40,c:DK}); G.deco.push({x:200,z:-1230,y0:30,w:56,h:34,d:56,c:OBS});   // the hanging tower — wider the higher it goes
+    G.deco.push({x:200,z:-1230,y0:64,w:74,h:38,d:74,c:tint(OBS,'#000',0.2)}); G.deco.push({x:200,z:-1230,y0:102,w:92,h:30,d:92,c:DK});
+    for(const ch of [[160,-1270],[240,-1190],[164,-1192],[238,-1266]]) G.deco.push({x:ch[0],z:ch[1],y0:36,w:7,h:64,d:7,c:'#3a3444'});   // chains dangling into the void
+    for(let k=0;k<4;k++) G.deco.push({x:60+(rnd()*2-1)*220,z:-1120+(rnd()*2-1)*140,w:22+rnd()*20,h:36+rnd()*46,c:OBS,theme:'void'});
+    gapStones(-160,-825,-100,-925,74,rnd,true);                                             // west shard -> ruin (phasing)
+    // ── 4) THE ANCHOR SPIRE (east): the Rift Anchor burns on its crown ──
+    gapStones(340,-1120,480,-1240,70,rnd,true);
+    const base=vseg(520,-1300,200,180);
+    climbRun(520,-1330,0, 560,-1420,150, 60);
+    vcol(560,-1480,60,60,144); const spire=vplat(560,-1480,150,150,140,{terrace:true,checkpoint:true});
+    for(let k=0;k<4;k++) G.deco.push({x:560+(k%2?38:-38),z:-1480+(k<2?38:-38),y0:20+k*32,w:8,h:30,d:8,c:'#3a3444'});   // chain-wrapped core
+    G.deco.push({x:560,z:-1500,y0:150,w:70,h:8,d:70,c:OBS}); G.deco.push({x:560,z:-1500,y0:150,w:30,h:16,d:30,c:VIO}); // the Anchor: a black ring, violet heart
+    // ── 5) THE KING'S DOOR (portal) ──
+    const door=vseg(0,-1560,560,440); G.rooms.push({x:0,z:-1560,w:560,d:440,monsters:[],encounter:false,cleared:true});
+    vcol(-110,-1680,44,44,170); vcol(110,-1680,44,44,170);
+    G.deco.push({x:0,z:-1680,y0:176,w:280,h:20,d:48,c:OBS});
+    G.deco.push({x:0,z:-1720,y0:0,w:150,h:140,d:16,c:DK}); G.deco.push({x:0,z:-1720,y0:56,w:96,h:8,d:18,c:VIO});      // the sealed black door, veined violet
+    for(let k=0;k<3;k++) G.deco.push({x:(rnd()*2-1)*200,z:-1560+(rnd()*2-1)*160,w:24,h:40+rnd()*40,c:OBS,theme:'void'});
+    vtorch(-180,-1450,rnd); vtorch(180,-1450,rnd);
+    // splinter SATELLITES — every one is a single brave jump off the route
+    const s1=vplat(-460,-560,50,110,100,{sec:true}), s2=vplat(300,-780,60,110,100,{sec:true}), s3=vplat(-380,-1480,70,110,100,{sec:true});
+    // the hidden pocket beyond the Door's west rim — the Reaper's Gate rift waits there
+    vseg(-460,-1660,140,120);
+    scapeSecret(ctx,-480,-1680,0);
+    // ── mobs: shadelings hold the shards; a void-caster keeps the ruin; sparklings drift the gaps ──
+    for(let m=0;m<2;m++) mkMonster('shadeling',(rnd()*2-1)*180,(rnd()*2-1)*120,shore);
+    mkMonster('shadeling',-200+(rnd()*2-1)*150,-660,null); mkMonster('shadeling',60+(rnd()*2-1)*180,-1120,null);
+    { const cs=mkMonster('caster',160,-1060,null); cs.sx=cs.x; cs.sz=cs.z; }
+    for(const fp of [[-70,-390],[400,-1180]]){ const fl=mkMonster('sparkling',fp[0],fp[1],null); fl.y=70; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:120,z:60},{x:-200,z:-660},{x:60,z:-1120}]);                            // shadeling dens: shore, west shard, ruin
+    scapeFetch(ctx,[{x:s1.x,z:s1.z,y:50},{x:s2.x,z:s2.z,y:60},{x:s3.x,z:s3.z,y:70},{x:520,z:-1300,y:0},{x:180,z:-820,y:88}]);
+    scapeFind(ctx, 560,-1500,150);
+    finishScape(ctx,{sx:0,sz:160,sy:0, gx:0,gz:-1660, decoCol:'#2a1a44',decoTheme:'void',decoTall:280});
+  },
+  /* THE SUNSPIRE PALACE (Phase 17 deep-dive) — a grand CEREMONIAL AXIS in white marble:
+     the Sun Court (reflecting pools, twin colossi) -> the Processional colonnade cut by
+     god-ray light shafts, hanging-garden planters stepping alongside -> TWO WINGS: the
+     intact West Gallery (statues, a chest) vs the CORRUPTED EAST WING — the palace's one
+     broken symmetry, a shattered checkerboard over the fall with the Sealed Reliquary at
+     its dead end -> the Grand Stair -> the Throne Antechamber dais (find + portal). */
+  palace(ctx){ const {rnd,mkMonster}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a', WATER='#3d6a92', RAY='#fff8d6';
+    // ── 1) THE SUN COURT ──
+    const court=vseg(0,0,720,480); G.rooms.push({x:0,z:0,w:720,d:480,monsters:[],encounter:false,cleared:true});
+    for(const px of [-180,180]){ G.deco.push({x:px,z:60,y0:0,w:212,h:2,d:102,c:GOLD});
+      G.deco.push({x:px,z:60,y0:2,w:196,h:2.4,d:86,c:WATER}); }                              // twin reflecting pools, gold-rimmed
+    for(const sx of [-250,250]){ vcol(sx,-170,64,64,44);                                     // twin colossi flank the way north
+      G.deco.push({x:sx,z:-170,y0:44,w:52,h:90,d:40,c:MARBLE}); G.deco.push({x:sx,z:-170,y0:134,w:30,h:24,d:26,c:tint(MARBLE,'#fff',0.2)});
+      G.deco.push({x:sx,z:-170,y0:158,w:36,h:8,d:32,c:GOLD}); }
+    vtorch(-260,150,rnd); vtorch(260,150,rnd);
+    vseg(0,-290,300,120);                                                                     // the broad steps north
+    // ── 2) THE PROCESSIONAL: colonnade + god-ray light shafts ──
+    const hall=vseg(0,-770,540,860); G.rooms.push({x:0,z:-770,w:540,d:860,monsters:[],encounter:false,cleared:true});
+    for(let k=0;k<7;k++){ const z=-420-k*110; for(const sx of [-240,240]){ vcol(sx,z,44,44,158);
+      G.deco.push({x:sx,z,y0:158,w:56,h:16,d:56,c:GOLD}); } }
+    for(const rz of [-520,-770,-1020]){ G.deco.push({x:0,z:rz,y0:0,w:30,h:170,d:30,c:RAY});   // shafts of sun through the broken roof
+      G.deco.push({x:0,z:rz,y0:0,w:110,h:1.2,d:110,c:tint(GOLD,'#fff',0.35)}); }
+    // hanging-garden planters step along the hall (the relics rest here)
+    const gard=[]; for(let k=0;k<6;k++){ const gx=(k%2?220:-220), gz=-480-k*120, gy=56+k*6;
+      gard.push(vplat(gx,gz,gy,100,100,{pillar:true})); vcol(gx,gz,100,100,gy-6);
+      G.deco.push({x:gx,z:gz,y0:gy,w:92,h:20,d:92,c:'#3a6b34'}); G.deco.push({x:gx,z:gz,y0:gy+20,w:64,h:12,d:64,c:'#4d8842'}); }
+    vtorch(-230,-340,rnd); vtorch(230,-340,rnd); vtorch(-230,-1150,rnd); vtorch(230,-1150,rnd);
+    // ── 3) THE WINGS: intact west, corrupted east — the one broken symmetry ──
+    vseg(-325,-770,110,140);                                                                  // west corridor
+    const wing=vseg(-560,-770,360,300); G.rooms.push({x:-560,z:-770,w:360,d:300,monsters:[],encounter:false,cleared:true});
+    for(let k=0;k<3;k++){ const wz=-690-k*80; vcol(-660,wz,26,26,30);
+      G.deco.push({x:-660,z:wz,y0:30,w:22,h:26,d:18,c:MARBLE}); }                             // the quiet statue row
+    G.chests.push(chestMaybeMimic({x:-640,z:-860,y:0,opened:false,bob:0},rnd));               // the gallery keeps one gift (...usually)
+    const lip=vseg(430,-770,140,140);                                                         // east lip — then the floor simply ends
+    for(const cb of [[520,-770],[610,-820],[700,-770],[790,-820]]) G.crumbles.push({x:cb[0],z:cb[1],w:70,d:70,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    for(let k=0;k<3;k++) G.deco.push({x:560+k*120,z:-740+(k%2?60:-20),w:22,h:34+rnd()*30,c:'#241431',theme:'apex'});   // the corruption creeping in
+    vcol(575,-820,24,24,40); vcol(745,-750,24,24,36);                                         // snapped pillar stubs
+    const pocket=vseg(900,-790,220,200); G.rooms.push({x:900,z:-790,w:220,d:200,monsters:[],encounter:false,cleared:true});
+    scapeSecret(ctx,920,-830,0);                                                              // the Sealed Reliquary, at the broken wing's dead end
+    G.chests.push(chestMaybeMimic({x:950,z:-740,y:0,opened:false,bob:0},rnd));
+    // ── 4) THE GRAND STAIR -> THE THRONE ANTECHAMBER ──
+    climbRun(0,-1230,0, 0,-1360,96, 110);
+    const dais=vplat(0,-1480,96,480,380,{terrace:true,checkpoint:true}); G.rooms.push({x:0,z:-1480,w:480,d:380,y:96,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:0,z:-1520,y0:96,w:200,h:10,d:130,c:tint(MARBLE,'#fff',0.15)});
+    G.deco.push({x:0,z:-1545,y0:106,w:110,h:56,d:60,c:GOLD}); G.deco.push({x:0,z:-1560,y0:162,w:130,h:64,d:14,c:tint(GOLD,'#fff',0.2)});   // the empty throne
+    for(const bx2 of [-150,150]){ vcol(bx2,-1560,20,20,60); G.deco.push({x:bx2,z:-1560,y0:60,w:26,h:12,d:26,c:'#ff9a4a'}); }               // twin braziers
+    // ── mobs: marble sentinels + a holy caster mid-hall; a sparkling drifts the broken wing ──
+    mkMonster('bones',-160,-90,court); mkMonster('bones',160,-90,court);
+    mkMonster('bones',-170,-620,null); mkMonster('bones',170,-950,null);
+    { const cs=mkMonster('caster',0,-720,null); if(cs.shot){cs.shot.el='holy';cs.shot.color=elementColor('holy');} cs.sx=cs.x; cs.sz=cs.z; }
+    { const fl=mkMonster('sparkling',650,-790,null); fl.y=60; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:170,z:70},{x:-170,z:-620},{x:170,z:-950}]);                             // sentinel dens: court + both hall reaches
+    // FRONT-LOADED: first two relics on the court floor (progress starts obvious), then the garden planters at height
+    scapeFetch(ctx, [{x:140,z:0,y:0},{x:-150,z:-150,y:0}].concat(gard.slice(0,3).map(g=>({x:g.x,z:g.z,y:g.h}))));
+    scapeFind(ctx, 0,-1590,96);
+    finishScape(ctx,{sx:0,sz:190,sy:0, gx:0,gz:-1610, decoCol:MARBLE,decoTheme:'marble',decoTall:240});
+  },
+  /* CASTLE DUSKMOOR (Phase 17 deep-dive) — the final SIEGE ASCENT: through THE BREACH in
+     the outer wall -> the Courtyard War (siege wreckage, murder-hole fire) -> a FORK: the
+     RAMPART RUN (climb the west wall and walk its crenellated top — above the fire) vs
+     the vented ground road below -> the BROKEN TOWER, a spiral of hanging steps around
+     its core -> THE LAST BRIDGE, two swaying spans at the sky -> the Keep Door and the
+     throne room, with everything you climbed falling away behind you. */
+  castle(ctx){ const {rnd,mkMonster}=ctx; const STONE='#2c2e38', DK2='#191b24', BLOOD='#6a2040';
+    // ── 1) THE BREACH: the outer wall is down — you enter through the wound ──
+    const breach=vseg(0,0,660,440); G.rooms.push({x:0,z:0,w:660,d:440,monsters:[],encounter:false,cleared:true});
+    G.walls.push({x:-220,z:-260,w:280,d:36,h:150}); G.walls.push({x:250,z:-260,w:240,d:36,h:130});   // the broken curtain wall — the gap is the way
+    G.deco.push({x:-220,z:-260,y0:150,w:290,h:14,d:42,c:DK2}); G.deco.push({x:250,z:-260,y0:130,w:250,h:14,d:42,c:DK2});
+    for(const rb of [[-40,-250],[90,-270],[30,-220]]) vcol(rb[0],rb[1],26+rnd()*18,26+rnd()*18,20+rnd()*30);   // rubble choking the gap
+    G.deco.push({x:40,z:-160,y0:0,w:150,h:12,d:90,c:tint(STONE,'#000',0.3)});                        // the fallen gate, face-down
+    vtorch(-260,120,rnd); vtorch(260,120,rnd);
+    vseg(30,-250,240,120);                                                                            // through the wound
+    // ── 2) THE COURTYARD WAR: the siege never ended ──
+    const yard=vseg(0,-560,760,560); G.rooms.push({x:0,z:-560,w:760,d:560,monsters:[],encounter:false,cleared:true});
+    G.deco.push({x:-170,z:-460,y0:14,w:70,h:26,d:44,c:'#3a2c1c'}); G.deco.push({x:-140,z:-440,y0:0,w:14,h:14,d:14,c:DK2}); G.deco.push({x:-200,z:-480,y0:0,w:14,h:14,d:14,c:DK2});   // a burned cart
+    G.deco.push({x:120,z:-620,y0:0,w:90,h:1.2,d:90,c:'#12070c'}); G.deco.push({x:-240,z:-700,y0:0,w:70,h:1.2,d:70,c:'#12070c'});   // scorch rings
+    for(const rb of [[280,-420],[-320,-520],[60,-780]]) vcol(rb[0],rb[1],30+rnd()*20,30+rnd()*20,26+rnd()*40);
+    for(const bz of [[-300,-380],[300,-720]]){ vcol(bz[0],bz[1],18,18,40); G.deco.push({x:bz[0],z:bz[1],y0:40,w:24,h:12,d:24,c:'#ff9a4a'}); }   // war braziers still lit
+    vtorch(-350,-560,rnd); vtorch(350,-560,rnd);
+    // ── 3) THE FORK: the rampart run above, or the vented road below ──
+    climbRun(-300,-750,0, -390,-870,150, 64);
+    G.walls.push({x:-420,z:-1150,w:70,d:520,h:150,stand:true});                                       // the west wall's crenellated top — a walk above the fire
+    for(let k=0;k<6;k++) G.deco.push({x:-450,z:-930-k*88,y0:150,w:18,h:20,d:18,c:DK2});
+    const road=vseg(180,-1150,260,560); G.rooms.push({x:180,z:-1150,w:260,d:560,monsters:[],encounter:false,cleared:true});   // the low road — the murder-holes breathe on it
+    // ── 4) TOWER BASE: the routes rejoin ──
+    const base=vseg(-120,-1560,520,260); G.rooms.push({x:-120,z:-1560,w:520,d:260,monsters:[],encounter:false,cleared:true});
+    climbRun(-420,-1430,150, -300,-1500,0, 64);
+    // ── 5) THE BROKEN TOWER: a spiral of hanging steps around the core ──
+    vcol(-120,-1810,140,140,420);
+    for(let k=0;k<8;k++){ const a=k*0.85; vplat(-120+Math.cos(a)*150,-1810+Math.sin(a)*150,40+k*44,86,86,{pillar:true}); }
+    const deck=vplat(-120,-1810,392,300,300,{terrace:true,checkpoint:true});
+    for(const s2 of [[-1,-1],[1,1]]) G.deco.push({x:-120+s2[0]*120,z:-1810+s2[1]*120,y0:392,w:20,h:26,d:20,c:DK2});
+    // ── 6) THE LAST BRIDGE: two swaying spans at the sky -> THE KEEP DOOR ──
+    G.movers.push({x0:-120,z:-2040,w:110,d:90,h:392,amp:30,sp:0.95,ph:rnd()*6.28,x:-120,px:-120});
+    G.movers.push({x0:-120,z:-2170,w:110,d:90,h:392,amp:34,sp:1.2,ph:rnd()*6.28,x:-120,px:-120});
+    const keep=vplat(-120,-2320,392,440,340,{terrace:true,checkpoint:true});
+    for(const px of [-320,80]){ vcol(px,-2260,30,30,470); G.deco.push({x:px,z:-2260,y0:470,w:38,h:22,d:38,c:DK2}); G.deco.push({x:px,z:-2260,y0:404,w:9,h:66,d:30,c:BLOOD}); }   // banner pylons at the door
+    G.deco.push({x:-120,z:-2400,y0:392,w:150,h:14,d:100,c:DK2});
+    G.deco.push({x:-120,z:-2420,y0:406,w:96,h:64,d:40,c:'#3a1420'}); G.deco.push({x:-120,z:-2432,y0:470,w:110,h:36,d:14,c:'#241431'});   // the dark throne, waiting
+    G.deco.push({x:-120,z:-2510,y0:392,w:480,h:200,d:40,c:DK2});                                       // the keep face behind it
+    for(const wx of [-260,-120,20]) G.deco.push({x:wx,z:-2488,y0:492,w:26,h:40,d:8,c:BLOOD});          // three windows burning violet-red
+    G.deco.push({x:-120,z:-2320,y0:620,w:660,h:8,d:20,c:'#8a3aff'});                                   // the void, banded across the sky
+    for(let k=0;k<4;k++) G.deco.push({x:(rnd()*2-1)*260,z:-560+(rnd()*2-1)*200,w:20+rnd()*20,h:30+rnd()*44,c:STONE,theme:'apex'});   // corruption breaking through the yard
+    // ── mobs: the King's guard hold every step of the way ──
+    mkMonster('shadeling',-140,-80,breach); mkMonster('shadeling',140,-80,breach);
+    mkMonster('bones',-170,-560,null); mkMonster('bones',180,-1000,null); mkMonster('shadeling',180,-1300,null);
+    { const cs=mkMonster('caster',-420,-1100,null); cs.y=150; cs.sx=cs.x; cs.sz=cs.z; }               // a warlock walks the rampart
+    { const fl=mkMonster('sparkling',-120,-2100,null); fl.y=440; fl.sx=fl.x; fl.sz=fl.z; }
+    // ── objectives ──
+    scapeKill(ctx,[{x:160,z:60},{x:-180,z:-560},{x:180,z:-1150}]);                                    // guard dens: breach, courtyard, the low road
+    scapeFind(ctx, -120,-2400,392);                                                                    // the Throne Room, at the very top
+    finishScape(ctx,{sx:0,sz:170,sy:0, gx:-120,gz:-2410, decoCol:STONE,decoTheme:'apex',decoTall:320});
+  },
+};
+/* World Expansion: authored replacements ship pair-by-pair without disturbing the proven
+   scapes below. Each replacement is a real journey made from named, visually distinct districts. */
+const EXPANDED_SCAPES={
+  outskirts(ctx){ const {rnd,mkMonster}=ctx, woods=G.area===1;
+    const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
+    const room=(name,x,z,w,d)=>{ const r={name,x,z,w,d,monsters:[],encounter:false,cleared:true}; vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const road=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
+    const tree=(x,z,h=92)=>{ vcol(x,z,22,22,h); G.deco.push({x,z,y0:h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains'}); G.deco.push({x:x-16,z:z+6,y0:h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains'}); };
+    const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
+    const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!woods){
+      // A new macro layout: one immense central prairie opens into two distant regional loops,
+      // reconverges at a river crossing, then climbs through a final field to the Waystone crown.
+      const gate=room('Old South Road',0,260,720,520),prairie=room('Sunward Prairie',0,-520,1280,900),acres=room('West Cornlands',-1120,-1450,1040,860),orchard=room('Eastwood Orchard',1120,-1500,980,880),crossing=room('Miller River Crossing',0,-2320,1120,760),bank=room('North Bank Commons',0,-2820,920,500),hamlet=room('Riverside Hamlet',-980,-3350,1040,820),ridge=room('Windmill Rise',980,-3420,980,820),dream=room('Dreaming Expanse',0,-4340,1380,920),henge=room('Old Waystone Crown',0,-5520,1120,900);
+      const trail=(a,b,w=132)=>{const n=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/120);for(let k=1;k<n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;vseg(x,z,w,w,{path:true});G.deco.push({x,z,y0:.2,w:52,h:.8,d:52,c:'#c9a85b'});if(k%4===0){G.deco.push({x:x-38,z,y0:0,w:7,h:38,d:7,c:WOOD});G.deco.push({x:x-38,z,y0:38,w:12,h:9,d:12,c:'#ffd36a'});}}};
+      trail(gate,prairie,170);trail(prairie,acres,150);trail(prairie,orchard,150);trail(acres,crossing,145);trail(orchard,crossing,145);trail(crossing,bank,170);trail(bank,hamlet,145);trail(bank,ridge,145);trail(hamlet,dream,150);trail(ridge,dream,150);trail(dream,henge,180);
+      // The opening view is a genuine prairie: pond and caravan near the road, distant cornland and windmill silhouettes framing the choice ahead.
+      G.deco.push({x:330,z:-260,y0:0,w:330,h:2,d:210,c:'#3d708d'});for(let k=0;k<16;k++)G.deco.push({x:170+k*22,z:-150+(k%2)*26,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
+      G.deco.push({x:-360,z:-400,y0:12,w:170,h:34,d:82,c:'#6b4827'});for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
+      field(-1120,-1450,20,16);field(-820,-1780,10,6);fence(-1120,-1015,960,0);fence(-1600,-1450,0,780);
+      // West: a working farm complex and two-stage barn climb, with its loft chest visible from the corn rows.
+      G.deco.push({x:-1180,z:-1540,y0:0,w:300,h:105,d:220,c:'#8b5d35'});G.deco.push({x:-1180,z:-1540,y0:105,w:340,h:32,d:250,c:'#5a2e24'});climbRun(-1370,-1390,0,-1300,-1540,92,70);vplat(-1180,-1540,120,300,210,{terrace:true,checkpoint:true});chest(-1110,-1570,120);
+      // Plan A farmhouse pass: timber frame, inset entry, loft shutters, chimney, layered eaves. Collision stays on the original authored mass.
+      for(const x of [-1320,-1180,-1040]){G.deco.push({x,z:-1432,y0:6,w:14,h:98,d:12,c:'#3b2819'});G.deco.push({x,z:-1648,y0:6,w:14,h:98,d:12,c:'#3b2819'});}
+      for(const z of [-1642,-1540,-1438]){G.deco.push({x:-1324,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});G.deco.push({x:-1036,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});}
+      G.deco.push({x:-1180,z:-1427,y0:4,w:52,h:72,d:8,c:'#34251b'});G.deco.push({x:-1180,z:-1422,y0:62,w:70,h:7,d:6,c:'#b87922'});
+      for(const x of [-1260,-1100]){G.deco.push({x,z:-1424,y0:48,w:42,h:34,d:7,c:'#8fc4d0'});G.deco.push({x,z:-1419,y0:46,w:5,h:38,d:5,c:'#e7d6a5'});G.deco.push({x,z:-1419,y0:61,w:46,h:5,d:5,c:'#e7d6a5'});}
+      G.deco.push({x:-1180,z:-1418,y0:110,w:62,h:42,d:8,c:'#49301f'});G.deco.push({x:-1180,z:-1413,y0:120,w:7,h:43,d:5,c:'#b87922'});
+      G.deco.push({x:-1280,z:-1580,y0:132,w:34,h:66,d:34,c:'#57402d'});G.deco.push({x:-1280,z:-1580,y0:195,w:46,h:10,d:46,c:'#30251d'});
+      // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
+      for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
+      const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}scapeSecret(ctx,glade.x,glade.z,0);chest(glade.x-70,glade.z+50);
+      // The river is a major transverse landmark. A broad stone ford is safe; stepping stones form a faster parkour line beside it.
+      G.deco.push({x:0,z:-2310,y0:0,w:2500,h:3,d:180,c:'#3b718c'});vseg(0,-2320,420,250,{ford:true});for(let k=0;k<9;k++)vplat(-420+k*105,-2250-(k%2)*105,12+(k%3)*5,82,72,{riverStone:true});
+      // West village rooftops and east windmill give the back half two unmistakably different skylines.
+      for(const h of [[-1260,-3290,240,180],[-960,-3500,280,190],[-650,-3270,230,170]]){G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:88,d:h[3],c:'#8d6039'});G.deco.push({x:h[0],z:h[1],y0:88,w:h[2]+26,h:25,d:h[3]+24,c:'#543126'});}climbRun(-1430,-3160,0,-1260,-3290,110,70);vplat(-960,-3500,110,260,170,{terrace:true});
+      vcol(980,-3470,140,140,230);G.deco.push({x:980,z:-3470,y0:230,w:190,h:28,d:190,c:'#eee0b8'});G.deco.push({x:980,z:-3470,y0:258,w:20,h:150,d:20,c:WOOD});for(let k=0;k<4;k++){const a=k*1.57;G.deco.push({x:980+Math.cos(a)*68,z:-3470+Math.sin(a)*68,y0:310,w:k%2?14:145,h:k%2?145:14,d:14,c:'#e8d4a7'});}climbRun(760,-3200,0,980,-3470,230,74);chest(980,-3470,230);
+      field(0,-4340,24,18);for(const sx of [-360,0,360]){vcol(sx,-4520,8,8,52);G.deco.push({x:sx,z:-4520,y0:46,w:62,h:8,d:8,c:WOOD});G.deco.push({x:sx,z:-4520,y0:54,w:18,h:18,d:15,c:'#d9c08c'});}
+      const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
+      // Forest walls frame the valley's outside perimeter while leaving the immense central sightlines open.
+      for(let k=0;k<70;k++){const R=[gate,prairie,acres,orchard,crossing,bank,hamlet,ridge,dream,henge][Math.floor(rnd()*10)],side=rnd()<.5?-1:1;tree(R.x+side*(R.w/2-18),R.z+(rnd()*2-1)*(R.d/2-25),76+rnd()*78);}
+      mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
+      scapeFind(ctx,top.x,top.z,165);finishScape(ctx,{sx:0,sz:470,sy:0,gx:0,gz:-5710,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240});
+    } else {
+      const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
+      road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);
+      for(let k=0;k<82;k++){ const R=[edge,creek,camp,grove,hollow,roots,shrine,gate][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.33+rnd()*.18); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,92+rnd()*90); }
+      G.deco.push({x:-440,z:-650,y0:0,w:620,h:2,d:90,c:'#315f68'}); for(let k=0;k<12;k++) vplat(-700+k*48,-650,10+(k%3)*7,38,48,{root:true});
+      for(const t of [[240,-850],[490,-970],[520,-780]]) G.deco.push({x:t[0],z:t[1],y0:0,w:110,h:44,d:70,c:'#5b4028'});
+      for(let k=0;k<8;k++){ const a=k/8*6.28; G.deco.push({x:Math.cos(a)*250,z:-1580+Math.sin(a)*230,y0:80,w:12,h:12,d:12,c:'#ffd26b'}); }
+      vcol(-620,-2250,150,150,280); climbRun(-760,-2100,0,-620,-2250,190,72); vplat(-620,-2250,206,250,230,{checkpoint:true}); chest(-620,-2250,206);
+      for(let k=0;k<8;k++) vplat(160+k*96,-2440,18+Math.sin(k)*8,82,66,{root:true}); climbRun(220,-2250,0,500,-2440,160,70); for(let k=0;k<5;k++) vplat(500+(k-2)*112,-2440-k*68,160+(k%2)*28,78,78,{root:true}); chest(690,-2650,188);
+      G.deco.push({x:40,z:-3300,y0:0,w:300,h:2,d:250,c:'#456c78'}); for(let k=0;k<6;k++){ const a=k/6*6.28; G.deco.push({x:40+Math.cos(a)*190,z:-3300+Math.sin(a)*160,y0:0,w:24,h:70,d:18,c:'#6a7180'}); }
+      mkMonster('sporeback',-440,-650,creek); mkMonster('toxling',390,-900,camp); mkMonster('sporeback',0,-1580,grove); mkMonster('toxling',40,-3300,shrine);
+      scapeFetch(ctx,[{x:-620,z:-2250,y:206},{x:690,z:-2650,y:188},{x:-440,z:-650,y:18},{x:40,z:-3300,y:0},{x:0,z:-3970,y:0}]);
+      finishScape(ctx,{sx:0,sz:220,sy:0,gx:0,gz:-4240,decoCol:'#25432e',decoTheme:'forest',decoTall:250});
+    }
+  },
+  hollow(ctx){ const {rnd,mkMonster}=ctx, upper=G.area===1, SAND='#9a7445', DARK='#553c25', BONE='#e1d5b7', SKY='#d4a85c';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const floorRoad=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
+    const wallPair=(r,h=300)=>{ canyonWall(r.x-r.w/2-18,r.z,r.d+40,+1,rnd,32,h); canyonWall(r.x+r.w/2+18,r.z,r.d+40,-1,rnd,32,h); };
+    const beacon=(x,z,y)=>{ vcol(x,z,24,24,y+62); G.deco.push({x,z,y0:y+62,w:36,h:14,d:36,c:'#ffb34d'}); G.deco.push({x,z,y0:y+76,w:12,h:74,d:12,c:'#fff0a0'}); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!upper){
+      const wash=room('Lower Wash',0,0,860,680),narrows=room('Breathing Narrows',-360,-760,780,700),fork=room('Split Mesa',280,-1420,920,760),switches=room('Switchback Ascent',-480,-2140,620,620),rim=room('Watcher Rim',-420,-2860,900,720,210),basin=room('Suspended Bridge Basin',380,-3300,760,700,210),gate=room('Wind-Carved Gate',0,-4300,1080,820,210);
+      floorRoad(wash,narrows,170); floorRoad(narrows,fork,145); floorRoad(fork,switches,145);
+      wallPair(wash,280); wallPair(narrows,380); wallPair(fork,430);
+      // The low road stays forgiving; the high switchback is faster and exposes a reward.
+      climbRun(-120,-1760,0,-480,-2140,210,78,{switchback:true}); vplat(-260,-2380,210,240,130,{checkpoint:true}); climbRun(-260,-2380,210,-420,-2860,210,76);
+      const cave=room('Smuggler Cave',500,-2220,360,300); floorRoad(fork,cave,110); chest(540,-2260); scapeSecret(ctx,610,-2220,0);
+      // A real high-altitude bridge basin: stable outside landings, then swaying and crumbling spans.
+      climbRun(-420,-2860,210,-120,-3140,210,74); G.movers.push({x0:0,z:-3200,w:100,d:72,h:210,amp:42,sp:1.0,ph:rnd()*6.28,x:0,px:0});
+      G.crumbles.push({x:150,z:-3250,w:84,d:72,h:210,state:0,timer:0,respawn:0,fallY:0,jit:0}); G.movers.push({x0:270,z:-3300,w:96,d:72,h:210,amp:36,sp:1.25,ph:rnd()*6.28,x:270,px:270});
+      // Optional premium rim route climbs higher, but the required route never needs Magic Socks.
+      climbRun(-520,-2860,210,-650,-3140,350,70); for(let k=0;k<5;k++) vplat(-650+k*130,-3140-k*70,350+(k%2)*34,76,76,{rim:true}); chest(-140,-3420,384);
+      floorRoad(basin,gate,170); climbRun(380,-3300,210,0,-4300,210,82,{bridge:true});vplat(0,-4300,210,1080,820,{checkpoint:true,breather:true}); beacon(0,-4260,210); beacon(-300,-2860,210); beacon(330,-3300,210);
+      // Telegraph the rockfall corridor with cracked shelves and rubble before enemies engage.
+      for(let k=0;k<12;k++){ const x=-180+(k%4)*120,z=-620-Math.floor(k/4)*130; G.deco.push({x,z,y0:0,w:34+(k%3)*12,h:20+(k%2)*14,d:30,c:DARK,theme:'canyon'}); }
+      mkMonster('dustjackal',0,-180,wash);for(const p of [[-360,-760,narrows],[280,-1420,fork],[-420,-2860,rim]]){ mkMonster('dustjackal',p[0]-65,p[1],p[2]); mkMonster(p[2]===rim?'cragspitter':'sparkling',p[0]+65,p[1]-20,p[2]); }mkMonster('cragspitter',-350,-2920,rim);
+      scapeKill(ctx,[{x:-360,z:-760,room:narrows},{x:280,z:-1420,room:fork},{x:-420,z:-2860,room:rim}]);
+      finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4490,sy:0,decoCol:SAND,decoTheme:'canyon',decoTall:390});
+    } else {
+      const dry=room('Dry Wash',0,0,820,620),fossils=room('Fossil Steps',-480,-760,660,620),needle=room('Needle Forest',420,-1280,720,680),shelf=room('High Bone Shelf',-300,-2080,760,620,160),arch=room('Gale Arch',480,-2700,700,620,160),shrine=room('Hollow Shrine',0,-3600,980,760,160),exit=room('Marksman Approach',0,-4380,840,620,160);
+      floorRoad(dry,fossils,160); floorRoad(fossils,needle,140); wallPair(dry,300); wallPair(fossils,410); wallPair(needle,460);
+      // Bone-step climb, a narrow high shelf, and gust-facing pillar weave.
+      climbRun(120,-1640,0,-300,-2080,160,72); vplat(-300,-2080,160,760,620,{terrace:true,checkpoint:true});
+      for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }
+      climbRun(300,-2500,160,480,-2700,160,74); G.movers.push({x0:250,z:-2960,w:100,d:76,h:160,amp:58,sp:.9,ph:rnd()*6.28,x:250,px:250}); G.movers.push({x0:80,z:-3100,w:100,d:76,h:160,amp:44,sp:1.2,ph:rnd()*6.28,x:80,px:80});
+      floorRoad(arch,shrine,170); floorRoad(shrine,exit,180); climbRun(480,-2700,160,0,-3600,160,82,{bridge:true}); climbRun(0,-3600,160,0,-4380,160,84,{bridge:true}); beacon(0,-3640,160); chest(520,-2760,160); chest(-620,-2080,160);
+      for(let k=0;k<18;k++){ const a=k/18*6.28,rr=270+(k%3)*34; G.deco.push({x:Math.cos(a)*rr,z:-3600+Math.sin(a)*rr,y0:160,w:24,h:90+(k%4)*30,d:24,c:k%3?SAND:BONE,theme:'canyon'}); }
+      mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',120,-3600,shrine); mkMonster('dustjackal',-120,-3600,shrine);
+      scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
+      finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
+    }
+  },
+  keep(ctx){ const {rnd,mkMonster}=ctx, under=G.area===1, STONE='#555969',IRON='#292d36',BANNER='#702c45';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const tower=(x,z,h)=>{vcol(x,z,100,100,h);for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?38:-38),z:z+(k<2?38:-38),y0:h,w:26,h:28,d:26,c:IRON});};
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!under){
+      const camp=room('Outer Siege Camp',0,0,900,700),breach=room('Breached Curtain Wall',-360,-850,760,650),yard=room('Prison Yard',360,-1550,980,820),ramp=room('Broken West Span',-500,-2320,820,700,190),hall=room('Great Hall Approach',280,-3000,1020,840,190),vault=room('Sealed Vault Court',0,-4050,1080,840,190);
+      road(camp,breach,180);road(breach,yard,160);G.walls.push({x:-730,z:-850,w:60,d:700,h:220,stand:true});G.walls.push({x:20,z:-850,w:60,d:700,h:220,stand:true});
+      // Siege camp silhouettes: ballista, broken carts, tents, and a climbable collapsed siege tower.
+      for(const t of [[-280,80],[250,-100],[-40,-220]])G.deco.push({x:t[0],z:t[1],y0:0,w:150,h:55,d:100,c:'#49392e'});
+      G.deco.push({x:-330,z:-600,y0:20,w:230,h:28,d:60,c:'#3b2d24'});for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      // High route: battlement crossfire and a broken-wall jump line. Low route: drainage infiltration under the yard.
+      climbRun(-520,-1650,0,-500,-2320,190,88);tower(-820,-2280,250);for(let k=0;k<7;k++){vplat(-500+k*125,-2320-(k%2)*82,190+(k%3)*22,110,100,{battlement:true,setpiece:true});G.deco.push({x:-500+k*125,z:-2320-(k%2)*82-44,y0:190+(k%3)*22,w:90,h:30,d:16,c:IRON});}
+      const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);scapeSecret(ctx,850,-2520,0);
+      climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});vplat(0,-4050,190,1080,840,{checkpoint:true,breather:true});
+      for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
+      chest(-720,-2320,190);chest(360,-3150,190);
+      mkMonster('revenant',0,-120,camp);for(const p of [[360,-1550,yard],[-500,-2320,ramp],[280,-3000,hall]]){mkMonster('revenant',p[0]-70,p[1],p[2]);mkMonster(p[2]===ramp?'caster':'bones',p[0]+70,p[1]-20,p[2]);}mkMonster('bones',340,-3070,hall);
+      scapeKill(ctx,[{x:360,z:-1550,room:yard},{x:-500,z:-2320,room:ramp},{x:280,z:-3000,room:hall}]);scapeFind(ctx,0,-4140,190);
+      finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4240,decoCol:STONE,decoTheme:'ruins',decoTall:380});
+    }else{
+      const intake=room('Undercroft Intake',0,0,760,600),cells=room('Prison Galleries',-460,-760,700,680),pit=room('Punishment Pit',420,-1440,760,700),records=room('Records Vault',-380,-2220,720,660,100),walk=room('Warden Walk',420,-2900,720,620,210),shaft=room('Escape Shaft',0,-3800,820,760,330),door=room('Fallen Warden Door',0,-4500,760,560,330);
+      road(intake,cells,140);road(cells,pit,130);for(let k=0;k<10;k++)G.deco.push({x:-720+k*58,z:-760,y0:0,w:8,h:110,d:8,c:IRON});
+      for(let k=0;k<8;k++){const a=k/8*6.28;vplat(420+Math.cos(a)*220,-1440+Math.sin(a)*210,20+(k%4)*34,84,72,{chain:true});}
+      climbRun(120,-1740,0,-380,-2220,100,72);vplat(-380,-2220,100,720,660,{checkpoint:true,terrace:true});
+      // Suspended-chain route rises to the Warden Walk; wide landings keep it fair without Socks.
+      for(let k=0;k<9;k++){const t=k/8;vplat(-380+800*t,-2460-440*t,100+110*t,78,78,{chain:true});G.deco.push({x:-380+800*t,z:-2460-440*t,y0:210+110*t,w:7,h:120,d:7,c:IRON});}
+      climbRun(420,-2900,210,0,-3800,330,76);for(let k=0;k<6;k++){const a=k*1.05;vplat(Math.cos(a)*190,-3800+Math.sin(a)*190,330+k*32,80,80,{shaft:true});}road(shaft,door,170);
+      chest(-620,-2220,100);chest(180,-3800,330);for(const p of [[-460,-760,cells],[-380,-2220,records],[0,-4500,door]]){mkMonster('revenant',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}
+      scapeFetch(ctx,[{x:-620,z:-760,y:0},{x:420,z:-1440,y:68},{x:-580,z:-2220,y:100},{x:420,z:-2900,y:210},{x:0,z:-3800,y:330}]);
+      finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:STONE,decoTheme:'dungeon',decoTall:430});
+    }
+  },
+  frost(ctx){ const {rnd,mkMonster}=ctx,upper=G.area===1,ICE='#9eddf2',SNOW='#d9eff5',DARK='#31536a',AUR='#75f0d2';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const icePine=(x,z,h)=>{vcol(x,z,20,20,h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};
+    const brazier=(x,z,y=0)=>{vcol(x,z,22,22,y+36);G.deco.push({x,z,y0:y+36,w:34,h:18,d:34,c:'#ffb04d'});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!upper){
+      const lake=room('Frozen Lake',0,0,980,760),village=room('Buried Village',-520,-900,940,800),gorge=room('Ice Gorge Arena',420,-1700,940,820),shelter=room('Expedition Shelter',-420,-2460,880,740,120),cavern=room('Aurora Caverns',420,-3150,820,720,220),summit=room('Summit Approach',0,-4200,1080,840,220);
+      // Cracking lake: two braided lines, with broad recovery ice between them.
+      for(let k=0;k<12;k++){const x=(k%2?-170:170),z=250-k*105;G.crumbles.push({x,z,w:120,d:92,h:0,state:0,timer:0,respawn:0,fallY:0,jit:0});}road(lake,village,170);road(village,gorge,150);
+      for(const h of [[-700,-820],[-450,-1040],[-250,-820]]){G.deco.push({x:h[0],z:h[1],y0:0,w:190,h:56,d:150,c:'#718b96'});G.deco.push({x:h[0],z:h[1],y0:56,w:220,h:24,d:175,c:SNOW});}
+      // Gorge climbs alternate wall shelves and a central ice spine.
+      climbRun(120,-1350,0,420,-1700,80,72);for(let k=0;k<9;k++){const x=120+(k%3)*150,z=-1850-k*72;vcol(x,z,58,58,70+k*18);vplat(x,z,82+k*18,86,76,{ice:true});}
+      climbRun(420,-2100,220,-420,-2460,120,76);vplat(-420,-2460,120,680,620,{checkpoint:true,terrace:true});brazier(-420,-2460,120);chest(-650,-2500,120);
+      // Aurora cavern floats over a safe snow floor; an optional crystal ladder rises above the main route.
+      climbRun(-120,-2700,120,420,-3150,220,74);for(let k=0;k<8;k++){const a=k/8*6.28;vplat(420+Math.cos(a)*250,-3150+Math.sin(a)*220,220+(k%3)*34,84,84,{crystal:true});G.deco.push({x:420+Math.cos(a)*250,z:-3150+Math.sin(a)*220,y0:220,w:18,h:90,d:18,c:AUR});}
+      climbRun(420,-3150,220,0,-4200,220,84,{snowbridge:true});vplat(0,-4200,220,1080,840,{checkpoint:true,breather:true});for(let k=0;k<14;k++){const a=k/14*6.28;icePine(Math.cos(a)*410,-4200+Math.sin(a)*310,70+rnd()*70);}chest(650,-3150,254);
+      for(const p of [[-520,-900,village],[420,-1700,gorge],[-420,-2460,shelter]]){mkMonster('frostshell',p[0]-65,p[1],p[2]);mkMonster('frostling',p[0]+65,p[1]-20,p[2]);}mkMonster('frostshell',-360,-2520,shelter);
+      scapeKill(ctx,[{x:-520,z:-900,room:village},{x:420,z:-1700,room:gorge},{x:-420,z:-2460,room:shelter}]);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4410,decoCol:DARK,decoTheme:'frost',decoTall:350});
+    }else{
+      const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
+      road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
+      climbRun(100,-1250,0,420,-1600,120,72);for(let k=0;k<7;k++)G.movers.push({x0:420+(k%2?120:-120),z:-1750-k*100,w:96,d:74,h:120+k*20,amp:30+(k%3)*8,sp:.8+k*.08,ph:rnd()*6.28,x:420,px:420});
+      climbRun(420,-1600,0,-420,-2350,250,82);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
+      // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
+      for(let k=0;k<14;k++){const t=k/13,x=-420+920*t,z=-2500-600*t,y=250-170*t;vplat(x,z,y,100,82,{slide:true});if(k%4===0)vplat(x-170,z,y,130,110,{shelter:true});}
+      vplat(500,-3100,80,760,700,{terrace:true});road(cave,cairn,170);climbRun(500,-3100,80,0,-4100,180,78);brazier(0,-4140,180);chest(650,-3100,80);chest(-650,-2350,250);
+      for(const p of [[-500,-850,white],[500,-3100,cave],[0,-4100,cairn]]){mkMonster('frostshell',p[0]-55,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
+      scapeFetch(ctx,[{x:-500,z:-850,y:0},{x:420,z:-1600,y:120},{x:-420,z:-2350,y:250},{x:500,z:-3100,y:80},{x:0,z:-4100,y:180}]);scapeFind(ctx,0,-4140,180);finishScape(ctx,{sx:0,sz:280,sy:0,gx:0,gz:-4380,decoCol:DARK,decoTheme:'frost',decoTall:390});
+    }
+  },
+  ember(ctx){const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=145)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!vents){const mine=room('Ash Mine',0,0,940,720),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks Arena',420,-1580,1020,860,120),city=room('Ancient Forge City',-400,-2380,1040,880,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,1100,860,280);
+      road(mine,slag,160);climbRun(-180,-350,0,-480,-850,120,74);for(let k=0;k<6;k++)G.movers.push({x0:-480+(k%2?120:-120),z:-900-k*100,w:100,d:80,h:120+k*34,amp:28,sp:.75+k*.1,ph:rnd()*6.28,x:-480,px:-480});
+      climbRun(-300,-1150,120,420,-1580,120,78);for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1450-Math.floor(k/5)*220;vcol(x,z,48,48,90);G.deco.push({x,z,y0:90,w:70,h:20,d:70,c:k%2?LAVA:GOLD});}
+      climbRun(180,-1900,120,-400,-2380,180,74);for(const h of [[-650,-2280],[-400,-2500],[-160,-2260]]){G.deco.push({x:h[0],z:h[1],y0:180,w:200,h:86,d:160,c:ROCK});vplat(h[0],h[1],280,190,150,{roof:true});}climbRun(-720,-2200,180,-650,-2280,280,68);chest(-160,-2260,280);
+      // Caldera crossing: basalt pillars rise above a broad recovery shelf; eruptions remain visible through geyser tells.
+      climbRun(-160,-2700,180,450,-3200,280,72);for(let k=0;k<11;k++){const a=k/11*6.28,rr=250+(k%3)*70;vcol(450+Math.cos(a)*rr,-3200+Math.sin(a)*rr,70,70,180+(k%4)*34);G.geysers.push({x:450+Math.cos(a)*rr,z:-3200+Math.sin(a)*rr,r:22,period:2.8+(k%3)*.4,phase:rnd()*6.28});}
+      climbRun(450,-3200,280,0,-4300,280,84,{mantle:true});vplat(0,-4300,280,1100,860,{checkpoint:true,terrace:true,breather:true});for(let k=0;k<12;k++)G.deco.push({x:-420+k*76,z:-4420,y0:280,w:38,h:100+(k%3)*35,d:38,c:k%2?IRON:LAVA});
+      for(const p of [[0,-150,mine],[420,-1580,slag],[-400,-2380,city]]){mkMonster('magmaskit',p[0]-65,p[1],p[2]);mkMonster('emberling',p[0]+65,p[1],p[2]);}mkMonster('emberling',-340,-2450,city);scapeKill(ctx,[{x:0,z:-150,room:mine},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city}]);scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
+    }else{const ventsR=room('Cinder Vents',0,0,860,660),cart=room('Minecart Gallery',-500,-820,720,650),refine=room('Suspended Refinery',420,-1560,780,700,140),channels=room('Cooling Channels',-420,-2360,760,680),forge=room('Forge-Routing Hall',450,-3100,820,720,220),altar=room('Ash Altar',0,-4180,980,760,220);
+      road(ventsR,cart,150);for(let k=0;k<12;k++){const t=k/11;vplat(-500+920*t,-900-650*t,20+120*t,88,72,{rail:true});if(k%3===0)G.movers.push({x0:-500+920*t,z:-900-650*t,w:96,d:76,h:20+120*t,amp:36,sp:1+rnd()*.4,ph:rnd()*6.28,x:0,px:0});}
+      vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}
+      climbRun(160,-2700,0,450,-3100,220,72);for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
+      for(const p of [[0,-160,ventsR],[420,-1560,refine],[0,-4180,altar]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:420,z:-1560,y:140},{x:-420,z:-2360,y:0},{x:450,z:-3100,y:220},{x:0,z:-4180,y:220}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4400,decoCol:ROCK,decoTheme:'volcano',decoTall:450});}
+  },
+  abyss(ctx){const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    if(!deep){const shore=room('Last Shore',0,0,920,700),field=room('Shatter Arena',-480,-820,980,860),drift=room('Drifting Archipelago',420,-1600,720,620,120),ruin=room('Inverted Ruin',-420,-2420,1020,880,250),anchor=room('Anchor Spire',450,-3260,700,600,390),door=room('King’s Door',0,-4380,1120,900,390);
+      const beacon=(x,z,y=0)=>{G.deco.push({x,z,y0:y,w:18,h:78,d:18,c:VIO});G.deco.push({x,z,y0:y+78,w:34,h:12,d:34,c:'#e7c56b'});};const rim=(r)=>{const hw=r.w/2-32,hd=r.d/2-32;for(let k=-2;k<=2;k++){G.deco.push({x:r.x+k*150,z:r.z-hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x+k*150,z:r.z+hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x-hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});G.deco.push({x:r.x+hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});}};
+      road(shore,field,160);for(let k=0;k<12;k++){const a=k/12*6.28,r=190+(k%3)*80;vplat(-480+Math.cos(a)*r,-820+Math.sin(a)*r,20+(k%4)*28,88,74,{phase:true});}
+      climbRun(-180,-1120,0,420,-1600,120,74,{safeRoute:true});for(let k=0;k<7;k++)G.movers.push({x0:120+k*95,z:-1380-k*95,w:92,d:76,h:55+k*12,amp:42,sp:.72+k*.09,ph:rnd()*6.28,x:120,px:120});
+      vplat(420,-1600,120,720,620,{checkpoint:true,breather:true,terrace:true});for(let k=0;k<10;k++){const a=k*.82;vplat(420+Math.cos(a)*250,-1600+Math.sin(a)*230,140+(k%3)*45,84,76,{drift:true});}
+      climbRun(160,-1950,120,-420,-2420,250,72);vplat(-420,-2420,250,1020,880,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const x=-750+(k%4)*220,z=-2660+Math.floor(k/4)*300;G.deco.push({x,z,y0:250,w:120,h:90+(k%3)*55,d:100,c:VOID});G.deco.push({x,z,y0:340+(k%3)*55,w:150,h:18,d:130,c:VIO});}
+      climbRun(-160,-2760,250,450,-3260,390,70);for(let k=0;k<12;k++){const a=k/12*12.56,y=390+k*25;vplat(450+Math.cos(a)*230,-3260+Math.sin(a)*210,y,80,68,{anchorRing:true});G.deco.push({x:450+Math.cos(a)*230,z:-3260+Math.sin(a)*210,y0:0,w:12,h:y,d:12,c:CHAIN});}
+      climbRun(450,-3260,390,0,-4380,390,82,{phaseBridge:true});vplat(0,-4380,390,1120,900,{district:'King’s Door',checkpoint:true,breather:true});for(let k=0;k<9;k++)G.crumbles.push({x:-320+k*80,z:-4050-k*55,w:70,d:68,h:390,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      for(const r of [field,ruin,door])rim(r);for(const p of [[0,-300,0],[-220,-560,0],[-160,-1190,35],[120,-1380,65],[180,-2020,145],[-150,-2200,210],[-150,-2870,280],[170,-3050,335],[300,-3700,390],[120,-4050,390]])beacon(...p);
+      chest(650,-1600,210);chest(-780,-2420,340);scapeSecret(ctx,720,-3260,440);mkMonster('shadeling',0,-180,shore);for(const p of [[-480,-820,field],[-420,-2420,ruin],[0,-4380,door]]){mkMonster('blinkstalker',p[0]-70,p[1],p[2]);mkMonster('shadeling',p[0]+70,p[1],p[2]);}mkMonster('shadeling',-420,-2500,ruin);mkMonster('blinkstalker',90,-4440,door);scapeKill(ctx,[{x:-480,z:-820,room:field},{x:-420,z:-2420,room:ruin},{x:0,z:-4380,room:door}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4600,decoCol:VOID,decoTheme:'void',decoTall:520});
+    }else{const lip=room('Hollow Lip',0,0,820,620),well=room('Gravity Well',-450,-850,740,680),inside=room('Inside-Out Keep',420,-1650,820,720,180),chains=room('Hanging Chain Sea',-420,-2480,760,700,330),rift=room('Rift Observatory',450,-3300,800,720,470),scar=room('World Scar',0,-4380,980,780,470);
+      road(lip,well,150);for(let k=0;k<14;k++){const a=k*.72,r=280-k*9,y=20+k*15;vplat(-450+Math.cos(a)*r,-850+Math.sin(a)*r,y,86,70,{gravitySpiral:true});}
+      climbRun(-450,-850,0,420,-1650,180,82);vplat(420,-1650,180,820,720,{checkpoint:true,terrace:true});for(let k=0;k<9;k++){const x=100+(k%3)*250,z=-1880+Math.floor(k/3)*220,y=180+(k%3)*50;G.deco.push({x,z,y0:y,w:150,h:110,d:130,c:k%2?VOID:CHAIN});vplat(x,z,y+120,140,120,{roof:true});}
+      climbRun(420,-1650,180,-420,-2480,330,82);for(let k=0;k<11;k++){const t=k/10,x=-420+840*t,z=-2600-450*t,y=330+(k%4)*38;vplat(x,z,y,76,70,{chain:true});G.deco.push({x,z,y0:y+20,w:8,h:190,d:8,c:CHAIN});}
+      climbRun(-420,-2480,330,450,-3300,470,82);vplat(450,-3300,470,800,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3300+Math.sin(a)*240,w:88,d:72,h:470+(k%3)*32,amp:36,sp:.65+k*.05,ph:rnd()*6.28,x:450,px:450});}
+      climbRun(450,-3300,470,0,-4380,470,82);chest(-650,-2480,368);chest(700,-3300,502);for(const p of [[0,-160,lip],[420,-1650,inside],[0,-4380,scar]]){mkMonster('blinkstalker',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-450,z:-850,y:120},{x:420,z:-1650,y:300},{x:-420,z:-2480,y:368},{x:450,z:-3300,y:470},{x:0,z:-4380,y:470}]);scapeFind(ctx,450,-3300,470);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4580,decoCol:VOID,decoTheme:'void',decoTall:570});}
+  },
+  palace(ctx){const {rnd,mkMonster}=ctx,gardens=G.area===1,MARBLE='#d8d5c7',GOLD='#d4a83e',WATER='#4b8eaa',GLASS='#75c8d2',VINE='#497b4c';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const col=(x,z,y=0,h=180)=>{vcol(x,z,34,34,y+h);G.deco.push({x,z,y0:y+h,w:58,h:18,d:58,c:GOLD});};
+    if(!gardens){const court=room('Sun Court',0,0,1040,800),process=room('Grand Processional',-460,-900,940,820),gallery=room('Hall of Statues',420,-1700,1000,840,100),aqueduct=room('Sky Aqueduct',-420,-2520,760,680,220),oculus=room('Solar Oculus',450,-3340,840,740,340),throne=room('Throne Antechamber',0,-4420,1120,880,340);
+      road(court,process,180);for(const x of [-280,280])G.deco.push({x,z:40,y0:0,w:250,h:3,d:130,c:WATER});for(let k=0;k<8;k++)col(-760+k*180,-900);
+      climbRun(-180,-1250,0,420,-1700,100,82);vplat(420,-1700,100,820,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*150,z=-1920+Math.floor(k/5)*260;G.deco.push({x,z,y0:100,w:70,h:150,d:70,c:MARBLE});G.deco.push({x,z,y0:250,w:90,h:18,d:90,c:GOLD});}
+      // The aqueduct offers a broad watercourse below and a faster balance-beam route above the arches.
+      climbRun(160,-2050,100,-420,-2520,220,80);vplat(-420,-2520,220,760,680,{checkpoint:true,terrace:true});G.deco.push({x:-420,z:-2520,y0:220,w:620,h:5,d:110,c:WATER});for(let k=0;k<9;k++)vplat(-720+k*75,-2690-(k%2)*80,300+(k%3)*26,66,52,{beam:true});
+      climbRun(-160,-2860,220,450,-3340,340,80);vplat(450,-3340,340,840,740,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3340+Math.sin(a)*240,w:92,d:70,h:340+(k%3)*30,amp:26,sp:.55+k*.04,ph:k*.5,x:450,px:450});G.deco.push({x:450+Math.cos(a)*175,z:-3340+Math.sin(a)*155,y0:340,w:18,h:140,d:18,c:GOLD});}
+      climbRun(450,-3340,340,0,-4420,340,84);vplat(0,-4420,340,1120,880,{checkpoint:true,breather:true});chest(-680,-2520,300);chest(720,-3340,370);scapeSecret(ctx,720,-1700,100);for(const p of [[0,-160,court],[-460,-900,process],[420,-1700,gallery]]){mkMonster('marblestatue',p[0]-65,p[1],p[2]);mkMonster('sunpriest',p[0]+65,p[1],p[2]);}mkMonster('sunpriest',470,-1770,gallery);scapeKill(ctx,[{x:0,z:-160,room:court},{x:-460,z:-900,room:process},{x:420,z:-1700,room:gallery}]);scapeFind(ctx,0,-4480,340);finishScape(ctx,{sx:0,sz:300,sy:0,gx:0,gz:-4640,decoCol:MARBLE,decoTheme:'marble',decoTall:510});
+    }else{const terrace=room('Lower Terraces',0,0,920,700),orchard=room('Citrus Arcade',-500,-820,760,680),falls=room('Waterfall Stairs',430,-1600,780,700,130),aviary=room('Gilded Aviary',-420,-2420,780,700,250),roof=room('Stained-Glass Roofs',450,-3260,820,720,360),crown=room('Garden Crown',0,-4340,1000,780,360);
+      road(terrace,orchard,170);for(let k=0;k<18;k++){const x=-760+(k%6)*105,z=-1020+Math.floor(k/6)*190;G.deco.push({x,z,y0:0,w:70,h:55,d:70,c:VINE});G.deco.push({x,z,y0:55,w:18,h:18,d:18,c:'#e9a83e'});}
+      climbRun(-200,-1180,0,430,-1600,130,80);for(let k=0;k<10;k++){const t=k/9;vplat(120+310*t,-1370-230*t,20+110*t,100,76,{waterStep:true});G.deco.push({x:120+310*t,z:-1370-230*t,y0:20+110*t,w:78,h:4,d:62,c:WATER});}
+      climbRun(430,-1600,130,-420,-2420,250,82);vplat(-420,-2420,250,780,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;vplat(-420+Math.cos(a)*250,-2420+Math.sin(a)*220,280+(k%4)*25,76,66,{perch:true});G.deco.push({x:-420+Math.cos(a)*250,z:-2420+Math.sin(a)*220,y0:250,w:8,h:150,d:8,c:GOLD});}
+      climbRun(-160,-2780,250,450,-3260,360,80);vplat(450,-3260,360,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const x=120+(k%4)*210,z=-3500+Math.floor(k/4)*170;vplat(x,z,360+(k%3)*28,170,120,{glass:true});G.deco.push({x,z,y0:360,w:150,h:5,d:100,c:k%2?GLASS:'#e7a2c9'});}
+      climbRun(450,-3260,360,0,-4340,360,84);chest(-650,-2420,300);chest(720,-3260,388);for(const p of [[-500,-820,orchard],[-420,-2420,aviary],[0,-4340,crown]]){mkMonster('marblestatue',p[0]-55,p[1],p[2]);mkMonster('sparkling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:430,z:-1600,y:130},{x:-420,z:-2420,y:300},{x:450,z:-3260,y:388},{x:0,z:-4340,y:360}]);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4560,decoCol:MARBLE,decoTheme:'marble',decoTall:500});}
+  },
+  castle(ctx){const {rnd,mkMonster}=ctx,ascent=G.area===1,STONE='#353541',IRON='#211f28',BLOOD='#702742',STORM='#8751b5',FIRE='#d65a2e';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const tower=(x,z,y,h)=>{vcol(x,z,130,130,y+h);vplat(x,z,y+h,160,160,{tower:true});for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?62:-62),z:z+(k<2?62:-62),y0:y+h,w:28,h:34,d:28,c:IRON});};
+    if(!ascent){const field=room('Ashen Siegefield',0,0,980,760),gate=room('Fallen Gatehouse',-500,-900,940,800),yard=room('Black Courtyard',430,-1740,1020,840,120),wall=room('Murderwall',-430,-2580,940,800,260),storm=room('Stormbridge Bastion',450,-3440,1040,860,400),keep=room('Inner Keep',0,-4580,1140,900,400);
+      road(field,gate,180);for(let k=0;k<10;k++){const x=-400+(k%5)*200,z=-200-Math.floor(k/5)*260;G.deco.push({x,z,y0:0,w:150,h:65,d:90,c:k%2?STONE:IRON});G.deco.push({x,z,y0:65,w:20,h:70,d:20,c:BLOOD});}
+      // The shattered gatehouse becomes a climb through its own collapse, with the open breach as recovery.
+      for(let k=0;k<12;k++){const t=k/11;G.crumbles.push({x:-760+520*t,z:-700-420*t,w:92,d:76,h:12+k*12,state:0,timer:0,respawn:0,fallY:0,jit:0});}climbRun(-500,-900,0,430,-1740,120,82);vplat(430,-1740,120,900,760,{checkpoint:true,terrace:true});
+      for(const p of [[140,-1560],[700,-1900],[-20,-1900]])tower(p[0],p[1],120,150);climbRun(160,-2100,120,-430,-2580,260,80);vplat(-430,-2580,260,800,720,{checkpoint:true,terrace:true});
+      // Murderwall alternates parapet blocks, arrow-slit cover, and a faster narrow crenellation line.
+      for(let k=0;k<12;k++){const x=-740+(k%6)*125,z=-2800+Math.floor(k/6)*260;vplat(x,z,260+(k%3)*35,100,78,{battlement:true});G.deco.push({x,z,y0:260,w:20,h:100,d:20,c:BLOOD});}
+      climbRun(-160,-2940,260,450,-3440,400,80);for(let k=0;k<10;k++)G.movers.push({x0:120+k*85,z:-3230-k*85,w:96,d:70,h:325+k*9,amp:42,sp:.7+k*.07,ph:k*.55,x:120,px:120});vplat(450,-3440,400,820,720,{checkpoint:true,terrace:true});
+      climbRun(450,-3440,400,0,-4580,400,84);for(let k=0;k<9;k++)G.crumbles.push({x:360-k*80,z:-3900-k*72,w:74,d:68,h:400,state:0,timer:0,respawn:0,fallY:0,jit:0});vplat(0,-4580,400,1140,900,{checkpoint:true,breather:true});chest(-680,-2580,330);chest(700,-3440,430);scapeSecret(ctx,760,-1740,120);
+      mkMonster('siegeknight',0,-180,field);for(const p of [[-500,-900,gate],[430,-1740,yard],[-430,-2580,wall],[450,-3440,storm]]){mkMonster('siegeknight',p[0]-55,p[1],p[2]);mkMonster('royalarcanist',p[0]+55,p[1],p[2]);}scapeKill(ctx,[{x:-500,z:-900,room:gate},{x:430,z:-1740,room:yard},{x:-430,z:-2580,room:wall},{x:450,z:-3440,room:storm}]);finishScape(ctx,{sx:0,sz:310,sy:0,gx:0,gz:-4820,decoCol:STONE,decoTheme:'apex',decoTall:620});
+    }else{const hall=room('Hall of Broken Oaths',0,0,900,700),spire=room('West Tower Spiral',-480,-850,760,680,150),gallery=room('Royal Gallery',430,-1680,980,820,290),cross=room('Lightning Crossing',-430,-2520,800,700,430),crown=room('Crown Tower Court',450,-3380,980,820,580),last=room('Last Bridge',0,-4200,820,600,580),throne=room('Throne of the Awakened',0,-4580,1120,900,580);
+      // A continuous three-dimensional spiral is the level's spine; side chambers branch for loot and fights.
+      climbRun(0,-260,0,-480,-850,150,80);for(let k=0;k<16;k++){const a=k*.68,y=150+k*22;vplat(-480+Math.cos(a)*250,-850+Math.sin(a)*220,y,78,68,{towerSpiral:true});if(k%4===0)G.deco.push({x:-480+Math.cos(a)*250,z:-850+Math.sin(a)*220,y0:0,w:14,h:y,d:14,c:IRON});}
+      climbRun(-480,-850,150,430,-1680,290,82);vplat(430,-1680,290,840,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*165,z=-1900+Math.floor(k/5)*260;G.deco.push({x,z,y0:290,w:100,h:120,d:80,c:STONE});G.deco.push({x,z,y0:410,w:80,h:12,d:60,c:BLOOD});}
+      climbRun(430,-1680,290,-430,-2520,430,82);for(let k=0;k<11;k++){const t=k/10,x=430-860*t,z=-2100-420*t,y=340+(k%4)*30;vplat(x,z,y,78,66,{lightning:true});G.deco.push({x,z,y0:y,w:12,h:120,d:12,c:STORM});}
+      climbRun(-430,-2520,430,450,-3380,580,82);vplat(450,-3380,580,820,720,{checkpoint:true,terrace:true});for(let k=0;k<14;k++){const a=k*.64,y=580+k*23;vplat(450+Math.cos(a)*245,-3380+Math.sin(a)*220,y,74,66,{crownSpiral:true});}
+      // The last approach crosses three wide sanctuary landings between aggressive collapsing ribbons.
+      climbRun(450,-3380,580,0,-4580,580,82);for(let band=0;band<3;band++){vplat(300-band*300,-3800-band*300,580,180,150,{sanctuary:true});for(let k=0;k<5;k++)G.crumbles.push({x:360-band*300-k*65,z:-3680-band*300-k*65,w:68,d:62,h:580,state:0,timer:0,respawn:0,fallY:0,jit:0});}vplat(0,-4200,580,820,600,{checkpoint:true,sanctuary:true,setpiece:true});vplat(0,-4580,580,1120,900,{checkpoint:true,breather:true});
+      chest(-690,-850,260);chest(700,-1680,410);chest(-680,-2520,460);mkMonster('siegeknight',0,-180,hall);for(const p of [[430,-1680,gallery],[450,-3380,crown],[0,-4200,last]]){mkMonster('royalarcanist',p[0]-70,p[1],p[2]);mkMonster('siegeknight',p[0]+70,p[1],p[2]);}mkMonster('siegeknight',60,-4260,last);scapeKill(ctx,[{x:430,z:-1680,room:gallery},{x:450,z:-3380,room:crown},{x:0,z:-4200,room:last}]);scapeFind(ctx,0,-4640,580);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4860,decoCol:STONE,decoTheme:'apex',decoTall:720});}
+  }
+};
+const SIDE_SCAPES={
+  thornwood(ctx){ const {rnd,mkMonster}=ctx,BARK='#493020',ROOT='#69472a',LEAF='#24462b',GLOW='#b56cff';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const tree=(x,z,h)=>{ vcol(x,z,26,26,h); G.deco.push({x,z,y0:h,w:68,h:46,d:68,c:tint(LEAF,'#000',rnd()*.2),theme:'forest'}); };
+    const rootRun=(x0,z0,x1,z1,y0=18,y1=18)=>{ const n=Math.ceil(Math.hypot(x1-x0,z1-z0)/105); for(let k=1;k<n;k++){ const t=k/n; vplat(x0+(x1-x0)*t,z0+(z1-z0)*t,y0+(y1-y0)*t,86,62,{root:true}); } };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const verge=room('Hunter Verge',0,0,760,600),snares=room('Snarewood',-480,-720,720,660),burrow=room('Burrowed Road',440,-1040,720,620),cathedral=room('Root Cathedral',0,-1780,980,760),canopy=room('High Canopy',-600,-2530,420,360,190),mire=room('Thorn Mire',520,-2740,760,700),heart=room('Heart Grove',0,-3660,1040,820),exit=room('Old Hunter Gate',0,-4560,820,620);
+    rootRun(0,-260,-480,-460); rootRun(0,-260,440,-730); rootRun(-480,-1040,0,-1450); rootRun(440,-1350,0,-1450); rootRun(0,-2150,-600,-2530,70,190); rootRun(0,-2150,520,-2740,24,24); rootRun(-600,-2530,0,-3300,190,0); rootRun(520,-2740,0,-3300,24,0); rootRun(0,-4070,0,-4310);
+    for(let k=0;k<52;k++){ const R=[verge,snares,burrow,cathedral,canopy,mire,heart,exit][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.52+rnd()*.12); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,100+rnd()*120); }
+    for(let k=0;k<10;k++){ const a=k/10*6.28; G.deco.push({x:Math.cos(a)*300,z:-1780+Math.sin(a)*260,y0:0,w:32,h:220+(k%3)*60,d:32,c:BARK}); G.deco.push({x:Math.cos(a)*300,z:-1780+Math.sin(a)*260,y0:220+(k%3)*60,w:42,h:18,d:42,c:GLOW}); }
+    for(let k=0;k<7;k++){ const x=-700+k*74; G.deco.push({x,z:-720,y0:0,w:8,h:50+(k%2)*24,d:8,c:ROOT}); G.deco.push({x,z:-720,y0:42,w:38,h:7,d:8,c:ROOT}); }
+    vcol(-600,-2530,210,210,188); for(let k=0;k<7;k++){ const a=k*.86; vplat(-600+Math.cos(a)*210,-2530+Math.sin(a)*210,190+k*28,84,84,{root:true}); } vplat(-600,-2530,352,260,240,{checkpoint:true,terrace:true}); chest(-600,-2530,352);
+    G.deco.push({x:520,z:-2740,y0:0,w:660,h:2,d:590,c:'#263d35'}); for(let k=0;k<16;k++){ const a=k/16*6.28,rr=120+(k%3)*80; vplat(520+Math.cos(a)*rr,-2740+Math.sin(a)*rr,12+(k%4)*8,88,72,{root:true}); }
+    for(let k=0;k<12;k++){ const a=k/12*6.28; G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:0,w:22,h:110+(k%4)*35,d:22,c:ROOT}); G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:110+(k%4)*35,w:38,h:18,d:38,c:GLOW}); }
+    room('Forgotten Hunter Cache',-880,-3650,280,260); rootRun(-520,-3660,-740,-3650); chest(-880,-3650); chest(420,-3820);
+    for(const p of [[-480,-720,snares],[440,-1040,burrow],[0,-1780,cathedral],[520,-2740,mire],[0,-3660,heart]]){ mkMonster('thornboar',p[0]-45,p[1],p[2]); mkMonster('sporeback',p[0]+55,p[1]+30,p[2]); }
+    let guardian; {guardian=mkMonster('toxling',0,-3660,heart);makeElite(guardian);guardian.maxHp=guardian.hp=Math.round(guardian.hp*2.4);guardian.name='The Thornheart';} {const e=mkMonster('sporeback',-600,-2530,canopy);e.y=352;e.sx=e.x;e.sz=e.z;makeElite(e);}
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4680,decoCol:'#223c29',decoTheme:'forest',decoTall:300});
+    G.portal=null; G.sideGuardian=guardian; G.sideTask='Track and defeat the Thornheart'; G.sideTaskDone=false; questUpdate();
+  },
+  sunkenwash(ctx){ const {rnd,mkMonster}=ctx,SAND='#8c6a43',WATER='#315b68',BONE='#dfd3b5',STONE='#554737';
+    const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
+    const path=(a,b,w=130)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w); };
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const collapsed=room('Collapsed Wash',0,0,820,620),fossil=room('Fossil Shelf',-520,-760,700,620,90),settle=room('Drowned Settlement',420,-1320,820,720),sluice=room('Sluice Tunnels',-260,-2140,760,680),slide=room('Bone Slide',520,-2700,700,620,150),basin=room('Bone Basin',0,-3540,1040,820),gate=room('Floodline Gate',0,-4460,860,620);
+    path(collapsed,settle,150); climbRun(-220,-360,0,-520,-760,90,72); climbRun(-520,-1040,90,180,-1320,0,72); path(settle,sluice,140);
+    // High-water lane: rooftops and fossil ledges. Low-water lane: broad floor with visible ambush holes.
+    G.deco.push({x:420,z:-1320,y0:0,w:700,h:2,d:600,c:WATER}); for(const h of [[180,-1180],[420,-1420],[650,-1200]]){ vcol(h[0],h[1],180,140,74); vplat(h[0],h[1],78,190,150,{roof:true}); }
+    climbRun(40,-1250,0,180,-1180,78,68); climbRun(180,-1180,78,420,-1420,78,72); climbRun(420,-1420,78,650,-1200,78,72); chest(650,-1200,78);
+    // Sluice teeth visually divide three timed-dry channels; side alcoves are recovery pockets.
+    for(let k=0;k<7;k++){ const x=-520+k*86; G.walls.push({x,z:-2140,w:26,d:220,h:110}); G.deco.push({x,z:-2140,y0:110,w:38,h:18,d:238,c:STONE}); }
+    for(const z of [-1940,-2140,-2340]) G.deco.push({x:-260,z,y0:0,w:680,h:2,d:90,c:WATER});
+    path(sluice,basin,150); climbRun(40,-2440,0,520,-2700,150,72);
+    // A long descending bone-slide set piece with side landings; every miss returns to the basin route.
+    for(let k=0;k<11;k++){ const t=k/10,x=520*(1-t),z=-2700-650*t,y=150*(1-t); G.crumbles.push({x,z,w:82,d:68,h:y,state:0,timer:0,respawn:0,fallY:0,jit:0}); if(k%3===0)vplat(x+150,z,y,100,90,{recovery:true}); }
+    path(basin,gate,170); vplat(0,-3540,0,1040,820,{checkpoint:true});
+    // Fossil landmark and scavenger holes telegraph attacks before anything emerges.
+    for(let k=0;k<14;k++){ const a=k/14*6.28; G.deco.push({x:-520+Math.cos(a)*240,z:-760+Math.sin(a)*210,y0:90,w:18,h:70+(k%4)*26,d:16,c:BONE}); }
+    for(const h of [[-300,-340],[260,-520],[-520,-3400],[380,-3700]]) G.deco.push({x:h[0],z:h[1],y0:0,w:70,h:3,d:54,c:'#211b16'});
+    const relics=[{x:-520,z:-760,y:90},{x:420,z:-1420,y:78},{x:-260,z:-2260,y:0}]; for(const p of relics) G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'washRelics',name:'Flood Relic'},bob:rnd()*3,placed:true});
+    localMission('washRelics','Recover the three Flood Relics','collect',3,120); G.portal=null;
+    chest(-720,-760,90); chest(360,-3540); scapeSecret(ctx,-760,-2260,0);
+    for(const p of [[0,-180,collapsed],[-520,-760,fossil],[420,-1320,settle],[-260,-2140,sluice],[0,-3540,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster('sparkling',p[0]+55,p[1]-20,p[2]); }
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:SAND,decoTheme:'canyon',decoTall:420});
+    G.portal=null; questUpdate();
+  },
+  oubliette(ctx){ const {rnd,mkMonster}=ctx,STONE='#404654',IRON='#20242c',GLOW='#7ea8d8';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=120)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
+    const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const intake=room('Intake Cells',0,0,760,600),chains=room('Chain Galleries',-500,-800,700,660,90),pit=room('Punishment Pit',420,-1500,800,720),records=room('Forgotten Records',-420,-2300,720,660,150),walk=room('Warden Walk',430,-3020,720,620,250),shaft=room('Escape Shaft',0,-3900,900,820,360),gate=room('Surface Seal',0,-4720,780,560,360);
+    path(intake,pit,140);climbRun(-200,-360,0,-500,-800,90,72);climbRun(-500,-1100,90,150,-1500,0,72);
+    // Chains are broad standable links, while low crawlspaces provide a slower no-fall alternative.
+    for(let k=0;k<10;k++){const t=k/9;vplat(420-840*t,-1680-620*t,20+130*t,78,78,{chain:true});G.deco.push({x:420-840*t,z:-1680-620*t,y0:160+130*t,w:7,h:150,d:7,c:IRON});}
+    vseg(0,-2140,150,900,{crawl:true});vseg(-260,-2580,520,120,{crawl:true});
+    climbRun(-420,-2300,150,430,-3020,250,76);for(let k=0;k<8;k++){const a=k/8*6.28;vplat(430+Math.cos(a)*230,-3020+Math.sin(a)*210,250+(k%3)*34,78,78,{chain:true});}
+    climbRun(430,-3020,250,0,-3900,360,74);for(let k=0;k<7;k++){const a=k*.9;vplat(Math.cos(a)*220,-3900+Math.sin(a)*220,360+k*34,80,80,{shaft:true});}
+    climbRun(0,-3900,360,0,-4720,360,84,{bridge:true});
+    // Bar grids, testimony cells, and a visible lights-out gallery silhouette.
+    for(const z of [-200,-800,-1500,-2300])for(let k=0;k<8;k++)G.deco.push({x:-250+k*72,z,y0:0,w:7,h:115,d:7,c:IRON});
+    for(let k=0;k<6;k++)G.deco.push({x:-420+(k%3)*140,z:-2300+Math.floor(k/3)*170,y0:150,w:100,h:70,d:80,c:k%2?STONE:'#252936'});
+    const recordsItems=[{x:-500,z:-790,y:90},{x:-420,z:-2300,y:150},{x:430,z:-3020,y:250}];for(const p of recordsItems)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'prisonRecords',name:'Prison Record'},bob:rnd()*3,placed:true});
+    localMission('prisonRecords','Recover the prisoners’ records','collect',3,150);G.portal=null;chest(-680,-2300,150);chest(210,-3900,360);scapeSecret(ctx,0,-2140,0);
+    for(const p of [[0,-200,intake],[-500,-800,chains],[420,-1500,pit],[-420,-2300,records],[430,-3020,walk]]){mkMonster('revenant',p[0]-50,p[1],p[2]);mkMonster('bones',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4800,decoCol:STONE,decoTheme:'dungeon',decoTall:480});G.portal=null;questUpdate();
+  },
+  glaciervault(ctx){const {rnd,mkMonster}=ctx,ICE='#a9e5f5',CRYSTAL='#78d7ef',METAL='#3f5968',HEAT='#ff9b4a';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=130)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const vest=room('Shattered Vestibule',0,0,820,620),spec=room('Specimen Galleries',-500,-820,760,680),thermal=room('Thermal Conduits',420,-1580,760,700),mirror=room('Mirror-Ice Hall',-420,-2380,740,660,120),archive=room('Crystal Archive',450,-3100,800,720,210),treasury=room('Sealed Treasury',0,-4140,980,780,210),escape=room('Refreeze Escape',0,-4900,820,560,210);
+    path(vest,spec,150);path(spec,thermal,140);for(let k=0;k<8;k++){const x=-720+k*72;G.deco.push({x,z:-820,y0:0,w:50,h:90+(k%3)*30,d:50,c:ICE});if(k%2===0)G.deco.push({x,z:-820,y0:90,w:36,h:28,d:36,c:'#456b78'});}
+    // Thermal conduits wind between heat pylons; cracks telegraph which frozen specimens will wake.
+    for(let k=0;k<10;k++){const x=120+(k%5)*140,z=-1440-Math.floor(k/5)*220;vcol(x,z,34,34,72);G.deco.push({x,z,y0:72,w:46,h:14,d:46,c:k%2?HEAT:CRYSTAL});}
+    climbRun(160,-1900,0,-420,-2380,120,72);vplat(-420,-2380,120,740,660,{checkpoint:true,terrace:true});
+    // Mirror-ice zigzag forces changing approach angles, with a broad floor below as recovery.
+    for(let k=0;k<10;k++){const x=-620+(k%2?360:80),z=-2550-k*90;vplat(x,z,120+(k%3)*28,92,68,{mirror:true});G.deco.push({x,z,y0:150,w:7,h:100,d:70,c:'#dff9ff'});}
+    climbRun(-260,-2750,120,450,-3100,210,74);for(let k=0;k<12;k++){const a=k/12*6.28;G.deco.push({x:450+Math.cos(a)*270,z:-3100+Math.sin(a)*240,y0:210,w:22,h:110+(k%4)*28,d:22,c:CRYSTAL});}
+    climbRun(450,-3100,210,0,-4140,210,84,{archive:true});climbRun(0,-4140,210,0,-4900,210,82,{escape:true});
+    const cores=[{x:-500,z:-820,y:0},{x:420,z:-1580,y:72},{x:450,z:-3100,y:210}];for(const p of cores)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'thermalCores',name:'Thermal Core'},bob:rnd()*3,placed:true});localMission('thermalCores','Restore the three thermal conduits','activate',3,180);G.portal=null;
+    chest(-700,-2380,120);chest(600,-4140,210);scapeSecret(ctx,720,-3100,210);for(const p of [[-500,-820,spec],[420,-1580,thermal],[-420,-2380,mirror],[450,-3100,archive]]){mkMonster('frostshell',p[0]-50,p[1],p[2]);mkMonster('frostling',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4980,decoCol:METAL,decoTheme:'frost',decoTall:440});G.portal=null;questUpdate();
+  },
+  magmacore(ctx){const {rnd,mkMonster}=ctx,BASALT='#29252b',IRON='#55444a',MAGMA='#ff5b19',GOLD='#e7a633',COOL='#386a73';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
+    const path=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const shelf=room('Fractured Crust',0,0,860,620),vents=room('Vent Maze',-520,-820,820,700),refinery=room('Suspended Refinery',500,-1740,850,720,150),mantle=room('Mantle Bridge',-430,-2720,760,700,300),core=room('Core Chamber',430,-3660,900,780,430),cool=room('Cooling Tunnels',-260,-4520,820,650,260),escape=room('Pressure Escape',0,-5200,900,540,260);
+    path(shelf,vents,150);for(let k=0;k<12;k++){const x=-780+(k%4)*175,z=-650-Math.floor(k/4)*210;vplat(x,z,(k%3)*32,96,88,{vent:true,recovery:k%4===0});G.deco.push({x,z,y0:(k%3)*32,w:34,h:78,d:34,c:k%2?MAGMA:GOLD});}
+    // A rising chain of ore lifts opens into a suspended refinery; missed jumps land on the broad vent floor.
+    climbRun(-260,-1120,0,500,-1740,150,74);for(let k=0;k<6;k++)G.movers.push({x:180+k*105,z:-1550-(k%2)*150,y0:55+k*20,w:78,d:70,axis:k%2?'x':'z',range:75,speed:.55+k*.04,phase:k*.8,c:IRON});
+    vplat(500,-1740,150,850,720,{checkpoint:true,terrace:true});for(let k=0;k<8;k++){const a=k/8*6.28;vplat(500+Math.cos(a)*290,-1740+Math.sin(a)*225,190+(k%2)*45,92,74,{refinery:true});}
+    // Twin routes cross the mantle: a generous lower basalt causeway and a faster high crane-line.
+    climbRun(280,-2070,150,-430,-2720,300,82,{safeRoute:true});for(let k=0;k<9;k++){const t=k/8,x=520+( -430-520)*t,z=-2050+(-2720+2050)*t;vplat(x,z,250+k*27,68,62,{fastRoute:true});if(k%2===0)G.deco.push({x,z,y0:0,w:24,h:250+k*27,d:24,c:BASALT});}
+    vplat(-430,-2720,300,760,700,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const a=k/10*6.28;vplat(-430+Math.cos(a)*250,-2720+Math.sin(a)*220,330+(k%3)*38,82,70,{basaltPillar:true});}
+    climbRun(-220,-3040,300,430,-3660,430,76);vplat(430,-3660,430,900,780,{district:'Core Chamber',checkpoint:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.deco.push({x:430+Math.cos(a)*310,z:-3660+Math.sin(a)*270,y0:430,w:28,h:120+(k%4)*35,d:28,c:k%3?BASALT:MAGMA});}
+    // Cooling descent reverses the rhythm: controlled drops through pipe rings, then one final climb out.
+    for(let k=0;k<8;k++){const a=k*.82;vplat(120+Math.cos(a)*210,-4090-k*75,430-k*24,84,76,{coolingDrop:true});G.deco.push({x:120+Math.cos(a)*210,z:-4090-k*75,y0:0,w:20,h:430-k*24,d:20,c:COOL});}
+    vplat(-260,-4520,260,820,650,{recovery:true,checkpoint:true});climbRun(-260,-4520,260,0,-5200,260,84,{escape:true});
+    const valves=[{x:-610,z:-820,y:32},{x:500,z:-1740,y:235},{x:430,z:-3660,y:430}];for(const p of valves)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'coreValves',name:'Core Valve'},bob:rnd()*3,placed:true});localMission('coreValves','Stabilize the three core valves','activate',3,220);G.portal=null;
+    chest(-720,-2720,300);chest(700,-3660,430);chest(-520,-4520,260);scapeSecret(ctx,760,-1740,235);for(const p of [[-520,-820,vents],[500,-1740,refinery],[-430,-2720,mantle],[430,-3660,core]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}
+    finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-5280,decoCol:BASALT,decoTheme:'ember',decoTall:520});G.portal=null;questUpdate();
+  },
+  reapersgate(ctx){const {rnd,mkMonster}=ctx,STONE='#27202f',BONE='#b7a7c5',SOUL='#9d54e8',IRON='#403746';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const path=(a,b,w=135)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const vestibule=room('Bone Vestibule',0,0,820,620),harvest=room('Harvest Galleries',-480,-820,760,680),pendulum=room('Pendulum Nave',430,-1650,800,720,140),ossuary=room('Spiral Ossuary',-420,-2500,760,700,300),choir=room('Soul Choir',450,-3380,820,720,440),gate=room('Reaper’s Gate',0,-4520,980,780,440);
+    path(vestibule,harvest,150);for(let k=0;k<10;k++){const a=k/10*6.28;G.deco.push({x:-480+Math.cos(a)*260,z:-820+Math.sin(a)*230,y0:0,w:34,h:90+(k%3)*30,d:34,c:BONE});}
+    // Scythe-blade stepping stones sweep across the nave on offset rhythms; a wider side aisle is the recovery route.
+    climbRun(-480,-820,0,430,-1650,140,82);for(let k=0;k<8;k++)G.movers.push({x0:120+k*95,z:-1450-k*92,w:100,d:66,h:70+k*10,amp:48,sp:.8+k*.08,ph:k*.7,x:120,px:120});vplat(430,-1650,140,800,720,{checkpoint:true,terrace:true});
+    for(let k=0;k<12;k++){const a=k*.72,y=160+k*14;vplat(430+Math.cos(a)*260,-1650+Math.sin(a)*230,y,82,68,{scytheArc:true});G.deco.push({x:430+Math.cos(a)*260,z:-1650+Math.sin(a)*230,y0:y,w:70,h:8,d:18,c:SOUL});}
+    climbRun(430,-1650,140,-420,-2500,300,82);for(let k=0;k<14;k++){const a=k*.68,y=300+k*24;vplat(-420+Math.cos(a)*230,-2500+Math.sin(a)*210,y,76,68,{ossuary:true});if(k%3===0)G.deco.push({x:-420+Math.cos(a)*230,z:-2500+Math.sin(a)*210,y0:0,w:12,h:y,d:12,c:IRON});}
+    climbRun(-420,-2500,300,450,-3380,440,82);vplat(450,-3380,440,820,720,{checkpoint:true,terrace:true});for(let k=0;k<9;k++){const x=160+(k%3)*290,z=-3600+Math.floor(k/3)*220;G.deco.push({x,z,y0:440,w:90,h:120,d:70,c:k%2?SOUL:BONE});}
+    // Final reaping line alternates disappearing slabs and broad sanctuary landings.
+    climbRun(450,-3380,440,0,-4520,440,82);for(let k=0;k<10;k++)G.crumbles.push({x:360-k*72,z:-3900-k*68,w:72,d:66,h:440,state:0,timer:0,respawn:0,fallY:0,jit:0});
+    const seals=[{x:-480,z:-820,y:0},{x:430,z:-1650,y:210},{x:-420,z:-2500,y:444}];for(const p of seals)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'reaperSeals',name:'Reaper Seal'},bob:rnd()*3,placed:true});localMission('reaperSeals','Break the three Reaper seals','activate',3,240);G.portal=null;
+    chest(680,-1650,210);chest(-650,-2500,420);scapeSecret(ctx,700,-3380,440);for(const p of [[-480,-820,harvest],[430,-1650,pendulum],[-420,-2500,ossuary],[450,-3380,choir]]){mkMonster('shadeling',p[0]-50,p[1],p[2]);mkMonster('blinkstalker',p[0]+55,p[1],p[2]);}finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4740,decoCol:STONE,decoTheme:'void',decoTall:590});G.portal=null;questUpdate();
+  },
+  reliquary(ctx){const {rnd,mkMonster}=ctx,MARBLE='#b9b5aa',GOLD='#d4aa42',JEWEL='#58c4c9',DARK='#343442';
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const path=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    const seal=room('Outer Seal',0,0,840,640),ledger=room('Royal Ledger Hall',-480,-820,760,680),weights=room('Counterweight Vault',430,-1640,800,720,150),prism=room('Prismatic Treasury',-420,-2480,780,700,290),lock=room('Sun-Lock Mechanism',450,-3340,820,720,430),heart=room('Reliquary Heart',0,-4480,1000,800,430);
+    path(seal,ledger,150);for(let k=0;k<12;k++){const x=-760+(k%4)*180,z=-1040+Math.floor(k/4)*190;G.deco.push({x,z,y0:0,w:100,h:70,d:80,c:DARK});G.deco.push({x,z,y0:70,w:86,h:10,d:66,c:GOLD});}
+    // Counterweight lifts travel in opposed pairs; the surrounding stairs guarantee a readable recovery path.
+    climbRun(-480,-820,0,430,-1640,150,82);for(let k=0;k<8;k++)G.movers.push({x0:120+k*90,z:-1430-k*85,w:96,d:72,h:55+k*13,amp:45,sp:.65+k*.08,ph:k%2?3.14:0,x:120,px:120});vplat(430,-1640,150,800,720,{checkpoint:true,terrace:true});
+    climbRun(430,-1640,150,-420,-2480,290,82);for(let k=0;k<12;k++){const a=k/12*6.28;vplat(-420+Math.cos(a)*260,-2480+Math.sin(a)*230,290+(k%4)*30,82,72,{prism:true});G.deco.push({x:-420+Math.cos(a)*170,z:-2480+Math.sin(a)*150,y0:290,w:28,h:130,d:28,c:k%2?JEWEL:'#d58bd5'});}
+    climbRun(-420,-2480,290,450,-3340,430,82);vplat(450,-3340,430,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;vplat(450+Math.cos(a)*280,-3340+Math.sin(a)*245,430+(k%3)*34,88,66,{sunGear:true});G.deco.push({x:450+Math.cos(a)*170,z:-3340+Math.sin(a)*150,y0:430,w:16,h:150,d:16,c:GOLD});}
+    climbRun(450,-3340,430,0,-4480,430,84);const keys=[{x:-480,z:-820,y:0},{x:-420,z:-2480,y:350},{x:450,z:-3340,y:464}];for(const p of keys)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'sunKeys',name:'Sun Key'},bob:rnd()*3,placed:true});localMission('sunKeys','Recover the three Sun Keys','collect',3,260);G.portal=null;
+    chest(680,-1640,190);chest(-680,-2480,350);chest(700,-3340,464);scapeSecret(ctx,720,-1640,150);for(const p of [[-480,-820,ledger],[430,-1640,weights],[-420,-2480,prism],[450,-3340,lock]]){mkMonster('marblestatue',p[0]-50,p[1],p[2]);mkMonster('sunpriest',p[0]+55,p[1],p[2]);}finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4700,decoCol:MARBLE,decoTheme:'marble',decoTall:560});G.portal=null;questUpdate();
+  }
+};
+function STONE_C(){ return '#6b6b73'; }
+/* ================= BOSS ARENAS (Phase 17) =================
+   Every zone boss fights on a purpose-built themed SET-PIECE instead of the shared maze.
+   bossFinish = finishScape minus the auto-portal: the way opens only when the boss falls
+   (checkStageClear sees G.portalPos + G.boss.dead). Arenas stay compact — the fight is
+   the content — and each reuses its zone's hazard + palette. */
+function bossFinish(ctx,o){
+  G.vertical=true;
+  let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
+  for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
+  for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);
+  for(const cr of G.crumbles) ext(cr.x,cr.z,cr.w,cr.d);
+  if(mnX>mxX){ mnX=-300;mxX=300;mnZ=-300;mxZ=300; }
+  G.bounds={minX:mnX-90,maxX:mxX+90,minZ:mnZ-90,maxZ:mxZ+90}; G.progressEnd=mnZ;
+  G.startPos={x:o.sx,z:o.sz}; G.goalPos={x:o.gx,z:o.gz}; G.lastSafe={x:o.sx,z:o.sz,y:o.sy||0};
+  G.portalPos={x:o.gx,z:o.gz};                                  // opens on the boss's death, never before
+  const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt2=o.decoTall||200;
+  for(let k=0;k<16;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
+    G.deco.push({x:ctx.rnd()<0.5?mnX-160-ctx.rnd()*300:mxX+160+ctx.rnd()*300, z:zz, w:56+ctx.rnd()*120, h:dt2*(0.5+ctx.rnd()*0.8), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
+  // Boss v2 — a GRAND outer frame so every arena reads as an event on entry: a ring of crowned monoliths + a glowing floor rim
+  { const cxA=(mnX+mxX)/2, czA=(mnZ+mxZ)/2, rmax=Math.max((mxX-mnX)/2,(mxZ-mnZ)/2), RR=rmax+150, rimC=tint(dc,'#fff',0.4);
+    for(let i=0;i<12;i++){ const a=i/12*6.283, px=cxA+Math.cos(a)*RR, pz=czA+Math.sin(a)*RR, hh=dt2*(1.5+((i%2)?0.55:0));
+      G.deco.push({x:px,z:pz,y0:0,w:46,h:hh,d:46,c:tint(dc,'#000',0.28),theme:dth});
+      G.deco.push({x:px,z:pz,y0:hh,w:60,h:22,d:60,c:tint(dc,'#fff',0.12),theme:dth}); }        // crowned monoliths
+    for(let i=0;i<24;i++){ const a=i/24*6.283; G.deco.push({x:cxA+Math.cos(a)*rmax*0.97,z:czA+Math.sin(a)*rmax*0.97,y0:0,w:16,h:1.6,d:16,c:rimC}); }   // glowing rune rim
+  }
+  hazSetup(ctx.rnd2);
+  G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
+}
+// spawn the stage's boss centered in its arena (plus escorts on miniboss stages), homed to the ring
+function arenaBoss(ctx,bx2,bz2,hw,hd){
+  const b=ctx.mkMonster(ctx.s.boss,bx2,bz2,null); b.boss=true; b.home={x:bx2,z:bz2,hw,hd};
+  if(ctx.s.type==='miniboss'){ ctx.mkMonster(ctx.pick(),bx2-100,bz2+80,null); ctx.mkMonster(ctx.pick(),bx2+100,bz2+80,null); }
+  return b;
+}
+const BOSS_ARENAS={
+  /* FROST SORCERER — the Cracked Ring: a frozen arena over the freezing deep, ringed by
+     icefall columns; the ice is slick and split by white pressure-cracks. */
+  frost(ctx){ const {rnd}=ctx; const ICE='#bfe6ff', SNOW='#e8f4ff';
+    vseg(0,-40,660,660); G.rooms.push({x:0,z:-40,w:660,d:660,monsters:[],encounter:false,cleared:true});
+    vseg(0,340,200,180);                                                             // the entry tongue of ice
+    for(let k=0;k<8;k++){ const a=k/8*6.283, rr=360; const px=Math.cos(a)*rr, pz=-40+Math.sin(a)*rr;
+      vcol(px,pz,46,46,150+((k%2)?46:0));
+      G.deco.push({x:px,z:pz,y0:150+((k%2)?46:0),w:34,h:40,c:ICE,theme:'frost'});     // icefall column crowns
+      if(k%2===0) G.deco.push({x:px*0.82,z:-40+Math.sin(a)*rr*0.82,w:26,h:70,c:ICE,theme:'frost'}); }
+    for(let k=0;k<7;k++){ const a=rnd()*6.283, rr=60+rnd()*220;                       // pressure-cracks radiating from center
+      G.deco.push({x:Math.cos(a)*rr*0.6,z:-40+Math.sin(a)*rr*0.6,y0:0,w:8,h:1.6,d:120+rnd()*130,c:SNOW}); }
+    G.deco.push({x:0,z:-40,y0:0,w:150,h:2,d:150,c:tint(ICE,'#fff',0.3)});             // the frozen heart he stands on
+    vtorch(-150,300,rnd); vtorch(150,300,rnd);
+    arenaBoss(ctx,0,-140,270,270);
+    bossFinish(ctx,{sx:0,sz:390,sy:0, gx:0,gz:-300, decoCol:'#8fb8d8',decoTheme:'frost',decoTall:300});
+  },
+  /* EMBER COLOSSUS — the Crucible: a basalt island alone in the lava sea; its rim crumbles,
+     its vents breathe fire, and there is nowhere else to stand. */
+  ember(ctx){ const {rnd}=ctx; const BAS='#241512';
+    vseg(0,-20,620,620); G.rooms.push({x:0,z:-20,w:620,d:620,monsters:[],encounter:false,cleared:true});
+    vseg(0,360,190,160);
+    for(const q of [[-1,-1],[1,-1],[-1,1],[1,1]]) G.rooms.push({x:q[0]*190,z:-20+q[1]*190,w:150,d:150,monsters:[],encounter:false,cleared:true});   // quadrant hearths -> Emberfall vents
+    for(let k=0;k<10;k++){ const a=k/10*6.283, rr=330;                                // the crumbling rim
+      G.crumbles.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:78,d:78,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+    for(let k=0;k<6;k++){ const a=k/6*6.283+0.5, rr=395; vcol(Math.cos(a)*rr,-20+Math.sin(a)*rr,40,40,60+rnd()*70); }   // obsidian teeth around the sea
+    G.deco.push({x:0,z:-260,y0:0,w:130,h:110,c:BAS,theme:'volcano'}); G.deco.push({x:0,z:-260,y0:110,w:60,h:34,c:'#3d1a10',theme:'volcano'});   // a half-sunk idol watches the fight
+    vtorch(-130,320,rnd); vtorch(130,320,rnd);
+    arenaBoss(ctx,0,-120,250,250);
+    bossFinish(ctx,{sx:0,sz:400,sy:0, gx:0,gz:-280, decoCol:'#5a2418',decoTheme:'volcano',decoTall:260});
+  },
+  /* ABYSS KING — the Throne Ring: his island alone in the dark, ringed by torn shards
+     and slow-turning void crystal; the throne watches you cross. */
+  abyss(ctx){ const {rnd}=ctx; const OBS='#241431';
+    vseg(0,-20,680,680); G.rooms.push({x:0,z:-20,w:680,d:680,monsters:[],encounter:false,cleared:true});
+    gapStones(0,390,0,330,80,rnd,true); vseg(0,450,180,160);                          // a phasing threshold — even walking in is a step of faith
+    vplat(0,-210,60,250,170,{terrace:true});                                          // the throne dais
+    G.deco.push({x:0,z:-260,y0:60,w:110,h:96,c:OBS}); G.deco.push({x:0,z:-260,y0:156,w:66,h:40,c:'#170a2c'});   // the black throne
+    for(let k=0;k<8;k++){ const a=k/8*6.283, rr=350; const px=Math.cos(a)*rr, pz=-20+Math.sin(a)*rr;
+      vcol(px,pz,42,42,110+((k%3)?0:60));
+      G.deco.push({x:px,z:pz,w:30,h:90,c:OBS,theme:'void'}); }                        // slow-turning crystals crown the ring
+    for(let k=0;k<5;k++){ const a=rnd()*6.283, rr=430+rnd()*80;                       // torn debris drifting beyond the edge
+      G.deco.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:24+rnd()*30,h:40+rnd()*60,c:OBS,theme:'void'}); }
+    arenaBoss(ctx,0,-60,280,280);
+    bossFinish(ctx,{sx:0,sz:490,sy:0, gx:0,gz:-300, decoCol:'#2a1a44',decoTheme:'void',decoTall:280});
+  },
+  /* MARBLE COLOSSUS — the Rotunda: a domed white circle whose pillars have started to fall;
+     the standing ones are your only cover from its thrown fire. */
+  palace(ctx){ const {rnd}=ctx; const MARBLE='#7a8092', GOLD='#c9a24a';
+    vseg(0,-20,660,660); G.rooms.push({x:0,z:-20,w:660,d:660,monsters:[],encounter:false,cleared:true});
+    vseg(0,360,200,160);
+    for(let k=0;k<10;k++){ const a=k/10*6.283, rr=300; const px=Math.cos(a)*rr, pz=-20+Math.sin(a)*rr;
+      if(k===2||k===7){ G.deco.push({x:px,z:pz,y0:0,w:44,h:26,d:150,c:tint(MARBLE,'#000',0.15)}); continue; }   // the toppled two
+      vcol(px,pz,44,44,150); G.deco.push({x:px,z:pz,y0:150,w:54,h:15,c:GOLD}); }
+    for(let k=0;k<10;k++){ const a=k/10*6.283+0.31, rr=300;                          // the broken dome ring floats where the roof was
+      if(k%4===3) continue;
+      G.deco.push({x:Math.cos(a)*rr*0.92,z:-20+Math.sin(a)*rr*0.92,y0:186,w:74,h:16,d:26,c:tint(MARBLE,'#fff',0.2)}); }
+    G.deco.push({x:0,z:-250,y0:0,w:120,h:26,c:GOLD}); G.deco.push({x:0,z:-250,y0:26,w:84,h:14,c:tint(GOLD,'#fff',0.25)});   // the sun altar
+    vtorch(-140,320,rnd); vtorch(140,320,rnd);
+    arenaBoss(ctx,0,-100,260,260);
+    bossFinish(ctx,{sx:0,sz:400,sy:0, gx:0,gz:-290, decoCol:MARBLE,decoTheme:'marble',decoTall:260});
+  },
+  /* VOID TYRANT — the Summit of Duskmoor: an open-sky crown of the castle; the edges are
+     already falling away, and the last banners burn violet against the dark. */
+  castle(ctx){ const {rnd}=ctx; const STONE='#2c2e38';
+    vseg(0,-20,700,700); G.rooms.push({x:0,z:-20,w:700,d:700,monsters:[],encounter:false,cleared:true});
+    vseg(0,380,200,180);
+    for(let k=0;k<12;k++){ const a=k/12*6.283, rr=372;                                // the summit's rim is collapsing
+      G.crumbles.push({x:Math.cos(a)*rr,z:-20+Math.sin(a)*rr,w:80,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0}); }
+    for(const s2 of [[-1,-1],[1,-1],[-1,1],[1,1]]){ const px=s2[0]*250, pz=-20+s2[1]*250;
+      vcol(px,pz,40,40,170);
+      G.deco.push({x:px,z:pz,y0:170,w:48,h:30,c:'#3a1420'}); G.deco.push({x:px,z:pz,y0:118,w:8,h:52,d:34,c:'#6a2040'}); }   // burnt banner pylons
+    for(let k=0;k<4;k++) G.deco.push({x:(rnd()*2-1)*220,z:-20+(rnd()*2-1)*220,w:22+rnd()*22,h:36+rnd()*50,c:STONE,theme:'apex'});   // void shards breaking through the stone
+    G.deco.push({x:0,z:-20,y0:0,w:210,h:1.6,d:210,c:'#1c1029'});                      // the dark circle where he waits
+    arenaBoss(ctx,0,-80,290,290);
+    bossFinish(ctx,{sx:0,sz:420,sy:0, gx:0,gz:-320, decoCol:STONE,decoTheme:'apex',decoTall:320});
+  },
+  /* THE BRUTE — the Trampled Field: a meadow he has paced into dirt; broken fence, a
+     gore-marked tree, and the bones of everything that stood here before you. */
+  outskirts(ctx){ const {rnd}=ctx; const DIRT='#4a3826', BONE='#d8cdb0';
+    vseg(0,-20,620,600); G.rooms.push({x:0,z:-20,w:620,d:600,monsters:[],encounter:false,cleared:true});
+    vseg(0,340,200,160);
+    G.deco.push({x:0,z:-20,y0:0,w:400,h:1.4,d:380,c:DIRT});                               // the ground he wore bare
+    for(let k=0;k<7;k++){ const a=k/7*6.283; const fx2=Math.cos(a)*330, fz2=-20+Math.sin(a)*300;
+      vcol(fx2,fz2,14,14,26+((k%2)?14:0)); if(k%2) G.deco.push({x:fx2,z:fz2,y0:38,w:44,h:8,d:10,c:'#5a4426'}); }   // the fence he broke through
+    vcol(-230,-190,26,26,90); G.deco.push({x:-230,z:-190,y0:90,w:70,h:44,d:70,c:'#284f28'});
+    G.deco.push({x:-230,z:-165,y0:34,w:10,h:30,d:4,c:'#8e1620'});                          // the tree, and the mark he leaves on it
+    for(const b of [[150,-240],[240,60],[-90,180]]) G.deco.push({x:b[0],z:b[1],y0:0,w:20+rnd()*16,h:9+rnd()*8,d:14,c:BONE});
+    vtorch(-140,300,rnd); vtorch(140,300,rnd);
+    arenaBoss(ctx,0,-120,250,240);
+    bossFinish(ctx,{sx:0,sz:380,sy:0, gx:0,gz:-260, decoCol:'#3a5a2e',decoTheme:'plains',decoTall:180});
+  },
+  /* HOLLOW MARKSMAN — the Shooting Gallery: a canyon bowl he has claimed; bone pillars
+     are the only cover between you and the arrows. */
+  hollow(ctx){ const {rnd}=ctx; const SAND='#8a6a42', BONE='#d8cdb0';
+    vseg(0,-20,640,620); G.rooms.push({x:0,z:-20,w:640,d:620,monsters:[],encounter:false,cleared:true});
+    vseg(0,350,200,160);
+    canyonWall(-(640/2+18),-20,560,+1,rnd,30,300); canyonWall(640/2+18,-20,560,-1,rnd,30,300);
+    for(const c2 of [[-170,-120],[150,-40],[-40,-260],[190,-230],[-220,90]]){ vcol(c2[0],c2[1],40,40,86+rnd()*40);
+      G.deco.push({x:c2[0],z:c2[1],y0:86+rnd()*40,w:30,h:16,d:30,c:BONE}); }               // bone-capped cover pillars
+    for(let k=0;k<5;k++) G.deco.push({x:(rnd()*2-1)*220,z:-20+(rnd()*2-1)*220,y0:0,w:16+rnd()*14,h:8,d:12,c:BONE});
+    vtorch(-150,310,rnd); vtorch(150,310,rnd);
+    arenaBoss(ctx,0,-160,260,250);
+    bossFinish(ctx,{sx:0,sz:390,sy:0, gx:0,gz:-280, decoCol:SAND,decoTheme:'canyon',decoTall:300});
+  },
+  /* THE WARDEN — the Warden's Yard: the prison court he never left; cell bars, chain
+     pillars, and the sarcophagi of the ones who kept the watch before him. */
+  keep(ctx){ const {rnd}=ctx; const STONE=STONE_C(), IRON='#3c4048';
+    vseg(0,-20,620,600); G.rooms.push({x:0,z:-20,w:620,d:600,monsters:[],encounter:false,cleared:true});
+    vseg(0,340,200,160);
+    for(const s2 of [-1,1]){ G.walls.push({x:s2*330,z:-20,w:26,d:560,h:170});               // the yard's walls...
+      for(let k=0;k<5;k++) G.deco.push({x:s2*314,z:-240+k*110,y0:24,w:6,h:120,d:9,c:IRON}); }   // ...barred like the cells
+    for(const c2 of [[-160,-140],[170,-60],[-20,-180]]){ vcol(c2[0],c2[1],34,34,110);
+      G.deco.push({x:c2[0],z:c2[1],y0:56,w:8,h:52,d:8,c:IRON}); }                          // chain pillars (clear of the portal's landing)
+    for(const s2 of [[-200,120],[210,150]]) G.deco.push({x:s2[0],z:s2[1],y0:0,w:74,h:26,d:40,c:'#43485a'});   // the old keepers' sarcophagi (cover)
+    vtorch(-170,300,rnd); vtorch(170,300,rnd); vtorch(-260,-260,rnd); vtorch(260,-260,rnd);
+    arenaBoss(ctx,0,-120,250,240);
+    bossFinish(ctx,{sx:0,sz:380,sy:0, gx:0,gz:-270, decoCol:STONE,decoTheme:'dungeon',decoTall:240});
+  }
+};
+function loadStage(i){
+  const s=STAGES[i]; G.stageIndex=i;
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
+  G.fx=[]; G.slowmo=0; G.interact=null;
+  document.getElementById('bonustimer').style.display='none';
+  G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
+  const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
+  const rnd=mulberry(i*7919+31+(G.runSeed||0)+so), rnd2=mulberry(i*104729+7+(G.runSeed||0)+so*3);
+  const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
+  const eliteRate=Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
+  const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
+  // Phasing zones bias their bridges toward static stones, because those are the only tiles the hazard may take.
+  const phz=!!(G && !G.side && !G.trial && curZone().haz==='phase');
+  const MOBS=THEMEMOBS[s.theme]||['grunt'];
+  const pick=()=>MOBS[Math.floor(rnd()*MOBS.length)];
+  const GW=104; // doorway width
+  const mkMonster=(type,x,z,room)=>{ const m=spawnEnemy(type,x,z); G.killGoal++;
+    if(m.kind==='caster'&&CASTER_EL[s.theme]){ m.shot.el=CASTER_EL[s.theme]; m.shot.color=elementColor(m.shot.el)||m.shot.color; }
+    if(room){ m.room=room; (room.monsters=room.monsters||[]).push(m); if(room.encounter) m.dropT=9999; }
+    if(!m.boss && !isBoss && rnd2()<eliteRate) makeElite(m);
+    return m; };
+  /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
+     Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
+  if(!isBoss && !isMini && !G.trial && !G.side && EXPANDED_SCAPES[curZone().id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
+  if(!isBoss && !isMini && !G.trial && !G.side && SCAPES[curZone().id]){
+    // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
+    // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
+  if(!isBoss && !isMini && !G.trial && G.side && curZone().side && SIDE_SCAPES[curZone().side.id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    SIDE_SCAPES[curZone().side.id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
+  /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
+     Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
+  if((isBoss||isMini) && !G.trial && !G.side && G.area<0 && BOSS_ARENAS[curZone().id]){
+    const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    BOSS_ARENAS[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+  }
+  // door slab across a doorway; ori 'x' = opening runs along x (front/back wall), 'z' = along z (side wall)
+  const sealDoor=(x,z,ori,type)=>{ const dr=ori==='x'?{x,z,w:GW,d:16,h:84,open:type==='combat',type,ori:'x',plates:[]}
+    :{x,z,w:16,d:GW,h:84,open:type==='combat',type,ori:'z',plates:[]}; G.doors.push(dr); return dr; };
+  const wallRoom=(r)=>{
+    const t2=14,h2=96,g=r._gaps||{};
+    const side=(fixed,isZ,start,end,cuts)=>{
+      let pts=[start]; (cuts||[]).slice().sort((a,b)=>a-b).forEach(c=>{ pts.push(c-GW/2,c+GW/2); }); pts.push(end);
+      for(let q=0;q<pts.length;q+=2){ const a=pts[q],b2=pts[q+1]; if(b2-a>12){
+        if(isZ) G.walls.push({x:(a+b2)/2,z:fixed,w:b2-a,d:t2,h:h2});
+        else G.walls.push({x:fixed,z:(a+b2)/2,w:t2,d:b2-a,h:h2}); } } };
+    side(r.z+r.d/2,true,r.x-r.w/2,r.x+r.w/2,g.front);
+    side(r.z-r.d/2,true,r.x-r.w/2,r.x+r.w/2,g.back);
+    side(r.x-r.w/2,false,r.z-r.d/2,r.z+r.d/2,g.w);
+    side(r.x+r.w/2,false,r.z-r.d/2,r.z+r.d/2,g.e);
+    [[r.x-r.w/2+22,r.z-r.d/2+22],[r.x+r.w/2-22,r.z+r.d/2-22]].forEach(c2=>G.torches.push({x:c2[0],z:c2[1],ph:rnd()*6.28}));
+  };
+  /* ===== grid-graph maze: spanning tree (guarantees every room reachable) + a few loops =====
+     Rooms sit centered on grid cells so every doorway lands on the shared cell centre-line and
+     always aligns — walls can never seal another room's opening. Wide GX gives lots of L/R space. */
+  // zones GROW with the chain: tier 1 = 5x4 (as ever), tier 4 = 6x5, tier 6+ = 7x6.
+  // Boss arenas stay compact — the fight is the content there.
+  const _tz=zoneTier();
+  const GX=(isBoss?4:isMini?4:Math.min(8,5+Math.floor(_tz/2)));
+  const GZ=(isBoss?3:isMini?4:Math.min(6,4+Math.floor((_tz-1)/2)));
+  const PITCHX=490, PITCHZ=450;
+  const cellX=gx=>(gx-(GX-1)/2)*PITCHX, cellZ=gz=>-gz*PITCHZ;
+  const K=(a,b)=>a+'_'+b, inG=(a,b)=>a>=0&&a<GX&&b>=0&&b<GZ;
+  const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
+  const startGX=Math.floor(GX/2), startGZ=0;
+  const target=isBoss?5:isMini?6:(7+Math.floor(rnd()*4)+Math.min(3,Math.floor(diff/3)));
+  const roomAt={}, order=[[startGX,startGZ]], inSet=new Set([K(startGX,startGZ)]), active=[[startGX,startGZ]], treeEdges=[];
+  while(order.length<target && active.length){
+    const ai=Math.floor(rnd()*active.length), a=active[ai], ds=DIRS.slice().sort(()=>rnd()-0.5); let grew=false;
+    for(const d of ds){ const nx=a[0]+d[0],nz=a[1]+d[1];
+      if(inG(nx,nz)&&!inSet.has(K(nx,nz))){ inSet.add(K(nx,nz)); order.push([nx,nz]); active.push([nx,nz]); treeEdges.push([a,[nx,nz]]); grew=true; break; } }
+    if(!grew) active.splice(ai,1);
+  }
+  const ekey=e=>{ const p=K(e[0][0],e[0][1]),q=K(e[1][0],e[1][1]); return p<q?p+'|'+q:q+'|'+p; };
+  const edges=treeEdges.slice(), eset=new Set(treeEdges.map(ekey)), tset=new Set(treeEdges.map(ekey));
+  for(const c of order){ for(const d of [[1,0],[0,1]]){ const nx=c[0]+d[0],nz=c[1]+d[1];
+    if(inSet.has(K(nx,nz))){ const e=[c,[nx,nz]]; if(!eset.has(ekey(e)) && rnd()<0.30){ edges.push(e); eset.add(ekey(e)); } } } }
+  // graph distances FIRST (so the far "boss" room can be enlarged before corridors align to its walls)
+  const adj={}; order.forEach(c=>adj[K(c[0],c[1])]=[]);
+  edges.forEach(e=>{ const pk=K(e[0][0],e[0][1]),qk=K(e[1][0],e[1][1]); if(adj[pk].indexOf(qk)<0)adj[pk].push(qk); if(adj[qk].indexOf(pk)<0)adj[qk].push(pk); });
+  const dist={}, bfs=[K(startGX,startGZ)]; dist[bfs[0]]=0;
+  while(bfs.length){ const u=bfs.shift(); for(const v of adj[u]) if(dist[v]==null){ dist[v]=dist[u]+1; bfs.push(v); } }
+  let goalKey=K(startGX,startGZ), goalD=-1;
+  for(const k in dist){ if(k!==K(startGX,startGZ) && (dist[k]>goalD || (dist[k]===goalD && rnd()<0.4))){ goalD=dist[k]; goalKey=k; } }
+  // rooms (centered on cells so doorways always align). The boss/exit room is bigger.
+  for(const c of order){ const gx=c[0],gz=c[1], isGoal=K(gx,gz)===goalKey, big=rnd()<0.5;
+    let w,d;
+    if(isGoal && (isBoss||isMini)){ w=Math.min(PITCHX-54,402+rnd()*26); d=Math.min(PITCHZ-54,378+rnd()*24); } // roomier boss arena
+    else { w=Math.min(PITCHX-120,(big?330:262)+rnd()*118); d=Math.min(PITCHZ-120,(big?300:250)+rnd()*112); }
+    const room={x:cellX(gx),z:cellZ(gz),w,d,gx,gz,monsters:[],doors:[],doorways:[],cleared:true,_gaps:{front:[],back:[],w:[],e:[]},deg:0};
+    roomAt[K(gx,gz)]=room; G.rooms.push(room); G.segments.push({x:room.x,z:room.z,w,d});
+  }
+  const entryRoom=roomAt[K(startGX,startGZ)], goalRoom=roomAt[goalKey]||entryRoom;
+  const CW=104; // corridor width matches doorway
+  // parkour corridor: stoops at both ends + jumpable stepping-stones over the drop (no side rails). Always crossable.
+  const bridgeSpan=(a0,a1,cross,horiz)=>{ const mn=Math.min(a0,a1),mx=Math.max(a0,a1);
+    const put=(cc,w2)=> horiz?{x:cc,z:cross,w:w2,d:CW}:{x:cross,z:cc,w:CW,d:w2};
+    const stoop=32; G.segments.push(put(mn+stoop/2+2,stoop)); G.segments.push(put(mx-stoop/2-2,stoop)); // tighter landing stoops (less resting room)
+    const lo=mn+stoop, hi=mx-stoop, span=hi-lo; if(span<=54) return;  // short span: one demanding jump, no foothold
+    const iw=32;                                                      // narrow footholds -> wider, more precise jumps
+    const F=Math.max(1, Math.ceil(span/150)-1), step=span/(F+1);      // fewest footholds that keep each gap crossable (~<=134)
+    for(let i=1;i<=F;i++){ const cc=lo+step*i, r2=rnd();              // mostly DYNAMIC tiles now -> can't dawdle
+      if(r2<(phz?0.3:0.5)){ G.crumbles.push(Object.assign({state:0,timer:0,respawn:0,fallY:0,jit:0},put(cc,iw))); }      // crumbling stone
+      else if(r2<(phz?0.52:0.82) && horiz){ const amp=Math.min(step*0.34,42); G.movers.push({x0:cc,z:cross,w:iw,d:CW*0.7,h:0,amp,sp:1.1+rnd()*0.7,ph:rnd()*6.28,x:cc,px:cc}); } // moving platform
+      else { G.segments.push(Object.assign(put(cc,iw),{phaseable:true})); }   // static stepping stone (the minority) — the only tiles Phasing may take
+    }
+    if(diff>=2 && rnd()<0.4){ const g=lo+step*(1+Math.floor(rnd()*F)); G.geysers.push({x:horiz?g:cross,z:horiz?cross:g,r:18,period:2.6+rnd()*1.4,phase:rnd()*6.28}); } }; // more frequent hazards, earlier
+  for(const e of edges){ const ca=e[0],cb=e[1], ra=roomAt[K(ca[0],ca[1])], rb=roomAt[K(cb[0],cb[1])]; ra.deg++; rb.deg++;
+    const parkour=!isBoss && diff>=1 && rnd()<0.6; // ~60% of corridors become parkour bridges (still always jumpable)
+    if(cb[0]!==ca[0]){ // horizontal corridor (rooms share the z row)
+      const west=ca[0]<cb[0]?ra:rb, east=ca[0]<cb[0]?rb:ra, zc=ra.z;
+      const x0=west.x+west.w/2-6, x1=east.x-east.w/2+6, cx=(x0+x1)/2, cwid=x1-x0;
+      west._gaps.e.push(zc); east._gaps.w.push(zc);
+      west.doorways.push({x:west.x+west.w/2,z:zc,ori:'z'}); east.doorways.push({x:east.x-east.w/2,z:zc,ori:'z'});
+      if(cwid>12){ if(parkour) bridgeSpan(x0,x1,zc,true);
+        else { G.segments.push({x:cx,z:zc,w:cwid,d:CW}); G.walls.push({x:cx,z:zc-CW/2,w:cwid,d:14,h:96}); G.walls.push({x:cx,z:zc+CW/2,w:cwid,d:14,h:96}); } }
+    } else { // vertical corridor (rooms share the x column); higher gz = deeper (more -z) = "north"
+      const south=ca[1]<cb[1]?ra:rb, north=ca[1]<cb[1]?rb:ra, xc=ra.x;
+      const z0=south.z-south.d/2+6, z1=north.z+north.d/2-6, cz=(z0+z1)/2, cd=Math.abs(z0-z1);
+      south._gaps.back.push(xc); north._gaps.front.push(xc);
+      south.doorways.push({x:xc,z:south.z-south.d/2,ori:'x'}); north.doorways.push({x:xc,z:north.z+north.d/2,ori:'x'});
+      if(cd>12){ if(parkour) bridgeSpan(z0,z1,xc,false);
+        else { G.segments.push({x:xc,z:cz,w:CW,d:cd}); G.walls.push({x:xc-CW/2,z:cz,w:14,d:cd,h:96}); G.walls.push({x:xc+CW/2,z:cz,w:14,d:cd,h:96}); } }
+    }
+  }
+  const leaves=G.rooms.filter(r=>r.deg===1 && r!==entryRoom && r!==goalRoom);
+  const vault=(!isBoss && leaves.length && (rnd2()<0.5||(G&&G.side)))?leaves[Math.floor(rnd2()*leaves.length)]:null;  // chests are a find, not a guarantee — but a side zone always pays
+  // boss / exit lives in the hidden goal room
+  if(isBoss||isMini){ goalRoom.encounter=true; goalRoom.cleared=false;
+    const b=mkMonster(s.boss,goalRoom.x,goalRoom.z,goalRoom); b.boss=true;
+    b.home={x:goalRoom.x,z:goalRoom.z,hw:goalRoom.w/2-34,hd:goalRoom.d/2-34};
+    if(isMini){ for(let m=0;m<2;m++) mkMonster(pick(),goalRoom.x+(m?90:-90),goalRoom.z+60,goalRoom); }
+    G.portalPos={x:goalRoom.x,z:goalRoom.z};
+  } else { G.portalPos={x:goalRoom.x,z:goalRoom.z};
+    // quest-free areas (and side zones) keep the old "reach the exit" rule; trials stay sealed until the keepers fall
+    if(!areaQuests().length && !G.trial) G.portal={x:goalRoom.x,z:goalRoom.z,t:0};
+  }
+  // populate rooms
+  const reaperTrial=G.trial==='reaper';   // the earned Reaper trial is a REAL fight: every room armed, denser packs, many elites
+  for(const room of G.rooms){ if(room===entryRoom) continue; if((isBoss||isMini)&&room===goalRoom) continue;
+    if(room===vault){ room.encounter=false; room.cleared=true;
+      const gm=mkMonster(pick(),room.x,room.z-20,room); gm.hp=Math.round(gm.hp*1.9); gm.maxHp=gm.hp; gm.elite=true;
+      G.chests.push(chestMaybeMimic({x:room.x,z:room.z+room.d/2-50,y:0,opened:false,bob:0},rnd2)); continue; }
+    room.encounter=reaperTrial?true:((room!==goalRoom)&&rnd()<0.5); room.cleared=!room.encounter;
+    const nM=reaperTrial?(4+Math.floor(rnd()*3)):Math.min(6,2+Math.floor(rnd()*(1.6+diff*0.18)));
+    const maj=pick(); for(let m=0;m<nM;m++){ const ty=(m===nM-1&&nM>=3)?saltMob(s.theme,maj):(m===0?maj:pick());   // guarantee a mixed pack: a complementary type salted into any 3+ fight
+      const mm=mkMonster(ty,room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room);
+      if(reaperTrial && !mm.boss && rnd()<0.45) makeElite(mm); }
+    if(reaperTrial){ mkMonster('caster',room.x+(rnd()*2-1)*(room.w/2-60),room.z-room.d/2+60,room); }   // a ranged threat in every trial room
+    if(rnd()<0.55) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-60),z:room.z+(rnd()*2-1)*(room.d/2-60),w:36+rnd()*20,d:36+rnd()*20,h:96+rnd()*40,kind:'col'});
+    if(rnd()<0.4) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-72),z:room.z+(rnd()*2-1)*(room.d/2-72),w:70+rnd()*40,d:70+rnd()*40,h:26+rnd()*8,kind:'plat'});
+    if(diff>=4&&rnd()<0.22) G.geysers.push({x:room.x+(rnd()*2-1)*(room.w/2-56),z:room.z+(rnd()*2-1)*(room.d/2-56),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
+  }
+  // SPAWNER NESTS: every zone's kill-quest gets 2 dens of that mob so the hunt is a real grind (not the canyon — it builds its own)
+  { const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q));
+    if(kq && curZone().id!=='hollow'){
+      const cand=G.rooms.filter(r=>r!==entryRoom&&(!isBoss&&!isMini||r!==goalRoom)&&r!==vault);
+      for(let d2=0;d2<Math.min(2,cand.length);d2++){ const room=cand[(d2*3+1)%cand.length];
+        const dx=room.x+(room.w/2-64)*(d2?1:-1), dz=room.z+(room.d/2-64)*(d2?1:-1);
+        G.dens.push({x:dx,z:dz,type:kq.mob,t:2.2+d2,questId:kq.id});
+        mkMonster(kq.mob,dx+30,dz,room); }
+    } }
+  goalRoom.encounter=(isBoss||isMini)?goalRoom.encounter:false; if(!isBoss&&!isMini) goalRoom.cleared=true;
+  // optional locked vault (dead-end ⇒ can never soft-lock the run)
+  if(vault && diff>=2 && vault.doorways.length===1 && rnd2()<0.7){
+    const dw=vault.doorways[0], type=rnd2()<0.5?'key':'plates', dr=sealDoor(dw.x,dw.z,dw.ori,type); dr.open=false; vault.locked=true;
+    if(type==='key'){ const kr=G.rooms.filter(r=>r!==vault&&r!==entryRoom), room=kr[Math.floor(rnd2()*kr.length)]||entryRoom;
+      G.keys.push({x:room.x+(rnd2()*2-1)*(room.w/2-50),z:room.z+(rnd2()*2-1)*(room.d/2-50),taken:false}); }
+    else { const prs=G.rooms.filter(r=>r!==vault); for(let q=0;q<3;q++){ const room=prs[Math.floor(rnd2()*prs.length)]||entryRoom;
+      const pl={x:room.x+(rnd2()*2-1)*Math.max(20,room.w/2-60),z:room.z+(rnd2()*2-1)*Math.max(20,room.d/2-60),lit:false,door:dr}; dr.plates.push(pl); G.plates.push(pl); } }
+  }
+  // seal encounter rooms — a door on every doorway
+  for(const room of G.rooms){ if(!room.encounter) continue;
+    for(const dw of room.doorways){ const dr=sealDoor(dw.x,dw.z,dw.ori,'combat'); room.doors.push(dr); } }
+  // build room walls (gaps already recorded on _gaps by carving)
+  G.rooms.forEach(wallRoom);
+  // hidden side-zone entrance: a rift in the deepest dead-end room. Reasonably hidden — but it's there, every time.
+  { const Zc=curZone();
+    if(Zc.side && !G.side && !G.trial && !isBoss && G.area===0){
+      // prefer a dead-end room; fall back to any non-entry room so the rift ALWAYS exists (some layouts have no spare leaves)
+      const dead=leaves.filter(r=>r!==entryRoom&&r!==goalRoom&&r!==vault);
+      const pool=dead.length?dead:G.rooms.filter(r=>r!==entryRoom);
+      const room=pool[pool.length-1];
+      if(room) G.secret={x:room.x,z:room.z-room.d/2+46,y:0,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]}; } }
+  // quest waystone: the "find" objective, parked in a room away from the entrance
+  { const fnd=areaQuests().find(q=>q.k==='find'&&!questDone(q));
+    if(fnd){ const cand=G.rooms.filter(r=>r!==entryRoom&&r!==goalRoom); const room=cand[Math.floor(rnd2()*cand.length)]||goalRoom;
+      G.waystone={x:room.x,z:room.z,y:0,q:fnd.id,taken:false,t:0}; } }
+  // spring + goblin
+  if(!isBoss && rnd2()<0.22){ const r=G.rooms[1+Math.floor(rnd2()*Math.max(1,G.rooms.length-1))]||entryRoom; G.springs.push({x:r.x,z:r.z,used:false}); }
+  if(!isBoss && !isMini && (i===3||i===7||rnd2()<0.15)){ const r=G.rooms[Math.floor(rnd2()*G.rooms.length)]||entryRoom; const gb=spawnEnemy('goblin',r.x,r.z); gb.despawnT=9; gb.dropT=0.2; }
+  if((i===1||i===5||i===9) && !isBoss && !isMini && leaves.length){ const lr=leaves[leaves.length-1]; G.bonusPortal={x:lr.x,z:lr.z,t:0}; }
+  // bounds (deco + culling)
+  let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9;
+  for(const sg of G.segments){ mnX=Math.min(mnX,sg.x-sg.w/2); mxX=Math.max(mxX,sg.x+sg.w/2); mnZ=Math.min(mnZ,sg.z-sg.d/2); mxZ=Math.max(mxZ,sg.z+sg.d/2); }
+  G.bounds={minX:mnX,maxX:mxX,minZ:mnZ,maxZ:mxZ};
+  for(let k2=0;k2<34;k2++){ const zz=mnZ+rnd()*(mxZ-mnZ);
+    G.deco.push({x: rnd()<0.5? mnX-40-rnd()*220 : mxX+40+rnd()*220, z:zz, w:12+rnd()*26, h:40+rnd()*(s.theme==='forest'?150:110), c:tint(s.ground,'#000',0.25+rnd()*0.2), theme:s.theme}); }
+  G.startPos={x:entryRoom.x,z:entryRoom.z}; G.goalPos={x:goalRoom.x,z:goalRoom.z};
+  G.progressEnd=goalRoom.z; G._dbg={maze:true,rooms:G.rooms.length,edges:edges.length,goalD};
+  hazSetup(rnd2);
+  G.lastSafe={x:entryRoom.x,z:entryRoom.z+entryRoom.d/2-40};
+  placeShade(entryRoom.x-60,entryRoom.z+entryRoom.d/2-60);
+  G.p.x=entryRoom.x; G.p.z=entryRoom.z+entryRoom.d/2-40; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  G.camYaw=Math.PI; G.camPitch=0.12; // player-aimed camera, facing into the maze at start
+  snapWorldInteractables();
+  document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||s.name); questUpdate(); hudUpdate();
+}
+/* ---- bonus stage: timed treasure sprint (no enemies, heavy platforming, boosted chest) ---- */
+function startBonus(){
+  G.sprintFun=false; G.sprintReturnHub=false;   // an in-zone sprint keeps its loot + returns to the zone
+  const ret=G.stageIndex+1;
+  meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
+  loadBonus(ret);
+}
+function loadBonus(returnIdx){
+  const s=STAGES[G.stageIndex];
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
+  G.bonusVisits=(G.bonusVisits||0)+1;
+  const seed=(((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0;
+  const rnd=mulberry(seed||1), R=(lo,hi)=>lo+rnd()*(hi-lo), CLIMB=Math.min(72,JMPV-18);
+  let cx=0,cz=0,cy=0,peak=0,budget=0;
+  G.bonusPath=[];
+  const put=(x,z,y,w,d,extra)=>{peak=Math.max(peak,y);let o;if(y<=1){o=Object.assign({x,z,w,d},extra||{});G.segments.push(o);}else{o=vplat(x,z,y,w,d,extra);}G.bonusPath.push({x,z,y,w,d,dash:!!(extra&&extra._dash)});return o;};
+  const hop=(dx,dz,dy,w=96,d=86,ex)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);return put(cx,cz,cy,w,d,ex);};
+  const mark=()=>put(cx,cz,cy,150,126,{checkpoint:true});
+  const mover=(dx,dz,dy,vamp=0)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy+vamp);const m={x0:cx,z:cz,w:92,d:82,h:cy,h0:cy,amp:R(18,38),sp:R(.55,.78),ph:R(0,6.28),vamp,vsp:R(.55,.78),vph:R(0,6.28),x:cx,px:cx,py:cy};G.movers.push(m);G.bonusPath.push({x:cx,z:cz,y:cy,w:m.w,d:m.d,mover:true});return m;};
+  const crumble=(dx,dz,dy)=>{cx+=dx;cz+=dz;cy=Math.max(0,cy+dy);peak=Math.max(peak,cy);const c={x:cx,z:cz,h:cy,w:86,d:80,state:0,timer:0,respawn:0,fallY:0,jit:0};G.crumbles.push(c);G.bonusPath.push({x:cx,z:cz,y:cy,w:c.w,d:c.d,crumble:true});};
+  const families={
+    spiral(){const dir=rnd()<.5?1:-1,ox=cx,oz=cz-100;for(let k=0;k<5;k++){const a=dir*(k+1)*.9;cx=ox+Math.sin(a)*82;cz=oz+Math.cos(a)*82;cy+=R(38,CLIMB);put(cx,cz,cy,k%2?88:116,k%2?82:104,k===2?{checkpoint:true}:null);}budget+=8;},
+    switchback(){const dir=rnd()<.5?1:-1;for(let k=0;k<5;k++)hop(dir*(k%2?145:-145),-78,R(32,54),112,74,k===2?{checkpoint:true}:null);budget+=7;},
+    elevator(){mark();mover(R(-55,55),-118,CLIMB*.7,R(30,46));hop(R(-55,55),-116,CLIMB,142,104,{checkpoint:true});budget+=8;},
+    crumble(){for(let k=0;k<5;k++)crumble((k%2?1:-1)*R(24,62),-R(86,112),R(18,38));mark();budget+=7;},
+    springs(){for(let k=0;k<3;k++){G.pads.push({x:cx,z:cz,y:cy,r:24});hop(R(-90,90),-R(105,130),R(72,104),132,116,k===2?{checkpoint:true}:null);}budget+=7;},
+    cascade(){for(let k=0;k<5;k++)hop((k%2?1:-1)*R(30,88),-R(88,118),-R(38,66),108,94,k===2?{checkpoint:true}:null);budget+=6;},
+    beams(){const base=Math.max(0,cy-70);for(let k=0;k<5;k++){hop((k%2?1:-1)*R(82,122),-R(82,108),R(-8,18),k%2?48:72,k%2?126:68);put(cx,cz,base,170,92,{recovery:true});}mark();budget+=8;},
+    phase(){for(let k=0;k<4;k++){const p=hop((k%2?1:-1)*R(45,85),-R(92,118),R(-8,24),100,88);const ph={ob:p,on:true,sp:R(.65,.85),off:k*1.35};G.bonusPhasers.push(ph);p.phase=ph;}mark();budget+=9;},
+    fork(){const sx=cx,sz=cz,sy=cy;for(let k=0;k<4;k++)hop(-76,-92,R(22,38),104,90);const ex=cx,ez=cz,ey=cy;cx=sx;cz=sz;cy=sy;for(let k=0;k<3;k++)hop(92,-123,R(30,48),82,72,{_dash:k===1});put(ex,ez,ey,168,126,{checkpoint:true});cx=ex;cz=ez;cy=ey;budget+=8;},
+    shaft(){mark();for(let k=0;k<5;k++){if(k===2)mover((k%2?1:-1)*72,-72,CLIMB*.8,28);else hop((k%2?1:-1)*72,-72,R(42,CLIMB),98,72);}mark();budget+=9;},
+    arches(){for(let k=0;k<5;k++){const dir=k%2?1:-1;hop(dir*R(70,112),-R(82,108),R(-22,28),54,132);hop(dir*22,-38,0,116,42);}mark();budget+=8;}
+  };
+  put(0,0,0,168,168);
+  G.p.x=0;G.p.z=0;G.p.y=0;G.p.vx=0;G.p.vy=0;G.p.vz=0;G.p.yaw=Math.PI;G.p.onGround=true;G.lastSafe={x:0,z:0,y:0};
+  const names=Object.keys(families),recent=G.bonusRecentFamilies||[],count=5+Math.floor(rnd()*3);
+  for(let i=names.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[names[i],names[j]]=[names[j],names[i]];}
+  let chosen=names.slice(0,count);
+  if(recent.length&&chosen[0]===recent[0]){const j=chosen.findIndex((n,k)=>k&&n!==recent[0]);if(j>0)[chosen[0],chosen[j]]=[chosen[j],chosen[0]];}
+  if(!chosen.some(n=>['spiral','switchback','shaft','springs'].includes(n)))chosen[1]='shaft';
+  chosen.forEach(n=>families[n]());
+  const finale=rnd()<.5?'crown':'orbit';
+  if(finale==='crown'){for(let k=0;k<3;k++)hop((k%2?1:-1)*55,-78,42,124-k*12,104-k*8,k===1?{checkpoint:true}:null);}
+  else{mark();mover(80,-95,52,24);hop(-80,-105,58,126,112,{checkpoint:true});}
+  const fin=hop(0,-92,0,210,200,{checkpoint:true});
+  G.chests.push({x:fin.x,z:fin.z,y:cy,opened:false,bob:0,bonus:true});
+  G.progressEnd=fin.z;
+  G.bonusTime=Math.max(34,Math.round(budget+12));
+  G.bonusCourse={seed,families:chosen,finale,peak:Math.round(peak),budget:G.bonusTime,bands:new Set(G.bonusPath.map(p=>Math.floor(p.y/100))).size};
+  G.bonusRecentFamilies=chosen.slice();
+  const bt=document.getElementById('bonustimer');bt.style.display='block';
+  document.getElementById('stagetag').textContent='TREASURE SPRINT';
+  toast('✨ TREASURE SPRINT — read the gold route, climb fast!');SFX.achieve();hudUpdate();
+}
+function endBonus(msg){
+  G.bonusActive=false; document.getElementById('bonustimer').style.display='none';
+  if(msg) toast(msg);
+  if(G.sprintReturnHub){ G.sprintReturnHub=false; G.sprintFun=false; enterWaystation(); SFX.pickup(); return; }   // for-fun hub sprint returns to the Waystation
+  loadStage(G.bonusReturn); SFX.pickup();
+}
+/* HUB Treasure Sprint — the exact same random parkour course, launched from the Waystation portal purely
+   for fun: NO loot, NO gold, just a time trial. Reaching the finale chest records your best time. */
+function startHubSprint(){
+  G.hub=false; G.sprintFun=true; G.sprintReturnHub=true; G.sprintStartT=G.time||0;
+  loadBonus(0);
+  toast('🏁 TREASURE SPRINT — race the clock! Best: '+(meta.sprintBest?meta.sprintBest.toFixed(1)+'s':'—'));
+}
+function finishHubSprint(){
+  const s=Math.max(0,(G.time||0)-(G.sprintStartT||0)), prev=meta.sprintBest||0, best=(!prev||s<prev);
+  if(best){ meta.sprintBest=+s.toFixed(1); persistGlobal(); }
+  SFX.achieve();
+  endBonus('🏁 Finished in '+s.toFixed(1)+'s'+(best?' · NEW BEST!':' · best '+prev.toFixed(1)+'s'));
+}
+function spawnEnemy(type,x,z,isBoss){
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale();
+  const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
+    r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
+    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
+    ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
+    look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
+    hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
+    atkTimer:0,lunge:0,phase:1,summonT:4,hurtKbX:0,hurtKbZ:0,burnT:0,burnDps:0,burnColor:null,burnAcc:0,slowT:0,stunT:0,
+    markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
+  if(e.boss) G.boss=e;
+  // Phase 11: enemy ROLES — a behavior archetype forcing a response (no extra HP). A minority of ground mobs.
+  if(!e.boss && e.kind!=='goblin' && !isBoss && Math.random()<0.22){
+    const opts = e.kind==='caster' ? ['healer'] : e.kind==='charger' ? ['exploder','flanker'] : ['shielder','exploder','flanker'];
+    e.role = opts[Math.floor(Math.random()*opts.length)];
+    e.roleCol = {shielder:'#8fb7ff',healer:'#7de08a',exploder:'#ff7a3a',flanker:'#c98cff'}[e.role];
+    if(e.role==='exploder') e.speed*=1.28;                       // rushes you
+    if(e.role==='flanker')  e.speed*=1.15;
+  }
+  if(e.type==='sentinel'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }   // the animated armor ALWAYS guards its front
+  // Phase 20 signature-mob roles/state
+  e.spec=(ENEMY[type]||{}).spec||null;
+  if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
+  if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
+  if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
+  snapEnemyToSurface(e); G.enemies.push(e); return e;
+}
+
+/* ---------------- Input (joystick + keys; identical bindings) ---------------- */
+const input={left:false,right:false,up:false,down:false,jump:false,attack:false,dodge:false,jumpEdge:false,dodgeEdge:false,jx:0,jz:0};
+function moveX(){ return Math.max(-1,Math.min(1,input.jx+(input.right?1:0)-(input.left?1:0))); }
+function moveZ(){ return Math.max(-1,Math.min(1,input.jz+(input.down?1:0)-(input.up?1:0))); }
+function bindBtn(id,key){
+  const el=document.getElementById(id); let heldId=null;
+  const set=v=>{ el.classList.toggle('pressed',v);
+    if(key==='jump'){ if(v&&!input.jump) input.jumpEdge=true; input.jump=v; }
+    else if(key==='dodge'){ if(v&&!input.dodge) input.dodgeEdge=true; input.dodge=v; }
+    else input[key]=v; };
+  el.addEventListener('pointerdown',e=>{ if(heldId!==null) return; e.preventDefault(); initAudio(); heldId=e.pointerId; set(true); el.setPointerCapture&&el.setPointerCapture(e.pointerId); });
+  const rel=e=>{ if(e.pointerId!==heldId) return; e.preventDefault&&e.preventDefault(); heldId=null; set(false); };
+  el.addEventListener('pointerup',rel); el.addEventListener('pointercancel',rel); el.addEventListener('lostpointercapture',rel);
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+bindBtn('bJump','jump'); bindBtn('bAttack','attack'); bindBtn('bDodge','dodge');
+bindBtn('bLMB','attack'); bindBtn('bSpace','dodge');   // desktop rail: LMB basic-attack + SPACE dodge slots
+for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); useSkill(i); }); }
+{ const bi=document.getElementById('bInteract'); if(bi) bi.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); initAudio(); doInteract(); }); }
+(function(){
+  const zone=document.getElementById('joyzone'), joy=document.getElementById('joy'), knob=document.getElementById('joyknob');
+  let pid=null, ox=0, oy=0; const R=46;
+  function setKnob(dx,dy){ knob.style.left=(29+dx)+'px'; knob.style.top=(29+dy)+'px'; }
+  zone.addEventListener('pointerdown',e=>{ if(pid!==null) return; if(e.pointerType&&e.pointerType!=='touch') return;   // touch-only: never spawn the joystick for a mouse/desktop pointer
+    e.preventDefault(); initAudio(); pid=e.pointerId; ox=e.clientX; oy=e.clientY;
+    joy.style.display='block'; joy.style.left=(ox-zone.getBoundingClientRect().left-52)+'px'; joy.style.top=(oy-zone.getBoundingClientRect().top-52)+'px';
+    setKnob(0,0); zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); });
+  zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid) return; e.preventDefault();
+    let dx=e.clientX-ox, dy=e.clientY-oy; const m=Math.hypot(dx,dy); if(m>R){ dx*=R/m; dy*=R/m; }
+    setKnob(dx,dy); const dead=0.18;
+    let nx=dx/R, nz=dy/R; input.jx=Math.abs(nx)>dead?nx:0; input.jz=Math.abs(nz)>dead?nz:0; });
+  const end=e=>{ if(e.pointerId!==pid) return; pid=null; input.jx=0; input.jz=0; joy.style.display='none'; };
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
+  zone.addEventListener('contextmenu',e=>e.preventDefault());
+})();
+function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); }
+function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
+function toggleKeep(){ meta.autoKeep=!meta.autoKeep; if(meta.autoKeep) meta.autoBag=false; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }   // auto-sell + auto-bag are mutually exclusive
+function toggleBag(){ meta.autoBag=!meta.autoBag; if(meta.autoBag) meta.autoKeep=false; persist(); updateToggles(); toast('Auto-bag '+(meta.autoBag?'ON':'OFF')); }
+[['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
+updateToggles();
+const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
+// fallback by typed character (e.key) so WASD works even if e.code is off (non-US layouts / some Mac browsers)
+const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
+window.addEventListener('keydown',e=>{
+  if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
+  if(e.code==='Escape'){ e.preventDefault();
+    if(mode==='studio'){ exitStudio(); return; }
+    if(mode==='mirror'){ exitMirror(); return; }
+    if(mode==='play') openPause();
+    else if(mode==='pause'){ mode='play'; resumeGameAudio(true); showOverlay(false); regrabCam(); }
+    else if(mode==='menu'){ const b=document.querySelector('#backBtn,#riseBtn,#resBtn,#backC'); if(b) b.click(); }   // Phase 10: Esc backs out of any open menu (one level)
+    else if(mode==='weapon'){ const b=document.querySelector('#stashBtn'); if(b) b.click(); else resumePlay(); }        // loot card: Esc stashes (keeps the item), never silently drops it
+    return; }
+  const _kt=e.target; if(_kt&&((_kt.matches&&_kt.matches('input,textarea,select'))||_kt.isContentEditable)) return;
+  if(mode==='weapon'){
+    // J = equip, K = keep (plus Enter/Backspace). Guarded: ignore key-repeat and the first 250ms,
+    // so holding J to attack can't accidentally equip the moment a popup opens.
+    const fresh=!e.repeat && (Date.now()-_offerT)>250;
+    if(e.code==='Enter'||(e.code==='KeyJ'&&fresh)){ e.preventDefault(); const eb=document.getElementById('equipBtn'); if(eb) eb.click(); return; }
+    if(e.code==='Backspace'||e.code==='Delete'||(e.code==='KeyK'&&fresh)){ e.preventDefault(); const kb=document.getElementById('sellBtn'); if(kb) kb.click(); return; }
+    if(e.code==='KeyJ'||e.code==='KeyK'){ e.preventDefault(); return; }
+  }
+  if(mode==='upgrade'){
+    // pick a level-up card with J/K/L or 1/2/3 (guarded by the read-window so you must actually read it)
+    const fresh=!e.repeat && (Date.now()-_offerT)>ARM_MS;
+    const pickMap={KeyJ:0,KeyK:1,KeyL:2,Digit1:0,Digit2:1,Digit3:2,Numpad1:0,Numpad2:1,Numpad3:2};
+    if(pickMap[e.code]!=null){ e.preventDefault();
+      if(fresh){ const btns=document.querySelectorAll('.choice,.c2opt'); if(btns[pickMap[e.code]]) btns[pickMap[e.code]].click(); }
+      return; }
+  }
+  if(mode==='play'&&!e.repeat&&/^Digit[1-4]$/.test(e.code)){ e.preventDefault(); useSkill(+e.code.slice(5)-1); return; }
+  if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
+  if(e.code==='KeyE'){ e.preventDefault(); initAudio(); doInteract(); return; }   // interact / talk
+  const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();
+  if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
+window.addEventListener('keyup',e=>{ const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(k) input[k]=false; });
+// mouse combat (desktop): left-click = attack (hold to combo), right-click = dodge
+// Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
+window.addEventListener('pointerdown',e=>{
+  if(mode!=='play'||!G||!G.npc) return;
+  const n=G.npc, sp=project(n.x,(n.y||0)+22,n.z); if(!sp) return;
+  const sx=sp[0]/DPR, sy=sp[1]/DPR;
+  if(Math.hypot(e.clientX-sx,e.clientY-sy)<64){ e.preventDefault(); e.stopPropagation(); initAudio(); openShade(); }
+},true);
+canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play') return; e.preventDefault(); initAudio();
+  if(e.button===0) input.attack=true;
+  else if(e.button===2){ if(!input.dodge) input.dodgeEdge=true; input.dodge=true; } });
+window.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse') return;
+  if(e.button===0) input.attack=false; if(e.button===2) input.dodge=false; });
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+/* ---- shoulder-cam camera control (only in 'shoulder' mode) ----
+   Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
+   (WASD still moves, relative to where you look; Esc releases). Mobile: drag the right side. */
+// Desktop: ANY click anywhere in live play recaptures the camera. Capture phase prevents HUD layers
+// or controls from shrinking the usable reacquisition region after tabbing away.
+function acquireCameraLock(){
+  if(meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
+  showGameUI(true); try{ const q=canvas.requestPointerLock(); if(q&&q.catch) q.catch(()=>{}); }catch(e){}
+}
+window.addEventListener('pointerdown',()=>acquireCameraLock(),true);
+window.addEventListener('focus',()=>{ if(mode==='play'){ showGameUI(true); hudUpdate(); } });
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&mode==='play'){ showGameUI(true); hudUpdate(); } });
+// Phase 19: in the OVERHEAD camera the mouse is a weapon — left-click anywhere to attack
+// (auto-aim does the rest), right-click to dodge. Canvas only, so UI buttons stay buttons.
+canvas.addEventListener('mousedown',e=>{ if(mode!=='play'||meta.camMode!=='far'||!G) return;
+  initAudio();
+  if(e.button===0){ playerAttack(); }
+  else if(e.button===2){ e.preventDefault(); input.dodgeEdge=true; } });
+canvas.addEventListener('contextmenu',e=>{ if(meta.camMode==='far') e.preventDefault(); });
+// The Mirror: drag anywhere on the character to orbit the camera 360° around yourself
+(function(){ let md=null;
+  const getX=e=>e.clientX!=null?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:null);
+  const dn=e=>{ if(mode==='mirror'&&mirror&&!(e.target&&e.target.closest&&e.target.closest('#mirrorui'))){ md=getX(e); if(mirror.spin){ mirror.spin=false; const b=document.getElementById('msSpin'); if(b) b.textContent='🔄 Spin: Off'; } } };
+  const mv=e=>{ if(md==null||mode!=='mirror'||!mirror) return; const x=getX(e); if(x==null) return; mirror.yaw-=(x-md)*0.013; md=x; };
+  const up=()=>{ md=null; };
+  window.addEventListener('pointerdown',dn); window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up);
+})();
+// menu click SFX: a soft button press on any overlay/menu control
+document.addEventListener('pointerdown',e=>{ const el=e.target; if(el&&el.closest&&el.closest('.bigbtn,.choice,.gearrow,.wsbtn,.wsbig,.zrow,.buybtn,.ctab,.skintile,.snode')) playFx('click'); },true);
+// Apply look input without ever allowing one malformed/coalesced browser event to snap the camera.
+// The per-event angular cap still permits a very fast continuous turn, but rejects the rare huge movementX/Y spike.
+function applyCameraLook(dx,dy,xScale,yScale){
+  if(!G||!Number.isFinite(dx)||!Number.isFinite(dy)) return;
+  const sn=meta.lookSens||1, cap=0.14;
+  const yawStep=Math.max(-cap,Math.min(cap,-dx*xScale*sn));
+  const pitchStep=Math.max(-cap,Math.min(cap,dy*yScale*sn));
+  G.camYaw=(G.camYaw||0)+yawStep;
+  G.camPitch=Math.max(PITCH_MIN,Math.min(PITCH_MAX,(G.camPitch||0)+pitchStep));
+}
+let mouseLookPrimed=false;
+document.addEventListener('pointerlockchange',()=>{ mouseLookPrimed=false; });
+document.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas && G && mode==='play'){
+  // Pointer-lock acquisition can report one stale desktop-position delta; discard that acquisition event.
+  if(!mouseLookPrimed){ mouseLookPrimed=true; return; }
+  applyCameraLook(e.movementX,e.movementY,0.0032,0.0026); } });
+(function(){ const zone=document.getElementById('lookzone'); if(!zone) return; let pid=null,lx=0,ly=0;
+  zone.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'||pid!==null||meta.camMode==='far'||!G) return; e.preventDefault(); pid=e.pointerId; lx=e.clientX; ly=e.clientY; zone.setPointerCapture&&zone.setPointerCapture(e.pointerId); }); // mouse uses pointer-lock; drag is touch-only
+  zone.addEventListener('pointermove',e=>{ if(e.pointerId!==pid||!G) return; e.preventDefault(); const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+    applyCameraLook(dx,dy,0.006,0.005); });
+  const end=e=>{ if(e.pointerId===pid) pid=null; };
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
+  zone.addEventListener('contextmenu',e=>e.preventDefault());
+})();
+let _lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+  if(e.target.closest&&e.target.closest('#overlay')) return;
+  const now=Date.now();
+  if(now-_lastTouchEnd<=300) e.preventDefault();
+  _lastTouchEnd=now;
+},{passive:false});
+/* ============================================================
+   COMBAT + UPDATE (3D)
+   ============================================================ */
+const worldTexts=[]; // DOM floating texts projected from world space
+function addText(wx,wy,wz,txt,color,big,kind){
+  // Phase 19: combat numbers read BIG — dmg 19px, heal 22px, CRIT 32px (with a shout of an
+  // outline); everything else 17/26. kind'd combat numbers respect the settings toggle.
+  if(kind && meta.dmgNumbers===false) return;
+  const sz=kind==='crit'?32:kind==='heal'?22:kind==='dmg'?19:(big?26:17);
+  const el=document.createElement('div');
+  el.style.cssText='position:absolute;z-index:8;pointer-events:none;font-weight:900;text-align:center;transform:translate(-50%,-50%);text-shadow:0 2px 6px #000'+(kind==='crit'?',0 0 12px #ffb020':'')+';font-size:'+sz+'px;color:'+(color.startsWith('var')?getComputedStyle(document.documentElement).getPropertyValue(color.slice(4,-1)):color);
+  el.textContent=txt; document.body.appendChild(el);
+  worldTexts.push({el,x:wx,y:wy,z:wz,life:kind==='crit'?1.1:0.9,vy:kind==='crit'?60:52});
+}
+function updateTexts(dt){
+  for(const t of worldTexts){ t.life-=dt; t.y+=t.vy*dt; t.vy*=0.92;
+    if(t.life<=0){ t.el.remove(); continue; }
+    const s=project(t.x,t.y,t.z);
+    if(s){ t.el.style.left=s[0]+'px'; t.el.style.top=s[1]+'px'; t.el.style.opacity=Math.min(1,t.life*1.6); }
+    else t.el.style.opacity=0;
+  }
+  for(let i=worldTexts.length-1;i>=0;i--) if(worldTexts[i].life<=0) worldTexts.splice(i,1);
+}
+let PROJ=mIdent(), VIEW=mIdent();
+// camera pitch: much wider now — look nearly straight up/down (was -0.32..0.62, a stiff neck).
+// FPS uses the full range; the over-the-shoulder cam clamps to a saner sub-range for framing.
+const PITCH_MIN=-1.35, PITCH_MAX=1.35;
+function project(x,y,z){
+  const m=mMul(PROJ,VIEW);
+  const cx=m[0]*x+m[4]*y+m[8]*z+m[12], cy=m[1]*x+m[5]*y+m[9]*z+m[13], cw=m[3]*x+m[7]*y+m[11]*z+m[15];
+  if(cw<=0) return null;
+  return [(cx/cw*0.5+0.5)*VW, (1-(cy/cw*0.5+0.5))*VH];
+}
+function burst(x,y,z,color,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=40+Math.random()*140;
+  G.particles.push({x,y:y+Math.random()*10,z,vx:Math.cos(a)*sp,vy:60+Math.random()*120,vz:Math.sin(a)*sp,life:0.4+Math.random()*0.3,color,sz:2.5+Math.random()*3}); } }
+function vOverlap(a,b){ return a.y<b.y+b.h && b.y<a.y+a.h; }
+function dXZ(ax,az,bx,bz){ return Math.hypot(ax-bx,az-bz); }
+/* obstacle physics: floor height under an entity (0 = ground, or a platform top it is above) */
+function obFloor(x,z,r,y){
+  let f=0; if(!G||!G.obstacles) return 0;
+  for(const ob of G.obstacles){ if(ob.h<=y+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
+  return f;
+}
+const ECLIMB=44; // ground enemies can climb anything up to this height (all platforms)
+/* push an entity out of any obstacle whose top is above its feet.
+   yRef = height BEFORE this frame's vertical move, so descending across a top
+   counts as landing (handled by obFloor) instead of a sideways wall eject.
+   climbMax: obstacles at or below this height are climbable, not walls. */
+function resolveObstacles(ent,r,yRef,climbMax){
+  if(!G||!G.obstacles) return;
+  const ey=(yRef==null?ent.y:yRef);
+  const push=(ob)=>{
+    if(ey>=ob.h-2) return;
+    const dx=ent.x-ob.x, dz=ent.z-ob.z, px=ob.w/2+r-Math.abs(dx), pz=ob.d/2+r-Math.abs(dz);
+    if(px>0&&pz>0){ if(px<pz) ent.x+=(dx>=0?1:-1)*px; else ent.z+=(dz>=0?1:-1)*pz; }
+  };
+  for(const ob of G.obstacles){ if(climbMax && ob.h<=climbMax) continue; push(ob); }
+  if(G.walls) for(const wl of G.walls) push(wl);
+  if(G.doors) for(const dr of G.doors){ if(!dr.open) push(dr); }
+}
+/* course floors: ground segments + moving platforms + obstacle tops. -Infinity = over the hazard. */
+function onSegment(x,z,r){
+  for(const sg of G.segments){ if(Math.abs(x-sg.x)<sg.w/2+r*0.35 && Math.abs(z-sg.z)<sg.d/2+r*0.35) return true; }
+  return false;
+}
+function floorAt(x,z,r,yRef){
+  let f=-Infinity;
+  for(const sg of G.segments){ if(Math.abs(x-sg.x)<sg.w/2+r*0.4 && Math.abs(z-sg.z)<sg.d/2+r*0.4){ f=0; break; } }
+  // stand-flagged walls are walkable on top (canyon rims etc.) — maze walls stay non-standable so rooms can't be sequence-broken
+  for(const wl of G.walls){ if(wl.stand && wl.h<=yRef+2 && Math.abs(x-wl.x)<wl.w/2+r*0.4 && Math.abs(z-wl.z)<wl.d/2+r*0.4) f=Math.max(f,wl.h); }
+  for(const mv of G.movers){ if(mv.h<=yRef+2 && Math.abs(x-mv.x)<mv.w/2+r*0.4 && Math.abs(z-mv.z)<mv.d/2+r*0.4) f=Math.max(f,mv.h); }
+  for(const cr of G.crumbles){ const ch=cr.h||0; if(cr.state<2 && ch<=yRef+2 && Math.abs(x-cr.x)<cr.w/2+r*0.4 && Math.abs(z-cr.z)<cr.d/2+r*0.4) f=Math.max(f,ch); }
+  for(const ob of G.obstacles){ if(ob.h<=yRef+2 && Math.abs(x-ob.x)<ob.w/2+r*0.5 && Math.abs(z-ob.z)<ob.d/2+r*0.5) f=Math.max(f,ob.h); }
+  return f;
+}
+/* Placement resolver for world objects. Player collision deliberately limits floorAt to
+   surfaces the player is already high enough to land on; spawners need the opposite rule:
+   find the HIGHEST walkable top at X/Z so an exit, chest or drop can never live under a mesa. */
+function surfaceHeightAt(x,z,r=8){
+  if(!G) return -Infinity; let f=-Infinity;
+  // footprint is INCLUSIVE (matches floorAt's +r reach) so a drop/portal anywhere the player could stand — including a
+  // plateau's edge — snaps to that top instead of falling to ground level under the mesa.
+  const m=r*0.4;
+  for(const sg of (G.segments||[])){ if(Math.abs(x-sg.x)<sg.w/2+m && Math.abs(z-sg.z)<sg.d/2+m) f=Math.max(f,0); }
+  for(const wl of (G.walls||[])){ if(wl.stand && Math.abs(x-wl.x)<wl.w/2+m && Math.abs(z-wl.z)<wl.d/2+m) f=Math.max(f,wl.h||0); }
+  for(const mv of (G.movers||[])){ if(Math.abs(x-mv.x)<mv.w/2+m && Math.abs(z-mv.z)<mv.d/2+m) f=Math.max(f,mv.h||0); }
+  for(const cr of (G.crumbles||[])){ if(cr.state!==2 && Math.abs(x-cr.x)<cr.w/2+m && Math.abs(z-cr.z)<cr.d/2+m) f=Math.max(f,cr.h||0); }
+  for(const ob of (G.obstacles||[])){ if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0); }
+  return f;
+}
+function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e8?f:0; }
+function nearestSurfacePoint(x,z,r=14){
+  if(!G) return null; let best=null,bd=Infinity;
+  const consider=(o,y)=>{ const hw=Math.max(1,o.w/2-r),hd=Math.max(1,o.d/2-r),px=Math.max(o.x-hw,Math.min(o.x+hw,x)),pz=Math.max(o.z-hd,Math.min(o.z+hd,z)),d=Math.hypot(px-x,pz-z);
+    if(d<bd){ bd=d; best={x:px,z:pz,y:y||0}; } };
+  for(const sg of (G.segments||[])) consider(sg,0);
+  for(const wl of (G.walls||[])) if(wl.stand) consider(wl,wl.h||0);
+  for(const mv of (G.movers||[])) consider(mv,mv.h||0);
+  for(const cr of (G.crumbles||[])) if(cr.state!==2) consider(cr,cr.h||0);
+  for(const ob of (G.obstacles||[])) consider(ob,ob.h||0);
+  return best;
+}
+function seatChest(ch){
+  if(!ch) return;
+  let h=surfaceHeightAt(ch.x,ch.z,14);
+  if(h<-1e8){ const safe=nearestSurfacePoint(ch.x,ch.z,14); if(safe){ ch.x=safe.x; ch.z=safe.z; h=safe.y; } }
+  ch.y=h>-1e8?h:0; // exact seating: stale authored heights may move DOWN as well as up
+}
+function dressHiddenChest(ch){
+  if(!ch||ch._dressed||ch.bonus||G.side||G.trial||G.hub||G.endless||curZone().id==='outskirts') return;
+  ch._dressed=true; ch.hiddenTreasure=true;
+  const th=(STAGES[G.stageIndex]&&STAGES[G.stageIndex].theme)||'ruins', cols=th==='frost'?['#8acde4','#d9eff5']:th==='volcano'?['#29252b','#61352b']:th==='void'||th==='apex'?['#30233e','#69418d']:th==='marble'?['#b9b5aa','#d4aa42']:th==='forest'?['#294b31','#4d6b38']:['#555969','#343844'];
+  const a=((Math.abs(Math.round(ch.x))*17+Math.abs(Math.round(ch.z))*31)%628)/100, y=ch.y||0;
+  // Three asymmetric pieces hide the reward from the main approach while leaving a clear opening.
+  for(let k=0;k<3;k++){ const aa=a+(k-1)*.72,rr=k===1?31:38; G.deco.push({x:ch.x+Math.cos(aa)*rr,z:ch.z+Math.sin(aa)*rr,y0:y,w:th==='forest'?34:18+(k%2)*9,h:th==='forest'?28+(k%2)*18:34+k*12,d:th==='forest'?30:16+(k%2)*8,c:cols[k%2],theme:th}); }
+}
+function snapEnemyToSurface(e){
+  if(!e||e.kind==='fly') return;
+  // Spawn on the highest walkable surface at this footprint. This is intentionally
+  // different from movement climbing: a creature authored on a plateau begins on
+  // that plateau even when its wall is too tall to climb from the ground below.
+  e.y=Math.max(Number(e.y)||0,highestSurfaceAt(e.x,e.z,e.r||8));
+  e.sx=e.x; e.sz=e.z;
+}
+// per-frame safety net: lift any collectible/exit that ended up below the surface it sits over (covers objects
+// created AFTER build-time snapping — e.g. the exit portal that only opens on clear — and terrain that changed).
+function reconcileWorldHeights(){ if(!G) return;
+  const lift=(o,r=16)=>{ if(o&&!o.taken&&!o.done) o.y=Math.max(o.y||0, highestSurfaceAt(o.x,o.z,r)); };
+  lift(G.portal); lift(G.bonusPortal); lift(G.waystone); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
+  for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
+  for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
+}
+function snapWorldInteractables(){ if(!G) return;
+  const snap=(o,k='y',r=8)=>{ if(o) o[k]=Math.max(Number(o[k])||0,highestSurfaceAt(o.x,o.z,r)); };
+  snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); snap(G.secret); snap(G.secretTrigger);
+  for(const o of (G.pickups||[])) snap(o,'y0');
+  for(const o of (G.chests||[])){ seatChest(o); dressHiddenChest(o); }
+  for(const o of (G.keys||[])) snap(o);
+  for(const o of (G.plates||[])) snap(o);
+  for(const o of (G.springs||[])) snap(o);
+  for(const e of (G.enemies||[])) snapEnemyToSurface(e);
+}
+function enemySupport(e){
+  let f=-Infinity;
+  for(const sg of G.segments){ if(Math.abs(e.x-sg.x)<sg.w/2+e.r*0.35 && Math.abs(e.z-sg.z)<sg.d/2+e.r*0.35){ f=0; break; } }
+  for(const mv of G.movers){ if(Math.abs(e.x-mv.x)<mv.w/2+e.r*0.4 && Math.abs(e.z-mv.z)<mv.d/2+e.r*0.4) f=Math.max(f,mv.h); }
+  for(const cr of G.crumbles){ if(cr.state<2 && Math.abs(e.x-cr.x)<cr.w/2+e.r*0.4 && Math.abs(e.z-cr.z)<cr.d/2+e.r*0.4) f=Math.max(f,cr.h||0); }
+  for(const wl of (G.walls||[])){ if(wl.stand && e.y>=(wl.h||0)-3 && Math.abs(e.x-wl.x)<wl.w/2+e.r*0.4 && Math.abs(e.z-wl.z)<wl.d/2+e.r*0.4) f=Math.max(f,wl.h||0); }
+  for(const ob of G.obstacles){ if((ob.h<=ECLIMB||e.y>=ob.h-3) && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.5 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.5) f=Math.max(f,ob.h); }
+  return f;
+}
+// true if a wall (or a closed door) blocks the straight line a->b — used so melee can't reach through walls
+function losBlocked(x0,z0,x1,z1){
+  const steps=Math.ceil(Math.hypot(x1-x0,z1-z0)/8);
+  for(let s=1;s<steps;s++){ const t=s/steps, x=x0+(x1-x0)*t, z=z0+(z1-z0)*t;
+    if(G.walls) for(const w of G.walls){ if(Math.abs(x-w.x)<w.w/2 && Math.abs(z-w.z)<w.d/2) return true; }
+    if(G.doors) for(const d of G.doors){ if(!d.open && Math.abs(x-d.x)<d.w/2 && Math.abs(z-d.z)<d.d/2) return true; } }
+  return false;
+}
+function updateCrumbles(dt){
+  const p=G.p;
+  for(const cr of G.crumbles){
+    if(cr.state===2){ cr.fallY+=240*dt; cr.respawn-=dt;
+      if(cr.respawn<=0){ cr.state=0; cr.timer=0; cr.fallY=0; } continue; }
+    const stood=p.onGround && Math.abs(p.y-(cr.h||0))<3 && Math.abs(p.x-cr.x)<cr.w/2+p.r*0.4 && Math.abs(p.z-cr.z)<cr.d/2+p.r*0.4;
+    if(cr.state===0 && stood){ cr.state=1; cr.timer=0.8; SFX.land(); }
+    if(cr.state===1){ cr.timer-=dt; cr.jit=(Math.random()-0.5)*3;
+      if(cr.timer<=0){ cr.state=2; cr.respawn=3.5; cr.fallY=0; burst(cr.x,2,cr.z,'#8a7a66',10); SFX.enemyDie(); } }
+  }
+}
+function updateGeysers(dt){
+  const p=G.p;
+  for(const gy2 of G.geysers){
+    const cyc=((G.time+gy2.phase)%gy2.period);
+    gy2.state=(cyc<0.6)?2:(cyc>gy2.period-0.9?1:0); // 2=erupting, 1=telegraph, 0=idle
+    if(gy2.state===1 && Math.random()<0.3) G.particles.push({x:gy2.x+(Math.random()-0.5)*30,y:2,z:gy2.z+(Math.random()-0.5)*30,vx:0,vy:60,vz:0,life:0.4,color:hazardCols(STAGES[G.stageIndex].theme)[1],sz:2.4});
+    if(gy2.state===2 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<95 && dXZ(p.x,p.z,gy2.x,gy2.z)<gy2.r+p.r*0.5){
+      const dmg=Math.max(1,Math.round(effMaxHp(p)*0.12));
+      hurtPlayer(dmg,gy2.x,gy2.z+1);
+      p.vy=700; p.onGround=false; // launched skyward
+    }
+  }
+}
+function updateMovers(dt){ for(const mv of G.movers){ mv.px=mv.x; mv.py=mv.h; mv.x=mv.x0+Math.sin(G.time*mv.sp+mv.ph)*mv.amp;
+  if(mv.vamp){ mv.h=mv.h0+Math.sin(G.time*(mv.vsp||1)+mv.vph)*mv.vamp; } } }
+function updateBonusPhasers(){ for(const ph of (G.bonusPhasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-.25; if(on!==ph.on){ ph.on=on; const ob=ph.ob,i=G.obstacles.indexOf(ob); if(on&&i<0)G.obstacles.push(ob); else if(!on&&i>=0)G.obstacles.splice(i,1); } } }   // Batch 5: vertical bob movers ride the player on y (via floorAt → p.y=floor)
+/* ---- Zone signature hazards (Phase 4): one per zone, applied every frame ---- */
+function curHaz(){ return (G&&G.haz)?HAZARDS[G.haz]:null; }
+function hazUpdate(dt){
+  if(!G.haz) return; const p=G.p;
+  if(G.haz==='slick'){                                   // Rime: ice keeps your momentum — brake early
+    if(p.onGround){ p.slide=Math.min(1,(p.slide||0)+dt*3); } else p.slide=Math.max(0,(p.slide||0)-dt*2);
+  } else if(G.haz==='gusts'){                            // Gales: the wind shoves you mid-air
+    G.gustT=(G.gustT||0)+dt;
+    const ph=Math.sin(G.time*0.45), strong=Math.abs(ph)>0.55;
+    G.gustX=ph*1.0;
+    if(!p.onGround&&strong){ const onClimb=highestSurfaceAt(p.x,p.z,16)>40; p.vx+=G.gustX*(onClimb?95:260)*dt; }  // over an elevated climb the wind only nudges — it can't fling you off a narrow ledge into the pit
+    if(strong&&Math.random()<0.25*60*dt) G.particles.push({x:p.x-G.gustX*180+(Math.random()-0.5)*160,y:20+Math.random()*80,z:p.z+(Math.random()-0.5)*220,vx:G.gustX*420,vy:0,vz:0,life:0.5,color:'#cfe6ff',sz:2});
+  } else if(G.haz==='phase'){                            // Phasing: some ground is only sometimes there
+    for(const ph of (G.phasers||[])){ const on=Math.sin(G.time*ph.sp+ph.off)>-0.15;
+      if(on!==ph.on){ ph.on=on;
+        if(!on){ const s=ph.seg; if(s&&G.segments.indexOf(s)>=0) G.segments.splice(G.segments.indexOf(s),1); }
+        else if(ph.seg && G.segments.indexOf(ph.seg)<0) G.segments.push(ph.seg); } }
+  } else if(G.haz==='lava'){                             // Emberfall: the floor breathes fire on a rhythm
+    G.emberT=(G.emberT||0)+dt;
+    if(G.emberT>=4.2){ G.emberT=0; G.emberWarn=1.1; }
+    if(G.emberWarn>0){ G.emberWarn-=dt;
+      if(G.emberWarn<=0){ G.emberBurn=0.5;
+        for(const v of (G.vents||[])){ burst(v.x,4,v.z,'#ff5a1e',9); } } }
+    if(G.emberBurn>0){ G.emberBurn-=dt;
+      for(const v of (G.vents||[])){ if(dXZ(v.x,v.z,p.x,p.z)<v.r+p.r && p.y<52){
+        hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.14)),v.x,v.z); break; } } }
+  }
+}
+function hazSetup(rnd){                                  // place whatever the zone's hazard needs
+  const Z=curZone(); G.haz=(G.side||G.trial)?null:(Z.haz||null);
+  G.phasers=[]; G.vents=[]; G.gustX=0; G.emberT=0; G.emberWarn=0; G.emberBurn=0;
+  if(!G.haz) return;
+  if(G.haz==='phase'){                                   // only mid-bridge stepping stones blink — never a landing stoop
+    const cand=G.segments.filter(s=>s.phaseable);
+    for(const s of cand){ if(rnd()<0.6) G.phasers.push({seg:s,sp:0.8+rnd()*0.7,off:rnd()*6.28,on:true}); }
+    // a phase zone must actually PHASE: if the dice left it bare, arm the first couple of stones
+    if(cand.length && G.phasers.length<2) for(const s of cand.slice(0,2)){ if(!G.phasers.some(ph2=>ph2.seg===s)) G.phasers.push({seg:s,sp:0.9+rnd()*0.6,off:rnd()*6.28,on:true}); }
+  } else if(G.haz==='lava'){                             // vents across the rooms
+    for(const r of G.rooms){ if(rnd()<0.75) G.vents.push({x:r.x+(rnd()*2-1)*(r.w/2-70),z:r.z+(rnd()*2-1)*(r.d/2-70),r:44}); }
+  }
+}
+function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
+function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
+  :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
+function lavaHit(){
+  const p=G.p;
+  if(isHitless()){ p.hp=0; p.dead=true; G.tookDamage=true;      // Hitless: a fall is death, not a toll
+    burst(p.x,6,p.z,hazardCols(STAGES[G.stageIndex].theme)[1],22); SFX.hurt();
+    addText(p.x,50,p.z,'FELL','var(--danger)',true); die(); return; }
+  const dmg=Math.max(1,Math.round(effMaxHp(p)*0.22));
+  p.hp-=dmg; G.tookDamage=true; G.combo=0; G.comboT=0;
+  burst(p.x,6,p.z,hazardCols(STAGES[G.stageIndex].theme)[1],16);
+  SFX.hurt(); SFX.magic('fire'); G.shake=Math.min(G.shake+12,18);
+  addText(p.x,50,p.z,'-'+dmg+' '+hazardName(STAGES[G.stageIndex].theme),'var(--danger)',true);
+  hudUpdate();
+  if(p.hp<=0){ p.hp=0; p.dead=true; die(); return; }
+  p.x=G.lastSafe.x; p.z=G.lastSafe.z; p.y=(G.lastSafe.y||0)+60; p.vx=0; p.vy=0; p.vz=0; p.onGround=false; p.invuln=1.2;
+  p.recoverT=0.7;   // brief recovery: holding forward can't chain you straight back into the hazard
+}
+/* ================= ELEMENTAL STATUS STACKS (Burn/Chill/Venom/Rune/Radiance/Corruption) =================
+   One compact per-enemy meter system. Buildup scales with weapon speed (slow weapons build more per
+   hit, so fast weapons don't dominate) and gets a big Scythe multiplier — so Reaper is the strongest
+   at stack application without the highest direct damage. A per-(enemy,status) cooldown stops persistent
+   hitboxes/rapid multi-hits from applying full stacks every frame. Bosses build at half rate and never
+   fully freeze. Meters are floats; integer stacks = floor(meter). No per-tick entity allocation. */
+const EL_STAT={fire:'burn',ice:'chill',poison:'venom',arcane:'rune',holy:'radiance',void:'corrupt'};
+const STCAP={burn:5,chill:5,venom:6,rune:5,radiance:5,corrupt:5};
+const STCOL={burn:'#ff7a3a',chill:'#7fd6ff',venom:'#86e05a',rune:'#c47bff',radiance:'#ffe9a8',corrupt:'#8f52d6'};
+const STATUS_ICON_SRC={burn:'icons/status-burn.png',chill:'icons/status-chill.png',venom:'icons/status-venom.png',rune:'icons/status-rune-mark.png',radiance:'icons/status-radiance.png',corrupt:'icons/status-corruption.png'};
+const STATUS_ICON_IMG={}; for(const k in STATUS_ICON_SRC){ const im=new Image(); im.src=STATUS_ICON_SRC[k]; STATUS_ICON_IMG[k]=im; }
+const STWIN={burn:2.5,chill:2.0,venom:4.0,rune:8.0,radiance:3.0,corrupt:12.0};   // grace before a meter decays
+const STDEC={burn:1.2,chill:1.5,venom:1.0,rune:0.5,radiance:1.5,corrupt:0.8};    // decay per second after the grace window
+function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,corrupt:0}); }
+function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st[k]; return n; }
+// buildup per hit: normalized by attack speed (cd), with the Scythe specialization + boss resistance
+function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
+function applyStatus(e,el,dmg,w){
+  el=normEl(el); const stat=EL_STAT[el]; if(!stat||e.dummy) return;
+  const now=(G&&G.time)||0; e.stcd=e.stcd||{};
+  if(now-(e.stcd[stat]||-9)<0.12) return;                    // per-target buildup rate limit (kills full-stack-every-frame)
+  e.stcd[stat]=now;
+  const st=estat(e); e.stFresh=e.stFresh||{}; e.stFresh[stat]=now;
+  e.stDmg=Math.max(e.stDmg||0,dmg||1);                       // representative hit for DoT scaling
+  st[stat]=Math.min(STCAP[stat], st[stat]+buildAmt(w,e.boss));
+  if(stat==='burn'   && st.burn>=STCAP.burn)         igniteBurn(e);
+  else if(stat==='chill' && st.chill>=STCAP.chill)   freezeChill(e);
+  else if(stat==='radiance' && st.radiance>=STCAP.radiance) purifyRadiance(e);
+  else if(stat==='venom' && st.venom>=3)             e.healCut=0.5;      // heavy Venom chokes enemy healing/regen
+  else if(stat==='corrupt' && st.corrupt>=STCAP.corrupt) e.primed=true;  // primed for Rupture (Reaper/void payoff)
+}
+// legacy entry point (skills/projectiles pass el here) -> routes into the stack system, scaled by the current weapon
+function applyElement(e,el,dmg){ applyStatus(e,el,dmg, (G&&G.p)?G.p.weapon:null); }
+function igniteBurn(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.2:2.2)); e.st.burn=0;
+  skillRing(e.x,e.z,'#ffd07a','#ff7a3a',110); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',16); addText(e.x,e.y+e.h+12,e.z,'IGNITE','#ff7a3a',true);
+  e.hp-=dmg; for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){ o.hp-=Math.round(dmg*0.4); estat(o).burn=Math.min(STCAP.burn,o.st.burn+1); } }   // combustion splash
+  if(e.hp<=0) killEnemy(e); }
+function freezeChill(e){
+  if(e.boss){ e.slowT=Math.max(e.slowT,2.2); e.stunT=Math.max(e.stunT,0.4); e.st.chill=2.5; addText(e.x,e.y+e.h+12,e.z,'DEEP CHILL','#7fd6ff'); }  // bosses stagger + heavy slow, never full-freeze
+  else if((e.freezeCd||0)<=0){ e.stunT=Math.max(e.stunT,1.2); e.slowT=Math.max(e.slowT,1.5); e.freezeCd=3.0; e.st.chill=1; addText(e.x,e.y+e.h+12,e.z,'FROZEN','#e3faff',true); burst(e.x,e.y+e.h*0.5,e.z,'#e3faff',12); }  // freeze-immunity window stops permanent CC loops
+  else e.st.chill=STCAP.chill-1; }
+function purifyRadiance(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1.0:1.8)); e.st.radiance=0; e.exposed=4;
+  skillRing(e.x,e.z,'#fff8d6','#ffe9a8',115); burst(e.x,e.y+e.h*0.6,e.z,'#ffe9a8',16); addText(e.x,e.y+e.h+12,e.z,'PURIFY','#ffe9a8',true);
+  e.hp-=dmg; if(e.hp<=0) killEnemy(e); }
+// designated attacks (Reaper scythe finisher / charged scythe / void charge) rupture a primed target
+function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
+  const base=e.stDmg||10, dmg=Math.round(base*(e.boss?1.4:2.5)); e.primed=false; if(e.st) e.st.corrupt=0;
+  skillRing(e.x,e.z,'#d69bff','#8f52d6',120); burst(e.x,e.y+e.h*0.5,e.z,'#8f52d6',18); addText(e.x,e.y+e.h+12,e.z,'RUPTURE','#d69bff',true);
+  e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); p.hp=Math.min(effMaxHp(p),p.hp+heal); }   // predatory Reaper sustain
+  if(e.hp<=0) killEnemy(e); return dmg; }
+// consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff
+function consumeRunes(e){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5);
+  e.st.rune=0; skillRing(e.x,e.z,'#e1b9ff','#c47bff',90); addText(e.x,e.y+e.h+12,e.z,'RUNE ×'+marks,'#c47bff',true); e.hp-=dmg; if(e.hp<=0) killEnemy(e); return dmg; }
+// per-enemy status upkeep (DoT + decay + chill slow factor). Returns the movement-speed multiplier from Chill.
+function statusTick(e,dt){
+  if(!e.st){ return 1; } const now=(G&&G.time)||0, st=e.st;
+  if(e.freezeCd>0) e.freezeCd-=dt;
+  // DoT: Burn + Venom, scaled by stacks and the remembered hit
+  if(st.burn>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.burn)*(e.stDmg||6)*0.055*dt;
+    if(Math.random()<0.25) G.particles.push({x:e.x,y:e.y+Math.random()*e.h,z:e.z,vx:0,vy:50,vz:0,life:0.3,color:'#ff7a3a',sz:2}); }
+  if(st.venom>0.01){ e.stAcc=(e.stAcc||0)+Math.floor(st.venom)*(e.stDmg||6)*0.04*dt;
+    if(Math.random()<0.18) G.particles.push({x:e.x,y:e.y+Math.random()*e.h*0.6,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#86e05a',sz:2}); }
+  if(e.stAcc>=1){ const d=Math.floor(e.stAcc); e.stAcc-=d; e.hp-=d; if(e.hp<=0){ killEnemy(e); return 1; } }
+  if(e.healCut && st.venom<3) e.healCut=0;
+  if(e.exposed>0) e.exposed-=dt;
+  // decay meters past their grace window
+  for(const k in st){ if(st[k]>0 && now-((e.stFresh&&e.stFresh[k])||0)>STWIN[k]){ st[k]=Math.max(0,st[k]-STDEC[k]*dt); if(k==='corrupt'&&st[k]<STCAP.corrupt) e.primed=false; } }
+  const ch=Math.floor(st.chill); return ch>0?(1-Math.min(0.5,ch*0.1)):1;   // each Chill stack -10% move speed, cap -50%
+}
+function nearestEnemy(maxDist,coneCos){
+  const p=G.p; let best=null,bd=maxDist;
+  const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  for(const e of G.enemies){ if(e.dead||!e.active) continue;
+    const d=dXZ(p.x,p.z,e.x,e.z); if(d>bd) continue;
+    if(coneCos!=null && d>1){ const dot=((e.x-p.x)/d)*fx+((e.z-p.z)/d)*fz; if(dot<coneCos) continue; }
+    bd=d; best=e; }
+  return best;
+}
+const PLAYER_SIGHT_COS=Math.SQRT1_2; // 90° total view cone: 45° left/right of the player's gaze
+function playerAimYaw(p){ return (meta.camMode!=='far'&&G.camYaw!=null)?G.camYaw:p.yaw; }
+function targetInPlayerSight(p,e,maxDist){
+  if(!e||e.dead||!e.active) return false;
+  const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz); if(d>maxDist) return false;
+  const aim=playerAimYaw(p),dot=d>1?(dx/d)*Math.sin(aim)+(dz/d)*Math.cos(aim):1;
+  return dot>=PLAYER_SIGHT_COS&&!losBlocked(p.x,p.z,e.x,e.z);
+}
+// Auto-aim follows the direction you are LOOKING (camera in shoulder/fps, facing in overhead).
+// Projectile targets must be inside the 90° sight cone and have an unobstructed line of sight.
+function aimTarget(p,w,maxDist){
+  const ranged=w&&w.cls==='ranged';
+  const aim=playerAimYaw(p), ax=Math.sin(aim), az=Math.cos(aim);
+  let best=null,bestScore=1e18;
+  for(const e of G.enemies){ if(e.dead||!e.active) continue;
+    const dx=e.x-p.x, dz=e.z-p.z, d=Math.hypot(dx,dz); if(d>maxDist) continue;
+    const dot=d>1?(dx/d)*ax+(dz/d)*az:1;
+    if(ranged && !targetInPlayerSight(p,e,maxDist)) continue;
+    const ang=Math.acos(Math.max(-1,Math.min(1,dot))), score=ang*180+d*.35;               // angle dominates among visible targets
+    if(score<bestScore){ bestScore=score; best=e; } }
+  return best;
+}
+function projectileAimTarget(p,maxDist){
+  const aim=playerAimYaw(p); if(meta.camMode!=='far') p.yaw=aim;                         // no target: fire straight through the reticle
+  return aimTarget(p,{cls:'ranged'},maxDist);
+}
+// is there an enemy actually worth auto-attacking? (in weapon range + LOS + roughly ahead) — gates auto-attack so it never swings/shoots at nothing behind you
+function autoAtkTarget(p,w){
+  let reach;
+  if(w.cls==='ranged'){ reach=((w.proj&&w.proj.range)||760); }
+  else { const M=MELEE[w.art]||MELEE.sword; reach=(M.shape==='slam')?((M.offset||40)+M.radius):M.reach; }
+  const t=aimTarget(p,w,reach+34);                              // +34 ~ enemy radius margin
+  if(!t) return null;
+  if(w.cls==='melee' && (!vOverlap(t,p) || losBlocked(p.x,p.z,t.x,t.z))) return null;     // melee: reachable height + no wall between
+  return t;
+}
+function playerAttack(cdMul){
+  const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
+  p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
+  // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
+  const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
+  if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
+  // weapon-specific tap identities — own-class ONLY (off-class falls through to the plain base attack)
+  if(w.cls==='ranged' && classFamilyOk(w)){
+    if(w.arche==='javelin'){ stabHit(p,w,82,1.25); return; }                                              // javelin tap = a short spear stab (hold = the thrown lance)
+    if(w.arche==='knives' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+42 && vOverlap(t,p)){ stabHit(p,w,54,1.9); return; }  // knives point-blank = a fast bonus stab, else the double-throw below
+  }
+  // Ranger is a MIXED-STYLE attacker: with a ranged weapon and an enemy in your face,
+  // the basic attack becomes a knife swipe (weaker than a Warrior's blade) instead of a shot.
+  if(meta.classId==='ranger' && w.cls==='ranged' && t && dXZ(t.x,t.z,p.x,p.z)<t.r+58 && vOverlap(t,p)){
+    p.atkTimer=0.24; SFX.slash();
+    const dmg=w.dmg*effPower(p)*0.7*offclassMul(p);
+    if(!losBlocked(p.x,p.z,t.x,t.z)) hitEnemy(t,dmg,p,260,effLifesteal(p),null);
+    burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
+    return;
+  }
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else SFX.shoot(); }   // Phase 20: wands use the new procedural zap (weaponFireFx still gates which weapons get it)
+  else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
+    if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
+      p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
+      p._scytheT=G.time; p.swingCombo=p.scytheCombo;
+      if(p.scytheCombo===2){ p.atkTimer=0.34; p.atkCd*=1.12; SFX.magic(w.el||'void'); G.shake=Math.min(G.shake+6,14); }   // the finisher costs a beat more
+    } else p.swingCombo=-1;
+  }
+}
+/* Class combat styles: the Ranger trades peaks for versatility — his shots trail a
+   Mage's catalysts and his steel trails a Warrior's, but he owns both ranges. */
+function classStyleMul(p){
+  const w=p.weapon; if(!w||!classFamilyOk(w)) return 1;   // off-family already pays 0.6x; don't stack style math on it
+  if(meta.classId==='warrior' && w.cls==='melee') return 1.12;
+  if(meta.classId==='mage' && w.sch==='mag') return 1.12;
+  if(meta.classId==='ranger') return w.cls==='ranged'?0.92:0.85;
+  return 1;
+}
+// a weapon supports tap/hold charging ONLY for its own class family (off-class = plain base attack, GLOBAL RULE)
+function isChargeWeapon(w){ return !!(w && w.chg && classFamilyOk(w)); }
+const THROWN_CHARGES=['hurl','javelin','scythethrow'];
+function thrownWeaponHidden(p,w){ return !!(p&&w&&p.throwHideT>0&&p.throwHideArche===w.arche&&THROWN_CHARGES.includes(w.chg)); }
+function beginThrownWeapon(p,w,returns){
+  p.throwToken=(p.throwToken||0)+1; p.throwHideArche=w.arche; p.throwHideReturn=!!returns;
+  p.throwHideT=returns?2.25:0.36; return p.throwToken;
+}
+// dispatch a charge release to the weapon's charged behavior (amt 0..1)
+function chargeRelease(p,w,amt){ if(!classFamilyOk(w)) return;
+  if(w.el==='fire') playFx('firecharge');                 // fire staff/blade charged release = launch-jet whoosh
+  else if(w.cls==='ranged'&&w.sch==='mag') playFx('wandcharge');   // other wand/staff charged shots
+  G._desig=true;                                        // a charged release is a "designated" attack: spends Rune Marks + ruptures Corruption on its melee hits
+  switch(w.chg){
+    case 'bolt': fireChargedBolt(p,w,amt); break;      // staff: a bigger elemental projectile
+    case 'hurl': hurlAxe(p,w,amt); break;              // axe: a returning thrown axe
+    case 'quake': chargeQuake(p,w,amt); break;         // hammer: radial shockwave + stun
+    case 'spin': spinCleave(p,w,amt); break;           // greatsword: spinning cleave
+    case 'javelin': throwJavelin(p,w,amt); break;      // javelin: heavy thrown lance
+    case 'scythethrow': throwScythe(p,w,amt); break;   // scythe: hurl the spinning scythe (ranged), it boomerangs back
+    case 'powershot': fireChargedBow(p,w,amt); break;  // longbow: a piercing power arrow
+    case 'spellsweep': spellSweep(p,w,amt); break;     // spellblade: a wide magic sweep that stacks its affinity
+    default: fireCharged(p,w,amt);                      // fallback elemental blast
+  }
+  G._desig=false;
+}
+// the scythe's RANGED attack: fling it spinning, it pierces everything and curves back to you
+function throwScythe(p,w,amt){ const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=560, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  const dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p);   // ranged-type damage
+  const throwToken=beginThrownWeapon(p,w,true);
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
+    size:30,color:w.blade||'#cfd6df',shape:'scythespin',glow:w.el?1:0,el:w.el||null,dmg,kb:(w.kb||260),pierce:99,
+    life:3.0,hitSet:[],axe:true,ox,oz,range:210+amt*280,returning:false,spin:0,desig:true,throwToken});
+  SFX.slash(); if(w.el) SFX.magic(w.el); p.atkTimer=0.26; G.shake=Math.min(G.shake+5,12);
+  burst(ox,oy,oz,w.blade||'#cfd6df',8); }
+// a short forward thrust (the light stab shared by javelin + point-blank knives)
+function stabHit(p,w,reach,mult){ p.atkTimer=0.22; p.swingId++; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
+  const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw), dmg=w.dmg*effPower(p)*(mult||1)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x, dz=e.z-p.z, along=dx*fx+dz*fz;
+    if(along<-e.r||along>reach+e.r) continue; if(Math.abs(dx*fz-dz*fx)>24+e.r) continue;
+    if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; hitEnemy(e,dmg,p,w.kb,ls,w.el); }
+  burst(p.x+fx*reach*0.6,p.y+22,p.z+fz*reach*0.6,'#cfd6df',6); }
+function fireChargedBolt(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=pr.speed||480, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+    size:(pr.size||9)*(1+amt*1.3),color:pr.color,shape:pr.shape,glow:1,dmg,kb:(w.kb||150)+120,pierce:(pr.pierce||0)+1,el:w.el,life:(pr.range||400)*1.5/sp,hitSet:[],desig:true});
+  SFX.magic(w.el); G.shake=Math.min(G.shake+4+amt*5,13); p.atkTimer=0.2; burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,pr.color||'#c9a6ff',9); }
+function hurlAxe(p,w,amt){ const t=projectileAimTarget(p,700); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=660, oy=p.y+24, ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  const dmg=w.dmg*effPower(p)*(1.8+amt*2.2)*offclassMul(p)*classStyleMul(p);
+  const throwToken=beginThrownWeapon(p,w,true);
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,
+    size:12,color:'#dfe5ec',shape:'axe',glow:0,dmg,kb:w.kb,pierce:99,el:null,life:2.15,hitSet:[],axe:true,ox,oz,range:120+amt*155,returning:false,spin:0,throwToken});
+  SFX.slash(); p.atkTimer=0.24; G.shake=Math.min(G.shake+4,11); }
+function chargeQuake(p,w,amt){ const R=118+amt*130, dmg=w.dmg*effPower(p)*(1.4+amt*1.8)*offclassMul(p)*classStyleMul(p);
+  skillRing(p.x,p.z,'#e8c27a','#b8863a',R); SFX.boss(); G.shake=Math.min(G.shake+8+amt*6,16);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r){ hitEnemy(e,dmg,p,(w.kb||400)+180,effLifesteal(p),null); e.stunT=Math.max(e.stunT||0,0.6+amt*0.6); } }
+  p.atkTimer=0.30; }
+// longbow charged POWER ARROW — a fat golden lance that pierces everything, scaling hard with charge
+function fireChargedBow(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,1200); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=(pr.speed||680)+amt*280, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const dmg=w.dmg*effPower(p)*(1.8+amt*3.4)*offclassMul(p)*classStyleMul(p);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+    size:(pr.size||5)+3+amt*5,color:'#ffe9a8',shape:'lance',glow:1,trail:'#ffe9a8',dmg,kb:(w.kb||110)+180,pierce:99,el:w.el,life:(pr.range||1150)*1.2/sp,hitSet:[]});
+  SFX.shoot(); burst(p.x+Math.sin(p.yaw)*18,oy,p.z+Math.cos(p.yaw)*18,'#ffe9a8',12); skillRing(p.x,p.z,'#ffe9a8','#e8c060',56); G.shake=Math.min(G.shake+3+amt*5,12); p.atkTimer=0.24; }
+// spellblade charged SPELL SWEEP — a wide arc of the blade's affinity: less raw damage than a
+// greatsword's spin, MAGIC damage, and it stacks the spellblade's element twice (its signature).
+function spellSweep(p,w,amt){ const R=(w.range||60)+58+amt*52, els=w.el, ec=elementColor(els)||'#c9a6ff';
+  const dmg=Math.round(w.dmg*effPower(p)*(1.3+amt*1.7)*effMagPower(p)*offclassMul(p)*classStyleMul(p)), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); if(els) SFX.magic(els); G.shake=Math.min(G.shake+5+amt*5,14);
+  skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+18);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)){ hitEnemy(e,dmg,p,w.kb,ls,els); if(els) applyStatus(e,els,dmg,p.weapon); } }   // the extra applyStatus = double affinity buildup
+  for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:p.x+Math.cos(a)*26,y:p.y+22,z:p.z+Math.sin(a)*26,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.45,color:ec,sz:2.8}); } }
+function spinCleave(p,w,amt){ const R=(w.range||84)+42+amt*44, dmg=w.dmg*effPower(p)*(1.6+amt*2.0)*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  p.spinT=0.4; p.atkTimer=0.36; SFX.slash(); G.shake=Math.min(G.shake+6+amt*5,15);
+  for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<R+e.r && vOverlap(e,p) && !losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,w.kb,ls,w.el); }
+  burst(p.x,p.y+22,p.z,'#ffd24a',18); }
+function throwJavelin(p,w,amt){ const pr=w.proj||{}, t=projectileAimTarget(p,900); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=(pr.speed||600)+amt*140, oy=p.y+30; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=90;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt + (pr.gravity||300)*0.5*tt; }
+  const dmg=w.dmg*effPower(p)*(1.6+amt*2.4)*offclassMul(p)*classStyleMul(p);
+  const throwToken=beginThrownWeapon(p,w,false);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:pr.gravity||300,
+    size:(pr.size||6)+3,color:pr.color,shape:'javelin',glow:0,dmg,kb:(w.kb||210)+120,pierce:(pr.pierce||1)+2,el:null,life:(pr.range||680)*1.6/sp,hitSet:[],throwToken});
+  SFX.shoot(); p.atkTimer=0.22; G.shake=Math.min(G.shake+4,11); }
+function fireCharged(p,w,amt){
+  const dmg=w.dmg*effPower(p)*(1.4+amt*2.6)*offclassMul(p)*classStyleMul(p);   // 1.4x at a flick up to 4x at full charge
+  const t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=580, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  const col=elementColor(w.el)||'#c9a6ff', ox=p.x+Math.sin(p.yaw)*18, oz=p.z+Math.cos(p.yaw)*18;
+  G.projectiles.push({owner:'player',x:ox,y:oy,z:oz,vx,vy,vz,gravity:0,size:9+amt*9,color:col,shape:'orb',glow:1,
+    dmg,kb:280,pierce:2,el:w.el,life:1150/sp,hitSet:[]});
+  SFX.magic(w.el); G.shake=Math.min(G.shake+5+amt*5,13); p.atkTimer=0.2; burst(ox,oy,oz,col,10);
+}
+function fireProjectile(p,w,target){
+  const pr=w.proj, crit=Math.random()<0.16+effCrit(p)?1.5:1, ok=classFamilyOk(w); let dmg=w.dmg*effPower(p)*crit*offclassMul(p)*classStyleMul(p);
+  if(ok && w.arche==='crossbow' && target){ const d=dXZ(p.x,p.z,target.x,target.z); dmg*=(0.7+Math.max(0,1-d/620)*1.7); }   // shotgun: heavy up close, weak at range
+  const seek = ok && !!pr.seek;                                                                                            // smart-missile wands (Demon Eye / Holy Scepter) home in
+  const oy=p.y+26; let vx=Math.sin(p.yaw)*pr.speed, vz=Math.cos(p.yaw)*pr.speed, vy=(pr.gravity?70:0);
+  if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
+    vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
+    vy=((target.y+target.h*0.5)-oy)/t + (pr.gravity?pr.gravity*0.5*t:0); }
+  const count=pr.count||1, spread=pr.spread||0;                 // multi-shot spread (crossbow, knives)
+  for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
+      gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
+      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,seekTarget:seek?target:null,pcrit:crit>1}); }
+}
+/* ---------------- Class skills: execution (Phase 1) ---------------- */
+function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
+const SKILL_FX={
+  cleave(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    p.atkTimer=0.26; p.swingId++; SFX.slash(); playFx('warskill1'); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>115+e.r) continue; if(d>e.r&&(dx*fx+dz*fz)/d<Math.cos(1.55)) continue;
+      if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,340,effLifesteal(p),ok?(w&&w.el):null); }
+    // a bright golden cleave arc sweeps the front cone — clearly a skill, not a normal swing
+    burst(p.x+fx*55,p.y+22,p.z+fz*55,'#ffd24a',14);
+    for(let i=0;i<12;i++){ const a=p.yaw+(i/11-0.5)*2.7, rr=72+Math.random()*44;
+      G.particles.push({x:p.x+Math.sin(a)*rr,y:16,z:p.z+Math.cos(a)*rr,vx:Math.sin(a)*130,vy:44,vz:Math.cos(a)*130,life:0.35,color:'#ffe08a',sz:3.4}); } },
+  stomp(p,ok,am){ const w=p.weapon, cm=classMods(), R=(cm.sub==='guardian'?210:150);
+    SFX.boss(); G.shake=Math.min(G.shake+9,15); skillRing(p.x,p.z,'#e8c27a','#b8863a',R+30);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>R+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,ok?520:200,effLifesteal(p),null); }
+    for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:p.x+Math.cos(a)*26,y:3,z:p.z+Math.sin(a)*26,vx:Math.cos(a)*160,vy:60,vz:Math.sin(a)*160,life:0.4,color:'#e8c27a',sz:3}); } },
+  wcharge(p,ok,am){ p.chargeDash=0.32; p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw);
+    p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies) e._chHit=false; p.invuln=Math.max(p.invuln,0.2); SFX.dodge(); },
+  berserk(p,ok,am){ p.berserkT=6; SFX.growl(1); toast('🔺 BERSERK!'); G.shake=Math.min(G.shake+5,10);
+    burst(p.x,p.y+30,p.z,'#ff5a3a',18); },
+  deadeye(p,ok,am){ const w=p.weapon, cm=classMods(), t=projectileAimTarget(p,950);
+    if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const sp=900, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+    if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+    // Deadeye reads as a SKILL, not a normal arrow: a bright muzzle flash + a fat golden piercing lance that trails
+    burst(p.x+Math.sin(p.yaw)*18,oy,p.z+Math.cos(p.yaw)*18,'#ffe9a8',12); skillRing(p.x,p.z,'#ffe9a8','#e8c060',60);
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+      size:11,color:'#ffe9a8',shape:'lance',glow:1,trail:'#ffe9a8',dmg:(w?w.dmg:8)*effPower(p)*3*am*(ok?1:OFFCLASS_MUL),
+      kb:220,pierce:ok?(cm.sub==='sniper'?99:3):0,el:ok?(w&&w.el):null,life:1.2,hitSet:[]});
+    p.atkTimer=0.18; SFX.shoot(); G.shake=Math.min(G.shake+4,9); },
+  volley(p,ok,am){ const w=p.weapon, base=(w&&w.proj)?w.proj:{speed:660,size:4,color:'#9fe6c8',shape:'arrow'};
+    const t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const oy=p.y+26, N=7, dmg=(w?w.dmg:8)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);
+    for(let i=0;i<N;i++){ const a=p.yaw+(i-(N-1)/2)*0.16;
+      G.projectiles.push({owner:'player',x:p.x+Math.sin(a)*16,y:oy,z:p.z+Math.cos(a)*16,vx:Math.sin(a)*base.speed,vy:0,vz:Math.cos(a)*base.speed,
+        gravity:0,size:base.size,color:base.color,shape:base.shape||'arrow',glow:base.glow||0,dmg,kb:120,pierce:0,el:ok?(w&&w.el):null,life:700/base.speed,hitSet:[]}); }
+    p.atkTimer=0.18; SFX.shoot(); },
+  tumble(p,ok,am){ const cm=classMods();
+    p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
+    p.invuln=Math.max(p.invuln,cm.sub==='assassin'?0.6:0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
+    if(ok){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
+      if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
+    burst(p.x,8,p.z,'#9fe0ff',10); },
+  mark(p,ok,am){ const t=projectileAimTarget(p,800); if(!t){ toast('No target in sight'); return 'refund'; }
+    t.markT=8; addText(t.x,t.h+22,t.z,'MARKED','#ffd24a',true); SFX.pickup(); },
+  bolt(p,ok,am){ const w=p.weapon, el=ok?(w&&w.el):null, col=elementColor(w&&w.el)||'#c9a6ff';
+    const t=projectileAimTarget(p,820); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+    const sp=560, oy=p.y+26; let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+    if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+    // a SKILL bolt reads bigger + charged than the basic shot: a cast ring + a fat glowing rune-orb that trails
+    skillRing(p.x,p.z,col,col,80); burst(p.x+Math.sin(p.yaw)*20,oy,p.z+Math.cos(p.yaw)*20,col,14);
+    G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*18,y:oy,z:p.z+Math.cos(p.yaw)*18,vx,vy,vz,gravity:0,
+      size:20,color:col,shape:'runeorb',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2.4*am*(ok?1:OFFCLASS_MUL),kb:260,pierce:1,el,life:1.3,hitSet:[]});
+    p.atkTimer=0.2; SFX.magic(w&&w.el); G.shake=Math.min(G.shake+5,10); },
+  nova(p,ok,am){ const w=p.weapon; SFX.magic('ice'); skillRing(p.x,p.z,'#bff0ff','#7fd6ff',190);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.4*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>165+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,220,0,null); if(ok) e.slowT=Math.max(e.slowT||0,2.5); }
+    for(let i=0;i<14;i++){ const a=i/14*6.283; G.particles.push({x:p.x+Math.cos(a)*22,y:6,z:p.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:50,vz:Math.sin(a)*130,life:0.45,color:'#bff0ff',sz:3}); } },
+  blink(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    burst(p.x,p.y+20,p.z,'#c9a6ff',10);
+    for(const d of [150,110,70]){ const nx=p.x+fx*d, nz=p.z+fz*d;
+      if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
+    p.invuln=Math.max(p.invuln,0.35); burst(p.x,p.y+20,p.z,'#c9a6ff',14); SFX.magic('arcane'); },
+  tempest(p,ok,am){ p.tempestT=4; p.tempAcc=0; p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.55*am*(ok?1:OFFCLASS_MUL);
+    SFX.magic('storm'); playFx('arcaneskill'); toast('🌩️ Arcane Tempest!'); },
+  reap(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    p.atkTimer=0.28; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*2.4*am*(ok?1:OFFCLASS_MUL), ls=ok?Math.max(0.25,effLifesteal(p)):effLifesteal(p);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>130+e.r) continue; if(d>e.r&&(dx*fx+dz*fz)/d<Math.cos(1.75)) continue;
+      if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,300,ls,ok?(w&&w.el):null); }
+    for(let i=0;i<10;i++){ const a=p.yaw-1.5+i*0.33; G.particles.push({x:p.x+Math.sin(a)*80,y:p.y+20,z:p.z+Math.cos(a)*80,vx:0,vy:40,vz:0,life:0.35,color:'#b06bff',sz:3}); } },
+  harvest(p,ok,am){ const w=p.weapon; SFX.magic('void'); skillRing(p.x,p.z,'#b06bff','#6a2fa0',185);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL); let hit=0;
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>160+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,180,0,null); hit++;
+      for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*1.6,vy:60,vz:(p.z-e.z)*1.6,life:0.4,color:'#b06bff',sz:3}); }
+    if(hit&&ok){ const heal=Math.round(effMaxHp(p)*0.05*hit); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+      addText(p.x,p.y+70,p.z,'+'+heal,'var(--good)'); hudUpdate(); } },
+  shadowstep(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    burst(p.x,p.y+20,p.z,'#6a2fa0',12);
+    for(const d of [170,130,80]){ const nx=p.x+fx*d, nz=p.z+fz*d;
+      if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
+    p.invuln=Math.max(p.invuln,ok?0.55:0.3); burst(p.x,p.y+20,p.z,'#b06bff',16); SFX.dodge(); },
+  deathsdoor(p,ok,am){ let n=0;
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>230+e.r) continue;
+      e.doomT=4; e.doomDps=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.5*am*(ok?1:OFFCLASS_MUL); e.doomAcc=0; e.doomSrc=p; n++;
+      addText(e.x,e.y+e.h+16,e.z,'DOOMED','#b06bff',true); }
+    if(!n){ toast('Nothing near enough to doom'); return 'refund'; }
+    SFX.growl(1); G.shake=Math.min(G.shake+6,12); toast('⚰️ '+n+' marked for death'); },
+  // ===== PATH B skills (chosen at the rank-2 fork) — a fully different kit per subclass =====
+  // GUARDIAN (Warrior path B) — hold the line
+  bulwark(p,ok,am){ p.guardT=3.2; skillRing(p.x,p.z,'#9fd0ff','#4a7da0',110); SFX.magic('ice');
+    for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<260) e.taunt=3.2; }   // pull aggro
+    addText(p.x,p.y+70,p.z,'BULWARK','#9fd0ff',true); },
+  ironwave(p,ok,am){ const w=p.weapon; SFX.boss(); G.shake=Math.min(G.shake+8,15); skillRing(p.x,p.z,'#c8b06a','#8a6a3a',230);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>240+e.r||losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,0,effLifesteal(p),null);
+      const nx=(p.x-e.x)/(d||1),nz=(p.z-e.z)/(d||1); e.hurtKbX=nx*260; e.hurtKbZ=nz*260; } },   // PULL inward, not away
+  laststand(p,ok,am){ p.guardT=Math.max(p.guardT||0,4); p.reflectT=4; p.invuln=Math.max(p.invuln,0.5);
+    SFX.growl(1); toast('🛡️ LAST STAND — damage reflected'); burst(p.x,p.y+30,p.z,'#ffd24a',20); },
+  // WIZARD (Mage path B) — control & protection
+  frostchains(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw); SFX.magic('ice'); let n=0;
+    const dmg=(w?w.dmg:10)*effPower(p)*1.2*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);
+      if(d>360) continue; if((dx*fx+dz*fz)/(d||1)<Math.cos(0.6)) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,0,0,'ice'); e.stunT=Math.max(e.stunT||0,ok?2:1); e.slowT=Math.max(e.slowT||0,3.5); n++;
+      for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+i*10,z:e.z,vx:0,vy:20,vz:0,life:0.5,color:'#bff0ff',sz:3}); }
+    if(!n){ toast('No one in the frost'); return 'refund'; } },
+  barrier(p,ok,am){ p.shieldHp=Math.round(effMaxHp(p)*(ok?0.5:0.35)); p.shieldT=10; SFX.magic('arcane');
+    addText(p.x,p.y+70,p.z,'BARRIER','#c9a6ff',true); },
+  meteor(p,ok,am){ const t=projectileAimTarget(p,700); const tx=t?t.x:p.x+Math.sin(p.yaw)*260, tz=t?t.z:p.z+Math.cos(p.yaw)*260;
+    (G.meteors=G.meteors||[]).push({x:tx,z:tz,t:1.3,r:150,dmg:(p.weapon?p.weapon.dmg:10)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),src:p});
+    SFX.magic('fire'); toast('☄️ Meteor incoming'); },
+  // ASSASSIN (Ranger path B) — mobility & burst
+  shadowstrike(p,ok,am){ const t=projectileAimTarget(p,700); if(!t){ toast('No target in sight'); return 'refund'; }
+    const a=Math.atan2(t.x-p.x,t.z-p.z); p.x=t.x-Math.sin(a)*(t.r+18); p.z=t.z-Math.cos(a)*(t.r+18); p.yaw=a; p.invuln=Math.max(p.invuln,0.3);
+    burst(p.x,p.y+16,p.z,'#6a2fa0',14); SFX.dodge();
+    const w=p.weapon; hitEnemy(t,(w?w.dmg:8)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),p,180,effLifesteal(p),ok?(w&&w.el):null); },
+  smokebomb(p,ok,am){ p.invuln=Math.max(p.invuln,ok?1.4:0.9); burst(p.x,p.y+14,p.z,'#8a8f9a',22);
+    for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200){ e.slowT=Math.max(e.slowT||0,3); e.taunt=0; } }
+    for(let i=0;i<10;i++) G.particles.push({x:p.x+(Math.random()-0.5)*80,y:8+Math.random()*40,z:p.z+(Math.random()-0.5)*80,vx:0,vy:14,vz:0,life:1.2,color:'#9aa0ac',sz:5});
+    SFX.dodge(); toast('💨 Vanished'); },
+  deathmark(p,ok,am){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>260+e.r) continue;
+      e.markExplode=(p.weapon?p.weapon.dmg:10)*effPower(p)*2*am; e.markT=8; n++; addText(e.x,e.y+e.h+14,e.z,'✖','#ff5a3a',true); }
+    if(!n){ toast('No targets to mark'); return 'refund'; } SFX.growl(1); toast('✖ '+n+' marked — they burst on death'); },
+  // EXECUTIONER (Reaper path B) — finish them
+  execute(p,ok,am){ const t=projectileAimTarget(p,150); if(!t){ toast('Nothing in sight'); return 'refund'; }
+    const w=p.weapon; if(t.hp<t.maxHp*0.25){ t.hp=0; killEnemy(t); addText(t.x,t.y+40,t.z,'EXECUTED','#ff2a1a',true); G.shake=Math.min(G.shake+8,14); }
+    else hitEnemy(t,(w?w.dmg:10)*effPower(p)*4*am*(ok?1:OFFCLASS_MUL),p,200,Math.max(0.2,effLifesteal(p)),ok?(w&&w.el):null);
+    SFX.slash(); burst(t.x,t.y+t.h*0.5,t.z,'#ff3020',12); },
+  grimscythe(p,ok,am){ const w=p.weapon; p.atkTimer=0.3; p.swingId++; SFX.slash(); G.shake=Math.min(G.shake+4,10);
+    const dmg=(w?w.dmg:10)*effPower(p)*1.8*am*(ok?1:OFFCLASS_MUL);
+    for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>140+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
+      hitEnemy(e,dmg,p,220,effLifesteal(p),ok?(w&&w.el):null); }
+    for(let i=0;i<12;i++){ const a=i/12*6.283; G.particles.push({x:p.x+Math.cos(a)*90,y:p.y+18,z:p.z+Math.sin(a)*90,vx:0,vy:30,vz:0,life:0.3,color:'#b06bff',sz:3}); } },
+  reapingstorm(p,ok,am){ p.stormT=4.5; p.stormAcc=0; p._stormDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.7*am*(ok?1:OFFCLASS_MUL);
+    SFX.growl(1); toast('🌀 REAPING STORM'); }
+};
+/* ===== CLASS v2 ENGINE — progression, choices, innate traits, skill dispatch ===== */
+let queueChoiceRank=0;
+let queueSkillTut=null;
+// A quick, one-time lesson the first time you unlock a usable skill: what it does, and which key fires it.
+function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tut.skill=1; persist();
+  mode='upgrade'; showGameUI(false); _offerT=Date.now();
+  const acc={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'}[meta.classId]||'#e8a33d';
+  const art=s.icon||(s.fx&&typeof C2_ICON!=='undefined'&&C2_ICON[s.fx])||'✦';
+  showOverlayHTML(`<div class="card skilltut" style="--tut:${acc}">
+    <p class="ovkicker">Skill Unlocked</p><h2 class="ovh">${s.n}</h2>
+    <div class="tutbody"><div class="tuticon">${art}</div>
+      <div class="tutcopy"><p class="tutdesc">${s.d}</p>
+        <div class="tutkeyrow"><span class="tutkey">1</span><span class="tutkeymsg">Press <b>1</b> — or tap the first skill button — to unleash ${s.n}.</span></div>
+        <p class="tuthint">It recharges over ${s.cd}s, then it's ready again. Keep fighting to rank up and earn more skills.</p></div></div>
+    <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
+  document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); };
+}
+function c2def(id){ return CLASS2[id||meta.classId]; }
+function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
+function c2Passive(pid){ const ch=c2ch(); for(const r of [3,5,7,9]) if(ch[r]===pid) return true; return false; }
+function c2SkillOfSlot(slot){ const def=c2def(); if(!def) return null; const rank=[2,4,6,8][slot], R=def['r'+rank]; if(!R) return null;
+  const pick=c2ch()[rank]; if(pick==null) return null; return R.a.id===pick?R.a:(R.b.id===pick?R.b:null); }
+function c2CurSkills(){ return [0,1,2,3].map(c2SkillOfSlot); }
+function c2NextChoice(){ const def=c2def(); if(!def) return 0; const cs=classState(meta.classId), ch=c2ch();
+  for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r && ch[r]==null) return r; } return 0; }
+function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def['r'+rank]; if(!R) return;
+  mode='upgrade'; showGameUI(false); _offerT=Date.now(); const isSk=R.kind==='skill', slot=([2,4,6,8].indexOf(rank))+1;
+  const card=(o,i)=>{ const art=isSk?(C2_ICON[o.fx]||'✦'):passiveIcon(o.id);
+    return `<button class="bigbtn ghost c2opt" data-pick="${o.id}"><span class="c2art ${isSk?'':'glyph'}">${art}</span><span class="c2copy"><span class="c2top"><span class="c2name">${o.n}</span><span class="c2role">${o.role||'Build'}</span></span><span class="c2meta">${isSk?`<span class="c2badge cd">${o.cd}s cooldown</span><span class="c2badge">${skillManaCost(R.slot,o)} mana</span><span class="c2badge">Skill slot ${slot}</span>`:'<span class="c2badge">Always active</span><span class="c2badge">Permanent passive</span>'}</span><span class="c2desc">${o.d}</span></span><span class="c2choose">Choose ${isSk?'skill':'passive'} · ${['J','K'][i]}</span></button>`; };
+  showOverlayHTML(`<div class="card classpick" style="--pick:#8fd56d"><div class="pickhead"><div class="pickcrest"><span>${def.icon||'✦'}</span>${def.disp} · Rank ${rank}</div><h2 class="ovh">Choose Your ${isSk?'Skill':'Passive'}</h2>
+    <p class="ovsub">${isSk?`This ability becomes <span class="pickkey">Skill ${slot}</span> on your combat bar.`:'This passive permanently shapes how your build plays.'} Compare both paths carefully — you can respec later at the Drillmaster.</p></div>
+    <div class="c2choices">${card(R.a,0)}${card(R.b,1)}</div></div>`);
+  document.querySelectorAll('.c2opt').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return;
+    c2ch()[rank]=b.dataset.pick; persist(); SFX.classup();
+    const nx=c2NextChoice(); if(nx) openClassChoice(nx);
+    else { skillbarUpdate(); const first=c2CurSkills()[0];
+      if(rank===2 && first && !(meta.tut&&meta.tut.skill)) openSkillTutorial(first);   // v2 classes learn the mechanic when their first skill is picked
+      else resumePlay(); } });
+}
+// Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
+function class2Innate(p,dt){
+  if(meta.classId!=='ranger'||!c2def('ranger')) p.clearAim=false;
+  if(meta.classId==='mage'){ const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ)); if(moved<1)p._stillT=(p._stillT||0)+dt;else{p._stillT=0;p._stillX=p.x;p._stillZ=p.z;} }
+  if((p.bloodlustT||0)>0)p.bloodlustT-=dt;if((p.tacticalT||0)>0)p.tacticalT-=dt;if((p.wraithT||0)>0)p.wraithT-=dt;if((p.wraithwalkT||0)>0)p.wraithwalkT-=dt;if((p.soulStrengthT||0)>0)p.soulStrengthT-=dt;else p.soulStrength=0;
+  if(meta.classId!=='ranger'||!c2def('ranger')) return;
+  if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
+  const need=c2Passive('r_patient')?3.5:(c2Passive('r_quick')?2.0:3.0);
+  p._noHitT=(p._noHitT||0)+dt;
+  if(!p.clearAim && p._noHitT>=need){ p.clearAim=true; if(!p._caAnn){ p._caAnn=1; addText(p.x,p.y+70,p.z,'CLEAR AIM','#f7d79a'); } }
+}
+function class2OnHit(p){ // called from hurtPlayer — a direct hit breaks Clear Aim (Perfect Hunt grants a grace)
+  if(meta.classId!=='ranger') return;
+  const cap=classState('ranger').rank>=10;
+  if(cap && p.clearAim){ p._caGrace=0.75; return; }   // Perfect Aim: 0.75s grace before it drops
+  p.clearAim=false; p._noHitT=0; p._caAnn=0;
+}
+function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient Hunter 14→17)
+  if(meta.classId!=='ranger'||!p||!p.clearAim) return 1;
+  const cap=classState('ranger').rank>=10; let b=c2Passive('r_patient')?0.14:0.10; if(cap) b+=0.03; return 1+b;
+}
+function c2OnKill(p){ // Perfect Hunt: a kill while Clear Aim active trims skill cooldowns
+  if(meta.classId==='ranger' && classState('ranger').rank>=10 && p&&p.clearAim && (G.time-(p._caCdT||-9))>=1){
+    p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
+  if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
+  if(meta.classId==='reaper'){
+    gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
+    if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
+    if(classState('reaper').rank>=10&&p.skillCd)for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.75);
+  }
+}
+// new Ranger skills — reuse proven behaviors; Spike Trap is new
+SKILL_FX.r_volley=SKILL_FX.volley; SKILL_FX.r_pierce=SKILL_FX.deadeye;
+SKILL_FX.r_tumble=SKILL_FX.tumble; SKILL_FX.r_shadow=SKILL_FX.shadowstrike;
+SKILL_FX.r_smoke=SKILL_FX.smokebomb; SKILL_FX.r_mark=SKILL_FX.mark; SKILL_FX.r_deathmark=SKILL_FX.deathmark;
+// Warrior v2 skills
+SKILL_FX.w_cleave=SKILL_FX.cleave; SKILL_FX.w_charge=SKILL_FX.wcharge; SKILL_FX.w_guard=SKILL_FX.bulwark;
+SKILL_FX.w_stomp=SKILL_FX.stomp; SKILL_FX.w_berserk=SKILL_FX.berserk; SKILL_FX.w_execute=SKILL_FX.execute;
+SKILL_FX.w_bash=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,125); if(!t){ SKILL_FX.cleave(p,ok,am*.78); p.guardT=Math.max(p.guardT||0,1); return; }
+  const dmg=(w?w.dmg:10)*effPower(p)*1.7*am*(ok?1:OFFCLASS_MUL); hitEnemy(t,dmg,p,420,effLifesteal(p),ok?(w&&w.el):null); t.stunT=Math.max(t.stunT||0,1.1); p.guardT=Math.max(p.guardT||0,1.2); skillRing(t.x,t.z,'#d8c391','#776342',70); };
+SKILL_FX.w_whirl=function(p,ok,am){ const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL); skillRing(p.x,p.z,'#ffd27a','#8c642f',185);
+  for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<165+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,260,effLifesteal(p),ok?(w&&w.el):null); } SFX.slash(); };
+// Mage v2 skills
+SKILL_FX.m_bolt=SKILL_FX.bolt; SKILL_FX.m_blink=SKILL_FX.blink; SKILL_FX.m_nova=SKILL_FX.nova; SKILL_FX.m_barrier=SKILL_FX.barrier; SKILL_FX.m_tempest=SKILL_FX.tempest;
+SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
+  G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:14,color:col,shape:'lance',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2*am*(ok?1:OFFCLASS_MUL),kb:100,pierce:99,el:ok?(w&&w.el):null,life:1,hitSet:[]}); skillRing(p.x,p.z,col,col,70); SFX.magic(w&&w.el); };
+SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,680),tx=t?t.x:p.x+Math.sin(p.yaw)*240,tz=t?t.z:p.z+Math.cos(p.yaw)*240,dmg=(w?w.dmg:10)*effPower(p)*1.3*am*(ok?1:OFFCLASS_MUL); skillRing(tx,tz,'#a98cff','#4b2770',190);
+  for(const e of G.enemies){ if(e.dead)continue;const d=dXZ(e.x,e.z,tx,tz);if(d>190+e.r)continue;hitEnemy(e,dmg,p,0,0,ok?(w&&w.el):null);e.hurtKbX=(tx-e.x)/(d||1)*320;e.hurtKbZ=(tz-e.z)/(d||1)*320;e.stunT=Math.max(e.stunT||0,.45); } SFX.magic('arcane'); };
+SKILL_FX.m_overload=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,720),tx=t?t.x:p.x+Math.sin(p.yaw)*220,tz=t?t.z:p.z+Math.cos(p.yaw)*220,dmg=(w?w.dmg:10)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL),col=elementColor(w&&w.el)||'#c47bff'; skillRing(tx,tz,col,'#fff0b0',220);
+  for(const e of G.enemies){if(!e.dead&&dXZ(e.x,e.z,tx,tz)<190+e.r&&!losBlocked(tx,tz,e.x,e.z))hitEnemy(e,dmg,p,360,0,ok?(w&&w.el):null);} SFX.magic(w&&w.el);G.shake=Math.min(G.shake+9,16); };
+// Reaper v2 skills
+SKILL_FX.x_reap=SKILL_FX.reap; SKILL_FX.x_step=SKILL_FX.shadowstep; SKILL_FX.x_bind=SKILL_FX.frostchains;
+SKILL_FX.x_cleave=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,820);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=620,col='#b06bff';G.projectiles.push({owner:'player',x:p.x,y:p.y+25,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:22,color:col,shape:'scythespin',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2.1*am*(ok?1:OFFCLASS_MUL),kb:230,pierce:3,el:ok?(w&&w.el):null,life:1.25,hitSet:[]});SFX.magic('void');};
+SKILL_FX.x_wraith=function(p,ok,am){p.wraithT=3;p.guardT=Math.max(p.guardT||0,3);p.invuln=Math.max(p.invuln,.3);addText(p.x,p.y+70,p.z,'WRAITH FORM','#c9a6ff',true);burst(p.x,p.y+25,p.z,'#b06bff',20);};
+SKILL_FX.x_pull=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#7b3ab5','#241133',230);for(const e of G.enemies){if(e.dead)continue;const d=dXZ(e.x,e.z,p.x,p.z);if(d>230+e.r)continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(p.x-e.x)/(d||1)*400;e.hurtKbZ=(p.z-e.z)/(d||1)*400;e.stunT=Math.max(e.stunT||0,.5);}SFX.magic('void');};
+SKILL_FX.x_siphon=function(p,ok,am){SKILL_FX.harvest(p,ok,am*1.15);p.siphonT=4;};
+SKILL_FX.x_vortex=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.62*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#b06bff','#3d175e',220);SFX.magic('void');};
+/* Per-ability mana economy. Costs reflect actual power/utility rather than bar slot:
+   repeatable attacks are cheap, mobility is cheapest, control/sustain sits mid-band,
+   and major immunity/burst/room-clearing effects carry the premium. */
+const SKILL_MANA={
+  cleave:12,stomp:16,wcharge:14,berserk:22,
+  bulwark:14,ironwave:18,laststand:26,
+  deadeye:14,volley:12,tumble:8,mark:16,
+  shadowstrike:13,smokebomb:12,deathmark:20,
+  bolt:13,nova:16,blink:8,tempest:24,
+  frostchains:15,barrier:18,meteor:26,
+  reap:14,harvest:18,shadowstep:9,deathsdoor:24,
+  execute:18,grimscythe:17,reapingstorm:25,
+  r_volley:11,r_pierce:14,r_tumble:8,r_shadow:12,
+  r_spike:13,r_smoke:11,r_mark:16,r_deathmark:20,
+  w_cleave:12,w_bash:11,w_charge:13,w_whirl:16,w_guard:15,w_stomp:17,w_berserk:22,w_execute:20,
+  m_bolt:13,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
+  x_reap:14,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24
+};
+function skillManaCost(i,s){
+  s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
+  let v=(s&&SKILL_MANA[s.id])||12;
+  if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
+  if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;if(c2Passive('m_potent'))v*=1.08;}
+  return Math.max(1,Math.round(v));
+}
+function gainMana(p,n,announce){
+  if(!p) return 0;
+  const max=p.maxMana||100, before=p.mana==null?max:p.mana;
+  p.maxMana=max; p.mana=Math.min(max,before+n);
+  const gained=Math.round(p.mana-before);
+  if(gained>0){
+    if(announce) addText(p.x,p.y+p.h+24,p.z,'+'+gained+' MANA','#a98cff',true);
+    hudUpdate(); skillbarUpdate();
+  }
+  return gained;
+}
+function spendSkillMana(p,i,s){
+  const cost=skillManaCost(i,s), cur=p.mana==null?(p.maxMana||100):p.mana;
+  if(cur<cost){ toast('Not enough mana · '+Math.floor(cur)+' / '+cost); return 0; }
+  p.mana=cur-cost; hudUpdate(); skillbarUpdate(); return cost;
+}
+SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160*ca;
+  const tx=p.x+Math.sin(p.yaw)*120, tz=p.z+Math.cos(p.yaw)*120;   // a spike field ahead of you (slow + element on entry)
+  (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(3,(w?w.dmg:10)*effPower(p)*0.25*am),hitSet:[]});
+  skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
+  addText(tx,40,tz,'SPIKE TRAP','#cfd6df',true); };
+function useSkill(i){
+  if(mode!=='play'||!G) return; const p=G.p; if(p.dead) return;
+  if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
+    if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
+    if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
+    G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),1):null;
+    if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
+    if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
+    if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
+    G._desig=false;
+    if(r==='refund'){ gainMana(p,manaSpent,false); return; }
+    let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate(); return; }
+  return useSkillLegacy(i);
+}
+function useSkillLegacy(i){
+  if(mode!=='play'||!G) return; const p=G.p, C=curClass(), cs=classState(meta.classId); if(p.dead) return;
+  if(i>=1&&!cs.sub){ if(cs.rank>=2){ queueSubclass=true; toast('Choose your path first (rank 2)'); } else toast('🔒 Choose a path at rank 2 to unlock skills 2-4'); return; }
+  const s=curSkills()[i]; if(!s) return;
+  if(!skillUnlocked(i)){ toast('🔒 '+s.n+' — unlocks at '+C.disp+' rank '+s.rank); return; }
+  if(p.skillCd[i]>0) return;
+  const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return;
+  initAudio();
+  G._desig=true;                                          // abilities are "designated" attacks: they spend Rune Marks + rupture Corruption
+  const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
+  G._desig=false;
+  if(r==='refund'){ gainMana(p,manaSpent,false); return; }
+  const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
+  cd*=(1-effCdr(p));                                     // Mystic armor
+  p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate();
+}
+/* the icon lives in its own span so the cooldown wheel (conic overlay) + 0.1s countdown can layer over a
+   greyed copy of it without skillbarUpdate having to redraw them every frame */
+function skIco(b){ let s=b.querySelector('.sk-ico'); if(!s){ s=document.createElement('span'); s.className='sk-ico'; b.insertBefore(s,b.firstChild);
+    if(!b.querySelector('.sk-wheel')){ const w=document.createElement('span'); w.className='sk-wheel'; b.appendChild(w); const n=document.createElement('span'); n.className='sk-cd'; b.appendChild(n); } }
+  return s; }
+/* locked skill slots show which rank unlocks them ("Unlocks / Rank 4") */
+function skUnlockLabel(b,rank){ let u=b.querySelector('.sk-unlock');
+  if(!rank){ if(u) u.remove(); return; }
+  if(!u){ u=document.createElement('span'); u.className='sk-unlock'; b.appendChild(u); }
+  u.innerHTML='<i>Unlocks</i><b>Rank '+rank+'</b>'; }
+/* per-frame: fill each cooling slot's wheel + tenth-second number; when one finishes, rebuild the bar once */
+function skillCoolPaint(p){ if(!p||!p.skillCd) return; let finished=false;
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b||b.classList.contains('lock')) continue;
+    const cd=p.skillCd[i]||0;
+    if(cd>0){ const mx=Math.max(cd,(p.skillCdMax&&p.skillCdMax[i])||cd); b.style.setProperty('--cdf',(cd/mx).toFixed(3));
+      const n=b.querySelector('.sk-cd'); if(n) n.textContent=cd.toFixed(1); if(!b.classList.contains('cooling')) b.classList.add('cooling'); }
+    else if(b.classList.contains('cooling')){ b.classList.remove('cooling'); b.style.setProperty('--cdf','0'); finished=true; } }
+  if(finished) skillbarUpdate(); }
+const C2_ICON={
+  w_cleave:skillIcon('cleave'),w_bash:skillIcon('warrior-shield-bash'),w_charge:skillIcon('charge'),w_whirl:skillIcon('warrior-whirlwind'),w_guard:skillIcon('warrior-iron-guard'),w_stomp:skillIcon('stomp'),w_berserk:skillIcon('berserk'),w_execute:skillIcon('warrior-execution'),
+  r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire'),
+  m_bolt:skillIcon('mage-elemental-bolt'),m_beam:skillIcon('mage-elemental-beam'),m_blink:skillIcon('mage-blink'),m_nova:skillIcon('mage-nova'),m_gravity:skillIcon('mage-gravity-well'),m_barrier:skillIcon('mage-rune-barrier'),m_tempest:skillIcon('mage-arcane-tempest'),m_overload:skillIcon('mage-elemental-overload'),
+  x_reap:skillIcon('reaper-reap'),x_cleave:skillIcon('reaper-soul-cleave'),x_step:skillIcon('reaper-shadow-step'),x_wraith:skillIcon('reaper-wraith-form'),x_pull:skillIcon('reaper-void-pull'),x_bind:skillIcon('reaper-gravebind'),x_siphon:skillIcon('reaper-soul-siphon'),x_vortex:skillIcon('reaper-death-vortex')
+};
+function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
+  tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
+/* desktop rail: fill the LMB (basic attack) + RMB (dodge) slots that flank the 4 skills */
+const BASIC_ATTACK_STYLES=['warrior','ranger','mage','reaper'];
+function classAttackStyle(cid){ const s=(CLASSES[cid]||{}).attackStyle; return BASIC_ATTACK_STYLES.includes(s)?s:'warrior'; }
+function auxSlotsUpdate(){
+  const lmb=document.getElementById('bLMB'), spc=document.getElementById('bSpace'); if(!lmb||!spc) return;
+  const v='?v='+VERSION3D, attackStyle=classAttackStyle(meta.classId), attackKey=attackStyle+'-'+VERSION3D;
+  if(lmb.dataset.i!==attackKey){ lmb.dataset.i=attackKey; lmb.innerHTML='<span class="auxico"><img src="icons/hud-basic-attack-'+attackStyle+'.png'+v+'" alt=""></span>'; }
+  if(spc.dataset.i!==VERSION3D){ spc.dataset.i=VERSION3D; spc.innerHTML='<span class="auxico"><img src="icons/hud-dodge.png'+v+'" alt=""></span>'; } }
+function skillbarUpdate(){ auxSlotsUpdate(); const cs=classState(meta.classId), p=(typeof G!=='undefined'&&G)?G.p:null;
+  if(c2def()){ const S=c2CurSkills(), slotRank=[2,4,6,8];
+    for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const s=S[i], reached=cs.rank>=slotRank[i], manaCost=skillManaCost(i,s); b.dataset.m=manaCost;
+      if(!reached){ skIco(b).textContent='🔒'; skUnlockLabel(b,slotRank[i]); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Skill '+(i+1)+' — unlocks at rank '+slotRank[i]; attachSkillTip(b,'Locked skill','Unlocks at class rank '+slotRank[i],0,manaCost); continue; }
+      if(!s){ skIco(b).textContent='❔'; skUnlockLabel(b,null); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title='Choose your rank-'+slotRank[i]+' skill'; attachSkillTip(b,'Choose a skill','Visit the Drillmaster to choose this class skill.',0,manaCost); continue; }
+      const cool=!!(p&&p.skillCd&&p.skillCd[i]>0);
+      skIco(b).innerHTML=C2_ICON[s.fx]||'✦'; skUnlockLabel(b,null);
+      b.classList.toggle('lock',false); b.classList.toggle('cooling',cool);
+      b.classList.toggle('nomana',!!(p&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
+      b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); }
+    return; }
+  const S=curSkills();
+  for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(!b) continue; const manaCost=skillManaCost(i,S[i]); b.dataset.m=manaCost;
+    if(i>=1&&!cs.sub){ skIco(b).textContent=cs.rank>=2?'🔀':'🔒'; skUnlockLabel(b,cs.rank>=2?null:((S[i]&&S[i].rank)||2)); b.classList.toggle('lock',true); b.classList.remove('cooling','nomana'); b.style.setProperty('--cdf','0'); b.title=cs.rank>=2?'Choose your path (rank 2)':'Skill '+(i+1)+' — pick a path at rank 2'; attachSkillTip(b,cs.rank>=2?'Choose your path':'Locked skill',cs.rank>=2?'Visit the Drillmaster to choose a class path.':'Choose a class path at rank 2 to unlock this skill.',0,manaCost); continue; }
+    const s=S[i]; if(!s) continue; const locked=cs.rank<s.rank, cooling=!!(p&&p.skillCd&&p.skillCd[i]>0);
+    skIco(b).innerHTML=locked?'🔒':s.icon; skUnlockLabel(b,locked?s.rank:null);
+    b.classList.toggle('lock',locked); b.classList.toggle('cooling',cooling);
+    b.classList.toggle('nomana',!!(p&&!locked&&(p.mana==null?(p.maxMana||100):p.mana)<manaCost));
+    b.title=s.n+' ('+(i+1)+') — '+s.d+' · '+manaCost+' mana'; attachSkillTip(b,s.n,s.d,s.cd,manaCost); } }
+function resolveSwing(){
+  const p=G.p,w=p.weapon; if(w.cls!=='melee') return;
+  if(p.atkTimer<0.26*0.4) return;                       // active-hit window
+  const M=MELEE[w.art]||MELEE.sword, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  if(w.reaper && classFamilyOk(w) && p._pullId!==p.swingId){ p._pullId=p.swingId;   // Void Scythe: gravity-yank the nearby dead inward to cluster them, then reap
+    for(const e of G.enemies){ if(e.dead||e.boss) continue; const d=dXZ(e.x,e.z,p.x,p.z); if(d>62 && d<240){ const k=Math.min(130,240-d);
+      e.x+=(p.x-e.x)/d*k*0.5; e.z+=(p.z-e.z)/d*k*0.5; G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*0.6,vy:20,vz:(p.z-e.z)*0.6,life:0.25,color:'#b06bff',sz:2.4}); } } }
+  if(w.art==='scythe' && p.swingCombo===2 && classFamilyOk(w)){       // SCYTHE FINISHER (3rd hit): a MAGIC burst — scales with magic damage, wider + harder
+    const cr=Math.random()<0.18+effCrit(p), els=w.el||'void', ec=elementColor(els)||'#c47bff';
+    const mdmg=Math.round(w.dmg*effPower(p)*(2.0+(cr?0.6:0))*effMagPower(p)*offclassMul(p)*classStyleMul(p));
+    const R=M.reach+56, ls2=Math.max(w.lifesteal||0,effLifesteal(p));
+    G._desig=true; G._crit=cr;                                         // the Reaper's magic finisher ruptures Corruption + spends Rune Marks
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue; const d=dXZ(e.x,e.z,p.x,p.z);
+      if(d>R+e.r) continue; if(!vOverlap(e,p)||losBlocked(p.x,p.z,e.x,e.z)) continue; e.lastHit=p.swingId; hitEnemy(e,mdmg,p,(w.kb||260)+90,ls2,els); }
+    G._desig=false; G._crit=false;
+    if(p._burstId!==p.swingId){ p._burstId=p.swingId;                 // one-shot burst VFX (skillRing carries no damage — dmg:0)
+      skillRing(p.x,p.z,ec,tint(ec,'#fff',0.3),R+30); G.shake=Math.min(G.shake+7,15);
+      for(let i=0;i<22;i++){ const a=i/22*6.283; G.particles.push({x:p.x+Math.cos(a)*24,y:p.y+22,z:p.z+Math.sin(a)*24,vx:Math.cos(a)*150,vy:70,vz:Math.sin(a)*150,life:0.5,color:ec,sz:3.2}); } }
+    return;
+  }
+  const crit=Math.random()<0.18+effCrit(p);
+  const dmg=w.dmg*effPower(p)*(1+(crit?0.5:0))*offclassMul(p)*classStyleMul(p), ls=Math.max(w.lifesteal||0,effLifesteal(p));
+  const hit=e=>{ if(losBlocked(p.x,p.z,e.x,e.z)) return; e.lastHit=p.swingId; G._crit=crit; hitEnemy(e,dmg,p,w.kb,ls,w.el); G._crit=false; }; // no reaching through walls
+  if(M.shape==='slam'){                                  // radial AoE around a point in front (hammer)
+    const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40);
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      if(dXZ(e.x,e.z,cx,cz)<(M.radius+e.r) && vOverlap(e,p)) hit(e); }
+  } else if(M.shape==='thrust'){                          // long narrow lunge (spear / dagger)
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      const dx=e.x-p.x, dz=e.z-p.z, along=dx*fx+dz*fz; if(along<-e.r||along>M.reach+e.r) continue;
+      if(Math.abs(dx*fz-dz*fx)>M.width+e.r) continue;     // perpendicular distance to the thrust line
+      if(vOverlap(e,p)) hit(e); }
+  } else {                                                // front cone / arc (sword, axe, great, scythe)
+    const cosHalf=Math.cos(M.arc/2);
+    for(const e of G.enemies){ if(e.dead||e.lastHit===p.swingId) continue;
+      const dx=e.x-p.x, dz=e.z-p.z, d=Math.hypot(dx,dz); if(d>M.reach+e.r) continue;
+      if(d>e.r && (dx*fx+dz*fz)/d<cosHalf) continue;      // outside the front arc (point-blank always connects)
+      if(vOverlap(e,p)) hit(e); }
+  }
+}
+function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  if(e.shielded && e.boss){ e.hitFlash=0.1; if(Math.random()<0.5) addText(e.x,e.y+e.h+12,e.z,'WARDED','#7fd6ff'); return; }   // the boss ward absorbs everything until its crystals fall
+  if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
+  let mod=elemMod(el,e.element);
+  if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
+  if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
+  if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
+  if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
+  { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
+  if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
+    const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
+    if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
+      if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
+        if(e.shellHp<=0){ e.role=null; e.shieldYaw=null; e.shellCracked=1; addText(e.x,e.y+e.h+14,e.z,'SHELL BROKEN!','#bfe6ff'); playFx('frostclink'); burst(e.x,e.y+e.h*0.55,e.z,'#cfeeff',12); } } } }
+  if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
+  G.combo=(G.combo||0)+1; G.comboT=2.0;
+  dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
+  const iansHit=src===G.p&&G.p.weapon&&G.p.weapon.ians;
+  if(iansHit){
+    const execute=!e.boss&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.15;
+    if(execute){ dmg=Math.max(dmg,e.hp); addText(e.x,e.y+e.h+24,e.z,'IAN\'S JUDGMENT','#fff4ae',true); skillRing(e.x,e.z,'#fff4ae','#ffd24a',105); }
+    burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?18:8);
+    for(let i=0;i<(execute?10:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
+  }
+  e.hp-=dmg; e.hitFlash=0.12;
+  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=(e.dummy?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies are BOLTED DOWN — no knockback, ever
+  e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
+  const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
+  addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
+  burst(e.x,e.y+e.h*0.5,e.z,e.color,5);
+  if(el) applyElement(e,el,dmg);
+  G.shake=Math.min(G.shake+(e.boss?2:3),9); SFX.hit();
+  if(src===G.p && e.hp>0){ const w=G.p.weapon;                              // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
+    if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
+    else if((e.boss||e.elite) && Math.random()<0.4) playFx('heavyhit',0.85); } // meaty connect on the big foes
+  if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
+  if(lifesteal>0){ const heal=Math.max(1,Math.round(dmg*lifesteal)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+  const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
+  if(weaponManaHit) gainMana(G.p,4,false);
+  if(e.hp<=0) killEnemy(e,weaponManaHit);
+}
+function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGoldMul)||1))); meta.gold=(meta.gold||0)+n; return n; }
+function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
+function killEnemy(e,weaponKill){
+  if(e.dead) return;
+  if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
+  if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
+  e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
+  if(weaponKill) gainMana(G.p,12,true);
+  if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p);   // Perfect Hunt: kill-while-Clear-Aim trims cooldowns
+  // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
+  if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
+    G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h);
+    addText(G.p.x,G.p.y+80,G.p.z,'+'+h+' ♥','#ffe9a8',true,'heal'); burst(e.x,e.y+e.h*0.5,e.z,'#fff8d6',10); }
+  if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
+  { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
+    if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
+  if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
+    for(const o of G.enemies){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
+  questKill(e.type);
+  { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
+    if(fq && !fq.placed && !e.boss && Math.random()<0.62){ const x=e.x+10,z=e.z+10; G.pickups.push({x,z,y0:highestSurfaceAt(x,z),questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); } }
+  burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
+  // Phase 11: kill crunch — a brief hitstop + a death pop / coin-spray so every kill has weight
+  G.slowmo=Math.max(G.slowmo||0, e.boss?0.38:(e.elite?0.10:0.05));
+  { const n=e.boss?20:(e.elite?9:6); for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=70+Math.random()*110; G.particles.push({x:e.x,y:e.y+e.h*0.45,z:e.z,vx:Math.cos(a)*sp,vy:130+Math.random()*90,vz:Math.sin(a)*sp,life:0.5,color:'#ffd24a',sz:2.3}); } }
+  if(e.deathpuff){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:132,dmg:e.dmg*0.85,life:0,spd:230,col:'#9fd84a',col2:'#6ea82e'});   // sporeback bursts a poison cloud on death
+    for(let i=0;i<14;i++){ const a=Math.random()*6.28, sp=40+Math.random()*70; G.particles.push({x:e.x,y:e.y+e.h*0.4,z:e.z,vx:Math.cos(a)*sp,vy:50+Math.random()*40,vz:Math.sin(a)*sp,life:0.7,color:'#9fd84a',sz:2.6}); }
+    addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
+  const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
+  if(G.endless) G.endKillsTotal=(G.endKillsTotal||0)+1;
+  const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+_xp+' XP','var(--xp)'); gainXp(_xp);
+  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
+  G.shake=Math.min(G.shake+(e.boss?14:2),16);
+  if(e.boss){
+    if(e._crystals) for(const c of e._crystals){ if(c&&!c.dead){ c.dead=true; burst(c.x,c.y+c.h*0.5,c.z,'#7fd6ff',8); } }   // the ward's crystals fall with their master
+    SFX.win(); playFx('bossdie'); document.getElementById('bosshpwrap').classList.remove('on');
+    meta.bossKills=(meta.bossKills||0)+1; const w=G.p.weapon;
+    if(w.sch==='mag') meta.magicBossKills=(meta.magicBossKills||0)+1;
+    if(w.cls==='ranged') meta.rangedBossKills=(meta.rangedBossKills||0)+1;
+    if(e.type==='king') meta.kingKills=(meta.kingKills||0)+1;
+    if(e.type==='tyrant') meta.tyrantKills=(meta.tyrantKills||0)+1;
+    rollDrop(e); persist(); checkAchievements();
+    if(G.stageIndex===STAGES.length-1){ winGame(); return; }
+  } else if(e.kind==='goblin'){ // caught the treasure goblin: premium loot burst
+    SFX.god(); toast('💰 Treasure goblin slain!');
+    for(let i=0;i<2;i++){
+      let rid=rollRarity(); while(RARITY[rid].tier<2) rid=RORDER[Math.min(4,RARITY[rid].tier+2)];
+      const item=Math.random()<0.45?{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}
+                                   :{weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)};
+      pushLoot(e.x+(i?26:-26),e.z+16,0,item);
+    }
+  } else if(e.mimicE){ // Phase 18: the mimic's hoard — the risk PAYS: two elite-band drops + a fat purse (vs a chest's one band-0 roll + 70g)
+    SFX.enemyDie(); playFx('wallbreak'); SFX.god(); toast('💰 The mimic disgorges its hoard');
+    const mg=awardGold(150+zoneTier()*50); addText(e.x,e.y+e.h+8,e.z,'+'+mg+'g','#ffd24a');
+    for(let i=0;i<2;i++) pushLoot(e.x+(i?28:-28),e.z+18,0,randomLoot(bandedRarity(1)));
+    checkAchievements();
+  } else {
+    // per-mob death voice (batch-2): grunt + a couple of assigned mobs, else the procedural die
+    if(e.type==='grunt') playFx('gruntdie');
+    else if(e.type==='revenant') playFx('mobvoice1');
+    else if(e.type==='charger') playFx('mobvoice2');
+    else if(e.deathpuff){ SFX.magic('poison'); noise({dur:.32,f0:900,f1:180,type:'lowpass',vol:.045,a:.01}); }
+    else if(e.look==='bones'||e.type==='bones'){ SFX.enemyDie(); playFx('bonesdie'); }
+    else if(e.type==='frostling'){ SFX.enemyDie(); playFx('frostdie'); }
+    else SFX.enemyDie();
+    { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
+    checkAchievements();
+    // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
+    // Organic mob loot is intentionally scarce: ordinary 5.3%, elites 33%.
+    // Bosses, chests, mimics, and goblins remain the reliable gear sources.
+    if(Math.random()<(e.elite?0.33:0.053)) rollDrop(e);
+    if(e.look==='slime' && !e.noSplit){ // slimes split into two slimelets
+      for(let i=0;i<2;i++){ const sl=spawnEnemy('slimelet',e.x+(i?16:-16),e.z+(i?-10:10));
+        sl.dropT=0; sl.active=true; if(e.room){ sl.room=e.room; e.room.monsters.push(sl); } } } }
+  checkStageClear();
+}
+/* ---------------- MIMIC CHESTS (Phase 18) ----------------
+   A random subset of chests are lying. Mimic-ness is decided AT SPAWN from the level's
+   seeded rnd, so the same chest is the mimic across reloads of the same run (the seed is
+   the save — no new fields; resolved mimics regenerate exactly as normal chests regenerate
+   closed, the existing behavior). The bonus-vault sprint chest is never a mimic. */
+const MIMIC_RATE=0.10;                                   // exactly 1 in 10 eligible chests are mimics
+function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE) ch.mimic=true; return ch; }
+function mimicReveal(ch){
+  const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
+  const m=spawnEnemy('mimic',ch.x,ch.z); m.active=true; m.mimicE=true; m.dropT=0;
+  burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
+  addText(ch.x,44,ch.z,'MIMIC!','var(--danger)',true);
+  SFX.growl(1.4); playFx('chestopen'); playFx('mobvoice1',0.9);
+  G.shake=Math.min(G.shake+12,18); G.slowmo=Math.max(G.slowmo||0,0.18);
+  toast('It was never a chest','var(--danger)','event-mimic');
+}
+function openChest(ch){
+  ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
+  burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
+  if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
+  const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();
+  if(ch.bonus && G.bonusActive){ G.bonusSecured=true; const pz=ch.z-64; G.portal={x:ch.x,z:pz,y:Math.max(ch.y||0,highestSurfaceAt(ch.x,pz)),t:0}; toast('Loot secured — grab it, then take the exit','#ffd24a','event-treasure-chest'); }
+  else toast('Treasure opened · +'+cg+'g','#ffd24a','event-treasure-chest'); // stop the clock the instant you grab it
+  const drops=ch.bonus?2:(1+(Math.random()<0.4?1:0)); // bonus vault always holds two
+  for(let i=0;i<drops;i++){
+    const rid=bandedRarity(ch.bonus?1:0);      // chests stay random, but only within this zone tier's band
+    const item=randomLoot(rid);
+    pushLoot(ch.x+(i?28:-28),ch.z+20,ch.y,item);
+  }
+}
+// every dropped item flows through here so its RARITY is an escalating event (sound + beam + burst + toast)
+function pushLoot(x,z,y0,item){ const o=item.weapon||item.armor||item.trinket, tier=o?RARITY[o.rarity].tier:0, col=o?RARITY[o.rarity].color:'#fff';
+  y0=Math.max(y0||0,highestSurfaceAt(x,z)); G.pickups.push(Object.assign({x,z,y0,bob:Math.random()*3},item));
+  SFX.drop(tier);
+  burst(x,(y0||0)+18,z,col,7+tier*7);
+  (G.fx=G.fx||[]).push({x,z,y0:y0||0,tier,col,t:0,life:tier>=4?1.7:tier>=2?1.0:0.7});   // rising beam / ring effect
+  if(tier>=2){ G.shake=Math.min(G.shake+2+tier,16);                                       // rare+ shakes + announces (common/uncommon stay silent)
+    const tag=tier>=4?'✦ LEGENDARY':tier>=3?'◆ EPIC':'✦ RARE';
+    toast(tag+(o&&o.name?' — '+o.name:''), col); }
+  if(tier>=4){ G.slowmo=Math.max(G.slowmo||0,0.32); }                                      // a brief triumphant hitch on a legendary
+  return o;
+}
+function rollDrop(e){
+  if(e.type==='tyrant') return;
+  if(e.type==='king'){ pushLoot(e.x,e.z,0,{weapon:makeWeapon('voidscythe','legendary','Abyss Blade')});
+    pushLoot(e.x-40,e.z+20,0,{armor:makeArmor('legendary','chest')}); meta.legendaryFound=(meta.legendaryFound||0)+1; return; }
+  let rid=e.boss?bandedRarity(1):rollOrganicRarity();
+  if(!e.boss){ const cap=Math.min(3,rarityCap(e.elite?1:0)); while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; } // organic mob kills cap at Epic
+  if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
+  if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
+  if(!e.boss && Math.random()<0.45){ pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
+  else { const aid=DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)];
+    pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
+    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
+}
+// Phase 9: no more roguelite pick-3. Every level bakes in automatic stat growth (folds the old
+// upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
+function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.004; }
+function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
+function gainXp(n){
+  const p=G.p; p.xp+=n;
+  gainClassXp(Math.max(1,Math.round(n*0.8)));           // class XP flows alongside character XP while this class is equipped
+  while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(44+p.level*30+p.level*p.level*1.7);
+    autoLevelGrow(p); recomputeArmor(p);
+    p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
+    SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
+    addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
+    const unlocked=rarityUnlockedAt(p.level);
+    if(unlocked) storyToast('Level '+p.level+' — you can now wield '+RARITY[unlocked].name+' gear.','item-key');
+    else if(p.level%5===0) storyToast('▲ Level '+p.level+' — markedly stronger.');
+    else toast('Level '+p.level+' · +HP +Power',null,'event-level-up'); }
+  checkAchievements(); hudUpdate();
+}
+function checkStageClear(){
+  // normal courses: the portal exists from the start — reaching the end IS the goal.
+  // boss stages: the portal opens when the boss falls.
+  if(G.portal) return;
+  if(G.portalPos && G.boss && G.boss.dead){
+    snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
+    addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
+  }
+}
+function hurtPlayer(dmg,sx,sz){
+  if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
+  { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
+  const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
+  if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
+  if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
+  if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
+  if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
+  if(p.reflectT>0){ for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
+  if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
+    burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
+  dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
+  if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
+  if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
+  const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
+  p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
+  G.tookDamage=true; G.combo=0; G.comboT=0;
+  addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
+  if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
+  if(p.hp<=0){ p.hp=0; p.dead=true; die(); }
+}
+/* ---------------- PET runtime (follow / attack / heal / vacuum + draw) ----------------
+   ONE pet lives on G.pet, spawned lazily whenever an active pet is set. No per-frame
+   allocation: enemy scans happen only on the pet's attack cadence; the name label reuses
+   one pooled DOM node. */
+function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G) G.pet=null; return; }
+  if(G.petLost){ G.pet=null; return; }                         // a fallen companion returns only when a new hub session resets G
+  const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.arch==='attacker'&&P.style==='melee');
+  const mh=petMaxHp(id); G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:p.y+(grounded?0:15),bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28,hp:mh,maxHp:mh,hurtT:0}; }
+function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead) return false; pet.hp=Math.max(0,pet.hp-Math.max(1,Math.round(dmg))); pet.hurtT=.28;
+  addText(pet.x,pet.y+34,pet.z,'-'+Math.round(dmg),'#ff8a82',true); burst(pet.x,pet.y+12,pet.z,'#ff6b62',6);
+  if(pet.hp<=0){ pet.dead=true; G.petLost=true; toast(petDisplayName(pet.id)+' has fallen — protect them until you return to the hub.'); SFX.enemyDie(); G.pet=null; }
+  return true; }
+function petUpdate(dt){
+  const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
+  pet.t+=dt; pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);
+  const grounded=(P.arch==='attacker'&&P.style==='melee');
+  pet.bob=grounded?Math.abs(Math.sin(pet.t*7))*2 : Math.sin(pet.t*3)*3;       // grounded: a little gait hop; ethereal: gentle hover bob
+  const floatY=p.y+(grounded?0:15), playing=(mode==='play'&&!isHitless());
+  // ---- pick a target: break off to engage a nearby enemy on its own, else follow the hero LOOSELY ----
+  let tx=pet.x, tz=pet.z, engaging=false, tgt=null;
+  if(playing && P.arch==='attacker'){
+    let bd=(P.range||240)+140;
+    for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue;
+      if(dXZ(e.x,e.z,p.x,p.z)>460) continue;                                  // leash: only foes near the hero, so it never wanders off across the map
+      const d=dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){ bd=d; tgt=e; } }
+    if(tgt){ engaging=true; const want=P.style==='ranged'?Math.max(120,(P.range||240)*0.6):34;
+      const d=Math.max(1,dXZ(tgt.x,tgt.z,pet.x,pet.z));
+      tx=tgt.x-(tgt.x-pet.x)/d*want; tz=tgt.z-(tgt.z-pet.z)/d*want; }
+  }
+  if(!engaging){                                                             // idle: only reposition when it has DRIFTED past the radius (breaks the linear tether; gives roaming wiggle room)
+    pet.wanderA=(pet.wanderA||0)+dt*0.7; const dh=dXZ(pet.x,pet.z,p.x,p.z);
+    if(dh>64){ tx=p.x-Math.sin(p.yaw)*40+Math.cos(pet.wanderA)*26; tz=p.z-Math.cos(p.yaw)*40+Math.sin(pet.wanderA)*26; }
+    if(dh>560 || Math.abs(pet.y-floatY)>105){ pet.x=p.x-Math.sin(p.yaw)*50; pet.z=p.z-Math.cos(p.yaw)*50; pet.y=floatY; } // vertical/horizontal catch-up after climbs and warps
+  }
+  const spd=engaging?300:170, dd=Math.hypot(tx-pet.x,tz-pet.z);
+  if(dd>2){ const step=Math.min(dd,spd*dt); pet.x+=(tx-pet.x)/dd*step; pet.z+=(tz-pet.z)/dd*step; }
+  const targetY=(engaging&&tgt)?Math.max(floatY,tgt.y+(grounded?0:15)):floatY; pet.y+=(targetY-pet.y)*Math.min(1,dt*(grounded?8:5));
+  const fy=(engaging&&tgt)?Math.atan2(tgt.x-pet.x,tgt.z-pet.z):(dd>6?Math.atan2(tx-pet.x,tz-pet.z):pet.yaw);
+  let dyaw=fy-pet.yaw; while(dyaw>Math.PI)dyaw-=6.283; while(dyaw<-Math.PI)dyaw+=6.283; pet.yaw+=dyaw*Math.min(1,dt*8);
+  if(!playing) return;
+  if(P.arch==='attacker'){ pet.atkT-=dt;
+    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ pet.atkT=P.cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
+  else if(P.arch==='healer'){ pet.healT-=dt;
+    if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
+      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
+        addText(p.x,p.y+80,p.z,'+'+h+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
+        burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } }
+  else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
+    for(const pk of G.pickups){ if(pk.questItem||pk.localItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
+}
+function petAttack(pet,P,e){
+  const dmg=petAtkDmg(pet.id);
+  if(P.style==='ranged'){ const oy=pet.y+pet.bob, sp=560, d=Math.max(1,dXZ(pet.x,pet.z,e.x,e.z));
+    G.projectiles.push({owner:'player',x:pet.x,y:oy,z:pet.z,vx:(e.x-pet.x)/d*sp,vy:((e.y+e.h*0.5)-oy)/d*sp,vz:(e.z-pet.z)/d*sp,
+      gravity:0,size:6,color:P.accent,shape:'orb',glow:1,dmg,kb:60,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true});   // pet shots home independently; player sight-cone rules do not constrain companions
+    burst(pet.x,oy,pet.z,P.accent,4); }
+  else { pet.x=e.x-Math.sin(pet.yaw)*22; pet.z=e.z-Math.cos(pet.yaw)*22;    // melee dart: hop in and strike
+    hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},90,0,null); burst(e.x,e.y+e.h*0.4,e.z,P.accent,5); }
+}
+function drawPet3(pet,t){
+  const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
+  const _vl=voxLod(pet.x,pet.z);
+  if(grounded) drawShadow(pet.x,pet.z,13,0.28); else drawShadow(pet.x,pet.z,11,0.16);
+  const glow=petRarityCol(pet.id);
+  pushM(); mv(pet.x,pet.y+pet.bob,pet.z); rotY(pet.yaw); CURM=mMul(CURM,mS(0.62,0.62,0.62));   // small companion, sized to the icon art (uniform scale keeps normals valid under the batched renderer)
+  const dk=tint(P.body,'#000',0.28), lt=tint(P.body,'#fff',0.15), wob=Math.sin(t*7+pet.t)*0.4;
+  bx(0,-12,0, 13,2.4,13, glow, glow, 0.16);                 // small rarity glow at the feet (replaces the big floating aura box)
+  if(pet.id==='emberpup'){ // charcoal pup veined with lava — tall pointed ears, ember maw, gold collar-tag, flame tail
+    bx(0,-4,-2, 16,13,22,'#241a1a');                                                  // charcoal body
+    bx(0,2,-2, 3,2,18,P.body,P.accent,0.55+0.2*Math.sin(t*4));                        // glowing lava spine
+    bx(0,-9,-1, 14,4,18,'#160f0f');                                                   // belly
+    for(const[dx,dz]of[[-5.5,7],[5.5,7],[-5.5,-9],[5.5,-9]]) bx(dx,-13,dz,3.6,7,3.6,'#1a1212');   // dark legs
+    bx(0,-11,10, 8,3,3,'#3a2a24'); bx(0,-12,12.5, 4,4,2,P.accent,'#ffd24a',0.8);      // collar + gold tag
+    pushM(); mv(0,4,11); rotX(-0.12);
+      bx(0,0,0, 12,11,10,'#241a1a'); bx(0,-2,7, 7,5,6,'#2e2020');                     // head + snout
+      bx(0,-4,10.4, 5,2.4,1.6,P.body,'#ffd07a',0.9);                                  // ember maw
+      bx(-2.6,1.8,9.4, 1.8,1.8,1,P.body,'#ffd07a',0.95); bx(2.6,1.8,9.4, 1.8,1.8,1,P.body,'#ffd07a',0.95);   // glowing eyes
+      pushM(); mv(-4.5,7,-1); rotZ(0.16+wob*0.1); bx(0,4,0, 3.4,12,2,'#241a1a'); bx(0,5,0.7, 1.6,8,1,P.body,P.accent,0.6); popM();   // tall ear + ember inner
+      pushM(); mv(4.5,7,-1); rotZ(-0.16-wob*0.1); bx(0,4,0, 3.4,12,2,'#241a1a'); bx(0,5,0.7, 1.6,8,1,P.body,P.accent,0.6); popM();
+    popM();
+    pushM(); mv(0,1,-13); rotX(0.5); rotZ(wob*1.6); bx(0,3,0, 2.6,9,2.6,P.body,P.accent,0.75); popM(); }  // flame tail
+  else if(pet.id==='stonewhelp'){ // heavy stone bulldog — layered rock plates, back horns, teal eyes, gold tag
+    bx(0,-5,0, 24,15,26,P.body);                                                      // low heavy body
+    bx(0,3,-1, 18,6,20,tint(P.body,'#000',0.18)); bx(0,7.5,-1, 11,4,13,tint(P.body,'#000',0.28)); bx(0,10.5,-1, 6,3,7,tint(P.body,'#000',0.36));   // stacked plated back
+    for(const s of [-1,1]) bx(s*6,11,4, 2.6,6,2.6,'#5a6070');                          // small back horns
+    bx(0,-2,15, 14,11,9,tint(P.body,'#fff',0.12)); bx(0,-6,19, 10,4,4,tint(P.body,'#000',0.28));   // ram head + heavy jaw
+    for(const s of [-1,1]) bx(s*4,2,15.6, 2.4,4,2,'#4a505e');                          // brow ridges
+    bx(-3.4,0,19.2, 2,2,1,'#7de0b0','#c8ffe0',0.9); bx(3.4,0,19.2, 2,2,1,'#7de0b0','#c8ffe0',0.9);   // teal glowing eyes
+    bx(0,-8,10, 12,3,3,'#4a3a2a'); bx(0,-10,15, 4,4,2,'#e8b23a','#ffd24a',0.7);        // collar + gold tag
+    for(const[dx,dz]of[[-9,9],[9,9],[-9,-9],[9,-9]]) bx(dx,-14,dz,5.5,6,5.5,'#4a505e');   // stumpy stone legs
+    bx(0,-3,-15, 5,5,4,tint(P.body,'#000',0.2)); }                                     // a pebble of a tail
+  else if(pet.id==='wisp'){ // a fallen Bladeborn's lantern, still lit — a hooded blue spirit-lantern
+    bx(0,14,0, 10,4,10,'#3a3020','#c9a24a',0.3);                                       // lantern cap
+    bx(0,19,0, 2.4,5,2.4,'#c9a24a','#ffd24a',0.4);                                     // ring finial
+    for(const[sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]]) bx(sx*4.5,7,sz*4.5, 1.4,16,1.4,'#4a4030');   // cage posts
+    bx(0,7,0, 8,15,8,'#eafaff',P.body,0.5);                                            // glass housing (glows)
+    bx(0,6,0, 4.6,9,4.6,'#ffffff',P.accent,0.95);                                      // blue flame core
+    bx(0,-3,0, 2.2,7,2.2,'#8b93a8','#c9d2e0',0.7);                                      // bottom spike
+    bx(-2.2,15.5,4, 1.8,1.8,1,'#dff4ff','#fff',0.95); bx(2.2,15.5,4, 1.8,1.8,1,'#dff4ff','#fff',0.95);   // the eyes watching from the hood
+    for(let i2=0;i2<5;i2++){ const a=t*2+i2*1.257; bx(Math.cos(a)*9,4+Math.sin(a*1.3)*9,Math.sin(a)*9, 2.2,2.2,2.2,P.body,P.accent,0.5); } }   // ghost-fire wisps
+  else if(pet.id==='mender'){ // a little leaf-fairy — leaf cap, satchel of remedies, a healing spark (it cannot fight)
+    bx(0,2,0, 8,12,6,P.body); bx(0,11,0, 7,6,6,tint(P.body,'#fff',0.4));               // mossy body + head
+    bx(0,16,0, 11,4,11,'#3a6a2e','#7de08a',0.3); bx(0,18.5,-1, 5,4,5,'#2e5a24');        // leaf cap
+    for(const s of [-1,1]) bx(s*5,12,-1, 2.4,5,2,tint(P.body,'#fff',0.2));             // pointed fairy ears
+    bx(-1.6,11.6,3.2, 1.6,1.6,1,'#1e4a34'); bx(1.6,11.6,3.2, 1.6,1.6,1,'#1e4a34');      // kind eyes
+    bx(6,3,-1, 5,7,3,'#6a4a2a'); bx(7,-1,-1, 3,4,2,'#8ad0ff',P.accent,0.6);            // satchel + potion vial
+    pushM(); mv(-5,8,-2); rotZ(0.9+Math.sin(t*16)*0.35); bx(-4,2,0, 9,8,1.4,'#eafff0',P.accent,0.5); popM();   // beating wings
+    pushM(); mv(5,8,-2); rotZ(-0.9-Math.sin(t*16)*0.35); bx(4,2,0, 9,8,1.4,'#eafff0',P.accent,0.5); popM();
+    { const s=0.6+0.4*Math.sin(t*5); bx(-7,7,3, 3,3,3,'#eaffd0',P.accent,s); }          // a healing spark cupped in its hand
+    for(let i2=0;i2<2;i2++){ const a=t*1.8+i2*3.14; bx(Math.cos(a)*9,Math.sin(a)*5+6,Math.sin(a)*9, 2,2,2,P.accent,P.accent,0.6); } }
+  else if(pet.id==='coinsprite'){ // a hooded golem of coins — blue eyes, a coin-crescent staff, a fat purse (it shares the gold)
+    bx(0,4,0, 12,16,9,P.body,P.accent,0.2); bx(0,3,0, 9,13,7,tint(P.body,'#000',0.15));   // coin-stacked body + robe shade
+    bx(0,14,0, 11,7,10,'#2a3350','#3a4a7a',0.3); bx(0,12,5, 8,6,2,'#0f1424');           // blue hood + dark face
+    bx(-2.4,13,5.4, 2,2.4,1,'#7fbaff','#c8e6ff',0.95); bx(2.4,13,5.4, 2,2.4,1,'#7fbaff','#c8e6ff',0.95);   // glowing blue eyes
+    bx(0,17,0, 4,4,4,P.accent,'#ffd24a',0.6);                                          // gilt crown stud
+    pushM(); mv(-9,10,2); rotZ(0.2); bx(0,10,0, 2.4,20,2.4,'#8a6f34'); bx(0,20,0, 7,7,2,P.body,P.accent,0.6); bx(2,20,0, 3,3,2,'#0f1424'); popM();  // coin-crescent staff
+    bx(9,2,2, 6,7,5,'#6a4a2a'); bx(9,5,3.4, 4,3,1,P.body,P.accent,0.6);                 // coin purse
+    for(const[dx,dz]of[[-3.5,3],[3.5,3]]) bx(dx,-6,dz,4,6,4,tint(P.body,'#000',0.25));  // stubby legs
+    if(_vl<2) for(let i2=0;i2<(_vl===0?6:3);i2++){ const a=t*2.2+i2*6.283/(_vl===0?6:3); bx(Math.cos(a)*13,10+Math.sin(t*3+i2)*5,Math.sin(a)*13, 3,3,1.4,P.body,P.accent,0.7); }
+    if(_vl===0){ bx(-4,5,4.7,2.4,1.2,1,'#fff2a0','#ffd24a',.7); bx(4,5,4.7,2.4,1.2,1,'#fff2a0','#ffd24a',.7); bx(9,0,4.8,4,1,1,'#d9a52f','#ffd24a',.5); } } // stamped coin glints + purse clasp
+  else if(pet.id==='gravewraith'){ // a skull-faced reaper-spirit — bone mask, tattered hood, a soul-censer, purple tendrils
+    bx(0,10,0, 13,11,11,'#241436');                                                   // deep hood
+    bx(0,9,4.4, 8,9,3,'#d8d2e0'); bx(0,7,5.6, 6,4,2,'#0f0820');                         // the pale SKULL face + jaw shadow
+    bx(-2.2,11,6, 2,2.6,1,P.body,P.accent,0.95); bx(2.2,11,6, 2,2.6,1,P.body,P.accent,0.95);   // burning eye sockets
+    for(let i2=0;i2<3;i2++){ const s2=13-i2*2.6; bx(0,3-i2*5,-1, s2,6,s2-2, tint('#241436','#000',0.12*i2),null,0.85-i2*0.2); }   // robe tattering away
+    for(const s of [-1,1]){ pushM(); mv(s*8,10,-2); rotZ(s*(0.6+wob*0.3)); bx(s*3,0,0, 8,3,4,P.body,P.accent,0.4); bx(s*7,-3,0, 6,2,3,P.body,P.accent,0.28); popM(); }   // purple tendril wings
+    pushM(); mv(7,4,3); rotZ(wob*0.2); bx(0,0,0, 4,5,4,'#3a3444','#8b93a8',0.2); bx(0,-4,0, 3,4,3,P.body,P.accent,0.6); popM();   // a swinging soul-censer
+    for(let i2=0;i2<3;i2++){ const a=t*2.2+i2*2.1; bx(Math.cos(a)*11,4+Math.sin(a*1.3)*8,Math.sin(a)*11, 2.4,2.4,2.4,P.body,P.accent,0.5); } }
+  else { bx(0,6,0,16,16,16,P.body,P.accent,0.4); }
+  popM();
+}
+function updatePetLabel(){
+  const el=document.getElementById('petlabel'); if(!el) return;
+  const pet=(G&&G.pet), show=pet&&meta.petLabel&&mode==='play';
+  if(!show){ el.classList.add('hide'); return; }
+  const sp=project(pet.x,pet.y+34,pet.z);
+  if(!sp){ el.classList.add('hide'); return; }
+  el.classList.remove('hide'); el.style.left=(sp[0]/DPR)+'px'; el.style.top=(sp[1]/DPR)+'px';
+  el.style.color=petRarityCol(pet.id); el.textContent=petDisplayName(pet.id);
+}
+function update(dt){
+  if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
+  if(mode==='mirror'){ mirrorUpdate(dt); return; }
+  if(mode!=='play') return;
+  if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
+  if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
+  if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
+  if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
+  updateInteract();
+  const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
+  if(G.stageBanner>0) G.stageBanner-=dt;
+  if(G.shake>0) G.shake=Math.max(0,G.shake-dt*40);
+  if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
+  if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
+  if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
+  const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
+  if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
+    if(Math.random()<0.25) G.particles.push({x:p.x+(Math.random()-0.5)*16,y:p.y+8,z:p.z+(Math.random()-0.5)*16,vx:0,vy:50,vz:0,life:0.3,color:'#cfd6df',sz:2}); }
+  if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
+    const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
+  if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
+  else {
+    // Rime (Frostfell): the ice takes your grip — slower to build speed, much slower to shed it
+    const ice=(G.haz==='slick')?(p.slide||0):0, acc=8*(1-ice*0.55), fr=0.80+ice*0.175, cut=4-ice*3.7;
+    if(mx!==0) p.vx+=mx*moveSpd*dt*acc; p.vx*=fr; if(Math.abs(p.vx)<cut) p.vx=0;
+    if(mz!==0) p.vz+=mz*moveSpd*dt*acc; p.vz*=fr; if(Math.abs(p.vz)<cut) p.vz=0;
+    const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
+    if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
+      while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
+  }
+  hazUpdate(dt);
+  if(G.hub) hubInteract(p,dt);
+  // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
+  // SPAWNERS (quest-driven): while a kill quest is open, refill its mob at the dens until the count is met.
+  // Driven by the quest + a global alive-count (one lookup, fixed cadence) so it can NEVER stall short of the goal.
+  if(G.dens&&G.dens.length){
+    const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q));
+    if(kq){ G._denT=(G._denT||0)-dt;
+      if(G._denT<=0){ G._denT=2.0;
+        const dens=G.dens.filter(d=>d.type===kq.mob), alive=G.enemies.filter(e2=>!e2.dead&&e2.type===kq.mob).length;
+        if(dens.length && alive<5){
+          let bi=0,bd=1e9; dens.forEach((d,i)=>{ const dd=dXZ(p.x,p.z,d.x,d.z); if(dd<bd){bd=dd;bi=i;} });   // spawn from the den nearest the player: the hunt comes to you
+          const n=Math.max(1,Math.min(dens.length,5-alive,3));
+          for(let s=0;s<n;s++){ const d=dens[(bi+s)%dens.length]; const m=spawnEnemy(kq.mob,d.x+(Math.random()-0.5)*50,d.z+(Math.random()-0.5)*50); m.active=true; burst(m.x,10,m.z,'#c8893a',12); }
+          SFX.growl(0.6);
+        }
+      }
+    }
+  }
+  { const tr=cosEquipped('trail');                     // cosmetic trail: only when you're actually moving
+    if(tr){ G.trailT=(G.trailT||0)+dt;
+      if(G.trailT>0.045 && Math.hypot(p.vx,p.vz)>70){ G.trailT=0;
+        G.particles.push({x:p.x+(Math.random()-0.5)*9,y:p.y+5+Math.random()*7,z:p.z+(Math.random()-0.5)*9,
+          vx:-p.vx*0.07,vy:22,vz:-p.vz*0.07,life:0.42,color:tr.col,sz:2.4}); } } }
+  // class-skill upkeep (cooldowns, berserk aura, charge dash, tempest ticks)
+  for(let i=0;i<4;i++) if(p.skillCd[i]>0) p.skillCd[i]=Math.max(0,p.skillCd[i]-dt);
+  skillCoolPaint(p);
+  if(p.berserkT>0){ p.berserkT-=dt; if(Math.random()<0.35) G.particles.push({x:p.x+(Math.random()-0.5)*20,y:p.y+30+Math.random()*18,z:p.z+(Math.random()-0.5)*20,vx:0,vy:60,vz:0,life:0.4,color:'#ff5a3a',sz:2.6}); }
+  if(p.chargeDash>0){ p.chargeDash-=dt; p.x+=p.dashX*880*dt; p.z+=p.dashZ*880*dt;
+    for(const e of G.enemies){ if(e.dead||e._chHit) continue; if(dXZ(e.x,e.z,p.x,p.z)<e.r+26&&vOverlap(e,p)){ e._chHit=true; hitEnemy(e,p._chDmg||20,p,380,effLifesteal(p),null); playFx('warcharge'); if(p._chOk) e.stunT=Math.max(e.stunT||0,0.8); } } }
+  if(p.tempestT>0){ p.tempestT-=dt; p.tempAcc+=dt;
+    if(Math.random()<0.5){ const a2=Math.random()*6.283, rr=40+Math.random()*130; G.particles.push({x:p.x+Math.cos(a2)*rr,y:10+Math.random()*50,z:p.z+Math.sin(a2)*rr,vx:-Math.sin(a2)*120,vy:30,vz:Math.cos(a2)*120,life:0.5,color:'#c47bff',sz:2.8}); }
+    if(p.tempAcc>=0.3){ p.tempAcc-=0.3;
+      for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._tmpDmg||8,p,60,0,null); } } }
+  // path-B upkeep: Guardian braces, Wizard barrier + meteors, Reaper reaping-storm
+  if(p.guardT>0){ p.guardT-=dt; if(Math.random()<0.4) G.particles.push({x:p.x+(Math.random()-0.5)*24,y:p.y+10+Math.random()*30,z:p.z+(Math.random()-0.5)*24,vx:0,vy:40,vz:0,life:0.3,color:'#9fd0ff',sz:2.4}); }
+  if(p.reflectT>0) p.reflectT-=dt;
+  if(p.shieldT>0){ p.shieldT-=dt; if(p.shieldT<=0) p.shieldHp=0; }
+  if(p.stormT>0){ p.stormT-=dt; p.stormAcc=(p.stormAcc||0)+dt; p.atkTimer=Math.max(p.atkTimer,0.12); p.swingId+=(Math.random()<0.3?1:0);
+    if(Math.random()<0.6){ const a2=Math.random()*6.283,rr=30+Math.random()*110; G.particles.push({x:p.x+Math.cos(a2)*rr,y:p.y+10+Math.random()*30,z:p.z+Math.sin(a2)*rr,vx:0,vy:20,vz:0,life:0.3,color:'#b06bff',sz:3}); }
+    if(p.stormAcc>=0.28){ p.stormAcc-=0.28; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<150+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,p._stormDmg||10,p,120,effLifesteal(p),null); } } }
+  if(G.meteors&&G.meteors.length){ for(const mt of G.meteors){ mt.t-=dt;
+      if(mt.t<=0.6&&!mt.warned){ mt.warned=true; }
+      if(mt.t<=0){ mt.done=true; skillRing(mt.x,mt.z,'#ff7a3a','#c33',mt.r+40); G.shake=Math.min(G.shake+9,16); burst(mt.x,10,mt.z,'#ff7a3a',24);
+        for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,mt.x,mt.z)<mt.r+e.r) hitEnemy(e,mt.dmg,mt.src||p,300,0,'fire'); } } }
+    G.meteors=G.meteors.filter(m=>!m.done); }
+  if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
+  if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
+  // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
+  if(p.varJump && !input.jump && p.vy>340) p.vy=340;
+  if(p.onGround || p.vy<=0) p.varJump=false;
+  // JETPACK (Hitless-clear reward): hold jump in the air to fly; fuel drains, refills on landing.
+  p.jets=0;
+  if(jetpackOn()){
+    if(p.onGround){ p.jetFuel=Math.min(1,(p.jetFuel==null?1:p.jetFuel)+dt*0.5); }   // ~2s to a full tank
+    else if(input.jump && !p.varJump && (p.jetFuel||0)>0){
+      p.vy=Math.min(p.vy+2400*dt,430); p.jetFuel=Math.max(0,(p.jetFuel||0)-dt*0.4); p.jets=1;   // ~2.5s of flight
+      if(Math.random()<0.7) G.particles.push({x:p.x+(Math.random()-0.5)*13,y:p.y+2,z:p.z+(Math.random()-0.5)*13,vx:(Math.random()-0.5)*40,vy:-160,vz:(Math.random()-0.5)*40,life:0.3,color:Math.random()<0.5?'#9fe0ff':'#ffd24a',sz:2.6}); }
+  }
+  if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
+    const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
+    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
+  document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
+  const _w=p.weapon;
+  if(thrownWeaponHidden(p,_w)){ p.charging=false; p.chargeAmt=0; p.attackHeld=false; p.holdT=0; }
+  else if(isChargeWeapon(_w) && !meta.autoAttack){                // charge-capable weapon: tap attacks, hold builds its signature release
+    if(input.attack){ if(!p.attackHeld){ p.attackHeld=true; p.holdT=0; if(p.atkCd<=0 && p.dodgeTimer<=0) playerAttack(1); }   // press = an instant quick attack...
+      p.holdT+=dt; if(p.holdT>=0.24 && p.dodgeTimer<=0){ if(!p.charging){ p.charging=true; p.chargeAmt=0; } p.chargeAmt=Math.min(1,p.chargeAmt+dt/0.8); } }   // ...then keep holding and it goes into the charge (0.24s grace so a normal click never starts a charge)
+    else { if(p.charging){ chargeRelease(p,_w,p.chargeAmt); p.charging=false; p.chargeAmt=0; p.atkCd=Math.max(p.atkCd,0.42); } p.attackHeld=false; p.holdT=0; }
+  } else { p.charging=false; p.holdT=0; p.attackHeld=false;
+    if(p.atkCd<=0 && p.dodgeTimer<=0){
+      if(input.attack) playerAttack(1);                                              // manual: always swings/fires
+      else if(meta.autoAttack && autoAtkTarget(p,_w)) playerAttack(1.176); } }        // auto: only when a hittable enemy is in range + line of sight (15% slower)
+  if(p.atkTimer>0) resolveSwing();
+  updateMovers(dt);
+  if(!p.onGround) p.vy-=1500*dt;
+  p.x+=p.vx*dt; p.z+=p.vz*dt;
+  const yPrev=p.y;
+  p.y+=p.vy*dt;
+  resolveObstacles(p,p.r,yPrev);                 // walls: obstacles whose top was above your feet
+  const floor=floorAt(p.x,p.z,p.r,yPrev);
+  if(!p.onGround && p.vy<=0 && floor>-1e8 && p.y<=floor){ if(p.vy<-640) playFx('bigland'); p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); SFX.land(); p.onGround=true; p.jumps=0; }
+  else if(p.onGround && (floor<-1e8 || p.y>floor+0.5)){ p.onGround=false; if(p.vy>0) p.vy=0; } // walked off an edge
+  else if(p.onGround) p.y=floor;
+  { const mv2=Math.hypot(p.vx||0,p.vz||0)>25 && p.onGround;   // file-SFX loops: footsteps while walking, heartbeat when critical
+    if(mv2 && mode==='play'){ loopFx('footstep'); } else { stopFx('footstep'); }
+    if(mode==='play' && p.hp>0 && p.hp<=effMaxHp(p)*0.15){ loopFx('heartbeat'); } else { stopFx('heartbeat'); } }
+  // ride moving platforms
+  if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
+  // jump pads launch you
+  if(p.onGround) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
+  // checkpoint: last solid ground you stood on (not a moving platform).
+  // vertical zones flag key plateaus `checkpoint` so a fall on a tall climb sends you back to the last shelf, not the base.
+  if(p.onGround){ if(p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe={x:p.x,z:p.z,y:0}; }
+    else if(G.obstacles) for(const ob of G.obstacles){ if(ob.checkpoint && Math.abs(p.y-ob.h)<3 && Math.abs(p.x-ob.x)<ob.w/2 && Math.abs(p.z-ob.z)<ob.d/2){ G.lastSafe={x:p.x,z:p.z,y:ob.h}; break; } } }
+  // fell into the hazard
+  if(p.y<-34){ lavaHit(); }
+  updateCrumbles(dt); updateGeysers(dt); updateBonusPhasers();
+  if(G.shockwaves){ for(const sw of G.shockwaves){ if(sw.delay>0){ sw.delay-=dt; continue; }   // staggered quake rings hold, then march
+      sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
+      let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
+    G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
+  if(G.collapse && G.collapse.length){ for(const tl of G.collapse){   // Void Tyrant: telegraphed floor tiles drop away, then re-form
+      if(tl.warn>0){ tl.warn-=dt; if(tl.warn<=0) tl.open=1.4; }
+      else { tl.open-=dt; tl.hit=Math.max(0,(tl.hit||0)-dt);
+        if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z); } } }
+    G.collapse=G.collapse.filter(tl=>tl.warn>0||tl.open>0); }
+  if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
+      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z); } }
+    G.trails=G.trails.filter(tr=>tr.life>0); }
+  if(G.spikefields && G.spikefields.length){ for(const sf of G.spikefields){ sf.life-=dt; sf.tick-=dt;   // Ranger Spike Trap: slow + DoT on enemies inside
+      const dot=sf.tick<=0; if(dot) sf.tick=1;
+      for(const e of G.enemies){ if(e.dead||!e.active) continue; if(dXZ(e.x,e.z,sf.x,sf.z)>sf.r+e.r) continue;
+        e.slowT=Math.max(e.slowT||0,0.4);
+        if(sf.hitSet.indexOf(e)<0){ sf.hitSet.push(e); const w=G.p.weapon; if(w&&w.el) applyElement(e,w.el,1); }   // element once, on first entry
+        if(dot) hitEnemy(e,sf.dmg,G.p,0,effLifesteal(G.p),null); } }
+    G.spikefields=G.spikefields.filter(sf=>sf.life>0); }
+  // healing spring (once per stage)
+  for(const sp2 of G.springs){ if(!sp2.used && Math.abs(p.y-(sp2.y||0))<18 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
+    sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+    addText(p.x,p.y+60,p.z,'+'+heal,'var(--good)',true); burst(p.x,10,p.z,'#7fe8c0',14); SFX.levelup(); hudUpdate(); } }
+  // dungeon logic: encounter rooms seal their doors; plates & keys open the locked ones
+  for(const r of G.rooms){
+    if(r.encounter && !r.triggered && Math.abs(p.x-r.x)<r.w/2-26 && Math.abs(p.z-r.z)<r.d/2-26 && p.y<40){
+      r.triggered=true; r.doors.forEach(dr=>dr.open=false);
+      r.monsters.forEach(m2=>{ if(!m2.dead) m2.dropT=0.25+Math.random()*0.6; });
+      toast('⚔ The doors slam shut!'); SFX.boss(); G.shake=Math.min(G.shake+8,14);
+    }
+    if(r.encounter && r.triggered && !r.cleared && r.monsters.length && r.monsters.every(m2=>m2.dead)){
+      r.cleared=true; r.doors.forEach(dr=>{ if(dr.type==='combat') dr.open=true; });
+      toast('✓ Room cleared'); SFX.achieve();
+    }
+  }
+  for(const pl of G.plates){ if(!pl.lit && p.onGround && Math.abs(p.y-(pl.y||0))<5 && Math.abs(p.x-pl.x)<22 && Math.abs(p.z-pl.z)<22){
+    pl.lit=true; SFX.pickup(); burst(pl.x,4,pl.z,'#4aa3e0',10);
+    if(pl.door && pl.door.plates.every(q=>q.lit)){ pl.door.open=true; toast('🚪 Ancient stone grinds open!'); SFX.god(); } } }
+  for(const ky of G.keys){ if(!ky.taken && Math.abs(p.y-(ky.y||0))<40 && dXZ(p.x,p.z,ky.x,ky.z)<34){
+    ky.taken=true; G.hasKey=true; toast('Ancient Key!',null,'item-key'); SFX.achieve(); } }
+  if(G.hasKey) for(const dr of G.doors){ if(dr.type==='key'&&!dr.open&&dXZ(p.x,p.z,dr.x,dr.z)<74){
+    dr.open=true; G.hasKey=false; toast('The lock yields!',null,'item-key'); SFX.god(); break; } }
+  // golden bonus portal
+  if(G.bonusPortal && dXZ(p.x,p.z,G.bonusPortal.x,G.bonusPortal.z)<48 && Math.abs(p.y-(G.bonusPortal.y||0))<70){ startBonus(); return; }
+  // bonus sprint clock
+  if(G.bonusActive){ const bt=document.getElementById('bonustimer');
+    if(G.bonusSecured){ bt.innerHTML=eventIcon('event-treasure-chest')+' SECURED'; bt.style.color='#3ad07f'; }
+    else { G.bonusTime-=dt; bt.innerHTML=eventIcon('event-treasure-chest')+' '+Math.max(0,G.bonusTime).toFixed(1)+'s'; bt.style.color=G.bonusTime<5?'#ff5e54':'#ffd24a';
+      if(G.bonusTime<=0){ endBonus(G.sprintFun?'⏱ Out of time — give it another go!':'⏱ Too slow — the vault seals!'); return; } } }
+  const spd2=Math.hypot(p.vx,p.vz);
+  if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
+  if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
+  { const mm=p.maxMana||100; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035); }  // slow passive mana regen (~28s empty→full)
+  updateAmbient(dt,s);
+  reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
+  // enemies
+  for(const e of G.enemies){
+    if(e.dead) continue;
+    if(e.dropT>0){ if(dXZ(e.x,e.z,p.x,p.z)<640){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
+      if(e.boss) onBossActivate(e); else if(e.kind==='fly') SFX.screech(0.5); else SFX.growl(0.5); } } continue; }
+    if(!e.active) continue;
+    if(e.hitFlash>0) e.hitFlash-=dt;
+    const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
+    let eff=e.speed*(e.slowT>0?0.5:1)*_chillMul; if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
+    if(e.doomT>0){ e.doomT-=dt; e.doomAcc+=dt;                       // Death's Door burns them down over time
+      if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
+        G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
+    if(e.stunT>0){ e.stunT-=dt; eff=0; }
+    const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
+    e.yaw=Math.atan2(dirX,dirZ);
+    if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
+      if(e.role==='flanker' && d>90){ const s=e._fs||(e._fs=Math.random()<0.5?1:-1), rx=-dirZ*s, rz=dirX*s;
+        dirX=dirX*0.55+rx*0.8; dirZ=dirZ*0.55+rz*0.8; const dl=Math.hypot(dirX,dirZ)||1; dirX/=dl; dirZ/=dl; }   // circle in from the side/behind
+      else if(e.role==='exploder'){
+        if(e.fuseT>0){ e.fuseT-=dt; eff=0; e.hitFlash=0.6; if(Math.floor(G.time*14)%2===0) burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',2);
+          if(e.fuseT<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:16,maxR:150,dmg:e.dmg*1.7,life:0,spd:340,col:'#ff7a3a',col2:'#c33'});
+            G.shake=Math.min(G.shake+8,14); SFX.boss(); burst(e.x,e.y+e.h*0.5,e.z,'#ff7a3a',22); killEnemy(e); continue; } }
+        else if(d<62){ e.fuseT=0.55; SFX.growl(1.3); addText(e.x,e.h+14,e.z,'!','#ff7a3a',true); }
+      }
+      else if(e.role==='healer'){ e.healT=(e.healT||0)-dt;
+        if(e.healT<=0){ e.healT=3; let n=0; for(const o of G.enemies){ if(o.dead||o===e||o.hp>=o.maxHp||o.boss) continue; if(dXZ(o.x,o.z,e.x,e.z)<220){ const hc=1-(o.healCut||0); o.hp=Math.min(o.maxHp,o.hp+Math.round(o.maxHp*0.12*hc)); if(hc<1) addText(o.x,o.y+o.h+8,o.z,'VENOM','#86e05a'); else burst(o.x,o.y+o.h*0.5,o.z,'#7de08a',5); n++; } }
+          if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
+      if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
+    }
+    if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
+    if(e.tethered>0) e.tethered-=dt;                  // void-tether buff decays once the tether dies
+    if(e.spec){ specBehavior(e,dt,p,dirX,dirZ,d); }   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
+    if(e.kind==='fly'){ e.bob+=dt*2.4;
+      let ty=Math.max(0,p.y+44+Math.sin(e.bob)*52-8), spd=eff;   // wave tracks YOUR height
+      if(e.dive){                                                // galewisp: hover high, telegraphed swoop to your level, then climb back
+        if(e.diving>0){ e.diving-=dt; ty=Math.max(0,p.y+4); spd=eff*2.5; if(e.diving<=0) e.diveCd=2.4+Math.random()*1.8; }
+        else { e.diveCd=(e.diveCd==null?1.4:e.diveCd)-dt; ty=Math.max(0,p.y+78+Math.sin(e.bob)*26);
+          if(e.diveCd<=0 && d<420){ e.diving=0.8; SFX.growl(1.25); addText(e.x,e.y+e.h+10,e.z,'!','#bfe0e8',true); } } }
+      e.x+=dirX*spd*dt; e.z+=dirZ*spd*dt;
+      e.y+=Math.sign(ty-e.y)*Math.min(Math.abs(ty-e.y),spd*1.6*dt);
+      // flyers breach over anything in their way (columns included) instead of being walled
+      for(const ob of G.obstacles){ if(ob.h>e.y-6 && Math.abs(e.x-ob.x)<ob.w/2+e.r*0.6 && Math.abs(e.z-ob.z)<ob.d/2+e.r*0.6){ e.y+=300*dt; break; } }
+    }
+    else if(e.kind==='goblin'){ // treasure goblin: flees, hugs the course, vanishes if not caught
+      e.despawnT-=dt;
+      if(e.despawnT<=0){ e.dead=true; burst(e.x,e.y+14,e.z,'#ffd24a',16); toast('The goblin escaped!'); continue; }
+      // run away from the player, steering toward the nearest island center so it doesn't dive into lava
+      let fx=-dirX, fz=-dirZ, best=null, bd=1e9;
+      for(const sg of G.segments){ const dd=dXZ(e.x,e.z,sg.x,sg.z); if(dd<bd && dXZ(p.x,p.z,sg.x,sg.z)>60){ bd=dd; best=sg; } }
+      if(best){ const bx2=best.x-e.x, bz2=best.z-e.z, bl=Math.hypot(bx2,bz2)||1; fx=fx*0.55+bx2/bl*0.45; fz=fz*0.55+bz2/bl*0.45; }
+      const fl2=Math.hypot(fx,fz)||1;
+      e.x+=fx/fl2*eff*dt; e.z+=fz/fl2*eff*dt; e.y=6+Math.abs(Math.sin(G.time*8))*4; e.yaw=Math.atan2(fx,fz);
+      if(Math.random()<0.2) G.particles.push({x:e.x,y:e.y+20,z:e.z,vx:0,vy:30,vz:0,life:0.4,color:'#ffd24a',sz:2});
+    }
+    else if(e.kind==='walk'){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+      if(e.look==='slime'){ e.bob+=dt*6; } }
+    else if(e.kind==='caster'){ // robed lobber: keeps range, hurls element orbs
+      const want=250;
+      if(d<want-40){ e.x-=dirX*eff*dt; e.z-=dirZ*eff*dt; }
+      else if(d>want+70){ e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt; }
+      if(e.shootT>0) e.shootT-=dt;
+      if(e.shootT<=0 && d<560){ bossShoot(e,p); e.shootT=e.shootCd; }
+    }
+    else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
+      if(e.atkTimer>0) e.atkTimer-=dt;
+      if(e.chargeT>0){ e.chargeT-=dt; e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
+      else if(e.windT>0){ e.windMax=e.windMax||e.windT; e.teleX=dirX; e.teleZ=dirZ; e.windT-=dt;   // track aim so the danger-line follows you during the tell
+        if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=dirX; e.cdz=dirZ; } }
+      else { e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
+        if(d<300 && e.atkTimer<=0){ e.windT=e.elite?0.42:0.55; e.windMax=e.windT; e.atkTimer=e.elite?1.8:2.8; SFX.growl(1.1); } }   // AUDIO CUE at the START of the wind-up, not at launch
+    }
+    else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
+    if(e.kind!=='fly'&&e.kind!=='goblin'){
+      resolveObstacles(e,e.r,null,ECLIMB);            // columns/walls block them; platforms are climbable
+      const sup=enemySupport(e);                      // ground/mover/platform under them
+      if(sup<-1e8){                                   // edge-aware: never walk (or get shoved) into the hazard
+        e.x=e.sx; e.z=e.sz; e.hurtKbX=0; e.hurtKbZ=0; e.chargeT=0;
+      } else { e.sx=e.x; e.sz=e.z;
+        if(e.y<sup) e.y=Math.min(sup,e.y+110*dt);     // clamber up — platform camping isn't safe
+        else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
+      }
+    }
+    if(!e.dead && e.dmg>0){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+      if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
+      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z); }
+  }
+  // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
+  for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
+  // projectiles
+  for(const pr of G.projectiles){
+    pr.life-=dt; if(pr.gravity) pr.vy-=pr.gravity*dt;
+    if(pr.seek && pr.owner==='player'){
+      let bt=pr.seekTarget||null,bd=bt?Math.hypot(bt.x-pr.x,bt.z-pr.z):1e9;
+      if(pr.petSeek){ bt=null;bd=560;for(const e of G.enemies){if(e.dead||!e.active)continue;const d=Math.hypot(e.x-pr.x,e.z-pr.z);if(d<bd){bd=d;bt=e;}} }
+      else if(!bt||!targetInPlayerSight(G.p,bt,Math.max(560,dXZ(G.p.x,G.p.z,bt.x,bt.z)+1))||losBlocked(pr.x,pr.z,bt.x,bt.z)) bt=null;
+      if(bt){ const sp=Math.hypot(pr.vx,pr.vz)||1, bl=.16; pr.vx=(pr.vx/sp*(1-bl)+(bt.x-pr.x)/Math.max(1,bd)*bl)*sp; pr.vz=(pr.vz/sp*(1-bl)+(bt.z-pr.z)/Math.max(1,bd)*bl)*sp; } }
+    if(pr.axe){ pr.spin=(pr.spin||0)+dt*22;                                                       // returning axe: fly out, then curve back to the player
+      if(!pr.returning && Math.hypot(pr.x-pr.ox,pr.z-pr.oz)>=pr.range) pr.returning=true;
+      if(pr.returning){ const dd=Math.hypot(p.x-pr.x,p.z-pr.z)||1, sp=Math.hypot(pr.vx,pr.vz)||1; pr.vx=(p.x-pr.x)/dd*sp; pr.vz=(p.z-pr.z)/dd*sp; if(dd<42) pr.life=0; } }
+    pr.x+=pr.vx*dt; pr.y+=pr.vy*dt; pr.z+=pr.vz*dt;
+    if(pr.trail && Math.random()<0.75) G.particles.push({x:pr.x,y:pr.y,z:pr.z,vx:0,vy:6,vz:0,life:0.26,color:pr.trail,sz:Math.max(2,pr.size*0.35)});   // skill-projectile comet trail
+    if(pr.owner==='player'){
+      G._desig=!!pr.desig; G._crit=!!pr.pcrit;             // charged bolts / thrown scythe spend Rune Marks + rupture Corruption; crit shots shout their number
+      for(const e of G.enemies){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
+        if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){
+          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01},pr.kb,effLifesteal(G.p),pr.el);
+          if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
+      G._desig=false; G._crit=false;
+    } else {
+      const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
+      if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
+      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
+    }
+    if(pr.y<-4 && !pr.axe) pr.life=0;
+    // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
+    if(pr.life>0 && !pr.axe) for(const ob of G.obstacles){
+      if(pr.y<ob.h && Math.abs(pr.x-ob.x)<ob.w/2+pr.size*0.4 && Math.abs(pr.z-ob.z)<ob.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+    if(pr.life>0 && !pr.axe && G.walls) for(const wl of G.walls){
+      if(pr.y<wl.h && Math.abs(pr.x-wl.x)<wl.w/2+pr.size*0.4 && Math.abs(pr.z-wl.z)<wl.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+    if(pr.life>0 && !pr.axe && G.doors) for(const dr of G.doors){ if(dr.open) continue;
+      if(pr.y<dr.h && Math.abs(pr.x-dr.x)<dr.w/2+pr.size*0.4 && Math.abs(pr.z-dr.z)<dr.d/2+pr.size*0.4){
+        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+  }
+  G.projectiles=G.projectiles.filter(pr=>pr.life>0);
+  if(p.throwHideT>0){
+    if(p.throwHideReturn && !G.projectiles.some(pr=>pr.throwToken===p.throwToken)) p.throwHideT=0;   // returning axe/scythe is back in hand
+    else p.throwHideT=Math.max(0,p.throwHideT-dt);                                                   // javelin replacement + safety timeout
+    if(p.throwHideT<=0){ p.throwHideReturn=false; p.throwHideArche=null; }
+  }
+  // chests
+  for(const ch of G.chests){ if(ch.opened) continue; ch.bob+=dt*3;
+    if(dXZ(ch.x,ch.z,p.x,p.z)<44 && Math.abs(p.y-ch.y)<36){ if(ch.mimic){ mimicReveal(ch); break; } openChest(ch); } }   // a mimic SNAPS the moment you reach for it (break: reveal splices the list)
+  // pickups
+  for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
+    if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
+      if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
+      else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); localBump(pk.localItem.id,1); }
+      else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
+      pk.taken=true; } }
+  G.pickups=G.pickups.filter(pk=>!pk.taken);
+  // quest waystone: touch it to complete a "find" objective
+  if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
+    if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } }
+  // the Warden's Shade: auto-greets you once per zone per save; after that, step close to hear him again
+  if(G.npc && !G.npc.talked){ G.npc.t+=dt;
+    const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
+    if(d2<(seen?44:62)) openShade(); }   // only greet within a sensible range (was 110 — popped from way too far in the bigger levels)
+  // an unusual-interaction rift: a dim floor rune tucked in a dead end — step on it and the rift grinds open
+  if(G.secretTrigger && !G.secretTrigger.done){ const tr=G.secretTrigger;
+    if(dXZ(tr.x,tr.z,p.x,p.z)<(tr.r||34) && Math.abs(p.y-(tr.y||0))<60){ tr.done=true;
+      if(G.secret){ G.secret.hidden=false; G.secret.t=0; burst(G.secret.x,G.secret.y+30,G.secret.z,'#c47bff',24); addText(G.secret.x,G.secret.y+82,G.secret.z,'A RIFT TEARS OPEN','#c47bff',true); }
+      SFX.god(); playFx('lever'); playFx('wallslide',1); G.shake=Math.min(G.shake+11,17); toast('⚙ Stone grinds somewhere in the dark — something has opened'); } }
+  // hidden side-zone rift: walk into it and it's yours forever (a hidden:true rift stays sealed until its trigger fires)
+  if(G.secret && !G.secret.hidden){ const s=G.secret; s.t+=dt;
+    if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
+      if(s.spent){ const g=awardGold(120); G.secret=null; SFX.pickup(); playFx('loot'); burst(s.x,s.y+40,s.z,'#9a86b0',18);   // already-claimed rift: a spent echo that just yields gold
+        addText(p.x,p.y+90,p.z,'+'+g+'g','#c9b6ff'); toast('A spent rift — its echo yields '+g+' gold','#c9b6ff','event-secret-rift'); }
+      else { const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
+        G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
+        addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
+        toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift'); } } }
+  // trial tutorial tips, paced out
+  if(G.trial){ const T=TRIALS[G.trial];
+    if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
+  // portal
+  if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72) nextStage(); }
+  // particles
+  for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
+  G.particles=G.particles.filter(pt=>pt.life>0);
+  updateTexts(dt);
+  // Phase 19: practice foes are ARENA property — applied after all movement, snapped WELL inside the walls
+  if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
+    for(const e of G.enemies){ if(e.practice&&!e.dead){ e.active=inPit;   // only wake (aggro) once you step into the ring
+      e.x=Math.max(P.minX+16,Math.min(P.maxX-16,e.x)); e.z=Math.max(P.minZ+16,Math.min(P.maxZ-16,e.z)); } } }   // and never let them leave it
+  if(queueSkillTut && mode==='play'){ const s=queueSkillTut; queueSkillTut=null; openSkillTutorial(s); }   // first-skill lesson takes priority
+  else if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
+  else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
+  class2Innate(G.p,dt);
+}
+const AMBIENT={
+  frost:{c:'#e6f7ff',vy:-40,n:2.4,g:1},           // snow drifting down
+  volcano:{c:'#ff9a4a',vy:46,n:2.4,g:1,e:1},       // embers rising, glowing
+  forest:{c:'#9fd84a',vy:-14,n:1.6},               // spores/pollen
+  plains:{c:'#d6e6a4',vy:-12,n:1.4},               // Hollow Pass pollen drifting up
+  void:{c:'#c9a6ff',vy:14,n:1.6,e:1},              // arcane motes
+  apex:{c:'#dcc0ff',vy:16,n:1.6,e:1},
+  marble:{c:'#ffe6a0',vy:12,n:1.8,e:1},            // Sunspire golden light motes
+  canyon:{c:'#d8b488',vy:-8,n:1.6,g:1},            // wind-blown dust
+  badlands:{c:'#d0a878',vy:-8,n:1.6,g:1},          // grit
+  ruins:{c:'#c0b6a4',vy:-6,n:1.2,g:1},             // settling dust
+  dungeon:{c:'#b8b0a4',vy:-6,n:1.2,g:1},
+  hub:{c:'#ffd98a',vy:8,n:1.0,e:1}                 // warm hearth fireflies
+};
+function updateAmbient(dt,s){
+  const cfg=AMBIENT[s.theme]; if(!cfg) return;
+  if(G.ambient.length<80 && Math.random()<cfg.n*0.6){
+    G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
+      vy:cfg.vy*(0.6+Math.random()*0.8), ph:Math.random()*6.28, sw:(cfg.g?7:14)+Math.random()*8, life:6+Math.random()*4,
+      c:cfg.c, e:cfg.e?cfg.c:null, sz:1.4+Math.random()*(cfg.e?2.4:1.8), tw:cfg.e?Math.random()*6.28:0});
+  }
+  for(const a of G.ambient){ a.ph+=dt*2; a.x+=Math.sin(a.ph)*a.sw*dt; a.y+=a.vy*dt; if(a.tw)a.tw+=dt*6; a.life-=dt; }
+  G.ambient=G.ambient.filter(a=>a.life>0 && a.y>-5 && a.y<300);
+}
+function onBossActivate(e){ SFX.boss();
+  playFx({brute:'bossroar1',warden:'bossroar1',archer:'bossroar2',sorcerer:'bossroar2',colossus:'bossroar3',king:'bossroar3',tyrant:'bossroar3'}[e.type]||'bossroar1');   // batch-2 boss-reveal roar, varied across the roster
+  { const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); bn.textContent=e.label; } document.getElementById('bosshpwrap').classList.add('on'); updateBossBar(e);
+  if(G&&!G.trial&&!G.side){ const line=STORY.boss[curZone().boss.stage]; if(line) storyToast(line); } }   // the boss gets a line
+function updateBossBar(e){ document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
+function bossShoot(e,p){
+  const cfg=e.shot, oy=e.y+e.h*0.62;
+  const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), t=Math.max(0.25,d/cfg.speed);
+  const baseAng=Math.atan2(p.x-e.x,p.z-e.z);
+  for(let i=0;i<cfg.count;i++){
+    const ang=baseAng+(cfg.count>1?(i-(cfg.count-1)/2)*cfg.spread*2.2:0);
+    const vx=Math.sin(ang)*cfg.speed, vz=Math.cos(ang)*cfg.speed;
+    let vy=((p.y+p.h*0.5)-oy)/t; if(cfg.gravity) vy+=cfg.gravity*0.5*t;
+    G.projectiles.push({owner:'enemy',x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
+  }
+  if(cfg.el) SFX.magic(cfg.el); else SFX.shoot(); // arrows thwip, spells cast by element
+}
+function specBehavior(e,dt,p,dirX,dirZ,d){
+  // ERUPTION TOTEM (Emberdeep): stationary vent, periodic fire ring — kill it first
+  if(e.spec==='totem'){ e.shootT=(e.shootT==null?1.8:e.shootT)-dt;
+    if(e.eruptW>0){ e.eruptW-=dt; if(e.eruptW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:16,maxR:210,dmg:e.dmg2||12,life:0,spd:250,col:'#ff8a3a',col2:'#c0331a'}); playFx('firewhoosh'); e.shootT=2.6; } }
+    else if(e.shootT<=0 && d<560){ e.eruptW=0.7; addText(e.x,e.y+e.h+8,e.z,'!','#ff8a3a',true); } }
+  // MAGMA-TRAIL SKITTER (Emberdeep): its path burns briefly
+  else if(e.spec==='trail'){ e.trailT=(e.trailT||0)-dt;
+    if(e.trailT<=0 && (Math.abs(dirX)+Math.abs(dirZ))>0.1){ (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:22,life:2.0,max:2.0,dmg:Math.max(4,e.dmg*0.4),hit:0}); e.trailT=0.18; } }
+  // BLINK-STALKER (The Abyss): telegraphed teleport behind you
+  else if(e.spec==='blink'){ e.blinkT=(e.blinkT==null?2.2:e.blinkT)-dt;
+    if(e.blinkFx>0){ e.blinkFx-=dt; if(e.blinkFx<=0){ const bx=p.x-dirX*72, bz=p.z-dirZ*72; burst(e.x,e.y+e.h*0.5,e.z,'#a86fe0',8); e.x=bx; e.z=bz; e.sx=bx; e.sz=bz; burst(bx,e.y+e.h*0.5,bz,'#a86fe0',10); e.blinkT=2.6+Math.random()*1.6; } }
+    else if(e.blinkT<=0 && d>110 && d<560){ e.blinkFx=0.35; addText(e.x,e.y+e.h+8,e.z,'blink','#c49bff',true); } }
+  // VOID TETHER (The Abyss): links to nearby allies, buffing them until it dies
+  else if(e.spec==='tether'){ e.tetherList=[]; e.tetherPulse=(e.tetherPulse||0)+dt;
+    for(const o of G.enemies){ if(o===e||o.dead||!o.active||o.boss) continue;
+      if(dXZ(e.x,e.z,o.x,o.z)<200){ e.tetherList.push(o); o.tethered=0.3; } } }
+  // SIEGE KNIGHT (Duskmoor): shield + telegraphed overhead crush
+  else if(e.spec==='knightslam'){ e.slamCd=(e.slamCd==null?2.0:e.slamCd)-dt;
+    if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
+    else if(e.slamCd<=0 && d<120){ e.knightW=0.6; addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true); } }
+}
+function beamBlocked(e,p){ for(const o of G.obstacles){ if(o.h<40) continue;   // a pillar tall enough to hide behind
+  const px=p.x-e.x, pz=p.z-e.z, pl=(px*px+pz*pz)||1, t=((o.x-e.x)*px+(o.z-e.z)*pz)/pl;
+  if(t<0||t>1) continue; const cx=e.x+px*t, cz=e.z+pz*t; if(dXZ(cx,cz,o.x,o.z)<o.w*0.5+16) return true; }
+  return false; }
+function bossSignature(e,dt,p,dirX,dirZ,dist){
+  const th=(STAGES[G.stageIndex]||{}).theme, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:400), hd=(e.home?e.home.hd:400);
+  // EMBER COLOSSUS (Crucible): a row of quake rings marches across the arena floor — jump them
+  if(e.type==='colossus' && th!=='marble'){
+    e.quakeCd=(e.quakeCd==null?4:e.quakeCd)-dt;
+    if(e.quakeCd<=0 && dist<650){ e.quakeCd=(6.5+Math.random()*2)*(e.phase>=2?0.6:1);
+      const axis=Math.random()<0.5, span=axis?hw:hd;
+      for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
+        (G.shockwaves=G.shockwaves||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:14,maxR:180,dmg:e.dmg*1.15,life:0,spd:230,delay:i*0.18,col:'#ffb060',col2:'#c05a1e'}); }
+      G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'QUAKE!','#ffb060',true); }
+  }
+  // MARBLE COLOSSUS (Rotunda): a sweeping LIGHT BEAM traverses the dome — use the pillars as cover
+  if(e.type==='colossus' && th==='marble'){
+    if(G.beam){ const b=G.beam;
+      if(b.warn>0){ b.warn-=dt; }
+      else { b.ang+=b.dir*dt*0.9; b.active-=dt; b.ex=e.x; b.ez=e.z;
+        const ax=p.x-e.x, az=p.z-e.z, pd=Math.hypot(ax,az)||1; let da=Math.atan2(az,ax)-b.ang; while(da>Math.PI)da-=6.283; while(da<-Math.PI)da+=6.283;
+        if(Math.abs(da)<0.13 && pd<640 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<40 && !beamBlocked(e,p)) hurtPlayer(e.dmg*1.3,e.x,e.z);
+        if(b.active<=0) G.beam=null; }
+    } else { e.beamCd=(e.beamCd==null?5:e.beamCd)-dt;
+      if(e.beamCd<=0 && dist<720){ e.beamCd=(7+Math.random()*2)*(e.phase>=2?0.6:1);
+        G.beam={ang:Math.atan2(p.z-e.z,p.x-e.x)-0.9,dir:Math.random()<0.5?1:-1,warn:0.8,active:1.7,ex:e.x,ez:e.z};
+        SFX.boss(); addText(e.x,e.h+16,e.z,'RADIANT SWEEP!','#fff2b0',true); }
+    }
+  }
+  // FROST SORCERER (Cracked Ring): teleports between the ring's pillars between volleys
+  if(e.type==='sorcerer'){
+    e.tpCd=(e.tpCd==null?3.5:e.tpCd)-dt;
+    if(e.tpCd<=0 && (e.novaW||0)<=0){ e.tpCd=(4.5+Math.random()*2)*(e.phase>=2?0.6:1);
+      const pil=G.obstacles.filter(o=>o.h>40); let dest;
+      if(pil.length){ const o=pil[Math.floor(Math.random()*pil.length)], a=Math.random()*6.283; dest={x:o.x+Math.cos(a)*(o.w*0.5+42),z:o.z+Math.sin(a)*(o.d*0.5+42)}; }
+      else { const a=Math.random()*6.283; dest={x:hx+Math.cos(a)*hw*0.6,z:hz+Math.sin(a)*hd*0.6}; }
+      burst(e.x,e.y+e.h*0.5,e.z,'#7fd6ff',12); e.x=Math.max(hx-hw,Math.min(hx+hw,dest.x)); e.z=Math.max(hz-hd,Math.min(hz+hd,dest.z));
+      burst(e.x,e.y+e.h*0.5,e.z,'#bff0ff',14); SFX.magic('ice'); e.shootT=Math.min(e.shootT,0.5); addText(e.x,e.h+14,e.z,'BLINK','#bff0ff',true); }
+  }
+  // VOID TYRANT (Summit): telegraphed collapsing floor tiles late in phase 2 (on TOP of the void-orb barrage)
+  if(e.type==='tyrant' && e.phase>=2){
+    e.tileCd=(e.tileCd==null?3:e.tileCd)-dt;
+    if(e.tileCd<=0){ e.tileCd=4+Math.random()*2; G.collapse=G.collapse||[];
+      for(let i=0;i<3;i++){ const a=Math.random()*6.283, rr=Math.random()*hw*0.72; G.collapse.push({x:hx+Math.cos(a)*rr,z:hz+Math.sin(a)*rr,r:54,warn:1.0,open:0,hit:0}); }
+      addText(e.x,e.h+16,e.z,'THE FLOOR FAILS!','#c47bff',true); }
+  }
+}
+// ===== Boss v2: multi-phase "miniature raid" — a shield/healing-crystal interrupt + a weak-point stagger + a phase-3 enrage =====
+function bossRaid(e){ return e.boss && e.type!=='brute' && e.type!=='archer'; }   // the two earliest bosses stay a straight fight; the rest get the raid mechanic
+function spawnBossCrystals(e){
+  e._crystals=[]; const n=3, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:300), hd=(e.home?e.home.hd:300);
+  for(let i=0;i<n;i++){ const a=(i/n)*6.283+0.6;
+    const cx=hx+Math.cos(a)*hw*0.74, cz=hz+Math.sin(a)*hd*0.74;
+    const c=spawnEnemy('bosscrystal',cx,cz); c.active=true; c.dropT=0; c.role=null; c.spec=null;
+    c.hp=c.maxHp=Math.max(60,Math.round(e.maxHp*0.14)); c._crystalOf=e; e._crystals.push(c); }
+}
+function bossEnterShield(e){ if(!bossRaid(e)) return;
+  e.shielded=true; e.shieldHeal=0; spawnBossCrystals(e);
+  G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
+  toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
+function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
+  updateBossBar(e); // y handled by the climb/support logic in the enemy loop
+  if(e.staggerT>0) e.staggerT-=dt;
+  if(e.shielded){                                                    // invulnerable + slowly self-healing until the crystals fall
+    const alive=(e._crystals||[]).filter(c=>c&&!c.dead).length;
+    if(alive===0){ e.shielded=false; e.staggerT=5; e.hitFlash=0.3; G.shake=Math.min(G.shake+14,18); SFX.boss();
+      addText(e.x,e.h+26,e.z,'SHIELD SHATTERED — STRIKE!','#ffd24a',true); toast('The ward breaks — strike now!'); }
+    else { e.shieldHeal=(e.shieldHeal||0)+dt; if(e.shieldHeal>=1){ e.shieldHeal=0; e.hp=Math.min(e.maxHp,e.hp+Math.round(e.maxHp*0.012)); updateBossBar(e); }
+      // a warding link to each living crystal (visual)
+    }
+  }
+  if(e.atkTimer>0) e.atkTimer-=dt; if(e.shootT>0) e.shootT-=dt;
+  if(e.lunge>0){ e.lunge-=dt; e.x+=dirX*eff*2.6*dt; e.z+=dirZ*eff*2.6*dt; }
+  else {
+    if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
+    else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
+    if(!e.kite && dist<240 && e.atkTimer<=0){ e.lunge=0.45; e.atkTimer=1.8; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
+  }
+  if(e.type==='brute'){                                    // ground-slam shockwave (non-projectile — jump the ring to avoid it)
+    if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
+      G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SLAM!','var(--danger)',true);
+      for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
+    else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
+      if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=(4.5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up (faster in phase 2)
+  }
+  if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
+    if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){ const dl=Math.hypot(dirX,dirZ)||1;
+      (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:300,dmg:e.dmg*1.4,life:0,spd:340,arc:0.95,dirX:dirX/dl,dirZ:dirZ/dl,col:'#e2e8f0',col2:'#95a2b4'});
+      G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
+      for(let i=0;i<12;i++){ const a=Math.atan2(dirZ,dirX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
+    else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
+      if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.6; e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+  }
+  if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
+    if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
+      G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'FROST NOVA!','#7fd6ff',true);
+      for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*20,y:6,z:e.z+Math.sin(a)*20,vx:Math.cos(a)*120,vy:40,vz:Math.sin(a)*120,life:0.5,color:'#bff0ff',sz:3}); } } }
+    else { if(e.novaCd==null) e.novaCd=5; e.novaCd-=dt;
+      if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=(6+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+2,7); } }
+  }
+  if(e.type==='colossus'){                                 // seismic pound — a shockwave ring you jump (arena mechanic)
+    if(e.poundW>0){ e.poundW-=dt; if(e.poundW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:300,dmg:e.dmg*1.2,life:0,spd:300,col:'#ffb060',col2:'#c05a1e'});
+      G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SEISMIC POUND!','#ffb060',true);
+      for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*22,y:2,z:e.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:60,vz:Math.sin(a)*130,life:0.45,color:'#ffb060',sz:3}); } } }
+    else { if(e.poundCd==null) e.poundCd=3.5; e.poundCd-=dt;
+      if(e.poundCd<=0 && dist<380){ e.poundW=0.7; e.poundCd=(5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } }
+  }
+  // ==== Batch 4: boss signature mechanics, keyed to each set-piece arena (readable, telegraphed, reuse ring/beam VFX) ====
+  bossSignature(e,dt,p,dirX,dirZ,dist);
+  if(e.ranged && e.shootT<=0 && dist<2000){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
+  if(e.type==='king'||e.type==='tyrant'){
+    e.summonT-=dt;
+    if(e.summonT<=0 && e.hp/e.maxHp<0.7){ e.summonT=e.type==='tyrant'?5:6;
+      // Abyss King / Void Tyrant: summon SHADES at phase 2 — capped so they never flood the arena
+      const shades=G.enemies.filter(o=>!o.dead&&o._shade).length, room=Math.max(0,3-shades);
+      for(let i=0;i<Math.min(2,room);i++){ const ne=spawnEnemy('shadeling',e.x+(i?70:-70),e.z+30); ne.dropT=0.4; ne._shade=true; }
+      if(room>0) addText(e.x,e.h+16,e.z,'SUMMON SHADES!','var(--danger)',true); }
+  }
+  if(e.hp/e.maxHp<0.5 && e.phase<2){ e.phase=2; e.speed*=1.22; e.dmg*=1.1;   // Phase 11: HP-threshold phase 2 — faster, harder, specials on a shorter fuse
+    for(const k of ['slamCd','cleaveCd','novaCd','poundCd']) if(e[k]!=null) e[k]=Math.min(e[k],1.2);   // a signature special comes almost immediately on the flip
+    if(e.ranged) e.shootT=Math.min(e.shootT,0.6);
+    if(e.type==='king'){ e.ranged=true; e.shot={count:3,spread:0.22,speed:380,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=2.0; e.shootT=0.8; }
+    if(e.type==='tyrant'){ e.ranged=true; e.shot={count:5,spread:0.2,speed:400,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=1.7; e.shootT=0.6; }
+    G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+24,e.z,'ENRAGED!','var(--danger)',true);
+    if(G&&!G.trial) storyToast('It stops holding back.');
+    bossEnterShield(e); }                                            // phase 2 raises the ward + healing crystals (major bosses)
+  // PHASE 3 — the final stand: at 25% it enrages again, specials on a hair-trigger, a burst nova (never mid-shield)
+  if(e.hp/e.maxHp<0.25 && e.phase<3 && !e.shielded){ e.phase=3; e.speed*=1.14; e.dmg*=1.12;
+    for(const k of ['slamCd','cleaveCd','novaCd','poundCd','quakeCd','beamCd','tpCd','tileCd','summonT']) if(e[k]!=null) e[k]=Math.min(e[k],0.8);
+    (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:20,maxR:340,dmg:e.dmg*1.15,life:0,spd:320,col:'#ff5a3a',col2:'#c33'});
+    G.shake=Math.min(G.shake+14,18); SFX.boss(); addText(e.x,e.h+24,e.z,'FINAL STAND!','#ff5a3a',true);
+    if(G&&!G.trial) storyToast('Now it fights with nothing held back.'); }
+  if(e.home){ // bosses never leave their arena (and never fall in the lava)
+    if(e.x<e.home.x-e.home.hw) e.x=e.home.x-e.home.hw; if(e.x>e.home.x+e.home.hw) e.x=e.home.x+e.home.hw;
+    if(e.z<e.home.z-e.home.hd) e.z=e.home.z-e.home.hd; if(e.z>e.home.z+e.home.hd) e.z=e.home.z+e.home.hd; }
+}
+// a quick fade-warp instead of an instant snap: black out, load the next area at the dark midpoint, fade back in
+function warpTo(fn){ if(warpTo._busy) return; warpTo._busy=true;
+  const v=document.getElementById('fadeveil'); try{ SFX.magic('void'); }catch(e){}
+  if(v) v.classList.add('on');
+  const mid=()=>{ try{ fn(); } finally { if(v) v.classList.remove('on'); warpTo._busy=false; } };
+  if(v) setTimeout(mid,190); else mid();
+}
+function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE's area chain, with a warp transition
+function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
+  if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
+  p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
+  p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
+function continueRun(){
+  if(!meta.run) return; initAudio(); queueLevelUp=0;
+  G={p:freshPlayer(),stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
+     shake:0,ngPlus:meta.run.ngPlus,ngHp:meta.run.ngHp||1,ngDmg:meta.run.ngDmg||1,baseLoadout:meta.run.base||null,
+     runSeed:meta.run.runSeed||0,
+     portal:null,stageBanner:0,killGoal:0,kills:0,boss:null,time:0,tookDamage:false,combo:0,comboT:0,cam:{x:0,y:0,z:0}};
+  restorePlayer(meta.run.p); loadStage(meta.run.stageIndex); restorePlayer(meta.run.p);
+  if(!G.baseLoadout) G.baseLoadout=snapOf(G.p);
+  mode='play'; showOverlay(false); showGameUI(true); hudUpdate();
+}
+/* ============================================================
+   UPGRADES / OFFERS / MENUS (ported from 2D)
+   ============================================================ */
+const UPGRADE_POOL=[
+  {n:'Vitality',d:'+25 Max HP and heal 25',icon:'❤',apply:p=>{p.maxHp+=25;p.hp+=25;}},
+  {n:'Power',d:'+18% weapon damage',icon:'⚔',apply:p=>{p.stats.power*=1.18;}},
+  {n:'Swiftness',d:'+12% move speed',icon:'»',apply:p=>{p.stats.speed*=1.12;}},
+  {n:'Frenzy',d:'+15% attack speed',icon:'⚡',apply:p=>{p.stats.atkSpeed*=1.15;}},
+  {n:'Lifedrain',d:'+8% lifesteal',icon:'✛',apply:p=>{p.stats.lifesteal+=0.08;}},
+  {n:'Evasion',d:'-15% dodge cooldown',icon:'○',apply:p=>{p.stats.dodgeCd*=0.85;}},
+  {n:'Second Wind',d:'Heal to full',icon:'+',apply:p=>{p.hp=effMaxHp(p);}}
+];
+function pick3(){
+  const pool=[...UPGRADE_POOL];
+  const out=[]; while(out.length<3 && pool.length) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); return out;
+}
+const ARM_MS=340;   // brief un-clickable window so you can't blind-tap through — short enough to feel like an invitation, not a timeout
+function openLevelUp(){
+  mode='upgrade'; _offerT=Date.now(); const opts=pick3(), KEYS=['J','K','L'];
+  try{ SFX.achieve(); }catch(e){}   // audio cue the instant the choices appear
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Level ${G.p.level}</p>
+    <h2 class="ovh">Level up</h2><p class="ovsub">Read, then choose an upgrade</p>
+    <div class="choices">${opts.map((o,i)=>`<button class="choice arm" data-i="${i}"><div class="cname"><span>${o.icon}</span>${o.n} <span style="opacity:.5;font-size:12px;margin-left:auto">(${KEYS[i]})</span></div><div class="cdesc">${o.d}</div></button>`).join('')}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; opts[+b.dataset.i].apply(G.p); SFX.pickup(); resumePlay(); });
+}
+function openSubclassFrom(then){
+  const C=curClass(), cs=classState(meta.classId);
+  mode='upgrade'; _offerT=Date.now(); SFX.classup();
+  showOverlayHTML(`<div class="card classcard"><p class="ovkicker" style="color:#c98cff">${C.icon} ${C.disp.toUpperCase()} · RANK ${cs.rank}</p>
+    <h2 class="ovh" style="color:#e6d2ff">Choose your path</h2><p class="ovsub">This choice shapes every skill you unlock after it. Respec later at the trainer.</p>
+    <div class="choices">${C.subs.map((s,i)=>{ const nx=s.skills?s.skills[0]:C.skills[1];
+      return `<button class="choice arm classchoice" data-i="${i}"><div class="cname" style="color:#c98cff">${s.disp} <span style="opacity:.5;font-size:12px;margin-left:auto">(${['J','K'][i]})</span></div><div class="cdesc">${s.blurb}<br><b style="color:#e6d2ff">Next: ${nx?nx.icon+' '+nx.n:'?'}</b> <span style="opacity:.6">— skills 3 &amp; 4 reveal as you rank up</span></div></button>`; }).join('')}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; cs.sub=C.subs[+b.dataset.i].id; persist(); SFX.classup(); toast('✦ You are now a '+C.subs[+b.dataset.i].disp+'!'); then(); });
+}
+function openSubclass(){ openSubclassFrom(resumePlay); }
+function fmt(n){ return Math.round(n*100)/100; }
+let _offerT=0;
+function offerWeapon(nw){
+  if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
+  if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
+  const typ=w=>weapFamily(w)+' · '+weapClassName(w);
+  const row=(label,a,b,better)=>{ const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
+    return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}${arr}</b></span></div>`; };
+  const reachRow=nw.cls==='ranged'?row('Range',(cur.proj&&cur.proj.range)||0,nw.proj.range||0):row('Range',cur.range||0,nw.range||0);
+  const el2=normEl(nw.el);
+  const elDesc=el2?(affName(el2)+' affinity · applies '+affStatus(el2)+' · strong vs '+affName(WEAK[el2])+', resisted by '+affName(el2)):('No affinity · flat '+dmgTypeName(nw).toLowerCase()+' damage');
+  showOverlayHTML(`<div class="card">
+    <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
+    <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
+    <img class="itemav" src="${itemAv(nw)}" alt="">
+    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':nw.cls==='ranged'?'#e5c997':'#b8b8b8'}">${damageTypeHTML(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${statusIcon(el2)} ${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
+    <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); playFx('equip'); toast(nw.name+' equipped'); resumePlay(); };
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
+}
+function offerArmor(na){
+  if(meta.autoBag){ if(stashItem({armor:na})) toast('🎒 Bagged · '+na.name); else { const g=sellItem(na); toast('Bag full — sold '+na.name+' · +'+g+'g'); } hudUpdate(); return; }
+  if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
+  const reduc=d=>Math.round(d/(d+200)*100);
+  const before=totalDefense(G.p), after=before-curDef+na.defense;
+  const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
+  showOverlayHTML(`<div class="card">
+    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(na.slot)} ${RARITY[na.rarity].name.toUpperCase()}${rpip(na.rarity)} · ${SLOTS[na.slot].label.toUpperCase()}${reqTag(na)}</p>
+    <h2 class="ovh" style="color:${RARITY[na.rarity].color}">${na.name}</h2>
+    <img class="itemav" src="${itemAv(na)}" alt="">
+    <div class="statgrid">
+      <div class="vsrow"><span>Piece defense</span><span><b>${curDef}</b> → <b class="${defCls}">${na.defense}${defCls==='up'?' ▲':defCls==='down'?' ▼':''}</b></span></div>
+      <div class="vsrow"><span>Total reduction</span><span><b>${reduc(before)}%</b> → <b class="${after>before?'up':(after<before?'down':'')}">${reduc(after)}%${after>before?' ▲':after<before?' ▼':''}</b></span></div>
+      ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
+      ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
+    </div>
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(na.name+' equipped'); resumePlay(); };
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
+}
+function offerTrinket(nt){
+  if(meta.autoBag){ if(stashItem({trinket:nt})) toast('🎒 Bagged · '+nt.name); else { const g=sellItem(nt); toast('Bag full — sold '+nt.name+' · +'+g+'g'); } hudUpdate(); return; }
+  if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
+  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
+  showOverlayHTML(`<div class="card">
+    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(nt.slot)} ${RARITY[nt.rarity].name.toUpperCase()}${rpip(nt.rarity)} · ${TRINKETS[nt.slot].label.toUpperCase()}${reqTag(nt)}</p>
+    <h2 class="ovh" style="color:${RARITY[nt.rarity].color}">${nt.name}</h2>
+    <div class="statgrid">
+      ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
+      ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
+    </div>
+    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
+    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
+  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({trinket:nt})){ toast(nt.name+' stashed'); resumePlay(); } else bagFullPrompt({trinket:nt},resumePlay); };
+  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(nt.name+' equipped'); resumePlay(); };
+  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+}
+/* one random loot item (weapon / armor / trinket) at a given rarity */
+function randomLoot(rid){ const r=Math.random();
+  if(r<0.16) return {trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])};
+  if(r<0.56) return {armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])};
+  return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
+// Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
+// interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
+function regrabCam(){ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
+function resumePlay(){ mode='play'; showOverlay(false); questUpdate(); hudUpdate(); regrabCam(); }
+function die(){
+  if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
+  mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
+  const Z=curZone(), perma=isPermadeath(), D=curDiff();
+  const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
+  if(perma) wipeMode(MODE); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
+  persist();
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
+    <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
+    ${perma?`<p class="hint" style="color:var(--danger)"><b>${D.name} — this save is erased. Back to the beginning.</b></p>`
+      :`<div class="statgrid"><div class="vsrow"><span>Lost this attempt</span><b style="color:var(--danger)">${lostGold}g + everything found</b></div>
+        <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
+    <button class="bigbtn" id="hubBtn">${hubBtnLabel()}</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function hubBtnLabel(){ return Object.keys(meta.classUnlocked||{}).length ? 'Return to Hub' : 'Choose your class'; }   // a class-less death routes to class select — say so
+/* ============================================================
+   ENDLESS DESCENT  (Phase 11 endgame loop + Phase 14 "Proving Grounds")
+   An infinite, escalating survival mode. Descend floor after floor; each is harder
+   than the last; clear a floor's wave to open the portal down; die and you keep every-
+   thing earned (a grind, not permadeath). Deepest floor is a permanent personal best.
+   Each floor borrows an existing zone THEME for its look, biasing darker as you go deep.
+   ============================================================ */
+const ENDLESS_ROT=[0,1,3,5,7,9,11,13,15];   // themed (non-boss) stage indices, light -> dark
+function endlessStageFor(n){                  // advance a new (darker) theme every 2 floors, then rotate the dark half
+  const idx=Math.floor((n-1)/2);
+  if(idx<ENDLESS_ROT.length) return ENDLESS_ROT[idx];
+  const dark=ENDLESS_ROT.slice(4);            // frost/volcano/void/marble/apex
+  return dark[(n-1)%dark.length];
+}
+// ---- Abyssal Descent: boon/bane shrine modifiers (each a boon WITH a bane; last the rest of the run, stack) ----
+const ENDLESS_MODS=[
+  {id:'glass',   icon:'🗡', name:'Glass Edge',    desc:'+50% damage, but −25% max HP',            apply:()=>{ G.endDmgMul*=1.5; G.endHpMul*=0.75; }},
+  {id:'bulwark', icon:'🛡', name:"Warden's Vow",   desc:'+45% max HP, but −20% damage',            apply:()=>{ G.endHpMul*=1.45; G.endDmgMul*=0.8; }},
+  {id:'haste',   icon:'⚡', name:'Quickened',      desc:'+25% attack & +15% move speed, −20% max HP', apply:()=>{ G.endAtkMul*=1.25; G.endSpdMul*=1.15; G.endHpMul*=0.8; }},
+  {id:'greed',   icon:'💰', name:"Miser's Bargain",desc:'Double gold, but enemies hit +25% harder', apply:()=>{ G.endGoldMul*=2; G.endEDmgMul*=1.25; }},
+  {id:'bloodpact',icon:'🩸',name:'Blood Pact',     desc:'+10% lifesteal, but enemies hit +20% harder', apply:()=>{ G.endLifesteal+=0.10; G.endEDmgMul*=1.20; }},
+  {id:'frenzy',  icon:'🔥', name:'Frenzied Abyss', desc:'+30% damage, but enemies move +20% faster', apply:()=>{ G.endDmgMul*=1.3; G.endESpdMul*=1.20; }},
+  {id:'ironblood',icon:'❤',name:'Ironblood',      desc:'+35% max HP, but gold gains halved',       apply:()=>{ G.endHpMul*=1.35; G.endGoldMul*=0.5; }},
+];
+function endModsReset(){ G.endDmgMul=1; G.endHpMul=1; G.endAtkMul=1; G.endSpdMul=1; G.endGoldMul=1; G.endEDmgMul=1; G.endESpdMul=1; G.endLifesteal=0; G.endMods=[]; }
+function endApplyMod(m){ m.apply(); G.endMods.push(m.id);
+  const nh=effMaxHp(G.p); G.p.hp=Math.min(nh,Math.max(1,Math.round(G.p.hp*(nh/Math.max(1,G.p._prevMaxHp||nh))))); G.p._prevMaxHp=nh;
+  toast(m.icon+' '+m.name+' — '+m.desc); playFx('secretget'); endModsHUD(); hudUpdate(); }
+function endModsHUD(){ let el=document.getElementById('endmods');
+  if(!el){ el=document.createElement('div'); el.id='endmods'; el.style.cssText='position:fixed;left:8px;top:96px;z-index:40;display:flex;flex-direction:column;gap:3px;pointer-events:none;font:600 12px system-ui'; document.body.appendChild(el); }
+  if(!G||!G.endless||!G.endMods||!G.endMods.length){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML=G.endMods.map(id=>{ const m=ENDLESS_MODS.find(x=>x.id===id)||{icon:'?',name:id}; return '<div style="background:rgba(20,12,28,0.72);border:1px solid #6a3fa0;border-radius:6px;padding:2px 7px;color:#e6d8ff">'+m.icon+' '+m.name+'</div>'; }).join(''); }
+function offerShrine(n){
+  // two DISTINCT random modifiers; picking one applies it for the rest of the descent
+  const pool=ENDLESS_MODS.slice(); for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  const a=pool[0], b=pool[1];
+  mode='menu'; SFX.pickup();
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:34px;color:#c47bff">A SHRINE IN THE DARK</h2>
+    <p class="ovsub">Floor ${n} · choose a pact — it binds for the rest of the descent</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+      <button class="bigbtn" id="shrA" style="text-align:left;padding:14px 18px"><b style="font-size:20px">${a.icon} ${a.name}</b><br><span class="hint">${a.desc}</span></button>
+      <button class="bigbtn" id="shrB" style="text-align:left;padding:14px 18px"><b style="font-size:20px">${b.icon} ${b.name}</b><br><span class="hint">${b.desc}</span></button>
+    </div></div>`);
+  const pick=m=>{ endApplyMod(m); showOverlay(false); showGameUI(true); mode='play'; };
+  document.getElementById('shrA').onclick=()=>pick(a);
+  document.getElementById('shrB').onclick=()=>pick(b);
+}
+function startEndless(){
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{endless:true,floor:0,zone:11,area:0,zoneTier:1});
+  G.endGold0=meta.gold||0; G.endKillsTotal=0;
+  endModsReset(); G.p._prevMaxHp=effMaxHp(G.p); endModsHUD();
+  meta.run=null;
+  loadEndlessArena(1);
+  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate(); questUpdate();
+  if(!startEndless._greeted){ startEndless._greeted=true; storyToast('The Abyss has no floor. See how far you can fall.'); }
+}
+function loadEndlessArena(n){
+  const stageIdx=endlessStageFor(n), s=STAGES[stageIdx];
+  G.floor=n; G.stageIndex=stageIdx; G.haz=null;
+  G.zoneTier=Math.min(7,1+Math.floor((n-1)/3));          // faster tier climb feeds the loot band + enemy scaling
+  G.ngHp=Math.pow(1.16,n-1); G.ngDmg=Math.pow(1.10,n-1); // Phase 19: MUCH steeper — the dark closes in fast now
+  G.endSpd=Math.min(1.7,1+(n-1)*0.03);                   // and the dead get QUICKER with every floor
+  G.endAtkQuick=Math.min(1.6,1+(n-1)*0.035);             // Batch 3: casters/rangers fire faster as you fall
+  G.endReward=1+n*0.14;                                  // XP + gold scale with depth
+  G.endEliteFloor=(n>=7 && n%7===0);                     // every 7th floor: ALL-ELITE (fewer, stronger)
+  G.endTarget=Math.min(80,10+Math.round(n*3.2));         // Batch 3: floor 1 is already a real fight (~13)
+  if(G.endEliteFloor) G.endTarget=Math.max(6,Math.round(G.endTarget*0.55));   // elite floors: fewer bodies, each a threat
+  G.endCap=Math.min(30,11+Math.floor(n*1.3));            // HARD concurrent-enemy cap (phones)
+  G.endBatch=Math.min(6,2+Math.floor(n/3));              // batch 2 from the very start; grows faster
+  G.endInt=Math.max(0.22,0.85-n*0.05);                   // ~0.8s at floor 1, shrinking hard
+  G.endSpawned=0; G.endSpawnT=0.5; G.floorCleared=false;
+  meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
+  // ---- reset scene arrays (mirrors loadStage) ----
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
+  document.getElementById('bonustimer').style.display='none';
+  document.getElementById('bosshpwrap').classList.remove('on');
+  // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
+  const R=470;
+  G.segments.push({x:0,z:0,w:R*2,d:R*2});
+  G.walls.push({x:0,z:-R,w:R*2+40,d:26,h:120},{x:0,z:R,w:R*2+40,d:26,h:120},{x:-R,z:0,w:26,d:R*2+40,h:120},{x:R,z:0,w:26,d:R*2+40,h:120});
+  for(const [tx,tz] of [[-R+40,-R+40],[R-40,-R+40],[-R+40,R-40],[R-40,R-40],[0,-R+40],[0,R-40]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});
+  const dc=tint(s.ground,'#000',0.25);
+  for(let k=0;k<20;k++){ const a=k/20*6.283, rr=R-70; G.deco.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y0:0,w:40+Math.random()*30,h:90+Math.random()*80,c:tint(dc,'#000',Math.random()*0.2),theme:s.theme}); }
+  G.bounds={minX:-R+30,maxX:R-30,minZ:-R+30,maxZ:R-30}; G.progressEnd=-R;
+  G.portalPos={x:0,z:-R+110};                          // the way down sits at the far (north) edge
+  G.startPos={x:0,z:R-140}; G.goalPos={x:0,z:-R+110}; G.lastSafe={x:0,z:R-140,y:0};
+  G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
+  G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
+  // reward beat: a loot cache every third floor (rarity still gated by character level via bandedRarity)
+  if(n>1 && n%3===0) G.chests.push(chestMaybeMimic({x:0,z:-40,y:0,opened:false,bob:0}));   // even the Abyss's gifts can lie
+  // MIMIC FLOORS: every 6th floor is a vault — three caches, each with the standard mimic rate (the bonus-vault exemption stays)
+  if(n>1 && n%6===0){ for(const cx of [-150,0,150]) G.chests.push(chestMaybeMimic({x:cx,z:-40,y:0,opened:false,bob:0}));
+    addText(0,90,-40,'A HOARD — or a trap','#ffd24a',true); }
+  G.stageBanner=2.2; G.areaName='Floor '+n;
+  document.getElementById('stagetag').textContent='🕳️ FLOOR '+n+(G.endEliteFloor?' ⚔ ELITE':'');
+  endModsHUD(); questUpdate(); hudUpdate();
+  // BOON/BANE SHRINE: every 5th floor opens with a binding pact choice
+  if(n>0 && n%5===0) offerShrine(n);
+}
+function spawnEndlessMob(n,s){
+  const pool=(THEMEMOBS[s.theme]||['grunt']).filter(m=>ENEMY[m]&&!ENEMY[m].boss);
+  const type=pool.length?pool[Math.floor(Math.random()*pool.length)]:'grunt';
+  // Batch 3: bias spawns toward the player as you fall deeper — no safe corner
+  const near=Math.random()<Math.min(0.55,0.2+n*0.02);
+  const a=Math.random()*6.283, rad=near?(180+Math.random()*130):(360+Math.random()*90);
+  const cx=near?G.p.x:0, cz=near?G.p.z:0;
+  let x=cx+Math.cos(a)*rad, z=cz+Math.sin(a)*rad;
+  if(G.bounds){ x=Math.max(G.bounds.minX,Math.min(G.bounds.maxX,x)); z=Math.max(G.bounds.minZ,Math.min(G.bounds.maxZ,z)); }
+  const m=spawnEnemy(type,x,z); m.active=true; G.endSpawned++;
+  m.speed*=(G.endSpd||1)*(G.endESpdMul||1);                    // Phase 19 + Batch 3: floor-scaled + pact quickness
+  if(m.shootCd) m.shootCd=Math.max(0.55,m.shootCd/(G.endAtkQuick||1));   // deeper casters fire faster (telegraph stays readable via the floor)
+  if(G.endEliteFloor || Math.random()<Math.min(0.6,0.05+n*0.03)) makeElite(m);   // every 7th floor ALL-elite; otherwise scaling elite chance
+  burst(x,20,z,'#c47bff',10);
+  return m;
+}
+function endlessTick(dt){
+  if(mode!=='play'||G.floorCleared) return;
+  const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length;
+  if(G.endSpawned<G.endTarget){
+    G.endSpawnT-=dt;
+    if(alive<G.endCap && G.endSpawnT<=0){
+      const batch=Math.min(G.endBatch,G.endTarget-G.endSpawned,G.endCap-alive);
+      for(let i=0;i<batch;i++) spawnEndlessMob(G.floor,STAGES[G.stageIndex]);
+      G.endSpawnT=G.endInt;
+    }
+  } else if(alive===0 && !G.portal){
+    G.floorCleared=true; snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
+    addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
+    toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('portalopen'); SFX.win(); questUpdate();
+  }
+}
+function endlessDescend(){
+  meta.hero=snapOf(G.p); meta.bank=null; persist();   // bank the run each floor so closing the tab keeps the gains
+  loadEndlessArena((G.floor||1)+1); SFX.pickup();
+}
+function endlessDie(){
+  mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
+  { const em=document.getElementById('endmods'); if(em) em.style.display='none'; }   // pacts reset on death/exit
+  const floor=G.floor||1, kills=G.endKillsTotal||0, goldEarned=Math.max(0,(meta.gold||0)-(G.endGold0||0));
+  const newBest=floor>(meta.endlessBest||0);
+  meta.hero=snapOf(G.p); meta.bank=null; meta.endlessBest=Math.max(meta.endlessBest||0,floor);
+  persist(); persistGlobal(); checkAchievements();
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:40px;color:#c47bff">THE ABYSS TOOK YOU</h2>
+    <p class="ovsub">Abyssal Descent · Level ${G.p.level}</p>
+    ${newBest?`<p class="hint" style="color:#ffd24a;font-weight:800">✦ NEW BEST — Floor ${floor}</p>`:''}
+    <div class="statgrid"><div class="vsrow"><span>Floor reached</span><b style="color:#c47bff">${floor}</b></div>
+      <div class="vsrow"><span>Deepest ever</span><b>${meta.endlessBest}</b></div>
+      <div class="vsrow"><span>Foes slain</span><b>${kills}</b></div>
+      <div class="vsrow"><span>Gold earned</span><b style="color:#ffd24a">+${goldEarned}g</b></div>
+      <div class="vsrow"><span>Kept</span><b style="color:var(--good)">everything — level, gear, gold</b></div></div>
+    <button class="bigbtn" id="hubBtn">${hubBtnLabel()}</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+function openEndlessGate(){
+  mode='menu'; SFX.pickup();
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:#c47bff;letter-spacing:.16em">🕳️ ABYSSAL DESCENT</p>
+    <h2 class="ovh">The Endless Below</h2>
+    <p class="ovsub">Floors without end, each harder than the last. Grind the best XP and gold in the game — until the dark finally outscales you. Death sends you home with everything you earned.</p>
+    <div class="statgrid"><div class="vsrow"><span>Your deepest floor</span><b style="color:#ffd24a">${meta.endlessBest?('Floor '+meta.endlessBest):'—'}</b></div></div>
+    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#7a3fb0,#4a2070)">Descend</button>
+    <button class="bigbtn ghost" id="descBack">Not yet</button></div>`);
+  document.getElementById('descBtn').onclick=startEndless;
+  document.getElementById('descBack').onclick=wsResume;
+}
+function enterEndlessFromTitle(){
+  initAudio(); if(!meta.diff) meta.diff='normal'; loadMode(diffMode(meta.diff));
+  if(!meta.hero || !Object.keys(meta.classUnlocked||{}).length){ meta.diff='normal'; loadMode('rl'); openHub(); toast('Pick a class first, then find the Abyssal Descent stone in the hub.'); return; }
+  startEndless();
+}
+function winGame(){
+  mode='win'; SFX.win(); playFx('bigreveal'); showGameUI(false); musicStop(1200);
+  const bonus=awardGold(500), D=curDiff();
+  meta.hero=snapOf(G.p); meta.bank=null; meta.run=null;
+  // Final-boss completion must be authoritative even when a caller bypasses zoneClear().
+  // These writes are idempotent, so the normal zoneClear -> winGame route remains safe.
+  meta.zoneDone[curZone().id]=true;
+  meta.zoneMax=Math.max(meta.zoneMax||0,ZONES.length-1);
+  if(!meta._iansBladeAnnounced) meta._iansBladeNotify=true;
+  meta['beat'+D.id.charAt(0).toUpperCase()+D.id.slice(1)]=true;     // beating a rung unlocks the next
+  persist(); persistGlobal(); checkAchievements(); checkCosmetics();
+  const lines=STORY.ending.slice(); if(STORY.endLadder[D.id]) lines.push(STORY.endLadder[D.id]);
+  playStory(lines, ()=>winScreen(bonus,D));                        // the ending rolls, then the results card
+}
+function winScreen(bonus,D){
+  mode='win'; musicPlay('hub');
+  const NX=D.id==='normal'?DIFFS.hardcore:D.id==='hardcore'?DIFFS.hitless:null;
+  showOverlayHTML(`<div class="card"><h2 class="title">${eventIcon('event-trophy')} VICTORY</h2>
+    <p class="ovsub">Every zone cleared on <b>${D.icon} ${D.name}</b>. The Abyss King is ended.
+      ${NX?`<br><span style="color:var(--amber)">${NX.icon} ${NX.name} unlocked.</span>`:'<br><span style="color:var(--amber)">You beat BLADEFALL at its cruelest.<br>🚀 The Jetpack is yours — fly free.</span>'}</p>
+    <div class="statgrid"><div class="vsrow"><span>Final level</span><b>${G.p.level}</b></div>
+      <div class="vsrow"><span>Weapon</span><b>${G.p.weapon.name}</b></div>
+      <div class="vsrow"><span>Clear reward</span><b style="color:#ffd24a">+${bonus}g</b></div></div>
+    <button class="bigbtn" id="hubBtn">Return to Hub</button></div>`);
+  document.getElementById('hubBtn').onclick=openHub;
+}
+const overlay=document.getElementById('overlay'), ovcard=document.getElementById('ovcard');
+function showOverlay(v){ overlay.classList.toggle('hide',!v); if(v && document.pointerLockElement && document.exitPointerLock) document.exitPointerLock(); // free the mouse to click menus
+  if(v){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract'); if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); } }
+function titleEmbers(){ const host=document.getElementById('tembers'); if(!host) return; if(host.childElementCount) return;   // drifting embers behind the key art
+  let h=''; for(let i=0;i<16;i++){ const dur=(7+Math.random()*9).toFixed(1), delay=(-Math.random()*12).toFixed(1), left=(Math.random()*100).toFixed(1), dx=((Math.random()*2-1)*70).toFixed(0), sz=(2+Math.random()*2.5).toFixed(1);
+    h+=`<span style="left:${left}%;width:${sz}px;height:${sz}px;--dx:${dx}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`; }
+  host.innerHTML=h; }
+function enhanceMenuShell(){
+  const card=ovcard.querySelector('.card'); if(!card) return;
+  card.classList.add('rpgmenu');
+  const heads=[...card.querySelectorAll('.ovkicker,.ovh,.title')].slice(0,3).map(x=>x.textContent||'').join(' ').toLowerCase(); let theme='amber';
+  if(/abyss|void|reaper|shade|soulfire|shrine/.test(heads)) theme='void';
+  else if(/you fell|delete|death|bag full|hardcore/.test(heads)) theme='danger';
+  else if(/class|skill|trainer|bestiary|training|options|characters|save files|gear|paused/.test(heads)) theme='steel';
+  else if(/pet yard|companion|quest|postings/.test(heads)) theme='nature';
+  else if(/frost|glacier|chill/.test(heads)) theme='frost';
+  card.dataset.theme=theme;
+  if(/shop/.test(heads)) card.classList.add('menu-shop');
+  else if(/waystation/.test(heads)) card.classList.add('menu-waystation');
+  else if(/paused/.test(heads)) card.classList.add('menu-pause');
+  else if(/bag/.test(heads)) card.classList.add('menu-bag');
+  else if(/pet yard/.test(heads)) card.classList.add('menu-pets');
+  card.querySelectorAll('.bigbtn').forEach(b=>{ const t=(b.textContent||'').trim().toLowerCase();
+    if(/^(back|leave|cancel|not now|keep old|return|close|remove|title screen)/.test(t)||/back$/i.test(b.id||'')) b.classList.add('utility','ghost'); });
+}
+function showOverlayHTML(html){
+  if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
+  // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
+  const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
+  ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
+  const na=ovcard.querySelector('.achlist'); if(na&&psc) na.scrollTop=psc;
+  if(pov) overlay.scrollTop=pov;
+}
+function decorateMenuIcons(){
+  const icons={backBtn:'back',backC:'back',descBack:'back',npcLeave:'back',nameBack:'back',cBack:'back',msBack:'back',delNo:'back',wsBack:'back',
+    resBtn:'resume',optBtn:'settings',fsBtn:'fullscreen',gearBtn:'character-sheet',slotsBtn:'character-sheet',titleBtnP:'title-screen-exit',qmenu:'title-leave',to2dBtn:'back'};
+  for(const [id,name] of Object.entries(icons)){ const b=document.getElementById(id); if(b&&!b.querySelector('.ico-menu')) b.insertAdjacentHTML('afterbegin',`<span class="ico ico-menu ico-${name}" aria-hidden="true"></span>`); }
+}
+/* body has touch-action:none (the joystick needs it) — which silently kills native
+   range-slider dragging on touch. So every overlay slider gets pointer-driven:
+   we compute the value from the drag ourselves and fire 'input' like the real thing. */
+function navCard(id,art,name,desc='',cls='',attrs=''){
+  return `<button class="navcard ${cls}${art?'':' noart'}" id="${id}" ${attrs}>${art?`<img class="navart" src="${art}" alt="">`:''}<span class="navname">${name}</span>${desc?`<span class="navdesc">${desc}</span>`:''}</button>`;
+}
+function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
+function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
+const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:`icons/class-core.png?v=${VERSION3D}`,
+  board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
+  abyss:'icons/portal.png',beastkeeper:`icons/beastkeeper.png?v=${VERSION3D}`};
+function fixSliders(){
+  ovcard.querySelectorAll('input[type=range]').forEach(el=>{
+    if(el._pfix) return; el._pfix=true;
+    el.style.touchAction='none';
+    const set=ev=>{ const r=el.getBoundingClientRect(), mn=+el.min||0, mx=+el.max||100, st=+el.step||1;
+      let v=mn+(mx-mn)*Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width));
+      v=Math.round(v/st)*st;
+      if(String(el.value)!==String(v)){ el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); } };
+    el.addEventListener('pointerdown',ev=>{ ev.stopPropagation(); try{ el.setPointerCapture(ev.pointerId); }catch(e){} set(ev); });
+    el.addEventListener('pointermove',ev=>{ if(ev.buttons>0 || ev.pointerType==='touch') { if(ev.pressure>0||ev.buttons>0) set(ev); } });
+  });
+}
+function toast(msg,color,icon){ const t=document.getElementById('toast'); t.textContent='';
+  if(icon){ const i=document.createElement('span'); i.className='ico ico-event ico-'+icon; i.setAttribute('aria-hidden','true'); t.append(i,document.createTextNode(' '+msg)); }
+  else t.textContent=msg;
+  t.style.color=color||''; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>{t.classList.remove('show');toast._t=null;},1400); }
+function openSlots(){
+  mode='menu';
+  const rows=[0,1,2].map(sl=>{ const su=slotSummary(sl), on=sl===SLOT;
+    if(su.empty) return `<div class="wowslot empty"><div class="wowport empty">＋</div>
+      <div class="wowmid"><div class="wowname" style="opacity:.85">Empty Slot ${sl+1}</div><div class="wowsub" style="opacity:.55">No Warden — start a new one here</div></div>
+      <div class="wowbtns"><button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Create</button></div></div>`;
+    const C=CLASSES[su.cls], zbar=Math.min(100,Math.round((su.zone-1)/Math.max(1,ZONES.length)*100));
+    return `<div class="wowslot ${on?'on':''}">
+      <div class="wowport" style="background-image:url('icons/skins/skin-${su.skin}.png')">${on?'<span class="wowactive">ACTIVE</span>':''}</div>
+      <div class="wowmid">
+        <div class="wowname">${htmlSafe(su.name)}</div>
+        <div class="wowsub">${C?C.icon+' '+C.disp:'No class yet'} · <b>Level ${su.lvl}</b>${su.rank>1?' · Rank '+su.rank:''}</div>
+        <div class="wowstats"><span>${su.beatN?'⚔ Realm cleared':'⚑ Zone '+su.zone+'/'+ZONES.length}</span><span style="color:#ffd24a">◆ ${su.gold}g</span></div>
+        <div class="wowzbar"><i style="width:${su.beatN?100:zbar}%"></i></div>
+      </div>
+      <div class="wowbtns">${on?`<button class="bigbtn buybtn" data-play="1" style="width:auto;margin:0;padding:8px 13px;font-size:12px">▶ Play</button>`:`<button class="bigbtn buybtn" data-sel="${sl}" style="width:auto;margin:0;padding:8px 13px;font-size:12px">Play</button>`}
+        <button class="bigbtn buybtn ghost" data-del="${sl}" style="width:auto;margin:0;padding:8px 10px;font-size:12px;color:var(--danger)">✕</button></div></div>`; }).join('');
+  showOverlayHTML(`<style>
+    .wowslot{display:flex;align-items:center;gap:12px;padding:11px;margin-bottom:10px;border:1px solid #2d3342;border-radius:14px;background:linear-gradient(150deg,rgba(30,26,40,.72),rgba(12,12,18,.86));box-shadow:0 6px 16px rgba(0,0,0,.3)}
+    .wowslot.on{border-color:var(--amber);box-shadow:0 6px 20px rgba(232,163,61,.2)}
+    .wowport{width:66px;height:66px;flex:0 0 66px;border-radius:11px;background:#0c0c12 center/cover no-repeat;border:1px solid #3a3f52;position:relative;overflow:hidden}
+    .wowport.empty{display:flex;align-items:center;justify-content:center;font-size:30px;color:#4a5468;background:#12131a}
+    .wowactive{position:absolute;left:0;right:0;bottom:0;font-size:8px;text-align:center;background:rgba(232,163,61,.92);color:#1a1206;font-weight:800;letter-spacing:.1em;padding:1px 0}
+    .wowmid{flex:1;min-width:0}
+    .wowname{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wowsub{font-size:12px;opacity:.85;margin-top:1px}
+    .wowstats{display:flex;gap:13px;font-size:11px;opacity:.72;margin-top:3px}
+    .wowzbar{height:4px;border-radius:3px;background:#22242e;margin-top:5px;overflow:hidden}.wowzbar i{display:block;height:100%;background:linear-gradient(90deg,#7a5cff,#b69aff)}
+    .wowbtns{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  </style>
+  <div class="card"><p class="ovkicker">Your Wardens</p><h2 class="ovh">Load Character</h2>
+    <p class="ovsub">Three independent Wardens — choose one to play. Switching reloads the realm.</p>
+    <div class="achlist">${rows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  { const pb=document.querySelector('[data-play]'); if(pb) pb.onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} modeSelect(); }; }
+  document.querySelectorAll('[data-sel]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.sel));
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const sl=+b.dataset.del;
+    const su=slotSummary(sl);
+    showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:var(--danger)">Delete Slot ${sl+1}?</p>
+      <h2 class="ovh">Erase this character?</h2><p class="ovsub">${su.cls?(CLASSES[su.cls]?CLASSES[su.cls].disp:su.cls)+' · Lv '+su.lvl:'this save'} will be gone for good.</p>
+      <button class="bigbtn" id="delYes" style="background:linear-gradient(180deg,#e8635a,#c33)">Erase it</button>
+      <button class="bigbtn ghost" id="delNo">Keep it</button></div>`);
+    document.getElementById('delYes').onclick=()=>{ deleteSlot(sl); if(sl===SLOT) selectSlot(0); else openSlots(); };
+    document.getElementById('delNo').onclick=openSlots; });
+  document.getElementById('backBtn').onclick=titleScreen;
+}
+function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
+  mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
+  const active=slotSummary(SLOT), activeClass=active.cls&&CLASSES[active.cls]?CLASSES[active.cls]:null;
+  const activeLine=active.empty?`Slot ${SLOT+1} · New Warden · Choose a class to begin`
+    :`Slot ${SLOT+1} · ${htmlSafe(active.name)} · Level ${active.lvl} · ${activeClass?activeClass.icon+' '+activeClass.disp:htmlSafe(active.cls||'No class equipped')}`;
+  const hasSave=!active.empty;
+  showOverlayHTML(`<style>
+    .mainmenu .mmwrap{display:flex;flex-direction:column;gap:11px;width:min(346px,84vw);margin:20px auto 0}
+    .mmbtn{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:13px 18px;cursor:pointer;background:linear-gradient(180deg,rgba(30,23,15,.82),rgba(11,9,13,.9));color:#e7dbc2;border:1px solid #3d3123;border-radius:11px;box-shadow:0 6px 18px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,220,160,.06);transition:transform .08s,border-color .14s,background .14s,box-shadow .14s}
+    .mmbtn .mmtx{font-size:21px;font-weight:800;letter-spacing:.1em;text-shadow:0 2px 4px rgba(0,0,0,.6)}
+    .mmbtn .mmsub{font-size:11px;opacity:.58;letter-spacing:.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mmbtn:hover,.mmbtn:focus{border-color:var(--amber);background:linear-gradient(180deg,rgba(60,43,22,.92),rgba(22,15,11,.95));color:#ffe6ad;box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 22px rgba(232,163,61,.22);outline:none}
+    .mmbtn:active{transform:scale(.975)}
+    .mmbtn::before,.mmbtn::after{content:'';position:absolute;top:50%;width:9px;height:9px;border:2px solid transparent;opacity:0;transform:translateY(-50%) rotate(45deg);transition:opacity .14s}
+    .mmbtn:hover::before{left:11px;border-left-color:var(--amber);border-bottom-color:var(--amber);opacity:.9}
+    .mmbtn:hover::after{right:11px;border-right-color:var(--amber);border-top-color:var(--amber);opacity:.9}
+    .mmbtn.mmdis,.mmbtn.mmdis:hover{opacity:.4;cursor:default;filter:grayscale(.6);border-color:#332a1e;background:linear-gradient(180deg,rgba(30,23,15,.7),rgba(11,9,13,.8));color:#9a8f7c;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+    .mmbtn.mmdis::before,.mmbtn.mmdis::after{display:none}
+    .mmbtn.mmexit{padding:10px 18px}.mmbtn.mmexit .mmtx{font-size:16px;opacity:.85;font-weight:700}
+  </style>
+  <div class="tmenu mainmenu" id="tmenu">
+    <div class="mmwrap">
+      <button class="mmbtn" id="mmNew"><span class="mmtx">New Game</span><span class="mmsub">Forge a new Warden</span></button>
+      <button class="mmbtn ${hasSave?'':'mmdis'}" id="mmCont" ${hasSave?'':'disabled'}><span class="mmtx">Continue</span><span class="mmsub">${hasSave?activeLine:'No saved Warden yet'}</span></button>
+      <button class="mmbtn" id="mmLoad"><span class="mmtx">Load Character</span><span class="mmsub">View &amp; choose your saved Wardens</span></button>
+      <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; skins</span></button>
+      <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
+    </div>
+    <div class="tver">v${VERSION3D}</div>
+    </div>
+    <div class="tbegin" id="tbegin"><div class="tbeginpulse" id="tbeginpulse">⚔ PRESS TO ENTER</div><div class="tver">v${VERSION3D}</div></div>`);
+  document.body.classList.add('t-title'); document.body.classList.add('t-attract'); titleEmbers();
+  // STAGE 1: the art stands alone. First tap/key reveals the menu (STAGE 2) so nothing ever covers the logo on entry.
+  const revealMenu=()=>{ if(mode!=='title'||!document.body.classList.contains('t-attract')) return;
+    document.body.classList.remove('t-attract'); try{ initAudio(); SFX.pickup(); }catch(e){}
+    window.removeEventListener('keydown',revealMenu); window.removeEventListener('pointerdown',revealMenu); };
+  titleScreen._reveal=revealMenu;
+  window.addEventListener('keydown',revealMenu);
+  window.addEventListener('pointerdown',revealMenu);
+  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} active.empty?openCharCreate():openSlots(); };   // new char: empty slot -> creation; else pick/free a slot
+  document.getElementById('mmCont').onclick=()=>{ if(active.empty) return; try{initAudio();SFX.pickup();}catch(e){} modeSelect(); };  // resume last-accessed save
+  document.getElementById('mmLoad').onclick=()=>{ try{SFX.pickup();}catch(e){} openSlots(); };
+  document.getElementById('mmSet').onclick=()=>{ try{SFX.pickup();}catch(e){} openTitleOptions(); };
+  document.getElementById('mmExit').onclick=()=>{ try{SFX.pickup();}catch(e){} titleScreen(); };   // back to the attract logo (web has no OS-quit)
+}
+function openTitleOptions(){
+  mode='menu'; showGameUI(false);
+  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Options</p><h2 class="ovh">More</h2>
+    <button class="bigbtn ghost" id="skinBtn2">🛡 Skins &amp; Appearance</button>
+    <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
+    ${audioSettingsHTML()}
+    <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
+    <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">Classic 2D BLADEFALL</button>
+    <button class="bigbtn ghost" id="backBtn" style="margin-top:12px">Back</button></div>`);
+  document.getElementById('skinBtn2').onclick=()=>openSkins(openTitleOptions);
+  document.getElementById('achBtn').onclick=()=>openAchievements(openTitleOptions);
+  bindAudioSettings();
+  document.getElementById('creditsBtn').onclick=()=>openCredits(openTitleOptions);
+  document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
+  document.getElementById('backBtn').onclick=titleScreen;
+}
+function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
+  initAudio();
+  const open=Object.keys(DIFFS).filter(diffOpen);
+  if(open.length<2){ meta.diff='normal'; loadMode('rl'); openHub(); return; }
+  openDiffSelect();
+}
+function openDiffSelect(){
+  mode='menu'; showGameUI(false);
+  const cards=Object.keys(DIFFS).map(id=>{ const D=DIFFS[id], open=diffOpen(id), mv=loadJSON(MKEY(diffMode(id)))||{};
+    const beat=meta['beat'+id.charAt(0).toUpperCase()+id.slice(1)];
+    const art=id==='normal'?'icons/class-warrior.png':id==='hardcore'?'icons/event-boss-skull.png':'icons/difficulty-hitless.png';
+    const desc=(open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock')+(open?`<br><span class="navmeta">${mv.gold||0}g · zone ${(mv.zoneMax||0)+1}/${ZONES.length}</span>`:'')+(beat?' <span class="navdone">✓ BEATEN</span>':'');
+    return navCard('',art,open?D.name:'Locked',desc,`diffcard diff-${id}${open?'':' lock'}`,open?`data-d="${id}"`:'disabled'); }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Choose Your Difficulty</h2><p class="ovsub">Each difficulty keeps its own save.</p>
+    <div class="navgrid three">${cards}</div><button class="bigbtn ghost" id="backBtn" style="margin-top:14px">Back</button></div>`);
+  document.querySelectorAll('.navcard[data-d]').forEach(b=>b.onclick=()=>{ initAudio();
+    meta.diff=b.dataset.d; persistGlobal(); loadMode(diffMode(meta.diff)); openHub(); });
+  document.getElementById('backBtn').onclick=titleScreen;
+}
+/* ============================================================
+   THE WAYSTATION — the walkable hub (Firelink, not a menu)
+   ============================================================ */
+function openHub(){
+  document.getElementById('bosshpwrap').classList.remove('on');
+  if(meta.bank) restoreBank();                 // an abandoned attempt reverts to the hub snapshot, same as dying
+  if(!Object.keys(meta.classUnlocked).length){ mode='menu'; showGameUI(false); musicPlay('hub'); openClassPicker(); return; }
+  if(!meta.introSeen){                         // first time you reach the hub as a Warden: the story opens
+    meta.introSeen=true; persistGlobal();
+    playStory(STORY.intro, openHub); return;
+  }
+  enterWaystation();
+}
+/* Phase 20: the hub gets its OWN look — a warm golden-hour home, NOT the grey/grassy
+   Outskirts it borrowed. Soft plum-warm sky, honeyed lantern haze, warm cobblestone. */
+const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:900,ad:760};
+function enterWaystation(){
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
+  G.stageIndex=0;
+  // scene arrays normally come from loadStage — the waystation builds its own room
+  G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[]; G.rooms=[]; G.doors=[]; G.plates=[];
+  G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
+  /* ============ THE WAYSTATION, rebuilt (Phase 19): a fortress QUARTER, not a box ============
+     A grand central plaza opens into five themed wings: the MARKET GARDEN west (shop +
+     wardrobe under an awning, under a tree), the FORGE YARD east (the Smith among racks
+     and braziers), the walled SPARRING ARENA south-east (practice stays inside), the
+     PET YARD south-west (the Beastkeeper — and something glinting behind the
+     crates...), the MIRROR PAVILION due south, and the DARK GROTTO north-east where the
+     Abyssal Descent stone waits. The gate terrace still crowns the north. */
+  // ---- floor: ONE grand plaza (compact hub-and-spoke; -z = north/forward toward the gates) ----
+  G.segments.push({x:0,z:-40,w:1300,d:840});
+  G.rooms.push({x:0,z:-40,w:1300,d:840,monsters:[],encounter:false,cleared:true});
+  // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
+  G.walls.push({x:0,z:-430,w:1320,d:26,h:64});                       // low north rampart behind the gate arc (see the sky/gates)
+  G.walls.push({x:0,z:372,w:1320,d:26,h:120});                       // south wall (behind spawn)
+  G.walls.push({x:-640,z:-30,w:26,d:830,h:120});                     // west wall
+  G.walls.push({x:640,z:-30,w:26,d:830,h:120});                      // east wall
+  // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
+  G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
+  G.deco.push({x:0,z:30,y0:7,w:96,h:2,d:96,c:'#2f6a7a'});                             // the water (animated glint in drawWaystation)
+  for(const la of [[-90,-40],[90,-40],[-90,100],[90,100]]){ vcol(la[0],la[1],9,9,62);
+    G.deco.push({x:la[0],z:la[1],y0:62,w:15,h:14,d:15,c:'#3a2c1c'}); G.deco.push({x:la[0],z:la[1],y0:66,w:11,h:9,d:11,c:'#ffd88a'});
+    G.deco.push({x:la[0],z:la[1],y0:44,w:20,h:12,d:20,c:'#4d8842'}); }               // lantern posts + hanging flower baskets
+  // honey flagstone paths: spawn -> waystone -> gate arc, and out to the two bays
+  for(const pt2 of [[0,150,84,300],[0,-160,96,260],[-380,40,520,66],[380,40,520,66]])
+    G.deco.push({x:pt2[0],z:pt2[1],y0:0,w:pt2[2],h:1.4,d:pt2[3],c:'#9a7c52'});
+  // FLOWER PLANTERS around the plaza edge (kept clear of the spawn->gate lanes)
+  const bloom=['#e8607a','#f0a93a','#7cc6ff','#e07ad0','#ffd24a','#8fdf6a'];
+  for(const fb of [[-250,-160],[250,-160],[-250,210],[250,210],[-160,250],[160,250]]){
+    G.deco.push({x:fb[0],z:fb[1],y0:0,w:54,h:10,d:32,c:'#6e4a2e'});
+    G.deco.push({x:fb[0],z:fb[1],y0:10,w:46,h:3,d:24,c:'#241b14'});
+    for(let k=0;k<5;k++){ const fx=fb[0]-18+k*9, fz=fb[1]+(k%2?4:-4), fh=10+(k%3)*3;
+      G.deco.push({x:fx,z:fz,y0:13,w:2.5,h:fh,d:2.5,c:'#3f7d3b'});
+      G.deco.push({x:fx+(k%2?3:-3),z:fz,y0:17,w:5,h:2.5,d:3,c:'#559b49'});
+      G.deco.push({x:fx,z:fz,y0:13+fh,w:5.5,h:5.5,d:5.5,c:bloom[(k*7+Math.abs(fb[0]))%6]}); } }
+  // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
+  // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
+  for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
+  G.torches.push({x:-548,z:-150,ph:1},{x:-548,z:240,ph:2},{x:548,z:-150,ph:3},{x:548,z:240,ph:4},{x:0,z:352,ph:5});
+  // ---- the gate ARC: one per zone across the north; centre gates drawn deeper so the eye is pulled forward ----
+  G.gates=[];
+  const gSpan=1040, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;   // WIDE spacing — each portal gets real side-to-side room
+  ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-262-26*(1-Math.abs(gx)/(gSpan/2||1)));   // gentle arc
+    G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name});
+    if(Z.side&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:gx,z:gz+64,open:true,done:!!meta.sideDone[Z.side.id],name:Z.side.name}); });   // secret rift sits IN FRONT of its parent, its own room
+  // ABYSSAL DESCENT — its OWN dark grotto in the north-west corner (no longer tucked behind the gate arc)
+  G.obstacles.push({kind:'plat',x:-548,z:-300,w:150,d:120,h:20});
+  G.deco.push({x:-548,z:-300,y0:0,w:190,h:1.4,d:170,c:'#16101f'});
+  for(const s of [-1,1]){ vcol(-548+s*74,-300,20,20,150); G.deco.push({x:-548+s*74,z:-300,y0:150,w:26,h:10,d:26,c:'#2a1840'}); }   // grotto pillars
+  for(let k=0;k<5;k++) G.deco.push({x:-548+(Math.random()*2-1)*72,z:-300+(Math.random()*2-1)*54,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
+  // WEST BAY — THE EXCHANGE (gear & gold): signpost banner only, NO floor carpet
+  G.deco.push({x:-548,z:70,y0:88,w:230,h:24,d:6,c:'#3a2a55'});
+  // EAST BAY — THE WAR YARD (combat prep): signpost banner only, NO floor carpet
+  G.deco.push({x:548,z:70,y0:88,w:230,h:24,d:6,c:'#5e2a24'});
+  // ---- the posts: everyone gets a home that fits them ----
+  // grouped by purpose: WEST BAY = the Exchange (gear/gold), EAST BAY = the War Yard (combat prep), centre = quests+mirror, north dais = the Abyss
+  // WEST column = the Exchange · EAST column = the War Yard · SOUTH back-wall = bag/postings/mirror · NW grotto = the Abyss
+  G.hubNpcs=[
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:()=>openForge(wsResume)},
+    {id:'keeper',ic:'🧥',name:'The Stylist',role:'Style & appearance',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
+    {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:360,z:150,open:()=>enterSparringRoom()},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-200,z:322,open:()=>openQuestBoard(wsResume)},
+    {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:330,open:()=>openMirror(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:200,z:322,open:()=>openBag(wsResume)},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-548,z:-284,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:548,z:-284,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
+  ];
+  // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
+  { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
+  G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
+  G.bounds={minX:-660,maxX:660,minZ:-450,maxZ:360}; G.progressEnd=-350;
+  G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  meta.run=null; persist();
+  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
+  document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
+  if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
+  if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }
+  if(meta._iansBladeNotify){ meta._iansBladeNotify=false; meta._iansBladeAnnounced=true; persist(); storyToast("Ian's Blade now waits in the Shop."); }
+  if(!meta.hubTutDone && Object.keys(meta.trialsDone||{}).length){ meta.hubTutDone=true; persistGlobal(); hubTutorial(); }   // one-time hub onboarding after the first trial
+}
+/* Each keeper's voice — grim + terse. E opens this; a button drops you into what they do. */
+const NPCVOICE={
+  quartermaster:{cta:'Browse wares',lines:["Steel, leather, charms — I sell what keeps you breathing.","Bring gold, I bring the goods. Nothing here is charity. Nothing here will fail you either."]},
+  drillmaster:{cta:'Train & trials',lines:["You swing like no one ever taught you. I can change that.","Pick a discipline. Or step into a trial and earn a new one. The dead won't wait while you practise."]},
+  keeper:{cta:'Open wardrobe',lines:["Cloaks. Marks. The colors of those who fell before you.","They sharpen nothing. They only decide how the dark remembers you."]},
+  board:{cta:'Read the postings',lines:["The dead left their work unfinished. It's all here, if you can read it.","Take what you can carry. Come back alive to be paid."]},
+  chest:{cta:'Open your bag',lines:["Everything you've dragged out of the deep. Sort it.","Feed the forge, sell the chaff. Carry nothing you'd weep to lose."]},
+  anvil:{cta:'Use the forge',lines:["Two of a kind, same worth — I'll beat them into something greater.","Bring me pairs. I give you rarity. That's the whole of it."]},
+  beastkeeper:{cta:'Open the Pet Yard',lines:["The deep breaks most things. A few, it makes loyal.","Take one down with you. It won't win your fights — but it'll be there when the dark closes in."]}
+};
+// Phase 12: a keeper's line that reacts to YOUR progress (gold, class/rank, gates cleared, last run)
+function npcReact(n){
+  const cs=classState(meta.classId), lv=(meta.hero&&meta.hero.level)||1, cleared=Object.keys(meta.zoneDone||{}).length, kills=meta.bossKills||0;
+  const R={
+    quartermaster:[ meta.gold>=2500?`${meta.gold} gold on you — you can afford to be choosy now.`:`${meta.gold} gold. Come back when it's heavier.`, meta.socks?`Those Magic Socks carry you well.`:null ],
+    drillmaster:[ `${curClass().disp}, rank ${cs.rank}. ${cs.rank>=7?'The dead should be afraid.':'Keep drilling.'}`, `Level ${lv} — ${lv>=15?'seasoned':'still green'}.`, Object.keys(meta.classUnlocked||{}).length>1?`Three disciplines under one roof. Greedy.`:null ],
+    keeper:[ cleared>=6?`Six gates gone dark behind you. The colors remember them.`:`${cleared} cleared. The dark keeps its own count.` ],
+    board:[ cleared>=ZONES.length-2?`Little left unfinished down there now.`:`Work still waits below. It always does.` ],
+    chest:[ (meta.stash&&meta.stash.length>=STASH_CAP)?`That bag is full — feed the forge or sell the chaff.`:null ],
+    anvil:[ kills>=6?`You've felled enough. Bring me their leavings and I'll better them.`:null ]
+  };
+  const arr=(R[n.id]||[]).filter(Boolean); return arr.length?arr[Math.floor((G&&G.time||0)/4)%arr.length]:null;
+}
+function openNpcTalk(n){ const v=NPCVOICE[n.id]; if(!v){ n.open(); return; }
+  mode='menu'; SFX.pickup();
+  document.getElementById('toast').classList.remove('show');
+  const react=npcReact(n);
+  showOverlayHTML(`<div class="card npcchat" style="--npc-accent:${n.c2||'#e8a33d'}"><div class="npctalkbody"><div class="npctalkcopy"><div class="npcintro">${npcPortrait(n.id)}
+    <div class="npcidentity"><p class="ovsub">WAYSTATION KEEPER</p><h2 class="ovh">${n.name}</h2><p class="npcrole">${n.role||''}</p><p class="npcline">“${v.lines[0]}”</p></div></div>
+    <div style="text-align:left;font-size:14px;line-height:1.7;color:#cfd6df;margin:8px 0 12px">
+      ${v.lines.slice(NPC_PORTRAIT_POS[n.id]?1:0).map(l=>`<p style="margin:0 0 8px;font-style:italic">"${l}"</p>`).join('')}
+      ${react?`<p style="margin:8px 0 0;font-style:italic;color:${n.c2||'#e8a33d'}">"${react}"</p>`:''}</div></div>
+    ${navCard('npcGo',NPC_MENU_ART[n.id]||'icons/event-quest-marker.png',v.cta,n.role||'','npcaction')}</div>
+    <button class="bigbtn ghost" id="npcLeave" style="margin-top:8px">Leave</button></div>`);
+  document.getElementById('npcGo').onclick=()=>n.open();
+  document.getElementById('npcLeave').onclick=resumePlay;
+}
+// Phase 12: the Mirror — inspect your own character (live gear/cosmetics), invaluable in first-person
+/* ============================================================
+   THE MIRROR — stand before it and orbit 360° around your character (drag to rotate),
+   with EVERY stat listed and your full equipped loadout (each piece's TYPE + bonus).
+   ============================================================ */
+let mirror=null, mirrorPanelMode=null;
+function openMirror(back){
+  initAudio();
+  if(document.pointerLockElement && document.exitPointerLock){ try{ document.exitPointerLock(); }catch(e){} }
+  const h=meta.hero, p=freshPlayer();
+  p.skin=(h&&h.skin)||p.skin; p.weapon=(h&&h.weapon)?normWeapon(JSON.parse(JSON.stringify(h.weapon))):p.weapon;
+  p.gear=h?cloneGear(h.gear):p.gear; p.x=0; p.y=0; p.z=0; p.yaw=Math.PI; p.invuln=0;
+  p.level=(h&&h.level)||1; recomputeArmor(p); p.hp=effMaxHp(p);
+  const pet=meta.petActive&&PETS[meta.petActive]?{id:meta.petActive,x:46,y:16,z:24,bob:0,t:0,yaw:Math.PI}:null;
+  mirror={ t:0, yaw:0, spin:false, back:back||openHubMenu, p, pet }; mirrorPanelMode=null;
+  mode='mirror'; showOverlay(false); showGameUI(false);
+  hpBars=[]; statPips=[]; drawHpBars(); updatePetLabel();
+  document.getElementById('questbox').classList.add('hide');
+  { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract');   // Phase 19: the 'Talk to the Mirror' prompt must not linger inside the mirror
+    if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); }
+  buildMirrorPanel(); buildMirrorInfo();
+}
+/* Always-on top-right character card in the Mirror: name, level, class, class rank, and equipped gear. */
+function buildMirrorInfo(){
+  if(!mirror) return; const p=mirror.p, C=curClass(), cs=classState(meta.classId), nm=meta.heroName||'Nameless';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const rc=it=>it?(RARITY[it.rarity]?RARITY[it.rarity].color:'#cfd6df'):'#5a6070';
+  const row=(label,it)=>`<div class="miRow"><img class="miIco" src="${it?(itemAv(it)||''):''}" alt="" style="${it&&itemAv(it)?'':'visibility:hidden'}"><div class="miTxt"><span class="miSlot">${label}</span><span class="miName" style="color:${rc(it)}">${it?esc(it.name):'— empty —'}</span></div></div>`;
+  const g=p.gear||{};
+  let info=document.getElementById('mirrorInfo'); if(!info){ info=document.createElement('div'); info.id='mirrorInfo'; document.body.appendChild(info); }
+  info.innerHTML=`<div class="miName2">${esc(nm)}</div><div class="miClass">${C.icon} ${C.disp}</div>`
+    +`<div class="miLvls"><span class="miPill">LEVEL ${p.level||1}</span><span class="miPill cls">${C.disp.toUpperCase()} · RANK ${cs.rank}</span></div>`
+    +`<div class="miDiv"></div><div class="miGearHdr">Equipped Gear</div>`
+    +row('Weapon',p.weapon)+row('Helmet',g.helmet)+row('Chestplate',g.chest)+row('Leggings',g.legs)+row('Amulet',g.amulet)+row('Ring',g.ring);
+  info.style.display='block';
+}
+function mirrorUpdate(dt){ if(!mirror) return; mirror.t+=dt; if(G) G.time+=dt;
+  if(mirror.spin) mirror.yaw+=dt*0.45;
+  if(mirror.pet){ mirror.pet.t=mirror.t; mirror.pet.bob=Math.sin(mirror.t*3)*3; }
+  const p=mirror.p; if(p.hurtFlash>0) p.hurtFlash-=dt;
+}
+function renderMirror(t){
+  hpBars=[]; statPips=[]; drawHpBars();
+  gl.clearColor(0.055,0.05,0.07,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(42*Math.PI/180,VW/VH,5,900);
+  const yaw=mirror.yaw, cx=Math.sin(yaw)*150, cz=Math.cos(yaw)*150;
+  VIEW=mLookAt([cx,66,cz],[0,26,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,600,2200); gl.uniform3f(U.uFog,0.055,0.05,0.07);
+  CURM=mIdent();
+  const behind=cz<-84;   // Phase 19: orbit BEHIND the glass and the mirror goes phantom — it never blocks your view of yourself
+  // pedestal + mirror base
+  bx(0,-8,-70, 300,16,60,'#171922');
+  bx(0,-8,0, 220,16,180,'#181b24'); bx(0,2,0, 130,6,130,'#242a36'); bx(0,6,0, 100,3,100,'#2c3340');
+  const p=mirror.p; p.yaw=Math.PI;   // hero faces the camera-front consistently; the CAMERA orbits
+  drawShadow(0,0,17,0.34);
+  if(!behind){ p.z=-168; p.yaw=0; drawHero3(p,t,false); if(mirror.pet){const mp=mirror.pet,oz=mp.z,oy=mp.y,oyaw=mp.yaw;mp.z=-145;mp.y=16;mp.yaw=0;drawPet3(mp,t);mp.z=oz;mp.y=oy;mp.yaw=oyaw;} p.z=0; p.yaw=Math.PI; }   // reflected hero and companion
+  if(behind){ gl.depthMask(false);   // phantom frame from the far side — never blocks the view
+    bx(0,90,-84, 150,190,10,'#2a2f3d',null,0.07); bx(0,188,-84, 168,14,14,'#3a4152',null,0.07);
+    gl.depthMask(true);
+  } else { gl.depthMask(false);      // smoked translucent glass OVER the double = it reads as a reflection
+    bx(0,90,-84, 150,190,10,'#10141f',null,0.5);
+    bx(0,90,-79, 122,168,4,'#0f1622','#7fb0e0',0.14);
+    gl.depthMask(true);
+    bx(0,188,-84, 168,14,14,'#3a4152');
+  }
+  drawHero3(p,t,false);              // the real you, drawn last — always visible
+  if(mirror.pet) drawPet3(mirror.pet,t); // equipped companion poses just behind the hero; drawPet3 supplies its unique idle
+}
+function exitMirror(){ const b=mirror&&mirror.back; mirror=null; const pn=document.getElementById('mirrorui'); if(pn) pn.classList.add('hide');
+  const mt=document.getElementById('mirrorToggle'); if(mt) mt.style.display='none';
+  const mn=document.getElementById('mirrorNameToggle'); if(mn) mn.style.display='none';
+  const esc=document.getElementById('mirrorEsc'); if(esc) esc.style.display='none';
+  const info=document.getElementById('mirrorInfo'); if(info) info.style.display='none';
+  if(G) showGameUI(true); if(b) b(); else openHubMenu(); }
+function mirrorStatsHTML(){
+  const p=mirror.p, row=(lbl,val,accent)=>`<div class="msrow"><span>${lbl}</span><b${accent?` style="color:${accent}"`:''}>${val}</b></div>`;
+  const pct=v=>(v>=0?'+':'')+Math.round(v*100)+'%', mul=v=>'×'+(Math.round(v*100)/100);
+  const cs=classState(meta.classId);
+  let s=`<div class="mssect">Stats</div>`;
+  s+=row(statIcon('max-hp')+'Max HP', Math.round(effMaxHp(p)), '#ff8a82');
+  s+=row(statIcon('damage-power')+'Damage / Power', pct(effPower(p)-1), '#ffce6a');
+  s+=row(statIcon('magic-damage')+'Magic Damage', pct(effMagPower(p)-1), '#c47bff');
+  s+=row(statIcon('attack-speed')+'Attack Speed', mul(effAtkSpeed(p)), '#ffb060');
+  s+=row(statIcon('move-speed')+'Move Speed', mul(effSpeed(p)), '#7ec46a');
+  s+=row(statIcon('critical-chance')+'Critical Chance', Math.round(effCrit(p)*100)+'%', '#ffd24a');
+  s+=row(statIcon('lifesteal')+'Lifesteal', Math.round(effLifesteal(p)*100)+'%', '#e0607a');
+  s+=row(statIcon('defense')+'Defense', Math.round(defenseR(p)*100)+'% dmg reduced', '#8fb7ff');
+  s+=row(statIcon('dodge-cooldown')+'Dodge Cooldown', (Math.round(effDodgeCd(p)*100)/100)+'s', '#9fe0ff');
+  s+=row(statIcon('skill-cooldown-reduction')+'Skill Cooldown Reduction', effCdr(p)>0?'-'+Math.round(effCdr(p)*100)+'%':'0%', '#c9a6ff');
+  s+=row(statIcon('gold-find')+'Gold Find', mul(effGoldFind(p)), '#ffd24a');
+  // loadout
+  s+=`<div class="mssect">Loadout</div>`;
+  const w=p.weapon; s+=`<div class="msgear"><span class="msg-l">Weapon</span><span class="msg-r" style="color:${w?RARITY[w.rarity].color:'#5a6270'}">${w?w.name:'—'}</span></div>`;
+  [['helmet','Helmet'],['chest','Chest'],['legs','Legs'],['amulet','Amulet'],['ring','Ring']].forEach(([sl,lbl])=>{
+    const a=p.gear&&p.gear[sl];
+    const bonus=a?(a.affixes||[]).map(x=>x.label).join(' · '):'';
+    s+=`<div class="msgear"><span class="msg-l">${slotIcon(sl)}${lbl}</span><span class="msg-r" style="color:${a?RARITY[a.rarity].color:'#5a6270'}">${a?a.name:'— empty —'}${bonus?`<br><span class="msg-b">${bonus}</span>`:''}</span></div>`;
+  });
+  return s;
+}
+function buildMirrorPanel(){
+  const pn=document.getElementById('mirrorui'); if(!pn) return;
+  const C=curClass(), cs=classState(meta.classId), lv=(mirror.p.level)||1, nm=meta.heroName||'';
+  const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  if(mirrorPanelMode==='stats') pn.innerHTML=`<div class="mstop"><div class="msttl">${nm?escText(nm)+' · ':''}${C.icon} ${C.disp}</div><div class="mssub">Level ${lv} · Rank ${cs.rank}${cs.sub?' · '+cs.sub:''}</div></div><div class="msbody">${mirrorStatsHTML()}</div><div class="msctrl"><button class="wsbig" id="msSpin">🔄 Spin: ${mirror.spin?'On':'Off'}</button><button class="wsbig ghost" id="msClose">Close</button></div>`;
+  else if(mirrorPanelMode==='name') pn.innerHTML=`<div class="mstop"><div class="msttl">Name Your Character</div><div class="mssub">This name appears in story narration.</div></div><label class="mslabel" for="msName">Character name</label><div class="msnamebar"><input class="msname" id="msName" maxlength="20" value="${escText(nm)}" placeholder="Name your character…"><button class="wsbig" id="msNameGo">Save Name</button></div><div class="msctrl"><button class="wsbig ghost" id="msClose">Cancel</button></div>`;
+  else pn.innerHTML='';
+  pn.classList.toggle('hide',!mirrorPanelMode);
+  // Phase 19: an always-visible, CLICKABLE way out, top-left
+  let esc=document.getElementById('mirrorEsc');
+  if(!esc){ esc=document.createElement('div'); esc.id='mirrorEsc';
+    esc.style.cssText='position:absolute;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:9;background:rgba(12,13,18,.85);border:1px solid var(--amber);border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:800;color:var(--ink);cursor:pointer;box-shadow:0 0 12px rgba(232,163,61,.35)';
+    document.body.appendChild(esc); }
+  esc.innerHTML='<span style="background:#e8a33d;color:#1a1206;border-radius:4px;padding:0 6px;margin-right:6px;font-weight:900">ESC</span>Leave the mirror';
+  esc.style.display='block'; esc.onclick=()=>exitMirror();
+  let mt=document.getElementById('mirrorToggle'); if(!mt){ mt=document.createElement('button'); mt.id='mirrorToggle'; document.body.appendChild(mt); }
+  let mn=document.getElementById('mirrorNameToggle'); if(!mn){ mn=document.createElement('button'); mn.id='mirrorNameToggle'; document.body.appendChild(mn); }
+  mt.innerHTML='<i></i>Character Stats'; mn.innerHTML='<i></i>Rename Character'; mt.style.display=mn.style.display='flex';
+  mt.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='stats'?null:'stats';SFX.pickup();buildMirrorPanel();};
+  mn.onclick=()=>{mirrorPanelMode=mirrorPanelMode==='name'?null:'name';SFX.pickup();buildMirrorPanel();};
+  const close=document.getElementById('msClose'); if(close) close.onclick=()=>{mirrorPanelMode=null;buildMirrorPanel();};
+  const spin=document.getElementById('msSpin'); if(spin) spin.onclick=()=>{mirror.spin=!mirror.spin;spin.textContent='🔄 Spin: '+(mirror.spin?'On':'Off');};
+  const ni=document.getElementById('msName'); if(ni){const saveName=()=>{meta.heroName=(ni.value||'').trim().slice(0,20);persist();SFX.pickup();mirrorPanelMode=null;buildMirrorPanel();};document.getElementById('msNameGo').onclick=saveName;ni.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveName();}};}
+}
+// Phase 12: Training Arena — spawn any unlocked foe, stakes-free (no death, no rewards)
+function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-1,meta.zoneMax||0);
+  for(let i=0;i<=maxZ;i++){ const A=ZONES[i].areas[0], st=A&&STAGES[A.stage], th=st&&st.theme;
+    (THEMEMOBS[th]||[]).forEach(m=>{ if(!seen[m]&&ENEMY[m]&&!ENEMY[m].boss){ seen[m]=1; out.push(m); } }); }
+  for(let i=0;i<=maxZ;i++){ const st=STAGES[ZONES[i].boss.stage], m=st&&st.boss; if(m&&ENEMY[m]&&!seen[m]){ seen[m]=1; out.push(m); } }
+  return out; }
+function enterSparringRoom(){
+  initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{hub:true,sparringRoom:true,zone:0,area:0,zoneTier:1}); G.stageIndex=0;
+  G.segments=[{x:0,z:0,w:940,d:760}]; G.rooms=[{x:0,z:0,w:940,d:760,monsters:[],encounter:false,cleared:true}];
+  G.walls=[{x:0,z:-380,w:960,d:28,h:150},{x:0,z:380,w:960,d:28,h:150},{x:-470,z:0,w:28,d:760,h:150},{x:470,z:0,w:28,d:760,h:150}];
+  G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.portalPos=null;G.haz=null;G.gates=[];
+  // ===== THE RING: a boxing-ring arena. Practice foes stay inside the ropes and only wake once you step in. =====
+  const PIT={minX:-260,maxX:260,minZ:-260,maxZ:20}; G.pit=PIT;
+  G.deco.push({x:0,z:-120,y0:0,w:(PIT.maxX-PIT.minX)+30,h:2,d:(PIT.maxZ-PIT.minZ)+30,c:'#6c5137'});   // ring canvas
+  G.deco.push({x:0,z:-120,y0:2,w:(PIT.maxX-PIT.minX)-12,h:1,d:(PIT.maxZ-PIT.minZ)-12,c:'#8b6a46'});
+  const cor=[[PIT.minX,PIT.minZ],[PIT.maxX,PIT.minZ],[PIT.maxX,PIT.maxZ],[PIT.minX,PIT.maxZ]];
+  for(const [cx,cz] of cor){ G.deco.push({x:cx,z:cz,y0:0,w:11,h:70,d:11,c:'#2a2028'}); G.deco.push({x:cx,z:cz,y0:70,w:15,h:8,d:15,c:'#e8a33d'}); }   // corner posts + gold caps
+  for(let i=0;i<4;i++){ const a=cor[i],b=cor[(i+1)%4]; for(const ry of [26,48]){ const seg=8; for(let s=1;s<seg;s++){ const rx=a[0]+(b[0]-a[0])*s/seg, rz=a[1]+(b[1]-a[1])*s/seg; G.deco.push({x:rx,z:rz,y0:ry,w:5,h:3.4,d:5,c:'#c0392b'}); } } }   // double ropes (all collisionless deco)
+  for(const x of [-360,360]){G.obstacles.push({kind:'plat',x,z:-40,w:110,d:520,h:22});G.deco.push({x,z:-40,y0:22,w:90,h:5,d:500,c:'#3a3030'});}   // spectator ledges
+  for(const x of [-320,320])for(let k=0;k<3;k++)G.deco.push({x,z:180-k*40,y0:0,w:10,h:72,d:10,c:k%2?'#586274':'#733145'});   // weapon racks
+  for(const x of [-300,0,300])G.torches.push({x,z:-350,ph:Math.random()*6.28});
+  G.hubNpcs=[
+    {id:'sparringcontrol',ic:'⚔️',name:'Sparring Controls',role:'Choose practice foes',prop:'sparring',verb:'Choose practice foes',direct:true,x:0,z:230,open:()=>openTrainingArena(wsResume)},
+    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:0,z:335,open:()=>enterWaystation()}
+  ];
+  G.trainSpawn={x:0,z:-120};G.lastSafe={x:0,z:250};G.startPos={x:0,z:250};G.goalPos={x:0,z:-300};G.bounds={minX:-460,maxX:460,minZ:-370,maxZ:370};G.progressEnd=-330;
+  p.x=0;p.z=280;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
+  document.getElementById('stagetag').textContent='SPARRING ROOM';questUpdate();toast('Sparring Room — practice foes give no XP, gold, or loot.');
+}
+const BESTIARY_INFO={
+  grunt:{name:'Rotbound',tell:'Closes in for simple melee strikes.',lore:'A common victim of the King’s dream, with little left beyond hunger and motion.'},
+  flyer:{name:'Dreamwing',tell:'Hovers over obstacles and attacks from above.',lore:'A small airborne scavenger twisted by nightmare-soaked air.'},
+  thornboar:{name:'Thornboar',tell:'Lowers its tusks before a heavy charge.',lore:'Once ordinary meadow stock, now plated in bark and black thorns.'},
+  sporeback:{name:'Sporeback',tell:'Bursts into a poison cloud when slain.',lore:'The forest rot learned to walk by filling dead beasts with spores.'},
+  toxling:{name:'Toxling',tell:'Its attacks build Poison.',lore:'A knot of swamp poison held together by roots and spite.'},
+  slime:{name:'Slime',tell:'Slow and durable; may split into smaller slimes.',lore:'Runoff from the deep given a hungry, wobbling shape.'},
+  charger:{name:'Ravager',tell:'Pauses, lines up, then rushes straight ahead.',lore:'A rust-red beast bred by the badlands to break shield lines.'},
+  dustjackal:{name:'Dust Jackal',tell:'A fast pounce follows its brief crouch.',lore:'Canyon pack hunters that learned to follow the wind between ruined posts.'},
+  cragspitter:{name:'Crag Spitter',tell:'Lobs slow arcing rocks from long range.',lore:'A stone-fed canyon brute that grinds cliff fragments into ammunition.'},
+  galewisp:{name:'Gale Wisp',tell:'Rises before diving sharply at its target.',lore:'The last breath of travelers who never escaped Hollow Pass.'},
+  bones:{name:'Risen Bones',tell:'Fast, fragile melee attacker.',lore:'Old watchmen pulled upright when the dream rattled their graves.'},
+  revenant:{name:'Revenant',tell:'Signals a quick forward lunge.',lore:'A fallen soldier still trying to finish an order it no longer remembers.'},
+  sentinel:{name:'Sentinel',tell:'Blocks frontal attacks; strike from the side or rear.',lore:'An empty suit of keep armor animated by a duty that outlived its wearer.'},
+  caster:{name:'Hex Caster',tell:'Keeps distance and fires focused arcane bolts.',lore:'A ruined scholar whose final spell never stopped casting.'},
+  frostshell:{name:'Frostshell',tell:'Its ice shell blocks frontal hits until cracked.',lore:'A creature sealed inside old glacial armor, preserved but never resting.'},
+  frostlobber:{name:'Frost Lobber',tell:'Throws arcing shards that build Chill.',lore:'It gathers the cold that refuses to move and hurls it at anything warm.'},
+  frostling:{name:'Frostling',tell:'Its attacks build Chill.',lore:'A splinter of Frostfell’s ancient cold moving on borrowed legs.'},
+  magmaskit:{name:'Magma Skitter',tell:'Moves quickly and leaves burning ground behind it.',lore:'A furnace parasite that carries liquid fire in a cracked stone shell.'},
+  embertotem:{name:'Ember Totem',tell:'Stays still, then releases a wide fire burst.',lore:'A buried vent taught by the nightmare to recognize living prey.'},
+  emberling:{name:'Emberling',tell:'Its attacks build Burn.',lore:'A loose coal from the mountain’s heart that refuses to cool.'},
+  blinkstalker:{name:'Blink Stalker',tell:'Marks its destination before teleporting behind you.',lore:'An Abyss predator that hunts through gaps in space instead of corridors.'},
+  voidtether:{name:'Void Tether',tell:'Links to nearby allies and makes them more dangerous.',lore:'A living knot in the King’s dream, binding lesser nightmares together.'},
+  shadeling:{name:'Shadeling',tell:'Its attacks build Corruption.',lore:'A thin scrap of the Abyss King’s shadow that learned to move alone.'},
+  sunpriest:{name:'Sun Priest',tell:'Heals nearby allies while firing radiant bolts.',lore:'A palace keeper still serving a sun that has not shone here for ages.'},
+  marblestatue:{name:'Marble Statue',tell:'A slow frontal blocker with heavy strikes.',lore:'The palace carved its guards from stone; the dream supplied obedience.'},
+  siegeknight:{name:'Siege Knight',tell:'Raises its shield before a crushing overhead slam.',lore:'A Duskmoor gate-breaker condemned to defend the gate it once destroyed.'},
+  royalarcanist:{name:'Royal Arcanist',tell:'Fires spreading volleys of arcane bolts.',lore:'The court mage kept casting after the court—and then the world—went dark.'},
+  sparkling:{name:'Arc Spark',tell:'A quick flying attacker infused with Arcane power.',lore:'Loose palace magic condensed around a restless core.'},
+  brute:{name:'The Brute',tell:'Wide, heavy swings punish standing close.',lore:'It was livestock once. The nightmare made its anger larger than its body.'},
+  archer:{name:'Hollow Marksman',tell:'Keeps range and fires a three-arrow spread.',lore:'The finest watcher of Hollow Pass still holds her post, long after death.'},
+  warden:{name:'The Fallen',tell:'A fast Bladeborn boss that pressures at close range.',lore:'A former Bladeborn who descended farther than most and returned as a prison guard.'},
+  sorcerer:{name:'Frost Sorcerer',tell:'Kites away while firing a spread of freezing orbs.',lore:'A scholar who studied Frostfell until the ancient cold began studying him.'},
+  colossus:{name:'The Colossus',tell:'Slow, massive attacks and arcing elemental shots.',lore:'A mountain-sized guardian forced upright by heat, stone, and nightmare.'},
+  king:{name:'Abyss King',tell:'Relentless close pressure backed by the power of the deep.',lore:'The sleeping source of the dream that has poisoned every layer above him.'},
+  tyrant:{name:'Abyss King, Awakened',tell:'Combines crushing attacks with a five-bolt Void spread.',lore:'The King fully awake: not the dreamer beneath the world, but the dream given a body.'}
+};
+function bestiaryName(m){ const E=ENEMY[m], B=BESTIARY_INFO[m]; return (B&&B.name)||(E.label?E.label.replace(/^THE /,'The '):m.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/^./,c=>c.toUpperCase())); }
+function bestiaryPortrait(m){ const E=ENEMY[m], cls=E.boss?'boss':(E.kind==='fly'?'fly':''); return `<div class="bestportrait ${cls}" style="--mob:${E.color||'#cfd6df'}" aria-label="${bestiaryName(m)} portrait"><span class="bphead"></span><span class="bpeye l"></span><span class="bpeye r"></span></div>`; }
+function openBestiaryEntry(m,back){
+  const E=ENEMY[m], B=BESTIARY_INFO[m]||{}, el=normEl(E.element), weak=el&&WEAK[el], ranged=!!(E.ranged||E.shot||E.kind==='caster');
+  mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Bestiary Entry</p><h2 class="ovh">${bestiaryName(m)}</h2>${bestiaryPortrait(m)}
+    <p class="ovsub" style="margin-top:0">${B.lore||'A creature shaped by the spreading nightmare beneath the world.'}</p>
+    <div class="statgrid"><div class="vsrow"><span>Health</span><b>${E.hp}</b></div><div class="vsrow"><span>Damage</span><b>${E.dmg}</b></div>
+      <div class="vsrow"><span>Speed</span><b>${E.speed}</b></div><div class="vsrow"><span>Attack</span><b>${ranged?'Ranged':'Melee'}</b></div>
+      <div class="vsrow"><span>Element</span><b style="color:${elementColor(el)||'#cfd6df'}">${el?affName(el):'None'}</b></div>
+      <div class="vsrow"><span>Weak to</span><b style="color:${elementColor(weak)||'#cfd6df'}">${weak?affName(weak):'No elemental weakness'}</b></div></div>
+    <p style="text-align:left;color:#cfd6df;font-size:13px;line-height:1.55"><b style="color:var(--amber)">Watch for:</b> ${B.tell||'Watch its movement and strike after it commits.'}</p>
+    <button class="bigbtn ghost" id="bestBack">Back to Training &amp; Bestiary</button></div>`);
+  document.getElementById('bestBack').onclick=()=>openTrainingArena(back);
+}
+function openTrainingArena(back){ mode='menu';
+  const mobs=trainRoster();
+  const rows=mobs.map(m=>{ const E=ENEMY[m]; return `<div class="gearrow bestiaryrow"><div class="gi" style="color:${E.color||'#cfd6df'}">●</div>
+    <div style="flex:1"><div class="gn">${bestiaryName(m)}</div><div class="gd">${E.boss?'boss':E.kind}${E.ranged?' · ranged':''}${E.element?' · '+affName(E.element):''}</div></div>
+    <button class="bigbtn ghost" data-info="${m}" style="width:auto;margin:0 4px 0 0;padding:8px 10px;font-size:12px">Info</button>
+    <button class="bigbtn buybtn" data-trainmob="${m}" style="width:auto;margin:0;padding:8px 10px;font-size:12px"><span class="spawnword">Spawn </span>×${E.boss?1:2}</button></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Sparring Room</p><h2 class="ovh">Training &amp; Bestiary</h2>
+    <p class="ovsub">Study discovered foes or summon real fighters. Practice gives no death penalty, XP, gold, or loot.</p>
+    <div class="achlist" style="max-height:min(44vh,300px)">${rows||'<p class="hint">Clear a zone to unlock foes to spar with.</p>'}</div>
+    <button class="bigbtn ghost" id="clearBtn">Clear practice foes</button>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-info]').forEach(b=>b.onclick=()=>openBestiaryEntry(b.dataset.info,back));
+  document.querySelectorAll('[data-trainmob]').forEach(b=>b.onclick=()=>{ const m=b.dataset.trainmob, sp=G.trainSpawn||{x:300,z:60}, count=ENEMY[m].boss?1:2;
+    for(let i=0;i<count;i++){ const e=spawnEnemy(m,sp.x+(count===1?0:(i?46:-46)),sp.z); e.active=true; e.dropT=0; e.practice=true; if(G.pit){e.x=Math.max(G.pit.minX+20,Math.min(G.pit.maxX-20,e.x));e.z=Math.max(G.pit.minZ+20,Math.min(G.pit.maxZ-20,e.z));e.sx=e.x;e.sz=e.z;} } SFX.pickup(); toast('Practice foes summoned — enter the ring to spar'); openTrainingArena(back); });   // menu stays OPEN until you close it
+  document.getElementById('clearBtn').onclick=()=>{ let n=0; for(const e of G.enemies){ if(e.practice&&!e.dead){ e.dead=true; n++; } } toast(n?'Cleared '+n:'Nothing to clear'); openTrainingArena(back); };
+  document.getElementById('backBtn').onclick=back;
+}
+// what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
+function updateInteract(){
+  let it=null; const p=G.p;
+  if(G.hub && G.hubNpcs){ let bd=110; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
+    if(!it && dXZ(0,30,p.x,p.z)<72) it={x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone};
+    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
+  else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
+  G.interact=it; updateInteractPrompt();
+}
+function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
+// Phase 19: the SECRET STASH — free money, zero shame. Press E behind the Pet Yard crates.
+const STASH_LINES=[
+  '💰 +1000g — shh. The Quartermaster doesn’t audit this corner.',
+  '💰 +1000g — wealth beyond ethics. You’re getting so rich and it’s not even legal.',
+  '💰 +1000g — the economy weeps. You cheat beautifully.',
+  '💰 +1000g — “found” money. The quotation marks are doing heavy lifting.',
+  '💰 +1000g — at this point the crates are just your bank.'];
+function goldStash(){
+  meta.gold=(meta.gold||0)+1000; persist();
+  goldStash._n=((goldStash._n||0)+1)%STASH_LINES.length;
+  SFX.god(); playFx('buy'); burst(-806,30,644,'#ffd24a',22);
+  addText(G.p.x,G.p.y+80,G.p.z,'+1000g','#ffd24a',true);
+  toast(STASH_LINES[goldStash._n],'#ffd24a'); hudUpdate();
+}
+/* ---------------- THE TINKERER'S TEST BENCH (Phase 20) ----------------
+   The '???' behind the Pet Yard crates: everything you need to test the whole game without
+   grinding — free gold + XP, a vault of EVERY weapon and armor type at any rarity, unlock-all,
+   grant-all-pets, kit-me-out, full heal, and more. Hub-only; all changes bank + persist. */
+let _cheatRar='legendary';
+function cheatBank(){ if(G&&G.p){ meta.hero=snapOf(G.p); } persist(); }
+function cheatLevels(n){ const p=G.p; for(let i=0;i<n;i++){ p.xp=(p.xpNext||50)+1; gainXp(0.0001); } cheatBank(); hudUpdate(); SFX.levelup(); playFx('levelcheer'); toast('▲ +'+n+' level'+(n>1?'s':'')+' — now Level '+p.level); }
+function cheatGold(n){ meta.gold=(meta.gold||0)+n; persist(); SFX.god(); playFx('buy'); toast('💰 +'+n+'g — '+STASH_LINES[(goldStash._n=((goldStash._n||0)+1)%STASH_LINES.length)].split('— ')[1]); hudUpdate(); }
+function cheatBagRoom(){ meta.bagSlots=Math.max(meta.bagSlots||0,120); refreshBagCap(); }
+function cheatGiveWeapons(){ cheatBagRoom(); let n=0; for(const a of ARCHEIDS){ if(a==='saber'||a==='dagger') continue; meta.stash.push({weapon:makeWeapon(a,_cheatRar)}); n++; } persist(); SFX.achieve(); playFx('lootpickup'); toast('⚔ Bagged all '+n+' weapons ('+RARITY[_cheatRar].name+')'); }
+function cheatGiveArmor(){ cheatBagRoom(); let n=0; for(const t of ARMOR_TYPE_IDS){ for(const s of SLOTIDS){ meta.stash.push({armor:makeArmor(_cheatRar,s,t)}); n++; } for(const s of TRINKETIDS){ meta.stash.push({trinket:makeTrinket(_cheatRar,s,t)}); n++; } } persist(); SFX.achieve(); playFx('lootpickup'); toast('🛡 Bagged all '+n+' armor + trinket pieces ('+RARITY[_cheatRar].name+')'); }
+function cheatKitOut(){ const p=G.p; const fam=curClass().family[0]||'sword';
+  const aid=ARCHEIDS.find(a=>ARCHES[a].art===fam&&ARCHES[a].sch!=='mag')||ARCHEIDS.find(a=>ARCHES[a].art===fam)||'sword';
+  p.weapon=makeWeapon(aid,'legendary'); for(const s of GEARSLOTS) p.gear[s]=('amulet'==s||'ring'==s)?makeTrinket('legendary',s):makeArmor('legendary',s);
+  recomputeArmor(p); p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.god(); playFx('equip'); toast('✦ Kitted out — full Legendary '+curClass().disp+' loadout equipped'); }
+function cheatUnlockClasses(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; classState(c); }); persist(); SFX.achieve(); toast('⚔️ All classes unlocked — swap at the Drillmaster'); }
+function cheatAllPets(){ meta.petOwned=PETIDS.slice(); persist(); SFX.achieve(); toast('🐾 All '+PETIDS.length+' companions granted — equip at the Beastkeeper'); }
+function cheatHeal(){ const p=G.p; p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.achieve(); toast('❤️ Full heal'); }
+function cheatRankUp(){ const cs=classState(meta.classId); cs.rank=10; cs.sub=cs.sub||(curClass().subs&&curClass().subs[0]&&curClass().subs[0].id); persist(); skillbarUpdate(); SFX.levelup(); toast('★ '+curClass().disp+' rank 10 — all skills unlocked'); }
+function cheatOpenZones(){ meta.zoneMax=ZONES.length-1; persist(); SFX.achieve(); toast('🗺 Every Gate opened'); }
+function cheatEndlessBest(v){ meta.endlessBest=Math.max(meta.endlessBest||0,v); persistGlobal(); SFX.achieve(); toast('🕳️ Abyssal best set to Floor '+v); }
+function openCheatMenu(back){
+  mode='menu';
+  const p=G&&G.p, rc=RARITY[_cheatRar].color;
+  const btn=(id,label,style)=>`<button class="bigbtn ghost" id="${id}" style="width:auto;margin:0;padding:9px 12px;font-size:13px;${style||''}">${label}</button>`;
+  showOverlayHTML(`<div class="card"><p class="ovkicker" style="color:#ffd24a">🔧 The Tinkerer's Bench</p><h2 class="ovh">Test everything</h2>
+    <p class="ovsub">Your dirty little secret behind the crates. Nothing here is earned — that's the point.</p>
+    <div class="sect">Gold &amp; levels · <b style="color:#ffd24a">${meta.gold}g</b> · Lv ${p?p.level:1}</div>
+    <div class="pgrid">${btn('cGold1','💰 +1,000g')}${btn('cGold10','💰 +10,000g')}${btn('cLv1','▲ +1 Level')}${btn('cLv5','▲ +5 Levels')}${btn('cLv10','▲ +10 Levels')}${btn('cRank','★ Rank 10')}</div>
+    <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
+    <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
+    <div class="sect">Unlocks &amp; conveniences</div>
+    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
+    <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
+  const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
+  wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
+  wire('cLv1',()=>{cheatLevels(1);openCheatMenu(back);}); wire('cLv5',()=>{cheatLevels(5);openCheatMenu(back);}); wire('cLv10',()=>{cheatLevels(10);openCheatMenu(back);});
+  wire('cRank',()=>{cheatRankUp();openCheatMenu(back);});
+  wire('cRar',()=>{ _cheatRar=RORDER[(RORDER.indexOf(_cheatRar)+1)%RORDER.length]; openCheatMenu(back); });
+  wire('cWeap',()=>{cheatGiveWeapons();openCheatMenu(back);}); wire('cArmor',()=>{cheatGiveArmor();openCheatMenu(back);}); wire('cKit',()=>{cheatKitOut();openCheatMenu(back);});
+  wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
+  wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
+  wire('cBack',()=>{ if(back) back(); else wsResume(); });
+}
+function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');
+  const it=(G&&G.interact&&mode==='play')?G.interact:null;
+  if(!it){ if(pr) pr.classList.add('hide'); if(btn) btn.classList.add('hide'); return; }
+  if(btn) btn.classList.remove('hide');
+  if(pr){ const sp=project(it.x,it.y||40,it.z); if(sp){ pr.classList.remove('hide'); pr.style.left=(sp[0]/DPR)+'px'; pr.style.top=(sp[1]/DPR-8)+'px'; pr.innerHTML='<span class="k">E</span>'+it.label; } else pr.classList.add('hide'); } }
+function wsResume(){
+  if(G&&G.hub){
+    if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+    mode='play'; showOverlay(false); hudUpdate(); regrabCam();  // re-sync: bag/shop changes made at a post appear in hand immediately
+  } else openHub();
+}
+function activateHubWaystone(){
+  if(!G||!G.hub) return;
+  const p=G.p; p.hp=effMaxHp(p); meta.hero=snapOf(p); persist();
+  SFX.achieve(); burst(0,76,30,'#ffd24a',18); hudUpdate(); openHubMenu();
+}
+function hubInteract(p,dt){
+  for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z);
+    if(d<40){ if(g._c) continue; g._c=true;
+      if(!g.open){ toast('🔒 '+g.name+' — clear '+(ZONES[g.zi-1]?ZONES[g.zi-1].name:'the road')+' first'); SFX.hurt(); }
+      else if(g.side){ enterSide(g.zi); return; }
+      else { enterZone(g.zi); return; } }
+    else if(d>72) g._c=false; }
+  // keepers are no longer auto-opened on touch — walk up and press E / TALK (see updateInteract)
+  // The central Waystone is handled by updateInteract/doInteract, never by proximity alone.
+}
+function hubNpcFacing(n,x,z){
+  const hx=n.faceX==null?0:n.faceX, hz=n.faceZ==null?120:n.faceZ;
+  let target=Math.atan2(hx-x,hz-z);
+  if(G&&G.p&&dXZ(x,z,G.p.x,G.p.z)<175) target=Math.atan2(G.p.x-x,G.p.z-z);
+  if(!Number.isFinite(n._yaw)) n._yaw=target;
+  const delta=Math.atan2(Math.sin(target-n._yaw),Math.cos(target-n._yaw));
+  n._yaw+=delta*0.11;
+  return n._yaw;
+}
+function openHubMenu(){
+  mode='menu'; musicPlay('hub');
+  document.getElementById('questbox').classList.add('hide');
+  const hero=meta.hero, C=CLASSES[meta.classId]||CLASSES.warrior, cs=classState(meta.classId);
+  const mainRows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    const desc=`${open?Z.blurb:'Clear '+ZONES[i-1].name+' to open'}<br><span class="navmeta">Level ${i+1}</span>${done?' <span class="navdone">✓ CLEARED</span>':''}`;
+    return navCard('',`icons/destinations/${Z.id}.png`,open?Z.name:'Locked',desc,`destcard ${open?'':'lock'}`,open?`data-z="${i}"`:'disabled'); }).join('');
+  const chamberRows=ZONES.map((Z,i)=>{ if(!Z.side||!meta.sideFound[Z.side.id]) return ''; const sd=!!meta.sideDone[Z.side.id];
+    return navCard('',`icons/destinations/${Z.side.id}.png`,Z.side.name,`${Z.side.blurb}<br><span class="navmeta">Trial Chamber</span>${sd?' <span class="navdone">✓ CLEARED</span>':''}`,'destcard side',`data-s="${i}"`); }).join('');  showOverlayHTML(`<div class="card"><p class="ovkicker">The Waystone</p><h2 class="ovh">The Waystation</h2>
+    <p class="ovsub">${curDiff().icon} ${curDiff().name} · ${C.icon} ${C.disp} rank ${cs.rank}${cs.sub?' · '+cs.sub:''} · Level ${hero?hero.level:1} · <b style="color:#ffd24a">${meta.gold}g</b></p>
+    <p class="hint" style="margin:0 0 8px">${isPermadeath()?'<b style="color:var(--danger)">⚠ '+curDiff().name+': death erases this save entirely.</b>':'Your progress is safe here. Anything you find in a zone only banks when you clear it.'}</p>
+    <div class="sect">Main Levels</div><div class="destgrid">${mainRows}</div>
+    <div class="sect">Trial Chambers</div><div class="destgrid trialgrid">${chamberRows||'<p class="hint">Discover Trial Chambers while exploring the Main Levels.</p>'}</div>
+    <p class="hint" style="margin:8px 0 2px;opacity:.7">Walk up to a keeper in the Waystation to shop, forge, train, and more.</p>
+    <button class="bigbtn" id="riseBtn">Exit</button>
+    <button class="bigbtn ghost" id="credBtn2">Credits</button>
+    <button class="bigbtn ghost" id="titleBtn">Title Screen</button></div>`);
+  document.getElementById('riseBtn').onclick=wsResume;
+  document.querySelectorAll('.destcard[data-z]').forEach(r=>r.onclick=()=>{ initAudio(); enterZone(+r.dataset.z); });
+  document.querySelectorAll('.destcard[data-s]').forEach(r=>r.onclick=()=>{ initAudio(); enterSide(+r.dataset.s); });
+  document.getElementById('credBtn2').onclick=()=>openCredits(openHubMenu);
+  document.getElementById('titleBtn').onclick=()=>{ persist(); titleScreen(); };
+}
+function openClassPicker(){
+  mode='menu'; showGameUI(false); _offerT=Date.now();
+  const cards=STARTERS.map(cid=>{ const C=CLASSES[cid];
+    return `<button class="choice" data-c="${cid}"><div class="cname"><span>${C.icon}</span>${C.disp}</div>
+      <div class="cdesc">${C.family.join(', ')}<br>${C.skills.map(s=>s.n).join(' · ')}</div></button>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:36px">BLADEFALL</h2>
+    <p class="ovsub">Choose how you fight. Its trial teaches you the rest.<br><span style="opacity:.6">You can unlock the others later — and more besides.</span></p>
+    <div class="choices">${cards}</div></div>`);
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.c); });
+}
+// NEW GAME -> character creation: name, class, and appearance (eye colour, hair style + colour), then the class trial
+function openCharCreate(){
+  mode='menu'; showGameUI(false); _offerT=Date.now();
+  const EYES=['#8fd0ff','#5affc8','#ffd24a','#ff7a3a','#c47bff','#e8e8e8','#ff4a8a','#4be08a'];
+  const HAIRS=[['short','Short'],['long','Long'],['topknot','Top-knot'],['mohawk','Mohawk'],['bald','Bald']];
+  const HCOLS=['#3a2a1c','#141010','#6b4a2c','#c8a24a','#dcd6c8','#b0402c','#3a4048','#7a5cff'];
+  const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff',hair:meta.hairStyle||'short',hcol:meta.hairColor||'#3a2a1c'};
+  function render(){
+    const classCards=STARTERS.map(cid=>{ const C=CLASSES[cid],on=st.cls===cid;
+      return `<button class="ccpick ${on?'on':''}" data-cls="${cid}"><b>${C.icon} ${C.disp}</b><span>${C.family.join(' · ')}</span></button>`; }).join('');
+    const eyeSw=EYES.map(c=>`<button class="ccsw ${st.eye===c?'on':''}" data-eye="${c}" style="background:${c}"></button>`).join('');
+    const hairPills=HAIRS.map(h=>`<button class="ccpill ${st.hair===h[0]?'on':''}" data-hair="${h[0]}">${h[1]}</button>`).join('');
+    const hcolSw=HCOLS.map(c=>`<button class="ccsw ${st.hcol===c?'on':''}" data-hcol="${c}" style="background:${c}"></button>`).join('');
+    showOverlayHTML(`<style>
+      .cc .cclbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin:12px 0 5px}
+      .cc .ccrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+      .ccname input{width:100%;padding:11px 14px;font-size:16px;text-align:center;background:rgba(10,9,14,.7);border:1px solid #3d3123;border-radius:10px;color:#ffe6ad;letter-spacing:.06em}
+      .ccname input:focus{outline:none;border-color:var(--amber)}
+      .ccpick{flex:1;min-width:96px;display:flex;flex-direction:column;gap:2px;align-items:center;padding:9px 8px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:11px;cursor:pointer;color:#e7dbc2}
+      .ccpick b{font-size:14px}.ccpick span{font-size:10px;opacity:.6}
+      .ccpick.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad;box-shadow:0 0 16px rgba(232,163,61,.2)}
+      .ccsw{width:30px;height:30px;border-radius:8px;border:2px solid #2a2a34;cursor:pointer;padding:0}.ccsw.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.4)}
+      .ccpill{padding:8px 13px;background:rgba(28,22,16,.7);border:1px solid #3d3123;border-radius:9px;cursor:pointer;color:#e7dbc2;font-size:13px}
+      .ccpill.on{border-color:var(--amber);background:rgba(60,43,22,.85);color:#ffe6ad}
+      .ccprev{width:88px;height:88px;margin:2px auto 0;border-radius:14px;background:linear-gradient(160deg,#2a2230,#141018);border:1px solid #3a3f52;position:relative;overflow:hidden}
+      .cphair{position:absolute;left:14px;right:14px;top:12px;height:${st.hair==='bald'?'0':'20px'};border-radius:10px 10px 4px 4px}
+      .cpface{position:absolute;left:20px;right:20px;top:30px;bottom:14px;background:#caa27e;border-radius:8px;display:flex;gap:9px;align-items:center;justify-content:center}
+      .cpeye{width:9px;height:9px;border-radius:50%;box-shadow:0 0 6px currentColor}
+    </style>
+    <div class="card cc"><p class="ovkicker">New Warden</p><h2 class="ovh">Create Your Warden</h2>
+      <div class="ccprev"><div class="cphair" style="background:${st.hcol}"></div><div class="cpface"><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span><span class="cpeye" style="background:${st.eye};color:${st.eye}"></span></div></div>
+      <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="20" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
+      <div class="cclbl">Class</div><div class="ccrow">${classCards}</div>
+      <div class="cclbl">Eye Colour</div><div class="ccrow">${eyeSw}</div>
+      <div class="cclbl">Hair</div><div class="ccrow">${hairPills}</div>
+      <div class="cclbl">Hair Colour</div><div class="ccrow">${hcolSw}</div>
+      <button class="bigbtn" id="ccBegin" style="margin-top:15px">⚔ Begin Your Legend</button>
+      <button class="bigbtn ghost" id="ccBack">Back</button></div>`);
+    const ni=document.getElementById('ccName'); if(ni) ni.oninput=()=>{ st.name=ni.value; };
+    document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ st.cls=b.dataset.cls; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{ st.eye=b.dataset.eye; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-hair]').forEach(b=>b.onclick=()=>{ st.hair=b.dataset.hair; try{SFX.pickup();}catch(e){} render(); });
+    document.querySelectorAll('[data-hcol]').forEach(b=>b.onclick=()=>{ st.hcol=b.dataset.hcol; try{SFX.pickup();}catch(e){} render(); });
+    document.getElementById('ccBack').onclick=titleScreen;
+    document.getElementById('ccBegin').onclick=()=>{ try{initAudio();}catch(e){}
+      meta.heroName=(st.name||'').trim().slice(0,20)||'Warden';
+      meta.eyeColor=st.eye; meta.hairStyle=st.hair; meta.hairColor=st.hcol; persist();
+      try{SFX.classup();}catch(e){} startTrial(st.cls); };
+  }
+  render();
+}
+/* Classes & Skills viewer — see every class, its rank, path, and skill tree with
+   unlock state + full descriptions. Read-only (equip/respec live at the hub trainer). */
+function openClassesLegacy(back){
+  mode='menu';
+  const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
+  const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
+  const C=CLASSES[view], cs=classState(view), un=!!meta.classUnlocked[view];
+  const tabRow=tabs.map(c=>{ const on=c===view;
+    return `<button class="ctab ${on?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`; }).join('')
+    + CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(c=>`<button class="ctab lock" disabled>🔒</button>`).join('');
+  const chosen=cs.sub&&C.subs.find(s=>s.id===cs.sub);
+  const subLine=chosen?('Path: '+chosen.disp):(cs.rank>=2?'<span style="color:var(--amber)">choose a path at the trainer</span>':'path chosen at rank 2');
+  const S=curSkills(view);   // effective kit for this class' current path (path-A default if unchosen)
+  // the tree: skill 1 shared, then the rank-2 FORK, then the path-specific 2/3/4 (later ones hidden until earned)
+  const nodes=[];
+  const sk0=C.skills[0], open0=cs.rank>=1;
+  nodes.push(`<div class="snode open"><div class="sic">${sk0.icon}</div>
+    <div class="sbody"><div class="stitle">${sk0.n} <span class="srank">Rank 1 ✓ · shared</span></div>
+      <div class="sdesc">${sk0.d} · <span style="opacity:.7">${skillManaCost(0,sk0)} mana · key 1</span></div></div></div>`);
+  // the fork node
+  const forked=cs.rank>=2;
+  nodes.push(`<div class="sfork ${chosen?'open':(forked?'open':'shut')}"><div class="sic">⑂</div>
+    <div class="sbody"><div class="stitle">Choose your path <span class="srank">Rank 2${chosen?' ✓':(forked?' — pick now!':'')}</span></div>
+    <div class="sdesc">${C.subs.map(s=>{ const me=cs.sub===s.id; const next=s.skills?s.skills[0]:C.skills[1];
+      return '<b'+(me?' style="color:var(--amber)"':'')+'>'+s.disp+'</b>'+(me?' (chosen)':'')+' — unlocks '+(next?next.n:'?')+'. This choice decides your skills 2-4.'; }).join('<br>')}</div></div></div>`);
+  // the path-specific skills 2-4: unlocked shown fully, the NEXT one previewed, later ones HIDDEN
+  if(chosen){
+    for(let i=1;i<=3;i++){ const sk=S[i]; if(!sk) continue;
+      const unlocked=cs.rank>=sk.rank;
+      const isNext=!unlocked && S.slice(1,i).every(s2=>cs.rank>=s2.rank);   // the immediate next unlock
+      if(unlocked) nodes.push(`<div class="snode open"><div class="sic">${sk.icon}</div>
+        <div class="sbody"><div class="stitle">${sk.n} <span class="srank">Rank ${sk.rank} ✓</span></div>
+          <div class="sdesc">${sk.d} · <span style="opacity:.7">${sk.cd}s cooldown · ${skillManaCost(i,sk)} mana · key ${i+1}</span></div></div></div>`);
+      else if(isNext) nodes.push(`<div class="snode shut" style="opacity:.75"><div class="sic">🔜</div>
+        <div class="sbody"><div class="stitle">${sk.n} <span class="srank" style="color:#8b93a8">next · Rank ${sk.rank}</span></div>
+          <div class="sdesc">${sk.d}</div></div></div>`);
+      else nodes.push(`<div class="snode shut"><div class="sic">❔</div>
+        <div class="sbody"><div class="stitle">??? <span class="srank" style="color:#8b93a8">Rank ${sk.rank}</span></div>
+          <div class="sdesc" style="opacity:.6">A hidden ${chosen.disp} skill — revealed when you reach rank ${sk.rank}.</div></div></div>`);
+    }
+  } else {
+    nodes.push(`<div class="snode shut"><div class="sic">🔒</div><div class="sbody"><div class="stitle">Skills 2-4</div>
+      <div class="sdesc" style="opacity:.7">Locked until you choose a path at rank 2. Each path is a completely different kit.</div></div></div>`);
+  }
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Classes &amp; Skills</p>
+    <h2 class="ovh">${C.icon} ${C.disp}</h2>
+    <p class="ovsub">${un?('Rank '+cs.rank+'/10 · '+subLine):(C.earned?'Locked — earn it in a hidden trial':'Locked — play its starter trial')}</p>
+    <div class="ctabs">${tabRow}</div>
+    <div class="achlist solo" style="max-height:min(50vh,400px)">${nodes.join('<div class="sconn"></div>')}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+/* Pause-menu build showcase. It shares the Drillmaster's visual language, but
+   every build node is inert: this screen can never mutate a class. */
+function openClasses(back){
+  mode='menu'; showGameUI(false);
+  const tabs=CLASSIDS.filter(c=>meta.classUnlocked[c]||c===meta.classId);
+  const view=openClasses._sel&&tabs.includes(openClasses._sel)?openClasses._sel:meta.classId;
+  const C=CLASSES[view], cs=classState(view), def=c2def(view);
+  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[view]||'#c98cff';
+  const tabRow=tabs.map(c=>`<button class="ctab ${c===view?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`).join('')
+    +CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(()=>`<button class="ctab lock" disabled>🔒<span>Locked</span></button>`).join('');
+  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
+  const choiceState=(picked,id,reached)=>!reached?'future':!picked?'pending':picked===id?'sel':'rejected';
+  const stateText=s=>({sel:'Chosen',rejected:'Not chosen',pending:'Choice pending',future:'Future rank'}[s]);
+  const option=(o,metaLine,picked,reached,kind,rank)=>{ if(!reached) return `<div class="buildopt viewer future"><span class="pickstate">Future rank</span><span class="boicon">🔒</span><div class="boname">Locked ${kind}</div><span class="borole">Unlocks at Rank ${rank}</span><div class="bodesc">Reach this rank to reveal its choices.</div></div>`; const st=choiceState(picked,o.id,reached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${metaLine}</span><div class="bodesc">${o.d}</div></div>`; };
+  let tree='';
+  if(def){
+    tree=`<div class="buildroot"><div class="bticon">${passiveIcon(C2_INNATE_ICON[view])}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE · ACTIVE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
+    tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, picked=(cs.ch||{})[rank], isSkill=R.kind==='skill';
+      const line=o=>(isSkill?`Skill ${R.slot+1} · ${o.cd}s · ${skillManaCost(R.slot,o)} mana`:'Passive')+` · ${o.role||'Build'}`;
+      const kind=isSkill?'Skill':'Passive'; return `<div class="buildrank ${reached?'reached':''}">${option(R.a,line(R.a),picked,reached,kind,rank)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${option(R.b,line(R.b),picked,reached,kind,rank)}</div><div class="buildspine"></div>`; }).join('');
+    tree+=cs.rank>=10?`<div class="buildcap"><div class="bticon">${passiveIcon(C2_CAP_ICON[view])}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE · ACTIVE</span></div><div class="sdesc">${def.cap.d}</div></div>`:`<div class="buildcap locked"><div class="bticon">🔒</div><div class="stitle">Locked Capstone <span class="srank">UNLOCKS AT RANK 10</span></div><div class="sdesc">Reach rank 10 to reveal this capstone.</div></div>`;
+  }else{
+    const root=C.skills[0], pA=C.subs[0], pB=C.subs[1], skA=(pA&&pA.skills)||C.skills.slice(1,4), skB=(pB&&pB.skills)||C.skills.slice(1,4);
+    tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL · ACTIVE</span></div><div class="sdesc">${root.d} · ${skillManaCost(0,root)} mana</div></div><div class="buildspine"></div>`;
+    const pathReached=cs.rank>=2, pathPicked=cs.sub;
+    const pathOpt=p=>{ const st=choiceState(pathPicked,p.id,pathReached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${passiveIcon(p.id)}</span><div class="boname">${p.disp}</div><span class="borole">Core passive · Discipline</span><div class="bodesc">${p.blurb}</div></div>`; };
+    tree+=`<div class="buildrank ${pathReached?'reached':''}">${pathOpt(pA)}<div class="rankorb"><span>PATH</span><b>2</b></div>${pathOpt(pB)}</div><div class="buildspine"></div>`;
+    for(let i=0;i<3;i++){ const a=skA[i],b=skB[i],rank=(a&&a.rank)||(b&&b.rank)||[2,4,7][i],reached=cs.rank>=rank,picked=(cs.mix&&cs.mix[i+1])||cs.sub;
+      const opt=(o,p)=>{ if(!o) return '<div></div>'; const st=choiceState(picked,p.id,reached); return `<div class="buildopt viewer ${st}"><span class="pickstate">${stateText(st)}</span><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s · ${skillManaCost(i+1,o)} mana · ${p.disp}</span><div class="bodesc">${o.d}</div></div>`; };
+      tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(b,pB)}</div><div class="buildspine"></div>`; }
+    tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">Your chosen discipline's defining passive reaches its final strength.</div></div>`;
+  }
+  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · Chosen skills and passives are highlighted. Changes are made only with the Drillmaster.</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="viewerfoot"><button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
+  document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+function openRespecTree(cid,back){
+  const C=CLASSES[cid], cs=classState(cid), def=c2def(cid), UNIT_COST=300;
+  if(!C||!meta.classUnlocked[cid]){ back(); return; }
+  mode='menu'; showGameUI(false);
+  const _baseSub=cs.sub||(C.subs&&C.subs[0]&&C.subs[0].id);
+  let staged=def?Object.assign({},cs.ch||{}):{1:(cs.mix&&cs.mix[1])||_baseSub,2:(cs.mix&&cs.mix[2])||_baseSub,3:(cs.mix&&cs.mix[3])||_baseSub};
+  const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[cid]||'#c98cff';
+  const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
+  function render(){
+    const changeCount=def?CLASS2_CHOICE_RANKS.filter(r=>(staged[r]||null)!==((cs.ch||{})[r]||null)).length:[1,2,3].filter(i=>(staged[i]||null)!==(((cs.mix&&cs.mix[i])||cs.sub)||null)).length;
+    const changed=changeCount>0, cost=changeCount*UNIT_COST;
+    let tree='';
+    if(def){
+      tree=`<div class="buildroot"><div class="bticon">${passiveIcon(C2_INNATE_ICON[cid])}</div><div class="stitle">${def.innate.name} <span class="srank">RANK 1 · INNATE</span></div><div class="sdesc">${def.innate.d}</div></div><div class="buildspine"></div>`;
+      tree+=CLASS2_CHOICE_RANKS.map(rank=>{ const R=def['r'+rank], reached=cs.rank>=rank, isSkill=R.kind==='skill';
+        const opt=o=>!reached?`<button class="buildopt future" disabled><span class="boicon">🔒</span><div class="boname">Locked ${isSkill?'Skill':'Passive'}</div><span class="borole">Unlocks at Rank ${rank}</span><div class="bodesc">Reach this rank to reveal its choices.</div></button>`:`<button class="buildopt ${staged[rank]===o.id?'sel':''}" data-rank="${rank}" data-pick="${o.id}"><span class="boicon">${iconOf(o)}</span><div class="boname">${o.n}</div><span class="borole">${isSkill?'Skill '+(R.slot+1)+' · '+o.cd+'s · '+skillManaCost(R.slot,o)+' mana':'Passive'} · ${o.role||'Build'}</span><div class="bodesc">${o.d}</div></button>`;
+        return `<div class="buildrank ${reached?'reached':''}">${opt(R.a)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(R.b)}</div><div class="buildspine"></div>`; }).join('');
+      tree+=cs.rank>=10?`<div class="buildcap"><div class="bticon">${passiveIcon(C2_CAP_ICON[cid])}</div><div class="stitle">${def.cap.name} <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">${def.cap.d}</div></div>`:`<div class="buildcap locked"><div class="bticon">🔒</div><div class="stitle">Locked Capstone <span class="srank">UNLOCKS AT RANK 10</span></div><div class="sdesc">Reach rank 10 to reveal this capstone.</div></div>`;
+    }else{
+      const root=C.skills[0], pA=C.subs[0], pB=C.subs[1];
+      const skA=(pA&&pA.skills)||C.skills.slice(1,4), skB=(pB&&pB.skills)||C.skills.slice(1,4);
+      tree=`<div class="buildroot"><div class="bticon">${root.icon}</div><div class="stitle">${root.n} <span class="srank">RANK 1 · SHARED SKILL</span></div><div class="sdesc">${root.d} · ${skillManaCost(0,root)} mana</div></div><div class="buildspine"></div>`;
+      // one row per skill SLOT — pick either discipline's ability for that slot, fully mix-and-match (e.g. Guardian skill 2 + Berserker skill 3)
+      for(let i=0;i<3;i++){ const a=skA[i], b=skB[i], rank=(a&&a.rank)||(b&&b.rank)||[2,4,7][i], reached=cs.rank>=rank;
+        const opt=(o,pid,disp)=>o?`<button class="buildopt ${staged[i+1]===pid?'sel':''}" data-mixslot="${i+1}" data-mixpath="${pid}" ${reached?'':'disabled'}><span class="boicon">${o.icon||'✦'}</span><div class="boname">${o.n}</div><span class="borole">Skill ${i+2} · ${o.cd}s cd · ${skillManaCost(i+1,o)} mana · ${disp}</span><div class="bodesc">${o.d}</div></button>`:'';
+        tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA.id,pA.disp)}<div class="rankorb"><span>SKILL</span><b>${i+2}</b></div>${opt(b,pB.id,pB.disp)}</div><div class="buildspine"></div>`; }
+      tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE</span></div><div class="sdesc">Your build's defining passives reach their final strength.</div></div>`;
+    }
+    showOverlayHTML(`<div class="card buildtree" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">The Drillmaster · Reforge Your Discipline</p><h2 class="ovh">${C.icon} ${C.disp} Skill Tree</h2><p class="ovsub">Each changed skill or passive costs <b>300g</b>. Nothing changes until you confirm.</p><div class="buildlegend"><span class="owned"><i></i>available at rank ${cs.rank}</span><span><i></i>alternate choice</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="buildfoot"><button class="bigbtn ghost" id="treeBack">Back to Trainer</button><button class="bigbtn" id="treeConfirm" ${(!changed||meta.gold<cost)?'disabled style="opacity:.45;cursor:default"':''}>${actionIcon('respec')}Confirm ${changeCount} Change${changeCount===1?'':'s'} · ${cost}g</button></div><p class="buildcost">You have <b>${meta.gold}g</b> · ${changed?`${changeCount} changed node${changeCount===1?'':'s'} × 300g.`:'Reviewing and leaving costs nothing.'}</p></div>`);
+    document.querySelectorAll('[data-rank]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.rank]=b.dataset.pick; SFX.pickup(); render(); });
+    document.querySelectorAll('[data-mixslot]').forEach(b=>b.onclick=()=>{ staged[+b.dataset.mixslot]=b.dataset.mixpath; SFX.pickup(); render(); });
+    document.getElementById('treeBack').onclick=back;
+    const confirm=document.getElementById('treeConfirm');
+    confirm.onclick=()=>{ if(!changed||meta.gold<cost) return; meta.gold-=cost;
+      if(def) cs.ch=Object.assign({},staged); else { cs.mix=Object.assign({},staged); if(!cs.sub) cs.sub=staged[1]; }
+      persist(); if(cid===meta.classId) skillbarUpdate(); SFX.levelup(); toast(C.disp+' build reforged'); back(); };
+  }
+  render();
+}
+function openTrainer(back){
+  mode='menu';
+  const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
+  const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe'};
+  const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
+    const sub=cs.sub?C.subs.find(s=>s.id===cs.sub):null;
+    const acc=ACC[cid]||'#c9a86a';
+    const path=un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(c2def(cid)?' · '+Object.keys(cs.ch||{}).length+' choices set':(cs.rank>=2?' · Choose a path':'')))):'';
+    const hint=un?'':(C.earned?'Win the Trial of the Reaper, hidden in a secret of The Abyss':'Clear its Trial to unlock');
+    const fams=C.family.map(f=>`<span class="ccfam">${FAM[f]||f}</span>`).join('');
+    const btns=un
+      ? `${sel?'':`<button class="bigbtn ccbtn" data-eq="${cid}">Equip</button>`}${cs.rank>=2&&(sub||c2def(cid))?`<button class="bigbtn ghost ccbtn" data-re="${cid}">Respec</button>`:''}`
+      : `${!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn ccbtn" data-tr="${cid}">Begin Trial</button>`:'<span class="cclockhint">Locked</span>'}`;
+    return `<div class="classcard${un?'':' cclocked'}${sel?' ccequipped':''}" style="--acc:${acc}">
+      <div class="cchead"><span class="ccicon">${un?C.icon:'🔒'}</span>
+        <div class="ccname">${C.disp}${sel?'<span class="ccbadge">Equipped</span>':''}</div></div>
+      <div class="ccrank">${un?path:hint}</div>
+      <div class="ccfams">${fams}</div>
+      <div class="ccbtns">${btns}</div>
+    </div>`; }).join('');
+  showOverlayHTML(`<div class="card trainercard"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
+    <p class="ovsub">Switch freely here. Never mid-zone.</p>
+    <div class="trainergrid">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
+  document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
+  document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>openRespecTree(b.dataset.re,()=>openTrainer(back)));
+  document.getElementById('backBtn').onclick=back;
+}
+function openCredits(back){
+  // CC-BY obligation: this screen is why we're allowed to use the music. Do not remove it.
+  mode='menu';
+  const blocks=MUSCREDITS.map(c=>`<div class="gearrow" style="align-items:flex-start">
+      <div class="gi">🎵</div>
+      <div style="flex:1;min-width:0">
+        <div class="gn">${c.who}</div>
+        <div class="gd"><a href="https://${c.url}" target="_blank" rel="noopener" style="color:var(--amber)">${c.url}</a>
+          · <a href="${c.licUrl}" target="_blank" rel="noopener" style="color:var(--muted)">${c.lic}</a></div>
+        <div class="gd" style="margin-top:4px;line-height:1.7">${c.tracks.map(t=>'“'+t+'”').join(' · ')}</div></div></div>`).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">Made with thanks</p><h2 class="ovh">Credits</h2>
+    <p class="ovsub">BLADEFALL 3D v${VERSION3D}</p>
+    <p class="hint" style="text-align:left;margin:0 0 8px"><b>Music</b> — licensed under Creative Commons Attribution. Used with thanks.</p>
+    <div class="achlist" style="max-height:min(50vh,360px)">${blocks}</div>
+    <p class="hint" style="text-align:left;margin-top:10px"><b>Game</b> — built by Oliver Lynch with Claude.<br>Story premise inspired by Isaac's BLADEFALL 2D.</p>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
+}
+function openWardrobe(back){
+  mode='menu'; checkCosmetics();
+  const secs=COSSLOTS.map(s=>{
+    const tiles=COSMETICS[s.k].map(c=>{ const un=c.has(), sel=meta.cosEquipped[s.k]===c.id;
+      return `<div class="cosrow ${un?'':'coslock'} ${sel?'cossel':''}" style="--cos:${c.col}" ${un?`data-k="${s.k}" data-i="${c.id}"`:''}>
+        <img class="cosart" src="icons/cosmetics/${s.k}-${c.id}.png" alt="${un?c.name:'Locked cosmetic'}">
+        <div style="min-width:0"><div class="gn">${un?c.name:'🔒 Hidden Reward'}</div>
+          <div class="gd">${c.hint}</div><span class="cosstate">${un?(sel?'Equipped':'Wear'):'Locked'}</span></div></div>`; }).join('');
+    const cur=cosEquipped(s.k);
+    const slotCol=s.k==='cape'?'#e8a33d':s.k==='trail'?'#64d9ff':'#c47bff';
+    return `<section class="cossection" style="--slot:${slotCol}"><div class="cossection-head"><span class="cossection-title">${s.label}</span><span class="cossection-current">Equipped: <b>${cur?cur.name:'None'}</b>${cur?`<span class="cosoff" data-off="${s.k}">Remove</span>`:''}</span></div><div class="cosgrid">${tiles}</div></section>`; }).join('');
+  const owned=Object.keys(meta.cosmetics||{}).length, total=COSSLOTS.reduce((a,s)=>a+COSMETICS[s.k].length,0);
+  showOverlayHTML(`<div class="card wardrobe-card"><p class="ovkicker">The Keeper · ${owned}/${total} Discovered</p><h2 class="ovh">Wardrobe</h2>
+    <p class="ovsub">Wear the victories you earned. Cosmetics change your legend—not your stats.</p>
+    <div class="wardrobe-body">${secs}</div>
+    <div class="wardrobe-actions"><button class="bigbtn ghost" id="skinBtn2">Skins</button><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
+  document.querySelectorAll('.cosrow[data-k]').forEach(r=>r.onclick=()=>{
+    const k=r.dataset.k; meta.cosEquipped[k]=(meta.cosEquipped[k]===r.dataset.i)?null:r.dataset.i;
+    persistGlobal(); SFX.pickup(); openWardrobe(back); });
+  document.querySelectorAll('.cosoff').forEach(b=>b.onclick=e=>{ e.stopPropagation(); meta.cosEquipped[b.dataset.off]=null; persistGlobal(); openWardrobe(back); });
+  document.getElementById('skinBtn2').onclick=()=>openSkins(()=>openWardrobe(back));
+  document.getElementById('backBtn').onclick=back;
+}
+function openQuestBoard(back){
+  mode='menu';
+  const rows=ZONES.map((Z,i)=>{ const open=i<=(meta.zoneMax||0), done=!!meta.zoneDone[Z.id];
+    const qs=[].concat(...Z.areas.map(a=>a.quests));
+    const list=qs.length?qs.map(q=>`<div class="qbq">☐ ${q.d}</div>`).join(''):'<div class="qbq" style="opacity:.6">No quests — just the fight.</div>';
+    return `<div class="gearrow" style="align-items:flex-start;${open?'':'opacity:.4'}">
+      <div class="gi">${open?Z.icon:'🔒'}</div>
+      <div style="flex:1;min-width:0"><div class="gn">${Z.name} ${done?'<span style="color:var(--good);font-size:10px">✓ cleared</span>':''}</div>
+        ${open?list:'<div class="gd">Locked</div>'}
+        <div class="gd" style="margin-top:3px">Final: slay <b>${Z.boss.name}</b></div></div></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Postings</p><h2 class="ovh">Quest Board</h2>
+    <p class="ovsub">Complete a zone's main quests to open its boss room.</p>
+    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
+}
+/* ---------------- The Beastkeeper: buy / sell / train / equip / name your pet ----------------
+   Hub-only (it's a hub NPC), so a pet can never be swapped mid-run. */
+const PET_ARCH_TAG={attacker:'⚔ Attacker',healer:'✚ Healer',utility:'💰 Utility'};
+function petIcon(id){ return 'icons/pets/pet-'+id+'.png'; }
+function petStatLine(id){ const P=PETS[id], lv=petTrainLvl(id), tag=lv>0?` · trained ${lv}/${PET_TRAIN_MAX}`:'';
+  if(P.arch==='attacker') return `${PET_ARCH_TAG.attacker} · ${petMaxHp(id)} HP · ${petAtkDmg(id)} dmg / ${P.cd}s · ${P.style==='ranged'?'ranged':'melee'}${tag}`;
+  if(P.arch==='healer') return `${PET_ARCH_TAG.healer} · ${petMaxHp(id)} HP · +${petHealAmt(id)} HP / ${P.cd}s${tag}`;
+  return `${PET_ARCH_TAG.utility} · ${petMaxHp(id)} HP · pulls loot within ${P.pull}${tag}`; }
+function petEquip(id){ if(!meta.petOwned.includes(id)) return; meta.petActive=id; if(G) G.pet=null; persist(); SFX.pickup(); }
+function petUnequip(){ meta.petActive=null; if(G) G.pet=null; persist(); SFX.pickup(); }
+function petBuy(id){ const P=PETS[id]; if(!P||meta.petOwned.includes(id)) return; if(meta.gold<P.price){ toast('Not enough gold'); SFX.hurt(); return; }
+  meta.gold-=P.price; meta.petOwned.push(id); if(!meta.petActive){ meta.petActive=id; if(G) G.pet=null; }
+  playFx('buy'); SFX.achieve(); persist(); toast('🐾 '+petDisplayName(id)+' joins you'); }
+function petSell(id){ const P=PETS[id]; if(!P||!meta.petOwned.includes(id)) return; const refund=Math.round(P.price*0.4);
+  meta.petOwned=meta.petOwned.filter(x=>x!==id); if(meta.petActive===id){ meta.petActive=meta.petOwned[0]||null; if(G) G.pet=null; }
+  delete meta.petNames[id]; delete meta.petTrain[id]; meta.gold+=refund; playFx('sell'); persist(); toast('Sold · +'+refund+'g'); }
+function petTrain(id){ const lv=petTrainLvl(id); if(lv>=PET_TRAIN_MAX){ toast('Already fully trained'); return; }
+  const cost=petTrainCost(id); if(meta.gold<cost){ toast('Not enough gold'); SFX.hurt(); return; }
+  meta.gold-=cost; meta.petTrain[id]=lv+1; playFx('forgedone'); SFX.levelup(); persist(); toast('▲ '+petDisplayName(id)+' grows a little stronger'); }
+function petToggleLabel(){ meta.petLabel=!meta.petLabel; persist(); SFX.pickup(); }
+function openBeastkeeper(back){
+  mode='menu';
+  const active=meta.petActive;
+  const owned=meta.petOwned.filter(id=>PETS[id]);
+  const unowned=PETIDS.filter(id=>!meta.petOwned.includes(id));
+  const role=id=>{ const a=PETS[id].arch; return a.charAt(0).toUpperCase()+a.slice(1); };
+  const badges=id=>{ const P=PETS[id], out=[`<span class="petbadge role">${role(id)}</span>`];
+    if(P.arch==='attacker') out.push(`<span class="petbadge">${petAtkDmg(id)} damage</span>`,`<span class="petbadge">Every ${P.cd}s</span>`,`<span class="petbadge">${P.style==='ranged'?'Ranged':'Melee'}</span>`);
+    else if(P.arch==='healer') out.push(`<span class="petbadge">+${petHealAmt(id)} HP</span>`,`<span class="petbadge">Every ${P.cd}s</span>`);
+    else out.push(`<span class="petbadge">${P.pull} pickup range</span>`);
+    return out.join(''); };
+  const training=id=>{ const lv=petTrainLvl(id); return `<div class="pettraining"><span>Training</span>${Array.from({length:PET_TRAIN_MAX},(_,i)=>`<i class="petpip ${i<lv?'on':''}"></i>`).join('')}<span>${lv}/${PET_TRAIN_MAX}</span></div>`; };
+  const btn=(label,data,extra='',disabled=false)=>`<button class="bigbtn buybtn ${extra}" ${data||''} ${disabled?'disabled style="opacity:.42;cursor:default"':''}>${label}</button>`;
+  const petCard=(id,kind)=>{ const P=PETS[id], col=petRarityCol(id), afford=meta.gold>=P.price, display=kind==='shop'?P.name:petDisplayName(id);
+    const actions=kind==='shop'?btn(`${P.price}g`,`data-buy="${id}"`,'',!afford):btn('Equip',`data-eq="${id}"`)+btn(`Sell · +${Math.round(P.price*.4)}g`,`data-sell="${id}"`,'ghost');
+    return `<article class="petcard ${kind==='shop'&&!afford?'dim':''}" style="--petcol:${col}" title="${htmlSafe(display)}">
+      <img class="petcardart" src="${petIcon(id)}" alt="${htmlSafe(P.name)}"><div class="petcardinfo"><div class="petcardname">${htmlSafe(display)}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(id)}</div>${training(id)}</div><div class="petcardactions">${actions}</div></article>`; };
+  const activeBlock=active?(()=>{ const P=PETS[active],col=petRarityCol(active),lv=petTrainLvl(active),max=lv>=PET_TRAIN_MAX;
+    return `<div class="petsection">Active companion</div><section class="pethero" style="--petcol:${col}"><img class="petheroart" src="${petIcon(active)}" alt="${htmlSafe(P.name)}"><div><div class="pettitle">${htmlSafe(petDisplayName(active))}</div><div class="petbase">${RARITY[P.rarity].name} · ${P.name}</div><p class="petflavor">“${P.flavor}”</p><div class="petbadges">${badges(active)}</div>${training(active)}</div><div class="petactions">${btn(max?'Fully trained':`Train · ${petTrainCost(active)}g`,max?'':`data-train="${active}"`,'',max)}${btn('Rename',`data-name="${active}"`,'ghost')}${btn('Stow','data-uneq="1"','ghost')}</div></section>`; })()
+    :`<div class="petsection">Active companion</div><section class="pethero" style="--petcol:#8b93a8"><div><div class="pettitle">No companion equipped</div><p class="petflavor">Choose a companion below to bring into the Abyss.</p></div></section>`;
+  const bench=owned.filter(id=>id!==active).map(id=>petCard(id,'owned')).join('');
+  const shop=unowned.map(id=>petCard(id,'shop')).join('');
+  showOverlayHTML(`<div class="card petyard"><header class="petyardhead"><img class="petyardbrand" src="icons/beastkeeper.png?v=${VERSION3D}" alt=""><p class="ovkicker">Beastkeeper</p><h2 class="ovh">Pet Yard</h2><p class="ovsub"><b style="color:#ffd24a">${meta.gold}g</b> · One companion at a time. They help; they never carry.</p></header>
+    ${activeBlock}${bench?`<div class="petsection">Your companions</div><div class="petgrid">${bench}</div>`:''}${shop?`<div class="petsection">Companions for sale</div><div class="petgrid">${shop}</div>`:''}
+    <footer class="petfooter"><button class="bigbtn ghost" id="lblBtn">Name tags · ${meta.petLabel?'On':'Off'}</button><button class="bigbtn ghost" id="backBtn">Back</button></footer></div>`);
+  const reopen=()=>openBeastkeeper(back);
+  document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ petBuy(b.dataset.buy); reopen(); });
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ petEquip(b.dataset.eq); reopen(); });
+  document.querySelectorAll('[data-sell]').forEach(b=>b.onclick=()=>{ petSell(b.dataset.sell); reopen(); });
+  document.querySelectorAll('[data-train]').forEach(b=>b.onclick=()=>{ petTrain(b.dataset.train); reopen(); });
+  document.querySelectorAll('[data-uneq]').forEach(b=>b.onclick=()=>{ petUnequip(); reopen(); });
+  document.querySelectorAll('[data-name]').forEach(b=>b.onclick=()=>petRenameScreen(b.dataset.name,back));
+  document.getElementById('lblBtn').onclick=()=>{ petToggleLabel(); reopen(); };
+  document.getElementById('backBtn').onclick=back;
+}
+function petRenameScreen(id,back){ mode='menu';
+  showOverlayHTML(`<div class="card"><p class="ovkicker">🐾 Beastkeeper</p><h2 class="ovh">Name your companion</h2>
+    <p class="ovsub">${PETS[id].name} — ${PETS[id].flavor}</p>
+    <input id="petNameIn" maxlength="14" value="${(petDisplayName(id)).replace(/"/g,'&quot;')}" placeholder="A name…"
+      style="width:100%;background:#0c1220;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 13px;font-size:15px;text-align:center;margin:4px 0 12px">
+    <button class="bigbtn" id="nameSave">Save</button>
+    <button class="bigbtn ghost" id="nameReset">Reset to default</button>
+    <button class="bigbtn ghost" id="nameBack">Back</button></div>`);
+  const inp=document.getElementById('petNameIn'); setTimeout(()=>{ try{ inp.focus(); }catch(e){} },50);
+  document.getElementById('nameSave').onclick=()=>{ const v=(inp.value||'').trim().slice(0,14); if(v) meta.petNames[id]=v; else delete meta.petNames[id]; persist(); SFX.pickup(); openBeastkeeper(back); };
+  document.getElementById('nameReset').onclick=()=>{ delete meta.petNames[id]; persist(); SFX.pickup(); openBeastkeeper(back); };
+  document.getElementById('nameBack').onclick=()=>openBeastkeeper(back);
+}
+function openShop(back){
+  mode='menu'; playFx('shopopen');
+  const rows=PERKIDS.map(id=>{ const P=PERKS[id], lv=perkLevel(id), maxed=lv>=P.max, cost=perkCost(id), afford=meta.gold>=cost;
+    const cur=perkValue(id,lv), next=perkValue(id,Math.min(P.max,lv+1)), cap=P.unit(perkValue(id,P.max));
+    return `<div class="gearrow perkrow" style="--spine:${maxed?'#ffd24a':'#58647b'}"><div class="gi">${statIcon(P.icon)}</div>
+      <div style="flex:1;min-width:0"><div class="gn">${P.name} <span style="color:${maxed?'#ffd24a':'var(--muted)'}">Lv ${Math.min(lv,P.max)}/${P.max}${maxed?' · MAX':''}</span></div>
+        <div class="gd">Current: <b style="color:var(--good)">${P.unit(cur)}</b>${maxed?'':` · Next: ${P.unit(next)}`}<br><span style="color:#ffd24a">Rank 10 capstone: ${cap}</span></div></div>
+      <button class="bigbtn buybtn" data-id="${id}" style="width:auto;margin:0;padding:9px 14px;font-size:13px;${maxed?'opacity:.35':(afford?'':'opacity:.5')}" ${maxed?'disabled':''}>${maxed?'MAX':cost+'g'}</button></div>`; }).join('');  const cid=meta.classId, CC=CLASSES[cid]||CLASSES.warrior;
+  const wrows=['common','uncommon','rare','epic'].map(rid=>{ const w=shopWeapon(cid,rid), cost=shopWeapCost(rid), afford=meta.gold>=cost;
+    const cur=meta.hero&&meta.hero.weapon?meta.hero.weapon.dmg:0;
+    const lock=!canWieldRid(rid);
+    return `<div class="gearrow" style="--spine:${RARITY[rid].color}${lock?';opacity:.55':''}"><img class="bagav" src="${itemAv(w)}" alt="">
+      <div class="cmpinfo" data-cmp="${rid}" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${RARITY[rid].color}">${w.name}${rpip(rid)}${lock?` <span style="color:#ff8a82;font-size:11px">🔒 Lv ${rarityReq(rid)}</span>`:` <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span>`}</div>
+        <div class="gd">${w.dmg} dmg${cur?` · yours: ${cur}`:''} · plain, but reliable</div></div>
+      <button class="bigbtn wbuy" data-r="${rid}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford&&!lock?'':'opacity:.5'}">${actionIcon('buy')}${cost}g</button></div>`; }).join('');
+  // Void Scythe — Reaper's signature, sold here ONLY once the Reaper is unlocked; the only way to get it (never drops)
+  const vs=makeWeapon('voidscythe','epic'), vsCost=2200, vsAfford=meta.gold>=vsCost;
+  const vsRow=meta.classUnlocked&&meta.classUnlocked.reaper?`<div class="gearrow" style="--spine:${elementColor('void')}"><img class="bagav" src="${itemAv(vs)}" alt="">
+      <div class="cmpinfo" data-cmp="voidscythe" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:${elementColor('void')}">${vs.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
+        <div class="gd">${vs.dmg} dmg · pulls foes in · heals on kill · <b>Reaper</b></div></div>
+      <button class="bigbtn wbuy" data-r="voidscythe" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${vsAfford?'':'opacity:.5'}">${actionIcon('buy')}${vsCost}g</button></div>`:'';
+  // Ian's Blade — the last Bladeborn's relic, revealed only after Castle Duskmoor falls.
+  const ib=makeWeapon('iansblade','legendary'), ibCost=1000000, ibAfford=meta.gold>=ibCost;
+  const ibRow=meta.zoneDone&&meta.zoneDone.castle?`<div class="gearrow" style="--spine:#ffd24a;background:linear-gradient(90deg,#33270f88,#171923)"><img class="bagav" src="${itemAv(ib)}" alt="">
+      <div class="cmpinfo" data-cmp="iansblade" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:#fff4ae;text-shadow:0 0 12px #ffd24a99">${ib.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
+        <div class="gd">${ib.dmg} dmg · radiant execute · <b>full power for every class</b></div></div>
+      <button class="bigbtn wbuy" data-r="iansblade" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${ibAfford?'':'opacity:.5'}">${actionIcon('buy')}${ibCost.toLocaleString()}g</button></div>`:'';
+  // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
+  const socksCost=1200, socksAfford=meta.gold>=socksCost;
+  const socksRow=meta.socks
+    ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
+    :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
+  // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
+  const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
+  const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi eventgi">${eventIcon('reward-bag-slots')}</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
+  // Phase 18: Fortune's Bag — one pull, mostly junk, a thin real tail. The Quartermaster profits.
+  const gAfford=meta.gold>=GAMBLE_COST;
+  const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi eventgi">${actionIcon('fortunes-bag')}</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${actionIcon('buy')}${GAMBLE_COST}g</button></div>`;
+  // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
+  const goal = meta.zoneDone&&meta.zoneDone.castle&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='iansblade') ? {name:"Ian's Blade",cost:ibCost} : !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
+  const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
+  const northStar=`<div style="margin:2px 0 8px"><div class="gd" style="text-align:left;margin-bottom:3px"><b style="color:#ffd24a">${meta.gold}</b> / ${goal.cost} to <b>${goal.name}</b></div>
+    <div style="height:7px;border-radius:5px;background:#1b1e26;overflow:hidden"><div style="height:100%;width:${gpct}%;background:linear-gradient(90deg,#ffd24a,#ff9a3a)"></div></div></div>`;
+  const hubRows=HUB_UPGRADES.map(u=>{ const owned=!!(meta.hubUpgrades&&meta.hubUpgrades[u.id]), afford=meta.gold>=u.cost;
+    return `<div class="gearrow" style="--spine:#caa23a${owned?';opacity:.6':''}"><div class="gi">🏰</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:#e8c86a">${u.name}</div><div class="gd">${u.desc}</div></div>
+      ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><span class="ico ico-coin"></span> <b style="color:#ffd24a">${meta.gold}</b> · permanent upgrades for this save</p>${northStar}
+    <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
+    <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
+    <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
+    <p class="hint" style="margin:10px 0 6px;text-align:left">🏰 <b>The Waystation</b> — restore your fortress (cosmetic, costly)</p>
+    <div class="achlist" style="max-height:min(22vh,160px)">${hubRows}</div>
+    <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.buybtn').forEach(b=>b.onclick=()=>{ const id=b.dataset.id, cost=perkCost(id);
+    if(perkLevel(id)>=PERKS[id].max) return;
+    if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; if(!meta.perks) meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); SFX.levelup(); persist(); openShop(back); });
+  document.querySelectorAll('.wbuy').forEach(b=>b.onclick=()=>{ const rid=b.dataset.r, isVS=rid==='voidscythe', isIan=rid==='iansblade', cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid));
+    const gateR=isIan?'legendary':(isVS?'epic':rid); if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
+    if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost;
+    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid));
+    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
+    if(isIan){ SFX.god(); playFx('bigreveal'); if(G&&G.p) burst(G.p.x,G.p.y+35,G.p.z,'#fff4ae',28); } else SFX.levelup();
+    persist(); toast('Equipped: '+w.name); openShop(back); });
+  document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe', isIan=rid==='iansblade';
+    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid)), cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid)); shopCompare(w,cost,back); });
+  const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
+    meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
+    SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
+  const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
+  const gmb=document.querySelector('.gamblebuy'); if(gmb) gmb.onclick=()=>{ if(meta.gold<GAMBLE_COST){ toast('Not enough gold'); return; }
+    meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); };   // gold up front — the pull is the purchase
+  document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
+    if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
+    meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+// full side-by-side compare of a shop weapon vs your CURRENT weapon (every stat, with up/down arrows), then buy
+function shopCompare(w,cost,back){
+  mode='menu'; const cur=(meta.hero&&meta.hero.weapon)?meta.hero.weapon:null, f=n=>Math.round(n*100)/100;
+  const row=(label,a,b,better)=>{ if(a==null) return `<div class="vsrow"><span>${label}</span><b>${f(b)}</b></div>`;
+    const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
+    return `<div class="vsrow"><span>${label}</span><span><b>${f(a)}</b> → <b class="${cls}">${f(b)}${arr}</b></span></div>`; };
+  const rA=cur?(cur.cls==='ranged'?((cur.proj&&cur.proj.range)||0):(cur.range||0)):null, rB=w.cls==='ranged'?(w.proj.range||0):(w.range||0);
+  showOverlayHTML(`<div class="card"><p class="ovsub" style="color:${RARITY[w.rarity].color};letter-spacing:.16em">${RARITY[w.rarity].name.toUpperCase()} · ${damageTypeHTML(w)}</p>
+    <h2 class="ovh" style="color:${RARITY[w.rarity].color}">${w.name}</h2>
+    <img class="itemav" src="${itemAv(w)}" alt="">
+    <p class="hint" style="margin:-6px 0 8px">vs your <b>${cur?cur.name:'—'}</b></p>
+    <div class="statgrid">
+      ${row('Damage',cur?cur.dmg:null,w.dmg)}
+      ${row('Range',cur?rA:null,rB)}
+      ${row('Attack speed',cur?cur.cd:null,w.cd,'low')}
+      ${row('Knockback',cur?cur.kb:null,w.kb)}
+      <div class="vsrow"><span>Element</span><b style="color:${elementColor(w.el)||'#cfd6df'};text-transform:capitalize">${w.el||'Neutral'}</b></div>
+      ${row('Lifesteal %',cur?(cur.lifesteal*100):null,(w.lifesteal||0)*100)}
+    </div>
+    <button class="bigbtn" id="buyC" style="${meta.gold>=cost?'':'opacity:.5'}">${actionIcon('buy')}Buy · ${cost}g</button>
+    <button class="bigbtn ghost" id="backC">Back to shop</button></div>`);
+  document.getElementById('buyC').onclick=()=>{ if(!canWield(w)){ toast('🔒 Requires Level '+rarityReq(w.rarity)+' to wield'); return; } if(meta.gold<cost){ toast('Not enough gold'); return; }
+    meta.gold-=cost; if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
+    SFX.levelup(); playFx('buy'); persist(); toast('Equipped: '+w.name); openShop(back); };
+  document.getElementById('backC').onclick=()=>openShop(back);
+}
+const GOD_SEQ=['void','void','void','frost','shadow']; let cheatSeq=[];
+function registerCheatTap(id){
+  cheatSeq.push(id); if(cheatSeq.length>GOD_SEQ.length) cheatSeq.shift();
+  if(cheatSeq.length===GOD_SEQ.length && cheatSeq.every((v,i)=>v===GOD_SEQ[i])){
+    cheatSeq=[];
+    if(!meta.unlockedSkins.includes('god')){ meta.unlockedSkins.push('god'); meta.selectedSkin='god'; if(G&&G.p){ G.p.skin='god'; recomputeArmor(G.p); G.p.hp=effMaxHp(G.p); } persist(); SFX.god(); toast('⚡ GOD MODE UNLOCKED ⚡'); return true; }
+  }
+  return false;
+}
+function openSkins(back){
+  mode='menu';
+  const ids=Object.keys(SKINS).filter(id=> id!=='god' || meta.unlockedSkins.includes('god'));
+  const tiles=ids.map(id=>{ const s=SKINS[id], unlocked=meta.unlockedSkins.includes(id), sel=meta.selectedSkin===id;
+    return `<div class="skintile ${sel?'sel':''} ${unlocked?'':'lock'} ${id==='god'?'godt':''}" style="--skin:${s.trim}" data-id="${id}">
+      <img class="av" src="icons/skins/skin-${id}.png" alt="${s.name} skin icon">
+      <div class="sn" style="color:${unlocked?(id==='god'?'#ffd24a':s.trim):'var(--muted)'}">${unlocked?s.name:'🔒'}</div>
+      <div class="lk">${unlocked?((SKINPASS[id]?SKINPASS[id].label:'No passive')+(sel?' · ✓':'')):skinUnlockHint(id)}</div></div>`; }).join('');
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Skins</h2><p class="ovsub">Each skin has a small passive — Crimson is the challenge skin.</p>
+    <div class="skingrid">${tiles}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.querySelectorAll('.skintile').forEach(t=>t.onclick=()=>{ const id=t.dataset.id;
+    if(registerCheatTap(id)){ openSkins(back); return; }
+    if(!meta.unlockedSkins.includes(id)){ toast('Locked — '+skinUnlockHint(id)); return; }
+    meta.selectedSkin=id; if(G&&G.p){ G.p.skin=id; recomputeArmor(G.p); if(id==='god') G.p.hp=effMaxHp(G.p); } persist(); SFX.pickup(); openSkins(back); });
+  document.getElementById('backBtn').onclick=back;
+}
+function openAchievements(back){
+  mode='menu';
+  const rows=ACHIEVEMENTS.map(a=>{ const done=!!meta.achievements[a.id];
+    return `<div class="achrow ${done?'done':'todo'}"><div class="ic"><img class="achart" src="icons/achievements/achievement-${a.id}.png" alt="${a.name}">${done?'':'<span class="achlock">🔒</span>'}</div>
+      <div><div class="at">${a.name}</div><div class="ad">${a.desc}${a.skin?` · unlocks ${SKINS[a.skin].name} skin`:''}</div></div></div>`; }).join('');
+  const n=ACHIEVEMENTS.filter(a=>meta.achievements[a.id]).length;
+  showOverlayHTML(`<div class="card"><h2 class="ovh">${eventIcon('event-achievement')} Achievements</h2><p class="ovsub">${n}/${ACHIEVEMENTS.length} complete</p>
+    <div class="achlist">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
+}
+function openGear(back){
+  mode='menu'; const p=G?G.p:null; if(!p){ back(); return; }
+  const w=p.weapon, wEl=w.el?(w.el==='void'?'Void (ignores resist + lifesteal)':w.el):'Neutral';
+  const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=slotLabel(slot);
+    const detail=a?(a.trinket?a.affixes.map(x=>x.label).join(' · '):('Defense '+a.defense+' · '+a.affixes.map(x=>x.label).join(' · '))):'';
+    return `<div class="gearrow"><div class="gi slotgi">${slotIcon(slot)}${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
+  showOverlayHTML(`<div class="card"><h2 class="ovh">Gear</h2>
+    <p class="ovsub">Total damage reduction: <b style="color:${bestGearRarity(p)}">${Math.round(defenseR(p)*100)}%</b></p>
+    <div class="achlist">
+      <div class="gearrow"><div class="gi">Weapon</div><div><div class="gn" style="color:${w.color}">${w.name}</div><div class="gd">Dmg ${fmt(w.dmg)} · ${damageTypeHTML(w)} · ${wEl}</div></div></div>
+      ${gearRow('helmet')}${gearRow('chest')}${gearRow('legs')}${gearRow('amulet')}${gearRow('ring')}
+    </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  document.getElementById('backBtn').onclick=back;
+}
+/* ============================================================
+   WEAPON STUDIO — inspect EVERY weapon held by the character + play its attack animation live
+   ============================================================ */
+let studio=null;
+function openWeaponStudio(back){
+  initAudio();
+  studio={ t:0, arche:'scythe', atkLoop:true, atkT:0.4, spin:true, back:back||openPause, proj:[], p:null, cat:'Weapons', design:false, di:0 };
+  const p=freshPlayer(); p.gear=freshGear(); p.x=0; p.y=0; p.z=0; p.yaw=0.4; p.hp=p.maxHp=9999; p.invuln=0; p.atkTimer=0;
+  studio.p=p;
+  mode='studio'; showOverlay(false); showGameUI(false);
+  document.getElementById('questbox').classList.add('hide');
+  buildStudioPanel();
+  studioSetWeapon('scythe');
+}
+// weapon ART -> reference-icon file (bundled in /3d/weapon-icons/). Fire/frost/etc. swords use the affinity refs.
+const ART_ICON={sword:'sword',great:'greatsword',axe:'battleaxe',hammer:'warhammer',knives:'knives',dagger:'knives',
+  bow:'longbow',cross:'crossbow',javelin:'javelins',staff:'staff',rod:'staff',wand:'wand',scepter:'wand',orb:'wand',
+  spellblade:'spellblade',scythe:'scythe'};
+function studioIconFor(w){
+  if(!w) return null;
+  if(w.art==='sword'&&w.el){ const m={fire:'aff_fire_sword',ice:'aff_frost_sword',poison:'aff_venom_sword',arcane:'aff_arcane_sword',holy:'aff_holy_sword',void:'aff_void_sword'}; if(m[w.el]) return m[w.el]; }
+  return ART_ICON[w.art]||null;
+}
+function studioSetWeapon(arche){ if(!studio) return; studio.arche=arche;
+  const w=makeWeapon(arche,'epic'); normWeapon(w); studio.p.weapon=w; studio.p.atkTimer=0; studio.proj.length=0;
+  const nm=document.getElementById('wsName'); if(nm) nm.textContent=(ARCHES[arche]?ARCHES[arche].disp:arche)+' — '+(w.cls==='ranged'?'Ranged':'Melee')+(w.el?' · '+w.el:'');
+  document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',b.dataset.a===arche));
+  const card=document.getElementById('wsIconCard'), img=document.getElementById('wsIconImg'), cap=document.getElementById('wsIconCap');
+  const ic=studioIconFor(w);
+  if(card&&img){ if(ic){ img.src='weapon-icons/'+ic+'.png'; if(cap) cap.textContent=ARCHES[arche]?ARCHES[arche].disp:arche; card.classList.remove('hide'); } else { card.classList.add('hide'); } }
+}
+function studioSwing(){ if(!studio) return; const p=studio.p; if(p.atkTimer>0) return; p.swingId=(p.swingId||0)+1;
+  const w=p.weapon;
+  if(w.cls==='melee'){ p.atkTimer=0.26; try{SFX.slash();}catch(e){} }
+  else { p.atkTimer=0.18; try{ w.sch==='mag'?SFX.magic(w.el):SFX.shoot(); }catch(e){}
+    const pr=w.proj||{}, ang=p.yaw, cnt=pr.count||1;
+    for(let i=0;i<cnt;i++){ const a=ang+(cnt>1?(i-(cnt-1)/2)*(pr.spread||0.1):0);
+      studio.proj.push({x:p.x+Math.sin(a)*22,y:p.y+30,z:p.z+Math.cos(a)*22,vx:Math.sin(a)*(pr.speed||500)*0.32,vy:0,vz:Math.cos(a)*(pr.speed||500)*0.32,size:pr.size||7,color:w.blade||pr.color||'#cfd6df',glow:1,shape:pr.shape||'arrow',life:1.6,gravity:(pr.gravity||0)*0.3}); } }
+}
+function studioUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt;
+  const p=studio.p;
+  if(studio.spin) p.yaw+=dt*0.5;
+  if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
+  if(studio.atkLoop){ studio.atkT-=dt; if(studio.atkT<=0){ studioSwing(); studio.atkT=1.5; } }
+  for(const pr of studio.proj){ pr.x+=pr.vx*dt; pr.z+=pr.vz*dt; pr.y+=(pr.vy||0)*dt; if(pr.gravity) pr.vy=(pr.vy||0)-pr.gravity*dt; pr.life-=dt; }
+  studio.proj=studio.proj.filter(pr=>pr.life>0);
+}
+function renderStudio(t){
+  gl.clearColor(0.05,0.055,0.075,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,900);
+  VIEW=mLookAt([Math.sin(0.7)*160,80,Math.cos(0.7)*160],[0,26,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,600,2000); gl.uniform3f(U.uFog,0.05,0.055,0.075);
+  CURM=mIdent();
+  bx(0,-8,0, 260,16,260,'#181b22'); bx(0,2,0, 120,6,120,'#242833'); bx(0,6.4,0, 96,3,96,'#2c313d');   // pedestal
+  const p=studio.p; drawShadow(0,0,17,0.34);
+  drawHero3(p,t,false); drawSwing3(p,t);
+  for(const pr of studio.proj) drawProjectile3(pr,t);
+}
+function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
+// ===== Design Studio — a turntable to review every approved voxel model (reuses the Weapon Studio pedestal) =====
+const DGROUP_CAM={Cast:{h:34,d:150},Pets:{h:12,d:70},Bosses:{h:60,d:270},Mobs:{h:24,d:120}};
+function designEnemy(key,boss){ const d=ENEMY[key]||{}; return {type:key,look:d.look,kind:d.kind||'walk',boss:!!boss,color:d.color||'#8a8f9e',r:d.r||15,h:d.h||38,x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,hitFlash:0,bob:1.2,shot:d.shot,element:d.element,slowT:0,lunge:0,phase:0,st:null,shootT:1}; }
+const DESIGNS=[
+  {g:'Cast',k:'Quartermaster',d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'quartermaster',x:0},t); popM(); }},
+  {g:'Cast',k:'Keeper',       d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'keeper',x:0},t); popM(); }},
+  {g:'Cast',k:'Drillmaster',  d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'drillmaster',x:0},t); popM(); }},
+  {g:'Cast',k:'Smith',        d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'smith',x:0},t); popM(); }},
+  {g:'Cast',k:'Beastkeeper',  d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'beastkeeper',x:0},t); popM(); }},
+  {g:'Cast',k:"Warden's Shade",d:(t,s)=>{ pushM(); rotY(s); drawShadeModel(t); popM(); }},
+  {g:'Pets',k:'Ember Pup',    d:(t,s)=>drawPet3({id:'emberpup',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Stone Whelp',  d:(t,s)=>drawPet3({id:'stonewhelp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Pale Wisp',    d:(t,s)=>drawPet3({id:'wisp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Mending Sprite',d:(t,s)=>drawPet3({id:'mender',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Coin Sprite',  d:(t,s)=>drawPet3({id:'coinsprite',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Grave Wraith', d:(t,s)=>drawPet3({id:'gravewraith',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Bosses',k:'The Brute',       d:(t,s)=>{ const e=designEnemy('brute',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'The Fallen',      d:(t,s)=>{ const e=designEnemy('warden',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Hollow Marksman', d:(t,s)=>{ const e=designEnemy('archer',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Frost Sorcerer',  d:(t,s)=>{ const e=designEnemy('sorcerer',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Ember Colossus',  stageTheme:'volcano', d:(t,s)=>{ const e=designEnemy('colossus',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Marble Colossus', stageTheme:'marble',  d:(t,s)=>{ const e=designEnemy('colossus',1); e.color='#9aa0b0'; e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Abyss King',      d:(t,s)=>{ const e=designEnemy('king',1); e.yaw=s; drawEnemy3(e,t); }},
+  {g:'Bosses',k:'Abyss King, Awakened', d:(t,s)=>{ const e=designEnemy('tyrant',1); e.yaw=s; drawEnemy3(e,t); }},
+];
+['grunt','flyer','emberling','frostling','toxling','shadeling','sparkling','goblin','bones','slime',
+ 'slimelet','caster','charger','mimic','thornboar','sporeback','dustjackal','cragspitter','galewisp','revenant',
+ 'sentinel','frostshell','frostlobber','magmaskit','embertotem','blinkstalker','voidtether','marblestatue','sunpriest','siegeknight','royalarcanist']
+  .filter(k=>ENEMY[k]).forEach(k=>DESIGNS.push({g:'Mobs',k:(BESTIARY_INFO[k]&&BESTIARY_INFO[k].name)||k,d:(t,s)=>{ const e=designEnemy(k,0); e.yaw=s; drawEnemy3(e,t); }}));
+// opens the Weapon/Design studio straight onto a design category (used by __BF3 tooling)
+function openDesignStudio(back,cat){ openWeaponStudio(back); studioSetCat(cat||'Cast'); }
+function designSet(i){ if(!studio) return; studio.di=i; const e=DESIGNS[i]; const nm=document.getElementById('wsName'); if(nm) nm.textContent=e.g+' · '+e.k;
+  const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide');
+  document.querySelectorAll('#wsList .wsbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); }
+function designUpdate(dt){ if(!studio) return; studio.t+=dt; if(G) G.time+=dt; }
+function renderDesign(t){
+  const e=DESIGNS[studio.di]||DESIGNS[0], cam=DGROUP_CAM[e.g]||{h:34,d:150};
+  gl.clearColor(0.05,0.055,0.075,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  setFlatLights();
+  PROJ=mPersp(40*Math.PI/180,VW/VH,5,1600);
+  VIEW=mLookAt([Math.sin(0.7)*cam.d,cam.h+42,Math.cos(0.7)*cam.d],[0,cam.h,0],[0,1,0]);
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ)); gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform2f(U.uFogNF,1000,3200); gl.uniform3f(U.uFog,0.05,0.055,0.075);
+  CURM=mIdent();
+  bx(0,-8,0, 320,16,320,'#181b22'); bx(0,2,0, 140,6,140,'#242833'); bx(0,6.4,0, 112,3,112,'#2c313d');   // pedestal
+  drawShadow(0,0,22,0.3);
+  const spin=studio.spin?studio.t*0.5:0.6, savedSi=G?G.stageIndex:undefined;
+  if(e.stageTheme!=null && G){ const si=STAGES.findIndex(s=>s&&s.theme===e.stageTheme); if(si>=0) G.stageIndex=si; }
+  try{ e.d(t,spin); }catch(err){}
+  if(e.stageTheme!=null && G) G.stageIndex=savedSi;
+}
+const STUDIO_CATS=['Weapons','Cast','Pets','Bosses','Mobs'];
+function buildStudioPanel(){
+  const pn=document.getElementById('wstudio'); if(!pn) return;
+  const cat=studio.cat||'Weapons', isW=(cat==='Weapons'), spinOn=(studio.spin!==false);
+  const tabs=STUDIO_CATS.map(c=>`<button class="wsbtn wscat${c===cat?' sel':''}" data-c="${c}" style="opacity:${c===cat?1:0.6}">${c}</button>`).join('');
+  const list=isW ? ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('')
+                 : DESIGNS.map((e,i)=>e.g===cat?`<button class="wsbtn" data-i="${i}">${e.k}</button>`:'').join('');
+  pn.innerHTML=`<div class="wshead">${isW?'⚒ Weapon Studio':'🎨 Design Studio'} <span id="wsName"></span></div>
+    <div class="wslist" style="margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:6px">${tabs}</div>
+    <div id="wsList" class="wslist">${list}</div>
+    <div class="wsctrl">
+      ${isW?`<button class="wsbig" id="wsSwing">⚔ Swing</button><button class="wsbig" id="wsAuto">↻ Auto: ${studio.atkLoop?'On':'Off'}</button>`
+           :`<button class="wsbig" id="dPrev">‹ Prev</button><button class="wsbig" id="dNext">Next ›</button>`}
+      <button class="wsbig" id="wsSpin">🔄 Spin: ${spinOn?'On':'Off'}</button>
+      <button class="wsbig ghost" id="wsBack">Back</button>
+    </div>`;
+  pn.classList.remove('hide');
+  pn.querySelectorAll('.wscat').forEach(b=>b.onclick=()=>studioSetCat(b.dataset.c));
+  if(isW){ pn.querySelectorAll('#wsList .wsbtn').forEach(b=>b.onclick=()=>studioSetWeapon(b.dataset.a));
+    document.getElementById('wsSwing').onclick=()=>studioSwing();
+    document.getElementById('wsAuto').onclick=()=>{ studio.atkLoop=!studio.atkLoop; document.getElementById('wsAuto').textContent='↻ Auto: '+(studio.atkLoop?'On':'Off'); };
+  } else { pn.querySelectorAll('#wsList .wsbtn').forEach(b=>b.onclick=()=>designSet(+b.dataset.i));
+    const gi=DESIGNS.map((e,i)=>e.g===cat?i:-1).filter(i=>i>=0);
+    document.getElementById('dPrev').onclick=()=>{ const p=Math.max(0,gi.indexOf(studio.di)); designSet(gi[(p-1+gi.length)%gi.length]); };
+    document.getElementById('dNext').onclick=()=>{ const p=Math.max(0,gi.indexOf(studio.di)); designSet(gi[(p+1)%gi.length]); };
+  }
+  document.getElementById('wsSpin').onclick=()=>{ studio.spin=(studio.spin===false); document.getElementById('wsSpin').textContent='🔄 Spin: '+(studio.spin!==false?'On':'Off'); };
+  document.getElementById('wsBack').onclick=()=>exitStudio();
+}
+function studioSetCat(cat){ if(!studio) return; studio.cat=cat; studio.design=(cat!=='Weapons'); buildStudioPanel();
+  const ic=document.getElementById('wsIconCard');
+  if(cat==='Weapons'){ studioSetWeapon(studio.arche||'scythe'); }
+  else { if(ic) ic.classList.add('hide'); const first=DESIGNS.findIndex(e=>e.g===cat); designSet(first>=0?first:0); } }
+function fsOn(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+function toggleFullscreen(){ try{
+  if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
+  else { const el=document.documentElement; (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
+}catch(e){} }
+function openPause(){
+  pauseGameAudio();
+  mode='pause';
+  const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
+  showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
+    ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
+    ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
+    <div class="sect">Character</div>
+    <div class="navgrid">
+      ${navCard('gearBtn','icons/armor_chest_legendary.png','Gear','Inspect equipment')}
+      ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
+      ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
+      ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
+      ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
+    </div>
+    <div class="sect">Settings</div>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
+      <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
+      <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
+      ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
+    </div>
+    ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
+    ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    ${audioSettingsHTML()}
+    <div class="sect">Leave</div>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
+      <button class="bigbtn ghost" id="titleBtnP">Title Screen</button>
+    </div></div>`);
+  { const _fs=document.getElementById('fsBtn'); if(_fs) _fs.onclick=()=>{ toggleFullscreen(); setTimeout(openPause,120); }; }
+  document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
+  document.getElementById('resBtn').onclick=()=>{ mode='play'; resumeGameAudio(true); showOverlay(false); regrabCam(); };
+  document.getElementById('camBtn').onclick=()=>{ const _o=['far','shoulder','fps']; meta.camMode=_o[(_o.indexOf(meta.camMode)+1)%3]; persist(); openPause(); };
+  { const _st=document.getElementById('skipTrialBtn');
+    if(_st) _st.onclick=()=>{ resumeGameAudio(false); if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
+  var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
+  var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
+  { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
+  { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
+  { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
+  { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
+  bindAudioSettings();
+  document.getElementById('gearBtn').onclick=()=>openGear(openPause);
+  document.getElementById('bagBtnP').onclick=()=>openBag(openPause);
+  document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
+  document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
+  document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
+  document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };
+}
+function openPauseSettingsV2(){
+  const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
+  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Game options</p><h2 class="ovh">Settings</h2>
+    <p class="ovsub">Tune the view, feedback, and sound without leaving your adventure.</p>
+    <div class="pgrid">
+      <button class="bigbtn ghost" id="camBtn">🎥 ${camName}</button>
+      <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
+      <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
+      ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
+      ${G&&G.trial?`<button class="bigbtn ghost" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
+    </div>
+    ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
+    ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    ${audioSettingsHTML()}
+    <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
+  document.getElementById('settingsBack').onclick=openPauseV2;
+  document.getElementById('fsBtn').onclick=()=>{ toggleFullscreen(); setTimeout(openPauseSettingsV2,120); };
+  document.getElementById('camBtn').onclick=()=>{ const o=['far','shoulder','fps']; meta.camMode=o[(o.indexOf(meta.camMode)+1)%3]; persist(); openPauseSettingsV2(); };
+  const ss=document.getElementById('sensSlider'); if(ss) ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(ss.value)||1; const v=document.getElementById('sensVal'); if(v) v.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
+  const fv=document.getElementById('fovSlider'); if(fv) fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(fv.value)||92; const v=document.getElementById('fovVal'); if(v) v.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPauseSettingsV2(); };
+  document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
+  document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
+  document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
+  const jb=document.getElementById('jetBtn'); if(jb) jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPauseSettingsV2(); };
+  const st=document.getElementById('skipTrialBtn'); if(st) st.onclick=()=>{ resumeGameAudio(false); if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); };
+  bindAudioSettings();
+}
+function openPauseV2(){
+  pauseGameAudio(); mode='pause';
+  showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
+    <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
+        ${navCard('gearBtn','icons/armor_chest_legendary.png','Gear','Inspect equipment')}
+        ${navCard('bagBtnP','icons/action_bag_stash.png','Bag',`${meta.stash.length}/${STASH_CAP} slots used`)}
+        ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes','Skills, ranks, and paths')}
+        ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
+      </div></section>
+    <section class="pausegroup pauseutility"><div class="pausegrouplabel">Menu &amp; Navigation</div><div class="navgrid">
+        ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
+        ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}
+        ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
+        ${navCard('titleBtnP',`icons/title-screen-exit.png?v=${VERSION3D}`,'Title Screen','Save and leave the game')}
+      </div></section>
+    ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
+    </div>`);
+  document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
+  document.getElementById('resBtn').onclick=()=>{ mode='play'; resumeGameAudio(true); showOverlay(false); regrabCam(); };
+  document.getElementById('optBtn').onclick=openPauseSettingsV2;
+  document.getElementById('gearBtn').onclick=()=>openGear(openPauseV2);
+  document.getElementById('bagBtnP').onclick=()=>openBag(openPauseV2);
+  document.getElementById('classesBtn').onclick=()=>openClasses(openPauseV2);
+  document.getElementById('skinBtn').onclick=()=>openSkins(openPauseV2);
+  document.getElementById('achBtn').onclick=()=>openAchievements(openPauseV2);
+  document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };
+}
+openPause=openPauseV2;
+document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });
+function hudUpdate(){
+  if(!G) return; const p=G.p;
+  const maxHp=effMaxHp(p), maxMana=p.maxMana||100; if(p.mana==null) p.mana=maxMana;
+  document.getElementById('hpfill').style.width=Math.max(0,p.hp/maxHp*100)+'%';
+  document.getElementById('hpnum').textContent=Math.ceil(p.hp)+' / '+Math.round(maxHp);
+  document.getElementById('manafill').style.width=Math.max(0,p.mana/maxMana*100)+'%';
+  document.getElementById('mananum').textContent=Math.floor(p.mana)+' / '+maxMana;
+  // AQW-style dual bars: character XP (blue) + class rank XP (violet→amber)
+  document.getElementById('xpfill').style.width=Math.max(0,p.xp/p.xpNext*100)+'%';
+  document.getElementById('xplabel').innerHTML=eventIcon('resource-soul-essence')+'CHARACTER · LV '+p.level;
+  document.getElementById('xpnum').textContent=Math.floor(p.xp)+'/'+p.xpNext;
+  const cs=classState(meta.classId), atMax=cs.rank>=10, need=RANK_XP(cs.rank);
+  document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
+  document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
+  document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
+  const portrait=document.getElementById('hudportraitimg'); if(portrait) portrait.src='icons/class-'+meta.classId+'.png';
+  document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
+  const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);
+  wt.textContent=p.weapon.name+(offF?' ⚠ off-class':'');
+  wt.style.color=offF?'#ff8a82':(RARITY[p.weapon.rarity]?RARITY[p.weapon.rarity].color:'var(--ink)');
+  const at=document.getElementById('armortag'), rating=armorRating(p), red=Math.round(defenseR(p)*100);
+  at.innerHTML='🛡 <b style="color:'+bestGearRarity(p)+'">'+rating+'%</b>';
+  at.title=rating+'% armor rating (full legendary = 100%) · '+red+'% damage reduction';
+  document.getElementById('bAttack').classList.toggle('ranged',p.weapon.cls==='ranged');
+  document.getElementById('bAttack').textContent=p.weapon.cls==='ranged'?'FIRE':'SLASH';
+  const gt=document.getElementById('goldtag'); if(gt) gt.textContent=(meta.gold||0);   // the coin icon beside it carries the currency meaning now
+  const ph=document.getElementById('pethud');
+  if(ph){ const pet=G.pet, pid=pet&&pet.id;
+    ph.classList.toggle('hide',!pid);
+    if(pid){ const php=Math.max(0,pet.hp||0), pmax=Math.max(1,pet.maxHp||petMaxHp(pid));
+      const pimg=document.getElementById('pethudimg');
+      if(pimg.dataset.pid!==pid){ pimg.dataset.pid=pid; pimg.style.visibility='hidden';   // hide until it actually loads so a slow/first-load icon never shows a broken glyph
+        pimg.onload=()=>{pimg.style.visibility='visible';}; pimg.onerror=()=>{pimg.style.visibility='hidden';}; pimg.src=petIcon(pid); }
+      document.getElementById('pethudname').textContent=petDisplayName(pid);
+      document.getElementById('pethudhp').textContent=Math.ceil(php)+' / '+Math.ceil(pmax)+' HP';
+      document.getElementById('pethudfill').style.width=Math.max(0,Math.min(100,php/pmax*100))+'%';
+    }
+  }
+  updateToggles();
+}
+/* ============================================================
+   3D SCENE RENDERING
+   ============================================================ */
+const LATE=[]; // near-front walls/doors deferred to a translucent pass so they never hide the hero
+/* THE HERO IS ALWAYS VISIBLE (Phase 19 fix): a true 3D camera->hero ray test, usable by EVERY
+   drawn box — walls fade via LATE, but DECO (canyon strata bands, roofs, set dressing) used to
+   stay opaque and could wall off the hero (Hollow spawn bug). In fps the ray is zero-length, so
+   this naturally never fires there. Samples height too, so a band only fades when its y-span
+   actually crosses the sightline. */
+function occRay(o,m,y0,hh){
+  if(!G||!G.p||meta.camMode==='fps') return false;
+  const E=G.eye||G.cam; if(!E) return false;
+  const cx=E.x,cy=(E.y==null?60:E.y),cz=E.z, px=G.p.x, py=(G.p.y||0)+34, pz=G.p.z;
+  if(Math.abs(cx-px)<1&&Math.abs(cz-pz)<1) return false;
+  const bt=(y0||0), tp=bt+(hh==null?(o.h==null?96:o.h):hh);
+  for(let t2=0.05;t2<0.95;t2+=0.05){ const x=cx+(px-cx)*t2, y=cy+(py-cy)*t2, z=cz+(pz-cz)*t2;
+    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m && y>bt-6 && y<tp+8) return true; }
+  return false;
+}
+let shadowEps=0;
+// world-space sun azimuth for cast shadows: shadows fall opposite the sun and stretch along its axis (stays fixed as the camera orbits)
+let SHADOWAZ=0.7, SHADOWOFF=0.42, SHADOWLEN=1.55;
+function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shadowEps*0.03; const a=alpha==null?0.34:alpha;
+  // soft layered contact shadow, offset + elongated along the sun direction so it reads as cast, not a symmetric blob
+  const off=r*SHADOWOFF, el=SHADOWLEN;
+  pushM(); mv(x,0,z); rotY(SHADOWAZ);
+  bx(off,      y,      0, r*1.35*el, 0.34, r*1.15, '#000000',null,a);       // core
+  bx(off*1.35, y+0.02, 0, r*2.0*el,  0.30, r*1.7,  '#000000',null,a*0.55);  // mid
+  bx(off*1.7,  y+0.04, 0, r*2.7*el,  0.26, r*2.3,  '#000000',null,a*0.26);  // penumbra
+  popM(); }
+function drawCourse(s,t){
+  const hz=hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
+  // the hazard lake below everything
+  bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
+  bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
+  // floating course islands
+  for(const sg of G.segments){
+    bx(sg.x,-14,sg.z, sg.w,28,sg.d, s.ground);
+    bx(sg.x,-25,sg.z, sg.w*0.86,8,sg.d*0.86, tint(s.ground,'#000',0.35));   // dark underside
+    bx(sg.x,0.6,sg.z, sg.w,1.4,sg.d, tint(s.ground,'#fff',0.12));           // lit top edge
+    bx(sg.x,-6,sg.z+sg.d/2-1, sg.w,12,2.4, tint(hz[1],'#000',0.35));        // hazard-lit front rim
+    for(let zz=sg.z-sg.d/2+26;zz<sg.z+sg.d/2-14;zz+=62) bx(sg.x,0.9,zz, 3,0.5,20, tint(s.ground,'#fff',0.2)); // path dashes
+  }
+  // moving platforms
+  for(const mv of G.movers){
+    bx(mv.x,mv.h-7,mv.z, mv.w,14,mv.d, tint(s.ground,'#fff',0.14));
+    bx(mv.x,mv.h+0.7,mv.z, mv.w,1.4,mv.d, tint(s.ground,'#fff',0.3));
+    bx(mv.x,mv.h-15,mv.z, mv.w*0.4,4,mv.d*0.4, hz[1], hz[1], 0.5); // thruster glow
+  }
+  // jump pads
+  for(const pd of G.pads){
+    const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
+    bx(pd.x,py+2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
+  }
+  // crumbling stepping stones (shake, drop, respawn)
+  for(const cr of G.crumbles){
+    if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
+    if(cr.state===2) continue;
+    const jx=cr.state===1?cr.jit:0, chy=cr.h||0;
+    bx(cr.x+jx,chy-6-(cr.state===2?cr.fallY:0),cr.z, cr.w,12,cr.d, tint('#8a7a66',s.ground,0.3));
+    bx(cr.x+jx,chy+0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
+    bx(cr.x,chy-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
+  }
+  // hazard geysers: vent → telegraph glow → eruption column
+  const hzc=hazardCols(s.theme);
+  for(const gy2 of G.geysers){
+    bx(gy2.x,0.8,gy2.z, gy2.r*2,1.6,gy2.r*2, tint(s.ground,'#000',0.35));
+    bx(gy2.x,1.6,gy2.z, gy2.r*1.3,1.2,gy2.r*1.3, hzc[1], hzc[1], gy2.state===1?0.5+0.4*Math.sin(t*14):0.18);
+    if(gy2.state===2){ const hgt=95;
+      for(let k2=0;k2<4;k2++){ const yy=12+k2*(hgt/4);
+        bx(gy2.x,yy,gy2.z, gy2.r*(1.5-k2*0.22),hgt/4+4,gy2.r*(1.5-k2*0.22), hzc[1], hzc[1], 0.8-k2*0.12); } }
+  }
+  // boss slam shockwave — expanding warning ring on the ground (jump it to avoid)
+  if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR), c1=sw.col||'#ff8a4a', c2=sw.col2||'#ff5a1e';
+    const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
+    for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, 3, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
+  // magma-trail patches (smouldering path)
+  if(G.trails) for(const tr of G.trails){ const a=Math.max(0,tr.life/tr.max), fl=0.5+0.5*Math.sin(t*9+tr.x*0.1);
+    bx(tr.x,2,tr.z, tr.r*1.5,4,tr.r*1.5, '#ff6a2a','#c0331a', 0.5*a);
+    bx(tr.x,6+fl*4,tr.z, tr.r*0.7,8,tr.r*0.7, '#ffb060','#ff7a2a', 0.4*a); }
+  if(G.spikefields) for(const sf of G.spikefields){ const a=Math.max(0,sf.life/sf.max);   // Ranger Spike Trap: low steel spikes with a clean edge
+    for(let i=0;i<10;i++){ const an=i/10*6.283; bx(sf.x+Math.cos(an)*sf.r*0.9, 5, sf.z+Math.sin(an)*sf.r*0.9, 4,1.5,4, '#8b93a8','#cfd6df',0.5*a); }
+    for(let i=0;i<7;i++){ const an=i*0.9+sf.x, rr=sf.r*(0.2+Math.random()*0.6); bx(sf.x+Math.cos(an)*rr, 6, sf.z+Math.sin(an)*rr, 3,9,3, '#b8bec8','#eef2f8',0.6*a); } }
+  // Marble Colossus: the radiant sweep beam
+  if(G.beam){ const b=G.beam, warn=b.warn>0, c=warn?'#fff2b0':'#fffbe6', op=warn?(0.14+0.14*Math.sin(t*20)):0.55;
+    for(let r=40;r<640;r+=34){ bx(b.ex+Math.cos(b.ang)*r, 8, b.ez+Math.sin(b.ang)*r, 15,warn?4:12,15, c, '#ffe27a', op); } }
+  // Void Tyrant: collapsing floor tiles
+  if(G.collapse) for(const tl of G.collapse){
+    if(tl.warn>0){ const pl=0.3+0.5*Math.abs(Math.sin(t*16)); bx(tl.x,3,tl.z, tl.r*1.8,3,tl.r*1.8, '#c47bff','#8a4fd0', 0.2+0.3*pl); }
+    else { bx(tl.x,-14,tl.z, tl.r*1.8,26,tl.r*1.8, '#120820','#000', 0.9); } }   // a dark hole where the floor dropped
+  // golden bonus portal
+  if(G.bonusPortal){ const bp=G.bonusPortal, by=bp.y||0;
+    for(let k2=0;k2<8;k2++){ const a2=t*2.2+k2*0.785;
+      bx(bp.x+Math.cos(a2)*30, by+48+Math.sin(a2)*30, bp.z, 8,8,8, k2%2?'#ffd24a':'#fff2a0','#ffd24a',0.95); }
+    bx(bp.x,by+48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
+    drawShadow(bp.x,bp.z,26,0.2);
+  }
+  // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
+  LATE.length=0;
+  const CAMX=(G.eye?G.eye.x:G.cam.x), CAMZ=(G.eye?G.eye.z:G.cam.z), shoulder=meta.camMode!=='far'; // Phase 19: rays start at the TRUE eye (G.cam is the follow-point at the hero — a zero-length ray)
+  const noFade=meta.camMode==='fps';   // first-person: the camera IS the eye and the hero isn't drawn, so NOTHING should ever go see-through (fixes platforms turning translucent when you jump off them)
+  const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
+  // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
+  const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
+    if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
+  // the surface you're STANDING on must never fade — the floor underfoot stays solid
+  const standingOn=(o)=>{ const oh=(o.h==null?96:o.h); return Math.abs((G.p.y||0)-oh)<12 && Math.abs(G.p.x-o.x)<o.w/2+10 && Math.abs(G.p.z-o.z)<(o.d||o.w)/2+10; };
+  for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue; const sy=sp2.y||0;                       // healing springs (drawn after cull is defined)
+    bx(sp2.x,sy+0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                       // base pad
+    bx(sp2.x,sy+2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
+    if(!sp2.used){ const fy=sy+13+Math.sin(t*2.6)*3;                                                    // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
+      bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
+  }
+  const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
+  const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
+    bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
+    bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
+  if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
+    if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
+    else if(!noFade && !shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
+    else if(!noFade && shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through
+    else wallBox(wl);
+  }
+  // doors: sealed slabs glow by type; open ones become archways. ori 'z' = opening along z (side wall)
+  const doorCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
+  if(G.doors) for(const dr of G.doors){ if(cull(dr.x,dr.z)) continue; const zd=dr.ori==='z';
+    if(zd){ bx(dr.x,48,dr.z-dr.d/2-8, 20,96,16, stone); bx(dr.x,48,dr.z+dr.d/2+8, 20,96,16, stone); bx(dr.x,92,dr.z, 20,10,dr.d+32, stoneTop); }
+    else { bx(dr.x-dr.w/2-8,48,dr.z, 16,96,20, stone); bx(dr.x+dr.w/2+8,48,dr.z, 16,96,20, stone); bx(dr.x,92,dr.z, dr.w+32,10,20, stoneTop); }
+    if(!dr.open){
+      if(!noFade && ((!shoulder && dr.z>G.p.z+26 && dr.z-G.p.z<320 && Math.abs(dr.x-G.p.x)<340) || (shoulder && rayHits(dr,12)))) LATE.push({kind:'door',o:dr});
+      else if(zd){ bx(dr.x,dr.h/2,dr.z, 10,dr.h,dr.d, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, 11,dr.h*0.8,dr.d*0.16, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
+      else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
+    }
+  }
+  // torches: flickering flames along the halls
+  if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
+    voxDraw('torch.post',{x:tc.x,z:tc.z,seed:Math.round((tc.ph||0)*100)});
+    bx(tc.x,56,tc.z, 7,9,7,'#c9783b','#713418',fl*0.84);
+    bx(tc.x+fk*1.2,63,tc.z, 4,6,4,'#f0bd68','#a65e22',fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,'#ffe39a','#f0bd68',fl*0.9);  // flickering flame tongues
+    bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
+    glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
+  // pressure plates
+  for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue; const py=pl.y||0;
+    bx(pl.x,py+1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
+    bx(pl.x,py+2.2,pl.z, 24,1.4,24, pl.lit?'#9fd0ff':tint(s.ground,'#fff',0.1), pl.lit?'#4aa3e0':null, 1); }
+  // the ancient key
+  for(const ky of G.keys){ if(ky.taken) continue; const ky0=ky.y||0;
+    bx(ky.x,ky0+60,ky.z, 4,120,4,'#ffd24a','#ffd24a',0.10);
+    pushM(); mv(ky.x,ky0+26+Math.sin(t*2.4)*4,ky.z); rotY(t*2);
+    bx(0,0,0, 3,16,3,'#ffd24a','#ffd24a'); bx(0,10,0, 9,7,3,'#ffd24a','#ffd24a');
+    bx(2.6,-6,0, 5,3,3,'#ffd24a','#ffd24a'); bx(2.6,-1,0, 4,2.6,3,'#ffd24a','#ffd24a'); popM(); }
+  // chests
+  for(const ch of G.chests) drawChest(ch,t);
+  // obstacles: platforms (jumpable, light top) & columns (cover, capped)
+  if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
+    if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
+    if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
+      bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
+    else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
+      bx(ob.x,ob.h*0.52,ob.z, ob.w*0.5,ob.h*0.9,ob.d*1.06, tint(s.ground,'#fff',0.06));
+      bx(ob.x,ob.h+2.5,ob.z, ob.w*1.35,5,ob.d*1.35, tint(s.ground,'#fff',0.13)); }
+  }
+  // theme decorations
+  for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
+    // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
+    if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
+      gl.depthMask(false); bx(d.x,(d.y0!=null?d.y0:0)+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c, null, 0.2); gl.depthMask(true); continue; }
+    if(d.y0!=null){ bx(d.x,d.y0+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c); continue; }   // strata band: an exact box at a given base height
+    if(d.theme==='forest'){ const bk='#3a2c1c', bkD='#2a2014', lf=tint('#2c5c34','#000',0.1), lfD=tint('#2c5c34','#000',0.28), lfL=tint('#2c5c34','#fff',0.12);
+      bx(d.x,d.h*0.3,d.z, d.w*0.34,d.h*0.62,d.w*0.34, bk);                                    // trunk
+      for(const s of [-1,1]) bx(d.x+s*d.w*0.22,d.h*0.05,d.z, d.w*0.16,d.h*0.1,d.w*0.5, bkD);  // buttress roots
+      for(const s of [-1,1]){ pushM(); mv(d.x,d.h*0.5,d.z); rotZ(-s*0.5); bx(s*d.w*0.4,d.h*0.12,0, d.w*0.5,d.w*0.16,d.w*0.16, bk); popM(); }   // limbs
+      bx(d.x,d.h*0.78,d.z, d.w*1.9,d.h*0.6,d.w*1.9, lfD); bx(d.x,d.h*0.9,d.z, d.w*1.5,d.h*0.4,d.w*1.5, lf); bx(d.x,d.h*1.02,d.z, d.w*0.9,d.h*0.3,d.w*0.9, lfL);   // layered canopy
+      for(let i=0;i<4;i++){ const a=i*1.571+d.x; bx(d.x+Math.cos(a)*d.w*0.9,d.h*0.8,d.z+Math.sin(a)*d.w*0.9, d.w*0.7,d.w*0.6,d.w*0.7, i%2?lf:lfD); } }   // outer clumps
+    else if(d.theme==='frost'){ const ic='#bff0ff', icD='#7fd6ff', icDk='#4a7fa8';
+      bx(d.x,d.h*0.08,d.z, d.w*0.9,d.h*0.14,d.w*0.9, tint(icDk,'#fff',0.2));                  // frosted base
+      pushM(); mv(d.x,d.h*0.45,d.z); rotY(d.x*0.1); rotZ(0.12); box(d.w*0.5,d.h*0.85,d.w*0.5, ic,icD,0.85); popM();
+      for(const p of [[-0.5,0.3,0.5],[0.6,0.25,-0.4],[0.3,0.35,0.6]]){ pushM(); mv(d.x+p[0]*d.w,d.h*p[1],d.z+p[2]*d.w); rotZ(p[0]*0.5); box(d.w*0.28,d.h*p[1]*1.6,d.w*0.28, ic,icD,0.8); popM(); }   // side shards
+      bx(d.x,d.h*0.82,d.z, d.w*0.2,d.h*0.3,d.w*0.2,'#eafcff','#fff',0.7); }                   // bright tip
+    else if(d.theme==='void'||d.theme==='apex'){ const vr='#4a2f7a', vg='#b06bff';
+      bx(d.x,d.h*0.2,d.z, d.w*0.8,d.h*0.4,d.w*0.8,'#1a1226');                                 // eroded base
+      pushM(); mv(d.x,d.h*0.55,d.z); rotY(t*0.15+d.x); box(d.w*0.46,d.h*0.9,d.w*0.46, vr,vg,0.85); bx(0,d.h*0.4,0, d.w*0.2,d.h*0.3,d.w*0.2, vr,vg,0.95); popM();
+      for(let i=0;i<3;i++){ const a=t*0.6+i*2.09; bx(d.x+Math.cos(a)*d.w*0.7,d.h*(0.5+0.2*Math.sin(t+i)),d.z+Math.sin(a)*d.w*0.7, d.w*0.14,d.w*0.14,d.w*0.14, vg,vg,0.7); } }   // floating shards
+    else if(d.theme==='volcano'){ const rk='#2a160e', rkD='#1a0e08', lav='#ff7a3a', lavB='#ff9a4a', em=0.6+0.3*Math.sin(t*3+d.x);
+      bx(d.x,d.h*0.32,d.z, d.w,d.h*0.64,d.w, rk); bx(d.x,d.h*0.1,d.z, d.w*1.2,d.h*0.2,d.w*1.2, rkD);   // basalt + base
+      for(let i=0;i<3;i++) bx(d.x+(i-1)*d.w*0.25,d.h*0.35,d.z+d.w*0.5, 2,d.h*0.5,1.4, lav,lavB,0.6*em);   // lava veins
+      bx(d.x,d.h*0.66,d.z, d.w*0.5,d.h*0.16,d.w*0.5, lav,lavB,0.5+0.3*em);                     // molten crown
+      for(let i=0;i<2;i++) bx(d.x+Math.sin(t*2+i)*d.w*0.3,d.h*0.8+((t*20+i*10)%(d.h*0.4)),d.z, 2.4,3,2.4, lav,lavB,0.6); }   // embers
+    else { const st=d.c, stD=tint(d.c,'#000',0.25), stL=tint(d.c,'#fff',0.1), ms='#3a5a2e';
+      bx(d.x,d.h*0.06,d.z, d.w*1.5,d.h*0.12,d.w*1.5, stD);                                    // plinth
+      bx(d.x,d.h*0.5,d.z, d.w,d.h*0.86,d.w, st);
+      for(let i=-1;i<=1;i++) bx(d.x+i*d.w*0.34,d.h*0.5,d.z+d.w*0.5, d.w*0.12,d.h*0.8,1.4, stD);   // flutes
+      bx(d.x,d.h*0.94,d.z, d.w*1.4,d.h*0.12,d.w*1.4, stL);                                    // capital
+      bx(d.x+d.w*0.4,d.h*0.3,d.z, d.w*0.2,d.h*0.4,1.4, stD);                                  // crack
+      for(const s of [-1,1]) bx(d.x+s*d.w*0.7,d.h*0.08,d.z+s*d.w*0.3, d.w*0.4,d.h*0.14,d.w*0.4, stD);   // rubble
+      bx(d.x,d.h*0.9,d.z+d.w*0.5, d.w*0.6,d.h*0.08,1.4, ms,ms,0.4); }                         // moss
+  }
+}
+function weaponMesh(w,swing){
+  // drawn in hand space: +y up along the blade
+  const gcos=(G&&G.p&&G.p.weapon===w)?cosEquipped('glow'):null;    // cosmetic edge glow — only on YOUR equipped weapon
+  // A cosmetic glow is an emissive outline, not a material replacement. Using its
+  // color as `blade` made every equipped weapon inherit the glow (commonly red) in
+  // the hub, while mirror copies happened to bypass the identity check and looked right.
+  const blade=w.blade||'#dfe5ec', mag=w.sch==='mag';
+  const glow=gcos?gcos.col:(mag?blade:null);
+  const T=(typeof G!=='undefined'&&G&&G.time)||0;
+  const edge=tint(blade,'#ffffff',0.45), dkb=tint(blade,'#000000',0.4);
+  // dark-artifact material kit: bone, rust, blood, black iron, leather, sinew
+  const bone='#d8cdb0', boneDk='#a08f6c', rust='#7c4a26', iron='#3c4048', blood='#8e1620', wrap='#453221', sinew='#cbb894', gold='#8a6f34', haft='#2e2620';
+  switch(w.art){
+    case 'dagger': // ritual dagger — bone pommel, wrapped grip, dark blade dripping blood
+      bx(0,-6,0, 4.4,4,4.4, bone); bx(0,-8,0, 5,1.6,5, boneDk); bx(0,-6,0, 2,2,2, blade,glow);   // pommel + cap + gem
+      bx(0,-1,0, 3,7,3, wrap); for(let i=0;i<3;i++) bx(0,-3.4+i*2.8,1.7, 3.3,0.9,0.6, boneDk);     // grip wrap rings
+      bx(0,3.5,0, 8,2,3.4, iron); bx(0,3.5,0, 8.8,0.9,1.2, edge); bx(0,4.5,1.9, 2,1.2,0.8, gold);   // crossguard + rim + rivet
+      bx(0,11,0, 4.6,14,2.4, dkb,glow); bx(0,20,0, 2.6,6,1.8, dkb,glow);
+      bx(0,13,1.25, 0.9,15,0.8, edge); bx(-2,12,0, 0.7,14,2, edge); bx(2,12,0, 0.7,14,2, edge);      // fuller groove + twin edge bevels
+      bx(1.6,14,1.2, 1.2,7,0.9, blood); bx(1.6,8.5,1.2, 1.5,2.2,1.2, blood); bx(-1.2,18,1.2, 1,3.4,0.8, blood); break;
+    case 'javelin': // impaler — black shaft, bone bindings, barbed point
+      bx(0,14,0, 2.8,44,2.8, haft); bx(0,14,1.5, 0.8,44,0.6, tint(haft,'#000',0.4));               // shaft + seam
+      for(let i=0;i<4;i++){ bx(0,-2+i*11,1.6, 3.4,1.6,1, bone); bx(0,-2+i*11,-1.6, 3.4,1.6,1, bone); } // bone bindings both sides
+      bx(0,40,0, 4.4,12,3, dkb,glow); bx(0,48,0, 2.4,7,2, edge,glow); bx(0,42,1.5, 0.8,12,0.7, edge); // leaf point + fuller
+      bx(3.4,37,0, 3.4,5,2, dkb,glow); bx(-3.4,37,0, 3.4,5,2, dkb,glow); bx(4.8,37,0, 1.6,2,1.4, edge); bx(-4.8,37,0, 1.6,2,1.4, edge); break;   // barbs + tips
+    case 'axe': // executioner's ax — rusted jagged head, carved eyes that glow
+      bx(0,12,0, 3.4,30,3.4, haft); for(let i=0;i<4;i++) bx(0,0+i*7,1.8, 3.8,1.4,1, wrap); bx(0,-3,0, 4,3,4, iron);   // hafts wraps + butt cap
+      bx(5,22,0, 6,15,3.6, rust);
+      bx(10.5,21,0, 8,17,3.4, dkb,glow); bx(14.2,21,0.2, 1.8,17,2.2, edge); bx(14.2,21,0, 1.2,17,3.6, tint(edge,'#fff',0.3));   // bit + honed edge
+      bx(6,30.5,0, 3,4,3, rust); bx(9.5,31.5,0, 2.4,5,2.6, rust); bx(12.5,30,0, 2,3.4,2.2, rust);
+      bx(-4.5,24,0, 4.4,5,3, rust); bx(-7.4,24,0, 2.6,3,2.2, edge); bx(-6,24,0, 2,7,2.4, rust);      // rear spike + cheek
+      bx(9,25,1.9, 2.6,2.2,0.8, '#17141c'); bx(9,25,2.2, 1.1,1,0.6, blade, blade);
+      bx(10.5,17,1.8, 2.4,2,0.8, '#17141c'); bx(10.5,17,2.1, 1,0.9,0.6, blade, blade); break;
+    case 'great': // cursed greatblade — notched dark blade, burning rune line, bone pommel
+      bx(0,-3,0, 4,12,4, wrap); bx(0,-10,0, 5.4,4.6,5.4, bone); bx(0,-13,0, 4,2.6,4, boneDk); bx(0,-10,0, 2,2,2, blade,glow);   // pommel stack + gem
+      for(let i=0;i<3;i++) bx(0,-6+i*3,2.1, 4,0.9,0.6, boneDk);                                       // grip wraps
+      bx(0,4,0, 20,3.6,5, iron); bx(0,4,0, 21,1.4,1.6, gold); bx(0,5,0, 6,4.6,6, rust);                 // guard + gilt line + collar
+      bx(0,25,0, 9,40,3.8, dkb,glow); bx(0,46,0, 5,9,3, dkb,glow);
+      bx(0,25,1.3, 1.8,36,1.1, blade, blade); bx(-4.4,25,0, 0.9,38,2.2, edge); bx(4.4,25,0, 0.9,38,2.2, edge);   // fuller + twin bevels
+      bx(5.2,15,0, 1.8,5,3, dkb); bx(5.2,29,0, 1.8,6,3, dkb); bx(-5.2,22,0, 1.8,5,3, dkb); break;      // silhouette notches
+    case 'hammer': // dread maul — black iron head, rust straps, face spikes
+      bx(0,12,0, 3.6,30,3.6, haft); for(let i=0;i<4;i++) bx(0,0+i*7,2, 4,1,0.6, wrap); bx(0,-3.4,0, 4.4,3.4,4.4, bone);
+      bx(0,28,0, 13,12,12, iron); bx(0,28,0, 14.5,3,3, rust); bx(0,31.5,0, 3,3,14.5, rust); bx(0,24.5,0, 3,3,14.5, rust);  // head + banding
+      for(const s of [-1,1]) for(const z of [-1,1]) bx(s*6.2,28,z*6.2, 1.6,12.4,1.6, tint(iron,'#000',0.3));   // corner ribs
+      bx(8.2,28,0, 3.4,4,4, edge); bx(-8.2,28,0, 3.4,4,4, edge); bx(0,35.6,0, 3,3.4,3, edge); bx(0,28,6.5, 3,3,2, edge); break;  // striking studs
+    case 'scythe': // necromancer's scythe — vertebra spine shaft, sweeping blade, glowing soul edge
+      for(let i=0;i<8;i++){ bx(0,-4+i*5.6,0, i%2?4.2:3, 5,3.2, i%2?bone:boneDk); bx(0,-4+i*5.6,2, i%2?2:1.4,2,0.8, tint(boneDk,'#000',0.2)); }  // vertebrae + discs
+      bx(0,42,0, 4.6,5,4, bone); bx(2.5,45.5,0, 6,3.4,3.4, boneDk);
+      bx(7,45,0, 10,3.6,3, dkb,glow); bx(13,45.5,0, 7,3.2,2.6, dkb,glow); bx(18.5,44,0, 5,3.2,2.4, dkb,glow);   // neck sweeps out from the top of the shaft
+      bx(22,38.5,0, 3.4,10,2.3, dkb,glow); bx(20.5,29,0, 3,11,2.1, dkb,glow); bx(17,19.5,0, 2.8,10,1.9, edge,glow);   // then curls sharply DOWN and back in — a sickle hook, tip at the ground
+      bx(10,46.6,0, 9,1.2,1.4, blade, blade); bx(21,40,0, 1.3,15,1.2, blade, blade); bx(18.4,24,0, 1.2,15,1.1, blade, blade); break;   // soul-edge glint runs out then down the inner curve
+    case 'bow': // recurve bow — vertebra limbs curving forward, sinew string drawn to a nocked arrow
+      bx(0,10,1, 3.4,11,4, wrap);                                                                 // riser / grip
+      pushM(); mv(0,16,0); rotZ(0.30); box(2.8,15,2.8, bone); mv(0,8,2.2); rotZ(0.55); box(2.2,9,2.2, boneDk); popM();   // upper limb, tips curl forward
+      pushM(); mv(0,4,0); rotZ(-0.30); box(2.8,15,2.8, bone); mv(0,-8,2.2); rotZ(-0.55); box(2.2,9,2.2, boneDk); popM(); // lower limb
+      bx(0,10,4.0, 0.8,42,0.8, sinew);                                                            // string at the limb tips
+      bx(0,10,1.4, 0.8,16,0.8, sinew);                                                            // string drawn back to the nock (V shape)
+      pushM(); mv(0,10,1.4); rotX(1.571); box(1.3,34,1.3,'#c9a06a'); mv(0,17,0); box(3,3.4,3,'#8a7a5a'); popM();   // NOCKED ARROW pointing forward (+z), head at the front
+      break;
+    case 'cross': // dark crossbow — iron prod, bone tips, loaded bolt
+      bx(0,7,0, 3.6,22,3.6, haft); bx(0,2,3.2, 3.2,4,7, iron); bx(0,-2.5,2, 2,4,3, wrap); bx(0,7,1.9, 3.8,10,0.8, gold);   // stock + gilt inlay
+      bx(0,15,0, 24,2.8,3, iron); bx(0,15,0, 24,1.2,1.4, tint(iron,'#fff',0.2)); bx(-12.6,15,0, 2.6,5,4.6, bone); bx(12.6,15,0, 2.6,5,4.6, bone);  // prod + limb tips
+      for(const s of [-1,1]) bx(s*7,15,0, 2,3.4,3.6, tint(iron,'#000',0.3));                                      // prod bindings
+      bx(0,15,-1.6, 22,0.8,0.8, sinew); bx(0,21,0, 2,9,2, dkb,glow); bx(0,26,0, 3,2.2,2, blade,glow); bx(0,25,1.4, 0.8,7,0.6, edge); break;   // string + bolt + fletch glint
+    case 'staff': // necro staff — gnarled shaft, skull with glowing sockets, floating crystal
+      bx(0,16,0, 3,44,3, '#3a2c1e'); bx(1.4,26,0, 1.6,10,1.6, haft); bx(-1.3,10,0, 1.5,9,1.5, haft); bx(0,-4,0, 3.6,3,3.6, iron);  // shaft knots + ferrule
+      for(let i=0;i<3;i++) bx(0,4+i*6,1.9, 3.2,0.8,0.6, boneDk);                                                   // sinew bindings
+      bx(0,41,0, 7,7.5,6.5, bone); bx(0,43.5,0, 6,2.4,6, boneDk); bx(0,38.6,3.3, 3.4,1.6,0.6, '#17141c'); bx(0,44,3.2, 3,1.4,0.6,'#17141c');  // skull + brow + jaw + crack
+      bx(-1.8,42,3.3, 1.8,2,0.8, blade, blade); bx(1.8,42,3.3, 1.8,2,0.8, blade, blade);
+      bx(0,49,0, 6,6,6, blade,blade); bx(0,49,0, 2,8,2, tint(blade,'#fff',0.4), blade); break;                     // floating crystal + inner light
+    case 'rod': // soul-cage rod — twisted haft, caged burning core
+      bx(0,12,0, 2.8,30,2.8, '#3a2c1e'); bx(0,-2,0, 3.6,3,3.6, iron); for(let i=0;i<4;i++) bx(0,2+i*6,1.7, 3,0.8,0.5, gold);   // gilt rings up the haft
+      bx(0,29,0, 7,2.4,7, iron); bx(0,38.6,0, 6,2.2,6, iron);
+      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.4,33.8,Math.sin(a)*3.4, 1.4,8.4,1.4, iron); bx(Math.cos(a)*3.4,33.8,Math.sin(a)*3.4, 0.8,8.6,0.8, tint(iron,'#fff',0.2)); }  // cage bars + shine
+      bx(0,33.8,0, 4.6,4.6,4.6, blade, blade); bx(0,33.8,0, 2,6,2, tint(blade,'#fff',0.4), blade); break;          // caged soul + flare
+    case 'scepter': // profane scepter — tarnished gold, bone crown, dark gem
+      bx(0,14,0, 3,34,3, gold); bx(0,-2,0, 4,3,4, iron); for(let i=0;i<3;i++) bx(0,4+i*8,1.7, 3.2,1,0.6, tint(gold,'#fff',0.25));   // shaft + polished rings
+      bx(0,32,0, 7.5,3.6,7.5, boneDk); bx(0,30,0, 6,1.8,6, gold); for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*4,35.4,Math.sin(a)*4, 1.8,4.4,1.8, bone); bx(Math.cos(a)*4,37.8,Math.sin(a)*4, 1.4,1.6,1.4, blade,glow); }  // crown + gilt band + tipped prongs
+      bx(0,38.5,0, 6.5,6.5,6.5, blade,blade); bx(0,38.5,0, 2.4,8,2.4, tint(blade,'#fff',0.4), blade); break;       // dark gem + core
+    case 'wand': // skeletal wand — bone fingers clawing a dark orb
+      bx(0,7,0, 2.6,16,2.6, boneDk); bx(0,-2,0, 3.2,2.6,3.2, wrap); for(let i=0;i<2;i++) bx(0,2+i*6,1.6, 2.8,0.8,0.5, wrap);   // grip wraps
+      bx(0,14.5,0, 3.6,3,3.6, bone); bx(0,12.5,0, 4,1.4,4, boneDk);                                                // knuckle collar
+      for(let i=0;i<4;i++){ const a=i*1.5708+0.4; pushM(); mv(Math.cos(a)*3.6,17.5,Math.sin(a)*3.6); rotY(-a); rotX(-0.35); box(1.4,6.5,1.4, bone); mv(0,4,1); rotX(-0.5); box(1.1,2.6,1.1, boneDk); popM(); }  // 4 clawed fingers, curling
+      bx(0,19.5,0, 5.5,5.5,5.5, tint(blade,'#000',0.3), blade); bx(0,19.5,0, 2,7,2, tint(blade,'#fff',0.3), blade); break;
+    case 'orb': // soul lantern — chained iron cage, burning core, rising wisps
+      bx(0,22,0, 1.8,2.4,1.8, iron); bx(1.2,25,0, 1.8,2.4,1.8, iron); bx(0,28,0, 1.6,2.2,1.6, iron); bx(-1,31,0, 1.6,2.2,1.6, iron);   // hanging chain
+      bx(0,19,0, 6.5,2.2,6.5, iron); bx(0,3,0, 7.5,2.4,7.5, iron); bx(0,1,0, 4,2,4, iron); bx(0,19,0, 4,1.2,4, gold); bx(0,3,0, 5,1.2,5, gold);   // cap + base + gilt rims
+      for(let i=0;i<4;i++){ const a=i*1.5708; bx(Math.cos(a)*3.8,11,Math.sin(a)*3.8, 1.5,14.5,1.5, iron); bx(Math.cos(a+0.785)*4.2,11,Math.sin(a+0.785)*4.2, 1,14.5,1, tint(iron,'#000',0.3)); }  // 8 cage bars
+      bx(0,11,0, 5,6.5,5, blade, blade);
+      { const wf=Math.sin(T*4)*0.5+0.5; bx(2,16+wf*3,1, 2,2.6,2, blade, blade, 0.55); bx(-1.8,14+wf*4,-1, 1.7,2.2,1.7, blade, blade, 0.4); } break;
+    default: // cursed longsword — wrapped grip, bone pommel, notched dark blade, rune glow
+      bx(0,-2,0, 3.4,13,3.4, wrap); bx(0,-9,0, 4.6,4.2,4.6, bone); bx(0,-11.5,0, 3.4,2,3.4, boneDk); bx(0,-9,0, 1.8,1.8,1.8, blade,glow);  // pommel + gem
+      for(let i=0;i<3;i++) bx(0,-6+i*3,2, 3.6,0.9,0.6, boneDk);                                                    // grip wraps
+      bx(0,5,0, 14,3,4.4, iron); bx(0,5,0, 14.8,1.2,1.4, gold); bx(0,5,0, 4.6,3.6,5, rust);                          // guard + gilt + collar
+      bx(0,24,0, 6.4,32,3.4, dkb,glow); bx(0,42,0, 3.6,8,2.6, dkb,glow);
+      bx(0,25,1.15, 1.4,28,1, blade, blade); bx(-3.1,24,0, 0.8,30,2.2, edge); bx(3.1,24,0, 0.8,30,2.2, edge);        // fuller + twin bevels
+      bx(3.9,17,0, 1.6,4,3, dkb); bx(-3.9,28,0, 1.6,4.6,3, dkb);
+      if(w.name==='Rusty Sword'){ bx(-1.8,14,1.8,1.2,5,.7,'#8d4f28'); bx(1.6,31,1.8,1,7,.7,'#6f3d23'); bx(0,38,1.7,2.2,2,.8,'#b66b35'); bx(-5.6,5,0,2.2,2.2,5,'#76512e'); }
+      break;                                            // silhouette notches
+  }
+  // equipped elemental flourish — animated aura keyed to the weapon's element (fire actually flickers)
+  const el=w.el;
+  if(el){ const ec=elementColor(el)||'#cfd6df';
+    const TIP={dagger:23,spear:50,axe:31,great:48,hammer:35,scythe:47,bow:22,cross:26,staff:49,rod:38,scepter:40,wand:22,orb:16}[w.art]||44;
+    if(el==='fire'){ for(let i=0;i<3;i++){ const f=Math.sin(T*13+i*2.1)*0.5+0.5; bx((i-1)*2.6, TIP+2+f*6, 0, 3.4-f*1.4, 5+f*4, 3.4-f*1.4, i&1?'#ffd257':'#ff6a24','#ff9a3b',0.9); } }
+    else if(el==='ice'){ bx(0,TIP,0, 5.5,9,5.5, ec,ec,0.5); bx(3,TIP+3,0, 2,7,2,'#eafaff','#bff0ff'); bx(-2.6,TIP-2,0, 2,6,2,'#eafaff','#bff0ff'); }
+    else if(el==='storm'){ const f=Math.sin(T*22)>0.3?1:0.25; bx(1.6,TIP+3,0, 1.8,6,1.8,'#ffffff',ec,f); bx(-1.6,TIP-1,0, 1.5,5,1.5,'#ffffff',ec,f*0.7); }
+    else if(el==='poison'){ const f=Math.sin(T*6)*0.5+0.5; bx(1.4,TIP+3+f*3,0, 2.4,2.4,2.4,'#c6ff7a',ec,0.75); bx(-1.6,TIP+f*2,0, 2,2,2,'#a6ef5a',ec,0.6); }
+    else { const f=Math.sin(T*5)*0.5+0.5; bx(0,TIP,0, 5+f*1.6,6+f*1.6,5+f*1.6, ec,ec,0.35+0.2*f); } // arcane / void / holy glow
+  }
+}
+function drawHero3(p,t,preview){
+  const sk=SKINS[p.skin]||SKINS.knight;
+  const _vl=preview?0:voxLod(p.x,p.z);
+  const hurt=p.hurtFlash>0, A=hurt?'#ff8a82':sk.armor, AL=hurt?'#ffb0aa':sk.armorLt;
+  const godGlow=sk.god?sk.glow:null;
+  const moving=Math.hypot(p.vx||0,p.vz||0)>20&&p.onGround;
+  const leg=Math.sin(p.runAnim||0)*(moving?0.55:0), bob=(moving?Math.abs(Math.sin((p.runAnim||0)*2))*1.4:Math.sin(t*2)*0.7);
+  if(p.invuln>0 && Math.floor(p.invuln*20)%2===0 && !preview) return;
+  pushM(); mv(p.x,p.y+bob,p.z); rotY(p.yaw);
+  if(p.dodgeTimer>0){ /* dash tilt */ rotX(0.28); }
+  // legs (hip pivot)
+  pushM(); mv(-4.5,14,0); rotX(leg); bx(0,-7,0, 6.5,14,6.5,'#1c2530'); popM();
+  pushM(); mv(4.5,14,0); rotX(-leg); bx(0,-7,0, 6.5,14,6.5,'#1c2530'); popM();
+  bx(-4.5,2.4,1, 6.5,4,8, sk.trim); bx(4.5,2.4,1, 6.5,4,8, sk.trim); // boots
+  // torso
+  bx(0,25,0, 17,22,10, A,godGlow);
+  bx(0,29,3.2, 13,10,5, AL);
+  bx(0,17,0, 17.6,3,10.6, sk.trim);
+  bx(0,29,5.6, 2.6,12,1.2, sk.glow, sk.glow); // chest glow line
+  // pauldrons
+  bx(-11,33,0, 8,6,10, AL); bx(11,33,0, 8,6,10, AL);
+  // left arm
+  pushM(); mv(-11,32,0); rotX(moving?leg*0.8:0.06); bx(0,-8,0, 4.6,15,4.6, AL); popM();
+  // right arm + weapon
+  // right arm + weapon — attack style varies by weapon type (thrust / arc-sweep / overhead-slam)
+  pushM(); mv(11,32,0);
+  const w=p.weapon;
+  const _casterLong=['staff','rod','scepter'].includes(w.art), _casterWand=w.art==='wand'||w.art==='orb';
+  let _armPitch=0;
+  if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
+    if(prog<0){ if(w.art==='scythe') rotX(-0.05+Math.sin(t*2)*0.04);   // idle: the scythe rests UPRIGHT (points up)...
+      else rotX(-0.16+Math.sin(t*2)*0.05); }                            // ...physical blades rest arm-forward so the blade points AHEAD, never into the ground
+    // SWING poses — each traces the SHAPE of its actual hitbox so the motion reads true
+    else if(M.shape==='thrust'){ rotX(w.art==='javelin'?-1.6:-1.45); }                  // straight forward lunge (thrust hitbox)
+    else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
+    else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
+    else if(w.art==='axe'){ rotY((0.75-prog)*1.9); rotX(-0.9-prog*0.3); rotZ(0.35); }    // wide sideways hack
+    else if(w.art==='scythe'){                                                            // 3-hit combo: a flat reap, a rising backhand reap, then an overhead magic chop
+      if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it straight down
+      else if(p.swingCombo===1){ rotZ(-0.55+prog*0.5); rotX(-1.05+prog*0.85); rotY(-1.5+prog*2.7); }   // 2nd: rising backhand reap — low-left sweeping up to high-right
+      else { rotZ(0.35); rotX(-0.4); rotY(1.5-prog*3.0); } }                              // 1st: flat waist-high reap, right to left
+    else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
+  } else if(_casterLong){
+    // Reach forward to a vertical focus instead of laying its shaft along the forearm.
+    _armPitch=p.atkTimer>0?(-0.82+(1-(p.atkTimer/0.18))*0.18):-0.55; rotX(_armPitch);
+  } else if(_casterWand){
+    // Wands/orbs are presented forward with a relaxed bent casting arm.
+    _armPitch=p.atkTimer>0?(-1.05+(1-(p.atkTimer/0.18))*0.16):-0.62; rotX(_armPitch);
+  } else { _armPitch=p.atkTimer>0?(-1.35+(1-(p.atkTimer/0.18))*0.35):(-1.1); rotX(_armPitch); }
+  bx(0,-8,0, 4.6,15,4.6, AL);
+  pushM(); mv(0,-14,0);
+  // Weapon geometry grows along local +Y. A positive X rotation sends its business end toward local +Z,
+  // the hero's facing direction. Compensate arm pitch for casting implements and project idle blades forward.
+  const _upright = (w.cls!=='melee') || w.art==='scythe';
+  const _tallHaft = (w.art==='scythe'||_casterLong);
+  if(_casterLong){ rotX(0.58-_armPitch); mv(0,-18,2.5); }                     // staff/rod/scepter leans forward, gripped at mid-shaft
+  else if(_casterWand){ rotX(1.42-_armPitch); mv(0,-1,1.5); }                 // wand/orb focus projects forward, clear of the body
+  else if(_upright){ rotX(-0.08); if(_tallHaft && p.atkTimer<=0) mv(0,-16,0); }   // point up; grip the middle of the shaft at rest
+  else if(p.atkTimer<=0) rotX(1.5);                                           // idle sword/dagger/axe/maul projects forward, tip up-and-out
+  else rotX(Math.PI);                                                        // swing keeps the blade-down base the swing poses expect
+  if(w.cls==='melee' && p.atkTimer>0 && (MELEE[w.art]||{}).shape==='thrust') mv(0,-Math.sin((1-(p.atkTimer/0.26))*Math.PI)*(w.art==='javelin'?17:10),0);
+  if(preview||!thrownWeaponHidden(p,w)) weaponMesh(w); popM();
+  popM();
+  // head
+  bx(0,42,0, 12,12,11, sk.tone);
+  // customisable HAIR (sits on the head, tucked under any headgear) + EYE COLOUR
+  const _hs=(p.hairStyle||meta.hairStyle||'short'), _hc=(p.hairColor||meta.hairColor||'#3a2a1c');
+  if(_hs!=='bald'){
+    bx(0,47.6,-0.5, 12.4,3.4,11.4, _hc);                                  // crown cap
+    bx(0,44,-5.4, 12,7,2.6, _hc);                                         // back of the head
+    if(_hs==='long'){ bx(0,37,-5.6, 11,10,2.4, _hc); bx(-6,38,-3, 2.4,9,7, _hc); bx(6,38,-3, 2.4,9,7, _hc); }   // long: down the back + sides
+    else if(_hs==='topknot'){ bx(0,51.5,-1, 3.2,4,3.2, _hc); bx(0,54,-1, 2.2,3,2.2, _hc); }                     // bun on top
+    else if(_hs==='mohawk'){ bx(0,50.2,-0.5, 2.6,4.6,11, tint(_hc,'#ff5a2a',0.15)); }                            // ridge
+  }
+  const _eye=(p.eyeColor||meta.eyeColor||'#8fd0ff');
+  bx(-2.6,42.5,5.6, 2.2,2.4,1.2,_eye,_eye,0.9); bx(2.6,42.5,5.6, 2.2,2.4,1.2,_eye,_eye,0.9); // eyes (custom colour, faint glow)
+  // headgear
+  const hd=sk.head;
+  if(hd==='helm'){ bx(0,48.6,0, 13,5.4,12, A,godGlow); bx(0,45,-0.5, 13,3,12.6, A); bx(0,52,-2, 2.6,5,9, sk.glow, sk.glow); }
+  else if(hd==='horns'){ bx(0,48.4,0, 13,4.6,12, A); pushM(); mv(-6.5,51,0); rotZ(0.5); box(2.6,8,2.6,'#2a1a14'); popM(); pushM(); mv(6.5,51,0); rotZ(-0.5); box(2.6,8,2.6,'#2a1a14'); popM(); }
+  else if(hd==='hood'){ bx(0,45.4,-1, 13.6,9.4,12.6, A); bx(0,49,3.4, 11,4,6, A); }
+  else if(hd==='hat'){ bx(0,48.6,0, 16,2.2,16, A); bx(0,52,0, 10,5,10, A); bx(0,56.5,0, 6,4.5,6, A); bx(0,60,0, 3,3,3, sk.glow, sk.glow); }
+  else if(hd==='crown'){ bx(0,48.4,0, 12.6,3.6,11.6, A); for(let i=-1;i<=1;i++){ bx(i*4.4,51.6,0, 2.2,4,2.2, p.skin==='god'?'#ffe04a':'#f7d79a', p.skin==='god'?'#fff2a0':null); } bx(0,53.4,0, 2,2,2, sk.glow, sk.glow); }
+  else if(hd==='halo'){ pushM(); mv(0,55,0); rotY(t*1.5); box(15,1.4,15, sk.glow, sk.glow, 0.85); popM(); }
+  else if(hd==='mask'){ bx(0,42.5,5.9, 12,10,1.6,'#0a0a0e'); bx(-2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); bx(2.8,42.5,6.6, 3,1.7,0.8, sk.glow, sk.glow); }
+  else if(hd==='eldritch'){ bx(0,42,0, 12.6,12.6,11.6, A); bx(-3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(3,43,5.9, 2.4,2.4,1.2, sk.glow, sk.glow); bx(0,39.6,5.9, 2,2,1.2, sk.glow, sk.glow); }
+  // ---- base-body detail: layered plating, rivets, face, gorget, cape (fixed to the body; sits under any equipped-armor overlay) ----
+  if(_vl<2){ const Ad=tint(A,'#000',0.24), Al=tint(AL,'#fff',0.12), riv=tint(AL,'#fff',0.35), skD=tint(sk.tone,'#000',0.2);
+    bx(0,27,-5, 16,22,3, Ad);                                                    // backplate
+    pushM(); mv(0,32,-5.6); rotX(0.14); box(15,28,2, tint(A,'#000',0.3)); for(let i=-1;i<=1;i++) bx(i*5,-16,0, 4,9,1.6, tint(A,'#000',0.4)); popM();   // cape + frayed hem
+    for(let i=0;i<3;i++) bx(0,22-i*4,5.3, 12-i*2.4,2.2,1.2, Al);                  // ab ridges
+    for(const s of [-1,1]){ bx(s*7.6,26,3.5, 3,15,4, Al); for(let i=0;i<3;i++) bx(s*7.6,32-i*7,5.6, 1.7,1.7,1.1, riv); }   // side plates + rivets
+    bx(0,20,5.6, 15,3,2, sk.trim); bx(0,20,6.2, 4,3,1.2, sk.glow, sk.glow, 0.7);  // belt + glowing buckle
+    bx(0,35,4.4, 10,4,4, sk.trim); bx(0,37.5,0, 8,4.5,8, skD);                    // gorget + neck
+    bx(0,44.6,5.7, 3,2,1.3, skD); bx(-2.6,44.4,5.9, 3.2,1,1, '#33281f'); bx(2.6,44.4,5.9, 3.2,1,1, '#33281f'); bx(0,39.4,5.7, 3.4,1,1, '#6a5648'); }   // nose + brows + mouth
+  if(_vl===0 && p.skin==='knight'){
+    const steel=VOXMAT.steel, gilt=VOXMAT.gold, ink=tint(A,'#000',.42);
+    bx(0,30,6.35,11.5,1.1,.8,steel.light,steel.edge,.28);
+    for(const s of [-1,1]){ bx(s*6.2,29,6.15,1.1,9,.8,gilt.base,gilt.edge,.25); bx(s*11,34,5.2,2.2,1.4,1.2,gilt.base,gilt.edge,.3); }
+    bx(0,25,6.4,3.8,4.5,.9,ink,gilt.edge,.25); bx(0,24,6.9,1.2,7,.6,gilt.light,gilt.edge,.5);
+    for(let i=-1;i<=1;i++) bx(i*4.4,17.2,5.7,3.2,1.1,.8,steel.dark);
+  }
+  // equipped armor shown on the character (toggle in pause menu)
+  if(!preview && p.gear && meta.showArmor){
+    const g=p.gear;
+    if(g.chest){ const a=normArmor(g.chest), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32), lt=tint(st,'#fff',0.14);
+      bx(0,24,0, 19.2,16,12, st);                                    // layered cuirass
+      bx(0,31,0, 20,3,12.4, ac, ac, 0.92);                           // gorget rim (accent)
+      bx(0,17.6,0, 20,3.2,12.2, tint(rc,'#000',0.22));               // fauld/belt
+      bx(-9.6,29,0, 6.2,7,12.6, lt); bx(9.6,29,0, 6.2,7,12.6, lt);   // shoulder plates
+      bx(-9.6,32.6,0, 6.6,2,12.8, ac, ac); bx(9.6,32.6,0, 6.6,2,12.8, ac, ac);   // pauldron trim
+      bx(0,24,6.3, 4,13,0.8, tint(st,'#000',0.28));                  // center seam
+      motifAt(a.type,0,25,6.7,1.15); }                               // the TYPE emblem, front-centre chest
+    if(g.helmet){ const a=normArmor(g.helmet), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32);
+      bx(0,44,0, 14.6,12,13.6, st);                                  // skullcap
+      bx(0,50.6,0, 15,3,13.8, ac, ac, 0.92);                         // crown rim (accent)
+      bx(0,42,6.6, 13.8,4,1, tint(rc,'#000',0.25));                  // brow guard
+      bx(0,45,6.9, 3,7,1, tint(st,'#000',0.35));                     // nasal bar
+      motifAt(a.type,0,55,0.5,0.72); }                               // crest emblem on top
+    if(g.legs){ const a=normArmor(g.legs), rc=a.color, ac=a.accent, st=tint('#8f99a8',rc,0.32);
+      bx(-4.5,8,3.9, 7.4,11,2.1, st); bx(4.5,8,3.9, 7.4,11,2.1, st); // thigh plates
+      bx(-4.5,12.6,4.1, 7.6,1.6,2.2, ac, ac); bx(4.5,12.6,4.1, 7.6,1.6,2.2, ac, ac);   // knee trim
+      motifAt(a.type,-4.5,7,4.6,0.58); motifAt(a.type,4.5,7,4.6,0.58); }               // emblem on each thigh
+    if(g.amulet){ const a=normArmor(g.amulet); bx(0,41.5,6.2, 1.2,6,0.8, tint(a.color,'#000',0.3));   // chain
+      motifAt(a.type,0,35,7,0.72); }                                 // the pendant IS the type emblem
+    if(g.ring){ const a=normArmor(g.ring); bx(9.5,2,4.4, 3.6,3.6,2.4, tint(a.color,'#000',0.1));      // band
+      motifAt(a.type,9.5,2.6,5.9,0.42); }                            // a tiny type gem on the hand
+  }
+  // cape
+  pushM(); mv(0,36,-5.6); rotX(0.16+(moving?0.42:0.06)+Math.sin(t*3)*0.04);
+  bx(0,-12,0, 15,24,1.8, sk.cape); popM();
+  popM();
+}
+/* first-person: the hero's arm + weapon hung in front of the camera, swinging on attack */
+function drawFPWeapon(p,t){
+  const cy=(G.camYaw!=null?G.camYaw:Math.PI), rawpit=(G.camPitch!=null?G.camPitch:0.06);
+  const pit=Math.max(-0.42,Math.min(0.42,rawpit));   // Phase 13: clamp the FP weapon's pitch so the arm/weapon never skews at extreme look-up/down
+  const fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+  const rx=Math.cos(cy), rz=-Math.sin(cy);                          // camera right (horizontal)
+  const ex=p.x, ey=p.y+40, ez=p.z, w=p.weapon;
+  const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4, sS=Math.sin(sw*Math.PI);
+  const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;    // magic implements + bow held upright; blades angled across
+  // per-weapon-kind attack motion — every strike travels DOWN/FORWARD (raise first, then commit)
+  const KIND=w.cls!=='melee' ? ((w.art==='bow'||w.art==='cross')?'shoot':'cast')
+    : (w.art==='dagger'||w.art==='javelin')?'stab' : (w.art==='great'||w.art==='axe')?'chop'
+    : (w.art==='hammer')?'slam' : (w.art==='scythe')?'reap' : 'slash';
+  let rxA=tilt, ryA=0, rzA=0, lunge=0, lift=0;
+  if(atk){
+    if(KIND==='stab'){ lunge=(w.art==='javelin'?26:16)*sS; rxA=tilt+0.15*sS; }                 // straight jab along your aim
+    else if(KIND==='slash'){ rxA=tilt-1.05+sw*2.0; rzA=-0.55+sw*0.95; }                      // diagonal cut: high-left -> low-right
+    else if(KIND==='chop'){ rxA=tilt-1.5+sw*2.5; rzA=(w.art==='axe'?-0.3+sw*0.55:0); lift=(1-sw)*8; }  // heavy overhead chop
+    else if(KIND==='slam'){ rxA=tilt-1.8+sw*2.9; lift=(1-sw)*12; }                           // maul crash from full height
+    else if(KIND==='reap'){ ryA=0.85-sw*1.9; rxA=tilt-0.5; rzA=-0.5; }                       // wide horizontal reap across the view
+    else if(KIND==='shoot'){ rxA=tilt-0.3*sS; lunge=-6*sS; }                                 // recoil kick back into the shoulder
+    else { lunge=10*sS; rxA=tilt-0.35*sS; }                                                  // cast: push the focus forward
+  }
+  const fwd=40+lunge, right=21, down=15;
+  const wx=ex+fx*fwd+rx*right, wy=ey+fy*fwd-down+(atk?lift:bob), wz=ez+fz*fwd+rz*right;
+  const sk=SKINS[p.skin]||SKINS.knight, AL=sk.armorLt||'#5d7da0', HAND=tint(sk.tone||'#c98d5a','#000',0.05);
+  pushM(); mv(wx,wy,wz); rotY(cy); rotX(-pit);
+    // everything below shares ONE frame (forearm → wrist → fist → weapon) so the hand physically holds the blade
+    rotY(-0.26+ryA); rotZ(-0.28+rzA); rotX(rxA);
+    pushM(); mv(0,-22,-3); rotX(0.22); box(8,22,8, AL); popM();                             // forearm sleeve trailing to the corner
+    bx(0,-10,-0.5, 8.5,10,8.5, AL);                                                          // wrist / gauntlet cuff
+    bx(0,-1,2.5, 9.5,9,9, HAND);                                                             // fist wrapped around the grip
+    bx(0,3.5,5.2, 9.5,4,3.4, tint(HAND,'#000',0.18));                                        // fingers curling over the front of the grip
+    bx(0,-4,5.2, 9.5,3.4,3, tint(HAND,'#000',0.28));                                         // thumb
+    pushM(); mv(0,3,2.5); if(!thrownWeaponHidden(p,w)) weaponMesh(w); popM();                  // thrown charge weapons visibly leave the fist
+    if(p.charging){ const col=elementColor(w.el)||'#c9a6ff', s=5+p.chargeAmt*11; const ty=(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?34:(w.art==='hammer'||w.art==='great'||w.art==='axe')?30:24; bx(0,ty,8, s,s,s, col,col,0.7); }   // orb rides the weapon's tip, not the grip
+  popM();
+}
+/* swing VFX — draws the actual hit shape (arc fan / thrust spike / slam ring) so ranges read clearly */
+function drawSwing3(p,t){
+  if(p.charging && p.weapon){ const w=p.weapon, col=elementColor(w.el)||'#c9a6ff', s=6+p.chargeAmt*13;
+    // Phase 10: the charge orb sits on the weapon's BUSINESS END (blade/tip/head), not the hand
+    const reach=(w.cls==='melee')?((MELEE[w.art]&&MELEE[w.art].reach)||46):40;
+    const fwd=reach*0.6+16, up=(w.art==='hammer'||w.art==='great'||w.art==='axe')?50:(w.sch==='mag'||w.art==='staff'||w.art==='wand'||w.art==='scepter'||w.art==='scythe')?46:36;
+    const hx=p.x+Math.sin(p.yaw)*fwd, hz=p.z+Math.cos(p.yaw)*fwd;
+    bx(hx,p.y+up,hz, s,s,s, col, col, 0.55+0.3*Math.sin(t*20)); }   // growing charge orb
+  const w=p.weapon; if(!w||w.cls!=='melee'||p.atkTimer<=0) return;
+  const M=MELEE[w.art]||MELEE.sword, prog=1-(p.atkTimer/0.26), fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+  const col=w.blade||'#dfe5ec', y=p.y+22, a=Math.max(0,0.5*(1-prog*0.8));
+  if(M.shape==='slam'){
+    const cx=p.x+fx*(M.offset||40), cz=p.z+fz*(M.offset||40), r=M.radius*(0.55+0.5*prog);
+    for(let k=0;k<14;k++){ const ang=k/14*6.283; bx(cx+Math.cos(ang)*r, y-16, cz+Math.sin(ang)*r, 9,5,9, col, col, a); }
+  } else if(M.shape==='thrust'){
+    const reach=M.reach*Math.min(1,prog*1.7);
+    for(let k=1;k<=5;k++){ const dd=reach*k/5; bx(p.x+fx*dd, y, p.z+fz*dd, M.width*1.1,6,M.width*1.1, col, col, a*(1-k*0.12)); }
+  } else if(w.art==='scythe' && p.swingCombo===2){    // scythe FINISHER: an expanding elemental ring + core flash
+    const els=w.el||'void', ec=elementColor(els)||'#c47bff', rr=(M.reach+56)*(0.45+0.65*prog);
+    for(let k=0;k<20;k++){ const ang=k/20*6.283; bx(p.x+Math.cos(ang)*rr, y+2, p.z+Math.sin(ang)*rr, 12,7,12, ec, tint(ec,'#fff',0.4), a*1.4); }
+    bx(p.x,y+8,p.z, 16,16,16, ec, ec, a*0.9);
+  } else { // arc fan swept up to the current blade angle (scythe hits 0/1 sweep alternate directions AND heights)
+    const sc1=(w.art==='scythe' && p.swingCombo===1), rev=sc1, half=M.arc/2, rr=M.reach*0.9;
+    const cur=rev?(half-prog*M.arc):(-half+prog*M.arc);
+    for(let k=0;k<=8;k++){ const a0=-half+(k/8)*M.arc; if(rev?(a0<cur-0.05):(a0>cur+0.05)) continue; const ang=p.yaw+a0;
+      const near=1-Math.min(1,Math.abs(a0-cur)/0.6);
+      const yy=(w.art==='scythe')?(sc1?(y-12+prog*32):(y-10)):y;   // 1st reap stays low & flat; 2nd rides upward as it sweeps
+      bx(p.x+Math.sin(ang)*rr, yy, p.z+Math.cos(ang)*rr, 11,6,11, col, col, a*(0.35+0.65*near)); }
+  }
+}
+/* The Waystation, drawn: waystone bonfire, seven gates, the posts and their keepers. */
+// Phase 12 hub data
+const ZONE_TROPHY={outskirts:'#7ec46a',hollow:'#e8a33d',keep:'#8fb7ff',frost:'#7fd6ff',ember:'#ff7a3a',abyss:'#b06bff',palace:'#ffe9a8',castle:'#c47bff'};
+const CLASS_COL={warrior:'#e8453d',ranger:'#7ec46a',mage:'#b06bff',reaper:'#8a6ac0'};
+const HUB_UPGRADES=[
+  {id:'braziers',name:'Relit Braziers',cost:2500,desc:'Four great braziers roar back to life'},
+  {id:'banners',name:'War Banners',cost:4000,desc:'Order banners hang the length of the hall'},
+  {id:'ramparts',name:'Repaired Ramparts',cost:7000,desc:'The broken north wall is crowned with battlements'},
+  {id:'gild',name:'Gild the Waystone',cost:12000,desc:'Your bonfire burns molten gold'}
+];
+// ===== Approved hub-NPC voxel models (distinct silhouette + signature prop + palette per the reference art) =====
+// Drawn in a frame already translated to the NPC's feet and rotated to face; +y up, +z toward the viewer.
+function hubNpcModel(n,t){
+  const sw=Math.sin(t*1.4+(n.x||0))*0.06, id=n.id;
+  const _vl=voxLod(n.x||0,n.z||0);
+  const face=(y,z,sk,skD)=>{ bx(-2.4,y+1,z, 1.5,1.5,1,'#2a2018'); bx(2.4,y+1,z, 1.5,1.5,1,'#2a2018');   // shared face helper: eyes, brows, nose, mouth
+    bx(-2.6,y+3,z, 2.4,1,1, skD||'#5a4638'); bx(2.6,y+3,z, 2.4,1,1, skD||'#5a4638'); bx(0,y,z+0.3, 1.6,2,1.4, skD||sk); bx(0,y-2.4,z, 3,1,1,'#6a4638'); };
+  if(id==='quartermaster'){                                   // sharp/skeptical: gold diamond tabard, ledger + keys, scroll pack, white spiky hair
+    const cl='#a8842e', clD='#7a5e20', gd='#e8c25a', gdL='#ffd24a', sk='#c9a380', skD='#a87f5e', hr='#eef2f8';
+    bx(-3.5,7,0, 6,15,8, clD); bx(3.5,7,0, 6,15,8, clD); bx(-3.5,1,2, 7,4,10,'#2a2620'); bx(3.5,1,2, 7,4,10,'#2a2620');   // legs + boots
+    bx(0,30,-7, 13,20,6,'#5a4326','#8a6a3a',0.2); for(const dz of [-4,4]) bx(dz,42,-8, 3,7,3,'#e8e0c8'); bx(2,44,-8, 3,6,3,'#d8cdb0'); for(const s of [-1,1]) bx(s*6,30,3, 2,20,2, clD);   // pack + scrolls + straps
+    bx(0,28,0, 15,22,10, cl, gd,0.08); if(_vl<2) for(let i=0;i<3;i++) for(const s of [-1,0,1]) bx(s*4,20+i*7,5.4, 3,3,1.4, gd,gdL,0.3);   // tabard + diamond studs
+    bx(0,30,5.6, 5,7,1.6, gd,gdL,0.4); bx(0,18,4, 15.6,3,3,'#3a2e1e'); bx(0,18,5.6, 5,4,1.4, gd);   // crest + belt + buckle
+    pushM(); mv(-8,28,2); rotZ(0.2); box(4.6,16,5, cl); mv(0,-9,3); box(4.6,4,4.6, sk); popM();
+    pushM(); mv(7,24,4); rotX(-0.2+sw); box(4.6,14,5, cl); bx(0,-8,5, 4.6,4,4.6, sk); bx(0,6,4, 6,4,8,'#6a4a2a','#c9a24a',0.15); popM();   // ledger arm
+    if(_vl<2){ bx(10,16,3, 2,3,2,'#3a2e1e'); for(const k of [0,1,2]) bx(10+k*1.4,11-k*2,3, 3.4,5,1, '#e8a33d',gdL,0.5); }   // keys
+    bx(0,44,0, 9,10,9, sk); bx(0,41,4.7, 8,5,1.4, skD); bx(0,37,0, 10,4,10, clD); face(45,4.6,sk,skD);
+    bx(0,51,0, 10.5,5,10.5, hr,'#fff',0.12); if(_vl<2) for(const p of [[3,55,2],[-3,55,1],[0,56,-1],[4,54,-2],[-4,55,0]]) bx(p[0],p[1],p[2], 2.4,4,2.4, hr);   // white spiky hair
+    if(_vl===0){ bx(0,31,6.45,4.2,4.2,.7,gdL,gdL,.45); bx(0,31,6.9,1.5,6,.55,'#fff0a0',gdL,.55); bx(0,25,-10.2,9,1.2,.8,'#cbb894'); }
+  } else if(id==='keeper'){                                   // elegant/eccentric: white mask, layered purple-black robe, gold trim, scissors + draped cloth
+    const rb='#241a2e', rb2='#3a2a55', gd='#c9a24a', gdL='#ffd24a', sk='#c9a380';
+    bx(0,4,3, 14,8,10, rb);                                                          // robe hem pooling
+    bx(0,20,0, 16,38,12, rb); bx(0,10,6.2, 14,16,1.6, rb2,'#b06bff',0.14); bx(0,8,6.6, 14,3,1, gd,gdL,0.4);   // robe + front panel + gold hem
+    for(let i=0;i<4;i++) bx(0,14+i*8,6.4, 12,1.4,1.2, gd,gdL,0.25);                   // gilt robe seams
+    bx(0,41,0, 19,7,14, rb2,'#b06bff',0.18); bx(0,44,0, 15,3,11, gd,gdL,0.2);          // mantle + gilt collar
+    pushM(); mv(-9,30,3); rotZ(0.12); box(5,22,4, '#5a2a70'); for(let i=0;i<3;i++) bx(0,-4-i*5,2.4, 4,1.4,1, rb2,'#b06bff',0.2); popM();   // draped cloth folds
+    pushM(); mv(9,30,6); rotX(-0.35+sw); box(2,11,2,'#cfd6df'); bx(-1.6,13,0, 4,4,2,'#8b93a8'); bx(1.6,13,0, 4,4,2,'#8b93a8'); bx(0,-6,0, 3,4,3, sk); popM();   // scissors + hand
+    bx(0,48,0, 9,10,9, sk); bx(0,54,-1, 11,6,11,'#1a1420'); for(const s of [-1,1]) bx(s*5,50,-2, 3,8,4,'#1a1420');   // head + dark curly hair
+    bx(0,48,5.2, 8,8,1.8,'#eef2f8','#fff',0.28); bx(-2,49,6, 1.6,1.6,1,'#1a1a22'); bx(2,49,6, 1.6,1.6,1,'#1a1a22'); bx(0,46,6, 1.4,1.8,1,'#c8ccd4');   // white mask + eyes + nose ridge
+  } else if(id==='drillmaster'){                              // stern: red+gold plate, crossed arms, beard, sheathed sword
+    const rd='#7a2a24', rdD='#5a2018', gd='#e8a33d', gdL='#ffd24a', sk='#b8895a', hr='#2a2018';
+    bx(-3.6,7,0, 6.4,15,9, '#241a18'); bx(3.6,7,0, 6.4,15,9, '#241a18'); bx(-3.6,1,2, 7,4,10, rdD); bx(3.6,1,2, 7,4,10, rdD);   // legs + boots
+    bx(0,28,0, 15,21,11, rd,'#e8453d',0.06); bx(0,31,5.6, 12,3,1.6, gd,gdL,0.4); bx(0,24,5.6, 10,3,1.4, gd,gdL,0.3);   // cuirass + trim
+    for(const s of [-1,1]){ bx(s*9,39,0, 6,7,10, rdD,'#e8453d',0.1); bx(s*9,42,0, 5,3,9, gd,gdL,0.25); }   // pauldrons + gilt
+    bx(0,30,7, 16,5,4,'#3a1a16'); bx(0,26,8, 13,4,3,'#4a201a'); for(const s of [-1,1]) bx(s*6,28,9, 4,4,3, sk);   // crossed arms + hands
+    bx(0,17,4, 15,3,3, rdD); bx(0,17,5.6, 4,4,1.4, gd);                               // belt + buckle
+    bx(0,44,0, 9,10,9, sk); bx(0,40,4.6, 7,5,3, hr); bx(0,50,0, 10,5,10, hr); bx(-4.6,45,3,2,5,3,hr); bx(4.6,45,3,2,5,3,hr);   // head + beard + hair + sideburns
+    bx(-2.4,46,4.7, 1.5,1.4,1,'#3a2a1a'); bx(2.4,46,4.7, 1.5,1.4,1,'#3a2a1a'); bx(-2.6,48,4.6, 2.6,1.2,1, hr); bx(2.6,48,4.6, 2.6,1.2,1, hr);   // eyes + heavy brows
+    bx(11,18,-2, 3.4,30,3.4,'#3a3a42','#8b93a8',0.1); bx(11,35,-2, 6.5,3,3, gd,gdL,0.4); bx(11,4,-2, 4,5,4,'#8b93a8');   // sheathed sword + chape
+  } else if(id==='smith'){                                    // warm: white beard, apron, ember gauntlet, hammer
+    const lo='#5a3a1e', loD='#3a2410', ap='#4a3018', em='#ff7a3a', emL='#ffd24a', sk='#d8b48a', wh='#e8e4d8';
+    bx(-4,7,0, 7,15,9, loD); bx(4,7,0, 7,15,9, loD); bx(-4,1,2, 8,4,11, '#2a1a0c'); bx(4,1,2, 8,4,11, '#2a1a0c');   // stout legs + boots
+    bx(0,29,0, 18,22,13, lo,'#7a5024',0.1); bx(0,28,6.6, 11,18,1.6, ap); bx(0,28,7, 3,12,1,'#8a6a3a'); for(const s of [-1,1]) bx(s*7,32,7, 2,16,1, '#6a4a2a');   // torso + apron + cross + straps
+    bx(0,42,3, 12,4,10, em,emL,0.5); for(const s of [-1,1]) bx(s*6,40,4, 4,6,4, em,emL,0.4);   // orange scarf + ends
+    bx(11,26,0, 8,15,9, loD); for(let i=0;i<3;i++) bx(11,20+i*4,4.6, 6,2,1, em,emL,0.6+0.2*Math.sin(t*5+i)); bx(11,14,4, 6,4,6, sk);   // ember gauntlet + hand
+    pushM(); mv(-11,40,-2); rotZ(0.5+sw*2); bx(0,10,0, 4,22,4,'#4a3a26'); bx(0,22,0, 10,9,9,'#20242e','#4a5568',0.3); bx(0,22,5, 8,7,2,'#3a4050'); popM();   // hammer
+    bx(0,50,0, 10,10,10, sk); bx(0,46,5, 8,7,3, wh); bx(0,43,6, 5,4,2, wh); bx(0,57,0, 11,5,11, wh); for(const s of [-1,1]) bx(s*5,52,-2, 3,7,4, wh);   // head + big beard + hair
+    bx(-2.4,51,5, 1.5,1.5,1,'#3a2a1a'); bx(2.4,51,5, 1.5,1.5,1,'#3a2a1a'); bx(0,54,5, 3,2,2, sk);   // eyes + bulb nose
+  } else if(id==='beastkeeper'){                              // glamorous/dangerous: dreadlocks, fur, gold crook, black panther
+    const ou='#2a2420', gd='#c9a86a', gdL='#ffd24a', sk='#6a4a32', drk='#141014';
+    bx(-3.4,7,0, 6,15,7, '#3a2a1e'); bx(3.4,7,0, 6,15,7, '#3a2a1e'); bx(-3.4,1,2, 7,4,9, ou); bx(3.4,1,2, 7,4,9, ou);   // legs + sandals
+    bx(0,30,0, 12,20,8, ou, gd,0.12); bx(0,22,4, 12,3,3, gd,gdL,0.4); bx(0,30,4.6, 6,10,1.4, gd,gdL,0.2);   // outfit + gold belt + pendant
+    bx(-8,42,-1, 9,8,11, '#1a1712'); for(let i=0;i<4;i++) bx(-6-i*1.5,44-i*2,-1, 3,3,3,'#241c16'); bx(8,42,-1, 6,6,10,'#1a1712');   // fur mantle (layered)
+    for(const s of [-1,1]){ pushM(); mv(s*8,26,2); rotZ(-s*0.1); box(4.4,16,5, ou); mv(0,-9,2); box(4.2,4,4.4, sk); popM(); }   // arms + hands
+    bx(0,45,0, 8.5,10,8.5, sk); for(let i=0;i<6;i++){ const a=i*1.047; bx(Math.cos(a)*6,52+i*0.4,Math.sin(a)*6-2, 2.6,11,2.6, drk); }   // head + long dreadlocks
+    bx(-3,49,4.4, 2,1.6,1,'#ffd24a','#ffd24a',0.6); bx(3,49,4.4, 2,1.6,1,'#ffd24a','#ffd24a',0.6); bx(0,52,4.4, 4,1.4,1, gd,gdL,0.4); bx(0,47,4.7, 1.6,2,1.4, tint(sk,'#000',0.2));   // eyes + circlet + nose
+    pushM(); mv(9,30,2); bx(0,10,0, 2.4,40,2.4, '#8a6f34', gd,0.5); bx(2,28,0, 6,7,3, gd,gdL,0.5); bx(4,26,0, 4,4,3, gd); popM();   // gold crook
+    pushM(); mv(-17,0,6); rotY(0.4);                                                  // black panther
+      bx(0,10,0, 10,10,26, drk); bx(0,7,-2, 10,4,26,'#0e0c0c'); bx(0,13,15, 8,9,10,'#161212'); bx(0,10,21, 6,5,5, drk);
+      bx(-2.2,15,20, 1.6,1.6,1,'#ffd24a','#ffd24a',0.85); bx(2.2,15,20, 1.6,1.6,1,'#ffd24a','#ffd24a',0.85); for(const s of [-1,1]) bx(s*3,18,18, 1.6,3,1.6, drk);
+      for(const s of [-1,1]){ bx(s*4,4,9, 3,10,3,'#0e0c0c'); bx(s*4,4,-9, 3,10,3,'#0e0c0c'); bx(s*4,0,10, 4,3,5, drk); }
+      pushM(); mv(0,10,-16); rotY(0.4); box(3,3,12,'#0e0c0c'); popM();
+    popM();
+  } else {                                                    // safe fallback for any unlisted keeper
+    bx(0,9,0, 12,18,9,'#2c2f3a'); bx(0,26,0, 15,18,11, n.c1||'#3a3a44');
+    bx(0,26,6, 15,4,2, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.4);
+    bx(0,41,0, 10,11,10,'#c9a380'); bx(0,48,0, 12,4,12, n.c2||'#c9a24a', n.c2||'#c9a24a', 0.35);
+  }
+}
+// the Warden's Shade: one shared silhouette with eight zone-specific palettes + relics.
+// Draw-only identity; no AI, collision, dialogue, trial, or persistence state changes.
+function drawShadeModel(t,zoneId){
+  const id=zoneId||'outskirts', V={
+    outskirts:{cloth:'#322d2a',armor:'#594f46',edge:'#d49a45',glow:'#ffbd58'},
+    hollow:{cloth:'#26333b',armor:'#445968',edge:'#62b9c8',glow:'#8feaff'},
+    keep:{cloth:'#382a30',armor:'#55474d',edge:'#9e4754',glow:'#c47bff'},
+    frost:{cloth:'#293747',armor:'#536a82',edge:'#a8d8ff',glow:'#d7f4ff'},
+    ember:{cloth:'#2d2020',armor:'#51332e',edge:'#d4512e',glow:'#ff843d'},
+    abyss:{cloth:'#241c35',armor:'#443365',edge:'#8b4fce',glow:'#c47bff'},
+    palace:{cloth:'#e0ddd1',armor:'#b9b4a5',edge:'#d6a94e',glow:'#fff1a8'},
+    castle:{cloth:'#311d2c',armor:'#4d3049',edge:'#8b3f7a',glow:'#d778ff'}
+  }[id]||{cloth:'#3a2a55',armor:'#4a3a66',edge:'#8a6ac0',glow:'#c47bff'};
+  const fl=0.42+0.16*Math.sin(t*2.1), fy=8+Math.sin(t*1.5)*3.5;
+  bx(0,1,0, 16,2,16,V.glow,V.glow,0.18);                                                  // spectral pool
+  for(let i=0;i<4;i++){ const a=t*0.8+i*1.571; bx(Math.cos(a)*10, fy+2+((t*6+i*5)%16), Math.sin(a)*10, 2.5,2.5,2.5,V.edge,V.glow,0.4*fl); }  // dissolving cloak fragments
+  pushM(); mv(0,fy,0); rotY(Math.sin(t*0.6)*0.28);
+    bx(0,10,0, 12,22,7,V.cloth,V.edge,fl*0.7);                                              // tattered gown
+    bx(0,7,4, 11,14,2,tint(V.cloth,'#000',0.22),V.edge,fl*0.55);                            // ragged front hem
+    bx(0,26,0, 14,10,10,V.armor,V.edge,fl*0.85);                                            // spectral cuirass
+    bx(-8,29,0, 5,6,9,tint(V.armor,'#fff',0.10),V.edge,fl*0.8); bx(8,29,0, 5,6,9,tint(V.armor,'#fff',0.10),V.edge,fl*0.8); // pauldrons
+    bx(0,39,0, 9,10,9,V.armor,V.edge,fl*0.9); bx(0,45,0, 10,4,10,V.cloth,V.edge,fl*0.85); // helmed head + crest
+    bx(0,39,4.6, 7,2,1.5,V.glow,'#ffffff',0.85+0.1*Math.sin(t*3));                         // glowing visor slit
+    bx(6,6,7, 3.5,44,3,tint(V.edge,'#fff',0.48),V.glow,0.6); bx(6,29,7, 12,3,3,V.edge,V.glow,0.7); bx(6,34,7, 4,7,4,V.armor,V.glow,0.7);  // sword, point-down
+    if(id==='outskirts'){ // warm road lantern dangling from a crook
+      bx(-11,31,0, 2,26,2,'#4a3926',V.glow,0.25); bx(-8,18,0, 8,9,8,'#4a3018',V.glow,0.75+0.2*Math.sin(t*5));
+    } else if(id==='hollow'){ // chained canyon talisman
+      for(let i=0;i<4;i++) bx(-11+i*2,34-i*5,1, 2,6,2,'#50626b',V.glow,0.35); bx(-5,13,1, 7,10,3,'#294751',V.glow,0.7);
+    } else if(id==='keep'){ // the fallen keep's torn standard
+      bx(13,34,-4, 2.5,58,2.5,'#4a382e'); bx(7,43,-4, 12,22,2,'#5a2028',V.glow,0.22); bx(3,32,-4, 5,7,2,'#5a2028');
+    } else if(id==='frost'){ // rime crown + drifting ice splinters
+      for(let i=-2;i<=2;i++) bx(i*4,49+Math.abs(i)*2,0, 3,10-Math.abs(i),3,'#b9dcf4',V.glow,0.65);
+      for(let i=0;i<3;i++) bx(-13+i*13,12+((t*8+i*11)%30),-2, 3,7,3,'#9fd7ff',V.glow,0.45);
+    } else if(id==='ember'){ // molten cracks crawling across armor and blade
+      bx(0,28,5.5, 3,10,1,V.glow,V.glow,0.8); bx(-5,24,5.5, 4,2,1,V.glow,V.glow,0.7); bx(6,15,8.7, 2,22,1,V.glow,V.glow,0.75);
+    } else if(id==='abyss'){ // broken void halo
+      for(let i=0;i<9;i++){ const a=i/11*6.283+t*0.08; bx(Math.cos(a)*17,38+Math.sin(a)*17,-5, 3,6,3,V.edge,V.glow,0.58); }
+    } else if(id==='palace'){ // Sunspire halo and hanging gold chain
+      for(let i=0;i<12;i++){ const a=i/12*6.283; bx(Math.cos(a)*18,40+Math.sin(a)*18,-5, 3,8,3,V.edge,V.glow,0.62); }
+      for(let i=0;i<5;i++) bx(13,35-i*5,0, 2,4,2,V.edge,V.glow,0.38);
+    } else if(id==='castle'){ // Duskmoor crescent and ragged wing spars
+      for(let i=0;i<7;i++){ const a=-1.15+i*0.35; bx(15+Math.cos(a)*13,42+Math.sin(a)*13,-5, 3,7,3,V.edge,V.glow,0.55); }
+      for(let i=0;i<3;i++){ pushM(); mv(-12-i*4,34-i*5,-3); rotZ(-0.55-i*0.12); bx(0,0,0, 3,22+i*5,3,V.cloth,V.edge,0.42); popM(); }
+    }
+  popM();
+}
+function drawWaystation(t){
+  if(G.sparringRoom){
+    // Enclosed training hall: rope ring, stone walls, trophy banners, control post, and exit door.
+    for(const x of [-325,325])for(const z of [-265,-90,85]){bx(x,42,z,10,84,10,'#3b3029');bx(x,70,z,18,8,18,'#9a7340');}
+    for(const z of [-265,-90,85]){bx(0,54,z,640,5,5,'#7a3a35');bx(0,40,z,640,4,4,'#caa45b');}
+    for(const x of [-210,0,210]){bx(x,105,-365,120,70,5,x===0?'#6c2438':'#343c50');bx(x,105,-359,54,28,3,'#d6aa42','#ffd47a',.35);}
+    // Spawn controls use the approved target/training icon silhouette.
+    drawShadow(0,230,18,.25);bx(0,26,230,10,52,10,'#5a4426');bx(0,58,230,42,42,6,'#caa23a','#ffd24a',.45);bx(0,58,234,18,18,5,'#e8453d','#ff7967',.65);
+    // Heavy timber return door at the south wall.
+    bx(-48,64,354,14,128,20,'#36313a');bx(48,64,354,14,128,20,'#36313a');bx(0,132,354,112,14,20,'#46414c');bx(0,62,347,82,116,10,'#56381f');bx(26,62,340,7,7,5,'#e8a33d','#ffd24a',.65);
+    return;
+  }
+  const pu=0.72+0.28*Math.sin(t*2.2);
+  // Phase 20 — HOMELY WARMTH: string lights strung between the plaza lanterns, drifting warm
+  // fireflies, and a shimmer on the fountain. This is home; it should feel alive and kind.
+  const posts=[[-90,-40],[90,-40],[90,100],[-90,100]];
+  for(let i=0;i<4;i++){ const a=posts[i], b=posts[(i+1)%4];
+    for(let s=0.12;s<0.9;s+=0.13){ const lx=a[0]+(b[0]-a[0])*s, lz=a[1]+(b[1]-a[1])*s, droop=Math.sin(s*Math.PI)*10;
+      bx(lx,72-droop,lz, 4,4,4, '#ffd88a','#ffd88a', 0.55+0.35*Math.sin(t*3+i+s*7)); } }   // warm bulbs on a sagging line
+  for(let i=0;i<14;i++){ const a=t*0.5+i*1.7, r=90+((i*53)%260); const fx=Math.cos(a)*r, fz=30+Math.sin(a*0.8+i)*r*0.7, fy=24+18*Math.sin(t*1.3+i);
+    bx(fx,fy,fz, 2.4,2.4,2.4, '#ffe6a0','#ffd24a', 0.4+0.4*Math.sin(t*4+i)); }                // fireflies drifting the plaza
+  for(let i=0;i<5;i++){ const a=t*1.6+i*1.26; bx(Math.cos(a)*44,11+Math.sin(t*3+i)*3,30+Math.sin(a)*44, 3,3,3, '#bfe6ff','#eaffff',0.5+0.3*Math.sin(t*5+i)); }   // fountain water sparkle
+  // the waystone: your bonfire, at plaza centre. Touch it to heal and take stock.
+  drawShadow(0,30,26,0.3);
+  bx(0,5,30, 64,10,64, '#3a3f4e'); bx(0,14,30, 48,10,48, '#4a4f5e');
+  bx(0,44,30, 22,52,22, '#6b7183');
+  bx(0,76,30, 15,15,15, '#ffd24a','#ffb020',pu);
+  bx(0,150,30, 7,140,7, '#ffd24a','#ffd24a',0.14);
+  for(let i=0;i<5;i++){ const a=t*0.9+i*1.257; bx(Math.cos(a)*34, 55+Math.sin(t*1.8+i)*10, 30+Math.sin(a)*34, 4,4,4, '#ffd24a','#ffd24a',0.7); }
+  // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
+  for(const g of G.gates){
+    if(g.side){ // discovered rift: a violet seam beside its parent gate
+      bx(g.x,26,g.z, 22,52,8, '#120a1e','#4a2070',0.9);
+      bx(g.x,26,g.z, 10,38,10, g.done?'#3a5a45':'#c47bff', g.done?'#4be08a':'#c47bff', 0.5+0.3*Math.sin(t*3+g.x));
+      continue; }
+    const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
+    bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
+    bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
+    bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?(g.done?0.55+0.25*Math.sin(t*3+g.zi):0.30+0.18*Math.sin(t*2.6+g.zi)):1);
+    if(open) for(let i=0;i<g.tier;i++) bx(g.x-((g.tier-1)*8)/2+i*8, 94, g.z+9.2, 4.4,4.4,1.4, '#ffd24a','#ffd24a',0.95);   // tier pips on the FRONT face of the top frame
+    if(g.done){ bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
+      for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
+    if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
+  }
+  // the keepers of the posts
+  for(const n of G.hubNpcs){
+    if(n.prop==='board'){ drawShadow(n.x,n.z,20,0.22);
+      bx(n.x-20,26,n.z, 5,52,5,'#4a3a26'); bx(n.x+20,26,n.z, 5,52,5,'#4a3a26');
+      bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
+      continue; }
+    if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
+      bx(n.x,10,n.z, 40,20,26,'#5a4426'); bx(n.x,22,n.z, 42,8,28,'#6e5430');
+      bx(n.x,16,n.z-13, 8,10,3,'#ffd24a','#ffd24a',0.7); continue; }
+    if(n.prop==='anvil'){ drawShadow(n.x,n.z,26,0.24);
+      // BIGGER anvil on a stump
+      bx(n.x,13,n.z, 30,26,30,'#2a231c'); bx(n.x,30,n.z, 52,14,22,'#20242e','#4a5568',0.4); bx(n.x+22,34,n.z, 14,9,16,'#262a36');  // stump + anvil body + horn
+      bx(n.x,40,n.z, 40,4,18,tint('#4a5568','#fff',0.15));
+      // a stone FORGE with live fire, to the smith's far side
+      const fx=n.x-4, fz=n.z-30; bx(fx,18,fz, 46,36,34,'#2c2420','#3a2f26',0.5); bx(fx,40,fz, 40,8,28,'#1a1512');
+      { const fl=0.6+0.35*Math.sin(t*7); bx(fx,30,fz+4, 22,16,10,'#ff6a24','#ff9a3b',fl); bx(fx,38,fz+4, 12,12,7,'#ffd257','#ffe39a',fl*0.9); }  // forge fire
+      for(let i=0;i<3;i++){ const f=Math.sin(t*9+i*2)*0.5+0.5; bx(fx+(i-1)*6,44+f*12,fz+4, 2.4,3,2.4,'#ff9a4a','#ffd24a',0.7*f); }   // rising embers
+      // a quench trough + a tool rack with hammers/tongs
+      bx(n.x+34,10,n.z+18, 26,12,16,'#2a2e3a'); bx(n.x+34,15,n.z+18, 22,2,12,'#2f6a7a',null,0.7);   // trough + water
+      bx(n.x-34,44,n.z+10, 4,44,4,'#3a2c1c'); bx(n.x-34,64,n.z+10, 30,4,4,'#3a2c1c');                // rack frame
+      for(let i=0;i<3;i++) bx(n.x-46+i*12,54,n.z+10, 3,18,3,i%2?'#8b93a8':'#6b4a2c');                 // hanging tools
+      // the Smith himself, working the forge
+      const sx=n.x-26, sz=n.z+16; drawShadow(sx,sz,12,0.24);
+      pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel({id:'smith',c1:n.c1,c2:n.c2},t); popM();
+      if(Math.sin(t*3)<0.12) for(let i=0;i<3;i++) bx(n.x+(Math.random()-0.5)*16, 38+Math.random()*8, n.z+(Math.random()-0.5)*10, 2,2,2, '#ffb060','#ffd24a',0.9);   // hammer sparks
+      continue; }
+    if(n.prop==='mirror'){ drawShadow(n.x,n.z,20,0.26);
+      // A grand gilded standing mirror facing inward toward the Waystation's main room (-z).
+      const fw=46, fh=110, bk=n.z+3, gf=n.z-9;                                                     // backing south, reflective face north toward the room
+      bx(n.x,fh/2,bk, fw+14,fh+10,14, '#241c14');                                                 // dark wood frame body (behind)
+      bx(n.x,fh+9,n.z, fw+22,16,20, '#6a531f','#e6c25a',0.9);                                      // ornate gilded crown
+      for(const sx2 of [-1,1]) bx(n.x+sx2*(fw*0.5+7),fh/2,n.z-6, 5,fh,7,'#7a5f28','#c9a24a',0.8);   // gilded side pillars flanking the glass
+      bx(n.x,5,n.z, fw+24,12,24, '#3a2f26','#5a4a2e',0.4);                                         // base foot
+      bx(n.x,fh/2,n.z-6, fw+7,fh+4,2, '#8a6f34','#e6c25a',0.95);                                    // gilded inner trim framing the glass
+      // the SILVERED GLASS — bright, near-opaque, cool vertical gradient (frontmost so it always reads as a mirror)
+      bx(n.x,fh*0.74,gf, fw,fh*0.34,2, '#eef5ff','#ffffff',0.98);                                  // top band (brightest)
+      bx(n.x,fh*0.46,gf, fw,fh*0.30,2, '#c4d8ee','#e6f1ff',0.98);                                  // mid band
+      bx(n.x,fh*0.20,gf, fw,fh*0.30,2, '#9fbad8','#c6ddf3',0.98);                                  // lower band (deeper toward the floor)
+      bx(n.x-fw*0.22,fh*0.5,gf+0.5, fw*0.34,fh*0.7,1, '#fff8e6','#fff',0.14);                       // warm reflected torch-glow, for depth
+      { const sh=Math.sin(t*0.55)*0.5+0.5, ssx=n.x-fw*0.5+fw*sh;                                   // a sweeping diagonal specular streak
+        pushM(); mv(ssx,fh*0.5+(sh-0.5)*22,gf+1); rotZ(0.5); bx(0,0,0, 8,fh*0.82,1, '#ffffff','#ffffff',0.32); popM(); }
+      bx(n.x,fh*0.5,gf+1.4, fw+2,fh,0.5, '#dff0ff','#ffffff',0.07);                                // faint overall glass sheen
+      continue; }
+    if(n.prop==='beast'){ drawShadow(n.x,n.z,26,0.26);
+      // THREE cages of different sizes, each with a little resident critter behind the bars
+      const cages=[[n.x-40,n.z-8,34,'#8fdf6a'],[n.x-2,n.z-14,48,'#7cc6ff'],[n.x+36,n.z-6,28,'#e07ad0']];
+      for(const [cxx,czz,ch,pc] of cages){ const cw=ch*0.82;
+        bx(cxx,ch/2,czz, cw,ch,cw*0.8,'#2a241c','#3a2f1e',0.5);                          // cage body (dark)
+        for(let b=-2;b<=2;b++) bx(cxx+b*(cw*0.2),ch/2,czz+cw*0.42, 1.6,ch-4,1.6,'#5a4a2e');   // vertical bars
+        bx(cxx,ch+3,czz, cw+4,4,cw*0.8+4,'#4a3a26');                                     // cage roof
+        bx(cxx,ch*0.34,czz+1, cw*0.4,ch*0.3,cw*0.3, pc, pc, 0.55+0.25*Math.sin(t*3+cxx));   // the critter glow inside
+        bx(cxx-2,ch*0.42,czz+cw*0.36, 1.6,1.6,1, '#fff','#fff',0.8); bx(cxx+2,ch*0.42,czz+cw*0.36, 1.6,1.6,1, '#fff','#fff',0.8); }  // its eyes
+      bx(n.x,3,n.z, 120,5,60,'#3a2f1e','#5a4a2e',0.25);                                   // pen floor tint (under the cages, small)
+      { const bx0=n.x+8, bz0=n.z+30; drawShadow(bx0,bz0,12,0.24);
+        pushM(); mv(bx0,0,bz0); rotY(hubNpcFacing(n,bx0,bz0)); hubNpcModel({id:'beastkeeper',c1:n.c1,c2:n.c2},t); popM(); }
+      continue; }
+    if(n.prop==='abyss'){ drawShadow(n.x,n.z,24,0.34);
+      bx(n.x,32,n.z, 50,64,16,'#140a20','#6a2fa0',0.5);                                    // dark monolith
+      bx(n.x,36,n.z+9, 30,46,4,'#0a0410','#b06bff',0.35+0.3*Math.sin(t*2));                // swirling void window
+      bx(n.x,68,n.z, 34,12,20,'#241436','#6a2fa0',0.5);                                    // capstone
+      for(let i=0;i<4;i++){ const a=t*1.4+i*1.6, rr=12+i*3; bx(n.x+Math.cos(a)*rr, 36+Math.sin(a*1.3)*16, n.z+11, 3.5,3.5,3.5, '#c47bff','#e0b0ff',0.75); }  // orbiting motes
+      continue; }
+    if(n.prop==='sparringdoor'){ drawShadow(n.x,n.z,24,0.24);
+      bx(n.x-38,54,n.z, 12,108,18,'#36313a');bx(n.x+38,54,n.z, 12,108,18,'#36313a');bx(n.x,112,n.z, 90,12,20,'#4b4651');
+      bx(n.x,52,n.z+5, 62,96,10,'#56381f');bx(n.x+20,52,n.z+12, 6,6,4,'#e8a33d','#ffd24a',.7);continue; }
+    if(n.prop==='sprintgate'){ drawShadow(n.x,n.z,24,0.30);                                   // Treasure Sprint — a bright gold run-portal
+      for(const s of [-1,1]) bx(n.x+s*30,46,n.z, 12,92,14,'#3a2e12','#caa23a',0.45);          // gilt pillars
+      bx(n.x,94,n.z, 84,14,18,'#4a3a16','#ffd24a',0.55);                                       // lintel
+      bx(n.x,46,n.z+8, 44,78,4,'#12240f','#7ce07a',0.30+0.28*Math.sin(t*2.2));                 // shimmering green run-portal
+      for(let i=0;i<5;i++){ const a=t*1.9+i*1.26, rr=9+i*3; bx(n.x+Math.cos(a)*rr, 46+Math.sin(a*1.4)*22, n.z+10, 3,3,3, '#ffe07a','#fff2b0',0.8); }  // speed motes
+      continue; }
+    if(n.prop==='sparring'){ drawShadow(n.x,n.z,16,0.22);
+      bx(n.x,7,n.z, 16,14,16,'#3a2f26'); bx(n.x,30,n.z, 8,34,8,'#5a4426');                        // post
+      bx(n.x,52,n.z, 30,30,4,'#caa23a','#ffd24a',0.5); bx(n.x,52,n.z+2.6, 12,12,4,'#e8453d','#ff6a4a',0.7); bx(n.x,52,n.z+3.4, 4,4,4,'#fff','#fff',0.9); // target
+      continue; }
+    if(n.prop==='counter'){ drawShadow(n.x,n.z,24,0.24);   // Quartermaster's shop stall
+      bx(n.x,44,n.z-16, 84,64,8,'#4a3826'); for(let i=0;i<3;i++) bx(n.x-28+i*28,52+((i%2)?8:0),n.z-13, 18,4,5,'#3a2c1c');   // back shelf + shelves
+      for(let i=0;i<6;i++){ const c=['#c9a24a','#8b93a8','#b06bff','#e8453d','#5affc8','#ffd24a'][i]; bx(n.x-32+i*13,56+((i%2)?7:0),n.z-11, 6,8,4, c, c, 0.55); }   // colourful wares
+      bx(n.x,16,n.z+16, 80,32,16,'#5a4028','#7a5836',0.35); bx(n.x,34,n.z+16, 88,5,22,'#6e5030'); bx(n.x,34,n.z+27, 88,3,3,'#caa23a','#ffd24a',0.6);   // counter + gilt lip
+      { const sx=n.x, sz=n.z-4; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      continue; }
+    if(n.prop==='booth'){ drawShadow(n.x,n.z,24,0.24);     // Drillmaster's booth + class-insignia banner
+      bx(n.x,18,n.z+16, 84,36,18,'#3a2420','#5e2a24',0.4); bx(n.x,38,n.z+16, 92,5,22,'#4a2e28');   // booth front + top
+      for(const s of [-1,1]) bx(n.x+s*48,74,n.z-8, 8,148,8,'#2a2028');                              // banner poles
+      bx(n.x,140,n.z-8, 104,44,4,'#5e2a24','#7a2a24',0.92);                                          // the banner
+      bx(n.x,140,n.z-6, 4,28,2,'#dfe5ec'); bx(n.x-6,127,n.z-6, 17,4,2,'#e8a33d','#ffd24a',0.8);      // SWORD insignia (centre)
+      bx(n.x-34,140,n.z-6, 3,26,2,'#6b4a2c'); bx(n.x-34,155,n.z-6, 9,9,2,'#e8a33d','#ffd24a',0.85);  // STAFF insignia (left)
+      for(let k=-4;k<=4;k++) bx(n.x+34+Math.round(Math.abs(k)*0.7),140+k*3.2,n.z-6, 2.6,3,2,'#e8a33d','#ffd24a',0.85);   // BOW insignia (right)
+      { const sx=n.x, sz=n.z-4; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      continue; }
+    if(n.prop==='barber'){ drawShadow(n.x,n.z,20,0.24);    // Keeper + a styling chair
+      { const sx=n.x-14, sz=n.z; drawShadow(sx,sz,12,0.24); pushM(); mv(sx,0,sz); rotY(hubNpcFacing(n,sx,sz)); hubNpcModel(n,t); popM(); }
+      const cx=n.x+26; bx(cx,8,n.z, 28,16,28,'#3a2a55'); bx(cx,24,n.z-12, 26,34,7,'#4a3a66'); bx(cx,20,n.z, 24,4,24,'#7a5f9c');
+      bx(cx,2,n.z, 9,4,9,'#b06bff','#b06bff',0.5); for(const s of [-1,1]) bx(cx+s*17,27,n.z, 4,3,11,'#6b5a8a'); bx(cx,46,n.z, 12,8,7,'#5a4a7a');   // headrest
+      continue; }
+    // a living hub keeper — a DISTINCT voxel model per character (approved art), not a palette swap
+    drawShadow(n.x,n.z,13,0.25);
+    pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));
+    hubNpcModel(n,t);
+    popM();
+    bx(n.x,72,n.z, 4,4,4, n.c2, n.c2, 0.5+0.3*Math.sin(t*3+n.z));                     // post marker
+  }
+  // ===== Phase 12: a hub that GROWS with your progress =====
+  // ITEM 1 — boss trophies mounted along the west wall, one per cleared zone, in the boss's colour
+  { let ti=0; ZONES.forEach((Z)=>{ if(!meta.zoneDone[Z.id]) return; const tz=-300+ti*82; ti++; const col=ZONE_TROPHY[Z.id]||'#e8a33d';
+      bx(-406,118,tz, 7,42,36,'#2a2f3a'); bx(-402,122,tz, 4,26,20, col, col, 0.85); bx(-402,122,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }
+  // ITEM 1 — a trainer figure stands for every class you've unlocked (behind the Drillmaster)
+  // ITEM 2 — the dying world on the horizon over the low north rampart, + the Apex throne looming
+  { const vista=[[-540,-760,240,300,'#2a2118'],[-210,-880,300,460,'#25303a'],[150,-800,230,300,'#3a1c14'],[470,-760,220,300,'#241431']];
+    for(const v of vista){ bx(v[0],v[3]/2,v[1], v[2],v[3],70, v[4], tint(v[4],'#000',0.3), 1); }
+    bx(0,320,-1080, 210,640,90, '#160f22','#3a2450',1); bx(0,600,-1080, 90,150,60,'#241431','#7a30c0',0.5);   // the Apex throne
+    for(let i=0;i<12;i++){ const ey=((t*26+i*70)%200); bx(-360+((i*151)%740), ey+8, -366-((i*47)%110), 3,3,3, '#ff9a4a','#ffd24a', 0.5*(1-ey/200)); } }   // drifting embers
+  // ITEM 6 — expensive cosmetic upgrades, purchased in the shop, that visibly transform the Waystation
+  const HU=meta.hubUpgrades||{};
+  if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ bx(b[0],20,b[1], 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b[0],46,b[1], 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b[0]+(Math.random()-0.5)*10,54+Math.random()*18,b[1], 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
+  if(HU.banners){ for(const s of [-1,1]) for(let k=0;k<3;k++){ const bz=-200+k*160; bx(s*406,112,bz, 3,72,34, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.6); } }
+  if(HU.ramparts){ for(let i=0;i<9;i++){ bx(-380+i*95,78,-380, 30,22,26,'#4a4f5e'); } }
+  if(HU.gild){ bx(0,76,30, 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,30, 9,150,9,'#ffe9a8','#ffd24a',0.22); }
+}
+/* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
+const SPAWNER={
+  charger:{base:'#3a2210',glow:'#ff9a3a',draw:(x,z,t,g)=>{ bx(x,10,z,52,20,52,'#2a1a0c'); bx(x,26,z,34,16,34,'#3a2210','#ff9a3a',g*0.5); bx(x,40,z,16,14,16,'#c8893a','#ff9a3a',g);
+    for(const s of [-1,1]) bx(x+s*20,30,z-16, 4,18,4,'#e8e4d8'); }},   // twin horns (charger)
+  grunt:{base:'#2c4420',glow:'#7ec46a',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#25381c'); bx(x,22,z,32,16,32,'#2c4420','#7ec46a',g*0.5);
+    for(let i=0;i<4;i++){ const a=i*1.571+t*0.3; bx(x+Math.cos(a)*22,20,z+Math.sin(a)*22, 6,22,6,'#3a5a24','#7ec46a',g*0.6); } }},   // vine cluster
+  bones:{base:'#3a3830',glow:'#e8e4d8',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#2a2822'); bx(x,26,z,20,30,20,'#4a4740');
+    for(const s of [-1,1]) for(let i=0;i<3;i++) bx(x+s*(14+i*3),18+i*10,z, 4,8,4,'#d8d2c2','#e8e4d8',g*0.5); }},   // ribcage
+  frostling:{base:'#243a48',glow:'#7fd6ff',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#1e3340'); bx(x,30,z,18,44,18,'#bff0ff','#7fd6ff',g);
+    for(const s of [-1,1]) { pushM(); mv(x+s*16,22,z); rotZ(s*0.5); box(8,26,8,'#d8f6ff','#7fd6ff',g*0.7); popM(); } }},   // ice shards
+  emberling:{base:'#3d1a10',glow:'#ff7a3a',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#2a1108'); bx(x,22,z,30,18,30,'#5a2410','#ff7a3a',g*0.6);
+    bx(x,38,z,14,16,14,'#ff7a3a','#ffb060',0.7+0.3*Math.sin(t*6));
+    for(let i=0;i<3;i++){ const a=t*2+i*2.09; bx(x+Math.cos(a)*16,44+Math.sin(t*4+i)*8,z+Math.sin(a)*16, 4,6,4,'#ff9a4a','#ffd24a',0.8); } }},   // ember vent
+  shadeling:{base:'#241431',glow:'#b06bff',draw:(x,z,t,g)=>{ bx(x,8,z,50,16,50,'#1a0e28'); pushM(); mv(x,28,z); rotY(t*0.8); box(22,40,22,'#3a2055','#b06bff',g*0.7); popM();
+    for(let i=0;i<3;i++){ const a=-t*1.4+i*2.09; bx(x+Math.cos(a)*24,20,z+Math.sin(a)*24, 5,5,5,'#c47bff','#c47bff',0.6); } }},   // void rift
+  _:{base:'#3a2210',glow:'#ff9a3a',draw:(x,z,t,g)=>{ bx(x,10,z,52,20,52,'#2a1a0c'); bx(x,30,z,20,20,20,'#c8893a','#ff9a3a',g); }}
+};
+function drawSpawner(dn,t){
+  const S=SPAWNER[dn.type]||SPAWNER['_'], g=0.45+0.3*Math.sin(t*2.2+dn.x);
+  drawShadow(dn.x,dn.z,26,0.25);
+  S.draw(dn.x,dn.z,t,g);
+}
+function drawEnemy3(e,t){
+  const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
+  const en=e.lunge>0||e.phase>=2;
+  const eyeC=e.boss?(en?'#ff3b3b':(e.shot?(e.shot.color||'#ff9a3b'):'#ff9a3b')):(e.element?elementColor(e.element):'#eaffd0');
+  pushM(); mv(e.x,e.y,e.z); rotY(e.yaw);
+  const W=e.r*2, H=e.h;
+  if(e.role){ const rc=e.roleCol||'#fff'; bx(0,H+13+Math.sin(t*3)*1.5,0, 5,5,5, rc, rc, 0.9);   // Phase 11: role beacon above the head
+    if(e.role==='shielder'&&e.shieldYaw!=null){ const rel=e.shieldYaw-e.yaw; bx(Math.sin(rel)*(W*0.5+5),H*0.5,Math.cos(rel)*(W*0.5+5), 3,H*0.66,11, rc, rc, 0.85); } }   // a shield plate on the guarded side
+  if(e.look==='dummy'){
+    // Purpose-built straw dummy matching its icon: hay body, crossbar arms, burlap head, target patch.
+    bx(0,5,0,18,10,18,'#5a4025');bx(0,28,0,13,36,13,'#c9a84f');bx(0,41,0,24,20,18,'#b99242');
+    bx(0,42,W*.42,12,12,3,'#efe0b1');bx(0,42,W*.45,6,6,3,'#b43f35');bx(0,42,W*.48,2.5,2.5,2,'#fff4d2');
+    bx(0,30,0,58,7,7,'#6a4726');for(const s2 of [-1,1])bx(s2*27,27,0,8,16,8,'#c9a84f');
+    for(let k=0;k<6;k++)bx(-8+k*3.2,52+(k%2)*3,0,2,10,2,'#e5c96d');
+  } else if(e.look==='jackal'){
+    // lean canine hunter: low slung body, long snout, ears back; rears in the wind-up, lunges on the pounce
+    const dk=tint(col,'#000',0.28), lt=tint(col,'#fff',0.12), gait=Math.sin(G.time*11+e.bob)*0.5;
+    pushM(); if(e.windT>0){ rotX(-0.28); } else if(e.chargeT>0){ rotX(0.22); }
+    bx(0,H*0.52,-2, W*0.7,H*0.5,W*1.5, col);                                   // long body
+    bx(0,H*0.6,W*0.72, W*0.5,H*0.34,W*0.5, lt);                                 // chest
+    pushM(); mv(0,H*0.72,W*0.95); rotX(-0.5); bx(0,4,0, W*0.4,H*0.4,W*0.42, col); bx(0,9,W*0.3, W*0.3,W*0.24,W*0.5, dk); popM();   // head + long snout
+    bx(-W*0.18,H*0.98,W*0.9, 2.6,6,2, dk); bx(W*0.18,H*0.98,W*0.9, 2.6,6,2, dk);   // ears
+    bx(-W*0.2,H*0.86,W*1.12, 2,2,1, eyeC, eyeC); bx(W*0.2,H*0.86,W*1.12, 2,2,1, eyeC, eyeC);   // eyes
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.3,H*0.24,W*0.55); rotX(gait*s2); bx(0,-H*0.24,0, 3.4,H*0.5,3.4, dk); popM();
+      pushM(); mv(s2*W*0.3,H*0.24,-W*0.5); rotX(-gait*s2); bx(0,-H*0.24,0, 3.4,H*0.5,3.4, dk); popM(); }   // legs
+    pushM(); mv(0,H*0.55,-W*0.85); rotX(0.6+Math.sin(G.time*8)*0.2); bx(0,-6,0, 3,13,3, dk); popM();   // tail
+    popM();
+  } else if(e.look==='wraith'){
+    // wind wraith: a wispy tapered spirit with trailing tendrils + a bright core; tucks tight while diving
+    const dv=e.diving>0, sway=Math.sin(G.time*6+e.bob)*0.3;
+    bx(0,H*0.5,0, W*0.7,H*(dv?1.2:0.95),W*0.6, col, col, 0.7);                  // body (stretches on the dive)
+    bx(0,H*0.86,0, W*0.5,H*0.4,W*0.44, tint(col,'#fff',0.25), null, 0.85);      // bright head/core
+    bx(-2.6,H*0.9,W*0.28, 2.2,2.4,1, eyeC, eyeC); bx(2.6,H*0.9,W*0.28, 2.2,2.4,1, eyeC, eyeC);
+    for(let i=0;i<3;i++){ const a=G.time*3+i*2.1; bx(Math.cos(a)*W*0.4,H*0.16,Math.sin(a)*W*0.4, 3,H*0.4,3, col, col, 0.4); }   // trailing tendrils
+    pushM(); mv(-W*0.5,H*0.6,0); rotZ(0.7+sway); bx(-W*0.3,0,0, W*0.7,2,W*0.4, tint(col,'#fff',0.2), null, 0.55); popM();       // gust wings
+    pushM(); mv(W*0.5,H*0.6,0); rotZ(-0.7-sway); bx(W*0.3,0,0, W*0.7,2,W*0.4, tint(col,'#fff',0.2), null, 0.55); popM();
+  } else if(e.look==='spitter'){
+    // squat boulder-hurler: broad stone body, a heavy arm cocked with a rock; leans back to lob
+    const oc=(e.shot&&e.shot.color)||'#b0946a', wind=e.shootT<0.5;
+    bx(0,H*0.34,0, W*1.25,H*0.62,W*1.05, col);                                  // boulder body
+    bx(0,H*0.62,0, W*0.95,H*0.34,W*0.8, tint(col,'#fff',0.12));                 // upper mass
+    bx(0,H*0.5,W*0.5, W*0.5,H*0.3,4, tint(col,'#000',0.3));                     // face plate
+    bx(-W*0.2,H*0.56,W*0.56, 2.6,2.6,1.2, eyeC, eyeC); bx(W*0.2,H*0.56,W*0.56, 2.6,2.6,1.2, eyeC, eyeC);
+    for(let i=0;i<4;i++){ const a=i*1.571+0.4; bx(Math.cos(a)*W*0.5,H*0.2+i*3,Math.sin(a)*W*0.5, 4,4,4, tint(col,'#000',0.2)); }  // craggy chunks
+    pushM(); mv(W*0.62,H*0.55,W*0.2); rotX(wind?-0.9:-0.2); bx(0,6,0, 5,14,5, tint(col,'#000',0.15));                            // cocked arm
+    bx(0,15,0, 7,7,7, oc, oc); popM();                                                                                          // the rock in hand
+  } else if(e.look==='boar'){
+    // bulky tusked boar: low broad body, big shielded head, curved tusks; rears in the wind-up
+    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.1), gait=Math.sin(G.time*10+e.bob)*0.4, _vl=voxLod(e.x,e.z);
+    pushM(); if(e.windT>0){ rotX(-0.22); } else if(e.chargeT>0){ rotX(0.18); }
+    bx(0,H*0.5,-2, W*0.95,H*0.6,W*1.5, col);                                    // barrel body
+    bx(0,H*0.78,-W*0.4, W*0.5,H*0.3,W*0.4, dk);                                 // bristled hump
+    if(_vl<2) for(let i=-2;i<=2;i++){ pushM(); mv(i*W*.14,H*.9,-W*.38); rotZ(i*.08); bx(0,4,0,2.2,9-Math.abs(i),2.2,'#31261c'); popM(); }
+    if(_vl===0){ for(const s2 of [-1,1]){ bx(s2*W*.34,H*.58,-W*.12,W*.18,H*.32,W*.42,dk); bx(s2*W*.36,H*.62,W*.1,1.2,H*.25,1.1,'#9a7141'); } bx(0,H*.48,-W*.77,W*.45,2,3,tint(col,'#000',.5)); }
+    pushM(); mv(0,H*0.5,W*0.9); bx(0,0,0, W*0.7,H*0.55,W*0.55, lt);             // big head
+    bx(0,-H*0.06,W*0.36, W*0.4,H*0.24,W*0.3, dk);                              // snout
+    bx(-W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8'); bx(W*0.28,-H*0.18,W*0.34, 3,7,3,'#efe8d8');   // tusks
+    bx(-W*0.2,H*0.14,W*0.3, 2.4,2.6,1.2, eyeC, eyeC); bx(W*0.2,H*0.14,W*0.3, 2.4,2.6,1.2, eyeC, eyeC); popM();
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.34,H*0.2,W*0.5); rotX(gait*s2); bx(0,-H*0.2,0, 4,H*0.42,4, dk); popM();
+      pushM(); mv(s2*W*0.34,H*0.2,-W*0.5); rotX(-gait*s2); bx(0,-H*0.2,0, 4,H*0.42,4, dk); popM(); }
+    popM();
+  } else if(e.look==='spore'){
+    // walking mushroom: a fat cap on a stubby stalk, spore motes puffing off it
+    const bob=Math.sin(e.bob*3)*0.1;
+    bx(0,H*0.36,0, W*0.7,H*0.5,W*0.7, tint(col,'#fff',0.12));                   // pale stalk/body
+    bx(-W*0.16,H*0.34,W*0.36, 2.4,2.6,1.2,'#2a3a1a'); bx(W*0.16,H*0.34,W*0.36, 2.4,2.6,1.2,'#2a3a1a');   // eyes
+    bx(0,H*0.78+bob*10,0, W*1.4,H*0.4,W*1.4, col);                             // the CAP
+    for(let i=0;i<6;i++){ const a=i/6*6.28; bx(Math.cos(a)*W*0.5,H*0.78,Math.sin(a)*W*0.5, 3,4,3, tint(col,'#fff',0.3)); }   // cap spots
+    for(let i=0;i<3;i++){ const a=G.time*2+i*2.1; bx(Math.cos(a)*W*0.6,H*0.9+((G.time*14+i*20)%30),Math.sin(a)*W*0.6, 2,2,2,'#9fd84a','#c6ff7a',0.5); }   // drifting spores
+  } else if(e.look==='sentinel'){
+    // animated plate armor: tall, broad-shouldered, hollow glowing visor (its shield plate draws via the shielder role)
+    const dk=tint(col,'#000',0.28), lt=tint(col,'#fff',0.16);
+    bx(-W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.4, dk); bx(W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.4, dk);   // greaves
+    bx(0,H*0.56,0, W*0.92,H*0.5,W*0.66, col);                                   // cuirass
+    bx(0,H*0.5,W*0.34, W*0.5,H*0.3,3, lt);                                      // breastplate sheen
+    bx(-W*0.58,H*0.74,0, W*0.4,W*0.4,W*0.5, lt); bx(W*0.58,H*0.74,0, W*0.4,W*0.4,W*0.5, lt);   // big pauldrons
+    bx(0,H*0.9,0, W*0.5,H*0.28,W*0.48, dk);                                     // great helm
+    bx(0,H*0.9,W*0.26, W*0.34,2.4,1.4, eyeC, eyeC);                             // glowing visor slit
+    bx(0,H*1.06,0, 3,7,3, lt);                                                   // helm crest
+  } else if(e.look==='revenant'){
+    // gaunt undead warrior: hunched tattered frame, glowing eyes, a broken blade
+    const dk=tint(col,'#000',0.3), sw=Math.sin(G.time*8+e.bob)*0.14;
+    pushM(); if(e.windT>0){ rotX(-0.2); } else if(e.chargeT>0){ rotX(0.2); }
+    bx(-3.2,H*0.16,0, 3,H*0.32,3, dk); bx(3.2,H*0.16,0, 3,H*0.32,3, dk);        // legs
+    bx(0,H*0.54,0, W*0.7,H*0.5,W*0.5, col);                                     // ribcage torso
+    bx(0,H*0.5,W*0.28, W*0.5,H*0.34,2, dk);                                     // tattered drape
+    bx(0,H*0.86,0, W*0.5,W*0.5,W*0.48, tint(col,'#fff',0.1));                   // skull head
+    bx(-2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC); bx(2.8,H*0.88,W*0.26, 2.6,2.8,1.2, eyeC, eyeC);
+    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.5+sw); rotX(-0.6); bx(0,-6,0, 2.6,12,2.6, dk); bx(0,4,0, 3,14,1.4,'#c8ccd2'); popM();   // broken blade arm
+    popM();
+  } else if(e.look==='bosscrystal'){
+    // BOSS WARD CRYSTAL — a floating faceted shard on a rune base; destroy all to break the boss's shield
+    const glc=0.6+0.4*Math.sin(G.time*3+e.x*0.1), cc=e.hitFlash>0?'#ffffff':'#7fd6ff', by=20+Math.sin(G.time*2+e.z*0.1)*3;
+    bx(0,4,0, 18,8,18, '#2a3550','#4a6a9a',0.6);                                    // rune base
+    bx(0,by,0, 14,22,14, cc,'#bff0ff',0.92);                                        // crystal core
+    bx(0,by+17,0, 8,14,8, cc,'#dffbff',0.96);                                       // upper facet
+    bx(0,by-13,0, 8,13,8, cc,'#bff0ff',0.86);                                       // lower facet
+    for(let i=0;i<3;i++){ const a=G.time*1.5+i*2.1; bx(Math.cos(a)*17,by,Math.sin(a)*17, 3.2,3.2,3.2,'#dffbff','#fff',0.55*glc); }   // orbiting motes
+  } else if(e.look==='frostshell'){
+    // ICE-ARMORED SHELL-CRACKER: squat body under a thick frontal ice carapace; the shell shatters off once cracked
+    const dk=tint(col,'#000',0.24), ice='#cfeeff', cracked=e.shellCracked;
+    bx(-W*0.24,H*0.16,0, W*0.32,H*0.32,W*0.4, dk); bx(W*0.24,H*0.16,0, W*0.32,H*0.32,W*0.4, dk);   // stubby legs
+    bx(0,H*0.5,0, W*0.86,H*0.56,W*0.66, col);                                       // body
+    bx(0,H*0.82,0, W*0.5,W*0.44,W*0.46, tint(col,'#fff',0.12));                      // head
+    bx(-2.8,H*0.84,W*0.28, 2.4,2.6,1.2, eyeC, eyeC); bx(2.8,H*0.84,W*0.28, 2.4,2.6,1.2, eyeC, eyeC);
+    if(!cracked){ bx(0,H*0.52,W*0.5, W*0.9,H*0.72,7, ice, ice, 0.82);               // the frontal ice shell
+      for(let i=0;i<3;i++) bx(-W*0.28+i*W*0.28,H*0.3+i*8,W*0.58, 4,10,4, tint(ice,'#fff',0.3), null, 0.9); }   // jagged crystal spikes
+    else { for(let i=0;i<4;i++){ const a=i*1.571; bx(Math.cos(a)*W*0.5,H*0.3,Math.sin(a)*W*0.5, 3,4,3, ice, ice, 0.5); } }   // shattered shards
+  } else if(e.look==='lobber'){
+    // FREEZING LOBBER: hunched ice-caster that arcs shards; a shard hovers at its raised hand
+    const sc=(e.shot&&e.shot.color)||'#bfe6ff', wind=e.shootT<0.6;
+    bx(0,H*0.32,0, W*0.86,H*0.56,W*0.66, col);                                       // frosty robe body
+    bx(0,H*0.66,0, W*0.6,W*0.5,W*0.54, tint(col,'#fff',0.14));                        // hooded head
+    bx(-2.6,H*0.68,W*0.28, 2.2,2.4,1.2, sc, sc); bx(2.6,H*0.68,W*0.28, 2.2,2.4,1.2, sc, sc);
+    for(let i=0;i<3;i++) bx(-W*0.2+i*W*0.2,H*0.9,-W*0.1, 3,7-i,3, tint(col,'#fff',0.25), null, 0.9);   // ice crest
+    pushM(); mv(W*0.55,H*0.55,W*0.1); rotX(wind?-1.0:-0.3); bx(0,6,0, 3.4,12,3.4, tint(col,'#000',0.2));
+    bx(0,14,0, 7,7,7, sc, sc, 0.95); popM();                                          // hovering ice shard
+  } else if(e.look==='skitter'){
+    // MAGMA-TRAIL SKITTER: low fast ember-bug; its underside glows and it leaves fire behind
+    const gait=Math.sin(G.time*16+e.bob)*0.6, glow=0.5+0.5*Math.sin(G.time*10);
+    bx(0,H*0.42,0, W*0.8,H*0.44,W*1.1, col);                                          // segmented body
+    bx(0,H*0.2,0, W*0.7,H*0.16,W*0.9, '#ff8a3a','#ff5a1e', 0.5+0.3*glow);              // glowing molten underside
+    bx(0,H*0.5,W*0.5, W*0.4,H*0.3,4, tint(col,'#000',0.3));                            // face
+    bx(-W*0.14,H*0.52,W*0.52, 2.4,2.4,1.2, '#ffd24a','#ffd24a'); bx(W*0.14,H*0.52,W*0.52, 2.4,2.4,1.2, '#ffd24a','#ffd24a');
+    for(const s2 of [-1,1]) for(let i2=0;i2<3;i2++){ pushM(); mv(s2*W*0.42,H*0.24,-W*0.4+i2*W*0.4); rotZ(s2*(0.6+((i2%2)?gait:-gait)*0.3));
+      bx(s2*3,-H*0.2,0, 2.4,H*0.4,2.4, tint(col,'#000',0.3)); popM(); }                // six ember legs
+  } else if(e.look==='totem'){
+    // ERUPTION TOTEM: a stacked carved-stone vent; the mouth glows and flares before it erupts
+    const heat=e.eruptW>0?(0.6+0.4*Math.sin(G.time*30)):(0.3+0.2*Math.sin(G.time*4));
+    bx(0,H*0.16,0, W*1.0,H*0.32,W*1.0, tint(col,'#000',0.1));                          // base
+    bx(0,H*0.5,0, W*0.8,H*0.4,W*0.8, col);                                             // mid carving
+    bx(0,H*0.8,0, W*0.7,H*0.3,W*0.7, tint(col,'#fff',0.08));                           // top carving
+    bx(0,H*0.5,W*0.42, W*0.44,H*0.34,3, '#1a0a08');                                    // carved face hollow
+    bx(-W*0.14,H*0.52,W*0.46, 3,3,1.4, '#ff8a3a','#ffd24a'); bx(W*0.14,H*0.52,W*0.46, 3,3,1.4, '#ff8a3a','#ffd24a');   // glowing eyes
+    bx(0,H*1.0,0, W*0.5,W*0.4,W*0.5, '#ff6a2a','#ffb060', 0.4+0.5*heat);               // the venting mouth glow
+    if(e.eruptW>0){ bx(0,H*1.2+heat*10,0, W*0.7,H*0.5,W*0.7, '#ff8a3a','#ff5a1e', 0.3*heat); }
+  } else if(e.look==='stalker'){
+    // BLINK-STALKER: a thin void-shade; fades to a smear while it teleports
+    const fade=e.blinkFx>0?0.3:0.9, sway=Math.sin(G.time*7+e.bob)*0.3;
+    bx(0,H*0.5,0, W*0.5,H*0.95,W*0.44, col, col, fade);                                // slender body
+    bx(0,H*0.9,0, W*0.42,W*0.4,W*0.4, tint(col,'#000',0.2), null, fade);               // narrow head
+    bx(-2.4,H*0.92,W*0.24, 2.4,3.4,1.2, '#c49bff','#c49bff', Math.min(1,fade+0.3)); bx(2.4,H*0.92,W*0.24, 2.4,3.4,1.2, '#c49bff','#c49bff', Math.min(1,fade+0.3));
+    for(let i=0;i<3;i++){ const a=G.time*4+i*2.1; bx(Math.cos(a)*W*0.35,H*0.2,Math.sin(a)*W*0.35, 3,H*0.44,3, col, col, 0.3*fade); }   // void wisps
+    pushM(); mv(-W*0.4,H*0.6,0); rotZ(0.7+sway); bx(-W*0.24,0,0, 2.6,10,2.6, col, col, fade); popM();   // claw arms
+    pushM(); mv(W*0.4,H*0.6,0); rotZ(-0.7-sway); bx(W*0.24,0,0, 2.6,10,2.6, col, col, fade); popM();
+  } else if(e.look==='tether'){
+    // VOID TETHER: a floating rune-node trailing strands that link to its allies
+    const pulse=0.6+0.4*Math.sin(G.time*5+e.tetherPulse);
+    bx(0,H*0.6,0, W*0.6,W*0.6,W*0.6, col, col, 0.8);                                   // central orb
+    bx(0,H*0.6,0, W*0.9,W*0.9,W*0.9, tint(col,'#fff',0.3), null, 0.18*pulse);          // aura
+    for(let i=0;i<4;i++){ const a=G.time*1.6+i*1.571; bx(Math.cos(a)*W*0.7,H*0.6+Math.sin(a)*W*0.3,Math.sin(a)*W*0.7, 3.4,3.4,3.4, '#c49bff','#e0c8ff', 0.85); }   // orbiting rune motes
+    bx(-2.6,H*0.62,W*0.3, 2.2,2.6,1.2, eyeC, eyeC); bx(2.6,H*0.62,W*0.3, 2.2,2.6,1.2, eyeC, eyeC);
+    for(let i=0;i<3;i++) bx(0,H*0.3-i*H*0.1,0, 2,H*0.14,2, col, col, 0.4);             // dangling tail strands
+  } else if(e.look==='priest'){
+    // CORRUPTED SUN-PRIEST: robed radiance-caster with a broken halo; heals its kin
+    const halo=0.6+0.4*Math.sin(G.time*3);
+    bx(0,H*0.3,0, W*1.0,H*0.5,W*0.78, col);                                            // long robe
+    bx(0,H*0.5,W*0.36, W*0.5,H*0.3,3, tint(col,'#fff',0.2));                           // gold stole
+    bx(0,H*0.7,0, W*0.7,H*0.3,W*0.6, tint(col,'#fff',0.1));                            // chest
+    bx(0,H*0.92,0, W*0.5,W*0.42,W*0.46, tint(col,'#fff',0.16));                        // head
+    bx(-2.6,H*0.94,W*0.26, 2.2,2.2,1.2, '#fff6d0','#fff6d0'); bx(2.6,H*0.94,W*0.26, 2.2,2.2,1.2, '#fff6d0','#fff6d0');
+    for(let i=0;i<8;i++){ const a=i*0.785; bx(Math.cos(a)*W*0.5,H*1.2,Math.sin(a)*W*0.5, 3,3,3, '#ffe9a8','#fff', 0.5+0.4*halo); }   // the halo ring
+    pushM(); mv(W*0.55,H*0.5,4); bx(0,0,0, 3,14,3, tint(col,'#000',0.2)); bx(0,12,0, 5,5,5, '#ffe9a8','#fff', 0.9); popM();          // radiant staff
+  } else if(e.look==='statue'){
+    // ANIMATED MARBLE STATUE: a heavy pale sculpture, slow shielder with cracked seams
+    const dk=tint(col,'#000',0.2), lt=tint(col,'#fff',0.14);
+    bx(-W*0.26,H*0.18,0, W*0.34,H*0.36,W*0.44, dk); bx(W*0.26,H*0.18,0, W*0.34,H*0.36,W*0.44, dk);   // pillar legs
+    bx(0,H*0.56,0, W*1.0,H*0.52,W*0.72, col);                                          // massive torso
+    bx(0,H*0.6,W*0.36, W*0.5,H*0.32,3, lt);                                            // chest facet
+    bx(-W*0.56,H*0.8,0, W*0.36,W*0.4,W*0.5, lt); bx(W*0.56,H*0.8,0, W*0.36,W*0.4,W*0.5, lt);         // shoulders
+    bx(0,H*0.98,0, W*0.5,W*0.46,W*0.48, tint(col,'#fff',0.1));                          // stoic head
+    bx(-2.8,H*1.0,W*0.28, 2.4,2.6,1.2, eyeC, eyeC); bx(2.8,H*1.0,W*0.28, 2.4,2.6,1.2, eyeC, eyeC);
+    bx(0,H*0.5,W*0.3, 1.4,H*0.5,1.4, dk); bx(-W*0.3,H*0.55,W*0.28, 1.2,H*0.3,1.2, dk);  // cracked seams
+  } else if(e.look==='knight'){
+    // SIEGE KNIGHT: armored, a broad shield on one arm, a heavy maul it raises to crush
+    const dk=tint(col,'#000',0.3), lt=tint(col,'#fff',0.14), raise=e.knightW>0?(1-e.knightW/0.6):0;
+    bx(-W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.42, dk); bx(W*0.24,H*0.2,0, W*0.34,H*0.4,W*0.42, dk);       // greaves
+    bx(0,H*0.56,0, W*0.9,H*0.5,W*0.64, col);                                           // plated body
+    bx(0,H*0.5,W*0.34, W*0.5,H*0.3,3, lt);                                             // breastplate
+    bx(0,H*0.9,0, W*0.5,H*0.3,W*0.46, dk);                                             // great helm
+    bx(0,H*0.9,W*0.26, W*0.34,2.4,1.4, eyeC, eyeC);                                    // visor slit
+    bx(0,H*1.08,0, 3,8,3, lt);                                                          // helm plume
+    pushM(); mv(-W*0.62,H*0.6,W*0.1); bx(0,0,0, 4,H*0.7,W*0.7, lt); bx(0,0,W*0.36, W*0.02+3,H*0.6,2, tint(col,'#fff',0.25)); popM();   // big shield
+    pushM(); mv(W*0.58,H*0.62,0); rotX(-0.4-raise*1.8); bx(0,10,0, 3.4,16,3.4, dk); bx(0,20,0, 8,8,8, tint(col,'#000',0.15)); popM(); // raised maul
+  } else if(e.look==='arcanist'){
+    // ROYAL ARCANIST: ornate mage, floating rune sigils, a crowned circlet
+    const oc=(e.shot&&e.shot.color)||'#c47bff', spin=G.time*2;
+    bx(0,H*0.3,0, W*1.0,H*0.52,W*0.78, col);                                           // regal robe
+    bx(0,H*0.5,W*0.36, W*0.5,H*0.3,3, tint(col,'#fff',0.2));                           // trim
+    bx(0,H*0.72,0, W*0.66,H*0.3,W*0.56, tint(col,'#fff',0.08));                        // shoulders
+    bx(0,H*0.94,0, W*0.5,W*0.42,W*0.46, tint(col,'#000',0.2));                         // hooded head
+    bx(-2.6,H*0.96,W*0.28, 2.2,2.4,1.2, oc, oc); bx(2.6,H*0.96,W*0.28, 2.2,2.4,1.2, oc, oc);
+    for(let i=0;i<3;i++) bx(-W*0.24+i*W*0.24,H*1.14,0, 3,6,3, '#ffd24a','#fff', 0.9);  // crown points
+    for(let i=0;i<3;i++){ const a=spin+i*2.094; bx(Math.cos(a)*W*0.75,H*0.7,Math.sin(a)*W*0.75, 5,5,1.6, oc, oc, 0.85); }   // orbiting arcane sigils
+  } else if(e.kind==='fly'){
+    const flap=Math.sin(e.bob*2.4)*0.7;
+    bx(0,H*0.5,0, W*0.72,H*0.9,W*0.62, col);
+    pushM(); mv(-W*0.42,H*0.62,0); rotZ(0.5+flap); bx(-W*0.34,0,0, W*0.7,2.2,W*0.42, tint(col,'#000',0.2)); popM();
+    pushM(); mv(W*0.42,H*0.62,0); rotZ(-0.5-flap); bx(W*0.34,0,0, W*0.7,2.2,W*0.42, tint(col,'#000',0.2)); popM();
+    bx(-3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC); bx(3.4,H*0.62,W*0.30, 2.6,2.8,1.2, eyeC, eyeC);
+  } else if(e.boss){
+    drawBoss3(e,t,col,eyeC,en,W,H);
+  } else if(e.kind==='caster'){
+    // robed cultist: hooded, glowing eyes, orb hovering at its palm
+    const oc=(e.shot&&e.shot.color)||'#c47bff';
+    bx(0,H*0.28,0, W*1.0,H*0.5,W*0.8, col);                 // skirt
+    bx(0,H*0.62,0, W*0.8,H*0.34,W*0.66, tint(col,'#fff',0.08));
+    bx(0,H*0.5,W*0.34, 7,4,1.6, oc, oc);                    // belt rune
+    bx(0,H*0.88,0, W*0.62,W*0.5,W*0.56, tint(col,'#000',0.25)); // hood
+    bx(0,H*0.86,W*0.24, W*0.44,W*0.34,2,'#0a0a12');         // hood shadow
+    bx(-2.6,H*0.87,W*0.30, 2.2,2.2,1.2, oc, oc); bx(2.6,H*0.87,W*0.30, 2.2,2.2,1.2, oc, oc);
+    pushM(); mv(W*0.55,H*0.55,4); bx(0,0,0, 3.4,12,3.4, tint(col,'#000',0.2));
+    bx(0,10+Math.sin(G.time*4)*2,2, 6.5,6.5,6.5, oc, oc); popM(); // hovering orb
+  } else if(e.look==='mimic'){
+    // THE MIMIC, unmasked: the chest is its skull — lid agape on fangs, a lolling tongue,
+    // spider legs under the box. It keeps the chest's colors so the betrayal reads instantly.
+    const snap=Math.max(0,Math.sin(G.time*9+e.bob))*0.5, wind=e.windT>0;
+    pushM(); if(wind){ rotX(-0.45); mv(0,4,0); } else if(e.chargeT>0) rotX(0.28);
+    bx(0,H*0.42,0, 30,13,22,'#6b4a2a');                                            // the box body
+    bx(0,H*0.44,0, 31,3,23,'#caa23a','#caa23a',0.9);                               // its gold band
+    pushM(); mv(0,H*0.62,-9); rotX(-(0.9+snap*0.7+(wind?0.5:0)));                  // the lid, hinged wide open
+    bx(0,4,10, 30,7,22,'#7a5836'); bx(0,1,10, 28,2,20,'#caa23a','#caa23a',0.5); popM();
+    bx(0,H*0.52,2, 24,6,16,'#1a0a0e');                                             // the dark of the mouth
+    for(let i2=0;i2<5;i2++){ bx(-10+i2*5,H*0.6,10.4, 2.6,5+((i2%2)?2:0),2, '#e8e4d8','#fff',0.9);   // fangs upper...
+      bx(-10+i2*5,H*0.4,10.4, 2.6,4,2, '#d8d4c8'); }                                // ...and lower
+    pushM(); mv(0,H*0.4,13); rotX(0.5+snap*0.3); bx(0,-3,3, 5,3,12,'#c04a5a'); popM();   // the tongue
+    bx(-8,H*0.72,9, 3,3,1.4, '#ffd24a','#ffd24a',0.95); bx(8,H*0.72,9, 3,3,1.4, '#ffd24a','#ffd24a',0.95);   // two greedy gold eyes
+    const skit=Math.sin(G.time*13+e.bob)*0.5;
+    for(const s2 of [-1,1]) for(let i2=0;i2<3;i2++){ pushM(); mv(s2*15,H*0.3,-8+i2*8); rotZ(s2*(0.7+((i2%2)?skit:-skit)*0.3));
+      bx(s2*4,-H*0.26,0, 2.6,H*0.5,2.6, '#3a2c1c'); popM(); }                       // six splayed spider legs
+    popM();
+  } else if(e.kind==='charger'){
+    // RESTYLED (Phase 18): a rust-red siege beetle — wedge thorax, six skittering legs, a
+    // two-segment ram horn, twitching antennae. Nothing box-like: chests are chests, this is a bug.
+    const gait=Math.sin(G.time*12+e.bob)*0.5, wind=e.windT>0;
+    pushM(); if(wind){ rotX(-0.5); mv(0,5,0); } else if(e.chargeT>0) rotX(0.25);
+    pushM(); rotX(0.12); bx(0,H*0.4,-W*0.28, W*0.86,H*0.52,W*0.7, tint(col,'#000',0.12)); popM();   // abdomen, tucked low
+    bx(0,H*0.42,-W*0.28, W*0.6,H*0.2,W*0.5, tint(col,'#000',0.3));                  // abdomen ridge
+    pushM(); rotX(-0.14); bx(0,H*0.56,W*0.22, W*0.8,H*0.6,W*0.62, col);             // thorax, raised and wedge-forward
+    bx(0,H*0.86,W*0.22, W*0.5,H*0.14,W*0.4, tint(col,'#000',0.28));                 // dark carapace saddle (no bright lid-strip)
+    bx(0,H*0.6,W*0.55, W*0.5,H*0.4,4, tint(col,'#000',0.35)); popM();               // face plate
+    bx(-W*0.16,H*0.6,W*0.56, 2.6,2.6,1.2, eyeC, eyeC); bx(W*0.16,H*0.6,W*0.56, 2.6,2.6,1.2, eyeC, eyeC);
+    pushM(); mv(0,H*0.74,W*0.5); rotX(0.85); bx(0,5,0, 4,11,4,'#e8e4d8');           // the ram horn, curved in two segments
+    pushM(); mv(0,10,0); rotX(-0.55); bx(0,4,0, 3,9,3,'#f4f0e4'); popM(); popM();
+    for(const s2 of [-1,1]){ pushM(); mv(s2*W*0.14,H*0.82,W*0.46); rotX(-0.5+(wind?Math.sin(G.time*30)*0.4:gait*0.2)); rotZ(s2*0.4);
+      bx(0,4,0, 1.6,9,1.6, tint(col,'#000',0.3)); popM(); }                          // antennae, twitching
+    for(const s2 of [-1,1]) for(let i2=0;i2<3;i2++){ pushM(); mv(s2*W*0.44,H*0.3,-W*0.32+i2*W*0.32); rotZ(s2*(0.55+((i2%2)?gait:-gait)*0.25));
+      bx(s2*3,-H*0.26,0, 3,H*0.5,3, tint(col,'#000',0.32)); popM(); }                // six splayed legs, skittering
+    if(wind){ const pf=0.5+0.5*Math.sin(G.time*26); bx(0,H*0.56,W*0.1, W*1.1,H*0.8,W*0.95, '#ff3020','#ff6040', 0.12+0.14*pf); }   // rearing body-glow joins the ground telegraph
+    popM();
+  } else if(e.look==='bones'){
+    // skeleton: skull, ribs, stick limbs — now with glowing sockets, clavicles, finger bones
+    const wob=Math.sin(G.time*10+e.bob)*0.16, ge=0.6+0.3*Math.sin(G.time*4+e.bob);
+    bx(-3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); bx(3.4,H*0.16,0, 3,H*0.32,3,'#d8d4c8'); // leg bones
+    bx(-3.4,H*0.02,1, 3.4,2.4,4,'#c8c4b6'); bx(3.4,H*0.02,1, 3.4,2.4,4,'#c8c4b6');   // bony feet
+    bx(0,H*0.42,0, 3.4,H*0.24,3.4,'#e8e4d8');                                        // spine
+    for(let i2=0;i2<4;i2++) bx(0,H*0.36+i2*4.4,0, W*0.92-i2*2.2,2.0,W*0.62,'#e8e4d8'); // ribs (one more)
+    bx(0,H*0.32,0, W*0.7,3.4,W*0.5,'#d8d4c8');                                        // pelvis
+    bx(-W*0.34,H*0.6,W*0.08, W*0.34,2,2,'#e8e4d8'); bx(W*0.34,H*0.6,W*0.08, W*0.34,2,2,'#e8e4d8'); // clavicles
+    pushM(); mv(-W*0.5,H*0.56,0); rotZ(0.4+wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); bx(0,-14,1, 2,3,3,'#c8c4b6'); popM();  // arm + hand
+    pushM(); mv(W*0.5,H*0.56,0); rotZ(-0.4-wob); bx(0,-7,0, 2.6,14,2.6,'#d8d4c8'); bx(0,-14,1, 2,3,3,'#c8c4b6'); popM();
+    bx(0,H*0.78,0, W*0.62,W*0.56,W*0.56,'#efece2');                                   // skull
+    bx(0,H*0.86,W*0.02, W*0.5,W*0.16,W*0.5,'#f4f1e8');                                // cranium dome
+    bx(-2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e'); bx(2.8,H*0.8,W*0.26, 2.6,3,1.2,'#0a0a0e');
+    bx(-2.8,H*0.8,W*0.28, 1.6,1.8,1,'#ff5a3a','#ff7a4a',ge); bx(2.8,H*0.8,W*0.28, 1.6,1.8,1,'#ff5a3a','#ff7a4a',ge);  // glowing socket embers
+    bx(0,H*0.68,W*0.26, W*0.4,2.4,1.2,'#0a0a0e');                                     // jaw shadow
+    for(let i2=0;i2<3;i2++) bx(-3+i2*3,H*0.71,W*0.27, 1,1.6,0.8,'#d8d4c8');           // teeth
+  } else if(e.look==='slime'){
+    // gelatinous blob: squashes and stretches as it oozes along
+    const sq=0.86+0.24*Math.abs(Math.sin(e.bob*1.6));
+    bx(0,H*0.5*sq,0, W*1.15/Math.sqrt(sq),H*sq,W*1.0/Math.sqrt(sq), col, null, 0.93);
+    bx(0,H*0.5*sq,0, W*0.45,W*0.45,W*0.45, tint(col,'#fff',0.25), tint(col,'#fff',0.2), 0.5);  // suspended inner core
+    bx(0,H*0.82*sq,-W*0.14, W*0.5,H*0.24,W*0.4, tint(col,'#fff',0.3), null, 0.8); // gloss highlight
+    bx(-W*0.28,H*0.7*sq,W*0.1, W*0.14,W*0.14,W*0.14, tint(col,'#fff',0.4), null,0.7);           // trapped bubbles
+    bx(W*0.22,H*0.34*sq,-W*0.1, W*0.1,W*0.1,W*0.1, tint(col,'#fff',0.4), null,0.7);
+    bx(-W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20'); bx(W*0.16,H*0.5*sq,W*0.4, 3,4,1.4,'#1a2a20');
+    bx(-W*0.16,H*0.52*sq,W*0.42, 1.4,1.6,1,'#eafff4','#eafff4',0.9); bx(W*0.16,H*0.52*sq,W*0.42, 1.4,1.6,1,'#eafff4','#eafff4',0.9); // eye glints
+  } else if(e.kind==='goblin'){
+    // scampering gold thief with a loot sack
+    const scam=Math.sin(G.time*14)*0.28;
+    bx(0,H*0.42,0, W*0.8,H*0.7,W*0.66, col);
+    pushM(); mv(-W*0.28,H*0.14,0); rotX(scam); bx(0,-4,0, 4,9,4,'#8a6a1e'); popM();
+    pushM(); mv(W*0.28,H*0.14,0); rotX(-scam); bx(0,-4,0, 4,9,4,'#8a6a1e'); popM();
+    bx(0,H*0.88,0, W*0.6,W*0.55,W*0.55, '#e8c24a');                    // head
+    bx(-2.6,H*0.9,W*0.29, 2.2,2.6,1.2,'#1a1a22'); bx(2.6,H*0.9,W*0.29, 2.2,2.6,1.2,'#1a1a22');
+    bx(0,H*1.1,0, 3,6,3, '#e8c24a');                                    // pointy ear tuft
+    pushM(); mv(0,H*0.5,-W*0.5); rotX(0.3); bx(0,4,-4, W*0.7,W*0.7,W*0.6,'#7a5836'); popM(); // loot sack
+    bx(0,H*0.52,-W*0.86, 4,4,4,'#ffd24a','#ffd24a');                    // gold spilling out
+  } else if(e.look==='soldier'){
+    // Grunt — a helmeted footsoldier with a sword and a round wooden shield
+    const dk=tint(col,'#000',0.3), sw=Math.sin(G.time*6+e.bob)*0.14;
+    bx(-W*0.2,H*0.16,0, W*0.3,H*0.32,W*0.4, dk); bx(W*0.2,H*0.16,0, W*0.3,H*0.32,W*0.4, dk);   // legs
+    bx(-W*0.2,H*0.02,1, W*0.32,3,W*0.5, tint(dk,'#000',0.3)); bx(W*0.2,H*0.02,1, W*0.32,3,W*0.5, tint(dk,'#000',0.3));  // boots
+    bx(0,H*0.5,0, W*0.7,H*0.4,W*0.5, col); bx(0,H*0.42,W*0.28, W*0.5,4,2, dk);                  // torso + belt
+    bx(0,H*0.58,0, W*0.78,W*0.2,W*0.56,'#9aa2b6'); for(const s2 of [-1,1]) bx(s2*W*0.38,H*0.6,0, W*0.16,W*0.16,W*0.5,'#aeb6c8'); // pauldrons
+    bx(0,H*0.5,W*0.27, W*0.34,H*0.28,2, tint(col,'#fff',0.12)); bx(0,H*0.5,W*0.28, 2,H*0.3,1, '#c9a24a');  // breastplate + gilt line
+    bx(0,H*0.78,0, W*0.5,W*0.42,W*0.46,'#8b93a8'); bx(0,H*0.9,0, W*0.42,W*0.2,W*0.44,'#6b7183'); // helmeted head + dome
+    bx(0,H*0.98,0, W*0.08,W*0.16,W*0.4,'#c9a24a');                                                // helmet crest
+    bx(0,H*0.76,W*0.24, W*0.3,3,1.4,'#12121a'); bx(-2.4,H*0.78,W*0.25, 2,2,1, eyeC, eyeC); bx(2.4,H*0.78,W*0.25, 2,2,1, eyeC, eyeC);  // visor + eyes
+    bx(0,H*0.7,W*0.22, W*0.34,3,1.2,'#6b7183');                                                   // gorget
+    pushM(); mv(-W*0.5,H*0.55,6); rotZ(0.2); bx(0,0,1, W*0.55,W*0.55,1.5,'#7a5836'); bx(0,0,2, W*0.5,W*0.5,1,'#6a4a2a'); bx(0,0,3, 3,3,1,'#c9a24a'); popM();   // round wooden shield
+    pushM(); mv(W*0.5,H*0.5,4); rotZ(-0.3-sw); bx(0,W*0.5,0, 2.4,W*1.1,2.4,'#cfd6df'); bx(0,-2,0, 6,3,3,'#3a2f24'); popM();   // sword
+  } else if(e.look==='emberimp'){
+    // Emberling — a flaming rock imp, head crowned in fire, dragging a chain
+    const rk='#2a1510', fl=0.6+0.3*Math.sin(G.time*7+e.bob);
+    bx(-W*0.18,H*0.18,0, W*0.26,H*0.36,W*0.3, rk); bx(W*0.18,H*0.18,0, W*0.26,H*0.36,W*0.3, rk);   // rocky legs
+    bx(0,H*0.5,0, W*0.6,H*0.42,W*0.44, rk);
+    for(let i=-1;i<=1;i++) bx(i*W*0.18,H*0.5,W*0.22, 2.6,H*0.34,1.6,'#ff7a3a','#ffb060',fl);        // lava cracks
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.4,H*0.55,2); rotZ(-s*0.4); bx(0,-H*0.2,0, W*0.2,H*0.4,W*0.2, rk); bx(0,-H*0.42,0, W*0.18,W*0.16,W*0.18,'#3a1f16'); popM(); }  // clawed arms
+    bx(0,H*0.86,0, W*0.5,W*0.44,W*0.44,'#3a1a12'); bx(0,H*0.96,0, W*0.4,W*0.3,W*0.4, col,'#ffb060',fl);   // rock head + fire crown
+    for(let i=0;i<3;i++){ const a=G.time*3+i*2.09; bx(Math.cos(a)*W*0.24, H*1.05+Math.sin(G.time*5+i)*3, Math.sin(a)*W*0.2, 3,5,3,'#ff9a4a','#ffd24a',0.8); }  // flame plume
+    bx(-2.4,H*0.86,W*0.24, 2,2,1,'#fff2b0','#ffd24a',0.95); bx(2.4,H*0.86,W*0.24, 2,2,1,'#fff2b0','#ffd24a',0.95);
+    for(const s of [-1,1]) bx(s*W*0.32,H*0.66,-W*0.14, W*0.16,W*0.14,W*0.16, tint(rk,'#ff5a20',0.4),'#ff7a3a',fl*0.8);  // molten shoulder vents
+    bx(0,H*0.4,-W*0.24, W*0.34,W*0.3,2,'#ff6a2a','#ffb060',fl*0.7);                                                    // back magma seam
+    for(const s of [-1,1]) bx(s*W*0.16,H*0.03,1, W*0.24,3,W*0.34, tint(rk,'#000',0.2));                                // rocky feet
+    bx(0,H*0.28,-W*0.3, W*0.14,W*0.14,W*0.14,'#3a3f4a'); bx(0,H*0.22,-W*0.42, W*0.12,W*0.12,W*0.12,'#3a3f4a');         // dragging chain
+  } else if(e.look==='frostbeast'){
+    // Frostling — a low ice beast on all fours, crystal spines, glowing eyes, fangs
+    const ic='#bfe6ff', icd='#7fb0d8', g2=Math.sin(G.time*10+e.bob)*0.3;
+    bx(0,H*0.42,-2, W*0.7,H*0.5,W*1.2, col);                        // low body
+    bx(0,H*0.62,W*0.6, W*0.55,H*0.42,W*0.5, ic);                    // head/shoulders
+    for(let i=0;i<4;i++) bx(-W*0.2+i*W*0.13,H*0.72+((i%2)?4:0),-W*0.2, 3,8+((i%2)?4:0),3, ic,'#7fd6ff',0.8);  // crystal spines
+    bx(0,H*0.5,W*0.92, W*0.4,W*0.24,W*0.3, icd);                    // snout
+    bx(-2.6,H*0.62,W*0.88, 2.2,2,1,'#7fe0ff','#bff0ff',0.95); bx(2.6,H*0.62,W*0.88, 2.2,2,1,'#7fe0ff','#bff0ff',0.95);  // eyes
+    for(let i=-1;i<=1;i+=2) bx(i*3,H*0.44,W*1.0, 1.6,4,1.6,'#eafaff');   // fangs
+    for(const p of [[-W*0.28,W*0.5],[W*0.28,W*0.5],[-W*0.28,-W*0.4],[W*0.28,-W*0.4]]){ pushM(); mv(p[0],H*0.2,p[1]); rotX(g2*(p[1]>0?1:-1)); bx(0,-H*0.2,0, 4,H*0.4,4, icd); bx(0,-H*0.4,2, 2.2,3,2.2,'#eafaff','#bff0ff',0.8); popM(); }  // four legs + ice claws
+    for(let i=0;i<3;i++) bx((i-1)*W*0.18,H*0.34,-W*0.5, 2.4,5+i%2*3,2.4, ic,'#7fd6ff',0.7);        // frozen tail spines
+    bx(0,H*0.4,W*1.06, W*0.3,W*0.2,W*0.2,'#dff4ff','#bff0ff',0.28+0.15*Math.sin(G.time*3));         // cold breath
+  } else if(e.look==='toxbeast'){
+    // Toxling — a hunched swamp beast with a glowing poison belly-sac and mushrooms on its back
+    const gr='#5a7a2e', grd='#3a5a1e', sac=0.6+0.3*Math.sin(G.time*3+e.bob);
+    bx(-W*0.2,H*0.16,0, W*0.28,H*0.34,W*0.34, grd); bx(W*0.2,H*0.16,0, W*0.28,H*0.34,W*0.34, grd);   // legs
+    bx(0,H*0.46,0, W*0.66,H*0.44,W*0.52, gr);
+    bx(0,H*0.38,W*0.3, W*0.4,W*0.36,W*0.2, col,'#c8ff6a',sac);       // glowing belly sac
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.42,H*0.5,2); rotZ(-s*0.3); bx(0,-H*0.24,0, W*0.18,H*0.44,W*0.18, gr); popM(); }  // long arms
+    bx(0,H*0.8,W*0.06, W*0.5,W*0.4,W*0.46, gr);                      // head
+    bx(-2.6,H*0.82,W*0.24, 2.2,2,1,'#c8ff6a','#eaffb0',0.9); bx(2.6,H*0.82,W*0.24, 2.2,2,1,'#c8ff6a','#eaffb0',0.9);
+    for(let i=0;i<3;i++){ const mx=(i-1)*W*0.2; bx(mx,H*0.98,-W*0.12, 3,4,3,'#8a5a3a'); bx(mx,H*1.04,-W*0.12, 6,3,6,'#b07a4a'); bx(mx-1.4,H*1.05,-W*0.06, 1.2,1.2,1.2,'#eaffb0','#c8ff6a',0.8); }  // mushroom caps + spore dots
+    for(const s of [-1,1]) bx(s*W*0.42,H*0.28,2, W*0.16,W*0.14,W*0.16, grd);                          // clawed hands
+    { const dr=(G.time*0.8+e.bob)%1; bx(0,H*0.34-dr*10,W*0.34, 1.6,2.4,1.6,'#c8ff6a','#eaffb0',0.7*(1-dr)); }  // dripping venom
+    bx(0,H*0.72,-W*0.14, W*0.4,W*0.12,W*0.3, grd);                                                      // hunched back ridge
+  } else if(e.look==='shadewraith'){
+    // Shadeling — a purple skeletal wraith with glowing ribs and reaching claws, tattering to nothing
+    const sh='#2a1840', gl='#c47bff', fl=0.6+0.3*Math.sin(G.time*4+e.bob);
+    for(let i=0;i<3;i++) bx(0,H*0.16+i*H*0.13,-1, W*0.5-i*3,H*0.15,W*0.4, tint(sh,'#000',0.1*i),null,0.9-i*0.18);   // tattering lower body
+    bx(0,H*0.56,0, W*0.5,H*0.4,W*0.4, sh);                          // torso
+    for(let i=0;i<3;i++) bx(0,H*0.5+i*5,W*0.2, W*0.44-i*2,2,1.4, gl, gl, 0.5*fl);   // glowing ribs
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.4,H*0.6,2); rotZ(-s*(0.5+Math.sin(G.time*3+e.bob)*0.15));
+      bx(0,-H*0.2,0, 2.6,H*0.4,2.6, sh); bx(0,-H*0.42,0, 3,4,3, gl, gl, fl); popM(); }   // reaching glowing-claw arms
+    bx(0,H*0.86,0, W*0.4,W*0.4,W*0.4, sh); bx(0,H*0.84,W*0.22, W*0.28,W*0.2,1.4,'#0a0410');   // skull + face void
+    for(const s of [-1,1]) bx(s*W*0.22,H*1.02,-W*0.05, W*0.12,W*0.24,W*0.1, sh,null,0.7);          // ragged horns/hood peaks
+    bx(-2.4,H*0.87,W*0.24, 2,2.4,1, gl, gl, 0.95); bx(2.4,H*0.87,W*0.24, 2,2.4,1, gl, gl, 0.95);   // burning eyes
+    for(let i=0;i<3;i++){ const a=G.time*2+i*2.1; bx(Math.cos(a)*W*0.4,H*(0.7+0.2*Math.sin(a)),Math.sin(a)*W*0.3, 2,2,2, gl, gl, 0.4*fl); }  // drifting soul wisps
+  } else if(e.look==='sparkstar'){
+    // Sparkling — a floating faceted arcane diamond with radiating crystal shards
+    const spin=G.time*1.5+e.bob;
+    pushM(); rotY(spin); rotZ(0.2);
+      bx(0,H*0.5,0, W*0.5,W*0.5,W*0.5, col,'#eafaff',0.85); bx(0,H*0.5,0, W*0.28,W*0.28,W*0.28,'#eafaff','#fff',0.95);   // diamond + core
+      for(let i=0;i<4;i++){ const a=i*1.571; pushM(); mv(Math.cos(a)*W*0.55,H*0.5,Math.sin(a)*W*0.55); rotY(a); bx(0,0,0, 3,3,W*0.5,'#bff0ff','#7fd6ff',0.8); popM(); }  // radiating shards
+      for(const s of [-1,1]) bx(0,H*0.5+s*W*0.6,0, 3,W*0.4,3,'#bff0ff','#7fd6ff',0.8);   // vertical shards
+    popM();
+    for(let i=0;i<3;i++){ const a=spin*2+i*2.09; bx(Math.cos(a)*W*0.7,H*0.5+Math.sin(a)*W*0.5,Math.sin(a)*W*0.4, 2,2,2,'#7fd6ff','#bff0ff',0.6); }  // motes
+  } else if(e.look==='batwing'){
+    // Flyer — a fanged purple bat-demon with broad membrane wings
+    const flap=Math.sin(e.bob*2.4)*0.8, dk=tint(col,'#000',0.28);
+    bx(0,H*0.5,0, W*0.5,H*0.7,W*0.5, col); bx(0,H*0.72,W*0.1, W*0.44,W*0.4,W*0.42, col);   // body + head
+    bx(0,H*0.62,W*0.3, W*0.34,W*0.18,W*0.2, dk);                    // snout/maw
+    for(let i=-1;i<=1;i+=2) bx(i*3,H*0.58,W*0.34, 1.6,3,1.6,'#eae4d8');   // fangs
+    for(const s of [-1,1]) bx(s*3.4,H*0.78,W*0.32, 2.4,2.8,1.2, eyeC, eyeC);   // eyes
+    for(const s of [-1,1]) bx(s*W*0.2,H*0.94,0, 2,5,2, dk);         // ears
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.34,H*0.6,0); rotZ(-s*(0.4+flap)); rotY(s*0.2);
+      bx(s*W*0.5,0,0, W*1.0,2,W*0.5, dk); for(let i=1;i<=3;i++) bx(s*W*(0.16+i*0.24),-W*0.16,0, 1.4,W*0.32,1.3, tint(col,'#000',0.4)); bx(s*W*0.98,W*0.12,0, 2,2,2, tint(col,'#000',0.5)); popM(); }  // membrane wings + finger struts + wingtip claw
+    for(const s of [-1,1]){ bx(s*3,H*0.2,W*0.1, 2.4,W*0.3,2.4, dk); for(let i=-1;i<=1;i++) bx(s*3+i*1.4,H*0.04,W*0.22, 1,1.4,2, tint(col,'#000',0.5)); }  // clawed feet + talons
+    bx(0,H*0.34,-W*0.34, W*0.12,W*0.12,W*0.4, dk); bx(0,H*0.3,-W*0.56, 2,2,4, tint(col,'#000',0.4));   // barbed tail
+  } else {
+    // brute grunt: armored torso, hunched shoulders, tusked snarl, clawed fists
+    const dk=tint(col,'#000',0.32), lt=tint(col,'#fff',0.13), sw=Math.sin(G.time*7+e.bob)*0.12;
+    bx(-W*0.26,H*0.2,0, W*0.36,H*0.4,W*0.5, dk); bx(W*0.26,H*0.2,0, W*0.36,H*0.4,W*0.5, dk); // stout legs
+    bx(0,H*0.58,0, W*1.04,H*0.5,W*0.78, col);                                    // broad torso
+    bx(0,H*0.6,W*0.35, W*0.52,H*0.32,3, lt);                                      // chest plate
+    bx(0,H*0.42,W*0.34, W*0.72,3.4,4.4, dk);                                      // belt
+    bx(-W*0.52,H*0.82,0, W*0.32,H*0.16,W*0.52, lt); bx(W*0.52,H*0.82,0, W*0.32,H*0.16,W*0.52, lt); // shoulder pads
+    pushM(); mv(-W*0.52,H*0.66,0); rotZ(0.36+sw); box(4.6,H*0.4,4.6, col); mv(0,-H*0.24,3.5); box(6.5,6.5,6.5, dk); popM(); // L arm+claw
+    pushM(); mv(W*0.52,H*0.66,0); rotZ(-0.36-sw); box(4.6,H*0.4,4.6, col); mv(0,-H*0.24,3.5); box(6.5,6.5,6.5, dk); popM();  // R arm+claw
+    bx(0,H*0.92,W*0.04, W*0.56,W*0.5,W*0.5, col);                                 // head
+    bx(0,H*0.84,W*0.30, W*0.42,4.6,5, dk);                                        // heavy jaw
+    bx(-3,H*0.81,W*0.34, 2.4,4,2.4,'#e8e0d0'); bx(3,H*0.81,W*0.34, 2.4,4,2.4,'#e8e0d0'); // tusks
+    bx(0,H*1.0,W*0.0, W*0.5,3.6,4, dk);                                           // brow
+    bx(-W*0.15,H*0.94,W*0.28, 3,3.2,1.2, eyeC, eyeC); bx(W*0.15,H*0.94,W*0.28, 3,3.2,1.2, eyeC, eyeC);
+  }
+  popM();
+}
+/* ---- bosses: mythic-monster voxel builds (visual only; hitbox r/h unchanged) ---- */
+function drawBoss3(e,t,col,eyeC,en,W,H){
+  const dark=tint(col,'#000',0.35), darker=tint(col,'#000',0.55), lite=tint(col,'#fff',0.16);
+  const GOLD='#c9a24a', GOLDL='#ffd77a', bth=(STAGES[G.stageIndex]||{}).theme;
+  if(en) rotX(0.12); // enraged/lunging lean
+  if(e.type==='brute'){
+    // The Brute — a mountain of battered red-iron plate: layered armour, rivets, brutish face, chiselled stone slab greatsword. (HIGH-DETAIL showcase for the batched renderer.)
+    const sk='#b07a4a', skD=tint(sk,'#000',0.3), lea='#2e2016', leaD='#1c130a', st='#6a6f7e', stD='#3a3f4a', stH='#8a909e', riv=tint(lite,'#fff',0.25), _vl=voxLod(e.x,e.z);
+    // ---- legs: layered greaves, knee cops, plated boots, hip rivets ----
+    for(const s of [-1,1]){
+      bx(s*13,18,0, 16,28,17, dark);                                   // thigh
+      bx(s*13,24,8.5, 13,20,3, col); bx(s*13,24,10, 11,16,1.6, lite);  // thigh plate + edge
+      bx(s*13,6,8, 12,8,7, lite); bx(s*13,6,11, 8,6,2, GOLD);          // knee cop + gold trim
+      bx(s*13,-1,3, 14,8,10, darker);                                  // shin
+      bx(s*13,3,10, 16,7,20, dark); bx(s*13,6,18, 14,4,5, col);        // armoured boot + toe cap
+      for(let i=0;i<3;i++) bx(s*13-6+i*6,34,9, 2,2,1.5, riv);          // hip rivets
+    }
+    bx(0,10,W*0.3, W*0.72,8,5, darker);                                // belt
+    bx(0,10,W*0.34, W*0.5,5,2, lea); bx(0,10,W*0.34, 8,8,2, GOLD); bx(0,10,W*0.36, 4,4,1.4, GOLDL);   // strap + gold buckle
+    for(let i=0;i<5;i++){ const x=(i-2)*W*0.17; bx(x,4,W*0.3, W*0.13,12,3, dark); bx(x,4,W*0.32, W*0.1,10,1.4, tint(col,'#000',0.15)); }  // fauld tassets
+    // ---- torso: leaning, layered breastplate + abs + rivets + gold emblem ----
+    pushM(); mv(0,40,3); rotX(0.30);
+      bx(0,6,0, W*1.04,36,W*0.64, col);                                // barrel torso
+      bx(0,18,W*0.31, W*0.66,16,3.5, lite);                            // upper breastplate
+      bx(0,4,W*0.32, W*0.6,14,3, tint(col,'#000',0.08));               // lower plate
+      for(let i=0;i<3;i++) bx(0,-2-i*5,W*0.33, W*0.5-i*6,3.4,2, dark); // ab ridges
+      bx(0,20,W*0.34, 10,10,2, GOLD); bx(0,20,W*0.36, 6,6,1.4, darker); bx(0,20,W*0.37, 3,5,1, GOLDL);   // chest emblem
+      for(const s of [-1,1]) for(let i=0;i<3;i++) bx(s*W*0.24,16-i*8,W*0.33, 2.2,2.2,1.6, riv);          // breastplate rivets
+      bx(0,24,-5, W*0.82,14,W*0.42, dark); bx(0,30,-5, W*0.6,5,W*0.36, darker);   // back / shoulder hump
+      bx(0,-8,W*0.2, W*0.5,6,W*0.3, lea);                              // gut strap
+    popM();
+    // ---- pauldrons: tiered layered shoulder plates + studs + spikes ----
+    for(const s of [-1,1]){
+      bx(s*W*0.56,60,4, 22,10,22, lite); bx(s*W*0.56,53,5, 24,8,23, col); bx(s*W*0.56,46,6, 20,7,20, dark);   // three tiers
+      bx(s*W*0.56,64,4, 16,4,16, GOLD);                                // gold rim
+      for(let i=0;i<4;i++){ const a=i*1.571; bx(s*W*0.56+Math.cos(a)*9,58,4+Math.sin(a)*9, 2.4,2.4,2.4, riv); }   // studs
+      pushM(); mv(s*W*0.56,66,-3); rotX(-0.4); bx(0,4,0, 4,10,4, darker); popM();   // spike
+    }
+    // ---- arms: upper plate, elbow cop, forearm gauntlet, knuckled fists ----
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.56,52,8); rotX(0.12);
+      box(14,20,14, col); bx(0,2,7, 10,14,2, lite);                    // upper arm + plate
+      mv(0,-16,2); box(11,9,11, dark); bx(0,0,6, 9,7,2, GOLD);         // elbow cop + trim
+      mv(0,-14,2); box(15,15,15, darker);                             // forearm gauntlet
+      for(let i=0;i<4;i++) bx(-6+i*4,-8,8, 3,4,3, dark);               // knuckles
+      for(let i=0;i<3;i++) bx(-4+i*4,2,8, 2,2,1.6, riv);               // rivets
+      popM(); }
+    // ---- head: brow, deep-set glowing eyes, broad nose, underbite + tusks, scar, matted mane ----
+    bx(0,58,W*0.40, 17,14,13, sk); bx(0,63,W*0.38, 15,5,12, skD);      // head + brow shadow
+    bx(0,66,W*0.44, 18,4,4, darker);                                   // heavy brow ridge
+    bx(0,52,W*0.50, 20,7,10, sk); bx(0,49,W*0.52, 16,4,6, skD);        // jaw + underbite
+    for(const s of [-1,1]) bx(s*6,55,W*0.55, 3.2,7,2.8,'#efe8d6');     // tusks
+    bx(0,57,W*0.56, 5,5,5, skD);                                       // broad nose
+    bx(-4.6,61,W*0.44, 5,5,3, '#1a0f0a'); bx(4.6,61,W*0.44, 5,5,3, '#1a0f0a');   // eye sockets
+    bx(-4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC); bx(4.6,61,W*0.47, 4,3,1.6, eyeC, eyeC);   // glowing eyes
+    bx(3,64,W*0.5, 1.6,7,1, skD);                                      // scar
+    if(_vl===0){ for(let i=0;i<4;i++) bx(-7+i*4.5,56+(i%2)*3,W*.565,1.1,1.1,.7,'#6f2d24'); bx(-10,41,W*.31,5,1.2,1,'#d9b25f',GOLDL,.3); }
+    for(let i=0;i<5;i++) bx(-8+i*4,70,-1, 4,6,10, leaD);               // matted mane (top/back)
+    for(const s of [-1,1]) bx(s*8,60,-2, 5,10,8, leaD);                // mane sides
+    bx(0,50,-3, W*0.4,10,6, sk);                                       // thick neck
+    // ---- the chiselled stone slab greatsword ----
+    pushM(); mv(W*0.74,58,12); rotZ(-0.5); rotX(-0.18);
+      bx(0,-6,0, 5,14,5, lea); for(let i=0;i<4;i++) bx(0,-10+i*4,0, 6,1.6,6, leaD);   // bound leather grip
+      bx(0,3,0, 16,4,7, st); bx(0,3,0, 4,7,9, stD);                    // crossguard + pommel
+      bx(0,42,0, 18,66,11, st); bx(0,42,6, 14,60,1.5, stH); bx(0,44,-6, 16,58,1.5, stD);   // stone blade + lit/shadow faces
+      for(let i=0;i<5;i++) bx(-6+(i%3)*6,18+i*11,6.2, 2,10,1, stD);    // chiselled cracks
+      for(let i=0;i<3;i++) bx(7,20+i*18,5, 3,5,3, stD);                // chipped edge
+      bx(0,76,0, 8,8,8, st); bx(0,80,0, 4,5,4, stH);                   // blunt tip
+    popM();
+  }
+  else if(e.type==='warden'){
+    // The Fallen — a corrupted Bladeborn in black-and-gold plate, one side erupting purple corruption, greatblade point-down. (HIGH-DETAIL)
+    const cf=0.5+0.3*Math.sin(t*3), blk='#1a1620', blk2='#241a30', crp='#c47bff', crpD='#7a3fb0', riv=tint(GOLD,'#fff',0.2);
+    // ---- legs: greaves, knee cops, sabatons ----
+    for(const s of [-1,1]){
+      bx(s*7,16,0, 11,26,12, blk); bx(s*7,20,7, 8,18,2.5, blk2); bx(s*7,22,8.4, 6,14,1.4, GOLD,GOLDL,0.25);   // greave + gilt shin
+      bx(s*7,4,7, 9,7,6, blk2); bx(s*7,4,9.5, 6,4,2, GOLD);                          // knee cop + trim
+      bx(s*7,2,10, 11,6,15, blk); bx(s*7,4,17, 8,4,5, blk2);                          // sabaton + toe
+    }
+    bx(0,26,0, W*0.7,8,W*0.5, '#0f0c14'); bx(0,26,W*0.28, W*0.5,4,2, GOLD,GOLDL,0.3);  // waist + gilt band
+    for(let i=0;i<5;i++){ const x=(i-2)*W*0.16; bx(x,20,W*0.28, W*0.12,12,3, blk2); bx(x,20,W*0.3, W*0.09,10,1.2, i===2?crpD:blk); }  // tassets (center leaks corruption)
+    // ---- cuirass: layered breast + abs + gilt filigree + the corrupted heart ----
+    bx(0,46,0, W*0.86,30,W*0.56, blk2);
+    bx(0,54,W*0.29, W*0.62,15,3.5, blk); bx(0,54,W*0.31, W*0.5,13,1.6, GOLD,GOLDL,0.2);   // upper plate + gilt
+    for(let i=0;i<3;i++) bx(0,44-i*5,W*0.3, W*0.46-i*6,3.2,2, blk);                   // ab ridges
+    bx(0,52,W*0.32, 9,12,2.4, crp, crpD, 0.9); bx(0,52,W*0.33, 5,7,1.4, '#eecbff','#fff',0.8);   // heart-core
+    for(let i=0;i<4;i++){ const a=i*1.571; bx(Math.cos(a)*6,52+Math.sin(a)*7,W*0.33, 1.6,1.6,1, crp,crp,0.6*cf); }   // core cracks
+    for(const s of [-1,1]) for(let i=0;i<3;i++) bx(s*W*0.22,50-i*8,W*0.31, 2,2,1.6, riv);   // rivets
+    bx(0,44,-W*0.28, W*0.62,26,3, blk); bx(0,54,-W*0.28, W*0.44,6,2, blk2);           // backplate
+    // ---- pauldrons: left clean gilt, right erupting corrupted growth + fire ----
+    bx(-W*0.5,62,2, 17,10,18, blk2); bx(-W*0.5,66,2, 13,4,15, GOLD,GOLDL,0.25); pushM(); mv(-W*0.5,70,0); rotX(-0.4); bx(0,4,0,3.4,9,3.4,blk); popM();
+    bx(W*0.5,60,2, 18,12,19, '#2a2038'); for(let i=0;i<4;i++){ pushM(); mv(W*0.5+(i-1.5)*4,70,0); rotZ((i-1.5)*0.3); bx(0,4,0, 3,9,3, crpD,crp,0.5); popM(); }   // corrupted spikes
+    for(let i=0;i<6;i++){ const a=t*2+i; bx(W*0.52+Math.cos(a)*9, 68+((t*24+i*7)%28), 4+Math.sin(a)*8, 3.5,5,3.5, '#a24fe0',crp,0.5*cf); }   // corruption fire plume
+    // ---- arms: rerebrace, elbow, gauntlet (right hand grips the blade) ----
+    for(const s of [-1,1]){ pushM(); mv(s*W*0.5,52,4); rotX(0.1);
+      box(11,18,11, blk2); bx(0,1,6, 8,12,2, GOLD,GOLDL,0.2);
+      mv(0,-15,1); box(9,8,9, blk); mv(0,-12,1); box(12,13,12, blk2);
+      for(let i=0;i<3;i++) bx(-5+i*4,-6,7, 2.6,3.4,2.6, blk); popM(); }
+    // ---- helm: full visored helm, glowing eyes, spiked gold crown ----
+    bx(0,72,0, 14,14,13, blk); bx(0,72,W*0.24, 12,3,1.6, eyeC, eyeC);                 // helm + visor slit
+    bx(0,68,W*0.26, 8,5,3, blk2); for(const s of [-1,1]) bx(s*4,66,W*0.27, 2,4,2, eyeC,eyeC,0.7);   // faceguard + eye glow
+    for(let i=-2;i<=2;i++) bx(i*4.2,81+(i===0?8:Math.abs(i)===1?3:0),0, 2.6,7+(i===0?8:0),2.6, i===0?GOLDL:GOLD, i===0?'#fff2a0':GOLDL,0.4);   // spiked gilt crown
+    for(let i=0;i<3;i++) bx(-4+i*4,84,-2, 4,4,8, crpD,crp,0.4*cf);                     // corruption seeping over the crown
+    // ---- the great blade, point-DOWN ----
+    pushM(); mv(-W*0.6,30,11);
+      bx(0,24,0, 5,10,5, blk); for(let i=0;i<3;i++) bx(0,20-i*3,0, 6,1.4,6, GOLD);     // grip wraps
+      bx(0,15,0, 15,3.4,4.5, GOLD,GOLDL,0.3); bx(0,29,0, 4,5,4, GOLDL);                // crossguard + pommel
+      bx(0,-13,0, 5.5,46,3, '#cfd6df'); bx(0,-13,1.6, 2,44,1, crp,crp,0.5*cf);          // blade + corrupted fuller-runes
+      bx(0,-37,0, 3,10,2, '#eef2ff');                                                  // point
+    popM();
+  }
+  else if(e.type==='archer'){
+    // Hollow Marksman — a skeletal watcher: bone ribcage, hooded skull, ornate golden longbow, full quiver. (HIGH-DETAIL)
+    const bone='#e8ecdc', boneD='#b8bca8', drawn=e.shootT<0.6;
+    for(const s of [-1,1]){ bx(s*5,10,0, 4,22,4, bone); bx(s*5,20,0, 5,4,5, boneD); bx(s*5,2,2, 6,4,9, boneD); }   // leg bones + feet
+    bx(0,24,0, W*0.42,6,W*0.34, boneD);                                              // pelvis
+    bx(0,44,0, 3.4,26,3.4, bone);                                                    // spine
+    for(let i=0;i<5;i++) bx(0,34+i*5,W*0.16, W*0.44-i*1.6,2.2,1.4, bone);            // front ribs
+    for(const s of [-1,1]) bx(s*W*0.2,44,0, 2.4,22,W*0.28, boneD);                   // side ribs
+    bx(0,50,W*0.18, W*0.32,10,2, tint(col,'#000',0.1)); bx(0,50,W*0.2, W*0.24,7,1.4, GOLD,GOLDL,0.25);   // chest strap + gilt plate
+    pushM(); mv(0,44,-W*0.24); rotX(0.14); box(W*0.78,40,2.4, dark);
+      for(let i=-2;i<=2;i++) bx(i*W*0.14,-22,0, W*0.1,10,1.6, darker); popM();       // frayed cloak
+    for(const s of [-1,1]){ bx(s*W*0.36,58,0, 9,7,10, dark); bx(s*W*0.36,61,0, 7,3,8, GOLD,GOLDL,0.2); }   // gilt pauldrons
+    bx(0,68,0, 13,13,12, dark); bx(0,74,0, 21,2.6,18, darker); bx(0,71,W*0.15, 13,2,2, GOLD);   // hood + brim + gilt band
+    bx(0,66,W*0.2, 9,9,8, bone); bx(0,63,W*0.24, 7,4,4, boneD);                      // skull + jaw
+    bx(-2.6,67,W*0.26, 2.6,3,1.4, eyeC, eyeC); bx(2.6,67,W*0.26, 2.6,3,1.4, eyeC, eyeC);
+    pushM(); mv(-W*0.5,52,10);
+      bx(0,13,0, 2.4,15,3, GOLD); bx(0,-13,0, 2.4,15,3, GOLD); bx(0,0,0, 3.4,6,4, GOLDL);   // longbow limbs + riser
+      bx(0,22,0, 2,4,2, GOLDL); bx(0,-22,0, 2,4,2, GOLDL);                           // recurve tips
+      for(const yy of [11,-11]) bx(0,yy,1.6, 1.6,7,1, tint(GOLD,'#000',0.2));        // inlay
+      bx(0,0,-2.4, 0.7,34,0.7,'#eef2e0'); if(drawn) bx(0,0,3, 1.6,1.6,15, e.shot.color, e.shot.color);   // string + nocked arrow
+    popM();
+    bx(W*0.3,50,4, 3,20,3, bone); bx(W*0.42,58,-2, 3,10,3, bone);                    // draw-arm bones
+    bx(6,54,-W*0.32, 8,20,8, darker); bx(6,63,-W*0.32, 9,3,9, GOLD);                 // quiver
+    for(let i=-2;i<=2;i++){ bx(6+i*2.2,66,-W*0.32, 1.2,7,1.2,'#e6d28a'); bx(6+i*2.2,70,-W*0.32, 2.2,2,2.2,'#c9b06a'); }   // shafts + fletching
+  }
+  else if(e.type==='sorcerer'){
+    // Frost Sorcerer — a levitating lich crowned in ice: layered frost robes, skeletal hands, crystal staff, orbiting shards. (HIGH-DETAIL)
+    const yo=8+Math.sin(t*2)*4, ice='#bff0ff', iceD='#7fd6ff', iceDk='#4a7fa8', bone='#dfe8ee', rb=col, rbD=dark;
+    for(let i=0;i<5;i++){ const a=i*1.256+t*0.5; bx(Math.cos(a)*W*0.4,2,Math.sin(a)*W*0.4, 10,3,10, ice,iceD,0.12); }   // frost mist on the ground
+    pushM(); mv(0,yo,0);
+      bx(0,8,0, W*0.9,16,W*0.62, rbD); bx(0,18,0, W*0.82,16,W*0.56, rb);             // tapered robe (no legs)
+      for(let i=-2;i<=2;i++) bx(i*W*0.16,0,W*0.22, W*0.11,10,3, rbD);                // hem tatters
+      for(let i=0;i<3;i++) bx(0,6+i*7,W*0.31, W*0.5-i*4,2,1.4, ice,iceD,0.5);        // frost-crust ridges
+      bx(0,34,0, W*0.7,20,W*0.5, rb);
+      for(const s of [-1,1]){ bx(s*W*0.34,46,0, 12,9,13, tint(rb,'#fff',0.1)); for(let i=0;i<3;i++) bx(s*W*0.34+(i-1)*4,52,0, 2.4,6,2.4, ice,iceD,0.7); }   // iced pauldrons
+      bx(0,40,W*0.28, 7,8,2.4, ice,iceD,0.9); bx(0,40,W*0.3, 4,5,1.4,'#eafcff','#fff',0.9);   // frozen brooch
+      pushM(); mv(-W*0.42,42,4); rotZ(0.15); box(9,26,9, rbD); mv(0,-16,3); for(let i=0;i<3;i++) bx((i-1)*2.4,-2,0, 1.8,7,1.8, bone); popM();   // casting hand + bony fingers
+      for(let i=0;i<4;i++){ const a=t*3+i*1.57; bx(-W*0.42+Math.cos(a)*8, 30+Math.sin(a)*6, 6, 2.4,2.4,2.4, ice,iceD,0.7); }   // frost gathering
+      bx(0,58,0, 12,12,11, bone); bx(0,54,W*0.22, 9,5,4, tint(bone,'#000',0.12));    // skull + jaw
+      bx(-2.8,59,W*0.24, 3,3,1.6, eyeC, eyeC); bx(2.8,59,W*0.24, 3,3,1.6, eyeC, eyeC); bx(0,57,W*0.26, 2.4,2.4,2, iceDk);   // eyes + nasal
+      bx(0,64,0, 14,3,13, tint(ice,'#000',0.1),iceD,0.5);
+      for(let i=-2;i<=2;i++){ const hh=9+(2-Math.abs(i))*8; bx(i*4.6,64+hh*0.5,3, 2.8,hh,2.8, ice,iceD,0.85); }   // ice crown, tallest center
+      for(const s of [-1,1]) bx(s*7,70,-4, 2.6,10,2.6, ice,iceD,0.75);
+      pushM(); mv(W*0.5,30,6); box(3,46,3, iceDk);
+        mv(0,26,0); for(const s of [-1,1]){ pushM(); rotZ(-s*0.6); box(2.4,10,2.4, ice); popM(); }
+        box(9,10,9, ice,iceD,0.9); mv(0,7,0); box(4,6,4,'#eafcff','#fff',0.95); popM();   // staff + faceted crystal
+    popM();
+    for(let k=0;k<4;k++){ const a=t*1.6+k*1.57; bx(Math.cos(a)*W*0.85, 46+yo*0.5+Math.sin(t*3+k)*8, Math.sin(a)*W*0.6, 5,9,5, ice,iceD,0.85); }   // orbiting shards
+  }
+  else if(e.type==='colossus' && bth==='marble'){
+    // Marble Colossus — a radiant palace guardian of white marble and gold: fluted columns, gilt filigree, sunburst halo. (HIGH-DETAIL)
+    const flash=e.hitFlash>0, M=flash?col:'#e6e4ec', MD=flash?col:'#bcbccc', MShad=flash?col:'#9a9ab0', G2=flash?col:GOLD, glo=0.6+0.3*Math.sin(t*2);
+    for(const s of [-1,1]){ bx(s*W*0.26,16,0, 22,32,24, MD);
+      for(let i=-1;i<=1;i++) bx(s*W*0.26+i*7,16,12.5, 2.4,30,1.4, MShad);          // column flutes
+      bx(s*W*0.26,2,0, 28,6,30, M); bx(s*W*0.26,6,0, 24,3,26, G2);                  // plinth + gilt base
+      bx(s*W*0.26,32,0, 26,5,28, M); }                                              // knee capital
+    bx(0,36,0, W*0.92,12,W*0.62, MD); bx(0,42,W*0.3, W*0.72,4,2, G2,GOLDL,0.3);
+    bx(0,64,0, W*1.0,46,W*0.66, M); bx(0,64,W*0.32, W*0.7,40,2, MShad);             // torso + recessed panel
+    for(let i=-1;i<=1;i++) bx(i*W*0.26,64,W*0.34, 2.6,40,1.4, G2, GOLDL,0.35); for(const s of [-1,1]) bx(s*W*0.36,64,W*0.33, 3,40,1.4, G2,GOLDL,0.3);   // gilt channels
+    bx(0,60,W*0.35, 15,15,4, GOLDL,'#fff8d6',glo); bx(0,60,W*0.37, 8,8,2,'#fffbe8','#fff',glo);
+    for(let i=0;i<8;i++){ const a=i*0.785; bx(Math.cos(a)*11,60+Math.sin(a)*11,W*0.36, 2.4,2.4,1, G2,GOLDL,0.5*glo); }   // radiant cracks
+    for(const s of [-1,1]){ bx(s*W*0.58,84,0, 22,26,24, M);
+      for(let i=-1;i<=1;i++) bx(s*W*0.58+i*7,84,12, 2.4,24,1.4, MShad);             // shoulder flutes
+      bx(s*W*0.58,98,0, 28,6,30, M); bx(s*W*0.58,101,0, 24,3,26, G2); bx(s*W*0.58,70,0, 28,5,30, MD);
+      const raise=(e.shootT<0.5&&s>0)?-0.9:0.12;
+      pushM(); mv(s*W*0.62,72,2); rotX(raise); box(15,34,15, M); bx(0,0,8, 11,26,1.4, MShad); mv(0,-22,3); box(19,16,18, MD);
+        for(let i=0;i<3;i++) bx(-5+i*5,-2,9, 3,4,3, M); popM(); }
+    bx(0,92,4, 17,14,15, M); bx(0,88,W*0.14+8, 13,5,4, MShad);
+    bx(-4.5,93,W*0.14+7, 4,3,1.4, GOLDL, GOLDL); bx(4.5,93,W*0.14+7, 4,3,1.4, GOLDL, GOLDL);
+    for(let i=-2;i<=2;i++) bx(i*4,102,2, 3,5,3, G2,GOLDL,0.4);                       // laurel crown
+    for(let i=0;i<12;i++){ const a=(i/12)*6.283, r=20+(i%2)*6; bx(Math.cos(a)*r,110,-8+Math.sin(a)*9, 2.6,(i%2?9:5),2.6, G2,GOLDL,0.5*glo); }   // sunburst halo
+  }
+  else if(e.type==='colossus'){
+    // Ember Colossus — a basalt furnace siege engine: chained plating, molten seams, furnace maw, smokestacks, rising embers. (HIGH-DETAIL)
+    const flash=e.hitFlash>0, B=flash?col:'#241d1c', BD=flash?col:'#150f0f', BL=flash?col:'#3a2a24', lav='#ff8a3a', lavB='#ffb35a', em=0.5+0.3*Math.sin(t*4);
+    for(const s of [-1,1]){ bx(s*W*0.26,16,0, 22,32,24, BD); bx(s*W*0.26,20,12, 16,22,2, BL);
+      for(let i=0;i<3;i++) bx(s*W*0.26-6+i*6,16,13, 1.6,26,1, lav,lavB,0.7*em);
+      bx(s*W*0.26,28,0, 24,6,26, lav,lavB,0.45+0.2*Math.sin(t*4+s)); bx(s*W*0.26,2,0, 26,6,28, BD); }
+    bx(0,36,0, W*0.9,12,W*0.6, BD);
+    bx(0,64,0, W*1.02,46,W*0.68, B);
+    for(let i=-2;i<=2;i++) bx(i*W*0.2,64,W*0.34, 3,42,1.6, lav,lavB,0.7*em); bx(0,74,W*0.34, W*0.76,3,1.6, lav,lavB,0.7);
+    bx(0,58,W*0.36, 18,22,4, '#ffb020','#ff7a1a',0.5+0.4*em);
+    for(let i=-1;i<=1;i++) bx(i*6,58,W*0.39, 3,18,2,'#160a06');
+    for(let i=0;i<4;i++) bx((i-1.5)*W*0.16, 90+((t*30+i*9)%40), W*0.1, 3,4,3, lav,lavB,0.6*(1-((t*30+i*9)%40)/40));   // rising embers
+    for(const s of [-1,1]){ bx(s*W*0.58,86,0, 24,22,26, BD); bx(s*W*0.58,90,13, 18,16,2, BL);
+      bx(s*W*0.5,104,-6, 9,18,9,'#0f0a09'); bx(s*W*0.5,113,-6, 11,3,11,'#2a2018');
+      for(let i=0;i<2;i++) bx(s*W*0.5,118+((t*24+i*8)%18),-6, 4,5,4,'#666','#999',0.35);
+      const raise=(e.shootT<0.5&&s>0)?-0.9:0.12;
+      pushM(); mv(s*W*0.62,72,2); rotX(raise); box(16,34,16, B); for(let i=0;i<3;i++) bx(0,8-i*10,9, 12,1.6,1, lav,lavB,0.6*em);
+        mv(0,-22,3); box(20,17,19, BD); bx(0,0,7, 15,5,2, lav,lavB,0.7*em); popM(); }
+    bx(0,92,4, 18,15,16, BD); bx(0,88,W*0.14+8, 13,4,3,'#0f0a09');
+    bx(0,90,W*0.14+8, 12,5,2, '#ffb020','#ff7a1a',0.5+0.4*em);
+    bx(-4.5,96,W*0.14+8, 4,3,1.4,'#ffd24a','#ffd24a'); bx(4.5,96,W*0.14+8, 4,3,1.4,'#ffd24a','#ffd24a');
+    for(let i=-2;i<=2;i++){ pushM(); mv(i*9,105,-3); rotX(-0.35); box(4,10,4, BD); popM(); }
+  }
+  else if(e.type==='king'){
+    // the Abyss King — floating void royal: layered robe, tiered crown, void tendrils, scepter, orbiting shards. (HIGH-DETAIL)
+    const yo=4+Math.sin(t*1.8)*3, vc='#c47bff', vcD='#8a4fd0', gld='#caa23a'; pushM(); mv(0,yo,0);
+    bx(0,10,0, W*0.98,20,W*0.68, darker); bx(0,22,0, W*0.86,16,W*0.58, tint(col,'#000',0.2));
+    for(let i=-2;i<=2;i++) bx(i*W*0.17,0,W*0.24, W*0.11,10,3, darker);
+    bx(0,36,0, W*0.8,26,W*0.55, col);
+    for(let i=0;i<3;i++) bx(0,26+i*8,W*0.3, W*0.5-i*4,2.4,1.4, gld,GOLDL,0.3);
+    bx(0,42,W*0.3, 13,16,3, '#1a0824','#000',1); bx(0,42,W*0.32, 8,10,1.6, vc,vcD,0.9);
+    for(let i=0;i<8;i++){ const a=t*2+i*0.785; bx(Math.cos(a)*9,42+Math.sin(a)*10,W*0.33, 1.8,1.8,1, '#e0b0ff','#fff',0.7); }
+    for(const s of [-1,1]){ bx(s*W*0.48,54,0, 16,11,17, lite); bx(s*W*0.48,58,0, 12,4,14, gld,GOLDL,0.3);
+      pushM(); mv(s*W*0.52,46,6); rotZ(s*0.2); box(6,18,6, col); bx(0,-2,4, 4,14,1.4, darker);
+        mv(0,-16,2); for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-4,2); rotZ(i*0.35); box(1.8,11,1.8, tint(col,'#000',0.3)); bx(0,-6,0, 1.4,3,1.4, vc,vc,0.6); popM(); } popM(); }
+    pushM(); mv(0,40,-W*0.32); rotX(0.1); box(W*0.94,44,2.4, darker); for(let i=-2;i<=2;i++) bx(i*W*0.18,-24,0, W*0.12,10,1.6, tint(col,'#000',0.3)); popM();
+    for(let i=0;i<6;i++){ const a=t*0.7+i*1.047; bx(Math.cos(a)*W*0.5, 6+((t*8+i*7)%30), -W*0.3+Math.sin(a)*4, 3,3,3,vcD,vc,0.45); }
+    bx(0,66,0, 14,13,12, tint(col,'#fff',0.06)); bx(0,62,W*0.22, 9,5,3, tint(col,'#000',0.2));
+    bx(-3.6,67,W*0.22, 3.2,3,1.4, eyeC, eyeC); bx(3.6,67,W*0.22, 3.2,3,1.4, eyeC, eyeC);
+    bx(0,74,0, 16,4,14, gld,GOLDL,0.3); bx(0,77,0, 12,3,10, gld);
+    for(let i=-2;i<=2;i++) bx(i*4.6,80+(i===0?7:Math.abs(i)===1?3:0),0, 2.8,9+(i===0?7:0),2.8, i===0?GOLDL:gld, i===0?'#fff2a0':GOLDL,0.3);
+    for(let i=-2;i<=2;i++) bx(i*3.6,79,W*0.16, 1.8,4,1.4, vc,vc,0.6);
+    pushM(); mv(W*0.56,36,4); box(3,44,3, tint(gld,'#000',0.2)); for(let i=0;i<4;i++) bx(0,-16+i*11,0, 4,2,4, gld); mv(0,26,0); box(9,9,9, vc,vcD,0.9); mv(0,6,0); box(3,4,3,'#eecbff','#fff'); popM();
+    popM();
+    for(let k=0;k<4;k++){ const a=t*2+k*1.57; bx(Math.cos(a)*26, 92+yo+Math.sin(t*4+k)*4, Math.sin(a)*20, 4,7,4, vc,vcD,0.85); }
+  }
+  else if(e.type==='tyrant'){
+    // The Abyss King, AWAKENED — the ascended king: black-hole heart, gold+void sun-crown, void tendrils, floating blades, lightning. (HIGH-DETAIL — surpasses all)
+    const yo=6+Math.sin(t*1.6)*4, pulse=0.6+0.4*Math.sin(t*4), vc='#c47bff', vcD='#8a4fd0', hot=en?'#ff3b6b':vc;
+    pushM(); mv(0,yo,0);
+      bx(0,12,0, W*1.04,22,W*0.72, darker); bx(0,26,0, W*0.9,16,W*0.6, tint(col,'#000',0.15));
+      for(let i=0;i<8;i++){ const a=t*0.6+i*0.785; bx(Math.cos(a)*W*0.56, 4+((t*10+i*6)%38), -W*0.32+Math.sin(a)*5, 3.4,3.4,3.4,vcD,vc,0.5); }
+      bx(0,44,0, W*0.88,32,W*0.6, col);
+      for(let i=0;i<3;i++) bx(0,34+i*9,W*0.32, W*0.56-i*5,2.6,1.4, GOLD,GOLDL,0.35);
+      bx(0,50,W*0.31, 17,19,4,'#0a0410','#000',1); bx(0,50,W*0.33, 11,12,2, hot, en?'#ff3b6b':vcD,pulse);
+      for(let i=0;i<12;i++){ const a=t*2.4+i*0.523; bx(Math.cos(a)*13,50+Math.sin(a)*13,W*0.34, 2,2,1,'#e0b0ff','#fff',0.7*pulse); }
+      for(let i=0;i<4;i++){ const a=i*1.57+t; bx(Math.cos(a)*W*0.42,50,W*0.34+Math.sin(a)*4, 2.4,2.4,6, vcD,vc,0.5); }
+      for(const s of [-1,1]){ bx(s*W*0.5,58,0, 18,13,19, lite); for(let i=0;i<3;i++){ pushM(); mv(s*W*0.5+(i-1)*5,66,0); rotZ((i-1)*0.3); box(3,10,3, vcD); popM(); }
+        pushM(); mv(s*W*0.56,50,6); rotZ(s*0.22); box(7,22,7, col); bx(0,-2,4, 5,16,1.4, darker);
+          for(let i=-1;i<=1;i++){ pushM(); mv(i*3,-15,2); rotZ(i*0.32); box(2,12,2, darker); bx(0,-6,0, 1.6,3,1.6, hot,hot,0.6); popM(); } popM(); }
+      pushM(); mv(0,40,-W*0.36); rotX(0.1); box(W*1.1,52,2.6, darker); for(let i=-3;i<=3;i++) bx(i*W*0.14,-28,0, W*0.1,12,1.6, tint(col,'#000',0.25)); popM();
+      bx(0,78,0, 15,15,13, tint(col,'#fff',0.06)); bx(0,74,W*0.2, 9,5,3, tint(col,'#000',0.2));
+      bx(-4,79,W*0.2, 3.4,3.4,1.4, hot, hot); bx(4,79,W*0.2, 3.4,3.4,1.4, hot, hot);
+      bx(0,87,0, 18,3,16, GOLD);
+      for(let i=0;i<12;i++){ const a=(i/12)*6.283, r=9+(i%2)*5; bx(Math.cos(a)*r,92+(i%2?9:3),Math.sin(a)*r*0.5, 2.6,(i%2?14:8),2.6, i%2?GOLDL:vcD, i%2?'#fff2a0':vc,0.85); }
+    popM();
+    for(let k=0;k<8;k++){ const a=t*1.2+k*0.785, r=W*1.05;
+      pushM(); mv(Math.cos(a)*r, 60+yo+Math.sin(t*2+k)*9, Math.sin(a)*r*0.7); rotY(-a); rotZ(0.4);
+        bx(0,0,0, 2.8,26,2,'#d8d0e8','#eef2ff',0.75); bx(0,-15,0, 7,3.4,3, GOLD); bx(0,14,0, 2,4,1.4, vc,vc,0.6); popM(); }
+    for(let i=0;i<4;i++){ const lx=(Math.sin(t*7+i*1.7)*W*0.7); for(let j=0;j<5;j++) bx(lx+(j%2?4:-4), 26+j*22, W*0.22, 2,11,2, vc,'#e0b0ff',0.5*pulse); }
+  }
+}
+function drawHpBar3(e){
+  if(e.dead) return;
+  if(!(e.boss||e.hp>=e.maxHp)){ const s=project(e.x,e.y+e.h+14,e.z); if(s) hpBars.push({x:s[0],y:s[1],f:e.hp/e.maxHp}); }
+  // elemental status pips (shown even at full HP + on bosses)
+  if(e.st){ const keys=[]; for(const k in e.st){ const n=Math.floor(e.st[k]); if(n>=1) keys.push([k,n]); }
+    if(keys.length){ const sp=project(e.x,e.y+e.h+(e.boss?30:24),e.z); if(sp) statPips.push({x:sp[0],y:sp[1],keys}); } }
+}
+let hpBars=[], statPips=[];
+const hpCanvas=document.createElement('canvas'); // tiny 2D overlay for enemy hp bars
+hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;width:100%;height:100%;';
+document.body.appendChild(hpCanvas);
+/* Hub nameplates: nearby projected pills over keepers/interactables, hidden across the plaza. */
+const HUB_TAG_REVEAL=230, HUB_TAG_NEAR=72;
+const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,sparringdoor:138,abyss:122,beast:108};
+function hubTagAnchor(n){
+  // Station labels belong above the visible character/prop silhouette—not at its world origin.
+  // The Smith stands left of his anvil, so his label follows his actual head as well.
+  if(n.prop==='anvil') return {x:n.x-30,y:HUB_TAG_HEIGHT.anvil,z:n.z+10};
+  return {x:n.x,y:HUB_TAG_HEIGHT[n.prop]||106,z:n.z};
+}
+function updateHubTags(){
+  const box=document.getElementById('hubtags'); if(!box) return;
+  if(!G||!G.hub||G.sparringRoom||!G.hubNpcs||mode!=='play'){ if(!box.classList.contains('hide')){ box.classList.add('hide'); box.innerHTML=''; } return; }
+  box.classList.remove('hide');
+  if(box.childElementCount!==G.hubNpcs.length){ box.innerHTML=G.hubNpcs.map(n=>
+    `<div class="htag"><span class="hi">${n.ic}</span><span class="hn">${n.name}</span><span class="hr">${n.role}</span></div>`).join(''); }
+  const tags=box.children;
+  G.hubNpcs.forEach((n,i)=>{ const tg=tags[i]; if(!tg) return;
+    const dist=dXZ(n.x,n.z,G.p.x,G.p.z);
+    if(dist>HUB_TAG_REVEAL){ tg.style.display='none'; tg.classList.remove('near'); return; }
+    const a=hubTagAnchor(n), sp=project(a.x,a.y,a.z);
+    if(!sp){ tg.style.display='none'; return; }
+    tg.style.display='';
+    tg.style.left=(sp[0]/DPR)+'px'; tg.style.top=(sp[1]/DPR-14)+'px';
+    tg.classList.toggle('near',dist<HUB_TAG_NEAR); });
+}
+function drawHpBars(){
+  hpCanvas.width=VW; hpCanvas.height=VH;
+  const c=hpCanvas.getContext('2d');
+  for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.62)'; c.fillRect(b.x-17,b.y,34,5);
+    c.fillStyle=b.pet?'#55d78b':'#e8453d'; c.fillRect(b.x-16,b.y+1,32*b.f,3); }
+  // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
+  c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';
+  for(const sp of statPips){ const n=sp.keys.length, pw=19, tot=n*pw, x0=sp.x-tot/2, y=sp.y-9;
+    for(let i=0;i<n;i++){ const [key,cnt]=sp.keys[i], px=x0+i*pw, im=STATUS_ICON_IMG[key];
+      if(im&&im.complete&&im.naturalWidth) c.drawImage(im,px,y,17,17);
+      else { c.fillStyle=STCOL[key]; c.fillRect(px+2,y+2,13,13); }
+      c.fillStyle='rgba(5,6,10,.88)'; c.beginPath(); c.arc(px+15,y+15,4.5,0,Math.PI*2); c.fill();
+      c.fillStyle='#fff'; c.fillText(cnt,px+15,y+15); } }
+  drawThreatArrows(c);
+  drawQuestPointer(c);
+}
+// Phase 11: off-screen threat arrows — edge indicators pointing at nearby enemies you can't see
+// (a 3D camera + auto-aim makes off-camera cheap-shots unfair; only in the aiming cameras where it matters)
+function drawThreatArrows(c){
+  if(!G||G.hub||meta.camMode==='far'||!G.enemies) return;
+  const cxp=VW/2, cyp=VH/2, mgx=VW/2-30, mgy=VH/2-30, cy=(G.camYaw!=null?G.camYaw:Math.PI);
+  for(const e of G.enemies){ if(e.dead||e.dummy) continue; const d=dXZ(e.x,e.z,G.p.x,G.p.z); if(d>820) continue;
+    const sp=project(e.x,e.y+e.h*0.5,e.z);
+    if(sp && sp[0]>=0 && sp[0]<=VW && sp[1]>=0 && sp[1]<=VH) continue;   // visible on screen — no arrow
+    let ang;
+    if(sp){ ang=Math.atan2(sp[1]-cyp, sp[0]-cxp); }
+    else { let rel=Math.atan2(e.x-G.p.x,e.z-G.p.z)-cy; while(rel>Math.PI)rel-=6.283; while(rel<-Math.PI)rel+=6.283; ang=rel>0?0.62:Math.PI-0.62; }  // behind the camera → bottom corners
+    const ex=cxp+Math.cos(ang)*mgx, ey=cyp+Math.sin(ang)*mgy, a=Math.max(0.35,1-d/820);
+    c.save(); c.translate(ex,ey); c.rotate(ang);
+    c.globalAlpha=a; c.fillStyle=e.boss?'#ff5a3a':(e.elite?'#ffb03a':'#ff6a4a');
+    c.beginPath(); c.moveTo(11,0); c.lineTo(-7,-7); c.lineTo(-7,7); c.closePath(); c.fill();
+    c.restore(); }
+  c.globalAlpha=1;
+}
+// points the player to the nearest uncollected PLACED quest item (climb-fetch bones/relics) + shows how many remain
+function drawQuestPointer(c){
+  if(!G||G.hub||!G.pickups) return;
+  const placed=G.pickups.filter(pk=>pk.placed&&(pk.questItem||pk.localItem)); if(!placed.length) return;
+  let best=null,bd=1e9; for(const pk of placed){ const d=dXZ(pk.x,pk.z,G.p.x,G.p.z); if(d<bd){bd=d;best=pk;} }
+  const cxp=VW/2,cyp=VH/2,mgx=VW/2-40,mgy=VH/2-40,cy=(G.camYaw!=null?G.camYaw:Math.PI),col='#ffe07a';
+  const sp=project(best.x,(best.y0||0)+16,best.z), onScreen=sp&&sp[0]>=0&&sp[0]<=VW&&sp[1]>=0&&sp[1]<=VH;
+  if(!onScreen){ let ang; if(sp) ang=Math.atan2(sp[1]-cyp,sp[0]-cxp); else { let rel=Math.atan2(best.x-G.p.x,best.z-G.p.z)-cy; while(rel>Math.PI)rel-=6.283; while(rel<-Math.PI)rel+=6.283; ang=rel>0?0.62:Math.PI-0.62; }
+    const ex=cxp+Math.cos(ang)*mgx, ey=cyp+Math.sin(ang)*mgy;
+    c.save(); c.translate(ex,ey); c.rotate(ang); c.globalAlpha=0.92; c.fillStyle=col;
+    c.beginPath(); c.moveTo(14,0); c.lineTo(-9,-9); c.lineTo(-9,9); c.closePath(); c.fill();
+    c.restore(); c.globalAlpha=1; }
+  // "N left" pill, top-centre under the quest card
+  const label=(best.questItem||best.localItem).name+' · '+placed.length+' left'; c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+  const w=c.measureText(label).width+26, x=VW/2, y=86;
+  c.fillStyle='rgba(12,10,16,0.72)'; c.beginPath(); if(c.roundRect) c.roundRect(x-w/2,y-13,w,26,13); else c.rect(x-w/2,y-13,w,26); c.fill();
+  c.fillStyle=col; c.beginPath(); c.arc(x-w/2+13,y,4,0,6.283); c.fill();
+  c.fillStyle='#fff'; c.fillText(label,x+6,y+1);
+}
+// per-theme sky: z = zenith darkening (top=sky*z), p = sun screen pos (0..1), c = sun glow colour
+const SKYSUN={
+  plains:{z:0.55,p:[0.52,0.82],c:[0.95,0.85,0.6]},   forest:{z:0.50,p:[0.60,0.85],c:[0.82,0.86,0.55]},
+  frost:{z:0.60,p:[0.50,0.86],c:[0.72,0.84,0.98]},   volcano:{z:0.38,p:[0.32,0.60],c:[1.0,0.42,0.16]},
+  canyon:{z:0.50,p:[0.40,0.70],c:[1.0,0.72,0.36]},   badlands:{z:0.50,p:[0.45,0.68],c:[0.96,0.66,0.36]},
+  void:{z:0.72,p:[0.50,0.90],c:[0.36,0.20,0.56]},    apex:{z:0.66,p:[0.50,0.88],c:[0.62,0.46,0.86]},
+  marble:{z:0.55,p:[0.50,0.80],c:[1.0,0.86,0.52]},   ruins:{z:0.55,p:[0.40,0.75],c:[0.72,0.68,0.60]},
+  dungeon:{z:0.70,p:[0.50,0.86],c:[0.42,0.44,0.52]}, hub:{z:0.55,p:[0.55,0.82],c:[1.0,0.80,0.50]},
+  _def:{z:0.60,p:[0.50,0.85],c:[0.60,0.60,0.72]}
+};
+function render(t){
+  if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
+  if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
+  const s=(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette
+  const sky=s.sky;
+  gl.clearColor(sky[0],sky[1],sky[2],1);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
+  if(G){ const sc=SKYSUN[s.theme]||SKYSUN._def;
+    const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
+    // The sun sits at a FIXED cardinal direction in the WORLD (not the screen). Its screen position is that
+    // world direction seen through the camera, so as you turn, it slides across the sky and off the edge like
+    // a real distant sun — but where it lives in the world never depends on your view. A slow drift = day-orbit.
+    // When it is behind you it is shoved fully off-screen in one step, so there is no whip at the antipode.
+    const camYaw=(G.camYaw==null?Math.PI:G.camYaw);
+    const worldAz=(Math.PI-0.30)+Math.sin((G.time||t)*.006)*0.28;   // fixed cardinal bearing + very slow azimuth drift
+    let rel=worldAz-camYaw; rel=((rel+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;   // signed angle to view, [-PI,PI]
+    const HALF=1.05;                                                 // angular half-width the sun spans across the screen
+    const sx=Math.abs(rel)>1.9 ? -3 : 0.5+(rel/HALF)*0.5;           // in front → project to screen; behind → off-screen
+    const sun=[sx, sc.p[1]];
+    PostFX.sky(top,bot,sun,sc.c); }
+  const p=G?G.p:{x:0,y:0,z:0,yaw:t*0.4};
+  if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
+    if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
+  const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0):0;
+  const shx=G?(Math.random()-0.5)*G.shake*0.8:0, shy=G?(Math.random()-0.5)*G.shake*0.8:0;
+  if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
+    const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
+    const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+    PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
+    VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
+    if(G) G.eye={x:ex,y:ey,z:ez};
+    gl.uniform2f(U.uFogNF,210,820);
+  } else if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
+    const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pitR=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
+    const pit=Math.max(-0.5,Math.min(0.9,pitR));   // over-the-shoulder keeps a sane frame even when the stored pitch is extreme
+    const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
+    PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
+    VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
+    if(G) G.eye={x:cx-fx*hd,y:eh+cyy,z:cz-fz*hd};
+    gl.uniform2f(U.uFogNF,300,880);
+  } else { // classic high chase overview
+    PROJ=mPersp(50*Math.PI/180,VW/VH,10,2400);
+    VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
+    if(G) G.eye={x:cx,y:296+cyy,z:cz+330};
+    gl.uniform2f(U.uFogNF,460,1320);
+  }
+  // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
+  // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and
+  // whole walls of deco could hide the hero (the Hollow spawn bug). Every ray test uses G.eye now.
+  gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
+  gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+  gl.uniform3f(U.uFog,sky[0],sky[1],sky[2]);
+  CURM=mIdent();
+  if(!G){ // title backdrop: rotating hero on an empty arena
+    const s0=STAGES[0]; G0BACKDROP(s0,t); return; }
+  setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
+  G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
+  drawCourse(s,t);
+  if(G.portal){ drawPortal3(G.portal,t); }
+  hpBars=[]; statPips=[];
+  for(const pk of G.pickups) drawPickup3(pk,t);
+  if(G.fx&&G.fx.length) drawLootFx(t);
+  if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
+    const warn=G.emberWarn>0, burn=G.emberBurn>0;
+    for(const v of (G.vents||[])){
+      const gl=burn?1:(warn?(0.35+0.45*Math.sin(t*22)):0.16);
+      bx(v.x,1.5,v.z, v.r*2,3,v.r*2, burn?'#ff5a1e':'#5a1d0a', burn?'#ff9a3a':'#ff5a1e', gl);
+      if(burn) for(let i=0;i<2;i++) bx(v.x+(Math.random()-0.5)*v.r, 12+Math.random()*46, v.z+(Math.random()-0.5)*v.r, 6,14,6, '#ff9a3a','#ffd24a',0.75); } }
+  if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
+    bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
+  if(G.secretTrigger && !G.secretTrigger.done){        // the trigger rune: a dim, easily-missed floor glyph in a dead end
+    const tr=G.secretTrigger, ty=tr.y||0, gl=0.28+0.14*Math.sin(t*2.3);
+    bx(tr.x,ty+1.2,tr.z, 40,2.5,40, '#1a1226', '#4a2a6a', gl);
+    bx(tr.x,ty+2,tr.z, 20,3,20, '#2a1840', '#7a40b0', gl*1.2);
+    for(let i=0;i<4;i++){ const a=i*1.571; bx(tr.x+Math.cos(a)*15,ty+2.4,tr.z+Math.sin(a)*15, 4,3,4, '#8a50c0','#c47bff',gl); } }
+  if(G.secret && !G.secret.hidden){                    // the rift: a dark violet seam (parkour/exploration reward). Once claimed it returns as a SPENT grey, semi-transparent echo that pays gold.
+    const s=G.secret, sp=s.spent, sy=s.y||0, pu=(sp?0.14:0.42)+(sp?0.05:0.22)*Math.sin(s.t*1.7);
+    const c1=sp?'#15141a':'#120a1e', c2=sp?'#37343e':'#4a2070', c3=sp?'#2a2832':'#2a1040', c4=sp?'#5a5666':'#7a30c0', c5=sp?'#8a86a0':'#c47bff';
+    bx(s.x,sy+26,s.z, 30,52,7, c1, c2, sp?0.4:0.9);
+    bx(s.x,sy+26,s.z, 16,40,9, c3, c4, pu);
+    bx(s.x,sy+26,s.z, 5,30,11, c5, c5, pu*0.9);
+    for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, c5,c5,sp?0.22:0.5); } }
+  if(G.hub) drawWaystation(t);
+  if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
+    const n=G.npc;
+    pushM(); mv(n.x,0,n.z); drawShadeModel(t,curZone().id); popM();
+    if(!n.talked) bx(n.x,66,n.z, 5,5,5,'#c47bff','#c47bff',0.6+0.3*Math.sin(t*4)); }
+  if(G.dens) for(const dn of G.dens) drawSpawner(dn,t);   // each nest styled to the mob it breeds
+  if(G.meteors) for(const mt of G.meteors){                // incoming-meteor telegraph on the ground
+    const f=0.4+0.5*Math.sin(t*22), close=mt.t<0.6;
+    for(let i=0;i<16;i++){ const a=i/16*6.283; bx(mt.x+Math.cos(a)*mt.r,2,mt.z+Math.sin(a)*mt.r, 12,3,12,'#ff5a1e','#ff8a3a',(close?0.7:0.3)*f); }
+    if(mt.t>0.15) bx(mt.x, 400-(1.3-mt.t)/1.3*380, mt.z, 22,30,22,'#ff7a3a','#ffd24a',0.9); }   // the falling rock
+  { const p2=G.p;
+    if(p2.shieldHp>0){ const s=0.4+0.2*Math.sin(t*4); bx(p2.x,p2.y+22,p2.z, 40,52,40,'#c9a6ff','#c9a6ff',0.14+0.08*Math.sin(t*3)); }
+    if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
+  if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
+    const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4), wy=w.y||0;   // sit on its real surface (raised vault court etc.), never buried under the platform
+    drawShadow(w.x,w.z,22,0.3);
+    bx(w.x,wy+4,w.z, 54,8,54, '#4a4f5e', null, 1);
+    bx(w.x,wy+34,w.z, 26,60,26, '#6b7183', null, 1);
+    bx(w.x,wy+68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
+    bx(w.x,wy+150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
+    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
+  for(const e of G.enemies){ if(e.dead) continue;
+    if(e.dropT>0){ // spawn-in: falling shadow marker
+      drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
+    drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
+    if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
+      const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;
+      gl.depthMask(false);
+      for(let i=0;i<12;i++){ const a=i/12*6.283+t*0.4; bx(e.x+Math.cos(a)*R2, e.h*0.55, e.z+Math.sin(a)*R2, 5,e.h*1.15,5, '#7fd6ff','#bff0ff',0.35+0.18*pu); }
+      bx(e.x,e.h+14,e.z, 10,10,10, '#bff0ff','#dffbff',0.6+0.3*pu);   // a ward sigil hovering overhead
+      gl.depthMask(true);
+    }
+    if(e.windT>0){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
+      const prog=1-(e.windT/(e.windMax||0.55)), flash=0.5+0.5*Math.sin(t*34);   // fast flash + a bar that fills toward the strike
+      const tx=e.teleX||0, tz=e.teleZ||1, reach=90+prog*230;
+      for(let s=0.15;s<1;s+=0.12){ const gx=e.x+tx*reach*s, gz=e.z+tz*reach*s;   // ground danger-line pointing where it will ram
+        bx(gx,1.5,gz, 20,3,20, '#ff2a1a','#ff5a3a', (0.2+prog*0.5)*flash); }
+      bx(e.x,e.y+e.h*0.55,e.z, e.r*2*(1.25+prog*0.4),e.h*(1.1+prog*0.35),e.r*2*(1.25+prog*0.4), '#ff3020','#ff6040', (0.15+prog*0.28)*flash);   // swelling red aura
+    }
+    if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); }
+    if(e.elite&&!e.dead){ const ef=0.6+0.4*Math.sin(t*3.2), ey=e.y+e.h+11;   // elite crown: read the threat before it reaches you
+      for(let i=0;i<3;i++) bx(e.x+(i-1)*7, ey+(i===1?3:0), e.z, 4,(i===1?9:6),4, '#ffd24a','#ffb020',ef);
+      bx(e.x, ey-4, e.z, 20,3,4, '#ffd24a','#ffb020',ef*0.9); } }
+  drawShadow(p.x,p.z,13);
+  if(meta.camMode!=='fps'){                            // cosmetic cape: hangs off the shoulders, swings with your speed
+    const cp=cosEquipped('cape');
+    if(cp && !SIL){ const spd=Math.min(1,Math.hypot(p.vx,p.vz)/240), sway=Math.sin(t*6)*3*spd, lift=spd*4;
+      pushM(); mv(p.x,p.y,p.z); rotY(p.yaw);
+      // draped strictly BEHIND the body (all z<=-9) and stepping further back each panel — can't clip the character
+      const C=cp.col;
+      bx(0,35,-9, 20,4,3, C, C, 0.95);                                  // collar clasp on the upper back
+      bx(sway*0.4,25,-11-lift, 18,22,2.4, C, C, 0.9);                   // upper drape
+      bx(sway*0.7,11,-13-lift*1.6, 14,18,2.2, C, C, 0.78);             // lower taper, kicks out when running
+      popM(); } }
+  if(meta.camMode!=='fps') drawHero3(p,t,false);
+  else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
+  if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
+  updatePetLabel();
+  // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
+  //  Its job is done properly now by the translucent LATE pass: anything between
+  //  the camera and the player fades instead.)
+  drawSwing3(p,t);
+  for(const pr of G.projectiles) drawProjectile3(pr,t);
+  for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
+  for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
+  // translucent pass: near-front walls & doors (drawn last, no depth write, so the hero shows through)
+  if(LATE.length){ gl.depthMask(false);
+    const stone2=tint(s.ground,'#fff',0.13), dCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
+    for(const L of LATE){ const o=L.o;
+      if(L.kind==='wall'||L.kind==='ob') bx(o.x,o.h/2,o.z, o.w,o.h,(o.d||o.w), stone2, null, 0.30);
+      else if(o.ori==='z'){ bx(o.x,o.h/2,o.z, 10,o.h,o.d, stone2, null, 0.30);
+        bx(o.x,o.h/2,o.z, 11,o.h*0.8,o.d*0.16, dCol[o.type]||'#fff', dCol[o.type], 0.5); }
+      else { bx(o.x,o.h/2,o.z, o.w,o.h,10, stone2, null, 0.30);
+        bx(o.x,o.h/2,o.z, o.w*0.16,o.h*0.8,11, dCol[o.type]||'#fff', dCol[o.type], 0.5); } }
+    gl.depthMask(true); }
+  drawHpBars();
+  updateHubTags();
+  // combo DOM
+  const cb=document.getElementById('combo');
+  if(mode==='play'&&G.combo>=3){ cb.textContent=G.combo+' HITS'; cb.style.opacity=Math.min(1,G.comboT); cb.style.fontSize=(15+Math.min(6,G.combo*0.2))+'px'; }
+  else cb.style.opacity=0;
+  const pf=document.getElementById('progfill'); if(pf&&G.goalPos&&G.startPos){ const d0=Math.hypot(G.goalPos.x-G.startPos.x,G.goalPos.z-G.startPos.z)||1, dd=Math.hypot(G.goalPos.x-G.p.x,G.goalPos.z-G.p.z); pf.style.width=Math.min(100,Math.max(0,(1-dd/d0)*100))+'%'; }
+  const jw=document.getElementById('jetwrap'), jf=document.getElementById('jetfill');
+  if(jw){ if(jetpackUnlocked()&&meta.jetpack!==false){ jw.classList.remove('hide'); if(jf) jf.style.width=Math.round((G.p.jetFuel==null?1:G.p.jetFuel)*100)+'%'; jw.style.opacity=G.p.jets?1:0.7; } else jw.classList.add('hide'); }
+  // stage banner via toast-style DOM (first 2.6s)
+  if(G.stageBanner>0 && !render._bannered){ render._bannered=s.name;   // banner reflects the real 7-zone world, not the retired 14-stage list
+    const nm=(G.areaName||s.name).toUpperCase(), sub=G.endless?('  ·  FLOOR '+(G.floor||1)):((G.hub||G.trial||G.side)?'':('  ·  ZONE '+((G.zone||0)+1)+'/'+ZONES.length));
+    toast(nm+sub); }
+  if(G.stageBanner<=0) render._bannered=null;
+}
+function G0BACKDROP(s0,t){
+  setFlatLights();
+  gl.uniform2f(U.uFogNF,520,1500);
+  bx(0,-10,0, 900,20,700, s0.ground);
+  const fake={x:0,y:0,z:0,vx:0,vz:0,yaw:t*0.5,onGround:true,runAnim:0,atkTimer:0,dodgeTimer:0,invuln:0,hurtFlash:0,
+    skin:meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight',weapon:startWeapon()};
+  drawShadow(0,0,13); drawHero3(fake,t,true);
+}
+function drawProjectile3(pr,t){
+  drawShadow(pr.x,pr.z,pr.size*0.7,0.16);
+  const yaw=Math.atan2(pr.vx,pr.vz), pitch=Math.atan2(-(pr.vy||0),Math.hypot(pr.vx,pr.vz));
+  pushM(); mv(pr.x,pr.y,pr.z); rotY(yaw); rotX(pitch);
+  if(pr.shape==='javelin'){                            // charged javelin: the full spear visibly leaves the Warden's hand
+    const c=pr.color||'#d8c27a';
+    box(2.5,2.5,46,'#5a4025');
+    pushM(); mv(0,0,25); box(5.8,5.8,9,tint(c,'#fff',0.25)); mv(0,0,6); box(2.2,2.2,5,'#eef2f4'); popM();
+    pushM(); mv(0,0,-20); box(5.5,1.1,9,'#8b3d32'); box(1.1,5.5,9,'#8b3d32'); popM();
+  }
+  else if(pr.shape==='arrow'||pr.shape==='bolt'){     // a real arrow: shaft + head + fletching, pointing along travel (+z)
+    const c=pr.color, g=pr.glow?pr.color:null;
+    box(1.4,1.4,15, c, g);                                          // shaft
+    pushM(); mv(0,0,8.4); box(3,3,3.5, tint(c,'#fff',0.25), g); box(1.3,1.3,3, c, g); popM();   // arrowhead
+    pushM(); mv(0,0,-6.6); box(0.6,4.6,4, c, g); box(4.6,0.6,4, c, g); popM();                   // fletching vanes
+  }
+  else if(pr.shape==='axe'){ rotY(pr.spin||t*6); box(3,3,16,'#6a4a2a'); pushM(); mv(0,7,0); box(15,3,11,'#cfd6df','#ffffff',0.2); box(10,3,6,'#9aa4ad'); popM(); }   // the hurled axe
+  else if(pr.shape==='scythespin'){ const c=pr.color||'#cfd6df', g=pr.glow?c:null, S=2.1;   // the thrown scythe, whirling flat — big and readable
+    rotY((pr.spin||0)*3+t*10);
+    box(3*S,3*S,4*S,'#3a2c1e');                                                              // hub
+    for(const s of [-1,1]){ pushM(); rotY(s>0?0:Math.PI);                              // two curved blades so it reads as a scythe wheel
+      box(3*S,2*S,20*S,'#2e2620'); mv(0,0,11*S); box(11*S,2*S,3*S, c, g); mv(5*S,0,-2*S); box(7*S,2*S,3*S, c, g); mv(3*S,0,-3*S); box(4*S,2*S,3*S, tint(c,'#fff',0.4), g); popM(); }
+    for(let i=0;i<3;i++){ const a=(pr.spin||0)*3+i*2.09; pushM(); mv(Math.cos(a)*14*S,0,Math.sin(a)*14*S); box(2.4*S,2.4*S,2.4*S, c, g, 0.5); popM(); } }   // motion sparks
+  else if(pr.shape==='rock'){ rotY(t*7+pr.x*0.1); rotX(t*5); const s=pr.size||9;   // cragspitter's hurled boulder — a tumbling stone
+    box(s*1.5,s*1.4,s*1.5,'#7a6a52','#3a2f22'); box(s*1.0,s*1.0,s*1.0,'#5a4c38'); box(s*0.6,s*1.6,s*0.5,'#4a3e2c'); }
+  else if(pr.shape==='lance'){ const c=pr.color;    // Deadeye: a long bright piercing lance (clearly a skill, not an arrow)
+    box(2.4,2.4,pr.size*2.6, c, c); pushM(); mv(0,0,pr.size*1.5); box(4.4,4.4,pr.size*0.9, tint(c,'#fff',0.4), c); popM();
+    box(1,1,pr.size*3.2, '#ffffff', c); }
+  else if(pr.shape==='runeorb'){ const s=pr.size, c=pr.color;   // Elemental Bolt: a fat charged rune-orb with an orbiting ring
+    box(s*1.5,s*1.5,s*1.5, tint(c,'#fff',0.2), c); box(s*0.7,s*0.7,s*0.7,'#ffffff',c);
+    for(let i=0;i<4;i++){ const a=t*5+i*1.571; box(0,0,0,c,c); pushM(); mv(Math.cos(a)*s*1.3,0,Math.sin(a)*s*1.3); box(s*0.5,s*0.5,s*0.5,c,c); popM(); } }
+  else { rotY(t*6); const s=pr.size, c=pr.color;   // caster projectiles styled to their element
+    if(pr.shape==='shard'){ box(s*0.8,s*0.8,s*2.6,c,c); }                                             // ice shard
+    else if(pr.shape==='spark'){ box(s*2.6,s*0.7,s*0.7,c,c); box(s*0.7,s*0.7,s*2.6,c,c); box(s*0.7,s*2.4,s*0.7,c,c); }  // storm spark
+    else if(pr.shape==='light'){ box(s*2.8,s*0.9,s*0.9,c,c); box(s*0.9,s*2.8,s*0.9,c,c); }             // holy light
+    else if(pr.shape==='fireball'){ box(s*1.7,s*1.7,s*1.7,c,c); pushM(); mv(0,0,-s*1.1); box(s,s,s*1.7,tint(c,'#ffe08a',0.35),c); popM(); }  // fire, trailing
+    else if(pr.shape==='glob'){ box(s*1.9,s*1.4,s*1.9,c,c); }                                          // poison glob
+    else box(s*1.6,s*1.6,s*1.6,c,c); }                                                                 // arcane / void orb
+  popM();
+}
+function drawArmorMini(a,rc){
+  const st=tint('#aeb9c6',rc,0.25);
+  if(a.slot==='helmet'){ bx(0,14,0, 17,11,15, st); bx(0,20.5,0, 12,4,11, st); bx(0,10.5,6.5, 17,3.4,2.4, rc, rc); bx(0,10,0, 18,2,16, tint(st,'#000',0.2)); }
+  else if(a.slot==='chest'){ bx(0,14,0, 18,17,10, st); bx(-10,20,0, 5,5,9, st); bx(10,20,0, 5,5,9, st); bx(0,21.5,0, 18.6,2.4,10.6, rc, rc); bx(0,13,5.4, 3,9,1, rc, rc); }
+  else { bx(-4.6,12,0, 7,17,7, st); bx(4.6,12,0, 7,17,7, st); bx(0,20,0, 17,3.4,7.4, rc, rc); bx(-4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); bx(4.6,3.4,1.2, 7.4,3.4,8, tint(st,'#000',0.15)); }
+}
+/* Quest items get their own look — a root is a root, a bone is a bone, not one amber cube. */
+const QITEM={
+  'Tangleroot':{c:'#5a8a3a',beam:'#7ec46a',draw:()=>{ box(4,20,4,'#3a5a24'); pushM(); mv(0,8,0); rotZ(0.6); box(3,14,3,'#4a7a2e'); popM(); pushM(); mv(0,4,0); rotZ(-0.7); box(3,12,3,'#4a7a2e'); popM(); box(9,5,9,'#6ea048','#9fd84a',0.4); }},
+  'Sun-Bleached Bone':{c:'#e8e4d8',beam:'#fff',draw:()=>{ box(4,20,4,'#e8e4d8'); box(9,6,6,'#f2eee2'); pushM(); mv(0,10,0); box(9,6,6,'#f2eee2'); popM(); pushM(); mv(0,-10,0); box(9,6,6,'#f2eee2'); popM(); }},
+  'Keep Sigil':{c:'#4aa3e0',beam:'#7fd0ff',draw:()=>{ pushM(); rotY(0.4); box(16,20,3,'#2a5a80'); box(11,14,4,'#4aa3e0','#7fd0ff',0.5); box(4,8,5,'#d8ecff','#7fd0ff',0.6); popM(); }},
+  'Frozen Core':{c:'#7fd6ff',beam:'#bff0ff',draw:t=>{ rotY(t*1.5); box(9,9,9,'#bff0ff','#7fd6ff',0.8); pushM(); rotZ(0.78); rotX(0.6); box(6,18,6,'#d8f6ff','#7fd6ff',0.6); popM(); }},
+  'Ember Shard':{c:'#ff7a3a',beam:'#ffb060',draw:()=>{ pushM(); rotZ(0.5); box(7,20,7,'#ff7a3a','#ffb060',0.9); popM(); pushM(); rotZ(-0.6); mv(3,-2,0); box(5,12,5,'#ff5a1e','#ff9a4a',0.8); popM(); }},
+  'Void Splinter':{c:'#b06bff',beam:'#c9a6ff',draw:t=>{ rotY(t*1.2); pushM(); rotZ(0.4); box(5,22,5,'#2a1040','#b06bff',0.85); popM(); pushM(); rotZ(-0.5); box(4,14,4,'#3a1a55','#c47bff',0.7); popM(); }},
+  '_':{c:'#ffd24a',beam:'#ffd24a',draw:()=>{ box(11,11,11,'#ffd24a','#ffb020',0.9); box(15,4,4,'#ffd24a','#ffb020',0.5); box(4,15,4,'#ffd24a','#ffb020',0.5); }}
+};
+function drawPickup3(pk,t){
+  if(pk.questItem||pk.localItem){                                   // objective item: a model that matches what it is
+    const qi=pk.questItem||pk.localItem, q=QITEM[qi.name]||QITEM['_'], py=pk.y0||0, yy=py+16+Math.sin(pk.bob)*4;   // sit on its real surface (pillar top etc.), not buried at ground
+    drawShadow(pk.x,pk.z,9,0.22);
+    // BEACON — a tall bright pillar of light + rising motes so a placed item is findable from across the area
+    bx(pk.x,py+150,pk.z, 8,300,8, q.beam, q.beam, 0.42);
+    bx(pk.x,py+150,pk.z, 3.4,300,3.4, '#ffffff', q.beam, 0.5);
+    for(let i=0;i<5;i++){ const a=t*1.7+i*1.256, ry=py+18+((t*44+i*30)%150); bx(pk.x+Math.cos(a)*13,ry,pk.z+Math.sin(a)*13, 3,3,3, q.beam,q.beam,0.85); }
+    glowFX(pk.x,py+18,pk.z, 15, q.beam, 0.22);
+    pushM(); mv(pk.x,yy,pk.z); rotY(t*1.6);
+    q.draw(t);
+    popM(); return; }
+  const it=pk.weapon||pk.armor||pk.trinket, rc=RARITY[it.rarity].color, tier=RARITY[it.rarity].tier, y0=pk.y0||0;
+  pushM(); mv(0,y0,0);
+  drawShadow(pk.x,pk.z,10,0.25);
+  const bh=120+tier*46;
+  bx(pk.x,bh/2,pk.z, 4+tier*1.3,bh,4+tier*1.3, rc, rc, 0.11+tier*0.05); // rarity beam — taller + brighter the rarer it is, so you SEE it across the room
+  if(tier>=2) glowFX(pk.x,16,pk.z, 9+tier*3, rc, 0.10+tier*0.045);
+  if(tier>=4) for(let i=0;i<5;i++){ const a=t*1.6+i*1.256, ry=28+((t*46+i*32)%150); bx(pk.x+Math.cos(a)*15,ry,pk.z+Math.sin(a)*15, 3,3,3, rc,rc,0.85); } // legendary sparkle motes
+  pushM(); mv(pk.x,14+Math.sin(pk.bob)*5,pk.z); rotY(t*2.2);
+  bx(0,-6,0, 20,2.4,20, rc, rc, 0.55); // rarity ring base
+  if(pk.weapon){ pushM(); mv(0,2,0); weaponMesh(pk.weapon); popM(); }
+  else if(pk.armor) drawArmorMini(pk.armor,rc);
+  else { bx(0,2,0, 12,2,12, rc, rc, 0.5); bx(0,9,0, 7,7,7, tint(rc,'#fff',0.25), rc); } // trinket gem
+  popM(); popM();
+}
+// the DROP moment: a rarity-colored pillar of light + expanding rings (rare+) + a legendary shockwave & sparkles
+function drawLootFx(t){
+  for(const f of G.fx){ const up=1-f.t/f.life, y0=f.y0||0;
+    const bh=(150+f.tier*95)*Math.min(1,f.t*6);
+    bx(f.x, y0+bh/2, f.z, 7+f.tier*3, bh, 7+f.tier*3, f.col, f.col, 0.5*up);
+    glowFX(f.x, y0+22, f.z, 15+f.tier*6, f.col, 0.5*up);
+    if(f.tier>=2){ const rr=(28+f.tier*24)+f.t*170; for(let i=0;i<16;i++){ const a=i/16*6.283; bx(f.x+Math.cos(a)*rr, y0+4, f.z+Math.sin(a)*rr, 7,7,7, f.col,f.col,0.6*up); } }
+    if(f.tier>=4){ const rr2=f.t*270; for(let i=0;i<20;i++){ const a=i/20*6.283; bx(f.x+Math.cos(a)*rr2, y0+8, f.z+Math.sin(a)*rr2, 6,6,6, '#ffffff',f.col,0.5*up); }
+      for(let i=0;i<8;i++){ const a=t*2+i*0.785, ry=y0+20+((t*130+i*40)%260)*up; bx(f.x+Math.cos(a)*(18+i*4), ry, f.z+Math.sin(a)*(18+i*4), 4,4,4, f.col,f.col,0.9*up); } }
+  }
+}
+function drawChest(ch,t){
+  pushM(); mv(ch.x,ch.y,ch.z);
+  if(!ch.opened){ const g=0.6+0.35*Math.sin(t*4+ch.bob);
+    // the mimic's TELL (Phase 18): identical at a glance, but up close it BREATHES — the lid
+    // rises a hair on a slow rhythm, it shudders once in a while, and the lock burns warmer.
+    const mim=!!ch.mimic, br=mim?Math.max(0,Math.sin(t*0.8+ch.bob))*1.1:0;
+    if(mim && Math.sin(t*0.47+ch.bob*2)>0.988) mv((Math.random()-0.5)*1.4,0,0);
+    const clod=voxLod(ch.x,ch.z);voxDraw('chest.base',{lod:clod,seed:Math.round(ch.bob*100)});voxDraw('chest.lid',{y:17+br,lod:clod,seed:Math.round(ch.bob*100)+7});
+    if(mim && br>0.6) bx(0,15.6,9.5, 22,1.4,2,'#1a0a0e');                          // the thinnest dark seam when it inhales
+    bx(0,12.5,11.2, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
+    bx(0,11,11.6, 1.6,2.4,1, '#1a0a0e');                                                       // keyhole
+    bx(0,26,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
+  } else {
+    bx(0,7,0, 30,12,22,'#5a3d22');
+    pushM(); mv(0,14,-10); rotX(-2.1); bx(0,3.4,0, 30,7,22,'#6b4a2a'); popM(); // open lid
+    bx(0,9,2, 24,5,14,'#1a1208');
+  }
+  popM();
+}
+function drawPortal3(po,t){
+  const py=po.y||0;   // sit on the surface it was snapped to (plateau top, platform, etc.) — never buried at ground
+  voxDraw('portal.arch',{x:po.x,y:py,z:po.z,seed:Math.round(po.x+po.z)});
+  for(let i=0;i<10;i++){ const a=t*1.4+i*0.628;
+    bx(po.x+Math.cos(a)*34, py+54+Math.sin(a)*34, po.z, 9,9,9, '#e8a33d','#e8a33d',0.92); }               // swirling motes
+  bx(po.x,py+54,po.z, 52,72,4,'#e8a33d','#e8a33d',0.22); bx(po.x,py+54,po.z-1, 30,44,2,'#ffd88a','#ffd88a',0.16);  // gate sheet + bright core
+  drawShadow(po.x,po.z,34,0.2);
+}
+/* ---- skin preview (rendered on the main GL canvas, cropped) ---- */
+const _avCache={};
+function skinAv(id){
+  if(_avCache[id]) return _avCache[id];
+  try{
+    gl.clearColor(0.082,0.086,0.11,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    setFlatLights();
+    PROJ=mPersp(50*Math.PI/180,VW/VH,5,800);
+    VIEW=mLookAt([26,58,104],[0,30,0],[0,1,0]);
+    gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
+    gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+    gl.uniform2f(U.uFogNF,600,2000);
+    CURM=mIdent();
+    const fake={x:0,y:0,z:0,vx:0,vz:0,yaw:0.5,onGround:true,runAnim:0,atkTimer:0,dodgeTimer:0,invuln:0,hurtFlash:0,skin:id,weapon:startWeapon()};
+    drawHero3(fake,1.2,true);
+    gl.finish();
+    const ctr=project(0,30,0)||[VW/2,VH/2];
+    const c2=document.createElement('canvas'); c2.width=92; c2.height=110;
+    const sw=VH*0.30*DPR, sh=VH*0.36*DPR;
+    c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,92,110);
+    _avCache[id]=c2.toDataURL();
+  }catch(e){ _avCache[id]=''; }
+  return _avCache[id];
+}
+function itemStaticAv(item){
+  if(!item) return null;
+  // Equipment art is intentionally keyed only by slot + rarity. Affixes still
+  // affect stats and names, but no longer replace the item's visual identity.
+  if(GEARSLOTS.includes(item.slot)&&RARITY[item.rarity]){
+    return 'icons/armor_'+item.slot+'_'+item.rarity+'.png?v='+VERSION3D;
+  }
+  if(item.cls){
+    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
+    const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
+    const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
+    return file?'icons/items/weapons/'+file+'.png?v='+VERSION3D:null;
+  }
+  return null;
+}
+/* ---- item preview (approved static art first; deterministic 3D crop remains the legacy fallback) ---- */
+const _itemAvCache={};
+function itemAv(item){
+  const staticAv=itemStaticAv(item); if(staticAv) return staticAv;
+  const key=(item.slot||item.arche)+'_'+item.rarity;
+  if(_itemAvCache[key]) return _itemAvCache[key];
+  try{
+    gl.clearColor(0.075,0.078,0.10,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    setFlatLights();
+    PROJ=mPersp(50*Math.PI/180,VW/VH,5,600);
+    VIEW=mLookAt([26,40,84],[0,17,0],[0,1,0]);
+    gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
+    gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
+    gl.uniform2f(U.uFogNF,600,2000);
+    CURM=mIdent();
+    const rc=RARITY[item.rarity].color;
+    pushM(); rotY(0.7);
+    bx(0,-3,0, 26,2.6,26, rc, rc, 0.5);
+    if(item.cls){ pushM(); mv(0,1,0); weaponMesh(item); popM(); }
+    else drawArmorMini(item,rc);
+    popM();
+    gl.finish();
+    const ctr=project(0,17,0)||[VW/2,VH/2];
+    const c2=document.createElement('canvas'); c2.width=96; c2.height=96;
+    const sw=VH*0.30*DPR, sh=VH*0.30*DPR;
+    c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,96,96);
+    _itemAvCache[key]=c2.toDataURL();
+  }catch(e){ window.__avErr=e; return ''; }   // NEVER cache a failure — one bad frame was poisoning portraits for the whole session
+  return _itemAvCache[key];
+}
+/* ============================================================
+   MAIN LOOP / BOOT
+   ============================================================ */
+function ensureSize(){ if(VW!==window.innerWidth||VH!==window.innerHeight||canvas.width===0) resize(); }
+function frame(ts){
+  const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
+  ensureSize();
+  if(!lastT) lastT=ts; let dt=(ts-lastT)/1000; lastT=ts; if(dt>0.05) dt=0.05;
+  acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
+  PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
+  render((G?G.time:ts/1000));
+  flushBatch();                       // draw whatever boxes are still pending at frame end
+  PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
+  VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+let _updating=false;
+function checkUpdate(){
+  if(_updating) return;
+  fetch('index.html?_='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{
+    const m=t.match(/const VERSION3D='([^']+)'/);
+    if(m && m[1]!==VERSION3D){ let tried; try{tried=sessionStorage.getItem('bf3_upd');}catch(e){}
+      if(tried!==m[1]){ try{sessionStorage.setItem('bf3_upd',m[1]);}catch(e){} _updating=true; toast('Updating to v'+m[1]+'…'); setTimeout(()=>location.reload(),700); } }
+  }).catch(()=>{});
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ resize(); lastT=0; checkUpdate(); } });
+titleScreen();
+setTimeout(checkUpdate,2500);
+window.addEventListener('pointerdown',initAudio,{once:true});
+/* debug hook (headless verification) */
+window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,
+  giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
+  giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
+  setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },
+  cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
+  makeWeapon, makeArmor, makeTrinket, itemAv, itemStaticAv, rollRarity, rollOrganicRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
+  VOXMAT,VOXASM,voxMetrics,voxLod,voxSeed,
+  useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
+  pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
+  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
+  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
+  chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
+  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
+  ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
+  applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
+  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,
+  TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND,
+  DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
+  MUSCREDITS, MUSDIR, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },
+  STORY, playStory, storyText, zoneCardMaybe, storyToast, winScreen, placeShade, openShade,
+  classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
+  setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
+  enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
+  openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
+  openMirror, openWardrobe, exitMirror, get mirror(){ return mirror; }, applyCameraLook,
+  recomputeArmor, effMagPower, effPower, effSpeed, normArmor, makeArmor, makeTrinket,
+  loadMode:m=>loadMode(m), enterHub:openHub, doModeSelect:modeSelect, openShopMenu:()=>openShop(openHub), perkIds:PERKIDS,
+  giveTrinket:(r,slot)=>{ if(G&&G.p){ const t=makeTrinket(r,slot||'amulet'); G.p.gear[t.slot]=t; recomputeArmor(G.p); hudUpdate(); return {name:t.name,affixes:t.affixes.map(a=>a.label)}; } },
+  buyPerk:id=>{ const c=perkCost(id); if(meta.gold>=c && perkLevel(id)<PERKS[id].max){ meta.gold-=c; if(!meta.perks)meta.perks={}; const newLv=(meta.perks[id]||0)+1; meta.perks[id]=newLv; upgradeStoredHeroPerk(id,newLv); persist(); return {id,lv:newLv,goldLeft:meta.gold}; } return {err:'cannot',cost:c,gold:meta.gold,lv:perkLevel(id)}; },
+  addGold:n=>{ meta.gold=(meta.gold||0)+n; return meta.gold; }, wipeMode:m=>wipeMode(m||MODE),
+  melee:MELEE, testSwing:(yaw)=>{ if(!G||!G.p) return -1; G.p.yaw=yaw; G.p.atkTimer=0.15; G.p.swingId=(G.p.swingId||0)+1; G.enemies.forEach(e=>{e.lastHit=-1;e.hp=99999;}); resolveSwing(); return G.enemies.filter(e=>e.lastHit===G.p.swingId).map(e=>e.tag); },
+  render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
+  get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
+  snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,
+    playMode:MODE, time:G&&G.time, audioPaused:gameAudioPaused, audioContext:actx&&actx.state,
+    gold:meta.gold, perks:Object.assign({},meta.perks||{}), camMode:meta.camMode, camYaw:G&&+((G.camYaw||0).toFixed(2)), camPitch:G&&+((G.camPitch||0).toFixed(2)),
+    doorways:G&&G.rooms.reduce((a,r)=>a+(r.doorways?r.doorways.length:0),0), mazeGoalD:G&&G._dbg&&G._dbg.goalD,
+    crit:p&&+effCrit(p).toFixed(3), goldFind:p&&+effGoldFind(p).toFixed(2), amulet:p&&!!p.gear.amulet, ring:p&&!!p.gear.ring,
+    p:p&&{x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z),yaw:+p.yaw.toFixed(2),onGround:p.onGround,hp:Math.round(p.hp),effMaxHp:Math.round(effMaxHp(p)),lvl:p.level,
+      weapon:p.weapon&&{name:p.weapon.name,cls:p.weapon.cls,rarity:p.weapon.rarity},
+      gear:p.gear&&{reduction:Math.round(defenseR(p)*100)},skin:p.skin},
+    stage:G&&G.stageIndex, stageName:G&&STAGES[G.stageIndex].name, ngHp:G&&+G.ngHp.toFixed(2), ngDmg:G&&+G.ngDmg.toFixed(2),
+    enemiesAlive:G&&G.enemies.filter(e=>!e.dead).length, killGoal:G&&G.killGoal, kills:G&&G.kills,
+    projectiles:G&&G.projectiles.length, pickups:G&&G.pickups.length, portal:G&&!!G.portal,
+    crumbles:G&&G.crumbles.length, geysers:G&&G.geysers.length, springs:G&&G.springs.length,
+    rooms:G&&G.rooms.length, walls:G&&G.walls.length, doors:G&&G.doors.map(d2=>({t:d2.type,open:d2.open})),
+    plates:G&&G.plates.map(p2=>p2.lit), keys:G&&G.keys.length, hasKey:G&&!!G.hasKey,
+    encounters:G&&G.rooms.filter(r=>r.encounter).length, mobTypes:G&&[...new Set(G.enemies.map(e=>e.type))],
+    bonusPortal:G&&!!G.bonusPortal, bonusActive:G&&!!G.bonusActive, bonusTime:G&&G.bonusActive?+G.bonusTime.toFixed(1):null, bonusCourse:G&&G.bonusCourse?Object.assign({},G.bonusCourse):null,
+    goblin:G&&G.enemies.some(e=>e.kind==='goblin'&&!e.dead),
+    queued:queueLevelUp, ngPlus:G&&G.ngPlus, combo:G&&G.combo,
+    unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };
+})();
+

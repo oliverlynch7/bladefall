@@ -1099,3 +1099,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Spread gear gates to Common 1, Uncommon 5, Rare 12, Epic 20, and Legendary 30 so powerful drops become future goals instead of immediate equipment.
 - Existing levels and class ranks remain intact, partial character XP now survives snapshot reconstruction, and old stored thresholds migrate automatically to the new curve.
 - Muted browser QA verified normal-versus-trial XP, the Rank-2 trial outcome, Level-3 snapshot migration, Epic Level-20 bag locking, and zero console errors.
+
+
+## [Codex | 2026-07-20] Level-scaled training dummy health - shipped v1.262.0
+- Training dummies now silently gain 35% of their 400 base HP per character level while retaining their nonlethal damage-checker behavior.
+- Verified maxima are 400 HP at Level 1, 1,660 at Level 10, 3,060 at Level 20, and 4,460 at Level 30.
+- Muted browser QA verified scaled spawning, full-health reset after depletion, no death or progression toast, and zero console errors.

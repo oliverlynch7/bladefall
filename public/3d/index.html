@@ -45,6 +45,9 @@
   #armortag{font-size:11px;font-weight:700;color:#aeb9c6;display:flex;align-items:center;gap:4px;}
   #armortag .pip{width:7px;height:7px;border-radius:2px;display:inline-block;background:#333;}
   #stagetag{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  #hudbag{position:relative;z-index:2;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:max-content;margin:-2px 0 8px;padding:4px 8px;border:1px solid #5d4729;border-radius:5px;background:#090a0dcc;color:#d9ccb4;font:800 10px Georgia,serif;letter-spacing:.05em;font-variant-numeric:tabular-nums;box-shadow:inset 0 1px #ffffff0a,0 3px 9px #0006}
+  #hudbag .ico{width:17px;height:17px;flex:none;filter:drop-shadow(0 2px 3px #000)}
+  #hudbag.full{border-color:#a34b3f;color:#ff9b8f;box-shadow:inset 0 0 9px #7b211f33,0 3px 9px #0006}
   .hudvitals{position:relative;z-index:1}.hudvitals .barwrap:last-child{margin-bottom:8px}
   .progpair{display:grid;grid-template-columns:1fr 1fr;gap:9px;position:relative;z-index:1;margin-bottom:8px}.progbox{min-width:0;padding:7px 8px 8px;border:1px solid #3c3b47;border-radius:5px 9px 9px 5px;background:linear-gradient(145deg,rgba(24,27,37,.82),rgba(5,7,11,.62));box-shadow:inset 0 1px rgba(255,255,255,.04)}
   #hudprogress{position:absolute;left:14px;top:150px;width:min(470px,88vw);z-index:5}
@@ -733,6 +736,8 @@
     #armortag{position:static;left:auto;top:auto;font-family:Georgia,serif;font-size:12px;color:#cbd3de;white-space:nowrap}
     #stagetag{position:absolute;left:auto;right:0;top:23px;max-width:164px;color:#d6b06c;font-family:Georgia,serif;font-size:8px;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 5px #000}
     #goldtag{font-family:Georgia,serif;font-size:12px!important}
+    #hudbag{position:absolute;left:10px;bottom:17px;width:104px;margin:0;padding:5px 8px;border-color:#795729;border-radius:3px;background:linear-gradient(145deg,rgba(24,21,26,.92),rgba(5,6,9,.94));color:#ead9b7;font-size:11px;box-shadow:inset 0 0 0 1px #08090c,0 5px 12px #0009}
+    #hudbag .ico{width:19px;height:19px}
     .hudvitals{margin-top:4px}
     .hudvitals .barwrap{gap:10px;margin-bottom:12px}.hudvitals .barwrap:last-child{margin-bottom:4px}
     .barlabel{width:38px;color:#c9b58f;font-family:Georgia,serif;font-size:10px;letter-spacing:.06em}
@@ -804,6 +809,7 @@
   <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
   <div class="hudpanel">
   <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span><span class="hudidentitydot">·</span><span id="lvlbadge">Warrior</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
+  <div id="hudbag" title="Bag · 0 / 30 slots used"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span id="hudbagnum">0 / 30</span></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
   <div class="barwrap hide" id="jetwrap" style="margin-bottom:2px"><span class="barlabel" style="font-size:8.5px">JET</span><div class="bar" style="height:6px"><i id="jetfill" style="background:linear-gradient(90deg,#7fd6ff,#ffd24a)"></i></div></div>
@@ -853,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.262.0';
+const VERSION3D='1.263.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2699,7 +2705,14 @@ function restoreBank(){ if(!meta.bank) return false;
   meta.bank=null; persist(); return true; }
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
 let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
-function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; }
+function hudBagUpdate(){
+  const el=document.getElementById('hudbag'), num=document.getElementById('hudbagnum'); if(!el||!num) return;
+  const used=Array.isArray(meta.stash)?meta.stash.length:0;
+  num.textContent=used+' / '+STASH_CAP;
+  el.classList.toggle('full',used>=STASH_CAP);
+  el.title='Bag · '+used+' / '+STASH_CAP+' slots used';
+}
+function refreshBagCap(){ STASH_CAP=30+(meta.bagSlots||0)*5; hudBagUpdate(); }
 // When you equip/buy something, the piece it replaced goes to your bag (not the void) —
 // unless it's throwaway starter/plain gear or the bag is full.
 const THROWAWAY=/Rusty Sword|Cracked Shortbow|Splintered Staff|Notched Scythe|^Plain |^Serviceable |^Standard |^Reliable /;
@@ -8506,6 +8519,7 @@ openPause=openPauseV2;
 document.getElementById('pausebtn').addEventListener('pointerdown',e=>{ e.preventDefault(); if(mode==='play') openPause(); });
 function hudUpdate(){
   if(!G) return; const p=G.p;
+  hudBagUpdate();
   const maxHp=effMaxHp(p), maxMana=p.maxMana||100; if(p.mana==null) p.mana=maxMana;
   document.getElementById('hpfill').style.width=Math.max(0,p.hp/maxHp*100)+'%';
   document.getElementById('hpnum').textContent=Math.ceil(p.hp)+' / '+Math.round(maxHp);

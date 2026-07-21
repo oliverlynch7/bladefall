@@ -1105,3 +1105,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Training dummies now silently gain 35% of their 400 base HP per character level while retaining their nonlethal damage-checker behavior.
 - Verified maxima are 400 HP at Level 1, 1,660 at Level 10, 3,060 at Level 20, and 4,460 at Level 30.
 - Muted browser QA verified scaled spawning, full-health reset after depletion, no death or progression toast, and zero console errors.
+
+
+## [Codex | 2026-07-20] HUD bag capacity readout - shipped v1.263.0
+- Added a compact bag icon and live used / total slot count to the open space beneath the class portrait in the top-left gameplay HUD.
+- The count refreshes with inventory and capacity changes, and gains a restrained red full-state treatment when every slot is occupied.

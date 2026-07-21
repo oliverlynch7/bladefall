@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.299.0';
+const VERSION3D='1.300.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10069,14 +10069,16 @@ function drawWaystation(t){
     const R=G.ring||{cx:0,cz:-60,hx:330,hz:330}, cx=R.cx, cz=R.cz, hx=R.hx, hz=R.hz;
     const corners=[[cx-hx,cz-hz],[cx+hx,cz-hz],[cx+hx,cz+hz],[cx-hx,cz+hz]];
     for(const [px,pz] of corners){ bx(px,46,pz,15,92,15,'#241b22','#3a2c34',0.4); bx(px,95,pz,22,11,22,'#caa23a','#ffd24a',.5); }   // corner posts + gold caps
-    const ropeCol=['#c0392b','#d94b3a','#c0392b'], ropeY=[34,58,82];
+    // three stacked ropes: RED / BLUE / RED — bold SOLID colours (alpha 1) with a matching emissive glow so
+    // they stand out against the warm floor instead of blending in (the old alpha-0 made them nearly invisible).
+    const ropeCol=['#e8453d','#3a7bd8','#e8453d'], ropeGlow=['#ff6a5a','#6aa6ff','#ff6a5a'], ropeY=[34,58,82];
     for(let e=0;e<4;e++){ const a=corners[e], b=corners[(e+1)%4], mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2;
       const horiz=Math.abs(b[0]-a[0])>Math.abs(b[1]-a[1]), len=Math.hypot(b[0]-a[0],b[1]-a[1]);
       const south=mz>cz+hz-2;                                                              // south edge = the entrance; leave a gap in the middle
       for(let ri=0;ri<3;ri++){
         if(south){ for(const sgn of [-1,1]){ const seg=hx*0.9, sc=cx+sgn*(hx*0.53);
-          bx(sc,ropeY[ri],mz, seg,5,6, ropeCol[ri],ropeCol[ri],0); } }
-        else bx(mx,ropeY[ri],mz, horiz?len:6, 5, horiz?6:len, ropeCol[ri],ropeCol[ri],0);
+          bx(sc,ropeY[ri],mz, seg,6,7, ropeCol[ri],ropeGlow[ri],1); } }
+        else bx(mx,ropeY[ri],mz, horiz?len:7, 6, horiz?7:len, ropeCol[ri],ropeGlow[ri],1);
       }
     }
     // banners high on the north wall

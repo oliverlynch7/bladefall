@@ -1400,3 +1400,9 @@ a real silvered mirror.
   now hang FLUSH high on the west wall behind the shop/smith/bag.
 - VERIFIED: hub builds with 0 console errors; screenshot confirms the floor reaches the walls and the HUD
   name has room. (Spatial placements — bag/postings/banners — worth a quick in-game look to fine-tune.)
+
+
+## [Claude | 2026-07-21] Sparring-ring ropes re-coloured red/blue — shipped v1.300.0
+The boxing-ring perimeter ropes had been drawn with alpha 0 (base colour transparent, only a faint emissive)
+so they washed out and blended into the warm floor. Restored them to BOLD SOLID red/blue/red stacked ropes
+(alpha 1 + a matching emissive glow), slightly thicker, so they read clearly against the floor. 0 console errors.

@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.270.0';
+const VERSION3D='1.271.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4546,14 +4546,16 @@ function loadStage(i){
     if(rnd()<0.4) G.obstacles.push({x:room.x+(rnd()*2-1)*(room.w/2-72),z:room.z+(rnd()*2-1)*(room.d/2-72),w:70+rnd()*40,d:70+rnd()*40,h:26+rnd()*8,kind:'plat'});
     if(diff>=4&&rnd()<0.22) G.geysers.push({x:room.x+(rnd()*2-1)*(room.w/2-56),z:room.z+(rnd()*2-1)*(room.d/2-56),r:24,period:3.4+rnd()*1.6,phase:rnd()*6.28});
   }
-  // SPAWNER NESTS: every zone's kill-quest gets 2 dens of that mob so the hunt is a real grind (not the canyon — it builds its own)
+  // SPAWNER NESTS: every zone's kill-quest gets SEVERAL dens spread to different room corners, so the mob
+  // pours in from multiple points/angles (harder to funnel) instead of trickling from one spot.
   { const kq=areaQuests().find(q=>q.k==='kill'&&!questDone(q));
     if(kq && curZone().id!=='hollow'){
       const cand=G.rooms.filter(r=>r!==entryRoom&&(!isBoss&&!isMini||r!==goalRoom)&&r!==vault);
-      for(let d2=0;d2<Math.min(2,cand.length);d2++){ const room=cand[(d2*3+1)%cand.length];
-        const dx=room.x+(room.w/2-64)*(d2?1:-1), dz=room.z+(room.d/2-64)*(d2?1:-1);
-        G.dens.push({x:dx,z:dz,type:kq.mob,t:2.2+d2,questId:kq.id});
-        mkMonster(kq.mob,dx+30,dz,room); }
+      const CORN=[[-1,-1],[1,-1],[1,1],[-1,1]];   // four corners → spread dens = multi-angle pressure
+      for(let d2=0;d2<Math.min(4,cand.length);d2++){ const room=cand[(d2*2+1)%cand.length], c=CORN[d2%4];
+        const dx=room.x+(room.w/2-64)*c[0], dz=room.z+(room.d/2-64)*c[1];
+        G.dens.push({x:dx,z:dz,type:kq.mob,t:2.2+d2*0.5,questId:kq.id});
+        if(d2<2) mkMonster(kq.mob,dx+30,dz,room); }   // pre-seed a couple; the rest fill in from the dens
     } }
   goalRoom.encounter=(isBoss||isMini)?goalRoom.encounter:false; if(!isBoss&&!isMini) goalRoom.cleared=true;
   // optional locked vault (dead-end ⇒ can never soft-lock the run)
@@ -4678,7 +4680,7 @@ function finishHubSprint(){
   endBonus('🏁 Finished in '+s.toFixed(1)+'s'+(best?' · NEW BEST!':' · best '+prev.toFixed(1)+'s'));
 }
 function spawnEnemy(type,x,z,isBoss){
-  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale();
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?10:1);   // bosses carry ~10x HP so a fight lasts a fight, not two hits
   const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18,speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',
@@ -6183,7 +6185,9 @@ function update(dt){
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
   else {
     // Rime (Frostfell): the ice takes your grip — slower to build speed, much slower to shed it
-    const ice=(G.haz==='slick')?(p.slide||0):0, acc=8*(1-ice*0.55), fr=0.80+ice*0.175, cut=4-ice*3.7;
+    // A permanent TINY bit of momentum: base friction retains a little speed so you ease to a stop
+    // (proportional to how fast you were going) instead of halting on a dime. Ice pushes it to a real slide.
+    const ice=(G.haz==='slick')?(p.slide||0):0, acc=8*(1-ice*0.55), fr=0.865+ice*0.11, cut=4-ice*3.7;
     if(mx!==0) p.vx+=mx*moveSpd*dt*acc; p.vx*=fr; if(Math.abs(p.vx)<cut) p.vx=0;
     if(mz!==0) p.vz+=mz*moveSpd*dt*acc; p.vz*=fr; if(Math.abs(p.vz)<cut) p.vz=0;
     const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
@@ -6203,7 +6207,8 @@ function update(dt){
         if(dens.length && alive<5){
           let bi=0,bd=1e9; dens.forEach((d,i)=>{ const dd=dXZ(p.x,p.z,d.x,d.z); if(dd<bd){bd=dd;bi=i;} });   // spawn from the den nearest the player: the hunt comes to you
           const n=Math.max(1,Math.min(dens.length,5-alive,3));
-          for(let s=0;s<n;s++){ const d=dens[(bi+s)%dens.length]; const m=spawnEnemy(kq.mob,d.x+(Math.random()-0.5)*50,d.z+(Math.random()-0.5)*50); m.active=true; burst(m.x,10,m.z,'#c8893a',12); }
+          for(let s=0;s<n;s++){ const d=dens[(bi+s)%dens.length]; const ang=Math.random()*6.283, rr=26+Math.random()*62;   // each wave draws from several dens, and each mob lands in a wide radial spread around its den
+            const m=spawnEnemy(kq.mob,d.x+Math.cos(ang)*rr,d.z+Math.sin(ang)*rr); m.active=true; burst(m.x,10,m.z,'#c8893a',12); }
           SFX.growl(0.6);
         }
       }

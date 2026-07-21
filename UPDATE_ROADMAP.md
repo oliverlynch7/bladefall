@@ -1243,3 +1243,22 @@ Player-like AI practice opponents for the Arena, with difficulty settings built 
 - VERIFIED in-browser: 2 Hard bots spawn, move and approach the player (AI runs), a kill scores +1 and
   schedules respawn, exit is clean, 0 console errors. Debug hooks: __BF3.botInfo(), botKillFirst().
 - NEXT: MP arena sync (share map + fair-mode + bots in co-op/PvP), scoreboard+rounds UI, team modes, pickups.
+
+
+## [Claude | 2026-07-21] Arena Increments 3-6 (scoreboard, MP sync, teams, powerups) — shipped v1.291.0
+The Arena feature set is now COMPLETE.
+- **Increment 3 — Scoreboard + rounds:** a live top-centre HUD. Solo: KOs / target / Deaths. PvP: per-player
+  frags (or team totals). Reaching the target (10 KOs solo / 5 frags PvP) wins the round and resets for a
+  rematch. Verified: HUD shows/updates on KO, removed on exit; bots killed the player 5x in a 10s sim
+  (full combat->death->respawn->score loop works).
+- **Increment 4 — MP arena sync:** host entering The Arena broadcasts the map (+ Fair Mode standardized
+  loadout) so guests auto-load the SAME arena (MP.ARENA sentinel zone, presence works). Late joiners land
+  in it too (placeMsg). Fair Mode is now a persistent toggle standardizing level/rank/gear/stats (class
+  stays your choice). Bots are solo-only (MP arena = player duel). PvP lobby hint now points to the Arena gate.
+- **Increment 5 — Team modes (2v2):** host toggle; host assigns alternating teams and broadcasts the map;
+  NO friendly fire between teammates (pvpMelee + takePvpDamage both check teams); team-coloured ally beacons
+  (blue/red); team-total scoreboard. Verified via loopback: friendly fire blocks teammates, team scores tally.
+- **Increment 6 — Powerups:** optional toggle; health / damage / speed orbs spawn around the arena (cap 5,
+  ~5-9s cadence), float+bob, apply on pickup (heal 40%, +50% dmg/speed for 9s). Verified spawning + 0 errors.
+- MULTIPLAYER + ARENA now fully complete: presence, shared enemies, shared hub, revive, PvP, arena sandbox,
+  3 maps, custom/fair/random loadouts, free respec, AI bots (4 difficulties), scoreboard/rounds, 2v2, powerups.

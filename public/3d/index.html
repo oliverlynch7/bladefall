@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.290.0';
+const VERSION3D='1.291.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5900,7 +5900,10 @@ function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx(
 function killEnemy(e,weaponKill){
   if(e.dead) return;
   if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
-    G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++; try{ toast('⚔ Bot defeated — '+G.arenaScore.p+' KO'+(G.arenaScore.p===1?'':'s')); }catch(_){}
+    G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++;
+    if(G.arenaTarget && G.arenaScore.p>=G.arenaTarget){ try{ toast('🏆 Round won — '+G.arenaTarget+' KOs! A fresh round begins.'); playFx&&playFx('bossdie'); }catch(_){} G.arenaScore={p:0,b:0}; }
+    else { try{ toast('⚔ Bot defeated — '+G.arenaScore.p+' KO'+(G.arenaScore.p===1?'':'s')); }catch(_){} }
+    try{ updateArenaHud(); }catch(_){}
     const diff=e.botDiff; setTimeout(()=>{ if(G&&G.arena&&IN_ARENA) spawnBot(diff); }, 1800); return; }   // Arena bots respawn, never truly die
   // CO-OP: a guest never kills on its own — the host is authoritative and drives death via kill events
   // (MP._authKill is set only when the guest is applying a host-sanctioned kill).
@@ -6247,8 +6250,9 @@ const MP={
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
-  HUB:-100,                 // sentinel "zone" for the shared Waystation (Phase 2)
-  pvp:false, scores:{},     // Phase 3 PvP duel state
+  HUB:-100, ARENA:-200,     // sentinel "zones" for the shared Waystation (Phase 2) and the shared Arena
+  pvp:false, scores:{}, arenaMsg:null,     // Phase 3 PvP duel + shared-arena state
+  teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
   ROOMPFX:'bladefall-mp-',
   rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
@@ -6275,9 +6279,9 @@ const MP={
     this.peer.on('connection',c=>this.wireGuest(c));
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
   wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
-    if(this.hasZone()) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){}
+    { const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} }
     c.on('data',d=>{
-      if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); if(this.hasZone()) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){} }
+      if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} if(IN_ARENA && this.teams) this.assignTeams(); }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
@@ -6305,6 +6309,10 @@ const MP={
     if(d.t==='zone'){ this.seed=d.seed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone; if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } } }
+    else if(d.t==='arena'){ this.arenaMsg=d; this.zone=this.ARENA; this.pvp=true; this.teams=!!d.teams;   // follow the host into the shared Arena
+      ARENA_LOADOUT.map=d.map||'flat'; if(d.fair && d.ld){ Object.assign(ARENA_LOADOUT,d.ld); ARENA_LOADOUT.fair=true; }
+      if(!IN_ARENA){ try{ enterArena(); }catch(e){} } }
+    else if(d.t==='teams'){ this.teamMap=d.map||{}; this.teams=!!d.on; }
     else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
@@ -6317,6 +6325,13 @@ const MP={
   // ---- called from enterZone (both roles) ----
   onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0;
     if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed,pvp:this.pvp?1:0});}catch(e){}}); },
+  // shared Arena: the host tells guests which map to load (+ a fair-mode standardized loadout)
+  broadcastArena(cfg){ this.teams=!!cfg.teams; this.arenaMsg={t:'arena',map:cfg.map,fair:cfg.fair?1:0,ld:cfg.fair?ARENA_FAIR:null,teams:this.teams?1:0}; this.zone=this.ARENA;
+    if(this.isHost){ this.assignTeams(); this.conns.forEach(c=>{try{c.send(this.arenaMsg);}catch(e){}}); } },
+  teamOf(id){ return this.teamMap[id]||0; },
+  assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
+    this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
+  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; if(this.hasZone()) return {t:'zone',zone:this.zone,seed:this.seed,pvp:this.pvp?1:0}; return null; },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
@@ -6336,7 +6351,7 @@ const MP={
     const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null;
     const body=sk?sk.armor:'#6f86c9', bodyLt=sk?sk.armorLt:'#9fb4e6', skinc=sk&&sk.skin?sk.skin:'#d9b08c';
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
-    const tint='hsl('+(h%360)+',70%,60%)';
+    const tint=this.teams?(this.teamOf(q.id)===0?'#4aa3ff':'#ff5555'):'hsl('+(h%360)+',70%,60%)';   // team colour in 2v2
     if(q.downed){   // collapsed on the ground + a pulsing red distress beacon so an ally can find & revive you
       pushM(); mv(q.x,4,q.z); rotY(q.yaw||0);
       bx(0,6,0, 20,8,12, '#7a2b2b'); bx(0,6,10, 10,8,10, skinc);   // slumped body + head
@@ -6418,6 +6433,7 @@ const MP={
   pvpMelee(p,w,dmg){ if(!this.pvp||!G||!p) return;
     const reach=((typeof MELEE!=='undefined'&&MELEE[w.art]&&MELEE[w.art].reach)||90)+22, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue;
+      if(this.teams && this.teamOf(id)===this.teamOf(this.myId)) continue;   // no friendly fire
       const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz); if(d>reach+16) continue;
       if(d>16 && (dx*fx+dz*fz)/d<0.35) continue;               // must be roughly in front of the swing
       if(q._pvpSwing===p.swingId) continue; q._pvpSwing=p.swingId;
@@ -6426,7 +6442,8 @@ const MP={
     if(this.isHost){ if(id===this.myId) this.takePvpDamage(m); else { const c=this.conns.find(x=>x._pid===id); if(c) try{c.send(m);}catch(e){} } }
     else { if(this.hostConn&&this.hostConn.open) try{this.hostConn.send(m);}catch(e){} } },
   routePvp(m){ if(m.id===this.myId){ this.takePvpDamage(m); return; } const c=this.conns.find(x=>x._pid===m.id); if(c) try{c.send(m);}catch(e){} },
-  takePvpDamage(m){ if(!G||!G.p||G.p._pvpDead) return; const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
+  takePvpDamage(m){ if(!G||!G.p||G.p._pvpDead) return; if(this.teams && m.by && this.teamOf(m.by)===this.teamOf(this.myId)) return;   // friendly fire off
+    const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
     let dmg=Math.max(1,Math.round((m.d||1)*(1-(typeof defenseR==='function'?defenseR(p):0))*0.6));   // 0.6 PvP scalar so duels last
     p.hp-=dmg; p.hurtFlash=0.3; p.invuln=0.5; const d=Math.max(1,Math.hypot(p.x-m.sx,p.z-m.sz));
     p.vx=(p.x-m.sx)/d*240; p.vz=(p.z-m.sz)/d*240; p.vy=150; p.onGround=false;
@@ -6437,7 +6454,8 @@ const MP={
   hostScore(byId){ if(!this.isHost) return; this.scores[byId]=(this.scores[byId]||0)+1; const n=this.scores[byId];
     this.conns.forEach(c=>{try{c.send({t:'score',id:byId,n});}catch(e){}}); this.showScore(byId,n); },
   showScore(byId,n){ this.scores[byId]=n; const nm=(byId===this.myId)?'You':((this.peers[byId]&&this.peers[byId].name)||'A rival');
-    try{ toast('⚔ '+nm+' — '+n+'/5'); if(n>=5) toast('🏆 '+nm+' win'+(byId===this.myId?'':'s')+' the duel!'); }catch(e){} },
+    try{ toast('⚔ '+nm+' — '+n+'/5'); if(n>=5){ toast('🏆 '+nm+' win'+(byId===this.myId?'':'s')+' the duel!'); if(this.isHost) this.scores={}; } }catch(e){}
+    try{ updateArenaHud(); }catch(e){} },
   pvpRespawn(){ if(!G||!G.p) return; const p=G.p; p._pvpDead=false; p.dead=false; p.downed=false; p.hp=(typeof effMaxHp==='function'?effMaxHp(p):p.maxHp||100);
     const a=Math.random()*6.28; p.x=Math.cos(a)*260; p.z=Math.sin(a)*260; p.y=0; p.vx=0; p.vy=0; p.vz=0; p.invuln=2;
     try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
@@ -6446,7 +6464,7 @@ const MP={
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
     try{ if(this.peer) this.peer.destroy(); }catch(e){}
     this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
-    this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={};
+    this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={}; this.arenaMsg=null;
     if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
     if(msg){ try{ toast(msg); }catch(e){} } }
 };
@@ -6466,8 +6484,8 @@ function openMPLobby(){
     MP.host((ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
       const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
       const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
-      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Share this code, then press Back and enter any zone — it becomes an enemy-free arena. First to 5 downs wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
-      st(pvp?'Hosting a PvP duel. Press Back and enter a zone to fight.':'Hosting co-op. Press Back and start a game — friends who join land with you.',true); }, pvp); };
+      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Share this code, then press Back, start your game, and walk into <b>The Arena</b> gate in the hub — pick a map + loadout (or Fair Mode) and your friend drops into the same arena. First to 5 wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
+      st(pvp?'Hosting a PvP duel. Enter The Arena in the hub to fight.':'Hosting co-op. Press Back and start a game — friends who join land with you.',true); }, pvp); };
   document.getElementById('mpHost').onclick=()=>doHost(false);
   document.getElementById('mpHostPvp').onclick=()=>doHost(true);
   document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
@@ -6482,7 +6500,7 @@ function openMPLobby(){
    entry and restored on exit, and persist() is frozen while inside.
    ============================================================================ */
 var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
-const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal' };
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', fair:false, teams:false, powerups:false };
 const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
 const ARENA_MAPS={
   flat:{ name:'Proving Ground', desc:'A clean flat arena — pure skill, no cover.', sky:[0.10,0.11,0.15], ground:'#3b4254',
@@ -6502,9 +6520,10 @@ function arenaSetLevel(p,lvl){ lvl=Math.max(1,Math.min(60,lvl|0)); for(let i=1;i
 function arenaApplyClass(cfg){ meta.classId=cfg.classId; const cs=classState(cfg.classId); cs.rank=Math.max(1,Math.min(10,cfg.rank||10));
   const def=c2def(cfg.classId); if(def){ cs.ch=cs.ch||{}; for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r) cs.ch[r]=cs.ch[r]||def['r'+r].a.id; } }   // auto-fill a valid build; Free Respec lets you customize
   if(!cs.sub){ const C=CLASSES[cfg.classId]; cs.sub=(C&&C.subs&&C.subs[0]&&C.subs[0].id)||null; } }
-function buildArenaPlayer(cfg){ arenaApplyClass(cfg); const p=freshPlayer(); arenaSetLevel(p,cfg.level);
-  try{ p.weapon=makeWeapon(cfg.wArch,cfg.wRid); }catch(e){}
-  for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(cfg.aRid,slot); }catch(e){} }
+function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.classId},ARENA_FAIR):cfg;   // Fair Mode standardizes level/rank/gear/stats (your class stays your choice)
+  arenaApplyClass({classId:cfg.classId,rank:L.rank}); const p=freshPlayer(); arenaSetLevel(p,L.level);
+  try{ p.weapon=makeWeapon(L.wArch,L.wRid); }catch(e){}
+  for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(L.aRid,slot); }catch(e){} }
   p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
 function enterArena(){ const cfg=ARENA_LOADOUT;
   // ---- SAVE PROTECTION: snapshot everything we might mutate; persist() is frozen while IN_ARENA ----
@@ -6521,22 +6540,53 @@ function enterArena(){ const cfg=ARENA_LOADOUT;
   try{ map.build(); }catch(e){}
   const sy=(cfg.map==='lava')?70:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
   p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=true;p.vx=0;p.vy=0;p.vz=0;
-  G.arenaScore={p:0,b:0}; if(cfg.bots>0){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI practice opponents
+  G.arenaPk=[]; G._pkT=4; G.arenaScore={p:0,b:0}; G.arenaTarget=(MP.active)?5:(cfg.bots>0?10:0);
+  if(cfg.bots>0 && !MP.active){ for(let i=0;i<cfg.bots;i++) spawnBot(cfg.botDiff); }   // AI bots are a solo feature (MP arena = player duel)
+  updateArenaHud();
   mode='play'; showOverlay(false); showGameUI(true); try{musicForScene();}catch(e){} skillbarUpdate(); hudUpdate();
   { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
-  if(MP.active){ MP.pvp=true; }
+  if(MP.active){ MP.pvp=true; MP.zone=MP.ARENA; if(MP.isHost) MP.broadcastArena(cfg); }   // co-op: shared PvP arena — sync the map to guests
   toast('⚔ '+map.name+' — Pause (Esc) to reconfigure or leave. Nothing here affects your save.');
 }
 function exitArena(){ IN_ARENA=false;
   if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; }
-  if(MP.active) MP.pvp=false; ARENA_STAGE=null; refreshBagCap&&refreshBagCap(); openHub(); }
+  if(MP.active){ MP.pvp=false; MP.arenaMsg=null; MP.scores={}; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} refreshBagCap&&refreshBagCap(); openHub(); }
 function arenaRespawn(){ if(!G||!G.p) return; const p=G.p; p.dead=false; p.downed=false; p._pvpDead=false;
   const sp=G.arenaSpawn||{x:0,z:0,y:60}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+8; p.vx=0;p.vy=0;p.vz=0; p.hp=effMaxHp(p); p.invuln=2;
+  G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.b++; try{ updateArenaHud(); }catch(_){}
   try{ burst(p.x,p.y+20,p.z,'#7de08a',14); hudUpdate(); }catch(e){} }
 function arenaHazardTick(dt){ if(!G||!G.arena||!G.p) return; const p=G.p;
   if(G.arenaLava && p.y<15 && !(p.invuln>0)){ let inLava=false; for(const L of G.arenaLava){ if(Math.abs(p.x-L.x)<L.w/2 && Math.abs(p.z-L.z)<L.d/2){ inLava=true; break; } }
     if(inLava){ p._lavaT=(p._lavaT||0)+dt; if(p._lavaT>=0.3){ p._lavaT=0; p.hp-=Math.max(5,Math.round((effMaxHp(p))*0.07)); p.hurtFlash=0.3;
       try{ addText(p.x,p.y+42,p.z,'🔥','#ff7a3a'); burst(p.x,4,p.z,'#ff7a3a',6); SFX.hurt(); }catch(e){} if(p.hp<=0){ p.hp=0; arenaRespawn(); } } } else p._lavaT=0; }
+}
+// ---- Arena powerups (optional chaotic variant): health / damage / speed orbs ----
+function arenaPickupTick(dt){ if(!G||!G.arena||!ARENA_LOADOUT.powerups) return;
+  G.arenaPk=G.arenaPk||[]; G._pkT=(G._pkT||0)-dt;
+  if(G._pkT<=0 && G.arenaPk.length<5){ G._pkT=5+Math.random()*4; const k=['heal','dmg','speed'][Math.floor(Math.random()*3)];
+    const b=G.bounds||{minX:-400,maxX:400,minZ:-400,maxZ:400};
+    const x=Math.random()*(b.maxX-b.minX-140)+b.minX+70, z=Math.random()*(b.maxZ-b.minZ-140)+b.minZ+70;
+    let y=0; try{ y=highestSurfaceAt(x,z); }catch(e){} G.arenaPk.push({x,z,y,kind:k,bob:Math.random()*6}); }
+  const p=G.p; for(let i=G.arenaPk.length-1;i>=0;i--){ const pk=G.arenaPk[i]; pk.bob+=dt*3;
+    if(Math.hypot(pk.x-p.x,pk.z-p.z)<28 && Math.abs((pk.y||0)-(p.y||0))<56){ applyArenaPickup(pk.kind,p); G.arenaPk.splice(i,1); } }
+}
+function applyArenaPickup(kind,p){
+  if(kind==='heal'){ const h=Math.round(effMaxHp(p)*0.4); p.hp=Math.min(effMaxHp(p),p.hp+h); try{ addText(p.x,p.y+60,p.z,'+'+h+' ♥','#7de08a',true,'heal'); burst(p.x,p.y+30,p.z,'#7de08a',12); SFX.pickup&&SFX.pickup(); }catch(e){} }
+  else if(kind==='dmg'){ p.stats.power*=1.5; try{ addText(p.x,p.y+60,p.z,'⚔ DAMAGE UP','#ff9a3a',true); burst(p.x,p.y+30,p.z,'#ff9a3a',12); SFX.levelup&&SFX.levelup(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.power/=1.5; },9000); }
+  else if(kind==='speed'){ p.stats.speed*=1.5; try{ addText(p.x,p.y+60,p.z,'💨 SPEED UP','#7fd6ff',true); burst(p.x,p.y+30,p.z,'#7fd6ff',12); SFX.dodge&&SFX.dodge(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.speed/=1.5; },9000); }
+}
+function drawArenaPickups(t){ if(!G||!G.arena||!G.arenaPk) return; for(const pk of G.arenaPk){ const c=pk.kind==='heal'?'#7de08a':pk.kind==='dmg'?'#ff9a3a':'#7fd6ff'; const yy=(pk.y||0)+26+Math.sin(pk.bob)*4;
+  bx(pk.x,yy,pk.z, 13,13,13, c, c, 0.92); bx(pk.x,yy,pk.z, 22,3,22, c, c, 0.28); bx(pk.x,yy+11,pk.z, 4,4,4, '#fff','#fff',0.8); } }
+// ---- Arena live scoreboard (solo KOs/deaths or PvP frags) + round target ----
+function updateArenaHud(){ let el=document.getElementById('arenaHud');
+  if(!IN_ARENA || !G || !G.arena){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement('div'); el.id='arenaHud'; el.style.cssText='position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(10,12,18,.72);border:1px solid #2b3040;border-radius:10px;padding:5px 14px;font:700 13px system-ui,Segoe UI,Arial;color:#f3f1ea;text-align:center;pointer-events:none;letter-spacing:.02em;white-space:nowrap'; document.body.appendChild(el); }
+  const sc=G.arenaScore||{p:0,b:0};
+  if(MP.active && MP.pvp && MP.teams){ const T=[0,0]; T[MP.teamOf(MP.myId)]+=MP.scores[MP.myId]||0; for(const id in MP.peers) T[MP.teamOf(id)]+=MP.scores[id]||0;
+    el.innerHTML='<span style="color:#e8a33d">⚔ 2v2 · first to '+(G.arenaTarget||5)+'</span> &nbsp; <b style="color:#7fd6ff">🔵 Blue '+T[0]+'</b> &nbsp;·&nbsp; <b style="color:#ff8a82">🔴 Red '+T[1]+'</b> &nbsp; <span style="opacity:.6">(you: '+(MP.teamOf(MP.myId)===0?'Blue':'Red')+')</span>';
+  } else if(MP.active && MP.pvp){ const rows=[['You',MP.scores[MP.myId]||0]]; for(const id in MP.peers) rows.push([(MP.peers[id].name||'Rival'),MP.scores[id]||0]);
+    el.innerHTML='<span style="color:#e8a33d">⚔ DUEL · first to '+(G.arenaTarget||5)+'</span> &nbsp; '+rows.map(r=>r[0]+': <b>'+r[1]+'</b>').join(' &nbsp;·&nbsp; ');
+  } else { el.innerHTML='<span style="color:#e8a33d">⚔ ARENA</span> &nbsp; KOs <b style="color:#7de08a">'+sc.p+'</b>'+(G.arenaTarget?' / '+G.arenaTarget:'')+' &nbsp;·&nbsp; Deaths <b style="color:#ff8a82">'+(sc.b||0)+'</b>'; }
 }
 /* ---- ARENA AI BOTS — player-like practice opponents. BOT_DIFF is the tuning table:
    every knob here is meant to be iterated on to make bots genuinely challenging. ---- */
@@ -6626,10 +6676,12 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
     <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
       <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
       <div style="flex:2;display:flex;gap:5px">${BOT_DIFFS.map(dk=>`<button class="bigbtn ghost arbd" data-bd="${dk}" style="flex:1;margin:0;padding:7px 3px;font-size:12px;${cfg.botDiff===dk?'border-color:'+BOT_DIFF[dk].color+';color:'+BOT_DIFF[dk].color:''}">${BOT_DIFF[dk].label}</button>`).join('')}</div></div>
-    <div style="display:flex;gap:8px;margin:12px 0">
-      <button class="bigbtn ghost" id="arFair" style="flex:1;margin:0">⚖️ Fair Mode</button>
-      <button class="bigbtn ghost" id="arRand" style="flex:1;margin:0">🎲 Randomize</button>
-      ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;margin:0">✨ Free Respec</button>':''}</div>
+    ${(MP.active&&MP.isHost)?`<button class="bigbtn ghost" id="arTeams" style="width:100%;margin:8px 0 0;${cfg.teams?'border-color:#7fd6ff;color:#7fd6ff':''}">👥 2v2 Team Mode${cfg.teams?' ✓':''} <span style="opacity:.6;font-size:11px">· friendly fire off</span></button>`:''}
+    <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
+      <button class="bigbtn ghost" id="arFair" style="flex:1;min-width:120px;margin:0;${cfg.fair?'border-color:#7de08a;color:#7de08a':''}">⚖️ Fair Mode${cfg.fair?' ✓':''}</button>
+      <button class="bigbtn ghost" id="arPow" style="flex:1;min-width:120px;margin:0;${cfg.powerups?'border-color:#ff9a3a;color:#ff9a3a':''}">✨ Powerups${cfg.powerups?' ✓':''}</button>
+      <button class="bigbtn ghost" id="arRand" style="flex:1;min-width:120px;margin:0">🎲 Randomize</button>
+      ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;min-width:120px;margin:0">✨ Free Respec</button>':''}</div>
     <button class="bigbtn" id="arGo">${inA?'✓ Apply Loadout':'⚔️ Enter Arena'}</button>
     ${inA?'<button class="bigbtn ghost" id="arLeave" style="margin-top:8px;color:#ff8a82;border-color:#5a2a2a">Leave Arena</button>':''}
     <button class="bigbtn ghost" id="arBack" style="margin-top:8px">Back</button></div>`);
@@ -6643,8 +6695,10 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
   g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
   document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
-  g('arFair').onclick=()=>{ Object.assign(cfg,ARENA_FAIR); try{SFX.pickup();}catch(e){} toast('⚖️ Fair Mode — standardized loadout for a level playing field.'); openArenaSetup(back); };
-  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); try{SFX.pickup();}catch(e){} toast('🎲 Randomized loadout!'); openArenaSetup(back); };
+  { const tb=g('arTeams'); if(tb) tb.onclick=()=>{ cfg.teams=!cfg.teams; try{SFX.pickup();}catch(e){} openArenaSetup(back); }; }
+  { const pw=g('arPow'); if(pw) pw.onclick=()=>{ cfg.powerups=!cfg.powerups; try{SFX.pickup();}catch(e){} toast(cfg.powerups?'✨ Powerups ON — health / damage / speed orbs spawn in the arena.':'Powerups off.'); openArenaSetup(back); }; }
+  g('arFair').onclick=()=>{ cfg.fair=!cfg.fair; try{SFX.pickup();}catch(e){} toast(cfg.fair?'⚖️ Fair Mode ON — everyone gets a standardized level, gear & stats.':'Fair Mode off — custom loadouts.'); openArenaSetup(back); };
+  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); try{SFX.pickup();}catch(e){} toast('🎲 Randomized loadout!'); openArenaSetup(back); };
   if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
@@ -6658,7 +6712,7 @@ function update(dt){
   if(mode!=='play') return;
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
-  if(G.arena) arenaHazardTick(dt);                             // Arena: lava/hazard damage -> respawn (never a real death)
+  if(G.arena){ arenaHazardTick(dt); arenaPickupTick(dt); }     // Arena: lava/hazard damage -> respawn; powerup orbs
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
@@ -10947,6 +11001,7 @@ function render(t){
   if(meta.camMode!=='fps') drawHero3(p,t,false);
   else { gl.clear(gl.DEPTH_BUFFER_BIT); drawFPWeapon(p,t); }   // FP arms draw over the world — never clip into the ground when looking down
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
+  if(G.arena) drawArenaPickups(t);                             // arena powerup orbs
   if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
   updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.

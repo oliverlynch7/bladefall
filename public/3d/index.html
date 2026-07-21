@@ -639,6 +639,15 @@
   .tutkeymsg{font-size:13px;line-height:1.4;color:#cdd3df;}.tutkeymsg b{color:var(--tut);}
   .tuthint{font-size:12px;line-height:1.45;color:#8a93a6;margin:0;}
   .skilltut .bigbtn{margin:0;}
+  .levelentry{max-width:460px;text-align:center;}
+  .levelentry .lecrest{width:96px;height:96px;margin:2px auto 8px;display:flex;align-items:center;justify-content:center;font-size:52px;border-radius:20px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--acc) 30%,#1c2130),#0b0d14);border:1px solid color-mix(in srgb,var(--acc) 45%,#2b3040);box-shadow:0 8px 22px rgba(0,0,0,.45);}
+  .levelentry .ovh{color:#fff;}
+  .levelentry .ovsub{max-width:400px;margin:6px auto 16px;line-height:1.5;}
+  .levelentry .lefoot{display:flex;gap:10px;align-items:center;justify-content:center;}
+  .levelentry .lefoot .bigbtn{margin:0;flex:1;}
+  .levelentry #leGo{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 62%,#2a2016),color-mix(in srgb,var(--acc) 30%,#120d08));border-color:color-mix(in srgb,var(--acc) 60%,#4a341a);}
+  .levelentry .lebtnicon{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:7px;filter:drop-shadow(0 2px 3px #000a);}
+  .levelentry .lelock{flex:1;text-align:center;font-size:12px;font-weight:800;letter-spacing:.06em;color:#c98a4a;padding:12px 0;}
   .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
   .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
   .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
@@ -859,7 +868,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.271.0';
+const VERSION3D='1.272.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7050,6 +7059,33 @@ function openEndlessGate(){
   document.getElementById('descBtn').onclick=startEndless;
   document.getElementById('descBack').onclick=wsResume;
 }
+const ZONE_ACCENT={outskirts:'#7ec46a',hollow:'#e8a33d',keep:'#8fb7ff',frost:'#7fd6ff',ember:'#ff7a3a',abyss:'#b06bff',palace:'#ffe9a8',castle:'#c47bff'};
+// A deliberate ENTER-LEVEL popup: the level's icon, its name + description, and an Enter button.
+// Used for every campaign portal, hidden Trial Chamber, and the Treasure Sprint — never enter by accident.
+function openLevelEntry(o){
+  mode='menu'; showGameUI(false); _offerT=Date.now(); SFX.pickup();
+  showOverlayHTML(`<div class="card levelentry" style="--acc:${o.col}">
+    <div class="lecrest">${o.icon}</div>
+    <p class="ovkicker" style="color:${o.col}">${o.kicker||'Portal'}</p>
+    <h2 class="ovh">${o.name}</h2>
+    <p class="ovsub">${o.desc||''}</p>
+    <div class="lefoot">
+      <button class="bigbtn ghost" id="leBack">Not yet</button>
+      ${o.locked?`<div class="lelock">🔒 ${o.lockMsg||'Locked'}</div>`
+        :`<button class="bigbtn" id="leGo"><img class="lebtnicon" src="icons/portal.png?v=${VERSION3D}" alt="">Enter Level</button>`}
+    </div></div>`);
+  document.getElementById('leBack').onclick=wsResume;
+  const go=document.getElementById('leGo'); if(go) go.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; o.onEnter(); };
+}
+function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null;
+  openLevelEntry({
+    icon:(sd?sd.icon:Z.icon), name:(sd?sd.name:Z.name),
+    kicker:(sd?'Hidden Trial Chamber':('Campaign Gate · Tier '+Z.tier)),
+    desc:(sd?sd.blurb:Z.blurb),
+    col:(g.side?'#c47bff':(ZONE_ACCENT[Z.id]||'#e8a33d')),
+    locked:!g.open, lockMsg:'Clear '+((ZONES[g.zi-1]&&ZONES[g.zi-1].name)||'the road')+' first',
+    onEnter:()=>{ if(g.side) enterSide(g.zi); else enterZone(g.zi); } });
+}
 function enterEndlessFromTitle(){
   initAudio(); if(!meta.diff) meta.diff='normal'; loadMode(diffMode(meta.diff));
   if(!meta.hero || !Object.keys(meta.classUnlocked||{}).length){ meta.diff='normal'; loadMode('rl'); openHub(); toast('Pick a class first, then find the Abyssal Descent stone in the hub.'); return; }
@@ -7331,12 +7367,13 @@ function enterWaystation(){
   G.segments.push({x:0,z:600,w:660,d:500});
   G.rooms.push({x:0,z:600,w:660,d:500,monsters:[],encounter:false,cleared:true,activityAnnex:true});
   // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
-  G.walls.push({x:0,z:-430,w:1320,d:26,h:64});                       // low north rampart behind the gate arc (see the sky/gates)
-  G.walls.push({x:-495,z:372,w:330,d:26,h:120});                     // south wall wings; centre opens into the annex
-  G.walls.push({x:495,z:372,w:330,d:26,h:120});
-  G.walls.push({x:-640,z:-30,w:26,d:830,h:120});                     // west wall
-  G.walls.push({x:640,z:-30,w:26,d:830,h:120});                      // east wall
-  G.walls.push({x:0,z:850,w:680,d:26,h:120});                        // annex outer wall
+  // Tall boundary walls — high enough that even a double jump can't clear them (no escaping the hub bowl).
+  G.walls.push({x:0,z:-430,w:1320,d:26,h:300});                      // north rampart behind the gate arc
+  G.walls.push({x:-495,z:372,w:330,d:26,h:300});                     // south wall wings; centre opens into the annex
+  G.walls.push({x:495,z:372,w:330,d:26,h:300});
+  G.walls.push({x:-640,z:-30,w:26,d:830,h:300});                     // west wall
+  G.walls.push({x:640,z:-30,w:26,d:830,h:300});                      // east wall
+  G.walls.push({x:0,z:850,w:680,d:26,h:300});                        // annex outer wall
   G.walls.push({x:-330,z:610,w:26,d:500,h:120}); G.walls.push({x:330,z:610,w:26,d:500,h:120});
   // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
   G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
@@ -7397,7 +7434,7 @@ function enterWaystation(){
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:0,z:330,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:200,z:322,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-150,z:650,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})}
   ];
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
@@ -7413,9 +7450,9 @@ function enterWaystation(){
     {x:0,z:330,w:62,d:24},     // The Mirror
     {x:200,z:322,w:48,d:40}    // Your Bag chest
   ];
-  for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108});
+  for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
   // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
-  for(const g of G.gates){ for(const s of [-1,1]) G.walls.push({x:g.x+s*26,z:g.z,w:14,d:22,h:112}); }
+  for(const g of G.gates){ for(const s of [-1,1]) G.walls.push({x:g.x+s*26,z:g.z,w:14,d:22,h:112,invisible:true}); }
   // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
   { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
   G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};
@@ -7700,6 +7737,9 @@ function updateInteract(){
   let it=null; const p=G.p;
   if(G.hub && G.hubNpcs){ let bd=110; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
     if(!it && dXZ(0,30,p.x,p.z)<72) it={x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone};
+    if(!it && G.gates){ let gb=96, gg=null; for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z); if(d<gb){ gb=d; gg=g; } }   // nearest portal → press E to open its entry popup (never auto-enter)
+      if(gg){ const Z=ZONES[gg.zi], nm=gg.side?(Z.side?Z.side.name:Z.name):Z.name;
+        it={x:gg.x,z:gg.z,y:96,label:(gg.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(gg)}; } }
     if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
@@ -7780,14 +7820,8 @@ function activateHubWaystone(){
   SFX.achieve(); burst(0,76,30,'#ffd24a',18); hudUpdate(); openHubMenu();
 }
 function hubInteract(p,dt){
-  for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z);
-    if(d<40){ if(g._c) continue; g._c=true;
-      if(!g.open){ toast('🔒 '+g.name+' — clear '+(ZONES[g.zi-1]?ZONES[g.zi-1].name:'the road')+' first'); SFX.hurt(); }
-      else if(g.side){ enterSide(g.zi); return; }
-      else { enterZone(g.zi); return; } }
-    else if(d>72) g._c=false; }
-  // keepers are no longer auto-opened on touch — walk up and press E / TALK (see updateInteract)
-  // The central Waystone is handled by updateInteract/doInteract, never by proximity alone.
+  // Portals no longer auto-enter on touch — you walk up and press E, which opens a confirm popup
+  // (see updateInteract → openGateEntry). Entering a level is always a deliberate choice, never an accident.
 }
 function hubNpcFacing(n,x,z){
   const hx=n.faceX==null?0:n.faceX, hz=n.faceZ==null?120:n.faceZ;
@@ -8753,6 +8787,7 @@ function drawCourse(s,t){
     bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
   if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
+    if(wl.invisible) continue;                                                               // collision-only blockers (e.g. hub fixtures) — no mesh
     if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
     else if(!noFade && !shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
     else if(!noFade && shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through

@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.292.0';
+const VERSION3D='1.293.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3140,7 +3140,7 @@ function showTutorial(cid){ mode='menu';
       <p style="color:var(--amber)"><b>Goal:</b> clear the foes here to earn your class. Then dive the Gates from the hub, clear each zone's quests, and beat its boss.</p></div>
     <button class="bigbtn" id="tutGo">Begin the trial</button>
     <button class="bigbtn ghost" id="tutSkip">Skip tutorial &amp; trial</button></div>`);
-  document.getElementById('tutGo').onclick=()=>{ resumePlay(); const T=TRIALS[cid]; if(T&&T.tips&&T.tips.length){ toast(T.tips[0]); if(G) G.tipT=4; } };
+  document.getElementById('tutGo').onclick=()=>{ resumePlay(); };   // the trial now teaches each verb just-in-time (trialTeachTick) instead of a front-loaded tip
   document.getElementById('tutSkip').onclick=()=>{ skipTrial(); };
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
@@ -3179,6 +3179,22 @@ function teachOnce(id, body, opts){
   if(meta.tutOff || meta.tutSeen[id]) return;
   meta.tutSeen[id] = true; persistGlobal();
   try{ storyToast(body, (opts&&opts.icon)||'📖'); }catch(e){ toast(body); }
+}
+// The tutorial LEVEL (first class trial) taught JUST-IN-TIME: each core verb is introduced the moment
+// it first matters, one at a time, in a safe context — instead of a wall of front-loaded text.
+function trialTeachTick(dt){ if(!G||!G.trial||mode!=='play') return; const T=TRIALS[G.trial]; if(!T||T.earned||meta.tutOff) return; const p=G.p; if(!p) return;
+  G._ttT=(G._ttT||0)+dt;
+  // 1) MOVE — the instant you gain control, before any threat
+  if(G._ttT>0.6) teachOnce('t_move','Move with the left stick or WASD. Jump with Space. Get a feel for your footing.',{icon:'🏃'});
+  const live=G.enemies.filter(e=>!e.dead&&!e.practice&&!e.dummy);
+  // 2) ATTACK — when the first foe closes in
+  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack','A foe! Tap SLASH (J) to strike — it auto-aims at whatever you face. Hold to keep swinging.',{icon:'⚔️'});
+  // 3) DODGE — the first time an enemy winds up a blow near you (the Barnacle principle: learn the danger safely)
+  if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge','It’s winding up! DODGE with K / Shift — the roll has invincibility frames, so roll THROUGH the blow, not just away.',{icon:'💨'});
+  // 4) first kill → the goal
+  if((G.trialKills||0)>=1) teachOnce('t_progress','Well struck. Clear the chamber — the way down opens once every foe has fallen.',{icon:'✨'});
+  // 5) the portal
+  if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to claim your class and make your Bladefall.',{icon:'🌀'});
 }
 function openHelp(back){
   mode='menu';
@@ -6743,6 +6759,7 @@ function update(dt){
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
   if(G.arena){ arenaHazardTick(dt); arenaPickupTick(dt); }     // Arena: lava/hazard damage -> respawn; powerup orbs
+  if(G.trial) trialTeachTick(dt);                              // tutorial level: just-in-time verb teaching
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
@@ -7371,6 +7388,8 @@ let _offerT=0;
 function offerWeapon(nw){
   if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
+  teachOnce('firstloot','Your first drop! Read the ▲/▼ arrows to compare it to what you carry, then Equip, Stash it in your bag, or Sell for gold.',{icon:'🎁'});
+  if(nw&&RARITY[nw.rarity]&&RARITY[nw.rarity].tier>=1) teachOnce('firstrare','Gear colour is its rarity: grey → green → blue → purple → gold. Stronger gear needs a higher character level to wield — a 🔒 shows the requirement.',{icon:'💎'});
   mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
   const typ=w=>weapFamily(w)+' · '+weapClassName(w);
   const row=(label,a,b,better)=>{ const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');

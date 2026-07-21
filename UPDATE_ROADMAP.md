@@ -1280,3 +1280,18 @@ generic procedural cues with per-weapon and per-mob character.
   stomp for chargers/siege/statues) at wind-up start. **Mimic reveal** = chest thunk + roar. **Gamble** = coin shuffle.
 - VERIFIED: all 18 sampled new files serve 200 at /sfx/, syntax OK, game loads 0 console errors.
 - NEXT (Oliver's ask): flesh out the tutorial level.
+
+
+## [Claude | 2026-07-21] Tutorial level fleshed out — just-in-time teaching — shipped v1.293.0
+Replaced the front-loaded tip on the first class trial (the tutorial level) with SEQUENCED, contextual
+teaching that introduces each core verb the moment it first matters (via the existing teachOnce primitive).
+- `trialTeachTick(dt)` (runs only in the first-time trial, honors the Tutorials toggle):
+  1) MOVE on gaining control, 2) ATTACK when the first foe closes in, 3) DODGE the first time an enemy
+  winds up a blow near you (learn the danger safely — the Barnacle principle), 4) progress nudge on first
+  kill, 5) PORTAL prompt when the way opens. Each fires once, non-blocking.
+- Removed the redundant front-loaded tips[0] toast on the first-time path (JIT covers it); earned/replay
+  trials keep their tip line.
+- First real level: added first-loot and first-rarity teachOnce triggers on the first weapon drop card
+  (compare ▲/▼ → equip/stash/sell; rarity colours + level lock).
+- VERIFIED: syntax OK, new-game→char-create path intact, 0 console errors.
+- NOTE: fires during an actual playthrough (needs char-create → class pick → trial to see live).

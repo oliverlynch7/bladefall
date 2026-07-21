@@ -1060,3 +1060,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Existing equipped weapon and all five equipment slots are protected before the trial and restored exactly on completion with the newly earned class equipped.
 - Genuine equipment found during the trial is preserved in the bag, even when the normal bag capacity has already been reached; first-ever class trials retain their normal starter-loadout behavior.
 - Muted browser QA verified a full five-slot Warrior loadout through Ranger and Mage trials, retained level/stat gains, trial-loot preservation, first-save behavior, and zero console errors.
+
+
+## [Codex | 2026-07-20] Hollow Pass area-2 opening crossing fix - shipped v1.256.0
+- Removed the solid canyon-wall collision that sealed the intended west-road exit from the Dry Wash and replaced it with a clearly readable 220-unit gateway.
+- Added three broad, level recovery shelves across the direct lava gap so one normal jump reaches a continuous safe crossing into Fossil Steps; no movement stats or global jump physics changed.
+- Muted browser QA loaded Hollow Pass area 2, verified both authored routes geometrically, and physically crossed the new shelves from z -250 to z -594 with base movement, full health, and zero console errors.

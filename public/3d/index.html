@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.255.0';
+const VERSION3D='1.256.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3837,7 +3837,13 @@ const EXPANDED_SCAPES={
       finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4490,sy:0,decoCol:SAND,decoTheme:'canyon',decoTall:390});
     } else {
       const dry=room('Dry Wash',0,0,820,620),fossils=room('Fossil Steps',-480,-760,660,620),needle=room('Needle Forest',420,-1280,720,680),shelf=room('High Bone Shelf',-300,-2080,760,620,160),arch=room('Gale Arch',480,-2700,700,620,160),shrine=room('Hollow Shrine',0,-3600,980,760,160),exit=room('Marksman Approach',0,-4380,840,620,160);
-      floorRoad(dry,fossils,160); floorRoad(fossils,needle,140); wallPair(dry,300); wallPair(fossils,410); wallPair(needle,460);
+      floorRoad(dry,fossils,160); floorRoad(fossils,needle,140);
+      // The old west wall sealed the L-shaped safe road, while the direct lava gap sat exactly at
+      // maximum jump reach. Keep the canyon silhouette, but author a broad gate plus low crossing stones.
+      canyonWall(428,0,660,-1,rnd,32,300);
+      canyonWall(-428,-220,220,+1,rnd,32,300); canyonWall(-428,220,220,+1,rnd,32,300);   // 220u west-road gateway at z=0
+      for(let k=0;k<3;k++) vplat(-280,-342-k*40,10,118,76,{safeRoute:true,recovery:true,canyonStep:true});
+      wallPair(fossils,410); wallPair(needle,460);
       // Bone-step climb, a narrow high shelf, and gust-facing pillar weave.
       climbRun(120,-1640,0,-300,-2080,160,72); vplat(-300,-2080,160,760,620,{terrace:true,checkpoint:true});
       for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }

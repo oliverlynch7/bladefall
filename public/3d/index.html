@@ -640,16 +640,19 @@
   .tutkeymsg{font-size:13px;line-height:1.4;color:#cdd3df;}.tutkeymsg b{color:var(--tut);}
   .tuthint{font-size:12px;line-height:1.45;color:#8a93a6;margin:0;}
   .skilltut .bigbtn{margin:0;}
-  .levelentry{max-width:460px;text-align:center;}
-  .levelentry .lecrest{width:120px;height:110px;margin:2px auto 8px;display:flex;align-items:center;justify-content:center;font-size:52px;}
-  .levelentry .lecrestimg{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));}
-  .levelentry .ovh{color:#fff;}
-  .levelentry .ovsub{max-width:400px;margin:6px auto 16px;line-height:1.5;}
-  .levelentry .lefoot{display:flex;gap:10px;align-items:center;justify-content:center;}
-  .levelentry .lefoot .bigbtn{margin:0;flex:1;}
+  /* Portal / level / trial ENTRY popups fill the screen — a proper "you're about to enter" splash. */
+  .levelentry{max-width:min(880px,95vw);width:100%;min-height:min(90vh,860px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .levelentry .lecrest{width:min(230px,42vw);height:min(210px,38vw);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:96px;}
+  .levelentry .lecrestimg{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6));}
+  .levelentry .ovkicker{font-size:15px;letter-spacing:.2em;}
+  .levelentry .ovh{color:#fff;font-size:clamp(34px,5vw,52px);line-height:1.05;}
+  .levelentry .ovsub{max-width:640px;margin:12px auto 30px;line-height:1.6;font-size:clamp(15px,1.7vw,19px);}
+  .levelentry .lefoot{display:flex;gap:16px;align-items:stretch;justify-content:center;width:100%;max-width:640px;margin-top:8px;}
+  .levelentry .lefoot .bigbtn{margin:0;flex:1;min-height:70px;font-size:21px;padding:20px 24px;border-radius:14px;}
   .levelentry #leGo{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 62%,#2a2016),color-mix(in srgb,var(--acc) 30%,#120d08));border-color:color-mix(in srgb,var(--acc) 60%,#4a341a);}
-  .levelentry .lebtnicon{width:22px;height:22px;object-fit:contain;vertical-align:-5px;margin-right:7px;filter:drop-shadow(0 2px 3px #000a);}
-  .levelentry .lelock{flex:1;text-align:center;font-size:12px;font-weight:800;letter-spacing:.06em;color:#c98a4a;padding:12px 0;}
+  .levelentry .lebtnicon{width:30px;height:30px;object-fit:contain;vertical-align:-7px;margin-right:9px;filter:drop-shadow(0 2px 3px #000a);}
+  .levelentry .lelock{flex:1;text-align:center;font-size:15px;font-weight:800;letter-spacing:.06em;color:#c98a4a;padding:20px 0;}
+  @media(max-width:560px){ .levelentry .lefoot{flex-direction:column-reverse;} .levelentry .lefoot .bigbtn{min-height:60px;font-size:18px;} }
   .petsection{font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#929bb2;margin:13px 2px 7px;display:flex;align-items:center;gap:10px}.petsection::after{content:'';height:1px;flex:1;background:linear-gradient(90deg,#343b50,transparent)}
   .pethero{display:grid;grid-template-columns:126px minmax(0,1fr) auto;gap:18px;align-items:center;padding:13px 18px;border:1px solid color-mix(in srgb,var(--petcol) 58%,#303648);border-radius:18px;background:radial-gradient(circle at 10% 50%,color-mix(in srgb,var(--petcol) 17%,transparent),transparent 34%),linear-gradient(145deg,rgba(35,38,49,.97),rgba(13,14,21,.99));box-shadow:0 16px 34px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.05);position:relative;overflow:hidden;}
   .pethero::before{content:'';position:absolute;left:0;top:12%;bottom:12%;width:4px;background:var(--petcol);box-shadow:0 0 18px var(--petcol)}
@@ -870,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.280.0';
+const VERSION3D='1.281.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7669,25 +7672,30 @@ function trainRoster(){ const seen={}, out=[]; const maxZ=Math.min(ZONES.length-
 function enterSparringRoom(){
   initAudio(); const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{hub:true,sparringRoom:true,zone:0,area:0,zoneTier:1}); G.stageIndex=0;
-  G.segments=[{x:0,z:0,w:940,d:760}]; G.rooms=[{x:0,z:0,w:940,d:760,monsters:[],encounter:false,cleared:true}];
-  G.walls=[{x:0,z:-380,w:960,d:28,h:150},{x:0,z:380,w:960,d:28,h:150},{x:-470,z:0,w:28,d:760,h:150},{x:470,z:0,w:28,d:760,h:150}];
+  // ===== A BIG SUNKEN BOXING RING =====
+  // The whole hall floor sits at y=0; a raised spectator BOWL of tiered platforms rings it, so the fighting
+  // floor reads as sunken beneath the surrounding ground. Everything functional (spawn, controls, exit, foes)
+  // stays on the sunken floor at y=0 — the bowl is what makes it look dug-in.
+  G.segments=[{x:0,z:0,w:1560,d:1380}]; G.rooms=[{x:0,z:0,w:1560,d:1380,monsters:[],encounter:false,cleared:true}];
+  G.walls=[{x:0,z:-690,w:1580,d:30,h:190},{x:0,z:690,w:1580,d:30,h:190},{x:-780,z:0,w:30,d:1380,h:190},{x:780,z:0,w:30,d:1380,h:190}];
   G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.portalPos=null;G.haz=null;G.gates=[];
-  // ===== THE RING: a boxing-ring arena. Practice foes stay inside the ropes and only wake once you step in. =====
-  const PIT={minX:-260,maxX:260,minZ:-260,maxZ:20}; G.pit=PIT;
-  G.deco.push({x:0,z:-120,y0:0,w:(PIT.maxX-PIT.minX)+30,h:2,d:(PIT.maxZ-PIT.minZ)+30,c:'#6c5137'});   // ring canvas
-  G.deco.push({x:0,z:-120,y0:2,w:(PIT.maxX-PIT.minX)-12,h:1,d:(PIT.maxZ-PIT.minZ)-12,c:'#8b6a46'});
-  const cor=[[PIT.minX,PIT.minZ],[PIT.maxX,PIT.minZ],[PIT.maxX,PIT.maxZ],[PIT.minX,PIT.maxZ]];
-  for(const [cx,cz] of cor){ G.deco.push({x:cx,z:cz,y0:0,w:11,h:70,d:11,c:'#2a2028'}); G.deco.push({x:cx,z:cz,y0:70,w:15,h:8,d:15,c:'#e8a33d'}); }   // corner posts + gold caps
-  for(let i=0;i<4;i++){ const a=cor[i],b=cor[(i+1)%4]; for(const ry of [26,48]){ const seg=8; for(let s=1;s<seg;s++){ const rx=a[0]+(b[0]-a[0])*s/seg, rz=a[1]+(b[1]-a[1])*s/seg; G.deco.push({x:rx,z:rz,y0:ry,w:5,h:3.4,d:5,c:'#c0392b'}); } } }   // double ropes (all collisionless deco)
-  for(const x of [-360,360]){G.obstacles.push({kind:'plat',x,z:-40,w:110,d:520,h:22});G.deco.push({x,z:-40,y0:22,w:90,h:5,d:500,c:'#3a3030'});}   // spectator ledges
-  for(const x of [-320,320])for(let k=0;k<3;k++)G.deco.push({x,z:180-k*40,y0:0,w:10,h:72,d:10,c:k%2?'#586274':'#733145'});   // weapon racks
-  for(const x of [-300,0,300])G.torches.push({x,z:-350,ph:Math.random()*6.28});
+  // THE SUNKEN BOWL — two tiers of raised bleachers frame the pit on all four sides (leaving a clear play floor
+  // roughly x:[-540,540] z:[-560,560]). Their height is what the fighting floor sits below.
+  const bowl=(x,z,w,d,h)=>{ G.obstacles.push({kind:'plat',x,z,w,d,h}); G.deco.push({x,z,y0:h-3,w:w-8,h:3,d:d-8,c:h>50?'#2c333f':'#39414f'}); G.deco.push({x,z,y0:0,w,h:Math.max(6,h-6),d,c:'#20252f'}); };
+  for(const s of [[0,-620,1520,120,34],[0,620,1520,120,34],[-620,0,120,1000,34],[620,0,120,1000,34]]) bowl(...s);   // inner rim
+  for(const s of [[0,-680,1560,70,66],[0,680,1560,70,66],[-700,0,70,1120,66],[700,0,70,1120,66]]) bowl(...s);       // outer bleacher
+  // THE RING: a proper SQUARE, ropes drawn as continuous rails around the perimeter (see drawWaystation).
+  const RH=330, RZ=-60; G.ring={cx:0,cz:RZ,hx:RH,hz:RH};
+  G.pit={minX:-RH,maxX:RH,minZ:RZ-RH,maxZ:RZ+RH};   // practice foes wake + stay inside the ropes
+  G.deco.push({x:0,z:RZ,y0:0,w:RH*2+34,h:2.5,d:RH*2+34,c:'#6c5137'});                     // ring canvas (raised mat lip)
+  G.deco.push({x:0,z:RZ,y0:2.5,w:RH*2+8,h:1,d:RH*2+8,c:'#8b6a46'});
+  for(const [tx,tz] of [[-660,-560],[660,-560],[-660,560],[660,560]]) G.torches.push({x:tx,z:tz,ph:Math.random()*6.28});   // corner braziers up on the rim
   G.hubNpcs=[
-    {id:'sparringcontrol',ic:'⚔️',name:'Sparring Controls',role:'Choose practice foes',prop:'sparring',verb:'Choose practice foes',direct:true,x:0,z:230,open:()=>openTrainingArena(wsResume)},
-    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:0,z:335,open:()=>enterWaystation()}
+    {id:'sparringcontrol',ic:'⚔️',name:'Sparring Controls',role:'Choose practice foes',prop:'sparring',verb:'Choose practice foes',direct:true,x:0,z:360,open:()=>openTrainingArena(wsResume)},
+    {id:'sparringexit',ic:'🚪',name:'Waystation',role:'Exit',prop:'sparringdoor',verb:'Return to the Waystation',direct:true,x:0,z:470,open:()=>enterWaystation()}
   ];
-  G.trainSpawn={x:0,z:-120};G.lastSafe={x:0,z:250};G.startPos={x:0,z:250};G.goalPos={x:0,z:-300};G.bounds={minX:-460,maxX:460,minZ:-370,maxZ:370};G.progressEnd=-330;
-  p.x=0;p.z=280;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
+  G.trainSpawn={x:0,z:RZ};G.lastSafe={x:0,z:280};G.startPos={x:0,z:280};G.goalPos={x:0,z:RZ};G.bounds={minX:-560,maxX:560,minZ:-560,maxZ:560};G.progressEnd=RZ;
+  p.x=0;p.z=300;p.y=0;p.vx=p.vy=p.vz=0;p.yaw=Math.PI;p.onGround=true;mode='play';showOverlay(false);showGameUI(true);musicForScene();skillbarUpdate();hudUpdate();
   document.getElementById('stagetag').textContent='SPARRING ROOM';questUpdate();toast('Sparring Room — practice foes give no XP, gold, or loot.');
 }
 const BESTIARY_INFO={
@@ -9348,14 +9356,26 @@ function drawShadeModel(t,zoneId){
 }
 function drawWaystation(t){
   if(G.sparringRoom){
-    // Enclosed training hall: rope ring, stone walls, trophy banners, control post, and exit door.
-    for(const x of [-325,325])for(const z of [-265,-90,85]){bx(x,42,z,10,84,10,'#3b3029');bx(x,70,z,18,8,18,'#9a7340');}
-    for(const z of [-265,-90,85]){bx(0,54,z,640,5,5,'#7a3a35');bx(0,40,z,640,4,4,'#caa45b');}
-    for(const x of [-210,0,210]){bx(x,105,-365,120,70,5,x===0?'#6c2438':'#343c50');bx(x,105,-359,54,28,3,'#d6aa42','#ffd47a',.35);}
-    // Spawn controls use the approved target/training icon silhouette.
-    drawShadow(0,230,18,.25);bx(0,26,230,10,52,10,'#5a4426');bx(0,58,230,42,42,6,'#caa23a','#ffd24a',.45);bx(0,58,234,18,18,5,'#e8453d','#ff7967',.65);
-    // Heavy timber return door at the south wall.
-    bx(-48,64,354,14,128,20,'#36313a');bx(48,64,354,14,128,20,'#36313a');bx(0,132,354,112,14,20,'#46414c');bx(0,62,347,82,116,10,'#56381f');bx(26,62,340,7,7,5,'#e8a33d','#ffd24a',.65);
+    // A proper SQUARE boxing ring: four corner posts joined by CONTINUOUS rope rails on every side (three
+    // stacked ropes), with a rope gap on the south edge you step through. Sits down in the sunken bowl.
+    const R=G.ring||{cx:0,cz:-60,hx:330,hz:330}, cx=R.cx, cz=R.cz, hx=R.hx, hz=R.hz;
+    const corners=[[cx-hx,cz-hz],[cx+hx,cz-hz],[cx+hx,cz+hz],[cx-hx,cz+hz]];
+    for(const [px,pz] of corners){ bx(px,46,pz,15,92,15,'#241b22','#3a2c34',0.4); bx(px,95,pz,22,11,22,'#caa23a','#ffd24a',.5); }   // corner posts + gold caps
+    const ropeCol=['#c0392b','#d94b3a','#c0392b'], ropeY=[34,58,82];
+    for(let e=0;e<4;e++){ const a=corners[e], b=corners[(e+1)%4], mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2;
+      const horiz=Math.abs(b[0]-a[0])>Math.abs(b[1]-a[1]), len=Math.hypot(b[0]-a[0],b[1]-a[1]);
+      const south=mz>cz+hz-2;                                                              // south edge = the entrance; leave a gap in the middle
+      for(let ri=0;ri<3;ri++){
+        if(south){ for(const sgn of [-1,1]){ const seg=hx*0.9, sc=cx+sgn*(hx*0.53);
+          bx(sc,ropeY[ri],mz, seg,5,6, ropeCol[ri],ropeCol[ri],0); } }
+        else bx(mx,ropeY[ri],mz, horiz?len:6, 5, horiz?6:len, ropeCol[ri],ropeCol[ri],0);
+      }
+    }
+    // banners high on the north wall
+    for(const x of [-260,0,260]){bx(x,150,-672,130,80,6,x===0?'#6c2438':'#343c50');bx(x,150,-665,60,32,3,'#d6aa42','#ffd47a',.35);}
+    // control post (target dummy silhouette) + heavy return door, both on the sunken floor
+    drawShadow(0,360,18,.25);bx(0,26,360,10,52,10,'#5a4426');bx(0,58,360,42,42,6,'#caa23a','#ffd24a',.45);bx(0,58,364,18,18,5,'#e8453d','#ff7967',.65);
+    bx(-48,64,470,14,128,20,'#36313a');bx(48,64,470,14,128,20,'#36313a');bx(0,132,470,112,14,20,'#46414c');bx(0,62,463,82,116,10,'#56381f');bx(26,62,456,7,7,5,'#e8a33d','#ffd24a',.65);
     return;
   }
   const pu=0.72+0.28*Math.sin(t*2.2);

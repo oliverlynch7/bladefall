@@ -869,7 +869,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.277.0';
+const VERSION3D='1.278.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4936,6 +4936,7 @@ function resolveObstacles(ent,r,yRef,climbMax){
   for(const ob of G.obstacles){ if(climbMax && ob.h<=climbMax) continue; push(ob); }
   if(G.walls) for(const wl of G.walls) push(wl);
   if(G.doors) for(const dr of G.doors){ if(!dr.open) push(dr); }
+  if(G.torches) for(const tc of G.torches) push({x:tc.x,z:tc.z,w:16,d:16,h:60});   // torches are solid: a skinny invisible post so you bump the sconce instead of walking through it
 }
 /* course floors: ground segments + moving platforms + obstacle tops. -Infinity = over the hazard. */
 function onSegment(x,z,r){
@@ -7430,10 +7431,7 @@ function enterWaystation(){
   G.deco.push({x:150,z:650,y0:0,w:210,h:1.4,d:190,c:'#302911'});
   for(const x of [-150,150])for(const s of [-1,1]){vcol(x+s*84,650,18,18,132);G.deco.push({x:x+s*84,z:650,y0:132,w:24,h:10,d:24,c:x<0?'#2a1840':'#6a531c'});}
   for(let k=0;k<5;k++)G.deco.push({x:-150+(Math.random()*2-1)*76,z:650+(Math.random()*2-1)*62,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
-  // WEST BAY — THE EXCHANGE (gear & gold): signpost banner only, NO floor carpet
-  G.deco.push({x:-548,z:70,y0:88,w:230,h:24,d:6,c:'#3a2a55'});
-  // EAST BAY — THE WAR YARD (combat prep): signpost banner only, NO floor carpet
-  G.deco.push({x:548,z:70,y0:88,w:230,h:24,d:6,c:'#5e2a24'});
+  // (removed the two floating signpost banners that hung between the NPCs — the NPC name tags already label each bay)
   // ---- the posts: everyone gets a home that fits them ----
   // grouped by purpose: WEST BAY = Exchange, EAST BAY = War Yard, centre = quests/mirror,
   // and the new SOUTH ANNEX = the Abyss plus the repeatable parkour trial.
@@ -7535,8 +7533,8 @@ function openMirror(back){
   mode='mirror'; showOverlay(false); showGameUI(false);
   hpBars=[]; statPips=[]; drawHpBars(); updatePetLabel();
   document.getElementById('questbox').classList.add('hide');
-  { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract');   // Phase 19: the 'Talk to the Mirror' prompt must not linger inside the mirror
-    if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); }
+  { const pr=document.getElementById('interactprompt'), bi=document.getElementById('bInteract'), ht=document.getElementById('hubtags');   // Phase 19: no prompt/tag may linger inside the mirror
+    if(pr) pr.classList.add('hide'); if(bi) bi.classList.add('hide'); if(ht){ ht.classList.add('hide'); ht.innerHTML=''; } }
   buildMirrorPanel(); buildMirrorInfo();
 }
 /* Always-on top-right character card in the Mirror: name, level, class, class rank, and equipped gear. */
@@ -9421,14 +9419,18 @@ function drawWaystation(t){
       for(const sx2 of [-1,1]) bx(n.x+sx2*(fw*0.5+7),fh/2,n.z-6, 5,fh,7,'#7a5f28','#c9a24a',0.8);   // gilded side pillars flanking the glass
       bx(n.x,5,n.z, fw+24,12,24, '#3a2f26','#5a4a2e',0.4);                                         // base foot
       bx(n.x,fh/2,n.z-6, fw+7,fh+4,2, '#8a6f34','#e6c25a',0.95);                                    // gilded inner trim framing the glass
-      // the SILVERED GLASS — bright, near-opaque, cool vertical gradient (frontmost so it always reads as a mirror)
-      bx(n.x,fh*0.74,gf, fw,fh*0.34,2, '#eef5ff','#ffffff',0.98);                                  // top band (brightest)
-      bx(n.x,fh*0.46,gf, fw,fh*0.30,2, '#c4d8ee','#e6f1ff',0.98);                                  // mid band
-      bx(n.x,fh*0.20,gf, fw,fh*0.30,2, '#9fbad8','#c6ddf3',0.98);                                  // lower band (deeper toward the floor)
-      bx(n.x-fw*0.22,fh*0.5,gf+0.5, fw*0.34,fh*0.7,1, '#fff8e6','#fff',0.14);                       // warm reflected torch-glow, for depth
-      { const sh=Math.sin(t*0.55)*0.5+0.5, ssx=n.x-fw*0.5+fw*sh;                                   // a sweeping diagonal specular streak
-        pushM(); mv(ssx,fh*0.5+(sh-0.5)*22,gf+1); rotZ(0.5); bx(0,0,0, 8,fh*0.82,1, '#ffffff','#ffffff',0.32); popM(); }
-      bx(n.x,fh*0.5,gf+1.4, fw+2,fh,0.5, '#dff0ff','#ffffff',0.07);                                // faint overall glass sheen
+      // LIVE REFLECTION: your character stands inside the glass (drawn just behind it), shown through a translucent pane
+      if(G&&G.p){ const src=G.p, mh=(drawWaystation._mirrorHero||(drawWaystation._mirrorHero=freshPlayer()));
+        mh.skin=src.skin; mh.weapon=src.weapon; mh.gear=src.gear; mh.level=src.level||1;
+        mh.eyeColor=src.eyeColor; mh.hairStyle=src.hairStyle; mh.hairColor=src.hairColor;
+        mh.x=n.x+Math.max(-13,Math.min(13,(src.x-n.x)*0.16)); mh.z=gf+7; mh.y=18; mh.yaw=Math.PI;   // faces the viewer; drifts slightly with your position for a mirror feel
+        mh.runAnim=0; mh.vx=0; mh.vz=0; mh.atkTimer=0; mh.dodgeTimer=0; mh.invuln=0; mh.hurtFlash=0; mh.onGround=true;
+        drawHero3(mh,t,true); }
+      // the glass — a cool TRANSLUCENT pane so the reflection reads through it (no more sweeping light bar)
+      bx(n.x,fh*0.74,gf, fw,fh*0.34,2, '#cfe2f7','#eaf3ff',0.34);                                  // top band
+      bx(n.x,fh*0.46,gf, fw,fh*0.30,2, '#b4cdea','#d8e8fb',0.30);                                  // mid band
+      bx(n.x,fh*0.20,gf, fw,fh*0.30,2, '#9fbad8','#c6ddf3',0.34);                                  // lower band
+      bx(n.x,fh*0.5,gf+1.4, fw+2,fh,0.5, '#dff0ff','#ffffff',0.05);                                // faint glass sheen
       continue; }
     if(n.prop==='beast'){ drawShadow(n.x,n.z,26,0.26);
       // THREE cages of different sizes, each with a little resident critter behind the bars

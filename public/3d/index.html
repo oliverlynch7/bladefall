@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.312.0';
+const VERSION3D='1.313.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3415,6 +3415,7 @@ function finishScape(ctx,o){
   G.bounds={minX:mnX-90,maxX:mxX+90,minZ:mnZ-90,maxZ:mxZ+90}; G.progressEnd=mnZ;
   G.startPos={x:o.sx,z:o.sz}; G.goalPos={x:o.gx,z:o.gz}; G.lastSafe={x:o.sx,z:o.sz,y:o.sy||0};
   G.portalPos={x:o.gx,z:o.gz};
+  clearPortalArea(o.gx,o.gz);   // a portal must never hide INSIDE a prop — strip big props/trunks crowding it
   if(!areaQuests().length && !G.trial) G.portal={x:o.gx,z:o.gz,t:0};
   placeShade(o.sx-70,o.sz+50);
   const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt=o.decoTall||200;
@@ -5178,6 +5179,11 @@ function propGroundAt(x,z,r=8){ if(!G) return 0; let f=0; const m=r*0.4;
   for(const sg of (G.segments||[])) if(Math.abs(x-sg.x)<sg.w/2+m && Math.abs(z-sg.z)<sg.d/2+m) f=Math.max(f,0);
   for(const ob of (G.obstacles||[])) if(ob.kind==='plat' && Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0);
   return f; }
+// Keep an exit/portal visible: strip big props (tree canopies, boulders) and prop TRUNKS crowding it, so a portal
+// can never hide INSIDE a collisionless asset. Small frame/rim decos (h<40) and the landing plat are preserved.
+function clearPortalArea(x,z,r){ r=r||96;
+  G.deco=(G.deco||[]).filter(d=> d.keepDeco || (d.h||0)<40 || dXZ(d.x,d.z,x,z)>r);
+  G.obstacles=(G.obstacles||[]).filter(o=> o.kind!=='col' || dXZ(o.x,o.z,x,z)>r*0.7); }
 function nearestSurfacePoint(x,z,r=14){
   if(!G) return null; let best=null,bd=Infinity;
   const consider=(o,y)=>{ const hw=Math.max(1,o.w/2-r),hd=Math.max(1,o.d/2-r),px=Math.max(o.x-hw,Math.min(o.x+hw,x)),pz=Math.max(o.z-hd,Math.min(o.z+hd,z)),d=Math.hypot(px-x,pz-z);

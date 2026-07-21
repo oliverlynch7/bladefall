@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.303.0';
+const VERSION3D='1.304.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3955,6 +3955,12 @@ const EXPANDED_SCAPES={
         for(const zz of [hEdge-4, landZ+90+4]) G.deco.push({x:landX,z:zz,y0:0,w:388,h:8,d:14,c:'#5a4a30'});   // broken cliff lips reading the chasm
         for(const sx2 of [-1,1]) vtorch(landX+sx2*140, landZ, rnd);
         G.dashTut={x:0, z:hEdge+100, r:180};
+        // an interactable SIGNPOST at the launch edge — press E anytime to RE-READ how to cross (jump then mid-air dash)
+        const signX=-150, signZ=hEdge+70; G.dashSign={x:signX, z:signZ};
+        G.deco.push({x:signX,z:signZ,y0:0,w:8,h:66,d:8,c:'#5a4426'});         // post
+        G.deco.push({x:signX,z:signZ,y0:54,w:72,h:40,d:6,c:'#7a5a30'});       // board frame
+        G.deco.push({x:signX,z:signZ-4,y0:54,w:62,h:32,d:2,c:'#d8c48a'});     // board face
+        G.deco.push({x:signX,z:signZ-6,y0:60,w:46,h:6,d:2,c:'#3a9dd0'});      // a painted dash-arrow hint
         finishScape(ctx,{sx:0,sz:470,sy:0,gx:landX,gz:landZ,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240}); }
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
@@ -8505,6 +8511,7 @@ function updateInteract(){
     consider(250,210,46,()=>({x:250,z:210,y:20,label:'???',act:()=>openCheatMenu(wsResume)}));   // something glints in the SE flowerbed — the Tinkerer buried his test bench in the petunias
   }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
+  if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }

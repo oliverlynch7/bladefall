@@ -1420,3 +1420,18 @@ so they washed out and blended into the warm floor. Restored them to BOLD SOLID 
   any spot for visual verification. Mirrors how Codex's Playwright harness drives the game via __BF3.
   Used it to confirm the bag sits on the west wall between shop & smith, banners hang behind them, and the
   floor is clean.
+
+
+## [Claude | 2026-07-21] Required jump+dash chasm + mid-air-dash tutorial in the Outskirts — shipped v1.303.0
+Taught the mid-air dash as a REQUIRED traversal in the first level, before the secret-hiding pass.
+- Measured the real reach via the sim harness: **single jump ~164u, jump + mid-air dash ~235u**.
+- Placed a **required ~195u dash chasm** on the Outskirts golden path — the exit portal now sits on a
+  landing island across the ravine, just past the Old Waystone Crown (edited the LIVE EXPANDED_SCAPES.outskirts,
+  not the dead legacy SCAPES one). A single jump falls ~31u short (impassible alone); a jump+dash clears it
+  with ~40u margin (easily done, not tight). Missing just drops you back to safe ground.
+- New **`openDashTutorial()`** popup fires once as you approach the edge — cleanly explains: run + JUMP, then
+  at the top DASH (K / Shift / right-click) in your movement direction to fly across. Honors the tutorial toggle.
+- VERIFIED in-harness: exit on the landing (solid), the gap is void, launch edge solid, single-jump<gap<dash,
+  tutorial fires with heading "The Mid-Air Dash", 0 console errors.
+- NEXT (deferred per Oliver): the creative secret-hiding pass (place trial-chamber secrets in hidden/hard,
+  single-jump-reachable spots), starting with the too-open Outskirts & Ruined Keep.

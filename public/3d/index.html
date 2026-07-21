@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.302.0';
+const VERSION3D='1.303.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3219,6 +3219,19 @@ function trialTeachTick(dt){ if(!G||!G.trial||mode!=='play') return; const T=TRI
   // 5) the portal
   if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to claim your class and make your Bladefall.',{icon:'🌀'});
 }
+// The mid-air DASH lesson — fires once when you approach the Outskirts' required dash chasm.
+function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash=1; persistGlobal();
+  mode='upgrade'; showGameUI(false); _offerT=Date.now();
+  showOverlayHTML(`<div class="card skilltut" style="--tut:#3a9dd0">
+    <p class="ovkicker">Traversal</p><h2 class="ovh">The Mid-Air Dash</h2>
+    <div class="tutbody"><div class="tuticon">💨</div>
+      <div class="tutcopy"><p class="tutdesc">That ravine is too wide to clear with a jump alone — but your <b>dodge is also a dash</b>, and it works in the air.</p>
+        <div class="tutkeyrow"><span class="tutkey">⎵</span><span class="tutkeymsg">Run at the gap and <b>JUMP</b> (Space).</span></div>
+        <div class="tutkeyrow"><span class="tutkey">K</span><span class="tutkeymsg">At the top of the jump, <b>DASH</b> (K / Shift / right-click) in the way you're moving — you'll fly across.</span></div>
+        <p class="tuthint">A jump + mid-air dash covers far more ground than a jump alone. You'll use it to clear wide gaps and reach hidden places all the way down.</p></div></div>
+    <button class="bigbtn" id="tutGo">Got it — I'll try it</button></div>`);
+  const b=document.getElementById('tutGo'); if(b) b.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); resumePlay(); };
+}
 function openHelp(back){
   mode='menu';
   const cats=[...new Set(HELP_ENTRIES.map(e=>e.cat))];
@@ -3933,7 +3946,16 @@ const EXPANDED_SCAPES={
       // Forest walls frame the valley's outside perimeter while leaving the immense central sightlines open.
       for(let k=0;k<70;k++){const R=[gate,prairie,acres,orchard,crossing,bank,hamlet,ridge,dream,henge][Math.floor(rnd()*10)],side=rnd()<.5?-1:1;tree(R.x+side*(R.w/2-18),R.z+(rnd()*2-1)*(R.d/2-25),76+rnd()*78);}
       mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:-720,z:-1800,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
-      scapeFind(ctx,top.x,top.z,165);finishScape(ctx,{sx:0,sz:470,sy:0,gx:0,gz:-5710,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240});
+      scapeFind(ctx,top.x,top.z,165);
+      // ── REQUIRED DASH CHASM before the exit — teaches the mid-air dash. The exit sits across a ~195u
+      //    ravine: a single jump reaches ~164 (falls short), a jump + mid-air DASH reaches ~235 (clears it). ──
+      { const hEdge=henge.z-henge.d/2, GAP=195, landZ=hEdge-GAP-90, landX=0;
+        vseg(landX,landZ,340,180); G.rooms.push({x:landX,z:landZ,w:340,d:180,monsters:[],encounter:false,cleared:true});
+        G.deco.push({x:landX,z:landZ,y0:.2,w:352,h:1,d:196,c:'#7a6a3e'});
+        for(const zz of [hEdge-4, landZ+90+4]) G.deco.push({x:landX,z:zz,y0:0,w:388,h:8,d:14,c:'#5a4a30'});   // broken cliff lips reading the chasm
+        for(const sx2 of [-1,1]) vtorch(landX+sx2*140, landZ, rnd);
+        G.dashTut={x:0, z:hEdge+100, r:180};
+        finishScape(ctx,{sx:0,sz:470,sy:0,gx:landX,gz:landZ,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240}); }
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
       road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);
@@ -6830,6 +6852,7 @@ function update(dt){
   if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
   if(G.arena){ arenaHazardTick(dt); arenaPickupTick(dt); }     // Arena: lava/hazard damage -> respawn; powerup orbs
   if(G.trial) trialTeachTick(dt);                              // tutorial level: just-in-time verb teaching
+  if(G.dashTut && !meta.tutOff && !(meta.tut&&meta.tut.dash) && mode==='play' && dXZ(G.p.x,G.p.z,G.dashTut.x,G.dashTut.z)<G.dashTut.r){ openDashTutorial(); }   // mid-air dash lesson at the required chasm
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal

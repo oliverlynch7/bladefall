@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.244.0';
+const VERSION3D='1.245.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -873,7 +873,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -888,7 +888,7 @@ const meta=Object.assign({
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
-  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c'
+  petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.achievements) meta.achievements={};
@@ -926,6 +926,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.petLabel=mv.petLabel!==false;
   meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,20):'';
   meta.eyeColor=mv.eyeColor||'#8fd0ff'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
+  meta.optionalDone=mv.optionalDone&&typeof mv.optionalDone==='object'?mv.optionalDone:{}; meta.optionalProgress=mv.optionalProgress&&typeof mv.optionalProgress==='object'?mv.optionalProgress:{};
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
@@ -2042,6 +2043,28 @@ function localBump(id,by){ const m=G.localMission; if(!m||m.id!==id||m.done) ret
   m.progress=Math.min(m.total,m.progress+(by||1)); SFX.pickup();
   if(m.progress>=m.total){ m.done=true; const gold=awardGold(m.reward||40+zoneTier()*15); SFX.achieve(); toast('Local mission complete: '+m.name+(gold?' · +'+gold+'g':''),null,'event-quest-marker'); openWay(); }
   questUpdate(); }
+/* Optional Main-Level quests are additive: they never gate the golden path. Progress and
+   one-time rewards persist per character mode, while active presentation lives on G. */
+function optionalReward(key){
+  let it=null;
+  if(key==='caravanCompass'){ const o=makeTrinket('rare','amulet','swift'); o.name="Caravaner's Compass"; o.questUnique=true; it={trinket:o}; }
+  else if(key==='millwrightSignet'){ const o=makeTrinket('uncommon','ring','haste'); o.name="Millwright's Signet"; o.questUnique=true; it={trinket:o}; }
+  if(!it) return;
+  const o=it.weapon||it.armor||it.trinket;
+  if(!stashItem(it)){ meta.stash.push(it); persist(); toast('Unique reward stored beyond bag capacity: '+o.name,RARITY[o.rarity].color); }
+  else toast('Unique reward: '+o.name,RARITY[o.rarity].color,'event-achievement');
+}
+function optionalMission(id,name,type,total,rewardKey,opts){
+  meta.optionalDone=meta.optionalDone||{}; meta.optionalProgress=meta.optionalProgress||{};
+  if(meta.optionalDone[id]) return null; opts=opts||{};
+  const progress=Math.min(total,meta.optionalProgress[id]||0),m={id,name,type,total,progress,done:false,rewardKey,discovered:progress>0||!!opts.discovered,zone:(G&&curZone().id)||'',hint:opts.hint||''};
+  (G.optionalMissions=G.optionalMissions||[]).push(m); return m;
+}
+function optionalBump(id,by){ const m=(G.optionalMissions||[]).find(x=>x.id===id); if(!m||m.done) return;
+  m.discovered=true; m.progress=Math.min(m.total,m.progress+(by||1)); meta.optionalProgress[id]=m.progress; SFX.pickup();
+  if(m.progress>=m.total){ m.done=true; meta.optionalDone[id]=1; delete meta.optionalProgress[id]; for(const pk of G.pickups||[]) if(pk.localItem&&pk.localItem.id===id) pk.taken=true; optionalReward(m.rewardKey); SFX.achieve(); toast('Optional quest complete: '+m.name,null,'event-quest-marker'); }
+  persist(); questUpdate();
+}
 function questKill(type){
   if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++;        // trials count every kill, whatever it was
     if(G.trialKills>=T.kills && !G.portal) openWay();
@@ -2087,6 +2110,8 @@ function questUpdate(){
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
     if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
     sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed'); }
+  const oq=(G.optionalMissions||[]).filter(m=>m.discovered);
+  if(oq.length){ rows+=oq.map(m=>qrow(m.done,m.done?'☑':'◇','<b>Optional</b> · '+m.name,`${m.progress}/${m.total}`)).join(''); sig+='|optional:'+oq.map(m=>m.id+':'+m.progress+'/'+m.total).join(','); }
   applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
 }
 
@@ -3673,6 +3698,18 @@ const EXPANDED_SCAPES={
       const gate=room('Old South Road',0,260,720,520),prairie=room('Sunward Prairie',0,-520,1280,900),acres=room('West Cornlands',-1120,-1450,1040,860),orchard=room('Eastwood Orchard',1120,-1500,980,880),crossing=room('Miller River Crossing',0,-2320,1120,760),bank=room('North Bank Commons',0,-2820,920,500),hamlet=room('Riverside Hamlet',-980,-3350,1040,820),ridge=room('Windmill Rise',980,-3420,980,820),dream=room('Dreaming Expanse',0,-4340,1380,920),henge=room('Old Waystone Crown',0,-5520,1120,900);
       const trail=(a,b,w=132)=>{const n=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)/120);for(let k=1;k<n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;vseg(x,z,w,w,{path:true});G.deco.push({x,z,y0:.2,w:52,h:.8,d:52,c:'#c9a85b'});if(k%4===0){G.deco.push({x:x-38,z,y0:0,w:7,h:38,d:7,c:WOOD});G.deco.push({x:x-38,z,y0:38,w:12,h:9,d:12,c:'#ffd36a'});}}};
       trail(gate,prairie,170);trail(prairie,acres,150);trail(prairie,orchard,150);trail(acres,crossing,145);trail(orchard,crossing,145);trail(crossing,bank,170);trail(bank,hamlet,145);trail(bank,ridge,145);trail(hamlet,dream,150);trail(ridge,dream,150);trail(dream,henge,180);
+      // Optional quests live off the golden path and reward deliberate exploration, never required walking.
+      const caravanQuest=optionalMission('outCaravan','Answer the scattered caravan signals','rescue',3,'caravanCompass',{hint:'Follow the blue signal lanterns beyond the road.'});
+      if(caravanQuest){ const signals=[{x:-360,z:-410,y:46},{x:1360,z:-1880,y:120},{x:-1260,z:-3290,y:112}];
+        for(const p of signals){ G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'outCaravan',name:"Survivor's Signal"},bob:rnd()*3,placed:true}); G.deco.push({x:p.x,z:p.z,y0:p.y,w:10,h:52,d:10,c:'#4d6f8f'}); G.deco.push({x:p.x,z:p.z,y0:p.y+48,w:22,h:15,d:22,c:'#8fdcff'}); }
+        mkMonster('sporeback',1300,-1840,orchard); mkMonster('thornboar',-1320,-3230,hamlet);
+      }
+      const millQuest=optionalMission('outMill','Recover the watermill gearworks','collect',3,'millwrightSignet',{hint:'Search the river machinery and Windmill Rise.'});
+      if(millQuest){ const gears=[{x:-390,z:-2245,y:18},{x:760,z:-3200,y:74},{x:980,z:-3470,y:230}];
+        for(const p of gears) G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'outMill',name:'Mill Gear'},bob:rnd()*3,placed:true});
+        G.deco.push({x:-390,z:-2245,y0:8,w:76,h:14,d:22,c:'#654629'}); G.deco.push({x:-390,z:-2245,y0:20,w:18,h:62,d:18,c:'#8a6f34'});
+        mkMonster('thornboar',-300,-2180,crossing); mkMonster('sporeback',820,-3240,ridge);
+      }
       // The opening view is a genuine prairie: pond and caravan near the road, distant cornland and windmill silhouettes framing the choice ahead.
       G.deco.push({x:330,z:-260,y0:0,w:330,h:2,d:210,c:'#3d708d'});for(let k=0;k<16;k++)G.deco.push({x:170+k*22,z:-150+(k%2)*26,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
       G.deco.push({x:-360,z:-400,y0:12,w:170,h:34,d:82,c:'#6b4827'});for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
@@ -4182,7 +4219,7 @@ function loadStage(i){
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
-  G.fx=[]; G.slowmo=0; G.interact=null;
+  G.fx=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -6262,7 +6299,7 @@ function update(dt){
   for(const pk of G.pickups){ pk.bob=(pk.bob||0)+dt*4;
     if(dXZ(pk.x,pk.z,p.x,p.z)<40 && Math.abs(p.y-(pk.y0||0))<50){
       if(pk.questItem){ SFX.pickup(); addText(pk.x,26,pk.z,'+ '+pk.questItem.name,'var(--amber)'); questBump(pk.questItem.id,1); }
-      else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); localBump(pk.localItem.id,1); }
+      else if(pk.localItem){ addText(pk.x,26,pk.z,'+ '+pk.localItem.name,'var(--amber)'); if((G.optionalMissions||[]).some(m=>m.id===pk.localItem.id)) optionalBump(pk.localItem.id,1); else localBump(pk.localItem.id,1); }
       else { playFx('lootpickup'); if(pk.weapon) offerWeapon(pk.weapon); else if(pk.armor) offerArmor(pk.armor); else if(pk.trinket) offerTrinket(pk.trinket); }
       pk.taken=true; } }
   G.pickups=G.pickups.filter(pk=>!pk.taken);

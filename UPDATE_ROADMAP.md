@@ -1002,3 +1002,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Standardized all eight pause-card artwork boxes to 88x88 desktop and 68x68 narrow-screen.
 - Preserved the menu structure, cards, labels, spacing, and duplicate-icon cleanup.
 - Muted browser QA confirmed all eight computed sizes and zero console errors.
+
+## [Codex | 2026-07-20] World rebuild Phase 1: optional quests and Outskirts slice - shipped v1.245.0
+
+- Added a save-safe multi-optional-quest foundation for Main Levels, including discovery, persistent progress, HUD tracking, one-time completion, and unique curated rewards.
+- Authored two optional Outskirts adventures across existing districts: scattered caravan signals and lost watermill gearworks, with distinct routes, guardians, vertical objectives, and no main-path gating.
+- Added the unique Caravaner's Compass (+11% move speed) and Millwright's Signet (+8% attack speed); full bags cannot silently destroy either reward.
+- Wrote `docs/WORLD_REBUILD_PROGRAM_2026-07-20.md` as the authoritative zone-pair rollout for rebuilding all eight Main Levels and seven Trial Chambers without empty traversal or copy-paste padding.
+- Muted browser QA verified discovery, HUD presentation, save persistence, completion cleanup, both rewards, all eleven named Outskirts districts, and zero console errors.

@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.309.0';
+const VERSION3D='1.310.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1581,7 +1581,7 @@ const ARCHES={
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
-  iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:38,cd:.38,kb:360,range:88,art:'sword',el:'holy',anyClass:true,ians:true}, // final capstone: fastest heavy blade, radiant execute, full power for every class
+  iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:58,cd:.32,kb:430,range:102,art:'sword',el:'holy',anyClass:true,ians:true}, // THE god-sword: highest DPS in the game, radiant execute + Soulfire splash + wielder grace (lifesteal/CDR/speed), full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
@@ -2715,15 +2715,16 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
+  if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
-function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} return Math.min(0.5,v); }
+function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} return Math.min(0.5,v); }
 function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -5999,12 +6000,17 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
   G.combo=(G.combo||0)+1; G.comboT=2.0;
   dmg=Math.round(dmg*mod*(1+Math.min(0.2,G.combo*0.004)));
-  const iansHit=src===G.p&&G.p.weapon&&G.p.weapon.ians;
+  // ── IAN'S BLADE — the last Bladeborn's relic. Radiant Execution, a bonus against the mighty, and a Soulfire
+  //    shockwave that splashes holy to everything near the strike. Its power is the sword's, so every class wields it whole.
+  const iansHit=src===G.p&&G.p.weapon&&G.p.weapon.ians&&!e._iansSplash;
   if(iansHit){
-    const execute=!e.boss&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.15;
-    if(execute){ dmg=Math.max(dmg,e.hp); addText(e.x,e.y+e.h+24,e.z,'IAN\'S JUDGMENT','#fff4ae',true); skillRing(e.x,e.z,'#fff4ae','#ffd24a',105); }
-    burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?18:8);
-    for(let i=0;i<(execute?10:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
+    const execute=!e.boss&&!e.dummy&&!e.practice&&(e.hp-dmg)<=e.maxHp*0.25;   // Radiant Execution: reap the wounded
+    if(execute){ dmg=Math.max(dmg,e.hp); addText(e.x,e.y+e.h+24,e.z,'IAN\'S JUDGMENT','#fff4ae',true); skillRing(e.x,e.z,'#fff4ae','#ffd24a',118); }
+    else if(e.boss||e.elite) dmg=Math.round(dmg*1.3);                          // no reaping the mighty — raw radiant bonus instead
+    burst(e.x,e.y+e.h*0.58,e.z,'#fff4ae',execute?20:9);
+    for(let i=0;i<(execute?12:4);i++) G.particles.push({x:e.x,y:e.y+e.h*(0.25+Math.random()*0.65),z:e.z,vx:(Math.random()-.5)*90,vy:90+Math.random()*110,vz:(Math.random()-.5)*90,life:.38,color:i%2?'#fff4ae':'#ffd24a',sz:2.4});
+    const splash=Math.round(dmg*0.35);                                          // Soulfire: a holy burst washes over nearby foes
+    if(splash>0){ skillRing(e.x,e.z,'#ffe9a8','#ffd24a',150); for(const e2 of G.enemies){ if(e2===e||e2.dead||e2.dummy) continue; if(dXZ(e2.x,e2.z,e.x,e.z)<150){ e2._iansSplash=1; hitEnemy(e2,splash,src,120,0,'holy'); e2._iansSplash=0; } } }
   }
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   e.hp-=dmg; e.hitFlash=0.12;
@@ -8199,7 +8205,7 @@ function enterWaystation(){
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-495,z:342,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
-    {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-548,z:45,open:()=>openBag(wsResume)},
+    {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:300,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
     {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()}
@@ -8216,7 +8222,7 @@ function enterWaystation(){
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
     {x:-495,z:342,w:66,d:24},  // Postings board — centred on the SW wall, sitting slightly off it
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
-    {x:-548,z:45,w:48,d:40},   // Your Bag chest — moved to the west wall, between the Quartermaster & the Smith
+    {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30}      // The Arena gate (deep-centre annex plaza)
   ];
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
@@ -9825,12 +9831,13 @@ function drawHero3(p,t,preview){
   let _armPitch=0;
   if(w.cls==='melee'){ const M=MELEE[w.art]||MELEE.sword, prog=p.atkTimer>0?(1-(p.atkTimer/0.26)):-1;
     if(prog<0){ if(w.art==='scythe') rotX(-0.05+Math.sin(t*2)*0.04);   // idle: the scythe rests UPRIGHT (points up)...
+      else if(w.art==='axe'){ rotX(-0.92+Math.sin(t*2)*0.05); rotZ(0.22); }   // axe rests HELD HIGH (~45° up), head up + edge canted down, ready to chop
       else rotX(-0.16+Math.sin(t*2)*0.05); }                            // ...physical blades rest arm-forward so the blade points AHEAD, never into the ground
     // SWING poses — each traces the SHAPE of its actual hitbox so the motion reads true
     else if(M.shape==='thrust'){ rotX(w.art==='javelin'?-1.6:-1.45); }                  // straight forward lunge (thrust hitbox)
     else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
     else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
-    else if(w.art==='axe'){ rotY((0.75-prog)*1.9); rotX(-0.9-prog*0.3); rotZ(0.35); }    // wide sideways hack
+    else if(w.art==='axe'){ rotX(-2.25+prog*3.0); rotZ(0.2); }                           // overhead DOWNWARD chop (like swinging a real axe), raised high then driven straight down
     else if(w.art==='scythe'){                                                            // grass-cutting reaps: two flat horizontal side-swipes, then an overhead magic chop
       if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it straight down
       else if(p.swingCombo===1){ rotX(-0.28); rotZ(-0.12); rotY(-1.95+prog*3.9); }        // 2nd: flat horizontal return sweep, LEFT → right
@@ -11141,6 +11148,12 @@ function render(t){
     VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
     if(G) G.eye={x:cx,y:296+cyy,z:cz+330};
     gl.uniform2f(U.uFogNF,460,1320);
+  }
+  if(G && G.hub){   // HUB ONLY: push the far plane + fog way out so you can see cleanly from one edge of the Waystation to the other
+    const fov = meta.camMode==='fps'?(meta.fpsFov||92):meta.camMode==='shoulder'?62:50;
+    const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?6:10;
+    PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 7000);
+    gl.uniform2f(U.uFogNF, 3000, 6500);
   }
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the
   // smoothed follow-point AT the player — so the camera->hero test was near-zero-length and

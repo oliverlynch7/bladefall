@@ -414,6 +414,7 @@
   #xplabel .ico-event,#clslabel .ico-event{width:16px;height:16px;margin-right:1px;vertical-align:-5px;}
   .gearrow .gi.slotgi{width:68px;text-align:center;}
   .gearrow .gi .ico-slot{display:block;width:34px;height:34px;margin:0 auto 3px;vertical-align:middle;}
+  .gearrow .gi .gearav{display:block;width:38px;height:38px;margin:0 auto 3px;object-fit:contain;border-radius:8px;border:1px solid #2b3040;background:#0d0e14;}
   .gearrow .gi.eventgi{width:58px;text-align:center;}
   .gearrow .gi .ico-event{display:block;width:38px;height:38px;margin:0 auto;vertical-align:middle;}
   .ico-menu{width:1.65em;height:1.65em;margin-right:.3em;vertical-align:-.48em;}
@@ -869,7 +870,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.279.0';
+const VERSION3D='1.280.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5680,7 +5681,7 @@ function spendSkillMana(p,i,s){
 SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160*ca;
   const tx=p.x+Math.sin(p.yaw)*120, tz=p.z+Math.cos(p.yaw)*120;   // a spike field ahead of you (slow + element on entry)
   let sy=highestSurfaceAt(tx,tz,20); if(sy<=0||Math.abs(sy-p.y)>140) sy=p.y||0;   // land it on the surface under the target (plateau/ledge), falling back to your own height
-  (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,y:sy,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(3,(w?w.dmg:10)*effPower(p)*0.25*am),hitSet:[]});
+  (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,y:sy,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(6,(w?w.dmg:10)*effPower(p)*0.5*am),hitSet:[]});
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
 function useSkill(i){
@@ -5848,7 +5849,9 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
     else if((e.boss||e.elite) && Math.random()<0.4) playFx('heavyhit',0.85); } // meaty connect on the big foes
   if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
-  if(lifesteal>0){ const heal=Math.max(1,Math.round(dmg*lifesteal)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+  if(lifesteal>0 && src===G.p){                                    // lifesteal heavily nerfed globally; the Reaper keeps a clear edge but is no longer a free full-heal
+    const lsMul = meta.classId==='reaper'?0.5:0.3;
+    const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
   if(weaponManaHit) gainMana(G.p,4,false);
   if(e.hp<=0) killEnemy(e,weaponManaHit);
@@ -5981,14 +5984,19 @@ function rollDrop(e){
   if(!e.boss){ const cap=Math.min(3,rarityCap(e.elite?1:0)); while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; } // organic mob kills cap at Epic
   if(e.boss){ const min=Math.min(rarityCap(1),(e.type==='colossus')?3:2); while(RARITY[rid].tier<min) rid=RORDER[Math.min(4,RARITY[rid].tier+1)]; }
   if(rid==='legendary') meta.legendaryFound=(meta.legendaryFound||0)+1;
-  if(!e.boss && Math.random()<0.45){ pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
+  if(!e.boss && Math.random()<0.45){
+    // within a gear drop, ~24% is a trinket (ring/amulet) — rarer than armor, but reliably findable now (was quest-only before)
+    if(Math.random()<0.24) pushLoot(e.x,e.z,0,{trinket:makeTrinket(rid,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])});
+    else pushLoot(e.x,e.z,0,{armor:makeArmor(rid,SLOTIDS[Math.floor(Math.random()*3)])}); }
   else { const aid=DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)];
     pushLoot(e.x,e.z,0,{weapon:makeWeapon(aid,rid)});
-    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)]; pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
+    if(e.boss && Math.random()<0.7){ const lr=RORDER[Math.max(0,RARITY[rid].tier-1)];
+      if(Math.random()<0.28) pushLoot(e.x-40,e.z+20,0,{trinket:makeTrinket(lr,TRINKETIDS[Math.floor(Math.random()*TRINKETIDS.length)])});
+      else pushLoot(e.x-40,e.z+20,0,{armor:makeArmor(lr,SLOTIDS[Math.floor(Math.random()*3)])}); } }
 }
 // Phase 9: no more roguelite pick-3. Every level bakes in automatic stat growth (folds the old
 // upgrade pool's power in), so the game is stronger — not weaker — for losing the menu.
-function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.004; }
+function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=1.018; p.stats.speed*=1.006; p.stats.lifesteal+=0.002; }
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){
   const p=G.p; p.xp+=n;
@@ -7058,7 +7066,7 @@ function openEndlessGate(){
     <h2 class="ovh">The Endless Below</h2>
     <p class="ovsub">Floors without end, each harder than the last. Grind the best XP and gold in the game — until the dark finally outscales you. Death sends you home with everything you earned.</p>
     <div class="statgrid"><div class="vsrow"><span>Your deepest floor</span><b style="color:#ffd24a">${meta.endlessBest?('Floor '+meta.endlessBest):'—'}</b></div></div>
-    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#7a3fb0,#4a2070)">Descend</button>
+    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#7a3fb0,#4a2070)"><img class="lebtnicon" src="icons/destinations/abyss.png?v=${VERSION3D}" alt="">Descend</button>
     <button class="bigbtn ghost" id="descBack">Not yet</button></div>`);
   document.getElementById('descBtn').onclick=startEndless;
   document.getElementById('descBack').onclick=wsResume;
@@ -7160,10 +7168,11 @@ function showOverlayHTML(html){
   if(typeof stopAllLoops==='function') stopAllLoops();   // opening any menu silences looping sfx (footsteps/heartbeat) that would otherwise hang while paused
   if(mode!=='title'){ document.body.classList.remove('t-title'); document.body.classList.remove('t-attract'); }   // the full-bleed title art only shows on the title screen
   // preserve scroll across a re-render (clicking an item shouldn't jump the list back to the top)
-  const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop;
+  const pa=ovcard.querySelector('.achlist'), psc=pa?pa.scrollTop:0, pov=overlay.scrollTop, pcard=ovcard.scrollTop;
   ovcard.innerHTML=html; enhanceMenuShell(); decorateMenuIcons(); showOverlay(true); fixSliders();
   const na=ovcard.querySelector('.achlist'); if(na&&psc) na.scrollTop=psc;
   if(pov) overlay.scrollTop=pov;
+  if(pcard) ovcard.scrollTop=pcard;   // shop/waystation/trainer menus scroll on the card itself — keep the reader's place on re-render (respec etc.)
 }
 function decorateMenuIcons(){
   const icons={backBtn:'back',backC:'back',descBack:'back',npcLeave:'back',nameBack:'back',cBack:'back',msBack:'back',delNo:'back',wsBack:'back',
@@ -8377,11 +8386,12 @@ function openGear(back){
   const w=p.weapon, wEl=w.el?(w.el==='void'?'Void (ignores resist + lifesteal)':w.el):'Neutral';
   const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=slotLabel(slot);
     const detail=a?(a.trinket?a.affixes.map(x=>x.label).join(' · '):('Defense '+a.defense+' · '+a.affixes.map(x=>x.label).join(' · '))):'';
-    return `<div class="gearrow"><div class="gi slotgi">${slotIcon(slot)}${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
+    const icon=a?`<img class="gearav" src="${itemAv(a)}" alt="">`:slotIcon(slot);   // new item art, same as the bag menu
+    return `<div class="gearrow"><div class="gi slotgi">${icon}${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
   showOverlayHTML(`<div class="card"><h2 class="ovh">Gear</h2>
     <p class="ovsub">Total damage reduction: <b style="color:${bestGearRarity(p)}">${Math.round(defenseR(p)*100)}%</b></p>
     <div class="achlist">
-      <div class="gearrow"><div class="gi">Weapon</div><div><div class="gn" style="color:${w.color}">${w.name}</div><div class="gd">Dmg ${fmt(w.dmg)} · ${damageTypeHTML(w)} · ${wEl}</div></div></div>
+      <div class="gearrow"><div class="gi slotgi"><img class="gearav" src="${itemAv(w)}" alt="">Weapon</div><div><div class="gn" style="color:${w.color}">${w.name}</div><div class="gd">Dmg ${fmt(w.dmg)} · ${damageTypeHTML(w)} · ${wEl}</div></div></div>
       ${gearRow('helmet')}${gearRow('chest')}${gearRow('legs')}${gearRow('amulet')}${gearRow('ring')}
     </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.getElementById('backBtn').onclick=back;
@@ -9047,10 +9057,10 @@ function drawHero3(p,t,preview){
     else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
     else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
     else if(w.art==='axe'){ rotY((0.75-prog)*1.9); rotX(-0.9-prog*0.3); rotZ(0.35); }    // wide sideways hack
-    else if(w.art==='scythe'){                                                            // 3-hit combo: a flat reap, a rising backhand reap, then an overhead magic chop
+    else if(w.art==='scythe'){                                                            // grass-cutting reaps: two flat horizontal side-swipes, then an overhead magic chop
       if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it straight down
-      else if(p.swingCombo===1){ rotZ(-0.55+prog*0.5); rotX(-1.05+prog*0.85); rotY(-1.5+prog*2.7); }   // 2nd: rising backhand reap — low-left sweeping up to high-right
-      else { rotZ(0.35); rotX(-0.4); rotY(1.5-prog*3.0); } }                              // 1st: flat waist-high reap, right to left
+      else if(p.swingCombo===1){ rotX(-0.28); rotZ(-0.12); rotY(-1.95+prog*3.9); }        // 2nd: flat horizontal return sweep, LEFT → right
+      else { rotX(-0.28); rotZ(0.12); rotY(1.95-prog*3.9); } }                            // 1st (main): a wide flat horizontal side-swipe in front, RIGHT → left — like scything grass
     else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
   } else if(_casterLong){
     // Reach forward to a vertical focus instead of laying its shaft along the forearm.

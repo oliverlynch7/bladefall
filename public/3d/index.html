@@ -853,7 +853,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.260.0';
+const VERSION3D='1.261.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1411,10 +1411,10 @@ const SFX={
 /* ---------------- Rarity / elements (identical to 2D) ---------------- */
 const RARITY={
   common:{name:'Common',color:'#b9c0cc',base:1000,mul:1.00,tier:0,req:1},
-  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:4},
-  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:9},
-  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:15},
-  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:22}
+  uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:5},
+  rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:12},
+  epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:20},
+  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:30}
 };
 const RORDER=['common','uncommon','rare','epic','legendary'];
 /* ---------------- PETS / COMPANIONS ----------------
@@ -1685,7 +1685,8 @@ const TRIALS={
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
     tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']}
 };
-const RANK_XP=r=>Math.round(60*Math.pow(Math.max(1,r),1.7));
+const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
+const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
 const OFFCLASS_MUL=0.6;                                   // off-family weapons: -40% damage + no ability riders
 let queueSubclass=false;
 function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
@@ -2581,7 +2582,7 @@ function upgradeStoredHeroPerk(id,newLv){
 }function freshPlayer(){
   const sk=meta.unlockedSkins.includes(meta.selectedSkin)?meta.selectedSkin:'knight';
   const p={x:0,y:0,z:120,vx:0,vy:0,vz:0,yaw:Math.PI,r:13,h:44,onGround:true,jumps:0,maxJumps:1,
-    hp:100,maxHp:100,mana:100,maxMana:100,level:1,xp:0,xpNext:46,weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
+    hp:100,maxHp:100,mana:100,maxMana:100,level:1,xp:0,xpNext:CHARACTER_XP(1),weapon:classStartWeapon(meta.classId),gear:freshGear(),armorMods:null,
     stats:{power:1.0,magPower:1.0,speed:1.0,atkSpeed:1.0,lifesteal:0,defense:0,cdr:0,dodgeCd:0.75,crit:0,goldFind:0},skin:sk,
     atkTimer:0,atkCd:0,swingId:0,dodgeTimer:0,dodgeCdT:0,dashX:0,dashZ:-1,invuln:0,hurtFlash:0,runAnim:0,dead:false,
     charging:false,chargeAmt:0,holdT:0,attackHeld:false,
@@ -2671,7 +2672,7 @@ function freshFromSnapshot(snap){
   p.maxHp=snap.maxHp||100; p.maxMana=snap.maxMana||100;
   p.mana=Math.max(0,Math.min(p.maxMana,snap.mana==null?p.maxMana:snap.mana));
   p.maxJumps=Math.max(snap.maxJumps||1, meta.socks?2:1); p.level=snap.level||1;
-  p.xp=0; p.xpNext=Math.round(46+p.level*34+p.level*p.level*2);
+  p.xp=Math.max(0,snap.xp||0); p.xpNext=CHARACTER_XP(p.level);
   recomputeArmor(p); p.hp=effMaxHp(p); return p;
 }
 function beginRun(ngPlus,carrySnap,scales){
@@ -5923,8 +5924,9 @@ function autoLevelGrow(p){ p.maxHp+=13; p.stats.power*=1.045; p.stats.atkSpeed*=
 function rarityUnlockedAt(lv){ for(const r of RORDER) if(RARITY[r].req===lv) return r; return null; }
 function gainXp(n){
   const p=G.p; p.xp+=n;
-  gainClassXp(Math.max(1,Math.round(n*0.8)));           // class XP flows alongside character XP while this class is equipped
-  while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=Math.round(44+p.level*30+p.level*p.level*1.7);
+  const classAward=Math.max(1,Math.round(n*0.8));
+  gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // trials still reach Rank 2; normal class progression is 2.5x longer
+  while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
     p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
     SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);

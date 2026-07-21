@@ -1091,3 +1091,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Rebuilt Rename Character as a compact prompt with a top-left cancel control, full-width name field, 2-20 character guidance, and a full-width Save button that remains disabled until the trimmed name is valid.
 - Saving by click or Enter now refreshes the Mirror character card and gameplay HUD immediately; cancel and Escape discard edits without leaving the Mirror.
 - Muted browser QA verified camera composition, validation, click/keyboard save, cancel behavior, immediate name refresh, and zero console errors.
+
+
+## [Codex | 2026-07-20] Slower character and class progression - shipped v1.261.0
+- Replaced the extremely short character curve with a materially longer level-scaled XP curve and raised normal class-rank requirements by 2.5x.
+- Preserved class-trial onboarding with trial-only class XP pacing that still reaches Rank 2 after the intended six enemies; trial difficulty and layout remain unchanged.
+- Spread gear gates to Common 1, Uncommon 5, Rare 12, Epic 20, and Legendary 30 so powerful drops become future goals instead of immediate equipment.
+- Existing levels and class ranks remain intact, partial character XP now survives snapshot reconstruction, and old stored thresholds migrate automatically to the new curve.
+- Muted browser QA verified normal-versus-trial XP, the Rank-2 trial outcome, Level-3 snapshot migration, Epic Level-20 bag locking, and zero console errors.

@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.269.0';
+const VERSION3D='1.270.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7394,6 +7394,23 @@ function enterWaystation(){
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-150,z:650,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>startHubSprint()}
   ];
+  // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
+  // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
+  const HUBSOLID=[
+    {x:0,z:30,w:66,d:66},      // the Waystone bonfire (plaza centre)
+    {x:-548,z:-60,w:84,d:46},  // Quartermaster's counter
+    {x:-548,z:150,w:54,d:54},  // The Smith (anvil)
+    {x:-350,z:40,w:48,d:48},   // The Stylist
+    {x:548,z:-60,w:78,d:54},   // Drillmaster's booth
+    {x:548,z:150,w:54,d:54},   // Beastkeeper
+    {x:360,z:150,w:74,d:28},   // Sparring Room door
+    {x:-200,z:322,w:66,d:24},  // Postings board
+    {x:0,z:330,w:62,d:24},     // The Mirror
+    {x:200,z:322,w:48,d:40}    // Your Bag chest
+  ];
+  for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108});
+  // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
+  for(const g of G.gates){ for(const s of [-1,1]) G.walls.push({x:g.x+s*26,z:g.z,w:14,d:22,h:112}); }
   // One harmless straw dummy, tucked into the back-east corner (out of the walking floor).
   { const d2=spawnEnemy('dummy',600,60); d2.dummy=true; d2.active=true; d2.dropT=0; d2.range=true; }
   G.lastSafe={x:0,z:190}; G.startPos={x:0,z:190}; G.goalPos={x:0,z:-290};

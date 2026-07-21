@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.245.0';
+const VERSION3D='1.246.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2049,6 +2049,7 @@ function optionalReward(key){
   let it=null;
   if(key==='caravanCompass'){ const o=makeTrinket('rare','amulet','swift'); o.name="Caravaner's Compass"; o.questUnique=true; it={trinket:o}; }
   else if(key==='millwrightSignet'){ const o=makeTrinket('uncommon','ring','haste'); o.name="Millwright's Signet"; o.questUnique=true; it={trinket:o}; }
+  else if(key==='thornheartCharm'){ const o=makeTrinket('rare','amulet','warding'); o.name='Thornheart Charm'; o.questUnique=true; it={trinket:o}; }
   if(!it) return;
   const o=it.weapon||it.armor||it.trinket;
   if(!stashItem(it)){ meta.stash.push(it); persist(); toast('Unique reward stored beyond bag capacity: '+o.name,RARITY[o.rarity].color); }
@@ -3701,6 +3702,7 @@ const EXPANDED_SCAPES={
       // Optional quests live off the golden path and reward deliberate exploration, never required walking.
       const caravanQuest=optionalMission('outCaravan','Answer the scattered caravan signals','rescue',3,'caravanCompass',{hint:'Follow the blue signal lanterns beyond the road.'});
       if(caravanQuest){ const signals=[{x:-360,z:-410,y:46},{x:1360,z:-1880,y:120},{x:-1260,z:-3290,y:112}];
+        vplat(1360,-1880,120,118,104,{canopy:true,questPerch:true});
         for(const p of signals){ G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'outCaravan',name:"Survivor's Signal"},bob:rnd()*3,placed:true}); G.deco.push({x:p.x,z:p.z,y0:p.y,w:10,h:52,d:10,c:'#4d6f8f'}); G.deco.push({x:p.x,z:p.z,y0:p.y+48,w:22,h:15,d:22,c:'#8fdcff'}); }
         mkMonster('sporeback',1300,-1840,orchard); mkMonster('thornboar',-1320,-3230,hamlet);
       }
@@ -3710,6 +3712,14 @@ const EXPANDED_SCAPES={
         G.deco.push({x:-390,z:-2245,y0:8,w:76,h:14,d:22,c:'#654629'}); G.deco.push({x:-390,z:-2245,y0:20,w:18,h:62,d:18,c:'#8a6f34'});
         mkMonster('thornboar',-300,-2180,crossing); mkMonster('sporeback',820,-3240,ridge);
       }
+      // The recovered mill visibly changes state on future visits: repaired gears, a bright turning-wheel silhouette, and a safe overlook.
+      const millAlive=!!meta.optionalDone.outMill, millCol=millAlive?'#d7b45b':'#6d5234';
+      for(let k=0;k<12;k++){ const a=k/12*6.283; G.deco.push({x:-390+Math.cos(a)*68,z:-2245,y0:52+Math.sin(a)*68,w:12,h:12,d:18,c:millCol}); }
+      for(let k=0;k<4;k++){ const a=k*1.57; G.deco.push({x:-390+Math.cos(a)*35,z:-2245,y0:52+Math.sin(a)*35,w:k%2?10:118,h:k%2?118:10,d:12,c:millCol}); }
+      vplat(-520,-2140,34,190,120,{vista:true,recovery:true});
+      // A telegraphed Thornboar stampede lane turns the west road into a set piece instead of another loose pack.
+      for(const z of [-1160,-1320,-1480,-1640]){ const b=mkMonster('thornboar',-880,z,acres); b.yaw=Math.PI; }
+      for(const z of [-1080,-1720]){ G.deco.push({x:-880,z,y0:0,w:180,h:30,d:18,c:WOOD}); G.deco.push({x:-950,z,y0:26,w:12,h:34,d:12,c:'#d6bd79'}); }
       // The opening view is a genuine prairie: pond and caravan near the road, distant cornland and windmill silhouettes framing the choice ahead.
       G.deco.push({x:330,z:-260,y0:0,w:330,h:2,d:210,c:'#3d708d'});for(let k=0;k<16;k++)G.deco.push({x:170+k*22,z:-150+(k%2)*26,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
       G.deco.push({x:-360,z:-400,y0:12,w:170,h:34,d:82,c:'#6b4827'});for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
@@ -3726,6 +3736,9 @@ const EXPANDED_SCAPES={
       // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
       for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
       const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}scapeSecret(ctx,glade.x,glade.z,0);chest(glade.x-70,glade.z+50);
+      // Foxglove's high rootway is a risky mastered-route shortcut to the northern fields; falling returns players to the normal road.
+      climbRun(1620,-2720,0,1220,-3210,92,70,{shortcut:true}); climbRun(1220,-3210,92,520,-4070,28,72,{shortcut:true});
+      G.deco.push({x:1500,z:-2860,y0:100,w:22,h:92,d:22,c:'#6f5431'}); G.deco.push({x:1500,z:-2860,y0:188,w:120,h:8,d:34,c:'#e2c36a'});
       // The river is a major transverse landmark. A broad stone ford is safe; stepping stones form a faster parkour line beside it.
       G.deco.push({x:0,z:-2310,y0:0,w:2500,h:3,d:180,c:'#3b718c'});vseg(0,-2320,420,250,{ford:true});for(let k=0;k<9;k++)vplat(-420+k*105,-2250-(k%2)*105,12+(k%3)*5,82,72,{riverStone:true});
       // West village rooftops and east windmill give the back half two unmistakably different skylines.
@@ -3735,7 +3748,7 @@ const EXPANDED_SCAPES={
       const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
       // Forest walls frame the valley's outside perimeter while leaving the immense central sightlines open.
       for(let k=0;k<70;k++){const R=[gate,prairie,acres,orchard,crossing,bank,hamlet,ridge,dream,henge][Math.floor(rnd()*10)],side=rnd()<.5?-1:1;tree(R.x+side*(R.w/2-18),R.z+(rnd()*2-1)*(R.d/2-25),76+rnd()*78);}
-      mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:acres.x,z:acres.z,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
+      mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:-720,z:-1800,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
       scapeFind(ctx,top.x,top.z,165);finishScape(ctx,{sx:0,sz:470,sy:0,gx:0,gz:-5710,decoCol:'#6f7b3d',decoTheme:'plains',decoTall:240});
     } else {
       const edge=room('Forest Verge',0,0,760,560),creek=room('Tangleroot Creek',-440,-650,700,580),camp=room('Woodcutters Camp',390,-900,700,600),grove=room('Lantern Grove',0,-1580,900,680),hollow=room('Hollow Oak',-620,-2250,700,650),roots=room('Rootbridge Ravine',500,-2440,720,700),shrine=room('Moonwell Shrine',40,-3300,960,760),gate=room('Thornwood Boundary',0,-4140,880,660);
@@ -3743,11 +3756,22 @@ const EXPANDED_SCAPES={
       for(let k=0;k<82;k++){ const R=[edge,creek,camp,grove,hollow,roots,shrine,gate][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.33+rnd()*.18); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,92+rnd()*90); }
       G.deco.push({x:-440,z:-650,y0:0,w:620,h:2,d:90,c:'#315f68'}); for(let k=0;k<12;k++) vplat(-700+k*48,-650,10+(k%3)*7,38,48,{root:true});
       for(const t of [[240,-850],[490,-970],[520,-780]]) G.deco.push({x:t[0],z:t[1],y0:0,w:110,h:44,d:70,c:'#5b4028'});
+      // Woodcutters Camp is a readable refuge rather than three anonymous blocks: open workshop, loft, saw rack, and warm route beacon.
+      vplat(390,-900,48,280,190,{interior:true,breather:true}); climbRun(250,-760,0,390,-900,48,70,{stairs:true});
+      G.deco.push({x:390,z:-990,y0:48,w:300,h:18,d:34,c:'#3b281b'}); G.deco.push({x:250,z:-900,y0:48,w:22,h:116,d:190,c:'#51351f'});
+      for(let k=0;k<6;k++) G.deco.push({x:330+k*24,z:-805,y0:48,w:9,h:72-k*5,d:9,c:'#c69a55'});
+      G.deco.push({x:500,z:-805,y0:62,w:26,h:26,d:26,c:'#ffd36a'}); chest(500,-930,48);
       for(let k=0;k<8;k++){ const a=k/8*6.28; G.deco.push({x:Math.cos(a)*250,z:-1580+Math.sin(a)*230,y0:80,w:12,h:12,d:12,c:'#ffd26b'}); }
       vcol(-620,-2250,150,150,280); climbRun(-760,-2100,0,-620,-2250,190,72); vplat(-620,-2250,206,250,230,{checkpoint:true}); chest(-620,-2250,206);
       for(let k=0;k<8;k++) vplat(160+k*96,-2440,18+Math.sin(k)*8,82,66,{root:true}); climbRun(220,-2250,0,500,-2440,160,70); for(let k=0;k<5;k++) vplat(500+(k-2)*112,-2440-k*68,160+(k%2)*28,78,78,{root:true}); chest(690,-2650,188);
       G.deco.push({x:40,z:-3300,y0:0,w:300,h:2,d:250,c:'#456c78'}); for(let k=0;k<6;k++){ const a=k/6*6.28; G.deco.push({x:40+Math.cos(a)*190,z:-3300+Math.sin(a)*160,y0:0,w:24,h:70,d:18,c:'#6a7180'}); }
+      // Moonwell approach offers a calm overlook and a fast canopy line for players who mastered the earlier root climb.
+      vplat(-260,-3060,128,220,150,{vista:true,breather:true}); climbRun(-520,-2700,170,-260,-3060,128,70,{shortcut:true}); climbRun(-260,-3060,128,40,-3300,0,72,{shortcut:true});
+      G.deco.push({x:-260,z:-3060,y0:128,w:18,h:90,d:18,c:'#8bc9b3'}); G.deco.push({x:-260,z:-3060,y0:212,w:76,h:10,d:76,c:'#d8f3d2'});
       mkMonster('sporeback',-440,-650,creek); mkMonster('toxling',390,-900,camp); mkMonster('sporeback',0,-1580,grove); mkMonster('toxling',40,-3300,shrine);
+      // District-specific fights: creek pincer, grove caster screen, and Moonwell honor guard.
+      mkMonster('thornboar',-560,-590,creek); mkMonster('toxling',130,-1510,grove); mkMonster('sporeback',-110,-1640,grove); mkMonster('sporeback',-120,-3220,shrine);
+      vplat(690,-2650,188,104,92,{root:true,questPerch:true});
       scapeFetch(ctx,[{x:-620,z:-2250,y:206},{x:690,z:-2650,y:188},{x:-440,z:-650,y:18},{x:40,z:-3300,y:0},{x:0,z:-3970,y:0}]);
       finishScape(ctx,{sx:0,sz:220,sy:0,gx:0,gz:-4240,decoCol:'#25432e',decoTheme:'forest',decoTall:250});
     }
@@ -3941,8 +3965,19 @@ const SIDE_SCAPES={
     vcol(-600,-2530,210,210,188); for(let k=0;k<7;k++){ const a=k*.86; vplat(-600+Math.cos(a)*210,-2530+Math.sin(a)*210,190+k*28,84,84,{root:true}); } vplat(-600,-2530,352,260,240,{checkpoint:true,terrace:true}); chest(-600,-2530,352);
     G.deco.push({x:520,z:-2740,y0:0,w:660,h:2,d:590,c:'#263d35'}); for(let k=0;k<16;k++){ const a=k/16*6.28,rr=120+(k%3)*80; vplat(520+Math.cos(a)*rr,-2740+Math.sin(a)*rr,12+(k%4)*8,88,72,{root:true}); }
     for(let k=0;k<12;k++){ const a=k/12*6.28; G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:0,w:22,h:110+(k%4)*35,d:22,c:ROOT}); G.deco.push({x:Math.cos(a)*300,z:-3660+Math.sin(a)*280,y0:110+(k%4)*35,w:38,h:18,d:38,c:GLOW}); }
-    room('Forgotten Hunter Cache',-880,-3650,280,260); rootRun(-520,-3660,-740,-3650); chest(-880,-3650); chest(420,-3820);
+    const cache=room('Forgotten Hunter Cache',-880,-3650,280,260); rootRun(-520,-3660,-740,-3650); chest(-880,-3650); chest(420,-3820);
+    // Optional Trial-Chamber route: four memories tell what happened to the hunters and award a unique protective charm.
+    const memories=optionalMission('thornMemories','Recover the lost hunters’ memories','collect',4,'thornheartCharm',{hint:'Follow the violet hunter marks away from the root road.'});
+    if(memories){ const marks=[{x:-690,z:-780,y:18},{x:-600,z:-2530,y:352},{x:730,z:-2810,y:36},{x:-880,z:-3650,y:18}];
+      for(const p of marks){ G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'thornMemories',name:'Hunter Memory'},bob:rnd()*3,placed:true}); G.deco.push({x:p.x,z:p.z,y0:p.y,w:15,h:58,d:15,c:'#b56cff'}); G.deco.push({x:p.x,z:p.z,y0:p.y+54,w:38,h:12,d:38,c:'#e5b6ff'}); }
+      const stalker=mkMonster('toxling',-820,-3560,cache); makeElite(stalker); stalker.name='The Last Snarekeeper';
+    }
+    // A difficult high-root return line opens a fast route from the canopy into Heart Grove.
+    for(let k=0;k<8;k++){ const t=k/7; vplat(-520+520*t,-2770-720*t,330-210*t,82,68,{shortcut:true,root:true}); }
     for(const p of [[-480,-720,snares],[440,-1040,burrow],[0,-1780,cathedral],[520,-2740,mire],[0,-3660,heart]]){ mkMonster('thornboar',p[0]-45,p[1],p[2]); mkMonster('sporeback',p[0]+55,p[1]+30,p[2]); }
+    // Root Cathedral ambush is staged around visible violet columns; Thorn Mire mixes ranged poison pressure with stepping-root cover.
+    const cantor=mkMonster('toxling',0,-1780,cathedral); makeElite(cantor); cantor.name='Briar Cantor';
+    mkMonster('toxling',650,-2680,mire); mkMonster('thornboar',390,-2860,mire);
     let guardian; {guardian=mkMonster('toxling',0,-3660,heart);makeElite(guardian);guardian.maxHp=guardian.hp=Math.round(guardian.hp*2.4);guardian.name='The Thornheart';} {const e=mkMonster('sporeback',-600,-2530,canopy);e.y=352;e.sx=e.x;e.sz=e.z;makeElite(e);}
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4680,decoCol:'#223c29',decoTheme:'forest',decoTall:300});
     G.portal=null; G.sideGuardian=guardian; G.sideTask='Track and defeat the Thornheart'; G.sideTaskDone=false; questUpdate();

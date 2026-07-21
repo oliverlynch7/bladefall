@@ -1010,3 +1010,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Added the unique Caravaner's Compass (+11% move speed) and Millwright's Signet (+8% attack speed); full bags cannot silently destroy either reward.
 - Wrote `docs/WORLD_REBUILD_PROGRAM_2026-07-20.md` as the authoritative zone-pair rollout for rebuilding all eight Main Levels and seven Trial Chambers without empty traversal or copy-paste padding.
 - Muted browser QA verified discovery, HUD presentation, save persistence, completion cleanup, both rewards, all eleven named Outskirts districts, and zero console errors.
+
+## [Codex | 2026-07-20] Outskirts + Thornwood world-quality pair pass - shipped v1.246.0
+
+- Expanded the Outskirts journey with a telegraphed Thornboar stampede, repaired-watermill world state, river overlook, high-risk Foxglove shortcut, and corrected West Cornlands encounter footing.
+- Rebuilt Black Woods activity density with an authored woodcutters refuge and loft, district-specific encounter compositions, a Moonwell vista, and a mastered canopy shortcut.
+- Deepened Thornwood with the optional four-part Lost Hunters' Memories route, the unique rare Warding Thornheart Charm, named Briar Cantor and Last Snarekeeper elites, mire pressure, and a canopy-to-heart return line.
+- Added explicit supports under two previously floating campaign objective markers and validated every active enemy, chest, and quest object across all three spaces against authored surfaces.
+- Muted real-browser QA passed at 1920x1080, 1600x900, and 1366x768 with WebGL active, persistent one-time rewards, independent guardian/optional-quest completion, and zero console errors.

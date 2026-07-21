@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.310.0';
+const VERSION3D='1.311.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -923,7 +923,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},socks:false,bagSlots:0,hubUpgrades:{},
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
@@ -1136,6 +1136,48 @@ function storyToast(line,icon){           // a slower, centered story line — d
   else el.textContent=line;
   el.classList.remove('hide'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   clearTimeout(storyToast._t); storyToast._t=setTimeout(()=>el.classList.remove('show'),5200);
+}
+/* ══ IAN'S BLADE — the shard questline. Five fragments of the last Bladeborn's sword, hidden in the deepest
+   trial chambers; each carries a nameless line of "the one before". Merge all five (at Level 100, for a price)
+   to reforge the god-sword — and only then does the blade remember its name, and his. The 1,000,000g shop row
+   is the shortcut/fallback; either road completes it and fires STORY.reveal. ══ */
+const IANS_SHARDS=[
+  {trial:'oubliette',    frag:"“…held the road eleven years, he wrote. Not him. The one before.”"},
+  {trial:'glaciervault', frag:"“…a name scratched out on the guard. Yours would fit the space.”"},
+  {trial:'magmacore',    frag:"“…‘if you're reading this, the blood found someone else. Good. Come down.’”"},
+  {trial:'reapersgate',  frag:"“…‘I'm sorry I couldn't finish it. You always were the stubborn one.’”"},
+  {trial:'reliquary',    frag:"“…‘—Ian.’”"}   // the final shard — his name arrives here, the full reveal at the forge
+];
+const IANS_FORGE_LEVEL=100, IANS_FORGE_GOLD=250000;
+function iansShardCount(){ return (meta.iansShards&&meta.iansShards.length)||0; }
+function iansHasAllShards(){ return iansShardCount()>=IANS_SHARDS.length; }
+function iansBladeName(){ return meta.iansComplete?"Ian's Blade":"??? ’s Blade"; }   // name stays hidden until reforged
+function grantIansShard(trialId){
+  if(meta.iansComplete) return;
+  const idx=IANS_SHARDS.findIndex(s=>s.trial===trialId); if(idx<0) return;   // not a shard-bearing trial
+  if(!meta.iansShards) meta.iansShards=[];
+  if(meta.iansShards.includes(idx)) return;                                   // already have this one
+  meta.iansShards.push(idx); persist();
+  const n=meta.iansShards.length;
+  if(SFX&&SFX.god) SFX.god();
+  toast('🗡 Blade Shard recovered — '+n+'/'+IANS_SHARDS.length+' · warm, and it knows you','#fff4ae','event-secret-rift');
+  storyToast(IANS_SHARDS[idx].frag);
+}
+// Reforge the sword: mark complete, name it, and play the one reveal. Called from the forge and the shop shortcut.
+function completeIansBlade(onDone){
+  const was=meta.iansComplete; meta.iansComplete=true; persist();
+  if(was){ if(onDone) onDone(); return; }
+  playStory(STORY.reveal, onDone||(()=>{}), {bg:'radial-gradient(ellipse at 50% 42%, #2b2410 0%, #05060a 82%)', dwell:5200});
+}
+// Fire the reveal, then grant + equip the finished (now-named) Ian's Blade. Shared by the forge and the 1M shortcut.
+function claimIansBlade(then){
+  completeIansBlade(()=>{
+    const w=makeWeapon('iansblade','legendary');                                  // iansComplete is now true -> "Ian's Blade"
+    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); }
+    else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
+    if(G&&G.p&&(G.hub||mode!=='play')) G.p.weapon=w;
+    persist(); if(then) then();
+  });
 }
 /* ---------------- Music (streamed mp3, crossfaded) ----------------
    Separate from SFX on purpose: SFX stay procedural WebAudio, music is plain
@@ -1815,7 +1857,7 @@ function makeWeapon(aid,rid,nameOverride){
     dmg:+(a.dmg*r.mul).toFixed(1),cd:a.cd,kb:a.kb,
     lifesteal:(a.lifesteal||0)+(rid==='legendary'?0.05:0),
     color:r.color, blade:(a.sch==='mag'?(elementColor(a.el)||'#c9a6ff'):'#dfe5ec')};
-  if(a.ians){ w.name="Ian's Blade"; w.blade='#fff4ae'; w.color='#ffd24a'; }
+  if(a.ians){ w.name=iansBladeName(); w.blade='#fff4ae'; w.color='#ffd24a'; }   // name hidden as "??? 's Blade" until reforged
   if(a.cls==='melee'){ w.range=a.range; } else { w.proj=Object.assign({},a.proj); }
   return w;
 }
@@ -7240,7 +7282,8 @@ function update(dt){
       else { const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
         G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
         addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
-        toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift'); } } }
+        toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift');
+        grantIansShard(S.id); } } }   // the deepest trials each hide a Blade Shard
   // trial tutorial tips, paced out
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
@@ -9039,6 +9082,13 @@ function openShop(back){
       <div class="cmpinfo" data-cmp="iansblade" style="flex:1;min-width:0;cursor:pointer"><div class="gn" style="color:#fff4ae;text-shadow:0 0 12px #ffd24a99">${ib.name} <span style="opacity:.75;font-size:11px">${actionIcon('compare')}compare ›</span></div>
         <div class="gd">${ib.dmg} dmg · radiant execute · <b>full power for every class</b></div></div>
       <button class="bigbtn wbuy" data-r="iansblade" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${ibAfford?'':'opacity:.5'}">${actionIcon('buy')}${ibCost.toLocaleString()}g</button></div>`:'';
+  // Ian's Blade — the shard REFORGE (the true path). Shows once the player holds any Blade Shard, until the sword is whole.
+  const iansSC=iansShardCount(), iansReady=iansHasAllShards(), heroLv=(meta.hero&&meta.hero.level)||1;
+  const iansLvOk=heroLv>=IANS_FORGE_LEVEL, iansGoldOk=meta.gold>=IANS_FORGE_GOLD, iansGo=iansReady&&iansLvOk&&iansGoldOk;
+  const forgeRow=(!meta.iansComplete && iansSC>0)?`<div class="gearrow" style="--spine:#ffd24a;background:linear-gradient(90deg,#33270f88,#171923)"><div class="gi eventgi" style="font-size:20px">🗡</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:#fff4ae;text-shadow:0 0 12px #ffd24a99">Reforge the Lost Blade <span class="iansfrags" role="button" style="opacity:.8;font-size:11px;cursor:pointer;text-decoration:underline">read the fragments ›</span></div>
+        <div class="gd">${iansSC}/${IANS_SHARDS.length} shards${iansReady?` · Lv ${IANS_FORGE_LEVEL}${iansLvOk?' ✓':` (you ${heroLv})`} · ${IANS_FORGE_GOLD.toLocaleString()}g`:' · the rest wait in the deepest trials'}</div></div>
+      ${iansReady?`<button class="bigbtn iansforge" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${iansGo?'':'opacity:.5'}" ${iansGo?'':'disabled'}>${actionIcon('buy')}Reforge</button>`:`<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>${iansSC}/${IANS_SHARDS.length}</button>`}</div>`:'';
   // Magic Socks — the permanent double-jump unlock (Phase 9: replaces the old level-8 auto-grant)
   const socksCost=1200, socksAfford=meta.gold>=socksCost;
   const socksRow=meta.socks
@@ -9061,7 +9111,7 @@ function openShop(back){
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><span class="ico ico-coin"></span> <b style="color:#ffd24a">${meta.gold}</b> · permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     ${perkRefundTotal()>0?`<button class="bigbtn ghost" id="refundPerks" style="margin:6px 0 0;padding:9px 14px;font-size:13px;color:#ffd24a;border-color:#5a4a20">↩ Refund all perks — get back <b>${perkRefundTotal()}g</b> &amp; reset every stat</button>`:''}
@@ -9079,10 +9129,20 @@ function openShop(back){
     const gateR=isIan?'legendary':(isVS?'epic':rid); if(!canWieldRid(gateR)){ toast('🔒 Requires Level '+rarityReq(gateR)+' to wield'); return; }
     if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost;
-    const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid));
+    if(isIan){ SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); return; }   // the shortcut: buy it whole, name + reveal fire
+    const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
     if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
-    if(isIan){ SFX.god(); playFx('bigreveal'); if(G&&G.p) burst(G.p.x,G.p.y+35,G.p.z,'#fff4ae',28); } else SFX.levelup();
+    SFX.levelup();
     persist(); toast('Equipped: '+w.name); openShop(back); });
+  { const fg=document.querySelector('.iansforge'); if(fg) fg.onclick=()=>{
+      if(!iansHasAllShards()){ toast('Recover all '+IANS_SHARDS.length+' Blade Shards first'); return; }
+      if(((meta.hero&&meta.hero.level)||1)<IANS_FORGE_LEVEL){ toast('🔒 Reach Level '+IANS_FORGE_LEVEL+' to reforge it'); return; }
+      if(meta.gold<IANS_FORGE_GOLD){ toast('Not enough gold'); return; }
+      meta.gold-=IANS_FORGE_GOLD; SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); }; }
+  { const fr=document.querySelector('.iansfrags'); if(fr) fr.onclick=()=>{
+      const lines=IANS_SHARDS.map((s,i)=>(meta.iansShards&&meta.iansShards.includes(i))?`<p style="margin:0 0 15px;font-style:italic;color:#e8dcc0">${s.frag}</p>`:`<p style="margin:0 0 15px;opacity:.32">— a fragment still in the dark —</p>`).join('');
+      showOverlayHTML(`<div class="card"><p class="ovkicker">The Last One's Blade</p><h2 class="ovh">🗡 Fragments Recovered</h2><p class="ovsub">${iansShardCount()}/${IANS_SHARDS.length} — merge them at the forge</p><div style="text-align:left;font-size:15px;line-height:1.7;margin:14px 2px">${lines}</div><button class="bigbtn ghost" id="fragBack">Back</button></div>`);
+      document.getElementById('fragBack').onclick=()=>openShop(back); }; }
   document.querySelectorAll('[data-cmp]').forEach(el=>el.onclick=()=>{ const rid=el.dataset.cmp, isVS=rid==='voidscythe', isIan=rid==='iansblade';
     const w=isIan?makeWeapon('iansblade','legendary'):(isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid)), cost=isIan?ibCost:(isVS?vsCost:shopWeapCost(rid)); shopCompare(w,cost,back); });
   const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
@@ -11531,6 +11591,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
+  grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,

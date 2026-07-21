@@ -640,7 +640,8 @@
   .tuthint{font-size:12px;line-height:1.45;color:#8a93a6;margin:0;}
   .skilltut .bigbtn{margin:0;}
   .levelentry{max-width:460px;text-align:center;}
-  .levelentry .lecrest{width:96px;height:96px;margin:2px auto 8px;display:flex;align-items:center;justify-content:center;font-size:52px;border-radius:20px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--acc) 30%,#1c2130),#0b0d14);border:1px solid color-mix(in srgb,var(--acc) 45%,#2b3040);box-shadow:0 8px 22px rgba(0,0,0,.45);}
+  .levelentry .lecrest{width:120px;height:110px;margin:2px auto 8px;display:flex;align-items:center;justify-content:center;font-size:52px;}
+  .levelentry .lecrestimg{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));}
   .levelentry .ovh{color:#fff;}
   .levelentry .ovsub{max-width:400px;margin:6px auto 16px;line-height:1.5;}
   .levelentry .lefoot{display:flex;gap:10px;align-items:center;justify-content:center;}
@@ -868,7 +869,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.275.0';
+const VERSION3D='1.276.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7078,9 +7079,10 @@ function openLevelEntry(o){
   document.getElementById('leBack').onclick=wsResume;
   const go=document.getElementById('leGo'); if(go) go.onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; o.onEnter(); };
 }
-function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null;
+function openGateEntry(g){ const Z=ZONES[g.zi], sd=g.side?Z.side:null, artId=(sd?sd.id:Z.id);
   openLevelEntry({
-    icon:(sd?sd.icon:Z.icon), name:(sd?sd.name:Z.name),
+    icon:`<img class="lecrestimg" src="icons/destinations/${artId}.png?v=${VERSION3D}" alt="">`,   // the same stylized destination art the Waystone travel menu uses
+    name:(sd?sd.name:Z.name),
     kicker:(sd?'Hidden Trial Chamber':('Campaign Gate · Tier '+Z.tier)),
     desc:(sd?sd.blurb:Z.blurb),
     col:(g.side?'#c47bff':(ZONE_ACCENT[Z.id]||'#e8a33d')),
@@ -7745,12 +7747,18 @@ function openTrainingArena(back){ mode='menu';
 // what's in reach to talk to right now (hub keeper / the Warden's Shade) — drives the E-prompt + TALK button
 function updateInteract(){
   let it=null; const p=G.p;
-  if(G.hub && G.hubNpcs){ let bd=110; for(const n of G.hubNpcs){ const d=dXZ(n.x,n.z,p.x,p.z); if(d<bd){ bd=d; it={x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}; } }
-    if(!it && dXZ(0,30,p.x,p.z)<72) it={x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone};
-    if(!it && G.gates){ let gb=96, gg=null; for(const g of G.gates){ const d=dXZ(g.x,g.z,p.x,p.z); if(d<gb){ gb=d; gg=g; } }   // nearest portal → press E to open its entry popup (never auto-enter)
-      if(gg){ const Z=ZONES[gg.zi], nm=gg.side?(Z.side?Z.side.name:Z.name):Z.name;
-        it={x:gg.x,z:gg.z,y:96,label:(gg.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(gg)}; } }
-    if(!it && dXZ(-806,644,p.x,p.z)<44) it={x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}; }   // the glint behind the Pet Yard crates — the Tinkerer's test bench
+  if(G.hub && G.hubNpcs){
+    // Pick by what you're LOOKING AT, not just what's nearest: a big facing bonus lets the object you face
+    // win even if another is closer. If nothing is in front, this falls back to the nearest thing in range.
+    const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
+    const consider=(cx,cz,range,make)=>{ const dx=cx-p.x, dz=cz-p.z, d=Math.hypot(dx,dz); if(d>=range) return;
+      const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
+      if(eff<best){ best=eff; it=make(); } };
+    for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}));
+    consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
+    if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
+    consider(-806,644,44,()=>({x:-806,z:644,y:44,label:'???',act:()=>openCheatMenu(wsResume)}));   // the glint behind the Pet Yard crates — the Tinkerer's test bench
+  }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   G.interact=it; updateInteractPrompt();
 }

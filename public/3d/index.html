@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.301.0';
+const VERSION3D='1.302.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8143,7 +8143,7 @@ function enterWaystation(){
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-360,z:360,faceZ:0,open:()=>openQuestBoard(wsResume)},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-495,z:342,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-548,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
@@ -8160,7 +8160,7 @@ function enterWaystation(){
     {x:548,z:-60,w:78,d:54},   // Drillmaster's booth
     {x:548,z:150,w:54,d:54},   // Beastkeeper
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
-    {x:-360,z:360,w:66,d:24},  // Postings board (flush on the south-west wall)
+    {x:-495,z:342,w:66,d:24},  // Postings board — centred on the SW wall, sitting slightly off it
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-548,z:45,w:48,d:40},   // Your Bag chest — moved to the west wall, between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30}      // The Arena gate (deep-centre annex plaza)
@@ -10143,9 +10143,9 @@ function drawWaystation(t){
       bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
       continue; }
     if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
-      pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));            // orient the chest so its face points toward the hub centre
+      pushM(); mv(n.x,0,n.z); rotY(Math.atan2(0-n.x,40-n.z));          // STATIC facing toward the hub centre (it's an object — it "looks at you" but never turns to track)
       bx(0,10,0, 40,20,26,'#5a4426'); bx(0,22,0, 42,8,28,'#6e5430');
-      bx(0,16,14, 8,10,3,'#ffd24a','#ffd24a',0.7);                     // gold clasp on the FRONT, now facing centre
+      bx(0,16,14, 8,10,3,'#ffd24a','#ffd24a',0.7);                     // gold clasp on the FRONT, facing the plaza
       popM(); continue; }
     if(n.prop==='anvil'){ drawShadow(n.x,n.z,26,0.24);
       // BIGGER anvil on a stump

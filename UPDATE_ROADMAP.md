@@ -1115,3 +1115,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 ## [Codex | 2026-07-20] Emberdeep Chain Lift ascent fix - shipped v1.264.0
 - Replaced the ambiguous four-slab opening climb with a grounded six-step basalt switchback leading clearly onto the Chain Lift plateau.
 - Required hops are now only 97 units horizontally and 20 units vertically, with 116x100 recovery landings and ember guide posts; the optional moving-lift spectacle remains intact.
+
+
+## [Codex | 2026-07-20] Equipped-skin HUD portrait - shipped v1.265.0
+- The top-left HUD portrait now shows the player's equipped skin artwork instead of the current class icon, with Knight as a safe missing-art fallback.
+- Skin changes refresh the portrait immediately while class identity remains visible in text beside it.

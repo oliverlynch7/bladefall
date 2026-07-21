@@ -806,7 +806,7 @@
 <body>
 <canvas id="gl"></canvas>
 <div id="hud" class="hide">
-  <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt=""></div>
+  <div class="hudportrait"><img id="hudportraitimg" src="icons/skins/skin-knight.png" alt="Equipped skin"></div>
   <div class="hudpanel">
   <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span><span class="hudidentitydot">·</span><span id="lvlbadge">Warrior</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
   <div id="hudbag" title="Bag · 0 / 30 slots used"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span id="hudbagnum">0 / 30</span></div>
@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.264.0';
+const VERSION3D='1.265.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8234,7 +8234,7 @@ function openSkins(back){
   document.querySelectorAll('.skintile').forEach(t=>t.onclick=()=>{ const id=t.dataset.id;
     if(registerCheatTap(id)){ openSkins(back); return; }
     if(!meta.unlockedSkins.includes(id)){ toast('Locked — '+skinUnlockHint(id)); return; }
-    meta.selectedSkin=id; if(G&&G.p){ G.p.skin=id; recomputeArmor(G.p); if(id==='god') G.p.hp=effMaxHp(G.p); } persist(); SFX.pickup(); openSkins(back); });
+    meta.selectedSkin=id; if(G&&G.p){ G.p.skin=id; recomputeArmor(G.p); if(id==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); } persist(); SFX.pickup(); openSkins(back); });
   document.getElementById('backBtn').onclick=back;
 }
 function openAchievements(back){
@@ -8541,7 +8541,8 @@ function hudUpdate(){
   document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
-  const portrait=document.getElementById('hudportraitimg'); if(portrait) portrait.src='icons/class-'+meta.classId+'.png';
+  const portrait=document.getElementById('hudportraitimg'), skinId=SKINS[p.skin]?p.skin:'knight';
+  if(portrait&&portrait.dataset.skin!==skinId){ portrait.dataset.skin=skinId; portrait.onerror=()=>{portrait.onerror=null;portrait.src='icons/skins/skin-knight.png?v='+VERSION3D;}; portrait.src='icons/skins/skin-'+skinId+'.png?v='+VERSION3D; }
   const playerName=document.getElementById('playername'); if(playerName) playerName.textContent=(meta.heroName||'').trim()||'Player';
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);

@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.308.0';
+const VERSION3D='1.309.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8152,8 +8152,7 @@ function enterWaystation(){
       G.deco.push({x:fx,z:fz,y0:13,w:2.5,h:fh,d:2.5,c:'#3f7d3b'});
       G.deco.push({x:fx+(k%2?3:-3),z:fz,y0:17,w:5,h:2.5,d:3,c:'#559b49'});
       G.deco.push({x:fx,z:fz,y0:13+fh,w:5.5,h:5.5,d:5.5,c:bloom[(k*7+Math.abs(fb[0]))%6]}); } }
-  // A tiny brass GLINT tucked in the SE flowerbed (250,210): the Tinkerer's Bench hides here. Walk onto it, press E.
-  G.deco.push({x:250,z:210,y0:20,w:3.5,h:3.5,d:3.5,c:'#fff3b0'}); G.deco.push({x:250,z:210,y0:24,w:2,h:2,d:2,c:'#ffe27a'});
+  // (the '???' cheat bench now lives at the SW cardboard-box pile — its glint is drawn in drawWaystation)
   // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
   // deliberately clear: no welcome banner, post, or flame may block the silvered glass.
   for(const tx of [-300,-100,100,300]) G.torches.push({x:tx,z:-360,ph:Math.random()*6.28});
@@ -8534,7 +8533,7 @@ function updateInteract(){
     for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}));
     consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
-    consider(250,210,46,()=>({x:250,z:210,y:20,label:'???',act:()=>openCheatMenu(wsResume)}));   // something glints in the SE flowerbed — the Tinkerer buried his test bench in the petunias
+    consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
   }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime

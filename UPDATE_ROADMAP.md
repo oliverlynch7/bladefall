@@ -1040,3 +1040,10 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - The top-left HUD now displays the chosen character name in larger white type, followed by a dot and the equipped class; unnamed characters safely fall back to `Player`.
 - Basic Attack and Dodge now reuse the Skills 1-4 radial cooldown wheel and decimal countdown treatment, while preserving each action's existing gameplay cooldown.
 - Browser QA passed muted at 1920x1080, 1600x900, and 1366x768: identity stayed inside the HUD, Attack and Dodge fractions visibly counted down, and the console reported zero errors.
+
+
+## [Codex | 2026-07-20] Title Continue quick save switch - shipped v1.252.0
+- Added dedicated left and right edge controls to Continue that cycle smoothly through occupied Warden slots and wrap at either end.
+- The Continue subtitle updates immediately with slot, name, level, and class; center-clicking resumes the previewed save, including a save-safe automatic handoff when switching slots.
+- Empty slots are skipped, single-save players see no unnecessary arrows, keyboard Left/Right is supported, and Load Character remains unchanged.
+- Muted browser QA verified three-slot cycling, unchanged active storage during preview, cross-slot automatic continuation, 1920x1080 and 1366x768 geometry, and zero console errors.

@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.251.0';
+const VERSION3D='1.252.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -865,6 +865,11 @@ function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
     hero:(best&&best.hero)||null,skin:(best&&best.hero&&best.hero.skin)||g.selectedSkin||'knight',rank:(best&&best.classes&&cls&&best.classes[cls]&&best.classes[cls].rank)||1}:{empty:true};
 }
 function selectSlot(sl){ try{ localStorage.setItem('bf3_slot',sl); }catch(e){} location.reload(); }
+function continueSlot(sl){
+  if(sl===SLOT){ modeSelect(); return; }
+  try{ sessionStorage.setItem('bf3_continue_after_slot','1'); localStorage.setItem('bf3_slot',sl); }catch(e){}
+  location.reload();
+}
 function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
@@ -7092,10 +7097,12 @@ function openSlots(){
 }
 function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building Dark Descent theme sets the tone under the key art
   mode='title'; MODE=null; showGameUI(false); document.getElementById('bosshpwrap').classList.remove('on');
-  const active=slotSummary(SLOT), activeClass=active.cls&&CLASSES[active.cls]?CLASSES[active.cls]:null;
-  const activeLine=active.empty?`Slot ${SLOT+1} · New Warden · Choose a class to begin`
-    :`Slot ${SLOT+1} · ${htmlSafe(active.name)} · Level ${active.lvl} · ${activeClass?activeClass.icon+' '+activeClass.disp:htmlSafe(active.cls||'No class equipped')}`;
-  const hasSave=!active.empty;
+  const currentSlot=slotSummary(SLOT);
+  const savedSlots=[0,1,2].filter(sl=>!slotSummary(sl).empty), hasSave=savedSlots.length>0;
+  let previewSlot=savedSlots.includes(SLOT)?SLOT:(savedSlots[0]??SLOT);
+  const active=slotSummary(previewSlot), activeClass=active.cls&&CLASSES[active.cls]?CLASSES[active.cls]:null;
+  const activeLine=active.empty?`Slot ${previewSlot+1} · New Warden · Choose a class to begin`
+    :`Slot ${previewSlot+1} · ${htmlSafe(active.name)} · Level ${active.lvl} · ${activeClass?activeClass.icon+' '+activeClass.disp:htmlSafe(active.cls||'No class equipped')}`;
   showOverlayHTML(`<style>
     .mainmenu .mmwrap{display:flex;flex-direction:column;gap:11px;width:min(346px,84vw);margin:20px auto 0}
     .mmbtn{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:13px 18px;cursor:pointer;background:linear-gradient(180deg,rgba(30,23,15,.82),rgba(11,9,13,.9));color:#e7dbc2;border:1px solid #3d3123;border-radius:11px;box-shadow:0 6px 18px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,220,160,.06);transition:transform .08s,border-color .14s,background .14s,box-shadow .14s}
@@ -7109,11 +7116,18 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
     .mmbtn.mmdis,.mmbtn.mmdis:hover{opacity:.4;cursor:default;filter:grayscale(.6);border-color:#332a1e;background:linear-gradient(180deg,rgba(30,23,15,.7),rgba(11,9,13,.8));color:#9a8f7c;box-shadow:0 4px 12px rgba(0,0,0,.35)}
     .mmbtn.mmdis::before,.mmbtn.mmdis::after{display:none}
     .mmbtn.mmexit{padding:10px 18px}.mmbtn.mmexit .mmtx{font-size:16px;opacity:.85;font-weight:700}
+    .mmcontinue{position:relative}.mmcontinue .mmbtn{width:100%;min-height:72px;padding-left:48px;padding-right:48px}
+    .mmslotedge{position:absolute;z-index:3;top:0;bottom:0;width:43px;border:0;background:transparent;color:#c99a50;font:900 29px/1 Georgia,serif;cursor:pointer;opacity:.72;transition:opacity .15s,transform .15s,background .15s,color .15s}
+    .mmslotedge:hover,.mmslotedge:focus-visible{opacity:1;color:#ffe2a0;background:linear-gradient(90deg,rgba(232,163,61,.18),transparent);outline:none}
+    .mmslotedge:active{transform:scale(.88)}.mmslotedge.prev{left:0;border-radius:11px 0 0 11px}.mmslotedge.next{right:0;border-radius:0 11px 11px 0}.mmslotedge.next:hover,.mmslotedge.next:focus-visible{background:linear-gradient(-90deg,rgba(232,163,61,.18),transparent)}
+    .mmslotedge:disabled{display:none}.mmcontinue.sliding-left .mmtx,.mmcontinue.sliding-left .mmsub{animation:mmslideleft .22s ease}.mmcontinue.sliding-right .mmtx,.mmcontinue.sliding-right .mmsub{animation:mmslideright .22s ease}
+    @keyframes mmslideleft{0%{opacity:1;transform:translateX(0)}45%{opacity:0;transform:translateX(-18px)}55%{opacity:0;transform:translateX(18px)}100%{opacity:1;transform:translateX(0)}}
+    @keyframes mmslideright{0%{opacity:1;transform:translateX(0)}45%{opacity:0;transform:translateX(18px)}55%{opacity:0;transform:translateX(-18px)}100%{opacity:1;transform:translateX(0)}}
   </style>
   <div class="tmenu mainmenu" id="tmenu">
     <div class="mmwrap">
       <button class="mmbtn" id="mmNew"><span class="mmtx">New Game</span><span class="mmsub">Forge a new Warden</span></button>
-      <button class="mmbtn ${hasSave?'':'mmdis'}" id="mmCont" ${hasSave?'':'disabled'}><span class="mmtx">Continue</span><span class="mmsub">${hasSave?activeLine:'No saved Warden yet'}</span></button>
+      <div class="mmcontinue" id="mmContinueWrap"><button class="mmbtn ${hasSave?'':'mmdis'}" id="mmCont" ${hasSave?'':'disabled'}><span class="mmtx">Continue</span><span class="mmsub" id="mmContSave">${hasSave?activeLine:'No saved Warden yet'}</span></button><button class="mmslotedge prev" id="mmSlotPrev" aria-label="Previous saved Warden" ${savedSlots.length>1?'':'disabled'}>‹</button><button class="mmslotedge next" id="mmSlotNext" aria-label="Next saved Warden" ${savedSlots.length>1?'':'disabled'}>›</button></div>
       <button class="mmbtn" id="mmLoad"><span class="mmtx">Load Character</span><span class="mmsub">View &amp; choose your saved Wardens</span></button>
       <button class="mmbtn" id="mmSet"><span class="mmtx">Settings</span><span class="mmsub">Audio, controls &amp; skins</span></button>
       <button class="mmbtn mmexit" id="mmExit"><span class="mmtx">Exit</span></button>
@@ -7129,8 +7143,17 @@ function titleScreen(){ musicPlay('apex_darkdescent');   // the dark, building D
   titleScreen._reveal=revealMenu;
   window.addEventListener('keydown',revealMenu);
   window.addEventListener('pointerdown',revealMenu);
-  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} active.empty?openCharCreate():openSlots(); };   // new char: empty slot -> creation; else pick/free a slot
-  document.getElementById('mmCont').onclick=()=>{ if(active.empty) return; try{initAudio();SFX.pickup();}catch(e){} modeSelect(); };  // resume last-accessed save
+  document.getElementById('mmNew').onclick=()=>{ try{initAudio();SFX.pickup();}catch(e){} currentSlot.empty?openCharCreate():openSlots(); };   // new char: empty slot -> creation; else pick/free a slot
+  const cont=document.getElementById('mmCont'), contSave=document.getElementById('mmContSave'), contWrap=document.getElementById('mmContinueWrap');
+  const paintPreview=dir=>{ const su=slotSummary(previewSlot), C=su.cls&&CLASSES[su.cls]?CLASSES[su.cls]:null;
+    contSave.innerHTML=`Slot ${previewSlot+1} · ${htmlSafe(su.name)} · Level ${su.lvl} · ${C?C.icon+' '+C.disp:htmlSafe(su.cls||'No class equipped')}`;
+    contWrap.classList.remove('sliding-left','sliding-right'); void contWrap.offsetWidth; contWrap.classList.add(dir<0?'sliding-left':'sliding-right');
+    setTimeout(()=>contWrap.classList.remove('sliding-left','sliding-right'),230); };
+  const cyclePreview=dir=>{ if(savedSlots.length<2) return; const at=savedSlots.indexOf(previewSlot); previewSlot=savedSlots[(at+dir+savedSlots.length)%savedSlots.length]; try{SFX.pickup();}catch(e){} paintPreview(dir); };
+  document.getElementById('mmSlotPrev').onclick=ev=>{ ev.stopPropagation(); cyclePreview(-1); };
+  document.getElementById('mmSlotNext').onclick=ev=>{ ev.stopPropagation(); cyclePreview(1); };
+  cont.onkeydown=ev=>{ if(ev.key==='ArrowLeft'||ev.key==='ArrowRight'){ ev.preventDefault(); cyclePreview(ev.key==='ArrowLeft'?-1:1); } };
+  cont.onclick=()=>{ if(!hasSave) return; try{initAudio();SFX.pickup();}catch(e){} continueSlot(previewSlot); };  // center resumes the previewed save; edges only switch the preview
   document.getElementById('mmLoad').onclick=()=>{ try{SFX.pickup();}catch(e){} openSlots(); };
   document.getElementById('mmSet').onclick=()=>{ try{SFX.pickup();}catch(e){} openTitleOptions(); };
   document.getElementById('mmExit').onclick=()=>{ try{SFX.pickup();}catch(e){} titleScreen(); };   // back to the attract logo (web has no OS-quit)
@@ -10439,6 +10462,11 @@ function checkUpdate(){
 }
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ resize(); lastT=0; checkUpdate(); } });
 titleScreen();
+try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
+  sessionStorage.removeItem('bf3_continue_after_slot');
+  if(titleScreen._reveal) titleScreen._reveal();
+  setTimeout(modeSelect,0);
+} }catch(e){}
 setTimeout(checkUpdate,2500);
 window.addEventListener('pointerdown',initAudio,{once:true});
 /* debug hook (headless verification) */

@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.291.0';
+const VERSION3D='1.292.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1316,8 +1316,39 @@ const FXDEF={
   arcaneskill:{f:'arcaneskill',v:0.5}, secretget:{f:'secretget',v:0.6}, wandcharge:{f:'wandcharge',v:0.44}, wandfire:{f:'wandfire',v:0.42},
   sell:{f:'sell',v:0.48}, lootpickup:{f:'lootpickup',v:0.48}, buy:{f:'buy',v:0.46},
   mobvoice1:{f:'mobvoice1',v:0.44}, mobvoice2:{f:'mobvoice2',v:0.44},
-  bossroar1:{f:'bossroar1',v:0.62}, bossroar2:{f:'bossroar2',v:0.62}, bossroar3:{f:'bossroar3',v:0.62}, bossdie:{f:'bossdie',v:0.6}
+  bossroar1:{f:'bossroar1',v:0.62}, bossroar2:{f:'bossroar2',v:0.62}, bossroar3:{f:'bossroar3',v:0.62}, bossdie:{f:'bossdie',v:0.6},
+  // ---- curated SFX pack (2026-07 upgrade): per-weapon impacts, mob voices, features ----
+  m_axe:{f:'m_axe',v:0.5}, m_gsmetal:{f:'m_gsmetal',v:0.5}, m_gsplate:{f:'m_gsplate',v:0.5}, m_gspunch:{f:'m_gspunch',v:0.52}, m_scythe:{f:'m_scythe',v:0.46}, m_knives:{f:'m_knives',v:0.44},
+  xbowclick:{f:'xbowclick',v:0.42}, xbowlatch:{f:'xbowlatch',v:0.42},
+  cast1:{f:'cast1',v:0.4}, cast2:{f:'cast2',v:0.4}, cast3:{f:'cast3',v:0.4}, cast4:{f:'cast4',v:0.4}, cast5:{f:'cast5',v:0.42}, cast6:{f:'cast6',v:0.4}, cast7:{f:'cast7',v:0.42},
+  die1:{f:'die1',v:0.5}, die2:{f:'die2',v:0.5}, die3:{f:'die3',v:0.5}, die4:{f:'die4',v:0.5}, hurt1:{f:'hurt1',v:0.44}, hurt2:{f:'hurt2',v:0.44}, shatter:{f:'shatter',v:0.5},
+  v_boargrunt:{f:'v_boargrunt',v:0.44}, v_boarroar:{f:'v_boarroar',v:0.5}, v_jackalbark:{f:'v_jackalbark',v:0.44}, v_jackalhowl:{f:'v_jackalhowl',v:0.48},
+  v_slime1:{f:'v_slime1',v:0.42}, v_slime2:{f:'v_slime2',v:0.42}, v_spit:{f:'v_spit',v:0.44}, v_burble:{f:'v_burble',v:0.46},
+  v_ghost1:{f:'v_ghost1',v:0.44}, v_ghost2:{f:'v_ghost2',v:0.44}, v_breath:{f:'v_breath',v:0.42}, v_undead1:{f:'v_undead1',v:0.46}, v_undead2:{f:'v_undead2',v:0.46},
+  v_goblin:{f:'v_goblin',v:0.44}, v_troll:{f:'v_troll',v:0.5}, v_small1:{f:'v_small1',v:0.42}, v_small2:{f:'v_small2',v:0.42}, v_deep:{f:'v_deep',v:0.5},
+  v_bossroar1:{f:'v_bossroar1',v:0.62}, v_bossroar2:{f:'v_bossroar2',v:0.6}, v_clank:{f:'v_clank',v:0.46}, v_stone:{f:'v_stone',v:0.5},
+  atk1:{f:'atk1',v:0.4}, atk2:{f:'atk2',v:0.4}, ma_stomp:{f:'ma_stomp',v:0.5},
+  mimicroar:{f:'mimicroar',v:0.58}, chestthunk:{f:'chestthunk',v:0.5}, gamblecoins:{f:'gamblecoins',v:0.48}
 };
+// per-mob voices (aggro on wake / die on death) from the curated pack — falls back to generics
+const MOBSND={
+  thornboar:{v:'v_boargrunt',d:'die1'}, charger:{v:'v_boarroar',d:'die2'}, dustjackal:{v:'v_jackalbark',d:'die3'},
+  toxling:{v:'v_slime1',d:'hurt1'}, slime:{v:'v_slime1',d:'hurt1'}, slimelet:{v:'v_slime2',d:'hurt2'},
+  cragspitter:{v:'v_spit',d:'die4'}, sporeback:{v:'v_burble',d:'v_burble'},
+  shadeling:{v:'v_ghost1',d:'die3'}, blinkstalker:{v:'v_ghost2',d:'die3'}, voidtether:{v:'v_ghost1',d:'die3'},
+  galewisp:{v:'v_breath',d:'hurt2'}, flyer:{v:'v_breath',d:'hurt2'},
+  revenant:{v:'v_undead1',d:'die4'}, bones:{v:'v_undead2',d:'die4'},
+  goblin:{v:'v_goblin',d:'hurt1'}, grunt:{v:'v_troll',d:'die1'},
+  emberling:{v:'v_small1',d:'die2'}, magmaskit:{v:'v_small1',d:'die2'}, embertotem:{v:'v_small1',d:'die2'},
+  frostling:{v:'v_small2',d:'shatter'}, sparkling:{v:'v_small2',d:'shatter'}, frostlobber:{v:'v_small2',d:'shatter'}, frostshell:{v:'v_small2',d:'shatter'},
+  sentinel:{v:'v_clank',d:'die1'}, siegeknight:{v:'v_clank',d:'die1'}, marblestatue:{v:'v_stone',d:'v_stone'},
+  caster:{v:'v_ghost2',d:'die3'}, sunpriest:{v:'v_ghost1',d:'die3'}, royalarcanist:{v:'v_ghost2',d:'die3'}
+};
+const DIE_GENERIC=['die1','die2','die3','die4'];
+function mobAggro(e){ if(!e||e.boss) return; const m=MOBSND[e.type]; if(m&&m.v) playFx(m.v,0.7); else SFX.growl(0.5); }
+function mobDie(e){ if(!e||e.boss) return; const m=MOBSND[e.type], k=(m&&m.d)||DIE_GENERIC[(Math.random()*4)|0]; try{ playFx(k,0.85); }catch(_){ try{SFX.enemyDie();}catch(e2){} } }
+// per-weapon melee IMPACT on a landed hit (heavy weapons only, so fast light weapons don't clutter)
+function weaponImpact(w){ if(!w) return; const k={axe:'m_axe',great:'m_gsmetal',hammer:'m_gspunch',scythe:'m_scythe'}[w.art]; if(k) playFx(k,0.6); }
 const FXBUF={}; let _fxLoaded=false;
 // measure a decoded buffer's RMS loudness (sparse sample, up to 2 channels)
 function bufRms(buf){ let s=0,n=0; const ch=Math.min(buf.numberOfChannels,2);
@@ -1352,6 +1383,8 @@ const SFX={
     noise({dur:0.08,f0:5400,f1:1700,q:2.2,vol:0.05,a:0.001});
     tone({f0:3300,dur:0.06,type:'sine',vol:0.035,at:0.085}); },
   magic(el){
+    { const now=(typeof actx!=='undefined'&&actx)?actx.currentTime:0; if(now-(this._castT||0)>0.12){ this._castT=now;   // curated cast layer, throttled so rapid wands don't stack
+      const ck={fire:'cast1',ice:'cast2',poison:'cast3',arcane:'cast4',void:'cast5',holy:'cast7'}[(typeof normEl==='function'?normEl(el):el)]; if(ck) playFx(ck,0.45); } }
     if(el==='fire'){ tone({f0:150,f1:46,dur:0.28,type:'sawtooth',vol:0.10});
       noise({dur:0.30,f0:900,f1:180,type:'lowpass',vol:0.13,a:0.01}); playFx('fireshot'); }
     else if(el==='ice'){ tone({f0:1250,dur:0.26,type:'sine',vol:0.05}); tone({f0:1870,dur:0.3,type:'sine',vol:0.03,at:0.02,detune:6});
@@ -2967,7 +3000,7 @@ const GAMBLE_COST=480;
 const GAMBLE_ODDS=[['common',0.52],['uncommon',0.30],['rare',0.13],['epic',0.042],['legendary',0.008]];
 function gambleRarity(){ let r=Math.random(); for(const q of GAMBLE_ODDS){ if(r<q[1]) return q[0]; r-=q[1]; } return 'common'; }
 function gambleSpin(back){
-  mode='menu'; playFx('dice'); playFx('forgespin',0.7);
+  mode='menu'; playFx('dice'); playFx('forgespin',0.7); playFx('gamblecoins',0.8);
   const rid=gambleRarity(), item=randomLoot(rid), ro=item.weapon||item.armor||item.trinket, rc=RARITY[rid].color, tier=RARITY[rid].tier;
   // a teaser reel that flashes every rarity — anything could happen (it won't)
   const pool=[itemAv(makeWeapon('sword','common')),itemAv(makeArmor('uncommon','chest')),itemAv(makeWeapon('bow','rare')),
@@ -5291,7 +5324,7 @@ function playerAttack(cdMul){
     burst(t.x,t.y+t.h*0.5,t.z,'#cfd6df',6);
     return;
   }
-  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else SFX.shoot(); }   // Phase 20: wands use the new procedural zap (weaponFireFx still gates which weapons get it)
+  if(w.cls==='ranged'){ p.atkTimer=0.18; fireProjectile(p,w,t); if(w.sch==='mag'){ SFX.magic(w.el); if(weaponFireFx(w)==='wandfire') SFX.wand(); } else { SFX.shoot(); if(w.arche==='crossbow') playFx('xbowclick',0.7); } }   // Phase 20: wands use the new procedural zap; crossbow gets its mechanical click
   else { p.atkTimer=0.26; SFX.slash(); { const _sf=weaponSwingFx(w); if(_sf) playFx(_sf); }
     if(w.art==='scythe' && classFamilyOk(w)){                          // scythe = a 3-hit combo: two physical sweeps, then a MAGIC burst
       p.scytheCombo = ((G.time-(p._scytheT||-9))>0.85) ? 0 : (((p.scytheCombo||0)+1)%3);
@@ -5885,8 +5918,9 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(el) applyElement(e,el,dmg);
   G.shake=Math.min(G.shake+(e.boss?2:3),9); SFX.hit();
   if(src===G.p && e.hp>0){ const w=G.p.weapon;                              // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
+    weaponImpact(w);                                                        // curated heavy-weapon impact (axe/great/hammer/scythe)
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
-    else if((e.boss||e.elite) && Math.random()<0.4) playFx('heavyhit',0.85); } // meaty connect on the big foes
+    else if((e.boss||e.elite) && Math.random()<0.4 && !(w&&/axe|great|hammer|scythe/.test(w.art||''))) playFx('heavyhit',0.85); } // meaty connect on the big foes (skip if a curated impact already played)
   if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
   if(lifesteal>0 && src===G.p){                                    // lifesteal heavily nerfed globally; the Reaper keeps a clear edge but is no longer a free full-heal
     const lsMul = meta.classId==='reaper'?0.5:0.3;
@@ -5965,13 +5999,8 @@ function killEnemy(e,weaponKill){
     checkAchievements();
   } else {
     // per-mob death voice (batch-2): grunt + a couple of assigned mobs, else the procedural die
-    if(e.type==='grunt') playFx('gruntdie');
-    else if(e.type==='revenant') playFx('mobvoice1');
-    else if(e.type==='charger') playFx('mobvoice2');
-    else if(e.deathpuff){ SFX.magic('poison'); noise({dur:.32,f0:900,f1:180,type:'lowpass',vol:.045,a:.01}); }
-    else if(e.look==='bones'||e.type==='bones'){ SFX.enemyDie(); playFx('bonesdie'); }
-    else if(e.type==='frostling'){ SFX.enemyDie(); playFx('frostdie'); }
-    else SFX.enemyDie();
+    if(e.deathpuff){ SFX.magic('poison'); noise({dur:.32,f0:900,f1:180,type:'lowpass',vol:.045,a:.01}); mobDie(e); }
+    else mobDie(e);   // curated per-mob death voice (die1-4 / shatter / undead / squelch, by type)
     { const w=G.p.weapon; if(!e.deathpuff&&w&&(w.arche==='dagger'||w.arche==='knives'||w.arche==='javelin')) playFx('stabkill',0.85); }  // stabbing-weapon kill accent
     checkAchievements();
     // FEWER, MEANINGFUL drops: even elites are no longer guaranteed loot, so long runs cannot flood the bag.
@@ -5994,6 +6023,7 @@ function mimicReveal(ch){
   if(MP.active && !MP.isHost) return;   // co-op: the host reveals mimics; guests receive them via the enemy mirror
   const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
   const m=spawnEnemy('mimic',ch.x,ch.z); m.active=true; m.mimicE=true; m.dropT=0;
+  playFx('chestthunk'); playFx('mimicroar',0.85);   // the chest lurches, then roars
   burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
   addText(ch.x,44,ch.z,'MIMIC!','var(--danger)',true);
   SFX.growl(1.4); playFx('chestopen'); playFx('mobvoice1',0.9);
@@ -6904,7 +6934,7 @@ function update(dt){
     if(e.dead) continue;
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.dropT>0){ if(dXZ(e.x,e.z,p.x,p.z)<640){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
-      if(e.boss) onBossActivate(e); else if(e.kind==='fly') SFX.screech(0.5); else SFX.growl(0.5); } } continue; }
+      if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
     const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
@@ -6969,7 +6999,7 @@ function update(dt){
       else if(e.windT>0){ e.windMax=e.windMax||e.windT; e.teleX=dirX; e.teleZ=dirZ; e.windT-=dt;   // track aim so the danger-line follows you during the tell
         if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=dirX; e.cdz=dirZ; } }
       else { e.x+=dirX*eff*dt; e.z+=dirZ*eff*dt;
-        if(d<300 && e.atkTimer<=0){ e.windT=e.elite?0.42:0.55; e.windMax=e.windT; e.atkTimer=e.elite?1.8:2.8; SFX.growl(1.1); } }   // AUDIO CUE at the START of the wind-up, not at launch
+        if(d<300 && e.atkTimer<=0){ e.windT=e.elite?0.42:0.55; e.windMax=e.windT; e.atkTimer=e.elite?1.8:2.8; playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
     if(e.kind!=='fly'&&e.kind!=='goblin'){

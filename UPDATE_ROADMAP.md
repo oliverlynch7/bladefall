@@ -1262,3 +1262,21 @@ The Arena feature set is now COMPLETE.
   ~5-9s cadence), float+bob, apply on pickup (heal 40%, +50% dmg/speed for 9s). Verified spawning + 0 errors.
 - MULTIPLAYER + ARENA now fully complete: presence, shared enemies, shared hub, revive, PvP, arena sandbox,
   3 maps, custom/fair/random loadouts, free respec, AI bots (4 difficulties), scoreboard/rounds, 2v2, powerups.
+
+
+## [Claude | 2026-07-21] Deeper SFX pass — curated pack wired in — shipped v1.292.0
+Brought the ~50 curated CC0 sounds (from the SFX review page) into the game as real audio, replacing
+generic procedural cues with per-weapon and per-mob character.
+- Copied 50 curated mp3s into public/sfx/ (game now 105 sounds); registered all in FXDEF with RMS auto-level.
+- **Per-mob aggro voices** on wake: MOBSND map routes each of 33 enemy types to a fitting voice (boar grunt,
+  jackal bark, slime squelch, ghost moan, undead groan, goblin chitter, troll grunt, metal clank, stone
+  impact, small-elemental, etc.); bosses keep their roars.
+- **Per-mob death sounds:** die1-4 / hurt / shatter (frost & shell) / squelch / undead by type — replaces
+  the single generic enemyDie.
+- **Heavy-weapon melee IMPACTS** on landed hits: axe→chop, greatsword→metal, warhammer→blunt, scythe→slice
+  (gated to heavy weapons so fast light weapons don't clutter; skips the old generic heavyhit when one plays).
+- **Per-element magic cast layer** in SFX.magic (fire/ice/poison/arcane/void/holy → cast1-7), throttled 120ms
+  so rapid wands don't stack. **Crossbow** gets its mechanical click. **Enemy attack telegraph** (atk1/2, or
+  stomp for chargers/siege/statues) at wind-up start. **Mimic reveal** = chest thunk + roar. **Gamble** = coin shuffle.
+- VERIFIED: all 18 sampled new files serve 200 at /sfx/, syntax OK, game loads 0 console errors.
+- NEXT (Oliver's ask): flesh out the tutorial level.

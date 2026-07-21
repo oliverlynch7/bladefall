@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.288.0';
+const VERSION3D='1.289.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -936,7 +936,8 @@ if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
 }catch(e){} })();
 function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
-function persist(){ persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
+function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
+  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
@@ -6471,12 +6472,120 @@ function openMPLobby(){
     MP.join(c,(ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not join ('+info+'). Check the code.'); return; }
       st('Connected! Waiting for the host to enter a zone…',true); }); };
 }
+/* ============================================================================
+   THE ARENA — a fully save-protected sandbox + PvP battleground (solo or co-op).
+   Build a TEMPORARY custom loadout (level, class, rank, weapon, armor) and fight
+   on selectable maps. NOTHING here touches your campaign: meta is snapshotted on
+   entry and restored on exit, and persist() is frozen while inside.
+   ============================================================================ */
+var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary' };
+const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
+const ARENA_MAPS={
+  flat:{ name:'Proving Ground', desc:'A clean flat arena — pure skill, no cover.', sky:[0.10,0.11,0.15], ground:'#3b4254',
+    build(){ /* open ground only */ } },
+  parkour:{ name:'The Gauntlet', desc:'Platforms, ledges and gaps — verticality and juke routes.', sky:[0.10,0.12,0.17], ground:'#3a3350',
+    build(){ const P=(x,z,w,d,h,c)=>{ G.obstacles.push({kind:'plat',x,z,w,d,h}); G.deco.push({x,z,y0:h,w,h:2.4,d,c:c||'#6a6088'}); G.deco.push({x,z,y0:0,w,h,d,c:'#2c2640'}); };
+      P(0,0,150,150,66); P(-280,-170,150,100,38); P(280,-170,150,100,38); P(-280,170,150,100,96); P(280,170,150,100,96);
+      P(0,-340,200,70,132); P(0,330,200,70,22); P(-460,0,110,320,58); P(460,0,110,320,58);
+      P(-150,-160,70,70,100); P(150,160,70,70,120); } },
+  lava:{ name:'Cinder Pit', desc:'Islands over a lava sea — a fall burns. Keep your footing.', sky:[0.16,0.06,0.05], ground:'#c93a12',
+    build(){ G.arenaLava=[{x:0,z:0,w:1600,d:1600}];   // the entire floor is molten; only the islands are safe
+      const isle=(x,z,r,h)=>{ h=h||26; G.obstacles.push({kind:'plat',x,z,w:r*2,d:r*2,h}); G.deco.push({x,z,y0:h,w:r*2,h:3,d:r*2,c:'#4a3a34'}); G.deco.push({x,z,y0:0,w:r*2,h,d:r*2,c:'#160a08'}); };
+      isle(0,0,150,26); isle(-320,-280,95,40); isle(320,-280,95,40); isle(-320,280,95,64); isle(320,280,95,64); isle(0,-380,80,90); isle(0,380,80,20);
+      for(let k=0;k<10;k++) G.deco.push({x:(Math.random()*2-1)*640,z:(Math.random()*2-1)*640,y0:0,w:18,h:6,d:18,c:'#ff7a3a',theme:'void'}); } }
+};
+function arenaSetLevel(p,lvl){ lvl=Math.max(1,Math.min(60,lvl|0)); for(let i=1;i<lvl;i++) autoLevelGrow(p); p.level=lvl; p.xp=0; p.xpNext=CHARACTER_XP(lvl); }
+function arenaApplyClass(cfg){ meta.classId=cfg.classId; const cs=classState(cfg.classId); cs.rank=Math.max(1,Math.min(10,cfg.rank||10));
+  const def=c2def(cfg.classId); if(def){ cs.ch=cs.ch||{}; for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r) cs.ch[r]=cs.ch[r]||def['r'+r].a.id; } }   // auto-fill a valid build; Free Respec lets you customize
+  if(!cs.sub){ const C=CLASSES[cfg.classId]; cs.sub=(C&&C.subs&&C.subs[0]&&C.subs[0].id)||null; } }
+function buildArenaPlayer(cfg){ arenaApplyClass(cfg); const p=freshPlayer(); arenaSetLevel(p,cfg.level);
+  try{ p.weapon=makeWeapon(cfg.wArch,cfg.wRid); }catch(e){}
+  for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(cfg.aRid,slot); }catch(e){} }
+  p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
+function enterArena(){ const cfg=ARENA_LOADOUT;
+  // ---- SAVE PROTECTION: snapshot everything we might mutate; persist() is frozen while IN_ARENA ----
+  ARENA_BACKUP={ classId:meta.classId, hero:meta.hero, classes:JSON.parse(JSON.stringify(meta.classes||{})),
+    perks:JSON.parse(JSON.stringify(meta.perks||{})), gold:meta.gold, stash:meta.stash, run:meta.run, bank:meta.bank,
+    classUnlocked:JSON.parse(JSON.stringify(meta.classUnlocked||{})) };
+  IN_ARENA=true; meta.perks={}; meta.gold=9999999;                 // clean stat base + free respec inside the arena
+  meta.classUnlocked=meta.classUnlocked||{}; for(const cid of Object.keys(CLASSES)) meta.classUnlocked[cid]=true;   // sandbox: every class available
+  const map=ARENA_MAPS[cfg.map]||ARENA_MAPS.flat; ARENA_STAGE={name:map.name,theme:'arena',sky:map.sky,ground:map.ground,aw:1600,ad:1600};
+  const p=buildArenaPlayer(cfg);
+  G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;
+  G.segments=[];G.walls=[];G.obstacles=[];G.movers=[];G.pads=[];G.chests=[];G.deco=[];G.crumbles=[];G.geysers=[];G.springs=[];G.shockwaves=[];G.trails=[];G.spikefields=[];G.beam=null;G.collapse=[];G.rooms=[];G.doors=[];G.plates=[];G.keys=[];G.torches=[];G.dens=[];G.npc=null;G.enemies=[];G.pickups=[];G.projectiles=[];G.gates=[];G.hubNpcs=[];G.arenaLava=null;
+  G.bounds={minX:-740,maxX:740,minZ:-740,maxZ:740};
+  try{ map.build(); }catch(e){}
+  const sy=(cfg.map==='lava')?70:0; G.arenaSpawn={x:0,z:0,y:sy}; G.startPos={x:0,z:0}; G.lastSafe={x:0,z:0,y:sy}; G.goalPos={x:0,z:-200}; G.progressEnd=-700;
+  p.x=0;p.z=0;p.y=sy;p.yaw=Math.PI;p.onGround=true;p.vx=0;p.vy=0;p.vz=0;
+  mode='play'; showOverlay(false); showGameUI(true); try{musicForScene();}catch(e){} skillbarUpdate(); hudUpdate();
+  { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
+  if(MP.active){ MP.pvp=true; }
+  toast('⚔ '+map.name+' — Pause (Esc) to reconfigure or leave. Nothing here affects your save.');
+}
+function exitArena(){ IN_ARENA=false;
+  if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; }
+  if(MP.active) MP.pvp=false; ARENA_STAGE=null; refreshBagCap&&refreshBagCap(); openHub(); }
+function arenaRespawn(){ if(!G||!G.p) return; const p=G.p; p.dead=false; p.downed=false; p._pvpDead=false;
+  const sp=G.arenaSpawn||{x:0,z:0,y:60}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+8; p.vx=0;p.vy=0;p.vz=0; p.hp=effMaxHp(p); p.invuln=2;
+  try{ burst(p.x,p.y+20,p.z,'#7de08a',14); hudUpdate(); }catch(e){} }
+function arenaHazardTick(dt){ if(!G||!G.arena||!G.p) return; const p=G.p;
+  if(G.arenaLava && p.y<15 && !(p.invuln>0)){ let inLava=false; for(const L of G.arenaLava){ if(Math.abs(p.x-L.x)<L.w/2 && Math.abs(p.z-L.z)<L.d/2){ inLava=true; break; } }
+    if(inLava){ p._lavaT=(p._lavaT||0)+dt; if(p._lavaT>=0.3){ p._lavaT=0; p.hp-=Math.max(5,Math.round((effMaxHp(p))*0.07)); p.hurtFlash=0.3;
+      try{ addText(p.x,p.y+42,p.z,'🔥','#ff7a3a'); burst(p.x,4,p.z,'#ff7a3a',6); SFX.hurt(); }catch(e){} if(p.hp<=0){ p.hp=0; arenaRespawn(); } } } else p._lavaT=0; }
+}
+// ---- The Arena setup / loadout menu (used pre-entry AND re-openable in-arena) ----
+function openArenaSetup(back){ mode='menu'; showGameUI(false);
+  const cfg=ARENA_LOADOUT, inA=IN_ARENA;
+  const mapCard=(id)=>{ const m=ARENA_MAPS[id]; return `<button class="bigbtn ghost arenamap ${cfg.map===id?'sel':''}" data-map="${id}" style="text-align:left;${cfg.map===id?'border-color:#e8a33d;':''}"><b>${m.name}</b><br><span style="opacity:.7;font-size:12px">${m.desc}</span></button>`; };
+  const classBtns=Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arenacls ${cfg.classId===cid?'sel':''}" data-cls="${cid}" style="width:auto;flex:1;min-width:90px;${cfg.classId===cid?'border-color:#e8a33d;':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('');
+  const archOpts=ARCHEIDS.map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
+  const ridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.wRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
+  const aridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.aRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
+  const sel=`background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:8px;padding:8px;font-size:13px`;
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Arena · sandbox</p><h2 class="ovh">⚔️ Arena Loadout</h2>
+    <p class="ovsub">A save-protected battleground. Everything here is <b>temporary</b> — you keep nothing you set and lose nothing from your campaign.</p>
+    <p class="hint" style="text-align:left;margin:6px 0 4px"><b>Map</b></p>
+    <div style="display:flex;flex-direction:column;gap:6px">${['flat','parkour','lava'].map(mapCard).join('')}</div>
+    <p class="hint" style="text-align:left;margin:12px 0 4px"><b>Class</b> · free respec inside</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${classBtns}</div>
+    <div style="display:flex;gap:14px;margin:12px 0 2px"><label style="flex:1">Level <b id="arLvlV">${cfg.level}</b><input id="arLvl" type="range" min="1" max="60" value="${cfg.level}" style="width:100%"></label>
+      <label style="flex:1">Class Rank <b id="arRankV">${cfg.rank}</b><input id="arRank" type="range" min="1" max="10" value="${cfg.rank}" style="width:100%"></label></div>
+    <div style="display:flex;gap:10px;margin:10px 0 2px;flex-wrap:wrap">
+      <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" style="${sel};width:100%">${archOpts}</select></label>
+      <label style="flex:1;min-width:110px">Weapon rarity<br><select id="arWRid" style="${sel};width:100%">${ridOpts}</select></label>
+      <label style="flex:1;min-width:110px">Armor rarity<br><select id="arARid" style="${sel};width:100%">${aridOpts}</select></label></div>
+    <div style="display:flex;gap:8px;margin:12px 0">
+      <button class="bigbtn ghost" id="arFair" style="flex:1;margin:0">⚖️ Fair Mode</button>
+      <button class="bigbtn ghost" id="arRand" style="flex:1;margin:0">🎲 Randomize</button>
+      ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;margin:0">✨ Free Respec</button>':''}</div>
+    <button class="bigbtn" id="arGo">${inA?'✓ Apply Loadout':'⚔️ Enter Arena'}</button>
+    ${inA?'<button class="bigbtn ghost" id="arLeave" style="margin-top:8px;color:#ff8a82;border-color:#5a2a2a">Leave Arena</button>':''}
+    <button class="bigbtn ghost" id="arBack" style="margin-top:8px">Back</button></div>`);
+  const g=id=>document.getElementById(id);
+  document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{ cfg.map=b.dataset.map; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
+  document.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>{ cfg.classId=b.dataset.cls; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
+  g('arLvl').oninput=e=>{ cfg.level=+e.target.value; g('arLvlV').textContent=cfg.level; };
+  g('arRank').oninput=e=>{ cfg.rank=+e.target.value; g('arRankV').textContent=cfg.rank; };
+  g('arArch').onchange=e=>{ cfg.wArch=e.target.value; };
+  g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
+  g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
+  g('arFair').onclick=()=>{ Object.assign(cfg,ARENA_FAIR); try{SFX.pickup();}catch(e){} toast('⚖️ Fair Mode — standardized loadout for a level playing field.'); openArenaSetup(back); };
+  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); try{SFX.pickup();}catch(e){} toast('🎲 Randomized loadout!'); openArenaSetup(back); };
+  if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
+    const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
+  g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
+    if(inA){ const np=buildArenaPlayer(cfg); const o=G.p; np.x=o.x;np.z=o.z;np.y=o.y;np.yaw=o.yaw;np.onGround=o.onGround; G.p=np; skillbarUpdate(); hudUpdate(); mode='play'; showOverlay(false); showGameUI(true); toast('Loadout applied.'); }
+    else enterArena(); };
+  g('arBack').onclick=back||titleScreen;
+}
 function update(dt){
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(MP.active && MP.pvp && G.enemies && G.enemies.length){ G.enemies.length=0; G.boss=null; }   // PvP is an enemy-free duel arena
+  if(G.arena) arenaHazardTick(dt);                             // Arena: lava/hazard damage -> respawn (never a real death)
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
@@ -7175,6 +7284,7 @@ function regrabCam(){ if(meta.camMode!=='far' && mode==='play' && document.point
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }
 function die(){
+  if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
   const Z=curZone(), perma=isPermadeath(), D=curDiff();
@@ -7769,7 +7879,8 @@ function enterWaystation(){
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-548,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-150,z:650,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})}
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:150,z:650,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
+    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'sprintgate',verb:'Enter the Arena',direct:true,x:0,z:720,c1:'#3a1618',c2:'#e8453d',open:()=>openArenaSetup(wsResume)}
   ];
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
@@ -7783,7 +7894,8 @@ function enterWaystation(){
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
     {x:-200,z:322,w:66,d:24},  // Postings board
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
-    {x:-548,z:45,w:48,d:40}    // Your Bag chest — moved to the west wall, between the Quartermaster & the Smith
+    {x:-548,z:45,w:48,d:40},   // Your Bag chest — moved to the west wall, between the Quartermaster & the Smith
+    {x:0,z:720,w:60,d:30}      // The Arena gate
   ];
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
   // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
@@ -8870,6 +8982,7 @@ function openPause(){
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
+    ${IN_ARENA?`<button class="bigbtn" id="arenaCfgBtn">⚔️ Arena Loadout &amp; Maps</button>`:''}
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
     <div class="navgrid">
@@ -8894,9 +9007,10 @@ function openPause(){
     ${audioSettingsHTML()}
     <div class="sect">Leave</div>
     <div class="pgrid">
-      <button class="bigbtn ghost" id="qmenu">Quit to Hub</button>
+      <button class="bigbtn ghost" id="qmenu">${IN_ARENA?'⟵ Leave Arena':'Quit to Hub'}</button>
       <button class="bigbtn ghost" id="titleBtnP">Title Screen</button>
     </div></div>`);
+  { const _ac=document.getElementById('arenaCfgBtn'); if(_ac) _ac.onclick=()=>{ resumeGameAudio(false); openArenaSetup(openPause); }; }
   { const _fs=document.getElementById('fsBtn'); if(_fs) _fs.onclick=()=>{ toggleFullscreen(); setTimeout(openPause,120); }; }
   document.getElementById('titleBtnP').onclick=()=>{ persist(); resumeGameAudio(false); titleScreen(); };
   document.getElementById('resBtn').onclick=()=>{ resumeGameAudio(true); resumePlay(); };
@@ -8916,7 +9030,7 @@ function openPause(){
   document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
-  document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };
+  document.getElementById('qmenu').onclick=()=>{ if(IN_ARENA){ resumeGameAudio(false); exitArena(); return; } persist(); resumeGameAudio(false); openHub(); };
 }
 function openPauseSettingsV2(){
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
@@ -10628,7 +10742,7 @@ const SKYSUN={
 function render(t){
   if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
-  const s=(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette
+  const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
   const sky=s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -11050,6 +11164,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
+  enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
   openWeaponStudio, studioSwing, exitStudio, get studio(){ return studio; },
   openDesignStudio, designSet, get DESIGNS(){ return DESIGNS; },
   openMirror, openWardrobe, exitMirror, get mirror(){ return mirror; }, applyCameraLook,

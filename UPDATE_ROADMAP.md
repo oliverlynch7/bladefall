@@ -1205,3 +1205,24 @@ Three phases in one pass (all guarded by MP.active; single-player & host byte-fo
   lobby; lobby shows Co-op / PvP / Join; loopback logic tests pass (down->revive->50%hp, die-when-alone,
   PvP host-scorekeeper to 5, 0.6 dmg scalar). Live 2-device tuning still recommended for feel.
 - Multiplayer roadmap COMPLETE: P1.1 presence, P1.2 shared enemies, Phase 2 hub, P1.3 revive, Phase 3 PvP.
+
+
+## [Claude | 2026-07-21] The Arena — save-protected loadout sandbox (Increment 1) — shipped v1.289.0
+A custom-loadout battleground, solo-accessible from the hub (new "⚔️ The Arena" gate at x0,z720) and
+the foundation for PvP. Increment 1 of a multi-part build.
+- **SAVE PROTECTION (verified):** entering snapshots meta (classId, hero, classes, perks, gold, stash,
+  run, bank, classUnlocked) and FREEZES persist() while inside (IN_ARENA); exiting restores everything.
+  Verified in-browser: localStorage stays byte-identical through enter->exit, player builds correctly,
+  0 console errors. You keep nothing you set and lose nothing from your campaign.
+- **Loadout menu (openArenaSetup):** pick MAP, CLASS (all 4, sandbox-unlocked), LEVEL 1-60 (default 30),
+  CLASS RANK 1-10 (default 10, skills auto-filled to a valid build), WEAPON (every archetype) + rarity,
+  ARMOR rarity. Buttons: ⚖️ Fair Mode (standard loadout for everyone), 🎲 Randomize, ✨ Free Respec
+  (arena gives temp gold so the Drillmaster respec is free). Re-openable in-arena via Pause.
+- **3 MAPS:** Proving Ground (flat), The Gauntlet (parkour platforms/ledges), Cinder Pit (islands over a
+  lava sea — falling burns you, respawn). Own sky/ground palette per map (ARENA_STAGE render hook).
+- **No real death inside:** die() -> arenaRespawn (full HP at spawn); lava/hazard damage -> respawn.
+  In co-op the arena flags MP.pvp. Pause menu gets "Arena Loadout" + "Leave Arena" (routes exitArena
+  so the save is always restored).
+- Debug hooks on __BF3: enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena.
+- NEXT increments: AI bots w/ difficulty settings (Oliver wants these improvable), MP arena sync so
+  co-op/PvP share the arena, scoreboard+rounds, team modes (2v2), arena pickups/powerups.

@@ -873,7 +873,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.287.0';
+const VERSION3D='1.288.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2116,7 +2116,9 @@ function questKill(type){
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
 function openWay(){ if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
-  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen'); }
+  addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); SFX.pickup(); playFx('portalopen');
+  if(MP.active && G.p.downed) MP.reviveSelf('The way opens — you rise.');   // co-op joint clear: clearing the zone lifts a downed ally
+}
 // render only when the content changes; pulse once on a progress change, hold a stronger state on completion
 function applyQuest(el,head,rows,sig,complete=false){
   const html=`<div class="qhead">${head}</div>${rows}`;
@@ -5711,7 +5713,7 @@ SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
 function useSkill(i){
-  if(mode!=='play'||!G) return; const p=G.p; if(p.dead) return;
+  if(mode!=='play'||!G) return; const p=G.p; if(p.dead||p.downed) return;
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
     if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
@@ -5837,6 +5839,7 @@ function resolveSwing(){
       if(d>e.r && (dx*fx+dz*fz)/d<cosHalf) continue;      // outside the front arc (point-blank always connects)
       if(vOverlap(e,p)) hit(e); }
   }
+  if(MP.active&&MP.pvp) MP.pvpMelee(p,w,dmg);   // Phase 3 PvP: the same swing can strike a rival player
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
@@ -6064,6 +6067,7 @@ function checkStageClear(){
 }
 function hurtPlayer(dmg,sx,sz){
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
+  if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
@@ -6081,7 +6085,10 @@ function hurtPlayer(dmg,sx,sz){
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
   if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
-  if(p.hp<=0){ p.hp=0; p.dead=true; die(); }
+  if(p.hp<=0){
+    if(MP.active && !MP.pvp && MP.anyAllyUp()){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
+    p.hp=0; p.dead=true; die();
+  }
 }
 /* ---------------- PET runtime (follow / attack / heal / vacuum + draw) ----------------
    ONE pet lives on G.pet, spawned lazily whenever an active pet is set. No per-frame
@@ -6236,6 +6243,9 @@ const MP={
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
+  HUB:-100,                 // sentinel "zone" for the shared Waystation (Phase 2)
+  pvp:false, scores:{},     // Phase 3 PvP duel state
+  hasZone(){ return this.zone!=null && this.zone!==-1; },
   ROOMPFX:'bladefall-mp-',
   rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
   // lazy-load PeerJS once, on first co-op entry; resolves true on success
@@ -6246,25 +6256,29 @@ const MP={
     s.onerror=()=>{ this._lib=false; const q=this._loading; this._loading=null; q.forEach(r=>r(false)); };
     document.head.appendChild(s); }); },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:this.name, zone:this.zone,
-    x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight', hp:p?Math.round(p.hp):0 }; },
-  mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,
+    x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight', hp:p?Math.round(p.hp):0, dn:(p&&p.downed)?1:0 }; },
+  mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,downed:!!s.dn,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,dn:q.downed?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw}; },
   // ---- HOST ----
-  async host(cb){ if(this.active){ cb&&cb(true,this.code); return; }
+  async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
+    this.pvp=!!pvp;
     this.code=this.rndCode(); this.isHost=true; this.myId='h';
     this.peer=new Peer(this.ROOMPFX+this.code,{debug:0});
     this.peer.on('open',()=>{ this.active=true; cb&&cb(true,this.code); });
     this.peer.on('connection',c=>this.wireGuest(c));
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
   wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
-    if(this.zone>=0) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){}
+    if(this.hasZone()) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){}
     c.on('data',d=>{
-      if(d.t==='hello'){ this.peers[d.p.id]=this.mkPeer(d.p); if(this.zone>=0) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){} }
-      else if(d.t==='pos'){ const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
+      if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); if(this.hasZone()) try{c.send({t:'zone',zone:this.zone,seed:this.seed});}catch(e){} }
+      else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
+      else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
+      else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
+      else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
     });
     c.on('close',()=>{ this.conns=this.conns.filter(x=>x!==c); }); }); },
@@ -6284,22 +6298,28 @@ const MP={
     });
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
   onGuestData(d){
-    if(d.t==='zone'){ this.zone=d.zone; this.seed=d.seed;
-      if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } }
+    if(d.t==='zone'){ this.seed=d.seed; this.pvp=!!d.pvp;
+      if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
+      else { this.zone=d.zone; if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } } }
     else if(d.t==='state'){ const live={}; d.players.forEach(s=>{ if(s.id===this.myId) return; live[s.id]=1;
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en) this.applyEnemies(d.en, d.ek); }
+    else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
+    else if(d.t==='wipe'){ this.doWipe(); }
+    else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
+    else if(d.t==='score'){ this.showScore(d.id,d.n); }
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
   onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0;
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed});}catch(e){}}); },
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed,pvp:this.pvp?1:0});}catch(e){}}); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
       if(q.last>3){ delete this.peers[id]; continue; }
       const k=Math.min(1,dt*12); q.x+=(q.tx-q.x)*k; q.y+=(q.ty-q.y)*k; q.z+=(q.tz-q.z)*k;
       let dy=q.tyaw-q.yaw; while(dy>Math.PI)dy-=2*Math.PI; while(dy<-Math.PI)dy+=2*Math.PI; q.yaw+=dy*k; }
+    this.survivalTick(dt);   // P1.3: downed/revive/bleed-out/wipe
     this._sendT+=dt;
     if(this._sendT>=0.07){ this._sendT=0;                       // ~14 Hz presence
       if(this.isHost){ this.broadcast(); }
@@ -6307,12 +6327,17 @@ const MP={
         this._pingT+=0.07; if(this._pingT>=1){ this._pingT=0; try{this.hostConn.send({t:'ping',ts:performance.now()});}catch(e){} } } } },
   // ---- render remote players in the same zone (simple safe voxel avatar) ----
   drawPeers(t){ if(!G) return;
-    for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==G.zone) continue; this.drawPeer(q,t); } },
+    for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue; this.drawPeer(q,t); } },
   drawPeer(q,t){
     const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null;
     const body=sk?sk.armor:'#6f86c9', bodyLt=sk?sk.armorLt:'#9fb4e6', skinc=sk&&sk.skin?sk.skin:'#d9b08c';
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
     const tint='hsl('+(h%360)+',70%,60%)';
+    if(q.downed){   // collapsed on the ground + a pulsing red distress beacon so an ally can find & revive you
+      pushM(); mv(q.x,4,q.z); rotY(q.yaw||0);
+      bx(0,6,0, 20,8,12, '#7a2b2b'); bx(0,6,10, 10,8,10, skinc);   // slumped body + head
+      const pu=0.5+0.5*Math.sin(t*6);
+      bx(0,40+pu*8,0, 6,6,6, '#ff5e54', '#ff5e54'); popM(); return; }
     pushM(); mv(q.x,(q.y||0)+Math.sin(t*2+ (h%6))*0.6,q.z); rotY(q.yaw||0);
     bx(0,25,0, 17,22,10, body);          // torso
     bx(0,38,0, 12,12,12, skinc);         // head
@@ -6357,30 +6382,90 @@ const MP={
   creditKill(type,xp,elite,boss){ if(!G||!G.p) return; try{ if(xp>0) gainXp(xp); }catch(e){}
     try{ if(type) questKill(type); }catch(e){}
     try{ const e={type,elite,boss,xp,x:G.p.x,z:G.p.z,y:0,h:20,color:'#fff'}; if(typeof rollDrop==='function' && Math.random()<(elite?0.33:0.053)) rollDrop(e); }catch(e){} },
+  // ================= P1.3 DOWNED / REVIVE (co-op death is not the end) =================
+  anyAllyUp(){ for(const id in this.peers){ const q=this.peers[id]; if(q.zone===this.zone && !q.downed && (q.hp==null||q.hp>0)) return true; } return false; },
+  goDown(){ if(!G||!G.p) return; const p=G.p; if(p.downed) return; p.downed=true; p.hp=0; p.vx=0; p.vz=0; p.dead=false;
+    p.downT=60;   // ~60s to be revived before you bleed out to the hub
+    try{ toast('💀 You are DOWN — stay alive, an ally can revive you!'); }catch(e){} try{ burst(p.x,p.y+20,p.z,'#ff5e54',16); }catch(e){} try{ hudUpdate(); }catch(e){} },
+  reviveSelf(msg){ if(!G||!G.p||!G.p.downed) return; const p=G.p; p.downed=false; p.dead=false;
+    p.hp=Math.max(1,Math.round(effMaxHp(p)*0.5)); p.invuln=Math.max(p.invuln||0,1.6);
+    try{ burst(p.x,p.y+30,p.z,'#7de08a',18); }catch(e){} try{ toast(msg||'You are back on your feet!'); }catch(e){} try{ hudUpdate(); }catch(e){} },
+  doRevive(targetId){ if(this.isHost) this.routeRevive(targetId);
+    else if(this.hostConn&&this.hostConn.open){ try{ this.hostConn.send({t:'revive',id:targetId}); }catch(e){} } },
+  routeRevive(id){ if(id===this.myId){ this.reviveSelf('An ally pulled you up!'); return; }   // host: apply or relay to the target guest
+    const c=this.conns.find(x=>x._pid===id); if(c){ try{ c.send({t:'revive',id}); }catch(e){} } },
+  doWipe(){ if(this._wiped) return; this._wiped=true; if(G&&G.p){ G.p.downed=false; G.p.dead=true; } try{ toast('The party has fallen…'); }catch(e){} try{ die(); }catch(e){} },
+  // per-frame co-op survival logic (called from tick while in a zone)
+  survivalTick(dt){ if(!G||!G.p||G.hub) return;
+    // bleed out if not revived in time (only matters once you're actually down)
+    if(G.p.downed){ G.p.downT=(G.p.downT||0)-dt; if(G.p.downT<=0){ G.p.downed=false; G.p.dead=true; try{ die(); }catch(e){} return; } }
+    // revive a nearby downed ally by standing close for ~2.5s
+    if(!G.p.downed && !G.p.dead && this.hasZone()){
+      for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone){ q._rev=0; continue; }
+        if(q.downed){ const d=Math.hypot((q.x||0)-G.p.x,(q.z||0)-G.p.z);
+          if(d<72){ q._rev=(q._rev||0)+dt; if(q._rev>=2.5){ q._rev=0; this.doRevive(q.id); try{ toast('🤝 You revived '+(q.name||'an ally')+'!'); }catch(e){} } }
+          else q._rev=0; }
+        else q._rev=0; } }
+    // host: if every player in the zone is down, it's a wipe
+    if(this.isHost && !this.pvp){ const ids=Object.keys(this.peers).filter(id=>this.peers[id].zone===this.zone);
+      if(ids.length){ const meDown=G.p.downed||G.p.dead, allDown=ids.every(id=>this.peers[id].downed);
+        if(meDown && allDown){ this.conns.forEach(c=>{try{c.send({t:'wipe'});}catch(e){}}); this.doWipe(); } } } },
+  // ================= PHASE 3 PvP (melee duel — friendly fire, first to 5) =================
+  pvpMelee(p,w,dmg){ if(!this.pvp||!G||!p) return;
+    const reach=((typeof MELEE!=='undefined'&&MELEE[w.art]&&MELEE[w.art].reach)||90)+22, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue;
+      const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz); if(d>reach+16) continue;
+      if(d>16 && (dx*fx+dz*fz)/d<0.35) continue;               // must be roughly in front of the swing
+      if(q._pvpSwing===p.swingId) continue; q._pvpSwing=p.swingId;
+      this.sendPvp(q.id, Math.round(dmg), p.x, p.z); try{ addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a'); }catch(e){} } },
+  sendPvp(id,dmg,sx,sz){ const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId};
+    if(this.isHost){ if(id===this.myId) this.takePvpDamage(m); else { const c=this.conns.find(x=>x._pid===id); if(c) try{c.send(m);}catch(e){} } }
+    else { if(this.hostConn&&this.hostConn.open) try{this.hostConn.send(m);}catch(e){} } },
+  routePvp(m){ if(m.id===this.myId){ this.takePvpDamage(m); return; } const c=this.conns.find(x=>x._pid===m.id); if(c) try{c.send(m);}catch(e){} },
+  takePvpDamage(m){ if(!G||!G.p||G.p._pvpDead) return; const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
+    let dmg=Math.max(1,Math.round((m.d||1)*(1-(typeof defenseR==='function'?defenseR(p):0))*0.6));   // 0.6 PvP scalar so duels last
+    p.hp-=dmg; p.hurtFlash=0.3; p.invuln=0.5; const d=Math.max(1,Math.hypot(p.x-m.sx,p.z-m.sz));
+    p.vx=(p.x-m.sx)/d*240; p.vz=(p.z-m.sz)/d*240; p.vy=150; p.onGround=false;
+    try{ addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'#ff5e54'); SFX.hurt(); G.shake=Math.min(G.shake+8,16); hudUpdate(); }catch(e){}
+    if(p.hp<=0){ p.hp=0; p._pvpDead=true; this.reportFrag(m.by); try{ toast('💀 Defeated — respawning…'); }catch(e){}
+      const self=this; setTimeout(()=>self.pvpRespawn(),2000); } },
+  reportFrag(byId){ if(this.isHost) this.hostScore(byId); else if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'frag',by:byId});}catch(e){} },
+  hostScore(byId){ if(!this.isHost) return; this.scores[byId]=(this.scores[byId]||0)+1; const n=this.scores[byId];
+    this.conns.forEach(c=>{try{c.send({t:'score',id:byId,n});}catch(e){}}); this.showScore(byId,n); },
+  showScore(byId,n){ this.scores[byId]=n; const nm=(byId===this.myId)?'You':((this.peers[byId]&&this.peers[byId].name)||'A rival');
+    try{ toast('⚔ '+nm+' — '+n+'/5'); if(n>=5) toast('🏆 '+nm+' win'+(byId===this.myId?'':'s')+' the duel!'); }catch(e){} },
+  pvpRespawn(){ if(!G||!G.p) return; const p=G.p; p._pvpDead=false; p.dead=false; p.downed=false; p.hp=(typeof effMaxHp==='function'?effMaxHp(p):p.maxHp||100);
+    const a=Math.random()*6.28; p.x=Math.cos(a)*260; p.z=Math.sin(a)*260; p.y=0; p.vx=0; p.vy=0; p.vz=0; p.invuln=2;
+    try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
   leave(msg){
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
     try{ if(this.peer) this.peer.destroy(); }catch(e){}
     this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
-    this.kills=[]; this._killed={}; this._gotEn=false;
+    this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={};
+    if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
     if(msg){ try{ toast(msg); }catch(e){} } }
 };
 function openMPLobby(){
   mode='menu'; showGameUI(false);
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Co-op · beta</p><h2 class="ovh">Multiplayer</h2>
-    <p class="ovsub">Run a zone together. Needs an internet connection. One player <b>hosts</b> and shares the code; the other <b>joins</b> and drops into the host's zone. Your single-player save is untouched.</p>
-    <button class="bigbtn" id="mpHost">🌐 Host a game</button>
-    <div id="mpHostInfo" style="display:none;margin:6px 0"><p class="ovsub">Share this code, then start a game and pick a zone — friends who join land in it with you.</p><div id="mpCode" style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--amber,#e8a33d);letter-spacing:.18em;text-align:center;margin:4px 0">····</div></div>
+    <p class="ovsub">Play together. Needs an internet connection. One player <b>hosts</b> and shares the code; the other <b>joins</b> and drops into the host's world. Your single-player save is untouched.</p>
+    <button class="bigbtn" id="mpHost">🤝 Host Co-op</button>
+    <button class="bigbtn" id="mpHostPvp" style="background:linear-gradient(180deg,#c0533f,#8a2f24);margin-top:8px">⚔️ Host PvP Duel</button>
+    <div id="mpHostInfo" style="display:none;margin:6px 0"><p class="ovsub" id="mpHostHint">Share this code, then start a game — friends who join land in your world.</p><div id="mpCode" style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--amber,#e8a33d);letter-spacing:.18em;text-align:center;margin:4px 0">····</div></div>
     <div style="display:flex;gap:8px;margin:10px 0"><input id="mpJoinCode" placeholder="ROOM CODE" maxlength="6" style="flex:1;background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:10px;padding:11px 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase"><button class="bigbtn ghost" id="mpJoin" style="width:auto;margin:0">Join</button></div>
     <p class="ovsub" id="mpStatus" style="min-height:18px"></p>
     <button class="bigbtn ghost" id="mpBack" style="margin-top:6px">Back</button></div>`);
   const st=(m,ok)=>{ const e=document.getElementById('mpStatus'); if(e){ e.textContent=m; e.style.color=ok?'var(--good,#3ad07f)':'var(--muted,#8b8f9a)'; } };
   document.getElementById('mpBack').onclick=titleScreen;
-  document.getElementById('mpHost').onclick=()=>{ st('Connecting…'); try{SFX.pickup();}catch(e){}
+  const doHost=(pvp)=>{ st('Connecting…'); try{SFX.pickup();}catch(e){}
     MP.host((ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
       const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
       const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
-      st('Hosting. Now press Back and start a game — friends who join will land in your zone.',true); }); };
+      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Share this code, then press Back and enter any zone — it becomes an enemy-free arena. First to 5 downs wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
+      st(pvp?'Hosting a PvP duel. Press Back and enter a zone to fight.':'Hosting co-op. Press Back and start a game — friends who join land with you.',true); }, pvp); };
+  document.getElementById('mpHost').onclick=()=>doHost(false);
+  document.getElementById('mpHostPvp').onclick=()=>doHost(true);
   document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
     if(!c){ st('Enter a room code.'); return; } st('Connecting…'); try{SFX.pickup();}catch(e){}
     MP.join(c,(ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not join ('+info+'). Check the code.'); return; }
@@ -6391,6 +6476,7 @@ function update(dt){
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
+  if(MP.active && MP.pvp && G.enemies && G.enemies.length){ G.enemies.length=0; G.boss=null; }   // PvP is an enemy-free duel arena
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
@@ -6403,6 +6489,8 @@ function update(dt){
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
   const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
+  if(p.downed){ mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false; input.attack=false; p.charging=false; p.attackHeld=false;   // co-op: a downed player is locked out until revived
+    if(Math.floor(G.time*1.5)%2===0) addText(p.x,p.y+70,p.z,'DOWNED','#ff5e54'); }
   if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
     if(Math.random()<0.25) G.particles.push({x:p.x+(Math.random()-0.5)*16,y:p.y+8,z:p.z+(Math.random()-0.5)*16,vx:0,vy:50,vz:0,life:0.3,color:'#cfd6df',sz:2}); }
   if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
@@ -7707,6 +7795,7 @@ function enterWaystation(){
   G.p.x=0; G.p.z=190; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
+  if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();
   if(!enterWaystation._greeted){ enterWaystation._greeted=true; toast('🕯️ The Waystation — walk to a keeper and press E (or TALK) to speak.'); }
   if(meta._scytheNotify){ meta._scytheNotify=false; persist(); storyToast('The Void Scythe is now available in the Shop.'); }

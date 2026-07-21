@@ -1183,3 +1183,25 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
   MP.active&&!MP.isHost). Verified: v1.287.0 loads 0 console errors, PeerJS NOT loaded in single-player,
   and a loopback reconciliation test passed all assertions (HP overwrite, mirrored split, kill+XP, cull).
 - NEXT: P1.3 shared world loot pickups + downed/revive; then shared hub (Phase 2) and PvP (Phase 3).
+
+
+## [Claude | 2026-07-21] Multiplayer Phase 2 + P1.3 + Phase 3 — shipped v1.288.0
+Three phases in one pass (all guarded by MP.active; single-player & host byte-for-byte unchanged):
+- **Phase 2 — Shared Hub.** The Waystation is now a shared space: allies appear and walk it together.
+  Hub uses a sentinel zone id (MP.HUB=-100); guests follow the host into the hub (openHub) and back into
+  zones. Peer draw now keyed on the MP zone (works for hub + real zones). Connect-time zone guard fixed
+  to allow the hub (hasZone()).
+- **P1.3 — Downed / Revive / Joint-clear.** In co-op, dropping to 0 HP no longer kills you if an ally is
+  still up — you go DOWN (locked out of move/attack/skill/dodge, drawn collapsed with a pulsing red
+  distress beacon). An ally standing near for ~2.5s revives you to 50% HP; clearing the zone (openWay)
+  lifts you too; bleed out after 60s -> hub. If EVERY player is down at once, the host calls a wipe for
+  all. Revive is routed host<->guest (peer id <-> connection map). Presence packet carries a `dn` flag.
+- **Phase 3 — PvP Duel (melee MVP).** New "Host PvP Duel" lobby button. The host's zone becomes an
+  enemy-free arena (enemies cleared each frame); the same melee swing that hits foes also strikes rival
+  players in front/in reach. Damage relayed host<->guest (0.6 PvP scalar + defense so duels last), a
+  frag respawns you after 2s at a random arena spot, the host is the sole scorekeeper and broadcasts
+  absolute scores; first to 5 downs wins. Co-op downed/wipe logic is disabled in PvP.
+- VERIFIED: v1.288.0 loads 0 console errors; PeerJS NOT loaded in single-player even after opening the
+  lobby; lobby shows Co-op / PvP / Join; loopback logic tests pass (down->revive->50%hp, die-when-alone,
+  PvP host-scorekeeper to 5, 0.6 dmg scalar). Live 2-device tuning still recommended for feel.
+- Multiplayer roadmap COMPLETE: P1.1 presence, P1.2 shared enemies, Phase 2 hub, P1.3 revive, Phase 3 PvP.

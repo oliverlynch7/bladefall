@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.267.0';
+const VERSION3D='1.269.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2864,7 +2864,10 @@ function catLabel(isW,cat){ return isW?({magic:'Magic Weapon',melee:'Melee Weapo
 function catArches(cat){ return DROP_ARCHES.filter(a=>{ const A=ARCHES[a]; return A && weapCat(A)===cat; }); }
 function fuseGroups(){
   const groups={};
-  (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor||it.trinket; if(!o||o.rarity==='legendary') return;
+  // never let a currently-equipped piece get forged (they live on the hero, not the stash — this is a belt-and-braces guard)
+  const HR=(G&&!G.hub&&G.p)?G.p:meta.hero, equipped=new Set();
+  if(HR){ if(HR.weapon) equipped.add(HR.weapon); if(HR.gear) Object.values(HR.gear).forEach(g=>g&&equipped.add(g)); }
+  (meta.stash||[]).forEach((it,i)=>{ const o=it.weapon||it.armor||it.trinket; if(!o||o.rarity==='legendary'||equipped.has(o)) return;
     const kind=it.weapon?'w':it.trinket?'t':'a', isW=kind==='w';
     const cat=isW?weapCat(o):o.slot;                                    // category, not exact type (armor slot / trinket slot)
     const k=kind+'|'+cat+'|'+o.rarity;
@@ -2886,12 +2889,32 @@ function openForge(back){
         <div class="gd">forge → <span style="color:${nc};font-weight:800">a random ${RARITY[nr].name} ${kind}</span> · ${g.idxs.length} in bag</div></div>
       <button class="bigbtn buybtn" data-g="${gi}" style="width:auto;margin:0;padding:8px 12px;font-size:12px">${actionIcon('forge-fuse')}Forge</button></div>`; }).join('')
     :'<p class="hint">Bring me two pieces of the same CATEGORY and rarity — two Rare melee weapons, two Epic helmets — and I\'ll gamble them into a random one of the next rarity. Legendaries are already the peak.</p>';
+  const totalPairs=fuseable.reduce((n,g)=>n+Math.floor(g.idxs.length/2),0);
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Smith</p><h2 class="ovh">${actionIcon('forge-fuse')}The Forge</h2>
     <p class="ovsub">Two same-category, same-rarity pieces → a random one of the next rarity.</p>
+    ${totalPairs>1?`<button class="bigbtn" id="forgeAllBtn" style="margin:2px 0 12px">${actionIcon('forge-fuse')}Forge All · ${totalPairs} pair${totalPairs>1?'s':''}</button>`:''}
     <div class="achlist" style="max-height:min(52vh,380px)">${rows}</div>
     <button class="bigbtn ghost" id="backBtn">Back</button></div>`);
   document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ const g=fuseGroups()[+b.dataset.g]; if(!g) return; forgeSpin(g,back); });
+  { const fa=document.getElementById('forgeAllBtn'); if(fa) fa.onclick=()=>forgeAll(back); }
   document.getElementById('backBtn').onclick=back;
+}
+// Forge All: forge every pair available across ALL current groups in one instant batch (no per-item reel).
+// Smart handling: each group fuses floor(count/2) pairs; an ODD leftover simply stays in the bag; different
+// categories are each handled independently. Results land in the bag — click Forge All again to cascade a tier up.
+function forgeAll(back){
+  const groups=fuseGroups();
+  if(!groups.length){ toast('Nothing to forge — bring me matching pairs'); return; }
+  const toRemove=[], toAdd=[], gained={}; let n=0;
+  for(const g of groups){ const pairs=Math.floor(g.idxs.length/2);
+    for(const idx of g.idxs.slice(0,pairs*2)) toRemove.push(idx);   // consume 2 per pair; a leftover odd one is untouched
+    for(let k=0;k<pairs;k++){ const res=forgeResult(g), o=res.weapon||res.armor||res.trinket; toAdd.push(res); gained[o.rarity]=(gained[o.rarity]||0)+1; n++; } }
+  toRemove.sort((a,b)=>b-a).forEach(i=>meta.stash.splice(i,1));    // splice high→low so indices stay valid
+  for(const res of toAdd){ if(!stashItem(res)) meta.stash.push(res); }
+  persist(); SFX.god(); playFx('forgedone');
+  const parts=RORDER.filter(r=>gained[r]).map(r=>gained[r]+'× '+RARITY[r].name);
+  toast('⚒ Forged '+n+' new '+(n>1?'items':'item')+' → '+parts.join(', '),'#ffd24a');
+  openForge(back);
 }
 /* Slot-machine forge reveal (Vampire-Survivors-style): the reel of category icons spins, ratchets down,
    and lands on the random forged item — then it drops into your bag. */
@@ -3980,7 +4003,14 @@ const EXPANDED_SCAPES={
     }else{const ventsR=room('Cinder Vents',0,0,860,660),cart=room('Minecart Gallery',-500,-820,720,650),refine=room('Suspended Refinery',420,-1560,780,700,140),channels=room('Cooling Channels',-420,-2360,760,680),forge=room('Forge-Routing Hall',450,-3100,820,720,220),altar=room('Ash Altar',0,-4180,980,760,220);
       road(ventsR,cart,150);for(let k=0;k<12;k++){const t=k/11;vplat(-500+920*t,-900-650*t,20+120*t,88,72,{rail:true});if(k%3===0)G.movers.push({x0:-500+920*t,z:-900-650*t,w:96,d:76,h:20+120*t,amp:36,sp:1+rnd()*.4,ph:rnd()*6.28,x:0,px:0});}
       vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}
-      climbRun(160,-2700,0,450,-3100,220,72);for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
+      // The former climb began off the walkable channel and buried its steps inside the solid
+      // Forge plateau. This west-face basalt stair stays visible outside the wall, then crosses
+      // onto the top only at full height. Every landing is reachable with base movement.
+      vseg(-40,-2550,150,440,{safeRoute:true,forgeApproach:true});
+      {const stair=[[-70,-2740,35],[-95,-2835,70],[-65,-2930,105],[-95,-3025,140],[-65,-3120,180],[30,-3200,220]];
+        for(let k=0;k<stair.length;k++){const [x,z,y]=stair[k];vcol(x,z,104,92,Math.max(8,y-4));vplat(x,z,y,118,106,{safeRoute:true,recovery:true,forgeStair:true});
+          if(k===1||k===3||k===5)G.deco.push({x:x-42,z,y0:y,w:12,h:28,d:12,c:k===5?GOLD:LAVA,theme:'ember'});}}
+      for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
       for(const p of [[0,-160,ventsR],[420,-1560,refine],[0,-4180,altar]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:420,z:-1560,y:140},{x:-420,z:-2360,y:0},{x:450,z:-3100,y:220},{x:0,z:-4180,y:220}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4400,decoCol:ROCK,decoTheme:'volcano',decoTall:450});}
   },
   abyss(ctx){const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
@@ -10480,13 +10510,14 @@ function skinAv(id){
 }
 function itemStaticAv(item){
   if(!item) return null;
-  // Equipment art is intentionally keyed only by slot + rarity. Affixes still
-  // affect stats and names, but no longer replace the item's visual identity.
+  // Armor (helmet/chest/legs) shows SET-SPECIFIC art (Might/Swift/Mystic/…); trinkets keep their rarity art.
   if(GEARSLOTS.includes(item.slot)&&RARITY[item.rarity]){
+    if(SLOTIDS.includes(item.slot)){ const type=(item.type&&ARMOR_TYPES[item.type])?item.type:'vigor';
+      return 'icons/items/armor/'+item.slot+'-'+type+'.png?v='+VERSION3D; }
     return 'icons/armor_'+item.slot+'_'+item.rarity+'.png?v='+VERSION3D;
   }
   if(item.cls){
-    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
+    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
     const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
     return file?'icons/items/weapons/'+file+'.png?v='+VERSION3D:null;

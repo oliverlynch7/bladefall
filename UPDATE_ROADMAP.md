@@ -1132,3 +1132,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 ## [Codex | 2026-07-20] Stylist wardrobe action icon - shipped v1.267.0
 - Generated and integrated a dedicated transparent voxel tailoring-scissors icon for the Stylist's Open Wardrobe action.
 - The dark-steel, gold-filigree, and violet-gem treatment replaces the unrelated mage-class artwork while matching Bladefall's approved action-icon language.
+
+## [Codex | 2026-07-20] Cinder Vents Forge plateau ascent - shipped v1.268.0
+- Replaced the hidden, unreachable Forge-Routing Hall climb with a broad grounded basalt stair on the plateau's west face.
+- The five approach landings remain outside the solid plateau wall; the final landing crosses onto the plateau only at its full 220-unit height.
+- Muted browser QA verified every hop against base movement limits, all five Ember Shards, the completion portal at the Ash Altar, 1600x900 presentation, and zero console errors.

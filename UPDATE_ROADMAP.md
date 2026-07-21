@@ -1479,3 +1479,8 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - **`propGroundAt(x,z)`** (new primitive): terrain top at a point (ground segments + plateau plats only, ignoring props), the reusable answer to "assets loading buried in the ground floor". Every natural-prop builder (icePine + all three `tree` helpers) now resolves its base through it and lifts trunk AND foliage together, so props rest ON a plateau instead of sinking inside it. Frostfell's frosted pines verified sitting on the y220 breather (were buried at y70–140); flat-ground trees unchanged.
 - **`clearPortalArea(x,z)`** (new, called from `finishScape`): a portal can never hide INSIDE a collisionless prop — strips big props (canopies/boulders, h≥40) within 96u and prop trunks within ~67u of the exit, keeping small frame/rim decos and the landing plat. Verified: all 8 zone portals now have 0 occluding props.
 - Convention going forward: any new world prop should base off `propGroundAt`; any new portal/exit/interactable should call `clearPortalArea`. This replaces the whack-a-mole per-asset fixes.
+
+## v1.314.0 — new hitless + Ian's Blade icons
+- Replaced `icons/difficulty-hitless.png` with Oliver's new crest art (gold/violet crested helm, lightning star) — resized 1254→256px, black background keyed to transparent.
+- Added `icons/items/weapons/iansblade.png` (Oliver's golden voxel greatsword) — resized to 256px, checkerboard background keyed out — and mapped `iansblade:'iansblade'` in `itemStaticAv` so Ian's Blade shows its own art instead of the generic sword icon.
+- Verified both load at 256×256 in-game; `itemAv(iansblade)` → `icons/items/weapons/iansblade.png`.

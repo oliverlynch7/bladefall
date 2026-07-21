@@ -1316,3 +1316,24 @@ Taught every major system so a brand-new player learns the game seamlessly.
 - **First hub return** (hubTutorial) rewritten: what the Waystation is, the keepers + press E, the Waystone
   heals+banks, the Gates are zones, and the core loop (dive → clear → return → upgrade → dive deeper).
 - VERIFIED: syntax OK, opening cutscene + menu-tip injection work in-browser, 0 console errors.
+
+
+## [Claude | 2026-07-21] Hub layout rework — room to breathe — shipped v1.295.0
+Reorganized the Waystation per Oliver's feedback so nothing feels cramped.
+- **Trial Chambers (purple secrets) moved OUT of the floor row** — each discovered secret now sits RIGHT
+  BESIDE its parent zone's portal (a small purple rift tucked forward-right in the same bay), so it clearly
+  belongs to that level instead of floating in the annex.
+- **Gate bays widened + wall CUTOUTS:** a short forward-jutting divider (solid wall + stone) between each
+  pair of main portals, so every portal gets its own alcove in the rampart. Base gate span widened.
+- **PvP/Arena portal redesigned:** was visually identical to the gold Treasure Sprint gate (shared prop).
+  New dedicated `arenagate` prop — a menacing CRIMSON hardcore portal: iron-red riveted pillars, a
+  blood-iron lintel, a bleached SKULL crest with eye sockets, a seething red core, rising embers, and
+  threshold spikes. Now unmistakably different from the Sprint.
+- **Annex split into THREE distinct plazas** (Abyss west, Treasure Sprint east, Arena deep-centre), each
+  with its own platform + pillars, instead of cramped together.
+- **SPACE PASS:** the whole hub is now ~45% wider and ~30% deeper (bounds ±660→±957, depth -450..850 →
+  -585..1105). One programmatic pass scales every position; large floors + the perimeter walls stretch to
+  enclose the bigger bowl while collision footprints keep their size. NPC bays spread out to fill it.
+- VERIFIED in-browser: hub builds with 0 console errors, screenshot shows a roomier plaza, and a geometry
+  probe confirms bounds scaled, 8 main gates span -812..812, arena prop='arenagate', annex plazas spread,
+  and everything sits inside bounds. Debug: __BF3.hubInfo().

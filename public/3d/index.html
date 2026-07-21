@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.256.0';
+const VERSION3D='1.257.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7898,6 +7898,16 @@ function openRespecTree(cid,back){
   }
   render();
 }
+function trainerEquipClass(cid){
+  if(!CLASSES[cid]||!meta.classUnlocked[cid]) return false;
+  // The live Waystation player is authoritative. Bank that exact loadout before
+  // changing class so wsResume cannot restore an older weapon/armor snapshot.
+  if(G&&G.hub&&G.p) meta.hero=snapOf(G.p);
+  meta.classId=cid;
+  persist();
+  if(G&&G.p){ skillbarUpdate(); hudUpdate(); }
+  return true;
+}
 function openTrainer(back){
   mode='menu';
   const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
@@ -7921,7 +7931,7 @@ function openTrainer(back){
   showOverlayHTML(`<div class="card trainercard"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
     <p class="ovsub">Switch freely here. Never mid-zone.</p>
     <div class="trainergrid">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
-  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ meta.classId=b.dataset.eq; persist(); SFX.pickup(); openTrainer(back); });
+  document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ if(!trainerEquipClass(b.dataset.eq)) return; SFX.pickup(); openTrainer(back); });
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
   document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>openRespecTree(b.dataset.re,()=>openTrainer(back)));
   document.getElementById('backBtn').onclick=back;

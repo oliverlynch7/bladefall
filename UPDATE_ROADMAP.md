@@ -1066,3 +1066,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Removed the solid canyon-wall collision that sealed the intended west-road exit from the Dry Wash and replaced it with a clearly readable 220-unit gateway.
 - Added three broad, level recovery shelves across the direct lava gap so one normal jump reaches a continuous safe crossing into Fossil Steps; no movement stats or global jump physics changed.
 - Muted browser QA loaded Hollow Pass area 2, verified both authored routes geometrically, and physically crossed the new shelves from z -250 to z -594 with base movement, full health, and zero console errors.
+
+
+## [Codex | 2026-07-20] Drillmaster loadout preservation - shipped v1.257.0
+- Switching classes at the Drillmaster now banks the authoritative live Waystation hero before changing class, preventing the menu return path from restoring an older weapon or armor snapshot.
+- Equipped weapon, helmet, chestplate, leggings, amulet, ring, and active pet remain unchanged; only the active class and its skill bar change.
+- Muted browser QA switched a deliberately stale save snapshot through Ranger, Mage, Reaper, and Warrior, then returned to gameplay with the full live and saved loadouts identical, the HUD visible, and zero console errors.

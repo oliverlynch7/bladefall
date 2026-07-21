@@ -1018,3 +1018,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Deepened Thornwood with the optional four-part Lost Hunters' Memories route, the unique rare Warding Thornheart Charm, named Briar Cantor and Last Snarekeeper elites, mire pressure, and a canopy-to-heart return line.
 - Added explicit supports under two previously floating campaign objective markers and validated every active enemy, chest, and quest object across all three spaces against authored surfaces.
 - Muted real-browser QA passed at 1920x1080, 1600x900, and 1366x768 with WebGL active, persistent one-time rewards, independent guardian/optional-quest completion, and zero console errors.
+
+## [Codex | 2026-07-20] Hollow Pass + Sunken Wash world-quality pair pass - shipped v1.247.0
+
+- Added two save-safe Hollow Pass optional routes: three lost survey beacons for the rare Surveyor's Eye (+9% Crit), and three Marksman field orders for the uncommon Windrunner Cord (-9% Dodge CD).
+- Deepened Hollow's lower and upper expeditions with a readable rockfall traversal event, wind shelters, exposed mastered routes, the Rattlecrest elite, and corrected terrace footing for Watcher Rim and High Bone Shelf encounters.
+- Expanded Sunken Wash with a Drowned Bell Shrine branch, a rooftop-to-sluice shortcut, three optional warning bells, the named Floodline Scavenger elite, and the rare Floodwarden Seal (+33% Gold Find).
+- Kept the optional drowned-bell route independent from the required Flood Relics; completion persists once and cannot bypass chamber progression.
+- Muted real-browser QA validated every enemy, chest, and objective against authored supports at 1920x1080, 1600x900, and 1366x768 with WebGL active and zero console errors.

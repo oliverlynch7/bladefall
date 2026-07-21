@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.246.0';
+const VERSION3D='1.247.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2050,6 +2050,9 @@ function optionalReward(key){
   if(key==='caravanCompass'){ const o=makeTrinket('rare','amulet','swift'); o.name="Caravaner's Compass"; o.questUnique=true; it={trinket:o}; }
   else if(key==='millwrightSignet'){ const o=makeTrinket('uncommon','ring','haste'); o.name="Millwright's Signet"; o.questUnique=true; it={trinket:o}; }
   else if(key==='thornheartCharm'){ const o=makeTrinket('rare','amulet','warding'); o.name='Thornheart Charm'; o.questUnique=true; it={trinket:o}; }
+  else if(key==='surveyorEye'){ const o=makeTrinket('rare','ring','keen'); o.name="Surveyor's Eye"; o.questUnique=true; it={trinket:o}; }
+  else if(key==='windrunnerCord'){ const o=makeTrinket('uncommon','amulet','nimble'); o.name='Windrunner Cord'; o.questUnique=true; it={trinket:o}; }
+  else if(key==='floodwardenSeal'){ const o=makeTrinket('rare','ring','gilded'); o.name='Floodwarden Seal'; o.questUnique=true; it={trinket:o}; }
   if(!it) return;
   const o=it.weapon||it.armor||it.trinket;
   if(!stashItem(it)){ meta.stash.push(it); persist(); toast('Unique reward stored beyond bag capacity: '+o.name,RARITY[o.rarity].color); }
@@ -3789,6 +3792,12 @@ const EXPANDED_SCAPES={
       // The low road stays forgiving; the high switchback is faster and exposes a reward.
       climbRun(-120,-1760,0,-480,-2140,210,78,{switchback:true}); vplat(-260,-2380,210,240,130,{checkpoint:true}); climbRun(-260,-2380,210,-420,-2860,210,76);
       const cave=room('Smuggler Cave',500,-2220,360,300); floorRoad(fork,cave,110); chest(540,-2260); scapeSecret(ctx,610,-2220,0);
+      // Optional survey route: three old brass beacons sit off the safe road and teach the canyon's high-line language.
+      const survey=optionalMission('hollowSurvey','Relight the three lost survey beacons','activate',3,'surveyorEye',{hint:'Look for brass cages above the wash and smuggler road.'});
+      if(survey){ const marks=[{x:-520,z:-910,y:72},{x:610,z:-2220,y:46},{x:-420,z:-2860,y:210}];
+        vplat(-520,-910,72,112,96,{questPerch:true,recovery:true}); vplat(610,-2220,46,104,92,{questPerch:true});
+        for(const p of marks){ G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'hollowSurvey',name:'Survey Beacon'},bob:rnd()*3,placed:true}); beacon(p.x,p.z,p.y); }
+      }
       // A real high-altitude bridge basin: stable outside landings, then swaying and crumbling spans.
       climbRun(-420,-2860,210,-120,-3140,210,74); G.movers.push({x0:0,z:-3200,w:100,d:72,h:210,amp:42,sp:1.0,ph:rnd()*6.28,x:0,px:0});
       G.crumbles.push({x:150,z:-3250,w:84,d:72,h:210,state:0,timer:0,respawn:0,fallY:0,jit:0}); G.movers.push({x0:270,z:-3300,w:96,d:72,h:210,amp:36,sp:1.25,ph:rnd()*6.28,x:270,px:270});
@@ -3797,7 +3806,11 @@ const EXPANDED_SCAPES={
       floorRoad(basin,gate,170); climbRun(380,-3300,210,0,-4300,210,82,{bridge:true});vplat(0,-4300,210,1080,820,{checkpoint:true,breather:true}); beacon(0,-4260,210); beacon(-300,-2860,210); beacon(330,-3300,210);
       // Telegraph the rockfall corridor with cracked shelves and rubble before enemies engage.
       for(let k=0;k<12;k++){ const x=-180+(k%4)*120,z=-620-Math.floor(k/4)*130; G.deco.push({x,z,y0:0,w:34+(k%3)*12,h:20+(k%2)*14,d:30,c:DARK,theme:'canyon'}); }
+      // Loose shelves make the rockfall read as a traversal event; misses land on the broad wash below.
+      for(let k=0;k<6;k++) G.crumbles.push({x:-560+k*92,z:-1030-k*46,w:78,d:66,h:24+(k%2)*18,state:0,timer:0,respawn:0,fallY:0,jit:0});
       mkMonster('dustjackal',0,-180,wash);for(const p of [[-360,-760,narrows],[280,-1420,fork],[-420,-2860,rim]]){ mkMonster('dustjackal',p[0]-65,p[1],p[2]); mkMonster(p[2]===rim?'cragspitter':'sparkling',p[0]+65,p[1]-20,p[2]); }mkMonster('cragspitter',-350,-2920,rim);
+      { const e=mkMonster('cragspitter',330,-1450,fork); makeElite(e); e.name='Rattlecrest'; }
+      for(const e of G.enemies) if(dXZ(e.x,e.z,-420,-2860)<230){ e.y=210; e.sx=e.x; e.sz=e.z; }
       scapeKill(ctx,[{x:-360,z:-760,room:narrows},{x:280,z:-1420,room:fork},{x:-420,z:-2860,room:rim}]);
       finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4490,sy:0,decoCol:SAND,decoTheme:'canyon',decoTall:390});
     } else {
@@ -3808,8 +3821,17 @@ const EXPANDED_SCAPES={
       for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }
       climbRun(300,-2500,160,480,-2700,160,74); G.movers.push({x0:250,z:-2960,w:100,d:76,h:160,amp:58,sp:.9,ph:rnd()*6.28,x:250,px:250}); G.movers.push({x0:80,z:-3100,w:100,d:76,h:160,amp:44,sp:1.2,ph:rnd()*6.28,x:80,px:80});
       floorRoad(arch,shrine,170); floorRoad(shrine,exit,180); climbRun(480,-2700,160,0,-3600,160,82,{bridge:true}); climbRun(0,-3600,160,0,-4380,160,84,{bridge:true}); beacon(0,-3640,160); chest(520,-2760,160); chest(-620,-2080,160);
+      // Optional intelligence route crosses the exposed pillar line and rewards a movement-focused amulet.
+      const orders=optionalMission('hollowOrders','Recover the Marksman’s three field orders','collect',3,'windrunnerCord',{hint:'Search the needle forest, bone shelf, and Gale Arch.'});
+      if(orders){ const notes=[{x:520,z:-1340,y:52},{x:-560,z:-2080,y:160},{x:520,z:-2760,y:160}];
+        vplat(520,-1340,52,108,94,{questPerch:true});
+        for(const p of notes) G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'hollowOrders',name:'Field Order'},bob:rnd()*3,placed:true});
+      }
+      // Stone windbreaks create readable pauses before the shrine rather than an uninterrupted exposed bridge.
+      for(const x of [-310,0,310]){ G.deco.push({x,z:-3400,y0:160,w:120,h:72,d:22,c:DARK,theme:'canyon'}); vplat(x,-3360,160,112,86,{windShelter:true}); }
       for(let k=0;k<18;k++){ const a=k/18*6.28,rr=270+(k%3)*34; G.deco.push({x:Math.cos(a)*rr,z:-3600+Math.sin(a)*rr,y0:160,w:24,h:90+(k%4)*30,d:24,c:k%3?SAND:BONE,theme:'canyon'}); }
       mkMonster('dustjackal',-480,-760,fossils); mkMonster('cragspitter',420,-1280,needle); mkMonster('sparkling',-300,-2080,shelf); mkMonster('cragspitter',120,-3600,shrine); mkMonster('dustjackal',-120,-3600,shrine);
+      for(const e of G.enemies) if(dXZ(e.x,e.z,-300,-2080)<230){ e.y=160; e.sx=e.x; e.sz=e.z; }
       scapeFetch(ctx,[{x:-520,z:-760,y:0},{x:420,z:-1280,y:0},{x:-560,z:-2080,y:160},{x:520,z:-2700,y:160},{x:0,z:-3600,y:160}]); scapeFind(ctx,0,-3640,160);
       finishScape(ctx,{sx:0,sz:260,sy:0,gx:0,gz:-4490,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     }
@@ -3991,9 +4013,20 @@ const SIDE_SCAPES={
     // High-water lane: rooftops and fossil ledges. Low-water lane: broad floor with visible ambush holes.
     G.deco.push({x:420,z:-1320,y0:0,w:700,h:2,d:600,c:WATER}); for(const h of [[180,-1180],[420,-1420],[650,-1200]]){ vcol(h[0],h[1],180,140,74); vplat(h[0],h[1],78,190,150,{roof:true}); }
     climbRun(40,-1250,0,180,-1180,78,68); climbRun(180,-1180,78,420,-1420,78,72); climbRun(420,-1420,78,650,-1200,78,72); chest(650,-1200,78);
+    // Rooftop masters can stay high and bypass the flooded street, but the route rejoins before the required sluice objective.
+    climbRun(650,-1200,78,250,-1760,118,72,{shortcut:true,roof:true}); climbRun(250,-1760,118,-120,-1940,32,72,{shortcut:true,roof:true});
     // Sluice teeth visually divide three timed-dry channels; side alcoves are recovery pockets.
     for(let k=0;k<7;k++){ const x=-520+k*86; G.walls.push({x,z:-2140,w:26,d:220,h:110}); G.deco.push({x,z:-2140,y0:110,w:38,h:18,d:238,c:STONE}); }
     for(const z of [-1940,-2140,-2340]) G.deco.push({x:-260,z,y0:0,w:680,h:2,d:90,c:WATER});
+    // The submerged shrine is a real optional branch, visually advertised from the sluice but never required.
+    const drowned=room('Drowned Bell Shrine',-860,-2700,420,360,36); climbRun(-520,-2380,0,-860,-2700,36,70,{secretRoute:true});
+    G.deco.push({x:-860,z:-2700,y0:36,w:260,h:3,d:230,c:WATER});
+    for(let k=0;k<6;k++){ const a=k/6*6.28; G.deco.push({x:-860+Math.cos(a)*120,z:-2700+Math.sin(a)*100,y0:36,w:18,h:74+(k%2)*24,d:18,c:BONE}); }
+    const bells=optionalMission('washBells','Ring the three drowned warning bells','activate',3,'floodwardenSeal',{hint:'Follow the broken blue tiles away from the sluice.'});
+    if(bells){ const marks=[{x:420,z:-1420,y:78},{x:-860,z:-2700,y:36},{x:300,z:-3700,y:44}];
+      vplat(300,-3700,44,112,96,{questPerch:true,recovery:true});
+      for(const p of marks){ G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'washBells',name:'Drowned Bell'},bob:rnd()*3,placed:true}); G.deco.push({x:p.x,z:p.z,y0:p.y,w:34,h:56,d:34,c:'#76b8c9'}); }
+    }
     path(sluice,basin,150); climbRun(40,-2440,0,520,-2700,150,72);
     // A long descending bone-slide set piece with side landings; every miss returns to the basin route.
     for(let k=0;k<11;k++){ const t=k/10,x=520*(1-t),z=-2700-650*t,y=150*(1-t); G.crumbles.push({x,z,w:82,d:68,h:y,state:0,timer:0,respawn:0,fallY:0,jit:0}); if(k%3===0)vplat(x+150,z,y,100,90,{recovery:true}); }
@@ -4005,6 +4038,7 @@ const SIDE_SCAPES={
     localMission('washRelics','Recover the three Flood Relics','collect',3,120); G.portal=null;
     chest(-720,-760,90); chest(360,-3540); scapeSecret(ctx,-760,-2260,0);
     for(const p of [[0,-180,collapsed],[-520,-760,fossil],[420,-1320,settle],[-260,-2140,sluice],[0,-3540,basin]]){ mkMonster('dustjackal',p[0]-50,p[1],p[2]); mkMonster('sparkling',p[0]+55,p[1]-20,p[2]); }
+    { const e=mkMonster('dustjackal',-860,-2700,drowned); makeElite(e); e.name='The Floodline Scavenger'; }
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:SAND,decoTheme:'canyon',decoTall:420});
     G.portal=null; questUpdate();
   },

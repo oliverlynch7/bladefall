@@ -25,7 +25,7 @@
     touch-action:none;overscroll-behavior:none;position:fixed;width:100%;}
   #gl{position:absolute;inset:0;width:100%;height:100%;display:block;}
   #hud{position:absolute;left:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 0 0 14px;pointer-events:none;z-index:5;width:min(470px,88vw);filter:drop-shadow(0 12px 18px rgba(0,0,0,.45))}
-  .hudpanel{position:relative;background:radial-gradient(circle at 8% 0,rgba(246,183,72,.16),transparent 34%),linear-gradient(158deg,rgba(22,23,31,.94),rgba(7,8,13,.86));border:1px solid #7b5928;border-radius:8px 17px 17px 8px;
+  .hudpanel{position:relative;background:radial-gradient(circle at 8% 0,rgba(246,183,72,.16),transparent 34%),linear-gradient(158deg,rgba(22,23,31,.8),rgba(7,8,13,.82));border:1px solid #7b5928;border-radius:8px 17px 17px 8px;
     padding:12px 15px 11px 17px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,238,196,.11),inset 0 0 28px rgba(0,0,0,.28);clip-path:polygon(0 0,95% 0,100% 16%,100% 84%,95% 100%,0 100%,0 73%,5px 68%,5px 32%,0 27%)}
   .hudpanel::before{content:'';position:absolute;top:0;left:7%;right:8%;height:2px;background:linear-gradient(90deg,transparent,#a66a22,var(--amber),#fff0b7,var(--amber),#a66a22,transparent);box-shadow:0 0 9px rgba(232,163,61,.5)}
   .hudpanel::after{content:'';position:absolute;inset:6px 7px;border:1px solid rgba(232,163,61,.13);border-radius:5px 12px 12px 5px;pointer-events:none;clip-path:polygon(0 0,96% 0,100% 18%,100% 82%,96% 100%,0 100%)}
@@ -711,7 +711,7 @@
   #pethud{display:none;position:absolute;z-index:5;pointer-events:none}
   @media (min-width:900px) and (pointer:fine){
     #hud{left:18px;top:18px;padding:0;width:560px;filter:drop-shadow(0 15px 20px #000a)}
-    .hudpanel{min-height:178px;padding:22px 24px 18px 126px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.97),rgba(4,5,8,.94));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
+    .hudpanel{min-height:178px;padding:22px 24px 18px 126px;border:1px solid #9b6c2c;border-radius:4px 18px 18px 4px;overflow:visible;clip-path:polygon(0 7%,6% 0,94% 0,100% 18%,100% 82%,94% 100%,7% 100%,0 90%);background:radial-gradient(circle at 20% 18%,rgba(115,57,177,.17),transparent 31%),linear-gradient(145deg,rgba(20,18,21,.8),rgba(4,5,8,.82));box-shadow:inset 0 0 0 2px #090a0e,inset 0 0 0 3px #513817,inset 0 0 34px #000b,0 14px 38px #000b}
     .hudpanel::before{left:8%;right:7%;height:3px;background:linear-gradient(90deg,transparent,#69451b,#e6ad4d,#fff0a6,#8c5b20,transparent);box-shadow:0 0 12px #d8953d66}
     .hudpanel::after{inset:7px;border:1px solid #c8944338;border-radius:2px 12px 12px 2px;clip-path:polygon(0 8%,5% 0,95% 0,100% 18%,100% 82%,95% 100%,5% 100%,0 92%)}
     .hudportrait{display:block;position:absolute;left:-8px;top:-8px;width:116px;height:116px;border-radius:50%;background:radial-gradient(circle,#241f2f 15%,#090a0d 58%,#020305 72%);border:2px solid #b07b32;box-shadow:0 0 0 4px #08090c,0 0 0 6px #53391a,0 7px 20px #000,0 0 22px #723eb144;z-index:3}
@@ -779,7 +779,7 @@
     #bAttack{right:calc(50% - 174px);bottom:50px;width:66px;height:66px;border-radius:5px;background:radial-gradient(circle,#48201e,#151014 72%);border-color:#aa7432;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
     #bInteract{right:22px;bottom:42px;width:96px;height:44px;border-radius:3px;background:linear-gradient(#1d1816,#09090d);border:1px solid #9c6d2e;clip-path:polygon(10% 0,90% 0,100% 25%,100% 75%,90% 100%,10% 100%,0 75%,0 25%)}
     .tog{right:15px;border-radius:3px;border-color:#6e522d;background:#0d0e12bb}.tog#bAuto{top:42%}
-    #pethud{display:grid;left:18px;top:204px;bottom:auto;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,#171419ed,#07080ced);border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
+    #pethud{display:grid;left:18px;top:204px;bottom:auto;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,rgba(23,20,25,.8),rgba(7,8,12,.82));border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
     #pethud img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}
     #pethud .petname{font:700 11px Georgia,serif;letter-spacing:.08em;color:#e7d7b7;text-transform:uppercase}.pethplabel{font-size:8px;color:#aaa;margin:3px 0}.pethpbar{height:6px;background:#020304;border:1px solid #5e4927}.pethpbar i{display:block;height:100%;background:linear-gradient(90deg,#286d32,#74d64b);box-shadow:0 0 5px #6bd24b66}
     #pausebtn{top:18px;right:18px;border-radius:4px;border-color:#8e6530;background:#101015e8;box-shadow:inset 0 0 0 2px #08090c,0 6px 16px #0008}
@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.250.0';
+const VERSION3D='1.251.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE

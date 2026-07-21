@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.311.0';
+const VERSION3D='1.312.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3544,9 +3544,9 @@ const SCAPES={
       cxz(a.x,b.x,a.z); czz(a.z,b.z,b.x); };                    // L-shaped wide land bridge (always walkable)
     linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],170); linkL(C[2],C[3],170); linkL(C[1],C[4],160); linkL(C[3],C[5],180); linkL(C[4],C[5],160);
     const leaf=isWoods?'#284f28':'#3a6b34';
-    const tree=(tx,tz,th)=>{ vcol(tx,tz,20+rnd()*10,20+rnd()*10,th);
-      G.deco.push({x:tx,z:tz,y0:th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});
-      G.deco.push({x:tx,z:tz,y0:th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); };
+    const tree=(tx,tz,th)=>{ const b=propGroundAt(tx,tz); vcol(tx,tz,20+rnd()*10,20+rnd()*10,b+th);
+      G.deco.push({x:tx,z:tz,y0:b+th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});
+      G.deco.push({x:tx,z:tz,y0:b+th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); };
     const treeN=isWoods?20:12;
     for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)]; tree(c.x+(rnd()*2-1)*(c.w/2-30), c.z+(rnd()*2-1)*(c.d/2-30), 70+rnd()*70); }
     for(let k=0;k<54;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
@@ -3949,7 +3949,7 @@ const EXPANDED_SCAPES={
     const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
     const room=(name,x,z,w,d)=>{ const r={name,x,z,w,d,monsters:[],encounter:false,cleared:true}; vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
     const road=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
-    const tree=(x,z,h=92)=>{ vcol(x,z,22,22,h); G.deco.push({x,z,y0:h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains'}); G.deco.push({x:x-16,z:z+6,y0:h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains'}); };
+    const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); vcol(x,z,22,22,b+h); G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains'}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains'}); };
     const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
     const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
@@ -4166,7 +4166,7 @@ const EXPANDED_SCAPES={
   frost(ctx){ const {rnd,mkMonster}=ctx,upper=G.area===1,ICE='#9eddf2',SNOW='#d9eff5',DARK='#31536a',AUR='#75f0d2';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
     const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w);vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w);};
-    const icePine=(x,z,h)=>{vcol(x,z,20,20,h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};
+    const icePine=(x,z,h)=>{const b=propGroundAt(x,z);vcol(x,z,20,20,b+h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:b+h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};
     const brazier=(x,z,y=0)=>{vcol(x,z,22,22,y+36);G.deco.push({x,z,y0:y+36,w:34,h:18,d:34,c:'#ffb04d'});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!upper){
       const lake=room('Frozen Lake',0,0,980,760),village=room('Buried Village',-520,-900,940,800),gorge=room('Ice Gorge Arena',420,-1700,940,820),shelter=room('Expedition Shelter',-420,-2460,880,740,120),cavern=room('Aurora Caverns',420,-3150,820,720,220),summit=room('Summit Approach',0,-4200,1080,840,220);
@@ -4285,7 +4285,7 @@ const EXPANDED_SCAPES={
 const SIDE_SCAPES={
   thornwood(ctx){ const {rnd,mkMonster}=ctx,BARK='#493020',ROOT='#69472a',LEAF='#24462b',GLOW='#b56cff';
     const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
-    const tree=(x,z,h)=>{ vcol(x,z,26,26,h); G.deco.push({x,z,y0:h,w:68,h:46,d:68,c:tint(LEAF,'#000',rnd()*.2),theme:'forest'}); };
+    const tree=(x,z,h)=>{ const b=propGroundAt(x,z); vcol(x,z,26,26,b+h); G.deco.push({x,z,y0:b+h,w:68,h:46,d:68,c:tint(LEAF,'#000',rnd()*.2),theme:'forest'}); };
     const rootRun=(x0,z0,x1,z1,y0=18,y1=18)=>{ const n=Math.ceil(Math.hypot(x1-x0,z1-z0)/105); for(let k=1;k<n;k++){ const t=k/n; vplat(x0+(x1-x0)*t,z0+(z1-z0)*t,y0+(y1-y0)*t,86,62,{root:true}); } };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     const verge=room('Hunter Verge',0,0,760,600),snares=room('Snarewood',-480,-720,720,660),burrow=room('Burrowed Road',440,-1040,720,620),cathedral=room('Root Cathedral',0,-1780,980,760),canopy=room('High Canopy',-600,-2530,420,360,190),mire=room('Thorn Mire',520,-2740,760,700),heart=room('Heart Grove',0,-3660,1040,820),exit=room('Old Hunter Gate',0,-4560,820,620);
@@ -5170,6 +5170,14 @@ function surfaceHeightAt(x,z,r=8){
   return f;
 }
 function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e8?f:0; }
+// TERRAIN top at (x,z) for GROUNDING props (trees, rocks, statues): ground segments + plateaus (plats) only —
+// ignores columns/movers/other props, so a prop rests on the mesa it stands on and never floats on another prop
+// or sinks inside a raised plateau. This is THE systemic answer to "assets loading buried in the ground floor":
+// any prop builder resolves its base through this instead of assuming y=0.
+function propGroundAt(x,z,r=8){ if(!G) return 0; let f=0; const m=r*0.4;
+  for(const sg of (G.segments||[])) if(Math.abs(x-sg.x)<sg.w/2+m && Math.abs(z-sg.z)<sg.d/2+m) f=Math.max(f,0);
+  for(const ob of (G.obstacles||[])) if(ob.kind==='plat' && Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0);
+  return f; }
 function nearestSurfacePoint(x,z,r=14){
   if(!G) return null; let best=null,bd=Infinity;
   const consider=(o,y)=>{ const hw=Math.max(1,o.w/2-r),hd=Math.max(1,o.d/2-r),px=Math.max(o.x-hw,Math.min(o.x+hw,x)),pz=Math.max(o.z-hd,Math.min(o.z+hd,z)),d=Math.hypot(px-x,pz-z);

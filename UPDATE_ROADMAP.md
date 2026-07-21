@@ -1127,3 +1127,8 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Moved Abyssal Descent and Treasure Sprint onto paired violet/gold dais and removed them from the campaign portal concourse.
 - Relocated every discovered exploration Trial Chamber into a scalable annex row; one chamber centers itself and up to all seven spread evenly without overlapping the eight Main Level gates.
 - Muted browser QA verified the one- and seven-chamber layouts, annex connectivity, wide portal separation, 1600x900 and 1366x768 rendering, and zero console errors.
+
+
+## [Codex | 2026-07-20] Stylist wardrobe action icon - shipped v1.267.0
+- Generated and integrated a dedicated transparent voxel tailoring-scissors icon for the Stylist's Open Wardrobe action.
+- The dark-steel, gold-filigree, and violet-gem treatment replaces the unrelated mage-class artwork while matching Bladefall's approved action-icon language.

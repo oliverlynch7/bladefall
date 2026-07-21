@@ -859,7 +859,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.266.0';
+const VERSION3D='1.267.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7093,7 +7093,7 @@ function navCard(id,art,name,desc='',cls='',attrs=''){
 function htmlSafe(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const NPC_PORTRAIT_POS={shade:'0% 0%',anvil:'50% 0%',beastkeeper:'100% 0%',quartermaster:'0% 100%',keeper:'50% 100%',drillmaster:'100% 100%'};
 function npcPortrait(id){ const pos=NPC_PORTRAIT_POS[id]; return pos?`<div class="npcportrait" role="img" aria-label="${id} portrait" style="--npc-pos:${pos}"></div>`:''; }
-const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:'icons/class-mage.png',anvil:'icons/action_forge_fuse.png',drillmaster:`icons/class-core.png?v=${VERSION3D}`,
+const NPC_MENU_ART={quartermaster:'icons/action_buy.png',keeper:`icons/action_wardrobe_stylist.png?v=${VERSION3D}`,anvil:'icons/action_forge_fuse.png',drillmaster:`icons/class-core.png?v=${VERSION3D}`,
   board:'icons/event-quest-marker.png',chest:'icons/action_bag_stash.png',mirror:'icons/character-sheet.png',sparring:'icons/damage-physical.png',
   abyss:'icons/portal.png',beastkeeper:`icons/beastkeeper.png?v=${VERSION3D}`};
 function fixSliders(){

@@ -1026,3 +1026,11 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - Expanded Sunken Wash with a Drowned Bell Shrine branch, a rooftop-to-sluice shortcut, three optional warning bells, the named Floodline Scavenger elite, and the rare Floodwarden Seal (+33% Gold Find).
 - Kept the optional drowned-bell route independent from the required Flood Relics; completion persists once and cannot bypass chamber progression.
 - Muted real-browser QA validated every enemy, chest, and objective against authored supports at 1920x1080, 1600x900, and 1366x768 with WebGL active and zero console errors.
+
+## [Codex | 2026-07-20] Ruined Keep + Oubliette world-quality pair pass - shipped v1.248.0
+
+- Added three save-safe exploration routes: fallen siege standards, discarded warden seals, and hidden witness testimonies.
+- Added unique supported rewards: Siegebreaker Badge (+13% Damage), Warden's Key (-8% Skill CD), and Witness Chain (+39 Max HP).
+- Deepened the Keep with a broken-parapet mastered shortcut, shaft recovery line, and named Gaol Captain elite.
+- Deepened the Oubliette with testimony-cell exploration and the named Nameless Jailer encounter while preserving all required prisoner records.
+- Muted WebGL QA validated zero unsupported placements, optional/required objective independence, and 1920x1080, 1600x900, and 1366x768 renders with zero console errors.

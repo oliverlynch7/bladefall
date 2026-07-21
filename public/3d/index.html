@@ -844,7 +844,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.247.0';
+const VERSION3D='1.248.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2053,6 +2053,9 @@ function optionalReward(key){
   else if(key==='surveyorEye'){ const o=makeTrinket('rare','ring','keen'); o.name="Surveyor's Eye"; o.questUnique=true; it={trinket:o}; }
   else if(key==='windrunnerCord'){ const o=makeTrinket('uncommon','amulet','nimble'); o.name='Windrunner Cord'; o.questUnique=true; it={trinket:o}; }
   else if(key==='floodwardenSeal'){ const o=makeTrinket('rare','ring','gilded'); o.name='Floodwarden Seal'; o.questUnique=true; it={trinket:o}; }
+  else if(key==='siegebreakerBadge'){ const o=makeTrinket('rare','ring','might'); o.name='Siegebreaker Badge'; o.questUnique=true; it={trinket:o}; }
+  else if(key==='wardenKey'){ const o=makeTrinket('uncommon','amulet','focus'); o.name="Warden's Key"; o.questUnique=true; it={trinket:o}; }
+  else if(key==='witnessChain'){ const o=makeTrinket('rare','amulet','vigor'); o.name='Witness Chain'; o.questUnique=true; it={trinket:o}; }
   if(!it) return;
   const o=it.weapon||it.armor||it.trinket;
   if(!stashItem(it)){ meta.stash.push(it); persist(); toast('Unique reward stored beyond bag capacity: '+o.name,RARITY[o.rarity].color); }
@@ -3853,7 +3856,12 @@ const EXPANDED_SCAPES={
       climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});vplat(0,-4050,190,1080,840,{checkpoint:true,breather:true});
       for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
       chest(-720,-2320,190);chest(360,-3150,190);
+      const standards=optionalMission('keepStandards','Recover the three fallen siege standards','collect',3,'siegebreakerBadge',{hint:'Search the breach, battlement, and Great Hall approach.'});
+      if(standards){const marks=[{x:-360,z:-850,y:44},{x:-500,z:-2320,y:190},{x:420,z:-3150,y:190}];vplat(-360,-850,44,108,92,{questPerch:true});for(const p of marks)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'keepStandards',name:'Fallen Standard'},bob:rnd()*3,placed:true});}
+      // A broken parapet line forms a mastered shortcut from the ramp toward the hall.
+      climbRun(-180,-2480,190,280,-3000,190,78,{shortcut:true,battlement:true});
       mkMonster('revenant',0,-120,camp);for(const p of [[360,-1550,yard],[-500,-2320,ramp],[280,-3000,hall]]){mkMonster('revenant',p[0]-70,p[1],p[2]);mkMonster(p[2]===ramp?'caster':'bones',p[0]+70,p[1]-20,p[2]);}mkMonster('bones',340,-3070,hall);
+      {const e=mkMonster('revenant',420,-1640,yard);makeElite(e);e.name='The Gaol Captain';}
       scapeKill(ctx,[{x:360,z:-1550,room:yard},{x:-500,z:-2320,room:ramp},{x:280,z:-3000,room:hall}]);scapeFind(ctx,0,-4140,190);
       finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4240,decoCol:STONE,decoTheme:'ruins',decoTall:380});
     }else{
@@ -3865,6 +3873,9 @@ const EXPANDED_SCAPES={
       for(let k=0;k<9;k++){const t=k/8;vplat(-380+800*t,-2460-440*t,100+110*t,78,78,{chain:true});G.deco.push({x:-380+800*t,z:-2460-440*t,y0:210+110*t,w:7,h:120,d:7,c:IRON});}
       climbRun(420,-2900,210,0,-3800,330,76);for(let k=0;k<6;k++){const a=k*1.05;vplat(Math.cos(a)*190,-3800+Math.sin(a)*190,330+k*32,80,80,{shaft:true});}road(shaft,door,170);
       chest(-620,-2220,100);chest(180,-3800,330);for(const p of [[-460,-760,cells],[-380,-2220,records],[0,-4500,door]]){mkMonster('revenant',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}
+      const seals=optionalMission('keepSeals','Recover the three discarded warden seals','collect',3,'wardenKey',{hint:'Search the cells, Records Vault, and Escape Shaft.'});
+      if(seals){const marks=[{x:-620,z:-760,y:42},{x:-300,z:-2220,y:100},{x:-180,z:-3800,y:330}];vplat(-620,-760,42,106,90,{questPerch:true});for(const p of marks)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'keepSeals',name:'Warden Seal'},bob:rnd()*3,placed:true});}
+      for(let k=0;k<5;k++)vplat(210-k*92,-4010-k*78,350-k*5,86,76,{shortcut:true,recovery:true});
       scapeFetch(ctx,[{x:-620,z:-760,y:0},{x:420,z:-1440,y:68},{x:-580,z:-2220,y:100},{x:420,z:-2900,y:210},{x:0,z:-3800,y:330}]);
       finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:STONE,decoTheme:'dungeon',decoTall:430});
     }
@@ -4059,7 +4070,10 @@ const SIDE_SCAPES={
     for(let k=0;k<6;k++)G.deco.push({x:-420+(k%3)*140,z:-2300+Math.floor(k/3)*170,y0:150,w:100,h:70,d:80,c:k%2?STONE:'#252936'});
     const recordsItems=[{x:-500,z:-790,y:90},{x:-420,z:-2300,y:150},{x:430,z:-3020,y:250}];for(const p of recordsItems)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'prisonRecords',name:'Prison Record'},bob:rnd()*3,placed:true});
     localMission('prisonRecords','Recover the prisoners’ records','collect',3,150);G.portal=null;chest(-680,-2300,150);chest(210,-3900,360);scapeSecret(ctx,0,-2140,0);
+    const testimony=optionalMission('oubTestimony','Recover the three hidden witness testimonies','collect',3,'witnessChain',{hint:'Look behind the barred galleries and above the Warden Walk.'});
+    if(testimony){const marks=[{x:-650,z:-800,y:90},{x:-180,z:-2300,y:150},{x:650,z:-3020,y:250}];vplat(-650,-800,90,104,90,{questPerch:true});vplat(-180,-2300,150,104,90,{questPerch:true});for(const p of marks)G.pickups.push({x:p.x,z:p.z,y0:p.y,localItem:{id:'oubTestimony',name:'Witness Testimony'},bob:rnd()*3,placed:true});}
     for(const p of [[0,-200,intake],[-500,-800,chains],[420,-1500,pit],[-420,-2300,records],[430,-3020,walk]]){mkMonster('revenant',p[0]-50,p[1],p[2]);mkMonster('bones',p[0]+55,p[1],p[2]);}
+    {const e=mkMonster('revenant',360,-3100,walk);makeElite(e);e.name='The Nameless Jailer';e.y=250;e.sx=e.x;e.sz=e.z;}
     finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4800,decoCol:STONE,decoTheme:'dungeon',decoTall:480});G.portal=null;questUpdate();
   },
   glaciervault(ctx){const {rnd,mkMonster}=ctx,ICE='#a9e5f5',CRYSTAL='#78d7ef',METAL='#3f5968',HEAT='#ff9b4a';

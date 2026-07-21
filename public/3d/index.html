@@ -40,7 +40,7 @@
   .barlabel{transition:none}.vitalnum{font-size:9px;font-weight:800;color:#d7dbe5;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
   #hud .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 8px;position:relative;z-index:1}
   #hud .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
-  #lvlbadge{font-size:10px;font-weight:900;letter-spacing:.08em;color:#f5c778;background:linear-gradient(#493317,#271d0e);border:1px solid #795526;padding:4px 9px;border-radius:6px;}.hudidentity{display:flex;align-items:baseline;gap:7px;min-width:0;margin-bottom:3px}.hudplayername{color:#fff;font:900 12px Georgia,serif;letter-spacing:.055em;text-shadow:0 1px 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hudidentitydot{color:#947342;font-weight:900}
+  #lvlbadge{font-size:10px;font-weight:900;letter-spacing:.08em;color:#f5c778;background:linear-gradient(#493317,#271d0e);border:1px solid #795526;padding:4px 9px;border-radius:6px;}.hudidentity{display:flex;align-items:baseline;gap:7px;min-width:0;margin-bottom:3px}.hudplayername{color:#fff;font:900 12px Georgia,serif;letter-spacing:.055em;text-shadow:0 1px 4px #000;white-space:nowrap;overflow:visible}.hudidentitydot{color:#947342;font-weight:900}
   #weapontag{font-size:11px;font-weight:700;color:var(--ink);opacity:.95;}
   #armortag{font-size:11px;font-weight:700;color:#aeb9c6;display:flex;align-items:center;gap:4px;}
   #armortag .pip{width:7px;height:7px;border-radius:2px;display:inline-block;background:#333;}
@@ -767,7 +767,9 @@
     .progbox.charprog{left:22px;right:calc(50% + 312px);border-radius:12px 4px 4px 12px;clip-path:polygon(1.5% 0,100% 0,100% 100%,1.5% 100%,0 66%,0 34%)}
     .progbox.classprog{right:22px;left:calc(50% + 312px);border-radius:4px 12px 12px 4px;clip-path:polygon(0 0,98.5% 0,100% 34%,100% 66%,98.5% 100%,0 100%)}
     .progbox:first-child{border:1px solid #9a6c30}
-    .proghead{margin-bottom:0}.progtitle{font-family:Georgia,serif;color:#e0d3b8;font-size:10px;letter-spacing:.1em;font-weight:800}.prognum{font-family:Georgia,serif;font-size:10px;color:#c3b9a8;font-weight:700}.progbox .bar{height:13px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),rgba(231,205,151,.25) calc(10% - 1px),rgba(231,205,151,.25) 10%)}
+    .proghead{margin-bottom:0}.progtitle{font-family:Georgia,serif;color:#e0d3b8;font-size:10px;letter-spacing:.1em;font-weight:800}.prognum{font-family:Georgia,serif;font-size:10px;color:#c3b9a8;font-weight:700}.progbox .bar{height:13px;border-color:#5b4222;box-shadow:inset 0 1px 3px #000,0 0 0 1px #08090c;background-color:#030307;position:relative}
+  /* ruler ticks LAYER ON TOP of the fill so they stay visible as the XP crosses each segment */
+  .progbox .bar::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:4;border-radius:inherit;background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1.5px),rgba(20,14,4,.55) calc(10% - 1.5px),rgba(20,14,4,.55) calc(10% - 0.5px),rgba(255,236,180,.5) calc(10% - 0.5px),rgba(255,236,180,.5) 10%)}
     .pathrow{position:absolute;left:104px;right:18px;bottom:9px}.pathrow .barlabel{color:#817766}.pathrow .bar{height:3px!important;box-shadow:none}
     #jetwrap{position:absolute;left:104px;right:18px;bottom:9px}
     #bosshpwrap{top:22px;width:min(610px,42vw)}
@@ -822,7 +824,7 @@
 <div id="hud" class="hide">
   <div class="hudportrait"><img id="hudportraitimg" src="icons/skins/skin-knight.png" alt="Equipped skin"></div>
   <div class="hudpanel">
-  <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span><span class="hudidentitydot">·</span><span id="lvlbadge">Warrior</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="armortag"></span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span></div></div>
+  <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="lvlbadge">Warrior</span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span><span id="armortag"></span></div></div>
   <div id="hudbag" title="Bag · 0 / 30 slots used"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span id="hudbagnum">0 / 30</span></div>
   <div class="hudvitals"><div class="barwrap"><span class="barlabel">HP</span><div class="bar"><i id="hpfill"></i></div><span class="vitalnum" id="hpnum">100 / 100</span></div>
   <div class="barwrap"><span class="barlabel">MANA</span><div class="bar"><i id="manafill"></i></div><span class="vitalnum" id="mananum">100 / 100</span></div></div>
@@ -873,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.298.0';
+const VERSION3D='1.299.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8033,7 +8035,8 @@ function openHub(){
 }
 /* Phase 20: the hub gets its OWN look — a warm golden-hour home, NOT the grey/grassy
    Outskirts it borrowed. Soft plum-warm sky, honeyed lantern haze, warm cobblestone. */
-const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:900,ad:760};
+const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:1320,ad:1120};   // ground plane widened to reach the space-passed walls
+const HUB_SX=1.45, HUB_SZ=1.30;   // the Waystation's "space pass" scale — shared by enterWaystation AND per-frame hub-upgrade rendering so they stay aligned
 function enterWaystation(){
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
@@ -8054,6 +8057,9 @@ function enterWaystation(){
      crates...), the MIRROR PAVILION due south, and the DARK GROTTO north-east where the
      Abyssal Descent stone waits. The gate terrace still crowns the north. */
   // ---- floor: ONE grand plaza (compact hub-and-spoke; -z = north/forward toward the gates) ----
+  // A BIG base floor that reaches the perimeter walls everywhere (scaled with the hub by the space pass),
+  // so there are no bare gaps between the floor and the walls after the widening.
+  G.segments.push({x:0,z:210,w:1400,d:1420});
   G.segments.push({x:0,z:-40,w:1300,d:840});
   G.rooms.push({x:0,z:-40,w:1300,d:840,monsters:[],encounter:false,cleared:true});
   // SOUTH ACTIVITY ANNEX — new real estate for the two repeatable challenge gates. It opens
@@ -8122,7 +8128,8 @@ function enterWaystation(){
   for(const a of annexPads){ G.obstacles.push({kind:'plat',x:a.x,z:a.z,w:180,d:150,h:20});
     G.deco.push({x:a.x,z:a.z,y0:0,w:240,h:1.4,d:210,c:a.f});
     for(const s of [-1,1]){ vcol(a.x+s*96,a.z,18,18,132); G.deco.push({x:a.x+s*96,z:a.z,y0:132,w:24,h:10,d:24,c:a.p}); } }   // a pair of corner pillars per plaza
-  for(let k=0;k<6;k++)G.deco.push({x:(Math.random()*2-1)*320,z:710+(Math.random()*2-1)*100,w:14+Math.random()*10,h:26+Math.random()*30,c:'#241431',theme:'void'});
+  // Void crystals belong to the ABYSSAL DESCENT portal only — ring them around it as its signature (they scale + stay together with the annex).
+  for(let k=0;k<8;k++){ const a=k/8*6.283, rr=76+Math.random()*40; G.deco.push({x:-300+Math.cos(a)*rr,z:660+Math.sin(a)*rr,w:14+Math.random()*11,h:26+Math.random()*34,c:'#241431',theme:'void'}); }
   // (removed the two floating signpost banners that hung between the NPCs — the NPC name tags already label each bay)
   // ---- the posts: everyone gets a home that fits them ----
   // grouped by purpose: WEST BAY = Exchange, EAST BAY = War Yard, centre = quests/mirror,
@@ -8134,7 +8141,7 @@ function enterWaystation(){
     {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
     {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
-    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-200,z:322,open:()=>openQuestBoard(wsResume)},
+    {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-360,z:360,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-548,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
@@ -8151,7 +8158,7 @@ function enterWaystation(){
     {x:548,z:-60,w:78,d:54},   // Drillmaster's booth
     {x:548,z:150,w:54,d:54},   // Beastkeeper
     {x:560,z:500,w:74,d:28},   // Sparring Room door (SE court)
-    {x:-200,z:322,w:66,d:24},  // Postings board
+    {x:-360,z:360,w:66,d:24},  // Postings board (flush on the south-west wall)
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-548,z:45,w:48,d:40},   // Your Bag chest — moved to the west wall, between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30}      // The Arena gate (deep-centre annex plaza)
@@ -8164,7 +8171,7 @@ function enterWaystation(){
   // ===== SPACE PASS — the whole Waystation gets ~45% more width and ~30% more depth so every portal,
   // keeper and activity has room to breathe. POSITIONS of everything scale; large floors and the perimeter
   // walls (h===300) stretch to enclose the bigger bowl; collision footprints (h 108/112) keep their size. =====
-  { const SX=1.45, SZ=1.30, R=Math.round;
+  { const SX=HUB_SX, SZ=HUB_SZ, R=Math.round;
     const pos=o=>{ if(o.x!=null)o.x=R(o.x*SX); if(o.z!=null)o.z=R(o.z*SZ); };
     G.segments.forEach(o=>{ pos(o); o.w=R(o.w*SX); o.d=R(o.d*SZ); });   // CRITICAL: the walkable FLOOR must scale with everything, or the outer gates/annex sit off the floor
     G.hubNpcs.forEach(pos); G.gates.forEach(pos); G.torches.forEach(pos);
@@ -10107,11 +10114,13 @@ function drawWaystation(t){
     bx(-806,96,644, 3.4,3.4,3.4, '#ffe6a0','#ffd24a', 0.4+0.42*Math.sin(t*4)); }   // the glint that hints at the secret
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
   for(const g of G.gates){
-    if(g.side){ // discovered Trial Chamber: a compact but grounded rift monument in the annex
+    if(g.side){ // discovered Trial Chamber: a compact but grounded rift monument, beside its parent portal
       bx(g.x-18,28,g.z, 8,56,12,'#30283d');bx(g.x+18,28,g.z, 8,56,12,'#30283d');
       bx(g.x,59,g.z,44,8,14,'#443452','#7b53a0',0.45);
       bx(g.x,28,g.z+2, 28,48,7,'#120a1e','#4a2070',0.9);
       bx(g.x,28,g.z+7, 15,38,6, g.done?'#3a5a45':'#c47bff', g.done?'#4be08a':'#c47bff', 0.5+0.3*Math.sin(t*3+g.x));
+      // number pips on the top bar (which secret this is), same idea as the main gates' tier pips but scaled to the smaller frame
+      { const num=(g.zi||0)+1, sp=5.2, pw=3; for(let i=0;i<num;i++) bx(g.x-((num-1)*sp)/2+i*sp, 62, g.z+7.6, pw,pw,1.2, '#ffd24a','#ffd24a',0.95); }
       continue; }
     const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
     bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
@@ -10129,8 +10138,10 @@ function drawWaystation(t){
       bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
       continue; }
     if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
-      bx(n.x,10,n.z, 40,20,26,'#5a4426'); bx(n.x,22,n.z, 42,8,28,'#6e5430');
-      bx(n.x,16,n.z-13, 8,10,3,'#ffd24a','#ffd24a',0.7); continue; }
+      pushM(); mv(n.x,0,n.z); rotY(hubNpcFacing(n,n.x,n.z));            // orient the chest so its face points toward the hub centre
+      bx(0,10,0, 40,20,26,'#5a4426'); bx(0,22,0, 42,8,28,'#6e5430');
+      bx(0,16,14, 8,10,3,'#ffd24a','#ffd24a',0.7);                     // gold clasp on the FRONT, now facing centre
+      popM(); continue; }
     if(n.prop==='anvil'){ drawShadow(n.x,n.z,26,0.24);
       // BIGGER anvil on a stump
       bx(n.x,13,n.z, 30,26,30,'#2a231c'); bx(n.x,30,n.z, 52,14,22,'#20242e','#4a5568',0.4); bx(n.x+22,34,n.z, 14,9,16,'#262a36');  // stump + anvil body + horn
@@ -10258,11 +10269,11 @@ function drawWaystation(t){
     bx(0,320,-1080, 210,640,90, '#160f22','#3a2450',1); bx(0,600,-1080, 90,150,60,'#241431','#7a30c0',0.5);   // the Apex throne
     for(let i=0;i<12;i++){ const ey=((t*26+i*70)%200); bx(-360+((i*151)%740), ey+8, -366-((i*47)%110), 3,3,3, '#ff9a4a','#ffd24a', 0.5*(1-ey/200)); } }   // drifting embers
   // ITEM 6 — expensive cosmetic upgrades, purchased in the shop, that visibly transform the Waystation
-  const HU=meta.hubUpgrades||{};
-  if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ bx(b[0],20,b[1], 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b[0],46,b[1], 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b[0]+(Math.random()-0.5)*10,54+Math.random()*18,b[1], 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
-  if(HU.banners){ for(const s of [-1,1]) for(let k=0;k<3;k++){ const bz=-200+k*160; bx(s*406,112,bz, 3,72,34, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.6); } }
-  if(HU.ramparts){ for(let i=0;i<9;i++){ bx(-380+i*95,78,-380, 30,22,26,'#4a4f5e'); } }
-  if(HU.gild){ bx(0,76,30, 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,30, 9,150,9,'#ffe9a8','#ffd24a',0.22); }
+  const HU=meta.hubUpgrades||{}, SX=HUB_SX, SZ=HUB_SZ, R=Math.round;   // scale upgrade decor with the space-passed hub so nothing floats
+  if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ const b0=R(b[0]*SX), b1=R(b[1]*SZ); bx(b0,20,b1, 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b0,46,b1, 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b0+(Math.random()-0.5)*10,54+Math.random()*18,b1, 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
+  if(HU.banners){ const wx=R(-640*SX)+14; for(let k=0;k<4;k++){ const bz=R((-150+k*150)*SZ); bx(wx,152,bz, 4,92,42, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.72); bx(wx,200,bz, 7,10,48,'#caa23a','#ffd24a',0.6); } }   // order banners hang FLUSH high on the WEST wall, behind the shop / smith / bag
+  if(HU.ramparts){ for(let i=0;i<11;i++){ bx(R((-460+i*92)*SX),78,R(-400*SZ), 34,24,26,'#4a4f5e'); } }
+  if(HU.gild){ bx(0,76,R(30*SZ), 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,R(30*SZ), 9,150,9,'#ffe9a8','#ffd24a',0.22); }
 }
 /* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
 const SPAWNER={

@@ -1378,3 +1378,25 @@ a real silvered mirror.
 - The live reflection is more realistic: it tracks your horizontal position more strongly, rises when you
   jump, and MIRRORS your facing (mh.yaw = π − your yaw) so turning turns your reflection — true mirror behavior.
 - VERIFIED: hub builds with 0 console errors. (Visual — review in the SE court by walking up to the Mirror.)
+
+
+## [Claude | 2026-07-21] Hub polish batch (Oliver's list) — shipped v1.299.0
+- **Floor now reaches the walls everywhere** — the space-passed hub left bare gaps at the perimeter (the
+  floor is drawn per walkable segment, and only 3 rectangles existed). Added a big base floor segment that
+  scales with the hub + widened HUB_STAGE's ground plane. Verified floor is solid at all walls/corners.
+- **Secret (purple) portals show number pips** on the top bar — like the main gates' tier pips, scaled to
+  the smaller trial-chamber frame, indicating which secret it is.
+- **Void crystals moved to ring the Abyssal Descent portal** (were scattered around Sprint/PvP); kept
+  together as its signature and scale with the annex.
+- **XP-bar ruler ticks now layer ON TOP of the fill** (pseudo-element overlay) so segment marks stay
+  visible as the bar fills past them.
+- **Player name never truncates** (removed ellipsis). Restructured the HUD meta row: name alone on the left
+  (full room), the CLASS badge moved to the right where armor% was, and armor% moved to sit after the
+  location text ("THE WAYSTATION") — verified name overflow is no longer clipped.
+- **Your Bag chest** now rotates to face the hub centre (gold clasp on the front toward the plaza).
+- **Postings board** moved flush against the south-west wall, posters facing the room.
+- **Hub-upgrade decor no longer floats:** the per-frame render was using UN-scaled coords after the space
+  pass. Made the hub scale a shared global (HUB_SX/HUB_SZ) and scaled all upgrade decor; the order banners
+  now hang FLUSH high on the west wall behind the shop/smith/bag.
+- VERIFIED: hub builds with 0 console errors; screenshot confirms the floor reaches the walls and the HUD
+  name has room. (Spatial placements — bag/postings/banners — worth a quick in-game look to fine-tune.)

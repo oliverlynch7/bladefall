@@ -875,7 +875,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.307.0';
+const VERSION3D='1.308.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1768,7 +1768,7 @@ function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
 function classFamilyOk(w){ return !w || w.anyClass || curClass().family.includes(w.art); }
 function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
-function abilityMul(){ const cm=classMods(); return cm.sub==='sorcerer'?(cm.cap?1.25:1.15):1; }
+function abilityMul(){ return 1; }   // legacy sorcerer hook retired — skill-damage bonuses now come from v2 passives (m_potent, etc.)
 // The effective 4-skill kit: skill 1 is shared; skills 2-4 come from the path you chose
 // at the rank-2 fork (each subclass = a distinct kit). Unchosen -> path-A default for display.
 function curSkills(cid){ cid=cid||meta.classId; const C=CLASSES[cid]; if(!C) return []; const cs=classState(cid);
@@ -2707,9 +2707,6 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
-  const cm=classMods();
-  if(cm.sub==='berserker') v*=cm.cap?1.2:1.12;
-  if(cm.sub==='sniper'&&p.weapon&&p.weapon.cls==='ranged') v*=cm.cap?1.25:1.15;
   if(p.berserkT>0) v*=1.35;
   if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
   if(meta.classId==='warrior'&&c2def('warrior')){ if(!(G&&G._desig))v*=1.08; if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
@@ -2718,9 +2715,8 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; const cm=classMods(); if(cm.sub==='assassin') v*=cm.cap?1.18:1.10; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
-  const cm=classMods(); if(cm.sub==='harvester') v+=cm.cap?0.20:0.12;
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
@@ -5568,7 +5564,7 @@ const SKILL_FX={
     burst(p.x+fx*55,p.y+22,p.z+fz*55,'#ffd24a',14);
     for(let i=0;i<12;i++){ const a=p.yaw+(i/11-0.5)*2.7, rr=72+Math.random()*44;
       G.particles.push({x:p.x+Math.sin(a)*rr,y:16,z:p.z+Math.cos(a)*rr,vx:Math.sin(a)*130,vy:44,vz:Math.cos(a)*130,life:0.35,color:'#ffe08a',sz:3.4}); } },
-  stomp(p,ok,am){ const w=p.weapon, cm=classMods(), R=(cm.sub==='guardian'?210:150);
+  stomp(p,ok,am){ const w=p.weapon, R=150;
     SFX.boss(); G.shake=Math.min(G.shake+9,15); skillRing(p.x,p.z,'#e8c27a','#b8863a',R+30);
     const dmg=(w?w.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
     for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>R+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
@@ -5587,7 +5583,7 @@ const SKILL_FX={
     burst(p.x+Math.sin(p.yaw)*18,oy,p.z+Math.cos(p.yaw)*18,'#ffe9a8',12); skillRing(p.x,p.z,'#ffe9a8','#e8c060',60);
     G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
       size:11,color:'#ffe9a8',shape:'lance',glow:1,trail:'#ffe9a8',dmg:(w?w.dmg:8)*effPower(p)*3*am*(ok?1:OFFCLASS_MUL),
-      kb:220,pierce:ok?(cm.sub==='sniper'?99:3):0,el:ok?(w&&w.el):null,life:1.2,hitSet:[]});
+      kb:220,pierce:ok?3:0,el:ok?(w&&w.el):null,life:1.2,hitSet:[]});
     p.atkTimer=0.18; SFX.shoot(); G.shake=Math.min(G.shake+4,9); },
   volley(p,ok,am){ const w=p.weapon, base=(w&&w.proj)?w.proj:{speed:660,size:4,color:'#9fe6c8',shape:'arrow'};
     const t=projectileAimTarget(p,760); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
@@ -5596,9 +5592,9 @@ const SKILL_FX={
       G.projectiles.push({owner:'player',x:p.x+Math.sin(a)*16,y:oy,z:p.z+Math.cos(a)*16,vx:Math.sin(a)*base.speed,vy:0,vz:Math.cos(a)*base.speed,
         gravity:0,size:base.size,color:base.color,shape:base.shape||'arrow',glow:base.glow||0,dmg,kb:120,pierce:0,el:ok?(w&&w.el):null,life:700/base.speed,hitSet:[]}); }
     p.atkTimer=0.18; SFX.shoot(); },
-  tumble(p,ok,am){ const cm=classMods();
+  tumble(p,ok,am){
     p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
-    p.invuln=Math.max(p.invuln,cm.sub==='assassin'?0.6:0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
+    p.invuln=Math.max(p.invuln,0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
     if(ok){ let n=0; for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
@@ -5874,7 +5870,7 @@ function useSkillLegacy(i){
   const r=SKILL_FX[s.id](p,classFamilyOk(p.weapon),abilityMul());
   G._desig=false;
   if(r==='refund'){ gainMana(p,manaSpent,false); return; }
-  const cm=classMods(); let cd=s.cd; if(cm.sub==='wizard') cd*=cm.cap?0.7:0.8;
+  let cd=s.cd;
   cd*=(1-effCdr(p));                                     // Mystic armor
   p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate();
 }
@@ -5995,7 +5991,6 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
-  { const cm=classMods(); if(cm.sub==='executioner'&&e.hp<e.maxHp*0.5) dmg*=cm.cap?1.5:1.3; }   // Executioner: finish the wounded
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
     if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
@@ -6208,7 +6203,6 @@ function checkStageClear(){
 function hurtPlayer(dmg,sx,sz){
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
-  { const cmG=classMods(); if(cmG.sub==='guardian') dmg=Math.max(1,Math.round(dmg*(cmG.cap?0.75:0.85))); }
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;

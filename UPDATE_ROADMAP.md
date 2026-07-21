@@ -1460,3 +1460,9 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Verified live (all 16): exactly 1 gate each, gap 195, 0 bridging platforms, launch height == landing height (pure horizontal — double-jump never required).
 - Exempted the Outskirts area-0 (`dashGate:false`) so it keeps only its hand-built tutorial chasm + signpost instead of double-gating.
 - `dashGate` now also skips `G.side` (trial/secret chambers keep their bespoke parkour), in addition to `G.trial`.
+
+## v1.308.0 — class-system audit + dead legacy-subclass cleanup
+- Double-checked the class system: all 4 classes (warrior/ranger/mage/reaper) are fully on the v2 CLASS2 rank-1-10 choice tree, and the chosen passives are wired into combat at 29 `c2Passive()` sites. Codex's conversion is COMPLETE and functional. Legacy `CLASSES[*].subs` data survives only for display fallback.
+- Removed dead code: `cs.sub` is forced null on v2 migration and never reassigned (every class is in CLASS2, so the legacy `else`/`!c2def()` branches are unreachable). That made every `cm.sub==='berserker'/'sniper'/'assassin'/'guardian'/'wizard'/'harvester'/'sorcerer'/'executioner'` combat conditional permanently false. Removed all of them (effDamage, effSpeed, effLifesteal, stomp, tumble, cooldown, executioner-damage, guardian-mitigation) plus the now-orphaned `const cm=classMods()` locals — behavior-preserving (they never fired), their intent already replaced by v2 passive choices.
+- Verified: parse OK, entered a zone with 18 enemies + 30 update ticks, no throw, 0 console errors.
+- Left inert: the legacy subclass-choice overlay (`queueSubclass` is never set true in v2) and `CLASSES.subs` display data — dead but harmless; a fuller UI removal is deferred to avoid risk.

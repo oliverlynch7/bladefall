@@ -1047,3 +1047,9 @@ Deliberately deferred: the three early bosses (Brute/Marksman/Warden) already ha
 - The Continue subtitle updates immediately with slot, name, level, and class; center-clicking resumes the previewed save, including a save-safe automatic handoff when switching slots.
 - Empty slots are skipped, single-save players see no unnecessary arrows, keyboard Left/Right is supported, and Load Character remains unchanged.
 - Muted browser QA verified three-slot cycling, unchanged active storage during preview, cross-slot automatic continuation, 1920x1080 and 1366x768 geometry, and zero console errors.
+
+
+## [Codex | 2026-07-20] Gameplay HUD restoration invariant - shipped v1.254.0
+- Fixed the shared menu-to-game return path so active gameplay always restores the player HUD, progression bars, controls, pause button, skill bar, quest tracker, and live pet panel.
+- Routed class skill/passive choices, the first-skill tutorial, pause resume, hub tutorial, and Waystation service returns through the same authoritative restoration path.
+- Muted browser QA reproduced the Ranger rank-up choice flow and verified both tutorial and later passive returns restore every gameplay UI surface with zero console errors.

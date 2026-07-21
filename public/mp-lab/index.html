@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BLADEFALL — Multiplayer Lab</title>
+<style>
+  :root{--bg:#0b0c10;--ink:#f3f1ea;--amber:#e8a33d;--good:#3ad07f;--bad:#ff5e54;--muted:#8b8f9a;--panel:#131a26;--line:#2b3040;}
+  *{box-sizing:border-box;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  body{background:var(--bg);color:var(--ink);padding:14px;max-width:860px;margin:0 auto}
+  h1{font-size:16px;letter-spacing:.06em}h1 b{color:var(--amber)}
+  .sub{color:var(--muted);font-size:12.5px;margin:4px 0 14px;line-height:1.5}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  button{background:linear-gradient(180deg,#f0b95c,var(--amber));color:#0b0c10;font-weight:800;border:0;border-radius:10px;padding:11px 16px;font-size:14px;cursor:pointer}
+  button.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+  input{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;width:170px}
+  .code{font-family:ui-monospace,monospace;font-size:22px;font-weight:800;color:var(--amber);letter-spacing:.18em;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;display:inline-block;cursor:pointer}
+  .stat{font-size:12.5px;color:var(--muted)}.stat b{color:var(--ink)}
+  #status{font-weight:800}
+  .ok{color:var(--good)}.err{color:var(--bad)}
+  canvas{width:100%;aspect-ratio:16/10;background:#0e1520;border:1px solid var(--line);border-radius:12px;margin-top:12px;touch-action:none}
+  .leg{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+</style>
+
+<h1>BLADEFALL — <b>Multiplayer Lab</b></h1>
+<div class="sub">A standalone WebRTC/PeerJS connection test — <b>separate from the game, changes nothing in it.</b>
+It proves peer-to-peer works across your networks and lets you feel the latency. Open this on two devices (or two
+browsers): one <b>Hosts</b>, the other <b>Joins</b> with the code. Then move your square with WASD / arrow keys —
+you should see each other move in real time.</div>
+
+<div class="card" id="setup">
+  <div class="row">
+    <button id="hostBtn">Host a room</button>
+    <span class="stat">— or —</span>
+    <input id="joinCode" placeholder="ROOM CODE" maxlength="6">
+    <button id="joinBtn" class="ghost">Join</button>
+  </div>
+  <div class="row" id="codeRow" style="display:none">
+    <span class="stat">Share this code:</span> <span class="code" id="myCode" title="tap to copy"></span>
+  </div>
+  <div class="row"><span class="stat">Status: <span id="status">idle</span></span></div>
+  <div class="row"><span class="stat">Players: <b id="pcount">0</b> &nbsp;·&nbsp; Ping to host: <b id="ping">—</b></span></div>
+</div>
+
+<canvas id="cv" width="640" height="400"></canvas>
+<div class="leg"><b>WASD / arrows</b> to move your square. Green status = connected. If two devices connect and move
+smoothly, the P2P layer works — that's the foundation for in-game co-op. If they can't connect, that's the NAT issue
+we discussed (usually fine on home wifi; would need a TURN relay for strict networks).</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const ROOMPFX='bladefall-mp-';                 // namespace so codes don't collide with other PeerJS apps
+let peer=null, isHost=false, conns=[], hostConn=null, myId=Math.random().toString(36).slice(2,7);
+const me={id:myId, x:320, y:200, c:'#'+((Math.random()*0xffffff)|0).toString(16).padStart(6,'0')};
+const others={};                               // id -> {x,y,c}
+const keys={};
+
+function setStatus(t,cls){ const s=$('status'); s.textContent=t; s.className=cls||''; }
+function rndCode(){ let s='';for(let i=0;i<4;i++)s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0];return s; }
+
+$('hostBtn').onclick=()=>{
+  const code=rndCode(); isHost=true;
+  peer=new Peer(ROOMPFX+code, {debug:1});
+  peer.on('open',()=>{ $('myCode').textContent=code; $('codeRow').style.display='flex'; setStatus('hosting — waiting for players','ok'); });
+  peer.on('connection', c=>wireGuest(c));
+  peer.on('error', e=>setStatus('error: '+e.type,'err'));
+};
+$('myCode').onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText($('myCode').textContent); };
+
+$('joinBtn').onclick=()=>{
+  const code=($('joinCode').value||'').trim().toUpperCase(); if(!code)return;
+  isHost=false; peer=new Peer({debug:1});
+  peer.on('open',()=>{ setStatus('connecting…');
+    const c=peer.connect(ROOMPFX+code,{reliable:false}); hostConn=c;
+    c.on('open',()=>{ setStatus('connected','ok'); c.send({t:'hello',p:me}); });
+    c.on('data',onData);
+    c.on('close',()=>setStatus('host left','err'));
+  });
+  peer.on('error', e=>setStatus('error: '+e.type+' (bad code, or NAT blocked)','err'));
+};
+
+// HOST: a guest connected — star topology, host relays everyone's positions
+function wireGuest(c){ c.on('open',()=>{ conns.push(c); updateCount();
+  c.on('data', d=>{ if(d.t==='hello'){ others[d.p.id]=d.p; } else if(d.t==='pos'){ if(others[d.p.id])Object.assign(others[d.p.id],d.p); else others[d.p.id]=d.p; }
+    else if(d.t==='ping'){ c.send({t:'pong',ts:d.ts}); return; }
+    broadcastState(); });
+  c.on('close',()=>{ conns=conns.filter(x=>x!==c); updateCount(); });
+}); }
+function broadcastState(){ const all=[me].concat(Object.values(others));
+  const msg={t:'state',players:all}; conns.forEach(c=>{try{c.send(msg)}catch(e){}}); }
+
+// GUEST: receive relayed state
+function onData(d){ if(d.t==='state'){ d.players.forEach(p=>{ if(p.id===me.id)return; others[p.id]=p; });
+    const live={}; d.players.forEach(p=>live[p.id]=1); Object.keys(others).forEach(id=>{if(!live[id])delete others[id];}); }
+  else if(d.t==='pong'){ $('ping').textContent=Math.round(performance.now()-d.ts)+' ms'; } }
+function updateCount(){ $('pcount').textContent=(isHost?1+conns.length:1+Object.keys(others).length+ (hostConn?1:0)); }
+
+// input + loop
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=1;});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0;});
+let pingT=0;
+function tick(){
+  const sp=3.4;
+  if(keys['a']||keys['arrowleft'])me.x-=sp; if(keys['d']||keys['arrowright'])me.x+=sp;
+  if(keys['w']||keys['arrowup'])me.y-=sp; if(keys['s']||keys['arrowdown'])me.y+=sp;
+  me.x=Math.max(12,Math.min(628,me.x)); me.y=Math.max(12,Math.min(388,me.y));
+  if(isHost){ broadcastState(); }
+  else if(hostConn&&hostConn.open){ hostConn.send({t:'pos',p:me});
+    if(performance.now()-pingT>1000){ pingT=performance.now(); hostConn.send({t:'ping',ts:performance.now()}); } }
+  // render
+  const cx=$('cv').getContext('2d'); cx.clearRect(0,0,640,400);
+  const draw=(p,isMe)=>{ cx.fillStyle=p.c; cx.fillRect(p.x-12,p.y-12,24,24);
+    if(isMe){cx.strokeStyle='#fff';cx.lineWidth=2;cx.strokeRect(p.x-13,p.y-13,26,26);} };
+  Object.values(others).forEach(p=>draw(p,false)); draw(me,true);
+  requestAnimationFrame(tick);
+}
+tick();
+</script>

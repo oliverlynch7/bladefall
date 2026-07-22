@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.317.1';
+const VERSION3D='1.318.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -933,7 +933,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen'];
@@ -955,6 +955,13 @@ const meta=Object.assign({
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
+if(!meta.quality) meta.quality='high';   // graphics quality: 'high' | 'medium' | 'low' (bloom + render-res + particles)
+// perf helpers, driven by meta.quality — let old/weak machines dial the graphics down
+function qLow(){ return meta.quality==='low'; }
+function qBloomOn(){ return meta.quality!=='low' && meta.quality!=='medium'; }   // the "upgraded light effect" — HIGH only
+function fxScale(){ return meta.quality==='low'?0.22:meta.quality==='medium'?0.5:1; }   // particle-count multiplier
+function qLabel(){ const q=meta.quality||'high'; return q.charAt(0).toUpperCase()+q.slice(1); }
+function cycleQuality(){ const o=['high','medium','low']; meta.quality=o[(o.indexOf(meta.quality||'high')+1)%3]; persistGlobal(); if(typeof resize==='function') resize(); }
 if(!meta.achievements) meta.achievements={};
 if(!Array.isArray(meta.unlockedSkins)) meta.unlockedSkins=['knight'];
 if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
@@ -2361,7 +2368,8 @@ const canvas=document.getElementById('gl');
 const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
 let VW=0,VH=0,DPR=1;
 function resize(){
-  DPR=Math.min(window.devicePixelRatio||1,2);
+  const _dpr=window.devicePixelRatio||1, _q=(typeof meta!=='undefined'&&meta.quality)||'high';
+  DPR = _q==='low' ? Math.min(_dpr,1)*0.66 : _q==='medium' ? Math.min(_dpr,1) : Math.min(_dpr,2);   // lower render resolution = big win on weak GPUs
   VW=window.innerWidth; VH=window.innerHeight;
   canvas.width=Math.round(VW*DPR); canvas.height=Math.round(VH*DPR);
   canvas.style.width=VW+'px'; canvas.style.height=VH+'px';
@@ -2473,7 +2481,8 @@ bindSceneVA();
 gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
 // ======= PostFX: render the scene to a texture, then add a blurred bright-pass (bloom) so glows/embers/gems radiate =======
 const PostFX=(function(){
-  const BLOOM_OFF=/[?&]nobloom/.test(location.search);
+  const URL_NOBLOOM=/[?&]nobloom/.test(location.search);
+  const BLOOM_OFF=()=>URL_NOBLOOM || (typeof qBloomOn==='function' && !qBloomOn());   // bloom is HIGH-quality only
   let W=0,H=0, sTex,sFBO,sDepth, bTex=[],bFBO=[];
   const QVS=`attribute vec2 aPos; varying vec2 vUv; void main(){ vUv=aPos*0.5+0.5; gl_Position=vec4(aPos,0.0,1.0); }`;
   function mkProg(fsSrc){ const p=gl.createProgram(); gl.attachShader(p,compile(QVS,gl.VERTEX_SHADER)); gl.attachShader(p,compile(fsSrc,gl.FRAGMENT_SHADER)); gl.linkProgram(p);
@@ -2518,15 +2527,15 @@ const PostFX=(function(){
     for(let i=0;i<2;i++){ bTex[i]=tex(hw,hh); bFBO[i]=fboFor(bTex[i]); }
     gl.bindFramebuffer(gl.FRAMEBUFFER,null); }
   function drawTri(loc){ gl.bindBuffer(gl.ARRAY_BUFFER,qb); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0); gl.drawArrays(gl.TRIANGLES,0,3); }
-  return { get on(){ return !BLOOM_OFF; },
+  return { get on(){ return !BLOOM_OFF(); },
     // draw the gradient sky + sun into whatever framebuffer is currently bound (called right after clear, before geometry)
     sky(top,bot,sun,sunC){ flushBatch(); gl.depthMask(false); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
       gl.useProgram(skyP); gl.uniform3f(U_skTop,top[0],top[1],top[2]); gl.uniform3f(U_skBot,bot[0],bot[1],bot[2]);
       gl.uniform3f(U_skSunC,sunC[0],sunC[1],sunC[2]); gl.uniform2f(U_skSun,sun[0],sun[1]); gl.uniform1f(U_skAsp,VW/Math.max(1,VH));
       drawTri(A_sky);
       gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(true); bindSceneVA(); },
-    begin(){ if(BLOOM_OFF) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
-    end(){ if(BLOOM_OFF) return; flushBatch();
+    begin(){ if(BLOOM_OFF()) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
+    end(){ if(BLOOM_OFF()) return; flushBatch();
       const hw=Math.max(1,VW>>1), hh=Math.max(1,VH>>1);
       gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.activeTexture(gl.TEXTURE0);
       gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[0]); gl.viewport(0,0,hw,hh); gl.useProgram(brightP); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_bT,0); drawTri(A_bright);
@@ -2660,6 +2669,7 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
   const setT=(pL,cL,e)=>{ if(e){ const tc=e[1], fl=0.72+0.18*Math.sin(t*9+(tc.ph||0)); gl.uniform3f(pL,tc.x,58,tc.z); gl.uniform3f(cL,0.38*fl,0.21*fl,0.10*fl); } else gl.uniform3f(cL,0,0,0); };   // (tc.ph||0): a malformed torch must never NaN the lights again
   setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
 function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
+  if(qLow()) return;   // skip the glow halos entirely on Low quality
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
   for(let i=3;i>=1;i--){ const s=r*i*0.7; bx(x,y,z,s,s,s,'#000000',color,a/(i*1.25)); }
   gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); }
@@ -3351,6 +3361,10 @@ function abandonTrial(){ restoreBank(); openHub(); }
 function nextArea(){
   if(G.endless){ endlessDescend(); return; }                  // Endless: the portal drops you a floor deeper
   if(G.bonusActive){ endBonus('✨ Sprint complete!'); return; }
+  // Commit a CLAIMED rift now that the level's been cleared alive (dying returns you to the hub, so reaching the exit == survived).
+  if(G.pendingSecret){ const ps=G.pendingSecret; G.pendingSecret=null;
+    if(!meta.sideFound[ps.id]){ meta.sideFound[ps.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; grantIansShard(ps.id); checkCosmetics(); persist();
+      toast('✦ '+ps.name+' secured — its portal now waits in the hub','#c47bff','event-secret-rift'); } }
   if(!G.tookDamage) meta.flawlessStages=(meta.flawlessStages||0)+1;
   if(G.trial){ trialComplete(); return; }
   if(G.side){ sideClear(); return; }
@@ -4173,13 +4187,18 @@ const EXPANDED_SCAPES={
       const camp=room('Outer Siege Camp',0,0,900,700),breach=room('Breached Curtain Wall',-360,-850,760,650),yard=room('Prison Yard',360,-1550,980,820),ramp=room('Broken West Span',-500,-2320,820,700,190),hall=room('Great Hall Approach',280,-3000,1020,840,190),vault=room('Sealed Vault Court',0,-4050,1080,840,190);
       road(camp,breach,180);road(breach,yard,160);G.walls.push({x:-730,z:-850,w:60,d:700,h:220,stand:true});G.walls.push({x:20,z:-850,w:60,d:700,h:220,stand:true});
       // Siege camp silhouettes: ballista, broken carts, tents, and a climbable collapsed siege tower.
-      for(const t of [[-280,80],[250,-100],[-40,-220]])G.deco.push({x:t[0],z:t[1],y0:0,w:150,h:55,d:100,c:'#49392e'});
-      G.deco.push({x:-330,z:-600,y0:20,w:230,h:28,d:60,c:'#3b2d24'});for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
+      for(const t of [[-280,80],[250,-100],[-40,-220]])vsolid(t[0],t[1],0,150,55,100,'#49392e');
+      vsolid(-330,-600,20,230,28,60,'#3b2d24');for(let k=0;k<6;k++)G.crumbles.push({x:-360-k*58,z:-700-k*70,w:80,d:70,h:28+k*28,state:0,timer:0,respawn:0,fallY:0,jit:0});
       // High route: battlement crossfire and a broken-wall jump line. Low route: drainage infiltration under the yard.
       climbRun(-520,-1650,0,-500,-2320,190,88);tower(-820,-2280,250);for(let k=0;k<7;k++){vplat(-500+k*125,-2320-(k%2)*82,190+(k%3)*22,110,100,{battlement:true,setpiece:true});G.deco.push({x:-500+k*125,z:-2320-(k%2)*82-44,y0:190+(k%3)*22,w:90,h:30,d:16,c:IRON});}
       const drain=room('Drainage Infiltration',760,-2380,360,520);road(yard,drain,105);road(drain,hall,110);chest(780,-2480);
-      vplat(870,-2560,86,140,110,{checkpoint:true}); G.deco.push({x:870,z:-2560,y0:86,w:148,h:5,d:118,c:'#43403a'});   // the rift on a raised drain-ledge in the far corner (single hop ~86)
-      scapeSecret(ctx,870,-2560,86);
+      chest(870,-2560,86);   // (the old drain-ledge keeps a chest; the rift moved out over the drop)
+      // ── THE RIFT OVER THE DROP: a tiny ledge stranded past a wall, out over the lava. Clear the wall with a jump+dash
+      //    to claim it, then jump+dash back to the level to survive — a fall just lands you back on the ledge to retry. ──
+      vplat(1000,-2380,0,200,240,{checkpoint:true}); G.deco.push({x:1000,z:-2380,y0:0,w:210,h:2,d:250,c:'#43403a'});
+      vcol(1170,-2380,52,260,68); G.deco.push({x:1170,z:-2380,y0:0,w:52,h:68,d:260,c:'#3a3540'}); G.deco.push({x:1170,z:-2380,y0:68,w:64,h:8,d:270,c:IRON});   // always-solid barrier (jump+dash over it)
+      vplat(1340,-2380,0,130,130,{checkpoint:true,secretPad:true}); G.deco.push({x:1340,z:-2380,y0:0,w:140,h:3,d:140,c:'#4a2c40'});
+      scapeSecret(ctx,1340,-2380,0);
       climbRun(500,-1850,0,280,-3000,190,78);road(hall,vault,180);climbRun(280,-3000,190,0,-4050,190,84,{bridge:true});vplat(0,-4050,190,1080,840,{checkpoint:true,breather:true});
       for(const p of [[-700,-2250],[0,-850],[420,-1550],[280,-3000]]){tower(p[0],p[1],120+(Math.abs(p[0])%3)*30);G.deco.push({x:p[0],z:p[1],y0:120,w:18,h:80,d:8,c:BANNER});}
       chest(-720,-2320,190);chest(360,-3150,190);
@@ -5161,7 +5180,9 @@ function project(x,y,z){
   if(cw<=0) return null;
   return [(cx/cw*0.5+0.5)*VW, (1-(cy/cw*0.5+0.5))*VH];
 }
-function burst(x,y,z,color,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=40+Math.random()*140;
+function burst(x,y,z,color,n){ n=Math.round(n*fxScale()); if(n<=0) return;   // quality: fewer particles on medium/low
+  if(G.particles.length > (qLow()?90:meta.quality==='medium'?240:600)) return;   // hard cap keeps weak GPUs from drowning
+  for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=40+Math.random()*140;
   G.particles.push({x,y:y+Math.random()*10,z,vx:Math.cos(a)*sp,vy:60+Math.random()*120,vz:Math.sin(a)*sp,life:0.4+Math.random()*0.3,color,sz:2.5+Math.random()*3}); } }
 function vOverlap(a,b){ return a.y<b.y+b.h && b.y<a.y+a.h; }
 function dXZ(ax,az,bx,bz){ return Math.hypot(ax-bx,az-bz); }
@@ -7355,11 +7376,11 @@ function update(dt){
     if(dXZ(s.x,s.z,p.x,p.z)<46 && Math.abs(p.y-s.y)<70){
       if(s.spent){ const g=awardGold(120); G.secret=null; SFX.pickup(); playFx('loot'); burst(s.x,s.y+40,s.z,'#9a86b0',18);   // already-claimed rift: a spent echo that just yields gold
         addText(p.x,p.y+90,p.z,'+'+g+'g','#c9b6ff'); toast('A spent rift — its echo yields '+g+' gold','#c9b6ff','event-secret-rift'); }
-      else { const S=curZone().side; meta.sideFound[S.id]=true; meta.secretsFound=(meta.secretsFound||0)+1; persist(); checkCosmetics();
+      else { const S=curZone().side;
+        G.pendingSecret={id:S.id,name:S.name};   // PROVISIONAL — a claimed rift only unlocks its portal if you clear the level ALIVE (committed in nextArea). Die and it slips away.
         G.secret=null; SFX.god(); playFx('secretget'); burst(s.x,s.y+40,s.z,'#c47bff',30); G.shake=Math.min(G.shake+8,14);
-        addText(p.x,p.y+90,p.z,'SECRET FOUND!','#c47bff',true);
-        toast(S.name+' discovered — its portal now waits in the hub','#c47bff','event-secret-rift');
-        grantIansShard(S.id); } } }   // the deepest trials each hide a Blade Shard
+        addText(p.x,p.y+90,p.z,'RIFT CLAIMED','#c47bff',true);
+        toast(S.name+' claimed — reach the exit ALIVE to keep it. Die, and the rift slips away.','#c47bff','event-secret-rift'); } } }
   // trial tutorial tips, paced out
   if(G.trial){ const T=TRIALS[G.trial];
     if(T.tips && G.tip<T.tips.length-1){ G.tipT-=dt; if(G.tipT<=0){ G.tip++; toast(T.tips[G.tip]); G.tipT=5.5; } } }
@@ -9552,6 +9573,7 @@ function openPause(){
       <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9595,6 +9617,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="fsBtn">Fullscreen: ${fsOn()?'On':'Off'}</button>
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
+      <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}

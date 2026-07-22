@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.2';
+const VERSION3D='1.318.3';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6258,7 +6258,8 @@ function chestMaybeMimic(ch,r){ if(!ch.bonus && (r?r():Math.random())<MIMIC_RATE
 function mimicReveal(ch){
   if(MP.active && !MP.isHost) return;   // co-op: the host reveals mimics; guests receive them via the enemy mirror
   const i=G.chests.indexOf(ch); if(i>=0) G.chests.splice(i,1);
-  const m=spawnEnemy('mimic',ch.x,ch.z); m.active=true; m.mimicE=true; m.dropT=0;
+  const m=spawnEnemy('mimic',ch.x,ch.z); m.mimicE=true;
+  m.active=false; m.dropT=1.0; m.emergeMax=1.0;   // ~1s emerge: it heaves up out of the ground FROZEN, then springs — time to back off
   playFx('chestthunk'); playFx('mimicroar',0.85);   // the chest lurches, then roars
   burst(ch.x,18,ch.z,'#caa23a',20); burst(ch.x,10,ch.z,'#6b4a2a',12);
   addText(ch.x,44,ch.z,'MIMIC!','var(--danger)',true);
@@ -10816,7 +10817,9 @@ function drawEnemy3(e,t){
     // THE MIMIC, unmasked: the chest is its skull — lid agape on fangs, a lolling tongue,
     // spider legs under the box. It keeps the chest's colors so the betrayal reads instantly.
     const snap=Math.max(0,Math.sin(G.time*9+e.bob))*0.5, wind=e.windT>0;
-    pushM(); if(wind){ rotX(-0.45); mv(0,4,0); } else if(e.chargeT>0) rotX(0.28);
+    const _emg=(e.dropT>0&&e.emergeMax)?Math.max(0,Math.min(1,e.dropT/e.emergeMax)):0;   // 1 at reveal -> 0 when it springs
+    pushM(); if(_emg>0){ mv(0,-H*0.95*_emg,0); rotZ(Math.sin(G.time*38)*0.07*_emg); }   // heaves up out of the ground, shuddering
+    if(wind){ rotX(-0.45); mv(0,4,0); } else if(e.chargeT>0) rotX(0.28);
     bx(0,H*0.42,0, 30,13,22,'#6b4a2a');                                            // the box body
     bx(0,H*0.44,0, 31,3,23,'#caa23a','#caa23a',0.9);                               // its gold band
     pushM(); mv(0,H*0.62,-9); rotX(-(0.9+snap*0.7+(wind?0.5:0)));                  // the lid, hinged wide open

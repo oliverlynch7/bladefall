@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.322.0';
+const VERSION3D='1.323.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -936,7 +936,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -6331,7 +6331,7 @@ function killEnemy(e,weaponKill){
     if(e.type==='king') meta.kingKills=(meta.kingKills||0)+1;
     if(e.type==='tyrant') meta.tyrantKills=(meta.tyrantKills||0)+1;
     rollDrop(e); persist(); checkAchievements();
-    if(G.stageIndex===STAGES.length-1){ winGame(); return; }
+    if(G.stageIndex===STAGES.length-1 && !G.bossRush){ winGame(); return; }   // Gauntlet's final boss doesn't trigger the campaign win
   } else if(e.kind==='goblin'){ // caught the treasure goblin: premium loot burst
     SFX.god(); toast('💰 Treasure goblin slain!');
     for(let i=0;i<2;i++){
@@ -7144,6 +7144,7 @@ function update(dt){
   if(G.dashTut && !meta.tutOff && !(meta.tut&&meta.tut.dash) && mode==='play' && dXZ(G.p.x,G.p.z,G.dashTut.x,G.dashTut.z)<G.dashTut.r){ openDashTutorial(); }   // mid-air dash lesson at the required chasm
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
+  if(G.bossRush) bossRushTick(dt);                                // The Gauntlet: advance to the next boss on kill; win after the last
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
@@ -7865,6 +7866,7 @@ function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillb
 function die(){
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
+  if(G.bossRush){ bossRushDie(); return; }                    // The Gauntlet: its own results screen, banks the run
   if(mode==='dying'||mode==='dead') return;                   // guard: never re-trigger the death sequence
   mode='dying'; if(G&&G.p) G.p.dead=true;
   G.deathWall=performance.now();                             // wall-clock stamp: drives the collapse animation (sim time is frozen once mode!=='play')
@@ -7955,6 +7957,88 @@ function offerShrine(n){
   const pick=m=>{ endApplyMod(m); showOverlay(false); showGameUI(true); mode='play'; };
   document.getElementById('shrA').onclick=()=>pick(a);
   document.getElementById('shrB').onclick=()=>pick(b);
+}
+// ══ THE GAUNTLET — Boss Rush. Every boss in the world, back to back, on one life, with a full heal stolen between
+//    each. Uses your current build; rewards XP/gold; tracks your best clear time. Modeled on the Endless framework. ══
+const BOSS_RUSH_SEQ=[
+  {t:'brute',stage:2},{t:'warden',stage:6},{t:'archer',stage:4},{t:'sorcerer',stage:8},
+  {t:'colossus',stage:10},{t:'king',stage:12},{t:'tyrant',stage:16}
+];
+function fmtTime(sec){ sec=Math.max(0,Math.round(sec||0)); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
+function startBossRush(){
+  if(!meta.hero || !Object.keys(meta.classUnlocked||{}).length){ toast('Pick a class and gear up first, then face the Gauntlet.'); return; }
+  initAudio(); queueLevelUp=0; queueSubclass=false;
+  const p=freshFromSnapshot(meta.hero); recomputeArmor(p); p.hp=effMaxHp(p);
+  G=newG(p,{bossRush:true,zone:11,area:0,zoneTier:5});
+  G.brIdx=0; G.brTime=0; G.brAdvanceT=0; G.brAdvancing=false; meta.run=null;
+  loadBossRushArena(0);
+  mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); questUpdate();
+  storyToast('The Gauntlet — every king in the world, one after another, on one life. Steal your rest between them.');
+}
+function loadBossRushArena(idx){
+  const spec=BOSS_RUSH_SEQ[idx], s=STAGES[spec.stage];
+  G.brIdx=idx; G.stageIndex=spec.stage; G.haz=null; G.boss=null; G.brAdvancing=false; G.brAdvanceT=0; G.ngHp=1; G.ngDmg=1;
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null;
+  G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
+  G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
+  const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
+  const R=470;
+  G.segments.push({x:0,z:0,w:R*2,d:R*2});
+  G.walls.push({x:0,z:-R,w:R*2+40,d:26,h:120},{x:0,z:R,w:R*2+40,d:26,h:120},{x:-R,z:0,w:26,d:R*2+40,h:120},{x:R,z:0,w:26,d:R*2+40,h:120});
+  for(const tt of [[-R+40,-R+40],[R-40,-R+40],[-R+40,R-40],[R-40,R-40],[0,-R+40],[0,R-40]]) G.torches.push({x:tt[0],z:tt[1],ph:Math.random()*6.28});
+  const dc=tint(s.ground,'#000',0.25);
+  for(let k=0;k<20;k++){ const a=k/20*6.283, rr=R-70; G.deco.push({x:Math.cos(a)*rr,z:Math.sin(a)*rr,y0:0,w:40+Math.random()*30,h:90+Math.random()*80,c:tint(dc,'#000',Math.random()*0.2),theme:s.theme}); }
+  G.bounds={minX:-R+30,maxX:R-30,minZ:-R+30,maxZ:R-30}; G.progressEnd=-R;
+  G.startPos={x:0,z:R-140}; G.goalPos={x:0,z:0}; G.lastSafe={x:0,z:R-140,y:0};
+  G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
+  G.p.hp=effMaxHp(G.p);   // a full breather stolen between kings
+  const b=spawnEnemy(spec.t,0,-190); if(b){ b.active=true; G.boss=b; }
+  const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); if(bn&&b) bn.textContent=(ENEMY[spec.t]&&ENEMY[spec.t].label)||spec.t;
+  const bw=document.getElementById('bosshpwrap'); if(bw) bw.classList.add('on');
+  G.stageBanner=2.4; G.areaName='Gauntlet '+(idx+1)+'/'+BOSS_RUSH_SEQ.length;
+  const st=document.getElementById('stagetag'); if(st) st.textContent='💀 THE GAUNTLET · '+(idx+1)+'/'+BOSS_RUSH_SEQ.length;
+  musicForScene(); questUpdate(); hudUpdate();
+}
+function bossRushTick(dt){
+  if(mode!=='play') return;
+  G.brTime=(G.brTime||0)+dt;
+  if(G.boss && !G.boss.dead) updateBossBar(G.boss);
+  if(G.brAdvanceT>0){ G.brAdvanceT-=dt; if(G.brAdvanceT<=0){ const nx=G.brIdx+1; if(nx>=BOSS_RUSH_SEQ.length) bossRushWin(); else loadBossRushArena(nx); } return; }
+  if(G.boss && G.boss.dead && !G.brAdvancing){
+    G.brAdvancing=true; G.brAdvanceT=1.7; const done=G.brIdx+1;
+    if(done<BOSS_RUSH_SEQ.length){ addText(G.p.x,G.p.y+96,G.p.z,'BOSS DOWN · '+done+'/'+BOSS_RUSH_SEQ.length,'#c47bff',true); toast('💀 '+done+' / '+BOSS_RUSH_SEQ.length+' felled — steal a breath'); }
+  }
+}
+function bossRushWin(){
+  mode='menu'; SFX.win(); try{ musicSting('fanfare'); }catch(e){}
+  const t=G.brTime||0, prev=meta.bossRushBest, newBest=(!prev||t<prev);
+  if(newBest) meta.bossRushBest=t;
+  meta.hero=snapOf(G.p); meta.bank=null; const bonus=awardGold(1500); persist(); persistGlobal(); if(typeof checkAchievements==='function') checkAchievements();
+  showOverlayHTML('<div class="card"><h2 class="title" style="font-size:38px;color:#c47bff">THE GAUNTLET FALLS</h2>'
+    +'<p class="ovsub">All '+BOSS_RUSH_SEQ.length+' kings, back to back, on one life.</p>'
+    +(newBest?'<p class="hint" style="color:#ffd24a;font-weight:800">✦ NEW BEST TIME</p>':'')
+    +'<div class="statgrid"><div class="vsrow"><span>Your time</span><b style="color:#c47bff">'+fmtTime(t)+'</b></div>'
+    +'<div class="vsrow"><span>Best</span><b>'+fmtTime(meta.bossRushBest)+'</b></div>'
+    +'<div class="vsrow"><span>Reward</span><b style="color:var(--good)">+'+bonus+'g</b></div></div>'
+    +'<button class="bigbtn" id="brHub">Return to Hub</button></div>');
+  document.getElementById('brHub').onclick=openHub;
+}
+function bossRushDie(){
+  mode='dead'; SFX.hurt(); musicStop(500);
+  const cleared=G.brIdx, t=G.brTime||0;
+  meta.hero=snapOf(G.p); meta.bank=null; persist(); persistGlobal();
+  const bw=document.getElementById('bosshpwrap'); if(bw) bw.classList.remove('on'); showGameUI(false);
+  showOverlayHTML('<div class="card"><h2 class="title" style="font-size:38px;color:#e8453d">CUT DOWN</h2>'
+    +'<p class="ovsub">The Gauntlet · fell at boss '+(G.brIdx+1)+' / '+BOSS_RUSH_SEQ.length+'</p>'
+    +'<div class="statgrid"><div class="vsrow"><span>Kings felled</span><b style="color:#c47bff">'+cleared+' / '+BOSS_RUSH_SEQ.length+'</b></div>'
+    +'<div class="vsrow"><span>Time</span><b>'+fmtTime(t)+'</b></div>'
+    +(meta.bossRushBest?'<div class="vsrow"><span>Best clear</span><b>'+fmtTime(meta.bossRushBest)+'</b></div>':'')+'</div>'
+    +'<button class="bigbtn" id="brHub">Return to Hub</button></div>');
+  document.getElementById('brHub').onclick=openHub;
 }
 function startEndless(){
   initAudio(); queueLevelUp=0; queueSubclass=false;
@@ -8508,7 +8592,8 @@ function enterWaystation(){
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
     {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:300,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
-    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()}
+    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()},
+    {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:340,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openLevelEntry({icon:'💀',name:'The Gauntlet',kicker:'Boss Rush · No Rest',desc:'Every boss in the world, back to back, on one life — with a full heal stolen between each. Beat them all, then beat your best time.',col:'#c47bff',onEnter:startBossRush})}
   ];
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
@@ -8523,7 +8608,8 @@ function enterWaystation(){
     {x:-495,z:342,w:66,d:24},  // Postings board — centred on the SW wall, sitting slightly off it
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
-    {x:0,z:800,w:60,d:30}      // The Arena gate (deep-centre annex plaza)
+    {x:0,z:800,w:60,d:30},     // The Arena gate (deep-centre annex plaza)
+    {x:340,z:800,w:60,d:30}    // The Gauntlet gate (beside the Arena)
   ];
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
   // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
@@ -12011,7 +12097,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
-  openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel,
+  openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
+  startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,

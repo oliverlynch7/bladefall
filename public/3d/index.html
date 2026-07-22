@@ -3416,6 +3416,13 @@ const JMPV=94, JMPH=150;   // max vertical / horizontal gap a generated climb st
 function vseg(x,z,w,d,ex){ const s=Object.assign({x,z,w,d},ex||{}); G.segments.push(s); return s; }
 function vplat(x,z,y,w,d,ex){ const o=Object.assign({kind:'plat',x,z,h:Math.round(y),w,d},ex||{}); G.obstacles.push(o); return o; }
 function vcol(x,z,w,d,h){ const o={kind:'col',x,z,w,d,h:Math.round(h)}; G.obstacles.push(o); return o; }
+// A SOLID structure: renders like a deco box AND blocks the player (a matching collision column) so you bump into
+// buildings/crates/big rocks instead of phasing through them. `colH` caps the collision height when an intended
+// climb route runs up over the structure (so the wall stops just below the walkway and never ejects the climber).
+function vsolid(x,z,y0,w,h,d,c,ex){ ex=ex||{}; const o=Object.assign({x,z,y0,w,h,d,c},ex); G.deco.push(o);
+  const top=(ex.colH!=null)?ex.colH:Math.round((y0||0)+h);
+  if(top>4) G.obstacles.push({kind:'col',x,z,w,d,h:top,structure:true});
+  return o; }
 function vtorch(x,z,rnd){ G.torches.push({x,z,ph:(rnd?rnd():0)*6.28}); }
 // a rising run of standable platforms A->B; step count auto-sized so no gap exceeds jump reach. returns the plats.
 function climbRun(x0,z0,y0,x1,z1,y1,w,ex){ w=w||62; const out=[];
@@ -4013,10 +4020,14 @@ const EXPANDED_SCAPES={
       for(const z of [-1080,-1720]){ G.deco.push({x:-880,z,y0:0,w:180,h:30,d:18,c:WOOD}); G.deco.push({x:-950,z,y0:26,w:12,h:34,d:12,c:'#d6bd79'}); }
       // The opening view is a genuine prairie: pond and caravan near the road, distant cornland and windmill silhouettes framing the choice ahead.
       G.deco.push({x:330,z:-260,y0:0,w:330,h:2,d:210,c:'#3d708d'});for(let k=0;k<16;k++)G.deco.push({x:170+k*22,z:-150+(k%2)*26,y0:0,w:4,h:18+(k%3)*4,d:4,c:'#719146'});
-      G.deco.push({x:-360,z:-400,y0:12,w:170,h:34,d:82,c:'#6b4827'});for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
+      vsolid(-360,-400,12,170,34,82,'#6b4827');for(const x of [-440,-280])vcol(x,-380,28,28,30);G.deco.push({x:-360,z:-420,y0:46,w:148,h:9,d:70,c:'#372719'});
       field(-1120,-1450,20,16);field(-820,-1780,10,6);fence(-1120,-1015,960,0);fence(-1600,-1450,0,780);
       // West: a working farm complex and two-stage barn climb, with its loft chest visible from the corn rows.
-      G.deco.push({x:-1180,z:-1540,y0:0,w:300,h:105,d:220,c:'#8b5d35'});G.deco.push({x:-1180,z:-1540,y0:105,w:340,h:32,d:250,c:'#5a2e24'});climbRun(-1370,-1390,0,-1300,-1540,92,70);vplat(-1180,-1540,120,300,210,{terrace:true,checkpoint:true});chest(-1110,-1570,120);
+      vsolid(-1180,-1540,0,300,105,220,'#8b5d35');G.deco.push({x:-1180,z:-1540,y0:105,w:340,h:32,d:250,c:'#5a2e24'});climbRun(-1370,-1390,0,-1300,-1540,92,70);vplat(-1180,-1540,120,300,210,{terrace:true,checkpoint:true});chest(-1110,-1570,120);
+      // The rift hides on the barn's BACK loft, behind a stout timber post — climb the barn, cross the roof, and round the post to find it.
+      vplat(-1180,-1740,120,300,200,{checkpoint:true}); G.deco.push({x:-1180,z:-1740,y0:120,w:312,h:4,d:212,c:'#4a3a26'});
+      vsolid(-1180,-1690,120,84,116,84,'#6d4a2c'); G.deco.push({x:-1180,z:-1690,y0:236,w:106,h:12,d:106,c:'#7a5836'});   // the screening post + cap that hides the rift from the roof approach
+      scapeSecret(ctx,-1180,-1812,120); chest(-1300,-1800,120);
       // Plan A farmhouse pass: timber frame, inset entry, loft shutters, chimney, layered eaves. Collision stays on the original authored mass.
       for(const x of [-1320,-1180,-1040]){G.deco.push({x,z:-1432,y0:6,w:14,h:98,d:12,c:'#3b2819'});G.deco.push({x,z:-1648,y0:6,w:14,h:98,d:12,c:'#3b2819'});}
       for(const z of [-1642,-1540,-1438]){G.deco.push({x:-1324,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});G.deco.push({x:-1036,z,y0:8,w:12,h:94,d:12,c:'#3b2819'});}
@@ -4027,16 +4038,16 @@ const EXPANDED_SCAPES={
       // East: a dense orchard whose canopy route reaches an abandoned lookout and a hidden side glade.
       for(let k=0;k<38;k++){const ix=k%7,iz=Math.floor(k/7);tree(820+ix*100,-1780+iz*100,78+(k%5)*10);}climbRun(880,-1320,0,1060,-1510,95,68);for(let k=0;k<6;k++)vplat(1060+k*105,-1510-k*70,95+(k%2)*24,88,80,{canopy:true});chest(1540,-1870,120);
       const glade=room('Foxglove Copse',1700,-2580,420,360);trail(orchard,glade,92);for(let k=0;k<10;k++){const a=k/10*6.28;tree(glade.x+Math.cos(a)*190,glade.z+Math.sin(a)*160,100+rnd()*42);}
-      // the rift hides on a mossy stump-ledge behind the copse — a single hop up (~74), screened by the treeline
+      // a quiet stump-ledge behind the copse — a single hop up (~74), screened by the treeline (now a chest cache; the rift moved to the barn loft)
       vplat(glade.x+120,glade.z-80,74,150,130,{checkpoint:true}); G.deco.push({x:glade.x+120,z:glade.z-80,y0:74,w:158,h:5,d:138,c:'#4a3a26'});
-      scapeSecret(ctx,glade.x+120,glade.z-80,74);chest(glade.x-70,glade.z+50);
+      chest(glade.x+120,glade.z-80,74);chest(glade.x-70,glade.z+50);
       // Foxglove's high rootway is a risky mastered-route shortcut to the northern fields; falling returns players to the normal road.
       climbRun(1620,-2720,0,1220,-3210,92,70,{shortcut:true}); climbRun(1220,-3210,92,520,-4070,28,72,{shortcut:true});
       G.deco.push({x:1500,z:-2860,y0:100,w:22,h:92,d:22,c:'#6f5431'}); G.deco.push({x:1500,z:-2860,y0:188,w:120,h:8,d:34,c:'#e2c36a'});
       // The river is a major transverse landmark. A broad stone ford is safe; stepping stones form a faster parkour line beside it.
       G.deco.push({x:0,z:-2310,y0:0,w:2500,h:3,d:180,c:'#3b718c'});vseg(0,-2320,420,250,{ford:true});for(let k=0;k<9;k++)vplat(-420+k*105,-2250-(k%2)*105,12+(k%3)*5,82,72,{riverStone:true});
       // West village rooftops and east windmill give the back half two unmistakably different skylines.
-      for(const h of [[-1260,-3290,240,180],[-960,-3500,280,190],[-650,-3270,230,170]]){G.deco.push({x:h[0],z:h[1],y0:0,w:h[2],h:88,d:h[3],c:'#8d6039'});G.deco.push({x:h[0],z:h[1],y0:88,w:h[2]+26,h:25,d:h[3]+24,c:'#543126'});}climbRun(-1430,-3160,0,-1260,-3290,110,70);vplat(-960,-3500,110,260,170,{terrace:true});
+      for(const h of [[-1260,-3290,240,180],[-960,-3500,280,190],[-650,-3270,230,170]]){vsolid(h[0],h[1],0,h[2],88,h[3],'#8d6039');G.deco.push({x:h[0],z:h[1],y0:88,w:h[2]+26,h:25,d:h[3]+24,c:'#543126'});}climbRun(-1430,-3160,0,-1260,-3290,110,70);vplat(-960,-3500,110,260,170,{terrace:true});
       vcol(980,-3470,140,140,230);G.deco.push({x:980,z:-3470,y0:230,w:190,h:28,d:190,c:'#eee0b8'});G.deco.push({x:980,z:-3470,y0:258,w:20,h:150,d:20,c:WOOD});for(let k=0;k<4;k++){const a=k*1.57;G.deco.push({x:980+Math.cos(a)*68,z:-3470+Math.sin(a)*68,y0:310,w:k%2?14:145,h:k%2?145:14,d:14,c:'#e8d4a7'});}climbRun(760,-3200,0,980,-3470,230,74);chest(980,-3470,230);
       field(0,-4340,24,18);for(const sx of [-360,0,360]){vcol(sx,-4520,8,8,52);G.deco.push({x:sx,z:-4520,y0:46,w:62,h:8,d:8,c:WOOD});G.deco.push({x:sx,z:-4520,y0:54,w:18,h:18,d:15,c:'#d9c08c'});}
       const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
@@ -4064,7 +4075,7 @@ const EXPANDED_SCAPES={
       road(edge,creek); road(edge,camp); road(creek,grove,140); road(camp,grove); road(grove,hollow,135); road(grove,roots,135); road(hollow,shrine,140); road(roots,shrine,140); road(shrine,gate,160);
       for(let k=0;k<82;k++){ const R=[edge,creek,camp,grove,hollow,roots,shrine,gate][Math.floor(rnd()*8)],a=rnd()*6.28,rr=Math.max(R.w,R.d)*(.33+rnd()*.18); tree(R.x+Math.cos(a)*rr,R.z+Math.sin(a)*rr,92+rnd()*90); }
       G.deco.push({x:-440,z:-650,y0:0,w:620,h:2,d:90,c:'#315f68'}); for(let k=0;k<12;k++) vplat(-700+k*48,-650,10+(k%3)*7,38,48,{root:true});
-      for(const t of [[240,-850],[490,-970],[520,-780]]) G.deco.push({x:t[0],z:t[1],y0:0,w:110,h:44,d:70,c:'#5b4028'});
+      for(const t of [[240,-850],[490,-970],[520,-780]]) vsolid(t[0],t[1],0,110,44,70,'#5b4028');
       // Woodcutters Camp is a readable refuge rather than three anonymous blocks: open workshop, loft, saw rack, and warm route beacon.
       vplat(390,-900,48,280,190,{interior:true,breather:true}); climbRun(250,-760,0,390,-900,48,70,{stairs:true});
       G.deco.push({x:390,z:-990,y0:48,w:300,h:18,d:34,c:'#3b281b'}); G.deco.push({x:250,z:-900,y0:48,w:22,h:116,d:190,c:'#51351f'});
@@ -4216,10 +4227,11 @@ const EXPANDED_SCAPES={
       const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
       road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
       climbRun(100,-1250,0,420,-1600,120,72);for(let k=0;k<7;k++)G.movers.push({x0:420+(k%2?120:-120),z:-1750-k*100,w:96,d:74,h:120+k*20,amp:30+(k%3)*8,sp:.8+k*.08,ph:rnd()*6.28,x:420,px:420});
-      // SECRET PILLAR: the rising floe-parkour now DELIVERS you — up and off to the right — onto an isolated
-      // ice pillar over the void, holding this level's purple rift. Reachable ONLY by the moving platforms.
-      {const px=640,pz=-2340,py=250; vcol(px,pz,92,92,py); vplat(px,pz,py,190,190,{terrace:true});
-        G.deco.push({x:px,z:pz,y0:py,w:52,h:64,d:52,c:ICE,theme:'frost'}); G.deco.push({x:px,z:pz,y0:py+48,w:26,h:30,d:26,c:SNOW}); brazier(px+80,pz+80,py);
+      // SECRET PILLAR: a TALL ice spire rising off the FINAL floe (the last mover sits at 300,-2350,h240).
+      // Reachable ONLY from that last platform — a committed jump UP and a mid-air DODGE north lands you on it.
+      {const px=300,pz=-2580,py=328; vcol(px,pz,90,90,py); vplat(px,pz,py,150,150,{terrace:true});
+        for(let s=0;s<3;s++) G.deco.push({x:px,z:pz,y0:py-84+s*84,w:66-s*16,h:74,d:66-s*16,c:s%2?ICE:'#6fbcd6',theme:'frost'});   // ribbed ice spire below the landing
+        G.deco.push({x:px,z:pz,y0:py,w:46,h:70,d:46,c:ICE,theme:'frost'}); G.deco.push({x:px,z:pz,y0:py+56,w:24,h:30,d:24,c:SNOW}); brazier(px+64,pz+64,py);
         const Zc=curZone(); if(Zc.side) G.secret={x:px,z:pz,y:py,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]};}
       climbRun(420,-1600,0,-420,-2350,250,82);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
       // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
@@ -5167,6 +5179,9 @@ function resolveObstacles(ent,r,yRef,climbMax){
   const ey=(yRef==null?ent.y:yRef);
   const push=(ob)=>{
     if(ey>=ob.h-2) return;
+    // A solid STRUCTURE (building) blocks phasing-through at ground level, but must never eject someone standing on an
+    // intended walkway that runs up over/through it (a climb step / plat at their feet). Check that before pushing.
+    if(ob.structure){ for(const p2 of G.obstacles){ if(p2.kind==='plat' && Math.abs((p2.h||0)-ent.y)<7 && Math.abs(ent.x-p2.x)<p2.w/2+r && Math.abs(ent.z-p2.z)<p2.d/2+r) return; } }
     const dx=ent.x-ob.x, dz=ent.z-ob.z, px=ob.w/2+r-Math.abs(dx), pz=ob.d/2+r-Math.abs(dz);
     if(px>0&&pz>0){ if(px<pz) ent.x+=(dx>=0?1:-1)*px; else ent.z+=(dz>=0?1:-1)*pz; }
   };

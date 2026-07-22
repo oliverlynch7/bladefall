@@ -1484,3 +1484,10 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Replaced `icons/difficulty-hitless.png` with Oliver's new crest art (gold/violet crested helm, lightning star) — resized 1254→256px, black background keyed to transparent.
 - Added `icons/items/weapons/iansblade.png` (Oliver's golden voxel greatsword) — resized to 256px, checkerboard background keyed out — and mapped `iansblade:'iansblade'` in `itemStaticAv` so Ian's Blade shows its own art instead of the generic sword icon.
 - Verified both load at 256×256 in-game; `itemAv(iansblade)` → `icons/items/weapons/iansblade.png`.
+
+## v1.315.0 — The Drillmaster's Seal (field class-swap + respec) + save-persist fix
+- **The Drillmaster's Seal** — a 20,000g purchase that unlocks in the Drillmaster's menu once you master all three of his disciplines (Warrior + Ranger + Mage all at rank 10). Owning it lets you **switch class and respec straight from the pause-menu Classes screen, anywhere, mid-run** — the game's usual "switch only at the yard, never mid-zone" rule no longer applies to you.
+- **First-time congratulation**: the first time you open the Drillmaster after hitting the mastery milestone, he gives a one-time speech ("Nothing Left to Teach You") announcing the Seal is now his to sell, before returning to his menu (`sealCongrats`, `meta.masterSealSeen`).
+- Pause → Classes now shows **Equip [class]** (for any unlocked class you're not currently playing) and **Respec** buttons when the Seal is owned; both reuse the existing `trainerEquipClass`/`openRespecTree` (class effects compute live from `meta.classId`, so switching mid-run is safe).
+- **Save fix (caught in passing):** `iansShards`/`iansComplete` were never in `MODE_FIELDS`, so Ian's Blade shard progress wasn't persisting across reloads. Added those + `masterSeal`/`masterSealSeen` to `MODE_FIELDS` and `loadMode`.
+- Verified live: milestone gating (nothing shows until mastered), one-time congrats, 20k buy deducts gold, pause-menu Equip switches class, Respec opens the tree, all hidden without the Seal. 0 console errors.

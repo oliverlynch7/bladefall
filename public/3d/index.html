@@ -937,7 +937,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -951,7 +951,7 @@ const meta=Object.assign({
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
   zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
-  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,socks:false,bagSlots:0,hubUpgrades:{},
+  hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
 if(meta.showArmor==null) meta.showArmor=true;
@@ -992,6 +992,8 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.heroName=(typeof mv.heroName==='string')?mv.heroName.slice(0,20):'';
   meta.eyeColor=mv.eyeColor||'#8fd0ff'; meta.hairStyle=mv.hairStyle||'short'; meta.hairColor=mv.hairColor||'#3a2a1c';
   meta.optionalDone=mv.optionalDone&&typeof mv.optionalDone==='object'?mv.optionalDone:{}; meta.optionalProgress=mv.optionalProgress&&typeof mv.optionalProgress==='object'?mv.optionalProgress:{};
+  meta.iansShards=Array.isArray(mv.iansShards)?mv.iansShards:[]; meta.iansComplete=!!mv.iansComplete;   // Ian's Blade progress (was not persisted before)
+  meta.masterSeal=!!mv.masterSeal; meta.masterSealSeen=!!mv.masterSealSeen;                             // Drillmaster's Seal (field class-swap/respec)
   // an existing save already past the start never gets re-gated behind the starter picker
   if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
@@ -8887,8 +8889,12 @@ function openClasses(back){
       tree+=`<div class="buildrank ${reached?'reached':''}">${opt(a,pA)}<div class="rankorb"><span>RANK</span><b>${rank}</b></div>${opt(b,pB)}</div><div class="buildspine"></div>`; }
     tree+=`<div class="buildcap ${cs.rank>=10?'':'locked'}"><div class="bticon">♛</div><div class="stitle">Mastered Discipline <span class="srank">RANK 10 · CAPSTONE${cs.rank>=10?' · ACTIVE':''}</span></div><div class="sdesc">Your chosen discipline's defining passive reaches its final strength.</div></div>`;
   }
-  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · Chosen skills and passives are highlighted. Changes are made only with the Drillmaster.</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="viewerfoot"><button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
+  showOverlayHTML(`<div class="card buildtree classviewer" style="--class:${classCol}"><div class="buildhead"><p class="ovkicker">Your Class Records · Read Only</p><h2 class="ovh">${C.icon} ${C.disp} Build</h2><p class="ovsub">Rank ${cs.rank}/10 · ${meta.masterSeal?'Your <b style="color:#f0d78a">Drillmaster\'s Seal</b> lets you equip &amp; respec right here.':'Chosen skills and passives are highlighted. Changes are made only with the Drillmaster.'}</p><div class="ctabs">${tabRow}</div><div class="buildlegend"><span class="owned"><i></i>chosen</span><span><i></i>not chosen</span><span class="locked"><i></i>future rank</span></div></div><div class="buildscroll">${tree}</div><div class="viewerfoot">${meta.masterSeal?`${(meta.classUnlocked[view]&&view!==meta.classId)?`<button class="bigbtn" id="clsEquip">${C.icon} Equip ${C.disp}</button>`:''}${(cs.rank>=2&&(cs.sub||c2def(view)))?`<button class="bigbtn ghost" id="clsRespec">✚ Respec</button>`:''}`:''}<button class="bigbtn ghost" id="backBtn">Back to Pause Menu</button></div></div>`);
   document.querySelectorAll('.ctab[data-c]').forEach(b=>b.onclick=()=>{ openClasses._sel=b.dataset.c; SFX.pickup(); openClasses(back); });
+  if(meta.masterSeal){
+    const eq=document.getElementById('clsEquip'); if(eq) eq.onclick=()=>{ if(trainerEquipClass(view)){ SFX.pickup(); toast('⚔️ Now playing as '+C.disp,'#f0d78a'); openClasses(back); } };
+    const rs=document.getElementById('clsRespec'); if(rs) rs.onclick=()=>openRespecTree(view,()=>openClasses(back));
+  }
   document.getElementById('backBtn').onclick=back;
 }
 function openRespecTree(cid,back){
@@ -8940,8 +8946,27 @@ function trainerEquipClass(cid){
   if(G&&G.p){ skillbarUpdate(); hudUpdate(); }
   return true;
 }
+/* ══ THE DRILLMASTER'S SEAL — his highest honor. Master all three disciplines he teaches (Warrior, Ranger, Mage
+   all at rank 10) and he'll sell you his seal (20,000g). Carry it and you may switch class + respec straight from
+   the pause menu, anywhere, mid-run — no marching back to the yard. ══ */
+const SEAL_COST=20000;
+function masteredStarters(){ return STARTERS.every(c=>meta.classUnlocked[c] && classState(c).rank>=10); }
+function sealCongrats(then){
+  mode='menu'; if(SFX&&SFX.achieve) SFX.achieve();
+  showOverlayHTML(`<div class="card" style="--acc:#e8c15a;max-width:560px">
+    <img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt="">
+    <p class="ovkicker">The Drillmaster</p><h2 class="ovh" style="color:#f0d78a">Nothing Left to Teach You</h2>
+    <div style="text-align:left;font-size:15px;line-height:1.8;color:#e4e7ee;margin:10px 2px 16px">
+      <p style="margin:0 0 12px">“Warrior. Ranger. Mage — every discipline of the yard, each taken to its peak. In thirty years I've drilled maybe three who got this far.”</p>
+      <p style="margin:0 0 12px">“You don't need me standing over you anymore. So take this.”</p>
+      <p style="margin:0;color:#f0d78a">The <b>Drillmaster's Seal</b> is his to sell now — <b>${SEAL_COST.toLocaleString()} gold</b>. Carry it and you may <b>switch class and respec from the pause menu</b>, anywhere, mid-run.</p>
+    </div>
+    <button class="bigbtn" id="sealGo">To the yard →</button></div>`);
+  document.getElementById('sealGo').onclick=then;
+}
 function openTrainer(back){
   mode='menu';
+  if(masteredStarters() && !meta.masterSealSeen){ meta.masterSealSeen=true; persist(); sealCongrats(()=>openTrainer(back)); return; }   // one-time congratulation on total mastery
   menuTip('tip_trainer','the <b>Drillmaster</b>. Switch your active class, take another class\'s <b>Trial</b> to unlock it, and <b>Respec</b> — re-pick every skill and passive choice you have made, for gold. This is where you reshape your build whenever you like.');
   const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
   const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe'};
@@ -8961,9 +8986,16 @@ function openTrainer(back){
       <div class="ccfams">${fams}</div>
       <div class="ccbtns">${btns}</div>
     </div>`; }).join('');
+  const showSeal=masteredStarters();
+  const sealRow=showSeal?`<div class="achlist" style="max-height:none;margin:0 0 14px"><div class="gearrow" style="--spine:#e8c15a;background:linear-gradient(90deg,#33290f88,#171923)"><div class="gi eventgi" style="font-size:20px">🎖️</div>
+      <div style="flex:1;min-width:0"><div class="gn" style="color:#f0d78a">The Drillmaster's Seal</div>
+        <div class="gd">${meta.masterSeal?'<b style="color:var(--good)">Acquired</b> · switch class &amp; respec from the pause menu, anywhere':'Switch class &amp; respec from the pause menu, anywhere — mid-run, no marching back'}</div></div>
+      ${meta.masterSeal?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn sealbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${meta.gold>=SEAL_COST?'':'opacity:.5'}">${actionIcon('buy')}${SEAL_COST.toLocaleString()}g</button>`}</div></div>`:'';
   showOverlayHTML(`<div class="card trainercard"><img class="trainerbrand" src="icons/class-core.png?v=${VERSION3D}" alt=""><p class="ovkicker">The Drillmaster</p><h2 class="ovh">Class Trainer</h2>
-    <p class="ovsub">Switch freely here. Never mid-zone.</p>
-    <div class="trainergrid">${rows}</div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+    <p class="ovsub">${meta.masterSeal?'Switch and respec here or, with the Seal, from the pause menu anywhere.':'Switch freely here. Never mid-zone.'}</p>
+    <div class="trainergrid">${rows}</div>${sealRow}<button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  { const sb=document.querySelector('.sealbuy'); if(sb) sb.onclick=()=>{ if(meta.masterSeal) return; if(meta.gold<SEAL_COST){ toast('Not enough gold'); return; }
+      meta.gold-=SEAL_COST; meta.masterSeal=true; if(SFX&&SFX.achieve) SFX.achieve(); persist(); toast('🎖️ The Drillmaster\'s Seal — switch class & respec anywhere, from the pause menu','#f0d78a'); openTrainer(back); }; }
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ if(!trainerEquipClass(b.dataset.eq)) return; SFX.pickup(); openTrainer(back); });
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
   document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>openRespecTree(b.dataset.re,()=>openTrainer(back)));
@@ -11675,6 +11707,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
+  masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,

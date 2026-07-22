@@ -1491,3 +1491,7 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Pause → Classes now shows **Equip [class]** (for any unlocked class you're not currently playing) and **Respec** buttons when the Seal is owned; both reuse the existing `trainerEquipClass`/`openRespecTree` (class effects compute live from `meta.classId`, so switching mid-run is safe).
 - **Save fix (caught in passing):** `iansShards`/`iansComplete` were never in `MODE_FIELDS`, so Ian's Blade shard progress wasn't persisting across reloads. Added those + `masterSeal`/`masterSealSeen` to `MODE_FIELDS` and `loadMode`.
 - Verified live: milestone gating (nothing shows until mastered), one-time congrats, 20k buy deducts gold, pause-menu Equip switches class, Respec opens the tree, all hidden without the Seal. 0 console errors.
+
+## v1.316.0 — auto step-up on low ledges (walk up small stairs, no jump)
+- The player passed NO climbMax to resolveObstacles, so every obstacle — even a 40u step — was a wall you had to jump. Added a STEP-UP: while grounded and moving, any standable ledge within STEP_UP (50u) of your feet is mounted automatically (obstacles, stand-walls, live crumbles), using the collision footprint so it engages exactly where a step would otherwise block you. Taller climbs (climbRun steps are ~94) still require a jump, and jumping/falling never auto-steps.
+- Verified live: player walks up a 40/80/120 staircase with no jump (y ascends smoothly), while a 200u wall still blocks; 0 console errors. STEP_UP is one constant, easy to tune.

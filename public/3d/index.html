@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.315.0';
+const VERSION3D='1.316.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4216,6 +4216,11 @@ const EXPANDED_SCAPES={
       const shelf=room('Rime Shelf',0,0,900,680),white=room('Whiteout Field',-500,-850,760,660),ravine=room('Blue-Ice Ravine',420,-1600,760,700),slide=room('Avalanche Crown',-420,-2350,700,620,250),cave=room('Thawed Cavern',500,-3100,760,700,80),cairn=room('Frostwatch Cairn',0,-4100,980,760,180);
       road(shelf,white,160);road(white,ravine,145);for(const p of [[-700,-760],[-420,-960],[-250,-760]])brazier(p[0],p[1]);
       climbRun(100,-1250,0,420,-1600,120,72);for(let k=0;k<7;k++)G.movers.push({x0:420+(k%2?120:-120),z:-1750-k*100,w:96,d:74,h:120+k*20,amp:30+(k%3)*8,sp:.8+k*.08,ph:rnd()*6.28,x:420,px:420});
+      // SECRET PILLAR: the rising floe-parkour now DELIVERS you — up and off to the right — onto an isolated
+      // ice pillar over the void, holding this level's purple rift. Reachable ONLY by the moving platforms.
+      {const px=640,pz=-2340,py=250; vcol(px,pz,92,92,py); vplat(px,pz,py,190,190,{terrace:true});
+        G.deco.push({x:px,z:pz,y0:py,w:52,h:64,d:52,c:ICE,theme:'frost'}); G.deco.push({x:px,z:pz,y0:py+48,w:26,h:30,d:26,c:SNOW}); brazier(px+80,pz+80,py);
+        const Zc=curZone(); if(Zc.side) G.secret={x:px,z:pz,y:py,t:0,id:Zc.side.id,spent:!!meta.sideFound[Zc.side.id]};}
       climbRun(420,-1600,0,-420,-2350,250,82);vplat(-420,-2350,250,700,620,{checkpoint:true,terrace:true});
       // Avalanche escape reads as a broad downhill chain with side shelves for recovery.
       for(let k=0;k<14;k++){const t=k/13,x=-420+920*t,z=-2500-600*t,y=250-170*t;vplat(x,z,y,100,82,{slide:true});if(k%4===0)vplat(x-170,z,y,130,110,{shelter:true});}
@@ -7088,8 +7093,18 @@ function update(dt){
   p.x+=p.vx*dt; p.z+=p.vz*dt;
   const yPrev=p.y;
   p.y+=p.vy*dt;
-  resolveObstacles(p,p.r,yPrev);                 // walls: obstacles whose top was above your feet
-  const floor=floorAt(p.x,p.z,p.r,yPrev);
+  // STEP-UP: smoothly walk up low ledges/stairs instead of bumping into them. Anything within STEP_UP of your feet
+  // is a step you mount automatically while moving on the ground; taller climbs (climbRun uses ~94) still need a jump.
+  const STEP_UP=50; let stepped=false;
+  if(p.onGround && (Math.abs(p.vx)>4||Math.abs(p.vz)>4)){
+    let st=-Infinity; const near=(o,ow,od)=>Math.abs(p.x-o.x)<ow/2+p.r+2 && Math.abs(p.z-o.z)<od/2+p.r+2, within=t=>t>yPrev+2&&t<=yPrev+STEP_UP;
+    for(const ob of G.obstacles){ if(within(ob.h)&&near(ob,ob.w,ob.d)) st=Math.max(st,ob.h); }
+    for(const wl of (G.walls||[])){ if(wl.stand&&within(wl.h)&&near(wl,wl.w,wl.d)) st=Math.max(st,wl.h); }
+    for(const cr of (G.crumbles||[])){ if(cr.state!==2&&within(cr.h||0)&&near(cr,cr.w,cr.d)) st=Math.max(st,cr.h||0); }
+    if(st>-1e8){ p.y=st; if(p.vy<0)p.vy=0; p.onGround=true; p.jumps=0; stepped=true; }
+  }
+  resolveObstacles(p,p.r, stepped?p.y:yPrev);    // walls: obstacles whose top was above your feet (a mounted step isn't a wall)
+  const floor=floorAt(p.x,p.z,p.r, stepped?p.y:yPrev);
   if(!p.onGround && p.vy<=0 && floor>-1e8 && p.y<=floor){ if(p.vy<-640) playFx('bigland'); p.y=floor; p.vy=0; burst(p.x,p.y+2,p.z,'#888',4); SFX.land(); p.onGround=true; p.jumps=0; }
   else if(p.onGround && (floor<-1e8 || p.y>floor+0.5)){ p.onGround=false; if(p.vy>0) p.vy=0; } // walked off an edge
   else if(p.onGround) p.y=floor;

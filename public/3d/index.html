@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.319.1';
+const VERSION3D='1.320.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -936,7 +936,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -5086,9 +5086,33 @@ function cycleLootMode(){
 }
 [['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
-const keymap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'jump',KeyJ:'attack',KeyK:'dodge',ShiftLeft:'dodge'};
-// fallback by typed character (e.key) so WASD works even if e.code is off (non-US layouts / some Mac browsers)
-const keymapKey={w:'up',a:'left',s:'down',d:'right',' ':'jump',j:'attack',k:'dodge'};
+// ── REMAPPABLE CONTROLS. Each action holds up to 2 physical keys (e.code — keyboard-layout independent, so KeyW is
+//    the W position on any layout). Defaults below; the player rebinds any of them in Settings → Controls. ──
+const KEYACTIONS=[
+  {id:'up',      label:'Move Up / Forward', def:['KeyW','ArrowUp']},
+  {id:'down',    label:'Move Down / Back',  def:['KeyS','ArrowDown']},
+  {id:'left',    label:'Move Left',         def:['KeyA','ArrowLeft']},
+  {id:'right',   label:'Move Right',        def:['KeyD','ArrowRight']},
+  {id:'jump',    label:'Jump',              def:['Space']},
+  {id:'attack',  label:'Attack',            def:['KeyJ']},
+  {id:'dodge',   label:'Dodge / Dash',      def:['KeyK','ShiftLeft']},
+  {id:'skill1',  label:'Skill 1',           def:['Digit1']},
+  {id:'skill2',  label:'Skill 2',           def:['Digit2']},
+  {id:'skill3',  label:'Skill 3',           def:['Digit3']},
+  {id:'skill4',  label:'Skill 4',           def:['Digit4']},
+  {id:'interact',label:'Interact / Talk',   def:['KeyE']},
+  {id:'loot',    label:'Cycle Loot Mode',   def:['KeyQ']},
+  {id:'auto',    label:'Toggle Auto-Fight', def:['KeyL']},
+];
+const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
+function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
+function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') meta.keybinds=defaultKeybinds();
+  for(const a of KEYACTIONS){ if(!Array.isArray(meta.keybinds[a.id])) meta.keybinds[a.id]=a.def.slice(); }   // fill any newly-added action
+  rebuildKeyLookup(); }
+let _codeToAction={};
+function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } }
+function keyAction(code){ return _codeToAction[code]||null; }
+ensureKeybinds();
 window.addEventListener('keydown',e=>{
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
@@ -5116,13 +5140,14 @@ window.addEventListener('keydown',e=>{
       if(fresh){ const btns=document.querySelectorAll('.choice,.c2opt'); if(btns[pickMap[e.code]]) btns[pickMap[e.code]].click(); }
       return; }
   }
-  if(mode==='play'&&!e.repeat&&/^Digit[1-4]$/.test(e.code)){ e.preventDefault(); useSkill(+e.code.slice(5)-1); return; }
-  if(mode==='play'&&!e.repeat&&e.code==='KeyQ'){ e.preventDefault(); initAudio(); cycleLootMode(); return; }
-  if(e.code==='KeyL'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
-  if(e.code==='KeyE'){ e.preventDefault(); initAudio(); doInteract(); return; }   // interact / talk
-  const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(!k) return; e.preventDefault(); initAudio();
-  if(k==='jump'&&!input.jump) input.jumpEdge=true; if(k==='dodge'&&!input.dodge) input.dodgeEdge=true; input[k]=true; });
-window.addEventListener('keyup',e=>{ const k=keymap[e.code]||(e.key&&e.key.length===1?keymapKey[e.key.toLowerCase()]:null); if(k) input[k]=false; });
+  const act=keyAction(e.code); if(!act) return;
+  if(MOVE_ACTS[act]){ e.preventDefault(); initAudio();
+    if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
+  if(/^skill[1-4]$/.test(act)){ if(mode==='play'&&!e.repeat){ e.preventDefault(); useSkill(+act.slice(5)-1); } return; }
+  if(act==='loot'){ if(mode==='play'&&!e.repeat){ e.preventDefault(); initAudio(); cycleLootMode(); } return; }
+  if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
+  if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
+window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });
 // mouse combat (desktop): left-click = attack (hold to combo), right-click = dodge
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
 window.addEventListener('pointerdown',e=>{
@@ -9657,6 +9682,52 @@ function toggleFullscreen(){ try{
   if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
   else { const el=document.documentElement; (el.requestFullscreen||el.webkitRequestFullscreen).call(el); }
 }catch(e){} }
+// human-readable label for a physical key code
+function keyLabel(code){ if(!code) return '—';
+  const m={Space:'Space',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',ShiftLeft:'L-Shift',ShiftRight:'R-Shift',ControlLeft:'L-Ctrl',ControlRight:'R-Ctrl',AltLeft:'L-Alt',AltRight:'R-Alt',Enter:'Enter',Tab:'Tab',Backquote:'`',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'\\',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',CapsLock:'Caps'};
+  if(m[code]) return m[code];
+  if(/^Key[A-Z]$/.test(code)) return code.slice(3);
+  if(/^Digit[0-9]$/.test(code)) return code.slice(5);
+  if(/^Numpad[0-9]$/.test(code)) return 'Num'+code.slice(6);
+  if(/^F[0-9]{1,2}$/.test(code)) return code;
+  return code; }
+let _rebindState=null;
+function openKeybinds(back){
+  mode='menu'; ensureKeybinds();
+  if(!document.getElementById('kbcss')){ const st=document.createElement('style'); st.id='kbcss'; st.textContent=
+    '.kbcard{max-width:600px}.kblist{max-height:min(52vh,430px);overflow-y:auto;text-align:left;margin:10px 0;padding-right:4px}'
+    +'.kbrow{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.06)}'
+    +'.kblabel{flex:1;font-size:14px;color:#dfe4ec}.kbcaps{display:flex;gap:6px}'
+    +'.kbcap{min-width:56px;padding:6px 10px;border-radius:6px;background:#1b1e28;border:1px solid #3c4150;color:#eef1f6;font:700 12px monospace;cursor:pointer}'
+    +'.kbcap:hover{border-color:#f3c272}.kbcap.empty{color:#6b7180;font-weight:900}'
+    +'.kbcap.listening{background:#3a2d18;border-color:#f3c272;color:#ffd24a;animation:kbpulse 1s infinite}@keyframes kbpulse{50%{opacity:.5}}'
+    +'.kbreset{width:32px;height:32px;flex:0 0 auto;border-radius:6px;background:transparent;border:1px solid #3c4150;color:#9aa2b2;cursor:pointer;font-size:15px}'
+    +'.kbreset:hover{border-color:#f3c272;color:#f3c272}.kbfoot{display:flex;gap:10px;margin-top:8px}.kbfoot .bigbtn{flex:1;margin:0}';
+    document.head.appendChild(st); }
+  const cap=(a,i)=>{ const code=(meta.keybinds[a.id]||[])[i], listening=_rebindState&&_rebindState.id===a.id&&_rebindState.slot===i;
+    return `<button class="kbcap${listening?' listening':''}${code?'':' empty'}" data-a="${a.id}" data-s="${i}">${listening?'Press…':(code?keyLabel(code):'+')}</button>`; };
+  const rows=KEYACTIONS.map(a=>`<div class="kbrow"><span class="kblabel">${a.label}</span><div class="kbcaps">${cap(a,0)}${cap(a,1)}</div><button class="kbreset" data-r="${a.id}" title="Reset to default">↺</button></div>`).join('');
+  showOverlayHTML(`<div class="card kbcard"><p class="ovkicker">Settings · Controls</p><h2 class="ovh">⌨️ Key Bindings</h2>
+    <p class="ovsub">Click a key to rebind it. <b>Esc</b> cancels a rebind. Each action holds up to two keys. Menu keys (Esc, Enter) stay fixed.</p>
+    <div class="kblist">${rows}</div>
+    <div class="kbfoot"><button class="bigbtn ghost" id="kbResetAll">↺ Reset all to defaults</button><button class="bigbtn" id="kbDone">Done</button></div></div>`);
+  const rerender=()=>openKeybinds(back);
+  document.getElementById('kbDone').onclick=()=>{ _rebindState=null; back(); };
+  document.getElementById('kbResetAll').onclick=()=>{ meta.keybinds=defaultKeybinds(); rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
+  document.querySelectorAll('.kbreset').forEach(b=>b.onclick=()=>{ const id=b.dataset.r, A=KEYACTIONS.find(x=>x.id===id); meta.keybinds[id]=A.def.slice(); rebuildKeyLookup(); persistGlobal(); rerender(); });
+  document.querySelectorAll('.kbcap').forEach(b=>b.onclick=()=>startRebind(b.dataset.a,+b.dataset.s,rerender));
+}
+function startRebind(id,slot,rerender){
+  _rebindState={id,slot}; rerender();
+  const onKey=(e)=>{ e.preventDefault(); e.stopPropagation(); window.removeEventListener('keydown',onKey,true);
+    if(e.code==='Escape'){ _rebindState=null; rerender(); return; }                              // Esc cancels; menu keys stay fixed
+    const code=e.code;
+    for(const a of KEYACTIONS){ meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(c=>c!==code); }  // no duplicate bindings anywhere (swap-style)
+    const arr=meta.keybinds[id]; while(arr.length<=slot) arr.push(null); arr[slot]=code;
+    meta.keybinds[id]=arr.filter(c=>c).slice(0,2);
+    _rebindState=null; rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
+  window.addEventListener('keydown',onKey,true);
+}
 function openPause(){
   pauseGameAudio();
   mode='pause';
@@ -9680,6 +9751,7 @@ function openPause(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9704,6 +9776,7 @@ function openPause(){
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
+  { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
   { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
@@ -9725,6 +9798,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9742,6 +9816,7 @@ function openPauseSettingsV2(){
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPauseSettingsV2(); };
   document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
+  { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
   document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
   const jb=document.getElementById('jetBtn'); if(jb) jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPauseSettingsV2(); };
@@ -11892,6 +11967,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
+  openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,

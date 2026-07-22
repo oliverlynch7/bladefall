@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.4';
+const VERSION3D='1.318.5';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3166,6 +3166,7 @@ function newG(p,extra){
 function enterZone(zi){
   const Z=zoneOf(zi);
   initAudio(); queueLevelUp=0; queueSubclass=false;
+  meta.autoKeep=false; meta.autoBag=false; persistGlobal();   // loot mode DEFAULTS to OFF each level — the player opts into auto-sell/bag with Q
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
@@ -5362,7 +5363,7 @@ function updateGeysers(dt){
     if(gy2.state===1 && Math.random()<0.3) G.particles.push({x:gy2.x+(Math.random()-0.5)*30,y:2,z:gy2.z+(Math.random()-0.5)*30,vx:0,vy:60,vz:0,life:0.4,color:hazardCols(STAGES[G.stageIndex].theme)[1],sz:2.4});
     if(gy2.state===2 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<95 && dXZ(p.x,p.z,gy2.x,gy2.z)<gy2.r+p.r*0.5){
       const dmg=Math.max(1,Math.round(effMaxHp(p)*0.12));
-      hurtPlayer(dmg,gy2.x,gy2.z+1);
+      hurtPlayer(dmg,gy2.x,gy2.z+1, {name:'an erupting geyser',attack:'scalding steam'});
       p.vy=700; p.onGround=false; // launched skyward
     }
   }
@@ -5395,7 +5396,7 @@ function hazUpdate(dt){
         for(const v of (G.vents||[])){ burst(v.x,4,v.z,'#ff5a1e',9); } } }
     if(G.emberBurn>0){ G.emberBurn-=dt;
       for(const v of (G.vents||[])){ if(dXZ(v.x,v.z,p.x,p.z)<v.r+p.r && p.y<52){
-        hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.14)),v.x,v.z); break; } } }
+        hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.14)),v.x,v.z, {name:'a lava vent',attack:'the flames'}); break; } } }
   }
 }
 function hazSetup(rnd){                                  // place whatever the zone's hazard needs
@@ -5414,8 +5415,13 @@ function hazSetup(rnd){                                  // place whatever the z
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
   :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
+function hazardCause(th){ return (th==='frost')?{name:'the Freezing Deep',attack:'the killing cold'}
+  :(th==='void'||th==='apex')?{name:'the Void',attack:'an endless fall'}
+  :(th==='plains'||th==='forest')?{name:'the Wilds',attack:'a fatal fall'}
+  :(th==='marble')?{name:'the Fall',attack:'a long drop'}:{name:'the Lava',attack:'molten rock'}; }
 function lavaHit(){
   const p=G.p;
+  G.lastHitBy = hazardCause(STAGES[G.stageIndex].theme);   // fall/hazard death cause for the death screen
   if(isHitless()){ p.hp=0; p.dead=true; G.tookDamage=true;      // Hitless: a fall is death, not a toll
     burst(p.x,6,p.z,hazardCols(STAGES[G.stageIndex].theme)[1],22); SFX.hurt();
     addText(p.x,50,p.z,'FELL','var(--danger)',true); die(); return; }
@@ -6354,7 +6360,11 @@ function checkStageClear(){
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function hurtPlayer(dmg,sx,sz){
+function foeName(e){ if(!e) return 'an unseen foe';
+  if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
+  return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
+function foeHit(e,atk){ return {name:foeName(e), attack:atk||'a strike'}; }
+function hurtPlayer(dmg,sx,sz,by){
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
@@ -6366,6 +6376,7 @@ function hurtPlayer(dmg,sx,sz){
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
+  if(by) G.lastHitBy = (typeof by==='string')?{name:by,attack:''}:by;   // remember what just hit us — the death screen names the killer
   if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
   const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
@@ -7191,15 +7202,15 @@ function update(dt){
   if(G.shockwaves){ for(const sw of G.shockwaves){ if(sw.delay>0){ sw.delay-=dt; continue; }   // staggered quake rings hold, then march
       sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
-      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z); } }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow'}); } }
     G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
   if(G.collapse && G.collapse.length){ for(const tl of G.collapse){   // Void Tyrant: telegraphed floor tiles drop away, then re-form
       if(tl.warn>0){ tl.warn-=dt; if(tl.warn<=0) tl.open=1.4; }
       else { tl.open-=dt; tl.hit=Math.max(0,(tl.hit||0)-dt);
-        if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z); } } }
+        if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a ground slam'}); } } }
     G.collapse=G.collapse.filter(tl=>tl.warn>0||tl.open>0); }
   if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
-      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z); } }
+      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z, {name:'the burning ground',attack:'a magma trail'}); } }
     G.trails=G.trails.filter(tr=>tr.life>0); }
   if(G.spikefields && G.spikefields.length){ for(const sf of G.spikefields){ sf.life-=dt; sf.tick-=dt;   // Ranger Spike Trap: slow + DoT on enemies inside
       const dot=sf.tick<=0; if(dot) sf.tick=1;
@@ -7329,7 +7340,7 @@ function update(dt){
     }
     if(!e.dead && e.dmg>0){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(petClose) hurtPet((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z);
-      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z); }
+      else if(dXZ(e.x,e.z,p.x,p.z)<(e.r+p.r) && vOverlap(e,p)) hurtPlayer((e.boss&&e.lunge>0)?e.dmg*1.6:(e.chargeT>0?e.dmg*1.5:e.dmg),e.x,e.z, foeHit(e, e.boss&&e.lunge>0?'a crushing lunge':e.chargeT>0?'a charging ram':'a melee blow')); }
   }
   // corpse culling: dead enemies aren't drawn or updated, so drop them so they can't pile up over a long Descent (keep a dead boss for its win/defeat sequence)
   for(let i=G.enemies.length-1;i>=0;i--){ const e=G.enemies[i]; if(e.dead && !e.boss) G.enemies.splice(i,1); }
@@ -7356,7 +7367,7 @@ function update(dt){
     } else {
       const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
       if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
-      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01); pr.life=0; }
+      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01, {name:pr.srcName||'a ranged foe', attack:'a ranged attack'}); pr.life=0; }
     }
     if(pr.y<-4 && !pr.axe) pr.life=0;
     // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
@@ -7464,7 +7475,7 @@ function bossShoot(e,p){
     const ang=baseAng+(cfg.count>1?(i-(cfg.count-1)/2)*cfg.spread*2.2:0);
     const vx=Math.sin(ang)*cfg.speed, vz=Math.cos(ang)*cfg.speed;
     let vy=((p.y+p.h*0.5)-oy)/t; if(cfg.gravity) vy+=cfg.gravity*0.5*t;
-    G.projectiles.push({owner:'enemy',x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
+    G.projectiles.push({owner:'enemy',srcName:foeName(e),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
   }
   if(cfg.el) SFX.magic(cfg.el); else SFX.shoot(); // arrows thwip, spells cast by element
 }
@@ -7510,7 +7521,7 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
       if(b.warn>0){ b.warn-=dt; }
       else { b.ang+=b.dir*dt*0.9; b.active-=dt; b.ex=e.x; b.ez=e.z;
         const ax=p.x-e.x, az=p.z-e.z, pd=Math.hypot(ax,az)||1; let da=Math.atan2(az,ax)-b.ang; while(da>Math.PI)da-=6.283; while(da<-Math.PI)da+=6.283;
-        if(Math.abs(da)<0.13 && pd<640 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<40 && !beamBlocked(e,p)) hurtPlayer(e.dmg*1.3,e.x,e.z);
+        if(Math.abs(da)<0.13 && pd<640 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<40 && !beamBlocked(e,p)) hurtPlayer(e.dmg*1.3,e.x,e.z, foeHit(e,'a searing beam'));
         if(b.active<=0) G.beam=null; }
     } else { e.beamCd=(e.beamCd==null?5:e.beamCd)-dt;
       if(e.beamCd<=0 && dist<720){ e.beamCd=(7+Math.random()*2)*(e.phase>=2?0.6:1);
@@ -7762,18 +7773,39 @@ function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillb
 function die(){
   if(IN_ARENA){ arenaRespawn(); return; }                     // the Arena never kills you to the hub — you respawn in place
   if(G.endless){ endlessDie(); return; }                      // Endless is a repeatable grind, not permadeath — bank the run
-  mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
-  const Z=curZone(), perma=isPermadeath(), D=curDiff();
+  if(mode==='dying'||mode==='dead') return;                   // guard: never re-trigger the death sequence
+  mode='dying'; if(G&&G.p) G.p.dead=true;
+  G.deathWall=performance.now();                             // wall-clock stamp: drives the collapse animation (sim time is frozen once mode!=='play')
+  SFX.hurt(); try{ SFX.enemyDie&&SFX.enemyDie(); }catch(e){} try{ playFx&&playFx('mobvoice1',0.75); }catch(e){}
+  G.slowmo=Math.max(G.slowmo||0,0.45); G.shake=Math.min((G.shake||0)+14,20);
+  showGameUI(false); musicStop(700);
+  // fade the screen to black over ~1.6s, THEN show the result popup
+  let fd=document.getElementById('deathfade');
+  if(!fd){ fd=document.createElement('div'); fd.id='deathfade'; document.body.appendChild(fd); }
+  fd.style.cssText='position:fixed;inset:0;z-index:19;background:#000;opacity:0;transition:opacity 1.6s ease-in;pointer-events:none';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ fd.style.opacity='1'; }));
+  setTimeout(showDeathScreen, 2000);
+}
+function showDeathScreen(){
+  mode='dead';
+  const Z=curZone(), perma=isPermadeath(), hitless=isHitless();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
   if(perma) wipeMode(MODE); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
   persist();
+  const cb=G.lastHitBy;
+  const cause = cb ? `Slain by <b style="color:#ff8a82">${cb.name}</b>${cb.attack?` <span style="opacity:.82">— ${cb.attack}</span>`:''}.`
+                   : 'You fell in battle.';
+  const next = hitless
+    ? `<b style="color:var(--danger)">Hitless — one hit ends the run.</b><br>This save is wiped. You begin again from the very start.`
+    : perma
+    ? `<b style="color:var(--danger)">Hardcore — death is final.</b><br>This save is wiped. You begin again from the very start.`
+    : `You wake at the Waystation with everything you'd banked there. You lose only <b style="color:var(--danger)">${lostGold}g + the gear found this run</b>; all other progress is safe.`;
   showOverlayHTML(`<div class="card"><h2 class="title" style="font-size:42px;">YOU FELL</h2>
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
-    ${perma?`<p class="hint" style="color:var(--danger)"><b>${D.name} — this save is erased. Back to the beginning.</b></p>`
-      :`<div class="statgrid"><div class="vsrow"><span>Lost this attempt</span><b style="color:var(--danger)">${lostGold}g + everything found</b></div>
-        <div class="vsrow"><span>Kept</span><b style="color:var(--good)">all progress banked at the hub</b></div></div>`}
-    <button class="bigbtn" id="hubBtn">${hubBtnLabel()}</button></div>`);
-  document.getElementById('hubBtn').onclick=openHub;
+    <p class="ovsub" style="margin:8px auto 4px;max-width:520px;font-size:16px">${cause}</p>
+    <div class="statgrid" style="margin-top:10px"><div class="vsrow" style="display:block;text-align:center;line-height:1.55"><span>${next}</span></div></div>
+    <button class="bigbtn" id="hubBtn" style="margin-top:14px">${hubBtnLabel()}</button></div>`);
+  document.getElementById('hubBtn').onclick=()=>{ const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
 }
 function hubBtnLabel(){ return Object.keys(meta.classUnlocked||{}).length ? 'Return to Hub' : 'Choose your class'; }   // a class-less death routes to class select — say so
 /* ============================================================
@@ -10074,8 +10106,9 @@ function drawHero3(p,t,preview){
   const godGlow=sk.god?sk.glow:null;
   const moving=Math.hypot(p.vx||0,p.vz||0)>20&&p.onGround;
   const leg=Math.sin(p.runAnim||0)*(moving?0.55:0), bob=(moving?Math.abs(Math.sin((p.runAnim||0)*2))*1.4:Math.sin(t*2)*0.7);
-  if(p.invuln>0 && Math.floor(p.invuln*20)%2===0 && !preview) return;
+  if(p.invuln>0 && Math.floor(p.invuln*20)%2===0 && !preview && !p.dead) return;
   pushM(); mv(p.x,p.y+bob,p.z); rotY(p.yaw);
+  if(p.dead && !preview){ const dd=Math.max(0,Math.min(1,(performance.now()-(G.deathWall||performance.now()))/550)); rotZ(dd*1.5); mv(0,-dd*15,-dd*6); }   // death collapse: tip over + sink (wall-clock; sim is frozen)
   if(p.dodgeTimer>0){ /* dash tilt */ rotX(0.28); }
   // legs (hip pivot)
   pushM(); mv(-4.5,14,0); rotX(leg); bx(0,-7,0, 6.5,14,6.5,'#1c2530'); popM();
@@ -11787,7 +11820,7 @@ try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
 setTimeout(checkUpdate,2500);
 window.addEventListener('pointerdown',initAudio,{once:true});
 /* debug hook (headless verification) */
-window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,
+window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.6';
+const VERSION3D='1.319.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3440,6 +3440,23 @@ function vsolid(x,z,y0,w,h,d,c,ex){ ex=ex||{}; const o=Object.assign({x,z,y0,w,h
   const top=(ex.colH!=null)?ex.colH:Math.round((y0||0)+h);
   if(top>4) G.obstacles.push({kind:'col',x,z,w,d,h:top,structure:true});
   return o; }
+// AUTO-COLLISION: the systemic fix for "assets you can walk through". Any chunky, ground-level, free-standing deco
+// mass (a building, crate, sarcophagus, big block) that isn't already backed by an obstacle gets a matching solid
+// column. structure:true routes it through the walkway guard so a climb/ramp running over it never ejects you.
+// Skips thin slabs, foliage/elevated decos, and anything an authored obstacle already covers. Run from finishScape.
+function autoSolidify(){
+  const obs=G.obstacles; if(!obs) return;
+  for(const dco of (G.deco||[])){
+    if(dco.nocol||dco.autoCol) continue;
+    const y0=dco.y0||0, w=dco.w||0, h=dco.h||0, d=dco.d||0;
+    if(y0>12 || w<96 || d<70 || h<46 || h>300) continue;                 // only chunky, ground-level masses
+    let covered=false;
+    for(const ob of obs){ if(Math.abs(ob.x-dco.x)<Math.max(24,w*0.35) && Math.abs(ob.z-dco.z)<Math.max(24,d*0.35) && (ob.h||0)>=y0+h-10){ covered=true; break; } }
+    if(covered) continue;                                                // an authored obstacle already blocks here
+    dco.autoCol=true;
+    obs.push({kind:'col',x:dco.x,z:dco.z,w:Math.max(24,w-26),d:Math.max(24,d-26),h:Math.round(y0+h),structure:true,auto:true});   // -26 so the block edge ~ the visual edge (player r)
+  }
+}
 function vtorch(x,z,rnd){ G.torches.push({x,z,ph:(rnd?rnd():0)*6.28}); }
 // a rising run of standable platforms A->B; step count auto-sized so no gap exceeds jump reach. returns the plats.
 function climbRun(x0,z0,y0,x1,z1,y1,w,ex){ w=w||62; const out=[];
@@ -3474,6 +3491,7 @@ function placeHealPads(o){
 function finishScape(ctx,o){
   G.vertical=true;
   dashGate(o);   // required jump+dash gap before the exit (main levels with a breather platform)
+  autoSolidify();   // free-standing building/crate masses (placed as decos) get real collision — no more phasing through
   let mnX=1e9,mxX=-1e9,mnZ=1e9,mxZ=-1e9; const ext=(x,z,w,d)=>{ mnX=Math.min(mnX,x-w/2); mxX=Math.max(mxX,x+w/2); mnZ=Math.min(mnZ,z-d/2); mxZ=Math.max(mxZ,z+d/2); };
   for(const sg of G.segments) ext(sg.x,sg.z,sg.w,sg.d);
   for(const ob of G.obstacles) ext(ob.x,ob.z,ob.w,ob.d);

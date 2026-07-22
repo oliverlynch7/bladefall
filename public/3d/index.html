@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.1';
+const VERSION3D='1.318.2';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4949,8 +4949,11 @@ function endBonus(msg){
 /* HUB Treasure Sprint — the exact same random parkour course, launched from the Waystation portal purely
    for fun: NO loot, NO gold, just a time trial. Reaching the finale chest records your best time. */
 function startHubSprint(){
+  initAudio();
   G.hub=false; G.sprintFun=true; G.sprintReturnHub=true; G.sprintStartT=G.time||0;
   loadBonus(0);
+  // openLevelEntry left us in mode='menu' with the popup up — actually ENTER the course (this was the bug: the button did nothing)
+  mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate();
   toast('🏁 TREASURE SPRINT — race the clock! Best: '+(meta.sprintBest?meta.sprintBest.toFixed(1)+'s':'—'));
 }
 function finishHubSprint(){

@@ -601,6 +601,34 @@
   .bagdoll3d{position:absolute;z-index:2;right:2px;top:56px;width:220px;height:380px;touch-action:none;cursor:grab;filter:drop-shadow(0 18px 16px rgba(0,0,0,.6))}
   .bagdoll3d:active{cursor:grabbing}
   .bagdollhint{position:absolute;z-index:3;right:20px;bottom:14px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6f7789;pointer-events:none;opacity:.8}
+  /* ===== GEAR & BUILD — full-screen paper-doll inspector (no scroll) ===== */
+  .gearscreen{max-width:min(1200px,96vw);width:100%;height:min(94vh,880px);max-height:94vh;overflow:hidden;display:flex;flex-direction:column;padding:16px 24px 14px;}
+  .gshead{text-align:center;margin-bottom:4px}
+  .gshead .gsname{font-size:clamp(24px,3vw,38px);font-weight:900;color:#faf7ed;letter-spacing:.01em;text-shadow:0 3px 12px rgba(0,0,0,.6);line-height:1}
+  .gshead .gsmeta{margin-top:5px;font-size:clamp(12px,1.3vw,15px);font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c9a86a}
+  .gsbody{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,1.04fr) minmax(0,1fr);gap:14px;align-items:stretch;margin-top:4px}
+  .gscol{display:flex;flex-direction:column;gap:9px;justify-content:center;min-width:0}
+  .gsdoll{position:relative;border-radius:18px;border:1px solid #39404f;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 34%,rgba(232,163,61,.12),transparent 46%),linear-gradient(160deg,#1b1f29,#0c0e14);box-shadow:inset 0 0 46px rgba(0,0,0,.55)}
+  .gsdoll canvas{height:100%;width:auto;max-width:100%;touch-action:none;cursor:grab}
+  .gsdoll canvas:active{cursor:grabbing}
+  .gsdollhint{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#6f7789;pointer-events:none;opacity:.85}
+  .gslot{display:grid;grid-template-columns:64px minmax(0,1fr);gap:11px;align-items:center;padding:8px 12px;border-radius:13px;border:1px solid color-mix(in srgb,var(--rc,#5a6478) 42%,#282d38);background:linear-gradient(120deg,rgba(30,34,44,.95),rgba(13,15,21,.9));box-shadow:0 5px 15px rgba(0,0,0,.3),inset 3px 0 0 var(--rc,#5a6478)}
+  .gslot-ic{width:64px;height:64px;object-fit:contain;border-radius:10px;background:#0a0c11;border:1px solid #2b3040;display:block}
+  .gslot-ic.empty{display:flex;align-items:center;justify-content:center;border-style:dashed}
+  .gslot-ic.empty .ico{width:40px;height:40px;opacity:.5}
+  .gslot-txt{min-width:0}
+  .gslot-label{font-size:10.5px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#8a93a6}
+  .gslot-name{font-size:clamp(15px,1.45vw,19px);font-weight:800;color:var(--rc,#cdd3df);line-height:1.12;margin:2px 0 3px;overflow-wrap:anywhere}
+  .gslot-stats{font-size:12.5px;line-height:1.5;color:#aeb7c5}
+  .gslot-stats b{color:#eef2f7;font-weight:800}
+  .gslot-stats .gpip{color:#8b93a3}
+  .gsstats{margin-top:10px;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}
+  .gstile{text-align:center;padding:7px 5px 6px;border-radius:11px;border:1px solid #2f3542;background:linear-gradient(160deg,rgba(41,46,59,.72),rgba(12,14,20,.82))}
+  .gstile b{display:block;font-size:clamp(14px,1.5vw,19px);font-weight:900;color:#f3ead7;line-height:1}
+  .gstile span{display:block;font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#838c9e;margin-top:4px}
+  .gsfoot{margin-top:10px;display:flex;justify-content:center}
+  .gsfoot .bigbtn{margin:0;min-width:260px}
+  @media(max-width:900px){ .gearscreen{height:auto;max-height:none;overflow:visible} .gsbody{grid-template-columns:1fr 1fr;overflow:visible} .gsdoll{grid-column:1/-1;min-height:260px;order:-1} .gslot-ic{width:58px;height:58px} .gsstats{grid-template-columns:repeat(5,1fr)} }
   .petav{width:74px;height:74px;object-fit:contain;flex:0 0 auto;border-radius:14px;border:1px solid #343b50;background:radial-gradient(circle,#24283a,#0c0e15 72%);filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));}
   /* Pet Yard has its own hierarchy: one hero companion, then a readable collection grid. */
   .petyard{--petcol:#e8a33d;text-align:left;overflow:hidden;padding-top:18px!important;padding-bottom:16px!important;}
@@ -875,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.314.0';
+const VERSION3D='1.315.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9234,17 +9262,58 @@ function openAchievements(back){
 }
 function openGear(back){
   mode='menu'; const p=G?G.p:null; if(!p){ back(); return; }
-  const w=p.weapon, wEl=w.el?(w.el==='void'?'Void (ignores resist + lifesteal)':w.el):'Neutral';
-  const gearRow=(slot)=>{ const a=p.gear[slot]; const lab=slotLabel(slot);
-    const detail=a?(a.trinket?a.affixes.map(x=>x.label).join(' · '):('Defense '+a.defense+' · '+a.affixes.map(x=>x.label).join(' · '))):'';
-    const icon=a?`<img class="gearav" src="${itemAv(a)}" alt="">`:slotIcon(slot);   // new item art, same as the bag menu
-    return `<div class="gearrow"><div class="gi slotgi">${icon}${lab}</div><div>${a?`<div class="gn" style="color:${a.color}">${a.name}</div><div class="gd">${detail}</div>`:`<div class="gn" style="color:var(--muted)">— empty —</div>`}</div></div>`; };
-  showOverlayHTML(`<div class="card"><h2 class="ovh">Gear</h2>
-    <p class="ovsub">Total damage reduction: <b style="color:${bestGearRarity(p)}">${Math.round(defenseR(p)*100)}%</b></p>
-    <div class="achlist">
-      <div class="gearrow"><div class="gi slotgi"><img class="gearav" src="${itemAv(w)}" alt="">Weapon</div><div><div class="gn" style="color:${w.color}">${w.name}</div><div class="gd">Dmg ${fmt(w.dmg)} · ${damageTypeHTML(w)} · ${wEl}</div></div></div>
-      ${gearRow('helmet')}${gearRow('chest')}${gearRow('legs')}${gearRow('amulet')}${gearRow('ring')}
-    </div><button class="bigbtn ghost" id="backBtn">Back</button></div>`);
+  const line=(...bits)=>bits.filter(Boolean).join('<span class="gpip"> · </span>');
+  // ---- WEAPON card ----
+  const w=p.weapon;
+  const aps=(1/Math.max(0.05,(w.cd||0.4)/Math.max(0.1,effAtkSpeed(p)))).toFixed(2);
+  const wLs=Math.max(w.lifesteal||0,0);
+  const wStats=[
+    line(`Damage <b>${fmt(w.dmg)}</b>`, `<b>${aps}</b>/s`),
+    line(damageTypeHTML(w), w.el?(w.el==='void'?'Void <span class="gpip">(ignores resist)</span>':(affIcon(w.el)+' '+affName(w.el)+(affStatus(w.el)?(' '+statusIcon(w.el)+' '+affStatus(w.el)):''))):'Neutral'),
+    line(`Reach <b>${(MELEE[w.art]&&MELEE[w.art].reach)||w.range||'—'}</b>`, w.kb?`Knockback <b>${w.kb}</b>`:'', weapFamily(w)),
+    wLs>0?`Lifesteal <b>${Math.round(wLs*100)}%</b>`:''
+  ].filter(Boolean).join('<br>');
+  const weaponCard=`<div class="gslot" style="--rc:${w.color}"><img class="gslot-ic" src="${itemAv(w)}" alt="">
+    <div class="gslot-txt"><div class="gslot-label">Weapon${w.rarity?' · '+RARITY[w.rarity].name:''}</div><div class="gslot-name">${w.name}${w.up?' +'+w.up:''}</div><div class="gslot-stats">${wStats}</div></div></div>`;
+  // ---- armor / trinket card ----
+  const gearCard=(slot)=>{ const a=p.gear[slot], lab=slotLabel(slot);
+    if(!a) return `<div class="gslot"><span class="gslot-ic empty">${slotIcon(slot)}</span><div class="gslot-txt"><div class="gslot-label">${lab}</div><div class="gslot-name" style="color:#6e778b">Empty</div><div class="gslot-stats">No ${lab.toLowerCase()} equipped</div></div></div>`;
+    const set=(!a.trinket&&a.type&&ARMOR_TYPES[a.type])?ARMOR_TYPES[a.type].name+' set':'';
+    const affix=a.affixes.map(x=>x.label).join('<br>');
+    const stats=[ a.trinket?'':`Defense <b>${a.defense}</b>`, set, affix ].filter(Boolean).join('<br>');
+    return `<div class="gslot" style="--rc:${a.color}"><img class="gslot-ic" src="${itemAv(a)}" alt="">
+      <div class="gslot-txt"><div class="gslot-label">${lab}${a.rarity?' · '+RARITY[a.rarity].name:''}</div><div class="gslot-name">${a.name}</div><div class="gslot-stats">${stats}</div></div></div>`; };
+  // ---- PET card ----
+  const petId=(meta.petActive&&PETS[meta.petActive])?meta.petActive:null;
+  let petCard;
+  if(!petId){ petCard=`<div class="gslot"><span class="gslot-ic empty"><span class="ico ico-pet-collar"></span></span><div class="gslot-txt"><div class="gslot-label">Companion</div><div class="gslot-name" style="color:#6e778b">None</div><div class="gslot-stats">Equip a pet at the Beastkeeper</div></div></div>`; }
+  else { const P=PETS[petId], role=P.arch==='healer'?'Healer':P.arch==='utility'?'Utility':'Attacker', rc=petRarityCol(petId), tl=petTrainLvl(petId);
+    const pl=[ line(`Role <b>${role}</b>`, `HP <b>${petMaxHp(petId)}</b>`),
+      P.arch==='healer'?`Heal <b>${petHealAmt(petId)}</b><span class="gpip"> every </span><b>${P.cd}s</b>`
+        :P.arch==='utility'?`Vacuums loot <b>${P.pull}</b> radius`
+        :line(`Damage <b>${petAtkDmg(petId)}</b>`, `every <b>${P.cd}s</b>`, `range <b>${P.range}</b>`),
+      tl>0?`Trained <b>Lv ${tl}</b>/${PET_TRAIN_MAX}`:'' ].filter(Boolean).join('<br>');
+    petCard=`<div class="gslot" style="--rc:${rc}"><img class="gslot-ic" src="${petIcon(petId)}" alt="">
+      <div class="gslot-txt"><div class="gslot-label">Companion · ${RARITY[P.rarity]?RARITY[P.rarity].name:''}</div><div class="gslot-name">${petDisplayName(petId)}</div><div class="gslot-stats">${pl}</div></div></div>`; }
+  // ---- BUILD STATS strip (effective values, after gear + perks + class) ----
+  const mul=v=>'×'+v.toFixed(2), pct=v=>Math.round(v*100)+'%';
+  const tiles=[
+    ['❤ '+effMaxHp(p),'Max HP'], [pct(defenseR(p)),'Dmg Reduct'], [pct(effCrit(p)),'Crit'],
+    [mul(effPower(p)),'Power'], [mul(effMagPower(p)),'Magic'], [mul(effAtkSpeed(p)),'Atk Speed'],
+    [mul(effSpeed(p)),'Move'], [pct(effCdr(p)),'Cooldown'], [pct(effLifesteal(p)),'Lifesteal'],
+    [effDodgeCd(p).toFixed(2)+'s','Dodge CD']
+  ].map(t=>`<div class="gstile"><b>${t[0]}</b><span>${t[1]}</span></div>`).join('');
+  const C=CLASSES[meta.classId]||CLASSES.warrior, rank=classState(meta.classId).rank, heroName=meta.heroName||'Your Warden';
+  showOverlayHTML(`<div class="card gearscreen">
+    <div class="gshead"><div class="gsname">${heroName}</div><div class="gsmeta">${C.icon||'⚔️'} ${C.disp} · Level ${p.level||1} · Rank ${rank}</div></div>
+    <div class="gsbody">
+      <div class="gscol">${weaponCard}${petCard}${gearCard('amulet')}</div>
+      <div class="gsdoll"><canvas id="bagDollCanvas" width="420" height="720"></canvas><div class="gsdollhint">drag to rotate</div></div>
+      <div class="gscol">${gearCard('helmet')}${gearCard('chest')}${gearCard('legs')}${gearCard('ring')}</div>
+    </div>
+    <div class="gsstats">${tiles}</div>
+    <div class="gsfoot"><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
+  setupBagDoll(p);
   document.getElementById('backBtn').onclick=back;
 }
 /* ============================================================
@@ -11592,7 +11661,7 @@ try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
 setTimeout(checkUpdate,2500);
 window.addEventListener('pointerdown',initAudio,{once:true});
 /* debug hook (headless verification) */
-window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,
+window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
   setSkin:(s)=>{ if(G&&G.p){ if(!meta.unlockedSkins.includes(s)) meta.unlockedSkins.push(s); G.p.skin=s; recomputeArmor(G.p); if(s==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); return G.p.skin; } },

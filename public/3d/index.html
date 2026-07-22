@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.321.0';
+const VERSION3D='1.322.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -936,7 +936,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -959,7 +959,7 @@ if(!meta.quality) meta.quality='high';   // graphics quality: 'high' | 'medium' 
 // perf helpers, driven by meta.quality — let old/weak machines dial the graphics down
 function qLow(){ return meta.quality==='low'; }
 function qBloomOn(){ return meta.quality!=='low' && meta.quality!=='medium'; }   // the "upgraded light effect" — HIGH only
-function fxScale(){ return meta.quality==='low'?0.22:meta.quality==='medium'?0.5:1; }   // particle-count multiplier
+function fxScale(){ return (meta.quality==='low'?0.22:meta.quality==='medium'?0.5:1)*(meta.reduceMotion?0.4:1); }   // particle-count multiplier (× accessibility reduce-motion)
 function qLabel(){ const q=meta.quality||'high'; return q.charAt(0).toUpperCase()+q.slice(1); }
 function cycleQuality(){ const o=['high','medium','low']; meta.quality=o[(o.indexOf(meta.quality||'high')+1)%3]; persistGlobal(); if(typeof resize==='function') resize(); }
 if(!meta.achievements) meta.achievements={};
@@ -9784,6 +9784,8 @@ function openPause(){
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9810,6 +9812,8 @@ function openPause(){
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
   { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPause(); }; }
+  { const _sk=document.getElementById('shakeBtn'); if(_sk) _sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPause(); }; }
+  { const _rm=document.getElementById('reduceMoBtn'); if(_rm) _rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPause(); }; }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
   { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
@@ -9833,6 +9837,8 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
+      <button class="bigbtn ghost" id="reduceMoBtn">♿ Reduce motion: ${meta.reduceMotion?'On':'Off'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9852,6 +9858,8 @@ function openPauseSettingsV2(){
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
   { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPauseSettingsV2(); }; }
+  { const sk=document.getElementById('shakeBtn'); if(sk) sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPauseSettingsV2(); }; }
+  { const rm=document.getElementById('reduceMoBtn'); if(rm) rm.onclick=()=>{ meta.reduceMotion=!meta.reduceMotion; persistGlobal(); openPauseSettingsV2(); }; }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
   document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
   const jb=document.getElementById('jetBtn'); if(jb) jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPauseSettingsV2(); };
@@ -11595,7 +11603,8 @@ function render(t){
   if(G){ G.cam.x+=(p.x-G.cam.x)*0.10; G.cam.z+=(p.z-G.cam.z)*0.10; G.cam.y+=((p.y||0)-(G.cam.y||0))*0.08;   // follow vertically too (mountain climbs)
     if(G.camYaw==null) G.camYaw=p.yaw; if(G.camPitch==null) G.camPitch=0.12; }
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0):0;
-  const shx=G?(Math.random()-0.5)*G.shake*0.8:0, shy=G?(Math.random()-0.5)*G.shake*0.8:0;
+  const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
+  const shx=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0, shy=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0;
   if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
     const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);

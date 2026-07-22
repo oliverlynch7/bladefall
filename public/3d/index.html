@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.317.0';
+const VERSION3D='1.317.1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2902,7 +2902,7 @@ let _bagSort='type';   // Phase 10 bag sort: type (default) | rarity | recency
 /* Bag equipment doll: a LIVE 3D voxel render of the hero (+ companion by the leg), drag to rotate.
    Rendered on demand into the WebGL canvas, then captured into the bag's 2D canvas (like item previews). */
 let bagDoll=null;
-function setupBagDoll(HR){
+function setupBagDoll(HR,centered){
   const cnv=document.getElementById('bagDollCanvas'); if(!cnv||typeof gl==='undefined'||!gl) return;
   const src=HR||meta.hero||{}; const p=freshPlayer();
   if(src.skin) p.skin=src.skin;
@@ -2911,7 +2911,7 @@ function setupBagDoll(HR){
   p.level=src.level||1; ['eyeColor','hairStyle','hairColor'].forEach(k=>{ if(src[k]!=null) p[k]=src[k]; });
   recomputeArmor(p); p.hp=effMaxHp(p);
   const pet=(meta.petActive&&PETS[meta.petActive])?{id:meta.petActive,x:0,y:0,z:0,bob:0,t:0,yaw:0,hp:1,maxHp:1}:null;
-  bagDoll={p,pet,yaw:0.6,t:1.2};
+  bagDoll={p,pet,yaw:0.6,t:1.2,centered:!!centered};
   bagDollRender();
   let dragX=null;
   const dn=e=>{ dragX=(e.touches?e.touches[0].clientX:e.clientX); e.preventDefault(); };
@@ -2936,10 +2936,12 @@ function bagDollRender(){
   if(pet){ pet.x=30; pet.z=14; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
   flushBatch(); gl.finish();          // draw the accumulated hero+pet cubes before we grab the pixels
   const ctx=cnv.getContext('2d'); ctx.clearRect(0,0,cnv.width,cnv.height);
-  // frame the pair pushed to the right of the canvas so the hero clears the equip cards on the left
-  const ctr=(typeof project==='function'?project(-12,30,0):null)||[VW/2,VH/2];
-  const sw=VH*0.60*DPR, sh=VH*1.02*DPR;
-  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*0.46, sw, sh, 0,0, cnv.width, cnv.height);
+  // BAG: frame the pair pushed to the right so the hero clears the equip cards on the left.
+  // GEAR (centered): centre the hero in its own panel and show the full body.
+  const CEN=bagDoll.centered;
+  const ctr=(typeof project==='function'?project(CEN?4:-12, CEN?16:30, 0):null)||[VW/2,VH/2];
+  const sw=VH*(CEN?0.60:0.60)*DPR, sh=VH*(CEN?1.22:1.02)*DPR;
+  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*(CEN?0.34:0.46), sw, sh, 0,0, cnv.width, cnv.height);
   // GL context is alpha:false, so the clear reads back as opaque black — key it out to float on the panel
   try{ const id=ctx.getImageData(0,0,cnv.width,cnv.height), px=id.data;
     for(let i=0;i<px.length;i+=4){ const m=Math.max(px[i],px[i+1],px[i+2]);
@@ -9375,7 +9377,7 @@ function openGear(back){
     </div>
     <div class="gsstats">${tiles}</div>
     <div class="gsfoot"><button class="bigbtn ghost" id="backBtn">Back</button></div></div>`);
-  setupBagDoll(p);
+  setupBagDoll(p,true);
   document.getElementById('backBtn').onclick=back;
 }
 /* ============================================================

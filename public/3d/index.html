@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.5';
+const VERSION3D='1.318.6';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4172,6 +4172,7 @@ const EXPANDED_SCAPES={
       canyonWall(-428,-220,220,+1,rnd,32,300); canyonWall(-428,220,220,+1,rnd,32,300);   // 220u west-road gateway at z=0
       for(let k=0;k<3;k++) vplat(-280,-342-k*40,10,118,76,{safeRoute:true,recovery:true,canyonStep:true});
       wallPair(fossils,410); wallPair(needle,460);
+      spawnCrackWall(250,-150,0, 150,180,48, 3);   // BREAKABLE cracked wall — attack it ~3x to smash it open (demo placement in the Dry Wash; reposition to the exact blocked spot)
       // Bone-step climb, a narrow high shelf, and gust-facing pillar weave.
       climbRun(120,-1640,0,-300,-2080,160,72); vplat(-300,-2080,160,760,620,{terrace:true,checkpoint:true});
       for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }
@@ -4977,6 +4978,18 @@ function finishHubSprint(){
   if(best){ meta.sprintBest=+s.toFixed(1); persistGlobal(); }
   SFX.achieve();
   endBonus('🏁 Finished in '+s.toFixed(1)+'s'+(best?' · NEW BEST!':' · best '+prev.toFixed(1)+'s'));
+}
+// A BREAKABLE cracked wall: a solid barrier you can ATTACK down. Reuses the enemy hit-system so any
+// weapon/skill damages it and it shows an HP bar; killEnemy() removes the collision wall to open the path.
+function spawnCrackWall(x,z,y,w,h,d,shots){
+  const wall={x,z,y0:y||0,w,d,h,invisible:true,_crack:true}; G.walls.push(wall);
+  const e=spawnEnemy('grunt',x,z);
+  Object.assign(e,{crackWall:true,wallRef:wall,type:'crackwall',look:'crackwall',
+    x,z,y:y||0,sx:x,sz:z,r:Math.max(w,d)/2,h:h,cw:w,cd:d,
+    active:false,dropT:0,immobile:true,speed:0,ranged:false,kite:false,shot:null,
+    dmg:0,xp:0,noSplit:true,deathpuff:false,elite:false,boss:false,role:null,color:'#7a6b52'});
+  e.hp=e.maxHp=Math.max(20,(shots||3)*22);   // "a couple shots" — ~3 weapon hits by default
+  return e;
 }
 function spawnEnemy(type,x,z,isBoss){
   const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?10:1);   // bosses carry ~10x HP so a fight lasts a fight, not two hits
@@ -6201,6 +6214,11 @@ function killEnemy(e,weaponKill){
   if(MP.active && !MP.isHost && !MP._authKill && !e.dummy && !e.practice) return;
   if(e.dummy){ e.hp=e.maxHp; addText(e.x,e.y+e.h+14,e.z,'RESET','#c9b37e'); burst(e.x,e.y+20,e.z,'#c9b37e',8); return; }   // training dummies just stand back up
   if(e.practice){ e.dead=true; burst(e.x,e.y+e.h*0.5,e.z,e.color,10); SFX.enemyDie(); return; }                        // Phase 12 practice foes: no XP, no gold, no loot
+  if(e.crackWall){ e.dead=true;                                                                                        // a breakable wall shatters, opening the way (no XP/kill credit)
+    if(e.wallRef){ const wi=G.walls.indexOf(e.wallRef); if(wi>=0) G.walls.splice(wi,1); }
+    for(let i=0;i<24;i++) burst(e.x+(Math.random()-0.5)*(e.cw||60),e.y+Math.random()*(e.h||120),e.z,'#b8a888',2);
+    G.shake=Math.min((G.shake||0)+9,16); try{ playFx('wallbreak'); }catch(_){ try{SFX.enemyDie();}catch(x){} }
+    toast('The cracked wall crumbles — the way opens!','#e8d8b0'); return; }
   if(MP.host_()) MP.noteKill(e);   // host records the kill so guests mirror the death + earn instanced rewards
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
@@ -7786,12 +7804,17 @@ function die(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ fd.style.opacity='1'; }));
   setTimeout(showDeathScreen, 2000);
 }
+function reviveAtStart(){   // TEMP (playtesting): shrug off the death and respawn at the level start — the run continues, nothing is wiped
+  const fd=document.getElementById('deathfade'); if(fd) fd.remove();
+  const p=G.p; p.dead=false; p.downed=false; p.hp=effMaxHp(p); p.invuln=2.0; G.lastHitBy=null;
+  const sp=G.startPos||{x:0,z:0}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+30; p.vx=p.vy=p.vz=0; p.onGround=false;
+  mode='play'; showOverlay(false); showGameUI(true); try{ musicForScene(); }catch(e){} hudUpdate();
+  toast('↻ Revived at the start — test mode');
+}
 function showDeathScreen(){
   mode='dead';
   const Z=curZone(), perma=isPermadeath(), hitless=isHitless();
   const lostGold=Math.max(0,(meta.gold||0)-((meta.bank&&meta.bank.gold)||0));
-  if(perma) wipeMode(MODE); else restoreBank();   // Normal: revert to the hub snapshot — you lose only this attempt
-  persist();
   const cb=G.lastHitBy;
   const cause = cb ? `Slain by <b style="color:#ff8a82">${cb.name}</b>${cb.attack?` <span style="opacity:.82">— ${cb.attack}</span>`:''}.`
                    : 'You fell in battle.';
@@ -7804,8 +7827,11 @@ function showDeathScreen(){
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
     <p class="ovsub" style="margin:8px auto 4px;max-width:520px;font-size:16px">${cause}</p>
     <div class="statgrid" style="margin-top:10px"><div class="vsrow" style="display:block;text-align:center;line-height:1.55"><span>${next}</span></div></div>
-    <button class="bigbtn" id="hubBtn" style="margin-top:14px">${hubBtnLabel()}</button></div>`);
-  document.getElementById('hubBtn').onclick=()=>{ const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
+    <button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest</span></button>
+    <button class="bigbtn" id="hubBtn" style="margin-top:8px">${hubBtnLabel()}</button></div>`);
+  document.getElementById('reviveBtn').onclick=reviveAtStart;
+  document.getElementById('hubBtn').onclick=()=>{ if(perma) wipeMode(MODE); else restoreBank(); persist();   // commit the loss only when you accept it
+    const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
 }
 function hubBtnLabel(){ return Object.keys(meta.classUnlocked||{}).length ? 'Return to Hub' : 'Choose your class'; }   // a class-less death routes to class select — say so
 /* ============================================================
@@ -9296,7 +9322,9 @@ function openShop(back){
     return `<div class="gearrow" style="--spine:#caa23a${owned?';opacity:.6':''}"><div class="gi">🏰</div>
       <div style="flex:1;min-width:0"><div class="gn" style="color:#e8c86a">${u.name}</div><div class="gd">${u.desc}</div></div>
       ${owned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>DONE</button>':`<button class="bigbtn hubbuy" data-h="${u.id}" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${afford?'':'opacity:.5'}">${u.cost}g</button>`}</div>`; }).join('');
-  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2><p class="ovsub"><span class="ico ico-coin"></span> <b style="color:#ffd24a">${meta.gold}</b> · permanent upgrades for this save</p>${northStar}
+  showOverlayHTML(`<div class="card"><p class="ovkicker">The Quartermaster</p><h2 class="ovh">Shop</h2>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
+    <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
     <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
@@ -10678,6 +10706,16 @@ function drawEnemy3(e,t){
     bx(0,42,W*.42,12,12,3,'#efe0b1');bx(0,42,W*.45,6,6,3,'#b43f35');bx(0,42,W*.48,2.5,2.5,2,'#fff4d2');
     bx(0,30,0,58,7,7,'#6a4726');for(const s2 of [-1,1])bx(s2*27,27,0,8,16,8,'#c9a84f');
     for(let k=0;k<6;k++)bx(-8+k*3.2,52+(k%2)*3,0,2,10,2,'#e5c96d');
+  } else if(e.look==='crackwall'){
+    // a fissured stone slab — the crack widens as you batter it down
+    const cw=e.cw||70, cd=e.cd||36, H2=e.h||140, dmgF=Math.max(0,Math.min(1,1-e.hp/(e.maxHp||1))), cc='#140f0a';
+    bx(0,H2*0.5,0, cw,H2,cd, '#7a6b52','#918062',0.35);                        // the slab
+    bx(0,H2*0.5,cd*0.5+0.6, cw*0.9,H2*0.9,1.5, tint('#7a6b52','#000',0.12));   // weathered face
+    bx(0,H2*0.55,cd*0.5+1.4, 3.5+dmgF*12,H2*0.72,1.5, cc);                     // central fissure (grows)
+    bx(-cw*0.2,H2*0.42,cd*0.5+1.4, cw*0.46,2+dmgF*5,1.5, cc);                  // branches
+    bx(cw*0.18,H2*0.66,cd*0.5+1.4, cw*0.4,2+dmgF*4,1.5, cc);
+    if(dmgF>0.45) for(let i=0;i<5;i++){ const a=i*1.5; bx(Math.cos(a)*cw*0.28,H2*0.5+Math.sin(a)*H2*0.28,cd*0.5+1.4, 2.4,2.4,1.5, cc); }   // shatter cracks when battered
+    bx(0,H2+8,0, 4,4,4, '#ffd24a','#ffd24a',0.5+0.4*Math.sin(t*4));            // a faint glint marks it as attackable
   } else if(e.look==='jackal'){
     // lean canine hunter: low slung body, long snout, ears back; rears in the wind-up, lunges on the pounce
     const dk=tint(col,'#000',0.28), lt=tint(col,'#fff',0.12), gait=Math.sin(G.time*11+e.bob)*0.5;
@@ -11516,8 +11554,9 @@ function render(t){
     for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters
-    if(e.dropT>0){ // spawn-in: falling shadow marker
-      drawShadow(e.x,e.z,e.r*(1-e.dropT*0.5),0.2+0.3*(1-e.dropT)); continue; }
+    if(e.dropT>0){ // spawn-in: the enemy is VISIBLE from the instant it spawns, rising up into place (was invisible before — only a shadow)
+      const oy=e.y; e.y=oy - e.dropT*e.h*0.22;
+      drawShadow(e.x,e.z,e.r,0.28+0.25*(1-e.dropT)); drawEnemy3(e,t); e.y=oy; drawHpBar3(e); continue; }
     drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
     if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
       const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;

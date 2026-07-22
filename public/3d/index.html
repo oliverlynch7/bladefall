@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.318.3';
+const VERSION3D='1.318.4';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3457,6 +3457,19 @@ function gapMovers(x0,z0,x1,z1,w,rnd){ const d=Math.abs(x1-x0), n=Math.max(1,Mat
   for(let k=1;k<=n;k++){ const t=k/(n+1), x=x0+(x1-x0)*t, z=z0+(z1-z0)*t, amp=Math.min(46,(d/(n+1))*0.34);
     G.movers.push({x0:x,z,w,d:w*0.8,h:0,amp,sp:1.0+rnd()*0.7,ph:rnd()*6.28,x,px:x}); } }
 // the common wrap: bounds, start/goal/portal, checkpoints, shade, horizon deco, hazard, camera, player.
+// Two HEALING PADS per campaign area — stand on one to slowly recover a bit of HP, so a build with no
+// lifesteal/regen still has a way to top up. Each pad has a limited charge (a lifeline, not a fountain).
+function placeHealPads(o){
+  if(G.trial||G.side||G.boss) return;
+  G.healpads=G.healpads||[];
+  const rooms=(G.rooms||[]).filter(r=>r&&!r.encounter);
+  const pick=(frac)=>{ const tz=o.sz+((o.gz==null?o.sz:o.gz)-o.sz)*frac; let best=null,bd=1e9;
+    for(const r of rooms){ const d=Math.abs(r.z-tz); if(d<bd){ bd=d; best=r; } }
+    let bx2=best?best.x:o.sx, bz2=best?best.z:tz, y=best?(best.y||0):0;
+    try{ const s=highestSurfaceAt(bx2,bz2,22); if(s>-1e7) y=s; }catch(e){}
+    return {x:bx2,z:bz2,y}; };
+  for(const f of [0.33,0.66]){ const q=pick(f); G.healpads.push({x:q.x,z:q.z,y:q.y||0,r:36,charge:1,_acc:0}); }
+}
 function finishScape(ctx,o){
   G.vertical=true;
   dashGate(o);   // required jump+dash gap before the exit (main levels with a breather platform)
@@ -3475,6 +3488,7 @@ function finishScape(ctx,o){
   for(let k=0;k<28;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
     G.deco.push({x:ctx.rnd()<0.5?mnX-150-ctx.rnd()*360:mxX+150+ctx.rnd()*360, z:zz, w:56+ctx.rnd()*140, h:dt*(0.55+ctx.rnd()*0.85), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
   hazSetup(ctx.rnd2);
+  placeHealPads(o);   // two rest pads per campaign area — a lifeline for builds with no lifesteal/regen (skips boss/trial/side)
   G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
@@ -4531,6 +4545,7 @@ function bossFinish(ctx,o){
     for(let i=0;i<24;i++){ const a=i/24*6.283; G.deco.push({x:cxA+Math.cos(a)*rmax*0.97,z:czA+Math.sin(a)*rmax*0.97,y0:0,w:16,h:1.6,d:16,c:rimC}); }   // glowing rune rim
   }
   hazSetup(ctx.rnd2);
+  placeHealPads(o);   // two rest pads per campaign area — a lifeline for builds with no lifesteal/regen (skips boss/trial/side)
   G.p.x=o.sx; G.p.z=o.sz; G.p.y=o.sy||0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=G.p.y; G.camYaw=Math.PI; G.camPitch=0.12;
   document.getElementById('stagetag').textContent=(isPermadeath()?curDiff().icon+' ':'')+(G.areaName||ctx.s.name); questUpdate(); hudUpdate();
@@ -4665,7 +4680,7 @@ function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
-  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
@@ -4893,7 +4908,7 @@ function startBonus(){
 function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
-  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
   G.bonusVisits=(G.bonusVisits||0)+1;
@@ -6202,7 +6217,7 @@ function killEnemy(e,weaponKill){
   // Phase 11: kill crunch — a brief hitstop + a death pop / coin-spray so every kill has weight
   G.slowmo=Math.max(G.slowmo||0, e.boss?0.38:(e.elite?0.10:0.05));
   { const n=e.boss?20:(e.elite?9:6); for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=70+Math.random()*110; G.particles.push({x:e.x,y:e.y+e.h*0.45,z:e.z,vx:Math.cos(a)*sp,vy:130+Math.random()*90,vz:Math.sin(a)*sp,life:0.5,color:'#ffd24a',sz:2.3}); } }
-  if(e.deathpuff){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:132,dmg:e.dmg*0.85,life:0,spd:230,col:'#9fd84a',col2:'#6ea82e'});   // sporeback bursts a poison cloud on death
+  if(e.deathpuff){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:12,maxR:78,dmg:e.dmg*0.85,life:0,spd:175,col:'#9fd84a',col2:'#6ea82e'});   // sporeback bursts a SMALL poison cloud on death (range trimmed from 132 -> 78)
     for(let i=0;i<14;i++){ const a=Math.random()*6.28, sp=40+Math.random()*70; G.particles.push({x:e.x,y:e.y+e.h*0.4,z:e.z,vx:Math.cos(a)*sp,vy:50+Math.random()*40,vz:Math.sin(a)*sp,life:0.7,color:'#9fd84a',sz:2.6}); }
     addText(e.x,e.y+e.h+12,e.z,'SPORE BURST','#9fd84a',true); }
   const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
@@ -7157,6 +7172,15 @@ function update(dt){
   if(p.onGround) for(const mv of G.movers){ if(Math.abs(p.y-mv.h)<3 && Math.abs(p.x-mv.x)<mv.w/2+p.r*0.4 && Math.abs(p.z-mv.z)<mv.d/2+p.r*0.4){ p.x+=mv.x-mv.px; p.y+=mv.h-(mv.py==null?mv.h:mv.py); break; } }
   // jump pads launch you
   if(p.onGround) for(const pd of G.pads){ if(Math.abs(p.y-(pd.y||0))<3 && dXZ(p.x,p.z,pd.x,pd.z)<pd.r+p.r*0.5){ p.vy=880; p.onGround=false; p.jumps=1; SFX.jump(); SFX.dodge(); burst(p.x,4,p.z,'#ffd24a',10); break; } }
+  // HEALING PADS: stand on one to slowly recover HP (a lifeline for no-lifesteal/regen builds). Limited charge per pad.
+  if(G.healpads) for(const hp of G.healpads){ if(hp.charge<=0) continue;
+    if(Math.abs(p.y-(hp.y||0))<30 && dXZ(p.x,p.z,hp.x,hp.z)<hp.r+p.r*0.6){ const mx=effMaxHp(p);
+      if(p.hp<mx){ const budget=mx*0.40, heal=Math.min((budget/1.2)*dt, hp.charge*budget, mx-p.hp);
+        if(heal>0.02){ p.hp+=heal; hp.charge=Math.max(0,hp.charge-heal/budget); hp._acc=(hp._acc||0)+heal;
+          if(hp._acc>=8){ addText(hp.x,(hp.y||0)+36,hp.z,'+'+Math.round(hp._acc),'#8fe8a0'); hp._acc=0; }
+          if(Math.random()<0.5) G.particles.push({x:hp.x+(Math.random()-0.5)*46,y:(hp.y||0)+4,z:hp.z+(Math.random()-0.5)*46,vx:0,vy:56+Math.random()*40,vz:0,life:0.6,color:'#8fe8a0',sz:2.6});
+          if(!hp._sfxT||(G.time-hp._sfxT)>0.45){ hp._sfxT=G.time; try{SFX.pickup&&SFX.pickup();}catch(e){} }
+          hudUpdate(); } } } }
   // checkpoint: last solid ground you stood on (not a moving platform).
   // vertical zones flag key plateaus `checkpoint` so a fall on a tall climb sends you back to the last shelf, not the base.
   if(p.onGround){ if(p.y===0 && onSegment(p.x,p.z,p.r)){ G.lastSafe={x:p.x,z:p.z,y:0}; }
@@ -7833,7 +7857,7 @@ function loadEndlessArena(n){
   // ---- reset scene arrays (mirrors loadStage) ----
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
-  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
@@ -8251,7 +8275,7 @@ function enterWaystation(){
   G=newG(p,{hub:true,zone:0,area:0,zoneTier:1});
   G.stageIndex=0;
   // scene arrays normally come from loadStage — the waystation builds its own room
-  G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.chests=[]; G.deco=[];
+  G.segments=[]; G.walls=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[]; G.rooms=[]; G.doors=[]; G.plates=[];
   G.keys=[]; G.torches=[]; G.dens=[]; G.npc=null; G.hasKey=false; G.bonusPortal=null; G.bonusActive=false; G.portalPos=null; G.haz=null;
   /* ============ THE WAYSTATION, rebuilt (Phase 19): a fortress QUARTER, not a box ============
@@ -9772,6 +9796,13 @@ function drawCourse(s,t){
   for(const pd of G.pads){
     const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
     bx(pd.x,py+2.6,pd.z, pd.r*1.5,1.8,pd.r*1.5,'#ffd24a','#ffd24a',0.65+0.3*Math.sin(t*5));
+  }
+  // healing pads — a soft green rest disc with a pulsing cross; dims once its charge is spent
+  if(G.healpads) for(const hp of G.healpads){ const py=hp.y||0, spent=hp.charge<=0, a=spent?0.16:(0.5+0.35*Math.sin(t*3));
+    bx(hp.x,py+1.2,hp.z, hp.r*2.0,2.0,hp.r*2.0,'#173327');
+    bx(hp.x,py+2.5,hp.z, hp.r*1.4,1.5,hp.r*1.4,'#3fe08a','#3fe08a',a);
+    if(!spent){ const g=0.55+0.35*Math.sin(t*4);
+      bx(hp.x,py+3.8,hp.z, 9,2.4,hp.r*0.85,'#c8ffd8','#7de0a0',g); bx(hp.x,py+3.8,hp.z, hp.r*0.85,2.4,9,'#c8ffd8','#7de0a0',g); }
   }
   // crumbling stepping stones (shake, drop, respawn)
   for(const cr of G.crumbles){
@@ -11377,20 +11408,20 @@ function render(t){
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pitR=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
     const pit=Math.max(-0.5,Math.min(0.9,pitR));   // over-the-shoulder keeps a sane frame even when the stored pitch is extreme
     const hd=180*Math.cos(pit), eh=118+180*Math.sin(pit);
-    PROJ=mPersp(62*Math.PI/180,VW/VH,6,2400);
+    PROJ=mPersp(62*Math.PI/180,VW/VH,18,2400);   // higher near plane = far better depth precision (kills z-fighting flicker)
     VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
     if(G) G.eye={x:cx-fx*hd,y:eh+cyy,z:cz-fz*hd};
     gl.uniform2f(U.uFogNF,300,880);
   } else { // classic high chase overview
-    PROJ=mPersp(50*Math.PI/180,VW/VH,10,2400);
+    PROJ=mPersp(50*Math.PI/180,VW/VH,45,2400);   // the chase cam sits ~430u from the world — a big near plane is safe and greatly improves depth precision (no z-fighting)
     VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
     if(G) G.eye={x:cx,y:296+cyy,z:cz+330};
     gl.uniform2f(U.uFogNF,460,1320);
   }
   if(G && G.hub){   // HUB ONLY: push the far plane + fog way out so you can see cleanly from one edge of the Waystation to the other
     const fov = meta.camMode==='fps'?(meta.fpsFov||92):meta.camMode==='shoulder'?62:50;
-    const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?6:10;
-    PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 7000);
+    const near = meta.camMode==='fps'?3:meta.camMode==='shoulder'?18:45;
+    PROJ = mPersp(fov*Math.PI/180, VW/VH, near, 4600);   // tighter far + bigger near = far better depth precision across the big hub (no z-fighting)
     gl.uniform2f(U.uFogNF, 3000, 6500);
   }
   // Phase 19: G.eye is the TRUE camera position. The old occlusion ray started at G.cam — the

@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.320.0';
+const VERSION3D='1.321.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -936,7 +936,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -5148,6 +5148,36 @@ window.addEventListener('keydown',e=>{
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
 window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });
+// ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
+//    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
+let _padPrev=[], _padSeen=false;
+window.addEventListener('gamepadconnected',()=>{ if(!_padSeen){ _padSeen=true; if(!meta.padOff) toast('🎮 Controller connected — A jump · X attack · B dodge · bumpers/triggers skills · Start pause','#8fd56d'); } });
+function pollGamepad(dt){
+  if(meta.padOff) return;
+  let pads; try{ pads=navigator.getGamepads&&navigator.getGamepads(); }catch(e){ return; }
+  if(!pads) return;
+  let gp=null; for(const g of pads){ if(g&&g.connected&&g.buttons&&g.buttons.length){ gp=g; break; } }
+  if(!gp){ _padPrev=[]; return; }
+  const Bt=gp.buttons, Ax=gp.axes||[];
+  const on=i=>!!(Bt[i]&&Bt[i].pressed), edge=i=>on(i)&&!_padPrev[i];
+  const DZ=0.28, dz=v=>Math.abs(v)<DZ?0:v;
+  if(edge(9)){ if(mode==='play') openPause(); else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); } }   // Start = pause/resume
+  if(mode==='play'){
+    initAudio();
+    let ax=dz(Ax[0]||0), az=dz(Ax[1]||0);
+    if(on(14)) ax-=1; if(on(15)) ax+=1; if(on(12)) az-=1; if(on(13)) az+=1;                 // D-pad
+    input.jx=Math.max(-1,Math.min(1,ax)); input.jz=Math.max(-1,Math.min(1,az));
+    input.attack=on(2);                                                                      // X = attack
+    if(edge(0)&&!input.jump) input.jumpEdge=true; input.jump=on(0);                           // A = jump
+    if(edge(1)&&!input.dodge) input.dodgeEdge=true; input.dodge=on(1);                        // B = dodge
+    if(edge(3)) doInteract();                                                                 // Y = interact
+    if(edge(4)) useSkill(0); if(edge(5)) useSkill(1); if(edge(6)) useSkill(2); if(edge(7)) useSkill(3);   // LB/RB/LT/RT = skills 1-4
+    if(meta.camMode!=='far'){ const rx=dz(Ax[2]||0), ry=dz(Ax[3]||0);                         // right stick = look
+      if(rx) G.camYaw=(G.camYaw==null?Math.PI:G.camYaw)+rx*2.7*dt*(meta.lookSens||1);
+      if(ry) G.camPitch=Math.max(-1.2,Math.min(1.2,(G.camPitch||0)-ry*2.0*dt*(meta.lookSens||1))); }
+  }
+  _padPrev=Bt.map(b=>b.pressed);
+}
 // mouse combat (desktop): left-click = attack (hold to combo), right-click = dodge
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
 window.addEventListener('pointerdown',e=>{
@@ -7103,6 +7133,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arBack').onclick=back||titleScreen;
 }
 function update(dt){
+  pollGamepad(dt);   // controller input (auto-detected; feeds the same input channels as touch/keyboard)
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
@@ -9752,6 +9783,7 @@ function openPause(){
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
+      <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9777,6 +9809,7 @@ function openPause(){
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
+  { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPause(); }; }
   { const _hb=document.getElementById('helpBtn'); if(_hb) _hb.onclick=()=>openHelp(openPause); }
   { const _tt=document.getElementById('tutTogBtn'); if(_tt) _tt.onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPause(); }; }   // re-enabling re-arms every tip
   { const _jb=document.getElementById('jetBtn'); if(_jb) _jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPause(); }; }
@@ -9799,6 +9832,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
+      <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="helpBtn">❔ Help &amp; Tutorials</button>
       <button class="bigbtn ghost" id="tutTogBtn">📖 Tutorials: ${meta.tutOff?'Off':'On'}</button>
       ${jetpackUnlocked()?`<button class="bigbtn ghost" id="jetBtn">🚀 Jetpack: ${meta.jetpack!==false?'On':'Off'}</button>`:''}
@@ -9817,6 +9851,7 @@ function openPauseSettingsV2(){
   document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
+  { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPauseSettingsV2(); }; }
   document.getElementById('helpBtn').onclick=()=>openHelp(openPauseSettingsV2);
   document.getElementById('tutTogBtn').onclick=()=>{ meta.tutOff=!meta.tutOff; if(!meta.tutOff) meta.tutSeen={}; persistGlobal(); openPauseSettingsV2(); };
   const jb=document.getElementById('jetBtn'); if(jb) jb.onclick=()=>{ meta.jetpack=(meta.jetpack===false); persistGlobal(); openPauseSettingsV2(); };

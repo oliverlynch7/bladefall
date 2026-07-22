@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.323.0';
+const VERSION3D='1.324.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8163,7 +8163,7 @@ function openEndlessGate(){
     <h2 class="ovh">The Endless Below</h2>
     <p class="ovsub">Floors without end, each harder than the last. Grind the best XP and gold in the game — until the dark finally outscales you. Death sends you home with everything you earned.</p>
     <div class="statgrid"><div class="vsrow"><span>Your deepest floor</span><b style="color:#ffd24a">${meta.endlessBest?('Floor '+meta.endlessBest):'—'}</b></div></div>
-    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#7a3fb0,#4a2070)"><img class="lebtnicon" src="icons/destinations/abyss.png?v=${VERSION3D}" alt="">Descend</button>
+    <button class="bigbtn" id="descBtn" style="background:linear-gradient(180deg,#1c1230,#0a0614);border:1px solid #6a3fa0;box-shadow:0 0 18px rgba(150,90,225,.4),inset 0 1px rgba(200,150,255,.14);color:#e9dcff"><img class="lebtnicon" src="icons/destinations/abyss.png?v=${VERSION3D}" alt="">Descend</button>
     <button class="bigbtn ghost" id="descBack">Not yet</button></div>`);
   document.getElementById('descBtn').onclick=startEndless;
   document.getElementById('descBack').onclick=wsResume;

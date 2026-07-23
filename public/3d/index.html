@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.325.0';
+const VERSION3D='1.326.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8468,12 +8468,14 @@ function openTitleOptions(){
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Options</p><h2 class="ovh">More</h2>
     <button class="bigbtn ghost" id="skinBtn2">🛡 Skins &amp; Appearance</button>
     <button class="bigbtn ghost" id="achBtn">${eventIcon('event-achievement')} Achievements</button>
+    <button class="bigbtn ghost" id="recBtn">📜 Records</button>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="creditsBtn">♪ Music & Credits</button>
     <button class="bigbtn ghost" id="to2dBtn" style="opacity:.75">Classic 2D BLADEFALL</button>
     <button class="bigbtn ghost" id="backBtn" style="margin-top:12px">Back</button></div>`);
   document.getElementById('skinBtn2').onclick=()=>openSkins(openTitleOptions);
   document.getElementById('achBtn').onclick=()=>openAchievements(openTitleOptions);
+  { const rb=document.getElementById('recBtn'); if(rb) rb.onclick=()=>openRecords(openTitleOptions); }
   bindAudioSettings();
   document.getElementById('creditsBtn').onclick=()=>openCredits(openTitleOptions);
   document.getElementById('to2dBtn').onclick=()=>{ location.href='/2d/'; };
@@ -9616,6 +9618,35 @@ function openSkins(back){
     meta.selectedSkin=id; if(G&&G.p){ G.p.skin=id; recomputeArmor(G.p); if(id==='god') G.p.hp=effMaxHp(G.p); hudUpdate(); } persist(); SFX.pickup(); openSkins(back); });
   document.getElementById('backBtn').onclick=back;
 }
+// A single home for everything the game quietly tracks — personal bests, combat tallies, and journey milestones.
+function openRecords(back){
+  mode='menu'; if(SFX&&SFX.pickup) SFX.pickup();
+  const diffLine=['normal','hardcore','hitless'].map(id=>{ const flag={normal:'beatNormal',hardcore:'beatHardcore',hitless:'beatHitless'}[id]; return meta[flag]?((DIFFS[id]?DIFFS[id].icon+' '+DIFFS[id].name:id)):null; }).filter(Boolean).join(' · ')||'—';
+  const row=(label,val)=>'<div class="vsrow"><span>'+label+'</span><b style="color:#e8dcff">'+val+'</b></div>';
+  const grp=(title,rows)=>'<p class="hint" style="text-align:left;margin:12px 0 4px;color:#c47bff;font-weight:800">'+title+'</p><div class="statgrid">'+rows+'</div>';
+  const n=x=>(x||0).toLocaleString();
+  showOverlayHTML('<div class="card" style="max-width:560px"><p class="ovkicker">Your legend so far</p><h2 class="ovh">📜 Records</h2>'
+    +'<div style="max-height:min(62vh,540px);overflow-y:auto;padding-right:4px">'
+    +grp('Challenges',
+        row('💀 The Gauntlet · Normal', meta.bossRushBest?fmtTime(meta.bossRushBest):'—')
+       +row('💀 The Gauntlet · Brutal', meta.bossRushBestBrutal?fmtTime(meta.bossRushBestBrutal):'—')
+       +row('🕳️ Abyssal Descent · deepest', meta.endlessBest?('Floor '+meta.endlessBest):'—')
+       +row('⚔ Difficulties beaten', diffLine))
+    +grp('Combat',
+        row('Total kills', n(meta.totalKills))
+       +row('Bosses felled', n(meta.bossKills))
+       +row('Elites slain', n(meta.elitesKilled))
+       +row('Abyss King · Awakened', n(meta.kingKills)+' · '+n(meta.tyrantKills))
+       +row('Boss kills · magic / ranged', n(meta.magicBossKills)+' / '+n(meta.rangedBossKills)))
+    +grp('Journey',
+        row('Highest level', n(meta.maxLevel||1))
+       +row('Zones cleared', n(meta.zonesCleared))
+       +row('Secrets found', n(meta.secretsFound)+' / 7')
+       +row('Legendaries found', n(meta.legendaryFound))
+       +row('Flawless areas', n(meta.flawlessStages)))
+    +'</div><button class="bigbtn ghost" id="recBack" style="margin-top:12px">Back</button></div>');
+  document.getElementById('recBack').onclick=back;
+}
 function openAchievements(back){
   mode='menu';
   const rows=ACHIEVEMENTS.map(a=>{ const done=!!meta.achievements[a.id];
@@ -9893,6 +9924,7 @@ function openPause(){
       ${navCard('classesBtn',`icons/class-core.png?v=${VERSION3D}`,'Classes & Skills','Ranks, paths, and skills')}
       ${navCard('skinBtn','icons/skins/skin-knight.png','Skins','Change your look')}
       ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
+        ${navCard('recBtn','icons/event-achievement.png','Records','Bests, kills &amp; milestones')}
     </div>
     <div class="sect">Settings</div>
     <div class="pgrid">
@@ -9942,6 +9974,7 @@ function openPause(){
   document.getElementById('classesBtn').onclick=()=>openClasses(openPause);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPause);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPause);
+  { const _rb=document.getElementById('recBtn'); if(_rb) _rb.onclick=()=>openRecords(openPause); }
   document.getElementById('qmenu').onclick=()=>{ if(IN_ARENA){ resumeGameAudio(false); exitArena(); return; } persist(); resumeGameAudio(false); openHub(); };
 }
 function openPauseSettingsV2(){
@@ -9996,6 +10029,7 @@ function openPauseV2(){
       </div></section>
     <section class="pausegroup pauseutility"><div class="pausegrouplabel">Menu &amp; Navigation</div><div class="navgrid">
         ${navCard('achBtn','icons/event-achievement.png','Achievements','Review your feats')}
+        ${navCard('recBtn','icons/event-achievement.png','Records','Bests, kills &amp; milestones')}
         ${navCard('optBtn','icons/settings.png','Settings','Audio, view, and controls')}
         ${navCard('qmenu','icons/title-leave.png','Quit to Hub','Return to the Waystation')}
         ${navCard('titleBtnP',`icons/title-screen-exit.png?v=${VERSION3D}`,'Title Screen','Save and leave the game')}
@@ -10010,6 +10044,7 @@ function openPauseV2(){
   document.getElementById('classesBtn').onclick=()=>openClasses(openPauseV2);
   document.getElementById('skinBtn').onclick=()=>openSkins(openPauseV2);
   document.getElementById('achBtn').onclick=()=>openAchievements(openPauseV2);
+  { const rb=document.getElementById('recBtn'); if(rb) rb.onclick=()=>openRecords(openPauseV2); }
   document.getElementById('qmenu').onclick=()=>{ persist(); resumeGameAudio(false); openHub(); };
 }
 openPause=openPauseV2;
@@ -12131,7 +12166,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
-  startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate,
+  startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,

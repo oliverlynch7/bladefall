@@ -903,7 +903,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.326.0';
+const VERSION3D='1.327.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1659,6 +1659,9 @@ const ARCHES={
   flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
+  venomedge:{disp:'Venom Edge',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:60,art:'spellblade',el:'poison',chg:'spellsweep'},   // poison spellblade
+  umbrablade:{disp:'Shadow Edge',cls:'melee',sch:'mag',dmg:17,cd:.46,kb:230,range:64,art:'spellblade',el:'void',chg:'spellsweep'},    // void spellblade
+  lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'axe',el:'holy',chg:'spellsweep'},        // the holy AXE — a Paladin's blazing greataxe (Artix-style)
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
   iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:58,cd:.32,kb:430,range:102,art:'sword',el:'holy',anyClass:true,ians:true}, // THE god-sword: highest DPS in the game, radiant execute + Soulfire splash + wielder grace (lifesteal/CDR/speed), full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
@@ -1705,7 +1708,7 @@ const MELEE={
 const CLASSES={
   warrior:{disp:'Warrior',icon:classIcon('warrior'),attackStyle:'warrior',family:['sword','great','axe','hammer'],
     subs:[{id:'berserker',disp:'Berserker',blurb:'+12% damage (rank 10: +20%). Hit harder, always.'},
-          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Bulwark, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
+          {id:'guardian',disp:'Guardian',blurb:'The wall: -15% damage taken (rank 10 -25%), plus a defensive kit — Guard Up, Iron Wave, Last Stand.',skills:[{id:'bulwark',n:'Bulwark',icon:skillIcon('warrior-iron-guard'),cd:8,rank:2,d:'Raise a shield: -60% damage for 3s and pull enemies to you'},{id:'ironwave',n:'Iron Wave',icon:skillIcon('warrior-shield-bash'),cd:14,rank:4,d:'Slam the ground, damaging and DRAGGING nearby enemies to you'},{id:'laststand',n:'Last Stand',icon:skillIcon('warrior-execution'),cd:24,rank:7,d:'For 4s take almost no damage and reflect it back'}]}],
     skills:[
       {id:'cleave',n:'Cleave',icon:skillIcon('cleave'),cd:4,rank:1,d:'Sweeping strike: 2.2x damage in a wide arc'},
       {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
@@ -2695,7 +2698,7 @@ const PERKS={
   swift:{name:'Swiftness',icon:'move-speed',per:0.04,cap:0.10,unit:v=>'+'+Math.round(v*100)+'% Move Speed',base:50,max:10},
   edge:{name:'Keen Edge',icon:'critical-chance',per:0.03,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Crit',base:70,max:10},
   sanguine:{name:'Sanguine',icon:'lifesteal',per:0.01,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Lifesteal',base:75,max:10},
-  bulwark:{name:'Bulwark',icon:'defense',per:0.012,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Defense',base:75,max:10},
+  bulwark:{name:'Toughness',icon:'defense',per:0.012,cap:0.03,unit:v=>'+'+Math.round(v*100)+'% Defense',base:75,max:10},
   evasion:{name:'Evasion',icon:'dodge-cooldown',per:0.02,cap:0.05,unit:v=>'-'+Math.round(v*100)+'% Dodge Cooldown',base:80,max:10},
   focus:{name:'Focus',icon:'skill-cooldown-reduction',per:0.02,cap:0.05,unit:v=>'+'+Math.round(v*100)+'% Skill CDR',base:80,max:10},
   greed:{name:'Greed',icon:'gold-find',per:0.08,cap:0.20,unit:v=>'+'+Math.round(v*100)+'% Gold Find',base:50,max:10}

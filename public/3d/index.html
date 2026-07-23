@@ -81,7 +81,7 @@
   #bSk2{right:calc(env(safe-area-inset-right) + 68px);} #bSk3{right:calc(env(safe-area-inset-right) + 12px);}
   .btn.skl::after{content:attr(data-n);position:absolute;top:2px;left:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
   .btn.skl::before{content:attr(data-m);position:absolute;right:3px;bottom:2px;min-width:17px;padding:1px 3px;border-radius:6px;background:rgba(21,12,55,.9);color:#cbbcff;font-size:7.5px;font-weight:950;line-height:1.25;box-shadow:0 0 5px rgba(126,89,240,.35)}
-  .btn.sklaux,#skillframe{display:none;}  /* desktop-only rail extras (LMB / SPACE slots + the framing plate) */
+  .btn.sklaux,#skillframe,.skilltip{display:none;}  /* desktop-only rail extras (LMB / SPACE slots + the framing plate); .skilltip is a hover tooltip — hidden by default so it never leaks as inline text on touch/mobile, the desktop media query re-enables it on hover */
   .btn.skl.cooling{opacity:1;}
   /* AQW-style radial cooldown: the icon greys out, a dark conic wedge covers the still-charging portion and
      sweeps away (revealing the colour icon) in tempo with the timer, and a 0.1s countdown sits centred. */
@@ -370,6 +370,15 @@
   .ico-skill-warrior-whirlwind{background-image:url('icons/warrior_whirlwind.png');}
   .ico-skill-warrior-iron-guard{background-image:url('icons/warrior_iron_guard.png');}
   .ico-skill-warrior-execution{background-image:url('icons/warrior_execution.png');}
+  .ico-skill-paladin-shield-bash{background-image:url('icons/paladin_shield_bash.png');}
+  .ico-skill-paladin-taunt{background-image:url('icons/paladin_taunt.png');}
+  .ico-skill-paladin-guard-up{background-image:url('icons/paladin_guard_up.png');}
+  .ico-skill-paladin-last-stand{background-image:url('icons/paladin_last_stand.png');}
+  .ico-skill-paladin-smite{background-image:url('icons/paladin_smite.png');}
+  .ico-skill-paladin-holy-ground{background-image:url('icons/paladin_holy_ground.png');}
+  .ico-skill-paladin-light-burst{background-image:url('icons/paladin_light_burst.png');}
+  .ico-skill-paladin-sky-hammer{background-image:url('icons/paladin_sky_hammer.png');}
+  .ico-class-paladin{background-image:url('icons/class-paladin.png');}
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -903,7 +912,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.327.0-autopilot';
+const VERSION3D='1.328.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1737,7 +1746,15 @@ const CLASSES={
       {id:'reap',n:'Reap',icon:skillIcon('reaper-reap'),cd:4,rank:1,d:'A wide 2.4x scythe arc that drains life'},
       {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
       {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
-      {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]}
+      {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]},
+  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','spellblade'],
+    subs:[{id:'guardian',disp:'Guardian',blurb:'The holy wall — survival, shields, and retaliation.'},
+          {id:'templar',disp:'Templar',blurb:'Holy wrath — smites, radiant bursts, and burning light.'}],
+    skills:[
+      {id:'pal_bash',n:'Shield Bash',icon:skillIcon('paladin-shield-bash'),cd:6,rank:1,d:'Drive forward: damage + stun the first foe'},
+      {id:'pal_taunt',n:'Taunt',icon:skillIcon('paladin-taunt'),cd:9,rank:2,d:'Pull nearby foes to you behind a shield'},
+      {id:'pal_guard',n:'Guard Up',icon:skillIcon('paladin-guard-up'),cd:14,rank:4,d:'Raise a holy shield that absorbs damage'},
+      {id:'pal_laststand',n:'Last Stand',icon:skillIcon('paladin-last-stand'),cd:24,rank:7,d:'Stand firm: take almost no damage and heal'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1804,6 +1821,18 @@ const CLASS2={
     r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Lifesteal is 25% stronger while below half HP.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies are slowed by 18%.'}},
     r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:'Drain nearby enemies for 4s, damaging them and restoring health.'},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
     r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Damage',d:'Corruption builds 25% faster and Rupture deals +15% damage.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
+  },
+  paladin:{ disp:'Paladin', icon:classIcon('paladin'),
+    innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
+    cap:{name:'Avatar of Light', d:'Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal.'},
+    r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:5,role:'Holy Damage',fx:'pal_smite',d:'Hurl a bolt of holy light that strikes for heavy damage.'}},
+    r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'Take 12% less damage from every source.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Damage',d:'+12% damage while wielding a holy weapon.'}},
+    r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
+    r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Damage',d:'+10% damage — your light burns everything you strike.'}},
+    r6:{kind:'skill',slot:2, a:{id:'pal_guard',n:'Guard Up',cd:14,role:'Defense',fx:'pal_guard',d:'Raise a holy shield that absorbs up to 50% of your max HP.'}, b:{id:'pal_burst',n:'Light Burst',cd:9,role:'Control',fx:'pal_burst',d:'A radiant burst: damage and slow every nearby foe.'}},
+    r7:{kind:'passive', a:{id:'pal_bounce',n:'Bounce Back',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pal_heal',n:'Healing Light',role:'Sustain',d:'+5% lifesteal on everything you do.'}},
+    r8:{kind:'skill',slot:3, a:{id:'pal_laststand',n:'Last Stand',cd:24,role:'Defense',fx:'pal_laststand',d:'For 4s take almost no damage and heal each second.'}, b:{id:'pal_sky',n:'Sky Hammer',cd:22,role:'Burst',fx:'pal_sky',d:'Call a pillar of light down: heavy damage and knockback all around you.'}},
+    r9:{kind:'passive', a:{id:'pal_will',n:"Guardian's Will",role:'Defense',d:'Take 15% less damage while below half HP.'}, b:{id:'pal_blessed',n:'Blessed Blade',role:'Damage',d:'+15% damage while wielding a holy weapon.'}}
   }
 };
 const PASSIVE_ART={
@@ -1819,11 +1848,14 @@ const PASSIVE_ART={
   m_attunement:'mage-arcane-attunement',m_potent:'mage-potent-weave',m_efficient:'mage-efficient-casting',m_glass:'mage-glass-cannon',m_ward:'mage-arcane-ward',
   m_savant:'mage-elemental-savant',m_temporal:'mage-temporal-focus',m_echo:'mage-spell-echo',m_manafont:'mage-manafont',m_archmage:'mage-archmage',
   x_hunger:'reaper-soul-hunger',x_strength:'reaper-harvested-strength',x_doom:'reaper-lingering-doom',x_armor:'reaper-soul-armor',x_wraithwalk:'reaper-wraithwalk',
-  x_crimson:'reaper-crimson-harvest',x_chill:'reaper-grave-chill',x_corrupt:'reaper-corruption-mastery',x_favor:'reaper-deaths-favor',x_avatar:'reaper-avatar-of-death'
+  x_crimson:'reaper-crimson-harvest',x_chill:'reaper-grave-chill',x_corrupt:'reaper-corruption-mastery',x_favor:'reaper-deaths-favor',x_avatar:'reaper-avatar-of-death',
+  pal_thick:'paladin-thick-armor',pal_second:'paladin-second-wind',pal_bounce:'paladin-bounce-back',pal_will:'paladin-guardians-will',
+  pal_holypow:'paladin-holy-power',pal_burn:'paladin-burning-light',pal_heal:'paladin-healing-light',pal_blessed:'paladin-blessed-blade',
+  pal_holy_warrior:'paladin-holy-warrior',pal_avatar:'paladin-avatar-of-light'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -1835,7 +1867,9 @@ const TRIALS={
   mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
     tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
-    tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']}
+    tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']},
+  paladin:{cls:'paladin',stage:13,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:6,
+    tips:['The Palace tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']}
 };
 const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
 const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
@@ -1904,7 +1938,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -2797,6 +2831,12 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
   if(meta.classId==='warrior'&&c2def('warrior')){ if(!(G&&G._desig))v*=1.08; if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
   if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){ v*=1.08; if(c2Passive('m_glass'))v*=1.15; if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
+  if(meta.classId==='paladin'&&c2def('paladin')){ const holy=!!(p.weapon&&p.weapon.el==='holy');
+    if(holy)v*=1.12;                                          // innate Holy Warrior
+    if(holy&&c2Passive('pal_holypow'))v*=1.12;               // Holy Power
+    if(c2Passive('pal_burn'))v*=1.10;                        // Burning Light
+    if(holy&&c2Passive('pal_blessed'))v*=1.15;              // Blessed Blade
+    if(classState('paladin').rank>=10)v*=1.10; }             // Avatar of Light
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
@@ -2805,6 +2845,7 @@ function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); 
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
+  if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_heal'))v+=.05;   // Healing Light
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
@@ -6028,6 +6069,10 @@ SKILL_FX.w_whirl=function(p,ok,am){ const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p
   for(const e of G.enemies){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<165+e.r&&!losBlocked(p.x,p.z,e.x,e.z)) hitEnemy(e,dmg,p,260,effLifesteal(p),ok?(w&&w.el):null); } SFX.slash(); };
 // Mage v2 skills
 SKILL_FX.m_bolt=SKILL_FX.bolt; SKILL_FX.m_blink=SKILL_FX.blink; SKILL_FX.m_nova=SKILL_FX.nova; SKILL_FX.m_barrier=SKILL_FX.barrier; SKILL_FX.m_tempest=SKILL_FX.tempest;
+// Paladin skills — reuse proven behaviors (holy flavor comes from the weapon element + innate)
+SKILL_FX.pal_bash=SKILL_FX.w_bash; SKILL_FX.pal_smite=SKILL_FX.bolt; SKILL_FX.pal_taunt=SKILL_FX.bulwark; SKILL_FX.pal_ground=SKILL_FX.w_whirl;
+SKILL_FX.pal_guard=SKILL_FX.barrier; SKILL_FX.pal_burst=SKILL_FX.nova; SKILL_FX.pal_sky=SKILL_FX.stomp;
+SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); p.hp=Math.min(effMaxHp(p),p.hp+h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
   G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:14,color:col,shape:'lance',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2*am*(ok?1:OFFCLASS_MUL),kb:100,pierce:99,el:ok?(w&&w.el):null,life:1,hitSet:[]}); skillRing(p.x,p.z,col,col,70); SFX.magic(w&&w.el); };
 SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,680),tx=t?t.x:p.x+Math.sin(p.yaw)*240,tz=t?t.z:p.z+Math.cos(p.yaw)*240,dmg=(w?w.dmg:10)*effPower(p)*1.3*am*(ok?1:OFFCLASS_MUL); skillRing(tx,tz,'#a98cff','#4b2770',190);
@@ -6140,7 +6185,9 @@ const C2_ICON={
   w_cleave:skillIcon('cleave'),w_bash:skillIcon('warrior-shield-bash'),w_charge:skillIcon('charge'),w_whirl:skillIcon('warrior-whirlwind'),w_guard:skillIcon('warrior-iron-guard'),w_stomp:skillIcon('stomp'),w_berserk:skillIcon('berserk'),w_execute:skillIcon('warrior-execution'),
   r_volley:skillIcon('volley'),r_pierce:skillIcon('deadeye'),r_tumble:skillIcon('tumble'),r_shadow:skillIcon('ranger-quickshot'),r_spike:skillIcon('ranger-snare-trap'),r_smoke:skillIcon('ranger-camouflage'),r_mark:skillIcon('hunters-mark'),r_deathmark:skillIcon('ranger-rapid-fire'),
   m_bolt:skillIcon('mage-elemental-bolt'),m_beam:skillIcon('mage-elemental-beam'),m_blink:skillIcon('mage-blink'),m_nova:skillIcon('mage-nova'),m_gravity:skillIcon('mage-gravity-well'),m_barrier:skillIcon('mage-rune-barrier'),m_tempest:skillIcon('mage-arcane-tempest'),m_overload:skillIcon('mage-elemental-overload'),
-  x_reap:skillIcon('reaper-reap'),x_cleave:skillIcon('reaper-soul-cleave'),x_step:skillIcon('reaper-shadow-step'),x_wraith:skillIcon('reaper-wraith-form'),x_pull:skillIcon('reaper-void-pull'),x_bind:skillIcon('reaper-gravebind'),x_siphon:skillIcon('reaper-soul-siphon'),x_vortex:skillIcon('reaper-death-vortex')
+  x_reap:skillIcon('reaper-reap'),x_cleave:skillIcon('reaper-soul-cleave'),x_step:skillIcon('reaper-shadow-step'),x_wraith:skillIcon('reaper-wraith-form'),x_pull:skillIcon('reaper-void-pull'),x_bind:skillIcon('reaper-gravebind'),x_siphon:skillIcon('reaper-soul-siphon'),x_vortex:skillIcon('reaper-death-vortex'),
+  pal_bash:skillIcon('paladin-shield-bash'),pal_taunt:skillIcon('paladin-taunt'),pal_guard:skillIcon('paladin-guard-up'),pal_laststand:skillIcon('paladin-last-stand'),
+  pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
@@ -6231,6 +6278,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   let mod=elemMod(el,e.element);
   if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
+  if(src===G.p&&meta.classId==='paladin'&&c2def('paladin')&&src.weapon&&src.weapon.el==='holy'){ const frac=0.02+(classState('paladin').rank>=10?0.01:0); const h=Math.max(1,Math.round(dmg*frac)); src.hp=Math.min(effMaxHp(src),src.hp+h); }   // Holy Warrior: heal on holy-weapon hits
   if(src===G.p&&meta.classId==='reaper'&&c2Passive('x_favor')&&(e.elite||e.boss)&&(G.time-(src._favorHitT||-9))>=.75){src._favorHitT=G.time;gainMana(src,1,false);}
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
@@ -6464,6 +6512,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
+  if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
@@ -6473,6 +6522,7 @@ function hurtPlayer(dmg,sx,sz,by){
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
   if(by) G.lastHitBy = (typeof by==='string')?{name:by,attack:''}:by;   // remember what just hit us — the death screen names the killer
   if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
+  if(meta.classId==='paladin'&&c2Passive('pal_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
   const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
   p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;

@@ -379,6 +379,7 @@
   .ico-skill-paladin-light-burst{background-image:url('icons/paladin_light_burst.png');}
   .ico-skill-paladin-sky-hammer{background-image:url('icons/paladin_sky_hammer.png');}
   .ico-class-paladin{background-image:url('icons/class-paladin.png');}
+  .ico-class-necromancer{background-image:url('icons/class-mage.png');}   /* placeholder — pending necromancer art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -912,7 +913,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.328.0-autopilot';
+const VERSION3D='1.329.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1754,7 +1755,15 @@ const CLASSES={
       {id:'pal_bash',n:'Shield Bash',icon:skillIcon('paladin-shield-bash'),cd:6,rank:1,d:'Drive forward: damage + stun the first foe'},
       {id:'pal_taunt',n:'Taunt',icon:skillIcon('paladin-taunt'),cd:9,rank:2,d:'Pull nearby foes to you behind a shield'},
       {id:'pal_guard',n:'Guard Up',icon:skillIcon('paladin-guard-up'),cd:14,rank:4,d:'Raise a holy shield that absorbs damage'},
-      {id:'pal_laststand',n:'Last Stand',icon:skillIcon('paladin-last-stand'),cd:24,rank:7,d:'Stand firm: take almost no damage and heal'}]}
+      {id:'pal_laststand',n:'Last Stand',icon:skillIcon('paladin-last-stand'),cd:24,rank:7,d:'Stand firm: take almost no damage and heal'}]},
+  necromancer:{disp:'Necromancer',icon:classIcon('necromancer'),attackStyle:'mage',earned:true,family:['staff','wand','spellblade'],
+    subs:[{id:'summoner',disp:'Summoner',blurb:'Command the dead — more and stronger minions.'},
+          {id:'plague',disp:'Plague',blurb:'Rot and drain — damage over time and life theft.'}],
+    skills:[
+      {id:'necro_summon',n:'Summon Skeletons',icon:skillIcon('reaper-gravebind'),cd:9,rank:1,d:'Raise a pack of skeletons to fight for you'},
+      {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('reaper-void-pull'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
+      {id:'m_barrier',n:'Bone Wall',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
+      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('reaper-death-vortex'),cd:24,rank:7,d:'Call up a whole undead host at once'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1833,6 +1842,18 @@ const CLASS2={
     r7:{kind:'passive', a:{id:'pal_bounce',n:'Bounce Back',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pal_heal',n:'Healing Light',role:'Sustain',d:'+5% lifesteal on everything you do.'}},
     r8:{kind:'skill',slot:3, a:{id:'pal_laststand',n:'Last Stand',cd:24,role:'Defense',fx:'pal_laststand',d:'For 4s take almost no damage and heal each second.'}, b:{id:'pal_sky',n:'Sky Hammer',cd:22,role:'Burst',fx:'pal_sky',d:'Call a pillar of light down: heavy damage and knockback all around you.'}},
     r9:{kind:'passive', a:{id:'pal_will',n:"Guardian's Will",role:'Defense',d:'Take 15% less damage while below half HP.'}, b:{id:'pal_blessed',n:'Blessed Blade',role:'Damage',d:'+15% damage while wielding a holy weapon.'}}
+  },
+  necromancer:{ disp:'Necromancer', icon:classIcon('necromancer'),
+    innate:{name:"Death's Embrace", d:'Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse you can raise.'},
+    cap:{name:'Lich', d:'+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once.'},
+    r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'m_bolt',n:'Plague Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'Hurl a heavy bolt of your weapon element.'}},
+    r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:'Withering',role:'Damage',d:'+10% damage — your magic rots what it touches.'}},
+    r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Turn the nearest fresh corpse into a stronger risen fighter.'}, b:{id:'m_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'m_nova',d:'Detonate a freezing burst that slows nearby enemies.'}},
+    r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:'Each hit your minions land heals you a little.'}, b:{id:'necro_plague',n:'Plague',role:'Damage',d:'+10% damage and your damage-over-time effects last longer.'}},
+    r6:{kind:'skill',slot:2, a:{id:'m_barrier',n:'Bone Wall',cd:14,role:'Defense',fx:'m_barrier',d:'Raise a shield of bone that absorbs up to 35% of your max HP.'}, b:{id:'m_gravity',n:'Death Grip',cd:13,role:'Control',fx:'m_gravity',d:'Implode enemies inward and deal damage.'}},
+    r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:'Take 12% less damage.'}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
+    r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field.'}, b:{id:'m_tempest',n:'Death Storm',cd:22,role:'Group Damage',fx:'m_tempest',d:'A storm of decay rages around you for 4s.'}},
+    r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Damage',d:'+12% damage against enemies near your minions.'}}
   }
 };
 const PASSIVE_ART={
@@ -1851,11 +1872,14 @@ const PASSIVE_ART={
   x_crimson:'reaper-crimson-harvest',x_chill:'reaper-grave-chill',x_corrupt:'reaper-corruption-mastery',x_favor:'reaper-deaths-favor',x_avatar:'reaper-avatar-of-death',
   pal_thick:'paladin-thick-armor',pal_second:'paladin-second-wind',pal_bounce:'paladin-bounce-back',pal_will:'paladin-guardians-will',
   pal_holypow:'paladin-holy-power',pal_burn:'paladin-burning-light',pal_heal:'paladin-healing-light',pal_blessed:'paladin-blessed-blade',
-  pal_holy_warrior:'paladin-holy-warrior',pal_avatar:'paladin-avatar-of-light'
+  pal_holy_warrior:'paladin-holy-warrior',pal_avatar:'paladin-avatar-of-light',
+  necro_legion:'reaper-harvested-strength',necro_wither:'reaper-lingering-doom',necro_bond:'reaper-soul-armor',necro_plague:'reaper-corruption-mastery',
+  necro_undying:'mage-arcane-ward',necro_harvest:'reaper-deaths-favor',necro_master:'reaper-avatar-of-death',necro_pest:'reaper-grave-chill',
+  necro_innate:'reaper-soul-hunger',necro_cap:'reaper-avatar-of-death'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -1869,7 +1893,9 @@ const TRIALS={
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
     tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']},
   paladin:{cls:'paladin',stage:13,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:6,
-    tips:['The Palace tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']}
+    tips:['The Palace tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']},
+  necromancer:{cls:'necromancer',stage:15,seed:506,name:'Trial of the Necromancer',kills:24,earned:true,tier:8,
+    tips:['The dead answer only the worthy.','Survive the host. Fell all 24. Then command death itself.']}
 };
 const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
 const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
@@ -1938,7 +1964,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -2837,6 +2863,9 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if(c2Passive('pal_burn'))v*=1.10;                        // Burning Light
     if(holy&&c2Passive('pal_blessed'))v*=1.15;              // Blessed Blade
     if(classState('paladin').rank>=10)v*=1.10; }             // Avatar of Light
+  if(meta.classId==='necromancer'&&c2def('necromancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Death's Embrace
+    if(c2Passive('necro_wither'))v*=1.10; if(c2Passive('necro_plague'))v*=1.10; if(c2Passive('necro_pest')&&G.minions&&G.minions.length)v*=1.12;
+    if(classState('necromancer').rank>=10)v*=1.12; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
@@ -4743,7 +4772,7 @@ const BOSS_ARENAS={
 };
 function loadStage(i){
   const s=STAGES[i]; G.stageIndex=i;
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
@@ -4972,7 +5001,7 @@ function startBonus(){
 }
 function loadBonus(returnIdx){
   const s=STAGES[G.stageIndex];
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
@@ -6050,6 +6079,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
   if(meta.classId==='ranger' && classState('ranger').rank>=10 && p&&p.clearAim && (G.time-(p._caCdT||-9))>=1){
     p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
+  if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
   if(meta.classId==='reaper'){
     gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
@@ -6187,7 +6217,8 @@ const C2_ICON={
   m_bolt:skillIcon('mage-elemental-bolt'),m_beam:skillIcon('mage-elemental-beam'),m_blink:skillIcon('mage-blink'),m_nova:skillIcon('mage-nova'),m_gravity:skillIcon('mage-gravity-well'),m_barrier:skillIcon('mage-rune-barrier'),m_tempest:skillIcon('mage-arcane-tempest'),m_overload:skillIcon('mage-elemental-overload'),
   x_reap:skillIcon('reaper-reap'),x_cleave:skillIcon('reaper-soul-cleave'),x_step:skillIcon('reaper-shadow-step'),x_wraith:skillIcon('reaper-wraith-form'),x_pull:skillIcon('reaper-void-pull'),x_bind:skillIcon('reaper-gravebind'),x_siphon:skillIcon('reaper-soul-siphon'),x_vortex:skillIcon('reaper-death-vortex'),
   pal_bash:skillIcon('paladin-shield-bash'),pal_taunt:skillIcon('paladin-taunt'),pal_guard:skillIcon('paladin-guard-up'),pal_laststand:skillIcon('paladin-last-stand'),
-  pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer')
+  pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer'),
+  necro_summon:skillIcon('reaper-gravebind'),necro_raise:skillIcon('reaper-void-pull'),necro_army:skillIcon('reaper-death-vortex')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
@@ -6346,6 +6377,7 @@ function killEnemy(e,weaponKill){
     toast('The cracked wall crumbles — the way opens!','#e8d8b0'); return; }
   if(MP.host_()) MP.noteKill(e);   // host records the kill so guests mirror the death + earn instanced rewards
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
+  if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5}); if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
   if(weaponKill) gainMana(G.p,12,true);
   if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p,e);   // class kill riders receive the defeated target for conditional capstones
@@ -6513,6 +6545,7 @@ function hurtPlayer(dmg,sx,sz,by){
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
+  if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
@@ -6593,6 +6626,47 @@ function petAttack(pet,P,e){
   else { pet.x=e.x-Math.sin(pet.yaw)*22; pet.z=e.z-Math.cos(pet.yaw)*22;    // melee dart: hop in and strike
     hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},90,0,null); burst(e.x,e.y+e.h*0.4,e.z,P.accent,5); }
 }
+/* ---- Necromancer minions (isolated ally system; reuses the Grave Wraith pet model to render).
+   Minions home to the nearest enemy and strike via hitEnemy; they expire on a lifespan (permanent
+   ones set life=null via the Lich capstone). They take no enemy damage — they are temporary summons. */
+function spawnMinion(x,z,o){ o=o||{}; if(!G) return; G.minions=G.minions||[];
+  const cap=o.cap||14; if(G.minions.length>=cap) G.minions.shift();
+  const p=G.p, jit=()=>(Math.random()-0.5)*44;
+  G.minions.push({id:'gravewraith',x:x+jit(),y:p?p.y:0,z:z+jit(),yaw:p?p.yaw:0,bob:0,t:Math.random()*3,atkT:0.15+Math.random()*0.3,
+    dmg:o.dmg||8,life:(o.life===null?null:(o.life||12)),ranged:!!o.ranged,hp:1,maxHp:1}); }
+function minionUpdate(dt){
+  if(G.corpses&&G.corpses.length){ for(const c of G.corpses) c.t-=dt; G.corpses=G.corpses.filter(c=>c.t>0); }
+  if(!G.minions||!G.minions.length) return; const p=G.p, playing=(mode==='play'&&!isHitless());
+  const bond=meta.classId==='necromancer'&&c2Passive('necro_bond');
+  for(const m of G.minions){ m.t+=dt; m.bob=Math.sin(m.t*3)*3; if(m.life!=null){ m.life-=dt; if(m.life<=0){ m.dead=true; try{burst(m.x,m.y+12,m.z,'#8be0a0',10);}catch(_){} continue; } }
+    let tgt=null,bd=540;
+    if(playing) for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,m.x,m.z); if(d<bd){bd=d;tgt=e;} }
+    let tx=m.x,tz=m.z;
+    if(tgt){ const want=m.ranged?200:34, d=Math.max(1,dXZ(tgt.x,tgt.z,m.x,m.z)); tx=tgt.x-(tgt.x-m.x)/d*want; tz=tgt.z-(tgt.z-m.z)/d*want; }
+    else { const dh=dXZ(m.x,m.z,p.x,p.z); if(dh>72){ tx=p.x-Math.sin(p.yaw)*48+Math.cos(m.t*0.8)*30; tz=p.z-Math.cos(p.yaw)*48+Math.sin(m.t*0.8)*30; } if(dh>660||Math.abs(m.y-p.y)>140){ m.x=p.x-Math.sin(p.yaw)*50; m.z=p.z-Math.cos(p.yaw)*50; m.y=p.y; } }
+    const dd=Math.hypot(tx-m.x,tz-m.z), spd=tgt?300:180; if(dd>2){ const s=Math.min(dd,spd*dt); m.x+=(tx-m.x)/dd*s; m.z+=(tz-m.z)/dd*s; }
+    m.y+=((p.y+2)-m.y)*Math.min(1,dt*6);
+    const fy=tgt?Math.atan2(tgt.x-m.x,tgt.z-m.z):(dd>6?Math.atan2(tx-m.x,tz-m.z):m.yaw); let dy=fy-m.yaw; while(dy>Math.PI)dy-=6.283; while(dy<-Math.PI)dy+=6.283; m.yaw+=dy*Math.min(1,dt*8);
+    if(playing){ m.atkT-=dt; if(m.atkT<=0 && tgt && dXZ(tgt.x,tgt.z,m.x,m.z)<(m.ranged?232:62)){ m.atkT=m.ranged?1.1:0.8;
+      if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true}); }
+      else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; hitEnemy(tgt,m.dmg,{x:m.x,z:m.z,pet:true},80,0,null); burst(tgt.x,tgt.y+tgt.h*0.4,tgt.z,'#8be0a0',5); }
+      if(bond&&p.hp>0){ const h=Math.max(1,Math.round(effMaxHp(p)*0.006)); p.hp=Math.min(effMaxHp(p),p.hp+h); } } }
+  }
+  G.minions=G.minions.filter(m=>!m.dead);
+}
+// Summon / Raise skill effects
+function necroCap(){ return meta.classId==='necromancer'&&classState('necromancer').rank>=10; }
+function necroMinCap(){ return 14+(c2Passive('necro_master')?6:0)+(necroCap()?6:0); }
+SKILL_FX.necro_summon=function(p,ok,am){ const legion=meta.classId==='necromancer'&&c2Passive('necro_legion'); const master=c2Passive('necro_master');
+  const n=(legion?4:3), dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*(legion?0.85:0.65)*(master?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:12, cap=necroMinCap();
+  for(let i=0;i<n;i++) spawnMinion(p.x-Math.sin(p.yaw)*30,p.z-Math.cos(p.yaw)*30,{dmg,life,ranged:false,cap}); skillRing(p.x,p.z,'#8be0a0','#3f7d55',120); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+70,p.z,'RISE','#8be0a0',true); };
+SKILL_FX.necro_raise=function(p,ok,am){ let best=null,bd=320; if(G.corpses) for(const c of G.corpses){ const d=dXZ(c.x,c.z,p.x,p.z); if(d<bd){bd=d;best=c;} }
+  const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p)*(ok?1:OFFCLASS_MUL);
+  if(best){ G.corpses=G.corpses.filter(c=>c!==best); spawnMinion(best.x,best.z,{dmg:Math.round(base*1.4),life:16,ranged:false}); skillRing(best.x,best.z,'#b28bff','#5a3f8f',110); addText(best.x,best.y+40,best.z,'RAISED','#b28bff',true); }
+  else { for(let i=0;i<2;i++) spawnMinion(p.x,p.z,{dmg:Math.round(base*0.7),life:10}); addText(p.x,p.y+70,p.z,'RAISE','#b28bff',true); }
+  SFX.magic&&SFX.magic('arcane'); };
+SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*0.9*(c2Passive('necro_master')?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
+  for(let i=0;i<6;i++) spawnMinion(p.x,p.z,{dmg,life,ranged:i%2===0,cap}); skillRing(p.x,p.z,'#b28bff','#5a3f8f',200); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+80,p.z,'ARMY OF THE DEAD','#b28bff',true); };
 function drawPet3(pet,t){
   const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');
   const _vl=voxLod(pet.x,pet.z);
@@ -7200,6 +7274,7 @@ function update(dt){
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(G.bossRush) bossRushTick(dt);                                // The Gauntlet: advance to the next boss on kill; win after the last
   if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
+  minionUpdate(dt);                                                                                                        // necromancer summons (no-op when none)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
@@ -8157,7 +8232,7 @@ function loadEndlessArena(n){
   G.endSpawned=0; G.endSpawnT=0.5; G.floorCleared=false;
   meta.endlessBest=Math.max(meta.endlessBest||0,n); persistGlobal();   // deepest floor REACHED is the personal best
   // ---- reset scene arrays (mirrors loadStage) ----
-  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null;
+  G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
@@ -11936,6 +12011,7 @@ function render(t){
   if(MP.active) MP.drawPeers(t);                                // co-op: draw allies in this zone (opt-in; no-op in single-player)
   if(G.arena){ drawArenaProps(t); drawArenaPickups(t); }        // arena master + door, then powerup orbs
   if(G.pet){ drawPet3(G.pet,t); if(G.pet.hp<G.pet.maxHp){ const ps=project(G.pet.x,G.pet.y+38,G.pet.z); if(ps) hpBars.push({x:ps[0],y:ps[1],f:G.pet.hp/G.pet.maxHp,pet:true}); } }
+  if(G.minions&&G.minions.length){ for(const m of G.minions){ try{ drawPet3(m,t); }catch(_){} } }   // necromancer summons (Grave Wraith model)
   updatePetLabel();
   // (the occlusion silhouette is DEAD — it painted the hero red even in the open.
   //  Its job is done properly now by the translucent LATE pass: anything between

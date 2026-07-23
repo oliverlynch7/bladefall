@@ -23,7 +23,13 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
-## Telegram digest (daily summary)
+## Cadence (hourly)
+This runs **every hour, 8am–11pm** — not once a day. So each run does **one** backlog chunk and stays lightweight. **Only make noise when you ship something:**
+- If you committed a real change this run → send the Telegram digest below.
+- If the top backlog item is **blocked** (needs Oliver — e.g. real icon art, a decision in "open decisions"), or the backlog has **nothing actionable**, or you'd only be repeating work → **exit quietly: no commit, no digest, no Telegram.** Silence is correct; do not ping just to say "nothing to do."
+- Never send more than one digest per run. Skip past blocked items to the next actionable one rather than idling on them.
+
+## Telegram digest (only when you shipped)
 ```
 curl -s -X POST https://thework.pages.dev/state -H "Content-Type: application/json" \
   -d '{"action":"tgPing","password":"oliverNCA2026","text":"🤖 BLADEFALL autopilot — <what you built>. Playtest: bladefall-autopilot.bladefall.pages.dev — merge to main when happy."}'
@@ -44,10 +50,22 @@ Every class is a **variant of one of the 3 cores** (Warrior / Mage / Ranger). Ea
 - [x] **Necromancer (Mage variant).** DONE (v1.329) — PLACEHOLDER icons (reused mage/reaper art; needs its own 18-icon ChatGPT pass). Built an isolated `G.minions` ally system (spawnMinion/minionUpdate, renders via the Grave Wraith pet model, homes+attacks via hitEnemy, lifespan-expiry). Summon Skeletons + Raise the Dead (consumes a fresh corpse from `G.corpses`, tracked in killEnemy) + Army of the Dead. Summoner (Bone Legion/Master of Death) vs Plague paths; capstone Lich = permanent minions + higher cap. Trial of the Necromancer at Castle Duskmoor (stage 15). Verified: selectable, mage family, summon/raise/army spawn working minions that hit (combo counter ticked), 180 ticks no errors. (progress: needs real icon art + trial-flow playtest.)
 - [ ] **Ninja (Ranger variant).** Family = `['dagger','knives','sword']`. Fast melee crit-combo + evasion/stealth. Skills: "Shadow Step" (dash + i-frames), a combo/crit skill, a smoke/vanish. Paths: **Shadow** (evasion, stealth burst) vs **Blade Fury** (crit/combo/speed). Unlock trial in the Hollow.
 - [ ] **Holy spellblade variant + affinity icons hook.** Ensure holy magical melee is covered (Lightbringer axe exists; consider a slim holy spellblade too). Make sure `itemStaticAv` has a sane placeholder icon path for the new arches (venomedge/umbrablade/lightbringer) so they don't render blank.
-- [ ] **Chronomancer (Mage variant).** Time control: a slow-field skill, a haste/rewind. Simple names ("Slow Time", "Rewind"). Unlock trial TBD.
-- [ ] **Pirate (Ranger variant).** Cutlass + pistol feel; a gold/loot-luck mechanic. Simple names. Unlock trial TBD.
+- [ ] **Chronomancer (Mage variant).** Time control: a slow-field skill, a haste/rewind. Simple names ("Slow Time", "Rewind"). Unlock trial in Frostfell (frost, stage 7).
+- [ ] **Pirate (Ranger variant).** Cutlass + pistol feel; a gold/loot-luck mechanic. Simple names. Unlock trial in Ruined Keep (ruins, stage 5).
+- [ ] **Secret-zone → class-unlock wiring.** Make each purple secret rift, on first clear, trigger that region's class **trial** (win it → class unlocked permanently, like the Reaper) instead of only dropping loot. Use the tier ladder in Notes. This is the real gate that turns exploration into class unlocks. (Trials already exist per class; this wires discovery→trial→unlock.)
+
+## Class-unlock tier ladder (deeper secret = slightly stronger class)
+Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):
+| Secret zone (region · stage) | Class | Core | Tier |
+|---|---|---|---|
+| Black Woods / Hollow (~1–3) | Ninja | Ranger | 1 |
+| Ruined Keep (ruins · 5) | Pirate | Ranger | 2 |
+| Frostfell (frost · 7) | Chronomancer | Mage | 3 |
+| Abyss Approach (void · 11) | Reaper *(done)* | — | 4 |
+| Sunspire Palace (marble · 13) | Paladin *(done)* | Warrior | 5 |
+| Castle Duskmoor (apex · 15) | Necromancer *(done)* | Mage | 6 (deepest/strongest) |
 
 ## Notes / open decisions (do NOT act on without Oliver)
 - Elemental affixes on **physical** weapon drops (making "a Flaming Sword") is a separate system change — Oliver decides before building.
-- Real icon art (class icons, skill/passive icons) is a supervised ChatGPT-in-Chrome pass — autopilot uses placeholders.
+- Real icon art (class icons, skill/passive icons) is a supervised ChatGPT-in-Chrome pass — autopilot uses placeholders. **Necromancer currently has placeholder icons and needs its own 18-icon pass** — this is BLOCKED on Oliver (needs his ChatGPT tab); do not attempt it autonomously, skip to the next actionable item.
 - No dragons in the game, so **no Dragonslayer class.**

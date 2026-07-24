@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.362.0-autopilot';
+const VERSION3D='1.363.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6732,10 +6732,11 @@ function killEnemy(e,weaponKill){
   if(e.bot && G.duel){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,14); }catch(_){} return; }   // DUEL: death is final — no respawn, no scoring
   if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
     G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++;
-    if(G.arenaTarget && G.arenaScore.p>=G.arenaTarget){ try{ toast('🏆 Round won — '+G.arenaTarget+' KOs! A fresh round begins.'); playFx&&playFx('bossdie'); }catch(_){} G.arenaScore={p:0,b:0}; }
-    else { try{ toast('⚔ Bot defeated — '+G.arenaScore.p+' KO'+(G.arenaScore.p===1?'':'s')); }catch(_){} }
     try{ updateArenaHud(); }catch(_){}
-    const diff=e.botDiff; setTimeout(()=>{ if(G&&G.arena&&IN_ARENA) spawnBot(diff); }, 1800); return; }   // Arena bots respawn, never truly die
+    const left=(G.enemies||[]).filter(x=>x.bot&&!x.dead&&x!==e).length;   // bots do NOT respawn — they stay defeated
+    try{ if(left>0) toast('⚔ Bot defeated — '+G.arenaScore.p+' KO'+(G.arenaScore.p===1?'':'s'));
+      else toast('All bots defeated. Talk to the ⚔️ Arena Master and Apply Loadout for a fresh set.','#7de08a'); }catch(_){}
+    return; }   // stays down until you re-apply the arena loadout (buildArenaRoom respawns the set)
   // CO-OP: a guest never kills on its own — the host is authoritative and drives death via kill events
   // (MP._authKill is set only when the guest is applying a host-sanctioned kill).
   if(MP.active && !MP.isHost && !MP._authKill && !e.dummy && !e.practice) return;

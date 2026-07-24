@@ -379,7 +379,15 @@
   .ico-skill-paladin-light-burst{background-image:url('icons/paladin_light_burst.png');}
   .ico-skill-paladin-sky-hammer{background-image:url('icons/paladin_sky_hammer.png');}
   .ico-class-paladin{background-image:url('icons/class-paladin.png');}
-  .ico-class-necromancer{background-image:url('icons/class-mage.png');}   /* placeholder — pending necromancer art pass */
+  .ico-class-necromancer{background-image:url('icons/class-necromancer.png');}
+  .ico-skill-necro-summon-skeletons{background-image:url('icons/necro_summon_skeletons.png');}
+  .ico-skill-necro-plague-bolt{background-image:url('icons/necro_plague_bolt.png');}
+  .ico-skill-necro-raise-the-dead{background-image:url('icons/necro_raise_the_dead.png');}
+  .ico-skill-necro-corpse-nova{background-image:url('icons/necro_corpse_nova.png');}
+  .ico-skill-necro-bone-wall{background-image:url('icons/necro_bone_wall.png');}
+  .ico-skill-necro-death-grip{background-image:url('icons/necro_death_grip.png');}
+  .ico-skill-necro-army-of-the-dead{background-image:url('icons/necro_army_of_the_dead.png');}
+  .ico-skill-necro-death-storm{background-image:url('icons/necro_death_storm.png');}
   .ico-class-ninja{background-image:url('icons/class-reaper.png');}       /* placeholder — pending ninja art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
@@ -914,7 +922,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.330.0-autopilot';
+const VERSION3D='1.331.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1761,10 +1769,10 @@ const CLASSES={
     subs:[{id:'summoner',disp:'Summoner',blurb:'Command the dead — more and stronger minions.'},
           {id:'plague',disp:'Plague',blurb:'Rot and drain — damage over time and life theft.'}],
     skills:[
-      {id:'necro_summon',n:'Summon Skeletons',icon:skillIcon('reaper-gravebind'),cd:9,rank:1,d:'Raise a pack of skeletons to fight for you'},
-      {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('reaper-void-pull'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
-      {id:'m_barrier',n:'Bone Wall',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
-      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('reaper-death-vortex'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
+      {id:'necro_summon',n:'Summon Skeletons',icon:skillIcon('necro-summon-skeletons'),cd:9,rank:1,d:'Raise a pack of skeletons to fight for you'},
+      {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('necro-raise-the-dead'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
+      {id:'necro_wall',n:'Bone Wall',icon:skillIcon('necro-bone-wall'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
+      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('necro-army-of-the-dead'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
   ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['dagger','sword'],
     subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
           {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
@@ -1855,13 +1863,13 @@ const CLASS2={
   necromancer:{ disp:'Necromancer', icon:classIcon('necromancer'),
     innate:{name:"Death's Embrace", d:'Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse you can raise.'},
     cap:{name:'Lich', d:'+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once.'},
-    r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'m_bolt',n:'Plague Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'Hurl a heavy bolt of your weapon element.'}},
+    r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'necro_bolt',n:'Plague Bolt',cd:5,role:'Focused Damage',fx:'necro_bolt',d:'Hurl a heavy bolt of necrotic plague.'}},
     r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:'Withering',role:'Damage',d:'+10% damage — your magic rots what it touches.'}},
-    r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Turn the nearest fresh corpse into a stronger risen fighter.'}, b:{id:'m_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'m_nova',d:'Detonate a freezing burst that slows nearby enemies.'}},
+    r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Turn the nearest fresh corpse into a stronger risen fighter.'}, b:{id:'necro_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'necro_nova',d:'Detonate a burst of bone shards that slows nearby enemies.'}},
     r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:'Each hit your minions land heals you a little.'}, b:{id:'necro_plague',n:'Plague',role:'Damage',d:'+10% damage and your damage-over-time effects last longer.'}},
-    r6:{kind:'skill',slot:2, a:{id:'m_barrier',n:'Bone Wall',cd:14,role:'Defense',fx:'m_barrier',d:'Raise a shield of bone that absorbs up to 35% of your max HP.'}, b:{id:'m_gravity',n:'Death Grip',cd:13,role:'Control',fx:'m_gravity',d:'Implode enemies inward and deal damage.'}},
+    r6:{kind:'skill',slot:2, a:{id:'necro_wall',n:'Bone Wall',cd:14,role:'Defense',fx:'necro_wall',d:'Raise a shield of bone that absorbs up to 35% of your max HP.'}, b:{id:'necro_grip',n:'Death Grip',cd:13,role:'Control',fx:'necro_grip',d:'A skeletal grip implodes enemies inward and deals damage.'}},
     r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:'Take 12% less damage.'}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
-    r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field.'}, b:{id:'m_tempest',n:'Death Storm',cd:22,role:'Group Damage',fx:'m_tempest',d:'A storm of decay rages around you for 4s.'}},
+    r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field.'}, b:{id:'necro_storm',n:'Death Storm',cd:22,role:'Group Damage',fx:'necro_storm',d:'A storm of decay rages around you for 4s.'}},
     r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Damage',d:'+12% damage against enemies near your minions.'}}
   },
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
@@ -1894,9 +1902,9 @@ const PASSIVE_ART={
   pal_thick:'paladin-thick-armor',pal_second:'paladin-second-wind',pal_bounce:'paladin-bounce-back',pal_will:'paladin-guardians-will',
   pal_holypow:'paladin-holy-power',pal_burn:'paladin-burning-light',pal_heal:'paladin-healing-light',pal_blessed:'paladin-blessed-blade',
   pal_holy_warrior:'paladin-holy-warrior',pal_avatar:'paladin-avatar-of-light',
-  necro_legion:'reaper-harvested-strength',necro_wither:'reaper-lingering-doom',necro_bond:'reaper-soul-armor',necro_plague:'reaper-corruption-mastery',
-  necro_undying:'mage-arcane-ward',necro_harvest:'reaper-deaths-favor',necro_master:'reaper-avatar-of-death',necro_pest:'reaper-grave-chill',
-  necro_innate:'reaper-soul-hunger',necro_cap:'reaper-avatar-of-death',
+  necro_legion:'necro-bone-legion',necro_wither:'necro-withering',necro_bond:'necro-grave-bond',necro_plague:'necro-plague',
+  necro_undying:'necro-undying',necro_harvest:'necro-soul-harvest',necro_master:'necro-master-of-death',necro_pest:'necro-pestilence',
+  necro_innate:'necro-deaths-embrace',necro_cap:'necro-lich',
   nin_swift:'ranger-quickdraw',nin_deadly:'ranger-clear-aim',nin_evasive:'ranger-escape-artist',nin_combo:'ranger-close-quarters',
   nin_ghost:'ranger-ambusher',nin_bleed:'reaper-lingering-doom',nin_shadowform:'reaper-wraithwalk',nin_assassin:'ranger-longshot',
   nin_innate:'ranger-clear-aim',nin_cap:'ranger-perfect-hunt'
@@ -6133,6 +6141,8 @@ SKILL_FX.m_bolt=SKILL_FX.bolt; SKILL_FX.m_blink=SKILL_FX.blink; SKILL_FX.m_nova=
 SKILL_FX.pal_bash=SKILL_FX.w_bash; SKILL_FX.pal_smite=SKILL_FX.bolt; SKILL_FX.pal_taunt=SKILL_FX.bulwark; SKILL_FX.pal_ground=SKILL_FX.w_whirl;
 SKILL_FX.pal_guard=SKILL_FX.barrier; SKILL_FX.pal_burst=SKILL_FX.nova; SKILL_FX.pal_sky=SKILL_FX.stomp;
 SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); p.hp=Math.min(effMaxHp(p),p.hp+h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
+// Necromancer non-summon skills reuse mage FX (necro-flavored icons via C2_ICON)
+SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
   G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:14,color:col,shape:'lance',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2*am*(ok?1:OFFCLASS_MUL),kb:100,pierce:99,el:ok?(w&&w.el):null,life:1,hitSet:[]}); skillRing(p.x,p.z,col,col,70); SFX.magic(w&&w.el); };
 SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,680),tx=t?t.x:p.x+Math.sin(p.yaw)*240,tz=t?t.z:p.z+Math.cos(p.yaw)*240,dmg=(w?w.dmg:10)*effPower(p)*1.3*am*(ok?1:OFFCLASS_MUL); skillRing(tx,tz,'#a98cff','#4b2770',190);
@@ -6248,7 +6258,8 @@ const C2_ICON={
   x_reap:skillIcon('reaper-reap'),x_cleave:skillIcon('reaper-soul-cleave'),x_step:skillIcon('reaper-shadow-step'),x_wraith:skillIcon('reaper-wraith-form'),x_pull:skillIcon('reaper-void-pull'),x_bind:skillIcon('reaper-gravebind'),x_siphon:skillIcon('reaper-soul-siphon'),x_vortex:skillIcon('reaper-death-vortex'),
   pal_bash:skillIcon('paladin-shield-bash'),pal_taunt:skillIcon('paladin-taunt'),pal_guard:skillIcon('paladin-guard-up'),pal_laststand:skillIcon('paladin-last-stand'),
   pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer'),
-  necro_summon:skillIcon('reaper-gravebind'),necro_raise:skillIcon('reaper-void-pull'),necro_army:skillIcon('reaper-death-vortex')
+  necro_summon:skillIcon('necro-summon-skeletons'),necro_raise:skillIcon('necro-raise-the-dead'),necro_army:skillIcon('necro-army-of-the-dead'),
+  necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

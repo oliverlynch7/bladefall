@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.346.0-autopilot';
+const VERSION3D='1.347.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7281,7 +7281,11 @@ function openMPLobby(){
    entry and restored on exit, and persist() is frozen while inside.
    ============================================================================ */
 var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
-const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', fair:false, teams:false, powerups:false };
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false };
+function randomClassId(){ const ks=Object.keys(CLASSES); return ks[Math.floor(Math.random()*ks.length)]; }
+function familyWeaponArche(cid){ const fam=(CLASSES[cid]||CLASSES.warrior).family;
+  const pool=ARCHEIDS.filter(a=>{ const w=ARCHES[a]; return w && fam.includes(w.art) && !(typeof RETIRED_ARCHES!=='undefined'&&RETIRED_ARCHES.includes(a)); });
+  return pool.length?pool[Math.floor(Math.random()*pool.length)]:'sword'; }   // an on-class weapon for a bot
 const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
 const ARENA_MAPS={
   flat:{ name:'Proving Ground', desc:'A clean flat arena — pure skill, no cover.', sky:[0.10,0.11,0.15], ground:'#3b4254',
@@ -7413,11 +7417,14 @@ function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_D
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)
   const hp=Math.max(80,Math.round(base*(D.hpMul!=null?D.hpMul:1))), dmg=Math.max(4,Math.round(base*(D.dmgMul!=null?D.dmgMul:0.05)));
+  const cls=(ARENA_LOADOUT.botClass&&ARENA_LOADOUT.botClass!=='random'&&CLASSES[ARENA_LOADOUT.botClass])?ARENA_LOADOUT.botClass:randomClassId();   // the bot's class
+  const style=(CLASSES[cls]||CLASSES.warrior).attackStyle, ranged=(style==='mage'||style==='ranger');
+  const botWeapon=(()=>{ try{ return makeWeapon(familyWeaponArche(cls),D.rarity); }catch(e){ return {range:60,kb:190}; } })();   // on-class weapon at the difficulty's gear tier
   const b={ bot:true, botDiff:diffKey, type:'bot', kind:'bot', element:null,
     x:sp.x+Math.cos(a)*rad, z:sp.z+Math.sin(a)*rad, y:(sp.y||0), yaw:0, r:14, h:44,
     hp, maxHp:hp, dmg, speed:D.speed, color:D.color, xp:0,
     active:true, dead:false, dropT:0, hitFlash:0, lastHit:-1, mid:null, boss:false,
-    weapon:(()=>{ try{ return makeWeapon(D.weapon,D.rarity); }catch(e){ return {range:60,kb:190}; } })(),
+    weapon:botWeapon, botClassId:cls, style, ranged, shootCd:0.8+Math.random()*1.2,
     vx:0, vz:0, vy:0, onGround:true, runAnim:Math.random()*6, atkTimer:0,
     atkCd:0.6+Math.random(), dodgeCd:1, dodgeTimer:0, invuln:0, reactT:0, strafe:Math.random()<0.5?1:-1, _pendingHit:null,
     skillCd:1+Math.random()*2, dashT:0, _skillHit:false, feintT:0, jumpCd:1+Math.random() };
@@ -7431,9 +7438,20 @@ function nearestArenaGround(x,z){ if(!G) return {x:0,z:0};   // nearest safe sta
 function botRespawn(e){ if(!G) return; e.hp=e.maxHp; e._lavaT=0; e._def=false; const c=G.arenaCombat||{x:0,z:0,y:0};
   const a=Math.random()*6.28, r=50+Math.random()*70; e.x=c.x+Math.cos(a)*r; e.z=c.z+Math.sin(a)*r; e.y=(c.y||0)+22; e.vy=0;
   try{ burst(e.x,e.y+10,e.z,e.color,10); }catch(_){} }   // lava/void death just resets the bot — no player KO credit
+function fireBotShot(e,p,D){ if(!G) return; const w=e.weapon||{}, pr=w.proj||{};
+  const count=(e.style==='mage'&&D&&D.skill>=0.35)?3:1, spread=count>1?0.16:0;
+  const oy=(e.y||0)+26, sp=pr.speed||520, dmg=Math.max(3,Math.round(e.dmg*0.85));
+  const el=w.el||(e.style==='mage'?'arcane':null), col=w.blade||e.color||'#ffd28a';
+  const baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
+  for(let i=0;i<count;i++){ const a=baseYaw+(i-(count-1)/2)*spread;
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' bot',
+      x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
+      gravity:0,size:pr.size||6,color:col,shape:pr.shape||(e.style==='mage'?'orb':'arrow'),glow:el?1:0,dmg,kb:120,pierce:0,el,life:1.5,hitSet:[]}); }
+  try{ e.style==='mage'?(SFX.magic&&SFX.magic(el||'arcane')):(SFX.shoot&&SFX.shoot()); }catch(_){}
+}
 function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
   if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
-  if(e.skillCd>0) e.skillCd-=dt; if(e.dashT>0) e.dashT-=dt; if(e.feintT>0) e.feintT-=dt; if(e.jumpCd>0) e.jumpCd-=dt;
+  if(e.skillCd>0) e.skillCd-=dt; if(e.dashT>0) e.dashT-=dt; if(e.feintT>0) e.feintT-=dt; if(e.jumpCd>0) e.jumpCd-=dt; if(e.shootCd>0) e.shootCd-=dt;
   const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
   e.yaw=Math.atan2(nx,nz);
   const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
@@ -7451,8 +7469,10 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
   // reactive dodge when the player is swinging close
   if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
     e.vx=(-nz*e.strafe)*560; e.vz=(nx*e.strafe)*560; try{ burst(e.x,10,e.z,'#7fd6ff',6); }catch(_){} }
-  // SKILL — a gap-closing dash-strike: lunge in fast, the arriving hit is heavier.
-  if(D.skill>0 && e.skillCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d>reach*1.3 && d<480 && Math.random()<D.skill*dt*3){
+  // RANGED classes fire real shots at you on a cadence (harder = faster); LOS not required for simplicity.
+  if(e.ranged && e.shootCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d<700){ e.shootCd=Math.max(0.6,(D.atkCd||1)*1.1); fireBotShot(e,p,D); }
+  // SKILL — a gap-closing dash-strike (MELEE bots): lunge in fast, the arriving hit is heavier.
+  if(D.skill>0 && !e.ranged && e.skillCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d>reach*1.3 && d<480 && Math.random()<D.skill*dt*3){
     e.skillCd=D.skillCdT; e.dashT=0.16; e.vx=nx*900; e.vz=nz*900; e._skillHit=true; e.atkCd=Math.min(e.atkCd,0.05);
     try{ burst(e.x,e.y+14,e.z,e.color,8); SFX.dodge&&SFX.dodge(); }catch(_){} }
   if(e._skillHit && e.dashT<=0 && d>reach*1.6) e._skillHit=false;   // stale skill charge fizzles if you slipped away
@@ -7467,6 +7487,8 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
     if(seekSafe){ const g=nearestArenaGround(e.x,e.z); const tdx=g.x-e.x, tdz=g.z-e.z, td=Math.max(1,Math.hypot(tdx,tdz)); mvx=tdx/td; mvz=tdz/td;
       if(onLava && e.onGround){ e.vy=560; e.onGround=false; } }   // hop toward the island
     else if(e.feintT>0){ mvx=-nx*1.0; mvz=-nz*1.0; mvx+=(-nz*e.strafe)*0.6; mvz+=(nx*e.strafe)*0.6; }   // bait retreat
+    else if(e.ranged){ const pref=300; if(d<pref-70){ mvx=-nx; mvz=-nz; } else if(d>pref+90){ mvx=nx*0.85; mvz=nz*0.85; }   // KITE: hold optimal range
+      if(Math.random()<0.03) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.9; mvz+=(nx*e.strafe)*0.9; }
     else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
       if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }
     const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1);
@@ -7517,6 +7539,10 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
     <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
       <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
       <div style="flex:2;display:flex;gap:5px">${BOT_DIFFS.map(dk=>`<button class="bigbtn ghost arbd" data-bd="${dk}" style="flex:1;margin:0;padding:7px 3px;font-size:12px;${cfg.botDiff===dk?'border-color:'+BOT_DIFF[dk].color+';color:'+BOT_DIFF[dk].color:''}">${BOT_DIFF[dk].label}</button>`).join('')}</div></div>
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0 3px"><span class="hint" style="margin:0"><b>Bot class</b> · they fight with that class's weapon &amp; skills</span><button class="bigbtn ghost" id="arBotClsRand" style="margin:0;padding:5px 9px;font-size:13px">🎲</button></div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <button class="bigbtn ghost arbotcls" data-botcls="random" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass==='random'?'border-color:#c78cff;color:#c78cff':''}">🎲 Random</button>
+      ${Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arbotcls" data-botcls="${cid}" style="width:auto;flex:1;min-width:78px;margin:0;padding:6px 4px;font-size:12px;${cfg.botClass===cid?'border-color:#e8a33d;color:#e8a33d':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('')}</div>
     ${(MP.active&&MP.isHost)?`<button class="bigbtn ghost" id="arTeams" style="width:100%;margin:8px 0 0;${cfg.teams?'border-color:#7fd6ff;color:#7fd6ff':''}">👥 2v2 Team Mode${cfg.teams?' ✓':''} <span style="opacity:.6;font-size:11px">· friendly fire off</span></button>`:''}
     <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
       <button class="bigbtn ghost" id="arFair" style="flex:1;min-width:120px;margin:0;${cfg.fair?'border-color:#7de08a;color:#7de08a':''}">⚖️ Fair Mode${cfg.fair?' ✓':''}</button>
@@ -7535,11 +7561,13 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
   g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
   g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
-  document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
+  document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
+  document.querySelectorAll('[data-botcls]').forEach(b=>b.onclick=()=>{ cfg.botClass=b.dataset.botcls; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
+  { const rb=g('arBotClsRand'); if(rb) rb.onclick=()=>{ cfg.botClass=randomClassId(); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('🎲 Bots: '+CLASSES[cfg.botClass].disp); openArenaSetup(back); }; }
   { const tb=g('arTeams'); if(tb) tb.onclick=()=>{ cfg.teams=!cfg.teams; try{SFX.pickup();}catch(e){} openArenaSetup(back); }; }
   { const pw=g('arPow'); if(pw) pw.onclick=()=>{ cfg.powerups=!cfg.powerups; try{SFX.pickup();}catch(e){} toast(cfg.powerups?'✨ Powerups ON — health / damage / speed orbs spawn in the arena.':'Powerups off.'); openArenaSetup(back); }; }
   g('arFair').onclick=()=>{ cfg.fair=!cfg.fair; try{SFX.pickup();}catch(e){} toast(cfg.fair?'⚖️ Fair Mode ON — everyone gets a standardized level, gear & stats.':'Fair Mode off — custom loadouts.'); openArenaSetup(back); };
-  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); try{SFX.pickup();}catch(e){} toast('🎲 Randomized loadout!'); openArenaSetup(back); };
+  g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('🎲 Randomized loadout + bots!'); openArenaSetup(back); };
   if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}

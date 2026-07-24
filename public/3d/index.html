@@ -380,6 +380,7 @@
   .ico-skill-paladin-sky-hammer{background-image:url('icons/paladin_sky_hammer.png');}
   .ico-class-paladin{background-image:url('icons/class-paladin.png');}
   .ico-class-necromancer{background-image:url('icons/class-mage.png');}   /* placeholder — pending necromancer art pass */
+  .ico-class-ninja{background-image:url('icons/class-reaper.png');}       /* placeholder — pending ninja art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -913,7 +914,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.329.0-autopilot';
+const VERSION3D='1.330.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1763,7 +1764,15 @@ const CLASSES={
       {id:'necro_summon',n:'Summon Skeletons',icon:skillIcon('reaper-gravebind'),cd:9,rank:1,d:'Raise a pack of skeletons to fight for you'},
       {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('reaper-void-pull'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
       {id:'m_barrier',n:'Bone Wall',icon:skillIcon('mage-rune-barrier'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
-      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('reaper-death-vortex'),cd:24,rank:7,d:'Call up a whole undead host at once'}]}
+      {id:'necro_army',n:'Army of the Dead',icon:skillIcon('reaper-death-vortex'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
+  ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['dagger','sword'],
+    subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
+          {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
+    skills:[
+      {id:'nin_strike',n:'Shadow Strike',icon:skillIcon('ranger-quickshot'),cd:8,rank:1,d:'Blink to a foe and strike hard'},
+      {id:'nin_step',n:'Shadow Step',icon:skillIcon('reaper-shadow-step'),cd:8,rank:2,d:'Dash through shadow, briefly untouchable'},
+      {id:'nin_mark',n:'Death Mark',icon:skillIcon('hunters-mark'),cd:14,rank:4,d:'Mark a target to take extra damage'},
+      {id:'nin_fury',n:'Blade Fury',icon:skillIcon('berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1854,6 +1863,18 @@ const CLASS2={
     r7:{kind:'passive', a:{id:'necro_undying',n:'Undying',role:'Defense',d:'Take 12% less damage.'}, b:{id:'necro_harvest',n:'Soul Harvest',role:'Sustain',d:'Kills restore an extra 8% of your max mana.'}},
     r8:{kind:'skill',slot:3, a:{id:'necro_army',n:'Army of the Dead',cd:24,role:'Minions',fx:'necro_army',d:'Raise a whole undead host at once to overwhelm the field.'}, b:{id:'m_tempest',n:'Death Storm',cd:22,role:'Group Damage',fx:'m_tempest',d:'A storm of decay rages around you for 4s.'}},
     r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Damage',d:'+12% damage against enemies near your minions.'}}
+  },
+  ninja:{ disp:'Ninja', icon:classIcon('ninja'),
+    innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster.'},
+    cap:{name:'Phantom', d:'+12% damage, +10% attack speed, and take 12% less damage.'},
+    r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'r_shadow',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_fan',n:'Fan of Knives',cd:6,role:'Group Damage',fx:'r_volley',d:'Loose a fan of blades across your front.'}},
+    r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:'+10% attack speed.'}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Damage',d:'+12% damage.'}},
+    r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'r_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
+    r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'Take 10% less damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Damage',d:'+10% damage — chain your strikes.'}},
+    r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'r_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_tumble',n:'Tumble',cd:10,role:'Control',fx:'r_tumble',d:'Roll back with a parting strike that snares nearby foes.'}},
+    r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'Take 10% less damage and slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
+    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'w_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'w_whirl',d:'A spinning storm of steel that cuts everything around you.'}},
+    r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
   }
 };
 const PASSIVE_ART={
@@ -1875,11 +1896,14 @@ const PASSIVE_ART={
   pal_holy_warrior:'paladin-holy-warrior',pal_avatar:'paladin-avatar-of-light',
   necro_legion:'reaper-harvested-strength',necro_wither:'reaper-lingering-doom',necro_bond:'reaper-soul-armor',necro_plague:'reaper-corruption-mastery',
   necro_undying:'mage-arcane-ward',necro_harvest:'reaper-deaths-favor',necro_master:'reaper-avatar-of-death',necro_pest:'reaper-grave-chill',
-  necro_innate:'reaper-soul-hunger',necro_cap:'reaper-avatar-of-death'
+  necro_innate:'reaper-soul-hunger',necro_cap:'reaper-avatar-of-death',
+  nin_swift:'ranger-quickdraw',nin_deadly:'ranger-clear-aim',nin_evasive:'ranger-escape-artist',nin_combo:'ranger-close-quarters',
+  nin_ghost:'ranger-ambusher',nin_bleed:'reaper-lingering-doom',nin_shadowform:'reaper-wraithwalk',nin_assassin:'ranger-longshot',
+  nin_innate:'ranger-clear-aim',nin_cap:'ranger-perfect-hunt'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -1895,7 +1919,9 @@ const TRIALS={
   paladin:{cls:'paladin',stage:13,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:6,
     tips:['The Palace tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']},
   necromancer:{cls:'necromancer',stage:15,seed:506,name:'Trial of the Necromancer',kills:24,earned:true,tier:8,
-    tips:['The dead answer only the worthy.','Survive the host. Fell all 24. Then command death itself.']}
+    tips:['The dead answer only the worthy.','Survive the host. Fell all 24. Then command death itself.']},
+  ninja:{cls:'ninja',stage:3,seed:507,name:'Trial of the Ninja',kills:14,earned:true,tier:3,
+    tips:['Speed is the only shield that matters.','Cut down all 14 before they can touch you. Then take the blades.']}
 };
 const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
 const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
@@ -1964,7 +1990,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -2866,11 +2892,15 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='necromancer'&&c2def('necromancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Death's Embrace
     if(c2Passive('necro_wither'))v*=1.10; if(c2Passive('necro_plague'))v*=1.10; if(c2Passive('necro_pest')&&G.minions&&G.minions.length)v*=1.12;
     if(classState('necromancer').rank>=10)v*=1.12; }
+  if(meta.classId==='ninja'&&c2def('ninja')){ const blade=p.weapon&&(p.weapon.art==='dagger'||p.weapon.art==='sword');
+    if(blade)v*=1.08;   // innate Killer Instinct
+    if(c2Passive('nin_deadly'))v*=1.12; if(c2Passive('nin_combo'))v*=1.10; if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
+    if(classState('ninja').rank>=10)v*=1.12; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
@@ -6546,6 +6576,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
+  if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace

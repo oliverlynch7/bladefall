@@ -406,7 +406,15 @@
   .ico-skill-berserker-execute{background-image:url('icons/berserker_execute.png');}
   .ico-skill-berserker-berserk{background-image:url('icons/berserker_berserk.png');}
   .ico-skill-berserker-bloodguard{background-image:url('icons/berserker_bloodguard.png');}
-  .ico-class-pirate{background-image:url('icons/class-ranger.png');}          /* placeholder — pending pirate art pass */
+  .ico-class-pirate{background-image:url('icons/class-pirate.png');}
+  .ico-skill-pirate-aimed-shot{background-image:url('icons/pirate_aimed_shot.png');}
+  .ico-skill-pirate-broadside{background-image:url('icons/pirate_broadside.png');}
+  .ico-skill-pirate-boarding-strike{background-image:url('icons/pirate_boarding_strike.png');}
+  .ico-skill-pirate-roll{background-image:url('icons/pirate_roll.png');}
+  .ico-skill-pirate-powder-smoke{background-image:url('icons/pirate_powder_smoke.png');}
+  .ico-skill-pirate-bounty{background-image:url('icons/pirate_bounty.png');}
+  .ico-skill-pirate-cannonade{background-image:url('icons/pirate_cannonade.png');}
+  .ico-skill-pirate-powder-keg{background-image:url('icons/pirate_powder_keg.png');}
   .ico-class-chronomancer{background-image:url('icons/class-mage.png');}      /* placeholder — pending chronomancer art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
@@ -947,7 +955,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.339.0-autopilot';
+const VERSION3D='1.340.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1819,10 +1827,10 @@ const CLASSES={
   pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['cross','bow','sword','javelin'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
-      {id:'r_pierce',n:'Aimed Shot',icon:skillIcon('deadeye'),cd:5,rank:1,d:'A precise, piercing shot'},
-      {id:'r_volley',n:'Broadside',icon:skillIcon('volley'),cd:8,rank:2,d:'A spread of shots across your front'},
-      {id:'r_smoke',n:'Powder Smoke',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish in smoke and slow foes'},
-      {id:'r_deathmark',n:'Cannonade',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark foes to explode on death'}]},
+      {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},
+      {id:'pir_volley',n:'Broadside',icon:skillIcon('pirate-broadside'),cd:8,rank:2,d:'A spread of shots across your front'},
+      {id:'pir_smoke',n:'Powder Smoke',icon:skillIcon('pirate-powder-smoke'),cd:14,rank:4,d:'Vanish in smoke and slow foes'},
+      {id:'pir_deathmark',n:'Cannonade',icon:skillIcon('pirate-cannonade'),cd:24,rank:7,d:'Mark foes to explode on death'}]},
   chronomancer:{disp:'Chronomancer',icon:classIcon('chronomancer'),attackStyle:'mage',earned:true,family:['staff','wand','spellblade'],
     subs:[{id:'frost',disp:'Frost',blurb:'Slow and freeze — control the field.'},{id:'tempo',disp:'Tempo',blurb:'Haste and burst — bend time to your favor.'}],
     skills:[
@@ -1948,13 +1956,13 @@ const CLASS2={
   pirate:{ disp:'Pirate', icon:classIcon('pirate'),
     innate:{name:'Plunder', d:'Deal +8% damage and find more gold.'},
     cap:{name:'Dread Captain', d:'+12% damage and +10% move speed.'},
-    r2:{kind:'skill',slot:0, a:{id:'r_pierce',n:'Aimed Shot',cd:5,role:'Focused Damage',fx:'r_pierce',d:'A precise 3x shot that pierces.'}, b:{id:'r_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'r_volley',d:'A spread of shots across your front.'}},
+    r2:{kind:'skill',slot:0, a:{id:'pir_pierce',n:'Aimed Shot',cd:5,role:'Focused Damage',fx:'pir_pierce',d:'A precise 3x shot that pierces.'}, b:{id:'pir_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'pir_volley',d:'A spread of shots across your front.'}},
     r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Damage',d:'+12% damage.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Speed',d:'+10% attack speed.'}},
-    r4:{kind:'skill',slot:1, a:{id:'r_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'r_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'r_tumble',n:'Roll',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back with a parting shot and snare.'}},
+    r4:{kind:'skill',slot:1, a:{id:'pir_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'pir_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'pir_tumble',n:'Roll',cd:8,role:'Movement',fx:'pir_tumble',d:'Roll back with a parting shot and snare.'}},
     r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_swagger',n:'Swagger',role:'Speed',d:'+8% move speed.'}},
-    r6:{kind:'skill',slot:2, a:{id:'r_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'r_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'r_mark',n:'Bounty',cd:14,role:'Damage',fx:'r_mark',d:'Mark a target to take extra damage.'}},
+    r6:{kind:'skill',slot:2, a:{id:'pir_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'pir_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'pir_mark',n:'Bounty',cd:14,role:'Damage',fx:'pir_mark',d:'Mark a target to take extra damage.'}},
     r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_luck',n:'Lucky',role:'Damage',d:'+12% damage.'}},
-    r8:{kind:'skill',slot:3, a:{id:'r_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'r_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'r_spike',n:'Powder Keg',cd:18,role:'Control',fx:'r_spike',d:'Drop a trap that damages and snares.'}},
+    r8:{kind:'skill',slot:3, a:{id:'pir_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'pir_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'pir_spike',n:'Powder Keg',cd:18,role:'Control',fx:'pir_spike',d:'Drop a trap that damages and snares.'}},
     r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Damage',d:'+12% damage.'}, b:{id:'pir_greed',n:'Greed',role:'Damage',d:'+10% damage.'}}
   },
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
@@ -1994,7 +2002,7 @@ const PASSIVE_ART={
   nin_ghost:'ninja-ghostwalk',nin_bleed:'ninja-bleeding-edge',nin_shadowform:'ninja-shadow-form',nin_assassin:'ninja-assassinate',
   nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom',
   bsk_heavy:'berserker-heavy-hands',bsk_reckless:'berserker-reckless',bsk_thick:'berserker-thick-hide',bsk_blood:'berserker-bloodthirst',bsk_rage:'berserker-rage',bsk_frenzy:'berserker-frenzy',bsk_tough:'berserker-unbreakable',bsk_brutal:'berserker-brutal',bsk_innate:'berserker-bloodrage',bsk_cap:'berserker-undying-rage',
-  pir_deadly:'ranger-clear-aim',pir_swift:'ranger-quickdraw',pir_tough:'ranger-escape-artist',pir_swagger:'ranger-close-quarters',pir_evasive:'ranger-ambusher',pir_luck:'ranger-bounty-hunter',pir_brutal:'ranger-longshot',pir_greed:'ranger-patient-hunter',pir_innate:'ranger-clear-aim',pir_cap:'ranger-perfect-hunt',
+  pir_deadly:'pirate-dead-aim',pir_swift:'pirate-quick-hands',pir_tough:'pirate-sea-legs',pir_swagger:'pirate-swagger',pir_evasive:'pirate-slippery',pir_luck:'pirate-lucky',pir_brutal:'pirate-cutthroat',pir_greed:'pirate-greed',pir_innate:'pirate-plunder',pir_cap:'pirate-dread-captain',
   chr_potent:'mage-potent-weave',chr_haste:'mage-temporal-focus',chr_ward:'mage-arcane-ward',chr_glass:'mage-glass-cannon',chr_temporal:'mage-temporal-focus',chr_slow:'mage-elemental-savant',chr_echo:'mage-spell-echo',chr_freeze:'mage-elemental-savant',chr_innate:'mage-arcane-attunement',chr_cap:'mage-archmage'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
@@ -6265,6 +6273,8 @@ SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_
 SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL_FX.nin_step=SKILL_FX.x_step; SKILL_FX.nin_smoke=SKILL_FX.r_smoke; SKILL_FX.nin_mark=SKILL_FX.r_mark; SKILL_FX.nin_tumble=SKILL_FX.r_tumble; SKILL_FX.nin_fury=SKILL_FX.w_berserk; SKILL_FX.nin_storm=SKILL_FX.w_whirl;
 // Berserker skills reuse warrior FX (berserker-flavored icons via C2_ICON)
 SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
+// Pirate skills reuse ranger FX (pirate-flavored icons via C2_ICON)
+SKILL_FX.pir_pierce=SKILL_FX.r_pierce; SKILL_FX.pir_volley=SKILL_FX.r_volley; SKILL_FX.pir_shadow=SKILL_FX.r_shadow; SKILL_FX.pir_tumble=SKILL_FX.r_tumble; SKILL_FX.pir_smoke=SKILL_FX.r_smoke; SKILL_FX.pir_mark=SKILL_FX.r_mark; SKILL_FX.pir_deathmark=SKILL_FX.r_deathmark; SKILL_FX.pir_spike=SKILL_FX.r_spike;
 // Throwing-star skills: Piercing Star = single-target/boss (deep pierce), Shuriken Barrage = groups (3 shotgun bursts)
 SKILL_FX.nin_pierce=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,1000); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=1050,oy=p.y+24; let vx=Math.sin(p.yaw)*sp,vz=Math.cos(p.yaw)*sp,vy=0;
@@ -6400,7 +6410,8 @@ const C2_ICON={
   necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm'),
   nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm'),
   nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives'),
-  bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard')
+  bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard'),
+  pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

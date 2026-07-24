@@ -415,7 +415,15 @@
   .ico-skill-pirate-bounty{background-image:url('icons/pirate_bounty.png');}
   .ico-skill-pirate-cannonade{background-image:url('icons/pirate_cannonade.png');}
   .ico-skill-pirate-powder-keg{background-image:url('icons/pirate_powder_keg.png');}
-  .ico-class-chronomancer{background-image:url('icons/class-mage.png');}      /* placeholder — pending chronomancer art pass */
+  .ico-class-chronomancer{background-image:url('icons/class-chronomancer.png');}
+  .ico-skill-chrono-time-bolt{background-image:url('icons/chrono_time_bolt.png');}
+  .ico-skill-chrono-time-lance{background-image:url('icons/chrono_time_lance.png');}
+  .ico-skill-chrono-slow-field{background-image:url('icons/chrono_slow_field.png');}
+  .ico-skill-chrono-rewind{background-image:url('icons/chrono_rewind.png');}
+  .ico-skill-chrono-time-warp{background-image:url('icons/chrono_time_warp.png');}
+  .ico-skill-chrono-aegis{background-image:url('icons/chrono_aegis.png');}
+  .ico-skill-chrono-time-storm{background-image:url('icons/chrono_time_storm.png');}
+  .ico-skill-chrono-singularity{background-image:url('icons/chrono_singularity.png');}
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -955,7 +963,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.340.0-autopilot';
+const VERSION3D='1.341.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1834,10 +1842,10 @@ const CLASSES={
   chronomancer:{disp:'Chronomancer',icon:classIcon('chronomancer'),attackStyle:'mage',earned:true,family:['staff','wand','spellblade'],
     subs:[{id:'frost',disp:'Frost',blurb:'Slow and freeze — control the field.'},{id:'tempo',disp:'Tempo',blurb:'Haste and burst — bend time to your favor.'}],
     skills:[
-      {id:'m_bolt',n:'Time Bolt',icon:skillIcon('mage-elemental-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
-      {id:'m_nova',n:'Slow Field',icon:skillIcon('mage-nova'),cd:8,rank:2,d:'A burst that slows nearby foes'},
-      {id:'m_blink',n:'Rewind',icon:skillIcon('mage-blink'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
-      {id:'m_tempest',n:'Time Storm',icon:skillIcon('mage-arcane-tempest'),cd:24,rank:7,d:'A storm of decaying time around you'}]}
+      {id:'chr_bolt',n:'Time Bolt',icon:skillIcon('chrono-time-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
+      {id:'chr_nova',n:'Slow Field',icon:skillIcon('chrono-slow-field'),cd:8,rank:2,d:'A burst that slows nearby foes'},
+      {id:'chr_blink',n:'Rewind',icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
+      {id:'chr_tempest',n:'Time Storm',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1968,13 +1976,13 @@ const CLASS2={
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
     innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage and your cooldowns recover 5% faster.'},
     cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
-    r2:{kind:'skill',slot:0, a:{id:'m_bolt',n:'Time Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'A heavy bolt of temporal energy.'}, b:{id:'m_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'m_beam',d:'A piercing lance through every foe.'}},
+    r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:5,role:'Focused Damage',fx:'chr_bolt',d:'A heavy bolt of temporal energy.'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
     r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Damage',d:'+12% skill damage.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'+10% cooldown reduction.'}},
-    r4:{kind:'skill',slot:1, a:{id:'m_nova',n:'Slow Field',cd:8,role:'Control',fx:'m_nova',d:'A burst that slows nearby foes.'}, b:{id:'m_blink',n:'Rewind',cd:8,role:'Movement',fx:'m_blink',d:'Blink through time, briefly untouchable.'}},
+    r4:{kind:'skill',slot:1, a:{id:'chr_nova',n:'Slow Field',cd:8,role:'Control',fx:'chr_nova',d:'A burst that slows nearby foes.'}, b:{id:'chr_blink',n:'Rewind',cd:8,role:'Movement',fx:'chr_blink',d:'Blink through time, briefly untouchable.'}},
     r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'Take 12% less damage.'}, b:{id:'chr_glass',n:'Focus',role:'Damage',d:'+12% damage.'}},
-    r6:{kind:'skill',slot:2, a:{id:'m_gravity',n:'Time Warp',cd:13,role:'Control',fx:'m_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'m_barrier',n:'Aegis',cd:14,role:'Defense',fx:'m_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
+    r6:{kind:'skill',slot:2, a:{id:'chr_gravity',n:'Time Warp',cd:13,role:'Control',fx:'chr_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'chr_barrier',n:'Aegis',cd:14,role:'Defense',fx:'chr_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
     r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Cooldowns',d:'+10% cooldown reduction.'}, b:{id:'chr_slow',n:'Entropy',role:'Damage',d:'+10% damage.'}},
-    r8:{kind:'skill',slot:3, a:{id:'m_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'m_tempest',d:'A storm of decaying time around you.'}, b:{id:'m_overload',n:'Singularity',cd:24,role:'Burst',fx:'m_overload',d:'A massive temporal explosion.'}},
+    r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'chr_tempest',d:'A storm of decaying time around you.'}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
     r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Damage',d:'+12% damage.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Damage',d:'+10% damage.'}}
   }
 };
@@ -2003,7 +2011,7 @@ const PASSIVE_ART={
   nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom',
   bsk_heavy:'berserker-heavy-hands',bsk_reckless:'berserker-reckless',bsk_thick:'berserker-thick-hide',bsk_blood:'berserker-bloodthirst',bsk_rage:'berserker-rage',bsk_frenzy:'berserker-frenzy',bsk_tough:'berserker-unbreakable',bsk_brutal:'berserker-brutal',bsk_innate:'berserker-bloodrage',bsk_cap:'berserker-undying-rage',
   pir_deadly:'pirate-dead-aim',pir_swift:'pirate-quick-hands',pir_tough:'pirate-sea-legs',pir_swagger:'pirate-swagger',pir_evasive:'pirate-slippery',pir_luck:'pirate-lucky',pir_brutal:'pirate-cutthroat',pir_greed:'pirate-greed',pir_innate:'pirate-plunder',pir_cap:'pirate-dread-captain',
-  chr_potent:'mage-potent-weave',chr_haste:'mage-temporal-focus',chr_ward:'mage-arcane-ward',chr_glass:'mage-glass-cannon',chr_temporal:'mage-temporal-focus',chr_slow:'mage-elemental-savant',chr_echo:'mage-spell-echo',chr_freeze:'mage-elemental-savant',chr_innate:'mage-arcane-attunement',chr_cap:'mage-archmage'
+  chr_potent:'chrono-potent',chr_haste:'chrono-haste',chr_ward:'chrono-time-ward',chr_glass:'chrono-focus',chr_temporal:'chrono-temporal-flow',chr_slow:'chrono-entropy',chr_echo:'chrono-echo',chr_freeze:'chrono-deep-freeze',chr_innate:'chrono-time-attunement',chr_cap:'chrono-timelord'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
 const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate'};
@@ -6275,6 +6283,8 @@ SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL
 SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
 // Pirate skills reuse ranger FX (pirate-flavored icons via C2_ICON)
 SKILL_FX.pir_pierce=SKILL_FX.r_pierce; SKILL_FX.pir_volley=SKILL_FX.r_volley; SKILL_FX.pir_shadow=SKILL_FX.r_shadow; SKILL_FX.pir_tumble=SKILL_FX.r_tumble; SKILL_FX.pir_smoke=SKILL_FX.r_smoke; SKILL_FX.pir_mark=SKILL_FX.r_mark; SKILL_FX.pir_deathmark=SKILL_FX.r_deathmark; SKILL_FX.pir_spike=SKILL_FX.r_spike;
+// Chronomancer skills reuse mage FX (chrono-flavored icons via C2_ICON)
+SKILL_FX.chr_bolt=SKILL_FX.m_bolt; SKILL_FX.chr_beam=SKILL_FX.m_beam; SKILL_FX.chr_nova=SKILL_FX.m_nova; SKILL_FX.chr_blink=SKILL_FX.m_blink; SKILL_FX.chr_gravity=SKILL_FX.m_gravity; SKILL_FX.chr_barrier=SKILL_FX.m_barrier; SKILL_FX.chr_tempest=SKILL_FX.m_tempest; SKILL_FX.chr_overload=SKILL_FX.m_overload;
 // Throwing-star skills: Piercing Star = single-target/boss (deep pierce), Shuriken Barrage = groups (3 shotgun bursts)
 SKILL_FX.nin_pierce=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,1000); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=1050,oy=p.y+24; let vx=Math.sin(p.yaw)*sp,vz=Math.cos(p.yaw)*sp,vy=0;
@@ -6411,7 +6421,8 @@ const C2_ICON={
   nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm'),
   nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives'),
   bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard'),
-  pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg')
+  pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg'),
+  chr_bolt:skillIcon('chrono-time-bolt'),chr_beam:skillIcon('chrono-time-lance'),chr_nova:skillIcon('chrono-slow-field'),chr_blink:skillIcon('chrono-rewind'),chr_gravity:skillIcon('chrono-time-warp'),chr_barrier:skillIcon('chrono-aegis'),chr_tempest:skillIcon('chrono-time-storm'),chr_overload:skillIcon('chrono-singularity')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

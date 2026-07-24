@@ -622,7 +622,7 @@
   #eschint .ico{width:13px;height:13px;}
   #eschint .eschk{letter-spacing:.05em;}
   @media (pointer:fine){ #eschint:not(.hide){display:flex;} }   /* keyboard hint — desktop only (touch has the button) */
-  #secretsense{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:47%;transform:translateY(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  #secretsense{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:22%;transform:translateY(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;}
   #secretsense img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 8px #b06bff) drop-shadow(0 0 3px #ff4af0);animation:abyssbeat var(--beat,1.2s) ease-in-out infinite;transform-origin:center;}
   #secretsense .ssword{font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#c78cff;text-shadow:0 1px 3px #000;}
   @keyframes abyssbeat{0%,100%{transform:scale(.82)}13%{transform:scale(1.14)}26%{transform:scale(.9)}40%{transform:scale(1.03)}55%{transform:scale(.86)}}
@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.358.0-autopilot';
+const VERSION3D='1.359.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8493,7 +8493,7 @@ let _offerT=0;
 // ==== LOOT PREVIEW CARD — a non-blocking HUD card (left): compare vs equipped, F=equip, Q=sell, wait=bag ====
 const LOOT_CARD_SEC=9;
 function _lootCSS(){ if(document.getElementById('lootcardcss')) return; const st=document.createElement('style'); st.id='lootcardcss';
-  st.textContent='#lootcard{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:50%;transform:translateY(-50%);z-index:8;width:238px;'
+  st.textContent='#lootcard{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:31%;z-index:8;width:238px;'
    +'background:linear-gradient(180deg,rgba(18,21,29,.95),rgba(11,13,18,.95));border:1px solid #2b3040;border-left:4px solid var(--lc,#8b8f9a);border-radius:12px;'
    +'padding:11px 12px 9px;box-shadow:0 8px 26px rgba(0,0,0,.6);pointer-events:none;font-size:12px;color:#e7eaf0;animation:lcin .18s ease}'
    +'@keyframes lcin{from{opacity:0}to{opacity:1}}'

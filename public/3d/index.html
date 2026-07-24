@@ -397,6 +397,9 @@
   .ico-skill-ninja-tumble{background-image:url('icons/ninja_tumble.png');}
   .ico-skill-ninja-blade-fury{background-image:url('icons/ninja_blade_fury.png');}
   .ico-skill-ninja-blade-storm{background-image:url('icons/ninja_blade_storm.png');}
+  .ico-class-berserker{background-image:url('icons/class-warrior.png');}      /* placeholder — pending berserker art pass */
+  .ico-class-pirate{background-image:url('icons/class-ranger.png');}          /* placeholder — pending pirate art pass */
+  .ico-class-chronomancer{background-image:url('icons/class-mage.png');}      /* placeholder — pending chronomancer art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -930,7 +933,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.332.0-autopilot';
+const VERSION3D='1.333.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1788,7 +1791,28 @@ const CLASSES={
       {id:'nin_strike',n:'Shadow Strike',icon:skillIcon('ninja-shadow-strike'),cd:8,rank:1,d:'Blink to a foe and strike hard'},
       {id:'nin_step',n:'Shadow Step',icon:skillIcon('ninja-shadow-step'),cd:8,rank:2,d:'Dash through shadow, briefly untouchable'},
       {id:'nin_mark',n:'Death Mark',icon:skillIcon('ninja-death-mark'),cd:14,rank:4,d:'Mark a target to take extra damage'},
-      {id:'nin_fury',n:'Blade Fury',icon:skillIcon('ninja-blade-fury'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]}
+      {id:'nin_fury',n:'Blade Fury',icon:skillIcon('ninja-blade-fury'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
+  berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer'],
+    subs:[{id:'fury',disp:'Fury',blurb:'Raw damage — hit like a landslide.'},{id:'blood',disp:'Blood',blurb:'Rage and lifesteal — the angrier, the stronger.'}],
+    skills:[
+      {id:'w_cleave',n:'Cleave',icon:skillIcon('cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
+      {id:'w_charge',n:'Charge',icon:skillIcon('charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
+      {id:'w_whirl',n:'Whirlwind',icon:skillIcon('warrior-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
+      {id:'w_berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['cross','bow','sword','javelin'],
+    subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
+    skills:[
+      {id:'r_pierce',n:'Aimed Shot',icon:skillIcon('deadeye'),cd:5,rank:1,d:'A precise, piercing shot'},
+      {id:'r_volley',n:'Broadside',icon:skillIcon('volley'),cd:8,rank:2,d:'A spread of shots across your front'},
+      {id:'r_smoke',n:'Powder Smoke',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish in smoke and slow foes'},
+      {id:'r_deathmark',n:'Cannonade',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark foes to explode on death'}]},
+  chronomancer:{disp:'Chronomancer',icon:classIcon('chronomancer'),attackStyle:'mage',earned:true,family:['staff','wand','spellblade'],
+    subs:[{id:'frost',disp:'Frost',blurb:'Slow and freeze — control the field.'},{id:'tempo',disp:'Tempo',blurb:'Haste and burst — bend time to your favor.'}],
+    skills:[
+      {id:'m_bolt',n:'Time Bolt',icon:skillIcon('mage-elemental-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
+      {id:'m_nova',n:'Slow Field',icon:skillIcon('mage-nova'),cd:8,rank:2,d:'A burst that slows nearby foes'},
+      {id:'m_blink',n:'Rewind',icon:skillIcon('mage-blink'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
+      {id:'m_tempest',n:'Time Storm',icon:skillIcon('mage-arcane-tempest'),cd:24,rank:7,d:'A storm of decaying time around you'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1891,6 +1915,42 @@ const CLASS2={
     r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'Take 10% less damage and slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
     r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
     r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
+  },
+  berserker:{ disp:'Berserker', icon:classIcon('berserker'),
+    innate:{name:'Bloodrage', d:'Deal +8% damage, and +15% more while below half HP.'},
+    cap:{name:'Undying Rage', d:'+12% damage, +10% attack speed, and +8% lifesteal.'},
+    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'w_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'w_bash',n:'Reckless Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage and stun.'}},
+    r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Damage',d:'+12% damage.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Damage',d:'+10% damage.'}},
+    r4:{kind:'skill',slot:1, a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'w_stomp',n:'Shockwave',cd:10,role:'Control',fx:'w_stomp',d:'Slam the ground for damage and heavy knockback.'}},
+    r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Take 12% less damage.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'+5% lifesteal.'}},
+    r6:{kind:'skill',slot:2, a:{id:'w_whirl',n:'Whirlwind',cd:12,role:'Group Damage',fx:'w_whirl',d:'Spin, cutting everything around you for 2.2x.'}, b:{id:'w_execute',n:'Execute',cd:14,role:'Finisher',fx:'w_execute',d:'A brutal strike that finishes low-HP foes.'}},
+    r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Damage',d:'+15% damage while below half HP.'}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:'+10% attack speed.'}},
+    r8:{kind:'skill',slot:3, a:{id:'w_berserk',n:'Berserk',cd:24,role:'Burst',fx:'w_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'w_guard',n:'Bloodguard',cd:14,role:'Defense',fx:'w_guard',d:'Raise a guard: heavy damage reduction and pull foes in.'}},
+    r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'bsk_brutal',n:'Brutal',role:'Damage',d:'+12% damage.'}}
+  },
+  pirate:{ disp:'Pirate', icon:classIcon('pirate'),
+    innate:{name:'Plunder', d:'Deal +8% damage and find more gold.'},
+    cap:{name:'Dread Captain', d:'+12% damage and +10% move speed.'},
+    r2:{kind:'skill',slot:0, a:{id:'r_pierce',n:'Aimed Shot',cd:5,role:'Focused Damage',fx:'r_pierce',d:'A precise 3x shot that pierces.'}, b:{id:'r_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'r_volley',d:'A spread of shots across your front.'}},
+    r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Damage',d:'+12% damage.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Speed',d:'+10% attack speed.'}},
+    r4:{kind:'skill',slot:1, a:{id:'r_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'r_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'r_tumble',n:'Roll',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back with a parting shot and snare.'}},
+    r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_swagger',n:'Swagger',role:'Speed',d:'+8% move speed.'}},
+    r6:{kind:'skill',slot:2, a:{id:'r_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'r_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'r_mark',n:'Bounty',cd:14,role:'Damage',fx:'r_mark',d:'Mark a target to take extra damage.'}},
+    r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_luck',n:'Lucky',role:'Damage',d:'+12% damage.'}},
+    r8:{kind:'skill',slot:3, a:{id:'r_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'r_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'r_spike',n:'Powder Keg',cd:18,role:'Control',fx:'r_spike',d:'Drop a trap that damages and snares.'}},
+    r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Damage',d:'+12% damage.'}, b:{id:'pir_greed',n:'Greed',role:'Damage',d:'+10% damage.'}}
+  },
+  chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
+    innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage and your cooldowns recover 5% faster.'},
+    cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
+    r2:{kind:'skill',slot:0, a:{id:'m_bolt',n:'Time Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'A heavy bolt of temporal energy.'}, b:{id:'m_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'m_beam',d:'A piercing lance through every foe.'}},
+    r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Damage',d:'+12% skill damage.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'+10% cooldown reduction.'}},
+    r4:{kind:'skill',slot:1, a:{id:'m_nova',n:'Slow Field',cd:8,role:'Control',fx:'m_nova',d:'A burst that slows nearby foes.'}, b:{id:'m_blink',n:'Rewind',cd:8,role:'Movement',fx:'m_blink',d:'Blink through time, briefly untouchable.'}},
+    r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'Take 12% less damage.'}, b:{id:'chr_glass',n:'Focus',role:'Damage',d:'+12% damage.'}},
+    r6:{kind:'skill',slot:2, a:{id:'m_gravity',n:'Time Warp',cd:13,role:'Control',fx:'m_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'m_barrier',n:'Aegis',cd:14,role:'Defense',fx:'m_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
+    r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Cooldowns',d:'+10% cooldown reduction.'}, b:{id:'chr_slow',n:'Entropy',role:'Damage',d:'+10% damage.'}},
+    r8:{kind:'skill',slot:3, a:{id:'m_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'m_tempest',d:'A storm of decaying time around you.'}, b:{id:'m_overload',n:'Singularity',cd:24,role:'Burst',fx:'m_overload',d:'A massive temporal explosion.'}},
+    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Damage',d:'+12% damage.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Damage',d:'+10% damage.'}}
   }
 };
 const PASSIVE_ART={
@@ -1915,11 +1975,14 @@ const PASSIVE_ART={
   necro_innate:'necro-deaths-embrace',necro_cap:'necro-lich',
   nin_swift:'ninja-swift',nin_deadly:'ninja-deadly-precision',nin_evasive:'ninja-evasion',nin_combo:'ninja-combo-edge',
   nin_ghost:'ninja-ghostwalk',nin_bleed:'ninja-bleeding-edge',nin_shadowform:'ninja-shadow-form',nin_assassin:'ninja-assassinate',
-  nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom'
+  nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom',
+  bsk_heavy:'warrior-heavy-hand',bsk_reckless:'warrior-battle-ready',bsk_thick:'warrior-unyielding',bsk_blood:'warrior-bloodlust',bsk_rage:'warrior-berserker',bsk_frenzy:'warrior-swift-steel',bsk_tough:'warrior-tactical-guard',bsk_brutal:'warrior-weapon-master',bsk_innate:'warrior-battle-ready',bsk_cap:'warrior-unbroken-champion',
+  pir_deadly:'ranger-clear-aim',pir_swift:'ranger-quickdraw',pir_tough:'ranger-escape-artist',pir_swagger:'ranger-close-quarters',pir_evasive:'ranger-ambusher',pir_luck:'ranger-bounty-hunter',pir_brutal:'ranger-longshot',pir_greed:'ranger-patient-hunter',pir_innate:'ranger-clear-aim',pir_cap:'ranger-perfect-hunt',
+  chr_potent:'mage-potent-weave',chr_haste:'mage-temporal-focus',chr_ward:'mage-arcane-ward',chr_glass:'mage-glass-cannon',chr_temporal:'mage-temporal-focus',chr_slow:'mage-elemental-savant',chr_echo:'mage-spell-echo',chr_freeze:'mage-elemental-savant',chr_innate:'mage-arcane-attunement',chr_cap:'mage-archmage'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -1932,12 +1995,18 @@ const TRIALS={
     tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
   reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
     tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']},
-  paladin:{cls:'paladin',stage:13,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:6,
-    tips:['The Palace tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']},
-  necromancer:{cls:'necromancer',stage:15,seed:506,name:'Trial of the Necromancer',kills:24,earned:true,tier:8,
+  paladin:{cls:'paladin',stage:9,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:5,
+    tips:['The fire tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']},
+  necromancer:{cls:'necromancer',stage:13,seed:506,name:'Trial of the Necromancer',kills:24,earned:true,tier:7,
     tips:['The dead answer only the worthy.','Survive the host. Fell all 24. Then command death itself.']},
-  ninja:{cls:'ninja',stage:3,seed:507,name:'Trial of the Ninja',kills:14,earned:true,tier:3,
-    tips:['Speed is the only shield that matters.','Cut down all 14 before they can touch you. Then take the blades.']}
+  ninja:{cls:'ninja',stage:3,seed:507,name:'Trial of the Ninja',kills:14,earned:true,tier:2,
+    tips:['Speed is the only shield that matters.','Cut down all 14 before they can touch you. Then take the blades.']},
+  berserker:{cls:'berserker',stage:1,seed:508,name:'Trial of the Berserker',kills:10,earned:true,tier:1,
+    tips:['Rage is a weapon. Learn to aim it.','Cut down all 10. The angrier you get, the harder you hit.']},
+  pirate:{cls:'pirate',stage:5,seed:509,name:'Trial of the Pirate',kills:14,earned:true,tier:3,
+    tips:['No rules down here. Only plunder.','Gun down all 14 and the loot is yours.']},
+  chronomancer:{cls:'chronomancer',stage:7,seed:510,name:'Trial of the Chronomancer',kills:16,earned:true,tier:4,
+    tips:['Time favors the patient — and the fast.','Freeze and fell all 16. Then bend time itself.']}
 };
 const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
 const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
@@ -2006,7 +2075,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['bow','Old Musket'],chronomancer:['firestaff','Cracked Hourglass']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -2195,27 +2264,27 @@ const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
     areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
-    side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,blurb:'Something older than the road grows in here.'},
+    side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
     areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'dustjackal',n:18,d:'Cull 18 Dust Jackals'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
-    side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,blurb:'The canyon floor gave way a long time ago.'},
+    side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,trial:'ninja',blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
-    side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,blurb:'A hole they threw people into and forgot.'},
+    side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,trial:'pirate',blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Fallen',mus:'boss_warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
     areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:12,d:'Crack 12 Frost-Shells'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
-    side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,blurb:'Frozen solid, and full of what the ice kept.'},
+    side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,trial:'chronomancer',blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
     areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:16,d:'Snuff 16 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
-    side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,blurb:'Straight down, into the heat that makes the mountain.'},
+    side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,trial:'paladin',blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
   {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
     areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'blinkstalker',n:16,d:'Hunt down 16 Blink-Stalkers'}]},
@@ -2225,7 +2294,7 @@ const ZONES=[
   {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:null,mus:'keep',blurb:'White marble the long war never reached.',
     areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:12,d:'Shatter 12 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
            {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
-    side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,blurb:'What a palace hides, it hides deep.'},
+    side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,trial:'necromancer',blurb:'What a palace hides, it hides deep.'},
     boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
   {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
     areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
@@ -2912,21 +2981,31 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if(blade)v*=1.08;   // innate Killer Instinct
     if(c2Passive('nin_deadly'))v*=1.12; if(c2Passive('nin_combo'))v*=1.10; if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
     if(classState('ninja').rank>=10)v*=1.12; }
+  if(meta.classId==='berserker'&&c2def('berserker')){ const low=p.hp<effMaxHp(p)*.5; v*=1.08; if(low)v*=1.15;   // innate Bloodrage
+    if(c2Passive('bsk_heavy'))v*=1.12; if(c2Passive('bsk_reckless'))v*=1.10; if(c2Passive('bsk_brutal'))v*=1.12; if(c2Passive('bsk_rage')&&low)v*=1.15;
+    if(classState('berserker').rank>=10)v*=1.12; }
+  if(meta.classId==='pirate'&&c2def('pirate')){ v*=1.08;
+    if(c2Passive('pir_deadly'))v*=1.12; if(c2Passive('pir_luck'))v*=1.12; if(c2Passive('pir_brutal'))v*=1.12; if(c2Passive('pir_greed'))v*=1.10;
+    if(classState('pirate').rank>=10)v*=1.12; }
+  if(meta.classId==='chronomancer'&&c2def('chronomancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;
+    if(c2Passive('chr_potent'))v*=1.12; if(c2Passive('chr_glass'))v*=1.12; if(c2Passive('chr_slow'))v*=1.10; if(c2Passive('chr_echo'))v*=1.12; if(c2Passive('chr_freeze'))v*=1.10;
+    if(classState('chronomancer').rank>=10)v*=1.12; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
   if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_heal'))v+=.05;   // Healing Light
+  if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_blood'))v+=.05;if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge; if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
-function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} return Math.min(0.5,v); }
+function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} if(meta.classId==='chronomancer'&&c2def('chronomancer')){v+=.05;if(c2Passive('chr_haste'))v+=.10;if(c2Passive('chr_temporal'))v+=.10;if(classState('chronomancer').rank>=10)v+=.10;} return Math.min(0.5,v); }
 function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }
@@ -6599,6 +6678,9 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
+  if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_thick'))dmg*=.88;if(c2Passive('bsk_tough')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
+  if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_tough'))dmg*=.90;if(c2Passive('pir_evasive'))dmg*=.90;}
+  if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace

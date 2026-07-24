@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.356.0-autopilot';
+const VERSION3D='1.357.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4672,7 +4672,9 @@ const EXPANDED_SCAPES={
       // Caldera crossing: basalt pillars rise above a broad recovery shelf; eruptions remain visible through geyser tells.
       climbRun(-160,-2700,180,450,-3200,280,72);for(let k=0;k<11;k++){const a=k/11*6.28,rr=250+(k%3)*70;vcol(450+Math.cos(a)*rr,-3200+Math.sin(a)*rr,70,70,180+(k%4)*34);G.geysers.push({x:450+Math.cos(a)*rr,z:-3200+Math.sin(a)*rr,r:22,period:2.8+(k%3)*.4,phase:rnd()*6.28});}
       climbRun(450,-3200,280,0,-4300,280,84,{mantle:true});vplat(0,-4300,280,1100,860,{checkpoint:true,terrace:true,breather:true});for(let k=0;k<12;k++)G.deco.push({x:-420+k*76,z:-4420,y0:280,w:38,h:100+(k%3)*35,d:38,c:k%2?IRON:LAVA});
-      for(const p of [[0,-150,mine],[420,-1580,slag],[-400,-2380,city]]){mkMonster('magmaskit',p[0]-65,p[1],p[2]);mkMonster('emberling',p[0]+65,p[1],p[2]);}mkMonster('emberling',-340,-2450,city);scapeKill(ctx,[{x:0,z:-150,room:mine},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city}]);scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
+      for(const p of [[0,-150,mine],[420,-1580,slag],[-400,-2380,city]]){mkMonster('magmaskit',p[0]-65,p[1],p[2]);mkMonster('emberling',p[0]+65,p[1],p[2]);}mkMonster('emberling',-340,-2450,city);scapeKill(ctx,[{x:0,z:-150,room:mine},{x:420,z:-1580,room:slag},{x:-400,z:-2380,room:city}]);
+      scapeSecret(ctx,720,-3320,280);   // the Magma Core rift — hidden on the Caldera Rim's east ledge (was MISSING, so the Abyssal Heart never warmed in Ember); the rim's lore already says the Core hides behind it
+      scapeFind(ctx,0,-4400,280);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4520,decoCol:ROCK,decoTheme:'volcano',decoTall:430});
     }else{const ventsR=room('Cinder Vents',0,0,860,660),cart=room('Minecart Gallery',-500,-820,720,650),refine=room('Suspended Refinery',420,-1560,780,700,140),channels=room('Cooling Channels',-420,-2360,760,680),forge=room('Forge-Routing Hall',450,-3100,820,720,220),altar=room('Ash Altar',0,-4180,980,760,220);
       road(ventsR,cart,150);for(let k=0;k<12;k++){const t=k/11;vplat(-500+920*t,-900-650*t,20+120*t,88,72,{rail:true});if(k%3===0)G.movers.push({x0:-500+920*t,z:-900-650*t,w:96,d:76,h:20+120*t,amp:36,sp:1+rnd()*.4,ph:rnd()*6.28,x:0,px:0});}
       vplat(420,-1560,140,780,700,{checkpoint:true,terrace:true});climbRun(120,-1900,140,-420,-2360,0,74);road(channels,forge,135);for(let k=0;k<10;k++){const x=-620+k*130,z=-2460-(k%2)*150;G.deco.push({x,z,y0:0,w:100,h:3,d:90,c:'#31545b'});}

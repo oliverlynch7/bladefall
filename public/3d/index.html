@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.351.0-autopilot';
+const VERSION3D='1.352.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1734,6 +1734,7 @@ const ARCHES={
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
+  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:6,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; ONLY on-class for the Monk (terrible for everyone else). Never drops as loot.
   flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
@@ -1756,7 +1757,7 @@ const ARCHES={
 const ARCHEIDS=Object.keys(ARCHES);
 // retired/removed archetypes never enter active generation: voidscythe + iansblade are shop-only; saber + dagger
 // were merged away (saber->sword, daggers->throwing knives) and survive only as save-migration aliases.
-const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger'];
+const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger','fist'];   // 'fist' is Monk-only, granted not dropped
 const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
@@ -1860,7 +1861,15 @@ const CLASSES={
       {id:'chr_bolt',n:'Time Bolt',icon:skillIcon('chrono-time-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
       {id:'chr_nova',n:'Slow Field',icon:skillIcon('chrono-slow-field'),cd:8,rank:2,d:'A burst that slows nearby foes'},
       {id:'chr_blink',n:'Rewind',icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
-      {id:'chr_tempest',n:'Time Storm',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]}
+      {id:'chr_tempest',n:'Time Storm',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]},
+  monk:{disp:'Monk',icon:'🥋',attackStyle:'warrior',earned:true,shopUnlock:true,charter:9000,family:['fist'],
+    subs:[{id:'way',disp:'Way of the Fist',blurb:'Flurry and Focus — relentless offense.'},
+          {id:'flow',disp:'Way of Flow',blurb:'Parry and evade — turn their blows against them.'}],
+    skills:[
+      {id:'mon_flurry',n:'Flurry',icon:'👊',cd:2,rank:1,d:'A rapid barrage of strikes'},
+      {id:'mon_deflect',n:'Deflect',icon:'🛡️',cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
+      {id:'mon_whirl',n:'Whirl Kick',icon:'🌀',cd:12,rank:4,d:'Spin, striking everything around you'},
+      {id:'mon_thousand',n:'Thousand Fists',icon:'✨',cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1999,6 +2008,18 @@ const CLASS2={
     r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Cooldowns',d:'+10% cooldown reduction.'}, b:{id:'chr_slow',n:'Entropy',role:'Damage',d:'+10% damage.'}},
     r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'chr_tempest',d:'A storm of decaying time around you.'}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
     r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Damage',d:'+12% damage.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Damage',d:'+10% damage.'}}
+  },
+  monk:{ disp:'Monk', icon:'🥋',
+    innate:{name:'Focus', d:'Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking.'},
+    cap:{name:'Grandmaster', d:'+12% damage, +10% attack speed, and your Focus stacks hit harder and linger longer.'},
+    r2:{kind:'skill',slot:0, a:{id:'mon_flurry',n:'Flurry',cd:2,am:0.42,role:'Rapid · Focused',fx:'mon_flurry',d:'A blur of rapid strikes (~2s, softer each) — builds Focus fast.'}, b:{id:'mon_palm',n:'Palm Strike',cd:6,role:'Burst',fx:'mon_palm',d:'Dash in with a heavy palm that staggers the first foe.'}},
+    r3:{kind:'passive', a:{id:'mon_iron',n:'Iron Body',role:'Defense',d:'Take 12% less damage — your discipline is armor.'}, b:{id:'mon_fire',n:'Inner Fire',role:'Damage',d:'+12% damage.'}},
+    r4:{kind:'skill',slot:1, a:{id:'mon_deflect',n:'Deflect',cd:10,role:'Defense',fx:'mon_deflect',d:'A parry stance: for a moment take almost nothing and throw blows straight back.'}, b:{id:'mon_roll',n:'Roll',cd:8,role:'Movement',fx:'mon_roll',d:'Roll aside with brief i-frames and a parting strike.'}},
+    r5:{kind:'passive', a:{id:'mon_flow',n:'Flow',role:'Speed',d:'+10% attack speed — never break rhythm.'}, b:{id:'mon_focused',n:'Focused Mind',role:'Damage',d:'Focus stacks build faster and your Focus damage is stronger.'}},
+    r6:{kind:'skill',slot:2, a:{id:'mon_whirl',n:'Whirl Kick',cd:12,role:'Group Damage',fx:'mon_whirl',d:'A spinning kick that strikes everything around you.'}, b:{id:'mon_stun',n:'Stunning Palm',cd:12,role:'Control',fx:'mon_stun',d:'A shockwave palm that dazes and slows nearby foes.'}},
+    r7:{kind:'passive', a:{id:'mon_med',n:'Meditation',role:'Sustain',d:'Slowly heal while you fight — a calm center.'}, b:{id:'mon_killer',n:'Killer Focus',role:'Damage',d:'+12% damage.'}},
+    r8:{kind:'skill',slot:3, a:{id:'mon_thousand',n:'Thousand Fists',cd:24,role:'Burst',fx:'mon_thousand',d:'A blinding assault: +35% damage and attack speed for 6s.'}, b:{id:'mon_dragon',n:'Dragon Kick',cd:20,role:'Finisher',fx:'mon_dragon',d:'A soaring kick that erupts on impact, blasting everything around.'}},
+    r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'mon_master',n:'Master Striker',role:'Damage',d:'+12% damage.'}}
   }
 };
 const PASSIVE_ART={
@@ -2066,7 +2087,7 @@ function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
   if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // legacy pre-v2 save: one-time reset (keeps rank 1)
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
-function classFamilyOk(w){ return !w || w.anyClass || curClass().family.includes(w.art); }
+function classFamilyOk(w){ if(w&&w.art==='fist') return meta.classId==='monk'; return !w || w.anyClass || curClass().family.includes(w.art); }   // fists: on-class (full power) ONLY for the Monk
 function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
 function abilityMul(){ return 1; }   // legacy sorcerer hook retired — skill-damage bonuses now come from v2 passives (m_potent, etc.)
@@ -2123,7 +2144,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['bow','Old Musket'],chronomancer:['firestaff','Cracked Hourglass']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['bow','Old Musket'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -3027,6 +3048,7 @@ function recomputeArmor(p){
    Embrace, Time loops). Martials (Warrior/Berserker/Ninja/Pirate/Ranger) get SMALL, fast-refilling
    pools + cheap skills — skills are utility, they live on basic attacks, no magical sustain. */
 const CLASS_MANA={
+  monk:       {pool:0.80, regen:1.25, cost:0.80},   // martial: small pool, cheap skills, fast recovery
   warrior:    {pool:0.75, regen:1.15, cost:0.85},
   ranger:     {pool:0.90, regen:1.10, cost:0.95},
   mage:       {pool:1.30, regen:0.85, cost:1.20},
@@ -3068,6 +3090,12 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if(c2Passive('nin_deadly'))v*=1.12; if(c2Passive('nin_combo'))v*=1.10; if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
     if((p.evadeStackT||0)>0)v*=1+Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.09;   // Evasion snowball: each dodge stacks +9% damage
     if(classState('ninja').rank>=10)v*=1.12; }
+  if(meta.classId==='monk'&&c2def('monk')){ const fist=p.weapon&&p.weapon.art==='fist';
+    if(fist)v*=1.15;   // innate Focus: fists are the monk's true weapon
+    const fCap=classState('monk').rank>=10?7:5, fDmg=c2Passive('mon_focused')?0.08:0.06;
+    if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;   // Focus snowball
+    if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
+    if(classState('monk').rank>=10)v*=1.12; }
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
     if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
     if(classState('ranger').rank>=10)v*=1.12; }
@@ -3083,8 +3111,8 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
@@ -3284,7 +3312,7 @@ function openBag(back){
     <div class="baglayout"><section class="baginventory"><button class="bigbtn ghost" id="sortBtn" style="padding:8px 12px;font-size:12px">${actionIcon('sort')}Sort: ${SORTS[_bagSort]}</button>
       <div class="achlist">${rows}</div></section>
       <aside class="bagequip">${doll}<div class="bagequiphead"><span>Currently equipped</span><b>${heroName} · ${C.disp} · Level ${eq.level||1}</b></div><div class="bagslots">${equipped}</div></aside></div>
-    <div class="bagfoot"><button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
+    <div class="bagfoot">${(HR&&HR.weapon&&HR.weapon.art!=='fist')?'<button class="bigbtn ghost" id="unequipBtn" style="color:#d9b08c">✊ Fight Unarmed</button>':''}<button class="bigbtn ghost" id="backBtn">Back</button><button class="bigbtn" id="gearInspect">Inspect Character</button></div></div>`);
   setupBagDoll(HR);
   document.getElementById('sortBtn').onclick=()=>{ const ks=Object.keys(SORTS); _bagSort=ks[(ks.indexOf(_bagSort)+1)%ks.length]; openBag(back); };
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.eq, it=meta.stash[i]; if(!it) return;
@@ -3302,6 +3330,13 @@ function openBag(back){
     persist(); SFX.pickup(); hudUpdate(); openBag(back); });
   document.querySelectorAll('[data-sl]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.sl, it=meta.stash[i]; if(!it) return;
     const g=sellItem(it.weapon||it.armor||it.trinket); meta.stash.splice(i,1); persist(); toast('Sold · +'+g+'g'); openBag(back); });
+  { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(!HR) return;
+      const old=HR.weapon;
+      if(old&&old.art!=='fist'&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
+      HR.weapon=normWeapon(makeWeapon('fist','common'));
+      if(G&&G.hub&&HR===meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+      else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
+      persist(); SFX.pickup(); hudUpdate(); toast(meta.classId==='monk'?'✊ Fists ready — your true weapon':'✊ Unarmed — weak unless you\'re a Monk'); openBag(back); }; }
   document.getElementById('backBtn').onclick=back;
   document.getElementById('gearInspect').onclick=()=>openMirror(()=>openBag(back));
 }
@@ -6278,6 +6313,8 @@ function class2Innate(p,dt){
   if(meta.classId==='mage'){ const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ)); if(moved<1)p._stillT=(p._stillT||0)+dt;else{p._stillT=0;p._stillX=p.x;p._stillZ=p.z;} }
   if((p.bloodlustT||0)>0)p.bloodlustT-=dt;if((p.tacticalT||0)>0)p.tacticalT-=dt;if((p.wraithT||0)>0)p.wraithT-=dt;if((p.wraithwalkT||0)>0)p.wraithwalkT-=dt;if((p.soulStrengthT||0)>0)p.soulStrengthT-=dt;else p.soulStrength=0;
   if((p.evadeStackT||0)>0)p.evadeStackT-=dt;else p.evadeStacks=0;   // Ninja evasion snowball decays if you stop dodging
+  if((p.focusT||0)>0)p.focusT-=dt;else p.focusStacks=0;   // Monk Focus snowball decays if you stop attacking
+  if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
@@ -6341,6 +6378,8 @@ SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=M
 SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
 // Ninja skills reuse ranger/warrior FX (ninja-flavored icons via C2_ICON)
 SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL_FX.nin_step=SKILL_FX.x_step; SKILL_FX.nin_smoke=SKILL_FX.r_smoke; SKILL_FX.nin_mark=SKILL_FX.r_mark; SKILL_FX.nin_tumble=SKILL_FX.r_tumble; SKILL_FX.nin_fury=SKILL_FX.w_berserk; SKILL_FX.nin_storm=SKILL_FX.w_whirl;
+// MONK — martial-arts kit reuses existing melee/defensive effects (bare-handed feel via the fist weapon)
+SKILL_FX.mon_flurry=SKILL_FX.w_cleave; SKILL_FX.mon_palm=SKILL_FX.w_bash; SKILL_FX.mon_deflect=SKILL_FX.laststand; SKILL_FX.mon_roll=SKILL_FX.tumble; SKILL_FX.mon_whirl=SKILL_FX.w_whirl; SKILL_FX.mon_stun=SKILL_FX.nova; SKILL_FX.mon_thousand=SKILL_FX.w_berserk; SKILL_FX.mon_dragon=SKILL_FX.stomp;
 // Berserker skills reuse warrior FX (berserker-flavored icons via C2_ICON)
 SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
 // Pirate skills reuse ranger FX (pirate-flavored icons via C2_ICON)
@@ -6397,7 +6436,8 @@ const SKILL_MANA={
   r_spike:13,r_smoke:11,r_mark:16,r_deathmark:20,
   w_cleave:6,w_bash:11,w_charge:13,w_whirl:16,w_guard:15,w_stomp:17,w_berserk:22,w_execute:20,
   m_bolt:6,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
-  x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24
+  x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24,
+  mon_flurry:5,mon_palm:9,mon_deflect:14,mon_roll:6,mon_whirl:14,mon_stun:13,mon_thousand:22,mon_dragon:16
 };
 function skillManaCost(i,s){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
@@ -6625,6 +6665,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
   if(weaponManaHit) gainMana(G.p,4,false);
+  if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(e.hp<=0) killEnemy(e,weaponManaHit);
 }
 function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGoldMul)||1))); meta.gold=(meta.gold||0)+n; return n; }
@@ -6842,6 +6883,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_thick'))dmg*=.88;if(c2Passive('bsk_tough')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
+  if(meta.classId==='monk'&&c2def('monk')){if(c2Passive('mon_iron'))dmg*=.88;if(c2Passive('mon_still')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
   if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_tough'))dmg*=.90;if(c2Passive('pir_evasive'))dmg*=.90;}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
@@ -7312,6 +7354,7 @@ var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): per
 const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false };
 function randomClassId(){ const ks=Object.keys(CLASSES); return ks[Math.floor(Math.random()*ks.length)]; }
 function familyWeaponArche(cid){ const fam=(CLASSES[cid]||CLASSES.warrior).family;
+  if(fam.length===1&&fam[0]==='fist') return 'fist';   // Monk: fists ARE the class weapon (retired from loot, but on-class here)
   const pool=ARCHEIDS.filter(a=>{ const w=ARCHES[a]; return w && fam.includes(w.art) && !(typeof RETIRED_ARCHES!=='undefined'&&RETIRED_ARCHES.includes(a)); });
   return pool.length?pool[Math.floor(Math.random()*pool.length)]:'sword'; }   // an on-class weapon for a bot
 const ARENA_FAIR={ level:30, rank:10, wArch:'sword', wRid:'epic', aRid:'epic' };
@@ -7443,7 +7486,7 @@ const BOT_DIFF={
 const BOT_DIFFS=['easy','normal','hard','brutal'];
 // Per-class ARENA-PVP damage tuning (bots only — does NOT touch player class balance). Casters out-burst
 // everyone from range, so they're toned down; the weaker melee kits are nudged up. Tuned via the duel matrix.
-const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, reaper:0.90, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
+const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, monk:1.52, reaper:0.92, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)
@@ -7537,6 +7580,9 @@ const BOT_SKILLS={
             {min:0,max:180,cast:(e,p,D)=>botNova(e,p,D,{r:160,dm:1.2,col:'#ffe6a0',col2:'#d0a040',heal:0.04})} ],
   necromancer:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.5,col:'#9fd84a',el:'poison'})},
                 {min:0,max:175,cast:(e,p,D)=>botNova(e,p,D,{r:170,dm:1.3,col:'#b06bff',col2:'#4a2a6a',heal:0.05})} ],
+  monk:[ {min:0,max:170,cast:(e,p,D)=>botNova(e,p,D,{r:150,dm:1.4,col:'#ffe08a',col2:'#c98a3a'})},
+         {min:120,max:470,cast:(e,p,D)=>botDashStrike(e,p,D,{mult:1.9,col:'#ffe08a'})},
+         {min:0,max:600,cast:(e,p,D)=>botBuff(e,{dur:5,haste:true,col:'#ffe08a',label:'FOCUS'})} ],
   _default:[ {min:0,max:170,cast:(e,p,D)=>botNova(e,p,D,{r:150,dm:1.3})} ]
 };
 function botCastSkill(e,p,D){ const list=BOT_SKILLS[e.botClassId]||BOT_SKILLS._default; if(!list||!list.length) return false;
@@ -9909,12 +9955,15 @@ function openTrainer(back){
     const acc=ACC[cid]||'#c9a86a';
     const path=un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(c2def(cid)?' · '+Object.keys(cs.ch||{}).length+' choices set':(cs.rank>=2?' · Choose a path':'')))):'';
     let hint='';
-    if(!un){ let loc=null; for(const Z of ZONES){ if(Z.side&&Z.side.trial===cid){ loc=Z; break; } }
-      hint = loc ? `Find ${loc.side.icon||'🌀'} <b>${loc.side.name}</b> — a hidden secret in <b>${loc.name}</b> — and win the ${TRIALS[cid]?TRIALS[cid].name:'Trial'}` : (C.earned?'Win its Trial, hidden in a secret zone':'Clear its Trial to unlock'); }
+    if(!un){ if(C.shopUnlock){ hint=`Buy the <b>${C.disp} Charter</b> — <b>${(C.charter||9000).toLocaleString()}g</b>`; }
+      else { let loc=null; for(const Z of ZONES){ if(Z.side&&Z.side.trial===cid){ loc=Z; break; } }
+        hint = loc ? `Find ${loc.side.icon||'🌀'} <b>${loc.side.name}</b> — a hidden secret in <b>${loc.name}</b> — and win the ${TRIALS[cid]?TRIALS[cid].name:'Trial'}` : (C.earned?'Win its Trial, hidden in a secret zone':'Clear its Trial to unlock'); } }
     const fams=C.family.map(f=>`<span class="ccfam">${FAM[f]||f}</span>`).join('');
     const btns=un
       ? `${sel?'':`<button class="bigbtn ccbtn" data-eq="${cid}">Equip</button>`}${cs.rank>=2&&(sub||c2def(cid))?`<button class="bigbtn ghost ccbtn" data-re="${cid}">Respec</button>`:''}`
-      : `${!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn ccbtn" data-tr="${cid}">Begin Trial</button>`:'<span class="cclockhint">Locked</span>'}`;
+      : C.shopUnlock
+        ? `<button class="bigbtn ccbtn" data-buy="${cid}" ${meta.gold>=(C.charter||9000)?'':'style="opacity:.5"'}>${actionIcon('buy')}Charter · ${(C.charter||9000).toLocaleString()}g</button>`
+        : `${!C.earned&&!meta.trialsDone[cid]?`<button class="bigbtn ccbtn" data-tr="${cid}">Begin Trial</button>`:'<span class="cclockhint">Locked</span>'}`;
     return `<div class="classcard${un?'':' cclocked'}${sel?' ccequipped':''}" style="--acc:${acc}">
       <div class="cchead"><span class="ccicon">${un?C.icon:'🔒'}</span>
         <div class="ccname">${C.disp}${sel?'<span class="ccbadge">Equipped</span>':''}</div></div>
@@ -9933,6 +9982,8 @@ function openTrainer(back){
   { const sb=document.querySelector('.sealbuy'); if(sb) sb.onclick=()=>{ if(meta.masterSeal) return; if(meta.gold<SEAL_COST){ toast('Not enough gold'); return; }
       meta.gold-=SEAL_COST; meta.masterSeal=true; if(SFX&&SFX.achieve) SFX.achieve(); persist(); toast('🎖️ The Drillmaster\'s Seal — switch class & respec anywhere, from the pause menu','#f0d78a'); openTrainer(back); }; }
   document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{ if(!trainerEquipClass(b.dataset.eq)) return; SFX.pickup(); openTrainer(back); });
+  document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{ const cid=b.dataset.buy, C=CLASSES[cid]; if(!C||meta.classUnlocked[cid])return; const cost=C.charter||9000; if(meta.gold<cost){ toast('Not enough gold — '+cost.toLocaleString()+'g'); return; }
+    meta.gold-=cost; meta.classUnlocked[cid]=true; classState(cid); if(SFX&&SFX.achieve) SFX.achieve(); persist(); toast((C.icon||'📜')+' '+C.disp+' unlocked — Equip it here!','#f0d78a'); openTrainer(back); });
   document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{ initAudio(); startTrial(b.dataset.tr); });
   document.querySelectorAll('[data-re]').forEach(b=>b.onclick=()=>openRespecTree(b.dataset.re,()=>openTrainer(back)));
   document.getElementById('backBtn').onclick=back;

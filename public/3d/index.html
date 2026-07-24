@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.361.0-autopilot';
+const VERSION3D='1.362.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1836,7 +1836,7 @@ const CLASSES={
       {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('necro-raise-the-dead'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
       {id:'necro_wall',n:'Bone Wall',icon:skillIcon('necro-bone-wall'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
       {id:'necro_army',n:'Army of the Dead',icon:skillIcon('necro-army-of-the-dead'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
-  ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['dagger','sword'],
+  ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','dagger','bow','cross','javelin','flintlock'],
     subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
           {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
     skills:[

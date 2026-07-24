@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.355.0-autopilot';
+const VERSION3D='1.356.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1748,7 +1748,7 @@ const ARCHES={
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
-  flintlock:{disp:'Flintlock Pistol',cls:'ranged',sch:'phys',dmg:16,cd:.60,kb:250,art:'flintlock',proj:{speed:940,size:5,pierce:1,range:760,color:'#ffd98a',shape:'arrow'}},   // pirate signature — slow, hard-hitting single lead shot with a heavy kick
+  flintlock:{disp:'Flintlock Pistol',cls:'ranged',sch:'phys',dmg:30,cd:1.30,kb:290,art:'flintlock',proj:{speed:860,size:6,pierce:1,range:760,color:'#33363c',shape:'cannonball'}},   // pirate signature — a SLOW-firing pistol that lobs a hard-hitting mini cannonball
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
   arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'wand',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1,seek:true}}, // wand-family (behaves like one): seeks + pierces
@@ -12678,6 +12678,10 @@ function drawProjectile3(pr,t){
     for(let i=0;i<3;i++){ const a=(pr.spin||0)*3+i*2.09; pushM(); mv(Math.cos(a)*14*S,0,Math.sin(a)*14*S); box(2.4*S,2.4*S,2.4*S, c, g, 0.5); popM(); } }   // motion sparks
   else if(pr.shape==='rock'){ rotY(t*7+pr.x*0.1); rotX(t*5); const s=pr.size||9;   // cragspitter's hurled boulder — a tumbling stone
     box(s*1.5,s*1.4,s*1.5,'#7a6a52','#3a2f22'); box(s*1.0,s*1.0,s*1.0,'#5a4c38'); box(s*0.6,s*1.6,s*0.5,'#4a3e2c'); }
+  else if(pr.shape==='cannonball'){ const s=pr.size||6, c=pr.color||'#33363c'; rotY(t*4); rotX(t*3.3);   // flintlock: a dark iron mini cannonball, tumbling
+    box(s*1.7,s*1.7,s*1.7, c, tint(c,'#000',0.45));                     // iron ball body
+    box(s*1.15,s*1.15,s*1.15, tint(c,'#fff',0.10), c);                  // inner shading
+    box(s*0.55,s*0.6,s*0.55, tint(c,'#fff',0.4), c); }                  // top glint highlight
   else if(pr.shape==='lance'){ const c=pr.color;    // Deadeye: a long bright piercing lance (clearly a skill, not an arrow)
     box(2.4,2.4,pr.size*2.6, c, c); pushM(); mv(0,0,pr.size*1.5); box(4.4,4.4,pr.size*0.9, tint(c,'#fff',0.4), c); popM();
     box(1,1,pr.size*3.2, '#ffffff', c); }

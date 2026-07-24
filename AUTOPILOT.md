@@ -30,11 +30,13 @@ This runs **every hour, 8am–11pm** — not once a day. So each run does **one*
 - Never send more than one digest per run. Skip past blocked items to the next actionable one rather than idling on them.
 
 ## Telegram digest (only when you shipped)
+**Format Oliver wants (2026-07): a short changelog in BULLET POINTS, plus the playtest link.** Header line with the version + play URL, then one `•` bullet per change, plain English. Use `\n` for line breaks in the JSON `text`.
 ```
-curl -s -X POST https://thework.pages.dev/state -H "Content-Type: application/json" \
-  -d '{"action":"tgPing","password":"oliverNCA2026","text":"🤖 BLADEFALL autopilot — <what you built>. Playtest: bladefall-autopilot.bladefall.pages.dev — merge to main when happy."}'
+curl -s -X POST https://thework.pages.dev/state -H "Content-Type: application/json" -d @- <<'JSON'
+{"action":"tgPing","password":"oliverNCA2026","text":"🎮 BLADEFALL update (v<ver>) — play: https://bladefall-autopilot.bladefall.pages.dev/3d/\n\n• <change one>\n• <change two>\n• <change three>\n\nMerge to your live game whenever you're happy."}
+JSON
 ```
-Keep it to 1–3 sentences, plain English, and always include the playtest URL.
+Always include the playtest URL. Bullets, not prose. Keep each bullet short.
 
 ## Naming rule (applies to EVERYTHING new)
 Names must be **interesting but understandable by a middle schooler.** No niche/archaic words. Good: "Holy Ground", "Guard Up", "Raise the Dead", "Shadow Step", "Smite". Bad: "Consecrate", "Bulwark", "Bastion", "Excoriate".

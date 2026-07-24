@@ -397,7 +397,15 @@
   .ico-skill-ninja-tumble{background-image:url('icons/ninja_tumble.png');}
   .ico-skill-ninja-blade-fury{background-image:url('icons/ninja_blade_fury.png');}
   .ico-skill-ninja-blade-storm{background-image:url('icons/ninja_blade_storm.png');}
-  .ico-class-berserker{background-image:url('icons/class-warrior.png');}      /* placeholder — pending berserker art pass */
+  .ico-class-berserker{background-image:url('icons/class-berserker.png');}
+  .ico-skill-berserker-cleave{background-image:url('icons/berserker_cleave.png');}
+  .ico-skill-berserker-reckless-bash{background-image:url('icons/berserker_reckless_bash.png');}
+  .ico-skill-berserker-charge{background-image:url('icons/berserker_charge.png');}
+  .ico-skill-berserker-shockwave{background-image:url('icons/berserker_shockwave.png');}
+  .ico-skill-berserker-whirlwind{background-image:url('icons/berserker_whirlwind.png');}
+  .ico-skill-berserker-execute{background-image:url('icons/berserker_execute.png');}
+  .ico-skill-berserker-berserk{background-image:url('icons/berserker_berserk.png');}
+  .ico-skill-berserker-bloodguard{background-image:url('icons/berserker_bloodguard.png');}
   .ico-class-pirate{background-image:url('icons/class-ranger.png');}          /* placeholder — pending pirate art pass */
   .ico-class-chronomancer{background-image:url('icons/class-mage.png');}      /* placeholder — pending chronomancer art pass */
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
@@ -939,7 +947,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.338.0-autopilot';
+const VERSION3D='1.339.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1804,10 +1812,10 @@ const CLASSES={
   berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer'],
     subs:[{id:'fury',disp:'Fury',blurb:'Raw damage — hit like a landslide.'},{id:'blood',disp:'Blood',blurb:'Rage and lifesteal — the angrier, the stronger.'}],
     skills:[
-      {id:'w_cleave',n:'Cleave',icon:skillIcon('cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
-      {id:'w_charge',n:'Charge',icon:skillIcon('charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
-      {id:'w_whirl',n:'Whirlwind',icon:skillIcon('warrior-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
-      {id:'w_berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
+      {id:'bsk_cleave',n:'Cleave',icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
+      {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
+      {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
+      {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
   pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['cross','bow','sword','javelin'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
@@ -1928,13 +1936,13 @@ const CLASS2={
   berserker:{ disp:'Berserker', icon:classIcon('berserker'),
     innate:{name:'Bloodrage', d:'Deal +8% damage, and +15% more while below half HP.'},
     cap:{name:'Undying Rage', d:'+12% damage, +10% attack speed, and +8% lifesteal.'},
-    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'w_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'w_bash',n:'Reckless Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage and stun.'}},
+    r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'bsk_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'bsk_bash',n:'Reckless Bash',cd:6,role:'Control',fx:'bsk_bash',d:'Drive forward for 1.7x damage and stun.'}},
     r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Damage',d:'+12% damage.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Damage',d:'+10% damage.'}},
-    r4:{kind:'skill',slot:1, a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'w_stomp',n:'Shockwave',cd:10,role:'Control',fx:'w_stomp',d:'Slam the ground for damage and heavy knockback.'}},
+    r4:{kind:'skill',slot:1, a:{id:'bsk_charge',n:'Charge',cd:9,role:'Movement',fx:'bsk_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'bsk_stomp',n:'Shockwave',cd:10,role:'Control',fx:'bsk_stomp',d:'Slam the ground for damage and heavy knockback.'}},
     r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Take 12% less damage.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'+5% lifesteal.'}},
-    r6:{kind:'skill',slot:2, a:{id:'w_whirl',n:'Whirlwind',cd:12,role:'Group Damage',fx:'w_whirl',d:'Spin, cutting everything around you for 2.2x.'}, b:{id:'w_execute',n:'Execute',cd:14,role:'Finisher',fx:'w_execute',d:'A brutal strike that finishes low-HP foes.'}},
+    r6:{kind:'skill',slot:2, a:{id:'bsk_whirl',n:'Whirlwind',cd:12,role:'Group Damage',fx:'bsk_whirl',d:'Spin, cutting everything around you for 2.2x.'}, b:{id:'bsk_execute',n:'Execute',cd:14,role:'Finisher',fx:'bsk_execute',d:'A brutal strike that finishes low-HP foes.'}},
     r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Damage',d:'+15% damage while below half HP.'}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:'+10% attack speed.'}},
-    r8:{kind:'skill',slot:3, a:{id:'w_berserk',n:'Berserk',cd:24,role:'Burst',fx:'w_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'w_guard',n:'Bloodguard',cd:14,role:'Defense',fx:'w_guard',d:'Raise a guard: heavy damage reduction and pull foes in.'}},
+    r8:{kind:'skill',slot:3, a:{id:'bsk_berserk',n:'Berserk',cd:24,role:'Burst',fx:'bsk_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'bsk_guard',n:'Bloodguard',cd:14,role:'Defense',fx:'bsk_guard',d:'Raise a guard: heavy damage reduction and pull foes in.'}},
     r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'bsk_brutal',n:'Brutal',role:'Damage',d:'+12% damage.'}}
   },
   pirate:{ disp:'Pirate', icon:classIcon('pirate'),
@@ -1985,7 +1993,7 @@ const PASSIVE_ART={
   nin_swift:'ninja-swift',nin_deadly:'ninja-deadly-precision',nin_evasive:'ninja-evasion',nin_combo:'ninja-combo-edge',
   nin_ghost:'ninja-ghostwalk',nin_bleed:'ninja-bleeding-edge',nin_shadowform:'ninja-shadow-form',nin_assassin:'ninja-assassinate',
   nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom',
-  bsk_heavy:'warrior-heavy-hand',bsk_reckless:'warrior-battle-ready',bsk_thick:'warrior-unyielding',bsk_blood:'warrior-bloodlust',bsk_rage:'warrior-berserker',bsk_frenzy:'warrior-swift-steel',bsk_tough:'warrior-tactical-guard',bsk_brutal:'warrior-weapon-master',bsk_innate:'warrior-battle-ready',bsk_cap:'warrior-unbroken-champion',
+  bsk_heavy:'berserker-heavy-hands',bsk_reckless:'berserker-reckless',bsk_thick:'berserker-thick-hide',bsk_blood:'berserker-bloodthirst',bsk_rage:'berserker-rage',bsk_frenzy:'berserker-frenzy',bsk_tough:'berserker-unbreakable',bsk_brutal:'berserker-brutal',bsk_innate:'berserker-bloodrage',bsk_cap:'berserker-undying-rage',
   pir_deadly:'ranger-clear-aim',pir_swift:'ranger-quickdraw',pir_tough:'ranger-escape-artist',pir_swagger:'ranger-close-quarters',pir_evasive:'ranger-ambusher',pir_luck:'ranger-bounty-hunter',pir_brutal:'ranger-longshot',pir_greed:'ranger-patient-hunter',pir_innate:'ranger-clear-aim',pir_cap:'ranger-perfect-hunt',
   chr_potent:'mage-potent-weave',chr_haste:'mage-temporal-focus',chr_ward:'mage-arcane-ward',chr_glass:'mage-glass-cannon',chr_temporal:'mage-temporal-focus',chr_slow:'mage-elemental-savant',chr_echo:'mage-spell-echo',chr_freeze:'mage-elemental-savant',chr_innate:'mage-arcane-attunement',chr_cap:'mage-archmage'
 };
@@ -6255,6 +6263,8 @@ SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=M
 SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
 // Ninja skills reuse ranger/warrior FX (ninja-flavored icons via C2_ICON)
 SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL_FX.nin_step=SKILL_FX.x_step; SKILL_FX.nin_smoke=SKILL_FX.r_smoke; SKILL_FX.nin_mark=SKILL_FX.r_mark; SKILL_FX.nin_tumble=SKILL_FX.r_tumble; SKILL_FX.nin_fury=SKILL_FX.w_berserk; SKILL_FX.nin_storm=SKILL_FX.w_whirl;
+// Berserker skills reuse warrior FX (berserker-flavored icons via C2_ICON)
+SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
 // Throwing-star skills: Piercing Star = single-target/boss (deep pierce), Shuriken Barrage = groups (3 shotgun bursts)
 SKILL_FX.nin_pierce=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,1000); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
   const sp=1050,oy=p.y+24; let vx=Math.sin(p.yaw)*sp,vz=Math.cos(p.yaw)*sp,vy=0;
@@ -6389,7 +6399,8 @@ const C2_ICON={
   necro_summon:skillIcon('necro-summon-skeletons'),necro_raise:skillIcon('necro-raise-the-dead'),necro_army:skillIcon('necro-army-of-the-dead'),
   necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm'),
   nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm'),
-  nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives')
+  nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives'),
+  bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

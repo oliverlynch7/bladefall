@@ -939,7 +939,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.335.0-autopilot';
+const VERSION3D='1.336.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9487,7 +9487,7 @@ function openClasses(back){
   const C=CLASSES[view], cs=classState(view), def=c2def(view);
   const classCol={warrior:'#ef7b5d',ranger:'#8fd56d',mage:'#a98cff',reaper:'#d665a8'}[view]||'#c98cff';
   const tabRow=tabs.map(c=>`<button class="ctab ${c===view?'on':''}" data-c="${c}">${CLASSES[c].icon}<span>${CLASSES[c].disp}</span></button>`).join('')
-    +CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(()=>`<button class="ctab lock" disabled>🔒<span>Locked</span></button>`).join('');
+    +CLASSIDS.filter(c=>!meta.classUnlocked[c]&&c!==meta.classId).map(c=>`<button class="ctab lock" disabled title="Locked — unlock at the Drillmaster">🔒<span>${CLASSES[c].disp}</span></button>`).join('');
   const iconOf=o=>o.fx?(C2_ICON[o.fx]||'✦'):(PASSIVE_ART[o.id]?passiveIcon(o.id):(o.icon||'✦'));
   const choiceState=(picked,id,reached)=>!reached?'future':!picked?'pending':picked===id?'sel':'rejected';
   const stateText=s=>({sel:'Chosen',rejected:'Not chosen',pending:'Choice pending',future:'Future rank'}[s]);

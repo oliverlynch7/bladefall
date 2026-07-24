@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.345.0-autopilot';
+const VERSION3D='1.346.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7399,22 +7399,28 @@ function updateArenaHud(){ let el=document.getElementById('arenaHud');
 }
 /* ---- ARENA AI BOTS — player-like practice opponents. BOT_DIFF is the tuning table:
    every knob here is meant to be iterated on to make bots genuinely challenging. ---- */
+// hpMul/dmgMul scale off the PLAYER's own effMaxHp (so bots track the arena level — never one-shottable).
+// HP gaps between tiers are modest ON PURPOSE — the real difference is the AI: reaction, dodging,
+// skill (gap-closer) use, feints/jukes, and punishing your recovery.
 const BOT_DIFF={
-  easy:  {label:'Easy',   color:'#7de08a', hp:90,  dmg:6,  speed:150, moveMul:0.85, atkCd:1.50, react:0.50, dodge:0.05, dodgeCdT:3.5, flee:true,  weapon:'sword', rarity:'common'},
-  normal:{label:'Normal', color:'#7fd6ff', hp:150, dmg:11, speed:185, moveMul:1.00, atkCd:1.10, react:0.32, dodge:0.18, dodgeCdT:2.4, flee:true,  weapon:'sword', rarity:'rare'},
-  hard:  {label:'Hard',   color:'#e8a33d', hp:230, dmg:17, speed:210, moveMul:1.12, atkCd:0.85, react:0.20, dodge:0.35, dodgeCdT:1.6, flee:true,  weapon:'axe',   rarity:'epic'},
-  brutal:{label:'Brutal', color:'#ff5e54', hp:340, dmg:24, speed:235, moveMul:1.25, atkCd:0.62, react:0.12, dodge:0.55, dodgeCdT:1.0, flee:false, weapon:'great', rarity:'legendary'}
+  easy:  {label:'Easy',   color:'#7de08a', hpMul:0.55, dmgMul:0.030, speed:150, moveMul:0.80, atkCd:1.60, react:0.55, dodge:0.05, dodgeCdT:3.8, flee:true,  skill:0.00, skillCdT:6.0, punish:0.00, feint:0.00, jump:0.00, weapon:'sword', rarity:'common'},
+  normal:{label:'Normal', color:'#7fd6ff', hpMul:0.85, dmgMul:0.050, speed:185, moveMul:1.00, atkCd:1.10, react:0.34, dodge:0.20, dodgeCdT:2.4, flee:true,  skill:0.15, skillCdT:5.0, punish:0.25, feint:0.15, jump:0.10, weapon:'sword', rarity:'rare'},
+  hard:  {label:'Hard',   color:'#e8a33d', hpMul:1.15, dmgMul:0.075, speed:210, moveMul:1.12, atkCd:0.85, react:0.20, dodge:0.38, dodgeCdT:1.6, flee:true,  skill:0.35, skillCdT:3.5, punish:0.55, feint:0.35, jump:0.25, weapon:'axe',   rarity:'epic'},
+  brutal:{label:'Brutal', color:'#ff5e54', hpMul:1.55, dmgMul:0.105, speed:235, moveMul:1.28, atkCd:0.60, react:0.10, dodge:0.60, dodgeCdT:0.9, flee:false, skill:0.60, skillCdT:2.2, punish:0.85, feint:0.60, jump:0.50, weapon:'great', rarity:'legendary'}
 };
 const BOT_DIFFS=['easy','normal','hard','brutal'];
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
+  const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)
+  const hp=Math.max(80,Math.round(base*(D.hpMul!=null?D.hpMul:1))), dmg=Math.max(4,Math.round(base*(D.dmgMul!=null?D.dmgMul:0.05)));
   const b={ bot:true, botDiff:diffKey, type:'bot', kind:'bot', element:null,
     x:sp.x+Math.cos(a)*rad, z:sp.z+Math.sin(a)*rad, y:(sp.y||0), yaw:0, r:14, h:44,
-    hp:D.hp, maxHp:D.hp, dmg:D.dmg, speed:D.speed, color:D.color, xp:0,
+    hp, maxHp:hp, dmg, speed:D.speed, color:D.color, xp:0,
     active:true, dead:false, dropT:0, hitFlash:0, lastHit:-1, mid:null, boss:false,
     weapon:(()=>{ try{ return makeWeapon(D.weapon,D.rarity); }catch(e){ return {range:60,kb:190}; } })(),
     vx:0, vz:0, vy:0, onGround:true, runAnim:Math.random()*6, atkTimer:0,
-    atkCd:0.6+Math.random(), dodgeCd:1, dodgeTimer:0, invuln:0, reactT:0, strafe:Math.random()<0.5?1:-1, _pendingHit:null };
+    atkCd:0.6+Math.random(), dodgeCd:1, dodgeTimer:0, invuln:0, reactT:0, strafe:Math.random()<0.5?1:-1, _pendingHit:null,
+    skillCd:1+Math.random()*2, dashT:0, _skillHit:false, feintT:0, jumpCd:1+Math.random() };
   try{ snapEnemyToSurface(b); }catch(e){} G.enemies.push(b); return b;
 }
 function refreshArenaBots(cfg){ if(!G) return; G.enemies=G.enemies.filter(e=>!e.bot);
@@ -7427,6 +7433,7 @@ function botRespawn(e){ if(!G) return; e.hp=e.maxHp; e._lavaT=0; e._def=false; c
   try{ burst(e.x,e.y+10,e.z,e.color,10); }catch(_){} }   // lava/void death just resets the bot — no player KO credit
 function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
   if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
+  if(e.skillCd>0) e.skillCd-=dt; if(e.dashT>0) e.dashT-=dt; if(e.feintT>0) e.feintT-=dt; if(e.jumpCd>0) e.jumpCd-=dt;
   const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
   e.yaw=Math.atan2(nx,nz);
   const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
@@ -7444,12 +7451,22 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
   // reactive dodge when the player is swinging close
   if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
     e.vx=(-nz*e.strafe)*560; e.vz=(nx*e.strafe)*560; try{ burst(e.x,10,e.z,'#7fd6ff',6); }catch(_){} }
+  // SKILL — a gap-closing dash-strike: lunge in fast, the arriving hit is heavier.
+  if(D.skill>0 && e.skillCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d>reach*1.3 && d<480 && Math.random()<D.skill*dt*3){
+    e.skillCd=D.skillCdT; e.dashT=0.16; e.vx=nx*900; e.vz=nz*900; e._skillHit=true; e.atkCd=Math.min(e.atkCd,0.05);
+    try{ burst(e.x,e.y+14,e.z,e.color,8); SFX.dodge&&SFX.dodge(); }catch(_){} }
+  if(e._skillHit && e.dashT<=0 && d>reach*1.6) e._skillHit=false;   // stale skill charge fizzles if you slipped away
+  // FEINT — bait your swing: when you wind up close, juke back briefly, then punish the whiff.
+  if(D.feint>0 && e.feintT<=0 && e.dashT<=0 && p.atkTimer>0.05 && d<reach+40 && Math.random()<D.feint*dt*6){ e.feintT=0.26; }
+  // JUMP juke — unpredictable hops (also clears low ground swings).
+  if(D.jump>0 && e.onGround && e.jumpCd<=0 && d<reach*2 && Math.random()<D.jump*dt*2){ e.vy=640; e.onGround=false; e.jumpCd=1.4+Math.random(); }
   // MOVE TARGET: to safety when on lava or low (a reachable island/centre, never off the map); else chase the player
   let mvx=0, mvz=0, seekSafe=(onLava||low);
-  if(e.dodgeTimer>0){ e.x+=e.vx*dt; e.z+=e.vz*dt; }
+  if(e.dodgeTimer>0||e.dashT>0){ e.x+=e.vx*dt; e.z+=e.vz*dt; }   // dodge OR skill-dash: move by velocity
   else {
     if(seekSafe){ const g=nearestArenaGround(e.x,e.z); const tdx=g.x-e.x, tdz=g.z-e.z, td=Math.max(1,Math.hypot(tdx,tdz)); mvx=tdx/td; mvz=tdz/td;
       if(onLava && e.onGround){ e.vy=560; e.onGround=false; } }   // hop toward the island
+    else if(e.feintT>0){ mvx=-nx*1.0; mvz=-nz*1.0; mvx+=(-nz*e.strafe)*0.6; mvz+=(nx*e.strafe)*0.6; }   // bait retreat
     else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
       if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }
     const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1);
@@ -7459,9 +7476,9 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
   // attack: telegraph (reaction delay) then land the hit if still in range and the player isn't i-framed
   if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
   if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
-    const dd=Math.hypot(p.x-e.x,p.z-e.z);
-    if(dd<reach+16 && !(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg), e.x, e.z);
-    try{ burst(e.x+nx*30,e.y+24,e.z+nz*30,e.color,6); }catch(_){} } }
+    const dd=Math.hypot(p.x-e.x,p.z-e.z), mult=e._skillHit?1.6:1; e._skillHit=false;
+    if(dd<reach+16 && !(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg*mult), e.x, e.z);
+    try{ burst(e.x+nx*30,e.y+24,e.z+nz*30,e.color,mult>1?10:6); }catch(_){} } }
 }
 function drawBotHero(e,t){ const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal, body=D.color, dark=tint(D.color,'#0a0a0a',0.5), lt=tint(D.color,'#ffffff',0.35);
   const moving=Math.hypot(e.vx||0,e.vz||0)>10, leg=Math.sin(e.runAnim||0)*(moving?0.5:0.12), sw=e.atkTimer>0?1:0;

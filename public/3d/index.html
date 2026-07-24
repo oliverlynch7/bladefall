@@ -415,6 +415,7 @@
   .ico-skill-pirate-bounty{background-image:url('icons/pirate_bounty.png');}
   .ico-skill-pirate-cannonade{background-image:url('icons/pirate_cannonade.png');}
   .ico-skill-pirate-powder-keg{background-image:url('icons/pirate_powder_keg.png');}
+  .ico-skill-pirate-gold-rush{background-image:url('icons/pirate_plunder.png');}   /* reuses the treasure art */
   .ico-class-chronomancer{background-image:url('icons/class-chronomancer.png');}
   .ico-skill-chrono-time-bolt{background-image:url('icons/chrono_time_bolt.png');}
   .ico-skill-chrono-time-lance{background-image:url('icons/chrono_time_lance.png');}
@@ -963,7 +964,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.341.0-autopilot';
+const VERSION3D='1.342.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1038,6 +1039,14 @@ function persistGlobal(){ const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); tr
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
 function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
   persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv));}catch(e){} } }
+// Continuous autosave: keep meta.run in sync with the live dive so a reload/auto-update NEVER loses progress.
+// Only snapshots normal dives (not hub/arena/trial/side); death still clears meta.run so roguelite rollback is intact.
+function autosaveRun(){ try{
+    if(typeof mode!=='undefined' && mode==='play' && G && G.p && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
+      meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
+    }
+    persist();
+  }catch(e){} }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
@@ -1746,7 +1755,7 @@ const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
   if(w.arche==='axe') return 'axeswing';                     // axes
-  if(w.art==='sword'&&w.sch==='phys') return 'swordswing';   // physical swords (sword, saber)
+  if(w.art==='sword'&&w.sch==='phys') return null;           // physical swords: the crisp synth SFX.slash only (the swordswing sample sounded like a lingering scrape on hit)
   if(w.arche==='javelin') return 'spearswing';               // spears / javelins
   return null; }
 function weaponFireFx(w){ if(!w) return null;
@@ -1968,7 +1977,7 @@ const CLASS2={
     r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Damage',d:'+12% damage.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Speed',d:'+10% attack speed.'}},
     r4:{kind:'skill',slot:1, a:{id:'pir_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'pir_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'pir_tumble',n:'Roll',cd:8,role:'Movement',fx:'pir_tumble',d:'Roll back with a parting shot and snare.'}},
     r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_swagger',n:'Swagger',role:'Speed',d:'+8% move speed.'}},
-    r6:{kind:'skill',slot:2, a:{id:'pir_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'pir_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'pir_mark',n:'Bounty',cd:14,role:'Damage',fx:'pir_mark',d:'Mark a target to take extra damage.'}},
+    r6:{kind:'skill',slot:2, a:{id:'pir_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'pir_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'pir_goldrush',n:'Gold Rush',cd:20,role:'Gold Farming',fx:'pir_goldrush',d:'For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate\'s farming tool.'}},
     r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_luck',n:'Lucky',role:'Damage',d:'+12% damage.'}},
     r8:{kind:'skill',slot:3, a:{id:'pir_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'pir_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'pir_spike',n:'Powder Keg',cd:18,role:'Control',fx:'pir_spike',d:'Drop a trap that damages and snares.'}},
     r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Damage',d:'+12% damage.'}, b:{id:'pir_greed',n:'Greed',role:'Damage',d:'+10% damage.'}}
@@ -2486,11 +2495,15 @@ function questUpdate(){
     applyQuest(el,`${eventIcon('event-secret-rift')} ${Z.side.name} · Trial Chamber`,rows,`side${Z.side.id}|${done?'done':'hunt'}`,done); return; }
   let rows,sig;
   if(G.area<0){ rows=qrow(false,eventIcon('event-boss-skull'),`Slay <b>${Z.boss.name}</b>`,null); sig='boss'+Z.id; }
-  else { const qs=areaQuests(); if(!qs.length){ el.classList.add('hide'); return; }
+  else { const qs=areaQuests();
+    const secret=(G.secret && !G.secret.spent && Z.side && !meta.sideFound[Z.side.id]) ? G.secret : null;   // an unfound purple secret hides in this area
+    const secretRow=secret ? qrow(false,eventIcon('event-secret-rift'),`Find the hidden <b>purple rift</b> — ${Z.side.name}`,null) : '';
+    if(!qs.length && !secret){ el.classList.add('hide'); return; }
     rows=qs.map(q=>{ const c=Math.min(q.n||1,G.qs[q.id]||0), done=questDone(q);
       return qrow(done,done?'☑':'☐',q.d,(q.n>1)?`${c}/${q.n}`:null); }).join('');
     if(areaClear()&&G.portal) rows+=qrow(false,eventIcon('event-secret-rift'),'The way opens — take the portal',null);
-    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed'); }
+    rows+=secretRow;
+    sig='z'+Z.id+G.area+'|'+qs.map(q=>Math.min(q.n||1,G.qs[q.id]||0)+'/'+(q.n||1)).join(',')+'|'+(G.portal?'portal':'closed')+(secret?'|secret':''); }
   const oq=(G.optionalMissions||[]).filter(m=>m.discovered);
   if(oq.length){ rows+=oq.map(m=>qrow(m.done,m.done?'☑':'◇','<b>Optional</b> · '+m.name,`${m.progress}/${m.total}`)).join(''); sig+='|optional:'+oq.map(m=>m.id+':'+m.progress+'/'+m.total).join(','); }
   applyQuest(el,`${eventIcon('event-quest-marker')} ${Z.name}`,rows,sig,G.area>=0&&areaClear()&&!!G.portal);
@@ -6219,6 +6232,7 @@ function class2Innate(p,dt){
   if(meta.classId!=='ranger'||!c2def('ranger')) p.clearAim=false;
   if(meta.classId==='mage'){ const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ)); if(moved<1)p._stillT=(p._stillT||0)+dt;else{p._stillT=0;p._stillX=p.x;p._stillZ=p.z;} }
   if((p.bloodlustT||0)>0)p.bloodlustT-=dt;if((p.tacticalT||0)>0)p.tacticalT-=dt;if((p.wraithT||0)>0)p.wraithT-=dt;if((p.wraithwalkT||0)>0)p.wraithwalkT-=dt;if((p.soulStrengthT||0)>0)p.soulStrengthT-=dt;else p.soulStrength=0;
+  if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
   const need=c2Passive('r_patient')?3.5:(c2Passive('r_quick')?2.0:3.0);
@@ -6240,6 +6254,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
     p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
+  if(meta.classId==='pirate'&&c2def('pirate')&&(p.goldRushT||0)>0){ p.goldRushStacks=Math.min(25,(p.goldRushStacks||0)+1); const g=awardGold((6+zoneTier()*4)*p.goldRushStacks); if(g>0){ addText(e.x,e.y+52,e.z,'+'+g+'g ×'+p.goldRushStacks,'#ffd24a',true); try{hudUpdate();}catch(_){} } }   // Gold Rush: each kill banks more, stacking on a streak
   if(meta.classId==='reaper'){
     gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
@@ -6283,6 +6298,8 @@ SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL
 SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
 // Pirate skills reuse ranger FX (pirate-flavored icons via C2_ICON)
 SKILL_FX.pir_pierce=SKILL_FX.r_pierce; SKILL_FX.pir_volley=SKILL_FX.r_volley; SKILL_FX.pir_shadow=SKILL_FX.r_shadow; SKILL_FX.pir_tumble=SKILL_FX.r_tumble; SKILL_FX.pir_smoke=SKILL_FX.r_smoke; SKILL_FX.pir_mark=SKILL_FX.r_mark; SKILL_FX.pir_deathmark=SKILL_FX.r_deathmark; SKILL_FX.pir_spike=SKILL_FX.r_spike;
+// Gold Rush: pirate's gold-farming skill — opens a 12s window where kills bank gold, stacking higher on a killstreak (payout handled in c2OnKill).
+SKILL_FX.pir_goldrush=function(p,ok,am){ p.goldRushT=12; p.goldRushStacks=0; skillRing(p.x,p.z,'#ffd24a','#a8842a',160); burst(p.x,p.y+30,p.z,'#ffd24a',20); addText(p.x,p.y+72,p.z,'GOLD RUSH','#ffd24a',true); SFX.pickup&&SFX.pickup(); };
 // Chronomancer skills reuse mage FX (chrono-flavored icons via C2_ICON)
 SKILL_FX.chr_bolt=SKILL_FX.m_bolt; SKILL_FX.chr_beam=SKILL_FX.m_beam; SKILL_FX.chr_nova=SKILL_FX.m_nova; SKILL_FX.chr_blink=SKILL_FX.m_blink; SKILL_FX.chr_gravity=SKILL_FX.m_gravity; SKILL_FX.chr_barrier=SKILL_FX.m_barrier; SKILL_FX.chr_tempest=SKILL_FX.m_tempest; SKILL_FX.chr_overload=SKILL_FX.m_overload;
 // Throwing-star skills: Piercing Star = single-target/boss (deep pierce), Shuriken Barrage = groups (3 shotgun bursts)
@@ -6421,7 +6438,7 @@ const C2_ICON={
   nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm'),
   nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives'),
   bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard'),
-  pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg'),
+  pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg'),pir_goldrush:skillIcon('pirate-gold-rush'),
   chr_bolt:skillIcon('chrono-time-bolt'),chr_beam:skillIcon('chrono-time-lance'),chr_nova:skillIcon('chrono-slow-field'),chr_blink:skillIcon('chrono-rewind'),chr_gravity:skillIcon('chrono-time-warp'),chr_barrier:skillIcon('chrono-aegis'),chr_tempest:skillIcon('chrono-time-storm'),chr_overload:skillIcon('chrono-singularity')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
@@ -7486,6 +7503,7 @@ function update(dt){
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
+  if(G.time-(G._saveT||0)>8){ G._saveT=G.time; try{autosaveRun();}catch(e){} }   // continuous autosave so a reload/auto-update never loses the dive
   if(G.stageBanner>0) G.stageBanner-=dt;
   if(G.shake>0) G.shake=Math.max(0,G.shake-dt*40);
   if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
@@ -12476,10 +12494,14 @@ function checkUpdate(){
   fetch('index.html?_='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{
     const m=t.match(/const VERSION3D='([^']+)'/);
     if(m && m[1]!==VERSION3D){ let tried; try{tried=sessionStorage.getItem('bf3_upd');}catch(e){}
-      if(tried!==m[1]){ try{sessionStorage.setItem('bf3_upd',m[1]);}catch(e){} _updating=true; toast('Updating to v'+m[1]+'…'); setTimeout(()=>location.reload(),700); } }
+      if(tried!==m[1]){ try{sessionStorage.setItem('bf3_upd',m[1]);}catch(e){} _updating=true; try{autosaveRun();}catch(e){} toast('Updating to v'+m[1]+'… (progress saved)'); setTimeout(()=>{ try{autosaveRun();}catch(e){} location.reload(); },700); } }
   }).catch(()=>{});
 }
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ resize(); lastT=0; checkUpdate(); } });
+// Never lose a run: save on tab-hide, page-hide, and unload (reloads, closes, phone app-switch, auto-update).
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'){ try{autosaveRun();}catch(e){} } });
+window.addEventListener('pagehide',()=>{ try{autosaveRun();}catch(e){} });
+window.addEventListener('beforeunload',()=>{ try{autosaveRun();}catch(e){} });
 titleScreen();
 try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
   sessionStorage.removeItem('bf3_continue_after_slot');

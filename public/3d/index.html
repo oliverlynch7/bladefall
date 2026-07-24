@@ -592,6 +592,11 @@
   #toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);z-index:25;background:rgba(20,21,27,.92);border:1px solid var(--amber-dim);color:var(--amber);font-weight:800;font-size:13px;letter-spacing:.04em;padding:10px 18px;border-radius:12px;opacity:0;transition:opacity .2s,top .2s;pointer-events:none;text-align:center;max-width:80vw;}
   #toast.show{opacity:1;top:24%;}
   #pausebtn{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:12px;z-index:7;width:34px;height:34px;border-radius:9px;background:rgba(28,30,38,.5);border:1px solid var(--line);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
+  #eschint{position:absolute;top:calc(env(safe-area-inset-top) + 50px);right:12px;z-index:7;display:none;align-items:center;gap:5px;padding:3px 8px;border-radius:8px;background:rgba(12,13,18,.62);border:1px solid var(--line);color:#c9cfdb;font-size:11px;font-weight:800;pointer-events:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  #eschint .ico{width:13px;height:13px;}
+  #eschint .eschk{letter-spacing:.05em;}
+  @media (pointer:fine){ #eschint:not(.hide){display:flex;} }   /* keyboard hint — desktop only (touch has the button) */
+  .pausecard #resBtn.restop{min-height:100px!important;border:2px solid #b98a3f;box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 22px rgba(232,163,61,.20);margin:0 auto 10px;}
   .skingrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px;}
   .skintile{position:relative;overflow:hidden;border:1.5px solid #353a48;border-radius:14px;padding:10px 8px 12px;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--skin) 18%,transparent),transparent 58%),linear-gradient(155deg,#1d202a,#0e1017);cursor:pointer;text-align:center;transition:.16s transform,.16s border-color,.16s box-shadow;}
   .skintile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--skin) 62%,#62697b);box-shadow:0 12px 24px rgba(0,0,0,.35),0 0 18px color-mix(in srgb,var(--skin) 18%,transparent)}
@@ -897,6 +902,7 @@
 <div id="combo"></div>
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
+<div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk">Esc</span></div>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
   <div id="lookzone"></div>
@@ -933,7 +939,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.333.0-autopilot';
+const VERSION3D='1.334.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1369,10 +1375,10 @@ function musicUnlock(){
   if(musCur && musCur.paused && musicOK()){ const p=musCur.play(); if(p&&p.catch) p.catch(()=>{}); }
   else if(!musCur && musCurKey){ const k=musCurKey; musCurKey=null; musicPlay(k,{fade:400}); }
 }
-function pauseGameAudio(){
+function pauseGameAudio(keepMusic){
   if(gameAudioPaused) return;
   gameAudioPaused=true; pausedHtmlAudio=[];
-  const all=[...Object.values(musEls),...musicStings];
+  const all=keepMusic?[...musicStings]:[...Object.values(musEls),...musicStings];   // keepMusic: pause menu leaves the current track playing
   for(const a of all){
     if(a._f){ clearInterval(a._f); a._f=null; }
     if(!a.paused){ pausedHtmlAudio.push(a); try{ a.pause(); }catch(e){} }
@@ -1907,11 +1913,11 @@ const CLASS2={
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
     innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster.'},
     cap:{name:'Phantom', d:'+12% damage, +10% attack speed, and take 12% less damage.'},
-    r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'nin_strike',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_fan',n:'Fan of Knives',cd:6,role:'Group Damage',fx:'nin_fan',d:'Loose a fan of blades across your front.'}},
+    r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'nin_strike',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_barrage',n:'Shuriken Barrage',cd:8,role:'Group Damage',fx:'nin_barrage',d:'Fire three back-to-back shotgun bursts of stars — shreds packs of enemies.'}},
     r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:'+10% attack speed.'}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Damage',d:'+12% damage.'}},
     r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'nin_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'nin_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
     r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'Take 10% less damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Damage',d:'+10% damage — chain your strikes.'}},
-    r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_tumble',n:'Tumble',cd:10,role:'Control',fx:'nin_tumble',d:'Roll back with a parting strike that snares nearby foes.'}},
+    r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_pierce',n:'Piercing Star',cd:9,role:'Single Target',fx:'nin_pierce',d:'Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.'}},
     r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'Take 10% less damage and slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
     r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
     r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
@@ -1993,20 +1999,20 @@ const TRIALS={
     tips:['Move with the stick (or WASD).','Tap FIRE to loose an arrow — it aims for you.','DODGE rolls you out of danger. Keep your distance.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
   mage:{cls:'mage',stage:5,seed:503,name:'Trial of the Staff',kills:6,
     tips:['Move with the stick (or WASD).','Tap FIRE to cast — your weapon’s element decides the damage.','DODGE gets you out of trouble. You are fragile.','Fight with basic attacks until rank 2 unlocks Skill 1.','Clear 6 foes, then take the portal.']},
-  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:26,earned:true,tier:7,
-    tips:['The dead do not welcome you.','Every room is a fight. Reap all 26. Then claim the scythe.']},
-  paladin:{cls:'paladin',stage:9,seed:505,name:'Trial of the Paladin',kills:20,earned:true,tier:5,
-    tips:['The fire tests the worthy.','Hold the line. Strike down all 20. Then take up the light.']},
-  necromancer:{cls:'necromancer',stage:13,seed:506,name:'Trial of the Necromancer',kills:24,earned:true,tier:7,
-    tips:['The dead answer only the worthy.','Survive the host. Fell all 24. Then command death itself.']},
-  ninja:{cls:'ninja',stage:3,seed:507,name:'Trial of the Ninja',kills:14,earned:true,tier:2,
-    tips:['Speed is the only shield that matters.','Cut down all 14 before they can touch you. Then take the blades.']},
-  berserker:{cls:'berserker',stage:1,seed:508,name:'Trial of the Berserker',kills:10,earned:true,tier:1,
-    tips:['Rage is a weapon. Learn to aim it.','Cut down all 10. The angrier you get, the harder you hit.']},
-  pirate:{cls:'pirate',stage:5,seed:509,name:'Trial of the Pirate',kills:14,earned:true,tier:3,
-    tips:['No rules down here. Only plunder.','Gun down all 14 and the loot is yours.']},
-  chronomancer:{cls:'chronomancer',stage:7,seed:510,name:'Trial of the Chronomancer',kills:16,earned:true,tier:4,
-    tips:['Time favors the patient — and the fast.','Freeze and fell all 16. Then bend time itself.']}
+  reaper:{cls:'reaper',stage:11,seed:504,name:'Trial of the Reaper',kills:30,earned:true,tier:6,
+    tips:['The dead do not welcome you. Only the strong leave.','Every room is a fight. Reap all 30. Then claim the scythe.']},
+  paladin:{cls:'paladin',stage:9,seed:505,name:'Trial of the Paladin',kills:26,earned:true,tier:5,
+    tips:['The fire tests the worthy. This is no place for the unready.','Hold the line against all 26. Then take up the light.']},
+  necromancer:{cls:'necromancer',stage:13,seed:506,name:'Trial of the Necromancer',kills:34,earned:true,tier:7,
+    tips:['The dead answer only the strongest. Turn back if you are not.','Survive the host. Fell all 34. Then command death itself.']},
+  ninja:{cls:'ninja',stage:3,seed:507,name:'Trial of the Ninja',kills:18,earned:true,tier:2,
+    tips:['Speed is the only shield that matters here.','Cut down all 18 before they can touch you. Then take the blades.']},
+  berserker:{cls:'berserker',stage:1,seed:508,name:'Trial of the Berserker',kills:14,earned:true,tier:1,
+    tips:['Rage is a weapon. Prove you can aim it.','Cut down all 14. The angrier you get, the harder you hit.']},
+  pirate:{cls:'pirate',stage:5,seed:509,name:'Trial of the Pirate',kills:20,earned:true,tier:3,
+    tips:['No rules down here. Only plunder — if you can take it.','Gun down all 20 and the loot is yours.']},
+  chronomancer:{cls:'chronomancer',stage:7,seed:510,name:'Trial of the Chronomancer',kills:24,earned:true,tier:4,
+    tips:['Time favors the patient — and the deadly.','Freeze and fell all 24. Then bend time itself.']}
 };
 const CHARACTER_XP=lv=>Math.round(135+Math.max(1,lv)*90+Math.pow(Math.max(1,lv),2)*5);
 const RANK_XP=r=>Math.round(150*Math.pow(Math.max(1,r),1.7));
@@ -3596,7 +3602,7 @@ function zoneClear(){
 }
 function showGameUI(v){
   if(v) document.body.classList.remove('t-title');
-  ['hud','hudprogress','controls','pausebtn'].forEach(id=>document.getElementById(id).classList.toggle('hide',!v));
+  ['hud','hudprogress','controls','pausebtn','eschint'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
   if(!v) document.getElementById('pethud').classList.add('hide');
   else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
   // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
@@ -5209,10 +5215,11 @@ function spawnCrackWall(x,z,y,w,h,d,shots){
   return e;
 }
 function spawnEnemy(type,x,z,isBoss){
-  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?10:1);   // bosses carry ~10x HP so a fight lasts a fight, not two hits
+  const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1);   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale)
   const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
-    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
+    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1)*(_earnedTrial?1.25:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
@@ -6232,6 +6239,22 @@ SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=M
 SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
 // Ninja skills reuse ranger/warrior FX (ninja-flavored icons via C2_ICON)
 SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL_FX.nin_step=SKILL_FX.x_step; SKILL_FX.nin_smoke=SKILL_FX.r_smoke; SKILL_FX.nin_mark=SKILL_FX.r_mark; SKILL_FX.nin_tumble=SKILL_FX.r_tumble; SKILL_FX.nin_fury=SKILL_FX.w_berserk; SKILL_FX.nin_storm=SKILL_FX.w_whirl;
+// Throwing-star skills: Piercing Star = single-target/boss (deep pierce), Shuriken Barrage = groups (3 shotgun bursts)
+SKILL_FX.nin_pierce=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,1000); if(t) p.yaw=Math.atan2(t.x-p.x,t.z-p.z);
+  const sp=1050,oy=p.y+24; let vx=Math.sin(p.yaw)*sp,vz=Math.cos(p.yaw)*sp,vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z),tt=Math.max(0.1,d/sp); vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt; vy=((t.y+t.h*0.5)-oy)/tt; }
+  burst(p.x+Math.sin(p.yaw)*18,oy,p.z+Math.cos(p.yaw)*18,'#e8354a',12); skillRing(p.x,p.z,'#e8354a','#8c1020',60);
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,gravity:0,
+    size:12,color:'#e6e6ec',shape:'orb',glow:1,trail:'#e8354a',dmg:(w?w.dmg:8)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL),
+    kb:200,pierce:ok?6:2,el:ok?(w&&w.el):null,life:1.3,hitSet:[]});
+  p.atkTimer=0.18; SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,9); };
+SKILL_FX.nin_barrage=function(p,ok,am){ const w=p.weapon;
+  const one=()=>{ if(mode!=='play'||!G||!G.p) return; const pp=G.p, t=projectileAimTarget(pp,720); if(t) pp.yaw=Math.atan2(t.x-pp.x,t.z-pp.z);
+    const oy=pp.y+24,N=6,sp=780,dmg=(w?w.dmg:8)*effPower(pp)*0.9*am*(ok?1:OFFCLASS_MUL);
+    for(let i=0;i<N;i++){ const a=pp.yaw+(i-(N-1)/2)*0.14;
+      G.projectiles.push({owner:'player',x:pp.x+Math.sin(a)*16,y:oy,z:pp.z+Math.cos(a)*16,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,gravity:0,size:6,color:'#e6e6ec',shape:'orb',glow:1,dmg,kb:90,pierce:1,el:ok?(w&&w.el):null,life:660/sp,hitSet:[]}); }
+    burst(pp.x,oy,pp.z,'#e8354a',5); SFX.shoot&&SFX.shoot(); };
+  one(); setTimeout(one,150); setTimeout(one,300); p.atkTimer=0.2; };
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
   G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:14,color:col,shape:'lance',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2*am*(ok?1:OFFCLASS_MUL),kb:100,pierce:99,el:ok?(w&&w.el):null,life:1,hitSet:[]}); skillRing(p.x,p.z,col,col,70); SFX.magic(w&&w.el); };
 SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,680),tx=t?t.x:p.x+Math.sin(p.yaw)*240,tz=t?t.z:p.z+Math.cos(p.yaw)*240,dmg=(w?w.dmg:10)*effPower(p)*1.3*am*(ok?1:OFFCLASS_MUL); skillRing(tx,tz,'#a98cff','#4b2770',190);
@@ -6349,7 +6372,8 @@ const C2_ICON={
   pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer'),
   necro_summon:skillIcon('necro-summon-skeletons'),necro_raise:skillIcon('necro-raise-the-dead'),necro_army:skillIcon('necro-army-of-the-dead'),
   necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm'),
-  nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm')
+  nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm'),
+  nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
@@ -9571,7 +9595,9 @@ function openTrainer(back){
     const sub=cs.sub?C.subs.find(s=>s.id===cs.sub):null;
     const acc=ACC[cid]||'#c9a86a';
     const path=un?('Rank '+cs.rank+'/10'+(sub?' · '+sub.disp:(c2def(cid)?' · '+Object.keys(cs.ch||{}).length+' choices set':(cs.rank>=2?' · Choose a path':'')))):'';
-    const hint=un?'':(C.earned?'Win the Trial of the Reaper, hidden in a secret of The Abyss':'Clear its Trial to unlock');
+    let hint='';
+    if(!un){ let loc=null; for(const Z of ZONES){ if(Z.side&&Z.side.trial===cid){ loc=Z; break; } }
+      hint = loc ? `Find ${loc.side.icon||'🌀'} <b>${loc.side.name}</b> — a hidden secret in <b>${loc.name}</b> — and win the ${TRIALS[cid]?TRIALS[cid].name:'Trial'}` : (C.earned?'Win its Trial, hidden in a secret zone':'Clear its Trial to unlock'); }
     const fams=C.family.map(f=>`<span class="ccfam">${FAM[f]||f}</span>`).join('');
     const btns=un
       ? `${sel?'':`<button class="bigbtn ccbtn" data-eq="${cid}">Equip</button>`}${cs.rank>=2&&(sub||c2def(cid))?`<button class="bigbtn ghost ccbtn" data-re="${cid}">Respec</button>`:''}`
@@ -10173,11 +10199,11 @@ function startRebind(id,slot,rerender){
   window.addEventListener('keydown',onKey,true);
 }
 function openPause(){
-  pauseGameAudio();
+  pauseGameAudio(true);
   mode='pause';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';
-  showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
-    ${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction')}
+  showOverlayHTML(`<div class="card pausecard">${navCard('resBtn','icons/resume.png','Resume','Return to the fight','npcaction restop')}
+    <p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     ${IN_ARENA?`<button class="bigbtn" id="arenaCfgBtn">⚔️ Arena Loadout &amp; Maps</button>`:''}
     ${G&&G.trial?`<button class="bigbtn" id="skipTrialBtn">⏭ ${TRIALS[G.trial].earned?'Leave the trial':'Skip the tutorial'}</button>`:''}
     <div class="sect">Character</div>
@@ -10282,7 +10308,7 @@ function openPauseSettingsV2(){
   bindAudioSettings();
 }
 function openPauseV2(){
-  pauseGameAudio(); mode='pause';
+  pauseGameAudio(true); mode='pause';
   showOverlayHTML(`<div class="card pausecard"><p class="ovkicker">Catch your breath</p><h2 class="ovh">Paused</h2>
     <section class="pausegroup pausegameplay"><div class="pausegrouplabel">In-Game</div><div class="navgrid">
         ${navCard('gearBtn','icons/character-sheet.png','Gear','Inspect equipment')}

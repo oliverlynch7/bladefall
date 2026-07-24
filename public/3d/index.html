@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.348.0-autopilot';
+const VERSION3D='1.349.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1953,14 +1953,14 @@ const CLASS2={
     r9:{kind:'passive', a:{id:'necro_master',n:'Master of Death',role:'Minions',d:'Keep more minions at once and they hit even harder.'}, b:{id:'necro_pest',n:'Pestilence',role:'Damage',d:'+12% damage against enemies near your minions.'}}
   },
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
-    innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster.'},
-    cap:{name:'Phantom', d:'+12% damage, +10% attack speed, and take 12% less damage.'},
+    innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster. You can EVADE attacks entirely (they MISS) — and every dodge stacks +9% damage (up to 5), fading if you stop dodging.'},
+    cap:{name:'Phantom', d:'+12% damage, +10% attack speed, take 12% less damage, and evade even more often.'},
     r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'nin_strike',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_barrage',n:'Shuriken Barrage',cd:8,role:'Group Damage',fx:'nin_barrage',d:'Fire three back-to-back shotgun bursts of stars — shreds packs of enemies.'}},
     r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:'+10% attack speed.'}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Damage',d:'+12% damage.'}},
     r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'nin_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'nin_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
-    r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'Take 10% less damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Damage',d:'+10% damage — chain your strikes.'}},
+    r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'+12% chance to dodge attacks entirely (MISS), and take 10% less damage. Each dodge also stacks your damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Damage',d:'+10% damage — chain your strikes.'}},
     r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_pierce',n:'Piercing Star',cd:9,role:'Single Target',fx:'nin_pierce',d:'Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.'}},
-    r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'Take 10% less damage and slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
+    r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'+8% dodge chance and take 10% less damage — slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
     r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
     r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
   },
@@ -3054,6 +3054,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='warrior'&&c2def('warrior')){ if(!(G&&G._desig))v*=1.08; if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
   if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){ v*=1.08; if(c2Passive('m_glass'))v*=1.15; if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
   if(meta.classId==='paladin'&&c2def('paladin')){ const holy=!!(p.weapon&&p.weapon.el==='holy');
+    v*=1.06;                                                  // small baseline so a non-holy paladin still scales
     if(holy)v*=1.12;                                          // innate Holy Warrior
     if(holy&&c2Passive('pal_holypow'))v*=1.12;               // Holy Power
     if(c2Passive('pal_burn'))v*=1.10;                        // Burning Light
@@ -3065,7 +3066,11 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='ninja'&&c2def('ninja')){ const blade=p.weapon&&(p.weapon.art==='dagger'||p.weapon.art==='sword');
     if(blade)v*=1.08;   // innate Killer Instinct
     if(c2Passive('nin_deadly'))v*=1.12; if(c2Passive('nin_combo'))v*=1.10; if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
+    if((p.evadeStackT||0)>0)v*=1+Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.09;   // Evasion snowball: each dodge stacks +9% damage
     if(classState('ninja').rank>=10)v*=1.12; }
+  if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
+    if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
+    if(classState('ranger').rank>=10)v*=1.12; }
   if(meta.classId==='berserker'&&c2def('berserker')){ const low=p.hp<effMaxHp(p)*.5; v*=1.08; if(low)v*=1.15;   // innate Bloodrage
     if(c2Passive('bsk_heavy'))v*=1.12; if(c2Passive('bsk_reckless'))v*=1.10; if(c2Passive('bsk_brutal'))v*=1.12; if(c2Passive('bsk_rage')&&low)v*=1.15;
     if(classState('berserker').rank>=10)v*=1.12; }
@@ -6272,6 +6277,7 @@ function class2Innate(p,dt){
   if(meta.classId!=='ranger'||!c2def('ranger')) p.clearAim=false;
   if(meta.classId==='mage'){ const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ)); if(moved<1)p._stillT=(p._stillT||0)+dt;else{p._stillT=0;p._stillX=p.x;p._stillZ=p.z;} }
   if((p.bloodlustT||0)>0)p.bloodlustT-=dt;if((p.tacticalT||0)>0)p.tacticalT-=dt;if((p.wraithT||0)>0)p.wraithT-=dt;if((p.wraithwalkT||0)>0)p.wraithwalkT-=dt;if((p.soulStrengthT||0)>0)p.soulStrengthT-=dt;else p.soulStrength=0;
+  if((p.evadeStackT||0)>0)p.evadeStackT-=dt;else p.evadeStacks=0;   // Ninja evasion snowball decays if you stop dodging
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
@@ -6805,10 +6811,31 @@ function foeName(e){ if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 function foeHit(e,atk){ return {name:foeName(e), attack:atk||'a strike'}; }
+// ===== NINJA EVASION — the ninja's signature: enemy attacks can simply MISS, and every dodge
+// stacks a boost that makes the ninja hit harder (evasion snowball, see effPower). =====
+const NIN_EVADE_CAP=5;
+function effEvade(p){                                        // chance (0..0.6) an incoming attack whiffs — ninja only
+  if(meta.classId!=='ninja'||!c2def('ninja')) return 0;
+  let e=0.10;                                               // innate nimbleness
+  if(c2Passive('nin_evasive')) e+=0.12;                    // Evasion passive leans into true dodge
+  if(c2Passive('nin_ghost'))   e+=0.08;                    // Ghostwalk
+  if(classState('ninja').rank>=10) e+=0.05;                // Phantom
+  if((p.evadeStackT||0)>0) e+=Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.02;   // dodges beget dodges
+  return Math.min(0.60,e);
+}
+function ninjaEvade(p,sx,sz){                               // a dodge: MISS text, brief grace, +1 stacking boost
+  p.invuln=Math.max(p.invuln,0.22);                        // short grace so a multi-hit volley doesn't all connect
+  p.evadeStacks=Math.min(NIN_EVADE_CAP,(p.evadeStacks||0)+1); p.evadeStackT=5;
+  addText(p.x,p.y+p.h+10,p.z,'MISS','#9fe0ff',true);
+  if(p.evadeStacks>1) addText(p.x,p.y+p.h+30,p.z,'⚡'+p.evadeStacks,'#c9f0ff');   // building damage snowball
+  try{ burst(p.x,p.y+16,p.z,'#9fe0ff',8); SFX.dodge&&SFX.dodge(); }catch(_){}
+  G.combo=G.combo; hudUpdate();
+}
 function hurtPlayer(dmg,sx,sz,by){
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
+  if(typeof sx==='number' && meta.classId==='ninja'){ const ev=effEvade(p); if(ev>0 && Math.random()<ev){ ninjaEvade(p,sx,sz); return; } }   // NINJA: dodge the hit entirely
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;

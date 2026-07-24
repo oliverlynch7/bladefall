@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.354.0-autopilot';
+const VERSION3D='1.355.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1001,7 +1001,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared'];
@@ -1013,7 +1013,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'shoulder',lookSens:1,fpsFov:92,silhouette:true,dmgNumbers:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'shoulder',lookSens:1,fpsFov:92,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -1748,6 +1748,7 @@ const ARCHES={
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
+  flintlock:{disp:'Flintlock Pistol',cls:'ranged',sch:'phys',dmg:16,cd:.60,kb:250,art:'flintlock',proj:{speed:940,size:5,pierce:1,range:760,color:'#ffd98a',shape:'arrow'}},   // pirate signature — slow, hard-hitting single lead shot with a heavy kick
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
   arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'wand',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1,seek:true}}, // wand-family (behaves like one): seeks + pierces
@@ -1794,7 +1795,7 @@ const CLASSES={
       {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
       {id:'wcharge',n:'Charge',icon:skillIcon('charge'),cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
       {id:'berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
-  ranger:{disp:'Ranger',icon:classIcon('ranger'),attackStyle:'ranger',family:['bow','cross','dagger','javelin'],
+  ranger:{disp:'Ranger',icon:classIcon('ranger'),attackStyle:'ranger',family:['bow','cross','dagger','javelin','flintlock'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
           {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:skillIcon('ranger-quickshot'),cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
@@ -1849,7 +1850,7 @@ const CLASSES={
       {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
       {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
-  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['cross','bow','sword','javelin'],
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['flintlock','cross','bow','sword','javelin'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
       {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},
@@ -2165,7 +2166,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['bow','Old Musket'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod']};
 function classStartWeapon(cid){
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
@@ -2174,7 +2175,7 @@ function classStartWeapon(cid){
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
    Deliberately below-par for its rarity — bad-luck insurance, never the best option. */
-const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe'};   // archetype ids, not arts
+const SHOPWEAP={warrior:'sword',ranger:'bow',mage:'firestaff',reaper:'scythe',pirate:'flintlock'};   // archetype ids, not arts
 const SHOPPLAIN={common:'Plain',uncommon:'Serviceable',rare:'Standard',epic:'Reliable'};
 function shopWeapon(cid,rid){
   const aid=ARCHES[SHOPWEAP[cid]]?SHOPWEAP[cid]:'sword', a=ARCHES[aid];
@@ -3369,7 +3370,7 @@ function openBag(back){
    or an armor slot) into a RANDOM new piece of that category at the next rarity — a slot machine. */
 function weapCat(w){ return w.sch==='mag'?'magic':(w.cls==='melee'?'melee':'ranged'); }
 // finalized weapon FAMILY (by art) + owning class, for tooltips
-const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Throwing Knives',javelin:'Javelins',staff:'Staff',wand:'Wand'};
+const ART_FAMILY={sword:'Sword',great:'Greatsword',axe:'Battle Axe',hammer:'Warhammer',scythe:'Scythe',spellblade:'Spellblade',bow:'Longbow',cross:'Crossbow',dagger:'Throwing Knives',javelin:'Javelins',flintlock:'Flintlock',staff:'Staff',wand:'Wand'};
 function weapFamily(w){ return (w&&ART_FAMILY[w.art])||'Weapon'; }
 function weapClassName(w){ if(!w) return ''; for(const c of CLASSIDS){ if(CLASSES[c].family.includes(w.art)) return CLASSES[c].disp; } return ''; }
 function damageTypeId(w){ return w&&w.sch==='mag'?'magic':(w&&w.cls==='ranged'?'ranged':'physical'); }
@@ -4541,7 +4542,14 @@ const EXPANDED_SCAPES={
       canyonWall(-428,-220,220,+1,rnd,32,300); canyonWall(-428,220,220,+1,rnd,32,300);   // 220u west-road gateway at z=0
       for(let k=0;k<3;k++) vplat(-280,-342-k*40,10,118,76,{safeRoute:true,recovery:true,canyonStep:true});
       wallPair(fossils,410); wallPair(needle,460);
-      spawnCrackWall(250,-150,0, 150,180,48, 3);   // BREAKABLE cracked wall — attack it ~3x to smash it open (demo placement in the Dry Wash; reposition to the exact blocked spot)
+      // ── SEALED TREASURE VAULT — a cracked wall in the Dry Wash hides a reward. Smash it (~3 hits) to break in. ──
+      { const vx=290, vz=170;
+        G.walls.push({x:vx+82,z:vz,w:30,d:190,h:174});     // east back wall
+        G.walls.push({x:vx,z:vz-86,w:194,d:30,h:174});     // north wall
+        G.walls.push({x:vx,z:vz+86,w:194,d:30,h:174});     // south wall
+        spawnCrackWall(vx-82,vz,0, 46,178,152,3);          // WEST entrance = the BREAKABLE cracked wall (~3 hits)
+        G.chests.push({x:vx+4,z:vz,y:0,opened:false,bob:0});   // guaranteed reward inside (not a mimic)
+        G.torches.push({x:vx-100,z:vz-58,ph:rnd()*6.28}); G.torches.push({x:vx-100,z:vz+58,ph:rnd()*6.28}); }   // torches flank the cracked wall — a hint you can break through
       // Bone-step climb, a narrow high shelf, and gust-facing pillar weave.
       climbRun(120,-1640,0,-300,-2080,160,72); vplat(-300,-2080,160,760,620,{terrace:true,checkpoint:true});
       for(let k=0;k<9;k++){ const x=-80+k*80,z=-2460-(k%2)*110; vcol(x,z,48,48,100+(k%3)*46); vplat(x,z,160,76,76,{pillar:true}); }
@@ -10651,6 +10659,7 @@ function openPause(){
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
     ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <div class="sect">Leave</div>
     <div class="pgrid">
@@ -10666,6 +10675,7 @@ function openPause(){
     if(_st) _st.onclick=()=>{ resumeGameAudio(false); if(TRIALS[G.trial].earned) abandonTrial(); else skipTrial(); }; }
   var _ss=document.getElementById('sensSlider'); if(_ss) _ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(_ss.value)||1; var sv=document.getElementById('sensVal'); if(sv) sv.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   var _fv=document.getElementById('fovSlider'); if(_fv) _fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(_fv.value)||92; var fv=document.getElementById('fovVal'); if(fv) fv.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  var _rd0=document.getElementById('rdSlider'); if(_rd0) _rd0.addEventListener('input',()=>{ meta.renderDist=parseFloat(_rd0.value)||1; var rv=document.getElementById('rdVal'); if(rv) rv.textContent=Math.round(meta.renderDist*100)+'%'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
@@ -10706,6 +10716,7 @@ function openPauseSettingsV2(){
     </div>
     ${meta.camMode!=='far'?`<div class="setrow"><label><span>Look / mouse sensitivity</span><b id="sensVal">${(meta.lookSens||1).toFixed(1)}×</b></label><input id="sensSlider" type="range" min="0.3" max="2.5" step="0.1" value="${meta.lookSens||1}"></div>`:''}
     ${meta.camMode==='fps'?`<div class="setrow"><label><span>First-person field of view</span><b id="fovVal">${meta.fpsFov||92}°</b></label><input id="fovSlider" type="range" min="70" max="115" step="1" value="${meta.fpsFov||92}"></div>`:''}
+    <div class="setrow"><label><span>Render distance <span style="opacity:.6;font-size:11px">(further sight · higher = more GPU)</span></span><b id="rdVal">${Math.round((meta.renderDist||1)*100)}%</b></label><input id="rdSlider" type="range" min="0.55" max="2.2" step="0.05" value="${meta.renderDist||1}"></div>
     ${audioSettingsHTML()}
     <button class="bigbtn ghost" id="settingsBack">Back to Pause Menu</button></div>`);
   document.getElementById('settingsBack').onclick=openPauseV2;
@@ -10713,6 +10724,7 @@ function openPauseSettingsV2(){
   document.getElementById('camBtn').onclick=()=>{ const o=['far','shoulder','fps']; meta.camMode=o[(o.indexOf(meta.camMode)+1)%3]; persist(); openPauseSettingsV2(); };
   const ss=document.getElementById('sensSlider'); if(ss) ss.addEventListener('input',()=>{ meta.lookSens=parseFloat(ss.value)||1; const v=document.getElementById('sensVal'); if(v) v.textContent=meta.lookSens.toFixed(1)+'×'; persistGlobal(); });
   const fv=document.getElementById('fovSlider'); if(fv) fv.addEventListener('input',()=>{ meta.fpsFov=parseInt(fv.value)||92; const v=document.getElementById('fovVal'); if(v) v.textContent=meta.fpsFov+'°'; persistGlobal(); });
+  const rd=document.getElementById('rdSlider'); if(rd) rd.addEventListener('input',()=>{ meta.renderDist=parseFloat(rd.value)||1; const v=document.getElementById('rdVal'); if(v) v.textContent=Math.round(meta.renderDist*100)+'%'; persistGlobal(); });
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPauseSettingsV2(); };
   document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
@@ -11078,6 +11090,13 @@ function weaponMesh(w,swing){
       bx(0,15,0, 24,2.8,3, iron); bx(0,15,0, 24,1.2,1.4, tint(iron,'#fff',0.2)); bx(-12.6,15,0, 2.6,5,4.6, bone); bx(12.6,15,0, 2.6,5,4.6, bone);  // prod + limb tips
       for(const s of [-1,1]) bx(s*7,15,0, 2,3.4,3.6, tint(iron,'#000',0.3));                                      // prod bindings
       bx(0,15,-1.6, 22,0.8,0.8, sinew); bx(0,21,0, 2,9,2, dkb,glow); bx(0,26,0, 3,2.2,2, blade,glow); bx(0,25,1.4, 0.8,7,0.6, edge); break;   // string + bolt + fletch glint
+    case 'flintlock': // flintlock pistol — wooden grip, iron barrel forward, brass lock + curled hammer
+      pushM(); mv(0,-4,-2); rotX(0.4); box(4.4,12,5, wrap); mv(0,-6.5,0); box(5,3,5.4, boneDk); popM();   // angled grip + butt cap
+      bx(0,3,1, 5,6.5,7, iron); bx(0,3,4.7, 5.4,5.4,1.4, gold);                                            // lock frame + brass sideplate
+      bx(0,4,10, 3.2,3.2,16, tint(iron,'#000',0.15)); bx(0,4,10, 1.2,1.2,16.4, tint(iron,'#fff',0.18));    // barrel forward (+z) + shine line
+      bx(0,4,18.6, 4,4,2.4, gold); bx(0,4,19.8, 2,2,1, dkb,glow);                                          // muzzle ring + bore
+      bx(0,7.8,-1.2, 2,4.2,2.4, gold); pushM(); mv(0,9.6,-1.2); rotX(-0.5); box(1.6,3,1.6, iron); popM();  // hammer/cock curled back
+      bx(0,-1.6,4, 3,3,1.2, iron); bx(0,-3,5, 1.2,3,1.2, iron); break;                                     // trigger guard + trigger
     case 'staff': // necro staff — gnarled shaft, skull with glowing sockets, floating crystal
       bx(0,16,0, 3,44,3, '#3a2c1e'); bx(1.4,26,0, 1.6,10,1.6, haft); bx(-1.3,10,0, 1.5,9,1.5, haft); bx(0,-4,0, 3.6,3,3.6, iron);  // shaft knots + ferrule
       for(let i=0;i<3;i++) bx(0,4+i*6,1.9, 3.2,0.8,0.6, boneDk);                                                   // sinew bindings
@@ -11270,7 +11289,7 @@ function drawFPWeapon(p,t){
   const atk=p.atkTimer>0, sw=atk?(1-(p.atkTimer/0.26)):0, bob=Math.sin(t*2)*1.4, sS=Math.sin(sw*Math.PI);
   const tilt={orb:0.30,staff:0.52,rod:0.52,scepter:0.52,wand:0.62,bow:0.38}[w.art]||1.30;    // magic implements + bow held upright; blades angled across
   // per-weapon-kind attack motion — every strike travels DOWN/FORWARD (raise first, then commit)
-  const KIND=w.cls!=='melee' ? ((w.art==='bow'||w.art==='cross')?'shoot':'cast')
+  const KIND=w.cls!=='melee' ? ((w.art==='bow'||w.art==='cross'||w.art==='flintlock')?'shoot':'cast')
     : (w.art==='dagger'||w.art==='javelin')?'stab' : (w.art==='great'||w.art==='axe')?'chop'
     : (w.art==='hammer')?'slam' : (w.art==='scythe')?'reap' : 'slash';
   let rxA=tilt, ryA=0, rzA=0, lunge=0, lift=0;
@@ -12467,13 +12486,14 @@ function render(t){
   const cx=G?G.cam.x:0, cz=G?G.cam.z:0, cyy=G?(G.cam.y||0):0;
   const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
   const shx=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0, shy=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0;
+  const _rd=Math.max(0.55,Math.min(2.2,meta.renderDist||1));   // Render Distance slider: pushes the fog wall out (see further) or pulls it in (better perf)
   if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
     const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
     PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
     if(G) G.eye={x:ex,y:ey,z:ez};
-    gl.uniform2f(U.uFogNF,210,820);
+    gl.uniform2f(U.uFogNF,210,820*_rd);
   } else if(meta.camMode==='shoulder'){ // over-the-shoulder: player aims the camera (mouse / drag); walls block the view ahead
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pitR=(G&&G.camPitch!=null)?G.camPitch:0.12, fx=Math.sin(cy), fz=Math.cos(cy);
     const pit=Math.max(-0.5,Math.min(0.9,pitR));   // over-the-shoulder keeps a sane frame even when the stored pitch is extreme
@@ -12481,12 +12501,12 @@ function render(t){
     PROJ=mPersp(62*Math.PI/180,VW/VH,18,2400);   // higher near plane = far better depth precision (kills z-fighting flicker)
     VIEW=mLookAt([cx-fx*hd+shx, eh+shy+cyy, cz-fz*hd],[cx+fx*120, 50-Math.sin(pit)*72+cyy, cz+fz*120],[0,1,0]);
     if(G) G.eye={x:cx-fx*hd,y:eh+cyy,z:cz-fz*hd};
-    gl.uniform2f(U.uFogNF,300,880);
+    gl.uniform2f(U.uFogNF,300,880*_rd);
   } else { // classic high chase overview
     PROJ=mPersp(50*Math.PI/180,VW/VH,45,2400);   // the chase cam sits ~430u from the world — a big near plane is safe and greatly improves depth precision (no z-fighting)
     VIEW=mLookAt([cx+shx,296+shy+cyy,cz+330],[cx,26+cyy,cz-4],[0,1,0]);
     if(G) G.eye={x:cx,y:296+cyy,z:cz+330};
-    gl.uniform2f(U.uFogNF,460,1320);
+    gl.uniform2f(U.uFogNF,460,1320*_rd);
   }
   if(G && G.hub){   // HUB ONLY: push the far plane + fog way out so you can see cleanly from one edge of the Waystation to the other
     const fov = meta.camMode==='fps'?(meta.fpsFov||92):meta.camMode==='shoulder'?62:50;

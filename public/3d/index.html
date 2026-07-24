@@ -939,7 +939,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.334.0-autopilot';
+const VERSION3D='1.335.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9610,7 +9610,7 @@ function openTrainer(back){
       <div class="ccbtns">${btns}</div>
     </div>`; }).join('');
   const showSeal=masteredStarters();
-  const sealRow=showSeal?`<div class="achlist" style="max-height:none;margin:0 0 14px"><div class="gearrow" style="--spine:#e8c15a;background:linear-gradient(90deg,#33290f88,#171923)"><div class="gi eventgi" style="font-size:20px">🎖️</div>
+  const sealRow=showSeal?`<div class="achlist" style="max-height:none;margin:0 0 14px"><div class="gearrow" style="--spine:#e8c15a;background:linear-gradient(90deg,#33290f88,#171923)"><div class="gi eventgi" style="font-size:20px"><img src="icons/drillmasters-seal.png?v=${VERSION3D}" alt="" style="width:34px;height:34px;object-fit:contain;vertical-align:middle"></div>
       <div style="flex:1;min-width:0"><div class="gn" style="color:#f0d78a">The Drillmaster's Seal</div>
         <div class="gd">${meta.masterSeal?'<b style="color:var(--good)">Acquired</b> · switch class &amp; respec from the pause menu, anywhere':'Switch class &amp; respec from the pause menu, anywhere — mid-run, no marching back'}</div></div>
       ${meta.masterSeal?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn sealbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${meta.gold>=SEAL_COST?'':'opacity:.5'}">${actionIcon('buy')}${SEAL_COST.toLocaleString()}g</button>`}</div></div>`:'';

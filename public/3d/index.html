@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.359.0-autopilot';
+const VERSION3D='1.360.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11679,7 +11679,7 @@ function drawWaystation(t){
   // ===== Phase 12: a hub that GROWS with your progress =====
   // ITEM 1 — boss trophies mounted along the west wall, one per cleared zone, in the boss's colour
   { let ti=0; ZONES.forEach((Z)=>{ if(!meta.zoneDone[Z.id]) return; const tz=-300+ti*82; ti++; const col=ZONE_TROPHY[Z.id]||'#e8a33d';
-      bx(-406,118,tz, 7,42,36,'#2a2f3a'); bx(-402,122,tz, 4,26,20, col, col, 0.85); bx(-402,122,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }
+      bx(-625,150,tz, 7,42,36,'#2a2f3a'); bx(-621,154,tz, 4,26,20, col, col, 0.85); bx(-621,154,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }   // hung FLUSH on the west wall (x=-625), high, behind the forge/shop/bag — no longer floating out in the room
   // ITEM 1 — a trainer figure stands for every class you've unlocked (behind the Drillmaster)
   // ITEM 2 — the dying world on the horizon over the low north rampart, + the Apex throne looming
   { const vista=[[-540,-760,240,300,'#2a2118'],[-210,-880,300,460,'#25303a'],[150,-800,230,300,'#3a1c14'],[470,-760,220,300,'#241431']];

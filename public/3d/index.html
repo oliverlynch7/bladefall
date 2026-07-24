@@ -939,7 +939,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.336.0-autopilot';
+const VERSION3D='1.337.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -969,7 +969,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared'];
@@ -981,7 +981,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
   _g={}; GLOBAL_FIELDS.forEach(f=>{ if(old&&old[f]!=null) _g[f]=old[f]; });
 }
 const meta=Object.assign({
-  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'far',lookSens:1,fpsFov:92,silhouette:true,dmgNumbers:true,
+  soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:false,camMode:'shoulder',lookSens:1,fpsFov:92,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
@@ -990,6 +990,9 @@ const meta=Object.assign({
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
 },_g);
+// One-time: over-the-shoulder is the new default camera. Flip saves still on the old 'far' default
+// exactly once (camV2 marks it done), so a player who later picks a different mode keeps their choice.
+if(!_g.camV2){ if(!_g.camMode || _g.camMode==='far') meta.camMode='shoulder'; meta.camV2=1; }
 if(meta.showArmor==null) meta.showArmor=true;
 if(!meta.quality) meta.quality='high';   // graphics quality: 'high' | 'medium' | 'low' (bloom + render-res + particles)
 // perf helpers, driven by meta.quality — let old/weak machines dial the graphics down

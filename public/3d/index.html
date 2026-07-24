@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.347.0-autopilot';
+const VERSION3D='1.348.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7449,9 +7449,71 @@ function fireBotShot(e,p,D){ if(!G) return; const w=e.weapon||{}, pr=w.proj||{};
       gravity:0,size:pr.size||6,color:col,shape:pr.shape||(e.style==='mage'?'orb':'arrow'),glow:el?1:0,dmg,kb:120,pierce:0,el,life:1.5,hitSet:[]}); }
   try{ e.style==='mage'?(SFX.magic&&SFX.magic(el||'arcane')):(SFX.shoot&&SFX.shoot()); }catch(_){}
 }
+// ==== BOT SKILL KIT — bots cast their CLASS's real signature moves, routed to hurt the PLAYER. ====
+// Reuses the same battle-tested primitives bosses use: expanding shockwave rings (dmg>0 hits you),
+// owner:'enemy' projectiles, telegraphed delayed slams, gap-close dashes + blinks, self-buffs/heals.
+// Every one telegraphs (ring/burst/SFX) and is dodgeable — so a class bot feels like a real player.
+function botName(e){ return 'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' '+((CLASSES[e.botClassId]||{}).disp||'bot'); }
+function botNova(e,p,D,o){ o=o||{}; const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.3)*(1+(D.skill||0)*0.35)));
+  (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:o.r0||16,maxR:o.r||150,dmg,life:0,spd:o.spd||300,col:o.col||'#ffd24a',col2:o.col2||'#c9873a'});
+  try{ skillRing(e.x,e.z,o.col||'#ffd24a',o.col2||'#c9873a',(o.r||150)*0.5); burst(e.x,e.y+18,e.z,o.col||'#ffd24a',12); (o.sfx?o.sfx():(SFX.boss&&SFX.boss())); }catch(_){}
+  if(o.heal){ e.hp=Math.min(e.maxHp,e.hp+e.maxHp*o.heal); try{ addText(e.x,e.y+56,e.z,'+'+Math.round(e.maxHp*o.heal),'#7de08a'); }catch(_){} } }
+function botSlam(e,p,D,o){ o=o||{}; const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.4)*(1+(D.skill||0)*0.35)));
+  // a telegraphed crater at your feet: it holds (delay), then the ring erupts and expands — walk out to avoid.
+  (G.shockwaves=G.shockwaves||[]).push({x:p.x,z:p.z,r:o.r0||14,maxR:o.r||160,dmg,life:0,spd:o.spd||240,delay:o.delay||0.55,col:o.col||'#ff7a3a',col2:o.col2||'#c33'});
+  try{ skillRing(p.x,p.z,o.col||'#ff7a3a',o.col2||'#c33',(o.r||160)*0.4); burst(p.x,10,p.z,o.col||'#ff7a3a',10); SFX.magic&&SFX.magic(o.el||'fire'); }catch(_){} }
+function botVolley(e,p,D,o){ o=o||{}; const n=o.count||5, spread=o.spread||0.16, sp=o.speed||620, oy=(e.y||0)+26;
+  const dmg=Math.max(3,Math.round(e.dmg*(o.dm||0.7))), baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
+  for(let i=0;i<n;i++){ const a=baseYaw+(i-(n-1)/2)*spread;
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
+      gravity:0,size:o.size||6,color:o.col||e.color,shape:o.shape||'arrow',glow:o.el?1:0,dmg,kb:120,pierce:0,el:o.el||null,life:1.5,hitSet:[]}); }
+  try{ (o.el?(SFX.magic&&SFX.magic(o.el)):(SFX.shoot&&SFX.shoot())); }catch(_){} }
+function botBolt(e,p,D,o){ o=o||{}; const sp=o.speed||640, oy=(e.y||0)+26, d=Math.max(1,Math.hypot(p.x-e.x,p.z-e.z)), tt=d/sp;
+  const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.4))), vx=(p.x-e.x)/tt, vz=(p.z-e.z)/tt, vy=((p.y+22)-oy)/tt, col=o.col||'#c9a6ff';
+  (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:0,
+    size:o.size||16,color:col,shape:o.shape||'runeorb',glow:1,trail:col,dmg,kb:220,pierce:o.pierce||0,el:o.el||null,life:1.7,hitSet:[]});
+  try{ skillRing(e.x,e.z,col,col,70); burst(e.x+Math.sin(e.yaw)*18,oy,e.z+Math.cos(e.yaw)*18,col,12); SFX.magic&&SFX.magic(o.el||'arcane'); }catch(_){} }
+function botDashStrike(e,p,D,o){ o=o||{}; const dx=p.x-e.x,dz=p.z-e.z,d=Math.max(1,Math.hypot(dx,dz));
+  e.dashT=0.18; e.vx=dx/d*940; e.vz=dz/d*940; e._skillHit=true; e._skillMult=o.mult||1.9; e.atkCd=Math.min(e.atkCd,0.05);
+  try{ burst(e.x,e.y+14,e.z,o.col||e.color,8); SFX.dodge&&SFX.dodge(); }catch(_){} }
+function botBlink(e,p,o){ o=o||{}; const a=Math.atan2(p.x-e.x,p.z-e.z);
+  try{ burst(e.x,e.y+16,e.z,'#6a2fa0',12); }catch(_){}
+  e.x=p.x+Math.sin(a)*(p.r+22); e.z=p.z+Math.cos(a)*(p.r+22); e.invuln=Math.max(e.invuln,0.3); e.atkCd=Math.min(e.atkCd,0.05); e._skillHit=true; e._skillMult=o.mult||1.8;
+  try{ burst(e.x,e.y+16,e.z,'#b06bff',16); SFX.dodge&&SFX.dodge(); }catch(_){} }
+function botBuff(e,o){ o=o||{}; e._dmgBuffT=Math.max(e._dmgBuffT||0,o.dur||6); if(o.haste) e._hasteT=Math.max(e._hasteT||0,o.dur||6);
+  try{ burst(e.x,e.y+30,e.z,o.col||'#ff5a3a',18); SFX.growl&&SFX.growl(1); addText(e.x,e.y+58,e.z,o.label||'RAGE',o.col||'#ff5a3a',true); }catch(_){} }
+const BOT_SKILLS={
+  warrior:[ {min:0,max:175,cast:(e,p,D)=>botNova(e,p,D,{r:160,dm:1.4,col:'#e8c27a',col2:'#b8863a'})},
+            {min:120,max:470,cast:(e,p,D)=>botDashStrike(e,p,D,{mult:1.9,col:'#ffd24a'})} ],
+  berserker:[ {min:0,max:640,cast:(e,p,D)=>botBuff(e,{dur:6,haste:true,col:'#ff5a3a',label:'RAGE'})},
+              {min:0,max:170,cast:(e,p,D)=>botNova(e,p,D,{r:150,dm:1.5,col:'#ff7a4a',col2:'#c0331a'})},
+              {min:120,max:470,cast:(e,p,D)=>botDashStrike(e,p,D,{mult:2.0,col:'#ff5a3a'})} ],
+  mage:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.8,col:'#c9a6ff',el:'arcane'})},
+         {min:0,max:185,cast:(e,p,D)=>botNova(e,p,D,{r:170,dm:1.2,col:'#bff0ff',col2:'#7fd6ff',sfx:()=>SFX.magic&&SFX.magic('ice')})},
+         {min:150,max:720,cast:(e,p,D)=>botSlam(e,p,D,{r:155,dm:1.6,el:'fire'})} ],
+  chronomancer:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.6,col:'#8fdcff',el:'ice'})},
+                 {min:120,max:720,cast:(e,p,D)=>botSlam(e,p,D,{r:155,dm:1.5,col:'#8fdcff',col2:'#3a7da0',el:'ice'})} ],
+  ranger:[ {min:120,max:860,cast:(e,p,D)=>botVolley(e,p,D,{count:5,spread:0.16,dm:0.8,col:'#9fe6c8',shape:'arrow'})},
+           {min:150,max:950,cast:(e,p,D)=>botBolt(e,p,D,{dm:2.2,col:'#ffe9a8',shape:'lance',speed:900,pierce:2})} ],
+  pirate:[ {min:120,max:780,cast:(e,p,D)=>botVolley(e,p,D,{count:4,spread:0.2,dm:0.85,col:'#ffd28a',shape:'arrow'})},
+           {min:120,max:660,cast:(e,p,D)=>botSlam(e,p,D,{r:150,dm:1.5,col:'#ffb060',col2:'#c05a1e',el:'fire'})} ],
+  ninja:[ {min:110,max:540,cast:(e,p,D)=>botBlink(e,p,{mult:1.9})},
+          {min:0,max:220,cast:(e,p,D)=>botBuff(e,{dur:2.4,haste:true,col:'#8a8f9a',label:'SMOKE'})} ],
+  reaper:[ {min:0,max:175,cast:(e,p,D)=>botNova(e,p,D,{r:165,dm:1.5,col:'#b06bff',col2:'#6a2fa0',heal:0.05,sfx:()=>SFX.magic&&SFX.magic('void')})},
+           {min:120,max:470,cast:(e,p,D)=>botDashStrike(e,p,D,{mult:1.9,col:'#b06bff'})} ],
+  paladin:[ {min:110,max:780,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.6,col:'#ffe6a0',el:'holy'})},
+            {min:0,max:180,cast:(e,p,D)=>botNova(e,p,D,{r:160,dm:1.2,col:'#ffe6a0',col2:'#d0a040',heal:0.04})} ],
+  necromancer:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.5,col:'#9fd84a',el:'poison'})},
+                {min:0,max:175,cast:(e,p,D)=>botNova(e,p,D,{r:170,dm:1.3,col:'#b06bff',col2:'#4a2a6a',heal:0.05})} ],
+  _default:[ {min:0,max:170,cast:(e,p,D)=>botNova(e,p,D,{r:150,dm:1.3})} ]
+};
+function botCastSkill(e,p,D){ const list=BOT_SKILLS[e.botClassId]||BOT_SKILLS._default; if(!list||!list.length) return false;
+  const d=Math.hypot(p.x-e.x,p.z-e.z), usable=list.filter(s=>d>=(s.min||0)&&d<=(s.max||9999));
+  if(!usable.length) return false; try{ usable[Math.floor(Math.random()*usable.length)].cast(e,p,D); }catch(_){ return false; } return true; }
 function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
   if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
   if(e.skillCd>0) e.skillCd-=dt; if(e.dashT>0) e.dashT-=dt; if(e.feintT>0) e.feintT-=dt; if(e.jumpCd>0) e.jumpCd-=dt; if(e.shootCd>0) e.shootCd-=dt;
+  if(e._dmgBuffT>0) e._dmgBuffT-=dt; if(e._hasteT>0) e._hasteT-=dt;
   const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
   e.yaw=Math.atan2(nx,nz);
   const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
@@ -7471,10 +7533,10 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
     e.vx=(-nz*e.strafe)*560; e.vz=(nx*e.strafe)*560; try{ burst(e.x,10,e.z,'#7fd6ff',6); }catch(_){} }
   // RANGED classes fire real shots at you on a cadence (harder = faster); LOS not required for simplicity.
   if(e.ranged && e.shootCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d<700){ e.shootCd=Math.max(0.6,(D.atkCd||1)*1.1); fireBotShot(e,p,D); }
-  // SKILL — a gap-closing dash-strike (MELEE bots): lunge in fast, the arriving hit is heavier.
-  if(D.skill>0 && !e.ranged && e.skillCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d>reach*1.3 && d<480 && Math.random()<D.skill*dt*3){
-    e.skillCd=D.skillCdT; e.dashT=0.16; e.vx=nx*900; e.vz=nz*900; e._skillHit=true; e.atkCd=Math.min(e.atkCd,0.05);
-    try{ burst(e.x,e.y+14,e.z,e.color,8); SFX.dodge&&SFX.dodge(); }catch(_){} }
+  // SKILL — bots cast their CLASS's real signature moves (BOT_SKILLS): bolts, novas, telegraphed
+  // slams, gap-close dashes/blinks, rage buffs, life-drains. Range-gated + telegraphed = readable PvP.
+  if(D.skill>0 && e.skillCd<=0 && e.dashT<=0 && e.dodgeTimer<=0 && d<860 && Math.random()<D.skill*dt*3.2){
+    if(botCastSkill(e,p,D)) e.skillCd=D.skillCdT*(0.7+Math.random()*0.6); }
   if(e._skillHit && e.dashT<=0 && d>reach*1.6) e._skillHit=false;   // stale skill charge fizzles if you slipped away
   // FEINT — bait your swing: when you wind up close, juke back briefly, then punish the whiff.
   if(D.feint>0 && e.feintT<=0 && e.dashT<=0 && p.atkTimer>0.05 && d<reach+40 && Math.random()<D.feint*dt*6){ e.feintT=0.26; }
@@ -7491,14 +7553,14 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
       if(Math.random()<0.03) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.9; mvz+=(nx*e.strafe)*0.9; }
     else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
       if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }
-    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1);
+    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1)*(e._hasteT>0?1.35:1);
     e.x+=(mvx/ml)*spd*dt; e.z+=(mvz/ml)*spd*dt; e.runAnim=(e.runAnim||0)+dt*11;
   }
   if(G.bounds){ const m=70; e.x=Math.max(G.bounds.minX+m,Math.min(G.bounds.maxX-m,e.x)); e.z=Math.max(G.bounds.minZ+m,Math.min(G.bounds.maxZ-m,e.z)); }   // never wander to the far edges
   // attack: telegraph (reaction delay) then land the hit if still in range and the player isn't i-framed
   if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
   if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
-    const dd=Math.hypot(p.x-e.x,p.z-e.z), mult=e._skillHit?1.6:1; e._skillHit=false;
+    const dd=Math.hypot(p.x-e.x,p.z-e.z), mult=(e._skillHit?(e._skillMult||1.6):1)*(e._dmgBuffT>0?1.4:1); e._skillHit=false; e._skillMult=1;
     if(dd<reach+16 && !(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg*mult), e.x, e.z);
     try{ burst(e.x+nx*30,e.y+24,e.z+nz*30,e.color,mult>1?10:6); }catch(_){} } }
 }

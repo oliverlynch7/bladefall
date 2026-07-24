@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.344.0-autopilot';
+const VERSION3D='1.345.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1989,7 +1989,7 @@ const CLASS2={
     r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Damage',d:'+12% damage.'}, b:{id:'pir_greed',n:'Greed',role:'Damage',d:'+10% damage.'}}
   },
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
-    innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage and your cooldowns recover 5% faster.'},
+    innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage, cooldowns recover 5% faster, and each kill loops a little mana back.'},
     cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
     r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'chr_bolt',d:'Rapid-fire bolts of temporal energy (~2s, softer each).'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
     r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Damage',d:'+12% skill damage.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'+10% cooldown reduction.'}},
@@ -3018,7 +3018,28 @@ function recomputeArmor(p){
     for(const slot of TRINKETIDS){ const a=p.gear[slot]; if(a){ normArmor(a); fold(a); } } }
   m.defense=(total+defBonus)/((total+defBonus)+200);
   p.armorMods=m;
+  p.maxMana=classMaxMana();                         // per-class mana pool (see CLASS_MANA)
+  if(p.mana!=null && p.mana>p.maxMana) p.mana=p.maxMana;
 }
+/* Per-class mana ECONOMY. pool = max-mana ×, regen = idle-regen ×, cost = skill-mana-cost ×.
+   Design: casters (Mage/Necro/Chrono) get BIG pools but SLOW idle regen + pricey skills — their
+   skills ARE their damage, and they earn mana back through thematic abilities (Soul Hunger, Death's
+   Embrace, Time loops). Martials (Warrior/Berserker/Ninja/Pirate/Ranger) get SMALL, fast-refilling
+   pools + cheap skills — skills are utility, they live on basic attacks, no magical sustain. */
+const CLASS_MANA={
+  warrior:    {pool:0.75, regen:1.15, cost:0.85},
+  ranger:     {pool:0.90, regen:1.10, cost:0.95},
+  mage:       {pool:1.30, regen:0.85, cost:1.20},
+  reaper:     {pool:1.00, regen:1.10, cost:1.00},
+  paladin:    {pool:1.00, regen:1.00, cost:1.05},
+  necromancer:{pool:1.35, regen:0.80, cost:1.30},
+  ninja:      {pool:0.85, regen:1.20, cost:0.85},
+  berserker:  {pool:0.70, regen:1.20, cost:0.80},
+  pirate:     {pool:0.95, regen:1.05, cost:1.00},
+  chronomancer:{pool:1.25, regen:0.85, cost:1.20}
+};
+function classManaCfg(){ return CLASS_MANA[meta.classId]||{pool:1,regen:1,cost:1}; }
+function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
 function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
@@ -6273,6 +6294,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
     p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
+  if(meta.classId==='chronomancer'&&c2def('chronomancer')) gainMana(p,4,false);   // Time Attunement: kills loop a little mana back
   if(meta.classId==='pirate'&&c2def('pirate')&&(p.goldRushT||0)>0){ p.goldRushStacks=Math.min(25,(p.goldRushStacks||0)+1); const g=awardGold((6+zoneTier()*4)*p.goldRushStacks); if(g>0){ addText(e.x,e.y+52,e.z,'+'+g+'g ×'+p.goldRushStacks,'#ffd24a',true); try{hudUpdate();}catch(_){} } }   // Gold Rush: each kill banks more, stacking on a streak
   if(meta.classId==='reaper'){
     gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
@@ -6376,6 +6398,7 @@ function skillManaCost(i,s){
   let v=(s&&SKILL_MANA[s.id])||12;
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
   if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;if(c2Passive('m_potent'))v*=1.08;}
+  v*=classManaCfg().cost;   // per-class mana economy: casters pay more, martials less
   return Math.max(1,Math.round(v));
 }
 function gainMana(p,n,announce){
@@ -7723,7 +7746,7 @@ function update(dt){
   const spd2=Math.hypot(p.vx,p.vz);
   if(spd2>20 && p.onGround) p.runAnim+=dt*spd2*0.045; else p.runAnim*=0.8;
   if(G.comboT>0){ G.comboT-=dt; if(G.comboT<=0) G.combo=0; }
-  { const mm=(p.maxMana||100)+(meta.classId==='mage'&&c2Passive('m_manafont')?10:0), regen=meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035*regen); }  // slow passive mana regen (~28s empty→full)
+  { const mm=(p.maxMana||100)+(meta.classId==='mage'&&c2Passive('m_manafont')?10:0), regen=(meta.classId==='mage'&&c2Passive('m_manafont')?1.3:1)*classManaCfg().regen; if(p.mana==null) p.mana=mm; if(p.mana<mm) p.mana=Math.min(mm, p.mana + dt*mm*0.035*regen); }  // slow passive mana regen, scaled per class (CLASS_MANA.regen)
   updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
   // enemies

@@ -338,6 +338,7 @@
   .ico-event-quest-marker{background-image:url('icons/event-quest-marker.png');}
   .ico-reward-magic-socks{background-image:url('icons/reward-magic-socks.png');}
   .ico-reward-bag-slots{background-image:url('icons/reward-bag-slots.png');}
+  .ico-reward-abyssal-heart{background-image:url('icons/abyssal-heart.png');}
   .ico-event-level-up{background-image:url('icons/event-level-up.png');}
   .ico-event-achievement{background-image:url('icons/event-achievement.png');}
   .ico-resource-soul-essence{background-image:url('icons/resource-soul-essence.png');}
@@ -621,6 +622,10 @@
   #eschint .ico{width:13px;height:13px;}
   #eschint .eschk{letter-spacing:.05em;}
   @media (pointer:fine){ #eschint:not(.hide){display:flex;} }   /* keyboard hint — desktop only (touch has the button) */
+  #secretsense{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:47%;transform:translateY(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  #secretsense img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 8px #b06bff) drop-shadow(0 0 3px #ff4af0);animation:abyssbeat var(--beat,1.2s) ease-in-out infinite;transform-origin:center;}
+  #secretsense .ssword{font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#c78cff;text-shadow:0 1px 3px #000;}
+  @keyframes abyssbeat{0%,100%{transform:scale(.82)}13%{transform:scale(1.14)}26%{transform:scale(.9)}40%{transform:scale(1.03)}55%{transform:scale(.86)}}
   .pausecard #resBtn.restop{min-height:100px!important;border:2px solid #b98a3f;box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 22px rgba(232,163,61,.20);margin:0 auto 10px;}
   .skingrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px;}
   .skintile{position:relative;overflow:hidden;border:1.5px solid #353a48;border-radius:14px;padding:10px 8px 12px;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--skin) 18%,transparent),transparent 58%),linear-gradient(155deg,#1d202a,#0e1017);cursor:pointer;text-align:center;transition:.16s transform,.16s border-color,.16s box-shadow;}
@@ -928,6 +933,7 @@
 <div id="bonustimer" style="position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 96px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:22px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;"></div>
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
 <div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk">Esc</span></div>
+<div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
   <div id="lookzone"></div>
@@ -964,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.342.0-autopilot';
+const VERSION3D='1.343.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -998,7 +1004,7 @@ const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','sh
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared'];
-const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen'];
+const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=loadJSON(SAVE_KEY_OLD);
@@ -1054,7 +1060,7 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   if(!meta.perkV2){ const oldBase={vigor:40,might:60,haste:60,swift:50,edge:70,greed:50}; let refund=0; for(const id in oldBase){ const lv=meta.perks[id]||0; if(lv>10){ for(let rank=10;rank<lv;rank++) refund+=Math.round(oldBase[id]*Math.pow(1.6,rank)); meta.perks[id]=10; } } meta.gold+=refund; meta.perkV2=true; meta._perkRefund=refund; }
   meta.classId=CLASSES[mv.classId]?mv.classId:'warrior';
   meta.classes=mv.classes&&typeof mv.classes==='object'?mv.classes:{};
-  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
+  meta.hero=(mv.hero&&mv.hero.gear)?mv.hero:null; meta.bank=mv.bank||null; meta.socks=!!mv.socks; meta.secretSense=!!mv.secretSense; meta.bagSlots=mv.bagSlots||0; refreshBagCap();
   meta.hubUpgrades=mv.hubUpgrades&&typeof mv.hubUpgrades==='object'?mv.hubUpgrades:{};
   meta.zoneMax=Math.max(0,Math.min(ZONES.length-1,mv.zoneMax||0));
   meta.zoneDone=mv.zoneDone&&typeof mv.zoneDone==='object'?mv.zoneDone:{};
@@ -2477,6 +2483,18 @@ function applyQuest(el,head,rows,sig,complete=false){
     clearTimeout(applyQuest._t); applyQuest._t=setTimeout(()=>el.classList.remove('qflash'),600); }
 }
 function qrow(done,tick,text,num){ return `<div class="qrow ${done?'qdone':''}"><span class="qtick">${tick}</span><span class="qtx">${text}</span>${num!=null?`<span class="qn">${num}</span>`:''}</div>`; }
+// The Abyssal Heart: a HUD heart that appears when an unfound secret hides in the current level and
+// beats faster the closer you are (hot/cold). Only active if bought from the shop (meta.secretSense).
+function secretSenseUpdate(){ const el=document.getElementById('secretsense'); if(!el) return;
+  const Z=G?curZone():null, s=G&&G.secret;
+  const on = meta.secretSense && mode==='play' && G && G.p && s && !s.spent && !G.hub && !G.arena && Z && Z.side && !meta.sideFound[Z.side.id];
+  if(!on){ if(!el.classList.contains('hide')) el.classList.add('hide'); return; }
+  el.classList.remove('hide');
+  const d=Math.hypot(G.p.x-s.x, G.p.z-s.z), t=Math.max(0,Math.min(1,d/1500));   // 0 = right on it, 1 = far away
+  el.style.setProperty('--beat',(0.24+t*1.6).toFixed(2)+'s');                     // closer = faster heartbeat
+  el.style.opacity=(0.6+(1-t)*0.4).toFixed(2);
+  const w=el.querySelector('.ssword'); if(w) w.textContent = t<0.15?'burning':t<0.33?'hot':t<0.55?'warm':t<0.78?'cool':'cold';
+}
 function questUpdate(){
   const el=document.getElementById('questbox'); if(!el) return;
   if(!G||mode!=='play'&&mode!=='pause'){ el.classList.add('hide'); return; }
@@ -3644,6 +3662,7 @@ function zoneClear(){
 function showGameUI(v){
   if(v) document.body.classList.remove('t-title');
   ['hud','hudprogress','controls','pausebtn','eschint'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
+  if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide'); }   // heart only shows during play, via secretSenseUpdate
   if(!v) document.getElementById('pethud').classList.add('hide');
   else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
   // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
@@ -7504,6 +7523,7 @@ function update(dt){
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
   if(G.time-(G._saveT||0)>8){ G._saveT=G.time; try{autosaveRun();}catch(e){} }   // continuous autosave so a reload/auto-update never loses the dive
+  if(meta.secretSense && G.time-(G._ssT||0)>0.1){ G._ssT=G.time; try{secretSenseUpdate();}catch(e){} }   // Abyssal Heart proximity pulse
   if(G.stageBanner>0) G.stageBanner-=dt;
   if(G.shake>0) G.shake=Math.max(0,G.shake-dt*40);
   if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
@@ -9858,6 +9878,11 @@ function openShop(back){
   const socksRow=meta.socks
     ?`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Double jump · <b style="color:var(--good)">owned</b></div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.35" disabled>OWNED</button></div>`
     :`<div class="gearrow" style="--spine:#7fd6ff"><div class="gi eventgi">${eventIcon('reward-magic-socks')}</div><div style="flex:1"><div class="gn" style="color:#7fd6ff">Magic Socks</div><div class="gd">Unlock a permanent <b>double jump</b></div></div><button class="bigbtn socksbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${socksAfford?'':'opacity:.5'}">${socksCost}g</button></div>`;
+  // The Abyssal Heart — a permanent secret-sensing relic (a HUD heart that beats faster the closer you are to a level's hidden purple rift)
+  const heartCost=30000, heartAfford=meta.gold>=heartCost;
+  const heartRow=meta.secretSense
+    ?`<div class="gearrow" style="--spine:#b06bff;opacity:.6"><div class="gi eventgi">${eventIcon('reward-abyssal-heart')}</div><div style="flex:1"><div class="gn" style="color:#c78cff">The Abyssal Heart</div><div class="gd"><b style="color:var(--good)">Owned</b> · it beats faster the closer you are to a hidden secret</div></div><button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button></div>`
+    :`<div class="gearrow" style="--spine:#b06bff"><div class="gi eventgi">${eventIcon('reward-abyssal-heart')}</div><div style="flex:1"><div class="gn" style="color:#c78cff">The Abyssal Heart</div><div class="gd">A cursed relic that <b>senses hidden purple secrets</b> — a HUD heart that beats faster the "warmer" you get</div></div><button class="bigbtn heartbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${heartAfford?'':'opacity:.5'}">${heartCost.toLocaleString()}g</button></div>`;
   // Magic Pack — +5 bag slots per purchase (Phase 10), scaling cost
   const packCost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)), packAfford=meta.gold>=packCost;
   const packRow=`<div class="gearrow" style="--spine:#c98cff"><div class="gi eventgi">${eventIcon('reward-bag-slots')}</div><div style="flex:1"><div class="gn" style="color:#c98cff">Magic Pack</div><div class="gd">+5 bag slots · now ${STASH_CAP}</div></div><button class="bigbtn packbuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${packAfford?'':'opacity:.5'}">${packCost}g</button></div>`;
@@ -9877,7 +9902,7 @@ function openShop(back){
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${packRow}${gambleRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     ${perkRefundTotal()>0?`<button class="bigbtn ghost" id="refundPerks" style="margin:6px 0 0;padding:9px 14px;font-size:13px;color:#ffd24a;border-color:#5a4a20">↩ Refund all perks — get back <b>${perkRefundTotal()}g</b> &amp; reset every stat</button>`:''}
@@ -9914,6 +9939,8 @@ function openShop(back){
   const sb=document.querySelector('.socksbuy'); if(sb) sb.onclick=()=>{ if(meta.socks) return; if(meta.gold<socksCost){ toast('Not enough gold'); return; }
     meta.gold-=socksCost; meta.socks=true; if(G&&G.p) G.p.maxJumps=Math.max(G.p.maxJumps,2); if(meta.hero) meta.hero.maxJumps=Math.max(meta.hero.maxJumps||1,2);
     SFX.levelup(); persist(); toast('🧦 Magic Socks — double jump unlocked!'); openShop(back); };
+  { const hb=document.querySelector('.heartbuy'); if(hb) hb.onclick=()=>{ if(meta.secretSense) return; if(meta.gold<heartCost){ toast('Not enough gold'); return; }
+    meta.gold-=heartCost; meta.secretSense=true; if(SFX&&SFX.god) SFX.god(); persist(); toast('🫀 The Abyssal Heart beats — it will guide you to hidden secrets','#c78cff','event-secret-rift'); openShop(back); }; }
   const pb=document.querySelector('.packbuy'); if(pb) pb.onclick=()=>{ const cost=Math.round(260*Math.pow(1.55,meta.bagSlots||0)); if(meta.gold<cost){ toast('Not enough gold'); return; }
     meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
   const gmb=document.querySelector('.gamblebuy'); if(gmb) gmb.onclick=()=>{ if(meta.gold<GAMBLE_COST){ toast('Not enough gold'); return; }

@@ -934,6 +934,7 @@
 <button id="pausebtn" class="hide" aria-label="Pause" title="Pause"><span class="ico ico-pause"></span></button>
 <div id="eschint" class="hide" aria-hidden="true"><span class="ico ico-pause"></span><span class="eschk">Esc</span></div>
 <div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
+<div id="lootcard" class="hide" aria-hidden="true"></div>
 <div id="controls" class="hide">
   <div id="joyzone"><div id="joy"><div id="joyknob"></div></div></div>
   <div id="lookzone"></div>
@@ -970,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.353.0-autopilot';
+const VERSION3D='1.354.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5425,7 +5426,13 @@ for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEvent
   zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
   zone.addEventListener('contextmenu',e=>e.preventDefault());
 })();
-function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); }
+function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); updateHudKeys(); }
+// Keep every on-screen key hint in sync with the player's current keybinds (auto-fight, auto-loot cycle).
+function updateHudKeys(){ if(typeof keyLabel!=='function'||!meta.keybinds) return;
+  const lbl=id=>{ const c=meta.keybinds[id]&&meta.keybinds[id][0]; return keyLabel(c||''); };
+  const a=document.getElementById('bAuto'); if(a){ a.classList.add('tog'); a.innerHTML='AUTO <span class="togkey" style="opacity:.75">'+lbl('auto')+'</span>'; }
+  const lk=lbl('loot'); document.querySelectorAll('#bKeep .togkey,#bBag .togkey').forEach(s=>{ s.textContent=lk; });
+  const k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(k)k.title=lk+': cycle auto-loot (Off / Sell / Bag)'; if(bg)bg.title=lk+': cycle auto-loot (Off / Sell / Bag)'; }
 function toggleAuto(){ meta.autoAttack=!meta.autoAttack; persist(); updateToggles(); toast('Auto-attack '+(meta.autoAttack?'ON':'OFF')); }
 function toggleKeep(){ meta.autoKeep=!meta.autoKeep; if(meta.autoKeep) meta.autoBag=false; persist(); updateToggles(); toast('Auto-sell '+(meta.autoKeep?'ON':'OFF')); }   // auto-sell + auto-bag are mutually exclusive
 function toggleBag(){ meta.autoBag=!meta.autoBag; if(meta.autoBag) meta.autoKeep=false; persist(); updateToggles(); toast('Auto-bag '+(meta.autoBag?'ON':'OFF')); }
@@ -5452,16 +5459,19 @@ const KEYACTIONS=[
   {id:'skill3',  label:'Skill 3',           def:['Digit3']},
   {id:'skill4',  label:'Skill 4',           def:['Digit4']},
   {id:'interact',label:'Interact / Talk',   def:['KeyE']},
-  {id:'loot',    label:'Cycle Loot Mode',   def:['KeyQ']},
+  {id:'loot',     label:'Auto-loot: Sell / Bag / Off', def:['Tab']},
+  {id:'lootEquip',label:'Equip Dropped Item', def:['KeyF']},
+  {id:'lootSell', label:'Sell Dropped Item',  def:['KeyQ']},
   {id:'auto',    label:'Toggle Auto-Fight', def:['KeyL']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
 function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') meta.keybinds=defaultKeybinds();
   for(const a of KEYACTIONS){ if(!Array.isArray(meta.keybinds[a.id])) meta.keybinds[a.id]=a.def.slice(); }   // fill any newly-added action
-  rebuildKeyLookup(); }
+  if(Array.isArray(meta.keybinds.loot)&&meta.keybinds.loot.includes('KeyQ')&&!meta.keybinds.loot.includes('Tab')) meta.keybinds.loot=meta.keybinds.loot.map(c=>c==='KeyQ'?'Tab':c);   // migrate: Q now sells a drop; auto-loot cycle moved to Tab
+  rebuildKeyLookup(); try{ updateHudKeys(); }catch(e){} }
 let _codeToAction={};
-function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } }
+function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } try{ updateHudKeys(); }catch(e){} }
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
 window.addEventListener('keydown',e=>{
@@ -5495,7 +5505,9 @@ window.addEventListener('keydown',e=>{
   if(MOVE_ACTS[act]){ e.preventDefault(); initAudio();
     if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
   if(/^skill[1-4]$/.test(act)){ if(mode==='play'&&!e.repeat){ e.preventDefault(); useSkill(+act.slice(5)-1); } return; }
-  if(act==='loot'){ if(mode==='play'&&!e.repeat){ e.preventDefault(); initAudio(); cycleLootMode(); } return; }
+  if(act==='lootEquip'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootEquipCurrent(); } return; }
+  if(act==='lootSell'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootSellCurrent(); } return; }
+  if(act==='loot'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); cycleLootMode(); } return; }
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
 window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });
@@ -7893,6 +7905,7 @@ function update(dt){
         for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,mt.x,mt.z)<mt.r+e.r) hitEnemy(e,mt.dmg,mt.src||p,300,0,'fire'); } } }
     G.meteors=G.meteors.filter(m=>!m.done); }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
+  if(G.lootCard) lootTick();
   if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
   // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
   if(p.varJump && !input.jump && p.vy>340) p.vy=340;
@@ -8467,69 +8480,72 @@ function openSubclassFrom(then){
 function openSubclass(){ openSubclassFrom(resumePlay); }
 function fmt(n){ return Math.round(n*100)/100; }
 let _offerT=0;
+// ==== LOOT PREVIEW CARD — a non-blocking HUD card (left): compare vs equipped, F=equip, Q=sell, wait=bag ====
+const LOOT_CARD_SEC=9;
+function _lootCSS(){ if(document.getElementById('lootcardcss')) return; const st=document.createElement('style'); st.id='lootcardcss';
+  st.textContent='#lootcard{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:50%;transform:translateY(-50%);z-index:8;width:238px;'
+   +'background:linear-gradient(180deg,rgba(18,21,29,.95),rgba(11,13,18,.95));border:1px solid #2b3040;border-left:4px solid var(--lc,#8b8f9a);border-radius:12px;'
+   +'padding:11px 12px 9px;box-shadow:0 8px 26px rgba(0,0,0,.6);pointer-events:none;font-size:12px;color:#e7eaf0;animation:lcin .18s ease}'
+   +'@keyframes lcin{from{opacity:0}to{opacity:1}}'
+   +'#lootcard .lcrar{font:800 10px/1 system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--lc)}'
+   +'#lootcard .lcname{font-weight:800;font-size:14px;margin:2px 0 1px;color:var(--lc)}'
+   +'#lootcard .lctyp{font-size:10.5px;color:#9aa4ad;margin-bottom:6px}'
+   +'#lootcard .lcrow{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-top:1px solid rgba(255,255,255,.06)}'
+   +'#lootcard .up{color:#7de08a}#lootcard .down{color:#ff7a72}#lootcard .same{color:#9aa4ad}'
+   +'#lootcard .lcaff{margin:5px 0 2px;font-size:11px}'
+   +'#lootcard .lckeys{display:flex;gap:6px;margin-top:8px}'
+   +'#lootcard .lckey{flex:1;text-align:center;padding:5px 4px;border-radius:7px;background:#1b1e28;border:1px solid #3c4150;font:700 11px system-ui}'
+   +'#lootcard .lckey b{font-family:monospace;color:#f3c272}'
+   +'#lootcard .lcbar{height:4px;border-radius:3px;background:#1b1e28;overflow:hidden;margin-top:8px}'
+   +'#lootcard .lcbar i{display:block;height:100%;background:linear-gradient(90deg,var(--lc),#ffd07a)}';
+  document.head.appendChild(st); }
+function lootLabel(actId){ const c=(meta.keybinds&&meta.keybinds[actId]&&meta.keybinds[actId][0]); return keyLabel(c||''); }
+function queueLoot(drop){ if(!G) return; G.lootQueue=G.lootQueue||[]; G.lootQueue.push(drop); if(!G.lootCard) showNextLoot(); }
+function showNextLoot(){ if(!G) return; const q=G.lootQueue||[], el=document.getElementById('lootcard');
+  if(!q.length){ G.lootCard=null; if(el) el.className='hide'; return; }
+  const drop=q.shift(); drop.expire=(G.time||0)+LOOT_CARD_SEC; drop.max=LOOT_CARD_SEC; G.lootCard=drop; _lootCSS(); renderLootCard(); }
+function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lootcard'); if(!d||!el) return;
+  const it=d.item, kind=d.kind, rar=RARITY[it.rarity]||RARITY.common, col=rar.color, p=G.p;
+  const arr=(a,b,low)=>a===b?'<span class="same">=</span>':((low?b<a:b>a)?'<span class="up">▲</span>':'<span class="down">▼</span>');
+  const numRow=(lbl,a,b,low)=>`<div class="lcrow"><span>${lbl}</span><span><b>${a}</b> → <b class="${a===b?'same':((low?b<a:b>a)?'up':'down')}">${b}</b> ${arr(a,b,low)}</span></div>`;
+  let rows='',aff='',typ='';
+  if(kind==='weapon'){ const cur=p.weapon||{dmg:0,cd:.4,range:0}; typ=weapFamily(it)+' · '+weapClassName(it);
+    rows=numRow('Damage',cur.dmg,it.dmg)+numRow('Speed',(+(cur.cd||0)).toFixed(2),(+(it.cd||0)).toFixed(2),true)+numRow('Range',cur.range||0,it.range||0);
+    const e2=normEl(it.el); if(e2) aff=`<div class="lcaff" style="color:${elementColor(e2)}">${affIcon(e2)} ${affName(e2)} · ${affStatus(e2)}</div>`; if(it.lifesteal) aff+=`<div class="lcaff" style="color:#ff9ab0">🩸 ${Math.round(it.lifesteal*100)}% lifesteal</div>`; }
+  else if(kind==='armor'){ const cur=(p.gear&&p.gear[it.slot])||{defense:0}; typ=((SLOTS&&SLOTS[it.slot]?SLOTS[it.slot].label:it.slot)||'armor');
+    rows=numRow('Defense',cur.defense||0,it.defense||0)+(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join(''); }
+  else { typ=(TRINKETS&&TRINKETS[it.slot]?TRINKETS[it.slot].label:'trinket'); rows=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Passive</span><b class="up">${a.label}</b></div>`).join('')||'<div class="lcrow"><span>bonus</span></div>'; }
+  const lock=(kind==='weapon'&&typeof canWield==='function'&&!canWield(it))?` 🔒Lv${rarityReq(it.rarity)}`:'';
+  el.style.setProperty('--lc',col);
+  el.innerHTML=`<div class="lcrar">${rar.name}${(G.lootQueue&&G.lootQueue.length)?' · +'+G.lootQueue.length+' waiting':''}</div>`
+   +`<div class="lcname">${it.name}${lock}</div><div class="lctyp">${typ}</div>${rows}${aff}`
+   +`<div class="lckeys"><div class="lckey"><b>${lootLabel('lootEquip')}</b> Equip</div><div class="lckey"><b>${lootLabel('lootSell')}</b> Sell +${itemGold(it)}g</div></div>`
+   +`<div class="lctyp" style="text-align:center;margin:6px 0 0;opacity:.65">no press → bag</div><div class="lcbar"><i id="lcbarfill" style="width:100%"></i></div>`;
+  el.className=''; }
+function lootTick(){ const d=G&&G.lootCard; if(!d) return; const rem=Math.max(0,d.expire-(G.time||0)), f=document.getElementById('lcbarfill'); if(f) f.style.width=Math.round(100*rem/d.max)+'%'; if(rem<=0) lootToBag(true); }
+function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.item;
+  if(d.kind==='weapon'){ if(typeof canWield==='function'&&!canWield(it)){ toast('🔒 Requires Level '+rarityReq(it.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=it; playFx('equip'); toast(it.name+' equipped'); }
+  else { const old=G.p.gear[it.slot]; G.p.gear[it.slot]=it; if(old) meta.stash.push((TRINKETIDS&&TRINKETIDS.includes(it.slot))?{trinket:old}:{armor:old}); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); toast(it.name+' equipped'); }
+  SFX.pickup(); persist(); hudUpdate(); showNextLoot(); }
+function lootSellCurrent(){ const d=G&&G.lootCard; if(!d) return; const g=sellItem(d.item); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); showNextLoot(); }
+function lootToBag(auto){ const d=G&&G.lootCard; if(!d) return; const it=d.item, box=d.kind==='weapon'?{weapon:it}:(d.kind==='armor'?{armor:it}:{trinket:it});
+  if(stashItem(box)){ if(!auto) toast('🎒 '+it.name+' → bag'); } else { const g=sellItem(it); toast('Bag full — sold '+it.name+' · +'+g+'g'); } hudUpdate(); showNextLoot(); }
 function offerWeapon(nw){
   if(meta.autoBag){ if(stashItem({weapon:nw})) toast('🎒 Bagged · '+nw.name); else { const g=sellItem(nw); toast('Bag full — sold '+nw.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nw); toast('Sold · '+nw.name+' · +'+g+'g'); hudUpdate(); return; }
   teachOnce('firstloot','Your first drop! Read the ▲/▼ arrows to compare it to what you carry, then Equip, Stash it in your bag, or Sell for gold.',{icon:'🎁'});
   if(nw&&RARITY[nw.rarity]&&RARITY[nw.rarity].tier>=1) teachOnce('firstrare','Gear colour is its rarity: grey → green → blue → purple → gold. Stronger gear needs a higher character level to wield — a 🔒 shows the requirement.',{icon:'💎'});
-  mode='weapon'; _offerT=Date.now(); const cur=G.p.weapon;
-  const typ=w=>weapFamily(w)+' · '+weapClassName(w);
-  const row=(label,a,b,better)=>{ const same=(a===b), up=better==='low'?b<a:b>a, cls=same?'':(up?'up':'down'), arr=same?'':(up?' ▲':' ▼');
-    return `<div class="vsrow"><span>${label}</span><span><b>${fmt(a)}</b> → <b class="${cls}">${fmt(b)}${arr}</b></span></div>`; };
-  const reachRow=nw.cls==='ranged'?row('Range',(cur.proj&&cur.proj.range)||0,nw.proj.range||0):row('Range',cur.range||0,nw.range||0);
-  const el2=normEl(nw.el);
-  const elDesc=el2?(affName(el2)+' affinity · applies '+affStatus(el2)+' · strong vs '+affName(WEAK[el2])+', resisted by '+affName(el2)):('No affinity · flat '+dmgTypeName(nw).toLowerCase()+' damage');
-  showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[nw.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${RARITY[nw.rarity].name.toUpperCase()}${rpip(nw.rarity)} · ${typ(nw)}${reqTag(nw)}</p>
-    <h2 class="ovh" style="color:${RARITY[nw.rarity].color}">${nw.name}</h2>
-    <img class="itemav" src="${itemAv(nw)}" alt="">
-    <div class="statgrid">${row('Damage',cur.dmg,nw.dmg)}${reachRow}${row('Attack speed',cur.cd,nw.cd,'low')}${row('Knockback',cur.kb,nw.kb)}<div class="vsrow"><span>Damage type</span><b style="color:${nw.sch==='mag'?'#c7b7e8':nw.cls==='ranged'?'#e5c997':'#b8b8b8'}">${damageTypeHTML(nw)}</b></div><div class="vsrow"><span>Affinity</span><b style="color:${elementColor(el2)||'#9aa4ad'}">${el2?(affIcon(el2)+' '+affName(el2)):'None'}</b></div>${el2?`<div class="vsrow"><span>Status</span><b style="color:${elementColor(el2)}">${statusIcon(el2)} ${affStatus(el2)}</b></div>`:''}${nw.lifesteal?row('Lifesteal %',(cur.lifesteal*100),(nw.lifesteal*100)):''}</div>
-    <p class="hint" style="margin:-8px 0 12px">${elDesc}</p>
-    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nw)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nw)){ toast('🔒 Requires Level '+rarityReq(nw.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=nw; SFX.pickup(); playFx('equip'); toast(nw.name+' equipped'); resumePlay(); };
-  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nw); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
-  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({weapon:nw})){ toast(nw.name+' stashed'); resumePlay(); } else bagFullPrompt({weapon:nw},resumePlay); };
+  queueLoot({kind:'weapon',item:nw});   // non-blocking HUD card (F equip / Q sell / wait -> bag)
 }
 function offerArmor(na){
   if(meta.autoBag){ if(stashItem({armor:na})) toast('🎒 Bagged · '+na.name); else { const g=sellItem(na); toast('Bag full — sold '+na.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(na); toast('Sold · '+na.name+' · +'+g+'g'); hudUpdate(); return; }
-  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[na.slot], curDef=cur?cur.defense:0;
-  const reduc=d=>Math.round(d/(d+200)*100);
-  const before=totalDefense(G.p), after=before-curDef+na.defense;
-  const defCls=na.defense>curDef?'up':(na.defense<curDef?'down':'');
-  showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[na.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(na.slot)} ${RARITY[na.rarity].name.toUpperCase()}${rpip(na.rarity)} · ${SLOTS[na.slot].label.toUpperCase()}${reqTag(na)}</p>
-    <h2 class="ovh" style="color:${RARITY[na.rarity].color}">${na.name}</h2>
-    <img class="itemav" src="${itemAv(na)}" alt="">
-    <div class="statgrid">
-      <div class="vsrow"><span>Piece defense</span><span><b>${curDef}</b> → <b class="${defCls}">${na.defense}${defCls==='up'?' ▲':defCls==='down'?' ▼':''}</b></span></div>
-      <div class="vsrow"><span>Total reduction</span><span><b>${reduc(before)}%</b> → <b class="${after>before?'up':(after<before?'down':'')}">${reduc(after)}%${after>before?' ▲':after<before?' ▼':''}</b></span></div>
-      ${na.affixes.map(a=>`<div class="vsrow"><span>Bonus</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
-      ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
-    </div>
-    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(na)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(na)){ toast('🔒 Requires Level '+rarityReq(na.rarity)+' to wear'); return; } bagReplaced(G.p.gear[na.slot],false); G.p.gear[na.slot]=na; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(na.name+' equipped'); resumePlay(); };
-  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(na); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
-  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({armor:na})){ toast(na.name+' stashed'); resumePlay(); } else bagFullPrompt({armor:na},resumePlay); };
+  queueLoot({kind:'armor',item:na});
 }
 function offerTrinket(nt){
   if(meta.autoBag){ if(stashItem({trinket:nt})) toast('🎒 Bagged · '+nt.name); else { const g=sellItem(nt); toast('Bag full — sold '+nt.name+' · +'+g+'g'); } hudUpdate(); return; }
   if(meta.autoKeep){ const g=sellItem(nt); toast('Sold · '+nt.name+' · +'+g+'g'); hudUpdate(); return; }
-  mode='weapon'; _offerT=Date.now(); const cur=G.p.gear[nt.slot];
-  showOverlayHTML(`<div class="card">
-    <p class="ovsub" style="color:${RARITY[nt.rarity].color};margin-bottom:2px;letter-spacing:.16em;">${slotIcon(nt.slot)} ${RARITY[nt.rarity].name.toUpperCase()}${rpip(nt.rarity)} · ${TRINKETS[nt.slot].label.toUpperCase()}${reqTag(nt)}</p>
-    <h2 class="ovh" style="color:${RARITY[nt.rarity].color}">${nt.name}</h2>
-    <div class="statgrid">
-      ${nt.affixes.map(a=>`<div class="vsrow"><span>Passive</span><b style="color:var(--good)">${a.label}</b></div>`).join('')}
-      ${cur?`<div class="vsrow" style="margin-top:6px;opacity:.65"><span>Replaces</span><span style="text-align:right">${cur.affixes.map(a=>a.label).join(', ')}</span></div>`:''}
-    </div>
-    <button class="bigbtn" id="equipBtn">${actionIcon('equip')}Equip <span style="opacity:.6">(J)</span></button><button class="bigbtn ghost" id="sellBtn" style="color:#ffd24a;border-color:var(--amber-dim)">${actionIcon('sell')}Sell · +${itemGold(nt)}g <span style="opacity:.6">(K)</span></button>
-    <button class="bigbtn ghost" id="stashBtn">${actionIcon('bag-stash')}Stash in bag · ${meta.stash.length}/${STASH_CAP}</button></div>`);
-  document.getElementById('stashBtn').onclick=()=>{ if(stashItem({trinket:nt})){ toast(nt.name+' stashed'); resumePlay(); } else bagFullPrompt({trinket:nt},resumePlay); };
-  document.getElementById('equipBtn').onclick=()=>{ if(!canWield(nt)){ toast('🔒 Requires Level '+rarityReq(nt.rarity)+' to wear'); return; } bagReplaced(G.p.gear[nt.slot],false); G.p.gear[nt.slot]=nt; recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); SFX.pickup(); playFx('equip'); toast(nt.name+' equipped'); resumePlay(); };
-  document.getElementById('sellBtn').onclick=()=>{ const g=sellItem(nt); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); resumePlay(); };
+  queueLoot({kind:'trinket',item:nt});
 }
 /* one random loot item (weapon / armor / trinket) at a given rarity */
 function randomLoot(rid){ const r=Math.random();
@@ -10231,9 +10247,9 @@ function openShop(back){
     meta.gold-=cost;
     if(isIan){ SFX.god(); playFx('bigreveal'); persist(); claimIansBlade(back); return; }   // the shortcut: buy it whole, name + reveal fire
     const w=isVS?makeWeapon('voidscythe','epic'):shopWeapon(meta.classId,rid);
-    if(!meta.hero){ const p=freshPlayer(); p.weapon=w; meta.hero=snapOf(p); } else { bagReplaced(meta.hero.weapon,true); meta.hero.weapon=w; }
-    SFX.levelup();
-    persist(); toast('Equipped: '+w.name); openShop(back); });
+    if(!meta.hero){ const p=freshPlayer(); meta.hero=snapOf(p); }   // ensure a hero exists (keeps its own starter weapon)
+    if(stashItem({weapon:w})){ SFX.levelup(); persist(); toast('🎒 '+w.name+' sent to your bag'); openShop(back); }   // buy -> bag, never auto-equip
+    else { meta.gold+=cost; toast('Bag full — free up space first'); openShop(back); } });
   { const fg=document.querySelector('.iansforge'); if(fg) fg.onclick=()=>{
       if(!iansHasAllShards()){ toast('Recover all '+IANS_SHARDS.length+' Blade Shards first'); return; }
       if(((meta.hero&&meta.hero.level)||1)<IANS_FORGE_LEVEL){ toast('🔒 Reach Level '+IANS_FORGE_LEVEL+' to reforge it'); return; }

@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.350.0-autopilot';
+const VERSION3D='1.351.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7441,11 +7441,15 @@ const BOT_DIFF={
   brutal:{label:'Brutal', color:'#ff5e54', hpMul:1.55, dmgMul:0.105, speed:235, moveMul:1.28, atkCd:0.60, react:0.10, dodge:0.60, dodgeCdT:0.9, flee:false, skill:0.60, skillCdT:2.2, punish:0.85, feint:0.60, jump:0.50, weapon:'great', rarity:'legendary'}
 };
 const BOT_DIFFS=['easy','normal','hard','brutal'];
+// Per-class ARENA-PVP damage tuning (bots only — does NOT touch player class balance). Casters out-burst
+// everyone from range, so they're toned down; the weaker melee kits are nudged up. Tuned via the duel matrix.
+const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, reaper:0.90, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)
-  const hp=Math.max(80,Math.round(base*(D.hpMul!=null?D.hpMul:1))), dmg=Math.max(4,Math.round(base*(D.dmgMul!=null?D.dmgMul:0.05)));
+  const hp=Math.max(80,Math.round(base*(D.hpMul!=null?D.hpMul:1)));
   const cls=(ARENA_LOADOUT.botClass&&ARENA_LOADOUT.botClass!=='random'&&CLASSES[ARENA_LOADOUT.botClass])?ARENA_LOADOUT.botClass:randomClassId();   // the bot's class
+  const dmg=Math.max(4,Math.round(base*(D.dmgMul!=null?D.dmgMul:0.05)*(BOT_DMG_MUL[cls]||1)));   // apply the per-class PvP damage knob
   const style=(CLASSES[cls]||CLASSES.warrior).attackStyle, ranged=(style==='mage'||style==='ranger');
   const botWeapon=(()=>{ try{ return makeWeapon(familyWeaponArche(cls),D.rarity); }catch(e){ return {range:60,kb:190}; } })();   // on-class weapon at the difficulty's gear tier
   const b={ bot:true, botDiff:diffKey, type:'bot', kind:'bot', element:null,
@@ -7588,11 +7592,16 @@ function botAI(e,dt){ const p=(G&&G.duel&&e.foe)?e.foe:(G&&G.p); if(!p||p.dead) 
     if(seekSafe){ const g=nearestArenaGround(e.x,e.z); const tdx=g.x-e.x, tdz=g.z-e.z, td=Math.max(1,Math.hypot(tdx,tdz)); mvx=tdx/td; mvz=tdz/td;
       if(onLava && e.onGround){ e.vy=560; e.onGround=false; } }   // hop toward the island
     else if(e.feintT>0){ mvx=-nx*1.0; mvz=-nz*1.0; mvx+=(-nz*e.strafe)*0.6; mvz+=(nx*e.strafe)*0.6; }   // bait retreat
-    else if(e.ranged){ const pref=300; if(d<pref-70){ mvx=-nx; mvz=-nz; } else if(d>pref+90){ mvx=nx*0.85; mvz=nz*0.85; }   // KITE: hold optimal range
+    let retreating=false, closing=false;
+    if(e.ranged){ const pref=265; if(d<pref-60){ mvx=-nx; mvz=-nz; retreating=true; } else if(d>pref+90){ mvx=nx*0.85; mvz=nz*0.85; }   // KITE: hold optimal range
       if(Math.random()<0.03) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.9; mvz+=(nx*e.strafe)*0.9; }
-    else { if(d>reach*0.9){ mvx=nx; mvz=nz; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
+    else { if(d>reach*0.9){ mvx=nx; mvz=nz; closing=true; } else if(d<reach*0.5){ mvx=-nx*0.7; mvz=-nz*0.7; }
       if(Math.random()<0.02) e.strafe*=-1; mvx+=(-nz*e.strafe)*0.7; mvz+=(nx*e.strafe)*0.7; }
-    const ml=Math.hypot(mvx,mvz)||1; const spd=e.speed*D.moveMul*(low?0.92:1)*(e._hasteT>0?1.35:1);
+    const ml=Math.hypot(mvx,mvz)||1;
+    const foeRanged=!!(p&&(p.ranged||p.style==='mage'||p.style==='ranger'));
+    let spd=e.speed*D.moveMul*(low?0.92:1)*(e._hasteT>0?1.35:1);
+    if(retreating) spd*=0.74;                         // a backpedaling archer is slower than a charging fighter — kiting has a cost
+    if(closing)    spd*=(foeRanged?1.45:1.15);        // ANTI-KITE: a melee bot runs a fleeing ranged foe down instead of chasing forever
     e.x+=(mvx/ml)*spd*dt; e.z+=(mvz/ml)*spd*dt; e.runAnim=(e.runAnim||0)+dt*11;
   }
   if(G.bounds){ const m=70; e.x=Math.max(G.bounds.minX+m,Math.min(G.bounds.maxX-m,e.x)); e.z=Math.max(G.bounds.minZ+m,Math.min(G.bounds.maxZ-m,e.z)); }   // never wander to the far edges

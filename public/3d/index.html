@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.343.0-autopilot';
+const VERSION3D='1.344.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1875,7 +1875,7 @@ const CLASS2={
   warrior:{ disp:'Warrior', icon:classIcon('warrior'),
     innate:{name:'Battle Ready', d:'Basic attacks deal +8% damage and gain +15% interrupt resistance while attacking.'},
     cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Skill hits restore 2% max HP.'},
-    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'w_cleave',d:'A broad 2.2x blade sweep that cuts every enemy in front of you.'},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
+    r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:2,am:0.45,role:'Rapid · Group',fx:'w_cleave',d:'A fast, spammable sweep (~2s, softer per hit) — weave it between basic attacks.'},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
     r3:{kind:'passive',a:{id:'w_heavy',n:'Heavy Hand',role:'Damage',d:'Basic attacks deal +12% damage but attack 5% slower.'},b:{id:'w_swift',n:'Swift Steel',role:'Speed',d:'+10% attack speed; every fourth basic hit deals +25% damage.'}},
     r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:'Spin through a full circle twice, dealing 1.1x damage per sweep.'}},
     r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:'Gain 12% damage reduction while below 50% HP.'}},
@@ -1907,7 +1907,7 @@ const CLASS2={
   mage:{ disp:'Mage', icon:classIcon('mage'),
     innate:{name:'Arcane Attunement',d:'Magic weapons deal +8% damage and restore 2 mana whenever a basic attack hits.'},
     cap:{name:'Archmage',d:'+12% magic damage, +10% cooldown reduction, and every third skill refunds half its mana cost.'},
-    r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:5,role:'Focused Damage',fx:'m_bolt',d:'Launch a heavy 2.4x projectile carrying your weapon element.'},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
+    r2:{kind:'skill',slot:0,a:{id:'m_bolt',n:'Elemental Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'m_bolt',d:'Rapid-fire elemental bolts (~2s, softer each) — a steady casting rhythm.'},b:{id:'m_beam',n:'Elemental Beam',cd:6,role:'Piercing Damage',fx:'m_beam',d:'Fire a piercing elemental lance for 2x damage through every target.'}},
     r3:{kind:'passive',a:{id:'m_potent',n:'Potent Weave',role:'Damage',d:'+12% skill damage, but skills cost 8% more mana.'},b:{id:'m_efficient',n:'Efficient Casting',role:'Economy',d:'Skills cost 15% less mana.'}},
     r4:{kind:'skill',slot:1,a:{id:'m_blink',n:'Blink',cd:8,role:'Movement',fx:'m_blink',d:'Teleport forward and become untouchable during the displacement.'},b:{id:'m_nova',n:'Nova',cd:9,role:'Control',fx:'m_nova',d:'Detonate a 1.4x freezing burst that slows nearby enemies.'}},
     r5:{kind:'passive',a:{id:'m_glass',n:'Glass Cannon',role:'Damage',d:'+15% magic damage, but take 8% more damage.'},b:{id:'m_ward',n:'Arcane Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP for 3s.'}},
@@ -1919,7 +1919,7 @@ const CLASS2={
   reaper:{ disp:'Reaper', icon:classIcon('reaper'),
     innate:{name:'Soul Hunger',d:'Scythe damage heals 3% of damage dealt and slain enemies restore 2 mana.'},
     cap:{name:'Avatar of Death',d:'+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s.'},
-    r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:5,role:'Sustain',fx:'x_reap',d:'A broad 2.4x scythe arc with strong lifesteal.'},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
+    r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:2,am:0.45,role:'Rapid · Sustain',fx:'x_reap',d:'Quick, spammable scythe arcs (~2s, softer each) with strong lifesteal — steady drain.'},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
     r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Damage',d:'Each kill grants +2% damage for 6s, stacking five times.'},b:{id:'x_doom',n:'Lingering Doom',role:'Damage Over Time',d:'Your damage-over-time effects last 20% longer.'}},
     r4:{kind:'skill',slot:1,a:{id:'x_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'},b:{id:'x_wraith',n:'Wraith Form',cd:10,role:'Defense',fx:'x_wraith',d:'Become spectral for 3s: faster movement and 65% damage reduction.'}},
     r5:{kind:'passive',a:{id:'x_armor',n:'Soul Armor',role:'Defense',d:'Collecting a kill grants a 3% max-HP shield for 5s.'},b:{id:'x_wraithwalk',n:'Wraithwalk',role:'Movement',d:'After using mobility, gain +18% move speed for 2.5s.'}},
@@ -1943,7 +1943,7 @@ const CLASS2={
   necromancer:{ disp:'Necromancer', icon:classIcon('necromancer'),
     innate:{name:"Death's Embrace", d:'Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse you can raise.'},
     cap:{name:'Lich', d:'+12% damage. Your Summon Skeletons and Army of the Dead minions never expire, and you may keep more of them at once.'},
-    r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'necro_bolt',n:'Plague Bolt',cd:5,role:'Focused Damage',fx:'necro_bolt',d:'Hurl a heavy bolt of necrotic plague.'}},
+    r2:{kind:'skill',slot:0, a:{id:'necro_summon',n:'Summon Skeletons',cd:9,role:'Minions',fx:'necro_summon',d:'Raise a pack of skeletons that hunt down nearby enemies.'}, b:{id:'necro_bolt',n:'Plague Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'necro_bolt',d:'Rapid-fire bolts of necrotic plague (~2s, softer each).'}},
     r3:{kind:'passive', a:{id:'necro_legion',n:'Bone Legion',role:'Minions',d:'Summon one extra skeleton and your minions hit 20% harder.'}, b:{id:'necro_wither',n:'Withering',role:'Damage',d:'+10% damage — your magic rots what it touches.'}},
     r4:{kind:'skill',slot:1, a:{id:'necro_raise',n:'Raise the Dead',cd:12,role:'Minions',fx:'necro_raise',d:'Turn the nearest fresh corpse into a stronger risen fighter.'}, b:{id:'necro_nova',n:'Corpse Nova',cd:9,role:'Control',fx:'necro_nova',d:'Detonate a burst of bone shards that slows nearby enemies.'}},
     r5:{kind:'passive', a:{id:'necro_bond',n:'Grave Bond',role:'Sustain',d:'Each hit your minions land heals you a little.'}, b:{id:'necro_plague',n:'Plague',role:'Damage',d:'+10% damage and your damage-over-time effects last longer.'}},
@@ -1979,7 +1979,7 @@ const CLASS2={
   pirate:{ disp:'Pirate', icon:classIcon('pirate'),
     innate:{name:'Plunder', d:'Deal +8% damage and find more gold.'},
     cap:{name:'Dread Captain', d:'+12% damage and +10% move speed.'},
-    r2:{kind:'skill',slot:0, a:{id:'pir_pierce',n:'Aimed Shot',cd:5,role:'Focused Damage',fx:'pir_pierce',d:'A precise 3x shot that pierces.'}, b:{id:'pir_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'pir_volley',d:'A spread of shots across your front.'}},
+    r2:{kind:'skill',slot:0, a:{id:'pir_pierce',n:'Aimed Shot',cd:2,am:0.4,role:'Rapid · Focused',fx:'pir_pierce',d:'Rapid piercing pistol shots (~2s, softer each) — a gunslinger\'s rhythm.'}, b:{id:'pir_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'pir_volley',d:'A spread of shots across your front.'}},
     r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Damage',d:'+12% damage.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Speed',d:'+10% attack speed.'}},
     r4:{kind:'skill',slot:1, a:{id:'pir_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'pir_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'pir_tumble',n:'Roll',cd:8,role:'Movement',fx:'pir_tumble',d:'Roll back with a parting shot and snare.'}},
     r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_swagger',n:'Swagger',role:'Speed',d:'+8% move speed.'}},
@@ -1991,7 +1991,7 @@ const CLASS2={
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
     innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage and your cooldowns recover 5% faster.'},
     cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
-    r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:5,role:'Focused Damage',fx:'chr_bolt',d:'A heavy bolt of temporal energy.'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
+    r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'chr_bolt',d:'Rapid-fire bolts of temporal energy (~2s, softer each).'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
     r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Damage',d:'+12% skill damage.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'+10% cooldown reduction.'}},
     r4:{kind:'skill',slot:1, a:{id:'chr_nova',n:'Slow Field',cd:8,role:'Control',fx:'chr_nova',d:'A burst that slows nearby foes.'}, b:{id:'chr_blink',n:'Rewind',cd:8,role:'Movement',fx:'chr_blink',d:'Blink through time, briefly untouchable.'}},
     r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'Take 12% less damage.'}, b:{id:'chr_glass',n:'Focus',role:'Damage',d:'+12% damage.'}},
@@ -6354,6 +6354,9 @@ SKILL_FX.x_vortex=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon
    repeatable attacks are cheap, mobility is cheapest, control/sustain sits mid-band,
    and major immunity/burst/room-clearing effects carry the premium. */
 const SKILL_MANA={
+  // Low-CD "spam" damage skills — cheap so mana naturally paces the spam (see s.am/cd on these skills).
+  // (w_cleave/m_bolt/x_reap are set to 6 in their class rows below; these three have no other entry.)
+  chr_bolt:6,necro_bolt:6,pir_pierce:6,
   cleave:12,stomp:16,wcharge:14,berserk:22,
   bulwark:14,ironwave:18,laststand:26,
   deadeye:14,volley:12,tumble:8,mark:16,
@@ -6364,9 +6367,9 @@ const SKILL_MANA={
   execute:18,grimscythe:17,reapingstorm:25,
   r_volley:11,r_pierce:14,r_tumble:8,r_shadow:12,
   r_spike:13,r_smoke:11,r_mark:16,r_deathmark:20,
-  w_cleave:12,w_bash:11,w_charge:13,w_whirl:16,w_guard:15,w_stomp:17,w_berserk:22,w_execute:20,
-  m_bolt:13,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
-  x_reap:14,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24
+  w_cleave:6,w_bash:11,w_charge:13,w_whirl:16,w_guard:15,w_stomp:17,w_berserk:22,w_execute:20,
+  m_bolt:6,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
+  x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24
 };
 function skillManaCost(i,s){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
@@ -6402,7 +6405,7 @@ function useSkill(i){
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
     if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
-    G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),1):null;
+    G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}

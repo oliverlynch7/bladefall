@@ -939,7 +939,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.337.0-autopilot';
+const VERSION3D='1.338.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1892,7 +1892,7 @@ const CLASS2={
   paladin:{ disp:'Paladin', icon:classIcon('paladin'),
     innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
     cap:{name:'Avatar of Light', d:'Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal.'},
-    r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:5,role:'Holy Damage',fx:'pal_smite',d:'Hurl a bolt of holy light that strikes for heavy damage.'}},
+    r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:5,role:'Holy Damage',fx:'pal_smite',d:'Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.'}},
     r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'Take 12% less damage from every source.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Damage',d:'+12% damage while wielding a holy weapon.'}},
     r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
     r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Damage',d:'+10% damage — your light burns everything you strike.'}},
@@ -3459,6 +3459,7 @@ function hubTutorial(){ mode='menu';
       <p style="opacity:.9">🛒 <b>Quartermaster</b> — gear &amp; upgrades · 🔨 <b>Smith</b> — forge gear · ⚔️ <b>Drillmaster</b> — classes &amp; respec<br>🎒 <b>Pack</b> — your bag · 📜 <b>Postings</b> — quests · 🐾 <b>Beastkeeper</b> — pets · 🪞 <b>Mirror</b> · 🧥 <b>Keeper</b> — looks · ⚔️ <b>Arena</b>.</p>
       <p>The glowing <b>Waystone</b> in the centre <b>heals you and banks your progress</b> — touch it anytime.</p>
       <p>The <b>Gates</b> along the far wall are the zones. Walk into one and press <b>E</b> to descend. Clear a zone's quests and beat its boss to open the next Gate.</p>
+      <p>🎥 <b>Camera:</b> you're playing <b>over-the-shoulder</b> by default. Prefer a different view? Press <b>Esc</b> (or the Pause button) and tap <b>Camera</b> to cycle <b>Over-the-shoulder → Overhead → First-person</b> — pick whatever feels best.</p>
       <p style="color:var(--amber);font-weight:600">The loop is simple: dive → clear → return → upgrade → dive deeper.</p></div>
     <button class="bigbtn" id="hubTutGo">Got it</button></div>`);
   document.getElementById('hubTutGo').onclick=resumePlay;
@@ -6235,7 +6236,19 @@ SKILL_FX.w_whirl=function(p,ok,am){ const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p
 // Mage v2 skills
 SKILL_FX.m_bolt=SKILL_FX.bolt; SKILL_FX.m_blink=SKILL_FX.blink; SKILL_FX.m_nova=SKILL_FX.nova; SKILL_FX.m_barrier=SKILL_FX.barrier; SKILL_FX.m_tempest=SKILL_FX.tempest;
 // Paladin skills — reuse proven behaviors (holy flavor comes from the weapon element + innate)
-SKILL_FX.pal_bash=SKILL_FX.w_bash; SKILL_FX.pal_smite=SKILL_FX.bolt; SKILL_FX.pal_taunt=SKILL_FX.bulwark; SKILL_FX.pal_ground=SKILL_FX.w_whirl;
+SKILL_FX.pal_bash=SKILL_FX.w_bash; SKILL_FX.pal_taunt=SKILL_FX.bulwark; SKILL_FX.pal_ground=SKILL_FX.w_whirl;
+// Smite: a holy thunderbolt that falls from the sky onto the HIGHEST-HP enemy in the vicinity (great for bosses/elites), with a small holy splash.
+SKILL_FX.pal_smite=function(p,ok,am){ const w=p.weapon, R=560;
+  let tgt=null,best=-1;
+  for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; if(dXZ(e.x,e.z,p.x,p.z)>R) continue; if(e.hp>best){ best=e.hp; tgt=e; } }
+  if(!tgt){ toast&&toast('No target in sight'); return 'refund'; }
+  const tx=tgt.x, tz=tgt.z, ty=tgt.y||0, dmg=(w?w.dmg:10)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL);
+  // descending bolt: a bright holy column crashing down + a flash ring at impact
+  for(let k=0;k<12;k++){ (G.particles=G.particles||[]).push({x:tx+(Math.random()-0.5)*12,y:ty+70+k*34,z:tz+(Math.random()-0.5)*12,vx:0,vy:-520,vz:0,life:0.2,color:k%2?'#fff6c8':'#ffe08a',sz:6-k*0.25}); }
+  skillRing(tx,tz,'#fff0a6','#e6c060',150); burst(tx,ty+18,tz,'#fff6c8',30); G.shake=Math.min(G.shake+8,14);
+  hitEnemy(tgt,dmg,p,220,effLifesteal(p),ok?(w&&w.el):null);
+  for(const e of G.enemies){ if(e===tgt||e.dead||!e.active||e.dummy) continue; if(dXZ(e.x,e.z,tx,tz)<130) hitEnemy(e,dmg*0.4,p,150,0,ok?(w&&w.el):null); }   // holy splash
+  addText(tx,ty+72,tz,'SMITE','#fff0a6',true); SFX.magic&&SFX.magic('arcane'); };
 SKILL_FX.pal_guard=SKILL_FX.barrier; SKILL_FX.pal_burst=SKILL_FX.nova; SKILL_FX.pal_sky=SKILL_FX.stomp;
 SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); p.hp=Math.min(effMaxHp(p),p.hp+h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
 // Necromancer non-summon skills reuse mage FX (necro-flavored icons via C2_ICON)

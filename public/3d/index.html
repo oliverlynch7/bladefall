@@ -970,7 +970,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.349.0-autopilot';
+const VERSION3D='1.350.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6631,6 +6631,7 @@ function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGold
 function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e,weaponKill){
   if(e.dead) return;
+  if(e.bot && G.duel){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,14); }catch(_){} return; }   // DUEL: death is final — no respawn, no scoring
   if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
     G.arenaScore=G.arenaScore||{p:0,b:0}; G.arenaScore.p++;
     if(G.arenaTarget && G.arenaScore.p>=G.arenaTarget){ try{ toast('🏆 Round won — '+G.arenaTarget+' KOs! A fresh round begins.'); playFx&&playFx('bossdie'); }catch(_){} G.arenaScore={p:0,b:0}; }
@@ -7471,7 +7472,7 @@ function fireBotShot(e,p,D){ if(!G) return; const w=e.weapon||{}, pr=w.proj||{};
   const el=w.el||(e.style==='mage'?'arcane':null), col=w.blade||e.color||'#ffd28a';
   const baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
   for(let i=0;i<count;i++){ const a=baseYaw+(i-(count-1)/2)*spread;
-    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' bot',
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' bot',foeBot:(G&&G.duel?e.foe:null),
       x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
       gravity:0,size:pr.size||6,color:col,shape:pr.shape||(e.style==='mage'?'orb':'arrow'),glow:el?1:0,dmg,kb:120,pierce:0,el,life:1.5,hitSet:[]}); }
   try{ e.style==='mage'?(SFX.magic&&SFX.magic(el||'arcane')):(SFX.shoot&&SFX.shoot()); }catch(_){}
@@ -7482,22 +7483,22 @@ function fireBotShot(e,p,D){ if(!G) return; const w=e.weapon||{}, pr=w.proj||{};
 // Every one telegraphs (ring/burst/SFX) and is dodgeable — so a class bot feels like a real player.
 function botName(e){ return 'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' '+((CLASSES[e.botClassId]||{}).disp||'bot'); }
 function botNova(e,p,D,o){ o=o||{}; const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.3)*(1+(D.skill||0)*0.35)));
-  (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:o.r0||16,maxR:o.r||150,dmg,life:0,spd:o.spd||300,col:o.col||'#ffd24a',col2:o.col2||'#c9873a'});
+  (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:o.r0||16,maxR:o.r||150,dmg,life:0,spd:o.spd||300,foeBot:(G&&G.duel?e.foe:null),col:o.col||'#ffd24a',col2:o.col2||'#c9873a'});
   try{ skillRing(e.x,e.z,o.col||'#ffd24a',o.col2||'#c9873a',(o.r||150)*0.5); burst(e.x,e.y+18,e.z,o.col||'#ffd24a',12); (o.sfx?o.sfx():(SFX.boss&&SFX.boss())); }catch(_){}
   if(o.heal){ e.hp=Math.min(e.maxHp,e.hp+e.maxHp*o.heal); try{ addText(e.x,e.y+56,e.z,'+'+Math.round(e.maxHp*o.heal),'#7de08a'); }catch(_){} } }
 function botSlam(e,p,D,o){ o=o||{}; const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.4)*(1+(D.skill||0)*0.35)));
   // a telegraphed crater at your feet: it holds (delay), then the ring erupts and expands — walk out to avoid.
-  (G.shockwaves=G.shockwaves||[]).push({x:p.x,z:p.z,r:o.r0||14,maxR:o.r||160,dmg,life:0,spd:o.spd||240,delay:o.delay||0.55,col:o.col||'#ff7a3a',col2:o.col2||'#c33'});
+  (G.shockwaves=G.shockwaves||[]).push({x:p.x,z:p.z,r:o.r0||14,maxR:o.r||160,dmg,life:0,spd:o.spd||240,delay:o.delay||0.55,foeBot:(G&&G.duel?e.foe:null),col:o.col||'#ff7a3a',col2:o.col2||'#c33'});
   try{ skillRing(p.x,p.z,o.col||'#ff7a3a',o.col2||'#c33',(o.r||160)*0.4); burst(p.x,10,p.z,o.col||'#ff7a3a',10); SFX.magic&&SFX.magic(o.el||'fire'); }catch(_){} }
 function botVolley(e,p,D,o){ o=o||{}; const n=o.count||5, spread=o.spread||0.16, sp=o.speed||620, oy=(e.y||0)+26;
   const dmg=Math.max(3,Math.round(e.dmg*(o.dm||0.7))), baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
   for(let i=0;i<n;i++){ const a=baseYaw+(i-(n-1)/2)*spread;
-    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),foeBot:(G&&G.duel?e.foe:null),x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
       gravity:0,size:o.size||6,color:o.col||e.color,shape:o.shape||'arrow',glow:o.el?1:0,dmg,kb:120,pierce:0,el:o.el||null,life:1.5,hitSet:[]}); }
   try{ (o.el?(SFX.magic&&SFX.magic(o.el)):(SFX.shoot&&SFX.shoot())); }catch(_){} }
 function botBolt(e,p,D,o){ o=o||{}; const sp=o.speed||640, oy=(e.y||0)+26, d=Math.max(1,Math.hypot(p.x-e.x,p.z-e.z)), tt=d/sp;
   const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.4))), vx=(p.x-e.x)/tt, vz=(p.z-e.z)/tt, vy=((p.y+22)-oy)/tt, col=o.col||'#c9a6ff';
-  (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:0,
+  (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),foeBot:(G&&G.duel?e.foe:null),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:0,
     size:o.size||16,color:col,shape:o.shape||'runeorb',glow:1,trail:col,dmg,kb:220,pierce:o.pierce||0,el:o.el||null,life:1.7,hitSet:[]});
   try{ skillRing(e.x,e.z,col,col,70); burst(e.x+Math.sin(e.yaw)*18,oy,e.z+Math.cos(e.yaw)*18,col,12); SFX.magic&&SFX.magic(o.el||'arcane'); }catch(_){} }
 function botDashStrike(e,p,D,o){ o=o||{}; const dx=p.x-e.x,dz=p.z-e.z,d=Math.max(1,Math.hypot(dx,dz));
@@ -7537,10 +7538,21 @@ const BOT_SKILLS={
 function botCastSkill(e,p,D){ const list=BOT_SKILLS[e.botClassId]||BOT_SKILLS._default; if(!list||!list.length) return false;
   const d=Math.hypot(p.x-e.x,p.z-e.z), usable=list.filter(s=>d>=(s.min||0)&&d<=(s.max||9999));
   if(!usable.length) return false; try{ usable[Math.floor(Math.random()*usable.length)].cast(e,p,D); }catch(_){ return false; } return true; }
-function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
+// Route a bot's outgoing damage to its DUEL foe (bot-vs-bot self-play), honoring the foe's dodge
+// i-frames + Ninja evasion. Falls through to hitEnemy, which applies the damage as-is (no player scaling).
+function botHurtFoe(attacker,dmg){ const t=attacker&&attacker.foe; if(!t||t.dead) return;
+  if((t.invuln||0)>0||(t.dodgeTimer||0)>0) return;                                  // it dodged
+  if(t.botClassId==='ninja'){ const ev=Math.min(0.55,0.22+Math.min(5,t._evadeStacks||0)*0.03);   // ninja bots evade too
+    if(Math.random()<ev){ t._evadeStacks=Math.min(5,(t._evadeStacks||0)+1); t._evadeT=5;
+      try{ addText(t.x,t.y+t.h+10,t.z,'MISS','#9fe0ff'); burst(t.x,t.y+16,t.z,'#9fe0ff',6); }catch(_){} return; } }
+  let d=dmg; if(attacker.botClassId==='ninja'&&(attacker._evadeT||0)>0) d*=1+0.09*Math.min(5,attacker._evadeStacks||0);   // evasion snowball
+  try{ hitEnemy(t,Math.max(1,Math.round(d)),{x:attacker.x,z:attacker.z},60,0,null); }catch(_){}
+}
+function botAI(e,dt){ const p=(G&&G.duel&&e.foe)?e.foe:(G&&G.p); if(!p||p.dead) return; const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal;
   if(e.hitFlash>0) e.hitFlash-=dt; if(e.atkCd>0) e.atkCd-=dt; if(e.dodgeCd>0) e.dodgeCd-=dt; if(e.reactT>0) e.reactT-=dt; if(e.dodgeTimer>0) e.dodgeTimer-=dt; if(e.atkTimer>0) e.atkTimer-=dt; if(e.invuln>0) e.invuln-=dt;
   if(e.skillCd>0) e.skillCd-=dt; if(e.dashT>0) e.dashT-=dt; if(e.feintT>0) e.feintT-=dt; if(e.jumpCd>0) e.jumpCd-=dt; if(e.shootCd>0) e.shootCd-=dt;
   if(e._dmgBuffT>0) e._dmgBuffT-=dt; if(e._hasteT>0) e._hasteT-=dt;
+  if(e._evadeT>0){ e._evadeT-=dt; } else e._evadeStacks=0;   // ninja bot evasion snowball decay (duels)
   const dx=p.x-e.x, dz=p.z-e.z, d=Math.max(1,Math.hypot(dx,dz)), nx=dx/d, nz=dz/d;
   e.yaw=Math.atan2(nx,nz);
   const reach=((e.weapon&&e.weapon.range)||60)+e.r+p.r;
@@ -7551,9 +7563,9 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
   // LAVA: bots burn like the player, and try to get back onto an island (respawn if they die to it)
   let onLava=false;
   if(G.arenaLava && gy<15){ for(const L of G.arenaLava){ if(Math.abs(e.x-L.x)<L.w/2 && Math.abs(e.z-L.z)<L.d/2){ onLava=true; break; } } }
-  if(onLava){ e._lavaT=(e._lavaT||0)+dt; if(e._lavaT>=0.4){ e._lavaT=0; e.hp-=Math.max(4,Math.round(e.maxHp*0.05)); e.hitFlash=0.3; try{burst(e.x,4,e.z,'#ff7a3a',5);}catch(_){} if(e.hp<=0){ botRespawn(e); return; } } } else e._lavaT=0;
+  if(onLava){ e._lavaT=(e._lavaT||0)+dt; if(e._lavaT>=0.4){ e._lavaT=0; e.hp-=Math.max(4,Math.round(e.maxHp*0.05)); e.hitFlash=0.3; try{burst(e.x,4,e.z,'#ff7a3a',5);}catch(_){} if(e.hp<=0){ if(G.duel){ e.dead=true; return; } botRespawn(e); return; } } } else e._lavaT=0;
   // LOW HP: turtle — prioritise defence + self-heal (stands in for a defensive/healing skill) and fall back to safe ground
-  const low=e.hp<e.maxHp*0.30 && D.flee; e._def=low;
+  const low=e.hp<e.maxHp*0.30 && D.flee && !G.duel; e._def=low;   // in a DUEL: no turtle/flee/self-heal — fight to the death (else both bots stalemate forever)
   if(low){ e.hp=Math.min(e.maxHp, e.hp+e.maxHp*0.03*dt); }
   // reactive dodge when the player is swinging close
   if(D.dodge>0 && e.dodgeCd<=0 && d<reach+50 && p.atkTimer>0 && Math.random()<D.dodge){ e.dodgeTimer=0.26; e.dodgeCd=D.dodgeCdT; e.invuln=0.22;
@@ -7588,8 +7600,45 @@ function botAI(e,dt){ const p=G&&G.p; if(!p) return; const D=BOT_DIFF[e.botDiff]
   if(d<reach && e.atkCd<=0 && e._pendingHit==null){ e.atkCd=D.atkCd; e.atkTimer=0.3; e._pendingHit=D.react; try{ SFX.slash&&SFX.slash(); }catch(_){} }
   if(e._pendingHit!=null){ e._pendingHit-=dt; if(e._pendingHit<=0){ e._pendingHit=null;
     const dd=Math.hypot(p.x-e.x,p.z-e.z), mult=(e._skillHit?(e._skillMult||1.6):1)*(e._dmgBuffT>0?1.4:1); e._skillHit=false; e._skillMult=1;
-    if(dd<reach+16 && !(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg*mult), e.x, e.z);
+    if(dd<reach+16){ if(G.duel&&e.foe) botHurtFoe(e,Math.round(e.dmg*mult)); else if(!(p.invuln>0||p.dodgeTimer>0)) hurtPlayer(Math.round(e.dmg*mult), e.x, e.z); }
     try{ burst(e.x+nx*30,e.y+24,e.z+nz*30,e.color,mult>1?10:6); }catch(_){} } }
+}
+// ==== PvP SELF-PLAY HARNESS — two class bots duel headlessly; run every matchup N times for a win matrix. ====
+// Reuses the whole bot combat stack (movement, kiting, dodges, class skill kits) with damage routed bot->bot
+// (foeBot tags on projectiles/shockwaves, botHurtFoe for melee). The arena player is parked + invulnerable.
+function _duelSpawn(cls,diff,pos){ ARENA_LOADOUT.botClass=cls; const b=spawnBot(diff); if(!b) return null;
+  b.x=pos.x; b.z=pos.z; b.y=0; b.vx=b.vz=b.vy=0; b._evadeStacks=0; b._evadeT=0; b._def=false; return b; }
+function runDuelOnce(clsA,clsB,diff,maxSec){ maxSec=maxSec||26; if(!G) return null;
+  G.enemies=G.enemies.filter(e=>!e.bot); if(G.projectiles)G.projectiles.length=0; if(G.shockwaves)G.shockwaves.length=0; if(G.meteors)G.meteors.length=0;
+  G.duel=true;
+  const A=_duelSpawn(clsA,diff,{x:-240,z:0}), B=_duelSpawn(clsB,diff,{x:240,z:0});
+  if(!A||!B){ G.duel=false; return null; }
+  A.foe=B; B.foe=A; A.team=0; B.team=1;
+  const steps=Math.round(maxSec/0.016); let t=0, winner=null;
+  for(let f=0; f<steps; f++){ if(G.p) G.p.invuln=1e12; update(0.016); t+=0.016;
+    if(A.dead||B.dead){ winner=(A.dead&&B.dead)?'draw':(A.dead?'B':'A'); break; } }
+  if(!winner){ const ha=A.hp/A.maxHp, hb=B.hp/B.maxHp; winner=Math.abs(ha-hb)<0.03?'draw':(ha>hb?'A':'B'); }
+  const res={a:clsA,b:clsB,winner,timedOut:!(A.dead||B.dead),time:+t.toFixed(1),aHpPct:Math.max(0,Math.round(100*A.hp/A.maxHp)),bHpPct:Math.max(0,Math.round(100*B.hp/B.maxHp))};
+  G.enemies=G.enemies.filter(e=>!e.bot); G.duel=false; return res;
+}
+function duelMatrix(opts){ opts=opts||{}; const N=opts.runs||10, diff=opts.diff||'hard', maxSec=opts.maxSec||24;
+  const classes=opts.classes||Object.keys(CLASSES);
+  if(IN_ARENA) exitArena();
+  Object.assign(ARENA_LOADOUT,{classId:'warrior',rank:10,level:40,wArch:'sword',wRid:'legendary',aRid:'legendary',bots:0,botDiff:diff,map:'flat'});
+  enterArena(); const p=G.p; p.x=0; p.z=640; p.y=0; p.invuln=1e12; p.dead=false;
+  const grid={}, wins={}, games={}, samples=[];
+  classes.forEach(a=>{ wins[a]=0; games[a]=0; grid[a]={}; classes.forEach(b=>grid[a][b]=(a===b?null:0)); });
+  for(let i=0;i<classes.length;i++) for(let j=i+1;j<classes.length;j++){
+    const A=classes[i], B=classes[j]; let aw=0,bw=0,dr=0,tt=0,to=0;
+    for(let r=0;r<N;r++){ const res=runDuelOnce(A,B,diff,maxSec); if(!res) continue; tt+=res.time; if(res.timedOut)to++;
+      games[A]++; games[B]++;
+      if(res.winner==='A'){aw++;wins[A]++;} else if(res.winner==='B'){bw++;wins[B]++;} else dr++; }
+    grid[A][B]=Math.round(100*aw/Math.max(1,N)); grid[B][A]=Math.round(100*bw/Math.max(1,N));
+    samples.push({a:A,b:B,aWin:aw,bWin:bw,draw:dr,avgTime:+(tt/Math.max(1,N)).toFixed(1),timeouts:to});
+  }
+  const winRate={}; classes.forEach(c=>winRate[c]=games[c]?Math.round(100*wins[c]/games[c]):0);
+  exitArena();
+  return { runs:N, diff, classes, winRate, grid, samples };
 }
 function drawBotHero(e,t){ const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal, body=D.color, dark=tint(D.color,'#0a0a0a',0.5), lt=tint(D.color,'#ffffff',0.35);
   const moving=Math.hypot(e.vx||0,e.vz||0)>10, leg=Math.sin(e.runAnim||0)*(moving?0.5:0.12), sw=e.atkTimer>0?1:0;
@@ -7829,6 +7878,9 @@ function update(dt){
   updateCrumbles(dt); updateGeysers(dt); updateBonusPhasers();
   if(G.shockwaves){ for(const sw of G.shockwaves){ if(sw.delay>0){ sw.delay-=dt; continue; }   // staggered quake rings hold, then march
       sw.life+=dt; sw.r+=(sw.spd||270)*dt;   // expanding boss slam ring (radial, or arc for a directional cleave)
+      if(G.duel && sw.foeBot){ const t=sw.foeBot;             // DUEL: the ring damages the opponent bot only
+        if(!t.dead && (t.invuln||0)<=0 && (t.dodgeTimer||0)<=0 && Math.abs(dXZ(t.x,t.z,sw.x,sw.z)-sw.r)<28 && !sw.hitFoe){ sw.hitFoe=true; if(t.foe) botHurtFoe(t.foe,sw.dmg); }
+        continue; }
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
       if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow'}); } }
     G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
@@ -7992,6 +8044,11 @@ function update(dt){
           pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01},pr.kb,effLifesteal(G.p),pr.el);
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
+    } else if(G.duel && pr.foeBot){                          // DUEL: a bot's shot hits only its opponent, never the parked player
+      const t=pr.foeBot;
+      if(!t.dead && (t.invuln||0)<=0 && (t.dodgeTimer||0)<=0 && dXZ(t.x,t.z,pr.x,pr.z)<(t.r+pr.size) && Math.abs(pr.y-(t.y+t.h/2))<(t.h/2+pr.size)){
+        if(t.foe) botHurtFoe(t.foe,pr.dmg); else { try{ hitEnemy(t,pr.dmg,{x:pr.x,z:pr.z},60,0,pr.el); }catch(_){} }
+        if(pr.pierce>0) pr.pierce--; else pr.life=0; }
     } else {
       const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
       if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
@@ -12727,6 +12784,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
   enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
+  runDuelOnce, duelMatrix,
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,
   floorAt:(x,z)=>G?floorAt(x,z,13,0):null,   // debug: walkable floor height at x/z (-Infinity = void/no ground)

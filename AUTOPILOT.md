@@ -54,7 +54,7 @@ Every class is a **variant of one of the 3 cores** (Warrior / Mage / Ranger). Ea
 - [x] **Pirate (Ranger variant).** DONE (v1.333) — placeholder icons. Gunner vs Swashbuckler paths; reused ranger FX (Aimed Shot/Broadside/Boarding Strike/Cannonade/Powder Keg). Unlock: The Oubliette (stage 5).
 - [x] **Berserker (Warrior variant).** DONE (v1.333) — placeholder icons. Rage class: innate Bloodrage (+dmg, more below half HP), Fury vs Blood paths, reused warrior FX. Unlock: The Thornwood (stage 1) — the tier-1/first unlock.
 - [x] **Secret-zone → class-unlock wiring.** DONE (v1.333). All 7 purple secret side-zones now carry `trial:'<class>'` so entering one starts that class's trial (win → permanent unlock, like the Reaper). Full ladder wired: Thornwood(1)=Berserker, Sunken Wash(3)=Ninja, Oubliette(5)=Pirate, Glacier Vault(7)=Chronomancer, Magma Core(9)=Paladin, Reaper's Gate(11)=Reaper, Reliquary(13)=Necromancer. Verified: all 7 trials exist + classes exist + stages 1..13.
-- [ ] **Icon-art passes (supervised, needs Oliver's ChatGPT):** Berserker, Pirate, Chronomancer still use placeholder icons (reused warrior/ranger/mage art). Generate 18 real icons each like Paladin/Necromancer/Ninja.
+- [x] **Icon-art passes — DONE (v1.339–1.341).** Berserker, Pirate, Chronomancer all now have their own 18-icon voxel sets (bg-stripped, wired). ALL 10 classes have real art. Drillmaster's Seal icon also done (v1.335).
 
 ## Class-unlock tier ladder (deeper secret = slightly stronger class)
 Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):

@@ -388,7 +388,15 @@
   .ico-skill-necro-death-grip{background-image:url('icons/necro_death_grip.png');}
   .ico-skill-necro-army-of-the-dead{background-image:url('icons/necro_army_of_the_dead.png');}
   .ico-skill-necro-death-storm{background-image:url('icons/necro_death_storm.png');}
-  .ico-class-ninja{background-image:url('icons/class-reaper.png');}       /* placeholder — pending ninja art pass */
+  .ico-class-ninja{background-image:url('icons/class-ninja.png');}
+  .ico-skill-ninja-shadow-strike{background-image:url('icons/ninja_shadow_strike.png');}
+  .ico-skill-ninja-fan-of-knives{background-image:url('icons/ninja_fan_of_knives.png');}
+  .ico-skill-ninja-shadow-step{background-image:url('icons/ninja_shadow_step.png');}
+  .ico-skill-ninja-smoke-bomb{background-image:url('icons/ninja_smoke_bomb.png');}
+  .ico-skill-ninja-death-mark{background-image:url('icons/ninja_death_mark.png');}
+  .ico-skill-ninja-tumble{background-image:url('icons/ninja_tumble.png');}
+  .ico-skill-ninja-blade-fury{background-image:url('icons/ninja_blade_fury.png');}
+  .ico-skill-ninja-blade-storm{background-image:url('icons/ninja_blade_storm.png');}
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -922,7 +930,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.331.0-autopilot';
+const VERSION3D='1.332.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1777,10 +1785,10 @@ const CLASSES={
     subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
           {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
     skills:[
-      {id:'nin_strike',n:'Shadow Strike',icon:skillIcon('ranger-quickshot'),cd:8,rank:1,d:'Blink to a foe and strike hard'},
-      {id:'nin_step',n:'Shadow Step',icon:skillIcon('reaper-shadow-step'),cd:8,rank:2,d:'Dash through shadow, briefly untouchable'},
-      {id:'nin_mark',n:'Death Mark',icon:skillIcon('hunters-mark'),cd:14,rank:4,d:'Mark a target to take extra damage'},
-      {id:'nin_fury',n:'Blade Fury',icon:skillIcon('berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]}
+      {id:'nin_strike',n:'Shadow Strike',icon:skillIcon('ninja-shadow-strike'),cd:8,rank:1,d:'Blink to a foe and strike hard'},
+      {id:'nin_step',n:'Shadow Step',icon:skillIcon('ninja-shadow-step'),cd:8,rank:2,d:'Dash through shadow, briefly untouchable'},
+      {id:'nin_mark',n:'Death Mark',icon:skillIcon('ninja-death-mark'),cd:14,rank:4,d:'Mark a target to take extra damage'},
+      {id:'nin_fury',n:'Blade Fury',icon:skillIcon('ninja-blade-fury'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -1875,13 +1883,13 @@ const CLASS2={
   ninja:{ disp:'Ninja', icon:classIcon('ninja'),
     innate:{name:'Killer Instinct', d:'Daggers and swords deal +8% damage and you move 8% faster.'},
     cap:{name:'Phantom', d:'+12% damage, +10% attack speed, and take 12% less damage.'},
-    r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'r_shadow',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_fan',n:'Fan of Knives',cd:6,role:'Group Damage',fx:'r_volley',d:'Loose a fan of blades across your front.'}},
+    r2:{kind:'skill',slot:0, a:{id:'nin_strike',n:'Shadow Strike',cd:8,role:'Burst',fx:'nin_strike',d:'Blink to the nearest enemy and strike for heavy damage.'}, b:{id:'nin_fan',n:'Fan of Knives',cd:6,role:'Group Damage',fx:'nin_fan',d:'Loose a fan of blades across your front.'}},
     r3:{kind:'passive', a:{id:'nin_swift',n:'Swift',role:'Speed',d:'+10% attack speed.'}, b:{id:'nin_deadly',n:'Deadly Precision',role:'Damage',d:'+12% damage.'}},
-    r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'r_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
+    r4:{kind:'skill',slot:1, a:{id:'nin_step',n:'Shadow Step',cd:8,role:'Movement',fx:'nin_step',d:'Dash through shadow and become briefly untouchable.'}, b:{id:'nin_smoke',n:'Smoke Bomb',cd:14,role:'Escape',fx:'nin_smoke',d:'Vanish in smoke (briefly invulnerable) and slow nearby foes.'}},
     r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'Take 10% less damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Damage',d:'+10% damage — chain your strikes.'}},
-    r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'r_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_tumble',n:'Tumble',cd:10,role:'Control',fx:'r_tumble',d:'Roll back with a parting strike that snares nearby foes.'}},
+    r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_tumble',n:'Tumble',cd:10,role:'Control',fx:'nin_tumble',d:'Roll back with a parting strike that snares nearby foes.'}},
     r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'Take 10% less damage and slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
-    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'w_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'w_whirl',d:'A spinning storm of steel that cuts everything around you.'}},
+    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
     r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
   }
 };
@@ -1905,9 +1913,9 @@ const PASSIVE_ART={
   necro_legion:'necro-bone-legion',necro_wither:'necro-withering',necro_bond:'necro-grave-bond',necro_plague:'necro-plague',
   necro_undying:'necro-undying',necro_harvest:'necro-soul-harvest',necro_master:'necro-master-of-death',necro_pest:'necro-pestilence',
   necro_innate:'necro-deaths-embrace',necro_cap:'necro-lich',
-  nin_swift:'ranger-quickdraw',nin_deadly:'ranger-clear-aim',nin_evasive:'ranger-escape-artist',nin_combo:'ranger-close-quarters',
-  nin_ghost:'ranger-ambusher',nin_bleed:'reaper-lingering-doom',nin_shadowform:'reaper-wraithwalk',nin_assassin:'ranger-longshot',
-  nin_innate:'ranger-clear-aim',nin_cap:'ranger-perfect-hunt'
+  nin_swift:'ninja-swift',nin_deadly:'ninja-deadly-precision',nin_evasive:'ninja-evasion',nin_combo:'ninja-combo-edge',
+  nin_ghost:'ninja-ghostwalk',nin_bleed:'ninja-bleeding-edge',nin_shadowform:'ninja-shadow-form',nin_assassin:'ninja-assassinate',
+  nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
 const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate'};
@@ -6143,6 +6151,8 @@ SKILL_FX.pal_guard=SKILL_FX.barrier; SKILL_FX.pal_burst=SKILL_FX.nova; SKILL_FX.
 SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); p.hp=Math.min(effMaxHp(p),p.hp+h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
 // Necromancer non-summon skills reuse mage FX (necro-flavored icons via C2_ICON)
 SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
+// Ninja skills reuse ranger/warrior FX (ninja-flavored icons via C2_ICON)
+SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL_FX.nin_step=SKILL_FX.x_step; SKILL_FX.nin_smoke=SKILL_FX.r_smoke; SKILL_FX.nin_mark=SKILL_FX.r_mark; SKILL_FX.nin_tumble=SKILL_FX.r_tumble; SKILL_FX.nin_fury=SKILL_FX.w_berserk; SKILL_FX.nin_storm=SKILL_FX.w_whirl;
 SKILL_FX.m_beam=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,950); if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z); const col=elementColor(w&&w.el)||'#c9a6ff',sp=1050,oy=p.y+26;
   G.projectiles.push({owner:'player',x:p.x,y:oy,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:14,color:col,shape:'lance',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2*am*(ok?1:OFFCLASS_MUL),kb:100,pierce:99,el:ok?(w&&w.el):null,life:1,hitSet:[]}); skillRing(p.x,p.z,col,col,70); SFX.magic(w&&w.el); };
 SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,680),tx=t?t.x:p.x+Math.sin(p.yaw)*240,tz=t?t.z:p.z+Math.cos(p.yaw)*240,dmg=(w?w.dmg:10)*effPower(p)*1.3*am*(ok?1:OFFCLASS_MUL); skillRing(tx,tz,'#a98cff','#4b2770',190);
@@ -6259,7 +6269,8 @@ const C2_ICON={
   pal_bash:skillIcon('paladin-shield-bash'),pal_taunt:skillIcon('paladin-taunt'),pal_guard:skillIcon('paladin-guard-up'),pal_laststand:skillIcon('paladin-last-stand'),
   pal_smite:skillIcon('paladin-smite'),pal_ground:skillIcon('paladin-holy-ground'),pal_burst:skillIcon('paladin-light-burst'),pal_sky:skillIcon('paladin-sky-hammer'),
   necro_summon:skillIcon('necro-summon-skeletons'),necro_raise:skillIcon('necro-raise-the-dead'),necro_army:skillIcon('necro-army-of-the-dead'),
-  necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm')
+  necro_bolt:skillIcon('necro-plague-bolt'),necro_nova:skillIcon('necro-corpse-nova'),necro_wall:skillIcon('necro-bone-wall'),necro_grip:skillIcon('necro-death-grip'),necro_storm:skillIcon('necro-death-storm'),
+  nin_strike:skillIcon('ninja-shadow-strike'),nin_fan:skillIcon('ninja-fan-of-knives'),nin_step:skillIcon('ninja-shadow-step'),nin_smoke:skillIcon('ninja-smoke-bomb'),nin_mark:skillIcon('ninja-death-mark'),nin_tumble:skillIcon('ninja-tumble'),nin_fury:skillIcon('ninja-blade-fury'),nin_storm:skillIcon('ninja-blade-storm')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

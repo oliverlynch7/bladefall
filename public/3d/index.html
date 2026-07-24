@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.360.0-autopilot';
+const VERSION3D='1.361.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1642,7 +1642,8 @@ const RARITY={
   uncommon:{name:'Uncommon',color:'#5fd17a',base:300,mul:1.30,tier:1,req:5},
   rare:{name:'Rare',color:'#4aa3e0',base:80,mul:1.70,tier:2,req:12},
   epic:{name:'Epic',color:'#b06bff',base:16,mul:2.25,tier:3,req:20},
-  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:30}
+  legendary:{name:'Legendary',color:'#f0a93a',base:2.6,mul:3.0,tier:4,req:30},
+  none:{name:'',color:'#9aa4ad',base:0,mul:1.00,tier:0,req:1}   // the Monk's Bare Fists — a rarity-less weapon (never rolled; not in RORDER)
 };
 const RORDER=['common','uncommon','rare','epic','legendary'];
 /* ---------------- PETS / COMPANIONS ----------------
@@ -1735,7 +1736,7 @@ const ARCHES={
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
-  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:6,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; ONLY on-class for the Monk (terrible for everyone else). Never drops as loot.
+  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:16,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; VERY strong for the Monk (on-class), useless for everyone else (see offclassMul). No rarity. Never drops.
   flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
@@ -2110,7 +2111,8 @@ function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
 function classFamilyOk(w){ if(w&&w.art==='fist') return meta.classId==='monk'; return !w || w.anyClass || curClass().family.includes(w.art); }   // fists: on-class (full power) ONLY for the Monk
-function offclassMul(p){ return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
+function offclassMul(p){ if(p.weapon&&p.weapon.art==='fist') return meta.classId==='monk'?1:0.20;   // bare fists: full power for the Monk, near-useless for everyone else
+  return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
 function classMods(){ const cs=classState(meta.classId); return {sub:cs.sub,cap:cs.rank>=10}; }
 function abilityMul(){ return 1; }   // legacy sorcerer hook retired — skill-damage bonuses now come from v2 passives (m_potent, etc.)
 // The effective 4-skill kit: skill 1 is shared; skills 2-4 come from the path you chose
@@ -2167,7 +2169,11 @@ function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dm
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
 const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod']};
+function fistsWeapon(){ const a=ARCHES.fist;   // the Monk's Bare Fists — a fixed, RARITY-LESS weapon (never rolled/scaled)
+  return {arche:'fist',art:'fist',cls:'melee',sch:'phys',el:null,rarity:'none',fist:true,chg:null,anyClass:false,reaper:false,ians:false,
+    name:'Bare Fists',dmg:a.dmg,cd:a.cd,kb:a.kb,range:a.range,lifesteal:0,color:'#9aa4ad',blade:'#e8d3b8'}; }
 function classStartWeapon(cid){
+  if(cid==='monk') return fistsWeapon();
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
   w.dmg=+(w.dmg*0.62).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
@@ -3359,7 +3365,7 @@ function openBag(back){
   { const ub=document.getElementById('unequipBtn'); if(ub) ub.onclick=()=>{ if(!HR) return;
       const old=HR.weapon;
       if(old&&old.art!=='fist'&&!/Rusty|Cracked|Splintered|Notched|Bare Fists/.test(old.name||'')){ if(meta.stash.length>=STASH_CAP){ toast('Bag full — sell or stash something first'); return; } meta.stash.push({weapon:old}); }
-      HR.weapon=normWeapon(makeWeapon('fist','common'));
+      HR.weapon=fistsWeapon();
       if(G&&G.hub&&HR===meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
       else if(HR===G.p){ recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
       persist(); SFX.pickup(); hudUpdate(); toast(meta.classId==='monk'?'✊ Fists ready — your true weapon':'✊ Unarmed — weak unless you\'re a Monk'); openBag(back); }; }
@@ -9705,6 +9711,10 @@ function cheatKitOut(){ const p=G.p; const fam=curClass().family[0]||'sword';
   p.weapon=makeWeapon(aid,'legendary'); for(const s of GEARSLOTS) p.gear[s]=('amulet'==s||'ring'==s)?makeTrinket('legendary',s):makeArmor('legendary',s);
   recomputeArmor(p); p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.god(); playFx('equip'); toast('✦ Kitted out — full Legendary '+curClass().disp+' loadout equipped'); }
 function cheatUnlockClasses(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; classState(c); }); persist(); SFX.achieve(); toast('⚔️ All classes unlocked — swap at the Drillmaster'); }
+function cheatRank10All(){ CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; const cs=classState(c); cs.rank=10;
+    const def=c2def(c); if(def){ cs.ch=cs.ch||{}; for(const r of CLASS2_CHOICE_RANKS) cs.ch[r]=cs.ch[r]||def['r'+r].a.id; }   // auto-fill a valid rank-10 build
+    if(!cs.sub){ const C=CLASSES[c]; cs.sub=(C&&C.subs&&C.subs[0]&&C.subs[0].id)||null; } });
+  persist(); skillbarUpdate(); SFX.achieve(); toast('★ Every class unlocked & set to Rank 10'); }
 function cheatAllPets(){ meta.petOwned=PETIDS.slice(); persist(); SFX.achieve(); toast('🐾 All '+PETIDS.length+' companions granted — equip at the Beastkeeper'); }
 function cheatHeal(){ const p=G.p; p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.achieve(); toast('❤️ Full heal'); }
 function cheatRankUp(){ const cs=classState(meta.classId); cs.rank=10; cs.sub=cs.sub||(curClass().subs&&curClass().subs[0]&&curClass().subs[0].id); persist(); skillbarUpdate(); SFX.levelup(); toast('★ '+curClass().disp+' rank 10 — all skills unlocked'); }
@@ -9721,7 +9731,7 @@ function openCheatMenu(back){
     <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
     <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
     <div class="sect">Unlocks &amp; conveniences</div>
-    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
+    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
     <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
   const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
   wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
@@ -9729,7 +9739,7 @@ function openCheatMenu(back){
   wire('cRank',()=>{cheatRankUp();openCheatMenu(back);});
   wire('cRar',()=>{ _cheatRar=RORDER[(RORDER.indexOf(_cheatRar)+1)%RORDER.length]; openCheatMenu(back); });
   wire('cWeap',()=>{cheatGiveWeapons();openCheatMenu(back);}); wire('cArmor',()=>{cheatGiveArmor();openCheatMenu(back);}); wire('cKit',()=>{cheatKitOut();openCheatMenu(back);});
-  wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
+  wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cRank10All',()=>{cheatRank10All();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
   wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
   wire('cBack',()=>{ if(back) back(); else wsResume(); });
 }
@@ -12910,7 +12920,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
-  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatAllPets, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
+  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

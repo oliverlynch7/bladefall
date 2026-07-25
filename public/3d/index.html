@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.367.0-autopilot';
+const VERSION3D='1.368.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7426,11 +7426,14 @@ function openMPLobby(){
     <div id="mpHostInfo" style="display:none;margin:6px 0"><p class="ovsub" id="mpHostHint">Share this code, then start a game — friends who join land in your world.</p><div id="mpCode" style="font-family:ui-monospace,monospace;font-size:26px;font-weight:800;color:var(--amber,#e8a33d);letter-spacing:.18em;text-align:center;margin:4px 0">····</div></div>
     <div style="display:flex;gap:8px;margin:10px 0"><input id="mpJoinCode" placeholder="ROOM CODE" maxlength="6" style="flex:1;background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:10px;padding:11px 12px;font-size:15px;letter-spacing:.12em;text-transform:uppercase"><button class="bigbtn ghost" id="mpJoin" style="width:auto;margin:0">Join</button></div>
     <p class="ovsub" id="mpStatus" style="min-height:18px"></p>
+    <p class="ovsub" style="opacity:.45;font-size:11px;margin-top:2px">build ${VERSION3D}</p>
     <button class="bigbtn ghost" id="mpBack" style="margin-top:6px">Back</button></div>`);
   const st=(m,ok)=>{ const e=document.getElementById('mpStatus'); if(e){ e.textContent=m; e.style.color=ok?'var(--good,#3ad07f)':'var(--muted,#8b8f9a)'; } };
-  document.getElementById('mpBack').onclick=titleScreen;
-  const doHost=(pvp)=>{ st('Connecting…'); try{SFX.pickup();}catch(e){}
-    MP.host((ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
+  let _ctick=null; const stopTick=()=>{ if(_ctick){ clearInterval(_ctick); _ctick=null; } };
+  const connCountdown=()=>{ stopTick(); let s=0; st('Connecting… 0s'); _ctick=setInterval(()=>{ s++; st('Connecting… '+s+'s'); if(s>=24) stopTick(); }, 1000); };
+  document.getElementById('mpBack').onclick=()=>{ stopTick(); titleScreen(); };
+  const doHost=(pvp)=>{ connCountdown(); try{SFX.pickup();}catch(e){}
+    MP.host((ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
       const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
       const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
       const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Dropping you into the arena lobby now — share this code and your friend joins straight into it. First to 5 wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
@@ -7441,8 +7444,8 @@ function openMPLobby(){
   document.getElementById('mpHost').onclick=()=>doHost(false);
   document.getElementById('mpHostPvp').onclick=()=>doHost(true);
   document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
-    if(!c){ st('Enter a room code.'); return; } st('Connecting…'); try{SFX.pickup();}catch(e){}
-    MP.join(c,(ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not join ('+info+'). Check the code.'); return; }
+    if(!c){ st('Enter a room code.'); return; } connCountdown(); try{SFX.pickup();}catch(e){}
+    MP.join(c,(ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':info==='timeout'?'Could not reach the host (timed out). Check the code, make sure they hosted, and retry.':'Could not join ('+info+'). Check the code.'); return; }
       st('Connected! Waiting for the host to enter a zone…',true); }); };
 }
 /* ============================================================================

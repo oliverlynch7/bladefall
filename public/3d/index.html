@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.368.0-autopilot';
+const VERSION3D='1.369.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7171,15 +7171,24 @@ const MP={
   teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
   ROOMPFX:'bladefall-mp-',
-  // ICE servers for WebRTC. The default PeerJS config has STUN only — that fails between many
-  // real device pairs (strict/symmetric NAT, mobile networks). Adding public TURN relays makes
-  // cross-network co-op actually connect. STUN handles the easy cases; TURN relays the hard ones.
-  ICE:{ iceServers:[
-    {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},
-    {urls:'turn:openrelay.metered.ca:80', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject'},
-    {urls:'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'}
-  ] },
+  // ICE servers for WebRTC. STUN alone fails between many real device pairs (strict/symmetric
+  // NAT, mobile networks) — those need a TURN relay. All the free public TURN servers are dead,
+  // so we mint short-lived Cloudflare TURN credentials on demand from our own /turn endpoint
+  // (the secret token lives in Cloudflare, never in this file). STUN-only is the fallback.
+  ICE:{ iceServers:[ {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']} ] },
+  iceCfg:null,
+  // fetch relay credentials once per session; merge them onto the STUN fallback. Never throws.
+  async ensureIce(){ if(this.iceCfg) return this.iceCfg;
+    const servers=[ {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']} ];
+    try{
+      const r=await fetch('/turn',{cache:'no-store'});
+      if(r.ok){ const d=await r.json();
+        if(Array.isArray(d.iceServers)) d.iceServers.forEach(s=>servers.push(s));
+        else if(d.iceServers && d.iceServers.urls) servers.push(d.iceServers);
+        else if(d.urls) servers.push({urls:d.urls, username:d.username, credential:d.credential});
+      }
+    }catch(e){ /* offline or /turn missing — STUN-only, same-network still works */ }
+    this.iceCfg={iceServers:servers}; return this.iceCfg; },
   rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
   // lazy-load PeerJS once, on first co-op entry; resolves true on success
   loadLib(){ return new Promise(res=>{ if(window.Peer){ this._lib=true; return res(true); }
@@ -7199,7 +7208,7 @@ const MP={
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     this.pvp=!!pvp;
     this.code=this.rndCode(); this.isHost=true; this.myId='h';
-    this.peer=new Peer(this.ROOMPFX+this.code,{debug:0,config:this.ICE});
+    this.peer=new Peer(this.ROOMPFX+this.code,{debug:0,config:await this.ensureIce()});
     this.peer.on('open',()=>{ this.active=true; cb&&cb(true,this.code); });
     this.peer.on('connection',c=>this.wireGuest(c));
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
@@ -7224,7 +7233,7 @@ const MP={
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
     this.isHost=false; this.myId=Math.random().toString(36).slice(2,7);
-    this.peer=new Peer({debug:0,config:this.ICE});
+    this.peer=new Peer({debug:0,config:await this.ensureIce()});
     let settled=false; const fail=info=>{ if(settled||this.active)return; settled=true; try{this.peer.destroy();}catch(e){} cb&&cb(false,info); };
     const giveUp=setTimeout(()=>fail('timeout'),22000);   // NO more endless "Connecting…" — bail after 22s so the player can retry
     this.peer.on('open',()=>{ const c=this.peer.connect(this.ROOMPFX+code,{reliable:false}); this.hostConn=c;

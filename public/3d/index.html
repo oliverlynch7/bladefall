@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.366.0-autopilot';
+const VERSION3D='1.367.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7206,7 +7206,8 @@ const MP={
   wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
     { const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} }
     c.on('data',d=>{
-      if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} if(IN_ARENA && this.teams) this.assignTeams(); }
+      if(d.t==='hello'){ c._pid=d.p.id; this.peers[d.p.id]=this.mkPeer(d.p); const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} if(IN_ARENA && this.teams) this.assignTeams();
+        try{ mpHideBanner(); toast('⚔️ '+(d.p.name||'Your friend')+' joined the arena!','#7de08a'); }catch(e){} }
       else if(d.t==='pos'){ c._pid=d.p.id; const q=this.peers[d.p.id]; if(q) this.applyPos(q,d.p); else this.peers[d.p.id]=this.mkPeer(d.p); }
       else if(d.t==='hit'){ this.hostApplyHit(d); }
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
@@ -7399,6 +7400,7 @@ const MP={
     const a=Math.random()*6.28; p.x=Math.cos(a)*260; p.z=Math.sin(a)*260; p.y=0; p.vx=0; p.vy=0; p.vz=0; p.invuln=2;
     try{ burst(p.x,p.y+30,p.z,'#7de08a',16); hudUpdate(); }catch(e){} },
   leave(msg){
+    try{ mpHideBanner(); }catch(e){}
     try{ this.conns.forEach(c=>{try{c.close()}catch(e){}}); }catch(e){}
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
     try{ if(this.peer) this.peer.destroy(); }catch(e){}
@@ -7407,6 +7409,14 @@ const MP={
     if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
     if(msg){ try{ toast(msg); }catch(e){} } }
 };
+// A persistent room-code banner so a PvP host can share the code from inside the arena lobby.
+function mpRoomBanner(code){ let el=document.getElementById('mpbanner');
+  if(!el){ el=document.createElement('div'); el.id='mpbanner';
+    el.style.cssText='position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);z-index:30;background:linear-gradient(180deg,#2a1614,#170d0c);border:1px solid #7a2a24;border-radius:11px;padding:8px 16px;color:#f3f1ea;font-size:13px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.55);pointer-events:none;text-align:center;max-width:92vw';
+    document.body.appendChild(el); }
+  el.innerHTML='⚔️ PvP Room <b style="color:#ffd24a;font-family:ui-monospace,monospace;letter-spacing:.18em">'+code+'</b> — share it · waiting for your friend…';
+  el.style.display='block'; }
+function mpHideBanner(){ const el=document.getElementById('mpbanner'); if(el) el.style.display='none'; }
 function openMPLobby(){
   mode='menu'; showGameUI(false);
   showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Co-op · beta</p><h2 class="ovh">Multiplayer</h2>
@@ -7423,8 +7433,11 @@ function openMPLobby(){
     MP.host((ok,info)=>{ if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
       const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
       const cc=document.getElementById('mpCode'); if(cc) cc.textContent=info;
-      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Share this code, then press Back, start your game, and walk into <b>The Arena</b> gate in the hub — pick a map + loadout (or Fair Mode) and your friend drops into the same arena. First to 5 wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
-      st(pvp?'Hosting a PvP duel. Enter The Arena in the hub to fight.':'Hosting co-op. Press Back and start a game — friends who join land with you.',true); }, pvp); };
+      const hint=document.getElementById('mpHostHint'); if(hint) hint.innerHTML=pvp?'<b>PvP duel.</b> Dropping you into the arena lobby now — share this code and your friend joins straight into it. First to 5 wins.':'Share this code, then press Back and start a game — friends who join land in your world.';
+      if(pvp){ st('PvP lobby ready — entering the arena…',true);
+        ARENA_LOADOUT.bots=0;   // clean player-vs-player lobby (host can add bots via the Arena Master)
+        setTimeout(()=>{ try{ MP.ensureGuestReady&&MP.ensureGuestReady(); enterArena(); mpRoomBanner(info); }catch(e){} }, 500);   // host drops straight into the PvP arena; the room code stays on-screen to share
+      } else { st('Hosting co-op. Press Back and start a game — friends who join land with you.',true); } }, pvp); };
   document.getElementById('mpHost').onclick=()=>doHost(false);
   document.getElementById('mpHostPvp').onclick=()=>doHost(true);
   document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
@@ -7508,7 +7521,7 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   { const st=document.getElementById('stagetag'); if(st) st.textContent='ARENA · '+map.name.toUpperCase(); }
   if(MP.active){ MP.pvp=true; MP.zone=MP.ARENA; if(MP.isHost) MP.broadcastArena(cfg); }   // co-op: shared PvP arena — sync the map to guests
 }
-function exitArena(){ IN_ARENA=false;
+function exitArena(){ IN_ARENA=false; try{ mpHideBanner(); }catch(e){}
   if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; }
   if(MP.active){ MP.pvp=false; MP.arenaMsg=null; MP.scores={}; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} refreshBagCap&&refreshBagCap(); openHub(); }
 function arenaRespawn(){ if(!G||!G.p) return; const p=G.p; p.dead=false; p.downed=false; p._pvpDead=false;

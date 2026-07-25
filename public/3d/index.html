@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.373.0-autopilot';
+const VERSION3D='1.374.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3526,6 +3526,7 @@ function enterZone(zi){
   bankNow();                                                  // snapshot the hub state — this attempt is provisional
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
+  if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
   loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
   if(MP.active) MP.onEnter(zi);                                 // co-op: host tells guests which zone to load (opt-in)
@@ -7174,7 +7175,7 @@ function updatePetLabel(){
    ============================================================================ */
 const MP={
   active:false, isHost:false, peer:null, conns:[], hostConn:null,
-  myId:null, name:'Warden', code:'', zone:-1, seed:0, ping:0,
+  myId:null, name:'Warden', code:'', zone:-1, seed:0, rseed:0, ping:0,
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
@@ -7280,7 +7281,7 @@ const MP={
     } },
   onGuestData(d){
     if(d.t==='zone'||d.t==='arena') this.ensureGuestReady();
-    if(d.t==='zone'){ this.seed=d.seed; this.pvp=!!d.pvp;
+    if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone; if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } } }
     else if(d.t==='arena'){ this.arenaMsg=d; this.zone=this.ARENA; this.pvp=true; this.teams=!!d.teams;   // follow the host into the shared Arena
@@ -7299,15 +7300,15 @@ const MP={
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
-  onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0;
-    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed,pvp:this.pvp?1:0});}catch(e){}}); },
+  onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
+    if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0});}catch(e){}}); },
   // shared Arena: the host tells guests which map to load (+ a fair-mode standardized loadout)
   broadcastArena(cfg){ this.teams=!!cfg.teams; this.arenaMsg={t:'arena',map:cfg.map,fair:cfg.fair?1:0,ld:cfg.fair?ARENA_FAIR:null,teams:this.teams?1:0}; this.zone=this.ARENA;
     if(this.isHost){ this.assignTeams(); this.conns.forEach(c=>{try{c.send(this.arenaMsg);}catch(e){}}); } },
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; if(this.hasZone()) return {t:'zone',zone:this.zone,seed:this.seed,pvp:this.pvp?1:0}; return null; },
+  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; if(this.hasZone()) return {t:'zone',zone:this.zone,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(

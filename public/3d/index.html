@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.372.0-autopilot';
+const VERSION3D='1.373.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7218,12 +7218,14 @@ const MP={
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
     w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
+    at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
   mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, mnRaw:s.mn||null, minions:this._mnRender(s.mn),
+    at:s.at||0, sc:s.sc||0, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -7243,6 +7245,7 @@ const MP={
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
+      else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
     });
@@ -7292,6 +7295,7 @@ const MP={
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
     else if(d.t==='score'){ this.showScore(d.id,d.n); }
+    else if(d.t==='cfx'){ this.recvCombat(d); }   // the host's (or a relayed guest's) projectiles/skill rings
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
@@ -7304,15 +7308,31 @@ const MP={
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
   placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; if(this.hasZone()) return {t:'zone',zone:this.zone,seed:this.seed,pvp:this.pvp?1:0}; return null; },
+  // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
+  sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
+    if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
+      [Math.round(pr.x),Math.round(pr.y),Math.round(pr.z),Math.round(pr.vx),Math.round(pr.vy),Math.round(pr.vz),pr.size||6,pr.color||'#fff',pr.shape||'orb',pr.el||0,pr.gravity||0,+(pr.life||1.4).toFixed(2),pr.glow?1:0,pr.trail||0]); } }
+    if(G.shockwaves) for(const s of G.shockwaves){ if(s._mp||s.visual||(G.duel&&s.foeBot)) continue; s._mp=1; (sw=sw||[]).push(
+      [Math.round(s.x),Math.round(s.z),Math.round(s.r),Math.round(s.maxR),Math.round(s.spd||270),s.col||'#ffd24a',s.col2||'#c33',s.arc?+(s.arc.toFixed(2)):0,s.arc?+((s.dirX||0).toFixed(2)):0,s.arc?+((s.dirZ||0).toFixed(2)):0]); }
+    if(!proj&&!sw) return; const m={t:'cfx'}; if(proj)m.proj=proj; if(sw)m.sw=sw;
+    if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
+    else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
+  recvCombat(d,fromConn){ if(!G) return;
+    if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0}); }
+    if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0}); }
+    // host relays a guest's combat FX to the OTHER guests so everyone sees it
+    if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
       if(q.last>3){ delete this.peers[id]; continue; }
       const k=Math.min(1,dt*12); q.x+=(q.tx-q.x)*k; q.y+=(q.ty-q.y)*k; q.z+=(q.tz-q.z)*k;
-      let dy=q.tyaw-q.yaw; while(dy>Math.PI)dy-=2*Math.PI; while(dy<-Math.PI)dy+=2*Math.PI; q.yaw+=dy*k; }
+      let dy=q.tyaw-q.yaw; while(dy>Math.PI)dy-=2*Math.PI; while(dy<-Math.PI)dy+=2*Math.PI; q.yaw+=dy*k;
+      if(q.at>0) q.at=Math.max(0,q.at-dt); }   // let the swing/cast pose play out smoothly between packets
     this.survivalTick(dt);   // P1.3: downed/revive/bleed-out/wipe
     this._sendT+=dt;
     if(this._sendT>=0.07){ this._sendT=0;                       // ~14 Hz presence
+      this.sendCombat();                                        // relay newly-spawned projectiles + skill rings as visual-only copies
       if(this.isHost){ this.broadcast();
         this._pingT+=0.07; if(this._pingT>=1){ this._pingT=0; const _t=performance.now(); this.conns.forEach(c=>{ if(c&&c.open) try{c.send({t:'ping',ts:_t});}catch(e){} }); } }
       else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send({t:'pos',p:this.selfState()});}catch(e){}
@@ -7334,8 +7354,8 @@ const MP={
       const mv2=Math.hypot((q.tx-q.x)||0,(q.tz-q.z)||0);   // some walk anim if they're moving
       const pw=q.weapon||{art:'sword',cls:'melee',sch:'phys',blade:'#dfe5ec',color:'#c9ccd2'};
       const pp={ x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
-        skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:0, dodgeTimer:0, invuln:0, hurtFlash:0,
-        dead:false, swingCombo:0, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
+        skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
+        dead:false, swingCombo:q.sc||0, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       try{ drawHero3(pp,t); }
       catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,'#6f86c9'); bx(0,38,0,12,12,12,'#d9b08c'); popM(); }
       // team/id beacon so allies stay distinguishable at a glance
@@ -8242,7 +8262,8 @@ function update(dt){
       if(pr.returning){ const dd=Math.hypot(p.x-pr.x,p.z-pr.z)||1, sp=Math.hypot(pr.vx,pr.vz)||1; pr.vx=(p.x-pr.x)/dd*sp; pr.vz=(p.z-pr.z)/dd*sp; if(dd<42) pr.life=0; } }
     pr.x+=pr.vx*dt; pr.y+=pr.vy*dt; pr.z+=pr.vz*dt;
     if(pr.trail && Math.random()<0.75) G.particles.push({x:pr.x,y:pr.y,z:pr.z,vx:0,vy:6,vz:0,life:0.26,color:pr.trail,sz:Math.max(2,pr.size*0.35)});   // skill-projectile comet trail
-    if(pr.owner==='player'){
+    if(pr.visual){ /* peer visual copy — travels + renders + can stop at walls, but never deals or takes damage */ }
+    else if(pr.owner==='player'){
       G._desig=!!pr.desig; G._crit=!!pr.pcrit;             // charged bolts / thrown scythe spend Rune Marks + rupture Corruption; crit shots shout their number
       for(const e of G.enemies){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
         if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){

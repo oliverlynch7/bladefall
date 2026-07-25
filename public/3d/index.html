@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.370.0-autopilot';
+const VERSION3D='1.371.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7043,9 +7043,16 @@ function minionUpdate(dt){
   if(G.corpses&&G.corpses.length){ for(const c of G.corpses) c.t-=dt; G.corpses=G.corpses.filter(c=>c.t>0); }
   if(!G.minions||!G.minions.length) return; const p=G.p, playing=(mode==='play'&&!isHitless());
   const bond=meta.classId==='necromancer'&&c2Passive('necro_bond');
+  // PvP: rival players aren't in G.enemies — build attackable pseudo-targets from the opposing peers
+  let _pvpFoes=null;
+  if(typeof MP!=='undefined' && MP.active && MP.pvp){ _pvpFoes=[];
+    for(const id in MP.peers){ const q=MP.peers[id]; if(q.zone!==MP.zone||q.downed) continue;
+      if(MP.teams && MP.teamOf(id)===MP.teamOf(MP.myId)) continue;
+      _pvpFoes.push({_peer:true,id:id,x:q.x||0,z:q.z||0,y:q.y||0,h:34}); } }
   for(const m of G.minions){ m.t+=dt; m.bob=Math.sin(m.t*3)*3; if(m.life!=null){ m.life-=dt; if(m.life<=0){ m.dead=true; try{burst(m.x,m.y+12,m.z,'#8be0a0',10);}catch(_){} continue; } }
     let tgt=null,bd=540;
-    if(playing) for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,m.x,m.z); if(d<bd){bd=d;tgt=e;} }
+    if(playing){ for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,m.x,m.z); if(d<bd){bd=d;tgt=e;} }
+      if(_pvpFoes) for(const q of _pvpFoes){ const d=dXZ(q.x,q.z,m.x,m.z); if(d<bd){bd=d;tgt=q;} } }
     let tx=m.x,tz=m.z;
     if(tgt){ const want=m.ranged?200:34, d=Math.max(1,dXZ(tgt.x,tgt.z,m.x,m.z)); tx=tgt.x-(tgt.x-m.x)/d*want; tz=tgt.z-(tgt.z-m.z)/d*want; }
     else { const dh=dXZ(m.x,m.z,p.x,p.z); if(dh>72){ tx=p.x-Math.sin(p.yaw)*48+Math.cos(m.t*0.8)*30; tz=p.z-Math.cos(p.yaw)*48+Math.sin(m.t*0.8)*30; } if(dh>660||Math.abs(m.y-p.y)>140){ m.x=p.x-Math.sin(p.yaw)*50; m.z=p.z-Math.cos(p.yaw)*50; m.y=p.y; } }
@@ -7053,7 +7060,12 @@ function minionUpdate(dt){
     m.y+=((p.y+2)-m.y)*Math.min(1,dt*6);
     const fy=tgt?Math.atan2(tgt.x-m.x,tgt.z-m.z):(dd>6?Math.atan2(tx-m.x,tz-m.z):m.yaw); let dy=fy-m.yaw; while(dy>Math.PI)dy-=6.283; while(dy<-Math.PI)dy+=6.283; m.yaw+=dy*Math.min(1,dt*8);
     if(playing){ m.atkT-=dt; if(m.atkT<=0 && tgt && dXZ(tgt.x,tgt.z,m.x,m.z)<(m.ranged?232:62)){ m.atkT=m.ranged?1.1:0.8;
-      if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true}); }
+      if(tgt._peer){ // PvP: damage the rival player through the host-authoritative PvP channel
+        MP.sendPvp(tgt.id, Math.round(m.dmg), m.x, m.z);
+        if(m.ranged) burst(m.x,m.y+16,m.z,'#8be0a0',4);
+        else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; }
+        try{ burst(tgt.x,(tgt.y||0)+18,tgt.z,'#8be0a0',5); addText(tgt.x,(tgt.y||0)+52,tgt.z,'HIT','#8be0a0'); }catch(_){} }
+      else if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true}); }
       else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; hitEnemy(tgt,m.dmg,{x:m.x,z:m.z,pet:true},80,0,null); burst(tgt.x,tgt.y+tgt.h*0.4,tgt.z,'#8be0a0',5); }
       if(bond&&p.hp>0){ const h=Math.max(1,Math.round(effMaxHp(p)*0.006)); p.hp=Math.min(effMaxHp(p),p.hp+h); } } }
   }

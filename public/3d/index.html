@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.365.0-autopilot';
+const VERSION3D='1.366.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6233,11 +6233,18 @@ const SKILL_FX={
     for(const e of G.enemies){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>165+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
       hitEnemy(e,dmg,p,220,0,null); if(ok) e.slowT=Math.max(e.slowT||0,2.5); }
     for(let i=0;i<14;i++){ const a=i/14*6.283; G.particles.push({x:p.x+Math.cos(a)*22,y:6,z:p.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:50,vz:Math.sin(a)*130,life:0.45,color:'#bff0ff',sz:3}); } },
-  blink(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
-    burst(p.x,p.y+20,p.z,'#c9a6ff',10);
-    for(const d of [150,110,70]){ const nx=p.x+fx*d, nz=p.z+fz*d;
-      if(floorAt(nx,nz,p.r,p.y)>-1e8){ p.x=nx; p.z=nz; break; } }
-    p.invuln=Math.max(p.invuln,0.35); burst(p.x,p.y+20,p.z,'#c9a6ff',14); SFX.magic('arcane'); },
+  blink(p,ok,am){ // AIMED teleport (Dishonored-style): blink toward where you're looking, to the farthest
+    // valid ground/ledge in line of sight, up to max range. Aims with the camera when you can steer it.
+    const ay=(typeof playerAimYaw==='function')?playerAimYaw(p):p.yaw, fx=Math.sin(ay), fz=Math.cos(ay), MAXR=270;
+    burst(p.x,p.y+22,p.z,'#c9a6ff',12);
+    for(let d=MAXR; d>=42; d-=12){ const nx=p.x+fx*d, nz=p.z+fz*d;
+      const fy=floorAt(nx,nz,p.r,(p.y||0)+95);                                   // allow blinking UP onto a ledge you aim at
+      if(fy>-1e8 && Math.abs(fy-(p.y||0))<175 && !losBlocked(p.x,p.z,nx,nz)){    // must be reachable + not through a wall
+        // leave an after-image trail from where you were to where you land
+        for(let k=1;k<=6;k++){ const tx=p.x+fx*d*k/6, tz=p.z+fz*d*k/6; burst(tx,p.y+20,tz,'#b78cff',3); }
+        p.x=nx; p.z=nz; p.y=fy; break; } }
+    p.vy=0; p.varJump=false; p.onGround=false; p.invuln=Math.max(p.invuln,0.4);
+    burst(p.x,p.y+22,p.z,'#c9a6ff',16); SFX.magic('arcane'); },
   tempest(p,ok,am){ p.tempestT=4; p.tempAcc=0; p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*0.55*am*(ok?1:OFFCLASS_MUL);
     SFX.magic('storm'); playFx('arcaneskill'); toast('🌩️ Arcane Tempest!'); },
   reap(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
@@ -7217,12 +7224,15 @@ const MP={
     code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
     this.isHost=false; this.myId=Math.random().toString(36).slice(2,7);
     this.peer=new Peer({debug:0,config:this.ICE});
+    let settled=false; const fail=info=>{ if(settled||this.active)return; settled=true; try{this.peer.destroy();}catch(e){} cb&&cb(false,info); };
+    const giveUp=setTimeout(()=>fail('timeout'),22000);   // NO more endless "Connecting…" — bail after 22s so the player can retry
     this.peer.on('open',()=>{ const c=this.peer.connect(this.ROOMPFX+code,{reliable:false}); this.hostConn=c;
-      c.on('open',()=>{ this.active=true; this.code=code; try{c.send({t:'hello',p:this.selfState()});}catch(e){} cb&&cb(true,code); });
+      c.on('open',()=>{ if(settled)return; settled=true; clearTimeout(giveUp); this.active=true; this.code=code; try{c.send({t:'hello',p:this.selfState()});}catch(e){} cb&&cb(true,code); });
       c.on('data',d=>this.onGuestData(d));
+      c.on('error',e=>{ clearTimeout(giveUp); fail((e&&e.type)||'conn-error'); });
       c.on('close',()=>{ if(this.active) this.leave('Host left the game — back to single-player.'); });
     });
-    this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
+    this.peer.on('error',e=>{ clearTimeout(giveUp); fail((e&&e.type)||'error'); }); },
   // A guest who joined co-op straight from the menu has no character yet — so following the host into
   // the hub/zone would bounce them to the class-picker or intro story and they'd never load in. Give
   // them a ready starter (Warrior) so they drop in immediately; they can respec at the Drillmaster.

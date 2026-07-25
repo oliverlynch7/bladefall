@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.369.0-autopilot';
+const VERSION3D='1.370.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7197,12 +7197,18 @@ const MP={
     s.onload=()=>{ this._lib=!!window.Peer; const q=this._loading; this._loading=null; q.forEach(r=>r(this._lib)); };
     s.onerror=()=>{ this._lib=false; const q=this._loading; this._loading=null; q.forEach(r=>r(false)); };
     document.head.appendChild(s); }); },
+  // compact weapon snapshot — just what weaponMesh() + the hero arm-poses need to render it in-hand
+  wsnap(w){ if(!w) return null; return { art:w.art, cls:w.cls, sch:w.sch, blade:w.blade, color:w.color, el:w.el, rarity:w.rarity, fist:!!w.fist }; },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:this.name, zone:this.zone,
-    x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight', hp:p?Math.round(p.hp):0, dn:(p&&p.downed)?1:0 }; },
-  mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,downed:!!s.dn,
+    x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
+    hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
+    hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
+    w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0 }; },
+  mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,dn:q.downed?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -7297,24 +7303,30 @@ const MP={
   drawPeers(t){ if(!G) return;
     for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue; this.drawPeer(q,t); } },
   drawPeer(q,t){
-    const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null;
-    const body=sk?sk.armor:'#6f86c9', bodyLt=sk?sk.armorLt:'#9fb4e6', skinc=sk&&sk.skin?sk.skin:'#d9b08c';
     let h=0; for(let i=0;i<(q.id||'').length;i++) h=(h*31+q.id.charCodeAt(i))>>>0;   // stable per-peer tint
     const tint=this.teams?(this.teamOf(q.id)===0?'#4aa3ff':'#ff5555'):'hsl('+(h%360)+',70%,60%)';   // team colour in 2v2
     if(q.downed){   // collapsed on the ground + a pulsing red distress beacon so an ally can find & revive you
+      const sk=(typeof SKINS!=='undefined'&&SKINS[q.skin])||null, skinc=sk&&sk.skin?sk.skin:'#d9b08c';
       pushM(); mv(q.x,4,q.z); rotY(q.yaw||0);
       bx(0,6,0, 20,8,12, '#7a2b2b'); bx(0,6,10, 10,8,10, skinc);   // slumped body + head
       const pu=0.5+0.5*Math.sin(t*6);
-      bx(0,40+pu*8,0, 6,6,6, '#ff5e54', '#ff5e54'); popM(); return; }
-    pushM(); mv(q.x,(q.y||0)+Math.sin(t*2+ (h%6))*0.6,q.z); rotY(q.yaw||0);
-    bx(0,25,0, 17,22,10, body);          // torso
-    bx(0,38,0, 12,12,12, skinc);         // head
-    bx(-11,24,0, 5,18,5, bodyLt);        // arms
-    bx(11,24,0, 5,18,5, bodyLt);
-    bx(-5,7,0, 6,16,6, body);            // legs
-    bx(5,7,0, 6,16,6, body);
-    bx(0,52,0, 5,5,5, tint, tint);       // id beacon above the head so allies are distinguishable
-    popM(); },
+      bx(0,40+pu*8,0, 6,6,6, '#ff5e54', '#ff5e54'); popM();
+    } else {
+      // render allies with the SAME renderer as you — so their skin AND equipped weapon show through.
+      const mv2=Math.hypot((q.tx-q.x)||0,(q.tz-q.z)||0);   // some walk anim if they're moving
+      const pw=q.weapon||{art:'sword',cls:'melee',sch:'phys',blade:'#dfe5ec',color:'#c9ccd2'};
+      const pp={ x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
+        skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:0, dodgeTimer:0, invuln:0, hurtFlash:0,
+        dead:false, swingCombo:0, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
+      try{ drawHero3(pp,t); }
+      catch(e){ pushM(); mv(q.x,q.y||0,q.z); rotY(q.yaw||0); bx(0,25,0,17,22,10,'#6f86c9'); bx(0,38,0,12,12,12,'#d9b08c'); popM(); }
+      // team/id beacon so allies stay distinguishable at a glance
+      pushM(); mv(q.x,(q.y||0)+58,q.z); bx(0,0,0, 5,5,5, tint, tint); popM();
+    }
+    // floating name + HP bar (uses the 2D overlay, like enemy/pet bars)
+    const s=project(q.x,(q.y||0)+72,q.z);
+    if(s){ const hpm=q.hpm||100, f=Math.max(0,Math.min(1,(q.hp==null?hpm:q.hp)/hpm));
+      hpBars.push({x:s[0],y:s[1],f:f,peer:true,name:q.name||'Ally',col:tint,downed:!!q.downed}); } },
   // ================= P1.2 SHARED ENEMIES (host-authoritative existence/HP/death) =================
   guest(){ return this.active && !this.isHost; },
   host_(){ return this.active && this.isHost; },
@@ -12478,7 +12490,14 @@ function updateHubTags(){
 function drawHpBars(){
   hpCanvas.width=VW; hpCanvas.height=VH;
   const c=hpCanvas.getContext('2d');
-  for(const b of hpBars){ c.fillStyle='rgba(0,0,0,0.62)'; c.fillRect(b.x-17,b.y,34,5);
+  for(const b of hpBars){
+    if(b.peer){   // ally: name label above a green (grey if downed) bar
+      c.textAlign='center'; c.textBaseline='alphabetic'; c.font='bold 10px system-ui,sans-serif';
+      c.fillStyle='rgba(0,0,0,0.6)'; c.fillText(b.name, b.x+0.7, b.y-5.4);
+      c.fillStyle=b.col||'#cfe3ff'; c.fillText(b.name, b.x, b.y-6);
+      c.fillStyle='rgba(0,0,0,0.66)'; c.fillRect(b.x-18,b.y,36,5);
+      c.fillStyle=b.downed?'#8a8f9a':'#54d06a'; c.fillRect(b.x-17,b.y+1,34*b.f,3); continue; }
+    c.fillStyle='rgba(0,0,0,0.62)'; c.fillRect(b.x-17,b.y,34,5);
     c.fillStyle=b.pet?'#55d78b':'#e8453d'; c.fillRect(b.x-16,b.y+1,32*b.f,3); }
   // elemental status icons: the same readable voxel emblems used by affinity/status tooltips
   c.textAlign='center'; c.textBaseline='middle'; c.font='bold 8px system-ui,sans-serif';

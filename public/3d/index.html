@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.364.0-autopilot';
+const VERSION3D='1.365.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7223,7 +7223,18 @@ const MP={
       c.on('close',()=>{ if(this.active) this.leave('Host left the game — back to single-player.'); });
     });
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
+  // A guest who joined co-op straight from the menu has no character yet — so following the host into
+  // the hub/zone would bounce them to the class-picker or intro story and they'd never load in. Give
+  // them a ready starter (Warrior) so they drop in immediately; they can respec at the Drillmaster.
+  ensureGuestReady(){
+    if(!meta.introSeen){ meta.introSeen=true; try{ persistGlobal(); }catch(e){} }
+    if(!meta.classUnlocked || !Object.keys(meta.classUnlocked).length){
+      meta.classUnlocked={warrior:true}; meta.classId='warrior'; try{ classState('warrior'); }catch(e){}
+      if(!meta.hero){ try{ const p=freshPlayer(); p.weapon=classStartWeapon('warrior'); meta.hero=snapOf(p); }catch(e){} }
+      try{ persist(); }catch(e){}
+    } },
   onGuestData(d){
+    if(d.t==='zone'||d.t==='arena') this.ensureGuestReady();
     if(d.t==='zone'){ this.seed=d.seed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone; if(!(mode==='play'&&G&&G.zone===d.zone)){ try{ enterZone(d.zone); }catch(e){} } } }

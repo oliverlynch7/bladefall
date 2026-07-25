@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.374.0-autopilot';
+const VERSION3D='1.375.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1001,7 +1001,7 @@ function deleteSlot(sl){ const pfx=sl===0?'':('s'+sl+'_');
   for(const k of ['global','rl','hc','hl']){ try{ localStorage.removeItem('bladefall3d_'+pfx+k); }catch(e){} } }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catch(e){return null;} }
-const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','tutDone','hubTutDone','tutSeen','tutOff',
+const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
   'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared'];
@@ -1026,6 +1026,7 @@ const meta=Object.assign({
 // exactly once (camV2 marks it done), so a player who later picks a different mode keeps their choice.
 if(!_g.camV2){ if(!_g.camMode || _g.camMode==='far') meta.camMode='shoulder'; meta.camV2=1; }
 if(meta.showArmor==null) meta.showArmor=true;
+if(meta.particles==null) meta.particles=true;
 if(!meta.quality) meta.quality='high';   // graphics quality: 'high' | 'medium' | 'low' (bloom + render-res + particles)
 // perf helpers, driven by meta.quality — let old/weak machines dial the graphics down
 function qLow(){ return meta.quality==='low'; }
@@ -5665,7 +5666,8 @@ function project(x,y,z){
   if(cw<=0) return null;
   return [(cx/cw*0.5+0.5)*VW, (1-(cy/cw*0.5+0.5))*VH];
 }
-function burst(x,y,z,color,n){ n=Math.round(n*fxScale()); if(n<=0) return;   // quality: fewer particles on medium/low
+function burst(x,y,z,color,n){ if(meta.particles===false) return;   // graphics setting: particles fully off
+  n=Math.round(n*fxScale()); if(n<=0) return;   // quality: fewer particles on medium/low
   if(G.particles.length > (qLow()?90:meta.quality==='medium'?240:600)) return;   // hard cap keeps weak GPUs from drowning
   for(let i=0;i<n;i++){ const a=Math.random()*6.283, sp=40+Math.random()*140;
   G.particles.push({x,y:y+Math.random()*10,z,vx:Math.cos(a)*sp,vy:60+Math.random()*120,vz:Math.sin(a)*sp,life:0.4+Math.random()*0.3,color,sz:2.5+Math.random()*3}); } }
@@ -8338,8 +8340,9 @@ function update(dt){
   // portal
   if(G.portal){ G.portal.t+=dt; if(dXZ(p.x,p.z,G.portal.x,G.portal.z)<52 && Math.abs(p.y-(G.portal.y||0))<72){ if(G.portal.win) winFinale(); else nextStage(); } }
   // particles
-  for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
-  G.particles=G.particles.filter(pt=>pt.life>0);
+  if(meta.particles===false){ if(G.particles.length) G.particles.length=0; }   // particles-off: drop any spawned by other systems so nothing accumulates
+  else { for(const pt of G.particles){ pt.vy-=600*dt; pt.x+=pt.vx*dt; pt.y+=pt.vy*dt; pt.z+=pt.vz*dt; if(pt.y<0){pt.y=0;pt.vy=0;} pt.life-=dt; }
+    G.particles=G.particles.filter(pt=>pt.life>0); }
   updateTexts(dt);
   // Phase 19: practice foes are ARENA property — applied after all movement, snapped WELL inside the walls
   if(G.hub&&G.pit){ const P=G.pit, inPit=(G.p.x>=P.minX&&G.p.x<=P.maxX&&G.p.z>=P.minZ&&G.p.z<=P.maxZ);
@@ -10776,6 +10779,7 @@ function openPause(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
@@ -10806,6 +10810,7 @@ function openPause(){
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPause(); };
   { const _dn=document.getElementById('dmgNumBtn'); if(_dn) _dn.onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPause(); }; }
   { const _qb=document.getElementById('qualBtn'); if(_qb) _qb.onclick=()=>{ cycleQuality(); openPause(); }; }
+  { const _pt=document.getElementById('particlesBtn'); if(_pt) _pt.onclick=()=>{ meta.particles=(meta.particles===false); persistGlobal(); openPause(); }; }
   { const _kb=document.getElementById('keybindsBtn'); if(_kb) _kb.onclick=()=>openKeybinds(openPause); }
   { const _pb=document.getElementById('padBtn'); if(_pb) _pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPause(); }; }
   { const _sk=document.getElementById('shakeBtn'); if(_sk) _sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPause(); }; }
@@ -10832,6 +10837,7 @@ function openPauseSettingsV2(){
       <button class="bigbtn ghost" id="armFxBtn">🩻 Armor shown: ${meta.showArmor?'On':'Off'}</button>
       <button class="bigbtn ghost" id="dmgNumBtn">🔢 Damage numbers: ${meta.dmgNumbers!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="qualBtn">🎬 Graphics: ${qLabel()}</button>
+      <button class="bigbtn ghost" id="particlesBtn">✨ Particles: ${meta.particles!==false?'On':'Off'}</button>
       <button class="bigbtn ghost" id="keybindsBtn">⌨️ Key Bindings</button>
       <button class="bigbtn ghost" id="padBtn">🎮 Gamepad: ${meta.padOff?'Off':'On'}</button>
       <button class="bigbtn ghost" id="shakeBtn">📳 Screen shake: ${meta.shakeOff?'Off':'On'}</button>
@@ -10855,6 +10861,7 @@ function openPauseSettingsV2(){
   document.getElementById('armFxBtn').onclick=()=>{ meta.showArmor=!meta.showArmor; persist(); openPauseSettingsV2(); };
   document.getElementById('dmgNumBtn').onclick=()=>{ meta.dmgNumbers=(meta.dmgNumbers===false); persistGlobal(); openPauseSettingsV2(); };
   { const qb=document.getElementById('qualBtn'); if(qb) qb.onclick=()=>{ cycleQuality(); toast('🎬 Graphics: '+qLabel()+(meta.quality==='low'?' — lightest (old PCs)':meta.quality==='medium'?' — balanced':' — full effects')); openPauseSettingsV2(); }; }
+  { const pt=document.getElementById('particlesBtn'); if(pt) pt.onclick=()=>{ meta.particles=(meta.particles===false); persistGlobal(); toast(meta.particles!==false?'✨ Particles: On':'✨ Particles: Off'); openPauseSettingsV2(); }; }
   { const kb=document.getElementById('keybindsBtn'); if(kb) kb.onclick=()=>openKeybinds(openPauseSettingsV2); }
   { const pb=document.getElementById('padBtn'); if(pb) pb.onclick=()=>{ meta.padOff=!meta.padOff; persistGlobal(); openPauseSettingsV2(); }; }
   { const sk=document.getElementById('shakeBtn'); if(sk) sk.onclick=()=>{ meta.shakeOff=!meta.shakeOff; persistGlobal(); openPauseSettingsV2(); }; }
@@ -12756,7 +12763,7 @@ function render(t){
   //  the camera and the player fades instead.)
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
-  for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
+  if(meta.particles!==false) for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
   for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
   // translucent pass: near-front walls & doors (drawn last, no depth write, so the hero shows through)
   if(LATE.length){ gl.depthMask(false);

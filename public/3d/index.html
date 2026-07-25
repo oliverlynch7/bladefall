@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.363.0-autopilot';
+const VERSION3D='1.364.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7164,6 +7164,15 @@ const MP={
   teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
   ROOMPFX:'bladefall-mp-',
+  // ICE servers for WebRTC. The default PeerJS config has STUN only — that fails between many
+  // real device pairs (strict/symmetric NAT, mobile networks). Adding public TURN relays makes
+  // cross-network co-op actually connect. STUN handles the easy cases; TURN relays the hard ones.
+  ICE:{ iceServers:[
+    {urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},
+    {urls:'turn:openrelay.metered.ca:80', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject'},
+    {urls:'turn:openrelay.metered.ca:443?transport=tcp', username:'openrelayproject', credential:'openrelayproject'}
+  ] },
   rndCode(){ let s=''; for(let i=0;i<4;i++) s+='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[(Math.random()*32)|0]; return s; },
   // lazy-load PeerJS once, on first co-op entry; resolves true on success
   loadLib(){ return new Promise(res=>{ if(window.Peer){ this._lib=true; return res(true); }
@@ -7183,7 +7192,7 @@ const MP={
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     this.pvp=!!pvp;
     this.code=this.rndCode(); this.isHost=true; this.myId='h';
-    this.peer=new Peer(this.ROOMPFX+this.code,{debug:0});
+    this.peer=new Peer(this.ROOMPFX+this.code,{debug:0,config:this.ICE});
     this.peer.on('open',()=>{ this.active=true; cb&&cb(true,this.code); });
     this.peer.on('connection',c=>this.wireGuest(c));
     this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
@@ -7207,7 +7216,7 @@ const MP={
   async join(code,cb){ if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
     code=(code||'').trim().toUpperCase(); if(!code){ cb&&cb(false,'no code'); return; }
     this.isHost=false; this.myId=Math.random().toString(36).slice(2,7);
-    this.peer=new Peer({debug:0});
+    this.peer=new Peer({debug:0,config:this.ICE});
     this.peer.on('open',()=>{ const c=this.peer.connect(this.ROOMPFX+code,{reliable:false}); this.hostConn=c;
       c.on('open',()=>{ this.active=true; this.code=code; try{c.send({t:'hello',p:this.selfState()});}catch(e){} cb&&cb(true,code); });
       c.on('data',d=>this.onGuestData(d));

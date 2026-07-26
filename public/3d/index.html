@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.380.0-autopilot';
+const VERSION3D='1.381.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1905,6 +1905,14 @@ const CLASSES={
       {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
       {id:'st_storm',n:'Thunderstorm',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
+  warlock:{disp:'Warlock',icon:'🔮',attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','wand','spellblade','dagger'],
+    subs:[{id:'blood',disp:'Blood Pact',blurb:'Trade safety for brutal spell damage.'},
+          {id:'curse',disp:'Curse Weaver',blurb:'Mark, drain, and control enemies from the shadows.'}],
+    skills:[
+      {id:'war_bolt',n:'Shadow Bolt',icon:'🟣',cd:2.5,rank:2,d:'A fast void bolt powered by a sliver of your health'},
+      {id:'war_curse',n:'Curse Circle',icon:'⭕',cd:9,rank:4,d:'Mark nearby foes so your spells hit them harder'},
+      {id:'war_step',n:'Rift Step',icon:'🌑',cd:11,rank:6,d:'Tear through shadow and burst at both ends'},
+      {id:'war_storm',n:'Dark Storm',icon:'🌩️',cd:23,rank:8,d:'A violent void storm follows you'}]},
   beastmaster:{disp:'Beastmaster',icon:'🐾',attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
@@ -2076,6 +2084,18 @@ const CLASS2={
     r8:{kind:'skill',slot:3, a:{id:'st_storm',n:'Thunderstorm',cd:22,role:'Group Damage',fx:'st_storm',d:'A storm of lightning rages around you for 4s.'}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
     r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Damage',d:'+12% damage.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Damage',d:'+10% damage.'}}
   },
+  warlock:{ disp:'Warlock', icon:'🔮',
+    innate:{name:'Dark Bargain',d:'Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price.'},
+    cap:{name:'Dark Ascension',d:'+12% damage. Dark Bargain costs only 1.5% max HP, and defeating a cursed foe cuts every skill cooldown by 1 second.'},
+    r2:{kind:'skill',slot:0,a:{id:'war_bolt',n:'Shadow Bolt',cd:2.5,am:.62,role:'Rapid Damage',fx:'war_bolt',d:'Fire a fast void bolt that pierces one extra foe.'},b:{id:'war_lance',n:'Blood Lance',cd:6,role:'Boss Damage',fx:'war_lance',d:'Hurl a heavy crimson lance through every foe in a line.'}},
+    r3:{kind:'passive',a:{id:'war_frail',n:'Frail Power',role:'Damage',d:'+15% damage, but -10% maximum HP.'},b:{id:'war_shield',n:'Soul Shield',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP.'}},
+    r4:{kind:'skill',slot:1,a:{id:'war_curse',n:'Curse Circle',cd:9,role:'Control',fx:'war_curse',d:'Mark nearby foes for 7 seconds. Your damage against them is increased.'},b:{id:'war_drain',n:'Life Drain',cd:10,role:'Sustain',fx:'war_drain',d:'Rip health from the strongest nearby foe and heal yourself.'}},
+    r5:{kind:'passive',a:{id:'war_deep',n:'Deep Curse',role:'Damage',d:'Deal 15% more damage to cursed enemies.'},b:{id:'war_swift',n:'Dark Step',role:'Movement',d:'Casting a skill grants +12% move speed for 2.5 seconds.'}},
+    r6:{kind:'skill',slot:2,a:{id:'war_step',n:'Rift Step',cd:11,role:'Movement',fx:'war_step',d:'Blink forward and detonate shadow at your starting point and destination.'},b:{id:'war_orb',n:'Doom Orb',cd:14,role:'Group Damage',fx:'war_orb',d:'Collapse a slow void orb on your target, damaging and pulling nearby foes.'}},
+    r7:{kind:'passive',a:{id:'war_pact',n:'Blood Pact',role:'Damage',d:'Deal +18% damage while below half HP.'},b:{id:'war_safe',n:'Careful Casting',role:'Sustain',d:'Dark Bargain sacrifices 35% less health.'}},
+    r8:{kind:'skill',slot:3,a:{id:'war_storm',n:'Dark Storm',cd:23,role:'Group Damage',fx:'war_storm',d:'A moving void storm tears at nearby foes for 5 seconds.'},b:{id:'war_final',n:'Final Curse',cd:24,role:'Boss Damage',fx:'war_final',d:'Condemn the strongest nearby foe with a massive delayed shadow blast.'}},
+    r9:{kind:'passive',a:{id:'war_feast',n:'Soul Feast',role:'Sustain',d:'Defeating a cursed foe restores 5% max HP and 6 mana.'},b:{id:'war_last',n:'Last Breath',role:'Defense',d:'Below 30% HP, gain 15% damage reduction.'}}
+  },
   beastmaster:{ disp:'Beastmaster', icon:'🐾',
     innate:{name:'Bonded Companion',d:'Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands.'},
     cap:{name:'One Pack',d:'+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion.'},
@@ -2123,8 +2143,8 @@ const PASSIVE_ART={
   st_innate:'stormcaller-static-charge',st_cap:'stormcaller-storm-lord'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',beastmaster:'bst_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',beastmaster:'bst_cap'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',warlock:'war_innate',beastmaster:'bst_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',warlock:'war_cap',beastmaster:'bst_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -2218,7 +2238,7 @@ function makeWeapon(aid,rid,nameOverride){
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
-const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod']};
+const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff']};
 function fistsWeapon(){ const a=ARCHES.fist;   // the Monk's Bare Fists — a fixed, RARITY-LESS weapon (never rolled/scaled)
   return {arche:'fist',art:'fist',cls:'melee',sch:'phys',el:null,rarity:'none',fist:true,chg:null,anyClass:false,reaper:false,ians:false,
     name:'Bare Fists',dmg:a.dmg,cd:a.cd,kb:a.kb,range:a.range,lifesteal:0,color:'#9aa4ad',blade:'#e8d3b8'}; }
@@ -3138,6 +3158,7 @@ const CLASS_MANA={
   berserker:  {pool:0.70, regen:1.20, cost:0.80},
   pirate:     {pool:0.95, regen:1.05, cost:1.00},
   chronomancer:{pool:1.25, regen:0.85, cost:1.20},
+  warlock:    {pool:1.15, regen:0.90, cost:1.05},
   beastmaster:{pool:1.00, regen:1.05, cost:1.00}
 };
 function classManaCfg(){ return CLASS_MANA[meta.classId]||{pool:1,regen:1,cost:1}; }
@@ -3145,7 +3166,7 @@ function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
 function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.magPowerMul:1); }   // Mystic gear: bonus to MAGIC damage specifically
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
-  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
+  let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(meta.classId==='warlock'&&c2Passive('war_frail'))v*=.90; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
 function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
   if(p.armorMods&&p.weapon&&p.weapon.sch==='mag') v*=p.armorMods.magPowerMul;   // Mystic gear boosts magic weapons specifically
   if(sp){ if(sp.power) v*=sp.power;
@@ -3179,6 +3200,9 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Static Charge
     if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; if(c2Passive('st_master'))v*=1.12; if(c2Passive('st_galvanize'))v*=1.10;
     if(classState('stormcaller').rank>=10)v*=1.12; }
+  if(meta.classId==='warlock'&&c2def('warlock')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.12;
+    if(c2Passive('war_frail'))v*=1.15; if(c2Passive('war_pact')&&p.hp<effMaxHp(p)*.5)v*=1.18;
+    if(classState('warlock').rank>=10)v*=1.12; }
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
     if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
     if(classState('ranger').rank>=10)v*=1.12; }
@@ -3196,7 +3220,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(c2Passive('st_charged'))v*=1.10;if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
@@ -6428,6 +6452,7 @@ function class2Innate(p,dt){
   if((p.evadeStackT||0)>0)p.evadeStackT-=dt;else p.evadeStacks=0;   // Ninja evasion snowball decays if you stop dodging
   if((p.focusT||0)>0)p.focusT-=dt;else p.focusStacks=0;   // Monk Focus snowball decays if you stop attacking
   if((p.staticT||0)>0)p.staticT-=dt;else p.staticStacks=0;   // Stormcaller Static speed-stacks decay if you stop attacking
+  if((p.warSpeedT||0)>0)p.warSpeedT-=dt;
   if((p.beastSpeedT||0)>0)p.beastSpeedT-=dt;
   if(meta.classId==='beastmaster'&&c2def('beastmaster')){
     const pet=beastCompanion();
@@ -6469,6 +6494,10 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
   if(meta.classId==='chronomancer'&&c2def('chronomancer')) gainMana(p,4,false);   // Time Attunement: kills loop a little mana back
+  if(meta.classId==='warlock'&&c2def('warlock')&&e&&(e.warCurseT||0)>0){
+    if(c2Passive('war_feast')){ p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.05)); gainMana(p,6,false); }
+    if(classState('warlock').rank>=10&&p.skillCd) for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-1);
+  }
   if(meta.classId==='pirate'&&c2def('pirate')&&(p.goldRushT||0)>0){ p.goldRushStacks=Math.min(25,(p.goldRushStacks||0)+1); const g=awardGold((6+zoneTier()*4)*p.goldRushStacks); if(g>0){ addText(e.x,e.y+52,e.z,'+'+g+'g ×'+p.goldRushStacks,'#ffd24a',true); try{hudUpdate();}catch(_){} } }   // Gold Rush: each kill banks more, stacking on a streak
   if(meta.classId==='reaper'){
     gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
@@ -6587,6 +6616,22 @@ SKILL_FX.x_wraith=function(p,ok,am){p.wraithT=3;p.guardT=Math.max(p.guardT||0,3)
 SKILL_FX.x_pull=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#7b3ab5','#241133',230);for(const e of G.enemies){if(e.dead)continue;const d=dXZ(e.x,e.z,p.x,p.z);if(d>230+e.r)continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(p.x-e.x)/(d||1)*400;e.hurtKbZ=(p.z-e.z)/(d||1)*400;e.stunT=Math.max(e.stunT||0,.5);}SFX.magic('void');};
 SKILL_FX.x_siphon=function(p,ok,am){SKILL_FX.harvest(p,ok,am*1.15);p.siphonT=4;};
 SKILL_FX.x_vortex=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.62*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#b06bff','#3d175e',220);SFX.magic('void');};
+// Warlock — authored blood/void spell shapes. Its class identity is health-for-power,
+// curses, and dangerous ranged burst rather than a recolored Mage kit.
+SKILL_FX.war_bolt=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,820);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=720;
+  G.projectiles.push({owner:'player',x:p.x,y:p.y+25,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:13,color:'#9d55ff',shape:'orb',glow:1,trail:'#4b176e',dmg:(w?w.dmg:10)*effPower(p)*1.25*am*(ok?1:OFFCLASS_MUL),kb:110,pierce:1,el:'void',life:1.3,hitSet:[]});SFX.magic('void');};
+SKILL_FX.war_lance=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,900);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=880;
+  G.projectiles.push({owner:'player',x:p.x,y:p.y+27,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:9,color:'#ff5475',shape:'lance',glow:1,trail:'#7a1835',dmg:(w?w.dmg:10)*effPower(p)*3.0*am*(ok?1:OFFCLASS_MUL),kb:260,pierce:5,el:'void',life:1.25,hitSet:[]});skillRing(p.x,p.z,'#9a1f48','#2b0a18',70);SFX.magic('void');};
+SKILL_FX.war_curse=function(p,ok,am){let hit=0;skillRing(p.x,p.z,'#a458e8','#36104f',245);for(const e of G.enemies){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>225+e.r)continue;e.warCurseT=7;e.slowT=Math.max(e.slowT||0,1.2);hit++;addText(e.x,e.y+e.h+12,e.z,'CURSED','#d78cff');}if(!hit)return 'refund';SFX.magic('void');};
+SKILL_FX.war_drain=function(p,ok,am){let t=null,b=-1;for(const e of G.enemies){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>620)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
+  const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.0*am*(ok?1:OFFCLASS_MUL);hitEnemy(t,dmg,p,80,0,'void');const h=Math.max(1,Math.round(dmg*.22));p.hp=Math.min(effMaxHp(p),p.hp+h);skillRing(t.x,t.z,'#b055d8','#4c123d',95);addText(p.x,p.y+70,p.z,'+'+h+' HP','#7de08a',true);SFX.magic('void');};
+SKILL_FX.war_step=function(p,ok,am){const ox=p.x,oz=p.z;SKILL_FX.blink(p,ok,am);const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.15*am*(ok?1:OFFCLASS_MUL);
+  for(const e of G.enemies){if(e.dead||!e.active||e.dummy)continue;if(dXZ(e.x,e.z,ox,oz)<115+e.r||dXZ(e.x,e.z,p.x,p.z)<115+e.r)hitEnemy(e,dmg,p,180,0,'void');}skillRing(ox,oz,'#7c3fc2','#1b0829',130);skillRing(p.x,p.z,'#d05cff','#35104b',130);SFX.magic('void');};
+SKILL_FX.war_orb=function(p,ok,am){const t=projectileAimTarget(p,720);if(!t)return 'refund';const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.3*am*(ok?1:OFFCLASS_MUL),tx=t.x,tz=t.z;skillRing(tx,tz,'#8b43c7','#22082e',205);
+  for(const e of G.enemies){if(e.dead||!e.active||e.dummy)continue;const d=dXZ(e.x,e.z,tx,tz);if(d>185+e.r||losBlocked(tx,tz,e.x,e.z))continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(tx-e.x)/(d||1)*360;e.hurtKbZ=(tz-e.z)/(d||1)*360;e.slowT=Math.max(e.slowT||0,2);}SFX.magic('void');};
+SKILL_FX.war_storm=function(p,ok,am){p.tempestT=5;p.tempAcc=0;p._tmpDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*.68*am*(ok?1:OFFCLASS_MUL);p._tmpVoid=1;skillRing(p.x,p.z,'#aa4cff','#2b0b40',230);SFX.magic('void');};
+SKILL_FX.war_final=function(p,ok,am){let t=null,b=-1;for(const e of G.enemies){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>760)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
+  t.warCurseT=Math.max(t.warCurseT||0,7);t.warBurstT=1.0;t.warBurstDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*5.0*am*(ok?1:OFFCLASS_MUL);t.warBurstSrc=p;skillRing(t.x,t.z,'#ff5475','#54112d',150);addText(t.x,t.y+t.h+24,t.z,'FINAL CURSE','#ff7ca0',true);SFX.magic('void');};
 /* Per-ability mana economy. Costs reflect actual power/utility rather than bar slot:
    repeatable attacks are cheap, mobility is cheapest, control/sustain sits mid-band,
    and major immunity/burst/room-clearing effects carry the premium. */
@@ -6609,6 +6654,7 @@ const SKILL_MANA={
   x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24,
   mon_flurry:5,mon_palm:9,mon_deflect:14,mon_roll:6,mon_whirl:14,mon_stun:13,mon_thousand:22,mon_dragon:16,
   st_bolt:6,st_lance:14,st_step:8,st_nova:15,st_orb:17,st_barrier:18,st_storm:23,st_overload:26,
+  war_bolt:6,war_lance:14,war_curse:15,war_drain:17,war_step:9,war_orb:19,war_storm:24,war_final:27,
   bst_sic:12,bst_coordinated:16,bst_guardian:18,bst_step:14,bst_mend:20,bst_roar:22,bst_stampede:32,bst_apex:28
 };
 function skillManaCost(i,s){
@@ -6653,6 +6699,13 @@ function useSkill(i){
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;
     if(r==='refund'){ gainMana(p,manaSpent,false); return; }
+    if(meta.classId==='warlock'&&fx){
+      const cap=classState('warlock').rank>=10, safe=c2Passive('war_safe'), frac=(cap?0.015:0.03)*(safe?0.65:1);
+      const blood=Math.max(1,Math.round(effMaxHp(p)*frac)); p.hp=Math.max(1,p.hp-blood);
+      if(c2Passive('war_shield')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
+      if(c2Passive('war_swift'))p.warSpeedT=2.5;
+      addText(p.x,p.y+p.h+22,p.z,'-'+blood+' HP','#ff6684'); hudUpdate();
+    }
     let cd=s.cd*(1-effCdr(p)); if(meta.classId==='beastmaster'&&(c2Passive('bst_swift')||c2Passive('bst_handler')))cd*=.88;
     if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))p.beastSpeedT=2;
     if(meta.classId==='beastmaster'&&classState('beastmaster').rank>=10)p.beastBasicEmpower=1;
@@ -6711,6 +6764,7 @@ const C2_ICON={
   mon_whirl:skillIcon('monk-whirl-kick'),mon_stun:skillIcon('monk-stunning-palm'),mon_thousand:skillIcon('monk-thousand-fists'),mon_dragon:skillIcon('monk-dragon-kick'),
   st_bolt:skillIcon('stormcaller-chain-bolt'),st_lance:skillIcon('stormcaller-lightning-lance'),st_step:skillIcon('stormcaller-thunder-step'),st_nova:skillIcon('stormcaller-static-field'),
   st_orb:skillIcon('stormcaller-ball-lightning'),st_barrier:skillIcon('stormcaller-storm-barrier'),st_storm:skillIcon('stormcaller-thunderstorm'),st_overload:skillIcon('stormcaller-chain-reaction'),
+  war_bolt:'🟣',war_lance:'🩸',war_curse:'⭕',war_drain:'💔',war_step:'🌑',war_orb:'🔮',war_storm:'🌩️',war_final:'☠️',
   bst_sic:'🐺',bst_coordinated:'⚔️',bst_guardian:'🛡️',bst_step:'🐾',bst_mend:'💚',bst_roar:'🦁',bst_stampede:'🐗',bst_apex:'👑'
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
@@ -6816,6 +6870,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
+  if(meta.classId==='warlock'&&(e.warCurseT||0)>0)dmg*=c2Passive('war_deep')?1.30:1.15;
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
     if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
@@ -7078,6 +7133,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='monk'&&c2def('monk')){if(c2Passive('mon_iron'))dmg*=.88;if(c2Passive('mon_still')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
   if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_tough'))dmg*=.90;if(c2Passive('pir_evasive'))dmg*=.90;}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
+  if(meta.classId==='warlock'&&c2def('warlock')&&c2Passive('war_last')&&p.hp<effMaxHp(p)*.30)dmg*=.85;
   if(meta.classId==='beastmaster'&&G.pet&&(G.pet.guardBondT||0)>0){const share=dmg*.35;dmg-=share;hurtPet(share,sx,sz);}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
@@ -7786,7 +7842,7 @@ const BOT_DIFF={
 const BOT_DIFFS=['easy','normal','hard','brutal'];
 // Per-class ARENA-PVP damage tuning (bots only — does NOT touch player class balance). Casters out-burst
 // everyone from range, so they're toned down; the weaker melee kits are nudged up. Tuned via the duel matrix.
-const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, monk:1.52, stormcaller:0.62, reaper:0.92, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
+const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, monk:1.52, stormcaller:0.62, warlock:0.64, reaper:0.92, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)
@@ -7866,6 +7922,9 @@ const BOT_SKILLS={
   mage:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.8,col:'#c9a6ff',el:'arcane'})},
          {min:0,max:185,cast:(e,p,D)=>botNova(e,p,D,{r:170,dm:1.2,col:'#bff0ff',col2:'#7fd6ff',sfx:()=>SFX.magic&&SFX.magic('ice')})},
          {min:150,max:720,cast:(e,p,D)=>botSlam(e,p,D,{r:155,dm:1.6,el:'fire'})} ],
+  warlock:[ {min:110,max:860,cast:(e,p,D)=>botBolt(e,p,D,{dm:2.0,col:'#a653ef',el:'void',pierce:1})},
+            {min:80,max:680,cast:(e,p,D)=>botSlam(e,p,D,{r:190,dm:1.8,col:'#d14e85',col2:'#4b102d',el:'void'})},
+            {min:0,max:190,cast:(e,p,D)=>botBlink(e,p,{mult:1.7})} ],
   chronomancer:[ {min:110,max:820,cast:(e,p,D)=>botBolt(e,p,D,{dm:1.6,col:'#8fdcff',el:'ice'})},
                  {min:120,max:720,cast:(e,p,D)=>botSlam(e,p,D,{r:155,dm:1.5,col:'#8fdcff',col2:'#3a7da0',el:'ice'})} ],
   ranger:[ {min:120,max:860,cast:(e,p,D)=>botVolley(e,p,D,{count:5,spread:0.16,dm:0.8,col:'#9fe6c8',shape:'arrow'})},
@@ -8304,6 +8363,8 @@ function update(dt){
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
+    if((e.warCurseT||0)>0)e.warCurseT=Math.max(0,e.warCurseT-dt);
+    if((e.warBurstT||0)>0){e.warBurstT-=dt;if(e.warBurstT<=0&&e.warBurstDmg>0){const wd=e.warBurstDmg,ws=e.warBurstSrc||p;e.warBurstDmg=0;hitEnemy(e,wd,ws,420,0,'void');skillRing(e.x,e.z,'#ff5475','#3b0920',210);burst(e.x,e.y+e.h*.5,e.z,'#d04cff',22);}}
     const _chillMul=statusTick(e,dt); if(e.dead) continue;   // elemental stacks: DoT + decay; returns the Chill move-speed factor
     let eff=e.speed*(e.slowT>0?0.5:1)*_chillMul; if(meta.classId==='reaper'&&c2Passive('x_chill')&&e.st&&e.st.corrupt>0)eff*=.82; if(e.slowT>0) e.slowT-=dt; if(e.markT>0) e.markT-=dt;
     if(e.doomT>0){ e.doomT-=dt/(meta.classId==='reaper'&&c2Passive('x_doom')?1.2:1); e.doomAcc+=dt;                       // Death's Door burns them down over time

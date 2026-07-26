@@ -1527,3 +1527,9 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 ## v1.325.0 — ease Frost ice-spire secret + deepen The Gauntlet
 - **Frost spire secret eased:** the Glacier Vault rift was a near-frame-perfect ~230u jump onto a target 88u up off a moving floe. Brought the spire platform closer (~150–190u gap) and lower (~30–58u up) — still a committed moving-platform jump, but a fair one (verified: jump+dash with good margin).
 - **The Gauntlet — depth:** a dedicated entry popup (`openGauntletGate`) with **Normal / Brutal** tiers (Brutal = +60% boss HP, +35% boss damage; separate best time), **per-boss split times** on the results screen (delta + cumulative), and a **first-clear reward** — a big gold cache + a new **Gauntlet Edge** glow cosmetic (color-gated on `meta.bossRushCleared`, no new art). Best times shown per tier on entry. Verified: Brutal scales boss HP, full clear records 7 splits + tiered best + first-clear cosmetic, 0 console errors.
+
+## v1.376.0 - Monk and Stormcaller class icon art
+- Replaced every Monk and Stormcaller placeholder class, skill, passive, innate, and capstone icon with game-ready voxel raster art. Monk Focus preserves the approved art from the Bladefall Icons ChatGPT session.
+- Wired all 38 new assets across legacy class summaries, class-build trees, skill choices, and passive nodes.
+- Fixed Pirate Gold Rush's pre-existing missing icon reference by reusing the approved treasure-chest artwork.
+- Verified JavaScript syntax, asset paths, title boot, and local browser rendering.

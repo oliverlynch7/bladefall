@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.384.0-autopilot';
+const VERSION3D='1.385.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5592,8 +5592,8 @@ const KEYACTIONS=[
   {id:'left',    label:'Move Left',         def:['KeyA','ArrowLeft']},
   {id:'right',   label:'Move Right',        def:['KeyD','ArrowRight']},
   {id:'jump',    label:'Jump',              def:['Space']},
-  {id:'attack',  label:'Attack',            def:['KeyJ']},
-  {id:'dodge',   label:'Dodge / Dash',      def:['KeyK','ShiftLeft']},
+  {id:'attack',  label:'Attack',            def:['Mouse0','KeyJ']},
+  {id:'dodge',   label:'Dodge / Dash',      def:['Mouse2','KeyK']},
   {id:'skill1',  label:'Skill 1',           def:['Digit1']},
   {id:'skill2',  label:'Skill 2',           def:['Digit2']},
   {id:'skill3',  label:'Skill 3',           def:['Digit3']},
@@ -5608,6 +5608,11 @@ const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held 
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
 function ensureKeybinds(){ if(!meta.keybinds||typeof meta.keybinds!=='object') meta.keybinds=defaultKeybinds();
   for(const a of KEYACTIONS){ if(!Array.isArray(meta.keybinds[a.id])) meta.keybinds[a.id]=a.def.slice(); }   // fill any newly-added action
+  // Save-safe migration from the original one-key attack and K/Shift dodge defaults.
+  // Custom player bindings are preserved; only untouched legacy defaults receive the new mouse partners.
+  if(meta.keybinds.attack.length===1&&meta.keybinds.attack[0]==='KeyJ') meta.keybinds.attack=['Mouse0','KeyJ'];
+  if((meta.keybinds.dodge.length===1&&meta.keybinds.dodge[0]==='KeyK')||
+     (meta.keybinds.dodge.length===2&&meta.keybinds.dodge[0]==='KeyK'&&meta.keybinds.dodge[1]==='ShiftLeft')) meta.keybinds.dodge=['Mouse2','KeyK'];
   if(Array.isArray(meta.keybinds.loot)&&meta.keybinds.loot.includes('KeyQ')&&!meta.keybinds.loot.includes('Tab')) meta.keybinds.loot=meta.keybinds.loot.map(c=>c==='KeyQ'?'Tab':c);   // migrate: Q now sells a drop; auto-loot cycle moved to Tab
   rebuildKeyLookup(); try{ updateHudKeys(); }catch(e){} }
 let _codeToAction={};
@@ -5681,7 +5686,7 @@ function pollGamepad(dt){
   }
   _padPrev=Bt.map(b=>b.pressed);
 }
-// mouse combat (desktop): left-click = attack (hold to combo), right-click = dodge
+// Mouse buttons share the same two-slot binding map as keyboard keys.
 // Click/tap the Warden's Shade to bring its briefing + orders back up — from any input, any distance.
 window.addEventListener('pointerdown',e=>{
   if(mode!=='play'||!G||!G.npc) return;
@@ -5689,11 +5694,22 @@ window.addEventListener('pointerdown',e=>{
   const sx=sp[0]/DPR, sy=sp[1]/DPR;
   if(Math.hypot(e.clientX-sx,e.clientY-sy)<64){ e.preventDefault(); e.stopPropagation(); initAudio(); openShade(); }
 },true);
-canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play') return; e.preventDefault(); initAudio();
-  if(e.button===0) input.attack=true;
-  else if(e.button===2){ if(!input.dodge) input.dodgeEdge=true; input.dodge=true; } });
+canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='play') return;
+  const act=keyAction('Mouse'+e.button); if(!act) return;
+  e.preventDefault(); initAudio();
+  if(MOVE_ACTS[act]){
+    if(act==='jump'&&!input.jump) input.jumpEdge=true;
+    if(act==='dodge'&&!input.dodge) input.dodgeEdge=true;
+    input[act]=true; return;
+  }
+  if(/^skill[1-4]$/.test(act)) useSkill(+act.slice(5)-1);
+  else if(act==='lootEquip'&&G.lootCard) lootEquipCurrent();
+  else if(act==='lootSell'&&G.lootCard) lootSellCurrent();
+  else if(act==='loot') cycleLootMode();
+  else if(act==='auto') toggleAuto();
+  else if(act==='interact') doInteract(); });
 window.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse') return;
-  if(e.button===0) input.attack=false; if(e.button===2) input.dodge=false; });
+  const act=keyAction('Mouse'+e.button); if(act&&MOVE_ACTS[act]) input[act]=false; });
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 /* ---- shoulder-cam camera control (only in 'shoulder' mode) ----
    Desktop: click the canvas to capture the mouse, then moving the mouse aims the camera
@@ -5707,12 +5723,7 @@ function acquireCameraLock(){
 window.addEventListener('pointerdown',()=>acquireCameraLock(),true);
 window.addEventListener('focus',()=>{ if(mode==='play'){ showGameUI(true); hudUpdate(); } });
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&mode==='play'){ showGameUI(true); hudUpdate(); } });
-// Phase 19: in the OVERHEAD camera the mouse is a weapon — left-click anywhere to attack
-// (auto-aim does the rest), right-click to dodge. Canvas only, so UI buttons stay buttons.
-canvas.addEventListener('mousedown',e=>{ if(mode!=='play'||meta.camMode!=='far'||!G) return;
-  initAudio();
-  if(e.button===0){ playerAttack(); }
-  else if(e.button===2){ e.preventDefault(); input.dodgeEdge=true; } });
+// The shared pointer binding above also drives overhead combat, avoiding duplicate attacks.
 canvas.addEventListener('contextmenu',e=>{ if(meta.camMode==='far') e.preventDefault(); });
 // The Mirror: drag anywhere on the character to orbit the camera 360° around yourself
 (function(){ let md=null;
@@ -11072,7 +11083,7 @@ function toggleFullscreen(){ try{
 }catch(e){} }
 // human-readable label for a physical key code
 function keyLabel(code){ if(!code) return '—';
-  const m={Space:'Space',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',ShiftLeft:'L-Shift',ShiftRight:'R-Shift',ControlLeft:'L-Ctrl',ControlRight:'R-Ctrl',AltLeft:'L-Alt',AltRight:'R-Alt',Enter:'Enter',Tab:'Tab',Backquote:'`',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'\\',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',CapsLock:'Caps'};
+  const m={Mouse0:'Left Click',Mouse1:'Middle Click',Mouse2:'Right Click',Space:'Space',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',ShiftLeft:'L-Shift',ShiftRight:'R-Shift',ControlLeft:'L-Ctrl',ControlRight:'R-Ctrl',AltLeft:'L-Alt',AltRight:'R-Alt',Enter:'Enter',Tab:'Tab',Backquote:'`',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'\\',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',CapsLock:'Caps'};
   if(m[code]) return m[code];
   if(/^Key[A-Z]$/.test(code)) return code.slice(3);
   if(/^Digit[0-9]$/.test(code)) return code.slice(5);
@@ -11096,7 +11107,7 @@ function openKeybinds(back){
     return `<button class="kbcap${listening?' listening':''}${code?'':' empty'}" data-a="${a.id}" data-s="${i}">${listening?'Press…':(code?keyLabel(code):'+')}</button>`; };
   const rows=KEYACTIONS.map(a=>`<div class="kbrow"><span class="kblabel">${a.label}</span><div class="kbcaps">${cap(a,0)}${cap(a,1)}</div><button class="kbreset" data-r="${a.id}" title="Reset to default">↺</button></div>`).join('');
   showOverlayHTML(`<div class="card kbcard"><p class="ovkicker">Settings · Controls</p><h2 class="ovh">⌨️ Key Bindings</h2>
-    <p class="ovsub">Click a key to rebind it. <b>Esc</b> cancels a rebind. Each action holds up to two keys. Menu keys (Esc, Enter) stay fixed.</p>
+    <p class="ovsub">Choose either slot, then press a keyboard key or mouse button. <b>Esc</b> cancels. Every action holds two bindings. Menu keys (Esc, Enter) stay fixed.</p>
     <div class="kblist">${rows}</div>
     <div class="kbfoot"><button class="bigbtn ghost" id="kbResetAll">↺ Reset all to defaults</button><button class="bigbtn" id="kbDone">Done</button></div></div>`);
   const rerender=()=>openKeybinds(back);
@@ -11107,14 +11118,20 @@ function openKeybinds(back){
 }
 function startRebind(id,slot,rerender){
   _rebindState={id,slot}; rerender();
-  const onKey=(e)=>{ e.preventDefault(); e.stopPropagation(); window.removeEventListener('keydown',onKey,true);
-    if(e.code==='Escape'){ _rebindState=null; rerender(); return; }                              // Esc cancels; menu keys stay fixed
-    const code=e.code;
+  const cleanup=()=>{ window.removeEventListener('keydown',onKey,true); window.removeEventListener('pointerdown',onPointer,true); window.removeEventListener('contextmenu',onContext,true); };
+  const bindCode=(code)=>{ cleanup();
     for(const a of KEYACTIONS){ meta.keybinds[a.id]=(meta.keybinds[a.id]||[]).filter(c=>c!==code); }  // no duplicate bindings anywhere (swap-style)
     const arr=meta.keybinds[id]; while(arr.length<=slot) arr.push(null); arr[slot]=code;
     meta.keybinds[id]=arr.filter(c=>c).slice(0,2);
     _rebindState=null; rebuildKeyLookup(); persistGlobal(); if(SFX&&SFX.pickup)SFX.pickup(); rerender(); };
+  const onKey=(e)=>{ e.preventDefault(); e.stopPropagation();
+    if(e.code==='Escape'){ cleanup(); _rebindState=null; rerender(); return; }                    // Esc cancels; menu keys stay fixed
+    bindCode(e.code); };
+  const onPointer=(e)=>{ if(e.pointerType!=='mouse') return; e.preventDefault(); e.stopPropagation(); bindCode('Mouse'+e.button); };
+  const onContext=(e)=>{ if(_rebindState){ e.preventDefault(); e.stopPropagation(); } };
   window.addEventListener('keydown',onKey,true);
+  window.addEventListener('pointerdown',onPointer,true);
+  window.addEventListener('contextmenu',onContext,true);
 }
 function openPause(){
   pauseGameAudio(true);

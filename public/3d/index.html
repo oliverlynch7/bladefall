@@ -416,7 +416,7 @@
   .ico-skill-pirate-bounty{background-image:url('icons/pirate_bounty.png');}
   .ico-skill-pirate-cannonade{background-image:url('icons/pirate_cannonade.png');}
   .ico-skill-pirate-powder-keg{background-image:url('icons/pirate_powder_keg.png');}
-  .ico-skill-pirate-gold-rush{background-image:url('icons/pirate_plunder.png');}   /* reuses the treasure art */
+  .ico-skill-pirate-gold-rush{background-image:url('icons/event-treasure-chest.png');}   /* reuses the treasure art */
   .ico-class-chronomancer{background-image:url('icons/class-chronomancer.png');}
   .ico-skill-chrono-time-bolt{background-image:url('icons/chrono_time_bolt.png');}
   .ico-skill-chrono-time-lance{background-image:url('icons/chrono_time_lance.png');}
@@ -426,6 +426,24 @@
   .ico-skill-chrono-aegis{background-image:url('icons/chrono_aegis.png');}
   .ico-skill-chrono-time-storm{background-image:url('icons/chrono_time_storm.png');}
   .ico-skill-chrono-singularity{background-image:url('icons/chrono_singularity.png');}
+  .ico-class-monk{background-image:url('icons/class-monk.png');}
+  .ico-skill-monk-flurry{background-image:url('icons/monk_flurry.png');}
+  .ico-skill-monk-palm-strike{background-image:url('icons/monk_palm_strike.png');}
+  .ico-skill-monk-deflect{background-image:url('icons/monk_deflect.png');}
+  .ico-skill-monk-roll{background-image:url('icons/monk_roll.png');}
+  .ico-skill-monk-whirl-kick{background-image:url('icons/monk_whirl_kick.png');}
+  .ico-skill-monk-stunning-palm{background-image:url('icons/monk_stunning_palm.png');}
+  .ico-skill-monk-thousand-fists{background-image:url('icons/monk_thousand_fists.png');}
+  .ico-skill-monk-dragon-kick{background-image:url('icons/monk_dragon_kick.png');}
+  .ico-class-stormcaller{background-image:url('icons/class-stormcaller.png');}
+  .ico-skill-stormcaller-chain-bolt{background-image:url('icons/stormcaller_chain_bolt.png');}
+  .ico-skill-stormcaller-lightning-lance{background-image:url('icons/stormcaller_lightning_lance.png');}
+  .ico-skill-stormcaller-thunder-step{background-image:url('icons/stormcaller_thunder_step.png');}
+  .ico-skill-stormcaller-static-field{background-image:url('icons/stormcaller_static_field.png');}
+  .ico-skill-stormcaller-ball-lightning{background-image:url('icons/stormcaller_ball_lightning.png');}
+  .ico-skill-stormcaller-storm-barrier{background-image:url('icons/stormcaller_storm_barrier.png');}
+  .ico-skill-stormcaller-thunderstorm{background-image:url('icons/stormcaller_thunderstorm.png');}
+  .ico-skill-stormcaller-chain-reaction{background-image:url('icons/stormcaller_chain_reaction.png');}
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -1743,7 +1761,7 @@ const ARCHES={
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
   venomedge:{disp:'Venom Edge',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:60,art:'spellblade',el:'poison',chg:'spellsweep'},   // poison spellblade
   umbrablade:{disp:'Shadow Edge',cls:'melee',sch:'mag',dmg:17,cd:.46,kb:230,range:64,art:'spellblade',el:'void',chg:'spellsweep'},    // void spellblade
-  lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'axe',el:'holy',chg:'spellsweep'},        // the holy AXE — a Paladin's blazing greataxe (Artix-style)
+  lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'spellblade',el:'holy',chg:'spellsweep'}, // holy magical melee: a radiant Paladin spellblade
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
   iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:58,cd:.32,kb:430,range:102,art:'sword',el:'holy',anyClass:true,ians:true}, // THE god-sword: highest DPS in the game, radiant execute + Soulfire splash + wielder grace (lifesteal/CDR/speed), full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
@@ -1866,22 +1884,22 @@ const CLASSES={
       {id:'chr_nova',n:'Slow Field',icon:skillIcon('chrono-slow-field'),cd:8,rank:2,d:'A burst that slows nearby foes'},
       {id:'chr_blink',n:'Rewind',icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
       {id:'chr_tempest',n:'Time Storm',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]},
-  monk:{disp:'Monk',icon:'🥋',attackStyle:'warrior',earned:true,shopUnlock:true,charter:9000,family:['fist'],
+  monk:{disp:'Monk',icon:classIcon('monk'),attackStyle:'warrior',earned:true,shopUnlock:true,charter:9000,family:['fist'],
     subs:[{id:'way',disp:'Way of the Fist',blurb:'Flurry and Focus — relentless offense.'},
           {id:'flow',disp:'Way of Flow',blurb:'Parry and evade — turn their blows against them.'}],
     skills:[
-      {id:'mon_flurry',n:'Flurry',icon:'👊',cd:2,rank:1,d:'A rapid barrage of strikes'},
-      {id:'mon_deflect',n:'Deflect',icon:'🛡️',cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
-      {id:'mon_whirl',n:'Whirl Kick',icon:'🌀',cd:12,rank:4,d:'Spin, striking everything around you'},
-      {id:'mon_thousand',n:'Thousand Fists',icon:'✨',cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
-  stormcaller:{disp:'Stormcaller',icon:'⚡',attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand','spellblade'],
+      {id:'mon_flurry',n:'Flurry',icon:skillIcon('monk-flurry'),cd:2,rank:1,d:'A rapid barrage of strikes'},
+      {id:'mon_deflect',n:'Deflect',icon:skillIcon('monk-deflect'),cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
+      {id:'mon_whirl',n:'Whirl Kick',icon:skillIcon('monk-whirl-kick'),cd:12,rank:4,d:'Spin, striking everything around you'},
+      {id:'mon_thousand',n:'Thousand Fists',icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
+  stormcaller:{disp:'Stormcaller',icon:classIcon('stormcaller'),attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand','spellblade'],
     subs:[{id:'tempest',disp:'Tempest',blurb:'Chain lightning and storms — spread the shock.'},
           {id:'current',disp:'Current',blurb:'Static speed — the longer you fight, the faster you strike.'}],
     skills:[
-      {id:'st_bolt',n:'Chain Bolt',icon:'⚡',cd:2,rank:1,d:'A bolt that leaps between foes'},
-      {id:'st_nova',n:'Static Field',icon:'🌐',cd:8,rank:2,d:'A shock burst that slows nearby foes'},
-      {id:'st_orb',n:'Ball Lightning',icon:'🔵',cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
-      {id:'st_storm',n:'Thunderstorm',icon:'🌩️',cd:24,rank:7,d:'A storm of lightning rages around you'}]},
+      {id:'st_bolt',n:'Chain Bolt',icon:skillIcon('stormcaller-chain-bolt'),cd:2,rank:1,d:'A bolt that leaps between foes'},
+      {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
+      {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
+      {id:'st_storm',n:'Thunderstorm',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
   beastmaster:{disp:'Beastmaster',icon:'🐾',attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
@@ -2029,7 +2047,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'chr_tempest',d:'A storm of decaying time around you.'}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
     r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Damage',d:'+12% damage.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Damage',d:'+10% damage.'}}
   },
-  monk:{ disp:'Monk', icon:'🥋',
+  monk:{ disp:'Monk', icon:classIcon('monk'),
     innate:{name:'Focus', d:'Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking.'},
     cap:{name:'Grandmaster', d:'+12% damage, +10% attack speed, and your Focus stacks hit harder and linger longer.'},
     r2:{kind:'skill',slot:0, a:{id:'mon_flurry',n:'Flurry',cd:2,am:0.42,role:'Rapid · Focused',fx:'mon_flurry',d:'A blur of rapid strikes (~2s, softer each) — builds Focus fast.'}, b:{id:'mon_palm',n:'Palm Strike',cd:6,role:'Burst',fx:'mon_palm',d:'Dash in with a heavy palm that staggers the first foe.'}},
@@ -2041,7 +2059,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3, a:{id:'mon_thousand',n:'Thousand Fists',cd:24,role:'Burst',fx:'mon_thousand',d:'A blinding assault: +35% damage and attack speed for 6s.'}, b:{id:'mon_dragon',n:'Dragon Kick',cd:20,role:'Finisher',fx:'mon_dragon',d:'A soaring kick that erupts on impact, blasting everything around.'}},
     r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'mon_master',n:'Master Striker',role:'Damage',d:'+12% damage.'}}
   },
-  stormcaller:{ disp:'Stormcaller', icon:'⚡',
+  stormcaller:{ disp:'Stormcaller', icon:classIcon('stormcaller'),
     innate:{name:'Static Charge', d:'Magic weapons deal +8% damage. Every hit you land builds a Static stack (up to 5) — each one makes you strike and move faster — fading if you stop attacking. The longer you fight, the faster the storm.'},
     cap:{name:'Storm Lord', d:'+12% damage, +10% cooldown reduction, and your lightning arcs to more enemies.'},
     r2:{kind:'skill',slot:0, a:{id:'st_bolt',n:'Chain Bolt',cd:2,am:0.4,role:'Rapid · Chain',fx:'st_bolt',d:'Rapid bolts that leap to a nearby foe (~2s, softer each) — builds Static fast.'}, b:{id:'st_lance',n:'Lightning Lance',cd:6,role:'Piercing Damage',fx:'st_lance',d:'A piercing bolt through every foe in a line.'}},
@@ -2091,11 +2109,17 @@ const PASSIVE_ART={
   nin_innate:'ninja-killer-instinct',nin_cap:'ninja-phantom',
   bsk_heavy:'berserker-heavy-hands',bsk_reckless:'berserker-reckless',bsk_thick:'berserker-thick-hide',bsk_blood:'berserker-bloodthirst',bsk_rage:'berserker-rage',bsk_frenzy:'berserker-frenzy',bsk_tough:'berserker-unbreakable',bsk_brutal:'berserker-brutal',bsk_innate:'berserker-bloodrage',bsk_cap:'berserker-undying-rage',
   pir_deadly:'pirate-dead-aim',pir_swift:'pirate-quick-hands',pir_tough:'pirate-sea-legs',pir_swagger:'pirate-swagger',pir_evasive:'pirate-slippery',pir_luck:'pirate-lucky',pir_brutal:'pirate-cutthroat',pir_greed:'pirate-greed',pir_innate:'pirate-plunder',pir_cap:'pirate-dread-captain',
-  chr_potent:'chrono-potent',chr_haste:'chrono-haste',chr_ward:'chrono-time-ward',chr_glass:'chrono-focus',chr_temporal:'chrono-temporal-flow',chr_slow:'chrono-entropy',chr_echo:'chrono-echo',chr_freeze:'chrono-deep-freeze',chr_innate:'chrono-time-attunement',chr_cap:'chrono-timelord'
+  chr_potent:'chrono-potent',chr_haste:'chrono-haste',chr_ward:'chrono-time-ward',chr_glass:'chrono-focus',chr_temporal:'chrono-temporal-flow',chr_slow:'chrono-entropy',chr_echo:'chrono-echo',chr_freeze:'chrono-deep-freeze',chr_innate:'chrono-time-attunement',chr_cap:'chrono-timelord',
+  mon_iron:'monk-iron-body',mon_fire:'monk-inner-fire',mon_flow:'monk-flow',mon_focused:'monk-focused-mind',
+  mon_med:'monk-meditation',mon_killer:'monk-killer-focus',mon_still:'monk-still-water',mon_master:'monk-master-striker',
+  mon_innate:'monk-focus',mon_cap:'monk-grandmaster',
+  st_conductor:'stormcaller-conductor',st_overcharge:'stormcaller-overcharge',st_momentum:'stormcaller-momentum',st_ward:'stormcaller-storm-ward',
+  st_charged:'stormcaller-charged',st_amped:'stormcaller-amped',st_master:'stormcaller-static-master',st_galvanize:'stormcaller-galvanize',
+  st_innate:'stormcaller-static-charge',st_cap:'stormcaller-storm-lord'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',beastmaster:'bst_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',beastmaster:'bst_cap'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',beastmaster:'bst_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',monk:'mon_cap',stormcaller:'st_cap',beastmaster:'bst_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -6678,6 +6702,10 @@ const C2_ICON={
   bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard'),
   pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg'),pir_goldrush:skillIcon('pirate-gold-rush'),
   chr_bolt:skillIcon('chrono-time-bolt'),chr_beam:skillIcon('chrono-time-lance'),chr_nova:skillIcon('chrono-slow-field'),chr_blink:skillIcon('chrono-rewind'),chr_gravity:skillIcon('chrono-time-warp'),chr_barrier:skillIcon('chrono-aegis'),chr_tempest:skillIcon('chrono-time-storm'),chr_overload:skillIcon('chrono-singularity'),
+  mon_flurry:skillIcon('monk-flurry'),mon_palm:skillIcon('monk-palm-strike'),mon_deflect:skillIcon('monk-deflect'),mon_roll:skillIcon('monk-roll'),
+  mon_whirl:skillIcon('monk-whirl-kick'),mon_stun:skillIcon('monk-stunning-palm'),mon_thousand:skillIcon('monk-thousand-fists'),mon_dragon:skillIcon('monk-dragon-kick'),
+  st_bolt:skillIcon('stormcaller-chain-bolt'),st_lance:skillIcon('stormcaller-lightning-lance'),st_step:skillIcon('stormcaller-thunder-step'),st_nova:skillIcon('stormcaller-static-field'),
+  st_orb:skillIcon('stormcaller-ball-lightning'),st_barrier:skillIcon('stormcaller-storm-barrier'),st_storm:skillIcon('stormcaller-thunderstorm'),st_overload:skillIcon('stormcaller-chain-reaction'),
   bst_sic:'🐺',bst_coordinated:'⚔️',bst_guardian:'🛡️',bst_step:'🐾',bst_mend:'💚',bst_roar:'🦁',bst_stampede:'🐗',bst_apex:'👑'
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
@@ -10676,6 +10704,8 @@ const ART_ICON={sword:'sword',great:'greatsword',axe:'battleaxe',hammer:'warhamm
   spellblade:'spellblade',scythe:'scythe'};
 function studioIconFor(w){
   if(!w) return null;
+  const affinitySpellblades={venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',lightbringer:'aff_holy_sword'};
+  if(affinitySpellblades[w.arche]) return affinitySpellblades[w.arche];
   if(w.art==='sword'&&w.el){ const m={fire:'aff_fire_sword',ice:'aff_frost_sword',poison:'aff_venom_sword',arcane:'aff_arcane_sword',holy:'aff_holy_sword',void:'aff_void_sword'}; if(m[w.el]) return m[w.el]; }
   return ART_ICON[w.art]||null;
 }
@@ -13052,7 +13082,7 @@ function itemStaticAv(item){
     return 'icons/armor_'+item.slot+'_'+item.rarity+'.png?v='+VERSION3D;
   }
   if(item.cls){
-    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
+    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',lightbringer:'aff_holy_sword',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
     const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
     return file?'icons/items/weapons/'+file+'.png?v='+VERSION3D:null;

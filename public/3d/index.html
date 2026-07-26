@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.376.0';
+const VERSION3D='1.377.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1761,7 +1761,7 @@ const ARCHES={
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
   venomedge:{disp:'Venom Edge',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:60,art:'spellblade',el:'poison',chg:'spellsweep'},   // poison spellblade
   umbrablade:{disp:'Shadow Edge',cls:'melee',sch:'mag',dmg:17,cd:.46,kb:230,range:64,art:'spellblade',el:'void',chg:'spellsweep'},    // void spellblade
-  lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'axe',el:'holy',chg:'spellsweep'},        // the holy AXE — a Paladin's blazing greataxe (Artix-style)
+  lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'spellblade',el:'holy',chg:'spellsweep'}, // holy magical melee: a radiant Paladin spellblade
   voidscythe:{disp:'Void Scythe',cls:'melee',sch:'mag',dmg:20,cd:.52,kb:280,range:90,art:'scythe',el:'void',lifesteal:.12,reaper:true,chg:'scythethrow'}, // swing PULLS + reaps + heals on kill; 3-hit combo + thrown spin
   iansblade:{disp:"Ian's Blade",cls:'melee',sch:'mag',dmg:58,cd:.32,kb:430,range:102,art:'sword',el:'holy',anyClass:true,ians:true}, // THE god-sword: highest DPS in the game, radiant execute + Soulfire splash + wielder grace (lifesteal/CDR/speed), full power for every class
   bow:{disp:'Longbow',cls:'ranged',sch:'phys',dmg:9,cd:.30,kb:110,art:'bow',chg:'powershot',proj:{speed:680,size:5,pierce:0,range:1150,color:'#d8c27a',shape:'arrow'}},   // tap = quick shot; hold = a piercing power arrow
@@ -10607,6 +10607,8 @@ const ART_ICON={sword:'sword',great:'greatsword',axe:'battleaxe',hammer:'warhamm
   spellblade:'spellblade',scythe:'scythe'};
 function studioIconFor(w){
   if(!w) return null;
+  const affinitySpellblades={venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',lightbringer:'aff_holy_sword'};
+  if(affinitySpellblades[w.arche]) return affinitySpellblades[w.arche];
   if(w.art==='sword'&&w.el){ const m={fire:'aff_fire_sword',ice:'aff_frost_sword',poison:'aff_venom_sword',arcane:'aff_arcane_sword',holy:'aff_holy_sword',void:'aff_void_sword'}; if(m[w.el]) return m[w.el]; }
   return ART_ICON[w.art]||null;
 }
@@ -12983,7 +12985,7 @@ function itemStaticAv(item){
     return 'icons/armor_'+item.slot+'_'+item.rarity+'.png?v='+VERSION3D;
   }
   if(item.cls){
-    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
+    const map={sword:'sword',saber:'sword',dagger:'knives',axe:'battleaxe',great:'greatsword',hammer:'warhammer',scythe:'scythe',flameblade:'flameblade',frostbrand:'frostbrand',runeblade:'runeblade',venomedge:'aff_venom_sword',umbrablade:'aff_void_sword',lightbringer:'aff_holy_sword',voidscythe:'voidscythe',iansblade:'iansblade',bow:'longbow',crossbow:'crossbow',knives:'knives',javelin:'javelins',staff:'staff',wand:'wand',spellblade:'spellblade',firestaff:'firestaff',frostwand:'frostwand',arcaneorb:'arcaneorb',stormrod:'stormrod',plaguestaff:'plaguestaff',holyscepter:'holyscepter'};
     const aff={fire:'fire',ice:'frost',poison:'venom',arcane:'arcane',holy:'holy',void:'void'};
     const file=item.arche==='sword'&&aff[item.el]?('aff_'+aff[item.el]+'_sword'):(map[item.arche]||map[item.art]);
     return file?'icons/items/weapons/'+file+'.png?v='+VERSION3D:null;

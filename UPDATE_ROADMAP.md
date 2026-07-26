@@ -1533,3 +1533,8 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Wired all 38 new assets across legacy class summaries, class-build trees, skill choices, and passive nodes.
 - Fixed Pirate Gold Rush's pre-existing missing icon reference by reusing the approved treasure-chest artwork.
 - Verified JavaScript syntax, asset paths, title boot, and local browser rendering.
+
+## v1.377.0 - holy spellblade and affinity icon hook
+- Lightbringer now renders as the intended holy magical spellblade instead of borrowing the battle-axe silhouette; combat values and balance are unchanged.
+- Venom Edge, Shadow Edge, and Lightbringer now resolve to approved poison, void, and holy affinity icons in both inventory cards and the weapon studio.
+- Verified every mapped affinity asset exists and the game script parses cleanly.

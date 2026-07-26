@@ -971,7 +971,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.375.0-autopilot';
+const VERSION3D='1.378.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1667,9 +1667,9 @@ function petTrainMul(id){ return 1+petTrainLvl(id)*0.05; }
 function petRarityCol(id){ const P=PETS[id]; return P?RARITY[P.rarity].color:'#fff'; }
 function petDisplayName(id){ return (meta.petNames&&meta.petNames[id])||(PETS[id]&&PETS[id].name)||'Pet'; }
 function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps chip relevant with level, never a spike
-function petAtkDmg(id){ const P=PETS[id]; return Math.max(1,Math.round((P.dmg||4)*petLevelScale()*petTrainMul(id))); }
-function petHealAmt(id){ const P=PETS[id]; return Math.max(1,Math.round((P.heal||3)*petTrainMul(id))); }
-function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); return Math.round(base*petLevelScale()*(1+petTrainLvl(id)*.12)); }
+function petAtkDmg(id){ const P=PETS[id]; let v=(P.dmg||4)*petLevelScale()*petTrainMul(id); if(meta.classId==='beastmaster'){v*=1.15;if(c2Passive('bst_heavy'))v*=1.15;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.10;} return Math.max(1,Math.round(v)); }
+function petHealAmt(id){ const P=PETS[id]; let v=(P.heal||3)*petTrainMul(id); if(meta.classId==='beastmaster'){v*=1.15;if(c2Passive('bst_wildkeeper'))v*=1.20;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.10;} return Math.max(1,Math.round(v)); }
+function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); let v=base*petLevelScale()*(1+petTrainLvl(id)*.12);if(meta.classId==='beastmaster'){v*=1.25;if(c2Passive('bst_heavy'))v*=1.25;}return Math.round(v); }
 // Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
 function rarityReq(rid){ return (RARITY[rid]&&RARITY[rid].req)||1; }
 function heroLevel(){ return (G&&G.p&&!G.hub)?(G.p.level||1):((meta.hero&&meta.hero.level)||1); }
@@ -1881,7 +1881,15 @@ const CLASSES={
       {id:'st_bolt',n:'Chain Bolt',icon:'⚡',cd:2,rank:1,d:'A bolt that leaps between foes'},
       {id:'st_nova',n:'Static Field',icon:'🌐',cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:'🔵',cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
-      {id:'st_storm',n:'Thunderstorm',icon:'🌩️',cd:24,rank:7,d:'A storm of lightning rages around you'}]}
+      {id:'st_storm',n:'Thunderstorm',icon:'🌩️',cd:24,rank:7,d:'A storm of lightning rages around you'}]},
+  beastmaster:{disp:'Beastmaster',icon:'🐾',attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
+    subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
+          {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
+    skills:[
+      {id:'bst_sic',n:"Sic 'Em",icon:'🐺',cd:5,rank:2,d:'Command your companion to lunge, strike, and briefly stun'},
+      {id:'bst_step',n:'Pack Step',icon:'🐾',cd:9,rank:4,d:'You and your companion pincer the target'},
+      {id:'bst_mend',n:'Mend the Pack',icon:'💚',cd:14,rank:6,d:'Restore your companion and yourself over time'},
+      {id:'bst_apex',n:'Apex Unleashed',icon:'🦁',cd:22,rank:8,d:'Unleash your companion at peak strength'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -2044,6 +2052,18 @@ const CLASS2={
     r7:{kind:'passive', a:{id:'st_charged',n:'Charged',role:'Speed',d:'+10% attack speed.'}, b:{id:'st_amped',n:'Amped',role:'Damage',d:'+12% damage.'}},
     r8:{kind:'skill',slot:3, a:{id:'st_storm',n:'Thunderstorm',cd:22,role:'Group Damage',fx:'st_storm',d:'A storm of lightning rages around you for 4s.'}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
     r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Damage',d:'+12% damage.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Damage',d:'+10% damage.'}}
+  },
+  beastmaster:{ disp:'Beastmaster', icon:'🐾',
+    innate:{name:'Bonded Companion',d:'Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands.'},
+    cap:{name:'One Pack',d:'+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion.'},
+    r2:{kind:'skill',slot:0,a:{id:'bst_sic',n:"Sic 'Em",cd:5,role:'Control',fx:'bst_sic',d:'Your companion lunges for 1.6x damage and briefly stuns.'},b:{id:'bst_coordinated',n:'Coordinated Strike',cd:6,role:'Boss Damage',fx:'bst_coordinated',d:'You and your companion strike together; the target is marked for increased companion damage.'}},
+    r3:{kind:'passive',a:{id:'bst_heavy',n:'Heavy Collar',role:'Power',d:'+25% companion HP and +15% damage, but 10% slower attacks.'},b:{id:'bst_swift',n:'Swift Paws',role:'Speed',d:'+18% companion attack and movement speed; commands recover 12% faster.'}},
+    r4:{kind:'skill',slot:1,a:{id:'bst_guardian',n:'Guardian Bond',cd:12,role:'Defense',fx:'bst_guardian',d:'For 4s your companion intercepts part of incoming damage and gains a shield.'},b:{id:'bst_step',n:'Pack Step',cd:9,role:'Movement',fx:'bst_step',d:'You and your companion dash to opposite sides of the target with brief dodge protection.'}},
+    r5:{kind:'passive',a:{id:'bst_vitality',n:'Shared Vitality',role:'Sustain',d:'Healing either partner also heals the other for 30% of that amount.'},b:{id:'bst_rhythm',n:"Predator's Rhythm",role:'Uptime',d:'Basic attacks reduce all Beastmaster command cooldowns by 0.25s.'}},
+    r6:{kind:'skill',slot:2,a:{id:'bst_mend',n:'Mend the Pack',cd:14,role:'Sustain',fx:'bst_mend',d:'Restore 30% companion HP and 10% player HP over time.'},b:{id:'bst_roar',n:'Alpha Roar',cd:13,role:'Control',fx:'bst_roar',d:'A damaging roar slows nearby foes and turns their attention toward your companion.'}},
+    r7:{kind:'passive',a:{id:'bst_scent',n:'Blood Scent',role:'Damage',d:'+20% companion damage against marked, elite, boss, or wounded targets.'},b:{id:'bst_wildkeeper',n:'Wildkeeper',role:'Defense',d:'+20% companion healing and 12% damage reduction while it is below half HP.'}},
+    r8:{kind:'skill',slot:3,a:{id:'bst_stampede',n:'Stampede',cd:24,role:'Group Damage',fx:'bst_stampede',d:'Call a spectral herd through a wide lane, striking and knocking enemies aside.'},b:{id:'bst_apex',n:'Apex Unleashed',cd:22,role:'Companion',fx:'bst_apex',d:'For 8s your companion gains +35% damage/healing, +30% speed, and relentless pursuit.'}},
+    r9:{kind:'passive',a:{id:'bst_authority',n:"Alpha's Authority",role:'Damage',d:'Companion attacks gain occasional splash damage and commands are 15% stronger.'},b:{id:'bst_handler',n:'Master Handler',role:'Economy',d:'Commands cost 15% less mana, recover 12% faster, and briefly speed you up.'}}
   }
 };
 const PASSIVE_ART={
@@ -2074,8 +2094,8 @@ const PASSIVE_ART={
   chr_potent:'chrono-potent',chr_haste:'chrono-haste',chr_ward:'chrono-time-ward',chr_glass:'chrono-focus',chr_temporal:'chrono-temporal-flow',chr_slow:'chrono-entropy',chr_echo:'chrono-echo',chr_freeze:'chrono-deep-freeze',chr_innate:'chrono-time-attunement',chr_cap:'chrono-timelord'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
-const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate'};
-const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap'};
+const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',beastmaster:'bst_innate'};
+const C2_CAP_ICON={warrior:'w_unbroken',ranger:'r_perfect_hunt',mage:'m_archmage',reaper:'x_avatar',paladin:'pal_avatar',necromancer:'necro_cap',ninja:'nin_cap',berserker:'bsk_cap',pirate:'pir_cap',chronomancer:'chr_cap',beastmaster:'bst_cap'};
 const CLASS2_CHOICE_RANKS=[2,3,4,5,6,7,8,9];   // the ranks that present a 1-of-2 choice
 /* Trials: a starter's is a themed tutorial (skippable — it teaches, it doesn't gate).
    An earned class's trial is a real fight hidden in a side zone and must be won. */
@@ -3088,7 +3108,8 @@ const CLASS_MANA={
   ninja:      {pool:0.85, regen:1.20, cost:0.85},
   berserker:  {pool:0.70, regen:1.20, cost:0.80},
   pirate:     {pool:0.95, regen:1.05, cost:1.00},
-  chronomancer:{pool:1.25, regen:0.85, cost:1.20}
+  chronomancer:{pool:1.25, regen:0.85, cost:1.20},
+  beastmaster:{pool:1.00, regen:1.05, cost:1.00}
 };
 function classManaCfg(){ return CLASS_MANA[meta.classId]||{pool:1,regen:1,cost:1}; }
 function classMaxMana(){ return Math.round(100*classManaCfg().pool); }
@@ -3141,11 +3162,12 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='chronomancer'&&c2def('chronomancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;
     if(c2Passive('chr_potent'))v*=1.12; if(c2Passive('chr_glass'))v*=1.12; if(c2Passive('chr_slow'))v*=1.10; if(c2Passive('chr_echo'))v*=1.12; if(c2Passive('chr_freeze'))v*=1.10;
     if(classState('chronomancer').rank>=10)v*=1.12; }
+  if(meta.classId==='beastmaster'&&c2def('beastmaster')&&classState('beastmaster').rank>=10)v*=1.10;
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
 function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_swift'))v*=1.10;if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(c2Passive('st_charged'))v*=1.10;if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
@@ -6377,6 +6399,23 @@ function class2Innate(p,dt){
   if((p.evadeStackT||0)>0)p.evadeStackT-=dt;else p.evadeStacks=0;   // Ninja evasion snowball decays if you stop dodging
   if((p.focusT||0)>0)p.focusT-=dt;else p.focusStacks=0;   // Monk Focus snowball decays if you stop attacking
   if((p.staticT||0)>0)p.staticT-=dt;else p.staticStacks=0;   // Stormcaller Static speed-stacks decay if you stop attacking
+  if((p.beastSpeedT||0)>0)p.beastSpeedT-=dt;
+  if(meta.classId==='beastmaster'&&c2def('beastmaster')){
+    const pet=beastCompanion();
+    if(pet){
+      pet.apexT=Math.max(0,(pet.apexT||0)-dt); pet.guardBondT=Math.max(0,(pet.guardBondT||0)-dt); pet.invuln=Math.max(0,(pet.invuln||0)-dt);
+      if((pet.beastMendT||0)>0){const step=Math.min(dt,pet.beastMendT);pet.beastMendT-=step;pet.hp=Math.min(pet.maxHp,pet.hp+(pet.beastMendHp||0)*step/5);}
+      if(c2Passive('bst_vitality')){
+        const prevP=p._beastPrevHp==null?p.hp:p._beastPrevHp,prevPet=pet._beastPrevHp==null?pet.hp:pet._beastPrevHp;
+        const playerHeal=Math.max(0,p.hp-prevP),petHeal=Math.max(0,pet.hp-prevPet);
+        if(playerHeal>0)pet.hp=Math.min(pet.maxHp,pet.hp+playerHeal*.30);
+        if(petHeal>0)p.hp=Math.min(effMaxHp(p),p.hp+petHeal*.30);
+        p._beastPrevHp=p.hp;pet._beastPrevHp=pet.hp;
+      }else{p._beastPrevHp=p.hp;pet._beastPrevHp=pet.hp;}
+    }
+    if((p.beastMendT||0)>0){const step=Math.min(dt,p.beastMendT);p.beastMendT-=step;p.hp=Math.min(effMaxHp(p),p.hp+(p.beastMendHp||0)*step/5);}
+    if(G.enemies)for(const e of G.enemies)if((e.beastMarkT||0)>0)e.beastMarkT=Math.max(0,e.beastMarkT-dt);
+  }
   if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
@@ -6445,6 +6484,43 @@ SKILL_FX.nin_strike=SKILL_FX.r_shadow; SKILL_FX.nin_fan=SKILL_FX.r_volley; SKILL
 SKILL_FX.mon_flurry=SKILL_FX.w_cleave; SKILL_FX.mon_palm=SKILL_FX.w_bash; SKILL_FX.mon_deflect=SKILL_FX.laststand; SKILL_FX.mon_roll=SKILL_FX.tumble; SKILL_FX.mon_whirl=SKILL_FX.w_whirl; SKILL_FX.mon_stun=SKILL_FX.nova; SKILL_FX.mon_thousand=SKILL_FX.w_berserk; SKILL_FX.mon_dragon=SKILL_FX.stomp;
 // STORMCALLER — lightning caster reuses the mage effect set (lightning-blue visuals via its own colors)
 SKILL_FX.st_bolt=SKILL_FX.m_bolt; SKILL_FX.st_lance=SKILL_FX.m_beam; SKILL_FX.st_step=SKILL_FX.m_blink; SKILL_FX.st_nova=SKILL_FX.m_nova; SKILL_FX.st_orb=SKILL_FX.m_gravity; SKILL_FX.st_barrier=SKILL_FX.m_barrier; SKILL_FX.st_storm=SKILL_FX.m_tempest; SKILL_FX.st_overload=SKILL_FX.m_overload;
+// BEASTMASTER — commands always have a companion. If no Pet Yard companion is equipped,
+// a spectral pup uses the Ember Pup rig without changing the player's saved pet selection.
+function beastCompanion(){
+  if(!G||!G.p) return null;
+  if(G.pet&&!G.pet.dead) return G.pet;
+  if(G.petLost)return null;
+  const p=G.p,id=(meta.petActive&&PETS[meta.petActive])?meta.petActive:'emberpup',P=PETS[id];
+  if(!P) return null;
+  const mh=petMaxHp(id);
+  G.pet={id,x:p.x-Math.sin(p.yaw)*44,z:p.z-Math.cos(p.yaw)*44,y:p.y+15,bob:0,yaw:p.yaw,atkT:.25,healT:1,t:0,wanderA:0,hp:mh,maxHp:mh,hurtT:0,_beastFallback:!meta.petActive};
+  return G.pet;
+}
+function beastTarget(p,range){ return projectileAimTarget(p,range||720); }
+function beastCommandPower(){ return c2Passive('bst_authority')?1.15:1; }
+function beastCompanionHit(p,pet,t,mul,stun){
+  if(!pet||!t) return false;
+  pet.x=t.x-Math.sin(p.yaw)*28; pet.z=t.z-Math.cos(p.yaw)*28; pet.y=t.y+12; pet.yaw=Math.atan2(t.x-pet.x,t.z-pet.z);
+  const mark=(t.beastMarkT||0)>0?1.18:1, scent=c2Passive('bst_scent')&&(t.elite||t.boss||t.hp<t.maxHp*.35||(t.beastMarkT||0)>0)?1.20:1;
+  hitEnemy(t,petAtkDmg(pet.id)*mul*beastCommandPower()*mark*scent,{x:pet.x,z:pet.z,pet:true},180,0,null);
+  if(stun)t.stunT=Math.max(t.stunT||0,stun);
+  burst(t.x,t.y+t.h*.45,t.z,'#d6a85c',12); return true;
+}
+SKILL_FX.bst_sic=function(p){ const pet=beastCompanion(),t=beastTarget(p,760); if(!pet||!t){toast('No target in sight');return 'refund';} beastCompanionHit(p,pet,t,1.6,.65); addText(t.x,t.y+t.h+28,t.z,"SIC 'EM",'#f0c66d',true); };
+SKILL_FX.bst_coordinated=function(p,ok,am){ const pet=beastCompanion(),t=beastTarget(p,650); if(!pet||!t){toast('No target in sight');return 'refund';}
+  const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.45*am*(ok?1:OFFCLASS_MUL); hitEnemy(t,dmg,p,120,effLifesteal(p),ok?(w&&w.el):null); beastCompanionHit(p,pet,t,1.25,0);
+  t.beastMarkT=6; skillRing(t.x,t.z,'#f0c66d','#70502a',90); addText(t.x,t.y+t.h+30,t.z,'PACK MARK','#f0c66d',true); };
+SKILL_FX.bst_guardian=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; pet.guardBondT=4; pet.shieldHp=Math.max(pet.shieldHp||0,Math.round(pet.maxHp*.25)); skillRing(pet.x,pet.z,'#8fd6ff','#355c70',90); addText(pet.x,pet.y+48,pet.z,'GUARDIAN BOND','#8fd6ff',true); };
+SKILL_FX.bst_step=function(p,ok,am){ const pet=beastCompanion(),t=beastTarget(p,620); if(!pet||!t){toast('No target in sight');return 'refund';}
+  const a=Math.atan2(t.x-p.x,t.z-p.z),side=34; p.x=t.x-Math.sin(a)*side;p.z=t.z-Math.cos(a)*side;pet.x=t.x+Math.sin(a)*side;pet.z=t.z+Math.cos(a)*side;p.invuln=Math.max(p.invuln,.45);pet.invuln=.65;
+  beastCompanionHit(p,pet,t,1.15,.2); burst(p.x,p.y+20,p.z,'#7de0a0',12); };
+SKILL_FX.bst_mend=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; p.beastMendT=5;pet.beastMendT=5;pet.beastMendHp=pet.maxHp*.30;p.beastMendHp=effMaxHp(p)*.10;skillRing(p.x,p.z,'#7de08a','#315d42',110); };
+SKILL_FX.bst_roar=function(p){ const pet=beastCompanion(); if(!pet)return 'refund'; const R=230,dmg=petAtkDmg(pet.id)*1.2*beastCommandPower();
+  skillRing(pet.x,pet.z,'#efb85c','#6e3d20',R); for(const e of G.enemies){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,pet.x,pet.z)>R+e.r)continue;hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},260,0,null);e.slowT=Math.max(e.slowT||0,2.5);e.petTauntT=3;} addText(pet.x,pet.y+55,pet.z,'ALPHA ROAR','#efb85c',true); };
+SKILL_FX.bst_stampede=function(p){ const pet=beastCompanion(),range=640,half=105,dmg=petAtkDmg(pet.id)*1.35*beastCommandPower(),sx=Math.sin(p.yaw),sz=Math.cos(p.yaw);
+  for(let k=0;k<9;k++){const d=50+k*70;setTimeout(()=>{if(!G)return;const x=p.x+sx*d,z=p.z+sz*d;burst(x,p.y+18,z,k%2?'#d7c59c':'#8bb8c4',12);skillRing(x,z,'#d7c59c','#6f6250',70);},k*45);}
+  for(const e of G.enemies){if(e.dead||!e.active||e.dummy)continue;const dx=e.x-p.x,dz=e.z-p.z,forward=dx*sx+dz*sz,side=Math.abs(dx*sz-dz*sx);if(forward>0&&forward<range&&side<half+e.r)hitEnemy(e,dmg,{x:p.x,z:p.z,pet:true},420,0,null);} };
+SKILL_FX.bst_apex=function(p){ const pet=beastCompanion(); if(!pet)return 'refund';pet.apexT=8;skillRing(pet.x,pet.z,'#f3c65f','#8c4d22',125);addText(pet.x,pet.y+54,pet.z,'APEX UNLEASHED','#f3c65f',true); };
 // Berserker skills reuse warrior FX (berserker-flavored icons via C2_ICON)
 SKILL_FX.bsk_cleave=SKILL_FX.w_cleave; SKILL_FX.bsk_bash=SKILL_FX.w_bash; SKILL_FX.bsk_charge=SKILL_FX.w_charge; SKILL_FX.bsk_stomp=SKILL_FX.w_stomp; SKILL_FX.bsk_whirl=SKILL_FX.w_whirl; SKILL_FX.bsk_execute=SKILL_FX.w_execute; SKILL_FX.bsk_berserk=SKILL_FX.w_berserk; SKILL_FX.bsk_guard=SKILL_FX.w_guard;
 // Pirate skills reuse ranger FX (pirate-flavored icons via C2_ICON)
@@ -6503,13 +6579,15 @@ const SKILL_MANA={
   m_bolt:6,m_beam:14,m_blink:8,m_nova:15,m_gravity:17,m_barrier:18,m_tempest:23,m_overload:26,
   x_reap:6,x_cleave:15,x_step:9,x_wraith:14,x_pull:16,x_bind:15,x_siphon:19,x_vortex:24,
   mon_flurry:5,mon_palm:9,mon_deflect:14,mon_roll:6,mon_whirl:14,mon_stun:13,mon_thousand:22,mon_dragon:16,
-  st_bolt:6,st_lance:14,st_step:8,st_nova:15,st_orb:17,st_barrier:18,st_storm:23,st_overload:26
+  st_bolt:6,st_lance:14,st_step:8,st_nova:15,st_orb:17,st_barrier:18,st_storm:23,st_overload:26,
+  bst_sic:12,bst_coordinated:16,bst_guardian:18,bst_step:14,bst_mend:20,bst_roar:22,bst_stampede:32,bst_apex:28
 };
 function skillManaCost(i,s){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
   let v=(s&&SKILL_MANA[s.id])||12;
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
   if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;if(c2Passive('m_potent'))v*=1.08;}
+  if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))v*=.85;
   v*=classManaCfg().cost;   // per-class mana economy: casters pay more, martials less
   return Math.max(1,Math.round(v));
 }
@@ -6546,7 +6624,10 @@ function useSkill(i){
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;
     if(r==='refund'){ gainMana(p,manaSpent,false); return; }
-    let cd=s.cd*(1-effCdr(p)); p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate(); return; }
+    let cd=s.cd*(1-effCdr(p)); if(meta.classId==='beastmaster'&&(c2Passive('bst_swift')||c2Passive('bst_handler')))cd*=.88;
+    if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))p.beastSpeedT=2;
+    if(meta.classId==='beastmaster'&&classState('beastmaster').rank>=10)p.beastBasicEmpower=1;
+    p.skillCd[i]=cd; p.skillCdMax[i]=cd; skillbarUpdate(); return; }
   return useSkillLegacy(i);
 }
 function useSkillLegacy(i){
@@ -6596,7 +6677,8 @@ const C2_ICON={
   nin_pierce:skillIcon('ninja-shadow-strike'),nin_barrage:skillIcon('ninja-fan-of-knives'),
   bsk_cleave:skillIcon('berserker-cleave'),bsk_bash:skillIcon('berserker-reckless-bash'),bsk_charge:skillIcon('berserker-charge'),bsk_stomp:skillIcon('berserker-shockwave'),bsk_whirl:skillIcon('berserker-whirlwind'),bsk_execute:skillIcon('berserker-execute'),bsk_berserk:skillIcon('berserker-berserk'),bsk_guard:skillIcon('berserker-bloodguard'),
   pir_pierce:skillIcon('pirate-aimed-shot'),pir_volley:skillIcon('pirate-broadside'),pir_shadow:skillIcon('pirate-boarding-strike'),pir_tumble:skillIcon('pirate-roll'),pir_smoke:skillIcon('pirate-powder-smoke'),pir_mark:skillIcon('pirate-bounty'),pir_deathmark:skillIcon('pirate-cannonade'),pir_spike:skillIcon('pirate-powder-keg'),pir_goldrush:skillIcon('pirate-gold-rush'),
-  chr_bolt:skillIcon('chrono-time-bolt'),chr_beam:skillIcon('chrono-time-lance'),chr_nova:skillIcon('chrono-slow-field'),chr_blink:skillIcon('chrono-rewind'),chr_gravity:skillIcon('chrono-time-warp'),chr_barrier:skillIcon('chrono-aegis'),chr_tempest:skillIcon('chrono-time-storm'),chr_overload:skillIcon('chrono-singularity')
+  chr_bolt:skillIcon('chrono-time-bolt'),chr_beam:skillIcon('chrono-time-lance'),chr_nova:skillIcon('chrono-slow-field'),chr_blink:skillIcon('chrono-rewind'),chr_gravity:skillIcon('chrono-time-warp'),chr_barrier:skillIcon('chrono-aegis'),chr_tempest:skillIcon('chrono-time-storm'),chr_overload:skillIcon('chrono-singularity'),
+  bst_sic:'🐺',bst_coordinated:'⚔️',bst_guardian:'🛡️',bst_step:'🐾',bst_mend:'💚',bst_roar:'🦁',bst_stampede:'🐗',bst_apex:'👑'
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }
@@ -6674,6 +6756,12 @@ function resolveSwing(){
   if(MP.active&&MP.pvp) MP.pvpMelee(p,w,dmg);   // Phase 3 PvP: the same swing can strike a rival player
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  if(src===G.p&&meta.classId==='beastmaster'&&!G._desig){
+    const p=G.p,now=G.time||0;
+    if(p.beastBasicEmpower){dmg*=1.25;p.beastBasicEmpower=0;}
+    if(now-(p._beastBasicT||-9)>.12){p._beastBasicT=now;p.beastPetEmpower=1;
+      if(c2Passive('bst_rhythm')&&p.skillCd)for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.25);}
+  }
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
   // but never reduce hp or kill locally — the host applies it and drives death for everyone.
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && src===G.p){
@@ -6954,6 +7042,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='monk'&&c2def('monk')){if(c2Passive('mon_iron'))dmg*=.88;if(c2Passive('mon_still')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
   if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_tough'))dmg*=.90;if(c2Passive('pir_evasive'))dmg*=.90;}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
+  if(meta.classId==='beastmaster'&&G.pet&&(G.pet.guardBondT||0)>0){const share=dmg*.35;dmg-=share;hurtPet(share,sx,sz);}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
   if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
@@ -6983,8 +7072,12 @@ function spawnPet(){ const id=meta.petActive; if(!id||!PETS[id]||!G||!G.p){ if(G
   if(G.petLost){ G.pet=null; return; }                         // a fallen companion returns only when a new hub session resets G
   const p=G.p, ang=p.yaw+2.5, P=PETS[id], grounded=(P.arch==='attacker'&&P.style==='melee');
   const mh=petMaxHp(id); G.pet={id,x:p.x+Math.sin(ang)*46,z:p.z+Math.cos(ang)*46,y:p.y+(grounded?0:15),bob:0,yaw:p.yaw,atkT:1.0,healT:2.2,t:0,wanderA:Math.random()*6.28,hp:mh,maxHp:mh,hurtT:0}; }
-function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead) return false; pet.hp=Math.max(0,pet.hp-Math.max(1,Math.round(dmg))); pet.hurtT=.28;
+function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead||(pet.invuln||0)>0) return false;
+  if(meta.classId==='beastmaster'&&c2Passive('bst_wildkeeper')&&pet.hp<pet.maxHp*.5)dmg*=.88;
+  if((pet.shieldHp||0)>0){const a=Math.min(pet.shieldHp,dmg);pet.shieldHp-=a;dmg-=a;if(dmg<=0){burst(pet.x,pet.y+12,pet.z,'#8fd6ff',5);return true;}}
+  pet.hp=Math.max(0,pet.hp-Math.max(1,Math.round(dmg))); pet.hurtT=.28;
   addText(pet.x,pet.y+34,pet.z,'-'+Math.round(dmg),'#ff8a82',true); burst(pet.x,pet.y+12,pet.z,'#ff6b62',6);
+  if(pet.hp<=0&&meta.classId==='beastmaster'&&classState('beastmaster').rank>=10&&!G.beastCapUsed){G.beastCapUsed=true;pet.hp=1;pet.invuln=2;pet.shieldHp=Math.round(pet.maxHp*.25);addText(pet.x,pet.y+42,pet.z,'ONE PACK','#f0c66d',true);return true;}
   if(pet.hp<=0){ pet.dead=true; G.petLost=true; toast(petDisplayName(pet.id)+' has fallen — protect them until you return to the hub.'); SFX.enemyDie(); G.pet=null; }
   return true; }
 function petUpdate(dt){
@@ -7009,14 +7102,15 @@ function petUpdate(dt){
     if(dh>64){ tx=p.x-Math.sin(p.yaw)*40+Math.cos(pet.wanderA)*26; tz=p.z-Math.cos(p.yaw)*40+Math.sin(pet.wanderA)*26; }
     if(dh>560 || Math.abs(pet.y-floatY)>105){ pet.x=p.x-Math.sin(p.yaw)*50; pet.z=p.z-Math.cos(p.yaw)*50; pet.y=floatY; } // vertical/horizontal catch-up after climbs and warps
   }
-  const spd=engaging?300:170, dd=Math.hypot(tx-pet.x,tz-pet.z);
+  const beastSpeed=meta.classId==='beastmaster'?(c2Passive('bst_swift')?1.18:1)*((pet.apexT||0)>0?1.30:1):1;
+  const spd=(engaging?300:170)*beastSpeed, dd=Math.hypot(tx-pet.x,tz-pet.z);
   if(dd>2){ const step=Math.min(dd,spd*dt); pet.x+=(tx-pet.x)/dd*step; pet.z+=(tz-pet.z)/dd*step; }
   const targetY=(engaging&&tgt)?Math.max(floatY,tgt.y+(grounded?0:15)):floatY; pet.y+=(targetY-pet.y)*Math.min(1,dt*(grounded?8:5));
   const fy=(engaging&&tgt)?Math.atan2(tgt.x-pet.x,tgt.z-pet.z):(dd>6?Math.atan2(tx-pet.x,tz-pet.z):pet.yaw);
   let dyaw=fy-pet.yaw; while(dyaw>Math.PI)dyaw-=6.283; while(dyaw<-Math.PI)dyaw+=6.283; pet.yaw+=dyaw*Math.min(1,dt*8);
   if(!playing) return;
   if(P.arch==='attacker'){ pet.atkT-=dt;
-    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ pet.atkT=P.cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
+    if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ let cd=P.cd;if(meta.classId==='beastmaster'&&c2Passive('bst_heavy'))cd*=1.10;if(meta.classId==='beastmaster'&&c2Passive('bst_swift'))cd*=.82;if((pet.apexT||0)>0)cd*=.77;pet.atkT=cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
       if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
@@ -7026,13 +7120,14 @@ function petUpdate(dt){
     for(const pk of G.pickups){ if(pk.questItem||pk.localItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
 }
 function petAttack(pet,P,e){
-  const dmg=petAtkDmg(pet.id);
+  let dmg=petAtkDmg(pet.id);if(meta.classId==='beastmaster'){if((e.beastMarkT||0)>0)dmg*=1.18;if(c2Passive('bst_scent')&&(e.elite||e.boss||e.hp<e.maxHp*.35||(e.beastMarkT||0)>0))dmg*=1.20;if(G.p.beastPetEmpower){dmg*=1.25;G.p.beastPetEmpower=0;}}
   if(P.style==='ranged'){ const oy=pet.y+pet.bob, sp=560, d=Math.max(1,dXZ(pet.x,pet.z,e.x,e.z));
     G.projectiles.push({owner:'player',x:pet.x,y:oy,z:pet.z,vx:(e.x-pet.x)/d*sp,vy:((e.y+e.h*0.5)-oy)/d*sp,vz:(e.z-pet.z)/d*sp,
       gravity:0,size:6,color:P.accent,shape:'orb',glow:1,dmg,kb:60,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true});   // pet shots home independently; player sight-cone rules do not constrain companions
     burst(pet.x,oy,pet.z,P.accent,4); }
   else { pet.x=e.x-Math.sin(pet.yaw)*22; pet.z=e.z-Math.cos(pet.yaw)*22;    // melee dart: hop in and strike
     hitEnemy(e,dmg,{x:pet.x,z:pet.z,pet:true},90,0,null); burst(e.x,e.y+e.h*0.4,e.z,P.accent,5); }
+  if(meta.classId==='beastmaster'&&c2Passive('bst_authority')&&Math.random()<.28)for(const q of G.enemies){if(q!==e&&!q.dead&&dXZ(q.x,q.z,e.x,e.z)<90)hitEnemy(q,dmg*.35,{x:pet.x,z:pet.z,pet:true},70,0,null);}
 }
 /* ---- Necromancer minions (isolated ally system; reuses the Grave Wraith pet model to render).
    Minions home to the nearest enemy and strike via hitEnemy; they expire on a lifespan (permanent
@@ -7953,7 +8048,9 @@ function update(dt){
   if(G.slowmo>0){ G.slowmo=Math.max(0,G.slowmo-dt); dt*=0.42; }   // brief triumphant hitch after a legendary drop (real-time timer, scaled sim)
   if(G.endless) endlessTick(dt);                                  // Endless: trickle-spawn the wave under a hard cap, open the portal on clear
   if(G.bossRush) bossRushTick(dt);                                // The Gauntlet: advance to the next boss on kill; win after the last
-  if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); } else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
+  if(meta.petActive){ if(!G.pet||G.pet.id!==meta.petActive) spawnPet(); if(G.pet) petUpdate(dt); }
+  else if(meta.classId==='beastmaster'){ if(!G.pet||!G.pet._beastFallback) beastCompanion(); if(G.pet) petUpdate(dt); }
+  else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
   minionUpdate(dt);                                                                                                        // necromancer summons (no-op when none)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();

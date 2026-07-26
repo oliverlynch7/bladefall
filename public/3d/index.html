@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.378.0-autopilot';
+const VERSION3D='1.379.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1022,7 +1022,7 @@ function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))||null;}catc
 const GLOBAL_FIELDS=['unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','camMode','camV2','lookSens','fpsFov','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol',
-  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared'];
+  'introSeen','zoneSeen','shadeSeen','endlessBest','dmgNumbers','originSeen','keybinds','padOff','shakeOff','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
 const MODE_FIELDS=['gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','eyeColor','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
@@ -1035,7 +1035,7 @@ const meta=Object.assign({
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
   beatNormal:false,beatHardcore:false,beatHitless:false,jetpack:true,diff:'normal',cosmetics:{},cosEquipped:{cape:null,trail:null,glow:null},
-  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},
+  zonesCleared:0,elitesKilled:0,secretsFound:0,introSeen:false,zoneSeen:{},shadeSeen:{},arcadeOwned:false,
   gold:0,ngPlus:0,bestStage:0,lastNgHp:1,lastNgDmg:1,run:null,stash:[],descent:0,perks:{},perkV2:true,classId:'warrior',classes:{},endlessBest:0,
   hero:null,bank:null,zoneMax:0,zoneDone:{},classUnlocked:{},trialsDone:{},sideFound:{},sideDone:{},iansShards:[],iansComplete:false,masterSeal:false,masterSealSeen:false,socks:false,bagSlots:0,hubUpgrades:{},
   petOwned:[],petActive:null,petNames:{},petTrain:{},petLabel:true,heroName:'',eyeColor:'#8fd0ff',hairStyle:'short',hairColor:'#3a2a1c',optionalDone:{},optionalProgress:{}
@@ -1074,6 +1074,11 @@ function autosaveRun(){ try{
     persist();
   }catch(e){} }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  // Preview migration: early arcade prototypes stored ownership per save. Promote any
+  // such flag to the global profile so the cabinet truly follows every character/mode.
+  if(!meta.arcadeOwned && (mv.arcadeOwned||mv.arcadeUnlocked||(mv.hubUpgrades&&mv.hubUpgrades.arcade))){
+    meta.arcadeOwned=true; persistGlobal();
+  }
   meta.gold=mv.gold||0; meta.run=mv.run||null; meta.ngPlus=mv.ngPlus||0; meta.bestStage=mv.bestStage||0;
   meta.lastNgHp=mv.lastNgHp||1; meta.lastNgDmg=mv.lastNgDmg||1; meta.stash=Array.isArray(mv.stash)?mv.stash:[]; meta.descent=mv.descent||0;
   meta.perks=mv.perks&&typeof mv.perks==='object'?mv.perks:{}; meta.perkV2=!!mv.perkV2;
@@ -9559,6 +9564,7 @@ function enterWaystation(){
   // each activity plaza gets a SOLID themed floor pad in its portal's colour, raised just ABOVE the base floor
   // (y0:2) so the two coplanar surfaces never z-fight/flicker. Abyss=violet, Sprint=gold, Arena=crimson.
   const annexPads=[{x:-300,z:660,f:'#3a1a5e',p:'#2a1840'},{x:300,z:660,f:'#4a3810',p:'#6a531c'},{x:0,z:800,f:'#4a1618',p:'#5e2320'}];
+  if(meta.arcadeOwned) annexPads.push({x:-340,z:800,f:'#122d3b',p:'#174a55'});
   for(const a of annexPads){ G.obstacles.push({kind:'plat',x:a.x,z:a.z,w:180,d:150,h:20});
     G.deco.push({x:a.x,z:a.z,y0:2,w:236,h:1.6,d:206,c:a.f});
     for(const s of [-1,1]){ vcol(a.x+s*96,a.z,18,18,132); G.deco.push({x:a.x+s*96,z:a.z,y0:132,w:24,h:10,d:24,c:a.p}); } }   // a pair of corner pillars per plaza
@@ -9583,6 +9589,7 @@ function enterWaystation(){
     {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()},
     {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:340,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}
   ];
+  if(meta.arcadeOwned) G.hubNpcs.push({id:'arcade',ic:'🕹️',name:"Isaac's Arcade",role:'A game within the game',prop:'arcade',verb:'Play the arcade',direct:true,x:-340,z:800,c1:'#182240',c2:'#5affc8',open:()=>openArcadeCabinet()});
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
   const HUBSOLID=[
@@ -9597,7 +9604,8 @@ function enterWaystation(){
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30},     // The Arena gate (deep-centre annex plaza)
-    {x:340,z:800,w:60,d:30}    // The Gauntlet gate (beside the Arena)
+    {x:340,z:800,w:60,d:30},   // The Gauntlet gate (beside the Arena)
+    ...(meta.arcadeOwned?[{x:-340,z:800,w:62,d:42}]:[]) // Isaac's arcade cabinet
   ];
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
   // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
@@ -9992,6 +10000,20 @@ function wsResume(){
     if(meta.hero){ G.p.weapon=normWeapon(JSON.parse(JSON.stringify(meta.hero.weapon))); G.p.gear=cloneGear(meta.hero.gear); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); }
     resumePlay();  // re-sync HUD + equipped visuals after bag/shop changes made at a post
   } else openHub();
+}
+function openArcadeCabinet(){
+  pauseGameAudio(true); mode='menu'; showGameUI(false);
+  showOverlayHTML(`<div class="card" style="max-width:920px;border-color:#3fe0ba;box-shadow:0 0 55px #2bd7b52b,inset 0 0 48px #172848">
+    <p class="ovkicker" style="color:#5affc8">A GAME WITHIN THE GAME</p>
+    <h2 class="ovh" style="font-size:clamp(34px,5vw,62px);text-shadow:0 0 24px #70ffe199">ISAAC'S BLADEFALL</h2>
+    <div style="margin:22px auto;padding:34px;max-width:680px;border:2px solid #5affc8;border-radius:18px;background:radial-gradient(circle at 50% 25%,#263d6a,#0b1020 68%);box-shadow:inset 0 0 40px #000,0 0 28px #5affc833">
+      <div style="font-size:84px;filter:drop-shadow(0 0 18px #5affc8)">🕹️</div>
+      <h3 style="font-size:28px;margin:8px 0;color:#fff2b0">COMING SOON</h3>
+      <p class="ovsub" style="font-size:16px;line-height:1.6">The cabinet hums to life, but its cartridge is still being forged.<br>Isaac's complete 2D adventure will live here.</p>
+    </div>
+    <button class="bigbtn" id="arcadeLeave" style="max-width:680px;margin:auto">Leave the cabinet</button>
+  </div>`);
+  document.getElementById('arcadeLeave').onclick=()=>{ resumeGameAudio(true); wsResume(); };
 }
 function activateHubWaystone(){
   if(!G||!G.hub) return;
@@ -10477,6 +10499,12 @@ function openShop(back){
   // Phase 18: Fortune's Bag — one pull, mostly junk, a thin real tail. The Quartermaster profits.
   const gAfford=meta.gold>=GAMBLE_COST;
   const gambleRow=`<div class="gearrow" style="--spine:#ffd24a"><div class="gi eventgi">${actionIcon('fortunes-bag')}</div><div style="flex:1;min-width:0"><div class="gn" style="color:#ffd24a">Fortune's Bag</div><div class="gd">One random item. Mostly junk. <b>Occasionally not.</b></div></div><button class="bigbtn gamblebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${gAfford?'':'opacity:.5'}">${actionIcon('buy')}${GAMBLE_COST}g</button></div>`;
+  // Isaac's Arcade — a global Waystation fixture, revealed by clearing Normal once.
+  const arcadeCost=100000, arcadeAfford=meta.gold>=arcadeCost;
+  const arcadeRow=meta.beatNormal?`<div class="gearrow" style="--spine:#5affc8;background:linear-gradient(90deg,#17334b88,#171923)">
+      <div class="gi eventgi" style="font-size:28px">🕹️</div><div style="flex:1;min-width:0"><div class="gn" style="color:#7fffe5">Isaac's Arcade</div>
+      <div class="gd">${meta.arcadeOwned?'<b style="color:var(--good)">Owned</b> · installed in the activity annex':'A permanent arcade cabinet for the Waystation · shared by every save'}</div></div>
+      ${meta.arcadeOwned?'<button class="bigbtn" style="width:auto;margin:0;padding:8px 12px;font-size:13px;opacity:.4" disabled>OWNED</button>':`<button class="bigbtn arcadebuy" style="width:auto;margin:0;padding:8px 12px;font-size:13px;${arcadeAfford?'':'opacity:.5'}">${arcadeCost.toLocaleString()}g</button>`}</div>`:'';
   // North-star: a visible progress bar toward the player's next big-ticket goal, so gold has a pull
   const goal = meta.zoneDone&&meta.zoneDone.castle&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='iansblade') ? {name:"Ian's Blade",cost:ibCost} : !meta.socks ? {name:'Magic Socks',cost:1200} : (meta.classUnlocked&&meta.classUnlocked.reaper&&(!meta.hero||!meta.hero.weapon||meta.hero.weapon.arche!=='voidscythe') ? {name:'Void Scythe',cost:2200} : {name:'a Magic Pack (+5 bag)',cost:packCost});
   const gpct=Math.min(100,Math.round(meta.gold/goal.cost*100));
@@ -10490,7 +10518,7 @@ function openShop(back){
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 4px"><span class="ico ico-coin" style="width:44px;height:44px"></span><b style="color:#ffd24a;font-size:clamp(34px,5vw,52px);font-weight:900;line-height:1;text-shadow:0 2px 10px rgba(255,180,40,.35)">${meta.gold}</b><span style="font-size:20px;font-weight:900;color:#caa23a">g</span></div>
     <p class="ovsub" style="margin-top:0">permanent upgrades for this save</p>${northStar}
     <p class="hint" style="margin:0 0 6px;text-align:left">${CC.icon} <b>${CC.disp} weapons</b> — below-par for their rarity. Insurance, not a prize.</p>
-    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}</div>
+    <div class="achlist" style="max-height:min(26vh,190px)">${wrows}${vsRow}${forgeRow}${ibRow}${socksRow}${heartRow}${packRow}${gambleRow}${arcadeRow}</div>
     <p class="hint" style="margin:10px 0 6px;text-align:left"><b>Perks</b> — permanent for this save</p>
     <div class="achlist" style="max-height:min(22vh,160px)">${rows}</div>
     ${perkRefundTotal()>0?`<button class="bigbtn ghost" id="refundPerks" style="margin:6px 0 0;padding:9px 14px;font-size:13px;color:#ffd24a;border-color:#5a4a20">↩ Refund all perks — get back <b>${perkRefundTotal()}g</b> &amp; reset every stat</button>`:''}
@@ -10533,6 +10561,12 @@ function openShop(back){
     meta.gold-=cost; meta.bagSlots=(meta.bagSlots||0)+1; refreshBagCap(); SFX.levelup(); persist(); toast('🎒 +5 bag slots · now '+STASH_CAP); openShop(back); };
   const gmb=document.querySelector('.gamblebuy'); if(gmb) gmb.onclick=()=>{ if(meta.gold<GAMBLE_COST){ toast('Not enough gold'); return; }
     meta.gold-=GAMBLE_COST; persist(); gambleSpin(back); };   // gold up front — the pull is the purchase
+  { const ab=document.querySelector('.arcadebuy'); if(ab) ab.onclick=()=>{
+      if(meta.arcadeOwned) return; if(meta.gold<arcadeCost){ toast('Not enough gold'); return; }
+      meta.gold-=arcadeCost; meta.arcadeOwned=true; persist();
+      SFX.god(); enterWaystation(); toast("🕹️ Isaac's Arcade installed — find it beside the Arena.");
+      openShop(wsResume);
+    }; }
   document.querySelectorAll('.hubbuy').forEach(b=>b.onclick=()=>{ const id=b.dataset.h, u=HUB_UPGRADES.find(x=>x.id===id); if(!u) return;
     if(meta.hubUpgrades&&meta.hubUpgrades[id]) return; if(meta.gold<u.cost){ toast('Not enough gold'); return; }
     meta.gold-=u.cost; if(!meta.hubUpgrades) meta.hubUpgrades={}; meta.hubUpgrades[id]=true; SFX.god(); persist(); toast('🏰 '+u.name+' — the Waystation is reborn'); openShop(back); });
@@ -11806,6 +11840,20 @@ function drawWaystation(t){
   }
   // the keepers of the posts
   for(const n of G.hubNpcs){
+    if(n.prop==='arcade'){ drawShadow(n.x,n.z,28,0.34);
+      // A proper freestanding arcade cabinet: deep navy shell, luminous marquee,
+      // recessed screen, control deck, joystick and paired action buttons.
+      bx(n.x,58,n.z,62,116,42,'#10182b','#24365a',0.45);
+      bx(n.x,122,n.z-3,70,24,46,'#172443','#5affc8',0.38);
+      bx(n.x,122,n.z+21,58,14,2,'#071018','#5affc8',0.72+0.18*Math.sin(t*2.4));
+      bx(n.x,82,n.z+22,48,48,3,'#05070f','#5affc8',0.26+0.14*Math.sin(t*1.8));
+      bx(n.x,50,n.z+27,58,16,28,'#18243a','#354b72',0.5);
+      bx(n.x-15,61,n.z+38,4,18,4,'#c73f54','#ff6a78',0.75);
+      bx(n.x-15,71,n.z+38,10,7,10,'#d94b63','#ff8090',0.8);
+      bx(n.x+8,60,n.z+39,8,5,8,'#ffd24a','#ffe38a',0.85);
+      bx(n.x+20,60,n.z+39,8,5,8,'#5affc8','#a8ffef',0.85);
+      for(let i=0;i<4;i++) bx(n.x-18+i*12,122,n.z+22.5,6,6,1,'#ffd24a','#fff0a0',0.7);
+      continue; }
     if(n.prop==='board'){ drawShadow(n.x,n.z,20,0.22);
       bx(n.x-20,26,n.z, 5,52,5,'#4a3a26'); bx(n.x+20,26,n.z, 5,52,5,'#4a3a26');
       bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
@@ -12641,7 +12689,7 @@ hpCanvas.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:4;
 document.body.appendChild(hpCanvas);
 /* Hub nameplates: nearby projected pills over keepers/interactables, hidden across the plaza. */
 const HUB_TAG_REVEAL=230, HUB_TAG_NEAR=72;
-const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,sparringdoor:138,abyss:122,beast:108};
+const HUB_TAG_HEIGHT={board:92,chest:66,anvil:108,mirror:134,sparring:104,sparringdoor:138,abyss:122,beast:108,arcade:150};
 function hubTagAnchor(n){
   // Station labels belong above the visible character/prop silhouette—not at its world origin.
   // The Smith stands left of his anvil, so his label follows his actual head as well.

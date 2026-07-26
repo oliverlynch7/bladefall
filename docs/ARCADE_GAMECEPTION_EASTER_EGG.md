@@ -1,7 +1,18 @@
 ﻿# Bladefall Arcade Gameception Easter Egg
 
-Status: DEFERRED — fun future update
-Owner decision: Oliver wants to revisit this after Isaac's browser-playable 2D Bladefall build is ready to share.
+Status: PHASE 1 IMPLEMENTED ON PREVIEW — game embed awaits Isaac's build/URL
+Owner decision: The cabinet is a 100,000-gold permanent Quartermaster upgrade, revealed after clearing Normal and shared globally across characters and difficulties.
+
+## [Codex | 2026-07-25] Superseding implementation decision
+
+The earlier hidden-cabinet premise below is retained as design history, but no longer controls placement or acquisition. The approved implementation is:
+
+- Clear Normal to reveal the shop row.
+- Buy once for 100,000 gold; ownership is global and cannot be purchased twice.
+- The cabinet is installed immediately in the Waystation activity annex beside the Arena.
+- It uses the normal nearby label and `E` interaction.
+- Until Isaac's URL/build is supplied and inspected, interaction opens a polished in-world Coming Soon screen and correctly pauses/restores Bladefall.
+- The existing overlay is the future integration hook; do not claim the embedded game is complete.
 
 ## Vision
 

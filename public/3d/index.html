@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.383.0-autopilot';
+const VERSION3D='1.384.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7359,7 +7359,7 @@ function spawnMinion(x,z,o){ o=o||{}; if(!G) return; G.minions=G.minions||[];
     dmg:o.dmg||8,life:(o.life===null?null:(o.life||12)),ranged:!!o.ranged,hp:1,maxHp:1}); }
 function minionUpdate(dt){
   if(G.corpses&&G.corpses.length){ for(const c of G.corpses) c.t-=dt; G.corpses=G.corpses.filter(c=>c.t>0); }
-  if(!G.minions||!G.minions.length) return; const p=G.p, playing=(mode==='play'&&!isHitless());
+  if(!G.minions||!G.minions.length) return; const p=G.p, playing=(mode==='play');
   const bond=meta.classId==='necromancer'&&c2Passive('necro_bond');
   // PvP: rival players aren't in G.enemies — build attackable pseudo-targets from the opposing peers
   let _pvpFoes=null;
@@ -7369,13 +7369,15 @@ function minionUpdate(dt){
       _pvpFoes.push({_peer:true,id:id,x:q.x||0,z:q.z||0,y:q.y||0,h:34}); } }
   for(const m of G.minions){ m.t+=dt; m.bob=Math.sin(m.t*3)*3; if(m.life!=null){ m.life-=dt; if(m.life<=0){ m.dead=true; try{burst(m.x,m.y+12,m.z,'#8be0a0',10);}catch(_){} continue; } }
     let tgt=null,bd=540;
-    if(playing){ for(const e of G.enemies){ if(e.dead||!e.active||e.dummy) continue; const d=dXZ(e.x,e.z,m.x,m.z); if(d<bd){bd=d;tgt=e;} }
+    if(playing){ for(const e of G.enemies){ if(e.dead||e.dummy) continue; const d=dXZ(e.x,e.z,m.x,m.z), hunt=e.active?540:360;
+        if(d<hunt&&d<bd){bd=d;tgt=e;} }
       if(_pvpFoes) for(const q of _pvpFoes){ const d=dXZ(q.x,q.z,m.x,m.z); if(d<bd){bd=d;tgt=q;} } }
+    if(tgt&&!tgt._peer&&!tgt.active){tgt.active=true;try{mobAggro(tgt);}catch(_){} }   // summons can start a nearby campaign fight, but cannot pull a whole district
     let tx=m.x,tz=m.z;
     if(tgt){ const want=m.ranged?200:34, d=Math.max(1,dXZ(tgt.x,tgt.z,m.x,m.z)); tx=tgt.x-(tgt.x-m.x)/d*want; tz=tgt.z-(tgt.z-m.z)/d*want; }
     else { const dh=dXZ(m.x,m.z,p.x,p.z); if(dh>72){ tx=p.x-Math.sin(p.yaw)*48+Math.cos(m.t*0.8)*30; tz=p.z-Math.cos(p.yaw)*48+Math.sin(m.t*0.8)*30; } if(dh>660||Math.abs(m.y-p.y)>140){ m.x=p.x-Math.sin(p.yaw)*50; m.z=p.z-Math.cos(p.yaw)*50; m.y=p.y; } }
     const dd=Math.hypot(tx-m.x,tz-m.z), spd=tgt?300:180; if(dd>2){ const s=Math.min(dd,spd*dt); m.x+=(tx-m.x)/dd*s; m.z+=(tz-m.z)/dd*s; }
-    m.y+=((p.y+2)-m.y)*Math.min(1,dt*6);
+    const my=tgt?Math.max(p.y+2,(tgt.y||0)+2):p.y+2;m.y+=(my-m.y)*Math.min(1,dt*6);
     const fy=tgt?Math.atan2(tgt.x-m.x,tgt.z-m.z):(dd>6?Math.atan2(tx-m.x,tz-m.z):m.yaw); let dy=fy-m.yaw; while(dy>Math.PI)dy-=6.283; while(dy<-Math.PI)dy+=6.283; m.yaw+=dy*Math.min(1,dt*8);
     if(playing){ m.atkT-=dt; if(m.atkT<=0 && tgt && dXZ(tgt.x,tgt.z,m.x,m.z)<(m.ranged?232:62)){ m.atkT=m.ranged?1.1:0.8;
       if(tgt._peer){ // PvP: damage the rival player through the host-authoritative PvP channel

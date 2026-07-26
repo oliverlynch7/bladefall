@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.379.0-autopilot';
+const VERSION3D='1.380.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6797,7 +6797,10 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   }
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
   // but never reduce hp or kill locally — the host applies it and drives death for everyone.
-  if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && src===G.p){
+  // Player-owned companions/summons use {pet:true} as their damage source. Guests must relay
+  // those hits too; otherwise they appear to attack locally, then the host snapshot restores
+  // the mob's HP and makes Necromancer summons (and pets) effectively deal zero shared damage.
+  if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&src.pet))){
     MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
@@ -13218,7 +13221,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
-  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, loadMode, persist, isHitless,
+  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,

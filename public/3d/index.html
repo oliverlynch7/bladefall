@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.377.0';
+const VERSION3D='1.378.0';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2680,9 +2680,15 @@ Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
 const canvas=document.getElementById('gl');
 const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
 let VW=0,VH=0,DPR=1;
+function targetRenderDpr(){
+  const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
+  let dpr=q==='low'?Math.min(raw,1)*0.66:q==='medium'?Math.min(raw,1):Math.min(raw,2);
+  // Keep every render target legal even on 5K/8K and heavily scaled displays.
+  const maxTex=gl?gl.getParameter(gl.MAX_TEXTURE_SIZE):4096, w=Math.max(1,window.innerWidth), h=Math.max(1,window.innerHeight);
+  return Math.min(dpr,maxTex/w,maxTex/h);
+}
 function resize(){
-  const _dpr=window.devicePixelRatio||1, _q=(typeof meta!=='undefined'&&meta.quality)||'high';
-  DPR = _q==='low' ? Math.min(_dpr,1)*0.66 : _q==='medium' ? Math.min(_dpr,1) : Math.min(_dpr,2);   // lower render resolution = big win on weak GPUs
+  DPR=targetRenderDpr();   // lower render resolution = big win on weak GPUs
   VW=window.innerWidth; VH=window.innerHeight;
   canvas.width=Math.round(VW*DPR); canvas.height=Math.round(VH*DPR);
   canvas.style.width=VW+'px'; canvas.style.height=VH+'px';
@@ -2690,6 +2696,8 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,120));
+document.addEventListener('fullscreenchange',()=>requestAnimationFrame(resize));
+if(window.visualViewport) window.visualViewport.addEventListener('resize',resize);
 resize();
 
 /* ---- mat4 (column-major) ---- */
@@ -2834,7 +2842,12 @@ const PostFX=(function(){
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); return t; }
   function fboFor(t){ const f=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,f); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0); return f; }
-  function alloc(){ W=VW; H=VH; const hw=Math.max(1,W>>1), hh=Math.max(1,H>>1);
+  function disposeTargets(){
+    if(sTex) gl.deleteTexture(sTex); if(sFBO) gl.deleteFramebuffer(sFBO); if(sDepth) gl.deleteRenderbuffer(sDepth);
+    for(const t of bTex) if(t) gl.deleteTexture(t); for(const f of bFBO) if(f) gl.deleteFramebuffer(f);
+    sTex=sFBO=sDepth=null; bTex=[]; bFBO=[];
+  }
+  function alloc(){ disposeTargets(); W=canvas.width; H=canvas.height; const hw=Math.max(1,W>>1), hh=Math.max(1,H>>1);
     sTex=tex(W,H); sFBO=fboFor(sTex); sDepth=gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER,sDepth); gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,W,H);
     gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,sDepth);
     for(let i=0;i<2;i++){ bTex[i]=tex(hw,hh); bFBO[i]=fboFor(bTex[i]); }
@@ -2847,14 +2860,14 @@ const PostFX=(function(){
       gl.uniform3f(U_skSunC,sunC[0],sunC[1],sunC[2]); gl.uniform2f(U_skSun,sun[0],sun[1]); gl.uniform1f(U_skAsp,VW/Math.max(1,VH));
       drawTri(A_sky);
       gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(true); bindSceneVA(); },
-    begin(){ if(BLOOM_OFF()) return; if(W!==VW||H!==VH) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,VW,VH); },
+    begin(){ if(BLOOM_OFF()) return; if(W!==canvas.width||H!==canvas.height) alloc(); gl.bindFramebuffer(gl.FRAMEBUFFER,sFBO); gl.viewport(0,0,W,H); },
     end(){ if(BLOOM_OFF()) return; flushBatch();
-      const hw=Math.max(1,VW>>1), hh=Math.max(1,VH>>1);
+      const hw=Math.max(1,W>>1), hh=Math.max(1,H>>1);
       gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.activeTexture(gl.TEXTURE0);
       gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[0]); gl.viewport(0,0,hw,hh); gl.useProgram(brightP); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_bT,0); drawTri(A_bright);
       let src=0,dst=1; gl.useProgram(blurP); gl.uniform1i(U_blT,0);
       for(let i=0;i<4;i++){ const hor=(i%2===0); gl.bindFramebuffer(gl.FRAMEBUFFER,bFBO[dst]); gl.viewport(0,0,hw,hh); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform2f(U_blD, hor?1/hw:0, hor?0:1/hh); drawTri(A_blur); const s=src; src=dst; dst=s; }
-      gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,VW,VH); gl.useProgram(compP);
+      gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,W,H); gl.useProgram(compP);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,sTex); gl.uniform1i(U_cS,0);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,bTex[src]); gl.uniform1i(U_cB,1); gl.uniform1f(U_cA,0.72);
       drawTri(A_comp); gl.activeTexture(gl.TEXTURE0);
@@ -13025,7 +13038,8 @@ function itemAv(item){
 /* ============================================================
    MAIN LOOP / BOOT
    ============================================================ */
-function ensureSize(){ if(VW!==window.innerWidth||VH!==window.innerHeight||canvas.width===0) resize(); }
+function ensureSize(){ const dpr=targetRenderDpr(), tw=Math.round(window.innerWidth*dpr), th=Math.round(window.innerHeight*dpr);
+  if(VW!==window.innerWidth||VH!==window.innerHeight||canvas.width!==tw||canvas.height!==th) resize(); }
 function frame(ts){
   const _vf0=performance.now(); VOXMET.frame++; VOXMET.submitted=0; VOXMET.drawCalls=0; VOXMET.assemblies=0; VOXMET.culled=0; VOXMET.lod[0]=VOXMET.lod[1]=VOXMET.lod[2]=0;
   ensureSize();

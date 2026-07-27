@@ -1538,3 +1538,8 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Lightbringer now renders as the intended holy magical spellblade instead of borrowing the battle-axe silhouette; combat values and balance are unchanged.
 - Venom Edge, Shadow Edge, and Lightbringer now resolve to approved poison, void, and holy affinity icons in both inventory cards and the weapon studio.
 - Verified every mapped affinity asset exists and the game script parses cleanly.
+
+## v1.391.0-autopilot - final new-class icon families
+- Added 76 transparent voxel assets for Beastmaster, Warlock, Skylancer, and Bladedancer: four class crests, 32 active-skill icons, and 40 innate/passive/capstone icons.
+- Replaced all emoji and blank hooks for those four classes across class summaries, build trees, skill choices, passive nodes, and the HUD skill rail.
+- Verified JavaScript syntax, all 76 alpha assets, every mapped file path, local title/gameplay boot, and a clean browser console.

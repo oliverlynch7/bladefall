@@ -444,6 +444,42 @@
   .ico-skill-stormcaller-storm-barrier{background-image:url('icons/stormcaller_storm_barrier.png');}
   .ico-skill-stormcaller-thunderstorm{background-image:url('icons/stormcaller_thunderstorm.png');}
   .ico-skill-stormcaller-chain-reaction{background-image:url('icons/stormcaller_chain_reaction.png');}
+  .ico-class-warlock{background-image:url('icons/class-warlock.png');}
+  .ico-skill-warlock-shadow-bolt{background-image:url('icons/warlock_shadow_bolt.png');}
+  .ico-skill-warlock-blood-lance{background-image:url('icons/warlock_blood_lance.png');}
+  .ico-skill-warlock-curse-circle{background-image:url('icons/warlock_curse_circle.png');}
+  .ico-skill-warlock-life-drain{background-image:url('icons/warlock_life_drain.png');}
+  .ico-skill-warlock-rift-step{background-image:url('icons/warlock_rift_step.png');}
+  .ico-skill-warlock-doom-orb{background-image:url('icons/warlock_doom_orb.png');}
+  .ico-skill-warlock-dark-storm{background-image:url('icons/warlock_dark_storm.png');}
+  .ico-skill-warlock-final-curse{background-image:url('icons/warlock_final_curse.png');}
+  .ico-class-skylancer{background-image:url('icons/class-skylancer.png');}
+  .ico-skill-skylancer-rising-spear{background-image:url('icons/skylancer_rising_spear.png');}
+  .ico-skill-skylancer-gale-shot{background-image:url('icons/skylancer_gale_shot.png');}
+  .ico-skill-skylancer-dive-strike{background-image:url('icons/skylancer_dive_strike.png');}
+  .ico-skill-skylancer-wind-lift{background-image:url('icons/skylancer_wind_lift.png');}
+  .ico-skill-skylancer-sky-dash{background-image:url('icons/skylancer_sky_dash.png');}
+  .ico-skill-skylancer-spear-rain{background-image:url('icons/skylancer_spear_rain.png');}
+  .ico-skill-skylancer-thunder-dive{background-image:url('icons/skylancer_thunder_dive.png');}
+  .ico-skill-skylancer-cyclone-volley{background-image:url('icons/skylancer_cyclone_volley.png');}
+  .ico-class-bladedancer{background-image:url('icons/class-bladedancer.png');}
+  .ico-skill-bladedancer-counter-stance{background-image:url('icons/bladedancer_counter_stance.png');}
+  .ico-skill-bladedancer-twin-cut{background-image:url('icons/bladedancer_twin_cut.png');}
+  .ico-skill-bladedancer-riposte{background-image:url('icons/bladedancer_riposte.png');}
+  .ico-skill-bladedancer-dance-step{background-image:url('icons/bladedancer_dance_step.png');}
+  .ico-skill-bladedancer-mirror-guard{background-image:url('icons/bladedancer_mirror_guard.png');}
+  .ico-skill-bladedancer-cross-slash{background-image:url('icons/bladedancer_cross_slash.png');}
+  .ico-skill-bladedancer-dance-of-steel{background-image:url('icons/bladedancer_dance_of_steel.png');}
+  .ico-skill-bladedancer-perfect-counter{background-image:url('icons/bladedancer_perfect_counter.png');}
+  .ico-class-beastmaster{background-image:url('icons/class-beastmaster.png');}
+  .ico-skill-beastmaster-sic-em{background-image:url('icons/beastmaster_sic_em.png');}
+  .ico-skill-beastmaster-coordinated-strike{background-image:url('icons/beastmaster_coordinated_strike.png');}
+  .ico-skill-beastmaster-guardian-bond{background-image:url('icons/beastmaster_guardian_bond.png');}
+  .ico-skill-beastmaster-pack-step{background-image:url('icons/beastmaster_pack_step.png');}
+  .ico-skill-beastmaster-mend-the-pack{background-image:url('icons/beastmaster_mend_the_pack.png');}
+  .ico-skill-beastmaster-alpha-roar{background-image:url('icons/beastmaster_alpha_roar.png');}
+  .ico-skill-beastmaster-stampede{background-image:url('icons/beastmaster_stampede.png');}
+  .ico-skill-beastmaster-apex-unleashed{background-image:url('icons/beastmaster_apex_unleashed.png');}
   .ico-skill-ranger-quickshot{background-image:url('icons/ranger_quickshot.png');}
   .ico-skill-ranger-snare-trap{background-image:url('icons/ranger_snare_trap.png');}
   .ico-skill-ranger-camouflage{background-image:url('icons/ranger_camouflage.png');}
@@ -989,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.390.0-autopilot';
+const VERSION3D='1.391.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1905,38 +1941,38 @@ const CLASSES={
       {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
       {id:'st_storm',n:'Thunderstorm',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
-  warlock:{disp:'Warlock',icon:'🔮',attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','wand','spellblade','dagger'],
+  warlock:{disp:'Warlock',icon:classIcon('warlock'),attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','wand','spellblade','dagger'],
     subs:[{id:'blood',disp:'Blood Pact',blurb:'Trade safety for brutal spell damage.'},
           {id:'curse',disp:'Curse Weaver',blurb:'Mark, drain, and control enemies from the shadows.'}],
     skills:[
-      {id:'war_bolt',n:'Shadow Bolt',icon:'🟣',cd:2.5,rank:2,d:'A fast void bolt powered by a sliver of your health'},
-      {id:'war_curse',n:'Curse Circle',icon:'⭕',cd:9,rank:4,d:'Mark nearby foes so your spells hit them harder'},
-      {id:'war_step',n:'Rift Step',icon:'🌑',cd:11,rank:6,d:'Tear through shadow and burst at both ends'},
-      {id:'war_storm',n:'Dark Storm',icon:'🌩️',cd:23,rank:8,d:'A violent void storm follows you'}]},
-  skylancer:{disp:'Skylancer',icon:'🪽',attackStyle:'ranger',earned:true,shopUnlock:true,charter:13500,family:['javelin','bow'],
+      {id:'war_bolt',n:'Shadow Bolt',icon:skillIcon('warlock-shadow-bolt'),cd:2.5,rank:2,d:'A fast void bolt powered by a sliver of your health'},
+      {id:'war_curse',n:'Curse Circle',icon:skillIcon('warlock-curse-circle'),cd:9,rank:4,d:'Mark nearby foes so your spells hit them harder'},
+      {id:'war_step',n:'Rift Step',icon:skillIcon('warlock-rift-step'),cd:11,rank:6,d:'Tear through shadow and burst at both ends'},
+      {id:'war_storm',n:'Dark Storm',icon:skillIcon('warlock-dark-storm'),cd:23,rank:8,d:'A violent void storm follows you'}]},
+  skylancer:{disp:'Skylancer',icon:classIcon('skylancer'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:13500,family:['javelin','bow'],
     subs:[{id:'diver',disp:'Storm Diver',blurb:'Launch high, then crash through the enemy line.'},
           {id:'wind',disp:'Wind Hunter',blurb:'Stay mobile and rain attacks down from safety.'}],
     skills:[
-      {id:'sky_rise',n:'Rising Spear',icon:'⬆️',cd:7,rank:2,d:'Strike upward and launch yourself into the air'},
-      {id:'sky_dive',n:'Dive Strike',icon:'🔻',cd:10,rank:4,d:'Dive forward and burst when you hit the ground'},
-      {id:'sky_dash',n:'Sky Dash',icon:'💨',cd:11,rank:6,d:'Dash through the air and cut enemies in your path'},
-      {id:'sky_crash',n:'Thunder Dive',icon:'⚡',cd:22,rank:8,d:'Fall like lightning and blast a wide landing zone'}]},
-  bladedancer:{disp:'Bladedancer',icon:'⚔️',attackStyle:'melee',earned:true,shopUnlock:true,charter:14500,family:['sword','dagger','spellblade'],
+      {id:'sky_rise',n:'Rising Spear',icon:skillIcon('skylancer-rising-spear'),cd:7,rank:2,d:'Strike upward and launch yourself into the air'},
+      {id:'sky_dive',n:'Dive Strike',icon:skillIcon('skylancer-dive-strike'),cd:10,rank:4,d:'Dive forward and burst when you hit the ground'},
+      {id:'sky_dash',n:'Sky Dash',icon:skillIcon('skylancer-sky-dash'),cd:11,rank:6,d:'Dash through the air and cut enemies in your path'},
+      {id:'sky_crash',n:'Thunder Dive',icon:skillIcon('skylancer-thunder-dive'),cd:22,rank:8,d:'Fall like lightning and blast a wide landing zone'}]},
+  bladedancer:{disp:'Bladedancer',icon:classIcon('bladedancer'),attackStyle:'melee',earned:true,shopUnlock:true,charter:14500,family:['sword','dagger','spellblade'],
     subs:[{id:'counter',disp:'Counter Dancer',blurb:'Read attacks, parry them, and answer with crushing ripostes.'},
           {id:'tempo',disp:'Blade Waltz',blurb:'Chain fast cuts and movement into a relentless dance.'}],
     skills:[
-      {id:'bd_counter',n:'Counter Stance',icon:'🛡️',cd:8,rank:2,d:'Briefly prepare to parry the next hit'},
-      {id:'bd_riposte',n:'Riposte',icon:'↩️',cd:9,rank:4,d:'A powerful counter slash, stronger after a parry'},
-      {id:'bd_mirror',n:'Mirror Guard',icon:'🪞',cd:14,rank:6,d:'Parry and send the force back around you'},
-      {id:'bd_steel',n:'Dance of Steel',icon:'✨',cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
-  beastmaster:{disp:'Beastmaster',icon:'🐾',attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
+      {id:'bd_counter',n:'Counter Stance',icon:skillIcon('bladedancer-counter-stance'),cd:8,rank:2,d:'Briefly prepare to parry the next hit'},
+      {id:'bd_riposte',n:'Riposte',icon:skillIcon('bladedancer-riposte'),cd:9,rank:4,d:'A powerful counter slash, stronger after a parry'},
+      {id:'bd_mirror',n:'Mirror Guard',icon:skillIcon('bladedancer-mirror-guard'),cd:14,rank:6,d:'Parry and send the force back around you'},
+      {id:'bd_steel',n:'Dance of Steel',icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
+  beastmaster:{disp:'Beastmaster',icon:classIcon('beastmaster'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
     skills:[
-      {id:'bst_sic',n:"Sic 'Em",icon:'🐺',cd:5,rank:2,d:'Command your companion to lunge, strike, and briefly stun'},
-      {id:'bst_step',n:'Pack Step',icon:'🐾',cd:9,rank:4,d:'You and your companion pincer the target'},
-      {id:'bst_mend',n:'Mend the Pack',icon:'💚',cd:14,rank:6,d:'Restore your companion and yourself over time'},
-      {id:'bst_apex',n:'Apex Unleashed',icon:'🦁',cd:22,rank:8,d:'Unleash your companion at peak strength'}]}
+      {id:'bst_sic',n:"Sic 'Em",icon:skillIcon('beastmaster-sic-em'),cd:5,rank:2,d:'Command your companion to lunge, strike, and briefly stun'},
+      {id:'bst_step',n:'Pack Step',icon:skillIcon('beastmaster-pack-step'),cd:9,rank:4,d:'You and your companion pincer the target'},
+      {id:'bst_mend',n:'Mend the Pack',icon:skillIcon('beastmaster-mend-the-pack'),cd:14,rank:6,d:'Restore your companion and yourself over time'},
+      {id:'bst_apex',n:'Apex Unleashed',icon:skillIcon('beastmaster-apex-unleashed'),cd:22,rank:8,d:'Unleash your companion at peak strength'}]}
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
@@ -2100,7 +2136,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3, a:{id:'st_storm',n:'Thunderstorm',cd:22,role:'Group Damage',fx:'st_storm',d:'A storm of lightning rages around you for 4s.'}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
     r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Damage',d:'+12% damage.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Damage',d:'+10% damage.'}}
   },
-  warlock:{ disp:'Warlock', icon:'🔮',
+  warlock:{ disp:'Warlock', icon:classIcon('warlock'),
     innate:{name:'Dark Bargain',d:'Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price.'},
     cap:{name:'Dark Ascension',d:'+12% damage. Dark Bargain costs only 1.5% max HP, and defeating a cursed foe cuts every skill cooldown by 1 second.'},
     r2:{kind:'skill',slot:0,a:{id:'war_bolt',n:'Shadow Bolt',cd:2.5,am:.62,role:'Rapid Damage',fx:'war_bolt',d:'Fire a fast void bolt that pierces one extra foe.'},b:{id:'war_lance',n:'Blood Lance',cd:6,role:'Boss Damage',fx:'war_lance',d:'Hurl a heavy crimson lance through every foe in a line.'}},
@@ -2112,7 +2148,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3,a:{id:'war_storm',n:'Dark Storm',cd:23,role:'Group Damage',fx:'war_storm',d:'A moving void storm tears at nearby foes for 5 seconds.'},b:{id:'war_final',n:'Final Curse',cd:24,role:'Boss Damage',fx:'war_final',d:'Condemn the strongest nearby foe with a massive delayed shadow blast.'}},
     r9:{kind:'passive',a:{id:'war_feast',n:'Soul Feast',role:'Sustain',d:'Defeating a cursed foe restores 5% max HP and 6 mana.'},b:{id:'war_last',n:'Last Breath',role:'Defense',d:'Below 30% HP, gain 15% damage reduction.'}}
   },
-  skylancer:{ disp:'Skylancer', icon:'🪽',
+  skylancer:{ disp:'Skylancer', icon:classIcon('skylancer'),
     innate:{name:'Born to Fly',d:'Ranged weapons deal +10% damage. While airborne, you fall 20% slower and deal 10% more damage.'},
     cap:{name:'Sky Master',d:'+12% damage. Using a skill in the air renews one air jump and briefly holds you aloft.'},
     r2:{kind:'skill',slot:0,a:{id:'sky_rise',n:'Rising Spear',cd:7,role:'Movement',fx:'sky_rise',d:'Sweep nearby enemies and launch high into the air.'},b:{id:'sky_gale',n:'Gale Shot',cd:5,role:'Rapid Damage',fx:'sky_gale',d:'Fire a fast wind spear that grows stronger while airborne.'}},
@@ -2124,7 +2160,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Cyclone Volley',cd:21,role:'Group Damage',fx:'sky_cyclone',d:'Spin in place and fire a ring of wind blades.'}},
     r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:'Defeating an enemy in the air renews your air jump and trims dodge cooldown.'},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:'Take 12% less damage while moving quickly or airborne.'}}
   },
-  bladedancer:{ disp:'Bladedancer', icon:'⚔️',
+  bladedancer:{ disp:'Bladedancer', icon:classIcon('bladedancer'),
     innate:{name:'Perfect Timing',d:'Blade weapons deal +10% damage. A successful parry stores one Riposte charge for your counterattacks.'},
     cap:{name:'Endless Dance',d:'+12% damage. A successful parry refreshes your second skill and grants one second of speed and damage protection.'},
     r2:{kind:'skill',slot:0,a:{id:'bd_counter',n:'Counter Stance',cd:8,role:'Defense',fx:'bd_counter',d:'Open a short parry window. A hit during it deals no damage and stores a Riposte.'},b:{id:'bd_twin',n:'Twin Cut',cd:5,role:'Rapid Damage',fx:'bd_twin',d:'Cut twice in a wide arc. The second cut pushes enemies back.'}},
@@ -2136,7 +2172,7 @@ const CLASS2={
     r8:{kind:'skill',slot:3,a:{id:'bd_steel',n:'Dance of Steel',cd:22,role:'Group Damage',fx:'bd_steel',d:'Flash between nearby enemies with a rapid series of six cuts.'},b:{id:'bd_perfect',n:'Perfect Counter',cd:24,role:'Boss Damage',fx:'bd_perfect',d:'Hold a long parry stance. Catching a hit unleashes a massive counterattack.'}},
     r9:{kind:'passive',a:{id:'bd_last',n:'Last Step',role:'Movement',d:'Below 35% HP, dodge cooldown is 20% shorter.'},b:{id:'bd_guard',n:'Duelist Guard',role:'Defense',d:'Take 10% less damage from nearby enemies.'}}
   },
-  beastmaster:{ disp:'Beastmaster', icon:'🐾',
+  beastmaster:{ disp:'Beastmaster', icon:classIcon('beastmaster'),
     innate:{name:'Bonded Companion',d:'Your companion gains +25% max HP and +15% damage or healing, and catches up quickly across climbs. Without an equipped pet, a spectral wolf answers your commands.'},
     cap:{name:'One Pack',d:'+10% damage for you and your companion. Once per level, a lethal hit leaves your companion at 1 HP, briefly untargetable and shielded. Commands empower your next basic attack; basic attacks empower your companion.'},
     r2:{kind:'skill',slot:0,a:{id:'bst_sic',n:"Sic 'Em",cd:5,role:'Control',fx:'bst_sic',d:'Your companion lunges for 1.6x damage and briefly stuns.'},b:{id:'bst_coordinated',n:'Coordinated Strike',cd:6,role:'Boss Damage',fx:'bst_coordinated',d:'You and your companion strike together; the target is marked for increased companion damage.'}},
@@ -2180,7 +2216,19 @@ const PASSIVE_ART={
   mon_innate:'monk-focus',mon_cap:'monk-grandmaster',
   st_conductor:'stormcaller-conductor',st_overcharge:'stormcaller-overcharge',st_momentum:'stormcaller-momentum',st_ward:'stormcaller-storm-ward',
   st_charged:'stormcaller-charged',st_amped:'stormcaller-amped',st_master:'stormcaller-static-master',st_galvanize:'stormcaller-galvanize',
-  st_innate:'stormcaller-static-charge',st_cap:'stormcaller-storm-lord'
+  st_innate:'stormcaller-static-charge',st_cap:'stormcaller-storm-lord',
+  war_frail:'warlock-frail-power',war_shield:'warlock-soul-shield',war_deep:'warlock-deep-curse',war_swift:'warlock-dark-step',
+  war_pact:'warlock-blood-pact',war_safe:'warlock-careful-casting',war_feast:'warlock-soul-feast',war_last:'warlock-last-breath',
+  war_innate:'warlock-dark-bargain',war_cap:'warlock-dark-ascension',
+  sky_high:'skylancer-high-ground',sky_soft:'skylancer-soft-landing',sky_tail:'skylancer-tailwind',sky_guard:'skylancer-cloud-guard',
+  sky_float:'skylancer-long-flight',sky_eye:'skylancer-hunters-eye',sky_reset:'skylancer-second-wind',sky_armor:'skylancer-sky-armor',
+  sky_innate:'skylancer-born-to-fly',sky_cap:'skylancer-sky-master',
+  bd_sharp:'bladedancer-sharp-counter',bd_feet:'bladedancer-light-feet',bd_patient:'bladedancer-patient-guard',bd_fast:'bladedancer-fast-hands',
+  bd_heal:'bladedancer-healing-counter',bd_flow:'bladedancer-keep-moving',bd_last:'bladedancer-last-step',bd_guard:'bladedancer-duelist-guard',
+  bd_innate:'bladedancer-perfect-timing',bd_cap:'bladedancer-endless-dance',
+  bst_heavy:'beastmaster-heavy-collar',bst_swift:'beastmaster-swift-paws',bst_vitality:'beastmaster-shared-vitality',bst_rhythm:'beastmaster-predators-rhythm',
+  bst_scent:'beastmaster-blood-scent',bst_wildkeeper:'beastmaster-wildkeeper',bst_authority:'beastmaster-alphas-authority',bst_handler:'beastmaster-master-handler',
+  bst_innate:'beastmaster-bonded-companion',bst_cap:'beastmaster-one-pack'
 };
 function passiveIcon(id){ const file=PASSIVE_ART[id]; return file?`<img class="passiveart" src="icons/passives/passive-${file}.png?v=${VERSION3D}" alt="" aria-hidden="true">`:'✦'; }
 const C2_INNATE_ICON={warrior:'w_battle_ready',ranger:'r_clear_aim',mage:'m_attunement',reaper:'x_hunger',paladin:'pal_holy_warrior',necromancer:'necro_innate',ninja:'nin_innate',berserker:'bsk_innate',pirate:'pir_innate',chronomancer:'chr_innate',monk:'mon_innate',stormcaller:'st_innate',warlock:'war_innate',skylancer:'sky_innate',bladedancer:'bd_innate',beastmaster:'bst_innate'};
@@ -6920,10 +6968,14 @@ const C2_ICON={
   mon_whirl:skillIcon('monk-whirl-kick'),mon_stun:skillIcon('monk-stunning-palm'),mon_thousand:skillIcon('monk-thousand-fists'),mon_dragon:skillIcon('monk-dragon-kick'),
   st_bolt:skillIcon('stormcaller-chain-bolt'),st_lance:skillIcon('stormcaller-lightning-lance'),st_step:skillIcon('stormcaller-thunder-step'),st_nova:skillIcon('stormcaller-static-field'),
   st_orb:skillIcon('stormcaller-ball-lightning'),st_barrier:skillIcon('stormcaller-storm-barrier'),st_storm:skillIcon('stormcaller-thunderstorm'),st_overload:skillIcon('stormcaller-chain-reaction'),
-  war_bolt:'🟣',war_lance:'🩸',war_curse:'⭕',war_drain:'💔',war_step:'🌑',war_orb:'🔮',war_storm:'🌩️',war_final:'☠️',
-  sky_rise:'⬆️',sky_gale:'🌬️',sky_dive:'🔻',sky_lift:'🌀',sky_dash:'💨',sky_rain:'🌧️',sky_crash:'⚡',sky_cyclone:'🪽',
-  bd_counter:'🛡️',bd_twin:'⚔️',bd_riposte:'↩️',bd_step:'💃',bd_mirror:'🪞',bd_cross:'❎',bd_steel:'✨',bd_perfect:'💥',
-  bst_sic:'🐺',bst_coordinated:'⚔️',bst_guardian:'🛡️',bst_step:'🐾',bst_mend:'💚',bst_roar:'🦁',bst_stampede:'🐗',bst_apex:'👑'
+  war_bolt:skillIcon('warlock-shadow-bolt'),war_lance:skillIcon('warlock-blood-lance'),war_curse:skillIcon('warlock-curse-circle'),war_drain:skillIcon('warlock-life-drain'),
+  war_step:skillIcon('warlock-rift-step'),war_orb:skillIcon('warlock-doom-orb'),war_storm:skillIcon('warlock-dark-storm'),war_final:skillIcon('warlock-final-curse'),
+  sky_rise:skillIcon('skylancer-rising-spear'),sky_gale:skillIcon('skylancer-gale-shot'),sky_dive:skillIcon('skylancer-dive-strike'),sky_lift:skillIcon('skylancer-wind-lift'),
+  sky_dash:skillIcon('skylancer-sky-dash'),sky_rain:skillIcon('skylancer-spear-rain'),sky_crash:skillIcon('skylancer-thunder-dive'),sky_cyclone:skillIcon('skylancer-cyclone-volley'),
+  bd_counter:skillIcon('bladedancer-counter-stance'),bd_twin:skillIcon('bladedancer-twin-cut'),bd_riposte:skillIcon('bladedancer-riposte'),bd_step:skillIcon('bladedancer-dance-step'),
+  bd_mirror:skillIcon('bladedancer-mirror-guard'),bd_cross:skillIcon('bladedancer-cross-slash'),bd_steel:skillIcon('bladedancer-dance-of-steel'),bd_perfect:skillIcon('bladedancer-perfect-counter'),
+  bst_sic:skillIcon('beastmaster-sic-em'),bst_coordinated:skillIcon('beastmaster-coordinated-strike'),bst_guardian:skillIcon('beastmaster-guardian-bond'),bst_step:skillIcon('beastmaster-pack-step'),
+  bst_mend:skillIcon('beastmaster-mend-the-pack'),bst_roar:skillIcon('beastmaster-alpha-roar'),bst_stampede:skillIcon('beastmaster-stampede'),bst_apex:skillIcon('beastmaster-apex-unleashed')
 };
 function attachSkillTip(b,name,desc,cd,mana){ const old=b.querySelector('.skilltip'); if(old) old.remove(); const tip=document.createElement('span'); tip.className='skilltip';
   tip.innerHTML='<b>'+htmlSafe(name)+'</b>'+htmlSafe(desc)+'<em>'+htmlSafe(String(cd))+'s recharge · '+htmlSafe(String(mana))+' mana</em>'; b.appendChild(tip); }

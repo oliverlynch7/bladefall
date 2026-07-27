@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.389.0-autopilot';
+const VERSION3D='1.390.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7899,7 +7899,7 @@ function openMPLobby(){
    entry and restored on exit, and persist() is frozen while inside.
    ============================================================================ */
 var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
-const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false, classBuilds:{} };
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', petId:null, bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false, classBuilds:{} };
 function randomClassId(){ const ks=Object.keys(CLASSES); return ks[Math.floor(Math.random()*ks.length)]; }
 function familyWeaponArche(cid){ const fam=(CLASSES[cid]||CLASSES.warrior).family;
   if(fam.length===1&&fam[0]==='fist') return 'fist';   // Monk: fists ARE the class weapon (retired from loot, but on-class here)
@@ -7944,6 +7944,11 @@ function arenaApplyClass(cfg){ meta.classId=cfg.classId; const cs=classState(cfg
     else {cs.ch=cs.ch||{};for(const r of CLASS2_CHOICE_RANKS){if(cs.rank>=r)cs.ch[r]=cs.ch[r]||def['r'+r].a.id;}}
   }else if(build){cs.sub=build.sub;cs.mix=Object.assign({},build.mix||{});}
   if(!cs.sub){ const C=CLASSES[cfg.classId]; cs.sub=(C&&C.subs&&C.subs[0]&&C.subs[0].id)||null; } }
+function arenaApplyPet(cfg){
+  meta.petOwned=PETIDS.slice();
+  meta.petTrain={};for(const id of PETIDS)meta.petTrain[id]=PET_TRAIN_MAX;
+  meta.petActive=(cfg.petId&&PETS[cfg.petId])?cfg.petId:null;
+}
 function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.classId},ARENA_FAIR):cfg;   // Fair Mode standardizes level/rank/gear/stats (your class stays your choice)
   arenaApplyClass({classId:cfg.classId,rank:L.rank,classBuilds:cfg.classBuilds}); const p=freshPlayer(); arenaSetLevel(p,L.level);
   try{ p.weapon=makeWeapon(L.wArch,L.wRid); }catch(e){}
@@ -7954,7 +7959,8 @@ function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.clas
 function enterArena(){ if(IN_ARENA){ buildArenaRoom(); return; }
   ARENA_BACKUP={ classId:meta.classId, hero:meta.hero, classes:JSON.parse(JSON.stringify(meta.classes||{})),
     perks:JSON.parse(JSON.stringify(meta.perks||{})), gold:meta.gold, stash:meta.stash, run:meta.run, bank:meta.bank,
-    classUnlocked:JSON.parse(JSON.stringify(meta.classUnlocked||{})) };
+    classUnlocked:JSON.parse(JSON.stringify(meta.classUnlocked||{})),petOwned:(meta.petOwned||[]).slice(),petActive:meta.petActive||null,
+    petNames:JSON.parse(JSON.stringify(meta.petNames||{})),petTrain:JSON.parse(JSON.stringify(meta.petTrain||{})) };
   IN_ARENA=true; meta.perks={}; meta.gold=9999999;                 // clean stat base + free respec inside the arena
   meta.classUnlocked=meta.classUnlocked||{}; for(const cid of Object.keys(CLASSES)) meta.classUnlocked[cid]=true;   // sandbox: every class available
   buildArenaRoom();
@@ -7962,6 +7968,7 @@ function enterArena(){ if(IN_ARENA){ buildArenaRoom(); return; }
 }
 // (re)build the arena room for the current ARENA_LOADOUT — used on entry AND when you change loadout/map.
 function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
+  arenaApplyPet(cfg);
   const map=ARENA_MAPS[cfg.map]||ARENA_MAPS.flat; ARENA_STAGE={name:map.name,theme:'arena',sky:map.sky,ground:map.ground,aw:1600,ad:1600};
   const p=buildArenaPlayer(cfg);
   G=newG(p,{arena:true,zone:0,area:0,zoneTier:1}); G.arena=true;
@@ -7989,7 +7996,8 @@ function buildArenaRoom(){ const cfg=ARENA_LOADOUT;
   if(MP.active){ MP.pvp=true; MP.zone=MP.ARENA; if(MP.isHost) MP.broadcastArena(cfg); }   // co-op: shared PvP arena — sync the map to guests
 }
 function exitArena(){ IN_ARENA=false; try{ mpHideBanner(); }catch(e){}
-  if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked; ARENA_BACKUP=null; }
+  if(ARENA_BACKUP){ const b=ARENA_BACKUP; meta.classId=b.classId; meta.hero=b.hero; meta.classes=b.classes; meta.perks=b.perks; meta.gold=b.gold; meta.stash=b.stash; meta.run=b.run; meta.bank=b.bank; meta.classUnlocked=b.classUnlocked;
+    meta.petOwned=b.petOwned;meta.petActive=b.petActive;meta.petNames=b.petNames;meta.petTrain=b.petTrain;ARENA_BACKUP=null; }
   if(MP.active){ MP.pvp=false; MP.arenaMsg=null; MP.scores={}; } ARENA_STAGE=null; try{ updateArenaHud(); }catch(e){} refreshBagCap&&refreshBagCap(); openHub(); }
 function arenaRespawn(){ if(!G||!G.p) return; const p=G.p; p.dead=false; p.downed=false; p._pvpDead=false;
   const sp=G.arenaSpawn||{x:0,z:0,y:60}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+8; p.vx=0;p.vy=0;p.vz=0; p.hp=effMaxHp(p); p.invuln=2;
@@ -8296,6 +8304,8 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   const archOpts=ARCHEIDS.map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
   const ridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.wRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
   const aridOpts=RORDER.map(r=>`<option value="${r}" ${cfg.aRid===r?'selected':''}>${RARITY[r].name}</option>`).join('');
+  const petBtns=`<button class="bigbtn ghost arenapet ${!cfg.petId?'sel':''}" data-pet="" style="flex:1;min-width:92px;margin:0;padding:8px 6px;${!cfg.petId?'border-color:#e8a33d;color:#f2c875':''}">No Pet</button>`+
+    PETIDS.map(id=>`<button class="bigbtn ghost arenapet ${cfg.petId===id?'sel':''}" data-pet="${id}" style="flex:1;min-width:112px;margin:0;padding:6px;${cfg.petId===id?'border-color:'+petRarityCol(id)+';color:'+petRarityCol(id):''}"><img src="${petIcon(id)}" alt="" style="width:42px;height:42px;object-fit:contain;display:block;margin:0 auto 3px"><b style="font-size:11px">${PETS[id].name}</b><span style="display:block;opacity:.65;font-size:9px">MAX 5/5</span></button>`).join('');
   const sel=`background:#131a26;border:1px solid #2b3040;color:#f3f1ea;border-radius:8px;padding:8px;font-size:13px`;
   showOverlayHTML(`<div class="card"><p class="ovkicker">The Arena · sandbox</p><h2 class="ovh">⚔️ Arena Loadout</h2>
     <p class="ovsub">A save-protected battleground. Everything here is <b>temporary</b> — you keep nothing you set and lose nothing from your campaign.</p>
@@ -8309,6 +8319,8 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
       <label style="flex:1;min-width:140px">Weapon<br><select id="arArch" style="${sel};width:100%">${archOpts}</select></label>
       <label style="flex:1;min-width:110px">Weapon rarity<br><select id="arWRid" style="${sel};width:100%">${ridOpts}</select></label>
       <label style="flex:1;min-width:110px">Armor rarity<br><select id="arARid" style="${sel};width:100%">${aridOpts}</select></label></div>
+    <p class="hint" style="text-align:left;margin:12px 0 5px"><b>Companion</b> &middot; every Arena pet is fully trained and scales to your selected level</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${petBtns}</div>
     <p class="hint" style="text-align:left;margin:12px 0 4px"><b>Practice Bots</b> · AI opponents (respawn on defeat)</p>
     <div style="display:flex;gap:14px;align-items:center;margin:2px 0 4px">
       <label style="flex:1">Count <b id="arBotsV">${cfg.bots}</b><input id="arBots" type="range" min="0" max="4" value="${cfg.bots}" style="width:100%"></label>
@@ -8335,6 +8347,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   g('arArch').onchange=e=>{ cfg.wArch=e.target.value; };
   g('arWRid').onchange=e=>{ cfg.wRid=e.target.value; };
   g('arARid').onchange=e=>{ cfg.aRid=e.target.value; };
+  document.querySelectorAll('[data-pet]').forEach(b=>b.onclick=()=>{ cfg.petId=b.dataset.pet||null; try{SFX.pickup();}catch(e){} openArenaSetup(back); });
   g('arBots').oninput=e=>{ cfg.bots=+e.target.value; g('arBotsV').textContent=cfg.bots; };
   document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{ cfg.botDiff=b.dataset.bd; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
   document.querySelectorAll('[data-botcls]').forEach(b=>b.onclick=()=>{ cfg.botClass=b.dataset.botcls; try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); openArenaSetup(back); });
@@ -13527,7 +13540,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
-  enterArena, exitArena, openArenaSetup, arenaRandomRespec, arenaApplyClass, buildArenaPlayer, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
+  enterArena, exitArena, openArenaSetup, arenaRandomRespec, arenaApplyClass, arenaApplyPet, buildArenaPlayer, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
   runDuelOnce, duelMatrix,
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,

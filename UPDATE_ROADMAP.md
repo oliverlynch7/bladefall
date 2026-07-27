@@ -1543,3 +1543,7 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Added 76 transparent voxel assets for Beastmaster, Warlock, Skylancer, and Bladedancer: four class crests, 32 active-skill icons, and 40 innate/passive/capstone icons.
 - Replaced all emoji and blank hooks for those four classes across class summaries, build trees, skill choices, passive nodes, and the HUD skill rail.
 - Verified JavaScript syntax, all 76 alpha assets, every mapped file path, local title/gameplay boot, and a clean browser console.
+## v1.392.0-autopilot - co-op boss-room transition sync
+- Multiplayer zone packets now include the exact authored district (`area`), including the campaign boss-room sentinel `-1`.
+- Guests already inside the same zone now rebuild when the host crosses a district or boss portal, while preserving their current hero state; late joiners also land in the host's current room instead of area 0.
+- Verified with a simulated host/guest browser run: Outskirts area 0 -> boss room, matching boss/enemy scene state, host packet `area:-1`, active gameplay, and zero console errors.

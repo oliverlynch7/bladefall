@@ -1547,3 +1547,9 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Multiplayer zone packets now include the exact authored district (`area`), including the campaign boss-room sentinel `-1`.
 - Guests already inside the same zone now rebuild when the host crosses a district or boss portal, while preserving their current hero state; late joiners also land in the host's current room instead of area 0.
 - Verified with a simulated host/guest browser run: Outskirts area 0 -> boss room, matching boss/enemy scene state, host packet `area:-1`, active gameplay, and zero console errors.
+
+## v1.393.0-autopilot - co-op special-mode scene sync
+- Abyssal Descent, Treasure Sprint, and Boss Gauntlet now use explicit shared multiplayer scene identities, including correct late-join placement.
+- Abyss and Gauntlet combat are host-authoritative: guests mirror live enemies/bosses, floor portals, and Gauntlet boss transitions instead of spawning divergent local encounters.
+- Treasure Sprint transmits its generated course seed so every peer receives the identical route, section families, and parkour layout.
+- Verified in isolated host/guest browser pages: four Abyss enemies visible as four guest mirrors; identical 47-node six-family Sprint course; Gauntlet bosses synchronized across indices 0 and 1; zero console errors.

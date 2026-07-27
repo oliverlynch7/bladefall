@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.392.0-autopilot';
+const VERSION3D='1.393.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5478,14 +5478,14 @@ function startBonus(){
   meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:ret,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed}; persist();
   loadBonus(ret);
 }
-function loadBonus(returnIdx){
+function loadBonus(returnIdx,forcedSeed){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
   G.bonusVisits=(G.bonusVisits||0)+1;
-  const seed=(((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0;
+  const seed=(forcedSeed!=null)?(forcedSeed>>>0):((((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0);
   const rnd=mulberry(seed||1), R=(lo,hi)=>lo+rnd()*(hi-lo), CLIMB=Math.min(72,JMPV-18);
   let cx=0,cz=0,cy=0,peak=0,budget=0;
   G.bonusPath=[];
@@ -5536,13 +5536,16 @@ function endBonus(msg){
 }
 /* HUB Treasure Sprint — the exact same random parkour course, launched from the Waystation portal purely
    for fun: NO loot, NO gold, just a time trial. Reaching the finale chest records your best time. */
-function startHubSprint(){
+function startHubSprint(opts){
+  opts=opts||{};
   initAudio();
+  if(!G) enterZone(0);                                        // late-joining co-op guests need a live hero/world before the course can load
   G.hub=false; G.sprintFun=true; G.sprintReturnHub=true; G.sprintStartT=G.time||0;
-  loadBonus(0);
+  loadBonus(0,opts.seed);
   // openLevelEntry left us in mode='menu' with the popup up — actually ENTER the course (this was the bug: the button did nothing)
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate();
   toast('🏁 TREASURE SPRINT — race the clock! Best: '+(meta.sprintBest?meta.sprintBest.toFixed(1)+'s':'—'));
+  if(MP.active&&!opts.remote) MP.enterSpecial('sprint');
 }
 function finishHubSprint(){
   const s=Math.max(0,(G.time||0)-(G.sprintStartT||0)), prev=meta.sprintBest||0, best=(!prev||s<prev);
@@ -7608,7 +7611,7 @@ const MP={
   peers:{},                 // id -> {id,name,skin,zone,hp, x,y,z,yaw, tx,ty,tz,tyaw, last}
   _lib:false, _loading:null, _sendT:0, _pingT:0,
   kills:[], _killed:{}, _gotEn:false, _authKill:false, _ek:null,   // P1.2 shared-enemy state
-  HUB:-100, ARENA:-200,     // sentinel "zones" for the shared Waystation (Phase 2) and the shared Arena
+  HUB:-100, ARENA:-200, ENDLESS:-300, SPRINT:-301, GAUNTLET:-302, // shared-scene sentinels; never collide with campaign zone ids
   pvp:false, scores:{}, arenaMsg:null,     // Phase 3 PvP duel + shared-arena state
   teams:false, teamMap:{},  // team (2v2) mode: id -> team index (0/1)
   hasZone(){ return this.zone!=null && this.zone!==-1; },
@@ -7676,6 +7679,7 @@ const MP={
       else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
+      else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
     });
@@ -7709,8 +7713,9 @@ const MP={
       try{ persist(); }catch(e){}
     } },
   onGuestData(d){
-    if(d.t==='zone'||d.t==='arena') this.ensureGuestReady();
-    if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
+    if(d.t==='zone'||d.t==='arena'||d.t==='special') this.ensureGuestReady();
+    if(d.t==='special'){ this.applySpecial(d); }
+    else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
         const entering=!(mode==='play'&&G&&G.zone===d.zone);
@@ -7744,13 +7749,44 @@ const MP={
   // ---- called from enterZone (both roles) ----
   onEnter(zi){ this.zone=zi; this.seed=(G&&G.areaSeed)||0; this.rseed=(G&&G.runSeed)||0;   // rseed = the per-run dungeon/mob seed — guests adopt it so we get the SAME map + mobs
     if(this.isHost) this.conns.forEach(c=>{try{c.send({t:'zone',zone:zi,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0});}catch(e){}}); },
+  specialMsg(kind){
+    if(!G) return null;
+    kind=kind||(G.endless?'endless':G.sprintFun&&G.bonusActive?'sprint':G.bossRush?'gauntlet':null);
+    if(kind==='endless') return {t:'special',kind,runSeed:G.runSeed,floor:G.floor||1,cleared:G.floorCleared?1:0};
+    if(kind==='sprint') return {t:'special',kind,runSeed:G.runSeed,seed:G.bonusCourse&&G.bonusCourse.seed};
+    if(kind==='gauntlet') return {t:'special',kind,runSeed:G.runSeed,tier:G.brTier||'normal',idx:G.brIdx||0};
+    return null;
+  },
+  enterSpecial(kind){ const z=kind==='endless'?this.ENDLESS:kind==='sprint'?this.SPRINT:this.GAUNTLET; this.zone=z; this.pvp=false;
+    this.rseed=(G&&G.runSeed)||this.rseed||0; const m=this.specialMsg(kind);
+    if(this.isHost&&m) this.conns.forEach(c=>{try{c.send(m);}catch(e){}});
+  },
+  requestSpecialAdvance(kind){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'specialAdvance',kind});}catch(e){} },
+  applySpecial(d){
+    this.pvp=false; if(d.runSeed!=null)this.rseed=d.runSeed;
+    if(d.kind==='endless'){
+      this.zone=this.ENDLESS;
+      if(!(G&&G.endless)) startEndless({remote:true,floor:d.floor||1,runSeed:d.runSeed});
+      else if((G.floor||1)!==(d.floor||1)){ if(d.runSeed!=null)G.runSeed=d.runSeed; loadEndlessArena(d.floor||1); }
+      if(G&&G.endless&&d.cleared&&!G.portal){ G.floorCleared=true; G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0}; questUpdate(); }
+    } else if(d.kind==='sprint'){
+      this.zone=this.SPRINT;
+      const same=G&&G.sprintFun&&G.bonusActive&&G.bonusCourse&&G.bonusCourse.seed===d.seed;
+      if(!same) startHubSprint({remote:true,seed:d.seed});
+    } else if(d.kind==='gauntlet'){
+      this.zone=this.GAUNTLET;
+      if(!(G&&G.bossRush)||G.brTier!==(d.tier||'normal')) startBossRush(d.tier||'normal',{remote:true,idx:d.idx||0,runSeed:d.runSeed});
+      else if((G.brIdx||0)!==(d.idx||0)){ if(d.runSeed!=null)G.runSeed=d.runSeed; loadBossRushArena(d.idx||0); }
+    }
+    mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); questUpdate();
+  },
   // shared Arena: the host tells guests which map to load (+ a fair-mode standardized loadout)
   broadcastArena(cfg){ this.teams=!!cfg.teams; this.arenaMsg={t:'arena',map:cfg.map,fair:cfg.fair?1:0,ld:cfg.fair?ARENA_FAIR:null,teams:this.teams?1:0}; this.zone=this.ARENA;
     if(this.isHost){ this.assignTeams(); this.conns.forEach(c=>{try{c.send(this.arenaMsg);}catch(e){}}); } },
   teamOf(id){ return this.teamMap[id]||0; },
   assignTeams(){ if(!this.isHost) return; this.teamMap={}; this.teamMap[this.myId]=0; let i=1; for(const c of this.conns){ if(c._pid){ this.teamMap[c._pid]=i%2; i++; } }   // alternate guests into the two teams
     this.conns.forEach(c=>{try{c.send({t:'teams',map:this.teamMap,on:this.teams?1:0});}catch(e){}}); },
-  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; if(this.hasZone()) return {t:'zone',zone:this.zone,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0}; return null; },
+  placeMsg(){ if(IN_ARENA && this.arenaMsg) return this.arenaMsg; const sm=this.specialMsg(); if(sm)return sm; if(this.hasZone()) return {t:'zone',zone:this.zone,area:(G&&!G.hub&&typeof G.area==='number')?G.area:null,seed:this.seed,rseed:this.rseed,pvp:this.pvp?1:0}; return null; },
   // ---- combat visuals: broadcast MY new projectiles + skill rings so allies SEE my attacks/spells ----
   sendCombat(){ if(!this.active||!G) return; let proj=null, sw=null;
     if(G.projectiles) for(const pr of G.projectiles){ if(pr.owner==='player' && !pr._mp && !pr.visual){ pr._mp=1; (proj=proj||[]).push(
@@ -7838,8 +7874,8 @@ const MP={
     const seen={};
     for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
       if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
-        if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; } }
-      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); } }
+        if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; if(ne.boss)G.boss=ne; } }
+      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e; } }
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -9288,16 +9324,19 @@ const BOSS_RUSH_SEQ=[
   {t:'colossus',stage:10},{t:'king',stage:12},{t:'tyrant',stage:16}
 ];
 function fmtTime(sec){ sec=Math.max(0,Math.round(sec||0)); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
-function startBossRush(tier){
+function startBossRush(tier,opts){
+  opts=opts||{};
   if(!meta.hero || !Object.keys(meta.classUnlocked||{}).length){ toast('Pick a class and gear up first, then face the Gauntlet.'); return; }
   initAudio(); queueLevelUp=0; queueSubclass=false;
   const p=freshFromSnapshot(meta.hero); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{bossRush:true,zone:11,area:0,zoneTier:5});
+  if(opts.runSeed!=null) G.runSeed=opts.runSeed;
   G.brTier=(tier==='brutal')?'brutal':'normal';
   G.brIdx=0; G.brTime=0; G.brAdvanceT=0; G.brAdvancing=false; G.brSplits=[]; meta.run=null;
-  loadBossRushArena(0);
+  loadBossRushArena(opts.idx||0);
   mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); questUpdate();
   storyToast(G.brTier==='brutal'?'The Gauntlet · BRUTAL — every king, tougher, on one life. No rest but what you steal.':'The Gauntlet — every king in the world, one after another, on one life. Steal your rest between them.');
+  if(MP.active&&!opts.remote) MP.enterSpecial('gauntlet');
 }
 function loadBossRushArena(idx){
   const spec=BOSS_RUSH_SEQ[idx], s=STAGES[spec.stage], brutal=G.brTier==='brutal';
@@ -9320,18 +9359,22 @@ function loadBossRushArena(idx){
   G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
   G.p.hp=effMaxHp(G.p);   // a full breather stolen between kings
-  const b=spawnEnemy(spec.t,0,-190); if(b){ b.active=true; G.boss=b;
+  let b=null;
+  if(!(MP.active&&!MP.isHost)) b=spawnEnemy(spec.t,0,-190);    // host owns the king; guests receive the authoritative mirror snapshot
+  if(b){ b.active=true; G.boss=b;
     if(brutal){ b.maxHp=Math.round(b.maxHp*1.6); b.hp=b.maxHp; if(b.dmg) b.dmg=Math.round(b.dmg*1.35); } }
   const bn=document.getElementById('bossnametx')||document.getElementById('bossname'); if(bn&&b) bn.textContent=((ENEMY[spec.t]&&ENEMY[spec.t].label)||spec.t)+(brutal?' · BRUTAL':'');
   const bw=document.getElementById('bosshpwrap'); if(bw) bw.classList.add('on');
   G.stageBanner=2.4; G.areaName='Gauntlet '+(idx+1)+'/'+BOSS_RUSH_SEQ.length;
   const st=document.getElementById('stagetag'); if(st) st.textContent='💀 THE GAUNTLET'+(brutal?' · BRUTAL':'')+' · '+(idx+1)+'/'+BOSS_RUSH_SEQ.length;
   musicForScene(); questUpdate(); hudUpdate();
+  if(MP.active&&MP.isHost) MP.enterSpecial('gauntlet');          // co-op: every new king/arena is host-authoritative
 }
 function bossRushTick(dt){
   if(mode!=='play') return;
   G.brTime=(G.brTime||0)+dt;
   if(G.boss && !G.boss.dead) updateBossBar(G.boss);
+  if(MP.active&&!MP.isHost) return;                              // guests mirror the host's current king and never advance independently
   if(G.brAdvanceT>0){ G.brAdvanceT-=dt; if(G.brAdvanceT<=0){ const nx=G.brIdx+1; if(nx>=BOSS_RUSH_SEQ.length) bossRushWin(); else loadBossRushArena(nx); } return; }
   if(G.boss && G.boss.dead && !G.brAdvancing){
     G.brAdvancing=true; G.brAdvanceT=1.7; (G.brSplits=G.brSplits||[]).push(G.brTime); const done=G.brIdx+1;
@@ -9395,16 +9438,19 @@ function openGauntletGate(){
   document.getElementById('brBrutal').onclick=()=>startBossRush('brutal');
   document.getElementById('brBack').onclick=wsResume;
 }
-function startEndless(){
+function startEndless(opts){
+  opts=opts||{};
   initAudio(); queueLevelUp=0; queueSubclass=false;
   const p=meta.hero?freshFromSnapshot(meta.hero):freshPlayer(); recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{endless:true,floor:0,zone:11,area:0,zoneTier:1});
+  if(opts.runSeed!=null) G.runSeed=opts.runSeed;
   G.endGold0=meta.gold||0; G.endKillsTotal=0;
   endModsReset(); G.p._prevMaxHp=effMaxHp(G.p); endModsHUD();
   meta.run=null;
-  loadEndlessArena(1);
+  loadEndlessArena(opts.floor||1);
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate(); hudUpdate(); questUpdate();
   if(!startEndless._greeted){ startEndless._greeted=true; storyToast('The Abyss has no floor. See how far you can fall.'); }
+  if(MP.active&&!opts.remote) MP.enterSpecial('endless');
 }
 function loadEndlessArena(n){
   const stageIdx=endlessStageFor(n), s=STAGES[stageIdx];
@@ -9456,7 +9502,7 @@ function loadEndlessArena(n){
   document.getElementById('stagetag').textContent='🕳️ FLOOR '+n+(G.endEliteFloor?' ⚔ ELITE':'');
   endModsHUD(); questUpdate(); hudUpdate();
   // BOON/BANE SHRINE: every 5th floor opens with a binding pact choice
-  if(n>0 && n%5===0) offerShrine(n);
+  if(n>0 && n%5===0 && !(MP.active&&!MP.isHost)) offerShrine(n);
 }
 function spawnEndlessMob(n,s){
   const pool=(THEMEMOBS[s.theme]||['grunt']).filter(m=>ENEMY[m]&&!ENEMY[m].boss);
@@ -9476,6 +9522,7 @@ function spawnEndlessMob(n,s){
 }
 function endlessTick(dt){
   if(mode!=='play'||G.floorCleared) return;
+  if(MP.active&&!MP.isHost) return;                              // host owns all Abyss spawns; guests receive the authoritative enemy mirror
   const alive=G.enemies.filter(e=>!e.dead&&!e.dummy&&!e.practice).length;
   if(G.endSpawned<G.endTarget){
     G.endSpawnT-=dt;
@@ -9488,11 +9535,14 @@ function endlessTick(dt){
     G.floorCleared=true; snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY DOWN OPENS','#c47bff',true);
     toast('🕳️ Floor '+G.floor+' cleared — take the portal down'); playFx('portalopen'); SFX.win(); questUpdate();
+    if(MP.active) MP.enterSpecial('endless');                    // mirror the opened descent portal for every guest
   }
 }
 function endlessDescend(){
+  if(MP.active&&!MP.isHost){ MP.requestSpecialAdvance('endless'); toast('Waiting for the party to descend…'); return; }
   meta.hero=snapOf(G.p); meta.bank=null; persist();   // bank the run each floor so closing the tab keeps the gains
   loadEndlessArena((G.floor||1)+1); SFX.pickup();
+  if(MP.active) MP.enterSpecial('endless');
 }
 function endlessDie(){
   mode='dead'; SFX.hurt(); showGameUI(false); musicStop(500);
@@ -13588,7 +13638,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
-  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
+  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },

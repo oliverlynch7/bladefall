@@ -989,7 +989,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.388.0-autopilot';
+const VERSION3D='1.389.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7899,7 +7899,7 @@ function openMPLobby(){
    entry and restored on exit, and persist() is frozen while inside.
    ============================================================================ */
 var IN_ARENA=false, ARENA_BACKUP=null, ARENA_STAGE=null;   // var (not let): persist() references IN_ARENA and may run during early init — avoid the TDZ
-const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false };
+const ARENA_LOADOUT={ map:'flat', level:30, classId:'warrior', rank:10, wArch:'sword', wRid:'legendary', aRid:'legendary', bots:1, botDiff:'normal', botClass:'random', fair:false, teams:false, powerups:false, classBuilds:{} };
 function randomClassId(){ const ks=Object.keys(CLASSES); return ks[Math.floor(Math.random()*ks.length)]; }
 function familyWeaponArche(cid){ const fam=(CLASSES[cid]||CLASSES.warrior).family;
   if(fam.length===1&&fam[0]==='fist') return 'fist';   // Monk: fists ARE the class weapon (retired from loot, but on-class here)
@@ -7921,11 +7921,31 @@ const ARENA_MAPS={
       for(let k=0;k<10;k++) G.deco.push({x:(Math.random()*2-1)*640,z:(Math.random()*2-1)*640,y0:0,w:18,h:6,d:18,c:'#ff7a3a',theme:'void'}); } }
 };
 function arenaSetLevel(p,lvl){ lvl=Math.max(1,Math.min(60,lvl|0)); for(let i=1;i<lvl;i++) autoLevelGrow(p); p.level=lvl; p.xp=0; p.xpNext=CHARACTER_XP(lvl); }
+function arenaRandomRespec(cfg){
+  const cid=cfg.classId,C=CLASSES[cid],def=c2def(cid),pick=(a,b)=>Math.random()<.5?a:b;
+  if(!C)return null;
+  cfg.classBuilds=cfg.classBuilds||{};
+  if(def){
+    const ch={};let skills=0,passives=0,a=0,b=0;
+    for(const rank of CLASS2_CHOICE_RANKS){const R=def['r'+rank],o=pick(R.a,R.b);ch[rank]=o.id;if(o===R.a)a++;else b++;if(R.kind==='skill')skills++;else passives++;}
+    cfg.classBuilds[cid]={v2:1,ch};
+    return {classId:cid,skills,passives,a,b};
+  }
+  const paths=C.subs||[],left=paths[0],right=paths[1]||left;
+  if(!left)return null;
+  const mix={},counts={};for(let i=1;i<=3;i++){const p=pick(left,right);mix[i]=p.id;counts[p.id]=(counts[p.id]||0)+1;}
+  const sub=pick(left,right).id;cfg.classBuilds[cid]={v2:0,sub,mix};
+  return {classId:cid,skills:3,passives:1,a:counts[left.id]||0,b:counts[right.id]||0};
+}
 function arenaApplyClass(cfg){ meta.classId=cfg.classId; const cs=classState(cfg.classId); cs.rank=Math.max(1,Math.min(10,cfg.rank||10));
-  const def=c2def(cfg.classId); if(def){ cs.ch=cs.ch||{}; for(const r of CLASS2_CHOICE_RANKS){ if(cs.rank>=r) cs.ch[r]=cs.ch[r]||def['r'+r].a.id; } }   // auto-fill a valid build; Free Respec lets you customize
+  const def=c2def(cfg.classId),build=cfg.classBuilds&&cfg.classBuilds[cfg.classId];
+  if(def){
+    if(build&&build.ch)cs.ch=Object.assign({},build.ch);
+    else {cs.ch=cs.ch||{};for(const r of CLASS2_CHOICE_RANKS){if(cs.rank>=r)cs.ch[r]=cs.ch[r]||def['r'+r].a.id;}}
+  }else if(build){cs.sub=build.sub;cs.mix=Object.assign({},build.mix||{});}
   if(!cs.sub){ const C=CLASSES[cfg.classId]; cs.sub=(C&&C.subs&&C.subs[0]&&C.subs[0].id)||null; } }
 function buildArenaPlayer(cfg){ const L=cfg.fair?Object.assign({classId:cfg.classId},ARENA_FAIR):cfg;   // Fair Mode standardizes level/rank/gear/stats (your class stays your choice)
-  arenaApplyClass({classId:cfg.classId,rank:L.rank}); const p=freshPlayer(); arenaSetLevel(p,L.level);
+  arenaApplyClass({classId:cfg.classId,rank:L.rank,classBuilds:cfg.classBuilds}); const p=freshPlayer(); arenaSetLevel(p,L.level);
   try{ p.weapon=makeWeapon(L.wArch,L.wRid); }catch(e){}
   for(const slot of SLOTIDS){ try{ p.gear[slot]=makeArmor(L.aRid,slot); }catch(e){} }
   p.maxJumps=2; recomputeArmor(p); p.mana=p.maxMana; p.hp=effMaxHp(p); return p; }
@@ -8270,6 +8290,7 @@ function drawBotHero(e,t){ const D=BOT_DIFF[e.botDiff]||BOT_DIFF.normal, body=D.
 // ---- The Arena setup / loadout menu (used pre-entry AND re-openable in-arena) ----
 function openArenaSetup(back){ mode='menu'; showGameUI(false);
   const cfg=ARENA_LOADOUT, inA=IN_ARENA;
+  const randomized=cfg.classBuilds&&cfg.classBuilds[cfg.classId];
   const mapCard=(id)=>{ const m=ARENA_MAPS[id]; return `<button class="bigbtn ghost arenamap ${cfg.map===id?'sel':''}" data-map="${id}" style="text-align:left;${cfg.map===id?'border-color:#e8a33d;':''}"><b>${m.name}</b><br><span style="opacity:.7;font-size:12px">${m.desc}</span></button>`; };
   const classBtns=Object.keys(CLASSES).map(cid=>`<button class="bigbtn ghost arenacls ${cfg.classId===cid?'sel':''}" data-cls="${cid}" style="width:auto;flex:1;min-width:90px;${cfg.classId===cid?'border-color:#e8a33d;':''}">${CLASSES[cid].icon} ${CLASSES[cid].disp}</button>`).join('');
   const archOpts=ARCHEIDS.map(a=>`<option value="${a}" ${cfg.wArch===a?'selected':''}>${ARCHES[a].disp}</option>`).join('');
@@ -8301,6 +8322,7 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
       <button class="bigbtn ghost" id="arFair" style="flex:1;min-width:120px;margin:0;${cfg.fair?'border-color:#7de08a;color:#7de08a':''}">⚖️ Fair Mode${cfg.fair?' ✓':''}</button>
       <button class="bigbtn ghost" id="arPow" style="flex:1;min-width:120px;margin:0;${cfg.powerups?'border-color:#ff9a3a;color:#ff9a3a':''}">✨ Powerups${cfg.powerups?' ✓':''}</button>
       <button class="bigbtn ghost" id="arRand" style="flex:1;min-width:120px;margin:0">🎲 Randomize</button>
+      <button class="bigbtn ghost" id="arRandSpec" style="flex:1;min-width:150px;margin:0;${randomized?'border-color:#c78cff;color:#e0b8ff;box-shadow:0 0 18px rgba(199,140,255,.14)':''}">&#127922; Random Respec${randomized?' &#10003;':''}<span style="display:block;opacity:.62;font-size:10px;margin-top:2px">${CLASSES[cfg.classId].disp} skills + passives</span></button>
       ${inA?'<button class="bigbtn ghost" id="arRespec" style="flex:1;min-width:120px;margin:0">✨ Free Respec</button>':''}</div>
     <button class="bigbtn" id="arGo">${inA?'✓ Apply Loadout':'⚔️ Enter Arena'}</button>
     ${inA?'<button class="bigbtn ghost" id="arLeave" style="margin-top:8px;color:#ff8a82;border-color:#5a2a2a">Leave Arena</button>':''}
@@ -8321,7 +8343,8 @@ function openArenaSetup(back){ mode='menu'; showGameUI(false);
   { const pw=g('arPow'); if(pw) pw.onclick=()=>{ cfg.powerups=!cfg.powerups; try{SFX.pickup();}catch(e){} toast(cfg.powerups?'✨ Powerups ON — health / damage / speed orbs spawn in the arena.':'Powerups off.'); openArenaSetup(back); }; }
   g('arFair').onclick=()=>{ cfg.fair=!cfg.fair; try{SFX.pickup();}catch(e){} toast(cfg.fair?'⚖️ Fair Mode ON — everyone gets a standardized level, gear & stats.':'Fair Mode off — custom loadouts.'); openArenaSetup(back); };
   g('arRand').onclick=()=>{ const R=a=>a[Math.floor(Math.random()*a.length)]; cfg.fair=false; cfg.classId=R(Object.keys(CLASSES)); cfg.wArch=R(ARCHEIDS); cfg.wRid=R(RORDER); cfg.aRid=R(RORDER); cfg.level=8+Math.floor(Math.random()*45); cfg.rank=1+Math.floor(Math.random()*10); cfg.botClass=R(Object.keys(CLASSES)); cfg.botDiff=R(BOT_DIFFS); try{SFX.pickup();}catch(e){} if(inA) refreshArenaBots(cfg); toast('🎲 Randomized loadout + bots!'); openArenaSetup(back); };
-  if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>openArenaSetup(back)); };
+  g('arRandSpec').onclick=()=>{ const r=arenaRandomRespec(cfg); try{SFX.pickup();}catch(e){} if(r)toast('Random '+CLASSES[r.classId].disp+' build: '+r.skills+' skills + '+r.passives+' passives. Apply the loadout to test it.'); openArenaSetup(back); };
+  if(inA){ const rs=g('arRespec'); if(rs) rs.onclick=()=>{ arenaApplyClass(cfg); openRespecTree(cfg.classId,()=>{ if(cfg.classBuilds)delete cfg.classBuilds[cfg.classId]; openArenaSetup(back); }); };
     const lv=g('arLeave'); if(lv) lv.onclick=()=>{ exitArena(); }; }
   g('arGo').onclick=()=>{ try{SFX.pickup();}catch(e){}
     if(inA){ buildArenaRoom(); toast('Loadout applied — fresh arena.'); }   // rebuild the room so a new MAP + loadout + bots all take effect (still fully save-protected)
@@ -13504,7 +13527,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   classStyleMul, classStartWeapon, stashItem, openBag, STASH_CAP, playerAttack, offerWeapon, offerArmor,
   setMusicVol, setSfxVol, audioSettingsHTML, itemAv,
   enterWaystation, openHubMenu, wsResume, hubInteract, openNpcTalk, drawWaystation, openClasses, openTrainer, openRespecTree, openPause, updateHubTags, hubTagAnchor, RANK_XP, CLASS2, c2ch, drawSpawner, SPAWNER, bagReplaced, THROWAWAY, openForge, fuseGroups, RORDER, RARITY, ARCHES, SLOTS, openSlots, slotSummary, selectSlot, deleteSlot, GKEY, MKEY, SLOT,
-  enterArena, exitArena, openArenaSetup, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
+  enterArena, exitArena, openArenaSetup, arenaRandomRespec, arenaApplyClass, buildArenaPlayer, ARENA_LOADOUT, get inArena(){ return IN_ARENA; },
   runDuelOnce, duelMatrix,
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,

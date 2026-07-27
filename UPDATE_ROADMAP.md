@@ -1553,3 +1553,8 @@ Taught the mid-air dash as a REQUIRED traversal in the first level, before the s
 - Abyss and Gauntlet combat are host-authoritative: guests mirror live enemies/bosses, floor portals, and Gauntlet boss transitions instead of spawning divergent local encounters.
 - Treasure Sprint transmits its generated course seed so every peer receives the identical route, section families, and parkour layout.
 - Verified in isolated host/guest browser pages: four Abyss enemies visible as four guest mirrors; identical 47-node six-family Sprint course; Gauntlet bosses synchronized across indices 0 and 1; zero console errors.
+
+## v1.394.0-autopilot - visible, combat-capable multiplayer pets
+- Multiplayer presence now synchronizes each equipped pet's identity, position, facing, health, and death state; remote companions render beside their owners with smooth movement and an HP bar.
+- In PvP, hostile pets are valid targets for player attacks, skills, projectiles, and opposing attacker pets. Pet damage is routed to the owning client, with team friendly fire still disabled.
+- Verified in isolated host/guest browser pages with Ember Pup versus Stone Whelp: remote rendering/target discovery passed, pet attack packets landed, authoritative HP fell from 75 to 63, player-to-pet damage routed correctly, and zero console errors occurred.

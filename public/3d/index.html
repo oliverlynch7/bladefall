@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.393.0-autopilot';
+const VERSION3D='1.394.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6202,9 +6202,24 @@ function pvpHostiles(){
   }
   return out;
 }
+function pvpPetHostiles(){
+  const out=[];
+  if(!MP.active||!MP.pvp)return out;
+  const myTeam=MP.teamOf(MP.myId);
+  for(const id in MP.peers){
+    const q=MP.peers[id],pet=q&&q.pet;
+    if(!pet||q.zone!==MP.zone||pet.dead||pet.hp<=0)continue;
+    if(MP.teams&&MP.teamOf(id)===myTeam)continue;
+    pet._peerPet=true;pet._peerId=id;pet.active=true;pet.dead=false;
+    pet.r=pet.r||14;pet.h=pet.h||30;
+    out.push(pet);
+  }
+  return out;
+}
 function combatTargets(){
   const peers=pvpHostiles();
-  return peers.length?G.enemies.concat(peers):G.enemies;
+  const pets=pvpPetHostiles();
+  return (peers.length||pets.length)?G.enemies.concat(peers,pets):G.enemies;
 }
 function targetInPlayerSight(p,e,maxDist){
   if(!e||e.dead||!e.active) return false;
@@ -7065,6 +7080,14 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   }
   // PvP opponents are real combat targets too. The local attacker owns hit detection and
   // sends authoritative damage to the target's client, just like ordinary PvP melee.
+  if(e&&e._peerPet){
+    dmg=Math.max(1,Math.round(dmg));
+    const sx=src&&Number.isFinite(src.x)?src.x:G.p.x,sz=src&&Number.isFinite(src.z)?src.z:G.p.z;
+    MP.sendPetPvp(e._peerId,dmg,sx,sz);
+    e.hitFlash=.12;addText(e.x,(e.y||0)+(e.h||30)+8,e.z,dmg,'#ffb47a',false,'dmg');
+    burst(e.x,(e.y||0)+(e.h||30)*.5,e.z,'#ff8a62',4);SFX.hit();
+    return;
+  }
   if(e&&e._peer){
     if(e.markT>0)dmg*=1.4;
     if(meta.classId==='warlock'&&(e.warCurseT||0)>0)dmg*=c2Passive('war_deep')?1.30:1.15;
@@ -7646,19 +7669,22 @@ const MP={
   wsnap(w){ if(!w) return null; return { art:w.art, cls:w.cls, sch:w.sch, blade:w.blade, color:w.color, el:w.el, rarity:w.rarity, fist:!!w.fist }; },
   // reconstruct render-only minion objects from a synced [x,z,y,yaw] snapshot (drawPet3 uses the Grave Wraith model)
   _mnRender(raw){ if(!raw||!raw.length) return []; const out=[]; for(let i=0;i<raw.length;i++){ const a=raw[i]; out.push({id:'gravewraith',x:a[0],z:a[1],y:a[2]||0,yaw:a[3]||0,bob:0,t:0}); } return out; },
+  _petRender(raw,old){ if(!raw||!raw.length)return null; const p=old&&old.id===raw[0]?old:{id:raw[0],x:raw[1],z:raw[2],y:raw[3]||0,yaw:raw[4]||0,bob:0,t:0};
+    p.tx=raw[1];p.tz=raw[2];p.ty=raw[3]||0;p.tyaw=raw[4]||0;p.hp=raw[5]||0;p.maxHp=raw[6]||1;p.dead=!!raw[7];return p; },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:this.name, zone:this.zone,
     x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
     w:(p&&p.weapon)?this.wsnap(p.weapon):null, dn:(p&&p.downed)?1:0,
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
+    pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
   mkPeer(s){ return {id:s.id,name:s.name||'Warden',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
-    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, mnRaw:s.mn||null, minions:this._mnRender(s.mn),
+    weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -7677,6 +7703,7 @@ const MP={
       else if(d.t==='hit'){ this.hostApplyHit(d); }
       else if(d.t==='revive'){ this.routeRevive(d.id); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pdmg'){ this.routePvp(d); }           // host relays PvP damage to the target
+      else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
       else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
@@ -7742,6 +7769,7 @@ const MP={
     else if(d.t==='revive'){ if(d.id===this.myId) this.reviveSelf('An ally pulled you up!'); }
     else if(d.t==='wipe'){ this.doWipe(); }
     else if(d.t==='pdmg'){ if(d.id===this.myId) this.takePvpDamage(d); }   // PvP: I got hit
+    else if(d.t==='petdmg'){ if(d.id===this.myId) this.takePetPvpDamage(d); }
     else if(d.t==='score'){ this.showScore(d.id,d.n); }
     else if(d.t==='cfx'){ this.recvCombat(d); }   // the host's (or a relayed guest's) projectiles/skill rings
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
@@ -7807,6 +7835,9 @@ const MP={
       if(q.last>3){ delete this.peers[id]; continue; }
       const k=Math.min(1,dt*12); q.x+=(q.tx-q.x)*k; q.y+=(q.ty-q.y)*k; q.z+=(q.tz-q.z)*k;
       let dy=q.tyaw-q.yaw; while(dy>Math.PI)dy-=2*Math.PI; while(dy<-Math.PI)dy+=2*Math.PI; q.yaw+=dy*k;
+      if(q.pet){ const pt=q.pet; pt.t=(pt.t||0)+dt; pt.bob=Math.sin(pt.t*3)*3;
+        pt.x+=(pt.tx-pt.x)*k;pt.y+=(pt.ty-pt.y)*k;pt.z+=(pt.tz-pt.z)*k;
+        let py=pt.tyaw-pt.yaw;while(py>Math.PI)py-=2*Math.PI;while(py<-Math.PI)py+=2*Math.PI;pt.yaw+=py*k; }
       if(q.at>0) q.at=Math.max(0,q.at-dt);
       if(q.markT>0)q.markT=Math.max(0,q.markT-dt);
       if(q.warCurseT>0)q.warCurseT=Math.max(0,q.warCurseT-dt);
@@ -7848,6 +7879,9 @@ const MP={
     // this ally's summons (necromancer minions etc.) — synced from the owner, drawn with the same model
     if(q.minions&&q.minions.length && typeof drawPet3==='function'){
       for(let i=0;i<q.minions.length;i++){ const mm=q.minions[i]; mm.bob=Math.sin(t*3+i)*3; try{ drawPet3(mm,t+i*0.31); }catch(_){} } }
+    if(q.pet&&!q.pet.dead&&q.pet.hp>0&&typeof drawPet3==='function'){
+      try{ drawPet3(q.pet,t); const ps=project(q.pet.x,q.pet.y+42,q.pet.z);
+        if(ps)hpBars.push({x:ps[0],y:ps[1],f:Math.max(0,Math.min(1,q.pet.hp/Math.max(1,q.pet.maxHp))),pet:true,name:(PETS[q.pet.id]&&PETS[q.pet.id].name)||'Companion'}); }catch(_){} }
     // floating name + HP bar (uses the 2D overlay, like enemy/pet bars) + link ping
     const s=project(q.x,(q.y||0)+72,q.z);
     if(s){ const hpm=q.hpm||100, f=Math.max(0,Math.min(1,(q.hp==null?hpm:q.hp)/hpm));
@@ -7920,14 +7954,24 @@ const MP={
     const reach=((typeof MELEE!=='undefined'&&MELEE[w.art]&&MELEE[w.art].reach)||90)+22, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     for(const id in this.peers){ const q=this.peers[id]; if(q.zone!==this.zone) continue;
       if(this.teams && this.teamOf(id)===this.teamOf(this.myId)) continue;   // no friendly fire
-      const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz); if(d>reach+16) continue;
-      if(d>16 && (dx*fx+dz*fz)/d<0.35) continue;               // must be roughly in front of the swing
-      if(q._pvpSwing===p.swingId) continue; q._pvpSwing=p.swingId;
-      this.sendPvp(q.id, Math.round(dmg), p.x, p.z); try{ addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a'); }catch(e){} } },
+      const dx=(q.x||0)-p.x, dz=(q.z||0)-p.z, d=Math.hypot(dx,dz);
+      if(d<=reach+16&&(d<=16||(dx*fx+dz*fz)/d>=0.35)&&q._pvpSwing!==p.swingId){
+        q._pvpSwing=p.swingId;this.sendPvp(q.id,Math.round(dmg),p.x,p.z);try{addText(q.x,(q.y||0)+52,q.z,'HIT','#ffd24a');}catch(e){}}
+      const pet=q.pet;if(!pet||pet.dead||pet.hp<=0)continue;
+      const px=pet.x-p.x,pz=pet.z-p.z,pd=Math.hypot(px,pz);if(pd>reach+14)continue;
+      if(pd>14&&(px*fx+pz*fz)/pd<0.35)continue;
+      if(pet._pvpSwing===p.swingId)continue;pet._pvpSwing=p.swingId;
+      this.sendPetPvp(q.id,Math.round(dmg),p.x,p.z);try{addText(pet.x,(pet.y||0)+40,pet.z,'HIT','#ffb47a');}catch(e){} } },
   sendPvp(id,dmg,sx,sz){ const m={t:'pdmg',id,d:dmg,sx:Math.round(sx),sz:Math.round(sz),by:this.myId};
     if(this.isHost){ if(id===this.myId) this.takePvpDamage(m); else { const c=this.conns.find(x=>x._pid===id); if(c) try{c.send(m);}catch(e){} } }
     else { if(this.hostConn&&this.hostConn.open) try{this.hostConn.send(m);}catch(e){} } },
   routePvp(m){ if(m.id===this.myId){ this.takePvpDamage(m); return; } const c=this.conns.find(x=>x._pid===m.id); if(c) try{c.send(m);}catch(e){} },
+  sendPetPvp(id,dmg,sx,sz){ const m={t:'petdmg',id,d:Math.max(1,Math.round(dmg)),sx:Math.round(sx),sz:Math.round(sz),by:this.myId};
+    if(this.isHost){if(id===this.myId)this.takePetPvpDamage(m);else{const c=this.conns.find(x=>x._pid===id);if(c)try{c.send(m);}catch(e){}}}
+    else if(this.hostConn&&this.hostConn.open)try{this.hostConn.send(m);}catch(e){} },
+  routePetPvp(m){if(m.id===this.myId){this.takePetPvpDamage(m);return;}const c=this.conns.find(x=>x._pid===m.id);if(c)try{c.send(m);}catch(e){}},
+  takePetPvpDamage(m){if(!this.pvp||!G||!G.pet||G.pet.dead)return; if(this.teams&&m.by&&this.teamOf(m.by)===this.teamOf(this.myId))return;
+    hurtPet(Math.max(1,Math.round((m.d||1)*.6)),m.sx,m.sz);},
   takePvpDamage(m){ if(!G||!G.p||G.p._pvpDead) return; if(this.teams && m.by && this.teamOf(m.by)===this.teamOf(this.myId)) return;   // friendly fire off
     const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
     let dmg=Math.max(1,Math.round((m.d||1)*(1-(typeof defenseR==='function'?defenseR(p):0))*0.6));   // 0.6 PvP scalar so duels last
@@ -13639,7 +13683,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; },
-  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
+  PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,

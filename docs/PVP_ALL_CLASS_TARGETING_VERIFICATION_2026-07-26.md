@@ -1,6 +1,7 @@
 # PvP All-Class Targeting Verification — 2026-07-26
 
-Branch: `bladefall-autopilot`  
+Branch: `bladefall-autopilot`
+
 Build: `1.388.0-autopilot`
 
 ## Problem

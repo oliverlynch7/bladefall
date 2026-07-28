@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>BLADEFALL — 3D Vertical Slice</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:#08090c;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#e8dcc6;overscroll-behavior:none}
+  canvas{display:block;width:100vw;height:100vh;touch-action:none}
+
+  #load{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:16px;
+    background:radial-gradient(circle at 50% 40%,#181420,#08090c 70%);z-index:50;text-align:center;padding:20px}
+  #load h1{font-family:Georgia,serif;letter-spacing:.14em;margin:0;font-size:clamp(22px,5vw,34px);color:#e8c07a}
+  #load p{margin:0;color:#8d8474;font-size:13px}
+  .spin{width:34px;height:34px;border:3px solid #3a3020;border-top-color:#e8a33d;border-radius:50%;
+    animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  #bar{width:min(280px,70vw);height:4px;background:#241f18;border-radius:3px;overflow:hidden}
+  #bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#a9762a,#f0c070);transition:width .3s}
+
+  .hud{position:fixed;z-index:20;pointer-events:none}
+  #top{top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+    display:flex;gap:8px;align-items:flex-start;justify-content:space-between;
+    background:linear-gradient(180deg,rgba(6,7,10,.82),transparent)}
+  #brand{font-family:Georgia,serif;font-size:13px;letter-spacing:.16em;color:#e8c07a;text-transform:uppercase}
+  #brand small{display:block;letter-spacing:.05em;text-transform:none;color:#8d8474;font-size:10.5px;font-family:system-ui}
+  #classes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
+  .cbtn{background:linear-gradient(180deg,rgba(38,30,20,.95),rgba(16,14,18,.95));border:1px solid #4a3c26;
+    color:#d8c8a8;font-size:11.5px;font-weight:700;padding:7px 11px;border-radius:9px;cursor:pointer;
+    letter-spacing:.03em;transition:.14s}
+  .cbtn:hover{border-color:#e8a33d;color:#fff}
+  .cbtn.sel{border-color:#e8a33d;color:#ffd89a;box-shadow:0 0 14px rgba(232,163,61,.28)}
+  .cbtn:focus-visible{outline:2px solid #e8a33d;outline-offset:2px}
+
+  #hint{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:20;
+    font-size:11.5px;color:#8d8474;line-height:1.7;pointer-events:none;text-shadow:0 1px 3px #000}
+  #hint b{color:#d8c8a8}
+  #fps{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:20;
+    font:600 11px ui-monospace,monospace;color:#6f6858;pointer-events:none}
+
+  /* touch controls */
+  #touch{position:fixed;inset:0;z-index:22;display:none;pointer-events:none}
+  body.touch #touch{display:block}
+  #stick{position:absolute;left:calc(env(safe-area-inset-left) + 22px);bottom:calc(env(safe-area-inset-bottom) + 26px);
+    width:124px;height:124px;border-radius:50%;background:rgba(20,18,24,.42);border:1.5px solid rgba(200,170,110,.28);
+    pointer-events:auto;touch-action:none}
+  #knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#5a4a30,#241d14);border:1.5px solid rgba(230,190,120,.5)}
+  #abtns{position:absolute;right:calc(env(safe-area-inset-right) + 20px);bottom:calc(env(safe-area-inset-bottom) + 30px);
+    display:grid;gap:12px;justify-items:center;pointer-events:auto}
+  .ab{width:74px;height:74px;border-radius:50%;border:2px solid;display:grid;place-content:center;
+    font-weight:800;font-size:12px;letter-spacing:.06em;cursor:pointer;touch-action:none;user-select:none}
+  #bAtk{background:radial-gradient(circle at 40% 35%,#7a2420,#2a0f0e);border-color:#c0533f;color:#ffd0c0}
+  #bSkill{background:radial-gradient(circle at 40% 35%,#5a3a10,#2a1c08);border-color:#e8a33d;color:#ffe0a8;
+    width:64px;height:64px;font-size:11px}
+  #bRoll{background:radial-gradient(circle at 40% 35%,#20344a,#0e1620);border-color:#5f8fb8;color:#cfe4f5;
+    width:60px;height:60px;font-size:11px}
+  .ab:active{filter:brightness(1.35)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="load">
+  <h1>BLADEFALL</h1>
+  <div class="spin"></div>
+  <div id="bar"><i></i></div>
+  <p id="lmsg">Loading 3D vertical slice…</p>
+</div>
+
+<div class="hud" id="top">
+  <div id="brand">Bladefall<small>3D slice · Quaternius art test</small></div>
+  <div id="classes"></div>
+</div>
+
+<div id="hint">
+  <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> roll · <b>J</b>/click attack · <b>K</b> skill<br>
+  <b>Drag</b> to orbit camera · <b>Scroll</b> to zoom
+</div>
+<div id="fps"></div>
+
+<div id="touch">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="abtns">
+    <div class="ab" id="bSkill">SKILL</div>
+    <div class="ab" id="bRoll">ROLL</div>
+    <div class="ab" id="bAtk">ATTACK</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "./three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+
+/* ─────────────────────────────────────────────────────────────
+   BLADEFALL — 3D vertical slice
+   Purpose: judge the Quaternius art direction in motion, with the
+   real game verbs (move / sprint / roll / attack / skill) before
+   committing to a full rebuild. Art: Quaternius + Kenney, all CC0.
+   ───────────────────────────────────────────────────────────── */
+
+const HERO_H = 1.75;                 // metres — everything is normalised to this
+const clock  = new THREE.Clock();
+const canvas = document.getElementById('c');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.34;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#171a24');
+scene.fog = new THREE.FogExp2('#171a24', 0.013);
+
+const camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.1, 300);
+
+/* ── Lighting: moody but READABLE — atmosphere shouldn't cost you the art. ── */
+scene.add(new THREE.HemisphereLight('#7f92bc', '#3a2f26', 1.35));
+const moon = new THREE.DirectionalLight('#cfe0ff', 1.5);
+moon.position.set(-8, 14, -6);
+moon.castShadow = true;
+moon.shadow.mapSize.set(2048, 2048);
+moon.shadow.camera.near = 1; moon.shadow.camera.far = 60;
+moon.shadow.camera.left = -22; moon.shadow.camera.right = 22;
+moon.shadow.camera.top = 22;  moon.shadow.camera.bottom = -22;
+moon.shadow.bias = -0.0016;
+scene.add(moon);
+
+const heroLamp = new THREE.PointLight('#ffc888', 2.6, 18, 2);   // keeps the hero readable in the gloom
+scene.add(heroLamp);
+
+// flickering braziers, placed after we know the room size
+const torches = [];
+function addTorch(x, z){
+  const g = new THREE.Group(); g.position.set(x, 0, z);
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,1.1,7),
+    new THREE.MeshStandardMaterial({ color:'#2b2119', roughness:.95 }));
+  post.position.y = 0.55; post.castShadow = true; g.add(post);
+  const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.11,0.16,9),
+    new THREE.MeshStandardMaterial({ color:'#3a2c1e', roughness:.9 }));
+  bowl.position.y = 1.16; g.add(bowl);
+  const flame = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16,0),
+    new THREE.MeshBasicMaterial({ color:'#ffb44a' }));
+  flame.position.y = 1.32; g.add(flame);
+  const li = new THREE.PointLight('#ff9a3c', 3.6, 16, 2);
+  li.position.y = 1.35; g.add(li);
+  scene.add(g);
+  torches.push({ li, flame, base:3.6, seed: Math.random()*7 });
+}
+
+/* ── Loading ── */
+const loader = new GLTFLoader();
+const bar = document.querySelector('#bar i');
+const lmsg = document.getElementById('lmsg');
+let loadedCount = 0, loadTotal = 1;
+const bump = () => { loadedCount++; bar.style.width = Math.round(100*loadedCount/loadTotal)+'%'; };
+const load = url => new Promise((res, rej) => loader.load(url, g => { bump(); res(g); }, undefined, rej));
+
+// Quaternius + Kenney ship KHR_materials_unlit, which GLTFLoader turns into MeshBasicMaterial —
+// those ignore every light, so torches/shadows would do nothing. Re-light them as Lambert
+// (cheap, and the flat stylised look survives) while keeping the baked colour map.
+function relight(m){
+  if(!m || !m.isMeshBasicMaterial) return m;
+  const lit = new THREE.MeshLambertMaterial({
+    map: m.map || null,
+    color: m.color ? m.color.clone() : new THREE.Color('#ffffff'),
+    transparent: m.transparent, opacity: m.opacity,
+    alphaTest: m.alphaTest, side: m.side, vertexColors: m.vertexColors
+  });
+  lit.name = m.name;
+  return lit;
+}
+function prep(obj, { shadow=true } = {}){
+  obj.traverse(o => {
+    if(!o.isMesh) return;
+    o.castShadow = shadow; o.receiveShadow = true;
+    o.material = Array.isArray(o.material) ? o.material.map(relight) : relight(o.material);
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const m of mats){ if(m && m.map) m.map.colorSpace = THREE.SRGBColorSpace; }
+  });
+  return obj;
+}
+const boxOf = o => new THREE.Box3().setFromObject(o);
+
+/* ─────────────  CLASSES  ─────────────
+   Clip names verified from the Quaternius glTF files. Each class maps the
+   game's verbs onto whatever that model actually ships, with fallbacks. */
+const CLASSES = [
+  { id:'Warrior', label:'Warrior', tint:'#d8b26a',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'],
+            attack:['Sword_Attack','Sword_Attack2'], skill:['Sword_Attack2','Sword_Attack'], hit:['RecieveHit'] },
+    skill:{ name:'Earthshatter', kind:'nova', color:'#ffb347', color2:'#ff5a2a' } },
+  { id:'Rogue', label:'Rogue', tint:'#8fd0a8',
+    clips:{ idle:['Idle'], walk:['Walk'], run:['Run'], roll:['Roll'],
+            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2','Dagger_Attack'], hit:['RecieveHit'] },
+    skill:{ name:'Venom Burst', kind:'nova', color:'#8dff9a', color2:'#2ea84a' } },
+  { id:'Wizard', label:'Wizard', tint:'#9ab8ff',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'],
+            attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit'] },
+    skill:{ name:'Arc Nova', kind:'bolt', color:'#9ad4ff', color2:'#5f8fff' } },
+];
+
+/* ─────────────  ACTOR  ───────────── */
+class Actor {
+  constructor(gltf, def){
+    this.def = def;
+    this.root = new THREE.Group();
+    const model = gltf.scene;
+    // normalise: Quaternius rigs vary in unit scale — fit every hero to HERO_H
+    const b = boxOf(model), size = b.getSize(new THREE.Vector3());
+    const s = HERO_H / Math.max(0.0001, size.y);
+    model.scale.setScalar(s);
+    const b2 = boxOf(model);
+    model.position.y -= b2.min.y;                     // feet on the floor
+    model.position.x -= (b2.min.x + b2.max.x)/2 ;
+    model.position.z -= (b2.min.z + b2.max.z)/2 ;
+    prep(model);
+    this.root.add(model);
+    this.model = model;
+
+    this.mixer = new THREE.AnimationMixer(model);
+    this.clips = {};
+    for(const c of gltf.animations) this.clips[c.name] = c;
+    this.actions = {};
+    this.current = null;
+    this.locked = 0;                                   // seconds of non-interruptible action
+    this.play('idle');
+  }
+  find(role){
+    const want = this.def.clips[role] || [];
+    for(const n of want) if(this.clips[n]) return this.clips[n];
+    return null;
+  }
+  action(role, clipOverride){
+    const clip = clipOverride || this.find(role);
+    if(!clip) return null;
+    const key = role + '|' + clip.name;
+    if(!this.actions[key]){
+      const a = this.mixer.clipAction(clip);
+      this.actions[key] = a;
+    }
+    return this.actions[key];
+  }
+  play(role, { loop=true, fade=0.18, clip=null, speed=1 } = {}){
+    const a = this.action(role, clip);
+    if(!a || a === this.current) { if(a) a.timeScale = speed; return a; }
+    a.reset();
+    a.timeScale = speed;
+    a.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
+    a.clampWhenFinished = !loop;
+    a.fadeIn(fade).play();
+    if(this.current) this.current.fadeOut(fade);
+    this.current = a;
+    return a;
+  }
+  once(role, speed=1){
+    const clip = this.find(role); if(!clip) return 0;
+    this.play(role, { loop:false, fade:0.08, speed });
+    const dur = clip.duration / speed;
+    this.locked = dur * 0.82;                          // let the tail blend back to idle
+    return dur;
+  }
+  update(dt){ this.mixer.update(dt); if(this.locked>0) this.locked -= dt; }
+}
+
+/* ─────────────  VFX  ───────────── */
+const vfx = [];
+function novaFX(pos, colA, colB){
+  // expanding ground ring
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.25, 0.42, 40),
+    new THREE.MeshBasicMaterial({ color:colA, transparent:true, opacity:.95, side:THREE.DoubleSide, depthWrite:false })
+  );
+  ring.rotation.x = -Math.PI/2; ring.position.copy(pos).setY(0.06);
+  scene.add(ring);
+  // embers
+  const N = 90, geo = new THREE.BufferGeometry();
+  const p = new Float32Array(N*3), v = [];
+  for(let i=0;i<N;i++){
+    p[i*3]=pos.x; p[i*3+1]=0.25; p[i*3+2]=pos.z;
+    const a = Math.random()*Math.PI*2, sp = 2.2 + Math.random()*4.2;
+    v.push(new THREE.Vector3(Math.cos(a)*sp, 2.4+Math.random()*4.2, Math.sin(a)*sp));
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(p,3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    color:colB, size:.13, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending }));
+  scene.add(pts);
+  const flash = new THREE.PointLight(colA, 14, 13, 2); flash.position.copy(pos).setY(1); scene.add(flash);
+  vfx.push({ t:0, life:1.15, ring, pts, v, flash, geo });
+}
+function boltFX(pos, colA, colB){
+  const g = new THREE.Group(); g.position.copy(pos);
+  for(let i=0;i<7;i++){                                   // jagged descending bolt
+    const seg = new THREE.Mesh(new THREE.BoxGeometry(.09,.62,.09),
+      new THREE.MeshBasicMaterial({ color: i%2?colA:colB, transparent:true, opacity:.95, depthWrite:false }));
+    seg.position.set((Math.random()-.5)*.5, 4.2 - i*0.62, (Math.random()-.5)*.5);
+    seg.rotation.z = (Math.random()-.5)*.7; g.add(seg);
+  }
+  scene.add(g);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.2,0.36,36),
+    new THREE.MeshBasicMaterial({ color:colA, transparent:true, opacity:.9, side:THREE.DoubleSide, depthWrite:false }));
+  ring.rotation.x=-Math.PI/2; ring.position.copy(pos).setY(.06); scene.add(ring);
+  const flash = new THREE.PointLight(colA, 18, 15, 2); flash.position.copy(pos).setY(1.4); scene.add(flash);
+  vfx.push({ t:0, life:.75, bolt:g, ring, flash });
+}
+function stepVFX(dt){
+  for(let i=vfx.length-1;i>=0;i--){
+    const f = vfx[i]; f.t += dt;
+    const k = f.t / f.life;
+    if(k>=1){
+      [f.ring,f.pts,f.bolt,f.flash].forEach(o=>{ if(o){ scene.remove(o);
+        if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); } });
+      vfx.splice(i,1); continue;
+    }
+    if(f.ring){ const s = 1 + k*11; f.ring.scale.set(s,s,1); f.ring.material.opacity = .95*(1-k); }
+    if(f.flash) f.flash.intensity = (f.bolt?18:14) * Math.max(0, 1-k*1.5);
+    if(f.bolt){ f.bolt.children.forEach(c=>{ c.material.opacity = .95*(1-k); }); f.bolt.position.y = -k*0.3; }
+    if(f.pts){
+      const arr = f.geo.attributes.position.array;
+      for(let j=0;j<f.v.length;j++){
+        f.v[j].y -= 9.5*dt;
+        arr[j*3] += f.v[j].x*dt; arr[j*3+1] += f.v[j].y*dt; arr[j*3+2] += f.v[j].z*dt;
+        if(arr[j*3+1] < 0.05){ arr[j*3+1] = 0.05; f.v[j].y *= -0.24; f.v[j].x*=.7; f.v[j].z*=.7; }
+      }
+      f.geo.attributes.position.needsUpdate = true;
+      f.pts.material.opacity = 1-k;
+    }
+  }
+}
+
+/* ─────────────  INPUT  ───────────── */
+const keys = {};
+addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if(e.code==='Space'){ e.preventDefault(); doRoll(); }
+  if(e.code==='KeyJ') doAttack();
+  if(e.code==='KeyK') doSkill();
+});
+addEventListener('keyup', e => keys[e.code] = false);
+
+// camera orbit (drag) — works for mouse and, outside the touch widgets, for fingers
+let camYaw = 0.0, camPitch = 0.34, camDist = 7.2;
+let dragging = false, lastX = 0, lastY = 0, dragId = null;
+function onDown(e){
+  if(e.target.closest && e.target.closest('#touch, #classes')) return;
+  dragging = true; dragId = e.pointerId; lastX = e.clientX; lastY = e.clientY;
+}
+function onMove(e){
+  if(!dragging || e.pointerId !== dragId) return;
+  camYaw   -= (e.clientX - lastX) * 0.0055;
+  camPitch  = Math.max(-0.15, Math.min(1.15, camPitch + (e.clientY - lastY) * 0.0042));
+  lastX = e.clientX; lastY = e.clientY;
+}
+function onUp(e){ if(e.pointerId===dragId){ dragging = false; dragId = null; } }
+canvas.addEventListener('pointerdown', onDown);
+addEventListener('pointermove', onMove);
+addEventListener('pointerup', onUp);
+addEventListener('pointercancel', onUp);
+addEventListener('wheel', e => { camDist = Math.max(3, Math.min(16, camDist + Math.sign(e.deltaY)*0.6)); }, {passive:true});
+
+// touch stick
+const touchVec = new THREE.Vector2(0,0);
+if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
+(function stickSetup(){
+  const stick = document.getElementById('stick'), knob = document.getElementById('knob');
+  let id = null, cx=0, cy=0, R=52;
+  const set = (dx,dy)=>{
+    const d = Math.hypot(dx,dy), c = d>R ? R/d : 1;
+    knob.style.transform = `translate(${dx*c}px,${dy*c}px)`;
+    touchVec.set((dx*c)/R, (dy*c)/R);
+  };
+  stick.addEventListener('pointerdown', e=>{
+    id = e.pointerId; const r = stick.getBoundingClientRect();
+    cx = r.left + r.width/2; cy = r.top + r.height/2;
+    set(e.clientX-cx, e.clientY-cy); stick.setPointerCapture(id);
+  });
+  stick.addEventListener('pointermove', e=>{ if(e.pointerId!==id) return; set(e.clientX-cx, e.clientY-cy); });
+  const end = e=>{ if(e.pointerId!==id) return; id=null; knob.style.transform=''; touchVec.set(0,0); };
+  stick.addEventListener('pointerup', end); stick.addEventListener('pointercancel', end);
+})();
+const tapBtn = (id, fn) => {
+  const el = document.getElementById(id);
+  el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
+};
+tapBtn('bAtk', ()=>doAttack()); tapBtn('bRoll', ()=>doRoll()); tapBtn('bSkill', ()=>doSkill());
+canvas.addEventListener('click', ()=>{ if(!dragging) doAttack(); });
+
+/* ─────────────  STATE  ───────────── */
+let hero = null, heroDef = CLASSES[0], enemy = null;
+let roomHalf = 11;                              // movement bounds, set from the room bbox
+const vel = new THREE.Vector3();
+let rollT = 0; const rollDir = new THREE.Vector3();
+let atkFlip = 0;
+
+function doAttack(){
+  if(!hero || hero.locked>0 || rollT>0) return;
+  const list = heroDef.clips.attack.filter(n=>hero.clips[n]);
+  const name = list.length ? list[atkFlip++ % list.length] : null;
+  if(name) { hero.play('attack', { loop:false, fade:.07, clip:hero.clips[name], speed:1.25 });
+             hero.locked = hero.clips[name].duration/1.25*0.8; }
+}
+function doRoll(){
+  if(!hero || rollT>0 || hero.locked>0) return;
+  const d = moveDir();
+  rollDir.copy(d.lengthSq()>0.01 ? d : new THREE.Vector3(Math.sin(hero.root.rotation.y),0,Math.cos(hero.root.rotation.y)));
+  rollT = 0.62; hero.once('roll', 1.15);
+}
+function doSkill(){
+  if(!hero || hero.locked>0 || rollT>0) return;
+  hero.once('skill', 1.0);
+  const S = heroDef.skill;
+  const at = hero.root.position.clone().add(
+    new THREE.Vector3(Math.sin(hero.root.rotation.y), 0, Math.cos(hero.root.rotation.y)).multiplyScalar(1.6));
+  setTimeout(()=>{
+    if(S.kind === 'bolt') boltFX(at, S.color, S.color2); else novaFX(at, S.color, S.color2);
+    if(enemy && enemy.root.position.distanceTo(at) < 4.2) enemy.once('hit', 1.1);
+  }, 190);
+}
+function moveDir(){
+  let x = 0, z = 0;
+  if(keys.KeyW||keys.ArrowUp) z -= 1;
+  if(keys.KeyS||keys.ArrowDown) z += 1;
+  if(keys.KeyA||keys.ArrowLeft) x -= 1;
+  if(keys.KeyD||keys.ArrowRight) x += 1;
+  x += touchVec.x; z += touchVec.y;
+  const v = new THREE.Vector3(x, 0, z);
+  if(v.lengthSq() > 1) v.normalize();
+  // camera-relative
+  return v.applyAxisAngle(new THREE.Vector3(0,1,0), camYaw);
+}
+
+/* ─────────────  BUILD  ───────────── */
+async function build(){
+  loadTotal = 6;
+  lmsg.textContent = 'Loading dungeon…';
+  const [room, wallA, torchProp] = await Promise.all([
+    load('assets/dungeon/room-large.glb'),
+    load('assets/dungeon/template-wall-detail-a.glb').catch(()=>null),
+    load('assets/dungeon/gate-metal-bars.glb').catch(()=>null),
+  ]);
+
+  // ROOM — measure it, scale it to a comfortable arena, sit it at y=0
+  const rm = room.scene; prep(rm, { shadow:true });
+  let rb = boxOf(rm); let rs = rb.getSize(new THREE.Vector3());
+  const target = 26;                                  // metres across
+  const rscale = target / Math.max(rs.x, rs.z);
+  rm.scale.setScalar(rscale);
+  rb = boxOf(rm); rs = rb.getSize(new THREE.Vector3());
+  rm.position.y -= rb.min.y;
+  rm.position.x -= (rb.min.x + rb.max.x)/2;
+  rm.position.z -= (rb.min.z + rb.max.z)/2;
+  scene.add(rm);
+  roomHalf = Math.min(rs.x, rs.z)/2 - 1.4;
+
+  // a floor plane under everything so there's never a visual hole
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80,80),
+    new THREE.MeshStandardMaterial({ color:'#332c38', roughness:.98 }));
+  floor.rotation.x = -Math.PI/2; floor.position.y = -0.02; floor.receiveShadow = true; scene.add(floor);
+
+  // braziers in the corners of the play space
+  const t = roomHalf * 0.74;
+  addTorch(-t,-t); addTorch(t,-t); addTorch(-t,t); addTorch(t,t);
+
+  // a couple of gate props for silhouette interest
+  if(torchProp){
+    const g = torchProp.scene; prep(g);
+    const gb = boxOf(g), gs = gb.getSize(new THREE.Vector3());
+    g.scale.setScalar(2.6/Math.max(gs.x,gs.y,gs.z));
+    const g2 = g.clone();
+    g.position.set(0, 0, -roomHalf+0.2);
+    g2.position.set(0, 0, roomHalf-0.2); g2.rotation.y = Math.PI;
+    scene.add(g, g2);
+  }
+
+  // HERO + ENEMY
+  lmsg.textContent = 'Loading characters…';
+  const gW = await load('assets/chars/Warrior.gltf');
+  hero = new Actor(gW, CLASSES[0]);
+  scene.add(hero.root);
+
+  const gR = await load('assets/chars/Rogue.gltf');
+  enemy = new Actor(gR, CLASSES[1]);
+  enemy.root.position.set(3.4, 0, -4.2);
+  enemy.root.rotation.y = Math.PI;
+  enemy.model.traverse(o=>{                            // tint the enemy so it reads as hostile, not a 2nd player
+    if(!o.isMesh) return;
+    const mats = Array.isArray(o.material)?o.material:[o.material];
+    o.material = mats.map(m=>{ const c = m.clone(); if(c.color) c.color.lerp(new THREE.Color('#b0442e'), .55); return c; });
+    if(o.material.length===1) o.material = o.material[0];
+  });
+  scene.add(enemy.root);
+
+  // preload the other classes so switching is instant
+  lmsg.textContent = 'Preloading classes…';
+  window.__pre = {};
+  for(const c of CLASSES.slice(1)){
+    if(c.id==='Rogue'){ window.__pre.Rogue = gR; continue; }
+    window.__pre[c.id] = await load(`assets/chars/${c.id}.gltf`).catch(()=>null);
+  }
+  window.__pre.Warrior = gW;
+
+  buildClassBar();
+  document.getElementById('load').style.display = 'none';
+}
+
+function buildClassBar(){
+  const bar = document.getElementById('classes');
+  bar.innerHTML = '';
+  for(const c of CLASSES){
+    const b = document.createElement('button');
+    b.className = 'cbtn' + (c.id===heroDef.id ? ' sel' : '');
+    b.textContent = c.label; b.dataset.id = c.id;
+    b.onclick = () => switchClass(c);
+    bar.appendChild(b);
+  }
+}
+async function switchClass(def){
+  if(def.id === heroDef.id || !hero) return;
+  let g = window.__pre[def.id];
+  if(!g) g = await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
+  if(!g) return;
+  // re-instantiate from the cached gltf (cheap: same buffers, fresh scene graph)
+  const { pos, rot } = { pos: hero.root.position.clone(), rot: hero.root.rotation.y };
+  scene.remove(hero.root);
+  const fresh = { scene: g.scene.clone(true), animations: g.animations };
+  hero = new Actor(fresh, def);
+  hero.root.position.copy(pos); hero.root.rotation.y = rot;
+  scene.add(hero.root);
+  heroDef = def;
+  document.querySelectorAll('.cbtn').forEach(b=>b.classList.toggle('sel', b.dataset.id===def.id));
+}
+
+/* ─────────────  LOOP  ───────────── */
+const camTarget = new THREE.Vector3();
+let fpsT = 0, frames = 0;
+const fpsEl = document.getElementById('fps');
+
+function tick(){
+  requestAnimationFrame(tick);
+  const dt = Math.min(0.05, clock.getDelta());
+  const t  = clock.elapsedTime;
+
+  if(hero){
+    // ── movement ──
+    const dir = moveDir();
+    const sprint = keys.ShiftLeft || keys.ShiftRight || touchVec.length() > 0.86;
+    const speed = sprint ? 5.6 : 3.0;
+
+    if(rollT > 0){
+      rollT -= dt;
+      const rs = 7.4 * Math.max(.25, rollT/0.62);
+      vel.copy(rollDir).multiplyScalar(rs);
+    } else if(hero.locked > 0){
+      vel.multiplyScalar(0.72);                         // rooted mid-swing
+    } else if(dir.lengthSq() > 0.004){
+      vel.lerp(dir.clone().multiplyScalar(speed), 0.22);
+      const want = Math.atan2(dir.x, dir.z);
+      let d = want - hero.root.rotation.y;
+      while(d >  Math.PI) d -= Math.PI*2;
+      while(d < -Math.PI) d += Math.PI*2;
+      hero.root.rotation.y += d * Math.min(1, dt*14);
+    } else {
+      vel.multiplyScalar(0.80);
+    }
+    hero.root.position.addScaledVector(vel, dt);
+    // keep inside the room
+    hero.root.position.x = Math.max(-roomHalf, Math.min(roomHalf, hero.root.position.x));
+    hero.root.position.z = Math.max(-roomHalf, Math.min(roomHalf, hero.root.position.z));
+
+    // ── animation state ──
+    if(rollT <= 0 && hero.locked <= 0){
+      const sp = vel.length();
+      if(sp > 3.6)      hero.play('run',  { speed: 1.0 });
+      else if(sp > 0.5) hero.play('walk', { speed: Math.max(.75, sp/2.4) });
+      else              hero.play('idle');
+    }
+    hero.update(dt);
+
+    // ── camera ──
+    camTarget.copy(hero.root.position).add(new THREE.Vector3(0, 1.15, 0));
+    const cp = Math.cos(camPitch), sp2 = Math.sin(camPitch);
+    camera.position.lerp(new THREE.Vector3(
+      camTarget.x + Math.sin(camYaw) * camDist * cp,
+      camTarget.y + camDist * sp2,
+      camTarget.z + Math.cos(camYaw) * camDist * cp
+    ), Math.min(1, dt*9));
+    camera.lookAt(camTarget);
+    heroLamp.position.copy(hero.root.position).add(new THREE.Vector3(0, 2.0, 0));
+  }
+
+  if(enemy){
+    enemy.update(dt);
+    if(enemy.locked <= 0) enemy.play('idle');
+    if(hero){                                            // always face the player — feels alive
+      const dx = hero.root.position.x - enemy.root.position.x;
+      const dz = hero.root.position.z - enemy.root.position.z;
+      const want = Math.atan2(dx, dz);
+      let d = want - enemy.root.rotation.y;
+      while(d >  Math.PI) d -= Math.PI*2;
+      while(d < -Math.PI) d += Math.PI*2;
+      enemy.root.rotation.y += d * Math.min(1, dt*3.2);
+    }
+  }
+
+  // torch flicker
+  for(const tc of torches){
+    const f = 0.72 + Math.sin(t*11 + tc.seed)*0.14 + Math.sin(t*27 + tc.seed*2)*0.08 + Math.random()*0.06;
+    tc.li.intensity = tc.base * f;
+    tc.flame.scale.setScalar(0.85 + f*0.3);
+    tc.flame.rotation.y += 2.4*dt;
+  }
+
+  stepVFX(dt);
+  renderer.render(scene, camera);
+
+  frames++; fpsT += dt;
+  if(fpsT >= 0.5){ fpsEl.textContent = Math.round(frames/fpsT) + ' fps'; frames = 0; fpsT = 0; }
+}
+
+function resize(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight, false);
+}
+addEventListener('resize', resize); resize();
+
+// QA hook — lets the headless screenshot harness pose the scene and fire abilities
+window.__SLICE = {
+  cam(yaw, pitch, dist){ if(yaw!=null) camYaw=yaw; if(pitch!=null) camPitch=pitch; if(dist!=null) camDist=dist; },
+  attack: ()=>doAttack(), roll: ()=>doRoll(), skill: ()=>doSkill(),
+  swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),
+  face: y => { if(hero) hero.root.rotation.y = y; },
+  info: () => ({ cls: heroDef.id, clips: hero ? Object.keys(hero.clips) : [], roomHalf,
+                 heroPos: hero ? hero.root.position.toArray().map(n=>+n.toFixed(2)) : null }),
+};
+
+build().then(tick).catch(err => {
+  lmsg.textContent = 'Load failed: ' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>

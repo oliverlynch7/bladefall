@@ -1712,13 +1712,14 @@ const RORDER=['common','uncommon','rare','epic','legendary'];
    utility pet vacuums loot. Bought/sold/trained only at the Beastkeeper in the hub. */
 const PETS={
   emberpup:  {name:'Ember Pup',   arch:'attacker',style:'melee', rarity:'common',   price:220,  dmg:5, cd:1.8, range:240, body:'#e0794a', accent:'#ffb060', flavor:'A stray from the Emberdeep. Bites what bites you.'},
+  spiritwolf:{name:'Spirit Wolf', arch:'attacker',style:'melee', rarity:'epic', hidden:true, dmg:8, cd:1.5, range:260, body:'#6f8ec6', accent:'#bfe6ff', flavor:'The bond made flesh — a lupine spirit that answers the Beastmaster alone.'},   // hidden: only the Beastmaster's Bonded Companion summons it
   stonewhelp:{name:'Stone Whelp', arch:'attacker',style:'melee', rarity:'common',   price:260,  dmg:8, cd:2.3, range:210, body:'#8a8f9e', accent:'#c7ccd6', flavor:'Slow, heavy, loyal. Headbutts like a landslide.'},
   wisp:      {name:'Pale Wisp',   arch:'attacker',style:'ranged',rarity:'uncommon', price:620,  dmg:5, cd:1.5, range:520, body:'#9fe0ff', accent:'#e6faff', flavor:"A fallen Bladeborn's lantern-light, still on watch."},
   mender:    {name:'Mending Sprite',arch:'healer',              rarity:'uncommon', price:760,  heal:4, cd:3.4,          body:'#7de08a', accent:'#c8ffd4', flavor:'It cannot fight. It only refuses to let you fall.'},
   coinsprite:{name:'Coin Sprite', arch:'utility',               rarity:'rare',     price:940,  pull:220,               body:'#ffd24a', accent:'#fff2b0', flavor:'Greedy, but it shares. Drags the gold to you.'},
   gravewraith:{name:'Grave Wraith',arch:'attacker',style:'ranged',rarity:'rare',   price:1500, dmg:11, cd:1.7, range:560, body:'#b06bff', accent:'#e0b0ff', flavor:'It hungers with you. Its bolts find the throat.'}
 };
-const PETIDS=Object.keys(PETS);
+const PETIDS=Object.keys(PETS).filter(id=>!PETS[id].hidden);   // hidden pets (e.g. the Beastmaster's spectral wolf) never appear in the shop/pickers
 const PET_TRAIN_MAX=5;                                   // diminishing gold sink: +5% per level, 5 levels max
 function petTrainLvl(id){ return (meta.petTrain&&meta.petTrain[id])||0; }
 function petTrainCost(id){ return Math.round(180*Math.pow(1.7,petTrainLvl(id))); }
@@ -1726,7 +1727,8 @@ function petTrainMul(id){ return 1+petTrainLvl(id)*0.05; }
 function petRarityCol(id){ const P=PETS[id]; return P?RARITY[P.rarity].color:'#fff'; }
 function petDisplayName(id){ return (meta.petNames&&meta.petNames[id])||(PETS[id]&&PETS[id].name)||'Pet'; }
 function petLevelScale(){ return 1+((G&&G.p?G.p.level:1)*0.045); }   // keeps chip relevant with level, never a spike
-function petAtkDmg(id){ const P=PETS[id]; let v=(P.dmg||4)*petLevelScale()*petTrainMul(id); if(meta.classId==='beastmaster'){v*=1.15;if(c2Passive('bst_heavy'))v*=1.15;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.10;} return Math.max(1,Math.round(v)); }
+function petAtkDmg(id){ const P=PETS[id]; let v=(P.dmg||4)*petLevelScale()*petTrainMul(id); if(meta.classId==='beastmaster'){v*=2.2;   // was 1.15 — the companion IS the beastmaster's damage but hit for almost nothing (playtest: too weak)
+    if(c2Passive('bst_heavy'))v*=1.15;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.15;} return Math.max(1,Math.round(v)); }
 function petHealAmt(id){ const P=PETS[id]; let v=(P.heal||3)*petTrainMul(id); if(meta.classId==='beastmaster'){v*=1.15;if(c2Passive('bst_wildkeeper'))v*=1.20;if(G&&G.pet&&(G.pet.apexT||0)>0)v*=1.35;if(classState('beastmaster').rank>=10)v*=1.10;} return Math.max(1,Math.round(v)); }
 function petMaxHp(id){ const P=PETS[id]; if(!P) return 1; const base=P.arch==='attacker'?(P.style==='melee'?72:54):(P.arch==='healer'?58:64); let v=base*petLevelScale()*(1+petTrainLvl(id)*.12);if(meta.classId==='beastmaster'){v*=1.25;if(c2Passive('bst_heavy'))v*=1.25;}return Math.round(v); }
 // Progression gating (Phase 9): each rarity needs a minimum CHARACTER level to wield.
@@ -1796,7 +1798,7 @@ const ARCHES={
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
   hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
-  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:16,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; VERY strong for the Monk (on-class), useless for everyone else (see offclassMul). No rarity. Never drops.
+  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:24,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; VERY strong for the Monk (on-class), useless for everyone else (see offclassMul). No rarity. Never drops. (base 16->24: playtest said Monk felt weak)
   flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
   frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
@@ -2044,7 +2046,7 @@ const CLASS2={
   paladin:{ disp:'Paladin', icon:classIcon('paladin'),
     innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
     cap:{name:'Avatar of Light', d:'Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal.'},
-    r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:5,role:'Holy Damage',fx:'pal_smite',d:'Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.'}},
+    r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:8,role:'Holy Damage',fx:'pal_smite',d:'Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.'}},
     r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'Take 12% less damage from every source.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Damage',d:'+12% damage while wielding a holy weapon.'}},
     r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
     r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Damage',d:'+10% damage — your light burns everything you strike.'}},
@@ -3296,11 +3298,11 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if((p.evadeStackT||0)>0)v*=1+Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.09;   // Evasion snowball: each dodge stacks +9% damage
     if(classState('ninja').rank>=10)v*=1.12; }
   if(meta.classId==='monk'&&c2def('monk')){ const fist=p.weapon&&p.weapon.art==='fist';
-    if(fist)v*=1.08;   // innate Focus: fists are the monk's true weapon (trimmed 1.15->1.08)
-    const fCap=classState('monk').rank>=10?6:4, fDmg=c2Passive('mon_focused')?0.06:0.045;   // Focus snowball trimmed (was 7/5 @ .08/.06) — Monk's ceiling was ~2x every other class
+    if(fist)v*=1.15;   // innate Focus: fists are the monk's true weapon
+    const fCap=classState('monk').rank>=10?7:5, fDmg=c2Passive('mon_focused')?0.08:0.06;   // Focus snowball (restored — playtest showed Monk felt WEAK; harness over-read its max-stack ceiling)
     if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;
-    if(c2Passive('mon_fire'))v*=1.10; if(c2Passive('mon_killer'))v*=1.10; if(c2Passive('mon_master'))v*=1.06;
-    if(classState('monk').rank>=10)v*=1.10; }
+    if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
+    if(classState('monk').rank>=10)v*=1.12; }
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Static Charge
     if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; if(c2Passive('st_master'))v*=1.12; if(c2Passive('st_galvanize'))v*=1.10;
     if(classState('stormcaller').rank>=10)v*=1.12; }
@@ -6704,7 +6706,7 @@ SKILL_FX.pal_smite=function(p,ok,am){ const w=p.weapon, R=560;
   let tgt=null,best=-1;
   for(const e of combatTargets()){ if(e.dead||!e.active||e.dummy) continue; if(dXZ(e.x,e.z,p.x,p.z)>R) continue; if(e.hp>best){ best=e.hp; tgt=e; } }
   if(!tgt){ toast&&toast('No target in sight'); return 'refund'; }
-  const tx=tgt.x, tz=tgt.z, ty=tgt.y||0, dmg=(w?w.dmg:10)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL);
+  const tx=tgt.x, tz=tgt.z, ty=tgt.y||0, dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);   // was 3.4 — playtest: near-instakill, overpowered
   // descending bolt: a bright holy column crashing down + a flash ring at impact
   for(let k=0;k<12;k++){ (G.particles=G.particles||[]).push({x:tx+(Math.random()-0.5)*12,y:ty+70+k*34,z:tz+(Math.random()-0.5)*12,vx:0,vy:-520,vz:0,life:0.2,color:k%2?'#fff6c8':'#ffe08a',sz:6-k*0.25}); }
   skillRing(tx,tz,'#fff0a6','#e6c060',150); burst(tx,ty+18,tz,'#fff6c8',30); G.shake=Math.min(G.shake+8,14);
@@ -6727,7 +6729,7 @@ function beastCompanion(){
   if(!G||!G.p) return null;
   if(G.pet&&!G.pet.dead) return G.pet;
   if(G.petLost)return null;
-  const p=G.p,id=(meta.petActive&&PETS[meta.petActive])?meta.petActive:'emberpup',P=PETS[id];
+  const p=G.p,id=(meta.petActive&&PETS[meta.petActive])?meta.petActive:'spiritwolf',P=PETS[id];   // no equipped pet -> the Beastmaster's own spectral Spirit Wolf (its dedicated beast)
   if(!P) return null;
   const mh=petMaxHp(id);
   G.pet={id,x:p.x-Math.sin(p.yaw)*44,z:p.z-Math.cos(p.yaw)*44,y:p.y+15,bob:0,yaw:p.yaw,atkT:.25,healT:1,t:0,wanderA:0,hp:mh,maxHp:mh,hurtT:0,_beastFallback:!meta.petActive};
@@ -7564,6 +7566,22 @@ function drawPet3(pet,t){
       pushM(); mv(4.5,7,-1); rotZ(-0.16-wob*0.1); bx(0,4,0, 3.4,12,2,'#241a1a'); bx(0,5,0.7, 1.6,8,1,P.body,P.accent,0.6); popM();
     popM();
     pushM(); mv(0,1,-13); rotX(0.5); rotZ(wob*1.6); bx(0,3,0, 2.6,9,2.6,P.body,P.accent,0.75); popM(); }  // flame tail
+  else if(pet.id==='spiritwolf'){ // a bonded spirit wolf — lean translucent lupine, glowing eyes, raised bushy tail, spectral ridge
+    const A=0.84, gl=P.accent, bd=P.body;
+    bx(0,-3,-3, 14,11,24, bd,'#0a1220',A);                                            // lean long body
+    bx(0,3,-4, 5,3,21, gl, gl, 0.35+0.18*Math.sin(t*4));                              // spectral spine ridge (pulses)
+    bx(0,-8,-2, 12,4,20, tint(bd,'#000',0.22),'#0a1220',A);                           // underbelly
+    bx(0,1,-13, 12,10,9, bd,'#0a1220',A);                                             // raised haunches
+    for(const[dx,dz,lh]of[[-5,8,9],[5,8,9],[-5,-10,10],[5,-10,10]]) bx(dx,-13,dz, 3.2,lh,3.4, tint(bd,'#000',0.28),'#0a1220',A);   // four lean legs
+    pushM(); mv(0,3,12); rotX(-0.14);
+      bx(0,0,0, 11,10,11, bd,'#0a1220',A);                                            // skull
+      bx(0,-2,7, 6,5,9, tint(bd,'#fff',0.08),'#0a1220',A);                            // long muzzle
+      bx(0,-4,12, 4.6,3,3, tint(bd,'#000',0.18),'#0a1220',A);                         // nose
+      bx(-2.6,2,9.6, 1.9,1.9,1, gl,'#eaffff',0.98); bx(2.6,2,9.6, 1.9,1.9,1, gl,'#eaffff',0.98);   // glowing eyes
+      pushM(); mv(-4,7,-2); rotZ(0.22+wob*0.12); bx(0,4,0, 3,8.5,2.4, bd,'#0a1220',A); bx(0,4,0.8, 1.4,5.5,1, gl,gl,0.5); popM();   // pointed ear + inner glow
+      pushM(); mv(4,7,-2); rotZ(-0.22-wob*0.12); bx(0,4,0, 3,8.5,2.4, bd,'#0a1220',A); bx(0,4,0.8, 1.4,5.5,1, gl,gl,0.5); popM();
+    popM();
+    pushM(); mv(0,2,-15); rotX(0.72); rotZ(wob*1.5); bx(0,4,0, 5,12,5, bd,'#0a1220',A); bx(0,9,0, 3.6,6,3.6, gl,gl,0.4); popM(); }   // raised bushy spectral tail
   else if(pet.id==='stonewhelp'){ // heavy stone bulldog — layered rock plates, back horns, teal eyes, gold tag
     bx(0,-5,0, 24,15,26,P.body);                                                      // low heavy body
     bx(0,3,-1, 18,6,20,tint(P.body,'#000',0.18)); bx(0,7.5,-1, 11,4,13,tint(P.body,'#000',0.28)); bx(0,10.5,-1, 6,3,7,tint(P.body,'#000',0.36));   // stacked plated back
@@ -11253,6 +11271,7 @@ const DESIGNS=[
   {g:'Cast',k:'Beastkeeper',  d:(t,s)=>{ pushM(); rotY(s); hubNpcModel({id:'beastkeeper',x:0},t); popM(); }},
   {g:'Cast',k:"Warden's Shade",d:(t,s)=>{ pushM(); rotY(s); drawShadeModel(t); popM(); }},
   {g:'Pets',k:'Ember Pup',    d:(t,s)=>drawPet3({id:'emberpup',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
+  {g:'Pets',k:'Spirit Wolf',  d:(t,s)=>drawPet3({id:'spiritwolf',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
   {g:'Pets',k:'Stone Whelp',  d:(t,s)=>drawPet3({id:'stonewhelp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
   {g:'Pets',k:'Pale Wisp',    d:(t,s)=>drawPet3({id:'wisp',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
   {g:'Pets',k:'Mending Sprite',d:(t,s)=>drawPet3({id:'mender',x:0,y:8,z:0,bob:0,t:0,yaw:s},t)},
@@ -13737,6 +13756,8 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   addGold:n=>{ meta.gold=(meta.gold||0)+n; return meta.gold; }, wipeMode:m=>wipeMode(m||MODE),
   melee:MELEE, testSwing:(yaw)=>{ if(!G||!G.p) return -1; G.p.yaw=yaw; G.p.atkTimer=0.15; G.p.swingId=(G.p.swingId||0)+1; G.enemies.forEach(e=>{e.lastHit=-1;e.hp=99999;}); resolveSwing(); return G.enemies.filter(e=>e.lastHit===G.p.swingId).map(e=>e.tag); },
   render:(t)=>render(t||1), captureFrame(){ try{ render(G?G.time:1); gl.finish(); return canvas.toDataURL('image/jpeg',0.85); }catch(e){ return 'err:'+e.message; } },
+  openDesignStudio:(cat)=>openDesignStudio(null,cat), DESIGNS, designSet, renderDesign,   // model QA: open the isolated Design Studio + pick/render a model on the pedestal
+  studioSpin:(on)=>{ if(typeof studio!=='undefined'&&studio) studio.spin=!!on; },
   get G(){return G;}, get mode(){return mode;}, get meta(){return meta;}, get gl(){return !!gl;},
   snap(){ const p=G&&G.p; return { mode,VW,VH,version:VERSION3D,webgl:!!gl,
     playMode:MODE, time:G&&G.time, audioPaused:gameAudioPaused, audioContext:actx&&actx.state,

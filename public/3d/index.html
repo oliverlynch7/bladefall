@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.396.0-autopilot';
+const VERSION3D='1.397.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11209,6 +11209,8 @@ function openWeaponStudio(back){
   const p=freshPlayer(); p.gear=freshGear(); p.x=0; p.y=0; p.z=0; p.yaw=0.4; p.hp=p.maxHp=9999; p.invuln=0; p.atkTimer=0;
   studio.p=p;
   mode='studio'; showOverlay(false); showGameUI(false);
+  if(!G){ studio._stubG=true; G={time:0,stageIndex:0}; }   // opened from the title with no game running: a tiny G stub so the Bosses/Mobs designs (which read G.time/G.stageIndex) render instead of throwing
+  document.body.classList.remove('t-title','t-attract');   // opened from the title screen: drop the full-bleed key-art overlay so the studio is actually visible (restored by titleScreen() on Back)
   document.getElementById('questbox').classList.add('hide');
   buildStudioPanel();
   studioSetWeapon('scythe');
@@ -11261,7 +11263,8 @@ function renderStudio(t){
   drawHero3(p,t,false); drawSwing3(p,t);
   for(const pr of studio.proj) drawProjectile3(pr,t);
 }
-function exitStudio(){ const b=studio&&studio.back; studio=null; const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
+function exitStudio(){ const b=studio&&studio.back, stub=studio&&studio._stubG; studio=null; if(stub) G=null;   // drop the studio's stub G so the title/menu sees "no game running"
+  const pn=document.getElementById('wstudio'); if(pn) pn.classList.add('hide'); const ic=document.getElementById('wsIconCard'); if(ic) ic.classList.add('hide'); if(G) showGameUI(true); if(b) b(); else openPause(); }
 // ===== Design Studio — a turntable to review every approved voxel model (reuses the Weapon Studio pedestal) =====
 const DGROUP_CAM={Cast:{h:34,d:150},Pets:{h:12,d:70},Bosses:{h:60,d:270},Mobs:{h:24,d:120}};
 function designEnemy(key,boss){ const d=ENEMY[key]||{}; return {type:key,look:d.look,kind:d.kind||'walk',boss:!!boss,color:d.color||'#8a8f9e',r:d.r||15,h:d.h||38,x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,hitFlash:0,bob:1.2,shot:d.shot,element:d.element,slowT:0,lunge:0,phase:0,st:null,shootT:1}; }

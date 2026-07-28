@@ -10457,7 +10457,7 @@ function openCheatMenu(back){
     <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
     <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
     <div class="sect">Unlocks &amp; conveniences</div>
-    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
+    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}${btn('cStudio','🎨 Model Studio')}</div>
     <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
   const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
   wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
@@ -10467,6 +10467,7 @@ function openCheatMenu(back){
   wire('cWeap',()=>{cheatGiveWeapons();openCheatMenu(back);}); wire('cArmor',()=>{cheatGiveArmor();openCheatMenu(back);}); wire('cKit',()=>{cheatKitOut();openCheatMenu(back);});
   wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cRank10All',()=>{cheatRank10All();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
   wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
+  wire('cStudio',()=>{ openDesignStudio(()=>openCheatMenu(back),'Pets'); });   // turntable to inspect every voxel model (Spirit Wolf lives under Pets)
   wire('cBack',()=>{ if(back) back(); else wsResume(); });
 }
 function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');

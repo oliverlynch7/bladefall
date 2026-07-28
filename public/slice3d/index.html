@@ -39,6 +39,8 @@
   #hint b{color:#d8c8a8}
   #fps{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:20;
     font:600 11px ui-monospace,monospace;color:#6f6858;pointer-events:none}
+  #kills{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 30px);z-index:20;
+    font:700 12px system-ui;color:#e8c07a;pointer-events:none;text-shadow:0 1px 3px #000}
 
   /* touch controls */
   #touch{position:fixed;inset:0;z-index:22;display:none;pointer-events:none}
@@ -56,7 +58,9 @@
   #bSkill{background:radial-gradient(circle at 40% 35%,#5a3a10,#2a1c08);border-color:#e8a33d;color:#ffe0a8;
     width:64px;height:64px;font-size:11px}
   #bRoll{background:radial-gradient(circle at 40% 35%,#20344a,#0e1620);border-color:#5f8fb8;color:#cfe4f5;
-    width:60px;height:60px;font-size:11px}
+    width:58px;height:58px;font-size:10.5px}
+  #bJump{background:radial-gradient(circle at 40% 35%,#1f4a34,#0b1a13);border-color:#54a87a;color:#ccf0dc;
+    width:58px;height:58px;font-size:10.5px}
   .ab:active{filter:brightness(1.35)}
 </style>
 </head>
@@ -76,15 +80,17 @@
 </div>
 
 <div id="hint">
-  <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> roll · <b>J</b>/click attack · <b>K</b> skill<br>
-  <b>Drag</b> to orbit camera · <b>Scroll</b> to zoom
+  <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
+  <b>J</b>/click attack · <b>K</b> skill · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
 <div id="fps"></div>
+<div id="kills"></div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
   <div id="abtns">
     <div class="ab" id="bSkill">SKILL</div>
+    <div class="ab" id="bJump">JUMP</div>
     <div class="ab" id="bRoll">ROLL</div>
     <div class="ab" id="bAtk">ATTACK</div>
   </div>
@@ -123,7 +129,10 @@ scene.fog = new THREE.FogExp2('#171a24', 0.013);
 const camera = new THREE.PerspectiveCamera(52, innerWidth/innerHeight, 0.1, 300);
 
 /* ── Lighting: moody but READABLE — atmosphere shouldn't cost you the art. ── */
-scene.add(new THREE.HemisphereLight('#7f92bc', '#3a2f26', 1.35));
+// Ambient floor so no surface ever reads as a black silhouette — these stylised
+// textures are dark, and without it the characters lose all their detail.
+scene.add(new THREE.AmbientLight('#9fb0d0', 0.95));
+scene.add(new THREE.HemisphereLight('#9fb4dd', '#5a4a3a', 1.5));
 const moon = new THREE.DirectionalLight('#cfe0ff', 1.5);
 moon.position.set(-8, 14, -6);
 moon.castShadow = true;
@@ -195,16 +204,16 @@ const boxOf = o => new THREE.Box3().setFromObject(o);
    game's verbs onto whatever that model actually ships, with fallbacks. */
 const CLASSES = [
   { id:'Warrior', label:'Warrior', tint:'#d8b26a',
-    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'],
-            attack:['Sword_Attack','Sword_Attack2'], skill:['Sword_Attack2','Sword_Attack'], hit:['RecieveHit'] },
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Idle_Weapon','Idle'],
+            attack:['Sword_Attack','Sword_Attack2'], skill:['Sword_Attack2','Sword_Attack'], hit:['RecieveHit'], death:['Death'] },
     skill:{ name:'Earthshatter', kind:'nova', color:'#ffb347', color2:'#ff5a2a' } },
   { id:'Rogue', label:'Rogue', tint:'#8fd0a8',
-    clips:{ idle:['Idle'], walk:['Walk'], run:['Run'], roll:['Roll'],
-            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2','Dagger_Attack'], hit:['RecieveHit'] },
+    clips:{ idle:['Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Idle'],
+            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2','Dagger_Attack'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
     skill:{ name:'Venom Burst', kind:'nova', color:'#8dff9a', color2:'#2ea84a' } },
   { id:'Wizard', label:'Wizard', tint:'#9ab8ff',
-    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'],
-            attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit'] },
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Idle_Weapon','Idle'],
+            attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
     skill:{ name:'Arc Nova', kind:'bolt', color:'#9ad4ff', color2:'#5f8fff' } },
 ];
 
@@ -214,7 +223,10 @@ class Actor {
     this.def = def;
     this.root = new THREE.Group();
     const model = gltf.scene;
-    // normalise: Quaternius rigs vary in unit scale — fit every hero to HERO_H
+    // normalise: Quaternius rigs vary in unit scale — fit every hero to HERO_H.
+    // Reset first so re-normalising an already-scaled scene is idempotent (setScalar
+    // REPLACES scale, so measuring a scaled model and re-setting would double it).
+    model.scale.set(1,1,1); model.position.set(0,0,0); model.updateMatrixWorld(true);
     const b = boxOf(model), size = b.getSize(new THREE.Vector3());
     const s = HERO_H / Math.max(0.0001, size.y);
     model.scale.setScalar(s);
@@ -339,8 +351,10 @@ function stepVFX(dt){
 /* ─────────────  INPUT  ───────────── */
 const keys = {};
 addEventListener('keydown', e => {
+  if(e.repeat) return;
   keys[e.code] = true;
-  if(e.code==='Space'){ e.preventDefault(); doRoll(); }
+  if(e.code==='Space'){ e.preventDefault(); doJump(); }
+  if(e.code==='KeyC' || e.code==='ControlLeft') doRoll();
   if(e.code==='KeyJ') doAttack();
   if(e.code==='KeyK') doSkill();
 });
@@ -390,28 +404,144 @@ const tapBtn = (id, fn) => {
   const el = document.getElementById(id);
   el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
 };
-tapBtn('bAtk', ()=>doAttack()); tapBtn('bRoll', ()=>doRoll()); tapBtn('bSkill', ()=>doSkill());
+tapBtn('bAtk', ()=>doAttack()); tapBtn('bRoll', ()=>doRoll()); tapBtn('bSkill', ()=>doSkill()); tapBtn('bJump', ()=>doJump());
 canvas.addEventListener('click', ()=>{ if(!dragging) doAttack(); });
 
 /* ─────────────  STATE  ───────────── */
-let hero = null, heroDef = CLASSES[0], enemy = null;
+let hero = null, heroDef = CLASSES[0];
+const enemies = [];
+const ENEMY_SPOTS = [
+  { x: 4.2, z:-4.6, tint:'#b0442e' },
+  { x:-4.8, z:-3.4, tint:'#7a4ba8' },
+  { x: 0.6, z:-7.4, tint:'#2f7d5c' },
+];
 let roomHalf = 11;                              // movement bounds, set from the room bbox
 const vel = new THREE.Vector3();
 let rollT = 0; const rollDir = new THREE.Vector3();
 let atkFlip = 0;
+let vy = 0, grounded = true;                    // jump state
+const GRAV = 22, JUMP_V = 8.0;
+let kills = 0;
 
+/* ── floating HP bar (a sprite so it always faces the camera) ── */
+function makeHpBar(){
+  const cvs = document.createElement('canvas'); cvs.width = 128; cvs.height = 20;
+  const tex = new THREE.CanvasTexture(cvs);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, depthTest:false, transparent:true }));
+  spr.scale.set(1.15, 0.18, 1);
+  const draw = f => {
+    const c = cvs.getContext('2d');
+    c.clearRect(0,0,128,20);
+    c.fillStyle = 'rgba(8,6,10,.82)'; c.fillRect(0,4,128,12);
+    c.fillStyle = f > .5 ? '#5fd06a' : f > .22 ? '#e0b040' : '#e04a3a';
+    c.fillRect(2,6,124*Math.max(0,f),8);
+    c.strokeStyle = 'rgba(230,200,150,.55)'; c.lineWidth = 1.5; c.strokeRect(1,4.5,126,11);
+    tex.needsUpdate = true;
+  };
+  draw(1);
+  return { spr, draw };
+}
+
+/* ── damage numbers ── */
+const dmgTexts = [];
+function damageNumber(pos, amount, crit){
+  const cvs = document.createElement('canvas'); cvs.width = 128; cvs.height = 64;
+  const c = cvs.getContext('2d');
+  c.font = 'bold ' + (crit ? 46 : 36) + 'px system-ui, sans-serif';
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.lineWidth = 6; c.strokeStyle = 'rgba(0,0,0,.85)';
+  c.strokeText(amount, 64, 32);
+  c.fillStyle = crit ? '#ffd24a' : '#fff2e0';
+  c.fillText(amount, 64, 32);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(cvs), depthTest:false, transparent:true }));
+  spr.scale.set(0.9, 0.45, 1);
+  spr.position.copy(pos);
+  scene.add(spr);
+  dmgTexts.push({ spr, t:0, life:0.85, vy: 1.7 });
+}
+
+/* ── enemies ── */
+async function spawnEnemy(x, z, tint){
+  const g = await load('assets/chars/Rogue.gltf').catch(()=>null);
+  if(!g) return null;
+  const e = new Actor(g, CLASSES[1]);
+  e.root.position.set(x, 0, z);
+  e.model.traverse(o=>{                          // tint so foes read as hostile, not a 2nd player
+    if(!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const out = mats.map(m => { const c = m.clone(); if(c.color) c.color.lerp(new THREE.Color(tint), .5); return c; });
+    o.material = out.length === 1 ? out[0] : out;
+  });
+  e.maxHp = 100; e.hp = 100; e.dead = false; e.hitFlash = 0;
+  const bar = makeHpBar();
+  bar.spr.position.y = 2.1;
+  e.root.add(bar.spr);
+  e.bar = bar;
+  scene.add(e.root);
+  enemies.push(e);
+  return e;
+}
+function hurtEnemy(e, amount, crit){
+  if(e.dead) return;
+  e.hp -= amount;
+  e.bar.draw(Math.max(0, e.hp / e.maxHp));
+  damageNumber(e.root.position.clone().add(new THREE.Vector3((Math.random()-.5)*.5, 2.0, 0)), amount, crit);
+  if(e.hp <= 0){
+    e.dead = true;
+    e.once('death', 1.0);
+    e.bar.spr.visible = false;
+    kills++; updateKills();
+    setTimeout(()=>{                              // fade out, then respawn it so there's always something to fight
+      scene.remove(e.root);
+      const i = enemies.indexOf(e); if(i>=0) enemies.splice(i,1);
+      disposeTree(e.root);
+      const spot = ENEMY_SPOTS[Math.floor(Math.random()*ENEMY_SPOTS.length)];
+      spawnEnemy(spot.x + (Math.random()-.5)*2.5, spot.z + (Math.random()-.5)*2.5, spot.tint);
+    }, 2600);
+  } else {
+    e.once('hit', 1.2);
+    e.hitFlash = 0.16;
+  }
+}
+function updateKills(){
+  const el = document.getElementById('kills');
+  if(el) el.textContent = kills === 0 ? '' : (kills + (kills===1 ? ' foe felled' : ' foes felled'));
+}
+
+/* ── hero actions ── */
+function strike(reach, arc, dmgMin, dmgMax){      // damage everything in a cone in front of the hero
+  const fx = Math.sin(hero.root.rotation.y), fz = Math.cos(hero.root.rotation.y);
+  for(const e of enemies){
+    if(e.dead) continue;
+    const dx = e.root.position.x - hero.root.position.x;
+    const dz = e.root.position.z - hero.root.position.z;
+    const d = Math.hypot(dx, dz);
+    if(d > reach) continue;
+    if(d > 0.3 && (dx*fx + dz*fz)/d < arc) continue;
+    const crit = Math.random() < 0.22;
+    const dmg = Math.round((dmgMin + Math.random()*(dmgMax-dmgMin)) * (crit ? 2 : 1));
+    hurtEnemy(e, dmg, crit);
+  }
+}
 function doAttack(){
   if(!hero || hero.locked>0 || rollT>0) return;
   const list = heroDef.clips.attack.filter(n=>hero.clips[n]);
   const name = list.length ? list[atkFlip++ % list.length] : null;
-  if(name) { hero.play('attack', { loop:false, fade:.07, clip:hero.clips[name], speed:1.25 });
-             hero.locked = hero.clips[name].duration/1.25*0.8; }
+  if(!name) return;
+  hero.play('attack', { loop:false, fade:.07, clip:hero.clips[name], speed:1.25 });
+  hero.locked = hero.clips[name].duration/1.25*0.8;
+  setTimeout(()=>{ if(hero) strike(2.5, 0.25, 9, 16); }, 170);   // land the hit mid-swing
 }
 function doRoll(){
-  if(!hero || rollT>0 || hero.locked>0) return;
+  if(!hero || rollT>0 || hero.locked>0 || !grounded) return;
   const d = moveDir();
   rollDir.copy(d.lengthSq()>0.01 ? d : new THREE.Vector3(Math.sin(hero.root.rotation.y),0,Math.cos(hero.root.rotation.y)));
   rollT = 0.62; hero.once('roll', 1.15);
+}
+function doJump(){
+  if(!hero || !grounded || rollT>0) return;
+  vy = JUMP_V; grounded = false;
 }
 function doSkill(){
   if(!hero || hero.locked>0 || rollT>0) return;
@@ -421,7 +551,10 @@ function doSkill(){
     new THREE.Vector3(Math.sin(hero.root.rotation.y), 0, Math.cos(hero.root.rotation.y)).multiplyScalar(1.6));
   setTimeout(()=>{
     if(S.kind === 'bolt') boltFX(at, S.color, S.color2); else novaFX(at, S.color, S.color2);
-    if(enemy && enemy.root.position.distanceTo(at) < 4.2) enemy.once('hit', 1.1);
+    for(const e of enemies){                       // AoE around the impact point
+      if(e.dead) continue;
+      if(e.root.position.distanceTo(at) < 4.0) hurtEnemy(e, Math.round(26 + Math.random()*14), true);
+    }
   }, 190);
 }
 function moveDir(){
@@ -486,26 +619,8 @@ async function build(){
   hero = new Actor(gW, CLASSES[0]);
   scene.add(hero.root);
 
-  const gR = await load('assets/chars/Rogue.gltf');
-  enemy = new Actor(gR, CLASSES[1]);
-  enemy.root.position.set(3.4, 0, -4.2);
-  enemy.root.rotation.y = Math.PI;
-  enemy.model.traverse(o=>{                            // tint the enemy so it reads as hostile, not a 2nd player
-    if(!o.isMesh) return;
-    const mats = Array.isArray(o.material)?o.material:[o.material];
-    o.material = mats.map(m=>{ const c = m.clone(); if(c.color) c.color.lerp(new THREE.Color('#b0442e'), .55); return c; });
-    if(o.material.length===1) o.material = o.material[0];
-  });
-  scene.add(enemy.root);
-
-  // preload the other classes so switching is instant
-  lmsg.textContent = 'Preloading classes…';
-  window.__pre = {};
-  for(const c of CLASSES.slice(1)){
-    if(c.id==='Rogue'){ window.__pre.Rogue = gR; continue; }
-    window.__pre[c.id] = await load(`assets/chars/${c.id}.gltf`).catch(()=>null);
-  }
-  window.__pre.Warrior = gW;
+  lmsg.textContent = 'Summoning foes…';
+  for(const spot of ENEMY_SPOTS) await spawnEnemy(spot.x, spot.z, spot.tint);
 
   buildClassBar();
   document.getElementById('load').style.display = 'none';
@@ -522,20 +637,37 @@ function buildClassBar(){
     bar.appendChild(b);
   }
 }
+let switching = false;
 async function switchClass(def){
-  if(def.id === heroDef.id || !hero) return;
-  let g = window.__pre[def.id];
-  if(!g) g = await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
-  if(!g) return;
-  // re-instantiate from the cached gltf (cheap: same buffers, fresh scene graph)
-  const { pos, rot } = { pos: hero.root.position.clone(), rot: hero.root.rotation.y };
-  scene.remove(hero.root);
-  const fresh = { scene: g.scene.clone(true), animations: g.animations };
-  hero = new Actor(fresh, def);
-  hero.root.position.copy(pos); hero.root.rotation.y = rot;
-  scene.add(hero.root);
-  heroDef = def;
-  document.querySelectorAll('.cbtn').forEach(b=>b.classList.toggle('sel', b.dataset.id===def.id));
+  if(def.id === heroDef.id || !hero || switching) return;
+  switching = true;
+  document.querySelectorAll('.cbtn').forEach(b=>b.disabled = true);
+  // IMPORTANT: re-LOAD rather than .clone(). Cloning a glTF rigs the copy's SkinnedMesh
+  // to the ORIGINAL skeleton, so the body collapses out of view while bone-parented props
+  // (shoulder pads, sword, hair) keep rendering — the "invisible character" bug. The file
+  // is HTTP-cached, so a fresh parse is cheap and gives a correctly-bound skeleton.
+  const g = await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
+  if(g){
+    const pos = hero.root.position.clone(), rot = hero.root.rotation.y;
+    scene.remove(hero.root);
+    disposeTree(hero.root);
+    hero = new Actor(g, def);
+    hero.root.position.copy(pos); hero.root.rotation.y = rot;
+    scene.add(hero.root);
+    heroDef = def;
+  }
+  document.querySelectorAll('.cbtn').forEach(b=>{
+    b.disabled = false; b.classList.toggle('sel', b.dataset.id===heroDef.id);
+  });
+  switching = false;
+}
+function disposeTree(root){
+  root.traverse(o => {
+    if(!o.isMesh) return;
+    if(o.geometry) o.geometry.dispose();
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const m of mats){ if(m) m.dispose(); }
+  });
 }
 
 /* ─────────────  LOOP  ───────────── */
@@ -571,6 +703,13 @@ function tick(){
       vel.multiplyScalar(0.80);
     }
     hero.root.position.addScaledVector(vel, dt);
+
+    // ── gravity / jump ──
+    vy -= GRAV * dt;
+    hero.root.position.y += vy * dt;
+    if(hero.root.position.y <= 0){ hero.root.position.y = 0; vy = 0; grounded = true; }
+    else grounded = false;
+
     // keep inside the room
     hero.root.position.x = Math.max(-roomHalf, Math.min(roomHalf, hero.root.position.x));
     hero.root.position.z = Math.max(-roomHalf, Math.min(roomHalf, hero.root.position.z));
@@ -578,7 +717,8 @@ function tick(){
     // ── animation state ──
     if(rollT <= 0 && hero.locked <= 0){
       const sp = vel.length();
-      if(sp > 3.6)      hero.play('run',  { speed: 1.0 });
+      if(!grounded)     hero.play('jump', { speed: 1.0 });   // falls back to a run/idle pose if the rig has no jump clip
+      else if(sp > 3.6) hero.play('run',  { speed: 1.0 });
       else if(sp > 0.5) hero.play('walk', { speed: Math.max(.75, sp/2.4) });
       else              hero.play('idle');
     }
@@ -596,17 +736,36 @@ function tick(){
     heroLamp.position.copy(hero.root.position).add(new THREE.Vector3(0, 2.0, 0));
   }
 
-  if(enemy){
-    enemy.update(dt);
-    if(enemy.locked <= 0) enemy.play('idle');
-    if(hero){                                            // always face the player — feels alive
-      const dx = hero.root.position.x - enemy.root.position.x;
-      const dz = hero.root.position.z - enemy.root.position.z;
+  for(const e of enemies){
+    e.update(dt);
+    if(e.dead){ e.root.position.y = Math.max(-0.4, e.root.position.y - dt*0.15); continue; }   // sink as it dies
+    if(e.locked <= 0) e.play('idle');
+    if(e.hitFlash > 0) e.hitFlash -= dt;
+    if(hero){                                            // face the player, and close in when near — feels alive
+      const dx = hero.root.position.x - e.root.position.x;
+      const dz = hero.root.position.z - e.root.position.z;
+      const dist = Math.hypot(dx, dz);
       const want = Math.atan2(dx, dz);
-      let d = want - enemy.root.rotation.y;
+      let d = want - e.root.rotation.y;
       while(d >  Math.PI) d -= Math.PI*2;
       while(d < -Math.PI) d += Math.PI*2;
-      enemy.root.rotation.y += d * Math.min(1, dt*3.2);
+      e.root.rotation.y += d * Math.min(1, dt*3.6);
+      if(dist < 9 && dist > 1.9 && e.locked <= 0){        // stalk the player
+        e.root.position.x += (dx/dist) * 1.5 * dt;
+        e.root.position.z += (dz/dist) * 1.5 * dt;
+        e.play('walk', { speed:.9 });
+      }
+    }
+  }
+
+  // floating damage numbers rise and fade
+  for(let i=dmgTexts.length-1; i>=0; i--){
+    const d = dmgTexts[i]; d.t += dt;
+    d.spr.position.y += d.vy * dt; d.vy = Math.max(0.2, d.vy - dt*1.8);
+    d.spr.material.opacity = Math.max(0, 1 - d.t/d.life);
+    if(d.t >= d.life){
+      scene.remove(d.spr); d.spr.material.map.dispose(); d.spr.material.dispose();
+      dmgTexts.splice(i,1);
     }
   }
 
@@ -634,11 +793,30 @@ addEventListener('resize', resize); resize();
 // QA hook — lets the headless screenshot harness pose the scene and fire abilities
 window.__SLICE = {
   cam(yaw, pitch, dist){ if(yaw!=null) camYaw=yaw; if(pitch!=null) camPitch=pitch; if(dist!=null) camDist=dist; },
-  attack: ()=>doAttack(), roll: ()=>doRoll(), skill: ()=>doSkill(),
+  attack: ()=>doAttack(), roll: ()=>doRoll(), skill: ()=>doSkill(), jump: ()=>doJump(),
+  enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),
   face: y => { if(hero) hero.root.rotation.y = y; },
   info: () => ({ cls: heroDef.id, clips: hero ? Object.keys(hero.clips) : [], roomHalf,
                  heroPos: hero ? hero.root.position.toArray().map(n=>+n.toFixed(2)) : null }),
+  get scene(){ return scene; }, get hero(){ return hero; }, get THREE(){ return THREE; },
+  // per-mesh material report — for diagnosing missing textures / invisible parts
+  mats(){
+    const rows = [];
+    hero.root.traverse(o => {
+      if(!o.isMesh) return;
+      const m = Array.isArray(o.material) ? o.material[0] : o.material;
+      rows.push({
+        mesh: o.name || '(unnamed)', type: o.type,
+        mat: m ? m.type : 'none',
+        map: m && m.map ? (m.map.image ? `${m.map.image.width}x${m.map.image.height}` : 'no-image') : 'NONE',
+        color: m && m.color ? '#'+m.color.getHexString() : '-',
+        visible: o.visible, opacity: m ? m.opacity : '-',
+        scale: +o.getWorldScale(new THREE.Vector3()).y.toFixed(3)
+      });
+    });
+    return { cls: heroDef.id, heightM: +new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y.toFixed(3), rows };
+  }
 };
 
 build().then(tick).catch(err => {

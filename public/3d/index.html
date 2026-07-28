@@ -3296,11 +3296,11 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if((p.evadeStackT||0)>0)v*=1+Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.09;   // Evasion snowball: each dodge stacks +9% damage
     if(classState('ninja').rank>=10)v*=1.12; }
   if(meta.classId==='monk'&&c2def('monk')){ const fist=p.weapon&&p.weapon.art==='fist';
-    if(fist)v*=1.15;   // innate Focus: fists are the monk's true weapon
-    const fCap=classState('monk').rank>=10?7:5, fDmg=c2Passive('mon_focused')?0.08:0.06;
-    if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;   // Focus snowball
-    if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
-    if(classState('monk').rank>=10)v*=1.12; }
+    if(fist)v*=1.08;   // innate Focus: fists are the monk's true weapon (trimmed 1.15->1.08)
+    const fCap=classState('monk').rank>=10?6:4, fDmg=c2Passive('mon_focused')?0.06:0.045;   // Focus snowball trimmed (was 7/5 @ .08/.06) — Monk's ceiling was ~2x every other class
+    if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;
+    if(c2Passive('mon_fire'))v*=1.10; if(c2Passive('mon_killer'))v*=1.10; if(c2Passive('mon_master'))v*=1.06;
+    if(classState('monk').rank>=10)v*=1.10; }
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Static Charge
     if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; if(c2Passive('st_master'))v*=1.12; if(c2Passive('st_galvanize'))v*=1.10;
     if(classState('stormcaller').rank>=10)v*=1.12; }
@@ -3310,8 +3310,8 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='skylancer'&&c2def('skylancer')){ if(p.weapon&&p.weapon.cls==='ranged')v*=1.10;
     if(!p.onGround){v*=1.10;if(c2Passive('sky_high'))v*=1.15;if(c2Passive('sky_eye'))v*=1.12;}
     if(classState('skylancer').rank>=10)v*=1.12; }
-  if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(p.weapon&&['sword','dagger','spellblade'].includes(p.weapon.art))v*=1.10;
-    if((p.bdFlowT||0)>0)v*=1.12;if(classState('bladedancer').rank>=10)v*=1.12;}
+  if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(p.weapon&&['sword','dagger','spellblade'].includes(p.weapon.art))v*=1.18;   // was 1.10 — bladedancer was bottom of both DPS and PvP
+    if((p.bdFlowT||0)>0)v*=1.15;if(classState('bladedancer').rank>=10)v*=1.12;}
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
     if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
     if(classState('ranger').rank>=10)v*=1.12; }
@@ -3324,7 +3324,8 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='chronomancer'&&c2def('chronomancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;
     if(c2Passive('chr_potent'))v*=1.12; if(c2Passive('chr_glass'))v*=1.12; if(c2Passive('chr_slow'))v*=1.10; if(c2Passive('chr_echo'))v*=1.12; if(c2Passive('chr_freeze'))v*=1.10;
     if(classState('chronomancer').rank>=10)v*=1.12; }
-  if(meta.classId==='beastmaster'&&c2def('beastmaster')&&classState('beastmaster').rank>=10)v*=1.10;
+  if(meta.classId==='beastmaster'&&c2def('beastmaster')){ v*=1.20;   // innate personal damage — beastmaster's OWN attacks were unbuffed (only the pet scaled), leaving it bottom-tier
+    if(classState('beastmaster').rank>=10)v*=1.10; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
@@ -8210,7 +8211,7 @@ const BOT_DIFF={
 const BOT_DIFFS=['easy','normal','hard','brutal'];
 // Per-class ARENA-PVP damage tuning (bots only — does NOT touch player class balance). Casters out-burst
 // everyone from range, so they're toned down; the weaker melee kits are nudged up. Tuned via the duel matrix.
-const BOT_DMG_MUL={ warrior:1.30, berserker:1.30, ninja:1.28, paladin:1.28, monk:1.52, bladedancer:1.16, stormcaller:0.62, warlock:0.64, skylancer:0.88, reaper:0.92, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };
+const BOT_DMG_MUL={ warrior:1.30, berserker:1.36, ninja:1.28, paladin:1.28, monk:1.52, bladedancer:1.42, beastmaster:1.32, stormcaller:0.62, warlock:0.55, skylancer:0.88, reaper:0.92, ranger:1.10, pirate:1.08, mage:0.66, chronomancer:0.68, necromancer:0.72 };   // pass: bladedancer 1.16->1.42 (was 21%), beastmaster added (was 1.0 default), warlock 0.64->0.55 (was 72%), berserker 1.30->1.36 (was 33%)
 function spawnBot(diffKey){ if(!G) return null; const D=BOT_DIFF[diffKey]||BOT_DIFF.normal;
   const a=Math.random()*6.283, rad=160+Math.random()*140, sp=G.arenaCombat||G.arenaSpawn||{x:0,z:0,y:0};
   const base=(()=>{ try{ return G.p?effMaxHp(G.p):300; }catch(e){ return 300; } })();   // scale to the arena player's HP (their level/gear)

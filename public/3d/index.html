@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.398.0-autopilot';
+const VERSION3D='1.399.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10044,7 +10044,7 @@ function enterWaystation(){
   G.deco.push({x:0,z:610,y0:0,w:720,h:1.4,d:96,c:'#8f744e'});                                   // annex approach walk
   // each activity plaza gets a SOLID themed floor pad in its portal's colour, raised just ABOVE the base floor
   // (y0:2) so the two coplanar surfaces never z-fight/flicker. Abyss=violet, Sprint=gold, Arena=crimson.
-  const annexPads=[{x:-300,z:660,f:'#3a1a5e',p:'#2a1840'},{x:300,z:660,f:'#4a3810',p:'#6a531c'},{x:0,z:800,f:'#4a1618',p:'#5e2320'}];
+  const annexPads=[{x:-235,z:660,f:'#3a1a5e',p:'#2a1840'},{x:235,z:660,f:'#4a3810',p:'#6a531c'},{x:0,z:800,f:'#4a1618',p:'#5e2320'},{x:185,z:800,f:'#2a1030',p:'#3a1840'}];   // pads track the portals (abyss/sprint pulled in off the divider walls; +Gauntlet pad)
   if(meta.arcadeOwned) annexPads.push({x:-340,z:800,f:'#122d3b',p:'#174a55'});
   for(const a of annexPads){ G.obstacles.push({kind:'plat',x:a.x,z:a.z,w:180,d:150,h:20});
     G.deco.push({x:a.x,z:a.z,y0:2,w:236,h:1.6,d:206,c:a.f});
@@ -10065,10 +10065,10 @@ function enterWaystation(){
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-495,z:342,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-300,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
-    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:300,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
+    {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:235,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
     {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()},
-    {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:340,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}
+    {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:185,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}   // was x:340 (SAT ON the x:330 divider wall) → pulled inside the bay, beside the Arena
   ];
   if(meta.arcadeOwned) G.hubNpcs.push({id:'arcade',ic:'🕹️',name:"Isaac's Arcade",role:'A game within the game',prop:'arcade',verb:'Play the arcade',direct:true,x:-340,z:800,c1:'#182240',c2:'#5affc8',open:()=>openArcadeCabinet()});
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
@@ -10085,7 +10085,7 @@ function enterWaystation(){
     {x:400,z:500,w:62,d:24},   // The Mirror (SE court, flush beside the Sparring Room)
     {x:-607,z:45,w:48,d:40},   // Your Bag chest — pushed back near the west wall (small gap, not flush), between the Quartermaster & the Smith
     {x:0,z:800,w:60,d:30},     // The Arena gate (deep-centre annex plaza)
-    {x:340,z:800,w:60,d:30},   // The Gauntlet gate (beside the Arena)
+    {x:185,z:800,w:60,d:30},   // The Gauntlet gate (beside the Arena) — moved in off the divider wall
     ...(meta.arcadeOwned?[{x:-340,z:800,w:62,d:42}]:[]) // Isaac's arcade cabinet
   ];
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual

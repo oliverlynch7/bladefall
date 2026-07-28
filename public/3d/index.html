@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.397.0-autopilot';
+const VERSION3D='1.398.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11320,6 +11320,7 @@ function renderDesign(t){
 const STUDIO_CATS=['Weapons','Cast','Pets','Bosses','Mobs'];
 function buildStudioPanel(){
   const pn=document.getElementById('wstudio'); if(!pn) return;
+  pn.classList.remove('hide');   // show the control dock (tabs / model list / spin / back) — it defaults hidden and was never un-hidden on open
   const cat=studio.cat||'Weapons', isW=(cat==='Weapons'), spinOn=(studio.spin!==false);
   const tabs=STUDIO_CATS.map(c=>`<button class="wsbtn wscat${c===cat?' sel':''}" data-c="${c}" style="opacity:${c===cat?1:0.6}">${c}</button>`).join('');
   const list=isW ? ARCHEIDS.map(a=>`<button class="wsbtn" data-a="${a}">${ARCHES[a].disp}</button>`).join('')

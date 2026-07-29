@@ -157,7 +157,7 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 const HERO_H = 1.75;
 const ATK_SPEED = 1.85;   // swing playback rate — higher = snappier
 // Face placement — tune live via __SLICE.faceTune({...}); values bake in here.
-const FACE = { bandLo:0.72, bandHi:0.90, eyeY:0.34, eyeX:0.38, size:0.17, lift:1.0 };
+const FACE = { enabled:false, bandLo:0.72, bandHi:0.90, eyeY:0.34, eyeX:0.38, size:0.17, lift:1.0 };
 let MOB_SCALE = 1.0;   // global mob-size dial (see __SLICE.mobScale)                 // metres — everything is normalised to this
 const clock  = new THREE.Clock();
 const canvas = document.getElementById('c');
@@ -451,6 +451,7 @@ function faceDecalTexture(opt){
 let _faceTex = null;
 function addFace(actor, opt){
   opt = opt || {};
+  if(!FACE.enabled) return;            // off by default — see faceTune({enabled:true})
   if(!actor || actor._face) return;
   const head = findBone(actor, 'head');
   if(!head) return;

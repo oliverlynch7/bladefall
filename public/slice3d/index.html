@@ -420,24 +420,51 @@ canvas.addEventListener('click', ()=>{ if(!dragging) doAttack(); });
 /* ─────────────  STATE  ───────────── */
 let hero = null, heroDef = CLASSES[0];
 const enemies = [];
-// Real foes (Kenney Graveyard Kit, CC0) — these rigs ship 32 clips, so they get their
-// own vocabulary rather than the hero's.
-const MONSTER_CLIPS = {
-  idle:['idle'], walk:['walk'], run:['sprint'], jump:['jump'],
-  attack:['attack-melee-right','attack-melee-left'],
-  hit:['emote-no','idle'], death:['die'], roll:['jump'],
+// Foes: Quaternius Ultimate Monsters (CC0, via Poly Pizza). Three rig families, each
+// with its own clip vocabulary. `bf` maps each model to the Bladefall archetype it
+// would stand in for, so this doubles as a casting test for the real rebuild.
+const RIGS = {
+  ground: { idle:['Idle'], walk:['Walk'], run:['Run'], jump:['Jump'],
+            attack:['Punch'], hit:['HitReact'], death:['Death'], roll:['Duck'] },
+  blob:   { idle:['Idle'], walk:['Walk'], run:['Walk'], jump:['Jump'],
+            attack:['Bite_Front'], hit:['HitRecieve'], death:['Death'], roll:['Jump'] },
+  fly:    { idle:['Flying_Idle'], walk:['Fast_Flying'], run:['Fast_Flying'], jump:['Fast_Flying'],
+            attack:['Headbutt','Punch'], hit:['HitReact'], death:['Death'], roll:['Fast_Flying'] },
 };
 const MONSTERS = [
-  { file:'character-skeleton', name:'Skeleton', hp: 90,  h:1.75, speed:1.9, dmg:6 },
-  { file:'character-zombie',   name:'Zombie',   hp:130,  h:1.78, speed:1.2, dmg:9 },
-  { file:'character-vampire',  name:'Vampire',  hp:150,  h:1.85, speed:2.3, dmg:11 },
-  { file:'character-ghost',    name:'Wraith',   hp: 70,  h:1.70, speed:2.6, dmg:5 },
+  // file,             label,        bladefall archetype, rig,  hp,  h,   speed, dmg, fly-height
+  { file:'Orc',                label:'Orc',           bf:'grunt',        rig:'ground', hp:120, h:1.9, speed:1.9, dmg:9 },
+  { file:'Orc_Enemy',          label:'Goblin',        bf:'goblin',       rig:'blob',   hp: 70, h:1.4, speed:2.4, dmg:6 },
+  { file:'Demon',              label:'Shade',         bf:'shadeling',    rig:'ground', hp:140, h:2.0, speed:2.2, dmg:12 },
+  { file:'Blue_Demon',         label:'Void Fiend',    bf:'voidtether',   rig:'ground', hp:150, h:2.0, speed:2.0, dmg:13 },
+  { file:'Dino',               label:'Charger',       bf:'charger',      rig:'ground', hp:130, h:1.8, speed:2.6, dmg:10 },
+  { file:'Pink_Slime',         label:'Slime',         bf:'slime',        rig:'blob',   hp: 60, h:1.1, speed:1.3, dmg:5 },
+  { file:'Green_Blob',         label:'Slimelet',      bf:'slimelet',     rig:'blob',   hp: 45, h:0.9, speed:1.6, dmg:4 },
+  { file:'Green_Spiky_Blob',   label:'Toxling',       bf:'toxling',      rig:'blob',   hp: 80, h:1.2, speed:1.5, dmg:8 },
+  { file:'Yeti',               label:'Frostshell',    bf:'frostshell',   rig:'blob',   hp:190, h:2.2, speed:1.2, dmg:15 },
+  { file:'Cactoro',            label:'Thornboar',     bf:'thornboar',    rig:'blob',   hp:110, h:1.5, speed:2.0, dmg:9 },
+  { file:'Mushnub_Evolved',    label:'Sporeback',     bf:'sporeback',    rig:'blob',   hp:100, h:1.5, speed:1.4, dmg:7 },
+  { file:'Wizard',             label:'Caster',        bf:'caster',       rig:'blob',   hp: 85, h:1.7, speed:1.6, dmg:11 },
+  { file:'Ninja',              label:'Blinkstalker',  bf:'blinkstalker', rig:'blob',   hp: 90, h:1.7, speed:3.0, dmg:10 },
+  { file:'Tribal',             label:'Revenant',      bf:'revenant',     rig:'fly',    hp:100, h:1.8, speed:2.1, dmg:9,  flyY:0.5 },
+  { file:'Ghost_Skull',        label:'Bones',         bf:'bones',        rig:'fly',    hp: 75, h:1.5, speed:2.4, dmg:7,  flyY:1.1 },
+  { file:'Goleling',           label:'Cragspitter',   bf:'cragspitter',  rig:'fly',    hp:160, h:1.6, speed:1.4, dmg:12, flyY:0.8 },
+  { file:'Goleling_Evolved',   label:'Marble Statue', bf:'marblestatue', rig:'fly',    hp:220, h:2.1, speed:1.1, dmg:16, flyY:0.8 },
+  { file:'Armabee_Evolved',    label:'Galewisp',      bf:'galewisp',     rig:'fly',    hp: 65, h:1.2, speed:3.1, dmg:6,  flyY:1.6 },
+  { file:'Squidle',            label:'Glub',          bf:'toxling',      rig:'fly',    hp: 80, h:1.3, speed:2.2, dmg:8,  flyY:1.3 },
+  { file:'Glub_Evolved',       label:'Deep Glub',     bf:'toxling',      rig:'fly',    hp:120, h:1.6, speed:2.0, dmg:11, flyY:1.3 },
+  { file:'Hywirl',             label:'Sparkling',     bf:'sparkling',    rig:'fly',    hp: 70, h:1.3, speed:3.2, dmg:7,  flyY:1.5 },
+  { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:2.0, speed:2.6, dmg:14, flyY:1.9 },
+  // ── bosses ──
+  { file:'Dragon_Evolved',     label:'DRAGON (boss)', bf:'boss',         rig:'fly',    hp:900, h:4.6, speed:2.2, dmg:26, flyY:2.6, boss:true },
+  { file:'Mushroom_King',      label:'MUSHROOM KING (boss)', bf:'boss',  rig:'ground', hp:800, h:4.2, speed:1.5, dmg:24, boss:true },
 ];
+const MONSTER_CLIPS = RIGS.ground;   // legacy alias; per-monster rig is used below
 const ENEMY_SPOTS = [
-  { x: 4.6, z:-4.6, m:0 },
-  { x:-5.0, z:-3.4, m:1 },
-  { x: 0.6, z:-7.6, m:2 },
-  { x:-2.6, z:-6.4, m:3 },
+  { x: 4.6, z:-4.6, m:0 },   // Orc
+  { x:-5.0, z:-3.4, m:5 },   // Slime
+  { x: 0.6, z:-7.6, m:14 },  // Bones
+  { x:-2.6, z:-6.4, m:1 },   // Goblin
 ];
 let roomHalf = 11;                              // movement bounds, set from the room bbox
 const vel = new THREE.Vector3();
@@ -490,7 +517,10 @@ async function spawnEnemy(x, z, mIdx){
   const M = MONSTERS[mIdx % MONSTERS.length];
   const g = await load(`assets/monsters/${M.file}.glb`).catch(()=>null);
   if(!g) return null;
-  const e = new Actor(g, { clips: MONSTER_CLIPS }, M.h);
+  // Quaternius exports name clips "CharacterArmature|Idle" — normalise so RIGS can find them
+  for(const c of g.animations) c.name = c.name.split('|').pop();
+  const e = new Actor(g, { clips: RIGS[M.rig] || RIGS.ground }, M.h);
+  if(M.flyY) e.root.position.y = M.flyY;
   e.root.position.set(x, 0, z);
   e.def2 = M;
   e.maxHp = M.hp; e.hp = M.hp; e.dead = false; e.hitFlash = 0; e.swingCd = 1 + Math.random()*2;
@@ -668,6 +698,48 @@ async function scatterProps(){
       scene.add(inst);
     }
   }
+  // ── Fantasy Props MegaKit (Quaternius) — the detailed dressing near the fight floor ──
+  const QPLAN = [
+    { file:'Barrel',        ringR:0.72, n:4, scale:1.0 },
+    { file:'Crate_Wooden',  ringR:0.66, n:3, scale:1.0 },
+    { file:'Crate_Metal',   ringR:0.70, n:2, scale:1.0 },
+    { file:'Cage_Small',    ringR:0.80, n:2, scale:1.2 },
+    { file:'Anvil_Log',     ringR:0.58, n:1, scale:1.1 },
+    { file:'Workbench',     ringR:0.62, n:1, scale:1.1 },
+    { file:'WeaponStand',   ringR:0.64, n:2, scale:1.1 },
+    { file:'Cauldron',      ringR:0.60, n:1, scale:1.1 },
+    { file:'Table_Large',   ringR:0.76, n:1, scale:1.0 },
+    { file:'Bench',         ringR:0.78, n:2, scale:1.0 },
+    { file:'Bookcase_2',    ringR:0.86, n:2, scale:1.1 },
+    { file:'Banner_1',      ringR:0.92, n:3, scale:1.6, faceIn:true },
+    { file:'Banner_2',      ringR:0.92, n:3, scale:1.6, faceIn:true },
+    { file:'Torch_Metal',   ringR:0.92, n:6, scale:1.2, faceIn:true },
+    { file:'Pot_1',         ringR:0.68, n:3, scale:0.9 },
+    { file:'Vase_2',        ringR:0.70, n:2, scale:0.9 },
+    { file:'Bucket_Wooden_1', ringR:0.64, n:2, scale:0.8 },
+    { file:'Chain_Coil',    ringR:0.74, n:2, scale:0.9 },
+    { file:'Dummy',         ringR:0.82, n:2, scale:1.2 },
+  ];
+  for(const P of QPLAN){
+    const g2 = await load(`assets/qprops/${P.file}.gltf`).catch(()=>null);
+    if(!g2) continue;
+    const base = prep(g2.scene);
+    const bb = new THREE.Box3().setFromObject(base), bs = bb.getSize(new THREE.Vector3());
+    const norm = 1 / Math.max(0.001, Math.max(bs.x, bs.y, bs.z));
+    for(let i=0;i<P.n;i++){
+      const inst = base.clone(true);
+      const a = (i / P.n) * Math.PI*2 + rnd()*0.7 + 0.4;
+      const r = roomHalf * P.ringR * (0.9 + rnd()*0.16);
+      inst.scale.setScalar(norm * P.scale);
+      inst.position.set(Math.cos(a)*r, 0, Math.sin(a)*r);
+      const nb = new THREE.Box3().setFromObject(inst);
+      inst.position.y -= nb.min.y;
+      inst.rotation.y = P.faceIn ? (-a + Math.PI/2) : rnd()*Math.PI*2;
+      scene.add(inst);
+    }
+  }
+  await addChests();
+
   // fire baskets flanking the centre — real light sources
   const fb = await load('assets/props/fire-basket.glb').catch(()=>null);
   if(fb){
@@ -688,6 +760,63 @@ async function scatterProps(){
       li.position.set(bx, 1.15, bz); scene.add(li);
       braziers.push({ li, flame, base:3.0, seed: Math.random()*7 });
     }
+  }
+}
+
+/* ── chests: walk up and they pop open, spill loot, and heal you ── */
+const chests = [];
+async function addChests(){
+  const g = await load('assets/qprops/Chest_Wood.gltf').catch(()=>null);
+  const coinG = await load('assets/qprops/Coin_Pile.gltf').catch(()=>null);
+  const potG  = await load('assets/qprops/Potion_1.gltf').catch(()=>null);
+  if(!g) return;
+  const base = prep(g.scene);
+  const bb = new THREE.Box3().setFromObject(base), bs = bb.getSize(new THREE.Vector3());
+  const norm = 0.95 / Math.max(0.001, Math.max(bs.x, bs.y, bs.z));
+  for(const [cx,cz] of [[-7.5,-1.5],[7.5,-1.5],[0,-9.0]]){
+    const inst = base.clone(true);
+    inst.scale.setScalar(norm);
+    inst.position.set(cx, 0, cz);
+    const nb = new THREE.Box3().setFromObject(inst);
+    inst.position.y -= nb.min.y;
+    inst.rotation.y = Math.atan2(-cx, -cz);
+    scene.add(inst);
+    // a soft glow so you can see it's interactive
+    const glow = new THREE.PointLight('#ffd24a', 0.9, 4.5, 2);
+    glow.position.set(cx, 0.7, cz); scene.add(glow);
+    chests.push({ obj:inst, x:cx, z:cz, opened:false, glow, coinG, potG });
+  }
+}
+function tryOpenChests(){
+  if(!hero) return;
+  for(const c of chests){
+    if(c.opened) continue;
+    if(Math.hypot(hero.root.position.x - c.x, hero.root.position.z - c.z) > 1.9) continue;
+    c.opened = true;
+    c.obj.rotation.x = -0.42;                      // lid tips back
+    c.glow.intensity = 0;
+    novaFX(new THREE.Vector3(c.x, 0.2, c.z), '#ffd24a', '#ffe9a8');
+    // spill the loot
+    const drop = (G, n, spread, y, sc) => {
+      if(!G) return;
+      const b = prep(G.scene);
+      const bb2 = new THREE.Box3().setFromObject(b), s2 = bb2.getSize(new THREE.Vector3());
+      const nm = sc / Math.max(0.001, Math.max(s2.x, s2.y, s2.z));
+      for(let i=0;i<n;i++){
+        const it = b.clone(true);
+        it.scale.setScalar(nm);
+        it.position.set(c.x + (Math.random()-.5)*spread, y, c.z + (Math.random()-.5)*spread);
+        it.rotation.y = Math.random()*Math.PI*2;
+        scene.add(it);
+      }
+    };
+    drop(c.coinG, 3, 1.3, 0.02, 0.5);
+    drop(c.potG,  2, 1.0, 0.02, 0.34);
+    heroHp = Math.min(heroMaxHp, heroHp + 35); updateHeroHp();
+    damageNumber(new THREE.Vector3(c.x, 1.4, c.z), '+35', false);
+    const el = document.getElementById('kills');
+    if(el){ const prev = el.textContent; el.textContent = '⚔ Chest opened  ·  +35 HP';
+      setTimeout(()=>{ if(el.textContent.startsWith('⚔ Chest')) el.textContent = prev; }, 2200); }
   }
 }
 
@@ -864,7 +993,10 @@ function tick(){
 
   for(const e of enemies){
     e.update(dt);
-    if(e.dead){ e.root.position.y = Math.max(-0.4, e.root.position.y - dt*0.15); continue; }   // sink as it dies
+    if(e.dead){ e.root.position.y = Math.max(-0.4, e.root.position.y - dt*0.6); continue; }
+    if(e.def2 && e.def2.flyY){                                   // bob in the air
+      e.root.position.y = e.def2.flyY + Math.sin(t*2 + e.root.position.x)*0.14;
+    }   // sink as it dies
     if(e.locked <= 0) e.play('idle');
     if(e.hitFlash > 0) e.hitFlash -= dt;
     if(hero){                                            // face the player, and close in when near — feels alive
@@ -916,6 +1048,7 @@ function tick(){
     tc.flame.rotation.y += 2.4*dt;
   }
 
+  tryOpenChests();
   stepVFX(dt);
   renderer.render(scene, camera);
 

@@ -3153,6 +3153,145 @@ function toggleAnimBar(on){
   if(btn) btn.style.display = open ? 'none' : 'block';
 }
 
+
+/* ─────────────  VILLAGE BUILDER  ─────────────
+   The Medieval Village MegaKit ships 176 MODULAR PARTS, not finished buildings: 39 roof
+   pieces, 20 walls, 15 stairs, 12 floors, doors, windows, corners, props. Exactly one
+   landmark. So a hub cannot be assembled by dropping in house models - the houses have to
+   be built.
+
+   That is a good trade rather than a bad one. Assembling on a grid is arithmetic, not
+   aesthetics, which is the half of this work I am actually reliable at. Measured from the
+   parts: walls are 2.0 wide and 3.12 tall, floors are 2x2, so the kit is on a 2-unit grid
+   with a ~3-unit storey. One generator therefore produces unlimited buildings instead of us
+   hand-placing several hundred pieces per house.
+
+   makeBuilding({w,d,storeys,...}) returns a Group. w/d are in GRID CELLS, not units. */
+const VIL = 'assets/village/';
+const VIL_GRID = 2.0;          // wall width / floor tile size, measured
+const VIL_STOREY = 3.0;        // wall height, measured (3.123 with trim overlap)
+
+const VIL_STYLE = {
+  plaster: { wall:'Wall_Plaster_Straight', door:'Wall_Plaster_Door_Round',
+             win:'Wall_Plaster_Window_Wide_Round', corner:'Corner_Exterior_Wood',
+             floor:'Floor_WoodDark' },
+  brick:   { wall:'Wall_UnevenBrick_Straight', door:'Wall_UnevenBrick_Door_Round',
+             win:'Wall_UnevenBrick_Window_Wide_Round', corner:'Corner_Exterior_Brick',
+             floor:'Floor_UnevenBrick' },
+};
+
+const _vilCache = {};
+async function vilPart(name){
+  if(_vilCache[name] !== undefined) return _vilCache[name];
+  const g = await load(VIL + name + '.gltf').catch(()=>null);
+  _vilCache[name] = g ? g.scene : null;
+  return _vilCache[name];
+}
+// a fresh, correctly-materialised copy of a part
+function vilClone(src){
+  const out = new THREE.Group();
+  src.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.receiveShadow = true;
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    for(const mm of mats){ if(mm && mm.map) mm.map.colorSpace = THREE.SRGBColorSpace; }
+    o.updateWorldMatrix(true, false);
+    m.applyMatrix4(o.matrixWorld);
+    out.add(m);
+  });
+  return out;
+}
+
+async function makeBuilding(opt){
+  opt = opt || {};
+  const w = Math.max(1, opt.w || 2), d = Math.max(1, opt.d || 2);
+  const storeys = Math.max(1, opt.storeys || 1);
+  const st = VIL_STYLE[opt.style || 'plaster'] || VIL_STYLE.plaster;
+  const G = VIL_GRID, H = VIL_STOREY;
+
+  const need = [st.wall, st.door, st.win, st.corner, st.floor,
+                'Roof_RoundTiles_4x4', 'Roof_RoundTiles_4x6', 'Roof_RoundTiles_4x8',
+                'Prop_Chimney'];
+  const parts = {};
+  for(const n of need) parts[n] = await vilPart(n);
+
+  const B = new THREE.Group();
+  B.userData._village = true;
+  const put = (partName, x, y, z, ry) => {
+    const src = parts[partName]; if(!src) return null;
+    const c = vilClone(src);
+    c.position.set(x, y, z);
+    c.rotation.y = ry || 0;
+    B.add(c);
+    return c;
+  };
+
+  /* Perimeter walls. A wall spans x -1..1 with its base at y=0 and faces +Z, so a run along
+     the south edge is one piece per cell centre; the other three edges are the same run
+     rotated. The door replaces one ground-floor slot and windows fill a share of the rest. */
+  const doorCell = Math.floor(w / 2);
+  for(let s = 0; s < storeys; s++){
+    const y = s * H;
+    for(let i = 0; i < w; i++){
+      const cx = i * G + G/2;
+      const isDoor = (s === 0 && i === doorCell);
+      put(isDoor ? st.door : (i % 2 === 1 ? st.win : st.wall), cx, y, 0, 0);
+      put(i % 2 === 0 ? st.win : st.wall, cx, y, d * G, Math.PI);
+    }
+    for(let j = 0; j < d; j++){
+      const cz = j * G + G/2;
+      put(j % 2 === 1 ? st.win : st.wall, 0,     y, cz, -Math.PI/2);
+      put(j % 2 === 0 ? st.win : st.wall, w * G, y, cz,  Math.PI/2);
+    }
+    // corner posts hide the seams where two wall runs meet
+    put(st.corner, 0,     y, 0,     0);
+    put(st.corner, w * G, y, 0,     -Math.PI/2);
+    put(st.corner, 0,     y, d * G, Math.PI/2);
+    put(st.corner, w * G, y, d * G, Math.PI);
+  }
+
+  // floor per storey, one tile per cell
+  for(let s = 0; s < storeys; s++)
+    for(let i = 0; i < w; i++) for(let j = 0; j < d; j++)
+      put(st.floor, i*G + G/2, s*H, j*G + G/2, 0);
+
+  /* Roof. The kit has 4x4 / 4x6 / 4x8 gables; pick the closest and scale to the footprint
+     rather than tiling ridge pieces, which would need per-size special cases. */
+  const roofName = (d >= 4 ? 'Roof_RoundTiles_4x8' : d >= 3 ? 'Roof_RoundTiles_4x6' : 'Roof_RoundTiles_4x4');
+  const roof = put(roofName, w*G/2, storeys*H, d*G/2, 0);
+  if(roof){
+    const rb = new THREE.Box3().setFromObject(roof), rs = rb.getSize(new THREE.Vector3());
+    if(rs.x > 1e-3 && rs.z > 1e-3){
+      roof.scale.set((w*G + 0.6)/rs.x, 1, (d*G + 0.6)/rs.z);
+    }
+  }
+  if(opt.chimney !== false) put('Prop_Chimney', w*G*0.25, storeys*H + 0.4, d*G*0.5, 0);
+
+  B.position.set(opt.x || 0, 0, opt.z || 0);
+  if(opt.ry) B.rotation.y = opt.ry;
+  return B;
+}
+
+/* A test hub: a ring of buildings so the generator can be judged at a glance. */
+let _hub = null;
+async function buildTestHub(){
+  if(_hub){ scene.remove(_hub); disposeTree(_hub); _hub = null; }
+  const g = new THREE.Group();
+  const spec = [
+    { w:3, d:3, storeys:2, style:'plaster', x:-16, z:-14 },
+    { w:2, d:2, storeys:1, style:'brick',   x:-4,  z:-18, ry:Math.PI/2 },
+    { w:4, d:3, storeys:2, style:'brick',   x:8,   z:-15 },
+    { w:2, d:3, storeys:1, style:'plaster', x:-18, z:2,  ry:-Math.PI/2 },
+    { w:3, d:2, storeys:2, style:'plaster', x:12,  z:2 },
+  ];
+  for(const sp of spec) g.add(await makeBuilding(sp));
+  scene.add(g); _hub = g;
+  const bb = new THREE.Box3().setFromObject(g), sz = bb.getSize(new THREE.Vector3());
+  let meshes = 0; g.traverse(o => { if(o.isMesh) meshes++; });
+  return { buildings: spec.length, meshes, size:[+sz.x.toFixed(1), +sz.y.toFixed(1), +sz.z.toFixed(1)] };
+}
+
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
   constructor(gltf, def, targetH){
@@ -4925,6 +5064,9 @@ window.__SLICE = {
   weapWorldSize: () => { if(!hero || !hero._weap) return null;
     const b = new THREE.Box3().setFromObject(hero._weap), z = b.getSize(new THREE.Vector3());
     return +Math.max(z.x, z.y, z.z).toFixed(4); },
+  village: async () => await buildTestHub(),
+  building: async o => { const b = await makeBuilding(o || {}); scene.add(b);
+    let n=0; b.traverse(x => { if(x.isMesh) n++; }); return { meshes:n }; },
   weaponScore: () => weaponScore(hero),
   autoFit: async o => await autoFitWeapon(hero, o),
   weapReach: () => { const g = hero && hero._weapGrip;

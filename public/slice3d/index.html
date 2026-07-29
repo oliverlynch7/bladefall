@@ -1821,7 +1821,12 @@ const EYE = {
 const EYE_DEFAULT = JSON.parse(JSON.stringify(EYE));
 let EYE_ALL = {};
 try { EYE_ALL = JSON.parse(localStorage.getItem('bf_eye') || '{}'); } catch(e){}
-const eyeModel = () => (heroDef && (heroDef.model || heroDef.id)) || 'Warrior';
+const eyeModel = () => {
+  // guarded: heroDef is declared later in the file, so anything running at module-init
+  // time would otherwise hit the temporal dead zone and take the whole page down
+  try { return (heroDef && (heroDef.model || heroDef.id)) || 'Warrior'; }
+  catch(e){ return 'Warrior'; }
+};
 function eyeLoadFor(model){
   const pre = (FACE_PRESETS[model] || {}).eye || {};
   Object.assign(EYE, EYE_DEFAULT, pre, cleanFace(EYE_ALL[model] || {}, EYE_DEFAULT));
@@ -2176,14 +2181,51 @@ const WEAPON_LEN = {
    stays put, so a spear can be aimed but not pushed through the fist to sit further
    forward. All three are fractions of the weapon's own length, so they behave the same
    on a dagger and on a scythe. */
+
+/* ─────────────  WEAPON RULES  ─────────────
+   Oliver's call, and it is a scoping decision more than a design one: a class may only
+   equip weapons that suit its archetype. 28 weapons across 6 bodies is 168 combinations to
+   position by hand; restricting each weapon to the archetype it belongs on collapses that
+   to roughly 28. It also reads as a real RPG rule rather than a limitation.
+
+   Grouped by BODY, because the body is what determines the hand and the grip — two classes
+   sharing a model share their weapon list and their tuning for free. */
+const ARCHETYPE_WEAPONS = {
+  Warrior: [/^Sword/, /^Claymore/, /^Axe/, /^Hammer/, /^Spear/, /^Scythe/, /^Shield/],
+  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Shield/],
+  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/],
+  Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
+  Wizard:  [/^Scythe/, /^Spear/, /^Dagger$/],
+  Monk:    [],                       // unarmed by design
+};
+function weaponsFor(model){
+  const rules = ARCHETYPE_WEAPONS[model];
+  if(!rules) return WEAPONS.slice();
+  return WEAPONS.filter(w => rules.some(re => re.test(w)));
+}
+
+/* Tuned transforms, keyed by WEAPON rather than by class. That is the point of the rule
+   above: a weapon lives on one archetype, so one set of numbers is enough for it
+   everywhere it can appear. */
+const WEAPON_PRESETS = {
+  // Oliver, tuned on the Warrior body, 2026-07-29
+  Scythe: { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,
+            fwd:-0.04, up:0.01, side:-0.17, grip:0.29 },
+};
+
 const WEAP = { on:false, name:'Sword', len:1.0, roll:0, pitch:0, yaw:0,
                fwd:0, up:0, side:0, grip:0.72, hideStock:true };
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
-function weapLoadFor(model){ Object.assign(WEAP, WEAP_DEFAULT, WEAP_ALL[model] || {}); }
+/* Keyed by weapon name, not by model: the archetype rule guarantees a weapon only ever
+   appears on one body, so its tuning is the same everywhere it shows up. */
+function weapLoadFor(_model){
+  const n = WEAP.name;
+  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {}, WEAP_ALL[n] || {}, { name: n });
+}
 const weapSave = () => {
-  WEAP_ALL[eyeModel()] = JSON.parse(JSON.stringify(WEAP));
+  WEAP_ALL[WEAP.name] = JSON.parse(JSON.stringify(WEAP));
   try { localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); } catch(e){}
 };
 
@@ -2228,6 +2270,10 @@ async function equipWeapon(actor, useSaved){
   clearWeapon(actor);
   if(useSaved !== false) weapLoadFor(eyeModel());
   if(!WEAP.on) return null;
+  // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
+  const allowed = weaponsFor(eyeModel());
+  if(allowed.length && !allowed.includes(WEAP.name)) WEAP.name = allowed[0];
+  if(!allowed.length) return null;
   const rig = weaponRig(actor);
   if(!rig) return null;
 
@@ -3077,7 +3123,7 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
        <label><input type="checkbox" data-wb="hideStock" ${WEAP.hideStock?'checked':''}> hide the built-in one</label>
        <label>Model</label>
        <select data-wsel style="width:100%;background:rgba(30,25,18,.9);color:#e0d2b4;border:1px solid #4a3c26;border-radius:6px;padding:5px">
-         ${WEAPONS.map(w => `<option value="${w}" ${WEAP.name===w?'selected':''}>${w}</option>`).join('')}
+         ${weaponsFor(eyeModel()).map(w => `<option value="${w}" ${WEAP.name===w?'selected':''}>${w}</option>`).join('')}
        </select>
        ${WEAP_ROWS.map(([k,lbl,mn,mx,st]) =>
          `<label>${lbl}</label><div class="rw">
@@ -3117,8 +3163,12 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       }));
     const applyW = () => { equipWeapon(hero, false).then(()=>weapSave()); };
     const sel = pane.querySelector('[data-wsel]');
-    if(sel) sel.addEventListener('change', () => { WEAP.name = sel.value; WEAP.on = true;
-      const cb = pane.querySelector('[data-wb="on"]'); if(cb) cb.checked = true; applyW(); });
+    if(sel) sel.addEventListener('change', () => {
+      WEAP.name = sel.value; WEAP.on = true;
+      weapLoadFor();                       // pull this weapon's own saved/preset numbers
+      const cb = pane.querySelector('[data-wb="on"]'); if(cb) cb.checked = true;
+      equipWeapon(hero, false).then(() => { weapSave(); if(window.__eyeRebuild) window.__eyeRebuild(); });
+    });
     pane.querySelectorAll('input[data-wk]').forEach(el => {
       el.addEventListener('input', () => {
         WEAP[el.dataset.wk] = +el.value;
@@ -3140,10 +3190,14 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       alert(t);
     });
   }
-  build();
-  btn.addEventListener('click', () => { pane.classList.toggle('open'); btn.style.display = pane.classList.contains('open') ? 'none' : 'block'; });
+  btn.addEventListener('click', () => {
+    const opening = !pane.classList.contains('open');
+    if(opening) build();                 // lazy: heroDef does not exist at module-init time
+    pane.classList.toggle('open');
+    btn.style.display = pane.classList.contains('open') ? 'none' : 'block';
+  });
   pane.addEventListener('click', e => { if(e.target === pane){ pane.classList.remove('open'); btn.style.display='block'; } });
-  window.__eyeRebuild = build;
+  window.__eyeRebuild = () => { if(pane.classList.contains('open')) build(); };
   const cb = document.getElementById('creatorBtn');
   if(cb) cb.addEventListener('click', () => toggleCreator());
   const ab = document.getElementById('animBtn');
@@ -4058,6 +4112,7 @@ window.__SLICE = {
   mouthShapes: () => MOUTH_SHAPES.slice(),
   creator: on => { toggleCreator(on); return CREATOR.open; },
   weapons: () => WEAPONS.slice(),
+  weaponsFor: m => weaponsFor(m || eyeModel()),
   clipList: () => hero ? Object.keys(hero.clips || {}).sort() : [],
   playClip: n => { if(hero && hero.clips && hero.clips[n]){
       hero.play(null, { clip: hero.clips[n], loop: true, fade: 0.15 });

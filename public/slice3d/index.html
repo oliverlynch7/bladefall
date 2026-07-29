@@ -1780,58 +1780,73 @@ function headMetrics(actor){
   actor.root.traverse(o => { if(!head && o.isBone && /^head$/i.test(o.name.replace(/[^a-z]/gi,''))) head = o; });
   if(!head) return null;
   actor.root.updateMatrixWorld(true);
+
+  /* Which vertices are the HEAD?
+
+     This was the bug behind every bad face placement. The old code took "whichever mesh
+     has the most vertices" and called it the head — on these models that is the BODY, so
+     width, height and the front surface were all measurements of the whole character.
+     Eyes then got positioned with body-sized offsets and floated off beside the skull.
+
+     The models already answer this question properly: they are skinned, so every vertex
+     records which bone drives it. Vertices weighted to the head bone ARE the head. That
+     is the artist's own definition, not a heuristic of mine. */
   const inv = new THREE.Matrix4().copy(head.matrixWorld).invert();
-
-  // Vertices of the head mesh, in HEAD-LOCAL space
-  let mesh = null, best = -1;
-  actor.root.traverse(o => {
-    if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
-    if(o.userData._eye) return;
-    // the head mesh is whichever has most verts near the head bone
-    const c = o.geometry.attributes.position.count;
-    if(c > best){ best = c; mesh = o; }
-  });
-  if(!mesh) return null;
-
-  const pos = mesh.geometry.attributes.position;
   const v = new THREE.Vector3(), local = new THREE.Vector3();
-  const toLocal = new THREE.Matrix4().multiplyMatrices(inv, mesh.matrixWorld);
-  let minX=1e9,maxX=-1e9, minY=1e9,maxY=-1e9, minZ=1e9,maxZ=-1e9;
-  let nose = null, noseScore = -1e9;
-  for(let i=0;i<pos.count;i++){
-    v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
-    if(local.y < -0.02) continue;              // ignore anything below the head bone
-    minX=Math.min(minX,local.x); maxX=Math.max(maxX,local.x);
-    minY=Math.min(minY,local.y); maxY=Math.max(maxY,local.y);
-    minZ=Math.min(minZ,local.z); maxZ=Math.max(maxZ,local.z);
-  }
-  const w = Math.max(1e-4, maxX-minX), h = Math.max(1e-4, maxY-minY);
+  let minX=1e9,maxX=-1e9, minY=1e9,maxY=-1e9, minZ=1e9,maxZ=-1e9, n=0;
+  const pts = [];
 
-  /* Which way does the face point? Comparing |maxZ| to |minZ| was unreliable — it gave
-     opposite answers on different characters (the Monk's beard skewed his bounds), so
-     eyes landed behind two of the three heads. Instead: find the single most protruding
-     vertex on the head's centre line (that's the nose, which every one of these models
-     has), and take the direction from the head's own centre out to it. That's derived
-     from artist-authored geometry and works whichever way the mesh happens to be built. */
+  actor.root.traverse(o => {
+    if(!o.isSkinnedMesh || o.userData._eye || o.userData._weap) return;
+    const geo = o.geometry, pos = geo.attributes.position;
+    const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight;
+    if(!pos || !si || !sw || !o.skeleton) return;
+    const bi = o.skeleton.bones.indexOf(head);
+    if(bi < 0) return;
+    const toLocal = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
+    for(let i=0;i<pos.count;i++){
+      let wgt = 0;
+      for(let k=0;k<4;k++){
+        if(si.getComponent(i,k) === bi) wgt += sw.getComponent(i,k);
+      }
+      if(wgt < 0.5) continue;                    // mostly-head vertices only
+      v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
+      minX=Math.min(minX,local.x); maxX=Math.max(maxX,local.x);
+      minY=Math.min(minY,local.y); maxY=Math.max(maxY,local.y);
+      minZ=Math.min(minZ,local.z); maxZ=Math.max(maxZ,local.z);
+      pts.push(local.x, local.y, local.z); n++;
+    }
+  });
+
+  if(n < 20) return null;                        // no usable head data — do not guess
+
+  const w = Math.max(1e-4, maxX-minX);
+  const h = Math.max(1e-4, maxY-minY);
+  const d = Math.max(1e-4, maxZ-minZ);
   const cz = (minZ + maxZ) / 2;
-  for(let i=0;i<pos.count;i++){
-    v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
-    if(local.y < minY + h*0.10 || local.y > minY + h*0.90) continue;
-    if(Math.abs(local.x) > w*0.10) continue;      // centre line only
-    const score = Math.abs(local.z - cz);          // distance from centre, either way
-    if(score > noseScore){ noseScore = score; nose = local.clone(); }
-  }
-  if(!nose) nose = new THREE.Vector3(0, minY + h*0.55, maxZ);
-  const dir = (nose.z - cz) >= 0 ? 1 : -1;
 
-  /* Anchor height to the HEAD, not the nose. Nose height varies a lot between these
-     models (0.22 on the Monk vs 0.62 on the Warrior in head-local units), which is why a
-     single height value put eyes on one face and above another skull. The head's own
-     vertical extent is stable, so 'height' now reads as a fraction of the head. */
-  const d = Math.max(1e-4, maxZ - minZ);
-  return { head, w, h, d, dir, nose, cz, minY, maxY,
-           eyeY: minY + h * 0.62,                 // rough brow line; slider trims from here
-           front: dir >= 0 ? maxZ : minZ };
+  /* Face direction — derived, not guessed.
+
+     Every heuristic I tried here disagreed between characters (comparing |maxZ| to |minZ|,
+     then counting vertex mass either side of centre) and produced dir=-1 on the Warrior
+     and dir=+1 on the Monk. That inconsistency is nonsense: all six share ONE skeleton, so
+     the way a head faces relative to its own bone is necessarily the same for all of them.
+
+     So stop inspecting the mesh and ask the rig. Take the direction the character's body
+     faces and express it in head-local coordinates. That is one deterministic answer, it
+     is identical across all six models, and it cannot flip based on a beard. */
+  const rootQ = new THREE.Quaternion(); actor.root.getWorldQuaternion(rootQ);
+  const headQ = new THREE.Quaternion(); head.getWorldQuaternion(headQ);
+  const FWD = new THREE.Vector3(0, 0, 1).applyQuaternion(rootQ)
+                .applyQuaternion(headQ.clone().invert()).normalize();
+  const UP  = new THREE.Vector3(0, 1, 0).applyQuaternion(rootQ)
+                .applyQuaternion(headQ.clone().invert()).normalize();
+  const RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  const centre = new THREE.Vector3((minX+maxX)/2, (minY+maxY)/2, cz);
+
+  // brow line: eyes sit a little above the middle of a head
+  const eyeY = minY + h * 0.58;
+  return { head, w, h, d, cz, minY, maxY, eyeY, centre, FWD, UP, RIGHT, verts: n };
 }
 
 function clearEyes(actor){
@@ -1847,7 +1862,7 @@ function addEyes(actor, useSaved){
   if(!EYE.on) return null;
   const M = headMetrics(actor);
   if(!M) return null;
-  if(EYE.flip) M.dir = -M.dir, M.front = (M.dir >= 0 ? M.cz + M.d/2 : M.cz - M.d/2);
+  const SGN = EYE.flip ? -1 : 1;
 
   const made = [];
   const mk = (geo, col) => {
@@ -1865,21 +1880,25 @@ function addEyes(actor, useSaved){
     }
     const ir = mk(new THREE.SphereGeometry(1, 12, 9), EYE.iris);
     ir.scale.setScalar(R*EYE.irisSz);
-    ir.position.z = M.dir * R*0.42; g.add(ir);
+    ir.position.z = R*0.42; g.add(ir);
     const pu = mk(new THREE.SphereGeometry(1, 10, 8), EYE.pupil);
     pu.scale.setScalar(R*EYE.irisSz*0.5);
-    pu.position.z = M.dir * R*0.60; g.add(pu);
+    pu.position.z = R*0.60; g.add(pu);
 
-    g.position.set(side * M.w * EYE.spread,
-                   M.eyeY + M.h * EYE.height,
-                   M.front + M.dir * (M.d * EYE.depth));
-    g.rotation.z = -side * EYE.tilt;
+    /* Build the position from the head's own basis vectors: sideways along RIGHT, up
+       along UP, outward along FWD. Works whichever way the bone happens to be oriented. */
+    g.position.copy(M.centre)
+      .addScaledVector(M.RIGHT, side * M.w * EYE.spread)
+      .addScaledVector(M.UP,    (M.eyeY - (M.minY + M.h/2)) + M.h * EYE.height)
+      .addScaledVector(M.FWD,   SGN * (M.d * (0.5 + EYE.depth)));
+    g.lookAt(g.position.clone().addScaledVector(M.FWD, SGN * 10));
+    g.rotateZ(-side * EYE.tilt);
     M.head.add(g);
     made.push(g);
   }
   actor._eyes = made;
-  return { w:+M.w.toFixed(3), h:+M.h.toFixed(3), dir:M.dir,
-           nose:[+M.nose.x.toFixed(3), +M.nose.y.toFixed(3), +M.nose.z.toFixed(3)] };
+  return { headVerts:M.verts, w:+M.w.toFixed(3), h:+M.h.toFixed(3), d:+M.d.toFixed(3),
+           fwd:[+M.FWD.x.toFixed(2), +M.FWD.y.toFixed(2), +M.FWD.z.toFixed(2)] };
 }
 
 
@@ -1990,13 +2009,15 @@ function addMouth(actor, useSaved){
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1,1), mat);
   m.userData._eye = true;                       // excluded from head measurement
   m.renderOrder = MOUTH.onTop ? 999 : 3;
+  const MSGN = MOUTH.flip ? -1 : 1;
   m.scale.set(M.w * MOUTH.width, M.w * MOUTH.height, 1);
-  m.position.set(0, M.eyeY + M.h * MOUTH.y, M.front + M.dir * (M.d * MOUTH.z));
-  // face outward: the plane's +Z must point the same way as the nose
-  if(M.dir < 0) m.rotation.y = Math.PI;
+  m.position.copy(M.centre)
+    .addScaledVector(M.UP,  (M.eyeY - (M.minY + M.h/2)) + M.h * MOUTH.y)
+    .addScaledVector(M.FWD, MSGN * (M.d * (0.5 + MOUTH.z)));
+  m.lookAt(m.position.clone().addScaledVector(M.FWD, MSGN * 10));
   M.head.add(m);
   actor._mouth = m;
-  return { shape: MOUTH.shape, w:+M.w.toFixed(3), dir:M.dir };
+  return { shape: MOUTH.shape, w:+M.w.toFixed(3) };
 }
 
 
@@ -2045,16 +2066,29 @@ function weaponRig(actor){
   return { bone, stock };
 }
 
+/* Sweep the bone for EVERY attached weapon, not just the one we happen to be tracking.
+   Tracking a single reference was not enough: equipWeapon awaits a model load, so dragging
+   a slider fires several overlapping calls that each clear (finding nothing yet), each
+   load, and each parent a new weapon to the hand. Only the last was recorded, so every
+   earlier copy stayed in the scene — a fan of ~40 scythes — and subsequent edits could no
+   longer remove what was actually visible. */
 function clearWeapon(actor){
   if(!actor) return;
+  const rig = weaponRig(actor);
+  if(rig){
+    for(const c of rig.bone.children.slice()){
+      if(c.userData && c.userData._weap) rig.bone.remove(c);
+    }
+    if(rig.stock) rig.stock.visible = true;         // restore the character's own weapon
+  }
   if(actor._weap && actor._weap.parent) actor._weap.parent.remove(actor._weap);
   actor._weap = null;
-  const rig = weaponRig(actor);
-  if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
 }
 
+let _weapSeq = 0;
 async function equipWeapon(actor, useSaved){
   if(!actor) return null;
+  const seq = ++_weapSeq;              // anything older than this is stale
   clearWeapon(actor);
   if(useSaved !== false) weapLoadFor(eyeModel());
   if(!WEAP.on) return null;
@@ -2062,6 +2096,8 @@ async function equipWeapon(actor, useSaved){
   if(!rig) return null;
 
   const g = await load(`assets/weapons/${WEAP.name}.glb`).catch(()=>null);
+  // a newer request started while this one was loading — drop this result on the floor
+  if(seq !== _weapSeq) return null;
   if(!g) return null;
 
   const holder = new THREE.Group();
@@ -2110,6 +2146,8 @@ async function equipWeapon(actor, useSaved){
     wrap.quaternion.copy(rig.stock.quaternion);
     wrap.scale.copy(rig.stock.scale);
   }
+  if(seq !== _weapSeq) return null;
+  clearWeapon(actor);                  // belt and braces: nothing else may be attached
   rig.bone.add(wrap);
   actor.root.updateMatrixWorld(true);
 
@@ -2770,6 +2808,7 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
             <input type="range" data-mk="${k}" min="${mn}" max="${mx}" step="${st}" value="${MOUTH[k]}">
             <span class="v" data-mv="${k}">${(+MOUTH[k]).toFixed(3)}</span></div>`).join('')}
        <label>Mouth colour</label><input type="color" data-mc="color" value="${MOUTH.color}">
+       <label><input type="checkbox" data-mb="flip" ${MOUTH.flip?'checked':''}> flip to other side</label>
        <label><input type="checkbox" data-mb="onTop" ${MOUTH.onTop?'checked':''}> draw through head</label>
        <label><input type="checkbox" data-mb="on" ${MOUTH.on?'checked':''}> mouth on</label>
        <hr><h5 style="margin-bottom:6px">Weapon</h5>
@@ -3750,6 +3789,8 @@ window.__SLICE = {
   tp: (x,z) => { if(hero){ hero.root.position.x = x; hero.root.position.z = z; } return true; },
   hp: () => heroHp,
   safeInfo: () => ({ x:SAFE.x, z:SAFE.z, r:SAFE.r }),
+  weapCount: () => { const rig = weaponRig(hero); if(!rig) return -1;
+    return rig.bone.children.filter(c => c.userData && c.userData._weap).length; },
   // drop the hero right on top of a live enemy — the only honest way to test that the
   // safe zone is what stops the damage, rather than the mobs simply not arriving
   nextToFoe: () => { const e = enemies.find(q => !q.dead); if(!e) return null;

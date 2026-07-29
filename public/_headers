@@ -8,3 +8,14 @@
   Cache-Control: no-store
 /3d/index.html
   Cache-Control: no-store
+
+# The 3D slice is iterated on constantly — never let a browser serve a stale build.
+# (This was missing while /, /2d/ and /3d/ had it, so slice fixes appeared not to land.)
+/slice3d/
+  Cache-Control: no-store
+/slice3d/index.html
+  Cache-Control: no-store
+/poc3d/
+  Cache-Control: no-store
+/poc3d/index.html
+  Cache-Control: no-store

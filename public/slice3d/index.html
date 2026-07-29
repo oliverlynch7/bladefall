@@ -3875,23 +3875,15 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     pane.querySelector('[data-a="autofit"]').addEventListener('click', async () => {
       const r = await window.__SLICE.autoFit();
       build();
-      alert('Auto-fit ' + r.name + '
-score ' + r.score.total + '  (clip ' + r.score.clip +
-            ', chest ' + r.score.chest + ', hand ' + r.score.handD + 'm)
-
-' +
-            'Not saved yet — nudge it, then Lock weapon if you like it.');
+      alert('Auto-fit ' + r.name + ' | score ' + r.score.total + ' (clip ' + r.score.clip +
+            ', chest ' + r.score.chest + ', hand ' + r.score.handD + 'm). ' +
+            'Not saved yet - nudge it, then Lock weapon if you like it.');
     });
     pane.querySelector('[data-a="score"]').addEventListener('click', () => {
       const sc = window.__SLICE.weaponScore();
-      alert('clipping points: ' + sc.clip + '
-inside torso: ' + sc.chest +
-            '
-below floor: ' + sc.ground + '
-grip to hand: ' + sc.handD + 'm' +
-            '
-
-total penalty ' + sc.total + ' (lower is better)');
+      alert('clipping points: ' + sc.clip + ' | inside torso: ' + sc.chest +
+            ' | below floor: ' + sc.ground + ' | grip to hand: ' + sc.handD + 'm' +
+            ' | total penalty ' + sc.total + ' (lower is better)');
     });
     pane.querySelector('[data-a="revert"]').addEventListener('click', () => {
       const r = window.__SLICE.revertModel();

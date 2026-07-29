@@ -1060,15 +1060,36 @@ class Actor {
      full-body by default, so we synthesise an upper-body-only version by dropping every
      track that targets a leg/foot/hip bone. That plays OVER the locomotion instead of
      replacing it — swing while sprinting, exactly like the voxel game. */
+  /* Which bones must the attack layer NEVER touch?
+     Name matching is not enough: on this rig the chain is Root > Body > UpperLeg, and
+     the attack clip animates Body — a PARENT of the legs — so the whole lower body
+     inherited the swing even after the leg bones themselves were excluded. That parent/
+     child mismatch is the bowlegged twist. So derive the set from the actual skeleton:
+     every leg bone, everything beneath it, and every ancestor above it. */
+  lowerBones(){
+    if(this._lowerSet) return this._lowerSet;
+    const LEGWORD = /(leg|thigh|shin|calf|knee|foot|ankle|toe|ball|poletarget)/i;
+    const legs = [];
+    this.root.traverse(o => { if(o.isBone && LEGWORD.test(o.name)) legs.push(o); });
+    const set = new Set();
+    const addBelow = b => { set.add(b.name); for(const c of b.children) if(c.isBone) addBelow(c); };
+    for(const L of legs){
+      addBelow(L);
+      let c = L.parent;
+      while(c && c.isBone){ set.add(c.name); c = c.parent; }   // ancestors drive the legs too
+    }
+    this._lowerSet = set;
+    return set;
+  }
   upperClip(clip){
     if(!clip) return null;
     if(!this._upper) this._upper = new Map();
     if(this._upper.has(clip.name)) return this._upper.get(clip.name);
-    const LOWER = /(leg|thigh|shin|calf|knee|foot|ankle|toe|ball|hip|pelvis|root|poletarget)/i;
-    const tracks = clip.tracks.filter(t => !LOWER.test(t.name.split('.')[0]));
+    const lower = this.lowerBones();
+    const tracks = clip.tracks.filter(t => !lower.has(t.name.split('.')[0]));
     const made = tracks.length && tracks.length < clip.tracks.length
       ? new THREE.AnimationClip(clip.name + '__upper', clip.duration, tracks)
-      : null;                                          // rig doesn't name bones usefully -> fall back
+      : null;
     this._upper.set(clip.name, made);
     return made;
   }

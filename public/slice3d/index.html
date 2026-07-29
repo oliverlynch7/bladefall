@@ -325,23 +325,30 @@ const SKINS = {
     { id:'w1', name:'Crimson',  metal:'#a8352a', leather:'#2e1c14', lift:1.30 },
     { id:'w2', name:'Gilded',   metal:'#c39a3e', leather:'#3a2a16', lift:1.34 },
     { id:'w3', name:'Obsidian', metal:'#5b5470', leather:'#241c2e', lift:1.26 },
+    { id:'w4', name:'★ Dread Knight', metal:'#3b3346', leather:'#1e1826', lift:1.22,
+      accent:'#ff5a2a', paint:'runes', redesign:'dreadknight' },
   ],
   Rogue: [
     { id:'r0', name:'Default',  stock:true },
     { id:'r1', name:'Emerald',  metal:'#2f8f5e', leather:'#1d2a20', lift:1.30 },
     { id:'r2', name:'Ashen',    metal:'#9aa2ad', leather:'#2b2b30', lift:1.32 },
     { id:'r3', name:'Sanguine', metal:'#8e2436', leather:'#2a1418', lift:1.28 },
+    { id:'r4', name:'★ Wraithblade', metal:'#2b2740', leather:'#171426', lift:1.20,
+      accent:'#8f6fd0', paint:'trim', redesign:'wraithblade' },
   ],
   Wizard: [
     { id:'z0', name:'Default',  stock:true },
     { id:'z1', name:'Arcane',   metal:'#5b57c8', leather:'#241f3e', lift:1.32 },
     { id:'z2', name:'Ember',    metal:'#c05a24', leather:'#331a10', lift:1.32 },
     { id:'z3', name:'Verdant',  metal:'#3f8f52', leather:'#1e2a1c', lift:1.30 },
+    { id:'z4', name:'★ Archon', metal:'#8fa6e8', leather:'#2b3358', lift:1.34,
+      accent:'#bfe0ff', paint:'astral', redesign:'archon' },
   ],
 };
 let skinIdx = { Warrior:0, Rogue:0, Wizard:0 };
 function applySkin(actor, clsId, skin){
   if(!actor || !skin) return;
+  applyRedesign(actor, skin);
   actor.root.traverse(o => {
     if(!o.isMesh) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
@@ -350,10 +357,252 @@ function applySkin(actor, clsId, skin){
       if(!m.userData._srcMap) m.userData._srcMap = m.map || null;
       const src = m.userData._srcMap;
       if(!src) continue;
-      m.map = skin.stock ? src : repaintTexture(src, skin);
+      m.map = skin.stock ? src : (skin.redesign ? repaintDetailed(src, skin) : repaintTexture(src, skin));
       m.needsUpdate = true;
     }
   });
+}
+
+/* ─────────────  FULL REDESIGNS  ─────────────
+   Beyond recolouring: these build NEW geometry onto the rig (horns, capes, pauldron
+   spikes, orbiting shards, auras) and bind it to real bones so it animates with the
+   character, plus paint pattern detail — trim, runes, wear — onto the atlas rather
+   than only shifting its hue. This is what "redesign" means vs "retint". */
+function findBone(actor, ...names){
+  let hit = null;
+  actor.root.traverse(o => {
+    if(hit || !o.isBone) return;
+    const n = (o.name||'').toLowerCase();
+    if(names.some(x => n.includes(x))) hit = o;
+  });
+  return hit;
+}
+function glowMat(color, opacity){
+  return new THREE.MeshBasicMaterial({ color:new THREE.Color(color), transparent:true,
+    opacity:opacity==null?1:opacity, blending:THREE.AdditiveBlending, depthWrite:false });
+}
+function solidMat(color, rough){
+  return new THREE.MeshLambertMaterial({ color:new THREE.Color(color) });
+}
+// paint pattern detail into the atlas: trim bands, rune glyphs, edge wear
+function repaintDetailed(srcTex, skin){
+  const img = srcTex.image;
+  if(!img || !img.width) return srcTex;
+  const key = (srcTex.uuid||'') + '|D|' + skin.id;
+  if(_skinCache.has(key)) return _skinCache.get(key);
+  const cvs = document.createElement('canvas');
+  cvs.width = img.width; cvs.height = img.height;
+  const ctx = cvs.getContext('2d', { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0);
+  // base recolour first
+  const data = ctx.getImageData(0,0,cvs.width,cvs.height), px = data.data;
+  const metal = hexRGB(skin.metal), leather = hexRGB(skin.leather), lift = skin.lift||1;
+  for(let i=0;i<px.length;i+=4){
+    if(px[i+3] < 8) continue;
+    const [h,s,v] = rgb2hsv(px[i],px[i+1],px[i+2]);
+    const lum = Math.min(1.9, (0.35 + v*1.25) * lift);
+    if(s < 0.20) tintPixel(px,i,metal,lum);
+    else if(h>=12 && h<=52 && v<0.52) tintPixel(px,i,leather,lum);
+    else { px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift; }
+  }
+  ctx.putImageData(data,0,0);
+  // then PAINT on top — this is the part a hue shift can't do
+  const S = cvs.width;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  if(skin.paint === 'runes'){
+    ctx.strokeStyle = skin.accent; ctx.lineWidth = S*0.004;
+    for(let i=0;i<70;i++){
+      const x = Math.random()*S, y = Math.random()*S, r = S*(0.008+Math.random()*0.02);
+      ctx.globalAlpha = 0.25 + Math.random()*0.5;
+      ctx.beginPath();
+      const sides = 3 + ((Math.random()*4)|0);
+      for(let k=0;k<sides;k++){
+        const a = (k/sides)*Math.PI*2;
+        ctx[k?'lineTo':'moveTo'](x+Math.cos(a)*r, y+Math.sin(a)*r);
+      }
+      ctx.closePath(); ctx.stroke();
+    }
+  } else if(skin.paint === 'trim'){
+    ctx.strokeStyle = skin.accent; ctx.lineWidth = S*0.006;
+    for(let i=0;i<46;i++){
+      ctx.globalAlpha = 0.3 + Math.random()*0.45;
+      const y = Math.random()*S, x = Math.random()*S, w = S*(0.03+Math.random()*0.12);
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w, y + (Math.random()-0.5)*S*0.02); ctx.stroke();
+    }
+  } else if(skin.paint === 'astral'){
+    for(let i=0;i<260;i++){
+      const x = Math.random()*S, y = Math.random()*S, r = S*(0.0015+Math.random()*0.005);
+      ctx.globalAlpha = 0.2 + Math.random()*0.7;
+      ctx.fillStyle = Math.random()<0.25 ? skin.accent : '#ffffff';
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.restore();
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.flipY = srcTex.flipY;
+  tex.wrapS = srcTex.wrapS; tex.wrapT = srcTex.wrapT; tex.needsUpdate = true;
+  _skinCache.set(key, tex);
+  return tex;
+}
+// each redesign returns a list of {obj, bone|null, offset, spin} attachments
+const REDESIGNS = {
+  // ── WARRIOR → DREAD KNIGHT: horned helm, tattered cape, spiked pauldrons, ember eyes
+  dreadknight(actor, sk){
+    const out = [];
+    const head = findBone(actor, 'head', 'neck');
+    const H = actor.targetH;
+    // horns
+    for(const side of [-1,1]){
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.34, 7), solidMat('#2a2028'));
+      horn.position.set(side*0.10, 0.16, -0.02);
+      horn.rotation.set(-0.5, 0, side*0.55);
+      out.push({ obj:horn, bone:head, fallbackY:H*0.94 });
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.10, 6), glowMat(sk.accent, 0.95));
+      tip.position.set(side*0.155, 0.30, -0.06); tip.rotation.set(-0.5,0,side*0.55);
+      out.push({ obj:tip, bone:head, fallbackY:H*0.94 });
+    }
+    // crown band
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.018, 6, 16), solidMat('#3a3040'));
+    band.rotation.x = Math.PI/2; band.position.set(0, 0.10, 0);
+    out.push({ obj:band, bone:head, fallbackY:H*0.92 });
+    // ember eyes
+    for(const side of [-1,1]){
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), glowMat(sk.accent, 1));
+      eye.position.set(side*0.042, 0.03, 0.105);
+      out.push({ obj:eye, bone:head, fallbackY:H*0.9 });
+    }
+    // tattered cape (root-attached, sways in update)
+    const cape = new THREE.Group();
+    for(let i=0;i<7;i++){
+      const w = 0.5 - Math.abs(i-3)*0.05;
+      const len = 0.95 - Math.abs(i-3)*0.12;
+      const strip = new THREE.Mesh(new THREE.PlaneGeometry(w*0.19, len), solidMat(sk.metal));
+      strip.position.set((i-3)*0.075, H*0.66 - len/2, -0.13);
+      strip.rotation.x = 0.12;
+      cape.add(strip);
+    }
+    out.push({ obj:cape, bone:null, sway:true });
+    // pauldron spikes
+    for(const side of [-1,1]){
+      for(let i=0;i<3;i++){
+        const sp = new THREE.Mesh(new THREE.ConeGeometry(0.032, 0.16, 5), solidMat('#2f2632'));
+        sp.position.set(side*0.26, H*0.80 + i*0.045, -0.05 + i*0.05);
+        sp.rotation.z = side*(0.9 - i*0.12);
+        out.push({ obj:sp, bone:null });
+      }
+    }
+    return out;
+  },
+  // ── WIZARD → ARCHON: halo, orbiting shards, robe starfield, staff corona
+  archon(actor, sk){
+    const out = [];
+    const H = actor.targetH;
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.30, 0.012, 6, 40), glowMat(sk.accent, 0.9));
+    halo.rotation.x = Math.PI/2;
+    out.push({ obj:halo, bone:null, haloY:H*1.10, spin:1.1 });
+    const shards = new THREE.Group();
+    for(let i=0;i<6;i++){
+      const sh = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 0), glowMat(sk.accent, 0.85));
+      const a = (i/6)*Math.PI*2;
+      sh.position.set(Math.cos(a)*0.62, 0, Math.sin(a)*0.62);
+      sh.userData.a = a;
+      shards.add(sh);
+    }
+    out.push({ obj:shards, bone:null, orbit:true, orbitY:H*0.72 });
+    const aura = new THREE.Sprite(addMat(sk.accent, TEX.mote, 0.30));
+    aura.scale.set(2.0, 2.0, 1);
+    out.push({ obj:aura, bone:null, auraY:H*0.5 });
+    return out;
+  },
+  // ── ROGUE → WRAITHBLADE: shadow shroud, hood-glow, twin trailing ribbons
+  wraithblade(actor, sk){
+    const out = [];
+    const H = actor.targetH;
+    const head = findBone(actor, 'head', 'neck');
+    for(const side of [-1,1]){
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 6), glowMat(sk.accent, 1));
+      eye.position.set(side*0.04, 0.02, 0.10);
+      out.push({ obj:eye, bone:head, fallbackY:H*0.9 });
+    }
+    // shroud: layered dark planes that sway
+    const shroud = new THREE.Group();
+    for(let i=0;i<9;i++){
+      const a = (i/9)*Math.PI*2;
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.8), solidMat('#161320'));
+      p.position.set(Math.cos(a)*0.20, H*0.52, Math.sin(a)*0.20);
+      p.lookAt(0, H*0.52, 0);
+      shroud.add(p);
+    }
+    out.push({ obj:shroud, bone:null, sway:true });
+    // ground shadow pool
+    const pool = groundQuad(TEX.mote, sk.accent, 1.5, 0.42);
+    out.push({ obj:pool, bone:null, poolY:0.03 });
+    // trailing motes
+    const trail = new THREE.Group();
+    for(let i=0;i<5;i++){
+      const m = new THREE.Sprite(addMat(sk.accent, TEX.mote, 0.6));
+      m.scale.setScalar(0.28); m.userData.i = i;
+      trail.add(m);
+    }
+    out.push({ obj:trail, bone:null, trail:true, trailY:H*0.55 });
+    return out;
+  },
+};
+let redesignParts = [];
+function clearRedesign(){
+  for(const p of redesignParts){
+    if(p.bone && p.obj.parent) p.obj.parent.remove(p.obj);
+    else scene.remove(p.obj);
+    p.obj.traverse && p.obj.traverse(o => { if(o.isMesh||o.isSprite){
+      if(o.geometry) o.geometry.dispose();
+      const m=o.material; if(m) (Array.isArray(m)?m:[m]).forEach(x=>x&&x.dispose()); } });
+  }
+  redesignParts = [];
+}
+function applyRedesign(actor, sk){
+  clearRedesign();
+  if(!sk || !sk.redesign || !REDESIGNS[sk.redesign]) return;
+  const parts = REDESIGNS[sk.redesign](actor, sk);
+  for(const p of parts){
+    if(p.bone) p.bone.add(p.obj);
+    else scene.add(p.obj);
+  }
+  redesignParts = parts;
+}
+function updateRedesign(t, dt){
+  if(!redesignParts.length || !hero) return;
+  const P = hero.root.position, yaw = hero.root.rotation.y;
+  for(const p of redesignParts){
+    if(p.bone) continue;                                    // bone-parented parts ride the rig
+    const o = p.obj;
+    if(p.sway){
+      o.position.copy(P); o.rotation.y = yaw + Math.sin(t*2.2)*0.05;
+      const lean = Math.min(0.5, vel.length()*0.06);
+      o.rotation.x = lean;
+    } else if(p.haloY != null){
+      o.position.copy(P).setY(p.haloY + Math.sin(t*1.6)*0.05);
+      o.rotation.z += (p.spin||1) * dt;
+    } else if(p.orbit){
+      o.position.copy(P).setY(p.orbitY + Math.sin(t*1.3)*0.08);
+      o.rotation.y = t*0.8;
+      o.children.forEach((c,i) => { c.rotation.x = t*1.7 + i; c.rotation.y = t*1.2; });
+    } else if(p.auraY != null){
+      o.position.copy(P).setY(p.auraY);
+      const s = 2.0 + Math.sin(t*2.4)*0.16; o.scale.set(s,s,1);
+    } else if(p.poolY != null){
+      o.position.copy(P).setY(p.poolY);
+      const s = 1.5 + Math.sin(t*1.8)*0.12; o.scale.set(s,s,1);
+    } else if(p.trail){
+      o.children.forEach((c,i) => {
+        const lag = 0.10*(i+1);
+        c.position.set(P.x - Math.sin(yaw)*lag*2.2, p.trailY - i*0.06, P.z - Math.cos(yaw)*lag*2.2);
+        c.material.opacity = 0.55 * (1 - i/6);
+      });
+    } else {
+      o.position.copy(P); o.rotation.y = yaw;               // pauldron spikes etc.
+    }
+  }
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -1365,6 +1614,7 @@ async function switchClass(def){
   const g = await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
   if(g){
     const pos = hero.root.position.clone(), rot = hero.root.rotation.y;
+    clearRedesign();
     scene.remove(hero.root);
     disposeTree(hero.root);
     hero = new Actor(g, def);
@@ -1522,6 +1772,7 @@ function tick(){
   }
 
   tryOpenChests();
+  updateRedesign(t, dt);
   paintSkillBar();
   stepVFX(dt);
   renderer.render(scene, camera);

@@ -286,19 +286,19 @@ const CLASSES = [
   // retargeting, which is why these get a far richer move set than the RPG rigs.
   // ── Mixamo (free, commercial-use, rigged, textured, with faces) ──
   // Our 86 UAL clips reach these through UE->mixamorig track renaming; see retargetClips.
-  { id:'Paladin', label:'Paladin ★', mixamo:true, file:'Paladin', tint:'#d9c48a',
+  { id:'Paladin', label:'Paladin ★', mixamo:true, preScaled:true, file:'Paladin', tint:'#d9c48a',
     clips:{ idle:['Sword_Idle','Idle_Loop'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
             roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
             attack:['Sword_Regular_A','Sword_Regular_B','Sword_Regular_C'],
             skill:['Sword_Heavy_Combo'], hit:['Hit_Chest'], death:['Death01'] },
     skill:{ name:'Judgement', kind:'nova', color:'#ffe6a0', color2:'#ffa42a' } },
-  { id:'Arissa', label:'Arissa ★', mixamo:true, file:'Arissa', tint:'#c98fa8',
+  { id:'Arissa', label:'Arissa ★', mixamo:true, preScaled:true, file:'Arissa', tint:'#c98fa8',
     clips:{ idle:['Idle_Loop','Sword_Idle'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
             roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
             attack:['Sword_Regular_B','Sword_Regular_C','Sword_Regular_A'],
             skill:['Sword_Dash'], hit:['Hit_Chest'], death:['Death01'] },
     skill:{ name:'Bladestorm', kind:'nova', color:'#ff8fc0', color2:'#a02a6a' } },
-  { id:'Maria', label:'Maria ★', mixamo:true, file:'Maria', tint:'#8fb8d9',
+  { id:'Maria', label:'Maria ★', mixamo:true, preScaled:true, file:'Maria', tint:'#8fb8d9',
     clips:{ idle:['Idle_Loop','Sword_Idle'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
             roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
             attack:['Sword_Regular_C','Sword_Regular_A'],
@@ -1463,7 +1463,12 @@ let _ualSrc = null;
 async function ualSource(){
   if(_ualSrc) return _ualSrc;
   const g = await load('assets/base/Superhero_Male_FullBody.gltf').catch(()=>null);
-  if(g){ _ualSrc = g.scene; _ualSrc.updateMatrixWorld(true); }
+  if(g){
+    g.scene.updateMatrixWorld(true);
+    // retargetClip reads source.skeleton, so it needs the SkinnedMesh itself — handing it
+    // the scene wrapper threw "Cannot read properties of undefined (reading 'bones')".
+    g.scene.traverse(o => { if(!_ualSrc && o.isSkinnedMesh) _ualSrc = o; });
+  }
   return _ualSrc;
 }
 
@@ -1480,12 +1485,66 @@ async function loadMixamoChar(def){
     for(const m of mats){ if(m && m.map) m.map.colorSpace = THREE.SRGBColorSpace; }
   });
 
-  /* Mixamo FBX is Z-up, so the character loads lying face-down — and Actor then measures
-     its bounding-box HEIGHT to normalise scale, which for a prone model is body thickness.
-     Stand it up before anything measures it. */
+  /* Mixamo FBX is Z-up, so the character loads lying face-down. Stand it up first —
+     everything below measures, and measuring a prone model gives nonsense. */
   const wrap = new THREE.Group();
-  obj.rotation.x = -Math.PI / 2;
   wrap.add(obj);
+
+  /* SIZE AND GROUND FROM THE SKELETON, here, before Actor ever sees the model.
+
+     Box3 is the wrong instrument: a SkinnedMesh draws where its BONES are, but Box3
+     reports the geometry's BIND-space bounds, and for these rigs they disagree wildly.
+     Measured: all three characters reported an identical 1.75m box while their skeletons
+     spanned 1.80m, 1.86m and 5.34m — that 3x is why Arissa rendered huge. The same
+     disagreement left every foot bone below zero (-0.36 / -0.76 / -2.05), which is the
+     sinking: the box sat on the floor, the visible pixels did not.
+
+     Doing it here (rather than after Actor) means we own the transform outright, so
+     nothing downstream re-measures a stale box and undoes it. def.preScaled tells Actor
+     to keep its hands off. */
+  const findBone = re => { let b = null;
+    obj.traverse(o => { if(!b && o.isBone && re.test(o.name.toLowerCase().replace(/[^a-z]/g,''))) b = o; });
+    return b; };
+  const head = findBone(/head$/), foot = findBone(/(leftfoot|rightfoot)$/);
+  const yOf = b => { wrap.updateMatrixWorld(true);
+    return new THREE.Vector3().setFromMatrixPosition(b.matrixWorld).y; };
+
+  /* Work out which way is up by MEASURING, not by assuming. Mixamo exports are not
+     consistent: two of these three are Z-up and load face-down, but the Paladin is
+     already Y-up, so a blanket -90 deg X rotation stood two of them up and turned the
+     third upside down (head-to-foot span came back as -1.565). Try the four right-angle
+     rotations and keep whichever puts the head furthest ABOVE the feet. */
+  if(head && foot){
+    let best = null;
+    for(const rx of [0, -Math.PI/2, Math.PI/2, Math.PI]){
+      obj.rotation.x = rx;
+      const span = yOf(head) - yOf(foot);
+      if(best === null || span > best.span) best = { rx, span };
+    }
+    obj.rotation.x = best.rx;
+    console.log(`DIAG upright ${def.id} rx=${best.rx.toFixed(2)} span=${best.span.toFixed(3)}`);
+  }
+
+  if(head && foot){
+    /* three caches parsed assets, so switching classes hands back the SAME object. A
+       relative adjustment then stacks on the previous one — that is how Arissa's "raw"
+       span came back as 0.128 and she ended up ~1000x oversized. Snapshot the original
+       transform once and always recompute from it, which makes this idempotent. */
+    if(obj.userData._fit0 === undefined){
+      obj.userData._fit0 = { s: obj.scale.x, y: obj.position.y };
+    }
+    obj.scale.setScalar(obj.userData._fit0.s);
+    obj.position.y = obj.userData._fit0.y;
+    const raw = yOf(head) - yOf(foot);
+    if(raw > 1e-6){
+      obj.scale.setScalar(obj.userData._fit0.s * (HERO_H / raw));
+      const span = yOf(head) - yOf(foot);
+      obj.position.y = obj.userData._fit0.y - yOf(foot);
+      console.log(`DIAG fit ${def.id} rawSpan=${raw.toFixed(3)} -> span=${span.toFixed(3)} foot=${yOf(foot).toFixed(4)}`);
+    }
+  } else {
+    console.log(`DIAG fit ${def.id} MISSING head=${!!head} foot=${!!foot}`);
+  }
 
   /* Retarget properly, with SkeletonUtils, rather than by renaming tracks.
 
@@ -1510,13 +1569,25 @@ async function loadMixamoChar(def){
       if(real){ names[real] = ue; mapped++; }
     }
     const want = new Set(Object.values(def.clips || {}).flat());
-    const t0 = performance.now();
+    const t0 = performance.now(); let failMsg = '';
     for(const c of clips){
       if(!want.has(c.name)) continue;
-      try { animations.push(SkeletonUtils.retargetClip(target, src, c, { names, fps: 30 })); }
-      catch(e){ console.warn('retarget failed for', c.name, e.message); }
+      try {
+        const rc = SkeletonUtils.retargetClip(target, src, c, { names, fps: 30 });
+        /* retargetClip emits SKELETON-relative track names: '.bones[mixamorigHips].quaternion'.
+           That form only binds when the AnimationMixer is rooted on the SkinnedMesh itself.
+           Our mixer is rooted on the model group, so none of them resolved and the character
+           just stood in its T-pose. Rewrite to the object-path form, which binds from any
+           ancestor. Position tracks are dropped: retargetClip bakes hip translation in the
+           SOURCE rig's units, which on a centimetre-scale Mixamo rig flings the character. */
+        rc.tracks = rc.tracks
+          .map(t => { t.name = t.name.replace(/^\.bones\[(.+?)\]\./, '$1.'); return t; })
+          .filter(t => !/\.position$/.test(t.name));
+        animations.push(rc);
+      }
+      catch(e){ if(!failMsg) failMsg = c.name + ': ' + e.message; }
     }
-    console.log(`[retarget] ${def.id}: ${mapped} bones, ${animations.length}/${want.size} clips in ${Math.round(performance.now()-t0)}ms`);
+    console.log(`DIAG retarget ${def.id}: ${mapped} bones, ${animations.length}/${want.size} clips in ${Math.round(performance.now()-t0)}ms${failMsg?' FAIL='+failMsg:''}`);
   }
   if(!animations.length) animations = retargetClips(clips, resolveMap(obj, UE_TO_MIXAMO));
   return { scene: wrap, animations };
@@ -1542,10 +1613,14 @@ class Actor {
       const s = this.targetH / Math.max(0.0001, size.y);
       model.scale.setScalar(s);
     }
-    const b2 = boxOf(model);
-    model.position.y -= b2.min.y;                     // feet on the floor
-    model.position.x -= (b2.min.x + b2.max.x)/2 ;
-    model.position.z -= (b2.min.z + b2.max.z)/2 ;
+    // Pre-fitted rigs (Mixamo) are already scaled and grounded from their SKELETON at
+    // load; re-grounding them off this bind-space box threw them hundreds of units up.
+    if(!(def && def.preScaled)){
+      const b2 = boxOf(model);
+      model.position.y -= b2.min.y;                   // feet on the floor
+      model.position.x -= (b2.min.x + b2.max.x)/2 ;
+      model.position.z -= (b2.min.z + b2.max.z)/2 ;
+    }
     prep(model, { shadow:true });
     this.root.add(model);
     this.model = model;

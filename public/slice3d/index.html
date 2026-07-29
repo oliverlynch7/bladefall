@@ -2672,6 +2672,150 @@ function clearWeapon(actor){
 }
 
 
+
+/* ─────────────  WEAPON AUTO-FIT  ─────────────
+   Positioning a weapon by SCORE rather than by eye.
+
+   This exists because eyeballing placement is the thing I am worst at, and the thing Oliver
+   is fast at. But "does this weapon clip through the leg" and "is the grip actually in the
+   fist" are geometric questions, and geometry I can do exactly. So: define what a good
+   placement means numerically, then search for it.
+
+   Score is a penalty, lower is better:
+     CLIP   weapon sample points that fall inside the character's body volume. This is the
+            bow-through-the-thigh problem, and the main thing that made bows unpleasant.
+     HAND   distance from the weapon's grip end to the hand bone. Keeps it held rather than
+            floating near the hand.
+     GROUND weapon points below the floor.
+     SPREAD points buried inside the torso specifically, weighted harder than limbs, since a
+            weapon emerging from the chest reads worse than one grazing a thigh.
+
+   Deliberately NOT scored: whether it looks cool. That is Oliver's call and no metric
+   substitutes for it — this only gets the geometry honest so his judgement starts from a
+   sane place. */
+function _bodySamples(actor, n){
+  const pts = [];
+  actor.root.updateMatrixWorld(true);
+  actor.root.traverse(o => {
+    if(!o.isSkinnedMesh || o.userData._weap || o.userData._eye) return;
+    const pos = o.geometry.attributes.position;
+    const step = Math.max(1, Math.floor(pos.count / (n || 400)));
+    const v = new THREE.Vector3();
+    for(let i = 0; i < pos.count; i += step){
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      pts.push(v.clone());
+    }
+  });
+  return pts;
+}
+function _weaponSamples(actor, n){
+  const pts = [];
+  if(!actor._weap) return pts;
+  actor.root.updateMatrixWorld(true);
+  actor._weap.traverse(o => {
+    if(!o.isMesh) return;
+    const pos = o.geometry.attributes.position;
+    const step = Math.max(1, Math.floor(pos.count / (n || 120)));
+    const v = new THREE.Vector3();
+    for(let i = 0; i < pos.count; i += step){
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      pts.push(v.clone());
+    }
+  });
+  return pts;
+}
+
+function weaponScore(actor, cache){
+  const w = _weaponSamples(actor, 120);
+  if(!w.length) return { total: 1e9 };
+  const body = (cache && cache.body) || _bodySamples(actor, 500);
+
+  // hand bone position
+  let hand = null;
+  actor.root.traverse(o => { if(!hand && o.isBone && /^(handr|fistr|weaponr)$/i
+      .test(o.name.replace(/[^a-z]/gi,''))) hand = o; });
+  const handP = hand ? new THREE.Vector3().setFromMatrixPosition(hand.matrixWorld) : null;
+
+  // torso centre, for the "emerging from the chest" penalty
+  let torso = null;
+  actor.root.traverse(o => { if(!torso && o.isBone && /^(spine02|spine03|torso|abdomen)$/i
+      .test(o.name.replace(/[^a-z]/gi,''))) torso = o; });
+  const torsoP = torso ? new THREE.Vector3().setFromMatrixPosition(torso.matrixWorld) : null;
+
+  let clip = 0, ground = 0, chest = 0;
+  const CLIP_R = 0.055;                     // a weapon point this close to body geometry is inside it
+  for(const q of w){
+    if(q.y < 0.01) ground++;
+    let near = false;
+    for(let i = 0; i < body.length; i++){
+      if(q.distanceToSquared(body[i]) < CLIP_R*CLIP_R){ near = true; break; }
+    }
+    if(near) clip++;
+    if(torsoP && q.distanceTo(torsoP) < 0.16) chest++;
+  }
+
+  // grip end: the weapon sample closest to the hand
+  let handD = 0;
+  if(handP){
+    let best = 1e9;
+    for(const q of w) best = Math.min(best, q.distanceTo(handP));
+    handD = best;
+  }
+
+  const total = clip * 1.0 + chest * 2.5 + ground * 1.5 + handD * 40;
+  return { total:+total.toFixed(2), clip, chest, ground, handD:+handD.toFixed(3), n:w.length };
+}
+
+/* Coarse-to-fine search over the transform controls. Synchronous and uses the fast transform
+   path, so a few hundred candidates cost almost nothing. */
+async function autoFitWeapon(actor, opts){
+  opts = opts || {};
+  const keys = opts.keys || ['pitch','yaw','roll','up','side','fwd','shaft'];
+  const base = JSON.parse(JSON.stringify(WEAP));
+  const body = _bodySamples(actor, 500);
+  const cache = { body };
+
+  let best = null;
+  const evaluate = () => { applyWeaponTransform(actor); return weaponScore(actor, cache); };
+
+  // pass 1: coarse sweep of orientation, which dominates the outcome
+  const P = [-3.1,-2.4,-1.6,-0.8,0,0.8,1.6,2.4,3.1];
+  const R = [-3.1,-1.6,-0.8,0,0.8,1.6,3.1];
+  const Y = [-3.1,-1.6,0,1.6,3.1];
+  for(const pitch of P) for(const yaw of Y) for(const roll of R){
+    Object.assign(WEAP, { pitch, yaw, roll });
+    const sc = evaluate();
+    if(!best || sc.total < best.score.total) best = { vals:{pitch,yaw,roll}, score:sc };
+  }
+  Object.assign(WEAP, best.vals);
+
+  // pass 2: refine orientation and slides together, shrinking the step
+  let step = { rot:0.4, pos:0.18 };
+  for(let it = 0; it < 5; it++){
+    let improved = true;
+    while(improved){
+      improved = false;
+      for(const k of keys){
+        const d = /pitch|yaw|roll/.test(k) ? step.rot : step.pos;
+        for(const dir of [1,-1]){
+          const prev = WEAP[k];
+          WEAP[k] = +(prev + dir*d).toFixed(3);
+          const sc = evaluate();
+          if(sc.total < best.score.total - 1e-6){ best = { vals:JSON.parse(JSON.stringify(WEAP)), score:sc }; improved = true; }
+          else WEAP[k] = prev;
+        }
+      }
+    }
+    step.rot *= 0.5; step.pos *= 0.5;
+  }
+  Object.assign(WEAP, best.vals);
+  applyWeaponTransform(actor);
+  return { name: base.name, score: best.score,
+           vals: { len:+WEAP.len.toFixed(3), pitch:+WEAP.pitch.toFixed(3), yaw:+WEAP.yaw.toFixed(3),
+                   roll:+WEAP.roll.toFixed(3), fwd:+WEAP.fwd.toFixed(3), up:+WEAP.up.toFixed(3),
+                   side:+WEAP.side.toFixed(3), shaft:+WEAP.shaft.toFixed(3), grip:+WEAP.grip.toFixed(3) } };
+}
+
 /* ─────────────  WEAPON TRANSFORM  ─────────────
    Applying the sliders WITHOUT rebuilding the weapon.
 
@@ -3654,9 +3798,11 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
             <input type="range" data-wk="${k}" min="${mn}" max="${mx}" step="${st}" value="${WEAP[k]}">
             <span class="v" data-wv="${k}">${(+WEAP[k]).toFixed(2)}</span></div>`).join('')}
        <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>
+       <div class="btns"><button data-a="autofit">Auto-fit weapon</button><button data-a="score">Score</button></div>
        <div class="btns"><button data-a="lock">Lock face</button><button data-a="lockw">Lock weapon</button></div>
        <div class="btns"><button data-a="backup">Backup all</button></div>
-       <div class="btns"><button data-a="restore">Restore from backup</button></div>`;
+       <div class="btns"><button data-a="restore">Restore from backup</button></div>
+       <div class="btns"><button data-a="revert">Revert this model to shipped</button></div>`;
 
     const apply  = () => { addEyes(hero, false); eyeSave(); };
     const applyM = () => { addMouth(hero, false); mouthSave(); };
@@ -3722,6 +3868,35 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       const f = window.__SLICE.lockPlacement();
       alert(f ? ('Placement locked for ' + eyeModel() + '. Values are now pinned to this frame.')
               : 'Could not measure a frame for this model.');
+    });
+    /* Auto-fit proposes a placement by SCORE — no clipping, grip in the hand. It does not
+       judge how it looks, so it is offered as a starting point rather than applied for you.
+       Your existing values are untouched until you save or lock. */
+    pane.querySelector('[data-a="autofit"]').addEventListener('click', async () => {
+      const r = await window.__SLICE.autoFit();
+      build();
+      alert('Auto-fit ' + r.name + '
+score ' + r.score.total + '  (clip ' + r.score.clip +
+            ', chest ' + r.score.chest + ', hand ' + r.score.handD + 'm)
+
+' +
+            'Not saved yet — nudge it, then Lock weapon if you like it.');
+    });
+    pane.querySelector('[data-a="score"]').addEventListener('click', () => {
+      const sc = window.__SLICE.weaponScore();
+      alert('clipping points: ' + sc.clip + '
+inside torso: ' + sc.chest +
+            '
+below floor: ' + sc.ground + '
+grip to hand: ' + sc.handD + 'm' +
+            '
+
+total penalty ' + sc.total + ' (lower is better)');
+    });
+    pane.querySelector('[data-a="revert"]').addEventListener('click', () => {
+      const r = window.__SLICE.revertModel();
+      build();
+      alert('Reverted ' + r.reverted + ' to the shipped face. Other models untouched.');
     });
     pane.querySelector('[data-a="lockw"]').addEventListener('click', () => {
       const r = window.__SLICE.lockWeapon();
@@ -4693,6 +4868,14 @@ window.__SLICE = {
   /* Pin the frame that is CURRENTLY producing what you see — never a fresh measurement.
      Re-measuring here was a bug: it would pin a different frame than the one on screen, so
      pressing Lock would itself move the face. Locking must be a no-op visually. */
+  /* Drop THIS model's saved face values so the shipped defaults take over again. Deliberately
+     per-model and per-key: never a localStorage wipe, which would cost every other model. */
+  revertModel: () => { const m = eyeModel();
+    delete EYE_ALL[m]; delete MOUTH_ALL[m];
+    try { localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL));
+          localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); } catch(e){}
+    addEyes(hero); addMouth(hero);
+    return { reverted: m, spread: EYE.spread, height: EYE.height }; },
   lockPlacement: () => {
     const m = eyeModel();
     const inUse = storedFrame(m);
@@ -4750,6 +4933,8 @@ window.__SLICE = {
   weapWorldSize: () => { if(!hero || !hero._weap) return null;
     const b = new THREE.Box3().setFromObject(hero._weap), z = b.getSize(new THREE.Vector3());
     return +Math.max(z.x, z.y, z.z).toFixed(4); },
+  weaponScore: () => weaponScore(hero),
+  autoFit: async o => await autoFitWeapon(hero, o),
   weapReach: () => { const g = hero && hero._weapGrip;
     return g ? { reach:+g.reach.toFixed(6), axis:g.axis, half:(g.half==null?null:+g.half.toFixed(6)) } : null; },
   stockVisible: () => { const r = weaponRig(hero); return !!(r && r.stock && r.stock.visible); },

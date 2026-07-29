@@ -100,6 +100,24 @@
   .skb.ready{border-color:#8a6f34}
   @media(max-width:560px){ .skb{width:52px;height:52px} .skb .n{font-size:7.5px} }
 
+  /* On a phone the class bar (16 entries) wrapped over the whole screen and buried the
+     character. Collapse it behind a single tap target, opened as a scrollable sheet. */
+  #clsToggle{display:none}
+  body.touch #clsToggle{display:block;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 12px system-ui;letter-spacing:.05em;
+    padding:9px 14px;border-radius:9px;pointer-events:auto}
+  body.touch #classes{display:none;position:fixed;left:8px;right:8px;top:52px;max-height:46vh;overflow-y:auto;
+    background:rgba(10,9,13,.97);border:1px solid #4a3c26;border-radius:12px;padding:10px;
+    justify-content:flex-start;z-index:30;-webkit-overflow-scrolling:touch}
+  body.touch #classes.open{display:flex}
+  body.touch .cbtn{font-size:13px;padding:9px 12px}
+  /* keep the top-right stack from covering the character on a phone */
+  body.touch #skins,body.touch #custom{max-height:32vh;overflow-y:auto}
+
+  /* keyboard hints are noise on a phone, and the skill bar sat on top of the stick */
+  body.touch #hint{display:none}
+  body.touch #skillbar{bottom:calc(env(safe-area-inset-bottom) + 168px);justify-content:center}
+
   /* touch controls */
   #touch{position:fixed;inset:0;z-index:22;display:none;pointer-events:none}
   body.touch #touch{display:block}
@@ -135,7 +153,8 @@
 <div class="hud" id="top">
   <div id="brand">Bladefall<small>3D slice · Quaternius + Kenney (CC0)</small></div>
   <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-    <div id="classes"></div>
+    <button id="clsToggle">CLASS ▾</button>
+  <div id="classes"></div>
     <div id="skins"></div>
   </div>
 </div>
@@ -2229,6 +2248,13 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   stick.addEventListener('pointermove', e=>{ if(e.pointerId!==id) return; set(e.clientX-cx, e.clientY-cy); });
   const end = e=>{ if(e.pointerId!==id) return; id=null; knob.style.transform=''; touchVec.set(0,0); };
   stick.addEventListener('pointerup', end); stick.addEventListener('pointercancel', end);
+})();
+(function classSheet(){
+  const t = document.getElementById('clsToggle'), list = document.getElementById('classes');
+  if(!t || !list) return;
+  t.addEventListener('pointerdown', e => { e.preventDefault(); list.classList.toggle('open'); });
+  // pick a class -> close the sheet, so the character is visible again immediately
+  list.addEventListener('click', e => { if(e.target.closest('.cbtn')) list.classList.remove('open'); });
 })();
 const tapBtn = (id, fn) => {
   const el = document.getElementById(id);

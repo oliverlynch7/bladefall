@@ -2060,10 +2060,13 @@ const FACE_PRESETS = {
   Rogue: {
     // Hooded, so the measured head box runs high and the face sits turned — same two
     // problems as the Monk, and solved by the same pair of controls.
-    eye:   { spread:0.195, height:-0.445, depth:0.23, size:0.08, squash:0.62, tilt:0.18,
+    eye:   { spread:0.195, height:-0.420, depth:0.23, size:0.08, squash:0.62, tilt:0.18,
              iris:'#3a6ea5', pupil:'#101014', flip:false,
-             offX:0, faceYaw:-0.13, facePitch:0 },
-    mouth: { shape:'smirk', y:-0.60, z:-0.285, width:0.34, height:0.20, color:'#5a2f28',
+             offX:0, faceYaw:-0.13, facePitch:0, irisSz:0.52 },
+    /* Mouth sits INSIDE the head on purpose (z negative). Oliver's call: the scarf covers
+       that part of the face anyway, so drawing a mouth there only risks it poking through.
+       Kept rather than disabled so the class still works if the scarf ever comes off. */
+    mouth: { shape:'smirk', y:-0.60, z:-0.075, width:0.34, height:0.20, color:'#5a2f28',
              offX:0 },
   },
 };

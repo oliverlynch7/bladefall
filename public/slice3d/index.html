@@ -169,6 +169,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 
 /* ─────────────────────────────────────────────────────────────
    BLADEFALL — 3D vertical slice
@@ -1456,10 +1457,20 @@ const fbxLoader = new FBXLoader();
 const loadFBX = url => new Promise((res, rej) =>
   fbxLoader.load(url, o => { bump(); res(o); }, undefined, rej));
 
+let _ualSrc = null;
+// The rig the UAL clips were authored against. retargetClip needs it as the SOURCE so it
+// can work out how each bone's rest orientation differs from the Mixamo rig's.
+async function ualSource(){
+  if(_ualSrc) return _ualSrc;
+  const g = await load('assets/base/Superhero_Male_FullBody.gltf').catch(()=>null);
+  if(g){ _ualSrc = g.scene; _ualSrc.updateMatrixWorld(true); }
+  return _ualSrc;
+}
+
 async function loadMixamoChar(def){
-  const [obj, clips] = await Promise.all([
+  const [obj, clips, src] = await Promise.all([
     loadFBX(`assets/mixamo/${def.file}.fbx`).catch(e => { console.warn('FBX fail', e); return null; }),
-    loadUAL(),
+    loadUAL(), ualSource(),
   ]);
   if(!obj) return null;
   obj.traverse(o => {
@@ -1468,17 +1479,47 @@ async function loadMixamoChar(def){
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     for(const m of mats){ if(m && m.map) m.map.colorSpace = THREE.SRGBColorSpace; }
   });
-  /* Mixamo FBX arrives Z-up, so the character loads lying face-down. Actor then measures
-     its bounding-box HEIGHT to normalise scale — which for a prone model is the body's
-     thickness, so it also scaled them to giants. Stand it up inside a wrapper: Actor
-     resets scale and position on the object it's handed, but not on its children, so the
-     correction survives. */
-  const rig = resolveMap(obj, UE_TO_MIXAMO);
+
+  /* Mixamo FBX is Z-up, so the character loads lying face-down — and Actor then measures
+     its bounding-box HEIGHT to normalise scale, which for a prone model is body thickness.
+     Stand it up before anything measures it. */
   const wrap = new THREE.Group();
   obj.rotation.x = -Math.PI / 2;
   wrap.add(obj);
 
-  return { scene: wrap, animations: retargetClips(clips, rig) };
+  /* Retarget properly, with SkeletonUtils, rather than by renaming tracks.
+
+     Renaming alone is what mangled the torso: it assumes both skeletons share a rest pose,
+     and they don't. Feeding a UE bone's rotation straight into a Mixamo bone whose rest
+     orientation differs twists the joint, which showed up worst around the hips because
+     that is where the two rigs disagree most. retargetClip samples the source rig and
+     re-expresses each pose in the target's own rest frame, so the difference cancels out.
+
+     Only the clips this class actually references get baked — retargeting all 85 would
+     cost far more time than the ~9 a class uses. */
+  let target = null;
+  obj.traverse(o => { if(!target && o.isSkinnedMesh) target = o; });
+  let animations = [];
+  if(target && src){
+    const have = new Map();
+    obj.traverse(o => { if(o.isBone && !have.has(boneKey(o.name))) have.set(boneKey(o.name), o.name); });
+    const names = {};                       // names[targetBone] = sourceBone
+    let mapped = 0;
+    for(const [ue, mx] of Object.entries(UE_TO_MIXAMO)){
+      const real = have.get(boneKey(mx));
+      if(real){ names[real] = ue; mapped++; }
+    }
+    const want = new Set(Object.values(def.clips || {}).flat());
+    const t0 = performance.now();
+    for(const c of clips){
+      if(!want.has(c.name)) continue;
+      try { animations.push(SkeletonUtils.retargetClip(target, src, c, { names, fps: 30 })); }
+      catch(e){ console.warn('retarget failed for', c.name, e.message); }
+    }
+    console.log(`[retarget] ${def.id}: ${mapped} bones, ${animations.length}/${want.size} clips in ${Math.round(performance.now()-t0)}ms`);
+  }
+  if(!animations.length) animations = retargetClips(clips, resolveMap(obj, UE_TO_MIXAMO));
+  return { scene: wrap, animations };
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -2928,6 +2969,23 @@ window.__SLICE = {
     if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);
     const v=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld); return [v.x,v.y,v.z]; },
   clipCount: () => (hero && hero.clips) ? Object.keys(hero.clips).length : (hero&&hero._acts?Object.keys(hero._acts).length:-1),
+  sizeDiag: () => {
+    const r = { bbox: null, boneSpan: null, footY: null, headY: null, scales: [] };
+    hero.root.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(hero.root);
+    r.bbox = [+(b.max.y-b.min.y).toFixed(3), +b.min.y.toFixed(3), +b.max.y.toFixed(3)];
+    let head=null, foot=null;
+    hero.root.traverse(o=>{ if(!o.isBone) return;
+      const k=o.name.toLowerCase().replace(/[^a-z]/g,'');
+      if(!head && /head$/.test(k)) head=o;
+      if(!foot && /(leftfoot|rightfoot)$/.test(k)) foot=o; });
+    if(head) r.headY = +new THREE.Vector3().setFromMatrixPosition(head.matrixWorld).y.toFixed(3);
+    if(foot) r.footY = +new THREE.Vector3().setFromMatrixPosition(foot.matrixWorld).y.toFixed(3);
+    if(head&&foot) r.boneSpan = +(r.headY-r.footY).toFixed(3);
+    r.names = [head?head.name:'NO-HEAD', foot?foot.name:'NO-FOOT'];
+    let n=0; hero.root.traverse(o=>{ if(n<6 && (o.isGroup||o.isObject3D) && o.scale && o.scale.x!==1){ r.scales.push(o.name+':'+o.scale.x.toFixed(4)); n++; } });
+    return r;
+  },
   heightM: () => +new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y.toFixed(3),
   cls: async id => { const d=CLASSES.find(c=>c.id===id); if(d) await switchClass(d); return heroDef.id; },
   animInfo: () => ({ cls: heroDef.id,

@@ -2271,8 +2271,10 @@ async function loadStockWeapon(key){
 const ARCHETYPE_WEAPONS = {
   // NB the sword patterns are anchored. /^Sword/ also matched Sword_Big, which is now
   // reserved as the mage spellblade — a loose prefix would have handed it back to warriors.
+  /* No spear or scythe: the spear belongs to the Ranger and the scythe to the Reaper, so
+     dropping them here keeps each weapon on one body and one tuning wherever possible. */
   Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Sword_Knight$/, /^Claymore/,
-            /^Axe/, /^Hammer/, /^Spear/, /^Scythe/, /^Shield/],
+            /^Axe/, /^Hammer/, /^Shield/],
   Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Staff_/, /^Shield/],
   // Scythe added for the Reaper, which uses this skin. Note it now appears on TWO bodies,
   // which is what forced weapon tuning to become per-body below.

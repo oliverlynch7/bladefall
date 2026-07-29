@@ -1832,9 +1832,18 @@ function eyeLoadFor(model){
   const pre = (FACE_PRESETS[model] || {}).eye || {};
   Object.assign(EYE, EYE_DEFAULT, pre, cleanFace(EYE_ALL[model] || {}, EYE_DEFAULT));
 }
+/* Values and their frame are saved together. Saving one without the other is what made this
+   feel random: the numbers survived but what they MEANT did not. */
+function persistFrame(){
+  const m = eyeModel();
+  if(FRAME_ALL[m]) return;                       // already pinned — never silently re-pin
+  const f = storedFrame(m);
+  if(f){ FRAME_ALL[m] = Object.assign({}, f, { v:FACE_FRAME_VERSION }); frameSave(); }
+}
 const eyeSave = () => {
   EYE_ALL[eyeModel()] = cleanFace(JSON.parse(JSON.stringify(EYE)), EYE_DEFAULT);
   try { localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL)); } catch(e){}
+  persistFrame();
 };
 
 /* Measure the head from the model instead of assuming: which bone, how wide, where the
@@ -1923,6 +1932,87 @@ function measureHead(actor){
 }
 
 
+
+/* ─────────────  PLACEMENT FRAMES  ─────────────
+
+   The durable fix for the problem that has now bitten twice.
+
+   Face offsets are stored as FRACTIONS of a measured head — spread is a fraction of head
+   width, height a fraction of head height, and so on. That means a tuned value only has
+   meaning relative to the measurement it was calibrated against. Change how the head is
+   measured and every face silently moves, which is exactly what happened when I switched to
+   bind-pose measurement.
+
+   Caching the measurement in memory was not enough: it dies on reload, and nothing recorded
+   WHICH frame a saved value belonged to.
+
+   So the frame is now data, not a computation. Each model's frame is stored alongside its
+   eye/mouth values and reused verbatim on every load, animation, class switch and deploy.
+   A tuned value therefore renders identically forever, even if I rewrite measureHead
+   tomorrow — because measureHead is only consulted when no frame exists yet.
+
+   Saved data carries a version. v1 entries (values with no frame) are migrated by attaching
+   the frame they were tuned against, which is the baked one below. Nothing is ever cleared.
+
+   Credit where due: Codex identified this architecture. My in-memory cache was a weaker
+   version of the same idea — it made the frame reproducible given unchanged code, rather
+   than making the values independent of the code. */
+const FACE_FRAME_VERSION = 2;
+
+// Frames as measured at the deterministic idle pose, at the time Oliver's values were tuned.
+// FROZEN. These are the calibration reference for every baked preset.
+const FACE_FRAMES = {
+  Warrior:{w:0.571448,h:0.795308,d:0.777282,cz:-0.187631,minY:-0.020652,maxY:0.774656,eyeY:0.440627,
+           centre:[0.000602,0.377002,-0.187631],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Ranger: {w:0.572455,h:0.742068,d:0.778651,cz:-0.181288,minY:-0.005073,maxY:0.736995,eyeY:0.425326,
+           centre:[0.000605,0.365961,-0.181288],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Wizard: {w:0.678373,h:0.900609,d:0.844725,cz:-0.216029,minY:-0.020441,maxY:0.880168,eyeY:0.501912,
+           centre:[0.000595,0.429864,-0.216029],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Cleric: {w:0.670265,h:0.866078,d:0.834630,cz:-0.205288,minY:-0.031627,maxY:0.834451,eyeY:0.470698,
+           centre:[0.000600,0.401412,-0.205288],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Monk:   {w:0.668034,h:0.862685,d:0.831851,cz:-0.197482,minY:-0.027455,maxY:0.835230,eyeY:0.472902,
+           centre:[0.000580,0.403888,-0.197482],fwd0:[-0.128986,0.071314,0.989079],up:[-0.000062,0.993698,-0.112086]},
+  Rogue:  {w:0.669730,h:0.865386,d:0.833963,cz:-0.202956,minY:-0.033046,maxY:0.832340,eyeY:0.468878,
+           centre:[0.000601,0.399647,-0.202956],fwd0:[-0.129092,0.111141,0.985385],up:[-0.000062,0.993698,-0.112086]},
+};
+
+let FRAME_ALL = {};                       // per-model frames saved from the user's own tuning
+try { FRAME_ALL = JSON.parse(localStorage.getItem('bf_frame') || '{}'); } catch(e){}
+const frameSave = () => { try { localStorage.setItem('bf_frame', JSON.stringify(FRAME_ALL)); } catch(e){} };
+
+function snapFrame(M){
+  return { v:FACE_FRAME_VERSION, w:M.w, h:M.h, d:M.d, cz:M.cz, minY:M.minY, maxY:M.maxY, eyeY:M.eyeY,
+           centre:[M.centre.x, M.centre.y, M.centre.z],
+           fwd0:[M.FWD0 ? M.FWD0.x : M.FWD.x, M.FWD0 ? M.FWD0.y : M.FWD.y, M.FWD0 ? M.FWD0.z : M.FWD.z],
+           up:[M.UP.x, M.UP.y, M.UP.z] };
+}
+
+/* Turn a stored frame back into a live metrics object. faceYaw/facePitch are USER CONTROLS,
+   so they are re-applied here rather than baked into the frame — otherwise dragging them
+   would do nothing. */
+function frameToMetrics(f, head){
+  const FWD0 = new THREE.Vector3().fromArray(f.fwd0);
+  const UP   = new THREE.Vector3().fromArray(f.up);
+  const FWD  = FWD0.clone();
+  let RIGHT  = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  if(EYE.faceYaw){
+    FWD.applyAxisAngle(UP, EYE.faceYaw).normalize();
+    RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  }
+  if(EYE.facePitch) FWD.applyAxisAngle(RIGHT, EYE.facePitch).normalize();
+  return { head, w:f.w, h:f.h, d:f.d, cz:f.cz, minY:f.minY, maxY:f.maxY, eyeY:f.eyeY,
+           centre:new THREE.Vector3().fromArray(f.centre), FWD, FWD0, UP, RIGHT, verts:-1, fromFrame:true };
+}
+
+// the frame this model should use: the user's saved one, else the baked one, else none
+function storedFrame(model){ return FRAME_ALL[model] || FACE_FRAMES[model] || null; }
+
+function findHeadBone(actor){
+  let head = null;
+  actor.root.traverse(o => { if(!head && o.isBone && /^head$/i.test(o.name.replace(/[^a-z]/gi,''))) head = o; });
+  return head;
+}
+
 /* ─────────────  HEAD MEASUREMENT + CACHE  ─────────────
 
    Why this is wrapped in a cache rather than just called:
@@ -1953,13 +2043,22 @@ let _headSettled = {};
 
 function headMetrics(actor, opts){
   const key = eyeModel();
-  const cached = HEAD_CACHE[key];
-  if(cached && !(opts && opts.remeasure)){
-    // reapply the live faceYaw/facePitch, which are user controls rather than measurements
-    return withFaceAngles(cached);
+
+  /* A stored frame wins outright. This is the whole point: once a model has a frame, its
+     tuned values are interpreted against that frame forever, so no change to measureHead —
+     mine or anyone's — can move them. measureHead is only reached for a model with no frame
+     yet (a new character), and its result is then frozen. */
+  if(!(opts && opts.remeasure)){
+    const f = storedFrame(key);
+    if(f){
+      const head = findHeadBone(actor);
+      if(head) return frameToMetrics(f, head);
+    }
+    if(HEAD_CACHE[key]) return withFaceAngles(HEAD_CACHE[key]);
   }
+
   const m = measureHead(actor);
-  if(!m) return cached ? withFaceAngles(cached) : null;
+  if(!m) return HEAD_CACHE[key] ? withFaceAngles(HEAD_CACHE[key]) : null;
   if(_headSettled[key]) HEAD_CACHE[key] = freezeMetrics(m);
   return m;
 }
@@ -2194,6 +2293,7 @@ function mouthLoadFor(model){
 const mouthSave = () => {
   MOUTH_ALL[eyeModel()] = cleanFace(JSON.parse(JSON.stringify(MOUTH)), MOUTH_DEFAULT);
   try { localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); } catch(e){}
+  persistFrame();
 };
 const _mouthTex = {};
 
@@ -3443,7 +3543,9 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
          `<label>${lbl}</label><div class="rw">
             <input type="range" data-wk="${k}" min="${mn}" max="${mx}" step="${st}" value="${WEAP[k]}">
             <span class="v" data-wv="${k}">${(+WEAP[k]).toFixed(2)}</span></div>`).join('')}
-       <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>`;
+       <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>
+       <div class="btns"><button data-a="lock">Lock placement</button><button data-a="backup">Backup all</button></div>
+       <div class="btns"><button data-a="restore">Restore from backup</button></div>`;
 
     const apply  = () => { addEyes(hero, false); eyeSave(); };
     const applyM = () => { addMouth(hero, false); mouthSave(); };
@@ -3496,6 +3598,27 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       Object.assign(EYE, EYE_DEFAULT);
       Object.assign(MOUTH, MOUTH_DEFAULT); Object.assign(WEAP, WEAP_DEFAULT);
       build(); addEyes(hero, false); eyeSave(); addMouth(hero, false); mouthSave();
+    });
+    /* Lock: pin the CURRENT measurement as this model's frame, so its values can never be
+       reinterpreted by a later code change. Backup/Restore exist so a browser wipe can never
+       cost a tuning session again. None of these clear anything. */
+    pane.querySelector('[data-a="lock"]').addEventListener('click', () => {
+      const f = window.__SLICE.lockPlacement();
+      alert(f ? ('Placement locked for ' + eyeModel() + '. Values are now pinned to this frame.')
+              : 'Could not measure a frame for this model.');
+    });
+    pane.querySelector('[data-a="backup"]').addEventListener('click', () => {
+      const t = window.__SLICE.faceBackup();
+      if(navigator.clipboard) navigator.clipboard.writeText(t);
+      console.log('FACE BACKUP', t);
+      alert('Backup copied to clipboard and logged to console. Keep it safe — paste it into Restore to bring everything back.');
+    });
+    pane.querySelector('[data-a="restore"]').addEventListener('click', () => {
+      const t = prompt('Paste a face backup:');
+      if(!t) return;
+      const r = window.__SLICE.faceRestore(t);
+      alert(r === true ? 'Restored.' : ('Failed: ' + r));
+      build();
     });
     pane.querySelector('[data-a="dump"]').addEventListener('click', () => {
       const t = JSON.stringify({ model: eyeModel(), EYE, MOUTH, WEAP }, null, 1);
@@ -4444,6 +4567,29 @@ window.__SLICE = {
     buildAnimBar(); return r; },
   eyeDump: () => ({ model: eyeModel(), cur: JSON.parse(JSON.stringify(EYE)), all: EYE_ALL }),
   eyeInfo: () => addEyes(hero),
+  /* Pin the CURRENT live measurement as this model's frame. Use when a model has no frame
+     yet, or after deliberately deciding the current placement is the reference. */
+  lockPlacement: () => { const M = headMetrics(hero, { remeasure:true }); if(!M) return null;
+    FRAME_ALL[eyeModel()] = snapFrame(M); frameSave(); addEyes(hero); addMouth(hero);
+    return FRAME_ALL[eyeModel()]; },
+  frameInfo: () => ({ model: eyeModel(), usingFrame: !!storedFrame(eyeModel()),
+                      pinned: !!FRAME_ALL[eyeModel()], frame: storedFrame(eyeModel()) }),
+  /* Full backup of every tuned value AND its frame. Paste it back with faceRestore(). */
+  faceBackup: () => JSON.stringify({ v:FACE_FRAME_VERSION, eye:EYE_ALL, mouth:MOUTH_ALL,
+                                     frame:FRAME_ALL, weapon:WEAP_ALL }, null, 1),
+  faceRestore: json => { try { const d = JSON.parse(json);
+      if(d.eye)   { Object.assign(EYE_ALL, d.eye);     localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL)); }
+      if(d.mouth) { Object.assign(MOUTH_ALL, d.mouth); localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); }
+      if(d.frame) { Object.assign(FRAME_ALL, d.frame); frameSave(); }
+      if(d.weapon){ Object.assign(WEAP_ALL, d.weapon); localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); }
+      addEyes(hero); addMouth(hero); return true;
+    } catch(e){ return 'bad json: ' + e.message; } },
+  frameOf: () => { const M = headMetrics(hero); if(!M) return null;
+    return { w:+M.w.toFixed(6), h:+M.h.toFixed(6), d:+M.d.toFixed(6), cz:+M.cz.toFixed(6),
+             minY:+M.minY.toFixed(6), maxY:+M.maxY.toFixed(6), eyeY:+M.eyeY.toFixed(6),
+             centre:[+M.centre.x.toFixed(6),+M.centre.y.toFixed(6),+M.centre.z.toFixed(6)],
+             fwd0:[+M.FWD.x.toFixed(6),+M.FWD.y.toFixed(6),+M.FWD.z.toFixed(6)],
+             up:[+M.UP.x.toFixed(6),+M.UP.y.toFixed(6),+M.UP.z.toFixed(6)] }; },
   mouthTune: o => { Object.assign(MOUTH, o||{}); const r = addMouth(hero, false); mouthSave();
                     if(window.__eyeRebuild) window.__eyeRebuild();
     buildAnimBar(); return r; },

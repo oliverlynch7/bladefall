@@ -129,6 +129,11 @@
   #eyep input[type=range]{flex:1;min-width:0;accent-color:#e8a33d}
   #eyep .v{width:42px;text-align:right;font:700 10px ui-monospace,monospace;color:#ffd89a}
   #eyep input[type=color]{width:100%;height:22px;border:1px solid #4a3c26;border-radius:5px;background:none;padding:0}
+  #eyep .shapes{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  #eyep .shapes button{flex:0 0 auto;padding:5px 8px;font-size:10px;border-radius:6px;
+    border:1px solid #4a3c26;color:#c9bda2;background:rgba(30,25,18,.9)}
+  #eyep .shapes button.sel{border-color:#e8a33d;color:#ffd89a}
+  #eyep hr{border:0;border-top:1px solid #33291c;margin:12px 0 4px}
   #eyep .btns{display:flex;gap:6px;margin-top:10px}
   #eyep button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:7px 4px;border-radius:7px}
@@ -180,7 +185,7 @@
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
   <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
-<button id="eyeBtn">EYES</button>
+<button id="eyeBtn">FACE</button>
 <div id="eyep"></div>
 <button id="custBtn">🎨 Customise</button>
 <div id="custom" class="hide"></div>
@@ -1873,6 +1878,122 @@ function addEyes(actor, useSaved){
            nose:[+M.nose.x.toFixed(3), +M.nose.y.toFixed(3), +M.nose.z.toFixed(3)] };
 }
 
+
+/* ─────────────  MOUTH  ─────────────
+   Same architecture as the eyes, because that one worked: anchor to measured head
+   geometry, express every offset as a fraction of head size, render through the head
+   while tuning, save per model, and leave the final placement to someone who can see it.
+
+   Mii-style shapes are drawn to a canvas rather than modelled. A mouth is a flat mark on
+   a face, so a transparent plane carrying a drawn shape gives us any expression we like
+   for one draw call — and adding a new shape later is a few lines of 2D canvas, not a
+   modelling job. */
+const MOUTH = {
+  on: true,
+  shape: 'smile',
+  y: -0.10,       // down from the brow line, fraction of head height
+  z: 0.02,        // forward of the face surface
+  width: 0.34,    // fraction of head width
+  height: 0.20,   // fraction of head width
+  color: '#5a2f28',
+  onTop: true,
+};
+const MOUTH_SHAPES = ['line','smile','grin','teeth','frown','o','smirk','open','flat'];
+const MOUTH_DEFAULT = JSON.parse(JSON.stringify(MOUTH));
+let MOUTH_ALL = {};
+try { MOUTH_ALL = JSON.parse(localStorage.getItem('bf_mouth') || '{}'); } catch(e){}
+function mouthLoadFor(model){ Object.assign(MOUTH, MOUTH_DEFAULT, MOUTH_ALL[model] || {}); }
+const mouthSave = () => {
+  MOUTH_ALL[eyeModel()] = JSON.parse(JSON.stringify(MOUTH));
+  try { localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); } catch(e){}
+};
+const _mouthTex = {};
+
+/* Draw one Mii-style mouth. Everything is in a 0..1 box so the plane's own scale controls
+   the real size; nothing here needs to know how big the head is. */
+function mouthTexture(shape, color){
+  const key = shape + '|' + color;
+  if(_mouthTex[key]) return _mouthTex[key];
+  const S = 256, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.clearRect(0,0,S,S);
+  x.strokeStyle = color; x.fillStyle = color;
+  x.lineCap = 'round'; x.lineJoin = 'round';
+  const LW = S*0.085; x.lineWidth = LW;
+  const cx = S/2, cy = S/2, w = S*0.34, h = S*0.22;
+  const curve = (dip) => {
+    x.beginPath();
+    x.moveTo(cx-w, cy - dip*0.5);
+    x.quadraticCurveTo(cx, cy + dip, cx+w, cy - dip*0.5);
+    x.stroke();
+  };
+  if(shape === 'line' || shape === 'flat'){
+    x.beginPath(); x.moveTo(cx-w, cy); x.lineTo(cx+w, cy); x.stroke();
+  } else if(shape === 'smile'){
+    curve(h*1.5);
+  } else if(shape === 'frown'){
+    curve(-h*1.5);
+  } else if(shape === 'smirk'){
+    x.beginPath(); x.moveTo(cx-w, cy+h*0.35);
+    x.quadraticCurveTo(cx, cy+h*0.55, cx+w, cy-h*0.5); x.stroke();
+  } else if(shape === 'o'){
+    x.beginPath(); x.ellipse(cx, cy, w*0.46, h*1.15, 0, 0, Math.PI*2); x.fill();
+  } else if(shape === 'open'){
+    x.beginPath(); x.ellipse(cx, cy, w*0.72, h*1.5, 0, 0, Math.PI*2); x.fill();
+  } else if(shape === 'grin'){
+    // filled crescent — a wide open smile
+    x.beginPath();
+    x.moveTo(cx-w, cy-h*0.35);
+    x.quadraticCurveTo(cx, cy+h*2.0, cx+w, cy-h*0.35);
+    x.closePath(); x.fill();
+  } else if(shape === 'teeth'){
+    x.beginPath();
+    x.moveTo(cx-w, cy-h*0.35);
+    x.quadraticCurveTo(cx, cy+h*2.0, cx+w, cy-h*0.35);
+    x.closePath(); x.fill();
+    x.strokeStyle = '#f4efe4'; x.lineWidth = LW*0.85;
+    x.beginPath(); x.moveTo(cx-w*0.82, cy-h*0.18); x.lineTo(cx+w*0.82, cy-h*0.18); x.stroke();
+  }
+  (window.__mouthCanvases = window.__mouthCanvases || {})[shape] = c;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  _mouthTex[key] = t;
+  return t;
+}
+
+function clearMouth(actor){
+  if(!actor || !actor._mouth) return;
+  if(actor._mouth.parent) actor._mouth.parent.remove(actor._mouth);
+  actor._mouth = null;
+}
+
+function addMouth(actor, useSaved){
+  if(!actor) return null;
+  clearMouth(actor);
+  if(useSaved !== false) mouthLoadFor(eyeModel());
+  if(!MOUTH.on) return null;
+  const M = headMetrics(actor);
+  if(!M) return null;
+
+  const tex = mouthTexture(MOUTH.shape, MOUTH.color);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, alphaTest: 0.04,
+    depthTest: !MOUTH.onTop, depthWrite: false, side: THREE.DoubleSide,
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1,1), mat);
+  m.userData._eye = true;                       // excluded from head measurement
+  m.renderOrder = MOUTH.onTop ? 999 : 3;
+  m.scale.set(M.w * MOUTH.width, M.w * MOUTH.height, 1);
+  m.position.set(0, M.eyeY + M.h * MOUTH.y, M.front + M.dir * (M.w * MOUTH.z));
+  // face outward: the plane's +Z must point the same way as the nose
+  if(M.dir < 0) m.rotation.y = Math.PI;
+  M.head.add(m);
+  actor._mouth = m;
+  return { shape: MOUTH.shape, w:+M.w.toFixed(3), dir:M.dir };
+}
+
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
   constructor(gltf, def, targetH){
@@ -2453,6 +2574,12 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
 (function eyeUI(){
   const btn = document.getElementById('eyeBtn'), pane = document.getElementById('eyep');
   if(!btn || !pane) return;
+  const MOUTH_ROWS = [
+    ['y',      'Height',      -0.60, 0.30, 0.005],
+    ['z',      'Forward',     -0.30, 0.40, 0.005],
+    ['width',  'Width',        0.08, 0.80, 0.005],
+    ['height', 'Tallness',     0.04, 0.60, 0.005],
+  ];
   const ROWS = [
     ['spread', 'Apart',        0.05, 0.60, 0.005],
     ['height', 'Height',      -0.30, 0.50, 0.005],
@@ -2473,9 +2600,20 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
        <label><input type="checkbox" data-b="onTop" ${EYE.onTop?'checked':''}> draw through head (tuning)</label>
        <label><input type="checkbox" data-b="showWhite" ${EYE.showWhite?'checked':''}> show sclera</label>
        <label><input type="checkbox" data-b="on" ${EYE.on?'checked':''}> eyes on</label>
+       <hr><h5 style="margin-bottom:6px">Mouth</h5>
+       <div class="shapes">${MOUTH_SHAPES.map(sh =>
+         `<button data-sh="${sh}" class="${MOUTH.shape===sh?'sel':''}">${sh}</button>`).join('')}</div>
+       ${MOUTH_ROWS.map(([k,lbl,mn,mx,st]) =>
+         `<label>${lbl}</label><div class="rw">
+            <input type="range" data-mk="${k}" min="${mn}" max="${mx}" step="${st}" value="${MOUTH[k]}">
+            <span class="v" data-mv="${k}">${(+MOUTH[k]).toFixed(3)}</span></div>`).join('')}
+       <label>Mouth colour</label><input type="color" data-mc="color" value="${MOUTH.color}">
+       <label><input type="checkbox" data-mb="onTop" ${MOUTH.onTop?'checked':''}> draw through head</label>
+       <label><input type="checkbox" data-mb="on" ${MOUTH.on?'checked':''}> mouth on</label>
        <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>`;
 
-    const apply = () => { addEyes(hero, false); eyeSave(); };
+    const apply  = () => { addEyes(hero, false); eyeSave(); };
+    const applyM = () => { addMouth(hero, false); mouthSave(); };
     pane.querySelectorAll('input[type=range]').forEach(el => {
       el.addEventListener('input', () => {
         EYE[el.dataset.k] = +el.value;
@@ -2487,13 +2625,31 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       el.addEventListener('input', () => { EYE[el.dataset.c] = el.value; apply(); }));
     pane.querySelectorAll('input[type=checkbox]').forEach(el =>
       el.addEventListener('change', () => { EYE[el.dataset.b] = el.checked; apply(); }));
+    pane.querySelectorAll('input[data-mk]').forEach(el => {
+      el.addEventListener('input', () => {
+        MOUTH[el.dataset.mk] = +el.value;
+        pane.querySelector(`[data-mv="${el.dataset.mk}"]`).textContent = (+el.value).toFixed(3);
+        applyM();
+      });
+    });
+    pane.querySelectorAll('input[data-mc]').forEach(el =>
+      el.addEventListener('input', () => { MOUTH[el.dataset.mc] = el.value; applyM(); }));
+    pane.querySelectorAll('input[data-mb]').forEach(el =>
+      el.addEventListener('change', () => { MOUTH[el.dataset.mb] = el.checked; applyM(); }));
+    pane.querySelectorAll('.shapes button').forEach(el =>
+      el.addEventListener('click', () => {
+        MOUTH.shape = el.dataset.sh;
+        pane.querySelectorAll('.shapes button').forEach(b => b.classList.toggle('sel', b === el));
+        applyM();
+      }));
     pane.querySelector('[data-a="reset"]').addEventListener('click', () => {
       Object.assign(EYE, { spread:0.30, height:0.10, depth:0.02, size:0.115, squash:0.62,
                            tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true });
-      build(); addEyes(hero, false); eyeSave();
+      Object.assign(MOUTH, MOUTH_DEFAULT);
+      build(); addEyes(hero, false); eyeSave(); addMouth(hero, false); mouthSave();
     });
     pane.querySelector('[data-a="dump"]').addEventListener('click', () => {
-      const t = JSON.stringify(EYE, null, 1);
+      const t = JSON.stringify({ model: eyeModel(), EYE, MOUTH }, null, 1);
       navigator.clipboard && navigator.clipboard.writeText(t);
       console.log('EYE =', t);
       alert(t);
@@ -3180,7 +3336,8 @@ async function switchClass(def){
     scene.add(hero.root);
     heroDef = def;
     applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
-    console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)));
+    console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)) +
+                ' mouth ' + JSON.stringify(addMouth(hero)));
     if(window.__eyeRebuild) window.__eyeRebuild();
     buildSkinBar();
     paintSkillBar();
@@ -3372,6 +3529,7 @@ function resize(){
 addEventListener('resize', resize); resize();
 
 // QA hook — lets the headless screenshot harness pose the scene and fire abilities
+window.__mouthCanvasFor = sh => { mouthTexture(sh, MOUTH.color); return (window.__mouthCanvases||{})[sh]; };
 window.__SLICE = {
   cam(yaw, pitch, dist){ if(yaw!=null) camYaw=yaw; if(pitch!=null) camPitch=pitch; if(dist!=null) camDist=dist; },
   attack: ()=>doAttack(), roll: ()=>doRoll(), skill: (i)=>castSkill(i||0), jump: ()=>doJump(),
@@ -3392,6 +3550,9 @@ window.__SLICE = {
                   if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
   eyeDump: () => ({ model: eyeModel(), cur: JSON.parse(JSON.stringify(EYE)), all: EYE_ALL }),
   eyeInfo: () => addEyes(hero),
+  mouthTune: o => { Object.assign(MOUTH, o||{}); const r = addMouth(hero, false); mouthSave();
+                    if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+  mouthShapes: () => MOUTH_SHAPES.slice(),
   probeBone: frag => { let b=null; hero.root.traverse(o=>{ if(!b && o.isBone && new RegExp(frag,'i').test(o.name)) b=o; });
     if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);
     const v=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld); return [v.x,v.y,v.z]; },

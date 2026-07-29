@@ -2258,22 +2258,27 @@ const FACE_PRESETS = {
     /* First set tuned with the controls added for this model specifically: faceYaw/facePitch
        correct the angled face, and the mouth needed a lateral nudge. Both were unreachable
        before, which is why the Monk was the hold-out. */
-    eye:   { spread:0.205, height:-0.400, depth:0.190, size:0.082, squash:0.81, tilt:-0.500,
+    /* Re-tuned against the frozen placement frame and locked, 2026-07-29. Note faceYaw
+       flipped sign (-0.130 -> +0.150): the earlier value was partly compensating for the
+       drifting reference, not describing the head. */
+    eye:   { spread:0.200, height:-0.220, depth:0.020, size:0.082, squash:0.81, tilt:-0.500,
              iris:'#2f6b45', pupil:'#101014', flip:false,
-             offX:-0.015, faceYaw:-0.130, facePitch:0.040, irisSz:0.52 },
-    mouth: { shape:'flat', y:-0.625, z:0.170, width:0.355, height:0.360, color:'#5a2f28',
+             offX:-0.015, faceYaw:0.150, facePitch:0.040, irisSz:0.52 },
+    mouth: { shape:'flat', y:-0.455, z:0.055, width:0.355, height:0.360, color:'#5a2f28',
              offX:0.015 },
   },
   Rogue: {
     // Hooded, so the measured head box runs high and the face sits turned — same two
     // problems as the Monk, and solved by the same pair of controls.
-    eye:   { spread:0.195, height:-0.420, depth:0.23, size:0.08, squash:0.62, tilt:0.18,
+    /* Re-tuned and locked, 2026-07-29. offX 0.175 is a real lateral shift: this head sits
+       noticeably off-centre on its own bone, which is what that control was added for. */
+    eye:   { spread:0.195, height:-0.265, depth:0.040, size:0.080, squash:0.62, tilt:-0.010,
              iris:'#3a6ea5', pupil:'#101014', flip:false,
-             offX:0, faceYaw:-0.13, facePitch:0, irisSz:0.52 },
+             offX:0.175, faceYaw:-0.130, facePitch:-0.040, irisSz:0.52 },
     /* Mouth sits INSIDE the head on purpose (z negative). Oliver's call: the scarf covers
        that part of the face anyway, so drawing a mouth there only risks it poking through.
        Kept rather than disabled so the class still works if the scarf ever comes off. */
-    mouth: { shape:'smirk', y:-0.60, z:-0.075, width:0.34, height:0.20, color:'#5a2f28',
+    mouth: { shape:'smirk', y:-0.625, z:-0.075, width:0.340, height:0.200, color:'#5a2f28',
              offX:0 },
   },
 };

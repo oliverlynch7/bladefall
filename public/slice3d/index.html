@@ -2052,7 +2052,15 @@ const FACE_PRESETS = {
     mouth: { shape:'flat', y:-0.65, z:0.17, width:0.32, height:0.36, color:'#5a2f28',
              offX:0.03 },
   },
-  // Rogue not yet tuned — falls back to the Warrior-derived base.
+  Rogue: {
+    // Hooded, so the measured head box runs high and the face sits turned — same two
+    // problems as the Monk, and solved by the same pair of controls.
+    eye:   { spread:0.195, height:-0.445, depth:0.23, size:0.08, squash:0.62, tilt:0.18,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0, faceYaw:-0.13, facePitch:0 },
+    mouth: { shape:'smirk', y:-0.60, z:-0.285, width:0.34, height:0.20, color:'#5a2f28',
+             offX:0 },
+  },
 };
 
 /* Saved settings from before the slider-scoping fix contain a stray "undefined" key: the

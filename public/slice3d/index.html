@@ -481,6 +481,59 @@ function addFace(actor, opt){
   actor._face = g;
   return g;
 }
+/* ── SELF-CHECK ──
+   Most 'looks wrong' bugs are actually measurable: floating off the mesh, buried inside
+   it, off-centre, behind the head. This raycasts every face part against the head mesh
+   and reports hard numbers, so placement can be verified without me eyeballing a
+   screenshot. It would have caught the sword-anchor bug immediately. */
+function validateFace(actor){
+  if(!actor || !actor._face) return { ok:false, reason:'no face' };
+  actor.root.updateMatrixWorld(true);
+  const SKIP = /(sword|axe|bow|staff|dagger|shield|weapon|pad|pauldron|cape)/i;
+  const box = new THREE.Box3().setFromObject(actor.root);
+  const H = box.max.y - box.min.y;
+  const lo = box.min.y + H*FACE.bandLo, hi = box.min.y + H*FACE.bandHi;
+  let headMesh = null, best = 0;
+  const v = new THREE.Vector3();
+  actor.root.traverse(o => {
+    if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+    if(SKIP.test(o.name||'')) return;
+    const pos = o.geometry.attributes.position; let n=0;
+    const st = Math.max(1, Math.floor(pos.count/600));
+    for(let i=0;i<pos.count;i+=st){
+      v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);
+      if(v.y>=lo && v.y<=hi) n++;
+    }
+    if(n>best){ best=n; headMesh=o; }
+  });
+  if(!headMesh) return { ok:false, reason:'no head mesh' };
+
+  const fwd = new THREE.Vector3(0,0,1).transformDirection(actor.root.matrixWorld).normalize();
+  const ray = new THREE.Raycaster();
+  ray.firstHitOnly = false;
+  const rows = [], problems = [];
+  for(const part of actor._face.children){
+    const wp = part.getWorldPosition(new THREE.Vector3());
+    // shoot from well in front of the part, backwards into the head
+    ray.set(wp.clone().addScaledVector(fwd, 0.6), fwd.clone().negate());
+    const hits = ray.intersectObject(headMesh, true);
+    if(!hits.length){ rows.push({ part:part.type, gap:null, note:'NO SURFACE BEHIND' });
+                      problems.push('a part has no head surface behind it'); continue; }
+    // signed distance along forward: + means in front of the surface (floating)
+    const surf = hits[0].point;
+    const gap = wp.clone().sub(surf).dot(fwd);
+    const size = part.geometry.boundingSphere
+      ? part.geometry.boundingSphere.radius * part.scale.x
+      : 0.02;
+    let note = 'flush';
+    if(gap >  size*2.2) note = 'FLOATING';
+    else if(gap < -size*1.6) note = 'BURIED';
+    rows.push({ gap:+gap.toFixed(4), size:+size.toFixed(4), note });
+    if(note !== 'flush') problems.push(note.toLowerCase() + ' by ' + gap.toFixed(3) + 'm');
+  }
+  return { ok: problems.length === 0, headMesh: headMesh.name || '(unnamed)',
+           parts: rows.length, problems, rows };
+}
 function removeFace(actor){
   if(!actor || !actor._face) return;
   const g = actor._face;
@@ -2428,6 +2481,7 @@ window.__SLICE = {
   mobScale: v => { if(v!=null) MOB_SCALE = v; return MOB_SCALE; },
   atkSpeed: v => { if(v!=null) window.__ATK = v; return window.__ATK || ATK_SPEED; },
   hasFace: () => !!(hero && hero._face),
+  validateFace: () => validateFace(hero),
   faceTune: o => {
     if(o) Object.assign(FACE, o);
     if(hero){ removeFace(hero); addFace(hero); }

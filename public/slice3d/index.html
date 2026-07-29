@@ -2207,14 +2207,34 @@ function weaponsFor(model){
 /* Tuned transforms, keyed by WEAPON rather than by class. That is the point of the rule
    above: a weapon lives on one archetype, so one set of numbers is enough for it
    everywhere it can appear. */
+/* Oliver's tuned values, on the Warrior body, 2026-07-29.
+
+   Worth noting the pattern: pitch 0.10, yaw -3.20, roll 0.10 and grip 0.72 recur on
+   almost every melee weapon. That is not coincidence — it is the correct base orientation
+   for this rig's hand, and only `up`, `side` and `len` really differ per weapon. Those
+   four are now the DEFAULTS, so any weapon not yet tuned already starts oriented
+   correctly and needs at most a nudge to its height. The Scythe is the odd one out
+   because it is held reversed. */
 const WEAPON_PRESETS = {
-  // Oliver, tuned on the Warrior body, 2026-07-29
-  Scythe: { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,
-            fwd:-0.04, up:0.01, side:-0.17, grip:0.29 },
+  Sword:               { len:1.00, up:-0.39, side:-0.03 },
+  Sword_2:             { len:1.00, up:-0.39, side:-0.03 },
+  Sword_Golden:        { len:1.00, up:-0.39, side:-0.03 },
+  Claymore:            { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
+  Sword_Big:           { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
+  Sword_big_Golden:    { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
+  Axe:                 { len:1.00, up:-0.41, side:-0.13, fwd:-0.04 },
+  Axe_Small:           { len:1.00, up:-0.46, side:-0.19, fwd:-0.04 },
+  Axe_Double:          { len:1.00, up:-0.46, side:-0.05, fwd:-0.04 },
+  Axe_Double_Golden:   { len:1.00, up:-0.46, side:-0.05, fwd:-0.04 },
+  Hammer_Small:        { len:1.00, up:-0.36, side:-0.10, fwd:-0.03 },
+  Hammer_Double:       { len:1.20, up:-0.39, side:-0.03, fwd:-0.01, pitch:0.06 },
+  Hammer_Double_Golden:{ len:1.20, up:-0.39, side:-0.03, fwd:-0.01, pitch:0.06 },
+  Scythe:              { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,
+                         fwd:-0.04, up:0.01, side:-0.17, grip:0.29 },
 };
 
-const WEAP = { on:false, name:'Sword', len:1.0, roll:0, pitch:0, yaw:0,
-               fwd:0, up:0, side:0, grip:0.72, hideStock:true };
+const WEAP = { on:false, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
+               fwd:0, up:-0.39, side:-0.03, grip:0.72, hideStock:true };
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}

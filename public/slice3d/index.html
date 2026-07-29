@@ -427,6 +427,53 @@ function applySkin(actor, clsId, skin){
    artist. So equipping is not placement at all: rebind the part's SkinnedMesh to the
    character's existing skeleton and it is correct by construction — right position, right
    deformation, animates with everything else. Nothing to guess, nothing to tune.  */
+/* Armour SLOTS. Honest limitation: the Standard tier of the outfit pack ships only
+   Ranger and Peasant sets — there is no plate/knight geometry. So a 'knight' here is the
+   ranger pieces tinted to steel, which reads as armour but is not true plate. The slot
+   STRUCTURE (head/chest/legs/shoulders/arms/feet) is real and would take proper plate
+   meshes unchanged the day we have them. */
+const ARMOUR_SLOTS = ['helmet','chest','legs','shoulders','arms','boots'];
+const ARMOUR_SETS = {
+  M: { helmet:'outfits/Male_Ranger_Head_Hood', chest:'outfits/Male_Ranger_Body',
+       legs:'outfits/Male_Ranger_Legs', shoulders:'outfits/Male_Ranger_Acc_Pauldron',
+       arms:'outfits/Male_Ranger_Arms', boots:'outfits/Male_Ranger_Feet_Boots' },
+  F: { helmet:'outfits/Female_Ranger_Head_Hood', chest:'outfits/Female_Ranger_Body',
+       legs:'outfits/Female_Ranger_Legs', shoulders:'outfits/Female_Ranger_Acc_Pauldrons',
+       arms:'outfits/Female_Ranger_Arms', boots:'outfits/Female_Ranger_Feet' },
+};
+function armourFile(slot){
+  const sex = (heroDef && heroDef.id === 'BaseF') ? 'F' : 'M';
+  return ARMOUR_SETS[sex][slot] || ARMOUR_SETS.M[slot];
+}
+/* The three Bladefall archetypes, expressed through what the pack actually provides:
+   which slots are worn, and how they're tinted. */
+const CLASS_LOOKS = {
+  warrior: { label:'Warrior', wear:['chest','legs','arms','boots','shoulders'],
+             outfit:'#c8ced6', skin:'#ffffff', hair:2, hairCol:'#4a3122', beard:true },
+  ranger:  { label:'Ranger',  wear:['chest','legs','arms','boots','helmet'],
+             outfit:'#7fc07a', skin:'#ffffff', hair:0, hairCol:'#2b1f18', beard:false },
+  wizard:  { label:'Wizard',  wear:['chest','legs','arms','boots','helmet'],
+             outfit:'#9a9aff', skin:'#ffffff', hair:1, hairCol:'#d8cbb0', beard:true },
+};
+async function applyClassLook(key){
+  const L = CLASS_LOOKS[key]; if(!L || !hero) return;
+  // Armour must go on the BARE BODY. The character otherwise loads wearing the full
+  // assembled Ranger outfit, so every 'class' came out identical with a hood baked in.
+  const baseIdx = (heroDef.outfits || []).findIndex(o => /Base Body/i.test(o.name));
+  if(baseIdx >= 0 && (outfitIdx[heroDef.id] || 0) !== baseIdx){
+    outfitIdx[heroDef.id] = baseIdx;
+    const d = heroDef; heroDef = { id:'__reload' };
+    await switchClass(d);
+    await new Promise(r => setTimeout(r, 60));
+  }
+  for(const s of ARMOUR_SLOTS) unequipPart(hero, s);
+  for(const s of L.wear){ EQUIP_SLOTS[s] = armourFile(s); await equipPart(hero, s); }
+  CUSTOM.hair = L.hair; CUSTOM.hairCol = L.hairCol;
+  CUSTOM.outfitCol = L.outfit; CUSTOM.skinCol = L.skin; CUSTOM.beard = L.beard;
+  await applyCustom();
+  CUSTOM.look = key;
+  buildCustomPanel();
+}
 const EQUIP_SLOTS = {
   // Hair ships in two variants; we use 'Rigged to Head Bone', which is skinned to the
   // same 65 joints — so it equips through the identical path as armour, no placement code.
@@ -510,7 +557,7 @@ async function applyCustom(){
   unequipPart(hero, 'beard');
   if(CUSTOM.beard){ await equipPart(hero, 'beard'); }
   tintMats(hero, /hair/i,            CUSTOM.hairCol);
-  tintMats(hero, /ranger|peasant/i,  CUSTOM.outfitCol);
+  tintMats(hero, /ranger|peasant|MI_Ranger|MI_Peasant/i, CUSTOM.outfitCol);
   tintMats(hero, /regular|superhero/i, CUSTOM.skinCol);
 }
 function buildCustomPanel(){
@@ -526,14 +573,18 @@ function buildCustomPanel(){
     sec('Outfit tint', sws(OUTFIT_COLS, CUSTOM.outfitCol, 'outfitCol')) +
     sec('Skin tone',  sws(SKIN_COLS, CUSTOM.skinCol, 'skinCol')) +
     sec('Extras', `<button class="opt${CUSTOM.beard?' sel':''}" data-act="beard">Beard</button>`) +
-    sec('Armour', ['pauldrons','hood','arms','legs','boots'].map(k=>
+    sec('Class preset', Object.keys(CLASS_LOOKS).map(k=>
+      `<button class="opt${CUSTOM.look===k?' sel':''}" data-act="look" data-k="${k}">${CLASS_LOOKS[k].label}</button>`).join('')) +
+    sec('Armour slots', ARMOUR_SLOTS.map(k=>
       `<button class="opt${(hero&&hero._equip&&hero._equip[k])?' sel':''}" data-act="equip" data-k="${k}">${k}</button>`).join(''));
   el.querySelectorAll('button').forEach(b => b.onclick = async () => {
     const a = b.dataset.act;
     if(a==='hair'){ CUSTOM.hair = +b.dataset.i; await applyCustom(); }
     else if(a==='beard'){ CUSTOM.beard = !CUSTOM.beard; await applyCustom(); }
+    else if(a==='look'){ await applyClassLook(b.dataset.k); return; }
     else if(a==='equip'){ const k=b.dataset.k;
-      if(hero && hero._equip && hero._equip[k]) unequipPart(hero,k); else await equipPart(hero,k);
+      if(hero && hero._equip && hero._equip[k]) unequipPart(hero,k);
+      else { EQUIP_SLOTS[k] = armourFile(k); await equipPart(hero,k); }
       await applyCustom(); }
     else { CUSTOM[a] = b.dataset.c; await applyCustom(); }
     buildCustomPanel();
@@ -2630,6 +2681,7 @@ window.__SLICE = {
   sizes: () => MONSTERS.map(m => m.label + ' ' + (m.h*MOB_SCALE).toFixed(2) + 'm'),
   enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),
+  look: k => applyClassLook(k),
   skin: i => { const L=SKINS[heroDef.id]||[]; if(L[i]){ skinIdx[heroDef.id]=i; applySkin(hero, heroDef.id, L[i]); buildSkinBar(); } },
   face: y => { if(hero) hero.root.rotation.y = y; },
   info: () => ({ cls: heroDef.id, clips: hero ? Object.keys(hero.clips) : [], roomHalf,

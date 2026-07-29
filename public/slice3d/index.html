@@ -273,17 +273,64 @@ const boxOf = o => new THREE.Box3().setFromObject(o);
    Clip names verified from the Quaternius glTF files. Each class maps the
    game's verbs onto whatever that model actually ships, with fallbacks. */
 const CLASSES = [
-  { id:'Warrior', label:'Warrior', tint:'#d8b26a',
-    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Idle_Weapon','Idle'],
-            attack:['Sword_Attack','Sword_Attack2'], skill:['Sword_Attack2','Sword_Attack'], hit:['RecieveHit'], death:['Death'] },
+  /* Bladefall's 13 classes across the 6 RPG models. All six share ONE identical 32-bone
+     skeleton, so every class draws from the pooled 26-clip library no matter which body it
+     wears - the Monk gets unarmed Attack/Attack2, the Ranger gets Bow_Draw/Bow_Shoot, the
+     casters get Spell1/Spell2 - with no retargeting anywhere. `model` picks the body,
+     `tint` separates classes that share one.
+     No jump clip exists anywhere in the pack, so jump falls back to Roll for now. */
+  { id:'warrior', label:'Warrior', model:'Warrior', tint:'#d8b26a',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Sword_Attack','Sword_Attack2'], skill:['Sword_Attack2'], hit:['RecieveHit'], death:['Death'] },
     skill:{ name:'Earthshatter', kind:'nova', color:'#ffb347', color2:'#ff5a2a' } },
-  { id:'Rogue', label:'Rogue', tint:'#8fd0a8',
-    clips:{ idle:['Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Idle'],
-            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2','Dagger_Attack'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
-    skill:{ name:'Venom Burst', kind:'nova', color:'#8dff9a', color2:'#2ea84a' } },
-  // ── Universal Base Characters + Universal Animation Library (Quaternius) ──
-  // UE-standard 65-joint skeleton; UAL1+UAL2 (86 clips) bind by bone NAME with zero
-  // retargeting, which is why these get a far richer move set than the RPG rigs.
+  { id:'berserker', label:'Berserker', model:'Warrior', tint:'#c0392b',
+    clips:{ idle:['Idle_Attacking','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Sword_Attack2','Sword_Attack'], skill:['Attack2'], hit:['RecieveHit'], death:['Death'] },
+    skill:{ name:'Bloodrage', kind:'nova', color:'#ff6a4a', color2:'#8a1a1a' } },
+  { id:'bladedancer', label:'Bladedancer', model:'Rogue', tint:'#7fd8d0',
+    clips:{ idle:['Attacking_Idle','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Riposte', kind:'nova', color:'#aefff5', color2:'#2a8a9a' } },
+  { id:'paladin', label:'Paladin', model:'Cleric', tint:'#ffe6a0',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Staff_Attack','Sword_Attack'], skill:['Spell1'], hit:['RecieveHit_Attacking','RecieveHit'], death:['Death'] },
+    skill:{ name:'Judgement', kind:'nova', color:'#fff3c0', color2:'#ffa42a' } },
+  { id:'monk', label:'Monk', model:'Monk', tint:'#e08a3c',
+    clips:{ idle:['Idle_Attacking','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Attack','Attack2'], skill:['Attack2'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Flowing Palm', kind:'nova', color:'#ffd0a0', color2:'#c05a1a' } },
+  { id:'ranger', label:'Ranger', model:'Ranger', tint:'#6aa84f',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Holding','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Bow_Shoot','Bow_Draw'], skill:['Bow_Draw'], hit:['RecieveHit'], death:['Death'] },
+    skill:{ name:'Piercing Shot', kind:'nova', color:'#b8ff9a', color2:'#2a7a2a' } },
+  { id:'beastmaster', label:'Beastmaster', model:'Ranger', tint:'#8a6a3a',
+    clips:{ idle:['Idle','Idle_Weapon'], walk:['Walk'], run:['Run_Holding','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Punch','Bow_Shoot'], skill:['Bow_Draw'], hit:['RecieveHit'], death:['Death'] },
+    skill:{ name:'Call of the Wild', kind:'nova', color:'#d8b06a', color2:'#6a4a1a' } },
+  { id:'skylancer', label:'Skylancer', model:'Ranger', tint:'#7fb8ff',
+    clips:{ idle:['Idle_Attacking','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Sword_Attack','Bow_Shoot'], skill:['Bow_Draw'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Skyfall', kind:'nova', color:'#cfe8ff', color2:'#2a6aba' } },
+  { id:'mage', label:'Mage', model:'Wizard', tint:'#6a8fd8',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Arcane Nova', kind:'nova', color:'#a8c8ff', color2:'#2a4aba' } },
+  { id:'stormcaller', label:'Stormcaller', model:'Wizard', tint:'#b08fff',
+    clips:{ idle:['Idle_Attacking','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Spell1','Staff_Attack'], skill:['Spell2'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Chain Lightning', kind:'nova', color:'#e0d0ff', color2:'#6a2aba' } },
+  { id:'warlock', label:'Warlock', model:'Wizard', tint:'#8a4fa0',
+    clips:{ idle:['Idle','Idle_Weapon'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Spell2','Spell1'], skill:['Spell1'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Soul Drain', kind:'nova', color:'#d89aff', color2:'#4a1a6a' } },
+  { id:'necromancer', label:'Necromancer', model:'Wizard', tint:'#9aa08a',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Spell1','Staff_Attack'], skill:['Spell2'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Raise Dead', kind:'nova', color:'#cfe0c0', color2:'#3a5a2a' } },
+  { id:'reaper', label:'Reaper', model:'Rogue', tint:'#7a2a3a',
+    clips:{ idle:['Attacking_Idle','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Dagger_Attack2','Dagger_Attack'], skill:['Dagger_Attack'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Harvest', kind:'nova', color:'#ff8fa0', color2:'#5a0a1a' } },
   // ── Mixamo (free, commercial-use, rigged, textured, with faces) ──
   // Our 86 UAL clips reach these through UE->mixamorig track renaming; see retargetClips.
   { id:'Paladin', label:'Paladin ★', mixamo:true, preScaled:true, file:'Paladin', tint:'#d9c48a',
@@ -1367,6 +1414,30 @@ function updateRedesign(t, dt){
 }
 
 let _ualClips = null;
+/* The six RPG characters share an IDENTICAL 32-bone skeleton, so any clip from any of
+   them binds to all of them by bone name — the same zero-retargeting mechanism the UAL
+   rigs use. Individually they ship ~12 clips each; pooled there are 26 distinct ones.
+   Loading the pool gives every class the full set (Bow_Shoot, Dagger_Attack, Spell2,
+   Sword_Attack, Monk's unarmed Attack/Attack2, Roll, ...) instead of its own dozen. */
+const RPG_POOL = ['Warrior','Rogue','Ranger','Wizard','Cleric','Monk'];
+let _rpgClips = null;
+async function loadRPGPool(){
+  if(_rpgClips) return _rpgClips;
+  const gs = await Promise.all(RPG_POOL.map(n => load(`assets/chars/${n}.gltf`).catch(()=>null)));
+  const seen = new Set(); _rpgClips = [];
+  for(const g of gs){ if(!g) continue;
+    for(const c of g.animations){ if(seen.has(c.name)) continue; seen.add(c.name); _rpgClips.push(c); } }
+  console.log('DIAG rpgpool clips=' + _rpgClips.length);
+  return _rpgClips;
+}
+async function loadRPGChar(def){
+  const [g, pool] = await Promise.all([
+    load(`assets/chars/${def.model || def.id}.gltf`).catch(()=>null), loadRPGPool(),
+  ]);
+  if(!g) return null;
+  return { scene: g.scene, animations: pool };
+}
+
 async function loadUAL(){
   if(_ualClips) return _ualClips;
   const [a,b] = await Promise.all([
@@ -2821,7 +2892,7 @@ async function switchClass(def){
   // is HTTP-cached, so a fresh parse is cheap and gives a correctly-bound skeleton.
   const g = def.mixamo ? await loadMixamoChar(def)
           : def.ual     ? await loadBaseChar(def)
-                        : await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
+                        : await loadRPGChar(def);
   if(g){
     const pos = hero.root.position.clone(), rot = hero.root.rotation.y;
     clearRedesign();

@@ -191,6 +191,40 @@ window.drawHero3D = drawHero3D;
 /* Diagnostic: where does the character actually land? Reports its world position, its
    projected normalised device coords (|x|,|y| < 1 means on screen, z < -1 or > 1 means
    outside the depth range), and its on-screen pixel size. Measuring beats guessing. */
+/* Bisect the "renders but invisible" problem with the bluntest possible marker: a large
+   unlit cube at the hero's position, depthTest off, drawn last. If THIS is invisible the
+   problem is GL state (scissor, framebuffer, program). If it appears, the problem is depth or
+   the character's own materials. */
+window.__hero3dDebugCube = (on) => {
+  if(!scene) return 'no scene';
+  let c = scene.getObjectByName('__dbg');
+  if(on){
+    if(!c){
+      c = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),
+        new THREE.MeshBasicMaterial({ color:0xff00ff, depthTest:false, depthWrite:false }));
+      c.name = '__dbg'; c.renderOrder = 9999; scene.add(c);
+    }
+    c.visible = true; c.scale.setScalar(40);
+    const w = HERO3D._wrap;
+    c.position.copy(w.position); c.position.y += 20;
+  } else if(c) c.visible = false;
+  return { added: !!c, pos: c ? c.position.toArray().map(n=>+n.toFixed(1)) : null };
+};
+window.__hero3dGLState = () => {
+  const g = window.__BF_GL; if(!g) return 'no gl';
+  return {
+    scissor: g.getParameter(g.SCISSOR_TEST),
+    scissorBox: Array.from(g.getParameter(g.SCISSOR_BOX) || []),
+    viewport: Array.from(g.getParameter(g.VIEWPORT) || []),
+    depthTest: g.getParameter(g.DEPTH_TEST),
+    depthFunc: g.getParameter(g.DEPTH_FUNC),
+    depthRange: Array.from(g.getParameter(g.DEPTH_RANGE) || []),
+    cullFace: g.getParameter(g.CULL_FACE),
+    blend: g.getParameter(g.BLEND),
+    fbo: g.getParameter(g.FRAMEBUFFER_BINDING) ? 'BOUND-FBO' : 'default',
+    colorMask: Array.from(g.getParameter(g.COLOR_WRITEMASK) || []),
+  };
+};
 window.__hero3dProbe = () => {
   if(!HERO3D.ready) return { err: 'not ready: ' + HERO3D.err };
   const wrap = HERO3D._wrap;

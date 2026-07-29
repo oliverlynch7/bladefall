@@ -3047,10 +3047,21 @@ function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
   instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
   instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
 }
-function flushBatch(){ if(instCount===0) return;
+function flushBatch(){
+  if(instCount===0){
+    // still honour a pending 3D hero even on an empty batch, or it would never draw
+    if(window.__hero3dPending && window.drawHero3D){ const q=window.__hero3dPending;
+      window.__hero3dPending=null; window.drawHero3D(q[0],q[1]); }
+    return;
+  }
   gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
   gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
   INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,instCount);
+  /* 3D hero goes on top of the world batch that just flushed. Queued by drawHero3 above. */
+  if(window.__hero3dPending && window.drawHero3D){
+    const q = window.__hero3dPending; window.__hero3dPending = null;
+    window.drawHero3D(q[0], q[1]);
+  }
   if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
   instCount=0;
 }
@@ -11939,7 +11950,10 @@ function drawHero3(p,t,preview){
      than to a missing character. Skipped for `preview`, which renders to the paper-doll
      canvas. */
   if(!preview && window.HERO3D && window.HERO3D.on && window.drawHero3D){
-    if(window.drawHero3D(p,t)) return;
+    /* The game QUEUES boxes and flushes them in a few instanced draws, so rendering the 3D
+       hero here would be painted over by the flush that follows. Instead mark it pending and
+       let flushBatch draw it once the world's batch has actually gone to the GPU. */
+    if(window.HERO3D.ready){ window.__hero3dPending = [p, t]; return; }
   }
   const sk=SKINS[p.skin]||SKINS.knight;
   const _vl=preview?0:voxLod(p.x,p.z);

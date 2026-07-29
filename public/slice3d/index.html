@@ -168,6 +168,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from './jsm/loaders/FBXLoader.js';
 
 /* ─────────────────────────────────────────────────────────────
    BLADEFALL — 3D vertical slice
@@ -282,6 +283,26 @@ const CLASSES = [
   // ── Universal Base Characters + Universal Animation Library (Quaternius) ──
   // UE-standard 65-joint skeleton; UAL1+UAL2 (86 clips) bind by bone NAME with zero
   // retargeting, which is why these get a far richer move set than the RPG rigs.
+  // ── Mixamo (free, commercial-use, rigged, textured, with faces) ──
+  // Our 86 UAL clips reach these through UE->mixamorig track renaming; see retargetClips.
+  { id:'Paladin', label:'Paladin ★', mixamo:true, file:'Paladin', tint:'#d9c48a',
+    clips:{ idle:['Sword_Idle','Idle_Loop'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
+            roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
+            attack:['Sword_Regular_A','Sword_Regular_B','Sword_Regular_C'],
+            skill:['Sword_Heavy_Combo'], hit:['Hit_Chest'], death:['Death01'] },
+    skill:{ name:'Judgement', kind:'nova', color:'#ffe6a0', color2:'#ffa42a' } },
+  { id:'Arissa', label:'Arissa ★', mixamo:true, file:'Arissa', tint:'#c98fa8',
+    clips:{ idle:['Idle_Loop','Sword_Idle'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
+            roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
+            attack:['Sword_Regular_B','Sword_Regular_C','Sword_Regular_A'],
+            skill:['Sword_Dash'], hit:['Hit_Chest'], death:['Death01'] },
+    skill:{ name:'Bladestorm', kind:'nova', color:'#ff8fc0', color2:'#a02a6a' } },
+  { id:'Maria', label:'Maria ★', mixamo:true, file:'Maria', tint:'#8fb8d9',
+    clips:{ idle:['Idle_Loop','Sword_Idle'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
+            roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
+            attack:['Sword_Regular_C','Sword_Regular_A'],
+            skill:['Spell_Simple_Shoot'], hit:['Hit_Chest'], death:['Death01'] },
+    skill:{ name:'Frostbind', kind:'nova', color:'#a8e0ff', color2:'#2a6aa0' } },
   { id:'BaseM', label:'Human ♂', ual:true, tint:'#cbb28a',
     outfits:[ {name:'Ranger',  file:'outfits/Male_Ranger'},
               {name:'Peasant', file:'outfits/Male_Peasant'},
@@ -1368,6 +1389,98 @@ async function loadBaseChar(def){
   return { scene: body.scene, animations: clips };
 }
 
+/* ─────────────  MIXAMO  ─────────────
+   Mixamo characters are free for commercial use and ship rigged with faces and real
+   textures, which is the gap every free low-poly pack left us with. They use their own
+   bone naming ('mixamorig:Hips'), so our 86-clip library will not bind to them by name
+   the way it binds to the UE-named rigs. Rather than hand-map in Blender, we rename the
+   animation tracks at load: UE bone -> Mixamo bone. Both are ordinary humanoid skeletons,
+   so this is a mechanical correspondence, not an approximation.
+
+   POSITION tracks are dropped on purpose. Bone lengths differ between the two rigs, so a
+   translation authored for one skeleton is simply wrong on the other and shows up as
+   stretched or dislocated limbs. Rotations transfer cleanly; movement is code-driven here
+   anyway, so we lose nothing by ignoring root motion. */
+const UE_TO_MIXAMO = {
+  pelvis:'mixamorig:Hips',
+  spine_01:'mixamorig:Spine', spine_02:'mixamorig:Spine1', spine_03:'mixamorig:Spine2',
+  neck_01:'mixamorig:Neck', Head:'mixamorig:Head',
+  clavicle_l:'mixamorig:LeftShoulder', upperarm_l:'mixamorig:LeftArm',
+  lowerarm_l:'mixamorig:LeftForeArm',  hand_l:'mixamorig:LeftHand',
+  clavicle_r:'mixamorig:RightShoulder', upperarm_r:'mixamorig:RightArm',
+  lowerarm_r:'mixamorig:RightForeArm',  hand_r:'mixamorig:RightHand',
+  thigh_l:'mixamorig:LeftUpLeg',  calf_l:'mixamorig:LeftLeg',
+  foot_l:'mixamorig:LeftFoot',    ball_l:'mixamorig:LeftToeBase',
+  thigh_r:'mixamorig:RightUpLeg', calf_r:'mixamorig:RightLeg',
+  foot_r:'mixamorig:RightFoot',   ball_r:'mixamorig:RightToeBase',
+};
+for(const [side, S] of [['l','Left'],['r','Right']]){
+  for(const [ue, mx] of [['index','HandIndex'],['middle','HandMiddle'],['pinky','HandPinky'],
+                         ['ring','HandRing'],['thumb','HandThumb']]){
+    for(let i=1;i<=3;i++) UE_TO_MIXAMO[`${ue}_0${i}_${side}`] = `mixamorig:${S}${mx}${i}`;
+  }
+}
+/* Resolve the map's target names against the bones the model ACTUALLY has.
+   Loaders disagree about punctuation — three's FBXLoader strips the colon, so Mixamo's
+   'mixamorig:Hips' arrives as 'mixamorigHips'. Hardcoding either spelling breaks the
+   moment the other shows up, so match on a punctuation-free, case-free key instead. */
+const boneKey = n => String(n).toLowerCase().replace(/[^a-z0-9]/g, '');
+function resolveMap(root, map){
+  const have = new Map();
+  root.traverse(o => { if(o.isBone && !have.has(boneKey(o.name))) have.set(boneKey(o.name), o.name); });
+  const out = {}; let hit = 0, miss = 0;
+  for(const [ue, want] of Object.entries(map)){
+    const real = have.get(boneKey(want));
+    if(real){ out[ue] = real; hit++; } else miss++;
+  }
+  console.log(`[retarget] mapped ${hit} bones, ${miss} unmatched`);
+  return out;
+}
+function retargetClips(clips, map){
+  const out = [];
+  for(const c of clips){
+    const tracks = [];
+    for(const tr of c.tracks){
+      const i = tr.name.lastIndexOf('.');
+      const node = tr.name.slice(0, i), prop = tr.name.slice(i + 1);
+      const to = map[node];
+      if(!to) continue;                 // bone has no counterpart — drop rather than guess
+      if(prop === 'position') continue; // see note above: bone lengths differ
+      const nt = tr.clone(); nt.name = to + '.' + prop; tracks.push(nt);
+    }
+    if(tracks.length) out.push(new THREE.AnimationClip(c.name, c.duration, tracks));
+  }
+  return out;
+}
+const fbxLoader = new FBXLoader();
+const loadFBX = url => new Promise((res, rej) =>
+  fbxLoader.load(url, o => { bump(); res(o); }, undefined, rej));
+
+async function loadMixamoChar(def){
+  const [obj, clips] = await Promise.all([
+    loadFBX(`assets/mixamo/${def.file}.fbx`).catch(e => { console.warn('FBX fail', e); return null; }),
+    loadUAL(),
+  ]);
+  if(!obj) return null;
+  obj.traverse(o => {
+    if(!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const m of mats){ if(m && m.map) m.map.colorSpace = THREE.SRGBColorSpace; }
+  });
+  /* Mixamo FBX arrives Z-up, so the character loads lying face-down. Actor then measures
+     its bounding-box HEIGHT to normalise scale — which for a prone model is the body's
+     thickness, so it also scaled them to giants. Stand it up inside a wrapper: Actor
+     resets scale and position on the object it's handed, but not on its children, so the
+     correction survives. */
+  const rig = resolveMap(obj, UE_TO_MIXAMO);
+  const wrap = new THREE.Group();
+  obj.rotation.x = -Math.PI / 2;
+  wrap.add(obj);
+
+  return { scene: wrap, animations: retargetClips(clips, rig) };
+}
+
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
   constructor(gltf, def, targetH){
@@ -1378,10 +1491,16 @@ class Actor {
     // normalise: Quaternius rigs vary in unit scale — fit every hero to HERO_H.
     // Reset first so re-normalising an already-scaled scene is idempotent (setScalar
     // REPLACES scale, so measuring a scaled model and re-setting would double it).
-    model.scale.set(1,1,1); model.position.set(0,0,0); model.updateMatrixWorld(true);
-    const b = boxOf(model), size = b.getSize(new THREE.Vector3());
-    const s = this.targetH / Math.max(0.0001, size.y);
-    model.scale.setScalar(s);
+    model.position.set(0,0,0); model.updateMatrixWorld(true);
+    /* Escape hatch for rigs a loader has already sized. Nothing sets it today: Box3
+       normalisation measured correctly on every character tested (all landed on 1.75m),
+       and bypassing it produced heights of 76m / 117m / 550m. Kept as a hook, not a fix. */
+    if(!(def && def.preScaled)){
+      model.scale.set(1,1,1); model.updateMatrixWorld(true);
+      const b = boxOf(model), size = b.getSize(new THREE.Vector3());
+      const s = this.targetH / Math.max(0.0001, size.y);
+      model.scale.setScalar(s);
+    }
     const b2 = boxOf(model);
     model.position.y -= b2.min.y;                     // feet on the floor
     model.position.x -= (b2.min.x + b2.max.x)/2 ;
@@ -2584,8 +2703,9 @@ async function switchClass(def){
   // to the ORIGINAL skeleton, so the body collapses out of view while bone-parented props
   // (shoulder pads, sword, hair) keep rendering — the "invisible character" bug. The file
   // is HTTP-cached, so a fresh parse is cheap and gives a correctly-bound skeleton.
-  const g = def.ual ? await loadBaseChar(def)
-                    : await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
+  const g = def.mixamo ? await loadMixamoChar(def)
+          : def.ual     ? await loadBaseChar(def)
+                        : await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
   if(g){
     const pos = hero.root.position.clone(), rot = hero.root.rotation.y;
     clearRedesign();
@@ -2804,6 +2924,12 @@ window.__SLICE = {
   gearTune: async (k, o) => { Object.assign(RIGID_GEAR[k], o||{}); await equipRigid(hero, k);
     return RIGID_GEAR[k]; },
   bodyWidth: () => bodyWidth(hero),
+  heightM: () => +new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y.toFixed(3),
+  cls: async id => { const d=CLASSES.find(c=>c.id===id); if(d) await switchClass(d); return heroDef.id; },
+  animInfo: () => ({ cls: heroDef.id,
+    clips: hero && hero.mixer ? (hero._clips? Object.keys(hero._clips).length : -1) : -1,
+    playing: hero && hero.cur ? hero.cur : null,
+    boundTracks: hero && hero._action && hero._action._clip ? hero._action._clip.tracks.length : -1 }),
   bones: () => { const n=[]; hero.root.traverse(o=>{ if(o.isBone) n.push(o.name); }); return n; },
   validateFace: () => validateFace(hero),
   faceTune: o => {

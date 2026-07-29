@@ -1850,6 +1850,11 @@ const eyeSave = () => {
    face points, and where the nose sticks out. Everything else is expressed relative to
    these, which is why one set of slider values works on all six bodies. */
 function measureHead(actor){
+  // test hook: lets a harness prove that a stored frame makes measurement irrelevant
+  if(window.__BREAK_MEASURE) return { head: findHeadBone(actor), w:9, h:9, d:9, cz:9,
+    minY:9, maxY:9, eyeY:9, centre:new THREE.Vector3(9,9,9),
+    FWD:new THREE.Vector3(0,0,1), UP:new THREE.Vector3(0,1,0),
+    RIGHT:new THREE.Vector3(1,0,0), verts:99 };
   let head = null;
   actor.root.traverse(o => { if(!head && o.isBone && /^head$/i.test(o.name.replace(/[^a-z]/gi,''))) head = o; });
   if(!head) return null;
@@ -4569,9 +4574,27 @@ window.__SLICE = {
   eyeInfo: () => addEyes(hero),
   /* Pin the CURRENT live measurement as this model's frame. Use when a model has no frame
      yet, or after deliberately deciding the current placement is the reference. */
-  lockPlacement: () => { const M = headMetrics(hero, { remeasure:true }); if(!M) return null;
-    FRAME_ALL[eyeModel()] = snapFrame(M); frameSave(); addEyes(hero); addMouth(hero);
-    return FRAME_ALL[eyeModel()]; },
+  /* Pin the frame that is CURRENTLY producing what you see — never a fresh measurement.
+     Re-measuring here was a bug: it would pin a different frame than the one on screen, so
+     pressing Lock would itself move the face. Locking must be a no-op visually. */
+  lockPlacement: () => {
+    const m = eyeModel();
+    const inUse = storedFrame(m);
+    if(inUse){ FRAME_ALL[m] = Object.assign({}, inUse, { v:FACE_FRAME_VERSION }); }
+    else {
+      const M = headMetrics(hero, { remeasure:true });
+      if(!M) return null;
+      FRAME_ALL[m] = snapFrame(M);
+    }
+    frameSave();
+    return FRAME_ALL[m]; },
+  /* Compare the frozen t=0 frame against the live animated pose, to quantify how far a
+     value tuned at an arbitrary animation moment would land from where it now lands. */
+  frameDelta: () => { const f = storedFrame(eyeModel()); const m = measureHead(hero);
+    if(!f || !m) return null;
+    const pct = (a,b) => +(100*(b-a)/a).toFixed(2);
+    return { w: pct(f.w, m.w), h: pct(f.h, m.h), d: pct(f.d, m.d),
+             eyeShiftMM: +(1000*Math.abs(m.eyeY - f.eyeY)).toFixed(1) }; },
   frameInfo: () => ({ model: eyeModel(), usingFrame: !!storedFrame(eyeModel()),
                       pinned: !!FRAME_ALL[eyeModel()], frame: storedFrame(eyeModel()) }),
   /* Full backup of every tuned value AND its frame. Paste it back with faceRestore(). */

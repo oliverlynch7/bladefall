@@ -2924,6 +2924,10 @@ window.__SLICE = {
   gearTune: async (k, o) => { Object.assign(RIGID_GEAR[k], o||{}); await equipRigid(hero, k);
     return RIGID_GEAR[k]; },
   bodyWidth: () => bodyWidth(hero),
+  probeBone: frag => { let b=null; hero.root.traverse(o=>{ if(!b && o.isBone && new RegExp(frag,'i').test(o.name)) b=o; });
+    if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);
+    const v=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld); return [v.x,v.y,v.z]; },
+  clipCount: () => (hero && hero.clips) ? Object.keys(hero.clips).length : (hero&&hero._acts?Object.keys(hero._acts).length:-1),
   heightM: () => +new THREE.Box3().setFromObject(hero.root).getSize(new THREE.Vector3()).y.toFixed(3),
   cls: async id => { const d=CLASSES.find(c=>c.id===id); if(d) await switchClass(d); return heroDef.id; },
   animInfo: () => ({ cls: heroDef.id,

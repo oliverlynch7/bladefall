@@ -1828,6 +1828,7 @@ const eyeModel = () => {
   catch(e){ return 'Warrior'; }
 };
 function eyeLoadFor(model){
+  // (cache is per model, so nothing to clear here)
   const pre = (FACE_PRESETS[model] || {}).eye || {};
   Object.assign(EYE, EYE_DEFAULT, pre, cleanFace(EYE_ALL[model] || {}, EYE_DEFAULT));
 }
@@ -1839,57 +1840,49 @@ const eyeSave = () => {
 /* Measure the head from the model instead of assuming: which bone, how wide, where the
    face points, and where the nose sticks out. Everything else is expressed relative to
    these, which is why one set of slider values works on all six bodies. */
-function headMetrics(actor){
+function measureHead(actor){
   let head = null;
   actor.root.traverse(o => { if(!head && o.isBone && /^head$/i.test(o.name.replace(/[^a-z]/gi,''))) head = o; });
   if(!head) return null;
+  actor.root.updateMatrixWorld(true);
 
-  /* Measure the BIND pose, not the live pose.
+  /* Which vertices are the HEAD?
 
-     This was the bug behind "the values are right but the eyes are in the wrong place until
-     I nudge a slider". The old code measured through head.matrixWorld, which is driven by
-     the animation — so the head box and the forward vector changed every frame:
+     This was the bug behind every bad face placement. The old code took "whichever mesh
+     has the most vertices" and called it the head — on these models that is the BODY, so
+     width, height and the front surface were all measurements of the whole character.
+     Eyes then got positioned with body-sized offsets and floated off beside the skull.
 
-         t=0      w 0.668  h 0.863  d 0.832  fwd -0.13, 0.07, 0.99
-         t=150ms  w 0.671  h 0.854  d 0.849  fwd -0.13, 0.11, 0.99
-         t=1.6s   w 0.673  h 0.849  d 0.855  fwd -0.14, 0.12, 0.98
-
-     Every offset is a fraction of those, so identical slider values produced different
-     placements depending on WHEN the face happened to be built. On load it was built before
-     the mixer had posed the skeleton, i.e. against the T-pose; nudging a slider rebuilt it
-     against the animated pose, which is why that "fixed" it.
-
-     The skeleton already carries a pose-independent reference: boneInverses, which map a
-     vertex into a bone's BIND space. Measuring there gives the same numbers on frame 1 and
-     frame 10,000 — so a set of values means one placement, always. */
-  let skel = null, mesh = null;
-  actor.root.traverse(o => {
-    if(skel || !o.isSkinnedMesh || o.userData._eye || o.userData._weap) return;
-    if(o.skeleton && o.skeleton.bones.indexOf(head) >= 0){ skel = o.skeleton; mesh = o; }
-  });
-  if(!skel || !mesh) return null;
-  const bi = skel.bones.indexOf(head);
-  if(bi < 0 || !skel.boneInverses || !skel.boneInverses[bi]) return null;
-
-  // mesh-local -> head BIND space
-  const toBind = new THREE.Matrix4().multiplyMatrices(skel.boneInverses[bi], mesh.bindMatrix);
-
-  const geo = mesh.geometry, pos = geo.attributes.position;
-  const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight;
-  if(!pos || !si || !sw) return null;
-
+     The models already answer this question properly: they are skinned, so every vertex
+     records which bone drives it. Vertices weighted to the head bone ARE the head. That
+     is the artist's own definition, not a heuristic of mine. */
+  const inv = new THREE.Matrix4().copy(head.matrixWorld).invert();
   const v = new THREE.Vector3(), local = new THREE.Vector3();
   let minX=1e9,maxX=-1e9, minY=1e9,maxY=-1e9, minZ=1e9,maxZ=-1e9, n=0;
-  for(let i=0;i<pos.count;i++){
-    let wgt = 0;
-    for(let k=0;k<4;k++) if(si.getComponent(i,k) === bi) wgt += sw.getComponent(i,k);
-    if(wgt < 0.5) continue;                      // mostly-head vertices only
-    v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toBind);
-    minX=Math.min(minX,local.x); maxX=Math.max(maxX,local.x);
-    minY=Math.min(minY,local.y); maxY=Math.max(maxY,local.y);
-    minZ=Math.min(minZ,local.z); maxZ=Math.max(maxZ,local.z);
-    n++;
-  }
+  const pts = [];
+
+  actor.root.traverse(o => {
+    if(!o.isSkinnedMesh || o.userData._eye || o.userData._weap) return;
+    const geo = o.geometry, pos = geo.attributes.position;
+    const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight;
+    if(!pos || !si || !sw || !o.skeleton) return;
+    const bi = o.skeleton.bones.indexOf(head);
+    if(bi < 0) return;
+    const toLocal = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
+    for(let i=0;i<pos.count;i++){
+      let wgt = 0;
+      for(let k=0;k<4;k++){
+        if(si.getComponent(i,k) === bi) wgt += sw.getComponent(i,k);
+      }
+      if(wgt < 0.5) continue;                    // mostly-head vertices only
+      v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
+      minX=Math.min(minX,local.x); maxX=Math.max(maxX,local.x);
+      minY=Math.min(minY,local.y); maxY=Math.max(maxY,local.y);
+      minZ=Math.min(minZ,local.z); maxZ=Math.max(maxZ,local.z);
+      pts.push(local.x, local.y, local.z); n++;
+    }
+  });
+
   if(n < 20) return null;                        // no usable head data — do not guess
 
   const w = Math.max(1e-4, maxX-minX);
@@ -1897,22 +1890,132 @@ function headMetrics(actor){
   const d = Math.max(1e-4, maxZ-minZ);
   const cz = (minZ + maxZ) / 2;
 
-  /* Basis, also from the bind pose. The character faces +Z in mesh space; rotate that into
-     head bind space and build the frame from it. Pose-independent, and identical across all
-     six models because they share one skeleton. */
-  const rot = new THREE.Matrix4().extractRotation(toBind);
-  const FWD = new THREE.Vector3(0, 0, 1).applyMatrix4(rot).normalize();
-  const UP  = new THREE.Vector3(0, 1, 0).applyMatrix4(rot).normalize();
+  /* Face direction — derived, not guessed.
+
+     Every heuristic I tried here disagreed between characters (comparing |maxZ| to |minZ|,
+     then counting vertex mass either side of centre) and produced dir=-1 on the Warrior
+     and dir=+1 on the Monk. That inconsistency is nonsense: all six share ONE skeleton, so
+     the way a head faces relative to its own bone is necessarily the same for all of them.
+
+     So stop inspecting the mesh and ask the rig. Take the direction the character's body
+     faces and express it in head-local coordinates. That is one deterministic answer, it
+     is identical across all six models, and it cannot flip based on a beard. */
+  const rootQ = new THREE.Quaternion(); actor.root.getWorldQuaternion(rootQ);
+  const headQ = new THREE.Quaternion(); head.getWorldQuaternion(headQ);
+  const FWD = new THREE.Vector3(0, 0, 1).applyQuaternion(rootQ)
+                .applyQuaternion(headQ.clone().invert()).normalize();
+  const UP  = new THREE.Vector3(0, 1, 0).applyQuaternion(rootQ)
+                .applyQuaternion(headQ.clone().invert()).normalize();
+  let RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  // turn the frame to match the real face plane (see EYE.faceYaw / facePitch)
+  if(EYE.faceYaw){
+    FWD.applyAxisAngle(UP, EYE.faceYaw).normalize();
+    RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  }
+  if(EYE.facePitch){
+    FWD.applyAxisAngle(RIGHT, EYE.facePitch).normalize();
+  }
+  const centre = new THREE.Vector3((minX+maxX)/2, (minY+maxY)/2, cz);
+
+  // brow line: eyes sit a little above the middle of a head
+  const eyeY = minY + h * 0.58;
+  return { head, w, h, d, cz, minY, maxY, eyeY, centre, FWD, UP, RIGHT, verts: n };
+}
+
+
+/* ─────────────  HEAD MEASUREMENT + CACHE  ─────────────
+
+   Why this is wrapped in a cache rather than just called:
+
+   measureHead reads the head through live world matrices, so its numbers move as the
+   animation plays. Every face offset is a FRACTION of those numbers, which caused two
+   separate failures:
+
+     1. On load the face was built before the mixer had posed the skeleton, so it measured
+        the T-pose and the eyes landed somewhere other than where the values said. Nudging
+        a slider rebuilt it against the animated pose, which is why that appeared to fix it.
+     2. The face drifted subtly as the character breathed.
+
+   I previously "fixed" this by measuring the BIND pose instead. That was stable but it
+   changed the numbers, which silently invalidated every value Oliver had tuned. Shipping
+   that was a mistake: correctness of the reference frame matters far less than never
+   moving it under work that is already done.
+
+   So: keep the original reference frame exactly, and make it stop moving by measuring ONCE
+   per model - after the pose has settled - then caching it forever. Same numbers Oliver
+   tuned against, stable from the first frame, and immune to my future changes because a
+   cached measurement cannot drift.
+
+   HEAD_CACHE is keyed by model. If a model somehow measures before its pose settles, the
+   cache is only committed once `settled` is true, so a T-pose reading is never kept. */
+const HEAD_CACHE = {};
+let _headSettled = {};
+
+function headMetrics(actor, opts){
+  const key = eyeModel();
+  const cached = HEAD_CACHE[key];
+  if(cached && !(opts && opts.remeasure)){
+    // reapply the live faceYaw/facePitch, which are user controls rather than measurements
+    return withFaceAngles(cached);
+  }
+  const m = measureHead(actor);
+  if(!m) return cached ? withFaceAngles(cached) : null;
+  if(_headSettled[key]) HEAD_CACHE[key] = freezeMetrics(m);
+  return m;
+}
+
+// keep an immutable copy: vectors are cloned so nothing downstream can mutate the cache
+function freezeMetrics(m){
+  return { head:m.head, w:m.w, h:m.h, d:m.d, cz:m.cz, minY:m.minY, maxY:m.maxY,
+           eyeY:m.eyeY, verts:m.verts,
+           centre:m.centre.clone(), FWD0:m.FWD.clone(), UP:m.UP.clone() };
+}
+
+/* faceYaw / facePitch are controls, not measurements, so they are applied fresh each time
+   rather than baked into the cache - otherwise dragging them would do nothing. */
+function withFaceAngles(c){
+  const FWD = c.FWD0.clone(), UP = c.UP.clone();
   let RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
   if(EYE.faceYaw){
     FWD.applyAxisAngle(UP, EYE.faceYaw).normalize();
     RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
   }
   if(EYE.facePitch) FWD.applyAxisAngle(RIGHT, EYE.facePitch).normalize();
+  return { head:c.head, w:c.w, h:c.h, d:c.d, cz:c.cz, minY:c.minY, maxY:c.maxY,
+           eyeY:c.eyeY, verts:c.verts, centre:c.centre.clone(), FWD, UP, RIGHT };
+}
 
-  const centre = new THREE.Vector3((minX+maxX)/2, (minY+maxY)/2, cz);
-  const eyeY = minY + h * 0.58;
-  return { head, w, h, d, cz, minY, maxY, eyeY, centre, FWD, UP, RIGHT, verts: n };
+/* Mark this model's pose as settled and (re)measure into the cache. Called a few frames
+   after a character is built, which is exactly what nudging a slider used to accomplish. */
+function settleHead(actor){
+  const key = eyeModel();
+  _headSettled[key] = true;
+
+  /* Measure at a DETERMINISTIC pose, not "whenever this happened to run".
+
+     Caching alone made the face stable within a session, but the cached number still
+     depended on which animation frame the settle landed on - the mage measured 0.90 head
+     height on one load and 0.94 on the next, a 4% swing that moves every offset with it.
+     Freezing the mixer to t=0 before measuring makes the reference identical on every load,
+     forever.
+
+     t=0 of the current clip is chosen because it is reproducible and it is an idle frame,
+     which is what Oliver was looking at while tuning. THIS REFERENCE IS NOW FROZEN: changing
+     it would silently move every tuned face again, which is exactly the mistake that cost
+     him a session of work. */
+  let m = null;
+  if(actor.mixer){
+    const t = actor.mixer.time;
+    actor.mixer.setTime(0);
+    actor.root.updateMatrixWorld(true);
+    m = measureHead(actor);
+    actor.mixer.setTime(t);                 // put the animation back where it was
+    actor.root.updateMatrixWorld(true);
+  } else {
+    m = measureHead(actor);
+  }
+  if(m) HEAD_CACHE[key] = freezeMetrics(m);
+  return !!m;
 }
 
 function clearEyes(actor){
@@ -3981,6 +4084,17 @@ async function build(){
   hero = new Actor(gW, CLASSES[0]);
   addFace(hero);
   addEyes(hero); addMouth(hero);
+  /* Re-measure and rebuild once the mixer has actually posed the skeleton. The first build
+     necessarily reads the T-pose, which is why the starting character's face never matched
+     its own values until a slider was nudged. Two frames is enough for a pose to apply; the
+     220ms pass covers a slow first frame. */
+  {
+    const _h = hero;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if(hero === _h){ settleHead(hero); addEyes(hero); addMouth(hero); }
+    }));
+    setTimeout(() => { if(hero === _h){ settleHead(hero); addEyes(hero); addMouth(hero); } }, 220);
+  }
   // the starting hero was the only one that never equipped — switchClass does this, but
   // the startup path bypasses it, so the first character stood there empty-handed
   equipWeapon(hero);
@@ -4099,8 +4213,18 @@ async function switchClass(def){
     scene.add(hero.root);
     heroDef = def;
     applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
-    console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)) +
-                ' mouth ' + JSON.stringify(addMouth(hero)));
+    addEyes(hero); addMouth(hero);
+    /* Re-measure once the animation has actually posed the skeleton, then rebuild. Without
+       this the first build reads the T-pose. Two frames is enough for the mixer to apply a
+       pose; the 220ms pass is belt-and-braces for a slow first frame. */
+    const _settleFor = hero;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if(hero !== _settleFor) return;
+      settleHead(hero); addEyes(hero); addMouth(hero);
+      console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)) +
+                  ' mouth ' + JSON.stringify(addMouth(hero)));
+    }));
+    setTimeout(() => { if(hero === _settleFor){ settleHead(hero); addEyes(hero); addMouth(hero); } }, 220);
     equipWeapon(hero).then(r => console.log('DIAG weapon ' + JSON.stringify(r)));
     if(window.__eyeRebuild) window.__eyeRebuild();
     buildAnimBar();

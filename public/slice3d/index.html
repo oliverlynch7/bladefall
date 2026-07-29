@@ -2486,18 +2486,23 @@ const ARCHETYPE_WEAPONS = {
   // reserved as the mage spellblade — a loose prefix would have handed it back to warriors.
   /* No spear or scythe: the spear belongs to the Ranger and the scythe to the Reaper, so
      dropping them here keeps each weapon on one body and one tuning wherever possible. */
-  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Sword_Knight$/, /^Claymore/,
+  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Claymore/,
             /^Axe/, /^Hammer/, /^Shield/],
-  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Staff_/, /^Shield/],
+  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Staff_/, /^Shield/],
   // Scythe added for the Reaper, which uses this skin. Note it now appears on TWO bodies,
   // which is what forced weapon tuning to become per-body below.
-  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Scythe/],
+  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Scythe/],
   Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
-  /* Casters carry staffs only. Oliver's call, and it is the cleaner one: the stock staffs
-     already sit correctly in the hand with the built-in holding pose, so a mage never needs
-     tuning. Staff_Wizard is the staff, Staff_Cleric doubles as the WAND at reduced scale.
-     The Sword_Big spellblade experiment is retired. */
-  Wizard:  [/^Staff_/],
+  /* Casters: two staffs plus the SPELLBLADE.
+
+     Staff_Wizard is the staff, Staff_Cleric doubles as the wand at reduced scale, and
+     Sword_Knight is the spellblade — exclusive to the mage archetypes, which is the point:
+     it gives casters a melee silhouette nobody else has. Removed from Warrior, Cleric and
+     Rogue so it stays exclusive. (Sword_Big served this role earlier and is retired.)
+
+     All three are stock weapons lifted from the characters that own them, so they inherit
+     the artist's holding pose and need no tuning to look correct. */
+  Wizard:  [/^Staff_/, /^Sword_Knight$/],
   Monk:    [],                       // unarmed by design
 };
 const WEAPONS = WEAPONS_FILE.concat(STOCK_NAMES);

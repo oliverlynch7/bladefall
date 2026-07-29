@@ -394,6 +394,58 @@ function applySkin(actor, clsId, skin){
   });
 }
 
+/* ─────────────  MODULAR EQUIPMENT  ─────────────
+   The lesson from the face fiasco: DON'T bolt geometry onto a model that wasn't authored
+   for it. Every attempt to guess a position produced something that floated, clipped or
+   showed through from an angle I hadn't checked.
+
+   Armour is the same class of problem — but it has a clean answer, because these outfit
+   packs are authored modularly. Every part (body, arms, legs, boots, hood, pauldrons)
+   ships with the IDENTICAL 65-joint skeleton, already positioned and weighted by the
+   artist. So equipping is not placement at all: rebind the part's SkinnedMesh to the
+   character's existing skeleton and it is correct by construction — right position, right
+   deformation, animates with everything else. Nothing to guess, nothing to tune.  */
+const EQUIP_SLOTS = {
+  hood:      'outfits/Male_Ranger_Head_Hood',
+  pauldrons: 'outfits/Male_Ranger_Acc_Pauldron',
+  arms:      'outfits/Male_Ranger_Arms',
+  legs:      'outfits/Male_Ranger_Legs',
+  boots:     'outfits/Male_Ranger_Feet_Boots',
+};
+async function equipPart(actor, slot){
+  if(!actor || actor._equip && actor._equip[slot]) return;
+  const file = EQUIP_SLOTS[slot]; if(!file) return;
+  const g = await load(`assets/${file}.gltf`).catch(()=>null);
+  if(!g) return;
+
+  // the character's own skeleton — the one the animations already drive
+  let skel = null;
+  actor.root.traverse(o => { if(!skel && o.isSkinnedMesh) skel = o.skeleton; });
+  if(!skel) return;
+
+  const added = [];
+  g.scene.traverse(o => {
+    if(!o.isSkinnedMesh) return;
+    const m = new THREE.SkinnedMesh(o.geometry, o.material);
+    m.castShadow = true; m.receiveShadow = true;
+    m.material = Array.isArray(o.material) ? o.material.map(relight) : relight(o.material);
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    for(const mm of mats){ if(mm && mm.map) mm.map.colorSpace = THREE.SRGBColorSpace; }
+    // THE WHOLE TRICK: reuse the character's skeleton + the part's own bind matrix.
+    m.bind(skel, o.bindMatrix);
+    actor.model.add(m);
+    added.push(m);
+  });
+  (actor._equip = actor._equip || {})[slot] = added;
+  return added;
+}
+function unequipPart(actor, slot){
+  const list = actor && actor._equip && actor._equip[slot];
+  if(!list) return;
+  for(const m of list){ if(m.parent) m.parent.remove(m); }
+  delete actor._equip[slot];
+}
+
 /* ─────────────  FACES  ─────────────
    The Quaternius atlases have NO facial features painted anywhere — the characters are
    deliberately blank-faced, and their UVs are scattered across the sheet so painting a
@@ -2467,6 +2519,8 @@ window.__SLICE = {
   mobScale: v => { if(v!=null) MOB_SCALE = v; return MOB_SCALE; },
   atkSpeed: v => { if(v!=null) window.__ATK = v; return window.__ATK || ATK_SPEED; },
   hasFace: () => !!(hero && hero._face),
+  equip: async slot => { await equipPart(hero, slot); return Object.keys(hero._equip||{}); },
+  unequip: slot => { unequipPart(hero, slot); return Object.keys(hero._equip||{}); },
   validateFace: () => validateFace(hero),
   faceTune: o => {
     if(o) Object.assign(FACE, o);

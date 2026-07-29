@@ -457,6 +457,15 @@ const CLASS_LOOKS = {
 };
 async function applyClassLook(key){
   const L = CLASS_LOOKS[key]; if(!L || !hero) return;
+  /* The outfit parts are skinned to the 65-bone base rig. The RPG-pack characters use a
+     completely different 32-bone rig (Root/Body/Abdomen/UpperArmL/WeaponR). Binding a
+     65-bone part to a 32-bone skeleton leaves most of its bone indices pointing at
+     nothing — three then throws on every bounds computation and the mesh skins to
+     garbage. So a class look only makes sense on a base character; switch to one first. */
+  if(!/^Base/.test(heroDef.id || '')){
+    const base = CLASSES.find(c => c.id === 'BaseM');
+    if(base){ await switchClass(base); await new Promise(r => setTimeout(r, 60)); }
+  }
   // Armour must go on the BARE BODY. The character otherwise loads wearing the full
   // assembled Ranger outfit, so every 'class' came out identical with a hood baked in.
   const baseIdx = (heroDef.outfits || []).findIndex(o => /Base Body/i.test(o.name));
@@ -536,6 +545,117 @@ const OUTFIT_COLS = ['#ffffff','#8f4a3a','#4a6a8f','#4a7a52','#7a5a2a','#5a4a6a'
 const SKIN_COLS   = ['#ffffff','#f0c9a8','#d9a377','#b57a4d','#8a5a34','#5f3d24'];
 const CUSTOM = { hair:0, hairCol:'#4a3122', outfitCol:'#ffffff', skinCol:'#ffffff', beard:false };
 
+/* ── RIGID GEAR ───────────────────────────────────────────────────────────────
+   Free plate armour that isn't skinned to our rig, bolted on anyway.
+
+   Why this is legitimate rather than a hack: real plate armour IS rigid. A steel
+   cuirass does not deform with the torso, a helm does not deform with the skull.
+   So parenting a solid mesh to a bone is physically what armour does. It only
+   breaks down for cloth (skirts, capes), which must be skinned.
+
+   The pieces here are loot ICONS from the RPG Items pack — authored to sit in a
+   chest, not on a body — so nothing about their scale or offset is meaningful.
+   Rather than hand-tune constants (which is what made face placement so fragile:
+   any constant is wrong the moment a parent scale changes), every piece is fitted
+   by MEASUREMENT at runtime: attach it, look at how wide it actually came out in
+   world space, and correct. Offsets are expressed as fractions of the wearer's own
+   measured body width, so they survive any change of character or scale. */
+const RIGID_GEAR = {
+  cuirass:  { file:'gear/Armor_Metal',   bone:/^(spine_03|Torso)$/i, wide:1.06, y: 0.02, z: 0.01 },
+  cuirass2: { file:'gear/Armor_Metal2',  bone:/^(spine_03|Torso)$/i, wide:1.06, y: 0.00, z: 0.01 },
+  cuirass3: { file:'gear/Armor_Black',   bone:/^(spine_03|Torso)$/i, wide:1.06, y: 0.00, z: 0.01 },
+  cuirass4: { file:'gear/Armor_Golden',  bone:/^(spine_03|Torso)$/i, wide:1.06, y: 0.00, z: 0.01 },
+  cuirass5: { file:'gear/Armor_Leather', bone:/^(spine_03|Torso)$/i, wide:1.02, y: 0.00, z: 0.01 },
+  helm:     { file:'gear/Crown',         bone:/^Head$/i,     wide:0.46, y: 0.10, z: 0.00 },
+  helm2:    { file:'gear/Crown2',        bone:/^Head$/i,     wide:0.48, y: 0.10, z: 0.00 },
+  shield:   { file:'gear/Shield_Heater', bone:/^(hand_l|FistL)$/i,   wide:0.55, y: 0.00, z: 0.00,
+              rot:[0, Math.PI/2, 0] },
+  shield2:  { file:'gear/Shield_Round',  bone:/^(hand_l|FistL)$/i,   wide:0.52, y: 0.00, z: 0.00,
+              rot:[0, Math.PI/2, 0] },
+};
+
+/* The wearer's shoulder width, in world metres.
+
+   Measured from BONES, not from mesh bounds. A SkinnedMesh's geometry.boundingBox is
+   the BIND pose — arms straight out — so bounding the mesh returns the arm span, not
+   the shoulder width. That read 1.78m on a 1.75m character, which would have scaled
+   every breastplate to roughly the size of the whole man. Bone world positions are
+   driven by the live animation and have no such problem. */
+function bodyWidth(actor){
+  let L = null, R = null;
+  actor.root.traverse(o => {
+    if(!o.isBone) return;
+    if(!L && /^(upperarm_l|UpperArmL)$/i.test(o.name)) L = o;
+    if(!R && /^(upperarm_r|UpperArmR)$/i.test(o.name)) R = o;
+  });
+  if(!L || !R) return 0.45;
+  actor.root.updateMatrixWorld(true);
+  const a = new THREE.Vector3().setFromMatrixPosition(L.matrixWorld);
+  const b = new THREE.Vector3().setFromMatrixPosition(R.matrixWorld);
+  // shoulder-joint separation is narrower than the body; widen to a torso measure
+  return Math.max(0.15, a.distanceTo(b) * 1.35);
+}
+
+async function equipRigid(actor, key){
+  if(!actor) return;
+  unequipRigid(actor, key);
+  const C = RIGID_GEAR[key]; if(!C) return;
+  const g = await load(`assets/${C.file}.glb`).catch(()=>null);
+  if(!g) return;
+
+  let bone = null;
+  actor.root.traverse(o => { if(!bone && o.isBone && C.bone.test(o.name)) bone = o; });
+  if(!bone) return;
+
+  const piece = new THREE.Group();
+  g.scene.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.receiveShadow = true;
+    m.userData._gear = true;
+    o.updateWorldMatrix(true, false);
+    m.applyMatrix4(o.matrixWorld);          // bake the prop's own internal transform
+    piece.add(m);
+  });
+  if(!piece.children.length) return;
+
+  // Recentre the prop on its own bounding box, so 'position' means what it says
+  // rather than being offset by wherever the artist happened to place the origin.
+  const local = new THREE.Box3().setFromObject(piece);
+  const mid = local.getCenter(new THREE.Vector3());
+  for(const c of piece.children) c.position.sub(mid);
+
+  if(C.rot) piece.rotation.set(C.rot[0], C.rot[1], C.rot[2]);
+  bone.add(piece);
+  actor.root.updateMatrixWorld(true);
+
+  // MEASURE, then correct. We do not predict what the nested bone/bind/model scales
+  // will do to this mesh — we attach it, look at the result in world space, and
+  // divide. That makes the fit independent of every transform above it.
+  const target = bodyWidth(actor) * C.wide;
+  const now = new THREE.Box3().setFromObject(piece);
+  const w = Math.max(1e-4, now.max.x - now.min.x);
+  piece.scale.multiplyScalar(target / w);
+
+  // Same trick for placement: nudge in WORLD metres, converted into bone-local space.
+  actor.root.updateMatrixWorld(true);
+  const off = new THREE.Vector3(0, C.y || 0, C.z || 0);
+  if(off.lengthSq() > 0){
+    const inv = new THREE.Matrix4().copy(bone.matrixWorld).invert();
+    const o0 = new THREE.Vector3(0,0,0).applyMatrix4(bone.matrixWorld);
+    const o1 = o0.clone().add(off);
+    piece.position.copy(o1.applyMatrix4(inv));
+  }
+  (actor._rigid = actor._rigid || {})[key] = piece;
+  return piece;
+}
+function unequipRigid(actor, key){
+  const p = actor && actor._rigid && actor._rigid[key];
+  if(!p) return;
+  if(p.parent) p.parent.remove(p);
+  delete actor._rigid[key];
+}
+
 function tintMats(actor, matchName, hex){
   if(!actor) return;
   const col = new THREE.Color(hex);
@@ -576,7 +696,9 @@ function buildCustomPanel(){
     sec('Class preset', Object.keys(CLASS_LOOKS).map(k=>
       `<button class="opt${CUSTOM.look===k?' sel':''}" data-act="look" data-k="${k}">${CLASS_LOOKS[k].label}</button>`).join('')) +
     sec('Armour slots', ARMOUR_SLOTS.map(k=>
-      `<button class="opt${(hero&&hero._equip&&hero._equip[k])?' sel':''}" data-act="equip" data-k="${k}">${k}</button>`).join(''));
+      `<button class="opt${(hero&&hero._equip&&hero._equip[k])?' sel':''}" data-act="equip" data-k="${k}">${k}</button>`).join('')) +
+    sec('Plate (rigid)', Object.keys(RIGID_GEAR).map(k=>
+      `<button class="opt${(hero&&hero._rigid&&hero._rigid[k])?' sel':''}" data-act="rigid" data-k="${k}">${k}</button>`).join(''));
   el.querySelectorAll('button').forEach(b => b.onclick = async () => {
     const a = b.dataset.act;
     if(a==='hair'){ CUSTOM.hair = +b.dataset.i; await applyCustom(); }
@@ -586,6 +708,9 @@ function buildCustomPanel(){
       if(hero && hero._equip && hero._equip[k]) unequipPart(hero,k);
       else { EQUIP_SLOTS[k] = armourFile(k); await equipPart(hero,k); }
       await applyCustom(); }
+    else if(a==='rigid'){ const k=b.dataset.k;
+      if(hero && hero._rigid && hero._rigid[k]) unequipRigid(hero,k);
+      else await equipRigid(hero,k); }
     else { CUSTOM[a] = b.dataset.c; await applyCustom(); }
     buildCustomPanel();
   });
@@ -2672,6 +2797,14 @@ window.__SLICE = {
   hasFace: () => !!(hero && hero._face),
   equip: async slot => { await equipPart(hero, slot); return Object.keys(hero._equip||{}); },
   unequip: slot => { unequipPart(hero, slot); return Object.keys(hero._equip||{}); },
+  rigid:   async k => { await equipRigid(hero, k); return Object.keys(hero._rigid||{}); },
+  unrigid: k => { unequipRigid(hero, k); return Object.keys(hero._rigid||{}); },
+  gearList: () => Object.keys(RIGID_GEAR),
+  // tweak a piece's fit and re-attach, so tuning is one call instead of an edit+reload
+  gearTune: async (k, o) => { Object.assign(RIGID_GEAR[k], o||{}); await equipRigid(hero, k);
+    return RIGID_GEAR[k]; },
+  bodyWidth: () => bodyWidth(hero),
+  bones: () => { const n=[]; hero.root.traverse(o=>{ if(o.isBone) n.push(o.name); }); return n; },
   validateFace: () => validateFace(hero),
   faceTune: o => {
     if(o) Object.assign(FACE, o);

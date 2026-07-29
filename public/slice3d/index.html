@@ -137,6 +137,26 @@
   #eyep .btns{display:flex;gap:6px;margin-top:10px}
   #eyep button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:7px 4px;border-radius:7px}
+  #creator{position:fixed;left:10px;top:52px;z-index:41;width:246px;max-height:82vh;overflow-y:auto;display:none;
+    background:rgba(12,10,16,.97);border:1px solid #6a5330;border-radius:12px;padding:12px 13px;
+    font:600 11px system-ui;color:#e0d2b4}
+  #creator.open{display:block}
+  #creator h5{margin:0 0 8px;font:800 11px system-ui;letter-spacing:.09em;color:#e8a33d;text-transform:uppercase}
+  #creator label{display:block;margin:8px 0 2px;color:#a89c84;font-size:10px;letter-spacing:.04em}
+  #creator .rw{display:flex;align-items:center;gap:7px}
+  #creator input[type=range]{flex:1;min-width:0;accent-color:#e8a33d}
+  #creator .shapes{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  #creator .shapes button{padding:5px 8px;font-size:10px;border-radius:6px;border:1px solid #4a3c26;
+    color:#c9bda2;background:rgba(30,25,18,.9)}
+  #creator .shapes button.sel{border-color:#e8a33d;color:#ffd89a}
+  #creator .sw2{width:24px;height:24px;border-radius:50%;padding:0;border:2px solid #4a3c26}
+  #creator .sw2.sel{border-color:#e8a33d}
+  #creator .btns{display:flex;gap:6px;margin-top:12px}
+  #creator .btns button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:8px 4px;border-radius:7px}
+  #creatorBtn{position:fixed;left:10px;top:52px;z-index:39;
+    background:linear-gradient(180deg,rgba(48,36,20,.96),rgba(20,16,22,.96));
+    border:1px solid #b0873a;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
   #eyeBtn{position:fixed;left:10px;top:10px;z-index:39;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
 
@@ -185,6 +205,8 @@
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
   <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
+<button id="creatorBtn">CUSTOMISE</button>
+<div id="creator"></div>
 <button id="eyeBtn">FACE</button>
 <div id="eyep"></div>
 <button id="custBtn">🎨 Customise</button>
@@ -1740,23 +1762,23 @@ async function loadMixamoChar(def){
    carry across all six characters instead of needing per-model tuning. */
 const EYE = {
   on: true,
-  spread: 0.30,   // apart, as a fraction of head width
-  height: 0.10,   // up from the nose tip
-  depth:  0.10,   // forward of the face surface (+ = outward)
-  size:   0.115,  // eyeball size, fraction of head width
-  squash: 0.62,   // vertical squash — 1 is a circle, lower is almond
-  tilt:   0.0,    // inner-corner tilt, radians
+  /* Oliver's tuned Warrior values, 2026-07-29. These are the shipping defaults now —
+     everything below was dialled in on a real head at real size, which beats any number
+     I would have guessed. `flip` is true because the derived face direction comes out
+     inverted on this rig; that is what the toggle exists for. */
+  spread: 0.13,
+  height: -0.185,
+  depth:  -0.075,
+  size:   0.072,
+  squash: 0.66,
+  tilt:   0.17,
   white:  '#f2efe6',
-  iris:   '#3a6ea5',
-  pupil:  '#101014',
+  iris:   '#9b2c2c',
+  pupil:  '#000000',
   irisSz: 0.52,
   showWhite: true,
-  /* Render the eyes THROUGH the head while tuning. Without this they can end up buried
-     inside the skull and you are adjusting something you cannot see — which is exactly
-     how the first two attempts failed. Position them first with this on, then switch it
-     off to check they sit correctly in depth. */
-  onTop: true,
-  flip: false,
+  onTop: false,
+  flip: true,
 };
 /* Saved PER MODEL. The six bodies have genuinely different head shapes and beards, so one
    set of numbers will not fit all of them — tune each once and it sticks. */
@@ -1913,13 +1935,13 @@ function addEyes(actor, useSaved){
    modelling job. */
 const MOUTH = {
   on: true,
-  shape: 'smile',
-  y: -0.10,       // down from the brow line, fraction of head height
-  z: 0.10,        // forward of the face surface
-  width: 0.34,    // fraction of head width
-  height: 0.20,   // fraction of head width
+  shape: 'line',
+  y: -0.465,
+  z: -0.95,
+  width: 0.27,
+  height: 0.275,
   color: '#5a2f28',
-  onTop: true,
+  onTop: false,
   flip: false,
 };
 const MOUTH_SHAPES = ['line','smile','grin','teeth','frown','o','smirk','open','flat'];
@@ -2185,6 +2207,89 @@ function buildSafeZone(scene){
   g.position.set(SAFE.x, 0, SAFE.z);
   scene.add(g);
   return g;
+}
+
+
+/* ─────────────  CHARACTER CREATOR  ─────────────
+   The player-facing half of the face system, and deliberately NOT the same panel as the
+   dev tuner.
+
+   Engines keep editor tools out of the shipped build for good reason, and the same split
+   applies here: the tuner exposes everything, including things that can only make a
+   character look broken. The creator exposes only what is safe to hand a player.
+
+   Per Oliver: up/down, width and height are adjustable; FORWARD/BACK is not, because that
+   is the one axis where a wrong value detaches the face from the head. Everything a player
+   can reach here produces a face that still reads as a face — the range is silly, in the
+   Mii sense, but never broken.
+
+   Intended use in the real game: once at new-save creation, and afterwards at a mirror in
+   the hub for gold. */
+const CREATOR = {
+  open: false,
+  // what a player may change, and the bounds they may change it within
+  rows: [
+    ['spread', 'Eye spacing',  0.06, 0.26, 0.005],
+    ['height', 'Eye height',  -0.32, 0.02, 0.005],
+    ['size',   'Eye size',     0.045, 0.115, 0.002],
+    ['squash', 'Eye shape',    0.35, 1.05, 0.01 ],
+    ['tilt',   'Eye tilt',    -0.35, 0.35, 0.01 ],
+  ],
+  mouthRows: [
+    ['y',      'Mouth height', -0.62, -0.24, 0.005],
+    ['width',  'Mouth width',   0.14, 0.46, 0.005],
+    ['height', 'Mouth size',    0.12, 0.42, 0.005],
+  ],
+  irises: ['#3a6ea5','#2f6b45','#6b4a2a','#9b2c2c','#4a3a6b','#2a2a2a','#7a6a2a','#5a8ea5'],
+};
+
+function buildCreator(){
+  const el = document.getElementById('creator'); if(!el) return;
+  const row = (k, lbl, mn, mx, st, val, tag) =>
+    `<label>${lbl}</label><div class="rw">
+       <input type="range" data-${tag}="${k}" min="${mn}" max="${mx}" step="${st}" value="${val}">
+     </div>`;
+  el.innerHTML =
+    `<h5>Appearance</h5>` +
+    CREATOR.rows.map(([k,l,mn,mx,st]) => row(k,l,mn,mx,st,EYE[k],'ck')).join('') +
+    `<label>Eye colour</label><div class="shapes">` +
+      CREATOR.irises.map(c => `<button class="sw2${EYE.iris===c?' sel':''}" data-iris="${c}" style="background:${c}"></button>`).join('') +
+    `</div>` +
+    CREATOR.mouthRows.map(([k,l,mn,mx,st]) => row(k,l,mn,mx,st,MOUTH[k],'cm')).join('') +
+    `<label>Mouth</label><div class="shapes">` +
+      MOUTH_SHAPES.map(sh => `<button data-cmouth="${sh}" class="${MOUTH.shape===sh?'sel':''}">${sh}</button>`).join('') +
+    `</div>
+     <div class="btns"><button data-c="rand">Randomise</button><button data-c="done">Done</button></div>`;
+
+  el.querySelectorAll('input[data-ck]').forEach(i =>
+    i.addEventListener('input', () => { EYE[i.dataset.ck] = +i.value; addEyes(hero, false); eyeSave(); }));
+  el.querySelectorAll('input[data-cm]').forEach(i =>
+    i.addEventListener('input', () => { MOUTH[i.dataset.cm] = +i.value; addMouth(hero, false); mouthSave(); }));
+  el.querySelectorAll('[data-iris]').forEach(b =>
+    b.addEventListener('click', () => { EYE.iris = b.dataset.iris;
+      el.querySelectorAll('[data-iris]').forEach(x => x.classList.toggle('sel', x === b));
+      addEyes(hero, false); eyeSave(); }));
+  el.querySelectorAll('[data-cmouth]').forEach(b =>
+    b.addEventListener('click', () => { MOUTH.shape = b.dataset.cmouth;
+      el.querySelectorAll('[data-cmouth]').forEach(x => x.classList.toggle('sel', x === b));
+      addMouth(hero, false); mouthSave(); }));
+  el.querySelector('[data-c="rand"]').addEventListener('click', () => {
+    const pick = (mn,mx,st) => mn + Math.round(Math.random()*(mx-mn)/st)*st;
+    for(const [k,,mn,mx,st] of CREATOR.rows)      EYE[k]   = +pick(mn,mx,st).toFixed(3);
+    for(const [k,,mn,mx,st] of CREATOR.mouthRows) MOUTH[k] = +pick(mn,mx,st).toFixed(3);
+    EYE.iris = CREATOR.irises[(Math.random()*CREATOR.irises.length)|0];
+    MOUTH.shape = MOUTH_SHAPES[(Math.random()*MOUTH_SHAPES.length)|0];
+    buildCreator(); addEyes(hero, false); addMouth(hero, false); eyeSave(); mouthSave();
+  });
+  el.querySelector('[data-c="done"]').addEventListener('click', () => toggleCreator(false));
+}
+function toggleCreator(on){
+  const el = document.getElementById('creator'), btn = document.getElementById('creatorBtn');
+  if(!el) return;
+  CREATOR.open = (on === undefined) ? !CREATOR.open : on;
+  if(CREATOR.open) buildCreator();
+  el.classList.toggle('open', CREATOR.open);
+  if(btn) btn.style.display = CREATOR.open ? 'none' : 'block';
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -2826,16 +2931,16 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
 
     const apply  = () => { addEyes(hero, false); eyeSave(); };
     const applyM = () => { addMouth(hero, false); mouthSave(); };
-    pane.querySelectorAll('input[type=range]').forEach(el => {
+    pane.querySelectorAll('input[data-k]').forEach(el => {
       el.addEventListener('input', () => {
         EYE[el.dataset.k] = +el.value;
         pane.querySelector(`[data-v="${el.dataset.k}"]`).textContent = (+el.value).toFixed(3);
         apply();
       });
     });
-    pane.querySelectorAll('input[type=color]').forEach(el =>
+    pane.querySelectorAll('input[data-c]').forEach(el =>
       el.addEventListener('input', () => { EYE[el.dataset.c] = el.value; apply(); }));
-    pane.querySelectorAll('input[type=checkbox]').forEach(el =>
+    pane.querySelectorAll('input[data-b]').forEach(el =>
       el.addEventListener('change', () => { EYE[el.dataset.b] = el.checked; apply(); }));
     pane.querySelectorAll('input[data-mk]').forEach(el => {
       el.addEventListener('input', () => {
@@ -2868,8 +2973,7 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     pane.querySelectorAll('input[data-wb]').forEach(el =>
       el.addEventListener('change', () => { WEAP[el.dataset.wb] = el.checked; applyW(); }));
     pane.querySelector('[data-a="reset"]').addEventListener('click', () => {
-      Object.assign(EYE, { spread:0.30, height:0.10, depth:0.10, size:0.115, squash:0.62,
-                           tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true, flip:false });
+      Object.assign(EYE, EYE_DEFAULT);
       Object.assign(MOUTH, MOUTH_DEFAULT); Object.assign(WEAP, WEAP_DEFAULT);
       build(); addEyes(hero, false); eyeSave(); addMouth(hero, false); mouthSave();
     });
@@ -2884,6 +2988,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   btn.addEventListener('click', () => { pane.classList.toggle('open'); btn.style.display = pane.classList.contains('open') ? 'none' : 'block'; });
   pane.addEventListener('click', e => { if(e.target === pane){ pane.classList.remove('open'); btn.style.display='block'; } });
   window.__eyeRebuild = build;
+  const cb = document.getElementById('creatorBtn');
+  if(cb) cb.addEventListener('click', () => toggleCreator());
 })();
 
 const tapBtn = (id, fn) => {
@@ -3784,6 +3890,7 @@ window.__SLICE = {
   mouthTune: o => { Object.assign(MOUTH, o||{}); const r = addMouth(hero, false); mouthSave();
                     if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
   mouthShapes: () => MOUTH_SHAPES.slice(),
+  creator: on => { toggleCreator(on); return CREATOR.open; },
   weapons: () => WEAPONS.slice(),
   inSafe: () => !!(hero && inSafeZone(hero.root.position)),
   tp: (x,z) => { if(hero){ hero.root.position.x = x; hero.root.position.z = z; } return true; },

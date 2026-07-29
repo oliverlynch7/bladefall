@@ -2690,6 +2690,8 @@ function applyWeaponTransform(actor){
 
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
   holder.scale.setScalar(g.baseScale * (g.usesLen ? WEAP.len : 1));
+  // file weapons carry Length on the outer wrap; rescale from the recorded len==1 baseline
+  if(g.wrap && g.lenBase) g.wrap.scale.copy(g.lenBase).multiplyScalar(WEAP.len);
   holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
   if(WEAP.shaft){
     const along = new THREE.Vector3(axis==='x'?1:0, axis==='y'?1:0, axis==='z'?1:0)
@@ -2747,9 +2749,9 @@ async function equipWeapon(actor, useSaved){
     {
       const wf = storedWeapFrame();
       const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
-      actor._weapGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
-                          axis: wf && wf.axis ? wf.axis : ax,
-                          half: null, children: null, baseScale: 1, usesLen: true };
+      actor._stockGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
+                           axis: wf && wf.axis ? wf.axis : ax,
+                           half: null, children: null, baseScale: 1, usesLen: true };
     }
     st.holder.position.set(WEAP.side * sreach, WEAP.up * sreach, WEAP.fwd * sreach);
     if(WEAP.shaft){
@@ -2758,10 +2760,12 @@ async function equipWeapon(actor, useSaved){
         .applyEuler(st.holder.rotation);
       st.holder.position.addScaledVector(along, WEAP.shaft * sreach);
     }
-    clearWeapon(actor);
+    clearWeapon(actor);              // NB this nulls _weapGrip, so assign it after
     rig.bone.add(wrapS);
     if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
     actor._weap = wrapS;
+    actor._weapGrip = actor._stockGrip;
+    actor._stockGrip = null;
     return { name: WEAP.name, stockModel: true };
   }
 
@@ -2825,6 +2829,10 @@ async function equipWeapon(actor, useSaved){
   const want = (rig.stock ? _lenOf(rig.stock) : 0.8) * (WEAPON_LEN[WEAP.name] || 1) * WEAP.len;
   const got  = _lenOf(wrap);
   if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
+  /* Length is applied to the OUTER wrap here, not the holder. The fast slider path needs the
+     scale that corresponds to len == 1 so it can rescale without re-measuring — otherwise
+     dragging Length does nothing until the model is reloaded, which is exactly what broke. */
+  const lenBase = wrap.scale.clone().divideScalar(WEAP.len || 1);
 
   let reach = Math.max(sz.x, sz.y, sz.z);
   let axisUse = axis, halfUse = half;
@@ -2838,7 +2846,8 @@ async function equipWeapon(actor, useSaved){
                       axis==='y' ? half * (WEAP.grip*2) : 0,
                       axis==='z' ? half * (WEAP.grip*2) : 0));
   actor._weapGrip = { holder, reach, axis: axisUse, half: halfUse,
-                      children: holder.children.slice(), baseScale: 1, usesLen: false };
+                      children: holder.children.slice(), baseScale: 1, usesLen: false,
+                      wrap, lenBase };
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
   /* Two different kinds of slide, and the missing one was the second.
 
@@ -4736,6 +4745,11 @@ window.__SLICE = {
     WEAP_FRAME_ALL[weapKey()] = { v:WEAP_FRAME_VERSION, reach:g.reach, axis:g.axis, half:g.half };
     weapFrameSave(); return { key: weapKey(), frame: WEAP_FRAME_ALL[weapKey()] }; },
   weapFrameInfo: () => ({ key: weapKey(), locked: !!storedWeapFrame(), frame: storedWeapFrame() }),
+  /* Actual world-space size of the weapon as rendered — the only honest check that the
+     Length slider is doing something. */
+  weapWorldSize: () => { if(!hero || !hero._weap) return null;
+    const b = new THREE.Box3().setFromObject(hero._weap), z = b.getSize(new THREE.Vector3());
+    return +Math.max(z.x, z.y, z.z).toFixed(4); },
   weapReach: () => { const g = hero && hero._weapGrip;
     return g ? { reach:+g.reach.toFixed(6), axis:g.axis, half:(g.half==null?null:+g.half.toFixed(6)) } : null; },
   stockVisible: () => { const r = weaponRig(hero); return !!(r && r.stock && r.stock.visible); },

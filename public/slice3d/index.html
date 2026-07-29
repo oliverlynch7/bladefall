@@ -1994,6 +1994,131 @@ function addMouth(actor, useSaved){
   return { shape: MOUTH.shape, w:+M.w.toFixed(3), dir:M.dir };
 }
 
+
+/* ─────────────  WEAPONS  ─────────────
+   The easy case, and worth saying why: the artist BUILT an attachment point. Every one of
+   these rigs has a `Weapon.R` bone with the character's own weapon parented to it at a
+   hand-authored offset. So we never have to invent how a sword sits in a fist — we read
+   the transform the artist already chose and reuse it for whatever we hang there instead.
+
+   That is the same principle that made hair and armour work first try, and it is the
+   opposite of what made faces so painful.
+
+   The only thing left to compute is SIZE, because a scythe is not a dagger. We measure
+   the built-in weapon's length, measure the new one's, and scale to match — then a
+   per-weapon `len` multiplier lets a two-hander read longer than the stock sword. */
+const WEAPONS = ['Arrow', 'Axe', 'Axe_Double', 'Axe_Double_Golden', 'Axe_Small', 'Bow_Evil', 'Bow_Golden', 'Bow_Wooden', 'Bow_Wooden2', 'Claymore', 'Dagger', 'Dagger_2', 'Dagger_Golden', 'Hammer_Double', 'Hammer_Double_Golden', 'Hammer_Small', 'Scythe', 'Shield_Celtic_Golden', 'Shield_Heater', 'Shield_Heater_2', 'Shield_Round', 'Shield_Round_2', 'Spear', 'Sword', 'Sword_2', 'Sword_Big', 'Sword_Golden', 'Sword_big_Golden'];
+// how long each should be relative to the character's stock weapon
+const WEAPON_LEN = {
+  Claymore:1.45, Sword_Big:1.4, Sword_big_Golden:1.4, Scythe:1.6, Spear:1.7,
+  Hammer_Double:1.25, Hammer_Double_Golden:1.25, Axe_Double:1.2, Axe_Double_Golden:1.2,
+  Dagger:0.62, Dagger_2:0.62, Dagger_Golden:0.62, Arrow:0.7,
+  Bow_Wooden:1.15, Bow_Wooden2:1.15, Bow_Golden:1.15, Bow_Evil:1.15,
+};
+const WEAP = { on:false, name:'Sword', len:1.0, roll:0, pitch:0, yaw:0, hideStock:true };
+const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
+let WEAP_ALL = {};
+try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
+function weapLoadFor(model){ Object.assign(WEAP, WEAP_DEFAULT, WEAP_ALL[model] || {}); }
+const weapSave = () => {
+  WEAP_ALL[eyeModel()] = JSON.parse(JSON.stringify(WEAP));
+  try { localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); } catch(e){}
+};
+
+const _lenOf = obj => {
+  const b = new THREE.Box3().setFromObject(obj), sz = b.getSize(new THREE.Vector3());
+  return Math.max(sz.x, sz.y, sz.z) || 1;
+};
+
+/* The bone, the artist's stock weapon, and the transform they gave it. */
+function weaponRig(actor){
+  let bone = null;
+  actor.root.traverse(o => { if(!bone && o.isBone && /^weaponr$/i.test(o.name.replace(/[^a-z]/gi,''))) bone = o; });
+  if(!bone) return null;
+  let stock = null;
+  for(const c of bone.children){ if(!c.isBone && !c.userData._weap){ stock = c; break; } }
+  return { bone, stock };
+}
+
+function clearWeapon(actor){
+  if(!actor) return;
+  if(actor._weap && actor._weap.parent) actor._weap.parent.remove(actor._weap);
+  actor._weap = null;
+  const rig = weaponRig(actor);
+  if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
+}
+
+async function equipWeapon(actor, useSaved){
+  if(!actor) return null;
+  clearWeapon(actor);
+  if(useSaved !== false) weapLoadFor(eyeModel());
+  if(!WEAP.on) return null;
+  const rig = weaponRig(actor);
+  if(!rig) return null;
+
+  const g = await load(`assets/weapons/${WEAP.name}.glb`).catch(()=>null);
+  if(!g) return null;
+
+  const holder = new THREE.Group();
+  holder.userData._weap = true;
+  const wmats = [];
+  g.scene.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.userData._weap = true;
+    o.updateWorldMatrix(true, false); m.applyMatrix4(o.matrixWorld);
+    (Array.isArray(m.material) ? m.material : [m.material]).forEach(mm => mm && wmats.push(mm));
+    holder.add(m);
+  });
+  if(!holder.children.length) return null;
+
+  /* This pack shipped OBJ-only and was batch-converted, which carried very dim diffuse
+     values across (a steel blade came through at 0.21 grey, some parts at 0.02). Against
+     this scene's lighting they render as black silhouettes. Lift the whole weapon by ONE
+     factor derived from its brightest material, so gold still reads brighter than steel
+     and steel brighter than wood — normalising each material separately would flatten
+     exactly the contrast that makes them readable. */
+  let peak = 0;
+  for(const mm of wmats){ if(mm.color) peak = Math.max(peak, mm.color.r, mm.color.g, mm.color.b); }
+  if(peak > 1e-3 && peak < 0.72){
+    const k = 0.72 / peak;
+    for(const mm of wmats){ if(mm.color) mm.color.multiplyScalar(k); }
+  }
+
+  // centre on its own origin so rotation behaves predictably
+  const bb = new THREE.Box3().setFromObject(holder);
+  const mid = bb.getCenter(new THREE.Vector3());
+  const sz  = bb.getSize(new THREE.Vector3());
+  const axis = (sz.y >= sz.x && sz.y >= sz.z) ? 'y' : (sz.x >= sz.z ? 'x' : 'z');
+  for(const c of holder.children){ c.position.sub(mid); }
+  // pivot at the grip end rather than the middle, so it sits in the fist not through it
+  const half = (axis === 'y' ? sz.y : axis === 'x' ? sz.x : sz.z) / 2;
+  for(const c of holder.children){ c.position[axis] += half * 0.72; }
+
+  const wrap = new THREE.Group();
+  wrap.userData._weap = true;
+  wrap.add(holder);
+
+  // COPY THE ARTIST'S PLACEMENT rather than inventing one
+  if(rig.stock){
+    wrap.position.copy(rig.stock.position);
+    wrap.quaternion.copy(rig.stock.quaternion);
+    wrap.scale.copy(rig.stock.scale);
+  }
+  rig.bone.add(wrap);
+  actor.root.updateMatrixWorld(true);
+
+  // match the stock weapon's on-screen length, then apply the per-weapon multiplier
+  const want = (rig.stock ? _lenOf(rig.stock) : 0.8) * (WEAPON_LEN[WEAP.name] || 1) * WEAP.len;
+  const got  = _lenOf(wrap);
+  if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
+
+  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+  if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
+  actor._weap = wrap;
+  return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
+}
+
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
   constructor(gltf, def, targetH){
@@ -2574,6 +2699,12 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
 (function eyeUI(){
   const btn = document.getElementById('eyeBtn'), pane = document.getElementById('eyep');
   if(!btn || !pane) return;
+  const WEAP_ROWS = [
+    ['len',   'Length',  0.35, 2.20, 0.01],
+    ['pitch', 'Pitch',  -3.20, 3.20, 0.02],
+    ['yaw',   'Yaw',    -3.20, 3.20, 0.02],
+    ['roll',  'Roll',   -3.20, 3.20, 0.02],
+  ];
   const MOUTH_ROWS = [
     ['y',      'Height',      -0.60, 0.30, 0.005],
     ['z',      'Forward',     -0.30, 0.40, 0.005],
@@ -2610,6 +2741,17 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
        <label>Mouth colour</label><input type="color" data-mc="color" value="${MOUTH.color}">
        <label><input type="checkbox" data-mb="onTop" ${MOUTH.onTop?'checked':''}> draw through head</label>
        <label><input type="checkbox" data-mb="on" ${MOUTH.on?'checked':''}> mouth on</label>
+       <hr><h5 style="margin-bottom:6px">Weapon</h5>
+       <label><input type="checkbox" data-wb="on" ${WEAP.on?'checked':''}> use custom weapon</label>
+       <label><input type="checkbox" data-wb="hideStock" ${WEAP.hideStock?'checked':''}> hide the built-in one</label>
+       <label>Model</label>
+       <select data-wsel style="width:100%;background:rgba(30,25,18,.9);color:#e0d2b4;border:1px solid #4a3c26;border-radius:6px;padding:5px">
+         ${WEAPONS.map(w => `<option value="${w}" ${WEAP.name===w?'selected':''}>${w}</option>`).join('')}
+       </select>
+       ${WEAP_ROWS.map(([k,lbl,mn,mx,st]) =>
+         `<label>${lbl}</label><div class="rw">
+            <input type="range" data-wk="${k}" min="${mn}" max="${mx}" step="${st}" value="${WEAP[k]}">
+            <span class="v" data-wv="${k}">${(+WEAP[k]).toFixed(2)}</span></div>`).join('')}
        <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>`;
 
     const apply  = () => { addEyes(hero, false); eyeSave(); };
@@ -2642,14 +2784,27 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
         pane.querySelectorAll('.shapes button').forEach(b => b.classList.toggle('sel', b === el));
         applyM();
       }));
+    const applyW = () => { equipWeapon(hero, false).then(()=>weapSave()); };
+    const sel = pane.querySelector('[data-wsel]');
+    if(sel) sel.addEventListener('change', () => { WEAP.name = sel.value; WEAP.on = true;
+      const cb = pane.querySelector('[data-wb="on"]'); if(cb) cb.checked = true; applyW(); });
+    pane.querySelectorAll('input[data-wk]').forEach(el => {
+      el.addEventListener('input', () => {
+        WEAP[el.dataset.wk] = +el.value;
+        pane.querySelector(`[data-wv="${el.dataset.wk}"]`).textContent = (+el.value).toFixed(2);
+        applyW();
+      });
+    });
+    pane.querySelectorAll('input[data-wb]').forEach(el =>
+      el.addEventListener('change', () => { WEAP[el.dataset.wb] = el.checked; applyW(); }));
     pane.querySelector('[data-a="reset"]').addEventListener('click', () => {
       Object.assign(EYE, { spread:0.30, height:0.10, depth:0.02, size:0.115, squash:0.62,
                            tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true });
-      Object.assign(MOUTH, MOUTH_DEFAULT);
+      Object.assign(MOUTH, MOUTH_DEFAULT); Object.assign(WEAP, WEAP_DEFAULT);
       build(); addEyes(hero, false); eyeSave(); addMouth(hero, false); mouthSave();
     });
     pane.querySelector('[data-a="dump"]').addEventListener('click', () => {
-      const t = JSON.stringify({ model: eyeModel(), EYE, MOUTH }, null, 1);
+      const t = JSON.stringify({ model: eyeModel(), EYE, MOUTH, WEAP }, null, 1);
       navigator.clipboard && navigator.clipboard.writeText(t);
       console.log('EYE =', t);
       alert(t);
@@ -3338,6 +3493,7 @@ async function switchClass(def){
     applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
     console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)) +
                 ' mouth ' + JSON.stringify(addMouth(hero)));
+    equipWeapon(hero).then(r => console.log('DIAG weapon ' + JSON.stringify(r)));
     if(window.__eyeRebuild) window.__eyeRebuild();
     buildSkinBar();
     paintSkillBar();
@@ -3553,6 +3709,11 @@ window.__SLICE = {
   mouthTune: o => { Object.assign(MOUTH, o||{}); const r = addMouth(hero, false); mouthSave();
                     if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
   mouthShapes: () => MOUTH_SHAPES.slice(),
+  weapons: () => WEAPONS.slice(),
+  weapon: async (name, o) => { Object.assign(WEAP, { on:true, name: name || WEAP.name }, o||{});
+    const r = await equipWeapon(hero, false); weapSave();
+    if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+  weaponOff: async () => { WEAP.on = false; await equipWeapon(hero, false); weapSave(); return true; },
   probeBone: frag => { let b=null; hero.root.traverse(o=>{ if(!b && o.isBone && new RegExp(frag,'i').test(o.name)) b=o; });
     if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);
     const v=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld); return [v.x,v.y,v.z]; },

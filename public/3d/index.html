@@ -2815,6 +2815,8 @@ Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
    ============================================================ */
 const canvas=document.getElementById('gl');
 const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+window.__BF_GL=gl;   // shared with the optional 3D hero layer (hero3d.js)
+window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -11932,6 +11934,13 @@ function weaponMesh(w,swing){
   }
 }
 function drawHero3(p,t,preview){
+  /* 3D hero layer. Additive and off by default: window.HERO3D.on=true to try it. Returns
+     true only when it actually drew, so any failure degrades to the voxel path below rather
+     than to a missing character. Skipped for `preview`, which renders to the paper-doll
+     canvas. */
+  if(!preview && window.HERO3D && window.HERO3D.on && window.drawHero3D){
+    if(window.drawHero3D(p,t)) return;
+  }
   const sk=SKINS[p.skin]||SKINS.knight;
   const _vl=preview?0:voxLod(p.x,p.z);
   const hurt=p.hurtFlash>0, A=hurt?'#ff8a82':sk.armor, AL=hurt?'#ffb0aa':sk.armorLt;
@@ -13786,5 +13795,9 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
     unlockedSkins:meta.unlockedSkins.length, godUnlocked:meta.unlockedSkins.includes('god'), achievements:Object.keys(meta.achievements).length, totalKills:meta.totalKills }; } };
 })();
 </script>
+<!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
+     default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
+<script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/"}}</script>
+<script type="module" src="./hero3d.js"></script>
 </body>
 </html>

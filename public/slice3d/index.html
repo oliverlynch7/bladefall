@@ -3154,6 +3154,139 @@ function toggleAnimBar(on){
 }
 
 
+
+/* ─────────────  TERRAIN BUILDER  ─────────────
+   Plateaus, platforms and ground, from the Kenney cliff set.
+
+   Measured: cliff_block is exactly 1x1x1, blockHalf 1x0.5x1, blockQuarter 1x0.25x1, and
+   ground tiles are 1x0x1. So this kit is a 1-unit voxel terrain system - which is the right
+   shape for Bladefall, since the voxel game's plateaus were built the same way. Half and
+   quarter blocks give fine height control, and at 1.75m tall the hero treats a single block
+   as a natural step.
+
+   The set includes the pieces that make a plateau read as terrain rather than a box: corner,
+   cornerInner, top, topDiagonal, slope, steps, diagonal - in rock and stone. makePlateau
+   picks the right edge piece per cell by looking at its neighbours, so an L-shaped or
+   irregular footprint still gets correct corners.
+
+   Note the grid differs from the village kit (1 unit vs 2), which is fine - 2 is a multiple
+   of 1, so buildings sit on terrain cells without fractional offsets. */
+const TER = 'assets/terrain/';
+const TER_GRID = 1.0;
+const _terCache = {};
+async function terPart(name){
+  if(_terCache[name] !== undefined) return _terCache[name];
+  const g = await load(TER + name + '.glb').catch(()=>null);
+  _terCache[name] = g ? g.scene : null;
+  return _terCache[name];
+}
+function terClone(src){
+  const out = new THREE.Group();
+  src.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.receiveShadow = true;
+    o.updateWorldMatrix(true, false);
+    m.applyMatrix4(o.matrixWorld);
+    out.add(m);
+  });
+  return out;
+}
+
+/* Build a plateau from a footprint mask.
+   opts.cells : array of [x,z] grid coords, or {w,d} for a rectangle
+   opts.height: whole blocks tall
+   opts.rock  : 'rock' | 'stone'
+   opts.ramp  : [x,z] edge cell to turn into a slope, so it can be walked up  */
+async function makePlateau(opts){
+  opts = opts || {};
+  const kind = opts.rock === 'stone' ? 'stone' : 'rock';
+  const H = Math.max(1, opts.height || 1);
+  let cells = opts.cells;
+  if(!cells){
+    const w = opts.w || 6, d = opts.d || 6;
+    cells = [];
+    for(let i = 0; i < w; i++) for(let j = 0; j < d; j++) cells.push([i, j]);
+  }
+  const set = new Set(cells.map(c => c[0] + ',' + c[1]));
+  const has = (x,z) => set.has(x + ',' + z);
+
+  const names = ['cliff_block_' + kind, 'cliff_corner_' + kind, 'cliff_cornerInner_' + kind,
+                 'cliff_top_' + kind, 'cliff_cornerTop_' + kind, 'cliff_blockSlope_' + kind,
+                 'cliff_steps_' + kind, 'ground_grass'];
+  const parts = {};
+  for(const n of names) parts[n] = await terPart(n);
+
+  const G = new THREE.Group();
+  G.userData._terrain = true;
+  const put = (name, x, y, z, ry) => {
+    const src = parts[name]; if(!src) return null;
+    const c = terClone(src);
+    c.position.set(x, y, z); c.rotation.y = ry || 0;
+    G.add(c); return c;
+  };
+
+  const rampKey = opts.ramp ? opts.ramp.join(',') : null;
+
+  for(const [x,z] of cells){
+    const N = has(x, z-1), S = has(x, z+1), W = has(x-1, z), E = has(x+1, z);
+    const edge = !(N && S && W && E);
+
+    // stack of blocks below the surface
+    for(let h = 0; h < H; h++){
+      const y = h * TER_GRID;
+      if(!edge){ continue; }                    // interior needs no side geometry
+      put('cliff_block_' + kind, x * TER_GRID, y, z * TER_GRID, 0);
+    }
+
+    const topY = H * TER_GRID;
+    if(rampKey === x + ',' + z){
+      // a walkable way up: slope faces whichever side is open
+      const ry = !N ? Math.PI : !S ? 0 : !W ? Math.PI/2 : -Math.PI/2;
+      put('cliff_blockSlope_' + kind, x * TER_GRID, topY - TER_GRID, z * TER_GRID, ry);
+      continue;
+    }
+
+    /* Cap the surface. An edge cell gets a corner piece when two adjacent sides are open,
+       otherwise a straight top; interior cells get grass. Choosing by neighbour means an
+       irregular footprint still resolves correctly instead of needing a hand-authored mask. */
+    if(edge){
+      const open = [!N, !E, !S, !W];
+      const openCount = open.filter(Boolean).length;
+      if(openCount >= 2 && ((!N && !E) || (!E && !S) || (!S && !W) || (!W && !N))){
+        const ry = (!N && !E) ? 0 : (!E && !S) ? -Math.PI/2 : (!S && !W) ? Math.PI : Math.PI/2;
+        put('cliff_cornerTop_' + kind, x * TER_GRID, topY, z * TER_GRID, ry);
+      } else {
+        const ry = !N ? 0 : !E ? -Math.PI/2 : !S ? Math.PI : Math.PI/2;
+        put('cliff_top_' + kind, x * TER_GRID, topY, z * TER_GRID, ry);
+      }
+    } else {
+      put('ground_grass', x * TER_GRID, topY, z * TER_GRID, 0);
+    }
+  }
+
+  G.position.set(opts.x || 0, opts.y || 0, opts.z || 0);
+  return G;
+}
+
+/* Demo: a two-tier plateau with a ramp, so the generator can be judged at a glance. */
+let _terDemo = null;
+async function buildTerrainDemo(){
+  if(_terDemo){ scene.remove(_terDemo); disposeTree(_terDemo); _terDemo = null; }
+  const g = new THREE.Group();
+  g.add(await makePlateau({ w:8, d:8, height:1, rock:'rock',  x:-40, z:-40, ramp:[0,4] }));
+  g.add(await makePlateau({ w:5, d:5, height:2, rock:'stone', x:-34, z:-34 }));
+  // an L-shaped footprint, to prove corner selection handles irregular shapes
+  const L = [];
+  for(let i=0;i<6;i++) L.push([i,0]);
+  for(let j=1;j<5;j++) L.push([0,j]);
+  g.add(await makePlateau({ cells:L, height:1, rock:'rock', x:-40, z:-22 }));
+  scene.add(g); _terDemo = g;
+  let meshes = 0; g.traverse(o => { if(o.isMesh) meshes++; });
+  const bb = new THREE.Box3().setFromObject(g), sz = bb.getSize(new THREE.Vector3());
+  return { meshes, size:[+sz.x.toFixed(1), +sz.y.toFixed(1), +sz.z.toFixed(1)] };
+}
+
 /* ─────────────  VILLAGE BUILDER  ─────────────
    The Medieval Village MegaKit ships 176 MODULAR PARTS, not finished buildings: 39 roof
    pieces, 20 walls, 15 stairs, 12 floors, doors, windows, corners, props. Exactly one
@@ -5065,6 +5198,9 @@ window.__SLICE = {
     const b = new THREE.Box3().setFromObject(hero._weap), z = b.getSize(new THREE.Vector3());
     return +Math.max(z.x, z.y, z.z).toFixed(4); },
   village: async () => await buildTestHub(),
+  terrain: async () => await buildTerrainDemo(),
+  plateau: async o => { const g = await makePlateau(o || {}); scene.add(g);
+    let n=0; g.traverse(x => { if(x.isMesh) n++; }); return { meshes:n }; },
   building: async o => { const b = await makeBuilding(o || {}); scene.add(b);
     let n=0; b.traverse(x => { if(x.isMesh) n++; }); return { meshes:n }; },
   weaponScore: () => weaponScore(hero),

@@ -2191,11 +2191,17 @@ const WEAPON_LEN = {
    Grouped by BODY, because the body is what determines the hand and the grip — two classes
    sharing a model share their weapon list and their tuning for free. */
 const ARCHETYPE_WEAPONS = {
-  Warrior: [/^Sword/, /^Claymore/, /^Axe/, /^Hammer/, /^Spear/, /^Scythe/, /^Shield/],
+  // NB the sword patterns are anchored. /^Sword/ also matched Sword_Big, which is now
+  // reserved as the mage spellblade — a loose prefix would have handed it back to warriors.
+  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Claymore/, /^Axe/, /^Hammer/,
+            /^Spear/, /^Scythe/, /^Shield/],
   Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Shield/],
   Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/],
   Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
-  Wizard:  [/^Scythe/, /^Spear/, /^Dagger$/],
+  // Spellblade: Sword_Big is the caster's weapon, held high and forward rather than
+  // shouldered. Oliver's call - it gives the mage archetype a silhouette of its own
+  // without needing a model we do not have.
+  Wizard:  [/^Sword_Big$/, /^Sword_big_Golden$/, /^Scythe/, /^Spear/, /^Dagger$/],
   Monk:    [],                       // unarmed by design
 };
 function weaponsFor(model){
@@ -2216,12 +2222,19 @@ function weaponsFor(model){
    correctly and needs at most a nudge to its height. The Scythe is the odd one out
    because it is held reversed. */
 const WEAPON_PRESETS = {
-  Sword:               { len:1.00, up:-0.39, side:-0.03 },
-  Sword_2:             { len:1.00, up:-0.39, side:-0.03 },
-  Sword_Golden:        { len:1.00, up:-0.39, side:-0.03 },
+  // Oliver tuned the plain sword to all-zero rotations, which is worth noting: the
+  // pitch/yaw/roll trio I derived from the axes is the AXE-family orientation, not a
+  // universal one. Swords hang differently.
+  Sword:               { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
+  Sword_2:             { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
+  Sword_Golden:        { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
   Claymore:            { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
-  Sword_Big:           { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
-  Sword_big_Golden:    { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
+  // SPELLBLADE - tuned by Oliver on the WIZARD body, not the Warrior. Held point-up and
+  // forward, which is why the numbers look nothing like the melee set.
+  Sword_Big:           { len:1.00, pitch:1.52, yaw:-0.40, roll:0,
+                         fwd:-0.39, up:-0.03, side:0, grip:0.74 },
+  Sword_big_Golden:    { len:1.00, pitch:1.52, yaw:-0.40, roll:0,
+                         fwd:-0.39, up:-0.03, side:0, grip:0.74 },
   Axe:                 { len:1.00, up:-0.41, side:-0.13, fwd:-0.04 },
   Axe_Small:           { len:1.00, up:-0.46, side:-0.19, fwd:-0.04 },
   Axe_Double:          { len:1.00, up:-0.46, side:-0.05, fwd:-0.04 },

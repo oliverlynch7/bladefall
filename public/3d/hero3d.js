@@ -37,6 +37,20 @@ export const HERO3D = {
 };
 window.HERO3D = HERO3D;
 
+/* Reachable by URL so it can be tried on a phone without a console:
+     /3d/?hero3d=1            enable the 3D hero
+     /3d/?hero3d=1&scale=30   ...and override the units-per-metre guess
+     /3d/?hero3d=1&model=Rogue
+   Anything unset keeps its default, and no parameter can break the game - the flag only
+   gates an additive draw. */
+try {
+  const q = new URLSearchParams(location.search);
+  if(q.get('hero3d') === '1' || q.get('hero3d') === 'true') HERO3D.on = true;
+  if(q.get('scale')) HERO3D.scale = parseFloat(q.get('scale')) || HERO3D.scale;
+  if(q.get('model')) HERO3D.model = q.get('model');
+  if(q.get('yoff'))  HERO3D.yOff  = parseFloat(q.get('yoff')) || 0;
+} catch(e){}
+
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
 let clips = {}, cur = null, clock = null;
 

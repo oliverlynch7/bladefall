@@ -57,6 +57,26 @@
   #kills{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 30px);z-index:20;
     font:700 12px system-ui;color:#e8c07a;pointer-events:none;text-shadow:0 1px 3px #000}
 
+  #custom{position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 96px);z-index:24;
+    width:206px;max-height:66vh;overflow-y:auto;background:rgba(10,10,15,.93);
+    border:1px solid #3d3830;border-radius:11px;padding:10px 11px;pointer-events:auto;
+    font-size:11px;color:#cfc6b4;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+  #custom.hide{display:none}
+  #custom h4{margin:9px 0 5px;font:800 9.5px system-ui;letter-spacing:.13em;
+    text-transform:uppercase;color:#8d8474}
+  #custom h4:first-child{margin-top:0}
+  #custom .row{display:flex;flex-wrap:wrap;gap:4px}
+  #custom .opt{background:linear-gradient(180deg,rgba(34,29,22,.95),rgba(15,13,18,.95));
+    border:1px solid #46402f;color:#c8bda8;font-size:10px;font-weight:700;padding:4px 7px;
+    border-radius:6px;cursor:pointer}
+  #custom .opt.sel{border-color:#e8a33d;color:#ffd89a}
+  #custom .sw{width:22px;height:22px;border-radius:50%;border:2px solid #3a352c;cursor:pointer;padding:0}
+  #custom .sw.sel{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.5)}
+  #custBtn{position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 62px);z-index:24;
+    background:linear-gradient(180deg,rgba(38,30,20,.95),rgba(16,14,18,.95));border:1px solid #4a3c26;
+    color:#d8c8a8;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;cursor:pointer}
+  #custBtn:hover{border-color:#e8a33d;color:#fff}
+
   #hpwrap{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 58px);
     z-index:20;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none}
   #hpbar{width:min(240px,52vw);height:13px;background:rgba(10,8,12,.8);border:1px solid #5a4a30;
@@ -124,6 +144,8 @@
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
   <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
+<button id="custBtn">🎨 Customise</button>
+<div id="custom" class="hide"></div>
 <div id="hpwrap"><div id="hpbar"><i id="hpfill"></i></div><span id="hptxt">100 / 100</span></div>
 <div id="skillbar"></div>
 <div id="fps"></div>
@@ -406,6 +428,14 @@ function applySkin(actor, clsId, skin){
    character's existing skeleton and it is correct by construction — right position, right
    deformation, animates with everything else. Nothing to guess, nothing to tune.  */
 const EQUIP_SLOTS = {
+  // Hair ships in two variants; we use 'Rigged to Head Bone', which is skinned to the
+  // same 65 joints — so it equips through the identical path as armour, no placement code.
+  hair:      'hair/Hair_SimpleParted',
+  hair_long: 'hair/Hair_Long',
+  hair_buns: 'hair/Hair_Buns',
+  buzzed:    'hair/Hair_Buzzed',
+  beard:     'hair/Hair_Beard',
+  brows:     'hair/Eyebrows_Regular',
   hood:      'outfits/Male_Ranger_Head_Hood',
   pauldrons: 'outfits/Male_Ranger_Acc_Pauldron',
   arms:      'outfits/Male_Ranger_Arms',
@@ -444,6 +474,70 @@ function unequipPart(actor, slot){
   if(!list) return;
   for(const m of list){ if(m.parent) m.parent.remove(m); }
   delete actor._equip[slot];
+}
+
+/* ── customisation: hair style + colours, all via the proven modular/tint paths ── */
+const HAIR_STYLES = [
+  { name:'Parted', slot:'hair',      file:'hair/Hair_SimpleParted' },
+  { name:'Long',   slot:'hair',      file:'hair/Hair_Long' },
+  { name:'Buns',   slot:'hair',      file:'hair/Hair_Buns' },
+  { name:'Buzzed', slot:'hair',      file:'hair/Hair_Buzzed' },
+  { name:'Bald',   slot:'hair',      file:null },
+];
+const HAIR_COLS   = ['#2b1f18','#4a3122','#7a5230','#b98a4a','#d8cbb0','#8f8f96','#5a2a2a','#2a3350'];
+const OUTFIT_COLS = ['#ffffff','#8f4a3a','#4a6a8f','#4a7a52','#7a5a2a','#5a4a6a','#2f2f36','#a08a5a'];
+const SKIN_COLS   = ['#ffffff','#f0c9a8','#d9a377','#b57a4d','#8a5a34','#5f3d24'];
+const CUSTOM = { hair:0, hairCol:'#4a3122', outfitCol:'#ffffff', skinCol:'#ffffff', beard:false };
+
+function tintMats(actor, matchName, hex){
+  if(!actor) return;
+  const col = new THREE.Color(hex);
+  actor.root.traverse(o => {
+    if(!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const m of mats){
+      if(!m || !m.name || !matchName.test(m.name)) continue;
+      if(!m.userData._baseCol) m.userData._baseCol = m.color ? m.color.clone() : new THREE.Color('#fff');
+      if(m.color){ m.color.copy(col); m.needsUpdate = true; }
+    }
+  });
+}
+async function applyCustom(){
+  if(!hero) return;
+  const st = HAIR_STYLES[CUSTOM.hair] || HAIR_STYLES[0];
+  unequipPart(hero, 'hair');
+  if(st.file){ EQUIP_SLOTS.hair = st.file; await equipPart(hero, 'hair'); }
+  unequipPart(hero, 'beard');
+  if(CUSTOM.beard){ await equipPart(hero, 'beard'); }
+  tintMats(hero, /hair/i,            CUSTOM.hairCol);
+  tintMats(hero, /ranger|peasant/i,  CUSTOM.outfitCol);
+  tintMats(hero, /regular|superhero/i, CUSTOM.skinCol);
+}
+function buildCustomPanel(){
+  const el = document.getElementById('custom'); if(!el) return;
+  const sec = (title, inner) => `<h4>${title}</h4><div class="row">${inner}</div>`;
+  const opts = (list, cur, act) => list.map((o,i)=>
+    `<button class="opt${i===cur?' sel':''}" data-act="${act}" data-i="${i}">${o.name||o}</button>`).join('');
+  const sws = (list, cur, act) => list.map(c=>
+    `<button class="sw${c===cur?' sel':''}" style="background:${c}" data-act="${act}" data-c="${c}"></button>`).join('');
+  el.innerHTML =
+    sec('Hair style', opts(HAIR_STYLES, CUSTOM.hair, 'hair')) +
+    sec('Hair colour', sws(HAIR_COLS, CUSTOM.hairCol, 'hairCol')) +
+    sec('Outfit tint', sws(OUTFIT_COLS, CUSTOM.outfitCol, 'outfitCol')) +
+    sec('Skin tone',  sws(SKIN_COLS, CUSTOM.skinCol, 'skinCol')) +
+    sec('Extras', `<button class="opt${CUSTOM.beard?' sel':''}" data-act="beard">Beard</button>`) +
+    sec('Armour', ['pauldrons','hood','arms','legs','boots'].map(k=>
+      `<button class="opt${(hero&&hero._equip&&hero._equip[k])?' sel':''}" data-act="equip" data-k="${k}">${k}</button>`).join(''));
+  el.querySelectorAll('button').forEach(b => b.onclick = async () => {
+    const a = b.dataset.act;
+    if(a==='hair'){ CUSTOM.hair = +b.dataset.i; await applyCustom(); }
+    else if(a==='beard'){ CUSTOM.beard = !CUSTOM.beard; await applyCustom(); }
+    else if(a==='equip'){ const k=b.dataset.k;
+      if(hero && hero._equip && hero._equip[k]) unequipPart(hero,k); else await equipPart(hero,k);
+      await applyCustom(); }
+    else { CUSTOM[a] = b.dataset.c; await applyCustom(); }
+    buildCustomPanel();
+  });
 }
 
 /* ─────────────  FACES  ─────────────
@@ -2226,6 +2320,10 @@ async function build(){
   buildClassBar();
   buildSkinBar();
   paintSkillBar();
+  buildCustomPanel();
+  { const cb = document.getElementById('custBtn');
+    if(cb) cb.onclick = () => { const el=document.getElementById('custom');
+      el.classList.toggle('hide'); if(!el.classList.contains('hide')) buildCustomPanel(); }; }
   lmsg.textContent = 'Warming shaders…';
   await warmupVFX();
 
@@ -2318,6 +2416,7 @@ async function switchClass(def){
     scene.remove(hero.root);
     disposeTree(hero.root);
     hero = new Actor(g, def);
+    if(def.ual){ equipPart(hero, 'brows'); applyCustom(); }
     addFace(hero);
     hero.root.position.copy(pos); hero.root.rotation.y = rot;
     scene.add(hero.root);
@@ -2325,6 +2424,7 @@ async function switchClass(def){
     applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
     buildSkinBar();
     paintSkillBar();
+    buildCustomPanel();
   }
   document.querySelectorAll('.cbtn').forEach(b=>{
     b.disabled = false; b.classList.toggle('sel', b.dataset.id===heroDef.id);

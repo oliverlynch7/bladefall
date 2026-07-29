@@ -248,6 +248,27 @@ const CLASSES = [
     clips:{ idle:['Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Idle'],
             attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2','Dagger_Attack'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
     skill:{ name:'Venom Burst', kind:'nova', color:'#8dff9a', color2:'#2ea84a' } },
+  // ── Universal Base Characters + Universal Animation Library (Quaternius) ──
+  // UE-standard 65-joint skeleton; UAL1+UAL2 (86 clips) bind by bone NAME with zero
+  // retargeting, which is why these get a far richer move set than the RPG rigs.
+  { id:'BaseM', label:'Human ♂', ual:true, tint:'#cbb28a',
+    outfits:[ {name:'Ranger',  file:'outfits/Male_Ranger'},
+              {name:'Peasant', file:'outfits/Male_Peasant'},
+              {name:'Base Body', file:'base/Superhero_Male_FullBody'} ],
+    clips:{ idle:['Sword_Idle','Idle_Loop'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
+            roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
+            attack:['Sword_Regular_A','Sword_Regular_B','Sword_Regular_C'],
+            skill:['Sword_Heavy_Combo'], hit:['Hit_Chest'], death:['Death01'] },
+    skill:{ name:'Heavy Combo', kind:'nova', color:'#ffb347', color2:'#ff5a2a' } },
+  { id:'BaseF', label:'Human ♀', ual:true, tint:'#e8c0a8',
+    outfits:[ {name:'Ranger',  file:'outfits/Female_Ranger'},
+              {name:'Peasant', file:'outfits/Female_Peasant'},
+              {name:'Base Body', file:'base/Superhero_Female_FullBody'} ],
+    clips:{ idle:['Idle_Loop','Sword_Idle'], walk:['Walk_Loop'], run:['Sprint_Loop','Jog_Fwd_Loop'],
+            roll:['Roll'], jump:['Jump_Loop','Jump_Start'],
+            attack:['Sword_Regular_B','Sword_Regular_C','Sword_Regular_A'],
+            skill:['Spell_Simple_Shoot'], hit:['Hit_Chest'], death:['Death01'] },
+    skill:{ name:'Arc Nova', kind:'bolt', color:'#9ad4ff', color2:'#5f8fff' } },
   { id:'Wizard', label:'Wizard', tint:'#9ab8ff',
     clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Idle_Weapon','Idle'],
             attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
@@ -346,6 +367,7 @@ const SKINS = {
   ],
 };
 let skinIdx = { Warrior:0, Rogue:0, Wizard:0 };
+let outfitIdx = { BaseM:0, BaseF:0 };
 function applySkin(actor, clsId, skin){
   if(!actor || !skin) return;
   applyRedesign(actor, skin);
@@ -856,6 +878,30 @@ function updateRedesign(t, dt){
       o.position.copy(P); o.rotation.y = yaw;               // pauldron spikes etc.
     }
   }
+}
+
+let _ualClips = null;
+async function loadUAL(){
+  if(_ualClips) return _ualClips;
+  const [a,b] = await Promise.all([
+    load('assets/base/UAL1_Standard.glb').catch(()=>null),
+    load('assets/base/UAL2_Standard.glb').catch(()=>null),
+  ]);
+  _ualClips = [].concat(a?a.animations:[], b?b.animations:[]);
+  return _ualClips;
+}
+// Load a base character and graft the shared animation library onto it. Three.js binds
+// animation tracks to nodes BY NAME, and these rigs share the exact UE bone naming, so
+// no retargeting step is required.
+async function loadBaseChar(def){
+  const oi = Math.min(outfitIdx[def.id] || 0, (def.outfits||[]).length - 1);
+  const file = def.outfits ? def.outfits[Math.max(0,oi)].file : `base/${def.file}`;
+  const [body, clips] = await Promise.all([
+    load(`assets/${file}.gltf`).catch(()=>null),
+    loadUAL(),
+  ]);
+  if(!body) return null;
+  return { scene: body.scene, animations: clips };
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -1876,6 +1922,24 @@ function paintSkillBar(){
 function buildSkinBar(){
   const bar = document.getElementById('skins');
   if(!bar) return;
+  // UAL characters swap OUTFIT MODELS rather than repainting a texture
+  if(heroDef.outfits){
+    bar.innerHTML = '';
+    heroDef.outfits.forEach((o,i) => {
+      const b = document.createElement('button');
+      b.className = 'sbtn' + (i === (outfitIdx[heroDef.id]||0) ? ' sel' : '');
+      b.innerHTML = `<i style="background:${['#6b8f4e','#9a7f52','#c8a888'][i]||'#888'}"></i>${o.name}`;
+      b.onclick = async () => {
+        if(switching) return;
+        outfitIdx[heroDef.id] = i;
+        [...bar.children].forEach((c,j)=>c.classList.toggle('sel', j===i));
+        const d = heroDef; heroDef = { id:'__reload' };   // force switchClass to re-run
+        await switchClass(d);
+      };
+      bar.appendChild(b);
+    });
+    return;
+  }
   const list = SKINS[heroDef.id] || [];
   bar.innerHTML = '';
   list.forEach((sk, i) => {
@@ -1910,7 +1974,8 @@ async function switchClass(def){
   // to the ORIGINAL skeleton, so the body collapses out of view while bone-parented props
   // (shoulder pads, sword, hair) keep rendering — the "invisible character" bug. The file
   // is HTTP-cached, so a fresh parse is cheap and gives a correctly-bound skeleton.
-  const g = await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
+  const g = def.ual ? await loadBaseChar(def)
+                    : await load(`assets/chars/${def.id}.gltf`).catch(()=>null);
   if(g){
     const pos = hero.root.position.clone(), rot = hero.root.rotation.y;
     clearRedesign();

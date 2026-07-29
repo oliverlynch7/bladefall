@@ -48,6 +48,12 @@
   #hint b{color:#d8c8a8}
   #fps{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:20;
     font:600 11px ui-monospace,monospace;color:#6f6858;pointer-events:none}
+  #perf{position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 96px);z-index:23;
+    font:600 11px/1.55 ui-monospace,monospace;color:#bfe6ff;background:rgba(6,8,14,.82);
+    border:1px solid #2b3a4a;border-radius:9px;padding:8px 11px;pointer-events:none;white-space:pre}
+  #perf.hide{display:none}
+  #perf b{color:#ffd24a}
+  #perf .bad{color:#ff7a6a}
   #kills{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 30px);z-index:20;
     font:700 12px system-ui;color:#e8c07a;pointer-events:none;text-shadow:0 1px 3px #000}
 
@@ -116,11 +122,12 @@
 
 <div id="hint">
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
-  <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
+  <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
 <div id="hpwrap"><div id="hpbar"><i id="hpfill"></i></div><span id="hptxt">100 / 100</span></div>
 <div id="skillbar"></div>
 <div id="fps"></div>
+<div id="perf" class="hide"></div>
 <div id="kills"></div>
 
 <div id="touch">
@@ -1010,6 +1017,7 @@ function canvasTex(draw, size){
   t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true;
   return t;
 }
+const UNIT_PLANE = new THREE.PlaneGeometry(1,1);
 const TEX = {
   mote: canvasTex((x,s) => {                       // soft glowing dot
     const g = x.createRadialGradient(s/2,s/2,0, s/2,s/2,s/2);
@@ -1070,7 +1078,7 @@ let _lightRR = 0;
 function takeLight(){ const l = LIGHT_POOL[_lightRR++ % LIGHT_POOL.length]; return l; }
 // a flat, camera-independent quad lying on the ground (for rings / decals)
 function groundQuad(tex, color, size, opacity){
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(1,1),
+  const m = new THREE.Mesh(UNIT_PLANE,
     new THREE.MeshBasicMaterial({ map:tex, color:new THREE.Color(color), transparent:true,
       opacity:opacity==null?1:opacity, depthWrite:false, blending:THREE.AdditiveBlending,
       side:THREE.DoubleSide }));
@@ -1086,7 +1094,7 @@ function push(o){ vfx.push(o); return o; }
 function killObj(o){
   if(!o) return;
   scene.remove(o);
-  if(o.geometry) o.geometry.dispose();
+  if(o.geometry && o.geometry !== UNIT_PLANE) o.geometry.dispose();
   const m = o.material;
   if(m){ (Array.isArray(m)?m:[m]).forEach(x=>x && x.dispose()); }
 }
@@ -1144,7 +1152,7 @@ function flash(pos, color, power, life){
 }
 /* crescent slash sweeping around a point */
 function slashArc(pos, color, radius, life, tilt, spin0){
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(1,1),
+  const m = new THREE.Mesh(UNIT_PLANE,
     new THREE.MeshBasicMaterial({ map:TEX.slash, color:new THREE.Color(color), transparent:true,
       depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.DoubleSide }));
   m.position.copy(pos);
@@ -1389,6 +1397,7 @@ addEventListener('keydown', e => {
   if(e.code==='KeyJ') doAttack();
   if(e.code==='KeyK') castSkill(0);
   if(/^Digit[1-4]$/.test(e.code)) castSkill(+e.code.slice(5)-1);
+  if(e.code==='KeyP'){ perfOn = !perfOn; document.getElementById('perf').classList.toggle('hide', !perfOn); }
 });
 addEventListener('keyup', e => keys[e.code] = false);
 
@@ -1521,23 +1530,48 @@ function makeHpBar(){
   return { spr, draw };
 }
 
-/* ── damage numbers ── */
+/* ── damage numbers ──
+   Previously every hit allocated a canvas AND a fresh GPU texture. A single Fan of
+   Knives can land ~28 hits in one frame, so that was ~28 texture uploads mid-frame —
+   the recurring stall. Now the glyphs are pre-rendered ONCE at boot and each number is
+   assembled from cached digit sprites: zero allocation per hit. */
+const GLYPHS = '0123456789+';
+const _glyphMat = { normal:{}, crit:{} };
+(function buildGlyphs(){
+  for(const crit of [false, true]){
+    for(const ch of GLYPHS){
+      const c = document.createElement('canvas'); c.width = 64; c.height = 80;
+      const x = c.getContext('2d');
+      x.font = 'bold ' + (crit ? 62 : 52) + 'px system-ui, sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.lineWidth = 8; x.strokeStyle = 'rgba(0,0,0,.9)';
+      x.strokeText(ch, 32, 40);
+      x.fillStyle = crit ? '#ffd24a' : '#fff2e0';
+      x.fillText(ch, 32, 40);
+      const t = new THREE.CanvasTexture(c);
+      t.colorSpace = THREE.SRGBColorSpace;
+      _glyphMat[crit ? 'crit' : 'normal'][ch] =
+        new THREE.SpriteMaterial({ map:t, depthTest:false, transparent:true });
+    }
+  }
+})();
 const dmgTexts = [];
 function damageNumber(pos, amount, crit){
-  const cvs = document.createElement('canvas'); cvs.width = 128; cvs.height = 64;
-  const c = cvs.getContext('2d');
-  c.font = 'bold ' + (crit ? 46 : 36) + 'px system-ui, sans-serif';
-  c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.lineWidth = 6; c.strokeStyle = 'rgba(0,0,0,.85)';
-  c.strokeText(amount, 64, 32);
-  c.fillStyle = crit ? '#ffd24a' : '#fff2e0';
-  c.fillText(amount, 64, 32);
-  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: new THREE.CanvasTexture(cvs), depthTest:false, transparent:true }));
-  spr.scale.set(0.9, 0.45, 1);
-  spr.position.copy(pos);
-  scene.add(spr);
-  dmgTexts.push({ spr, t:0, life:0.85, vy: 1.7 });
+  const str = String(amount);
+  const set = _glyphMat[crit ? 'crit' : 'normal'];
+  const grp = new THREE.Group();
+  const w = crit ? 0.34 : 0.28;
+  for(let i=0;i<str.length && i<5;i++){
+    const m = set[str[i]];
+    if(!m) continue;
+    const sp = new THREE.Sprite(m.clone());          // clone shares map + program
+    sp.scale.set(w, w*1.25, 1);
+    sp.position.x = (i - (str.length-1)/2) * w * 0.72;
+    grp.add(sp);
+  }
+  grp.position.copy(pos);
+  scene.add(grp);
+  dmgTexts.push({ spr:grp, t:0, life:0.85, vy:1.7 });
 }
 
 /* ── enemies ── */
@@ -1658,6 +1692,7 @@ function doJump(){
   vy = JUMP_V; grounded = false;
 }
 const skillCd = [0,0,0,0];
+let _sbT = 0;
 function castSkill(i){
   if(!hero || hero.locked>0 || rollT>0) return;
   const kit = SKILLS[heroDef.id] || SKILLS.Warrior;
@@ -1860,6 +1895,65 @@ function tryOpenChests(){
   }
 }
 
+/* ─────────────  SHADER PREWARM  ─────────────
+   The "freeze for a moment, then smooth forever" stall is GPU shader compilation: the
+   first time a material variant is drawn, the driver compiles its program and BLOCKS
+   the frame. Every VFX primitive introduces a new variant, so the first cast of each
+   skill stalled. Here we instantiate one of every variant up front, force the compile
+   and the texture uploads while the loading screen is still showing, then throw them
+   away — so gameplay never meets an uncompiled shader. */
+async function warmupVFX(){
+  const warm = new THREE.Group();
+  warm.position.copy(camera.position).add(new THREE.Vector3(0, -400, 0));   // offscreen but in-scene
+  const P = new THREE.Vector3();
+
+  // every texture used by the VFX layer -> force the GPU upload
+  for(const k in TEX){ try{ renderer.initTexture(TEX[k]); }catch(e){} }
+
+  // 1. sprite + additive (heads, glows, damage numbers)
+  for(const t of [TEX.mote, TEX.ring, TEX.beam, TEX.slash]){
+    const sp = new THREE.Sprite(addMat('#ffffff', t, 1)); sp.scale.setScalar(0.01); warm.add(sp);
+  }
+  // 2. points + additive (motes bursts and projectile trails)
+  for(const size of [0.4, 1.5]){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0,0,0]), 3));
+    warm.add(new THREE.Points(g, new THREE.PointsMaterial({ map:TEX.mote, color:0xffffff,
+      size, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true })));
+  }
+  // 3. ground quads / beams / slashes (MeshBasic + map + additive + DoubleSide)
+  for(const t of [TEX.ring, TEX.slash, TEX.beam]){
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.01,0.01),
+      new THREE.MeshBasicMaterial({ map:t, transparent:true, depthWrite:false,
+        blending:THREE.AdditiveBlending, side:THREE.DoubleSide }));
+    warm.add(m);
+  }
+  // 4. pillar (open-ended cylinder, additive)
+  warm.add(new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.02,18,1,true),
+    new THREE.MeshBasicMaterial({ map:TEX.beam, transparent:true, depthWrite:false,
+      blending:THREE.AdditiveBlending, side:THREE.DoubleSide })));
+  // 5. plain additive box (bolt segments)
+  warm.add(new THREE.Mesh(new THREE.BoxGeometry(0.01,0.01,0.01),
+    new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, depthWrite:false })));
+  // 6. canvas-sprite variant (damage numbers use their own CanvasTexture)
+  { const c = document.createElement('canvas'); c.width = c.height = 8;
+    c.getContext('2d').fillRect(0,0,8,8);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(c),
+      depthTest:false, transparent:true }));
+    sp.scale.setScalar(0.01); warm.add(sp); }
+
+  scene.add(warm);
+  try{ renderer.compile(scene, camera); }catch(e){}
+  renderer.render(scene, camera);                 // force the programs to actually run once
+  await new Promise(r => requestAnimationFrame(r));
+  renderer.render(scene, camera);
+  scene.remove(warm);
+  warm.traverse(o => {
+    if(o.geometry) o.geometry.dispose();
+    const m = o.material; if(m) (Array.isArray(m)?m:[m]).forEach(x=>x&&x.dispose());
+  });
+}
+
 /* ─────────────  BUILD  ───────────── */
 async function build(){
   loadTotal = 6;
@@ -1918,6 +2012,9 @@ async function build(){
   buildClassBar();
   buildSkinBar();
   paintSkillBar();
+  lmsg.textContent = 'Warming shaders…';
+  await warmupVFX();
+
   document.getElementById('load').style.display = 'none';
 }
 
@@ -2030,7 +2127,7 @@ function disposeTree(root){
 
 /* ─────────────  LOOP  ───────────── */
 const camTarget = new THREE.Vector3();
-let fpsT = 0, frames = 0;
+let fpsT = 0, frames = 0, perfOn = false, worstMs = 0, lastMs = performance.now(), perfT = 0;
 const fpsEl = document.getElementById('fps');
 
 function tick(){
@@ -2039,7 +2136,7 @@ function tick(){
   const t  = clock.elapsedTime;
 
   if(hurtCd > 0) hurtCd -= dt;
-  for(let i=0;i<4;i++) if(skillCd[i] > 0){ skillCd[i] = Math.max(0, skillCd[i]-dt); if(skillCd[i]===0) paintSkillBar(); }
+  for(let i=0;i<4;i++) if(skillCd[i] > 0){ skillCd[i] = Math.max(0, skillCd[i]-dt); /* bar repaints on its own throttle */ }
   if(camShake > 0) camShake = Math.max(0, camShake - dt*2.4);
 
   if(hero){
@@ -2144,9 +2241,11 @@ function tick(){
   for(let i=dmgTexts.length-1; i>=0; i--){
     const d = dmgTexts[i]; d.t += dt;
     d.spr.position.y += d.vy * dt; d.vy = Math.max(0.2, d.vy - dt*1.8);
-    d.spr.material.opacity = Math.max(0, 1 - d.t/d.life);
+    const o = Math.max(0, 1 - d.t/d.life);
+    d.spr.children.forEach(c => { c.material.opacity = o; });
     if(d.t >= d.life){
-      scene.remove(d.spr); d.spr.material.map.dispose(); d.spr.material.dispose();
+      scene.remove(d.spr);
+      d.spr.children.forEach(c => c.material.dispose());   // map is shared, never disposed
       dmgTexts.splice(i,1);
     }
   }
@@ -2161,13 +2260,34 @@ function tick(){
 
   tryOpenChests();
   mobParticles(dt);
+  _sbT += dt;
   updateRedesign(t, dt);
-  paintSkillBar();
+  if(_sbT > 0.08){ _sbT = 0; paintSkillBar(); }
   stepVFX(dt);
   renderer.render(scene, camera);
 
-  frames++; fpsT += dt;
+  // frame-time watch: a stall shows as one huge frame, which an fps average hides
+  { const now = performance.now(); const ms = now - lastMs; lastMs = now;
+    if(ms > worstMs) worstMs = ms; }
+  frames++; fpsT += dt; perfT += dt;
   if(fpsT >= 0.5){ fpsEl.textContent = Math.round(frames/fpsT) + ' fps'; frames = 0; fpsT = 0; }
+  if(perfOn && perfT >= 0.25){
+    perfT = 0;
+    const I = renderer.info, cls = worstMs > 60 ? ' class="bad"' : '';
+    let live = 0; scene.traverse(o=>{ if(o.isLight && o.visible && o.intensity > 0) live++; });
+    document.getElementById('perf').innerHTML = [
+      'fps      <b>' + Math.round(1/Math.max(0.0001,dt)) + '</b>',
+      'worst    <span' + cls + '>' + worstMs.toFixed(0) + ' ms</span>',
+      'draws    <b>' + I.render.calls + '</b>',
+      'tris     ' + Math.round(I.render.triangles/1000) + 'k',
+      'geoms    ' + I.memory.geometries,
+      'textures ' + I.memory.textures,
+      'programs ' + (I.programs ? I.programs.length : '?'),
+      'lights   ' + live,
+      'vfx      ' + vfx.length,
+    ].join('<br>');
+    worstMs = 0;
+  }
 }
 
 function resize(){

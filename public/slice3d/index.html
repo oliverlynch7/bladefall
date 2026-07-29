@@ -154,6 +154,18 @@
   #creator .btns{display:flex;gap:6px;margin-top:12px}
   #creator .btns button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:8px 4px;border-radius:7px}
+  #animbar{position:fixed;right:10px;bottom:120px;z-index:41;width:220px;max-height:58vh;overflow-y:auto;
+    display:none;background:rgba(12,10,16,.97);border:1px solid #6a5330;border-radius:12px;padding:10px;
+    -webkit-overflow-scrolling:touch}
+  #animbar.open{display:block}
+  #animbar b{display:block;font:800 10px system-ui;letter-spacing:.09em;color:#e8a33d;margin-bottom:7px}
+  #animbar button{display:block;width:100%;text-align:left;margin-bottom:4px;padding:6px 9px;
+    font:700 10.5px system-ui;border-radius:6px;border:1px solid #4a3c26;color:#c9bda2;
+    background:rgba(30,25,18,.9)}
+  #animbar button.sel{border-color:#e8a33d;color:#ffd89a}
+  #animBtn{position:fixed;right:10px;bottom:120px;z-index:39;
+    background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
   #creatorBtn{position:fixed;left:10px;top:52px;z-index:39;
     background:linear-gradient(180deg,rgba(48,36,20,.96),rgba(20,16,22,.96));
     border:1px solid #b0873a;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
@@ -205,6 +217,8 @@
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
   <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
+<button id="animBtn">ANIMS</button>
+<div id="animbar"></div>
 <button id="creatorBtn">CUSTOMISE</button>
 <div id="creator"></div>
 <button id="eyeBtn">FACE</button>
@@ -1896,16 +1910,31 @@ function addEyes(actor, useSaved){
   const R = M.w * EYE.size;
   for(const side of [-1, 1]){
     const g = new THREE.Group(); g.userData._eye = true;
+    /* Iris and pupil are flat DISCS stacked just proud of the sclera, not spheres nested
+       inside it. As spheres the pupil sat entirely within the iris sphere's volume; with
+       depth testing off, draw order hid the problem, but the moment 'draw through head'
+       was unticked the iris correctly occluded the pupil and it vanished. Discs cannot
+       intersect each other, so the layering holds in both modes.
+
+       They keep depthTest (so the head still hides the eye when you look from behind) but
+       skip depthWrite and use renderOrder to stack, which avoids z-fighting against the
+       sclera surface they sit on. */
+    const frontZ = R * 0.55;
     if(EYE.showWhite){
       const w = mk(new THREE.SphereGeometry(1, 14, 10), EYE.white);
-      w.scale.set(R, R*EYE.squash, R*0.55); g.add(w);
+      w.scale.set(R, R*EYE.squash, frontZ); g.add(w);
     }
-    const ir = mk(new THREE.SphereGeometry(1, 12, 9), EYE.iris);
-    ir.scale.setScalar(R*EYE.irisSz);
-    ir.position.z = R*0.42; g.add(ir);
-    const pu = mk(new THREE.SphereGeometry(1, 10, 8), EYE.pupil);
-    pu.scale.setScalar(R*EYE.irisSz*0.5);
-    pu.position.z = R*0.60; g.add(pu);
+    const irR = R * EYE.irisSz * 0.9;
+    const ir = mk(new THREE.CircleGeometry(1, 20), EYE.iris);
+    ir.scale.setScalar(irR);
+    ir.position.z = frontZ * 0.995;
+    ir.material.depthWrite = false; ir.renderOrder = (EYE.onTop ? 999 : 3) + 1;
+    g.add(ir);
+    const pu = mk(new THREE.CircleGeometry(1, 16), EYE.pupil);
+    pu.scale.setScalar(irR * 0.5);
+    pu.position.z = frontZ * 1.02;
+    pu.material.depthWrite = false; pu.renderOrder = (EYE.onTop ? 999 : 3) + 2;
+    g.add(pu);
 
     /* Build the position from the head's own basis vectors: sideways along RIGHT, up
        along UP, outward along FWD. Works whichever way the bone happens to be oriented. */
@@ -2063,7 +2092,12 @@ const WEAPON_LEN = {
   Dagger:0.62, Dagger_2:0.62, Dagger_Golden:0.62, Arrow:0.7,
   Bow_Wooden:1.15, Bow_Wooden2:1.15, Bow_Golden:1.15, Bow_Evil:1.15,
 };
-const WEAP = { on:false, name:'Sword', len:1.0, roll:0, pitch:0, yaw:0, hideStock:true };
+/* fwd/up/side slide the weapon along the grip. Rotation alone cannot do this: the hand
+   stays put, so a spear can be aimed but not pushed through the fist to sit further
+   forward. All three are fractions of the weapon's own length, so they behave the same
+   on a dagger and on a scythe. */
+const WEAP = { on:false, name:'Sword', len:1.0, roll:0, pitch:0, yaw:0,
+               fwd:0, up:0, side:0, grip:0.72, hideStock:true };
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
@@ -2156,7 +2190,7 @@ async function equipWeapon(actor, useSaved){
   for(const c of holder.children){ c.position.sub(mid); }
   // pivot at the grip end rather than the middle, so it sits in the fist not through it
   const half = (axis === 'y' ? sz.y : axis === 'x' ? sz.x : sz.z) / 2;
-  for(const c of holder.children){ c.position[axis] += half * 0.72; }
+  for(const c of holder.children){ c.position[axis] += half * (WEAP.grip * 2); }
 
   const wrap = new THREE.Group();
   wrap.userData._weap = true;
@@ -2179,6 +2213,9 @@ async function equipWeapon(actor, useSaved){
   if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
 
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+  // slide along the grip, in units of the weapon's own length so it scales sensibly
+  const reach = Math.max(sz.x, sz.y, sz.z);
+  holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
   if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
   actor._weap = wrap;
   return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
@@ -2290,6 +2327,34 @@ function toggleCreator(on){
   if(CREATOR.open) buildCreator();
   el.classList.toggle('open', CREATOR.open);
   if(btn) btn.style.display = CREATOR.open ? 'none' : 'block';
+}
+
+
+/* ─────────────  ANIMATION BROWSER  ─────────────
+   All 26 pooled clips, one tap each. Oliver asked to see what the full library can do;
+   the class definitions only reference about nine of them, so most of what we have has
+   never been on screen. */
+function buildAnimBar(){
+  const el = document.getElementById('animbar'); if(!el || !hero) return;
+  const names = Object.keys(hero.clips || {}).sort();
+  el.innerHTML = '<b>ANIMATIONS</b>' + names.map(n =>
+    `<button data-clip="${n}">${n.replace(/_/g,' ')}</button>`).join('');
+  el.querySelectorAll('[data-clip]').forEach(b =>
+    b.addEventListener('click', () => {
+      const c = hero.clips[b.dataset.clip];
+      if(!c) return;
+      hero.play(null, { clip: c, loop: true, fade: 0.15 });
+      hero.locked = 3.0;                      // hold it long enough to actually watch
+      el.querySelectorAll('[data-clip]').forEach(x => x.classList.toggle('sel', x === b));
+    }));
+}
+function toggleAnimBar(on){
+  const el = document.getElementById('animbar'), btn = document.getElementById('animBtn');
+  if(!el) return;
+  const open = (on === undefined) ? !el.classList.contains('open') : on;
+  if(open) buildAnimBar();
+  el.classList.toggle('open', open);
+  if(btn) btn.style.display = open ? 'none' : 'block';
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -2877,6 +2942,10 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     ['pitch', 'Pitch',  -3.20, 3.20, 0.02],
     ['yaw',   'Yaw',    -3.20, 3.20, 0.02],
     ['roll',  'Roll',   -3.20, 3.20, 0.02],
+    ['fwd',   'Slide fwd', -0.80, 0.80, 0.01],
+    ['up',    'Slide up',  -0.80, 0.80, 0.01],
+    ['side',  'Slide side',-0.80, 0.80, 0.01],
+    ['grip',  'Grip point', 0.00, 1.00, 0.01],
   ];
   const MOUTH_ROWS = [
     ['y',      'Height',      -0.60, 0.30, 0.005],
@@ -2990,6 +3059,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   window.__eyeRebuild = build;
   const cb = document.getElementById('creatorBtn');
   if(cb) cb.addEventListener('click', () => toggleCreator());
+  const ab = document.getElementById('animBtn');
+  if(ab) ab.addEventListener('click', () => toggleAnimBar());
 })();
 
 const tapBtn = (id, fn) => {
@@ -3551,10 +3622,15 @@ async function build(){
 
   // HERO + ENEMY
   lmsg.textContent = 'Loading characters…';
-  const gW = await load('assets/chars/Warrior.gltf');
+  // Route the STARTING hero through loadRPGChar too. Built directly from the Warrior gltf
+  // it only carried that model's own 13 clips, so the first character on screen silently
+  // had half the library until you switched class.
+  const gW = await loadRPGChar(CLASSES[0]);
   hero = new Actor(gW, CLASSES[0]);
   addFace(hero);
+  addEyes(hero); addMouth(hero);
   scene.add(hero.root);
+  buildAnimBar();
 
   lmsg.textContent = 'Dressing the crypt…';
   await scatterProps();
@@ -3672,6 +3748,7 @@ async function switchClass(def){
                 ' mouth ' + JSON.stringify(addMouth(hero)));
     equipWeapon(hero).then(r => console.log('DIAG weapon ' + JSON.stringify(r)));
     if(window.__eyeRebuild) window.__eyeRebuild();
+    buildAnimBar();
     buildSkinBar();
     paintSkillBar();
     buildCustomPanel();
@@ -3884,14 +3961,20 @@ window.__SLICE = {
     return RIGID_GEAR[k]; },
   bodyWidth: () => bodyWidth(hero),
   eyeTune: o => { Object.assign(EYE, o||{}); const r = addEyes(hero, false); eyeSave();
-                  if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+                  if(window.__eyeRebuild) window.__eyeRebuild();
+    buildAnimBar(); return r; },
   eyeDump: () => ({ model: eyeModel(), cur: JSON.parse(JSON.stringify(EYE)), all: EYE_ALL }),
   eyeInfo: () => addEyes(hero),
   mouthTune: o => { Object.assign(MOUTH, o||{}); const r = addMouth(hero, false); mouthSave();
-                    if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+                    if(window.__eyeRebuild) window.__eyeRebuild();
+    buildAnimBar(); return r; },
   mouthShapes: () => MOUTH_SHAPES.slice(),
   creator: on => { toggleCreator(on); return CREATOR.open; },
   weapons: () => WEAPONS.slice(),
+  clipList: () => hero ? Object.keys(hero.clips || {}).sort() : [],
+  playClip: n => { if(hero && hero.clips && hero.clips[n]){
+      hero.play(null, { clip: hero.clips[n], loop: true, fade: 0.15 });
+      hero.locked = 2.0; return n; } return null; },
   inSafe: () => !!(hero && inSafeZone(hero.root.position)),
   tp: (x,z) => { if(hero){ hero.root.position.x = x; hero.root.position.z = z; } return true; },
   hp: () => heroHp,
@@ -3910,7 +3993,8 @@ window.__SLICE = {
     return true; },
   weapon: async (name, o) => { Object.assign(WEAP, { on:true, name: name || WEAP.name }, o||{});
     const r = await equipWeapon(hero, false); weapSave();
-    if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+    if(window.__eyeRebuild) window.__eyeRebuild();
+    buildAnimBar(); return r; },
   weaponOff: async () => { WEAP.on = false; await equipWeapon(hero, false); weapSave(); return true; },
   probeBone: frag => { let b=null; hero.root.traverse(o=>{ if(!b && o.isBone && new RegExp(frag,'i').test(o.name)) b=o; });
     if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);

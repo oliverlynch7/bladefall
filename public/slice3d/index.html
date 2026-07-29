@@ -189,6 +189,7 @@
 <div id="eyep"></div>
 <button id="custBtn">🎨 Customise</button>
 <div id="custom" class="hide"></div>
+<div id="safeTag" style="position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:24;padding:6px 14px;border-radius:8px;background:rgba(10,30,20,.86);border:1px solid #4d9a74;color:#9affd0;font:800 11px system-ui;letter-spacing:.08em;display:none">SAFE ZONE</div>
 <div id="hpwrap"><div id="hpbar"><i id="hpfill"></i></div><span id="hptxt">100 / 100</span></div>
 <div id="skillbar"></div>
 <div id="fps"></div>
@@ -1741,7 +1742,7 @@ const EYE = {
   on: true,
   spread: 0.30,   // apart, as a fraction of head width
   height: 0.10,   // up from the nose tip
-  depth:  0.02,   // forward of the face surface (+ = outward)
+  depth:  0.10,   // forward of the face surface (+ = outward)
   size:   0.115,  // eyeball size, fraction of head width
   squash: 0.62,   // vertical squash — 1 is a circle, lower is almond
   tilt:   0.0,    // inner-corner tilt, radians
@@ -1755,6 +1756,7 @@ const EYE = {
      how the first two attempts failed. Position them first with this on, then switch it
      off to check they sit correctly in depth. */
   onTop: true,
+  flip: false,
 };
 /* Saved PER MODEL. The six bodies have genuinely different head shapes and beards, so one
    set of numbers will not fit all of them — tune each once and it sticks. */
@@ -1826,7 +1828,8 @@ function headMetrics(actor){
      models (0.22 on the Monk vs 0.62 on the Warrior in head-local units), which is why a
      single height value put eyes on one face and above another skull. The head's own
      vertical extent is stable, so 'height' now reads as a fraction of the head. */
-  return { head, w, h, dir, nose, cz, minY, maxY,
+  const d = Math.max(1e-4, maxZ - minZ);
+  return { head, w, h, d, dir, nose, cz, minY, maxY,
            eyeY: minY + h * 0.62,                 // rough brow line; slider trims from here
            front: dir >= 0 ? maxZ : minZ };
 }
@@ -1844,6 +1847,7 @@ function addEyes(actor, useSaved){
   if(!EYE.on) return null;
   const M = headMetrics(actor);
   if(!M) return null;
+  if(EYE.flip) M.dir = -M.dir, M.front = (M.dir >= 0 ? M.cz + M.d/2 : M.cz - M.d/2);
 
   const made = [];
   const mk = (geo, col) => {
@@ -1868,7 +1872,7 @@ function addEyes(actor, useSaved){
 
     g.position.set(side * M.w * EYE.spread,
                    M.eyeY + M.h * EYE.height,
-                   M.front + M.dir * (M.w * EYE.depth));
+                   M.front + M.dir * (M.d * EYE.depth));
     g.rotation.z = -side * EYE.tilt;
     M.head.add(g);
     made.push(g);
@@ -1892,11 +1896,12 @@ const MOUTH = {
   on: true,
   shape: 'smile',
   y: -0.10,       // down from the brow line, fraction of head height
-  z: 0.02,        // forward of the face surface
+  z: 0.10,        // forward of the face surface
   width: 0.34,    // fraction of head width
   height: 0.20,   // fraction of head width
   color: '#5a2f28',
   onTop: true,
+  flip: false,
 };
 const MOUTH_SHAPES = ['line','smile','grin','teeth','frown','o','smirk','open','flat'];
 const MOUTH_DEFAULT = JSON.parse(JSON.stringify(MOUTH));
@@ -1986,7 +1991,7 @@ function addMouth(actor, useSaved){
   m.userData._eye = true;                       // excluded from head measurement
   m.renderOrder = MOUTH.onTop ? 999 : 3;
   m.scale.set(M.w * MOUTH.width, M.w * MOUTH.height, 1);
-  m.position.set(0, M.eyeY + M.h * MOUTH.y, M.front + M.dir * (M.w * MOUTH.z));
+  m.position.set(0, M.eyeY + M.h * MOUTH.y, M.front + M.dir * (M.d * MOUTH.z));
   // face outward: the plane's +Z must point the same way as the nose
   if(M.dir < 0) m.rotation.y = Math.PI;
   M.head.add(m);
@@ -2117,6 +2122,31 @@ async function equipWeapon(actor, useSaved){
   if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
   actor._weap = wrap;
   return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
+}
+
+
+/* ─────────────  SAFE ZONE  ─────────────
+   Oliver needs somewhere to stand and actually look at his character without being chewed
+   on. A ring near spawn: step inside and enemies stop pathing to you and stop swinging.
+   They still wander and animate, so the scene stays alive to look at. */
+const SAFE = { x: 0, z: 9.5, r: 4.2 };
+const inSafeZone = p => !!p && Math.hypot(p.x - SAFE.x, p.z - SAFE.z) <= SAFE.r;
+
+function buildSafeZone(scene){
+  const g = new THREE.Group();
+  const disc = new THREE.Mesh(
+    new THREE.CircleGeometry(SAFE.r, 48),
+    new THREE.MeshBasicMaterial({ color:0x64d8a0, transparent:true, opacity:0.10,
+                                  depthWrite:false, side:THREE.DoubleSide }));
+  disc.rotation.x = -Math.PI/2; disc.position.y = 0.02; g.add(disc);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(SAFE.r*0.965, SAFE.r, 64),
+    new THREE.MeshBasicMaterial({ color:0x8affc8, transparent:true, opacity:0.55,
+                                  depthWrite:false, side:THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI/2; ring.position.y = 0.03; g.add(ring);
+  g.position.set(SAFE.x, 0, SAFE.z);
+  scene.add(g);
+  return g;
 }
 
 /* ─────────────  ACTOR  ───────────── */
@@ -2707,14 +2737,14 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   ];
   const MOUTH_ROWS = [
     ['y',      'Height',      -0.60, 0.30, 0.005],
-    ['z',      'Forward',     -0.30, 0.40, 0.005],
+    ['z',      'Forward',     -1.20, 1.20, 0.005],
     ['width',  'Width',        0.08, 0.80, 0.005],
     ['height', 'Tallness',     0.04, 0.60, 0.005],
   ];
   const ROWS = [
     ['spread', 'Apart',        0.05, 0.60, 0.005],
     ['height', 'Height',      -0.30, 0.50, 0.005],
-    ['depth',  'Forward',     -0.30, 0.40, 0.005],
+    ['depth',  'Forward',     -1.20, 1.20, 0.005],
     ['size',   'Size',         0.02, 0.30, 0.002],
     ['squash', 'Squash',       0.25, 1.20, 0.01 ],
     ['tilt',   'Tilt',        -0.50, 0.50, 0.01 ],
@@ -2728,6 +2758,7 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       `<label>Sclera</label><input type="color" data-c="white" value="${EYE.white}">
        <label>Iris</label><input type="color" data-c="iris" value="${EYE.iris}">
        <label>Pupil</label><input type="color" data-c="pupil" value="${EYE.pupil}">
+       <label><input type="checkbox" data-b="flip" ${EYE.flip?'checked':''}> flip to other side of head</label>
        <label><input type="checkbox" data-b="onTop" ${EYE.onTop?'checked':''}> draw through head (tuning)</label>
        <label><input type="checkbox" data-b="showWhite" ${EYE.showWhite?'checked':''}> show sclera</label>
        <label><input type="checkbox" data-b="on" ${EYE.on?'checked':''}> eyes on</label>
@@ -2798,8 +2829,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     pane.querySelectorAll('input[data-wb]').forEach(el =>
       el.addEventListener('change', () => { WEAP[el.dataset.wb] = el.checked; applyW(); }));
     pane.querySelector('[data-a="reset"]').addEventListener('click', () => {
-      Object.assign(EYE, { spread:0.30, height:0.10, depth:0.02, size:0.115, squash:0.62,
-                           tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true });
+      Object.assign(EYE, { spread:0.30, height:0.10, depth:0.10, size:0.115, squash:0.62,
+                           tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true, flip:false });
       Object.assign(MOUTH, MOUTH_DEFAULT); Object.assign(WEAP, WEAP_DEFAULT);
       build(); addEyes(hero, false); eyeSave(); addMouth(hero, false); mouthSave();
     });
@@ -3356,6 +3387,7 @@ async function build(){
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(80,80),
     new THREE.MeshStandardMaterial({ color:'#332c38', roughness:.98 }));
   floor.rotation.x = -Math.PI/2; floor.position.y = -0.02; floor.receiveShadow = true; scene.add(floor);
+  buildSafeZone(scene);
 
   // braziers in the corners of the play space
   const t = roomHalf * 0.74;
@@ -3587,6 +3619,8 @@ function tick(){
     heroLamp.position.copy(hero.root.position).add(new THREE.Vector3(0, 2.0, 0));
   }
 
+  { const tag = document.getElementById('safeTag');
+    if(tag) tag.style.display = (hero && inSafeZone(hero.root.position)) ? 'block' : 'none'; }
   for(const e of enemies){
     e.update(dt);
     if(e.dead){ e.root.position.y = Math.max(-0.4, e.root.position.y - dt*0.6); continue; }
@@ -3605,21 +3639,23 @@ function tick(){
       while(d < -Math.PI) d += Math.PI*2;
       e.root.rotation.y += d * Math.min(1, dt*3.6);
       const spd = (e.def2 && e.def2.speed) || 1.5;
-      if(dist < 10 && dist > 1.7 && e.locked <= 0){       // stalk the player
+      const safe = inSafeZone(hero.root.position);
+      if(!safe && dist < 10 && dist > 1.7 && e.locked <= 0){   // stalk the player
         e.root.position.x += (dx/dist) * spd * dt;
         e.root.position.z += (dz/dist) * spd * dt;
         e.play(spd > 2.2 ? 'run' : 'walk', { speed:.95 });
       }
       // ...and swing once in reach
       e.swingCd -= dt;
-      if(dist <= 2.0 && e.locked <= 0 && e.swingCd <= 0){
+      if(!safe && dist <= 2.0 && e.locked <= 0 && e.swingCd <= 0){
         e.swingCd = 1.5 + Math.random()*1.2;
         e.once('attack', 1.0);
         setTimeout(() => {                                 // connect mid-swing
           if(e.dead || !hero) return;
           const d2 = Math.hypot(hero.root.position.x - e.root.position.x,
                                 hero.root.position.z - e.root.position.z);
-          if(d2 <= 2.4 && rollT <= 0) hurtHero((e.def2 && e.def2.dmg) || 7);
+          if(d2 <= 2.4 && rollT <= 0 && !inSafeZone(hero.root.position))
+            hurtHero((e.def2 && e.def2.dmg) || 7);
         }, 320);
       }
     }
@@ -3710,6 +3746,20 @@ window.__SLICE = {
                     if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
   mouthShapes: () => MOUTH_SHAPES.slice(),
   weapons: () => WEAPONS.slice(),
+  inSafe: () => !!(hero && inSafeZone(hero.root.position)),
+  tp: (x,z) => { if(hero){ hero.root.position.x = x; hero.root.position.z = z; } return true; },
+  hp: () => heroHp,
+  safeInfo: () => ({ x:SAFE.x, z:SAFE.z, r:SAFE.r }),
+  // drop the hero right on top of a live enemy — the only honest way to test that the
+  // safe zone is what stops the damage, rather than the mobs simply not arriving
+  nextToFoe: () => { const e = enemies.find(q => !q.dead); if(!e) return null;
+    hero.root.position.x = e.root.position.x + 1.2;
+    hero.root.position.z = e.root.position.z;
+    return { x:+hero.root.position.x.toFixed(2), z:+hero.root.position.z.toFixed(2) }; },
+  dragFoeToSafe: () => { const e = enemies.find(q => !q.dead); if(!e) return null;
+    hero.root.position.set(SAFE.x, hero.root.position.y, SAFE.z);
+    e.root.position.x = SAFE.x + 1.2; e.root.position.z = SAFE.z;
+    return true; },
   weapon: async (name, o) => { Object.assign(WEAP, { on:true, name: name || WEAP.name }, o||{});
     const r = await equipWeapon(hero, false); weapSave();
     if(window.__eyeRebuild) window.__eyeRebuild(); return r; },

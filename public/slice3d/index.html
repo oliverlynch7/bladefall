@@ -1801,10 +1801,11 @@ let EYE_ALL = {};
 try { EYE_ALL = JSON.parse(localStorage.getItem('bf_eye') || '{}'); } catch(e){}
 const eyeModel = () => (heroDef && (heroDef.model || heroDef.id)) || 'Warrior';
 function eyeLoadFor(model){
-  Object.assign(EYE, EYE_DEFAULT, EYE_ALL[model] || {});
+  const pre = (FACE_PRESETS[model] || {}).eye || {};
+  Object.assign(EYE, EYE_DEFAULT, pre, cleanFace(EYE_ALL[model] || {}, EYE_DEFAULT));
 }
 const eyeSave = () => {
-  EYE_ALL[eyeModel()] = JSON.parse(JSON.stringify(EYE));
+  EYE_ALL[eyeModel()] = cleanFace(JSON.parse(JSON.stringify(EYE)), EYE_DEFAULT);
   try { localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL)); } catch(e){}
 };
 
@@ -1974,12 +1975,59 @@ const MOUTH = {
   flip: false,
 };
 const MOUTH_SHAPES = ['line','smile','grin','teeth','frown','o','smirk','open','flat'];
+
+/* ─────────────  FACE PRESETS  ─────────────
+   Tuned by Oliver, on real heads, at real size — 2026-07-29. These beat anything derived:
+   the six bodies have genuinely different skulls, beards and hoods, so no single set of
+   numbers fits them all, which is why the values are keyed by MODEL rather than by class.
+   (Paladin currently rides the Cleric body; if it moves to the Warrior archetype later it
+   simply picks up the Warrior entry, no retuning.)
+
+   A saved localStorage value still wins, so Oliver's in-browser tweaks are never
+   overwritten by a deploy. */
+const FACE_PRESETS = {
+  Warrior: {
+    eye:   { spread:0.13,  height:-0.185, depth:-0.075, size:0.072, squash:0.66, tilt:0.17,
+             iris:'#9b2c2c', pupil:'#000000', flip:true },
+    mouth: { shape:'line', y:-0.465, z:-0.95, width:0.27, height:0.275, color:'#5a2f28' },
+  },
+  Ranger: {
+    eye:   { spread:0.195, height:-0.16,  depth:0.075,  size:0.098, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false },
+    mouth: { shape:'line', y:-0.52,  z:0.095, width:0.34, height:0.20, color:'#5a2f28' },
+  },
+  Wizard: {
+    eye:   { spread:0.195, height:-0.225, depth:0.02,   size:0.088, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false },
+    mouth: { shape:'flat', y:-0.495, z:0.075, width:0.31, height:0.26, color:'#483e3c' },
+  },
+  Cleric: {
+    eye:   { spread:0.23,  height:-0.21,  depth:0.095,  size:0.076, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false },
+    mouth: { shape:'smile', y:-0.465, z:0.135, width:0.34, height:0.20, color:'#5a2f28' },
+  },
+  // Monk and Rogue not yet tuned — they fall back to the Warrior-derived base.
+};
+
+/* Saved settings from before the slider-scoping fix contain a stray "undefined" key: the
+   eye handlers were bound to every range/colour input in the panel, so mouth and weapon
+   edits wrote into EYE. Drop anything that is not a real field rather than carrying
+   garbage forward. */
+function cleanFace(obj, ref){
+  const out = {};
+  for(const k of Object.keys(ref)) if(k in obj) out[k] = obj[k];
+  return out;
+}
+
 const MOUTH_DEFAULT = JSON.parse(JSON.stringify(MOUTH));
 let MOUTH_ALL = {};
 try { MOUTH_ALL = JSON.parse(localStorage.getItem('bf_mouth') || '{}'); } catch(e){}
-function mouthLoadFor(model){ Object.assign(MOUTH, MOUTH_DEFAULT, MOUTH_ALL[model] || {}); }
+function mouthLoadFor(model){
+  const pre = (FACE_PRESETS[model] || {}).mouth || {};
+  Object.assign(MOUTH, MOUTH_DEFAULT, pre, cleanFace(MOUTH_ALL[model] || {}, MOUTH_DEFAULT));
+}
 const mouthSave = () => {
-  MOUTH_ALL[eyeModel()] = JSON.parse(JSON.stringify(MOUTH));
+  MOUTH_ALL[eyeModel()] = cleanFace(JSON.parse(JSON.stringify(MOUTH)), MOUTH_DEFAULT);
   try { localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); } catch(e){}
 };
 const _mouthTex = {};
@@ -2267,13 +2315,13 @@ const CREATOR = {
   // what a player may change, and the bounds they may change it within
   rows: [
     ['spread', 'Eye spacing',  0.06, 0.26, 0.005],
-    ['height', 'Eye height',  -0.32, 0.02, 0.005],
+    ['height', 'Eye height',  -1.60, 0.10, 0.005],
     ['size',   'Eye size',     0.045, 0.115, 0.002],
     ['squash', 'Eye shape',    0.35, 1.05, 0.01 ],
     ['tilt',   'Eye tilt',    -0.35, 0.35, 0.01 ],
   ],
   mouthRows: [
-    ['y',      'Mouth height', -0.62, -0.24, 0.005],
+    ['y',      'Mouth height', -2.00, -0.15, 0.005],
     ['width',  'Mouth width',   0.14, 0.46, 0.005],
     ['height', 'Mouth size',    0.12, 0.42, 0.005],
   ],
@@ -2948,14 +2996,14 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     ['grip',  'Grip point', 0.00, 1.00, 0.01],
   ];
   const MOUTH_ROWS = [
-    ['y',      'Height',      -0.60, 0.30, 0.005],
+    ['y',      'Height',      -2.60, 0.40, 0.005],
     ['z',      'Forward',     -1.20, 1.20, 0.005],
     ['width',  'Width',        0.08, 0.80, 0.005],
     ['height', 'Tallness',     0.04, 0.60, 0.005],
   ];
   const ROWS = [
     ['spread', 'Apart',        0.05, 0.60, 0.005],
-    ['height', 'Height',      -0.30, 0.50, 0.005],
+    ['height', 'Height',      -2.20, 0.60, 0.005],
     ['depth',  'Forward',     -1.20, 1.20, 0.005],
     ['size',   'Size',         0.02, 0.30, 0.002],
     ['squash', 'Squash',       0.25, 1.20, 0.01 ],

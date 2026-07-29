@@ -2274,12 +2274,15 @@ const ARCHETYPE_WEAPONS = {
   Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Sword_Knight$/, /^Claymore/,
             /^Axe/, /^Hammer/, /^Spear/, /^Scythe/, /^Shield/],
   Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Staff_/, /^Shield/],
-  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/],
+  // Scythe added for the Reaper, which uses this skin. Note it now appears on TWO bodies,
+  // which is what forced weapon tuning to become per-body below.
+  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Scythe/],
   Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
-  // Spellblade: Sword_Big is the caster's weapon, held high and forward rather than
-  // shouldered. Oliver's call - it gives the mage archetype a silhouette of its own
-  // without needing a model we do not have.
-  Wizard:  [/^Sword_Big$/, /^Sword_big_Golden$/, /^Staff_/, /^Scythe/, /^Spear/, /^Dagger$/],
+  /* Casters carry staffs only. Oliver's call, and it is the cleaner one: the stock staffs
+     already sit correctly in the hand with the built-in holding pose, so a mage never needs
+     tuning. Staff_Wizard is the staff, Staff_Cleric doubles as the WAND at reduced scale.
+     The Sword_Big spellblade experiment is retired. */
+  Wizard:  [/^Staff_/],
   Monk:    [],                       // unarmed by design
 };
 const WEAPONS = WEAPONS_FILE.concat(STOCK_NAMES);
@@ -2289,9 +2292,18 @@ function weaponsFor(model){
   return WEAPONS.filter(w => rules.some(re => re.test(w)));
 }
 
-/* Tuned transforms, keyed by WEAPON rather than by class. That is the point of the rule
-   above: a weapon lives on one archetype, so one set of numbers is enough for it
-   everywhere it can appear. */
+/* Tuned transforms. Keyed by WEAPON, with an optional per-BODY override.
+
+   The bare key was enough while every weapon lived on exactly one archetype. The Scythe
+   now appears on both the Warrior and the Rogue, and it will not hang the same way in two
+   differently-proportioned hands — so a weapon can carry a per-model entry that wins over
+   its general one. Saving follows the same rule, keyed 'Model|Weapon', so tuning the Rogue's
+   scythe cannot overwrite the Warrior's. */
+const WEAPON_PRESETS_BY_MODEL = {
+  // Rogue's scythe starts from the Warrior's numbers; Oliver will tune it for this hand.
+  Rogue: { Scythe: { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,
+                     fwd:-0.04, up:0.01, side:-0.17, grip:0.29, shaft:0 } },
+};
 /* Oliver's tuned values, on the Warrior body, 2026-07-29.
 
    Worth noting the pattern: pitch 0.10, yaw -3.20, roll 0.10 and grip 0.72 recur on
@@ -2346,7 +2358,8 @@ const WEAPON_PRESETS = {
 
   /* Stock weapons carry the artist's own placement, so they start neutral — length 1 and
      no rotation means "exactly as the character that owns it holds it". */
-  Staff_Cleric: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  // the WAND: same model as the cleric staff, scaled down
+  Staff_Cleric: { len:0.72, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
   Staff_Wizard: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
   Sword_Knight: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
   Dagger_Rogue: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
@@ -2360,13 +2373,17 @@ let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
 /* Keyed by weapon name, not by model: the archetype rule guarantees a weapon only ever
    appears on one body, so its tuning is the same everywhere it shows up. */
+function weapKey(){ return eyeModel() + '|' + WEAP.name; }
 function weapLoadFor(_model){
-  const n = WEAP.name;
-  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {}, WEAP_ALL[n] || {},
+  const n = WEAP.name, m = eyeModel();
+  const byModel = (WEAPON_PRESETS_BY_MODEL[m] || {})[n] || {};
+  // saved: prefer this body's own tuning, fall back to any older bare-keyed entry
+  const saved = WEAP_ALL[m + '|' + n] || WEAP_ALL[n] || {};
+  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {}, byModel, saved,
                 { name: n, on: true });
 }
 const weapSave = () => {
-  WEAP_ALL[WEAP.name] = JSON.parse(JSON.stringify(WEAP));
+  WEAP_ALL[weapKey()] = JSON.parse(JSON.stringify(WEAP));
   try { localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); } catch(e){}
 };
 
@@ -4308,6 +4325,7 @@ window.__SLICE = {
   creator: on => { toggleCreator(on); return CREATOR.open; },
   weapons: () => WEAPONS.slice(),
   weaponsFor: m => weaponsFor(m || eyeModel()),
+  weapDump: () => JSON.parse(JSON.stringify(WEAP)),
   clipList: () => hero ? Object.keys(hero.clips || {}).sort() : [],
   playClip: n => { if(hero && hero.clips && hero.clips[n]){
       hero.play(null, { clip: hero.clips[n], loop: true, fade: 0.15 });

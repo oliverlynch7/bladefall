@@ -34,6 +34,15 @@
   .cbtn.sel{border-color:#e8a33d;color:#ffd89a;box-shadow:0 0 14px rgba(232,163,61,.28)}
   .cbtn:focus-visible{outline:2px solid #e8a33d;outline-offset:2px}
 
+  #skins{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
+  .sbtn{display:flex;align-items:center;gap:5px;background:linear-gradient(180deg,rgba(30,26,20,.95),rgba(14,12,16,.95));
+    border:1px solid #3d3830;color:#bdb3a0;font-size:10.5px;font-weight:700;padding:5px 9px;border-radius:8px;
+    cursor:pointer;letter-spacing:.03em;transition:.14s}
+  .sbtn:hover{border-color:#e8a33d;color:#fff}
+  .sbtn.sel{border-color:#e8a33d;color:#ffd89a;box-shadow:0 0 10px rgba(232,163,61,.25)}
+  .sbtn i{width:9px;height:9px;border-radius:50%;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.5) inset}
+  .sbtn:focus-visible{outline:2px solid #e8a33d;outline-offset:2px}
+
   #hint{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:20;
     font-size:11.5px;color:#8d8474;line-height:1.7;pointer-events:none;text-shadow:0 1px 3px #000}
   #hint b{color:#d8c8a8}
@@ -84,7 +93,10 @@
 
 <div class="hud" id="top">
   <div id="brand">Bladefall<small>3D slice · Quaternius + Kenney (CC0)</small></div>
-  <div id="classes"></div>
+  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+    <div id="classes"></div>
+    <div id="skins"></div>
+  </div>
 </div>
 
 <div id="hint">
@@ -225,6 +237,108 @@ const CLASSES = [
             attack:['Staff_Attack','Spell1'], skill:['Spell2','Spell1'], hit:['RecieveHit','RecieveHit_2'], death:['Death'] },
     skill:{ name:'Arc Nova', kind:'bolt', color:'#9ad4ff', color2:'#5f8fff' } },
 ];
+
+/* ─────────────  SKINS  ─────────────
+   The Quaternius atlases are genuinely dark (the Warrior's plate is #3d3d3d at 24%
+   brightness), which is why the stock models read as silhouettes. Rather than ship a
+   second set of textures, we repaint the atlas on a canvas at load time:
+     · desaturated pixels  → the armour/metal colour  (luminance preserved)
+     · dark warm-brown     → the leather/cloth colour
+     · everything else     → untouched, so skin, hair and eyes survive
+   `lift` raises overall brightness. This is the same trick that gives one sword mesh
+   a whole rarity ladder, so it doubles as a test of that idea. */
+function hexRGB(h){ const n = parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function rgb2hsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+  let h=0; if(d){ h = mx===r ? ((g-b)/d+(g<b?6:0)) : mx===g ? ((b-r)/d+2) : ((r-g)/d+4); h*=60; }
+  return [h, mx?d/mx:0, mx];
+}
+function tintPixel(out, i, target, lum){
+  // paint `target` at the pixel's own luminance so shading/detail survives
+  const [tr,tg,tb] = target;
+  out[i]   = Math.min(255, tr * lum);
+  out[i+1] = Math.min(255, tg * lum);
+  out[i+2] = Math.min(255, tb * lum);
+}
+const _skinCache = new Map();
+function repaintTexture(srcTex, skin){
+  const img = srcTex.image;
+  if(!img || !img.width) return srcTex;
+  const key = (srcTex.uuid || '') + '|' + skin.id;
+  if(_skinCache.has(key)) return _skinCache.get(key);
+
+  const cvs = document.createElement('canvas');
+  cvs.width = img.width; cvs.height = img.height;
+  const ctx = cvs.getContext('2d', { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0);
+  const data = ctx.getImageData(0,0,cvs.width,cvs.height);
+  const px = data.data;
+  const metal   = hexRGB(skin.metal);
+  const leather = hexRGB(skin.leather);
+  const lift    = skin.lift || 1.0;
+
+  for(let i=0;i<px.length;i+=4){
+    if(px[i+3] < 8) continue;
+    const [h,s,v] = rgb2hsv(px[i],px[i+1],px[i+2]);
+    // luminance normalised so mid-greys land mid-tone, then lifted
+    const lum = Math.min(1.9, (0.35 + v * 1.25) * lift);
+    if(s < 0.20){                                     // steel / plate / cloth-grey
+      tintPixel(px, i, metal, lum);
+    } else if(h >= 12 && h <= 52 && v < 0.52){        // dark leather + straps
+      tintPixel(px, i, leather, lum);
+    } else {                                          // skin, hair, eyes, accents
+      px[i]   = Math.min(255, px[i]   * lift);
+      px[i+1] = Math.min(255, px[i+1] * lift);
+      px[i+2] = Math.min(255, px[i+2] * lift);
+    }
+  }
+  ctx.putImageData(data, 0, 0);
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = srcTex.flipY;
+  tex.wrapS = srcTex.wrapS; tex.wrapT = srcTex.wrapT;
+  tex.needsUpdate = true;
+  _skinCache.set(key, tex);
+  return tex;
+}
+// Stock ("Default") plus three repaints per class. `lift` alone fixes the darkness.
+const SKINS = {
+  Warrior: [
+    { id:'w0', name:'Default',  stock:true },
+    { id:'w1', name:'Crimson',  metal:'#a8352a', leather:'#2e1c14', lift:1.30 },
+    { id:'w2', name:'Gilded',   metal:'#c39a3e', leather:'#3a2a16', lift:1.34 },
+    { id:'w3', name:'Obsidian', metal:'#5b5470', leather:'#241c2e', lift:1.26 },
+  ],
+  Rogue: [
+    { id:'r0', name:'Default',  stock:true },
+    { id:'r1', name:'Emerald',  metal:'#2f8f5e', leather:'#1d2a20', lift:1.30 },
+    { id:'r2', name:'Ashen',    metal:'#9aa2ad', leather:'#2b2b30', lift:1.32 },
+    { id:'r3', name:'Sanguine', metal:'#8e2436', leather:'#2a1418', lift:1.28 },
+  ],
+  Wizard: [
+    { id:'z0', name:'Default',  stock:true },
+    { id:'z1', name:'Arcane',   metal:'#5b57c8', leather:'#241f3e', lift:1.32 },
+    { id:'z2', name:'Ember',    metal:'#c05a24', leather:'#331a10', lift:1.32 },
+    { id:'z3', name:'Verdant',  metal:'#3f8f52', leather:'#1e2a1c', lift:1.30 },
+  ],
+};
+let skinIdx = { Warrior:0, Rogue:0, Wizard:0 };
+function applySkin(actor, clsId, skin){
+  if(!actor || !skin) return;
+  actor.root.traverse(o => {
+    if(!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const m of mats){
+      if(!m) continue;
+      if(!m.userData._srcMap) m.userData._srcMap = m.map || null;
+      const src = m.userData._srcMap;
+      if(!src) continue;
+      m.map = skin.stock ? src : repaintTexture(src, skin);
+      m.needsUpdate = true;
+    }
+  });
+}
 
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
@@ -876,9 +990,27 @@ async function build(){
   for(const spot of ENEMY_SPOTS) await spawnEnemy(spot.x, spot.z, spot.m);
 
   buildClassBar();
+  buildSkinBar();
   document.getElementById('load').style.display = 'none';
 }
 
+function buildSkinBar(){
+  const bar = document.getElementById('skins');
+  if(!bar) return;
+  const list = SKINS[heroDef.id] || [];
+  bar.innerHTML = '';
+  list.forEach((sk, i) => {
+    const b = document.createElement('button');
+    b.className = 'sbtn' + (i === skinIdx[heroDef.id] ? ' sel' : '');
+    b.innerHTML = `<i style="background:${sk.stock ? '#5a5f6b' : sk.metal}"></i>${sk.name}`;
+    b.onclick = () => {
+      skinIdx[heroDef.id] = i;
+      applySkin(hero, heroDef.id, sk);
+      [...bar.children].forEach((c,j) => c.classList.toggle('sel', j === i));
+    };
+    bar.appendChild(b);
+  });
+}
 function buildClassBar(){
   const bar = document.getElementById('classes');
   bar.innerHTML = '';
@@ -908,6 +1040,8 @@ async function switchClass(def){
     hero.root.position.copy(pos); hero.root.rotation.y = rot;
     scene.add(hero.root);
     heroDef = def;
+    applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
+    buildSkinBar();
   }
   document.querySelectorAll('.cbtn').forEach(b=>{
     b.disabled = false; b.classList.toggle('sel', b.dataset.id===heroDef.id);
@@ -1068,6 +1202,7 @@ window.__SLICE = {
   attack: ()=>doAttack(), roll: ()=>doRoll(), skill: ()=>doSkill(), jump: ()=>doJump(),
   enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),
+  skin: i => { const L=SKINS[heroDef.id]||[]; if(L[i]){ skinIdx[heroDef.id]=i; applySkin(hero, heroDef.id, L[i]); buildSkinBar(); } },
   face: y => { if(hero) hero.root.rotation.y = y; },
   info: () => ({ cls: heroDef.id, clips: hero ? Object.keys(hero.clips) : [], roomHalf,
                  heroPos: hero ? hero.root.position.toArray().map(n=>+n.toFixed(2)) : null }),

@@ -2023,9 +2023,14 @@ const MOUTH_SHAPES = ['line','smile','grin','teeth','frown','o','smirk','open','
    overwritten by a deploy. */
 const FACE_PRESETS = {
   Warrior: {
-    eye:   { spread:0.13,  height:-0.185, depth:-0.075, size:0.072, squash:0.66, tilt:0.17,
-             iris:'#9b2c2c', pupil:'#000000', flip:true },
-    mouth: { shape:'line', y:-0.465, z:-0.95, width:0.27, height:0.275, color:'#5a2f28' },
+    /* Retuned after the face-direction fix. The first pass had flip:true and depth:-0.075,
+       which were compensating for the broken direction detection rather than describing
+       where the eyes belong; with that fixed the values are straightforward. */
+    eye:   { spread:0.145, height:-0.185, depth:0.095, size:0.092, squash:0.66, tilt:0.17,
+             iris:'#9b2c2c', pupil:'#000000', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'line', y:-0.465, z:0.095, width:0.27, height:0.455, color:'#5a2f28',
+             offX:0 },
   },
   Ranger: {
     eye:   { spread:0.195, height:-0.16,  depth:0.075,  size:0.098, squash:0.62, tilt:0,

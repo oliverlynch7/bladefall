@@ -155,6 +155,7 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
    ───────────────────────────────────────────────────────────── */
 
 const HERO_H = 1.75;
+const ATK_SPEED = 1.85;   // swing playback rate — higher = snappier
 let MOB_SCALE = 1.0;   // global mob-size dial (see __SLICE.mobScale)                 // metres — everything is normalised to this
 const clock  = new THREE.Clock();
 const canvas = document.getElementById('c');
@@ -981,7 +982,7 @@ class Actor {
     if(!clip) return null;
     if(!this._upper) this._upper = new Map();
     if(this._upper.has(clip.name)) return this._upper.get(clip.name);
-    const LOWER = /(^|[._|])(leg|thigh|shin|calf|knee|foot|ankle|toe|hip|pelvis|root)/i;
+    const LOWER = /(leg|thigh|shin|calf|knee|foot|ankle|toe|ball|hip|pelvis|root|poletarget)/i;
     const tracks = clip.tracks.filter(t => !LOWER.test(t.name.split('.')[0]));
     const made = tracks.length && tracks.length < clip.tracks.length
       ? new THREE.AnimationClip(clip.name + '__upper', clip.duration, tracks)
@@ -1673,14 +1674,14 @@ function doAttack(){
   const name = list.length ? list[atkFlip++ % list.length] : null;
   if(!name) return;
   const clip = hero.clips[name];
-  if(hero.layer('attack', { speed:1.25, clip })){
+  if(hero.layer('attack', { speed:ATK_SPEED, clip })){
     hero.locked = 0;                                    // arms only — legs keep running
-    hero.swingT = clip.duration/1.25*0.8;
+    hero.swingT = clip.duration/ATK_SPEED*0.8;
   } else {                                              // rig has no usable bone names
-    hero.play('attack', { loop:false, fade:.07, clip, speed:1.25 });
-    hero.locked = clip.duration/1.25*0.55;              // still shorter than before
+    hero.play('attack', { loop:false, fade:.07, clip, speed:ATK_SPEED });
+    hero.locked = clip.duration/ATK_SPEED*0.55;
   }
-  setTimeout(()=>{ if(hero) strike(2.5, 0.25, 9, 16); }, 170);   // land the hit mid-swing
+  setTimeout(()=>{ if(hero) strike(2.5, 0.25, 9, 16); }, 110);   // land the hit mid-swing
 }
 function doRoll(){
   if(!hero || rollT>0 || hero.locked>0 || !grounded) return;
@@ -2303,6 +2304,7 @@ window.__SLICE = {
   attack: ()=>doAttack(), roll: ()=>doRoll(), skill: (i)=>castSkill(i||0), jump: ()=>doJump(),
   skills: () => (SKILLS[heroDef.id]||[]).map(s=>s.name),
   mobScale: v => { if(v!=null) MOB_SCALE = v; return MOB_SCALE; },
+  atkSpeed: v => { if(v!=null) window.__ATK = v; return window.__ATK || ATK_SPEED; },
   sizes: () => MONSTERS.map(m => m.label + ' ' + (m.h*MOB_SCALE).toFixed(2) + 'm'),
   enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),

@@ -2169,7 +2169,7 @@ function addMouth(actor, useSaved){
    The only thing left to compute is SIZE, because a scythe is not a dagger. We measure
    the built-in weapon's length, measure the new one's, and scale to match — then a
    per-weapon `len` multiplier lets a two-hander read longer than the stock sword. */
-const WEAPONS = ['Arrow', 'Axe', 'Axe_Double', 'Axe_Double_Golden', 'Axe_Small', 'Bow_Evil', 'Bow_Golden', 'Bow_Wooden', 'Bow_Wooden2', 'Claymore', 'Dagger', 'Dagger_2', 'Dagger_Golden', 'Hammer_Double', 'Hammer_Double_Golden', 'Hammer_Small', 'Scythe', 'Shield_Celtic_Golden', 'Shield_Heater', 'Shield_Heater_2', 'Shield_Round', 'Shield_Round_2', 'Spear', 'Sword', 'Sword_2', 'Sword_Big', 'Sword_Golden', 'Sword_big_Golden'];
+const WEAPONS_FILE = ['Arrow', 'Axe', 'Axe_Double', 'Axe_Double_Golden', 'Axe_Small', 'Bow_Evil', 'Bow_Golden', 'Bow_Wooden', 'Bow_Wooden2', 'Claymore', 'Dagger', 'Dagger_2', 'Dagger_Golden', 'Hammer_Double', 'Hammer_Double_Golden', 'Hammer_Small', 'Scythe', 'Shield_Celtic_Golden', 'Shield_Heater', 'Shield_Heater_2', 'Shield_Round', 'Shield_Round_2', 'Spear', 'Sword', 'Sword_2', 'Sword_Big', 'Sword_Golden', 'Sword_big_Golden'];
 // how long each should be relative to the character's stock weapon
 const WEAPON_LEN = {
   Claymore:1.45, Sword_Big:1.4, Sword_big_Golden:1.4, Scythe:1.6, Spear:1.7,
@@ -2182,6 +2182,50 @@ const WEAPON_LEN = {
    forward. All three are fractions of the weapon's own length, so they behave the same
    on a dagger and on a scythe. */
 
+
+/* ─────────────  STOCK WEAPONS  ─────────────
+   The staffs Oliver wants already exist — they are built into the Cleric and Wizard
+   models as `Cleric_Staff` and `Wizard_Staff`, parented to the same Weapon.R bone as
+   everything else. So rather than hunting for staff models we do not own, we lift them
+   out of the characters that ship with them.
+
+   Better than a download in three ways: they are already in the exact art style, they are
+   already the right scale for this rig, and the artist already chose how they sit in the
+   hand — so they need no tuning at all. The same trick makes every character's built-in
+   weapon available to the others. */
+const STOCK_WEAPONS = {
+  Staff_Cleric:  { from:'Cleric',  node:'Cleric_Staff'  },
+  Staff_Wizard:  { from:'Wizard',  node:'Wizard_Staff'  },
+  Sword_Knight:  { from:'Warrior', node:'Warrior_Sword' },
+  Dagger_Rogue:  { from:'Rogue',   node:'Rogue_Dagger'  },
+  Bow_Ranger:    { from:'Ranger',  node:'Ranger_Bow'    },
+};
+const STOCK_NAMES = Object.keys(STOCK_WEAPONS);
+
+/* Pull a built-in weapon out of its source character. Returns a group plus the local
+   transform the artist gave it, so we can drop it onto another character's hand exactly
+   as it sat on its own. */
+async function loadStockWeapon(key){
+  const def = STOCK_WEAPONS[key]; if(!def) return null;
+  const g = await load(`assets/chars/${def.from}.gltf`).catch(()=>null);
+  if(!g) return null;
+  let src = null;
+  g.scene.traverse(o => { if(!src && o.name === def.node) src = o; });
+  if(!src) return null;
+  const holder = new THREE.Group();
+  src.updateWorldMatrix(true, false);
+  src.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.userData._weap = true;
+    o.updateWorldMatrix(true, false);
+    m.applyMatrix4(new THREE.Matrix4().copy(src.matrixWorld).invert().multiply(o.matrixWorld));
+    holder.add(m);
+  });
+  if(!holder.children.length) return null;
+  return { holder, pos: src.position.clone(), quat: src.quaternion.clone(), scale: src.scale.clone() };
+}
+
 /* ─────────────  WEAPON RULES  ─────────────
    Oliver's call, and it is a scoping decision more than a design one: a class may only
    equip weapons that suit its archetype. 28 weapons across 6 bodies is 168 combinations to
@@ -2193,17 +2237,18 @@ const WEAPON_LEN = {
 const ARCHETYPE_WEAPONS = {
   // NB the sword patterns are anchored. /^Sword/ also matched Sword_Big, which is now
   // reserved as the mage spellblade — a loose prefix would have handed it back to warriors.
-  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Claymore/, /^Axe/, /^Hammer/,
-            /^Spear/, /^Scythe/, /^Shield/],
-  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Shield/],
-  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/],
+  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Sword_Knight$/, /^Claymore/,
+            /^Axe/, /^Hammer/, /^Spear/, /^Scythe/, /^Shield/],
+  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/, /^Staff_/, /^Shield/],
+  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Sword_Knight$/],
   Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
   // Spellblade: Sword_Big is the caster's weapon, held high and forward rather than
   // shouldered. Oliver's call - it gives the mage archetype a silhouette of its own
   // without needing a model we do not have.
-  Wizard:  [/^Sword_Big$/, /^Sword_big_Golden$/, /^Scythe/, /^Spear/, /^Dagger$/],
+  Wizard:  [/^Sword_Big$/, /^Sword_big_Golden$/, /^Staff_/, /^Scythe/, /^Spear/, /^Dagger$/],
   Monk:    [],                       // unarmed by design
 };
+const WEAPONS = WEAPONS_FILE.concat(STOCK_NAMES);
 function weaponsFor(model){
   const rules = ARCHETYPE_WEAPONS[model];
   if(!rules) return WEAPONS.slice();
@@ -2264,6 +2309,14 @@ const WEAPON_PRESETS = {
   Dagger_Golden:{len:0.82, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:1.00 },
   Spear:       { len:0.88, pitch:1.38, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.14, side:-0.14, grip:0.93 },
   Bow_Wooden2: { len:0.82, pitch:1.48, yaw:-0.20, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.01, grip:0.62 },
+
+  /* Stock weapons carry the artist's own placement, so they start neutral — length 1 and
+     no rotation means "exactly as the character that owns it holds it". */
+  Staff_Cleric: { len:1, pitch:0, yaw:0, roll:0 },
+  Staff_Wizard: { len:1, pitch:0, yaw:0, roll:0 },
+  Sword_Knight: { len:1, pitch:0, yaw:0, roll:0 },
+  Dagger_Rogue: { len:1, pitch:0, yaw:0, roll:0 },
+  Bow_Ranger:   { len:1, pitch:0, yaw:0, roll:0 },
 };
 
 const WEAP = { on:false, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
@@ -2329,6 +2382,25 @@ async function equipWeapon(actor, useSaved){
   if(!allowed.length) return null;
   const rig = weaponRig(actor);
   if(!rig) return null;
+
+  /* Stock weapons take a different path: they arrive with the transform the artist gave
+     them, which is by definition correct for this rig, so they skip the measure-and-scale
+     step entirely and need no tuning. */
+  if(STOCK_WEAPONS[WEAP.name]){
+    const st = await loadStockWeapon(WEAP.name);
+    if(seq !== _weapSeq || !st) return null;
+    const wrapS = new THREE.Group();
+    wrapS.userData._weap = true;
+    wrapS.add(st.holder);
+    wrapS.position.copy(st.pos); wrapS.quaternion.copy(st.quat); wrapS.scale.copy(st.scale);
+    st.holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+    st.holder.scale.setScalar(WEAP.len);
+    clearWeapon(actor);
+    rig.bone.add(wrapS);
+    if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
+    actor._weap = wrapS;
+    return { name: WEAP.name, stockModel: true };
+  }
 
   const g = await load(`assets/weapons/${WEAP.name}.glb`).catch(()=>null);
   // a newer request started while this one was loading — drop this result on the floor

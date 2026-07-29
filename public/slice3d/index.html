@@ -2202,6 +2202,14 @@ const STOCK_WEAPONS = {
 };
 const STOCK_NAMES = Object.keys(STOCK_WEAPONS);
 
+/* What each archetype draws by default. Needed now that custom weapons are on from the
+   start: falling back to the first ALLOWED entry picked alphabetically, which armed the
+   Ranger with an Arrow and the Paladin with a shield. */
+const DEFAULT_WEAPON = {
+  Warrior: 'Sword', Cleric: 'Staff_Cleric', Rogue: 'Dagger',
+  Ranger:  'Bow_Wooden', Wizard: 'Staff_Wizard', Monk: null,
+};
+
 /* Pull a built-in weapon out of its source character. Returns a group plus the local
    transform the artist gave it, so we can drop it onto another character's hand exactly
    as it sat on its own. */
@@ -2319,7 +2327,7 @@ const WEAPON_PRESETS = {
   Bow_Ranger:   { len:1, pitch:0, yaw:0, roll:0 },
 };
 
-const WEAP = { on:false, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
+const WEAP = { on:true, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
                fwd:0, up:-0.39, side:-0.03, grip:0.72, shaft:0, hideStock:true };
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 let WEAP_ALL = {};
@@ -2328,7 +2336,8 @@ try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e)
    appears on one body, so its tuning is the same everywhere it shows up. */
 function weapLoadFor(_model){
   const n = WEAP.name;
-  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {}, WEAP_ALL[n] || {}, { name: n });
+  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {}, WEAP_ALL[n] || {},
+                { name: n, on: true });
 }
 const weapSave = () => {
   WEAP_ALL[WEAP.name] = JSON.parse(JSON.stringify(WEAP));
@@ -2378,7 +2387,10 @@ async function equipWeapon(actor, useSaved){
   if(!WEAP.on) return null;
   // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
   const allowed = weaponsFor(eyeModel());
-  if(allowed.length && !allowed.includes(WEAP.name)) WEAP.name = allowed[0];
+  if(allowed.length && !allowed.includes(WEAP.name)){
+    const pref = DEFAULT_WEAPON[eyeModel()];
+    WEAP.name = (pref && allowed.includes(pref)) ? pref : allowed[0];
+  }
   if(!allowed.length) return null;
   const rig = weaponRig(actor);
   if(!rig) return null;
@@ -3910,6 +3922,9 @@ async function build(){
   hero = new Actor(gW, CLASSES[0]);
   addFace(hero);
   addEyes(hero); addMouth(hero);
+  // the starting hero was the only one that never equipped — switchClass does this, but
+  // the startup path bypasses it, so the first character stood there empty-handed
+  equipWeapon(hero);
   scene.add(hero.root);
   buildAnimBar();
 

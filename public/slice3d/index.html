@@ -2040,14 +2040,18 @@ const FACE_PRESETS = {
              offX:0 },
   },
   Wizard: {
-    eye:   { spread:0.195, height:-0.225, depth:0.02,   size:0.088, squash:0.62, tilt:0,
-             iris:'#3a6ea5', pupil:'#101014', flip:false },
-    mouth: { shape:'flat', y:-0.495, z:0.075, width:0.31, height:0.26, color:'#483e3c' },
+    eye:   { spread:0.195, height:-0.225, depth:0.020, size:0.088, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'flat', y:-0.505, z:0.075, width:0.310, height:0.260, color:'#483e3c',
+             offX:0 },
   },
   Cleric: {
-    eye:   { spread:0.23,  height:-0.21,  depth:0.095,  size:0.076, squash:0.62, tilt:0,
-             iris:'#3a6ea5', pupil:'#101014', flip:false },
-    mouth: { shape:'smile', y:-0.465, z:0.135, width:0.34, height:0.20, color:'#5a2f28' },
+    eye:   { spread:0.230, height:-0.210, depth:0.095, size:0.076, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'smile', y:-0.465, z:0.135, width:0.340, height:0.200, color:'#5a2f28',
+             offX:0 },
   },
   Monk: {
     /* First set tuned with the controls added for this model specifically: faceYaw/facePitch
@@ -2348,11 +2352,11 @@ const WEAPON_PRESETS = {
 
   /* Stock weapons carry the artist's own placement, so they start neutral — length 1 and
      no rotation means "exactly as the character that owns it holds it". */
-  Staff_Cleric: { len:1, pitch:0, yaw:0, roll:0 },
-  Staff_Wizard: { len:1, pitch:0, yaw:0, roll:0 },
-  Sword_Knight: { len:1, pitch:0, yaw:0, roll:0 },
-  Dagger_Rogue: { len:1, pitch:0, yaw:0, roll:0 },
-  Bow_Ranger:   { len:1, pitch:0, yaw:0, roll:0 },
+  Staff_Cleric: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Staff_Wizard: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Sword_Knight: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Dagger_Rogue: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Bow_Ranger:   { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
 };
 
 const WEAP = { on:true, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
@@ -2435,6 +2439,20 @@ async function equipWeapon(actor, useSaved){
     wrapS.position.copy(st.pos); wrapS.quaternion.copy(st.quat); wrapS.scale.copy(st.scale);
     st.holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
     st.holder.scale.setScalar(WEAP.len);
+    /* Stock weapons were skipping the slide controls entirely. Inheriting the artist's
+       transform is right for the STARTING position, but it should not mean the staffs and
+       wands cannot then be nudged like everything else. Same maths as the file path, with
+       reach taken from the piece's own size. */
+    const sb = new THREE.Box3().setFromObject(st.holder);
+    const ss = sb.getSize(new THREE.Vector3());
+    const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
+    st.holder.position.set(WEAP.side * sreach, WEAP.up * sreach, WEAP.fwd * sreach);
+    if(WEAP.shaft){
+      const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
+      const along = new THREE.Vector3(ax==='x'?1:0, ax==='y'?1:0, ax==='z'?1:0)
+        .applyEuler(st.holder.rotation);
+      st.holder.position.addScaledVector(along, WEAP.shaft * sreach);
+    }
     clearWeapon(actor);
     rig.bone.add(wrapS);
     if(rig.stock && WEAP.hideStock) rig.stock.visible = false;

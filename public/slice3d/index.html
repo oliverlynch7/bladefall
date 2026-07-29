@@ -173,7 +173,7 @@ scene.add(new THREE.HemisphereLight('#9fb4dd', '#5a4a3a', 1.5));
 const moon = new THREE.DirectionalLight('#cfe0ff', 1.5);
 moon.position.set(-8, 14, -6);
 moon.castShadow = true;
-moon.shadow.mapSize.set(2048, 2048);
+moon.shadow.mapSize.set(1024, 1024);
 moon.shadow.camera.near = 1; moon.shadow.camera.far = 60;
 moon.shadow.camera.left = -22; moon.shadow.camera.right = 22;
 moon.shadow.camera.top = 22;  moon.shadow.camera.bottom = -22;
@@ -189,7 +189,7 @@ function addTorch(x, z){
   const g = new THREE.Group(); g.position.set(x, 0, z);
   const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,1.1,7),
     new THREE.MeshStandardMaterial({ color:'#2b2119', roughness:.95 }));
-  post.position.y = 0.55; post.castShadow = true; g.add(post);
+  post.position.y = 0.55; g.add(post);
   const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.11,0.16,9),
     new THREE.MeshStandardMaterial({ color:'#3a2c1e', roughness:.9 }));
   bowl.position.y = 1.16; g.add(bowl);
@@ -224,7 +224,7 @@ function relight(m){
   lit.name = m.name;
   return lit;
 }
-function prep(obj, { shadow=true } = {}){
+function prep(obj, { shadow=false } = {}){
   obj.traverse(o => {
     if(!o.isMesh) return;
     o.castShadow = shadow; o.receiveShadow = true;
@@ -876,7 +876,7 @@ class Actor {
     model.position.y -= b2.min.y;                     // feet on the floor
     model.position.x -= (b2.min.x + b2.max.x)/2 ;
     model.position.z -= (b2.min.z + b2.max.z)/2 ;
-    prep(model);
+    prep(model, { shadow:true });
     this.root.add(model);
     this.model = model;
 
@@ -1690,7 +1690,7 @@ async function scatterProps(){
   for(const P of QPLAN){
     const g2 = await load(`assets/qprops/${P.file}.gltf`).catch(()=>null);
     if(!g2) continue;
-    const base = prep(g2.scene);
+    const base = prep(g2.scene, { shadow:false });
     const bb = new THREE.Box3().setFromObject(base), bs = bb.getSize(new THREE.Vector3());
     const norm = 1 / Math.max(0.001, Math.max(bs.x, bs.y, bs.z));
     for(let i=0;i<P.n;i++){
@@ -1710,7 +1710,7 @@ async function scatterProps(){
   // fire baskets flanking the centre — real light sources
   const fb = await load('assets/props/fire-basket.glb').catch(()=>null);
   if(fb){
-    const base = prep(fb.scene);
+    const base = prep(fb.scene, { shadow:false });
     const bb = new THREE.Box3().setFromObject(base), bs = bb.getSize(new THREE.Vector3());
     const norm = 1.35 / Math.max(0.001, Math.max(bs.x, bs.y, bs.z));
     for(const [bx,bz] of [[-3.6,-3.6],[3.6,-3.6],[-3.6,3.6],[3.6,3.6]]){
@@ -1737,7 +1737,7 @@ async function addChests(){
   const coinG = await load('assets/qprops/Coin_Pile.gltf').catch(()=>null);
   const potG  = await load('assets/qprops/Potion_1.gltf').catch(()=>null);
   if(!g) return;
-  const base = prep(g.scene);
+  const base = prep(g.scene, { shadow:false });
   const bb = new THREE.Box3().setFromObject(base), bs = bb.getSize(new THREE.Vector3());
   const norm = 0.95 / Math.max(0.001, Math.max(bs.x, bs.y, bs.z));
   for(const [cx,cz] of [[-7.5,-1.5],[7.5,-1.5],[0,-9.0]]){
@@ -1768,7 +1768,7 @@ function tryOpenChests(){
     // spill the loot
     const drop = (G, n, spread, y, sc) => {
       if(!G) return;
-      const b = prep(G.scene);
+      const b = prep(G.scene, { shadow:false });
       const bb2 = new THREE.Box3().setFromObject(b), s2 = bb2.getSize(new THREE.Vector3());
       const nm = sc / Math.max(0.001, Math.max(s2.x, s2.y, s2.z));
       for(let i=0;i<n;i++){
@@ -1800,7 +1800,7 @@ async function build(){
   ]);
 
   // ROOM — measure it, scale it to a comfortable arena, sit it at y=0
-  const rm = room.scene; prep(rm, { shadow:true });
+  const rm = room.scene; prep(rm, { shadow:false });
   let rb = boxOf(rm); let rs = rb.getSize(new THREE.Vector3());
   const target = 26;                                  // metres across
   const rscale = target / Math.max(rs.x, rs.z);

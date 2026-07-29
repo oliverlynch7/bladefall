@@ -118,6 +118,23 @@
   body.touch #hint{display:none}
   body.touch #skillbar{bottom:calc(env(safe-area-inset-bottom) + 168px);justify-content:center}
 
+  /* eye tuner — sliders, because placement has to be judged by someone who can see it */
+  #eyep{position:fixed;left:10px;top:10px;z-index:40;width:236px;max-height:86vh;overflow-y:auto;display:none;
+    background:rgba(10,9,13,.96);border:1px solid #4a3c26;border-radius:12px;padding:11px 12px;
+    font:600 11px system-ui;color:#e0d2b4;-webkit-overflow-scrolling:touch}
+  #eyep.open{display:block}
+  #eyep h5{margin:0 0 8px;font:800 11px system-ui;letter-spacing:.09em;color:#e8a33d;text-transform:uppercase}
+  #eyep label{display:block;margin:7px 0 2px;color:#a89c84;font-size:10px;letter-spacing:.04em}
+  #eyep .rw{display:flex;align-items:center;gap:7px}
+  #eyep input[type=range]{flex:1;min-width:0;accent-color:#e8a33d}
+  #eyep .v{width:42px;text-align:right;font:700 10px ui-monospace,monospace;color:#ffd89a}
+  #eyep input[type=color]{width:100%;height:22px;border:1px solid #4a3c26;border-radius:5px;background:none;padding:0}
+  #eyep .btns{display:flex;gap:6px;margin-top:10px}
+  #eyep button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:7px 4px;border-radius:7px}
+  #eyeBtn{position:fixed;left:10px;top:10px;z-index:39;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
+
   /* touch controls */
   #touch{position:fixed;inset:0;z-index:22;display:none;pointer-events:none}
   body.touch #touch{display:block}
@@ -163,6 +180,8 @@
   <b>WASD</b> move · <b>Shift</b> sprint · <b>Space</b> jump · <b>C</b> roll<br>
   <b>P</b> profiler · <b>J</b>/click attack · <b>1-4</b> skills · <b>Drag</b> orbit · <b>Scroll</b> zoom
 </div>
+<button id="eyeBtn">EYES</button>
+<div id="eyep"></div>
 <button id="custBtn">🎨 Customise</button>
 <div id="custom" class="hide"></div>
 <div id="hpwrap"><div id="hpbar"><i id="hpfill"></i></div><span id="hptxt">100 / 100</span></div>
@@ -350,6 +369,21 @@ const CLASSES = [
     clips:{ idle:['Attacking_Idle','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
             attack:['Dagger_Attack2','Dagger_Attack'], skill:['Dagger_Attack'], hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
     skill:{ name:'Harvest', kind:'nova', color:'#ff8fa0', color2:'#5a0a1a' } },
+  { id:'ninja', label:'Ninja', model:'Rogue', tint:'#3a4250',
+    clips:{ idle:['Attacking_Idle','Idle'], walk:['Walk'], run:['Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Dagger_Attack','Dagger_Attack2'], skill:['Dagger_Attack2'],
+            hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Shadowstep', kind:'nova', color:'#9ab0d0', color2:'#1a2030' } },
+  { id:'pirate', label:'Pirate', model:'Warrior', tint:'#a8823c',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Sword_Attack','Dagger_Attack'], skill:['Sword_Attack2'],
+            hit:['RecieveHit'], death:['Death'] },
+    skill:{ name:'Broadside', kind:'nova', color:'#ffd88a', color2:'#8a4a12' } },
+  { id:'chronomancer', label:'Chronomancer', model:'Wizard', tint:'#7fd8c0',
+    clips:{ idle:['Idle_Weapon','Idle'], walk:['Walk'], run:['Run_Weapon','Run'], roll:['Roll'], jump:['Roll'],
+            attack:['Spell1','Staff_Attack'], skill:['Spell2'],
+            hit:['RecieveHit_2','RecieveHit'], death:['Death'] },
+    skill:{ name:'Rewind', kind:'nova', color:'#c0fff0', color2:'#2a8a7a' } },
   // ── Mixamo (free, commercial-use, rigged, textured, with faces) ──
   // Our 86 UAL clips reach these through UE->mixamorig track renaming; see retargetClips.
   { id:'Paladin', label:'Paladin ★', mixamo:true, preScaled:true, file:'Paladin', tint:'#d9c48a',
@@ -1683,6 +1717,162 @@ async function loadMixamoChar(def){
   return { scene: wrap, animations };
 }
 
+
+/* ─────────────  EYES  ─────────────
+   These models were authored with a nose and a mouth but NO eyes, so eyes have to be
+   ADDED — the exact task I have repeatedly got wrong, because judging placement needs a
+   pair of working eyes of my own and I only get one still frame every couple of minutes.
+
+   So this does not try to be clever. It does two things:
+     1. Anchors to geometry the ARTIST authored — the head bone and the measured nose tip —
+        rather than to numbers I invented. That gets it into the right neighbourhood.
+     2. Exposes every remaining number as a live control, so the final call is made by
+        someone who can actually see it. Values persist to localStorage and can be dumped
+        with __SLICE.eyeDump() to be baked in permanently once they're right.
+
+   Placement is in HEAD-LOCAL space and scaled by head size, so one set of numbers should
+   carry across all six characters instead of needing per-model tuning. */
+const EYE = {
+  on: true,
+  spread: 0.30,   // apart, as a fraction of head width
+  height: 0.10,   // up from the nose tip
+  depth:  0.02,   // forward of the face surface (+ = outward)
+  size:   0.115,  // eyeball size, fraction of head width
+  squash: 0.62,   // vertical squash — 1 is a circle, lower is almond
+  tilt:   0.0,    // inner-corner tilt, radians
+  white:  '#f2efe6',
+  iris:   '#3a6ea5',
+  pupil:  '#101014',
+  irisSz: 0.52,
+  showWhite: true,
+  /* Render the eyes THROUGH the head while tuning. Without this they can end up buried
+     inside the skull and you are adjusting something you cannot see — which is exactly
+     how the first two attempts failed. Position them first with this on, then switch it
+     off to check they sit correctly in depth. */
+  onTop: true,
+};
+/* Saved PER MODEL. The six bodies have genuinely different head shapes and beards, so one
+   set of numbers will not fit all of them — tune each once and it sticks. */
+const EYE_DEFAULT = JSON.parse(JSON.stringify(EYE));
+let EYE_ALL = {};
+try { EYE_ALL = JSON.parse(localStorage.getItem('bf_eye') || '{}'); } catch(e){}
+const eyeModel = () => (heroDef && (heroDef.model || heroDef.id)) || 'Warrior';
+function eyeLoadFor(model){
+  Object.assign(EYE, EYE_DEFAULT, EYE_ALL[model] || {});
+}
+const eyeSave = () => {
+  EYE_ALL[eyeModel()] = JSON.parse(JSON.stringify(EYE));
+  try { localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL)); } catch(e){}
+};
+
+/* Measure the head from the model instead of assuming: which bone, how wide, where the
+   face points, and where the nose sticks out. Everything else is expressed relative to
+   these, which is why one set of slider values works on all six bodies. */
+function headMetrics(actor){
+  let head = null;
+  actor.root.traverse(o => { if(!head && o.isBone && /^head$/i.test(o.name.replace(/[^a-z]/gi,''))) head = o; });
+  if(!head) return null;
+  actor.root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(head.matrixWorld).invert();
+
+  // Vertices of the head mesh, in HEAD-LOCAL space
+  let mesh = null, best = -1;
+  actor.root.traverse(o => {
+    if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+    if(o.userData._eye) return;
+    // the head mesh is whichever has most verts near the head bone
+    const c = o.geometry.attributes.position.count;
+    if(c > best){ best = c; mesh = o; }
+  });
+  if(!mesh) return null;
+
+  const pos = mesh.geometry.attributes.position;
+  const v = new THREE.Vector3(), local = new THREE.Vector3();
+  const toLocal = new THREE.Matrix4().multiplyMatrices(inv, mesh.matrixWorld);
+  let minX=1e9,maxX=-1e9, minY=1e9,maxY=-1e9, minZ=1e9,maxZ=-1e9;
+  let nose = null, noseScore = -1e9;
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
+    if(local.y < -0.02) continue;              // ignore anything below the head bone
+    minX=Math.min(minX,local.x); maxX=Math.max(maxX,local.x);
+    minY=Math.min(minY,local.y); maxY=Math.max(maxY,local.y);
+    minZ=Math.min(minZ,local.z); maxZ=Math.max(maxZ,local.z);
+  }
+  const w = Math.max(1e-4, maxX-minX), h = Math.max(1e-4, maxY-minY);
+
+  /* Which way does the face point? Comparing |maxZ| to |minZ| was unreliable — it gave
+     opposite answers on different characters (the Monk's beard skewed his bounds), so
+     eyes landed behind two of the three heads. Instead: find the single most protruding
+     vertex on the head's centre line (that's the nose, which every one of these models
+     has), and take the direction from the head's own centre out to it. That's derived
+     from artist-authored geometry and works whichever way the mesh happens to be built. */
+  const cz = (minZ + maxZ) / 2;
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i); local.copy(v).applyMatrix4(toLocal);
+    if(local.y < minY + h*0.10 || local.y > minY + h*0.90) continue;
+    if(Math.abs(local.x) > w*0.10) continue;      // centre line only
+    const score = Math.abs(local.z - cz);          // distance from centre, either way
+    if(score > noseScore){ noseScore = score; nose = local.clone(); }
+  }
+  if(!nose) nose = new THREE.Vector3(0, minY + h*0.55, maxZ);
+  const dir = (nose.z - cz) >= 0 ? 1 : -1;
+
+  /* Anchor height to the HEAD, not the nose. Nose height varies a lot between these
+     models (0.22 on the Monk vs 0.62 on the Warrior in head-local units), which is why a
+     single height value put eyes on one face and above another skull. The head's own
+     vertical extent is stable, so 'height' now reads as a fraction of the head. */
+  return { head, w, h, dir, nose, cz, minY, maxY,
+           eyeY: minY + h * 0.62,                 // rough brow line; slider trims from here
+           front: dir >= 0 ? maxZ : minZ };
+}
+
+function clearEyes(actor){
+  if(!actor || !actor._eyes) return;
+  for(const m of actor._eyes){ if(m.parent) m.parent.remove(m); }
+  actor._eyes = null;
+}
+
+function addEyes(actor, useSaved){
+  if(!actor) return null;
+  clearEyes(actor);
+  if(useSaved !== false) eyeLoadFor(eyeModel());
+  if(!EYE.on) return null;
+  const M = headMetrics(actor);
+  if(!M) return null;
+
+  const made = [];
+  const mk = (geo, col) => {
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      color: col, depthTest: !EYE.onTop, depthWrite: !EYE.onTop }));
+    m.userData._eye = true; m.renderOrder = EYE.onTop ? 999 : 3;
+    return m;
+  };
+  const R = M.w * EYE.size;
+  for(const side of [-1, 1]){
+    const g = new THREE.Group(); g.userData._eye = true;
+    if(EYE.showWhite){
+      const w = mk(new THREE.SphereGeometry(1, 14, 10), EYE.white);
+      w.scale.set(R, R*EYE.squash, R*0.55); g.add(w);
+    }
+    const ir = mk(new THREE.SphereGeometry(1, 12, 9), EYE.iris);
+    ir.scale.setScalar(R*EYE.irisSz);
+    ir.position.z = M.dir * R*0.42; g.add(ir);
+    const pu = mk(new THREE.SphereGeometry(1, 10, 8), EYE.pupil);
+    pu.scale.setScalar(R*EYE.irisSz*0.5);
+    pu.position.z = M.dir * R*0.60; g.add(pu);
+
+    g.position.set(side * M.w * EYE.spread,
+                   M.eyeY + M.h * EYE.height,
+                   M.front + M.dir * (M.w * EYE.depth));
+    g.rotation.z = -side * EYE.tilt;
+    M.head.add(g);
+    made.push(g);
+  }
+  actor._eyes = made;
+  return { w:+M.w.toFixed(3), h:+M.h.toFixed(3), dir:M.dir,
+           nose:[+M.nose.x.toFixed(3), +M.nose.y.toFixed(3), +M.nose.z.toFixed(3)] };
+}
+
 /* ─────────────  ACTOR  ───────────── */
 class Actor {
   constructor(gltf, def, targetH){
@@ -2256,6 +2446,65 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   // pick a class -> close the sheet, so the character is visible again immediately
   list.addEventListener('click', e => { if(e.target.closest('.cbtn')) list.classList.remove('open'); });
 })();
+
+/* The eye tuner. Every number that decides placement is a slider, because I cannot reliably
+   judge this from a still frame and Oliver can judge it instantly. Changes apply live,
+   persist to localStorage, and eyeDump() prints the final values to bake in. */
+(function eyeUI(){
+  const btn = document.getElementById('eyeBtn'), pane = document.getElementById('eyep');
+  if(!btn || !pane) return;
+  const ROWS = [
+    ['spread', 'Apart',        0.05, 0.60, 0.005],
+    ['height', 'Height',      -0.30, 0.50, 0.005],
+    ['depth',  'Forward',     -0.30, 0.40, 0.005],
+    ['size',   'Size',         0.02, 0.30, 0.002],
+    ['squash', 'Squash',       0.25, 1.20, 0.01 ],
+    ['tilt',   'Tilt',        -0.50, 0.50, 0.01 ],
+    ['irisSz', 'Iris size',    0.10, 0.95, 0.01 ],
+  ];
+  function build(){
+    pane.innerHTML = '<h5>Eye placement</h5>' + ROWS.map(([k,lbl,mn,mx,st]) =>
+      `<label>${lbl}</label><div class="rw">
+         <input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${EYE[k]}">
+         <span class="v" data-v="${k}">${(+EYE[k]).toFixed(3)}</span></div>`).join('') +
+      `<label>Sclera</label><input type="color" data-c="white" value="${EYE.white}">
+       <label>Iris</label><input type="color" data-c="iris" value="${EYE.iris}">
+       <label>Pupil</label><input type="color" data-c="pupil" value="${EYE.pupil}">
+       <label><input type="checkbox" data-b="onTop" ${EYE.onTop?'checked':''}> draw through head (tuning)</label>
+       <label><input type="checkbox" data-b="showWhite" ${EYE.showWhite?'checked':''}> show sclera</label>
+       <label><input type="checkbox" data-b="on" ${EYE.on?'checked':''}> eyes on</label>
+       <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>`;
+
+    const apply = () => { addEyes(hero, false); eyeSave(); };
+    pane.querySelectorAll('input[type=range]').forEach(el => {
+      el.addEventListener('input', () => {
+        EYE[el.dataset.k] = +el.value;
+        pane.querySelector(`[data-v="${el.dataset.k}"]`).textContent = (+el.value).toFixed(3);
+        apply();
+      });
+    });
+    pane.querySelectorAll('input[type=color]').forEach(el =>
+      el.addEventListener('input', () => { EYE[el.dataset.c] = el.value; apply(); }));
+    pane.querySelectorAll('input[type=checkbox]').forEach(el =>
+      el.addEventListener('change', () => { EYE[el.dataset.b] = el.checked; apply(); }));
+    pane.querySelector('[data-a="reset"]').addEventListener('click', () => {
+      Object.assign(EYE, { spread:0.30, height:0.10, depth:0.02, size:0.115, squash:0.62,
+                           tilt:0, irisSz:0.52, showWhite:true, on:true, onTop:true });
+      build(); addEyes(hero, false); eyeSave();
+    });
+    pane.querySelector('[data-a="dump"]').addEventListener('click', () => {
+      const t = JSON.stringify(EYE, null, 1);
+      navigator.clipboard && navigator.clipboard.writeText(t);
+      console.log('EYE =', t);
+      alert(t);
+    });
+  }
+  build();
+  btn.addEventListener('click', () => { pane.classList.toggle('open'); btn.style.display = pane.classList.contains('open') ? 'none' : 'block'; });
+  pane.addEventListener('click', e => { if(e.target === pane){ pane.classList.remove('open'); btn.style.display='block'; } });
+  window.__eyeRebuild = build;
+})();
+
 const tapBtn = (id, fn) => {
   const el = document.getElementById(id);
   el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
@@ -2931,6 +3180,8 @@ async function switchClass(def){
     scene.add(hero.root);
     heroDef = def;
     applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
+    console.log('DIAG eyes ' + def.id + ' ' + JSON.stringify(addEyes(hero)));
+    if(window.__eyeRebuild) window.__eyeRebuild();
     buildSkinBar();
     paintSkillBar();
     buildCustomPanel();
@@ -3137,6 +3388,10 @@ window.__SLICE = {
   gearTune: async (k, o) => { Object.assign(RIGID_GEAR[k], o||{}); await equipRigid(hero, k);
     return RIGID_GEAR[k]; },
   bodyWidth: () => bodyWidth(hero),
+  eyeTune: o => { Object.assign(EYE, o||{}); const r = addEyes(hero, false); eyeSave();
+                  if(window.__eyeRebuild) window.__eyeRebuild(); return r; },
+  eyeDump: () => ({ model: eyeModel(), cur: JSON.parse(JSON.stringify(EYE)), all: EYE_ALL }),
+  eyeInfo: () => addEyes(hero),
   probeBone: frag => { let b=null; hero.root.traverse(o=>{ if(!b && o.isBone && new RegExp(frag,'i').test(o.name)) b=o; });
     if(!b) return [0,0,0]; hero.root.updateMatrixWorld(true);
     const v=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld); return [v.x,v.y,v.z]; },

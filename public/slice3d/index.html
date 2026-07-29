@@ -922,6 +922,38 @@ class Actor {
     this.locked = dur * 0.82;                          // let the tail blend back to idle
     return dur;
   }
+  /* ── upper-body layering ──
+     Real Bladefall never roots you: p.atkTimer only drives the arm pose, the movement
+     code never reads it, so you run and swing at the same time. Skeletal clips are
+     full-body by default, so we synthesise an upper-body-only version by dropping every
+     track that targets a leg/foot/hip bone. That plays OVER the locomotion instead of
+     replacing it — swing while sprinting, exactly like the voxel game. */
+  upperClip(clip){
+    if(!clip) return null;
+    if(!this._upper) this._upper = new Map();
+    if(this._upper.has(clip.name)) return this._upper.get(clip.name);
+    const LOWER = /(^|[._|])(leg|thigh|shin|calf|knee|foot|ankle|toe|hip|pelvis|root)/i;
+    const tracks = clip.tracks.filter(t => !LOWER.test(t.name.split('.')[0]));
+    const made = tracks.length && tracks.length < clip.tracks.length
+      ? new THREE.AnimationClip(clip.name + '__upper', clip.duration, tracks)
+      : null;                                          // rig doesn't name bones usefully -> fall back
+    this._upper.set(clip.name, made);
+    return made;
+  }
+  /* play an action on the arms only; returns true if layering worked */
+  layer(role, { speed=1, clip=null } = {}){
+    const base = clip || this.find(role);
+    const up = this.upperClip(base);
+    if(!up) return false;
+    if(this._layerAct){ this._layerAct.stop(); }
+    const a = this.mixer.clipAction(up);
+    a.reset(); a.timeScale = speed;
+    a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false;
+    a.weight = 1; a.fadeIn(0.05).play();
+    this._layerAct = a;
+    this._layerT = up.duration / speed;
+    return true;
+  }
   update(dt){ this.mixer.update(dt); if(this.locked>0) this.locked -= dt; }
 }
 
@@ -1534,8 +1566,14 @@ function doAttack(){
   const list = heroDef.clips.attack.filter(n=>hero.clips[n]);
   const name = list.length ? list[atkFlip++ % list.length] : null;
   if(!name) return;
-  hero.play('attack', { loop:false, fade:.07, clip:hero.clips[name], speed:1.25 });
-  hero.locked = hero.clips[name].duration/1.25*0.8;
+  const clip = hero.clips[name];
+  if(hero.layer('attack', { speed:1.25, clip })){
+    hero.locked = 0;                                    // arms only — legs keep running
+    hero.swingT = clip.duration/1.25*0.8;
+  } else {                                              // rig has no usable bone names
+    hero.play('attack', { loop:false, fade:.07, clip, speed:1.25 });
+    hero.locked = clip.duration/1.25*0.55;              // still shorter than before
+  }
   setTimeout(()=>{ if(hero) strike(2.5, 0.25, 9, 16); }, 170);   // land the hit mid-swing
 }
 function doRoll(){
@@ -1555,7 +1593,7 @@ function castSkill(i){
   const S = kit[i]; if(!S) return;
   if(skillCd[i] > 0) return;
   skillCd[i] = S.cd;
-  hero.once('skill', 1.0);
+  if(!hero.layer('skill', { speed:1.0 })) hero.once('skill', 1.0);
   const yaw = hero.root.rotation.y;
   const fwd = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
   const p = hero.root.position.clone();
@@ -1924,8 +1962,6 @@ function tick(){
       rollT -= dt;
       const rs = 7.4 * Math.max(.25, rollT/0.62);
       vel.copy(rollDir).multiplyScalar(rs);
-    } else if(hero.locked > 0){
-      vel.multiplyScalar(0.72);                         // rooted mid-swing
     } else if(dir.lengthSq() > 0.004){
       vel.lerp(dir.clone().multiplyScalar(speed), 0.22);
       const want = Math.atan2(dir.x, dir.z);
@@ -1949,6 +1985,7 @@ function tick(){
     hero.root.position.z = Math.max(-roomHalf, Math.min(roomHalf, hero.root.position.z));
 
     // ── animation state ──
+    if(hero.swingT > 0) hero.swingT -= dt;
     if(rollT <= 0 && hero.locked <= 0){
       const sp = vel.length();
       if(!grounded)     hero.play('jump', { speed: 1.0 });   // falls back to a run/idle pose if the rig has no jump clip

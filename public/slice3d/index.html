@@ -2588,6 +2588,29 @@ let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
 /* Keyed by weapon name, not by model: the archetype rule guarantees a weapon only ever
    appears on one body, so its tuning is the same everywhere it shows up. */
+
+/* ─────────────  WEAPON PLACEMENT FRAMES  ─────────────
+   The same protection the faces got, applied to weapons.
+
+   Weapons do NOT currently suffer the drift that broke the faces: their reach/axis/half come
+   from a STATIC mesh bounding box rather than an animated skeleton, and that was verified
+   stable across time and re-equips (6.59461 identically at t0, t+3s and after re-equipping).
+
+   So this is insurance, not a bug fix, and worth having for two reasons:
+     - a weapon transform is still expressed relative to a MEASURED reach, so if I ever
+       change how that is measured, tuned weapons would move exactly as the faces did
+     - tuning that lives only in localStorage is lost to a cleared browser or another device
+
+   Keyed 'Model|Weapon' to match the tuning, so the same weapon can be locked separately on
+   each body. */
+const WEAP_FRAME_VERSION = 1;
+let WEAP_FRAME_ALL = {};
+try { WEAP_FRAME_ALL = JSON.parse(localStorage.getItem('bf_weapframe') || '{}'); } catch(e){}
+const weapFrameSave = () => {
+  try { localStorage.setItem('bf_weapframe', JSON.stringify(WEAP_FRAME_ALL)); } catch(e){}
+};
+function storedWeapFrame(){ return WEAP_FRAME_ALL[weapKey()] || null; }
+
 function weapKey(){ return eyeModel() + '|' + WEAP.name; }
 function weapLoadFor(_model){
   const n = WEAP.name, m = eyeModel();
@@ -2600,6 +2623,12 @@ function weapLoadFor(_model){
 const weapSave = () => {
   WEAP_ALL[weapKey()] = JSON.parse(JSON.stringify(WEAP));
   try { localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); } catch(e){}
+  // pin the frame alongside the values, so what they MEAN is saved too
+  if(!WEAP_FRAME_ALL[weapKey()] && hero && hero._weapGrip){
+    const g = hero._weapGrip;
+    WEAP_FRAME_ALL[weapKey()] = { v:WEAP_FRAME_VERSION, reach:g.reach, axis:g.axis, half:g.half };
+    weapFrameSave();
+  }
 };
 
 const _lenOf = obj => {
@@ -2710,9 +2739,13 @@ async function equipWeapon(actor, useSaved){
     const sb = new THREE.Box3().setFromObject(st.holder);
     const ss = sb.getSize(new THREE.Vector3());
     const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
-    actor._weapGrip = { holder: st.holder, reach: sreach,
-                        axis: (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z'),
-                        half: null, children: null, baseScale: 1, usesLen: true };
+    {
+      const wf = storedWeapFrame();
+      const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
+      actor._weapGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
+                          axis: wf && wf.axis ? wf.axis : ax,
+                          half: null, children: null, baseScale: 1, usesLen: true };
+    }
     st.holder.position.set(WEAP.side * sreach, WEAP.up * sreach, WEAP.fwd * sreach);
     if(WEAP.shaft){
       const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
@@ -2788,14 +2821,19 @@ async function equipWeapon(actor, useSaved){
   const got  = _lenOf(wrap);
   if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
 
-  const reach = Math.max(sz.x, sz.y, sz.z);
+  let reach = Math.max(sz.x, sz.y, sz.z);
+  let axisUse = axis, halfUse = half;
+  {   // a locked frame wins, so a future change to how reach is measured cannot move it
+    const wf = storedWeapFrame();
+    if(wf){ reach = wf.reach; axisUse = wf.axis || axis; if(wf.half != null) halfUse = wf.half; }
+  }
   // remember the pieces the transform helper needs so slider drags never reload anything
   for(const c of holder.children) c.userData._basePos = c.position.clone().sub(
     new THREE.Vector3(axis==='x' ? half * (WEAP.grip*2) : 0,
                       axis==='y' ? half * (WEAP.grip*2) : 0,
                       axis==='z' ? half * (WEAP.grip*2) : 0));
-  actor._weapGrip = { holder, reach, axis, half, children: holder.children.slice(),
-                      baseScale: 1, usesLen: false };
+  actor._weapGrip = { holder, reach, axis: axisUse, half: halfUse,
+                      children: holder.children.slice(), baseScale: 1, usesLen: false };
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
   /* Two different kinds of slide, and the missing one was the second.
 
@@ -3602,7 +3640,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
             <input type="range" data-wk="${k}" min="${mn}" max="${mx}" step="${st}" value="${WEAP[k]}">
             <span class="v" data-wv="${k}">${(+WEAP[k]).toFixed(2)}</span></div>`).join('')}
        <div class="btns"><button data-a="reset">Reset</button><button data-a="dump">Copy values</button></div>
-       <div class="btns"><button data-a="lock">Lock placement</button><button data-a="backup">Backup all</button></div>
+       <div class="btns"><button data-a="lock">Lock face</button><button data-a="lockw">Lock weapon</button></div>
+       <div class="btns"><button data-a="backup">Backup all</button></div>
        <div class="btns"><button data-a="restore">Restore from backup</button></div>`;
 
     const apply  = () => { addEyes(hero, false); eyeSave(); };
@@ -3669,6 +3708,11 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
       const f = window.__SLICE.lockPlacement();
       alert(f ? ('Placement locked for ' + eyeModel() + '. Values are now pinned to this frame.')
               : 'Could not measure a frame for this model.');
+    });
+    pane.querySelector('[data-a="lockw"]').addEventListener('click', () => {
+      const r = window.__SLICE.lockWeapon();
+      alert(r ? ('Weapon placement locked for ' + r.key + '. This weapon on this body is now pinned.')
+              : 'No weapon equipped to lock.');
     });
     pane.querySelector('[data-a="backup"]').addEventListener('click', () => {
       const t = window.__SLICE.faceBackup();
@@ -4657,12 +4701,14 @@ window.__SLICE = {
                       pinned: !!FRAME_ALL[eyeModel()], frame: storedFrame(eyeModel()) }),
   /* Full backup of every tuned value AND its frame. Paste it back with faceRestore(). */
   faceBackup: () => JSON.stringify({ v:FACE_FRAME_VERSION, eye:EYE_ALL, mouth:MOUTH_ALL,
-                                     frame:FRAME_ALL, weapon:WEAP_ALL }, null, 1),
+                                     frame:FRAME_ALL, weapon:WEAP_ALL,
+                                     weaponFrame:WEAP_FRAME_ALL }, null, 1),
   faceRestore: json => { try { const d = JSON.parse(json);
       if(d.eye)   { Object.assign(EYE_ALL, d.eye);     localStorage.setItem('bf_eye', JSON.stringify(EYE_ALL)); }
       if(d.mouth) { Object.assign(MOUTH_ALL, d.mouth); localStorage.setItem('bf_mouth', JSON.stringify(MOUTH_ALL)); }
       if(d.frame) { Object.assign(FRAME_ALL, d.frame); frameSave(); }
       if(d.weapon){ Object.assign(WEAP_ALL, d.weapon); localStorage.setItem('bf_weap', JSON.stringify(WEAP_ALL)); }
+      if(d.weaponFrame){ Object.assign(WEAP_FRAME_ALL, d.weaponFrame); weapFrameSave(); }
       addEyes(hero); addMouth(hero); return true;
     } catch(e){ return 'bad json: ' + e.message; } },
   frameOf: () => { const M = headMetrics(hero); if(!M) return null;
@@ -4679,6 +4725,14 @@ window.__SLICE = {
   weapons: () => WEAPONS.slice(),
   weaponsFor: m => weaponsFor(m || eyeModel()),
   weapDump: () => JSON.parse(JSON.stringify(WEAP)),
+  /* Report the weapon's measured reach, to check whether it drifts the way the head did. */
+  /* Pin the weapon frame currently in use for this Model|Weapon pair. Visual no-op. */
+  lockWeapon: () => { const g = hero && hero._weapGrip; if(!g) return null;
+    WEAP_FRAME_ALL[weapKey()] = { v:WEAP_FRAME_VERSION, reach:g.reach, axis:g.axis, half:g.half };
+    weapFrameSave(); return { key: weapKey(), frame: WEAP_FRAME_ALL[weapKey()] }; },
+  weapFrameInfo: () => ({ key: weapKey(), locked: !!storedWeapFrame(), frame: storedWeapFrame() }),
+  weapReach: () => { const g = hero && hero._weapGrip;
+    return g ? { reach:+g.reach.toFixed(6), axis:g.axis, half:(g.half==null?null:+g.half.toFixed(6)) } : null; },
   stockVisible: () => { const r = weaponRig(hero); return !!(r && r.stock && r.stock.visible); },
   weapNudge: o => { Object.assign(WEAP, o||{}); const ok = applyWeaponTransform(hero);
     if(ok) weapSave(); return ok; },

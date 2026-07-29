@@ -591,11 +591,19 @@ function applySkin(actor, clsId, skin){
    artist. So equipping is not placement at all: rebind the part's SkinnedMesh to the
    character's existing skeleton and it is correct by construction — right position, right
    deformation, animates with everything else. Nothing to guess, nothing to tune.  */
-/* Armour SLOTS. Honest limitation: the Standard tier of the outfit pack ships only
-   Ranger and Peasant sets — there is no plate/knight geometry. So a 'knight' here is the
-   ranger pieces tinted to steel, which reads as armour but is not true plate. The slot
-   STRUCTURE (head/chest/legs/shoulders/arms/feet) is real and would take proper plate
-   meshes unchanged the day we have them. */
+/* Armour SLOTS — SUPERSEDED, kept for the base-character models only.
+
+   DESIGN DECISION (Oliver, 2026-07-29): Bladefall does NOT show armour on the character.
+   Armour is a stats-only item; visual identity comes from a set of COLOURED SKINS per
+   class instead.
+
+   That retires a whole category of problems rather than solving them: no fitting armour
+   to six different body shapes, no clipping through shoulders, no per-model armour
+   tuning, no hunting for plate meshes that do not exist in any free pack. It is also why
+   the weapon work matters more — the weapon becomes the main silhouette cue.
+
+   This block still drives outfit swaps on the Universal Base Characters, which are not
+   the shipping heroes. Nothing below is on the path to the real game. */
 const ARMOUR_SLOTS = ['helmet','chest','legs','shoulders','arms','boots'];
 const ARMOUR_SETS = {
   M: { helmet:'outfits/Male_Ranger_Head_Hood', chest:'outfits/Male_Ranger_Body',
@@ -1796,6 +1804,15 @@ const EYE = {
      centred on its own bone, so centring the pair on the measured head still lands
      them off to one side. Separate control, because they are separate problems. */
   offX: 0,
+  /* Face-plane alignment. On the Rogue and Monk the face is not perpendicular to the
+     head's forward axis — it is turned slightly. Pushing both eyes along one shared FWD
+     vector then drives one INTO the mesh while the other bulges out, which no per-eye
+     control can fix because the two eyes are behaving correctly relative to each other;
+     it is the PLANE that is wrong. These rotate the whole RIGHT/UP/FWD frame so 'forward'
+     means perpendicular to the actual face. Shared by eyes and mouth, since they describe
+     the head rather than any one feature. */
+  faceYaw: 0,
+  facePitch: 0,
   onTop: false,
   flip: true,
 };
@@ -1883,7 +1900,15 @@ function headMetrics(actor){
                 .applyQuaternion(headQ.clone().invert()).normalize();
   const UP  = new THREE.Vector3(0, 1, 0).applyQuaternion(rootQ)
                 .applyQuaternion(headQ.clone().invert()).normalize();
-  const RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  let RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  // turn the frame to match the real face plane (see EYE.faceYaw / facePitch)
+  if(EYE.faceYaw){
+    FWD.applyAxisAngle(UP, EYE.faceYaw).normalize();
+    RIGHT = new THREE.Vector3().crossVectors(UP, FWD).normalize();
+  }
+  if(EYE.facePitch){
+    FWD.applyAxisAngle(RIGHT, EYE.facePitch).normalize();
+  }
   const centre = new THREE.Vector3((minX+maxX)/2, (minY+maxY)/2, cz);
 
   // brow line: eyes sit a little above the middle of a head
@@ -2327,6 +2352,7 @@ const CREATOR = {
     ['size',   'Eye size',     0.045, 0.115, 0.002],
     ['squash', 'Eye shape',    0.35, 1.05, 0.01 ],
     ['tilt',   'Eye tilt',    -0.35, 0.35, 0.01 ],
+    ['faceYaw','Face angle',  -0.60, 0.60, 0.01],
   ],
   mouthRows: [
     ['y',      'Mouth height', -2.00, -0.15, 0.005],
@@ -3019,6 +3045,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     ['size',   'Size',         0.02, 0.30, 0.002],
     ['squash', 'Squash',       0.25, 1.20, 0.01 ],
     ['tilt',   'Tilt',        -0.50, 0.50, 0.01 ],
+    ['faceYaw','Face angle L/R', -1.20, 1.20, 0.01],
+    ['facePitch','Face angle U/D', -1.20, 1.20, 0.01],
     ['irisSz', 'Iris size',    0.10, 0.95, 0.01 ],
   ];
   function build(){

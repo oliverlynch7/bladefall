@@ -2259,11 +2259,15 @@ const WEAPON_PRESETS = {
   Bow_Evil:    { len:0.89, pitch:1.42, yaw:-0.16, roll:-0.26, fwd:-0.62, up:-0.08, side:-0.01, grip:0.63 },
   Bow_Golden:  { len:0.89, pitch:1.48, yaw:-0.36, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.00, grip:0.63 },
   Bow_Wooden:  { len:0.82, pitch:1.48, yaw:-0.20, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.03, grip:0.62 },
+  Dagger:      { len:0.82, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:1.00 },
+  Dagger_2:    { len:0.88, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:0.93 },
+  Dagger_Golden:{len:0.82, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:1.00 },
+  Spear:       { len:0.88, pitch:1.38, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.14, side:-0.14, grip:0.93 },
   Bow_Wooden2: { len:0.82, pitch:1.48, yaw:-0.20, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.01, grip:0.62 },
 };
 
 const WEAP = { on:false, name:'Sword', len:1.0, roll:0.10, pitch:0.10, yaw:-3.20,
-               fwd:0, up:-0.39, side:-0.03, grip:0.72, hideStock:true };
+               fwd:0, up:-0.39, side:-0.03, grip:0.72, shaft:0, hideStock:true };
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 let WEAP_ALL = {};
 try { WEAP_ALL = JSON.parse(localStorage.getItem('bf_weap') || '{}'); } catch(e){}
@@ -2388,9 +2392,23 @@ async function equipWeapon(actor, useSaved){
   if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
 
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
-  // slide along the grip, in units of the weapon's own length so it scales sensibly
   const reach = Math.max(sz.x, sz.y, sz.z);
+  /* Two different kinds of slide, and the missing one was the second.
+
+     fwd/up/side move the weapon along the HAND's axes. Rotation is applied to the same
+     object, so once a weapon is turned those sliders no longer line up with anything you
+     can see — pushing a rotated spear along its own shaft means combining all three by
+     trial and error. That is the dimension that felt absent.
+
+     `shaft` moves it along the WEAPON's own long axis, after rotation. It is the
+     "push it through the fist" control, and it stays intuitive at any orientation. */
   holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
+  if(WEAP.shaft){
+    const along = new THREE.Vector3(
+      axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0
+    ).applyEuler(holder.rotation);
+    holder.position.addScaledVector(along, WEAP.shaft * reach);
+  }
   if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
   actor._weap = wrap;
   return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
@@ -3120,6 +3138,7 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
     ['pitch', 'Pitch',  -3.20, 3.20, 0.02],
     ['yaw',   'Yaw',    -3.20, 3.20, 0.02],
     ['roll',  'Roll',   -3.20, 3.20, 0.02],
+    ['shaft', 'Along shaft', -1.20, 1.20, 0.01],
     ['fwd',   'Slide fwd', -0.80, 0.80, 0.01],
     ['up',    'Slide up',  -0.80, 0.80, 0.01],
     ['side',  'Slide side',-0.80, 0.80, 0.01],

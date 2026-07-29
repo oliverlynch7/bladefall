@@ -399,6 +399,56 @@ function applySkin(actor, clsId, skin){
    deliberately blank-faced, and their UVs are scattered across the sheet so painting a
    face into the texture isn't reliable. So we build one from geometry and bind it to
    the head bone, which means it animates with the character. */
+/* Paint the face INTO THE TEXTURE.
+   Geometry eyes were a mistake: they read fine head-on but protrude as visible blobs
+   from any other angle, because a flat feature set can't follow a curved skull. Painted
+   pixels are part of the surface, so they cannot float, cannot poke through, and cost
+   nothing to render.
+   The trick is finding WHERE on the atlas the face lives: we take the head mesh's
+   front-facing vertices, and for each feature's 3D position we look up the UV of the
+   nearest vertex. That maps a point on the model to a point on the texture. */
+/* Face as a FLAT DECAL on the head plane.
+   Two dead ends got us here, both worth recording:
+     - Sphere/box features PROTRUDE. They read fine head-on but from any other angle they
+       are visibly detached blobs floating off the skull.
+     - Painting into the texture is IMPOSSIBLE on these models: they are flat-shaded atlas
+       samplers whose head UVs span the whole sheet (u .002-.990, v .035-.998), so each
+       polygon grabs one solid swatch. There is no contiguous face region to draw on.
+   What works: these heads are flat-fronted low-poly, so a single ZERO-THICKNESS quad laid
+   on the face plane and aligned to its normal has no volume to stick out, and carries the
+   whole face as one drawn texture. */
+function faceDecalTexture(opt){
+  const S = 256;
+  const c = document.createElement('canvas'); c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.clearRect(0,0,S,S);
+  const eyeY = S*0.42, eyeDX = S*0.20, R = S*0.085;
+  const drawEye = (cx) => {
+    x.fillStyle = opt.sclera || '#f6f2e8';
+    x.beginPath(); x.ellipse(cx, eyeY, R*1.15, R*0.86, 0, 0, Math.PI*2); x.fill();
+    x.fillStyle = opt.pupil || '#1d1712';
+    x.beginPath(); x.ellipse(cx, eyeY + R*0.05, R*0.46, R*0.56, 0, 0, Math.PI*2); x.fill();
+    x.fillStyle = 'rgba(255,255,255,0.9)';
+    x.beginPath(); x.arc(cx - R*0.24, eyeY - R*0.26, R*0.15, 0, Math.PI*2); x.fill();
+  };
+  drawEye(S/2 - eyeDX); drawEye(S/2 + eyeDX);
+  x.strokeStyle = opt.brow || '#3a2a1c';
+  x.lineWidth = R*0.40; x.lineCap = 'round';
+  for(const sgn of [-1,1]){
+    const cx = S/2 + sgn*eyeDX;
+    x.beginPath();
+    x.moveTo(cx - R*1.25, eyeY - R*1.65);
+    x.lineTo(cx + R*1.15, eyeY - R*1.95);
+    x.stroke();
+  }
+  x.strokeStyle = opt.pupil || '#241c16';
+  x.lineWidth = R*0.34;
+  x.beginPath(); x.moveTo(S/2 - R*0.85, eyeY + R*2.5); x.lineTo(S/2 + R*0.85, eyeY + R*2.5); x.stroke();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true;
+  return t;
+}
+let _faceTex = null;
 function addFace(actor, opt){
   opt = opt || {};
   if(!actor || actor._face) return;
@@ -406,139 +456,74 @@ function addFace(actor, opt){
   if(!head) return;
   actor.root.updateMatrixWorld(true);
 
-  // Measure in the ACTOR'S LOCAL space (+Z = forward) so character rotation can't skew it.
   const toLocal = new THREE.Matrix4().copy(actor.root.matrixWorld).invert();
   const box = new THREE.Box3().setFromObject(actor.root).applyMatrix4(toLocal);
   const H = box.max.y - box.min.y;
   const lo = box.min.y + H*FACE.bandLo, hi = box.min.y + H*FACE.bandHi;
-
-  // Head mesh ONLY. Sampling every mesh previously took the SWORD as the face surface
-  // and pushed the features ~30cm off the model — that was the floating face.
   const SKIP = /(sword|axe|bow|staff|dagger|shield|weapon|pad|pauldron|cape)/i;
-  let headMesh = null, best = 0;
-  const v = new THREE.Vector3();
-  actor.root.traverse(o => {
-    if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
-    if(SKIP.test(o.name || '')) return;
-    const pos = o.geometry.attributes.position; let n = 0;
-    const step = Math.max(1, Math.floor(pos.count/600));
-    for(let i=0;i<pos.count;i+=step){
-      v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld).applyMatrix4(toLocal);
-      if(v.y>=lo && v.y<=hi) n++;
-    }
-    if(n > best){ best = n; headMesh = o; }
-  });
-  if(!headMesh) return;
 
-  // Front surface + extents of the HEAD, in local space.
-  const pos = headMesh.geometry.attributes.position;
-  let frontZ = -Infinity, cx = 0, halfW = 0, minY = Infinity, maxY = -Infinity, n = 0;
-  for(let i=0;i<pos.count;i++){
-    v.fromBufferAttribute(pos,i).applyMatrix4(headMesh.matrixWorld).applyMatrix4(toLocal);
-    if(v.y < lo || v.y > hi) continue;
-    frontZ = Math.max(frontZ, v.z);
-    cx += v.x; halfW = Math.max(halfW, Math.abs(v.x));
-    minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
-    n++;
-  }
-  if(!n || !isFinite(frontZ)) return;
-  cx /= n;
-
-  // These heads are near-flat-fronted, so a single face plane sits flush and is far more
-  // predictable than per-vertex snapping (which kept orienting features edge-on).
-  const R     = halfW * FACE.size;
-  const eyeX  = halfW * FACE.eyeX;
-  const eyeY  = minY + (maxY - minY) * FACE.eyeY;
-  const faceZ = frontZ - R * 0.35;                 // slightly sunk so it reads as part of the head
-
-  const g = new THREE.Group();
-  const white = new THREE.MeshBasicMaterial({ color: opt.sclera || '#f4f1e8' });
-  const dark  = new THREE.MeshBasicMaterial({ color: opt.pupil  || '#1e1815' });
-  const brow  = new THREE.MeshBasicMaterial({ color: opt.brow   || '#3a2a1c' });
-  const ws = head.getWorldScale(new THREE.Vector3()).x || 1;
-
-  const put = (mesh, lx, ly, lz) => {
-    const world = new THREE.Vector3(lx, ly, lz).applyMatrix4(actor.root.matrixWorld);
-    mesh.position.copy(head.worldToLocal(world));
-    mesh.scale.multiplyScalar(1/ws);
-    g.add(mesh);
-  };
-  for(const side of [-1,1]){
-    const e = new THREE.Mesh(new THREE.SphereGeometry(R, 12, 9), white);
-    e.scale.set(1, 0.78, 0.45);
-    put(e, cx + side*eyeX, eyeY, faceZ + R*0.30*FACE.lift);
-    const pu = new THREE.Mesh(new THREE.SphereGeometry(R*0.52, 10, 7), dark);
-    pu.scale.set(1, 1, 0.45);
-    put(pu, cx + side*eyeX, eyeY, faceZ + R*0.62*FACE.lift);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(R*1.9, R*0.28, R*0.22), brow);
-    b.rotation.z = side * -0.14;
-    put(b, cx + side*eyeX, eyeY + R*1.6, faceZ + R*0.34*FACE.lift);
-  }
-  const m = new THREE.Mesh(new THREE.BoxGeometry(R*1.6, R*0.24, R*0.20), dark);
-  put(m, cx, eyeY - R*2.0, faceZ + R*0.32*FACE.lift);
-
-  head.add(g);
-  actor._face = g;
-  return g;
-}
-/* ── SELF-CHECK ──
-   Most 'looks wrong' bugs are actually measurable: floating off the mesh, buried inside
-   it, off-centre, behind the head. This raycasts every face part against the head mesh
-   and reports hard numbers, so placement can be verified without me eyeballing a
-   screenshot. It would have caught the sword-anchor bug immediately. */
-function validateFace(actor){
-  if(!actor || !actor._face) return { ok:false, reason:'no face' };
-  actor.root.updateMatrixWorld(true);
-  const SKIP = /(sword|axe|bow|staff|dagger|shield|weapon|pad|pauldron|cape)/i;
-  const box = new THREE.Box3().setFromObject(actor.root);
-  const H = box.max.y - box.min.y;
-  const lo = box.min.y + H*FACE.bandLo, hi = box.min.y + H*FACE.bandHi;
   let headMesh = null, best = 0;
   const v = new THREE.Vector3();
   actor.root.traverse(o => {
     if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
     if(SKIP.test(o.name||'')) return;
-    const pos = o.geometry.attributes.position; let n=0;
+    const pos = o.geometry.attributes.position; let n = 0;
     const st = Math.max(1, Math.floor(pos.count/600));
     for(let i=0;i<pos.count;i+=st){
-      v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld);
+      v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld).applyMatrix4(toLocal);
       if(v.y>=lo && v.y<=hi) n++;
     }
     if(n>best){ best=n; headMesh=o; }
   });
-  if(!headMesh) return { ok:false, reason:'no head mesh' };
+  if(!headMesh || !headMesh.geometry.attributes.normal) return;
 
-  const fwd = new THREE.Vector3(0,0,1).transformDirection(actor.root.matrixWorld).normalize();
-  const ray = new THREE.Raycaster();
-  ray.firstHitOnly = false;
-  const rows = [], problems = [];
-  for(const part of actor._face.children){
-    const wp = part.getWorldPosition(new THREE.Vector3());
-    // shoot from well in front of the part, backwards into the head
-    ray.set(wp.clone().addScaledVector(fwd, 0.6), fwd.clone().negate());
-    const hits = ray.intersectObject(headMesh, true);
-    if(!hits.length){ rows.push({ part:part.type, gap:null, note:'NO SURFACE BEHIND' });
-                      problems.push('a part has no head surface behind it'); continue; }
-    // signed distance along forward: + means in front of the surface (floating)
-    const surf = hits[0].point;
-    const gap = wp.clone().sub(surf).dot(fwd);
-    const size = part.geometry.boundingSphere
-      ? part.geometry.boundingSphere.radius * part.scale.x
-      : 0.02;
-    let note = 'flush';
-    if(gap >  size*2.2) note = 'FLOATING';
-    else if(gap < -size*1.6) note = 'BURIED';
-    rows.push({ gap:+gap.toFixed(4), size:+size.toFixed(4), note });
-    if(note !== 'flush') problems.push(note.toLowerCase() + ' by ' + gap.toFixed(3) + 'm');
+  // average the front-facing head surface: its centre, its normal, its width
+  const pos = headMesh.geometry.attributes.position, nor = headMesh.geometry.attributes.normal;
+  const nmat = new THREE.Matrix3().getNormalMatrix(headMesh.matrixWorld);
+  const nv = new THREE.Vector3(), acc = new THREE.Vector3(), nAcc = new THREE.Vector3();
+  let n = 0, halfW = 0, minY = Infinity, maxY = -Infinity, frontZ = -Infinity;
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).applyMatrix4(headMesh.matrixWorld).applyMatrix4(toLocal);
+    if(v.y < lo || v.y > hi) continue;
+    nv.fromBufferAttribute(nor,i).applyMatrix3(nmat).normalize();
+    if(nv.z < 0.45) continue;                        // the flat front plate only
+    acc.add(v); nAcc.add(nv); n++;
+    halfW = Math.max(halfW, Math.abs(v.x));
+    minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
+    frontZ = Math.max(frontZ, v.z);
   }
-  return { ok: problems.length === 0, headMesh: headMesh.name || '(unnamed)',
-           parts: rows.length, problems, rows };
+  if(n < 6) return;
+  acc.divideScalar(n); nAcc.divideScalar(n).normalize();
+
+  const wide = halfW * 1.65 * (FACE.size / 0.17);
+  if(!_faceTex) _faceTex = faceDecalTexture(opt);
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(wide, wide),
+    new THREE.MeshBasicMaterial({ map:_faceTex, transparent:true, depthWrite:false,
+      polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 }));
+
+  // sit ON the front plane, aligned to its normal — zero thickness, so nothing protrudes
+  const localPos = new THREE.Vector3(
+    acc.x,
+    minY + (maxY - minY) * FACE.eyeY + wide*0.06,
+    frontZ + 0.0015);
+  const worldPos = localPos.applyMatrix4(actor.root.matrixWorld);
+  const worldNrm = nAcc.clone().transformDirection(actor.root.matrixWorld).normalize();
+  const ws = head.getWorldScale(new THREE.Vector3()).x || 1;
+  m.position.copy(head.worldToLocal(worldPos.clone()));
+  m.scale.multiplyScalar(1/ws);
+  head.add(m);
+  m.updateMatrixWorld(true);
+  m.lookAt(worldPos.clone().add(worldNrm));          // world-space target, parented first
+
+  actor._face = m;
+  return m;
 }
 function removeFace(actor){
   if(!actor || !actor._face) return;
-  const g = actor._face;
-  if(g.parent) g.parent.remove(g);
-  g.traverse(o => { if(o.geometry) o.geometry.dispose(); });
+  const m = actor._face;
+  if(m.parent) m.parent.remove(m);
+  if(m.geometry) m.geometry.dispose();
   actor._face = null;
 }
 
@@ -992,7 +977,7 @@ function clearRedesign(){
 function applyRedesign(actor, sk){
   clearRedesign();
   const glowEyes = !!(sk && sk.redesign && /dreadknight|wraithblade/.test(sk.redesign));
-  if(actor && actor._face) actor._face.visible = !glowEyes;
+
   if(!sk || !sk.redesign || !REDESIGNS[sk.redesign]) return;
   const parts = REDESIGNS[sk.redesign](actor, sk);
   for(const p of parts){

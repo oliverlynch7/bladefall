@@ -156,6 +156,8 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 
 const HERO_H = 1.75;
 const ATK_SPEED = 1.85;   // swing playback rate — higher = snappier
+// Face placement — tune live via __SLICE.faceTune({...}); values bake in here.
+const FACE = { bandLo:0.72, bandHi:0.90, eyeY:0.34, eyeX:0.38, size:0.17, lift:1.0 };
 let MOB_SCALE = 1.0;   // global mob-size dial (see __SLICE.mobScale)                 // metres — everything is normalised to this
 const clock  = new THREE.Clock();
 const canvas = document.getElementById('c');
@@ -404,62 +406,77 @@ function addFace(actor, opt){
   if(!head) return;
   actor.root.updateMatrixWorld(true);
 
-  // ── MEASURE the head rather than guessing offsets. Rigs differ wildly in where the
-  //    head bone sits and how the model is scaled, so we find the real front surface:
-  //    sample mesh vertices in the upper band of the body and take the frontmost point.
-  const box = new THREE.Box3().setFromObject(actor.root);
-  const top = box.max.y, bottom = box.min.y, H = top - bottom;
-  const bandLo = bottom + H*0.74, bandHi = bottom + H*0.90;   // face band, under the hairline
-  let frontZ = -Infinity, cx = 0, cy = 0, n = 0, halfW = 0;
+  // Measure in the ACTOR'S LOCAL space (+Z = forward) so character rotation can't skew it.
+  const toLocal = new THREE.Matrix4().copy(actor.root.matrixWorld).invert();
+  const box = new THREE.Box3().setFromObject(actor.root).applyMatrix4(toLocal);
+  const H = box.max.y - box.min.y;
+  const lo = box.min.y + H*FACE.bandLo, hi = box.min.y + H*FACE.bandHi;
+
+  // Head mesh ONLY. Sampling every mesh previously took the SWORD as the face surface
+  // and pushed the features ~30cm off the model — that was the floating face.
+  const SKIP = /(sword|axe|bow|staff|dagger|shield|weapon|pad|pauldron|cape)/i;
+  let headMesh = null, best = 0;
   const v = new THREE.Vector3();
   actor.root.traverse(o => {
     if(!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
-    const pos = o.geometry.attributes.position;
-    const step = Math.max(1, Math.floor(pos.count / 900));    // sample, don't scan everything
+    if(SKIP.test(o.name || '')) return;
+    const pos = o.geometry.attributes.position; let n = 0;
+    const step = Math.max(1, Math.floor(pos.count/600));
     for(let i=0;i<pos.count;i+=step){
-      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
-      if(v.y < bandLo || v.y > bandHi) continue;
-      if(v.z > frontZ) frontZ = v.z;
-      cx += v.x; cy += v.y; n++;
-      halfW = Math.max(halfW, Math.abs(v.x));
+      v.fromBufferAttribute(pos,i).applyMatrix4(o.matrixWorld).applyMatrix4(toLocal);
+      if(v.y>=lo && v.y<=hi) n++;
     }
+    if(n > best){ best = n; headMesh = o; }
   });
-  if(!n || !isFinite(frontZ)) return;
-  cx /= n; cy /= n;
+  if(!headMesh) return;
 
-  const S = Math.max(0.6, halfW / 0.09);                      // head width -> feature scale
-  const eyeY  = bandLo + (bandHi - bandLo) * 0.34;            // eyes sit low in the face band
-  const eyeX  = halfW * 0.36;                                 // closer set reads calmer
-  const faceZ = frontZ - halfW * 0.06;                        // just inside the surface
+  // Front surface + extents of the HEAD, in local space.
+  const pos = headMesh.geometry.attributes.position;
+  let frontZ = -Infinity, cx = 0, halfW = 0, minY = Infinity, maxY = -Infinity, n = 0;
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos,i).applyMatrix4(headMesh.matrixWorld).applyMatrix4(toLocal);
+    if(v.y < lo || v.y > hi) continue;
+    frontZ = Math.max(frontZ, v.z);
+    cx += v.x; halfW = Math.max(halfW, Math.abs(v.x));
+    minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
+    n++;
+  }
+  if(!n || !isFinite(frontZ)) return;
+  cx /= n;
+
+  // These heads are near-flat-fronted, so a single face plane sits flush and is far more
+  // predictable than per-vertex snapping (which kept orienting features edge-on).
+  const R     = halfW * FACE.size;
+  const eyeX  = halfW * FACE.eyeX;
+  const eyeY  = minY + (maxY - minY) * FACE.eyeY;
+  const faceZ = frontZ - R * 0.35;                 // slightly sunk so it reads as part of the head
 
   const g = new THREE.Group();
   const white = new THREE.MeshBasicMaterial({ color: opt.sclera || '#f4f1e8' });
   const dark  = new THREE.MeshBasicMaterial({ color: opt.pupil  || '#1e1815' });
   const brow  = new THREE.MeshBasicMaterial({ color: opt.brow   || '#3a2a1c' });
-  const R = halfW * 0.165;                                    // eye radius from head width
+  const ws = head.getWorldScale(new THREE.Vector3()).x || 1;
 
-  const put = (mesh, wx, wy, wz) => {
-    mesh.position.copy(head.worldToLocal(new THREE.Vector3(wx, wy, wz)));
+  const put = (mesh, lx, ly, lz) => {
+    const world = new THREE.Vector3(lx, ly, lz).applyMatrix4(actor.root.matrixWorld);
+    mesh.position.copy(head.worldToLocal(world));
+    mesh.scale.multiplyScalar(1/ws);
     g.add(mesh);
   };
-  for(const side of [-1, 1]){
-    const e = new THREE.Mesh(new THREE.SphereGeometry(R, 10, 8), white);
-    e.scale.set(1, 0.78, 0.5);                                // slight lid squash
-    put(e, cx + side*eyeX, eyeY, faceZ);
-    const pu = new THREE.Mesh(new THREE.SphereGeometry(R*0.60, 8, 6), dark);
-    pu.scale.set(1, 1, 0.5);
-    put(pu, cx + side*eyeX, eyeY, faceZ + R*0.55);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(R*2.0, R*0.34, R*0.4), brow);
-    b.rotation.z = side * -0.15;
-    put(b, cx + side*eyeX, eyeY + R*1.7, faceZ + R*0.3);
+  for(const side of [-1,1]){
+    const e = new THREE.Mesh(new THREE.SphereGeometry(R, 12, 9), white);
+    e.scale.set(1, 0.78, 0.45);
+    put(e, cx + side*eyeX, eyeY, faceZ + R*0.30*FACE.lift);
+    const pu = new THREE.Mesh(new THREE.SphereGeometry(R*0.52, 10, 7), dark);
+    pu.scale.set(1, 1, 0.45);
+    put(pu, cx + side*eyeX, eyeY, faceZ + R*0.62*FACE.lift);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(R*1.9, R*0.28, R*0.22), brow);
+    b.rotation.z = side * -0.14;
+    put(b, cx + side*eyeX, eyeY + R*1.6, faceZ + R*0.34*FACE.lift);
   }
-  const m = new THREE.Mesh(new THREE.BoxGeometry(R*1.7, R*0.30, R*0.36), dark);
-  put(m, cx, eyeY - R*2.1, faceZ + R*0.25);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(R*1.6, R*0.24, R*0.20), dark);
+  put(m, cx, eyeY - R*2.0, faceZ + R*0.32*FACE.lift);
 
-  // worldToLocal already gave correct bone-local POSITIONS; only each mesh's own SIZE
-  // needs undoing of the bone's world scale. Scaling the group would move the parts too.
-  const ws = head.getWorldScale(new THREE.Vector3()).x || 1;
-  g.children.forEach(c => c.scale.multiplyScalar(1 / ws));
   head.add(g);
   actor._face = g;
   return g;
@@ -2411,6 +2428,11 @@ window.__SLICE = {
   mobScale: v => { if(v!=null) MOB_SCALE = v; return MOB_SCALE; },
   atkSpeed: v => { if(v!=null) window.__ATK = v; return window.__ATK || ATK_SPEED; },
   hasFace: () => !!(hero && hero._face),
+  faceTune: o => {
+    if(o) Object.assign(FACE, o);
+    if(hero){ removeFace(hero); addFace(hero); }
+    return JSON.parse(JSON.stringify(FACE));
+  },
   sizes: () => MONSTERS.map(m => m.label + ' ' + (m.h*MOB_SCALE).toFixed(2) + 'm'),
   enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),

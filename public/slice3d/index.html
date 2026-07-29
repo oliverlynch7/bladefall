@@ -2033,9 +2033,11 @@ const FACE_PRESETS = {
              offX:0 },
   },
   Ranger: {
-    eye:   { spread:0.195, height:-0.16,  depth:0.075,  size:0.098, squash:0.62, tilt:0,
-             iris:'#3a6ea5', pupil:'#101014', flip:false },
-    mouth: { shape:'line', y:-0.52,  z:0.095, width:0.34, height:0.20, color:'#5a2f28' },
+    eye:   { spread:0.175, height:-0.220, depth:0.075, size:0.092, squash:0.66, tilt:-0.130,
+             iris:'#9b2c2c', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'line', y:-0.465, z:0.095, width:0.280, height:0.295, color:'#5a2f28',
+             offX:0 },
   },
   Wizard: {
     eye:   { spread:0.195, height:-0.225, depth:0.02,   size:0.088, squash:0.62, tilt:0,
@@ -2051,11 +2053,11 @@ const FACE_PRESETS = {
     /* First set tuned with the controls added for this model specifically: faceYaw/facePitch
        correct the angled face, and the mouth needed a lateral nudge. Both were unreachable
        before, which is why the Monk was the hold-out. */
-    eye:   { spread:0.205, height:-0.40, depth:0.21, size:0.082, squash:0.81, tilt:-0.11,
+    eye:   { spread:0.205, height:-0.400, depth:0.190, size:0.082, squash:0.81, tilt:-0.500,
              iris:'#2f6b45', pupil:'#101014', flip:false,
-             offX:0, faceYaw:-0.15, facePitch:0.04 },
-    mouth: { shape:'flat', y:-0.65, z:0.17, width:0.32, height:0.36, color:'#5a2f28',
-             offX:0.03 },
+             offX:-0.015, faceYaw:-0.130, facePitch:0.040, irisSz:0.52 },
+    mouth: { shape:'flat', y:-0.625, z:0.170, width:0.355, height:0.360, color:'#5a2f28',
+             offX:0.015 },
   },
   Rogue: {
     // Hooded, so the measured head box runs high and the face sits turned — same two

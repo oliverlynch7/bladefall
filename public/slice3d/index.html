@@ -154,7 +154,8 @@ import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
    committing to a full rebuild. Art: Quaternius + Kenney, all CC0.
    ───────────────────────────────────────────────────────────── */
 
-const HERO_H = 1.75;                 // metres — everything is normalised to this
+const HERO_H = 1.75;
+let MOB_SCALE = 1.0;   // global mob-size dial (see __SLICE.mobScale)                 // metres — everything is normalised to this
 const clock  = new THREE.Clock();
 const canvas = document.getElementById('c');
 
@@ -1464,36 +1465,36 @@ const RIGS = {
 };
 const MONSTERS = [
   // file,             label,        bladefall archetype, rig,  hp,  h,   speed, dmg, fly-height
-  { file:'Orc',                label:'Orc',           bf:'grunt',        rig:'ground', hp:120, h:1.9, speed:1.9, dmg:9 },
-  { file:'Orc_Enemy',          label:'Goblin',        bf:'goblin',       rig:'blob',   hp: 70, h:1.4, speed:2.4, dmg:6 },
-  { file:'Demon',              label:'Shade',         bf:'shadeling',    rig:'ground', hp:140, h:2.0, speed:2.2, dmg:12 },
-  { file:'Blue_Demon',         label:'Void Fiend',    bf:'voidtether',   rig:'ground', hp:150, h:2.0, speed:2.0, dmg:13 },
-  { file:'Dino',               label:'Charger',       bf:'charger',      rig:'ground', hp:130, h:1.8, speed:2.6, dmg:10 },
-  { file:'Pink_Slime',         label:'Slime',         bf:'slime',        rig:'blob',   hp: 60, h:1.1, speed:1.3, dmg:5 },
-  { file:'Green_Blob',         label:'Slimelet',      bf:'slimelet',     rig:'blob',   hp: 45, h:0.9, speed:1.6, dmg:4 },
-  { file:'Green_Spiky_Blob',   label:'Toxling',       bf:'toxling',      rig:'blob',   hp: 80, h:1.2, speed:1.5, dmg:8 },
-  { file:'Yeti',               label:'Frostshell',    bf:'frostshell',   rig:'blob',   hp:190, h:2.2, speed:1.2, dmg:15 },
-  { file:'Cactoro',            label:'Thornboar',     bf:'thornboar',    rig:'blob',   hp:110, h:1.5, speed:2.0, dmg:9 },
-  { file:'Mushnub_Evolved',    label:'Sporeback',     bf:'sporeback',    rig:'blob',   hp:100, h:1.5, speed:1.4, dmg:7 },
-  { file:'Wizard',             label:'Caster',        bf:'caster',       rig:'blob',   hp: 85, h:1.7, speed:1.6, dmg:11 },
-  { file:'Ninja',              label:'Blinkstalker',  bf:'blinkstalker', rig:'blob',   hp: 90, h:1.7, speed:3.0, dmg:10 },
-  { file:'Tribal',             label:'Revenant',      bf:'revenant',     rig:'fly',    hp:100, h:1.8, speed:2.1, dmg:9,  flyY:0.5 },
-  { file:'Ghost_Skull',        label:'Bones',         bf:'bones',        rig:'fly',    hp: 75, h:1.5, speed:2.4, dmg:7,  flyY:1.1 },
-  { file:'Goleling',           label:'Cragspitter',   bf:'cragspitter',  rig:'fly',    hp:160, h:1.6, speed:1.4, dmg:12, flyY:0.8 },
-  { file:'Goleling_Evolved',   label:'Marble Statue', bf:'marblestatue', rig:'fly',    hp:220, h:2.1, speed:1.1, dmg:16, flyY:0.8 },
-  { file:'Armabee_Evolved',    label:'Galewisp',      bf:'galewisp',     rig:'fly',    hp: 65, h:1.2, speed:3.1, dmg:6,  flyY:1.6 },
-  { file:'Squidle',            label:'Glub',          bf:'toxling',      rig:'fly',    hp: 80, h:1.3, speed:2.2, dmg:8,  flyY:1.3 },
-  { file:'Glub_Evolved',       label:'Deep Glub',     bf:'toxling',      rig:'fly',    hp:120, h:1.6, speed:2.0, dmg:11, flyY:1.3 },
-  { file:'Hywirl',             label:'Sparkling',     bf:'sparkling',    rig:'fly',    hp: 70, h:1.3, speed:3.2, dmg:7,  flyY:1.5 },
-  { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:2.0, speed:2.6, dmg:14, flyY:1.9 },
+  { file:'Orc',                label:'Orc',           bf:'grunt',        rig:'ground', hp:120, h:1.35, speed:1.9, dmg:9 },
+  { file:'Orc_Enemy',          label:'Goblin',        bf:'goblin',       rig:'blob',   hp: 70, h:0.95, speed:2.4, dmg:6 },
+  { file:'Demon',              label:'Shade',         bf:'shadeling',    rig:'ground', hp:140, h:1.45, speed:2.2, dmg:12 },
+  { file:'Blue_Demon',         label:'Void Fiend',    bf:'voidtether',   rig:'ground', hp:150, h:1.55, speed:2.0, dmg:13 },
+  { file:'Dino',               label:'Charger',       bf:'charger',      rig:'ground', hp:130, h:1.25, speed:2.6, dmg:10 },
+  { file:'Pink_Slime',         label:'Slime',         bf:'slime',        rig:'blob',   hp: 60, h:0.7, speed:1.3, dmg:5 },
+  { file:'Green_Blob',         label:'Slimelet',      bf:'slimelet',     rig:'blob',   hp: 45, h:0.55, speed:1.6, dmg:4 },
+  { file:'Green_Spiky_Blob',   label:'Toxling',       bf:'toxling',      rig:'blob',   hp: 80, h:0.85, speed:1.5, dmg:8 },
+  { file:'Yeti',               label:'Frostshell',    bf:'frostshell',   rig:'blob',   hp:190, h:1.65, speed:1.2, dmg:15 },
+  { file:'Cactoro',            label:'Thornboar',     bf:'thornboar',    rig:'blob',   hp:110, h:1.0, speed:2.0, dmg:9 },
+  { file:'Mushnub_Evolved',    label:'Sporeback',     bf:'sporeback',    rig:'blob',   hp:100, h:1.05, speed:1.4, dmg:7 },
+  { file:'Wizard',             label:'Caster',        bf:'caster',       rig:'blob',   hp: 85, h:1.2, speed:1.6, dmg:11 },
+  { file:'Ninja',              label:'Blinkstalker',  bf:'blinkstalker', rig:'blob',   hp: 90, h:1.2, speed:3.0, dmg:10 },
+  { file:'Tribal',             label:'Revenant',      bf:'revenant',     rig:'fly',    hp:100, h:1.25, speed:2.1, dmg:9,  flyY:0.5 },
+  { file:'Ghost_Skull',        label:'Bones',         bf:'bones',        rig:'fly',    hp: 75, h:1.05, speed:2.4, dmg:7,  flyY:1.1 },
+  { file:'Goleling',           label:'Cragspitter',   bf:'cragspitter',  rig:'fly',    hp:160, h:1.1, speed:1.4, dmg:12, flyY:0.8 },
+  { file:'Goleling_Evolved',   label:'Marble Statue', bf:'marblestatue', rig:'fly',    hp:220, h:1.5, speed:1.1, dmg:16, flyY:0.8 },
+  { file:'Armabee_Evolved',    label:'Galewisp',      bf:'galewisp',     rig:'fly',    hp: 65, h:0.75, speed:3.1, dmg:6,  flyY:1.6 },
+  { file:'Squidle',            label:'Glub',          bf:'toxling',      rig:'fly',    hp: 80, h:0.85, speed:2.2, dmg:8,  flyY:1.3 },
+  { file:'Glub_Evolved',       label:'Deep Glub',     bf:'toxling',      rig:'fly',    hp:120, h:1.05, speed:2.0, dmg:11, flyY:1.3 },
+  { file:'Hywirl',             label:'Sparkling',     bf:'sparkling',    rig:'fly',    hp: 70, h:0.72, speed:3.2, dmg:7,  flyY:1.5 },
+  { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:1.4, speed:2.6, dmg:14, flyY:1.9 },
   // ── RESKIN TEST: one Goleling mesh, four different creatures ──
-  { file:'Goleling', label:'Ember Gargoyle', bf:'emberling',   rig:'fly', hp:170, h:1.8, speed:1.3, dmg:13, flyY:0.7, skin:'magma'  },
-  { file:'Goleling', label:'Frost Gargoyle', bf:'frostshell',   rig:'fly', hp:190, h:1.9, speed:1.1, dmg:14, flyY:0.7, skin:'frost'  },
-  { file:'Goleling', label:'Marble Gargoyle',  bf:'marblestatue', rig:'fly', hp:230, h:2.0, speed:1.0, dmg:16, flyY:0.7, skin:'marble' },
-  { file:'Goleling', label:'Iron Gargoyle', bf:'sentinel',     rig:'fly', hp:200, h:1.85,speed:1.2, dmg:15, flyY:0.7, skin:'rust'   },
+  { file:'Goleling', label:'Ember Gargoyle', bf:'emberling',   rig:'fly', hp:170, h:1.2, speed:1.3, dmg:13, flyY:0.7, skin:'magma'  },
+  { file:'Goleling', label:'Frost Gargoyle', bf:'frostshell',   rig:'fly', hp:190, h:1.25, speed:1.1, dmg:14, flyY:0.7, skin:'frost'  },
+  { file:'Goleling', label:'Marble Gargoyle',  bf:'marblestatue', rig:'fly', hp:230, h:1.3, speed:1.0, dmg:16, flyY:0.7, skin:'marble' },
+  { file:'Goleling', label:'Iron Gargoyle', bf:'sentinel',     rig:'fly', hp:200, h:1.22,speed:1.2, dmg:15, flyY:0.7, skin:'rust'   },
   // ── bosses ──
-  { file:'Dragon_Evolved',     label:'DRAGON (boss)', bf:'boss',         rig:'fly',    hp:900, h:4.6, speed:2.2, dmg:26, flyY:2.6, boss:true },
-  { file:'Mushroom_King',      label:'MUSHROOM KING (boss)', bf:'boss',  rig:'ground', hp:800, h:4.2, speed:1.5, dmg:24, boss:true },
+  { file:'Dragon_Evolved',     label:'DRAGON (boss)', bf:'boss',         rig:'fly',    hp:900, h:3.0, speed:2.2, dmg:26, flyY:2.6, boss:true },
+  { file:'Mushroom_King',      label:'MUSHROOM KING (boss)', bf:'boss',  rig:'ground', hp:800, h:2.9, speed:1.5, dmg:24, boss:true },
 ];
 const MONSTER_CLIPS = RIGS.ground;   // legacy alias; per-monster rig is used below
 const ENEMY_SPOTS = [
@@ -1583,7 +1584,7 @@ async function spawnEnemy(x, z, mIdx){
   if(!g) return null;
   // Quaternius exports name clips "CharacterArmature|Idle" — normalise so RIGS can find them
   for(const c of g.animations) c.name = c.name.split('|').pop();
-  const e = new Actor(g, { clips: RIGS[M.rig] || RIGS.ground }, M.h);
+  const e = new Actor(g, { clips: RIGS[M.rig] || RIGS.ground }, M.h * MOB_SCALE);
   if(M.flyY) e.root.position.y = M.flyY;
   if(M.skin) applyMobSkin(e, M.skin);
   e.root.position.set(x, 0, z);
@@ -2301,6 +2302,8 @@ window.__SLICE = {
   cam(yaw, pitch, dist){ if(yaw!=null) camYaw=yaw; if(pitch!=null) camPitch=pitch; if(dist!=null) camDist=dist; },
   attack: ()=>doAttack(), roll: ()=>doRoll(), skill: (i)=>castSkill(i||0), jump: ()=>doJump(),
   skills: () => (SKILLS[heroDef.id]||[]).map(s=>s.name),
+  mobScale: v => { if(v!=null) MOB_SCALE = v; return MOB_SCALE; },
+  sizes: () => MONSTERS.map(m => m.label + ' ' + (m.h*MOB_SCALE).toFixed(2) + 'm'),
   enemies: () => enemies.map(e=>({hp:e.hp, dead:e.dead, pos:e.root.position.toArray().map(n=>+n.toFixed(1))})),
   swap: id => switchClass(CLASSES.find(c=>c.id===id) || CLASSES[0]),
   skin: i => { const L=SKINS[heroDef.id]||[]; if(L[i]){ skinIdx[heroDef.id]=i; applySkin(hero, heroDef.id, L[i]); buildSkinBar(); } },

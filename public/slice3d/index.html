@@ -1791,6 +1791,11 @@ const EYE = {
   pupil:  '#000000',
   irisSz: 0.52,
   showWhite: true,
+  /* Lateral shift of the whole pair. `spread` moves the eyes apart from each other;
+     this slides both together. The Monk needs it because his head geometry is not
+     centred on its own bone, so centring the pair on the measured head still lands
+     them off to one side. Separate control, because they are separate problems. */
+  offX: 0,
   onTop: false,
   flip: true,
 };
@@ -1940,7 +1945,7 @@ function addEyes(actor, useSaved){
     /* Build the position from the head's own basis vectors: sideways along RIGHT, up
        along UP, outward along FWD. Works whichever way the bone happens to be oriented. */
     g.position.copy(M.centre)
-      .addScaledVector(M.RIGHT, side * M.w * EYE.spread)
+      .addScaledVector(M.RIGHT, (side * EYE.spread + EYE.offX) * M.w)
       .addScaledVector(M.UP,    (M.eyeY - (M.minY + M.h/2)) + M.h * EYE.height)
       .addScaledVector(M.FWD,   SGN * (M.d * (0.5 + EYE.depth)));
     g.lookAt(g.position.clone().addScaledVector(M.FWD, SGN * 10));
@@ -1971,6 +1976,7 @@ const MOUTH = {
   width: 0.27,
   height: 0.275,
   color: '#5a2f28',
+  offX: 0,
   onTop: false,
   flip: false,
 };
@@ -2111,6 +2117,7 @@ function addMouth(actor, useSaved){
   const MSGN = MOUTH.flip ? -1 : 1;
   m.scale.set(M.w * MOUTH.width, M.w * MOUTH.height, 1);
   m.position.copy(M.centre)
+    .addScaledVector(M.RIGHT, MOUTH.offX * M.w)
     .addScaledVector(M.UP,  (M.eyeY - (M.minY + M.h/2)) + M.h * MOUTH.y)
     .addScaledVector(M.FWD, MSGN * (M.d * (0.5 + MOUTH.z)));
   m.lookAt(m.position.clone().addScaledVector(M.FWD, MSGN * 10));
@@ -2315,6 +2322,7 @@ const CREATOR = {
   // what a player may change, and the bounds they may change it within
   rows: [
     ['spread', 'Eye spacing',  0.06, 0.26, 0.005],
+    ['offX',   'Eye shift',   -0.30, 0.30, 0.005],
     ['height', 'Eye height',  -1.60, 0.10, 0.005],
     ['size',   'Eye size',     0.045, 0.115, 0.002],
     ['squash', 'Eye shape',    0.35, 1.05, 0.01 ],
@@ -2322,6 +2330,7 @@ const CREATOR = {
   ],
   mouthRows: [
     ['y',      'Mouth height', -2.00, -0.15, 0.005],
+    ['offX',   'Mouth shift',  -0.30, 0.30, 0.005],
     ['width',  'Mouth width',   0.14, 0.46, 0.005],
     ['height', 'Mouth size',    0.12, 0.42, 0.005],
   ],
@@ -2998,11 +3007,13 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   const MOUTH_ROWS = [
     ['y',      'Height',      -2.60, 0.40, 0.005],
     ['z',      'Forward',     -1.20, 1.20, 0.005],
+    ['offX',   'Shift L/R',   -1.00, 1.00, 0.005],
     ['width',  'Width',        0.08, 0.80, 0.005],
     ['height', 'Tallness',     0.04, 0.60, 0.005],
   ];
   const ROWS = [
     ['spread', 'Apart',        0.05, 0.60, 0.005],
+    ['offX',   'Shift L/R',   -1.00, 1.00, 0.005],
     ['height', 'Height',      -2.20, 0.60, 0.005],
     ['depth',  'Forward',     -1.20, 1.20, 0.005],
     ['size',   'Size',         0.02, 0.30, 0.002],

@@ -2634,6 +2634,44 @@ function clearWeapon(actor){
   const rig = weaponRig(actor);
   if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
+  actor._weapGrip = null;
+}
+
+
+/* ─────────────  WEAPON TRANSFORM  ─────────────
+   Applying the sliders WITHOUT rebuilding the weapon.
+
+   Dragging a slider used to call equipWeapon, which clears the current weapon (restoring the
+   character's built-in one) and then AWAITS a model load. That async gap is the stutter Oliver
+   saw, and the stock sword flashing through it is the built-in weapon being briefly visible
+   again. Reloading an identical model on every input event is also simply wasted work.
+
+   Nothing about a Length/Pitch/Slide change requires reloading anything - it is a transform.
+   This applies it in place, synchronously, so dragging is smooth and the stock weapon never
+   reappears. equipWeapon is now only called when the MODEL changes. */
+function applyWeaponTransform(actor){
+  const g = actor && actor._weapGrip;
+  if(!g || !g.holder) return false;
+  const holder = g.holder, reach = g.reach || 1, axis = g.axis || 'y';
+
+  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+  holder.scale.setScalar(g.baseScale * (g.usesLen ? WEAP.len : 1));
+  holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
+  if(WEAP.shaft){
+    const along = new THREE.Vector3(axis==='x'?1:0, axis==='y'?1:0, axis==='z'?1:0)
+      .applyEuler(holder.rotation);
+    holder.position.addScaledVector(along, WEAP.shaft * reach);
+  }
+  // grip point moves the mesh along its own axis inside the holder
+  if(g.children && g.half != null){
+    for(const c of g.children){
+      c.position.copy(c.userData._basePos);
+      c.position[axis] += g.half * (WEAP.grip * 2);
+    }
+  }
+  const rig = weaponRig(actor);
+  if(rig && rig.stock) rig.stock.visible = !WEAP.hideStock;
+  return true;
 }
 
 let _weapSeq = 0;
@@ -2672,6 +2710,9 @@ async function equipWeapon(actor, useSaved){
     const sb = new THREE.Box3().setFromObject(st.holder);
     const ss = sb.getSize(new THREE.Vector3());
     const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
+    actor._weapGrip = { holder: st.holder, reach: sreach,
+                        axis: (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z'),
+                        half: null, children: null, baseScale: 1, usesLen: true };
     st.holder.position.set(WEAP.side * sreach, WEAP.up * sreach, WEAP.fwd * sreach);
     if(WEAP.shaft){
       const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
@@ -2747,8 +2788,15 @@ async function equipWeapon(actor, useSaved){
   const got  = _lenOf(wrap);
   if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
 
-  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
   const reach = Math.max(sz.x, sz.y, sz.z);
+  // remember the pieces the transform helper needs so slider drags never reload anything
+  for(const c of holder.children) c.userData._basePos = c.position.clone().sub(
+    new THREE.Vector3(axis==='x' ? half * (WEAP.grip*2) : 0,
+                      axis==='y' ? half * (WEAP.grip*2) : 0,
+                      axis==='z' ? half * (WEAP.grip*2) : 0));
+  actor._weapGrip = { holder, reach, axis, half, children: holder.children.slice(),
+                      baseScale: 1, usesLen: false };
+  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
   /* Two different kinds of slide, and the missing one was the second.
 
      fwd/up/side move the weapon along the HAND's axes. Rotation is applied to the same
@@ -3587,7 +3635,12 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
         pane.querySelectorAll('.shapes button').forEach(b => b.classList.toggle('sel', b === el));
         applyM();
       }));
-    const applyW = () => { equipWeapon(hero, false).then(()=>weapSave()); };
+    /* Sliders no longer reload the weapon - they retransform the one already in the hand.
+       Falls back to a full equip only if there is nothing attached yet. */
+    const applyW = () => {
+      if(applyWeaponTransform(hero)) weapSave();
+      else equipWeapon(hero, false).then(()=>weapSave());
+    };
     const sel = pane.querySelector('[data-wsel]');
     if(sel) sel.addEventListener('change', () => {
       WEAP.name = sel.value; WEAP.on = true;
@@ -4626,6 +4679,9 @@ window.__SLICE = {
   weapons: () => WEAPONS.slice(),
   weaponsFor: m => weaponsFor(m || eyeModel()),
   weapDump: () => JSON.parse(JSON.stringify(WEAP)),
+  stockVisible: () => { const r = weaponRig(hero); return !!(r && r.stock && r.stock.visible); },
+  weapNudge: o => { Object.assign(WEAP, o||{}); const ok = applyWeaponTransform(hero);
+    if(ok) weapSave(); return ok; },
   clipList: () => hero ? Object.keys(hero.clips || {}).sort() : [],
   playClip: n => { if(hero && hero.clips && hero.clips[n]){
       hero.play(null, { clip: hero.clips[n], loop: true, fade: 0.15 });

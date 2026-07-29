@@ -2074,14 +2074,14 @@ function weaponRig(actor){
    longer remove what was actually visible. */
 function clearWeapon(actor){
   if(!actor) return;
+  /* Sweep the WHOLE actor, not just the weapon bone. Belt and braces: if any future path
+     ever parents a weapon somewhere unexpected, this still finds it, so a stray copy can
+     never accumulate again. Cheap — it is a handful of nodes. */
+  const strays = [];
+  actor.root.traverse(o => { if(o.userData && o.userData._weap) strays.push(o); });
+  for(const o of strays){ if(o.parent) o.parent.remove(o); }
   const rig = weaponRig(actor);
-  if(rig){
-    for(const c of rig.bone.children.slice()){
-      if(c.userData && c.userData._weap) rig.bone.remove(c);
-    }
-    if(rig.stock) rig.stock.visible = true;         // restore the character's own weapon
-  }
-  if(actor._weap && actor._weap.parent) actor._weap.parent.remove(actor._weap);
+  if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
   actor._weap = null;
 }
 

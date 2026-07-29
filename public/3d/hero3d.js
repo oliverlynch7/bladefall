@@ -28,7 +28,7 @@ const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplica
    Exposed as a control because it is the one number most likely to need a nudge by eye. */
 export const HERO3D = {
   on: false,
-  scale: 26,
+  scale: 15,   // measured: scale 26 gave 76.8 units tall vs the voxel hero's ~45
   yOff: 0,
   yawOff: Math.PI,          // the glTF characters face +Z; the game's yaw 0 faces away
   model: 'Warrior',
@@ -53,6 +53,7 @@ try {
 
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
 let clips = {}, cur = null, clock = null;
+let _lastW = 0, _lastH = 0;
 
 /* Build a Three.js camera whose matrices ARE the game's. Nothing is recomputed, so the 3D
    hero cannot drift out of alignment with the voxel world however the game moves its camera. */
@@ -84,6 +85,13 @@ async function boot(){
     });
     renderer.autoClear = false;                 // the game owns clearing
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    /* Tell Three the drawing buffer size, WITHOUT letting it resize the canvas (false).
+       Omitting this was the actual bug behind the misplaced character: Three kept its own
+       default viewport, which did not match the game's, so the render landed in the wrong
+       part of the screen at the wrong scale. The game's matrices were never the problem -
+       its mMul/mT/mPersp are column-major, exactly what Matrix4.fromArray expects. */
+    renderer.setPixelRatio(1);
+    renderer.setSize(canvas.width, canvas.height, false);
 
     scene = new THREE.Scene();
     cam = new THREE.PerspectiveCamera(40, 1, 5, 900);
@@ -148,6 +156,13 @@ export function drawHero3D(p, t){
   if(!HERO3D.on || !HERO3D.ready || !renderer || !p) return false;
   if(!syncCamera()) return false;
   try {
+    // the game resizes its canvas on rotate/resize, so keep the viewport in step every frame
+    const cv = renderer.domElement;
+    if(cv.width !== _lastW || cv.height !== _lastH){
+      renderer.setSize(cv.width, cv.height, false);
+      _lastW = cv.width; _lastH = cv.height;
+    }
+    renderer.setViewport(0, 0, cv.width, cv.height);
     const S = HERO3D.scale;
     const wrap = HERO3D._wrap;
     wrap.scale.setScalar(S);
@@ -172,5 +187,32 @@ export function drawHero3D(p, t){
   }
 }
 window.drawHero3D = drawHero3D;
+
+/* Diagnostic: where does the character actually land? Reports its world position, its
+   projected normalised device coords (|x|,|y| < 1 means on screen, z < -1 or > 1 means
+   outside the depth range), and its on-screen pixel size. Measuring beats guessing. */
+window.__hero3dProbe = () => {
+  if(!HERO3D.ready) return { err: 'not ready: ' + HERO3D.err };
+  const wrap = HERO3D._wrap;
+  if(!syncCamera()) return { err: 'no camera' };
+  wrap.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(wrap);
+  const ctr = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const ndc = ctr.clone().project(cam);
+  const cv = renderer.domElement;
+  // rough pixel height: project top and bottom of the bounding box
+  const top = new THREE.Vector3(ctr.x, box.max.y, ctr.z).project(cam);
+  const bot = new THREE.Vector3(ctr.x, box.min.y, ctr.z).project(cam);
+  return {
+    worldPos: [+wrap.position.x.toFixed(1), +wrap.position.y.toFixed(1), +wrap.position.z.toFixed(1)],
+    worldSize: [+size.x.toFixed(1), +size.y.toFixed(1), +size.z.toFixed(1)],
+    ndc: [+ndc.x.toFixed(3), +ndc.y.toFixed(3), +ndc.z.toFixed(3)],
+    onScreen: Math.abs(ndc.x) < 1 && Math.abs(ndc.y) < 1 && ndc.z > -1 && ndc.z < 1,
+    pxHeight: +Math.abs((top.y - bot.y) * cv.height / 2).toFixed(1),
+    canvas: [cv.width, cv.height],
+    scale: HERO3D.scale,
+  };
+};
 
 boot();

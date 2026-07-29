@@ -363,6 +363,259 @@ function applySkin(actor, clsId, skin){
   });
 }
 
+/* ─────────────  MOB RESKINS  ─────────────
+   One base mesh → several genuinely different creatures, for the many Bladefall mobs
+   that share a silhouette (rock/ice/marble/iron constructs).
+
+   The catch with these packs: flat-colour models collapse every UV to a single point,
+   so a texture map does nothing — every vertex samples one pixel. So we GENERATE UVs
+   from object-space position (a cheap triplanar-ish projection), then paint a real
+   procedural surface: lava fissures, ice facets, marble veining, corroded iron. That,
+   plus per-slot materials, added geometry and emissive light, is a new creature rather
+   than a recolour. */
+function reprojectUVs(root){
+  root.traverse(o => {
+    if(!o.isMesh || !o.geometry) return;
+    const g = o.geometry;
+    if(g.userData._uvFixed) return;
+    const pos = g.attributes.position, nor = g.attributes.normal;
+    if(!pos) return;
+    g.computeBoundingBox();
+    const bb = g.boundingBox, sz = new THREE.Vector3().subVectors(bb.max, bb.min);
+    const sx = sz.x||1, sy = sz.y||1, sz2 = sz.z||1;
+    const uv = new Float32Array(pos.count*2);
+    for(let i=0;i<pos.count;i++){
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+      let nx=0, ny=1, nz=0;
+      if(nor){ nx=Math.abs(nor.getX(i)); ny=Math.abs(nor.getY(i)); nz=Math.abs(nor.getZ(i)); }
+      let u, v;
+      if(ny >= nx && ny >= nz){ u = (x-bb.min.x)/sx; v = (z-bb.min.z)/sz2; }   // top/bottom
+      else if(nx >= nz){        u = (z-bb.min.z)/sz2; v = (y-bb.min.y)/sy; }   // sides
+      else {                    u = (x-bb.min.x)/sx;  v = (y-bb.min.y)/sy; }   // front/back
+      uv[i*2] = u; uv[i*2+1] = v;
+    }
+    g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.userData._uvFixed = true;
+  });
+}
+// procedural surfaces — drawn, not tinted
+function surfaceTex(kind, A, B, C){
+  const S = 512;
+  const c = document.createElement('canvas'); c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.fillStyle = A; x.fillRect(0,0,S,S);
+  const rnd = (() => { let s = 99173; return () => (s = (s*1664525+1013904223)&0x7fffffff)/0x7fffffff; })();
+
+  if(kind === 'lava'){
+    // cooled obsidian crust with molten fissures forced through it
+    for(let i=0;i<220;i++){                                    // crust mottling
+      x.globalAlpha = 0.05+rnd()*0.18; x.fillStyle = B;
+      const r = S*(0.01+rnd()*0.06);
+      x.beginPath(); x.arc(rnd()*S, rnd()*S, r, 0, 7); x.fill();
+    }
+    x.globalAlpha = 1;
+    for(let f=0; f<16; f++){                                   // branching fissures
+      let px = rnd()*S, py = rnd()*S, a = rnd()*7;
+      for(let step=0; step<70; step++){
+        const w = 5.5*(1-step/70) + 0.6;
+        const g = x.createLinearGradient(px-w,py-w,px+w,py+w);
+        g.addColorStop(0, C); g.addColorStop(1, B);
+        x.fillStyle = g; x.globalAlpha = 0.85;
+        x.beginPath(); x.arc(px, py, w, 0, 7); x.fill();
+        a += (rnd()-0.5)*0.85; px += Math.cos(a)*5; py += Math.sin(a)*5;
+        if(px<0||px>S||py<0||py>S) break;
+      }
+    }
+  } else if(kind === 'ice'){
+    // faceted glacial planes + frozen fractures
+    for(let i=0;i<80;i++){
+      x.globalAlpha = 0.10+rnd()*0.30; x.fillStyle = rnd()<0.5 ? B : C;
+      x.beginPath();
+      const cx = rnd()*S, cy = rnd()*S, r = S*(0.04+rnd()*0.14), n = 3+((rnd()*3)|0);
+      for(let k=0;k<n;k++){ const a=(k/n)*7+rnd()*0.4;
+        x[k?'lineTo':'moveTo'](cx+Math.cos(a)*r, cy+Math.sin(a)*r); }
+      x.closePath(); x.fill();
+    }
+    x.globalAlpha = 0.9; x.strokeStyle = C; x.lineWidth = 1.6;
+    for(let i=0;i<40;i++){                                     // fracture lines
+      x.beginPath(); let px=rnd()*S, py=rnd()*S; x.moveTo(px,py);
+      for(let k=0;k<5;k++){ px += (rnd()-0.5)*S*0.22; py += (rnd()-0.5)*S*0.22; x.lineTo(px,py); }
+      x.stroke();
+    }
+  } else if(kind === 'marble'){
+    // polished stone with mineral veining
+    for(let i=0;i<26;i++){
+      x.globalAlpha = 0.10+rnd()*0.2; x.fillStyle = B;
+      x.beginPath(); x.arc(rnd()*S, rnd()*S, S*(0.08+rnd()*0.22), 0, 7); x.fill();
+    }
+    for(let v=0; v<22; v++){                                   // gold/grey veins
+      x.globalAlpha = 0.35+rnd()*0.5;
+      x.strokeStyle = rnd()<0.35 ? C : B;
+      x.lineWidth = 0.8 + rnd()*2.6;
+      x.beginPath();
+      let px = rnd()*S, py = rnd()*S, a = rnd()*7;
+      x.moveTo(px,py);
+      for(let k=0;k<26;k++){ a += (rnd()-0.5)*0.8; px += Math.cos(a)*S*0.045; py += Math.sin(a)*S*0.045; x.lineTo(px,py); }
+      x.stroke();
+    }
+  } else if(kind === 'rust'){
+    // pitted iron: corrosion blooms, streaks, rivets
+    for(let i=0;i<300;i++){
+      x.globalAlpha = 0.06+rnd()*0.35; x.fillStyle = rnd()<0.6 ? B : C;
+      x.beginPath(); x.arc(rnd()*S, rnd()*S, S*(0.004+rnd()*0.05), 0, 7); x.fill();
+    }
+    x.globalAlpha = 0.4; x.strokeStyle = B; x.lineWidth = 2.5;
+    for(let i=0;i<34;i++){                                     // weep streaks
+      const px = rnd()*S, py = rnd()*S;
+      x.beginPath(); x.moveTo(px,py); x.lineTo(px + (rnd()-0.5)*10, py + S*(0.06+rnd()*0.2)); x.stroke();
+    }
+    x.globalAlpha = 0.85;
+    for(let i=0;i<26;i++){                                     // rivets
+      const px=rnd()*S, py=rnd()*S, r=S*0.011;
+      const g=x.createRadialGradient(px-r*0.3,py-r*0.3,0,px,py,r);
+      g.addColorStop(0,C); g.addColorStop(1,A);
+      x.fillStyle=g; x.beginPath(); x.arc(px,py,r,0,7); x.fill();
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(2.2, 2.2);
+  t.needsUpdate = true;
+  return t;
+}
+const _mobTexCache = new Map();
+function getSurface(kind, A, B, C){
+  const k = [kind,A,B,C].join('|');
+  if(!_mobTexCache.has(k)) _mobTexCache.set(k, surfaceTex(kind, A, B, C));
+  return _mobTexCache.get(k);
+}
+/* Four creatures from ONE Goleling mesh. Each targets a Bladefall mob we had no model
+   for, and differs in surface, emissive, light, added geometry and particles. */
+const MOB_SKINS = {
+  magma: {
+    label:'Ember Gargoyle', bf:'emberling',
+    main:{ kind:'lava', A:'#241816', B:'#5a2410', C:'#ff7a24', emissive:'#ff5a1e', ei:0.85 },
+    second:{ color:'#3a1d14', emissive:'#ff4a12', ei:0.5 },
+    eye:'#ffd27a', light:{ color:'#ff6a20', power:2.8, dist:7 },
+    embers:{ color:'#ff9a3a', rate:0.09 },
+    spikes:{ n:7, color:'#2a1a16', glow:'#ff7a24', len:0.30, rad:0.075 },
+  },
+  frost: {
+    label:'Frost Gargoyle', bf:'frostshell',
+    main:{ kind:'ice', A:'#8fc6e8', B:'#cfeaff', C:'#ffffff', emissive:'#7fd0ff', ei:0.22 },
+    second:{ color:'#5f9fc8', emissive:'#9fe0ff', ei:0.18 },
+    eye:'#eaffff', light:{ color:'#8fd8ff', power:1.7, dist:6.5 },
+    embers:{ color:'#dff4ff', rate:0.16, up:0.5 },
+    spikes:{ n:9, color:'#bfe6ff', glow:'#ffffff', len:0.42, rad:0.055, sharp:true },
+  },
+  marble: {
+    label:'Marble Gargoyle', bf:'marblestatue',
+    main:{ kind:'marble', A:'#e8e4da', B:'#a89f8c', C:'#d8b45a', emissive:'#fff2c8', ei:0.10 },
+    second:{ color:'#c9a24a', emissive:'#ffe9a8', ei:0.25 },
+    eye:'#ffe9a8', light:{ color:'#ffe0a0', power:1.4, dist:6 },
+    embers:null,
+    rings:{ n:3, color:'#c9a24a' },
+  },
+  rust: {
+    label:'Iron Gargoyle', bf:'sentinel',
+    main:{ kind:'rust', A:'#5a4436', B:'#8a4a22', C:'#9aa0a6', emissive:'#000000', ei:0 },
+    second:{ color:'#3e3630', emissive:'#6affc8', ei:0.30 },
+    eye:'#7affd0', light:{ color:'#4fd8a8', power:1.2, dist:5 },
+    embers:{ color:'#b8b0a4', rate:0.30, up:0.9, size:0.3 },
+    rivets:true,
+  },
+};
+function applyMobSkin(actor, key){
+  const S = MOB_SKINS[key];
+  if(!S || !actor) return;
+  reprojectUVs(actor.root);
+  actor.root.traverse(o => {
+    if(!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const out = mats.map(m => {
+      const n = (m && m.name || '').toLowerCase();
+      let d;
+      if(n.includes('eye_black'))      d = new THREE.MeshBasicMaterial({ color:'#0a0a0c' });
+      else if(n.includes('eye'))       d = new THREE.MeshBasicMaterial({ color:S.eye });
+      else if(n.includes('second'))    d = new THREE.MeshStandardMaterial({
+        color:S.second.color, emissive:S.second.emissive, emissiveIntensity:S.second.ei,
+        roughness:0.75, metalness:0.15 });
+      else                             d = new THREE.MeshStandardMaterial({
+        map:getSurface(S.main.kind, S.main.A, S.main.B, S.main.C),
+        color:'#ffffff', emissive:S.main.emissive, emissiveIntensity:S.main.ei,
+        roughness: S.main.kind==='marble' ? 0.35 : S.main.kind==='ice' ? 0.18 : 0.85,
+        metalness: S.main.kind==='rust' ? 0.55 : 0.1 });
+      if(S.main.kind === 'ice' && !n.includes('eye')){ d.transparent = true; d.opacity = 0.94; }
+      return d;
+    });
+    o.material = out.length === 1 ? out[0] : out;
+  });
+  // per-creature light
+  if(S.light){
+    const li = new THREE.PointLight(S.light.color, S.light.power, S.light.dist, 2);
+    li.position.y = actor.targetH * 0.55;
+    actor.root.add(li);
+  }
+  // added geometry: spikes / rings / rivets
+  const H = actor.targetH;
+  if(S.spikes){
+    for(let i=0;i<S.spikes.n;i++){
+      const a = (i/S.spikes.n)*Math.PI*2;
+      const len = S.spikes.len * (0.65 + Math.random()*0.7);
+      const sp = new THREE.Mesh(
+        new THREE.ConeGeometry(S.spikes.rad, len, S.spikes.sharp?5:6),
+        new THREE.MeshStandardMaterial({ color:S.spikes.color, emissive:S.spikes.glow,
+          emissiveIntensity: S.spikes.sharp?0.35:0.55, roughness:0.5,
+          transparent:S.spikes.sharp, opacity:S.spikes.sharp?0.9:1 }));
+      sp.position.set(Math.cos(a)*H*0.26, H*(0.52 + Math.random()*0.34), Math.sin(a)*H*0.26);
+      sp.rotation.set((Math.random()-0.5)*0.9, a, (Math.random()-0.5)*0.9 + 0.3);
+      actor.root.add(sp);
+    }
+  }
+  if(S.rings){
+    for(let i=0;i<S.rings.n;i++){
+      const r = new THREE.Mesh(new THREE.TorusGeometry(H*0.20, H*0.016, 6, 20),
+        new THREE.MeshStandardMaterial({ color:S.rings.color, emissive:S.rings.color,
+          emissiveIntensity:0.35, metalness:0.7, roughness:0.3 }));
+      r.rotation.x = Math.PI/2;
+      r.position.y = H*(0.32 + i*0.22);
+      actor.root.add(r);
+    }
+  }
+  if(S.rivets){
+    for(let i=0;i<10;i++){
+      const b = new THREE.Mesh(new THREE.SphereGeometry(H*0.022, 6, 5),
+        new THREE.MeshStandardMaterial({ color:'#9aa0a6', metalness:0.85, roughness:0.35 }));
+      const a = Math.random()*Math.PI*2;
+      b.position.set(Math.cos(a)*H*0.23, H*(0.30+Math.random()*0.5), Math.sin(a)*H*0.23);
+      actor.root.add(b);
+    }
+  }
+  actor.mobSkin = S;
+}
+// ambient particles for skinned mobs (embers rising / frost drifting / steam)
+function mobParticles(dt){
+  for(const e of enemies){
+    if(e.dead || !e.mobSkin || !e.mobSkin.embers) continue;
+    const E = e.mobSkin.embers;
+    e._emT = (e._emT || 0) + dt;
+    if(e._emT < E.rate) continue;
+    e._emT = 0;
+    const sp = new THREE.Sprite(addMat(E.color, TEX.mote, 0.9));
+    const s = E.size || 0.22; sp.scale.setScalar(s);
+    sp.position.copy(e.root.position).add(new THREE.Vector3(
+      (Math.random()-0.5)*0.7, 0.35 + Math.random()*0.9, (Math.random()-0.5)*0.7));
+    scene.add(sp);
+    const rise = (E.up==null?1.5:E.up) * (0.6+Math.random()*0.8);
+    push({ life:0.95, t:0, step(k, d){
+      sp.position.y += rise*d;
+      sp.material.opacity = 0.9*(1-k);
+      const q = s*(1 + k*0.5); sp.scale.setScalar(q);
+    }, done(){ killObj(sp); } });
+  }
+}
+
 /* ─────────────  FULL REDESIGNS  ─────────────
    Beyond recolouring: these build NEW geometry onto the rig (horns, capes, pauldron
    spikes, orbiting shards, auras) and bind it to real bones so it animates with the
@@ -1121,16 +1374,22 @@ const MONSTERS = [
   { file:'Glub_Evolved',       label:'Deep Glub',     bf:'toxling',      rig:'fly',    hp:120, h:1.6, speed:2.0, dmg:11, flyY:1.3 },
   { file:'Hywirl',             label:'Sparkling',     bf:'sparkling',    rig:'fly',    hp: 70, h:1.3, speed:3.2, dmg:7,  flyY:1.5 },
   { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:2.0, speed:2.6, dmg:14, flyY:1.9 },
+  // ── RESKIN TEST: one Goleling mesh, four different creatures ──
+  { file:'Goleling', label:'Ember Gargoyle', bf:'emberling',   rig:'fly', hp:170, h:1.8, speed:1.3, dmg:13, flyY:0.7, skin:'magma'  },
+  { file:'Goleling', label:'Frost Gargoyle', bf:'frostshell',   rig:'fly', hp:190, h:1.9, speed:1.1, dmg:14, flyY:0.7, skin:'frost'  },
+  { file:'Goleling', label:'Marble Gargoyle',  bf:'marblestatue', rig:'fly', hp:230, h:2.0, speed:1.0, dmg:16, flyY:0.7, skin:'marble' },
+  { file:'Goleling', label:'Iron Gargoyle', bf:'sentinel',     rig:'fly', hp:200, h:1.85,speed:1.2, dmg:15, flyY:0.7, skin:'rust'   },
   // ── bosses ──
   { file:'Dragon_Evolved',     label:'DRAGON (boss)', bf:'boss',         rig:'fly',    hp:900, h:4.6, speed:2.2, dmg:26, flyY:2.6, boss:true },
   { file:'Mushroom_King',      label:'MUSHROOM KING (boss)', bf:'boss',  rig:'ground', hp:800, h:4.2, speed:1.5, dmg:24, boss:true },
 ];
 const MONSTER_CLIPS = RIGS.ground;   // legacy alias; per-monster rig is used below
 const ENEMY_SPOTS = [
-  { x: 4.6, z:-4.6, m:0 },   // Orc
-  { x:-5.0, z:-3.4, m:5 },   // Slime
-  { x: 0.6, z:-7.6, m:14 },  // Bones
-  { x:-2.6, z:-6.4, m:1 },   // Goblin
+  // the four reskin variants, so the one-mesh-many-creatures test is visible on load
+  { x: 5.4, z:-4.2, m:'Ember Gargoyle' },
+  { x: 1.8, z:-6.6, m:'Frost Gargoyle' },
+  { x:-1.8, z:-6.6, m:'Marble Gargoyle'  },
+  { x:-5.4, z:-4.2, m:'Iron Gargoyle' },
 ];
 let roomHalf = 11;                              // movement bounds, set from the room bbox
 const vel = new THREE.Vector3();
@@ -1180,13 +1439,16 @@ function damageNumber(pos, amount, crit){
 
 /* ── enemies ── */
 async function spawnEnemy(x, z, mIdx){
-  const M = MONSTERS[mIdx % MONSTERS.length];
+  const M = (typeof mIdx === 'string')
+    ? (MONSTERS.find(q => q.label === mIdx) || MONSTERS[0])
+    : MONSTERS[mIdx % MONSTERS.length];
   const g = await load(`assets/monsters/${M.file}.glb`).catch(()=>null);
   if(!g) return null;
   // Quaternius exports name clips "CharacterArmature|Idle" — normalise so RIGS can find them
   for(const c of g.animations) c.name = c.name.split('|').pop();
   const e = new Actor(g, { clips: RIGS[M.rig] || RIGS.ground }, M.h);
   if(M.flyY) e.root.position.y = M.flyY;
+  if(M.skin) applyMobSkin(e, M.skin);
   e.root.position.set(x, 0, z);
   e.def2 = M;
   e.maxHp = M.hp; e.hp = M.hp; e.dead = false; e.hitFlash = 0; e.swingCd = 1 + Math.random()*2;
@@ -1213,8 +1475,7 @@ function hurtEnemy(e, amount, crit){
       const i = enemies.indexOf(e); if(i>=0) enemies.splice(i,1);
       disposeTree(e.root);
       const spot = ENEMY_SPOTS[Math.floor(Math.random()*ENEMY_SPOTS.length)];
-      spawnEnemy(spot.x + (Math.random()-.5)*2.5, spot.z + (Math.random()-.5)*2.5,
-                 Math.floor(Math.random()*MONSTERS.length));
+      spawnEnemy(spot.x + (Math.random()-.5)*2.5, spot.z + (Math.random()-.5)*2.5, spot.m);
     }, 2600);
   } else {
     e.once('hit', 1.2);
@@ -1772,6 +2033,7 @@ function tick(){
   }
 
   tryOpenChests();
+  mobParticles(dt);
   updateRedesign(t, dt);
   paintSkillBar();
   stepVFX(dt);

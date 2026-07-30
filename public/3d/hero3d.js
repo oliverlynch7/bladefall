@@ -229,29 +229,42 @@ const _mouthTex = {};
    repaintTexture classifies by HSV — low-saturation pixels become `metal`, dark warm pixels
    become `leather`, and skin/hair/eyes are only brightened — so one palette repaints a whole
    character coherently without touching its face. */
+/* Palettes taken from GPT's concept sheet (2026-07-30). COLOUR ONLY.
+
+   The concept art added geometry we cannot use - a tricorn hat, a wolf-head hood, winged helms,
+   spiked pauldrons, horned crowns, face masks. Our characters are fixed meshes, so a skin can
+   repaint a surface but cannot grow a new one. What carries over is the colour identity, which
+   is most of what makes a class readable at a glance anyway.
+
+   Ninja is deliberately unchanged: the sheet came back with 12 designs, not 13, and no Ninja
+   among them. Left on its original palette rather than inventing one and implying it was
+   approved art.
+
+   `metal` is the bright structural colour and `leather` the dark cloth/hide, matching how
+   repaintTexture classifies pixels by saturation and hue. */
 const CLASS_SKINS = {
   // Warrior body
   warrior:      { id:'c_warrior',      metal:'#c9a05a', leather:'#3a2a16', lift:1.30 },
-  berserker:    { id:'c_berserker',    metal:'#a8352a', leather:'#2a1410', lift:1.28 },
-  pirate:       { id:'c_pirate',       metal:'#b08a42', leather:'#402c18', lift:1.30 },
+  berserker:    { id:'c_berserker',    metal:'#8e2a24', leather:'#241c1e', lift:1.24 },
+  pirate:       { id:'c_pirate',       metal:'#c9a24a', leather:'#2c5f63', lift:1.30 },
   // Rogue body
-  bladedancer:  { id:'c_bladedancer',  metal:'#4fa8a0', leather:'#1d2a2a', lift:1.32 },
-  reaper:       { id:'c_reaper',       metal:'#8e2a3c', leather:'#1a1014', lift:1.26 },
+  bladedancer:  { id:'c_bladedancer',  metal:'#9fc4c8', leather:'#2f5f66', lift:1.32 },
+  reaper:       { id:'c_reaper',       metal:'#7a2028', leather:'#1a1418', lift:1.22 },
   ninja:        { id:'c_ninja',        metal:'#454e60', leather:'#16181f', lift:1.24 },
   // Cleric body
-  paladin:      { id:'c_paladin',      metal:'#d8c274', leather:'#3a3120', lift:1.34 },
+  paladin:      { id:'c_paladin',      metal:'#e8c86a', leather:'#4a4032', lift:1.36 },
   // Monk body
-  monk:         { id:'c_monk',         metal:'#c9782f', leather:'#35240f', lift:1.30 },
+  monk:         { id:'c_monk',         metal:'#d8792a', leather:'#6a4a2c', lift:1.32 },
   // Ranger body
   ranger:       { id:'c_ranger',       metal:'#5a8f45', leather:'#26301c', lift:1.30 },
-  beastmaster:  { id:'c_beastmaster',  metal:'#8a6a3a', leather:'#2e2415', lift:1.28 },
-  skylancer:    { id:'c_skylancer',    metal:'#5f92d8', leather:'#1e2a3a', lift:1.32 },
+  beastmaster:  { id:'c_beastmaster',  metal:'#cfc2a4', leather:'#5e452c', lift:1.28 },
+  skylancer:    { id:'c_skylancer',    metal:'#c8d4e4', leather:'#2f5f9e', lift:1.34 },
   // Wizard body
   mage:         { id:'c_mage',         metal:'#5a7fc8', leather:'#1e2436', lift:1.30 },
-  stormcaller:  { id:'c_stormcaller',  metal:'#9a7fe8', leather:'#241c38', lift:1.32 },
-  warlock:      { id:'c_warlock',      metal:'#7a4490', leather:'#201430', lift:1.26 },
-  necromancer:  { id:'c_necromancer',  metal:'#9aa08a', leather:'#2a2c22', lift:1.28 },
-  chronomancer: { id:'c_chronomancer', metal:'#5fb8a0', leather:'#1c2e28', lift:1.32 },
+  stormcaller:  { id:'c_stormcaller',  metal:'#b9a8e8', leather:'#4a3a9e', lift:1.32 },
+  warlock:      { id:'c_warlock',      metal:'#8a4fb0', leather:'#241338', lift:1.24 },
+  necromancer:  { id:'c_necromancer',  metal:'#d8d6c0', leather:'#44503e', lift:1.30 },
+  chronomancer: { id:'c_chronomancer', metal:'#d0a94a', leather:'#1f5a5e', lift:1.32 },
 };
 
 const CLASS_TO_MODEL = {
@@ -943,7 +956,13 @@ function repaintTexture(srcTex, skin){
     if(px[i+3] < 8) continue;
     const hsv = rgb2hsv(px[i],px[i+1],px[i+2]);
     const lum = Math.min(1.9, (0.35 + hsv[2]*1.25) * lift);
-    if(hsv[1] < 0.20) tintPixel(px,i,metal,lum);
+    /* SKIN GUARD - see the matching note in the slice. Skin is a warm mid-value hue that collides
+       with both the low-saturation "metal" test and the warm-dark "leather" test, so faces and
+       hands were being repainted with the outfit. Excluded explicitly; only brightness passes. */
+    if(hsv[0]>=8 && hsv[0]<=54 && hsv[1]>=0.12 && hsv[1]<=0.62 && hsv[2]>=0.45){
+      px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift;
+    }
+    else if(hsv[1] < 0.20) tintPixel(px,i,metal,lum);
     else if(hsv[0] >= 12 && hsv[0] <= 52 && hsv[2] < 0.52) tintPixel(px,i,leather,lum);
     else { px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift; }
   }

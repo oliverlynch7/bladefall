@@ -515,6 +515,15 @@ function tintPixel(out, i, target, lum){
   out[i+2] = Math.min(255, tb * lum);
 }
 const _skinCache = new Map();
+
+/* HSV -> RGB, needed for the hue remap below. */
+function hsv2rgb(h,s,v){
+  const c=v*s, x=c*(1-Math.abs(((h/60)%2)-1)), m=v-c;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;} else if(h<300){r=x;b=c;} else {r=c;b=x;}
+  return [(r+m)*255,(g+m)*255,(b+m)*255];
+}
 function repaintTexture(srcTex, skin){
   const img = srcTex.image;
   if(!img || !img.width) return srcTex;
@@ -1450,7 +1459,20 @@ function repaintDetailed(srcTex, skin){
     }
     else if(s < 0.20) tintPixel(px,i,metal,lum);
     else if(h>=12 && h<=52 && v<0.52) tintPixel(px,i,leather,lum);
-    else { px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift; }
+    /* SATURATED GARMENT REMAP. Without this, three Rogue classes all stayed the same red and the
+       Wizard classes all stayed the same blue: the old rules only replaced LOW-saturation pixels
+       (-> metal) and dark warm ones (-> leather), so a strongly coloured robe fell through to a
+       plain brightness lift and kept its original hue no matter what palette was applied. That
+       defeats the whole point, because classes sharing a body are told apart by colour alone.
+       Saturated non-skin pixels now take the palette's HUE while keeping their own shading, so
+       folds, trim and painted detail survive the recolour instead of flattening to one flat fill. */
+    else {
+      const tgt = rgb2hsv(...(v < 0.42 ? leather : metal));
+      const nv = Math.min(1, v * lift);
+      const ns = Math.min(1, s * 0.45 + tgt[1] * 0.6);
+      const out = hsv2rgb(tgt[0], ns, nv);
+      px[i]=out[0]; px[i+1]=out[1]; px[i+2]=out[2];
+    }
   }
   ctx.putImageData(data,0,0);
   // then PAINT on top — this is the part a hue shift can't do

@@ -526,6 +526,331 @@ const WEAPON_PRESETS_BY_MODEL = {
 
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
 let clips = {}, cur = null, clock = null;
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WEAPONS — ported verbatim from the slice.
+
+   The archetype rules and Oliver's tuned transforms were already ported; this is the machinery
+   that actually attaches a weapon. Copied out of public/slice3d/index.html rather than retyped,
+   same reasoning as the faces: WEAPON_PRESETS holds tuned values and a transcription slip would
+   silently move every weapon.
+
+   Two paths, and any future change must be tested on BOTH — that split has already caused two
+   bugs (the slide controls, then Length, each silently dead on one path):
+     - FILE weapons load a .glb and are sized by matching the character's stock weapon length
+     - STOCK weapons are lifted out of the character that owns them and inherit the artist's
+       placement, so they need no tuning at all
+
+   Weapon frames are read from WEAP_FRAME_ALL when present, exactly as in the slice, so a tuned
+   transform cannot be reinterpreted by a change to how reach is measured.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Serialises overlapping equips. The slice declares this immediately before equipWeapon, so my
+   function-boundary extraction missed it — a newer request must invalidate one still loading, or
+   rapid changes stack copies of the weapon. */
+/* Module-scope glTF loader. The ported slice code calls load() freely; in hero3d.js it was
+   previously scoped inside boot(). Paths are rewritten onto ASSETS because the slice's relative
+   'assets/...' does not resolve from /3d/. */
+const _loader = new GLTFLoader();
+const load = url => new Promise((res, rej) =>
+  _loader.load(url.startsWith('assets/') ? ASSETS + url.slice(7) : url, res, undefined, rej));
+
+/* Per-weapon length multipliers, relative to the character's stock weapon. Also from the slice
+   - a claymore should read longer than a sword and a dagger shorter. */
+const WEAPON_LEN = {
+  Claymore:1.45, Sword_Big:1.4, Sword_big_Golden:1.4, Scythe:1.6, Spear:1.7,
+  Hammer_Double:1.25, Hammer_Double_Golden:1.25, Axe_Double:1.2, Axe_Double_Golden:1.2,
+  Dagger:0.62, Dagger_2:0.62, Dagger_Golden:0.62, Arrow:0.7,
+  Bow_Wooden:1.15, Bow_Wooden2:1.15, Bow_Golden:1.15, Bow_Evil:1.15,
+};
+
+let _weapSeq = 0;
+const WEAP_FRAME_VERSION = 1;
+let WEAP_FRAME_ALL = {};
+function weapKey(){ return eyeModel() + '|' + WEAP.name; }
+function storedWeapFrame(){ return WEAP_FRAME_ALL[weapKey()] || null; }
+const weapFrameSave = () => {};        // no persistence in the game build; presets are the source
+const weapSave = () => {};
+
+const VIL = '';                        // unused here; kept so ported code needs no edits
+const _terCache = {};
+
+function relight(m){
+  if(!m || !m.isMeshBasicMaterial) return m;
+  const lit = new THREE.MeshLambertMaterial({
+    map: m.map || null,
+    color: m.color ? m.color.clone() : new THREE.Color('#ffffff'),
+    transparent: m.transparent, opacity: m.opacity,
+    alphaTest: m.alphaTest, side: m.side, vertexColors: m.vertexColors
+  });
+  lit.name = m.name;
+  return lit;
+}
+
+const _lenOf = obj => {
+  const b = new THREE.Box3().setFromObject(obj), sz = b.getSize(new THREE.Vector3());
+  return Math.max(sz.x, sz.y, sz.z) || 1;
+};
+
+function weaponRig(actor){
+  let bone = null;
+  actor.root.traverse(o => { if(!bone && o.isBone && /^weaponr$/i.test(o.name.replace(/[^a-z]/gi,''))) bone = o; });
+  if(!bone) return null;
+  let stock = null;
+  for(const c of bone.children){ if(!c.isBone && !c.userData._weap){ stock = c; break; } }
+  return { bone, stock };
+}
+
+
+function clearWeapon(actor){
+  if(!actor) return;
+  /* Sweep the WHOLE actor, not just the weapon bone. Belt and braces: if any future path
+     ever parents a weapon somewhere unexpected, this still finds it, so a stray copy can
+     never accumulate again. Cheap — it is a handful of nodes. */
+  const strays = [];
+  actor.root.traverse(o => { if(o.userData && o.userData._weap) strays.push(o); });
+  for(const o of strays){ if(o.parent) o.parent.remove(o); }
+  const rig = weaponRig(actor);
+  if(rig && rig.stock) rig.stock.visible = true;    // restore the character's own weapon
+  actor._weap = null;
+  actor._weapGrip = null;
+}
+
+
+
+
+function applyWeaponTransform(actor){
+  const g = actor && actor._weapGrip;
+  if(!g || !g.holder) return false;
+  const holder = g.holder, reach = g.reach || 1, axis = g.axis || 'y';
+
+  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+  holder.scale.setScalar(g.baseScale * (g.usesLen ? WEAP.len : 1));
+  // file weapons carry Length on the outer wrap; rescale from the recorded len==1 baseline
+  if(g.wrap && g.lenBase) g.wrap.scale.copy(g.lenBase).multiplyScalar(WEAP.len);
+  holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
+  if(WEAP.shaft){
+    const along = new THREE.Vector3(axis==='x'?1:0, axis==='y'?1:0, axis==='z'?1:0)
+      .applyEuler(holder.rotation);
+    holder.position.addScaledVector(along, WEAP.shaft * reach);
+  }
+  // grip point moves the mesh along its own axis inside the holder
+  if(g.children && g.half != null){
+    for(const c of g.children){
+      c.position.copy(c.userData._basePos);
+      c.position[axis] += g.half * (WEAP.grip * 2);
+    }
+  }
+  const rig = weaponRig(actor);
+  if(rig && rig.stock) rig.stock.visible = !WEAP.hideStock;
+  return true;
+}
+
+
+async function loadStockWeapon(key){
+  const def = STOCK_WEAPONS[key]; if(!def) return null;
+  const g = await load(`assets/chars/${def.from}.gltf`).catch(()=>null);
+  if(!g) return null;
+  let src = null;
+  g.scene.traverse(o => { if(!src && o.name === def.node) src = o; });
+  if(!src) return null;
+  const holder = new THREE.Group();
+  src.updateWorldMatrix(true, false);
+  src.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.userData._weap = true;
+    o.updateWorldMatrix(true, false);
+    m.applyMatrix4(new THREE.Matrix4().copy(src.matrixWorld).invert().multiply(o.matrixWorld));
+    holder.add(m);
+  });
+  if(!holder.children.length) return null;
+  return { holder, pos: src.position.clone(), quat: src.quaternion.clone(), scale: src.scale.clone() };
+}
+
+
+async function equipWeapon(actor, useSaved){
+  if(!actor) return null;
+  const seq = ++_weapSeq;              // anything older than this is stale
+  clearWeapon(actor);
+  if(useSaved !== false) weapLoadFor(eyeModel());
+  if(!WEAP.on) return null;
+  // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
+  const allowed = weaponsFor(eyeModel());
+  if(allowed.length && !allowed.includes(WEAP.name)){
+    const pref = DEFAULT_WEAPON[eyeModel()];
+    WEAP.name = (pref && allowed.includes(pref)) ? pref : allowed[0];
+  }
+  if(!allowed.length) return null;
+  const rig = weaponRig(actor);
+  if(!rig) return null;
+
+  /* Stock weapons take a different path: they arrive with the transform the artist gave
+     them, which is by definition correct for this rig, so they skip the measure-and-scale
+     step entirely and need no tuning. */
+  if(STOCK_WEAPONS[WEAP.name]){
+    const st = await loadStockWeapon(WEAP.name);
+    if(seq !== _weapSeq || !st) return null;
+    const wrapS = new THREE.Group();
+    wrapS.userData._weap = true;
+    wrapS.add(st.holder);
+    wrapS.position.copy(st.pos); wrapS.quaternion.copy(st.quat); wrapS.scale.copy(st.scale);
+    st.holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+    st.holder.scale.setScalar(WEAP.len);
+    /* Stock weapons were skipping the slide controls entirely. Inheriting the artist's
+       transform is right for the STARTING position, but it should not mean the staffs and
+       wands cannot then be nudged like everything else. Same maths as the file path, with
+       reach taken from the piece's own size. */
+    const sb = new THREE.Box3().setFromObject(st.holder);
+    const ss = sb.getSize(new THREE.Vector3());
+    const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
+    {
+      const wf = storedWeapFrame();
+      const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
+      actor._stockGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
+                           axis: wf && wf.axis ? wf.axis : ax,
+                           half: null, children: null, baseScale: 1, usesLen: true };
+    }
+    st.holder.position.set(WEAP.side * sreach, WEAP.up * sreach, WEAP.fwd * sreach);
+    if(WEAP.shaft){
+      const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
+      const along = new THREE.Vector3(ax==='x'?1:0, ax==='y'?1:0, ax==='z'?1:0)
+        .applyEuler(st.holder.rotation);
+      st.holder.position.addScaledVector(along, WEAP.shaft * sreach);
+    }
+    clearWeapon(actor);              // NB this nulls _weapGrip, so assign it after
+    rig.bone.add(wrapS);
+    if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
+    actor._weap = wrapS;
+    actor._weapGrip = actor._stockGrip;
+    actor._stockGrip = null;
+    return { name: WEAP.name, stockModel: true };
+  }
+
+  const g = await load(`assets/weapons/${WEAP.name}.glb`).catch(()=>null);
+  // a newer request started while this one was loading — drop this result on the floor
+  if(seq !== _weapSeq) return null;
+  if(!g) return null;
+
+  const holder = new THREE.Group();
+  holder.userData._weap = true;
+  const wmats = [];
+  g.scene.traverse(o => {
+    if(!o.isMesh) return;
+    const m = new THREE.Mesh(o.geometry, relight(o.material.clone()));
+    m.castShadow = true; m.userData._weap = true;
+    o.updateWorldMatrix(true, false); m.applyMatrix4(o.matrixWorld);
+    (Array.isArray(m.material) ? m.material : [m.material]).forEach(mm => mm && wmats.push(mm));
+    holder.add(m);
+  });
+  if(!holder.children.length) return null;
+
+  /* This pack shipped OBJ-only and was batch-converted, which carried very dim diffuse
+     values across (a steel blade came through at 0.21 grey, some parts at 0.02). Against
+     this scene's lighting they render as black silhouettes. Lift the whole weapon by ONE
+     factor derived from its brightest material, so gold still reads brighter than steel
+     and steel brighter than wood — normalising each material separately would flatten
+     exactly the contrast that makes them readable. */
+  let peak = 0;
+  for(const mm of wmats){ if(mm.color) peak = Math.max(peak, mm.color.r, mm.color.g, mm.color.b); }
+  if(peak > 1e-3 && peak < 0.72){
+    const k = 0.72 / peak;
+    for(const mm of wmats){ if(mm.color) mm.color.multiplyScalar(k); }
+  }
+
+  // centre on its own origin so rotation behaves predictably
+  const bb = new THREE.Box3().setFromObject(holder);
+  const mid = bb.getCenter(new THREE.Vector3());
+  const sz  = bb.getSize(new THREE.Vector3());
+  const axis = (sz.y >= sz.x && sz.y >= sz.z) ? 'y' : (sz.x >= sz.z ? 'x' : 'z');
+  for(const c of holder.children){ c.position.sub(mid); }
+  // pivot at the grip end rather than the middle, so it sits in the fist not through it
+  const half = (axis === 'y' ? sz.y : axis === 'x' ? sz.x : sz.z) / 2;
+  for(const c of holder.children){ c.position[axis] += half * (WEAP.grip * 2); }
+
+  const wrap = new THREE.Group();
+  wrap.userData._weap = true;
+  wrap.add(holder);
+
+  // COPY THE ARTIST'S PLACEMENT rather than inventing one
+  if(rig.stock){
+    wrap.position.copy(rig.stock.position);
+    wrap.quaternion.copy(rig.stock.quaternion);
+    wrap.scale.copy(rig.stock.scale);
+  }
+  if(seq !== _weapSeq) return null;
+  clearWeapon(actor);                  // belt and braces: nothing else may be attached
+  rig.bone.add(wrap);
+  actor.root.updateMatrixWorld(true);
+
+  // match the stock weapon's on-screen length, then apply the per-weapon multiplier
+  const want = (rig.stock ? _lenOf(rig.stock) : 0.8) * (WEAPON_LEN[WEAP.name] || 1) * WEAP.len;
+  const got  = _lenOf(wrap);
+  if(got > 1e-5) wrap.scale.multiplyScalar(want / got);
+  /* Length is applied to the OUTER wrap here, not the holder. The fast slider path needs the
+     scale that corresponds to len == 1 so it can rescale without re-measuring — otherwise
+     dragging Length does nothing until the model is reloaded, which is exactly what broke. */
+  const lenBase = wrap.scale.clone().divideScalar(WEAP.len || 1);
+
+  let reach = Math.max(sz.x, sz.y, sz.z);
+  let axisUse = axis, halfUse = half;
+  {   // a locked frame wins, so a future change to how reach is measured cannot move it
+    const wf = storedWeapFrame();
+    if(wf){ reach = wf.reach; axisUse = wf.axis || axis; if(wf.half != null) halfUse = wf.half; }
+  }
+  // remember the pieces the transform helper needs so slider drags never reload anything
+  for(const c of holder.children) c.userData._basePos = c.position.clone().sub(
+    new THREE.Vector3(axis==='x' ? half * (WEAP.grip*2) : 0,
+                      axis==='y' ? half * (WEAP.grip*2) : 0,
+                      axis==='z' ? half * (WEAP.grip*2) : 0));
+  actor._weapGrip = { holder, reach, axis: axisUse, half: halfUse,
+                      children: holder.children.slice(), baseScale: 1, usesLen: false,
+                      wrap, lenBase };
+  holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
+  /* Two different kinds of slide, and the missing one was the second.
+
+     fwd/up/side move the weapon along the HAND's axes. Rotation is applied to the same
+     object, so once a weapon is turned those sliders no longer line up with anything you
+     can see — pushing a rotated spear along its own shaft means combining all three by
+     trial and error. That is the dimension that felt absent.
+
+     `shaft` moves it along the WEAPON's own long axis, after rotation. It is the
+     "push it through the fist" control, and it stays intuitive at any orientation. */
+  holder.position.set(WEAP.side * reach, WEAP.up * reach, WEAP.fwd * reach);
+  if(WEAP.shaft){
+    const along = new THREE.Vector3(
+      axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0
+    ).applyEuler(holder.rotation);
+    holder.position.addScaledVector(along, WEAP.shaft * reach);
+  }
+  if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
+  actor._weap = wrap;
+  return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
+}
+
+
+
+/* Choose the weapon for the current class. Uses the archetype default where one exists, so a
+   ranger draws a bow rather than whatever sorts first alphabetically. */
+function weaponForClass(){
+  const model = eyeModel();
+  const allowed = weaponsFor(model);
+  if(!allowed.length) return null;                  // Monk is unarmed by design
+  const pref = DEFAULT_WEAPON[model];
+  return (pref && allowed.includes(pref)) ? pref : allowed[0];
+}
+async function equipForClass(){
+  if(!actor) return null;
+  const name = weaponForClass();
+  const holder = { root: actor, model: HERO3D._wrap };
+  if(!name){ clearWeapon(holder); HERO3D.weapon = null; return null; }
+  WEAP.name = name;
+  weapLoadFor();
+  const r = await equipWeapon(holder, false);
+  HERO3D.weapon = r ? { name, stock: !!r.stockModel } : { name, failed: true };
+  return HERO3D.weapon;
+}
+
 let _lastW = 0, _lastH = 0;
 let _loaded = {}, _classNow = null;
 
@@ -569,6 +894,7 @@ function syncClass(){
   mixer = new THREE.AnimationMixer(actor);
   cur = null;
   buildFace();
+  equipForClass();
 }
 let _angle = null, _maxAttribs = 16;
 
@@ -675,6 +1001,7 @@ async function boot(){
     clock = new THREE.Clock();
     HERO3D.ready = true;
     buildFace();                       // Oliver's tuned eyes and mouth for this model
+    equipForClass();                   // and the weapon its archetype carries
     HERO3D.clips = Object.keys(clips);
     console.log('[hero3d] ready — ' + HERO3D.clips.length + ' clips, model ' + HERO3D.model);
   } catch(e){
@@ -754,6 +1081,11 @@ window.__hero3dFace  = () => HERO3D.face || 'not built';
 window.__hero3dClass = () => ({ classId: (window.__BF_META && window.__BF_META().classId),
                                 model: HERO3D.model, mapped: modelForClass() });
 window.__hero3dWeaponsFor = () => weaponsFor(eyeModel());
+window.__hero3dWeapon = () => HERO3D.weapon || 'none';
+window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
+  const r = await equipWeapon({ root: actor, model: HERO3D._wrap }, false);
+  HERO3D.weapon = r ? { name:n, stock:!!r.stockModel } : { name:n, failed:true };
+  return HERO3D.weapon; };
 
 /* Diagnostic: where does the character actually land? Reports its world position, its
    projected normalised device coords (|x|,|y| < 1 means on screen, z < -1 or > 1 means

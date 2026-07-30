@@ -54,6 +54,25 @@ try {
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
 let clips = {}, cur = null, clock = null;
 let _lastW = 0, _lastH = 0;
+let _angle = null, _maxAttribs = 16;
+
+/* Clear leftover instancing divisors before Three draws.
+
+   This is the missing piece. The game renders with ANGLE_instanced_arrays and sets a divisor
+   on its per-instance attributes (iM, iS, iCA, iE). renderer.resetState() does NOT reset
+   vertexAttribDivisorANGLE, so a stale divisor can remain on an attribute location that Three
+   then uses for skinIndex/skinWeight - which makes those advance per INSTANCE instead of per
+   vertex. The result is garbage skinning and a collapsed, invisible body, while every
+   non-skinned mesh (face, shoulder pads, sword) draws perfectly because it never touches those
+   attributes. That is exactly the symptom. */
+function clearDivisors(gl){
+  if(!_angle){
+    _angle = gl.getExtension('ANGLE_instanced_arrays');
+    _maxAttribs = gl.getParameter(gl.MAX_VERTEX_ATTRIBS) || 16;
+  }
+  if(!_angle) return;
+  for(let i = 0; i < _maxAttribs; i++) _angle.vertexAttribDivisorANGLE(i, 0);
+}
 
 /* Build a Three.js camera whose matrices ARE the game's. Nothing is recomputed, so the 3D
    hero cannot drift out of alignment with the voxel world however the game moves its camera. */
@@ -112,7 +131,15 @@ async function boot(){
     if(!own) throw new Error('no character models loaded from ' + ASSETS + 'chars/');
 
     actor = own.scene;
-    actor.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; } });
+    actor.traverse(o => {
+      if(!o.isMesh) return;
+      o.castShadow = false; o.receiveShadow = false;
+      /* Do not let Three cull these. A SkinnedMesh's bounding sphere is computed in BIND space,
+         so scaling the wrap 15x and moving it across the world can make the cull test reject it
+         while non-skinned children survive - which is exactly the symptom (body missing, face,
+         shoulder pads and sword present). Cheap to disable for five meshes. */
+      o.frustumCulled = false;
+    });
     const wrap = new THREE.Group();
     wrap.add(actor);
     scene.add(wrap);
@@ -172,10 +199,15 @@ export function drawHero3D(p, t){
 
     playFor(p);
     mixer.update(Math.min(0.05, clock.getDelta()));
+    /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
+       shared context its internal state cache is reset every frame, so being explicit removes a
+       variable while diagnosing the missing skinned body. */
+    HERO3D._wrap.traverse(o => { if(o.isSkinnedMesh && o.skeleton){ o.skeleton.update(); } });
 
     /* Both Three.js and the game write GL state. Without bracketing the draw in resetState()
        the game's next frame renders with Three's leftover state and the world breaks. */
     renderer.resetState();
+    clearDivisors(window.__BF_GL);
     renderer.render(scene, cam);
     renderer.resetState();
     return true;
@@ -209,6 +241,47 @@ window.__hero3dDebugCube = (on) => {
     c.position.copy(w.position); c.position.y += 20;
   } else if(c) c.visible = false;
   return { added: !!c, pos: c ? c.position.toArray().map(n=>+n.toFixed(1)) : null };
+};
+/* Which meshes are present, and is anything being culled? A skinned body vanishing while
+   bone-parented props still draw is the classic signature of frustum culling on a SkinnedMesh:
+   its bounding sphere is computed in BIND space, so scaling the wrap 15x and moving it across
+   the world makes Three's cull test reject it while non-skinned children survive. */
+/* Is GPU skinning even possible here? Three delivers bone matrices as a FLOAT texture, which
+   WebGL 1 only supports via OES_texture_float; without it (or without vertex-texture support)
+   skinning silently produces degenerate transforms and the mesh collapses - which matches the
+   body vanishing while every non-skinned part draws. */
+window.__hero3dSkinCaps = () => {
+  const g = window.__BF_GL; if(!g || !renderer) return 'no gl';
+  const cap = renderer.capabilities;
+  let sk = null;
+  HERO3D._wrap && HERO3D._wrap.traverse(o => { if(!sk && o.isSkinnedMesh) sk = o; });
+  return {
+    isWebGL2: cap.isWebGL2 !== undefined ? cap.isWebGL2 : 'n/a',
+    floatVertexTextures: cap.floatVertexTextures,
+    maxTextures: cap.maxTextures,
+    maxVertexTextures: g.getParameter(g.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+    maxVertexUniformVectors: g.getParameter(g.MAX_VERTEX_UNIFORM_VECTORS),
+    OES_texture_float: !!g.getExtension('OES_texture_float'),
+    boneCount: sk && sk.skeleton ? sk.skeleton.bones.length : null,
+    hasBoneTexture: !!(sk && sk.skeleton && sk.skeleton.boneTexture),
+    programErr: (renderer.info && renderer.info.programs) ? renderer.info.programs.length : null,
+  };
+};
+window.__hero3dMeshes = () => {
+  if(!HERO3D._wrap) return 'not ready';
+  const out = [];
+  HERO3D._wrap.updateMatrixWorld(true);
+  HERO3D._wrap.traverse(o => {
+    if(!o.isMesh) return;
+    const bs = o.geometry && o.geometry.boundingSphere;
+    out.push({ name:(o.name||'?').slice(0,22), skinned:!!o.isSkinnedMesh, visible:o.visible,
+               culled:o.frustumCulled,
+               bsR: bs ? +bs.radius.toFixed(2) : null,
+               mat: o.material && o.material.type,
+               tris: o.geometry && o.geometry.index ? o.geometry.index.count/3
+                     : (o.geometry ? o.geometry.attributes.position.count/3 : 0) });
+  });
+  return out;
 };
 window.__hero3dGLState = () => {
   const g = window.__BF_GL; if(!g) return 'no gl';

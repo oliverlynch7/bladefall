@@ -1,0 +1,154 @@
+const FACE_FRAMES = {
+  Warrior:{w:0.571448,h:0.795308,d:0.777282,cz:-0.187631,minY:-0.020652,maxY:0.774656,eyeY:0.440627,
+           centre:[0.000602,0.377002,-0.187631],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Ranger: {w:0.572455,h:0.742068,d:0.778651,cz:-0.181288,minY:-0.005073,maxY:0.736995,eyeY:0.425326,
+           centre:[0.000605,0.365961,-0.181288],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Wizard: {w:0.678373,h:0.900609,d:0.844725,cz:-0.216029,minY:-0.020441,maxY:0.880168,eyeY:0.501912,
+           centre:[0.000595,0.429864,-0.216029],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Cleric: {w:0.670265,h:0.866078,d:0.834630,cz:-0.205288,minY:-0.031627,maxY:0.834451,eyeY:0.470698,
+           centre:[0.000600,0.401412,-0.205288],fwd0:[0.000547,0.112086,0.993698],up:[-0.000062,0.993698,-0.112086]},
+  Monk:   {w:0.668034,h:0.862685,d:0.831851,cz:-0.197482,minY:-0.027455,maxY:0.835230,eyeY:0.472902,
+           centre:[0.000580,0.403888,-0.197482],fwd0:[-0.128986,0.071314,0.989079],up:[-0.000062,0.993698,-0.112086]},
+  Rogue:  {w:0.669730,h:0.865386,d:0.833963,cz:-0.202956,minY:-0.033046,maxY:0.832340,eyeY:0.468878,
+           centre:[0.000601,0.399647,-0.202956],fwd0:[-0.129092,0.111141,0.985385],up:[-0.000062,0.993698,-0.112086]},
+};
+
+const FACE_PRESETS = {
+  Warrior: {
+    /* Retuned after the face-direction fix. The first pass had flip:true and depth:-0.075,
+       which were compensating for the broken direction detection rather than describing
+       where the eyes belong; with that fixed the values are straightforward. */
+    eye:   { spread:0.145, height:-0.185, depth:0.095, size:0.092, squash:0.66, tilt:0.17,
+             iris:'#9b2c2c', pupil:'#000000', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'line', y:-0.465, z:0.095, width:0.27, height:0.455, color:'#5a2f28',
+             offX:0 },
+  },
+  Ranger: {
+    eye:   { spread:0.175, height:-0.220, depth:0.075, size:0.092, squash:0.66, tilt:-0.130,
+             iris:'#9b2c2c', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'line', y:-0.465, z:0.095, width:0.280, height:0.295, color:'#5a2f28',
+             offX:0 },
+  },
+  Wizard: {
+    eye:   { spread:0.195, height:-0.225, depth:0.020, size:0.088, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'flat', y:-0.505, z:0.075, width:0.310, height:0.260, color:'#483e3c',
+             offX:0 },
+  },
+  Cleric: {
+    eye:   { spread:0.230, height:-0.210, depth:0.095, size:0.076, squash:0.62, tilt:0,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0, faceYaw:0, facePitch:0, irisSz:0.52 },
+    mouth: { shape:'smile', y:-0.465, z:0.135, width:0.340, height:0.200, color:'#5a2f28',
+             offX:0 },
+  },
+  Monk: {
+    /* First set tuned with the controls added for this model specifically: faceYaw/facePitch
+       correct the angled face, and the mouth needed a lateral nudge. Both were unreachable
+       before, which is why the Monk was the hold-out. */
+    /* Re-tuned against the frozen placement frame and locked, 2026-07-29. Note faceYaw
+       flipped sign (-0.130 -> +0.150): the earlier value was partly compensating for the
+       drifting reference, not describing the head. */
+    eye:   { spread:0.200, height:-0.220, depth:0.020, size:0.082, squash:0.81, tilt:-0.500,
+             iris:'#2f6b45', pupil:'#101014', flip:false,
+             offX:-0.015, faceYaw:0.150, facePitch:0.040, irisSz:0.52 },
+    mouth: { shape:'flat', y:-0.455, z:0.055, width:0.355, height:0.360, color:'#5a2f28',
+             offX:0.015 },
+  },
+  Rogue: {
+    // Hooded, so the measured head box runs high and the face sits turned — same two
+    // problems as the Monk, and solved by the same pair of controls.
+    /* Re-tuned and locked, 2026-07-29. offX 0.175 is a real lateral shift: this head sits
+       noticeably off-centre on its own bone, which is what that control was added for. */
+    eye:   { spread:0.195, height:-0.265, depth:0.040, size:0.080, squash:0.62, tilt:-0.010,
+             iris:'#3a6ea5', pupil:'#101014', flip:false,
+             offX:0.175, faceYaw:-0.130, facePitch:-0.040, irisSz:0.52 },
+    /* Mouth sits INSIDE the head on purpose (z negative). Oliver's call: the scarf covers
+       that part of the face anyway, so drawing a mouth there only risks it poking through.
+       Kept rather than disabled so the class still works if the scarf ever comes off. */
+    mouth: { shape:'smirk', y:-0.625, z:-0.075, width:0.340, height:0.200, color:'#5a2f28',
+             offX:0 },
+  },
+};
+
+const WEAPON_PRESETS = {
+  // Oliver tuned the plain sword to all-zero rotations, which is worth noting: the
+  // pitch/yaw/roll trio I derived from the axes is the AXE-family orientation, not a
+  // universal one. Swords hang differently.
+  Sword:               { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
+  Sword_2:             { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
+  Sword_Golden:        { len:1.01, pitch:0, yaw:0, roll:0, fwd:0, up:-0.37, side:0, grip:0.72 },
+  Claymore:            { len:1.20, up:-0.39, side:-0.03, fwd:-0.04 },
+  // SPELLBLADE - tuned by Oliver on the WIZARD body, not the Warrior. Held point-up and
+  // forward, which is why the numbers look nothing like the melee set.
+  Sword_Big:           { len:1.00, pitch:1.52, yaw:-0.40, roll:0,
+                         fwd:-0.39, up:-0.03, side:0, grip:0.74 },
+  Sword_big_Golden:    { len:1.00, pitch:1.52, yaw:-0.40, roll:0,
+                         fwd:-0.39, up:-0.03, side:0, grip:0.74 },
+  Axe:                 { len:1.00, up:-0.41, side:-0.13, fwd:-0.04 },
+  Axe_Small:           { len:1.00, up:-0.46, side:-0.19, fwd:-0.04 },
+  Axe_Double:          { len:1.00, up:-0.46, side:-0.05, fwd:-0.04 },
+  Axe_Double_Golden:   { len:1.00, up:-0.46, side:-0.05, fwd:-0.04 },
+  Hammer_Small:        { len:1.00, up:-0.36, side:-0.10, fwd:-0.03 },
+  Hammer_Double:       { len:1.20, up:-0.39, side:-0.03, fwd:-0.01, pitch:0.06 },
+  Hammer_Double_Golden:{ len:1.20, up:-0.39, side:-0.03, fwd:-0.01, pitch:0.06 },
+  Scythe:              { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,
+                         fwd:-0.04, up:0.01, side:-0.17, grip:0.29 },
+
+  /* BOWS - Oliver, tuned on the Ranger body, and the hardest set so far. Worth recording
+     WHY, because it is structural rather than a tuning failure.
+
+     Every other weapon is gripped near one END, so the pivot sits in the fist and the
+     blade points away. A bow is gripped at its MIDDLE, and the limbs extend both up and
+     down from the hand. With the hand hanging at hip height the lower limb has nowhere to
+     go but through the thigh, so 'looks good in hand' and 'does not clip the leg' pull
+     against each other. No slider fixes that; only a shorter bow or a raised arm does.
+
+     Mitigated by shrinking them (len 0.82-0.89) and pushing them forward (fwd -0.62),
+     which is what Oliver landed on. Good enough for a carry pose. */
+  Bow_Evil:    { len:0.89, pitch:1.42, yaw:-0.16, roll:-0.26, fwd:-0.62, up:-0.08, side:-0.01, grip:0.63 },
+  Bow_Golden:  { len:0.89, pitch:1.48, yaw:-0.36, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.00, grip:0.63 },
+  Bow_Wooden:  { len:0.82, pitch:1.48, yaw:-0.20, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.03, grip:0.62 },
+  Dagger:      { len:0.82, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:1.00 },
+  Dagger_2:    { len:0.88, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:0.93 },
+  Dagger_Golden:{len:0.82, pitch:1.48, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.09, side:0.00, grip:1.00 },
+  Spear:       { len:0.88, pitch:1.38, yaw:3.20, roll:0.30, fwd:-0.62, up:-0.14, side:-0.14, grip:0.93 },
+  Bow_Wooden2: { len:0.82, pitch:1.48, yaw:-0.20, roll:-0.26, fwd:-0.62, up:-0.03, side: 0.01, grip:0.62 },
+
+  /* Stock weapons carry the artist's own placement, so they start neutral — length 1 and
+     no rotation means "exactly as the character that owns it holds it". */
+  // the WAND: same model as the cleric staff, scaled down
+  Staff_Cleric: { len:0.72, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Staff_Wizard: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Sword_Knight: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Dagger_Rogue: { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+  Bow_Ranger:   { len:1, pitch:0, yaw:0, roll:0, fwd:0, up:0, side:0, shaft:0 },
+};
+
+const ARCHETYPE_WEAPONS = {
+  // NB the sword patterns are anchored. /^Sword/ also matched Sword_Big, which is now
+  // reserved as the mage spellblade — a loose prefix would have handed it back to warriors.
+  /* No spear or scythe: the spear belongs to the Ranger and the scythe to the Reaper, so
+     dropping them here keeps each weapon on one body and one tuning wherever possible. */
+  Warrior: [/^Sword$/, /^Sword_2$/, /^Sword_Golden$/, /^Claymore/,
+            /^Axe/, /^Hammer/, /^Shield/],
+  Cleric:  [/^Hammer/, /^Sword$/, /^Sword_2$/, /^Staff_/, /^Shield/],
+  // Scythe added for the Reaper, which uses this skin. Note it now appears on TWO bodies,
+  // which is what forced weapon tuning to become per-body below.
+  Rogue:   [/^Dagger/, /^Sword$/, /^Sword_2$/, /^Scythe/],
+  Ranger:  [/^Bow/, /^Arrow/, /^Spear/, /^Dagger/],
+  /* Casters: two staffs plus the SPELLBLADE.
+
+     Staff_Wizard is the staff, Staff_Cleric doubles as the wand at reduced scale, and
+     Sword_Knight is the spellblade — exclusive to the mage archetypes, which is the point:
+     it gives casters a melee silhouette nobody else has. Removed from Warrior, Cleric and
+     Rogue so it stays exclusive. (Sword_Big served this role earlier and is retired.)
+
+     All three are stock weapons lifted from the characters that own them, so they inherit
+     the artist's holding pose and need no tuning to look correct. */
+  Wizard:  [/^Staff_/, /^Sword_Knight$/],
+  Monk:    [],                       // unarmed by design
+};

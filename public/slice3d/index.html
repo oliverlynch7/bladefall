@@ -154,15 +154,34 @@
   #creator .btns{display:flex;gap:6px;margin-top:12px}
   #creator .btns button{flex:1;background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 10px system-ui;padding:8px 4px;border-radius:7px}
-  #animbar{position:fixed;right:10px;bottom:120px;z-index:41;width:220px;max-height:58vh;overflow-y:auto;
+  #animbar,#mobbar{position:fixed;right:10px;bottom:120px;z-index:41;width:220px;max-height:58vh;overflow-y:auto;
     display:none;background:rgba(12,10,16,.97);border:1px solid #6a5330;border-radius:12px;padding:10px;
     -webkit-overflow-scrolling:touch}
-  #animbar.open{display:block}
-  #animbar b{display:block;font:800 10px system-ui;letter-spacing:.09em;color:#e8a33d;margin-bottom:7px}
-  #animbar button{display:block;width:100%;text-align:left;margin-bottom:4px;padding:6px 9px;
+  #animbar.open,#mobbar.open{display:block}
+  #animbar b,#mobbar b{display:block;font:800 10px system-ui;letter-spacing:.09em;color:#e8a33d;margin-bottom:7px}
+  #animbar button,#mobbar button{display:block;width:100%;text-align:left;margin-bottom:4px;padding:6px 9px;
     font:700 10.5px system-ui;border-radius:6px;border:1px solid #4a3c26;color:#c9bda2;
     background:rgba(30,25,18,.9)}
-  #animbar button.sel{border-color:#e8a33d;color:#ffd89a}
+  #animbar button.sel,#mobbar button.sel{border-color:#e8a33d;color:#ffd89a}
+  /* Stacked directly above ANIMS at the same right edge rather than offset inward. At right:240
+     the panel floated in the middle of the viewport and covered the very creature it spawns. */
+  #mobbar{right:10px;bottom:170px;max-height:52vh}
+  #mobbar .row{display:flex;gap:5px;margin-bottom:6px}
+  #mobbar .row button{margin-bottom:0;text-align:center}
+  #mobBtn{position:fixed;right:10px;bottom:170px;z-index:39;
+    background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
+    border:1px solid #8a6f34;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
+  /* On a phone the right-edge dock sat straight on top of the action buttons (verified: it
+     overlapped bSkill, bJump and bRoll), so it becomes a top sheet instead - the same pattern
+     #classes already uses on touch. Two columns because 36 mobs in one column inside 46vh is
+     mostly scrolling. The button moves to the free slot under FACE/CUSTOMISE on the left. */
+  body.touch #mobbar{left:8px;right:8px;top:52px;bottom:auto;width:auto;max-height:46vh;
+    display:none;grid-template-columns:1fr 1fr;gap:5px}
+  body.touch #mobbar.open{display:grid}
+  body.touch #mobbar b,body.touch #mobbar .row{grid-column:1 / -1}
+  body.touch #mobbar button{margin-bottom:0}
+  body.touch #mobBtn{left:10px;top:94px;right:auto;bottom:auto}
+  @media (max-width:860px){ #mobbar{max-height:44vh} }
   #animBtn{position:fixed;right:10px;bottom:120px;z-index:39;
     background:linear-gradient(180deg,rgba(38,30,20,.96),rgba(16,14,18,.96));
     border:1px solid #8a6f34;color:#ffd89a;font:800 11px system-ui;padding:8px 12px;border-radius:8px}
@@ -219,6 +238,8 @@
 </div>
 <button id="animBtn">ANIMS</button>
 <div id="animbar"></div>
+<button id="mobBtn">MOBS</button>
+<div id="mobbar"></div>
 <button id="creatorBtn">CUSTOMISE</button>
 <div id="creator"></div>
 <button id="eyeBtn">FACE</button>
@@ -1261,8 +1282,12 @@ const MOB_SKINS = {
   },
   steel: {
     label:'Siege Knight', bf:'siegeknight',
-    main:{ kind:'rust', A:'#3c4048', B:'#262a30', C:'#8f9aa8', emissive:'#000000', ei:0 },
-    second:{ color:'#1e2126', emissive:'#000000', ei:0 },
+    /* Lifted off the game's literal #3c4048. That value is correct for a flat HP-bar swatch, but
+       on a lit 3D mesh it collapsed into a black silhouette with no readable plate at all - and
+       an enemy whose telegraphed overhead CRUSH you are meant to read has to be legible. Kept
+       cold and desaturated so it is still slate steel, just no longer a hole in the screen. */
+    main:{ kind:'rust', A:'#4e545e', B:'#343a42', C:'#aab6c6', emissive:'#000000', ei:0 },
+    second:{ color:'#2c3037', emissive:'#000000', ei:0 },
     eye:'#c8d4e4', light:null,
     embers:null,
     rivets:true,
@@ -3244,6 +3269,89 @@ function toggleAnimBar(on){
   if(btn) btn.style.display = open ? 'none' : 'block';
 }
 
+/* ─────────────  MOB BROWSER  ─────────────
+   Every mob in one tappable list. This exists because the casting work was only inspectable
+   from a browser console, which means it was not inspectable from a phone - so the person who
+   has to approve how these creatures look could not actually look at them.
+
+   Spawning happens BETWEEN the hero and the camera (the camera sits at
+   target + (sin(camYaw)*d, _, cos(camYaw)*d), so +(sin,cos) is toward it). That way a mob is
+   always framed wherever the camera happens to be, instead of appearing behind the view or
+   inside the hub buildings, which is exactly what went wrong when these were shot headless.
+
+   The swatch is the mob's real palette colour, so the list doubles as a check that a reskin
+   resolved: a stock-model mob shows its label without a swatch. */
+function mobSwatch(m){
+  const S = m.skin && MOB_SKINS[m.skin];
+  return S ? S.main.C : null;
+}
+let _mobBusy = false;
+/* Returns the spawned mob, the string 'busy' if a load is already in flight, or null if the
+   model genuinely failed. These MUST stay distinguishable: returning null for "busy" made three
+   rapid taps label two perfectly good mobs "(failed to load)", which is a lie that would send
+   the next debugging session looking for a missing .glb that was never missing. */
+async function spawnForReview(label){
+  if(_mobBusy) return 'busy';                     // taps arrive faster than a .glb loads
+  _mobBusy = true;
+  try {
+    for(const e of enemies){ if(e.root.parent) e.root.parent.remove(e.root); }
+    enemies.length = 0;
+    const p = hero ? hero.root.position : { x:0, z:0 };
+    /* Placed beside the hero rather than straight down the camera axis. Two fixes in one:
+       the forward distance is a FRACTION of camDist (fixed at 3.4m the mob sat (camDist-3.4)
+       from the lens, so a close zoom filled the entire frame), and the lateral offset moves it
+       out of the centre so a tall mob is not clipped by the bottom edge.
+       Offset LEFT specifically: the right of the screen is where SKILL/JUMP/ATTACK live on a
+       phone, and a mob placed there renders behind them. */
+    const d = Math.min(2.6, camDist * 0.34), side = -1.3;
+    const e = await spawnEnemy(p.x + Math.sin(camYaw) * d + Math.cos(camYaw) * side,
+                              p.z + Math.cos(camYaw) * d - Math.sin(camYaw) * side, label);
+    return e;
+  } finally { _mobBusy = false; }
+}
+function buildMobBar(){
+  const el = document.getElementById('mobbar'); if(!el) return;
+  const rows = MONSTERS.map((m, i) => {
+    const c = mobSwatch(m);
+    const dot = c ? `<span style="display:inline-block;width:8px;height:8px;border-radius:2px;
+      background:${c};margin-right:6px;vertical-align:middle"></span>` : '';
+    return `<button data-mob="${i}">${dot}${m.label}</button>`;
+  }).join('');
+  el.innerHTML = '<b>MOBS &middot; ' + MONSTERS.length + '</b>' +
+    '<div class="row"><button data-mact="clear">Clear</button>' +
+    '<button data-mact="close">Close</button></div>' + rows;
+  el.querySelectorAll('[data-mob]').forEach(b =>
+    b.addEventListener('click', async () => {
+      const m = MONSTERS[+b.dataset.mob]; if(!m) return;
+      el.querySelectorAll('[data-mob]').forEach(x => x.classList.toggle('sel', x === b));
+      const e = await spawnForReview(m.label);
+      if(e === 'busy') return;                    // another load in flight; not a failure
+      /* Say plainly when a model really fails to load. Silence here would look like "the mob has
+         no body", which is the same symptom as a bad casting and would send the next hour the
+         wrong way. */
+      if(!e) b.textContent = m.label + '  (failed to load)';
+      /* On a phone the list is a top sheet covering half the screen, so the creature you just
+         asked for is behind it. Close on a hit so the tap actually shows you something; the
+         MOBS button comes straight back. On desktop the panel is a narrow side dock and does
+         not occlude, so it stays open for fast comparison. */
+      else if(document.body.classList.contains('touch')) toggleMobBar(false);
+    }));
+  el.querySelector('[data-mact="clear"]').addEventListener('click', () => {
+    for(const e of enemies){ if(e.root.parent) e.root.parent.remove(e.root); }
+    enemies.length = 0;
+    el.querySelectorAll('[data-mob]').forEach(x => x.classList.remove('sel'));
+  });
+  el.querySelector('[data-mact="close"]').addEventListener('click', () => toggleMobBar(false));
+}
+function toggleMobBar(on){
+  const el = document.getElementById('mobbar'), btn = document.getElementById('mobBtn');
+  if(!el) return;
+  const open = (on === undefined) ? !el.classList.contains('open') : on;
+  if(open) buildMobBar();
+  el.classList.toggle('open', open);
+  if(btn) btn.style.display = open ? 'none' : 'block';
+}
+
 
 
 /* ─────────────  TERRAIN BUILDER  ─────────────
@@ -4290,6 +4398,8 @@ if(matchMedia('(pointer:coarse)').matches) document.body.classList.add('touch');
   if(cb) cb.addEventListener('click', () => toggleCreator());
   const ab = document.getElementById('animBtn');
   if(ab) ab.addEventListener('click', () => toggleAnimBar());
+  const mb = document.getElementById('mobBtn');
+  if(mb) mb.addEventListener('click', () => toggleMobBar());
 })();
 
 const tapBtn = (id, fn) => {

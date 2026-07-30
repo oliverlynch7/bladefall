@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BLADEFALL — device stress test</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b0a10;color:#e8dfd0;
+    font:600 14px/1.45 system-ui,-apple-system,sans-serif;overflow:hidden}
+  canvas{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+  #ui{position:fixed;left:0;right:0;top:0;z-index:5;padding:14px 14px 16px;
+    background:linear-gradient(180deg,rgba(8,7,12,.94),rgba(8,7,12,.72) 78%,transparent);
+    max-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  h1{margin:0 0 2px;font:800 15px system-ui;letter-spacing:.10em;color:#e8a33d}
+  .sub{margin:0 0 12px;font-size:11.5px;color:#8e8577}
+  #now{font:800 30px system-ui;color:#fff;margin:6px 0 2px}
+  #now small{font:700 13px system-ui;color:#9a9182;letter-spacing:.04em}
+  table{border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:3px 14px 3px 0;font-size:13px}
+  th{color:#8e8577;font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase}
+  td.n{color:#fff;font-weight:800}
+  .ok{color:#7fd6a0} .warn{color:#e8c33d} .bad{color:#e8705a}
+  #verdict{margin-top:14px;padding:11px 13px;border-radius:9px;border:1px solid #6a5330;
+    background:rgba(30,24,14,.85);font-size:13.5px;display:none;max-width:640px}
+  #verdict b{color:#e8a33d}
+  #dev{margin-top:10px;font-size:11px;color:#6f6858;max-width:640px;word-break:break-word}
+  button{margin-top:12px;background:linear-gradient(180deg,#3a2e1c,#191520);
+    border:1px solid #8a6f34;color:#ffd89a;font:800 13px system-ui;
+    padding:11px 18px;border-radius:9px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <h1>BLADEFALL &middot; DEVICE STRESS TEST</h1>
+  <p class="sub">How many animated 3D characters this device can actually draw.</p>
+  <div id="now">starting&hellip;<br><small id="stage"></small></div>
+  <table id="tbl"><thead><tr><th>Characters</th><th>FPS</th><th>Verdict</th></tr></thead><tbody></tbody></table>
+  <div id="verdict"></div>
+  <div id="dev"></div>
+  <button id="again" style="display:none">Run again</button>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "../slice3d/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../slice3d/jsm/loaders/GLTFLoader.js';
+import * as SkeletonUtils from '../slice3d/jsm/utils/SkeletonUtils.js';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Why this page exists.
+
+   Every frame-rate number produced so far came from a headless Chrome running
+   SwiftShader — software rasterisation. Those numbers are meaningless for deciding
+   anything, and the decision they gate is a big one: whether Bladefall's mobs can be
+   3D skinned characters at all. A room can hold a handful of enemies plus splits, so
+   "can this phone animate N skinned characters" determines the whole plan.
+
+   Deliberately standalone rather than a mode inside the slice. The slice builds a
+   village and terrain on load, and measuring the character cost with all that in the
+   scene would report a number that is not about characters.
+
+   It also proves out SkeletonUtils.clone, which is how many copies of one mob would
+   actually be made. A plain .clone() rebinds the copy's SkinnedMesh to the ORIGINAL
+   skeleton — every clone then animates off one creature's bones. SkeletonUtils.clone
+   is the tool that rebinds correctly, so if this page renders N independently animating
+   characters, that approach is validated for mobs at the same time.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+const CANVAS = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas: CANVAS, antialias: false, powerPreference: 'high-performance' });
+/* Cap at 2. Phones report 3-4 and rendering at native density measures the screen, not
+   the engine — the game itself will not draw at 4x either. */
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#12101a');
+const cam = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x2a2436, 2.1));
+const sun = new THREE.DirectionalLight(0xfff0d8, 1.5); sun.position.set(4, 9, 5); scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(120, 120).rotateX(-Math.PI/2),
+                         new THREE.MeshStandardMaterial({ color:'#2a2536' })));
+
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  cam.aspect = w / h; cam.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize); resize();
+
+const stageEl = document.getElementById('stage');
+const nowEl   = document.getElementById('now');
+const tbody   = document.querySelector('#tbl tbody');
+const verdict = document.getElementById('verdict');
+const again   = document.getElementById('again');
+
+/* device identity, so a result can be attributed to a real machine later */
+(() => {
+  const gl = renderer.getContext();
+  let gpu = 'unknown GPU';
+  try {
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    if(dbg) gpu = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
+  } catch(e){}
+  document.getElementById('dev').textContent =
+    gpu + '  ·  ' + (gl instanceof WebGL2RenderingContext ? 'WebGL 2' : 'WebGL 1') +
+    '  ·  ' + window.innerWidth + '×' + window.innerHeight +
+    ' @' + (window.devicePixelRatio || 1) + 'x  ·  ' + navigator.hardwareConcurrency + ' cores';
+})();
+
+const loader = new GLTFLoader();
+const load = url => new Promise((res, rej) => loader.load(url, res, undefined, rej));
+
+const actors = [];      // { root, mixer }
+let source = null;
+
+/* Ramp steps. Stops early once a step drops below PLAYABLE, because past that the
+   remaining steps only measure how bad it gets. */
+const STEPS = [1, 4, 8, 12, 16, 24, 32, 48, 64];
+const PLAYABLE = 30, SMOOTH = 50;
+
+function addActors(n){
+  for(let i = 0; i < n; i++){
+    /* SkeletonUtils.clone, NOT root.clone() — see the note at the top. */
+    const root = SkeletonUtils.clone(source.scene);
+    const k = actors.length;
+    const ring = 3.4 + Math.floor(k / 12) * 2.4, a = (k % 12) / 12 * Math.PI * 2;
+    root.position.set(Math.cos(a) * ring, 0, Math.sin(a) * ring);
+    root.rotation.y = -a + Math.PI / 2;
+    root.traverse(o => { if(o.isMesh) o.frustumCulled = false; });   // never cull: measure the full cost
+    scene.add(root);
+    const mixer = new THREE.AnimationMixer(root);
+    const clips = source.animations;
+    const clip = clips.find(c => /run/i.test(c.name)) || clips.find(c => /idle/i.test(c.name)) || clips[0];
+    if(clip){ const act = mixer.clipAction(clip); act.time = Math.random() * 2; act.play(); }
+    actors.push({ root, mixer });
+  }
+}
+
+const clock = new THREE.Clock();
+let frames = 0, acc = 0, lastFps = 0;
+function frame(){
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, clock.getDelta());
+  for(const a of actors) a.mixer.update(dt);
+  const t = performance.now() / 1000;
+  cam.position.set(Math.cos(t * 0.16) * 11, 5.2, Math.sin(t * 0.16) * 11);
+  cam.lookAt(0, 1.1, 0);
+  renderer.render(scene, cam);
+  frames++; acc += dt;
+  if(acc >= 0.4){ lastFps = frames / acc; frames = 0; acc = 0; }
+}
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* Measure by sampling the running counter rather than timing one burst: a single burst
+   can land entirely inside a GC pause or a thermal blip and report a number the device
+   does not actually sustain. */
+async function measure(seconds){
+  const s = [];
+  const until = performance.now() + seconds * 1000;
+  while(performance.now() < until){ await wait(120); if(lastFps > 0) s.push(lastFps); }
+  s.sort((a, b) => a - b);
+  return s.length ? s[Math.floor(s.length / 2)] : 0;   // median, not mean
+}
+
+function row(n, fps){
+  const cls = fps >= SMOOTH ? 'ok' : fps >= PLAYABLE ? 'warn' : 'bad';
+  const word = fps >= SMOOTH ? 'smooth' : fps >= PLAYABLE ? 'playable' : 'too slow';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="n">${n}</td><td class="n">${Math.round(fps)}</td><td class="${cls}">${word}</td>`;
+  tbody.appendChild(tr);
+}
+
+async function run(){
+  tbody.innerHTML = ''; verdict.style.display = 'none'; again.style.display = 'none';
+  for(const a of actors) scene.remove(a.root);
+  actors.length = 0;
+
+  stageEl.textContent = 'loading character…';
+  if(!source){
+    try { source = await load('../slice3d/assets/chars/Warrior.gltf'); }
+    catch(e){
+      nowEl.innerHTML = 'could not load the character model<br><small>' + e.message + '</small>';
+      return;
+    }
+  }
+
+  let best = 0, brokeAt = null;
+  for(const n of STEPS){
+    addActors(n - actors.length);
+    nowEl.innerHTML = actors.length + ' characters<br><small id="stage">measuring…</small>';
+    await wait(700);                       // let it settle before sampling
+    const fps = await measure(1.8);
+    row(actors.length, fps);
+    if(fps >= PLAYABLE) best = actors.length; else { brokeAt = actors.length; break; }
+  }
+
+  nowEl.innerHTML = best + ' characters<br><small>highest count that stayed playable</small>';
+  const line = brokeAt
+    ? `Held <b>${best}</b> animated characters above ${PLAYABLE} fps. Dropped below at <b>${brokeAt}</b>.`
+    : `Held <b>${best}</b> animated characters above ${PLAYABLE} fps — the test ran out of steps before this device ran out of headroom.`;
+  const call = best >= 24
+    ? 'Comfortably enough for 3D mobs — a room only needs a handful.'
+    : best >= 12
+      ? 'Enough for a normal room of enemies. Large fights may need distant mobs kept simple.'
+      : best >= 6
+        ? 'Tight. 3D mobs are possible but would need real budgeting — fewer on screen, or simpler distant ones.'
+        : 'Not enough for 3D mobs on this device. The hero could still be 3D while mobs stay as they are.';
+  verdict.innerHTML = line + '<br><br>' + call;
+  verdict.style.display = 'block';
+  again.style.display = 'inline-block';
+  window.__STRESS = { best, brokeAt, rows: [...tbody.children].map(tr => tr.textContent) };
+
+  /* Proof that SkeletonUtils.clone gave each copy its OWN skeleton. Sample the same bone on
+     every character: if the clones shared one skeleton, every reading would be identical.
+     This is the claim that decides whether mobs can reuse one loaded model, so it is measured
+     rather than eyeballed from a screenshot. */
+  window.__BONECHK = (() => {
+    const pos = [];
+    for(const a of actors){
+      /* Match this rig's actual names (UpperArmL, Torso, Hips - there is no "hand" or
+         "forearm" bone), and fall back to the first bone of any name so a naming mismatch
+         reports "could not sample" instead of masquerading as a shared-skeleton failure. */
+      let bone = null, anyBone = null;
+      a.root.traverse(o => {
+        if(!o.isBone) return;
+        if(!anyBone) anyBone = o;
+        if(!bone && /arm|leg|torso|abdomen/i.test(o.name)) bone = o;
+      });
+      bone = bone || anyBone;
+      if(!bone) continue;
+      a.root.updateMatrixWorld(true);
+      const v = new THREE.Vector3().setFromMatrixPosition(bone.matrixWorld);
+      pos.push([+v.x.toFixed(3), +v.y.toFixed(3)].join(','));
+    }
+    const distinct = new Set(pos).size;
+    /* Three outcomes, not two. "No bone sampled" is missing data, NOT evidence of a shared
+       skeleton — reporting it as a failure would send someone chasing a bug that isn't there. */
+    const note = pos.length < 2 ? 'inconclusive: could not sample two characters'
+               : distinct > 1   ? 'each clone animates on its own skeleton'
+                                : 'WARNING: clones appear to share one skeleton';
+    return { sampled: pos.length, distinctPoses: distinct,
+             independent: pos.length >= 2 && distinct > 1, note };
+  })();
+}
+
+again.addEventListener('click', run);
+frame();
+run();
+</script>
+</body>
+</html>

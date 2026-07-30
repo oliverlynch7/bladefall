@@ -2830,7 +2830,10 @@ const gl=canvas.getContext('webgl2',GL_OPTS)||canvas.getContext('webgl',GL_OPTS)
 const IS_GL2=!!(window.WebGL2RenderingContext && gl instanceof WebGL2RenderingContext);
 window.__BF_GL=gl;   // shared with the optional 3D hero layer (hero3d.js)
 window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero layer
-window.__BF_META=()=>meta;   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_META=()=>meta;
+/* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
+   property - the same reason __BF_CAM and __BF_META exist as closures. */
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,p:G.p,zone:(curZone&&curZone().id)||'hub'});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -11810,6 +11813,11 @@ function drawCourse(s,t){
       bx(ob.x,ob.h+2.5,ob.z, ob.w*1.35,5,ob.d*1.35, tint(s.ground,'#fff',0.13)); }
   }
   // theme decorations
+  /* When world3d is drawing the level in 3D, the voxel deco pass must not also run: both draw
+     the same G.deco list, so leaving it on renders every prop twice - once flat and once lit,
+     z-fighting against each other. */
+  const _w3d = window.__world3d && window.__world3d();
+  if(!(_w3d && _w3d.on && _w3d.ready))
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.

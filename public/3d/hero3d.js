@@ -20,6 +20,7 @@
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { WORLD3D, syncWorld } from './world3d.js';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
 
@@ -1186,6 +1187,11 @@ export function drawHero3D(p, t){
     wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff, p.z);
     wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
     wrap.updateMatrixWorld(true);
+
+    /* Build or refresh the 3D world before drawing. Cheap when nothing changed - it compares a
+       level signature and returns. Deliberately in the SAME scene and render call as the hero,
+       so there is one Three.js context over the game canvas rather than two fighting for it. */
+    syncWorld(scene);
 
     syncClass();                      // respec or a different save changes the body
     playFor(p);

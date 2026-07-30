@@ -4433,25 +4433,30 @@ const MONSTERS = [
   { file:'Pink_Slime',         label:'Slime',         bf:'slime',        rig:'blob',   hp: 60, h:0.7, speed:1.3, dmg:5 },
   { file:'Green_Blob',         label:'Slimelet',      bf:'slimelet',     rig:'blob',   hp: 45, h:0.55, speed:1.6, dmg:4 },
   { file:'Green_Spiky_Blob',   label:'Toxling',       bf:'toxling',      rig:'blob',   hp: 80, h:0.85, speed:1.5, dmg:8 },
-  { file:'Yeti',               label:'Frostshell',    bf:'frostshell',   rig:'blob',   hp:190, h:1.65, speed:1.2, dmg:15 },
+  { file:'Yeti',               label:'Frostshell',    bf:'frostshell',   rig:'blob',   hp:190, h:1.34, speed:1.2, dmg:15 },
   { file:'Cactoro',            label:'Thornboar',     bf:'thornboar',    rig:'blob',   hp:110, h:1.0, speed:2.0, dmg:9 },
   { file:'Mushnub_Evolved',    label:'Sporeback',     bf:'sporeback',    rig:'blob',   hp:100, h:1.05, speed:1.4, dmg:7 },
   { file:'Wizard',             label:'Caster',        bf:'caster',       rig:'blob',   hp: 85, h:1.2, speed:1.6, dmg:11 },
   { file:'Ninja',              label:'Blinkstalker',  bf:'blinkstalker', rig:'blob',   hp: 90, h:1.2, speed:3.0, dmg:10 },
   { file:'Tribal',             label:'Revenant',      bf:'revenant',     rig:'fly',    hp:100, h:1.25, speed:2.1, dmg:9,  flyY:0.5 },
   { file:'Ghost_Skull',        label:'Bones',         bf:'bones',        rig:'fly',    hp: 75, h:1.05, speed:2.4, dmg:7,  flyY:1.1 },
-  { file:'Goleling',           label:'Cragspitter',   bf:'cragspitter',  rig:'fly',    hp:160, h:1.1, speed:1.4, dmg:12, flyY:0.8 },
+  { file:'Goleling',           label:'Cragspitter',   bf:'cragspitter',  rig:'fly',    hp:160, h:1.05, speed:1.4, dmg:12, flyY:0.45 },
   { file:'Goleling_Evolved',   label:'Marble Statue', bf:'marblestatue', rig:'fly',    hp:220, h:1.5, speed:1.1, dmg:16, flyY:0.8 },
   { file:'Armabee_Evolved',    label:'Galewisp',      bf:'galewisp',     rig:'fly',    hp: 65, h:0.75, speed:3.1, dmg:6,  flyY:1.6 },
   { file:'Squidle',            label:'Glub',          bf:'toxling',      rig:'fly',    hp: 80, h:0.85, speed:2.2, dmg:8,  flyY:1.3 },
   { file:'Glub_Evolved',       label:'Deep Glub',     bf:'toxling',      rig:'fly',    hp:120, h:1.05, speed:2.0, dmg:11, flyY:1.3 },
   { file:'Hywirl',             label:'Sparkling',     bf:'sparkling',    rig:'fly',    hp: 70, h:0.72, speed:3.2, dmg:7,  flyY:1.5 },
-  { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:1.4, speed:2.6, dmg:14, flyY:1.9 },
+  { file:'Dragon',             label:'Flyer',         bf:'flyer',        rig:'fly',    hp:150, h:0.95, speed:2.6, dmg:14, flyY:1.35 },
   // ── one Goleling mesh, four different creatures (this is what proved the reskin approach) ──
   { file:'Goleling', label:'Ember Gargoyle', bf:'emberling',   rig:'fly', hp:170, h:1.2, speed:1.3, dmg:13, flyY:0.7, skin:'magma'  },
   { file:'Goleling', label:'Frost Gargoyle', bf:'frostshell',   rig:'fly', hp:190, h:1.25, speed:1.1, dmg:14, flyY:0.7, skin:'frost'  },
   { file:'Goleling', label:'Marble Gargoyle',  bf:'marblestatue', rig:'fly', hp:230, h:1.3, speed:1.0, dmg:16, flyY:0.7, skin:'marble' },
   { file:'Goleling', label:'Iron Gargoyle', bf:'sentinel',     rig:'fly', hp:200, h:1.22,speed:1.2, dmg:15, flyY:0.7, skin:'rust'   },
+  /* Frostshell, Cragspitter and Flyer read as too big (Oliver, 2026-07-29). Sized against the
+     game's own numbers rather than by eye: grunt is h:38 there and the Orc is 1.35m here, so a
+     game unit is ~0.0355m. That makes frostshell 1.42 (was 1.65) and flyer 0.92-ish (was 1.40).
+     For the two floaters the bigger cause was flyY, not the body - hovering at 0.8 and 1.9 put
+     their tops at 1.9m and 3.3m against a 1.35m Orc, which is what made them loom. */
   /* ── the eight remaining Bladefall mobs, cast onto owned models ──
      These complete the set: with these, all 27 ids in the game's THEMEMOBS have a body.
      Known limitation, worth Oliver seeing before it ships: reskinned mobs share silhouettes,
@@ -5044,6 +5049,69 @@ function paintSkillBar(){
     b.classList.toggle('ready', f === 0);
   });
 }
+
+/* Which body each class wears. The slice picks the model through CLASSES, but the skin sets need
+   the same mapping by id to offer a model's palettes to every class that wears it. */
+const CLASS_TO_MODEL_SLICE = {
+  warrior:'Warrior', berserker:'Warrior', pirate:'Warrior',
+  bladedancer:'Rogue', reaper:'Rogue', ninja:'Rogue',
+  paladin:'Cleric', monk:'Monk',
+  ranger:'Ranger', beastmaster:'Ranger', skylancer:'Ranger',
+  mage:'Wizard', stormcaller:'Wizard', warlock:'Wizard',
+  necromancer:'Wizard', chronomancer:'Wizard',
+};
+
+/* ─────────────  CLASS SKIN SETS  ─────────────
+   Base skin for every class is the ORIGINAL texture the RPG pack shipped with (Oliver, 2026-07-29).
+   The recolours built earlier become unlockable alternates rather than the default look.
+
+   That is a real reversal of what shipped before: applySkin was being handed CLASS_SKINS
+   unconditionally, so a class could never show its pack artwork at all. The pack skins are the
+   art the models were actually designed around, and they should be what a new player sees.
+
+   Fixes a second, quieter bug while restructuring. buildSkinBar read SKINS[heroDef.id], but
+   heroDef.id is a CLASS id ('warrior') while SKINS is keyed by MODEL name ('Warrior') - so the
+   lookup was undefined and the skin bar rendered EMPTY for every class. Same mistake family as
+   the applySkin one. Keying everything by class id here means there is one id space, not two.
+
+   `unlock` is descriptive only. In this testbed every skin stays selectable so the whole set can
+   be reviewed; gating belongs in the game's progression code, not in a review tool that would
+   then hide the very thing being reviewed. */
+const CLASS_SKIN_NAMES = {
+  warrior:'Gilded',      berserker:'Bloodforged', pirate:'Corsair',
+  bladedancer:'Tidecut', reaper:'Sanguine',       ninja:'Nightfall',
+  paladin:'Dawnplate',   monk:'Emberwrap',
+  ranger:'Greenwarden',  beastmaster:'Wildhide',  skylancer:'Skysteel',
+  mage:'Azure',          stormcaller:'Tempest',   warlock:'Hexbound',
+  necromancer:'Bonecall', chronomancer:'Hourglass',
+};
+/* Built rather than written out by hand: one entry per class, so a class added later cannot be
+   silently left with no skins the way the model-keyed table left most classes with none. */
+const CLASS_SKIN_SETS = (() => {
+  const out = {};
+  for(const c of CLASSES){
+    const id = c.id;
+    const list = [{ id:id+'_base', name:'Original', stock:true }];
+    const p = CLASS_SKINS[id];
+    if(p) list.push({ id:p.id, name:CLASS_SKIN_NAMES[id] || 'Recoloured',
+                      metal:p.metal, leather:p.leather, lift:p.lift,
+                      unlock:'Unlockable' });
+    /* The older per-MODEL palettes still have value, so they are offered to whichever classes
+       wear that model instead of being stranded behind a lookup nothing matched. */
+    for(const extra of (SKINS[CLASS_TO_MODEL_SLICE[id]] || [])){
+      if(extra.stock) continue;
+      /* Skip a name already in the list. The Warrior model ships a palette called 'Gilded' and
+         the warrior CLASS palette was named 'Gilded' too, so the bar showed the entry twice with
+         two different colours behind one label. */
+      if(list.some(x => x.name.toLowerCase() === String(extra.name).toLowerCase())) continue;
+      list.push(Object.assign({}, extra, { unlock:'Unlockable' }));
+    }
+    out[id] = list;
+  }
+  return out;
+})();
+function skinsFor(clsId){ return CLASS_SKIN_SETS[clsId] || [{ id:'base', name:'Original', stock:true }]; }
+
 function buildSkinBar(){
   const bar = document.getElementById('skins');
   if(!bar) return;
@@ -5065,11 +5133,12 @@ function buildSkinBar(){
     });
     return;
   }
-  const list = SKINS[heroDef.id] || [];
+  const list = skinsFor(heroDef.id);
   bar.innerHTML = '';
   list.forEach((sk, i) => {
     const b = document.createElement('button');
-    b.className = 'sbtn' + (i === skinIdx[heroDef.id] ? ' sel' : '');
+    b.className = 'sbtn' + (i === (skinIdx[heroDef.id] || 0) ? ' sel' : '');
+    b.title = sk.stock ? 'The texture the model pack shipped with' : (sk.unlock || '');
     b.innerHTML = `<i style="background:${sk.stock ? '#5a5f6b' : sk.metal}"></i>${sk.name}`;
     b.onclick = () => {
       skinIdx[heroDef.id] = i;
@@ -5113,10 +5182,10 @@ async function switchClass(def){
     hero.root.position.copy(pos); hero.root.rotation.y = rot;
     scene.add(hero.root);
     heroDef = def;
-    /* Class skin first: CLASS_SKINS is keyed by class id, which is what def.id actually is.
-       SKINS is keyed by MODEL name, so the old lookup was always undefined and no skin was ever
-       applied - the reason classes sharing a body were indistinguishable. */
-    applySkin(hero, def.id, CLASS_SKINS[def.id] || (SKINS[def.id]||[])[skinIdx[def.id]||0]);
+    /* Base skin is the pack original. Previously this passed CLASS_SKINS unconditionally, which
+       meant a class could never show the artwork its model was designed with. The recolours are
+       still here, one index along, as unlockables. */
+    applySkin(hero, def.id, skinsFor(def.id)[skinIdx[def.id] || 0]);
     addEyes(hero); addMouth(hero);
     /* Re-measure once the animation has actually posed the skeleton, then rebuild. Without
        this the first build reads the T-pose. Two frames is enough for the mixer to apply a

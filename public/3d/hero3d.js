@@ -28,6 +28,9 @@ const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplica
    Exposed as a control because it is the one number most likely to need a nudge by eye. */
 export const HERO3D = {
   on: false,
+  /* Which skin the hero wears. 'base' is the texture the RPG pack shipped with and is the
+     default; any CLASS_SKINS id is an unlockable recolour. Set via ?skin= or __hero3dSetSkin. */
+  skinId: 'base',
   scale: 15,   // measured: scale 26 gave 76.8 units tall vs the voxel hero's ~45
   yOff: 0,
   /* Facing offset. I originally guessed Math.PI on the assumption the glTF characters face
@@ -54,6 +57,7 @@ try {
   if(q.get('model')) HERO3D.model = q.get('model');
   if(q.get('yoff'))  HERO3D.yOff  = parseFloat(q.get('yoff')) || 0;
   if(q.get('yawoff')) HERO3D.yawOff = parseFloat(q.get('yawoff')) || 0;
+  if(q.get('skin'))  HERO3D.skinId = q.get('skin');   // 'base' (default) or an unlockable id
 } catch(e){}
 
 
@@ -948,13 +952,20 @@ function repaintTexture(srcTex, skin){
   return tex;
 }
 /* Applied to the BODY material only. The added eye/mouth meshes are excluded by their _eye flag
-   so a repaint can never disturb the face, and the weapon is excluded by _weap. */
+   so a repaint can never disturb the face, and the weapon is excluded by _weap.
+
+   HERO3D.skinId selects which skin is worn, and it defaults to 'base' — the texture the RPG pack
+   shipped with (Oliver, 2026-07-29). This used to apply CLASS_SKINS unconditionally, so a class
+   could never show the artwork its model was designed around. The recolours are still here as
+   unlockables; they are just no longer the default. Restoring the base means putting back the
+   ORIGINAL map, which is why _srcMap is captured before the first repaint and never overwritten. */
 function applyClassSkin(){
   if(!actor) return null;
   let cls = 'warrior';
   try { const m = window.__BF_META && window.__BF_META(); if(m && m.classId) cls = m.classId; } catch(e){}
+  const wantBase = (HERO3D.skinId || 'base') === 'base';
   const skin = CLASS_SKINS[cls];
-  if(!skin) return null;
+  if(!wantBase && !skin) return null;
   let painted = 0;
   actor.traverse(o => {
     if(!o.isMesh || o.userData._eye || o.userData._weap) return;
@@ -964,12 +975,13 @@ function applyClassSkin(){
       if(!mm.userData._srcMap) mm.userData._srcMap = mm.map || null;
       const src = mm.userData._srcMap;
       if(!src) continue;
-      mm.map = repaintTexture(src, skin);
+      mm.map = wantBase ? src : repaintTexture(src, skin);
       mm.needsUpdate = true;
       painted++;
     }
   });
-  HERO3D.skin = { classId: cls, metal: skin.metal, painted };
+  HERO3D.skin = { classId: cls, skinId: wantBase ? 'base' : skin.id,
+                  metal: wantBase ? 'pack original' : skin.metal, painted };
   return HERO3D.skin;
 }
 
@@ -1204,6 +1216,15 @@ window.__hero3dClass = () => ({ classId: (window.__BF_META && window.__BF_META()
 window.__hero3dWeaponsFor = () => weaponsFor(eyeModel());
 window.__hero3dWeapon = () => HERO3D.weapon || 'none';
 window.__hero3dSkin = () => HERO3D.skin || 'none';
+/* Switch skin at runtime. 'base' restores the pack original; anything else is treated as an
+   unlockable recolour for the current class. Returns what is now worn. */
+window.__hero3dSetSkin = id => { HERO3D.skinId = id || 'base'; return applyClassSkin(); };
+window.__hero3dSkins = () => {
+  let cls = 'warrior';
+  try { const m = window.__BF_META && window.__BF_META(); if(m && m.classId) cls = m.classId; } catch(e){}
+  return { classId: cls, worn: HERO3D.skinId || 'base',
+           available: ['base'].concat(CLASS_SKINS[cls] ? [CLASS_SKINS[cls].id] : []) };
+};
 window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
   const r = await equipWeapon({ root: actor, model: HERO3D._wrap }, false);
   HERO3D.weapon = r ? { name:n, stock:!!r.stockModel } : { name:n, failed:true };

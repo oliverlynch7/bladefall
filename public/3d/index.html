@@ -4629,7 +4629,11 @@ const EXPANDED_SCAPES={
        actually runs for the Outskirts - an earlier pass tagged the other outskirts() generator,
        which produced no trees at all because that one does not build this stage. Verify a tag
        reaches G.deco before assuming it worked. */
-    const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); vcol(x,z,22,22,b+h); G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains',kind:'tree',lead:true,trunkH:h}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains',kind:'tree'}); };
+    /* treeCol:true marks this column as a tree TRUNK. The collision must stay - you should still
+       bump into a tree - but when world3d draws a real 3D tree here the voxel column becomes a
+       redundant pillar standing beside it, tinted with the zone ground colour. Rendering skips
+       flagged columns only while world3d is live. */
+    const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); const tc=vcol(x,z,22,22,b+h); tc.treeCol=true; G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains',kind:'tree',lead:true,trunkH:h}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains',kind:'tree'}); };
     const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
     const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
@@ -11818,7 +11822,9 @@ function drawCourse(s,t){
   // chests
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
+  const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(w && w.on && w.ready); })();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
+    if(ob.treeCol && _w3dOn) continue;            // world3d draws the real tree; skip the voxel trunk
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }

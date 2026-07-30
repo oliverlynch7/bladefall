@@ -61,13 +61,28 @@ const _geoCache = {};
 
 /* Real props, from the pack. Several variants per kind so a forest is not one tree stamped
    repeatedly; the variant is chosen by position hash, so it is stable across rebuilds. */
-const PROPS = '../slice3d/assets/props/';
+const PROPS = '../slice3d/assets/';
+/* Real models from the Kenney Nature Kit, installed 2026-07-30. Variety matters more than any
+   single model here: a treeline built from ONE mesh reads as wallpaper no matter how good that
+   mesh is, so each set carries several and the variant is picked by position hash - stable
+   across rebuilds, so a wood does not reshuffle itself every time you walk into it.
+   Broadleaf and pine are mixed deliberately; the Outskirts is meadow-and-woodland, not forest. */
 const PROP_SETS = {
-  tree:   ['pine', 'pine-crooked', 'pine-fall'],
-  rock:   ['rocks', 'rocks-tall'],
-  fence:  ['iron-fence', 'iron-fence-damaged'],
-  grave:  ['gravestone-cross', 'gravestone-round', 'gravestone-decorative', 'gravestone-broken'],
-  pillar: ['pillar-square', 'pillar-large', 'pillar-obelisk'],
+  tree:   ['nature/tree_default', 'nature/tree_oak', 'nature/tree_tall', 'nature/tree_detailed',
+           'nature/tree_fat', 'nature/tree_thin', 'nature/tree_default_dark', 'nature/tree_oak_dark',
+           'nature/tree_pineTallA', 'nature/tree_pineTallB', 'nature/tree_pineRoundA',
+           'nature/tree_pineDefaultA'],
+  bush:   ['nature/plant_bush', 'nature/plant_bushDetailed', 'nature/plant_bushLarge',
+           'nature/plant_bushSmall'],
+  grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
+  flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
+           'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
+  rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
+           'nature/rock_tallB', 'nature/rock_smallA', 'nature/rock_smallB', 'nature/rock_smallFlatA'],
+  fence:  ['props/iron-fence', 'props/iron-fence-damaged'],
+  grave:  ['props/gravestone-cross', 'props/gravestone-round', 'props/gravestone-decorative',
+           'props/gravestone-broken'],
+  pillar: ['props/pillar-square', 'props/pillar-large', 'props/pillar-obelisk'],
 };
 const _propCache = new Map();     // name -> { geo, mat, height } or null when a load failed
 let _propsReady = false, _propsPending = false;
@@ -92,8 +107,13 @@ async function loadProp(name){
     const bb = geo.boundingBox;
     geo.translate(0, -bb.min.y, 0);              // base at y=0
     const height = Math.max(0.001, bb.max.y - bb.min.y);
+    /* Width matters as much as height. Scaling purely to match a deco's height blew the wheat up
+       into giant yellow pillars: a wheat stalk is w:4 h:24, and the grass model is WIDER than it
+       is tall, so matching 24 units of height made it ~36 units across. Fitting to the box
+       instead means a prop can never exceed the footprint the level intended. */
+    const width = Math.max(0.001, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z));
     const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-    const rec = { geo, mat, height };
+    const rec = { geo, mat, height, width };
     _propCache.set(name, rec);
     return rec;
   } catch(e){
@@ -239,7 +259,11 @@ function buildProps(items, names, defaultH, heightOf){
     const o = new THREE.Object3D();
     for(let k = 0; k < list.length; k++){
       const d = list[k], r = hash(d.x, d.z);
-      const sc = (heightOf ? heightOf(d) : (d.h || defaultH)) / rec.height;
+      /* Fit inside the deco's box: whichever of height or width binds first wins, so a prop is
+         never wider or taller than the space the generator allotted it. */
+      const wantH = heightOf ? heightOf(d) : (d.h || defaultH);
+      const wantW = d.w || wantH;
+      const sc = Math.min(wantH / rec.height, wantW / rec.width);
       o.position.set(d.x, d.y0 || 0, d.z);
       o.rotation.set(0, r * 6.283, 0);
       o.scale.set(sc, sc, sc);
@@ -275,28 +299,25 @@ export function buildWorld(scene, world){
     o.scale.set(d.w, Math.max(1, d.h || 1), d.d || d.w);
   });
 
-  /* Foliage. One deco entry becomes one clump; the entry's own colour carries grass vs wheat,
-     which is why a field reads as two-tone without any of it being hard-coded here. */
-  const tufts = [];
+  /* Ground foliage, now real grass and flower models rather than the procedural cones this used
+     to draw. Split by the entry's OWN colour: the meadow generator emits wheat stalks and grass
+     with different tints, so the yellow ones become tall grass and the green ones a mix of grass,
+     bushes and the occasional flower. Reading the colour keeps this honest to what the level
+     actually placed instead of scattering decoration at random. */
+  const grassBin = [], bushBin = [], flowerBin = [];
   for(const d of bins.foliage){
-    const n = 3;                                   // a clump reads as grass; a single cone does not
-    for(let k = 0; k < n; k++){
-      const r = hash(d.x + k * 7.7, d.z - k * 3.1);
-      const a = r * Math.PI * 2;
-      const spread = (d.w || 20) * 0.42;
-      tufts.push({ x: d.x + Math.cos(a) * spread * r,
-                   z: d.z + Math.sin(a) * spread * r,
-                   y0: d.y0 || 0,
-                   w: (d.w || 20) * (0.18 + r * 0.16),
-                   h: Math.max(6, (d.h || 20) * (0.7 + r * 0.7)),
-                   c: d.c, r });
-    }
+    const r = hash(d.x * 3.1, d.z * 1.7);
+    const c = new THREE.Color(d.c || '#7a9a4a');
+    const yellowish = c.r > c.b * 1.5 && c.g > c.b;      // wheat/straw rather than leaf green
+    if(yellowish){ grassBin.push(d); continue; }
+    if(r < 0.10) flowerBin.push(d);
+    else if(r < 0.22) bushBin.push(d);
+    else grassBin.push(d);
   }
-  buildCategory(scene, tufts, bladeGeo(), mat(), (o, d) => {
-    o.position.set(d.x, d.y0, d.z);
-    o.rotation.set(0, d.r * 6.283, (d.r - 0.5) * 0.34);   // lean, so a field is not a pin cushion
-    o.scale.set(d.w, d.h, d.w);
-  });
+  buildProps(grassBin,  PROP_SETS.grass,  22);
+  buildProps(bushBin,   PROP_SETS.bush,   26);
+  buildProps(flowerBin, PROP_SETS.flower, 18);
+  const tufts = grassBin.length + bushBin.length + flowerBin.length;
 
   /* Trees and rocks: the real models. Scale is deco height divided by the model's own height,
      so a tree ends up exactly as tall as the level says it should be rather than a guessed size. */
@@ -327,7 +348,7 @@ export function buildWorld(scene, world){
   });
 
   WORLD3D.counts = { deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
-                     tufts: tufts.length, tree: bins.tree.length, shard: bins.shard.length,
+                     tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, skipped: bins.skip.length,
                      drawCalls: group.children.length,

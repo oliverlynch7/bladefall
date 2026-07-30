@@ -32,7 +32,10 @@ export const HERO3D = {
   /* Which skin the hero wears. 'base' is the texture the RPG pack shipped with and is the
      default; any CLASS_SKINS id is an unlockable recolour. Set via ?skin= or __hero3dSetSkin. */
   skinId: 'base',
-  scale: 15,   // measured: scale 26 gave 76.8 units tall vs the voxel hero's ~45
+  /* 15 matched the VOXEL hero's ~45 units exactly, which is why it looked right in isolation and
+     too short to Oliver in the actual world - the voxel hero was always a bit stumpy next to the
+     scenery. 20 reads correctly against buildings and mobs. Override live with ?scale=. */
+  scale: 20,   // measured: scale 26 gave 76.8 units tall; 15 gave ~44, matching the voxel hero
   yOff: 0,
   /* Facing offset. I originally guessed Math.PI on the assumption the glTF characters face
      away from the game's yaw 0 — wrong: Oliver reported the character running backwards, which

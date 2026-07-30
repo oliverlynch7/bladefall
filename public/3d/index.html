@@ -4216,8 +4216,13 @@ const SCAPES={
     linkL(C[0],C[1],180); linkL(C[0],C[2],180); linkL(C[1],C[3],170); linkL(C[2],C[3],170); linkL(C[1],C[4],160); linkL(C[3],C[5],180); linkL(C[4],C[5],160);
     const leaf=isWoods?'#284f28':'#3a6b34';
     const tree=(tx,tz,th)=>{ const b=propGroundAt(tx,tz); vcol(tx,tz,20+rnd()*10,20+rnd()*10,b+th);
-      G.deco.push({x:tx,z:tz,y0:b+th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains'});
-      G.deco.push({x:tx,z:tz,y0:b+th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains'}); };
+      /* kind:'tree' is the whole point. These two boxes ARE a tree, and the generator is the only
+         place that knows it - once emitted they are indistinguishable from terrain banding, which
+         is why the 3D renderer kept drawing them as blocks. `kind` costs one field and lets
+         world3d place a real pine. The voxel renderer ignores it, so nothing changes if 3D is off.
+         `lead` marks the canopy that owns the trunk, so one tree becomes one model, not two. */
+      G.deco.push({x:tx,z:tz,y0:b+th,w:52+rnd()*30,h:40+rnd()*26,c:tint(leaf,'#000',rnd()*0.18),theme:'plains',kind:'tree',lead:true,trunkH:th});
+      G.deco.push({x:tx,z:tz,y0:b+th+30,w:36+rnd()*20,h:26,c:tint(leaf,'#fff',0.08),theme:'plains',kind:'tree'}); };
     const treeN=isWoods?20:12;
     for(let k=0;k<treeN;k++){ const c=C[Math.floor(rnd()*C.length)]; tree(c.x+(rnd()*2-1)*(c.w/2-30), c.z+(rnd()*2-1)*(c.d/2-30), 70+rnd()*70); }
     for(let k=0;k<54;k++){ const c=C[Math.floor(rnd()*C.length)], gx=c.x+(rnd()*2-1)*(c.w/2-18), gz=c.z+(rnd()*2-1)*(c.d/2-18);
@@ -4620,7 +4625,11 @@ const EXPANDED_SCAPES={
     const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
     const room=(name,x,z,w,d)=>{ const r={name,x,z,w,d,monsters:[],encounter:false,cleared:true}; vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
     const road=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
-    const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); vcol(x,z,22,22,b+h); G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains'}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains'}); };
+    /* Tagged kind:'tree' so the 3D renderer can place a real pine. This is the emitter that
+       actually runs for the Outskirts - an earlier pass tagged the other outskirts() generator,
+       which produced no trees at all because that one does not build this stage. Verify a tag
+       reaches G.deco before assuming it worked. */
+    const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); vcol(x,z,22,22,b+h); G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains',kind:'tree',lead:true,trunkH:h}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains',kind:'tree'}); };
     const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
     const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
@@ -11657,13 +11666,18 @@ function occRay(o,m,y0,hh){
 let shadowEps=0;
 // world-space sun azimuth for cast shadows: shadows fall opposite the sun and stretch along its axis (stays fixed as the camera orbits)
 let SHADOWAZ=0.7, SHADOWOFF=0.42, SHADOWLEN=1.55;
-function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shadowEps*0.03; const a=alpha==null?0.34:alpha;
-  // soft layered contact shadow, offset + elongated along the sun direction so it reads as cast, not a symmetric blob
-  const off=r*SHADOWOFF, el=SHADOWLEN;
-  pushM(); mv(x,0,z); rotY(SHADOWAZ);
-  bx(off,      y,      0, r*1.35*el, 0.34, r*1.15, '#000000',null,a);       // core
-  bx(off*1.35, y+0.02, 0, r*2.0*el,  0.30, r*1.7,  '#000000',null,a*0.55);  // mid
-  bx(off*1.7,  y+0.04, 0, r*2.7*el,  0.26, r*2.3,  '#000000',null,a*0.26);  // penumbra
+function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shadowEps*0.03;
+  /* Small, round and soft (Oliver, 2026-07-30). This used to be elongated by SHADOWLEN and
+     pushed sideways by SHADOWOFF to read as a cast shadow, but with a single quad per layer that
+     just makes a dark RECTANGLE sitting under every character and summon. A contact shadow only
+     has to say "this thing is on the ground", so: no offset, no stretch, smaller, fainter, and
+     three squares rotated 30 degrees apart to approximate a disc rather than a slab. */
+  const a=(alpha==null?0.34:alpha)*0.55, R=r*0.95;
+  pushM(); mv(x,0,z);
+  for(let i=0;i<3;i++){ pushM(); rotY(i*0.5236);
+    bx(0, y+i*0.012, 0, R*1.5, 0.30, R*1.5, '#000000',null, a*(i?0.55:1)); popM(); }
+  pushM(); rotY(0.2618);                                                    // faint wide falloff
+  bx(0, y+0.06, 0, R*2.2, 0.24, R*2.2, '#000000',null, a*0.16); popM();
   popM(); }
 function drawCourse(s,t){
   const hz=hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;

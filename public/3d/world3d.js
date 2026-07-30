@@ -63,8 +63,11 @@ const _geoCache = {};
    repeatedly; the variant is chosen by position hash, so it is stable across rebuilds. */
 const PROPS = '../slice3d/assets/props/';
 const PROP_SETS = {
-  tree: ['pine', 'pine-crooked', 'pine-fall'],
-  rock: ['rocks', 'rocks-tall'],
+  tree:   ['pine', 'pine-crooked', 'pine-fall'],
+  rock:   ['rocks', 'rocks-tall'],
+  fence:  ['iron-fence', 'iron-fence-damaged'],
+  grave:  ['gravestone-cross', 'gravestone-round', 'gravestone-decorative', 'gravestone-broken'],
+  pillar: ['pillar-square', 'pillar-large', 'pillar-obelisk'],
 };
 const _propCache = new Map();     // name -> { geo, mat, height } or null when a load failed
 let _propsReady = false, _propsPending = false;
@@ -151,6 +154,18 @@ function mat(opts){
    thing here that it is there. Getting this wrong would not just look different, it would
    misrepresent the level. */
 function classify(d){
+  /* An explicit `kind` from the generator always wins. Guessing a tree from a green box is
+     impossible after the fact - the two canopy boxes a tree emits are indistinguishable from
+     terrain banding - so the generators tag what they build and this just reads the tag.
+     Non-lead pieces of a multi-box prop are dropped: one tree should become one model, not two
+     stacked pines. */
+  if(d.kind){
+    if(d.kind === 'tree')  return d.lead === true ? 'tree' : 'skip';
+    if(d.kind === 'rock')  return d.lead === false ? 'skip' : 'rock';
+    if(d.kind === 'fence') return 'fence';
+    if(d.kind === 'grave') return 'grave';
+    if(d.kind === 'pillar')return 'pillar';
+  }
   const t = d.theme;
   if(t === 'forest') return 'tree';
   if(t === 'frost' || t === 'void' || t === 'apex') return 'shard';
@@ -199,7 +214,7 @@ function hash(x, z){
 /* Place a bin of deco onto real prop models, splitting it across the available variants.
    Falls back to a lit box if a model failed to load, so a missing asset degrades to something
    visible rather than to an invisible hole in the level. */
-function buildProps(items, names, defaultH){
+function buildProps(items, names, defaultH, heightOf){
   if(!items.length) return;
   const recs = names.map(n => _propCache.get(n)).filter(Boolean);
   if(!recs.length){
@@ -224,7 +239,7 @@ function buildProps(items, names, defaultH){
     const o = new THREE.Object3D();
     for(let k = 0; k < list.length; k++){
       const d = list[k], r = hash(d.x, d.z);
-      const sc = (d.h || defaultH) / rec.height;
+      const sc = (heightOf ? heightOf(d) : (d.h || defaultH)) / rec.height;
       o.position.set(d.x, d.y0 || 0, d.z);
       o.rotation.set(0, r * 6.283, 0);
       o.scale.set(sc, sc, sc);
@@ -244,7 +259,8 @@ export function buildWorld(scene, world){
   group.name = 'world3d';
   scene.add(group);
 
-  const bins = { box: [], foliage: [], tree: [], shard: [], rock: [] };
+  const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
+                 fence: [], grave: [], pillar: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -284,8 +300,13 @@ export function buildWorld(scene, world){
 
   /* Trees and rocks: the real models. Scale is deco height divided by the model's own height,
      so a tree ends up exactly as tall as the level says it should be rather than a guessed size. */
-  buildProps(bins.tree, PROP_SETS.tree, 90);
+  /* A tree's real height is its trunk plus canopy. The lead deco carries trunkH; using the
+     canopy box height alone would place a pine a third of its proper size. */
+  buildProps(bins.tree, PROP_SETS.tree, 90, d => (d.trunkH || 0) + (d.h || 40) + 30);
   buildProps(bins.rock, PROP_SETS.rock, 20);
+  buildProps(bins.fence, PROP_SETS.fence, 30);
+  buildProps(bins.grave, PROP_SETS.grave, 30);
+  buildProps(bins.pillar, PROP_SETS.pillar, 80);
 
   buildCategory(scene, bins.shard, shardGeo(), mat(), (o, d) => {
     const r = hash(d.x, d.z);
@@ -307,7 +328,9 @@ export function buildWorld(scene, world){
 
   WORLD3D.counts = { deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts.length, tree: bins.tree.length, shard: bins.shard.length,
-                     rock: bins.rock.length, drawCalls: group.children.length,
+                     rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
+                     pillar: bins.pillar.length, skipped: bins.skip.length,
+                     drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };
   WORLD3D.ready = true;
   return WORLD3D.counts;

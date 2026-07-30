@@ -545,14 +545,29 @@ function repaintTexture(srcTex, skin){
     const [h,s,v] = rgb2hsv(px[i],px[i+1],px[i+2]);
     // luminance normalised so mid-greys land mid-tone, then lifted
     const lum = Math.min(1.9, (0.35 + v * 1.25) * lift);
-    if(s < 0.20){                                     // steel / plate / cloth-grey
-      tintPixel(px, i, metal, lum);
-    } else if(h >= 12 && h <= 52 && v < 0.52){        // dark leather + straps
-      tintPixel(px, i, leather, lum);
-    } else {                                          // skin, hair, eyes, accents
+    /* SKIN GUARD - faces and hands must survive a recolour. Skin is a warm mid-value hue that
+       collides with both the low-saturation "metal" test and the warm-dark "leather" test, so it
+       needs an explicit exclusion rather than careful branch ordering. Only brightness passes. */
+    if(h >= 8 && h <= 54 && s >= 0.12 && s <= 0.62 && v >= 0.45){
       px[i]   = Math.min(255, px[i]   * lift);
       px[i+1] = Math.min(255, px[i+1] * lift);
       px[i+2] = Math.min(255, px[i+2] * lift);
+    } else if(s < 0.20){                              // steel / plate / cloth-grey
+      tintPixel(px, i, metal, lum);
+    } else if(h >= 12 && h <= 52 && v < 0.52){        // dark leather + straps
+      tintPixel(px, i, leather, lum);
+    } else {
+      /* SATURATED GARMENT REMAP. This branch used to only brighten, which is why three Rogue
+         classes all stayed the same red and two Wizards stayed the same blue - a strongly
+         coloured robe never got recoloured at all, whatever palette was applied. Classes sharing
+         a body are told apart by colour alone, so that defeated the whole system. The pixel now
+         takes the palette's HUE while keeping its own shading, so folds, trim and painted detail
+         survive instead of flattening into one flat fill. */
+      const tgt = rgb2hsv(...(v < 0.42 ? leather : metal));
+      const nv  = Math.min(1, v * lift);
+      const ns  = Math.min(1, s * 0.45 + tgt[1] * 0.6);
+      const out = hsv2rgb(tgt[0], ns, nv);
+      px[i] = out[0]; px[i+1] = out[1]; px[i+2] = out[2];
     }
   }
   ctx.putImageData(data, 0, 0);

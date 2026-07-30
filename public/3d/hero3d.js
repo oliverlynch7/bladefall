@@ -30,7 +30,11 @@ export const HERO3D = {
   on: false,
   scale: 15,   // measured: scale 26 gave 76.8 units tall vs the voxel hero's ~45
   yOff: 0,
-  yawOff: Math.PI,          // the glTF characters face +Z; the game's yaw 0 faces away
+  /* Facing offset. I originally guessed Math.PI on the assumption the glTF characters face
+     away from the game's yaw 0 — wrong: Oliver reported the character running backwards, which
+     is the signature of being exactly 180 degrees out. Tunable via ?yawoff= if a future model
+     differs. */
+  yawOff: 0,
   model: 'Warrior',
   ready: false,
   err: null,
@@ -49,6 +53,7 @@ try {
   if(q.get('scale')) HERO3D.scale = parseFloat(q.get('scale')) || HERO3D.scale;
   if(q.get('model')) HERO3D.model = q.get('model');
   if(q.get('yoff'))  HERO3D.yOff  = parseFloat(q.get('yoff')) || 0;
+  if(q.get('yawoff')) HERO3D.yawOff = parseFloat(q.get('yawoff')) || 0;
 } catch(e){}
 
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
@@ -163,9 +168,16 @@ async function boot(){
 function playFor(p){
   // pick a clip from the game's own player state, so the 3D hero animates off real gameplay
   const moving = Math.hypot(p.vx || 0, p.vz || 0) > 20 && p.onGround;
+  /* Clip selection from the game's own player state.
+
+     Airborne uses Roll, matching the slice: the 26-clip pool contains NO jump animation, and a
+     jump reads mostly from vertical motion, which the game already drives. A tucked pose from an
+     existing clip beats inventing one. p.onGround and p.vy are the game's own fields. */
+  const airborne = p.onGround === false;
   const want = p.dead ? 'Death'
              : (p.attackTimer > 0 || p.swingT > 0) ? 'Sword_Attack'
              : p.dodgeTimer > 0 ? 'Roll'
+             : airborne ? 'Roll'
              : moving ? (Math.hypot(p.vx||0, p.vz||0) > 120 ? 'Run' : 'Walk')
              : 'Idle';
   const name = clips[want] ? want : (clips.Idle ? 'Idle' : Object.keys(clips)[0]);
@@ -250,6 +262,22 @@ window.__hero3dDebugCube = (on) => {
    WebGL 1 only supports via OES_texture_float; without it (or without vertex-texture support)
    skinning silently produces degenerate transforms and the mesh collapses - which matches the
    body vanishing while every non-skinned part draws. */
+/* Is the character facing the way it is moving? Dot the model's own forward axis against the
+   velocity. ~+1 means correct, ~-1 means 180 degrees out, which is the "runs backwards" bug.
+   Measured rather than eyeballed, since facing is easy to misjudge from a still frame. */
+window.__hero3dFacing = (p) => {
+  const w = HERO3D._wrap; if(!w) return 'not ready';
+  w.updateMatrixWorld(true);
+  const fwd = new THREE.Vector3(0,0,1).applyQuaternion(w.getWorldQuaternion(new THREE.Quaternion()));
+  const vx = (p && p.vx) || 0, vz = (p && p.vz) || 0;
+  const sp = Math.hypot(vx, vz);
+  if(sp < 5) return { moving:false, note:'stand still and it cannot be judged' };
+  const vel = new THREE.Vector3(vx/sp, 0, vz/sp);
+  const dot = +fwd.clone().setY(0).normalize().dot(vel).toFixed(3);
+  return { moving:true, dot, verdict: dot > 0.5 ? 'FORWARD (correct)'
+                                 : dot < -0.5 ? 'BACKWARD (180 out)' : 'sideways/unclear',
+           yawOff: HERO3D.yawOff, clip: cur };
+};
 window.__hero3dSkinCaps = () => {
   const g = window.__BF_GL; if(!g || !renderer) return 'no gl';
   const cap = renderer.capabilities;

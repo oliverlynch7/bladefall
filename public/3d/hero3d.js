@@ -205,6 +205,47 @@ const _mouthTex = {};
 
 /* Which body each of the 16 classes wears. Same mapping as the slice: six models, and the
    classes that share one are separated by tint rather than geometry. */
+
+/* ─────────────  CLASS SKINS  ─────────────
+   Coloured skins are what carries class identity, now that armour is stats-only and invisible.
+   Without them a Mage, Stormcaller, Warlock, Necromancer and Chronomancer are literally the same
+   character, because all five share the Wizard body.
+
+   Found while building this: applySkin() was being called with the CLASS id ('warrior',
+   'berserker') while SKINS is keyed by MODEL name ('Warrior', 'Rogue'), so SKINS[classId] was
+   always undefined and no skin was ever applied. The per-class `tint` in the class table was
+   unused too. That is why classes sharing a body looked identical.
+
+   Each palette derives from the tint already chosen for that class in CLASSES, so the colours
+   match the skill-bar and UI accents rather than being a second, competing scheme.
+   repaintTexture classifies by HSV — low-saturation pixels become `metal`, dark warm pixels
+   become `leather`, and skin/hair/eyes are only brightened — so one palette repaints a whole
+   character coherently without touching its face. */
+const CLASS_SKINS = {
+  // Warrior body
+  warrior:      { id:'c_warrior',      metal:'#c9a05a', leather:'#3a2a16', lift:1.30 },
+  berserker:    { id:'c_berserker',    metal:'#a8352a', leather:'#2a1410', lift:1.28 },
+  pirate:       { id:'c_pirate',       metal:'#b08a42', leather:'#402c18', lift:1.30 },
+  // Rogue body
+  bladedancer:  { id:'c_bladedancer',  metal:'#4fa8a0', leather:'#1d2a2a', lift:1.32 },
+  reaper:       { id:'c_reaper',       metal:'#8e2a3c', leather:'#1a1014', lift:1.26 },
+  ninja:        { id:'c_ninja',        metal:'#454e60', leather:'#16181f', lift:1.24 },
+  // Cleric body
+  paladin:      { id:'c_paladin',      metal:'#d8c274', leather:'#3a3120', lift:1.34 },
+  // Monk body
+  monk:         { id:'c_monk',         metal:'#c9782f', leather:'#35240f', lift:1.30 },
+  // Ranger body
+  ranger:       { id:'c_ranger',       metal:'#5a8f45', leather:'#26301c', lift:1.30 },
+  beastmaster:  { id:'c_beastmaster',  metal:'#8a6a3a', leather:'#2e2415', lift:1.28 },
+  skylancer:    { id:'c_skylancer',    metal:'#5f92d8', leather:'#1e2a3a', lift:1.32 },
+  // Wizard body
+  mage:         { id:'c_mage',         metal:'#5a7fc8', leather:'#1e2436', lift:1.30 },
+  stormcaller:  { id:'c_stormcaller',  metal:'#9a7fe8', leather:'#241c38', lift:1.32 },
+  warlock:      { id:'c_warlock',      metal:'#7a4490', leather:'#201430', lift:1.26 },
+  necromancer:  { id:'c_necromancer',  metal:'#9aa08a', leather:'#2a2c22', lift:1.28 },
+  chronomancer: { id:'c_chronomancer', metal:'#5fb8a0', leather:'#1c2e28', lift:1.32 },
+};
+
 const CLASS_TO_MODEL = {
   warrior:'Warrior', berserker:'Warrior', pirate:'Warrior',
   bladedancer:'Rogue', reaper:'Rogue', ninja:'Rogue',
@@ -854,6 +895,84 @@ async function equipForClass(){
 let _lastW = 0, _lastH = 0;
 let _loaded = {}, _classNow = null;
 
+/* Repaint the character in its class's colours.
+
+   Same HSV classification as the slice: low-saturation pixels become the class metal, dark warm
+   pixels become its leather, and skin/hair/eyes are only brightened so the tuned face is never
+   recoloured. Cached per texture+class, so switching class twice costs nothing. */
+const _skinCache = new Map();
+function hexRGB(h){ const n = parseInt(String(h).replace('#',''), 16);
+  return [ (n>>16)&255, (n>>8)&255, n&255 ]; }
+function rgb2hsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+  let hh=0;
+  if(d>1e-6){
+    if(mx===r) hh=60*(((g-b)/d)%6);
+    else if(mx===g) hh=60*(((b-r)/d)+2);
+    else hh=60*(((r-g)/d)+4);
+  }
+  if(hh<0) hh+=360;
+  return [hh, mx<=0?0:d/mx, mx];
+}
+function tintPixel(px,i,rgb,lum){
+  px[i]   = Math.min(255, rgb[0]*lum);
+  px[i+1] = Math.min(255, rgb[1]*lum);
+  px[i+2] = Math.min(255, rgb[2]*lum);
+}
+function repaintTexture(srcTex, skin){
+  const img = srcTex.image;
+  if(!img || !img.width) return srcTex;
+  const key = (srcTex.uuid||'') + '|' + skin.id;
+  if(_skinCache.has(key)) return _skinCache.get(key);
+  const cvs = document.createElement('canvas');
+  cvs.width = img.width; cvs.height = img.height;
+  const ctx = cvs.getContext('2d', { willReadFrequently:true });
+  ctx.drawImage(img, 0, 0);
+  const data = ctx.getImageData(0,0,cvs.width,cvs.height), px = data.data;
+  const metal = hexRGB(skin.metal), leather = hexRGB(skin.leather), lift = skin.lift || 1.0;
+  for(let i=0;i<px.length;i+=4){
+    if(px[i+3] < 8) continue;
+    const hsv = rgb2hsv(px[i],px[i+1],px[i+2]);
+    const lum = Math.min(1.9, (0.35 + hsv[2]*1.25) * lift);
+    if(hsv[1] < 0.20) tintPixel(px,i,metal,lum);
+    else if(hsv[0] >= 12 && hsv[0] <= 52 && hsv[2] < 0.52) tintPixel(px,i,leather,lum);
+    else { px[i]*=lift; px[i+1]*=lift; px[i+2]*=lift; }
+  }
+  ctx.putImageData(data,0,0);
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = srcTex.flipY; tex.wrapS = srcTex.wrapS; tex.wrapT = srcTex.wrapT;
+  tex.needsUpdate = true;
+  _skinCache.set(key, tex);
+  return tex;
+}
+/* Applied to the BODY material only. The added eye/mouth meshes are excluded by their _eye flag
+   so a repaint can never disturb the face, and the weapon is excluded by _weap. */
+function applyClassSkin(){
+  if(!actor) return null;
+  let cls = 'warrior';
+  try { const m = window.__BF_META && window.__BF_META(); if(m && m.classId) cls = m.classId; } catch(e){}
+  const skin = CLASS_SKINS[cls];
+  if(!skin) return null;
+  let painted = 0;
+  actor.traverse(o => {
+    if(!o.isMesh || o.userData._eye || o.userData._weap) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for(const mm of mats){
+      if(!mm) continue;
+      if(!mm.userData._srcMap) mm.userData._srcMap = mm.map || null;
+      const src = mm.userData._srcMap;
+      if(!src) continue;
+      mm.map = repaintTexture(src, skin);
+      mm.needsUpdate = true;
+      painted++;
+    }
+  });
+  HERO3D.skin = { classId: cls, metal: skin.metal, painted };
+  return HERO3D.skin;
+}
+
 /* The player's class, from the game's own state. */
 function modelForClass(){
   try {
@@ -894,6 +1013,7 @@ function syncClass(){
   mixer = new THREE.AnimationMixer(actor);
   cur = null;
   buildFace();
+  applyClassSkin();
   equipForClass();
 }
 let _angle = null, _maxAttribs = 16;
@@ -1001,6 +1121,7 @@ async function boot(){
     clock = new THREE.Clock();
     HERO3D.ready = true;
     buildFace();                       // Oliver's tuned eyes and mouth for this model
+    applyClassSkin();                  // and its class colours
     equipForClass();                   // and the weapon its archetype carries
     HERO3D.clips = Object.keys(clips);
     console.log('[hero3d] ready — ' + HERO3D.clips.length + ' clips, model ' + HERO3D.model);
@@ -1082,6 +1203,7 @@ window.__hero3dClass = () => ({ classId: (window.__BF_META && window.__BF_META()
                                 model: HERO3D.model, mapped: modelForClass() });
 window.__hero3dWeaponsFor = () => weaponsFor(eyeModel());
 window.__hero3dWeapon = () => HERO3D.weapon || 'none';
+window.__hero3dSkin = () => HERO3D.skin || 'none';
 window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
   const r = await equipWeapon({ root: actor, model: HERO3D._wrap }, false);
   HERO3D.weapon = r ? { name:n, stock:!!r.stockModel } : { name:n, failed:true };

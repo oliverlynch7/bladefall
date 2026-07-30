@@ -534,6 +534,47 @@ function repaintTexture(srcTex, skin){
   _skinCache.set(key, tex);
   return tex;
 }
+
+/* ─────────────  CLASS SKINS  ─────────────
+   Coloured skins are what carries class identity, now that armour is stats-only and invisible.
+   Without them a Mage, Stormcaller, Warlock, Necromancer and Chronomancer are literally the same
+   character, because all five share the Wizard body.
+
+   Found while building this: applySkin() was being called with the CLASS id ('warrior',
+   'berserker') while SKINS is keyed by MODEL name ('Warrior', 'Rogue'), so SKINS[classId] was
+   always undefined and no skin was ever applied. The per-class `tint` in the class table was
+   unused too. That is why classes sharing a body looked identical.
+
+   Each palette derives from the tint already chosen for that class in CLASSES, so the colours
+   match the skill-bar and UI accents rather than being a second, competing scheme.
+   repaintTexture classifies by HSV — low-saturation pixels become `metal`, dark warm pixels
+   become `leather`, and skin/hair/eyes are only brightened — so one palette repaints a whole
+   character coherently without touching its face. */
+const CLASS_SKINS = {
+  // Warrior body
+  warrior:      { id:'c_warrior',      metal:'#c9a05a', leather:'#3a2a16', lift:1.30 },
+  berserker:    { id:'c_berserker',    metal:'#a8352a', leather:'#2a1410', lift:1.28 },
+  pirate:       { id:'c_pirate',       metal:'#b08a42', leather:'#402c18', lift:1.30 },
+  // Rogue body
+  bladedancer:  { id:'c_bladedancer',  metal:'#4fa8a0', leather:'#1d2a2a', lift:1.32 },
+  reaper:       { id:'c_reaper',       metal:'#8e2a3c', leather:'#1a1014', lift:1.26 },
+  ninja:        { id:'c_ninja',        metal:'#454e60', leather:'#16181f', lift:1.24 },
+  // Cleric body
+  paladin:      { id:'c_paladin',      metal:'#d8c274', leather:'#3a3120', lift:1.34 },
+  // Monk body
+  monk:         { id:'c_monk',         metal:'#c9782f', leather:'#35240f', lift:1.30 },
+  // Ranger body
+  ranger:       { id:'c_ranger',       metal:'#5a8f45', leather:'#26301c', lift:1.30 },
+  beastmaster:  { id:'c_beastmaster',  metal:'#8a6a3a', leather:'#2e2415', lift:1.28 },
+  skylancer:    { id:'c_skylancer',    metal:'#5f92d8', leather:'#1e2a3a', lift:1.32 },
+  // Wizard body
+  mage:         { id:'c_mage',         metal:'#5a7fc8', leather:'#1e2436', lift:1.30 },
+  stormcaller:  { id:'c_stormcaller',  metal:'#9a7fe8', leather:'#241c38', lift:1.32 },
+  warlock:      { id:'c_warlock',      metal:'#7a4490', leather:'#201430', lift:1.26 },
+  necromancer:  { id:'c_necromancer',  metal:'#9aa08a', leather:'#2a2c22', lift:1.28 },
+  chronomancer: { id:'c_chronomancer', metal:'#5fb8a0', leather:'#1c2e28', lift:1.32 },
+};
+
 // Stock ("Default") plus three repaints per class. `lift` alone fixes the darkness.
 const SKINS = {
   Warrior: [
@@ -4895,7 +4936,10 @@ async function switchClass(def){
     hero.root.position.copy(pos); hero.root.rotation.y = rot;
     scene.add(hero.root);
     heroDef = def;
-    applySkin(hero, def.id, (SKINS[def.id]||[])[skinIdx[def.id]||0]);
+    /* Class skin first: CLASS_SKINS is keyed by class id, which is what def.id actually is.
+       SKINS is keyed by MODEL name, so the old lookup was always undefined and no skin was ever
+       applied - the reason classes sharing a body were indistinguishable. */
+    applySkin(hero, def.id, CLASS_SKINS[def.id] || (SKINS[def.id]||[])[skinIdx[def.id]||0]);
     addEyes(hero); addMouth(hero);
     /* Re-measure once the animation has actually posed the skeleton, then rebuild. Without
        this the first build reads the T-pose. Two frames is enough for the mixer to apply a

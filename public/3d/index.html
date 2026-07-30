@@ -2814,7 +2814,20 @@ Object.assign(ENEMY,_ENEMY_END); // bosses live in the same registry
    WEBGL RENDERER (raw, zero deps) — flat-shaded voxel cubes
    ============================================================ */
 const canvas=document.getElementById('gl');
-const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+/* Prefer WebGL 2, fall back to WebGL 1 unchanged.
+
+   Reason, found by reading three.module.js:14020 — Three r160's skinning vertex shader uses
+   textureSize() and texelFetch(), which are GLSL ES 3.00 and therefore WebGL 2 ONLY. There is no
+   WebGL 1 skinning fallback in r160. That is why the 3D hero's only SkinnedMesh never drew while
+   every non-skinned mesh did: the skinning shader cannot compile on a WebGL 1 context.
+
+   This game needs nothing from WebGL 1 that WebGL 2 lacks. Its shaders are GLSL ES 1.00, which
+   WebGL 2 still accepts, and the only WebGL-1-specific calls are the three instancing ones,
+   shimmed below. Devices without WebGL 2 keep the old path exactly, and simply do not get the
+   optional 3D hero. */
+const GL_OPTS={antialias:true,alpha:false,preserveDrawingBuffer:true};
+const gl=canvas.getContext('webgl2',GL_OPTS)||canvas.getContext('webgl',GL_OPTS)||canvas.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+const IS_GL2=!!(window.WebGL2RenderingContext && gl instanceof WebGL2RenderingContext);
 window.__BF_GL=gl;   // shared with the optional 3D hero layer (hero3d.js)
 window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero layer
 let VW=0,VH=0,DPR=1;
@@ -2925,8 +2938,14 @@ const A_P=gl.getAttribLocation(prog,'aP'), A_N=gl.getAttribLocation(prog,'aN');
   cubeNB=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,cubeNB); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);
 })();
 // ---- instance buffer: one record per box = mat4(16) + scale(3) + colour&alpha(4) + emissive(3) = 26 floats ----
-const INST=gl.getExtension('ANGLE_instanced_arrays');
-if(!INST) throw new Error('This game needs the ANGLE_instanced_arrays WebGL extension.');
+/* Instancing: core in WebGL 2, an extension in WebGL 1. Shimmed to one interface so the four
+   call sites below are untouched. */
+const INST=IS_GL2
+  ? { drawArraysInstancedANGLE:(m,f,c,n)=>gl.drawArraysInstanced(m,f,c,n),
+      vertexAttribDivisorANGLE:(i,d)=>gl.vertexAttribDivisor(i,d) }
+  : gl.getExtension('ANGLE_instanced_arrays');
+if(!INST) throw new Error('This game needs WebGL 2 or the ANGLE_instanced_arrays extension.');
+window.__BF_GL2=IS_GL2;
 const ISTRIDE=26;
 let instCap=8192, instData=new Float32Array(instCap*ISTRIDE), instCount=0;
 const instVBO=gl.createBuffer();

@@ -6,6 +6,23 @@ and line so you can check it rather than trust me.
 
 Implementation is paused. Nothing but this document was changed to produce it.
 
+> **UPDATE 2026-07-29, after this document was first written.** Codex ran out of usage, so I
+> re-checked myself using its method — reading source rather than reasoning from memory — and
+> found the root cause of the skinned-mesh failure in §5. **Three r160's skinning vertex shader
+> uses `textureSize()` and `texelFetch()` (three.module.js:14020), which are GLSL ES 3.00 and
+> therefore WebGL 2 only.** There is no WebGL 1 fallback. The game was WebGL 1, so the skinning
+> shader could not compile while every non-skinned material did.
+>
+> Fixed by preferring WebGL 2 with a full WebGL 1 fallback and shimming the three instancing
+> calls (`__BF_GL2` reports which path is live). **The complete character now renders in live
+> gameplay** — see `docs/reference_hero_working_webgl2.png`. Game verified unaffected first:
+> `/3d/` with no flags shows zero errors and normal voxel rendering.
+>
+> **Bloom is still unresolved and your diagnosis of it stands unchanged.** `?nobloom` is still
+> required, and the render-target ownership question in §8 is still the decision I want from you.
+> Sections 5 and 7 below describe the pre-fix state; treat this note as authoritative where they
+> conflict.
+
 ---
 
 ## 1. Exact git state

@@ -2833,7 +2833,7 @@ window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero
 window.__BF_META=()=>meta;
 /* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
    property - the same reason __BF_CAM and __BF_META exist as closures. */
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,p:G.p,zone:(curZone&&curZone().id)||'hub'});   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,p:G.p,zone:(curZone&&curZone().id)||'hub',ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -11685,6 +11685,9 @@ function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shado
   popM(); }
 function drawCourse(s,t){
   const hz=hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
+  /* Is world3d laying real ground tiles this frame? Checked once, not per segment. */
+  const _w3dGround = (() => { const w = window.__world3d && window.__world3d();
+    return !!(w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
   // the hazard lake below everything
   bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
@@ -11693,9 +11696,15 @@ function drawCourse(s,t){
     if(sg.nofloor) continue;   // hub: redundant sub-segments (kept for collision) skip the floor slab so coplanar slabs don't z-fight/flicker
     bx(sg.x,-14,sg.z, sg.w,28,sg.d, s.ground);
     bx(sg.x,-25,sg.z, sg.w*0.86,8,sg.d*0.86, tint(s.ground,'#000',0.35));   // dark underside
-    bx(sg.x,0.6,sg.z, sg.w,1.4,sg.d, tint(s.ground,'#fff',0.12));           // lit top edge
+    /* The slab body, underside and hazard rim stay: they give the floating island its thickness
+       and silhouette. The TOP-surface decoration is skipped when world3d is laying real grass
+       tiles over it, or the lit edge and the painted path dashes show through as bright lines
+       across an otherwise continuous field. */
+    if(!_w3dGround){
+      bx(sg.x,0.6,sg.z, sg.w,1.4,sg.d, tint(s.ground,'#fff',0.12));         // lit top edge
+      for(let zz=sg.z-sg.d/2+26;zz<sg.z+sg.d/2-14;zz+=62) bx(sg.x,0.9,zz, 3,0.5,20, tint(s.ground,'#fff',0.2)); // path dashes
+    }
     bx(sg.x,-6,sg.z+sg.d/2-1, sg.w,12,2.4, tint(hz[1],'#000',0.35));        // hazard-lit front rim
-    for(let zz=sg.z-sg.d/2+26;zz<sg.z+sg.d/2-14;zz+=62) bx(sg.x,0.9,zz, 3,0.5,20, tint(s.ground,'#fff',0.2)); // path dashes
   }
   // moving platforms
   for(const mv of G.movers){

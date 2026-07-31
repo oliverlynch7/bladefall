@@ -75,6 +75,7 @@ const PROP_SETS = {
   bush:   ['nature/plant_bush', 'nature/plant_bushDetailed', 'nature/plant_bushLarge',
            'nature/plant_bushSmall'],
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
+  floor:  ['nature/ground_grass'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -124,7 +125,7 @@ async function loadProp(name){
 }
 async function ensureProps(){
   if(_propsReady) return;
-  const names = Object.values(PROP_SETS).flat();
+  const names = Object.values(PROP_SETS).flat();   // includes the ground tile
   await Promise.all(names.map(loadProp));
   _propsReady = true;
 }
@@ -276,6 +277,70 @@ function buildProps(items, names, defaultH, heightOf){
   });
 }
 
+
+/* ── GROUND ────────────────────────────────────────────────────────────────────
+   The floor is drawn from G.segments, a separate pass from G.deco: each segment is a flat slab
+   filled with the zone's ground colour. That is why the meadow stayed a flat plane while
+   everything standing on it became 3D.
+
+   ground_grass is a 1x1 single-mesh tile, so a segment becomes a grid of instances. The game's
+   own slab is deliberately LEFT drawing underneath: it provides the island's thickness, dark
+   underside and hazard-lit rim, which together give the floating-course silhouette. Replacing it
+   outright would have meant rebuilding all of that. These tiles only cover its top face, sitting
+   just above it so nothing z-fights.
+
+   Each tile takes a random quarter-turn so a large field does not read as one stamped pattern. */
+const FLOOR_TILE = 78;          // game units per tile (~3m); smaller repeats visibly, larger reads coarse
+
+function buildGround(world){
+  const segs = (world && world.segments) || [];
+  if(!segs.length) return 0;
+  const rec = _propCache.get('nature/ground_grass');
+  if(!rec) return 0;
+  const cells = [];
+  for(const sg of segs){
+    if(sg.nofloor) continue;    // the game skips these too: coplanar sub-segments kept for collision
+    const w = sg.w || 0, d = sg.d || 0;
+    if(w < 8 || d < 8) continue;
+    /* Ceil, not round: rounding down on a segment slightly narrower than a whole tile leaves an
+       uncovered strip at its edge. Over-covering is invisible, under-covering is a visible gap. */
+    const nx = Math.max(1, Math.ceil(w / FLOOR_TILE));
+    const nz = Math.max(1, Math.ceil(d / FLOOR_TILE));
+    const tw = w / nx, td = d / nz;
+    for(let ix = 0; ix < nx; ix++){
+      for(let iz = 0; iz < nz; iz++){
+        cells.push({ x: sg.x - w/2 + (ix + 0.5) * tw,
+                     z: sg.z - d/2 + (iz + 0.5) * td,
+                     w: tw, d: td });
+      }
+    }
+  }
+  if(!cells.length) return 0;
+  const m = new THREE.InstancedMesh(rec.geo, rec.mat, cells.length);
+  const o = new THREE.Object3D();
+  for(let i = 0; i < cells.length; i++){
+    const c = cells[i], r = hash(c.x, c.z);
+    const quarter = (r * 4) | 0;
+    o.position.set(c.x, 1.45, c.z);          // just above the game's lit top edge (tops out at 1.3)
+    o.rotation.set(0, quarter * Math.PI / 2, 0);
+    /* Scale must account for the rotation. A quarter-turn maps local X onto world Z, so on an odd
+       quarter the axes swap - scaling by (w, d) then rotating 90 degrees leaves the tile d wide
+       where w was needed, and the gaps show up as regular bright stripes of the slab underneath.
+       That was the first attempt's failure, and it looked like z-fighting rather than a sizing
+       error, which is what made it hard to place. */
+    const sx = (quarter & 1) ? c.d : c.w;
+    const sz = (quarter & 1) ? c.w : c.d;
+    o.scale.set(sx / rec.width, 1, sz / rec.width);
+    o.updateMatrix();
+    m.setMatrixAt(i, o.matrix);
+  }
+  m.instanceMatrix.needsUpdate = true;
+  m.frustumCulled = false;
+  m.renderOrder = -1;                        // draw before the props standing on it
+  group.add(m);
+  return cells.length;
+}
+
 export function buildWorld(scene, world){
   const deco = (world && world.deco) || [];
   clearWorld(scene);
@@ -289,6 +354,8 @@ export function buildWorld(scene, world){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
   }
+
+  const floorTiles = buildGround(world);
 
   /* Structure: strata bands, floors, platforms, walls. Rendered as real lit boxes rather than
      the flat unlit colour the voxel path uses — same silhouette, but it now takes light, which
@@ -347,7 +414,7 @@ export function buildWorld(scene, world){
     o.intensity = o.userData._w3dOrig * k;
   });
 
-  WORLD3D.counts = { deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
+  WORLD3D.counts = { floorTiles, deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, skipped: bins.skip.length,

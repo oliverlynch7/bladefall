@@ -76,6 +76,7 @@ const PROP_SETS = {
            'nature/plant_bushSmall'],
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
   floor:  ['nature/ground_grass'],
+  floorStone: ['nature/Floor_Brick'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -251,25 +252,40 @@ function buildProps(items, names, defaultH, heightOf){
     const r = hash(d.x * 1.7, d.z * 2.3);
     buckets[Math.min(recs.length - 1, (r * recs.length) | 0)].push(d);
   }
+  /* Stacked props first: a tall thin structure (a rampart divider is 150 tall but 20 wide)
+     cannot be one scaled model without becoming stubby. Stacking segments keeps the model at its
+     correct thickness and repeats it up to the required height. */
+  const stackCount = d => {
+    if(!d.stack) return 1;
+    return Math.max(1, Math.round((d.h || defaultH) / Math.max(1, (d.w || defaultH))));
+  };
   recs.forEach((rec, i) => {
     const list = buckets[i];
     if(!list.length) return;
+    let total = 0;
+    for(const d of list) total += stackCount(d);
     /* The prop's own texture carries its colour, so instanceColor is NOT set here - tinting a
-       textured pine by the deco's flat green would throw away the artwork. */
-    const m = new THREE.InstancedMesh(rec.geo, rec.mat, list.length);
+       textured model by the deco's flat colour would throw away the artwork. */
+    const m = new THREE.InstancedMesh(rec.geo, rec.mat, total);
     const o = new THREE.Object3D();
-    for(let k = 0; k < list.length; k++){
-      const d = list[k], r = hash(d.x, d.z);
-      /* Fit inside the deco's box: whichever of height or width binds first wins, so a prop is
-         never wider or taller than the space the generator allotted it. */
+    let k = 0;
+    for(const d of list){
+      const r = hash(d.x, d.z);
+      const n = stackCount(d);
       const wantH = heightOf ? heightOf(d) : (d.h || defaultH);
       const wantW = d.w || wantH;
-      const sc = Math.min(wantH / rec.height, wantW / rec.width);
-      o.position.set(d.x, d.y0 || 0, d.z);
-      o.rotation.set(0, r * 6.283, 0);
-      o.scale.set(sc, sc, sc);
-      o.updateMatrix();
-      m.setMatrixAt(k, o.matrix);
+      /* Fit inside the deco's box: whichever of height or width binds first wins, so a prop is
+         never wider or taller than the space the generator allotted it. For a stack, each segment
+         gets its share of the height. */
+      const segH = wantH / n;
+      const sc = Math.min(segH / rec.height, wantW / rec.width);
+      for(let sIdx = 0; sIdx < n; sIdx++){
+        o.position.set(d.x, (d.y0 || 0) + sIdx * rec.height * sc, d.z);
+        o.rotation.set(0, (n > 1 ? sIdx * 1.5708 : r * 6.283), 0);
+        o.scale.set(sc, sc, sc);
+        o.updateMatrix();
+        m.setMatrixAt(k++, o.matrix);
+      }
     }
     m.instanceMatrix.needsUpdate = true;
     m.frustumCulled = false;
@@ -295,7 +311,19 @@ const FLOOR_TILE = 78;          // game units per tile (~3m); smaller repeats vi
 function buildGround(world){
   const segs = (world && world.segments) || [];
   if(!segs.length) return 0;
-  const rec = _propCache.get('nature/ground_grass');
+  /* Floor material follows the ZONE, not one global choice. Laying grass across the Waystation
+     turned a stone plaza into a lawn - the hub is paved, and the meadow is not. Zones without a
+     natural grass floor get the path/stone tile instead. */
+  const zone = (world && world.zone) || 'hub';
+  /* world.hub is the game's own G.hub flag. An earlier guess inferred the hub from deco count and
+     zone id and got it wrong: the Waystation REPORTS its zone as 'outskirts', so the heuristic
+     laid grass across a stone plaza. Ask the game what it is rather than inferring it. */
+  const isHub = !!(world && world.hub);
+  const grassy = !isHub && (zone === 'outskirts' || zone === 'forest' || zone === 'plains');
+  /* Floor_Brick from the village kit, not ground_pathTile: the path tile is a dirt patch drawn
+     ON grass, so using it for a plaza produced sandy blobs floating on a green field. A paved hub
+     needs actual paving. */
+  const rec = _propCache.get(grassy ? 'nature/ground_grass' : 'nature/Floor_Brick');
   if(!rec) return 0;
   const cells = [];
   for(const sg of segs){

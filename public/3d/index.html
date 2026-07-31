@@ -2833,7 +2833,7 @@ window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero
 window.__BF_META=()=>meta;
 /* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
    property - the same reason __BF_CAM and __BF_META exist as closures. */
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,p:G.p,zone:(curZone&&curZone().id)||'hub',ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -10087,7 +10087,12 @@ function enterWaystation(){
   { const mains=G.gates.filter(g=>!g.side);
     for(let i=0;i<mains.length-1;i++){ const mx=Math.round((mains[i].x+mains[i+1].x)/2), mz=Math.round((mains[i].z+mains[i+1].z)/2);
       G.walls.push({x:mx,z:mz-6,w:16,d:78,h:150,invisible:true});                                   // solid divider so bays feel separate
-      G.deco.push({x:mx,z:mz-6,y0:0,w:20,h:150,d:82,c:'#2b3040'}); G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152'}); } }
+      /* Tagged so the 3D renderer can build the rampart from real stone columns instead of a flat
+         slab. `stack` because these are 150 tall but only 20 wide - fitting one pillar model to
+         that box would shrink it to 20 units tall; stacking segments fills the height at the
+         right thickness. The voxel path ignores both fields. */
+      G.deco.push({x:mx,z:mz-6,y0:0,w:20,h:150,d:82,c:'#2b3040',kind:'pillar',stack:true});
+      G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152'}); } }
   // REPEATABLE ACTIVITY ANNEX — three distinct plazas so each activity has its own room to breathe:
   // the Abyss (west), the Treasure Sprint (east), and the Arena (deep centre). Further widened by the space pass.
   G.deco.push({x:0,z:610,y0:0,w:720,h:1.4,d:96,c:'#8f744e'});                                   // annex approach walk

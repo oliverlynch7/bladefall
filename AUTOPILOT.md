@@ -100,6 +100,26 @@ Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE
 | Sunspire Palace (marble · 13) | Paladin *(done)* | Warrior | 5 |
 | Castle Duskmoor (apex · 15) | Necromancer *(done)* | Mage | 6 (deepest/strongest) |
 
+## Kit textures — fixed 2026-08-01, and the one gap left
+Every Kenney-style kit ships a `colormap.png` palette that its models index by UV. Three kits
+could not find theirs, so 27 castle models, both hub floors and every brick floor rendered as
+flat white. That is the real cause of the "these tiles carry no texture, only a material colour"
+note that survived five sessions of hub-floor attempts — `map` was NONE because the file 404'd.
+
+Fixed: `castle/colormap.png` copied to `castle/Textures/colormap.png` (where its 27 models look
+for it), and `T_Brick/T_RedBrick/T_UnevenBrick_BaseColor.png` copied from `village/` into
+`nature/` (the `Floor_*.gltf` in both kits are byte-identical files).
+
+**Still missing, needs Oliver:** `town/Textures/colormap.png` — the town kit (fountain, cart,
+stall, hedge, lantern, fence, banners, pillars = 15 models) has no palette anywhere in the repo.
+Each kit's palette has a DIFFERENT column order, so castle's or props' cannot be substituted
+without recolouring every model wrongly. Re-download the town kit or drop the palette in; do not
+fake it. Until then those props render white and are held together by explicit tints in world3d.
+
+Audit any time with `node _shot/shot.js --assets all` — lists every texture each kit references
+and whether it is on disk. Remaining MISSING entries there are Normal/ORM/Roughness detail maps
+only; those degrade shading slightly and never cause the white-model failure.
+
 ## Notes / open decisions (do NOT act on without Oliver)
 - Elemental affixes on **physical** weapon drops (making "a Flaming Sword") is a separate system change — Oliver decides before building.
 - Real icon art (class icons, skill/passive icons) is a supervised ChatGPT-in-Chrome pass — autopilot uses placeholders. **Necromancer currently has placeholder icons and needs its own 18-icon pass** — this is BLOCKED on Oliver (needs his ChatGPT tab); do not attempt it autonomously, skip to the next actionable item.

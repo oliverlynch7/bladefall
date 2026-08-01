@@ -87,7 +87,12 @@ const PROP_SETS = {
   hubTowerM: ['castle/tower-square-mid-windows'],
   hubRoof:   ['castle/tower-square-top-roof'],
   hubFlag:   ['castle/flag'],
-  hubPave:   ['castle/ground'],
+  /* Real cobblestone, not castle/ground. castle/ground is the Castle Kit's GRASS tile; it only
+     ever looked like neutral stone because its colormap 404'd, so the warm tint below was
+     multiplying against plain white. With the texture restored it is unmistakably a lawn.
+     Floor_UnevenBrick was rejected by an earlier pass as "a featureless white expanse" - same
+     cause, same 404 - and is in fact a painted cobble the courtyard was always asking for. */
+  hubPave:   ['village/Floor_UnevenBrick'],
   /* Plaza dressing. The rebuilt courtyard read as an empty lot - the perimeter was right but the
      middle was bare paving. These give it the things that make a town square somewhere people
      stand around: a fountain to gather at, market carts and stalls, lanterns lining the approach,
@@ -727,8 +732,9 @@ function buildHub(scene, world){
     o.scale.set(s, s, s);
   }, '#d9a441');
 
-  /* PAVED COURTYARD. Coloured warm from the zone's own ground colour - the tiles carry no
-     texture, only a material colour, which is what five earlier attempts kept missing. */
+  /* PAVED COURTYARD. The tiles DO carry a texture; the reason five earlier attempts concluded
+     otherwise is that every kit colormap 404'd, so probing showed map=NONE and the material
+     colour was the only thing left driving the look. */
   const paveCells = [];
   for(let x = westX; x <= eastX; x += HUB_UNIT)
     for(let z = northZ; z <= southZ; z += HUB_UNIT)
@@ -736,9 +742,9 @@ function buildHub(scene, world){
   const paveRec = _propCache.get(PROP_SETS.hubPave[0]);
   if(paveRec && paveCells.length){
     const pm = paveRec.mat.clone();
-    /* Explicit warm stone. Deriving this from the zone ground colour gave an olive courtyard -
-       that colour is meant for open terrain, not a paved plaza. */
-    pm.color = new THREE.Color('#c9b998');
+    /* Gentle warm tint only. The cobble texture carries the detail now, so the old flat
+       '#c9b998' would just mud it - this nudges it towards the plaza's warm light and stops. */
+    pm.color = new THREE.Color('#e8dfcb');
     const m = new THREE.InstancedMesh(paveRec.geo, pm, paveCells.length);
     const o = new THREE.Object3D();
     for(let i = 0; i < paveCells.length; i++){

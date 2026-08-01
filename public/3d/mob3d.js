@@ -128,6 +128,18 @@ function playMob(rec, moving){
 /* Called every frame from the hero draw. Reads the game's live enemy list and mirrors it. */
 export function syncMobs(scene, dt){
   if(!MOB3D.on) return false;
+  /* Contain mob faults HERE. Without this the throw propagates to drawHero3D's catch, which sets
+     HERO3D.on = false - so one bad creature would take down the hero and the whole world with it.
+     Each layer should be able to fail alone; world3d already does this. */
+  try { return syncMobsInner(scene, dt); }
+  catch(e){
+    MOB3D.err = String(e && e.message || e);
+    MOB3D.on = false;
+    console.warn('[mob3d] disabled after fault, voxel mobs resume:', MOB3D.err);
+    return false;
+  }
+}
+function syncMobsInner(scene, dt){
   let world = null;
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   const foes = (world && world.enemies) || null;
@@ -164,7 +176,21 @@ export function syncMobs(scene, dt){
     rec.mixer.update(dt);
     live++;
   }
-  for(const m of _mobPool) if(!m.inUse) m.root.visible = false;
+  /* Release, don't just hide. The pool used to only ever GROW - unused actors were hidden and
+     kept forever, so every creature spawned across every zone stayed resident in GPU memory and
+     in the per-frame loop. Keep a small reserve per type for instant reuse mid-fight, and drop
+     the rest. */
+  const keep = {};
+  for(let i = _mobPool.length - 1; i >= 0; i--){
+    const m = _mobPool[i];
+    if(m.inUse) continue;
+    keep[m.type] = (keep[m.type] || 0) + 1;
+    if(keep[m.type] <= 2){ m.root.visible = false; continue; }   // reserve two per type
+    m.mixer.stopAllAction();
+    if(m.root.parent) m.root.parent.remove(m.root);
+    m.root.traverse(o => { if(o.isMesh && o.geometry && o.geometry.dispose) o.geometry.dispose(); });
+    _mobPool.splice(i, 1);
+  }
 
   /* Load any model this room needs but has not got yet. Fire and forget - the voxel mob draws
      until it arrives, so nothing pops out of existence while waiting. */
@@ -173,6 +199,17 @@ export function syncMobs(scene, dt){
   MOB3D.live = live;
   MOB3D.pooled = _mobPool.length;
   return true;
+}
+
+/* Called when the level changes. Without this a new zone inherits every actor the previous zone
+   built, hidden but resident. */
+export function clearMobs(){
+  for(const m of _mobPool){
+    m.mixer.stopAllAction();
+    if(m.root.parent) m.root.parent.remove(m.root);
+  }
+  _mobPool.length = 0;
+  MOB3D.pooled = 0;
 }
 
 /* True only for enemies mob3d is actually drawing, so the voxel path can skip exactly those and

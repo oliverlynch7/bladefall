@@ -93,9 +93,13 @@ Worlds standard), and the graphics need finishing before he shows more people.
       answer. Work one class-pair at a time and re-run the matrix after each change.
       NOTE: changing balance numbers needs Oliver's sign-off per docs/VISION.md — prepare the
       change and the measured before/after, then queue it rather than shipping it.
-- [ ] **Mobs in 3D.** 27 mob types are cast onto real models in the slice already; port that into
-      world3d so levels are populated with real creatures. SkeletonUtils.clone is verified as the
-      right technique (32 characters, 32 independent skeletons).
+- [x] **Mobs in 3D.** DONE — and it was already done; this run only proved it. `public/3d/mob3d.js`
+      carries the 27-entry cast table, pools one animated clone per live enemy off G.enemies, and
+      `mobDrawn()` tells the voxel path which ones to skip. Verified in the running game, not by
+      reading the module: Outskirts reports 18 live / 18 pooled, 4 models, 0 missing, all 4 room
+      types drawn3d=true; Frostfell 13 live / 13 pooled, Yeti + Green_Blob + Glub_Evolved, all 3
+      types true. Both screenshotted with real creatures standing in front of the hero.
+      (`_shot/presets/mobs_check.js` re-runs this for any zone with `&zone=N`.)
 - [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
 - [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no

@@ -78,6 +78,16 @@ const PROP_SETS = {
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
   floor:  ['nature/ground_grass'],
   floorStone: ['castle/ground'],
+  /* Hub architecture. Kept to a handful of pieces on purpose: Oliver's steer is that the
+     MECHANICS matter most, so the hub needs to be charming and READABLE - you should see at a
+     glance where the portals are and where things happen - not an architectural showpiece. */
+  hubWall:   ['castle/wall'],
+  hubGate:   ['castle/wall-doorway'],
+  hubTower:  ['castle/tower-square-base'],
+  hubTowerM: ['castle/tower-square-mid-windows'],
+  hubRoof:   ['castle/tower-square-top-roof'],
+  hubFlag:   ['castle/flag'],
+  hubPave:   ['castle/ground'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -411,6 +421,178 @@ function buildGround(world){
   return cells.length;
 }
 
+
+/* ── HUB ───────────────────────────────────────────────────────────────────────
+   A purpose-built Waystation rather than a translation of the old one's boxes.
+
+   Oliver is explicitly not attached to the old layout ("they've mostly just been functional"),
+   and cares most about the game MECHANICS reading clearly. So this is built for legibility: a
+   walled courtyard, a real gatehouse at every portal so the eight destinations are unmistakable,
+   towers marking the corners, and an open plaza to gather in.
+
+   Built AROUND the game's own anchors - gate positions come from G.gates, never from constants
+   here - so the architecture can never drift out of sync with where the portals actually are.
+   Move a gate in the game and its gatehouse follows. */
+const HUB_UNIT = 96;          // game units per wall segment (~3.4m); a whole number of these tiles a wall
+
+/* The Castle Kit pieces carry NO texture - material colour only, and that colour is #ffffff, so
+   an unpainted hub renders as a white cardboard model. Same trap the floor tiles set five times.
+   Every piece therefore gets an explicit colour here. */
+function hubPiece(setName, cells, place, colour){
+  const rec = _propCache.get(PROP_SETS[setName][0]);
+  if(!rec || !cells.length) return 0;
+  const mat = rec.mat.clone();
+  if(colour) mat.color = new THREE.Color(colour);
+  const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
+  const o = new THREE.Object3D();
+  for(let i = 0; i < cells.length; i++){
+    place(o, cells[i], rec, i);
+    o.updateMatrix();
+    m.setMatrixAt(i, o.matrix);
+  }
+  m.instanceMatrix.needsUpdate = true;
+  m.frustumCulled = false;
+  group.add(m);
+  return cells.length;
+}
+
+function buildHub(scene, world){
+  const gates = (world.gates || []).filter(g => !g.side);
+  if(!gates.length) return null;
+
+  const gx = gates.map(g => g.x);
+  const westX = Math.min(...gx) - 190, eastX = Math.max(...gx) + 190;
+  const northZ = Math.min(...gates.map(g => g.z)) - 40;   // the rampart line, just behind the gates
+  const southZ = northZ + 1180;                            // courtyard depth
+
+  const wallH = 150;                                       // matches the old rampart height
+  const counts = {};
+
+  /* NORTH RAMPART, with a gatehouse at every portal. Gate openings are skipped from the plain
+     wall run so a doorway piece can sit exactly on the portal - that is what makes each
+     destination read as a real entrance instead of a hole in a fence. */
+  const gateHalf = 92;
+  const wallCells = [], gateCells = [];
+  for(let x = westX; x < eastX; x += HUB_UNIT){
+    const cx = x + HUB_UNIT / 2;
+    const onGate = gates.find(g => Math.abs(g.x - cx) < gateHalf);
+    if(onGate) continue;
+    wallCells.push({ x: cx, z: northZ, rot: 0 });
+  }
+  for(const g of gates) gateCells.push({ x: g.x, z: northZ, rot: 0 });
+
+  /* SIDE WALLS running south, closing the courtyard so it feels like a place rather than a
+     clearing. Left open at the south end - that is where the player spawns and walks in. */
+  for(let z = northZ + HUB_UNIT; z < southZ - HUB_UNIT * 2; z += HUB_UNIT){
+    wallCells.push({ x: westX, z, rot: Math.PI / 2 });
+    wallCells.push({ x: eastX, z, rot: Math.PI / 2 });
+  }
+
+  counts.wall = hubPiece('hubWall', wallCells, (o, c, rec) => {
+    const s = HUB_UNIT / rec.width;
+    o.position.set(c.x, 0, c.z);
+    o.rotation.set(0, c.rot, 0);
+    o.scale.set(s, wallH / rec.height, s);
+  }, '#c2b08c');
+  counts.gatehouse = hubPiece('hubGate', gateCells, (o, c, rec) => {
+    const s = (gateHalf * 2) / rec.width;
+    o.position.set(c.x, 0, c.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(s, wallH / rec.height, s);
+  }, '#a89478');
+
+  /* CORNER TOWERS plus one between each pair of gates, so the rampart has rhythm and the corners
+     of the courtyard are legible from the middle of the plaza. */
+  const towerCells = [{ x: westX, z: northZ }, { x: eastX, z: northZ }];
+  for(let i = 0; i < gates.length - 1; i++)
+    towerCells.push({ x: (gates[i].x + gates[i + 1].x) / 2, z: northZ });
+
+  const tw = 150;
+  counts.tower = hubPiece('hubTower', towerCells, (o, c, rec) => {
+    const s = tw / rec.width;
+    o.position.set(c.x, 0, c.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(s, s, s);
+  }, '#c2b08c');
+  counts.towerMid = hubPiece('hubTowerM', towerCells, (o, c, rec) => {
+    const s = tw / rec.width;
+    o.position.set(c.x, tw * 0.95, c.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(s, s, s);
+  }, '#b8a582');
+  counts.roof = hubPiece('hubRoof', towerCells, (o, c, rec) => {
+    const s = tw / rec.width;
+    o.position.set(c.x, tw * 1.9, c.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(s, s, s);
+  }, '#8e3b32');
+  counts.flag = hubPiece('hubFlag', towerCells, (o, c, rec) => {
+    const s = tw * 0.7 / rec.width;
+    o.position.set(c.x, tw * 2.5, c.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(s, s, s);
+  }, '#d9a441');
+
+  /* PAVED COURTYARD. Coloured warm from the zone's own ground colour - the tiles carry no
+     texture, only a material colour, which is what five earlier attempts kept missing. */
+  const paveCells = [];
+  for(let x = westX; x <= eastX; x += HUB_UNIT)
+    for(let z = northZ; z <= southZ; z += HUB_UNIT)
+      paveCells.push({ x: x + HUB_UNIT / 2, z: z + HUB_UNIT / 2 });
+  const paveRec = _propCache.get(PROP_SETS.hubPave[0]);
+  if(paveRec && paveCells.length){
+    const pm = paveRec.mat.clone();
+    /* Explicit warm stone. Deriving this from the zone ground colour gave an olive courtyard -
+       that colour is meant for open terrain, not a paved plaza. */
+    pm.color = new THREE.Color('#c9b998');
+    const m = new THREE.InstancedMesh(paveRec.geo, pm, paveCells.length);
+    const o = new THREE.Object3D();
+    for(let i = 0; i < paveCells.length; i++){
+      const c = paveCells[i], s = HUB_UNIT / paveRec.width;
+      o.position.set(c.x, 1.2, c.z);
+      o.rotation.set(0, ((hash(c.x, c.z) * 4) | 0) * Math.PI / 2, 0);
+      o.scale.set(s, 1, s);
+      o.updateMatrix();
+      m.setMatrixAt(i, o.matrix);
+    }
+    m.instanceMatrix.needsUpdate = true;
+    m.frustumCulled = false;
+    m.renderOrder = -1;
+    group.add(m);
+    counts.pave = paveCells.length;
+  }
+
+  /* CENTREPIECE. A courtyard with nothing in the middle reads as an empty lot; a monument gives
+     the plaza a focus to gather around and orient by, which is the point of a social hub. Placed
+     on the courtyard's centre line, forward of the gates so it never blocks a portal. */
+  /* Well clear of the gate approach. At +430 it sat right on the walking line between spawn and
+     the portals - the camera ended up inside it. Note it is VISUAL ONLY: world3d adds no
+     collision, so the player walks through it. Collision still comes from the game's own G.walls,
+     which is why this rebuild deliberately keeps the original gate positions and puts the rampart
+     just behind them rather than moving anything the physics depends on. */
+  const cx = (westX + eastX) / 2, cz = northZ + 620;
+  const mono = [{ x: cx, z: cz }];
+  const mh = 210;
+  counts.monument = hubPiece('hubTower', mono, (o, c, rec) => {
+    const sc = mh * 0.62 / rec.width;
+    o.position.set(c.x, 0, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
+  }, '#b9a887');
+  hubPiece('hubTowerM', mono, (o, c, rec) => {
+    const sc = mh * 0.62 / rec.width;
+    o.position.set(c.x, mh * 0.59, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
+  }, '#c2b08c');
+  hubPiece('hubRoof', mono, (o, c, rec) => {
+    const sc = mh * 0.62 / rec.width;
+    o.position.set(c.x, mh * 1.18, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
+  }, '#8e3b32');
+  hubPiece('hubFlag', mono, (o, c, rec) => {
+    const sc = mh * 0.5 / rec.width;
+    o.position.set(c.x, mh * 1.55, c.z); o.rotation.set(0, 0, 0); o.scale.set(sc, sc, sc);
+  }, '#d9a441');
+
+  return counts;
+}
+
 export function buildWorld(scene, world){
   /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
 
@@ -424,7 +606,21 @@ export function buildWorld(scene, world){
      Half-converted is the one genuinely bad state, so the hub stays fully voxel until it can be
      rebuilt properly from the village and castle kits. The hero and mobs still render in 3D over
      it, which is the part that reads well. */
-  if(world && world.hub){ clearWorld(scene); WORLD3D.counts = { skippedHub: true }; return WORLD3D.counts; }
+  if(world && world.hub){
+    clearWorld(scene);
+    group = new THREE.Group(); group.name = 'world3d-hub'; scene.add(group);
+    /* The hub is enclosed and torch-lit, not an open meadow; the dim outdoor setting left it
+       muddy. */
+    scene.traverse(o => {
+      if(!o.isLight) return;
+      if(o.userData._w3dOrig == null) o.userData._w3dOrig = o.intensity;
+      o.intensity = o.userData._w3dOrig * (o.isDirectionalLight ? 1.05 : 0.92);
+    });
+    const c = buildHub(scene, world) || {};
+    WORLD3D.counts = Object.assign({ hub: true }, c);
+    WORLD3D.ready = true;
+    return WORLD3D.counts;
+  }
   const deco = (world && world.deco) || [];
   clearWorld(scene);
   group = new THREE.Group();

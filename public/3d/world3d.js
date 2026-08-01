@@ -76,7 +76,7 @@ const PROP_SETS = {
            'nature/plant_bushSmall'],
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
   floor:  ['nature/ground_grass'],
-  floorStone: ['nature/Floor_UnevenBrick'],
+  floorStone: ['castle/ground'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -338,14 +338,13 @@ function buildGround(world){
      grass, so using it for a plaza produced sandy blobs floating on a green field.
      Read from PROP_SETS rather than naming the file twice - having the loaded set and the
      requested name drift apart silently produced a hub with zero floor tiles. */
-  /* GRASSY ZONES ONLY. Four attempts at a 3D hub floor all came out worse than the game's own
-     slab: ground_pathTile is a dirt patch drawn on grass (sandy blobs on green), and both village
-     floor tiles are pale INTERIOR floors that render as a featureless white expanse outdoors, at
-     any tile scale. The game's existing plaza floor is warmer and reads better, so the hub keeps
-     it. Reverted rather than shipped - a 3D floor that looks worse is not progress.
-     Revisit if a proper outdoor paving asset turns up; the wiring below is ready for one. */
-  if(!grassy) return 0;
-  const want = 'nature/ground_grass';
+  /* The hub floor took five attempts. ground_pathTile is a dirt patch drawn ON grass (sandy blobs
+     floating on green); Floor_Brick and Floor_UnevenBrick are pale INTERIOR floors that render as
+     a featureless white expanse outdoors at any tile scale. castle/ground from the Castle Kit is
+     an actual OUTDOOR ground tile - same 1x0x1 flat shape as the grass tile, built to be seen
+     from above in daylight. That distinction, indoor-floor versus outdoor-ground, is what the
+     earlier attempts kept missing. */
+  const want = grassy ? 'nature/ground_grass' : PROP_SETS.floorStone[0];
   const rec = _propCache.get(want);
   if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want); return 0; }
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
@@ -368,7 +367,19 @@ function buildGround(world){
     }
   }
   if(!cells.length) return 0;
-  const m = new THREE.InstancedMesh(rec.geo, rec.mat, cells.length);
+  /* These Kenney tiles carry their colour in the MATERIAL COLOUR, not a texture - probing them
+     showed map=NONE on all of them. ground_grass only looks like grass because its material colour
+     is #73eddd; castle/ground and the village floors are #ffffff, i.e. plain white geometry, which
+     is why five different "stone" tiles all rendered as a featureless white expanse. Nothing was
+     wrong with the tiling, the scale, or the asset choice.
+     So the floor is coloured here, from the zone's own ground colour, and only lightened enough to
+     read as a lit surface. Using the game's colour keeps the hub the warm stone it always was. */
+  const mat = rec.mat.clone();
+  if(!grassy){
+    const base = new THREE.Color((world && world.ground) || '#8a8445');
+    mat.color = base.clone().lerp(new THREE.Color('#ffffff'), 0.18);
+  }
+  const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
   const o = new THREE.Object3D();
   for(let i = 0; i < cells.length; i++){
     const c = cells[i], r = hash(c.x, c.z);

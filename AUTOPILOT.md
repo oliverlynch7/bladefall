@@ -119,6 +119,16 @@ Worlds standard), and the graphics need finishing before he shows more people.
       deliberate chunk, not a drive-by. No atlas ships for `town/`, so do not guess one in.)
 - [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no
       ground surface asset yet. Flag to Oliver if a pack is needed rather than faking it.
+      (progress 2026-08-01: they DO have a surface — castle/ground is laid in every non-grassy zone
+      — but it was the wrong COLOUR in all of them. `__BF_WORLD()` read the ground colour from
+      `G.s`, which nothing in the game ever assigns, so it always fell through to the plains
+      fallback #8a8445 and every zone floor was painted khaki. Frostfell reported #8a8445 while its
+      stage says #243240. Now sourced from the same stage lookup the voxel renderer uses; probed
+      across five zones (plains #8a8445, canyon #352a1e, frost #243240, volcano #3a1c14) and
+      Frostfell re-shot — tan floor became cold blue-grey. `theme` is exposed too, unused so far,
+      but it is the honest key for per-theme floors instead of matching on zone id.
+      STILL OPEN: one shared stone tile for five very different themes. A snow/ice and a volcanic
+      surface would need an asset pack — Oliver's call, do not fake it.)
 
 ## Class-unlock tier ladder (deeper secret = slightly stronger class)
 Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):

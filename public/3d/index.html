@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.402.0-autopilot';
+const VERSION3D='1.403.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2833,7 +2833,14 @@ window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero
 window.__BF_META=()=>meta;
 /* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
    property - the same reason __BF_CAM and __BF_META exist as closures. */
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
+/* The 3D layer's view of the live world. `ground` and `theme` come from the SAME stage lookup the
+   voxel renderer uses (see the draw path's `const s=...`), because the previous source — G.s — is
+   never assigned anywhere: newG does not create it and nothing sets it afterwards. So this always
+   returned the '#8a8445' fallback, and world3d tinted every zone's floor plains-khaki. Frostfell
+   reported ground=#8a8445 while its stage says #243240. Nothing errored; the floors were just
+   quietly the wrong colour in five zones. */
+function bfStage(){ return (G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:(STAGES[(G&&G.stageIndex)||0]||STAGES[0]); }
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:bfStage().ground||'#8a8445',theme:bfStage().theme||''});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';

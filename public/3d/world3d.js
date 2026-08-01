@@ -110,6 +110,82 @@ const PROP_SETS = {
 const _propCache = new Map();     // name -> { geo, mat, height } or null when a load failed
 let _propsReady = false, _propsPending = false;
 
+/* ── VILLAGE KIT ───────────────────────────────────────────────────────────────
+   The Medieval Village MegaKit has no finished buildings in it — 176 modular PARTS and exactly
+   one landmark. So a hub cannot be furnished by dropping house models in; the houses have to be
+   assembled from walls, windows, doors, corner posts and a roof. slice3d proved the arithmetic
+   works (makeBuilding there); this is the same grid, emitting INSTANCE MATRICES instead of a
+   Group of meshes, because a courtyard of houses built as loose meshes is several hundred draw
+   calls and this is one per part per material.
+
+   Two things make these parts different from every other asset here:
+   - They carry REAL TEXTURES (T_Plaster_BaseColor and friends), unlike the castle kit, whose
+     pieces are untextured white and have to be tinted by hand. So nothing here is colour-tinted;
+     doing that would throw the artwork away.
+   - One part is one glTF mesh with SEVERAL primitives (a wall is plaster + wood trim). loadProp
+     keeps only the first mesh it finds, which would render half of every wall, so parts get their
+     own loader that keeps all of them. */
+const VIL_GRID = 2.0;      // wall width / floor tile size, measured off the kit
+const VIL_STOREY = 3.0;    // wall height, measured (3.12 with the trim overlap)
+/* Game units per kit unit. The hero is 1.75m and stands ~59 units tall (hero3d scale 20, where 26
+   measured 76.8), so a metre is ~34 units. Anything else and a house is the wrong size next to the
+   character, which is the only scale reference a player actually has.
+   VIL_CELL must equal BUILD_CELL in index.html's hub generator — that is the number the collision
+   box is sized with, and if the two drift the model no longer fills the box you cannot walk into. */
+const VIL_U = 34;
+const VIL_CELL = VIL_GRID * VIL_U;    // 68 game units per cell
+const VIL_STYLE = {
+  plaster: { wall:'Wall_Plaster_Straight', door:'Wall_Plaster_Door_Round',
+             win:'Wall_Plaster_Window_Wide_Round', corner:'Corner_Exterior_Wood',
+             floor:'Floor_WoodDark' },
+  brick:   { wall:'Wall_UnevenBrick_Straight', door:'Wall_UnevenBrick_Door_Round',
+             win:'Wall_UnevenBrick_Window_Wide_Round', corner:'Corner_Exterior_Brick',
+             floor:'Floor_UnevenBrick' },
+};
+const VIL_ROOFS = ['Roof_RoundTiles_4x4', 'Roof_RoundTiles_4x6', 'Roof_RoundTiles_4x8'];
+const VIL_PARTS = [...new Set([].concat(
+  ...Object.values(VIL_STYLE).map(s => Object.values(s)), VIL_ROOFS, ['Prop_Chimney']))];
+const _partCache = new Map();     // name -> { subs:[{geo,mat}], size:Vector3 } or null
+
+/* Load one modular part, keeping EVERY primitive with its own material and baking each into the
+   part's own space. Unlike loadProp the origin is left alone: the kit's convention (a wall spans
+   x -1..1, base at y=0) is exactly what the assembler's grid arithmetic assumes. */
+async function loadPart(name){
+  if(_partCache.has(name)) return _partCache.get(name);
+  let rec = null;
+  try {
+    const g = await _loadGLB(PROPS + 'village/' + name + '.gltf');
+    g.scene.updateMatrixWorld(true);
+    const subs = [];
+    const bb = new THREE.Box3();
+    g.scene.traverse(o => {
+      if(!o.isMesh) return;
+      const geo = o.geometry.clone();
+      geo.applyMatrix4(o.matrixWorld);
+      geo.computeBoundingBox();
+      bb.union(geo.boundingBox);
+      const src = Array.isArray(o.material) ? o.material[0] : o.material;
+      /* Converted to Lambert to match everything else world3d draws. The kit ships PBR standard
+         materials, which without an environment map render dark and dead next to the Lambert props
+         standing beside them - one lighting model per scene, or the scene reads as two scenes. */
+      const m = new THREE.MeshLambertMaterial({
+        map: src && src.map ? src.map : null,
+        color: src && src.color ? src.color.clone() : new THREE.Color(0xffffff),
+        side: src ? src.side : THREE.FrontSide,
+        transparent: !!(src && src.transparent), opacity: src ? src.opacity : 1,
+      });
+      if(m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+      subs.push({ geo, mat: m });
+    });
+    if(!subs.length) throw new Error('no mesh in ' + name);
+    rec = { subs, size: bb.getSize(new THREE.Vector3()) };
+  } catch(e){
+    console.warn('[world3d] village part failed to load:', name, e.message);
+  }
+  _partCache.set(name, rec);
+  return rec;
+}
+
 const _loader = new GLTFLoader();
 const _loadGLB = url => new Promise((res, rej) => _loader.load(url, res, undefined, rej));
 
@@ -154,8 +230,100 @@ async function loadProp(name){
 async function ensureProps(){
   if(_propsReady) return;
   const names = Object.values(PROP_SETS).flat();   // includes the ground tile
-  await Promise.all(names.map(loadProp));
+  await Promise.all([...names.map(loadProp), ...VIL_PARTS.map(loadPart)]);
   _propsReady = true;
+}
+
+/* ── BUILDING ASSEMBLER ────────────────────────────────────────────────────────
+   Ported from slice3d's makeBuilding: same grid, same door/window rhythm, same roof choice. The
+   spec comes from the GAME (a deco entry tagged kind:'building' carries the cell counts), so a
+   building can never sit somewhere the collision box does not.
+
+   Emits into `out`, a map of partName -> placements, so several buildings sharing a part all land
+   in one InstancedMesh. Positions are LOCAL to the building and centred on its footprint, which is
+   what lets the caller rotate about the centre the game gave it. */
+function planBuilding(spec, out){
+  const w = Math.max(1, spec.w | 0), d = Math.max(1, spec.d | 0);
+  const storeys = Math.max(1, spec.storeys | 0);
+  const st = VIL_STYLE[spec.style] || VIL_STYLE.plaster;
+  const g = VIL_GRID, H = VIL_STOREY;
+  const halfW = w * g / 2, halfD = d * g / 2;
+  const add = (part, x, y, z, ry, fit) =>
+    (out[part] || (out[part] = [])).push({ b: spec, x: x - halfW, y, z: z - halfD, ry, fit });
+
+  /* Perimeter walls, one piece per cell. The door replaces one ground-floor slot on the front and
+     windows take alternate slots, so a wall run reads as a frontage rather than a fence. */
+  const doorCell = Math.floor(w / 2);
+  for(let s = 0; s < storeys; s++){
+    const y = s * H;
+    for(let i = 0; i < w; i++){
+      const cx = i * g + g / 2;
+      add((s === 0 && i === doorCell) ? st.door : (i % 2 === 1 ? st.win : st.wall), cx, y, 0, 0);
+      add(i % 2 === 0 ? st.win : st.wall, cx, y, d * g, Math.PI);
+    }
+    for(let j = 0; j < d; j++){
+      const cz = j * g + g / 2;
+      add(j % 2 === 1 ? st.win : st.wall, 0,     y, cz, -Math.PI / 2);
+      add(j % 2 === 0 ? st.win : st.wall, w * g, y, cz,  Math.PI / 2);
+    }
+    // corner posts hide the seams where two wall runs meet
+    add(st.corner, 0,     y, 0,     0);
+    add(st.corner, w * g, y, 0,     -Math.PI / 2);
+    add(st.corner, 0,     y, d * g, Math.PI / 2);
+    add(st.corner, w * g, y, d * g, Math.PI);
+  }
+  /* GROUND FLOOR ONLY. Upper storeys are never seen - there is no way in - and every extra tile is
+     instances spent on geometry inside a sealed box. The ground one stays because the doorway is a
+     real opening and you would otherwise look through the house at the plaza behind it. */
+  for(let i = 0; i < w; i++) for(let j = 0; j < d; j++)
+    add(st.floor, i * g + g / 2, 0, j * g + g / 2, 0);
+
+  /* Roof: pick the nearest gable and stretch it to the footprint. Tiling ridge pieces instead
+     would need a special case per size for no visible gain at this distance. */
+  const roofName = d >= 4 ? VIL_ROOFS[2] : d >= 3 ? VIL_ROOFS[1] : VIL_ROOFS[0];
+  add(roofName, w * g / 2, storeys * H, d * g / 2, 0, { x: w * g + 0.6, z: d * g + 0.6 });
+  add('Prop_Chimney', w * g * 0.25, storeys * H + 0.4, d * g * 0.5, 0);
+}
+
+/* Turn the planned placements into instanced geometry. One InstancedMesh per part PER PRIMITIVE:
+   a plaster wall is two primitives (plaster + wood trim) with different materials, and merging
+   them would paint the trim in plaster. */
+function buildBuildings(specs){
+  if(!specs.length) return { buildings: 0, pieces: 0, meshes: 0, missing: 0 };
+  const out = {};
+  for(const sp of specs) planBuilding(sp, out);
+  const o = new THREE.Object3D();
+  let pieces = 0, meshes = 0, missing = 0;
+  for(const name of Object.keys(out)){
+    const list = out[name], rec = _partCache.get(name);
+    if(!rec){ missing += list.length; continue; }
+    pieces += list.length;
+    for(const sub of rec.subs){
+      const m = new THREE.InstancedMesh(sub.geo, sub.mat, list.length);
+      for(let i = 0; i < list.length; i++){
+        const pl = list[i], b = pl.b;
+        const c = Math.cos(b.ry || 0), s = Math.sin(b.ry || 0);
+        /* Rotate the local offset by the BUILDING's yaw, then scale into game units. The part's own
+           yaw is added on top: the offset and the piece turn together, so a rotated house keeps its
+           door on the face that was pointing at the plaza. */
+        o.position.set(b.x + (pl.x * c + pl.z * s) * VIL_U,
+                       (b.y || 0) + pl.y * VIL_U,
+                       b.z + (-pl.x * s + pl.z * c) * VIL_U);
+        o.rotation.set(0, (b.ry || 0) + (pl.ry || 0), 0);
+        /* Only the roof is fitted; everything else is uniform, because a stretched wall stretches
+           its plaster texture with it and the mortar lines stop lining up between neighbours. */
+        const fx = pl.fit && rec.size.x > 1e-4 ? pl.fit.x / rec.size.x : 1;
+        const fz = pl.fit && rec.size.z > 1e-4 ? pl.fit.z / rec.size.z : 1;
+        o.scale.set(VIL_U * fx, VIL_U, VIL_U * fz);
+        o.updateMatrix();
+        m.setMatrixAt(i, o.matrix);
+      }
+      m.instanceMatrix.needsUpdate = true;
+      m.frustumCulled = false;
+      group.add(m); meshes++;
+    }
+  }
+  return { buildings: specs.length, pieces, meshes, missing };
 }
 
 /* A tapered blade, cheap and readable at distance. Three crossed quads would need alpha
@@ -216,6 +384,9 @@ function classify(d){
     if(d.kind === 'pillar')return 'pillar';
     if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
     if(d.kind === 'skipflower') return 'skip';   // stem/leaf boxes the real flower model replaces
+    /* A building's lead box carries the modular spec; the second box is only the voxel path's roof
+       cap, and letting it through would stack a whole second house on the first one's roof. */
+    if(d.kind === 'building') return d.lead === false ? 'skip' : 'building';
   }
   const t = d.theme;
   if(t === 'forest') return 'tree';
@@ -466,6 +637,19 @@ function hubPiece(setName, cells, place, colour){
   return cells.length;
 }
 
+/* Read the hub's building specs off the game's own deco. buildHub otherwise ignores deco entirely
+   and derives everything from G.gates, but a building has to agree with a collision box, and the
+   only place that pairing can be authored honestly is next to the box itself. */
+function hubBuildingSpecs(world){
+  const out = [];
+  for(const d of (world.deco || [])){
+    if(!d || d.kind !== 'building' || d.lead === false) continue;
+    out.push({ x: d.x, y: (d.y0 || 0) + 1.5, z: d.z, w: d.bw | 0, d: d.bd | 0,
+               storeys: d.storeys | 0, style: d.style, ry: d.ry || 0 });
+  }
+  return out;
+}
+
 function buildHub(scene, world){
   const gates = (world.gates || []).filter(g => !g.side);
   if(!gates.length) return null;
@@ -649,6 +833,12 @@ function buildHub(scene, world){
     o.position.set(c.x, mh * 1.55, c.z); o.rotation.set(0, 0, 0); o.scale.set(sc, sc, sc);
   }, '#d9a441');
 
+  /* BUILDINGS. The one thing in the courtyard with a real footprint you cannot walk through, so
+     these are the pieces that turn an open plaza into a place. */
+  const bc = buildBuildings(hubBuildingSpecs(world));
+  counts.buildings = bc.buildings; counts.buildingPieces = bc.pieces;
+  counts.buildingMeshes = bc.meshes; counts.buildingMissing = bc.missing;
+
   return counts;
 }
 
@@ -690,7 +880,7 @@ export function buildWorld(scene, world){
      adding its bin threw "Cannot read properties of undefined" and world3d disabled itself - the
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
-                 fence: [], grave: [], pillar: [], flower: [], skip: [] };
+                 fence: [], grave: [], pillar: [], flower: [], building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -737,6 +927,11 @@ export function buildWorld(scene, world){
   buildProps(bins.grave, PROP_SETS.grave, 30);
   buildProps(bins.pillar, PROP_SETS.pillar, 80);
   buildProps(bins.flower, PROP_SETS.flower, 18);
+  /* Buildings work in any zone, not just the hub - a zone generator only has to tag a deco box the
+     way the Waystation does. Nothing outside the hub emits them yet. */
+  const zoneBuild = buildBuildings(bins.building.map(d => ({
+    x: d.x, y: (d.y0 || 0) + 1.5, z: d.z, w: d.bw | 0, d: d.bd | 0,
+    storeys: d.storeys | 0, style: d.style, ry: d.ry || 0 })));
 
   buildCategory(scene, bins.shard, shardGeo(), mat(), (o, d) => {
     const r = hash(d.x, d.z);
@@ -765,7 +960,7 @@ export function buildWorld(scene, world){
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, flowerProps: bins.flower.length,
-                     skipped: bins.skip.length,
+                     buildings: zoneBuild.buildings, skipped: bins.skip.length,
                      drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };
   WORLD3D.ready = true;

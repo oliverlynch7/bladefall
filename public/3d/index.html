@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.399.0-autopilot';
+const VERSION3D='1.400.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10181,6 +10181,45 @@ function enterWaystation(){
     G.lastSafe={x:0,z:R(190*SZ)}; G.startPos={x:0,z:R(190*SZ)}; G.goalPos={x:0,z:R(-360*SZ)};
     G.bounds={minX:R(-660*SX),maxX:R(660*SX),minZ:R(-450*SZ),maxZ:R(850*SZ)}; G.progressEnd=R(-350*SZ);
     G.p.x=0; G.p.z=R(190*SZ); }
+  /* ===== WAYSTATION BUILDINGS — the first real ARCHITECTURE in the hub =====
+     The Medieval Village kit ships modular parts, not finished houses, so a building is described
+     here as a SPEC (cells wide/deep, storeys, style) and assembled by world3d from walls, windows,
+     doors, corners and a roof. Nothing else in the hub is authored this way; a plain deco box
+     cannot carry the cell counts a modular kit needs.
+
+     Pushed AFTER the space pass ON PURPOSE. The pass scales x/z and any w/d over 60 units, and
+     stretching a MODULAR footprint knocks it off its own grid — the assembled parts would no longer
+     line up with the box the game reserved for them. These coordinates are already final.
+
+     BUILD_CELL is the same number as VIL_CELL in world3d.js (one kit cell in game units). If one
+     moves without the other, the collision box and the model that fills it come apart. */
+  { const BUILD_CELL=68, BUILD_STOREY=102;                       // 2 kit units wide, 3 tall, at 34 units/metre
+    /* Placed in the four corners the courtyard was NOT using. Deliberately clear of every keeper's
+       footprint, every torch and the spawn->gate walk: a building you have to walk around to reach
+       a portal is worse than a bare corner. The north pair frames the gate concourse; the south
+       pair closes the walk down to the annex. Each faces INWARD (ry turns the door wall toward the
+       middle of the plaza) so you always see a frontage, never a blank back wall. */
+    const HUB_BUILD=[
+      {x:-800,z:-350,w:3,d:2,storeys:2,style:'plaster',ry: Math.PI/2,c:'#c8b393',rc:'#8f4a39'},
+      {x: 800,z:-350,w:3,d:2,storeys:2,style:'brick',  ry:-Math.PI/2,c:'#a98470',rc:'#7d4032'},
+      {x:-840,z: 395,w:2,d:2,storeys:1,style:'brick',  ry: Math.PI/2,c:'#a98470',rc:'#8f4a39'},
+      {x: 840,z: 395,w:2,d:2,storeys:1,style:'plaster',ry:-Math.PI/2,c:'#c8b393',rc:'#7d4032'}
+    ];
+    for(const b of HUB_BUILD){
+      /* A quarter-turn swaps the footprint's axes, so width and depth have to be swapped with it —
+         otherwise the collision box is the right size in the wrong orientation and you clip the
+         corner of every rotated house. */
+      const turned=Math.abs(Math.sin(b.ry||0))>0.5;
+      const fw=(turned?b.d:b.w)*BUILD_CELL, fd=(turned?b.w:b.d)*BUILD_CELL, bh=b.storeys*BUILD_STOREY;
+      G.walls.push({x:b.x,z:b.z,w:fw,d:fd,h:bh,invisible:true});    // solid: you walk around a house, not through it
+      /* The lead entry carries the SPEC world3d assembles from; the voxel path just draws it as a
+         plain block, which is what a non-3D player already sees everywhere else in the hub. The
+         second entry is the roof cap for that voxel block — lead:false so the 3D pass drops it and
+         builds a real tiled roof instead of stacking a second house on top. */
+      G.deco.push({x:b.x,z:b.z,y0:0,w:fw,h:bh,d:fd,c:b.c,kind:'building',lead:true,
+                   bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
+      G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
+    } }
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();

@@ -22,11 +22,18 @@ function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -F
 $h = (Get-Date).Hour
 if ($h -lt 8 -or $h -gt 22) { Log "skipped (hour $h outside 08-22)"; exit 0 }
 
-# Never start a run on top of a dirty tree - it would sweep unrelated in-progress edits into an
-# autonomous commit.
+# Never start a run on top of MODIFIED TRACKED files - that would sweep a supervised session's
+# in-progress edits into an autonomous commit.
+#
+# Untracked files (??) deliberately do NOT block. The first test of this guard tripped on a stray
+# Playwright console log, which would have blocked every future run forever. Stray artefacts are
+# not in-progress work.
 Set-Location $repo
-$dirty = (git status --porcelain) | Where-Object { $_ -notmatch '_autopilot\.log' }
-if ($dirty) { Log "skipped (working tree dirty - supervised work in progress)"; exit 0 }
+$dirty = (git status --porcelain) | Where-Object { $_ -notmatch '^\?\?' }
+if ($dirty) {
+  Log "skipped (tracked files modified - supervised work in progress): $($dirty -join '; ')"
+  exit 0
+}
 
 Log 'run start'
 

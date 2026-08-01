@@ -6,7 +6,22 @@ You are the BLADEFALL autopilot. Each run is fresh (no memory of prior chats). F
 Keep improving BLADEFALL by working through the backlog below — **on the review branch only**. Oliver playtests the branch preview and merges to main (which deploys live) himself. You never touch the live game.
 
 ## Environment
-- Game file: `_automation/bladefall/public/3d/index.html` (single-file raw WebGL voxel game). Repo = the `bladefall` git submodule (remote `oliverlynch7/bladefall`).
+- **Read `docs/VISION.md` first.** It defines what Bladefall is (a social action-RPG - multiplayer is the point), the class-identity goal, and the money constraint. It outranks guesswork.
+- Game file: `_automation/bladefall/public/3d/index.html` (raw WebGL voxel game). Repo = the `bladefall` git submodule (remote `oliverlynch7/bladefall`).
+- **3D layer** (newer, sits over the voxel renderer, enabled with `?hero3d=1&world3d=1&nobloom`):
+  - `public/3d/hero3d.js` — the player character (glTF, skinned, class skins, faces, weapons)
+  - `public/3d/world3d.js` — the WORLD: reads the game's own `G.deco` and `G.segments` and draws
+    them with real models. Converts every zone at once; it is not a per-level rebuild.
+  - `public/slice3d/` — the testbed where character/weapon/face tuning lives. Holds Oliver's tuned
+    values; treat FACE_PRESETS / WEAPON_PRESETS as precious.
+  - Assets in `public/slice3d/assets/` (chars, monsters, nature, village, props, terrain).
+- **Levels are generated, not authored.** Each zone emits `{x,z,y0,w,h,d,c,theme}` boxes into
+  `G.deco`. Nothing records that a box is a TREE, so the way to get real art in is to tag the
+  generator at the source (`kind:'tree'`, `kind:'pillar'`, `stack:true`) and let world3d map it.
+- **Harnesses** (local-only, `_shot/` is gitignored):
+  - `_shot/shot.js` — screenshot the GAME headless. `_shot/slice.js` — screenshot the slice.
+  - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
+  - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices.
 - Work branch: **`bladefall-autopilot`**. Live/deploy branch: `main` (Cloudflare Pages deploys main to `bladefall.pages.dev`; the branch preview is `bladefall-autopilot.bladefall.pages.dev`).
 - Debug interface: `window.__BF3` (exposes `G`, `update(dt)`, `input`, `makeWeapon`, `enterZone`, `CLASSES`, `CLASS2`, etc.) — use it via the in-app Browser pane on the local preview server (`.claude/launch.json` name `bladefall`, port 4310) to verify.
 
@@ -48,15 +63,31 @@ Every class is a **variant of one of the 3 cores** (Warrior / Mage / Ranger). Ea
 
 ## Backlog (top = next)
 
-- [x] **Paladin (Warrior variant).** DONE (v1.328) with REAL GPT icon art (18 icons, bg-stripped). Family sword/great/axe/hammer/spellblade; innate Holy Warrior (+12% dmg & 2% heal-on-hit w/ holy weapon); Guardian vs Templar paths; capstone Avatar of Light; Trial of the Paladin at Palace (stage 13). Verified: selectable, family correct, holy innate applies, all 8 skills fire, no errors. (progress: trial-discovery flow untested live; skill FX reuse existing effects.)
-- [x] **Necromancer (Mage variant).** DONE (v1.329) + REAL icon art wired (v1.331): 18 necrotic voxel icons generated + bg-stripped, class/skill/passive/innate/cap all on real art. Built an isolated `G.minions` ally system (spawnMinion/minionUpdate, renders via the Grave Wraith pet model, homes+attacks via hitEnemy, lifespan-expiry). Summon Skeletons + Raise the Dead (consumes a fresh corpse from `G.corpses`, tracked in killEnemy) + Army of the Dead. Summoner (Bone Legion/Master of Death) vs Plague paths; capstone Lich = permanent minions + higher cap. Trial of the Necromancer at Castle Duskmoor (stage 15). Verified: selectable, mage family, summon/raise/army spawn working minions that hit (combo counter ticked), 180 ticks no errors. (progress: needs real icon art + trial-flow playtest.)
-- [x] **Ninja (Ranger variant).** DONE (v1.330) + REAL icon art wired (v1.332): 18 black/steel/crimson voxel icons generated + bg-stripped, class/skill/passive/innate/cap all on real art. Family `['dagger','sword']` ('knives' isn't a real art — it uses art 'dagger'; melee attackStyle). Innate Killer Instinct (+8% blade dmg & +8% move). Shadow vs Blade Fury paths. Skills reuse Shadow Strike/Fan of Knives/Shadow Step/Smoke Bomb/Death Mark/Tumble/Blade Fury/Blade Storm FX. Capstone Phantom. Trial of the Ninja at Hollow Pass (stage 3). Verified: selectable, family correct (dagger/sword yes, staff/bow no), all 8 skills fire, 120 ticks + hurt no errors. (progress: needs real icon art + trial-flow playtest.)
-- [x] **Holy spellblade variant + affinity icons hook.** DONE (v1.395.0). Added **Sunblade** (slim/fast holy spellblade: 12 dmg / .32 cd / range 58, `spellsweep` charge) as the light end of the holy pair opposite the heavy Lightbringer — auto-joins the drop pool and every `spellblade` family (mage/paladin/necromancer/chronomancer/stormcaller/warlock). Icon hook: venomedge/umbrablade/lightbringer/sunblade already map to the real `aff_*_sword` art; the two arches that were genuinely rendering BLANK (`flintlock`, `fist` — the legacy 3D-crop fallback returned a flat 96×96 background, 1 distinct colour) now use placeholder paths (`icons/pirate_aimed_shot.png` = a flintlock pistol, `icons/monk_flurry.png` = fists) until real art lands. Verified: all **28** arches resolve to an icon that loads (0 blanks, 0 404s); Sunblade on-class for mage/paladin/necro/chrono + off-class for warrior/ranger/pirate, charge weapon true, 132 dmg dealt over 200 ticks + a charged spell sweep, no console errors.
-- [x] **Chronomancer (Mage variant).** DONE (v1.333) — placeholder icons. Time/frost control (Time Bolt/Slow Field/Rewind/Time Warp/Time Storm/Singularity), Frost vs Tempo paths, cdr-focused passives (Haste/Temporal Flow). Unlock: Glacier Vault (stage 7).
-- [x] **Pirate (Ranger variant).** DONE (v1.333) — placeholder icons. Gunner vs Swashbuckler paths; reused ranger FX (Aimed Shot/Broadside/Boarding Strike/Cannonade/Powder Keg). Unlock: The Oubliette (stage 5).
-- [x] **Berserker (Warrior variant).** DONE (v1.333) — placeholder icons. Rage class: innate Bloodrage (+dmg, more below half HP), Fury vs Blood paths, reused warrior FX. Unlock: The Thornwood (stage 1) — the tier-1/first unlock.
-- [x] **Secret-zone → class-unlock wiring.** DONE (v1.333). All 7 purple secret side-zones now carry `trial:'<class>'` so entering one starts that class's trial (win → permanent unlock, like the Reaper). Full ladder wired: Thornwood(1)=Berserker, Sunken Wash(3)=Ninja, Oubliette(5)=Pirate, Glacier Vault(7)=Chronomancer, Magma Core(9)=Paladin, Reaper's Gate(11)=Reaper, Reliquary(13)=Necromancer. Verified: all 7 trials exist + classes exist + stages 1..13.
-- [x] **Icon-art passes — DONE (v1.339–1.341).** Berserker, Pirate, Chronomancer all now have their own 18-icon voxel sets (bg-stripped, wired). ALL 10 classes have real art. Drillmaster's Seal icon also done (v1.335).
+Priorities come from Oliver's vision conversation (2026-07-31): multiplayer is the point, classes
+must feel genuinely distinct (League of Legends standard), the hub is a social space (AdventureQuest
+Worlds standard), and the graphics need finishing before he shows more people.
+
+- [ ] **Hub buildings.** The Waystation is where players idle and socialise, so it matters most.
+      Both kits are MODULAR (walls/doors/roofs, no whole buildings) — `makeBuilding()` in
+      public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's
+      structural deco at the source the way the rampart dividers were tagged. Floor is already
+      Floor_Brick, rampart columns already placed.
+- [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
+      what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
+      game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the
+      default. Do NOT flip it while nobloom is still needed.
+- [ ] **Class distinctiveness pass.** The top design goal. Use `_duel/` to measure, not opinion.
+      First finding already on record: ranged beats melee 74%-24%, so melee needs an anti-kite
+      answer. Work one class-pair at a time and re-run the matrix after each change.
+      NOTE: changing balance numbers needs Oliver's sign-off per docs/VISION.md — prepare the
+      change and the measured before/after, then queue it rather than shipping it.
+- [ ] **Mobs in 3D.** 27 mob types are cast onto real models in the slice already; port that into
+      world3d so levels are populated with real creatures. SkeletonUtils.clone is verified as the
+      right technique (32 characters, 32 independent skeletons).
+- [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
+      Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
+- [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no
+      ground surface asset yet. Flag to Oliver if a pack is needed rather than faking it.
 
 ## Class-unlock tier ladder (deeper secret = slightly stronger class)
 Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):

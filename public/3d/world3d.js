@@ -616,14 +616,49 @@ function buildGround(world){
      So the floor is coloured here, from the zone's own ground colour, and only lightened enough to
      read as a lit surface. Using the game's colour keeps the hub the warm stone it always was. */
   const mat = rec.mat.clone();
-  if(!grassy){
-    const base = new THREE.Color((world && world.ground) || '#8a8445');
+  const base = new THREE.Color((world && world.ground) || '#8a8445');
+  /* GRASS was the one floor still wearing the MODEL's own colour, and that colour is #73eddd - an
+     aqua. Every grassy zone was therefore a cyan field, which read as "stylised" in a screenshot
+     and is simply wrong: the game's own slab underneath is olive (#8a8445 in the Outskirts). The
+     stone path has been taking the zone's colour for some time; grass never was, because the note
+     that discovered map=NONE recorded it as the reason the tile "looks like grass" rather than as
+     the reason it does not.
+
+     Two tones, not one. A single flat colour over 2149 tiles is a bedsheet, and the ask was for a
+     field that is not one uniform green. The patch tone is chosen on a COARSE grid (~4 tiles) so
+     the meadow breaks into drifts rather than salt-and-pepper noise, which at this tile size would
+     just read as dither. Deterministic, so the same field never reshuffles between visits. */
+  const grassTint = grassy;
+  if(grassTint){
+    mat.color = new THREE.Color('#ffffff');    // the per-tile instanceColor carries it instead
+  } else {
     mat.color = base.clone().lerp(new THREE.Color('#ffffff'), 0.18);
   }
   const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
+  let tint = null, lit = null, dark = null;
+  if(grassTint){
+    m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(cells.length * 3), 3);
+    tint = new THREE.Color();
+    /* The zone's own ground colour sets the KEY, not the whole answer. Used neat it produced a
+       drab olive-grey field, because those values are the slab's base tone and world3d then runs
+       outdoor zones at 0.42 ambient - a mid-luminance colour under a dim key is mud. Pulling it
+       toward a lit grass green keeps each zone distinguishable (the Outskirts stay khaki-leaning,
+       the forest stays darker) while giving the surface enough light to read as ground you are
+       standing on. */
+    const GRASS = new THREE.Color('#79a84e');
+    const key = base.clone().lerp(GRASS, 0.55);
+    lit  = key.clone().lerp(new THREE.Color('#ffffff'), 0.20);    // sun-bleached drift
+    dark = key.clone().lerp(new THREE.Color('#000000'), 0.10);    // shaded drift
+  }
   const o = new THREE.Object3D();
+  const PATCH = TILE * 4;                       // drift size: a few tiles across, not one
   for(let i = 0; i < cells.length; i++){
     const c = cells[i], r = hash(c.x, c.z);
+    if(grassTint){
+      const p = hash(Math.floor(c.x / PATCH) * 7.3, Math.floor(c.z / PATCH) * 3.1);
+      tint.copy(p < 0.5 ? dark : lit).lerp(p < 0.5 ? lit : dark, Math.abs(p - 0.5));
+      m.instanceColor.setXYZ(i, tint.r, tint.g, tint.b);
+    }
     const quarter = (r * 4) | 0;
     o.position.set(c.x, 1.45, c.z);          // just above the game's lit top edge (tops out at 1.3)
     o.rotation.set(0, quarter * Math.PI / 2, 0);
@@ -639,6 +674,7 @@ function buildGround(world){
     m.setMatrixAt(i, o.matrix);
   }
   m.instanceMatrix.needsUpdate = true;
+  if(m.instanceColor) m.instanceColor.needsUpdate = true;
   m.frustumCulled = false;
   m.renderOrder = -1;                        // draw before the props standing on it
   group.add(m);

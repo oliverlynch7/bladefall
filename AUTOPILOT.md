@@ -102,6 +102,21 @@ Worlds standard), and the graphics need finishing before he shows more people.
       (`_shot/presets/mobs_check.js` re-runs this for any zone with `&zone=N`.)
 - [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
+      (progress 2026-08-01: the GRASS half is done. The field was not "one uniform green", it was
+      one uniform AQUA — nature/ground_grass carries no texture at all, only material colour
+      #73eddd, and world3d was laying it untinted across 2149 tiles. Grassy floors now take the
+      zone's own ground colour pulled 55% toward a lit grass green, in two drifting tones chosen on
+      a coarse ~4-tile grid so a meadow breaks into patches instead of dithering. Flag for Oliver:
+      the green is an ART CALL I made to fix a clear defect — say if you want it warmer or cooler.
+      NEXT: paths. Nothing records that a deco box is a WALKWAY, so this needs the same
+      tag-at-the-source treatment the trees and buildings got — mark walkway deco `kind:'path'` in
+      the generators, then map straight/bend/corner in world3d.
+      ALSO FOUND, not fixed: the castle and town kits reference `Textures/colormap.png` and 404 on
+      it, which is why every castle piece is untextured white and has to be hand-tinted in world3d.
+      The atlas EXISTS for castle — at `castle/colormap.png`, one directory off from where the
+      models look. Copying it to `castle/Textures/` would texture the whole hub, but the existing
+      hand tints would then multiply the texture and need removing in the same change, so it is a
+      deliberate chunk, not a drive-by. No atlas ships for `town/`, so do not guess one in.)
 - [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no
       ground surface asset yet. Flag to Oliver if a pack is needed rather than faking it.
 

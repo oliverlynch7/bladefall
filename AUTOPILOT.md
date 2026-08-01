@@ -106,10 +106,21 @@ Worlds standard), and the graphics need finishing before he shows more people.
       NEXT for this item: the SE court (Mirror + Sparring Room) and the south annex are still bare
       3D-wise, and the annex has no 3D perimeter at all — buildHub's side walls stop at
       southZ-2*HUB_UNIT, so the activity plazas sit in an unbounded space.)
-- [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
-      what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
-      game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the
-      default. Do NOT flip it while nobloom is still needed.
+- [x] **3D on by default.** DONE 2026-08-01. `hero3d`, `world3d` and `mob3d` all default to ON;
+      the flags survive as escape hatches (`?hero3d=0`, `?world3d=0`, `?mob3d=0`) so old links and
+      A/B checks still work.
+      The "BLOCKED until bloom is resolved" note was STALE — bloom stopped being a problem when the
+      3D draw moved after `PostFX.end()`. Re-checked properly rather than taken on trust: bloom is
+      HIGH-quality only, so a headless run can have the composite quietly switched off and make the
+      test look like it passed. `_shot/presets/bloom_check.js` forces `meta.quality='high'` and
+      `window.__BF_POSTFX()` reports whether the composite is actually running. With
+      `{"bloom":true,"nobloom":false}` confirmed, the hub and Emberdeep both render the full 3D
+      layer. `?nobloom` is no longer required anywhere.
+      Smoke-tested with NO flags at all: title screen, hub, Outskirts, Frostfell, Emberdeep, the
+      Abyss, Castle Duskmoor and the Sparring Room — 0 page errors, mob3d reports every room type
+      drawn3d in each.
+      NOT self-verifiable, and it is Oliver's call: 60fps on his phone. If it drops,
+      `?hero3d=0&world3d=0` is the instant fallback and the default is a one-line revert.
 - [ ] **Class distinctiveness pass.** The top design goal. Use `_duel/` to measure, not opinion.
       First finding already on record: ranged beats melee 74%-24%, so melee needs an anti-kite
       answer. Work one class-pair at a time and re-run the matrix after each change.

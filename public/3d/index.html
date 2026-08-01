@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.405.0-autopilot';
+const VERSION3D='1.406.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3134,6 +3134,12 @@ function flushDeferred(){
   if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
   defCount=0;
 }
+/* Is the bloom composite actually running this session? `?nobloom` is one switch and the quality
+   tier is another (bloom is High only), so "I did not pass nobloom" does NOT mean bloom is on —
+   a headless check that assumed it does would report the 3D-under-bloom question answered when
+   the pass never ran. Exposed for the screenshot harness for exactly that reason. */
+window.__BF_POSTFX=()=>({ bloom:PostFX.on, quality:(typeof meta!=='undefined'&&meta.quality)||null,
+                          nobloom:/[?&]nobloom/.test(location.search) });
 function flushBatch(){
   /* The 3D layer is NOT drawn here any more - see flushHero3D(), called after PostFX.end().
      Drawing it here put it inside the bloom pass: the game renders into an offscreen buffer,
@@ -11834,9 +11840,14 @@ function drawCourse(s,t){
   /* Is this the 3D Waystation? Then the voxel fixtures that world3d has no equivalent for are
      DEFERRED past the Three pass rather than drawn under it (see the DEFER buffer). Set once per
      frame here and read again by render() for drawWaystation, so the two can never disagree about
-     whether the hub props were held back. */
+     whether the hub props were held back.
+     The test is PAVING, not counts.hub. buildWorld stamps hub:true on any hub-flagged world, but
+     buildHub bails out when there are no gates — which is the Sparring Room. There the 3D layer
+     builds nothing at all, so deferring would push the voxel props past a depth clear with no 3D
+     geometry to test against and float them over their own walls. Paving is the thing that erases
+     the fixtures, so paving is the thing that should trigger the fix. */
   HUBDEFER = !!(G && G.hub && window.__world3d && (() => { const w = window.__world3d();
-    return !!(w && w.on && w.ready && w.counts && w.counts.hub); })());
+    return !!(w && w.on && w.ready && w.counts && w.counts.pave > 0); })());
   // the hazard lake below everything
   bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film

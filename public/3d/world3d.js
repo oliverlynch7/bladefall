@@ -39,7 +39,7 @@ import { clearMobs } from './mob3d.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 
 export const WORLD3D = {
-  on: false,
+  on: true,           // ON BY DEFAULT since 2026-08-01 — see the note on HERO3D.on; ?world3d=0 opts out
   ready: false,
   built: null,        // signature of the level currently built, so rebuilds only happen on change
   counts: {},
@@ -48,7 +48,9 @@ export const WORLD3D = {
 
 try {
   const q = new URLSearchParams(location.search);
-  if(q.get('world3d') === '1' || q.get('world3d') === 'true') WORLD3D.on = true;
+  const w3 = q.get('world3d');
+  if(w3 === '0' || w3 === 'false') WORLD3D.on = false;
+  else if(w3 === '1' || w3 === 'true') WORLD3D.on = true;   // the old opt-in still works
 } catch(e){}
 
 /* ── palette ──────────────────────────────────────────────────────────────────
@@ -918,18 +920,19 @@ function buildHub(scene, world){
 }
 
 export function buildWorld(scene, world){
-  /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
+  /* THE HUB IS BUILT IN 3D, but only its ARCHITECTURE — paving, ramparts, gatehouses, towers,
+     market dressing and the assembled houses. Its FIXTURES stay voxel: the keepers, the waystone,
+     the portal arc, the planters and the torches are hand-authored art with no equivalent in any
+     kit here, and rebuilding them badly would be worse than leaving them.
 
-     The Waystation is hand-authored: a 228-line drawWaystation() plus 157 deco boxes, and its
-     centrepiece monument is bespoke voxel art that is not in the deco list at all. Because the 3D
-     layer draws over the voxel world with depth cleared, ANY ground-level 3D surface hides the
-     voxel props standing on it - first the floor tiles, then the 86 flat paving boxes, each time
-     erasing the monument. Converting only the boxes also loses the warmth and colour the
-     hand-drawn version has.
-
-     Half-converted is the one genuinely bad state, so the hub stays fully voxel until it can be
-     rebuilt properly from the village and castle kits. The hero and mobs still render in 3D over
-     it, which is the part that reads well. */
+     That split used to be broken, and the note here used to claim the hub was left fully voxel.
+     It is not, and the mismatch cost the hub every shopkeeper: the 3D layer draws over a cleared
+     depth buffer, and a paving tile BEHIND a keeper projects above them on screen, so the moment
+     this function laid a courtyard the fixtures standing on it were painted out. The Waystation
+     rendered as an empty yard with floating name tags.
+     The fix lives in index.html (search DEFER): those voxel draws are held back and replayed
+     after the Three pass. So this function may lay ground freely, but anything it does NOT build
+     has to be something the deferred pass still draws. */
   if(world && world.hub){
     clearWorld(scene);
     group = new THREE.Group(); group.name = 'world3d-hub'; scene.add(group);

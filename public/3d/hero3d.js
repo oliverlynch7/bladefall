@@ -29,7 +29,14 @@ const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplica
    y=14, head box tops out near y=33 above that) and our glTF characters are 1.75m, so ~26.
    Exposed as a control because it is the one number most likely to need a nudge by eye. */
 export const HERO3D = {
-  on: false,
+  /* ON BY DEFAULT since 2026-08-01. This was behind ?hero3d=1 while the layer was still being
+     built, and the last thing holding the flag in place was bloom: the composite used to paint
+     over the 3D layer, so ?nobloom was mandatory too. That has not been true since the draw moved
+     after PostFX.end(); re-checked by forcing meta.quality='high' (bloom is High-only, so a
+     headless run can have bloom quietly off and make the check look like it passed) and shooting
+     the hub and Emberdeep with the composite confirmed running. Both render correctly.
+     ?hero3d=0 still turns it off — the flag is now an escape hatch rather than an opt-in. */
+  on: true,
   /* Which skin the hero wears. 'base' is the texture the RPG pack shipped with and is the
      default; any CLASS_SKINS id is an unlockable recolour. Set via ?skin= or __hero3dSetSkin. */
   skinId: 'base',
@@ -50,14 +57,16 @@ export const HERO3D = {
 window.HERO3D = HERO3D;
 
 /* Reachable by URL so it can be tried on a phone without a console:
-     /3d/?hero3d=1            enable the 3D hero
-     /3d/?hero3d=1&scale=30   ...and override the units-per-metre guess
-     /3d/?hero3d=1&model=Rogue
+     /3d/?hero3d=0            fall back to the voxel hero
+     /3d/?scale=30            override the units-per-metre guess
+     /3d/?model=Rogue
    Anything unset keeps its default, and no parameter can break the game - the flag only
    gates an additive draw. */
 try {
   const q = new URLSearchParams(location.search);
-  if(q.get('hero3d') === '1' || q.get('hero3d') === 'true') HERO3D.on = true;
+  const h3 = q.get('hero3d');
+  if(h3 === '0' || h3 === 'false') HERO3D.on = false;      // escape hatch, now that 3D is the default
+  else if(h3 === '1' || h3 === 'true') HERO3D.on = true;   // the old opt-in still works, so saved links do not break
   if(q.get('scale')) HERO3D.scale = parseFloat(q.get('scale')) || HERO3D.scale;
   if(q.get('model')) HERO3D.model = q.get('model');
   if(q.get('yoff'))  HERO3D.yOff  = parseFloat(q.get('yoff')) || 0;

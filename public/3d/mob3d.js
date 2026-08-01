@@ -62,11 +62,16 @@ const _mobModels = new Map();
 const _mobPool = [];
 let _mobGroup = null;
 
-export const MOB3D = { on:false, live:0, pooled:0, missing:[], err:null };
+export const MOB3D = { on:true, live:0, pooled:0, missing:[], err:null };   // on by default with the rest of the 3D layer
 try {
   const q = new URLSearchParams(location.search);
-  /* Rides with world3d: a 3D world full of voxel monsters looks worse than either alone. */
-  if(q.get('world3d') === '1' || q.get('mob3d') === '1') MOB3D.on = true;
+  /* Rides with world3d: a 3D world full of voxel monsters looks worse than either alone. So
+     turning the 3D world off turns the 3D mobs off with it, and ?mob3d= overrides either way. */
+  const w3 = q.get('world3d'), m3 = q.get('mob3d');
+  if(w3 === '0' || w3 === 'false') MOB3D.on = false;
+  if(w3 === '1' || w3 === 'true') MOB3D.on = true;
+  if(m3 === '0' || m3 === 'false') MOB3D.on = false;
+  else if(m3 === '1' || m3 === 'true') MOB3D.on = true;
 } catch(e){}
 
 async function loadMobModel(file){

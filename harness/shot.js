@@ -16,6 +16,18 @@
      node _shot/shot.js --eval "Object.keys(__BF3.G.deco[0]||{})"
      node _shot/shot.js --pre  "__BF3.enterZone('woods',1)" --wait 6000
      node _shot/shot.js --size 1280x720
+     node _shot/shot.js --scene 0                        # in-game in The Outskirts, world3d built
+     node _shot/shot.js --scene hub                      # standing in the Waystation
+     node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
+
+   --scene / --ready exist because of a failure mode that WILL fool you otherwise.
+   A screenshot of a 3D zone taken too early is not blank and is not an error: the game has
+   already fallen back to the voxel renderer, so you get a complete, plausible, WRONG picture —
+   flat ground, box trees, no roads — that looks exactly like "the 3D world regressed". On this
+   machine (headless SwiftShader) world3d needs ~30-45s to fetch and parse its glTF props, so a
+   `--prewait 20000` render is a voxel render every time. --ready polls the page until the world
+   reports itself built and says so, and shouts if it gave up instead. Never trust a 3D-world
+   screenshot that did not print "ready ✓".
 
    Exit 0 = screenshot written. Console errors from the page are always printed.
    ───────────────────────────────────────────────────────────────────────────── */
@@ -82,9 +94,41 @@ const URLPATH = arg('url', '/3d/index.html?hero3d=1&world3d=1&nobloom');
 const OUT = path.resolve(ROOT, arg('out', '_shot/out/shot.png'));
 const WAIT = parseInt(arg('wait', '9000'), 10);
 const EVAL = arg('eval', null);
-const PRE = arg('pre', null);
 const PREWAIT = parseInt(arg('prewait', '3500'), 10);
 const [W, H] = arg('size', '1280x720').split('x').map(Number);
+
+/* ── --scene: get from the attract screen to somewhere worth photographing ──
+   The game does not open in a zone. It opens on the title, then a story cutscene, then class
+   select, then a class TRIAL, then the hub — five gates, each of which will happily hand you a
+   screenshot of itself. Every session so far has re-derived this sequence by taking pictures of
+   menus, so it lives here now.
+
+   Chrome runs on a throwaway profile, so localStorage is empty on every run and the sequence is
+   the same every time: the story veil is dismissed by clicking its own Skip button on a timer
+   (it fades in over several lines and there is no single moment to click), startTrial picks a
+   class, skipTrial grants it and drops you in the hub, then enterZone descends.
+
+   The dismiss list is a WHITELIST of specific ids, not "click the first button in the overlay".
+   These cards sit next to menus whose first button is Exit or Title Screen, and a generic
+   clicker would eventually walk the run back out to the attract screen and photograph that. */
+const SCENE = arg('scene', null);
+const sceneJs = (dest) => `(function(){
+  var ids=['storyskip','hubTutGo'];
+  var t=setInterval(function(){
+    for(var i=0;i<ids.length;i++){ var b=document.getElementById(ids[i]); if(b&&b.offsetParent) b.click(); }
+  },300);
+  __BF3.startTrial('warrior');
+  setTimeout(function(){
+    __BF3.skipTrial();
+    setTimeout(function(){ clearInterval(t); ${dest === 'hub' ? '' : '__BF3.enterZone(' + (parseInt(dest, 10) || 0) + ');'} }, 5000);
+  }, 2500);
+})()`;
+const PRE = arg('pre', SCENE == null ? null : sceneJs(SCENE));
+
+/* Poll until this expression is truthy, THEN screenshot. Defaults with --scene to "world3d has
+   finished building the level", which is the thing that is silently slow. */
+const READY = arg('ready', SCENE == null ? null : '!!(window.__world3d && __world3d().built)');
+const READYMAX = parseInt(arg('readymax', '120000'), 10);
 
 const CHROME = [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -214,6 +258,23 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const r = await evaluate(PRE);
     console.log('PRE  → ' + JSON.stringify(r));
     await sleep(PREWAIT);
+  }
+  /* Hold the shutter until the page says it is ready. A fixed --prewait cannot do this job:
+     too short and you photograph the voxel fallback, which looks like a finished picture and
+     reads as a regression. Loud either way — a silent timeout here would be the same trap. */
+  if (READY) {
+    const t0 = Date.now();
+    let ok = false, last = null;
+    while (Date.now() - t0 < READYMAX) {
+      const r = await evaluate(READY);
+      last = r;
+      if (r.value) { ok = true; break; }
+      await sleep(500);
+    }
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    if (ok) console.log('ready ✓ after ' + secs + 's  (' + READY + ')');
+    else console.log('READY NEVER CAME after ' + secs + 's — the shot below is NOT the state you '
+      + 'asked for, do not read it as a regression. last=' + JSON.stringify(last) + '  expr=' + READY);
   }
   if (EVAL) {
     const r = await evaluate(EVAL);

@@ -88,6 +88,16 @@ const PROP_SETS = {
   hubRoof:   ['castle/tower-square-top-roof'],
   hubFlag:   ['castle/flag'],
   hubPave:   ['castle/ground'],
+  /* Plaza dressing. The rebuilt courtyard read as an empty lot - the perimeter was right but the
+     middle was bare paving. These give it the things that make a town square somewhere people
+     stand around: a fountain to gather at, market carts and stalls, lanterns lining the approach,
+     hedges softening the edges. */
+  hubFountain: ['town/fountain-round'],
+  hubCart:     ['town/cart'],
+  hubStall:    ['town/stall-bench'],
+  hubLantern:  ['props/lightpost-single'],
+  hubHedge:    ['town/hedge-large'],
+  hubBanner:   ['town/banner-red'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -561,6 +571,55 @@ function buildHub(scene, world){
     group.add(m);
     counts.pave = paveCells.length;
   }
+
+  /* PLAZA DRESSING. Placed relative to the courtyard's own bounds rather than fixed coordinates,
+     so it follows if the gates ever move.
+     Deliberately kept OFF the centre line: spawn is to the south and the portals to the north, so
+     the walking route between them stays clear. Clutter in a doorway is worse than empty space. */
+  const midX = (westX + eastX) / 2, midZ = northZ + 560;
+  const laneHalf = 190;                       // keep this corridor clear, spawn -> gates
+
+  /* Lanterns down both sides of the approach - they line the route to the portals, which is the
+     one piece of wayfinding a new player needs. */
+  const lanterns = [];
+  for(let z = northZ + 210; z < southZ - 120; z += 210){
+    lanterns.push({ x: midX - laneHalf, z });
+    lanterns.push({ x: midX + laneHalf, z });
+  }
+  counts.lantern = hubPiece('hubLantern', lanterns, (o, c, rec) => {
+    /* Sized by HEIGHT and left upright. The town kit's 'lantern' is a WALL fitting, authored
+       projecting sideways, so it rendered as a row of fallen posts across the plaza. */
+    const sc = 92 / rec.height;
+    o.position.set(c.x, 1.4, c.z); o.rotation.set(0, c.x < midX ? 0 : Math.PI, 0);
+    o.scale.set(sc, sc, sc);
+  }, '#6b5636');
+
+  /* A market row along each side wall: carts, stalls and hedges, well clear of the lane. */
+  const carts = [], stalls = [], hedges = [];
+  for(let i = 0; i < 5; i++){
+    const z = northZ + 300 + i * 190;
+    carts.push({ x: westX + 150, z, rot: 1.5708 });
+    stalls.push({ x: eastX - 150, z, rot: -1.5708 });
+    if(i % 2 === 0){ hedges.push({ x: westX + 300, z: z + 90, rot: 0 });
+                     hedges.push({ x: eastX - 300, z: z + 90, rot: 0 }); }
+  }
+  counts.cart = hubPiece('hubCart', carts, (o, c, rec) => {
+    const sc = 105 / rec.width;
+    o.position.set(c.x, 1.4, c.z); o.rotation.set(0, c.rot, 0); o.scale.set(sc, sc, sc);
+  }, '#8a6438');
+  counts.stall = hubPiece('hubStall', stalls, (o, c, rec) => {
+    const sc = 105 / rec.width;
+    o.position.set(c.x, 1.4, c.z); o.rotation.set(0, c.rot, 0); o.scale.set(sc, sc, sc);
+  }, '#9a7a4a');
+  counts.hedge = hubPiece('hubHedge', hedges, (o, c, rec) => {
+    const sc = 96 / rec.width;
+    o.position.set(c.x, 1.4, c.z); o.rotation.set(0, c.rot, 0); o.scale.set(sc, sc, sc);
+  }, '#4d7f3c');
+
+  /* No fountain. town/fountain-round is a RIM piece meant to cap a stack of other fountain parts,
+     so on its own it rendered as a grey bowl floating in mid-air. Assembling a real fountain from
+     centre/edge/corner pieces is worth doing, but a floating bowl is worse than nothing, so it is
+     left out until it can be built properly. */
 
   /* CENTREPIECE. A courtyard with nothing in the middle reads as an empty lot; a monument gives
      the plaza a focus to gather around and orient by, which is the point of a social hub. Placed

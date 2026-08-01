@@ -530,21 +530,41 @@ const FLOOR_TILE_STONE = 28;
    `tint` MULTIPLIES the texture, so these are deliberately light - a stage's own ground colour
    (#243240 for Frostfell, #1c1220 for Duskmoor) would multiply the cobble to near-black. Each is
    the stage colour pulled most of the way to white: enough to keep the zone's identity, not enough
-   to bury the stonework. Themes are the game's own STAGES[].theme strings. */
+   to bury the stonework. Themes are the game's own STAGES[].theme strings.
+
+   `tiles` may list more than one surface, each with its own `w` (share of the cells, 0-1) and an
+   optional `tint` overriding the theme's. A second variant only helps if it reads as the SAME
+   ground with different detail: an even split between two tiles of noticeably different colour
+   does not look varied, it looks like a chessboard, which is exactly what an even
+   ground_grass/castle-ground mix produced. So the variant is a MINORITY and is tinted to sit on
+   top of the primary's colour - the variety comes from its texture, not from its hue. */
 const THEME_GROUND = {
-  plains:   { tile: 'nature/ground_grass',       tint: null,      grass: true },
-  forest:   { tile: 'nature/ground_grass',       tint: '#b9cfa8', grass: true },
-  badlands: { tile: 'village/Floor_UnevenBrick', tint: '#c2a184' },
-  canyon:   { tile: 'village/Floor_UnevenBrick', tint: '#cbab86' },
-  ruins:    { tile: 'village/Floor_Brick',       tint: '#a9a4bd' },
-  dungeon:  { tile: 'village/Floor_Brick',       tint: '#a99cb4' },
-  frost:    { tile: 'village/Floor_Brick',       tint: '#cfe2f2' },
-  volcano:  { tile: 'village/Floor_UnevenBrick', tint: '#a8705c' },
-  void:     { tile: 'village/Floor_Brick',       tint: '#8e7ba8' },
-  marble:   { tile: 'village/Floor_Brick',       tint: '#e0dcd2' },
-  apex:     { tile: 'village/Floor_Brick',       tint: '#8b7f9c' },
+  /* ONE grass tile, on purpose. castle/ground was tried as a second variant and does not work at
+     any weight or tint: nature/ground_grass is flat TEAL with no texture at all, castle/ground is
+     a textured mid-green, and mixing them reads as discoloured patches rather than uneven meadow -
+     a 50/50 split is a literal chessboard, and even at 24% the odd tiles still read as blotches.
+     The variety in a grassy field comes from GROUND_JITTER instead, which varies brightness only.
+     A second variant needs an asset that is the same green with different detail; the repo has
+     none. Rendered and compared both ways before settling on this. */
+  plains:   { tiles: [{ n: 'nature/ground_grass' }], tint: null,      grass: true },
+  forest:   { tiles: [{ n: 'nature/ground_grass' }], tint: '#b9cfa8', grass: true },
+  badlands: { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c2a184' },
+  canyon:   { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#cbab86' },
+  ruins:    { tiles: [{ n: 'village/Floor_Brick', w: 0.72 },
+                      { n: 'village/Floor_UnevenBrick', w: 0.28 }], tint: '#a9a4bd' },
+  dungeon:  { tiles: [{ n: 'village/Floor_Brick' }], tint: '#a99cb4' },
+  frost:    { tiles: [{ n: 'village/Floor_Brick' }], tint: '#cfe2f2' },
+  volcano:  { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#a8705c' },
+  void:     { tiles: [{ n: 'village/Floor_Brick' }], tint: '#8e7ba8' },
+  marble:   { tiles: [{ n: 'village/Floor_Brick' }], tint: '#e0dcd2' },
+  apex:     { tiles: [{ n: 'village/Floor_Brick', w: 0.78 },
+                      { n: 'village/Floor_UnevenBrick', w: 0.22 }], tint: '#8b7f9c' },
 };
-const THEME_GROUND_DEFAULT = { tile: 'village/Floor_UnevenBrick', tint: '#c9b998' };
+const THEME_GROUND_DEFAULT = { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c9b998' };
+/* Per-instance brightness spread, so even a single-variant surface is not one flat sheet of
+   colour. Applied through InstancedMesh.setColorAt, which MULTIPLIES the material colour, so
+   these hover around 1.0 rather than replacing the theme tint. */
+const GROUND_JITTER = 0.13;
 
 function buildGround(world){
   const segs = (world && world.segments) || [];
@@ -579,9 +599,15 @@ function buildGround(world){
      anything achieved with these flat-coloured tiles across five attempts. Grassy zones keep their
      tiles because those zones have no voxel centrepiece to lose. */
   if(isHub) return 0;
-  const want = spec.tile;
-  const rec = _propCache.get(want);
-  if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want, 'theme', theme); return 0; }
+  /* Drop variants that failed to load rather than bailing: one absent tile should cost variety,
+     not the whole floor. Only an empty list leaves the ground to the voxel pass. */
+  const vars = spec.tiles.map(t => ({ t, rec: _propCache.get(t.n) })).filter(v => v.rec);
+  if(!vars.length){ console.warn('[world3d] floor tiles missing, ground left to the voxel pass:', spec.tiles.map(t => t.n), 'theme', theme); return 0; }
+  /* Cumulative weights over the SURVIVING variants, normalised - so if the minority tile fails to
+     load the primary simply takes all the cells instead of the field going half-empty. */
+  const wsum = vars.reduce((s, v) => s + (v.t.w != null ? v.t.w : 1), 0);
+  let acc = 0;
+  for(const v of vars){ acc += (v.t.w != null ? v.t.w : 1) / wsum; v.cut = acc; }
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
   for(const sg of segs){
@@ -607,30 +633,56 @@ function buildGround(world){
      tile was plain white; against real stonework those colours (#243240, #1c1220) multiply to
      near-black. The earlier note here - "these tiles carry no texture, only a material colour" -
      was reading a missing file, not the asset. */
-  const mat = rec.mat.clone();
-  if(spec.tint) mat.color = new THREE.Color(spec.tint);
-  const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
-  const o = new THREE.Object3D();
-  for(let i = 0; i < cells.length; i++){
-    const c = cells[i], r = hash(c.x, c.z);
-    const quarter = (r * 4) | 0;
-    o.position.set(c.x, 1.45, c.z);          // just above the game's lit top edge (tops out at 1.3)
-    o.rotation.set(0, quarter * Math.PI / 2, 0);
-    /* Scale must account for the rotation. A quarter-turn maps local X onto world Z, so on an odd
-       quarter the axes swap - scaling by (w, d) then rotating 90 degrees leaves the tile d wide
-       where w was needed, and the gaps show up as regular bright stripes of the slab underneath.
-       That was the first attempt's failure, and it looked like z-fighting rather than a sizing
-       error, which is what made it hard to place. */
-    const sx = (quarter & 1) ? c.d : c.w;
-    const sz = (quarter & 1) ? c.w : c.d;
-    o.scale.set(sx / rec.width, 1, sz / rec.width);
-    o.updateMatrix();
-    m.setMatrixAt(i, o.matrix);
+  /* Split the cells across the variants first, so each InstancedMesh knows its own count.
+     Hashed on a SHIFTED position, not the same hash that picks the quarter-turn: reusing one
+     hash for both makes every tile of variant B share a rotation, and the field stripes. */
+  const buckets = vars.map(() => []);
+  for(const c of cells){
+    const r = hash(c.x + 91.7, c.z - 43.1);
+    let vi = 0; while(vi < vars.length - 1 && r > vars[vi].cut) vi++;
+    buckets[vi].push(c);
   }
-  m.instanceMatrix.needsUpdate = true;
-  m.frustumCulled = false;
-  m.renderOrder = -1;                        // draw before the props standing on it
-  group.add(m);
+
+  const o = new THREE.Object3D();
+  const col = new THREE.Color();
+  for(let v = 0; v < vars.length; v++){
+    const rec = vars[v].rec, bucket = buckets[v];
+    if(!bucket.length) continue;
+    /* Tint MULTIPLIES the tile's texture, so it comes from THEME_GROUND, not from the stage's own
+       ground colour. Deriving it from the stage colour was correct while the textures 404'd and
+       the tile was plain white; against real stonework those colours (#243240, #1c1220) multiply
+       to near-black. The earlier note here - "these tiles carry no texture, only a material
+       colour" - was reading a missing file, not the asset. */
+    const mat = rec.mat.clone();
+    const tint = vars[v].t.tint || spec.tint;
+    if(tint) mat.color = new THREE.Color(tint);
+    const m = new THREE.InstancedMesh(rec.geo, mat, bucket.length);
+    for(let i = 0; i < bucket.length; i++){
+      const c = bucket[i], r = hash(c.x, c.z);
+      const quarter = (r * 4) | 0;
+      o.position.set(c.x, 1.45, c.z);        // just above the game's lit top edge (tops out at 1.3)
+      o.rotation.set(0, quarter * Math.PI / 2, 0);
+      /* Scale must account for the rotation. A quarter-turn maps local X onto world Z, so on an odd
+         quarter the axes swap - scaling by (w, d) then rotating 90 degrees leaves the tile d wide
+         where w was needed, and the gaps show up as regular bright stripes of the slab underneath.
+         That was the first attempt's failure, and it looked like z-fighting rather than a sizing
+         error, which is what made it hard to place. */
+      const sx = (quarter & 1) ? c.d : c.w;
+      const sz = (quarter & 1) ? c.w : c.d;
+      o.scale.set(sx / rec.width, 1, sz / rec.width);
+      o.updateMatrix();
+      m.setMatrixAt(i, o.matrix);
+      /* Brightness only, no hue shift - shifting hue per tile reads as patchy discolouration
+         rather than uneven ground. A third hash so the shading does not track the variant split. */
+      const j = 1 + (hash(c.x - 12.4, c.z + 57.9) - 0.5) * 2 * GROUND_JITTER;
+      m.setColorAt(i, col.setRGB(j, j, j));
+    }
+    m.instanceMatrix.needsUpdate = true;
+    if(m.instanceColor) m.instanceColor.needsUpdate = true;
+    m.frustumCulled = false;
+    m.renderOrder = -1;                      // draw before the props standing on it
+    group.add(m);
+  }
   return cells.length;
 }
 

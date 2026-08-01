@@ -86,6 +86,21 @@ Worlds standard), and the graphics need finishing before he shows more people.
       right technique (32 characters, 32 independent skeletons).
 - [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
+      *(progress 2026-08-01: the "not one uniform green" half is DONE, but not via a second grass
+      tile. `THEME_GROUND[].tiles` now takes weighted variants, and every ground instance gets a
+      deterministic brightness jitter (`GROUND_JITTER`) through `InstancedMesh.setColorAt`, so a
+      field is mottled rather than one flat sheet — at no extra draw call. A second GRASS tile was
+      built, rendered and REJECTED: the only candidate is castle/ground, and nature/ground_grass is
+      flat teal with no texture while castle/ground is a textured mid-green, so any mix reads as
+      discoloured blotches — 50/50 is a literal chessboard. Screenshots compared before dropping
+      it. A real second grass variant needs an asset that is the same green with different detail;
+      the repo has none (nature/ and terrain/ ship the identical file). The variant machinery IS
+      used where the tiles match: ruins and apex mix Floor_Brick with Floor_UnevenBrick and read
+      as worn flagstone.*
+      *Still to do: PATHS. Deliberately not attempted by heuristic — inferring "this segment is a
+      walkway" from its aspect ratio is the same class of guess that laid grass across the hub
+      plaza. The right fix is to tag walkways at the generator the way the rampart dividers were
+      tagged, then map `kind:'path'` onto the Nature Kit path pieces.)*
 - [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
       was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
       `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its

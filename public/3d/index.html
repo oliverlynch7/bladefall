@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.401.0-autopilot';
+const VERSION3D='1.402.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2833,7 +2833,11 @@ window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero
 window.__BF_META=()=>meta;
 /* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
    property - the same reason __BF_CAM and __BF_META exist as closures. */
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
+/* `G.s` never existed - the live stage is STAGES[G.stageIndex]. So `ground` here silently fell
+   back to the olive default in EVERY zone, and world3d had no way to see the stage THEME at all
+   (it was matching theme names like 'forest'/'plains' against ZONE ids, which never match). */
+window.__BF_WORLD=()=>{const st=STAGES[G.stageIndex]||{};
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';

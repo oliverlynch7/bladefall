@@ -77,7 +77,10 @@ const PROP_SETS = {
            'nature/plant_bushSmall'],
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
   floor:  ['nature/ground_grass'],
-  floorStone: ['castle/ground'],
+  /* Every surface THEME_GROUND can ask for, so they are all preloaded (line ~237 flattens this
+     whole object into the load list). castle/ground is kept only because other code may still
+     reference the old set name; the zone floor no longer uses it - it is a grass tile. */
+  floorStone: ['village/Floor_Brick', 'village/Floor_UnevenBrick', 'castle/ground'],
   /* Hub architecture. Kept to a handful of pieces on purpose: Oliver's steer is that the
      MECHANICS matter most, so the hub needs to be charming and READABLE - you should see at a
      glance where the portals are and where things happen - not an architectural showpiece. */
@@ -519,6 +522,30 @@ function buildProps(items, names, defaultH, heightOf){
 const FLOOR_TILE_GRASS = 78;
 const FLOOR_TILE_STONE = 28;
 
+/* GROUND PER THEME. Every zone used to share one tile - castle/ground, which is the Castle Kit's
+   GRASS tile. It passed as neutral only because its colormap 404'd and it drew white, so Frostfell,
+   Emberdeep, the Abyss, the Palace and Duskmoor were all the same untextured expanse. With the
+   texture restored that tile is unmistakably a lawn, so each theme now names its own surface.
+
+   `tint` MULTIPLIES the texture, so these are deliberately light - a stage's own ground colour
+   (#243240 for Frostfell, #1c1220 for Duskmoor) would multiply the cobble to near-black. Each is
+   the stage colour pulled most of the way to white: enough to keep the zone's identity, not enough
+   to bury the stonework. Themes are the game's own STAGES[].theme strings. */
+const THEME_GROUND = {
+  plains:   { tile: 'nature/ground_grass',       tint: null,      grass: true },
+  forest:   { tile: 'nature/ground_grass',       tint: '#b9cfa8', grass: true },
+  badlands: { tile: 'village/Floor_UnevenBrick', tint: '#c2a184' },
+  canyon:   { tile: 'village/Floor_UnevenBrick', tint: '#cbab86' },
+  ruins:    { tile: 'village/Floor_Brick',       tint: '#a9a4bd' },
+  dungeon:  { tile: 'village/Floor_Brick',       tint: '#a99cb4' },
+  frost:    { tile: 'village/Floor_Brick',       tint: '#cfe2f2' },
+  volcano:  { tile: 'village/Floor_UnevenBrick', tint: '#a8705c' },
+  void:     { tile: 'village/Floor_Brick',       tint: '#8e7ba8' },
+  marble:   { tile: 'village/Floor_Brick',       tint: '#e0dcd2' },
+  apex:     { tile: 'village/Floor_Brick',       tint: '#8b7f9c' },
+};
+const THEME_GROUND_DEFAULT = { tile: 'village/Floor_UnevenBrick', tint: '#c9b998' };
+
 function buildGround(world){
   const segs = (world && world.segments) || [];
   if(!segs.length) return 0;
@@ -526,11 +553,16 @@ function buildGround(world){
      turned a stone plaza into a lawn - the hub is paved, and the meadow is not. Zones without a
      natural grass floor get the path/stone tile instead. */
   const zone = (world && world.zone) || 'hub';
+  /* Theme, not zone id. The old test compared world.zone against 'forest'/'plains', which are
+     STAGES[].theme values and never appear as zone ids - so only 'outskirts' ever matched by
+     accident and every other grassy stage got the stone tile. */
+  const theme = (world && world.theme) || '';
   /* world.hub is the game's own G.hub flag. An earlier guess inferred the hub from deco count and
      zone id and got it wrong: the Waystation REPORTS its zone as 'outskirts', so the heuristic
      laid grass across a stone plaza. Ask the game what it is rather than inferring it. */
   const isHub = !!(world && world.hub);
-  const grassy = !isHub && (zone === 'outskirts' || zone === 'forest' || zone === 'plains');
+  const spec = (!isHub && THEME_GROUND[theme]) || THEME_GROUND_DEFAULT;
+  const grassy = !isHub && !!spec.grass;
   /* Paving from the village kit, not ground_pathTile: the path tile is a dirt patch drawn ON
      grass, so using it for a plaza produced sandy blobs floating on a green field.
      Read from PROP_SETS rather than naming the file twice - having the loaded set and the
@@ -547,9 +579,9 @@ function buildGround(world){
      anything achieved with these flat-coloured tiles across five attempts. Grassy zones keep their
      tiles because those zones have no voxel centrepiece to lose. */
   if(isHub) return 0;
-  const want = grassy ? 'nature/ground_grass' : PROP_SETS.floorStone[0];
+  const want = spec.tile;
   const rec = _propCache.get(want);
-  if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want); return 0; }
+  if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want, 'theme', theme); return 0; }
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
   for(const sg of segs){
@@ -570,18 +602,13 @@ function buildGround(world){
     }
   }
   if(!cells.length) return 0;
-  /* These Kenney tiles carry their colour in the MATERIAL COLOUR, not a texture - probing them
-     showed map=NONE on all of them. ground_grass only looks like grass because its material colour
-     is #73eddd; castle/ground and the village floors are #ffffff, i.e. plain white geometry, which
-     is why five different "stone" tiles all rendered as a featureless white expanse. Nothing was
-     wrong with the tiling, the scale, or the asset choice.
-     So the floor is coloured here, from the zone's own ground colour, and only lightened enough to
-     read as a lit surface. Using the game's colour keeps the hub the warm stone it always was. */
+  /* Tint MULTIPLIES the tile's texture, so it comes from THEME_GROUND, not from the stage's own
+     ground colour. Deriving it from the stage colour was correct while the textures 404'd and the
+     tile was plain white; against real stonework those colours (#243240, #1c1220) multiply to
+     near-black. The earlier note here - "these tiles carry no texture, only a material colour" -
+     was reading a missing file, not the asset. */
   const mat = rec.mat.clone();
-  if(!grassy){
-    const base = new THREE.Color((world && world.ground) || '#8a8445');
-    mat.color = base.clone().lerp(new THREE.Color('#ffffff'), 0.18);
-  }
+  if(spec.tint) mat.color = new THREE.Color(spec.tint);
   const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
   const o = new THREE.Object3D();
   for(let i = 0; i < cells.length; i++){

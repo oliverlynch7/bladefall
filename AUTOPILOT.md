@@ -86,8 +86,18 @@ Worlds standard), and the graphics need finishing before he shows more people.
       right technique (32 characters, 32 independent skeletons).
 - [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
-- [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no
-      ground surface asset yet. Flag to Oliver if a pack is needed rather than faking it.
+- [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
+      was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
+      `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its
+      colormap 404'd and it drew white. Now each `STAGES[].theme` names its own surface + tint via
+      `THEME_GROUND` in world3d.js: frost/void/apex/marble/ruins/dungeon on `village/Floor_Brick`,
+      volcano/canyon/badlands on `village/Floor_UnevenBrick`, plains/forest still on grass.
+      Also fixed the plumbing this depended on: `__BF_WORLD()` read `G.s.ground`, but `G.s` does
+      not exist — the live stage is `STAGES[G.stageIndex]` — so the tint fell back to the olive
+      default in EVERY zone, and world3d had no theme at all (it was testing theme names like
+      'forest'/'plains' against ZONE ids, which never match). All 8 zones rendered and eyeballed.
+      *Still approximations:* there is no true SNOW or MARBLE asset in the repo — Frostfell and the
+      Sunspire are tinted stone. They read correctly, but a snow/marble pack would beat them.
 
 ## Class-unlock tier ladder (deeper secret = slightly stronger class)
 Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):

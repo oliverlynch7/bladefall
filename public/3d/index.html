@@ -3070,21 +3070,36 @@ function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
   instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
   instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
 }
+/* Draw the Three.js layer onto the finished, already-composited frame.
+   Deliberately after PostFX.end(): the 3D characters and world therefore do not receive bloom,
+   which is the correct trade. Inside the pass they were simply erased; and bloom on a lit,
+   textured character tends to wash it out anyway - the effect exists for the voxel game's glowing
+   gems and embers, which still get it. */
+function flushHero3D(){
+  if(!(window.__hero3dPending && window.drawHero3D)) return;
+  const q = window.__hero3dPending; window.__hero3dPending = null;
+  /* Clear DEPTH only, never colour. PostFX.end() composites a fullscreen quad, which leaves the
+     depth buffer filled at the quad's depth - so the 3D layer drew correctly and was then
+     rejected by the depth test, appearing to vanish entirely. Colour must survive: it holds the
+     finished, bloomed frame we are drawing on top of.
+     Consequence to be aware of: the 3D layer now always draws OVER the voxel world and cannot be
+     occluded by it. Acceptable while the world itself is becoming 3D (Three keeps its own depth
+     internally, so 3D-vs-3D occlusion is correct), but it is the reason a half-converted scene
+     can show a character through a voxel wall. */
+  gl.depthMask(true);
+  gl.clear(gl.DEPTH_BUFFER_BIT);
+  window.drawHero3D(q[0], q[1]);
+}
 function flushBatch(){
-  if(instCount===0){
-    // still honour a pending 3D hero even on an empty batch, or it would never draw
-    if(window.__hero3dPending && window.drawHero3D){ const q=window.__hero3dPending;
-      window.__hero3dPending=null; window.drawHero3D(q[0],q[1]); }
-    return;
-  }
+  /* The 3D layer is NOT drawn here any more - see flushHero3D(), called after PostFX.end().
+     Drawing it here put it inside the bloom pass: the game renders into an offscreen buffer,
+     Three renders to the DEFAULT framebuffer, and then the bloom composite paints the offscreen
+     buffer over the top - erasing the 3D characters and world every frame. That is the whole
+     reason ?nobloom was required. */
+  if(instCount===0) return;
   gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
   gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
   INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,instCount);
-  /* 3D hero goes on top of the world batch that just flushed. Queued by drawHero3 above. */
-  if(window.__hero3dPending && window.drawHero3D){
-    const q = window.__hero3dPending; window.__hero3dPending = null;
-    window.drawHero3D(q[0], q[1]);
-  }
   if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
   instCount=0;
 }
@@ -13781,6 +13796,7 @@ function frame(ts){
   render((G?G.time:ts/1000));
   flushBatch();                       // draw whatever boxes are still pending at frame end
   PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
+  flushHero3D();                      // 3D hero/world/mobs go on top of the COMPOSITED frame
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   requestAnimationFrame(frame);
 }

@@ -91,13 +91,21 @@ Worlds standard), and the graphics need finishing before he shows more people.
       still correctly hidden by the 3D houses. Dropped rather than deferred: kind:'building' and
       kind:'pillar' (world3d builds both already) and anything ≤3 units tall (floor paint the
       paving replaced). Torch glow halos are skipped in the deferred pass — additive-only geometry.
-      Also: the monument was ONE tower on the centre line, sitting on the waystone and hiding the
-      entire portal arc from spawn. Now a matched PAIR at x=±380, z=140, clear of the ±114
-      sightline fan. ART CALL for Oliver — say if you want one tower back somewhere else instead.
-      NEXT: only the four corner plots are filled. Fill the west/east perimeter strip (x ±928..±1002,
-      unreachable behind the collision wall, so shallow d=1 frontages need no new collision), and
-      give the Quartermaster / Smith / Drillmaster / Beastkeeper bays a shopfront behind each keeper
-      so the hub reads as a town rather than a walled yard.)
+      Also: world3d's free-standing monument is GONE, not moved. It sat on the waystone and hid the
+      whole portal arc from spawn; every alternative was measured and every one of them is either
+      inside the spawn-to-gate sightline fan (which widens toward the rampart until it covers
+      everything) or on the walk to a keeper bay — a pair at ±380,140 was tried and the camera ends
+      up inside it on the way to the Stylist. Its stated job ("empty lot") only existed because the
+      3D layer was erasing the waystone. ART CALL, reversible: four hubPiece() calls in git history.
+      The perimeter strip is DONE: four shopfronts at x=±965, z=-78 / z=195, one behind each of the
+      Quartermaster / Smith / Drillmaster / Beastkeeper. w:1 d:3 storeys:2, deliberately NOT
+      quarter-turned — the kit's ridge runs along DEPTH, so turning the door toward the plaza turns
+      the bare gable triangle toward it too (shot and confirmed). Unturned, the plaza gets the long
+      tiled slope and a three-bay window frontage. No collision box: probed 8 specs / 4 with
+      collision, and the strip is behind the x=±915 wall anyway.
+      NEXT for this item: the SE court (Mirror + Sparring Room) and the south annex are still bare
+      3D-wise, and the annex has no 3D perimeter at all — buildHub's side walls stop at
+      southZ-2*HUB_UNIT, so the activity plazas sit in an unbounded space.)
 - [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
       what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
       game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the

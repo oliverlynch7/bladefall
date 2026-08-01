@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.404.0-autopilot';
+const VERSION3D='1.405.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10260,7 +10260,29 @@ function enterWaystation(){
       {x:-800,z:-350,w:3,d:2,storeys:2,style:'plaster',ry:-Math.PI/2,c:'#c8b393',rc:'#8f4a39'},
       {x: 800,z:-350,w:3,d:2,storeys:2,style:'brick',  ry: Math.PI/2,c:'#a98470',rc:'#7d4032'},
       {x:-840,z: 395,w:2,d:2,storeys:1,style:'brick',  ry:-Math.PI/2,c:'#a98470',rc:'#8f4a39'},
-      {x: 840,z: 395,w:2,d:2,storeys:1,style:'plaster',ry: Math.PI/2,c:'#c8b393',rc:'#7d4032'}
+      {x: 840,z: 395,w:2,d:2,storeys:1,style:'plaster',ry: Math.PI/2,c:'#c8b393',rc:'#7d4032'},
+      /* SHOPFRONTS, one behind each keeper, in the strip between the collision wall (x ±915) and
+         the 3D rampart (x ±1002). The keepers were standing against a blank wall, which is what
+         made the Waystation read as a walled yard rather than a town: a shop with no shop.
+         One cell deep is the whole budget — centred at 965 a house spans 931..999, which clears
+         the collision wall by 16 units and the rampart by 3. It is also why these carry NO
+         collision box: the player cannot reach x 931 in the first place, so a solid volume there
+         would only be a wall in front of a wall.
+         Two storeys on purpose. The rampart behind them is 150 tall and these stand 204, so the
+         roofs break the wall line — that is the whole difference between a skyline and a fence.
+
+         NOT quarter-turned like the corner houses, and that is the point. The kit's ridge runs
+         along a building's DEPTH, so turning the door wall toward the plaza also turns the gable
+         END toward it — and on a 3-wide, 1-deep shop the gable is three times wider than the roof
+         is deep, so the plaza got a row of bare plaster triangles with no tiles in sight.
+         Shot and confirmed before changing it. Left unturned (w:1, d:3) the ridge runs ALONG the
+         rampart instead: the plaza sees the long tiled slope and a three-bay window frontage, and
+         the narrow gables point up and down the wall where nobody stands. The east pair takes
+         ry:PI so its window rhythm mirrors the west's rather than presenting the blanker face. */
+      {x:-965,z: -78,w:1,d:3,storeys:2,behindWall:true,style:'plaster',ry:0,        c:'#c8b393',rc:'#8f4a39'},
+      {x:-965,z: 195,w:1,d:3,storeys:2,behindWall:true,style:'brick',  ry:0,        c:'#a98470',rc:'#7d4032'},
+      {x: 965,z: -78,w:1,d:3,storeys:2,behindWall:true,style:'brick',  ry:Math.PI,  c:'#a98470',rc:'#8f4a39'},
+      {x: 965,z: 195,w:1,d:3,storeys:2,behindWall:true,style:'plaster',ry:Math.PI,  c:'#c8b393',rc:'#7d4032'}
     ];
     for(const b of HUB_BUILD){
       /* A quarter-turn swaps the footprint's axes, so width and depth have to be swapped with it —
@@ -10268,7 +10290,7 @@ function enterWaystation(){
          corner of every rotated house. */
       const turned=Math.abs(Math.sin(b.ry||0))>0.5;
       const fw=(turned?b.d:b.w)*BUILD_CELL, fd=(turned?b.w:b.d)*BUILD_CELL, bh=b.storeys*BUILD_STOREY;
-      G.walls.push({x:b.x,z:b.z,w:fw,d:fd,h:bh,invisible:true});    // solid: you walk around a house, not through it
+      if(!b.behindWall) G.walls.push({x:b.x,z:b.z,w:fw,d:fd,h:bh,invisible:true});    // solid: you walk around a house, not through it
       /* The lead entry carries the SPEC world3d assembles from; the voxel path just draws it as a
          plain block, which is what a non-3D player already sees everywhere else in the hub. The
          second entry is the roof cap for that voxel block — lead:false so the 3D pass drops it and

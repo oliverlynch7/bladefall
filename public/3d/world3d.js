@@ -884,41 +884,29 @@ function buildHub(scene, world){
      centre/edge/corner pieces is worth doing, but a floating bowl is worse than nothing, so it is
      left out until it can be built properly. */
 
-  /* PLAZA TOWERS — a matched pair, one either side of the walk to the portals.
-     This was ONE tower on the centre line, and the centre line is the worst place in the hub for
-     a 210-unit object: it landed on the game's own waystone bonfire at (0,39) and, seen from the
-     spawn point, it hid the entire portal arc behind a grey column. Standing at spawn you could
-     not see a single gate.
-     Both traffic axes run through x~0 (spawn to the gates north, spawn to the annex south), so
-     "off the centre line" is the only workable answer and a symmetric pair is the only way to be
-     off it without looking accidental. They now frame the walk instead of blocking it, and the
-     waystone is the centrepiece again - which is what the game's own art intended.
-     The numbers: at z=140 the fan of sightlines from spawn to the eight gates spans x +-114, and
-     the towers' rotated footprint starts at 288. The nearest fixture is the Stylist at (-507,52),
-     clear by 11 units in x. Do not slide these inward without redoing that arithmetic.
-     Note they are VISUAL ONLY: world3d adds no collision, so the player walks through them.
-     Collision still comes from the game's own G.walls, which is why this rebuild keeps the
-     original gate positions and puts the rampart just behind them. */
-  const cx = (westX + eastX) / 2, cz = northZ + 713;
-  const monoX = 380;
-  const mono = [{ x: cx - monoX, z: cz }, { x: cx + monoX, z: cz }];
-  const mh = 210;
-  counts.monument = hubPiece('hubTower', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, 0, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#b9a887');
-  hubPiece('hubTowerM', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, mh * 0.59, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#c2b08c');
-  hubPiece('hubRoof', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, mh * 1.18, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#8e3b32');
-  hubPiece('hubFlag', mono, (o, c, rec) => {
-    const sc = mh * 0.5 / rec.width;
-    o.position.set(c.x, mh * 1.55, c.z); o.rotation.set(0, 0, 0); o.scale.set(sc, sc, sc);
-  }, '#d9a441');
+  /* NO FREE-STANDING MONUMENT. There was one — a 210-unit stone tower on the courtyard's centre
+     line — and it was removed rather than relocated. Three findings, in order:
+
+     1. It sat ON the game's own waystone bonfire at (0,39), and from the spawn point it hid the
+        ENTIRE portal arc behind a grey column. Screenshotted from spawn: not one gate visible.
+     2. There is nowhere in this courtyard to put a 210-unit free-standing object. Both traffic
+        axes run through x~0 (spawn to the gates north, spawn to the annex south), so it has to go
+        off-centre; but move it north and it enters the fan of spawn-to-gate sightlines, which
+        widens the closer you get to the rampart until it covers everything. Move it out to the
+        sides and it lands on the walk to the keeper bays — tried at (+-380, 140), and the camera
+        ends up inside it on the way to the Stylist. The south corners are taken by the corner
+        houses, the Postings board and the Sparring Room door. Every candidate was measured, not
+        eyeballed.
+     3. Its stated job — "a courtyard with nothing in the middle reads as an empty lot" — was
+        written when the middle really was bare paving, because the 3D layer was painting over the
+        hub's own voxel fixtures. That is fixed (see the DEFER buffer in index.html): the waystone,
+        its lanterns, the flower planters and the string lights are all back, and the waystone is
+        the centrepiece the game's art always intended. The rampart also carries nine castle
+        towers already, so the courtyard is not short of landmarks.
+
+     ART CALL, and a reversible one: this is four hubPiece() calls in git history if Oliver wants a
+     monument back. What it would need is a home that is off both walking axes AND outside the
+     sightline fan, which most likely means the annex rather than the plaza. */
 
   /* BUILDINGS. The one thing in the courtyard with a real footprint you cannot walk through, so
      these are the pieces that turn an open plaza into a place. */

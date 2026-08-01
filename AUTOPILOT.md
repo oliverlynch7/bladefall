@@ -8,7 +8,11 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
 ## Environment
 - **Read `docs/VISION.md` first.** It defines what Bladefall is (a social action-RPG - multiplayer is the point), the class-identity goal, and the money constraint. It outranks guesswork.
 - Game file: `_automation/bladefall/public/3d/index.html` (raw WebGL voxel game). Repo = the `bladefall` git submodule (remote `oliverlynch7/bladefall`).
-- **3D layer** (newer, sits over the voxel renderer, enabled with `?hero3d=1&world3d=1&nobloom`):
+- **3D layer** (sits over the voxel renderer, **ON by default** since 2026-08-01 — no flags needed).
+  The old flags survive as an OPT-OUT so the two renderers can still be A/B'd on a phone:
+  `?hero3d=0` voxel hero, `?world3d=0` voxel world (takes the mobs with it), `?mob3d=0` voxel
+  creatures only. `?nobloom` is no longer required and no longer changes whether the 3D layer
+  appears — it is now just the bloom switch it says it is.
   - `public/3d/hero3d.js` — the player character (glTF, skinned, class skins, faces, weapons)
   - `public/3d/world3d.js` — the WORLD: reads the game's own `G.deco` and `G.segments` and draws
     them with real models. Converts every zone at once; it is not a per-level rebuild.
@@ -79,10 +83,24 @@ Worlds standard), and the graphics need finishing before he shows more people.
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's
       structural deco at the source the way the rampart dividers were tagged. Floor is already
       Floor_Brick, rampart columns already placed.
-- [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
-      what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
-      game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the
-      default. Do NOT flip it while nobloom is still needed.
+- [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
+      true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
+      `https://…/3d/` with no query string at all is the 3D game.
+      **The bloom blocker was STALE.** It had already been fixed and the note never caught up:
+      `flushHero3D()` is called AFTER `PostFX.end()` (index.html, main loop), so the 3D layer is
+      drawn onto the finished composited frame instead of into a buffer the composite then paints
+      over. Measured, not assumed — rendered with bloom ON and no `nobloom` and the whole 3D world
+      is there: `__world3d()` ready, 115 road tiles, 1299 floor tiles, 18 live creatures.
+      Verified with NO flags in the URL: title screen, the Waystation (25 building meshes, 0
+      missing, cobbles + lanterns + gatehouses) and the Outskirts (full 3D world, roads, 18 mobs,
+      21 draw calls). `?world3d=0&hero3d=0` was also rendered and reports all three layers off, so
+      the escape hatch still works.
+      *Known consequence, NOT a regression, worth Oliver's eye:* the 3D layer draws after the
+      PostFX grade, so it gets no bloom, tone-map, vignette or the +13% saturation the voxel
+      backdrop gets. In practice the two read consistently (compare `_shot/out/road-ship.png`
+      against `bloom-on-world.png`), but a bright voxel sky over an ungraded 3D world is the one
+      place it could show. Giving the 3D layer the grade means rendering Three into the game's own
+      offscreen FBO, which Three does not support without reaching into renderer internals.
 - [ ] **Class distinctiveness pass.** The top design goal. Use `_duel/` to measure, not opinion.
       First finding already on record: ranged beats melee 74%-24%, so melee needs an anti-kite
       answer. Work one class-pair at a time and re-run the matrix after each change.

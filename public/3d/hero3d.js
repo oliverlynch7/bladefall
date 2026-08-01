@@ -29,7 +29,11 @@ const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplica
    y=14, head box tops out near y=33 above that) and our glTF characters are 1.75m, so ~26.
    Exposed as a control because it is the one number most likely to need a nudge by eye. */
 export const HERO3D = {
-  on: false,
+  /* ON by default. What Oliver shows people has to be what they get - a renderer that only
+     appears when you know the URL is not shipped, it is a demo. Every failure path here already
+     degrades to the voxel hero rather than to a missing character (see drawHero3D's catch), so
+     defaulting to on cannot cost more than the character looking like it used to. */
+  on: true,
   /* Which skin the hero wears. 'base' is the texture the RPG pack shipped with and is the
      default; any CLASS_SKINS id is an unlockable recolour. Set via ?skin= or __hero3dSetSkin. */
   skinId: 'base',
@@ -50,14 +54,15 @@ export const HERO3D = {
 window.HERO3D = HERO3D;
 
 /* Reachable by URL so it can be tried on a phone without a console:
-     /3d/?hero3d=1            enable the 3D hero
-     /3d/?hero3d=1&scale=30   ...and override the units-per-metre guess
-     /3d/?hero3d=1&model=Rogue
+     /3d/?hero3d=0            fall BACK to the voxel hero (the flag is now an opt-out)
+     /3d/?scale=30            override the units-per-metre guess
+     /3d/?model=Rogue
    Anything unset keeps its default, and no parameter can break the game - the flag only
-   gates an additive draw. */
+   gates an additive draw. The flag reads both ways on purpose: it is the only way to A/B the
+   two renderers on a phone, and that comparison is still worth having. */
 try {
   const q = new URLSearchParams(location.search);
-  if(q.get('hero3d') === '1' || q.get('hero3d') === 'true') HERO3D.on = true;
+  if(q.has('hero3d')) HERO3D.on = (q.get('hero3d') === '1' || q.get('hero3d') === 'true');
   if(q.get('scale')) HERO3D.scale = parseFloat(q.get('scale')) || HERO3D.scale;
   if(q.get('model')) HERO3D.model = q.get('model');
   if(q.get('yoff'))  HERO3D.yOff  = parseFloat(q.get('yoff')) || 0;

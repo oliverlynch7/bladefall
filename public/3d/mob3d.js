@@ -69,11 +69,15 @@ const _mobModels = new Map();
 const _mobPool = [];
 let _mobGroup = null;
 
-export const MOB3D = { on:false, live:0, pooled:0, missing:[], err:null };
+export const MOB3D = { on:true, live:0, pooled:0, missing:[], err:null };
 try {
   const q = new URLSearchParams(location.search);
-  /* Rides with world3d: a 3D world full of voxel monsters looks worse than either alone. */
-  if(q.get('world3d') === '1' || q.get('mob3d') === '1') MOB3D.on = true;
+  /* Rides with world3d: a 3D world full of voxel monsters looks worse than either alone. Both
+     flags read as an opt-OUT now that the layer is on by default; `?mob3d=` wins where both are
+     given, so the creatures can be turned off on their own to isolate a problem. */
+  const yes = v => (v === '1' || v === 'true');
+  if(q.has('world3d')) MOB3D.on = yes(q.get('world3d'));
+  if(q.has('mob3d'))   MOB3D.on = yes(q.get('mob3d'));
 } catch(e){}
 
 async function loadMobModel(file){

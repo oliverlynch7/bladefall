@@ -39,16 +39,20 @@ import { clearMobs } from './mob3d.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 
 export const WORLD3D = {
-  on: false,
+  /* ON by default, same reasoning as HERO3D. A build fault sets this back to false and logs, so
+     the worst case is the zone rendering exactly as it did before the 3D layer existed. */
+  on: true,
   ready: false,
   built: null,        // signature of the level currently built, so rebuilds only happen on change
   counts: {},
   err: null,
 };
 
+/* `?world3d=0` goes back to the voxel world. Reads both ways so the two renderers can still be
+   compared on a phone without a console. */
 try {
   const q = new URLSearchParams(location.search);
-  if(q.get('world3d') === '1' || q.get('world3d') === 'true') WORLD3D.on = true;
+  if(q.has('world3d')) WORLD3D.on = (q.get('world3d') === '1' || q.get('world3d') === 'true');
 } catch(e){}
 
 /* ── palette ──────────────────────────────────────────────────────────────────

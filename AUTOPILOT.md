@@ -84,6 +84,16 @@ Worlds standard), and the graphics need finishing before he shows more people.
 - [ ] **Mobs in 3D.** 27 mob types are cast onto real models in the slice already; port that into
       world3d so levels are populated with real creatures. SkeletonUtils.clone is verified as the
       right technique (32 characters, 32 independent skeletons).
+      *(progress 2026-08-01: this is LIVE and working — `mob3d.js` reports `on:true` with 18 real
+      creatures in Outskirts. Audited `MOB_CAST` against the game's own `ENEMY` table: 40 types
+      exist, 27 were cast, and 3 ordinary mobs had been silently dropped by the port even though
+      the slice casts them. Added goblin (Orc_Enemy), slimelet (Green_Blob) and sparkling (Hywirl)
+      with the slice's own files/rigs/heights — spawned and eyeballed all three. That is 30/40.
+      Re-run the audit any time with `node _shot/shot.js --eval` over `Object.keys(__BF3.ENEMY)`.
+      The 10 left are NOT autopilot work: 7 are BOSSES (brute, warden, archer, sorcerer, colossus,
+      king, tyrant) and picking a creature model for a boss is an art-direction call — the slice
+      only has a generic `bf:'boss'` Dragon_Evolved placeholder. The other 3 are mimic, dummy and
+      bosscrystal, which are objects rather than creatures. Needs Oliver.)*
 - [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(progress 2026-08-01: the "not one uniform green" half is DONE, but not via a second grass

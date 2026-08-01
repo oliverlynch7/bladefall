@@ -34,6 +34,11 @@ const MOB_CAST = {
   frostlobber:   { file:'Glub_Evolved', rig:'fly', h:1.43, skin:'frost' },
   frostshell:    { file:'Yeti', rig:'blob', h:1.34 },
   galewisp:      { file:'Armabee_Evolved', rig:'fly', h:0.75 },
+  /* goblin / slimelet / sparkling were dropped by the original port even though the slice casts
+     all three. Same files, rigs and heights as the slice's MONSTERS rows, so they match what
+     Oliver tuned there. Without them these mobs fell back to the voxel renderer and stood out as
+     the only flat-shaded creatures in an otherwise 3D fight. */
+  goblin:        { file:'Orc_Enemy', rig:'blob', h:0.95 },
   grunt:         { file:'Orc', rig:'ground', h:1.35 },
   magmaskit:     { file:'Green_Spiky_Blob', rig:'blob', h:0.79, skin:'magma' },
   marblestatue:  { file:'Goleling_Evolved', rig:'fly', h:1.5 },
@@ -43,6 +48,8 @@ const MOB_CAST = {
   shadeling:     { file:'Demon', rig:'ground', h:1.45 },
   siegeknight:   { file:'Orc', rig:'ground', h:1.64, skin:'steel' },
   slime:         { file:'Pink_Slime', rig:'blob', h:0.7 },
+  slimelet:      { file:'Green_Blob', rig:'blob', h:0.55 },
+  sparkling:     { file:'Hywirl', rig:'fly', h:0.72 },
   sporeback:     { file:'Mushnub_Evolved', rig:'blob', h:1.05 },
   sunpriest:     { file:'Wizard', rig:'blob', h:1.57, skin:'holy' },
   thornboar:     { file:'Cactoro', rig:'blob', h:1.0 },

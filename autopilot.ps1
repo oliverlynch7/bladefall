@@ -44,7 +44,13 @@ Read these two files FIRST, in this order, and follow them exactly:
   1. docs/VISION.md      - what the game is, priorities, what you may decide alone
   2. AUTOPILOT.md        - workflow, verification gate, branch rules, Telegram format
 
-Then do ONE meaningful chunk from the AUTOPILOT.md backlog. One chunk, not three.
+Then work the AUTOPILOT.md backlog. Do as MUCH as you can verify properly in this run - Oliver
+wants real throughput, not a token trickle, so keep going through backlog items until you run low
+on context rather than stopping after one. Commit after EACH item so a later failure never
+discards earlier verified work.
+
+Depth over speed on each item: it is better to finish and verify three things than to half-do
+eight. Verified work only - unverified work is worse than no work.
 
 Non-negotiable:
 - Work on the bladefall-autopilot branch only. NEVER commit to main.

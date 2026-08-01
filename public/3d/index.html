@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.400.0-autopilot';
+const VERSION3D='1.401.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10200,10 +10200,14 @@ function enterWaystation(){
        pair closes the walk down to the annex. Each faces INWARD (ry turns the door wall toward the
        middle of the plaza) so you always see a frontage, never a blank back wall. */
     const HUB_BUILD=[
-      {x:-800,z:-350,w:3,d:2,storeys:2,style:'plaster',ry: Math.PI/2,c:'#c8b393',rc:'#8f4a39'},
-      {x: 800,z:-350,w:3,d:2,storeys:2,style:'brick',  ry:-Math.PI/2,c:'#a98470',rc:'#7d4032'},
-      {x:-840,z: 395,w:2,d:2,storeys:1,style:'brick',  ry: Math.PI/2,c:'#a98470',rc:'#8f4a39'},
-      {x: 840,z: 395,w:2,d:2,storeys:1,style:'plaster',ry:-Math.PI/2,c:'#c8b393',rc:'#7d4032'}
+      /* ry turns the DOOR wall toward the plaza. A quarter-turn maps the building's local -Z (the
+         door face) onto world -X, so a house on the WEST side needs the negative turn to end up
+         facing east. Getting this backwards is invisible in the numbers and obvious the moment you
+         look: four houses presenting their back walls to the courtyard. */
+      {x:-800,z:-350,w:3,d:2,storeys:2,style:'plaster',ry:-Math.PI/2,c:'#c8b393',rc:'#8f4a39'},
+      {x: 800,z:-350,w:3,d:2,storeys:2,style:'brick',  ry: Math.PI/2,c:'#a98470',rc:'#7d4032'},
+      {x:-840,z: 395,w:2,d:2,storeys:1,style:'brick',  ry:-Math.PI/2,c:'#a98470',rc:'#8f4a39'},
+      {x: 840,z: 395,w:2,d:2,storeys:1,style:'plaster',ry: Math.PI/2,c:'#c8b393',rc:'#7d4032'}
     ];
     for(const b of HUB_BUILD){
       /* A quarter-turn swaps the footprint's axes, so width and depth have to be swapped with it —

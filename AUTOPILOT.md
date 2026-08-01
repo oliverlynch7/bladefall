@@ -72,6 +72,18 @@ Worlds standard), and the graphics need finishing before he shows more people.
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's
       structural deco at the source the way the rampart dividers were tagged. Floor is already
       Floor_Brick, rampart columns already placed.
+      (progress 2026-08-01: assembler PORTED and working. `planBuilding`/`buildBuildings` in
+      world3d.js build from the village kit and instance per part-primitive — 4 houses = 116 pieces
+      in 31 draw calls. Specs are tagged at the source: `enterWaystation` pushes `kind:'building'`
+      deco carrying cells/storeys/style/ry plus a real `G.walls` box, so the houses are SOLID —
+      walk-into proven, not assumed. Roofs pick from the kit's full 13-size matrix and close both
+      gable ends with Roof_Front_Brick*. `window.__world3dParts()` dumps measured part sizes.
+      NEXT: only the four corner plots are filled. Fill the west/east perimeter strip (x ±928..±1002,
+      unreachable behind the collision wall, so shallow d=1 frontages need no new collision), and
+      give the Quartermaster / Smith / Drillmaster / Beastkeeper bays a shopfront behind each keeper
+      so the hub reads as a town rather than a walled yard.
+      ALSO SEEN, not fixed: world3d's monument sits at (0,47), dead centre of the spawn->gate walk,
+      and from the spawn point it blocks the whole view of the portal arc.)
 - [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
       what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
       game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the

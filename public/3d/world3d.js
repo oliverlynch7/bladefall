@@ -142,9 +142,31 @@ const VIL_STYLE = {
              win:'Wall_UnevenBrick_Window_Wide_Round', corner:'Corner_Exterior_Brick',
              floor:'Floor_UnevenBrick' },
 };
-const VIL_ROOFS = ['Roof_RoundTiles_4x4', 'Roof_RoundTiles_4x6', 'Roof_RoundTiles_4x8'];
+/* The kit ships a whole MATRIX of gable roofs, not the three sizes slice3d used. That matters: a
+   3x2-cell house is 6x4 kit units, and forcing it onto a 4x4 roof meant a 65% stretch across the
+   ridge - the tiles smeared and the gable pitch flattened. With the real matrix almost every
+   building lands on an exact size and the roof is drawn as it was modelled. */
+const VIL_ROOF_SIZES = [[4,4],[4,6],[4,8],[6,4],[6,6],[6,8],[6,10],[6,12],[6,14],
+                        [8,8],[8,10],[8,12],[8,14]];
+const VIL_ROOFS = VIL_ROOF_SIZES.map(s => 'Roof_RoundTiles_' + s[0] + 'x' + s[1]);
+/* Nearest roof by footprint, scored on both axes so a long thin house cannot be handed a square
+   roof just because one side happens to match. */
+function roofFor(w, d){
+  const tw = w * VIL_GRID, td = d * VIL_GRID;
+  let best = VIL_ROOF_SIZES[0], bestErr = Infinity;
+  for(const s of VIL_ROOF_SIZES){
+    const err = Math.abs(s[0] - tw) / tw + Math.abs(s[1] - td) / td;
+    if(err < bestErr){ bestErr = err; best = s; }
+  }
+  return 'Roof_RoundTiles_' + best[0] + 'x' + best[1];
+}
+/* GABLE ENDS. The RoundTiles roofs are open at both ends - the kit expects a Front piece to close
+   them - so without these you look straight through the gable into the roof void and out the other
+   side. One per roof width, matched by the roof's own name. */
+const VIL_ROOF_FRONTS = { 4:'Roof_Front_Brick4', 6:'Roof_Front_Brick6', 8:'Roof_Front_Brick8' };
 const VIL_PARTS = [...new Set([].concat(
-  ...Object.values(VIL_STYLE).map(s => Object.values(s)), VIL_ROOFS, ['Prop_Chimney']))];
+  ...Object.values(VIL_STYLE).map(s => Object.values(s)), VIL_ROOFS,
+  Object.values(VIL_ROOF_FRONTS), ['Prop_Chimney']))];
 const _partCache = new Map();     // name -> { subs:[{geo,mat}], size:Vector3 } or null
 
 /* Load one modular part, keeping EVERY primitive with its own material and baking each into the
@@ -278,10 +300,22 @@ function planBuilding(spec, out){
   for(let i = 0; i < w; i++) for(let j = 0; j < d; j++)
     add(st.floor, i * g + g / 2, 0, j * g + g / 2, 0);
 
-  /* Roof: pick the nearest gable and stretch it to the footprint. Tiling ridge pieces instead
-     would need a special case per size for no visible gain at this distance. */
-  const roofName = d >= 4 ? VIL_ROOFS[2] : d >= 3 ? VIL_ROOFS[1] : VIL_ROOFS[0];
-  add(roofName, w * g / 2, storeys * H, d * g / 2, 0, { x: w * g + 0.6, z: d * g + 0.6 });
+  /* Roof: the closest gable in the kit, then a small stretch onto the exact footprint plus an
+     eaves overhang. Because roofFor almost always finds an exact match that stretch is a few per
+     cent, not the 65% the three-size table forced. */
+  const roofName = roofFor(w, d);
+  const roofFit = { x: w * g + 0.6, z: d * g + 0.6 };
+  add(roofName, w * g / 2, storeys * H, d * g / 2, 0, roofFit);
+  /* Close BOTH gable ends. The ridge runs along the building's depth, so the triangles face the
+     front and back walls - which for a house turned toward the plaza means the open one is the
+     first thing you see. The front piece is authored to the same width as the roof it belongs to,
+     so it takes the roof's own x fit and nothing else. */
+  const front = VIL_ROOF_FRONTS[+(roofName.match(/_(\d+)x/) || [0, 4])[1]];
+  if(front){
+    const fit = { x: roofFit.x, z: null, useRoof: roofName };
+    add(front, w * g / 2, storeys * H, 0,     0,       fit);
+    add(front, w * g / 2, storeys * H, d * g, Math.PI, fit);
+  }
   add('Prop_Chimney', w * g * 0.25, storeys * H + 0.4, d * g * 0.5, 0);
 }
 
@@ -311,10 +345,19 @@ function buildBuildings(specs){
                        b.z + (-pl.x * s + pl.z * c) * VIL_U);
         o.rotation.set(0, (b.ry || 0) + (pl.ry || 0), 0);
         /* Only the roof is fitted; everything else is uniform, because a stretched wall stretches
-           its plaster texture with it and the mortar lines stop lining up between neighbours. */
-        const fx = pl.fit && rec.size.x > 1e-4 ? pl.fit.x / rec.size.x : 1;
-        const fz = pl.fit && rec.size.z > 1e-4 ? pl.fit.z / rec.size.z : 1;
-        o.scale.set(VIL_U * fx, VIL_U, VIL_U * fz);
+           its plaster texture with it and the mortar lines stop lining up between neighbours.
+           `useRoof` means "take the ROOF's stretch, not your own": a gable end is authored narrower
+           than the roof bounding box it caps (6.69 against 8.25, the difference being the eaves
+           overhang), so fitting it to the footprint itself would leave it too wide by that gap. */
+        const fitRec = pl.fit && pl.fit.useRoof ? _partCache.get(pl.fit.useRoof) : rec;
+        const src = fitRec || rec;
+        const fx = pl.fit && pl.fit.x != null && src.size.x > 1e-4 ? pl.fit.x / src.size.x : 1;
+        const fz = pl.fit && pl.fit.z != null && src.size.z > 1e-4 ? pl.fit.z / src.size.z : 1;
+        /* A fitted part takes its x fit on the Y axis too. Squeezing a roof across the ridge while
+           leaving its height alone does not just look off, it changes the PITCH - the 6x4 gable
+           narrowed to 80% stood 25% steeper than the kit modelled it, and a 1-storey cottage ended
+           up with a roof half again as tall as its walls. Scaling both together keeps the angle. */
+        o.scale.set(VIL_U * fx, VIL_U * (pl.fit ? fx : 1), VIL_U * fz);
         o.updateMatrix();
         m.setMatrixAt(i, o.matrix);
       }
@@ -1025,3 +1068,8 @@ export function syncWorld(scene){
 window.__world3d = () => ({ on: WORLD3D.on, ready: WORLD3D.ready, built: WORLD3D.built,
                             counts: WORLD3D.counts, err: WORLD3D.err });
 window.__world3dRebuild = () => { WORLD3D.built = null; return 'will rebuild next frame'; };
+/* Measured size of every loaded village part, so a build can be checked against the kit's REAL
+   dimensions instead of against what a filename implies. The roof matrix was picked off the names
+   alone once and produced a 65%-stretched gable that looked deliberate in a screenshot. */
+window.__world3dParts = () => Object.fromEntries([..._partCache].map(([k, v]) =>
+  [k, v ? { size: [+v.size.x.toFixed(2), +v.size.y.toFixed(2), +v.size.z.toFixed(2)], subs: v.subs.length } : null]));

@@ -61,6 +61,23 @@ Non-negotiable:
 try {
   $out = & $claude -p $prompt --permission-mode acceptEdits 2>&1
   $out | Out-File -FilePath $log -Append -Encoding utf8
+
+  # A failing autopilot must be LOUD. Ten runs in a row died on an expired auth token, exiting in
+     #   five seconds each, and the only evidence was a log nobody was reading - Oliver reasonably
+     #   assumed work was happening overnight when nothing was. Auth failure now pings Telegram once
+     #   per day, so a broken automation announces itself instead of quietly doing nothing. 
+  if ($out -match 'Failed to authenticate|401|OAuth access token has expired') {
+    $stamp = Join-Path $repo '_autopilot_authwarn'
+    $today = (Get-Date -Format 'yyyy-MM-dd')
+    $last  = if (Test-Path $stamp) { Get-Content $stamp -Raw } else { '' }
+    if ($last.Trim() -ne $today) {
+      $today | Out-File -FilePath $stamp -Encoding utf8 -NoNewline
+      $body = '{"action":"tgPing","password":"oliverNCA2026","text":"BLADEFALL autopilot is DOWN - Claude could not authenticate, so no work is happening. Fix: open a terminal and run claude, then log in. It will resume on its own after that."}'
+      try { Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json' -Body $body | Out-Null } catch {}
+    }
+    Log 'run end (AUTH FAILURE - no work done)'
+    exit 0
+  }
   Log 'run end'
 } catch {
   Log "FAILED: $_"

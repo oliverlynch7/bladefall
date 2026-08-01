@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.403.0-autopilot';
+const VERSION3D='1.404.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3064,18 +3064,40 @@ function rotZ(a){ CURM=mMul(CURM,mRZ(a)); }
 function rot3(m){ // upper 3x3 (rotation-ish) for normals; scale is applied after, so CURM stays rotation+translation
   return [m[0],m[1],m[2], m[4],m[5],m[6], m[8],m[9],m[10]]; }
 let SIL=null, SILA=0.9;   // occlusion-silhouette pass: when set, every box draws as a flat unlit shape in this colour
+/* ---- DEFERRED (post-3D) VOXEL BUFFER ----------------------------------------------------------
+   flushHero3D clears the depth buffer before the Three.js pass, so the 3D layer paints over every
+   voxel pixel it covers — including voxel props standing IN FRONT of it. In the Waystation that
+   was fatal: world3d lays a paved courtyard, and the paving tiles BEHIND a shopkeeper project
+   above them on screen, so switching world3d on erased every keeper, the waystone, the portal arc,
+   the torches and the planters, leaving floating name tags over an empty yard.
+   The hub's fixtures are hand-authored voxel art with no 3D equivalent, so they cannot simply be
+   converted. Instead they are held back here and replayed AFTER Three has rendered, testing
+   against Three's depth buffer — which is directly comparable, because hero3d's camera IS the
+   game's own PROJ/VIEW rather than a rebuilt one. Result: keepers stand on the 3D paving and are
+   correctly hidden by the 3D houses.
+   Only pushInst is touched, so nothing about how the hub is DRAWN had to move; the callers just
+   raise DEFER around the draws that belong on top. */
+let DEFER=false, defCap=4096, defData=new Float32Array(defCap*ISTRIDE), defCount=0;
+let HUBDEFER=false;   // set per-frame by drawCourse: "the 3D hub is up, so hold its fixtures back"
 // accumulate one instance record (CURM is rotation+translation only; scale rides separately)
 function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
-  if(instCount>=instCap){ instCap*=2; const n=new Float32Array(instCap*ISTRIDE); n.set(instData); instData=n; }
-  let o=instCount*ISTRIDE, m=CURM;
-  instData[o]=m[0];instData[o+1]=m[1];instData[o+2]=m[2];instData[o+3]=m[3];
-  instData[o+4]=m[4];instData[o+5]=m[5];instData[o+6]=m[6];instData[o+7]=m[7];
-  instData[o+8]=m[8];instData[o+9]=m[9];instData[o+10]=m[10];instData[o+11]=m[11];
-  instData[o+12]=m[12];instData[o+13]=m[13];instData[o+14]=m[14];instData[o+15]=m[15];
-  instData[o+16]=sx;instData[o+17]=sy;instData[o+18]=sz;
-  instData[o+19]=cr;instData[o+20]=cg;instData[o+21]=cb;instData[o+22]=ca;
-  instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
-  instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
+  let buf, o;
+  if(DEFER){
+    if(defCount>=defCap){ defCap*=2; const n=new Float32Array(defCap*ISTRIDE); n.set(defData); defData=n; }
+    buf=defData; o=defCount*ISTRIDE; defCount++;
+  } else {
+    if(instCount>=instCap){ instCap*=2; const n=new Float32Array(instCap*ISTRIDE); n.set(instData); instData=n; }
+    buf=instData; o=instCount*ISTRIDE; instCount++;
+  }
+  const m=CURM;
+  buf[o]=m[0];buf[o+1]=m[1];buf[o+2]=m[2];buf[o+3]=m[3];
+  buf[o+4]=m[4];buf[o+5]=m[5];buf[o+6]=m[6];buf[o+7]=m[7];
+  buf[o+8]=m[8];buf[o+9]=m[9];buf[o+10]=m[10];buf[o+11]=m[11];
+  buf[o+12]=m[12];buf[o+13]=m[13];buf[o+14]=m[14];buf[o+15]=m[15];
+  buf[o+16]=sx;buf[o+17]=sy;buf[o+18]=sz;
+  buf[o+19]=cr;buf[o+20]=cg;buf[o+21]=cb;buf[o+22]=ca;
+  buf[o+23]=er;buf[o+24]=eg;buf[o+25]=eb;
+  if(typeof VOXMET!=='undefined') VOXMET.submitted++;
 }
 /* Draw the Three.js layer onto the finished, already-composited frame.
    Deliberately after PostFX.end(): the 3D characters and world therefore do not receive bloom,
@@ -3096,6 +3118,21 @@ function flushHero3D(){
   gl.depthMask(true);
   gl.clear(gl.DEPTH_BUFFER_BIT);
   window.drawHero3D(q[0], q[1]);
+}
+/* Replay the deferred voxel fixtures on top of the finished 3D pass. Three leaves its own GL state
+   behind, so the scene program and vertex arrays are re-established first — bindSceneVA is the
+   same hook the post-processing passes use for exactly this. Depth TESTING stays on so the 3D
+   houses still occlude what stands behind them; only the ordering changed. */
+function flushDeferred(){
+  if(!defCount) return;
+  bindSceneVA();
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, defData.subarray(0,defCount*ISTRIDE), gl.DYNAMIC_DRAW);
+  INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,defCount);
+  if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
+  defCount=0;
 }
 function flushBatch(){
   /* The 3D layer is NOT drawn here any more - see flushHero3D(), called after PostFX.end().
@@ -3190,6 +3227,11 @@ function setSceneLights(p,t){ // gameplay: low cold ambient + a carried light + 
   setT(U.uPL1,U.uPC1,near[0]); setT(U.uPL2,U.uPC2,near[1]); setT(U.uPL3,U.uPC3,near[2]); }
 function glowFX(x,y,z,r,color,a){ // cheap additive bloom halo for emissive light sources
   if(qLow()) return;   // skip the glow halos entirely on Low quality
+  /* A halo is a stack of large black boxes that only reads as light under ADDITIVE blending with
+     depth writes off. The deferred pass replays its whole buffer under one blend state, so a halo
+     sent there would darken the plaza and punch a 20-unit depth hole around every torch. The lamp
+     itself is emissive and still shows; only its bloom is dropped. */
+  if(DEFER) return;
   gl.blendFunc(gl.SRC_ALPHA,gl.ONE); gl.depthMask(false);
   for(let i=3;i>=1;i--){ const s=r*i*0.7; bx(x,y,z,s,s,s,'#000000',color,a/(i*1.25)); }
   gl.depthMask(true); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); }
@@ -10119,7 +10161,11 @@ function enterWaystation(){
          that box would shrink it to 20 units tall; stacking segments fills the height at the
          right thickness. The voxel path ignores both fields. */
       G.deco.push({x:mx,z:mz-6,y0:0,w:20,h:150,d:82,c:'#2b3040',kind:'pillar',stack:true});
-      G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152'}); } }
+      /* The cap carries the same kind so the 3D hub can drop the pair together: buildHub already
+         raises a real castle tower between every pair of gates, and the voxel divider standing in
+         front of it made each bay read as two dividers deep. Untagged, the cap alone survived and
+         floated at 150 with nothing under it. */
+      G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152',kind:'pillar'}); } }
   // REPEATABLE ACTIVITY ANNEX — three distinct plazas so each activity has its own room to breathe:
   // the Abyss (west), the Treasure Sprint (east), and the Arena (deep centre). Further widened by the space pass.
   G.deco.push({x:0,z:610,y0:0,w:720,h:1.4,d:96,c:'#8f744e'});                                   // annex approach walk
@@ -11763,6 +11809,12 @@ function drawCourse(s,t){
   /* Is world3d laying real ground tiles this frame? Checked once, not per segment. */
   const _w3dGround = (() => { const w = window.__world3d && window.__world3d();
     return !!(w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
+  /* Is this the 3D Waystation? Then the voxel fixtures that world3d has no equivalent for are
+     DEFERRED past the Three pass rather than drawn under it (see the DEFER buffer). Set once per
+     frame here and read again by render() for drawWaystation, so the two can never disagree about
+     whether the hub props were held back. */
+  HUBDEFER = !!(G && G.hub && window.__world3d && (() => { const w = window.__world3d();
+    return !!(w && w.on && w.ready && w.counts && w.counts.hub); })());
   // the hazard lake below everything
   bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
@@ -11887,12 +11939,14 @@ function drawCourse(s,t){
     }
   }
   // torches: flickering flames along the halls
+  if(HUBDEFER) DEFER=true;             // hub torches stand ON the 3D paving, so they go on top of it
   if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
     voxDraw('torch.post',{x:tc.x,z:tc.z,seed:Math.round((tc.ph||0)*100)});
     bx(tc.x,56,tc.z, 7,9,7,'#c9783b','#713418',fl*0.84);
     bx(tc.x+fk*1.2,63,tc.z, 4,6,4,'#f0bd68','#a65e22',fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,'#ffe39a','#f0bd68',fl*0.9);  // flickering flame tongues
     bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
     glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
+  DEFER=false;
   // pressure plates
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue; const py=pl.y||0;
     bx(pl.x,py+1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
@@ -11907,6 +11961,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(w && w.on && w.ready); })();
+  if(HUBDEFER) DEFER=true;             // the hub's lantern posts and annex pillars, likewise
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
     if(ob.treeCol && _w3dOn) continue;            // world3d draws the real tree; skip the voxel trunk
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
@@ -11916,16 +11971,28 @@ function drawCourse(s,t){
       bx(ob.x,ob.h*0.52,ob.z, ob.w*0.5,ob.h*0.9,ob.d*1.06, tint(s.ground,'#fff',0.06));
       bx(ob.x,ob.h+2.5,ob.z, ob.w*1.35,5,ob.d*1.35, tint(s.ground,'#fff',0.13)); }
   }
+  DEFER=false;
   // theme decorations
   /* When world3d is drawing the level in 3D, the voxel deco pass must not also run: both draw
      the same G.deco list, so leaving it on renders every prop twice - once flat and once lit,
      z-fighting against each other. */
-  /* Also re-enabled when world3d has SKIPPED this level (the hub), or its deco would vanish
-     entirely - gated off here while nothing draws it there. */
+  /* THE HUB IS THE EXCEPTION. buildHub derives the courtyard from G.gates and converts no deco at
+     all, so gating it off there deleted the waystone basin, the flower planters, the lantern
+     posts, the rampart pillars and the annex plazas outright. They are drawn again, deferred past
+     the 3D pass. Three things are still dropped, all of them because world3d already builds a
+     better version in the same spot:
+       - kind:'building' — world3d assembles a real house from that spec; the voxel box is the
+         low-detail stand-in and would sit as a slab inside the house.
+       - kind:'pillar' — buildHub raises a castle tower between every pair of gates already.
+       - anything standing 3 units or less — that is floor PAINT (flagstone lanes, plaza slabs),
+         which the 3D paving has already replaced. Re-drawing it a unit above the tiles only
+         z-fights, and the lanterns already do the wayfinding job it was there for. */
   const _w3d = window.__world3d && window.__world3d();
   const _w3dDrawing = !!(_w3d && _w3d.on && _w3d.ready);
-  if(!_w3dDrawing)
+  if(HUBDEFER) DEFER=true;
+  if(!_w3dDrawing || HUBDEFER)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    if(HUBDEFER && (d.kind==='building' || d.kind==='pillar' || (d.y0||0)+(d.h||0)<=3)) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
@@ -11960,6 +12027,7 @@ function drawCourse(s,t){
       for(const s of [-1,1]) bx(d.x+s*d.w*0.7,d.h*0.08,d.z+s*d.w*0.3, d.w*0.4,d.h*0.14,d.w*0.4, stD);   // rubble
       bx(d.x,d.h*0.9,d.z+d.w*0.5, d.w*0.6,d.h*0.08,1.4, ms,ms,0.4); }                         // moss
   }
+  DEFER=false;
 }
 function weaponMesh(w,swing){
   // drawn in hand space: +y up along the blade
@@ -13529,7 +13597,9 @@ function render(t){
     bx(s.x,sy+26,s.z, 16,40,9, c3, c4, pu);
     bx(s.x,sy+26,s.z, 5,30,11, c5, c5, pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, c5,c5,sp?0.22:0.5); } }
-  if(G.hub) drawWaystation(t);
+  /* The keepers, the waystone and the portal arc. HUBDEFER (set in drawCourse this same frame)
+     sends them into the deferred buffer so the 3D paving cannot paint over the shopkeepers. */
+  if(G.hub){ if(HUBDEFER) DEFER=true; drawWaystation(t); DEFER=false; }
   if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
     const n=G.npc;
     pushM(); mv(n.x,0,n.z); drawShadeModel(t,curZone().id); popM();
@@ -13850,6 +13920,7 @@ function frame(ts){
   flushBatch();                       // draw whatever boxes are still pending at frame end
   PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
   flushHero3D();                      // 3D hero/world/mobs go on top of the COMPOSITED frame
+  flushDeferred();                    // …and the hub's voxel fixtures go on top of THAT (see DEFER)
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   requestAnimationFrame(frame);
 }

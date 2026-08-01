@@ -884,16 +884,24 @@ function buildHub(scene, world){
      centre/edge/corner pieces is worth doing, but a floating bowl is worse than nothing, so it is
      left out until it can be built properly. */
 
-  /* CENTREPIECE. A courtyard with nothing in the middle reads as an empty lot; a monument gives
-     the plaza a focus to gather around and orient by, which is the point of a social hub. Placed
-     on the courtyard's centre line, forward of the gates so it never blocks a portal. */
-  /* Well clear of the gate approach. At +430 it sat right on the walking line between spawn and
-     the portals - the camera ended up inside it. Note it is VISUAL ONLY: world3d adds no
-     collision, so the player walks through it. Collision still comes from the game's own G.walls,
-     which is why this rebuild deliberately keeps the original gate positions and puts the rampart
-     just behind them rather than moving anything the physics depends on. */
-  const cx = (westX + eastX) / 2, cz = northZ + 620;
-  const mono = [{ x: cx, z: cz }];
+  /* PLAZA TOWERS — a matched pair, one either side of the walk to the portals.
+     This was ONE tower on the centre line, and the centre line is the worst place in the hub for
+     a 210-unit object: it landed on the game's own waystone bonfire at (0,39) and, seen from the
+     spawn point, it hid the entire portal arc behind a grey column. Standing at spawn you could
+     not see a single gate.
+     Both traffic axes run through x~0 (spawn to the gates north, spawn to the annex south), so
+     "off the centre line" is the only workable answer and a symmetric pair is the only way to be
+     off it without looking accidental. They now frame the walk instead of blocking it, and the
+     waystone is the centrepiece again - which is what the game's own art intended.
+     The numbers: at z=140 the fan of sightlines from spawn to the eight gates spans x +-114, and
+     the towers' rotated footprint starts at 288. The nearest fixture is the Stylist at (-507,52),
+     clear by 11 units in x. Do not slide these inward without redoing that arithmetic.
+     Note they are VISUAL ONLY: world3d adds no collision, so the player walks through them.
+     Collision still comes from the game's own G.walls, which is why this rebuild keeps the
+     original gate positions and puts the rampart just behind them. */
+  const cx = (westX + eastX) / 2, cz = northZ + 713;
+  const monoX = 380;
+  const mono = [{ x: cx - monoX, z: cz }, { x: cx + monoX, z: cz }];
   const mh = 210;
   counts.monument = hubPiece('hubTower', mono, (o, c, rec) => {
     const sc = mh * 0.62 / rec.width;

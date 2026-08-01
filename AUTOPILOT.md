@@ -78,12 +78,26 @@ Worlds standard), and the graphics need finishing before he shows more people.
       deco carrying cells/storeys/style/ry plus a real `G.walls` box, so the houses are SOLID —
       walk-into proven, not assumed. Roofs pick from the kit's full 13-size matrix and close both
       gable ends with Roof_Front_Brick*. `window.__world3dParts()` dumps measured part sizes.
+      progress 2026-08-01 (b): the 3D hub was EMPTYING ITSELF and nobody had noticed. flushHero3D
+      clears the depth buffer before the Three pass, so the 3D layer paints over every voxel pixel
+      it covers — and paving tiles BEHIND a shopkeeper project above them on screen. Result: with
+      world3d on, the Waystation had no Quartermaster, no Smith, no anvil, no bag chest, no
+      waystone, no torches, no planters — just floating name tags over a bare yard. Proved with an
+      A/B shot at the Quartermaster (world3d off = shopkeeper + counter + chest; on = nothing).
+      Fixed by holding those draws back: pushInst now has a DEFER buffer, drawCourse raises it
+      around the hub's torches / obstacles / deco and render() around drawWaystation, and
+      flushDeferred() replays them AFTER Three. Depth values are directly comparable because
+      hero3d's camera IS the game's own PROJ/VIEW — so the keepers stand on the 3D paving and are
+      still correctly hidden by the 3D houses. Dropped rather than deferred: kind:'building' and
+      kind:'pillar' (world3d builds both already) and anything ≤3 units tall (floor paint the
+      paving replaced). Torch glow halos are skipped in the deferred pass — additive-only geometry.
+      Also: the monument was ONE tower on the centre line, sitting on the waystone and hiding the
+      entire portal arc from spawn. Now a matched PAIR at x=±380, z=140, clear of the ±114
+      sightline fan. ART CALL for Oliver — say if you want one tower back somewhere else instead.
       NEXT: only the four corner plots are filled. Fill the west/east perimeter strip (x ±928..±1002,
       unreachable behind the collision wall, so shallow d=1 frontages need no new collision), and
       give the Quartermaster / Smith / Drillmaster / Beastkeeper bays a shopfront behind each keeper
-      so the hub reads as a town rather than a walled yard.
-      ALSO SEEN, not fixed: world3d's monument sits at (0,47), dead centre of the spawn->gate walk,
-      and from the spawn point it blocks the whole view of the portal arc.)
+      so the hub reads as a town rather than a walled yard.)
 - [ ] **3D on by default.** Drop the `?hero3d=1&world3d=1` flags so what Oliver shows people is
       what they get. BLOCKED until bloom is resolved — `?nobloom` is still required, because the
       game's PostFX composite paints over the Three.js layer. Fix bloom first, then flip the

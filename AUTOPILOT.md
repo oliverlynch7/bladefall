@@ -20,6 +20,13 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
   generator at the source (`kind:'tree'`, `kind:'pillar'`, `stack:true`) and let world3d map it.
 - **Harnesses** (local-only, `_shot/` is gitignored):
   - `_shot/shot.js` — screenshot the GAME headless. `_shot/slice.js` — screenshot the slice.
+    **`_shot/` is gitignored, so a fresh checkout does not have it.** The source of record is
+    `harness/shot.js`, which IS committed — copy it to `_shot/shot.js` (that exact path is what
+    the permission allowlist permits) rather than writing a new one. It needs no `npm install`:
+    it drives the installed Chrome over the DevTools Protocol using Node's built-in WebSocket and
+    serves `public/` itself, because this machine has no playwright/puppeteer resolvable anywhere
+    and an unattended run cannot install one. Flags: `--url --out --wait --pre --prewait --eval
+    --size`, plus `--assets <kit|all>` for the offline texture audit.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
   - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices.
 - Work branch: **`bladefall-autopilot`**. Live/deploy branch: `main` (Cloudflare Pages deploys main to `bladefall.pages.dev`; the branch preview is `bladefall-autopilot.bladefall.pages.dev`).

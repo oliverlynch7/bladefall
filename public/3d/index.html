@@ -10061,10 +10061,15 @@ function enterWaystation(){
   for(const fb of [[-250,-160],[250,-160],[-250,210],[250,210],[-160,250],[160,250]]){
     G.deco.push({x:fb[0],z:fb[1],y0:0,w:54,h:10,d:32,c:'#6e4a2e'});
     G.deco.push({x:fb[0],z:fb[1],y0:10,w:46,h:3,d:24,c:'#241b14'});
+    /* Each planter plant is three boxes: a stem, a leaf and a bloom. Tagged kind:'flower' on the
+       BLOOM only, with lead:true, so the 3D renderer places ONE real flower model per plant rather
+       than three stacked props. The stem and leaf are marked kind:'skipflower' so world3d drops
+       them - the flower model already has its own stem. The voxel path ignores all of it and keeps
+       drawing the three boxes exactly as before. */
     for(let k=0;k<5;k++){ const fx=fb[0]-18+k*9, fz=fb[1]+(k%2?4:-4), fh=10+(k%3)*3;
-      G.deco.push({x:fx,z:fz,y0:13,w:2.5,h:fh,d:2.5,c:'#3f7d3b'});
-      G.deco.push({x:fx+(k%2?3:-3),z:fz,y0:17,w:5,h:2.5,d:3,c:'#559b49'});
-      G.deco.push({x:fx,z:fz,y0:13+fh,w:5.5,h:5.5,d:5.5,c:bloom[(k*7+Math.abs(fb[0]))%6]}); } }
+      G.deco.push({x:fx,z:fz,y0:13,w:2.5,h:fh,d:2.5,c:'#3f7d3b',kind:'skipflower'});
+      G.deco.push({x:fx+(k%2?3:-3),z:fz,y0:17,w:5,h:2.5,d:3,c:'#559b49',kind:'skipflower'});
+      G.deco.push({x:fx,z:fz,y0:13,w:11,h:fh+7,d:11,c:bloom[(k*7+Math.abs(fb[0]))%6],kind:'flower',lead:true}); } }
   // (the '???' cheat bench now lives at the SW cardboard-box pile — its glint is drawn in drawWaystation)
   // Torches stay at the gate arc and service bays. The south Mirror Pavilion is kept
   // deliberately clear: no welcome banner, post, or flame may block the silvered glass.

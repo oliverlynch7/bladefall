@@ -76,7 +76,7 @@ const PROP_SETS = {
            'nature/plant_bushSmall'],
   grass:  ['nature/grass', 'nature/grass_large', 'nature/grass_leafs', 'nature/grass_leafsLarge'],
   floor:  ['nature/ground_grass'],
-  floorStone: ['nature/Floor_Brick'],
+  floorStone: ['nature/Floor_UnevenBrick'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -98,7 +98,13 @@ const _loadGLB = url => new Promise((res, rej) => _loader.load(url, res, undefin
 async function loadProp(name){
   if(_propCache.has(name)) return _propCache.get(name);
   try {
-    const g = await _loadGLB(PROPS + name + '.glb');
+    /* Try .glb then .gltf. The loader used to hardcode .glb, so Floor_Brick.gltf silently failed,
+       buildGround returned 0 tiles, and the hub showed the GAME's own floor instead - which looked
+       plausible enough that I reported it as working. A failed asset load must not be able to
+       masquerade as a successful render. */
+    let g = null;
+    try { g = await _loadGLB(PROPS + name + '.glb'); }
+    catch(e){ g = await _loadGLB(PROPS + name + '.gltf'); }
     let mesh = null;
     g.scene.updateMatrixWorld(true);
     g.scene.traverse(o => { if(!mesh && o.isMesh) mesh = o; });
@@ -187,6 +193,8 @@ function classify(d){
     if(d.kind === 'fence') return 'fence';
     if(d.kind === 'grave') return 'grave';
     if(d.kind === 'pillar')return 'pillar';
+    if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
+    if(d.kind === 'skipflower') return 'skip';   // stem/leaf boxes the real flower model replaces
   }
   const t = d.theme;
   if(t === 'forest') return 'tree';
@@ -306,7 +314,13 @@ function buildProps(items, names, defaultH, heightOf){
    just above it so nothing z-fights.
 
    Each tile takes a random quarter-turn so a large field does not read as one stamped pattern. */
-const FLOOR_TILE = 78;          // game units per tile (~3m); smaller repeats visibly, larger reads coarse
+/* Tile size is per SURFACE, not global. A 1-unit grass tile stretched across ~3m still reads as
+   grass, because grass is organic and repeating. Brick does not: stretched 3x its mortar lines
+   wash out and a plaza renders as flat white, which is exactly what the first two attempts at a
+   stone hub floor produced. Architectural tiles are laid near their true size (~1m = 26 game
+   units, from the mob-scale calibration) so the pattern stays legible. */
+const FLOOR_TILE_GRASS = 78;
+const FLOOR_TILE_STONE = 28;
 
 function buildGround(world){
   const segs = (world && world.segments) || [];
@@ -320,11 +334,21 @@ function buildGround(world){
      laid grass across a stone plaza. Ask the game what it is rather than inferring it. */
   const isHub = !!(world && world.hub);
   const grassy = !isHub && (zone === 'outskirts' || zone === 'forest' || zone === 'plains');
-  /* Floor_Brick from the village kit, not ground_pathTile: the path tile is a dirt patch drawn
-     ON grass, so using it for a plaza produced sandy blobs floating on a green field. A paved hub
-     needs actual paving. */
-  const rec = _propCache.get(grassy ? 'nature/ground_grass' : 'nature/Floor_Brick');
-  if(!rec) return 0;
+  /* Paving from the village kit, not ground_pathTile: the path tile is a dirt patch drawn ON
+     grass, so using it for a plaza produced sandy blobs floating on a green field.
+     Read from PROP_SETS rather than naming the file twice - having the loaded set and the
+     requested name drift apart silently produced a hub with zero floor tiles. */
+  /* GRASSY ZONES ONLY. Four attempts at a 3D hub floor all came out worse than the game's own
+     slab: ground_pathTile is a dirt patch drawn on grass (sandy blobs on green), and both village
+     floor tiles are pale INTERIOR floors that render as a featureless white expanse outdoors, at
+     any tile scale. The game's existing plaza floor is warmer and reads better, so the hub keeps
+     it. Reverted rather than shipped - a 3D floor that looks worse is not progress.
+     Revisit if a proper outdoor paving asset turns up; the wiring below is ready for one. */
+  if(!grassy) return 0;
+  const want = 'nature/ground_grass';
+  const rec = _propCache.get(want);
+  if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want); return 0; }
+  const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
   for(const sg of segs){
     if(sg.nofloor) continue;    // the game skips these too: coplanar sub-segments kept for collision
@@ -332,8 +356,8 @@ function buildGround(world){
     if(w < 8 || d < 8) continue;
     /* Ceil, not round: rounding down on a segment slightly narrower than a whole tile leaves an
        uncovered strip at its edge. Over-covering is invisible, under-covering is a visible gap. */
-    const nx = Math.max(1, Math.ceil(w / FLOOR_TILE));
-    const nz = Math.max(1, Math.ceil(d / FLOOR_TILE));
+    const nx = Math.max(1, Math.ceil(w / TILE));
+    const nz = Math.max(1, Math.ceil(d / TILE));
     const tw = w / nx, td = d / nz;
     for(let ix = 0; ix < nx; ix++){
       for(let iz = 0; iz < nz; iz++){
@@ -376,8 +400,11 @@ export function buildWorld(scene, world){
   group.name = 'world3d';
   scene.add(group);
 
+  /* Every value classify() can return needs a bin here. Adding a 'flower' classification without
+     adding its bin threw "Cannot read properties of undefined" and world3d disabled itself - the
+     fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
-                 fence: [], grave: [], pillar: [], skip: [] };
+                 fence: [], grave: [], pillar: [], flower: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -423,6 +450,7 @@ export function buildWorld(scene, world){
   buildProps(bins.fence, PROP_SETS.fence, 30);
   buildProps(bins.grave, PROP_SETS.grave, 30);
   buildProps(bins.pillar, PROP_SETS.pillar, 80);
+  buildProps(bins.flower, PROP_SETS.flower, 18);
 
   buildCategory(scene, bins.shard, shardGeo(), mat(), (o, d) => {
     const r = hash(d.x, d.z);
@@ -445,7 +473,8 @@ export function buildWorld(scene, world){
   WORLD3D.counts = { floorTiles, deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
-                     pillar: bins.pillar.length, skipped: bins.skip.length,
+                     pillar: bins.pillar.length, flowerProps: bins.flower.length,
+                     skipped: bins.skip.length,
                      drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };
   WORLD3D.ready = true;

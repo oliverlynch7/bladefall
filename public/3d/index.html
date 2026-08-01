@@ -11870,8 +11870,11 @@ function drawCourse(s,t){
   /* When world3d is drawing the level in 3D, the voxel deco pass must not also run: both draw
      the same G.deco list, so leaving it on renders every prop twice - once flat and once lit,
      z-fighting against each other. */
+  /* Also re-enabled when world3d has SKIPPED this level (the hub), or its deco would vanish
+     entirely - gated off here while nothing draws it there. */
   const _w3d = window.__world3d && window.__world3d();
-  if(!(_w3d && _w3d.on && _w3d.ready))
+  const _w3dDrawing = !!(_w3d && _w3d.on && _w3d.ready && !(_w3d.counts && _w3d.counts.skippedHub));
+  if(!_w3dDrawing)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.

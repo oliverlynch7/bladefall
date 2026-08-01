@@ -345,6 +345,12 @@ function buildGround(world){
      an actual OUTDOOR ground tile - same 1x0x1 flat shape as the grass tile, built to be seen
      from above in daylight. That distinction, indoor-floor versus outdoor-ground, is what the
      earlier attempts kept missing. */
+  /* NO 3D floor in the hub. Because the 3D layer draws over the voxel world with depth cleared,
+     a floor-sized 3D surface hides every voxel prop standing on it - the Waystation's centrepiece
+     monument disappeared entirely. The voxel plaza floor is also warmer and more characterful than
+     anything achieved with these flat-coloured tiles across five attempts. Grassy zones keep their
+     tiles because those zones have no voxel centrepiece to lose. */
+  if(isHub) return 0;
   const want = grassy ? 'nature/ground_grass' : PROP_SETS.floorStone[0];
   const rec = _propCache.get(want);
   if(!rec){ console.warn('[world3d] floor tile missing, ground left to the voxel pass:', want); return 0; }
@@ -406,6 +412,19 @@ function buildGround(world){
 }
 
 export function buildWorld(scene, world){
+  /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
+
+     The Waystation is hand-authored: a 228-line drawWaystation() plus 157 deco boxes, and its
+     centrepiece monument is bespoke voxel art that is not in the deco list at all. Because the 3D
+     layer draws over the voxel world with depth cleared, ANY ground-level 3D surface hides the
+     voxel props standing on it - first the floor tiles, then the 86 flat paving boxes, each time
+     erasing the monument. Converting only the boxes also loses the warmth and colour the
+     hand-drawn version has.
+
+     Half-converted is the one genuinely bad state, so the hub stays fully voxel until it can be
+     rebuilt properly from the village and castle kits. The hero and mobs still render in 3D over
+     it, which is the part that reads well. */
+  if(world && world.hub){ clearWorld(scene); WORLD3D.counts = { skippedHub: true }; return WORLD3D.counts; }
   const deco = (world && world.deco) || [];
   clearWorld(scene);
   group = new THREE.Group();
@@ -475,10 +494,15 @@ export function buildWorld(scene, world){
      tuned to make one character read clearly against the game's own background; applied to a
      whole meadow they blow the entire scene out to near-white. Only touched while world3d is
      active, and the originals are stashed so turning it off restores the hero's lighting. */
+  /* Light level follows the zone. The single dim setting was tuned for an open meadow and left
+     the Waystation's props dark, muddy blobs against its warm voxel floor - the flowers read as
+     black lumps. The hub is an enclosed, torch-lit space and needs close to full intensity. */
+  const dim = (world && world.hub) ? 0.92 : 0.42;
+  const dimDir = (world && world.hub) ? 1.05 : 0.62;
   scene.traverse(o => {
     if(!o.isLight) return;
     if(o.userData._w3dOrig == null) o.userData._w3dOrig = o.intensity;
-    const k = o.isAmbientLight ? 0.42 : o.isDirectionalLight ? 0.62 : 0.6;
+    const k = o.isAmbientLight ? dim : o.isDirectionalLight ? dimDir : dim;
     o.intensity = o.userData._w3dOrig * k;
   });
 

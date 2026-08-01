@@ -618,6 +618,12 @@ function buildGround(world){
      So the floor is coloured here, from the zone's own ground colour, and only lightened enough to
      read as a lit surface. Using the game's colour keeps the hub the warm stone it always was. */
   const mat = rec.mat.clone();
+  /* The map is dropped, not merely ignored. That note above was written when castle/ground's atlas
+     was 404ing, so "map=NONE" was a symptom, not a property of the asset. With the atlas restored
+     the tile has a real texture again — and its UVs point at the GREEN band, because in the Castle
+     Kit `ground` is a grass tile. Every non-grassy zone floor would multiply its stone tint by
+     green. This floor is colour-driven by design, so it takes no map either way. */
+  mat.map = null;
   const base = new THREE.Color((world && world.ground) || '#8a8445');
   /* GRASS was the one floor still wearing the MODEL's own colour, and that colour is #73eddd - an
      aqua. Every grassy zone was therefore a cyan field, which read as "stylised" in a screenshot
@@ -700,10 +706,18 @@ const HUB_UNIT = 96;          // game units per wall segment (~3.4m); a whole nu
 /* The Castle Kit pieces carry NO texture - material colour only, and that colour is #ffffff, so
    an unpainted hub renders as a white cardboard model. Same trap the floor tiles set five times.
    Every piece therefore gets an explicit colour here. */
-function hubPiece(setName, cells, place, colour){
+function hubPiece(setName, cells, place, colour, dropMap){
   const rec = _propCache.get(PROP_SETS[setName][0]);
   if(!rec || !cells.length) return 0;
   const mat = rec.mat.clone();
+  /* dropMap is OPT-IN, and deliberately so. A tint MULTIPLIES a texture, so with the Castle Kit's
+     atlas restored a tinted castle piece renders as the tint times whatever swatch its UVs point
+     at. The obvious fix — drop the map whenever there is a tint — is wrong: the PROPS kit's atlas
+     was never missing, so its lantern has been textured all along and its tint is doing the job it
+     was tuned to do. Dropping it turned the plaza lamps from dark green to flat brown. So only the
+     pieces that actually need it ask for it, and everything with a working texture keeps the look
+     it already had. */
+  if(colour && dropMap) mat.map = null;
   if(colour) mat.color = new THREE.Color(colour);
   const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
   const o = new THREE.Object3D();
@@ -768,13 +782,13 @@ function buildHub(scene, world){
     o.position.set(c.x, 0, c.z);
     o.rotation.set(0, c.rot, 0);
     o.scale.set(s, wallH / rec.height, s);
-  }, '#c2b08c');
+  });
   counts.gatehouse = hubPiece('hubGate', gateCells, (o, c, rec) => {
     const s = (gateHalf * 2) / rec.width;
     o.position.set(c.x, 0, c.z);
     o.rotation.set(0, 0, 0);
     o.scale.set(s, wallH / rec.height, s);
-  }, '#a89478');
+  });
 
   /* CORNER TOWERS plus one between each pair of gates, so the rampart has rhythm and the corners
      of the courtyard are legible from the middle of the plaza. */
@@ -788,28 +802,29 @@ function buildHub(scene, world){
     o.position.set(c.x, 0, c.z);
     o.rotation.set(0, 0, 0);
     o.scale.set(s, s, s);
-  }, '#c2b08c');
+  });
   counts.towerMid = hubPiece('hubTowerM', towerCells, (o, c, rec) => {
     const s = tw / rec.width;
     o.position.set(c.x, tw * 0.95, c.z);
     o.rotation.set(0, 0, 0);
     o.scale.set(s, s, s);
-  }, '#b8a582');
+  });
   counts.roof = hubPiece('hubRoof', towerCells, (o, c, rec) => {
     const s = tw / rec.width;
     o.position.set(c.x, tw * 1.9, c.z);
     o.rotation.set(0, 0, 0);
     o.scale.set(s, s, s);
-  }, '#8e3b32');
+  });
   counts.flag = hubPiece('hubFlag', towerCells, (o, c, rec) => {
     const s = tw * 0.7 / rec.width;
     o.position.set(c.x, tw * 2.5, c.z);
     o.rotation.set(0, 0, 0);
     o.scale.set(s, s, s);
-  }, '#d9a441');
+  });
 
-  /* PAVED COURTYARD. Coloured warm from the zone's own ground colour - the tiles carry no
-     texture, only a material colour, which is what five earlier attempts kept missing. */
+  /* PAVED COURTYARD. castle/ground is a GRASS tile in the kit — its UVs point at the green band of
+     the atlas — so this is the one piece that must keep its tint AND drop its map, or the plaza
+     renders as a lawn. Discovered the moment the atlas was put back: the courtyard went green. */
   const paveCells = [];
   for(let x = westX; x <= eastX; x += HUB_UNIT)
     for(let z = northZ; z <= southZ; z += HUB_UNIT)
@@ -819,6 +834,7 @@ function buildHub(scene, world){
     const pm = paveRec.mat.clone();
     /* Explicit warm stone. Deriving this from the zone ground colour gave an olive courtyard -
        that colour is meant for open terrain, not a paved plaza. */
+    pm.map = null;
     pm.color = new THREE.Color('#c9b998');
     const m = new THREE.InstancedMesh(paveRec.geo, pm, paveCells.length);
     const o = new THREE.Object3D();

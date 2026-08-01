@@ -144,12 +144,21 @@ Worlds standard), and the graphics need finishing before he shows more people.
       NEXT: paths. Nothing records that a deco box is a WALKWAY, so this needs the same
       tag-at-the-source treatment the trees and buildings got — mark walkway deco `kind:'path'` in
       the generators, then map straight/bend/corner in world3d.
-      ALSO FOUND, not fixed: the castle and town kits reference `Textures/colormap.png` and 404 on
-      it, which is why every castle piece is untextured white and has to be hand-tinted in world3d.
-      The atlas EXISTS for castle — at `castle/colormap.png`, one directory off from where the
-      models look. Copying it to `castle/Textures/` would texture the whole hub, but the existing
-      hand tints would then multiply the texture and need removing in the same change, so it is a
-      deliberate chunk, not a drive-by. No atlas ships for `town/`, so do not guess one in.)
+      progress 2026-08-01 (b): the castle atlas is DONE. `castle/colormap.png` copied to
+      `castle/Textures/` where the models actually look, and the hand tints removed from the wall,
+      gatehouse, tower, tower-mid, roof and flag so they take their authored colours instead of
+      multiplying them. The rampart is textured sandstone with terracotta gatehouses now, not flat
+      cream. FLAG FOR OLIVER: that IS a palette shift — warmer and pinker than the old cream. Say
+      if you want it pulled back.
+      Two traps found by looking rather than assuming:
+      - `castle/ground` is a GRASS tile in the kit (its UVs point at the green band), so the moment
+        the atlas resolved the courtyard turned green. Paving and the non-grassy zone floors keep
+        their tint and explicitly drop the map. Both are colour-driven by design.
+      - dropping the map wherever there is a tint is WRONG: the `props/` atlas was never missing,
+        so its lightpost has always been textured and its tint tuned against it. Auto-dropping
+        turned the plaza lamps from dark green to flat brown. `dropMap` is opt-in for that reason.
+      The old note here said "map=NONE on all of them" — that was a symptom of the 404, not a
+      property of the assets. Still true for `town/`: no atlas ships for it, do not guess one in.)
 - [ ] **Zone floors for the other five zones.** Frost, Ember, Abyss, Palace and Castle have no
       ground surface asset yet. Flag to Oliver if a pack is needed rather than faking it.
       (progress 2026-08-01: they DO have a surface — castle/ground is laid in every non-grassy zone

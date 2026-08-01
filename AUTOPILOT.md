@@ -101,8 +101,30 @@ Worlds standard), and the graphics need finishing before he shows more people.
       king, tyrant) and picking a creature model for a boss is an art-direction call — the slice
       only has a generic `bf:'boss'` Dragon_Evolved placeholder. The other 3 are mimic, dummy and
       bosscrystal, which are objects rather than creatures. Needs Oliver.)*
-- [ ] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
+- [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
+      *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:
+      every road()/path()/trail()/floorRoad() helper in the zone generators marks its segments
+      `path:true` (12 helpers; the Outskirts pair was already tagged). world3d then lays real
+      Nature Kit road pieces on them and AUTOTILES — each tile probes past its four edges and
+      picks straight/bend/cross/T/dead-end, so an L-corner renders as a corner rather than two
+      crossed stripes. The ground under a road is dropped rather than drawn beneath it.
+      trail() needed more than a tag: it emits a CHAIN of squares along an arbitrary line, and a
+      132x132 square carries no direction, so the generator now records `pdx/pdz/pstep` and each
+      step becomes one straight piece rotated onto that heading — which is what makes the Outskirts'
+      diagonal trails continuous ribbons instead of a staircase. Metadata only; no collision change.
+      Non-grassy zones get a road too, but NOT these pieces: the kit's road tiles are dirt tracks
+      drawn ON GRASS, so one in a dungeon lays a lawn in it. Those themes name a `road` surface in
+      THEME_GROUND (Floor_RedBrick / Floor_Brick, a shade off the zone's own floor) and the floor
+      pass paves the tagged cells with it.
+      Verified by render in three zones: the Outskirts field (diagonal trails, road network at the
+      river crossing), Black Woods (axis roads + autotiled corners, checked at eye level as well as
+      from above) and the Ruined Keep (stone theme, `roadPaved` 2204 cells). Probe any zone with
+      `__world3d().counts` — roadPlanned / roadTiles / roadPaved.
+      ONE BUG WORTH REMEMBERING: the first Keep render reported roadPaved 0 with 47 tiles planned
+      and logged nothing at all. THEME_GROUND named Floor_RedBrick but PROP_SETS never listed it,
+      so it was never loaded and the road silently fell back to ordinary floor. A surface named in
+      THEME_GROUND must also be in PROP_SETS; there is now a console.warn when it is not.)*
       *(progress 2026-08-01: the "not one uniform green" half is DONE, but not via a second grass
       tile. `THEME_GROUND[].tiles` now takes weighted variants, and every ground instance gets a
       deterministic brightness jitter (`GROUND_JITTER`) through `InstancedMesh.setColorAt`, so a
@@ -114,10 +136,6 @@ Worlds standard), and the graphics need finishing before he shows more people.
       the repo has none (nature/ and terrain/ ship the identical file). The variant machinery IS
       used where the tiles match: ruins and apex mix Floor_Brick with Floor_UnevenBrick and read
       as worn flagstone.*
-      *Still to do: PATHS. Deliberately not attempted by heuristic — inferring "this segment is a
-      walkway" from its aspect ratio is the same class of guess that laid grass across the hub
-      plaza. The right fix is to tag walkways at the generator the way the rampart dividers were
-      tagged, then map `kind:'path'` onto the Nature Kit path pieces.)*
 - [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
       was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
       `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its

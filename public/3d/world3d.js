@@ -80,7 +80,13 @@ const PROP_SETS = {
   /* Every surface THEME_GROUND can ask for, so they are all preloaded (line ~237 flattens this
      whole object into the load list). castle/ground is kept only because other code may still
      reference the old set name; the zone floor no longer uses it - it is a grass tile. */
-  floorStone: ['village/Floor_Brick', 'village/Floor_UnevenBrick', 'castle/ground'],
+  /* Floor_RedBrick is here because it is what the stone themes lay their ROADS in, and a surface
+     THEME_GROUND names but PROP_SETS does not list is simply never loaded: the road cells then
+     find no model, fall through to the ordinary floor, and the zone reports a road it did not
+     draw. That is exactly what happened the first time - `roadPaved` came back 0 with 47 tiles
+     planned, and nothing anywhere logged a complaint. */
+  floorStone: ['village/Floor_Brick', 'village/Floor_UnevenBrick', 'village/Floor_RedBrick',
+               'castle/ground'],
   /* Hub architecture. Kept to a handful of pieces on purpose: Oliver's steer is that the
      MECHANICS matter most, so the hub needs to be charming and READABLE - you should see at a
      glance where the portals are and where things happen - not an architectural showpiece. */
@@ -235,10 +241,67 @@ async function loadProp(name){
     return null;
   }
 }
+/* ── ROAD TILES ────────────────────────────────────────────────────────────────
+   The Nature Kit's road pieces are one mesh made of THREE primitives - grass, dirt and dirtDark -
+   and loadProp keeps only the first mesh it finds. Loaded through loadProp a road tile therefore
+   renders as a single stripe of dirtDark with no grass and no track: not a missing asset, not a
+   missing texture, just two thirds of the model quietly dropped. So they get their own loader,
+   the same way the village wall parts do.
+
+   Each piece is a 1x1 tile whose grass sits at y=0 and whose worn track is sunk to y=-0.05. The
+   geometry is moved so the TRACK is at y=0, because the track is the surface you walk on and it
+   has to clear the game's own lit slab (which tops out at 1.3). That leaves the grass verge
+   standing 0.05 model-units proud, which at road scale would be a 9-unit kerb - so the vertical
+   axis is scaled separately, to PATH_RELIEF. */
+const PATH_SET = {
+  straight: 'nature/ground_pathStraight',
+  bend:     'nature/ground_pathBend',
+  cross:    'nature/ground_pathCross',
+  split:    'nature/ground_pathSplit',
+  end:      'nature/ground_pathEnd',
+  patch:    'nature/ground_pathTile',
+};
+const _tileCache = new Map();     // name -> { subs:[{geo,mat,grass}], width, relief } or null
+
+async function loadTile(name){
+  if(_tileCache.has(name)) return _tileCache.get(name);
+  let rec = null;
+  try {
+    let g = null;
+    try { g = await _loadGLB(PROPS + name + '.glb'); }
+    catch(e){ g = await _loadGLB(PROPS + name + '.gltf'); }
+    g.scene.updateMatrixWorld(true);
+    const subs = [];
+    const bb = new THREE.Box3();
+    g.scene.traverse(o => {
+      if(!o.isMesh) return;
+      const geo = o.geometry.clone();
+      geo.applyMatrix4(o.matrixWorld);
+      geo.computeBoundingBox();
+      bb.union(geo.boundingBox);
+      const src = Array.isArray(o.material) ? o.material[0] : o.material;
+      /* The material is kept exactly as the kit ships it, NOT converted. The road's own grass has
+         to be the same green as the ground_grass tile lying next to it, and the surest way to get
+         that is to use the same material out of the same kit. */
+      subs.push({ geo, mat: src, grass: !!(src && /grass/i.test(src.name || '')) });
+    });
+    if(!subs.length) throw new Error('no mesh in ' + name);
+    for(const s of subs) s.geo.translate(0, -bb.min.y, 0);   // worn track at y=0
+    const size = bb.getSize(new THREE.Vector3());
+    rec = { subs, width: Math.max(0.001, Math.max(size.x, size.z)),
+            relief: Math.max(0.001, size.y) };
+  } catch(e){
+    console.warn('[world3d] road tile failed to load:', name, e.message);
+  }
+  _tileCache.set(name, rec);
+  return rec;
+}
+
 async function ensureProps(){
   if(_propsReady) return;
   const names = Object.values(PROP_SETS).flat();   // includes the ground tile
-  await Promise.all([...names.map(loadProp), ...VIL_PARTS.map(loadPart)]);
+  await Promise.all([...names.map(loadProp), ...VIL_PARTS.map(loadPart),
+                     ...Object.values(PATH_SET).map(loadTile)]);
   _propsReady = true;
 }
 
@@ -537,7 +600,12 @@ const FLOOR_TILE_STONE = 28;
    ground with different detail: an even split between two tiles of noticeably different colour
    does not look varied, it looks like a chessboard, which is exactly what an even
    ground_grass/castle-ground mix produced. So the variant is a MINORITY and is tinted to sit on
-   top of the primary's colour - the variety comes from its texture, not from its hue. */
+   top of the primary's colour - the variety comes from its texture, not from its hue.
+
+   `road` is the surface laid where the generator tagged a segment `path:true`. Grassy themes do
+   not need one: they get the Nature Kit's real road pieces instead (see planPaths). Everywhere
+   else a road is the same masonry family a shade darker and in a different bond, so it reads as a
+   laid way through the zone rather than as a differently-coloured stripe. */
 const THEME_GROUND = {
   /* ONE grass tile, on purpose. castle/ground was tried as a second variant and does not work at
      any weight or tint: nature/ground_grass is flat TEAL with no texture at all, castle/ground is
@@ -548,27 +616,50 @@ const THEME_GROUND = {
      none. Rendered and compared both ways before settling on this. */
   plains:   { tiles: [{ n: 'nature/ground_grass' }], tint: null,      grass: true },
   forest:   { tiles: [{ n: 'nature/ground_grass' }], tint: '#b9cfa8', grass: true },
-  badlands: { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c2a184' },
-  canyon:   { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#cbab86' },
+  badlands: { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c2a184',
+              road: { n: 'village/Floor_Brick', tint: '#ab8f72' } },
+  canyon:   { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#cbab86',
+              road: { n: 'village/Floor_Brick', tint: '#b39674' } },
   ruins:    { tiles: [{ n: 'village/Floor_Brick', w: 0.72 },
-                      { n: 'village/Floor_UnevenBrick', w: 0.28 }], tint: '#a9a4bd' },
-  dungeon:  { tiles: [{ n: 'village/Floor_Brick' }], tint: '#a99cb4' },
-  frost:    { tiles: [{ n: 'village/Floor_Brick' }], tint: '#cfe2f2' },
-  volcano:  { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#a8705c' },
-  void:     { tiles: [{ n: 'village/Floor_Brick' }], tint: '#8e7ba8' },
-  marble:   { tiles: [{ n: 'village/Floor_Brick' }], tint: '#e0dcd2' },
+                      { n: 'village/Floor_UnevenBrick', w: 0.28 }], tint: '#a9a4bd',
+              road: { n: 'village/Floor_RedBrick', tint: '#8f92b6' } },
+  dungeon:  { tiles: [{ n: 'village/Floor_Brick' }], tint: '#a99cb4',
+              road: { n: 'village/Floor_RedBrick', tint: '#8e8ab0' } },
+  frost:    { tiles: [{ n: 'village/Floor_Brick' }], tint: '#cfe2f2',
+              road: { n: 'village/Floor_UnevenBrick', tint: '#b4c9da' } },
+  volcano:  { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#a8705c',
+              road: { n: 'village/Floor_Brick', tint: '#8c604f' } },
+  void:     { tiles: [{ n: 'village/Floor_Brick' }], tint: '#8e7ba8',
+              road: { n: 'village/Floor_RedBrick', tint: '#6e6fa2' } },
+  marble:   { tiles: [{ n: 'village/Floor_Brick' }], tint: '#e0dcd2',
+              road: { n: 'village/Floor_RedBrick', tint: '#c3c0c8' } },
   apex:     { tiles: [{ n: 'village/Floor_Brick', w: 0.78 },
-                      { n: 'village/Floor_UnevenBrick', w: 0.22 }], tint: '#8b7f9c' },
+                      { n: 'village/Floor_UnevenBrick', w: 0.22 }], tint: '#8b7f9c',
+              road: { n: 'village/Floor_RedBrick', tint: '#6f6d92' } },
 };
-const THEME_GROUND_DEFAULT = { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c9b998' };
+/* The default carries a road too. Themes drift - `ember` reaches here rather than matching
+   `volcano` - and a zone that falls through should still show its roads rather than silently
+   losing them because nobody added its name to the table. */
+const THEME_GROUND_DEFAULT = { tiles: [{ n: 'village/Floor_UnevenBrick' }], tint: '#c9b998',
+                               road: { n: 'village/Floor_Brick', tint: '#b3a488' } };
 /* Per-instance brightness spread, so even a single-variant surface is not one flat sheet of
    colour. Applied through InstancedMesh.setColorAt, which MULTIPLIES the material colour, so
    these hover around 1.0 rather than replacing the theme tint. */
 const GROUND_JITTER = 0.13;
 
-function buildGround(world){
+/* One place decides which surface a zone stands on, so the floor pass and the road pass can never
+   disagree about whether a zone is grassy - if they did, a grassy zone would drop the ground under
+   its roads and then decline to draw the roads, leaving holes in the field. */
+function groundSpecFor(world){
+  const isHub = !!(world && world.hub);
+  return (!isHub && THEME_GROUND[(world && world.theme) || '']) || THEME_GROUND_DEFAULT;
+}
+
+const NO_GROUND = { tiles: 0, paved: 0 };
+
+function buildGround(world, paths){
   const segs = (world && world.segments) || [];
-  if(!segs.length) return 0;
+  if(!segs.length) return NO_GROUND;
   /* Floor material follows the ZONE, not one global choice. Laying grass across the Waystation
      turned a stone plaza into a lawn - the hub is paved, and the meadow is not. Zones without a
      natural grass floor get the path/stone tile instead. */
@@ -581,7 +672,7 @@ function buildGround(world){
      zone id and got it wrong: the Waystation REPORTS its zone as 'outskirts', so the heuristic
      laid grass across a stone plaza. Ask the game what it is rather than inferring it. */
   const isHub = !!(world && world.hub);
-  const spec = (!isHub && THEME_GROUND[theme]) || THEME_GROUND_DEFAULT;
+  const spec = groundSpecFor(world);
   const grassy = !isHub && !!spec.grass;
   /* Paving from the village kit, not ground_pathTile: the path tile is a dirt patch drawn ON
      grass, so using it for a plaza produced sandy blobs floating on a green field.
@@ -598,16 +689,24 @@ function buildGround(world){
      monument disappeared entirely. The voxel plaza floor is also warmer and more characterful than
      anything achieved with these flat-coloured tiles across five attempts. Grassy zones keep their
      tiles because those zones have no voxel centrepiece to lose. */
-  if(isHub) return 0;
+  if(isHub) return NO_GROUND;
   /* Drop variants that failed to load rather than bailing: one absent tile should cost variety,
      not the whole floor. Only an empty list leaves the ground to the voxel pass. */
   const vars = spec.tiles.map(t => ({ t, rec: _propCache.get(t.n) })).filter(v => v.rec);
-  if(!vars.length){ console.warn('[world3d] floor tiles missing, ground left to the voxel pass:', spec.tiles.map(t => t.n), 'theme', theme); return 0; }
+  if(!vars.length){ console.warn('[world3d] floor tiles missing, ground left to the voxel pass:', spec.tiles.map(t => t.n), 'theme', theme); return NO_GROUND; }
   /* Cumulative weights over the SURVIVING variants, normalised - so if the minority tile fails to
      load the primary simply takes all the cells instead of the field going half-empty. */
   const wsum = vars.reduce((s, v) => s + (v.t.w != null ? v.t.w : 1), 0);
   let acc = 0;
   for(const v of vars){ acc += (v.t.w != null ? v.t.w : 1) / wsum; v.cut = acc; }
+  /* The road surface is a variant the weighted picker can never choose - cells reach it only by
+     lying under a tagged path. Its cut is deliberately past 1 so the picker's `while r > cut`
+     walk stops on the last real variant, whatever the weights are. */
+  const roadRec = (!grassy && spec.road) ? _propCache.get(spec.road.n) : null;
+  if(!grassy && spec.road && !roadRec)
+    console.warn('[world3d] road surface not loaded, roads left as ordinary floor:', spec.road.n);
+  if(roadRec) vars.push({ t: { n: spec.road.n, tint: spec.road.tint }, rec: roadRec, cut: 2 });
+  const roadIdx = roadRec ? vars.length - 1 : -1;
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
   for(const sg of segs){
@@ -627,7 +726,7 @@ function buildGround(world){
       }
     }
   }
-  if(!cells.length) return 0;
+  if(!cells.length) return NO_GROUND;
   /* Tint MULTIPLIES the tile's texture, so it comes from THEME_GROUND, not from the stage's own
      ground colour. Deriving it from the stage colour was correct while the textures 404'd and the
      tile was plain white; against real stonework those colours (#243240, #1c1220) multiply to
@@ -638,6 +737,14 @@ function buildGround(world){
      hash for both makes every tile of variant B share a rotation, and the field stripes. */
   const buckets = vars.map(() => []);
   for(const c of cells){
+    /* A cell under a tagged road never draws the zone's ordinary ground. On grass the real road
+       piece covers it completely, so drawing ground underneath would only z-fight with it; on
+       stone the cell becomes paving instead. Skipping is what keeps the road from being a
+       translucent-looking stripe painted over the field. */
+    if(paths && paths.covers(c.x, c.z)){
+      if(grassy) continue;
+      if(roadIdx >= 0){ buckets[roadIdx].push(c); continue; }
+    }
     const r = hash(c.x + 91.7, c.z - 43.1);
     let vi = 0; while(vi < vars.length - 1 && r > vars[vi].cut) vi++;
     buckets[vi].push(c);
@@ -683,7 +790,192 @@ function buildGround(world){
     m.renderOrder = -1;                      // draw before the props standing on it
     group.add(m);
   }
-  return cells.length;
+  /* The cells actually DRAWN, not the cells considered: on grass every cell under a road is
+     dropped, so returning cells.length would report a floor that is partly not there. `paved` is
+     reported separately because a stone zone's road IS floor cells - without it there is no way to
+     tell "the road was paved" from "the road was never found" by probing the counts. */
+  return { tiles: buckets.reduce((n, b) => n + b.length, 0),
+           paved: roadIdx >= 0 ? buckets[roadIdx].length : 0 };
+}
+
+
+/* ── ROADS ─────────────────────────────────────────────────────────────────────
+   Where a level has a walkway, put a real road on it.
+
+   This is TAGGED, never inferred. Guessing "this segment is a walkway" from its aspect ratio is
+   the same class of guess that once laid grass across the hub plaza: a room and a road are both
+   flat rectangles and nothing about their shape separates them. So the generators say so - every
+   road()/path()/trail()/floorRoad() helper in index.html now marks its segments `path:true`, the
+   same way the rampart dividers were tagged - and this pass only draws what was declared.
+
+   Two shapes of road come out of those generators and they need different treatment:
+
+   - road()/path() emit AXIS-ALIGNED rectangles, in Ls: one leg along x, one along z. Those are cut
+     into square-ish tiles along their long axis and then AUTOTILED - each tile looks at whether
+     there is more road past each of its four edges and picks the Nature Kit piece that matches
+     (straight / bend / cross / T / dead-end). That is what the kit's six road pieces are for, and
+     it is why a corner reads as a corner rather than as two stripes crossing.
+   - trail() emits a CHAIN of squares along an arbitrary line, so its direction cannot be read back
+     off a tile's shape at all. The generator records it (pdx/pdz/pstep) and each step becomes one
+     straight piece rotated onto that heading, which is what lets a diagonal trail be a ribbon
+     instead of a staircase.
+
+   Only grassy zones get these pieces, because the kit's road tiles are dirt tracks drawn ON GRASS
+   - the grass is part of the model. Laying one across a dungeon floor would put a lawn in it. The
+   stone themes get a road out of THEME_GROUND[].road instead, painted through the ordinary floor
+   pass, which is why planPaths still runs for them: the ground pass needs the footprint. */
+const PATH_RELIEF = 3;      // game units the grass verge stands above the worn track
+/* A cap, not a budget. Every road tile is instanced, so the cost is in the planning arithmetic,
+   not the draw; this only exists so a pathological zone cannot hang the build. */
+const PATH_MAX = 2000;
+const DIRV = [[1, 0], [0, 1], [-1, 0], [0, -1]];   // 0=+X, 1=+Z, 2=-X, 3=-Z
+const PATH_IDX_CELL = 256;
+
+/* Pick the road piece for a set of connected directions, and how far to turn it.
+
+   Every piece's connections in its own unrotated space, measured off the models' vertex data:
+   straight joins +Z and -Z, bend joins +X and +Z, cross joins all four, split (a T) joins
+   everything but -Z, end joins +Z alone. Turning a model +90 degrees about Y sends a connection
+   at direction d to d-1, because three.js maps local +Z onto world +X at +90. Each case below is
+   just that relation solved for the quarter-turn count. */
+function pathPiece(mask){
+  const n = mask.length;
+  if(n === 4) return { p: 'cross', q: 0 };
+  if(n === 3){ const m = [0, 1, 2, 3].find(d => mask.indexOf(d) < 0); return { p: 'split', q: (3 - m + 4) % 4 }; }
+  if(n === 2){
+    if(mask[1] - mask[0] === 2) return { p: 'straight', q: mask.indexOf(0) >= 0 ? 1 : 0 };
+    const d = [0, 1, 2, 3].find(x => mask.indexOf(x) >= 0 && mask.indexOf((x + 1) % 4) >= 0);
+    return { p: 'bend', q: (4 - d) % 4 };
+  }
+  if(n === 1) return { p: 'end', q: (1 - mask[0] + 4) % 4 };
+  return { p: 'patch', q: 0 };               // a lone step with nothing either side: a worn patch
+}
+
+/* Is (x,z) on this tile? Axis tiles are a plain rectangle; a trail tile is turned to its heading,
+   so the point goes into the tile's own frame first (the inverse of rotation.y). */
+function inTile(t, x, z){
+  const dx = x - t.x, dz = z - t.z;
+  if(!t.free) return Math.abs(dx) <= t.wx / 2 && Math.abs(dz) <= t.wz / 2;
+  const c = Math.cos(t.yaw), s = Math.sin(t.yaw);
+  return Math.abs(dx * c - dz * s) <= t.lx / 2 && Math.abs(dx * s + dz * c) <= t.lz / 2;
+}
+
+function planPaths(world){
+  const segs = (world && world.segments) || [];
+  const axis = [], free = [];
+  for(const sg of segs){
+    if(!sg || !sg.path || sg.nofloor) continue;
+    const w = sg.w || 0, d = sg.d || 0;
+    if(w < 8 || d < 8) continue;
+    if(sg.pdx != null || sg.pdz != null){
+      /* A trail step. The heading came from the generator because the tile itself cannot carry it:
+         a 132x132 square says nothing about which way the road runs. */
+      const cross = Math.min(w, d), run = Math.max(20, sg.pstep || cross);
+      const yaw = Math.atan2(sg.pdx || 0, sg.pdz || 0);
+      const c = Math.abs(Math.cos(yaw)), s = Math.abs(Math.sin(yaw));
+      free.push({ x: sg.x, z: sg.z, free: true, yaw, lx: cross, lz: run,
+                  wx: cross * c + run * s, wz: cross * s + run * c });
+      continue;
+    }
+    const alongX = w >= d;
+    const cross = Math.min(w, d), long = Math.max(w, d);
+    const n = Math.max(1, Math.round(long / cross));
+    const step = long / n;
+    const a0 = (alongX ? sg.x : sg.z) - long / 2;
+    for(let i = 0; i < n; i++){
+      const c = a0 + (i + 0.5) * step;
+      axis.push({ x: alongX ? c : sg.x, z: alongX ? sg.z : c,
+                  wx: alongX ? step : cross, wz: alongX ? cross : step });
+    }
+  }
+  if(axis.length + free.length > PATH_MAX){
+    console.warn('[world3d] road plan skipped, ' + (axis.length + free.length) + ' tiles');
+    return null;
+  }
+  /* The two legs of an L each lay a tile on the corner square. Keeping both would stack two
+     straights at right angles there, which is exactly the crossed-stripes look the bend piece
+     exists to avoid - so the duplicate is dropped and the survivor autotiles into a bend. */
+  const kept = [];
+  for(const t of axis){
+    const tol = Math.min(t.wx, t.wz) * 0.4;
+    if(kept.some(k => Math.abs(k.x - t.x) < tol && Math.abs(k.z - t.z) < tol)) continue;
+    kept.push(t);
+  }
+  const tiles = kept.concat(free);
+  if(!tiles.length) return null;
+
+  const idx = new Map();
+  const bucket = (i, j) => { const k = i + ':' + j; let a = idx.get(k); if(!a) idx.set(k, a = []); return a; };
+  for(const t of tiles){
+    const i0 = Math.floor((t.x - t.wx / 2) / PATH_IDX_CELL), i1 = Math.floor((t.x + t.wx / 2) / PATH_IDX_CELL);
+    const j0 = Math.floor((t.z - t.wz / 2) / PATH_IDX_CELL), j1 = Math.floor((t.z + t.wz / 2) / PATH_IDX_CELL);
+    for(let i = i0; i <= i1; i++) for(let j = j0; j <= j1; j++) bucket(i, j).push(t);
+  }
+  const near = (x, z) => idx.get(Math.floor(x / PATH_IDX_CELL) + ':' + Math.floor(z / PATH_IDX_CELL)) || [];
+
+  /* Autotile: probe just past each edge and ask whether any OTHER tile is there. Probing rather
+     than comparing grid coordinates is what lets tiles of different widths meet - the trails are
+     132 wide and the roads 150, and they never share a lattice. */
+  for(const t of kept){
+    const mask = [];
+    for(let k = 0; k < 4; k++){
+      const px = t.x + DIRV[k][0] * t.wx * 0.6, pz = t.z + DIRV[k][1] * t.wz * 0.6;
+      if(near(px, pz).some(o => o !== t && inTile(o, px, pz))) mask.push(k);
+    }
+    const pq = pathPiece(mask);
+    t.piece = pq.p;
+    t.yaw = pq.q * Math.PI / 2;
+    /* Same trap the floor tiles set: a quarter-turn swaps local X and Z, so scaling by the world
+       footprint and then turning the tile leaves it the wrong way round and the road narrows. */
+    t.lx = (pq.q & 1) ? t.wz : t.wx;
+    t.lz = (pq.q & 1) ? t.wx : t.wz;
+  }
+  for(const t of free) t.piece = 'straight';
+
+  return { tiles, count: tiles.length,
+           covers(x, z){ return near(x, z).some(t => inTile(t, x, z)); } };
+}
+
+function drawPaths(plan, spec){
+  if(!plan || !plan.tiles.length) return 0;
+  const byPiece = new Map();
+  for(const t of plan.tiles){ let a = byPiece.get(t.piece); if(!a) byPiece.set(t.piece, a = []); a.push(t); }
+  const o = new THREE.Object3D();
+  const col = new THREE.Color();
+  let drawn = 0, missing = 0;
+  for(const [piece, list] of byPiece){
+    const rec = _tileCache.get(PATH_SET[piece]);
+    if(!rec){ missing += list.length; continue; }
+    for(const sub of rec.subs){
+      const mat = sub.mat.clone();
+      /* Only the verge takes the theme tint. The track keeps the kit's own dirt, the same rule the
+         ground tiles follow - tinting the dirt as well turns a road green. */
+      if(sub.grass && spec.tint) mat.color = new THREE.Color(spec.tint);
+      const m = new THREE.InstancedMesh(sub.geo, mat, list.length);
+      for(let i = 0; i < list.length; i++){
+        const t = list[i];
+        /* A hair of vertical scatter. Trails converging on the same clearing overlap, and two
+           coplanar tiles of identical dirt z-fight into a shimmering seam; half a unit against a
+           three-unit verge is invisible and settles the argument. */
+        const j = hash(t.x * 0.7, t.z * 1.3);
+        o.position.set(t.x, 1.45 + j * 0.5, t.z);
+        o.rotation.set(0, t.yaw || 0, 0);
+        o.scale.set(t.lx / rec.width, PATH_RELIEF / rec.relief, t.lz / rec.width);
+        o.updateMatrix();
+        m.setMatrixAt(i, o.matrix);
+        const b = 1 + (hash(t.x - 12.4, t.z + 57.9) - 0.5) * 2 * GROUND_JITTER;
+        m.setColorAt(i, col.setRGB(b, b, b));
+      }
+      m.instanceMatrix.needsUpdate = true;
+      if(m.instanceColor) m.instanceColor.needsUpdate = true;
+      m.frustumCulled = false;
+      m.renderOrder = -1;
+      group.add(m);
+    }
+    drawn += list.length;
+  }
+  if(missing) console.warn('[world3d] ' + missing + ' road tiles had no model and were skipped');
+  return drawn;
 }
 
 
@@ -971,7 +1263,14 @@ export function buildWorld(scene, world){
     bins[classify(d)].push(d);
   }
 
-  const floorTiles = buildGround(world);
+  /* Roads are planned BEFORE the floor, because the floor has to know where they are: on grass a
+     road replaces the ground under it rather than sitting on top of it. Stone zones get no road
+     pieces of their own - the plan is still needed, to tell the floor which cells to pave. */
+  const gspec = groundSpecFor(world);
+  const roadPlan = planPaths(world);
+  const ground = buildGround(world, roadPlan);
+  const floorTiles = ground.tiles;
+  const roadTiles = gspec.grass ? drawPaths(roadPlan, gspec) : 0;
 
   /* Structure: strata bands, floors, platforms, walls. Rendered as real lit boxes rather than
      the flat unlit colour the voxel path uses — same silhouette, but it now takes light, which
@@ -1041,7 +1340,9 @@ export function buildWorld(scene, world){
     o.intensity = o.userData._w3dOrig * k;
   });
 
-  WORLD3D.counts = { floorTiles, deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
+  WORLD3D.counts = { floorTiles, roadTiles, roadPaved: ground.paved,
+                     roadPlanned: roadPlan ? roadPlan.count : 0,
+                     deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, flowerProps: bins.flower.length,

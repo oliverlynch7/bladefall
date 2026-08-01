@@ -21,6 +21,7 @@
 import * as THREE from './three.module.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
 
@@ -1235,11 +1236,15 @@ export function drawHero3D(p, t){
     /* Build or refresh the 3D world before drawing. Cheap when nothing changed - it compares a
        level signature and returns. Deliberately in the SAME scene and render call as the hero,
        so there is one Three.js context over the game canvas rather than two fighting for it. */
+    /* ONE getDelta per frame. Calling it again for the mobs returns ~0 because the clock resets on
+       read, which would freeze the hero's animation while the mobs animated fine. */
+    const dt = Math.min(0.05, clock.getDelta());
     syncWorld(scene);
+    syncMobs(scene, dt);
 
     syncClass();                      // respec or a different save changes the body
     playFor(p);
-    mixer.update(Math.min(0.05, clock.getDelta()));
+    mixer.update(dt);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
        shared context its internal state cache is reset every frame, so being explicit removes a
        variable while diagnosing the missing skinned body. */

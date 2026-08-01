@@ -2833,7 +2833,7 @@ window.__BF_CAM=()=>({P:PROJ,V:VIEW});   // live camera matrices for the 3D hero
 window.__BF_META=()=>meta;
 /* Live level data for world3d. G is a top-level const in a classic script, so it is not a window
    property - the same reason __BF_CAM and __BF_META exist as closures. */
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:(G.s&&G.s.ground)||'#8a8445'});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -13487,7 +13487,12 @@ function render(t){
     if(e.dropT>0){ // spawn-in: the enemy is VISIBLE from the instant it spawns, rising up into place (was invisible before — only a shadow)
       const oy=e.y; e.y=oy - e.dropT*e.h*0.22;
       drawShadow(e.x,e.z,e.r,0.28+0.25*(1-e.dropT)); drawEnemy3(e,t); e.y=oy; drawHpBar3(e); continue; }
-    drawShadow(e.x,e.z,e.r); drawEnemy3(e,t); drawHpBar3(e);
+    /* mob3d draws this creature in 3D, so skip the voxel body - but keep the shadow and HP bar,
+       which are gameplay readability, not art. mobDrawn() is false for anything unmapped or still
+       loading, so those keep their voxel body and nothing ever vanishes. */
+    drawShadow(e.x,e.z,e.r);
+    if(!(window.__mob3dDrawn && window.__mob3dDrawn(e.type))) drawEnemy3(e,t);
+    drawHpBar3(e);
     if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
       const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;
       gl.depthMask(false);

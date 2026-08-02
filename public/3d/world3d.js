@@ -125,6 +125,16 @@ const PROP_SETS = {
   grave:  ['props/gravestone-cross', 'props/gravestone-round', 'props/gravestone-decorative',
            'props/gravestone-broken'],
   pillar: ['props/pillar-square', 'props/pillar-large', 'props/pillar-obelisk'],
+  /* COLONNADE COLUMNS - ONE model, and the two omissions are the whole point of the set existing.
+     `pillar` splits its bin across all three variants, which is right for the hub's rampart
+     dividers (its only other user) and wrong for a row: a colonnade is a repeated column, and
+     variety in it reads as damage. Both rejects were rendered before being dropped.
+     pillar-obelisk is a monument with a POINTED top and stood in the processional row like a spire
+     somebody left in the aisle (b7-colonnade-3d.png). pillar-large is TERRACOTTA with a ball
+     capital - that is the kit's own artwork, not a missing texture - and three of them among five
+     grey ones read as a half-repainted arcade in a level whose own script line is "white marble,
+     untouched" (b7-colonnade-fix.png). pillar-square is pale stone and repeats cleanly. */
+  column: ['props/pillar-square'],
   /* The same lightpost the hub lines its approach with, reused for the roadside lanterns a zone
      generator tags. One model, already in the load list, so a zone that has lanterns costs no
      extra download. */
@@ -338,7 +348,10 @@ async function loadTile(name){
 
 async function ensureProps(){
   if(_propsReady) return;
-  const names = Object.values(PROP_SETS).flat();   // includes the ground tile
+  /* De-duped: two sets can name the same model on purpose (`column` is `pillar` without the
+     obelisk), and Promise.all fires them all before any of them reaches the cache, so a shared
+     name would be fetched and parsed twice. */
+  const names = [...new Set(Object.values(PROP_SETS).flat())];   // includes the ground tile
   await Promise.all([...names.map(loadProp), ...VIL_PARTS.map(loadPart),
                      ...Object.values(PATH_SET).map(loadTile)]);
   _propsReady = true;
@@ -492,6 +505,7 @@ function classify(d){
     if(d.kind === 'fence') return 'fence';
     if(d.kind === 'grave') return 'grave';
     if(d.kind === 'pillar')return 'pillar';
+    if(d.kind === 'column') return d.lead === false ? 'skip' : 'column';
     if(d.kind === 'lantern') return d.lead === false ? 'skip' : 'lantern';
     if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
     /* A crop plant is a golden stalk plus a green leaf nub. The tag exists to keep the stalk OUT
@@ -1377,7 +1391,7 @@ export function buildWorld(scene, world){
      adding its bin threw "Cannot read properties of undefined" and world3d disabled itself - the
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
-                 fence: [], grave: [], pillar: [], flower: [], lantern: [], corn: [],
+                 fence: [], grave: [], pillar: [], column: [], flower: [], lantern: [], corn: [],
                  standstone: [], building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
@@ -1440,6 +1454,15 @@ export function buildWorld(scene, world){
   buildProps(bins.fence, PROP_SETS.fence, 30);
   buildProps(bins.grave, PROP_SETS.grave, 30);
   buildProps(bins.pillar, PROP_SETS.pillar, 80);
+  /* Exactly the trees' problem in a second place: the Sunspire Palace's processional colonnade
+     emits a voxel SHAFT with a gold CAPITAL perched on top, and the capital is the lead deco - so
+     its y0 is the top of the shaft and an unadjusted model hangs from there. `pillarH` is the
+     shaft height, the same role trunkH plays above, and the fitted height is shaft + capital so
+     the model stands as tall as the column the level actually built. Columns with no pillarH - the
+     Hall of Statues' free-standing marble shafts - give y0 as their base already and are
+     untouched. */
+  buildProps(bins.column.map(d => (d.pillarH ? Object.assign({}, d, { y0: (d.y0 || 0) - d.pillarH }) : d)),
+             PROP_SETS.column, 80, d => (d.pillarH || 0) + (d.h || 80));
   buildProps(bins.flower, PROP_SETS.flower, 18);
   /* Height alone, and lampH not d.h: the lead deco is only the POST, so d.h would stand a
      lightpost 38 tall where the object the generator built is 47 tall to the top of its head. */
@@ -1495,7 +1518,8 @@ export function buildWorld(scene, world){
                      deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
-                     pillar: bins.pillar.length, flowerProps: bins.flower.length,
+                     pillar: bins.pillar.length, column: bins.column.length,
+                     flowerProps: bins.flower.length,
                      lantern: bins.lantern.length, corn: bins.corn.length,
                      standstone: bins.standstone.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,

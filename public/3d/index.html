@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.427.0-autopilot';
+const VERSION3D='1.428.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5120,10 +5120,16 @@ const EXPANDED_SCAPES={
       climbRun(450,-3300,470,0,-4380,470,82);chest(-650,-2480,368);chest(700,-3300,502);for(const p of [[0,-160,lip],[420,-1650,inside],[0,-4380,scar]]){mkMonster('blinkstalker',p[0]-55,p[1],p[2]);mkMonster('shadeling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-450,z:-850,y:120},{x:420,z:-1650,y:300},{x:-420,z:-2480,y:368},{x:450,z:-3300,y:470},{x:0,z:-4380,y:470}]);scapeFind(ctx,450,-3300,470);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4580,decoCol:VOID,decoTheme:'void',decoTall:570});}
   },
   palace(ctx){const {rnd,mkMonster}=ctx,gardens=G.area===1,MARBLE='#d8d5c7',GOLD='#d4a83e',WATER='#4b8eaa',GLASS='#75c8d2',VINE='#497b4c';
-    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const col=(x,z,y=0,h=180)=>{vcol(x,z,34,34,y+h);G.deco.push({x,z,y0:y+h,w:58,h:18,d:58,c:GOLD});};
+    const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
+    /* A colonnade column, tagged the way the Outskirts tags a tree and for the same reason: the
+       LEAD deco is the gold CAPITAL sitting on TOP of the shaft, so world3d needs pillarH to know
+       where the column's base is or the model hangs from the capital. The shaft itself is an
+       obstacle - you take cover behind a column - so it carries pillarCol: the collision stays,
+       and only the redundant voxel box is skipped while a real pillar stands in its place. */
+    const col=(x,z,y=0,h=180)=>{const c=vcol(x,z,34,34,y+h);c.pillarCol=true;G.deco.push({x,z,y0:y+h,w:58,h:18,d:58,c:GOLD,kind:'column',lead:true,pillarH:h});};
     if(!gardens){const court=room('Sun Court',0,0,1040,800),process=room('Grand Processional',-460,-900,940,820),gallery=room('Hall of Statues',420,-1700,1000,840,100),aqueduct=room('Sky Aqueduct',-420,-2520,760,680,220),oculus=room('Solar Oculus',450,-3340,840,740,340),throne=room('Throne Antechamber',0,-4420,1120,880,340);
       road(court,process,180);for(const x of [-280,280])G.deco.push({x,z:40,y0:0,w:250,h:3,d:130,c:WATER});for(let k=0;k<8;k++)col(-760+k*180,-900);
-      climbRun(-180,-1250,0,420,-1700,100,82);vplat(420,-1700,100,820,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*150,z=-1920+Math.floor(k/5)*260;G.deco.push({x,z,y0:100,w:70,h:150,d:70,c:MARBLE});G.deco.push({x,z,y0:250,w:90,h:18,d:90,c:GOLD});}
+      climbRun(-180,-1250,0,420,-1700,100,82);vplat(420,-1700,100,820,720,{checkpoint:true,terrace:true});for(let k=0;k<10;k++){const x=100+(k%5)*150,z=-1920+Math.floor(k/5)*260;G.deco.push({x,z,y0:100,w:70,h:150,d:70,c:MARBLE,kind:'column'});G.deco.push({x,z,y0:250,w:90,h:18,d:90,c:GOLD});}
       // The aqueduct offers a broad watercourse below and a faster balance-beam route above the arches.
       climbRun(160,-2050,100,-420,-2520,220,80);vplat(-420,-2520,220,760,680,{checkpoint:true,terrace:true});G.deco.push({x:-420,z:-2520,y0:220,w:620,h:5,d:110,c:WATER});for(let k=0;k<9;k++)vplat(-720+k*75,-2690-(k%2)*80,300+(k%3)*26,66,52,{beam:true});
       climbRun(-160,-2860,220,450,-3340,340,80);vplat(450,-3340,340,840,740,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const a=k/12*6.28;G.movers.push({x0:450+Math.cos(a)*270,z:-3340+Math.sin(a)*240,w:92,d:70,h:340+(k%3)*30,amp:26,sp:.55+k*.04,ph:k*.5,x:450,px:450});G.deco.push({x:450+Math.cos(a)*175,z:-3340+Math.sin(a)*155,y0:340,w:18,h:140,d:18,c:GOLD});}
@@ -12146,7 +12152,7 @@ function drawCourse(s,t){
   const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(three3DLive() && w && w.on && w.ready); })();
   deferOn();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
-    if(ob.treeCol && _w3dOn) continue;            // world3d draws the real tree; skip the voxel trunk
+    if((ob.treeCol || ob.pillarCol) && _w3dOn) continue;   // world3d draws the real tree / the real pillar; skip the voxel shaft
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }

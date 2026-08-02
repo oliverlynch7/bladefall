@@ -530,6 +530,56 @@ Worlds standard), and the graphics need finishing before he shows more people.
       Whatever gets added: it is an ENTITY, so it must be drawn inside a defer window, and its skip
       guard must ask `three3DLive()` and not "is the layer on". Both traps are documented below and
       both have already cost a session.
+- [x] **The Grand Colonnade had no colonnade in it.** Done 2026-08-02 (worker B), after re-checking
+      the bottom of this backlog and finding every item there still blocked (see "Notes / open
+      decisions"). Found by measuring instead of browsing: an `--eval` that walks all eight zones,
+      groups `G.deco` by `kind|size|colour|y0|theme` and prints the commonest signatures. The
+      Sunspire Palace came back **deco 83, box 83** — every single deco entry in the zone untagged,
+      in the one zone named after its architecture. Its two colonnades were 18 grey boxes:
+      - the Grand Processional's 8 columns, built by a `col()` helper as a 34-wide voxel SHAFT with
+        a 58x18x58 gold capital perched on top — the tree's exact shape, so the lead deco is the
+        CAPITAL and its `y0` is the top of the shaft. Tagged `kind:'column'`/`lead:true`/`pillarH`,
+        which world3d subtracts the way it subtracts `trunkH`, and the shaft carries `pillarCol` so
+        the collision stays while the redundant voxel box is skipped (the obstacle guard now reads
+        `treeCol || pillarCol`).
+      - the Hall of Statues' 10 free-standing marble shafts, which are base-anchored already and
+        only needed the tag.
+      **`kind:'column'` is its own bin and its own PROP_SET rather than reusing `pillar`, and the
+      reason is the whole point of the item.** `pillar` splits across three variants, which is right
+      for its only other user (the hub's rampart dividers) and wrong for a ROW: a colonnade is a
+      repeated column, and variety in one reads as damage. Both rejects were RENDERED before being
+      dropped — `props/pillar-obelisk` is a monument with a pointed top and stood in the row like a
+      spire left in the aisle (`_shot/out/b7-colonnade-3d.png`); `props/pillar-large` is TERRACOTTA
+      with a ball capital, which is the kit's own artwork and not a missing texture, and three of
+      them among five grey ones read as a half-repainted arcade in a level whose own script line is
+      "white marble, untouched" (`b7-colonnade-fix.png`). The set is `props/pillar-square` alone.
+      Verified: the processional row at gameplay range (`b7-colonnade-fix2.png` — eighteen columns
+      with moulded bases and capitals, the Hall's gold abaci sitting on their shafts beyond) against
+      the same camera before (`b7-palace-before.png`, grey slabs). Poses measured, not eyeballed:
+      all 18 report their base at the floor they stand on (8 at y 0, 10 at y 100 on the terrace) and
+      191/150 tall against the 198/150 the level builds. `?world3d=0` unchanged — 8 voxel shafts and
+      their gold capitals, `pillarCol` obstacles still drawn (`b7-colonnade-voxel.png`). Counts move
+      exactly as designed: `column 18`, `box 83 → 65`, `drawCalls 3 → 4`. Outskirts identical to the
+      recorded baseline (1257 floor, 115 road, 2194 deco, 277 box, 118 trees, 24 lanterns, 1624
+      corn, 9 standstone, 142 skipped, 41 draw calls, `b7-reg-outskirts.png`) and the Waystation is
+      unchanged (273 paving, 4 buildings, 8 gatehouses, 26 wall, 9 tower, `b7-reg-hub.png`).
+      Also fixed here because the new set made it reachable: `ensureProps` de-dupes its name list.
+      Two sets may name the same model on purpose, and `Promise.all` fires them all before any of
+      them reaches `_propCache`, so a shared name was fetched and parsed twice.
+      *A harness fact worth keeping, measured rather than assumed:* **zone 6 kills an idle hero, so
+      a slow shot there photographs the death screen.** Two runs came back "YOU FELL · Slain by the
+      Fall" and one printed READY NEVER CAME. Traced the hero at 2Hz for 35s: it stands at
+      (0, 0, 300) on full HP for ~19 seconds and then loses 16 HP at a time while drifting +z — that
+      is the Sun Court's ranged `sunpriest` chipping a level-1 warrior from across the room, not a
+      hole in the floor (`floorAt` is 0 under the spawn and the hero never leaves it). Not a bug.
+      Shots there pass a `--pre` that keeps `p.invuln` topped up; the default `--scene 6` is fine
+      only because it resolves in ~5s.
+      *Left for whoever takes the next zone:* the same probe says Hollow Pass, the Ruined Keep,
+      Frostfell, Emberdeep, the Abyss and Castle Duskmoor are ALSO 100% untagged box (62–145 deco
+      each — these zones are built mostly out of `G.obstacles`, so there is far less to convert than
+      the Outskirts' 2194). The two that look worth a look are the Keep's 4 banners (`18x80x8`
+      `#702c45`, and `town/banner-red` is already loaded) and the palace's own area 1, whose Citrus
+      Arcade is 18 green `70x55x70` bushes each with an orange fruit ball on top.
 - [x] **Every tree, flower and rock in the game was drawing HALF of itself.** Found and fixed
       2026-08-02 (worker B). `loadProp` kept only the FIRST mesh it found in a glTF
       (`traverse(o => { if(!mesh && o.isMesh) mesh = o; })`), and a Nature Kit tree is TWO meshes —

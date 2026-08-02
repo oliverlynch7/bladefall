@@ -20,6 +20,7 @@
      node _shot/shot.js --scene 0                        # in-game in The Outskirts, world3d built
      node _shot/shot.js --scene hub                      # standing in the Waystation
      node _shot/shot.js --scene side0                    # the zone's HIDDEN side area (The Thornwood)
+     node _shot/shot.js --scene 0.1                      # zone 0's SECOND area (Black Woods); 0.b = its boss
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
      node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
@@ -182,10 +183,23 @@ const SCENE = arg('scene', null);
    every class is locked on every run and a bare enterSide() would photograph the trial arena while
    reporting the side area's name. cheatUnlockClasses() first makes the door open. */
 const sideOf = (dest) => { const m = /^side(\d+)$/.exec(String(dest || '')); return m ? parseInt(m[1], 10) : null; };
+/* `<zone>.<area>` reaches a zone's LATER areas — `--scene 0.1` is Black Woods, the second place
+   anyone plays. Until this went in, `--scene <n>` could only ever photograph area 0, because
+   enterZone() loads the zone's first area and nothing else moved: half the levels in the game
+   (every zone has two areas, most of them a different scape) had never been in front of a camera.
+   `<zone>.b` is the zone's BOSS room, which is `G.area === -1`.
+   nextArea() is the game's own "you reached the exit" step and is synchronous through loadArea(),
+   so stepping it N times lands on area N without waiting on anything. */
+const areaOf = (dest) => {
+  const m = /^(\d+)\.(b|\d+)$/.exec(String(dest || ''));
+  return m ? { zone: parseInt(m[1], 10), area: m[2] === 'b' ? -1 : parseInt(m[2], 10) } : null;
+};
 const sceneJs = (dest) => {
-  const sd = sideOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest);
   const go = dest === 'hub' ? ''
     : sd != null ? '__BF3.cheatUnlockClasses(); __BF3.enterSide(' + sd + ');'
+    : ar ? '__BF3.enterZone(' + ar.zone + '); for(var a=0;a<' + (ar.area < 0 ? 9 : ar.area)
+           + ' && __BF3.G.area >= 0; a++) __BF3.nextArea();'
     : '__BF3.enterZone(' + (parseInt(dest, 10) || 0) + ');';
   return `(function(){
   var ids=['storyskip','hubTutGo'];
@@ -241,12 +255,15 @@ const sceneReady = (dest) => {
      pure race with how warm the asset cache is: one run reported "The Outskirts" with 118 trees,
      the next reported "Trial of the Blade" with 34 deco and 0 trees, from an identical command.
      Same shape as the hub race fixed earlier the same day, one gate further back. */
-  const sd = sideOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest);
+  const inZone = '!__BF3.G.hub && !__BF3.G.trial && !__BF3.G.side && __BF3.G.zone === ';
   const at = dest === 'hub'
     ? '!!__BF3.G.hub'
     : sd != null
       ? '!__BF3.G.hub && !__BF3.G.trial && !!__BF3.G.side && __BF3.G.zone === ' + sd
-      : '!__BF3.G.hub && !__BF3.G.trial && !__BF3.G.side && __BF3.G.zone === ' + (parseInt(dest, 10) || 0);
+      : ar
+        ? inZone + ar.zone + ' && __BF3.G.area === ' + ar.area
+        : inZone + (parseInt(dest, 10) || 0);
   const wb = dest === 'hub' ? '!!w.counts.hub' : '!w.counts.hub';
   return '(function(){ try{'
        + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'

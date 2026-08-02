@@ -66,6 +66,14 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     **And every run now prints `at → <place>` under `ready ✓`** — the level's own `areaName` plus
     hub/TRIAL/side and the zone + stage. Both of the day's ready bugs were invisible in the log
     and obvious in one word; a shot of the wrong level should not have to be caught by eye.
+    **`--scene <zone>.<area>` reaches a zone's LATER areas** (added 2026-08-02, worker B):
+    `--scene 0.1` is Black Woods, the second place anyone plays, and `--scene 0.b` is The Brute's
+    arena. Until this went in `--scene <n>` could only ever photograph area 0, because
+    `enterZone()` loads the zone's first area and nothing else moved — so **half the levels in the
+    game, every second area and every boss room, had never been in front of a camera.** It steps
+    the game's own `nextArea()`, which is synchronous through `loadArea()`, and the ready test
+    waits on `G.area` as well as the zone. Verified on 0.1 (Black Woods, 110 trees, road through
+    the wood) and 0.b (The Brute, `G.area === -1`, stage 2).
     **`--scene side<N>` photographs a zone's hidden SIDE area** (added 2026-08-02, worker B):
     `--scene side0` is The Thornwood, `side2` the Oubliette, and so on for all seven. They are
     their own hand-authored `SIDE_SCAPES`, not a reskin of the zone above them, so nothing a

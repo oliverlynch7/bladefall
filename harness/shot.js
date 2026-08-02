@@ -274,8 +274,9 @@ const focusJs = (spec) => `(async function(){
   var hd = 180 * Math.cos(pc);
   var back = D - hd;
   var px = -fz, pz = fx;                                  // hero's left/right, in world XZ
-  G.p.x = t.x - fx * back + px * side;
-  G.p.z = t.z - fz * back + pz * side;
+  var wantX = t.x - fx * back + px * side, wantZ = t.z - fz * back + pz * side;
+  G.p.x = wantX;
+  G.p.z = wantZ;
   var heroY = (t.y != null) ? t.y : (G.p.y || 0);         // stand on the subject's own level
   G.p.y = heroY;
   G.camYaw = yaw; G.camPitch = pit;
@@ -294,7 +295,23 @@ const focusJs = (spec) => `(async function(){
   snap();                                      // ...it has been falling and lerping the whole time
   await new Promise(function(r){ setTimeout(r, 250); });
   snap();
-  return { at:{x:+t.x.toFixed(0), y:+(t.y||0).toFixed(0), z:+t.z.toFixed(0)},
+  /* Did the teleport actually STICK? It often does not, and until 2026-08-02 the failure was
+     silent: the harness printed a target, a hero and an eye and looked like it had worked.
+     Teleporting into a spot with no floor under it trips the game's own fell-out-of-the-world
+     rescue, which puts the hero back at G.lastSafe - the level's START - so the frame is a
+     perfectly good photograph of the entrance while the log says it is pointing at your subject.
+     Measured: --focus "{x:0,y:0,z:-900}" in the Ruined Keep reported hero z 290, the start, with
+     the target 1200 units away, and nothing said so.
+     Reported, never corrected - a target with no floor is the caller's to fix by giving --focus
+     the subject's real y, and quietly moving the camera would be the same lie in a new place. */
+  var driftX = G.p.x - wantX, driftZ = G.p.z - wantZ;
+  var drift = Math.round(Math.sqrt(driftX * driftX + driftZ * driftZ));
+  return { lost: drift > 60 ? 'HERO DID NOT STAY PUT - it is ' + drift + ' units from where '
+                 + '--focus placed it, so this shot is NOT aimed at your target. Almost always a '
+                 + 'target with no floor under it: the game rescued the hero to the level start. '
+                 + 'Pass the subject real y.' : undefined,
+           drift: drift,
+           at:{x:+t.x.toFixed(0), y:+(t.y||0).toFixed(0), z:+t.z.toFixed(0)},
            hero:{x:+G.p.x.toFixed(0), y:+(G.p.y||0).toFixed(0), z:+G.p.z.toFixed(0)},
            eye:G.eye && {x:+G.eye.x.toFixed(0), y:+G.eye.y.toFixed(0), z:+G.eye.z.toFixed(0)} };
 })()`;
@@ -453,6 +470,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     console.log('FOCUS → ' + JSON.stringify(r.value !== undefined ? r.value : r));
     if (r.error || typeof r.value === 'string') {
       console.log('  ^ the camera was NOT moved — the frame below is wherever the game left it.');
+    } else if (r.value && r.value.lost) {
+      console.log('  ^ FOCUS LOST: ' + r.value.lost);
     }
   }
   if (EVAL) {

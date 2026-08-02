@@ -65,6 +65,16 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     hero's height, because a subject on a raised mesa has no floor under the teleport spot and
     gravity drops the camera with the hero (measured: y 165 → 55 in under two seconds). It prints
     the target, hero and eye it ended up with.
+    **It now says when the teleport did not stick (2026-08-02, worker B), and until it did the
+    failure was silent.** Teleporting the hero to a spot with no floor under it trips the game's
+    own fell-out-of-the-world rescue, which puts it back at `G.lastSafe` — the level START — so the
+    harness printed a target, a hero and an eye, and handed back a perfectly good photograph of the
+    entrance while the log claimed to be pointing at your subject. Reproduced in the Ruined Keep:
+    `--focus "{x:0,y:0,z:-900}" --dist 340 --side 60` reported hero z 290 with the target 1200 away.
+    It now compares where the hero ENDED UP against where focus put it and prints
+    `^ FOCUS LOST: …` past 60 units (ordinary settle drift measures ~23). It reports and does not
+    correct: the fix is to pass the subject's real y, and silently moving the camera would be the
+    same lie in a new place.
     **It will not give you a tight close-up, and that is geometry, not a missing feature.** The eye
     rides 118+180·sin(pitch) above the hero on a fixed look-down angle, so under ~200 units a
     ground-level subject drops out of frame. Solving the pitch to compensate swings to near

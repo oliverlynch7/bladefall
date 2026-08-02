@@ -22,6 +22,7 @@
      node _shot/shot.js --scene side0                    # the zone's HIDDEN side area (The Thornwood)
      node _shot/shot.js --scene 0.1                      # zone 0's SECOND area (Black Woods); 0.b = its boss
      node _shot/shot.js --scene trial                    # the class trial — the only ROOM DUNGEON
+     node _shot/shot.js --scene spar                     # the hub's SPARRING ROOM (the boxing hall)
                                                          #   (walls with doorways, doors, plates)
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
@@ -210,7 +211,13 @@ const areaOf = (dest) => {
 const trialOf = (dest) => { const m = /^trial(?::([a-z]+))?$/i.exec(String(dest || '')); return m ? (m[1] || 'warrior') : null; };
 const sceneJs = (dest) => {
   const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest);
+  /* The SPARRING ROOM is a hub sub-area — its own hand-authored boxing hall, `G.hub` true and
+     `G.sparringRoom` true — and it needed a destination of its own because there is no way in from
+     outside: `enterSparringRoom` is a plain top-level function and is NOT on `window.__BF3`, so a
+     --pre cannot call it. The way in is the game's own door: the hub NPC list carries the handler
+     (`{id:'sparring', open:()=>enterSparringRoom()}`), so this opens it the way a player does. */
   const go = dest === 'hub' ? ''
+    : dest === 'spar' ? 'var sp=(__BF3.G.hubNpcs||[]).filter(function(q){return q.id==="sparring"})[0]; if(sp) sp.open();'
     : sd != null ? '__BF3.cheatUnlockClasses(); __BF3.enterSide(' + sd + ');'
     : ar ? '__BF3.enterZone(' + ar.zone + '); for(var a=0;a<' + (ar.area < 0 ? 9 : ar.area)
            + ' && __BF3.G.area >= 0; a++) __BF3.nextArea();'
@@ -288,6 +295,9 @@ const sceneReady = (dest) => {
      zone you came from (`fromZone||0`), so the arena's identity is G.trial itself. */
   const at = dest === 'hub'
     ? '!!__BF3.G.hub'
+    /* The sparring room sets G.hub AND G.sparringRoom, so `hub` alone would resolve in the
+       Waystation on the way and photograph the plaza. Test the room itself. */
+    : dest === 'spar' ? '!!__BF3.G.sparringRoom'
     : tr
       /* ...and the arena is actually ON SCREEN. showTutorial() sets mode='menu' and covers the
          level with a full-page card, so `G.trial` alone resolved in 0.5s and handed back a
@@ -298,7 +308,9 @@ const sceneReady = (dest) => {
         : ar
           ? inZone + ar.zone + ' && __BF3.G.area === ' + ar.area
           : inZone + (parseInt(dest, 10) || 0);
-  const wb = dest === 'hub' ? '!!w.counts.hub' : '!w.counts.hub';
+  /* The sparring room goes down world3d's HUB branch (`world.hub` is the game's own G.hub), so its
+     counts carry `hub:true` even though buildHub lays nothing there. */
+  const wb = (dest === 'hub' || dest === 'spar') ? '!!w.counts.hub' : '!w.counts.hub';
   return '(function(){ try{'
        + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'
        + ' var w = window.__world3d && __world3d(); if(!w) return true;'
@@ -552,7 +564,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
        both would have been obvious the moment the run printed the name of the place. Costs one
        round-trip and needs no argument from the caller. */
     const where = await evaluate('(function(){ var G=window.__BF3&&__BF3.G; if(!G) return null;'
-      + ' return (G.areaName||"?") + (G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
+      /* The sparring room has no areaName, so it printed "? [hub]" — indistinguishable in the log
+         from the Waystation, which is the one thing this line exists to prevent. */
+      + ' return (G.areaName||(G.sparringRoom?"Sparring Room":"?"))'
+      + ' + (G.sparringRoom?" [SPAR]":G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
       + ' + "  zone " + G.zone + " stage " + G.stageIndex; })()');
     if (where.value) console.log('at   → ' + where.value);
   }

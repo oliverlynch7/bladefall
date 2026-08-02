@@ -102,6 +102,13 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     control chest renders correctly composited over the 3D floor — jambs, lintel and lock stripe
     (`b5-door-3d.png`) — and `?world3d=0` is unchanged (`b5-door-voxel.png`). **The door path is now
     photographed rather than inferred.**
+    **`--scene spar` photographs the hub's SPARRING ROOM** (added 2026-08-02, worker B) — the last
+    hub sub-area nobody had rendered. It needs a destination because `enterSparringRoom` is a plain
+    top-level function and is NOT on `window.__BF3`, so a `--pre` cannot call it; this opens the
+    game's own door instead (`G.hubNpcs` carries `{id:'sparring', open:()=>…}`). It waits on
+    `G.sparringRoom`, not `G.hub`, because the room sets both and `hub` alone resolves in the
+    Waystation on the way. See the backlog entry for what it found — and for the near-miss that
+    came of reaching it with a hand-rolled `--pre` first.
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight
@@ -227,6 +234,34 @@ Worlds standard), and the graphics need finishing before he shows more people.
       against `bloom-on-world.png`), but a bright voxel sky over an ungraded 3D world is the one
       place it could show. Giving the 3D layer the grade means rendering Three into the game's own
       offscreen FBO, which Three does not support without reaching into renderer internals.
+- [x] **The SPARRING ROOM has now been photographed, and it is CLEAN.** Done 2026-08-02 (worker B).
+      It was the last hub sub-area nobody had ever rendered — the practice hall: a sunken boxing
+      ring with red/blue rope rails on gold-capped corner posts, a two-tier spectator bowl, corner
+      braziers, a canvas mat, wall banners, the control post and the return door. All of it
+      composites correctly over the 3D layer (`_shot/out/b6-spar-scene.png`, `b6-spar-scene2.png`),
+      and matches `?world3d=0` (`b6-spar-voxel.png`).
+      It renders clean for a reason worth knowing: world3d builds *nothing at all* here. Measured,
+      not assumed — `__world3dPoses('')` returns `[]` and `__world3d().counts` is exactly
+      `{hub:true}`. `G.sparringRoom` sets `G.hub`, so `buildWorld` takes the hub branch, and
+      `buildHub` is hard-authored to the Waystation's own geometry and lays nothing in a room that
+      is not it. Nothing 3D covers anything, so every voxel object survives. **That also means the
+      room gets no 3D conversion at all** — if the hub ever gains one, this room needs its own
+      answer rather than the Waystation's.
+      **`--scene spar` is how you get there** (added the same run). It needed a destination because
+      there is no way in from outside: `enterSparringRoom` is a plain top-level function and is NOT
+      on `window.__BF3`, so no `--pre` can call it. The way in is the game's own door — `G.hubNpcs`
+      carries `{id:'sparring', open:()=>…}`. The `at →` line learned to say `Sparring Room [SPAR]`,
+      because with no `areaName` it printed `? [hub]`, which in a log is indistinguishable from the
+      Waystation — the one thing that line exists to prevent.
+      **THE NEAR-MISS IS THE LESSON, and it is the one this file keeps re-learning.** The first
+      attempt used a hand-rolled `--pre` + `--ready` instead of a destination, and handed back a
+      featureless brown plane with the banners floating over it and no ring at all. It was
+      completely plausible: it looked exactly like the Waystation paint-out bug, in a room where
+      that bug would have made sense, and the `?world3d=0` twin obligingly showed a perfect ring for
+      the comparison. It had a written-up backlog entry with a suspect named before `--scene spar`
+      rendered the same room twice, correctly, and did not reproduce it once. **A hand-rolled
+      run-up is not a destination.** If you find yourself writing `--pre` and `--ready` by hand to
+      reach somewhere, add the destination first and find the bug second.
 - [ ] **Class distinctiveness pass.** The top design goal. Use `_duel/` to measure, not opinion.
       First finding already on record: ranged beats melee 74%-24%, so melee needs an anti-kite
       answer. Work one class-pair at a time and re-run the matrix after each change.

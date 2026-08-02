@@ -103,9 +103,35 @@ Worlds standard), and the graphics need finishing before he shows more people.
       the bare gable triangle toward it too (shot and confirmed). Unturned, the plaza gets the long
       tiled slope and a three-bay window frontage. No collision box: probed 8 specs / 4 with
       collision, and the strip is behind the x=±915 wall anyway.
-      NEXT for this item: the SE court (Mirror + Sparring Room) and the south annex are still bare
-      3D-wise, and the annex has no 3D perimeter at all — buildHub's side walls stop at
-      southZ-2*HUB_UNIT, so the activity plazas sit in an unbounded space.)
+      progress 2026-08-01 (c): the SOUTH SHELL is done — the SE court and the activity annex have
+      real walls now. buildHub no longer guesses the perimeter from gate positions; it reads the
+      game's own `kind:'rampart'` collision boxes (tagged at the source in `enterWaystation`) and
+      lays a wall run on each, so a wall cannot exist in collision without existing in 3D. That
+      picked up the six the old hard-coded pair missed: both south wings, both annex dividers and
+      the annex back wall. 6 north cells + 55 derived = the 61 reported, every box accounted for.
+      Voxel perimeter slabs stop drawing once the shell is up (they are 300 tall against a 150-tall
+      rampart, so the top half stood above the stonework as a flat band).
+      Three things MEASURING caught that reading would not have:
+      - castle/wall's footprint is a full unit CUBE — a piece is as deep as it is long. Centred on
+        a 26-unit collision sheet the south wing spread stone from z 432 to 536 and swallowed the
+        Postings board at 445 whole; it simply stopped existing. Runs are pushed outward until
+        their INNER face lands on the collision line. `__world3dProps` / `__world3dBoxes` are new
+        and are how this was found — use them before trusting a placement coordinate.
+      - the market row ran a flat five deep down both sides of a courtyard 200 units shallower on
+        the west, so the last west cart stood inside the south wall and the last west hedge outside
+        the hub entirely. It now stops at whatever wall is actually behind that column.
+      - the paving stopped at the nominal courtyard depth rather than where the side walls really
+        run, so the Mirror had its heels on 3D stone and its toes on voxel floor.
+      NEXT for this item: the annex FLOOR is still voxel, and deliberately so — its activity plazas
+      are painted as sub-3-unit deco which the 3D pass drops, so paving over them would delete the
+      violet Abyss, gold Sprint and crimson Arena pads outright. Doing it properly means tagging
+      those pads so they survive the drop, THEN paving. There is also a visible seam where the
+      paving ends at z 707.
+      WARNING, cost this run ~30 minutes: a second autopilot process is running in THIS checkout at
+      the same time. Its killed-run guard cannot tell live work from wreckage, so it reverted
+      world3d.js out from under a verified edit and committed the other half alone — leaving HEAD
+      with the voxel walls suppressed and no 3D shell to replace them. Commit early and often here
+      until that is fixed.)
 - [x] **3D on by default.** DONE 2026-08-01. `hero3d`, `world3d` and `mob3d` all default to ON;
       the flags survive as escape hatches (`?hero3d=0`, `?world3d=0`, `?mob3d=0`) so old links and
       A/B checks still work.

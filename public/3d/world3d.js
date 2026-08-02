@@ -506,6 +506,11 @@ function classify(d){
     if(d.kind === 'grave') return 'grave';
     if(d.kind === 'pillar')return 'pillar';
     if(d.kind === 'column') return d.lead === false ? 'skip' : 'column';
+    /* An explicit BUSH, as opposed to the `foliage` bin below, which is a guess made from a box's
+       theme and height and then split three ways at random. A generator that says "this is a
+       leafy plant" gets one every time - the palace's citrus orchard is 18 plants in a grid and
+       a random third of them coming out as grass would read as a half-dead garden. */
+    if(d.kind === 'bush') return d.lead === false ? 'skip' : 'bush';
     if(d.kind === 'lantern') return d.lead === false ? 'skip' : 'lantern';
     if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
     /* A crop plant is a golden stalk plus a green leaf nub. The tag exists to keep the stalk OUT
@@ -1392,7 +1397,7 @@ export function buildWorld(scene, world){
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
                  fence: [], grave: [], pillar: [], column: [], flower: [], lantern: [], corn: [],
-                 standstone: [], building: [], skip: [] };
+                 standstone: [], bush: [], building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -1421,7 +1426,9 @@ export function buildWorld(scene, world){
      with different tints, so the yellow ones become tall grass and the green ones a mix of grass,
      bushes and the occasional flower. Reading the colour keeps this honest to what the level
      actually placed instead of scattering decoration at random. */
-  const grassBin = [], bushBin = [], flowerBin = [];
+  /* Anything a generator TAGGED as a bush joins the guessed ones here rather than getting its own
+     pass, so a tagged plant and an inferred one are the same model at the same fit. */
+  const grassBin = [], bushBin = bins.bush.slice(), flowerBin = [];
   for(const d of bins.foliage){
     const r = hash(d.x * 3.1, d.z * 1.7);
     const c = new THREE.Color(d.c || '#7a9a4a');
@@ -1519,7 +1526,7 @@ export function buildWorld(scene, world){
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, column: bins.column.length,
-                     flowerProps: bins.flower.length,
+                     bush: bins.bush.length, flowerProps: bins.flower.length,
                      lantern: bins.lantern.length, corn: bins.corn.length,
                      standstone: bins.standstone.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,

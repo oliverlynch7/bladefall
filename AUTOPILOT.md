@@ -160,6 +160,20 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
   or harness fix, or a documented cleanup — rather than racing A for the same item.
 - Debug interface: `window.__BF3` (exposes `G`, `update(dt)`, `input`, `makeWeapon`, `enterZone`, `CLASSES`, `CLASS2`, etc.) — use it via the in-app Browser pane on the local preview server (`.claude/launch.json` name `bladefall`, port 4310) to verify.
 
+## If you cannot run `node`, STOP — the run is dead, and it is not your fault
+Check this first, before picking an item. Try `node --version` and then `node -e "console.log(1)"`.
+If the bare version works and `-e` comes back "This command requires approval", the workspace is
+**not trusted**, so Claude is ignoring every `permissions.allow` entry in `.claude/settings.json`.
+That removes BOTH verification gates at once — the syntax check and the `_shot/` harness — and
+there is no fallback, because the harness needs real headless Chrome (the in-app browser pane
+renders the `#gl` canvas at 0x0). Any code you write in that state is unverifiable by definition.
+
+**Do not write game code. Change nothing under `public/`. Exit.** The fix is Oliver's and takes ten
+seconds: open a terminal in `_automation\bladefall`, run `claude`, accept the trust dialog.
+`autopilot.ps1` now pre-flights this and pings Telegram once a day, so it announces itself rather
+than burning an hourly session — but if you are reading this from inside such a session, the ping
+is already handled and the correct move is to stop.
+
 ## Workflow — every run
 1. `cd` to your checkout. `git fetch origin`, `git checkout <your branch>`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).
 2. Pick your end of the Backlog below — **A: top unchecked item. B: last unchecked item, working upward.**
@@ -262,6 +276,101 @@ Worlds standard), and the graphics need finishing before he shows more people.
       rendered the same room twice, correctly, and did not reproduce it once. **A hand-rolled
       run-up is not a destination.** If you find yourself writing `--pre` and `--ready` by hand to
       reach somewhere, add the destination first and find the bug second.
+      (progress 2026-08-01: assembler PORTED and working. `planBuilding`/`buildBuildings` in
+      world3d.js build from the village kit and instance per part-primitive — 4 houses = 116 pieces
+      in 31 draw calls. Specs are tagged at the source: `enterWaystation` pushes `kind:'building'`
+      deco carrying cells/storeys/style/ry plus a real `G.walls` box, so the houses are SOLID —
+      walk-into proven, not assumed. Roofs pick from the kit's full 13-size matrix and close both
+      gable ends with Roof_Front_Brick*. `window.__world3dParts()` dumps measured part sizes.
+      progress 2026-08-01 (b): the 3D hub was EMPTYING ITSELF and nobody had noticed. flushHero3D
+      clears the depth buffer before the Three pass, so the 3D layer paints over every voxel pixel
+      it covers — and paving tiles BEHIND a shopkeeper project above them on screen. Result: with
+      world3d on, the Waystation had no Quartermaster, no Smith, no anvil, no bag chest, no
+      waystone, no torches, no planters — just floating name tags over a bare yard. Proved with an
+      A/B shot at the Quartermaster (world3d off = shopkeeper + counter + chest; on = nothing).
+      Fixed by holding those draws back: pushInst now has a DEFER buffer, drawCourse raises it
+      around the hub's torches / obstacles / deco and render() around drawWaystation, and
+      flushDeferred() replays them AFTER Three. Depth values are directly comparable because
+      hero3d's camera IS the game's own PROJ/VIEW — so the keepers stand on the 3D paving and are
+      still correctly hidden by the 3D houses. Dropped rather than deferred: kind:'building' and
+      kind:'pillar' (world3d builds both already) and anything ≤3 units tall (floor paint the
+      paving replaced). Torch glow halos are skipped in the deferred pass — additive-only geometry.
+      Also: world3d's free-standing monument is GONE, not moved. It sat on the waystone and hid the
+      whole portal arc from spawn; every alternative was measured and every one of them is either
+      inside the spawn-to-gate sightline fan (which widens toward the rampart until it covers
+      everything) or on the walk to a keeper bay — a pair at ±380,140 was tried and the camera ends
+      up inside it on the way to the Stylist. Its stated job ("empty lot") only existed because the
+      3D layer was erasing the waystone. ART CALL, reversible: four hubPiece() calls in git history.
+      The perimeter strip is DONE: four shopfronts at x=±965, z=-78 / z=195, one behind each of the
+      Quartermaster / Smith / Drillmaster / Beastkeeper. w:1 d:3 storeys:2, deliberately NOT
+      quarter-turned — the kit's ridge runs along DEPTH, so turning the door toward the plaza turns
+      the bare gable triangle toward it too (shot and confirmed). Unturned, the plaza gets the long
+      tiled slope and a three-bay window frontage. No collision box: probed 8 specs / 4 with
+      collision, and the strip is behind the x=±915 wall anyway.
+      progress 2026-08-01 (c): the SOUTH SHELL is done — the SE court and the activity annex have
+      real walls now. buildHub no longer guesses the perimeter from gate positions; it reads the
+      game's own `kind:'rampart'` collision boxes (tagged at the source in `enterWaystation`) and
+      lays a wall run on each, so a wall cannot exist in collision without existing in 3D. That
+      picked up the six the old hard-coded pair missed: both south wings, both annex dividers and
+      the annex back wall. 6 north cells + 55 derived = the 61 reported, every box accounted for.
+      Voxel perimeter slabs stop drawing once the shell is up (they are 300 tall against a 150-tall
+      rampart, so the top half stood above the stonework as a flat band).
+      Three things MEASURING caught that reading would not have:
+      - castle/wall's footprint is a full unit CUBE — a piece is as deep as it is long. Centred on
+        a 26-unit collision sheet the south wing spread stone from z 432 to 536 and swallowed the
+        Postings board at 445 whole; it simply stopped existing. Runs are pushed outward until
+        their INNER face lands on the collision line. `__world3dProps` / `__world3dBoxes` are new
+        and are how this was found — use them before trusting a placement coordinate.
+      - the market row ran a flat five deep down both sides of a courtyard 200 units shallower on
+        the west, so the last west cart stood inside the south wall and the last west hedge outside
+        the hub entirely. It now stops at whatever wall is actually behind that column.
+      - the paving stopped at the nominal courtyard depth rather than where the side walls really
+        run, so the Mirror had its heels on 3D stone and its toes on voxel floor.
+      NEXT for this item: the annex FLOOR is still voxel, and deliberately so — its activity plazas
+      are painted as sub-3-unit deco which the 3D pass drops, so paving over them would delete the
+      violet Abyss, gold Sprint and crimson Arena pads outright. Doing it properly means tagging
+      those pads so they survive the drop, THEN paving. There is also a visible seam where the
+      paving ends at z 707.
+      DESK RESEARCH ONLY, 2026-08-01 (d) — read off the source in a session that could not run
+      `node`, so NONE of it is rendered proof. Probe each claim before building on it; it is here
+      so the next run starts from coordinates instead of re-deriving them.
+      - The claim above that the pads are dropped by the ≤3-unit rule looks WRONG. The rule is
+        `(d.y0||0)+(d.h||0)<=3` (index.html:12043) and the pads are pushed `y0:2, h:1.6` = 3.6
+        (index.html:10193), so they should already survive. `h` is not touched by the space pass.
+        If that holds, paving the annex needs no tagging at all — check it first, because it turns
+        this from a two-part job into a one-part one.
+      - The z-707 seam is `paveSouth` (world3d.js:889) = max(southZ, sideEnd[westX], sideEnd[eastX]).
+        The east wall runs z 49→64 with d 988→1284 after the pass, so sideEnd[eastX] ≈ 706. Nothing
+        south of that is paved, which is the whole annex.
+      - Paving is currently ONE rectangle over westX..eastX, so it also over-paves: the west south
+        wall is at z≈484 but the west column is paved to 706, i.e. ~220 units of stone outside the
+        hub on that side. A rect cannot describe this floor plan.
+      - The honest source for the SHAPE is `G.segments`: the three `nofloor:true` entries are the
+        courtyard, the SE court and the annex, and the space pass DOES scale segments. Use those,
+        not `G.rooms` — rooms are NOT scaled by the pass, so their coordinates are stale.
+      WARNING, cost that run ~30 minutes: a second autopilot process was running in THIS checkout
+      at the same time. Its killed-run guard cannot tell live work from wreckage, so it reverted
+      world3d.js out from under a verified edit and committed the other half alone — leaving HEAD
+      with the voxel walls suppressed and no 3D shell to replace them. Commit early and often here.
+      APPEARS FIXED as of 2026-08-01: `autopilot-b.ps1` now sets `$repo` to
+      `_automation\bladefall-wt-b`, a separate worktree, so the two runners no longer share a
+      working tree. Read from the runner, not observed — if you see a tree go dirty under you,
+      that assumption is wrong.)
+- [x] **3D on by default.** DONE 2026-08-01. `hero3d`, `world3d` and `mob3d` all default to ON;
+      the flags survive as escape hatches (`?hero3d=0`, `?world3d=0`, `?mob3d=0`) so old links and
+      A/B checks still work.
+      The "BLOCKED until bloom is resolved" note was STALE — bloom stopped being a problem when the
+      3D draw moved after `PostFX.end()`. Re-checked properly rather than taken on trust: bloom is
+      HIGH-quality only, so a headless run can have the composite quietly switched off and make the
+      test look like it passed. `_shot/presets/bloom_check.js` forces `meta.quality='high'` and
+      `window.__BF_POSTFX()` reports whether the composite is actually running. With
+      `{"bloom":true,"nobloom":false}` confirmed, the hub and Emberdeep both render the full 3D
+      layer. `?nobloom` is no longer required anywhere.
+      Smoke-tested with NO flags at all: title screen, hub, Outskirts, Frostfell, Emberdeep, the
+      Abyss, Castle Duskmoor and the Sparring Room — 0 page errors, mob3d reports every room type
+      drawn3d in each.
+      NOT self-verifiable, and it is Oliver's call: 60fps on his phone. If it drops,
+      `?hero3d=0&world3d=0` is the instant fallback and the default is a one-line revert.
 - [ ] **Class distinctiveness pass.** The top design goal. Use `_duel/` to measure, not opinion.
       First finding already on record: ranged beats melee 74%-24%, so melee needs an anti-kite
       answer. Work one class-pair at a time and re-run the matrix after each change.

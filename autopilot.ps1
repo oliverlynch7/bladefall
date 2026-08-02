@@ -17,6 +17,22 @@ $claude = 'C:\Users\Oliver\.local\bin\claude.exe'
 
 function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -FilePath $log -Append -Encoding utf8 }
 
+# One Telegram alert per day about a BROKEN TOOLCHAIN, so a dead autopilot announces itself.
+# Same shape as the auth warning below, with its own stamp file so neither can silence the other.
+function AlertOncePerDay($stampName, $text) {
+  try {
+    $stamp = Join-Path $repo $stampName
+    $today = (Get-Date -Format 'yyyy-MM-dd')
+    # Cast through a string: Get-Content -Raw on an EMPTY stamp returns $null, and $null.Trim()
+    # throws straight into the catch below - which would swallow the alert this exists to send.
+    $last  = if (Test-Path $stamp) { Get-Content $stamp -Raw } else { '' }
+    if ("$last".Trim() -eq $today) { return }
+    $today | Out-File -FilePath $stamp -Encoding utf8 -NoNewline
+    $body = '{"action":"tgPing","password":"oliverNCA2026","text":"' + $text + '"}'
+    Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json' -Body $body | Out-Null
+  } catch {}
+}
+
 # Only run during waking hours. The scheduled task already bounds this, but a machine that was
 # asleep can fire a missed trigger at any hour, and a 4am Telegram ping is not welcome.
 $h = (Get-Date).Hour
@@ -29,6 +45,34 @@ if ($h -lt 8 -or $h -gt 22) { Log "skipped (hour $h outside 08-22)"; exit 0 }
 # Playwright console log, which would have blocked every future run forever. Stray artefacts are
 # not in-progress work.
 Set-Location $repo
+
+# PRE-FLIGHT: is this folder a TRUSTED workspace? If it is not, Claude ignores every
+# permissions.allow entry in .claude/settings.json, and the single most important consequence is
+# that the session cannot run `node`. That is BOTH verification gates at once - the syntax check
+# and the _shot/ screenshot harness - so a correctly-behaved run is required to ship nothing at
+# all. It still logs "run start" / "run end" and looks perfectly healthy from the outside.
+#
+# This cost every run on 2026-08-01: ten died outright with "this workspace has not been trusted",
+# and the two after that started cleanly, did the reading, picked the right backlog item and then
+# had to stop at the gate. Scraping $out for the warning does NOT catch the second kind - the
+# message never reached the captured output - so the state is checked directly and up front.
+#
+# Read-only ON PURPOSE. Writing the flag would mean an unattended script editing Claude's own
+# config, which is a one-line manual fix for Oliver and an unrecoverable mess if it goes wrong.
+# Fails OPEN: any error reading the config counts as trusted, so a bug in this check can never be
+# the thing that stops the autopilot.
+$trusted = $true
+try {
+  $cfg = Get-Content (Join-Path $env:USERPROFILE '.claude.json') -Raw -ErrorAction Stop | ConvertFrom-Json
+  $key = $repo -replace '\\', '/'
+  $prj = $cfg.projects.PSObject.Properties[$key]
+  $trusted = [bool]($prj -and $prj.Value.hasTrustDialogAccepted)
+} catch { $trusted = $true }
+if (-not $trusted) {
+  Log 'skipped (WORKSPACE NOT TRUSTED - allowlist ignored, node unavailable, so nothing can be verified or shipped)'
+  AlertOncePerDay '_autopilot_trustwarn' 'BLADEFALL autopilot is DOWN - this folder is not a trusted workspace, so Claude ignores its allowlist and cannot run node. That kills both checks (syntax gate + screenshot harness), so every hourly run reads the backlog and then ships nothing. Fix: open a terminal in _automation\\bladefall, run claude once, and accept the trust dialog. It resumes on its own after that.'
+  exit 0
+}
 
 # A run that hits the task time limit is KILLED mid-edit, leaving a dirty tree. The next run then
 # saw "tracked files modified" and skipped, and so did the one after - so a single timeout cost
@@ -64,6 +108,21 @@ if ($dirty) {
 }
 Remove-Item $marker -ErrorAction SilentlyContinue
 New-Item -ItemType File -Path $marker -Force | Out-Null
+
+# Clear the marker ONLY if the tree is genuinely clean.
+#
+# The killed-run guard assumed a run that ENDS cleanly leaves nothing behind. Worker A disproved
+# that overnight: it finished normally, but left AUTOPILOT.md and both runner scripts modified and
+# uncommitted. The marker was removed, so every later run saw a dirty tree with NO marker, read it
+# as supervised work, and skipped - four hours of cycles lost to a run that thought it succeeded.
+#
+# Leaving the marker in place when the tree is dirty routes that state into the recovery path that
+# is already tested: the next run sees dirty+marker, stashes the leftovers, and continues.
+function ClearMarkerIfClean {
+  $left = (git status --porcelain) | Where-Object { $_ -notmatch '^\?\?' }
+  if ($left) { Log "run left the tree dirty; keeping the marker so the next run recovers it: $($left -join '; ')" }
+  else { Remove-Item $marker -ErrorAction SilentlyContinue }
+}
 
 Log 'run start'
 
@@ -111,13 +170,18 @@ try {
       $body = '{"action":"tgPing","password":"oliverNCA2026","text":"BLADEFALL autopilot is DOWN - Claude could not authenticate, so no work is happening. Fix: open a terminal and run claude, then log in. It will resume on its own after that."}'
       try { Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json' -Body $body | Out-Null } catch {}
     }
-    Remove-Item $marker -ErrorAction SilentlyContinue
+    ClearMarkerIfClean
     Log 'run end (AUTH FAILURE - no work done)'
     exit 0
   }
-  Remove-Item $marker -ErrorAction SilentlyContinue
+  ClearMarkerIfClean
   Log 'run end'
 } catch {
   Log "FAILED: $_"
+  # The OTHER shape of the same fault: Claude refuses to start at all and the trust message comes
+  # back as a terminating error. The pre-flight above fails open, so this is the backstop.
+  if ("$_" -match 'has not been trusted|hasTrustDialogAccepted') {
+    AlertOncePerDay '_autopilot_trustwarn' 'BLADEFALL autopilot is DOWN - Claude will not start because this folder is not a trusted workspace. Fix: open a terminal in _automation\\bladefall, run claude once, and accept the trust dialog. It resumes on its own after that.'
+  }
   exit 1
 }

@@ -1,17 +1,17 @@
 # BLADEFALL autopilot runner
 #
 # Fires one headless Claude session that reads docs/VISION.md and AUTOPILOT.md, does ONE chunk of
-# work from the backlog, verifies it, commits to the bladefall-autopilot branch, and only pings
+# work from the backlog, verifies it, commits to the autopilot-b branch, and only pings
 # Telegram if it actually shipped something.
 #
-# Registered as the Windows Scheduled Task "Bladefall Autopilot" (hourly, 08:00-23:00), matching
+# Registered as the Windows Scheduled Task "Bladefall Autopilot B" (hourly, 08:00-23:00), matching
 # how the other PraxisBrain automations are wired.
 #
 # Deliberately branch-only: it never commits to main, so a bad autonomous run cannot break the
 # live game. Oliver reviews the branch preview and merges when he is happy.
 
 $ErrorActionPreference = 'Stop'
-$repo = 'C:\Users\Oliver\Documents\PraxisBrain\_automation\bladefall'
+$repo = 'C:\Users\Oliver\Documents\PraxisBrain\_automation\bladefall-wt-b'
 $log  = Join-Path $repo '_autopilot.log'
 $claude = 'C:\Users\Oliver\.local\bin\claude.exe'
 
@@ -22,12 +22,6 @@ function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -F
 $h = (Get-Date).Hour
 if ($h -lt 8 -or $h -gt 22) { Log "skipped (hour $h outside 08-22)"; exit 0 }
 
-# Never start a run on top of MODIFIED TRACKED files - that would sweep a supervised session's
-# in-progress edits into an autonomous commit.
-#
-# Untracked files (??) deliberately do NOT block. The first test of this guard tripped on a stray
-# Playwright console log, which would have blocked every future run forever. Stray artefacts are
-# not in-progress work.
 Set-Location $repo
 
 # A run that hits the task time limit is KILLED mid-edit, leaving a dirty tree. The next run then
@@ -74,6 +68,14 @@ Read these two files FIRST, in this order, and follow them exactly:
   1. docs/VISION.md      - what the game is, priorities, what you may decide alone
   2. AUTOPILOT.md        - workflow, verification gate, branch rules, Telegram format
 
+You are WORKER B. Worker A runs in a separate checkout at the same time and takes the backlog
+from the TOP. You take it from the BOTTOM - start at the LAST unchecked item and work upward - so
+the two of you never build the same thing twice. If only one item remains, leave it to A and pick
+any well-defined improvement that does not overlap: asset integration, a tooling or harness fix,
+or a documented cleanup.
+
+Commit to `autopilot-b` and push to `autopilot-b`. NEVER main, never bladefall-autopilot.
+
 Then work the AUTOPILOT.md backlog. Do as MUCH as you can verify properly in this run - Oliver
 wants real throughput, not a token trickle, so keep going through backlog items until you run low
 on context rather than stopping after one. Commit after EACH item so a later failure never
@@ -83,7 +85,7 @@ Depth over speed on each item: it is better to finish and verify three things th
 eight. Verified work only - unverified work is worse than no work.
 
 Non-negotiable:
-- Work on the bladefall-autopilot branch only. NEVER commit to main.
+- Work on the autopilot-b branch only. NEVER commit to main.
 - Run the syntax gate before any commit. Never commit code that fails it.
 - Verify visually with the _shot/ harness and actually LOOK at the PNG. Reading source is not proof.
 - If a change does not appear to take effect, confirm WHICH definition your edit landed in before

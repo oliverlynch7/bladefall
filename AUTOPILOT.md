@@ -501,9 +501,43 @@ Worlds standard), and the graphics need finishing before he shows more people.
       *One for Oliver's eye, not a bug:* the kit lightpost is GREEN where the voxel post was wood
       brown. It is the same green as the hub's lanterns, which is the point — the two lamps in the
       game now match each other — but it no longer matches the box it replaced. A tint is one line.
-      *Measured and left alone:* the 812 corn stalks of the West Cornlands. They already get a real
-      grass model each (they classify as plains foliage), and the repo has no crop/wheat asset in
-      any kit — `plant_flatTall` would be a substitution, i.e. an art call. Needs Oliver.
+      *Correction 2026-08-02 (worker B), and the reason the note below exists:* "the 812 corn
+      stalks already get a real grass model each" was WRONG, and it was wrong because it was read
+      off the classifier instead of off a render. See the next item.
+- [x] **The West Cornlands and the Dreaming Expanse had no corn in them.** Done 2026-08-02
+      (worker B). Both fields are built by one helper, `field()` in the Outskirts generator, and one
+      CORN PLANT is two deco boxes: a `4x24..34x4` golden stalk and a `9x3x3` green leaf nub pinned
+      halfway up it. Untagged, world3d's plains rules claimed each half separately and got BOTH
+      wrong:
+      - the stalk is theme `plains`, y0 0 and under 60 tall, so the ground-tuft rule made it
+        foliage — and `buildProps` fits by whichever of height or width binds first, so a grass
+        model fitted into 4 units of WIDTH came out a ~3-unit speck. This is the lantern/mimic
+        lesson for the third time: **the default fit is wrong whenever the deco box is a thin CORE
+        rather than the object's outline.**
+      - the leaf is pinned to `y0:12`, and an explicit base height reads as STRUCTURE, so it stayed
+        a raw green brick floating at knee height.
+      812 plants, so both fields rendered as a grid of green blocks on bare ground. Measured before
+      touching anything, same camera both ways: `?world3d=0` is a dense golden field you walk
+      through (`_shot/out/b3-corn-voxel.png`); the default was floating bricks
+      (`b3-corn-3d.png`). `kind:'corn'` with `lead:true`/`cropH` on the stalk now tags the plant at
+      the source, exactly like the roadside lanterns.
+      **The cast onto real models was BUILT, RENDERED AND REJECTED, and that is the part worth
+      keeping.** Standing the stalks up as tall grass (`PROP_SETS.grass`, height-only fit) works
+      geometrically — the plants are the right size and the bricks are gone — but a prop carries
+      its own texture, so 812 golden stalks came out a solid TEAL thicket and the West Cornlands
+      read as jungle (`b3-corn-fix1.png`). `instanceColor` cannot rescue it: it MULTIPLIES, and no
+      multiple of teal is gold. The repo has no wheat or corn asset in any kit.
+      So the corn stays the level's own geometry, drawn as real LIT boxes — which is what a 4x30
+      golden stalk already is. Same field as the voxel renderer, now taking light, and the leaf nub
+      kept because it is what gives the rows texture at eye level. A real crop model from Oliver
+      would beat this; until then honest beats ambitious.
+      Verified: the West Cornlands at gameplay distance (`b3-corn-fix2.png` vs `b3-corn-voxel.png`),
+      the Dreaming Expanse field with the road cutting through it (`b3-dream-after.png`), the corn
+      now legible from the zone entrance (`b3-entrance-after.png`), and `?world3d=0` unchanged
+      (`b3-corn-voxel-after.png`). Counts move exactly as designed — `corn 1624`, `foliage 812 → 0`,
+      `box 1098 → 286`, `skipped 142` (unchanged: nothing is dropped). **Draw calls went DOWN, 22 →
+      19**, because four grass InstancedMeshes became one box mesh. Rest of the Outskirts baseline
+      identical: 1257 floor, 115 road, 118 trees, 24 lanterns, 2194 deco, 18 creatures, 7 chests.
 - [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
       was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
       `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its

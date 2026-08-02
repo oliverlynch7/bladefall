@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.419.0-autopilot';
+const VERSION3D='1.420.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4770,7 +4770,18 @@ const EXPANDED_SCAPES={
        redundant pillar standing beside it, tinted with the zone ground colour. Rendering skips
        flagged columns only while world3d is live. */
     const tree=(x,z,h=92)=>{ const b=propGroundAt(x,z); const tc=vcol(x,z,22,22,b+h); tc.treeCol=true; G.deco.push({x,z,y0:b+h,w:72,h:52,d:72,c:tint(LEAF,'#000',rnd()*.16),theme:'plains',kind:'tree',lead:true,trunkH:h}); G.deco.push({x:x-16,z:z+6,y0:b+h+35,w:48,h:34,d:48,c:tint(LEAF,'#fff',.08),theme:'plains',kind:'tree'}); };
-    const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36; G.deco.push({x,z,y0:0,w:4,h:24+(ix+iz)%3*5,d:4,c:CORN,theme:'plains'}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains'}); } };
+    /* One CORN PLANT is these two boxes: a 4-wide golden stalk 24-34 tall and a green leaf nub
+       halfway up it. Untagged, world3d read them as two unrelated bits of plains foliage and got
+       both wrong - the stalk classified as a ground tuft and fitted by whichever of height or
+       width binds first, so a 4-wide core became a 4-unit speck, and the leaf, pinned to y0 12,
+       classified as STRUCTURE and stayed a raw green brick floating at knee height. 812 of them:
+       the whole West Cornlands and the Dreaming Expanse read as a grid of green blocks on bare
+       ground where the voxel renderer draws a field you walk through.
+       kind:'corn' with lead:true on the stalk (carrying cropH, its own full height) makes one
+       plant one model at the height the level actually built; the leaf is lead:false and world3d
+       drops it, exactly as the flower planters drop their stem and leaf. Metadata only - the
+       voxel path ignores kind and draws both boxes as before. */
+    const field=(cx,cz,cols,rows)=>{ for(let ix=0;ix<cols;ix++) for(let iz=0;iz<rows;iz++){ const x=cx+(ix-(cols-1)/2)*34,z=cz+(iz-(rows-1)/2)*36,ch=24+(ix+iz)%3*5; G.deco.push({x,z,y0:0,w:4,h:ch,d:4,c:CORN,theme:'plains',kind:'corn',lead:true,cropH:ch}); G.deco.push({x:x+4,z,y0:12,w:9,h:3,d:3,c:'#8aa33f',theme:'plains',kind:'corn',lead:false}); } };
     const fence=(x,z,w,d)=>{ const n=Math.max(2,Math.floor(Math.max(w,d)/70)); for(let k=0;k<=n;k++){ const t=k/n,px=x+(w?t*w-w/2:0),pz=z+(d?t*d-d/2:0); G.deco.push({x:px,z:pz,y0:0,w:7,h:24,d:7,c:WOOD}); } G.deco.push({x,z,y0:11,w:w||7,h:5,d:d||7,c:WOOD}); };
     const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!woods){

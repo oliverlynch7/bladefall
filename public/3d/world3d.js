@@ -464,6 +464,10 @@ function classify(d){
     if(d.kind === 'pillar')return 'pillar';
     if(d.kind === 'lantern') return d.lead === false ? 'skip' : 'lantern';
     if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
+    /* A crop plant is a golden stalk plus a green leaf nub. The tag exists to keep the stalk OUT
+       of the foliage bin - it is theme 'plains' and under 60 tall, so the ground-tuft rule below
+       claimed it and shrank it to nothing. See the corn bin for why it stays a lit box. */
+    if(d.kind === 'corn') return 'corn';
     if(d.kind === 'skipflower') return 'skip';   // stem/leaf boxes the real flower model replaces
     /* A building's lead box carries the modular spec; the second box is only the voxel path's roof
        cap, and letting it through would stack a whole second house on the first one's roof. */
@@ -1274,7 +1278,8 @@ export function buildWorld(scene, world){
      adding its bin threw "Cannot read properties of undefined" and world3d disabled itself - the
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
-                 fence: [], grave: [], pillar: [], flower: [], lantern: [], building: [], skip: [] };
+                 fence: [], grave: [], pillar: [], flower: [], lantern: [], corn: [],
+                 building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -1331,6 +1336,21 @@ export function buildWorld(scene, world){
   /* Height alone, and lampH not d.h: the lead deco is only the POST, so d.h would stand a
      lightpost 38 tall where the object the generator built is 47 tall to the top of its head. */
   buildProps(bins.lantern, PROP_SETS.lantern, 47, d => (d.lampH || d.h || 47), true);
+  /* CROPS, as real lit boxes rather than models, and that is a measured choice rather than a
+     shortcut. The repo has no wheat or corn asset in any kit. Casting the stalks onto the
+     tall-grass set WAS built and rendered (b3-corn-fix1.png): the plants stand at the right
+     height, but a prop carries its own texture, so 812 golden stalks become a dense TEAL thicket
+     and the West Cornlands reads as jungle. instanceColor cannot recover it either - it
+     multiplies, and no multiple of teal is gold.
+     A 4x30 golden box already IS a corn stalk, so drawing the level's own geometry lit is the
+     faithful conversion here: same field as the voxel renderer, now taking light. The leaf nub
+     stays too - it is what gives the rows their texture at eye level.
+     A real crop model from Oliver would beat this; until then, honest beats ambitious. */
+  buildCategory(scene, bins.corn, boxGeo(), mat(), (o, d) => {
+    o.position.set(d.x, d.y0 || 0, d.z);
+    o.rotation.set(0, 0, 0);
+    o.scale.set(d.w, Math.max(1, d.h || 1), d.d || d.w);
+  });
   /* Buildings work in any zone, not just the hub - a zone generator only has to tag a deco box the
      way the Waystation does. Nothing outside the hub emits them yet. */
   const zoneBuild = buildBuildings(bins.building.map(d => ({
@@ -1366,7 +1386,7 @@ export function buildWorld(scene, world){
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, flowerProps: bins.flower.length,
-                     lantern: bins.lantern.length,
+                     lantern: bins.lantern.length, corn: bins.corn.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,
                      drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };

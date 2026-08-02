@@ -82,6 +82,26 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     `startTrial()` instead when the class is locked — which is always, on a throwaway profile — so
     a bare `enterSide()` photographs the trial arena under the side area's name. It calls
     `cheatUnlockClasses()` first.
+    **`--scene trial` photographs a ROOM DUNGEON, which nothing could do before** (added
+    2026-08-02, worker B — the missing piece the walls/doors item below explicitly asked for).
+    Every other destination lands on a hand-authored scape: `EXPANDED_SCAPES` for the eight zones,
+    `SIDE_SCAPES` for the seven side areas, `BOSS_ARENAS` for the boss rooms. The shared grid-graph
+    maze underneath them — the ONE generator that emits `G.walls` with doorway gaps, `sealDoor()`
+    slabs into `G.doors`, pressure `G.plates` and corner `G.torches` — is reached only when all four
+    dispatches are skipped, and `G.trial` is what skips them (every guard reads `!G.trial`). So
+    doors existed in the game and had never been in front of a camera. The run-up already calls
+    `startTrial('warrior')` on its way to the hub; this destination simply never calls `skipTrial()`.
+    `--scene trial:<class>` picks the class, hence the trial.
+    Two things it had to learn, both measured: **`tutGo` is on the dismiss whitelist here and
+    nowhere else** — the first trial opens behind "The Proving Chamber" card whose two buttons are
+    `tutGo` (begin) and `tutSkip` (skip tutorial AND trial), so a clicker that took the first button
+    in the overlay would take the trial with it and photograph the hub; and the ready test waits for
+    that card to stop being visible, because `G.trial` alone resolved in 0.5s and handed back a
+    photograph of the tutorial TEXT (`b5-trial.png`).
+    Used immediately to close the door question: a closed door injected in front of the hero with a
+    control chest renders correctly composited over the 3D floor — jambs, lintel and lock stripe
+    (`b5-door-3d.png`) — and `?world3d=0` is unchanged (`b5-door-voxel.png`). **The door path is now
+    photographed rather than inferred.**
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight
@@ -493,6 +513,32 @@ Worlds standard), and the graphics need finishing before he shows more people.
       cut off in mid-air) and after (`b4-float-after.png`, conifers standing on the terrain with
       their trunks meeting the ground); poses now report `y: 0` for every tree over a floor of 0.
       Outskirts baseline otherwise identical: 1257 floor, 115 road, 2194 deco, 277 box.
+- [x] **The class trial was standing on a lawn.** Found and fixed 2026-08-02 (worker B) in the
+      first minute a room dungeon had ever been photographed — it is the thing `--scene trial` was
+      built to find, and it is the FIRST level every new player sees, before the hub.
+      A trial runs the shared maze, but it borrows `STAGES[].theme` from the zone it was started
+      FROM (`startTrial` builds `newG` with `zone: fromZone||0`). So the Trial of the Blade reported
+      theme `plains`, and `THEME_GROUND.plains` is `nature/ground_grass` — flat teal — laid wall to
+      wall inside the walled chamber the game's own tutorial card calls "this sealed chamber".
+      Measured before touching anything, same camera both ways: the game paints that floor
+      `s.ground = #8a8445`, a khaki stone (`_shot/out/b5-door-voxel.png`), and the 3D layer painted
+      it teal (`b5-door-3d.png`). **The two renderers disagreed about what the ground IS**, which is
+      a conversion bug rather than a look, and the level's own colour settles it without anyone
+      inventing art: interior `village/Floor_Brick` tinted with the ground colour the game already
+      declares, so a trial in ANY zone lands on that zone's own stone automatically.
+      Done in `groundSpecFor()`, which the file already calls the one place that decides a level's
+      surface, so the floor pass and the road pass cannot disagree. `__BF_WORLD()` now reports
+      `trial`.
+      Verified: `b5-trial-stone.png` (khaki flagstone matching the walls, closed door and control
+      chest intact) against `b5-door-3d.png` (teal). Regression clean and this matters, because
+      `groundSpecFor` decides the ground for EVERY level: the Outskirts is identical to its recorded
+      baseline (1257 floor, 115 road, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 277 box, 2194
+      deco, 18 creatures, 7 chests, 22 draw calls, `b5-reg-outskirts.png`), the Waystation is
+      unchanged (273 paving, 4 buildings, 8 gatehouses, `b5-reg-hub.png`) and the trial's
+      `?world3d=0` path is untouched (`b5-trial-voxel-after.png`).
+      *Scoped to `G.trial` on purpose:* the maze also serves boss/mini stages with `G.area >= 0`,
+      which the harness still cannot reach — changing what cannot be rendered is what this file
+      keeps warning against.
 - [ ] **The seven hidden SIDE areas had never been looked at in 3D.** They are the class-unlock
       trials' home zones — the Thornwood, the Sunken Wash, the Oubliette, the Glacier Vault, the
       Magma Core, the Reaper's Gate, the Sealed Reliquary — each its own hand-authored
@@ -509,8 +555,38 @@ Worlds standard), and the graphics need finishing before he shows more people.
       Verified: `b4-thorn-3d.png` (before, columns) vs `b4-thorn-fixed.png` (after, conifers on
       the ground, root platforms and the violet-capped cathedral pillars unchanged); poses report
       `y` 0–9 over their own floor; `?world3d=0` byte-for-behaviour identical to the pre-change
-      reference (`b4-thorn-voxel.png` vs `b4-thorn-voxel-after.png`, 52 treeCols still drawn).
-      The other six are unaudited. `node _shot/shot.js --scene side1 …` through `side6`.)*
+      reference (`b4-thorn-voxel.png` vs `b4-thorn-voxel-after.png`, 52 treeCols still drawn).)*
+      *(progress 2026-08-02 worker B, second run: THE OTHER SIX ARE NOW AUDITED — the item is
+      photographed end to end, 7 of 7. `side1` Sunken Wash, `side2` Oubliette, `side3` Glacier
+      Vault, `side4` Magma Core, `side5` Reaper's Gate, `side6` Sealed Reliquary
+      (`_shot/out/b5-side1.png` … `b5-side6.png`). **All six render correctly and none needs a
+      Thornwood-style fix** — the earlier deferred-entity, obstacle, wall and crumble passes already
+      cover them, and that is a real finding rather than a shrug: the six were the largest body of
+      unlooked-at level in the game. Checked live per area, not by eye alone — obstacle bodies,
+      walls, crumbles, movers, deco counts and draw calls. The Glacier Vault's thermal pylons were
+      the one thing that read as floating caps from the entrance and are not: photographed at
+      gameplay range (`b5-s3-pylon.png`) they stand on their columns.
+      Why there is no conversion work here and it is not laziness: unlike the Thornwood these six
+      are interiors, and every repeated object in them (cell bars, bone spires, ice blocks, crystal
+      spires, display cases, water sheets) is a thin coloured box the repo has no matching asset
+      for. Casting bone spires onto `nature/rock_tall` is the warm-brown-rock substitution already
+      rejected twice — an art call, so it stays boxes.
+      **ONE REAL BUG FOUND, and it needs Oliver because the repair is level design, not code.**
+      The Magma Core's six ore lifts — the "rising chain of ore lifts opens into a suspended
+      refinery" its own source comment describes — are DEAD DATA. index.html:5280 pushes them with a
+      completely different property set from the other twenty-odd `G.movers.push` sites in the file:
+      `{x, y0, axis, range, speed, phase, c}` where `updateMovers` reads `{x0, amp, sp, ph}` and
+      everything else reads `h`. Measured live, not inferred: every one reports `x: NaN` and no `h`,
+      so they draw at NaN (invisible) and `floorAt`'s `mv.h<=yRef+2` is false against undefined, so
+      you cannot stand on one. Not a softlock — the `climbRun` beside them is the real route.
+      **Fixing the shape alone is worthless, which is why this is queued and not shipped.** All six
+      sit inside the footprint of `vplat(500,-1740,150,850,720)`, the refinery deck, at heights
+      55–155 under its top of 150 — and a `plat` obstacle draws as a SOLID block from the ground up
+      (index.html:12147), so a correctly-built lift there is sealed in stone. Proved by injecting
+      six correctly-shaped movers at those exact coordinates with a control chest: the chest
+      rendered, the lifts did not (`b5-s4-probe.png`). Making them real means re-siting the chain
+      into the approach, which is authoring a platforming beat. The same deck-over-chain overlap
+      exists in the Reaper's Gate and the Reliquary, whose movers ARE correctly shaped.)*
       *Dead code found on the way, deliberately NOT touched:* `SCAPES.outskirts` (index.html) has a
       third, untagged `tree()` of the same shape. `SCAPES` is only reached when
       `EXPANDED_SCAPES[zone.id]` is missing and EXPANDED has all eight zone ids, so it cannot run
@@ -664,6 +740,11 @@ Worlds standard), and the graphics need finishing before he shows more people.
       index.html:5461/5688/9612 are where doors actually live. The wall path is proven; the door
       path is the same three lines in the same window and is inferred, not photographed. A harness
       way into a room dungeon is the missing piece.
+      *(closed 2026-08-02, worker B, later run: `--scene trial` is that way in — the maze is what a
+      CLASS TRIAL loads, because `G.trial` is the flag that skips all four scape dispatches. Doors
+      photographed and correct: a closed door in front of the hero draws its jambs, lintel and lock
+      stripe over the 3D floor with a control chest beside it (`_shot/out/b5-door-3d.png`), and
+      `?world3d=0` is unchanged (`b5-door-voxel.png`). Nothing to fix — the inference was right.)*
 - [x] **`--eval` mutations were never in the picture, and it failed silently.** Fixed 2026-08-02
       (worker B) in `harness/shot.js`. There was no render between the EVAL round-trip and
       `Page.captureScreenshot`, and captureScreenshot returns the last composited frame — so the

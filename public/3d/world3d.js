@@ -710,8 +710,25 @@ const GROUND_JITTER = 0.13;
 /* One place decides which surface a zone stands on, so the floor pass and the road pass can never
    disagree about whether a zone is grassy - if they did, a grassy zone would drop the ground under
    its roads and then decline to draw the roads, leaving holes in the field. */
+/* A CLASS TRIAL IS AN INTERIOR, and its theme lies about that. The trial runs the shared
+   grid-graph maze - stone rooms with doorway gaps, sealed doors, corner torches - but it borrows
+   STAGES[].theme from the zone it was started FROM (startTrial builds newG with `zone: fromZone||0`),
+   so a trial begun in the Outskirts reports theme 'plains' and this table laid a teal LAWN inside
+   the walled chamber the game's own tutorial calls "this sealed chamber".
+   Measured 2026-08-02 (worker B) the first time a room dungeon was ever photographed - the maze is
+   reached ONLY when every scape dispatch is skipped, and `G.trial` is what skips all four, so until
+   `--scene trial` went into the harness the same day there was no way to look at one. The game
+   paints that floor s.ground = #8a8445, a khaki stone, and the 3D layer painted it teal grass:
+   the two renderers disagreed about what the ground IS, which is a conversion bug, not a look.
+   The level's own colour settles it rather than a new art choice - interior brick tinted with the
+   ground colour the game already declares, so a trial in any zone lands on that zone's own stone. */
+const TRIAL_TILE = 'village/Floor_Brick', TRIAL_ROAD = 'village/Floor_RedBrick';
 function groundSpecFor(world){
   const isHub = !!(world && world.hub);
+  if(!isHub && world && world.trial){
+    const c = world.ground || '#a99cb4';
+    return { tiles: [{ n: TRIAL_TILE }], tint: c, road: { n: TRIAL_ROAD, tint: c } };
+  }
   return (!isHub && THEME_GROUND[(world && world.theme) || '']) || THEME_GROUND_DEFAULT;
 }
 

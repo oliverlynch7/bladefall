@@ -21,6 +21,8 @@
      node _shot/shot.js --scene hub                      # standing in the Waystation
      node _shot/shot.js --scene side0                    # the zone's HIDDEN side area (The Thornwood)
      node _shot/shot.js --scene 0.1                      # zone 0's SECOND area (Black Woods); 0.b = its boss
+     node _shot/shot.js --scene trial                    # the class trial — the only ROOM DUNGEON
+                                                         #   (walls with doorways, doors, plates)
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
      node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
@@ -194,13 +196,37 @@ const areaOf = (dest) => {
   const m = /^(\d+)\.(b|\d+)$/.exec(String(dest || ''));
   return m ? { zone: parseInt(m[1], 10), area: m[2] === 'b' ? -1 : parseInt(m[2], 10) } : null;
 };
+/* `trial` / `trial:<class>` STAYS in the class trial instead of skipping past it, and it is the
+   only way this harness has into a ROOM DUNGEON. Every other destination lands on a hand-authored
+   scape: EXPANDED_SCAPES for the eight zones, SIDE_SCAPES for the seven side areas, BOSS_ARENAS
+   for the boss rooms. The shared grid-graph maze underneath them — the one generator that emits
+   `G.walls` with doorway gaps, `sealDoor()` slabs into `G.doors`, pressure `G.plates` and corner
+   `G.torches` — is reached only when every one of those dispatches is skipped, and `G.trial` is
+   what skips all four (each guard reads `!G.trial`). So doors existed in the game and could not be
+   photographed: the wall/door defer fix shipped 2026-08-02 was verified on walls and INFERRED on
+   doors, and the backlog said so in as many words.
+   The run-up already calls startTrial('warrior') on its way to the hub — this destination simply
+   never calls skipTrial(). `trial:reaper` etc. picks the class, which picks the trial. */
+const trialOf = (dest) => { const m = /^trial(?::([a-z]+))?$/i.exec(String(dest || '')); return m ? (m[1] || 'warrior') : null; };
 const sceneJs = (dest) => {
-  const sd = sideOf(dest), ar = areaOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest);
   const go = dest === 'hub' ? ''
     : sd != null ? '__BF3.cheatUnlockClasses(); __BF3.enterSide(' + sd + ');'
     : ar ? '__BF3.enterZone(' + ar.zone + '); for(var a=0;a<' + (ar.area < 0 ? 9 : ar.area)
            + ' && __BF3.G.area >= 0; a++) __BF3.nextArea();'
     : '__BF3.enterZone(' + (parseInt(dest, 10) || 0) + ');';
+  /* 'tutGo' is on the whitelist HERE and nowhere else, and the distinction is the whole reason the
+     dismiss list is a whitelist. The first trial opens behind "The Proving Chamber" tutorial card,
+     whose two buttons are `tutGo` (begin) and `tutSkip` (skip tutorial AND trial). A clicker that
+     took the first button in the overlay would take the trial with it and photograph the hub. */
+  if (tr) return `(function(){
+  var ids=['storyskip','tutGo'];
+  var t=setInterval(function(){
+    for(var i=0;i<ids.length;i++){ var b=document.getElementById(ids[i]); if(b&&b.offsetParent) b.click(); }
+  },300);
+  __BF3.startTrial(${JSON.stringify(tr)});
+  setTimeout(function(){ clearInterval(t); }, 6000);
+})()`;
   return `(function(){
   var ids=['storyskip','hubTutGo'];
   var t=setInterval(function(){
@@ -255,15 +281,23 @@ const sceneReady = (dest) => {
      pure race with how warm the asset cache is: one run reported "The Outskirts" with 118 trees,
      the next reported "Trial of the Blade" with 34 deco and 0 trees, from an identical command.
      Same shape as the hub race fixed earlier the same day, one gate further back. */
-  const sd = sideOf(dest), ar = areaOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest);
   const inZone = '!__BF3.G.hub && !__BF3.G.trial && !__BF3.G.side && __BF3.G.zone === ';
+  /* The trial is the one destination that WANTS G.trial, so it inverts the clause every other
+     destination added to keep the trial out. It cannot name a zone: startTrial() reuses whatever
+     zone you came from (`fromZone||0`), so the arena's identity is G.trial itself. */
   const at = dest === 'hub'
     ? '!!__BF3.G.hub'
-    : sd != null
-      ? '!__BF3.G.hub && !__BF3.G.trial && !!__BF3.G.side && __BF3.G.zone === ' + sd
-      : ar
-        ? inZone + ar.zone + ' && __BF3.G.area === ' + ar.area
-        : inZone + (parseInt(dest, 10) || 0);
+    : tr
+      /* ...and the arena is actually ON SCREEN. showTutorial() sets mode='menu' and covers the
+         level with a full-page card, so `G.trial` alone resolved in 0.5s and handed back a
+         photograph of the tutorial text. Wait for its Begin button to stop being visible. */
+      ? '!__BF3.G.hub && !!__BF3.G.trial && !(document.getElementById("tutGo")||{}).offsetParent'
+      : sd != null
+        ? '!__BF3.G.hub && !__BF3.G.trial && !!__BF3.G.side && __BF3.G.zone === ' + sd
+        : ar
+          ? inZone + ar.zone + ' && __BF3.G.area === ' + ar.area
+          : inZone + (parseInt(dest, 10) || 0);
   const wb = dest === 'hub' ? '!!w.counts.hub' : '!w.counts.hub';
   return '(function(){ try{'
        + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'

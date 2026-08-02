@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.411.0-autopilot';
+const VERSION3D='1.412.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2837,7 +2837,7 @@ window.__BF_META=()=>meta;
    back to the olive default in EVERY zone, and world3d had no way to see the stage THEME at all
    (it was matching theme names like 'forest'/'plains' against ZONE ids, which never match). */
 window.__BF_WORLD=()=>{const st=STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -12012,10 +12012,22 @@ function drawCourse(s,t){
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue; const py=pl.y||0;
     bx(pl.x,py+1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
     bx(pl.x,py+2.2,pl.z, 24,1.4,24, pl.lit?'#9fd0ff':tint(s.ground,'#fff',0.1), pl.lit?'#4aa3e0':null, 1); }
-  // the ancient key
+  /* THE ANCIENT KEY. prop3d casts the body onto the real gold key model; the BEAM stays voxel.
+     That split is deliberate: the beam is not the object, it is the affordance that makes a key
+     findable from the far side of a dungeon room, and it wants to keep glowing at exactly the
+     brightness the rest of the game's markers do.
+     The bob and the spin are computed HERE even on the frames the model draws them, and handed
+     over on the key itself — the same arrangement drawChest uses for the mimic's lid. This runs
+     on game time and prop3d runs on wall time, so computing the rhythm in both places would let
+     the key drift out of the beam it is supposed to be standing in.
+     deferArmed() is the test, not "is the model loaded": in first-person the whole Three layer
+     sits the frame out, and believing prop3d had drawn would leave a beam with nothing in it. */
+  const _k3d = !!(deferArmed() && window.__prop3dKeyDrawn && window.__prop3dKeyDrawn());
   for(const ky of G.keys){ if(ky.taken) continue; const ky0=ky.y||0;
     bx(ky.x,ky0+60,ky.z, 4,120,4,'#ffd24a','#ffd24a',0.10);
-    pushM(); mv(ky.x,ky0+26+Math.sin(t*2.4)*4,ky.z); rotY(t*2);
+    ky._y=ky0+26+Math.sin(t*2.4)*4; ky._spin=t*2;
+    if(_k3d) continue;
+    pushM(); mv(ky.x,ky._y,ky.z); rotY(ky._spin);
     bx(0,0,0, 3,16,3,'#ffd24a','#ffd24a'); bx(0,10,0, 9,7,3,'#ffd24a','#ffd24a');
     bx(2.6,-6,0, 5,3,3,'#ffd24a','#ffd24a'); bx(2.6,-1,0, 4,2.6,3,'#ffd24a','#ffd24a'); popM(); }
   // chests

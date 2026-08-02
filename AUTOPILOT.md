@@ -215,11 +215,26 @@ Worlds standard), and the graphics need finishing before he shows more people.
 - [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
       `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
       in rough order of how often a player sees them:
-      - **The ancient key** (`G.keys`) → `qprops/Key_Gold`. Measured its extents already so the next
-        run does not have to: the model LIES FLAT, long axis on Z (0.122 long, 0.058 wide, 0.012
-        thick), so a plain height fit will scale it wrongly. Stand it up with `rotation.order='YXZ'`
-        and `rotation.set(-Math.PI/2, spin, 0)` — Y last means the spin stays about world up — and
-        fit the LONG axis to ~22 units to match the voxel key. Keep the vertical glow beam.
+      - [x] **The ancient key** (`G.keys`) → `qprops/Key_Gold`. DONE 2026-08-01 (worker B). The
+        measured extents were right (0.0581 x 0.0123 x 0.1223, long axis Z, confirmed live via
+        `__prop3dKey()`), so the model is fitted on its LONGEST native axis to 22 units — not by
+        height, which is its 0.012 blade edge and would have scaled it ~1800x — and stood up with a
+        quarter turn about X. The spin rides on a parent Group rather than an Euler order, so it is
+        a pure world yaw whatever the model was authored along, and the model is re-centred on its
+        own post-rotation bounding box so it turns on the spot instead of being waved.
+        **The turn is +PI/2, not -PI/2**, and that is the one thing the note above got backwards:
+        the model is authored bow-to-+Z, so the documented sign stands it up TEETH-UP. Rendered it
+        both ways; bow-up is what the voxel key does and what reads as a key at a glance.
+        The glow beam stays voxel, and so do `_y`/`_spin` — the game computes the bob and the spin
+        on GAME time and hands them over on the key object, exactly as drawChest does for the
+        mimic's lid, or the key would drift out of its own beam.
+        Model is fetched on DEMAND (keys are rare), unlike the chest which loads in every zone.
+        Verified: hub side-by-side at gameplay distance (`_shot/out/b-key-play-voxel.png` vs
+        `b-key-play-3d.png`), a close-up (`b-key-zoom3-3d.png`), a real generated zone
+        (`b-key-zone3.png`, Frostfell), collecting one hides exactly that one (`b-key-taken.png`),
+        and the fallbacks all still draw the voxel key: first-person (`b-key-fps.png`),
+        `?world3d=0` (`b-key-w3doff.png`) and `?prop3d=0`. Outskirts re-checked for the prop3d
+        refactor: still 7 chests, no errors.
       - **Loot pickups** (`G.pickups`) — commonest object in the game, but "what does a dropped
         sword look like" is an art call per drop type; ask Oliver before picking models. The gold/
         coin case is not a call (`qprops/Coin_Pile`).

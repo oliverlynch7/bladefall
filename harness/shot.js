@@ -19,6 +19,8 @@
      node _shot/shot.js --scene 0                        # in-game in The Outskirts, world3d built
      node _shot/shot.js --scene hub                      # standing in the Waystation
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
+     node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
+     node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
 
    --scene / --ready exist because of a failure mode that WILL fool you otherwise.
    A screenshot of a 3D zone taken too early is not blank and is not an error: the game has
@@ -179,6 +181,82 @@ const PRE = arg('pre', SCENE == null ? null : sceneJs(SCENE));
 const READY = arg('ready', SCENE == null ? null : '!!(window.__world3d && __world3d().built)');
 const READYMAX = parseInt(arg('readymax', '120000'), 10);
 
+/* ── --focus: point the shot AT something ──────────────────────────────────────
+   Every session that photographs one specific object re-invents this, badly, in an --eval, and
+   2026-08-01 spent eight renders on it before getting a usable frame. Two things make aiming by
+   hand harder than it looks, and both are now handled here once:
+
+   1. G.cam is a SMOOTHED follow-point that lerps 10% per frame toward the hero. Headless
+      SwiftShader renders only a handful of frames per second, so after a teleport it is still
+      hundreds of units behind - and the shoulder camera is built off G.cam, not off G.p. The
+      symptom is not subtle: the subject lands behind the camera, or inside the near plane, and
+      the frame looks like the object simply is not being drawn. This snaps G.cam, waits, then
+      snaps it AGAIN just before the shutter, because the game keeps lerping in between.
+   2. The shoulder camera does not sit at the hero, it sits 180*cos(pitch) BEHIND them, so
+      "put the hero D away from the thing" is not the same as "frame it at D". --dist is the
+      distance from the CAMERA to the subject, which is the number you actually care about.
+
+   --focus takes either a JS expression evaluated in the page (`__BF3.G.waystone`, anything with
+   .x/.z, .y optional) or a bare `x,y,z`. --side shifts the hero sideways so the subject sits off
+   to one side of the frame instead of directly behind the HUD, which is where a tall glowing
+   object lands every single time.
+
+   WHAT THIS DOES NOT DO, measured rather than assumed, so the next run does not spend renders
+   rediscovering it: it will not give you a tight close-up. The eye rides 118+180*sin(pitch) above
+   the hero and looks down a fixed angle, so under about 200 units a ground-level subject falls
+   out of the bottom of the frame - at --dist 95 the ray is 26 degrees down where it needs 56, and
+   the picture comes back as bare ground. Two ways out were tried and both are worse: solving the
+   pitch to centre it swings the camera to near top-down (it centres a chest as a grey sliver seen
+   from above), and solving the hero's height so the subject lands on the view ray buries the
+   camera inside the terrain the subject is standing on. So --dist 200-400 with --side to keep the
+   subject clear of the HUD is the working range, and a genuine close-up still means spawning the
+   thing near the camera by hand. */
+const FOCUS = arg('focus', null);
+const FOCUS_DIST = parseFloat(arg('dist', '210'));
+const FOCUS_SIDE = parseFloat(arg('side', '0'));
+const FOCUS_YAW = parseFloat(arg('yaw', String(Math.PI)));
+
+const FOCUS_PITCH = parseFloat(arg('pitch', '0.16'));
+const focusJs = (spec) => `(async function(){
+  var G = __BF3.G; if(!G) return 'no G';
+  var t = ${/^-?[\d.]+\s*,/.test(spec) ? '(function(){var a=' + JSON.stringify(spec)
+    + '.split(",").map(Number); return {x:a[0], y:a.length>2?a[1]:0, z:a.length>2?a[2]:a[1]};})()'
+    : '(' + spec + ')'};
+  if(!t || t.x == null) return 'focus target has no .x';
+  var yaw = ${FOCUS_YAW}, pit = ${FOCUS_PITCH}, D = ${FOCUS_DIST}, side = ${FOCUS_SIDE};
+  var fx = Math.sin(yaw), fz = Math.cos(yaw);
+  var pc = Math.max(-0.5, Math.min(0.9, pit));            // render() clamps pitch; match it exactly
+  /* The camera sits hd behind the hero, so the hero stands (D - hd) in front of the subject and
+     the EYE ends up exactly D from it. A subject nearer than the camera's own setback means
+     standing the hero past it, which is why this is signed arithmetic and not a clamp. */
+  var hd = 180 * Math.cos(pc);
+  var back = D - hd;
+  var px = -fz, pz = fx;                                  // hero's left/right, in world XZ
+  G.p.x = t.x - fx * back + px * side;
+  G.p.z = t.z - fz * back + pz * side;
+  var heroY = (t.y != null) ? t.y : (G.p.y || 0);         // stand on the subject's own level
+  G.p.y = heroY;
+  G.camYaw = yaw; G.camPitch = pit;
+  /* Re-asserting the HEIGHT, not just the camera, and this is not belt-and-braces. There is
+     usually no floor under the spot the hero is teleported to - a subject on a raised mesa (the
+     Outskirts waystone sits at y=165) or a lifted hero both hang in mid-air - so gravity drops
+     them. Measured: 165 to 55 in under two seconds, and since the camera rides the hero's y the
+     whole frame sinks below the subject. Velocity is zeroed too or the fall resumes at speed. */
+  var snap = function(){
+    G.p.y = heroY; G.p.vy = 0; G.p.onGround = true;
+    G.cam.x = G.p.x; G.cam.z = G.p.z; G.cam.y = G.p.y || 0;
+    G.camYaw = yaw; G.camPitch = pit;
+  };
+  snap();
+  await new Promise(function(r){ setTimeout(r, 1400); });
+  snap();                                      // ...it has been falling and lerping the whole time
+  await new Promise(function(r){ setTimeout(r, 250); });
+  snap();
+  return { at:{x:+t.x.toFixed(0), y:+(t.y||0).toFixed(0), z:+t.z.toFixed(0)},
+           hero:{x:+G.p.x.toFixed(0), y:+(G.p.y||0).toFixed(0), z:+G.p.z.toFixed(0)},
+           eye:G.eye && {x:+G.eye.x.toFixed(0), y:+G.eye.y.toFixed(0), z:+G.eye.z.toFixed(0)} };
+})()`;
+
 const CHROME = [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
@@ -324,6 +402,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (ok) console.log('ready ✓ after ' + secs + 's  (' + READY + ')');
     else console.log('READY NEVER CAME after ' + secs + 's — the shot below is NOT the state you '
       + 'asked for, do not read it as a regression. last=' + JSON.stringify(last) + '  expr=' + READY);
+  }
+  /* After READY, not before: the target usually does not exist until the level is built, and the
+     camera has nothing to lerp toward until the hero is in the world. Before EVAL, so a probe can
+     report on what is actually in shot. */
+  if (FOCUS) {
+    const r = await evaluate(focusJs(FOCUS));
+    console.log('FOCUS → ' + JSON.stringify(r.value !== undefined ? r.value : r));
+    if (r.error || typeof r.value === 'string') {
+      console.log('  ^ the camera was NOT moved — the frame below is wherever the game left it.');
+    }
   }
   if (EVAL) {
     const r = await evaluate(EVAL);

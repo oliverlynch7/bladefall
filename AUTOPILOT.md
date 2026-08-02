@@ -25,6 +25,20 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
 - Work branch: **`bladefall-autopilot`**. Live/deploy branch: `main` (Cloudflare Pages deploys main to `bladefall.pages.dev`; the branch preview is `bladefall-autopilot.bladefall.pages.dev`).
 - Debug interface: `window.__BF3` (exposes `G`, `update(dt)`, `input`, `makeWeapon`, `enterZone`, `CLASSES`, `CLASS2`, etc.) — use it via the in-app Browser pane on the local preview server (`.claude/launch.json` name `bladefall`, port 4310) to verify.
 
+## If you cannot run `node`, STOP — the run is dead, and it is not your fault
+Check this first, before picking an item. Try `node --version` and then `node -e "console.log(1)"`.
+If the bare version works and `-e` comes back "This command requires approval", the workspace is
+**not trusted**, so Claude is ignoring every `permissions.allow` entry in `.claude/settings.json`.
+That removes BOTH verification gates at once — the syntax check and the `_shot/` harness — and
+there is no fallback, because the harness needs real headless Chrome (the in-app browser pane
+renders the `#gl` canvas at 0x0). Any code you write in that state is unverifiable by definition.
+
+**Do not write game code. Change nothing under `public/`. Exit.** The fix is Oliver's and takes ten
+seconds: open a terminal in `_automation\bladefall`, run `claude`, accept the trust dialog.
+`autopilot.ps1` now pre-flights this and pings Telegram once a day, so it announces itself rather
+than burning an hourly session — but if you are reading this from inside such a session, the ping
+is already handled and the correct move is to stop.
+
 ## Workflow — every run
 1. `cd` to the submodule. `git fetch origin`, `git checkout bladefall-autopilot`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).
 2. Pick the **top unchecked `- [ ]` item** in the Backlog below.
@@ -127,11 +141,31 @@ Worlds standard), and the graphics need finishing before he shows more people.
       violet Abyss, gold Sprint and crimson Arena pads outright. Doing it properly means tagging
       those pads so they survive the drop, THEN paving. There is also a visible seam where the
       paving ends at z 707.
-      WARNING, cost this run ~30 minutes: a second autopilot process is running in THIS checkout at
-      the same time. Its killed-run guard cannot tell live work from wreckage, so it reverted
+      DESK RESEARCH ONLY, 2026-08-01 (d) — read off the source in a session that could not run
+      `node`, so NONE of it is rendered proof. Probe each claim before building on it; it is here
+      so the next run starts from coordinates instead of re-deriving them.
+      - The claim above that the pads are dropped by the ≤3-unit rule looks WRONG. The rule is
+        `(d.y0||0)+(d.h||0)<=3` (index.html:12043) and the pads are pushed `y0:2, h:1.6` = 3.6
+        (index.html:10193), so they should already survive. `h` is not touched by the space pass.
+        If that holds, paving the annex needs no tagging at all — check it first, because it turns
+        this from a two-part job into a one-part one.
+      - The z-707 seam is `paveSouth` (world3d.js:889) = max(southZ, sideEnd[westX], sideEnd[eastX]).
+        The east wall runs z 49→64 with d 988→1284 after the pass, so sideEnd[eastX] ≈ 706. Nothing
+        south of that is paved, which is the whole annex.
+      - Paving is currently ONE rectangle over westX..eastX, so it also over-paves: the west south
+        wall is at z≈484 but the west column is paved to 706, i.e. ~220 units of stone outside the
+        hub on that side. A rect cannot describe this floor plan.
+      - The honest source for the SHAPE is `G.segments`: the three `nofloor:true` entries are the
+        courtyard, the SE court and the annex, and the space pass DOES scale segments. Use those,
+        not `G.rooms` — rooms are NOT scaled by the pass, so their coordinates are stale.
+      WARNING, cost that run ~30 minutes: a second autopilot process was running in THIS checkout
+      at the same time. Its killed-run guard cannot tell live work from wreckage, so it reverted
       world3d.js out from under a verified edit and committed the other half alone — leaving HEAD
-      with the voxel walls suppressed and no 3D shell to replace them. Commit early and often here
-      until that is fixed.)
+      with the voxel walls suppressed and no 3D shell to replace them. Commit early and often here.
+      APPEARS FIXED as of 2026-08-01: `autopilot-b.ps1` now sets `$repo` to
+      `_automation\bladefall-wt-b`, a separate worktree, so the two runners no longer share a
+      working tree. Read from the runner, not observed — if you see a tree go dirty under you,
+      that assumption is wrong.)
 - [x] **3D on by default.** DONE 2026-08-01. `hero3d`, `world3d` and `mob3d` all default to ON;
       the flags survive as escape hatches (`?hero3d=0`, `?world3d=0`, `?mob3d=0`) so old links and
       A/B checks still work.

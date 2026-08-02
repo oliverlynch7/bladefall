@@ -55,6 +55,21 @@ const MOB_CAST = {
   thornboar:     { file:'Cactoro', rig:'blob', h:1.0 },
   toxling:       { file:'Green_Spiky_Blob', rig:'blob', h:0.85 },
   voidtether:    { file:'Blue_Demon', rig:'ground', h:1.55 },
+  /* The two enemies that are OBJECTS rather than creatures. They were left out of the port as
+     "needs an art call", but neither is a call: a mimic IS a chest and a training dummy IS a
+     dummy, and the Quaternius prop kit ships exactly those two models under exactly those names.
+
+     Leaving them out had stopped being cosmetic. The 3D layer draws onto the FINISHED frame with
+     its own depth buffer (see flushHero3D in index.html), so 3D geometry paints over anything the
+     voxel pass drew - and the Waystation's floor is 3D. Measured, not assumed: with ?world3d=0
+     the straw dummy stands in front of the hero; with the 3D world on, the same frame has bare
+     cobbles where it should be. The hub's one practice target was INVISIBLE. Casting it puts it
+     in the layer that wins.
+
+     These two live outside monsters/, so the file carries its kit folder and the loader resolves
+     the extension. */
+  dummy:         { file:'qprops/Dummy',      rig:'still', h:1.86 },
+  mimic:         { file:'qprops/Chest_Wood', rig:'chest', h:0.72, fit:'width' },
 };
 
 /* Clip names differ per rig. Quaternius exports them as "CharacterArmature|Idle", so the pipe
@@ -63,8 +78,15 @@ const MOB_CLIPS = {
   ground: { idle:['Idle'], move:['Run','Walk'] },
   blob:   { idle:['Idle'], move:['Jump','Run','Walk'] },
   fly:    { idle:['Flying_Idle','Idle'], move:['Fly','Flying','Run'] },
+  /* A prop has no animation at all. Naming clips that cannot exist would fall through to
+     animations[0], which for a prop is undefined - harmless, but 'still' says so on purpose. */
+  still:  { idle:[], move:[] },
+  /* The chest rig is the mimic. Its four clips are two poses and two transitions; held OPEN is
+     the menacing idle, and looping the CLOSE transition while it charges reads as biting. */
+  chest:  { idle:['Chest_Opened'], move:['Chest_Close'] },
 };
-const MOBS_DIR = '../slice3d/assets/monsters/';
+const ASSETS_DIR = '../slice3d/assets/';
+const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();
 const _mobPool = [];
 let _mobGroup = null;
@@ -83,7 +105,14 @@ try {
 async function loadMobModel(file){
   if(_mobModels.has(file)) return _mobModels.get(file);
   try {
-    const g = await _loadGLB(MOBS_DIR + file + '.glb');
+    /* A bare name is a creature in monsters/; a name with a slash carries its own kit folder.
+       Extension is resolved rather than assumed - monsters/ ships .glb, the prop kits ship .gltf
+       with a sidecar .bin, and hardcoding .glb is exactly how world3d's Floor_Brick silently
+       failed and reported a successful build with no floor in it. */
+    const base = file.indexOf('/') >= 0 ? ASSETS_DIR + file : MOBS_DIR + file;
+    let g = null;
+    try { g = await _loadGLB(base + '.glb'); }
+    catch(e){ g = await _loadGLB(base + '.gltf'); }
     for(const c of g.animations) c.name = c.name.split('|').pop();
     /* Measure the model's NATIVE height once. cast.h is the slice's TARGET height, not the
        model's own size - the slice normalises to it inside its Actor constructor. Treating the
@@ -93,6 +122,8 @@ async function loadMobModel(file){
     const bb = new THREE.Box3().setFromObject(g.scene);
     g._nativeH = Math.max(0.001, bb.max.y - bb.min.y);
     g._baseY = bb.min.y;
+    /* Footprint too, for the fit:'width' casts. See the scale note in syncMobsInner. */
+    g._nativeW = Math.max(0.001, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z));
     _mobModels.set(file, g);
     return g;
   } catch(e){
@@ -173,7 +204,17 @@ function syncMobsInner(scene, dt){
        ~1.0 and rendered every mob about 30x too small - they were damaging the player from
        off-screen while being far too tiny to see. */
     const src = _mobModels.get(cast.file);
-    const s = (e.h || 38) / ((src && src._nativeH) || cast.h);
+    /* Creatures are fitted by HEIGHT: e.h is the number the game reasons about and a creature is
+       taller than it is wide, so height carries the silhouette.
+       A WIDE object is the opposite. The mimic's e.h of 30 includes the voxel model's spider legs
+       and lolling tongue, while a real chest is 1.8x wider than it is tall - fitted by height it
+       came out 54 units across against a 32-unit hitbox, so its front edge sat well outside the
+       box you can actually hit. fit:'width' matches the FOOTPRINT to the hitbox instead
+       (e.r*2), which is what makes a squat object read honestly. Measured against the game's own
+       voxel mimic, which is a 30x13x22 box - i.e. footprint-sized, not height-sized. */
+    const s = cast.fit === 'width'
+      ? ((e.r || 16) * 2) / ((src && src._nativeW) || 1)
+      : (e.h || 38) / ((src && src._nativeH) || cast.h);
     rec.root.scale.setScalar(s);
     /* flyY is a hover height in metres; convert to game units. It is NOT multiplied by s - s
        already carries the model-to-world conversion, and applying both would square it. */

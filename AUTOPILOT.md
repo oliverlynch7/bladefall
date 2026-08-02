@@ -130,6 +130,28 @@ Worlds standard), and the graphics need finishing before he shows more people.
       king, tyrant) and picking a creature model for a boss is an art-direction call — the slice
       only has a generic `bf:'boss'` Dragon_Evolved placeholder. The other 3 are mimic, dummy and
       bosscrystal, which are objects rather than creatures. Needs Oliver.)*
+      *(progress 2026-08-01 worker B: mimic and dummy are DONE — 32/40. Neither was actually an
+      art call: a mimic IS a chest and a training dummy IS a dummy, and the Quaternius prop kit
+      ships `qprops/Chest_Wood` and `qprops/Dummy` under exactly those names. They live outside
+      monsters/ and ship as .gltf+.bin, so `loadMobModel` now takes a kit-qualified path and
+      resolves the extension instead of hardcoding .glb.
+      This had stopped being cosmetic. The 3D layer draws onto the FINISHED frame with its own
+      depth buffer (`flushHero3D`, index.html — the source comment already says "cannot be
+      occluded by [the voxel world]"), so 3D geometry paints over anything the voxel pass drew.
+      The Waystation floor is 3D, therefore the hub's ONE practice dummy was invisible. Measured
+      both ways: `?world3d=0` shows the straw dummy in front of the hero; the same frame with the
+      3D world on has bare cobbles. After the cast it stands in its real spot by the Sparring Room
+      with nothing repositioned (`_shot/out/b-dummy-before.png` vs `b-dummy-inplace.png`).
+      One scale rule came out of it: creatures fit by HEIGHT, but a chest is 1.8x wider than tall,
+      so height-fitting gave a 54-unit-wide mimic over a 32-unit hitbox — its front edge outside
+      the box you can hit. `fit:'width'` matches the footprint to `e.r*2` instead, which is what
+      the game's own voxel mimic does (a 30x13x22 box).
+      Outskirts re-checked after: still 18 live creatures, 0 missing, no errors.
+      **bosscrystal is still genuinely blocked** — the repo has no crystal/gem/shard asset at all
+      (searched every kit), so any model for it would be an art-direction substitution. It has the
+      same invisibility problem as the dummy did, and it is a BOSS MECHANIC (destroy all to break
+      the ward), so it is worth Oliver's attention: either drop in a crystal asset, or accept a
+      substitute and say which.)*
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:

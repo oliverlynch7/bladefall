@@ -26,18 +26,46 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
 - Debug interface: `window.__BF3` (exposes `G`, `update(dt)`, `input`, `makeWeapon`, `enterZone`, `CLASSES`, `CLASS2`, etc.) — use it via the in-app Browser pane on the local preview server (`.claude/launch.json` name `bladefall`, port 4310) to verify.
 
 ## If you cannot run `node`, STOP — the run is dead, and it is not your fault
-Check this first, before picking an item. Try `node --version` and then `node -e "console.log(1)"`.
-If the bare version works and `-e` comes back "This command requires approval", the workspace is
-**not trusted**, so Claude is ignoring every `permissions.allow` entry in `.claude/settings.json`.
-That removes BOTH verification gates at once — the syntax check and the `_shot/` harness — and
-there is no fallback, because the harness needs real headless Chrome (the in-app browser pane
-renders the `#gl` canvas at 0x0). Any code you write in that state is unverifiable by definition.
+Check this FIRST, before picking a backlog item. Run `node -v`, then `node tools/gate.js`.
 
-**Do not write game code. Change nothing under `public/`. Exit.** The fix is Oliver's and takes ten
-seconds: open a terminal in `_automation\bladefall`, run `claude`, accept the trust dialog.
-`autopilot.ps1` now pre-flights this and pings Telegram once a day, so it announces itself rather
-than burning an hourly session — but if you are reading this from inside such a session, the ping
-is already handled and the correct move is to stop.
+`node -e "…"` is a bad test — it is denied *by design* (allowlisting it means allowlisting "run
+arbitrary JavaScript"), so a refused `node -e` proves nothing. A whole session was thrown away in
+2026-08-01 on that misread. **Test with `node tools/gate.js`, the real committed gate.**
+
+If `node -v` prints a version but `node tools/gate.js` comes back "This command requires approval",
+Claude is ignoring the `permissions.allow` allowlist. That removes BOTH verification gates at once —
+the syntax check and the `_shot/` harness — and there is no fallback, because the harness needs real
+headless Chrome (the in-app browser pane renders the `#gl` canvas at 0x0). Any code you write in
+that state is unverifiable by definition.
+
+**Two different causes. One command tells them apart — `ls .claude`:**
+
+1. **`.claude/settings.json` is MISSING from this checkout.** Then there is no allowlist to ignore.
+   Confirmed on worker A (`_automation\bladefall`) on 2026-08-02: no `.claude/` directory at all,
+   while worker B's worktree had its own copy and was shipping fine. `.claude/` is neither tracked
+   nor gitignored, so it is a local-only file that can simply vanish from a checkout and never come
+   back. **Oliver's fix:** copy `.claude/settings.json` in from `_automation\bladefall-wt-b` (or run
+   `claude` once in `_automation\bladefall` and re-approve the commands). *Durable fix, Oliver's call
+   because it is a permissions file:* commit `.claude/settings.json` to the repo so every checkout
+   and worktree gets it and it cannot go missing again.
+2. **The workspace is not trusted.** The file is there and node is still refused. **Oliver's fix:**
+   open a terminal in `_automation\bladefall`, run `claude`, accept the trust dialog.
+
+**The runner cannot see cause 1, and that is the dangerous part.** `autopilot.ps1`'s pre-flight only
+reads `hasTrustDialogAccepted` from `~/.claude.json`, so a missing allowlist sails straight through
+it: the session starts, logs `run start` and `run end`, and looks perfectly healthy from outside
+while shipping nothing, every hour, indefinitely. Check for a `_autopilot_trustwarn` stamp file — if
+there isn't one, the trust warning has never fired and cause 1 is what you are looking at.
+
+Compounding it: the runner launches with `--permission-mode acceptEdits`, which auto-accepts file
+**writes** but not command **execution**. So in this state you can happily edit `index.html` all run
+and never be able to run a single line of it. Writing feels normal. Verifying is impossible.
+
+**Do not write game code. Change nothing under `public/`. Exit.** Do not "fix" it by writing your own
+`.claude/settings.json` either — that is a session granting itself arbitrary code execution while
+nobody is watching, and it would be unverifiable this run regardless (project settings load at
+session start). Ping Oliver and stop. Documentation is the one thing still worth writing in this
+state, because prose is verified by reading it; scripts and game code are not.
 
 ## Workflow — every run
 1. `cd` to the submodule. `git fetch origin`, `git checkout bladefall-autopilot`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).

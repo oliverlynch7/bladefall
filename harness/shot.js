@@ -40,6 +40,31 @@ const { spawn } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const WEBROOT = path.join(ROOT, 'public');
 
+/* ── the two copies must not drift ──────────────────────────────────────────
+   This file lives twice on purpose: harness/shot.js is committed and is the source of record,
+   _shot/shot.js is the gitignored working copy, and only the second path is on the permission
+   allowlist. Both resolve ROOT the same way, so either can be run — but a fix made to one and
+   not the other is invisible, and "two copies of the same code, edits landing in the one nobody
+   runs" is the single failure that has cost this project the most sessions.
+
+   So: whichever copy you invoke, it checks the other and says if they differ. A warning, never
+   a refusal — a verification run failing because of housekeeping would be worse than the drift. */
+(() => {
+  const mine = path.resolve(__filename);
+  const other = path.join(ROOT, path.basename(path.dirname(mine)) === '_shot' ? 'harness' : '_shot', 'shot.js');
+  try {
+    if (!fs.existsSync(other)) return;
+    /* Compare with line endings normalised: git checks harness/shot.js out with CRLF on Windows
+       while the copy in _shot/ keeps whatever it was copied with, and a warning that fires on
+       every single run is a warning nobody reads. */
+    const norm = p => fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+    if (norm(mine) === norm(other)) return;
+    console.log('\n!! shot.js DRIFT: ' + mine + '\n   differs from      ' + other
+      + '\n   The committed copy is harness/shot.js. Refresh with:  cp harness/shot.js _shot/shot.js'
+      + '\n   (running the older copy is how a "fixed" harness quietly keeps the old bug)\n');
+  } catch (e) { /* never let housekeeping stop a render */ }
+})();
+
 /* ── args ────────────────────────────────────────────────────────────────── */
 const argv = process.argv.slice(2);
 const arg = (name, dflt) => {
@@ -90,7 +115,31 @@ if (ASSETS) {
   process.exit(0);
 }
 
-const URLPATH = arg('url', '/3d/index.html?hero3d=1&world3d=1&nobloom');
+/* Git Bash (MSYS) rewrites any argument that LOOKS like a unix path into a Windows one, so
+   `--url "/3d/index.html"` arrives as "C:/Program Files/Git/3d/index.html" and Chrome answers
+   "Cannot navigate to invalid URL", which names neither the cause nor the fix. It only bites the
+   flagless form: a `?` or `&` in the string suppresses the rewrite, which is why every URL with
+   query flags has always worked and this was never noticed.
+
+   Recovering it is unambiguous rather than clever - walk the mangled string's suffixes longest
+   first and take the first one that is a real file under public/. Says what it did, because a
+   harness silently loading a different page than you asked for is its own trap. */
+const unmangle = (u) => {
+  if (!/^[A-Za-z]:[\\/]/.test(u)) return u;
+  const parts = u.replace(/\\/g, '/').split('/');
+  for (let i = 1; i < parts.length; i++) {
+    const cand = '/' + parts.slice(i).join('/');
+    if (fs.existsSync(path.join(WEBROOT, cand))) {
+      console.log('note: Git Bash rewrote --url to "' + u + '"; using "' + cand + '" instead.'
+        + '  (add a ?query to the url, or MSYS_NO_PATHCONV=1, to avoid this)');
+      return cand;
+    }
+  }
+  console.log('!! --url "' + u + '" looks like Git Bash rewrote a unix path and nothing under '
+    + 'public/ matches it. Add a ?query to the url, or set MSYS_NO_PATHCONV=1.');
+  return u;
+};
+const URLPATH = unmangle(arg('url', '/3d/index.html?hero3d=1&world3d=1&nobloom'));
 const OUT = path.resolve(ROOT, arg('out', '_shot/out/shot.png'));
 const WAIT = parseInt(arg('wait', '9000'), 10);
 const EVAL = arg('eval', null);

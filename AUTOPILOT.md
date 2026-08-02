@@ -485,6 +485,28 @@ Worlds standard), and the graphics need finishing before he shows more people.
       cut off in mid-air) and after (`b4-float-after.png`, conifers standing on the terrain with
       their trunks meeting the ground); poses now report `y: 0` for every tree over a floor of 0.
       Outskirts baseline otherwise identical: 1257 floor, 115 road, 2194 deco, 277 box.
+- [ ] **The seven hidden SIDE areas had never been looked at in 3D.** They are the class-unlock
+      trials' home zones — the Thornwood, the Sunken Wash, the Oubliette, the Glacier Vault, the
+      Magma Core, the Reaper's Gate, the Sealed Reliquary — each its own hand-authored
+      `SIDE_SCAPES` entry, so nothing a `--scene <n>` render shows says anything about them. They
+      were unreachable from the harness until `--scene side<N>` went in the same day.
+      *(progress 2026-08-02 worker B: THE THORNWOOD IS DONE, 1 of 7. Its 52 trees are built by a
+      `tree()` helper that was never tagged, and all three consequences were visible at once:
+      no `trunkH`, so world3d fitted a pine to the 46-unit canopy box alone — a third size; the
+      model hung at the top of the trunk like every other tree until the fix above; and no
+      `treeCol` on the trunk COLUMN, so since obstacles started drawing (`G.obstacles` deferred,
+      two commits earlier) the voxel trunk drew as well. The result was a wood of bare 26-wide dark
+      slabs with small pines floating over them, where the voxel renderer draws a forest.
+      Tagged `kind:'tree'`/`lead:true`/`trunkH` + `treeCol`, exactly like the Outskirts' tree().
+      Verified: `b4-thorn-3d.png` (before, columns) vs `b4-thorn-fixed.png` (after, conifers on
+      the ground, root platforms and the violet-capped cathedral pillars unchanged); poses report
+      `y` 0–9 over their own floor; `?world3d=0` byte-for-behaviour identical to the pre-change
+      reference (`b4-thorn-voxel.png` vs `b4-thorn-voxel-after.png`, 52 treeCols still drawn).
+      The other six are unaudited. `node _shot/shot.js --scene side1 …` through `side6`.)*
+      *Dead code found on the way, deliberately NOT touched:* `SCAPES.outskirts` (index.html) has a
+      third, untagged `tree()` of the same shape. `SCAPES` is only reached when
+      `EXPANDED_SCAPES[zone.id]` is missing and EXPANDED has all eight zone ids, so it cannot run
+      and cannot be rendered — tagging it would be an unverifiable change.
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:

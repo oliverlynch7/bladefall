@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.408.0-autopilot';
+const VERSION3D='1.409.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3074,6 +3074,93 @@ function pushInst(sx,sy,sz, cr,cg,cb,ca, er,eg,eb){
   instData[o+23]=er;instData[o+24]=eg;instData[o+25]=eb;
   instCount++; if(typeof VOXMET!=='undefined') VOXMET.submitted++;
 }
+/* ── DEFERRED ENTITY PASS ──────────────────────────────────────────────────────
+   The bug this exists to fix, measured rather than reasoned about:
+
+   flushHero3D() clears the DEPTH buffer and draws Three onto the finished frame. Three therefore
+   wins every pixel it covers - the comment there already says the 3D layer "cannot be occluded by"
+   the voxel world. That was written when the only 3D thing was the hero. Now the WORLD is 3D, so
+   its ground alone covers most of the screen, and every voxel ENTITY standing on that ground is
+   painted out. Not dimmed, not z-fighting: gone.
+
+   Rendered both ways in the Waystation with a chest, a loot pickup and an exit portal placed in
+   front of the hero. ?world3d=0: all three plainly visible. Default (3D on): bare cobbles.
+   Chests, loot and the level exit had been invisible since 3D became the default.
+
+   The fix is not to draw them earlier but LATER. Three renders into the same default framebuffer
+   and derives its camera from the game's own PROJ/VIEW (see __BF_CAM), so once it has drawn, the
+   default depth buffer holds the 3D world at depths the game's own matrices agree with. Replaying
+   the entity boxes after it therefore composites CORRECTLY: in front of the 3D ground they show,
+   behind a 3D building they are occluded. Neither is true of drawing them first.
+
+   Order and transparency have to survive the trip. blendFunc/depthMask/clear already flush the
+   batch mid-frame precisely to preserve draw order, so while deferring they instead SEAL a
+   segment and record the state; the replay walks the segments in order and re-applies each one.
+   A single flat replay would render every additive glow as an opaque black cube.
+
+   Only armed when the Three layer will actually draw this frame. With no 3D layer nothing clears
+   the depth buffer, the voxel world is already composited correctly, and deferring would only
+   break the occlusion that pure-voxel mode gets right. */
+let DEFER=false;
+let defCap=4096, defData=new Float32Array(defCap*ISTRIDE), defCount=0;
+const defSegs=[];                                   // {start,count,bs,bd,mask,clr}
+let _defBS=null,_defBD=null,_defMask=true,_defClr=false,_defStart=0;
+let _mainData=null,_mainCap=0,_mainCount=0;
+/* This must match, exactly, the condition under which flushHero3D actually runs — the replay is
+   only correct because Three has just written the depth buffer it tests against. The camMode term
+   is not decoration: in first-person drawHero3 is never called, so nothing is ever queued, so the
+   3D layer does not draw at all and the depth buffer would be a whole frame stale. */
+function deferArmed(){ return !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D && meta.camMode!=='fps'); }
+function deferSeal(){                               // close the run of instances sharing one GL state
+  /* While recording, the live counter is instCount - deferOn swaps the deferred buffer INTO the
+     batch globals so every existing bx() path keeps working untouched. defCount is only correct
+     once deferOff has swapped back. */
+  const n = DEFER ? instCount : defCount;
+  if(n>_defStart){ defSegs.push({start:_defStart,count:n-_defStart,bs:_defBS,bd:_defBD,mask:_defMask,clr:_defClr}); _defClr=false; }
+  _defStart=n;
+}
+function deferOn(){
+  if(DEFER || !deferArmed()) return;
+  flushBatch();                                     // the static world so far goes to the GPU first
+  _mainData=instData; _mainCap=instCap; _mainCount=instCount;
+  instData=defData; instCap=defCap; instCount=defCount;
+  DEFER=true;
+}
+function deferOff(){
+  if(!DEFER) return;
+  defData=instData; defCap=instCap; defCount=instCount;   // pushInst may have grown the array
+  DEFER=false; deferSeal();
+  instData=_mainData; instCap=_mainCap; instCount=_mainCount;
+}
+/* Replay. Runs after flushHero3D, straight into the default framebuffer. */
+function flushDeferred(){
+  if(!defCount){ defSegs.length=0; _defStart=0; return; }
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  gl.viewport(0,0,canvas.width,canvas.height);
+  /* Three leaves its own state behind: its program, back-face culling, LEQUAL depth, and in
+     WebGL2 one of its vertex-array objects. bindSceneVA writes attribute pointers into whatever
+     VAO is bound, so unbinding first is what stops this pass from being written into Three's. */
+  if(IS_GL2 && gl.bindVertexArray) gl.bindVertexArray(null);
+  gl.disable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LESS);
+  gl.enable(gl.BLEND); if(gl.blendEquation) gl.blendEquation(gl.FUNC_ADD);
+  bindSceneVA();
+  gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, defData.subarray(0,defCount*ISTRIDE), gl.DYNAMIC_DRAW);
+  const F=4, S=ISTRIDE*F;
+  for(const sg of defSegs){
+    if(sg.clr) _rawClear(gl.DEPTH_BUFFER_BIT);      // FP weapon: draws over everything, as it does inline
+    _rawBlend(sg.bs==null?gl.SRC_ALPHA:sg.bs, sg.bd==null?gl.ONE_MINUS_SRC_ALPHA:sg.bd);
+    _rawMask(sg.mask);
+    /* WebGL has no first-instance argument, so the base offset rides on the attribute pointers. */
+    I_LOC.forEach((l,i)=>{ if(l<0) return; gl.vertexAttribPointer(l,I_SZ[i],gl.FLOAT,false,S,(sg.start*ISTRIDE+I_OFF[i])*F); });
+    INST.drawArraysInstancedANGLE(gl.TRIANGLES,0,36,sg.count);
+    if(typeof VOXMET!=='undefined') VOXMET.drawCalls++;
+  }
+  _rawBlend(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); _rawMask(true);
+  defCount=0; defSegs.length=0; _defStart=0; _defBS=null; _defBD=null; _defMask=true; _defClr=false;
+  bindSceneVA();                                    // leave the pointers at instance 0 for the next frame
+}
 /* Draw the Three.js layer onto the finished, already-composited frame.
    Deliberately after PostFX.end(): the 3D characters and world therefore do not receive bloom,
    which is the correct trade. Inside the pass they were simply erased; and bloom on a lit,
@@ -3100,6 +3187,10 @@ function flushBatch(){
      Three renders to the DEFAULT framebuffer, and then the bloom composite paints the offscreen
      buffer over the top - erasing the 3D characters and world every frame. That is the whole
      reason ?nobloom was required. */
+  /* While the entity pass is being recorded there is nothing to send: the boxes are going into
+     the deferred buffer and will be replayed after the 3D layer. A flush here means a GL state
+     change, so it seals a segment instead - that is what keeps draw order and blend modes. */
+  if(DEFER){ deferSeal(); return; }
   if(instCount===0) return;
   gl.bindBuffer(gl.ARRAY_BUFFER,instVBO);
   gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0,instCount*ISTRIDE), gl.DYNAMIC_DRAW);
@@ -3158,10 +3249,17 @@ voxDefine('portal.arch',[
   ...[-28,0,28].map(x=>voxPart(x,72,9,5,5,3,'void',0,{glow:true}))
 ]);
 // preserve exact draw order/transparency: any blend/depth/clear state change flushes the pending batch first
+/* While DEFER is on the same three calls RECORD the state onto the segment being sealed instead of
+   touching GL. The real GL state at that moment belongs to the offscreen pass, which is not where
+   these boxes are going - applying it there would set the wrong mode on the wrong framebuffer and
+   lose it by the time the replay runs. _rawBlend/_rawMask are the unpatched calls the replay uses
+   so it does not recurse back through flushBatch. */
+let _rawBlend=null,_rawMask=null,_rawClear=null;
 (function(){ const _bf=gl.blendFunc.bind(gl), _dm=gl.depthMask.bind(gl), _cl=gl.clear.bind(gl);
-  gl.blendFunc=(a,b)=>{ flushBatch(); _bf(a,b); };
-  gl.depthMask=(b)=>{ flushBatch(); _dm(b); };
-  gl.clear=(m)=>{ flushBatch(); _cl(m); }; })();
+  _rawBlend=_bf; _rawMask=_dm; _rawClear=_cl;
+  gl.blendFunc=(a,b)=>{ if(DEFER){ deferSeal(); _defBS=a; _defBD=b; return; } flushBatch(); _bf(a,b); };
+  gl.depthMask=(b)=>{ if(DEFER){ deferSeal(); _defMask=b; return; } flushBatch(); _dm(b); };
+  gl.clear=(m)=>{ if(DEFER && (m&gl.DEPTH_BUFFER_BIT)){ deferSeal(); _defClr=true; return; } flushBatch(); _cl(m); }; })();
 /* ---- lighting rigs (dark-fantasy in gameplay, bright-neutral for menus/previews) ---- */
 function setFlatLights(){ // menus, item/skin previews, title: even, readable
   gl.uniform3f(U.uL,0.45,0.78,0.42); gl.uniform1f(U.uAmb,0.58); gl.uniform1f(U.uDif,0.46); gl.uniform3f(U.uKey,1,1,1);
@@ -11893,6 +11991,10 @@ function drawCourse(s,t){
     bx(tc.x+fk*1.2,63,tc.z, 4,6,4,'#f0bd68','#a65e22',fl*0.82); bx(tc.x-fk*1,68,tc.z, 2.6,5,2.6,'#ffe39a','#f0bd68',fl*0.9);  // flickering flame tongues
     bx(tc.x+fk*2,72+fl*3,tc.z, 1.2,1.6,1.2,'#ffe39a','#ffd24a',0.7*fl);                                          // rising spark
     glowFX(tc.x,60,tc.z, 10, '#d36a28', 0.10*fl); }                // restrained firelight bloom
+  /* Plates, keys and chests live inside drawCourse but they are OBJECTS, not architecture — the
+     things you step on, pick up and open. A pressure plate is 2 units proud of the floor and a
+     chest sits on it, so the 3D ground buried all three. Deferred like the rest of the entities. */
+  deferOn();
   // pressure plates
   for(const pl of G.plates){ if(cull(pl.x,pl.z)) continue; const py=pl.y||0;
     bx(pl.x,py+1.1,pl.z, 34,2.2,34, pl.lit?'#4aa3e0':tint(s.ground,'#000',0.3), pl.lit?'#4aa3e0':null, 1);
@@ -11905,6 +12007,7 @@ function drawCourse(s,t){
     bx(2.6,-6,0, 5,3,3,'#ffd24a','#ffd24a'); bx(2.6,-1,0, 4,2.6,3,'#ffd24a','#ffd24a'); popM(); }
   // chests
   for(const ch of G.chests) drawChest(ch,t);
+  deferOff();
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
   const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(w && w.on && w.ready); })();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
@@ -13505,6 +13608,11 @@ function render(t){
   setSceneLights(p,t);       // dark-fantasy lighting for the live dungeon
   G._occN=0;                 // per-frame count of deco boxes ghosted off the hero's sightline (test hook)
   drawCourse(s,t);
+  /* Everything from here is a live ENTITY, not architecture, so it is recorded and replayed after
+     the 3D layer instead of being painted out by it. See the DEFERRED ENTITY PASS note above.
+     drawCourse and drawWaystation stay inline on purpose: they are the voxel WORLD, and world3d
+     already draws its 3D replacement over them. */
+  deferOn();
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[]; statPips=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
@@ -13529,7 +13637,7 @@ function render(t){
     bx(s.x,sy+26,s.z, 16,40,9, c3, c4, pu);
     bx(s.x,sy+26,s.z, 5,30,11, c5, c5, pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, c5,c5,sp?0.22:0.5); } }
-  if(G.hub) drawWaystation(t);
+  deferOff(); if(G.hub) drawWaystation(t); deferOn();   // hub architecture is world, not entity
   if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
     const n=G.npc;
     pushM(); mv(n.x,0,n.z); drawShadeModel(t,curZone().id); popM();
@@ -13604,6 +13712,10 @@ function render(t){
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   if(meta.particles!==false) for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
   for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
+  /* The LATE ghost-wall pass stays with the voxel world. Those are the WALLS of the level faded
+     out so the hero shows through; replayed over the 3D layer they would read as a second,
+     translucent copy of a wall world3d has already drawn solid. */
+  deferOff();
   // translucent pass: near-front walls & doors (drawn last, no depth write, so the hero shows through)
   if(LATE.length){ gl.depthMask(false);
     const stone2=tint(s.ground,'#fff',0.13), dCol={combat:'#ff5e54',plates:'#4aa3e0',key:'#ffd24a'};
@@ -13847,9 +13959,11 @@ function frame(ts){
   acc+=dt; while(acc>=DT){ update(DT); acc-=DT; }
   PostFX.begin();                     // render the scene into an offscreen texture (for bloom)
   render((G?G.time:ts/1000));
+  deferOff();                         // belt and braces: an early return inside render must never leave the batch globals swapped
   flushBatch();                       // draw whatever boxes are still pending at frame end
   PostFX.end();                       // bright-pass + blur + composite the bloom to the screen
   flushHero3D();                      // 3D hero/world/mobs go on top of the COMPOSITED frame
+  flushDeferred();                    // ...then the entities, depth-tested against what it just drew
   VOXMET.peak=Math.max(VOXMET.peak,VOXMET.submitted); VOXMET.lastMs=performance.now()-_vf0;
   requestAnimationFrame(frame);
 }

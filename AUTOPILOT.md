@@ -148,10 +148,9 @@ Worlds standard), and the graphics need finishing before he shows more people.
       the game's own voxel mimic does (a 30x13x22 box).
       Outskirts re-checked after: still 18 live creatures, 0 missing, no errors.
       **bosscrystal is still genuinely blocked** — the repo has no crystal/gem/shard asset at all
-      (searched every kit), so any model for it would be an art-direction substitution. It has the
-      same invisibility problem as the dummy did, and it is a BOSS MECHANIC (destroy all to break
-      the ward), so it is worth Oliver's attention: either drop in a crystal asset, or accept a
-      substitute and say which.)*
+      (searched every kit), so any model for it would be an art-direction substitution. Its
+      INVISIBILITY is fixed by the deferred entity pass below, so it is no longer urgent; it is
+      just still a voxel object in a 3D world. A crystal asset from Oliver would finish it.)*
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:
@@ -199,6 +198,44 @@ Worlds standard), and the graphics need finishing before he shows more people.
       'forest'/'plains' against ZONE ids, which never match). All 8 zones rendered and eyeballed.
       *Still approximations:* there is no true SNOW or MARBLE asset in the repo — Frostfell and the
       Sunspire are tinted stone. They read correctly, but a snow/marble pack would beat them.
+
+## How the voxel and 3D layers compose — read this before touching either renderer
+Fixed 2026-08-01 (worker B). `flushHero3D()` clears the DEPTH buffer and draws Three onto the
+already-composited frame, so **Three wins every pixel it covers** — the comment there has always
+said the 3D layer "cannot be occluded by" the voxel world. That was harmless when the only 3D
+thing was the hero. Once the WORLD became 3D its ground alone covers most of the screen, and every
+voxel ENTITY standing on that ground was painted out. Not dimmed, not z-fighting: gone.
+
+Measured, not reasoned about: a chest, a loot pickup and an exit portal placed in front of the
+hero in the Waystation. `?world3d=0` → all three plainly visible. Default (3D on) → bare cobbles.
+**Chests, loot and the level exit had been invisible since 3D became the default**, along with the
+hub's practice dummy, the Warden's Shade, pressure plates, keys, spawners, the waystone, boss ward
+crystals, projectiles and particles.
+
+The fix is a **deferred entity pass** (`deferOn` / `deferOff` / `flushDeferred` in index.html).
+Entities are recorded instead of drawn, and replayed AFTER `flushHero3D()`. Three renders into the
+same default framebuffer and takes its camera from the game's own PROJ/VIEW (`__BF_CAM`), so by
+then the depth buffer holds the 3D world at depths the game's matrices agree with — the replay
+therefore composites *correctly*, not merely on top. Verified: five chests in a line straight ahead
+through a 3D tower, only the one in front of it renders.
+
+Rules that fall out of this, worth keeping:
+- **World stays inline, entities defer.** `drawCourse` and `drawWaystation` are architecture and
+  world3d already draws their 3D replacement over them. Plates/keys/chests are objects and were
+  moved into the deferred window even though they live inside `drawCourse`.
+- The LATE translucent ghost-wall pass stays inline: replayed it would read as a second, see-
+  through copy of a wall world3d has already drawn solid.
+- Order and blend survive because `gl.blendFunc/depthMask/clear` already flush the batch to
+  preserve draw order; while deferring they SEAL A SEGMENT and record the state instead. A single
+  flat replay renders every additive glow as an opaque black cube.
+- `deferArmed()` must keep matching, exactly, when `flushHero3D` actually runs — including
+  `camMode!=='fps'`, because first-person never queues the hero so the 3D layer never draws and the
+  depth buffer would be a whole frame stale.
+- Anything NEW that is an entity must be drawn inside a defer window or it will be invisible.
+
+Checked after: Outskirts unchanged (18 live creatures, 17 voxel draw calls), pure-voxel mode
+(`?world3d=0&hero3d=0`) byte-for-byte the same behaviour, first-person unchanged, bloom on and off
+both composite.
 
 ## Class-unlock tier ladder (deeper secret = slightly stronger class)
 Oliver will fine-tune power via playtesting, so build classes deliberately CLOSE in power (nudge numbers, not whole kits):

@@ -129,6 +129,11 @@ const PROP_SETS = {
      generator tags. One model, already in the load list, so a zone that has lanterns costs no
      extra download. */
   lantern: ['props/lightpost-single'],
+  /* STANDING STONES. Separate from `rock` because the fit differs, not because the models do: a
+     henge stone's deco box is 24 wide and 75-99 tall, a thin CORE, so the ordinary rock fit (the
+     narrower of height and width) would stand a 24-unit boulder where the level asked for a
+     megalith. Only the tall variants, and only ever fitted by height. */
+  standstone: ['nature/rock_tallA', 'nature/rock_tallB', 'nature/rock_tallC'],
 };
 const _propCache = new Map();     // name -> { geo, mat, height } or null when a load failed
 let _propsReady = false, _propsPending = false;
@@ -468,6 +473,7 @@ function classify(d){
        of the foliage bin - it is theme 'plains' and under 60 tall, so the ground-tuft rule below
        claimed it and shrank it to nothing. See the corn bin for why it stays a lit box. */
     if(d.kind === 'corn') return 'corn';
+    if(d.kind === 'standstone') return 'standstone';
     if(d.kind === 'skipflower') return 'skip';   // stem/leaf boxes the real flower model replaces
     /* A building's lead box carries the modular spec; the second box is only the voxel path's roof
        cap, and letting it through would stack a whole second house on the first one's roof. */
@@ -1279,7 +1285,7 @@ export function buildWorld(scene, world){
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
                  fence: [], grave: [], pillar: [], flower: [], lantern: [], corn: [],
-                 building: [], skip: [] };
+                 standstone: [], building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -1336,6 +1342,8 @@ export function buildWorld(scene, world){
   /* Height alone, and lampH not d.h: the lead deco is only the POST, so d.h would stand a
      lightpost 38 tall where the object the generator built is 47 tall to the top of its head. */
   buildProps(bins.lantern, PROP_SETS.lantern, 47, d => (d.lampH || d.h || 47), true);
+  /* Standing stones, by HEIGHT alone - see PROP_SETS.standstone for why. */
+  buildProps(bins.standstone, PROP_SETS.standstone, 90, d => (d.h || 90), true);
   /* CROPS, as real lit boxes rather than models, and that is a measured choice rather than a
      shortcut. The repo has no wheat or corn asset in any kit. Casting the stalks onto the
      tall-grass set WAS built and rendered (b3-corn-fix1.png): the plants stand at the right
@@ -1387,6 +1395,7 @@ export function buildWorld(scene, world){
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, flowerProps: bins.flower.length,
                      lantern: bins.lantern.length, corn: bins.corn.length,
+                     standstone: bins.standstone.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,
                      drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };

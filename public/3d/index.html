@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.420.0-autopilot';
+const VERSION3D='1.421.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4857,7 +4857,13 @@ const EXPANDED_SCAPES={
       for(const h of [[-1260,-3290,240,180],[-960,-3500,280,190],[-650,-3270,230,170]]){vsolid(h[0],h[1],0,h[2],88,h[3],'#8d6039');G.deco.push({x:h[0],z:h[1],y0:88,w:h[2]+26,h:25,d:h[3]+24,c:'#543126'});}climbRun(-1430,-3160,0,-1260,-3290,110,70);vplat(-960,-3500,110,260,170,{terrace:true});
       vcol(980,-3470,140,140,230);G.deco.push({x:980,z:-3470,y0:230,w:190,h:28,d:190,c:'#eee0b8'});G.deco.push({x:980,z:-3470,y0:258,w:20,h:150,d:20,c:WOOD});for(let k=0;k<4;k++){const a=k*1.57;G.deco.push({x:980+Math.cos(a)*68,z:-3470+Math.sin(a)*68,y0:310,w:k%2?14:145,h:k%2?145:14,d:14,c:'#e8d4a7'});}climbRun(760,-3200,0,980,-3470,230,74);chest(980,-3470,230);
       field(0,-4340,24,18);for(const sx of [-360,0,360]){vcol(sx,-4520,8,8,52);G.deco.push({x:sx,z:-4520,y0:46,w:62,h:8,d:8,c:WOOD});G.deco.push({x:sx,z:-4520,y0:54,w:18,h:18,d:15,c:'#d9c08c'});}
-      const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
+      /* THE OLD WAYSTONE CROWN - the zone's last district and its payoff view: nine stones ringing
+         a three-tier knoll with the waystone beacon on top. kind:'standstone' so world3d stands a
+         real megalith in each ring slot. Each box is 24 wide and 75-99 tall, a thin CORE, so it
+         has to be fitted by HEIGHT - the ordinary rock fit takes the narrower of height and width
+         and would leave a boulder a quarter of the size the level asked for. Same trap as the
+         roadside lanterns and the corn. Metadata only; the voxel path draws the boxes as before. */
+      const kx=0,kz=-5600;vplat(kx,kz,55,360,340);vplat(kx,kz,110,240,220);const top=vplat(kx,kz,165,150,150,{checkpoint:true,breather:true});for(let k=0;k<9;k++){const a=k/9*6.283;G.deco.push({x:kx+Math.cos(a)*145,z:kz+Math.sin(a)*132,y0:55,w:24,h:75+(k%3)*12,d:18,c:'#626879',kind:'standstone'});}G.deco.push({x:kx,z:kz,y0:165,w:42,h:210,d:30,c:'#fff0a0'});chest(kx+145,kz+90,55);
       // Forest walls frame the valley's outside perimeter while leaving the immense central sightlines open.
       for(let k=0;k<70;k++){const R=[gate,prairie,acres,orchard,crossing,bank,hamlet,ridge,dream,henge][Math.floor(rnd()*10)],side=rnd()<.5?-1:1;tree(R.x+side*(R.w/2-18),R.z+(rnd()*2-1)*(R.d/2-25),76+rnd()*78);}
       mkMonster('thornboar',0,-640,prairie);scapeKill(ctx,[{x:-720,z:-1800,room:acres},{x:bank.x,z:bank.z,room:bank},{x:dream.x,z:dream.z,room:dream}]);mkMonster('sporeback',bank.x+140,bank.z-60,bank);mkMonster('sporeback',dream.x+150,dream.z-80,dream);mkMonster('thornboar',dream.x-160,dream.z+100,dream);
@@ -12104,8 +12110,18 @@ function drawCourse(s,t){
   // chests
   for(const ch of G.chests) drawChest(ch,t);
   deferOff();
-  // obstacles: platforms (jumpable, light top) & columns (cover, capped)
+  /* OBSTACLES: platforms (jumpable, light top) & columns (cover, capped). DEFERRED, and this is
+     the crumbling-stepping-stone finding one list further on. `vplat` pushes to G.obstacles, and
+     world3d reads only G.deco and G.segments - obstacles are in NEITHER, so nothing 3D draws a
+     platform and the 3D ground painted every one of them out. Not dimmed: gone. The knoll at the
+     Old Waystone Crown is three stacked platforms 55/110/165 tall and the Outskirts' payoff view
+     rendered as flat field with a ring of stones standing on nothing.
+     Same question as always, and the same answer as the movers and the crumbles: does world3d draw
+     a 3D replacement for THIS? It does not, so it defers. The columns go with them - a cover column
+     is the same kind of object, and the tree-trunk ones are still skipped outright above because
+     world3d really does stand a tree there. */
   const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(three3DLive() && w && w.on && w.ready); })();
+  deferOn();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
     if(ob.treeCol && _w3dOn) continue;            // world3d draws the real tree; skip the voxel trunk
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
@@ -12115,6 +12131,7 @@ function drawCourse(s,t){
       bx(ob.x,ob.h*0.52,ob.z, ob.w*0.5,ob.h*0.9,ob.d*1.06, tint(s.ground,'#fff',0.06));
       bx(ob.x,ob.h+2.5,ob.z, ob.w*1.35,5,ob.d*1.35, tint(s.ground,'#fff',0.13)); }
   }
+  deferOff();
   // theme decorations
   /* When world3d is drawing the level in 3D, the voxel deco pass must not also run: both draw
      the same G.deco list, so leaving it on renders every prop twice - once flat and once lit,

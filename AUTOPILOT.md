@@ -538,6 +538,48 @@ Worlds standard), and the graphics need finishing before he shows more people.
       `box 1098 → 286`, `skipped 142` (unchanged: nothing is dropped). **Draw calls went DOWN, 22 →
       19**, because four grass InstancedMeshes became one box mesh. Rest of the Outskirts baseline
       identical: 1257 floor, 115 road, 118 trees, 24 lanterns, 2194 deco, 18 creatures, 7 chests.
+- [x] **EVERY STATIC PLATFORM AND COVER COLUMN IN THE GAME WAS BEING PAINTED OUT.** Found and fixed
+      2026-08-02 (worker B), while checking why the Outskirts' final landmark looked wrong. This is
+      the crumbling-stepping-stone finding one list further on, and it is the biggest instance of
+      the compositing bug left: `vplat()` and `vcol()` push to **`G.obstacles`**, and world3d reads
+      only `G.deco` and `G.segments`. Obstacles are in NEITHER, so nothing 3D draws a platform, they
+      were drawn inline, and the 3D ground painted them out.
+      Measured at the Old Waystone Crown, which is three stacked platforms (55/110/165) under the
+      waystone beacon: `?world3d=0` is a clear three-tier knoll with the chest up on the second
+      step (`_shot/out/b3-henge-voxel.png`); the same camera with the 3D world on was a flat field
+      with a ring of stones standing on nothing (`b3-henge-fix.png`). The Ruined Keep is the same
+      story less obviously — its 41 platforms kept their dark bodies and lost their lit top faces,
+      so a terraced hall read as a flat floor with black blocks on it (`b3-z2.png` vs
+      `b3-z2-obs.png`, where the steps are legible again).
+      The obstacle pass now runs in a defer window. Tree-trunk columns are still skipped outright
+      before it (`ob.treeCol && _w3dOn`), because world3d really does stand a tree there — that is
+      the one obstacle it replaces.
+      Verified: the knoll back in 3D at its reference shape (`b3-knoll-fixed.png` vs
+      `b3-henge-voxel.png`); the Ruined Keep terraces (`b3-z2-obs.png`); the Waystation, where the
+      four capped plaza columns are back on the cobbles and nothing is doubled (`b3-hub-after.png`,
+      against `b3-hub-w3doff.png`); first-person unchanged and still drawing the full voxel hub
+      (`b3-hub-fps.png`); pure voxel `?world3d=0&hero3d=0` unchanged with all nine stones correctly
+      depth-sorted (`b3-henge-purevoxel.png`). Outskirts baseline identical: 1257 floor, 115 road,
+      118 trees, 24 lanterns, 18 creatures, 7 chests, 22 draw calls.
+      *Widens one KNOWN consequence, already recorded below and not introduced here:* with
+      `?world3d=0` AND the 3D hero on, `flushHero3D` still clears the depth buffer, so the deferred
+      replay tests against a buffer holding only the hero. Platforms now join the chests, plates and
+      crumbles in drawing over the voxel world on that one path — at the henge, a tier hides two
+      stones it should stand behind (`b3-henge-voxel-after.png`). The default and pure-voxel paths
+      both composite correctly; the fix would mean changing `deferArmed()`, which must keep matching
+      exactly when `flushHero3D` runs.
+- [x] **The Old Waystone Crown's nine standing stones are real megaliths.** Done 2026-08-02
+      (worker B). The Outskirts' last district and its payoff view was nine grey boxes in a ring.
+      Tagged `kind:'standstone'` at the source; world3d stands a `nature/rock_tall{A,B,C}` in each
+      slot. New PROP_SET rather than reusing `rock` because the FIT differs, not the models: a henge
+      stone's box is 24 wide and 75-99 tall, a thin CORE, and the ordinary rock fit takes the
+      narrower of height and width — a 24-unit boulder where the level asked for a megalith. That
+      is now the third object to hit this trap (lanterns, corn, stones), so `fitH` is worth reaching
+      for whenever the deco box is a core rather than an outline.
+      Verified: `b3-henge-fix.png` / `b3-knoll-fixed.png` against `b3-henge-3d.png`; counts
+      `standstone 9`, `box 286 → 277`. *One for Oliver's eye, not a bug:* the kit rock is warm brown
+      where the voxel stone was blue-grey — same situation as the green lightposts. A tint is one
+      line.
 - [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
       was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
       `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its
@@ -587,6 +629,11 @@ Rules that fall out of this, worth keeping:
 - **World stays inline, entities defer.** `drawCourse` is architecture and world3d already draws
   its 3D replacement over it. Plates/keys/chests are objects and were moved into the deferred
   window even though they live inside `drawCourse`.
+- **Know which LISTS world3d actually reads: `G.deco` and `G.segments`, and nothing else.** That is
+  the whole rule, and it answers the question above mechanically instead of by judgement. Everything
+  in any other list — `G.movers`, `G.crumbles`, `G.obstacles`, `G.chests`, `G.keys`, `G.torches`,
+  `G.pads` — has no 3D replacement by construction and must defer. Three separate sessions arrived
+  at that answer one list at a time by rendering things and finding them missing.
 - The LATE translucent ghost-wall pass stays inline: replayed it would read as a second, see-
   through copy of a wall world3d has already drawn solid.
 - Order and blend survive because `gl.blendFunc/depthMask/clear` already flush the batch to

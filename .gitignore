@@ -13,6 +13,13 @@ Thumbs.db
 *.tmp
 _poc_gen/
 
+# Claude Code workspace permissions. MUST stay ignored: autopilot*.ps1's killed-run guard
+# runs `git stash push -u`, which sweeps untracked files — and on 2026-08-02 it swept
+# .claude/settings.json itself three times, killing every run after it (no syntax gate, no
+# screenshot harness, no commit path). `-u` does NOT touch ignored files, so this line is the
+# fix. See AUTOPILOT_BLOCKED_2026-08-02.md.
+.claude/
+
 # wrangler local cache
 .wrangler/
 .playwright-cli/

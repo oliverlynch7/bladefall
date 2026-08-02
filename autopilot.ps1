@@ -1,7 +1,7 @@
 # BLADEFALL autopilot runner
 #
 # Fires one headless Claude session that reads docs/VISION.md and AUTOPILOT.md, does ONE chunk of
-# work from the backlog, verifies it, commits to the bladefall-autopilot branch, and only pings
+# work from the backlog, verifies it, commits to the autopilot-merged branch, and only pings
 # Telegram if it actually shipped something.
 #
 # Registered as the Windows Scheduled Task "Bladefall Autopilot" (hourly, 08:00-23:00), matching
@@ -142,7 +142,7 @@ Depth over speed on each item: it is better to finish and verify three things th
 eight. Verified work only - unverified work is worse than no work.
 
 Non-negotiable:
-- Work on the bladefall-autopilot branch only. NEVER commit to main.
+- Work on the autopilot-merged branch only. NEVER commit to main.
 - Run the syntax gate before any commit. Never commit code that fails it.
 - Verify visually with the _shot/ harness and actually LOOK at the PNG. Reading source is not proof.
 - If a change does not appear to take effect, confirm WHICH definition your edit landed in before

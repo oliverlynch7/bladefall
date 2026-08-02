@@ -172,13 +172,24 @@ Worlds standard), and the graphics need finishing before he shows more people.
       Verified: hub close-ups of closed / mimic / opened, real generated chests in the Outskirts
       (7 of them, seated on the road), `?world3d=0` still draws voxel chests, and first-person
       still draws them — see the FPS note below, which that check turned up.
-- [ ] **The 3D layer does not draw in first-person, and only chests know it.** Measured, not
-      guessed: `drawHero3(p,t)` is not called when `meta.camMode==='fps'`, so `__hero3dPending` is
-      never set, so `flushHero3D` returns early and world3d/mob3d/prop3d draw NOTHING. `drawChest`
-      now gates on `deferArmed()` (which includes the camMode test) and is fine. **`__mob3dDrawn()`
-      does not** — it answers "yes, mob3d has this one" purely from "is the model loaded", so in
-      first-person the voxel body is skipped for a creature nothing then draws. Same class of bug
-      as the invisible chests. Confirm with a first-person shot in a populated zone before fixing.
+- [x] **First-person was rendering an empty world.** Found and fixed 2026-08-01 (worker B) while
+      checking the chest work; it turned out to be much larger than the chest question that found
+      it. `drawHero3(p,t)` is not called when `meta.camMode==='fps'`, so `__hero3dPending` is never
+      set, `flushHero3D` returns early, and **the entire Three layer sits the frame out** — world3d,
+      mob3d and prop3d together, because one call renders all three.
+      Meanwhile FOUR separate guards were skipping the voxel copy on the strength of "the 3D layer
+      is switched on" rather than "the 3D layer will draw": `_w3dGround` (floor), `_w3dOn` (tree
+      trunks), `_w3dDrawing` (**the whole of `G.deco` — every tree, rock and prop in the level**)
+      and `__mob3dDrawn` (creatures). With the voxel copy skipped and Three not running, those
+      things were drawn by NOBODY, while every layer reported itself on, ready and healthy.
+      All four now ask `three3DLive()`, which is `deferArmed()` under a name that says why.
+      Measured both ways in the Waystation: before, the practice dummy left a shadow on the cobbles
+      with nothing standing in it (`_shot/out/b-fps-dummy-bug.png`); after, the dummy, the market
+      stalls, the crates and the trees are all back (`b-fps-dummy-fixed.png`). Same in the Outskirts
+      (`b-fps-bug.png` → `b-fps-zone-fixed.png`: bare terraces → a grove). Shoulder camera re-checked
+      in hub and Outskirts and is unchanged — no doubled deco.
+      *Worth remembering:* this is the third bug of exactly one shape. Anything that skips its voxel
+      version because a 3D layer "has it" must ask whether that layer is drawing THIS FRAME.
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:

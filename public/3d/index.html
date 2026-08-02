@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.410.0-autopilot';
+const VERSION3D='1.411.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3111,6 +3111,19 @@ let _mainData=null,_mainCap=0,_mainCount=0;
    is not decoration: in first-person drawHero3 is never called, so nothing is ever queued, so the
    3D layer does not draw at all and the depth buffer would be a whole frame stale. */
 function deferArmed(){ return !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D && meta.camMode!=='fps'); }
+/* Same test, said the other way round, because it is asked for a completely different reason and
+   four places were getting it wrong.
+
+   flushHero3D is ALL OR NOTHING: one call renders world3d, mob3d and prop3d together, and it only
+   runs when the hero queued itself. So in first-person, where drawHero3 is never called, the whole
+   Three layer sits the frame out — world, creatures and chests at once.
+
+   Every "skip the voxel version, the 3D layer has this one" guard therefore has to ask *will it
+   draw*, not *is it switched on*. Asking the wrong one is not a small error: with the voxel copy
+   skipped and Three not running, the thing is drawn by NOBODY. First-person was rendering an empty
+   world — every tree, rock and prop in G.deco gone, creatures reduced to a shadow with nothing
+   above it — while every layer cheerfully reported itself on and ready. */
+function three3DLive(){ return deferArmed(); }
 function deferSeal(){                               // close the run of instances sharing one GL state
   /* While recording, the live counter is instCount - deferOn swaps the deferred buffer INTO the
      batch globals so every existing bx() path keeps working untouched. defCount is only correct
@@ -11860,7 +11873,7 @@ function drawCourse(s,t){
   const hz=hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
   /* Is world3d laying real ground tiles this frame? Checked once, not per segment. */
   const _w3dGround = (() => { const w = window.__world3d && window.__world3d();
-    return !!(w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
+    return !!(three3DLive() && w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
   // the hazard lake below everything
   bx(0,-30,-L/2+260, 1500,12,L+700, hz[0], hz[1], 1);
   bx(0,-23.5,-L/2+260, 1500,1.5,L+700, hz[1], hz[1], 0.16+0.05*Math.sin(t*2.4)); // glow film
@@ -12009,7 +12022,7 @@ function drawCourse(s,t){
   for(const ch of G.chests) drawChest(ch,t);
   deferOff();
   // obstacles: platforms (jumpable, light top) & columns (cover, capped)
-  const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(w && w.on && w.ready); })();
+  const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(three3DLive() && w && w.on && w.ready); })();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
     if(ob.treeCol && _w3dOn) continue;            // world3d draws the real tree; skip the voxel trunk
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
@@ -12025,8 +12038,11 @@ function drawCourse(s,t){
      z-fighting against each other. */
   /* Also re-enabled when world3d has SKIPPED this level (the hub), or its deco would vanish
      entirely - gated off here while nothing draws it there. */
+  /* Also re-enabled whenever the Three layer will not run at all this frame — first-person, or a
+     hero that has not finished loading. This list is EVERY tree, rock and prop in the level; with
+     both copies off the world is simply empty. See three3DLive(). */
   const _w3d = window.__world3d && window.__world3d();
-  const _w3dDrawing = !!(_w3d && _w3d.on && _w3d.ready);
+  const _w3dDrawing = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
   if(!_w3dDrawing)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
@@ -13658,6 +13674,7 @@ function render(t){
     bx(w.x,wy+68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
     bx(w.x,wy+150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
     for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
+  const _mob3dLive=three3DLive();     // once per frame, not once per creature
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters
     if(e.dropT>0){ // spawn-in: the enemy is VISIBLE from the instant it spawns, rising up into place (was invisible before — only a shadow)
@@ -13665,9 +13682,12 @@ function render(t){
       drawShadow(e.x,e.z,e.r,0.28+0.25*(1-e.dropT)); drawEnemy3(e,t); e.y=oy; drawHpBar3(e); continue; }
     /* mob3d draws this creature in 3D, so skip the voxel body - but keep the shadow and HP bar,
        which are gameplay readability, not art. mobDrawn() is false for anything unmapped or still
-       loading, so those keep their voxel body and nothing ever vanishes. */
+       loading, so those keep their voxel body and nothing ever vanishes.
+       _mob3dLive is the other half of that promise and was missing: mobDrawn() only knows whether
+       the MODEL is loaded, and in first-person mob3d never runs at all. Measured in the Waystation
+       - the practice dummy left a shadow on the cobbles with nothing standing in it. */
     drawShadow(e.x,e.z,e.r);
-    if(!(window.__mob3dDrawn && window.__mob3dDrawn(e.type))) drawEnemy3(e,t);
+    if(!(_mob3dLive && window.__mob3dDrawn && window.__mob3dDrawn(e.type))) drawEnemy3(e,t);
     drawHpBar3(e);
     if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
       const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;

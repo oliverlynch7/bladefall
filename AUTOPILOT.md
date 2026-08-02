@@ -322,6 +322,22 @@ Worlds standard), and the graphics need finishing before he shows more people.
       world3d's hub buildings, so a camera pushed up to them ends up inside a roof. They are drawn;
       they are just indoors now. Whether those buildings should be open-fronted market shells is an
       art call.
+      *(follow-up, same run: THE PORTAL ROW COULD NOT BE READ. The gates were left inline above
+      because world3d really does put a gatehouse on each of the eight cells — but a gatehouse is
+      one stone arch repeated eight times, and it says nothing about which of the eight you can
+      walk through. Amber = open, green with a capstone = cleared, a cold slab with a bar = locked,
+      and the pips on the lintel say what tier it is: that is the whole read of the row, it is
+      gameplay rather than decoration, and world3d draws no equivalent for any of it. Every
+      destination in the hub looked identical.
+      The gate loop is now SPLIT rather than moved, which is the right shape for this and the first
+      time this file has needed it: the posts and lintel stay inline because they ARE replaced,
+      and only the state — fill, pips, cleared capstone, cold bar — is deferred. Trial-chamber side
+      gates have no gatehouse at all, so those defer whole.
+      Verified by forcing four gates through their states in one frame (`--eval` over `G.gates`):
+      3D world on, a green cleared portal and an amber open one either side of two dark locked ones
+      with their bars (`_shot/out/b-gate-states.png`), the same frame with `?world3d=0`
+      (`b-gate-states-w3doff.png`) and in first-person (`b-gate-states-fps.png`), both unchanged.
+      The default-state row is `b-gate-state.png` — one open gate, seven barred.)*
 - [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
       `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
       in rough order of how often a player sees them:

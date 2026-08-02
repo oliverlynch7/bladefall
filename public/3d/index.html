@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.416.0-autopilot';
+const VERSION3D='1.417.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12661,10 +12661,22 @@ function drawWaystation(t){
       bx(x,y0+h*0.5,z-w*0.5-0.5, w*0.9,h*0.9,1, '#a9833f'); }   // front flap seam
     bx(-806,96,644, 3.4,3.4,3.4, '#ffe6a0','#ffd24a', 0.4+0.42*Math.sin(t*4)); }   // the glint that hints at the secret
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
-  /* INLINE, unlike the rest of this function: world3d puts a real stone gatehouse at every one of
-     these eight cells (`counts.gatehouse === 8`), so the voxel frame IS replaced and deferring it
-     would stand a second, boxier gate in front of the first. */
+  /* Split in two, and the split is the point.
+     THE FRAME is inline: world3d puts a real stone gatehouse on every one of these eight cells
+     (`counts.gatehouse === 8`), so the posts and the lintel really are replaced, and deferring
+     them would stand a second, boxier gate in front of the first. */
   deferOff();
+  for(const g of G.gates){
+    if(g.side) continue;                                                              // trial chambers have no gatehouse — deferred below, whole
+    bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
+    bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
+  }
+  /* THE STATE is deferred, because world3d's gatehouse is one stone arch repeated eight times and
+     says nothing about WHICH of the eight you can walk through. Amber = open, green with a
+     capstone = cleared, a cold slab with a bar = locked, and the pips on the lintel say what tier
+     it is. That is the entire read of the portal row and it is gameplay, not decoration — with it
+     painted out, every destination in the hub looked identical. */
+  deferOn();
   for(const g of G.gates){
     if(g.side){ // discovered Trial Chamber: a compact but grounded rift monument, beside its parent portal
       bx(g.x-18,28,g.z, 8,56,12,'#30283d');bx(g.x+18,28,g.z, 8,56,12,'#30283d');
@@ -12675,15 +12687,12 @@ function drawWaystation(t){
       { const num=(g.zi||0)+1, sp=5.2, pw=3; for(let i=0;i<num;i++) bx(g.x-((num-1)*sp)/2+i*sp, 62, g.z+7.6, pw,pw,1.2, '#ffd24a','#ffd24a',0.95); }
       continue; }
     const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
-    bx(g.x-26,45,g.z, 12,90,14, '#4a4f5e'); bx(g.x+26,45,g.z, 12,90,14, '#4a4f5e');   // posts
-    bx(g.x,94,g.z, 66,12,16, '#565c6e');                                              // lintel
     bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?(g.done?0.55+0.25*Math.sin(t*3+g.zi):0.30+0.18*Math.sin(t*2.6+g.zi)):1);
     if(open) for(let i=0;i<g.tier;i++) bx(g.x-((g.tier-1)*8)/2+i*8, 94, g.z+9.2, 4.4,4.4,1.4, '#ffd24a','#ffd24a',0.95);   // tier pips on the FRONT face of the top frame
     if(g.done){ bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);
       for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
     if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
   }
-  deferOn();
   // the keepers of the posts
   for(const n of G.hubNpcs){
     if(n.prop==='arcade'){ drawShadow(n.x,n.z,28,0.34);

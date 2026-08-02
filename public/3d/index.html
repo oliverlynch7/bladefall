@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.412.0-autopilot';
+const VERSION3D='1.413.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2837,7 +2837,7 @@ window.__BF_META=()=>meta;
    back to the olive default in EVERY zone, and world3d had no way to see the stage THEME at all
    (it was matching theme names like 'forest'/'plains' against ZONE ids, which never match). */
 window.__BF_WORLD=()=>{const st=STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -13680,12 +13680,20 @@ function render(t){
     if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4), wy=w.y||0;   // sit on its real surface (raised vault court etc.), never buried under the platform
+    /* prop3d stands a real obelisk here. Only the STONE is skipped — the capstone, the light
+       column and the orbiting motes are what make this findable across a room, they pulse every
+       frame, and they are the whole reason the object exists. They are placed against the model's
+       real fitted height (__prop3dWaystone()) rather than the voxel shaft's, so a re-fitted model
+       cannot leave the light hovering above nothing or buried in the stone. */
+    const _wb = (three3DLive() && window.__prop3dWaystoneDrawn && window.__prop3dWaystoneDrawn()
+                 && window.__prop3dWaystone) ? window.__prop3dWaystone() : null;
+    const top = _wb ? _wb.h : 64;                      // 64 = the voxel shaft's own top; the light was tuned against it
     drawShadow(w.x,w.z,22,0.3);
-    bx(w.x,wy+4,w.z, 54,8,54, '#4a4f5e', null, 1);
-    bx(w.x,wy+34,w.z, 26,60,26, '#6b7183', null, 1);
-    bx(w.x,wy+68,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
-    bx(w.x,wy+150,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
-    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+60+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
+    if(!_wb){ bx(w.x,wy+4,w.z, 54,8,54, '#4a4f5e', null, 1);
+              bx(w.x,wy+34,w.z, 26,60,26, '#6b7183', null, 1); }
+    bx(w.x,wy+top+4,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
+    bx(w.x,wy+top+86,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
+    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+top-4+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
   const _mob3dLive=three3DLive();     // once per frame, not once per creature
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters

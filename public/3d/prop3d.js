@@ -57,7 +57,17 @@ const KEY_FILE = 'qprops/Key_Gold';
    job of being visible from across the room. */
 const KEY_LEN = 22;
 
-export const PROP3D = { on:true, chests:0, keys:0, ready:false, keysReady:false, err:null };
+/* THE QUEST WAYSTONE - the "find" objective, one per level that has one. This is the least
+   invented cast in the file: the game's own source comment calls it "a lit obelisk you can spot
+   across a room", and `props/pillar-obelisk` is an obelisk that world3d already loads for pillar
+   deco, so the model is known-good and costs no new download in most zones.
+   64 is the voxel stone's own height - plinth base through the top of the shaft - so the gold
+   capstone, the light column and the orbiting motes, which all stay voxel, keep landing exactly
+   where they were tuned to land. */
+const WAY_FILE = 'props/pillar-obelisk';
+const WAY_H = 64;
+
+export const PROP3D = { on:true, chests:0, keys:0, waystone:0, ready:false, keysReady:false, err:null };
 try {
   const q = new URLSearchParams(location.search);
   /* Rides with world3d exactly as mob3d does: a 3D world with voxel chests in it is worse than
@@ -77,6 +87,9 @@ const _keyFree = [];
    being in the cache is not the same as something standing in the world, and answering yes a frame
    early draws a voxel key and a 3D one in the same picture. */
 let _keyBox = null;
+/* One waystone per level at most, so no pool and no map - a single actor that is moved and hidden.
+   `_wayBox` is both its fitted size and the "really built" flag, as _box and _keyBox are. */
+let _wayRec = null, _wayBox = null, _wayPending = false;
 /* The fitted size of a chest in GAME units, published for the voxel overlay pass. Null until one
    has actually been built - the game falls back to the old voxel numbers until then, so a slow
    model load never leaves a chest with no lock on it. */
@@ -176,7 +189,8 @@ function syncPropsInner(scene, dt){
      or failed CHEST download also held the keys as voxel boxes - two unrelated props, one fate. */
   const a = syncChests(world.chests || [], dt);
   const b = syncKeys(world.keys || []);
-  return a || b;
+  const c = syncWaystone(world.waystone || null);
+  return a || b || c;
 }
 
 function syncChests(chests, dt){
@@ -273,6 +287,37 @@ function syncKeys(keys){
   return true;
 }
 
+function syncWaystone(w){
+  /* No waystone in this level, or it has already been touched: hide the actor and stop. Hidden,
+     not disposed - the next level very likely has one, and rebuilding is the expensive half. */
+  if(!w || w.taken){ if(_wayRec) _wayRec.root.visible = false; PROP3D.waystone = 0; return false; }
+  if(!kitModel(WAY_FILE)){
+    if(!_wayPending && kitModel(WAY_FILE) === undefined){
+      _wayPending = true;
+      loadKitModel(WAY_FILE).finally(() => { _wayPending = false; });
+    }
+    return false;
+  }
+  if(!_wayRec){
+    const src = kitModel(WAY_FILE);
+    const root = SkeletonUtils.clone(src.scene);
+    root.traverse(o => { if(o.isMesh){ o.frustumCulled = false; o.castShadow = false; } });
+    const s = WAY_H / (src._nativeH || 1);
+    root.scale.setScalar(s);
+    _group.add(root);
+    _wayRec = { root };
+    _wayBox = { w:+((src._nativeX || 1) * s).toFixed(2), d:+((src._nativeZ || 1) * s).toFixed(2),
+                h:+((src._nativeH || 1) * s).toFixed(2), footY:-(src._baseY || 0) * s };
+  }
+  _wayRec.root.visible = true;
+  /* Stood on its own foot, not its origin: the same `-_baseY * scale` correction every other cast
+     here uses, because a model whose pivot is at its centre sinks half its height into the floor.
+     `w.y` is the surface the level builder snapped it to - a raised vault court is not y=0. */
+  _wayRec.root.position.set(w.x, (w.y || 0) + _wayBox.footY, w.z);
+  PROP3D.waystone = 1;
+  return true;
+}
+
 /* Called when the level changes, from world3d's rebuild - same place clearMobs() is called.
    Without it a new zone inherits every actor the previous one built. */
 export function clearProps(){
@@ -286,6 +331,9 @@ export function clearProps(){
   _keyActors.clear();
   _keyFree.length = 0;
   PROP3D.keys = 0;
+  if(_wayRec && _wayRec.root.parent) _wayRec.root.parent.remove(_wayRec.root);
+  _wayRec = null;
+  PROP3D.waystone = 0;
 }
 
 /* True only when prop3d is really drawing chests, so the voxel path can skip exactly the body and
@@ -304,8 +352,16 @@ window.__prop3dChest = () => _box;
 export function keyDrawn(){ return !!(PROP3D.on && kitModel(KEY_FILE) && _keyBox); }
 window.__prop3dKeyDrawn = keyDrawn;
 
+/* Same contract again, for the quest waystone. The gold capstone, the light column and the motes
+   stay voxel - they are the "spot it across a room" affordance and they pulse every frame - so the
+   game needs the fitted height to put the capstone on the real top of the real stone. */
+export function waystoneDrawn(){ return !!(PROP3D.on && kitModel(WAY_FILE) && _wayBox); }
+window.__prop3dWaystoneDrawn = waystoneDrawn;
+window.__prop3dWaystone = () => _wayBox;
+
 window.__prop3d = () => ({ on:PROP3D.on, ready:PROP3D.ready, chests:PROP3D.chests,
                            keysReady:PROP3D.keysReady, keys:PROP3D.keys, keyBox:_keyBox,
+                           waystone:PROP3D.waystone, wayBox:_wayBox,
                            box:_box, err:PROP3D.err });
 /* The key's measurements, so "it came out standing up and the right size" is a number rather than
    a squint: native is the model as authored (long axis on Z, which is the whole reason it needs a

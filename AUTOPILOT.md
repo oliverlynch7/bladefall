@@ -238,8 +238,34 @@ Worlds standard), and the graphics need finishing before he shows more people.
       - **Loot pickups** (`G.pickups`) — commonest object in the game, but "what does a dropped
         sword look like" is an art call per drop type; ask Oliver before picking models. The gold/
         coin case is not a call (`qprops/Coin_Pile`).
-      - The exit portal, the waystone and the spawner dens are architecture-ish and would suit
-        world3d more than prop3d.
+      - [x] **The quest waystone** (`G.waystone`) → `props/pillar-obelisk`. DONE 2026-08-01
+        (worker B). It went in prop3d after all, not world3d: there is at most ONE per level, it
+        has state (`taken`), and it is an ENTITY that has to be drawn in the defer window — every
+        reason prop3d exists. It is also the least invented cast in the file, because the game's
+        own source comment already calls it "a lit obelisk you can spot across a room" and world3d
+        already loads `props/pillar-obelisk` for pillar deco, so the model is proven and usually
+        already downloaded.
+        Fitted to 64 — the voxel stone's own height, plinth through shaft — so the gold capstone,
+        the light column and the orbiting motes, which all stay voxel, land where they were tuned
+        to land. They are placed against `__prop3dWaystone().h` rather than the old 64 literal, so
+        a re-fit cannot leave the light hovering over nothing.
+        Verified: hub side-by-side (`_shot/out/b-way-voxel.png` vs `b-way-3d3.png`) — real obelisk,
+        capstone on the apex, base on the ground, no doubled voxel shaft; the real generated
+        Outskirts waystone reports `waystone:1` at its generated spot; touching it removes stone,
+        capstone, beam and motes together (`b-way-taken.png`); first-person (`b-way-fps.png`) and
+        `?world3d=0` (`b-way-w3doff.png`) both still draw the full voxel stone. Outskirts
+        regression clean: 7 chests, 18 creatures, 21 draw calls, no errors.
+        *One for Oliver's eye, not a bug:* the kit obelisk is a pale blue-grey, where the voxel one
+        was a neutral mid-grey. It matches how that model already renders elsewhere in the 3D
+        world, so it is consistent — it is just cooler in tone than the box it replaced. A tint is
+        one line if you want it warmer.
+        *Checked and rejected on the way:* converting the prop's PBR material to Lambert the way
+        `loadPart` does. Rendered before and after — pixel-identical, because `loadProp`, which is
+        what world3d actually uses for props, keeps the glTF material too. The colour is the kit's,
+        not the lighting model's. Reverted rather than committed as a fix that fixed nothing.
+      - The exit portal and the spawner dens are the two left. Both are art calls as things stand:
+        the repo has no portal/vortex asset at all, and "what does a goblin den look like" is a
+        per-mob styling decision (`drawSpawner` already styles each nest to the mob it breeds).
       Whatever gets added: it is an ENTITY, so it must be drawn inside a defer window, and its skip
       guard must ask `three3DLive()` and not "is the layer on". Both traps are documented below and
       both have already cost a session.

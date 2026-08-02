@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.415.0-autopilot';
+const VERSION3D='1.416.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12596,6 +12596,19 @@ function drawShadeModel(t,zoneId){
   popM();
 }
 function drawWaystation(t){
+  /* THE WAYSTATION'S FURNITURE IS ENTITIES, NOT ARCHITECTURE — and calling the whole function
+     "world" was the same wrong test that hid the torches and the stepping stones. The only
+     question that ever matters is *does world3d draw a 3D replacement for this*.
+     world3d's hub build is a REBUILT courtyard, not a conversion of these boxes: it lays walls,
+     paving, lanterns, market carts, hedges, a monument tower, four buildings and one gatehouse per
+     portal (`__world3d().counts`). It draws nothing at all for the keepers, their stalls, the
+     forge, the mirror, the beast cages, the arcade, the plaza bonfire or the string lights — and
+     its paving covers the ground every one of them stands on, so all of it was painted out.
+     Measured, same camera, `?world3d=0` vs default: fountain, bonfire, market wares and every
+     keeper present → bare cobbles (_shot/out/b-hubwide-voxel.png vs b-hubwide-3d.png).
+     So the default here is DEFERRED, and the few blocks world3d really does replace turn it off
+     again around themselves. */
+  deferOn();
   if(G.sparringRoom){
     // A proper SQUARE boxing ring: four corner posts joined by CONTINUOUS rope rails on every side (three
     // stacked ropes), with a rope gap on the south edge you step through. Sits down in the sunken bowl.
@@ -12648,6 +12661,10 @@ function drawWaystation(t){
       bx(x,y0+h*0.5,z-w*0.5-0.5, w*0.9,h*0.9,1, '#a9833f'); }   // front flap seam
     bx(-806,96,644, 3.4,3.4,3.4, '#ffe6a0','#ffd24a', 0.4+0.42*Math.sin(t*4)); }   // the glint that hints at the secret
   // the portal row: unlocked gates burn amber, cleared ones carry a green capstone, locked ones are cold stone
+  /* INLINE, unlike the rest of this function: world3d puts a real stone gatehouse at every one of
+     these eight cells (`counts.gatehouse === 8`), so the voxel frame IS replaced and deferring it
+     would stand a second, boxier gate in front of the first. */
+  deferOff();
   for(const g of G.gates){
     if(g.side){ // discovered Trial Chamber: a compact but grounded rift monument, beside its parent portal
       bx(g.x-18,28,g.z, 8,56,12,'#30283d');bx(g.x+18,28,g.z, 8,56,12,'#30283d');
@@ -12666,6 +12683,7 @@ function drawWaystation(t){
       for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
     if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
   }
+  deferOn();
   // the keepers of the posts
   for(const n of G.hubNpcs){
     if(n.prop==='arcade'){ drawShadow(n.x,n.z,28,0.34);
@@ -12813,16 +12831,27 @@ function drawWaystation(t){
       bx(-625,150,tz, 7,42,36,'#2a2f3a'); bx(-621,154,tz, 4,26,20, col, col, 0.85); bx(-621,154,tz, 3,10,8, tint(col,'#fff',0.4),'#fff',0.5); }); }   // hung FLUSH on the west wall (x=-625), high, behind the forge/shop/bag — no longer floating out in the room
   // ITEM 1 — a trainer figure stands for every class you've unlocked (behind the Drillmaster)
   // ITEM 2 — the dying world on the horizon over the low north rampart, + the Apex throne looming
+  /* INLINE: this is the SKYLINE, a mile off and hundreds of units tall. It reads over the top of
+     the rampart whether that rampart is voxel or world3d's, and deferring a backdrop would only
+     buy it the right to draw in front of the courtyard wall. */
+  deferOff();
   { const vista=[[-540,-760,240,300,'#2a2118'],[-210,-880,300,460,'#25303a'],[150,-800,230,300,'#3a1c14'],[470,-760,220,300,'#241431']];
     for(const v of vista){ bx(v[0],v[3]/2,v[1], v[2],v[3],70, v[4], tint(v[4],'#000',0.3), 1); }
     bx(0,320,-1080, 210,640,90, '#160f22','#3a2450',1); bx(0,600,-1080, 90,150,60,'#241431','#7a30c0',0.5);   // the Apex throne
     for(let i=0;i<12;i++){ const ey=((t*26+i*70)%200); bx(-360+((i*151)%740), ey+8, -366-((i*47)%110), 3,3,3, '#ff9a4a','#ffd24a', 0.5*(1-ey/200)); } }   // drifting embers
   // ITEM 6 — expensive cosmetic upgrades, purchased in the shop, that visibly transform the Waystation
   const HU=meta.hubUpgrades||{}, SX=HUB_SX, SZ=HUB_SZ, R=Math.round;   // scale upgrade decor with the space-passed hub so nothing floats
+  /* The ramparts upgrade is the one piece of this that world3d already builds — a merlon course on
+     the north wall — so it alone stays inline; the braziers, the banners and the gilded waystone
+     are props standing on covered ground, like everything else the player paid to see. */
+  deferOn();
   if(HU.braziers){ for(const b of [[-360,-300],[360,-300],[-360,340],[360,340]]){ const b0=R(b[0]*SX), b1=R(b[1]*SZ); bx(b0,20,b1, 18,40,18,'#2a2018'); const fl=0.7+0.3*Math.sin(t*6+b[0]); bx(b0,46,b1, 20,15,20,'#ff7a3a','#ffd24a',fl); for(let i=0;i<2;i++) bx(b0+(Math.random()-0.5)*10,54+Math.random()*18,b1, 4,6,4,'#ff9a4a','#ffd24a',0.7); } }
   if(HU.banners){ const wx=R(-640*SX)+14; for(let k=0;k<4;k++){ const bz=R((-150+k*150)*SZ); bx(wx,152,bz, 4,92,42, k%2?'#5e2a24':'#3a2a55', k%2?'#e8453d':'#b06bff',0.72); bx(wx,200,bz, 7,10,48,'#caa23a','#ffd24a',0.6); } }   // order banners hang FLUSH high on the WEST wall, behind the shop / smith / bag
-  if(HU.ramparts){ for(let i=0;i<11;i++){ bx(R((-460+i*92)*SX),78,R(-400*SZ), 34,24,26,'#4a4f5e'); } }
+  if(HU.ramparts){ deferOff(); for(let i=0;i<11;i++){ bx(R((-460+i*92)*SX),78,R(-400*SZ), 34,24,26,'#4a4f5e'); } deferOn(); }
   if(HU.gild){ bx(0,76,R(30*SZ), 20,20,20,'#ffe9a8','#ffd24a',0.95); bx(0,150,R(30*SZ), 9,150,9,'#ffe9a8','#ffd24a',0.22); }
+  /* Leave the window OPEN: the caller carries straight on into the Warden's Shade, the dens and the
+     enemies, all of which are deferred too. Closing it here and reopening there would only cost a
+     batch flush. */
 }
 /* Spawner nests — each looks like what it breeds, so the hunt reads at a glance. */
 const SPAWNER={
@@ -13712,7 +13741,12 @@ function render(t){
     bx(s.x,sy+26,s.z, 16,40,9, c3, c4, pu);
     bx(s.x,sy+26,s.z, 5,30,11, c5, c5, pu*0.9);
     for(let i=0;i<2;i++){ const yy=sy+8+((s.t*22+i*30)%48); bx(s.x+Math.sin(s.t*2+i)*8, yy, s.z, 3,3,3, c5,c5,sp?0.22:0.5); } }
-  deferOff(); if(G.hub) drawWaystation(t); deferOn();   // hub architecture is world, not entity
+  /* The Waystation manages its OWN defer window now. Most of it is furniture standing on ground
+     the 3D hub paves over, so it stays deferred like every other entity; only the blocks world3d
+     genuinely rebuilds (the eight gatehouses, the skyline, the rampart merlons) turn it off around
+     themselves. It used to be wrapped in a blanket deferOff() on the theory that a hub is
+     architecture — see the note on drawWaystation for what that cost. */
+  if(G.hub) drawWaystation(t);
   if(G.npc){                                           // the Warden's Shade — a mournful spectral knight-woman (model factored into drawShadeModel for reuse)
     const n=G.npc;
     pushM(); mv(n.x,0,n.z); drawShadeModel(t,curZone().id); popM();

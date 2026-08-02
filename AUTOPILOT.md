@@ -282,6 +282,46 @@ Worlds standard), and the graphics need finishing before he shows more people.
       proud of ice that used to hide it. The default (3D world on) composites correctly; the fix
       would mean changing `deferArmed()`, which the note below explicitly warns must keep matching
       when `flushHero3D` runs.)*
+- [x] **The whole Waystation was invisible — every keeper, stall, forge and the plaza bonfire.**
+      Found and fixed 2026-08-01 (worker B). Same bug shape as the torches and the stepping stones,
+      and the biggest instance of it yet, because it hit the HUB — the place VISION.md ranks as
+      priority 4 and calls "where the game happens socially".
+      `drawCourse`'s entity pass ended with `deferOff(); if(G.hub) drawWaystation(t); deferOn();`,
+      on the theory that a hub is architecture. It is not: `drawWaystation` draws the FURNITURE.
+      world3d's hub build is a REBUILT courtyard, not a conversion of those boxes — it lays walls,
+      paving, lanterns, market carts, hedges, four buildings and one gatehouse per portal, and
+      draws nothing whatever for the keepers, their stalls, the forge, the mirror, the beast cages,
+      the arcade, the notice board, the abyss monolith, the Sprint/Arena gates, the boss trophies,
+      the string lights or the plaza bonfire. Its 273 paving tiles cover the ground every one of
+      them stands on, so all of it was painted out.
+      Measured before touching anything, same camera both ways: `?world3d=0` gives a plaza with a
+      fountain, a lit bonfire, market wares and keepers (`_shot/out/b-hubwide-voxel.png`); the
+      default gives bare cobbles (`b-hubwide-3d.png`). The tell that hid it for so long is that the
+      HTML labels survive — walk up and "The Smith · Fuse gear" appears over an empty patch of
+      floor, so the hub reads as working.
+      `drawWaystation` now manages its own defer window: deferred by default, turned OFF around
+      exactly the three blocks world3d really does rebuild — the eight gate frames (`counts
+      .gatehouse === 8`, so deferring would stand a second boxier gate in front of the first), the
+      horizon vista (a skyline a mile off, it reads over the rampart either way) and the ramparts
+      hub-upgrade.
+      **Second half of the fix, and it would have been a half-conversion without it: world3d's
+      centrepiece tower was deleted.** It stood at northZ+620 = z 47, and the game's own plaza
+      waystone — the bonfire you touch to heal and take stock — is at z 30. A 130-wide tower over a
+      64-wide stone: deferring the bonfire just moved it inside the tower, with only the fireflies
+      escaping (`b-hubstone-fixed.png`). That tower was only ever a substitute for a centrepiece
+      this bug had erased ("a courtyard with nothing in the middle reads as an empty lot" — the
+      middle was never empty), so with the real one back it goes. The corner towers are untouched.
+      Verified: plaza before (`b-hubstone-3d.png`, solid tower) vs after (`b-hubstone-fixed2.png`,
+      stone + gold capstone + light column + string lights + fireflies); the Barber and her chair
+      standing on the cobbles (`b-barber-fixed.png`) where the same camera showed nothing;
+      `?world3d=0` unchanged (`b-barber-w3doff.png`); first-person draws the full voxel hub
+      (`b-hub-fps.png`) because `deferArmed()` is false there and every `deferOn()` no-ops.
+      Outskirts regression clean and identical to the recorded baseline: 1257 floor tiles, 115 road
+      tiles, 118 trees, 2194 deco, 18 creatures, 7 chests, 21 draw calls.
+      *One for Oliver's eye, not a bug:* the west-side keepers (Quartermaster, Smith) stand inside
+      world3d's hub buildings, so a camera pushed up to them ends up inside a roof. They are drawn;
+      they are just indoors now. Whether those buildings should be open-fronted market shells is an
+      art call.
 - [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
       `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
       in rough order of how often a player sees them:

@@ -1202,33 +1202,17 @@ function buildHub(scene, world){
      centre/edge/corner pieces is worth doing, but a floating bowl is worse than nothing, so it is
      left out until it can be built properly. */
 
-  /* CENTREPIECE. A courtyard with nothing in the middle reads as an empty lot; a monument gives
-     the plaza a focus to gather around and orient by, which is the point of a social hub. Placed
-     on the courtyard's centre line, forward of the gates so it never blocks a portal. */
-  /* Well clear of the gate approach. At +430 it sat right on the walking line between spawn and
-     the portals - the camera ended up inside it. Note it is VISUAL ONLY: world3d adds no
-     collision, so the player walks through it. Collision still comes from the game's own G.walls,
-     which is why this rebuild deliberately keeps the original gate positions and puts the rampart
-     just behind them rather than moving anything the physics depends on. */
-  const cx = (westX + eastX) / 2, cz = northZ + 620;
-  const mono = [{ x: cx, z: cz }];
-  const mh = 210;
-  counts.monument = hubPiece('hubTower', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, 0, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#b9a887');
-  hubPiece('hubTowerM', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, mh * 0.59, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#c2b08c');
-  hubPiece('hubRoof', mono, (o, c, rec) => {
-    const sc = mh * 0.62 / rec.width;
-    o.position.set(c.x, mh * 1.18, c.z); o.rotation.set(0, 0.785, 0); o.scale.set(sc, sc, sc);
-  }, '#8e3b32');
-  hubPiece('hubFlag', mono, (o, c, rec) => {
-    const sc = mh * 0.5 / rec.width;
-    o.position.set(c.x, mh * 1.55, c.z); o.rotation.set(0, 0, 0); o.scale.set(sc, sc, sc);
-  }, '#d9a441');
+  /* NO CENTREPIECE TOWER ANY MORE — and this is a deletion with a reason, not a trim.
+     A 210-unit tower stood on the courtyard's centre line at northZ+620 because "a courtyard with
+     nothing in the middle reads as an empty lot". The middle was never empty: the game's own plaza
+     WAYSTONE - the bonfire you touch to heal and take stock - sits at (0, 30), which is within 17
+     units of that spot. It looked empty because drawWaystation was drawn outside the deferred
+     entity window, so the 3D paving painted the bonfire, the fountain, the market wares and every
+     keeper straight out. This tower was a substitute for the thing the bug had erased.
+     With drawWaystation deferred the bonfire is back, and rendered here the tower simply swallowed
+     it: 130 units wide over a 64-unit stone, with only the fireflies escaping
+     (_shot/out/b-hubstone-fixed.png). Decoration loses to a landmark the player walks up to and
+     uses. The corner towers above are untouched - they mark the rampart, not the plaza. */
 
   /* BUILDINGS. The one thing in the courtyard with a real footprint you cannot walk through, so
      these are the pieces that turn an open plaza into a place. */

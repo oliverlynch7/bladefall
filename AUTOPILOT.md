@@ -212,6 +212,22 @@ Worlds standard), and the graphics need finishing before he shows more people.
       in hub and Outskirts and is unchanged — no doubled deco.
       *Worth remembering:* this is the third bug of exactly one shape. Anything that skips its voxel
       version because a 3D layer "has it" must ask whether that layer is drawing THIS FRAME.
+- [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
+      `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
+      in rough order of how often a player sees them:
+      - **The ancient key** (`G.keys`) → `qprops/Key_Gold`. Measured its extents already so the next
+        run does not have to: the model LIES FLAT, long axis on Z (0.122 long, 0.058 wide, 0.012
+        thick), so a plain height fit will scale it wrongly. Stand it up with `rotation.order='YXZ'`
+        and `rotation.set(-Math.PI/2, spin, 0)` — Y last means the spin stays about world up — and
+        fit the LONG axis to ~22 units to match the voxel key. Keep the vertical glow beam.
+      - **Loot pickups** (`G.pickups`) — commonest object in the game, but "what does a dropped
+        sword look like" is an art call per drop type; ask Oliver before picking models. The gold/
+        coin case is not a call (`qprops/Coin_Pile`).
+      - The exit portal, the waystone and the spawner dens are architecture-ish and would suit
+        world3d more than prop3d.
+      Whatever gets added: it is an ENTITY, so it must be drawn inside a defer window, and its skip
+      guard must ask `three3DLive()` and not "is the layer on". Both traps are documented below and
+      both have already cost a session.
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:

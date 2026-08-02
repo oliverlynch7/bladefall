@@ -720,6 +720,7 @@ function hubPiece(setName, cells, place, colour, dropMap){
   if(colour && dropMap) mat.map = null;
   if(colour) mat.color = new THREE.Color(colour);
   const m = new THREE.InstancedMesh(rec.geo, mat, cells.length);
+  m.name = setName;                               // so __world3dBoxes can say WHICH run is where
   const o = new THREE.Object3D();
   for(let i = 0; i < cells.length; i++){
     place(o, cells[i], rec, i);
@@ -770,18 +771,66 @@ function buildHub(scene, world){
   }
   for(const g of gates) gateCells.push({ x: g.x, z: northZ, rot: 0 });
 
-  /* SIDE WALLS running south, closing the courtyard so it feels like a place rather than a
-     clearing. Left open at the south end - that is where the player spawns and walks in. */
-  for(let z = northZ + HUB_UNIT; z < southZ - HUB_UNIT * 2; z += HUB_UNIT){
-    wallCells.push({ x: westX, z, rot: Math.PI / 2 });
-    wallCells.push({ x: eastX, z, rot: Math.PI / 2 });
+  /* THE REST OF THE SHELL, read off the game's own kind:'rampart' boxes.
+     It used to be two hard-coded side runs stopping two units short of the courtyard's south edge,
+     and that was the bug: the game has SIX more perimeter walls south of the plaza — the two south
+     wings, the two annex dividers and the annex back wall — and none of them existed in 3D. The SE
+     court and the whole activity annex were unbounded space with flat voxel slabs for edges.
+     Deriving the runs from the collision boxes means a wall can never again exist in one and not
+     the other. */
+  const runCells = (x1, z1, x2, z2, h) => {
+    const dx = x2 - x1, dz = z2 - z1, len = Math.hypot(dx, dz);
+    if(len < HUB_UNIT * 0.4) return;
+    const n = Math.max(1, Math.round(len / HUB_UNIT)), seg = len / n;
+    const rot = Math.abs(dx) >= Math.abs(dz) ? 0 : Math.PI / 2;
+    for(let i = 0; i < n; i++){
+      const f = (i + 0.5) / n;
+      wallCells.push({ x: x1 + dx * f, z: z1 + dz * f, rot, h, seg });
+    }
+  };
+  const ramparts = (world.walls || []).filter(w => w.kind === 'rampart' && !w.gateRow && !w.invisible);
+  const alongX = w => (w.w || 0) >= (w.d || 0);
+  /* The 3D shell stands on the COURTYARD bound, not on the collision line: the two long side walls
+     sit at x +-928 but the rampart is at +-1002, and the 74-unit strip between them is where the
+     keepers' shopfronts live. So a run that lands near a courtyard edge is snapped onto it — that
+     keeps the shopfront strip, and it closes the corners, where a wall stopping 45 units short of
+     the one it meets leaves a slot you can see daylight through. */
+  const snapX = x => Math.abs(x - westX) < 120 ? westX : (Math.abs(x - eastX) < 120 ? eastX : x);
+  const snapZ = z => Math.abs(z - northZ) < 120 ? northZ + HUB_UNIT : z;   // clear of the corner tower
+  /* The annex dividers stop 62 units short of the annex's own back wall. Invisible in collision —
+     the player is bounded before they reach it — and an obvious slot once there is real stone
+     there. A run ending near the back wall is carried out to meet it. */
+  const backZ = Math.max(-Infinity, ...ramparts.filter(alongX).map(w => w.z));
+  const snapEndZ = z => Math.abs(z - backZ) < 120 ? backZ : z;
+  /* A COLLISION wall is a 26-unit sheet; a castle wall piece is a solid block as DEEP as it is
+     long, because castle/wall's footprint measures a full unit cube (measured with
+     __world3dProps, not assumed). Centring the block on the sheet therefore buries anything
+     standing within ~50 units in FRONT of it: laying the south wing centred on z 484 spread stone
+     from 432 to 536 and swallowed the Postings board at z 445 whole. So each run is pushed outward
+     until its INNER face sits on the collision line, which is where a wall is supposed to begin.
+     Runs already snapped onto the courtyard edge are left alone — they stand outside the collision
+     line by design, and the shopfronts are tuned to the strip between the two. */
+  const hubMidZ = (northZ + southZ) / 2;
+  const outward = (v, mid, thin) => v + Math.sign(v - mid) * Math.max(0, (HUB_UNIT - thin) / 2);
+  const sideEnd = { [westX]: -Infinity, [eastX]: -Infinity };   // southernmost point each side run reaches
+  for(const w of ramparts){
+    const h = w.h >= 300 ? wallH : w.h;                    // 300 is "unjumpable", not a drawn height
+    if(alongX(w)){
+      const z = outward(w.z, hubMidZ, w.d || 26);
+      runCells(snapX(w.x - w.w / 2), z, snapX(w.x + w.w / 2), z, h);
+    } else {
+      const sx = snapX(w.x), x = sx === w.x ? outward(w.x, 0, w.w || 26) : sx;
+      const z2 = snapEndZ(w.z + w.d / 2);
+      runCells(x, snapZ(w.z - w.d / 2), x, z2, h);
+      if(sideEnd[sx] !== undefined) sideEnd[sx] = Math.max(sideEnd[sx], z2);
+    }
   }
 
   counts.wall = hubPiece('hubWall', wallCells, (o, c, rec) => {
-    const s = HUB_UNIT / rec.width;
+    const s = (c.seg || HUB_UNIT) / rec.width;
     o.position.set(c.x, 0, c.z);
     o.rotation.set(0, c.rot, 0);
-    o.scale.set(s, wallH / rec.height, s);
+    o.scale.set(s, (c.h || wallH) / rec.height, s);
   });
   counts.gatehouse = hubPiece('hubGate', gateCells, (o, c, rec) => {
     const s = (gateHalf * 2) / rec.width;
@@ -791,10 +840,16 @@ function buildHub(scene, world){
   });
 
   /* CORNER TOWERS plus one between each pair of gates, so the rampart has rhythm and the corners
-     of the courtyard are legible from the middle of the plaza. */
+     of the courtyard are legible from the middle of the plaza.
+     The two SOUTH corners get one as well, on the junction where each side wall turns inward into
+     its south wing. Without them the two runs simply stop beside each other at slightly different
+     depths, which reads as a broken wall rather than a corner. They also give the south half of the
+     hub a skyline: from the annex the only tall stonework used to be 1200 units away at the gates. */
   const towerCells = [{ x: westX, z: northZ }, { x: eastX, z: northZ }];
   for(let i = 0; i < gates.length - 1; i++)
     towerCells.push({ x: (gates[i].x + gates[i + 1].x) / 2, z: northZ });
+  for(const sx of [westX, eastX])
+    if(sideEnd[sx] > northZ) towerCells.push({ x: sx, z: sideEnd[sx] });
 
   const tw = 150;
   counts.tower = hubPiece('hubTower', towerCells, (o, c, rec) => {
@@ -825,9 +880,16 @@ function buildHub(scene, world){
   /* PAVED COURTYARD. castle/ground is a GRASS tile in the kit — its UVs point at the green band of
      the atlas — so this is the one piece that must keep its tint AND drop its map, or the plaza
      renders as a lawn. Discovered the moment the atlas was put back: the courtyard went green. */
+  /* Paved as far south as the side walls actually run, not to the nominal courtyard depth. The two
+     differ by a hundred units on the east side, and that hundred units is exactly the SE court —
+     the Mirror and the Sparring Room door stood with their heels on 3D stone and their toes on the
+     voxel floor. The annex proper is deliberately NOT paved: its activity plazas are painted on
+     the floor as sub-3-unit deco, which the 3D pass drops, so paving over them would delete the
+     violet Abyss pad, the gold Sprint pad and the crimson Arena pad outright. */
+  const paveSouth = Math.max(southZ, sideEnd[westX], sideEnd[eastX]);
   const paveCells = [];
   for(let x = westX; x <= eastX; x += HUB_UNIT)
-    for(let z = northZ; z <= southZ; z += HUB_UNIT)
+    for(let z = northZ; z <= paveSouth; z += HUB_UNIT)
       paveCells.push({ x: x + HUB_UNIT / 2, z: z + HUB_UNIT / 2 });
   const paveRec = _propCache.get(PROP_SETS.hubPave[0]);
   if(paveRec && paveCells.length){
@@ -875,14 +937,25 @@ function buildHub(scene, world){
     o.scale.set(sc, sc, sc);
   }, '#6b5636');
 
-  /* A market row along each side wall: carts, stalls and hedges, well clear of the lane. */
+  /* A market row along each side wall: carts, stalls and hedges, well clear of the lane.
+     Stopped at whatever south wall is actually behind that column, which is NOT the same on both
+     sides — the west wing closes at z 484 and the east one 200 units further back. The row used to
+     run a flat five deep on both, so the last west cart stood at z 487 and the last west hedge at
+     577: one embedded in the south wall and one outside the hub altogether. Invisible while that
+     wall was a voxel slab the 3D layer painted over, obvious the moment it became stone. */
+  const southLimit = x => {
+    const behind = ramparts.filter(w => alongX(w) && w.z > hubMidZ && Math.abs(w.x - x) < w.w / 2);
+    return behind.length ? Math.min(...behind.map(w => w.z)) : southZ;   // southZ is the FALLBACK,
+  };                                        // not a cap — as a cap it trims the deeper east side too
   const carts = [], stalls = [], hedges = [];
   for(let i = 0; i < 5; i++){
     const z = northZ + 300 + i * 190;
-    carts.push({ x: westX + 150, z, rot: 1.5708 });
-    stalls.push({ x: eastX - 150, z, rot: -1.5708 });
-    if(i % 2 === 0){ hedges.push({ x: westX + 300, z: z + 90, rot: 0 });
-                     hedges.push({ x: eastX - 300, z: z + 90, rot: 0 }); }
+    if(z < southLimit(westX + 150) - 110) carts.push({ x: westX + 150, z, rot: 1.5708 });
+    if(z < southLimit(eastX - 150) - 110) stalls.push({ x: eastX - 150, z, rot: -1.5708 });
+    if(i % 2 === 0){
+      if(z + 90 < southLimit(westX + 300) - 60) hedges.push({ x: westX + 300, z: z + 90, rot: 0 });
+      if(z + 90 < southLimit(eastX - 300) - 60) hedges.push({ x: eastX - 300, z: z + 90, rot: 0 });
+    }
   }
   counts.cart = hubPiece('hubCart', carts, (o, c, rec) => {
     const sc = 105 / rec.width;
@@ -1124,3 +1197,41 @@ window.__world3dRebuild = () => { WORLD3D.built = null; return 'will rebuild nex
    alone once and produced a 65%-stretched gable that looked deliberate in a screenshot. */
 window.__world3dParts = () => Object.fromEntries([..._partCache].map(([k, v]) =>
   [k, v ? { size: [+v.size.x.toFixed(2), +v.size.y.toFixed(2), +v.size.z.toFixed(2)], subs: v.subs.length } : null]));
+/* Same idea for the standalone props, plus the thing `width`/`height` do not tell you: how much
+   room the geometry takes around its own origin. A hub piece is POSITIONED by its origin but SIZED
+   by one scale applied to all three axes, so a wall run laid on a line can reach fifty units in
+   front of it — which is how a rampart swallowed a notice board standing clear of the wall. */
+window.__world3dProps = () => Object.fromEntries([..._propCache].map(([k, v]) => {
+  if(!v) return [k, null];
+  v.geo.computeBoundingBox();
+  const b = v.geo.boundingBox, r = n => +n.toFixed(2);
+  return [k, { w: r(v.width), h: r(v.height),
+               min: [r(b.min.x), r(b.min.y), r(b.min.z)], max: [r(b.max.x), r(b.max.y), r(b.max.z)] }];
+}));
+/* The world-space box every built mesh actually occupies, instance transforms included.
+   `near` is [x, z, radius]: report the individual pieces around a point, not just the union — one
+   InstancedMesh carries every wall in the hub, so its union box says nothing about which run is
+   standing on top of which prop. Measure the geometry; do not reason about it. */
+window.__world3dBoxes = (near) => {
+  const out = {};
+  if(!group) return out;
+  const m = new THREE.Matrix4(), b = new THREE.Box3(), t = new THREE.Box3(), r = n => Math.round(n);
+  group.traverse(o => {
+    if(!o.isInstancedMesh || !o.count) return;
+    o.geometry.computeBoundingBox();
+    b.makeEmpty();
+    const hits = [];
+    for(let i = 0; i < o.count; i++){
+      o.getMatrixAt(i, m);
+      t.copy(o.geometry.boundingBox).applyMatrix4(m);
+      b.union(t);
+      if(near && Math.abs((t.min.x + t.max.x) / 2 - near[0]) < near[2]
+              && Math.abs((t.min.z + t.max.z) / 2 - near[1]) < near[2])
+        hits.push([r(t.min.x), r(t.max.x), r(t.min.z), r(t.max.z)]);
+    }
+    const key = o.name || ('mesh' + Object.keys(out).length);
+    out[key] = { n: o.count, x: [r(b.min.x), r(b.max.x)], y: [r(b.min.y), r(b.max.y)], z: [r(b.min.z), r(b.max.z)] };
+    if(hits.length) out[key].near = hits;
+  });
+  return out;
+};

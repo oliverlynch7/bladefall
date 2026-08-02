@@ -42,6 +42,21 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     `--ready "<expr>"` to wait on anything else. If it gives up it says `READY NEVER CAME`.
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
+    **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight
+    renders aiming a camera by hand in `--eval`). Takes a page expression or a bare `x,y,z`:
+    `--focus "__BF3.G.waystone" --dist 300 --side -70`. It places the hero so the EYE ends up
+    `--dist` from the subject, snaps `G.cam` — which is a smoothed follow-point that lerps 10% a
+    frame and, on headless SwiftShader's handful of fps, is still hundreds of units behind after a
+    teleport, so the subject lands behind the camera and reads as "not being drawn" — and holds the
+    hero's height, because a subject on a raised mesa has no floor under the teleport spot and
+    gravity drops the camera with the hero (measured: y 165 → 55 in under two seconds). It prints
+    the target, hero and eye it ended up with.
+    **It will not give you a tight close-up, and that is geometry, not a missing feature.** The eye
+    rides 118+180·sin(pitch) above the hero on a fixed look-down angle, so under ~200 units a
+    ground-level subject drops out of frame. Solving the pitch to compensate swings to near
+    top-down; solving the hero's height to put the subject on the view ray buries the camera in the
+    terrain. Both were built, rendered and rejected. Working range is `--dist 200–400` with
+    `--side` to clear the HUD; a real close-up still means spawning the object near the camera.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
   - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices. **Gitignored like
     `_shot/` (the `/_*` rule), and unlike `_shot/` there is NO committed source of record**, so a
@@ -212,6 +227,36 @@ Worlds standard), and the graphics need finishing before he shows more people.
       in hub and Outskirts and is unchanged — no doubled deco.
       *Worth remembering:* this is the third bug of exactly one shape. Anything that skips its voxel
       version because a 3D layer "has it" must ask whether that layer is drawing THIS FRAME.
+- [x] **Wall torches, jump pads, heal pads, springs and every floor hazard were invisible too.**
+      Found and fixed 2026-08-01 (worker B) while looking for the next prop3d cast. This is the
+      SAME bug as the chests and the practice dummy, and it had been missed because the earlier
+      sweep listed the objects it could think of rather than reading `drawCourse` top to bottom.
+      Measured first, not reasoned about: same hub frame, same camera, `?world3d=0` shows the
+      sconce standing beside the hero (`_shot/out/b-torch-voxel.png`); with the 3D world on the
+      spot is bare lit cobbles (`b-torch-3d.png`). Fifteen torches in the Waystation alone, plus
+      every dungeon hall. The giveaway that nobody spotted it sooner: the LIGHT survived —
+      `setSceneLights` feeds the three nearest torches to the shader as point lights, so the hub
+      had warm pools of firelight cast by sconces that were not on screen.
+      Deferred alongside the plates: torches, jump pads, healing pads, healing springs, geysers,
+      boss slam shockwaves, magma trails, spike fields, the Colossus sweep beam, Void Tyrant
+      collapse tiles and the golden bonus portal. Every one is a thing you step on or read off the
+      floor, world3d draws no replacement for any of them, and all of them sit within a few units
+      of ground the 3D layer covers completely.
+      THREE windows, not one, and that is the load-bearing detail: moving platforms and crumbling
+      stepping stones are interleaved with these in the source and are WORLD, not entity — you
+      stand on them — so they keep their inline, depth-tested place. Reordering the source to get
+      one window would have changed the draw order of the platforms as well.
+      Verified: hub torch before (`b-torch-3d.png`) vs after (`b-torch-fixed.png`) — same camera,
+      sconce and flame back on the cobbles; a REAL generated heal pad in the Outskirts renders on
+      the road with its cross (`b-healpad-after.png`); first-person still draws the full voxel
+      torch (`b-torch-fps.png`); `?world3d=0` unchanged and still correctly occluded
+      (`b-torch-w3doff-after.png`). Outskirts regression clean: 1257 floor tiles, 115 road tiles,
+      118 trees, 7 chests, 18 live creatures, 21 draw calls.
+      *Worth remembering:* the way to find the rest of these is to read `drawCourse` in order and
+      ask of each block "is this architecture world3d replaces, or a thing the player uses?", not
+      to list objects from memory. Still inline and still unresolved: `G.movers` and `G.crumbles`
+      (platforms — world, but nothing 3D draws them either, so they may yet be painted out where
+      they pass in front of 3D ground) and `drawSpawner`'s dens.
 - [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
       `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
       in rough order of how often a player sees them:

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.413.0-autopilot';
+const VERSION3D='1.414.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11898,6 +11898,19 @@ function drawCourse(s,t){
     bx(mv.x,mv.h+0.7,mv.z, mv.w,1.4,mv.d, tint(s.ground,'#fff',0.3));
     bx(mv.x,mv.h-15,mv.z, mv.w*0.4,4,mv.d*0.4, hz[1], hz[1], 0.5); // thruster glow
   }
+  /* ── GAMEPLAY PROPS ON THE FLOOR — deferred, for the same reason the pressure plates are ──
+     Every one of these is a thing you STEP ON or a hazard you read off the ground: a jump pad, a
+     heal pad, a spring, a geyser vent, a slam ring, a magma trail, a spike field, the Colossus
+     beam, a collapsing tile, the golden bonus portal. None of them is architecture, so world3d
+     draws no 3D replacement for any of them - and all of them sit within a couple of units of the
+     floor, which the 3D layer covers completely. Drawn inline they were painted out exactly as the
+     plates, the chests and the hub's practice dummy were: the pad's light still lit the cobbles,
+     the vent still erupted, and there was nothing there to see.
+     Measured, not reasoned about - see the torch note further down, which is the same finding on
+     the object that made it obvious.
+     Three windows rather than one, because the platforms you stand on (movers, crumbles) are
+     interleaved with them and are WORLD, not entity: they keep their inline, depth-tested place. */
+  deferOn();
   // jump pads
   for(const pd of G.pads){
     const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
@@ -11910,6 +11923,7 @@ function drawCourse(s,t){
     if(!spent){ const g=0.55+0.35*Math.sin(t*4);
       bx(hp.x,py+3.8,hp.z, 9,2.4,hp.r*0.85,'#c8ffd8','#7de0a0',g); bx(hp.x,py+3.8,hp.z, hp.r*0.85,2.4,9,'#c8ffd8','#7de0a0',g); }
   }
+  deferOff();
   // crumbling stepping stones (shake, drop, respawn)
   for(const cr of G.crumbles){
     if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
@@ -11919,6 +11933,7 @@ function drawCourse(s,t){
     bx(cr.x+jx,chy+0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
     bx(cr.x,chy-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
   }
+  deferOn();                     // ...hazards and the bonus portal: entities, see the note above
   // hazard geysers: vent → telegraph glow → eruption column
   const hzc=hazardCols(s.theme);
   for(const gy2 of G.geysers){
@@ -11959,6 +11974,7 @@ function drawCourse(s,t){
     bx(bp.x,by+48,bp.z, 40,60,4,'#ffd24a','#ffd24a',0.20);
     drawShadow(bp.x,bp.z,26,0.2);
   }
+  deferOff();
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
   LATE.length=0;
   const CAMX=(G.eye?G.eye.x:G.cam.x), CAMZ=(G.eye?G.eye.z:G.cam.z), shoulder=meta.camMode!=='far'; // Phase 19: rays start at the TRUE eye (G.cam is the follow-point at the hero — a zero-length ray)
@@ -11969,12 +11985,14 @@ function drawCourse(s,t){
     if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
   // the surface you're STANDING on must never fade — the floor underfoot stays solid
   const standingOn=(o)=>{ const oh=(o.h==null?96:o.h); return Math.abs((G.p.y||0)-oh)<12 && Math.abs(G.p.x-o.x)<o.w/2+10 && Math.abs(G.p.z-o.z)<(o.d||o.w)/2+10; };
+  deferOn();                                                                                           // ...and the springs, for the same reason
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue; const sy=sp2.y||0;                       // healing springs (drawn after cull is defined)
     bx(sp2.x,sy+0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                       // base pad
     bx(sp2.x,sy+2.0,sp2.z, 30,2.2,30, sp2.used?'#2f4a40':'#5fe89a', sp2.used?null:'#4be08a', sp2.used?0.6:0.6+0.25*Math.sin(t*3));
     if(!sp2.used){ const fy=sy+13+Math.sin(t*2.6)*3;                                                    // floating green + (medical cross) = clearly HEALING, unlike the hazard geysers
       bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
   }
+  deferOff();
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
   const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
     bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
@@ -11997,6 +12015,15 @@ function drawCourse(s,t){
       else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
     }
   }
+  /* WALL TORCHES - the sconce that made the whole class of bug visible, and the reason the three
+     windows above exist. A torch is a free-standing fixture with its own collision post; world3d
+     draws nothing in its place, and it stands on ground the 3D layer covers, so drawn inline it
+     was painted out along with its flame. What survived was the LIGHT: setSceneLights feeds the
+     three nearest torches into the shader as point lights, so every hall and the whole Waystation
+     had warm pools of firelight cast by sconces that were not on screen.
+     Measured: the same frame in the hub with `?world3d=0` (b-torch-voxel.png) shows the sconce
+     beside the hero; with the 3D world on (b-torch-3d.png) there is nothing but lit cobbles. */
+  deferOn();
   // torches: flickering flames along the halls
   if(G.torches) for(const tc of G.torches){ if(cull(tc.x,tc.z)) continue; const fl=0.72+0.18*Math.sin(t*9+tc.ph), fk=Math.sin(t*11+tc.ph);
     voxDraw('torch.post',{x:tc.x,z:tc.z,seed:Math.round((tc.ph||0)*100)});

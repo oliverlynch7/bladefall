@@ -486,9 +486,21 @@ therefore composites *correctly*, not merely on top. Verified: five chests in a 
 through a 3D tower, only the one in front of it renders.
 
 Rules that fall out of this, worth keeping:
-- **World stays inline, entities defer.** `drawCourse` and `drawWaystation` are architecture and
-  world3d already draws their 3D replacement over them. Plates/keys/chests are objects and were
-  moved into the deferred window even though they live inside `drawCourse`.
+- **The only question is: does world3d draw a 3D replacement for THIS?** Not "is it world or
+  entity", not "do you stand on it", not "is this function architecture". Every one of those
+  sounds right and every one of them has now cost a session — the crumbling stepping stones
+  (world, and nothing drew them) and then the whole Waystation (`drawWaystation` was deferOff'd as
+  "architecture" when it draws the FURNITURE). Answer it per BLOCK, not per function: the hub's
+  eight gate frames really are replaced by world3d gatehouses and stay inline, while the gate
+  STATE drawn two lines later is not replaced by anything and defers.
+- **Its corollary: a 3D replacement that stands where a functional object stands is worse than no
+  replacement.** world3d's plaza tower was placed to fill a courtyard the compositing bug had
+  emptied, and it landed 17 units from the bonfire you touch to heal. When the deferred pass gave
+  the real object back, the stand-in buried it. Check what is already at those coordinates in the
+  game's own draw code before adding scenery to a hand-authored space.
+- **World stays inline, entities defer.** `drawCourse` is architecture and world3d already draws
+  its 3D replacement over it. Plates/keys/chests are objects and were moved into the deferred
+  window even though they live inside `drawCourse`.
 - The LATE translucent ghost-wall pass stays inline: replayed it would read as a second, see-
   through copy of a wall world3d has already drawn solid.
 - Order and blend survive because `gl.blendFunc/depthMask/clear` already flush the batch to

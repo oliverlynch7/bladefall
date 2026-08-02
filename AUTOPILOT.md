@@ -43,20 +43,41 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
-  - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices.
-- Work branch: **`bladefall-autopilot`**. Live/deploy branch: `main` (Cloudflare Pages deploys main to `bladefall.pages.dev`; the branch preview is `bladefall-autopilot.bladefall.pages.dev`).
+  - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices. **Gitignored like
+    `_shot/` (the `/_*` rule), and unlike `_shot/` there is NO committed source of record**, so a
+    fresh checkout or a second worker's worktree does not have them. Check they exist before
+    planning any work that depends on measuring balance; if they are missing, that work is blocked
+    until they are rebuilt or copied in, and saying so beats guessing at numbers.
+- Work branches: **`autopilot-a`** and **`autopilot-b`**, one per worker, in separate checkouts so the
+  two can run at the same time. **Your own branch is named in your run prompt — use that one and no
+  other.** `bladefall-autopilot` is the retired single-worker branch; the permission allowlist now
+  actively DENIES checking it out or pushing to it. Live/deploy branch: `main` (Cloudflare Pages
+  deploys main to `bladefall.pages.dev`; branch previews are `autopilot-a.bladefall.pages.dev` and
+  `autopilot-b.bladefall.pages.dev`).
+- **Worker A takes the backlog from the TOP, worker B from the BOTTOM** (last unchecked item, working
+  upward), so the two never build the same thing. If everything below A's item is blocked or needs
+  Oliver, B takes a well-defined non-overlapping improvement instead — asset integration, a tooling
+  or harness fix, or a documented cleanup — rather than racing A for the same item.
 - Debug interface: `window.__BF3` (exposes `G`, `update(dt)`, `input`, `makeWeapon`, `enterZone`, `CLASSES`, `CLASS2`, etc.) — use it via the in-app Browser pane on the local preview server (`.claude/launch.json` name `bladefall`, port 4310) to verify.
 
 ## Workflow — every run
-1. `cd` to the submodule. `git fetch origin`, `git checkout bladefall-autopilot`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).
-2. Pick the **top unchecked `- [ ]` item** in the Backlog below.
+1. `cd` to your checkout. `git fetch origin`, `git checkout <your branch>`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).
+2. Pick your end of the Backlog below — **A: top unchecked item. B: last unchecked item, working upward.**
 3. Build it in `index.html`. Keep changes **small and focused**. A whole class is too big for one run — make **one meaningful chunk** of progress (e.g. "Paladin: class def + family + innate", then next run "Paladin: rank 2-4 skills", etc.), leave the item `- [ ]` with a `(progress: …)` note, and only mark it `- [x]` when fully done + verified. A small item (a rename, one weapon) can be finished in a run.
 4. **VERIFY (mandatory gate before any commit):**
-   - Syntax: `node -e "const fs=require('fs');const s=fs.readFileSync('public/3d/index.html','utf8');const m=s.match(/<script>([\\s\\S]*)<\\/script>/);new Function(m[1]);console.log('OK')"` — must print OK.
-   - Smoke test via the preview + `__BF3` (enter a zone, run some `update()` ticks, check no console errors; for a class/weapon, `makeWeapon`/class-state checks).
+   - Syntax: **`node tools/gate.js`** — must end in `GATE OK`. It parses index.html's classic
+     `<script>` blocks AND every ES module under `public/3d/` (discovered, not listed), and prints
+     VERSION3D.
+     **Do not reach for `node -e "…"`.** The old spec named a one-liner here; `node -e` is not on the
+     permission allowlist and never will be, because allowing it means allowing "run any JavaScript
+     I like". A denied gate is not the same thing as a blocked workspace — on 2026-08-01 a run drew
+     exactly that conclusion and twelve runs shipped nothing. If `node tools/gate.js` and
+     `node _shot/shot.js …` work, you are fine; those two paths are what the allowlist grants.
+   - Render it and LOOK: `node _shot/shot.js --scene 0` / `--scene hub`. Reading source is not proof.
+   - Smoke test via `--eval` over `__BF3` / `__world3d()` / `__mob3d()` / `__prop3d()`.
    - If verification fails and you can't fix it quickly, **revert your change, mark the item blocked with a note, and move on.** Never commit broken code.
 5. Bump `const VERSION3D` to `X.Y.Z-autopilot` (keep the `-autopilot` suffix on the branch so previews cache-bust and it's obvious it's branch work).
-6. Mark the backlog item `- [x]` (and add a one-line note). Commit **to `bladefall-autopilot`** with a `[autopilot]` message prefix and the Co-Authored-By trailer. `git push`.
+6. Mark the backlog item `- [x]` (and add a one-line note). Commit **to your own branch** with a `[autopilot]` message prefix and the Co-Authored-By trailer, then `git push origin <your branch>`. Commit after EACH item, so a later failure cannot discard earlier verified work.
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
@@ -70,10 +91,11 @@ This runs **every hour, 8am–11pm** — not once a day. So each run does **one*
 **Format Oliver wants (2026-07): a short changelog in BULLET POINTS, plus the playtest link.** Header line with the version + play URL, then one `•` bullet per change, plain English. Use `\n` for line breaks in the JSON `text`.
 ```
 curl -s -X POST https://thework.pages.dev/state -H "Content-Type: application/json" -d @- <<'JSON'
-{"action":"tgPing","password":"oliverNCA2026","text":"🎮 BLADEFALL update (v<ver>) — play: https://bladefall-autopilot.bladefall.pages.dev/3d/\n\n• <change one>\n• <change two>\n• <change three>\n\nMerge to your live game whenever you're happy."}
+{"action":"tgPing","password":"oliverNCA2026","text":"🎮 BLADEFALL update (v<ver>) — play: https://<your-branch>.bladefall.pages.dev/3d/\n\n• <change one>\n• <change two>\n• <change three>\n\nMerge to your live game whenever you're happy."}
 JSON
 ```
-Always include the playtest URL. Bullets, not prose. Keep each bullet short.
+Always include the playtest URL — **your own branch's preview**, `autopilot-a.bladefall.pages.dev`
+or `autopilot-b.bladefall.pages.dev`. Bullets, not prose. Keep each bullet short.
 
 ## Naming rule (applies to EVERYTHING new)
 Names must be **interesting but understandable by a middle schooler.** No niche/archaic words. Good: "Holy Ground", "Guard Up", "Raise the Dead", "Shadow Step", "Smite". Bad: "Consecrate", "Bulwark", "Bastion", "Excoriate".

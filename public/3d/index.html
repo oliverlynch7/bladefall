@@ -2840,7 +2840,7 @@ window.__BF_META=()=>meta;
    reported ground=#8a8445 while its stage says #243240. Nothing errored; the floors were just
    quietly the wrong colour in five zones. */
 function bfStage(){ return (G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:(STAGES[(G&&G.stageIndex)||0]||STAGES[0]); }
-window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:bfStage().ground||'#8a8445',theme:bfStage().theme||''});   // live player meta (classId, skin) for the 3D hero layer
+window.__BF_WORLD=()=>({deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,walls:G.walls,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,ground:bfStage().ground||'#8a8445',theme:bfStage().theme||''});   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -10110,13 +10110,23 @@ function enterWaystation(){
   G.rooms.push({x:470,z:455,w:360,d:150,monsters:[],encounter:false,cleared:true});
   // ---- perimeter walls ONLY — no interior room walls, so nothing can wedge and sightlines stay open ----
   // Tall boundary walls — high enough that even a double jump can't clear them (no escaping the hub bowl).
-  G.walls.push({x:0,z:-430,w:1320,d:26,h:300});                      // north rampart behind the gate arc
-  G.walls.push({x:-495,z:372,w:330,d:26,h:300});                     // south wall wing (west); centre opens into the annex
-  G.walls.push({x:495,z:530,w:360,d:26,h:300});                      // south wall wing (east) — pushed back to close the new SE court
-  G.walls.push({x:-640,z:-30,w:26,d:830,h:300});                     // west wall
-  G.walls.push({x:640,z:49,w:26,d:988,h:300});                       // east wall — extended south to wrap the SE court
-  G.walls.push({x:0,z:850,w:680,d:26,h:300});                        // annex outer wall
-  G.walls.push({x:-330,z:610,w:26,d:500,h:120}); G.walls.push({x:330,z:610,w:26,d:500,h:120});
+  /* kind:'rampart' is the tag world3d builds the 3D shell from. It exists because the shell used to
+     be derived from G.gates alone: the north wall got a real stone rampart and everything south of
+     the plaza got nothing, so the SE court and the whole activity annex sat in an unbounded space
+     with flat voxel slabs for walls. Tagged here rather than listed over in world3d.js so a wall can
+     never exist in collision without existing in 3D — the pairing lives next to the box itself, the
+     same reason the building specs do.
+     `gateRow` marks the one wall world3d already builds another way (the gatehouse rampart, laid on
+     the portal positions), so it is skipped rather than built twice.
+     When the 3D shell is up these walls stop drawing as voxel boxes — see kind==='rampart' in the
+     wall pass. */
+  G.walls.push({x:0,z:-430,w:1320,d:26,h:300,kind:'rampart',gateRow:true});   // north rampart behind the gate arc
+  G.walls.push({x:-495,z:372,w:330,d:26,h:300,kind:'rampart'});      // south wall wing (west); centre opens into the annex
+  G.walls.push({x:495,z:530,w:360,d:26,h:300,kind:'rampart'});       // south wall wing (east) — pushed back to close the new SE court
+  G.walls.push({x:-640,z:-30,w:26,d:830,h:300,kind:'rampart'});      // west wall
+  G.walls.push({x:640,z:49,w:26,d:988,h:300,kind:'rampart'});        // east wall — extended south to wrap the SE court
+  G.walls.push({x:0,z:850,w:680,d:26,h:300,kind:'rampart'});         // annex outer wall
+  G.walls.push({x:-330,z:610,w:26,d:500,h:120,kind:'rampart'}); G.walls.push({x:330,z:610,w:26,d:500,h:120,kind:'rampart'});
   // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
   G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
   G.deco.push({x:0,z:30,y0:7,w:96,h:2,d:96,c:'#2f6a7a'});                             // the water (animated glint in drawWaystation)
@@ -11955,6 +11965,11 @@ function drawCourse(s,t){
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
   if(G.walls) for(const wl of G.walls){ if(cull(wl.x,wl.z)) continue;
     if(wl.invisible) continue;                                                               // collision-only blockers (e.g. hub fixtures) — no mesh
+    /* The 3D hub builds a real stone shell on every kind:'rampart' box, so drawing the voxel slab
+       as well leaves its top half standing above the stonework as a flat untextured band (the 3D
+       wall is rampart-height, the collision box is unjumpable-height). HUBDEFER, not a plain
+       world3d check, so the slabs still draw while the 3D layer is still loading. */
+    if(HUBDEFER && wl.kind==='rampart') continue;
     if(standingOn(wl)) wallBox(wl);                                                       // rim you're standing on: keep it solid underfoot
     else if(!noFade && !shoulder && wl.z>G.p.z+26 && wl.z-G.p.z<320 && Math.abs(wl.x-G.p.x)<340) LATE.push({kind:'wall',o:wl});
     else if(!noFade && shoulder && (wl.h||96)>50 && rayHits(wl,12)) LATE.push({kind:'wall',o:wl});   // camera-blocking wall -> see-through

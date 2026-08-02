@@ -588,9 +588,41 @@ function buildProps(items, names, defaultH, heightOf, fitH){
     }
     m.instanceMatrix.needsUpdate = true;
     m.frustumCulled = false;
+    /* Named so a render can be CHECKED rather than squinted at - see __world3dPoses below. The
+       model name is the only label this function is given, and it is the useful one anyway. */
+    m.name = 'w3d:' + names[i];
+    m.userData._w3dFit = { defaultH: defaultH, fitH: !!fitH };
     group.add(m);
   });
 }
+
+/* Where did the props actually END UP? A prop is placed at the deco's y0, and whether that y0 is
+   the object's BASE or the top of a voxel trunk is the difference between a forest and a forest
+   hanging in the air. That question has been argued from source and from screenshots more than
+   once; both are guesses. This answers it in numbers.
+     __world3dPoses('tree')  -> [{model, x, y, z, h, w}, ...]
+   `y` is the model's base in world units (the geometry is translated so its base is y=0), `h` its
+   fitted height, so a tree whose y is not the ground under it is floating and says so. */
+window.__world3dPoses = (match, limit) => {
+  if(!group) return [];
+  const out = [], V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+  const M = new THREE.Matrix4();
+  const cap = limit || 8;
+  for(const c of group.children){
+    if(!c.isInstancedMesh || !c.name || c.name.indexOf('w3d:') !== 0) continue;
+    if(match && c.name.toLowerCase().indexOf(String(match).toLowerCase()) < 0) continue;
+    const rec = _propCache.get(c.name.slice(4));
+    for(let i = 0; i < c.count && out.length < cap; i++){
+      c.getMatrixAt(i, M);
+      M.decompose(V, Q, S);
+      out.push({ model: c.name.slice(4), n: c.count,
+                 x: Math.round(V.x), y: Math.round(V.y * 10) / 10, z: Math.round(V.z),
+                 h: rec ? Math.round(rec.height * S.y) : null,
+                 w: rec ? Math.round(rec.width * S.x) : null });
+    }
+  }
+  return out;
+};
 
 
 /* ── GROUND ────────────────────────────────────────────────────────────────────

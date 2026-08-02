@@ -14,10 +14,12 @@
      node _shot/shot.js --url "/3d/index.html?hero3d=1&world3d=1&nobloom"
      node _shot/shot.js --out _shot/out/hub.png --wait 9000
      node _shot/shot.js --eval "Object.keys(__BF3.G.deco[0]||{})"
+     node _shot/shot.js --eval "__BF3.G.chests.push({x:0,z:0,y:0,opened:false,bob:0})"  # MUTATE, then shoot
      node _shot/shot.js --pre  "__BF3.enterZone('woods',1)" --wait 6000
      node _shot/shot.js --size 1280x720
      node _shot/shot.js --scene 0                        # in-game in The Outskirts, world3d built
      node _shot/shot.js --scene hub                      # standing in the Waystation
+     node _shot/shot.js --scene side0                    # the zone's HIDDEN side area (The Thornwood)
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
      node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
@@ -32,10 +34,12 @@
    screenshot that did not print "ready ✓".
 
    And "ready ✓" has to mean ready HERE, not ready somewhere. `--scene <n>` passes through the
-   hub on the way, so a default of "the world is built" was satisfied by the HUB build seconds
-   before the zone was entered — see the long note on sceneReady() below. Since 2026-08-02 the
-   default waits for the destination itself, so a `--scene 0` that resolves in under a second is
-   the bug, not the fast path.
+   class TRIAL and then the hub on the way, and BOTH of them satisfied older versions of the test
+   — the trial arena because startTrial() sets G.zone to the zone you asked for, the hub because
+   world3d builds it five seconds before enterZone fires. See the long note on sceneReady() below.
+   Since 2026-08-02 the default waits for the destination itself, so a `--scene 0` that resolves in
+   under a second is the bug, not the fast path — and every run now prints `at → <place>` so a
+   shot of the wrong level says so in words instead of only in pixels.
 
    Exit 0 = screenshot written. Console errors from the page are always printed.
    ───────────────────────────────────────────────────────────────────────────── */
@@ -169,7 +173,21 @@ const [W, H] = arg('size', '1280x720').split('x').map(Number);
    These cards sit next to menus whose first button is Exit or Title Screen, and a generic
    clicker would eventually walk the run back out to the attract screen and photograph that. */
 const SCENE = arg('scene', null);
-const sceneJs = (dest) => `(function(){
+/* `side<N>` reaches the hidden SIDE area of zone N — the Thornwood, the Oubliette, the Reaper's
+   Gate and the other four. They are their own hand-authored scapes (SIDE_SCAPES), not a reskin of
+   the zone above them, so nothing a `--scene <n>` render shows says anything about them.
+   The unlock step is not optional and is the whole reason this needed a flag rather than a --pre:
+   `enterSide(zi)` checks `meta.classUnlocked[S.trial]` FIRST and, if the class is locked, quietly
+   runs `startTrial()` instead — a different level entirely. Chrome runs on a throwaway profile, so
+   every class is locked on every run and a bare enterSide() would photograph the trial arena while
+   reporting the side area's name. cheatUnlockClasses() first makes the door open. */
+const sideOf = (dest) => { const m = /^side(\d+)$/.exec(String(dest || '')); return m ? parseInt(m[1], 10) : null; };
+const sceneJs = (dest) => {
+  const sd = sideOf(dest);
+  const go = dest === 'hub' ? ''
+    : sd != null ? '__BF3.cheatUnlockClasses(); __BF3.enterSide(' + sd + ');'
+    : '__BF3.enterZone(' + (parseInt(dest, 10) || 0) + ');';
+  return `(function(){
   var ids=['storyskip','hubTutGo'];
   var t=setInterval(function(){
     for(var i=0;i<ids.length;i++){ var b=document.getElementById(ids[i]); if(b&&b.offsetParent) b.click(); }
@@ -177,9 +195,10 @@ const sceneJs = (dest) => `(function(){
   __BF3.startTrial('warrior');
   setTimeout(function(){
     __BF3.skipTrial();
-    setTimeout(function(){ clearInterval(t); ${dest === 'hub' ? '' : '__BF3.enterZone(' + (parseInt(dest, 10) || 0) + ');'} }, 5000);
+    setTimeout(function(){ clearInterval(t); ${go} }, 5000);
   }, 2500);
 })()`;
+};
 const PRE = arg('pre', SCENE == null ? null : sceneJs(SCENE));
 
 /* Poll until this expression is truthy, THEN screenshot. Defaults with --scene to "world3d has
@@ -209,9 +228,25 @@ const sceneReady = (dest) => {
      stage 3. They only agree for zone 0, which is why --scene 0 is the example everywhere and
      why testing stageIndex looked right. Caught by this fix's own --scene 1 check, which sat
      out the full readymax waiting for a stageIndex that was never coming. */
+  /* A side area is `G.side` on the SAME zone index, so testing the index alone cannot tell one
+     from the other. Test the flag too, both ways round.
+
+     `!G.trial` is the other half, and without it the whole test was still a lie — MEASURED
+     2026-08-02 (worker B) by running the same `--scene 0` twice and getting two different levels.
+     The run-up to a zone is startTrial('warrior') → 2.5s → skipTrial() → 5s → enterZone(n), and
+     `startTrial` builds `newG(p,{zone: fromZone||0, …, trial:cid})`. So for those seven and a half
+     seconds the game is standing in the TRIAL ARENA with G.zone already 0, G.hub falsy and G.side
+     false — every clause of the old test satisfied — and world3d builds the arena, so `built` and
+     `!counts.hub` come true there as well. Whether the shutter fires on the arena or the zone is a
+     pure race with how warm the asset cache is: one run reported "The Outskirts" with 118 trees,
+     the next reported "Trial of the Blade" with 34 deco and 0 trees, from an identical command.
+     Same shape as the hub race fixed earlier the same day, one gate further back. */
+  const sd = sideOf(dest);
   const at = dest === 'hub'
     ? '!!__BF3.G.hub'
-    : '!__BF3.G.hub && __BF3.G.zone === ' + (parseInt(dest, 10) || 0);
+    : sd != null
+      ? '!__BF3.G.hub && !__BF3.G.trial && !!__BF3.G.side && __BF3.G.zone === ' + sd
+      : '!__BF3.G.hub && !__BF3.G.trial && !__BF3.G.side && __BF3.G.zone === ' + (parseInt(dest, 10) || 0);
   const wb = dest === 'hub' ? '!!w.counts.hub' : '!w.counts.hub';
   return '(function(){ try{'
        + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'
@@ -461,6 +496,14 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     if (ok) console.log('ready ✓ after ' + secs + 's  (' + READY + ')');
     else console.log('READY NEVER CAME after ' + secs + 's — the shot below is NOT the state you '
       + 'asked for, do not read it as a regression. last=' + JSON.stringify(last) + '  expr=' + READY);
+    /* Say WHERE it landed, in the level's own words. Two ready-expression bugs in two days both
+       looked identical from the log — "ready ✓" and a plausible picture of somewhere else — and
+       both would have been obvious the moment the run printed the name of the place. Costs one
+       round-trip and needs no argument from the caller. */
+    const where = await evaluate('(function(){ var G=window.__BF3&&__BF3.G; if(!G) return null;'
+      + ' return (G.areaName||"?") + (G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
+      + ' + "  zone " + G.zone + " stage " + G.stageIndex; })()');
+    if (where.value) console.log('at   → ' + where.value);
   }
   /* After READY, not before: the target usually does not exist until the level is built, and the
      camera has nothing to lerp toward until the hero is in the world. Before EVAL, so a probe can
@@ -478,6 +521,23 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const r = await evaluate(EVAL);
     console.log('EVAL → ' + JSON.stringify(r, null, 2));
   }
+
+  /* LET THE GAME DRAW A FRAME BEFORE THE SHUTTER. Without this, an --eval that CHANGES the world
+     is not in the picture, and it fails silently: you get a complete, plausible photograph of the
+     frame before your change.
+     Measured 2026-08-02 (worker B) while trying to answer whether dungeon walls are painted out by
+     the 3D ground. The standard technique for that question — push an object in front of the hero
+     in --eval and photograph it — reported the object present in G and absent from the image, which
+     reads exactly like "the 3D layer paints it out". It was the harness. A known-good CONTROL (a
+     chest, which certainly renders) vanished from the same frame, which is the only reason the
+     wrong conclusion did not get shipped: put a control in any probe like this.
+     Why --focus never hit it: FOCUS is followed by the EVAL round-trip, so a frame lands in the gap
+     by luck. EVAL had nothing after it and captureScreenshot returns the last composited frame.
+     Two rAF ticks, not one: the game renders on rAF, so the first tick only guarantees the callback
+     ran — the second guarantees the frame it drew has been composited. Falls back to a plain sleep
+     if rAF never fires (a backgrounded tab throttles it), so a hung page still hands back a shot. */
+  await evaluate('new Promise(function(r){var t=setTimeout(r,400);'
+    + 'requestAnimationFrame(function(){requestAnimationFrame(function(){clearTimeout(t);r();});});})');
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const shot = await cdp.send('Page.captureScreenshot', { format: 'png' }, sessionId);

@@ -54,6 +54,26 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     fast path (it should take ~4.5s); and **`--scene <n>` is a ZONE index, not a stage index** —
     it goes to `enterZone()`, which loads that zone's first AREA, so zone 1 is stage 3. They
     agree only at zone 0, which is why every example uses `--scene 0`.
+    **THE SAME LIE HAD A SECOND SOURCE, one gate further back, fixed later on 2026-08-02 (worker
+    B).** The hub was not the only place on the way that satisfied the test — the CLASS TRIAL was
+    too. `startTrial('warrior')` builds `newG(p,{zone: fromZone||0, …, trial:cid})`, so for the
+    ~7.5s between it and `enterZone()` the game stands in the Trial of the Blade with `G.zone`
+    already 0, `G.hub` falsy and `G.side` false: every clause of the destination test true, and
+    world3d builds the arena so `built && !counts.hub` comes true there as well. Measured by
+    running one identical `--scene 0` twice — "The Outskirts", 118 trees, 118 3D trees; then
+    "Trial of the Blade", 34 deco, 0 trees. Pure race with how warm the asset cache is. The test
+    now also requires `!G.trial`.
+    **And every run now prints `at → <place>` under `ready ✓`** — the level's own `areaName` plus
+    hub/TRIAL/side and the zone + stage. Both of the day's ready bugs were invisible in the log
+    and obvious in one word; a shot of the wrong level should not have to be caught by eye.
+    **`--scene side<N>` photographs a zone's hidden SIDE area** (added 2026-08-02, worker B):
+    `--scene side0` is The Thornwood, `side2` the Oubliette, and so on for all seven. They are
+    their own hand-authored `SIDE_SCAPES`, not a reskin of the zone above them, so nothing a
+    `--scene <n>` render shows says anything about them. The unlock step is why this needed a flag
+    rather than a `--pre`: `enterSide()` checks `meta.classUnlocked[trial]` FIRST and quietly runs
+    `startTrial()` instead when the class is locked — which is always, on a throwaway profile — so
+    a bare `enterSide()` photographs the trial arena under the side area's name. It calls
+    `cheatUnlockClasses()` first.
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight
@@ -81,6 +101,12 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     top-down; solving the hero's height to put the subject on the view ray buries the camera in the
     terrain. Both were built, rendered and rejected. Working range is `--dist 200–400` with
     `--side` to clear the HUD; a real close-up still means spawning the object near the camera.
+  - **`__world3dPoses('<model>')` says where the props actually ENDED UP** (added 2026-08-02,
+    worker B). Returns `{model, x, y, z, h, w}` per instance — `y` is the model's BASE in world
+    units, `h` its fitted height — so `__world3dPoses('tree')` against `__BF3.floorAt(x,z)`
+    answers "is this standing on the ground" in numbers. It exists because that exact question
+    was argued twice from source and twice from screenshots and got a different answer each time;
+    the InstancedMeshes are now named `w3d:<model>` so they can be read back.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
   - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices. **Gitignored like
     `_shot/` (the `/_*` rule), and unlike `_shot/` there is NO committed source of record**, so a

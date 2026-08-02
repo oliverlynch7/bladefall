@@ -31,6 +31,12 @@
    reports itself built and says so, and shouts if it gave up instead. Never trust a 3D-world
    screenshot that did not print "ready ✓".
 
+   And "ready ✓" has to mean ready HERE, not ready somewhere. `--scene <n>` passes through the
+   hub on the way, so a default of "the world is built" was satisfied by the HUB build seconds
+   before the zone was entered — see the long note on sceneReady() below. Since 2026-08-02 the
+   default waits for the destination itself, so a `--scene 0` that resolves in under a second is
+   the bug, not the fast path.
+
    Exit 0 = screenshot written. Console errors from the page are always printed.
    ───────────────────────────────────────────────────────────────────────────── */
 const fs = require('fs');
@@ -177,8 +183,44 @@ const sceneJs = (dest) => `(function(){
 const PRE = arg('pre', SCENE == null ? null : sceneJs(SCENE));
 
 /* Poll until this expression is truthy, THEN screenshot. Defaults with --scene to "world3d has
-   finished building the level", which is the thing that is silently slow. */
-const READY = arg('ready', SCENE == null ? null : '!!(window.__world3d && __world3d().built)');
+   finished building THIS destination", which is the thing that is silently slow.
+
+   The default used to be just `__world3d().built`, and that was WRONG for `--scene <n>` in a way
+   that produced the exact fake it exists to prevent. Read the sequence above: skipTrial() drops
+   you in the HUB, and enterZone() only fires FIVE SECONDS later. world3d builds the hub the
+   moment you land in it, so `built` is already truthy long before the zone is entered — the
+   shutter fires on the Waystation and the run gets a complete, plausible picture of the wrong
+   place. Measured 2026-08-02: `--scene 0` printed "ready ✓ after 0.0s", photographed the hub
+   plaza, and reported counts {hub:true, pave:273} with mob live 0 and chests 0 while the run
+   believed it was auditing the Outskirts. It is a RACE, which is why it had worked before — if
+   the hub build happens to take longer than the 7.5s run-up, `built` flips after enterZone and
+   the shot is correct by luck.
+
+   So the destination is part of the test now, and each half is checked against something only
+   that destination can produce:
+     - the GAME is where it should be   — G.hub / G.stageIndex, set synchronously by enterZone
+     - the BUILD is of that place       — counts.hub is set only by the hub build, so a zone
+                                          waits for counts to stop being the hub's
+   `world3d().on` gates the build half, so `--scene 0 --url "...?world3d=0"` still resolves
+   instead of burning the full readymax and reporting READY NEVER CAME. */
+const sceneReady = (dest) => {
+  /* G.zone, NOT G.stageIndex. --scene <n> hands n to enterZone(), which takes a ZONE index and
+     then loads that zone's first AREA, whose stage is a different number: zone 1 area 0 is
+     stage 3. They only agree for zone 0, which is why --scene 0 is the example everywhere and
+     why testing stageIndex looked right. Caught by this fix's own --scene 1 check, which sat
+     out the full readymax waiting for a stageIndex that was never coming. */
+  const at = dest === 'hub'
+    ? '!!__BF3.G.hub'
+    : '!__BF3.G.hub && __BF3.G.zone === ' + (parseInt(dest, 10) || 0);
+  const wb = dest === 'hub' ? '!!w.counts.hub' : '!w.counts.hub';
+  return '(function(){ try{'
+       + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'
+       + ' var w = window.__world3d && __world3d(); if(!w) return true;'
+       + ' if(!w.on) return true;'
+       + ' return !!(w.built && w.counts && ' + wb + ');'
+       + ' }catch(e){ return false; } })()';
+};
+const READY = arg('ready', SCENE == null ? null : sceneReady(SCENE));
 const READYMAX = parseInt(arg('readymax', '120000'), 10);
 
 /* ── --focus: point the shot AT something ──────────────────────────────────────

@@ -40,6 +40,20 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     that reads exactly like "the 3D world regressed". Headless SwiftShader needs ~30–45s to load
     the glTF props. **Never trust a 3D-world screenshot whose log did not print `ready ✓`**; use
     `--ready "<expr>"` to wait on anything else. If it gives up it says `READY NEVER CAME`.
+    **And `ready ✓` had to be taught to mean ready HERE — fixed 2026-08-02 (worker B).** The
+    default wait was `__world3d().built`, but `--scene <n>` goes through the HUB on the way:
+    `skipTrial()` lands you in the Waystation and `enterZone()` only fires five seconds later, so
+    world3d had already built the hub and `built` was truthy before the zone existed. `--scene 0`
+    printed `ready ✓ after 0.0s` and handed back a photograph of the plaza — `counts {hub:true,
+    pave:273}`, `mob live 0`, `chests 0` — to a run that believed it was auditing the Outskirts.
+    A RACE, so it had worked before: if the hub build ran long, `built` flipped after enterZone
+    and the shot was right by luck. The wait now tests the DESTINATION — the game is there
+    (`G.hub` / `G.zone`) and the build is of that place (`counts.hub` is set only by the hub
+    build) — and short-circuits when `world3d` is off so `?world3d=0` still resolves.
+    Two things to keep: a `--scene 0` that resolves in under a second is now the BUG, not the
+    fast path (it should take ~4.5s); and **`--scene <n>` is a ZONE index, not a stage index** —
+    it goes to `enterZone()`, which loads that zone's first AREA, so zone 1 is stage 3. They
+    agree only at zone 0, which is why every example uses `--scene 0`.
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight

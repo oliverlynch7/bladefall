@@ -1364,8 +1364,17 @@ export function buildWorld(scene, world){
   /* Trees and rocks: the real models. Scale is deco height divided by the model's own height,
      so a tree ends up exactly as tall as the level says it should be rather than a guessed size. */
   /* A tree's real height is its trunk plus canopy. The lead deco carries trunkH; using the
-     canopy box height alone would place a pine a third of its proper size. */
-  buildProps(bins.tree, PROP_SETS.tree, 90, d => (d.trunkH || 0) + (d.h || 40) + 30);
+     canopy box height alone would place a pine a third of its proper size.
+     ...and it has to be STOOD ON THE GROUND, which is the half that was missing. A prop is placed
+     at the deco's y0, and every other kind of deco gives its y0 as the object's base - but a tree
+     is emitted as a voxel trunk COLUMN with a canopy box perched on top, and the lead deco is the
+     CANOPY. Its y0 is therefore the top of the trunk, so the whole model was hung from there:
+     measured in the Outskirts, 118 trees with their bases at y 98-108 over a floor at 0 and a
+     fitted height of 163. The trunk world3d skips (`ob.treeCol`) is exactly the gap. Subtracting
+     trunkH puts the model where the object it replaces starts. Trees with no trunkH - the
+     theme-fallback border scenery - already give y0 as their base and are untouched. */
+  buildProps(bins.tree.map(d => (d.trunkH ? Object.assign({}, d, { y0: (d.y0 || 0) - d.trunkH }) : d)),
+             PROP_SETS.tree, 90, d => (d.trunkH || 0) + (d.h || 40) + 30);
   buildProps(bins.rock, PROP_SETS.rock, 20);
   buildProps(bins.fence, PROP_SETS.fence, 30);
   buildProps(bins.grave, PROP_SETS.grave, 30);

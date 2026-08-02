@@ -467,6 +467,24 @@ Worlds standard), and the graphics need finishing before he shows more people.
       Whatever gets added: it is an ENTITY, so it must be drawn inside a defer window, and its skip
       guard must ask `three3DLive()` and not "is the layer on". Both traps are documented below and
       both have already cost a session.
+- [x] **Every 3D tree in the game was hanging in the air.** Found and fixed 2026-08-02 (worker B),
+      by measuring rather than looking: `__world3dPoses('tree')` put the Outskirts' 118 trees at
+      y 98–108 with `__BF3.floorAt()` reporting 0 under them, fitted height 163.
+      A prop is placed at its deco's `y0`, and for every other kind of deco `y0` IS the object's
+      base. A tree is the exception, and the generator says so plainly: it emits a voxel trunk
+      COLUMN and perches a canopy box on top, and the lead deco — the one carrying `kind:'tree'` —
+      is the CANOPY. So `y0` was the top of the trunk, and the whole model hung from there. The
+      trunk world3d skips because it "draws the real tree" (`ob.treeCol`) is exactly the gap that
+      was left. `bins.tree` now places at `y0 - trunkH`; trees with no trunkH (the theme-fallback
+      border scenery, whose `y0` is already its base) are untouched.
+      **Why it survived every earlier render:** a floating tree is not a broken-looking tree. It is
+      a correct pine at the correct size in the correct place in X and Z, ~100 units too high, and
+      at the distance a zone screenshot puts them that reads as "trees on a rise". It was found by
+      asking a number for the answer instead of a picture — which is why the probe went in first.
+      Verified: same camera before (`_shot/out/b4-float-before.png`, olive scenery boxes and trunks
+      cut off in mid-air) and after (`b4-float-after.png`, conifers standing on the terrain with
+      their trunks meeting the ground); poses now report `y: 0` for every tree over a floor of 0.
+      Outskirts baseline otherwise identical: 1257 floor, 115 road, 2194 deco, 277 box.
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:

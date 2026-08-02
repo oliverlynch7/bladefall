@@ -12172,8 +12172,28 @@ function drawCourse(s,t){
      both copies off the world is simply empty. See three3DLive(). */
   const _w3d = window.__world3d && window.__world3d();
   const _w3dDrawing = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
-  if(!_w3dDrawing)
+  /* ...and the "re-enabled in the hub" the comment above promises was never actually TESTED for,
+     which quietly cost the Waystation its own deco. When that comment was written world3d skipped
+     the hub outright, so `ready` stayed false there and the guard fell open by luck. `buildHub`
+     then landed and set `ready` in the hub too - and this line has been reading "world3d is
+     drawing" as "world3d is drawing THIS", which in the hub it is not. buildHub reads G.deco for
+     the BUILDING specs and ignores every other entry in it.
+     So the hub's four activity PADS - the violet Abyss, gold Sprint and crimson Arena floor
+     markings that are the only thing telling you which platform is which - plus its benches,
+     planters, flowers and the seven rampart dividers were drawn by nobody. Same shape as the
+     torches, the stepping stones and the Waystation furniture before them, and the same one-line
+     question settles it: does world3d draw a 3D replacement for THIS? For hub deco it does not.
+     DEFERRED, because these are entities standing on ground the 3D pass covers completely - drawn
+     inline they would be painted straight back out. deferOn() no-ops when the Three layer will not
+     run this frame, so the first-person and ?world3d=0 paths are untouched.
+     Two exclusions, both because world3d DOES replace them: `kind:'building'`, which would stand a
+     flat box inside each assembled house, and floor paint (top <= 3 units) - the walkway strips the
+     cobbles now are. The pads survive that test on purpose: they are y0 2 + h 1.6 = 3.6. */
+  const _hubDeco = !!(_w3dDrawing && _w3d.counts && _w3d.counts.hub);
+  if(_hubDeco) deferOn();
+  if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    if(_hubDeco && (d.kind === 'building' || (d.y0||0) + (d.h||0) <= 3)) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
@@ -12208,6 +12228,7 @@ function drawCourse(s,t){
       for(const s of [-1,1]) bx(d.x+s*d.w*0.7,d.h*0.08,d.z+s*d.w*0.3, d.w*0.4,d.h*0.14,d.w*0.4, stD);   // rubble
       bx(d.x,d.h*0.9,d.z+d.w*0.5, d.w*0.6,d.h*0.08,1.4, ms,ms,0.4); }                         // moss
   }
+  if(_hubDeco) deferOff();
 }
 function weaponMesh(w,swing){
   // drawn in hand space: +y up along the blade

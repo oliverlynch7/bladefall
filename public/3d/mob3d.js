@@ -102,7 +102,36 @@ try {
   if(q.has('mob3d'))   MOB3D.on = yes(q.get('mob3d'));
 } catch(e){}
 
-async function loadMobModel(file){
+/* A glTF material with no `metallicRoughnessTexture` and no metallicFactor takes the SPEC DEFAULT
+   of metalness 1. A fully metallic surface is lit only by what it reflects, and this scene has no
+   environment map, so such a model renders near-black - a "wooden" chest came out dark navy.
+
+   The Quaternius prop kit ships its roughness/metalness in T_*_ORM.png, and every single ORM in
+   that kit is missing from the repo (`node _shot/shot.js --assets qprops` lists ten of them). So
+   the whole kit is in exactly that state. AUTOPILOT.md filed missing ORM/Normal maps as "degrade
+   shading slightly"; for a base-colour-only kit it is the difference between wood and a black box.
+
+   The condition is deliberately the FAULT, not the folder: metallic with no map to vary it. A
+   correctly authored material - metalness from a texture, or an explicit low factor - is left
+   exactly as its artist made it. */
+function demetalise(root, label){
+  let fixed = 0;
+  root.traverse(o => {
+    if(!o.isMesh) return;
+    for(const m of (Array.isArray(o.material) ? o.material : [o.material])){
+      if(!m || m.metalness === undefined) continue;
+      if(m.metalness > 0.5 && !m.metalnessMap){ m.metalness = 0; m.needsUpdate = true; fixed++; }
+    }
+  });
+  if(fixed) console.log('[3d] ' + label + ': ' + fixed + ' material(s) were metalness=1 with no ORM map — lit as diffuse instead of black');
+}
+
+/* Exported because prop3d casts the world's OBJECTS (chests, keys) out of the same kits and needs
+   exactly this: resolve the extension, strip the clip-name prefix, measure the native height,
+   footprint and base offset once. Copying the body into a second module is how this project has
+   lost whole sessions - two identical functions, the fix landing in the one nobody calls. One
+   body, two callers. The cache is shared too, so a chest and a mimic are one download. */
+export async function loadKitModel(file){
   if(_mobModels.has(file)) return _mobModels.get(file);
   try {
     /* A bare name is a creature in monsters/; a name with a slash carries its own kit folder.
@@ -114,6 +143,7 @@ async function loadMobModel(file){
     try { g = await _loadGLB(base + '.glb'); }
     catch(e){ g = await _loadGLB(base + '.gltf'); }
     for(const c of g.animations) c.name = c.name.split('|').pop();
+    demetalise(g.scene, file);
     /* Measure the model's NATIVE height once. cast.h is the slice's TARGET height, not the
        model's own size - the slice normalises to it inside its Actor constructor. Treating the
        target as the native size made a sporeback tower over the hero. Scale needs the real
@@ -122,17 +152,26 @@ async function loadMobModel(file){
     const bb = new THREE.Box3().setFromObject(g.scene);
     g._nativeH = Math.max(0.001, bb.max.y - bb.min.y);
     g._baseY = bb.min.y;
-    /* Footprint too, for the fit:'width' casts. See the scale note in syncMobsInner. */
-    g._nativeW = Math.max(0.001, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z));
+    /* Footprint too, for the fit:'width' casts. See the scale note in syncMobsInner.
+       The two axes are kept separately as well: a chest is a BOX, and prop3d has to know how deep
+       it ends up so the glowing lock can be placed just proud of its real front face rather than
+       at a number guessed from the voxel model it replaces. */
+    g._nativeX = Math.max(0.001, bb.max.x - bb.min.x);
+    g._nativeZ = Math.max(0.001, bb.max.z - bb.min.z);
+    g._nativeW = Math.max(g._nativeX, g._nativeZ);
     _mobModels.set(file, g);
     return g;
   } catch(e){
-    console.warn('[mob3d] model failed:', file, e.message);
+    console.warn('[3d] kit model failed:', file, e.message);
     _mobModels.set(file, null);          // remember the failure; do not retry every frame
     if(MOB3D.missing.indexOf(file) < 0) MOB3D.missing.push(file);
     return null;
   }
 }
+
+/* Read-only view of the shared cache. `undefined` = never asked for, `null` = tried and failed,
+   otherwise the parsed glTF with its measurements attached. */
+export function kitModel(file){ return _mobModels.get(file); }
 
 /* Take a pooled actor of this type, or build one. Pooling matters because enemies die and spawn
    constantly - cloning a skinned mesh per spawn would allocate through the whole fight. */
@@ -246,7 +285,7 @@ function syncMobsInner(scene, dt){
 
   /* Load any model this room needs but has not got yet. Fire and forget - the voxel mob draws
      until it arrives, so nothing pops out of existence while waiting. */
-  for(const f of want) if(!_mobModels.has(f)) loadMobModel(f);
+  for(const f of want) if(!_mobModels.has(f)) loadKitModel(f);
 
   MOB3D.live = live;
   MOB3D.pooled = _mobPool.length;

@@ -36,6 +36,7 @@
    SECOND module instance, and two THREE copies break every instanceof check silently. */
 import * as THREE from './three.module.js';
 import { clearMobs } from './mob3d.js';
+import { clearProps } from './prop3d.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 
 export const WORLD3D = {
@@ -1416,6 +1417,7 @@ export function syncWorld(scene){
   try {
     buildWorld(scene, world);
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
+    clearProps();         // ...nor its chests
     WORLD3D.built = sig;
     WORLD3D.err = null;
   } catch(e){

@@ -22,6 +22,7 @@ import * as THREE from './three.module.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js';
+import { PROP3D, syncProps } from './prop3d.js';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
 
@@ -1246,6 +1247,7 @@ export function drawHero3D(p, t){
     const dt = Math.min(0.05, clock.getDelta());
     syncWorld(scene);
     syncMobs(scene, dt);
+    syncProps(scene, dt);             // chests and the other objects you interact with
 
     syncClass();                      // respec or a different save changes the body
     playFor(p);

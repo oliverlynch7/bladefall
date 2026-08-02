@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.409.0-autopilot';
+const VERSION3D='1.410.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2837,7 +2837,7 @@ window.__BF_META=()=>meta;
    back to the olive default in EVERY zone, and world3d had no way to see the stage THEME at all
    (it was matching theme names like 'forest'/'plains' against ZONE ids, which never match). */
 window.__BF_WORLD=()=>{const st=STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -13847,18 +13847,35 @@ function drawLootFx(t){
   }
 }
 function drawChest(ch,t){
+  /* prop3d draws the real wooden chest as a 3D model. When it does, the BODY is skipped here but
+     the lock, keyhole and sparkle are not: they glow, they pulse every frame, and two of them are
+     the mimic's tell. They are placed against the model's own fitted box (__prop3dChest()) rather
+     than against the voxel numbers, which no longer describe anything on screen.
+     deferArmed() is the test, not "is the model loaded" — in first-person the whole Three layer
+     is skipped, so believing prop3d had drawn would leave a chest that is nowhere at all. */
+  const p3 = (deferArmed() && window.__prop3dChestDrawn && window.__prop3dChestDrawn()
+              && window.__prop3dChest) ? window.__prop3dChest() : null;
   pushM(); mv(ch.x,ch.y,ch.z);
   if(!ch.opened){ const g=0.6+0.35*Math.sin(t*4+ch.bob);
     // the mimic's TELL (Phase 18): identical at a glance, but up close it BREATHES — the lid
     // rises a hair on a slow rhythm, it shudders once in a while, and the lock burns warmer.
     const mim=!!ch.mimic, br=mim?Math.max(0,Math.sin(t*0.8+ch.bob))*1.1:0;
-    if(mim && Math.sin(t*0.47+ch.bob*2)>0.988) mv((Math.random()-0.5)*1.4,0,0);
-    const clod=voxLod(ch.x,ch.z);voxDraw('chest.base',{lod:clod,seed:Math.round(ch.bob*100)});voxDraw('chest.lid',{y:17+br,lod:clod,seed:Math.round(ch.bob*100)+7});
-    if(mim && br>0.6) bx(0,15.6,9.5, 22,1.4,2,'#1a0a0e');                          // the thinnest dark seam when it inhales
-    bx(0,12.5,11.2, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
-    bx(0,11,11.6, 1.6,2.4,1, '#1a0a0e');                                                       // keyhole
-    bx(0,26,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
-  } else {
+    const shove=(mim && Math.sin(t*0.47+ch.bob*2)>0.988)?(Math.random()-0.5)*1.4:0;
+    /* The tell is decided HERE, once, and stashed for prop3d to pose the model with. Recomputing
+       it in the renderer would drift: this runs on game time and prop3d on wall time, so the lid
+       would breathe on one clock while the lock slid about on another. */
+    ch._br=br; ch._shove=shove;
+    mv(shove,0,0);
+    if(!p3){
+      const clod=voxLod(ch.x,ch.z);voxDraw('chest.base',{lod:clod,seed:Math.round(ch.bob*100)});voxDraw('chest.lid',{y:17+br,lod:clod,seed:Math.round(ch.bob*100)+7});
+      if(mim && br>0.6) bx(0,15.6,9.5, 22,1.4,2,'#1a0a0e');                        // the thinnest dark seam when it inhales
+    }
+    // front face of whatever body was actually drawn, plus a hair so it can never z-fight it
+    const fz=p3?p3.d/2+1.4:11.2, ly=p3?p3.h*0.5:12.5, sy=p3?p3.h+8:26;
+    bx(0,ly,fz-0.4, 5,6.5,1.8, mim?'#ffb84a':'#ffd24a', mim?'#ff9a3a':'#ffd24a', g);   // glowing lock (a shade warmer on a liar)
+    bx(0,ly-1.5,fz, 1.6,2.4,1, '#1a0a0e');                                                     // keyhole
+    bx(0,sy,0, 4,4,4,'#ffd24a','#ffd24a',g*0.6);                  // sparkle
+  } else if(!p3){
     bx(0,7,0, 30,12,22,'#5a3d22');
     pushM(); mv(0,14,-10); rotX(-2.1); bx(0,3.4,0, 30,7,22,'#6b4a2a'); popM(); // open lid
     bx(0,9,2, 24,5,14,'#1a1208');

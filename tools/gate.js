@@ -50,7 +50,15 @@ else {
 /* 2. The ES modules. `node --check` on a .js file containing `import` can be rejected as
       CommonJS depending on how module detection resolves, so each source is copied to a
       temp .mjs — an unambiguous module — and checked there. Parsing only; nothing runs. */
-const MODULES = ['public/3d/hero3d.js', 'public/3d/world3d.js', 'public/3d/mob3d.js'];
+/* DISCOVERED, never listed. A hand-written list is a gate with a hole in it: add a fifth module
+   and the gate keeps printing GATE OK without ever having parsed it, which is precisely the
+   "it passed, so it must be fine" failure this file exists to prevent. Everything directly under
+   public/3d/ is ours; three.module.js and jsm/ are vendored Three.js and are not. */
+const SRC3D = path.join(root, 'public/3d');
+const MODULES = fs.readdirSync(SRC3D)
+  .filter(f => f.endsWith('.js') && f !== 'three.module.js')
+  .sort()
+  .map(f => 'public/3d/' + f);
 const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'bf-gate-'));
 try {
   for (const rel of MODULES) {

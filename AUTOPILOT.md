@@ -151,6 +151,34 @@ Worlds standard), and the graphics need finishing before he shows more people.
       (searched every kit), so any model for it would be an art-direction substitution. Its
       INVISIBILITY is fixed by the deferred entity pass below, so it is no longer urgent; it is
       just still a voxel object in a 3D world. A crystal asset from Oliver would finish it.)*
+- [x] **Chests in 3D.** Done 2026-08-01 (worker B). The treasure chest is the thing a run is FOR
+      and it was the last big voxel box left in a 3D world. New layer `public/3d/prop3d.js` casts
+      `G.chests` onto the Quaternius `qprops/Chest_Wood`, alongside world3d (architecture) and
+      mob3d (creatures). Probe it with `__prop3d()` / `__prop3dPoses()`.
+      Three things worth keeping:
+      - **The mimic's tell survives, and is now the model's own hinge.** A mimic chest breathes —
+        the lid lifts a hair on a slow rhythm — and that is the only warning you get. Rather than
+        play an animation, one `Chest_Open` action is held PAUSED and its `time` is used as a dial:
+        0 shut, `duration` flung open, ~3% ajar for a mimic. The game still decides the tell
+        (drawChest stashes `_br`/`_shove` on the chest) because it runs on game time while prop3d
+        runs on wall time — computed twice, the lid would breathe on one clock and the glowing lock
+        slide about on another.
+      - **The lock, keyhole and sparkle stay voxel** and are placed against the model's real fitted
+        box (`__prop3dChest()`), not the old voxel numbers. They pulse every frame and two of them
+        are the other half of the mimic tell.
+      - **Fitted to 32 wide, which is exactly what mob3d fits the woken mimic to** (`e.r*2`). Pick
+        any other number and the disguise gains a size tell nobody designed, and the reveal pops.
+        Opening range is a flat 44 from the centre and does not depend on the model.
+      Verified: hub close-ups of closed / mimic / opened, real generated chests in the Outskirts
+      (7 of them, seated on the road), `?world3d=0` still draws voxel chests, and first-person
+      still draws them — see the FPS note below, which that check turned up.
+- [ ] **The 3D layer does not draw in first-person, and only chests know it.** Measured, not
+      guessed: `drawHero3(p,t)` is not called when `meta.camMode==='fps'`, so `__hero3dPending` is
+      never set, so `flushHero3D` returns early and world3d/mob3d/prop3d draw NOTHING. `drawChest`
+      now gates on `deferArmed()` (which includes the camMode test) and is fine. **`__mob3dDrawn()`
+      does not** — it answers "yes, mob3d has this one" purely from "is the model loaded", so in
+      first-person the voxel body is skipped for a creature nothing then draws. Same class of bug
+      as the invisible chests. Confirm with a first-person shot in a populated zone before fixing.
 - [x] **Ground polish.** Real paths where levels have walkways (the Nature Kit has pathStraight/
       Bend/Corner/Cross/Split) and a second grass variant, so a field is not one uniform green.
       *(PATHS done 2026-08-01 — the item is now complete. Tagged at the SOURCE, never inferred:
@@ -266,7 +294,17 @@ fake it. Until then those props render white and are held together by explicit t
 
 Audit any time with `node _shot/shot.js --assets all` — lists every texture each kit references
 and whether it is on disk. Remaining MISSING entries there are Normal/ORM/Roughness detail maps
-only; those degrade shading slightly and never cause the white-model failure.
+only; those never cause the white-model failure.
+
+**But "missing ORM only degrades shading slightly" was wrong, and cost a render** (2026-08-01,
+worker B). A glTF material with no `metallicRoughnessTexture` and no explicit factor takes the
+SPEC DEFAULT of metalness 1. A fully metallic surface is lit only by what it reflects and this
+scene has no environment map, so it renders near-BLACK. Every ORM in `qprops/` is missing, so the
+whole kit was in that state: the first 3D chest came out dark navy, and the hub's practice dummy
+had shipped that way. `demetalise()` in mob3d.js now zeroes metalness on any material that is
+metallic with no map to vary it — the FAULT, not the folder, so a correctly authored material is
+untouched. It logs when it fires. world3d had already met this and solved it its own way (kit PBR
+materials converted to Lambert in `loadPart`).
 
 ## Notes / open decisions (do NOT act on without Oliver)
 - Elemental affixes on **physical** weapon drops (making "a Flaming Sword") is a separate system change — Oliver decides before building.

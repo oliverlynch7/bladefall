@@ -31,6 +31,17 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     serves `public/` itself, because this machine has no playwright/puppeteer resolvable anywhere
     and an unattended run cannot install one. Flags: `--url --out --wait --pre --prewait --eval
     --size`, plus `--assets <kit|all>` for the offline texture audit.
+    **Use `--scene <n|hub>` to get in-game** — the game opens on the title, then a cutscene, then
+    class select, then a class trial, then the hub, and each of those will happily hand you a
+    screenshot of itself. `--scene 0` lands in The Outskirts, `--scene hub` in the Waystation.
+    **`--scene` also waits for the world**, and that is the part that matters: a 3D-zone shot
+    taken too early is not blank and not an error — the game has already fallen back to the voxel
+    renderer, so you get a complete, plausible, WRONG picture (flat ground, box trees, no roads)
+    that reads exactly like "the 3D world regressed". Headless SwiftShader needs ~30–45s to load
+    the glTF props. **Never trust a 3D-world screenshot whose log did not print `ready ✓`**; use
+    `--ready "<expr>"` to wait on anything else. If it gives up it says `READY NEVER CAME`.
+    Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
+    path — the harness now detects that and says what it substituted.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
   - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices.
 - Work branch: **`bladefall-autopilot`**. Live/deploy branch: `main` (Cloudflare Pages deploys main to `bladefall.pages.dev`; the branch preview is `bladefall-autopilot.bladefall.pages.dev`).

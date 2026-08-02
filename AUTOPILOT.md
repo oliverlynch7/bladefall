@@ -230,6 +230,33 @@ Worlds standard), and the graphics need finishing before he shows more people.
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's
       structural deco at the source the way the rampart dividers were tagged. Floor is already
       Floor_Brick, rampart columns already placed.
+      *(progress 2026-08-02, single worker on `autopilot-merged`: THE ANNEX HAS A FLOOR. The 3D
+      paving was one rectangle derived from the gate positions, so it stopped ~480 units short of
+      the activity annex and the tan voxel floor past the cobbles was a hard seam straight across
+      the walk from the plaza to the Arena (`_shot/out/m1-annex-3d.png`). It now tiles the game's
+      OWN `G.segments` — the same list the voxel renderer floors — so the two layers cover exactly
+      the same ground and there is nothing left for a seam to appear at.
+      **ALL the segments, `nofloor` included, and that is the correction worth keeping.** The
+      recorded desk research said to use the three `nofloor:true` entries because they are the
+      courtyard, the annex and the SE court. That was built and RENDERED and it is visibly wrong:
+      the annex is 957 wide against the courtyard's 1885, so tan voxel floor stayed either side of
+      it (`m1-annex-fix.png`). `nofloor` means "my parent already floored this, do not draw it
+      twice", not "there is no floor here" — and the parent is the one entry that reaches the
+      annex. The desk research was right about the arithmetic and wrong about the conclusion.
+      Cells sit on ONE lattice keyed off (westX, northZ) and are deduped, so **every tile the old
+      rect laid keeps its exact position and quarter-turn** and the plaza is unchanged — checked
+      against the baseline shot, not assumed (`m1-hub-base.png` vs `m1-hub-after.png`).
+      *A probe worth reusing:* which pixels are 3D floor was argued three ways off one screenshot
+      and settled in one render by tinting the pave material `#ff00ff` (`m1-pave-probe.png`). The
+      tan quads that survived turned out to be the annex's raised DAISES — voxel `plat` obstacles,
+      h 20 — standing correctly on the new cobbles, not unpaved ground. Rendered at gameplay range
+      with the Abyssal Descent dais, its monolith, columns and torch all composited right
+      (`m1-dais-after.png`), against `?world3d=0` at the identical camera (`m1-dais-voxel.png`).
+      Counts move exactly as designed: `pave 273 → 399`, new `paveSegs 4`, nothing else in the hub
+      moves. Outskirts identical to the recorded baseline (1257 floor, 115 road, 2194 deco, 277
+      box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped, 41 draw calls).
+      NEXT for this item: the four activity PADS are drawn by nobody — see the item below, which
+      the A/B for this one turned up.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

@@ -1256,10 +1256,45 @@ function buildHub(scene, world){
   /* PAVED COURTYARD. The tiles DO carry a texture; the reason five earlier attempts concluded
      otherwise is that every kit colormap 404'd, so probing showed map=NONE and the material
      colour was the only thing left driving the look. */
+  /* The floor plan is NOT a rectangle and paving it as one got both halves wrong: the Waystation
+     is a courtyard with an activity ANNEX hanging off its south edge and a small SE court beside
+     it, so one rect stopped ~480 units short of the annex (the tan voxel floor showing past the
+     cobbles was the seam) while simultaneously laying stone west of the annex where the hub does
+     not go. The shape comes from the game's own G.segments, the same list the voxel renderer
+     floors, so the two layers cover exactly the same ground and there is nothing left for a seam
+     to appear at. ALL of them, `nofloor` included: nofloor means "my parent segment already
+     floored this, do not draw it twice", not "there is no floor here", and the parent is the one
+     entry that reaches the annex. Paving the three nofloor rooms alone was built and RENDERED
+     first and it is visibly wrong - the annex is 957 wide against the courtyard's 1885, so tan
+     voxel floor stayed either side of it (`_shot/out/m1-annex-fix.png`).
+     G.rooms is NOT the source: the hub's space pass scales segments and leaves rooms stale.
+     Cells stay on ONE lattice keyed off (westX, northZ) and are deduped, so overlapping segments
+     meet without a doubled tile or a hairline, and every tile the old rect laid keeps the exact
+     position and quarter-turn it had. Clamped to the shell so a segment running past the rampart
+     does not pave the outside of it. */
   const paveCells = [];
-  for(let x = westX; x <= eastX; x += HUB_UNIT)
-    for(let z = northZ; z <= southZ; z += HUB_UNIT)
-      paveCells.push({ x: x + HUB_UNIT / 2, z: z + HUB_UNIT / 2 });
+  const paveSeen = new Set();
+  const paveRect = (x0, x1, z0, z1) => {
+    x0 = Math.max(x0, westX); x1 = Math.min(x1, eastX); z0 = Math.max(z0, northZ);
+    const i0 = Math.floor((x0 - westX) / HUB_UNIT), i1 = Math.ceil((x1 - westX) / HUB_UNIT);
+    const j0 = Math.floor((z0 - northZ) / HUB_UNIT), j1 = Math.ceil((z1 - northZ) / HUB_UNIT);
+    for(let i = i0; i < i1; i++) for(let j = j0; j < j1; j++){
+      const k = i + ',' + j;
+      if(paveSeen.has(k)) continue;
+      paveSeen.add(k);
+      paveCells.push({ x: westX + (i + 0.5) * HUB_UNIT, z: northZ + (j + 0.5) * HUB_UNIT });
+    }
+  };
+  const paveSegs = (world.segments || []).filter(s => s && s.w > 8 && s.d > 8);
+  if(paveSegs.length){
+    for(const sg of paveSegs)
+      paveRect(sg.x - sg.w / 2, sg.x + sg.w / 2, sg.z - sg.d / 2, sg.z + sg.d / 2);
+  } else {
+    /* No segments at all (a hub variant that never declared any): the old courtyard rect is still
+       better than a bare floor, and this line is exactly the block it used to be. */
+    paveRect(westX, eastX, northZ, southZ);
+  }
+  counts.paveSegs = paveSegs.length;
   const paveRec = _propCache.get(PROP_SETS.hubPave[0]);
   if(paveRec && paveCells.length){
     const pm = paveRec.mat.clone();

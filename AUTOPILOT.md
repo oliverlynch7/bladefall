@@ -539,6 +539,13 @@ Worlds standard), and the graphics need finishing before he shows more people.
       *Scoped to `G.trial` on purpose:* the maze also serves boss/mini stages with `G.area >= 0`,
       which the harness still cannot reach — changing what cannot be rendered is what this file
       keeps warning against.
+      *(follow-up, same run: FIRST-PERSON IN A ROOM DUNGEON IS CLEAN, and it was worth checking
+      rather than assuming, because a room dungeon is where the objects this file keeps losing all
+      live at once. `camMode='fps'` means the 3D layer sits the frame out and every `deferOn()`
+      no-ops, so walls, doors, torches and chests fall back to the voxel pass — and all of them are
+      there: the sconce with its flame, the maze walls, the closed door's jambs and lintel, the
+      voxel chest and a keeper (`_shot/out/b5-trial-fps.png`). Nothing is drawn by nobody, which is
+      the failure mode that has cost three sessions.)*
 - [ ] **The seven hidden SIDE areas had never been looked at in 3D.** They are the class-unlock
       trials' home zones — the Thornwood, the Sunken Wash, the Oubliette, the Glacier Vault, the
       Magma Core, the Reaper's Gate, the Sealed Reliquary — each its own hand-authored

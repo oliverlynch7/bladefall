@@ -659,7 +659,7 @@ function groundSpecFor(world){
   return (!isHub && THEME_GROUND[(world && world.theme) || '']) || THEME_GROUND_DEFAULT;
 }
 
-const NO_GROUND = { tiles: 0, paved: 0 };
+const NO_GROUND = { tiles: 0, paved: 0, buried: 0 };
 
 function buildGround(world, paths){
   const segs = (world && world.segments) || [];
@@ -713,6 +713,19 @@ function buildGround(world, paths){
   const roadIdx = roadRec ? vars.length - 1 : -1;
   const TILE = grassy ? FLOOR_TILE_GRASS : FLOOR_TILE_STONE;
   const cells = [];
+  /* Segments OVERLAP - every road crosses the districts it joins, and each one tiles its own
+     rectangle independently, so the shared area was being covered twice. Nothing showed, because
+     the two layers land at the same y and the depth test throws the second one away, but the
+     Ruined Keep was paying for 4406 floor instances to draw about 2200 tiles' worth of ground.
+     A cell is dropped only when it lies ENTIRELY inside a segment already tiled. Testing the
+     centre instead would be cheaper and wrong: the lattices differ per segment (a 1380-wide room
+     steps at 76.7 units, a 170-wide road at 56.7), so a cell can have its centre covered and its
+     edges hanging out, and dropping it would open a hairline of bare slab along every overlap.
+     Under-covering is a visible gap; over-covering is only wasted work. */
+  const done = [];
+  const buried = (x, z, hw, hd) => done.some(p =>
+    x - hw >= p.x0 && x + hw <= p.x1 && z - hd >= p.z0 && z + hd <= p.z1);
+  let dropped = 0;
   for(const sg of segs){
     if(sg.nofloor) continue;    // the game skips these too: coplanar sub-segments kept for collision
     const w = sg.w || 0, d = sg.d || 0;
@@ -724,11 +737,12 @@ function buildGround(world, paths){
     const tw = w / nx, td = d / nz;
     for(let ix = 0; ix < nx; ix++){
       for(let iz = 0; iz < nz; iz++){
-        cells.push({ x: sg.x - w/2 + (ix + 0.5) * tw,
-                     z: sg.z - d/2 + (iz + 0.5) * td,
-                     w: tw, d: td });
+        const cx = sg.x - w/2 + (ix + 0.5) * tw, cz = sg.z - d/2 + (iz + 0.5) * td;
+        if(buried(cx, cz, tw/2, td/2)){ dropped++; continue; }
+        cells.push({ x: cx, z: cz, w: tw, d: td });
       }
     }
+    done.push({ x0: sg.x - w/2, x1: sg.x + w/2, z0: sg.z - d/2, z1: sg.z + d/2 });
   }
   if(!cells.length) return NO_GROUND;
   /* Tint MULTIPLIES the tile's texture, so it comes from THEME_GROUND, not from the stage's own
@@ -799,7 +813,8 @@ function buildGround(world, paths){
      reported separately because a stone zone's road IS floor cells - without it there is no way to
      tell "the road was paved" from "the road was never found" by probing the counts. */
   return { tiles: buckets.reduce((n, b) => n + b.length, 0),
-           paved: roadIdx >= 0 ? buckets[roadIdx].length : 0 };
+           paved: roadIdx >= 0 ? buckets[roadIdx].length : 0,
+           buried: dropped };
 }
 
 
@@ -1344,7 +1359,7 @@ export function buildWorld(scene, world){
     o.intensity = o.userData._w3dOrig * k;
   });
 
-  WORLD3D.counts = { floorTiles, roadTiles, roadPaved: ground.paved,
+  WORLD3D.counts = { floorTiles, floorBuried: ground.buried, roadTiles, roadPaved: ground.paved,
                      roadPlanned: roadPlan ? roadPlan.count : 0,
                      deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,

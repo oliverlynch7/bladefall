@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.418.0-autopilot';
+const VERSION3D='1.419.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4784,7 +4784,14 @@ const EXPANDED_SCAPES={
          world3d lays one road tile per step, rotated to pdx/pdz, so a diagonal trail renders as a
          continuous ribbon instead of a staircase of axis-aligned squares. Metadata only - the
          collision box is unchanged. */
-      const trail=(a,b,w=132)=>{const L=Math.hypot(b.x-a.x,b.z-a.z)||1,n=Math.ceil(L/120),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;for(let k=1;k<n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;vseg(x,z,w,w,{path:true,pdx:ux,pdz:uz,pstep:L/n});G.deco.push({x,z,y0:.2,w:52,h:.8,d:52,c:'#c9a85b'});if(k%4===0){G.deco.push({x:x-38,z,y0:0,w:7,h:38,d:7,c:WOOD});G.deco.push({x:x-38,z,y0:38,w:12,h:9,d:12,c:'#ffd36a'});}}};
+      const trail=(a,b,w=132)=>{const L=Math.hypot(b.x-a.x,b.z-a.z)||1,n=Math.ceil(L/120),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;for(let k=1;k<n;k++){const t=k/n,x=a.x+(b.x-a.x)*t,z=a.z+(b.z-a.z)*t;vseg(x,z,w,w,{path:true,pdx:ux,pdz:uz,pstep:L/n});G.deco.push({x,z,y0:.2,w:52,h:.8,d:52,c:'#c9a85b'});if(k%4===0){G.deco.push({x:x-38,z,y0:0,w:7,h:38,d:7,c:WOOD,kind:'lantern',lead:true,lampH:47});G.deco.push({x:x-38,z,y0:38,w:12,h:9,d:12,c:'#ffd36a',kind:'lantern',lead:false});}}};
+      /* The two boxes above are ONE roadside lantern - a wooden post with a lit head - and they
+         are the only man-made object standing beside the golden path for the whole zone. Tagged
+         kind:'lantern' so world3d stands a real lightpost there instead; lead:true is the post,
+         which carries lampH (post 38 + head 9 = the object's own full height, so the model ends up
+         exactly as tall as the level says it is), and the head is lead:false so one lantern
+         becomes one model rather than a lamp with a gold cube floating in it. Untagged, both
+         render voxel exactly as before. */
       trail(gate,prairie,170);trail(prairie,acres,150);trail(prairie,orchard,150);trail(acres,crossing,145);trail(orchard,crossing,145);trail(crossing,bank,170);trail(bank,hamlet,145);trail(bank,ridge,145);trail(hamlet,dream,150);trail(ridge,dream,150);trail(dream,henge,180);
       // Optional quests live off the golden path and reward deliberate exploration, never required walking.
       const caravanQuest=optionalMission('outCaravan','Answer the scattered caravan signals','rescue',3,'caravanCompass',{hint:'Follow the blue signal lanterns beyond the road.'});

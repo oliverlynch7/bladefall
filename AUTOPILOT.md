@@ -466,6 +466,34 @@ Worlds standard), and the graphics need finishing before he shows more people.
       the repo has none (nature/ and terrain/ ship the identical file). The variant machinery IS
       used where the tiles match: ruins and apex mix Floor_Brick with Floor_UnevenBrick and read
       as worn flagstone.*
+- [x] **The Outskirts' roadside lanterns are real lightposts.** Done 2026-08-02 (worker B), after
+      re-checking the bottom of this backlog and finding every item there genuinely blocked (see
+      the note under "Notes / open decisions"). Tagged at the SOURCE like the trees: the Outskirts'
+      `trail()` helper drops a lantern every fourth step of the golden path, and those two boxes —
+      a `7x38x7` wooden post carrying a `12x9x12` lit head — were the only man-made object standing
+      beside the road for the whole zone. `kind:'lantern'` with `lead:true` on the post (carrying
+      `lampH:47`, post + head, so the model is as tall as the object the level actually built) and
+      `lead:false` on the head, so one lantern becomes one model instead of a lamp with a gold cube
+      floating inside it. world3d reuses `props/lightpost-single` — the same model the hub lines
+      its approach with, already in the load list, so this costs no download.
+      ONE THING WORTH KEEPING, and it is the mimic's width lesson again in a new place:
+      **`buildProps` fits by whichever of height or width binds first, and that is wrong whenever
+      the voxel box is a thin CORE rather than an outline.** A lightpost fitted into 7 units of
+      width is a bollard a tenth of its stated height. The hub had already met this and solved it
+      privately (`92 / rec.height`); `buildProps` now takes a `fitH` flag so that rule is reusable
+      instead of copied. Default behaviour is unchanged — a tree's deco box IS its footprint.
+      Verified: the lightpost standing beside the road at gameplay distance
+      (`_shot/out/b2-lantern-3d.png`) where the same camera with `?world3d=0` still draws the
+      brown voxel post and its gold head (`b2-lantern-voxel.png`). Counts move exactly as designed
+      — `lantern 24`, `box 1146 → 1098` (the 48 boxes leaving), `skipped 118 → 142` (the 24 heads),
+      `drawCalls 21 → 22`. Rest of the Outskirts baseline unchanged: 1257 floor, 115 road, 118
+      trees, no errors.
+      *One for Oliver's eye, not a bug:* the kit lightpost is GREEN where the voxel post was wood
+      brown. It is the same green as the hub's lanterns, which is the point — the two lamps in the
+      game now match each other — but it no longer matches the box it replaced. A tint is one line.
+      *Measured and left alone:* the 812 corn stalks of the West Cornlands. They already get a real
+      grass model each (they classify as plains foliage), and the repo has no crop/wheat asset in
+      any kit — `plant_flatTall` would be a substitution, i.e. an art call. Needs Oliver.
 - [x] **Zone floors for the other five zones.** Done 2026-08-01 — no new pack needed. The premise
       was slightly off: those zones DID get a floor, but every non-grass zone shared one tile,
       `castle/ground`, which is the Castle Kit's GRASS tile. It passed as neutral only because its
@@ -571,6 +599,20 @@ untouched. It logs when it fires. world3d had already met this and solved it its
 materials converted to Lambert in `loadPart`).
 
 ## Notes / open decisions (do NOT act on without Oliver)
+- **The bottom three backlog items were re-checked on 2026-08-02 (worker B) and are all genuinely
+  blocked** — worth recording so the next B does not re-derive it:
+  - *Loot pickups.* Not "pick a model per drop type" — read `weaponMesh` in index.html first. The
+    game already draws fourteen HAND-AUTHORED weapon silhouettes (a "cursed greatblade", an
+    "executioner's ax", a "necromancer's scythe" built from vertebrae, all out of one deliberate
+    bone/rust/blood/black-iron material kit). The weapon kit's `Sword.glb`/`Axe.glb` are generic
+    cartoon props, so casting onto them is not a conversion, it is replacing art with worse art.
+    Genuinely Oliver's call. The coin case named in the item does not exist: gold is never a world
+    object, `awardGold()` credits it directly on kill.
+  - *Mobs in 3D.* Re-audited live rather than trusted: `MOB_CAST` has 32 entries and `G.ENEMY` has
+    40, and the 8 uncast are exactly the 7 bosses plus `bosscrystal`. Unchanged, still art calls.
+  - *Class distinctiveness.* `_balance/` and `_duel/` do not exist in this checkout (the `/_*`
+    gitignore rule, and unlike `_shot/` there is no committed source of record), so nothing here
+    can measure a win matrix. Blocked on the harnesses before it is blocked on Oliver's sign-off.
 - Elemental affixes on **physical** weapon drops (making "a Flaming Sword") is a separate system change — Oliver decides before building.
 - Real icon art (class icons, skill/passive icons) is a supervised ChatGPT-in-Chrome pass — autopilot uses placeholders. **Necromancer currently has placeholder icons and needs its own 18-icon pass** — this is BLOCKED on Oliver (needs his ChatGPT tab); do not attempt it autonomously, skip to the next actionable item.
 - No dragons in the game, so **no Dragonslayer class.**

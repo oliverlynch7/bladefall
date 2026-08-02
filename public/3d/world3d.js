@@ -125,6 +125,10 @@ const PROP_SETS = {
   grave:  ['props/gravestone-cross', 'props/gravestone-round', 'props/gravestone-decorative',
            'props/gravestone-broken'],
   pillar: ['props/pillar-square', 'props/pillar-large', 'props/pillar-obelisk'],
+  /* The same lightpost the hub lines its approach with, reused for the roadside lanterns a zone
+     generator tags. One model, already in the load list, so a zone that has lanterns costs no
+     extra download. */
+  lantern: ['props/lightpost-single'],
 };
 const _propCache = new Map();     // name -> { geo, mat, height } or null when a load failed
 let _propsReady = false, _propsPending = false;
@@ -458,6 +462,7 @@ function classify(d){
     if(d.kind === 'fence') return 'fence';
     if(d.kind === 'grave') return 'grave';
     if(d.kind === 'pillar')return 'pillar';
+    if(d.kind === 'lantern') return d.lead === false ? 'skip' : 'lantern';
     if(d.kind === 'flower') return d.lead === false ? 'skip' : 'flower';
     if(d.kind === 'skipflower') return 'skip';   // stem/leaf boxes the real flower model replaces
     /* A building's lead box carries the modular spec; the second box is only the voxel path's roof
@@ -512,7 +517,15 @@ function hash(x, z){
 /* Place a bin of deco onto real prop models, splitting it across the available variants.
    Falls back to a lit box if a model failed to load, so a missing asset degrades to something
    visible rather than to an invisible hole in the level. */
-function buildProps(items, names, defaultH, heightOf){
+/* `fitH` fits by HEIGHT ALONE and ignores the deco's width, which is wrong for most props and
+   necessary for a few. The default fit takes whichever of height or width binds first, so a prop
+   can never overflow the space the generator allotted it - right for a tree or a rock, whose deco
+   box IS the object's footprint. It is wrong wherever the voxel object is a thin CORE rather than
+   an outline: a roadside lantern is a 7-wide post carrying a 12-wide head, and fitting a lightpost
+   into 7 units of width shrinks it to a bollard a tenth of its stated height. The hub's lanterns
+   already sized by height alone (`92 / rec.height`) for exactly this reason; this is that rule
+   made reusable rather than a second copy of it. */
+function buildProps(items, names, defaultH, heightOf, fitH){
   if(!items.length) return;
   const recs = names.map(n => _propCache.get(n)).filter(Boolean);
   if(!recs.length){
@@ -554,7 +567,7 @@ function buildProps(items, names, defaultH, heightOf){
          never wider or taller than the space the generator allotted it. For a stack, each segment
          gets its share of the height. */
       const segH = wantH / n;
-      const sc = Math.min(segH / rec.height, wantW / rec.width);
+      const sc = fitH ? (segH / rec.height) : Math.min(segH / rec.height, wantW / rec.width);
       for(let sIdx = 0; sIdx < n; sIdx++){
         o.position.set(d.x, (d.y0 || 0) + sIdx * rec.height * sc, d.z);
         o.rotation.set(0, (n > 1 ? sIdx * 1.5708 : r * 6.283), 0);
@@ -1261,7 +1274,7 @@ export function buildWorld(scene, world){
      adding its bin threw "Cannot read properties of undefined" and world3d disabled itself - the
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
-                 fence: [], grave: [], pillar: [], flower: [], building: [], skip: [] };
+                 fence: [], grave: [], pillar: [], flower: [], lantern: [], building: [], skip: [] };
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -1315,6 +1328,9 @@ export function buildWorld(scene, world){
   buildProps(bins.grave, PROP_SETS.grave, 30);
   buildProps(bins.pillar, PROP_SETS.pillar, 80);
   buildProps(bins.flower, PROP_SETS.flower, 18);
+  /* Height alone, and lampH not d.h: the lead deco is only the POST, so d.h would stand a
+     lightpost 38 tall where the object the generator built is 47 tall to the top of its head. */
+  buildProps(bins.lantern, PROP_SETS.lantern, 47, d => (d.lampH || d.h || 47), true);
   /* Buildings work in any zone, not just the hub - a zone generator only has to tag a deco box the
      way the Waystation does. Nothing outside the hub emits them yet. */
   const zoneBuild = buildBuildings(bins.building.map(d => ({
@@ -1350,6 +1366,7 @@ export function buildWorld(scene, world){
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,
                      pillar: bins.pillar.length, flowerProps: bins.flower.length,
+                     lantern: bins.lantern.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,
                      drawCalls: group.children.length,
                      propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };

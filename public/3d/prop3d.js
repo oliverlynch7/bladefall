@@ -189,7 +189,11 @@ function syncPropsInner(scene, dt){
      or failed CHEST download also held the keys as voxel boxes - two unrelated props, one fate. */
   const a = syncChests(world.chests || [], dt);
   const b = syncKeys(world.keys || []);
-  const c = syncWaystone(world.waystone || null);
+  /* Two objects, one actor, and they can never coexist: `waystone` is a zone's quest objective and
+     `hubStone` is the Waystation's plaza bonfire, so one of them is always null. Sharing the actor
+     is what makes the hub's centrepiece free — walking out of the hub into a zone with a waystone
+     re-homes the obelisk that is already built and downloaded. */
+  const c = syncWaystone(world.waystone || world.hubStone || null);
   return a || b || c;
 }
 
@@ -333,6 +337,11 @@ export function clearProps(){
   PROP3D.keys = 0;
   if(_wayRec && _wayRec.root.parent) _wayRec.root.parent.remove(_wayRec.root);
   _wayRec = null;
+  /* _wayBox goes with it. Left standing it outlives the actor, so on the first frame of a new level
+     waystoneDrawn() says yes, the game skips the voxel stone, and prop3d has not rebuilt the actor
+     yet - one frame with the landmark drawn by nobody. Same rule as _box and _keyBox: the fitted
+     size doubles as the "something is really standing there" flag, so it has to be cleared. */
+  _wayBox = null;
   PROP3D.waystone = 0;
 }
 

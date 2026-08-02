@@ -385,6 +385,28 @@ Worlds standard), and the graphics need finishing before he shows more people.
         was a neutral mid-grey. It matches how that model already renders elsewhere in the 3D
         world, so it is consistent — it is just cooler in tone than the box it replaced. A tint is
         one line if you want it warmer.
+        *(follow-up 2026-08-01, same worker: THE HUB'S PLAZA BONFIRE now casts onto the SAME
+        obelisk, and it is the same object in everything but where it comes from — "your bonfire,
+        at plaza centre, touch it to heal and take stock", drawn as a stepped plinth under a tall
+        square shaft with a gold capstone and a column of light, which is the quest waystone's art
+        almost box for box. It became worth doing the moment the Waystation defer fix landed: with
+        world3d's substitute tower gone, the plaza's focal point was the least 3D thing in an
+        otherwise 3D hub.
+        The one new piece of plumbing is `HUB_STONE` / `world.hubStone`. Every other object prop3d
+        casts arrives as a game object; this one is hand-placed inside drawWaystation, so there was
+        nothing to hand over. The two share ONE actor and can never coexist — a zone waystone and a
+        hub bonfire are never both live — so the hub centrepiece costs no extra model and no extra
+        download.
+        Fixed on the way: `clearProps()` cleared `_wayRec` but left `_wayBox` standing, and
+        `_wayBox` is what `waystoneDrawn()` tests. So on the first frame of a new level the game
+        skipped the voxel stone while prop3d had not rebuilt the actor yet — one frame with the
+        landmark drawn by nobody. Same rule as `_box` and `_keyBox`.
+        Verified: the plaza obelisk with its capstone on the apex, light column and motes
+        (`_shot/out/b-hubstone-obelisk.png`) where the same camera showed a grey voxel box
+        (`b-hubstone-fixed2.png`); `?world3d=0` still draws the full voxel stone in its fountain
+        (`b-hubstone-w3doff.png`) and so does first-person (`b-hubstone-fps.png`); a zone still
+        reports `waystone:1` with the same fitted box, and its frames are pixel-identical with
+        `?prop3d=0`.)*
         *Checked and rejected on the way:* converting the prop's PBR material to Lambert the way
         `loadPart` does. Rendered before and after — pixel-identical, because `loadProp`, which is
         what world3d actually uses for props, keeps the glTF material too. The colour is the kit's,

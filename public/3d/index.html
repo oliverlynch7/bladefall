@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.414.0-autopilot';
+const VERSION3D='1.415.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11892,12 +11892,6 @@ function drawCourse(s,t){
     }
     bx(sg.x,-6,sg.z+sg.d/2-1, sg.w,12,2.4, tint(hz[1],'#000',0.35));        // hazard-lit front rim
   }
-  // moving platforms
-  for(const mv of G.movers){
-    bx(mv.x,mv.h-7,mv.z, mv.w,14,mv.d, tint(s.ground,'#fff',0.14));
-    bx(mv.x,mv.h+0.7,mv.z, mv.w,1.4,mv.d, tint(s.ground,'#fff',0.3));
-    bx(mv.x,mv.h-15,mv.z, mv.w*0.4,4,mv.d*0.4, hz[1], hz[1], 0.5); // thruster glow
-  }
   /* ── GAMEPLAY PROPS ON THE FLOOR — deferred, for the same reason the pressure plates are ──
      Every one of these is a thing you STEP ON or a hazard you read off the ground: a jump pad, a
      heal pad, a spring, a geyser vent, a slam ring, a magma trail, a spike field, the Colossus
@@ -11908,9 +11902,26 @@ function drawCourse(s,t){
      the vent still erupted, and there was nothing there to see.
      Measured, not reasoned about - see the torch note further down, which is the same finding on
      the object that made it obvious.
-     Three windows rather than one, because the platforms you stand on (movers, crumbles) are
-     interleaved with them and are WORLD, not entity: they keep their inline, depth-tested place. */
+
+     THE MOVING PLATFORMS AND THE CRUMBLING STEPPING STONES ARE IN HERE TOO, and that correction
+     is worth more than the rest of the list. The first pass left them inline on the reasoning that
+     a thing you STAND ON is world, not entity. Wrong test. The question is only ever *does world3d
+     draw a 3D replacement for this*, and world3d lays floor tiles for `G.segments` - movers and
+     crumbles are in neither list, so nothing 3D draws them and the 3D floor simply covered them.
+     Measured in Frostfell: `?world3d=0` shows six pale stepping stones scattered across the ice
+     (b-crumble-voxel.png); the same frame with the 3D world on is one unbroken sheet of stone
+     (b-crumble-3d.png). These are the platforming beats - they shake, they drop, you have to read
+     which slab is about to go - and they were invisible.
+     Deferring them is not "drawing them on top": the replay depth-tests against the buffer Three
+     just wrote, using the game's own PROJ/VIEW, so a platform behind a 3D tower is still hidden by
+     it. See the DEFERRED ENTITY PASS note near the top of this file. */
   deferOn();
+  // moving platforms
+  for(const mv of G.movers){
+    bx(mv.x,mv.h-7,mv.z, mv.w,14,mv.d, tint(s.ground,'#fff',0.14));
+    bx(mv.x,mv.h+0.7,mv.z, mv.w,1.4,mv.d, tint(s.ground,'#fff',0.3));
+    bx(mv.x,mv.h-15,mv.z, mv.w*0.4,4,mv.d*0.4, hz[1], hz[1], 0.5); // thruster glow
+  }
   // jump pads
   for(const pd of G.pads){
     const py=pd.y||0; bx(pd.x,py+1.4,pd.z, pd.r*2.1,2.2,pd.r*2.1,'#22303c');
@@ -11923,17 +11934,26 @@ function drawCourse(s,t){
     if(!spent){ const g=0.55+0.35*Math.sin(t*4);
       bx(hp.x,py+3.8,hp.z, 9,2.4,hp.r*0.85,'#c8ffd8','#7de0a0',g); bx(hp.x,py+3.8,hp.z, hp.r*0.85,2.4,9,'#c8ffd8','#7de0a0',g); }
   }
-  deferOff();
   // crumbling stepping stones (shake, drop, respawn)
+  /* Deferring a crumble was necessary and NOT sufficient, which is the second half of the finding.
+     The voxel slab's visible face spans y 0..1.4; world3d parks its floor tiles at y=1.45 ("just
+     above the game's lit top edge, which tops out at 1.3"). So the stone was drawn, depth-tested
+     honestly, and lost by five hundredths of a unit - measured by lifting one to h=44, where it
+     appeared immediately (b-crumble-lift.png).
+     2.2 is not a number picked by eye: it puts the top face at 2.9, exactly where the pressure
+     plate's top sits, and the plates have been rendering correctly over the 3D floor since the
+     deferred pass went in. Only applied when the 3D ground is actually being laid, so the voxel
+     renderer keeps the tuned 0.7 it was built around. */
+  const _crLift=_w3dGround?2.2:0;
   for(const cr of G.crumbles){
-    if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
+    if(cr.state===2 && cr.respawn<1){ bx(cr.x,0.4+_crLift,cr.z, cr.w,0.8,cr.d, tint(s.ground,'#fff',0.08), null, 0.35); continue; } // ghost preview
     if(cr.state===2) continue;
     const jx=cr.state===1?cr.jit:0, chy=cr.h||0;
     bx(cr.x+jx,chy-6-(cr.state===2?cr.fallY:0),cr.z, cr.w,12,cr.d, tint('#8a7a66',s.ground,0.3));
-    bx(cr.x+jx,chy+0.7,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
+    bx(cr.x+jx,chy+0.7+_crLift,cr.z, cr.w,1.4,cr.d, cr.state===1?'#c9a86a':tint('#8a7a66','#fff',0.25));
     bx(cr.x,chy-12,cr.z, cr.w*0.5,4,cr.d*0.5, tint('#8a7a66','#000',0.4)); // cracked underside
   }
-  deferOn();                     // ...hazards and the bonus portal: entities, see the note above
+  // ...same window continues through the hazards and the bonus portal
   // hazard geysers: vent → telegraph glow → eruption column
   const hzc=hazardCols(s.theme);
   for(const gy2 of G.geysers){

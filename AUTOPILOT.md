@@ -254,9 +254,34 @@ Worlds standard), and the graphics need finishing before he shows more people.
       118 trees, 7 chests, 18 live creatures, 21 draw calls.
       *Worth remembering:* the way to find the rest of these is to read `drawCourse` in order and
       ask of each block "is this architecture world3d replaces, or a thing the player uses?", not
-      to list objects from memory. Still inline and still unresolved: `G.movers` and `G.crumbles`
-      (platforms — world, but nothing 3D draws them either, so they may yet be painted out where
-      they pass in front of 3D ground) and `drawSpawner`'s dens.
+      to list objects from memory. `drawSpawner`'s dens were checked and are already deferred.
+      *(follow-up, same run: THE MOVING PLATFORMS AND CRUMBLING STEPPING STONES WERE INVISIBLE TOO,
+      and the reason the first pass left them out was a wrong test. "A thing you stand on is world,
+      not entity" sounds right and is not the question — the question is only ever **does world3d
+      draw a 3D replacement for this**. world3d lays floor tiles for `G.segments`; movers and
+      crumbles are in neither list, so nothing 3D drew them and the 3D floor covered them.
+      Measured in Frostfell: `?world3d=0` shows six pale stepping stones across the ice
+      (`b-crumble-voxel.png`), the same frame with the 3D world on is one unbroken sheet of stone
+      (`b-crumble-3d.png`). These are the platforming beats — they shake, they drop, you have to
+      read which slab is about to go.
+      **Deferring them was necessary and NOT sufficient, and that is the part worth keeping.** The
+      crumble's visible face spans y 0..1.4; world3d parks its floor tiles at y=1.45. So the stone
+      was drawn, depth-tested honestly, and lost by five hundredths of a unit — found by lifting one
+      to h=44, where it appeared instantly (`b-crumble-lift.png`). It now lifts 2.2 when the 3D
+      ground is being laid, which puts its top face at 2.9: exactly where the pressure plate's top
+      sits, and the plates have rendered correctly over the 3D floor since the deferred pass went
+      in. The voxel renderer keeps the tuned 0.7 it was built around.
+      Verified: all six stones back in the 3D world at their reference positions
+      (`b-crumble-lifted-fix.png` vs `b-crumble-voxel.png`), and the voxel path unchanged
+      (`b-crumble-voxel-after.png`).
+      **One known consequence, on the debug path only, worth Oliver's eye rather than a fix:** with
+      `?world3d=0` AND the 3D hero on, `flushHero3D` still clears the depth buffer, so the deferred
+      replay tests against a buffer holding only the hero and every deferred object draws over the
+      voxel world. Pre-existing — chests, plates and keys have behaved this way since the deferred
+      pass — but this commit adds more objects to it, and it shows as a crumble's side face standing
+      proud of ice that used to hide it. The default (3D world on) composites correctly; the fix
+      would mean changing `deferArmed()`, which the note below explicitly warns must keep matching
+      when `flushHero3D` runs.)*
 - [ ] **The rest of the objects you interact with, through prop3d.** The chest proved the pattern;
       `prop3d.js` is named for props in general and its header already says "chests, keys". Next,
       in rough order of how often a player sees them:

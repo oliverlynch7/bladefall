@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.426.0-autopilot';
+const VERSION3D='1.427.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5439,9 +5439,13 @@ const BOSS_ARENAS={
     G.deco.push({x:0,z:-20,y0:0,w:400,h:1.4,d:380,c:DIRT});                               // the ground he wore bare
     for(let k=0;k<7;k++){ const a=k/7*6.283; const fx2=Math.cos(a)*330, fz2=-20+Math.sin(a)*300;
       vcol(fx2,fz2,14,14,26+((k%2)?14:0)); if(k%2) G.deco.push({x:fx2,z:fz2,y0:38,w:44,h:8,d:10,c:'#5a4426'}); }   // the fence he broke through
-    vcol(-230,-190,26,26,90); G.deco.push({x:-230,z:-190,y0:90,w:70,h:44,d:70,c:'#284f28'});
-    G.deco.push({x:-230,z:-165,y0:34,w:10,h:30,d:4,c:'#8e1620'});                          // the tree, and the mark he leaves on it
-    for(const b of [[150,-240],[240,60],[-90,180]]) G.deco.push({x:b[0],z:b[1],y0:0,w:20+rnd()*16,h:9+rnd()*8,d:14,c:BONE});
+    /* The tree, and the mark he leaves on it. Tagged like every other tree in the game: the
+       column is the TRUNK (treeCol, so the 3D layer skips it and stands a real pine there) and
+       the canopy box is the lead deco carrying trunkH. Untagged it drew as a grey slab with a
+       flat green box floating over it, in the one arena where it is the only landmark. */
+    { const tc=vcol(-230,-190,26,26,90); tc.treeCol=true;
+      G.deco.push({x:-230,z:-190,y0:90,w:70,h:44,d:70,c:'#284f28',theme:'plains',kind:'tree',lead:true,trunkH:90}); }
+    G.deco.push({x:-230,z:-165,y0:34,w:10,h:30,d:4,c:'#8e1620'});                          // the gore mark he leaves on it (its own tuned spot: nudging it onto the 3D trunk buries it inside the voxel one)    for(const b of [[150,-240],[240,60],[-90,180]]) G.deco.push({x:b[0],z:b[1],y0:0,w:20+rnd()*16,h:9+rnd()*8,d:14,c:BONE});
     vtorch(-140,300,rnd); vtorch(140,300,rnd);
     arenaBoss(ctx,0,-120,250,240);
     bossFinish(ctx,{sx:0,sz:380,sy:0, gx:0,gz:-260, decoCol:'#3a5a2e',decoTheme:'plains',decoTall:180});

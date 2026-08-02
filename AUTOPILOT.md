@@ -495,6 +495,85 @@ Worlds standard), and the graphics need finishing before he shows more people.
       Whatever gets added: it is an ENTITY, so it must be drawn inside a defer window, and its skip
       guard must ask `three3DLive()` and not "is the layer on". Both traps are documented below and
       both have already cost a session.
+- [x] **Every tree, flower and rock in the game was drawing HALF of itself.** Found and fixed
+      2026-08-02 (worker B). `loadProp` kept only the FIRST mesh it found in a glTF
+      (`traverse(o => { if(!mesh && o.isMesh) mesh = o; })`), and a Nature Kit tree is TWO meshes —
+      a trunk and a canopy, each with its own material. So every tree rendered as one or the other:
+      models whose first primitive is the canopy became a **teal blob floating over bare ground**,
+      models whose first primitive is the trunk became a **bare brown post with no leaves**. The
+      Outskirts was a field of both (`_shot/out/b6-outskirts-tree.png`) where it should be a grove.
+      **The file already knew this trap and had never carried it back.** The road-tile loader two
+      functions below `loadProp` exists for exactly this reason and its own comment says so — "a
+      road tile therefore renders as a single stripe of dirtDark with no grass and no track: not a
+      missing asset, not a missing texture, just two thirds of the model quietly dropped". Same
+      sentence, same function, every prop in the game.
+      Measured, not guessed: `__world3d().counts.multiPart` is new and lists every loaded model made
+      of more than one primitive — i.e. exactly the ones that were drawing as a fraction of
+      themselves. In the Outskirts that is **29 models: all 12 trees, all 6 flowers, all 10 rocks,
+      the town fountain and the town cart.**
+      Fix: `loadProp` now keeps every primitive in `subs` with the WHOLE model's `fullHeight` /
+      `fullWidth`, and `buildProps` makes one InstancedMesh per primitive driven by the same
+      matrices — separate meshes rather than a merged geometry because a trunk and a canopy are
+      different materials, and merging without baking vertex colours paints the tree one of the two.
+      **The legacy `geo`/`mat`/`height`/`width` are deliberately UNTOUCHED.** The ground pass, the
+      road pass and the hub assembler all size themselves off those, against values Oliver's renders
+      were tuned to; re-measuring them in this commit is the thing VISION.md warns about. Only
+      `buildProps` — the deco props — reads the new fields. For a single-mesh prop the two are
+      identical, so nothing else moves.
+      Also fixed here, because it made the probe lie: `buildProps` labelled its meshes `names[i]`
+      while bucketing by a FILTERED `recs`, so once any model in a set failed to load, every mesh
+      after it was named after the wrong model — and `__world3dPoses`, whose entire job is to answer
+      "which model ended up here", reported that wrong name back. Kept as name+rec pairs now.
+      Verified by render, everywhere trees live: the Outskirts (`b6-outskirts-tree.png` floating
+      blobs and bare posts → `b6-outskirts-tree-fix.png`, a grove the hero stands inside), Black
+      Woods (`b6-blackwoods.png`, 110 trees, real trunks) and the Thornwood (`b6-thorn.png`, 80
+      trees). Counts identical to the recorded Outskirts baseline — 1257 floor, 115 road, 118 trees,
+      24 lanterns, 1624 corn, 9 standstone — and the Waystation is unchanged (273 paving, 4
+      buildings, 8 gatehouses, `b6-hub-reg.png`). `?world3d=0` is untouched (`b6-outskirts-voxel.png`).
+      *One number to know:* Outskirts draw calls **22 → 41**, because a two-part model is two
+      InstancedMeshes. Forty-one instanced draws is nothing for a phone, but it is the cost and it
+      is real; if it ever matters, merging with baked vertex colours is the lever.
+      *Left alone on purpose:* the HUB assembler and the ground/road passes still take the first
+      primitive only, so `town/fountain-round` and `town/cart` are still half-drawn in the
+      Waystation. That is unchanged behaviour, not a new regression, and the hub is the top backlog
+      item somebody else is holding — one worker in the hub assembler at a time.
+- [x] **The Brute's arena had the only untagged tree left in the game.** Found and fixed 2026-08-02
+      (worker B) — it is what led to the loader bug above. The Trampled Field's gore-marked tree is
+      hand-built rather than emitted by a `tree()` helper: `vcol(-230,-190,26,26,90)` with a green
+      canopy box perched on it, and neither half was tagged. It drew as a grey slab with a flat
+      green box floating over it (`b6-brute-tree.png`), in the one arena where it is the ONLY
+      landmark and the first boss every player meets. Tagged `treeCol` on the column and
+      `kind:'tree'`/`lead:true`/`trunkH:90` on the canopy, exactly like the Outskirts' own `tree()`.
+      Verified: `b6-brute-fixed.png` — a real pine standing where the same camera had shown nothing.
+      *The gore mark was moved onto the 3D trunk and then moved BACK*, which is the lesson worth
+      keeping: the 3D pine's trunk is ~5 units wide and the voxel one is 26, so there is no single z
+      that sits on both. Nudging it to the 3D trunk buried it inside the voxel trunk
+      (`b6-brute-canopy-vox.png`). It keeps its own tuned spot.
+      *Checked and NOT touched:* `SCAPES.outskirts` (index.html:4345) has a third `tree()` whose
+      `vcol` also lacks `treeCol` — but `SCAPES` is only reached when `EXPANDED_SCAPES[zone.id]` is
+      missing and EXPANDED has all eight ids, so it cannot run and cannot be rendered. Same call the
+      last worker made, re-confirmed by probing Black Woods' obstacles live (every column near the
+      hero reports `treeCol:true`).
+- [x] **All seven unphotographed BOSS ARENAS are now audited.** Done 2026-08-02 (worker B). Only the
+      Brute's had ever been in front of a camera; `BOSS_ARENAS` is one hand-authored arena per zone
+      and the other seven — Hollow Marksman, The Fallen, Frost Sorcerer, Ember Colossus, Abyss King,
+      Marble Colossus, Void Tyrant — had never been rendered in 3D. Shot every one
+      (`_shot/out/b6-boss1.png` … `b6-boss7.png`, plus `?world3d=0` twins for frost and ember).
+      **All seven composite correctly and none needs a fix** — cover pillars, cell bars, crumbling
+      rims, thrones, dome rings, banner pylons and crowned monoliths are all present and correctly
+      depth-sorted, because the deferred-entity, obstacle, wall and crumble passes already cover
+      them. The one real bug the audit turned up was the Brute's tree, above.
+      *Not audited and deliberately so:* each zone's AREA 1. `EXPANDED_SCAPES` is keyed by ZONE, not
+      area, so a zone's second area is the same hand-authored scape with a different rng seed — a
+      render of it says nothing a render of area 0 has not already said.
+      *Two things queued for Oliver, both art calls, neither a bug:* `bossFinish` builds a shared
+      outer frame for every arena — 12 crowned monoliths, 16 border slabs, 24 rune-rim tiles — and
+      all of it is plain boxes in 3D. Casting the monoliths onto `props/pillar-obelisk` or
+      `nature/rock_tall` is the warm-brown-rock substitution rejected twice already: the models are
+      pale blue-grey and warm brown, `instanceColor` multiplies, and no multiple of either is the
+      volcano arena's tint. And the Warden's Yard names its two cover slabs "the old keepers'
+      sarcophagi", for which `props/coffin` and `props/coffin-old` exist and would be a literal
+      rather than invented cast — worth one line from Oliver either way.
 - [x] **Every 3D tree in the game was hanging in the air.** Found and fixed 2026-08-02 (worker B),
       by measuring rather than looking: `__world3dPoses('tree')` put the Outskirts' 118 trees at
       y 98–108 with `__BF3.floorAt()` reporting 0 under them, fitted height 163.

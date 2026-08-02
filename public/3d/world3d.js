@@ -239,6 +239,31 @@ async function loadProp(name){
     geo.computeBoundingBox();
     const bb = geo.boundingBox;
     geo.translate(0, -bb.min.y, 0);              // base at y=0
+    /* EVERY primitive, not just the first one. A Nature Kit tree is TWO meshes - a trunk and a
+       canopy, each with its own material - and keeping only the first drew half of it: models
+       whose first mesh is the canopy became a floating blob and models whose first mesh is the
+       trunk became a bare post. Measured in the Outskirts, where the whole grove is one or the
+       other (b6-outskirts-tree.png). The file already knew this trap - the road tiles two
+       functions down have their own loader for exactly this reason ("two thirds of the model
+       quietly dropped") - and it was never carried back to props.
+       The legacy `geo`/`mat`/`height`/`width` above are LEFT ALONE on purpose. The ground pass,
+       the road pass and the hub assembler all size themselves off them with values Oliver's
+       renders were tuned against; re-measuring those in the same commit is what VISION.md warns
+       about. `subs` and fullHeight/fullWidth are a parallel record, and only buildProps reads
+       them. For a single-mesh prop - which is most of them - the two are identical. */
+    const subs = [];
+    const bbAll = new THREE.Box3();
+    g.scene.traverse(o => {
+      if(!o.isMesh) return;
+      const sg = o.geometry.clone();
+      sg.applyMatrix4(o.matrixWorld);
+      sg.computeBoundingBox();
+      bbAll.union(sg.boundingBox);
+      subs.push({ geo: sg, mat: Array.isArray(o.material) ? o.material[0] : o.material });
+    });
+    for(const s of subs) s.geo.translate(0, -bbAll.min.y, 0);   // the WHOLE model's base at y=0
+    const fullHeight = Math.max(0.001, bbAll.max.y - bbAll.min.y);
+    const fullWidth  = Math.max(0.001, Math.max(bbAll.max.x - bbAll.min.x, bbAll.max.z - bbAll.min.z));
     const height = Math.max(0.001, bb.max.y - bb.min.y);
     /* Width matters as much as height. Scaling purely to match a deco's height blew the wheat up
        into giant yellow pillars: a wheat stalk is w:4 h:24, and the grass model is WIDER than it
@@ -246,7 +271,7 @@ async function loadProp(name){
        instead means a prop can never exceed the footprint the level intended. */
     const width = Math.max(0.001, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z));
     const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-    const rec = { geo, mat, height, width };
+    const rec = { geo, mat, height, width, subs, fullHeight, fullWidth };
     _propCache.set(name, rec);
     return rec;
   } catch(e){
@@ -537,7 +562,11 @@ function hash(x, z){
    made reusable rather than a second copy of it. */
 function buildProps(items, names, defaultH, heightOf, fitH){
   if(!items.length) return;
-  const recs = names.map(n => _propCache.get(n)).filter(Boolean);
+  /* Kept as NAME+REC PAIRS. `names.map(...).filter(Boolean)` shortened the list without shortening
+     `names`, so once any model in a set failed to load every mesh after it was labelled with the
+     wrong model name - and `__world3dPoses`, whose whole job is to answer "which model ended up
+     here", reported that wrong name back. A probe that lies is worse than no probe. */
+  const recs = names.map(n => ({ n, rec: _propCache.get(n) })).filter(v => v.rec);
   if(!recs.length){
     buildCategory(null, items, boxGeo(), mat(), (o, d) => {
       o.position.set(d.x, d.y0 || 0, d.z);
@@ -558,14 +587,24 @@ function buildProps(items, names, defaultH, heightOf, fitH){
     if(!d.stack) return 1;
     return Math.max(1, Math.round((d.h || defaultH) / Math.max(1, (d.w || defaultH))));
   };
-  recs.forEach((rec, i) => {
+  recs.forEach(({ n: nm, rec }, i) => {
     const list = buckets[i];
     if(!list.length) return;
     let total = 0;
     for(const d of list) total += stackCount(d);
+    /* One InstancedMesh PER PRIMITIVE, all driven by the same matrices, so a two-part model draws
+       as both its parts instead of whichever one happened to come first out of the glTF. They are
+       separate meshes rather than one merged geometry because each primitive carries its own
+       material: a trunk and a canopy are different colours, and merging them without baking vertex
+       colours would paint the whole tree one of the two. Costs one extra draw call per multi-part
+       model in a set, which is single digits per level. */
+    const subs = (rec.subs && rec.subs.length) ? rec.subs : [{ geo: rec.geo, mat: rec.mat }];
+    /* The WHOLE model's height and width, not the first primitive's. Fitting a tree by its canopy
+       mesh alone put a full tree in the space the canopy was meant to fill. */
+    const rh = rec.fullHeight || rec.height, rw = rec.fullWidth || rec.width;
     /* The prop's own texture carries its colour, so instanceColor is NOT set here - tinting a
        textured model by the deco's flat colour would throw away the artwork. */
-    const m = new THREE.InstancedMesh(rec.geo, rec.mat, total);
+    const ms = subs.map(s => new THREE.InstancedMesh(s.geo, s.mat, total));
     const o = new THREE.Object3D();
     let k = 0;
     for(const d of list){
@@ -577,22 +616,26 @@ function buildProps(items, names, defaultH, heightOf, fitH){
          never wider or taller than the space the generator allotted it. For a stack, each segment
          gets its share of the height. */
       const segH = wantH / n;
-      const sc = fitH ? (segH / rec.height) : Math.min(segH / rec.height, wantW / rec.width);
+      const sc = fitH ? (segH / rh) : Math.min(segH / rh, wantW / rw);
       for(let sIdx = 0; sIdx < n; sIdx++){
-        o.position.set(d.x, (d.y0 || 0) + sIdx * rec.height * sc, d.z);
+        o.position.set(d.x, (d.y0 || 0) + sIdx * rh * sc, d.z);
         o.rotation.set(0, (n > 1 ? sIdx * 1.5708 : r * 6.283), 0);
         o.scale.set(sc, sc, sc);
         o.updateMatrix();
-        m.setMatrixAt(k++, o.matrix);
+        for(const m of ms) m.setMatrixAt(k, o.matrix);
+        k++;
       }
     }
-    m.instanceMatrix.needsUpdate = true;
-    m.frustumCulled = false;
-    /* Named so a render can be CHECKED rather than squinted at - see __world3dPoses below. The
-       model name is the only label this function is given, and it is the useful one anyway. */
-    m.name = 'w3d:' + names[i];
-    m.userData._w3dFit = { defaultH: defaultH, fitH: !!fitH };
-    group.add(m);
+    ms.forEach((m, si) => {
+      m.instanceMatrix.needsUpdate = true;
+      m.frustumCulled = false;
+      /* Named so a render can be CHECKED rather than squinted at - see __world3dPoses below. Only
+         the FIRST primitive takes the probe name: the others sit at identical matrices, and
+         reporting a two-part tree twice would make every count read double. */
+      m.name = (si === 0 ? 'w3d:' : 'w3dsub:') + nm;
+      m.userData._w3dFit = { defaultH: defaultH, fitH: !!fitH };
+      group.add(m);
+    });
   });
 }
 
@@ -617,8 +660,9 @@ window.__world3dPoses = (match, limit) => {
       M.decompose(V, Q, S);
       out.push({ model: c.name.slice(4), n: c.count,
                  x: Math.round(V.x), y: Math.round(V.y * 10) / 10, z: Math.round(V.z),
-                 h: rec ? Math.round(rec.height * S.y) : null,
-                 w: rec ? Math.round(rec.width * S.x) : null });
+                 h: rec ? Math.round((rec.fullHeight || rec.height) * S.y) : null,
+                 w: rec ? Math.round((rec.fullWidth || rec.width) * S.x) : null,
+                 parts: rec && rec.subs ? rec.subs.length : 1 });
     }
   }
   return out;
@@ -1456,7 +1500,11 @@ export function buildWorld(scene, world){
                      standstone: bins.standstone.length,
                      buildings: zoneBuild.buildings, skipped: bins.skip.length,
                      drawCalls: group.children.length,
-                     propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]) };
+                     propsLoaded: [..._propCache.entries()].filter(e => e[1]).map(e => e[0]),
+                     /* Which loaded models are made of more than one primitive - i.e. exactly the
+                        ones that used to draw as a fraction of themselves. The audit, in numbers. */
+                     multiPart: [..._propCache.entries()].filter(e => e[1] && e[1].subs && e[1].subs.length > 1)
+                                  .map(e => e[0] + ':' + e[1].subs.length) };
   WORLD3D.ready = true;
   return WORLD3D.counts;
 }

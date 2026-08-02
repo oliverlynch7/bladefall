@@ -568,6 +568,50 @@ Worlds standard), and the graphics need finishing before he shows more people.
       stones it should stand behind (`b3-henge-voxel-after.png`). The default and pure-voxel paths
       both composite correctly; the fix would mean changing `deferArmed()`, which must keep matching
       exactly when `flushHero3D` runs.
+- [x] **Zone walls and doors were being painted out too.** Done 2026-08-02 (worker B), same run as
+      the platforms and found by the same rule: `G.walls` and `G.doors` are two more lists world3d
+      does not read, so in a zone nothing 3D draws them and the 3D ground covered them.
+      **The HUB is deliberately excluded, and that exclusion is the interesting half.** Measured
+      before changing anything: the Waystation has 47 walls, 39 of them `invisible` collision-only,
+      and the 8 real ones are the perimeter RAMPART — the exact thing world3d's hub build stands a
+      `castle/wall` on. Deferred, each would put a 300-tall flat voxel slab in front of its own 3D
+      replacement. That is the plaza-tower mistake, so `_wallDefer = !G.hub` and the hub keeps them
+      inline, like the eight gate frames. The LATE translucent ghost pass is untouched: a
+      camera-blocking wall never reaches the solid pass at all.
+      Verified with the injection probe, which is worth reusing: a wall and a CONTROL chest pushed
+      into the same frame in front of the hero. Before, neither appeared and that was the harness
+      (see below); after the harness fix the chest rendered and the wall did not
+      (`_shot/out/b3-harness-check.png`), while `?world3d=0` drew the wall plainly
+      (`b3-harness-check-voxel.png`). With the fix in, the wall stands correctly composited with
+      the road and terrain intact behind it (`b3-wallfix-3d.png`). Hub re-rendered at the gate row:
+      3D cobbles, gatehouses and castle wall, no doubled rampart (`b3-hub-wallfix2.png`).
+      *Still not verified, and honestly so:* no ROOM-dungeon area was reached this run. `--scene <n>`
+      loads a zone's first scape, `loadArea(i)` does not advance, and the dungeon generators at
+      index.html:5461/5688/9612 are where doors actually live. The wall path is proven; the door
+      path is the same three lines in the same window and is inferred, not photographed. A harness
+      way into a room dungeon is the missing piece.
+- [x] **`--eval` mutations were never in the picture, and it failed silently.** Fixed 2026-08-02
+      (worker B) in `harness/shot.js`. There was no render between the EVAL round-trip and
+      `Page.captureScreenshot`, and captureScreenshot returns the last composited frame — so the
+      standard "push an object in front of the hero and photograph it" probe photographed the frame
+      BEFORE the change and handed back a complete, plausible, wrong picture. Pushing a wall and
+      finding it absent reads exactly like "the 3D layer paints walls out", which is the conclusion
+      it nearly produced. A known-good CONTROL saved it: a chest, which certainly renders, vanished
+      from the same frame, and no compositing bug does that.
+      `--focus` never hit this because the EVAL round-trip follows it, so a frame lands in the gap
+      by luck. The shutter now waits two rAF ticks (the second is what guarantees the frame the
+      first drew has been composited), with a 400ms fallback so a throttled tab still returns.
+      **Put a control object in any probe of this shape.** The harness lies quietly; a control does
+      not.
+      **NOT IN THIS COMMIT, and here is where to find it.** `harness/shot.js` had another worker's
+      uncommitted `--scene side<N>` work in it at the time, and committing the file would have
+      published their in-flight change under this message. `git apply --cached` is not on the
+      permission allowlist, so a partial stage was not available either. The fix is IN the working
+      tree of both `harness/shot.js` and `_shot/shot.js` — it is the hunk immediately after the
+      `EVAL` block, and a copy of the patch is at `_shot/mine.patch`. Whoever commits the
+      `--scene side<N>` work will carry it along; if that lands without it, re-apply from there.
+      *Two workers really do share this checkout* — check `git status` before `git add`, and always
+      add by pathspec.
 - [x] **The Old Waystone Crown's nine standing stones are real megaliths.** Done 2026-08-02
       (worker B). The Outskirts' last district and its payoff view was nine grey boxes in a ring.
       Tagged `kind:'standstone'` at the source; world3d stands a `nature/rock_tall{A,B,C}` in each

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.421.0-autopilot';
+const VERSION3D='1.422.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12043,7 +12043,20 @@ function drawCourse(s,t){
       bx(sp2.x,fy,sp2.z, 16,4.6,4.6,'#e6fff0','#4be08a'); bx(sp2.x,fy,sp2.z, 4.6,16,4.6,'#e6fff0','#4be08a'); }
   }
   deferOff();
+  /* WALLS AND DOORS — deferred in a ZONE, inline in the HUB, and the split is the whole point.
+     `G.walls` and `G.doors` are two more lists world3d does not read, so in a zone nothing 3D
+     draws them and the 3D ground painted them out. Measured with the injection probe: a wall and
+     a control chest pushed into the same frame in front of the hero, the chest renders and the
+     wall does not (`_shot/out/b3-harness-check.png`), while `?world3d=0` draws the wall plainly
+     (`b3-harness-check-voxel.png`). The control matters — see the harness note about --eval.
+     The HUB is the exception and deferring there would be the plaza-tower mistake again: its 8
+     visible walls ARE the perimeter rampart, and world3d's hub build stands a real castle wall on
+     every one of them. Deferred, each would put a 300-tall voxel slab in front of its own
+     replacement. So the hub keeps them inline, exactly as the eight gate frames do.
+     The LATE ghost pass is unaffected: a camera-blocking wall never reaches the solid pass. */
+  const _wallDefer = !G.hub;
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
+  if(_wallDefer) deferOn();
   const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
     bx(wl.x,wl.h+1.5,wl.z, wl.w+3,4,wl.d+3, stoneTop);
     bx(wl.x,5,wl.z, wl.w+2,10,wl.d+2, stoneDk); };
@@ -12065,6 +12078,7 @@ function drawCourse(s,t){
       else { bx(dr.x,dr.h/2,dr.z, dr.w,dr.h,10, tint(s.ground,'#000',0.3)); bx(dr.x,dr.h/2,dr.z, dr.w*0.16,dr.h*0.8,11, doorCol[dr.type]||'#fff', doorCol[dr.type], 0.9); }
     }
   }
+  if(_wallDefer) deferOff();
   /* WALL TORCHES - the sconce that made the whole class of bug visible, and the reason the three
      windows above exist. A torch is a free-standing fixture with its own collision post; world3d
      draws nothing in its place, and it stands on ground the 3D layer covers, so drawn inline it

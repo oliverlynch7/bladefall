@@ -7449,8 +7449,25 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
   burst(e.x,e.y+e.h*0.5,e.z,e.color,5);
   if(el) applyElement(e,el,dmg);
-  G.shake=Math.min(G.shake+(e.boss?2:3),9); SFX.hit();
-  if(src===G.p && e.hp>0){ const w=G.p.weapon;                              // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
+  G.shake=Math.min(G.shake+(e.boss?2:3),9);
+  /* ONE impact sound per SWING, not per enemy hit. A2's sibling on the playtest list (A3), asked
+     for twice: a single sword arc through three trial enemies fired SFX.hit() three times AND the
+     starter blade's rustyhit three times, staggered as the arc registered each enemy over
+     successive frames - which is heard as one hit playing several attack sounds spaced out. Six to
+     nine sounds for one button press.
+     Gated on p.swingId, which the attack functions already increment once per swing, so this is
+     exact rather than a timer guessing at swing boundaries. The time fallback covers damage that
+     is NOT a swing - element ticks, Soulfire splash, damage-over-time - which share the swingId of
+     whatever swing started them and would otherwise fall silent after their first tick. */
+  const _pl = (src===G.p);
+  let _sfx = true;
+  if(_pl){
+    const sid=G.p.swingId, now=G.time||0;   // G.time is the run clock; there is no G.t
+    if(sid===G._sfxSwing && (now-(G._sfxAt||-9))<0.25) _sfx=false;
+    else { G._sfxSwing=sid; G._sfxAt=now; }
+  }
+  if(_sfx) SFX.hit();
+  if(_pl && _sfx && e.hp>0){ const w=G.p.weapon;                            // batch-2 impact layers (skip if this hit was the kill — killEnemy plays the death sound)
     weaponImpact(w);                                                        // curated heavy-weapon impact (axe/great/hammer/scythe)
     if(w && w.name==='Rusty Sword') playFx('rustyhit');                     // the starter blade's dull thud
     else if((e.boss||e.elite) && Math.random()<0.4 && !(w&&/axe|great|hammer|scythe/.test(w.art||''))) playFx('heavyhit',0.85); } // meaty connect on the big foes (skip if a curated impact already played)
@@ -14400,6 +14417,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   abandonTrial, restoreBank, bankNow,   /* exported so the harness can test trial ABORT, which is where A2 lived */
+  SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,

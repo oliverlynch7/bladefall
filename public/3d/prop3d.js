@@ -391,3 +391,54 @@ window.__prop3dKeyPoses = () => [..._keyActors].map(([ky, rec]) => ({
 window.__prop3dPoses = () => [..._actors].map(([ch, rec]) => ({
   mimic:!!ch.mimic, opened:!!ch.opened, br:+(ch._br || 0).toFixed(3),
   shove:+(ch._shove || 0).toFixed(2), t:+(rec.act ? rec.act.time : 0).toFixed(4), dur:+rec.dur.toFixed(3) }));
+/* WHERE EVERY CHEST ACTOR REALLY IS, and whether it is in front of the camera — the probe that had
+   to exist before "the chest is not being drawn" could be said honestly. `__prop3dPoses` reports the
+   lid dial and nothing about placement, so which of seven chests a given brown smudge in a
+   screenshot belongs to was being decided by eye, and it was decided wrong once already.
+   `ndc` is the game's OWN projection (`__BF_CAM`, the same matrices hero3d hands Three), so
+   onScreen is a fact rather than an estimate, and `px` converts it to the pixel to go and look at.
+   The WORLD box comes from Box3, so a collapsed or NaN transform shows up as a degenerate box
+   rather than as a plausible position. */
+window.__prop3dChestPlaces = () => {
+  let P = null, V = null;
+  try { const c = window.__BF_CAM && window.__BF_CAM(); if(c){ P = c.P; V = c.V; } } catch(e){}
+  const cv = (window.__BF_GL && window.__BF_GL.canvas) || null;
+  const mv = (m, v) => [ m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3],
+                         m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13]*v[3],
+                         m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]*v[3],
+                         m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15]*v[3] ];
+  return [..._actors].map(([ch, rec], i) => {
+    rec.root.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(rec.root);
+    const c = bb.getCenter(new THREE.Vector3());
+    let ndc = null, px = null;
+    if(P && V){
+      const e = mv(P, mv(V, [c.x, c.y, c.z, 1]));
+      if(e[3] > 0){
+        ndc = [+(e[0]/e[3]).toFixed(3), +(e[1]/e[3]).toFixed(3), +(e[2]/e[3]).toFixed(3)];
+        if(cv) px = [Math.round((ndc[0]*0.5+0.5)*cv.width), Math.round((0.5-ndc[1]*0.5)*cv.height)];
+      }
+    }
+    return { i, at:[+ch.x.toFixed(0), +(ch.y||0).toFixed(0), +ch.z.toFixed(0)],
+             mimic:!!ch.mimic, opened:!!ch.opened, visible:rec.root.visible,
+             inScene:!!(rec.root.parent && rec.root.parent.name === 'prop3d'),
+             boxY:[+bb.min.y.toFixed(1), +bb.max.y.toFixed(1)],
+             boxW:+(bb.max.x - bb.min.x).toFixed(1),
+             ndc, px, onScreen:!!(ndc && Math.abs(ndc[0]) < 1 && Math.abs(ndc[1]) < 1 && ndc[2] < 1) };
+  });
+};
+/* PAINT EVERY CHEST MAGENTA — the hub-floor probe, moved to the objects. Squinting at a screenshot
+   cannot separate "Three never drew this" from "Three drew it and something is on top of it", and
+   both have now been argued from the same picture. Unlit, so lighting cannot hide it; with
+   `noDepth` it also ignores the depth buffer and draws last, so anything that survives that is
+   genuinely not being rasterised. Debug only — it destroys the model's own materials. */
+window.__prop3dDebugPaint = (noDepth) => {
+  let n = 0;
+  for(const [, rec] of _actors) rec.root.traverse(o => {
+    if(!o.isMesh) return;
+    o.material = new THREE.MeshBasicMaterial({ color:0xff00ff, depthTest:!noDepth, depthWrite:!noDepth });
+    if(noDepth) o.renderOrder = 9999;
+    n++;
+  });
+  return { painted:n, actors:_actors.size };
+};

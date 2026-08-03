@@ -704,6 +704,69 @@ because the three maps are three different levels.
       are invisible too then this is a pre-existing regression that a hub cast merely walked into.
       That is one render and it splits the problem in half.
       Nothing of this is in the tree: index.html and prop3d.js are byte-identical to HEAD.)*
+      *(progress 2026-08-03, `autopilot-merged`: **THE QUESTION ABOVE IS ANSWERED, AND THE ANSWER
+      KILLS THE LEADING THEORY.** The note said one render splits the problem in half; it did, and
+      the half it landed in is not the one it expected.
+      - **ZONE CHESTS ARE INVISIBLE TOO.** A/B at one camera in The Outskirts, `--focus
+        "__BF3.G.chests[0]" --dist 230 --side 40`, everything else identical: `?prop3d=0` draws the
+        full orange voxel chest on the mesa (`_shot/out/r2-chest-voxel.png`); the default draws
+        **nothing at all** in that spot (`r2-chest-3d.png`). So this is NOT a hub bug the bag cast
+        introduced — it is a live regression in the object a run is FOR, and the bag merely walked
+        into it. It reaches every zone, and nobody had noticed because a chest that is simply absent
+        reads as a level that had no chest there.
+      - **AND THE SAME CHEST OBJECT RENDERS PERFECTLY SOMEWHERE ELSE.** `chests[0]` moved beside the
+        zone waystone comes out a real wooden 3D model with a shaped lid (`r5-way-chest-3d.png`)
+        against its voxel twin at the same camera (`r5-way-chest-voxel.png`). One `--eval`, one
+        actor, one frame apart. **So the actor, the model, the fit, the mixer, the materials and
+        prop3d's whole pipeline are FINE**, and the "build the bag the waystone's way — no mixer, no
+        action" theory recorded above is dead: the mixer is not what is hiding anything. Whatever
+        this is, it is tied to WHERE the chest stands.
+      - Measured, so nobody re-derives it: the actor reports everything correct while drawing
+        nothing — `inScene true`, `visible true`, parent `prop3d`, scale 25.077, and a world Box3 of
+        exactly 32 x 17.9 x 19 sitting at (-1126..-1094, 120..137.9, -1579.5..-1560.5), materials
+        `MeshStandardMaterial`, `opacity 1`, `transparent false`, `matVis true`, 4 primitives,
+        3200 verts. **Every number a probe can ask for is right.** That is the same clean bill of
+        health the hub bag got, and it is why this needed a render rather than another probe.
+      - **AND IT IS BEING RASTERISED. THE CHEST IS HIDDEN, NOT SKIPPED — that is the finding this
+        run turns over.** All seven actors painted unlit magenta with `depthTest:false` and
+        `renderOrder 9999`, so nothing can occlude them and no light can dim them: `r9-places.png`
+        shows a solid magenta chest at **pixel (686, 595)**, ~100 x 65 px, which is exactly the
+        32 x 17.9-unit box at that range — and exactly the pixel `__prop3dChestPlaces()` predicted
+        for `chests[0]` in the same frame (`ndc [-0.142,-0.322,0.877], px [686,595], onScreen
+        true`). **Three draws this geometry every frame.** Whatever removes it is depth or shading,
+        not culling, not the scene graph, not the mixer, and not the load path.
+      **NEXT for this bug, and it is one render:** `__prop3dDebugPaint(0)` — the same magenta WITH
+      the depth test on. Magenta appears → the chest is depth-visible and the model is being shaded
+      into invisibility; magenta gone → something is drawn in front of it, and the suspect is the
+      DEFERRED voxel pass, which replays after Three and is what draws the `vplat` mesa this chest
+      stands on. `floorAt` under it reports **0** while the chest sits at y **120**, which is worth
+      understanding before believing any story about that mesa.
+      Do NOT go back to the actor: `chests[1]` at (-1300, **120**, -1800) renders normally at
+      px (441,407) in the same frames, same height, same build path. Whatever is special about
+      `chests[0]` is at its coordinates, not in how it was made.
+      **A probe habit this run earned:** the pixel a chest projects to had been argued from
+      screenshots three times and got a different answer each time — the smudge at (686,565) that
+      two renders were read against turned out not to be the chest at all (it survived lifting the
+      chest 45 units, `r6-lift.png`). `__prop3dChestPlaces()` prints the pixel; go and look at that
+      one.
+      **Three new probes went in for this and all three are committed:** `__prop3dChestProbe()`
+      (per-mesh world transform + material state for one actor), `__prop3dChestPlaces()` (every
+      actor's box, NDC and pixel), `__prop3dDebugPaint(noDepth)` (paint them magenta, optionally
+      ignoring depth). Plus `__hero3dInfo()` — Three's own `renderer.info.render` for the frame the
+      shutter caught, which is the one number that separates "the renderer skipped it" from "the
+      renderer drew it and you cannot see it". No game code changed; this run is probes and a
+      measurement.
+      **A HAZARD THAT CORRUPTED HALF THIS RUN'S RENDERS, and it will corrupt the next one's:**
+      `autopilot.ps1` fires every TWENTY MINUTES on this checkout, and its killed-run guard cannot
+      tell a live session's edits from wreckage — it stashed this run's working tree twice
+      mid-investigation (`git stash list`: "autopilot killed-run leftovers 2026-08-03 09:04" and
+      "09:24"), each time while a render was in flight, so the page loaded a file that no longer had
+      the probe in it and came back `ReferenceError: … is not defined` with a perfectly good
+      screenshot attached. Two consequences worth acting on: **commit inside twenty minutes or lose
+      it**, and **a `--eval` ReferenceError for something you know you just wrote is the stash, not
+      your code**. The two runners also share a Chrome profile, which is the likeliest cause of the
+      `READY NEVER CAME after 240s` runs here — renders that took 5s when nothing else was running
+      took 200s when they were.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

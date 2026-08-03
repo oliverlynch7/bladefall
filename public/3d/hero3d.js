@@ -1371,6 +1371,18 @@ window.__hero3dMeshes = () => {
   });
   return out;
 };
+/* WHAT THREE ACTUALLY DREW last frame. Every other probe in this file reports what was ASKED for —
+   a position, a scale, a visible flag — and all of those can be perfect while nothing reaches the
+   screen. renderer.info.render is reset per render() call, so this is the frame the shutter caught
+   rather than a running total, and a draw-call count that moves when a layer is switched on is the
+   difference between "the renderer skipped it" and "the renderer drew it and you cannot see it". */
+window.__hero3dInfo = () => {
+  if(!renderer) return 'no renderer';
+  const r = renderer.info.render;
+  return { calls:r.calls, triangles:r.triangles, points:r.points, lines:r.lines,
+           geometries:renderer.info.memory.geometries, textures:renderer.info.memory.textures,
+           programs:renderer.info.programs ? renderer.info.programs.length : null };
+};
 window.__hero3dGLState = () => {
   const g = window.__BF_GL; if(!g) return 'no gl';
   return {

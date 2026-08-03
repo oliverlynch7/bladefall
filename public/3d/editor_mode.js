@@ -117,16 +117,21 @@ function hud(){
     rows.push(s
       ? '<div class="row">selected <span class="sel">' + s.arr + ':' + s.idx + '</span><br>x ' +
         Math.round(s.o.x) + '  z ' + Math.round(s.o.z) +
-        (s.o.y0 != null ? '  y ' + Math.round(s.o.y0) : '') + '</div>'
+        (s.o.y0 != null ? '  y ' + Math.round(s.o.y0) : '') +
+        (s.o.w != null ? '<br>' + Math.round(s.o.w) + ' x ' + Math.round(s.o.d || s.o.w) +
+                         ' x ' + Math.round(s.o.h || 0) : '') +
+        (s.o.r != null ? '<br>radius ' + Math.round(s.o.r) : '') + '</div>'
       : '<div class="row">click something to select it</div>');
     rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
+    rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
+              (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
 
     rows.push('<div class="pal">' + PALETTE.map((p, i) =>
-      '<button class="p' + (EDITOR.place === i ? ' on' : '') + (kindRenders(p.kind) ? '' : ' off') +
-      '" data-p="' + i + '"' + (kindRenders(p.kind) ? '' : ' disabled') + '>' + p.label + '</button>'
+      '<button class="p' + (EDITOR.place === i ? ' on' : '') + (kindRenders(p) ? '' : ' off') +
+      '" data-p="' + i + '"' + (kindRenders(p) ? '' : ' disabled') + '>' + p.label + '</button>'
     ).join('') + '</div>');
     rows.push(EDITOR.place != null
       ? '<div class="row" style="color:#9fd6ff">click the ground to place a ' + PALETTE[EDITOR.place].label +
@@ -142,7 +147,7 @@ function hud(){
     b.onclick = () => {
       if(b.dataset.p != null){
         const i = +b.dataset.p;
-        if(!kindRenders(PALETTE[i].kind)){ toast(PALETTE[i].label + ' has no model in the hub yet'); return; }
+        if(!kindRenders(PALETTE[i])){ toast(PALETTE[i].label + ' has no model in the hub yet'); return; }
         EDITOR.place = (EDITOR.place === i) ? null : i;   // clicking the armed one disarms it
         hud();
       } else act(b.dataset.a);
@@ -205,7 +210,40 @@ const PALETTE = [
   { kind: 'flower',     label: 'Flower',      w: 11, h: 18, d: 11, c: '#ffd24a' },
   { kind: 'standstone', label: 'Standing st', w: 24, h: 90, d: 18, c: '#626879' },
   { kind: 'corn',       label: 'Crop',        w:  4, h: 24, d:  4, c: '#d9ad42', theme: 'plains' },
+
+  /* TERRAIN (P3) and GAMEPLAY OBJECTS (P4). These do not go in `deco` and are not props - they
+     are the things you stand on and interact with, so each names its own array and builds its own
+     entry shape, sampled from what the Outskirts generator actually emits.
+
+     A platform is an `obstacles` entry with kind 'plat'. That array IS the game's collision, so a
+     placed platform is solid and stand-on-able the moment it exists - which is the whole answer to
+     Oliver's "automatic collision true to the visual size" for anything you build out of these.
+     Props in `deco` are a separate question and stay on the list. */
+  { arr: 'obstacles', label: '+ Platform', terrain: true,
+    make: (x, z) => ({ kind: 'plat', x, z, w: 160, d: 160, h: 40 }) },
+  { arr: 'obstacles', label: '+ Pillar blk', terrain: true,
+    make: (x, z) => ({ kind: 'plat', x, z, w: 60, d: 60, h: 200 }) },
+  { arr: 'healpads',  label: '+ Heal pad', terrain: true,
+    make: (x, z) => ({ x, z, y: 0, r: 36, charge: 1 }) },
+  /* A MOVING PLATFORM. `x0` is the rest position and `x`/`px` the live ones, so all three start
+     equal; `amp` is how far it swings, `sp` its speed and `ph` its phase offset. Phase is fixed
+     rather than random so two platforms placed side by side move together and can be edited into
+     a rhythm deliberately, instead of the editor scattering timings you then cannot reproduce. */
+  { arr: 'movers',    label: '+ Mover', terrain: true,
+    make: (x, z) => ({ x0: x, x, px: x, z, w: 110, d: 88, h: 0, amp: 40, sp: 1.1, ph: 0 }) },
 ];
+
+/* MOB SPAWNERS are deliberately NOT here yet. Every den in the game carries a `questId` binding it
+   to a quest's kill counter (they are emitted by the quest builder, not the terrain pass), and
+   what a den with no quest behind it does - spawn freely, spawn nothing, or corrupt a counter -
+   is not something this session established. Placing one would be a guess dressed as a feature.
+   Next step is to read the den consumer and either give the palette a plain non-quest spawner or
+   let it pick an existing quest. */
+
+/* Everything in the palette that is not a prop places into its own array and is always available:
+   the hub-model caveat is about world3d's prop pipeline, and platforms and healing pads do not go
+   through it. */
+function palArray(spec){ return spec.arr || 'deco'; }
 
 /* WHICH KINDS ACTUALLY BECOME MODELS HERE.
 
@@ -224,9 +262,10 @@ const PALETTE = [
    hub really built that kind, so a kind added on one side and not the other draws BOTH the model
    and the box it replaces. */
 const HUB_MODEL_KINDS = ['lantern', 'flower'];
-function kindRenders(kind){
+function kindRenders(spec){
+  if(spec.terrain) return true;               // not a prop, so the prop pipeline does not apply
   const g = G();
-  return (g && g.hub) ? HUB_MODEL_KINDS.indexOf(kind) >= 0 : true;
+  return (g && g.hub) ? HUB_MODEL_KINDS.indexOf(spec.kind) >= 0 : true;
 }
 
 /* Place at the cursor. The GROUND plane is the right primitive here (unlike drag, where no single
@@ -236,17 +275,20 @@ function placeAt(sx, sy){
   const spec = PALETTE[EDITOR.place];
   const gp = unprojectToPlane(sx, sy, 0);
   if(!gp){ toast('no ground under the cursor - aim lower'); return; }
-  const o = { x: Math.round(gp.x / EDITOR.grid) * EDITOR.grid,
-              z: Math.round(gp.z / EDITOR.grid) * EDITOR.grid,
-              y0: 0, w: spec.w, h: spec.h, d: spec.d, c: spec.c,
-              kind: spec.kind, lead: true };
-  if(spec.theme) o.theme = spec.theme;
-  const arr = G().deco;
+  const gx = Math.round(gp.x / EDITOR.grid) * EDITOR.grid;
+  const gz = Math.round(gp.z / EDITOR.grid) * EDITOR.grid;
+  const name = palArray(spec);
+  const o = spec.make
+    ? spec.make(gx, gz)
+    : Object.assign({ x: gx, z: gz, y0: 0, w: spec.w, h: spec.h, d: spec.d, c: spec.c,
+                      kind: spec.kind, lead: true }, spec.theme ? { theme: spec.theme } : {});
+  const arr = G()[name];
+  if(!arr){ toast('this area has no ' + name + ' list'); return; }
   arr.push(o);
-  commit(L => recordAdd(L, 'deco', o));
+  commit(L => recordAdd(L, name, o));
   /* Select what you just placed, so it can be nudged into position immediately rather than needing
      to be found and clicked again. Its index is the end of the array by construction. */
-  EDITOR.sel = { arr: 'deco', idx: arr.length - 1, o };
+  EDITOR.sel = { arr: name, idx: arr.length - 1, o };
   toast('placed ' + spec.label);
   hud();
 }
@@ -328,6 +370,30 @@ function onKey(e){
   if(!s || !EDITOR.editable) return;
   const step = EDITOR.grid * (e.shiftKey ? 5 : 1);
   let handled = true;
+
+  /* ALT turns the same keys into RESIZE. Shaping a platform is the other half of terrain editing -
+     placing a fixed 160x160 slab and being unable to make it a long ledge or a tall block is not
+     "take full control of every level". Same keys on purpose: one set to learn, and the modifier
+     says whether you are moving the thing or changing its size.
+     Sizes floor at one grid step rather than 0 - a zero-width platform is invisible, still
+     collides, and looks exactly like the object having been deleted. */
+  if(e.altKey){
+    const min = EDITOR.grid;
+    const grow = (k, by) => { s.o[k] = Math.max(min, (s.o[k] || min) + by); };
+    if(e.key === 'ArrowLeft')       grow('w', -step);
+    else if(e.key === 'ArrowRight') grow('w',  step);
+    else if(e.key === 'ArrowUp')    grow('d', -step);
+    else if(e.key === 'ArrowDown')  grow('d',  step);
+    else if(e.key === 'PageUp')     grow('h',  step);
+    else if(e.key === 'PageDown')   grow('h', -step);
+    else if(s.o.r != null && (e.key === '[' || e.key === ']')){
+      s.o.r = Math.max(8, s.o.r + (e.key === ']' ? 8 : -8));   // healing pads are a radius, not a box
+    }
+    else handled = false;
+    if(handled){ commit(L => recordMove(L, s.arr, s.idx, s.o)); e.preventDefault(); e.stopPropagation(); }
+    return;
+  }
+
   if(e.key === 'ArrowLeft')       s.o.x -= step;
   else if(e.key === 'ArrowRight') s.o.x += step;
   else if(e.key === 'ArrowUp')    s.o.z -= step;

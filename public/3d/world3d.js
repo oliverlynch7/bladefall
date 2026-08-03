@@ -38,6 +38,7 @@ import * as THREE from './three.module.js';
 import { clearMobs } from './mob3d.js';
 import { clearProps } from './prop3d.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { loadModelAnyExt } from './loadmodel.js';
 
 export const WORLD3D = {
   /* ON by default, same reasoning as HERO3D. A build fault sets this back to false and logs, so
@@ -237,9 +238,7 @@ async function loadProp(name){
        buildGround returned 0 tiles, and the hub showed the GAME's own floor instead - which looked
        plausible enough that I reported it as working. A failed asset load must not be able to
        masquerade as a successful render. */
-    let g = null;
-    try { g = await _loadGLB(PROPS + name + '.glb'); }
-    catch(e){ g = await _loadGLB(PROPS + name + '.gltf'); }
+    const g = await loadModelAnyExt(PROPS + name);
     let mesh = null;
     g.scene.updateMatrixWorld(true);
     g.scene.traverse(o => { if(!mesh && o.isMesh) mesh = o; });
@@ -316,9 +315,7 @@ async function loadTile(name){
   if(_tileCache.has(name)) return _tileCache.get(name);
   let rec = null;
   try {
-    let g = null;
-    try { g = await _loadGLB(PROPS + name + '.glb'); }
-    catch(e){ g = await _loadGLB(PROPS + name + '.gltf'); }
+    const g = await loadModelAnyExt(PROPS + name);
     g.scene.updateMatrixWorld(true);
     const subs = [];
     const bb = new THREE.Box3();

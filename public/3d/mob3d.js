@@ -1,6 +1,7 @@
 import * as THREE from './three.module.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
+import { loadModelAnyExt } from './loadmodel.js';
 
 const _mobLoader = new GLTFLoader();
 const _loadGLB = url => new Promise((res, rej) => _mobLoader.load(url, res, undefined, rej));
@@ -140,8 +141,7 @@ export async function loadKitModel(file){
        failed and reported a successful build with no floor in it. */
     const base = file.indexOf('/') >= 0 ? ASSETS_DIR + file : MOBS_DIR + file;
     let g = null;
-    try { g = await _loadGLB(base + '.glb'); }
-    catch(e){ g = await _loadGLB(base + '.gltf'); }
+    g = await loadModelAnyExt(base);
     for(const c of g.animations) c.name = c.name.split('|').pop();
     demetalise(g.scene, file);
     /* Measure the model's NATIVE height once. cast.h is the slice's TARGET height, not the

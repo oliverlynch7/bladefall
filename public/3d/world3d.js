@@ -1226,6 +1226,36 @@ function hubPiece(setName, cells, place, colour){
   return cells.length;
 }
 
+/* Lay cobbles over a lattice of floor cells, one InstancedMesh for the lot.
+   Shared by the courtyard and the Sparring Room: the two rooms differ only in how they CHOOSE
+   their cells (a union of segments against a single hall), and keeping one copy of the mesh build
+   means the tint, the height and the render order can never drift apart between the hub's two
+   rooms. Returns 0 rather than throwing when the cobble prop never loaded, which is what lets the
+   voxel floor keep drawing - every caller's count test is `> 0`. */
+function layPaving(cells, cellSize){
+  const rec = _propCache.get(PROP_SETS.hubPave[0]);
+  if(!rec || !cells.length) return 0;
+  const pm = rec.mat.clone();
+  /* Gentle warm tint only. The cobble texture carries the detail now, so the old flat
+     '#c9b998' would just mud it - this nudges it towards the plaza's warm light and stops. */
+  pm.color = new THREE.Color('#e8dfcb');
+  const m = new THREE.InstancedMesh(rec.geo, pm, cells.length);
+  const o = new THREE.Object3D();
+  for(let i = 0; i < cells.length; i++){
+    const c = cells[i], s = cellSize / rec.width;
+    o.position.set(c.x, 1.2, c.z);
+    o.rotation.set(0, ((hash(c.x, c.z) * 4) | 0) * Math.PI / 2, 0);
+    o.scale.set(s, 1, s);
+    o.updateMatrix();
+    m.setMatrixAt(i, o.matrix);
+  }
+  m.instanceMatrix.needsUpdate = true;
+  m.frustumCulled = false;
+  m.renderOrder = -1;
+  group.add(m);
+  return cells.length;
+}
+
 /* Read the hub's building specs off the game's own deco. buildHub otherwise ignores deco entirely
    and derives everything from G.gates, but a building has to agree with a collision box, and the
    only place that pairing can be authored honestly is next to the box itself. */
@@ -1364,28 +1394,7 @@ function buildHub(scene, world){
     paveRect(westX, eastX, northZ, southZ);
   }
   counts.paveSegs = paveSegs.length;
-  const paveRec = _propCache.get(PROP_SETS.hubPave[0]);
-  if(paveRec && paveCells.length){
-    const pm = paveRec.mat.clone();
-    /* Gentle warm tint only. The cobble texture carries the detail now, so the old flat
-       '#c9b998' would just mud it - this nudges it towards the plaza's warm light and stops. */
-    pm.color = new THREE.Color('#e8dfcb');
-    const m = new THREE.InstancedMesh(paveRec.geo, pm, paveCells.length);
-    const o = new THREE.Object3D();
-    for(let i = 0; i < paveCells.length; i++){
-      const c = paveCells[i], s = HUB_UNIT / paveRec.width;
-      o.position.set(c.x, 1.2, c.z);
-      o.rotation.set(0, ((hash(c.x, c.z) * 4) | 0) * Math.PI / 2, 0);
-      o.scale.set(s, 1, s);
-      o.updateMatrix();
-      m.setMatrixAt(i, o.matrix);
-    }
-    m.instanceMatrix.needsUpdate = true;
-    m.frustumCulled = false;
-    m.renderOrder = -1;
-    group.add(m);
-    counts.pave = paveCells.length;
-  }
+  counts.pave = layPaving(paveCells, HUB_UNIT);
 
   /* PLAZA DRESSING. Placed relative to the courtyard's own bounds rather than fixed coordinates,
      so it follows if the gates ever move.
@@ -1511,6 +1520,69 @@ function buildHubDecoProps(world){
   return out;
 }
 
+/* THE HUB'S OTHER ROOM — the Sparring Room, and until this existed it was the one destination in
+   the whole game where the 3D layer built LITERALLY NOTHING.
+
+   buildHub is built around G.gates: the rampart line, the courtyard bounds, the paving lattice and
+   every tower position are derived from where the portals are. A hub sub-area declares no gates, so
+   buildHub returns null there and the Waystation's own door led to a flat khaki void with a voxel
+   boxing ring standing in it (_shot/out/o3-spar.png). It is the room Oliver's PvP practice happens
+   in, one door off the plaza VISION.md says players idle in, and the only thing 3D about it was the
+   hero.
+
+   It gets the courtyard's cobbles and nothing else, so walking through the door does not change
+   building. Everything that makes it the Sparring Room — the ring, the ropes, the corner posts, the
+   bleacher bowl, the banners, the braziers, the control post — is voxel and STAYS voxel, and none
+   of it is dropped, because every drop rule on the index.html side is keyed to a count this
+   function deliberately does not return (`pave`, `tower`, `hubLamp`, `hubFlower`). In particular
+   the ring canvas is floor paint 2.5 units proud, exactly the shape `counts.pave` licenses
+   deleting, and it has no 3D replacement — hence the separate name `roomPave`.
+
+   The one count it DOES share is `floorTiles`, and that is deliberate too: it is the honest name for
+   what this lays, and it is what turns off the segment's own lit top edge and painted path dashes,
+   which would otherwise show through the cobbles as a bright khaki rectangle the size of the room.
+
+   The room's shape comes from G.segments, the same list the voxel renderer floors, so the two
+   layers cover the same ground. The lattice is CENTRED on the hall rather than clamped to it: a
+   1560-wide room is 16.25 tiles, and centring spends the leftover as a small overhang under the
+   walls at both ends instead of a bare strip along one.
+
+   THE FLOOR AND ONLY THE FLOOR, and the walls are a deletion with a reason rather than a gap.
+   A castle wall run on all four edges plus corner tower masses was built, RENDERED and rejected. It
+   looks right from across the room — real crenellated stone where there had been a flat khaki slab
+   — and it BURIES the three banners that hang high on the north wall. They are authored at z:-672
+   against a wall whose inner face is at -675, i.e. flush against it; and the hub is the one place
+   the voxel walls are drawn INLINE rather than deferred (index.html: `_wallDefer = !G.hub`)
+   precisely so world3d can stand stone over them. So any 3D wall thick enough to cover the voxel
+   one covers what is pinned to its face as well, and there is no offset that clears the banner and
+   still hides the wall behind it. Measured at one camera: `_shot/out/p1-ban-3d.png` is castle stone
+   with no banner on it, `p2-ban-voxel.png` the slate banner and its olive emblem, large and
+   legible. Losing the only decoration in the room that says "arena" is a worse trade than a khaki
+   wall, and the fix belongs on the index.html side — tag the banners so world3d can stand a real
+   one there — rather than here. */
+
+function buildHubRoom(world){
+  const segs = (world.segments || []).filter(s => s && s.w > 8 && s.d > 8);
+  if(!segs.length) return null;
+  const counts = {};
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for(const s of segs){
+    minX = Math.min(minX, s.x - s.w / 2); maxX = Math.max(maxX, s.x + s.w / 2);
+    minZ = Math.min(minZ, s.z - s.d / 2); maxZ = Math.max(maxZ, s.z + s.d / 2);
+  }
+  const spanX = maxX - minX, spanZ = maxZ - minZ;
+  const nx = Math.max(1, Math.ceil(spanX / HUB_UNIT)), nz = Math.max(1, Math.ceil(spanZ / HUB_UNIT));
+  const ox = minX - (nx * HUB_UNIT - spanX) / 2, oz = minZ - (nz * HUB_UNIT - spanZ) / 2;
+
+  const cells = [];
+  for(let i = 0; i < nx; i++) for(let j = 0; j < nz; j++)
+    cells.push({ x: ox + (i + 0.5) * HUB_UNIT, z: oz + (j + 0.5) * HUB_UNIT });
+  counts.roomPave = layPaving(cells, HUB_UNIT);
+  counts.floorTiles = counts.roomPave;
+
+  return counts;
+}
+
 export function buildWorld(scene, world){
   /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
 
@@ -1534,7 +1606,11 @@ export function buildWorld(scene, world){
       if(o.userData._w3dOrig == null) o.userData._w3dOrig = o.intensity;
       o.intensity = o.userData._w3dOrig * (o.isDirectionalLight ? 1.05 : 0.92);
     });
-    const c = buildHub(scene, world) || {};
+    /* buildHub still returns null for a hub sub-area that declares no gates - it has nothing to
+       derive a courtyard from - and buildHubRoom picks those up. Kept as a fallback here rather
+       than folded into buildHub so the "no gates, no courtyard" contract the index.html drop rules
+       are written against stays literally true. */
+    const c = buildHub(scene, world) || buildHubRoom(world) || {};
     /* The hub never reported what it costs to draw. Every zone has published `drawCalls` since the
        first conversion, and the Waystation - the place VISION.md says players will idle in - was
        the one destination where "did that change cost anything" could not be answered at all.

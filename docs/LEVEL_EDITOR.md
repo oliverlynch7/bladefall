@@ -63,6 +63,17 @@ exported yet. **Revert area** clears YOUR edit for that area and falls back to t
 Edits are stored as a LIST of changes replayed over the generated level, not as a copy of it, so
 an area you have not touched behaves exactly as it does today, and the diffs are readable.
 
+## Coming next: the detached camera
+
+Oliver's design, and the right one: F2 should RELEASE you from the character into a free overhead
+camera you can pan and zoom, place things in front of where you are looking, and F2 again drops you
+straight back into the hero to playtest what you just built. That is the standard editor shape and
+the fast edit-test loop every tool write-up argues for.
+
+Landed so far: edit mode now OWNS the keyboard, so nudging a platform no longer walks the hero
+across the level. The free camera itself is the next piece of work - it needs an editor branch in
+the camera code (~13958) and a movement skip in update(), neither of which should be half-done.
+
 ## What it cannot do yet
 
 - **In the hub, the ten generator PROP kinds (tree, rock, fence...) still place as plain boxes** and

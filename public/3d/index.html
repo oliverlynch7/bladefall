@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.440.0-editor';
+const VERSION3D='1.441.0-editor';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5986,6 +5986,15 @@ function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(c
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
 window.addEventListener('keydown',e=>{
+  /* EDIT MODE OWNS THE KEYBOARD. Oliver, testing the editor: "when I try to press some of the keys,
+     it moves my character around while I'm trying to do things." Nudging a platform with the arrow
+     keys was also walking the hero across the level, and R/D/C/K are all bound to something.
+     Every held movement axis is cleared as well as the event being dropped - otherwise a key held
+     at the moment F2 was pressed stays latched true forever and the hero jogs off on his own. */
+  if(window.__bfEd && window.__bfEd.EDITOR && window.__bfEd.EDITOR.on){
+    for(const k in input) if(MOVE_ACTS[k]) input[k]=false;
+    return;
+  }
   if(mode==='story'){ if(e.code==='Escape'){ e.preventDefault(); if(story._skip) story._skip(); } else if(e.code==='Space'||e.code==='Enter'){ e.preventDefault(); const v=document.getElementById('storyveil'); if(v) v.click(); } return; }
   if(e.code==='Escape'){ e.preventDefault();
     if(mode==='studio'){ exitStudio(); return; }
@@ -6022,7 +6031,7 @@ window.addEventListener('keydown',e=>{
   if(act==='loot'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); cycleLootMode(); } return; }
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
   if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
-window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });
+window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
 //    LB/RB/LT/RT = skills 1-4, Start = pause, right stick = camera (shoulder/first-person). Auto-detected. ──
 let _padPrev=[], _padSeen=false;

@@ -118,6 +118,11 @@ const PROP_SETS = {
   hubLantern:  ['props/lightpost-single'],
   hubHedge:    ['town/hedge-large'],
   hubBanner:   ['town/banner-red'],
+  /* THE SMITH'S ANVIL — the first of drawWaystation's FURNITURE to get a model, and the least
+     invented cast in the file after the mimic: the game's own source comment calls the voxel one
+     "BIGGER anvil on a stump" and the Quaternius prop kit ships an anvil on a stump under exactly
+     that name. Anvil_Log, not Anvil: the bare one would leave the hub's stump drawn twice. */
+  hubAnvil:    ['qprops/Anvil_Log'],
   flower: ['nature/flower_purpleA', 'nature/flower_redA', 'nature/flower_yellowA',
            'nature/flower_purpleB', 'nature/flower_redB', 'nature/flower_yellowB'],
   rock:   ['nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_largeC', 'nature/rock_tallA',
@@ -687,16 +692,21 @@ window.__world3dPoses = (match, limit) => {
    world-space box comes within `r` of (x,z), ground tiles and buildings included:
      __world3dNear(-1110, -1570, 130)  -> [{model, n, x, z, y0, y1, w, d}, ...]
    `y0`/`y1` are the box's BOTTOM and TOP in world units, which is the pair that settles a burial -
-   an object whose y1 is above a chest's base and whose footprint contains it is drawn over it. */
-window.__world3dNear = (x, z, r, limit) => {
+   an object whose y1 is above a chest's base and whose footprint contains it is drawn over it.
+   `minTop` is not a convenience: a zone floors itself with over a thousand ground tiles and they
+   are the FIRST children of the group, so without it the cap fills with y1=1.5 tiles and the query
+   answers "there is a floor here" to every question you ask it. Pass the subject's base. */
+window.__world3dNear = (x, z, r, limit, minTop) => {
   if(!group) return [];
   const rad = r == null ? 100 : r, cap = limit || 40, out = [];
+  const floor = minTop == null ? -Infinity : minTop;
   const M = new THREE.Matrix4(), T = new THREE.Box3();
   group.updateMatrixWorld(true);
   const nodes = [];
   group.traverse(o => { if(o.geometry) nodes.push(o); });
   const hit = (b, nm, n) => {
     if(out.length >= cap) return;
+    if(b.max.y < floor) return;
     if(b.max.x < x - rad || b.min.x > x + rad || b.max.z < z - rad || b.min.z > z + rad) return;
     out.push({ model: nm, n: n,
                x: Math.round((b.min.x + b.max.x) / 2), z: Math.round((b.min.z + b.max.z) / 2),
@@ -1550,6 +1560,29 @@ function buildHubDecoProps(world){
   if(blooms.length){
     buildProps(blooms, PROP_SETS.flower, 18);
     out.hubFlower = blooms.length;
+  }
+  /* THE SMITH'S ANVIL — the first thing drawWaystation FURNISHES the hub with to become a model.
+     Everything above came out of G.deco; this does not, and that is the point. drawWaystation
+     draws the keepers, their stalls, the forge, the mirror and the beast cages, and none of it has
+     ever been in the deco list, so none of it could reach any 3D pipeline at all. G.hubNpcs is
+     handed over by __BF_WORLD for the same reason HUB_STONE is: the object exists only inside the
+     hub's own draw call, so there is nothing else to convert from.
+     buildProps, NOT hubPiece, and that distinction has already cost this file once. hubPiece
+     instances `rec.geo`/`rec.mat`, which is the FIRST primitive only — this model is a log and an
+     anvil in two materials, so hubPiece would stand half of it in the yard, the same trap the
+     loader's own "two thirds of the model quietly dropped" note describes. buildProps also keeps
+     the model's own texture, which is right here and was wrong for the plaza lamps (those had to
+     match ten hand-painted ones).
+     Sized to the voxel smithy it replaces — 52 wide, 42 to the top of the face — so the forge with
+     its live fire, the rising embers, the quench trough, the tool rack and the Smith himself, all
+     of which stay voxel because all of them move, keep standing exactly where they were placed
+     around it. */
+  const anvils = (world.hubNpcs || [])
+    .filter(n => n && n.prop === 'anvil')
+    .map(n => ({ x:n.x, z:n.z, y0:0, w:52, h:42 }));
+  if(anvils.length){
+    buildProps(anvils, PROP_SETS.hubAnvil, 42);
+    out.hubAnvil = anvils.length;
   }
   out.hubDecoDraws = group.children.length - before;
   return out;

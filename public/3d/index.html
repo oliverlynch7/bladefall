@@ -3584,11 +3584,26 @@ function beginRun(ngPlus,carrySnap,scales){
 }
 function startRun(ngPlus){ enterZone(0); }
 /* ---- Zone flow (Phase 2): hub is the save point; a zone attempt is provisional ---- */
+/* `classId` is escrowed with everything else, and that is the fix for A2.
+   startTrial sets meta.classId to the class you are attempting, because you play the trial AS it.
+   Every exit that is not COMPLETION has to put the old class back - and none of them did. It was
+   half-built: startTrial stashed the previous class on the run state as `G.trialFrom`, and nothing
+   anywhere ever read that field. So quitting an unfinished trial left you equipped as a class you
+   had not unlocked, which is exactly Oliver's report of the Drillmaster showing it LOCKED while it
+   sat equipped - the unlock flag and the equip state disagreeing because only one was restored.
+   Putting it in the bank fixes all three exits at once (abandon, death, and the hub's stale-bank
+   sweep) instead of patching each one and missing the next. */
 function bankNow(){ meta.bank={gold:meta.gold||0, hero:meta.hero?JSON.parse(JSON.stringify(meta.hero)):null,
-  classes:JSON.parse(JSON.stringify(meta.classes||{})), stash:JSON.parse(JSON.stringify(meta.stash||[]))}; persist(); }
+  classes:JSON.parse(JSON.stringify(meta.classes||{})), stash:JSON.parse(JSON.stringify(meta.stash||[])),
+  classId:meta.classId||null}; persist(); }
 function restoreBank(){ if(!meta.bank) return false;
   meta.gold=meta.bank.gold||0; meta.hero=meta.bank.hero||null; meta.classes=meta.bank.classes||{};
   meta.stash=meta.bank.stash||[];                          // items stashed during a failed attempt are lost with it
+  /* Only when the banked class is still legitimately yours. A bank written before an unlock (or
+     carried across a save whose classes changed) must not re-equip something now locked - that
+     would be this same bug pointing the other way. */
+  const back=meta.bank.classId;
+  if(back!==undefined) meta.classId=(back&&meta.classUnlocked&&meta.classUnlocked[back])?back:null;
   meta.bank=null; persist(); return true; }
 /* ---- The bag: pocket loot mid-zone, manage it at the hub (class swaps + future fusion) ---- */
 let STASH_CAP=30;   // base; +5 per Magic Pack bought in the shop (meta.bagSlots) — refreshed in loadMode + on purchase
@@ -3941,9 +3956,12 @@ function sideClear(){
 function startTrial(cid,fromZone){
   const T=TRIALS[cid]; if(!T) return;
   initAudio(); queueLevelUp=0; queueSubclass=false;
-  const wasClass=meta.classId; meta.classId=cid;                 // you play the trial AS the class you're earning
+  /* Bank FIRST, then switch. bankNow() escrows meta.classId, so switching before banking would
+     escrow the trial class as the thing to restore and the bug would survive the fix. */
+  const wasClass=meta.classId;
   if(!meta.classes[cid]) classState(cid);
   bankNow();
+  meta.classId=cid;                                              // you play the trial AS the class you're earning
   // A class trial borrows progression, never equipment. Existing level/stat growth carries in,
   // while the real loadout stays escrowed in meta.bank until completion, abandonment, or death.
   const hadHero=!!meta.hero, p=hadHero?freshFromSnapshot(meta.hero):freshPlayer(), issued=trialWeapon(cid);
@@ -14381,6 +14399,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
+  abandonTrial, restoreBank, bankNow,   /* exported so the harness can test trial ABORT, which is where A2 lived */
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,

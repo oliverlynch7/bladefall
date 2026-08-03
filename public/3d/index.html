@@ -2842,6 +2842,20 @@ window.__BF_META=()=>meta;
    zone's quest waystone and the voxel art is all but identical (a stepped plinth under a tall
    square shaft, a gold capstone, a column of light), which is why both cast onto the same obelisk. */
 const HUB_STONE={x:0,y:0,z:30};
+/* "Your Bag" — the hub's storage chest, hand-drawn by drawWaystation from its G.hubNpcs entry the
+   same way the bonfire is hand-placed, so like the bonfire there is no game object to hand over.
+   Derived rather than hard-coded because the hub's SPACE PASS scales the whole courtyard after
+   enterWaystation authors it: -607 is not where this ends up. The facing is the npc block's own
+   `Math.atan2(0-n.x,40-n.z)` — repeated here on purpose so a change to one is visibly a change to
+   both, rather than the two layers quietly turning the chest different ways.
+   MEMOISED ON THE NPC OBJECT, which is the part that matters: prop3d holds one actor for this and
+   handing it a fresh literal every frame would be fine, but handing a fresh literal to anything
+   keyed by object identity is the bug that pattern invites. Re-entering the hub rebuilds
+   G.hubNpcs, so the cache turns over exactly when the coordinates can have moved. */
+let _hubBagNpc=null,_hubBagProp=null;
+function hubBagProp(){ const n=(G.hubNpcs||[]).find(h=>h&&h.prop==='chest'); if(!n) return null;
+  if(_hubBagNpc!==n){ _hubBagNpc=n; _hubBagProp={x:n.x,y:0,z:n.z,yaw:Math.atan2(0-n.x,40-n.z)}; }
+  return _hubBagProp; }
 /* THE ARENA HAS NO STAGE INDEX, and this is the only lookup that did not know it. buildArenaRoom
    builds newG({arena:true, zone:0, …}) and never assigns G.stageIndex, so newG's default of 0 stood
    — STAGES[0] is The Outskirts, theme 'plains', a teal LAWN. The voxel renderer's own lookup
@@ -2855,7 +2869,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,hubBag:(G.hub&&!G.sparringRoom)?hubBagProp():null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -12894,6 +12908,13 @@ function drawWaystation(t){
       bx(n.x,38,n.z, 52,34,4,'#3a2f1e'); for(const [px,py] of [[-14,44],[2,36],[13,42]]) bx(n.x+px,py,n.z-3, 10,12,1.5,'#d8cba8');
       continue; }
     if(n.prop==='chest'){ drawShadow(n.x,n.z,18,0.22);
+      /* prop3d stands the game's OWN chest model here — the same qprops/Chest_Wood every treasure
+         chest in every zone is cast onto, at the same 32-unit fit. "Your Bag" is a chest; it was
+         the last brown box left in a plaza that had otherwise become 3D, standing a few steps from
+         the Quartermaster's real cart. Nothing is kept voxel: unlike a treasure chest there is no
+         lock, no keyhole and no mimic tell to overlay, and the model has its own clasp.
+         The shadow stays either way, as it does for every other cast. */
+      if(three3DLive() && window.__prop3dHubBagDrawn && window.__prop3dHubBagDrawn()) continue;
       pushM(); mv(n.x,0,n.z); rotY(Math.atan2(0-n.x,40-n.z));          // STATIC facing toward the hub centre (it's an object — it "looks at you" but never turns to track)
       bx(0,10,0, 40,20,26,'#5a4426'); bx(0,22,0, 42,8,28,'#6e5430');
       bx(0,16,14, 8,10,3,'#ffd24a','#ffd24a',0.7);                     // gold clasp on the FRONT, facing the plaza

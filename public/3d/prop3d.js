@@ -67,7 +67,7 @@ const KEY_LEN = 22;
 const WAY_FILE = 'props/pillar-obelisk';
 const WAY_H = 64;
 
-export const PROP3D = { on:true, chests:0, keys:0, waystone:0, ready:false, keysReady:false, err:null };
+export const PROP3D = { on:true, chests:0, keys:0, waystone:0, hubBag:0, ready:false, keysReady:false, err:null };
 try {
   const q = new URLSearchParams(location.search);
   /* Rides with world3d exactly as mob3d does: a 3D world with voxel chests in it is worse than
@@ -94,6 +94,12 @@ let _wayRec = null, _wayBox = null, _wayPending = false;
    has actually been built - the game falls back to the old voxel numbers until then, so a slow
    model load never leaves a chest with no lock on it. */
 let _box = null;
+/* THE WAYSTATION'S BAG. One actor, moved and hidden the way the waystone's is, and it is the same
+   MODEL as every chest in the game on purpose - "Your Bag" is a chest, it is drawn as a chest, and
+   it stands in the one place VISION.md says players idle. It is not in the chest POOL because it
+   is not in any list the game hands over: drawWaystation hand-draws it from G.hubNpcs, so like the
+   plaza bonfire there is nothing to key an actor to. */
+let _bagRec = null;
 
 function buildActor(){
   const src = kitModel(CHEST_FILE);
@@ -194,7 +200,34 @@ function syncPropsInner(scene, dt){
      is what makes the hub's centrepiece free — walking out of the hub into a zone with a waystone
      re-homes the obelisk that is already built and downloaded. */
   const c = syncWaystone(world.waystone || world.hubStone || null);
-  return a || b || c;
+  const d = syncHubBag(world.hubBag || null, dt);
+  return a || b || c || d;
+}
+
+/* The hub's bag chest. Deliberately NOT folded into syncChests: that map is keyed by the chest
+   OBJECT, so anything handed over as a fresh literal each frame would take a new actor every frame
+   and drain the pool. It does share the pool's actors, because a bag and a chest are the same
+   model at the same size, and it shares `_box` for the foot correction - a model whose pivot is at
+   its centre sinks half its height into the cobbles otherwise. */
+function syncHubBag(w, dt){
+  if(!w || !kitModel(CHEST_FILE)){
+    if(_bagRec) _bagRec.root.visible = false;
+    PROP3D.hubBag = 0;
+    return false;
+  }
+  if(!_bagRec){ _bagRec = acquire(); if(!_bagRec) return false; }
+  _bagRec.root.visible = true;
+  _bagRec.root.position.set(w.x, (w.y || 0) + ((_box && _box.footY) || 0), w.z);
+  /* Math.PI is the same half-turn syncChests applies - the kit's chest faces -Z and the game's
+     faces +Z - and `yaw` is the game's own facing for this object, computed once in index.html so
+     the two layers cannot disagree about which way the bag is turned. */
+  _bagRec.root.rotation.y = Math.PI + (w.yaw || 0);
+  /* Always shut. The bag is a door into a menu, not a container that opens in the world, and the
+     voxel one it replaces never opened either. */
+  if(_bagRec.act) _bagRec.act.time = 0;
+  _bagRec.mixer.update(dt);
+  PROP3D.hubBag = 1;
+  return true;
 }
 
 function syncChests(chests, dt){
@@ -343,6 +376,12 @@ export function clearProps(){
      size doubles as the "something is really standing there" flag, so it has to be cleared. */
   _wayBox = null;
   PROP3D.waystone = 0;
+  /* The bag holds an actor from the shared pool, and it is in neither `_actors` nor `_free`, so
+     the two loops above walk straight past it. Left behind, walking out of the hub into a zone
+     keeps a chest standing at the Waystation's coordinates in the middle of a level. */
+  if(_bagRec && _bagRec.root.parent) _bagRec.root.parent.remove(_bagRec.root);
+  _bagRec = null;
+  PROP3D.hubBag = 0;
 }
 
 /* True only when prop3d is really drawing chests, so the voxel path can skip exactly the body and
@@ -368,9 +407,20 @@ export function waystoneDrawn(){ return !!(PROP3D.on && kitModel(WAY_FILE) && _w
 window.__prop3dWaystoneDrawn = waystoneDrawn;
 window.__prop3dWaystone = () => _wayBox;
 
+/* And again for the hub's bag. `_bagRec.root.visible` is part of the test rather than just
+   `_bagRec`: the actor is kept and hidden when the level changes, so an existence check alone
+   would tell a zone that something is standing at the Waystation. */
+export function hubBagDrawn(){
+  return !!(PROP3D.on && kitModel(CHEST_FILE) && _bagRec && _bagRec.root.visible);
+}
+window.__prop3dHubBagDrawn = hubBagDrawn;
+/* The fitted box, so the game can place anything it keeps voxel against the real model. */
+window.__prop3dHubBag = () => (hubBagDrawn() ? _box : null);
+
 window.__prop3d = () => ({ on:PROP3D.on, ready:PROP3D.ready, chests:PROP3D.chests,
                            keysReady:PROP3D.keysReady, keys:PROP3D.keys, keyBox:_keyBox,
                            waystone:PROP3D.waystone, wayBox:_wayBox,
+                           hubBag:PROP3D.hubBag, hubBagDrawn:hubBagDrawn(),
                            box:_box, err:PROP3D.err });
 /* The key's measurements, so "it came out standing up and the right size" is a number rather than
    a squint: native is the model as authored (long axis on Z, which is the whole reason it needs a

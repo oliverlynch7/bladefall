@@ -59,8 +59,43 @@ export function areaKey(G, curZone){
   return z + '.' + (G.area != null ? G.area : 0);
 }
 
-export function loadLayers(){
+/* SHIPPED EDITS - the half that makes this a tool rather than a toy.
+
+   localStorage is the working copy: fast, survives reload, and lives on exactly one browser. Until
+   this existed, "Export file" produced a download and NOTHING anywhere read one back, so an edit
+   could never reach a player no matter how many times it was committed. The editor was a level
+   viewer with opinions.
+
+   public/3d/edits.json is the committed set. It is fetched once at boot and merged UNDER the local
+   working copy, so Oliver's in-progress edits always win over the shipped ones on his own machine -
+   otherwise deploying would silently overwrite whatever he had not exported yet.
+
+   Absent file is the normal case, not an error: the fetch fails quietly and the game runs exactly
+   as it does today. */
+let _shipped = {};
+export function loadShipped(){
+  return fetch('./edits.json', { cache: 'no-cache' })
+    .then(r => r.ok ? r.json() : {})
+    .then(j => { _shipped = j || {}; return _shipped; })
+    .catch(() => ({}));
+}
+export function shipped(){ return _shipped; }
+
+/* The working copy alone - what the editor writes and reverts. Kept separate from the merged view
+   so "Revert area" clears YOUR edit and falls back to the shipped one, rather than baking the
+   shipped one into local storage as if you had made it. */
+export function loadLocal(){
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e){ return {}; }
+}
+/* What the GAME applies: shipped underneath, local on top, per area. Merged per-area rather than
+   deep-merged, because an area is the unit an edit list is written and reverted as - half of one
+   list and half of another would replay edits against indices neither of them meant. */
+export function loadLayers(){
+  const out = {};
+  for(const k in _shipped) out[k] = _shipped[k];
+  const local = loadLocal();
+  for(const k in local) out[k] = local[k];
+  return out;
 }
 export function saveLayers(all){
   try { localStorage.setItem(LS_KEY, JSON.stringify(all)); return true; } catch(e){ return false; }

@@ -12,7 +12,7 @@
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
 import { EDITOR, EDIT_ARRAYS, areaKey, loadLayers, saveLayers, genFingerprint,
-         recordMove, recordDelete, recordAdd, exportLayers } from './editor.js';
+         recordMove, recordDelete, recordAdd, exportLayers, loadLocal } from './editor.js';
 import { toggleOverlay, refresh as refreshOverlay, OVERLAY } from './editor_collision.js';
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
@@ -174,7 +174,7 @@ function hud(){
 }
 
 function act(a){
-  const all = loadLayers();
+  const all = loadLocal();   // acting on YOUR working copy, not the merged view
   if(a === 'save'){ saveLayers(all); EDITOR.dirty = false; toast('saved in this browser'); }
   if(a === 'export'){ exportLayers(all); toast('exported - send me the file to commit it'); }
   if(a === 'revert'){ delete all[EDITOR.key]; saveLayers(all); EDITOR.dirty = false; toast('area reverted - reload to see it'); }
@@ -184,7 +184,7 @@ function act(a){
 /* The current area's edit list, created on demand so merely LOOKING at an area never writes a
    record for it - an empty entry would still be compared against the generator fingerprint. */
 function layer(){
-  const all = loadLayers();
+  const all = loadLocal();
   if(!all[EDITOR.key]) all[EDITOR.key] = { gen: genFingerprint(G()) };
   return { all, L: all[EDITOR.key] };
 }
@@ -229,7 +229,7 @@ function pushStep(before, revert, reapply){
 }
 
 function restoreLayer(json){
-  const all = loadLayers();
+  const all = loadLocal();
   all[EDITOR.key] = JSON.parse(json);
   saveLayers(all);
 }

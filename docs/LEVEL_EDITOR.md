@@ -42,8 +42,12 @@ checked within 1400 units of you, and the panel says so, so it is not a level-wi
 
 ## Saving
 
-**Save** keeps edits in this browser. **Export file** writes `bladefall.edits.json` - send it over
-to be committed, and it ships to players. **Revert area** throws away this area's edits.
+**Save** keeps edits in this browser. **Export file** writes `bladefall.edits.json`; commit it as
+`public/3d/edits.json` and it ships to players - the game fetches it at boot.
+
+Two layers, deliberately: the shipped file underneath, your browser's working copy on top. Your
+in-progress edits always win on your own machine, so a deploy can never overwrite work you have not
+exported yet. **Revert area** clears YOUR edit for that area and falls back to the shipped one.
 
 Edits are stored as a LIST of changes replayed over the generated level, not as a copy of it, so
 an area you have not touched behaves exactly as it does today, and the diffs are readable.

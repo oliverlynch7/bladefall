@@ -14487,6 +14487,11 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      that a minute ago, which is the gate doing its job.) */
   import * as ED from "./editor.js";
   window.__bfEditor = ED;
+  /* Pull the COMMITTED edits before anything loads a level. Async and unawaited on purpose: the
+     title screen comes up first and the fetch is local, so it has always landed by the time a
+     level builds - and if it has not, or the file is absent, applyEditsNow simply finds nothing
+     and the level is exactly as generated. Never a reason to hold up boot. */
+  ED.loadShipped();
 </script>
 <script type="module" src="./hero3d.js"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

@@ -1398,7 +1398,61 @@ function buildHub(scene, world){
   counts.buildings = bc.buildings; counts.buildingPieces = bc.pieces;
   counts.buildingMeshes = bc.meshes; counts.buildingMissing = bc.missing;
 
+  Object.assign(counts, buildHubDecoProps(world));
+
   return counts;
+}
+
+/* THE HUB'S OWN DECO, CAST ONTO REAL PROPS.
+
+   buildHub otherwise ignores G.deco entirely and rebuilds the courtyard from G.gates / G.walls /
+   G.segments, and buildWorld returns on the hub branch before the bins/classify block - so until
+   this existed, NOTHING the Waystation itself placed ever became a model. Every plaza lamp,
+   planter and bloom stayed a voxel box standing on 3D cobbles, which is the half-converted state
+   the top of buildWorld warns about: real green lightposts lining the approach and brown boxes
+   with a green cube on top doing the same job in the plaza (_shot/out/h1-base.png).
+
+   Deliberately an OPT-IN list rather than the zone path's full classify sweep. The hub is
+   hand-authored: most of its deco is flagstone paint, basin lips, activity pads and pillar caps
+   that no kit model replaces, and running them all through the prop bins would replace authored
+   art with guesses. Only kinds the generator has explicitly tagged AND that have a proven model
+   are converted, and each returns a count so the voxel side can drop exactly what was built and
+   nothing else - the counts.pave idiom. If a model fails to load the count is still returned
+   (buildProps degrades to a lit box rather than to a hole), so the two layers can never both be
+   drawing the same object. */
+function buildHubDecoProps(world){
+  const out = {};
+  /* What this pass COSTS, reported rather than guessed. A prop set draws one InstancedMesh per
+     variant per primitive, so thirty blooms split six ways is not one draw call, and the hub is
+     the place Oliver's 60fps phone budget is spent idling. */
+  const before = group.children.length;
+  const lamps = [], blooms = [];
+  for(const d of (world.deco || [])){
+    if(!d || d.w == null) continue;
+    if(d.kind === 'lantern' && d.lead !== false) lamps.push(d);
+    else if(d.kind === 'flower' && d.lead !== false) blooms.push(d);
+  }
+  /* hubPiece, not buildProps, and the difference is the whole point of converting these: buildProps
+     deliberately keeps a prop's own material, which is right for a wood full of trees and wrong
+     here. The Waystation already stands ten of this exact model down its approach and paints them
+     '#6b5636'; casting the plaza's four untinted left the courtyard with two different-coloured
+     lamps thirty feet apart - a mint one at the fountain, a dark green one behind it - which is a
+     more obvious inconsistency than the voxel box they replaced (_shot/out/h2-after.png).
+     postH is the tree's trunkH in a third place: the lead deco is the lamp HOUSING, perched on a
+     collision column the deco list does not contain, so its y0 is the top of the post and an
+     unadjusted model would hang from there. */
+  out.hubLamp = hubPiece('hubLantern', lamps, (o, d, rec) => {
+    const sc = (d.lampH || d.h || 76) / rec.height;
+    o.position.set(d.x, (d.y0 || 0) - (d.postH || 0), d.z);
+    o.rotation.set(0, hash(d.x, d.z) * 6.283, 0);
+    o.scale.set(sc, sc, sc);
+  }, '#6b5636');
+  if(blooms.length){
+    buildProps(blooms, PROP_SETS.flower, 18);
+    out.hubFlower = blooms.length;
+  }
+  out.hubDecoDraws = group.children.length - before;
+  return out;
 }
 
 export function buildWorld(scene, world){
@@ -1425,7 +1479,11 @@ export function buildWorld(scene, world){
       o.intensity = o.userData._w3dOrig * (o.isDirectionalLight ? 1.05 : 0.92);
     });
     const c = buildHub(scene, world) || {};
-    WORLD3D.counts = Object.assign({ hub: true }, c);
+    /* The hub never reported what it costs to draw. Every zone has published `drawCalls` since the
+       first conversion, and the Waystation - the place VISION.md says players will idle in - was
+       the one destination where "did that change cost anything" could not be answered at all.
+       0 in a hub sub-area that builds nothing, which is itself the honest answer. */
+    WORLD3D.counts = Object.assign({ hub: true, drawCalls: group.children.length }, c);
     WORLD3D.ready = true;
     return WORLD3D.counts;
   }
@@ -1514,7 +1572,11 @@ export function buildWorld(scene, world){
   buildProps(bins.flower, PROP_SETS.flower, 18);
   /* Height alone, and lampH not d.h: the lead deco is only the POST, so d.h would stand a
      lightpost 38 tall where the object the generator built is 47 tall to the top of its head. */
-  buildProps(bins.lantern, PROP_SETS.lantern, 47, d => (d.lampH || d.h || 47), true);
+  /* `postH` is subtracted here for the same reason it is in buildHubDecoProps, so the field means
+     one thing in both places: a lantern whose lead deco is the HOUSING gives y0 as the top of its
+     post. Roadside lanterns tag the post itself and carry no postH, so they are untouched. */
+  buildProps(bins.lantern.map(d => (d.postH ? Object.assign({}, d, { y0: (d.y0 || 0) - d.postH }) : d)),
+             PROP_SETS.lantern, 47, d => (d.lampH || d.h || 47), true);
   /* Standing stones, by HEIGHT alone - see PROP_SETS.standstone for why. */
   buildProps(bins.standstone, PROP_SETS.standstone, 90, d => (d.h || 90), true);
   /* CROPS, as real lit boxes rather than models, and that is a measured choice rather than a

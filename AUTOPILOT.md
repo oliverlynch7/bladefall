@@ -440,6 +440,68 @@ because the three maps are three different levels.
       calls, 18 creatures, 7 chests.
       NEXT for this item: the hub deco is all DRAWN now, but it is drawn as voxel boxes standing on
       3D cobbles. Converting the benches/planters/market wares to kit props is the remaining half.)*
+      *(progress 2026-08-02, `autopilot-merged`: **THE HUB'S OWN DECO NOW CASTS ONTO REAL PROPS —
+      the first time anything the Waystation itself places has ever become a model.** New
+      `buildHubDecoProps` in world3d.js, called from `buildHub`. Until this went in, `buildHub`
+      read exactly one thing out of `G.deco` (`hubBuildingSpecs`) and `buildWorld` returned on the
+      hub branch before the bins/classify block, so **every `kind:` tag in `enterWaystation` was
+      inert** — the 30 planter blooms had carried `kind:'flower', lead:true` since the pads patch
+      and nothing had ever read it.
+      Two conversions, both measured, neither an art call:
+      - **The four plaza lamps** → `props/lightpost-single`, the SAME model the hub already lines
+        its approach with (ten of them, `counts.lantern`). The before shot is the argument
+        (`_shot/out/h1-base.png`): real green lightposts down the approach and, thirty feet away at
+        the fountain, brown voxel posts with a green cube stuck on top doing the identical job.
+        That is the half-converted state `buildWorld`'s own header warns about, in the one place
+        VISION.md says players idle. After: `h3-lamp.png`.
+      - **The 30 planter blooms** → `PROP_SETS.flower`, six variants. `h4-planter.png` — real
+        flowers with stems standing in the trough where `h1-base.png` had five coloured cubes.
+      **`hubPiece`, NOT `buildProps`, for the lamps — and shipping buildProps is the trap.** It
+      renders correctly and it is still wrong: `buildProps` deliberately keeps a prop's own
+      material ("tinting a textured model by the deco's flat colour would throw away the artwork"),
+      but the hub paints its ten approach lanterns `#6b5636`. So the first build stood a MINT
+      lightpost at the fountain in front of ten dark green ones (`h2-after.png`) — a more obvious
+      inconsistency than the voxel box it replaced. Rendered, seen, redone through `hubPiece`,
+      which is what the hub's own dressing uses and takes the colour.
+      **`postH` is `trunkH` in a third place.** The lead deco is the lamp HOUSING, not the post,
+      because the post is a `vcol` OBSTACLE and is not in the deco list at all — so its `y0` is the
+      top of the post and an unadjusted model hangs from there. Subtracted in both places, so the
+      field means one thing everywhere; roadside lanterns tag the post itself, carry no `postH`,
+      and are untouched.
+      **The hanging basket goes WITH the lamp, and leaving it was the second render's finding.**
+      It is a 20-wide green box pinned to the middle of the voxel post; on a real lightpost it
+      reads as a plank nailed to a lamp (`h2-after.png` again). Tagged `lead:false` so it is
+      dropped with the lamp's glow box — a non-lead piece of a converted object, the same rule as a
+      tree's second canopy box.
+      **Every drop is gated on its OWN count, never on `_hubDeco`.** `_hubLamp`/`_hubFlower` read
+      `counts.hubLamp`/`counts.hubFlower`, the `counts.pave` idiom, and `ob.lampCol` is
+      `treeCol`/`pillarCol` for the collision post. Fails safe twice over: `buildHub` returns null
+      in a hub sub-area with no gates, so the **Sparring Room's counts is still exactly `{hub:true}`
+      and nothing there is dropped** (rendered — ring, ropes, posts, banners, braziers all intact,
+      `h6-spar.png`); and if a model never loads, `buildProps` degrades to a lit box rather than to
+      a hole, so the count is still returned and the two layers can never both draw the object.
+      **THE HUB NOW REPORTS `drawCalls`, and it never has before.** Every zone has published it
+      since the first conversion; the Waystation — the one place Oliver's 60fps phone budget gets
+      spent idling — was the single destination where "did that change cost anything" could not be
+      answered at all. Measured rather than guessed: the hub was **38 draw calls, is now 51**, and
+      `counts.hubDecoDraws` says this pass is **13 of them** (1 lamp mesh + 6 flower variants x 2
+      primitives). Kept at six variants deliberately: the Outskirts is 41, so the hub becomes the
+      heaviest place in the game, but 13 instanced meshes is nothing beside the 64 animated
+      characters the phone already holds 60fps at. The number is published now, so trimming the
+      flower set to three variants is a one-line revisit if it ever matters.
+      Deliberately an OPT-IN list of kinds, not the zone path's full classify sweep: most hub deco
+      is flagstone paint, basin lips, activity pads and pillar caps that no kit model replaces, and
+      the seven rampart dividers still have nothing standing in their place — excluding `pillar`
+      would delete them.
+      Regressions all clean: `?world3d=0` unchanged, still five coloured bloom boxes in the trough
+      (`h4-planter-voxel.png`); first-person still draws the full voxel hub (`h5-fps.png`) because
+      `three3DLive()` is false there; Outskirts identical to the recorded baseline — 1257 floor,
+      115 road, 2194 deco, 277 box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped,
+      41 draw calls, 18 creatures, 7 chests.
+      NEXT for this item: the market wares, keeper stalls, forge, mirror and beast cages are drawn
+      by `drawWaystation`, NOT from `G.deco` — so they are outside this pipeline entirely and
+      converting them is a different job. The rampart dividers are the remaining tagged deco with
+      no model.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

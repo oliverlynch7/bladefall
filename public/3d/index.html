@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.431.0-autopilot';
+const VERSION3D='1.432.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10244,9 +10244,23 @@ function enterWaystation(){
   // ---- the heart: the waystone pool + lanterns at plaza centre (0,30). DECO = non-colliding, so a straight spawn->gate walk is never blocked ----
   G.deco.push({x:0,z:30,y0:0,w:130,h:5,d:130,c:'#8a7452'}); G.deco.push({x:0,z:30,y0:5,w:112,h:3,d:112,c:'#6e5a44'});   // basin lip
   G.deco.push({x:0,z:30,y0:7,w:96,h:2,d:96,c:'#2f6a7a'});                             // the water (animated glint in drawWaystation)
-  for(const la of [[-90,-40],[90,-40],[-90,100],[90,100]]){ vcol(la[0],la[1],9,9,62);
-    G.deco.push({x:la[0],z:la[1],y0:62,w:15,h:14,d:15,c:'#3a2c1c'}); G.deco.push({x:la[0],z:la[1],y0:66,w:11,h:9,d:11,c:'#ffd88a'});
-    G.deco.push({x:la[0],z:la[1],y0:44,w:20,h:12,d:20,c:'#4d8842'}); }               // lantern posts + hanging flower baskets
+  /* The four plaza lamps. Tagged kind:'lantern' so the 3D layer stands a real lightpost here -
+     the SAME model it already lines the approach with, so the plaza stops having two different
+     kinds of lamp standing thirty feet apart.
+     The lead is the HOUSING, not the post, because the post is an obstacle (vcol) rather than
+     deco - so it carries `postH`, which the 3D layer subtracts to get the object's base, exactly
+     as `trunkH` does for a tree and `pillarH` for a colonnade column. `lampH` is post + housing,
+     i.e. how tall the thing the level actually built is.
+     `lampCol` on the collision column is the treeCol/pillarCol rule again: the collision stays,
+     the redundant voxel shaft is skipped once a real lightpost is standing in it. */
+  for(const la of [[-90,-40],[90,-40],[-90,100],[90,100]]){ const lc=vcol(la[0],la[1],9,9,62); lc.lampCol=true;
+    G.deco.push({x:la[0],z:la[1],y0:62,w:15,h:14,d:15,c:'#3a2c1c',kind:'lantern',lead:true,lampH:76,postH:62});
+    G.deco.push({x:la[0],z:la[1],y0:66,w:11,h:9,d:11,c:'#ffd88a',kind:'lantern',lead:false});
+    /* The hanging basket is part of the LAMP, not a thing standing beside one, so it is tagged
+       with it and goes when the lamp does - the way a tree's second canopy box or a building's
+       roof cap does. Left behind, it is a 20-wide green slab pinned to the middle of a lightpost
+       that has no basket on it. The voxel path still draws all three boxes exactly as before. */
+    G.deco.push({x:la[0],z:la[1],y0:44,w:20,h:12,d:20,c:'#4d8842',kind:'lantern',lead:false}); }   // lantern posts + hanging flower baskets
   // honey flagstone paths: spawn -> waystone -> gate arc, and out to the two bays
   for(const pt2 of [[0,150,84,300],[0,-160,96,260],[-380,40,520,66],[380,40,520,66]])
     G.deco.push({x:pt2[0],z:pt2[1],y0:0,w:pt2[2],h:1.4,d:pt2[3],c:'#9a7c52'});
@@ -12183,10 +12197,17 @@ function drawCourse(s,t){
      a 3D replacement for THIS? It does not, so it defers. The columns go with them - a cover column
      is the same kind of object, and the tree-trunk ones are still skipped outright above because
      world3d really does stand a tree there. */
-  const _w3dOn = (() => { const w = window.__world3d && window.__world3d(); return !!(three3DLive() && w && w.on && w.ready); })();
+  const _w3d = window.__world3d && window.__world3d();
+  const _w3dOn = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
+  /* The hub's plaza lamp posts. Gated on the COUNT rather than on `_w3dOn`, because "world3d is
+     on" is not "world3d stood a lightpost here" - buildHub lays nothing at all in a hub sub-area
+     that declares no gates (the Sparring Room), and the count is the only honest test. Fails safe:
+     no count, and the voxel post draws. */
+  const _hubLamp = !!(_w3dOn && _w3d.counts && _w3d.counts.hubLamp > 0);
   deferOn();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
     if((ob.treeCol || ob.pillarCol) && _w3dOn) continue;   // world3d draws the real tree / the real pillar; skip the voxel shaft
+    if(ob.lampCol && _hubLamp) continue;                   // ...and the real lightpost; skip the voxel lamp post
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
     if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
@@ -12204,8 +12225,7 @@ function drawCourse(s,t){
   /* Also re-enabled whenever the Three layer will not run at all this frame — first-person, or a
      hero that has not finished loading. This list is EVERY tree, rock and prop in the level; with
      both copies off the world is simply empty. See three3DLive(). */
-  const _w3d = window.__world3d && window.__world3d();
-  const _w3dDrawing = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
+  const _w3dDrawing = _w3dOn;   // same test, read once above so the obstacle pass can share it
   /* THE HUB IS NOT A LEVEL world3d CONVERTS. buildHub reads exactly ONE thing out of G.deco —
      hubBuildingSpecs, which drops everything where kind!=='building' — and derives the rest of the
      Waystation from G.gates / G.walls / G.segments. So "world3d is drawing" is not "world3d is
@@ -12218,13 +12238,21 @@ function drawCourse(s,t){
      _hubDeco alone would delete that room's ring canvas lip (y0:0 h:2.5), which nothing replaces.
      It fails safe too: if the cobble prop never loads, pave is undefined and the voxel floor draws. */
   const _hubPaved = !!(_hubDeco && _w3d.counts.pave > 0);
+  /* buildHubDecoProps casts the hub's TAGGED deco onto real props, so those kinds - and only
+     those - must stop being drawn here or they render twice. Each is gated on its own count, so
+     a kind the 3D layer did not build keeps its voxel copy. `skipflower` goes with `flower`: the
+     stem and leaf are the boxes the one real flower model replaces. */
+  const _hubFlower = !!(_hubDeco && _w3d.counts.hubFlower > 0);
   if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
   if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
-    /* Nothing but 'building' may be excluded by tag here: buildWorld returns on the hub branch
-       before the bins/classify block, so buildProps never runs in the Waystation and excluding
-       'pillar' would delete the seven rampart bay dividers, 'flower' all 30 planter plants. */
-    if(_hubDeco && (d.kind === 'building' || (_hubPaved && (d.y0||0) + (d.h||0) <= 3))) continue;
+    /* Nothing may be excluded by tag here that buildHubDecoProps does not actually convert:
+       buildWorld returns on the hub branch before the bins/classify block, so excluding 'pillar'
+       would delete the seven rampart bay dividers with nothing standing in their place. */
+    if(_hubDeco && (d.kind === 'building'
+        || (_hubLamp && d.kind === 'lantern')
+        || (_hubFlower && (d.kind === 'flower' || d.kind === 'skipflower'))
+        || (_hubPaved && (d.y0||0) + (d.h||0) <= 3))) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;

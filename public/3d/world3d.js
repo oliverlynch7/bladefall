@@ -778,8 +778,24 @@ const GROUND_JITTER = 0.13;
    The level's own colour settles it rather than a new art choice - interior brick tinted with the
    ground colour the game already declares, so a trial in any zone lands on that zone's own stone. */
 const TRIAL_TILE = 'village/Floor_Brick', TRIAL_ROAD = 'village/Floor_RedBrick';
+/* AN ARENA IS THE SAME CLASS OF BUG AS A TRIAL, one step further along: it does not merely borrow
+   the wrong theme, it has no stage at all. See the long note at __BF_WORLD in index.html.
+   Do NOT "fix" this by adding an `arena` entry to THEME_GROUND. That table's entries are static
+   literals and the three arena maps declare three DIFFERENT grounds - Proving Ground #3b4254 slate,
+   the parkour map #3a3350, Cinder Pit #c93a12 molten - so one entry gives all three the same floor
+   and the Cinder Pit's read is still gone. Each map's colour is already authored; use it. That also
+   means this needs no new art choice.
+   The half-fix looks like it worked, which is the trap: with no `arena` key in THEME_GROUND,
+   theme:'arena' falls through to THEME_GROUND_DEFAULT - tan uneven brick. That is a plausible arena
+   floor and an obvious improvement on teal grass, so a run that ships only the index.html half
+   renders it, sees stone, and leaves the Cinder Pit a lawn's worth of brick over a lava sea. */
+const ARENA_TILE = 'village/Floor_Brick', ARENA_ROAD = 'village/Floor_RedBrick';
 function groundSpecFor(world){
   const isHub = !!(world && world.hub);
+  if(!isHub && world && world.arena){
+    const c = world.ground || '#3b4254';
+    return { tiles: [{ n: ARENA_TILE }], tint: c, road: { n: ARENA_ROAD, tint: c } };
+  }
   if(!isHub && world && world.trial){
     const c = world.ground || '#a99cb4';
     return { tiles: [{ n: TRIAL_TILE }], tint: c, road: { n: TRIAL_ROAD, tint: c } };

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.430.0-autopilot';
+const VERSION3D='1.431.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2842,8 +2842,20 @@ window.__BF_META=()=>meta;
    zone's quest waystone and the voxel art is all but identical (a stepped plinth under a tall
    square shaft, a gold capstone, a column of light), which is why both cast onto the same obelisk. */
 const HUB_STONE={x:0,y:0,z:30};
-window.__BF_WORLD=()=>{const st=STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+/* THE ARENA HAS NO STAGE INDEX, and this is the only lookup that did not know it. buildArenaRoom
+   builds newG({arena:true, zone:0, …}) and never assigns G.stageIndex, so newG's default of 0 stood
+   — STAGES[0] is The Outskirts, theme 'plains', a teal LAWN. The voxel renderer's own lookup
+   (search ARENA_STAGE below) has always special-cased the arena; this one, the only thing world3d
+   is ever told, special-cased the hub and not the arena.
+   The Cinder Pit is where it bit: `G.arenaLava` is set, read for player damage and enemy damage,
+   and NEVER DRAWN — the molten sea IS the stage ground colour, over a single 1560x1560 segment the
+   author's own comment calls "for lava this floor IS the lava surface". The seven islands are
+   r=80..150 against that, so the 3D layer laid grass over the large majority of the map and the
+   whole read of it — stay on the islands — was gone. Rendered both ways before and after.
+   ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
+   reference it ahead of its assignment without a TDZ throw. */
+window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';

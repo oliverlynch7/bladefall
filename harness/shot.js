@@ -24,6 +24,10 @@
      node _shot/shot.js --scene trial                    # the class trial — the only ROOM DUNGEON
      node _shot/shot.js --scene spar                     # the hub's SPARRING ROOM (the boxing hall)
                                                          #   (walls with doorways, doors, plates)
+     node _shot/shot.js --scene arena:lava               # THE FOUR ACTIVITIES. arena:flat|parkour|lava
+     node _shot/shot.js --scene abyss:13                 #   abyss:<floor> — stage rotates every 2 floors
+     node _shot/shot.js --scene sprint                   #   the floating parkour course
+     node _shot/shot.js --scene gauntlet                 #   gauntlet:normal|brutal (boss rush)
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
      node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
@@ -209,8 +213,42 @@ const areaOf = (dest) => {
    The run-up already calls startTrial('warrior') on its way to the hub — this destination simply
    never calls skipTrial(). `trial:reaper` etc. picks the class, which picks the trial. */
 const trialOf = (dest) => { const m = /^trial(?::([a-z]+))?$/i.exec(String(dest || '')); return m ? (m[1] || 'warrior') : null; };
+/* THE FOUR REPEATABLE ACTIVITIES — the Abyssal Descent, the Treasure Sprint, the Arena and the
+   Boss Gauntlet. Oliver's stage-2 brief is "each of the four is a PLACE, not a menu", and until
+   this went in NOT ONE OF THEM HAD EVER BEEN IN FRONT OF A CAMERA. All four take world3d's full
+   ZONE branch (they are not hub sub-areas: only the Sparring Room is), so most of stage 2 is
+   auditing a conversion that already happens rather than building one — but you cannot audit what
+   you cannot photograph.
+   Each ready test is keyed to the destination's OWN flag, never to a generic `built && !counts.hub`:
+   the run-up passes through the class trial AND the hub, and both satisfy the generic test. That is
+   the same race, twice fixed, written up at length above — do not reintroduce it here.
+   Two entry notes, both measured off the source:
+     - `startBossRush` early-returns with a toast unless `meta.hero` and `meta.classUnlocked` are
+       populated (index.html:9625), so it needs cheatUnlockClasses() first exactly as `side<N>` does.
+     - The Abyss and Gauntlet NPCs open an overlay CARD (openEndlessGate / openGauntletGate) rather
+       than entering. The door is the `start*` call, not the NPC — which is why these are `--pre`
+       style entries and `spar` is not.
+   `arena:<map>` picks the map (flat | parkour | lava) and `abyss:<floor>` the floor, because both
+   change the LEVEL: the three arena maps declare three different grounds, and the Abyss rotates
+   stage every two floors, so a single default render says nothing about the other variants. */
+const ACTIVITIES = {
+  arena:    { arg: 'map',   go: (v) => 'if(' + JSON.stringify(!!v) + ') __BF3.ARENA_LOADOUT.map=' + JSON.stringify(v || 'flat') + '; __BF3.enterArena();',
+              at: '__BF3.G.arena === true' },
+  abyss:    { arg: 'floor', go: (v) => '__BF3.startEndless({floor:' + (parseInt(v, 10) || 1) + '});',
+              at: '!!__BF3.G.endless && __BF3.G.floor > 0' },
+  sprint:   { arg: null,    go: () => '__BF3.startHubSprint();',
+              at: '!!__BF3.G.sprintFun && !!__BF3.G.bonusActive' },
+  gauntlet: { arg: 'tier',  go: (v) => '__BF3.cheatUnlockClasses(); __BF3.startBossRush(' + JSON.stringify(v || 'normal') + ');',
+              at: '!!__BF3.G.bossRush && __BF3.G.brIdx != null' },
+};
+const activityOf = (dest) => {
+  const m = /^(arena|abyss|sprint|gauntlet)(?::([a-z0-9]+))?$/i.exec(String(dest || ''));
+  if (!m) return null;
+  const key = m[1].toLowerCase();
+  return { key, spec: ACTIVITIES[key], val: m[2] || null };
+};
 const sceneJs = (dest) => {
-  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest), ac = activityOf(dest);
   /* The SPARRING ROOM is a hub sub-area — its own hand-authored boxing hall, `G.hub` true and
      `G.sparringRoom` true — and it needed a destination of its own because there is no way in from
      outside: `enterSparringRoom` is a plain top-level function and is NOT on `window.__BF3`, so a
@@ -218,6 +256,7 @@ const sceneJs = (dest) => {
      (`{id:'sparring', open:()=>enterSparringRoom()}`), so this opens it the way a player does. */
   const go = dest === 'hub' ? ''
     : dest === 'spar' ? 'var sp=(__BF3.G.hubNpcs||[]).filter(function(q){return q.id==="sparring"})[0]; if(sp) sp.open();'
+    : ac ? ac.spec.go(ac.val)
     : sd != null ? '__BF3.cheatUnlockClasses(); __BF3.enterSide(' + sd + ');'
     : ar ? '__BF3.enterZone(' + ar.zone + '); for(var a=0;a<' + (ar.area < 0 ? 9 : ar.area)
            + ' && __BF3.G.area >= 0; a++) __BF3.nextArea();'
@@ -288,7 +327,7 @@ const sceneReady = (dest) => {
      pure race with how warm the asset cache is: one run reported "The Outskirts" with 118 trees,
      the next reported "Trial of the Blade" with 34 deco and 0 trees, from an identical command.
      Same shape as the hub race fixed earlier the same day, one gate further back. */
-  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest);
+  const sd = sideOf(dest), ar = areaOf(dest), tr = trialOf(dest), ac = activityOf(dest);
   const inZone = '!__BF3.G.hub && !__BF3.G.trial && !__BF3.G.side && __BF3.G.zone === ';
   /* The trial is the one destination that WANTS G.trial, so it inverts the clause every other
      destination added to keep the trial out. It cannot name a zone: startTrial() reuses whatever
@@ -298,6 +337,11 @@ const sceneReady = (dest) => {
     /* The sparring room sets G.hub AND G.sparringRoom, so `hub` alone would resolve in the
        Waystation on the way and photograph the plaza. Test the room itself. */
     : dest === 'spar' ? '!!__BF3.G.sparringRoom'
+    /* Each activity is identified by its own flag, and never by a zone index. Three of the four
+       reuse an existing zone number (the Arena builds newG with zone:0, i.e. The Outskirts', and
+       the trial on the way there is zone 0 as well), so `inZone` would resolve in the wrong place
+       exactly the way it did before `!G.trial` was added. */
+    : ac ? '!__BF3.G.hub && ' + ac.spec.at
     : tr
       /* ...and the arena is actually ON SCREEN. showTutorial() sets mode='menu' and covers the
          level with a full-page card, so `G.trial` alone resolved in 0.5s and handed back a
@@ -566,8 +610,17 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const where = await evaluate('(function(){ var G=window.__BF3&&__BF3.G; if(!G) return null;'
       /* The sparring room has no areaName, so it printed "? [hub]" — indistinguishable in the log
          from the Waystation, which is the one thing this line exists to prevent. */
-      + ' return (G.areaName||(G.sparringRoom?"Sparring Room":"?"))'
-      + ' + (G.sparringRoom?" [SPAR]":G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
+      /* Same problem again for the four activities: none of them sets areaName, so all four printed
+         "?" and three of them carry a zone index borrowed from somewhere else (the Arena is zone 0,
+         The Outskirts'). Name them off their own flags, and let the Arena say WHICH MAP — the three
+         maps are three different levels and the whole point of photographing them is telling them
+         apart. */
+      + ' var act = G.arena ? ("The Arena" + (window.__BF3.ARENA_LOADOUT ? " · " + __BF3.ARENA_LOADOUT.map : ""))'
+      + '   : G.endless ? ("Abyssal Descent · floor " + G.floor)'
+      + '   : G.bossRush ? ("The Gauntlet · " + (G.brTier||"normal") + " #" + G.brIdx)'
+      + '   : G.sprintFun ? "Treasure Sprint" : null;'
+      + ' return (act||G.areaName||(G.sparringRoom?"Sparring Room":"?"))'
+      + ' + (act?" [ACTIVITY]":G.sparringRoom?" [SPAR]":G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
       + ' + "  zone " + G.zone + " stage " + G.stageIndex; })()');
     if (where.value) console.log('at   → ' + where.value);
   }

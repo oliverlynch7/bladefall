@@ -261,6 +261,62 @@ Each of the four is a PLACE, not a menu. The pads are flat coloured slabs today;
 make each read as somewhere you go, in the way the Waystation now does - and to check the
 interior, not just the pad, because three of the four lead somewhere.
 
+**ALL FOUR ACTIVITIES CAN NOW BE PHOTOGRAPHED** (added 2026-08-02, `autopilot-merged`):
+`--scene arena:flat|parkour|lava`, `--scene abyss:<floor>`, `--scene sprint`,
+`--scene gauntlet:normal|brutal`. Until this went in **not one of the four had ever been in front
+of a camera**, which is why the bug below survived. Four of the five stage-2 destinations take
+world3d's full ZONE branch (only the Sparring Room is a hub sub-area), so most of stage 2 is
+auditing a conversion that already happens — but you cannot audit what you cannot photograph.
+Each ready test is keyed to the destination's OWN flag (`G.arena`, `G.endless && G.floor`,
+`G.sprintFun && G.bonusActive`, `G.bossRush && G.brIdx != null`), never to a generic
+`built && !counts.hub`: three of the four reuse a zone index borrowed from somewhere else — the
+Arena builds `newG` with `zone:0`, The Outskirts' — so the generic test resolves in the trial or
+the hub on the way, which is the same race this file has now fixed three times.
+The `at →` line names them (`The Arena · lava [ACTIVITY]`), and for the Arena it names the MAP,
+because the three maps are three different levels.
+
+- [x] **THE ARENA WAS A LAWN — including the Cinder Pit's lava sea.** Done 2026-08-02
+      (`autopilot-merged`), the first render of any of the four activities.
+      Two stage lookups disagreed. The **voxel** renderer (`index.html:13798`) has always been
+      arena-aware: `(G && G.arena && ARENA_STAGE) ? ARENA_STAGE : …`. `__BF_WORLD()` (2845) — **the
+      only thing world3d is ever told** — special-cased the hub and not the arena, and
+      `buildArenaRoom` builds `newG({arena:true, zone:0, …})` and **never assigns `G.stageIndex`**,
+      so `newG`'s default of 0 stood. `STAGES[0]` is The Outskirts: theme `plains`, teal grass.
+      Grep settles it rather than suspects it — `G.stageIndex=` has exactly seven assignment sites
+      and none is in `buildArenaRoom`.
+      **The Cinder Pit is where it bit, and it is the biggest wrong-surface area found so far.**
+      `G.arenaLava` is set (8316), read for player damage (8405) and enemy damage (8601), and
+      **never drawn** — the molten sea IS the stage ground colour, over the single
+      `{x:0,z:0,w:1560,d:1560}` segment whose own comment says *"for lava this floor IS the lava
+      surface; islands are plats above it"*. The islands are r=80..150 against 1560, so the 3D
+      layer laid grass over the large majority of the map and the entire read of it — stay on the
+      islands — was gone. Rendered before (`_shot/out/m3-arena-lava-before.png`, a teal-green sea)
+      against `?world3d=0` at the same destination (`m3-arena-lava-voxel.png`, a molten orange one).
+      **Both halves shipped, and shipping one is the trap.** `THEME_GROUND` has no `arena` key, so
+      `theme:'arena'` alone falls through to `THEME_GROUND_DEFAULT` — tan uneven brick. That is a
+      plausible arena floor and an obvious improvement on grass, so a run that ships only the
+      `__BF_WORLD` change renders it, sees stone, and leaves the Cinder Pit a lawn's worth of brick
+      over a lava sea.
+      **And "just add an `arena` entry to `THEME_GROUND`" is the WRONG fix.** That table's entries
+      are static literals and the three maps declare three DIFFERENT grounds: Proving Ground
+      `#3b4254` slate, the parkour map `#3a3350`, Cinder Pit `#c93a12` molten. One entry gives all
+      three the same floor. `groundSpecFor` gets an arena branch keyed on `world.arena` and tinted
+      with the level's own `world.ground`, exactly the shape of the TRIAL branch three lines up —
+      so **no new art choice was needed; each map's colour is already authored.** Verified live: the
+      three maps report those three grounds (`m3-arena-lava-after.png`, `m3-arena-flat.png`,
+      `m3-arena-parkour.png`), 2 draw calls.
+      *TDZ risk settled and settles in favour:* `ARENA_STAGE` is declared `var` at 8299 with an
+      explicit trailing comment saying `var` not `let` precisely so 2845 can reference it.
+      *One thing measured that reads as a second bug and is not:* the voxel Proving Ground renders
+      pale sage rather than `#3b4254` slate. The voxel path IS honouring `ARENA_STAGE.ground` — the
+      lava map proves the mechanism, rendering correctly orange the same way — so this is lighting,
+      and the residual brightness gap between the two layers is the already-recorded consequence of
+      the 3D layer drawing after `PostFX.end()` and getting no grade. Not chased.
+      Regressions clean: the class trial still lands on its khaki stone chamber and still takes the
+      TRIAL branch (`arena:false, trial:true`, 1379 floor tiles, `m3-trial.png`); Outskirts
+      identical to baseline (1257 floor, 115 road, 2194 deco, 118 trees, 277 box, 1624 corn, 41
+      draw calls); hub unchanged (pave 399, 8 buildings, 4 pads, 8 caps).
+
 - [ ] **Hub buildings.** The Waystation is where players idle and socialise, so it matters most.
       Both kits are MODULAR (walls/doors/roofs, no whole buildings) — `makeBuilding()` in
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's

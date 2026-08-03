@@ -22,9 +22,16 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 
 ## The palette
 
-Props (tree, rock, fence, gravestone, pillar, column, lantern, flower, standing stone, crop),
-terrain (platform, pillar block), gameplay objects (healing pad, mover) and mobs. Pick one, then
-click the ground.
+- **Structures and assets** - wall, gateway, tower base/mid/roof, flag, fountain, cart, stall,
+  hedge, banner, anvil, bush, grass, stone and grass floor tiles. These are the model kits
+  themselves, so anything in them can be placed.
+- **Props** - tree, rock, fence, gravestone, pillar, column, lantern, flower, standing stone, crop.
+- **Terrain** - platform, floor, plateau, parkour column, step. A step duplicated and raised
+  (`D` then `PgUp`, repeatedly) builds stairs and ramps.
+- **Gameplay** - healing pad, moving platform, mobs.
+
+Pick one, then click the ground. Every size is a starting point: `alt`+arrows resizes anything and
+the collider follows.
 
 Placed props get **collision sized to them automatically**, linked to the prop - move, resize,
 duplicate or delete the prop and its collider follows. `K` turns it off for things you should walk
@@ -54,10 +61,13 @@ an area you have not touched behaves exactly as it does today, and the diffs are
 
 ## What it cannot do yet
 
-- **The hub renders only lanterns and flowers as models**, so the rest of the prop palette is
-  disabled there. Fixing it needs the matching entry in `index.html`'s hub exclusion list (~12308),
-  which is gated on whether the hub really built that kind - change one side only and you draw both
-  the model and the box it replaces.
+- **In the hub, the ten generator PROP kinds (tree, rock, fence...) still place as plain boxes** and
+  are greyed out there. Everything from Wall onward - the whole kit library - works in the hub and
+  the zones alike. Finishing the last ten means giving each its own entry in the hub's build pass
+  and the matching exclusion in `index.html` (~12345), which must be done on both sides at once or
+  you draw the model AND the box it replaces.
+- **Default asset sizes are rough.** They are each set's working size, not a measured fit, so some
+  land large. Resize with `alt`+arrows.
 - **No quest spawners (dens).** Every den carries a `questId` binding it to a quest's kill counter,
   and what a den without one does was never established. Placing one would be a guess.
 - **Class trials, side zones and boss arenas are read-only.** They re-roll every run, so an edit

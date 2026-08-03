@@ -12334,12 +12334,18 @@ function drawCourse(s,t){
      on counts.hub, which is true in the Sparring Room where buildHub lays nothing at all. Fails
      safe: if the tower model never loads hubPiece returns 0 and the voxel slab draws. */
   const _hubPillar = !!(_hubDeco && _w3d.counts.tower > 0);
+  const _hubAsset  = !!(_hubDeco && _w3d.counts.hubAsset > 0);
   if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
   if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
     /* Nothing may be excluded by tag here that the 3D layer does not actually stand something in
        the place of: buildWorld returns on the hub branch before the bins/classify block, so a kind
        only counts as converted if buildHub or buildHubDecoProps built it and returned a count. */
+    /* Editor-placed assets: skip the voxel box only when buildHubDecoProps ACTUALLY built the
+       model, which is what _hubAsset reports. Gated on the count for the same reason every other
+       entry here is - a kind excluded on this side but not built on the other vanishes from the
+       hub entirely, and one built here but not excluded draws the model AND the box it replaces. */
+    if(_hubDeco && _hubAsset && d.kind === 'asset') continue;
     if(_hubDeco && (d.kind === 'building'
         || (_hubLamp && d.kind === 'lantern')
         || (_hubPillar && d.kind === 'pillar')

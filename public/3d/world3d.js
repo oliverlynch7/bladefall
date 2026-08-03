@@ -502,6 +502,11 @@ function classify(d){
      Non-lead pieces of a multi-box prop are dropped: one tree should become one model, not two
      stacked pines. */
   if(d.kind){
+    /* THE EDITOR'S GENERIC ASSET. `kind:'asset'` carries the PROP_SETS name in `d.set`, which is
+       what lets Oliver place ANY model in the kits - castle walls and gates, towers, fountains,
+       carts, stalls, hedges, banners - instead of only the dozen kinds the generators happen to
+       tag. One tag, one bin, and every set becomes placeable without a new branch here per set. */
+    if(d.kind === 'asset') return d.lead === false ? 'skip' : 'asset';
     if(d.kind === 'tree')  return d.lead === true ? 'tree' : 'skip';
     if(d.kind === 'rock')  return d.lead === false ? 'skip' : 'rock';
     if(d.kind === 'fence') return 'fence';
@@ -576,6 +581,20 @@ function hash(x, z){
    into 7 units of width shrinks it to a bollard a tenth of its stated height. The hub's lanterns
    already sized by height alone (`92 / rec.height`) for exactly this reason; this is that rule
    made reusable rather than a second copy of it. */
+/* Editor-placed assets, grouped by which PROP_SET they name so each group is one buildProps call
+   (and therefore one instanced draw per model), rather than one call per object. An unknown set
+   falls through to the plain-box path inside buildProps, which is the same thing an unloaded model
+   does - visible and obviously wrong, rather than silently absent. */
+function buildAssets(items){
+  if(!items || !items.length) return;
+  const bySet = {};
+  for(const d of items){ const k = d.set || 'rock'; (bySet[k] = bySet[k] || []).push(d); }
+  for(const k in bySet){
+    const set = PROP_SETS[k];
+    buildProps(bySet[k], set || [], 40, d => (d.h || 40), true);
+  }
+}
+
 function buildProps(items, names, defaultH, heightOf, fitH){
   if(!items.length) return;
   /* Kept as NAME+REC PAIRS. `names.map(...).filter(Boolean)` shortened the list without shortening
@@ -1551,6 +1570,16 @@ function buildHubDecoProps(world){
      postH is the tree's trunkH in a third place: the lead deco is the lamp HOUSING, perched on a
      collision column the deco list does not contain, so its y0 is the top of the post and an
      unadjusted model would hang from there. */
+  /* EDITOR-PLACED ASSETS IN THE HUB. buildWorld returns on the hub branch before the classify
+     block, so until this existed the hub could render only lanterns and flowers from deco and
+     everything Oliver placed there came out a plain box - in the one area he most wants to edit.
+     Only `kind:'asset'` entries go through here, which is exactly the set the editor creates, so
+     the hand-authored hub is untouched and this cannot change what the Waystation looks like
+     today. Counted and returned, because index.html's exclusion list is gated on that count. */
+  const edAssets = [];
+  for(const d of (world.deco || [])) if(d && d.kind === 'asset' && d.lead !== false) edAssets.push(d);
+  if(edAssets.length){ buildAssets(edAssets); out.hubAsset = edAssets.length; }
+
   out.hubLamp = hubPiece('hubLantern', lamps, (o, d, rec) => {
     const sc = (d.lampH || d.h || 76) / rec.height;
     o.position.set(d.x, (d.y0 || 0) - (d.postH || 0), d.z);
@@ -1631,7 +1660,7 @@ export function buildWorld(scene, world){
      fallback did its job, but the crash was avoidable. */
   const bins = { box: [], foliage: [], tree: [], shard: [], rock: [],
                  fence: [], grave: [], pillar: [], column: [], flower: [], lantern: [], corn: [],
-                 standstone: [], building: [], skip: [] };
+                 standstone: [], building: [], skip: [], asset: []};
   for(const d of deco){
     if(!d || d.w == null) continue;
     bins[classify(d)].push(d);
@@ -1689,6 +1718,7 @@ export function buildWorld(scene, world){
      theme-fallback border scenery - already give y0 as their base and are untouched. */
   buildProps(bins.tree.map(d => (d.trunkH ? Object.assign({}, d, { y0: (d.y0 || 0) - d.trunkH }) : d)),
              PROP_SETS.tree, 90, d => (d.trunkH || 0) + (d.h || 40) + 30);
+  buildAssets(bins.asset);
   buildProps(bins.rock, PROP_SETS.rock, 20);
   buildProps(bins.fence, PROP_SETS.fence, 30);
   buildProps(bins.grave, PROP_SETS.grave, 30);

@@ -155,7 +155,7 @@ function hud(){
       ? '<div class="row" style="color:#9fd6ff">click the ground to place a ' + PALETTE[EDITOR.place].label +
         ' &middot; <span class="k">Esc</span>stop</div>'
       : (G() && G().hub
-          ? '<div class="row">the hub only renders lanterns and flowers as models yet - the rest would place a plain box</div>'
+          ? '<div class="row">pick an asset, then click the ground. In the hub the greyed props have no model yet - everything from Wall onward does.</div>'
           : '<div class="row">pick an asset above, then click the ground</div>'));
 
     rows.push('<button data-a="save">Save</button><button data-a="export">Export file</button><button data-a="revert">Revert area</button>');
@@ -299,8 +299,18 @@ const PALETTE = [
      Props in `deco` are a separate question and stay on the list. */
   { arr: 'obstacles', label: '+ Platform', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 160, d: 160, h: 40 }) },
-  { arr: 'obstacles', label: '+ Pillar blk', terrain: true,
+  { arr: 'obstacles', label: '+ Parkour col', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 60, d: 60, h: 200 }) },
+  /* A FLOOR is a broad, shallow obstacle - the game has no separate floor type, and an obstacle
+     one unit proud of the ground is exactly what you stand on. */
+  { arr: 'obstacles', label: '+ Floor', terrain: true,
+    make: (x, z) => ({ kind: 'plat', x, z, w: 480, d: 480, h: 4 }) },
+  /* A PLATEAU is the same thing tall and wide - the raised terraces the zones build with vplat. */
+  { arr: 'obstacles', label: '+ Plateau', terrain: true,
+    make: (x, z) => ({ kind: 'plat', x, z, w: 420, d: 360, h: 150, terrace: true }) },
+  /* A STEP, for building ramps and stairs by duplicating and raising - D then PgUp, repeatedly. */
+  { arr: 'obstacles', label: '+ Step', terrain: true,
+    make: (x, z) => ({ kind: 'plat', x, z, w: 130, d: 130, h: 40 }) },
   { arr: 'healpads',  label: '+ Heal pad', terrain: true,
     make: (x, z) => ({ x, z, y: 0, r: 36, charge: 1 }) },
   /* A MOVING PLATFORM. `x0` is the rest position and `x`/`px` the live ones, so all three start
@@ -310,6 +320,30 @@ const PALETTE = [
   { arr: 'movers',    label: '+ Mover', terrain: true,
     make: (x, z) => ({ x0: x, x, px: x, z, w: 110, d: 88, h: 0, amp: 40, sp: 1.1, ph: 0 }) },
   { arr: 'enemies',   label: '+ Mob', terrain: true, mob: true },
+
+  /* ── ANY ASSET IN THE KITS ────────────────────────────────────────────────
+     Oliver: "I want to be able to place any structure, and asset." These are PROP_SETS names
+     rendered through the generic `kind:'asset'` tag, so the whole model library is placeable -
+     castle walls and gateways, towers, roofs, the fountain, carts, market stalls, hedges, banners,
+     the anvil - not only the dozen kinds the level generators happen to tag.
+     Sizes are each set's own working size in the hub it was built for. They are a starting point,
+     not a constraint: alt+arrows resizes anything, and the collider follows. */
+    { asset: 'hubWall',    label: 'Wall',        w: 120, h: 130, d: 28, c: '#b6ab95' },
+  { asset: 'hubGate',    label: 'Gateway',     w: 120, h: 130, d: 28, c: '#b6ab95' },
+  { asset: 'hubTower',   label: 'Tower base',  w: 120, h: 130, d: 120, c: '#b6ab95' },
+  { asset: 'hubTowerM',  label: 'Tower mid',   w: 120, h: 130, d: 120, c: '#b6ab95' },
+  { asset: 'hubRoof',    label: 'Tower roof',  w: 120, h: 90,  d: 120, c: '#8a3f3f' },
+  { asset: 'hubFlag',    label: 'Flag',        w: 26,  h: 110, d: 26,  c: '#a03a3a' },
+  { asset: 'hubFountain',label: 'Fountain',    w: 150, h: 70,  d: 150, c: '#9aa3ad' },
+  { asset: 'hubCart',    label: 'Cart',        w: 90,  h: 60,  d: 60,  c: '#7a5a34' },
+  { asset: 'hubStall',   label: 'Stall',       w: 110, h: 80,  d: 70,  c: '#7a5a34' },
+  { asset: 'hubHedge',   label: 'Hedge',       w: 110, h: 55,  d: 55,  c: '#3f6b38' },
+  { asset: 'hubBanner',  label: 'Banner',      w: 40,  h: 110, d: 12,  c: '#a03a3a' },
+  { asset: 'hubAnvil',   label: 'Anvil',       w: 52,  h: 42,  d: 40,  c: '#4a4a52' },
+  { asset: 'bush',       label: 'Bush',        w: 34,  h: 26,  d: 34,  c: '#3f6b38' },
+  { asset: 'grass',      label: 'Grass tuft',  w: 22,  h: 22,  d: 22,  c: '#5f8a3f' },
+  { asset: 'floorStone', label: 'Stone tile',  w: 120, h: 8,   d: 120, c: '#8f8a80', collide: false },
+  { asset: 'floor',      label: 'Grass tile',  w: 120, h: 8,   d: 120, c: '#5f8a3f', collide: false },
 ];
 
 /* MOBS. Not a fixed palette entry: which creatures belong here is a per-zone question, so the
@@ -356,6 +390,7 @@ function palArray(spec){ return spec.arr || 'deco'; }
 const HUB_MODEL_KINDS = ['lantern', 'flower'];
 function kindRenders(spec){
   if(spec.terrain) return true;               // not a prop, so the prop pipeline does not apply
+  if(spec.asset) return true;                 // kind:'asset' is built in the hub AND the zones
   const g = G();
   return (g && g.hub) ? HUB_MODEL_KINDS.indexOf(spec.kind) >= 0 : true;
 }
@@ -403,6 +438,9 @@ function syncCollider(o){
    under it. That case gets a toast rather than a prop dumped at the origin. */
 function placeAt(sx, sy){
   const spec = PALETTE[EDITOR.place];
+  /* An out-of-range index is a caller bug, but throwing out of a mousedown handler leaves the
+     editor wedged mid-click with no selection and no explanation. Disarm and say so. */
+  if(!spec){ EDITOR.place = null; toast('no such palette item'); hud(); return; }
   const gp = unprojectToPlane(sx, sy, 0);
   if(!gp){ toast('no ground under the cursor - aim lower'); return; }
   const gx = Math.round(gp.x / EDITOR.grid) * EDITOR.grid;
@@ -429,7 +467,9 @@ function placeAt(sx, sy){
   const o = spec.make
     ? spec.make(gx, gz)
     : Object.assign({ x: gx, z: gz, y0: 0, w: spec.w, h: spec.h, d: spec.d, c: spec.c,
-                      kind: spec.kind, lead: true }, spec.theme ? { theme: spec.theme } : {});
+                      kind: spec.asset ? 'asset' : spec.kind, lead: true },
+                    spec.asset ? { set: spec.asset } : {},
+                    spec.theme ? { theme: spec.theme } : {});
   const arr = G()[name];
   if(!arr){ toast('this area has no ' + name + ' list'); return; }
   const before = snapLayer();
@@ -727,4 +767,4 @@ addEventListener('keydown', onKey, true);
 /* project/unprojectToPlane are exposed as well as used internally: they are what any later editor
    phase (asset palette, terrain, spawner placement) needs to turn a cursor into a world point, and
    they are the two functions worth probing from the screenshot harness when placement looks off. */
-window.__bfEd = { toggle, pickAt, project, unprojectToPlane, EDITOR, get drag(){ return _drag; } };
+window.__bfEd = { toggle, pickAt, project, unprojectToPlane, EDITOR, PALETTE, get drag(){ return _drag; } };

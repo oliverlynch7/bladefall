@@ -362,6 +362,26 @@ because the three maps are three different levels.
         read off two bare `--scene sprint` renders is comparing two different levels.** Nothing had
         to be added to the game: `loadBonus` already took a `forcedSeed` and `startHubSprint`
         already forwarded `opts.seed`.
+        *Side effect of the fix, claimed and then actually checked:* `_crLift` lifts crumbling
+        stepping stones 2.2 units to clear the 3D floor, and with no 3D floor it correctly stops.
+        Rendered seed 1's shaft section at the same camera both ways (`k4-crumble-3d.png` vs
+        `k5-crumble-voxel.png`) — the two frames are identical apart from the 3D hero, which is
+        exactly what `NO_GROUND` should mean.
+        *THE GRASS-IN-A-NON-MEADOW BUG CLASS IS NOW EXHAUSTED, and this is a negative finding
+        worth recording so nobody re-derives it.* Only `plains` and `forest` are grassy in
+        `THEME_GROUND`, so the bug can only reach a level that BORROWS one of those themes without
+        being one. All three borrowers are now fixed (trial, arena, bonus room), and everything
+        else was measured rather than assumed: all 17 `STAGES` entries pair a sensible theme with
+        their authored ground, and **all seven side areas were probed live** — Thornwood/forest,
+        Sunken Wash/canyon, Oubliette/ruins, Glacier Vault/frost, Magma Core/volcano, Reaper's
+        Gate/void, Sealed Reliquary/marble. Only the Thornwood is grassy and it is a wood.
+        **One thing this audit deliberately did NOT touch:** The Outskirts declares
+        `ground:'#8a8445'`, a dry khaki, and the 3D layer lays flat teal grass over it — the
+        largest 3D-vs-voxel colour disagreement in the game (`j8-outskirts.png` against
+        `k1-outskirts-voxel.png`). That is NOT the same bug: the Outskirts genuinely IS a meadow,
+        the teal tile is a documented deliberate choice with its own long comment, and it is what
+        Oliver has been playtesting for weeks. Recolouring the flagship zone's ground is an ART
+        CALL and belongs to him.
       - **Treasure Sprint** (`--scene sprint`, `_shot/out/m4-sprint.png`) — **the biggest
         un-converted surface left in the game, and the desk research was right.** Probed live:
         **51 floor tiles, 0 deco, 41 `kind:'plat'` obstacles, 1 draw call.** `put()` (5727) sends

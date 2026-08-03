@@ -129,6 +129,10 @@ function hud(){
     rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
               (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
+    rows.push('<div class="row"><span class="k">R</span>rotate <span class="k">D</span>duplicate' +
+              ' <span class="k">K</span>collision' +
+              (s ? (findCollider(s.o.edId) >= 0 ? ' <span style="color:#54d17a">on</span>'
+                                                : ' <span style="color:#ff3df0">off</span>') : '') + '</div>');
     rows.push('<div class="row"><span class="k">C</span>collision overlay' +
               (OVERLAY.on ? ' <span style="color:#54d17a">on</span>' : '') + '</div>');
     if(OVERLAY.on && OVERLAY.counts){
@@ -342,6 +346,40 @@ function kindRenders(spec){
   return (g && g.hub) ? HUB_MODEL_KINDS.indexOf(spec.kind) >= 0 : true;
 }
 
+/* ── AUTOMATIC COLLISION ──────────────────────────────────────────────────────
+   Oliver's requirement, in his words: "I would have you do the automatic collision for each
+   object", true to its visual size. A prop pushed into G.deco is scenery you walk through - the
+   generators pair theirs with a hand-written vcol() column, and an editor that did not would let
+   you build a forest you can stroll through, which is E1 all over again in new content.
+
+   So placing a prop places a matching `obstacles` entry too. The two are linked by a shared id, so
+   moving, resizing or deleting the prop does the same to its collider - a collider left behind at
+   the old position is an invisible wall, which is worse than no collision because nothing on
+   screen explains it.
+
+   Height is capped at the prop's own height and the box is the prop's footprint: true to the
+   visual size, as asked. Press K to toggle the collider on the selected object, because "true to
+   the visual size" is right for a tree and wrong for a flower you should be able to walk over. */
+let _edSeq = Date.now() % 1e7;
+function colliderFor(o, id){
+  return { x: o.x, z: o.z, w: o.w || 20, d: o.d || o.w || 20, h: (o.y0 || 0) + (o.h || 20),
+           kind: 'plat', edCol: id };
+}
+function findCollider(id){
+  const arr = G() && G().obstacles;
+  if(!arr || id == null) return -1;
+  for(let i = 0; i < arr.length; i++) if(arr[i] && arr[i].edCol === id) return i;
+  return -1;
+}
+/* Keep a linked collider in step with its prop, after any move or resize. */
+function syncCollider(o){
+  if(o.edId == null) return;
+  const arr = G().obstacles, i = findCollider(o.edId);
+  if(i < 0) return;
+  Object.assign(arr[i], colliderFor(o, o.edId));
+  commit(L => recordMove(L, 'obstacles', i, arr[i]));
+}
+
 /* Place at the cursor. The GROUND plane is the right primitive here (unlike drag, where no single
    plane works): you are choosing a spot on the floor, and a click above the horizon has no floor
    under it. That case gets a toast rather than a prop dumped at the origin. */
@@ -359,10 +397,20 @@ function placeAt(sx, sy){
   const arr = G()[name];
   if(!arr){ toast('this area has no ' + name + ' list'); return; }
   const before = snapLayer();
+  /* Props get a collider; terrain and gameplay objects do not - a platform IS collision already,
+     and a healing pad you cannot walk onto is a healing pad that does nothing. */
+  const wantsCol = !spec.terrain && spec.collide !== false;
+  let col = null;
+  if(wantsCol){ o.edId = ++_edSeq; col = colliderFor(o, o.edId); }
   arr.push(o);
-  commit(L => recordAdd(L, name, o));
-  pushStep(before, () => { const i = arr.indexOf(o); if(i >= 0) arr.splice(i, 1); },
-                   () => { if(arr.indexOf(o) < 0) arr.push(o); });
+  const obs = G().obstacles;
+  if(col && obs) obs.push(col);
+  commit(L => { recordAdd(L, name, o); if(col && obs) recordAdd(L, 'obstacles', col); });
+  pushStep(before,
+    () => { const i = arr.indexOf(o); if(i >= 0) arr.splice(i, 1);
+            if(col && obs){ const j = obs.indexOf(col); if(j >= 0) obs.splice(j, 1); } },
+    () => { if(arr.indexOf(o) < 0) arr.push(o);
+            if(col && obs && obs.indexOf(col) < 0) obs.push(col); });
   /* Select what you just placed, so it can be nudged into position immediately rather than needing
      to be found and clicked again. Its index is the end of the array by construction. */
   EDITOR.sel = { arr: name, idx: arr.length - 1, o };
@@ -435,7 +483,9 @@ function onUp(){
     if(o.x !== was.x || o.z !== was.z){
       const now = geom(o);
       commit(L => recordMove(L, s.arr, s.idx, o));
-      pushStep(from, () => setGeom(o, was), () => setGeom(o, now));
+      syncCollider(o);
+      pushStep(from, () => { setGeom(o, was); syncCollider(o); },
+                     () => { setGeom(o, now); syncCollider(o); });
     }
   }
   _drag = null;
@@ -462,6 +512,63 @@ function onKey(e){
             : 'collision overlay off');
     hud(); e.preventDefault(); e.stopPropagation(); return;
   }
+  /* K toggles the selected object's collider. "True to the visual size" is right for a tree and
+     wrong for a flower you should be able to walk over, so the default is on and this is the
+     escape hatch - and it is also how an EXISTING walk-through prop found by the C overlay gets
+     collision, which is the whole of E1 done by hand. */
+  if((e.key === 'k' || e.key === 'K') && EDITOR.sel && EDITOR.editable){
+    const o = EDITOR.sel.o, obs = G().obstacles, before = snapLayer();
+    const i = findCollider(o.edId);
+    if(i >= 0){
+      const gone = obs[i];
+      commit(L => recordDelete(L, 'obstacles', i));
+      obs.splice(i, 1);
+      pushStep(before, () => obs.splice(i, 0, gone), () => obs.splice(i, 1));
+      toast('collision removed');
+    } else {
+      if(o.edId == null) o.edId = ++_edSeq;
+      const col = colliderFor(o, o.edId);
+      obs.push(col);
+      commit(L => recordAdd(L, 'obstacles', col));
+      pushStep(before, () => { const j = obs.indexOf(col); if(j >= 0) obs.splice(j, 1); },
+                       () => { if(obs.indexOf(col) < 0) obs.push(col); });
+      toast('collision added, sized to the object');
+    }
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
+  /* R rotates. Props are placed on a grid and a wood of identically-facing trees reads as a
+     tileset; the models already honour `ry`, nothing was setting it. */
+  if((e.key === 'r' || e.key === 'R') && EDITOR.sel && EDITOR.editable && !e.ctrlKey){
+    const o = EDITOR.sel.o, before = snapLayer(), was = geom(o);
+    o.ry = (((o.ry || 0) + (e.shiftKey ? -Math.PI / 8 : Math.PI / 8)) + Math.PI * 2) % (Math.PI * 2);
+    const now = geom(o);
+    commit(L => recordMove(L, EDITOR.sel.arr, EDITOR.sel.idx, o));
+    pushStep(before, () => setGeom(o, was), () => setGeom(o, now));
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
+  /* D duplicates, offset by one grid step so the copy is visible rather than hidden inside the
+     original. Building a row of anything without this is place-nudge-place-nudge; with it, it is
+     D-D-D. The copy carries its own collider, not a reference to the original's. */
+  if((e.key === 'd' || e.key === 'D') && EDITOR.sel && EDITOR.editable && !e.ctrlKey){
+    const src = EDITOR.sel, arr = G()[src.arr], obs = G().obstacles, before = snapLayer();
+    const o = JSON.parse(JSON.stringify(src.o));
+    o.x += EDITOR.grid * 2; o.z += EDITOR.grid * 2;
+    let col = null;
+    if(src.o.edId != null){ o.edId = ++_edSeq; col = colliderFor(o, o.edId); }
+    arr.push(o);
+    if(col) obs.push(col);
+    commit(L => { recordAdd(L, src.arr, o); if(col) recordAdd(L, 'obstacles', col); });
+    pushStep(before,
+      () => { const i = arr.indexOf(o); if(i >= 0) arr.splice(i, 1);
+              if(col){ const j = obs.indexOf(col); if(j >= 0) obs.splice(j, 1); } },
+      () => { if(arr.indexOf(o) < 0) arr.push(o); if(col && obs.indexOf(col) < 0) obs.push(col); });
+    EDITOR.sel = { arr: src.arr, idx: arr.length - 1, o };   // select the COPY, so D D D builds a row
+    toast('duplicated');
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
   if(e.key === 'Escape'){
     if(EDITOR.place != null) EDITOR.place = null; else EDITOR.sel = null;
     hud(); e.stopPropagation(); return;
@@ -494,7 +601,9 @@ function onKey(e){
     if(handled){
       const now = geom(s.o);
       commit(L => recordMove(L, s.arr, s.idx, s.o));
-      pushStep(before, () => setGeom(s.o, was), () => setGeom(s.o, now));
+      syncCollider(s.o);
+      pushStep(before, () => { setGeom(s.o, was); syncCollider(s.o); },
+                       () => { setGeom(s.o, now); syncCollider(s.o); });
       e.preventDefault(); e.stopPropagation();
     }
     return;
@@ -508,13 +617,18 @@ function onKey(e){
   else if(e.key === 'PageDown')   s.o.y0 = Math.max(0, (s.o.y0 || 0) - step);
   else if(e.key === 'Delete' || e.key === 'Backspace'){
     const arr = G()[s.arr], idx = s.idx, obj = s.o;
-    commit(L => recordDelete(L, s.arr, idx));
+    /* Take the linked collider too. Leaving it behind is an invisible wall where a prop used to
+       be - worse than no collision, because nothing on screen explains it. */
+    const obs = G().obstacles, ci = findCollider(obj.edId), cobj = ci >= 0 ? obs[ci] : null;
+    commit(L => { recordDelete(L, s.arr, idx); if(ci >= 0) recordDelete(L, 'obstacles', ci); });
     if(arr) arr.splice(idx, 1);
+    if(ci >= 0) obs.splice(ci, 1);
     /* Put back AT ITS INDEX, not appended: every id in the edit list is `<array>:<index>`, so
        restoring it at the end would renumber everything after it and point saved edits at the
        wrong objects. */
-    pushStep(before, () => { if(arr) arr.splice(idx, 0, obj); },
-                     () => { if(arr) arr.splice(idx, 1); });
+    pushStep(before,
+      () => { if(arr) arr.splice(idx, 0, obj); if(cobj) obs.splice(ci, 0, cobj); },
+      () => { if(arr) arr.splice(idx, 1); if(ci >= 0) obs.splice(ci, 1); });
     EDITOR.sel = null;
     toast('deleted - Ctrl+Z puts it back');
   }
@@ -523,7 +637,9 @@ function onKey(e){
     if(EDITOR.sel){
       const now = geom(s.o);
       commit(L => recordMove(L, s.arr, s.idx, s.o));
-      pushStep(before, () => setGeom(s.o, was), () => setGeom(s.o, now));
+      syncCollider(s.o);
+      pushStep(before, () => { setGeom(s.o, was); syncCollider(s.o); },
+                       () => { setGeom(s.o, now); syncCollider(s.o); });
     }
     e.preventDefault(); e.stopPropagation();
   }

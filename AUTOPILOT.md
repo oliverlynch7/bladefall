@@ -218,6 +218,33 @@ is already handled and the correct move is to stop.
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
+## Cadence — A RUN IS KILLED AFTER ~20 MINUTES, AND THAT IS ~3 RENDERS (measured 2026-08-03)
+**Read this before picking an item.** The section below says "hourly"; `_autopilot.log` says
+otherwise and the log is the measurement. Runs start every **20 minutes**, and **every run since
+08:04 on 2026-08-03 was killed at its boundary** — 08:24, 08:44, 09:04, 09:24, 09:44 each logged
+*"previous run was killed mid-edit; stashing its leftovers"*, naming modified files under `public/`.
+A run does not end when it decides to; it ends on a clock.
+
+**Costed in the unit that matters: a `--scene` render is 2–5 minutes wall clock**, and worse under
+contention (measured this run: 127.4s and 126.5s of ready-wait alone, plus Chrome start, page load
+and PNG write). **So a run gets roughly THREE renders, total.** An item needing a before shot, a
+fix, an after shot and two regression checks does not fit. The backlog is full of the evidence:
+three consecutive entries — the Sparring Room `buildHubRoom` scout, the hub bag chest, and the
+contention note under it — are *scouting reports and reverts* rather than shipped work.
+
+Rules that follow, in priority order:
+- **Commit by pathspec the moment anything is verified** — not at the end of the item. The
+  killed-run guard cannot tell a live session's edits from wreckage and will `git stash push -u`
+  your working tree mid-render. It is recoverable (`git stash list`, then read the blob out of
+  `stash@{0}`) but nobody looks, and a `--eval ReferenceError` for code you just wrote is the stash.
+- **Cost the renders before starting.** Prefer an item whose proof is one `--eval` probe over one
+  needing an A/B pair plus regressions.
+- **Doc-only commits are real output here**, with precedent (`920fe2a`, `4804565`). Recording a
+  measurement so the next run starts from it beats losing it.
+- **Never `git add -A`.** A second worker edits this same checkout; two of this run's `git status`
+  polls came back holding another process's half-finished `prop3d.js`.
+- Do not start one more render past the ~15-minute mark. It will not come back.
+
 ## Cadence (hourly)
 This runs **every hour, 8am–11pm** — not once a day. So each run does **one** backlog chunk and stays lightweight. **Only make noise when you ship something:**
 - If you committed a real change this run → send the Telegram digest below.
@@ -767,6 +794,39 @@ because the three maps are three different levels.
       your code**. The two runners also share a Chrome profile, which is the likeliest cause of the
       `READY NEVER CAME after 240s` runs here — renders that took 5s when nothing else was running
       took 200s when they were.)*
+      *(2026-08-03, `autopilot-merged`, the OTHER worker in the same window — **independent
+      confirmation of the contention above, plus what the losing side actually looks like, because
+      it is disguised as a total 3D regression and cost this run its whole budget.**
+      Two bare `--scene 0` renders (the second with no `--focus` and no `--pre` at all) printed
+      `READY NEVER CAME` at **127.4s and 126.5s**, while the worker above was rendering normally in
+      the same checkout in the same minute — it committed `46e0669` at 09:41:54, between them. Same
+      repo, same assets, same machine. And **nothing under `public/` had changed since `6ec0fdd`**
+      when these were taken, so there was no candidate regression in the tree at all.
+      **The disguise is the point. Every error channel stays clean:**
+      `__world3d()` → `{on:true, ready:false, built:null, counts:{}, err:null}`
+      `__prop3d()`  → `{on:true, ready:false, chests:0, waystone:0, box:null, err:null}`
+      `__mob3d()`   → `{on:true, live:0, pooled:0, models:[], missing:[], err:null}`
+      `at → The Outskirts  zone 0 stage 0` — the GAME half of the ready test passes, so the log
+      looks healthy and only the world half never comes.
+      **Where it is stuck is pinned by what is NOT in the log.** `err` is null on all three layers
+      and the console holds exactly one line, `[hero3d] ready — 26 clips, model Warrior`. There is
+      no `[world3d] prop failed to load`, no `village part failed to load`, no `road tile failed to
+      load`, no `build failed, falling back to voxels`. Every one of those loaders catches its own
+      error and warns, so **silence means nothing failed — they are still pending**, which leaves
+      exactly one gate: `syncWorld`'s `if(!_propsReady) return false` (world3d.js:1739), i.e.
+      `ensureProps()` (world3d.js:346) has not resolved its `Promise.all`. Consistent with
+      `built:null` (never stamped) and `counts:{}` (never filled). hero3d loaded a skinned glTF in
+      the same page, so it is not "glTF is broken" — it is one process losing a race for the cores
+      SwiftShader parses on.
+      **What you get handed is the trap:** a complete, plausible, entirely VOXEL Outskirts
+      (`_shot/out/r1-zone-chest.png`, `r2-outskirts.png`) — khaki ground, box trees, voxel corn,
+      voxel chest — which is the documented fallback rendering correctly. So the chest in those
+      frames is a **voxel** chest and says nothing whatever about prop3d. This run set out to answer
+      the zone-chest question and every frame it took was incapable of answering it; the worker
+      above answered it properly instead.
+      **Treat any `READY NEVER CAME` as UNPROVEN until you know you were alone** — the harness says
+      so in its own message, and `--readymax 300000` is the flag that buys the losing side enough
+      room to finish.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

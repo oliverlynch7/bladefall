@@ -762,12 +762,36 @@ because the three maps are three different levels.
         for `chests[0]` in the same frame (`ndc [-0.142,-0.322,0.877], px [686,595], onScreen
         true`). **Three draws this geometry every frame.** Whatever removes it is depth or shading,
         not culling, not the scene graph, not the mixer, and not the load path.
-      **NEXT for this bug, and it is one render:** `__prop3dDebugPaint(0)` — the same magenta WITH
-      the depth test on. Magenta appears → the chest is depth-visible and the model is being shaded
-      into invisibility; magenta gone → something is drawn in front of it, and the suspect is the
-      DEFERRED voxel pass, which replays after Three and is what draws the `vplat` mesa this chest
-      stands on. `floorAt` under it reports **0** while the chest sits at y **120**, which is worth
-      understanding before believing any story about that mesa.
+      - **AND IT IS BURIED. The depth test was run and it is the answer: something with NEARER
+        DEPTH is drawn over it.** Same paint with `depthTest:true` (`s1-magenta-depth.png`): where
+        the no-depth frame had a solid 100 x 65 px magenta chest, the depth frame has a **10-px
+        magenta bar** across the top of that same footprint — the top ~3 of its 17.9 units. Not
+        dimmed, not mis-shaded, not absent: **sunk**. And that bar is the answer to a second
+        question this run got wrong twice: the "grey smudge" that two earlier renders were read
+        against, and that survived lifting the chest 45 units, is the chest's own top edge poking
+        out of whatever it is inside.
+      **NEXT for this bug — it is now "what is drawn in front of it", and here is what is already
+      measured at those coordinates:**
+      - `G.obstacles` there is a `kind:'plat'` **h 120**, w 300 d 210, and a `kind:'col'` **h 105**,
+        w 300 d 220, both centred (-1180, -1540). The chest at (-1110, 120, -1570) is inside that
+        footprint with its base EXACTLY on the plat's top. Neither reaches the ~135 the burial line
+        implies, so the naive "it is inside the mesa" story does not survive arithmetic — check it
+        rather than assume it.
+      - `floorAt(-1110,-1570)` reports **0** while the chest sits at y **120**. Understand that
+        before believing any story about that mesa.
+      - `G.deco` within 120 units is corn stalks and one `h:0.8` floor-paint square. Nothing tall.
+      - **The lead worth taking first: `__world3d().counts.floorBuried` is 487 of 1257 floor tiles
+        in this zone.** world3d is doing something height-aware with the floor that nothing in this
+        file has ever written down, and a floor tile with a nearer depth than a chest standing on it
+        would explain the whole shape of this bug.
+      - Two suspects, and one render splits them exactly as this one did: the occluder is either in
+        **Three's own pass** (world3d geometry — then `?world3d=0&prop3d=1` frees the chest) or in
+        the **deferred voxel replay**, which runs after Three and would explain why the VOXEL chest
+        is fine — it is drawn after the occluder, not before it.
+      *A probe limitation found on the way, so nobody trusts it:* **`__world3dPoses('')` is not a
+      spatial query.** Given an empty name it returned 8 instances for a zone reporting 2194 deco,
+      so "nothing of world3d's is near the chest" cannot be concluded from it. It answers "where did
+      THIS MODEL end up", by name, and nothing else.
       Do NOT go back to the actor: `chests[1]` at (-1300, **120**, -1800) renders normally at
       px (441,407) in the same frames, same height, same build path. Whatever is special about
       `chests[0]` is at its coordinates, not in how it was made.

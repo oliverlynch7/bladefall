@@ -5672,6 +5672,26 @@ function loadStage(i){
         G.dens.push({x:dx,z:dz,type:kq.mob,t:2.2+d2*0.5,questId:kq.id});
         if(d2<2) mkMonster(kq.mob,dx+30,dz,room); }   // pre-seed a couple; the rest fill in from the dens
     } }
+  /* A TRIAL MUST CONTAIN ENOUGH ENEMIES TO COMPLETE IT.
+     Nothing above connected TRIALS[cid].kills to what actually spawns: a non-Reaper trial armed
+     only ~50% of its rooms with 2-4 mobs each, so a Chronomancer trial needing 24 kills could
+     generate a dungeon holding twelve. Oliver hit exactly that twice in a row - killed everything
+     in the dungeon and the trial could not complete, which burns a run and blocks a class unlock.
+     Counted and topped up here rather than by raising the per-room numbers, because that is the
+     only place the actual total is known. The surplus is deliberate: a few enemies can be lost to
+     a pit or a hazard, and coming up ONE kill short is the same soft-lock. */
+  if(G.trial){
+    const need=(TRIALS[G.trial]&&TRIALS[G.trial].kills)||0;
+    const alive=()=>G.enemies.filter(e=>!e.dead).length;
+    const fillRooms=G.rooms.filter(r=>r!==entryRoom&&!r.locked);
+    let guard=0;
+    while(fillRooms.length && alive()<need+4 && guard++<400){
+      const room=fillRooms[guard%fillRooms.length];
+      room.encounter=true; room.cleared=false;
+      mkMonster(pick(),room.x+(rnd()*2-1)*(room.w/2-46),room.z+(rnd()*2-1)*(room.d/2-46),room);
+    }
+    if(guard>=400) console.warn('[trial] could not reach',need,'enemies; got',alive());
+  }
   goalRoom.encounter=(isBoss||isMini)?goalRoom.encounter:false; if(!isBoss&&!isMini) goalRoom.cleared=true;
   // optional locked vault (dead-end ⇒ can never soft-lock the run)
   if(vault && diff>=2 && vault.doorways.length===1 && rnd2()<0.7){

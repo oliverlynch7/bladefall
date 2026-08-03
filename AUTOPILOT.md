@@ -784,10 +784,17 @@ because the three maps are three different levels.
         in this zone.** world3d is doing something height-aware with the floor that nothing in this
         file has ever written down, and a floor tile with a nearer depth than a chest standing on it
         would explain the whole shape of this bug.
-      - Two suspects, and one render splits them exactly as this one did: the occluder is either in
-        **Three's own pass** (world3d geometry — then `?world3d=0&prop3d=1` frees the chest) or in
-        the **deferred voxel replay**, which runs after Three and would explain why the VOXEL chest
-        is fine — it is drawn after the occluder, not before it.
+      - **AND THAT RENDER WAS RUN. THE OCCLUDER IS WORLD3D'S OWN GEOMETRY, inside Three's pass.**
+        `?world3d=0&prop3d=1`, same camera, same magenta, depth still ON (`s4-w3doff-magenta.png`):
+        the chest at px (686,595) comes back as a **full solid 100 x 65 px magenta chest**, and so
+        does `chests[1]` at (441,407). Against `s1-magenta-depth.png` — world3d ON, everything else
+        identical, a 10-px sliver. **Switching the 3D WORLD off is what frees the 3D CHEST.**
+        So it is not the deferred voxel replay, not the plat, not the col, not the terrain: it is
+        something world3d builds and puts in the Three scene, and the chest is depth-tested behind
+        it in the same pass. `counts.floorBuried` 487/1257 is the lead to pull first.
+        *One thing this does NOT yet explain, and the next run should not pretend otherwise:* why
+        the VOXEL chest is unharmed by the same occluder. It draws in the deferred replay, which is
+        depth-tested against the same buffer, so "it is drawn later" is only half an answer.
       *A probe limitation found on the way, so nobody trusts it:* **`__world3dPoses('')` is not a
       spatial query.** Given an empty name it returned 8 instances for a zone reporting 2194 deco,
       so "nothing of world3d's is near the chest" cannot be concluded from it. It answers "where did

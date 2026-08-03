@@ -5496,7 +5496,22 @@ const BOSS_ARENAS={
     bossFinish(ctx,{sx:0,sz:380,sy:0, gx:0,gz:-270, decoCol:STONE,decoTheme:'dungeon',decoTall:240});
   }
 };
-function loadStage(i){
+/* The editor replays Oliver's edit list onto the level the generator just built. Wrapped rather
+   than called at each `return` inside loadStage: that function has three early exits today and a
+   fourth would silently skip the edits, which would look like the editor losing his work. */
+function loadStage(i){ loadStageRaw(i); applyEditsNow(); }
+function applyEditsNow(){
+  try {
+    if(!window.__bfEditor || !window.__bfEditor.applyLayer) return;
+    const E = window.__bfEditor;
+    const key = E.areaKey(G, curZone);
+    if(!key || typeof key !== 'string') return;          // re-rolled area: nothing stable to edit
+    const r = E.applyLayer(G, key, E.loadLayers());
+    if(r.stale) console.warn('[editor] edits for', key, 'were saved against a different generator output - positions may have shifted');
+    if(r.applied) console.log('[editor]', key, '- applied', r.moved, 'moved,', r.deleted, 'deleted,', r.added, 'added');
+  } catch(e){ console.warn('[editor] apply failed, level left as generated:', e.message); }
+}
+function loadStageRaw(i){
   const s=STAGES[i]; G.stageIndex=i;
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
@@ -10462,6 +10477,7 @@ function enterWaystation(){
                    bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
       G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
     } }
+  applyEditsNow();          // the hub is built here, not by loadStage, so it needs its own call
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
@@ -14426,6 +14442,15 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
      default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
 <script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./jsm/"}}</script>
+<script type="module">
+  /* Exposed on window rather than imported by the game code: the game lives in a classic,
+     non-module script tag and so cannot use `import`. Same bridge pattern as __BF_WORLD.
+     (Deliberately not writing the tag name literally here - the syntax gate scans raw HTML for
+     script openings, and a literal one inside a comment reads as a new block. It caught exactly
+     that a minute ago, which is the gate doing its job.) */
+  import * as ED from "./editor.js";
+  window.__bfEditor = ED;
+</script>
 <script type="module" src="./hero3d.js"></script>
 </body>
 </html>

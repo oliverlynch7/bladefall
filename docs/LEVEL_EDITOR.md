@@ -30,6 +30,10 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
   (`D` then `PgUp`, repeatedly) builds stairs and ramps.
 - **Gameplay** - healing pad, moving platform, mobs.
 
+The palette is grouped - **Terrain, Structures, Town, Floors, Nature, Props, Gameplay** - one group
+open at a time, with a count on each. Click a group header to open it, click it again to close.
+The open group survives clicking around in the world.
+
 Pick one, then click the ground. Every size is a starting point: `alt`+arrows resizes anything and
 the collider follows.
 

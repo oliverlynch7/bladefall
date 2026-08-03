@@ -90,6 +90,13 @@ function css(){
     'background:#221e18;color:#cbbfa8}',
     '#bfed button.p.on{border-color:#ffd24a;background:#3a2f18;color:#ffe6b0}',
     '#bfed button.p.off{opacity:.34;border-style:dashed}',
+    '#bfed button.grp{display:flex;align-items:center;width:100%;margin:4px 0 0;padding:5px 8px;',
+    'border-radius:6px;border:1px solid #4a3c26;background:#221e18;color:#d8cbb0;',
+    'font:800 11px system-ui;letter-spacing:.05em;text-align:left}',
+    '#bfed button.grp.open{background:#2e2718;border-color:#6a5330;color:#ffd89a}',
+    '#bfed button.grp.armed{border-color:#ffd24a}',
+    '#bfed button.grp .n{margin-left:auto;opacity:.55;font-weight:700}',
+    '#bfed .pal{margin:4px 0 2px;padding:0 0 2px 6px;border-top:0}',
     '#bfedmark{position:fixed;z-index:99997;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;',
     'border:2px solid #ffd24a;box-shadow:0 0 0 2px rgba(0,0,0,.55),0 0 14px rgba(255,210,74,.7);pointer-events:none}',
     '#bfedhint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99998;',
@@ -147,10 +154,40 @@ function hud(){
     rows.push('<div class="row"><span class="k">ctrl Z</span>undo (' + _undo.length + ')' +
               ' <span class="k">ctrl Y</span>redo (' + _redo.length + ')</div>');
 
-    rows.push('<div class="pal">' + PALETTE.map((p, i) =>
-      '<button class="p' + (EDITOR.place === i ? ' on' : '') + (kindRenders(p) ? '' : ' off') +
-      '" data-p="' + i + '"' + (kindRenders(p) ? '' : ' disabled') + '>' + p.label + '</button>'
-    ).join('') + '</div>');
+    /* GROUPED, one open at a time. Thirty-four buttons in a flat wrap is a wall you have to read
+       every time to find one thing; the panel also sits over the game, so keeping it short matters
+       more here than in a windowed editor. Single-open accordion rather than many-open for the
+       same reason - two open groups already push the Save buttons off a phone screen.
+       The open group is remembered across rebuilds because hud() re-renders on every selection
+       change, and a palette that snapped shut every time you clicked something would be unusable. */
+    /* Ordered by what you reach for, not by where the entries happen to sit in the array:
+       Terrain first because you shape the ground before you dress it, then the structures and town
+       pieces that are the point of editing the hub, then scenery, then the gameplay objects you
+       place last. Anything not in this list still appears, at the end. */
+    const ORDER = ['Terrain', 'Structures', 'Town', 'Floors', 'Nature', 'Props', 'Gameplay'];
+    const groups = [];
+    for(const p of PALETTE){ const g = p.group || 'Other'; if(groups.indexOf(g) < 0) groups.push(g); }
+    groups.sort((a, b) => {
+      const ia = ORDER.indexOf(a), ib = ORDER.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    /* The default open group is chosen ONCE when the mode opens, not here. Defaulting inside the
+       render meant null was indistinguishable from "closed", so collapsing a group re-opened it on
+       the very next repaint and nothing could ever be shut. */
+    for(const g of groups){
+      const open = EDITOR.openGroup === g;
+      const items = PALETTE.map((p, i) => ({ p, i })).filter(v => (v.p.group || 'Other') === g);
+      const armed = items.some(v => EDITOR.place === v.i);
+      rows.push('<button class="grp' + (open ? ' open' : '') + (armed ? ' armed' : '') +
+                '" data-g="' + g + '">' + (open ? '&#9662; ' : '&#9656; ') + g +
+                '<span class="n">' + items.length + '</span></button>');
+      if(open){
+        rows.push('<div class="pal">' + items.map(v =>
+          '<button class="p' + (EDITOR.place === v.i ? ' on' : '') + (kindRenders(v.p) ? '' : ' off') +
+          '" data-p="' + v.i + '"' + (kindRenders(v.p) ? '' : ' disabled') + '>' + v.p.label + '</button>'
+        ).join('') + '</div>');
+      }
+    }
     rows.push(EDITOR.place != null
       ? '<div class="row" style="color:#9fd6ff">click the ground to place a ' + PALETTE[EDITOR.place].label +
         ' &middot; <span class="k">Esc</span>stop</div>'
@@ -163,6 +200,10 @@ function hud(){
   _ui.innerHTML = rows.join('');
   _ui.querySelectorAll('button').forEach(b => {
     b.onclick = () => {
+      if(b.dataset.g != null){
+        EDITOR.openGroup = (EDITOR.openGroup === b.dataset.g) ? null : b.dataset.g;
+        hud(); return;
+      }
       if(b.dataset.p != null){
         const i = +b.dataset.p;
         if(!kindRenders(PALETTE[i])){ toast(PALETTE[i].label + ' has no model in the hub yet'); return; }
@@ -278,16 +319,16 @@ function redraw(){
    set. Guessing here produces props at the wrong scale, which was already a full day's bug once
    when mob scale was inverted. */
 const PALETTE = [
-  { kind: 'tree',       label: 'Tree',        w: 72, h: 52, d: 72, c: '#46723b', theme: 'plains' },
-  { kind: 'rock',       label: 'Rock',        w: 20, h: 20, d: 20, c: '#6b6b6b' },
-  { kind: 'fence',      label: 'Fence',       w: 30, h: 30, d: 12, c: '#6b5334' },
-  { kind: 'grave',      label: 'Gravestone',  w: 18, h: 30, d: 12, c: '#7a7a80' },
-  { kind: 'pillar',     label: 'Pillar',      w: 26, h: 80, d: 26, c: '#2b3040' },
-  { kind: 'column',     label: 'Column',      w: 26, h: 80, d: 26, c: '#c8c2b0' },
-  { kind: 'lantern',    label: 'Lantern',     w:  7, h: 47, d:  7, c: '#5a3f25' },
-  { kind: 'flower',     label: 'Flower',      w: 11, h: 18, d: 11, c: '#ffd24a' },
-  { kind: 'standstone', label: 'Standing st', w: 24, h: 90, d: 18, c: '#626879' },
-  { kind: 'corn',       label: 'Crop',        w:  4, h: 24, d:  4, c: '#d9ad42', theme: 'plains' },
+  { kind: 'tree',       label: 'Tree', group: 'Nature',        w: 72, h: 52, d: 72, c: '#46723b', theme: 'plains' },
+  { kind: 'rock',       label: 'Rock', group: 'Nature',        w: 20, h: 20, d: 20, c: '#6b6b6b' },
+  { kind: 'fence',      label: 'Fence', group: 'Props',       w: 30, h: 30, d: 12, c: '#6b5334' },
+  { kind: 'grave',      label: 'Gravestone', group: 'Props',  w: 18, h: 30, d: 12, c: '#7a7a80' },
+  { kind: 'pillar',     label: 'Pillar', group: 'Props',      w: 26, h: 80, d: 26, c: '#2b3040' },
+  { kind: 'column',     label: 'Column', group: 'Props',      w: 26, h: 80, d: 26, c: '#c8c2b0' },
+  { kind: 'lantern',    label: 'Lantern', group: 'Props',     w:  7, h: 47, d:  7, c: '#5a3f25' },
+  { kind: 'flower',     label: 'Flower', group: 'Nature',      w: 11, h: 18, d: 11, c: '#ffd24a' },
+  { kind: 'standstone', label: 'Standing st', group: 'Nature', w: 24, h: 90, d: 18, c: '#626879' },
+  { kind: 'corn',       label: 'Crop', group: 'Nature',        w:  4, h: 24, d:  4, c: '#d9ad42', theme: 'plains' },
 
   /* TERRAIN (P3) and GAMEPLAY OBJECTS (P4). These do not go in `deco` and are not props - they
      are the things you stand on and interact with, so each names its own array and builds its own
@@ -297,29 +338,29 @@ const PALETTE = [
      placed platform is solid and stand-on-able the moment it exists - which is the whole answer to
      Oliver's "automatic collision true to the visual size" for anything you build out of these.
      Props in `deco` are a separate question and stay on the list. */
-  { arr: 'obstacles', label: '+ Platform', terrain: true,
+  { arr: 'obstacles', label: '+ Platform', group: 'Terrain', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 160, d: 160, h: 40 }) },
-  { arr: 'obstacles', label: '+ Parkour col', terrain: true,
+  { arr: 'obstacles', label: '+ Parkour col', group: 'Terrain', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 60, d: 60, h: 200 }) },
   /* A FLOOR is a broad, shallow obstacle - the game has no separate floor type, and an obstacle
      one unit proud of the ground is exactly what you stand on. */
-  { arr: 'obstacles', label: '+ Floor', terrain: true,
+  { arr: 'obstacles', label: '+ Floor', group: 'Terrain', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 480, d: 480, h: 4 }) },
   /* A PLATEAU is the same thing tall and wide - the raised terraces the zones build with vplat. */
-  { arr: 'obstacles', label: '+ Plateau', terrain: true,
+  { arr: 'obstacles', label: '+ Plateau', group: 'Terrain', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 420, d: 360, h: 150, terrace: true }) },
   /* A STEP, for building ramps and stairs by duplicating and raising - D then PgUp, repeatedly. */
-  { arr: 'obstacles', label: '+ Step', terrain: true,
+  { arr: 'obstacles', label: '+ Step', group: 'Terrain', terrain: true,
     make: (x, z) => ({ kind: 'plat', x, z, w: 130, d: 130, h: 40 }) },
-  { arr: 'healpads',  label: '+ Heal pad', terrain: true,
+  { arr: 'healpads',  label: '+ Heal pad', group: 'Gameplay', terrain: true,
     make: (x, z) => ({ x, z, y: 0, r: 36, charge: 1 }) },
   /* A MOVING PLATFORM. `x0` is the rest position and `x`/`px` the live ones, so all three start
      equal; `amp` is how far it swings, `sp` its speed and `ph` its phase offset. Phase is fixed
      rather than random so two platforms placed side by side move together and can be edited into
      a rhythm deliberately, instead of the editor scattering timings you then cannot reproduce. */
-  { arr: 'movers',    label: '+ Mover', terrain: true,
+  { arr: 'movers',    label: '+ Mover', group: 'Gameplay', terrain: true,
     make: (x, z) => ({ x0: x, x, px: x, z, w: 110, d: 88, h: 0, amp: 40, sp: 1.1, ph: 0 }) },
-  { arr: 'enemies',   label: '+ Mob', terrain: true, mob: true },
+  { arr: 'enemies',   label: '+ Mob', group: 'Gameplay', terrain: true, mob: true },
 
   /* ── ANY ASSET IN THE KITS ────────────────────────────────────────────────
      Oliver: "I want to be able to place any structure, and asset." These are PROP_SETS names
@@ -328,22 +369,22 @@ const PALETTE = [
      the anvil - not only the dozen kinds the level generators happen to tag.
      Sizes are each set's own working size in the hub it was built for. They are a starting point,
      not a constraint: alt+arrows resizes anything, and the collider follows. */
-    { asset: 'hubWall',    label: 'Wall',        w: 120, h: 130, d: 28, c: '#b6ab95' },
-  { asset: 'hubGate',    label: 'Gateway',     w: 120, h: 130, d: 28, c: '#b6ab95' },
-  { asset: 'hubTower',   label: 'Tower base',  w: 120, h: 130, d: 120, c: '#b6ab95' },
-  { asset: 'hubTowerM',  label: 'Tower mid',   w: 120, h: 130, d: 120, c: '#b6ab95' },
-  { asset: 'hubRoof',    label: 'Tower roof',  w: 120, h: 90,  d: 120, c: '#8a3f3f' },
-  { asset: 'hubFlag',    label: 'Flag',        w: 26,  h: 110, d: 26,  c: '#a03a3a' },
-  { asset: 'hubFountain',label: 'Fountain',    w: 150, h: 70,  d: 150, c: '#9aa3ad' },
-  { asset: 'hubCart',    label: 'Cart',        w: 90,  h: 60,  d: 60,  c: '#7a5a34' },
-  { asset: 'hubStall',   label: 'Stall',       w: 110, h: 80,  d: 70,  c: '#7a5a34' },
-  { asset: 'hubHedge',   label: 'Hedge',       w: 110, h: 55,  d: 55,  c: '#3f6b38' },
-  { asset: 'hubBanner',  label: 'Banner',      w: 40,  h: 110, d: 12,  c: '#a03a3a' },
-  { asset: 'hubAnvil',   label: 'Anvil',       w: 52,  h: 42,  d: 40,  c: '#4a4a52' },
-  { asset: 'bush',       label: 'Bush',        w: 34,  h: 26,  d: 34,  c: '#3f6b38' },
-  { asset: 'grass',      label: 'Grass tuft',  w: 22,  h: 22,  d: 22,  c: '#5f8a3f' },
-  { asset: 'floorStone', label: 'Stone tile',  w: 120, h: 8,   d: 120, c: '#8f8a80', collide: false },
-  { asset: 'floor',      label: 'Grass tile',  w: 120, h: 8,   d: 120, c: '#5f8a3f', collide: false },
+    { asset: 'hubWall',    label: 'Wall', group: 'Structures',        w: 120, h: 130, d: 28, c: '#b6ab95' },
+  { asset: 'hubGate',    label: 'Gateway', group: 'Structures',     w: 120, h: 130, d: 28, c: '#b6ab95' },
+  { asset: 'hubTower',   label: 'Tower base', group: 'Structures',  w: 120, h: 130, d: 120, c: '#b6ab95' },
+  { asset: 'hubTowerM',  label: 'Tower mid', group: 'Structures',   w: 120, h: 130, d: 120, c: '#b6ab95' },
+  { asset: 'hubRoof',    label: 'Tower roof', group: 'Structures',  w: 120, h: 90,  d: 120, c: '#8a3f3f' },
+  { asset: 'hubFlag',    label: 'Flag', group: 'Structures',        w: 26,  h: 110, d: 26,  c: '#a03a3a' },
+  { asset: 'hubFountain',label: 'Fountain', group: 'Town',    w: 150, h: 70,  d: 150, c: '#9aa3ad' },
+  { asset: 'hubCart',    label: 'Cart', group: 'Town',        w: 90,  h: 60,  d: 60,  c: '#7a5a34' },
+  { asset: 'hubStall',   label: 'Stall', group: 'Town',       w: 110, h: 80,  d: 70,  c: '#7a5a34' },
+  { asset: 'hubHedge',   label: 'Hedge', group: 'Town',       w: 110, h: 55,  d: 55,  c: '#3f6b38' },
+  { asset: 'hubBanner',  label: 'Banner', group: 'Town',      w: 40,  h: 110, d: 12,  c: '#a03a3a' },
+  { asset: 'hubAnvil',   label: 'Anvil', group: 'Town',       w: 52,  h: 42,  d: 40,  c: '#4a4a52' },
+  { asset: 'bush',       label: 'Bush', group: 'Nature',        w: 34,  h: 26,  d: 34,  c: '#3f6b38' },
+  { asset: 'grass',      label: 'Grass tuft', group: 'Nature',  w: 22,  h: 22,  d: 22,  c: '#5f8a3f' },
+  { asset: 'floorStone', label: 'Stone tile', group: 'Floors',  w: 120, h: 8,   d: 120, c: '#8f8a80', collide: false },
+  { asset: 'floor',      label: 'Grass tile', group: 'Floors',  w: 120, h: 8,   d: 120, c: '#5f8a3f', collide: false },
 ];
 
 /* MOBS. Not a fixed palette entry: which creatures belong here is a per-zone question, so the
@@ -740,7 +781,8 @@ export function toggle(force){
     const k = areaKey(G(), (window.__BF3 && window.__BF3.curZone) || null);
     if(typeof k === 'string'){ EDITOR.key = k; EDITOR.editable = true; EDITOR.msg = ''; }
     else { EDITOR.key = '-'; EDITOR.editable = false; EDITOR.msg = (k && k.blocked) || 'no level loaded'; }
-    _undo = []; _redo = [];   // history is per session in one area; see step()
+    _undo = []; _redo = [];   // history is per session in one area; see history()
+    if(EDITOR.openGroup === undefined) EDITOR.openGroup = 'Terrain';
     _ui = document.createElement('div'); _ui.id = 'bfed'; document.body.appendChild(_ui);
     _marker = document.createElement('div'); _marker.id = 'bfedmark'; document.body.appendChild(_marker);
     /* Capture phase, so a click selects an object instead of swinging the sword. */

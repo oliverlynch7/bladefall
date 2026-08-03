@@ -12,7 +12,7 @@
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
 import { EDITOR, EDIT_ARRAYS, areaKey, loadLayers, saveLayers, genFingerprint,
-         recordMove, recordDelete, exportLayers } from './editor.js';
+         recordMove, recordDelete, recordAdd, exportLayers } from './editor.js';
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
 let _ui = null, _marker = null, _raf = 0, _drag = null;
@@ -84,6 +84,11 @@ function css(){
     '#bfed .warn{color:#e8705a}',
     '#bfed button{margin:6px 4px 0 0;padding:5px 9px;border-radius:6px;border:1px solid #8a6f34;',
     'background:linear-gradient(180deg,#332a1c,#191520);color:#ffd89a;font:800 11px system-ui}',
+    '#bfed .pal{display:flex;flex-wrap:wrap;gap:4px;margin:7px 0 4px;padding-top:7px;border-top:1px solid #3a3020}',
+    '#bfed button.p{margin:0;padding:4px 7px;font:700 10.5px system-ui;border-color:#4a3c26;',
+    'background:#221e18;color:#cbbfa8}',
+    '#bfed button.p.on{border-color:#ffd24a;background:#3a2f18;color:#ffe6b0}',
+    '#bfed button.p.off{opacity:.34;border-style:dashed}',
     '#bfedmark{position:fixed;z-index:99997;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;',
     'border:2px solid #ffd24a;box-shadow:0 0 0 2px rgba(0,0,0,.55),0 0 14px rgba(255,210,74,.7);pointer-events:none}',
     '#bfedhint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99998;',
@@ -118,10 +123,31 @@ function hud(){
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
+
+    rows.push('<div class="pal">' + PALETTE.map((p, i) =>
+      '<button class="p' + (EDITOR.place === i ? ' on' : '') + (kindRenders(p.kind) ? '' : ' off') +
+      '" data-p="' + i + '"' + (kindRenders(p.kind) ? '' : ' disabled') + '>' + p.label + '</button>'
+    ).join('') + '</div>');
+    rows.push(EDITOR.place != null
+      ? '<div class="row" style="color:#9fd6ff">click the ground to place a ' + PALETTE[EDITOR.place].label +
+        ' &middot; <span class="k">Esc</span>stop</div>'
+      : (G() && G().hub
+          ? '<div class="row">the hub only renders lanterns and flowers as models yet - the rest would place a plain box</div>'
+          : '<div class="row">pick an asset above, then click the ground</div>'));
+
     rows.push('<button data-a="save">Save</button><button data-a="export">Export file</button><button data-a="revert">Revert area</button>');
   }
   _ui.innerHTML = rows.join('');
-  _ui.querySelectorAll('button').forEach(b => { b.onclick = () => act(b.dataset.a); });
+  _ui.querySelectorAll('button').forEach(b => {
+    b.onclick = () => {
+      if(b.dataset.p != null){
+        const i = +b.dataset.p;
+        if(!kindRenders(PALETTE[i].kind)){ toast(PALETTE[i].label + ' has no model in the hub yet'); return; }
+        EDITOR.place = (EDITOR.place === i) ? null : i;   // clicking the armed one disarms it
+        hud();
+      } else act(b.dataset.a);
+    };
+  });
 }
 
 function act(a){
@@ -140,7 +166,89 @@ function layer(){
   return { all, L: all[EDITOR.key] };
 }
 function commit(mut){
-  const r = layer(); mut(r.L); saveLayers(r.all); EDITOR.dirty = true; hud();
+  const r = layer(); mut(r.L); saveLayers(r.all); EDITOR.dirty = true; hud(); redraw();
+}
+
+/* Rebuild the 3D world so the change is VISIBLE.
+
+   Editing G.deco changes the data; it does not change what is on screen. world3d bakes the level
+   into instanced meshes once at load, so without this a drag moved the object in the save file and
+   left the picture exactly as it was - which reads as the editor not working at all. P1 verified
+   the data and not the picture, and that is precisely the gap this closes.
+
+   Debounced, because a rebuild walks the whole level: firing one per mousemove during a drag would
+   stall the frame. The marker keeps tracking live, so the drag still feels continuous and the
+   world catches up a beat later. */
+let _redrawT = 0;
+function redraw(){
+  clearTimeout(_redrawT);
+  _redrawT = setTimeout(() => { try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){} }, 120);
+}
+
+/* ── the asset palette ────────────────────────────────────────────────────────
+   Placing a prop means pushing a deco entry that world3d's classify() recognises, so the palette
+   is exactly the set of tags it reads, and nothing else - an unrecognised kind falls through to a
+   plain lit box, which looks like the editor placed the wrong thing.
+
+   The default sizes are MEASURED, not invented: each one is either a real entry sampled out of the
+   hub and the first zones, or the defaultH that world3d's own buildProps call passes for that
+   set. Guessing here produces props at the wrong scale, which was already a full day's bug once
+   when mob scale was inverted. */
+const PALETTE = [
+  { kind: 'tree',       label: 'Tree',        w: 72, h: 52, d: 72, c: '#46723b', theme: 'plains' },
+  { kind: 'rock',       label: 'Rock',        w: 20, h: 20, d: 20, c: '#6b6b6b' },
+  { kind: 'fence',      label: 'Fence',       w: 30, h: 30, d: 12, c: '#6b5334' },
+  { kind: 'grave',      label: 'Gravestone',  w: 18, h: 30, d: 12, c: '#7a7a80' },
+  { kind: 'pillar',     label: 'Pillar',      w: 26, h: 80, d: 26, c: '#2b3040' },
+  { kind: 'column',     label: 'Column',      w: 26, h: 80, d: 26, c: '#c8c2b0' },
+  { kind: 'lantern',    label: 'Lantern',     w:  7, h: 47, d:  7, c: '#5a3f25' },
+  { kind: 'flower',     label: 'Flower',      w: 11, h: 18, d: 11, c: '#ffd24a' },
+  { kind: 'standstone', label: 'Standing st', w: 24, h: 90, d: 18, c: '#626879' },
+  { kind: 'corn',       label: 'Crop',        w:  4, h: 24, d:  4, c: '#d9ad42', theme: 'plains' },
+];
+
+/* WHICH KINDS ACTUALLY BECOME MODELS HERE.
+
+   The zones run every deco entry through world3d's classify() and give each recognised kind a real
+   model. The HUB does not: buildWorld returns on the hub branch before that block, and
+   buildHubDecoProps converts only lanterns and flowers. Everything else in hub deco stays a lit
+   box drawn by the voxel path - verified by placing a Tree in the Waystation and getting a green
+   box (_shot/out/place.png).
+
+   So the palette says so instead of pretending. An asset that cannot become a model here is shown
+   disabled with the reason, because the alternative is Oliver placing a tree, seeing a box, and
+   reasonably concluding the editor is broken.
+
+   Extending the hub to the full set is worth doing and is the next item: it needs the matching
+   entry in index.html's hub exclusion list (~12308), which is deliberately gated on whether the
+   hub really built that kind, so a kind added on one side and not the other draws BOTH the model
+   and the box it replaces. */
+const HUB_MODEL_KINDS = ['lantern', 'flower'];
+function kindRenders(kind){
+  const g = G();
+  return (g && g.hub) ? HUB_MODEL_KINDS.indexOf(kind) >= 0 : true;
+}
+
+/* Place at the cursor. The GROUND plane is the right primitive here (unlike drag, where no single
+   plane works): you are choosing a spot on the floor, and a click above the horizon has no floor
+   under it. That case gets a toast rather than a prop dumped at the origin. */
+function placeAt(sx, sy){
+  const spec = PALETTE[EDITOR.place];
+  const gp = unprojectToPlane(sx, sy, 0);
+  if(!gp){ toast('no ground under the cursor - aim lower'); return; }
+  const o = { x: Math.round(gp.x / EDITOR.grid) * EDITOR.grid,
+              z: Math.round(gp.z / EDITOR.grid) * EDITOR.grid,
+              y0: 0, w: spec.w, h: spec.h, d: spec.d, c: spec.c,
+              kind: spec.kind, lead: true };
+  if(spec.theme) o.theme = spec.theme;
+  const arr = G().deco;
+  arr.push(o);
+  commit(L => recordAdd(L, 'deco', o));
+  /* Select what you just placed, so it can be nudged into position immediately rather than needing
+     to be found and clicked again. Its index is the end of the array by construction. */
+  EDITOR.sel = { arr: 'deco', idx: arr.length - 1, o };
+  toast('placed ' + spec.label);
+  hud();
 }
 
 /* How far does the object move in the world per pixel the cursor moves?
@@ -176,6 +284,10 @@ function dragBasis(o){
 
 function onDown(e){
   if(!EDITOR.on || !EDITOR.editable || e.button !== 0) return;
+  /* Place mode wins over selection: while a palette item is armed, a click on the world means
+     "put one here", not "select whatever is nearest". Checked before picking so a click next to an
+     existing prop cannot quietly select it instead of placing. */
+  if(EDITOR.place != null){ placeAt(e.clientX, e.clientY); e.preventDefault(); e.stopPropagation(); return; }
   const hit = pickAt(e.clientX, e.clientY);
   EDITOR.sel = hit;
   if(hit){
@@ -205,7 +317,13 @@ function onKey(e){
      editing, so a nudge cannot also swing the sword or fire a skill. */
   if(e.key === 'F2'){ toggle(); e.preventDefault(); e.stopPropagation(); return; }
   if(!EDITOR.on) return;
-  if(e.key === 'Escape'){ EDITOR.sel = null; hud(); e.stopPropagation(); return; }
+  /* Escape disarms the palette FIRST, then clears the selection. Placing is the more modal state -
+     leaving it armed while the selection cleared would mean the next click drops another prop when
+     you meant to stop. */
+  if(e.key === 'Escape'){
+    if(EDITOR.place != null) EDITOR.place = null; else EDITOR.sel = null;
+    hud(); e.stopPropagation(); return;
+  }
   const s = EDITOR.sel;
   if(!s || !EDITOR.editable) return;
   const step = EDITOR.grid * (e.shiftKey ? 5 : 1);
@@ -264,7 +382,7 @@ export function toggle(force){
     cancelAnimationFrame(_raf);
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
-    _ui = null; _marker = null; EDITOR.sel = null; _drag = null;
+    _ui = null; _marker = null; EDITOR.sel = null; _drag = null; EDITOR.place = null;
     toast('edit mode off');
   }
   return EDITOR.on;

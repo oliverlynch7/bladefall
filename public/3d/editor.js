@@ -33,6 +33,7 @@ export const EDITOR = {
   msg: '',
   grid: 10,             // nudge step, game units
   editable: true,       // false in a re-rolled area, with a reason in .msg
+  place: null,          // index into the mode's asset palette while placing, else null
 };
 
 /* Arrays the editor can touch. Everything Oliver listed is one of these - props, floors,

@@ -1371,6 +1371,17 @@ window.__hero3dMeshes = () => {
   });
   return out;
 };
+/* WHAT THREE ACTUALLY DREW last frame. The one number that separates "the renderer skipped this
+   object" from "the renderer drew it and you cannot see it" — every other probe in this file
+   reports what was ASKED for. renderer.info.render is reset per render() call, so this is the
+   frame the shutter caught, not a running total. */
+window.__hero3dInfo = () => {
+  if(!renderer) return 'no renderer';
+  const r = renderer.info.render;
+  return { calls:r.calls, triangles:r.triangles, points:r.points, lines:r.lines,
+           geometries:renderer.info.memory.geometries, textures:renderer.info.memory.textures,
+           programs:renderer.info.programs ? renderer.info.programs.length : null };
+};
 window.__hero3dGLState = () => {
   const g = window.__BF_GL; if(!g) return 'no gl';
   return {

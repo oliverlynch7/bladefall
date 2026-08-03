@@ -1369,7 +1369,7 @@ function buildHub(scene, world){
     const pm = paveRec.mat.clone();
     /* Gentle warm tint only. The cobble texture carries the detail now, so the old flat
        '#c9b998' would just mud it - this nudges it towards the plaza's warm light and stops. */
-    pm.color = new THREE.Color('#e8dfcb');
+    pm.color = new THREE.Color('#ff00ff');
     const m = new THREE.InstancedMesh(paveRec.geo, pm, paveCells.length);
     const o = new THREE.Object3D();
     for(let i = 0; i < paveCells.length; i++){

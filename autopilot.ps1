@@ -98,7 +98,12 @@ if ($dirty -and (Test-Path $marker)) {
   # class of problem.
   $prevEAP = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
-  git stash push -u -m "autopilot killed-run leftovers $(Get-Date -Format 'yyyy-MM-dd HH:mm')" | Out-Null
+  # ':(exclude).claude/' is not optional. `-u` sweeps UNTRACKED files, and .claude/settings.json
+  # is the permission allowlist this script depends on - so the killed-run guard was stashing away
+  # the autopilot's own permissions and disabling it for every subsequent run. It took the
+  # autopilot down for ~14 consecutive runs before it diagnosed itself. Same `-u` that deleted
+  # worker B's runner earlier; the lesson did not generalise the first time.
+  git stash push -u -m "autopilot killed-run leftovers $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -- . ':(exclude).claude/' | Out-Null
   $ErrorActionPreference = $prevEAP
   $dirty = (git status --porcelain) | Where-Object { $_ -notmatch '^\?\?' }
 }

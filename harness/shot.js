@@ -375,11 +375,42 @@ const sceneReady = (dest) => {
   /* The sparring room goes down world3d's HUB branch (`world.hub` is the game's own G.hub), so its
      counts carry `hub:true` even though buildHub lays nothing there. */
   const wb = (dest === 'hub' || dest === 'spar') ? '!!w.counts.hub' : '!w.counts.hub';
+  /* AND `counts.hub` IS THE HOLE FOR `spar`, not the answer — the fourth time this file has fixed
+     the same shape of race, and the first time the destination test itself was already right.
+     `at` correctly waits for `G.sparringRoom`, but the world half only asks "has world3d built
+     something whose counts say hub". The WAYSTATION's counts say that too, and the run-up goes
+     through the Waystation on the way — the destination opens the hub's own sparring door. So the
+     instant `G.sparringRoom` flips true the whole test is already satisfied by the hub's build from
+     a second earlier, and the shutter fires before syncWorld has rebuilt for the room.
+     MEASURED 2026-08-03, on unmodified game code, from two identical `--scene spar` commands: the
+     first reported `at → Sparring Room [SPAR]` and handed back the WAYSTATION's counts
+     (`pave:399, wall:26, tower:9, gatehouse:8, buildings:8`); the second reported the room's own
+     build, `built:"18|outskirts|0,-620;0,-680;0,-60"`, counts `{hub:true, drawCalls:0}`. Same
+     command, two different worlds — a pure race with how long the hub build takes, exactly like the
+     three before it. It matters more than it looks: a run auditing this room reads 51 draw calls of
+     castle wall and cobbles that are a THOUSAND UNITS AWAY at hub coordinates and concludes the 3D
+     layer is doing something here.
+     Fixed by requiring the build to have CHANGED since we were last outside the room, rather than by
+     naming a count. `WORLD3D.built` is the level signature syncWorld stamps on every rebuild, so
+     "it is different from the one that was up in the hub" is exactly "world3d has rebuilt for this
+     place", and it cannot be fooled by two levels that happen to share a flag. Nothing is hard-coded
+     about what the room contains, so it keeps working the day the room gets a build of its own —
+     which is the whole reason to reach for it.
+     Fails OPEN, deliberately: if the mark was never taken (world3d not loaded yet, or a future entry
+     point that never passes through the hub) the comparison is against `undefined` and the test
+     passes, so a missing mark can never turn into READY NEVER CAME. */
+  const mark = dest === 'spar'
+    ? ' if(w && w.built && !(window.__BF3 && __BF3.G && __BF3.G.sparringRoom))'
+      + ' window.__shotPriorBuild = w.built;'
+    : '';
+  const fresh = dest === 'spar' ? ' && w.built !== window.__shotPriorBuild' : '';
   return '(function(){ try{'
+       + ' var w = window.__world3d && __world3d();'
+       + mark
        + ' if(!(window.__BF3 && __BF3.G && ' + at + ')) return false;'
-       + ' var w = window.__world3d && __world3d(); if(!w) return true;'
+       + ' if(!w) return true;'
        + ' if(!w.on) return true;'
-       + ' return !!(w.built && w.counts && ' + wb + ');'
+       + ' return !!(w.built && w.counts && ' + wb + fresh + ');'
        + ' }catch(e){ return false; } })()';
 };
 const READY = arg('ready', SCENE == null ? null : sceneReady(SCENE));

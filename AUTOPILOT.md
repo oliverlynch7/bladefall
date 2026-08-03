@@ -109,6 +109,29 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     `G.sparringRoom`, not `G.hub`, because the room sets both and `hub` alone resolves in the
     Waystation on the way. See the backlog entry for what it found — and for the near-miss that
     came of reaching it with a hand-rolled `--pre` first.
+    **AND IT WAS STILL RACING, on its WORLD half — fixed 2026-08-03 (`autopilot-merged`), the
+    fourth time this file has fixed this shape and the first time the destination test was already
+    right.** `--scene spar` correctly waited for `G.sparringRoom`, then asked of world3d only
+    `built && counts.hub`. **The Waystation's counts say `hub` too**, and the run-up goes through
+    the Waystation by design — the destination opens the hub's own sparring door. So the instant
+    `G.sparringRoom` flipped true the world half was already satisfied by the HUB's build from a
+    second earlier, and the shutter fired before `syncWorld` had rebuilt for the room.
+    Measured on unmodified game code, two identical `--scene spar` commands: the first printed
+    `at → Sparring Room [SPAR]` and handed back the **Waystation's** counts — `pave:399, wall:26,
+    tower:9, gatehouse:8, buildings:8, drawCalls:51` — the second the room's own build,
+    `built:"18|outskirts|0,-620;0,-680;0,-60"`, counts `{hub:true, drawCalls:0}`. Pure race with how
+    long the hub build takes. It matters more than it looks: **a run auditing this room reads 51
+    draw calls of castle wall and cobbles that are a thousand units away at hub coordinates** and
+    concludes the 3D layer is doing something there — the exact opposite of the truth.
+    The fix names no count. It requires `WORLD3D.built` — the level signature `syncWorld` stamps on
+    every rebuild — to have CHANGED since the last poll taken outside the room, which is exactly
+    "world3d has rebuilt for this place" and cannot be fooled by two levels sharing a flag. Nothing
+    is hard-coded about what the room contains, so it keeps working the day the room gets a 3D build
+    of its own. Fails OPEN: no mark taken means the comparison is against `undefined`, so it can
+    never turn into a spurious READY NEVER CAME.
+    Verified: two consecutive runs now both report the room's build at 4.2s and 4.5s (never the
+    sub-second false positive), and `?world3d=0` still resolves at 4.1s through the `!w.on`
+    short-circuit (`on:false, built:null, spar:true`).
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight
@@ -608,6 +631,41 @@ because the three maps are three different levels.
       NEXT for this item: `drawWaystation`'s furniture (market wares, keeper stalls, forge, mirror,
       beast cages) is the remaining half, and it is a different pipeline — those are not in
       `G.deco` at all.)*
+      *(scouted 2026-08-03, `autopilot-merged` — **THE SPARRING ROOM CAN TAKE A 3D BUILD, and two
+      of the three things anyone would try there are now settled without having to build them
+      again.** The code was written and rendered; it is NOT in the tree (see the note at the end),
+      so this is a scouting report, not a shipped change.
+      - **A `buildHubRoom` fallback works.** `buildHub` derives everything from `G.gates` and
+        returns null with none, which is why this room has always built nothing; a fallback keyed on
+        `world.segments` and called from `buildWorld`'s hub branch renders perfectly well there —
+        castle wall and corner towers stood up in the room and photographed
+        (`_shot/out/o5-spar-after.png`, `o8-north.png`). So "the 3D layer builds nothing in the
+        Sparring Room" is a consequence of one early `return`, not of anything about the room.
+      - **DO NOT WALL IT. The walls bury the three banners, and that is the finding.** A castle wall
+        run on all four edges reads well from across the room and deletes the only decoration in it
+        that says "arena". The banners are authored at `z:-672` against a wall whose inner face is
+        at `-675` — flush against it — and the hub is the one place the voxel walls are drawn INLINE
+        rather than deferred (`_wallDefer = !G.hub`) precisely so world3d can stand stone over them.
+        So any 3D wall thick enough to cover the voxel one covers what is pinned to its face too;
+        there is no offset that clears the banner and still hides the wall behind it. A/B at one
+        camera: `p1-ban-3d.png` is castle stone with no banner on it, `p2-ban-voxel.png` the slate
+        banner and its olive emblem, large and legible. Tag the banners on the index.html side first
+        if this is ever wanted.
+      - **The FLOOR is genuinely unresolved and the next run should not assume either way.** A
+        255-tile cobble floor built and counted (`roomPave:255`, `drawCalls:1`), and a magenta probe
+        of it showed **nothing** in the room while the identical call painted the whole Waystation
+        magenta (`p9-hub-probe.png`). That is either a real "the room's floor is covered by
+        something" bug or simply the `--scene spar` ready race described in the harness section
+        above, which was still live at the time and which every one of these renders was taken
+        through. **Redo the probe first, on the fixed harness, before believing either answer.**
+      Two counts must NOT be reused if this is rebuilt: `pave` (it licenses index.html to delete the
+      ring canvas lip, which nothing 3D replaces) and `tower` (it licenses deleting the Waystation's
+      seven rampart dividers). `roomPave` / `roomTower` were used instead. `floorTiles` IS the right
+      shared name — it is what turns off the segment's own lit top edge and path dashes.
+      **Why it is not in the tree: a SECOND autopilot process was editing this checkout at the same
+      time and overwrote `world3d.js` mid-run**, wiping the work. See the note on concurrent workers
+      — commit by pathspec, never `git add -A`, and check `git status` before AND after editing a
+      shared file.)*
       *(BLOCKED, 2026-08-03, `autopilot-merged`: **THE HUB'S "YOUR BAG" CHEST — BUILT, RENDERED,
       AND REVERTED, because prop3d reports it drawn and draws nothing.** Recorded in full so the
       next run starts from the measurement instead of rebuilding the same patch.

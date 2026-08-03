@@ -67,7 +67,7 @@ const KEY_LEN = 22;
 const WAY_FILE = 'props/pillar-obelisk';
 const WAY_H = 64;
 
-export const PROP3D = { on:true, chests:0, keys:0, waystone:0, ready:false, keysReady:false, err:null };
+export const PROP3D = { on:true, chests:0, keys:0, waystone:0, hubBag:0, ready:false, keysReady:false, err:null };
 try {
   const q = new URLSearchParams(location.search);
   /* Rides with world3d exactly as mob3d does: a 3D world with voxel chests in it is worse than
@@ -78,6 +78,7 @@ try {
 } catch(e){}
 
 let _group = null, _pending = false, _keyPending = false;
+const _chestList = [];            // scratch: G.chests plus the hub's bag, rebuilt each frame
 const _actors = new Map();        // chest object -> actor
 const _free = [];                 // released actors, ready to re-home
 const _keyActors = new Map();     // key object -> actor
@@ -187,7 +188,17 @@ function syncPropsInner(scene, dt){
   if(!_group){ _group = new THREE.Group(); _group.name = 'prop3d'; scene.add(_group); }
   /* Each object type answers for itself. They used to share one early return, which meant a slow
      or failed CHEST download also held the keys as voxel boxes - two unrelated props, one fate. */
-  const a = syncChests(world.chests || [], dt);
+  /* THE WAYSTATION'S BAG rides the ORDINARY chest list rather than getting a sync of its own, and
+     that is the whole design. "Your Bag" IS a chest — same model, same fit, same pose — so a
+     bespoke path would be a second copy of syncChests differing only in where the object came
+     from, and the previous attempt at exactly that shipped an actor which reported itself
+     positioned, scaled, visible and in-scene and drew nothing at all. Appending it to the list the
+     zone chests already travel down means there is only ever one code path to be wrong.
+     Appended to a scratch array, not concat: this runs every frame. */
+  const bag = world.hubBag || null;
+  let list = world.chests || [];
+  if(bag){ _chestList.length = 0; for(const c of list) _chestList.push(c); _chestList.push(bag); list = _chestList; }
+  const a = syncChests(list, dt, bag);
   const b = syncKeys(world.keys || []);
   /* Two objects, one actor, and they can never coexist: `waystone` is a zone's quest objective and
      `hubStone` is the Waystation's plaza bonfire, so one of them is always null. Sharing the actor

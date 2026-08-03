@@ -218,6 +218,31 @@ is already handled and the correct move is to stop.
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
+## Cadence — A RUN IS KILLED AFTER ~20 MINUTES. Budget for it. (measured 2026-08-03)
+**Read this before planning a run.** The spec below says "hourly"; `_autopilot.log` says otherwise
+and the log is the measurement. Runs start every **20 minutes**, and **every run since 08:04 on
+2026-08-03 was killed at its boundary** — 08:24, 08:44, 09:04, 09:24 each logged *"previous run was
+killed mid-edit; stashing its leftovers"*, naming modified files under `public/`. So a run does not
+end when it decides to; it ends on a clock.
+
+**What that costs, in the unit that matters: a `--scene` render is 2–5 minutes wall clock.**
+Measured this run — two `--scene 0` renders, 127.4s and 126.5s of ready-wait each *plus* Chrome
+start, page load and PNG write. **A run therefore gets roughly THREE renders, total.** An item
+needing a before shot, a fix, an after shot and two regression checks does not fit, and the
+backlog above is full of the evidence: three consecutive entries — the Sparring Room `buildHubRoom`
+scout, the hub bag chest, and this one — are *scouting reports and reverts* rather than shipped
+work, and the bag entry says in so many words that a second process "overwrote `world3d.js`
+mid-run".
+
+Practical rules, in priority order:
+- **Commit by pathspec the moment anything is verified.** Not at the end of the item. A killed run
+  keeps nothing, and the next run's guard *stashes* your leftovers — recoverable, but nobody looks.
+- **Cost the renders before starting an item.** Three renders is the budget. Prefer an item whose
+  proof is one probe (`--eval` counts) over one that needs an A/B pair plus regressions.
+- **Doc-only commits are real output here** and there is precedent (`920fe2a`, `4804565`). Recording
+  a measurement so the next run starts from it beats losing it.
+- Do not "just start one more render" past the ~15-minute mark. It will not come back.
+
 ## Cadence (hourly)
 This runs **every hour, 8am–11pm** — not once a day. So each run does **one** backlog chunk and stays lightweight. **Only make noise when you ship something:**
 - If you committed a real change this run → send the Telegram digest below.
@@ -704,6 +729,41 @@ because the three maps are three different levels.
       are invisible too then this is a pre-existing regression that a hub cast merely walked into.
       That is one render and it splits the problem in half.
       Nothing of this is in the tree: index.html and prop3d.js are byte-identical to HEAD.)*
+      *(2026-08-03, `autopilot-merged` — **TWO WORKERS RENDERING AT ONCE MAKES `--scene` TIME OUT
+      WITH NO ERROR, AND IT IS PERFECTLY DISGUISED AS A TOTAL 3D REGRESSION.** Recorded because the
+      disguise is very good and cost this run its whole budget.
+      Symptom, reproduced twice, the second time on a bare `node _shot/shot.js --scene 0` with no
+      `--focus` and no `--pre`:
+      `__world3d()` → **`{on:true, ready:false, built:null, counts:{}, err:null}`**
+      `__prop3d()`  → `{on:true, ready:false, chests:0, waystone:0, box:null, err:null}`
+      `__mob3d()`   → `{on:true, live:0, pooled:0, models:[], missing:[], err:null}`
+      `at → The Outskirts  zone 0 stage 0` — the GAME half of the ready test was satisfied; only
+      the world half never came. Both runs printed `READY NEVER CAME` at 127.4s / 126.5s, and the
+      picture handed back is a completely voxel Outskirts (`_shot/out/r1-zone-chest.png`,
+      `r2-outskirts.png`): khaki ground, box trees, voxel corn, voxel chest — the documented
+      fallback, rendering correctly. **So the chest in that frame is a VOXEL chest and says nothing
+      about prop3d.** The original question is still open; it just cannot be asked from here.
+      **Where it is stuck is pinned by what is NOT in the log, and that is the useful half.**
+      `err` is `null` on all three layers and the console holds exactly one line — `[hero3d] ready
+      — 26 clips, model Warrior` — with **no `[world3d] prop failed to load`, no `[world3d] village
+      part failed to load`, no `[world3d] road tile failed to load`, and no `[world3d] build failed,
+      falling back to voxels`**. Every one of those loaders catches its own error and warns, so
+      silence means **nothing failed — they are still pending.** That leaves exactly one gate:
+      `syncWorld`'s `if(!_propsReady) return false` (world3d.js:1739), i.e. `ensureProps()`
+      (world3d.js:346) has not resolved its `Promise.all` after two minutes. Consistent with
+      `built:null` (never stamped) and `counts:{}` (never filled).
+      hero3d loaded a skinned glTF fine in the same page, so this is not "glTF is broken".
+      **NOT yet called a regression, and the next run must not assume it is one.** Nothing under
+      `public/` has changed since `6ec0fdd`, whose own note recorded a full Outskirts build (1257
+      floor, 118 trees, 41 draw calls) hours earlier, and the two commits after it are doc/harness
+      only. The live alternative is contention: runs have been killed at 20-minute boundaries all
+      morning (see the cadence section), and an orphaned Chrome from a killed run competing for the
+      same cores would slow SwiftShader's glTF parse without producing a single error. **One render
+      splits THIS in half:** `--scene 0 --readymax 300000`. If it resolves at ~200s it is the
+      machine; if it still never comes with no warnings, `ensureProps` is genuinely hung and the
+      next thing to instrument is which of the three loader groups never settles.
+      Until that is known, **treat any `READY NEVER CAME` this morning as unproven, not as a
+      finding** — and note the harness itself says so in its own message.)*
       *(progress 2026-08-03, `autopilot-merged`: **THE QUESTION ABOVE IS ANSWERED, AND THE ANSWER
       KILLS THE LEADING THEORY.** The note said one render splits the problem in half; it did, and
       the half it landed in is not the one it expected.

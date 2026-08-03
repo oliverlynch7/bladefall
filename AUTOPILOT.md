@@ -658,6 +658,62 @@ because the three maps are three different levels.
       NEXT for this item: `drawWaystation`'s furniture (market wares, keeper stalls, forge, mirror,
       beast cages) is the remaining half, and it is a different pipeline — those are not in
       `G.deco` at all.)*
+      *(progress 2026-08-03, `autopilot-merged`: **THE SMITH'S ANVIL IS A REAL ANVIL — the first
+      piece of `drawWaystation`'s FURNITURE to become a model, and the pipeline the rest of it
+      needs.** Every hub conversion before this one read `G.deco`; the keepers, their stalls, the
+      forge, the mirror and the beast cages have never been in that list, so none of them could
+      reach any 3D pipeline at all. `__BF_WORLD()` now hands over `G.hubNpcs`, for the same reason
+      it already hands over `HUB_STONE`: the objects exist only inside the hub's own draw call, so
+      there is nothing else to convert from. That one field is what opens the remaining half.
+      **The least invented cast in the file after the mimic.** The game's own source comment calls
+      the voxel one *"BIGGER anvil on a stump"* and the Quaternius kit ships an anvil on a stump —
+      `qprops/Anvil_Log`. Not `qprops/Anvil`, which would leave the hub's stump drawn twice. No art
+      choice was made.
+      **`buildProps`, NOT `hubPiece`, and that would have shipped half a model.** `hubPiece`
+      instances `rec.geo`/`rec.mat`, which is the FIRST primitive only. Measured before building
+      anything: `__world3dRec('qprops/Anvil_Log')` reports **3 parts** (`height` 0.609 against
+      `fullHeight` 1.073 — the first primitive is barely half the model), so `hubPiece` would have
+      stood a log with no anvil on it, exactly the "two thirds of the model quietly dropped" trap
+      the loader's own note describes. `buildProps` also keeps the model's own texture, which is
+      right here and was wrong for the plaza lamps (those had to match ten hand-painted ones).
+      Sized to the voxel smithy it replaces — 52 wide, 42 to the top of the face — so the forge with
+      its live fire, the rising embers, the quench trough, the tool rack and the Smith himself, all
+      of which stay voxel because all of them MOVE, keep standing where they were placed around it.
+      The fit comes out height-bound: `__world3dPoses('Anvil')` reports **x -795, y 0, z 195, h 42,
+      w 36, parts 3** — base on the ground, at the Smith npc's own live post-space-pass position,
+      not at an authored number.
+      Gated on `counts.hubAnvil`, the piece that actually replaces it — never on `counts.hub`, which
+      is true in the **Sparring Room** where `buildHub` bails before `buildHubDecoProps` is ever
+      reached, so `counts.hubAnvil` is undefined there and the voxel smithy is untouched. Fails safe
+      the other way too: if the model never loads `buildProps` degrades to a lit box rather than to
+      a hole, so the count is still returned and the two layers can never both draw the anvil; and
+      in first-person `three3DLive()` is false and the whole voxel smithy draws.
+      Verified at one camera both ways: `_shot/out/oa5-anvil-close.png` — a real anvil with its horn
+      on a planked wooden stump, the Smith beside it with his hammer, tool rack, forge and quench
+      trough all still there — against `oa4-anvil-voxel.png` (`?world3d=0`), the flat grey slab it
+      replaces. Wider shot `oa3-anvil-3d.png`. Exactly ONE anvil in frame, so the drop lands.
+      Hub counts move exactly as designed and nothing else moves: **drawCalls 51 → 54**,
+      `hubDecoDraws` 13 → 16 (one per primitive), `hubAnvil 1`; pave 399, tower 9, hubLamp 4,
+      hubFlower 30 all unchanged. Outskirts identical to the recorded baseline — 1257 floor, 115
+      road, 2194 deco, 277 box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped, 41
+      draw calls (`oa7-outskirts.png`).
+      *One cost, published rather than buried:* `PROP_SETS` is flattened into the preload list, so
+      `qprops/Anvil_Log` is now downloaded in every zone, not just the hub. It is a 3-primitive prop
+      kit model and the zone draw count did not move, but if the furniture pass adds a dozen of
+      these the set will want splitting into a hub-only preload.
+      NEXT for this item: the same `world.hubNpcs` route now reaches the Beastkeeper's cages
+      (`qprops/Cage_Small`), the market crates and barrels (`qprops/Crate_Wooden`, `qprops/Barrel`)
+      and the Postings board. Each is the same five-line shape as this one: a `PROP_SETS` entry, a
+      `buildProps` call in `buildHubDecoProps`, a count, and a gate in `drawWaystation`.)*
+      *(HAZARD, measured 2026-08-03: **two autopilot workers were live in THIS checkout at once**,
+      and it cost this run three ways rather than one. `autopilot.ps1` fires every twenty minutes
+      here and its killed-run guard stashed a tree of verified edits mid-session
+      (`git stash list` → "autopilot killed-run leftovers"); HEAD moved forward two commits under a
+      running session; and — the one nobody has written down — **both workers were writing
+      `_shot/out/` files under the same short prefixes**, so one run's `--out`/log was silently
+      overwritten by the other's and a probe result from somebody else's command was read as if it
+      were this one's. Commit by pathspec, early; and give a run's renders a prefix nothing else
+      will pick (this one used `oa*`).)*
       *(scouted 2026-08-03, `autopilot-merged` — **THE SPARRING ROOM CAN TAKE A 3D BUILD, and two
       of the three things anyone would try there are now settled without having to build them
       again.** The code was written and rendered; it is NOT in the tree (see the note at the end),
@@ -869,6 +925,75 @@ because the three maps are three different levels.
       render and settles it.** The harness already says as much in its own message; believe it.
       The 120s default is the real hazard, because it is comfortably enough when you are alone and
       comfortably not when you are not.)*
+      *(SOLVED 2026-08-03, `autopilot-merged`: **THE CHEST IS NOT A RENDERING BUG AT ALL. IT IS
+      AUTHORED INSIDE THE BARN ROOF.** prop3d is innocent, world3d is innocent, the mixer is
+      innocent, and the four runs that went looking for a fault in the 3D layer were looking in the
+      wrong file. Every line below is a probe or a picture.
+      **What settled it was a new question, not another probe of the chest.** Everything that had
+      been asked so far reports what was ASKED FOR — position, scale, `visible`, `inScene`, a world
+      Box3, even the pixel it projects to — and the previous run had already proved all of those can
+      be perfect while the object is depth-tested away. Nobody had asked **what is standing in front
+      of it**. One raycast from the game's own eye answered it: the only thing between the camera and
+      `chests[0]` is a `world3d` box instance whose surface is at **y 137**, 15.7 units nearer than
+      the chest. (Built as `__hero3dRayTo`; **it is NOT in the tree** — the killed-run stash guard
+      took it mid-run, and the other worker's `__world3dNear(x,z,r,minTop)` answers the same question
+      spatially and IS committed. Use that one.)
+      **y 137 names the object on sight.** index.html:4845, the Outskirts' west farm, three calls on
+      one line: `vsolid(-1180,-1540,0,300,105,220)` the barn body, `G.deco.push({x:-1180,z:-1540,
+      y0:105,w:340,h:32,d:250})` the roof slab — **105 + 32 = 137** — and `vplat(-1180,-1540,120,
+      300,210,{terrace:true,checkpoint:true})`, the loft you actually walk on, at **120**. Then
+      `chest(-1110,-1570,120)`. So the chest is placed on the walking surface and the roof slab
+      rises **17 units through it**: of 17.9 units of chest, **0.9 can ever be seen.**
+      The depth-ON magenta render the last run asked for shows exactly that and nothing else — a
+      thin magenta band, ~70px wide and ~8px tall, at the predicted pixel (`_shot/out/s1-depth-on.png`,
+      `__prop3dChestPlaces()` → `px [549,476]`). Not gone (so it is being drawn), not whole (so it is
+      buried). **Both of the last run's two branches were wrong** because both assumed the geometry
+      was right.
+      **Base-at-y0 is measured, not assumed.** A centred box would top out at 121 and the ray would
+      have hit there; it hit at 137. So world3d's boxes span `y0 .. y0+h`, which is the same
+      convention index.html's own floor-paint rule uses (`(d.y0||0)+(d.h||0)<=3`). **The two
+      renderers agree about where the roof is** — which is why this is an authoring bug and not a
+      conversion bug, and why "fix it in prop3d" would have been a patch over a wrong number.
+      **IT IS A CLASS, AND THE SCAN IS THE CHECK.** Every chest in the zone tested against every
+      deco box for containment (`h>3`, non-corn, the chest's own 32x19x17.9 footprint):
+      **four of the Outskirts' seven chests are inside a deco box.**
+      - `chests[0]` barn loft, at y 120 inside `105..137` → **17 buried, 0.9 shows. INVISIBLE.**
+      - `chests[5]` windmill, `chest(980,-3470,230)` at y 230 inside `{y0:230,h:28}` = `230..258`,
+        and the chest is 17.9 tall → **entirely inside it. INVISIBLE.** Same line, same shape:
+        `vcol(980,-3470,140,140,230)` gives a walk surface at 230 and the cap sits ON it instead of
+        UNDER it (index.html:4870).
+      - `chests[1]` back loft, y 120 inside `120..124` → 4 buried, 13.9 shows. Reads fine, and this
+        is the one the last run called "renders normally at px (441,407)" and used to rule out the
+        actor. It was right about the actor and right for the wrong reason: that chest is clipped
+        too, just not enough to notice.
+      - `chests[3]` stump ledge, y 74 inside `74..79` → 5 buried.
+      - `chests[2]`, `[4]`, `[6]` are clear of everything and render.
+      The rule the four share: **a deck's cap deco is pushed at `y0 = the walk height` (or higher),
+      when a cap's TOP is what the player stands on.** Every one of them is off by its own `h`.
+      **NOT verified, and the next run should render it before believing it:** the same arithmetic
+      says the HERO is 17 units inside that roof too (it stands at y 120 under a surface at 137), in
+      **both** renderers. The render that would have shown it errored out (the stash again), so this
+      is arithmetic, not a picture. It matters because it decides the fix: if the hero is visibly
+      sunk, the cap is simply mis-authored and lowering it so its top meets the walk plane fixes
+      hero and chest together, in one number each, with no collision, jump distance or climb
+      tuning touched — `{y0:105,h:32}` → `{y0:88,h:32}`, `{y0:120,h:4}` → `{y0:116,h:4}`,
+      `{y0:74,h:5}` → `{y0:69,h:5}`. The windmill needs its mast (`y0:258`) and sail cross
+      (`y0:310`) shifted down with its cap or the head comes apart, so that one is 28 units of
+      landmark silhouette and is worth Oliver's eye rather than a silent fix.
+      **DO NOT move the `vplat`s to meet the roofs instead.** `climbRun(-1370,-1390,0,-1300,-1540,
+      92,70)` ends at 92 and the loft is at 120; raising it to 137 turns a 28-unit step into 45.
+      That is platforming tuning and it is exactly what VISION.md's last rule forbids doing casually.
+      **Scope honestly: this scan covered zone 0 only.** The other seven zones have not been scanned
+      and the same `vplat` + cap-deco + `chest` idiom is all over them — that scan is one `--eval`
+      and should be the next run's first move, before any fix.
+      **A process finding worth more than the bug.** This run and the other worker were on the same
+      item at the same time in the same checkout, and it cost both of them: a `git add` by pathspec
+      still swept the other's in-flight `index.html` into commit `e0466fa` (their `hubNpcs` and
+      anvil work, under this run's message — gate-clean, nothing lost, but not this run's to commit),
+      and the stash guard took this run's probe out of `hero3d.js` between writing it and committing
+      it, so the commit landed with only the version bump in it. **Check `git status` immediately
+      before every commit and commit only files you can see are yours** — pathspec alone is not
+      enough when the other worker is editing the same file.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

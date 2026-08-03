@@ -225,6 +225,34 @@ Priorities come from Oliver's vision conversation (2026-07-31): multiplayer is t
 must feel genuinely distinct (League of Legends standard), the hub is a social space (AdventureQuest
 Worlds standard), and the graphics need finishing before he shows more people.
 
+### ORDER OF WORK — set by Oliver, 2026-08-02. Do not reorder.
+
+1. **Finish remastering the main hub.** Everything below waits on this.
+2. **The four repeatable activities**, in this order: Abyssal Descent, Treasure Sprint,
+   Sparring Post, Boss Gauntlet.
+3. **Then the levels** — all eight zones.
+
+Take the TOP unfinished item in that order. If it is genuinely blocked, say so in the log and
+take the next one; do not skip ahead because a later item looks easier.
+
+Anchors for stage 2, so a run does not have to rediscover them (all in `enterWaystation`,
+index.html around 10283, the "REPEATABLE ACTIVITY ANNEX" block):
+
+  - the annex approach walk is the deco at `x:0, z:610, w:720, d:96`
+  - each activity has a themed floor pad in `annexPads`, raised to `y0:2` so it cannot z-fight
+    the base floor: **Abyss** `x:-235,z:660` violet, **Treasure Sprint** `x:235,z:660` gold,
+    **Arena / Sparring** `x:0,z:800` crimson, and the **Arcade** `x:-340,z:800` when owned
+  - entry points: `startHubSprint()` (5774), `enterSparringRoom()` (10596),
+    `openGauntletGate()` (9721)
+  - the Sparring Room is its own interior — `G.sparringRoom`, photographable with
+    `node _shot/shot.js --scene spar`. NOTE: buildHub bails out when there are no gates, which is
+    exactly that room, so the 3D layer currently builds NOTHING there. Check that before assuming
+    a change took effect.
+
+Each of the four is a PLACE, not a menu. The pads are flat coloured slabs today; the job is to
+make each read as somewhere you go, in the way the Waystation now does - and to check the
+interior, not just the pad, because three of the four lead somewhere.
+
 - [ ] **Hub buildings.** The Waystation is where players idle and socialise, so it matters most.
       Both kits are MODULAR (walls/doors/roofs, no whole buildings) — `makeBuilding()` in
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.435.0-autopilot';
+const VERSION3D='1.436.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2855,7 +2855,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -12873,6 +12873,16 @@ function drawWaystation(t){
       for(let i=0;i<2;i++) bx(g.x+(Math.random()-0.5)*30, 58+Math.random()*44, g.z+3, 3,5,3, '#7be0a0','#bfffd0',0.7); }   // cleared gates burn permanently bright
     if(!open) bx(g.x,45,g.z+5, 26,7,4, '#0b0c10');                                     // the bar across a cold gate
   }
+  /* THE SMITH'S ANVIL is now a real model (world3d's buildHubDecoProps), so its voxel body must
+     stop being drawn or the two stand in the same square foot. Gated on counts.hubAnvil — the
+     piece that actually replaces it — never on counts.hub, which is true in the Sparring Room
+     where buildHub bails before it lays anything at all. Fails safe twice over: if the model never
+     loads buildProps degrades to a lit box and the count is still returned, and if world3d is off
+     or not drawing this frame (first-person) three3DLive() is false and the voxel smithy is whole.
+     Computed ONCE per frame here rather than inside the npc loop. */
+  const _hubAnvil = (() => { if(!three3DLive()) return false;
+    const w = window.__world3d && window.__world3d();
+    return !!(w && w.on && w.ready && w.counts && w.counts.hubAnvil > 0); })();
   // the keepers of the posts
   for(const n of G.hubNpcs){
     if(n.prop==='arcade'){ drawShadow(n.x,n.z,28,0.34);
@@ -12899,9 +12909,11 @@ function drawWaystation(t){
       bx(0,16,14, 8,10,3,'#ffd24a','#ffd24a',0.7);                     // gold clasp on the FRONT, facing the plaza
       popM(); continue; }
     if(n.prop==='anvil'){ drawShadow(n.x,n.z,26,0.24);
-      // BIGGER anvil on a stump
-      bx(n.x,13,n.z, 30,26,30,'#2a231c'); bx(n.x,30,n.z, 52,14,22,'#20242e','#4a5568',0.4); bx(n.x+22,34,n.z, 14,9,16,'#262a36');  // stump + anvil body + horn
-      bx(n.x,40,n.z, 40,4,18,tint('#4a5568','#fff',0.15));
+      // BIGGER anvil on a stump — replaced by qprops/Anvil_Log when the 3D layer has built it
+      if(!_hubAnvil){
+        bx(n.x,13,n.z, 30,26,30,'#2a231c'); bx(n.x,30,n.z, 52,14,22,'#20242e','#4a5568',0.4); bx(n.x+22,34,n.z, 14,9,16,'#262a36');  // stump + anvil body + horn
+        bx(n.x,40,n.z, 40,4,18,tint('#4a5568','#fff',0.15));
+      }
       // a stone FORGE with live fire, to the smith's far side
       const fx=n.x-4, fz=n.z-30; bx(fx,18,fz, 46,36,34,'#2c2420','#3a2f26',0.5); bx(fx,40,fz, 40,8,28,'#1a1512');
       { const fl=0.6+0.35*Math.sin(t*7); bx(fx,30,fz+4, 22,16,10,'#ff6a24','#ff9a3b',fl); bx(fx,38,fz+4, 12,12,7,'#ffd257','#ffe39a',fl*0.9); }  // forge fire

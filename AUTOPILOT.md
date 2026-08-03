@@ -241,8 +241,16 @@ index.html around 10283, the "REPEATABLE ACTIVITY ANNEX" block):
   - the annex approach walk is the deco at `x:0, z:610, w:720, d:96`
   - each activity has a themed floor pad in `annexPads`, raised to `y0:2` so it cannot z-fight
     the base floor: **Abyss** `x:-235,z:660` violet, **Treasure Sprint** `x:235,z:660` gold,
-    **Arena / Sparring** `x:0,z:800` crimson, and the **Arcade** `x:-340,z:800` when owned
-  - entry points: `startHubSprint()` (5774), `enterSparringRoom()` (10596),
+    **The Arena** `x:0,z:800` crimson, **The Gauntlet** `x:185,z:800` violet-black, and the
+    **Arcade** `x:-340,z:800` when `meta.arcadeOwned`. That is FOUR pads by default — an earlier
+    version of this block listed three and called the crimson one "Arena / Sparring", so a run that
+    photographs three and calls it done has missed one.
+    **These are AUTHORED coordinates and the space pass scales them** — measured live, the pads
+    land at `x:±341,z:858` and `x:0/268,z:1040`. Probe, do not aim a camera at the numbers above.
+  - **The Arena and the Sparring Room are two different places.** `x:0,z:800` is
+    `{id:'arena', open:()=>enterArena()}` (10311); the Sparring Room is its own door at
+    `x:560,z:500` in the SE court (10305), outside the annex entirely.
+  - entry points: `startHubSprint()` (5774), `enterArena()` (8357), `enterSparringRoom()` (10596),
     `openGauntletGate()` (9721)
   - the Sparring Room is its own interior — `G.sparringRoom`, photographable with
     `node _shot/shot.js --scene spar`. NOTE: buildHub bails out when there are no gates, which is
@@ -285,6 +293,54 @@ interior, not just the pad, because three of the four lead somewhere.
       box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped, 41 draw calls).
       NEXT for this item: the four activity PADS are drawn by nobody — see the item below, which
       the A/B for this one turned up.)*
+      *(progress 2026-08-02, `autopilot-merged`: **THE FOUR ACTIVITY PADS ARE DRAWN.** So are the
+      hub's benches, planters, 30 planter flowers, 8 void crystals, 7 rampart dividers and the
+      plaza's reflecting pool. `drawCourse`'s deco guard `if(!_w3dDrawing)` read "world3d is
+      drawing" as "world3d is drawing THIS", and in the hub it is not: `buildHub` reads exactly ONE
+      thing out of `G.deco` — `hubBuildingSpecs`, which drops everything where `kind!=='building'`
+      — and derives the rest of the Waystation from `G.gates`/`G.walls`/`G.segments`. Everything
+      else in `G.deco` was drawn by nobody.
+      Measured before touching anything: the annex daises stood BARE TAN with no pad on any of them
+      (`_shot/out/m2-annex-base.png`); after, the violet Abyss pad, its crystal ring and the crimson
+      Arena carpet are all there (`m2-annex-after.png`), and the plaza gained its whole reflecting
+      pool (`m2-hub-base.png` vs `m2-hub-after.png`).
+      **Four pads, and the count is the check** — probed live: `#3a1a5e` violet Abyss, `#4a3810`
+      gold Sprint, `#4a1618` crimson Arena, `#2a1030` violet-black Gauntlet, plus all 8 corner
+      pillar caps at `y0:132`. A pad rendering without its two caps means the exclusion is
+      over-catching.
+      Three things worth keeping:
+      - **`counts.pave`, not `counts.hub`, is what licenses dropping floor paint.** `counts.hub` is
+        true in the SPARRING ROOM too, and there `buildHub` bails at `world3d.js:1178` and lays
+        nothing — `counts` is exactly `{hub:true}`. Keying the `<=3` floor-paint drop on `hub` would
+        have deleted that room's ring canvas lip (`y0:0 h:2.5`) with nothing to replace it. Rendered
+        both ways and the ring, ropes, posts and mat are intact (`m2-spar-after.png` vs
+        `m2-spar-voxel.png`). It also fails SAFE: if the cobble prop never loads, `pave` is
+        undefined and the voxel floor paint draws.
+      - **Nothing but `'building'` may be excluded by tag.** `buildWorld` returns on the hub branch
+        at `world3d.js:1414`, *before* the bins/classify block, so `buildProps` never runs in the
+        Waystation: excluding `kind:'pillar'` deletes the seven rampart bay dividers and
+        `kind:'flower'` all 30 planter plants. The only 6 items the `<=3` rule drops were probed and
+        are all `h:1.4` floor paint — no content loss.
+      - **The double-draw everyone feared is not there, and it was settled in numbers.** `buildHub`
+        does not convert hub deco, it *invents* dressing at derived coordinates (lanterns, carts,
+        stalls, hedges at `westX+150`/`eastX-300`), so a voxel planter inside a 3D hedge was the one
+        failure this patch could produce and it is invisible from source. Reconstructed the market
+        row from the live hub bounds and intersected it against every non-building deco box: 4 hits,
+        **all four of them the `h:1.4` floor paint the rule already drops.** Zero upright overlaps.
+        West lane A/B rendered as well (`m2-west-3d.png` vs `m2-west-voxel.png`).
+      **Also fixed, one line, and this patch is what made it visible:** the 8 void crystals ringed
+      on `x:-300` while their own Abyss pad and NPC sit at `x:-235` — the portal was pulled in off
+      the divider wall (the source comment at 10309 says so) and the ring was not moved with it.
+      65 authored units, ~90 after the space pass, measured as a ring centre of (-431, 852) against
+      a pad centre of (-341, 858), with crystals standing on bare cobbles past the pad's west edge.
+      Now derived from `annexPads[0]` so it cannot drift again: centre (-346, 859) (`m2-annex-ring.png`).
+      Regressions all clean: first-person still draws the full voxel hub (`m2-hub-fps.png`) because
+      `deferOn()` no-ops when the Three layer will not run; `?world3d=0` unchanged
+      (`m2-hub-voxel.png`); Outskirts identical to the recorded baseline — 1257 floor, 115 road,
+      2194 deco, 277 box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped, 41 draw
+      calls, 18 creatures, 7 chests.
+      NEXT for this item: the hub deco is all DRAWN now, but it is drawn as voxel boxes standing on
+      3D cobbles. Converting the benches/planters/market wares to kit props is the remaining half.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.
@@ -1093,13 +1149,10 @@ interior, not just the pad, because three of the four lead somewhere.
       first drew has been composited), with a 400ms fallback so a throttled tab still returns.
       **Put a control object in any probe of this shape.** The harness lies quietly; a control does
       not.
-      **NOT IN THIS COMMIT, and here is where to find it.** `harness/shot.js` had another worker's
-      uncommitted `--scene side<N>` work in it at the time, and committing the file would have
-      published their in-flight change under this message. `git apply --cached` is not on the
-      permission allowlist, so a partial stage was not available either. The fix is IN the working
-      tree of both `harness/shot.js` and `_shot/shot.js` — it is the hunk immediately after the
-      `EVAL` block, and a copy of the patch is at `_shot/mine.patch`. Whoever commits the
-      `--scene side<N>` work will carry it along; if that lands without it, re-apply from there.
+      **This DID land and is committed — re-checked 2026-08-02.** The paragraph that used to sit
+      here sent runs hunting a `_shot/mine.patch` that no longer exists. The two-rAF shutter with
+      the 400ms fallback is at `harness/shot.js:605-606` with its comment intact above it, and
+      `harness/shot.js` and `_shot/shot.js` are both 40008 bytes, i.e. in sync.
       *Two workers really do share this checkout* — check `git status` before `git add`, and always
       add by pathspec.
 - [x] **The Old Waystone Crown's nine standing stones are real megaliths.** Done 2026-08-02

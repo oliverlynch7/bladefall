@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.429.0-autopilot';
+const VERSION3D='1.430.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10291,7 +10291,7 @@ function enterWaystation(){
     G.deco.push({x:a.x,z:a.z,y0:2,w:236,h:1.6,d:206,c:a.f});
     for(const s of [-1,1]){ vcol(a.x+s*96,a.z,18,18,132); G.deco.push({x:a.x+s*96,z:a.z,y0:132,w:24,h:10,d:24,c:a.p}); } }   // a pair of corner pillars per plaza
   // Void crystals belong to the ABYSSAL DESCENT portal only — ring them around it as its signature (they scale + stay together with the annex).
-  for(let k=0;k<8;k++){ const a=k/8*6.283, rr=76+Math.random()*40; G.deco.push({x:-300+Math.cos(a)*rr,z:660+Math.sin(a)*rr,w:14+Math.random()*11,h:26+Math.random()*34,c:'#241431',theme:'void'}); }
+  for(let k=0;k<8;k++){ const a=k/8*6.283, rr=76+Math.random()*40; G.deco.push({x:annexPads[0].x+Math.cos(a)*rr,z:annexPads[0].z+Math.sin(a)*rr,w:14+Math.random()*11,h:26+Math.random()*34,c:'#241431',theme:'void'}); }   // centred on the pad itself: the ring was left at -300 when the Abyss portal was pulled in off the divider wall to -235, and nothing drew the crystals so the 65-unit offset never showed
   // (removed the two floating signpost banners that hung between the NPCs — the NPC name tags already label each bay)
   // ---- the posts: everyone gets a home that fits them ----
   // grouped by purpose: WEST BAY = Exchange, EAST BAY = War Yard, centre = quests/mirror,
@@ -12194,8 +12194,25 @@ function drawCourse(s,t){
      both copies off the world is simply empty. See three3DLive(). */
   const _w3d = window.__world3d && window.__world3d();
   const _w3dDrawing = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
-  if(!_w3dDrawing)
+  /* THE HUB IS NOT A LEVEL world3d CONVERTS. buildHub reads exactly ONE thing out of G.deco —
+     hubBuildingSpecs, which drops everything where kind!=='building' — and derives the rest of the
+     Waystation from G.gates / G.walls / G.segments. So "world3d is drawing" is not "world3d is
+     drawing THIS", and the blanket guard above left the hub's four activity pads, benches,
+     planters, flowers, void crystals and rampart dividers drawn by NOBODY. */
+  const _hubDeco  = !!(_w3dDrawing && _w3d.counts && _w3d.counts.hub);
+  /* Floor paint is only safe to drop where something 3D actually paved over it, and counts.pave is
+     the honest test: buildHub returns null in any hub sub-area that declares no gates, so the
+     Sparring Room's counts is exactly {hub:true} and pave is undefined there. Dropping paint on
+     _hubDeco alone would delete that room's ring canvas lip (y0:0 h:2.5), which nothing replaces.
+     It fails safe too: if the cobble prop never loads, pave is undefined and the voxel floor draws. */
+  const _hubPaved = !!(_hubDeco && _w3d.counts.pave > 0);
+  if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
+  if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
+    /* Nothing but 'building' may be excluded by tag here: buildWorld returns on the hub branch
+       before the bins/classify block, so buildProps never runs in the Waystation and excluding
+       'pillar' would delete the seven rampart bay dividers, 'flower' all 30 planter plants. */
+    if(_hubDeco && (d.kind === 'building' || (_hubPaved && (d.y0||0) + (d.h||0) <= 3))) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
@@ -12230,6 +12247,7 @@ function drawCourse(s,t){
       for(const s of [-1,1]) bx(d.x+s*d.w*0.7,d.h*0.08,d.z+s*d.w*0.3, d.w*0.4,d.h*0.14,d.w*0.4, stD);   // rubble
       bx(d.x,d.h*0.9,d.z+d.w*0.5, d.w*0.6,d.h*0.08,1.4, ms,ms,0.4); }                         // moss
   }
+  if(_hubDeco) deferOff();
 }
 function weaponMesh(w,swing){
   // drawn in hand space: +y up along the blade

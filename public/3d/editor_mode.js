@@ -128,6 +128,8 @@ function hud(){
     rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
               (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
+    rows.push('<div class="row"><span class="k">ctrl Z</span>undo (' + _undo.length + ')' +
+              ' <span class="k">ctrl Y</span>redo (' + _redo.length + ')</div>');
 
     rows.push('<div class="pal">' + PALETTE.map((p, i) =>
       '<button class="p' + (EDITOR.place === i ? ' on' : '') + (kindRenders(p) ? '' : ' off') +
@@ -184,6 +186,61 @@ function commit(mut){
    Debounced, because a rebuild walks the whole level: firing one per mousemove during a drag would
    stall the frame. The marker keeps tracking live, so the drag still feels continuous and the
    world catches up a beat later. */
+/* ── UNDO / REDO ──────────────────────────────────────────────────────────────
+   The single thing every write-up on level editors agrees makes one usable, and the reason is not
+   convenience: without it you edit timidly. You do not try the bold version of a layout if getting
+   back costs you a reload and everything since your last save.
+
+   The advice is to store the CHANGE, not the whole state - which this already does, because the
+   edit list IS a command log. So a step is the area's edit-list entry before the action, plus a
+   closure that puts the live level arrays back the way they were. Small, and no level rebuild
+   needed to reverse anything.
+
+   Grouped as TRANSACTIONS: a drag is one step, not one per mousemove. The whole point of undo is
+   to reverse a decision, and "moved the pillar" is the decision - having to press Ctrl+Z ninety
+   times to walk back one drag is the same as not having undo. */
+const UNDO_MAX = 100;
+let _undo = [], _redo = [];
+
+function snapLayer(){ return JSON.stringify(layer().L); }
+
+/* revert: puts the live G arrays back. The edit list is restored from the snapshot separately, so
+   this only has to deal with what the generator's own arrays hold. */
+function pushStep(before, revert, reapply){
+  _undo.push({ before, after: snapLayer(), revert, reapply });
+  if(_undo.length > UNDO_MAX) _undo.shift();
+  _redo.length = 0;                       // a new action forks history; the old redo branch is gone
+}
+
+function restoreLayer(json){
+  const all = loadLayers();
+  all[EDITOR.key] = JSON.parse(json);
+  saveLayers(all);
+}
+
+/* NOT named `step`: onKey declares a local `const step` for the nudge distance, which shadows this
+   for the whole function body - so calling it from the Ctrl+Z branch hit the temporal dead zone and
+   the handler threw before undo ever ran. */
+function history(dir){
+  const from = dir === 'undo' ? _undo : _redo, to = dir === 'undo' ? _redo : _undo;
+  const st = from.pop();
+  if(!st){ toast('nothing to ' + dir); return; }
+  try { (dir === 'undo' ? st.revert : st.reapply)(); } catch(err){ toast('could not ' + dir + ' that'); }
+  restoreLayer(dir === 'undo' ? st.before : st.after);
+  to.push(st);
+  EDITOR.dirty = true;
+  EDITOR.sel = null;                      // the selection may name an index that just moved
+  hud(); redraw();
+  toast(dir === 'undo' ? 'undone' : 'redone');
+}
+
+/* Snapshot an object's geometry so a move or resize can be put back exactly. Copied by value: the
+   live object keeps being mutated, so holding a reference would record the CURRENT position as the
+   old one and undo would do nothing. */
+const GEOM = ['x', 'z', 'y0', 'w', 'h', 'd', 'r', 'ry', 'x0', 'px'];
+function geom(o){ const g = {}; for(const k of GEOM) if(o[k] != null) g[k] = o[k]; return g; }
+function setGeom(o, g){ for(const k in g) o[k] = g[k]; }
+
 let _redrawT = 0;
 function redraw(){
   clearTimeout(_redrawT);
@@ -284,8 +341,11 @@ function placeAt(sx, sy){
                       kind: spec.kind, lead: true }, spec.theme ? { theme: spec.theme } : {});
   const arr = G()[name];
   if(!arr){ toast('this area has no ' + name + ' list'); return; }
+  const before = snapLayer();
   arr.push(o);
   commit(L => recordAdd(L, name, o));
+  pushStep(before, () => { const i = arr.indexOf(o); if(i >= 0) arr.splice(i, 1); },
+                   () => { if(arr.indexOf(o) < 0) arr.push(o); });
   /* Select what you just placed, so it can be nudged into position immediately rather than needing
      to be found and clicked again. Its index is the end of the array by construction. */
   EDITOR.sel = { arr: name, idx: arr.length - 1, o };
@@ -334,7 +394,8 @@ function onDown(e){
   EDITOR.sel = hit;
   if(hit){
     const B = dragBasis(hit.o);
-    _drag = B ? { B, sx: e.clientX, sy: e.clientY, x0: hit.o.x, z0: hit.o.z } : null;
+    _drag = B ? { B, sx: e.clientX, sy: e.clientY, x0: hit.o.x, z0: hit.o.z,
+                  undoFrom: snapLayer(), undoGeom: geom(hit.o) } : null;
     e.preventDefault(); e.stopPropagation();
   }
   hud();
@@ -350,7 +411,16 @@ function onMove(e){
   e.preventDefault();
 }
 function onUp(){
-  if(_drag && EDITOR.sel){ const s = EDITOR.sel; commit(L => recordMove(L, s.arr, s.idx, s.o)); }
+  if(_drag && EDITOR.sel){
+    const s = EDITOR.sel, o = s.o, was = _drag.undoGeom, from = _drag.undoFrom;
+    /* A click that did not actually move anything is not an edit, and pushing it would fill the
+       undo stack with no-ops - press Ctrl+Z and nothing appears to happen. */
+    if(o.x !== was.x || o.z !== was.z){
+      const now = geom(o);
+      commit(L => recordMove(L, s.arr, s.idx, o));
+      pushStep(from, () => setGeom(o, was), () => setGeom(o, now));
+    }
+  }
   _drag = null;
 }
 
@@ -362,6 +432,13 @@ function onKey(e){
   /* Escape disarms the palette FIRST, then clears the selection. Placing is the more modal state -
      leaving it armed while the selection cleared would mean the next click drops another prop when
      you meant to stop. */
+  if((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')){
+    history(e.shiftKey ? 'redo' : 'undo');   // Ctrl+Shift+Z redoes, matching every tool Oliver uses
+    e.preventDefault(); e.stopPropagation(); return;
+  }
+  if((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')){
+    history('redo'); e.preventDefault(); e.stopPropagation(); return;
+  }
   if(e.key === 'Escape'){
     if(EDITOR.place != null) EDITOR.place = null; else EDITOR.sel = null;
     hud(); e.stopPropagation(); return;
@@ -370,6 +447,7 @@ function onKey(e){
   if(!s || !EDITOR.editable) return;
   const step = EDITOR.grid * (e.shiftKey ? 5 : 1);
   let handled = true;
+  const before = snapLayer(), was = geom(s.o);
 
   /* ALT turns the same keys into RESIZE. Shaping a platform is the other half of terrain editing -
      placing a fixed 160x160 slab and being unable to make it a long ledge or a tall block is not
@@ -390,7 +468,12 @@ function onKey(e){
       s.o.r = Math.max(8, s.o.r + (e.key === ']' ? 8 : -8));   // healing pads are a radius, not a box
     }
     else handled = false;
-    if(handled){ commit(L => recordMove(L, s.arr, s.idx, s.o)); e.preventDefault(); e.stopPropagation(); }
+    if(handled){
+      const now = geom(s.o);
+      commit(L => recordMove(L, s.arr, s.idx, s.o));
+      pushStep(before, () => setGeom(s.o, was), () => setGeom(s.o, now));
+      e.preventDefault(); e.stopPropagation();
+    }
     return;
   }
 
@@ -401,15 +484,24 @@ function onKey(e){
   else if(e.key === 'PageUp')     s.o.y0 = (s.o.y0 || 0) + step;
   else if(e.key === 'PageDown')   s.o.y0 = Math.max(0, (s.o.y0 || 0) - step);
   else if(e.key === 'Delete' || e.key === 'Backspace'){
-    const arr = G()[s.arr];
-    commit(L => recordDelete(L, s.arr, s.idx));
-    if(arr) arr.splice(s.idx, 1);
+    const arr = G()[s.arr], idx = s.idx, obj = s.o;
+    commit(L => recordDelete(L, s.arr, idx));
+    if(arr) arr.splice(idx, 1);
+    /* Put back AT ITS INDEX, not appended: every id in the edit list is `<array>:<index>`, so
+       restoring it at the end would renumber everything after it and point saved edits at the
+       wrong objects. */
+    pushStep(before, () => { if(arr) arr.splice(idx, 0, obj); },
+                     () => { if(arr) arr.splice(idx, 1); });
     EDITOR.sel = null;
-    toast('deleted - "Revert area" undoes it');
+    toast('deleted - Ctrl+Z puts it back');
   }
   else handled = false;
   if(handled){
-    if(EDITOR.sel) commit(L => recordMove(L, s.arr, s.idx, s.o));
+    if(EDITOR.sel){
+      const now = geom(s.o);
+      commit(L => recordMove(L, s.arr, s.idx, s.o));
+      pushStep(before, () => setGeom(s.o, was), () => setGeom(s.o, now));
+    }
     e.preventDefault(); e.stopPropagation();
   }
 }
@@ -433,6 +525,7 @@ export function toggle(force){
     const k = areaKey(G(), (window.__BF3 && window.__BF3.curZone) || null);
     if(typeof k === 'string'){ EDITOR.key = k; EDITOR.editable = true; EDITOR.msg = ''; }
     else { EDITOR.key = '-'; EDITOR.editable = false; EDITOR.msg = (k && k.blocked) || 'no level loaded'; }
+    _undo = []; _redo = [];   // history is per session in one area; see step()
     _ui = document.createElement('div'); _ui.id = 'bfed'; document.body.appendChild(_ui);
     _marker = document.createElement('div'); _marker.id = 'bfedmark'; document.body.appendChild(_marker);
     /* Capture phase, so a click selects an object instead of swinging the sword. */

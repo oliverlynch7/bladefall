@@ -679,6 +679,50 @@ window.__world3dPoses = (match, limit) => {
   return out;
 };
 
+/* WHAT IS WORLD3D DRAWING HERE? __world3dPoses answers "where did THIS MODEL end up", by name, and
+   nothing else - given an empty name it hands back the first few instances of the first few models,
+   which reads like a spatial answer and is not (that mistake cost a run: 8 instances came back for
+   a zone reporting 2194 deco, and "nothing of world3d's is near the chest" was nearly concluded
+   from it). This is the spatial query. Every piece of geometry world3d has put in the scene whose
+   world-space box comes within `r` of (x,z), ground tiles and buildings included:
+     __world3dNear(-1110, -1570, 130)  -> [{model, n, x, z, y0, y1, w, d}, ...]
+   `y0`/`y1` are the box's BOTTOM and TOP in world units, which is the pair that settles a burial -
+   an object whose y1 is above a chest's base and whose footprint contains it is drawn over it. */
+window.__world3dNear = (x, z, r, limit) => {
+  if(!group) return [];
+  const rad = r == null ? 100 : r, cap = limit || 40, out = [];
+  const M = new THREE.Matrix4(), T = new THREE.Box3();
+  group.updateMatrixWorld(true);
+  const nodes = [];
+  group.traverse(o => { if(o.geometry) nodes.push(o); });
+  const hit = (b, nm, n) => {
+    if(out.length >= cap) return;
+    if(b.max.x < x - rad || b.min.x > x + rad || b.max.z < z - rad || b.min.z > z + rad) return;
+    out.push({ model: nm, n: n,
+               x: Math.round((b.min.x + b.max.x) / 2), z: Math.round((b.min.z + b.max.z) / 2),
+               y0: Math.round(b.min.y * 10) / 10, y1: Math.round(b.max.y * 10) / 10,
+               w: Math.round(b.max.x - b.min.x), d: Math.round(b.max.z - b.min.z) });
+  };
+  for(const c of nodes){
+    if(!c.geometry.boundingBox) c.geometry.computeBoundingBox();
+    const nm = c.name || ('<' + c.type + '>');
+    if(c.isInstancedMesh){
+      for(let i = 0; i < c.count && out.length < cap; i++){
+        c.getMatrixAt(i, M);
+        /* Compose, don't apply twice: transforming an AABB by two matrices in turn re-bounds the
+           already-axis-aligned intermediate and inflates every rotated instance. */
+        M.premultiply(c.matrixWorld);
+        T.copy(c.geometry.boundingBox).applyMatrix4(M);
+        hit(T, nm, c.count);
+      }
+    } else {
+      T.copy(c.geometry.boundingBox).applyMatrix4(c.matrixWorld);
+      hit(T, nm, 1);
+    }
+  }
+  return out;
+};
+
 /* What SHAPE is a model, before anything is fitted to it? __world3dPoses answers "where did this
    end up"; this answers the question that comes first - how tall and how wide is the thing in its
    own units - and it is the number every fit rule here is written against. Without it the only

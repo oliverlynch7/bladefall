@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.433.0-autopilot';
+const VERSION3D='1.434.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10300,12 +10300,19 @@ function enterWaystation(){
   { const mains=G.gates.filter(g=>!g.side);
     for(let i=0;i<mains.length-1;i++){ const mx=Math.round((mains[i].x+mains[i+1].x)/2), mz=Math.round((mains[i].z+mains[i+1].z)/2);
       G.walls.push({x:mx,z:mz-6,w:16,d:78,h:150,invisible:true});                                   // solid divider so bays feel separate
-      /* Tagged so the 3D renderer can build the rampart from real stone columns instead of a flat
-         slab. `stack` because these are 150 tall but only 20 wide - fitting one pillar model to
-         that box would shrink it to 20 units tall; stacking segments fills the height at the
-         right thickness. The voxel path ignores both fields. */
+      /* Tagged `pillar` so the 3D layer can drop this slab - and the finding, measured 2026-08-03,
+         is that it needs no model of its own because it ALREADY HAS ONE. buildHub stands a
+         150-wide `castle/tower-square-base` at the midpoint of every pair of gates, which is
+         exactly this x, so the tower's footprint swallows the divider whole: tower z -648..-498
+         against a divider spanning -594..-487 and a collision box spanning -580..-502. Only the
+         ~11 units of slab that stick out past the tower's south face were ever visible, and from
+         the courtyard that reads as a full-height dark column stuck on the front of the stonework.
+         `stack` is left in place: it is the right hint if a future rampart ever has a divider with
+         no tower on it. The voxel path ignores both fields. */
       G.deco.push({x:mx,z:mz-6,y0:0,w:20,h:150,d:82,c:'#2b3040',kind:'pillar',stack:true});
-      G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152'}); } }
+      /* The capstone goes WITH the slab - a non-lead piece of a converted object, the same rule as
+         the hanging basket on a plaza lamp or a tree's second canopy box. */
+      G.deco.push({x:mx,z:mz-6,y0:150,w:26,h:8,d:88,c:'#3a4152',kind:'pillar',lead:false}); } }
   // REPEATABLE ACTIVITY ANNEX — three distinct plazas so each activity has its own room to breathe:
   // the Abyss (west), the Treasure Sprint (east), and the Arena (deep centre). Further widened by the space pass.
   G.deco.push({x:0,z:610,y0:0,w:720,h:1.4,d:96,c:'#8f744e'});                                   // annex approach walk
@@ -12243,14 +12250,28 @@ function drawCourse(s,t){
      a kind the 3D layer did not build keeps its voxel copy. `skipflower` goes with `flower`: the
      stem and leaf are the boxes the one real flower model replaces. */
   const _hubFlower = !!(_hubDeco && _w3d.counts.hubFlower > 0);
+  /* The seven rampart bay dividers. This entry read the other way round until 2026-08-03 - "nothing
+     may be excluded by tag that buildHubDecoProps converts, so excluding 'pillar' would delete the
+     dividers with nothing standing in their place" - and it was wrong about the second half.
+     buildHub puts a 150-wide tower at the midpoint of every pair of gates, which is the divider's
+     own x, and the tower's footprint contains the whole slab AND its whole collision box. Measured
+     both ways at one camera: the dark slabs stand proud of the stonework
+     (`_shot/out/n2-divider-3d.png`); with them gone the rampart is unbroken castle stone and each
+     portal still gets its alcove, because the tower masses are what make the bays
+     (`n5-divider-hidden.png`).
+     Gated on counts.tower, which is the piece that actually replaces it - not on _hubDeco, and not
+     on counts.hub, which is true in the Sparring Room where buildHub lays nothing at all. Fails
+     safe: if the tower model never loads hubPiece returns 0 and the voxel slab draws. */
+  const _hubPillar = !!(_hubDeco && _w3d.counts.tower > 0);
   if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
   if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
-    /* Nothing may be excluded by tag here that buildHubDecoProps does not actually convert:
-       buildWorld returns on the hub branch before the bins/classify block, so excluding 'pillar'
-       would delete the seven rampart bay dividers with nothing standing in their place. */
+    /* Nothing may be excluded by tag here that the 3D layer does not actually stand something in
+       the place of: buildWorld returns on the hub branch before the bins/classify block, so a kind
+       only counts as converted if buildHub or buildHubDecoProps built it and returned a count. */
     if(_hubDeco && (d.kind === 'building'
         || (_hubLamp && d.kind === 'lantern')
+        || (_hubPillar && d.kind === 'pillar')
         || (_hubFlower && (d.kind === 'flower' || d.kind === 'skipflower'))
         || (_hubPaved && (d.y0||0) + (d.h||0) <= 3))) continue;
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero

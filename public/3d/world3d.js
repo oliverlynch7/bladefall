@@ -679,6 +679,28 @@ window.__world3dPoses = (match, limit) => {
   return out;
 };
 
+/* What SHAPE is a model, before anything is fitted to it? __world3dPoses answers "where did this
+   end up"; this answers the question that comes first - how tall and how wide is the thing in its
+   own units - and it is the number every fit rule here is written against. Without it the only
+   way to learn a prop's aspect ratio is to place it, render it and squint, which is how a stack
+   rule sized for a cube-ish block came to be applied to a tall thin column.
+     __world3dRec('props/pillar-square')  -> {height, width, fullHeight, fullWidth, aspect, parts}
+   `aspect` is fullHeight/fullWidth: 1 is a cube, 5 is a lamp post. */
+window.__world3dRec = (name) => {
+  const out = [];
+  for(const n of [...new Set(Object.values(PROP_SETS).flat())]){
+    if(name && n.toLowerCase().indexOf(String(name).toLowerCase()) < 0) continue;
+    const rec = _propCache.get(n);
+    if(!rec){ out.push({ model: n, loaded: false }); continue; }
+    const h = rec.fullHeight || rec.height, w = rec.fullWidth || rec.width;
+    out.push({ model: n, loaded: true,
+               height: Math.round(rec.height * 1000) / 1000, width: Math.round(rec.width * 1000) / 1000,
+               fullHeight: Math.round(h * 1000) / 1000, fullWidth: Math.round(w * 1000) / 1000,
+               aspect: Math.round(h / w * 100) / 100, parts: rec.subs ? rec.subs.length : 1 });
+  }
+  return out;
+};
+
 
 /* ── GROUND ────────────────────────────────────────────────────────────────────
    The floor is drawn from G.segments, a separate pass from G.deco: each segment is a flat slab
@@ -1263,7 +1285,13 @@ function buildHub(scene, world){
   }, '#a89478');
 
   /* CORNER TOWERS plus one between each pair of gates, so the rampart has rhythm and the corners
-     of the courtyard are legible from the middle of the plaza. */
+     of the courtyard are legible from the middle of the plaza.
+     THE MID TOWERS ARE ALSO THE GAME'S RAMPART BAY DIVIDERS, which nothing recorded until it was
+     measured (2026-08-03). enterWaystation puts a `kind:'pillar'` slab at the midpoint of every
+     pair of gates to give each portal its own alcove - the same x this loop uses - and a 150-wide
+     tower at (mid, northZ) contains that slab and its collision box outright. So the divider needs
+     no model of its own; it needs the voxel copy to stop drawing, which `counts.tower` licenses on
+     the index.html side. Move these cells and that stops being true. */
   const towerCells = [{ x: westX, z: northZ }, { x: eastX, z: northZ }];
   for(let i = 0; i < gates.length - 1; i++)
     towerCells.push({ x: (gates[i].x + gates[i + 1].x) / 2, z: northZ });

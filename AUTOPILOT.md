@@ -564,6 +564,50 @@ because the three maps are three different levels.
       by `drawWaystation`, NOT from `G.deco` — so they are outside this pipeline entirely and
       converting them is a different job. The rampart dividers are the remaining tagged deco with
       no model.)*
+      *(progress 2026-08-03, `autopilot-merged`: **THE RAMPART DIVIDERS NEEDED NO MODEL — THEY
+      ALREADY HAD ONE, AND NOTHING HAD EVER CHECKED.** The last tagged hub deco with nothing
+      standing in its place turned out to be seven dark voxel slabs stuck on the FRONT of stonework
+      the 3D layer was already drawing.
+      `buildHub` stands a 150-wide `castle/tower-square-base` at the midpoint of every pair of
+      gates — and that is exactly the x `enterWaystation` puts each `kind:'pillar'` divider at.
+      Measured rather than eyeballed: mid towers at x −696/−464/−232/0/232/464/696 spanning
+      z −648..−498, against dividers spanning z −594..−487 and an invisible collision box spanning
+      z −580..−502. The tower contains the slab and the whole collision box; only the ~11 units of
+      slab past the tower's south face were ever visible, and from the courtyard that thin sliver
+      is a full-height dark column, because you are looking at its unoccluded south FACE.
+      A/B at one camera settles it: `_shot/out/n2-divider-3d.png` (dark slabs over tan castle
+      stone) against `n5-divider-hidden.png` / `n7-divider-after.png` — unbroken stone, and every
+      portal still gets its alcove, because the tower masses are what make the bays. They read as
+      MORE separate without the slabs, not less.
+      **The old guard said the opposite in so many words** — "excluding `pillar` would delete the
+      seven rampart bay dividers with nothing standing in their place" — and it was right about the
+      rule and wrong about this case. The rule is now stated as what it actually is: a kind counts
+      as converted only if `buildHub` or `buildHubDecoProps` built it AND returned a count.
+      Gated on `counts.tower`, the piece that actually replaces it. Not `counts.hub`, which is true
+      in the **Sparring Room** where `buildHub` bails and lays nothing — rendered, and its counts is
+      exactly `{hub:true, drawCalls:0}` so `_hubPillar` is false and nothing there is dropped
+      (`n10-spar.png`: ring, ropes, posts, banners, braziers all intact). Fails safe the other way
+      too: if the tower model never loads, `hubPiece` returns 0 and the voxel slab draws.
+      The **capstone** (`y0:150 h:8`) is tagged `kind:'pillar', lead:false` and goes with the slab —
+      the hanging-basket rule again, a non-lead piece of a converted object.
+      **New probe, and the item could not be decided honestly without it: `__world3dRec('<name>')`
+      says what SHAPE a model is before anything is fitted to it** — `height`/`width`/`fullHeight`/
+      `fullWidth`/`aspect`/`parts` for every prop in `PROP_SETS`. `__world3dPoses` answers "where
+      did this end up"; this answers the question that comes first, and it is the number every fit
+      rule in world3d.js is written against. It immediately killed the obvious "fix": the authored
+      `stack:true` hint sizes a stack by `round(h/w)`, which assumes a cube-ish block, and
+      `props/pillar-square` measures 1.15 x 0.35 — **aspect 3.29**, so eight stacked segments would
+      have fitted to 18.75 units tall each and **5.7 units WIDE**: a segmented twig in front of a
+      tower. Fitted by height instead it is 45.7 wide, which happens to be almost exactly the
+      48-unit gap the gatehouses leave — a real coincidence, and still the wrong build, because the
+      tower is already there.
+      Regressions clean: `?world3d=0` still draws all seven voxel slabs with their caps
+      (`n8-divider-voxel.png`); hub counts unmoved (51 draw calls, pave 399, tower 9, hubLamp 4,
+      hubFlower 30); Outskirts identical to the recorded baseline — 1257 floor, 115 road, 2194
+      deco, 277 box, 118 trees, 24 lanterns, 1624 corn, 9 standstone, 142 skipped, 41 draw calls.
+      NEXT for this item: `drawWaystation`'s furniture (market wares, keeper stalls, forge, mirror,
+      beast cages) is the remaining half, and it is a different pipeline — those are not in
+      `G.deco` at all.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

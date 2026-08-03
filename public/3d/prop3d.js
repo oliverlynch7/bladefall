@@ -391,3 +391,54 @@ window.__prop3dKeyPoses = () => [..._keyActors].map(([ky, rec]) => ({
 window.__prop3dPoses = () => [..._actors].map(([ch, rec]) => ({
   mimic:!!ch.mimic, opened:!!ch.opened, br:+(ch._br || 0).toFixed(3),
   shove:+(ch._shove || 0).toFixed(2), t:+(rec.act ? rec.act.time : 0).toFixed(4), dur:+rec.dur.toFixed(3) }));
+/* WHAT IS ACTUALLY ON SCREEN, per mesh, for the first live chest — the probe that exists because
+   "position, scale, visible and inScene all report correct and nothing draws" is not a question a
+   screenshot can answer. It reports the WORLD box (so a collapsed or NaN transform shows up as a
+   degenerate box rather than as a plausible position), and the per-mesh material state, because an
+   invisible model and a model drawn with nothing in it look identical from outside. */
+window.__prop3dChestProbe = () => {
+  const first = [..._actors][0];
+  if(!first) return { err:'no live chest actor', group:_group ? _group.children.length : null };
+  const rec = first[1];
+  rec.root.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(rec.root);
+  const meshes = [];
+  rec.root.traverse(o => {
+    if(!o.isMesh) return;
+    const m = o.material, g = o.geometry;
+    const wp = new THREE.Vector3(), ws = new THREE.Vector3(), wq = new THREE.Quaternion();
+    o.matrixWorld.decompose(wp, wq, ws);
+    meshes.push({ name:(o.name||'?').slice(0,24), visible:o.visible, culled:o.frustumCulled,
+                  mat:m && m.type, opacity:m && m.opacity, transparent:!!(m && m.transparent),
+                  matVis:!!(m && m.visible), col:m && m.color && m.color.getHexString(),
+                  side:m && m.side, depthTest:!!(m && m.depthTest), depthWrite:!!(m && m.depthWrite),
+                  map:!!(m && m.map), renderOrder:o.renderOrder, layers:o.layers.mask,
+                  wp:[+wp.x.toFixed(1), +wp.y.toFixed(1), +wp.z.toFixed(1)],
+                  ws:[+ws.x.toFixed(3), +ws.y.toFixed(3), +ws.z.toFixed(3)],
+                  verts:g && g.attributes.position ? g.attributes.position.count : 0 });
+  });
+  return { group:_group ? _group.children.length : null,
+           inScene:!!(rec.root.parent && rec.root.parent.name === 'prop3d'),
+           pos:[+rec.root.position.x.toFixed(1), +rec.root.position.y.toFixed(2), +rec.root.position.z.toFixed(1)],
+           scale:+rec.root.scale.x.toFixed(3), visible:rec.root.visible,
+           box:{ min:[+bb.min.x.toFixed(1), +bb.min.y.toFixed(1), +bb.min.z.toFixed(1)],
+                 max:[+bb.max.x.toFixed(1), +bb.max.y.toFixed(1), +bb.max.z.toFixed(1)] },
+           actTime:rec.act ? rec.act.time : null, actWeight:rec.act ? rec.act.getEffectiveWeight() : null,
+           meshes };
+};
+/* PAINT EVERY CHEST MAGENTA — the hub-floor probe, moved to the objects. Squinting at a screenshot
+   cannot separate "Three never drew this" from "Three drew it and something is on top of it", and
+   both have now been argued from the same picture. Unlit, so lighting cannot hide it; with
+   `noDepth` it also ignores the depth buffer and draws last, so anything that survives that is
+   genuinely not being rasterised. */
+window.__prop3dDebugPaint = (noDepth) => {
+  let n = 0;
+  const paint = rec => rec.root.traverse(o => {
+    if(!o.isMesh) return;
+    o.material = new THREE.MeshBasicMaterial({ color:0xff00ff, depthTest:!noDepth, depthWrite:!noDepth });
+    if(noDepth) o.renderOrder = 9999;
+    n++;
+  });
+  for(const [, rec] of _actors) paint(rec);
+  return { painted:n, actors:_actors.size };
+};

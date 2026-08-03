@@ -838,6 +838,34 @@ function buildGround(world, paths){
      anything achieved with these flat-coloured tiles across five attempts. Grassy zones keep their
      tiles because those zones have no voxel centrepiece to lose. */
   if(isHub) return NO_GROUND;
+  /* NO 3D FLOOR IN A BONUS ROOM EITHER, and this one was found by rendering three answers and
+     keeping the honest one.
+
+     THE TREASURE SPRINT'S START PAD WAS A LAWN FLOATING IN THE SKY - the arena bug's cousin rather
+     than a repeat of it. loadBonus() takes its palette from STAGES[G.stageIndex] on PURPOSE (a
+     bonus room borrows the zone it hangs off), so unlike the arena the stage index here is not
+     wrong. What is wrong is that a bonus room is not GROUND: its segments are the starting
+     PLATFORM of a floating parkour course, and theme 'plains' hands that platform the grass model,
+     which carries its own teal texture and ignores world.ground completely. One frame held both
+     answers - a teal grass pad with forty sand-gold platforms stepping away from it
+     (_shot/out/j1-sprint.png) - while the voxel twin drew pad and platforms the same sand-gold and
+     the course read as one object (j2-sprint-voxel.png). The platforms were right in both: they
+     are vplat OBSTACLES drawn by the deferred voxel pass from `tint(s.ground, …)`, so only the
+     pad ever disagreed.
+     BUILT AND REJECTED FIRST, both rendered: a groundSpecFor branch tinted with the level's own
+     `world.ground`, the arena's exact fix - correct hue, and a DARK BROWN pad under pale sand
+     platforms, because a tint MULTIPLIES the stonework texture (the note in this function's tile
+     loop says so). Then the same branch lightened 50% toward white to pay for the multiply - a
+     mid grey-brown tiled floor, still visibly a different material from the course it starts
+     (j5c.png against j6-seed7-voxel.png, same seed, same camera).
+     So there is no tile in the kit that matches the platforms, and the voxel renderer already
+     draws this pad AS one of them - `tint(s.ground,'#fff',0.12)` against the platforms' 0.10.
+     Standing back is the faithful conversion here, the same call the corn stalks got. It also
+     costs nothing: floorTiles 0 turns `_w3dGround` off, so the game restores the pad's own lit top
+     edge and painted path dashes, and `_crLift` correctly stops lifting crumbles that no 3D floor
+     is covering. Everything else in the room - hero, mobs, chests, props - is still 3D.
+     A real platform model would beat this; until then, honest beats ambitious. */
+  if(world && world.bonus) return NO_GROUND;
   /* Drop variants that failed to load rather than bailing: one absent tile should cost variety,
      not the whole floor. Only an empty list leaves the ground to the voxel pass. */
   const vars = spec.tiles.map(t => ({ t, rec: _propCache.get(t.n) })).filter(v => v.rec);

@@ -236,7 +236,16 @@ const ACTIVITIES = {
               at: '__BF3.G.arena === true' },
   abyss:    { arg: 'floor', go: (v) => '__BF3.startEndless({floor:' + (parseInt(v, 10) || 1) + '});',
               at: '!!__BF3.G.endless && __BF3.G.floor > 0' },
-  sprint:   { arg: null,    go: () => '__BF3.startHubSprint();',
+  /* `sprint:<seed>` FORCES THE COURSE, and without it a Sprint change cannot be A/B'd at all.
+     loadBonus() derives its seed from G.runSeed ^ stageIndex ^ bonusVisits, so every bare
+     `--scene sprint` builds a DIFFERENT parkour course: two renders taken a minute apart have
+     different platform counts, a different route and a different number of ground segments, and
+     any before/after read off them is comparing two levels. Found the hard way while checking the
+     start pad's ground - floorTiles came back 9, then 36, then 113, and none of that was the
+     change. loadBonus already takes a forcedSeed and startHubSprint already forwards opts.seed;
+     nothing needed adding to the game. */
+  sprint:   { arg: 'seed',  go: (v) => '__BF3.startHubSprint('
+              + (v == null ? '' : '{seed:' + (parseInt(v, 10) || 1) + '}') + ');',
               at: '!!__BF3.G.sprintFun && !!__BF3.G.bonusActive' },
   /* The Gauntlet needs BOTH halves of startBossRush's guard, and cheatUnlockClasses() is only one
      of them. `meta.hero` is the campaign loadout snapshot and it is null on a throwaway profile —

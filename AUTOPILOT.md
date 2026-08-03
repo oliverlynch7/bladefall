@@ -320,6 +320,48 @@ because the three maps are three different levels.
 - [ ] **The other three activities: FIRST-EVER RENDERS, and what they found.** Audited 2026-08-02
       (`autopilot-merged`) with the new destinations. Nothing below is desk research; each line is a
       probe or a picture.
+      - **THE TREASURE SPRINT'S START PAD WAS A LAWN FLOATING IN THE SKY.** Fixed 2026-08-02
+        (`autopilot-merged`), and it is the Arena bug's cousin rather than a repeat of it — the
+        SECOND of the four activities found rendering the wrong surface, both of them found only
+        once the destination existed to photograph them.
+        `loadBonus()` takes its palette from `STAGES[G.stageIndex]` on PURPOSE (a bonus room
+        borrows the zone it hangs off), so unlike the Arena the stage index here is not wrong.
+        What is wrong is that **a bonus room is not GROUND**: its segments are the starting
+        PLATFORM of a floating parkour course, theme `plains` hands that platform the grass model,
+        and a prop carries its own texture — so `world.ground` was ignored completely. One frame
+        held both answers: a teal grass pad with forty sand-gold platforms stepping away from it
+        (`_shot/out/j1-sprint.png`), against a voxel twin where pad and platforms are the same
+        sand-gold and the course reads as one object (`j2-sprint-voxel.png`). The platforms were
+        right in both — they are `vplat` OBSTACLES drawn by the deferred voxel pass from
+        `tint(s.ground,…)` — so only the pad ever disagreed.
+        **TWO FIXES WERE BUILT AND RENDERED AND BOTH REJECTED, and shipping either was the trap.**
+        (1) A `groundSpecFor` branch tinted with the level's own `world.ground` — the Arena's exact
+        fix, one line, correct hue — renders a DARK BROWN pad under pale sand platforms, because a
+        tint MULTIPLIES the stonework texture. `buildGround`'s own note already warns of this
+        ("against real stonework those colours multiply to near-black") and it still nearly
+        shipped, because brown stone under a parkour course is entirely plausible. (2) The same
+        branch lightened 50% toward white to pay for the multiply: a mid grey-brown tiled floor,
+        still visibly a different material from the course it starts.
+        So **there is no tile in the kit that matches the platforms, and the voxel renderer already
+        draws this pad AS one of them** — `tint(s.ground,'#fff',0.12)` against the platforms' 0.10.
+        `buildGround` now returns `NO_GROUND` for a bonus room, the same call the corn stalks got.
+        It costs nothing and undoes two things automatically: `floorTiles` 0 turns `_w3dGround`
+        off, so the game restores the pad's own lit top edge and painted path dashes, and
+        `_crLift` stops lifting crumbling stepping stones that no 3D floor is covering. Everything
+        else in the room — hero, mobs, chests, props — is still 3D.
+        Verified at a FIXED SEED, which is the only reason the A/B means anything (`j7-seed7-
+        after.png` against `j6-seed7-voxel.png`, same course, same camera): pad and platforms now
+        one material. Regressions: the Cinder Pit still molten (`j9-arena-lava.png`, ground
+        `#c93a12`, 3136 floor tiles), the Abyss still floored (`j10-abyss.png`, 1156 tiles,
+        `bonus:false`), the Outskirts identical to baseline (1257 floor, 115 road, 118 trees, 1624
+        corn, 277 box, 41 draw calls).
+        **`--scene sprint:<seed>` was added the same run and the item could not be verified
+        without it.** `loadBonus` derives its seed from `G.runSeed ^ stageIndex ^ bonusVisits`, so
+        every bare `--scene sprint` builds a DIFFERENT course — measured, `floorTiles` came back 9,
+        then 36, then 113 across three runs and none of that was the change. **Any before/after
+        read off two bare `--scene sprint` renders is comparing two different levels.** Nothing had
+        to be added to the game: `loadBonus` already took a `forcedSeed` and `startHubSprint`
+        already forwarded `opts.seed`.
       - **Treasure Sprint** (`--scene sprint`, `_shot/out/m4-sprint.png`) — **the biggest
         un-converted surface left in the game, and the desk research was right.** Probed live:
         **51 floor tiles, 0 deco, 41 `kind:'plat'` obstacles, 1 draw call.** `put()` (5727) sends

@@ -39,7 +39,11 @@ export const EDITOR = {
 /* Arrays the editor can touch. Everything Oliver listed is one of these - props, floors,
    platforms and pillars, movers, healing pads, spawner dens - so one tool covers all of it
    rather than a special case per feature. */
-export const EDIT_ARRAYS = ['deco', 'obstacles', 'segments', 'movers', 'healpads', 'dens', 'torches', 'chests'];
+/* `enemies` is in here for MOB START POSITIONS, which Oliver asked for by name. It works for the
+   same reason everything else does: the scape calls mkMonster in a fixed order during loadStage,
+   so an enemy's index is exactly as stable as a deco's, and applyLayer runs after the level is
+   built and before the first frame. Moving one must also move its sx/sz home, or it walks back. */
+export const EDIT_ARRAYS = ['deco', 'obstacles', 'segments', 'movers', 'healpads', 'dens', 'torches', 'chests', 'enemies'];
 
 const LS_KEY = 'bf_editlayers';
 
@@ -122,6 +126,7 @@ export function recordMove(L, arr, idx, o){
   if(o.h != null)  rec.h  = o.h;
   if(o.w != null)  rec.w  = o.w;
   if(o.d != null)  rec.d  = o.d;
+  if(o.sx != null){ rec.sx = o.sx; rec.sz = o.sz; }   // an enemy's HOME - without it it walks back
   m[arr + ':' + idx] = rec;
 }
 export function recordDelete(L, arr, idx){

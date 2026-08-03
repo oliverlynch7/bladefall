@@ -253,7 +253,7 @@ function history(dir){
 /* Snapshot an object's geometry so a move or resize can be put back exactly. Copied by value: the
    live object keeps being mutated, so holding a reference would record the CURRENT position as the
    old one and undo would do nothing. */
-const GEOM = ['x', 'z', 'y0', 'w', 'h', 'd', 'r', 'ry', 'x0', 'px'];
+const GEOM = ['x', 'z', 'y0', 'w', 'h', 'd', 'r', 'ry', 'x0', 'px', 'sx', 'sz', 'y'];
 function geom(o){ const g = {}; for(const k of GEOM) if(o[k] != null) g[k] = o[k]; return g; }
 function setGeom(o, g){ for(const k in g) o[k] = g[k]; }
 
@@ -309,9 +309,23 @@ const PALETTE = [
      a rhythm deliberately, instead of the editor scattering timings you then cannot reproduce. */
   { arr: 'movers',    label: '+ Mover', terrain: true,
     make: (x, z) => ({ x0: x, x, px: x, z, w: 110, d: 88, h: 0, amp: 40, sp: 1.1, ph: 0 }) },
+  { arr: 'enemies',   label: '+ Mob', terrain: true, mob: true },
 ];
 
-/* MOB SPAWNERS are deliberately NOT here yet. Every den in the game carries a `questId` binding it
+/* MOBS. Not a fixed palette entry: which creatures belong here is a per-zone question, so the
+   button offers whatever THIS level already spawns. Placing a jackal in the frost zone would be a
+   content decision the editor has no business making on its own, and a hardcoded list would rot
+   the moment a zone's bestiary changes.
+   spawnEnemy() is the game's own constructor, so a placed mob is a real one - correct stats,
+   element, elite rules and all - rather than an editor-shaped object that behaves differently. */
+function zoneMobTypes(){
+  const g = G(); if(!g) return [];
+  const seen = [];
+  for(const e of (g.enemies || [])) if(e && e.type && !e.boss && seen.indexOf(e.type) < 0) seen.push(e.type);
+  return seen;
+}
+
+/* MOB SPAWNERS (dens) are deliberately NOT here yet. Every den in the game carries a `questId` binding it
    to a quest's kill counter (they are emitted by the quest builder, not the terrain pass), and
    what a den with no quest behind it does - spawn freely, spawn nothing, or corrupt a counter -
    is not something this session established. Placing one would be a guess dressed as a feature.
@@ -372,6 +386,10 @@ function findCollider(id){
   return -1;
 }
 /* Keep a linked collider in step with its prop, after any move or resize. */
+/* An enemy's sx/sz is the spot it returns to when it loses you. Move one without moving its home
+   and it walks straight back, which reads as the edit not having taken. */
+function syncHome(o){ if(o.sx != null){ o.sx = o.x; o.sz = o.z; } }
+
 function syncCollider(o){
   if(o.edId == null) return;
   const arr = G().obstacles, i = findCollider(o.edId);
@@ -390,6 +408,24 @@ function placeAt(sx, sy){
   const gx = Math.round(gp.x / EDITOR.grid) * EDITOR.grid;
   const gz = Math.round(gp.z / EDITOR.grid) * EDITOR.grid;
   const name = palArray(spec);
+  if(spec.mob){
+    const types = zoneMobTypes();
+    if(!types.length){ toast('this area has no mobs to copy a type from'); return; }
+    /* Cycles through the zone's roster on repeat presses rather than asking: placing five of the
+       same thing then five of the next is how you actually populate a room. */
+    EDITOR.mobI = ((EDITOR.mobI || 0) + 1) % types.length;
+    const type = types[EDITOR.mobI];
+    const before = snapLayer();
+    const arr = G().enemies;
+    const m = window.__BF3.spawnEnemy(type, gx, gz);
+    commit(L => recordAdd(L, 'enemies', m));
+    pushStep(before, () => { const i = arr.indexOf(m); if(i >= 0) arr.splice(i, 1); },
+                     () => { if(arr.indexOf(m) < 0) arr.push(m); });
+    EDITOR.sel = { arr: 'enemies', idx: arr.indexOf(m), o: m };
+    toast('placed ' + type);
+    hud();
+    return;
+  }
   const o = spec.make
     ? spec.make(gx, gz)
     : Object.assign({ x: gx, z: gz, y0: 0, w: spec.w, h: spec.h, d: spec.d, c: spec.c,
@@ -483,7 +519,7 @@ function onUp(){
     if(o.x !== was.x || o.z !== was.z){
       const now = geom(o);
       commit(L => recordMove(L, s.arr, s.idx, o));
-      syncCollider(o);
+      syncHome(o); syncCollider(o);
       pushStep(from, () => { setGeom(o, was); syncCollider(o); },
                      () => { setGeom(o, now); syncCollider(o); });
     }
@@ -601,7 +637,7 @@ function onKey(e){
     if(handled){
       const now = geom(s.o);
       commit(L => recordMove(L, s.arr, s.idx, s.o));
-      syncCollider(s.o);
+      syncHome(s.o); syncCollider(s.o);
       pushStep(before, () => { setGeom(s.o, was); syncCollider(s.o); },
                        () => { setGeom(s.o, now); syncCollider(s.o); });
       e.preventDefault(); e.stopPropagation();
@@ -637,7 +673,7 @@ function onKey(e){
     if(EDITOR.sel){
       const now = geom(s.o);
       commit(L => recordMove(L, s.arr, s.idx, s.o));
-      syncCollider(s.o);
+      syncHome(s.o); syncCollider(s.o);
       pushStep(before, () => { setGeom(s.o, was); syncCollider(s.o); },
                        () => { setGeom(s.o, now); syncCollider(s.o); });
     }

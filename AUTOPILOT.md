@@ -608,6 +608,44 @@ because the three maps are three different levels.
       NEXT for this item: `drawWaystation`'s furniture (market wares, keeper stalls, forge, mirror,
       beast cages) is the remaining half, and it is a different pipeline — those are not in
       `G.deco` at all.)*
+      *(BLOCKED, 2026-08-03, `autopilot-merged`: **THE HUB'S "YOUR BAG" CHEST — BUILT, RENDERED,
+      AND REVERTED, because prop3d reports it drawn and draws nothing.** Recorded in full so the
+      next run starts from the measurement instead of rebuilding the same patch.
+      The job looked like the safest cast left in the hub: "Your Bag" IS a chest, `prop3d.js`
+      already casts every treasure chest in the game onto `qprops/Chest_Wood` at a 32-unit fit, and
+      the model is already downloaded in the Waystation. The plumbing exists too — `hubStone` is
+      the exact precedent for handing prop3d an object that only `drawWaystation` knows about.
+      What was built: `hubBagProp()` in index.html deriving `{x,y,z,yaw}` from the `prop:'chest'`
+      npc (memoised on the npc object, because the hub SPACE PASS moves it — authored -607, live
+      **-880**); `hubBag` on `__BF_WORLD()`; `syncHubBag()` in prop3d holding one actor from the
+      chest pool; `__prop3dHubBagDrawn()` gating the voxel body in `drawWaystation`.
+      **The voxel half works and the 3D half does not, which is the worst possible state and is why
+      it is reverted rather than left in.** A/B at one camera: `?prop3d=0` shows the tan voxel bag
+      (`_shot/out/p5-bag-voxel.png`), the default shows the same spot with the box gone and nothing
+      standing in it (`p4-bag-3d.png`, `p9-bag-3d-hi.png` at 1600x900). Moved to open cobbles at
+      (300,300) with the camera on it, still nothing (`q1-bag-open.png`).
+      **And it is NOT a placement or occlusion problem — that was the first four guesses and all
+      four are dead.** A probe was added for exactly this (`__prop3dHubBagPose()`, reverted with the
+      rest) and it reports the actor at **x -880, y 0.57, z 59, scale 25.077, visible true, inScene
+      true, parent 'prop3d'** — the right place, the right size, flagged visible, and genuinely
+      under the Three scene. `__prop3d()` agrees: `hubBag:1, hubBagDrawn:true`, `box {w:32,
+      d:18.9, h:17.9, footY:0.57}`.
+      Things ruled out by measurement, so nobody re-derives them: prop3d renders in the hub at all
+      (the plaza bonfire obelisk is prop3d's and is plainly in every hub shot, `waystone:1` with a
+      `wayBox`); the group is attached (`inScene`); the fit is sane (32 wide is what the model is
+      asked for and what it reports); the model is loaded (its metalness fix-up logs in every hub
+      render, before this patch as well).
+      **The remaining suspect, untested, is the ACTOR rather than the placement:** the waystone is
+      a bare `SkeletonUtils.clone` added straight to the group, while `buildActor()` builds a mixer
+      with a PAUSED `Chest_Open` action scrubbed to `time = 0`. The next attempt should build the
+      bag the waystone's way — no mixer, no action — and see whether it appears. If it does, the
+      question becomes why `mixer.update()` at t=0 yields nothing here.
+      **A second thing worth checking FIRST, because it would change what this bug is:** whether
+      ZONE chests still render. `--scene 0 --focus "__BF3.G.chests[0]"` reports `chests: 7` but the
+      frame it handed back was not conclusively a 3D one (`q2-zone-chest.png`), and if zone chests
+      are invisible too then this is a pre-existing regression that a hub cast merely walked into.
+      That is one render and it splits the problem in half.
+      Nothing of this is in the tree: index.html and prop3d.js are byte-identical to HEAD.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

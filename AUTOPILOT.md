@@ -848,9 +848,20 @@ because the three maps are three different levels.
       frames is a **voxel** chest and says nothing whatever about prop3d. This run set out to answer
       the zone-chest question and every frame it took was incapable of answering it; the worker
       above answered it properly instead.
-      **Treat any `READY NEVER CAME` as UNPROVEN until you know you were alone** — the harness says
-      so in its own message, and `--readymax 300000` is the flag that buys the losing side enough
-      room to finish.)*
+      **AND IT IS NOW SETTLED, not inferred — one render, no code change, `--readymax 300000`:
+      `ready ✓ after 194.9s`.** The same `--scene 0` that had twice given up at ~127s simply needed
+      195, and what came back is the recorded baseline VERBATIM — `floorTiles 1257, roadTiles 115,
+      deco 2194, box 277, tree 118, lantern 24, corn 1624, standstone 9, skipped 142, drawCalls 41`,
+      `mob live 18`, `err:null`, 60 props loaded. Not one number off. The frame
+      (`_shot/out/r3-outskirts-longwait.png`) is the full 3D world: real pine and oak models, the
+      textured road, 3D ground, 3D fences.
+      **So world3d was healthy the entire time and there was never anything to fix.** The two
+      "failures" were one process losing a race for the cores, and they cost this run its budget.
+      The rule that falls out: **`READY NEVER CAME` is a statement about the CLOCK, not about the
+      game — treat it as unproven until you have re-run it with `--readymax 300000`, which is one
+      render and settles it.** The harness already says as much in its own message; believe it.
+      The 120s default is the real hazard, because it is comfortably enough when you are alone and
+      comfortably not when you are not.)*
 - [x] **3D on by default.** Done 2026-08-01. `HERO3D.on`, `WORLD3D.on` and `MOB3D.on` now start
       true and the URL flags read as an opt-out (`?hero3d=0`, `?world3d=0`, `?mob3d=0`), so
       `https://…/3d/` with no query string at all is the 3D game.

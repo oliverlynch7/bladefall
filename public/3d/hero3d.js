@@ -1371,6 +1371,39 @@ window.__hero3dMeshes = () => {
   });
   return out;
 };
+/* WHAT IS STANDING IN FRONT OF A POINT. The one question a screenshot cannot answer and every
+   "it is not being drawn" argument eventually turns into: an object can be in the scene, visible,
+   the right size and genuinely rasterised, and still lose the depth test to something nearer.
+   Raycasts the SCENE from the game's own eye toward a world point and lists every Three mesh the
+   ray meets BEFORE it — so the occluder is named rather than guessed at from a picture.
+   The camera is the game's (syncCamera), so this is the same ray the frame was drawn with.
+   `skip` drops matches whose group is that name (pass 'prop3d' to ignore the thing you are aiming
+   at). Distances are in game units. */
+window.__hero3dRayTo = (x, y, z, skip) => {
+  if(!scene || !syncCamera()) return { err:'no camera' };
+  scene.updateMatrixWorld(true);
+  /* Read the eye OUT of matrixWorld rather than asking for it. `getWorldPosition` calls
+     `updateWorldMatrix`, which recomputes matrixWorld from the camera's own (identity) local
+     matrix — and syncCamera does not set that, it writes matrixWorld directly from the game's
+     VIEW. So the polite call both returns (0,0,0) and CORRUPTS the live camera. Measured. */
+  const eye = new THREE.Vector3().setFromMatrixPosition(cam.matrixWorld);
+  const tgt = new THREE.Vector3(x, y, z);
+  const dist = eye.distanceTo(tgt);
+  const rc = new THREE.Raycaster(eye, tgt.clone().sub(eye).normalize(), 0.1, dist * 4);
+  const grp = o => { let p = o; while(p){ if(p.name && p.parent === scene) return p.name; p = p.parent; } return '?'; };
+  /* The full ancestor chain, not just the mesh's own name: world3d's InstancedMeshes carry the
+     `w3d:<model>` name, but the pieces of a multi-part prop are unnamed children of it, so the
+     hit object alone comes back '?' and names nothing. */
+  const chain = o => { const out = []; let p = o; while(p && p !== scene){ if(p.name) out.push(p.name); p = p.parent; } return out.join('<').slice(0, 60) || '?'; };
+  const hits = rc.intersectObject(scene, true)
+    .filter(h => !(skip && grp(h.object) === skip))
+    .map(h => ({ d:+h.distance.toFixed(1), before:h.distance < dist,
+                 group:grp(h.object), name:chain(h.object), type:h.object.type,
+                 at:[+h.point.x.toFixed(0), +h.point.y.toFixed(0), +h.point.z.toFixed(0)],
+                 inst:h.instanceId != null ? h.instanceId : null }));
+  return { eye:[+eye.x.toFixed(0), +eye.y.toFixed(0), +eye.z.toFixed(0)], distToTarget:+dist.toFixed(1),
+           occluders:hits.filter(h => h.before).slice(0, 12), total:hits.length };
+};
 /* WHAT THREE ACTUALLY DREW last frame. Every other probe in this file reports what was ASKED for —
    a position, a scale, a visible flag — and all of those can be perfect while nothing reaches the
    screen. renderer.info.render is reset per render() call, so this is the frame the shutter caught

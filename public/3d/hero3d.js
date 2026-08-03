@@ -1295,6 +1295,13 @@ window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
 /* Diagnostic: where does the character actually land? Reports its world position, its
    projected normalised device coords (|x|,|y| < 1 means on screen, z < -1 or > 1 means
    outside the depth range), and its on-screen pixel size. Measuring beats guessing. */
+/* The Three scene, for the level editor's collision overlay.
+   Exposed rather than imported for the same reason __BF_CAM is: the editor mode has to draw into
+   the SAME scene and the same render call as the hero and the world, or its boxes land in a
+   different framebuffer and are composited away. Read-only by convention - the editor adds and
+   removes one named group and touches nothing else. */
+window.__hero3dScene = () => scene;
+
 /* Bisect the "renders but invisible" problem with the bluntest possible marker: a large
    unlit cube at the hero's position, depthTest off, drawn last. If THIS is invisible the
    problem is GL state (scissor, framebuffer, program). If it appears, the problem is depth or

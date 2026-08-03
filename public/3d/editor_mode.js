@@ -13,6 +13,7 @@
 import * as THREE from './three.module.js';
 import { EDITOR, EDIT_ARRAYS, areaKey, loadLayers, saveLayers, genFingerprint,
          recordMove, recordDelete, recordAdd, exportLayers } from './editor.js';
+import { toggleOverlay, refresh as refreshOverlay, OVERLAY } from './editor_collision.js';
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
 let _ui = null, _marker = null, _raf = 0, _drag = null;
@@ -128,6 +129,17 @@ function hud(){
     rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
               (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
+    rows.push('<div class="row"><span class="k">C</span>collision overlay' +
+              (OVERLAY.on ? ' <span style="color:#54d17a">on</span>' : '') + '</div>');
+    if(OVERLAY.on && OVERLAY.counts){
+      const c = OVERLAY.counts;
+      rows.push('<div class="row" style="line-height:1.7">' +
+        '<span style="color:#ff4a4a">&#9646;</span> solid, stand on top (' + c.blocking + ')<br>' +
+        '<span style="color:#54d17a">&#9646;</span> movers &amp; pads (' + c.special + ')<br>' +
+        '<span style="color:#ff3df0">&#9646;</span> <b>walk-through scenery (' + c.walkThrough + ')</b>' +
+        '</div>');
+      rows.push('<div class="row">props checked within ' + c.radius + 'u of you (' + c.decoChecked + ')</div>');
+    }
     rows.push('<div class="row"><span class="k">ctrl Z</span>undo (' + _undo.length + ')' +
               ' <span class="k">ctrl Y</span>redo (' + _redo.length + ')</div>');
 
@@ -244,7 +256,12 @@ function setGeom(o, g){ for(const k in g) o[k] = g[k]; }
 let _redrawT = 0;
 function redraw(){
   clearTimeout(_redrawT);
-  _redrawT = setTimeout(() => { try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){} }, 120);
+  _redrawT = setTimeout(() => {
+    try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){}
+    /* The overlay is built from the same arrays, so it has to follow the edit - otherwise a
+       platform you just placed shows no collision box and reads as non-solid. */
+    try { refreshOverlay(); } catch(e){}
+  }, 120);
 }
 
 /* ── the asset palette ────────────────────────────────────────────────────────
@@ -439,6 +456,12 @@ function onKey(e){
   if((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')){
     history('redo'); e.preventDefault(); e.stopPropagation(); return;
   }
+  if((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey){
+    const c = toggleOverlay();
+    toast(c ? (c.walkThrough + ' of ' + c.decoChecked + ' props nearby have NO collision')
+            : 'collision overlay off');
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
   if(e.key === 'Escape'){
     if(EDITOR.place != null) EDITOR.place = null; else EDITOR.sel = null;
     hud(); e.stopPropagation(); return;
@@ -542,6 +565,7 @@ export function toggle(force){
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
     _ui = null; _marker = null; EDITOR.sel = null; _drag = null; EDITOR.place = null;
+    if(OVERLAY.on) toggleOverlay(false);   // leaving edit mode must not strand wireframes in the game
     toast('edit mode off');
   }
   return EDITOR.on;

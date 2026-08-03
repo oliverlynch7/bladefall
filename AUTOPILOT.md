@@ -317,6 +317,49 @@ because the three maps are three different levels.
       identical to baseline (1257 floor, 115 road, 2194 deco, 118 trees, 277 box, 1624 corn, 41
       draw calls); hub unchanged (pave 399, 8 buildings, 4 pads, 8 caps).
 
+- [ ] **The other three activities: FIRST-EVER RENDERS, and what they found.** Audited 2026-08-02
+      (`autopilot-merged`) with the new destinations. Nothing below is desk research; each line is a
+      probe or a picture.
+      - **Treasure Sprint** (`--scene sprint`, `_shot/out/m4-sprint.png`) — **the biggest
+        un-converted surface left in the game, and the desk research was right.** Probed live:
+        **51 floor tiles, 0 deco, 41 `kind:'plat'` obstacles, 1 draw call.** `put()` (5727) sends
+        everything above knee height to `vplat`, world3d draws no 3D replacement for a plat, so the
+        only thing the 3D layer contributes to a Sprint is the floor under the 168x168 start pad.
+        The picture is exactly that: a 3D-tiled start pad, and the entire course you actually run on
+        floating above it as untextured voxel boxes. NOT a regression and nothing is drawn by
+        nobody — the plats defer correctly and are visible. It is simply the one activity where
+        "make it a PLACE" means conversion rather than an audit. **Worth Oliver's eye before anyone
+        starts it: this is real work, not a bug fix.**
+      - **Abyssal Descent** (`--scene abyss:13`, `m4-abyss13.png`) — **CORRECT, do not "fix" it.**
+        Reports theme `void`, ground `#241431`, stage 11, 1156 floor tiles, 20 monoliths, 2 draw
+        calls, and renders as a violet walled box with a stone floor and a ring of black spires. It
+        reads as the Abyss. `loadEndlessArena` sets `G.stageIndex = endlessStageFor(n)` explicitly,
+        and `ENDLESS_ROT` advances one entry every TWO floors — so floors 1 and 2 are stage 0, The
+        Outskirts, grass. **A `--scene abyss` at the default floor 1 showing a green floor is the
+        design, not the Arena bug.** Render floor 13+ to see the Abyss look like the Abyss.
+      - **Boss Gauntlet** (`--scene gauntlet`, `m4-gauntlet.png`) — renders; stage 2, theme
+        `badlands`, the Brute present with its health bar. **`__mob3dDrawn('brute')` is `false`,
+        measured — the art gap is confirmed, not inherited.** An uncast type keeps its voxel body
+        and the enemies loop is inside the deferred entity pass, so it composites correctly: the
+        Gauntlet renders seven voxel bosses in a 3D room. **Still 100% blocked on Oliver**, and put
+        it to him in these terms: the boss models have been queued as "8 leftover mobs" since
+        2026-08-01, but they are the *entire content* of one of his four stage-2 activities.
+      - **The Abyss and the Gauntlet really are the same room, and it is now measured rather than
+        read.** Identical probes from two different destinations: **1156 floor tiles, 20 deco, 2
+        draw calls, four `h:120` walls, six torches** in both. Only the ground tint each inherits
+        from `STAGES` tells them apart. Against Oliver's brief — *"each of the four is a PLACE, not
+        a menu"* — that is the most concrete target in stage 2, and it is a design call, so it is
+        his.
+      **`--scene gauntlet` needed a second unlock and the harness caught it honestly.**
+      `startBossRush` guards on `meta.hero` AS WELL AS `meta.classUnlocked` (9625), and `meta.hero`
+      is null on a throwaway profile because `skipTrial()` grants the class without establishing a
+      loadout — so the first attempt toasted "Pick a class and gear up first" and stood in the
+      Waystation. It printed **`READY NEVER CAME after 120s` with `at → ? [hub]`**, which is the
+      whole point of keying each ready test to the destination's own flag: the generic
+      `built && !counts.hub` test would have resolved in the hub and handed back a photograph of the
+      plaza captioned "the Gauntlet". The destination now snapshots the live hub hero, which is the
+      game's own idiom for this (index.html:8003 does it for a co-op guest arriving without one).
+
 - [ ] **Hub buildings.** The Waystation is where players idle and socialise, so it matters most.
       Both kits are MODULAR (walls/doors/roofs, no whole buildings) — `makeBuilding()` in
       public/slice3d/index.html already assembles them; port that into world3d. Tag the hub's

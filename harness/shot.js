@@ -238,7 +238,18 @@ const ACTIVITIES = {
               at: '!!__BF3.G.endless && __BF3.G.floor > 0' },
   sprint:   { arg: null,    go: () => '__BF3.startHubSprint();',
               at: '!!__BF3.G.sprintFun && !!__BF3.G.bonusActive' },
-  gauntlet: { arg: 'tier',  go: (v) => '__BF3.cheatUnlockClasses(); __BF3.startBossRush(' + JSON.stringify(v || 'normal') + ');',
+  /* The Gauntlet needs BOTH halves of startBossRush's guard, and cheatUnlockClasses() is only one
+     of them. `meta.hero` is the campaign loadout snapshot and it is null on a throwaway profile —
+     skipTrial() grants the class without establishing one — so a bare startBossRush() toasts "Pick
+     a class and gear up first" and returns, leaving the run standing in the Waystation. MEASURED:
+     the first --scene gauntlet printed READY NEVER CAME after 120s with `at → ? [hub]`, which is
+     the destination doing its job — the old generic `built && !counts.hub` ready test would have
+     resolved in the hub and handed back a photograph of the plaza captioned "the Gauntlet".
+     Snapshot the live hub hero, which is the game's own idiom for this (index.html:8003 does the
+     same thing for a co-op guest arriving without one). */
+  gauntlet: { arg: 'tier',  go: (v) => '__BF3.cheatUnlockClasses();'
+              + ' if(!__BF3.meta.hero && __BF3.G && __BF3.G.p) __BF3.meta.hero = __BF3.snapOf(__BF3.G.p);'
+              + ' __BF3.startBossRush(' + JSON.stringify(v || 'normal') + ');',
               at: '!!__BF3.G.bossRush && __BF3.G.brIdx != null' },
 };
 const activityOf = (dest) => {

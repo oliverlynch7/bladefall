@@ -181,15 +181,23 @@ function css(){
     'border:2px solid #ffd24a;box-shadow:0 0 0 2px rgba(0,0,0,.55),0 0 14px rgba(255,210,74,.7);pointer-events:none}',
     '#bfedhint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99998;',
     'padding:6px 13px;border-radius:8px;background:rgba(10,10,16,.9);border:1px solid #6a5330;',
-    'color:#ffd89a;font:700 11.5px system-ui;pointer-events:none}'
+    'color:#ffd89a;font:800 14px system-ui;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.5)}',
+    '#bfedhint.add{border-color:#54d17a;color:#bdf5cf}',
+    '#bfedhint.del{border-color:#ff6a5a;color:#ffc9c0}'
   ].join('');
   document.head.appendChild(st);
 }
 
-function toast(t){
+/* On-screen confirmation for every action, because Oliver asked for it and because without it you
+   cannot tell "nothing happened" from "it happened behind me". A spawn or delete off-camera is
+   invisible, and silently doing nothing is exactly how the dead panel above went unnoticed.
+   `kind` tints it: green for something created, red for something removed. */
+function toast(t, kind){
   let h = document.getElementById('bfedhint');
   if(!h){ h = document.createElement('div'); h.id = 'bfedhint'; document.body.appendChild(h); }
-  h.textContent = t; clearTimeout(h._t); h._t = setTimeout(() => h.remove(), 2200);
+  h.textContent = t;
+  h.className = kind || '';
+  clearTimeout(h._t); h._t = setTimeout(() => h.remove(), 2600);
 }
 
 function hud(){
@@ -583,7 +591,7 @@ function placeWorld(spec, gx, gz){
     pushStep(before, () => { const i = arr.indexOf(m); if(i >= 0) arr.splice(i, 1); },
                      () => { if(arr.indexOf(m) < 0) arr.push(m); });
     EDITOR.sel = { arr: 'enemies', idx: arr.indexOf(m), o: m };
-    toast('placed ' + type);
+    toast('+ added ' + type, 'add');
     hud();
     return;
   }
@@ -613,7 +621,9 @@ function placeWorld(spec, gx, gz){
   /* Select what you just placed, so it can be nudged into position immediately rather than needing
      to be found and clicked again. Its index is the end of the array by construction. */
   EDITOR.sel = { arr: name, idx: arr.length - 1, o };
-  toast('placed ' + spec.label);
+  /* Labels for the terrain entries already start with "+", so name them without it or the message
+     reads "+ added + Platform". */
+  toast('+ added ' + spec.label.replace(/^\+\s*/, ''), 'add');
   hud();
 }
 
@@ -648,8 +658,22 @@ function dragBasis(o){
   return { ia: d / det, ib: -b / det, ic: -c / det, id: a / det };   // inverse, screen px -> world
 }
 
+/* Is this click on the editor's own UI rather than the world?
+
+   THE BUG THIS FIXES: these handlers are on `window` in CAPTURE phase, so they see every mousedown
+   in the page BEFORE the element under the cursor does. While every click meant "select", that was
+   harmless - a click on a button found no object and fell through. Drag-to-look changed it: a
+   click that grabs nothing now starts a camera look and calls stopPropagation, so clicking a
+   palette button turned the camera and the button's own handler NEVER RAN. The whole asset panel
+   went dead the moment the fly camera shipped. */
+function inPanel(e){
+  const t = e.target;
+  return !!(t && t.closest && t.closest('#bfed'));
+}
+
 function onDown(e){
   if(!EDITOR.on || e.button !== 0) return;
+  if(inPanel(e)) return;                 // the panel handles its own clicks; never swallow them
   /* Right/middle drag always looks. Left drag looks too UNLESS it grabbed an object - so dragging
      empty space turns the camera, which is what every 3D tool does and what Oliver asked for, and
      dragging a thing still moves the thing. One button, no modifier to remember. */
@@ -671,6 +695,7 @@ function onDown(e){
 }
 function onMove(e){
   if(!EDITOR.on) return;
+  if(!_look && !_drag && inPanel(e)) return;
   if(_look){
     camLook(e.clientX - _look.sx, e.clientY - _look.sy);
     _look.sx = e.clientX; _look.sy = e.clientY;
@@ -754,7 +779,7 @@ function onKey(e){
       commit(L => recordDelete(L, 'obstacles', i));
       obs.splice(i, 1);
       pushStep(before, () => obs.splice(i, 0, gone), () => obs.splice(i, 1));
-      toast('collision removed');
+      toast('- collision removed', 'del');
     } else {
       if(o.edId == null) o.edId = ++_edSeq;
       const col = colliderFor(o, o.edId);
@@ -762,7 +787,7 @@ function onKey(e){
       commit(L => recordAdd(L, 'obstacles', col));
       pushStep(before, () => { const j = obs.indexOf(col); if(j >= 0) obs.splice(j, 1); },
                        () => { if(obs.indexOf(col) < 0) obs.push(col); });
-      toast('collision added, sized to the object');
+      toast('+ collision added, sized to the object', 'add');
     }
     hud(); e.preventDefault(); e.stopPropagation(); return;
   }
@@ -795,7 +820,7 @@ function onKey(e){
               if(col){ const j = obs.indexOf(col); if(j >= 0) obs.splice(j, 1); } },
       () => { if(arr.indexOf(o) < 0) arr.push(o); if(col && obs.indexOf(col) < 0) obs.push(col); });
     EDITOR.sel = { arr: src.arr, idx: arr.length - 1, o };   // select the COPY, so D D D builds a row
-    toast('duplicated');
+    toast('+ duplicated', 'add');
     hud(); e.preventDefault(); e.stopPropagation(); return;
   }
 
@@ -860,7 +885,7 @@ function onKey(e){
       () => { if(arr) arr.splice(idx, 0, obj); if(cobj) obs.splice(ci, 0, cobj); },
       () => { if(arr) arr.splice(idx, 1); if(ci >= 0) obs.splice(ci, 1); });
     EDITOR.sel = null;
-    toast('deleted - Ctrl+Z puts it back');
+    toast('- deleted ' + (obj.set || obj.kind || s.arr) + ' - Ctrl+Z puts it back', 'del');
   }
   else handled = false;
   if(handled){

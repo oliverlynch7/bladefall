@@ -1887,7 +1887,9 @@ const CLASSES={
       {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
       {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
       {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]},
-  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','spellblade'],
+  /* C4 Paladin: MAGIC + WARRIOR. It had the warrior line plus spellblade only, which is a warrior
+     with one exception rather than the hybrid it is meant to be. */
+  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','spellblade','staff','wand','tome','orb'],
     subs:[{id:'guardian',disp:'Guardian',blurb:'The holy wall — survival, shields, and retaliation.'},
           {id:'templar',disp:'Templar',blurb:'Holy wrath — smites, radiant bursts, and burning light.'}],
     skills:[
@@ -1918,7 +1920,10 @@ const CLASSES={
       {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
       {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
-  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['flintlock','cross','bow','sword','javelin'],
+  /* C4 Pirate: the flintlock was effectively its ONLY on-class weapon, so a pirate who had not
+     found one was playing at a permanent penalty. Warrior weapons join it - a pirate with a cutlass
+     and an axe is not a stretch. */
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['flintlock','cross','bow','sword','javelin','great','axe','hammer','dagger'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
       {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},
@@ -2275,6 +2280,36 @@ function classState(id){ let cs=meta.classes[id]; const fresh=!cs;
   if(CLASS2[id] && !cs.v2){ cs.v2=1; cs.xp=0; cs.rank=1; cs.ch={}; cs.sub=null; }   // legacy pre-v2 save: one-time reset (keeps rank 1)
   return cs; }
 function curClass(){ return CLASSES[meta.classId]||CLASSES.warrior; }
+/* ── C1/C2: OFF-CLASS WEAPONS ARE BLOCKED, AND THE BLOCK TEACHES ────────────
+   Replaces the old soft system, where equipping off-class simply multiplied your damage down: you
+   could equip anything, quietly do a fraction of your damage, and never be told why the game felt
+   bad. A hard block is more honest.
+   FIRST refusal explains the whole rule; every one after is a single line, because a modal on the
+   twentieth attempt is nagging, not teaching. */
+function weaponFamilyName(w){ return (w&&w.art)||'that'; }
+function refuseOffclass(w){
+  const C=curClass(), fam=(C.family||[]).join(', ');
+  if(!meta.taughtOffclass){
+    meta.taughtOffclass=1; persistGlobal();
+    showOverlayHTML(`<div class="card"><p class="ovsub" style="color:var(--amber);letter-spacing:.2em">OFF-CLASS WEAPON</p>
+      <h2 class="title" style="font-size:26px">${C.icon} ${C.disp} cannot use ${weaponFamilyName(w)}</h2>
+      <p class="ovsub">Every class is trained on its own weapons, and only those. It is not a penalty
+      any more - you simply cannot equip what your class was never taught.</p>
+      <p class="ovsub">${C.disp} uses: <b>${fam}</b>.</p>
+      <p class="ovsub">Swap class at the Drillmaster in the hub to use something else. He can also
+      show you the full weapon chart for every class.</p>
+      <button class="bigbtn" id="ocOk">Understood</button></div>`);
+    const b=document.getElementById('ocOk'); if(b) b.onclick=()=>{ showOverlay(false); mode='play'; showGameUI(true); };
+    mode='menu';
+    return;
+  }
+  toast("Can't equip off-class weapons");
+}
+/* C4 Monk: equipping the class blocks EVERY weapon by design - it fights with its hands, and the
+   fists are its weapon. Handled before the family test so the message is about the Monk rather
+   than about a missing family entry. */
+function monkBlocksWeapons(w){ return meta.classId==='monk' && w && w.art!=='fist'; }
+
 function classFamilyOk(w){ if(w&&w.art==='fist') return meta.classId==='monk'; return !w || w.anyClass || curClass().family.includes(w.art); }   // fists: on-class (full power) ONLY for the Monk
 function offclassMul(p){ if(p.weapon&&p.weapon.art==='fist') return meta.classId==='monk'?1:0.20;   // bare fists: full power for the Monk, near-useless for everyone else
   return classFamilyOk(p.weapon)?1:OFFCLASS_MUL; }
@@ -9628,7 +9663,10 @@ function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lo
   el.className=''; }
 function lootTick(){ const d=G&&G.lootCard; if(!d) return; const rem=Math.max(0,d.expire-(G.time||0)), f=document.getElementById('lcbarfill'); if(f) f.style.width=Math.round(100*rem/d.max)+'%'; if(rem<=0) lootToBag(true); }
 function lootEquipCurrent(){ const d=G&&G.lootCard; if(!d) return; const it=d.item;
-  if(d.kind==='weapon'){ if(typeof canWield==='function'&&!canWield(it)){ toast('🔒 Requires Level '+rarityReq(it.rarity)+' to wield'); return; } bagReplaced(G.p.weapon,true); G.p.weapon=it; playFx('equip'); toast(it.name+' equipped'); }
+  if(d.kind==='weapon'){ if(typeof canWield==='function'&&!canWield(it)){ toast('🔒 Requires Level '+rarityReq(it.rarity)+' to wield'); return; }
+    if(monkBlocksWeapons(it)){ toast('The Monk fights with its hands'); return; }
+    if(!classFamilyOk(it)){ refuseOffclass(it); return; }                    // C1: hard block, not a damage penalty
+    bagReplaced(G.p.weapon,true); G.p.weapon=it; playFx('equip'); toast(it.name+' equipped'); }
   else { const old=G.p.gear[it.slot]; G.p.gear[it.slot]=it; if(old) meta.stash.push((TRINKETIDS&&TRINKETIDS.includes(it.slot))?{trinket:old}:{armor:old}); recomputeArmor(G.p); G.p.hp=Math.min(G.p.hp,effMaxHp(G.p)); toast(it.name+' equipped'); }
   SFX.pickup(); persist(); hudUpdate(); showNextLoot(); }
 function lootSellCurrent(){ const d=G&&G.lootCard; if(!d) return; const g=sellItem(d.item); SFX.pickup(); toast('Sold · +'+g+'g'); hudUpdate(); showNextLoot(); }
@@ -11231,7 +11269,12 @@ function openTrainer(back){
   if(masteredStarters() && !meta.masterSealSeen){ meta.masterSealSeen=true; persist(); sealCongrats(()=>openTrainer(back)); return; }   // one-time congratulation on total mastery
   menuTip('tip_trainer','the <b>Drillmaster</b>. Switch your active class, take another class\'s <b>Trial</b> to unlock it, and <b>Respec</b> — re-pick every skill and passive choice you have made, for gold. This is where you reshape your build whenever you like.');
   const ACC={warrior:'#e8a33d',ranger:'#7ec46a',mage:'#8fb7ff',reaper:'#c47bff'};
-  const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe'};
+  /* C3: the Drillmaster teaches the weapon matrix. The class cards already listed families - what
+     they could not do is NAME the newer types, so a Pirate's defining weapon rendered as a blank
+     and the Monk's card looked empty. Any art missing from this map is silently invisible, which
+     is why the chart read as incomplete rather than as informative. */
+  const FAM={sword:'Sword',great:'Greatsword',axe:'Axe',hammer:'Hammer',bow:'Bow',cross:'Crossbow',dagger:'Dagger',javelin:'Javelin',staff:'Staff',wand:'Wand',spellblade:'Spellblade',scythe:'Scythe',
+    flintlock:'Flintlock',tome:'Tome',orb:'Orb',fist:'Fists'};
   const rows=CLASSIDS.map(cid=>{ const C=CLASSES[cid], un=!!meta.classUnlocked[cid], cs=classState(cid), sel=meta.classId===cid;
     const sub=cs.sub?C.subs.find(s=>s.id===cs.sub):null;
     const acc=ACC[cid]||'#c9a86a';

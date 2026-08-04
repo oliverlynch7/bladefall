@@ -177,6 +177,21 @@ function onWheel(e){
   if(!EDITOR.on) return;
   /* The wheel zooms, because that is what every 3D tool does and what a hand reaches for. Fly
      speed moves to shift+wheel - still adjustable, no longer occupying the obvious gesture. */
+  /* Holding an object? The wheel is its SIZE. Same principle as the keys above - what you are
+     holding decides what the control does - and scaling by a ratio rather than a fixed step keeps
+     a lamp post and a castle wall equally adjustable. */
+  if(_drag && EDITOR.sel && EDITOR.editable){
+    const o = EDITOR.sel.o, f = e.deltaY > 0 ? 0.92 : 1.087;
+    if(o.r != null) o.r = Math.max(8, o.r * f);                          // healing pads are a radius
+    else {
+      o.w = Math.max(4, (o.w || 20) * f);
+      o.d = Math.max(4, ((o.d || o.w) || 20) * f);
+      o.h = Math.max(4, (o.h || 20) * f);
+    }
+    syncColliderLive(o); redrawLive(); hud();
+    e.preventDefault(); e.stopPropagation(); return;
+  }
+
   /* Wheel zooms in fine steps; shift+wheel zooms coarsely. Fly speed moves to ctrl+wheel - it is
      the rarest of the three and no longer deserves the second-easiest gesture. */
   if(e.ctrlKey || e.metaKey) camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
@@ -302,7 +317,9 @@ function hud(){
     rows.push('<div class="row"><span class="k">G</span>hero <span class="k">F</span>frame selection' +
               ' <span class="k">Tab</span>next here</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
-    rows.push('<div class="row"><span class="k">right drag</span>move the selection</div>');
+    rows.push('<div class="row"><span class="k">right drag</span>move &middot; while held: ' +
+              '<span class="k">space</span><span class="k">shift</span>up/down ' +
+              '<span class="k">R</span>turn <span class="k">wheel</span>size</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid +
               'u <span class="k">shift</span>x5 <span class="k">-</span><span class="k">=</span>grid</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
@@ -849,7 +866,8 @@ function onUp(){
     const s = EDITOR.sel, o = s.o, was = _drag.undoGeom, from = _drag.undoFrom;
     /* A click that did not actually move anything is not an edit, and pushing it would fill the
        undo stack with no-ops - press Ctrl+Z and nothing appears to happen. */
-    if(o.x !== was.x || o.z !== was.z){
+    if(o.x !== was.x || o.z !== was.z || o.y0 !== was.y0 || o.ry !== was.ry
+       || o.w !== was.w || o.h !== was.h || o.d !== was.d || o.r !== was.r){
       const now = geom(o);
       commit(L => recordMove(L, s.arr, s.idx, o));
       syncHome(o); syncCollider(o);
@@ -905,6 +923,38 @@ function onKey(e){
   /* Camera keys first, and they never touch the selection - you are moving the VIEW, not the
      thing. WASD pans, QE turns, RF (and the wheel) zooms, G re-centres on the hero when you have
      flown somewhere and lost him. */
+  /* ── HOLDING RIGHT-CLICK ON AN OBJECT PUTS THESE KEYS ON THE OBJECT ────────
+     While a drag is live, space/shift raise and lower it, and R turns it. The same keys fly the
+     camera when nothing is held, which is what makes this feel like grabbing a thing rather than
+     operating a tool: what you are holding decides what the keys do.
+     ROTATION SNAPS NEAR THE CARDINALS but is not limited to them - Oliver wants square things to
+     land square without being forced into quarter-turns. Within ~7 degrees of a right angle it
+     settles onto it; anywhere else it turns freely. */
+  if(_drag && EDITOR.sel && EDITOR.editable){
+    const o = EDITOR.sel.o, k = e.key.toLowerCase();
+    const step = EDITOR.grid * (e.shiftKey && k !== 'shift' ? 5 : 1);
+    let did = true;
+    if(k === ' ')            o.y0 = (o.y0 || 0) + step;                  // space: up
+    else if(k === 'shift')   o.y0 = Math.max(0, (o.y0 || 0) - step);     // shift: down
+    else if(k === 'r'){
+      /* The RAW angle advances; `ry` is the snapped view of it. Snapping the stored angle directly
+         meant every press landed inside the tolerance of the cardinal it had just left and was
+         pulled straight back - the prop simply never turned. Keeping the true rotation separate
+         lets it travel out of the snap zone while still settling cleanly on the way into the next
+         one. */
+      const SNAP = Math.PI / 2, TOL = 0.12;                              // ~7 degrees
+      const raw = ((o._ryRaw != null ? o._ryRaw : (o.ry || 0)) + 0.09) % (Math.PI * 2);
+      o._ryRaw = raw;
+      const near = Math.round(raw / SNAP) * SNAP;
+      o.ry = (Math.abs(raw - near) < TOL) ? (near % (Math.PI * 2)) : raw;
+    }
+    else did = false;
+    if(did){
+      syncHome(o); syncColliderLive(o); redrawLive(); hud();
+      e.preventDefault(); e.stopPropagation(); return;
+    }
+  }
+
   /* Bare keys only. This block runs BEFORE undo/redo, so without the modifier guard Ctrl+Z zoomed
      the camera and undo never ran - a conflict of my own making, found while auditing the bindings
      Oliver flagged rather than by hitting it. */

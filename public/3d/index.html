@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.650.0-passives4';
+const VERSION3D='1.660.0-editgrab';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9382,6 +9382,13 @@ function update(dt){
   if(mode==='studio'){ if(studio&&studio.design) designUpdate(dt); else studioUpdate(dt); return; }
   if(mode==='mirror'){ mirrorUpdate(dt); return; }
   if(mode!=='play') return;
+  /* THE WORLD HOLDS STILL WHILE YOU EDIT. Oliver: "time should freeze so that I don't get attacked
+     or my character doesn't move around while I'm editing." Editing a room while its occupants
+     chase you is the obvious problem; the quieter one is that a moving hero drifts the whole time
+     you are lining a prop up, so nothing you place stays where you put it relative to him.
+     Returning here freezes enemies, projectiles, hazards and the player together - the render loop
+     is separate and keeps drawing, so the editor camera still flies. */
+  if(_edOpen()) return;
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
   if(G.arena){ arenaHazardTick(dt); arenaPickupTick(dt); }     // Arena: lava/hazard damage -> respawn; powerup orbs
@@ -13030,6 +13037,18 @@ function drawCourse(s,t){
   const _hubLamp = !!(_w3dOn && _w3d.counts && _w3d.counts.hubLamp > 0);
   deferOn();
   if(G.obstacles) for(const ob of G.obstacles){ if(cull(ob.x,ob.z)) continue;
+    /* DERIVED COLLIDERS ARE INVISIBLE. E1 gives every solid prop a collision box sized to it - and
+       obstacles are DRAWN, so every tree, rock and tuft of grass in the game sprouted a beige box
+       around it. The collision is the point; the box was never meant to be seen. Same skip the
+       hand-written tree and pillar columns have always used, which is exactly the precedent I
+       should have followed when adding these. */
+    if(ob.autoCol) continue;
+    /* DERIVED COLLIDERS ARE INVISIBLE. E1 gives every solid prop a collision box sized to it - and
+       obstacles are DRAWN, so every tree, rock and tuft of grass sprouted a beige box around it.
+       The collision was the point; the box was never meant to be seen. This is the same skip the
+       hand-written tree and pillar columns have always used, which is the precedent I should have
+       followed when adding them. */
+    if(ob.autoCol) continue;
     if((ob.treeCol || ob.pillarCol) && _w3dOn) continue;   // world3d draws the real tree / the real pillar; skip the voxel shaft
     if(ob.lampCol && _hubLamp) continue;                   // ...and the real lightpost; skip the voxel lamp post
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person

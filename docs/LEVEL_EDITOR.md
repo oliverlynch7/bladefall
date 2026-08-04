@@ -9,6 +9,7 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 | `F2` | open / close edit mode |
 | right click | select the nearest object - its name appears on it |
 | right drag | move it along the ground |
+| **while holding right-click** | `space` raise · `shift` lower · `R` turn · `wheel` resize |
 | arrows | nudge 10 units (`shift` = 50) |
 | `PgUp` / `PgDn` | raise / lower |
 | `alt` + those | **resize** instead of move (`[` `]` for a healing pad's radius) |

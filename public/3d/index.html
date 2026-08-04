@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.780.0-encounters';
+const VERSION3D='1.790.0-fps';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3221,7 +3221,11 @@ let _mainData=null,_mainCap=0,_mainCount=0;
    only correct because Three has just written the depth buffer it tests against. The camMode term
    is not decoration: in first-person drawHero3 is never called, so nothing is ever queued, so the
    3D layer does not draw at all and the depth buffer would be a whole frame stale. */
-function deferArmed(){ return !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D && meta.camMode!=='fps'); }
+/* FIRST PERSON DRAWS THE REAL MODEL NOW. This used to exclude 'fps' outright, which is why first
+   person still showed the old voxel character and its voxel weapon: the 3D layer was switched off
+   entirely and the fallback path drew everything. The eye is pushed just past the model's face
+   below, so you see the arm and the weapon it is holding rather than the inside of your own head. */
+function deferArmed(){ return !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D); }
 /* Same test, said the other way round, because it is asked for a completely different reason and
    four places were getting it wrong.
 
@@ -13478,7 +13482,7 @@ function drawCourse(s,t){
   // dungeon walls (in far-cam, near-front walls go translucent so they never hide you; distance-culled)
   LATE.length=0;
   const CAMX=(G.eye?G.eye.x:G.cam.x), CAMZ=(G.eye?G.eye.z:G.cam.z), shoulder=meta.camMode!=='far'; // Phase 19: rays start at the TRUE eye (G.cam is the follow-point at the hero — a zero-length ray)
-  const noFade=meta.camMode==='fps';   // first-person: the camera IS the eye and the hero isn't drawn, so NOTHING should ever go see-through (fixes platforms turning translucent when you jump off them)
+  const noFade=meta.camMode==='fps';   // first-person: the camera IS the eye, so NOTHING should ever go see-through (fixes platforms turning translucent when you jump off them)
   const cull=(x,z)=>((x-CAMX)*(x-CAMX)+(z-CAMZ)*(z-CAMZ))>1200*1200;
   // does the camera->player sightline cross this footprint? (shoulder cam sits low, so an XZ line test is honest)
   const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
@@ -15331,7 +15335,13 @@ function render(t){
     gl.uniform2f(U.uFogNF,2600,9000);            // push the fog right back, or half the level you flew up to see is grey
   } else if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
-    const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+    const fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
+    /* The eye sits just FORWARD of the head. With the real model drawn, an eye exactly at the head
+       fills the screen with the inside of a skull; nudging it past the face puts the body behind
+       the camera and leaves the weapon arm in front of you, which is the whole point of seeing
+       yourself hold what you are wielding. */
+    const EYE_FWD=26;
+    const ex=p.x+fx*EYE_FWD, ey=p.y+42+fy*EYE_FWD, ez=p.z+fz*EYE_FWD;
     PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)
     VIEW=mLookAt([ex+shx, ey+shy, ez],[ex+fx*100, ey+fy*100, ez+fz*100],[0,1,0]);
     if(G) G.eye={x:ex,y:ey,z:ez};

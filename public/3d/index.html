@@ -13335,6 +13335,12 @@ function drawWaystation(t){
         mh.x=n.x+Math.max(-15,Math.min(15,(src.x-n.x)*0.5)); mh.z=gf+8; mh.y=18+Math.max(0,Math.min(34,(src.y||0)*0.42));
         mh.yaw=Math.PI-(src.yaw||Math.PI);                 // TRUE mirror: reflects which way you face
         mh.runAnim=src.runAnim||0; mh.vx=0; mh.vz=0; mh.atkTimer=0; mh.dodgeTimer=0; mh.invuln=0; mh.hurtFlash=0; mh.onGround=true;
+        /* E3 IS NOT DONE. window.__hero3dMirror() exists and works - it clones the hero with its
+           own skeleton and poses it at the glass, verified - but I could not confirm the clone
+           actually READS in the mirror from the room side, and the Three layer draws after the
+           voxel flush, so its depth against the frame and glass boxes is unresolved. Wiring it up
+           unverified risks the mirror showing NOTHING where it currently shows the wrong character,
+           which is a worse failure. The voxel double stays until the reflection has been seen. */
         drawHero3(mh,t,true); }
       // THE GLASS — a real SILVERED pane, not a portal: a subtle cool tint + gradient + vignette + faint sheen,
       // and crucially NO emissive glow (that was the "glowing portal" look). A mirror reflects; it does not shine.

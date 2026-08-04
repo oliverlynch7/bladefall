@@ -19,6 +19,7 @@
    around every draw — without it the game's own rendering corrupts.
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
+import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js';
@@ -1369,6 +1370,41 @@ window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
    different framebuffer and are composited away. Read-only by convention - the editor adds and
    removes one named group and touches nothing else. */
 window.__hero3dScene = () => scene;
+
+/* ── E3: THE MIRROR REFLECTS THE REAL YOU ──────────────────────────────────
+   The Waystation mirror drew its reflection with drawHero3(mh, t, TRUE) - and that third argument
+   is `preview`, which the 3D path is explicitly gated against. So the reflection was hard-routed to
+   the voxel renderer no matter how well the 3D hero was working two feet away. You stood in front
+   of the glass as one character and were reflected as another.
+
+   It needs a SECOND instance, not a second draw: the real hero is on screen at the same time, so
+   the one actor cannot be in both places. SkeletonUtils.clone gives the copy its own skeleton -
+   the same technique mob3d already uses for crowds - and it is built once and then reposed, never
+   rebuilt.
+
+   It deliberately does NOT animate. A mirror image that idles out of sync with you reads as a
+   second person standing behind glass, which is worse than a still reflection; this is posed to
+   your position and facing, which is what sells it. */
+let _mirrorClone = null, _mirrorOn = false;
+window.__hero3dMirror = (o) => {
+  if(!scene || !actor || !HERO3D.ready) return false;
+  if(!o){ if(_mirrorClone) _mirrorClone.visible = false; _mirrorOn = false; return false; }
+  try {
+    if(!_mirrorClone){
+      _mirrorClone = SkeletonUtils.clone(actor);
+      _mirrorClone.name = '__heroMirror';
+      scene.add(_mirrorClone);
+    }
+    _mirrorClone.visible = true;
+    _mirrorOn = true;
+    const S = HERO3D.scale * (o.scale || 1);
+    _mirrorClone.scale.setScalar(S);
+    _mirrorClone.position.set(o.x, o.y || 0, o.z);
+    _mirrorClone.rotation.y = (o.yaw || 0) + HERO3D.yawOff;
+    _mirrorClone.updateMatrixWorld(true);
+    return true;
+  } catch(e){ return false; }
+};
 
 /* Bisect the "renders but invisible" problem with the bluntest possible marker: a large
    unlit cube at the hero's position, depthTest off, drawn last. If THIS is invisible the

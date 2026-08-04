@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.640.0-cheats';
+const VERSION3D='1.650.0-passives4';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2025,7 +2025,7 @@ const CLASS2={
     r2:{kind:'skill',slot:0, a:{id:'r_volley',n:'Volley',cd:5,role:'Group Damage',fx:'r_volley',d:'Fan of arrows — up to 5 enemies, 1.4x each. Applies your element once each.'},
                              b:{id:'r_pierce',n:'Piercing Shot',cd:5,role:'Boss Damage',fx:'r_pierce',d:'One shot through a line — 2.2x first (−10% its armor), 1.5x rest.'}},
     r3:{kind:'passive', a:{id:'r_longshot',n:'Longshot',role:'Range',d:'+8% damage to enemies 7m+ away.'},
-                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Close',d:'+6% damage within 4m; +25% interrupt resistance up close.'}},
+                        b:{id:'r_closeq',n:'Close-Quarters Archer',role:'Reversal',d:'Enemies within 4m are knocked back by every shot.'}},
     r4:{kind:'skill',slot:1, a:{id:'r_tumble',n:'Tumble',cd:8,role:'Movement',fx:'r_tumble',d:'Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim.'},
                              b:{id:'r_shadow',n:'Shadowstrike',cd:9,role:'Movement',fx:'r_shadow',d:'Dash through a target (2.0x) and appear behind it; tap again within 1s to return.'}},
     r5:{kind:'passive', a:{id:'r_escape',n:'Escape Artist',role:'Defense',d:'After Tumble/Shadowstrike: −15% damage taken & −30% slows for 1.5s.'},
@@ -2036,7 +2036,7 @@ const CLASS2={
                         b:{id:'r_quick',n:'Quickdraw',role:'Uptime',d:'Clear Aim activates after 2s instead of 3s.'}},
     r8:{kind:'skill',slot:3, a:{id:'r_mark',n:"Hunter's Mark",cd:12,role:'Boss Damage',fx:'r_mark',d:'Mark one enemy: you deal +18% and +10% crit to it for 8s.'},
                              b:{id:'r_deathmark',n:'Death Mark',cd:14,role:'Farming',fx:'r_deathmark',d:'Mark up to 5 enemies — they explode for 1.8x on death.'}},
-    r9:{kind:'passive', a:{id:'r_elem',n:'Elemental Archer',role:'Damage',d:'Your elemental reactions deal +10% and control lasts +10% longer.'},
+    r9:{kind:'passive', a:{id:'r_elem',n:'Elemental Archer',role:'Elements',d:'Your arrows carry the element of the ground they fly over.'},
                         b:{id:'r_bounty',n:'Bounty Hunter',role:'Sustain',d:'Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold.'}}
   },
   mage:{ disp:'Mage', icon:classIcon('mage'),
@@ -2055,13 +2055,13 @@ const CLASS2={
     innate:{name:'Soul Hunger',d:'Scythe damage heals 3% of damage dealt and slain enemies restore 2 mana.'},
     cap:{name:'Avatar of Death',d:'+12% damage and lifesteal. Killing a marked or corrupted enemy reduces every cooldown by 0.75s.'},
     r2:{kind:'skill',slot:0,a:{id:'x_reap',n:'Reap',cd:2,am:0.45,role:'Rapid · Sustain',fx:'x_reap',d:'Quick, spammable scythe arcs (~2s, softer each) with strong lifesteal — steady drain.'},b:{id:'x_cleave',n:'Soul Cleave',cd:6,role:'Ranged Damage',fx:'x_cleave',d:'Send a spectral scythe wave outward for 2.1x damage.'}},
-    r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Damage',d:'Each kill grants +2% damage for 6s, stacking five times.'},b:{id:'x_doom',n:'Lingering Doom',role:'Damage Over Time',d:'Your damage-over-time effects last 20% longer.'}},
+    r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Harvest',d:'Souls you collect are spent on your next skill, making it free.'},b:{id:'x_doom',n:'Lingering Doom',role:'Doom',d:'Marked enemies that die spread their mark to the nearest foe.'}},
     r4:{kind:'skill',slot:1,a:{id:'x_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'},b:{id:'x_wraith',n:'Wraith Form',cd:10,role:'Defense',fx:'x_wraith',d:'Become spectral for 3s: faster movement and 65% damage reduction.'}},
     r5:{kind:'passive',a:{id:'x_armor',n:'Soul Armor',role:'Defense',d:'Collecting a kill grants a 3% max-HP shield for 5s.'},b:{id:'x_wraithwalk',n:'Wraithwalk',role:'Movement',d:'After using mobility, gain +18% move speed for 2.5s.'}},
     r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Gravebind',cd:12,role:'Control',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
-    r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Lifesteal is 25% stronger while below half HP.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies are slowed by 18%.'}},
+    r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Below half health, every soul you collect heals you outright.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies cannot flee — they walk toward you instead.'}},
     r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:'Drain nearby enemies for 4s, damaging them and restoring health.'},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
-    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Damage',d:'Corruption builds 25% faster and Rupture deals +15% damage.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
+    r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:'Rupturing a corrupted enemy corrupts everything near it.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
   },
   paladin:{ disp:'Paladin', icon:classIcon('paladin'),
     innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
@@ -2139,25 +2139,25 @@ const CLASS2={
     innate:{name:'Focus', d:'Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking.'},
     cap:{name:'Grandmaster', d:'+12% damage, +10% attack speed, and your Focus stacks hit harder and linger longer.'},
     r2:{kind:'skill',slot:0, a:{id:'mon_flurry',n:'Flurry',cd:2,am:0.42,role:'Rapid · Focused',fx:'mon_flurry',d:'A blur of rapid strikes (~2s, softer each) — builds Focus fast.'}, b:{id:'mon_palm',n:'Palm Strike',cd:6,role:'Burst',fx:'mon_palm',d:'Dash in with a heavy palm that staggers the first foe.'}},
-    r3:{kind:'passive', a:{id:'mon_iron',n:'Iron Body',role:'Defense',d:'Take 12% less damage — your discipline is armor.'}, b:{id:'mon_fire',n:'Inner Fire',role:'Damage',d:'+12% damage.'}},
+    r3:{kind:'passive', a:{id:'mon_iron',n:'Iron Body',role:'Defense',d:'While your dodge is ready, you cannot be stunned or knocked back.'}, b:{id:'mon_fire',n:'Inner Fire',role:'Flow',d:'Dodging refunds mana instead of spending your rhythm.'}},
     r4:{kind:'skill',slot:1, a:{id:'mon_deflect',n:'Deflect',cd:10,role:'Defense',fx:'mon_deflect',d:'A parry stance: for a moment take almost nothing and throw blows straight back.'}, b:{id:'mon_roll',n:'Roll',cd:8,role:'Movement',fx:'mon_roll',d:'Roll aside with brief i-frames and a parting strike.'}},
-    r5:{kind:'passive', a:{id:'mon_flow',n:'Flow',role:'Speed',d:'+10% attack speed — never break rhythm.'}, b:{id:'mon_focused',n:'Focused Mind',role:'Damage',d:'Focus stacks build faster and your Focus damage is stronger.'}},
+    r5:{kind:'passive', a:{id:'mon_flow',n:'Flow',role:'Rhythm',d:'Each hit shortens your dodge twice as much.'}, b:{id:'mon_focused',n:'Focused Mind',role:'Damage',d:'Focus stacks build faster and your Focus damage is stronger.'}},
     r6:{kind:'skill',slot:2, a:{id:'mon_whirl',n:'Whirl Kick',cd:12,role:'Group Damage',fx:'mon_whirl',d:'A spinning kick that strikes everything around you.'}, b:{id:'mon_stun',n:'Stunning Palm',cd:12,role:'Control',fx:'mon_stun',d:'A shockwave palm that dazes and slows nearby foes.'}},
-    r7:{kind:'passive', a:{id:'mon_med',n:'Meditation',role:'Sustain',d:'Slowly heal while you fight — a calm center.'}, b:{id:'mon_killer',n:'Killer Focus',role:'Damage',d:'+12% damage.'}},
+    r7:{kind:'passive', a:{id:'mon_med',n:'Meditation',role:'Sustain',d:'Slowly heal while you fight — a calm center.'}, b:{id:'mon_killer',n:'Killer Focus',role:'Burst',d:'The first strike after a dodge hits for triple.'}},
     r8:{kind:'skill',slot:3, a:{id:'mon_thousand',n:'Thousand Fists',cd:24,role:'Burst',fx:'mon_thousand',d:'A blinding assault: +35% damage and attack speed for 6s.'}, b:{id:'mon_dragon',n:'Dragon Kick',cd:20,role:'Finisher',fx:'mon_dragon',d:'A soaring kick that erupts on impact, blasting everything around.'}},
-    r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'mon_master',n:'Master Striker',role:'Damage',d:'+12% damage.'}}
+    r9:{kind:'passive', a:{id:'mon_still',n:'Still Water',role:'Calm',d:'Standing still for a moment restores health, and quickly.'}, b:{id:'mon_master',n:'Master Striker',role:'Chain',d:'Every fourth unbroken strike hits everything around you.'}}
   },
   stormcaller:{ disp:'Stormcaller', icon:classIcon('stormcaller'),
     innate:{name:'Static Charge', d:'Magic weapons deal +8% damage. Every hit you land builds a Static stack (up to 5) — each one makes you strike and move faster — fading if you stop attacking. The longer you fight, the faster the storm.'},
     cap:{name:'Storm Lord', d:'+12% damage, +10% cooldown reduction, and your lightning arcs to more enemies.'},
     r2:{kind:'skill',slot:0, a:{id:'st_bolt',n:'Chain Bolt',cd:2,am:0.4,role:'Rapid · Chain',fx:'st_bolt',d:'Rapid bolts that leap to a nearby foe (~2s, softer each) — builds Static fast.'}, b:{id:'st_lance',n:'Lightning Lance',cd:6,role:'Piercing Damage',fx:'st_lance',d:'A piercing bolt through every foe in a line.'}},
-    r3:{kind:'passive', a:{id:'st_conductor',n:'Conductor',role:'Damage',d:'+10% damage to slowed or shocked foes.'}, b:{id:'st_overcharge',n:'Overcharge',role:'Damage',d:'+12% damage.'}},
+    r3:{kind:'passive', a:{id:'st_conductor',n:'Conductor',role:'Conduct',d:'Wet, frozen or shocked enemies chain to everything near them.'}, b:{id:'st_overcharge',n:'Overcharge',role:'Chain',d:'Your lightning arcs to a third enemy as well as a second.'}},
     r4:{kind:'skill',slot:1, a:{id:'st_step',n:'Thunder Step',cd:8,role:'Movement',fx:'st_step',d:'Blink in a crack of lightning, briefly untouchable.'}, b:{id:'st_nova',n:'Static Field',cd:8,role:'Control',fx:'st_nova',d:'A shock burst that slows nearby foes.'}},
     r5:{kind:'passive', a:{id:'st_momentum',n:'Momentum',role:'Speed',d:'Static stacks give even more attack and move speed.'}, b:{id:'st_ward',n:'Storm Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP.'}},
     r6:{kind:'skill',slot:2, a:{id:'st_orb',n:'Ball Lightning',cd:13,role:'Control',fx:'st_orb',d:'A crackling orb that pulls foes in and zaps them.'}, b:{id:'st_barrier',n:'Storm Barrier',cd:14,role:'Defense',fx:'st_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
-    r7:{kind:'passive', a:{id:'st_charged',n:'Charged',role:'Speed',d:'+10% attack speed.'}, b:{id:'st_amped',n:'Amped',role:'Damage',d:'+12% damage.'}},
+    r7:{kind:'passive', a:{id:'st_charged',n:'Charged',role:'Reach',d:'Your chain jumps twice as far between targets.'}, b:{id:'st_amped',n:'Amped',role:'Power',d:'Each jump in a chain hits harder than the last, not weaker.'}},
     r8:{kind:'skill',slot:3, a:{id:'st_storm',n:'Thunderstorm',cd:22,role:'Group Damage',fx:'st_storm',d:'A storm of lightning rages around you for 4s.'}, b:{id:'st_overload',n:'Chain Reaction',cd:24,role:'Burst',fx:'st_overload',d:'A massive electric explosion around your target.'}},
-    r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Damage',d:'+12% damage.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Damage',d:'+10% damage.'}}
+    r9:{kind:'passive', a:{id:'st_master',n:'Static Master',role:'Control',d:'A chained enemy is briefly stunned by the jolt.'}, b:{id:'st_galvanize',n:'Galvanize',role:'Return',d:'Chains that find no second target strike the first one twice.'}}
   },
   warlock:{ disp:'Warlock', icon:classIcon('warlock'),
     innate:{name:'Dark Bargain',d:'Magic weapons deal +12% damage. Every skill sacrifices 3% max HP, but the sacrifice can never defeat you. Power always has a price.'},
@@ -2175,23 +2175,23 @@ const CLASS2={
     innate:{name:'Born to Fly',d:'Ranged weapons deal +10% damage. While airborne, you fall 20% slower and deal 10% more damage.'},
     cap:{name:'Sky Master',d:'+12% damage. Using a skill in the air renews one air jump and briefly holds you aloft.'},
     r2:{kind:'skill',slot:0,a:{id:'sky_rise',n:'Rising Spear',cd:7,role:'Movement',fx:'sky_rise',d:'Sweep nearby enemies and launch high into the air.'},b:{id:'sky_gale',n:'Gale Shot',cd:5,role:'Rapid Damage',fx:'sky_gale',d:'Fire a fast wind spear that grows stronger while airborne.'}},
-    r3:{kind:'passive',a:{id:'sky_high',n:'High Ground',role:'Damage',d:'Deal 15% more damage while airborne.'},b:{id:'sky_soft',n:'Soft Landing',role:'Defense',d:'Take 15% less damage in the air and for 2 seconds after landing.'}},
+    r3:{kind:'passive',a:{id:'sky_high',n:'High Ground',role:'Height',d:'The higher you are when you strike, the harder you land it.'},b:{id:'sky_soft',n:'Soft Landing',role:'Defense',d:'Take 15% less damage in the air and for 2 seconds after landing.'}},
     r4:{kind:'skill',slot:1,a:{id:'sky_dive',n:'Dive Strike',cd:10,role:'Burst',fx:'sky_dive',d:'Dive forward. Your next landing damages nearby enemies.'},b:{id:'sky_lift',n:'Wind Lift',cd:12,role:'Control',fx:'sky_lift',d:'Create a rising wind that damages foes and launches you upward.'}},
     r5:{kind:'passive',a:{id:'sky_tail',n:'Tailwind',role:'Movement',d:'Landing grants +15% move speed for 3 seconds.'},b:{id:'sky_guard',n:'Cloud Guard',role:'Defense',d:'Using a skill in the air grants a shield equal to 6% max HP.'}},
     r6:{kind:'skill',slot:2,a:{id:'sky_dash',n:'Sky Dash',cd:11,role:'Movement',fx:'sky_dash',d:'Dash through the air, damaging every enemy in your path.'},b:{id:'sky_rain',n:'Spear Rain',cd:15,role:'Group Damage',fx:'sky_rain',d:'Call down five wind spears around your target.'}},
-    r7:{kind:'passive',a:{id:'sky_float',n:'Long Flight',role:'Movement',d:'Fall 25% slower and gain more control in the air.'},b:{id:'sky_eye',n:'Hunter’s Eye',role:'Damage',d:'Airborne attacks deal 12% more damage to healthy enemies.'}},
+    r7:{kind:'passive',a:{id:'sky_float',n:'Long Flight',role:'Movement',d:'Fall 25% slower and gain more control in the air.'},b:{id:'sky_eye',n:'Hunter’s Eye',role:'Dive',d:'Attacking while falling drives you down onto the target.'}},
     r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Cyclone Volley',cd:21,role:'Group Damage',fx:'sky_cyclone',d:'Spin in place and fire a ring of wind blades.'}},
-    r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:'Defeating an enemy in the air renews your air jump and trims dodge cooldown.'},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:'Take 12% less damage while moving quickly or airborne.'}}
+    r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:'Defeating an enemy in the air renews your air jump and trims dodge cooldown.'},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:'Nothing can hit you in the first moment after a jump.'}}
   },
   bladedancer:{ disp:'Bladedancer', icon:classIcon('bladedancer'),
     innate:{name:'Perfect Timing',d:'Blade weapons deal +10% damage. A successful parry stores one Riposte charge for your counterattacks.'},
     cap:{name:'Endless Dance',d:'+12% damage. A successful parry refreshes your second skill and grants one second of speed and damage protection.'},
     r2:{kind:'skill',slot:0,a:{id:'bd_counter',n:'Counter Stance',cd:8,role:'Defense',fx:'bd_counter',d:'Open a short parry window. A hit during it deals no damage and stores a Riposte.'},b:{id:'bd_twin',n:'Twin Cut',cd:5,role:'Rapid Damage',fx:'bd_twin',d:'Cut twice in a wide arc. The second cut pushes enemies back.'}},
-    r3:{kind:'passive',a:{id:'bd_sharp',n:'Sharp Counter',role:'Damage',d:'A stored Riposte deals 35% more damage.'},b:{id:'bd_feet',n:'Light Feet',role:'Movement',d:'+10% move speed and 10% shorter dodge cooldown.'}},
+    r3:{kind:'passive',a:{id:'bd_sharp',n:'Sharp Counter',role:'Damage',d:'A stored Riposte deals 35% more damage.'},b:{id:'bd_feet',n:'Light Feet',role:'Footwork',d:'Dodging through an enemy parries their next attack automatically.'}},
     r4:{kind:'skill',slot:1,a:{id:'bd_riposte',n:'Riposte',cd:9,role:'Boss Damage',fx:'bd_riposte',d:'Lunge and slash. A stored Riposte greatly increases its damage and reach.'},b:{id:'bd_step',n:'Dance Step',cd:8,role:'Movement',fx:'bd_step',d:'Dash through enemies and turn to face them for your next attack.'}},
-    r5:{kind:'passive',a:{id:'bd_patient',n:'Patient Guard',role:'Defense',d:'Parry windows last 0.2 seconds longer.'},b:{id:'bd_fast',n:'Fast Hands',role:'Damage',d:'+12% attack speed.'}},
+    r5:{kind:'passive',a:{id:'bd_patient',n:'Patient Guard',role:'Defense',d:'Parry windows last 0.2 seconds longer.'},b:{id:'bd_fast',n:'Fast Hands',role:'Tempo',d:'A parry refunds the time your attack would have taken.'}},
     r6:{kind:'skill',slot:2,a:{id:'bd_mirror',n:'Mirror Guard',cd:14,role:'Defense',fx:'bd_mirror',d:'Open a parry window that releases a shockwave when it catches an attack.'},b:{id:'bd_cross',n:'Cross Slash',cd:12,role:'Group Damage',fx:'bd_cross',d:'Cut an X ahead of you and leave enemies briefly stunned.'}},
-    r7:{kind:'passive',a:{id:'bd_heal',n:'Healing Counter',role:'Sustain',d:'A successful parry restores 5% max HP.'},b:{id:'bd_flow',n:'Keep Moving',role:'Damage',d:'Using a movement skill grants +12% damage for 3 seconds.'}},
+    r7:{kind:'passive',a:{id:'bd_heal',n:'Healing Counter',role:'Sustain',d:'A successful parry restores 5% max HP.'},b:{id:'bd_flow',n:'Keep Moving',role:'Momentum',d:'You cannot be hit while moving between two parries.'}},
     r8:{kind:'skill',slot:3,a:{id:'bd_steel',n:'Dance of Steel',cd:22,role:'Group Damage',fx:'bd_steel',d:'Flash between nearby enemies with a rapid series of six cuts.'},b:{id:'bd_perfect',n:'Perfect Counter',cd:24,role:'Boss Damage',fx:'bd_perfect',d:'Hold a long parry stance. Catching a hit unleashes a massive counterattack.'}},
     r9:{kind:'passive',a:{id:'bd_last',n:'Last Step',role:'Movement',d:'Below 35% HP, dodge cooldown is 20% shorter.'},b:{id:'bd_guard',n:'Duelist Guard',role:'Defense',d:'Take 10% less damage from nearby enemies.'}}
   },
@@ -3583,21 +3583,21 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
     if(fist)v*=1.15;   // innate Focus: fists are the monk's true weapon
     const fCap=classState('monk').rank>=10?7:5, fDmg=c2Passive('mon_focused')?0.08:0.06;   // Focus snowball (restored — playtest showed Monk felt WEAK; harness over-read its max-stack ceiling)
     if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;
-    if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
+      
     if(classState('monk').rank>=10)v*=1.12; }
   if(meta.classId==='stormcaller'&&c2def('stormcaller')){
-    if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; if(c2Passive('st_master'))v*=1.12; if(c2Passive('st_galvanize'))v*=1.10;
+        
     if(classState('stormcaller').rank>=10)v*=1.12; }
   if(meta.classId==='warlock'&&c2def('warlock')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.12;
     if(c2Passive('war_frail'))v*=1.15; if(c2Passive('war_pact')&&p.hp<effMaxHp(p)*.5)v*=1.18;
     if(classState('warlock').rank>=10)v*=1.12; }
   if(meta.classId==='skylancer'&&c2def('skylancer')){ if(p.weapon&&p.weapon.cls==='ranged')v*=1.10;
-    if(!p.onGround){v*=1.10;if(c2Passive('sky_high'))v*=1.15;if(c2Passive('sky_eye'))v*=1.12;}
+    if(!p.onGround){v*=1.10;}
     if(classState('skylancer').rank>=10)v*=1.12; }
   if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(p.weapon&&['sword','dagger','spellblade'].includes(p.weapon.art))v*=1.18;   // was 1.10 — bladedancer was bottom of both DPS and PvP
     if((p.bdFlowT||0)>0)v*=1.15;if(classState('bladedancer').rank>=10)v*=1.12;}
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
-    if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
+    if(c2Passive('r_patient'))v*=1.04; 
     if(classState('ranger').rank>=10)v*=1.12; }
   if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); } const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
        
@@ -3613,16 +3613,16 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(c2Passive('st_charged'))v*=1.10;if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
 function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
-  if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
+  if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;}
   if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_heal'))v+=.05;   // Healing Light
   if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
-function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_feet'))v*=.90;if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
+function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
 function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} if(meta.classId==='chronomancer'&&c2def('chronomancer')){v+=.05;if(c2Passive('chr_haste'))v+=.10;if(c2Passive('chr_temporal'))v+=.10;if(classState('chronomancer').rank>=10)v+=.10;} return Math.min(0.5,v); }
@@ -7219,7 +7219,9 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
   }
   if(meta.classId==='pirate'&&c2def('pirate')&&(p.goldRushT||0)>0){ p.goldRushStacks=Math.min(25,(p.goldRushStacks||0)+1); const g=awardGold((6+zoneTier()*4)*p.goldRushStacks); if(g>0){ addText(e.x,e.y+52,e.z,'+'+g+'g ×'+p.goldRushStacks,'#ffd24a',true); try{hudUpdate();}catch(_){} } }   // Gold Rush: each kill banks more, stacking on a streak
   if(meta.classId==='reaper'){
-    gainMana(p,2,false); if(c2Passive('x_strength')){p.soulStrength=Math.min(5,(p.soulStrength||0)+1);p.soulStrengthT=6;}
+    /* x_strength's stack counter is gone with its rewrite (Harvested Strength now makes your next
+       skill free); the mana on kill stays, because that is the Reaper's Soul Hunger innate. */
+    gainMana(p,2,false);
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
     if(classState('reaper').rank>=10&&p.skillCd&&(e&&((e.markT||0)>0||(e.st&&e.st.corrupt>0))))for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.75);
   }
@@ -8203,13 +8205,13 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }}
-  if(meta.classId==='monk'&&c2def('monk')){if(c2Passive('mon_iron'))dmg*=.88;if(c2Passive('mon_still')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
+  if(meta.classId==='monk'&&c2def('monk')){}
   if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
   if(meta.classId==='warlock'&&c2def('warlock')&&c2Passive('war_last')&&p.hp<effMaxHp(p)*.30)dmg*=.85;
   if(meta.classId==='skylancer'&&c2def('skylancer')){
     if(!p.onGround&&c2Passive('sky_soft'))dmg*=.85;
-    if(c2Passive('sky_armor')&&(!p.onGround||Math.hypot(p.vx||0,p.vz||0)>260))dmg*=.88;
+    
     if((p.skyGuardT||0)>0&&c2Passive('sky_soft'))dmg*=.85;
   }
   if(meta.classId==='bladedancer'&&c2def('bladedancer')){

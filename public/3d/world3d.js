@@ -1656,6 +1656,32 @@ function buildHubDecoProps(world){
   for(const d of (world.deco || [])) if(d && d.kind === 'asset' && d.lead !== false) edAssets.push(d);
   if(edAssets.length){ buildAssets(edAssets); out.hubAsset = edAssets.length; }
 
+  /* THE GENERATOR PROP KINDS, IN THE HUB. buildWorld returns on the hub branch before the
+     classify()/bins block, so trees, rocks, fences, gravestones, columns and standing stones placed
+     in the Waystation came out as plain lit boxes while the identical entry in a zone became a
+     model. That is why most of the editor's palette was greyed out here.
+     `pillar` is deliberately absent: the hub already draws a TOWER for those (see _hubPillar), and
+     adding it again would stand two things in one spot. `lantern` and `flower` are handled above
+     with their own tinting, for the same reason.
+     Each bin is counted and returned, because index.html's exclusion list is gated on these counts
+     - a kind excluded there but not built here vanishes from the hub entirely. */
+  const HUB_KINDS = { tree:'tree', rock:'rock', fence:'fence', grave:'grave',
+                      column:'column', standstone:'standstone' };
+  const hb = {};
+  for(const d of (world.deco || [])){
+    if(!d || d.lead === false) continue;
+    const k = HUB_KINDS[d.kind];
+    if(k) (hb[k] = hb[k] || []).push(d);
+  }
+  if(hb.tree){ buildProps(hb.tree.map(d => (d.trunkH ? Object.assign({}, d, { y0:(d.y0||0)-d.trunkH }) : d)),
+                          PROP_SETS.tree, 90, d => (d.trunkH||0) + (d.h||40) + 30); out.hubTree = hb.tree.length; }
+  if(hb.rock){ buildProps(hb.rock, PROP_SETS.rock, 20); out.hubRock = hb.rock.length; }
+  if(hb.fence){ buildProps(hb.fence, PROP_SETS.fence, 30); out.hubFence = hb.fence.length; }
+  if(hb.grave){ buildProps(hb.grave, PROP_SETS.grave, 30); out.hubGrave = hb.grave.length; }
+  if(hb.column){ buildProps(hb.column.map(d => (d.pillarH ? Object.assign({}, d, { y0:(d.y0||0)-d.pillarH }) : d)),
+                           PROP_SETS.column, 80, d => (d.pillarH||0) + (d.h||80)); out.hubColumn = hb.column.length; }
+  if(hb.standstone){ buildProps(hb.standstone, PROP_SETS.standstone, 90, d => (d.h||90), true); out.hubStand = hb.standstone.length; }
+
   out.hubLamp = hubPiece('hubLantern', lamps, (o, d, rec) => {
     const sc = (d.lampH || d.h || 76) / rec.height;
     o.position.set(d.x, (d.y0 || 0) - (d.postH || 0), d.z);

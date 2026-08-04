@@ -361,7 +361,7 @@ function hud(){
       }
     }
     rows.push(G() && G().hub
-      ? '<div class="row">click an asset to add it where the camera is looking. Greyed props have no hub model yet - everything from Wall onward does.</div>'
+      ? '<div class="row">click an asset to add it where the camera is looking</div>'
       : '<div class="row">click an asset to add it where the camera is looking</div>');
 
     rows.push('<button data-a="save">Save</button><button data-a="export">Export file</button><button data-a="revert">Revert area</button>');
@@ -617,7 +617,10 @@ function palArray(spec){ return spec.arr || 'deco'; }
    entry in index.html's hub exclusion list (~12308), which is deliberately gated on whether the
    hub really built that kind, so a kind added on one side and not the other draws BOTH the model
    and the box it replaces. */
-const HUB_MODEL_KINDS = ['lantern', 'flower'];
+/* The hub builds these as models now too (world3d buildHubDecoProps). `pillar` stays off the list:
+   the hub draws a TOWER for a pillar, so placing one there would give architecture rather than the
+   pillar prop you asked for - honest to grey it out until that is reconciled. */
+const HUB_MODEL_KINDS = ['lantern', 'flower', 'tree', 'rock', 'fence', 'grave', 'column', 'standstone'];
 function kindRenders(spec){
   if(spec.terrain) return true;               // not a prop, so the prop pipeline does not apply
   if(spec.asset) return true;                 // kind:'asset' is built in the hub AND the zones

@@ -124,11 +124,9 @@ the camera code (~13958) and a movement skip in update(), neither of which shoul
 
 ## What it cannot do yet
 
-- **In the hub, the ten generator PROP kinds (tree, rock, fence...) still place as plain boxes** and
-  are greyed out there. Everything from Wall onward - the whole kit library - works in the hub and
-  the zones alike. Finishing the last ten means giving each its own entry in the hub's build pass
-  and the matching exclusion in `index.html` (~12345), which must be done on both sides at once or
-  you draw the model AND the box it replaces.
+- **`Pillar` is still greyed out in the hub only.** The hub draws a TOWER where a pillar stands, so
+  placing one there gives you architecture rather than the pillar prop you asked for. Everything
+  else in the palette now works in the hub and the zones alike.
 - **Default asset sizes are rough.** They are each set's working size, not a measured fit, so some
   land large. Resize with `alt`+arrows.
 - **No quest spawners (dens).** Every den carries a `questId` binding it to a quest's kill counter,

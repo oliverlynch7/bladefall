@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.541.0-roads';
+const VERSION3D='1.550.0-hubprops';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12712,6 +12712,9 @@ function drawCourse(s,t){
      safe: if the tower model never loads hubPiece returns 0 and the voxel slab draws. */
   const _hubPillar = !!(_hubDeco && _w3d.counts.tower > 0);
   const _hubAsset  = !!(_hubDeco && _w3d.counts.hubAsset > 0);
+  const _hubKind = _hubDeco ? { tree:_w3d.counts.hubTree>0, rock:_w3d.counts.hubRock>0,
+                                fence:_w3d.counts.hubFence>0, grave:_w3d.counts.hubGrave>0,
+                                column:_w3d.counts.hubColumn>0, standstone:_w3d.counts.hubStand>0 } : {};
   if(_hubDeco) deferOn();   // these stand on ground the 3D pass covers completely - inline they are painted straight back out
   if(!_w3dDrawing || _hubDeco)
   for(const d of G.deco){ if(cull(d.x,d.z)) continue;
@@ -12723,6 +12726,10 @@ function drawCourse(s,t){
        entry here is - a kind excluded on this side but not built on the other vanishes from the
        hub entirely, and one built here but not excluded draws the model AND the box it replaces. */
     if(_hubDeco && _hubAsset && d.kind === 'asset') continue;
+    /* The generator prop kinds, each gated on the count the hub ACTUALLY built - the same discipline
+       every other entry here follows. Excluded-but-not-built vanishes; built-but-not-excluded draws
+       the model AND the box it replaces. */
+    if(_hubDeco && _hubKind[d.kind]) continue;
     if(_hubDeco && (d.kind === 'building'
         || (_hubLamp && d.kind === 'lantern')
         || (_hubPillar && d.kind === 'pillar')

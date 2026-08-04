@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.595.0-innatefold';
+const VERSION3D='1.600.0-passives1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2011,7 +2011,7 @@ const CLASS2={
     innate:{name:'Battle Ready', d:'Basic attacks deal +8% damage and gain +15% interrupt resistance while attacking.'},
     cap:{name:'Unbroken Champion', d:'Gain +10% damage, +10% attack speed, and 15% damage reduction. Skill hits restore 2% max HP.'},
     r2:{kind:'skill',slot:0, a:{id:'w_cleave',n:'Cleave',cd:2,am:0.45,role:'Rapid · Group',fx:'w_cleave',d:'A fast, spammable sweep (~2s, softer per hit) — weave it between basic attacks.'},b:{id:'w_bash',n:'Shield Bash',cd:6,role:'Control',fx:'w_bash',d:'Drive forward for 1.7x damage, stun the first target, and briefly brace.'}},
-    r3:{kind:'passive',a:{id:'w_heavy',n:'Heavy Hand',role:'Damage',d:'Basic attacks deal +12% damage but attack 5% slower.'},b:{id:'w_swift',n:'Swift Steel',role:'Speed',d:'+10% attack speed; every fourth basic hit deals +25% damage.'}},
+    r3:{kind:'passive',a:{id:'w_heavy',n:'Heavy Hand',role:'Commitment',d:'Your basic attacks cannot be interrupted — and you cannot cancel them either.'},b:{id:'w_swift',n:'Swift Steel',role:'Rhythm',d:'Every fourth basic attack is free and instant, ignoring your attack timer.'}},
     r4:{kind:'skill',slot:1,a:{id:'w_charge',n:'Charge',cd:9,role:'Movement',fx:'w_charge',d:'Rush through enemies for 1.6x damage and stun them.'},b:{id:'w_whirl',n:'Whirlwind',cd:10,role:'Group Damage',fx:'w_whirl',d:'Spin through a full circle twice, dealing 1.1x damage per sweep.'}},
     r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:'Gain 12% damage reduction while below 50% HP.'}},
     r6:{kind:'skill',slot:2,a:{id:'w_guard',n:'Iron Guard',cd:13,role:'Defense',fx:'w_guard',d:'Brace for 3s, reducing incoming damage by 60%.'},b:{id:'w_stomp',n:'Shockwave Stomp',cd:12,role:'Control',fx:'w_stomp',d:'Slam the ground for 1.5x damage and heavy knockback all around.'}},
@@ -2067,7 +2067,7 @@ const CLASS2={
     innate:{name:'Holy Warrior', d:'While wielding a holy weapon, deal +12% damage and heal for 2% of the damage you deal.'},
     cap:{name:'Avatar of Light', d:'Take 18% less damage and deal +10% damage. Holy weapons heal you for an extra 1% of the damage you deal.'},
     r2:{kind:'skill',slot:0, a:{id:'pal_bash',n:'Shield Bash',cd:6,role:'Control',fx:'pal_bash',d:'Drive forward for 1.7x damage, stun the first foe, and brace behind your shield.'}, b:{id:'pal_smite',n:'Smite',cd:8,role:'Holy Damage',fx:'pal_smite',d:'Call a holy thunderbolt down on the toughest enemy nearby, with a holy splash — great against bosses and elites.'}},
-    r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'Take 12% less damage from every source.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Damage',d:'+12% damage while wielding a holy weapon.'}},
+    r3:{kind:'passive', a:{id:'pal_thick',n:'Thick Armor',role:'Defense',d:'The first hit of every fight deals no damage at all.'}, b:{id:'pal_holypow',n:'Holy Power',role:'Damage',d:'+12% damage while wielding a holy weapon.'}},
     r4:{kind:'skill',slot:1, a:{id:'pal_taunt',n:'Taunt',cd:9,role:'Control',fx:'pal_taunt',d:'Pull nearby foes to you and brace behind a shield.'}, b:{id:'pal_ground',n:'Holy Ground',cd:10,role:'Group Damage',fx:'pal_ground',d:'Scorch every foe around you with holy light for 2.2x damage.'}},
     r5:{kind:'passive', a:{id:'pal_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP heals you for 12% max HP (every 30s).'}, b:{id:'pal_burn',n:'Burning Light',role:'Damage',d:'+10% damage — your light burns everything you strike.'}},
     r6:{kind:'skill',slot:2, a:{id:'pal_guard',n:'Guard Up',cd:14,role:'Defense',fx:'pal_guard',d:'Raise a holy shield that absorbs up to 50% of your max HP.'}, b:{id:'pal_burst',n:'Light Burst',cd:9,role:'Control',fx:'pal_burst',d:'A radiant burst: damage and slow every nearby foe.'}},
@@ -6792,7 +6792,14 @@ function autoAtkTarget(p,w){
 }
 function playerAttack(cdMul){
   const p=G.p,w=p.weapon; if(p.atkCd>0||thrownWeaponHidden(p,w)) return;
-  p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++; // auto-attack passes cdMul>1 (15% slower than manual)
+  p.atkCd=w.cd/effAtkSpeed(p)*(cdMul||1); p.atkCdMax=p.atkCd; p.swingId++;
+  /* SWIFT STEEL, rewritten. Was "+10% attack speed" - invisible. Now every FOURTH swing costs no
+     time at all, so the class has a rhythm you can hear and play into rather than a number that
+     quietly shortens a timer. */
+  if(c2Passive('w_swift')){
+    p._swiftN = (p._swiftN||0) + 1;
+    if(p._swiftN >= 4){ p._swiftN = 0; p.atkCd = 0; addText(p.x, p.y+40, p.z, 'FREE', '#ffd24a'); }
+  } // auto-attack passes cdMul>1 (15% slower than manual)
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
   const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
@@ -8124,6 +8131,19 @@ function hurtPlayer(dmg,sx,sz,by){
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
      run and dying to a floor. */
   dmg=dmg*tPlayerTake();
+  /* THICK ARMOR, rewritten. Was "take 12% less damage from every source" - a number you could not
+     feel and could not play around. Now the FIRST hit of every fight deals nothing, which you feel
+     every single time and which rewards opening a fight rather than surviving one. Rearms whenever
+     you have been out of combat for a few seconds, so it is per FIGHT and not per area. */
+  if(c2Passive('pal_thick')){
+    if(!G.p._tarmT || (G.time - G.p._tarmT) > 5){
+      G.p._tarmT = G.time;
+      addText(G.p.x, G.p.y + 46, G.p.z, 'TURNED', '#9fd6ff');
+      try { burst(G.p.x, G.p.y+18, G.p.z, '#9fd6ff', 10); } catch(err){}
+      return;
+    }
+    G.p._tarmT = G.time;
+  }
   /* THE OATH pays out here rather than where it is sworn: while your Sworn target lives, everything
      ELSE hits you for a third less. That is what makes swapping off it a real cost. */
   if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && by!==G.p._oath) dmg*=0.67;
@@ -8138,7 +8158,7 @@ function hurtPlayer(dmg,sx,sz,by){
   }
   if(typeof sx==='number' && meta.classId==='ninja'){ const ev=effEvade(p); if(ev>0 && Math.random()<ev){ ninjaEvade(p,sx,sz); return; } }   // NINJA: dodge the hit entirely
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
-  if(meta.classId==='paladin'&&c2def('paladin')){if(c2Passive('pal_thick'))dmg*=.88;if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
+  if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_bounce'))dmg*=.90;if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_thick'))dmg*=.88;if(c2Passive('bsk_tough')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}

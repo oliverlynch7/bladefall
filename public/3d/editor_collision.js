@@ -98,10 +98,23 @@ export function build(){
   for(const d of (g.deco || [])){
     if(!d || d.w == null) continue;
     if(Math.abs(d.x - p.x) > OVERLAY.radius || Math.abs(d.z - p.z) > OVERLAY.radius) continue;
-    /* Ground banding and floor plates are deco you are MEANT to walk over - flagging every strata
-       band as "no collision" would bury the real answer in thousands of false positives. */
+    /* Only things you could REASONABLY expect to stop you.
+
+       The first version counted anything over 6 units tall and reported "105 of 162 props have no
+       collision" in the hub - a number I passed on to Oliver as if it were the scale of the
+       problem. Measured properly, 90 of those 105 are FLOWERS and flower stems, 3 to 11 units wide,
+       which are correctly walk-through and always were. The real count was twelve, and those are
+       flower-bed trim.
+
+       A tool that measures the wrong thing is worse than no tool, because it gets believed. Ground
+       banding, floor plates, foliage and anything narrower than a bollard are excluded now, so the
+       magenta count means "things that ought to be solid and are not". */
     const top = (d.y0 || 0) + (d.h || 0);
     if(top <= 6) continue;
+    if(d.kind === 'flower' || d.kind === 'skipflower' || d.kind === 'corn') continue;
+    const fw = d.w || 0, fd = (d.d || d.w) || 0;
+    if(Math.min(fw, fd) < 14) continue;          // foliage and stems: never solid
+    if((d.h || 0) < 18) continue;                // kerbs and bed trim: you step over these
     checked++;
     if(covered(d, blockers)) continue;
     ghosts++;

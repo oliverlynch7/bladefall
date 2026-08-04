@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.530.0-hubedit';
+const VERSION3D='1.540.0-collision';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6428,7 +6428,71 @@ function reconcileWorldHeights(){ if(!G) return;
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
   for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
 }
+/* ── E1: COLLISION NORMALISATION ───────────────────────────────────────────
+   Oliver: "four green lamps by the Waystation have collision; the taller ones around them do not.
+   Buildings do, spires do not. Benches and carts do not. Rule: every placed asset gets collision
+   TRUE TO ITS VISUAL SIZE, by default."
+
+   The inconsistency was never a decision - it is what happens when collision is hand-written per
+   prop. A generator that remembers to emit a vcol() column for its lamps and forgets for its
+   benches produces exactly this, and nothing anywhere notices. The editor's overlay measured it:
+   105 of 162 props near the Waystation had no collider at all.
+
+   So collision is DERIVED rather than remembered. Every prop of a solid kind gets a box unless
+   something solid already stands there - which is what keeps the hand-written ones authoritative
+   and stops this doubling up on the lamps that were always fine.
+
+   WIDTH FACTORS, because "true to its visual size" is not the same as "the size of its widest
+   part". A tree's deco is its CANOPY at 72 wide; boxing that turns a wood into a wall you cannot
+   walk through, when what stops you in reality is a trunk. Each kind names the fraction of its
+   footprint that is actually solid.
+
+   Foliage, flowers, crops and floor tiles are deliberately absent: you are meant to walk over
+   those, and making them solid would be a worse bug than the one being fixed. */
+const SOLID_PROPS = {
+  tree:0.34, rock:0.85, grave:0.7, pillar:0.9, column:0.9, standstone:0.8,
+  lantern:0.8, fence:0.95, building:0.95,
+};
+const SOLID_SETS = {
+  hubWall:0.95, hubGate:0.95, hubTower:0.9, hubTowerM:0.9, hubRoof:0.9,
+  hubFountain:0.8, hubCart:0.8, hubStall:0.8, hubHedge:0.9, hubAnvil:0.8, hubFlag:0.35,
+};
+function normalizeCollision(){
+  if(!G || !G.deco || !G.obstacles) return 0;
+  const solid = G.obstacles.concat(G.walls||[]);
+  const covered = (d, hw, hd) => {
+    for(const b of solid){
+      if(Math.abs(d.x-b.x) < hw + (b.w||10)/2 && Math.abs(d.z-b.z) < hd + (b.d||b.w||10)/2) return true;
+    }
+    return false;
+  };
+  let added = 0;
+  for(const d of G.deco){
+    if(!d || d.w == null || d.lead === false) continue;
+    let f = (d.kind === 'asset') ? SOLID_SETS[d.set] : SOLID_PROPS[d.kind];
+    const top = (d.y0||0) + (d.h||0);
+    /* UNTAGGED FURNITURE. Most of what Oliver named - the benches, the carts - carries no `kind` at
+       all: it is drawn as plain lit boxes, so a rule keyed on kind misses precisely the things he
+       complained about. Anything standing ON THE GROUND, taller than a step, and small enough to be
+       an object rather than terrain gets collision at its own size.
+       The three bounds are all load-bearing. `y0<=4` excludes strata bands and platforms, which are
+       meant to be walked ON, not into. `h>=24` excludes kerbs and floor trim you should step over.
+       The 260 footprint cap excludes walls and terrain slabs, which have their own collision and
+       whose silhouette is not their solid part. */
+    if(f == null && !d.kind && (d.y0||0) <= 4 && (d.h||0) >= 24
+       && (d.w||0) <= 260 && ((d.d||d.w)||0) <= 260) f = 1;
+    if(!f) continue;
+    if(top <= 8) continue;                       // ground banding: walk over it
+    const w = Math.max(8, (d.w||20) * f), dd = Math.max(8, ((d.d||d.w)||20) * f);
+    if(covered(d, w/2, dd/2)) continue;          // a hand-written collider already owns this spot
+    const box = { x:d.x, z:d.z, w, d:dd, h:top, kind:'plat', autoCol:true };
+    G.obstacles.push(box); solid.push(box); added++;
+  }
+  return added;
+}
+
 function snapWorldInteractables(){ if(!G) return;
+  try { G._autoCol = normalizeCollision(); } catch(e){}
   const snap=(o,k='y',r=8)=>{ if(o) o[k]=Math.max(Number(o[k])||0,highestSurfaceAt(o.x,o.z,r)); };
   snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); snap(G.secret); snap(G.secretTrigger);
   for(const o of (G.pickups||[])) snap(o,'y0');
@@ -10803,6 +10867,10 @@ function enterWaystation(){
                    bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
       G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
     } }
+  /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
+     exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
+     replay, so a collider he deleted by hand stays deleted. */
+  try { G._autoCol = normalizeCollision(); } catch(e){}
   applyEditsNow();          // the hub is built here, not by loadStage, so it needs its own call
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();

@@ -1812,7 +1812,11 @@ const ARCHES={
   crossbow:{disp:'Crossbow',cls:'ranged',sch:'phys',dmg:7,cd:.53,kb:150,art:'cross',proj:{speed:760,size:6,pierce:1,range:820,count:3,spread:0.15,color:'#cfd6df',shape:'arrow'}}, // 3-arrow shotgun: per-pellet dmg rises up close
   knives:{disp:'Throwing Knives',cls:'ranged',sch:'phys',dmg:4,cd:.16,kb:70,art:'dagger',proj:{speed:660,size:4,pierce:0,range:900,count:2,spread:0.05,color:'#9fe6c8',shape:'arrow'}}, // point-blank -> a fast stab, else rapid double-throw
   javelin:{disp:'Javelins',cls:'ranged',sch:'phys',dmg:17,cd:.50,kb:210,art:'javelin',chg:'javelin',proj:{speed:600,size:6,pierce:1,gravity:300,range:680,color:'#d8c27a',shape:'arrow'}}, // tap = melee stab; hold = heavy thrown lance
-  flintlock:{disp:'Flintlock Pistol',cls:'ranged',sch:'phys',dmg:52,cd:2.40,kb:360,art:'flintlock',proj:{speed:900,size:7,pierce:2,range:800,color:'#33363c',shape:'cannonball'}},   // pirate signature — a SLOW single-shot pistol (long reload) that hits like a cannon
+  /* B4: "fire rate too slow, damage per shot too low. Should hit significantly harder per shot."
+     52 -> 88 damage and 2.40 -> 1.55s reload. Deliberately still the slowest gun in the game by a
+     distance - it is the Pirate's signature BECAUSE it is a single heavy shot, and speeding it up
+     to a carbine would delete the identity while fixing the feel. */
+  flintlock:{disp:'Flintlock Pistol',cls:'ranged',sch:'phys',dmg:88,cd:1.55,kb:360,art:'flintlock',proj:{speed:900,size:7,pierce:2,range:800,color:'#33363c',shape:'cannonball'}},   // pirate signature — a SLOW single-shot pistol (long reload) that hits like a cannon
   firestaff:{disp:'Fire Staff',cls:'ranged',sch:'mag',dmg:20,cd:.54,kb:150,art:'staff',el:'fire',chg:'bolt',proj:{speed:470,size:9,pierce:0,range:360,color:'#ff7a3a',shape:'fireball',glow:1}},
   frostwand:{disp:'Frost Wand',cls:'ranged',sch:'mag',dmg:9,cd:.20,kb:90,art:'wand',el:'ice',proj:{speed:620,size:4,pierce:0,range:520,color:'#7fd6ff',shape:'shard',glow:1}},   // rapid-fire: fast + thin, low per-hit
   arcaneorb:{disp:'Demon Eye Scepter',cls:'ranged',sch:'mag',dmg:25,cd:.60,kb:170,art:'wand',el:'arcane',proj:{speed:430,size:11,pierce:2,range:460,color:'#c47bff',shape:'orb',glow:1,seek:true}}, // wand-family (behaves like one): seeks + pierces
@@ -2569,6 +2573,11 @@ const HAZARDS={
 };
 /* Difficulty ladder: Normal -> Hardcore (beat Normal) -> Hitless (beat Hardcore). */
 const DIFFS={
+  /* CASUAL (B2). Named for the player's intent rather than their ability - "Easy" reads as a
+     verdict on you, "Casual" as a statement about how you want to spend the evening. Roughly twice
+     as easy as Normal, which is the brief. Its own save (mode 'cs') like every other difficulty, so
+     a casual run can never quietly overwrite a Normal one. */
+  casual:{id:'casual',name:'Casual',icon:'🌿',blurb:'For the story and the exploring. Enemies hit softer and fall faster.'},
   normal:{id:'normal',name:'Normal',icon:'⚔',blurb:'The hub is your save point. Die and you lose only that attempt.'},
   hardcore:{id:'hardcore',name:'Hardcore',icon:'☠',blurb:'One life for the whole chain. Death erases everything.',needs:'beatNormal'},
   hitless:{id:'hitless',name:'Hitless',icon:'👁',blurb:'One hit — or one fall — and it is over. Everything resets.',needs:'beatHardcore'}
@@ -2603,10 +2612,41 @@ function checkCosmetics(){ let n=0;
     if(c.has()&&!meta.cosmetics[key]){ meta.cosmetics[key]=1; n++; toast('✨ Cosmetic unlocked: '+c.name); } }
   if(n) persistGlobal(); return n; }
 function diffOpen(id){ const d=DIFFS[id]; return !d.needs || !!meta[d.needs]; }
-function diffMode(id){ return id==='hardcore'?'hc':id==='hitless'?'hl':'rl'; }   // each difficulty keeps its own save
+function diffMode(id){ return id==='hardcore'?'hc':id==='hitless'?'hl':id==='casual'?'cs':'rl'; }   // each difficulty keeps its own save
 // MODE (the save key actually loaded) is the single source of truth for the rules — meta.diff is only the menu's memory.
 // Deriving from MODE means a desync can never let a hardcore save quietly play by Normal's rules.
-function curDiff(){ return MODE==='hc'?DIFFS.hardcore:MODE==='hl'?DIFFS.hitless:DIFFS.normal; }
+function curDiff(){ return MODE==='hc'?DIFFS.hardcore:MODE==='hl'?DIFFS.hitless:MODE==='cs'?DIFFS.casual:DIFFS.normal; }
+
+/* ── DIFFICULTY TUNING (B1, B2, B3) ───────────────────────────────────────────
+   Oliver, playtesting as the best player of this game: "I am dying to early bosses." Normal was
+   tuned by someone who already knew every fight.
+
+   Four dials rather than one, because "too hard" is not one problem: enemy HP decides how long a
+   fight LASTS, enemy damage decides how badly a mistake COSTS, and the two feel completely
+   different. Bosses get their own dial because they carry ~5x HP and 2.6x damage already, so a
+   flat cut moves them far more than it moves a jackal - and they are what he is actually dying to.
+
+   Normal moves SLIGHTLY, as he asked, because Casual has to have somewhere to sit below it.
+   Casual is about twice as easy, reached by softening both sides at once rather than by gutting
+   enemy HP alone - a fight you cannot lose but that lasts just as long is boring, not easy.
+   Hardcore and Hitless are untouched: their whole point is that they are not tuned for you. */
+const DIFFTUNE={
+  casual:  {ehp:0.62, edmg:0.55, pdmg:1.45, ptake:0.62, boss:0.55},
+  normal:  {ehp:0.90, edmg:0.90, pdmg:1.12, ptake:0.90, boss:0.80},
+  hardcore:{ehp:1.00, edmg:1.00, pdmg:1.00, ptake:1.00, boss:1.00},
+  hitless: {ehp:1.00, edmg:1.00, pdmg:1.00, ptake:1.00, boss:1.00}
+};
+/* The three BEGINNER trials on top (B3): "we do too little damage, enemies do a little too much."
+   Tuned separately from the campaign on purpose - a trial is a tutorial that gates a class, and
+   failing it costs a run and blocks an unlock, which is a far worse experience than dying in a
+   zone. Earned trials (`_earnedTrial`) are excluded: those are meant to be a real fight. */
+const TRIALTUNE={ehp:0.78, edmg:0.80, pdmg:1.30, ptake:0.80};
+function dtune(){ return DIFFTUNE[curDiff().id]||DIFFTUNE.normal; }
+function inBeginnerTrial(){ return !!(G&&G.trial&&TRIALS[G.trial]&&!TRIALS[G.trial].earned); }
+function tEnemyHp(){  const d=dtune(); return d.ehp  * (inBeginnerTrial()?TRIALTUNE.ehp :1); }
+function tEnemyDmg(){ const d=dtune(); return d.edmg * (inBeginnerTrial()?TRIALTUNE.edmg:1); }
+function tPlayerDmg(){const d=dtune(); return d.pdmg * (inBeginnerTrial()?TRIALTUNE.pdmg:1); }
+function tPlayerTake(){const d=dtune();return d.ptake* (inBeginnerTrial()?TRIALTUNE.ptake:1); }
 function isHitless(){ return MODE==='hl'; }
 function jetpackUnlocked(){ return !!meta.beatHitless; }
 function jetpackOn(){ return jetpackUnlocked() && meta.jetpack!==false && G && G.p && MODE!=='hl'; }   // earned reward; off in Hitless itself (no flying past its point)
@@ -5867,10 +5907,10 @@ function spawnCrackWall(x,z,y,w,h,d,shots){
 }
 function spawnEnemy(type,x,z,isBoss){
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
-  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1);   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale)
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1);   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale)
   const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
-    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1)*(_earnedTrial?1.25:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
+    dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1)*(_earnedTrial?1.25:1)*tEnemyDmg()*(a.boss?dtune().boss:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
     ranged:!!a.ranged,kite:!!a.kite,shot:a.shot?Object.assign({},a.shot):null,shootCd:a.shootCd||2.2,shootT:1.2,
     look:a.look||null,dive:!!a.dive,deathpuff:!!a.deathpuff,noSplit:!!a.noSplit,windT:0,windMax:0,teleX:0,teleZ:1,chargeT:0,cdx:0,cdz:1,sx:x,sz:z,
     hitFlash:0,lastHit:-1,active:false,dead:false,bob:Math.random()*6.28,dropT:0.9+Math.random()*0.8,
@@ -7458,6 +7498,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const splash=Math.round(dmg*0.35);                                          // Soulfire: a holy burst washes over nearby foes
     if(splash>0){ skillRing(e.x,e.z,'#ffe9a8','#ffd24a',150); for(const e2 of combatTargets()){ if(e2===e||e2.dead||e2.dummy) continue; if(dXZ(e2.x,e2.z,e.x,e.z)<150){ e2._iansSplash=1; hitEnemy(e2,splash,src,120,0,'holy'); e2._iansSplash=0; } } }
   }
+  if(src===G.p) dmg=dmg*tPlayerDmg();            // difficulty + beginner-trial player damage dial
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
@@ -7705,6 +7746,10 @@ function ninjaEvade(p,sx,sz){                               // a dodge: MISS tex
   G.combo=G.combo; hudUpdate();
 }
 function hurtPlayer(dmg,sx,sz,by){
+  /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
+     hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
+     run and dying to a floor. */
+  dmg=dmg*tPlayerTake();
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;

@@ -240,9 +240,31 @@ Verified: the stagger fires on the third hit and resets on target switch, the ch
 second target, the ranger's far hit beats his near hit 153 to 90, and skills/charged attacks are
 untouched.
 
+## Eleven of sixteen — DONE (v1.570.0)
+
+Warrior Momentum, Stormcaller Chain, Ranger Distance, plus:
+
+- **Berserker — No brakes.** Damage rises as health falls, up to +85%. A Berserker at a sliver is
+  terrifying; at full health, ordinary. The class is played by choosing not to retreat.
+- **Paladin — Oath.** Your first target of a fight is Sworn: you hit it 15% harder and take a third
+  less from everything else while it lives. Swapping off it early costs you the shield.
+- **Ninja — Unseen.** Stand still a moment and the next attack teleports you behind the target for
+  1.5x. Repositioning inside the ordinary attack rather than on a cooldown.
+- **Monk — Flow.** Every connecting hit shaves 0.35s off your dodge. The only class that gets MORE
+  mobile the more it fights.
+- **Mage — Overcharge.** Basic attacks spend 6 mana for 1.35x. A Mage holding mana for a skill is
+  choosing to punch softer - a resource decision inside the ordinary attack.
+- **Necromancer — Harvest.** Every fifth basic hit drops a corpse whether the target dies or not.
+  Waiting for kills made the class worst exactly when it was losing.
+- **Warlock — Blood price.** Basic attacks cost 1.2% max HP for 1.4x damage, and a KILL returns
+  every point spent. A good round is free; a bad one compounds.
+- **Skylancer — Air.** 0.8x on the ground, 1.5x airborne, and attacking slows your fall so a good
+  jump is a whole engagement.
+
 ## Remaining, in order
 
-1. The other eleven basic-attack identities from the design above - each is one callback now.
+1. Chronomancer (rewind), Beastmaster (pet takes skill inputs) and Pirate (flintlock as class
+   equipment) - the three that are NOT basic-attack shaped and need their own systems.
 2. Strip the flat +8-12% from the fourteen innates and fold into base damage.
 3. Rewrite the passives against the decision-not-a-number rule.
 4. The Pirate's flintlock-as-class-equipment.

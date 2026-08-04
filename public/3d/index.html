@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.560.0-classbasic';
+const VERSION3D='1.570.0-classes11';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7716,6 +7716,17 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
 function awardGold(n){ n=Math.max(0,Math.round(n*effGoldFind(G.p)*((G&&G.endGoldMul)||1))); meta.gold=(meta.gold||0)+n; return n; }
 function sellItem(it){ const g=itemGold(it); meta.gold=(meta.gold||0)+g; playFx('sell'); return g; } // flat (no gold-find on sales)
 function killEnemy(e,weaponKill){
+  /* The Warlock's bargain settles on a KILL: every sliver of health its basic attacks spent comes
+     back at once. A round going well costs nothing, a round going badly compounds - which is the
+     whole point of the class and was previously just a description. */
+  try {
+    if(meta.classId==='warlock' && G && G.p && (G.p._bloodOwed||0) > 0){
+      G.p.hp = Math.min(effMaxHp(G.p), G.p.hp + G.p._bloodOwed);
+      addText(G.p.x, G.p.y + 40, G.p.z, '+' + G.p._bloodOwed, '#b06bff');
+      G.p._bloodOwed = 0; hudUpdate();
+    }
+  } catch(err){}
+
   if(e.dead) return;
   if(e.bot && G.duel){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,14); }catch(_){} return; }   // DUEL: death is final — no respawn, no scoring
   if(e.bot){ e.dead=true; try{ burst(e.x,e.y+e.h*0.5,e.z,e.color,18); SFX.enemyDie(); addText(e.x,e.y+e.h+16,e.z,'DEFEATED','#7de08a',true); }catch(_){}
@@ -7967,6 +7978,89 @@ const CLASS_BASIC = {
     const k = Math.max(0.75, Math.min(1.35, 0.75 + (d / 520) * 0.6));
     return dmg * k;
   },
+
+  /* NO BRAKES. Damage rises as your health falls, hard. A Berserker at a sliver is terrifying and a
+     Berserker at full health is ordinary, so the class is played by choosing not to retreat -
+     which is the only decision that matters to it. */
+  berserker(p, e, dmg){
+    const frac = Math.max(0, Math.min(1, p.hp / Math.max(1, effMaxHp(p))));
+    return dmg * (1 + (1 - frac) * 0.85);
+  },
+
+  /* OATH. Your first target of a fight is Sworn; while it lives you take a third less from
+     everything else, and swapping off it early costs you that. Punishes target-swapping and
+     rewards picking the right threat, which is what a Paladin is for.
+     The mitigation itself is applied in hurtPlayer - this is where the oath is SWORN. */
+  paladin(p, e, dmg){
+    if(!p._oath || p._oath.dead){
+      p._oath = e;
+      addText(e.x, e.y + e.h + 18, e.z, 'SWORN', '#ffe9a8');
+    }
+    if(p._oath === e) return dmg * 1.15;          // the oathed target is where your strength goes
+  },
+
+  /* UNSEEN. Stand still for a moment and your next attack lands from BEHIND the target - a melee
+     class with repositioning built into its ordinary attack rather than into a cooldown. */
+  ninja(p, e, dmg){
+    if((p._stillT || 0) < 1) return;
+    p._stillT = 0;
+    const a = Math.atan2(p.x - e.x, p.z - e.z);
+    p.x = e.x - Math.sin(a) * (e.r + 26); p.z = e.z - Math.cos(a) * (e.r + 26);
+    p.yaw = Math.atan2(e.x - p.x, e.z - p.z);
+    addText(e.x, e.y + e.h + 18, e.z, 'UNSEEN', '#9fe0ff');
+    try { burst(p.x, p.y + 16, p.z, '#9fe0ff', 10); } catch(err){}
+    return dmg * 1.5;
+  },
+
+  /* FLOW. Every connecting attack shaves your dodge cooldown. The only class that gets MORE mobile
+     the more it fights, which is the opposite of how every other melee class works. */
+  monk(p, e, dmg){
+    if((p.dodgeCdT || 0) > 0) p.dodgeCdT = Math.max(0, p.dodgeCdT - 0.35);
+  },
+
+  /* OVERCHARGE. Basic attacks spend mana to hit harder, automatically, while you have it to spend.
+     The only class whose ordinary attack has a resource decision inside it - a Mage holding mana
+     for a skill is choosing to punch softer. */
+  mage(p, e, dmg){
+    if((p.mana || 0) < 6) return;
+    p.mana -= 6;
+    try { hudUpdate(); } catch(err){}
+    return dmg * 1.35;
+  },
+
+  /* HARVEST. Every basic hit builds toward a corpse: at five, the target drops one whether it dies
+     or not. A Necromancer should never be short of bodies, and waiting for kills made the class
+     worst exactly when it was losing. */
+  necromancer(p, e, dmg){
+    p._harv = (p._harv || 0) + 1;
+    if(p._harv >= 5){
+      p._harv = 0;
+      try { (G.corpses = G.corpses || []).push({ x:e.x, z:e.z, y:e.y||0, t:0, raised:false }); } catch(err){}
+      addText(e.x, e.y + e.h + 18, e.z, 'CORPSE', '#b06bff');
+    }
+  },
+
+  /* BLOOD PRICE. Basic attacks cost you a sliver of health and pay far more damage for it, and a
+     KILL returns the health. A round going well costs nothing; a round going badly compounds -
+     which is the bargain the class is named for, made real instead of described. */
+  warlock(p, e, dmg){
+    const cost = Math.max(1, Math.round(effMaxHp(p) * 0.012));
+    if(p.hp <= cost + 1) return;
+    p.hp -= cost;
+    p._bloodOwed = (p._bloodOwed || 0) + cost;
+    try { hudUpdate(); } catch(err){}
+    return dmg * 1.4;
+  },
+
+  /* AIR. Almost nothing on the ground, everything off it. A Skylancer should be unplayable standing
+     still and dominant in the air, and attacking while airborne extends the hang so a good jump is
+     a whole engagement rather than a moment. */
+  skylancer(p, e, dmg){
+    const air = !p.onGround && (p.y || 0) > 6;
+    if(!air) return dmg * 0.8;
+    if(p.vy != null && p.vy < 0) p.vy *= 0.55;    // attacking keeps you up
+    return dmg * 1.5;
+  },
 };
 
 function hurtPlayer(dmg,sx,sz,by){
@@ -7974,6 +8068,9 @@ function hurtPlayer(dmg,sx,sz,by){
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
      run and dying to a floor. */
   dmg=dmg*tPlayerTake();
+  /* THE OATH pays out here rather than where it is sworn: while your Sworn target lives, everything
+     ELSE hits you for a third less. That is what makes swapping off it a real cost. */
+  if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && by!==G.p._oath) dmg*=0.67;
   if(G.hub) return;                                         // Phase 20: the Waystation is a true sanctuary — NOTHING harms you at home
   if(G.p.downed) return;                                    // co-op: a downed ally is already on the ground — no further harm
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;

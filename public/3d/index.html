@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.660.0-editgrab';
+const VERSION3D='1.670.0-skills1';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2058,7 +2058,7 @@ const CLASS2={
     r3:{kind:'passive',a:{id:'x_strength',n:'Harvested Strength',role:'Harvest',d:'Souls you collect are spent on your next skill, making it free.'},b:{id:'x_doom',n:'Lingering Doom',role:'Doom',d:'Marked enemies that die spread their mark to the nearest foe.'}},
     r4:{kind:'skill',slot:1,a:{id:'x_step',n:'Shadow Step',cd:8,role:'Movement',fx:'x_step',d:'Dash through shadow and become briefly untouchable.'},b:{id:'x_wraith',n:'Wraith Form',cd:10,role:'Defense',fx:'x_wraith',d:'Become spectral for 3s: faster movement and 65% damage reduction.'}},
     r5:{kind:'passive',a:{id:'x_armor',n:'Soul Armor',role:'Defense',d:'Collecting a kill grants a 3% max-HP shield for 5s.'},b:{id:'x_wraithwalk',n:'Wraithwalk',role:'Movement',d:'After using mobility, gain +18% move speed for 2.5s.'}},
-    r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Gravebind',cd:12,role:'Control',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
+    r6:{kind:'skill',slot:2,a:{id:'x_pull',n:'Void Pull',cd:12,role:'Control',fx:'x_pull',d:'Implode nearby enemies toward a central point and stagger them.'},b:{id:'x_bind',n:'Soul Tether',cd:12,role:'Linkage',fx:'x_bind',d:'Bind enemies in front of you, rooting them for 2.5s.'}},
     r7:{kind:'passive',a:{id:'x_crimson',n:'Crimson Harvest',role:'Sustain',d:'Below half health, every soul you collect heals you outright.'},b:{id:'x_chill',n:'Grave Chill',role:'Control',d:'Corrupted enemies cannot flee — they walk toward you instead.'}},
     r8:{kind:'skill',slot:3,a:{id:'x_siphon',n:'Soul Siphon',cd:18,role:'Sustain',fx:'x_siphon',d:'Drain nearby enemies for 4s, damaging them and restoring health.'},b:{id:'x_vortex',n:'Death Vortex',cd:22,role:'Group Damage',fx:'x_vortex',d:'Create a persistent soul storm that damages and corrupts enemies.'}},
     r9:{kind:'passive',a:{id:'x_corrupt',n:'Corruption Mastery',role:'Rupture',d:'Rupturing a corrupted enemy corrupts everything near it.'},b:{id:'x_favor',n:"Death's Favor",role:'Sustain',d:'Elite and boss hits restore 1 mana; elite kills restore 8% HP.'}}
@@ -2180,7 +2180,7 @@ const CLASS2={
     r5:{kind:'passive',a:{id:'sky_tail',n:'Tailwind',role:'Movement',d:'Landing grants +15% move speed for 3 seconds.'},b:{id:'sky_guard',n:'Cloud Guard',role:'Defense',d:'Using a skill in the air grants a shield equal to 6% max HP.'}},
     r6:{kind:'skill',slot:2,a:{id:'sky_dash',n:'Sky Dash',cd:11,role:'Movement',fx:'sky_dash',d:'Dash through the air, damaging every enemy in your path.'},b:{id:'sky_rain',n:'Spear Rain',cd:15,role:'Group Damage',fx:'sky_rain',d:'Call down five wind spears around your target.'}},
     r7:{kind:'passive',a:{id:'sky_float',n:'Long Flight',role:'Movement',d:'Fall 25% slower and gain more control in the air.'},b:{id:'sky_eye',n:'Hunter’s Eye',role:'Dive',d:'Attacking while falling drives you down onto the target.'}},
-    r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Cyclone Volley',cd:21,role:'Group Damage',fx:'sky_cyclone',d:'Spin in place and fire a ring of wind blades.'}},
+    r8:{kind:'skill',slot:3,a:{id:'sky_crash',n:'Thunder Dive',cd:22,role:'Group Damage',fx:'sky_crash',d:'Drop like lightning. Your next landing creates a large shockwave.'},b:{id:'sky_cyclone',n:'Updraft',cd:21,role:'Air Control',fx:'sky_cyclone',d:'Spin in place and fire a ring of wind blades.'}},
     r9:{kind:'passive',a:{id:'sky_reset',n:'Second Wind',role:'Movement',d:'Defeating an enemy in the air renews your air jump and trims dodge cooldown.'},b:{id:'sky_armor',n:'Sky Armor',role:'Defense',d:'Nothing can hit you in the first moment after a jump.'}}
   },
   bladedancer:{ disp:'Bladedancer', icon:classIcon('bladedancer'),
@@ -7331,7 +7331,25 @@ SKILL_FX.m_gravity=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,6
 SKILL_FX.m_overload=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,720),tx=t?t.x:p.x+Math.sin(p.yaw)*220,tz=t?t.z:p.z+Math.cos(p.yaw)*220,dmg=(w?w.dmg:10)*effPower(p)*3.4*am*(ok?1:OFFCLASS_MUL),col=elementColor(w&&w.el)||'#c47bff'; skillRing(tx,tz,col,'#fff0b0',220);
   for(const e of combatTargets()){if(!e.dead&&dXZ(e.x,e.z,tx,tz)<190+e.r&&!losBlocked(tx,tz,e.x,e.z))hitEnemy(e,dmg,p,360,0,ok?(w&&w.el):null);} SFX.magic(w&&w.el);G.shake=Math.min(G.shake+9,16); };
 // Reaper v2 skills
-SKILL_FX.x_reap=SKILL_FX.reap; SKILL_FX.x_step=SKILL_FX.shadowstep; SKILL_FX.x_bind=SKILL_FX.frostchains;
+SKILL_FX.x_reap=SKILL_FX.reap; SKILL_FX.x_step=SKILL_FX.shadowstep;
+/* SOUL TETHER, replacing Gravebind. Gravebind was ALIASED TO THE MAGE'S FROST CHAINS - a borrowed
+   effect sitting opposite Void Pull, so the Reaper's rank-6 choice was Control against Control and
+   one of them was not even his own skill.
+   Tethering makes it a different question entirely: not "how do I stop them" but "how do I make
+   them one target". Everything linked shares a share of all damage dealt to any of them, which
+   turns a Reaper's single-target drain into a room clear without giving him an area attack. */
+SKILL_FX.x_bind=function(p,ok,am){
+  const id=(G._tetherN=(G._tetherN||0)+1);
+  let n=0;
+  for(const e of combatTargets()){
+    if(e.dead||e.dummy) continue;
+    if(dXZ(e.x,e.z,p.x,p.z)>300) continue;
+    e._tether=id; e._tetherT=8; n++;
+    try{ skillRing(e.x,e.z,'#b06bff','#3a1a4a',70); }catch(err){}
+  }
+  if(n>1) addText(p.x,p.y+52,p.z,'TETHERED x'+n,'#c9a6ff',true);
+  else addText(p.x,p.y+52,p.z,'nothing to bind','#8a7a9a');
+};
 SKILL_FX.x_cleave=function(p,ok,am){ const w=p.weapon,t=projectileAimTarget(p,820);if(t)p.yaw=Math.atan2(t.x-p.x,t.z-p.z);const sp=620,col='#b06bff';G.projectiles.push({owner:'player',x:p.x,y:p.y+25,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:22,color:col,shape:'scythespin',glow:1,trail:col,dmg:(w?w.dmg:10)*effPower(p)*2.1*am*(ok?1:OFFCLASS_MUL),kb:230,pierce:3,el:ok?(w&&w.el):null,life:1.25,hitSet:[]});SFX.magic('void');};
 SKILL_FX.x_wraith=function(p,ok,am){p.wraithT=3;p.guardT=Math.max(p.guardT||0,3);p.invuln=Math.max(p.invuln,.3);addText(p.x,p.y+70,p.z,'WRAITH FORM','#c9a6ff',true);burst(p.x,p.y+25,p.z,'#b06bff',20);};
 SKILL_FX.x_pull=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.1*am*(ok?1:OFFCLASS_MUL);skillRing(p.x,p.z,'#7b3ab5','#241133',230);for(const e of combatTargets()){if(e.dead)continue;const d=dXZ(e.x,e.z,p.x,p.z);if(d>230+e.r)continue;hitEnemy(e,dmg,p,0,0,'void');e.hurtKbX=(p.x-e.x)/(d||1)*400;e.hurtKbZ=(p.z-e.z)/(d||1)*400;e.stunT=Math.max(e.stunT||0,.5);}SFX.magic('void');};
@@ -7371,7 +7389,22 @@ SKILL_FX.sky_rain=function(p,ok,am){const t=projectileAimTarget(p,800);if(!t)ret
   for(let i=0;i<5;i++){const a=i*2.4,r=i?65:0,tx=t.x+Math.cos(a)*r,tz=t.z+Math.sin(a)*r;skillRing(tx,tz,'#9de7ff','#ffffff',45);
     for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,tx,tz)<48+e.r)hitEnemy(e,base,p,90,0,'ice');}SFX.magic('ice');};
 SKILL_FX.sky_crash=function(p,ok,am){if(p.onGround){p.vy=560;p.onGround=false;}p.vy=-720;p.skyLandDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*3.6*am*(ok?1:OFFCLASS_MUL);p.skyLandR=285;p.skyLandCol='#f3e86d';addText(p.x,p.y+p.h+18,p.z,'THUNDER DIVE','#fff18a',true);SFX.magic('lightning');};
-SKILL_FX.sky_cyclone=function(p,ok,am){const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.05*am*(ok?1:OFFCLASS_MUL);
+SKILL_FX.sky_cyclone=function(p,ok,am){
+  /* UPDRAFT, replacing Cyclone Volley. The Skylancer's rank-8 choice was Group Damage against Group
+     Damage - Thunder Dive and Cyclone Volley answered the same question at the same size.
+     This answers a different one: it takes the fight INTO the air, where the class already lives.
+     Everything caught is lifted and cannot come down for a few seconds, which is worth far more to
+     a Skylancer than another area attack because every one of his other tools is worth more
+     airborne. */
+  let lifted = 0;
+  for(const e of combatTargets()){
+    if(e.dead || e.boss || e.dummy) continue;
+    if(dXZ(e.x, e.z, p.x, p.z) > 280) continue;
+    e.y = (e.y || 0) + 90; e.vy = 0; e._noLand = 3.2; lifted++;
+    try { burst(e.x, (e.y||0), e.z, '#bfe6ff', 8); } catch(err){}
+  }
+  if(lifted) addText(p.x, p.y + 54, p.z, 'UPDRAFT x' + lifted, '#bfe6ff', true);
+const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*1.05*am*(ok?1:OFFCLASS_MUL);
   for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<210+e.r)hitEnemy(e,dmg,p,220,0,'ice');
   for(let i=0;i<8;i++){const a=i/8*6.283;G.projectiles.push({owner:'player',x:p.x,y:p.y+26,z:p.z,vx:Math.sin(a)*620,vy:-360,vz:Math.cos(a)*620,gravity:180,size:9,color:'#c9f3ff',shape:'blade',glow:1,trail:'#60bce6',dmg:dmg*.35,kb:120,pierce:1,el:'ice',life:1.0,hitSet:[]});}p.vy=Math.max(p.vy,80);p.onGround=false;skillRing(p.x,p.z,'#91dcff','#ffffff',210);SFX.magic('ice');};
 // Bladedancer — explicit, readable timing instead of passive random blocks. Stance skills open
@@ -7719,6 +7752,16 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      skills and charges - so it reads as the opposite half of the basic-attack identity. */
   if(src===G.p && (G&&G._desig) && meta.classId==='paladin' && c2Passive('pal_holypow')
      && G.p._oath && e===G.p._oath) dmg*=2;
+  /* Soul Tether: everything linked shares what any one of them takes. `_tetherHit` stops the share
+     re-entering - without it two tethered enemies would bounce damage between them forever. */
+  if(e._tether && (e._tetherT||0)>0 && !G._tetherHit && dmg>0){
+    G._tetherHit=1;
+    for(const o of combatTargets()){
+      if(o===e||o.dead||o._tether!==e._tether||(o._tetherT||0)<=0) continue;
+      hitEnemy(o, Math.max(1,Math.round(dmg*0.4)), src, 0, 0, null);
+    }
+    G._tetherHit=0;
+  }
   if(src===G.p && !(G&&G._desig)){
     const _bh = CLASS_BASIC[meta.classId];
     if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
@@ -9389,6 +9432,12 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
+  for(const e of (G.enemies||[])){
+    if((e._tetherT||0)>0) e._tetherT-=dt;
+    /* Updraft holds them off the floor: gravity is suspended, not merely overcome, so they hang
+       exactly where the wind put them until it lets go. */
+    if((e._noLand||0)>0){ e._noLand-=dt; e.vy=0; }
+  }
   if(MP.active) MP.tick(dt);                                    // co-op presence sync (opt-in; no-op in single-player)
   if(MP.active && MP.pvp && G.enemies && G.enemies.some(e=>!e.bot)){ G.enemies=G.enemies.filter(e=>e.bot); G.boss=null; }   // PvP duel: clear campaign enemies but KEEP arena bots
   if(G.arena){ arenaHazardTick(dt); arenaPickupTick(dt); }     // Arena: lava/hazard damage -> respawn; powerup orbs

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.810.0-bagdoll';
+const VERSION3D='1.820.0-doll-frame';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3822,12 +3822,28 @@ function bagDollRender(){
   // GEAR (centered): centre the hero in its own panel and show the full body.
   const CEN=bagDoll.centered;
   const ctr=(typeof project==='function'?project(CEN?4:-12, CEN?16:30, 0):null)||[VW/2,VH/2];
-  const sw=VH*(CEN?0.60:0.60)*DPR, sh=VH*(CEN?1.22:1.02)*DPR;
-  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*(CEN?0.34:0.46), sw, sh, 0,0, cnv.width, cnv.height);
-  // GL context is alpha:false, so the clear reads back as opaque black — key it out to float on the panel
+  /* A SOLID BACKDROP, painted before the blit. The doll used to key its black background out so the
+     character floated on the panel - which means anything the key did not catch (a lit prop, a
+     bright wall) floated there with him. Oliver: "the preview image should show our character on a
+     solid background... rn theres things in the hub blocking him." A filled panel cannot leak the
+     world through it, whatever happens to be standing behind the camera. */
+  const bg=ctx.createLinearGradient(0,0,0,cnv.height);
+  bg.addColorStop(0,'#20242e'); bg.addColorStop(1,'#12141b');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,cnv.width,cnv.height);
+
+  /* TIGHTER CROP - 0.60 of the viewport height showed the character at a distance with room to
+     spare. 0.38 fills the panel with him, which is the point of a portrait. The vertical anchor
+     rises with it so the tighter frame centres on the torso and head rather than the feet. */
+  const sw=VH*(CEN?0.38:0.38)*DPR, sh=VH*(CEN?0.78:0.66)*DPR;
+  ctx.drawImage(canvas, ctr[0]*DPR-sw/2, ctr[1]*DPR-sh*(CEN?0.30:0.42), sw, sh, 0,0, cnv.width, cnv.height);
+
+  /* The GL clear reads back as opaque black, so the character arrives on a black rectangle. Key
+     only the near-black to let the backdrop above show through behind him - the same test as
+     before, but now failing safe onto a solid panel instead of onto the world. */
   try{ const id=ctx.getImageData(0,0,cnv.width,cnv.height), px=id.data;
+    const r0=parseInt('20',16), g0=parseInt('24',16), b0=parseInt('2e',16);
     for(let i=0;i<px.length;i+=4){ const m=Math.max(px[i],px[i+1],px[i+2]);
-      if(m<14) px[i+3]=0; else if(m<36) px[i+3]=Math.round(px[i+3]*(m-14)/22); }
+      if(m<14){ px[i]=r0; px[i+1]=g0; px[i+2]=b0; px[i+3]=255; } }
     ctx.putImageData(id,0,0);
   }catch(e){}
 }

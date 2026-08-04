@@ -237,7 +237,7 @@ function hud(){
     rows.push('<div class="row">area <span class="sel">' + EDITOR.key + '</span>' +
               (EDITOR.dirty ? ' &middot; <span style="color:#e8a33d">unsaved</span>' : '') + '</div>');
     rows.push(s
-      ? '<div class="row">selected <span class="sel">' + s.arr + ':' + s.idx + '</span><br>x ' +
+      ? '<div class="row">selected <span class="sel">' + (s.built ? ('built ' + (s.o.model || '')) : (s.arr + ':' + s.idx)) + '</span><br>x ' +
         Math.round(s.o.x) + '  z ' + Math.round(s.o.z) +
         (s.o.y0 != null ? '  y ' + Math.round(s.o.y0) : '') +
         (s.o.w != null ? '<br>' + Math.round(s.o.w) + ' x ' + Math.round(s.o.d || s.o.w) +
@@ -419,6 +419,7 @@ function redraw(){
     try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){}
     /* The overlay is built from the same arrays, so it has to follow the edit - otherwise a
        platform you just placed shows no collision box and reads as non-solid. */
+    try { reapplyHides(); } catch(e){}
     try { refreshOverlay(); } catch(e){}
   }, 120);
 }
@@ -943,6 +944,12 @@ function onKey(e){
   }
   const s = EDITOR.sel;
   if(!s || !EDITOR.editable) return;
+  if(s.built && e.key !== 'Delete' && e.key !== 'Backspace' && e.key !== 'Escape'){
+    /* Built pieces come from a layout, so there is no record to move or resize - only Delete means
+       anything. Saying so beats a key that silently does nothing. */
+    toast('built-in piece: Delete removes it, but it cannot be moved yet');
+    e.preventDefault(); e.stopPropagation(); return;
+  }
   const step = EDITOR.grid * (e.shiftKey ? 5 : 1);
   let handled = true;
   const before = snapLayer(), was = geom(s.o);
@@ -983,6 +990,16 @@ function onKey(e){
   else if(e.key === 'ArrowDown')  s.o.z += step;
   else if(e.key === 'PageUp')     s.o.y0 = (s.o.y0 || 0) + step;
   else if(e.key === 'PageDown')   s.o.y0 = Math.max(0, (s.o.y0 || 0) - step);
+  else if((e.key === 'Delete' || e.key === 'Backspace') && s.built){
+    /* A built piece has no array entry to splice - it is hidden instead, and the hide is recorded
+       so it stays gone across rebuilds and ships with the rest of the edits. */
+    const o = s.o, before = snapLayer();
+    const n = window.__world3dHideAt ? window.__world3dHideAt(o.x, o.z, 46) : 0;
+    commit(L => { (L.hide = L.hide || []).push({ x: o.x, z: o.z, r: 46 }); });
+    pushStep(before, () => { redraw(); }, () => { if(window.__world3dHideAt) window.__world3dHideAt(o.x, o.z, 46); });
+    EDITOR.sel = null;
+    toast(n ? '- removed ' + (o.model || 'piece') + ' - Ctrl+Z puts it back' : 'nothing built there', 'del');
+  }
   else if(e.key === 'Delete' || e.key === 'Backspace'){
     const arr = G()[s.arr], idx = s.idx, obj = s.o;
     /* Take the linked collider too. Leaving it behind is an invisible wall where a prop used to

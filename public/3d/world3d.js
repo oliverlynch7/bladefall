@@ -674,6 +674,61 @@ function buildProps(items, names, defaultH, heightOf, fitH){
   });
 }
 
+/* EVERY PLACED MODEL, so the editor can select and delete things it did not create.
+
+   Oliver: "when i deleted the pillars overlapping the portals, they didnt visually disappear... i
+   should be able to delete things you've added before, not just the new things i add."
+
+   He is right and the cause is structural: the hub's architecture is built by buildHub from its own
+   layout, NOT from G.deco, so those pieces are in no array the editor searches. Deleting near one
+   removed whatever deco WAS in range - correctly, and reporting so - while the spire itself stayed
+   up, because nothing had ever asked it to go.
+
+   Instances carry their own world matrices, so this reads positions straight back out of what was
+   actually drawn. That is the only honest source: it answers "what is standing there" rather than
+   "what do I think I placed". */
+window.__world3dInstances = (limit) => {
+  if(!group) return [];
+  const out = [], V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+  const M = new THREE.Matrix4(), cap = limit || 4000;
+  for(const c of group.children){
+    if(!c.isInstancedMesh || !c.name || c.name.indexOf('w3d:') !== 0) continue;
+    const rec = _propCache.get(c.name.slice(4));
+    for(let i = 0; i < c.count && out.length < cap; i++){
+      c.getMatrixAt(i, M); M.decompose(V, Q, S);
+      if(S.x < 0.001) continue;                       // already hidden
+      out.push({ model: c.name.slice(4), x: V.x, y: V.y, z: V.z,
+                 h: rec ? (rec.fullHeight || rec.height) * S.y : 40 });
+    }
+  }
+  return out;
+};
+
+/* HIDE a built piece. Scaling the instance to zero rather than rebuilding the group: the piece
+   comes from a layout, not a list, so there is nothing to remove from - and a zero-scale instance
+   costs nothing and survives until the next rebuild, which re-applies the hide list from the edit
+   layer. Radius rather than an exact match because the recorded position is a rounded click. */
+window.__world3dHideAt = (x, z, r) => {
+  if(!group) return 0;
+  const V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+  const M = new THREE.Matrix4(); let n = 0;
+  const rr = r || 40;
+  for(const c of group.children){
+    if(!c.isInstancedMesh || !c.name || c.name.indexOf('w3d') !== 0) continue;
+    let touched = false;
+    for(let i = 0; i < c.count; i++){
+      c.getMatrixAt(i, M); M.decompose(V, Q, S);
+      if(S.x < 0.001) continue;
+      if(Math.hypot(V.x - x, V.z - z) <= rr){
+        M.compose(V, Q, new THREE.Vector3(0, 0, 0));
+        c.setMatrixAt(i, M); touched = true; n++;
+      }
+    }
+    if(touched) c.instanceMatrix.needsUpdate = true;
+  }
+  return n;
+};
+
 /* Where did the props actually END UP? A prop is placed at the deco's y0, and whether that y0 is
    the object's BASE or the top of a voxel trunk is the difference between a forest and a forest
    hanging in the air. That question has been argued from source and from screenshots more than

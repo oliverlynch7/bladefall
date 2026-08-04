@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.485.0-trials';
+const VERSION3D='1.490.0-e45';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12484,7 +12484,15 @@ function drawCourse(s,t){
     // Phase 19: deco must never wall off the hero — if this box crosses the camera->hero
     // sightline (zoomed views only), it goes ghost for the frame instead of blocking.
     if(occRay(d, 8, d.y0!=null?d.y0:0, d.h)){ G._occN=(G._occN||0)+1;
-      gl.depthMask(false); bx(d.x,(d.y0!=null?d.y0:0)+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c, null, 0.2); gl.depthMask(true); continue; }
+      /* E5: "old hub walls render see-through in a way that does not read as intentional."
+         This is the sightline ghost - anything between the camera and the hero fades so it cannot
+         wall you off. Correct behaviour, wrong strength: at 0.2 a lamp post politely gets out of
+         the way, while a whole hub WALL turns to glass and reads as a rendering fault rather than a
+         courtesy. Alpha now scales with how big the thing is - large architecture fades just enough
+         to see through, small props keep getting fully out of the way. */
+      const _foot=(d.w||10)*((d.d||d.w)||10);
+      const _ga=_foot>9000?0.62:(_foot>2600?0.42:0.2);
+      gl.depthMask(false); bx(d.x,(d.y0!=null?d.y0:0)+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c, null, _ga); gl.depthMask(true); continue; }
     if(d.y0!=null){ bx(d.x,d.y0+d.h/2,d.z, d.w,d.h,(d.d||d.w), d.c); continue; }   // strata band: an exact box at a given base height
     if(d.theme==='forest'){ const bk='#3a2c1c', bkD='#2a2014', lf=tint('#2c5c34','#000',0.1), lfD=tint('#2c5c34','#000',0.28), lfL=tint('#2c5c34','#fff',0.12);
       bx(d.x,d.h*0.3,d.z, d.w*0.34,d.h*0.62,d.w*0.34, bk);                                    // trunk
@@ -12645,6 +12653,17 @@ function drawHero3(p,t,preview){
        hero here would be painted over by the flush that follows. Instead mark it pending and
        let flushBatch draw it once the world's batch has actually gone to the GPU. */
     if(window.HERO3D.ready){ window.__hero3dPending = [p, t]; return; }
+    /* E4: THE VOXEL FLASH. While the 3D layer is on but still loading, this fell through and drew
+       the VOXEL hero - so every level load showed the old blocky character for a moment before the
+       real one appeared. Drawing NOTHING for those frames is right: the hero is at the centre of
+       the screen and a wrong model there is far more noticeable than a brief absence.
+       Bounded, deliberately. If the layer never becomes ready - a failed fetch, a decode error - the
+       voxel hero must come back rather than leave you invisible and unable to play. HERO3D.err is
+       the explicit failure, and the deadline covers a load that simply never resolves. */
+    if(!window.HERO3D.err){
+      if(window.__h3dWait == null) window.__h3dWait = t;
+      if((t - window.__h3dWait) < 12) return;                 // still loading: draw nothing, not the wrong thing
+    }
   }
   const sk=SKINS[p.skin]||SKINS.knight;
   const _vl=preview?0:voxLod(p.x,p.z);

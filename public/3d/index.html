@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.445.0-editorcam';
+const VERSION3D='1.450.0-flycam';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13971,11 +13971,15 @@ function render(t){
      front of where I'm looking" needs. __bfEdCam is read here and written by the editor module. */
   const _ed = window.__bfEdCam && window.__bfEdCam();
   if(_ed && _ed.on){
-    const fy=_ed.y||0, pit=_ed.pitch, hd=_ed.dist*Math.cos(pit), eh=_ed.dist*Math.sin(pit);
-    const fx=Math.sin(_ed.yaw), fz=Math.cos(_ed.yaw);
-    PROJ=mPersp(60*Math.PI/180,VW/VH,18,9000);   // far plane well past gameplay's: you zoom out to see a whole level
-    VIEW=mLookAt([_ed.x-fx*hd, fy+eh, _ed.z-fz*hd],[_ed.x, fy, _ed.z],[0,1,0]);
-    if(G) G.eye={x:_ed.x-fx*hd,y:fy+eh,z:_ed.z-fz*hd};
+    /* A FREE camera: an eye position and a look direction, not an orbit. Oliver wants to "move
+       around the space free form", which an orbit cannot do - an orbit always points at one spot
+       on the ground, so you can circle a thing but never fly down a corridor or look up at a wall
+       you are building. Drag turns it, WASD flies it along the direction it faces. */
+    const cp=Math.cos(_ed.pitch);
+    const fx=Math.sin(_ed.yaw)*cp, fy=Math.sin(_ed.pitch), fz=Math.cos(_ed.yaw)*cp;
+    PROJ=mPersp(60*Math.PI/180,VW/VH,18,9000);   // far plane well past gameplay's: you fly up to see a whole level
+    VIEW=mLookAt([_ed.x,_ed.y,_ed.z],[_ed.x+fx*100,_ed.y+fy*100,_ed.z+fz*100],[0,1,0]);
+    if(G) G.eye={x:_ed.x,y:_ed.y,z:_ed.z};
     gl.uniform2f(U.uFogNF,2600,9000);            // push the fog right back, or half the level you flew up to see is grey
   } else if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;

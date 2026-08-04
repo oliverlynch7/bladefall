@@ -16,7 +16,7 @@ import { EDITOR, EDIT_ARRAYS, areaKey, loadLayers, saveLayers, genFingerprint,
 import { toggleOverlay, refresh as refreshOverlay, OVERLAY } from './editor_collision.js';
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
-let _ui = null, _marker = null, _raf = 0, _drag = null;
+let _ui = null, _marker = null, _raf = 0, _drag = null, _look = null;
 
 function G(){ return (window.__BF3 && window.__BF3.G) || null; }
 function cam(){ try { return window.__BF_CAM ? window.__BF_CAM() : null; } catch(e){ return null; } }
@@ -57,7 +57,10 @@ function unprojectToPlane(sx, sy, atY){
    without first building a parallel collision world. This treats every array identically. */
 export function pickAt(sx, sy, maxPx){
   const g = G(); if(!g) return null;
-  let best = null, bestD = (maxPx || 90);
+  /* 46px, down from 90. A generous grab radius was right when every click meant "select"; now that
+     dragging empty space turns the camera, a wide radius means you try to look and instead drag a
+     prop you did not know was near the cursor. Selection stays forgiving, looking stays possible. */
+  let best = null, bestD = (maxPx || 46);
   for(const arr of EDIT_ARRAYS){
     const list = g[arr]; if(!list) continue;
     for(let i = 0; i < list.length; i++){
@@ -81,35 +84,71 @@ export function pickAt(sx, sy, maxPx){
    looking" needs - the new object goes at the focus, which is the middle of your screen.
 
    Starts on the hero, so opening the editor never teleports you somewhere unrecognisable. */
-export const EDCAM = { on: false, x: 0, z: 0, y: 0, yaw: 0, pitch: 0.85, dist: 700 };
-const DIST_MIN = 120, DIST_MAX = 6000;
+export const EDCAM = { on: false, x: 0, y: 0, z: 0, yaw: 0, pitch: -0.5, speed: 26 };
+const SPD_MIN = 4, SPD_MAX = 400;
+/* How far in front of the camera a new object lands. Far enough to be in frame at a normal flying
+   height, near enough that it is not a dot on the horizon. */
+const PLACE_AHEAD = 260;
 window.__bfEdCam = () => EDCAM;
 
+/* Start behind and above the hero looking down at him, which is the view he was just playing in -
+   opening the editor should never drop you somewhere you have to re-orient from. */
 function camStart(){
   const g = G(), p = g && g.p;
-  EDCAM.x = p ? p.x : 0; EDCAM.z = p ? p.z : 0; EDCAM.y = p ? (p.y || 0) : 0;
-  EDCAM.yaw = (g && g.camYaw != null) ? g.camYaw : 0;
-  EDCAM.pitch = 0.85; EDCAM.dist = 700; EDCAM.on = true;
+  const yaw = (g && g.camYaw != null) ? g.camYaw : 0;
+  EDCAM.yaw = yaw; EDCAM.pitch = -0.45;
+  EDCAM.x = (p ? p.x : 0) - Math.sin(yaw) * 300;
+  EDCAM.y = (p ? (p.y || 0) : 0) + 210;
+  EDCAM.z = (p ? p.z : 0) - Math.cos(yaw) * 300;
+  EDCAM.on = true;
+}
+
+/* Fly along the direction you are FACING, including up and down - flying "forward" while looking
+   at the ground has to take you toward the ground, or you cannot get close to what you are
+   editing. Strafe stays horizontal so you can sidestep along a wall without drifting into it. */
+function camFly(fwd, right, up){
+  const sp = EDCAM.speed;
+  const cp = Math.cos(EDCAM.pitch);
+  const fx = Math.sin(EDCAM.yaw) * cp, fy = Math.sin(EDCAM.pitch), fz = Math.cos(EDCAM.yaw) * cp;
+  const rx = Math.cos(EDCAM.yaw), rz = -Math.sin(EDCAM.yaw);
+  EDCAM.x += fx * fwd * sp + rx * right * sp;
+  EDCAM.y += fy * fwd * sp + up * sp;
+  EDCAM.z += fz * fwd * sp + rz * right * sp;
+}
+
+/* Drag to look. Pitch is clamped just short of straight up and down: past vertical the view rolls
+   over and every control inverts, which is disorienting and has no use. */
+function camLook(dx, dy){
+  EDCAM.yaw   -= dx * 0.0042;
+  EDCAM.pitch -= dy * 0.0042;
+  const lim = Math.PI / 2 - 0.03;
+  EDCAM.pitch = Math.max(-lim, Math.min(lim, EDCAM.pitch));
 }
 
 /* Pan RELATIVE TO WHERE YOU ARE FACING, not along world x/z. Turn the camera 90 degrees and a
    world-axis pan sends you sideways, which reads as broken. */
-function camPan(fwd, right){
-  const sp = EDCAM.dist * 0.06;                 // zoomed out you cross more ground per press
-  const fx = Math.sin(EDCAM.yaw), fz = Math.cos(EDCAM.yaw);
-  EDCAM.x += fx * fwd * sp + fz * right * sp;
-  EDCAM.z += fz * fwd * sp - fx * right * sp;
-}
-function camZoom(mul){ EDCAM.dist = Math.max(DIST_MIN, Math.min(DIST_MAX, EDCAM.dist * mul)); }
+/* The wheel changes FLY SPEED, not zoom. There is no zoom on a free camera - you move instead -
+   and speed is the thing you actually need to change, between nudging around one prop and crossing
+   a level. */
+function camSpeed(mul){ EDCAM.speed = Math.max(SPD_MIN, Math.min(SPD_MAX, EDCAM.speed * mul)); }
 
 function onWheel(e){
   if(!EDITOR.on) return;
-  camZoom(e.deltaY > 0 ? 1.12 : 0.89);
+  camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
   e.preventDefault(); e.stopPropagation();
 }
 
 /* Where a new object goes: the focus point, which is the centre of the screen. */
-export function camFocus(){ return { x: EDCAM.x, z: EDCAM.z }; }
+/* Where a new object goes: a point on the ground in front of the camera. Projected from the look
+   direction so it is genuinely "where I'm looking"; if you are looking at or above the horizon
+   there is no ground ahead, so it falls back to a fixed distance out. */
+export function camFocus(){
+  const cp = Math.cos(EDCAM.pitch);
+  const fx = Math.sin(EDCAM.yaw) * cp, fy = Math.sin(EDCAM.pitch), fz = Math.cos(EDCAM.yaw) * cp;
+  let t = PLACE_AHEAD;
+  if(fy < -0.05){ const g = -EDCAM.y / fy; if(g > 0 && g < 4000) t = g; }
+  return { x: EDCAM.x + fx * t, z: EDCAM.z + fz * t };
+}
 
 function css(){
   if(document.getElementById('bfedcss')) return;
@@ -171,8 +210,10 @@ function hud(){
                          ' x ' + Math.round(s.o.h || 0) : '') +
         (s.o.r != null ? '<br>radius ' + Math.round(s.o.r) : '') + '</div>'
       : '<div class="row">click something to select it</div>');
-    rows.push('<div class="row"><span class="k">WASD</span>pan <span class="k">QE</span>turn' +
-              ' <span class="k">wheel</span>zoom <span class="k">G</span>find hero</div>');
+    rows.push('<div class="row"><span class="k">drag</span>look around &middot; ' +
+              '<span class="k">WASD</span>fly <span class="k">Q</span><span class="k">E</span>down/up</div>');
+    rows.push('<div class="row"><span class="k">wheel</span>fly speed (' + Math.round(EDCAM.speed) +
+              ') <span class="k">G</span>find hero</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
     rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
@@ -608,8 +649,17 @@ function dragBasis(o){
 }
 
 function onDown(e){
-  if(!EDITOR.on || !EDITOR.editable || e.button !== 0) return;
-  const hit = pickAt(e.clientX, e.clientY);
+  if(!EDITOR.on || e.button !== 0) return;
+  /* Right/middle drag always looks. Left drag looks too UNLESS it grabbed an object - so dragging
+     empty space turns the camera, which is what every 3D tool does and what Oliver asked for, and
+     dragging a thing still moves the thing. One button, no modifier to remember. */
+  const hit = EDITOR.editable ? pickAt(e.clientX, e.clientY) : null;
+  if(!hit){
+    _look = { sx: e.clientX, sy: e.clientY };
+    EDITOR.sel = null; hud();
+    e.preventDefault(); e.stopPropagation();
+    return;
+  }
   EDITOR.sel = hit;
   if(hit){
     const B = dragBasis(hit.o);
@@ -620,7 +670,13 @@ function onDown(e){
   hud();
 }
 function onMove(e){
-  if(!EDITOR.on || !_drag || !EDITOR.sel) return;
+  if(!EDITOR.on) return;
+  if(_look){
+    camLook(e.clientX - _look.sx, e.clientY - _look.sy);
+    _look.sx = e.clientX; _look.sy = e.clientY;
+    e.preventDefault(); return;
+  }
+  if(!_drag || !EDITOR.sel) return;
   const s = EDITOR.sel, B = _drag.B;
   const dx = e.clientX - _drag.sx, dy = e.clientY - _drag.sy;
   /* Always measured from the drag's START, never accumulated per event: accumulating would let
@@ -630,6 +686,7 @@ function onMove(e){
   e.preventDefault();
 }
 function onUp(){
+  if(_look){ _look = null; return; }
   if(_drag && EDITOR.sel){
     const s = EDITOR.sel, o = s.o, was = _drag.undoGeom, from = _drag.undoFrom;
     /* A click that did not actually move anything is not an edit, and pushing it would fill the
@@ -667,15 +724,14 @@ function onKey(e){
     const k = e.key.toLowerCase();
     let did = true;
     const step = e.shiftKey ? 3 : 1;
-    if(k === 'w') camPan(step, 0);
-    else if(k === 's') camPan(-step, 0);
-    else if(k === 'a') camPan(0, -step);
-    else if(k === 'd' && !EDITOR.sel) camPan(0, step);        // D duplicates when something is selected
-    else if(k === 'q') EDCAM.yaw -= 0.12 * step;
-    else if(k === 'e') EDCAM.yaw += 0.12 * step;
-    else if(k === 'f') camZoom(1.12);
-    else if(k === 'g'){ const p = G() && G().p; if(p){ EDCAM.x = p.x; EDCAM.z = p.z; EDCAM.y = p.y || 0; } }
-    else if(k === 't') EDCAM.pitch = Math.max(0.25, Math.min(1.45, EDCAM.pitch + (e.shiftKey ? -0.08 : 0.08)));
+    if(k === 'w') camFly(step, 0, 0);
+    else if(k === 's') camFly(-step, 0, 0);
+    else if(k === 'a') camFly(0, -step, 0);
+    else if(k === 'd' && !EDITOR.sel) camFly(0, step, 0);     // D duplicates when something is selected
+    else if(k === 'q') camFly(0, 0, -step);                   // down
+    else if(k === 'e') camFly(0, 0, step);                    // up
+    else if(k === ' ') camFly(0, 0, step);
+    else if(k === 'g'){ const p = G() && G().p; if(p){ EDCAM.x = p.x; EDCAM.y = (p.y || 0) + 210; EDCAM.z = p.z; } }
     else did = false;
     if(did){ hud(); e.preventDefault(); e.stopPropagation(); return; }
   }
@@ -860,7 +916,7 @@ export function toggle(force){
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
     EDCAM.on = false;   // back into the hero, standing exactly where he was, ready to playtest
-    _ui = null; _marker = null; EDITOR.sel = null; _drag = null; EDITOR.place = null;
+    _ui = null; _marker = null; EDITOR.sel = null; _drag = null; _look = null; EDITOR.place = null;
     if(OVERLAY.on) toggleOverlay(false);   // leaving edit mode must not strand wireframes in the game
     toast('edit mode off');
   }

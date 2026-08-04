@@ -65,22 +65,28 @@ an area you have not touched behaves exactly as it does today, and the diffs are
 
 ## The camera
 
-**F2 releases you from the character** into an overhead orbit. **F2 again drops you straight back
+**F2 releases you from the character** into a free-flying camera. **F2 again drops you straight back
 into the hero, where he was standing**, so you can playtest what you just built without a reload.
 
 | key | camera |
 |---|---|
-| `WASD` | pan (`shift` = faster) |
-| `Q` / `E` | turn |
-| wheel, or `F` | zoom (`R` is rotate, so zoom-in is the wheel) |
-| `T` | tilt (`shift` reverses) |
-| `G` | re-centre on the hero when you have flown off and lost him |
+| drag empty space | look around |
+| `WASD` | fly along the way you are facing |
+| `Q` / `E` | down / up (`space` also rises) |
+| wheel | fly speed |
+| `G` | jump back to the hero when you have flown off and lost him |
 
 Clicking an asset in the palette **adds it where the camera is looking** and selects it, so you
 nudge it into place from there. No arming, no second click hunting for a ground pixel.
 
-Panning is relative to the way you are facing, not world axes - turn 90 degrees and W still goes
-"forward" on screen.
+Dragging empty space turns the camera; dragging an OBJECT still moves the object. One button, no
+modifier - the editor works out which you meant from whether the cursor grabbed something.
+
+Flying forward while looking down takes you toward the ground, so you can get close to what you are
+editing. Strafing stays horizontal so you can sidestep along a wall without drifting into it.
+
+**Still to come:** explicit Build and Transform modes. Right now selecting an object gives you the
+move/resize/rotate keys directly; Oliver wants a distinct transform mode with handles.
 
 ## Superseded: the old note about this being next
 

@@ -106,14 +106,27 @@ function camStart(){
 /* Fly along the direction you are FACING, including up and down - flying "forward" while looking
    at the ground has to take you toward the ground, or you cannot get close to what you are
    editing. Strafe stays horizontal so you can sidestep along a wall without drifting into it. */
-function camFly(fwd, right, up){
+/* WASD moves HORIZONTALLY, exactly like walking - Oliver: "just like how my character does, just
+   not being stuck on the ground". It deliberately ignores pitch: flying along the look direction
+   made W and S behave like zoom whenever you were looking down, which is why he asked for separate
+   zoom keys. Height is its own control, and zoom is its own control. */
+function camMove(fwd, right, up){
   const sp = EDCAM.speed;
-  const cp = Math.cos(EDCAM.pitch);
-  const fx = Math.sin(EDCAM.yaw) * cp, fy = Math.sin(EDCAM.pitch), fz = Math.cos(EDCAM.yaw) * cp;
+  const fx = Math.sin(EDCAM.yaw), fz = Math.cos(EDCAM.yaw);
   const rx = Math.cos(EDCAM.yaw), rz = -Math.sin(EDCAM.yaw);
   EDCAM.x += fx * fwd * sp + rx * right * sp;
-  EDCAM.y += fy * fwd * sp + up * sp;
   EDCAM.z += fz * fwd * sp + rz * right * sp;
+  EDCAM.y += up * sp;
+}
+
+/* ZOOM on a free camera is a dolly: travel along the way you are looking, pitch included, so
+   zooming in while looking down at a platform takes you to that platform. */
+function camDolly(dir){
+  const sp = EDCAM.speed * 2.2;
+  const cp = Math.cos(EDCAM.pitch);
+  EDCAM.x += Math.sin(EDCAM.yaw) * cp * dir * sp;
+  EDCAM.y += Math.sin(EDCAM.pitch) * dir * sp;
+  EDCAM.z += Math.cos(EDCAM.yaw) * cp * dir * sp;
 }
 
 /* Drag to look. Pitch is clamped just short of straight up and down: past vertical the view rolls
@@ -134,7 +147,10 @@ function camSpeed(mul){ EDCAM.speed = Math.max(SPD_MIN, Math.min(SPD_MAX, EDCAM.
 
 function onWheel(e){
   if(!EDITOR.on) return;
-  camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
+  /* The wheel zooms, because that is what every 3D tool does and what a hand reaches for. Fly
+     speed moves to shift+wheel - still adjustable, no longer occupying the obvious gesture. */
+  if(e.shiftKey) camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
+  else camDolly(e.deltaY > 0 ? -1 : 1);
   e.preventDefault(); e.stopPropagation();
 }
 
@@ -218,10 +234,11 @@ function hud(){
                          ' x ' + Math.round(s.o.h || 0) : '') +
         (s.o.r != null ? '<br>radius ' + Math.round(s.o.r) : '') + '</div>'
       : '<div class="row">click something to select it</div>');
-    rows.push('<div class="row"><span class="k">drag</span>look around &middot; ' +
-              '<span class="k">WASD</span>fly <span class="k">Q</span><span class="k">E</span>down/up</div>');
-    rows.push('<div class="row"><span class="k">wheel</span>fly speed (' + Math.round(EDCAM.speed) +
-              ') <span class="k">G</span>find hero</div>');
+    rows.push('<div class="row"><span class="k">drag</span>turn the camera &middot; ' +
+              '<span class="k">WASD</span>move <span class="k">Q</span><span class="k">E</span>down/up</div>');
+    rows.push('<div class="row"><span class="k">Z</span><span class="k">X</span>or <span class="k">wheel</span>zoom' +
+              ' &middot; <span class="k">shift wheel</span>speed (' + Math.round(EDCAM.speed) + ')</div>');
+    rows.push('<div class="row"><span class="k">G</span>jump back to the hero</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
     rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
@@ -749,13 +766,15 @@ function onKey(e){
     const k = e.key.toLowerCase();
     let did = true;
     const step = e.shiftKey ? 3 : 1;
-    if(k === 'w') camFly(step, 0, 0);
-    else if(k === 's') camFly(-step, 0, 0);
-    else if(k === 'a') camFly(0, -step, 0);
-    else if(k === 'd' && !EDITOR.sel) camFly(0, step, 0);     // D duplicates when something is selected
-    else if(k === 'q') camFly(0, 0, -step);                   // down
-    else if(k === 'e') camFly(0, 0, step);                    // up
-    else if(k === ' ') camFly(0, 0, step);
+    if(k === 'w') camMove(step, 0, 0);
+    else if(k === 's') camMove(-step, 0, 0);
+    else if(k === 'a') camMove(0, -step, 0);
+    else if(k === 'd' && !EDITOR.sel) camMove(0, step, 0);    // D duplicates when something is selected
+    else if(k === 'q') camMove(0, 0, -step);                  // down
+    else if(k === 'e') camMove(0, 0, step);                   // up
+    else if(k === ' ') camMove(0, 0, step);
+    else if(k === 'z') camDolly(step);                        // zoom IN
+    else if(k === 'x') camDolly(-step);                       // zoom OUT
     else if(k === 'g'){ const p = G() && G().p; if(p){ EDCAM.x = p.x; EDCAM.y = (p.y || 0) + 210; EDCAM.z = p.z; } }
     else did = false;
     if(did){ hud(); e.preventDefault(); e.stopPropagation(); return; }
@@ -929,6 +948,10 @@ export function toggle(force){
     addEventListener('mouseup',   onUp,   true);
     addEventListener('wheel',     onWheel, { capture: true, passive: false });
     camStart();
+    /* Hand the cursor back. The shoulder camera may already hold a pointer lock from play, and the
+       editor is unusable without a visible pointer. */
+    try { if(document.pointerLockElement) document.exitPointerLock(); } catch(err){}
+    const cv = document.getElementById('gl'); if(cv) cv.style.cursor = 'crosshair';
     hud(); tick();
     toast(EDITOR.editable ? 'edit mode - WASD pan, QE turn, wheel zoom, F2 to play'
                           : 'edit mode (read-only here)');
@@ -941,6 +964,7 @@ export function toggle(force){
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
     EDCAM.on = false;   // back into the hero, standing exactly where he was, ready to playtest
+    const cv0 = document.getElementById('gl'); if(cv0) cv0.style.cursor = '';
     _ui = null; _marker = null; EDITOR.sel = null; _drag = null; _look = null; EDITOR.place = null;
     if(OVERLAY.on) toggleOverlay(false);   // leaving edit mode must not strand wireframes in the game
     toast('edit mode off');

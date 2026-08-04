@@ -70,10 +70,11 @@ into the hero, where he was standing**, so you can playtest what you just built 
 
 | key | camera |
 |---|---|
-| drag empty space | look around |
-| `WASD` | fly along the way you are facing |
+| drag empty space | turn the camera (the cursor stays visible) |
+| `WASD` | move horizontally, like walking, at any height |
 | `Q` / `E` | down / up (`space` also rises) |
-| wheel | fly speed |
+| `Z` / `X`, or wheel | zoom in / out along the way you are looking |
+| `shift`+wheel | fly speed |
 | `G` | jump back to the hero when you have flown off and lost him |
 
 Clicking an asset in the palette **adds it where the camera is looking** and selects it, so you

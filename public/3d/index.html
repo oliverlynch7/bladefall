@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.451.0-panelfix';
+const VERSION3D='1.455.0-freecam';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5985,13 +5985,16 @@ let _codeToAction={};
 function rebuildKeyLookup(){ _codeToAction={}; for(const a of KEYACTIONS){ for(const code of (meta.keybinds[a.id]||[])){ if(code && _codeToAction[code]==null) _codeToAction[code]=a.id; } } try{ updateHudKeys(); }catch(e){} }
 function keyAction(code){ return _codeToAction[code]||null; }
 ensureKeybinds();
+/* Is the level editor open? Read in the pointer-lock paths and the key handler. A function rather
+   than a cached flag because the editor module loads after this script and toggles at any time. */
+function _edOpen(){ return !!(window.__bfEd && window.__bfEd.EDITOR && window.__bfEd.EDITOR.on); }
 window.addEventListener('keydown',e=>{
   /* EDIT MODE OWNS THE KEYBOARD. Oliver, testing the editor: "when I try to press some of the keys,
      it moves my character around while I'm trying to do things." Nudging a platform with the arrow
      keys was also walking the hero across the level, and R/D/C/K are all bound to something.
      Every held movement axis is cleared as well as the event being dropped - otherwise a key held
      at the moment F2 was pressed stays latched true forever and the hero jogs off on his own. */
-  if(window.__bfEd && window.__bfEd.EDITOR && window.__bfEd.EDITOR.on){
+  if(_edOpen()){
     for(const k in input) if(MOVE_ACTS[k]) input[k]=false;
     return;
   }
@@ -6094,7 +6097,12 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Desktop: ANY click anywhere in live play recaptures the camera. Capture phase prevents HUD layers
 // or controls from shrinking the usable reacquisition region after tabbing away.
 function acquireCameraLock(){
-  if(meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
+  /* NEVER grab the pointer while the level editor is open. Oliver: "i dont have control of my
+     mouse." The over-the-shoulder camera pointer-locks the canvas on click to steer the hero, which
+     hides the cursor and feeds the movement straight to the camera - so in edit mode you could not
+     see where you were clicking, could not press a palette button, and could not drag to look.
+     An editor is a cursor-driven tool; the lock has to be off for the whole time it is open. */
+  if(_edOpen()||meta.camMode==='far'||mode!=='play'||document.pointerLockElement===canvas||!canvas.requestPointerLock) return;
   showGameUI(true); try{ const q=canvas.requestPointerLock(); if(q&&q.catch) q.catch(()=>{}); }catch(e){}
 }
 window.addEventListener('pointerdown',()=>acquireCameraLock(),true);
@@ -9605,7 +9613,7 @@ function randomLoot(rid){ const r=Math.random();
   return {weapon:makeWeapon(DROP_ARCHES[Math.floor(Math.random()*DROP_ARCHES.length)],rid)}; }
 // Re-capture the mouse for the shoulder/fps camera the instant a menu closes, so a normal menu
 // interaction never costs you camera control — only Esc releases it. (Runs inside the closing click = a valid gesture.)
-function regrabCam(){ if(meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
+function regrabCam(){ if(!_edOpen() && meta.camMode!=='far' && mode==='play' && document.pointerLockElement!==canvas && canvas.requestPointerLock){ try{ canvas.requestPointerLock(); }catch(e){} } }
 // The single menu-to-game boundary. Active play must always have the full HUD restored;
 // individual menus are allowed to hide it, but they never get to decide whether it returns.
 function resumePlay(){ mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); questUpdate(); hudUpdate(); regrabCam(); }

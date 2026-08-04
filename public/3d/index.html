@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.490.0-e45';
+const VERSION3D='1.495.0-arenas';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5616,8 +5616,20 @@ function loadStageRaw(i){
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
-  const rnd=mulberry(i*7919+31+(G.runSeed||0)+so), rnd2=mulberry(i*104729+7+(G.runSeed||0)+so*3);
+  /* G1: BOSS AND MINI-BOSS ARENAS ARE SET, NOT PROCEDURAL.
+     `runSeed` is re-rolled every run, so every arena was a different room each time you reached it.
+     That is wrong for a boss: the fight is the content, and learning it means learning the SPACE -
+     where the pillars are, where you can back off, what you can put between you and a charge. A
+     re-rolled arena makes every attempt partly a fresh map-reading problem, which is also why the
+     Boss Gauntlet never felt like a gauntlet: a gauntlet of unfamiliar rooms is just a long run.
+     Dropping runSeed leaves them keyed to the stage index, exactly as the eight core zones already
+     are through EXPANDED_SCAPES. It also makes them EDITABLE - the level editor refuses re-rolled
+     areas because an edit has nothing stable to attach to, so this is what lets Oliver lay out a
+     boss arena by hand.
+     isBoss/isMini moved above the seed because the seed now depends on them. */
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
+  const _seed=(isBoss||isMini)?0:(G.runSeed||0);   // arenas: same layout every run
+  const rnd=mulberry(i*7919+31+_seed+so), rnd2=mulberry(i*104729+7+_seed+so*3);
   const eliteRate=Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
   const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
   // Phasing zones bias their bridges toward static stones, because those are the only tiles the hazard may take.

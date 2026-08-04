@@ -54,7 +54,10 @@ export function areaKey(G, curZone){
   if(G.hub) return 'hub';
   if(G.trial) return { blocked: 'class trial — re-rolls every run, so edits cannot stick' };
   if(G.side)  return { blocked: 'side zone — re-rolls every run, so edits cannot stick' };
-  if(G.arena) return { blocked: 'arena' };
+  /* Boss and mini-boss arenas became SET in G1, so they now have a stable identity to attach edits
+     to and are editable like the core zones. `G.arena` is the SPARRING arena, which is a different
+     thing and still re-rolls. */
+  if(G.arena) return { blocked: 'sparring arena — re-rolls every run, so edits cannot stick' };
   const z = (curZone && curZone().id) || 'zone';
   return z + '.' + (G.area != null ? G.area : 0);
 }

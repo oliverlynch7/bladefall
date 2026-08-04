@@ -1967,4 +1967,18 @@ export function syncWorld(scene){
 
 window.__world3d = () => ({ on: WORLD3D.on, ready: WORLD3D.ready, built: WORLD3D.built,
                             counts: WORLD3D.counts, err: WORLD3D.err });
+/* Toggle the world layer off for a frame. The bag paper-doll and the skin avatars render the hero
+   into the MAIN canvas and blit the result, and drawHero3D syncs the whole world before it draws -
+   so without this the doll came back with the Waystation's cobbles and a lamp post behind the
+   character. The hero is the portrait; the world is not invited. */
+window.__world3dEnabled = (v) => {
+  const was = WORLD3D.on;
+  WORLD3D.on = !!v;
+  /* HIDE THE GROUP, do not merely stop updating it. Clearing the flag only makes syncWorld
+     early-return; the group it already built stays in the scene and keeps drawing, which is why the
+     paper-doll still came back with cobbles and a lamp post behind the character. */
+  if(group) group.visible = !!v;
+  return was;
+};
+
 window.__world3dRebuild = () => { WORLD3D.built = null; return 'will rebuild next frame'; };

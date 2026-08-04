@@ -167,6 +167,10 @@ function buildKeyActor(){
   return { root:pivot };
 }
 
+/* Same switch world3d and mob3d have: the bag paper-doll blits the main canvas, so a chest left
+   visible in the scene ends up standing in the portrait next to you. */
+window.__prop3dEnabled = (v) => { try { if(_group) _group.visible = !!v; } catch(e){} };
+
 export function syncProps(scene, dt){
   if(!PROP3D.on) return false;
   /* Contain faults HERE, as mob3d does. Left to propagate, a bad chest reaches drawHero3D's catch

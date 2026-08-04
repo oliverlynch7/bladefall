@@ -207,6 +207,10 @@ function playMob(rec, moving){
 }
 
 /* Called every frame from the hero draw. Reads the game's live enemy list and mirrors it. */
+/* Same switch world3d has, and for the same reason: the bag paper-doll blits the main canvas, so
+   anything left visible in the scene ends up standing behind the portrait. */
+window.__mob3dEnabled = (v) => { try { if(_mobGroup) _mobGroup.visible = !!v; } catch(e){} };
+
 export function syncMobs(scene, dt){
   if(!MOB3D.on) return false;
   /* Contain mob faults HERE. Without this the throw propagates to drawHero3D's catch, which sets

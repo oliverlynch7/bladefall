@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.800.0-poses';
+const VERSION3D='1.810.0-bagdoll';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3786,9 +3786,37 @@ function bagDollRender(){
      permanently prevents the 2D context the blit needs - the doll threw on clearRect and the bag
      broke outright. The fix is not a renderer, it is to get the 3D hero into the main canvas during
      this pass so the existing blit carries it. */
-  p.x=0; p.z=0; p.y=0; p.yaw=0; drawHero3(p,t,true);
+  /* THE 3D HERO GOES INTO THE MAIN CANVAS, and the blit below carries it. The doll draws the scene
+     into the game canvas and then drawImage()s it into bagDollCanvas, so the way to get the real
+     model in here is not a second renderer - it is to be in the frame the blit already takes.
+     An earlier attempt handed bagDollCanvas to __hero3dPreview instead. That made the canvas claim
+     a WebGL context, and a canvas that has given one out can never give out a 2D one, so the blit's
+     getContext('2d') returned null and the bag threw. Hence: main canvas, not this one. */
+  p.x=0; p.z=0; p.y=0; p.yaw=0;
+  const _doll3d = !!(window.HERO3D && window.HERO3D.on && window.HERO3D.ready && window.drawHero3D);
+  if(!_doll3d) drawHero3(p,t,true);
   if(pet){ pet.x=30; pet.z=14; pet.y=0; pet.yaw=-0.35; pet.bob=0; drawPet3(pet,t); }
-  flushBatch(); gl.finish();          // draw the accumulated hero+pet cubes before we grab the pixels
+  flushBatch();                       // draw the accumulated cubes before we grab the pixels
+  /* AFTER the voxel batch and BEFORE the grab: the 3D hero composites over what is already there,
+     exactly as it does in the world. */
+  if(_doll3d){
+    /* World off for this one draw, or the blit brings the Waystation in with it. Mobs and props go
+       with it for the same reason - a portrait with a thornboar in the background is not a
+       portrait. Restored immediately, whatever happens. */
+    let _w;
+    try {
+      _w = window.__world3dEnabled ? window.__world3dEnabled(false) : undefined;
+      if(window.__mob3dEnabled) window.__mob3dEnabled(false);
+      if(window.__prop3dEnabled) window.__prop3dEnabled(false);
+      window.drawHero3D(p, t);
+    } catch(err){}
+    try {
+      if(_w !== undefined && window.__world3dEnabled) window.__world3dEnabled(_w);
+      if(window.__mob3dEnabled) window.__mob3dEnabled(true);
+      if(window.__prop3dEnabled) window.__prop3dEnabled(true);
+    } catch(err){}
+  }
+  gl.finish();
   const ctx=cnv.getContext('2d'); ctx.clearRect(0,0,cnv.width,cnv.height);
   // BAG: frame the pair pushed to the right so the hero clears the equip cards on the left.
   // GEAR (centered): centre the hero in its own panel and show the full body.

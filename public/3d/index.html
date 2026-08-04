@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.770.0-zoneshapes';
+const VERSION3D='1.780.0-encounters';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5700,7 +5700,7 @@ function loadStageRaw(i){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
-    addVerticality(srnd); highGround(srnd); snapWorldInteractables(); return;
+    addVerticality(srnd); highGround(srnd); encounterPass(srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6638,6 +6638,60 @@ function addVerticality(rnd){
     G.obstacles.push({ x:bx0 - side*70, z:bz0 - side2*70, w:150, d:150, h:78,  kind:'plat', riser:true });
     G.obstacles.push({ x:bx0,           z:bz0,            w:190, d:190, h:168, kind:'plat', riser:true, vista:true });
     made++;
+  }
+  return made;
+}
+
+/* ── ENCOUNTERS ON THE NEW GROUND ───────────────────────────────────────────
+   Measured after the topology pass: the rooms it adds hold loot, beacons and a raised route, and
+   between zero and three defenders between them. Hollow's flank had NONE. So every optional route
+   was pure reward at no risk, which is not a choice - it is a detour you would be foolish to skip,
+   and it makes the main road the wrong answer every time.
+
+   The generator cannot fix this itself: mkMonster runs while the scape builds, and these rooms do
+   not exist yet at that point. So they are populated here, AFTER, and populated to suit the SHAPE
+   they belong to - which is what stops this being "scatter more enemies":
+
+     ISLAND  ranged, because something shooting while you are mid-jump is the islands' own threat
+             and nothing else in the game asks that question.
+     TIER    ranged and ABOVE you, so the high route is contested by whoever already holds it.
+     COURT   a dense cluster - the courtyard is a set piece you clear, not a room you pass.
+     SPUR    a small melee guard, sized to what it is guarding.
+
+   Rooms holding a chest get one extra: the reward should be the reason it is defended. */
+function encounterPass(rnd){
+  if(!G || !G.rooms) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  const rooms = (G.rooms||[]).filter(r => r && (r.spur || r.flank || r.court || r.island || r.tier));
+  if(!rooms.length) return 0;
+  const pool = [...new Set((G.enemies||[]).filter(e => !e.boss && e.type).map(e => e.type))];
+  if(!pool.length) return 0;
+  /* A SHOOTER IS ONE WITH A `shot`, NOT ONE WITH `ranged`. Every entry carrying the `ranged` flag
+     in this game is a BOSS - archer, sorcerer, colossus, tyrant - so filtering on it returned an
+     empty pool and every island got melee defenders, which is exactly the encounter the islands
+     exist to avoid. Ordinary shooters express it through kind:'caster' and a `shot` block instead.
+     Two wrong field guesses in a row on this one function; the fix both times was to read the data
+     rather than assume the schema. */
+  const ranged = Object.keys(ENEMY||{}).filter(k => ENEMY[k] && ENEMY[k].shot && !ENEMY[k].boss);
+  let made = 0;
+
+  for(const r of rooms){
+    const guarded = (G.chests||[]).some(c => Math.abs(c.x-r.x) < r.w/2+60 && Math.abs(c.z-r.z) < (r.d||r.w)/2+60);
+    const isIsland = (r.y||0) > 40 && r.w <= 420;
+    const isTier   = (r.y||0) > 120 && r.w > 420;
+    let n = r.court ? 5 : (guarded ? 3 : 2);
+    const wantRanged = (isIsland || isTier) && ranged.length;
+
+    for(let i = 0; i < n; i++){
+      const a = R()*6.283, rr = (R()*0.34) * Math.min(r.w, r.d||r.w);
+      const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr;
+      const type = wantRanged ? ranged[Math.floor(R()*ranged.length)]
+                              : pool[Math.floor(R()*pool.length)];
+      try {
+        const m = spawnEnemy(type, x, z);
+        if(m){ m.y = r.y || 0; m.sx = m.x; m.sz = m.z; G.killGoal++; made++; }
+      } catch(err){}
+    }
   }
   return made;
 }

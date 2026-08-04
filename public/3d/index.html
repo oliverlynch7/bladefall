@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.740.0-zonevocab';
+const VERSION3D='1.750.0-verticality';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5699,7 +5699,7 @@ function loadStageRaw(i){
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
-    zoneFlavour(curZone().id, srnd); snapWorldInteractables(); return;
+    zoneFlavour(curZone().id, srnd); addVerticality(srnd); highGround(srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6461,6 +6461,94 @@ const ZONE_VOCAB = {
   castle:   [['fence',10,{w:30,h:32,d:12,c:'#3a3540'}], ['grave',8,{w:18,h:36,d:12,c:'#7a7480'}],
              ['pillar',6,{w:24,h:120,d:24,c:'#4a4450'}]],
 };
+/* ── VERTICALITY ────────────────────────────────────────────────────────────
+   The measurement that forced this: after excluding E1's invisible colliders, THE OUTSKIRTS HAS ONE
+   platform you can fight on above ground level. Twelve rooms, one. Hollow has six, Frostfell four.
+   My first count said sixteen to twenty-three and was wrong - it was counting the collision boxes
+   around trees, which have a platform's shape and none of its meaning.
+
+   So the levels are flat, and that is most of why they play the same as each other however
+   differently they are coloured: every fight happens on one plane, so the only variable is what is
+   standing on it.
+
+   Each room now gets a REACHABLE rise: a two-step stack, 78 then 168, against a jump of 94 - so you
+   can climb it from any side without hunting for a staircase, and you can be pushed off it. Built
+   at the room's edge so it never blocks the route through, and skipped for small rooms and for
+   rooms that already have height, so hand-authored set pieces are left alone. */
+function addVerticality(rnd){
+  if(!G || !G.rooms) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  let made = 0;
+  for(const r of G.rooms){
+    if(!r || !r.w || r.w < 420 || (r.d||0) < 380) continue;          // too small to give up floor
+    const already = (G.obstacles||[]).some(o => o.kind==='plat' && !o.autoCol && (o.h||0) > 120
+                        && Math.abs(o.x-r.x) < r.w*0.6 && Math.abs(o.z-r.z) < (r.d||r.w)*0.6);
+    if(already) continue;                                            // this room was authored with height
+    if(R() < 0.28) continue;                                         // not every room, or it is a pattern
+    const side = R() < 0.5 ? -1 : 1, side2 = R() < 0.5 ? -1 : 1;
+    const bx0 = r.x + side * r.w * 0.30, bz0 = r.z + side2 * (r.d||r.w) * 0.30;
+    G.obstacles.push({ x:bx0 - side*70, z:bz0 - side2*70, w:150, d:150, h:78,  kind:'plat', riser:true });
+    G.obstacles.push({ x:bx0,           z:bz0,            w:190, d:190, h:168, kind:'plat', riser:true, vista:true });
+    made++;
+  }
+  return made;
+}
+
+/* ── HIGH GROUND ────────────────────────────────────────────────────────────
+   Measured across three zones before writing a line: 16 to 23 platforms big enough to fight on,
+   more than 120 units up - and on all of them, ZERO chests, ZERO pickups, and four enemies total.
+   The verticality was already built. Nobody had ever put anything on it.
+
+   That is why the levels read as functional rather than designed: climbing costs you time and buys
+   you nothing, so no player climbs, so every fight happens on the floor and every zone plays the
+   same regardless of its shape.
+
+   Three things go up there, and never the same thing twice in a row:
+     a REWARD  - go up and get it
+     an ARCHER - take the high ground or be shot from it, which is the only one that makes you WANT
+                 the vantage rather than merely visit it
+     a LANDMARK - a lit beacon, so the high point reads from across the level and tells you the
+                 space has a shape
+   A third are left bare, because verticality that ALWAYS pays becomes a checklist. */
+function highGround(rnd){
+  if(!G || !G.obstacles) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  /* EXCLUDE DERIVED COLLIDERS. E1 gives every solid prop an invisible collision box, and those are
+     kind:'plat' with a real footprint - so they look exactly like a platform to a filter and
+     nothing like one to a player. Without this, chests and archers were being placed floating on
+     the invisible box around a tree. Caught by inspecting what the filter actually matched instead
+     of trusting the count, which also means my earlier "16-23 fightable platforms per zone" was
+     inflated by them and the true verticality is lower than I reported. */
+  const high = G.obstacles.filter(o => o.kind==='plat' && !o.autoCol
+                                    && (o.h||0) > 120 && (o.w||0) >= 90 && (o.d||0) >= 90);
+  if(!high.length) return 0;
+  let n = 0;
+  high.forEach((o, i) => {
+    const roll = R();
+    if(roll < 0.34){
+      G.chests.push(chestMaybeMimic({ x:o.x, z:o.z, y:o.h, opened:false, bob:0 }, rnd || Math.random));
+      n++;
+    } else if(roll < 0.62){
+      /* A shooter on the ledge. Ranged on purpose: a melee enemy up there is a thing you ignore,
+         while something shooting down at you makes the high ground worth taking. */
+      try {
+        const type = (G.enemies||[]).find(e => e.ranged && !e.boss);
+        const m = spawnEnemy(type ? type.type : 'caster', o.x, o.z);
+        if(m){ m.y = o.h; m.sx = m.x; m.sz = m.z; n++; }
+      } catch(err){}
+    } else if(roll < 0.78){
+      /* A beacon: the high point becomes something you can navigate BY, which is most of what
+         "sightlines" means in a level you cannot see the whole of. */
+      vcol(o.x, o.z, 18, 18, o.h + 54);
+      G.deco.push({ x:o.x, z:o.z, y0:o.h + 54, w:30, h:12, d:30, c:'#ffb34d' });
+      G.deco.push({ x:o.x, z:o.z, y0:o.h + 64, w:11, h:64, d:11, c:'#fff0a0' });
+      G.torches.push({ x:o.x + 26, z:o.z, ph:R()*6.28, y:o.h });
+      n++;
+    }
+  });
+  return n;
+}
+
 function zoneFlavour(zid, rnd){
   const V = ZONE_VOCAB[zid];
   if(!V || !G || !G.rooms || !G.rooms.length) return 0;

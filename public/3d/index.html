@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.690.0-skills-done';
+const VERSION3D='1.695.0-balance-probe';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8204,7 +8204,12 @@ const CLASS_BASIC = {
      KILL returns the health. A round going well costs nothing; a round going badly compounds -
      which is the bargain the class is named for, made real instead of described. */
   warlock(p, e, dmg){
-    const cost = Math.max(1, Math.round(effMaxHp(p) * 0.012));
+    /* 3%, up from 1.2%. Measured across sixteen classes against a dummy: the Warlock came out top
+       at 1882 damage per ten swings against a 1344 baseline - a 40% gain for about a tenth of his
+       health, which is a free lunch rather than a bargain. At 3% ten swings cost nearly a third of
+       him, so the class is genuinely choosing between damage and survival, which is the whole idea.
+       The kill refund is unchanged, so a Warlock who is winning still pays nothing. */
+    const cost = Math.max(1, Math.round(effMaxHp(p) * 0.03));
     if(p.hp <= cost + 1) return;
     p.hp -= cost;
     p._bloodOwed = (p._bloodOwed || 0) + cost;

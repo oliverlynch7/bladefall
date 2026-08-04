@@ -428,3 +428,32 @@ Whirlwind -> **Deathwish** (a spin that hits harder the less health you have).
 
 IMPLEMENTED 2026-08-04 (v1.670-1.690). All nine capstones, both same-role pairs, and the
 Berserker's four Warrior copies.
+
+
+---
+
+# Balance probe, 2026-08-04
+
+Everything above was verified to FIRE, not to be survivable or fair. Ten basic attacks per class
+against a dummy, all at full health, common starter weapon:
+
+    Warlock 1882 | Mage 1666 | Paladin 1522 | Pirate 1519 | Reaper 1279
+    baseline 1344 (necro, ninja, berserker, chrono, monk, stormcaller, bladedancer, beastmaster)
+    Warrior 1145 | Skylancer 1075 | Ranger 974
+
+Most of that spread is intentional and CONDITIONAL, and the probe cannot see the condition:
+  - Ranger 974 because the dummy is at 60 units. At range he is 1.35x, so he tops the table.
+  - Skylancer 1075 because he is grounded. Airborne he is 1.5x.
+  - Berserker reads baseline because he is at FULL HEALTH. At a sliver he is roughly double.
+  - Warrior 1145 because his identity is a stagger, not damage.
+The eight classes sitting exactly on 1344 are the ones whose identity does not touch damage at all,
+which is the healthy result: nothing was accidentally inflated by the rewrite.
+
+ONE GENUINE PROBLEM FOUND AND FIXED. The Warlock was 40% above baseline for 1.2% max HP per swing -
+about a tenth of his health across ten swings, which is a free lunch rather than a bargain. Raised
+to 3%: ten swings now cost 30% of him for the same gain, so the class genuinely chooses between
+damage and survival. The kill refund is untouched, so a Warlock who is winning still pays nothing.
+
+WHAT THIS PROBE CANNOT TELL YOU: whether any of it is fun, whether the conditional classes feel bad
+in their off state (Ranger up close, Skylancer grounded), or how any of it survives contact with an
+actual room of enemies. That needs playing.

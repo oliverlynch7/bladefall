@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.670.0-skills1';
+const VERSION3D='1.680.0-capstones';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1947,7 +1947,7 @@ const CLASSES={
       {id:'chr_bolt',n:'Time Bolt',icon:skillIcon('chrono-time-bolt'),cd:5,rank:1,d:'A heavy bolt of temporal energy'},
       {id:'chr_nova',n:'Slow Field',icon:skillIcon('chrono-slow-field'),cd:8,rank:2,d:'A burst that slows nearby foes'},
       {id:'chr_blink',n:'Rewind',icon:skillIcon('chrono-rewind'),cd:14,rank:4,d:'Blink through time, briefly untouchable'},
-      {id:'chr_tempest',n:'Time Storm',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]},
+      {id:'chr_tempest',n:'Stopped Clock',icon:skillIcon('chrono-time-storm'),cd:24,rank:7,d:'A storm of decaying time around you'}]},
   monk:{disp:'Monk',icon:classIcon('monk'),attackStyle:'warrior',earned:true,shopUnlock:true,charter:9000,family:['fist'],
     subs:[{id:'way',disp:'Way of the Fist',blurb:'Flurry and Focus — relentless offense.'},
           {id:'flow',disp:'Way of Flow',blurb:'Parry and evade — turn their blows against them.'}],
@@ -1971,7 +1971,7 @@ const CLASSES={
       {id:'war_bolt',n:'Shadow Bolt',icon:skillIcon('warlock-shadow-bolt'),cd:2.5,rank:2,d:'A fast void bolt powered by a sliver of your health'},
       {id:'war_curse',n:'Curse Circle',icon:skillIcon('warlock-curse-circle'),cd:9,rank:4,d:'Mark nearby foes so your spells hit them harder'},
       {id:'war_step',n:'Rift Step',icon:skillIcon('warlock-rift-step'),cd:11,rank:6,d:'Tear through shadow and burst at both ends'},
-      {id:'war_storm',n:'Dark Storm',icon:skillIcon('warlock-dark-storm'),cd:23,rank:8,d:'A violent void storm follows you'}]},
+      {id:'war_storm',n:'Pact',icon:skillIcon('warlock-dark-storm'),cd:23,rank:8,d:'A violent void storm follows you'}]},
   skylancer:{disp:'Skylancer',icon:classIcon('skylancer'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:13500,family:['javelin','bow'],
     subs:[{id:'diver',disp:'Storm Diver',blurb:'Launch high, then crash through the enemy line.'},
           {id:'wind',disp:'Wind Hunter',blurb:'Stay mobile and rain attacks down from safety.'}],
@@ -1987,7 +1987,7 @@ const CLASSES={
       {id:'bd_counter',n:'Counter Stance',icon:skillIcon('bladedancer-counter-stance'),cd:8,rank:2,d:'Briefly prepare to parry the next hit'},
       {id:'bd_riposte',n:'Riposte',icon:skillIcon('bladedancer-riposte'),cd:9,rank:4,d:'A powerful counter slash, stronger after a parry'},
       {id:'bd_mirror',n:'Mirror Guard',icon:skillIcon('bladedancer-mirror-guard'),cd:14,rank:6,d:'Parry and send the force back around you'},
-      {id:'bd_steel',n:'Dance of Steel',icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
+      {id:'bd_steel',n:'Perfect Guard',icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
   beastmaster:{disp:'Beastmaster',icon:classIcon('beastmaster'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
@@ -2016,7 +2016,7 @@ const CLASS2={
     r5:{kind:'passive',a:{id:'w_second',n:'Second Wind',role:'Sustain',d:'Dropping below 35% HP restores 12% max HP once every 30s.'},b:{id:'w_unyield',n:'Unyielding',role:'Defense',d:'You cannot be staggered, knocked back, or moved by anything.'}},
     r6:{kind:'skill',slot:2,a:{id:'w_guard',n:'Iron Guard',cd:13,role:'Defense',fx:'w_guard',d:'Brace for 3s, reducing incoming damage by 60%.'},b:{id:'w_stomp',n:'Shockwave Stomp',cd:12,role:'Control',fx:'w_stomp',d:'Slam the ground for 1.5x damage and heavy knockback all around.'}},
     r7:{kind:'passive',a:{id:'w_bloodlust',n:'Bloodlust',role:'Offense',d:'A kill keeps your Momentum stacks instead of resetting them.'},b:{id:'w_tactical',n:'Tactical Guard',role:'Defense',d:'After dodging, gain 20% damage reduction for 2s.'}},
-    r8:{kind:'skill',slot:3,a:{id:'w_berserk',n:'Berserk',cd:22,role:'Offense',fx:'w_berserk',d:'+35% damage and +30% attack speed for 6s.'},b:{id:'w_execute',n:'Execution',cd:20,role:'Finisher',fx:'w_execute',d:'A crushing 4x strike that executes normal enemies below 20% HP.'}},
+    r8:{kind:'skill',slot:3,a:{id:'w_berserk',n:'Warcry',cd:22,role:'Offense',fx:'w_berserk',d:'+35% damage and +30% attack speed for 6s.'},b:{id:'w_execute',n:'Execution',cd:20,role:'Finisher',fx:'w_execute',d:'A crushing 4x strike that executes normal enemies below 20% HP.'}},
     r9:{kind:'passive',a:{id:'w_master',n:'Weapon Master',role:'Damage',d:'Warrior-family weapons deal +10% damage and skills cost 10% less mana.'},b:{id:'w_juggernaut',n:'Juggernaut',role:'Defense',d:'+15% knockback resistance and +8% damage reduction while moving.'}}
   },
   ranger:{ disp:'Ranger', icon:classIcon('ranger'),
@@ -2096,7 +2096,7 @@ const CLASS2={
     r5:{kind:'passive', a:{id:'nin_evasive',n:'Evasion',role:'Defense',d:'+12% chance to dodge attacks entirely (MISS), and take 10% less damage. Each dodge also stacks your damage.'}, b:{id:'nin_combo',n:'Combo Edge',role:'Chain',d:'Killing with Unseen instantly rearms it — chain from body to body.'}},
     r6:{kind:'skill',slot:2, a:{id:'nin_mark',n:'Death Mark',cd:14,role:'Damage',fx:'nin_mark',d:'Mark a target: it takes extra damage from you.'}, b:{id:'nin_pierce',n:'Piercing Star',cd:9,role:'Single Target',fx:'nin_pierce',d:'Hurl one massive shuriken that pierces straight through — huge single-target damage for bosses.'}},
     r7:{kind:'passive', a:{id:'nin_ghost',n:'Ghostwalk',role:'Defense',d:'+8% dodge chance and take 10% less damage — slip through crowds.'}, b:{id:'nin_bleed',n:'Bleeding Edge',role:'Damage',d:'+10% damage — your cuts run deep.'}},
-    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Blade Storm',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
+    r8:{kind:'skill',slot:3, a:{id:'nin_fury',n:'Blade Fury',cd:24,role:'Burst',fx:'nin_fury',d:'+35% damage and attack speed for 6s.'}, b:{id:'nin_storm',n:'Vanish',cd:22,role:'Group Damage',fx:'nin_storm',d:'A spinning storm of steel that cuts everything around you.'}},
     r9:{kind:'passive', a:{id:'nin_shadowform',n:'Shadow Form',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'nin_assassin',n:'Assassinate',role:'Damage',d:'+12% damage.'}}
   },
   berserker:{ disp:'Berserker', icon:classIcon('berserker'),
@@ -9685,6 +9685,10 @@ function update(dt){
     if(e.doomT>0){ e.doomT-=dt/(meta.classId==='reaper'&&c2Passive('x_doom')?1.2:1); e.doomAcc+=dt;                       // Death's Door burns them down over time
       if(e.doomAcc>=0.5){ e.doomAcc-=0.5; hitEnemy(e,e.doomDps*0.5,e.doomSrc||G.p,0,0,null);
         G.particles.push({x:e.x,y:e.y+e.h*0.6,z:e.z,vx:0,vy:50,vz:0,life:0.4,color:'#b06bff',sz:2.6}); } }
+    /* Stopped Clock holds an enemy exactly as a stun does, and holds its wind-up too so nothing
+       lands the instant time resumes. Reusing the stun gate means every behaviour that already
+       respects a stun respects this. */
+    if((G._freezeT||0)>0){ eff=0; e.windT=Math.max(e.windT||0,0.12); e.shootT=Math.max(e.shootT||0,0.4); }
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
     const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)); let dirX=(p.x-e.x)/d, dirZ=(p.z-e.z)/d;
     e.yaw=Math.atan2(dirX,dirZ);
@@ -15278,6 +15282,76 @@ try{ if(sessionStorage.getItem('bf3_continue_after_slot')==='1'){
 setTimeout(checkUpdate,2500);
 window.addEventListener('pointerdown',initAudio,{once:true});
 /* debug hook (headless verification) */
+
+/* ── CAPSTONE REWORKS ───────────────────────────────────────────────────────
+   Slot 3 is the rank-8 pick, the last and most exciting choice a class offers - and in nine classes
+   both options were damage with a different spread. "Hit many things" against "hit one thing hard"
+   is a real choice ONCE; as the climax of nine classes it is the same choice nine times.
+   Each replaces the group-damage half with A NEW RULE FOR THE REST OF THE FIGHT, so the pair becomes
+   "change how this fight works" against "one enormous moment".
+
+   ASSIGNED HERE, at the very end, because SKILL_FX is a plain object and a later assignment silently
+   wins. Two of these were originally defined further down than my first attempt and quietly
+   overwrote it - the skills did nothing and looked like broken code. Appending is the only placement
+   that cannot lose that race. */
+
+/* WARRIOR - WARCRY. Everything that can see you attacks only you. The Warrior is the one class built
+   to be hit; this lets him decide that he is the one being hit. */
+SKILL_FX.w_berserk=function(p,ok,am){
+  let n=0;
+  for(const e of combatTargets()){
+    if(e.dead||e.dummy) continue;
+    if(dXZ(e.x,e.z,p.x,p.z)>620) continue;
+    e._taunt=6; e.target=p; n++;
+  }
+  p.warcryT=6;
+  addText(p.x,p.y+56,p.z,'WARCRY x'+n,'#ffd24a',true);
+  try{ skillRing(p.x,p.z,'#ffd24a','#6a4a12',300); }catch(err){}
+};
+
+/* WARLOCK - PACT. Spend half your current health; deal exactly that to everything nearby. The class
+   is named for a bargain and previously cast a storm. This IS the bargain, and it scales with what
+   you are willing to risk rather than with a number on a sheet. */
+SKILL_FX.war_storm=function(p,ok,am){
+  const spend=Math.floor(p.hp*0.5);
+  if(spend<1) return;
+  p.hp-=spend;
+  for(const e of combatTargets()){
+    if(e.dead||dXZ(e.x,e.z,p.x,p.z)>380) continue;
+    hitEnemy(e,spend,p,140,0,'void');
+  }
+  addText(p.x,p.y+56,p.z,'PACT -'+spend,'#b06bff',true);
+  try{ skillRing(p.x,p.z,'#b06bff','#2a0f3a',380); }catch(err){}
+  hudUpdate();
+};
+
+/* CHRONOMANCER - STOPPED CLOCK. Everything but you stops for three seconds. The only capstone on the
+   roster that deals no damage at all: the value is entirely in what you do with the time. */
+SKILL_FX.chr_tempest=function(p,ok,am){
+  G._freezeT=3;
+  addText(p.x,p.y+56,p.z,'STOPPED','#9fd6ff',true);
+  try{ skillRing(p.x,p.z,'#9fd6ff','#1a2a3a',420); }catch(err){}
+};
+
+/* NINJA - VANISH. Gone for four seconds, and the next Unseen strike is already armed. The class is
+   about striking from where you are not; this is that taken to its end. */
+SKILL_FX.nin_storm=function(p,ok,am){
+  p.invuln=Math.max(p.invuln||0,4); p._vanish=4; p._stillT=9;
+  for(const e of combatTargets()) if(e.target===p) e.target=null;
+  addText(p.x,p.y+56,p.z,'VANISH','#9fe0ff',true);
+  try{ burst(p.x,p.y+18,p.z,'#9fe0ff',18); }catch(err){}
+};
+
+/* BLADEDANCER - PERFECT GUARD. Every attack parried for three seconds. Its whole kit is built on
+   catching one attack at the right moment; this is what that looks like as a state rather than a
+   moment. */
+SKILL_FX.bd_steel=function(p,ok,am){
+  p.bdParryT=Math.max(p.bdParryT||0,3);
+  p._perfectGuard=3;
+  addText(p.x,p.y+56,p.z,'PERFECT GUARD','#cfe8ff',true);
+  try{ skillRing(p.x,p.z,'#cfe8ff','#243447',260); }catch(err){}
+};
+
 window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },

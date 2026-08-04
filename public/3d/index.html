@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.700.0-arenas';
+const VERSION3D='1.710.0-bosses';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7806,6 +7806,9 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const _bh = CLASS_BASIC[meta.classId];
     if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
   }
+  /* The Abyss King's ward: while any of his court still stands he takes a fifth of the damage, so
+     the fight is "clear the court" before it is ever "hit the king". */
+  if(e.courtWard) dmg=dmg*0.2;
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
@@ -10002,6 +10005,58 @@ function beamBlocked(e,p){ for(const o of G.obstacles){ if(o.h<40) continue;   /
   if(t<0||t>1) continue; const cx=e.x+px*t, cz=e.z+pz*t; if(dXZ(cx,cz,o.x,o.z)<o.w*0.5+16) return true; }
   return false; }
 function bossSignature(e,dt,p,dirX,dirZ,dist){
+  const _hx=(e.home?e.home.x:0), _hz=(e.home?e.home.z:0), _hw=(e.home?e.home.hw:400), _hd=(e.home?e.home.hd:400);
+
+  /* HOLLOW MARKSMAN - THE PIN. He had NO signature at all: a kiting archer with a boss health bar,
+     which is why he read as a big enemy rather than a fight. Now he plants a stake where you are
+     STANDING and, a beat later, fires a line through it - so the answer is to be somewhere else by
+     the time it lands, and the arena's pillars become cover rather than scenery. Punishes standing
+     still, which is exactly the sin a marksman should punish. */
+  if(e.type==='archer'){
+    e.pinCd=(e.pinCd==null?3:e.pinCd)-dt;
+    if(e.pinT>0){
+      e.pinT-=dt;
+      if(e.pinT<=0 && e.pinX!=null){
+        (G.shockwaves=G.shockwaves||[]).push({x:e.pinX,z:e.pinZ,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
+        SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,12);
+      }
+    } else if(e.pinCd<=0 && dist<820){
+      e.pinCd=(4.5+Math.random()*2)*(e.phase>=2?0.55:1);
+      e.pinX=p.x; e.pinZ=p.z; e.pinT=0.85;
+      (G.trails=G.trails||[]).push({x:p.x,z:p.z,r:44,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
+      addText(e.x,e.h+16,e.z,'PINNED!','#ffd9a0',true);
+    }
+  }
+
+  /* ABYSS KING - THE COURT. Also had nothing. He is a KING, so he does what a king does: he does
+     not fight you himself until he has to. At each phase he calls up two of the dead to hold you,
+     and while any of them stand he takes far less damage - so the fight becomes "clear the court to
+     reach the throne" rather than "hit the big one". It is the only boss on the roster whose health
+     bar is not the thing you attack first. */
+  if(e.type==='king'){
+    e._court=(e._court||[]).filter(m=>m&&!m.dead);
+    e.courtCd=(e.courtCd==null?2:e.courtCd)-dt;
+    if(e.courtCd<=0 && e._court.length===0 && dist<900){
+      e.courtCd=14;
+      for(let i=0;i<2;i++){
+        const a=Math.random()*6.283, rr=180+Math.random()*140;
+        try{
+          /* `revenant` is the Abyss's own risen dead - checked against ENEMY rather than assumed.
+             My first attempt summoned 'wraith', which does not exist, so the court silently never
+             rose and the ward never engaged: the King fought exactly as before and nothing errored. */
+          const m=spawnEnemy('revenant', e.x+Math.cos(a)*rr, e.z+Math.sin(a)*rr);
+          if(m){ m.hp=m.maxHp=Math.round(m.maxHp*1.6); e._court.push(m); burst(m.x,m.y+16,m.z,'#b06bff',12); }
+        }catch(err){}
+      }
+      if(e._court.length){
+        e.courtWard=1;
+        addText(e.x,e.h+18,e.z,'THE COURT RISES','#c9a6ff',true);
+        SFX.boss&&SFX.boss(); G.shake=Math.min(G.shake+5,13);
+      }
+    }
+    e.courtWard = e._court.length ? 1 : 0;
+  }
+
   const th=(STAGES[G.stageIndex]||{}).theme, hx=(e.home?e.home.x:0), hz=(e.home?e.home.z:0), hw=(e.home?e.home.hw:400), hd=(e.home?e.home.hd:400);
   // EMBER COLOSSUS (Crucible): a row of quake rings marches across the arena floor — jump them
   if(e.type==='colossus' && th!=='marble'){

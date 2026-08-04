@@ -135,8 +135,14 @@ function camMove(fwd, right, up){
 
 /* ZOOM on a free camera is a dolly: travel along the way you are looking, pitch included, so
    zooming in while looking down at a platform takes you to that platform. */
-function camDolly(dir){
-  const sp = EDCAM.speed * 2.2;
+/* One wheel notch used to travel speed*2.2 - about 1500 units, most of a courtyard, which is why
+   zoom felt violent and unusable for fine work. A notch is now a fixed, modest step, and holding
+   shift makes it coarse for crossing distance. Fixed rather than proportional to fly speed on
+   purpose: speed is how fast you TRAVEL, and tying the two meant setting a comfortable flying
+   speed also made zoom unusable. */
+const DOLLY_STEP = 58;
+function camDolly(dir, coarse){
+  const sp = DOLLY_STEP * (coarse ? 5 : 1);
   const cp = Math.cos(EDCAM.pitch);
   EDCAM.x += Math.sin(EDCAM.yaw) * cp * dir * sp;
   EDCAM.y += Math.sin(EDCAM.pitch) * dir * sp;
@@ -165,8 +171,10 @@ function onWheel(e){
   if(!EDITOR.on) return;
   /* The wheel zooms, because that is what every 3D tool does and what a hand reaches for. Fly
      speed moves to shift+wheel - still adjustable, no longer occupying the obvious gesture. */
-  if(e.shiftKey) camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
-  else camDolly(e.deltaY > 0 ? -1 : 1);
+  /* Wheel zooms in fine steps; shift+wheel zooms coarsely. Fly speed moves to ctrl+wheel - it is
+     the rarest of the three and no longer deserves the second-easiest gesture. */
+  if(e.ctrlKey || e.metaKey) camSpeed(e.deltaY > 0 ? 0.85 : 1.18);
+  else camDolly(e.deltaY > 0 ? -1 : 1, e.shiftKey);
   e.preventDefault(); e.stopPropagation();
 }
 
@@ -282,7 +290,8 @@ function hud(){
     rows.push('<div class="row"><span class="k">WASD</span>move <span class="k">space</span>up ' +
               '<span class="k">shift</span>down</div>');
     rows.push('<div class="row"><span class="k">Z</span><span class="k">X</span>or <span class="k">wheel</span>zoom' +
-              ' &middot; <span class="k">shift wheel</span>speed (' + Math.round(EDCAM.speed) + ')</div>');
+              ' &middot; <span class="k">shift</span>coarse &middot; <span class="k">ctrl wheel</span>speed (' +
+              Math.round(EDCAM.speed) + ')</div>');
     rows.push('<div class="row"><span class="k">G</span>hero <span class="k">F</span>frame selection' +
               ' <span class="k">Tab</span>next here</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
@@ -446,6 +455,29 @@ function history(dir){
 const GEOM = ['x', 'z', 'y0', 'w', 'h', 'd', 'r', 'ry', 'x0', 'px', 'sx', 'sz', 'y'];
 function geom(o){ const g = {}; for(const k of GEOM) if(o[k] != null) g[k] = o[k]; return g; }
 function setGeom(o, g){ for(const k in g) o[k] = g[k]; }
+
+/* While DRAGGING, refresh on a short throttle so the building follows your cursor instead of
+   snapping into place when you let go. Oliver: "when i move the buildings, i want to see them move
+   as i drag them." A full rebuild every frame would stall, so this is a floor on the interval, not
+   a per-frame redraw - the object visibly tracks, a beat behind. */
+let _dragRedrawAt = 0;
+function redrawLive(){
+  const now = (typeof performance !== 'undefined' ? performance.now() : 0);
+  if(now - _dragRedrawAt < 110) return;
+  _dragRedrawAt = now;
+  try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){}
+}
+
+/* Publish the area's hide list to world3d, which applies it as part of every build. Pushing the
+   LIST rather than calling hide directly is what fixes the race Oliver kept hitting: the editor no
+   longer has to win against a rebuild that had not happened yet. */
+export function reapplyHides(){
+  const L = loadLayers()[EDITOR.key];
+  window.__bfEdHides = (L && L.hide) ? L.hide.slice() : [];
+  try {
+    if(window.__world3dHideAt) for(const h of window.__bfEdHides) window.__world3dHideAt(h.x, h.z, h.r || 46);
+  } catch(e){}
+}
 
 let _redrawT = 0;
 function redraw(){
@@ -615,6 +647,14 @@ function findCollider(id){
 /* An enemy's sx/sz is the spot it returns to when it loses you. Move one without moving its home
    and it walks straight back, which reads as the edit not having taken. */
 function syncHome(o){ if(o.sx != null){ o.sx = o.x; o.sz = o.z; } }
+
+/* Collider follow WITHOUT writing to the edit list - called every drag step, where recording each
+   intermediate position would fill the save with noise. The real record happens once on mouseup. */
+function syncColliderLive(o){
+  if(o.edId == null) return;
+  const arr = G().obstacles, i = findCollider(o.edId);
+  if(i >= 0) Object.assign(arr[i], colliderFor(o, o.edId));
+}
 
 function syncCollider(o){
   if(o.edId == null) return;
@@ -786,8 +826,11 @@ function onMove(e){
   const dx = e.clientX - _drag.sx, dy = e.clientY - _drag.sy;
   /* Always measured from the drag's START, never accumulated per event: accumulating would let
      grid rounding compound, so a slow drag would land somewhere different from a fast one. */
-  s.o.x = Math.round((_drag.x0 + B.ia * dx + B.ib * dy) / EDITOR.grid) * EDITOR.grid;
-  s.o.z = Math.round((_drag.z0 + B.ic * dx + B.id * dy) / EDITOR.grid) * EDITOR.grid;
+  const nx = Math.round((_drag.x0 + B.ia * dx + B.ib * dy) / EDITOR.grid) * EDITOR.grid;
+  const nz = Math.round((_drag.z0 + B.ic * dx + B.id * dy) / EDITOR.grid) * EDITOR.grid;
+  const moved = (nx !== s.o.x || nz !== s.o.z);
+  s.o.x = nx; s.o.z = nz;
+  if(moved){ syncHome(s.o); syncColliderLive(s.o); redrawLive(); }   // see it move, not just at the end
   e.preventDefault();
 }
 function onUp(){
@@ -831,7 +874,7 @@ function flyFrame(dt){
   if(_held.has('z')) dolly += 1;
   if(_held.has('x')) dolly -= 1;
   if(fwd || right || up) camMove(fwd * f, right * f, up * f);
-  if(dolly) camDolly(dolly * f);
+  if(dolly) camDolly(dolly * f * 22, _held.has('shift'));   // held Z/X: smooth, same fine step per second
 }
 
 function onKey(e){
@@ -1068,7 +1111,10 @@ function onKey(e){
       if(ci >= 0) recordDelete(L, 'obstacles', ci);
       (L.hide = L.hide || []).push({ x: obj.x, z: obj.z, r: hr });
     });
-    try { window.__world3dHideAt && window.__world3dHideAt(obj.x, obj.z, hr); } catch(err){}
+    try {
+      (window.__bfEdHides = window.__bfEdHides || []).push({ x: obj.x, z: obj.z, r: hr });
+      window.__world3dHideAt && window.__world3dHideAt(obj.x, obj.z, hr);
+    } catch(err){}
     if(arr) arr.splice(idx, 1);
     if(ci >= 0) obs.splice(ci, 1);
     /* Put back AT ITS INDEX, not appended: every id in the edit list is `<array>:<index>`, so
@@ -1149,6 +1195,7 @@ export function toggle(force){
     addEventListener('mouseup',   onUp,   true);
     addEventListener('wheel',     onWheel, { capture: true, passive: false });
     addEventListener('contextmenu', onCtx, true);   // right-drag is a control here, not a menu
+    reapplyHides();      // a hide saved in a previous session must apply on the first build
     camStart();
     /* Hand the cursor back. The shoulder camera may already hold a pointer lock from play, and the
        editor is unusable without a visible pointer. */

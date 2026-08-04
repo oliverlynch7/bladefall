@@ -708,6 +708,22 @@ window.__world3dInstances = (limit) => {
    comes from a layout, not a list, so there is nothing to remove from - and a zero-scale instance
    costs nothing and survives until the next rebuild, which re-applies the hide list from the edit
    layer. Radius rather than an exact match because the recorded position is a rounded click. */
+/* THE HIDE LIST, applied by world3d itself after every build.
+   The editor used to call __world3dHideAt straight after asking for a rebuild - and the rebuild
+   happens on the NEXT FRAME, so it faithfully reconstructed every piece the editor had just
+   hidden. Oliver deleted the same pillar repeatedly and watched it come back each time, because
+   the two were racing and the rebuild always won.
+   Owning the list here removes the race entirely: whatever is on it is hidden as part of building,
+   not after it. */
+window.__bfEdHides = [];
+function applyHideList(){
+  const list = window.__bfEdHides;
+  if(!list || !list.length || !window.__world3dHideAt) return 0;
+  let n = 0;
+  for(const h of list) n += window.__world3dHideAt(h.x, h.z, h.r || 46);
+  return n;
+}
+
 window.__world3dHideAt = (x, z, r) => {
   if(!group) return 0;
   const V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
@@ -1587,6 +1603,7 @@ function buildHub(scene, world){
   counts.buildingMeshes = bc.meshes; counts.buildingMissing = bc.missing;
 
   Object.assign(counts, buildHubDecoProps(world));
+  counts.hidden = applyHideList();          // hides are part of building, never a step after it
 
   return counts;
 }
@@ -1847,6 +1864,7 @@ export function buildWorld(scene, world){
 
   WORLD3D.counts = { floorTiles, floorBuried: ground.buried, roadTiles, roadPaved: ground.paved,
                      roadPlanned: roadPlan ? roadPlan.count : 0,
+                     hidden: applyHideList(),
                      deco: deco.length, box: bins.box.length, foliage: bins.foliage.length,
                      tufts: tufts, tree: bins.tree.length, shard: bins.shard.length,
                      rock: bins.rock.length, fence: bins.fence.length, grave: bins.grave.length,

@@ -713,8 +713,12 @@ window.__world3dHideAt = (x, z, r) => {
   const V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
   const M = new THREE.Matrix4(); let n = 0;
   const rr = r || 40;
+  /* EVERY instanced mesh, whatever it is called. The name filter here was the reason hiding a hub
+     pillar changed nothing: buildProps names its meshes 'w3d:<model>', but the hub's architecture
+     is built by hubPiece, whose meshes carry no such name - so the towers were skipped by exactly
+     the function meant to remove them. Hiding is positional, so it needs no name at all. */
   for(const c of group.children){
-    if(!c.isInstancedMesh || !c.name || c.name.indexOf('w3d') !== 0) continue;
+    if(!c.isInstancedMesh) continue;
     let touched = false;
     for(let i = 0; i < c.count; i++){
       c.getMatrixAt(i, M); M.decompose(V, Q, S);

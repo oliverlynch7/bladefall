@@ -7,8 +7,8 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 | key | does |
 |---|---|
 | `F2` | open / close edit mode |
-| click | select the nearest object |
-| drag | move it along the ground |
+| right click | select the nearest object - its name appears on it |
+| right drag | move it along the ground |
 | arrows | nudge 10 units (`shift` = 50) |
 | `PgUp` / `PgDn` | raise / lower |
 | `alt` + those | **resize** instead of move (`[` `]` for a healing pad's radius) |
@@ -79,9 +79,10 @@ into the hero, where he was standing**, so you can playtest what you just built 
 
 | key | camera |
 |---|---|
-| drag empty space | turn the camera (the cursor stays visible) |
+| **left** drag | turn the camera |
+| **right** click / drag | select and move an object |
 | `WASD` | move horizontally, like walking, at any height |
-| `Q` / `E` | down / up (`space` also rises) |
+| `space` / `shift` | up / down (`E`/`Q` also work) |
 | `Z` / `X`, or wheel | zoom in / out along the way you are looking |
 | `shift`+wheel | fly speed |
 | `G` | jump back to the hero when you have flown off and lost him |

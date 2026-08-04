@@ -156,6 +156,8 @@ function camLook(dx, dy){
    a level. */
 function camSpeed(mul){ EDCAM.speed = Math.max(SPD_MIN, Math.min(SPD_MAX, EDCAM.speed * mul)); }
 
+function onCtx(e){ if(EDITOR.on && !inPanel(e)){ e.preventDefault(); e.stopPropagation(); } }
+
 function onWheel(e){
   if(!EDITOR.on) return;
   /* The wheel zooms, because that is what every 3D tool does and what a hand reaches for. Fly
@@ -272,14 +274,16 @@ function hud(){
                          ' x ' + Math.round(s.o.h || 0) : '') +
         (s.o.r != null ? '<br>radius ' + Math.round(s.o.r) : '') + '</div>'
       : '<div class="row">click something to select it</div>');
-    rows.push('<div class="row"><span class="k">drag</span>turn the camera &middot; ' +
-              '<span class="k">WASD</span>move <span class="k">Q</span><span class="k">E</span>down/up</div>');
+    rows.push('<div class="row"><span class="k">left drag</span>turn camera &middot; ' +
+              '<span class="k">right click</span>select</div>');
+    rows.push('<div class="row"><span class="k">WASD</span>move <span class="k">space</span>up ' +
+              '<span class="k">shift</span>down</div>');
     rows.push('<div class="row"><span class="k">Z</span><span class="k">X</span>or <span class="k">wheel</span>zoom' +
               ' &middot; <span class="k">shift wheel</span>speed (' + Math.round(EDCAM.speed) + ')</div>');
     rows.push('<div class="row"><span class="k">G</span>hero <span class="k">F</span>frame selection' +
               ' <span class="k">Tab</span>next here</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
-    rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
+    rows.push('<div class="row"><span class="k">right drag</span>move the selection</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid +
               'u <span class="k">shift</span>x5 <span class="k">-</span><span class="k">=</span>grid</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
@@ -730,18 +734,26 @@ function inPanel(e){
 }
 
 function onDown(e){
-  if(!EDITOR.on || e.button !== 0) return;
+  if(!EDITOR.on) return;
   if(inPanel(e)) return;                 // the panel handles its own clicks; never swallow them
-  /* Right/middle drag always looks. Left drag looks too UNLESS it grabbed an object - so dragging
-     empty space turns the camera, which is what every 3D tool does and what Oliver asked for, and
-     dragging a thing still moves the thing. One button, no modifier to remember. */
-  const hit = EDITOR.editable ? pickAt(e.clientX, e.clientY) : null;
-  if(!hit){
+
+  /* LEFT = camera, RIGHT = objects. Oliver's split, and it is cleaner than what it replaces: left
+     drag used to mean "look, UNLESS you happened to grab something", so whether you turned the
+     view or dragged a prop depended on what was invisibly under the cursor. Now each button has
+     exactly one job and nothing is ambiguous. */
+  if(e.button === 0){
     _look = { sx: e.clientX, sy: e.clientY };
-    EDITOR.sel = null; hud();
     e.preventDefault(); e.stopPropagation();
     return;
   }
+  if(e.button !== 2) return;
+  if(!EDITOR.editable){ e.preventDefault(); return; }
+  /* Right/middle drag always looks. Left drag looks too UNLESS it grabbed an object - so dragging
+     empty space turns the camera, which is what every 3D tool does and what Oliver asked for, and
+     dragging a thing still moves the thing. One button, no modifier to remember. */
+  const hit = pickAt(e.clientX, e.clientY);
+  EDITOR.sel = hit;
+  if(!hit){ hud(); e.preventDefault(); e.stopPropagation(); return; }
   EDITOR.sel = hit;
   if(hit){
     const B = dragBasis(hit.o);
@@ -786,7 +798,7 @@ function onUp(){
   _drag = null;
 }
 
-const MOVE_KEYS = ['w', 'a', 's', 'd', 'q', 'e', 'z', 'x', ' '];
+const MOVE_KEYS = ['w', 'a', 's', 'd', 'q', 'e', 'z', 'x', ' ', 'shift'];
 
 /* Release on keyup, and clear everything if the window loses focus - a key held when you alt-tab
    never sends its keyup, and the camera would drift away on its own forever. */
@@ -806,7 +818,7 @@ function flyFrame(dt){
   if(_held.has('a')) right += 1;
   if(_held.has('d')) right -= 1;
   if(_held.has('e') || _held.has(' ')) up += 1;
-  if(_held.has('q')) up -= 1;
+  if(_held.has('q') || _held.has('shift')) up -= 1;   // Oliver: space rises, shift is its opposite
   if(_held.has('z')) dolly += 1;
   if(_held.has('x')) dolly -= 1;
   if(fwd || right || up) camMove(fwd * f, right * f, up * f);
@@ -1031,10 +1043,23 @@ function onKey(e){
   }
   else if(e.key === 'Delete' || e.key === 'Backspace'){
     const arr = G()[s.arr], idx = s.idx, obj = s.o;
+    /* THE PILLAR BUG. Selecting the pillar always worked - it is deco:126 in the hub and the panel
+       named it. What did not work is that the hub draws a TOWER MODEL for that pillar from its own
+       layout, so removing the deco entry removed a voxel box that was already being skipped, and
+       the tower stood there untouched. Oliver deleted the right thing and nothing moved.
+       So a delete now also hides whatever is DRAWN at that spot, sized to the object, and records
+       it so it survives a rebuild. This is the general fix: it applies to any object whose model
+       comes from a layout rather than from the array, not just hub pillars. */
+    const hr = Math.max(40, Math.max(obj.w || 0, obj.d || 0) * 0.75);
     /* Take the linked collider too. Leaving it behind is an invisible wall where a prop used to
        be - worse than no collision, because nothing on screen explains it. */
     const obs = G().obstacles, ci = findCollider(obj.edId), cobj = ci >= 0 ? obs[ci] : null;
-    commit(L => { recordDelete(L, s.arr, idx); if(ci >= 0) recordDelete(L, 'obstacles', ci); });
+    commit(L => {
+      recordDelete(L, s.arr, idx);
+      if(ci >= 0) recordDelete(L, 'obstacles', ci);
+      (L.hide = L.hide || []).push({ x: obj.x, z: obj.z, r: hr });
+    });
+    try { window.__world3dHideAt && window.__world3dHideAt(obj.x, obj.z, hr); } catch(err){}
     if(arr) arr.splice(idx, 1);
     if(ci >= 0) obs.splice(ci, 1);
     /* Put back AT ITS INDEX, not appended: every id in the edit list is `<array>:<index>`, so
@@ -1114,6 +1139,7 @@ export function toggle(force){
     addEventListener('mousemove', onMove, true);
     addEventListener('mouseup',   onUp,   true);
     addEventListener('wheel',     onWheel, { capture: true, passive: false });
+    addEventListener('contextmenu', onCtx, true);   // right-drag is a control here, not a menu
     camStart();
     /* Hand the cursor back. The shoulder camera may already hold a pointer lock from play, and the
        editor is unusable without a visible pointer. */
@@ -1127,6 +1153,7 @@ export function toggle(force){
     removeEventListener('mousemove', onMove, true);
     removeEventListener('mouseup',   onUp,   true);
     removeEventListener('wheel',     onWheel, true);
+    removeEventListener('contextmenu', onCtx, true);
     cancelAnimationFrame(_raf);
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();

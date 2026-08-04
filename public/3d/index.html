@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.590.0-weapbalance';
+const VERSION3D='1.595.0-innatefold';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3550,27 +3550,32 @@ function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.m
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
   let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(meta.classId==='warlock'&&c2Passive('war_frail'))v*=.90; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
-function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); const sp=skinP(p);
+/* THE INNATE FOLD. Fourteen of sixteen innate traits opened with a flat +8-12% damage - a bonus
+   every class had, which therefore distinguished none of them, while burying each class's actual
+   mechanic behind an identical opening clause. The percentages are stripped from the class blocks
+   below and their average lives here instead, applied to everyone.
+   Net damage is unchanged; what changes is that an innate is now free to say one true thing about
+   its class instead of restating the baseline. This is the deletion half of the class rewrite -
+   the identities that replace them ship in CLASS_BASIC. */
+const INNATE_FOLD = 1.09;
+function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*INNATE_FOLD; const sp=skinP(p);
   if(p.armorMods&&p.weapon&&p.weapon.sch==='mag') v*=p.armorMods.magPowerMul;   // Mystic gear boosts magic weapons specifically
   if(sp){ if(sp.power) v*=sp.power;
     if(sp.magPower&&p.weapon&&p.weapon.sch==='mag') v*=sp.magPower;
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
   if(p.berserkT>0) v*=1.35;
   if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
-  if(meta.classId==='warrior'&&c2def('warrior')){ if(!(G&&G._desig))v*=1.08; if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
-  if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){ v*=1.08; if(c2Passive('m_glass'))v*=1.15; if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
+  if(meta.classId==='warrior'&&c2def('warrior')){ if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
+  if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){ if(c2Passive('m_glass'))v*=1.15; if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
   if(meta.classId==='paladin'&&c2def('paladin')){ const holy=!!(p.weapon&&p.weapon.el==='holy');
-    v*=1.06;                                                  // small baseline so a non-holy paladin still scales
-    if(holy)v*=1.12;                                          // innate Holy Warrior
     if(holy&&c2Passive('pal_holypow'))v*=1.12;               // Holy Power
     if(c2Passive('pal_burn'))v*=1.10;                        // Burning Light
     if(holy&&c2Passive('pal_blessed'))v*=1.15;              // Blessed Blade
     if(classState('paladin').rank>=10)v*=1.10; }             // Avatar of Light
-  if(meta.classId==='necromancer'&&c2def('necromancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Death's Embrace
+  if(meta.classId==='necromancer'&&c2def('necromancer')){
     if(c2Passive('necro_wither'))v*=1.10; if(c2Passive('necro_plague'))v*=1.10; if(c2Passive('necro_pest')&&G.minions&&G.minions.length)v*=1.12;
     if(classState('necromancer').rank>=10)v*=1.12; }
   if(meta.classId==='ninja'&&c2def('ninja')){ const blade=p.weapon&&(p.weapon.art==='dagger'||p.weapon.art==='sword');
-    if(blade)v*=1.08;   // innate Killer Instinct
     if(c2Passive('nin_deadly'))v*=1.12; if(c2Passive('nin_combo'))v*=1.10; if(c2Passive('nin_bleed'))v*=1.10; if(c2Passive('nin_assassin'))v*=1.12;
     if((p.evadeStackT||0)>0)v*=1+Math.min(NIN_EVADE_CAP,p.evadeStacks||0)*0.09;   // Evasion snowball: each dodge stacks +9% damage
     if(classState('ninja').rank>=10)v*=1.12; }
@@ -3580,7 +3585,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
     if((p.focusT||0)>0)v*=1+Math.min(fCap,p.focusStacks||0)*fDmg;
     if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
     if(classState('monk').rank>=10)v*=1.12; }
-  if(meta.classId==='stormcaller'&&c2def('stormcaller')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;   // innate Static Charge
+  if(meta.classId==='stormcaller'&&c2def('stormcaller')){
     if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; if(c2Passive('st_master'))v*=1.12; if(c2Passive('st_galvanize'))v*=1.10;
     if(classState('stormcaller').rank>=10)v*=1.12; }
   if(meta.classId==='warlock'&&c2def('warlock')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.12;
@@ -3594,7 +3599,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1); 
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
     if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
     if(classState('ranger').rank>=10)v*=1.12; }
-  if(meta.classId==='berserker'&&c2def('berserker')){ const low=p.hp<effMaxHp(p)*.5; v*=1.08; if(low)v*=1.15;   // innate Bloodrage
+  if(meta.classId==='berserker'&&c2def('berserker')){ const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
     if(c2Passive('bsk_heavy'))v*=1.12; if(c2Passive('bsk_reckless'))v*=1.10; if(c2Passive('bsk_brutal'))v*=1.12; if(c2Passive('bsk_rage')&&low)v*=1.15;
     if(classState('berserker').rank>=10)v*=1.12; }
   if(meta.classId==='pirate'&&c2def('pirate')){ v*=1.08;

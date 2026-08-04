@@ -64,10 +64,13 @@ function unprojectToPlane(sx, sy, atY){
    without first building a parallel collision world. This treats every array identically. */
 export function pickAt(sx, sy, maxPx){
   const g = G(); if(!g) return null;
-  /* 46px, down from 90. A generous grab radius was right when every click meant "select"; now that
-     dragging empty space turns the camera, a wide radius means you try to look and instead drag a
-     prop you did not know was near the cursor. Selection stays forgiving, looking stays possible. */
-  let best = null, bestD = (maxPx || 46);
+  /* Back to a generous 96px. It was cut to 46 when LEFT-drag had to mean both "look" and "grab",
+     where a wide radius stole camera drags. Right-click select removed that conflict entirely -
+     the button now says which you meant - so a tight radius is pure downside: you right-click a
+     pillar, land 50px from its centre, and nothing happens with no explanation. An object's
+     projected centre can sit well away from the mass you are aiming at, which is exactly why this
+     needs slack. */
+  let best = null, bestD = (maxPx || 96);
   for(const arr of EDIT_ARRAYS){
     const list = g[arr]; if(!list) continue;
     for(let i = 0; i < list.length; i++){
@@ -753,7 +756,13 @@ function onDown(e){
      dragging a thing still moves the thing. One button, no modifier to remember. */
   const hit = pickAt(e.clientX, e.clientY);
   EDITOR.sel = hit;
-  if(!hit){ hud(); e.preventDefault(); e.stopPropagation(); return; }
+  if(!hit){
+    /* Say so. A right-click that selects nothing used to be indistinguishable from a right-click
+       that was not received at all, which is precisely how "I can't select things" gets reported
+       for what is really a near miss. */
+    toast('nothing to select there');
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
   EDITOR.sel = hit;
   if(hit){
     const B = dragBasis(hit.o);
@@ -1146,7 +1155,7 @@ export function toggle(force){
     try { if(document.pointerLockElement) document.exitPointerLock(); } catch(err){}
     const cv = document.getElementById('gl'); if(cv) cv.style.cursor = 'crosshair';
     hud(); tick();
-    toast(EDITOR.editable ? 'edit mode - WASD pan, QE turn, wheel zoom, F2 to play'
+    toast(EDITOR.editable ? 'edit mode - LEFT drag looks, RIGHT click selects, F2 to play'
                           : 'edit mode (read-only here)');
   } else {
     removeEventListener('mousedown', onDown, true);

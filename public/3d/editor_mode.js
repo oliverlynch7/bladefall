@@ -16,7 +16,8 @@ import { EDITOR, EDIT_ARRAYS, areaKey, loadLayers, saveLayers, genFingerprint,
 import { toggleOverlay, refresh as refreshOverlay, OVERLAY } from './editor_collision.js';
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
-let _ui = null, _marker = null, _raf = 0, _drag = null, _look = null;
+let _ui = null, _marker = null, _tag = null, _hov = null, _raf = 0, _drag = null, _look = null;
+let _hovAt = { x: 0, y: 0 };
 /* Keys currently HELD. Movement used to happen once per keydown EVENT, which meant it ran at the
    operating system's key-repeat rate: one step, a ~500ms pause, then a stuttery stream. That is
    why flying felt choppy. Held keys are recorded here and the camera is moved every frame in
@@ -176,6 +177,26 @@ export function camFocus(){
   return { x: EDCAM.x + fx * t, z: EDCAM.z + fz * t };
 }
 
+/* A HUMAN NAME for a thing. The panel could only ever say "deco:123", which identifies it for the
+   save file and tells you nothing about what you grabbed. Built from what the object actually is,
+   in the order that carries the most meaning: the kit set it came from, then its generator kind,
+   then the array it lives in. */
+function labelOf(sel){
+  if(!sel) return '';
+  const o = sel.o;
+  if(sel.built) return (o.model || 'built piece').replace(/^.*\//, '');
+  if(o.set) return o.set.replace(/^hub/, '');
+  if(o.type) return o.type;                                   // enemies name themselves
+  if(o.kind === 'plat') return (o.h > 120 ? 'column' : (o.h < 12 ? 'floor' : 'platform'));
+  if(o.kind) return o.kind;
+  if(sel.arr === 'healpads') return 'heal pad';
+  if(sel.arr === 'movers') return 'moving platform';
+  if(sel.arr === 'torches') return 'torch';
+  if(sel.arr === 'chests') return 'chest';
+  if(sel.arr === 'segments') return 'ground';
+  return sel.arr;
+}
+
 function css(){
   if(document.getElementById('bfedcss')) return;
   const st = document.createElement('style'); st.id = 'bfedcss';
@@ -209,7 +230,13 @@ function css(){
     'padding:6px 13px;border-radius:8px;background:rgba(10,10,16,.9);border:1px solid #6a5330;',
     'color:#ffd89a;font:800 14px system-ui;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.5)}',
     '#bfedhint.add{border-color:#54d17a;color:#bdf5cf}',
-    '#bfedhint.del{border-color:#ff6a5a;color:#ffc9c0}'
+    '#bfedhint.del{border-color:#ff6a5a;color:#ffc9c0}',
+    /* Names ride WITH the object on screen rather than sitting in the panel, because the question
+       "what am I about to grab" is asked while looking at the world, not at a sidebar. */
+    '#bfedtag,#bfedhov{position:fixed;z-index:99999;transform:translate(-50%,-100%);pointer-events:none;',
+    'padding:3px 8px;border-radius:6px;font:800 11.5px system-ui;white-space:nowrap}',
+    '#bfedtag{background:rgba(10,10,16,.94);border:1px solid #ffd24a;color:#ffe6b0;margin-top:-18px}',
+    '#bfedhov{background:rgba(10,10,16,.8);border:1px solid #6a7f9a;color:#cfe0f5;margin-top:-14px}'
   ].join('');
   document.head.appendChild(st);
 }
@@ -237,7 +264,8 @@ function hud(){
     rows.push('<div class="row">area <span class="sel">' + EDITOR.key + '</span>' +
               (EDITOR.dirty ? ' &middot; <span style="color:#e8a33d">unsaved</span>' : '') + '</div>');
     rows.push(s
-      ? '<div class="row">selected <span class="sel">' + (s.built ? ('built ' + (s.o.model || '')) : (s.arr + ':' + s.idx)) + '</span><br>x ' +
+      ? '<div class="row">selected <span class="sel">' + labelOf(s) + '</span> ' +
+        '<span style="opacity:.5">' + (s.built ? 'built-in' : s.arr + ':' + s.idx) + '</span><br>x ' +
         Math.round(s.o.x) + '  z ' + Math.round(s.o.z) +
         (s.o.y0 != null ? '  y ' + Math.round(s.o.y0) : '') +
         (s.o.w != null ? '<br>' + Math.round(s.o.w) + ' x ' + Math.round(s.o.d || s.o.w) +
@@ -725,6 +753,7 @@ function onDown(e){
 }
 function onMove(e){
   if(!EDITOR.on) return;
+  _hovAt.x = e.clientX; _hovAt.y = e.clientY;
   if(!_look && !_drag && inPanel(e)) return;
   if(_look){
     camLook(e.clientX - _look.sx, e.clientY - _look.sy);
@@ -1015,7 +1044,7 @@ function onKey(e){
       () => { if(arr) arr.splice(idx, 0, obj); if(cobj) obs.splice(ci, 0, cobj); },
       () => { if(arr) arr.splice(idx, 1); if(ci >= 0) obs.splice(ci, 1); });
     EDITOR.sel = null;
-    toast('- deleted ' + (obj.set || obj.kind || s.arr) + ' - Ctrl+Z puts it back', 'del');
+    toast('- deleted ' + labelOf(s) + ' - Ctrl+Z puts it back', 'del');
   }
   else handled = false;
   if(handled){
@@ -1041,7 +1070,28 @@ function tick(){
     const p = project(s.o.x, objY(s.o), s.o.z);
     _marker.style.display = p ? 'block' : 'none';
     if(p){ _marker.style.left = p.x + 'px'; _marker.style.top = p.y + 'px'; }
-  } else if(_marker){ _marker.style.display = 'none'; }
+    if(_tag){
+      _tag.style.display = p ? 'block' : 'none';
+      if(p){ _tag.textContent = labelOf(s); _tag.style.left = p.x + 'px'; _tag.style.top = p.y + 'px'; }
+    }
+  } else {
+    if(_marker) _marker.style.display = 'none';
+    if(_tag) _tag.style.display = 'none';
+  }
+
+  /* What the cursor would grab if you clicked NOW - the answer to "so I don't accidentally grab
+     something behind it". Suppressed while dragging or looking, when it is only noise. */
+  if(_hov){
+    if(_drag || _look){ _hov.style.display = 'none'; }
+    else {
+      const h = pickAt(_hovAt.x, _hovAt.y);
+      if(h && (!s || h.o !== s.o)){
+        const p = project(h.o.x, objY(h.o), h.o.z);
+        _hov.style.display = p ? 'block' : 'none';
+        if(p){ _hov.textContent = labelOf(h); _hov.style.left = p.x + 'px'; _hov.style.top = p.y + 'px'; }
+      } else _hov.style.display = 'none';
+    }
+  }
   _raf = requestAnimationFrame(tick);
 }
 
@@ -1057,6 +1107,8 @@ export function toggle(force){
     if(EDITOR.openGroup === undefined) EDITOR.openGroup = 'Terrain';
     _ui = document.createElement('div'); _ui.id = 'bfed'; document.body.appendChild(_ui);
     _marker = document.createElement('div'); _marker.id = 'bfedmark'; document.body.appendChild(_marker);
+    _tag = document.createElement('div'); _tag.id = 'bfedtag'; _tag.style.display = 'none'; document.body.appendChild(_tag);
+    _hov = document.createElement('div'); _hov.id = 'bfedhov'; _hov.style.display = 'none'; document.body.appendChild(_hov);
     /* Capture phase, so a click selects an object instead of swinging the sword. */
     addEventListener('mousedown', onDown, true);
     addEventListener('mousemove', onMove, true);
@@ -1078,6 +1130,9 @@ export function toggle(force){
     cancelAnimationFrame(_raf);
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
+    if(_tag) _tag.remove();
+    if(_hov) _hov.remove();
+    _tag = null; _hov = null;
     EDCAM.on = false;   // back into the hero, standing exactly where he was, ready to playtest
     const cv0 = document.getElementById('gl'); if(cv0) cv0.style.cursor = '';
     _held.clear(); _lastT = 0;

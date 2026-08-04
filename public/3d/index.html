@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.821.0-deadcode';
+const VERSION3D='1.830.0-hazards-scatter';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2569,7 +2569,7 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    the layout) gated by main quests, then a boss room. Clearing the boss completes the
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
-  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:null,mus:'outskirts',blurb:'Where the road ends and the wild begins.',
+  {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:'bramble',mus:'outskirts',blurb:'Where the road ends and the wild begins.',
     areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
@@ -2579,7 +2579,7 @@ const ZONES=[
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,trial:'ninja',blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
-  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'phase',mus:'keep',blurb:'A fortress the dead never left.',
+  {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'rubble',mus:'keep',blurb:'A fortress the dead never left.',
     areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,trial:'pirate',blurb:'A hole they threw people into and forgot.'},
@@ -2599,12 +2599,12 @@ const ZONES=[
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
-  {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:null,mus:'keep',blurb:'White marble the long war never reached.',
+  {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:'glare',mus:'keep',blurb:'White marble the long war never reached.',
     areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:12,d:'Shatter 12 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
            {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
     side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,trial:'necromancer',blurb:'What a palace hides, it hides deep.'},
     boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
-  {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'lava',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
+  {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'gloom',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
     areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
            {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'royalarcanist',n:14,d:'Silence 14 Royal Arcanists'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
     boss:{stage:16,name:'The Abyss King, Awakened',mus:'apex_darkdescent'}}
@@ -2615,7 +2615,16 @@ const HAZARDS={
   slick:{name:'Rime',blurb:'The ice gives back nothing. Plan your stops.'},      // low friction
   gusts:{name:'Gales',blurb:'The wind shoves you mid-air.'},                     // lateral push while airborne
   phase:{name:'Phasing',blurb:'Some ground is only sometimes there.'},           // platforms blink out
-  lava:{name:'Emberfall',blurb:'The floor breathes fire on a rhythm.'}           // periodic ground pulse
+  lava:{name:'Emberfall',blurb:'The floor breathes fire on a rhythm.'},          // periodic ground pulse
+  /* Four zones had NO hazard of their own - Outskirts and Palace had none at all, and Keep and
+     Castle borrowed Phasing and Emberfall from Abyss and Emberdeep. Half the game's zones therefore
+     played identically to another zone regardless of how different they looked. These four are
+     built so that no two answer the same question: thorns are about WHERE you walk, collapse is
+     about WHEN you move, glare is a moving thing you time, gloom is a resource you route around. */
+  bramble:{name:'Thornwild',blurb:'The scrub bites. Pick your line through it.'},// slow + light bleed underfoot
+  rubble:{name:'Collapse',blurb:'The keep is still falling. Watch the ground.'}, // telegraphed overhead debris
+  glare:{name:'Sunspire Glare',blurb:'The spire sweeps the floor with light.'},  // rotating beam
+  gloom:{name:'Duskmoor Gloom',blurb:'The dark drinks. Keep to the light.'}      // damage away from light
 };
 /* Difficulty ladder: Normal -> Hardcore (beat Normal) -> Hitless (beat Hardcore). */
 const DIFFS={
@@ -5754,7 +5763,7 @@ function loadStageRaw(i){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
-    addVerticality(srnd); highGround(srnd); encounterPass(srnd); snapWorldInteractables(); return;
+    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6750,6 +6759,173 @@ function encounterPass(rnd){
   return made;
 }
 
+/* ── SCATTER ────────────────────────────────────────────────────────────────
+   Oliver: "mobs scattered all throughout the level. not evenly so, and not at every moment, but
+   not only just around spawners."
+
+   Measured before writing this (tools/mobdist.js, all eight zones): between 0% and 5% of enemies
+   stand outside a room. Every zone in the game is a chain of arenas joined by completely safe
+   walking, which is why the connective tissue reads as travel rather than as level.
+
+   The same probe answered the other two clauses before I built for them, and both were already
+   satisfied - which is the useful part, because designing for them anyway would have made things
+   worse:
+     "not evenly so"     - clumpiness already measures 0.29-0.61 against a uniform spread of 1.0.
+                           The packs are ALREADY clumpy. Adding scatter evenly would have flattened
+                           the one thing that was right.
+     "not at every moment" - enemies sleep until the player is within 640 units (the dropT gate in
+                           the enemy update). A scattered mob is not a fight until you walk near it,
+                           so filling the open space does not fill the level with combat.
+   So this pass adds exactly one thing: presence in the space BETWEEN rooms.
+
+   How, so it stays irregular rather than becoming a hedge of guards:
+     - packs go on the SPAN between two consecutive rooms, at a random point 30-70% along, pushed
+       sideways off the direct line so walking the obvious route does not walk into all of them
+     - only about half of spans get one, and that dice roll is what keeps stretches of quiet. A
+       pack on every span is a corridor of enemies, which is the same failure as none.
+     - never within 450 units of a den, because "not only just around spawners" is the whole ask
+     - every anchor is ground-checked. The spans in this game cross chasms, and a pack placed over
+       one falls out of the world on frame one and the kill goal can never be met.
+   Lone sentries go out too: single mobs, far from anything, so the open space is not uniformly
+   "pack or nothing" either. */
+function scatterPass(rnd){
+  if(!G || !G.rooms) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  const rooms = (G.rooms||[]).filter(r => r && r.w);
+  if(rooms.length < 2) return 0;
+  const pool = [...new Set((G.enemies||[]).filter(e => !e.boss && e.type).map(e => e.type))];
+  if(!pool.length) return 0;
+  const dens = G.dens || [];
+
+  /* OUTSIDE EVERY ROOM, tested directly rather than assumed from the geometry.
+     The first version anchored packs at the midpoint of the line between two consecutive rooms and
+     measured no change at all: 0% of enemies outside a room, before and after. Rooms here are
+     around 1280x900 and consecutive ones sit as little as 780 apart, so they OVERLAP - the midpoint
+     between two rooms is the single most reliable way to land inside one. I had aimed the pass at
+     the fullest part of the map while believing it was the emptiest.
+     37% of a zone's area is inside a room, so the open space is real and plentiful; it just is not
+     where the straight line between two room centres goes. Hence an explicit test. */
+  const outside = (x,z) => !rooms.some(r => Math.abs(x-r.x) < r.w/2 && Math.abs(z-r.z) < (r.d||r.w)/2);
+
+  /* Is this a real place to stand? A span can cross a chasm, and the generator's void reads as a
+     surface far below rather than as "no surface", so the test is against the span's own rooms
+     rather than an absolute. */
+  const okGround = (x,z,yRef,a,b) => {
+    const h = surfaceHeightAt(x,z,20);
+    if(h < -1e8){ if(G._scatterDbg) G._scatterDbg.voidHit++; return null; }   // over the void
+    /* Ground at EITHER END's elevation counts, not just the average of the two.
+       Emberdeep and Castle Duskmoor stayed at ratio 0.75 and 0.43 while five other zones reached
+       1.9-4.0, and it was not lack of ground - they have 7-8% open ground, as much as the Palace.
+       They are the VERTICAL zones ("ascend the towers"), so a span runs from a room at y=0 to one
+       at y=580, the average is 290, and a test against the average rejects the floor AND the top -
+       every legal surface on the span, for being neither. */
+    const ok = Math.abs(h - yRef) <= 90
+            || (a && Math.abs(h - (a.y||0)) <= 90)
+            || (b && Math.abs(h - (b.y||0)) <= 90);
+    if(!ok){ if(G._scatterDbg) G._scatterDbg.cliff++; return null; }   // a cliff top or a pit floor
+    if(dens.some(d => Math.hypot(x-d.x, z-d.z) < 450)){ if(G._scatterDbg) G._scatterDbg.denHit++; return null; }
+    return h;
+  };
+  /* Try a handful of points along and beside the span and take the first that is genuinely in the
+     open. Sampling rather than one fixed point is what makes this robust to rooms of any size:
+     a tight cluster of rooms simply yields no anchor and that span stays quiet. */
+  const findAnchor = (a,b,span,yRef) => {
+    for(let k = 0; k < 8; k++){
+      const t = 0.25 + R()*0.5;
+      const cx = a.x + (b.x-a.x)*t, cz = a.z + (b.z-a.z)*t;
+      const px = -(b.z-a.z)/span, pz = (b.x-a.x)/span;
+      /* offset grows with each miss: a near-miss beside the line is nicer than being shoved to the
+         far edge of the level, so try close first and widen only when close is occupied. */
+      const off = (R()<0.5?-1:1) * (120 + k*90 + R()*120);
+      const ax = cx + px*off, az = cz + pz*off;
+      if(!outside(ax,az)){ dbg.inRoom++; continue; }
+      const h = okGround(ax,az,yRef,a,b);
+      if(h != null) return {x:ax, z:az, h};
+    }
+    /* CHASM ZONES: fall back to the line itself.
+       Emberdeep, the Abyss and Castle Duskmoor placed NOTHING on the first working version - 0%,
+       4% and 3% open while five other zones went to 14-27%. Every candidate was correctly
+       rejected, because in those zones the space BESIDE the walking line is not ground, it is the
+       void. Their connective tissue IS the bridge.
+       So when nothing off-line works, stand on the line. A pack met on a narrow span over the Abyss
+       is a better encounter than the same pack in a field, but it is also a much harder one to back
+       out of, so fewer of them go down (see the pack size below). */
+    for(let k = 0; k < 5; k++){
+      const t = 0.3 + R()*0.4;
+      const ax = a.x + (b.x-a.x)*t, az = a.z + (b.z-a.z)*t;
+      if(!outside(ax,az)) continue;
+      const h = okGround(ax,az,yRef,a,b);
+      if(h != null) return {x:ax, z:az, h, onLine:true};
+    }
+    return null;
+  };
+
+  const place = (x,z,h) => {
+    try{
+      const m = spawnEnemy(pool[Math.floor(R()*pool.length)], x, z);
+      if(!m) return 0;
+      m.y = h; m.sx = m.x; m.sz = m.z; G.killGoal++;
+      return 1;
+    }catch(err){ return 0; }
+  };
+
+  let made = 0;
+  /* Rejection tally. Three wrong guesses about why a zone placed nothing - the anchor geometry, the
+     ground metric, then the elevation test - cost far more than counting would have. Counting gave
+     the answer in one run: of Emberdeep's 9 spans, the dice killed 5. */
+  const dbg = G._scatterDbg = {spans:0, short:0, dice:0, noAnchor:0, onLine:0, placed:0, voidHit:0, cliff:0, denHit:0, inRoom:0};
+
+  /* WHICH SPANS STAY QUIET, chosen as a PROPORTION rather than as an independent coin flip.
+     A per-span 45% skip is fine in the Outskirts (16 spans, 9 survive) and starves Emberdeep (9
+     spans, 3 survived) - the small zones are exactly the ones that can least afford the variance.
+     Picking a fixed share keeps the irregularity (WHICH spans is still random, and that is what the
+     player feels) while making the amount independent of how many rooms the zone happens to have. */
+  const spanIdx = [];
+  for(let i = 0; i + 1 < rooms.length; i++) if(Math.hypot(rooms[i+1].x-rooms[i].x, rooms[i+1].z-rooms[i].z) >= 420) spanIdx.push(i);
+  for(let i = spanIdx.length - 1; i > 0; i--){ const j = Math.floor(R()*(i+1)); const t2 = spanIdx[i]; spanIdx[i] = spanIdx[j]; spanIdx[j] = t2; }
+  const live = new Set(spanIdx.slice(0, Math.max(1, Math.round(spanIdx.length*0.6))));
+
+  for(let i = 0; i + 1 < rooms.length; i++){
+    const a = rooms[i], b = rooms[i+1];
+    const span = Math.hypot(b.x-a.x, b.z-a.z);
+    dbg.spans++;
+    if(span < 420){ dbg.short++; continue; }        // adjacent rooms: no space to be "between"
+    if(!live.has(i)){ dbg.dice++; continue; }       // THE QUIET: a fixed share of spans stay empty
+
+    const yRef = ((a.y||0) + (b.y||0)) / 2;
+    const anc = findAnchor(a, b, span, yRef);
+    if(!anc){ dbg.noAnchor++; continue; }
+    if(anc.onLine) dbg.onLine++;
+
+    /* 2-4 in the open; 1-2 on a bridge, where a pack of four is a wall rather than an encounter */
+    const n = anc.onLine ? (1 + Math.floor(R()*2)) : (2 + Math.floor(R()*3));
+    for(let k = 0; k < n; k++){
+      const ang = R()*6.283, rr = R()*(anc.onLine ? 40 : 70);
+      const ex = anc.x + Math.cos(ang)*rr, ez = anc.z + Math.sin(ang)*rr;
+      const eh = okGround(ex, ez, yRef, a, b);
+      if(eh != null){ const n2=place(ex, ez, eh); made+=n2; dbg.placed+=n2; }
+    }
+  }
+
+  /* SENTRIES: single mobs well off the route. Without these the open space is either a pack of
+     three or nothing, which is its own kind of even. */
+  const tries = Math.min(10, Math.round(rooms.length*0.8));
+  for(let i = 0; i < tries; i++){
+    if(R() > 0.5) continue;
+    const r = rooms[Math.floor(R()*rooms.length)];
+    /* Same lesson as the packs: a ring measured from ONE room's edge lands inside its neighbour,
+       so the ring only proposes and `outside` disposes. */
+    for(let k = 0; k < 6; k++){
+      const ang = R()*6.283, rr = (r.w/2) + 260 + k*140 + R()*200;
+      const x = r.x + Math.cos(ang)*rr, z = r.z + Math.sin(ang)*rr;
+      if(!outside(x,z)) continue;
+      const h = okGround(x, z, r.y||0);
+      if(h != null){ made += place(x, z, h); break; }
+    }
+  }
+  return made;
+}
+
 /* ── HIGH GROUND ────────────────────────────────────────────────────────────
    Measured across three zones before writing a line: 16 to 23 platforms big enough to fight on,
    more than 120 units up - and on all of them, ZERO chests, ZERO pickups, and four enemies total.
@@ -7034,11 +7210,69 @@ function hazUpdate(dt){
     if(G.emberBurn>0){ G.emberBurn-=dt;
       for(const v of (G.vents||[])){ if(dXZ(v.x,v.z,p.x,p.z)<v.r+p.r && p.y<52){
         hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.14)),v.x,v.z, {name:'a lava vent',attack:'the flames'}); break; } } }
+  } else if(G.haz==='bramble'){          // Thornwild: the scrub bites - pick your line through it
+    /* Tier 1's hazard, so it must TEACH rather than punish: it never kills from full, it slows you
+       enough to notice, and the damage is a slow bleed you can simply walk out of. The lesson is
+       "the ground is not neutral", which every later zone then charges you for. */
+    let inT=false;
+    for(const th of (G.thorns||[])){ if(dXZ(th.x,th.z,p.x,p.z)<th.r+p.r && Math.abs((p.y||0)-th.y)<60){ inT=true; break; } }
+    p.thornT=inT?Math.min(1,(p.thornT||0)+dt*4):Math.max(0,(p.thornT||0)-dt*3);
+    if(inT){ G.thornTick=(G.thornTick||0)+dt;
+      if(G.thornTick>=1.0){ G.thornTick=0;
+        hurtPlayer(Math.max(1,Math.round(effMaxHp(p)*0.03)),p.x,p.z,{name:'the thornwild',attack:'the briars'}); } }
+    else G.thornTick=0;
+  } else if(G.haz==='rubble'){           // Collapse: the keep is still falling
+    G.rubT=(G.rubT||0)-dt;
+    if(G.rubT<=0){ G.rubT=2.2+Math.random()*2.0;
+      /* Lands NEAR you, never ON you: offset far enough that standing still is survivable and
+         walking a straight line is not. A hazard you cannot dodge is just a damage tax. */
+      const a=Math.random()*6.283, rr=110+Math.random()*180;
+      const x=p.x+Math.cos(a)*rr, z=p.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
+      if(h>-1e8) G.debris.push({x,z,y:h,warn:1.15,r:64});
+    }
+    for(const d of (G.debris||[])){
+      if(d.warn>0){ d.warn-=dt;
+        if(d.warn<=0){ burst(d.x,d.y+6,d.z,'#8a7d6c',18); G.shake=Math.min(16,(G.shake||0)+7);
+          if(dXZ(d.x,d.z,p.x,p.z)<d.r+p.r && Math.abs((p.y||0)-d.y)<70)
+            hurtPlayer(Math.max(3,Math.round(effMaxHp(p)*0.12)),d.x,d.z,{name:'the falling keep',attack:'the masonry'});
+          d.gone=1.2; } }
+      else if(d.gone>0) d.gone-=dt;
+    }
+    G.debris=(G.debris||[]).filter(d=>d.warn>0||d.gone>0);
+  } else if(G.haz==='glare'){            // Sunspire Glare: the spire sweeps the floor with light
+    /* A ROTATING beam rather than a blinking one. Rotation is readable from anywhere in the level -
+       you can see where it is and where it is going without having learned a timer - and it is the
+       only hazard here that you solve by MOVING WITH it rather than away from it. */
+    G.glareA=(G.glareA||0)+dt*0.55;
+    const o=G.glareO||{x:0,z:0};
+    const ang=Math.atan2(p.z-o.z,p.x-o.x);
+    let d=Math.abs(((ang-G.glareA+Math.PI*3)%(Math.PI*2))-Math.PI);
+    if(d<0.17){                                        // inside the wedge
+      G.glareTick=(G.glareTick||0)+dt;
+      if(G.glareTick>=0.7){ G.glareTick=0;
+        hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.09)),p.x,p.z,{name:'the Sunspire',attack:'the light'}); }
+    } else G.glareTick=0;
+    G.glareNear=d<0.34;                                 // for the warning shimmer in the draw pass
+  } else if(G.haz==='gloom'){            // Duskmoor Gloom: the dark drinks
+    /* The finale's hazard makes the LEVEL's own lights load-bearing, which is the only hazard here
+       that changes how you read the map rather than how you move. It builds slowly and drains fast,
+       so crossing a dark stretch is a decision with a cost, not a wall. */
+    let lit=false;
+    for(const L of (G.lights||[])){ if(dXZ(L.x,L.z,p.x,p.z)<L.r){ lit=true; break; } }
+    G.inLight=lit?1:0;
+    if(lit) G.gloomT=Math.max(0,(G.gloomT||0)-dt*1.8);
+    else{
+      G.gloomT=(G.gloomT||0)+dt;
+      if(G.gloomT>3.5){ G.gloomTick=(G.gloomTick||0)+dt;
+        if(G.gloomTick>=0.9){ G.gloomTick=0;
+          hurtPlayer(Math.max(2,Math.round(effMaxHp(p)*0.07)),p.x,p.z,{name:'the gloom',attack:'the dark'}); } }
+    }
   }
 }
 function hazSetup(rnd){                                  // place whatever the zone's hazard needs
   const Z=curZone(); G.haz=(G.side||G.trial)?null:(Z.haz||null);
   G.phasers=[]; G.vents=[]; G.gustX=0; G.emberT=0; G.emberWarn=0; G.emberBurn=0;
+  G.thorns=[]; G.debris=[]; G.rubT=0; G.lights=[]; G.glareA=0; G.glareO=null; G.gloomT=0; G.inLight=1;
   if(!G.haz) return;
   if(G.haz==='phase'){                                   // only mid-bridge stepping stones blink — never a landing stoop
     const cand=G.segments.filter(s=>s.phaseable);
@@ -7047,7 +7281,72 @@ function hazSetup(rnd){                                  // place whatever the z
     if(cand.length && G.phasers.length<2) for(const s of cand.slice(0,2)){ if(!G.phasers.some(ph2=>ph2.seg===s)) G.phasers.push({seg:s,sp:0.9+rnd()*0.6,off:rnd()*6.28,on:true}); }
   } else if(G.haz==='lava'){                             // vents across the rooms
     for(const r of G.rooms){ if(rnd()<0.75) G.vents.push({x:r.x+(rnd()*2-1)*(r.w/2-70),z:r.z+(rnd()*2-1)*(r.d/2-70),r:44}); }
+  } else if(G.haz==='bramble'){
+    /* Patches sit BETWEEN rooms as often as in them, because a thorn patch inside an arena is a
+       nuisance during a fight and a thorn patch on the route is a decision about your line. */
+    for(const r of G.rooms){ const n=1+Math.floor(rnd()*3);
+      for(let i=0;i<n;i++){ const a=rnd()*6.283, rr=(r.w/2)*(0.4+rnd()*1.1);
+        const x=r.x+Math.cos(a)*rr, z=r.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
+        if(h<-1e8) continue;
+        G.thorns.push({x,z,y:h,r:56+rnd()*46}); } }
+  } else if(G.haz==='rubble'){
+    /* Debris falls near the PLAYER, not at fixed points - a ruin that only collapses in three
+       places is a trap layout, and you learn it once and never look up again. Zones are picked
+       per-strike in hazUpdate; setup only sets the clock. */
+    G.rubT=2.4;
+  } else if(G.haz==='glare'){
+    G.glareA=rnd()*6.283;                                // where the sweep starts, so it is not identical every area
+    /* The spire the beam comes from: the level's centre of mass, so the sweep reads as originating
+       somewhere rather than from off-screen. */
+    let sx=0,sz=0; for(const r of G.rooms){ sx+=r.x; sz+=r.z; }
+    G.glareO={x:sx/Math.max(1,G.rooms.length), z:sz/Math.max(1,G.rooms.length)};
+  } else if(G.haz==='gloom'){
+    /* Light comes from torches the level already placed, plus a lamp in the middle of every room,
+       so no room is a death sentence and the ROUTE between them is where the pressure lives. */
+    /* EVERY room gets its lamp, with no ground check. The first version required solid ground at
+       the room's centre and gave Castle Duskmoor 6 lights for 10 rooms - in a tower zone four room
+       centres are over void (the room is a ring or a ledge, not a disc). Those four rooms would
+       have been unlit, in the one hazard that punishes darkness. The light is an x/z position with
+       a radius and the safety test is a flat distance, so its height was never used for anything. */
+    for(const r of G.rooms){ const h=surfaceHeightAt(r.x,r.z,20); G.lights.push({x:r.x,z:r.z,y:h>-1e8?h:(r.y||0),r:300}); }
+    for(const tc of (G.torches||[])) G.lights.push({x:tc.x,z:tc.z,y:tc.y||0,r:260});
   }
+}
+/* Rooms created AFTER hazSetup ran get their hazard furniture here.
+   Castle Duskmoor reported 6 lights for 10 rooms, and I first blamed a ground check at the room
+   centre - a real flaw, fixed above, that changed the count not at all. The actual cause is
+   ORDERING: hazSetup runs inside the scape builder, and zoneTopology / addVerticality / highGround
+   all push more rooms afterwards. The hazard only ever furnished the rooms that existed at the
+   moment it ran, which in the gloom zone meant four rooms with no light in the one hazard that
+   punishes darkness, and in the Outskirts and Emberdeep meant whole late-built rooms with no
+   thorns and no vents.
+   Fourth wrong guess on this pass, and the third that a counter would have caught faster than a
+   theory: the number 6 was in front of me twice before I asked WHEN it was produced rather than
+   WHY it was small. */
+function hazTopUp(rnd){
+  if(!G || !G.haz || !G.rooms) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  let n = 0;
+  if(G.haz === 'gloom'){
+    for(const r of G.rooms){
+      if((G.lights||[]).some(L => dXZ(L.x, L.z, r.x, r.z) < 260)) continue;
+      const h = surfaceHeightAt(r.x, r.z, 20);
+      G.lights.push({x:r.x, z:r.z, y:h > -1e8 ? h : (r.y||0), r:300}); n++;
+    }
+  } else if(G.haz === 'lava'){
+    for(const r of G.rooms){
+      if((G.vents||[]).some(v => dXZ(v.x, v.z, r.x, r.z) < r.w/2)) continue;
+      if(R() < 0.75){ G.vents.push({x:r.x + (R()*2-1)*(r.w/2-70), z:r.z + (R()*2-1)*((r.d||r.w)/2-70), r:44}); n++; }
+    }
+  } else if(G.haz === 'bramble'){
+    for(const r of G.rooms){
+      if((G.thorns||[]).some(t => dXZ(t.x, t.z, r.x, r.z) < r.w)) continue;
+      const a = R()*6.283, rr = (r.w/2)*(0.4 + R()*0.8);
+      const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr, h = surfaceHeightAt(x, z, 20);
+      if(h > -1e8){ G.thorns.push({x, z, y:h, r:56 + R()*46}); n++; }
+    }
+  }
+  return n;
 }
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
@@ -9936,7 +10235,7 @@ function update(dt){
   if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
   if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
-  const moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();
+  let moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();   // `let`: the Thornwild hazard scales it below
   if(p.downed){ mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false; input.attack=false; p.charging=false; p.attackHeld=false;   // co-op: a downed player is locked out until revived
     if(Math.floor(G.time*1.5)%2===0) addText(p.x,p.y+70,p.z,'DOWNED','#ff5e54'); }
   if(p.recoverT>0){ p.recoverT-=dt; mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false;   // regain your feet first
@@ -9949,6 +10248,11 @@ function update(dt){
     // A permanent TINY bit of momentum: base friction retains a little speed so you ease to a stop
     // (proportional to how fast you were going) instead of halting on a dime. Ice pushes it to a real slide.
     const ice=(G.haz==='slick')?(p.slide||0):0, acc=8*(1-ice*0.55), fr=0.865+ice*0.11, cut=4-ice*3.7;
+    /* Thornwild drags on the TOP SPEED, not on acceleration: braking and turning still feel like
+       yours, you are simply wading. Slowing acceleration instead reads as input lag, which is the
+       one thing a movement hazard must never feel like. */
+    const thorn=(G.haz==='bramble')?(p.thornT||0):0;
+    moveSpd*=(1-thorn*0.34);
     if(mx!==0) p.vx+=mx*moveSpd*dt*acc; p.vx*=fr; if(Math.abs(p.vx)<cut) p.vx=0;
     if(mz!==0) p.vz+=mz*moveSpd*dt*acc; p.vz*=fr; if(Math.abs(p.vz)<cut) p.vz=0;
     const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
@@ -15443,6 +15747,27 @@ function render(t){
       const gl=burn?1:(warn?(0.35+0.45*Math.sin(t*22)):0.16);
       bx(v.x,1.5,v.z, v.r*2,3,v.r*2, burn?'#ff5a1e':'#5a1d0a', burn?'#ff9a3a':'#ff5a1e', gl);
       if(burn) for(let i=0;i<2;i++) bx(v.x+(Math.random()-0.5)*v.r, 12+Math.random()*46, v.z+(Math.random()-0.5)*v.r, 6,14,6, '#ff9a3a','#ffd24a',0.75); } }
+  if(G.haz==='bramble') for(const th of (G.thorns||[])){   // Thornwild: a dark tangle you can see from a distance and route around
+    const n=Math.max(4,Math.round(th.r/16));
+    for(let i=0;i<n;i++){ const a=(i/n)*6.283+th.x*0.01, rr=th.r*(0.35+((i*7)%5)/7);
+      bx(th.x+Math.cos(a)*rr, th.y+7, th.z+Math.sin(a)*rr, 7,15,7, '#20301c','#4a5c33',0.3); }
+    bx(th.x,th.y+1,th.z, th.r*2,2,th.r*2, '#1a2416','#33421f',0.2); }
+  if(G.haz==='rubble') for(const d of (G.debris||[])){
+    if(d.warn>0){                                      // THE TELL: a growing shadow, then the mass above it
+      const k=1-d.warn/1.15, pulse=0.3+0.5*Math.sin(t*18);
+      bx(d.x,d.y+1.5,d.z, d.r*2*(0.5+k*0.5),2,d.r*2*(0.5+k*0.5), '#0d0b09','#6a5c4a',0.35+pulse*0.3);
+      bx(d.x, d.y+380*(1-k)+40, d.z, 46,46,46, '#4a4038','#8a7d6c',0.85); }
+    else if(d.gone>0) bx(d.x,d.y+8,d.z, d.r*1.4,16,d.r*1.4, '#3a332c','#6a5c4a',0.5*(d.gone/1.2)); }
+  if(G.haz==='glare' && G.glareO){                     // Sunspire Glare: a wedge of light sweeping the floor
+    const o=G.glareO, A=G.glareA||0;
+    for(let i=1;i<=14;i++){ const rr=i*260;
+      bx(o.x+Math.cos(A)*rr, 2, o.z+Math.sin(A)*rr, 70+rr*0.16,3,70+rr*0.16,
+         '#6a5a20','#ffe9a0', G.glareNear?0.5:0.34); } }
+  if(G.haz==='gloom' && !G.inLight){                   // Duskmoor Gloom: the ring of safety you just left
+    const gl=Math.min(1,(G.gloomT||0)/3.5);
+    for(const L of (G.lights||[])){ if(dXZ(L.x,L.z,G.p.x,G.p.z)>1500) continue;
+      const n=14; for(let i=0;i<n;i++){ const a=(i/n)*6.283;
+        bx(L.x+Math.cos(a)*L.r, L.y+1.5, L.z+Math.sin(a)*L.r, 26,2,26, '#3a2f14','#ffd88a',0.2+gl*0.45); } } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
   if(G.secretTrigger && !G.secretTrigger.done){        // the trigger rune: a dim, easily-missed floor glyph in a dead end
@@ -16074,6 +16399,11 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   cheatTap:(id)=>registerCheatTap(id), godSeq:GOD_SEQ.slice(),
   makeWeapon, makeArmor, makeTrinket, itemAv, itemStaticAv, rollRarity, rollOrganicRarity, elemMod, powerScore, computeNgScales, effDodgeCd, skinIds:Object.keys(SKINS),
   VOXMAT,VOXASM,voxMetrics,voxLod,voxSeed,
+  /* Exported for the measurement tools ONLY. tools/mobdist.js needed to know how much open,
+     non-room GROUND a level has, re-implemented the test as "is there a segment or a plat here",
+     and reported the Outskirts - a grassland - as 2% ground. Every probe that reimplements one of
+     these tests eventually measures something the game does not believe. */
+  surfaceHeightAt, highestSurfaceAt,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

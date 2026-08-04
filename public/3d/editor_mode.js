@@ -246,7 +246,7 @@ function hud(){
     rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
               (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
     rows.push('<div class="row"><span class="k">Del</span>delete <span class="k">Esc</span>deselect</div>');
-    rows.push('<div class="row"><span class="k">R</span>rotate <span class="k">D</span>duplicate' +
+    rows.push('<div class="row"><span class="k">R</span>rotate <span class="k">ctrl D</span>duplicate' +
               ' <span class="k">K</span>collision' +
               (s ? (findCollider(s.o.edId) >= 0 ? ' <span style="color:#54d17a">on</span>'
                                                 : ' <span style="color:#ff3df0">off</span>') : '') + '</div>');
@@ -762,14 +762,19 @@ function onKey(e){
   /* Camera keys first, and they never touch the selection - you are moving the VIEW, not the
      thing. WASD pans, QE turns, RF (and the wheel) zooms, G re-centres on the hero when you have
      flown somewhere and lost him. */
-  if(EDCAM.on){
+  /* Bare keys only. This block runs BEFORE undo/redo, so without the modifier guard Ctrl+Z zoomed
+     the camera and undo never ran - a conflict of my own making, found while auditing the bindings
+     Oliver flagged rather than by hitting it. */
+  if(EDCAM.on && !e.ctrlKey && !e.metaKey && !e.altKey){
     const k = e.key.toLowerCase();
     let did = true;
     const step = e.shiftKey ? 3 : 1;
     if(k === 'w') camMove(step, 0, 0);
     else if(k === 's') camMove(-step, 0, 0);
-    else if(k === 'a') camMove(0, -step, 0);
-    else if(k === 'd' && !EDITOR.sel) camMove(0, step, 0);    // D duplicates when something is selected
+    /* A goes left, D goes right. They were reversed: camMove's `right` axis is built from the yaw
+       basis (cos, -sin), which already points right, so negating it for A sent you the wrong way. */
+    else if(k === 'a') camMove(0, step, 0);
+    else if(k === 'd') camMove(0, -step, 0);
     else if(k === 'q') camMove(0, 0, -step);                  // down
     else if(k === 'e') camMove(0, 0, step);                   // up
     else if(k === ' ') camMove(0, 0, step);
@@ -790,7 +795,7 @@ function onKey(e){
      wrong for a flower you should be able to walk over, so the default is on and this is the
      escape hatch - and it is also how an EXISTING walk-through prop found by the C overlay gets
      collision, which is the whole of E1 done by hand. */
-  if((e.key === 'k' || e.key === 'K') && EDITOR.sel && EDITOR.editable){
+  if((e.key === 'k' || e.key === 'K') && !e.ctrlKey && !e.metaKey && EDITOR.sel && EDITOR.editable){
     const o = EDITOR.sel.o, obs = G().obstacles, before = snapLayer();
     const i = findCollider(o.edId);
     if(i >= 0){
@@ -813,7 +818,7 @@ function onKey(e){
 
   /* R rotates. Props are placed on a grid and a wood of identically-facing trees reads as a
      tileset; the models already honour `ry`, nothing was setting it. */
-  if((e.key === 'r' || e.key === 'R') && EDITOR.sel && EDITOR.editable && !e.ctrlKey){
+  if((e.key === 'r' || e.key === 'R') && EDITOR.sel && EDITOR.editable && !e.ctrlKey && !e.metaKey){
     const o = EDITOR.sel.o, before = snapLayer(), was = geom(o);
     o.ry = (((o.ry || 0) + (e.shiftKey ? -Math.PI / 8 : Math.PI / 8)) + Math.PI * 2) % (Math.PI * 2);
     const now = geom(o);
@@ -822,10 +827,11 @@ function onKey(e){
     hud(); e.preventDefault(); e.stopPropagation(); return;
   }
 
-  /* D duplicates, offset by one grid step so the copy is visible rather than hidden inside the
-     original. Building a row of anything without this is place-nudge-place-nudge; with it, it is
-     D-D-D. The copy carries its own collider, not a reference to the original's. */
-  if((e.key === 'd' || e.key === 'D') && EDITOR.sel && EDITOR.editable && !e.ctrlKey){
+  /* CTRL+D duplicates. It was plain D, which is also strafe-right - I "resolved" that by only
+     duplicating when something was selected, so the same key did two different things depending on
+     hidden state. That is the kind of binding that makes a tool feel broken. Ctrl+D is what every
+     design tool uses and it collides with nothing here. */
+  if((e.key === 'd' || e.key === 'D') && (e.ctrlKey || e.metaKey) && EDITOR.sel && EDITOR.editable){
     const src = EDITOR.sel, arr = G()[src.arr], obs = G().obstacles, before = snapLayer();
     const o = JSON.parse(JSON.stringify(src.o));
     o.x += EDITOR.grid * 2; o.z += EDITOR.grid * 2;

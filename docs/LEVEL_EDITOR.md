@@ -13,12 +13,21 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 | `PgUp` / `PgDn` | raise / lower |
 | `alt` + those | **resize** instead of move (`[` `]` for a healing pad's radius) |
 | `R` | rotate 1/16 turn (`shift` reverses) |
-| `D` | duplicate, and select the copy - so `D D D` builds a row |
+| `ctrl`+`D` | duplicate, and select the copy - so ctrl+D ctrl+D builds a row |
 | `K` | toggle collision on the selected object |
 | `C` | collision overlay |
 | `Del` | delete |
 | `Ctrl+Z` / `Ctrl+Y` | undo / redo |
 | `Esc` | stop placing, or deselect |
+
+## Every binding, once
+
+No key does two jobs. Camera keys are bare-key only, so `ctrl`+anything always reaches the editor
+command rather than flying the view.
+
+**Camera** - drag, `WASD`, `Q`/`E`, `Z`/`X`, wheel, `shift`+wheel, `G`
+**Selected object** - arrows, `alt`+arrows, `PgUp`/`PgDn`, `[`/`]`, `R`, `ctrl`+`D`, `K`, `Del`
+**Session** - `ctrl`+`Z`, `ctrl`+`Y`, `C`, `Esc`, `F2`
 
 ## The palette
 

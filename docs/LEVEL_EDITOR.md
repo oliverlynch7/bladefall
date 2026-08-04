@@ -53,6 +53,18 @@ over, and turns it ON for an existing walk-through prop, which is how E1 gets fi
 Mobs are placed with the game's own spawner, so they are real enemies with correct stats. The
 button offers whatever the current level already spawns and cycles that roster on repeat presses.
 
+## Hub furniture
+
+The Waystation's stalls, anvil, barber's booth, beast cages, notice board, mirror and the four
+activity gates are all editable - select, move, delete, undo. They are drawn from their own list
+rather than from the level's props, which is why nothing could touch them before.
+
+Deleting one removes what it DOES as well as how it looks (the shop, the Drillmaster, a portal), so
+the message names it. `Ctrl+Z` and **Revert area** both put it back.
+
+Moving the gates is the fix for spires overlapping the portals - the gates themselves are entries
+in this list.
+
 ## The collision overlay
 
 `C` draws what is solid: **red** blocks you and you can stand on top, **green** is movers and

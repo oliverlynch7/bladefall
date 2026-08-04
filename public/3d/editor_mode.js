@@ -27,7 +27,13 @@ let _lastT = 0;
 
 function G(){ return (window.__BF3 && window.__BF3.G) || null; }
 function cam(){ try { return window.__BF_CAM ? window.__BF_CAM() : null; } catch(e){ return null; } }
-function objY(o){ return (o.y0 != null ? o.y0 : 0) + ((o.h || 0) * 0.5); }
+function objY(o){
+  /* Hub furniture carries no height - it is a marker the draw call builds around - so its pick
+     point would sit on the floor at its feet, well below the thing you are aiming at. 46 is the
+     height the interaction prompt already uses for these, so the two agree. */
+  if(o.prop && o.h == null) return 46;
+  return (o.y0 != null ? o.y0 : 0) + ((o.h || 0) * 0.5);
+}
 
 /* World -> screen. Returns null behind the camera, so an object at your back cannot win the
    "nearest to cursor" test - that reads as clicking something you cannot see. */
@@ -200,6 +206,7 @@ function labelOf(sel){
   if(sel.built) return (o.model || 'built piece').replace(/^.*\//, '');
   if(o.set) return o.set.replace(/^hub/, '');
   if(o.type) return o.type;                                   // enemies name themselves
+  if(o.prop) return o.name || o.prop;                         // hub furniture knows what it is
   if(o.kind === 'plat') return (o.h > 120 ? 'column' : (o.h < 12 ? 'floor' : 'platform'));
   if(o.kind) return o.kind;
   if(sel.arr === 'healpads') return 'heal pad';
@@ -1124,7 +1131,9 @@ function onKey(e){
       () => { if(arr) arr.splice(idx, 0, obj); if(cobj) obs.splice(ci, 0, cobj); },
       () => { if(arr) arr.splice(idx, 1); if(ci >= 0) obs.splice(ci, 1); });
     EDITOR.sel = null;
-    toast('- deleted ' + labelOf(s) + ' - Ctrl+Z puts it back', 'del');
+    /* Hub furniture is a function as well as a model, so name what just stopped working. */
+    toast((s.o.prop ? '- removed ' + labelOf(s) + ' (and what it does)' : '- deleted ' + labelOf(s)) +
+          ' - Ctrl+Z puts it back', 'del');
   }
   else handled = false;
   if(handled){

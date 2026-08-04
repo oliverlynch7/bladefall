@@ -43,7 +43,15 @@ export const EDITOR = {
    same reason everything else does: the scape calls mkMonster in a fixed order during loadStage,
    so an enemy's index is exactly as stable as a deco's, and applyLayer runs after the level is
    built and before the first frame. Moving one must also move its sx/sz home, or it walks back. */
-export const EDIT_ARRAYS = ['deco', 'obstacles', 'segments', 'movers', 'healpads', 'dens', 'torches', 'chests', 'enemies'];
+/* `hubNpcs` is the Waystation's FURNITURE - the stalls, the anvil, the barber's booth, the beast
+   cages, the notice board, the mirror, and the four activity gates. Oliver: "there's also still a
+   bunch of graphical things in the hub that i cant remove." They are drawn from this list rather
+   than from deco, so nothing the editor searched ever touched them.
+   Moving these is the direct fix for D3 - the spires overlapping the portal gates - because the
+   gates themselves are entries here. Deleting one removes a FUNCTION as well as a model (the
+   Drillmaster, the shop, a portal), which is why the delete says exactly what it removed; Ctrl+Z
+   and Revert area both put it back. */
+export const EDIT_ARRAYS = ['deco', 'obstacles', 'segments', 'movers', 'healpads', 'dens', 'torches', 'chests', 'enemies', 'hubNpcs'];
 
 const LS_KEY = 'bf_editlayers';
 

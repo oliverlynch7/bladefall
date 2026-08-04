@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.585.0-weaponmatrix';
+const VERSION3D='1.590.0-weapbalance';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1827,7 +1827,12 @@ const ARCHES={
 const ARCHEIDS=Object.keys(ARCHES);
 // retired/removed archetypes never enter active generation: voidscythe + iansblade are shop-only; saber + dagger
 // were merged away (saber->sword, daggers->throwing knives) and survive only as save-migration aliases.
-const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger','fist'];   // 'fist' is Monk-only, granted not dropped
+/* 'flintlock' retired from DROPS 2026-08-03: it is the PIRATE'S CLASS EQUIPMENT now, not loot.
+   It became the only archetype in the game no class family lists, so every one that dropped would
+   have been unusable by everybody - dead weight in a chest. The archetype itself stays, because the
+   Pirate's own pistol is built from it. Retiring rather than deleting is the existing mechanism for
+   exactly this. */
+const RETIRED_ARCHES=['voidscythe','iansblade','saber','dagger','fist','flintlock'];   // 'fist' is Monk-only, granted not dropped
 const DROP_ARCHES=ARCHEIDS.filter(a=>!RETIRED_ARCHES.includes(a));
 // Batch-2 SFX: which file-sound a weapon's swing / fire should layer over the procedural whoosh
 function weaponSwingFx(w){ if(!w) return null;
@@ -1887,10 +1892,12 @@ const CLASSES={
       {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
       {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
       {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]},
-  /* Paladin: sword, hammer, spellblade. Knightly arms and a blessed blade - not the greatsword or
-     the axe, which are butcher's tools, and not the full magic line, which would make him a mage in
-     plate. Three types, like every earned class. */
-  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','hammer','spellblade'],
+  /* Paladin: sword, GREATSWORD, hammer, blessed blade. I called the greatsword a butcher's tool when
+     I trimmed this; that was wrong - a two-handed sword is the most knightly weapon there is, and
+     the line belongs on the axe alone. It also fixes coverage: greatswords were reachable by two
+     classes, so they dropped as dead weight for everyone else. The full magic line stays off, which
+     is what would make him a mage in plate. */
+  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','great','hammer','spellblade'],
     subs:[{id:'guardian',disp:'Guardian',blurb:'The holy wall — survival, shields, and retaliation.'},
           {id:'templar',disp:'Templar',blurb:'Holy wrath — smites, radiant bursts, and burning light.'}],
     skills:[
@@ -1921,10 +1928,13 @@ const CLASSES={
       {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
       {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
-  /* Pirate: cutlass, boarding crossbow, boarding pike. NO FLINTLOCK - the pistol is class equipment
-     now, always in his off hand, so listing it as loot would mean finding something you already
-     have. This is the change that C4 was groping toward. */
-  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['sword','cross','javelin'],
+  /* Pirate: cutlass, boarding crossbow, pike, and a BOARDING AXE. The axe is a coverage fix as much
+     as a flavour one - it and the greatsword were reachable by only two classes each, so those
+     drops were dead weight for fourteen of sixteen. A boarding axe is about as piratical as it
+     gets, so the fix costs nothing in character.
+     NO FLINTLOCK: the pistol is class equipment now, always in his off hand, so listing it as loot
+     would mean finding something you already have. That is what C4 was groping toward. */
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['sword','cross','javelin','axe'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
       {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},

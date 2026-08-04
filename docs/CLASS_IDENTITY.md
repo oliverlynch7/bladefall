@@ -319,3 +319,42 @@ tops out at four types; earned tops out at three.
 The pistol is class equipment now - always in his off hand. Listing it as loot would mean finding
 something you already have, and it was the reason C4 existed at all. That entry has now been removed
 rather than compensated for.
+
+
+---
+
+# Weapon coverage — is it balanced?
+
+The right test is not "how many weapons does a class get", it is **if this drops, how many of the
+sixteen can use it?** A type only two classes can wield is dead weight in thirteen chests out of
+fourteen.
+
+## A correction first
+
+My first count said NINETEEN OF TWENTY-EIGHT archetypes were unusable, including Ian's Blade. That
+was wrong and I nearly reported it as a crisis. The archetype ID is not the family key: each
+archetype carries an `art`, and families match on THAT. `saber`->sword, `crossbow`->cross,
+`firestaff`->staff, `holyscepter`->wand, and Ian's Blade is `anyClass`. Nothing was dead.
+Fourth time in this session a measurement of the wrong field produced a false alarm. Check what the
+consumer actually reads before believing a count.
+
+## The real picture, by art
+
+    sword 5   staff 5   dagger 4   javelin 4   wand 4
+    great 3   axe 3   hammer 3   bow 3   cross 3   spellblade 3
+    scythe 1 (Reaper)   fist 1 (Monk)
+
+Axe and greatsword were on TWO each - reachable only by Warrior and Berserker - so those drops were
+dead weight for fourteen of sixteen classes. Fixed by giving the Pirate a boarding axe (about as
+piratical as it gets) and the Paladin the greatsword. I had called the greatsword a butcher's tool
+when trimming his list; that was wrong, a two-handed sword is the most knightly weapon there is and
+the line belongs on the axe alone.
+
+Everything now sits at 3-5 except the two deliberate exclusives. No class exceeds four types.
+
+## One genuinely dead archetype, found and retired
+
+`flintlock` was the only archetype no family listed, because the pistol became the Pirate's class
+equipment. Every one that dropped would have been unusable by everybody. Added to RETIRED_ARCHES -
+the existing mechanism for exactly this - so it no longer drops while the archetype survives for the
+class's own pistol to be built from. Drop pool 23 -> 22, zero dead drops.

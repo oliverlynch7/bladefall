@@ -559,7 +559,13 @@ function addEyes(actor, useSaved){
       w.scale.set(R, R*EYE.squash, frontZ); g.add(w);
     }
     const irR = R * EYE.irisSz * 0.9;
-    const ir = mk(new THREE.CircleGeometry(1, 20), EYE.iris);
+    /* THE PLAYER'S CHOSEN EYE COLOUR. Character creation has always offered eight of them and the
+       3D hero never read any: the iris came from FACE_PRESETS per MODEL, so the choice changed a
+       voxel character nobody sees any more and did nothing to the one you play. Same dead option
+       as hairstyle, but worth wiring up rather than removing - it is the only cosmetic choice left
+       once hair goes, and now it is visible on your actual face. */
+    const _pick = (function(){ try { const m = window.__BF_META && window.__BF_META(); return m && m.eyeColor; } catch(e){ return null; } })();
+    const ir = mk(new THREE.CircleGeometry(1, 20), _pick || EYE.iris);
     ir.scale.setScalar(irR);
     ir.position.z = frontZ * 0.995;
     ir.material.depthWrite = false; ir.renderOrder = (EYE.onTop ? 999 : 3) + 1;
@@ -1370,6 +1376,68 @@ window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
    different framebuffer and are composited away. Read-only by convention - the editor adds and
    removes one named group and touches nothing else. */
 window.__hero3dScene = () => scene;
+
+/* ── CHARACTER-CREATION PREVIEW ────────────────────────────────────────────
+   A real, spinnable 3D model on its own canvas, so you can SEE the class you are choosing and the
+   eye colour you picked before committing to a character you cannot change.
+   Its own renderer and scene rather than the game's: the creation screen is an overlay with no
+   level behind it, and borrowing the game's canvas would mean fighting whatever it is drawing.
+   The model is a SkeletonUtils clone for the same reason the mirror's is - one actor cannot be in
+   two places, and the game may already be using it. */
+let _pv = null;
+window.__hero3dPreview = (canvas, opts) => {
+  opts = opts || {};
+  if(!canvas) return false;
+  try {
+    if(!_pv || _pv.canvas !== canvas){
+      if(_pv && _pv.renderer) _pv.renderer.dispose();
+      const r = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+      r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      const sc = new THREE.Scene();
+      sc.add(new THREE.AmbientLight(0xffffff, 1.35));
+      const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(2, 4, 3); sc.add(key);
+      const rim = new THREE.DirectionalLight(0x9fd6ff, 0.7); rim.position.set(-3, 2, -2); sc.add(rim);
+      const cam2 = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+      _pv = { canvas, renderer:r, scene:sc, cam:cam2, wrap:new THREE.Group(), model:null, yaw:0 };
+      sc.add(_pv.wrap);
+    }
+    const want = opts.model || 'Warrior';
+    if(_pv.model !== want){
+      const g = _loaded[want];
+      if(!g) return false;                       // not loaded yet; the caller retries
+      while(_pv.wrap.children.length) _pv.wrap.remove(_pv.wrap.children[0]);
+      const clone = SkeletonUtils.clone(g.scene);
+      clone.traverse(o => { if(o.isMesh){ o.frustumCulled = false; o.castShadow = false; } });
+      _pv.wrap.add(clone);
+      _pv.model = want;
+      /* FIXED FRAMING, not Box3. Measuring a SKINNED clone is the trap this file already documents
+         twice: a SkinnedMesh's bounds are computed in BIND space, so setFromObject returns a box
+         that has nothing to do with where the character actually is - and the camera derived from
+         it flew far enough away to render an empty frame. The kit characters are all built to
+         roughly the same height, so framing them the same way is both correct and simpler. */
+      /* FULL FIGURE. This framing is the one verified to render (_shot/out/cc2.png). Two attempts
+         to frame the FACE instead both failed - Box3 on a skinned clone returns bind-space bounds,
+         and findHeadBone threw inside this function's try/catch, which fails silently to a blank
+         canvas. Showing the whole character is worth having now; tightening onto the face so eye
+         colour reads clearly is a known follow-up, and must be verified by LOOKING because a
+         silent catch here renders nothing rather than something wrong. */
+      _pv.wrap.position.set(0, -0.95, 0);
+      _pv.cam.position.set(0, 0.15, 3.1);
+      _pv.cam.lookAt(0, 0.05, 0);
+    }
+    if(opts.yaw != null) _pv.yaw = opts.yaw;
+    _pv.wrap.rotation.y = _pv.yaw;
+    const w = canvas.clientWidth || 220, hh = canvas.clientHeight || 260;
+    if(canvas.width !== w || canvas.height !== hh){
+      _pv.renderer.setSize(w, hh, false);
+      _pv.cam.aspect = w / hh; _pv.cam.updateProjectionMatrix();
+    }
+    _pv.renderer.render(_pv.scene, _pv.cam);
+    return true;
+  } catch(e){ return false; }
+};
+window.__hero3dPreviewReady = (model) => !!_loaded[model || 'Warrior'];
+window.__hero3dClassModel = (cid) => CLASS_TO_MODEL[cid] || 'Warrior';
 
 /* ── E3: THE MIRROR REFLECTS THE REAL YOU ──────────────────────────────────
    The Waystation mirror drew its reflection with drawHero3(mh, t, TRUE) - and that third argument

@@ -14,10 +14,16 @@ one wearing voxel gear, in a game where everything else is a model. Most-seen re
 `drawHero3(fake, t, TRUE)`. The slowly turning hero behind the main menu. It is the first thing
 anybody sees of the game, and it is the old character.
 
-## 3. Skin thumbnails — `skinAv(id)` (~15707)
+## 3. ~~Skin thumbnails~~ — `skinAv(id)` — WAS DEAD CODE, now DELETED
 
-`drawHero3(fake, 1.2, TRUE)`. Small avatars in the skin picker. Lowest value: they are thumbnails,
-and a voxel thumbnail reads fine at that size. Worth doing last or not at all.
+I listed this as a remnant "worth doing last". It was not a remnant at all: `skinAv` was defined
+once and called from NOWHERE - a single reference in the whole file, its own definition - rendering
+avatars for a skin picker that stopped using them. Nothing ever put it on screen.
+
+Oliver asked what the skin thumbnails were, and checking in order to answer him is what found it.
+Deleted along with its `_avCache`, 23 lines. Worth recording as a caution about this very document:
+a sweep that greps for a PATTERN finds code shaped like the problem, not code that causes it, and
+three of the four entries here were verified while this one was only matched.
 
 ## 4. The hub mirror — `drawWaystation` (~14384)
 
@@ -34,6 +40,15 @@ This has never been tested with two devices on the current build. It may be fine
 and the remote hero may simply be dropped - or remote players may flicker or replace your own model.
 Flagged rather than fixed: it needs two machines to observe, which is exactly the test Oliver has and
 I do not.
+
+## Final state
+
+  first person   FIXED - real model, and you can see the weapon you are holding
+  bag paper-doll FIXED - real model, solid backdrop, portrait crop
+  title backdrop FIXED - routed through the pose system
+  hub mirror     ROUTED but UNVERIFIED - whether the clone reads through the glass still needs a
+                 human to stand in front of it; everything else here was confirmed by rendering
+  skin avatars   DELETED - never existed on screen
 
 ## The fix these share
 

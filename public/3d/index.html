@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.820.0-doll-frame';
+const VERSION3D='1.821.0-deadcode';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -15746,29 +15746,11 @@ function drawPortal3(po,t){
   drawShadow(po.x,po.z,34,0.2);
 }
 /* ---- skin preview (rendered on the main GL canvas, cropped) ---- */
-const _avCache={};
-function skinAv(id){
-  if(_avCache[id]) return _avCache[id];
-  try{
-    gl.clearColor(0.082,0.086,0.11,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    setFlatLights();
-    PROJ=mPersp(50*Math.PI/180,VW/VH,5,800);
-    VIEW=mLookAt([26,58,104],[0,30,0],[0,1,0]);
-    gl.uniformMatrix4fv(U.uP,false,new Float32Array(PROJ));
-    gl.uniformMatrix4fv(U.uV,false,new Float32Array(VIEW));
-    gl.uniform2f(U.uFogNF,600,2000);
-    CURM=mIdent();
-    const fake={x:0,y:0,z:0,vx:0,vz:0,yaw:0.5,onGround:true,runAnim:0,atkTimer:0,dodgeTimer:0,invuln:0,hurtFlash:0,skin:id,weapon:startWeapon()};
-    drawHero3(fake,1.2,true);
-    gl.finish();
-    const ctr=project(0,30,0)||[VW/2,VH/2];
-    const c2=document.createElement('canvas'); c2.width=92; c2.height=110;
-    const sw=VH*0.30*DPR, sh=VH*0.36*DPR;
-    c2.getContext('2d').drawImage(canvas,(ctr[0]*DPR)-sw/2,(ctr[1]*DPR)-sh/2,sw,sh,0,0,92,110);
-    _avCache[id]=c2.toDataURL();
-  }catch(e){ _avCache[id]=''; }
-  return _avCache[id];
-}
+/* `skinAv()` and its _avCache lived here and were DEAD CODE - defined once, called from
+   nowhere, one reference in the whole file which was its own definition. It rendered voxel
+   avatar thumbnails for a skin picker that no longer uses them. It was listed in
+   docs/VOXEL_REMNANTS.md as a voxel remnant 'worth doing last'; it was never on screen at
+   all, which is why checking beat describing it from the sweep. */
 function itemStaticAv(item){
   if(!item) return null;
   // Armor (helmet/chest/legs) shows SET-SPECIFIC art (Might/Swift/Mystic/…); trinkets keep their rarity art.

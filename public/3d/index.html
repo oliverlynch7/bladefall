@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.720.0-telegraph';
+const VERSION3D='1.730.0-phase2';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10018,12 +10018,25 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
       e.pinT-=dt;
       if(e.pinT<=0 && e.pinX!=null){
         (G.shockwaves=G.shockwaves||[]).push({x:e.pinX,z:e.pinZ,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
+        for(const q of (e._pin2||[])) (G.shockwaves=G.shockwaves||[]).push({x:q.x,z:q.z,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
+        e._pin2=null;
         SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,12);
       }
     } else if(e.pinCd<=0 && dist<820){
       e.pinCd=(4.5+Math.random()*2)*(e.phase>=2?0.55:1);
       e.pinX=p.x; e.pinZ=p.z; e.pinT=0.85;
       (G.trails=G.trails||[]).push({x:p.x,z:p.z,r:44,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
+      /* Phase 2: three arrows nocked. The extra pins bracket you rather than stack on you, so the
+         question stops being "step aside" and becomes "read which gap is left". */
+      if(e._volleyPin){
+        e._pin2=[];
+        for(let q=0;q<(e._volleyPin-1);q++){
+          const a=Math.random()*6.283, rr=90+Math.random()*70;
+          const px=p.x+Math.cos(a)*rr, pz=p.z+Math.sin(a)*rr;
+          e._pin2.push({x:px,z:pz});
+          (G.trails=G.trails||[]).push({x:px,z:pz,r:44,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
+        }
+      }
       addText(e.x,e.h+16,e.z,'PINNED!','#ffd9a0',true);
     }
   }
@@ -10037,7 +10050,7 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
     e._court=(e._court||[]).filter(m=>m&&!m.dead);
     e.courtCd=(e.courtCd==null?2:e.courtCd)-dt;
     if(e.courtCd<=0 && e._court.length===0 && dist<900){
-      e.courtCd=14;
+      e.courtCd = e._endlessCourt ? 4 : 14;      // phase 2: a new pair almost the moment the last falls
       for(let i=0;i<2;i++){
         const a=Math.random()*6.283, rr=180+Math.random()*140;
         try{
@@ -10062,13 +10075,17 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
   if(e.type==='colossus' && th!=='marble'){
     e.quakeCd=(e.quakeCd==null?4:e.quakeCd)-dt;
     if(e.quakeCd<=0 && dist<650){ e.quakeCd=(6.5+Math.random()*2)*(e.phase>=2?0.6:1);
-      const axis=Math.random()<0.5, span=axis?hw:hd;
+      /* Phase 2: both axes at once, so the safe ground is a moving intersection rather than a lane
+         - the same mechanic asking a harder question instead of a faster one. */
+      const _axes = e._crossQuake ? [true,false] : [Math.random()<0.5];
+      for(const axis of _axes){ const span=axis?hw:hd;
       /* Paint the lanes BEFORE they erupt. The rings already arrive staggered, but the first one
          arrived with no warning at all, so the mechanic taught you by killing you once. */
       for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
         (G.trails=G.trails||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:150, life:0.7, max:0.7, dmg:0, hit:0, col:'#ffb060'}); }
       for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
         (G.shockwaves=G.shockwaves||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:14,maxR:180,dmg:e.dmg*1.15,life:0,spd:230,delay:i*0.18,col:'#ffb060',col2:'#c05a1e'}); }
+      }
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'QUAKE!','#ffb060',true); }
   }
   // MARBLE COLOSSUS (Rotunda): a sweeping LIGHT BEAM traverses the dome — use the pillars as cover
@@ -10151,6 +10168,10 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   }
   if(e.type==='brute'){                                    // ground-slam shockwave (non-projectile — jump the ring to avoid it)
     if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
+      /* Phase 2: the floor stays broken. Each slam leaves standing rubble, so the arena you kite
+         around shrinks as the fight runs and your space becomes something you spend. */
+      if(e._rubble){ for(let q=0;q<3;q++){ const a=Math.random()*6.283, rr=70+Math.random()*120;
+        G.obstacles.push({x:e.x+Math.cos(a)*rr, z:e.z+Math.sin(a)*rr, w:54, d:54, h:46, kind:'plat'}); } }
       G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SLAM!','var(--danger)',true);
       for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
     else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
@@ -10196,7 +10217,8 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.type==='tyrant'){ e.ranged=true; e.shot={count:5,spread:0.2,speed:400,size:8,color:'#c47bff',shape:'orb',el:'void',glow:1}; e.shootCd=1.7; e.shootT=0.6; }
     G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+24,e.z,'ENRAGED!','var(--danger)',true);
     if(G&&!G.trial) storyToast('It stops holding back.');
-    bossEnterShield(e); }                                            // phase 2 raises the ward + healing crystals (major bosses)
+    bossEnterShield(e);                                              // phase 2 raises the ward + healing crystals (major bosses)
+    try { if(BOSS_PHASE2[e.type]) BOSS_PHASE2[e.type](e); } catch(err){} }
   // PHASE 3 — the final stand: at 25% it enrages again, specials on a hair-trigger, a burst nova (never mid-shield)
   if(e.hp/e.maxHp<0.25 && e.phase<3 && !e.shielded){ e.phase=3; e.speed*=1.14; e.dmg*=1.12;
     for(const k of ['slamCd','cleaveCd','novaCd','poundCd','quakeCd','beamCd','tpCd','tileCd','summonT']) if(e[k]!=null) e[k]=Math.min(e[k],0.8);
@@ -15584,6 +15606,68 @@ SKILL_FX.bsk_bash=function(p,ok,am){
     addText(p.x,p.y+50,p.z,'HEADBUTT','#ff8a62',true);
     hudUpdate();
   }
+};
+
+
+/* ── SECOND PHASES ──────────────────────────────────────────────────────────
+   Phase 2 already existed and was the SAME EVENT for every boss: faster, harder, cooldowns cut,
+   ward up. That is an intensity change, not a phase change - the fight at 40% health is the fight
+   at 90% health with the numbers turned up, which is a large part of why the bosses read as similar
+   to one another. Only the King and the Tyrant gained anything genuinely new.
+
+   Each entry below changes what the fight IS, and each is built from that boss's OWN signature, so
+   the second half is recognisably the same creature escalating rather than a different one
+   arriving. Appended for the same reason as the class tables: a later assignment silently wins, and
+   this is the placement that cannot lose that race. */
+const BOSS_PHASE2 = {
+
+  /* THE BRUTE slams the ground. In phase 2 the floor STAYS broken: every slam leaves rubble that
+     lingers, so the arena you are kiting around shrinks as the fight goes on and the space you have
+     is something you spend. */
+  brute(e){
+    e._rubble = 1;
+    addText(e.x, e.h + 30, e.z, 'THE FLOOR GIVES', '#ff8a3a', true);
+  },
+
+  /* THE HOLLOW MARKSMAN pins one spot. In phase 2 he pins THREE at once, so the answer stops being
+     "step aside" and becomes "read which gap is left". */
+  archer(e){
+    e._volleyPin = 3;
+    addText(e.x, e.h + 30, e.z, 'THREE ARROWS NOCKED', '#ffd9a0', true);
+  },
+
+  /* THE FROST SORCERER blinks between pillars. In phase 2 he leaves a MIRROR where he was, and the
+     mirror casts too - so the blink stops being an escape and starts being a way to be in two
+     places, and you have to decide which one is worth chasing. */
+  sorcerer(e){
+    e._mirrorCast = 1;
+    addText(e.x, e.h + 30, e.z, 'A SECOND OF HIM', '#bff0ff', true);
+  },
+
+  /* THE COLOSSUS marches quake rings down one axis. In phase 2 they come down BOTH at once, so the
+     safe ground becomes a moving grid intersection rather than a lane - the same mechanic asking a
+     harder question instead of a faster one. */
+  colossus(e){
+    e._crossQuake = 1;
+    addText(e.x, e.h + 30, e.z, 'THE GROUND ANSWERS', '#ffb060', true);
+  },
+
+  /* THE ABYSS KING hides behind his court. In phase 2 the court NEVER STOPS COMING - a new pair the
+     moment the last falls - so the fight turns from "clear them once" into a race: kill him through
+     the ward before the room fills, or clear forever. */
+  king(e){
+    e._endlessCourt = 1;
+    e.courtCd = 0;
+    addText(e.x, e.h + 30, e.z, 'THE COURT IS ENDLESS', '#c9a6ff', true);
+  },
+
+  /* THE AWAKENED KING collapses the floor. In phase 2 he takes the ARENA'S EDGE instead of tiles:
+     the rim falls away and keeps falling, so the final fight is fought on an island that is still
+     shrinking when it ends. */
+  tyrant(e){
+    e._rimFall = 1;
+    addText(e.x, e.h + 30, e.z, 'THE EDGE FALLS AWAY', '#c47bff', true);
+  },
 };
 
 window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,

@@ -17,6 +17,12 @@ import { toggleOverlay, refresh as refreshOverlay, OVERLAY } from './editor_coll
 
 const _mvp = new THREE.Matrix4(), _inv = new THREE.Matrix4(), _v = new THREE.Vector3();
 let _ui = null, _marker = null, _raf = 0, _drag = null, _look = null;
+/* Keys currently HELD. Movement used to happen once per keydown EVENT, which meant it ran at the
+   operating system's key-repeat rate: one step, a ~500ms pause, then a stuttery stream. That is
+   why flying felt choppy. Held keys are recorded here and the camera is moved every frame in
+   tick() instead, scaled by real elapsed time so it is smooth and frame-rate independent. */
+const _held = new Set();
+let _lastT = 0;
 
 function G(){ return (window.__BF3 && window.__BF3.G) || null; }
 function cam(){ try { return window.__BF_CAM ? window.__BF_CAM() : null; } catch(e){ return null; } }
@@ -84,8 +90,12 @@ export function pickAt(sx, sy, maxPx){
    looking" needs - the new object goes at the focus, which is the middle of your screen.
 
    Starts on the hero, so opening the editor never teleports you somewhere unrecognisable. */
-export const EDCAM = { on: false, x: 0, y: 0, z: 0, yaw: 0, pitch: -0.5, speed: 26 };
-const SPD_MIN = 4, SPD_MAX = 400;
+/* `speed` is UNITS PER SECOND now that movement runs in the frame loop. It was 26 units per key
+   PRESS, and applying a per-press figure once a frame would have flown at ~1500 u/s on a 60fps
+   machine - across the level in a second. The headless harness runs at a few frames a second, so
+   that error looked like "slow" there and would have been unusable on his desktop. */
+export const EDCAM = { on: false, x: 0, y: 0, z: 0, yaw: 0, pitch: -0.5, speed: 700 };
+const SPD_MIN = 80, SPD_MAX = 6000;
 /* How far in front of the camera a new object lands. Far enough to be in frame at a normal flying
    height, near enough that it is not a dot on the horizon. */
 const PLACE_AHEAD = 260;
@@ -238,10 +248,12 @@ function hud(){
               '<span class="k">WASD</span>move <span class="k">Q</span><span class="k">E</span>down/up</div>');
     rows.push('<div class="row"><span class="k">Z</span><span class="k">X</span>or <span class="k">wheel</span>zoom' +
               ' &middot; <span class="k">shift wheel</span>speed (' + Math.round(EDCAM.speed) + ')</div>');
-    rows.push('<div class="row"><span class="k">G</span>jump back to the hero</div>');
+    rows.push('<div class="row"><span class="k">G</span>hero <span class="k">F</span>frame selection' +
+              ' <span class="k">Tab</span>next here</div>');
     rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
     rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
-    rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
+    rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid +
+              'u <span class="k">shift</span>x5 <span class="k">-</span><span class="k">=</span>grid</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
     rows.push('<div class="row"><span class="k">alt</span>+ those keys resizes instead' +
               (s && s.o.r != null ? ' <span class="k">[</span><span class="k">]</span>radius' : '') + '</div>');
@@ -744,6 +756,33 @@ function onUp(){
   _drag = null;
 }
 
+const MOVE_KEYS = ['w', 'a', 's', 'd', 'q', 'e', 'z', 'x', ' '];
+
+/* Release on keyup, and clear everything if the window loses focus - a key held when you alt-tab
+   never sends its keyup, and the camera would drift away on its own forever. */
+function onKeyUp(e){ _held.delete(e.key.toLowerCase()); }
+function onBlur(){ _held.clear(); }
+
+/* One frame of held-key movement. `dt` is real elapsed seconds normalised to 60fps, so the same
+   press covers the same ground on a fast machine and a slow one. */
+function flyFrame(dt){
+  if(!EDCAM.on || !_held.size) return;
+  /* Seconds, clamped: a backgrounded tab hands back a huge dt on its first frame, and without the
+     clamp that single frame teleports you across the map. */
+  const f = Math.min(dt, 0.05);
+  let fwd = 0, right = 0, up = 0, dolly = 0;
+  if(_held.has('w')) fwd += 1;
+  if(_held.has('s')) fwd -= 1;
+  if(_held.has('a')) right += 1;
+  if(_held.has('d')) right -= 1;
+  if(_held.has('e') || _held.has(' ')) up += 1;
+  if(_held.has('q')) up -= 1;
+  if(_held.has('z')) dolly += 1;
+  if(_held.has('x')) dolly -= 1;
+  if(fwd || right || up) camMove(fwd * f, right * f, up * f);
+  if(dolly) camDolly(dolly * f);
+}
+
 function onKey(e){
   /* F2 toggles and is handled even when the editor is off. Everything else is swallowed while
      editing, so a nudge cannot also swing the sword or fire a skill. */
@@ -767,22 +806,16 @@ function onKey(e){
      Oliver flagged rather than by hitting it. */
   if(EDCAM.on && !e.ctrlKey && !e.metaKey && !e.altKey){
     const k = e.key.toLowerCase();
-    let did = true;
-    const step = e.shiftKey ? 3 : 1;
-    if(k === 'w') camMove(step, 0, 0);
-    else if(k === 's') camMove(-step, 0, 0);
-    /* A goes left, D goes right. They were reversed: camMove's `right` axis is built from the yaw
-       basis (cos, -sin), which already points right, so negating it for A sent you the wrong way. */
-    else if(k === 'a') camMove(0, step, 0);
-    else if(k === 'd') camMove(0, -step, 0);
-    else if(k === 'q') camMove(0, 0, -step);                  // down
-    else if(k === 'e') camMove(0, 0, step);                   // up
-    else if(k === ' ') camMove(0, 0, step);
-    else if(k === 'z') camDolly(step);                        // zoom IN
-    else if(k === 'x') camDolly(-step);                       // zoom OUT
-    else if(k === 'g'){ const p = G() && G().p; if(p){ EDCAM.x = p.x; EDCAM.y = (p.y || 0) + 210; EDCAM.z = p.z; } }
-    else did = false;
-    if(did){ hud(); e.preventDefault(); e.stopPropagation(); return; }
+    /* Movement keys are RECORDED as held and applied in tick(); they are not acted on here. */
+    if(MOVE_KEYS.indexOf(k) >= 0){
+      _held.add(k);
+      e.preventDefault(); e.stopPropagation(); return;
+    }
+    if(k === 'g'){
+      const p = G() && G().p;
+      if(p){ EDCAM.x = p.x; EDCAM.y = (p.y || 0) + 210; EDCAM.z = p.z; }
+      hud(); e.preventDefault(); e.stopPropagation(); return;
+    }
   }
 
   if((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey){
@@ -848,6 +881,61 @@ function onKey(e){
     toast('+ duplicated', 'add');
     hud(); e.preventDefault(); e.stopPropagation(); return;
   }
+
+  /* F FRAMES THE SELECTION - fly to whatever is selected and look at it. The single most-used key
+     in every 3D tool, and the answer to the thing that actually wastes time here: you nudge a prop,
+     look away, and cannot find it again. Distance scales with the object so a flower fills the
+     frame as much as a tower does. */
+  if((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && EDITOR.sel){
+    const o = EDITOR.sel.o;
+    const size = Math.max(o.w || 40, o.h || 40, o.d || 40, o.r ? o.r * 2 : 0);
+    const back = Math.max(140, size * 2.2);
+    const cp = Math.cos(EDCAM.pitch);
+    EDCAM.x = o.x - Math.sin(EDCAM.yaw) * cp * back;
+    EDCAM.y = objY(o) - Math.sin(EDCAM.pitch) * back;
+    EDCAM.z = o.z - Math.cos(EDCAM.yaw) * cp * back;
+    toast('framed ' + EDITOR.sel.arr + ':' + EDITOR.sel.idx);
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
+  /* TAB CYCLES what is under the cursor. Props overlap constantly - a lamp housing sits on its
+     post, a canopy on its trunk - and picking only ever returns the nearest, so the thing behind
+     was unreachable. Tab steps to the next candidate at the same spot. */
+  if(e.key === 'Tab' && EDITOR.editable){
+    const g = G(), sel = EDITOR.sel;
+    if(sel){
+      const near = [];
+      for(const arr of EDIT_ARRAYS){
+        const list = g[arr]; if(!list) continue;
+        for(let i = 0; i < list.length; i++){
+          const o = list[i];
+          if(o && o.x != null && Math.hypot(o.x - sel.o.x, o.z - sel.o.z) < 90) near.push({ arr, idx: i, o });
+        }
+      }
+      if(near.length > 1){
+        const at = near.findIndex(v => v.o === sel.o);
+        EDITOR.sel = near[(at + 1) % near.length];
+        toast('cycled to ' + EDITOR.sel.arr + ':' + EDITOR.sel.idx + '  (' + near.length + ' here)');
+      }
+    }
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
+  /* GRID SIZE. Ten units is right for laying out a courtyard and far too coarse for seating a
+     banner against a wall. Anything that snaps needs its snap to be adjustable. */
+  if((e.key === '-' || e.key === '=' || e.key === '+') && !e.ctrlKey){
+    const steps = [1, 2, 5, 10, 20, 50, 100];
+    let i = steps.indexOf(EDITOR.grid); if(i < 0) i = 3;
+    i = Math.max(0, Math.min(steps.length - 1, i + (e.key === '-' ? -1 : 1)));
+    EDITOR.grid = steps[i];
+    toast('grid ' + EDITOR.grid + 'u');
+    hud(); e.preventDefault(); e.stopPropagation(); return;
+  }
+
+  /* Ctrl+S saves, Ctrl+E exports. Both were button-only, and a tool you can drive from the
+     keyboard should not make you go back to the mouse to keep your work. */
+  if((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')){ act('save'); e.preventDefault(); e.stopPropagation(); return; }
+  if((e.ctrlKey || e.metaKey) && (e.key === 'e' || e.key === 'E')){ act('export'); e.preventDefault(); e.stopPropagation(); return; }
 
   if(e.key === 'Escape'){
     EDITOR.sel = null;   // nothing is "armed" any more: palette buttons place immediately
@@ -927,6 +1015,10 @@ function onKey(e){
 
 function tick(){
   if(!EDITOR.on) return;
+  const now = (typeof performance !== 'undefined' ? performance.now() : 0) / 1000;
+  const dt = _lastT ? Math.max(0, now - _lastT) : 0.016;
+  _lastT = now;
+  flyFrame(dt);
   const s = EDITOR.sel;
   if(s && _marker){
     const p = project(s.o.x, objY(s.o), s.o.z);
@@ -971,6 +1063,7 @@ export function toggle(force){
     if(_marker) _marker.remove();
     EDCAM.on = false;   // back into the hero, standing exactly where he was, ready to playtest
     const cv0 = document.getElementById('gl'); if(cv0) cv0.style.cursor = '';
+    _held.clear(); _lastT = 0;
     _ui = null; _marker = null; EDITOR.sel = null; _drag = null; _look = null; EDITOR.place = null;
     if(OVERLAY.on) toggleOverlay(false);   // leaving edit mode must not strand wireframes in the game
     toast('edit mode off');
@@ -979,6 +1072,8 @@ export function toggle(force){
 }
 
 addEventListener('keydown', onKey, true);
+addEventListener('keyup', onKeyUp, true);
+addEventListener('blur', onBlur);
 /* project/unprojectToPlane are exposed as well as used internally: they are what any later editor
    phase (asset palette, terrain, spawner placement) needs to turn a cursor into a world point, and
    they are the two functions worth probing from the screenshot harness when placement looks off. */

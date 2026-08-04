@@ -63,7 +63,26 @@ exported yet. **Revert area** clears YOUR edit for that area and falls back to t
 Edits are stored as a LIST of changes replayed over the generated level, not as a copy of it, so
 an area you have not touched behaves exactly as it does today, and the diffs are readable.
 
-## Coming next: the detached camera
+## The camera
+
+**F2 releases you from the character** into an overhead orbit. **F2 again drops you straight back
+into the hero, where he was standing**, so you can playtest what you just built without a reload.
+
+| key | camera |
+|---|---|
+| `WASD` | pan (`shift` = faster) |
+| `Q` / `E` | turn |
+| wheel, or `F` | zoom (`R` is rotate, so zoom-in is the wheel) |
+| `T` | tilt (`shift` reverses) |
+| `G` | re-centre on the hero when you have flown off and lost him |
+
+Clicking an asset in the palette **adds it where the camera is looking** and selects it, so you
+nudge it into place from there. No arming, no second click hunting for a ground pixel.
+
+Panning is relative to the way you are facing, not world axes - turn 90 degrees and W still goes
+"forward" on screen.
+
+## Superseded: the old note about this being next
 
 Oliver's design, and the right one: F2 should RELEASE you from the character into a free overhead
 camera you can pan and zoom, place things in front of where you are looking, and F2 again drops you

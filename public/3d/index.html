@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.441.0-editor';
+const VERSION3D='1.445.0-editorcam';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13960,7 +13960,24 @@ function render(t){
   const _noShake=meta.shakeOff||meta.reduceMotion;   // accessibility: hold the camera steady
   const shx=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0, shy=(G&&!_noShake)?(Math.random()-0.5)*G.shake*0.8:0;
   const _rd=Math.max(0.55,Math.min(2.2,meta.renderDist||1));   // Render Distance slider: pushes the fog wall out (see further) or pulls it in (better perf)
-  if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
+  /* ── THE EDITOR CAMERA ─────────────────────────────────────────────────────
+     Oliver: "when I hit F2 I am released from my character, and in overhead style view that I can
+     zoom in and out of and pan around with." Placed AHEAD of the three gameplay modes rather than
+     as a fourth camMode, because camMode is a persisted player SETTING - making the editor a value
+     of it would save "editor" as his camera preference and he would come back to a game he cannot
+     play.
+     It orbits a focus point on the ground rather than flying free: a free 6-axis camera is easy to
+     get lost in and hard to place things with, while a focus point is exactly the thing "add it in
+     front of where I'm looking" needs. __bfEdCam is read here and written by the editor module. */
+  const _ed = window.__bfEdCam && window.__bfEdCam();
+  if(_ed && _ed.on){
+    const fy=_ed.y||0, pit=_ed.pitch, hd=_ed.dist*Math.cos(pit), eh=_ed.dist*Math.sin(pit);
+    const fx=Math.sin(_ed.yaw), fz=Math.cos(_ed.yaw);
+    PROJ=mPersp(60*Math.PI/180,VW/VH,18,9000);   // far plane well past gameplay's: you zoom out to see a whole level
+    VIEW=mLookAt([_ed.x-fx*hd, fy+eh, _ed.z-fz*hd],[_ed.x, fy, _ed.z],[0,1,0]);
+    if(G) G.eye={x:_ed.x-fx*hd,y:fy+eh,z:_ed.z-fz*hd};
+    gl.uniform2f(U.uFogNF,2600,9000);            // push the fog right back, or half the level you flew up to see is grey
+  } else if(meta.camMode==='fps'){ // first-person: eye at the hero's head, look exactly where you aim
     const cy=(G&&G.camYaw!=null)?G.camYaw:t*0.4, pit=(G&&G.camPitch!=null)?G.camPitch:0.06;
     const ex=p.x, ey=p.y+40, ez=p.z, fx=Math.sin(cy)*Math.cos(pit), fy=-Math.sin(pit), fz=Math.cos(cy)*Math.cos(pit);
     PROJ=mPersp((meta.fpsFov||92)*Math.PI/180,VW/VH,3,2400);  // first-person field of view (settings slider)

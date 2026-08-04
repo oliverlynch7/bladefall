@@ -70,6 +70,47 @@ export function pickAt(sx, sy, maxPx){
   return best;
 }
 
+/* ── THE DETACHED CAMERA ──────────────────────────────────────────────────────
+   F2 releases you from the hero into an overhead orbit you pan, turn and zoom. F2 again drops you
+   straight back into the character, standing where you were, so you can playtest what you just
+   built without a reload - the fast edit-test loop that every write-up on level editors says is
+   the difference between a tool people iterate with and one they endure.
+
+   It orbits a FOCUS POINT on the ground rather than flying free. A 6-axis fly camera is easy to
+   get lost in and hard to aim, while a focus point is precisely what "add it in front of where I'm
+   looking" needs - the new object goes at the focus, which is the middle of your screen.
+
+   Starts on the hero, so opening the editor never teleports you somewhere unrecognisable. */
+export const EDCAM = { on: false, x: 0, z: 0, y: 0, yaw: 0, pitch: 0.85, dist: 700 };
+const DIST_MIN = 120, DIST_MAX = 6000;
+window.__bfEdCam = () => EDCAM;
+
+function camStart(){
+  const g = G(), p = g && g.p;
+  EDCAM.x = p ? p.x : 0; EDCAM.z = p ? p.z : 0; EDCAM.y = p ? (p.y || 0) : 0;
+  EDCAM.yaw = (g && g.camYaw != null) ? g.camYaw : 0;
+  EDCAM.pitch = 0.85; EDCAM.dist = 700; EDCAM.on = true;
+}
+
+/* Pan RELATIVE TO WHERE YOU ARE FACING, not along world x/z. Turn the camera 90 degrees and a
+   world-axis pan sends you sideways, which reads as broken. */
+function camPan(fwd, right){
+  const sp = EDCAM.dist * 0.06;                 // zoomed out you cross more ground per press
+  const fx = Math.sin(EDCAM.yaw), fz = Math.cos(EDCAM.yaw);
+  EDCAM.x += fx * fwd * sp + fz * right * sp;
+  EDCAM.z += fz * fwd * sp - fx * right * sp;
+}
+function camZoom(mul){ EDCAM.dist = Math.max(DIST_MIN, Math.min(DIST_MAX, EDCAM.dist * mul)); }
+
+function onWheel(e){
+  if(!EDITOR.on) return;
+  camZoom(e.deltaY > 0 ? 1.12 : 0.89);
+  e.preventDefault(); e.stopPropagation();
+}
+
+/* Where a new object goes: the focus point, which is the centre of the screen. */
+export function camFocus(){ return { x: EDCAM.x, z: EDCAM.z }; }
+
 function css(){
   if(document.getElementById('bfedcss')) return;
   const st = document.createElement('style'); st.id = 'bfedcss';
@@ -130,6 +171,9 @@ function hud(){
                          ' x ' + Math.round(s.o.h || 0) : '') +
         (s.o.r != null ? '<br>radius ' + Math.round(s.o.r) : '') + '</div>'
       : '<div class="row">click something to select it</div>');
+    rows.push('<div class="row"><span class="k">WASD</span>pan <span class="k">QE</span>turn' +
+              ' <span class="k">wheel</span>zoom <span class="k">G</span>find hero</div>');
+    rows.push('<div class="row"><span class="k">F2</span>back into the character to playtest</div>');
     rows.push('<div class="row"><span class="k">drag</span>move along the ground</div>');
     rows.push('<div class="row"><span class="k">&larr;&uarr;&darr;&rarr;</span>nudge ' + EDITOR.grid + 'u <span class="k">shift</span>x5</div>');
     rows.push('<div class="row"><span class="k">PgUp</span><span class="k">PgDn</span>height</div>');
@@ -177,23 +221,19 @@ function hud(){
     for(const g of groups){
       const open = EDITOR.openGroup === g;
       const items = PALETTE.map((p, i) => ({ p, i })).filter(v => (v.p.group || 'Other') === g);
-      const armed = items.some(v => EDITOR.place === v.i);
-      rows.push('<button class="grp' + (open ? ' open' : '') + (armed ? ' armed' : '') +
+      rows.push('<button class="grp' + (open ? ' open' : '') +
                 '" data-g="' + g + '">' + (open ? '&#9662; ' : '&#9656; ') + g +
                 '<span class="n">' + items.length + '</span></button>');
       if(open){
         rows.push('<div class="pal">' + items.map(v =>
-          '<button class="p' + (EDITOR.place === v.i ? ' on' : '') + (kindRenders(v.p) ? '' : ' off') +
+          '<button class="p' + (kindRenders(v.p) ? '' : ' off') +
           '" data-p="' + v.i + '"' + (kindRenders(v.p) ? '' : ' disabled') + '>' + v.p.label + '</button>'
         ).join('') + '</div>');
       }
     }
-    rows.push(EDITOR.place != null
-      ? '<div class="row" style="color:#9fd6ff">click the ground to place a ' + PALETTE[EDITOR.place].label +
-        ' &middot; <span class="k">Esc</span>stop</div>'
-      : (G() && G().hub
-          ? '<div class="row">pick an asset, then click the ground. In the hub the greyed props have no model yet - everything from Wall onward does.</div>'
-          : '<div class="row">pick an asset above, then click the ground</div>'));
+    rows.push(G() && G().hub
+      ? '<div class="row">click an asset to add it where the camera is looking. Greyed props have no hub model yet - everything from Wall onward does.</div>'
+      : '<div class="row">click an asset to add it where the camera is looking</div>');
 
     rows.push('<button data-a="save">Save</button><button data-a="export">Export file</button><button data-a="revert">Revert area</button>');
   }
@@ -204,12 +244,8 @@ function hud(){
         EDITOR.openGroup = (EDITOR.openGroup === b.dataset.g) ? null : b.dataset.g;
         hud(); return;
       }
-      if(b.dataset.p != null){
-        const i = +b.dataset.p;
-        if(!kindRenders(PALETTE[i])){ toast(PALETTE[i].label + ' has no model in the hub yet'); return; }
-        EDITOR.place = (EDITOR.place === i) ? null : i;   // clicking the armed one disarms it
-        hud();
-      } else act(b.dataset.a);
+      if(b.dataset.p != null){ placeFromPalette(+b.dataset.p); }
+      else act(b.dataset.a);
     };
   });
 }
@@ -477,15 +513,20 @@ function syncCollider(o){
 /* Place at the cursor. The GROUND plane is the right primitive here (unlike drag, where no single
    plane works): you are choosing a spot on the floor, and a click above the horizon has no floor
    under it. That case gets a toast rather than a prop dumped at the origin. */
-function placeAt(sx, sy){
-  const spec = PALETTE[EDITOR.place];
-  /* An out-of-range index is a caller bug, but throwing out of a mousedown handler leaves the
-     editor wedged mid-click with no selection and no explanation. Disarm and say so. */
-  if(!spec){ EDITOR.place = null; toast('no such palette item'); hud(); return; }
-  const gp = unprojectToPlane(sx, sy, 0);
-  if(!gp){ toast('no ground under the cursor - aim lower'); return; }
-  const gx = Math.round(gp.x / EDITOR.grid) * EDITOR.grid;
-  const gz = Math.round(gp.z / EDITOR.grid) * EDITOR.grid;
+/* Add straight from the palette, at the CAMERA'S FOCUS - Oliver's "it'll add it right in front of
+   where I'm looking at, and then I can adjust it from there". No arming, no second click hunting
+   for a ground pixel: press the button, the thing is there and selected, nudge it into place.
+   That also removes the click-on-sky failure the cursor-based version had. */
+function placeFromPalette(i){
+  const spec = PALETTE[i];
+  if(!spec){ toast('no such palette item'); return; }
+  if(!kindRenders(spec)){ toast(spec.label + ' has no model here yet'); return; }
+  const f = camFocus();
+  placeWorld(spec, Math.round(f.x / EDITOR.grid) * EDITOR.grid,
+                   Math.round(f.z / EDITOR.grid) * EDITOR.grid);
+}
+
+function placeWorld(spec, gx, gz){
   const name = palArray(spec);
   if(spec.mob){
     const types = zoneMobTypes();
@@ -568,10 +609,6 @@ function dragBasis(o){
 
 function onDown(e){
   if(!EDITOR.on || !EDITOR.editable || e.button !== 0) return;
-  /* Place mode wins over selection: while a palette item is armed, a click on the world means
-     "put one here", not "select whatever is nearest". Checked before picking so a click next to an
-     existing prop cannot quietly select it instead of placing. */
-  if(EDITOR.place != null){ placeAt(e.clientX, e.clientY); e.preventDefault(); e.stopPropagation(); return; }
   const hit = pickAt(e.clientX, e.clientY);
   EDITOR.sel = hit;
   if(hit){
@@ -623,6 +660,26 @@ function onKey(e){
   if((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')){
     history('redo'); e.preventDefault(); e.stopPropagation(); return;
   }
+  /* Camera keys first, and they never touch the selection - you are moving the VIEW, not the
+     thing. WASD pans, QE turns, RF (and the wheel) zooms, G re-centres on the hero when you have
+     flown somewhere and lost him. */
+  if(EDCAM.on){
+    const k = e.key.toLowerCase();
+    let did = true;
+    const step = e.shiftKey ? 3 : 1;
+    if(k === 'w') camPan(step, 0);
+    else if(k === 's') camPan(-step, 0);
+    else if(k === 'a') camPan(0, -step);
+    else if(k === 'd' && !EDITOR.sel) camPan(0, step);        // D duplicates when something is selected
+    else if(k === 'q') EDCAM.yaw -= 0.12 * step;
+    else if(k === 'e') EDCAM.yaw += 0.12 * step;
+    else if(k === 'f') camZoom(1.12);
+    else if(k === 'g'){ const p = G() && G().p; if(p){ EDCAM.x = p.x; EDCAM.z = p.z; EDCAM.y = p.y || 0; } }
+    else if(k === 't') EDCAM.pitch = Math.max(0.25, Math.min(1.45, EDCAM.pitch + (e.shiftKey ? -0.08 : 0.08)));
+    else did = false;
+    if(did){ hud(); e.preventDefault(); e.stopPropagation(); return; }
+  }
+
   if((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey){
     const c = toggleOverlay();
     toast(c ? (c.walkThrough + ' of ' + c.decoChecked + ' props nearby have NO collision')
@@ -687,7 +744,7 @@ function onKey(e){
   }
 
   if(e.key === 'Escape'){
-    if(EDITOR.place != null) EDITOR.place = null; else EDITOR.sel = null;
+    EDITOR.sel = null;   // nothing is "armed" any more: palette buttons place immediately
     hud(); e.stopPropagation(); return;
   }
   const s = EDITOR.sel;
@@ -789,15 +846,20 @@ export function toggle(force){
     addEventListener('mousedown', onDown, true);
     addEventListener('mousemove', onMove, true);
     addEventListener('mouseup',   onUp,   true);
+    addEventListener('wheel',     onWheel, { capture: true, passive: false });
+    camStart();
     hud(); tick();
-    toast(EDITOR.editable ? 'edit mode - F2 to exit' : 'edit mode (read-only here)');
+    toast(EDITOR.editable ? 'edit mode - WASD pan, QE turn, wheel zoom, F2 to play'
+                          : 'edit mode (read-only here)');
   } else {
     removeEventListener('mousedown', onDown, true);
     removeEventListener('mousemove', onMove, true);
     removeEventListener('mouseup',   onUp,   true);
+    removeEventListener('wheel',     onWheel, true);
     cancelAnimationFrame(_raf);
     if(_ui) _ui.remove();
     if(_marker) _marker.remove();
+    EDCAM.on = false;   // back into the hero, standing exactly where he was, ready to playtest
     _ui = null; _marker = null; EDITOR.sel = null; _drag = null; EDITOR.place = null;
     if(OVERLAY.on) toggleOverlay(false);   // leaving edit mode must not strand wireframes in the game
     toast('edit mode off');

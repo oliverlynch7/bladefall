@@ -371,6 +371,44 @@ const STOCK_WEAPONS = {
   Bow_Ranger:    { from:'Ranger',  node:'Ranger_Bow'    },
 };
 
+/* E2: THE EQUIPPED WEAPON DECIDES THE MODEL.
+   Oliver: "the new weapon models are still not in the game. Only the default class weapons show."
+   The models were never missing - all 28 are loaded, tuned and reachable. The link was: WEAP.name
+   was only ever set to the archetype's DEFAULT_WEAPON (or the first model the archetype allowed),
+   so a warrior carried the plain Sword whatever was actually in his hands, and every tuned model
+   sat unused.
+   Where a family has several models the choice is by RARITY, so a legendary looks like one - the
+   golden variants exist for exactly that and were otherwise dead files. Anything unmapped falls
+   through to the archetype default, which is the old behaviour and a safe floor. */
+const ART_MODELS = {
+  sword:      ['Sword', 'Sword_2', 'Sword_Golden'],
+  great:      ['Claymore'],
+  axe:        ['Axe_Small', 'Axe', 'Axe_Double', 'Axe_Double_Golden'],
+  hammer:     ['Hammer_Small', 'Hammer_Double', 'Hammer_Double_Golden'],
+  dagger:     ['Dagger', 'Dagger_2', 'Dagger_Golden'],
+  bow:        ['Bow_Wooden', 'Bow_Wooden2', 'Bow_Evil', 'Bow_Golden'],
+  cross:      ['Bow_Wooden2', 'Bow_Evil', 'Bow_Golden'],
+  javelin:    ['Spear'],
+  spear:      ['Spear'],
+  scythe:     ['Scythe'],
+  staff:      ['Staff_Wizard'],
+  wand:       ['Staff_Cleric'],
+  tome:       ['Staff_Cleric'],
+  orb:        ['Staff_Cleric'],
+  spellblade: ['Sword_Knight'],
+  /* No `flintlock` and no `fist`, ON PURPOSE. There is no pistol model in any kit and the Monk is
+     unarmed by design; a stand-in would put a sword-shaped pistol in a pirate's hand, which is
+     worse than the archetype default. */
+};
+const RARITY_RANK = { common:0, uncommon:1, rare:1, epic:2, legendary:3, mythic:3 };
+function modelForWeapon(w){
+  if(!w || !w.art) return null;
+  const list = ART_MODELS[w.art];
+  if(!list || !list.length) return null;
+  const r = RARITY_RANK[String(w.rarity || 'common').toLowerCase()] || 0;
+  return list[Math.min(list.length - 1, r)];
+}
+
 const DEFAULT_WEAPON = {
   Warrior: 'Sword', Cleric: 'Staff_Cleric', Rogue: 'Dagger',
   Ranger:  'Bow_Wooden', Wizard: 'Staff_Wizard', Monk: null,
@@ -744,6 +782,14 @@ async function equipWeapon(actor, useSaved){
   clearWeapon(actor);
   if(useSaved !== false) weapLoadFor(eyeModel());
   if(!WEAP.on) return null;
+  /* What the player is ACTUALLY carrying, ahead of the archetype default. Still filtered by the
+     archetype rule below, so a wizard cannot end up swinging a claymore - that rule is what kept
+     tuning to ~28 weapons rather than 168. */
+  try {
+    const pw = window.__BF3 && window.__BF3.G && window.__BF3.G.p && window.__BF3.G.p.weapon;
+    const want = modelForWeapon(pw);
+    if(want) WEAP.name = want;
+  } catch(err){}
   // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
   const allowed = weaponsFor(eyeModel());
   if(allowed.length && !allowed.includes(WEAP.name)){
@@ -1221,7 +1267,28 @@ function playFor(p){
 /* Called from the game's drawHero3. Returns true when it has drawn, so the caller can skip
    its voxel path; returns false whenever anything is not ready, so a failure here degrades
    to the original renderer rather than to a missing character. */
+let _lastArt = null, _lastRar = null, _reArming = false;
 export function drawHero3D(p, t){
+  /* Swap the model when the weapon changes. equipWeapon runs only on load and on class change, so
+     without this the right model appeared only if you happened to spawn holding it - picking up a
+     legendary axe mid-run changed the stats and not the hand.
+     The HOLDER SHAPE MATTERS: equipWeapon expects { root, model }, not the bare scene. Passing the
+     scene is what threw "Cannot read properties of undefined (reading 'traverse')" on the first
+     attempt at this - clearWeapon walks actor.root, and the scene has no .root. Every other caller
+     wraps it the same way; this now matches them.
+     _reArming guards against re-entry: equipWeapon is async and this runs every frame. */
+  try {
+    const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
+    if(actor && HERO3D.ready && !_reArming && (a !== _lastArt || r !== _lastRar)){
+      _lastArt = a; _lastRar = r;
+      if(modelForWeapon(w)){
+        _reArming = true;
+        Promise.resolve(equipWeapon({ root: actor, model: HERO3D._wrap }, false))
+          .catch(() => {})
+          .then(() => { _reArming = false; });
+      }
+    }
+  } catch(err){}
   if(!HERO3D.on || !HERO3D.ready || !renderer || !p) return false;
   if(!syncCamera()) return false;
   try {
@@ -1277,6 +1344,7 @@ window.__hero3dClass = () => ({ classId: (window.__BF_META && window.__BF_META()
                                 model: HERO3D.model, mapped: modelForClass() });
 window.__hero3dWeaponsFor = () => weaponsFor(eyeModel());
 window.__hero3dWeapon = () => HERO3D.weapon || 'none';
+window.__hero3dSwapState = () => ({ lastArt:_lastArt, lastRar:_lastRar, reArming:_reArming, hasActor:!!actor, ready:!!HERO3D.ready, weapName:WEAP.name, want:(function(){try{return modelForWeapon(window.__BF3.G.p.weapon);}catch(e){return 'ERR '+e.message;}})() });
 window.__hero3dSkin = () => HERO3D.skin || 'none';
 /* Switch skin at runtime. 'base' restores the pack original; anything else is treated as an
    unlockable recolour for the current class. Returns what is now worn. */

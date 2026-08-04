@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.730.0-phase2';
+const VERSION3D='1.740.0-zonevocab';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5698,7 +5698,8 @@ function loadStageRaw(i){
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
-    EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
+    EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
+    zoneFlavour(curZone().id, srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6423,6 +6424,65 @@ function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e
 // ignores columns/movers/other props, so a prop rests on the mesa it stands on and never floats on another prop
 // or sinks inside a raised plateau. This is THE systemic answer to "assets loading buried in the ground floor":
 // any prop builder resolves its base through this instead of assuming y=0.
+/* ── ZONE VOCABULARY ────────────────────────────────────────────────────────
+   Measured before writing this: the OUTSKIRTS emits fifteen kind-tagged props (trees, lanterns,
+   standing stones, crops). Every other zone emits ZERO. That is not a small gap - world3d only
+   turns a deco entry into a MODEL if the generator tagged it, so seven of eight zones render as
+   plain lit boxes. They feel similar to each other because they are the same boxes in different
+   colours, which is exactly what Oliver reported and why "the baseline needs a lot of work".
+
+   Rather than retrofit hundreds of existing deco pushes - hundreds of chances to move a wall - each
+   zone gets a VOCABULARY: a handful of props that only it uses, scattered through its rooms after
+   the generator has run. A zone becomes recognisable from a still frame, which is the actual test.
+
+   Scattered per ROOM rather than uniformly, so props cluster where you walk instead of dusting the
+   map evenly, and grounded with propGroundAt so nothing floats above a terrace or sinks into one. */
+const ZONE_VOCAB = {
+  /* Dry canyon: bones bleaching on the rock, standing stones, nothing that ever grew. */
+  hollow:   [['standstone',7,{w:24,h:92,d:18,c:'#6b6252'}], ['rock',9,{w:26,h:26,d:26,c:'#7a6a52'}],
+             ['grave',4,{w:18,h:34,d:12,c:'#cfc4a8'}]],
+  /* A fallen holding: iron fences, lamp posts, the columns of something that had a roof. */
+  keep:     [['fence',9,{w:30,h:30,d:12,c:'#5a5148'}], ['lantern',6,{w:7,h:47,d:7,c:'#4a4038'}],
+             ['column',6,{w:26,h:96,d:26,c:'#8f887c'}], ['grave',4,{w:18,h:32,d:12,c:'#9aa0a6'}]],
+  /* Frostfell: dead pines and ice shards. The trees are what make it read as a PLACE and not a
+     white floor. */
+  frost:    [['tree',10,{w:64,h:48,d:64,c:'#2b4a52'}], ['standstone',8,{w:22,h:104,d:16,c:'#bfe6ff'}],
+             ['rock',6,{w:24,h:24,d:24,c:'#8fb8d8'}]],
+  /* Emberdeep: basalt spires and slag. Nothing soft survives here. */
+  ember:    [['standstone',9,{w:26,h:110,d:20,c:'#3a1f18'}], ['rock',10,{w:28,h:30,d:28,c:'#4a2a20'}],
+             ['pillar',5,{w:24,h:120,d:24,c:'#5a2a1a'}]],
+  /* The Abyss: broken colonnades and grave markers from whatever came before. */
+  abyss:    [['pillar',8,{w:24,h:130,d:24,c:'#3a2a4a'}], ['grave',7,{w:18,h:34,d:12,c:'#6a5a7a'}],
+             ['standstone',5,{w:22,h:96,d:18,c:'#4a3a5a'}]],
+  /* Sunspire Palace: marble columns and planted colour - the only zone with anything cultivated. */
+  palace:   [['column',10,{w:26,h:110,d:26,c:'#e8dcc0'}], ['flower',12,{w:11,h:18,d:11,c:'#ffd24a'}],
+             ['lantern',6,{w:7,h:50,d:7,c:'#c8a24a'}]],
+  /* Castle Duskmoor: iron and graves, the lamps long dead. */
+  castle:   [['fence',10,{w:30,h:32,d:12,c:'#3a3540'}], ['grave',8,{w:18,h:36,d:12,c:'#7a7480'}],
+             ['pillar',6,{w:24,h:120,d:24,c:'#4a4450'}]],
+};
+function zoneFlavour(zid, rnd){
+  const V = ZONE_VOCAB[zid];
+  if(!V || !G || !G.rooms || !G.rooms.length) return 0;
+  const R = G.rooms.filter(r => r && r.w);
+  if(!R.length) return 0;
+  let n = 0;
+  for(const [kind, count, spec] of V){
+    for(let i = 0; i < count; i++){
+      const r = R[Math.floor((rnd?rnd():Math.random()) * R.length)];
+      /* Pushed toward the room's EDGES. Props in the middle of a room are things you fight around
+         by accident; props at the rim frame the space and leave the floor to the fight. */
+      const a = (rnd?rnd():Math.random()) * 6.283;
+      const rr = 0.34 + (rnd?rnd():Math.random()) * 0.16;
+      const x = r.x + Math.cos(a) * r.w * rr, z = r.z + Math.sin(a) * (r.d||r.w) * rr;
+      const y = propGroundAt(x, z);
+      G.deco.push(Object.assign({ x, z, y0:y, kind, lead:true }, spec));
+      n++;
+    }
+  }
+  return n;
+}
+
 function propGroundAt(x,z,r=8){ if(!G) return 0; let f=0; const m=r*0.4;
   for(const sg of (G.segments||[])) if(Math.abs(x-sg.x)<sg.w/2+m && Math.abs(z-sg.z)<sg.d/2+m) f=Math.max(f,0);
   for(const ob of (G.obstacles||[])) if(ob.kind==='plat' && Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0);

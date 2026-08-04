@@ -157,5 +157,60 @@ Consequences to handle when this is built:
   cannot be common or legendary.
 - **THERE IS NO PISTOL MODEL IN ANY KIT.** Flagged during E2 and it matters far more now: this is
   no longer an occasional drop with no art, it is the thing a whole class does every few seconds.
-  Either Oliver sources one, or it needs a procedural/voxel render good enough to carry the class.
-  Worth deciding BEFORE the mechanic is built, not after.
+  DECIDED: Oliver sources a model later, so the mechanic is NOT blocked. Build against the existing
+  voxel render and swap on arrival - ART_MODELS in hero3d (added in E2) deliberately has no
+  `flintlock` entry because no model existed, so adding one is the entire swap. Waiting on art, not
+  on code.
+
+
+---
+
+# The passives have the same disease
+
+Oliver, unprompted: "I noticed a lot of basicness in the class passives." He is right, and it is
+the innate problem again one layer down. Sampled eighteen:
+
+    Heavy Hand          +12% damage, -5% attack speed
+    Bloodlust           +12% damage and speed on kill
+    Weapon Master       +10% damage
+    Longshot            +8% damage at range
+    Patient Hunter      10% -> 14% damage
+    Elemental Archer    +10% reaction damage
+    Potent Weave        +12% skill damage, +8% cost
+    Glass Cannon        +15% magic damage, +8% damage taken
+    Elemental Savant    +15% buildup
+    Harvested Strength  +2% per stack
+    Crimson Harvest     lifesteal 25% stronger
+    Corruption Mastery  +25% buildup, +15% damage
+    Thick Armor         -12% damage taken
+
+Four of eighteen do something you could describe without arithmetic: Spell Echo (every fourth skill
+repeats), Escape Artist, Second Wind, Soul Armor.
+
+## Why this is worse than it looks
+
+The structure is a 1-of-2 CHOICE at each rank, which is the right structure. But a choice between
+"+12% damage" and "+10% attack speed" is not a decision - it is arithmetic, and there is a correct
+answer that a spreadsheet finds once and every player copies forever. The choice architecture is
+doing no work, which is why the ranks feel like filling in a form.
+
+**The rule: a passive should change a DECISION, not a number.** Test - can you describe what it does
+without saying a percentage? If not, it is a stat allocation wearing a name.
+
+## Worked examples, to show the shape
+
+- Heavy Hand / Swift Steel (+12% dmg vs +10% speed) becomes:
+  **Heavy Hand** - your basic attacks cannot be interrupted, but you cannot cancel them either.
+  **Swift Steel** - every fourth basic attack is free and instant, ignoring your attack timer.
+  One commits you, one rewards rhythm. Both change how you hold the button.
+- Glass Cannon (+15% damage, +8% taken) becomes:
+  **Glass Cannon** - you have no armour at all, and your spells cost no mana below 25% HP.
+- Longshot (+8% at range) becomes:
+  **Longshot** - your arrows pierce every target in a line, but only past 7m.
+- Thick Armor (-12% taken) becomes:
+  **Thick Armor** - the first hit in every fight deals no damage.
+
+Same power budget, completely different play.
+
+STATUS: measured and designed in principle, not implemented. Eighteen-plus passives across sixteen
+classes is a bigger job than the innates and wants its own session.

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.480.0-balance';
+const VERSION3D='1.485.0-trials';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5676,7 +5676,20 @@ function loadStageRaw(i){
   const _tz=zoneTier();
   const GX=(isBoss?4:isMini?4:Math.min(8,5+Math.floor(_tz/2)));
   const GZ=(isBoss?3:isMini?4:Math.min(6,4+Math.floor((_tz-1)/2)));
-  const PITCHX=490, PITCHZ=450;
+  /* D1: CLASS-TRIAL ROOMS ARE ABOUT TWICE THE AREA. Oliver: "it should feel like a dungeon you
+     move through, with room to kite and avoid enemies" - the trial rooms were tight enough that a
+     melee pack cornered you the moment you entered, which is most of why B3 (trials too hard) felt
+     the way it did.
+     Twice the AREA is x1.41 on each side, and the grid PITCH has to grow with it: room size is
+     clamped to the pitch, so scaling the rooms alone would have hit the clamp and changed nothing.
+     Trials only - the campaign zones are hand-authored scapes and never reach this generator. */
+  /* 1.25, not the 1.41 that "twice the area" suggests. The OLD rooms were being clipped by the
+     pitch clamp (370x330 max, ~98k average), so scaling both the rooms and the pitch by 1.41
+     removed the clamp AND grew them, landing at 250k - two and a half times, measured. 1.25 puts
+     the average near 196k, which is twice what it actually was rather than twice what the formula
+     said. Measured, not derived. */
+  const TSCALE=(G.trial?1.25:1);
+  const PITCHX=490*TSCALE, PITCHZ=450*TSCALE;
   const cellX=gx=>(gx-(GX-1)/2)*PITCHX, cellZ=gz=>-gz*PITCHZ;
   const K=(a,b)=>a+'_'+b, inG=(a,b)=>a>=0&&a<GX&&b>=0&&b<GZ;
   const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
@@ -5704,11 +5717,23 @@ function loadStageRaw(i){
   for(const c of order){ const gx=c[0],gz=c[1], isGoal=K(gx,gz)===goalKey, big=rnd()<0.5;
     let w,d;
     if(isGoal && (isBoss||isMini)){ w=Math.min(PITCHX-54,402+rnd()*26); d=Math.min(PITCHZ-54,378+rnd()*24); } // roomier boss arena
-    else { w=Math.min(PITCHX-120,(big?330:262)+rnd()*118); d=Math.min(PITCHZ-120,(big?300:250)+rnd()*112); }
+    else { w=Math.min(PITCHX-120,((big?330:262)+rnd()*118)*TSCALE); d=Math.min(PITCHZ-120,((big?300:250)+rnd()*112)*TSCALE); }
     const room={x:cellX(gx),z:cellZ(gz),w,d,gx,gz,monsters:[],doors:[],doorways:[],cleared:true,_gaps:{front:[],back:[],w:[],e:[]},deg:0};
     roomAt[K(gx,gz)]=room; G.rooms.push(room); G.segments.push({x:room.x,z:room.z,w,d});
   }
   const entryRoom=roomAt[K(startGX,startGZ)], goalRoom=roomAt[goalKey]||entryRoom;
+  /* D2: HEALING PADS IN THE TRIAL DUNGEONS, "appearing every so often". Every third room rather
+     than a flat chance, so the spacing is dependable - a run of bad rolls leaving you with none
+     across a whole trial is exactly the case this is meant to prevent. The entry and goal rooms are
+     skipped: you start at full health and the goal is the fight you are supposed to arrive at
+     ready for. */
+  if(G.trial){
+    const pads=G.rooms.filter(r=>r!==entryRoom&&r!==goalRoom);
+    for(let i=2;i<pads.length;i+=3){
+      const r=pads[i];
+      G.healpads.push({x:r.x,z:r.z,y:r.y||0,r:36,charge:1,_acc:0});
+    }
+  }
   const CW=104; // corridor width matches doorway
   // parkour corridor: stoops at both ends + jumpable stepping-stones over the drop (no side rails). Always crossable.
   const bridgeSpan=(a0,a1,cross,horiz)=>{ const mn=Math.min(a0,a1),mx=Math.max(a0,a1);

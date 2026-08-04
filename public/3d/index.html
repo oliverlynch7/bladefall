@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.620.0-passives2';
+const VERSION3D='1.630.0-passives3';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2103,37 +2103,37 @@ const CLASS2={
     innate:{name:'Bloodrage', d:'Deal +8% damage, and +15% more while below half HP.'},
     cap:{name:'Undying Rage', d:'+12% damage, +10% attack speed, and +8% lifesteal.'},
     r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'bsk_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'bsk_bash',n:'Reckless Bash',cd:6,role:'Control',fx:'bsk_bash',d:'Drive forward for 1.7x damage and stun.'}},
-    r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Damage',d:'+12% damage.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Damage',d:'+10% damage.'}},
+    r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Commitment',d:'You cannot dodge — but nothing can knock you back or stagger you.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Sacrifice',d:'Every swing costs you a sliver of health, hit or miss.'}},
     r4:{kind:'skill',slot:1, a:{id:'bsk_charge',n:'Charge',cd:9,role:'Movement',fx:'bsk_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'bsk_stomp',n:'Shockwave',cd:10,role:'Control',fx:'bsk_stomp',d:'Slam the ground for damage and heavy knockback.'}},
-    r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Take 12% less damage.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'+5% lifesteal.'}},
+    r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Damage that would drop you below 1 HP leaves you at 1 instead, once per fight.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'Kills heal you — but only while you are below half health.'}},
     r6:{kind:'skill',slot:2, a:{id:'bsk_whirl',n:'Whirlwind',cd:12,role:'Group Damage',fx:'bsk_whirl',d:'Spin, cutting everything around you for 2.2x.'}, b:{id:'bsk_execute',n:'Execute',cd:14,role:'Finisher',fx:'bsk_execute',d:'A brutal strike that finishes low-HP foes.'}},
-    r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Damage',d:'+15% damage while below half HP.'}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:'+10% attack speed.'}},
+    r7:{kind:'passive', a:{id:'bsk_rage',n:'Rage',role:'Fury',d:'Below a quarter health you cannot be healed, and your damage doubles.'}, b:{id:'bsk_frenzy',n:'Frenzy',role:'Speed',d:'Your attack speed rises as your health falls, to double at a sliver.'}},
     r8:{kind:'skill',slot:3, a:{id:'bsk_berserk',n:'Berserk',cd:24,role:'Burst',fx:'bsk_berserk',d:'+35% damage and attack speed for 6s.'}, b:{id:'bsk_guard',n:'Bloodguard',cd:14,role:'Defense',fx:'bsk_guard',d:'Raise a guard: heavy damage reduction and pull foes in.'}},
-    r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:'Take 12% less damage while below half HP.'}, b:{id:'bsk_brutal',n:'Brutal',role:'Damage',d:'+12% damage.'}}
+    r9:{kind:'passive', a:{id:'bsk_tough',n:'Unbreakable',role:'Defense',d:'While below half health you cannot be stunned, slowed or feared.'}, b:{id:'bsk_brutal',n:'Brutal',role:'Execution',d:'Enemies below a quarter health die to any hit you land.'}}
   },
   pirate:{ disp:'Pirate', icon:classIcon('pirate'),
     innate:{name:'Plunder', d:'Deal +8% damage and find more gold.'},
     cap:{name:'Dread Captain', d:'+12% damage and +10% move speed.'},
     r2:{kind:'skill',slot:0, a:{id:'pir_pierce',n:'Aimed Shot',cd:2,am:0.4,role:'Rapid · Focused',fx:'pir_pierce',d:'Rapid piercing pistol shots (~2s, softer each) — a gunslinger\'s rhythm.'}, b:{id:'pir_volley',n:'Broadside',cd:6,role:'Group Damage',fx:'pir_volley',d:'A spread of shots across your front.'}},
-    r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Damage',d:'+12% damage.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Speed',d:'+10% attack speed.'}},
+    r3:{kind:'passive', a:{id:'pir_deadly',n:'Dead Aim',role:'Powder',d:'The pistol pierces every enemy in a line.'}, b:{id:'pir_swift',n:'Quick Hands',role:'Reload',d:'Opening a chest reloads your pistol.'}},
     r4:{kind:'skill',slot:1, a:{id:'pir_shadow',n:'Boarding Strike',cd:8,role:'Burst',fx:'pir_shadow',d:'Dash to a foe and strike hard.'}, b:{id:'pir_tumble',n:'Roll',cd:8,role:'Movement',fx:'pir_tumble',d:'Roll back with a parting shot and snare.'}},
-    r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_swagger',n:'Swagger',role:'Speed',d:'+8% move speed.'}},
+    r5:{kind:'passive', a:{id:'pir_tough',n:'Sea Legs',role:'Footing',d:'You cannot be knocked off ledges or moving platforms.'}, b:{id:'pir_swagger',n:'Swagger',role:'Nerve',d:'While your pistol is loaded you move noticeably faster.'}},
     r6:{kind:'skill',slot:2, a:{id:'pir_smoke',n:'Powder Smoke',cd:14,role:'Escape',fx:'pir_smoke',d:'Vanish in smoke and slow nearby foes.'}, b:{id:'pir_goldrush',n:'Gold Rush',cd:20,role:'Gold Farming',fx:'pir_goldrush',d:'For 12s, every kill drops gold straight into your purse — and a killstreak stacks the payout higher and higher. The pirate\'s farming tool.'}},
-    r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Defense',d:'Take 10% less damage.'}, b:{id:'pir_luck',n:'Lucky',role:'Damage',d:'+12% damage.'}},
+    r7:{kind:'passive', a:{id:'pir_evasive',n:'Slippery',role:'Escape',d:'Firing the pistol pushes you back out of melee range.'}, b:{id:'pir_luck',n:'Lucky',role:'Fortune',d:'A pistol kill sometimes drops gold on the spot.'}},
     r8:{kind:'skill',slot:3, a:{id:'pir_deathmark',n:'Cannonade',cd:24,role:'Farming',fx:'pir_deathmark',d:'Mark foes — they explode on death.'}, b:{id:'pir_spike',n:'Powder Keg',cd:18,role:'Control',fx:'pir_spike',d:'Drop a trap that damages and snares.'}},
-    r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Damage',d:'+12% damage.'}, b:{id:'pir_greed',n:'Greed',role:'Damage',d:'+10% damage.'}}
+    r9:{kind:'passive', a:{id:'pir_brutal',n:'Cutthroat',role:'Steel',d:'Your sword hits harder while the pistol is spent.'}, b:{id:'pir_greed',n:'Greed',role:'Plunder',d:'Every 500 gold you carry sharpens your blade a little further.'}}
   },
   chronomancer:{ disp:'Chronomancer', icon:classIcon('chronomancer'),
     innate:{name:'Time Attunement', d:'Magic weapons deal +8% damage, cooldowns recover 5% faster, and each kill loops a little mana back.'},
     cap:{name:'Timelord', d:'+12% damage and +10% cooldown reduction.'},
     r2:{kind:'skill',slot:0, a:{id:'chr_bolt',n:'Time Bolt',cd:2,am:0.4,role:'Rapid · Focused',fx:'chr_bolt',d:'Rapid-fire bolts of temporal energy (~2s, softer each).'}, b:{id:'chr_beam',n:'Time Lance',cd:6,role:'Piercing Damage',fx:'chr_beam',d:'A piercing lance through every foe.'}},
-    r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Damage',d:'+12% skill damage.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'+10% cooldown reduction.'}},
+    r3:{kind:'passive', a:{id:'chr_potent',n:'Potent',role:'Echo',d:'Rewinding also restores the mana you had three seconds ago.'}, b:{id:'chr_haste',n:'Haste',role:'Cooldowns',d:'Rewinding resets every skill cooldown.'}},
     r4:{kind:'skill',slot:1, a:{id:'chr_nova',n:'Slow Field',cd:8,role:'Control',fx:'chr_nova',d:'A burst that slows nearby foes.'}, b:{id:'chr_blink',n:'Rewind',cd:8,role:'Movement',fx:'chr_blink',d:'Blink through time, briefly untouchable.'}},
-    r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'Take 12% less damage.'}, b:{id:'chr_glass',n:'Focus',role:'Damage',d:'+12% damage.'}},
+    r5:{kind:'passive', a:{id:'chr_ward',n:'Time Ward',role:'Defense',d:'For three seconds after a Rewind you cannot be harmed.'}, b:{id:'chr_glass',n:'Focus',role:'Recall',d:'You may Rewind twice per area instead of once.'}},
     r6:{kind:'skill',slot:2, a:{id:'chr_gravity',n:'Time Warp',cd:13,role:'Control',fx:'chr_gravity',d:'Implode foes inward and deal damage.'}, b:{id:'chr_barrier',n:'Aegis',cd:14,role:'Defense',fx:'chr_barrier',d:'A shield that absorbs up to 35% of your max HP.'}},
-    r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Cooldowns',d:'+10% cooldown reduction.'}, b:{id:'chr_slow',n:'Entropy',role:'Damage',d:'+10% damage.'}},
+    r7:{kind:'passive', a:{id:'chr_temporal',n:'Temporal Flow',role:'Stillness',d:'Standing still rewinds your cooldowns rather than merely pausing them.'}, b:{id:'chr_slow',n:'Entropy',role:'Decay',d:'Enemies you slow keep aging — they weaken the longer they are held.'}},
     r8:{kind:'skill',slot:3, a:{id:'chr_tempest',n:'Time Storm',cd:22,role:'Group Damage',fx:'chr_tempest',d:'A storm of decaying time around you.'}, b:{id:'chr_overload',n:'Singularity',cd:24,role:'Burst',fx:'chr_overload',d:'A massive temporal explosion.'}},
-    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Damage',d:'+12% damage.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Damage',d:'+10% damage.'}}
+    r9:{kind:'passive', a:{id:'chr_echo',n:'Echo',role:'Repeat',d:'Your last skill fires again, by itself, three seconds later.'}, b:{id:'chr_freeze',n:'Deep Freeze',role:'Control',d:'A frozen enemy shatters instantly if you strike it from behind.'}}
   },
   monk:{ disp:'Monk', icon:classIcon('monk'),
     innate:{name:'Focus', d:'Fists are your true weapon: +15% damage and faster strikes bare-handed. Every hit you land builds a Focus stack (up to 5) — each adds +6% damage — fading if you stop attacking.'},
@@ -3599,27 +3599,27 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
   if(meta.classId==='ranger'&&c2def('ranger')){ v*=1.20;   // innate class scaling — ranger was missing its damage block entirely (balance fix)
     if(c2Passive('r_patient'))v*=1.04; if(c2Passive('r_elem'))v*=1.05;
     if(classState('ranger').rank>=10)v*=1.12; }
-  if(meta.classId==='berserker'&&c2def('berserker')){ const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
-    if(c2Passive('bsk_heavy'))v*=1.12; if(c2Passive('bsk_reckless'))v*=1.10; if(c2Passive('bsk_brutal'))v*=1.12; if(c2Passive('bsk_rage')&&low)v*=1.15;
+  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); } const low=p.hp<effMaxHp(p)*.5; if(low)v*=1.15;   // Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class
+       
     if(classState('berserker').rank>=10)v*=1.12; }
   if(meta.classId==='pirate'&&c2def('pirate')){ v*=1.08;
-    if(c2Passive('pir_deadly'))v*=1.12; if(c2Passive('pir_luck'))v*=1.12; if(c2Passive('pir_brutal'))v*=1.12; if(c2Passive('pir_greed'))v*=1.10;
+       
     if(classState('pirate').rank>=10)v*=1.12; }
   if(meta.classId==='chronomancer'&&c2def('chronomancer')){ if(p.weapon&&p.weapon.sch==='mag')v*=1.08;
-    if(c2Passive('chr_potent'))v*=1.12; if(c2Passive('chr_glass'))v*=1.12; if(c2Passive('chr_slow'))v*=1.10; if(c2Passive('chr_echo'))v*=1.12; if(c2Passive('chr_freeze'))v*=1.10;
+        
     if(classState('chronomancer').rank>=10)v*=1.12; }
   if(meta.classId==='beastmaster'&&c2def('beastmaster')){ v*=1.20;   // innate personal damage — beastmaster's OWN attacks were unbuffed (only the pet scaled), leaving it bottom-tier
     if(classState('beastmaster').rank>=10)v*=1.10; }
   if(meta.classId==='reaper'&&c2def('reaper')){ if((p.soulStrengthT||0)>0)v*=1+Math.min(5,p.soulStrength||0)*.02; if(classState('reaper').rank>=10)v*=1.12; }
   if(G&&G.endDmgMul) v*=G.endDmgMul;
   return isGod(p)?v*6:v; }
-function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(c2Passive('st_charged'))v*=1.10;if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_frenzy'))v*=1.10;if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
-function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_swagger'))v*=1.08;if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
+function effAtkSpeed(p){ let v=p.stats.atkSpeed*(p.armorMods?p.armorMods.atkSpeedMul:1); const sp=skinP(p); if(sp&&sp.atkSpeed) v*=sp.atkSpeed; if(p.berserkT>0) v*=1.3; if(meta.classId==='warrior'&&c2def('warrior')){if(c2Passive('w_heavy'))v*=.95;if(c2Passive('w_swift'))v*=1.10;if((p.bloodlustT||0)>0)v*=1.12;if(classState('warrior').rank>=10)v*=1.10;} if(meta.classId==='ninja'&&c2def('ninja')){if(classState('ninja').rank>=10)v*=1.10;} if(meta.classId==='monk'&&c2def('monk')){if(p.weapon&&p.weapon.art==='fist')v*=1.15;if(c2Passive('mon_flow'))v*=1.10;if(classState('monk').rank>=10)v*=1.10;} if(meta.classId==='stormcaller'&&c2def('stormcaller')){if((p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.045:0.03);if(c2Passive('st_charged'))v*=1.10;if(classState('stormcaller').rank>=10)v*=1.10;} if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v*=1.10;} if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift'))v*=1.10;if(meta.classId==='bladedancer'&&c2Passive('bd_fast'))v*=1.12; if(G&&G.endAtkMul) v*=G.endAtkMul; return isGod(p)?v*1.7:v; }
+function effSpeed(p){ let v=p.stats.speed*(p.armorMods?p.armorMods.speedMul:1); const sp=skinP(p); if(sp&&sp.speed) v*=sp.speed; if(p.weapon&&p.weapon.ians) v*=1.08; if(meta.classId==='reaper'&&((p.wraithT||0)>0||(p.wraithwalkT||0)>0))v*=1.18; if(meta.classId==='ninja'&&c2def('ninja'))v*=1.08; if(meta.classId==='monk'&&c2def('monk'))v*=1.10; if(meta.classId==='stormcaller'&&c2def('stormcaller')&&(p.staticT||0)>0)v*=1+Math.min(5,p.staticStacks||0)*(c2Passive('st_momentum')?0.04:0.025); if(meta.classId==='pirate'&&c2def('pirate')){if(classState('pirate').rank>=10)v*=1.10;} if(meta.classId==='warlock'&&(p.warSpeedT||0)>0)v*=1.12; if(meta.classId==='skylancer'&&(p.skyTailT||0)>0)v*=1.15;if(meta.classId==='bladedancer'&&(c2Passive('bd_feet')||(p.bdCapT||0)>0))v*=1.10; if(meta.classId==='beastmaster'&&(p.beastSpeedT||0)>0)v*=1.10; if(G&&G.endSpdMul) v*=G.endSpdMul; return isGod(p)?v*1.4:v; }
 function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifesteal:0); const sp=skinP(p); if(sp&&sp.lifesteal) v+=sp.lifesteal;
   if(p.weapon&&p.weapon.ians) v+=0.15;   // Ian's Blade — Bladeborn's Grace: the relic sustains its wielder
   if(meta.classId==='reaper'&&c2def('reaper')){if(p.weapon&&p.weapon.art==='scythe')v+=.03;if(classState('reaper').rank>=10)v+=.12;if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5)v*=1.25;}
   if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_heal'))v+=.05;   // Healing Light
-  if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_blood'))v+=.05;if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
+  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }if(classState('berserker').rank>=10)v+=.08;}   // Bloodthirst + Undying Rage
   if(G&&G.endLifesteal) v+=G.endLifesteal;
   return isGod(p)?v+0.6:v; }
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_feet'))v*=.90;if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
@@ -8054,7 +8054,9 @@ const CLASS_BASIC = {
      handled by chargeRelease. */
   pirate(p, e, dmg){
     if((meta.pirateSlot||'basic') !== 'basic') return;
-    if(!p._loaded && p._loaded !== undefined) return;      // spent: you are swinging steel
+    if(!p._loaded && p._loaded !== undefined){
+      return c2Passive('pir_brutal') ? dmg * 1.45 : undefined;   // Cutthroat: steel bites while reloading
+    }
     p._loaded = false;
     addText(e.x, e.y + e.h + 18, e.z, 'BANG', '#ffd24a');
     try { burst(e.x, e.y + e.h*0.5, e.z, '#ffe9a8', 12); playFx && playFx('shoot'); } catch(err){}
@@ -8065,8 +8067,15 @@ const CLASS_BASIC = {
      Berserker at full health is ordinary, so the class is played by choosing not to retreat -
      which is the only decision that matters to it. */
   berserker(p, e, dmg){
+    /* Brutal: anything already gutted dies to any hit you land. */
+    if(c2Passive('bsk_brutal') && e.hp <= e.maxHp * 0.25){
+      addText(e.x, e.y + e.h + 26, e.z, 'BUTCHERED', '#ff5a6a', true);
+      return e.hp + 9999;
+    }
     const frac = Math.max(0, Math.min(1, p.hp / Math.max(1, effMaxHp(p))));
-    return dmg * (1 + (1 - frac) * 0.85);
+    /* Rage: below a quarter, the damage doubles instead of merely climbing. */
+    const rage = (c2Passive('bsk_rage') && frac < 0.25) ? 2 : 1;
+    return dmg * (1 + (1 - frac) * 0.85) * rage;
   },
 
   /* OATH. Your first target of a fight is Sworn; while it lives you take a third less from
@@ -8193,9 +8202,9 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
-  if(meta.classId==='berserker'&&c2def('berserker')){if(c2Passive('bsk_thick'))dmg*=.88;if(c2Passive('bsk_tough')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
+  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }}
   if(meta.classId==='monk'&&c2def('monk')){if(c2Passive('mon_iron'))dmg*=.88;if(c2Passive('mon_still')&&p.hp<effMaxHp(p)*.5)dmg*=.88;}
-  if(meta.classId==='pirate'&&c2def('pirate')){if(c2Passive('pir_tough'))dmg*=.90;if(c2Passive('pir_evasive'))dmg*=.90;}
+  if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;
   if(meta.classId==='warlock'&&c2def('warlock')&&c2Passive('war_last')&&p.hp<effMaxHp(p)*.30)dmg*=.85;
   if(meta.classId==='skylancer'&&c2def('skylancer')){
@@ -8240,12 +8249,14 @@ function hurtPlayer(dmg,sx,sz,by){
     try{ if(m) burst(m.x,(m.y||0)+16,m.z,'#b06bff',14); }catch(e){}
     hudUpdate(); return;
   }
-  if(p.hp<=0 && meta.classId==='chronomancer' && !G._rewUsed && (p._rew||[]).length){
+  if(p.hp<=0 && meta.classId==='chronomancer' && (G._rewUsed||0) < (c2Passive('chr_glass')?2:1) && (p._rew||[]).length){
     const back = p._rew[0];
-    G._rewUsed = 1;
+    G._rewUsed = (G._rewUsed||0) + 1;
     p.x = back.x; p.y = back.y; p.z = back.z;
     p.hp = Math.max(1, Math.round(back.hp));
-    p.vx = 0; p.vz = 0; p.invuln = Math.max(p.invuln||0, 1.2);
+    p.vx = 0; p.vz = 0;
+    p.invuln = Math.max(p.invuln||0, c2Passive('chr_ward') ? 3 : 1.2);   // Time Ward: three seconds untouchable
+    if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
     p._rew.length = 0;
     addText(p.x, p.y + 56, p.z, 'REWIND', '#c9a6ff', true);
     try { burst(p.x, p.y+20, p.z, '#c9a6ff', 18); SFX.magic && SFX.magic('void'); G.slowmo = 0.5; } catch(err){}

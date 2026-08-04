@@ -42,3 +42,31 @@ The bag doll and the title backdrop both draw into the GAME canvas using the CUR
 Either give them their own canvas as character creation has, or teach the 3D layer to render a hero
 at an arbitrary transform into the current frame. The second is more work and fixes all of them at
 once.
+
+
+---
+
+# Progress, and what the attempt taught
+
+**BUILT: `__hero3dAt(key, {x,y,z,yaw,scale})`** - one keyed pool of hero clones that can be posed
+anywhere in the scene. Several at once, each with its own skeleton, built once per key and reposed
+thereafter, with `__hero3dPoseSweep(keep)` to hide anything nobody asked for this frame. The hub
+mirror now goes through it, and the title backdrop asks for a pose with a voxel fallback.
+
+**THE BAG PAPER-DOLL DOES NOT WORK THIS WAY, and the reason kills the "one fix for all four" idea:**
+it renders the scene into the MAIN GL canvas and then BLITS the result into `bagDollCanvas` through a
+2D context. Two consequences:
+  - a scene pose cannot appear there, because the 3D layer draws to the game canvas and this is a
+    different one;
+  - handing that canvas to `__hero3dPreview` makes it claim a WebGL context, which PERMANENTLY
+    prevents the 2D context the blit needs. That broke the bag outright - it threw on clearRect.
+    Reverted.
+
+So there are two families, not one:
+  A. draws into the main canvas -> a scene pose reaches it (title backdrop, mirror)
+  B. blits to its own canvas    -> needs either its own renderer, like character creation, or the
+                                   3D hero rendered into the main canvas DURING that pass so the
+                                   existing blit carries it (bag doll, skin thumbnails)
+
+Family B is the remaining work, and the second option is the better one: it reuses the blit that is
+already there instead of adding a third renderer.

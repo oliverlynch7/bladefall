@@ -1439,40 +1439,56 @@ window.__hero3dPreview = (canvas, opts) => {
 window.__hero3dPreviewReady = (model) => !!_loaded[model || 'Warrior'];
 window.__hero3dClassModel = (cid) => CLASS_TO_MODEL[cid] || 'Warrior';
 
-/* ── E3: THE MIRROR REFLECTS THE REAL YOU ──────────────────────────────────
-   The Waystation mirror drew its reflection with drawHero3(mh, t, TRUE) - and that third argument
-   is `preview`, which the 3D path is explicitly gated against. So the reflection was hard-routed to
-   the voxel renderer no matter how well the 3D hero was working two feet away. You stood in front
-   of the glass as one character and were reflected as another.
+/* ── HEROES AT ARBITRARY TRANSFORMS ────────────────────────────────────────
+   One mechanism for every place that needs to show the character somewhere other than where he is
+   standing: the hub mirror, the bag paper-doll, the title backdrop, the skin thumbnails.
 
-   It needs a SECOND instance, not a second draw: the real hero is on screen at the same time, so
-   the one actor cannot be in both places. SkeletonUtils.clone gives the copy its own skeleton -
-   the same technique mob3d already uses for crowds - and it is built once and then reposed, never
-   rebuilt.
+   Each was drawing the OLD VOXEL hero, and for the same two reasons every time - either the call
+   site passed `preview=true`, or the 3D layer was gated off in that mode. Fixing them one at a time
+   would have meant three more single-purpose renderers on top of the character-creation one; this
+   is the general answer, so the next place that needs a hero costs one line instead of a system.
 
-   It deliberately does NOT animate. A mirror image that idles out of sync with you reads as a
-   second person standing behind glass, which is worse than a still reflection; this is posed to
-   your position and facing, which is what sells it. */
-let _mirrorClone = null, _mirrorOn = false;
-window.__hero3dMirror = (o) => {
+   KEYED, because several can be on screen at once (six skin thumbnails) and each needs its own
+   skeleton - a shared one would make every avatar strike the same pose as the last caller. Clones
+   are built once per key and then reposed, never rebuilt.
+
+   Deliberately NOT animated: these are portraits. A doll idling out of sync with itself reads as a
+   second person standing in your inventory. */
+const _poses = new Map();
+
+window.__hero3dAt = (key, o) => {
   if(!scene || !actor || !HERO3D.ready) return false;
-  if(!o){ if(_mirrorClone) _mirrorClone.visible = false; _mirrorOn = false; return false; }
   try {
-    if(!_mirrorClone){
-      _mirrorClone = SkeletonUtils.clone(actor);
-      _mirrorClone.name = '__heroMirror';
-      scene.add(_mirrorClone);
+    let rec = _poses.get(key);
+    if(!o){ if(rec) rec.node.visible = false; return false; }
+    if(!rec){
+      const node = SkeletonUtils.clone(actor);
+      node.name = '__heroPose:' + key;
+      node.traverse(n => { if(n.isMesh){ n.frustumCulled = false; n.castShadow = false; } });
+      scene.add(node);
+      rec = { node };
+      _poses.set(key, rec);
     }
-    _mirrorClone.visible = true;
-    _mirrorOn = true;
-    const S = HERO3D.scale * (o.scale || 1);
-    _mirrorClone.scale.setScalar(S);
-    _mirrorClone.position.set(o.x, o.y || 0, o.z);
-    _mirrorClone.rotation.y = (o.yaw || 0) + HERO3D.yawOff;
-    _mirrorClone.updateMatrixWorld(true);
+    rec.node.visible = true;
+    const sc = HERO3D.scale * (o.scale != null ? o.scale : 1);
+    rec.node.scale.setScalar(sc);
+    rec.node.position.set(o.x || 0, o.y || 0, o.z || 0);
+    rec.node.rotation.y = (o.yaw || 0) + HERO3D.yawOff;
+    rec.node.updateMatrixWorld(true);
     return true;
   } catch(e){ return false; }
 };
+
+/* Anything posed this frame that nobody asked for again is hidden, so a doll does not linger in the
+   world after you close the bag. Cheap: it walks a map with a handful of entries. */
+window.__hero3dPoseSweep = (keep) => {
+  const k = keep || [];
+  for(const [key, rec] of _poses) if(k.indexOf(key) < 0) rec.node.visible = false;
+};
+
+/* The mirror is now just a pose like any other - kept as its own name so the call site in
+   drawWaystation does not need to know that. */
+window.__hero3dMirror = (o) => window.__hero3dAt('mirror', o);
 
 /* Bisect the "renders but invisible" problem with the bluntest possible marker: a large
    unlit cube at the hero's position, depthTest off, drawn last. If THIS is invisible the

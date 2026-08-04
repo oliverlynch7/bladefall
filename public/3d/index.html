@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.680.0-capstones';
+const VERSION3D='1.690.0-skills-done';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1924,9 +1924,9 @@ const CLASSES={
   berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['great','axe','hammer'],
     subs:[{id:'fury',disp:'Fury',blurb:'Raw damage — hit like a landslide.'},{id:'blood',disp:'Blood',blurb:'Rage and lifesteal — the angrier, the stronger.'}],
     skills:[
-      {id:'bsk_cleave',n:'Cleave',icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
-      {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
-      {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
+      {id:'bsk_cleave',n:'Bloodletting',icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
+      {id:'bsk_charge',n:'Headlong',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
+      {id:'bsk_whirl',n:'No Retreat',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
   /* Pirate: cutlass, boarding crossbow, pike, and a BOARDING AXE. The axe is a coverage fix as much
      as a flavour one - it and the greatsword were reachable by only two classes each, so those
@@ -1955,7 +1955,7 @@ const CLASSES={
       {id:'mon_flurry',n:'Flurry',icon:skillIcon('monk-flurry'),cd:2,rank:1,d:'A rapid barrage of strikes'},
       {id:'mon_deflect',n:'Deflect',icon:skillIcon('monk-deflect'),cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
       {id:'mon_whirl',n:'Whirl Kick',icon:skillIcon('monk-whirl-kick'),cd:12,rank:4,d:'Spin, striking everything around you'},
-      {id:'mon_thousand',n:'Thousand Fists',icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
+      {id:'mon_thousand',n:'Stillness',icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
   stormcaller:{disp:'Stormcaller',icon:classIcon('stormcaller'),attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand'],
     subs:[{id:'tempest',disp:'Tempest',blurb:'Chain lightning and storms — spread the shock.'},
           {id:'current',disp:'Current',blurb:'Static speed — the longer you fight, the faster you strike.'}],
@@ -1963,7 +1963,7 @@ const CLASSES={
       {id:'st_bolt',n:'Chain Bolt',icon:skillIcon('stormcaller-chain-bolt'),cd:2,rank:1,d:'A bolt that leaps between foes'},
       {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
-      {id:'st_storm',n:'Thunderstorm',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
+      {id:'st_storm',n:'Conduit',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
   warlock:{disp:'Warlock',icon:classIcon('warlock'),attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','dagger'],
     subs:[{id:'blood',disp:'Blood Pact',blurb:'Trade safety for brutal spell damage.'},
           {id:'curse',disp:'Curse Weaver',blurb:'Mark, drain, and control enemies from the shadows.'}],
@@ -2048,7 +2048,7 @@ const CLASS2={
     r5:{kind:'passive',a:{id:'m_glass',n:'Glass Cannon',role:'Gamble',d:'Below a quarter health your skills cost no mana at all.'},b:{id:'m_ward',n:'Arcane Ward',role:'Defense',d:'Casting a skill grants a shield equal to 4% max HP for 3s.'}},
     r6:{kind:'skill',slot:2,a:{id:'m_gravity',n:'Gravity Well',cd:13,role:'Control',fx:'m_gravity',d:'Create an implosion that pulls enemies inward and deals 1.3x damage.'},b:{id:'m_barrier',n:'Rune Barrier',cd:14,role:'Defense',fx:'m_barrier',d:'Create a shield that absorbs 35% of max HP.'}},
     r7:{kind:'passive',a:{id:'m_savant',n:'Elemental Savant',role:'Elements',d:'Overcharged attacks apply your weapon’s element instantly.'},b:{id:'m_temporal',n:'Temporal Focus',role:'Uptime',d:'Standing still for 1.5s grants 15% cooldown recovery until you move.'}},
-    r8:{kind:'skill',slot:3,a:{id:'m_tempest',n:'Arcane Tempest',cd:22,role:'Group Damage',fx:'m_tempest',d:'A 4s storm repeatedly damages enemies around you.'},b:{id:'m_overload',n:'Elemental Overload',cd:24,role:'Burst',fx:'m_overload',d:'Release a massive 3.4x elemental explosion around your target.'}},
+    r8:{kind:'skill',slot:3,a:{id:'m_tempest',n:'Attunement',cd:22,role:'Group Damage',fx:'m_tempest',d:'A 4s storm repeatedly damages enemies around you.'},b:{id:'m_overload',n:'Elemental Overload',cd:24,role:'Burst',fx:'m_overload',d:'Release a massive 3.4x elemental explosion around your target.'}},
     r9:{kind:'passive',a:{id:'m_echo',n:'Spell Echo',role:'Burst',d:'Every fourth skill repeats at 35% power without extra mana.'},b:{id:'m_manafont',n:'Manafont',role:'Sustain',d:'+30% mana regeneration and +10 maximum mana.'}}
   },
   reaper:{ disp:'Reaper', icon:classIcon('reaper'),
@@ -2102,7 +2102,7 @@ const CLASS2={
   berserker:{ disp:'Berserker', icon:classIcon('berserker'),
     innate:{name:'Bloodrage', d:'Deal +8% damage, and +15% more while below half HP.'},
     cap:{name:'Undying Rage', d:'+12% damage, +10% attack speed, and +8% lifesteal.'},
-    r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'bsk_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'bsk_bash',n:'Reckless Bash',cd:6,role:'Control',fx:'bsk_bash',d:'Drive forward for 1.7x damage and stun.'}},
+    r2:{kind:'skill',slot:0, a:{id:'bsk_cleave',n:'Cleave',cd:5,role:'Group Damage',fx:'bsk_cleave',d:'A broad 2.2x blade sweep.'}, b:{id:'bsk_bash',n:'Headbutt',cd:6,role:'Control',fx:'bsk_bash',d:'Drive forward for 1.7x damage and stun.'}},
     r3:{kind:'passive', a:{id:'bsk_heavy',n:'Heavy Hands',role:'Commitment',d:'You cannot dodge — but nothing can knock you back or stagger you.'}, b:{id:'bsk_reckless',n:'Reckless',role:'Sacrifice',d:'Every swing costs you a sliver of health, hit or miss.'}},
     r4:{kind:'skill',slot:1, a:{id:'bsk_charge',n:'Charge',cd:9,role:'Movement',fx:'bsk_charge',d:'Rush forward, damaging and stunning in your path.'}, b:{id:'bsk_stomp',n:'Shockwave',cd:10,role:'Control',fx:'bsk_stomp',d:'Slam the ground for damage and heavy knockback.'}},
     r5:{kind:'passive', a:{id:'bsk_thick',n:'Thick Hide',role:'Defense',d:'Damage that would drop you below 1 HP leaves you at 1 instead, once per fight.'}, b:{id:'bsk_blood',n:'Bloodthirst',role:'Sustain',d:'Kills heal you — but only while you are below half health.'}},
@@ -7490,6 +7490,16 @@ SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
 function useSkill(i){
+  /* Attunement: each cast advances the Mage's element, so a ten-second window walks the whole
+     reaction table instead of repeating one. */
+  try {
+    if(meta.classId==='mage' && (G.p._attuneT||0)>0 && G.p.weapon){
+      const ELS=['fire','frost','shock','poison','holy','void'];
+      G.p._attuneI=((G.p._attuneI||0)+1)%ELS.length;
+      G.p.weapon.el=ELS[G.p._attuneI];
+      addText(G.p.x,G.p.y+34,G.p.z,ELS[G.p._attuneI].toUpperCase(),elementColor(ELS[G.p._attuneI])||'#fff');
+    }
+  } catch(err){}
   /* THE BEASTMASTER'S COMPANION TAKES YOUR SKILL INPUTS. Press a skill and the pet commits too -
      it lunges at whatever you are aiming at and its own attack comes off cooldown at once. You are
      playing two characters, which is the class: every skill is also an order.
@@ -7739,6 +7749,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const splash=Math.round(dmg*0.35);                                          // Soulfire: a holy burst washes over nearby foes
     if(splash>0){ skillRing(e.x,e.z,'#ffe9a8','#ffd24a',150); for(const e2 of combatTargets()){ if(e2===e||e2.dead||e2.dummy) continue; if(dXZ(e2.x,e2.z,e.x,e.z)<150){ e2._iansSplash=1; hitEnemy(e2,splash,src,120,0,'holy'); e2._iansSplash=0; } } }
   }
+  if(src===G.p && (G.p._noRetreatT||0)>0) dmg*=2;      // No Retreat: paid for by being unable to back away
   if(src===G.p) dmg=dmg*tPlayerDmg();            // difficulty + beginner-trial player damage dial
   /* ── THE BASIC-ATTACK HOOK ─────────────────────────────────────────────────
      The keystone of the class rewrite. Five classes share one swing and fourteen innates open with
@@ -8216,6 +8227,12 @@ function hurtPlayer(dmg,sx,sz,by){
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
      run and dying to a floor. */
+  /* Stillness: while it runs and you are not moving, what hits you is returned doubled to whoever
+     threw it. Movement cancels the benefit rather than the state, so it stays a discipline. */
+  if((G.p._stillnessT||0)>0 && Math.abs(G.p.vx||0)+Math.abs(G.p.vz||0) < 6 && by && !by.dead){
+    try{ hitEnemy(by, Math.round(dmg*2), G.p, 120, 0, null);
+         addText(G.p.x,G.p.y+40,G.p.z,'RETURNED','#ffe6ad'); }catch(e){}
+  }
   dmg=dmg*tPlayerTake();
   /* THICK ARMOR, rewritten. Was "take 12% less damage from every source" - a number you could not
      feel and could not play around. Now the FIRST hit of every fight deals nothing, which you feel
@@ -9432,6 +9449,12 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
+  /* Headlong drives you forward and refuses to be steered - the whole point of it. */
+  if((G.p._headlongT||0)>0){
+    G.p.x += (G.p._headlongX||0)*760*dt;
+    G.p.z += (G.p._headlongZ||0)*760*dt;
+    G.p.vx=0; G.p.vz=0;
+  }
   for(const e of (G.enemies||[])){
     if((e._tetherT||0)>0) e._tetherT-=dt;
     /* Updraft holds them off the floor: gravity is suspended, not merely overcome, so they hang
@@ -15350,6 +15373,96 @@ SKILL_FX.bd_steel=function(p,ok,am){
   p._perfectGuard=3;
   addText(p.x,p.y+56,p.z,'PERFECT GUARD','#cfe8ff',true);
   try{ skillRing(p.x,p.z,'#cfe8ff','#243447',260); }catch(err){}
+};
+
+
+/* ── CAPSTONES, PART TWO, AND THE BERSERKER'S OWN KIT ──────────────────────
+   Appended for the same reason as the first batch: SKILL_FX is a plain object, so the last
+   assignment wins and this is the only placement that cannot lose that race or cut anything out.
+
+   The Berserker's four here are not capstones - they are the Warrior copies. Five of his eight
+   skills were the same skill with the same NAME (Cleave, Charge, Whirlwind, Berserk, Execute), so
+   his identity was doing all the work of separating two classes that shared a kit. Each of these
+   now faces the thing that defines him: damage rises as health falls, so every skill asks how much
+   health you will spend to swing harder. */
+
+/* MAGE - ATTUNEMENT. Your element changes on every cast for 10s. The Mage's whole kit is elemental
+   reactions; this hands you all of them in sequence instead of a second area attack. */
+SKILL_FX.m_tempest=function(p,ok,am){
+  p._attuneT=10; p._attuneI=0;
+  addText(p.x,p.y+56,p.z,'ATTUNED','#c9a6ff',true);
+  try{ skillRing(p.x,p.z,'#c9a6ff','#241a3a',240); }catch(err){}
+};
+
+/* STORMCALLER - CONDUIT. Every enemy struck stays chained to every other for 8s, so the class's
+   basic-attack identity stops being one arc and becomes a web. */
+SKILL_FX.st_storm=function(p,ok,am){
+  const id=(G._tetherN=(G._tetherN||0)+1);
+  let n=0;
+  for(const e of combatTargets()){
+    if(e.dead||dXZ(e.x,e.z,p.x,p.z)>340) continue;
+    e._tether=id; e._tetherT=8; n++;
+    try{ skillRing(e.x,e.z,'#9fe0ff','#1a3040',60); }catch(err){}
+  }
+  addText(p.x,p.y+56,p.z,'CONDUIT x'+n,'#9fe0ff',true);
+};
+
+/* MONK - STILLNESS. Stop moving and every hit you take is returned doubled. The only class that
+   gets more mobile the more it fights now has a capstone that rewards standing perfectly still,
+   which is the discipline the class is named for. */
+SKILL_FX.mon_thousand=function(p,ok,am){
+  p._stillnessT=6;
+  addText(p.x,p.y+56,p.z,'STILLNESS','#ffe6ad',true);
+  try{ skillRing(p.x,p.z,'#ffe6ad','#3a3018',200); }catch(err){}
+};
+
+/* BERSERKER - NO RETREAT. You cannot move backwards for 10s, and all your damage doubles. The class
+   is played by choosing not to retreat; this removes the choice and pays you for it. */
+SKILL_FX.bsk_whirl=function(p,ok,am){
+  p._noRetreatT=10;
+  addText(p.x,p.y+56,p.z,'NO RETREAT','#ff5a6a',true);
+  try{ skillRing(p.x,p.z,'#ff5a6a','#3a1218',260); }catch(err){}
+};
+
+/* BERSERKER - BLOODLETTING, replacing a copy of the Warrior's Cleave. Wound yourself to swing far
+   harder: the damage is paid for in health, which is the only currency this class has. */
+SKILL_FX.bsk_cleave=function(p,ok,am){
+  const cost=Math.max(1,Math.round(effMaxHp(p)*0.10));
+  if(p.hp<=cost+1) return;
+  p.hp-=cost;
+  const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*2.6*am*(ok?1:OFFCLASS_MUL);
+  for(const e of combatTargets()){
+    if(e.dead||dXZ(e.x,e.z,p.x,p.z)>210) continue;
+    hitEnemy(e,Math.round(dmg),p,220,0,null);
+  }
+  addText(p.x,p.y+50,p.z,'BLOODLETTING -'+cost,'#ff5a6a',true);
+  hudUpdate();
+};
+
+/* BERSERKER - HEADLONG, replacing a copy of the Warrior's Charge. A charge that cannot be stopped
+   OR STEERED - it commits you, which is the difference between a Warrior's tool and a Berserker's. */
+SKILL_FX.bsk_charge=function(p,ok,am){
+  p._headlongT=0.9; p._headlongX=Math.sin(p.yaw); p._headlongZ=Math.cos(p.yaw);
+  p.invuln=Math.max(p.invuln||0,0.9);
+  addText(p.x,p.y+50,p.z,'HEADLONG','#ff8a62',true);
+};
+
+/* BERSERKER - HEADBUTT, replacing a copy of the Warrior's Shield Bash. It stuns them and it stuns
+   YOU, and it hurts you both. A bash that costs nothing belongs to the class with a shield. */
+SKILL_FX.bsk_bash=function(p,ok,am){
+  const w=p.weapon,dmg=(w?w.dmg:10)*effPower(p)*2.2*am*(ok?1:OFFCLASS_MUL);
+  let hit=false;
+  for(const e of combatTargets()){
+    if(e.dead||dXZ(e.x,e.z,p.x,p.z)>150) continue;
+    hitEnemy(e,Math.round(dmg),p,300,0,null);
+    e.stunT=Math.max(e.stunT||0,2.2); hit=true;
+  }
+  if(hit){
+    p.hp=Math.max(1,p.hp-Math.round(effMaxHp(p)*0.06));
+    p.stunT=Math.max(p.stunT||0,0.5);
+    addText(p.x,p.y+50,p.z,'HEADBUTT','#ff8a62',true);
+    hudUpdate();
+  }
 };
 
 window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,

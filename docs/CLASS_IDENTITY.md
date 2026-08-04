@@ -426,4 +426,5 @@ Cleave -> **Bloodletting** (wound yourself to hit far harder), Charge -> **Headl
 cannot be stopped or steered), Reckless Bash -> **Headbutt** (damage both of you, stun both),
 Whirlwind -> **Deathwish** (a spin that hits harder the less health you have).
 
-NOT IMPLEMENTED - awaiting Oliver's sign-off, per his request.
+IMPLEMENTED 2026-08-04 (v1.670-1.690). All nine capstones, both same-role pairs, and the
+Berserker's four Warrior copies.

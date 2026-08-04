@@ -7713,6 +7713,10 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      have their own identities already - and it may both modify the damage and act on the world.
      Everything a class does every few seconds now lives in one table instead of being scattered
      through effPower as percentages. */
+  /* Holy Power: your skills hit the Sworn target twice as hard. Deliberately on DESIGNATED hits -
+     skills and charges - so it reads as the opposite half of the basic-attack identity. */
+  if(src===G.p && (G&&G._desig) && meta.classId==='paladin' && c2Passive('pal_holypow')
+     && G.p._oath && e===G.p._oath) dmg*=2;
   if(src===G.p && !(G&&G._desig)){
     const _bh = CLASS_BASIC[meta.classId];
     if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
@@ -7763,6 +7767,16 @@ function killEnemy(e,weaponKill){
   /* The Warlock's bargain settles on a KILL: every sliver of health its basic attacks spent comes
      back at once. A round going well costs nothing, a round going badly compounds - which is the
      whole point of the class and was previously just a description. */
+  /* Combo Edge: killing with Unseen rearms it at once, so you chain from body to body. */
+  try {
+    if(meta.classId==='ninja' && c2Passive('nin_combo') && e && e._ninExec !== undefined){
+      G.p._stillT = 9; addText(G.p.x, G.p.y+44, G.p.z, 'UNSEEN READY', '#9fe0ff');
+    }
+  } catch(err){}
+  /* Bloodlust: a kill KEEPS your Momentum instead of resetting it - the Warrior's snowball. */
+  try {
+    if(meta.classId==='warrior' && c2Passive('w_bloodlust') && G && G.p){ G.p._momKeep = 1; }
+  } catch(err){}
   /* The Pirate reloads on a KILL - the pistol is a resource you earn by finishing things. */
   try {
     if(meta.classId==='pirate' && G && G.p && !G.p._loaded){
@@ -7989,7 +8003,7 @@ const CLASS_BASIC = {
   /* MOMENTUM. Hitting the SAME target builds up; the third staggers it. Rewards committing to one
      enemy rather than spreading damage around, which is what a warrior does. */
   warrior(p, e, dmg){
-    if(p._momT !== e){ p._momT = e; p._mom = 0; }
+    if(p._momT !== e){ p._momT = e; if(!p._momKeep) p._mom = 0; p._momKeep = 0; }
     p._mom = (p._mom || 0) + 1;
     if(p._mom >= (c2Passive('w_master') ? 2 : 3)){   // Weapon Master: stagger a hit sooner
       p._mom = 0;
@@ -8070,8 +8084,15 @@ const CLASS_BASIC = {
   /* UNSEEN. Stand still for a moment and your next attack lands from BEHIND the target - a melee
      class with repositioning built into its ordinary attack rather than into a cooldown. */
   ninja(p, e, dmg){
-    if((p._stillT || 0) < 1) return;
+    /* Swift: Unseen rearms in half the time. */
+    if((p._stillT || 0) < (c2Passive('nin_swift') ? 0.5 : 1)) return;
     p._stillT = 0;
+    /* Deadly Precision: an Unseen strike finishes anything already badly hurt. */
+    if(c2Passive('nin_deadly') && e.hp <= e.maxHp/3){
+      addText(e.x, e.y + e.h + 26, e.z, 'EXECUTE', '#ff5a6a', true);
+      e._ninExec = 1;
+      return e.hp + 9999;
+    }
     const a = Math.atan2(p.x - e.x, p.z - e.z);
     p.x = e.x - Math.sin(a) * (e.r + 26); p.z = e.z - Math.cos(a) * (e.r + 26);
     p.yaw = Math.atan2(e.x - p.x, e.z - p.z);
@@ -8090,10 +8111,16 @@ const CLASS_BASIC = {
      The only class whose ordinary attack has a resource decision inside it - a Mage holding mana
      for a skill is choosing to punch softer. */
   mage(p, e, dmg){
-    if((p.mana || 0) < 6) return;
-    p.mana -= 6;
+    const potent = c2Passive('m_potent');                 // Potent Weave: costs double, hits double
+    const cost = potent ? 12 : 6;
+    if((p.mana || 0) < cost) return;
+    p.mana -= cost;
+    /* Elemental Savant: an overcharged hit applies your weapon's element outright. */
+    if(c2Passive('m_savant') && p.weapon && p.weapon.el){
+      try { applyElement(e, p.weapon.el, dmg); } catch(err){}
+    }
     try { hudUpdate(); } catch(err){}
-    return dmg * 1.35;
+    return dmg * (potent ? 1.7 : 1.35);
   },
 
   /* HARVEST. Every basic hit builds toward a corpse: at five, the target drops one whether it dies

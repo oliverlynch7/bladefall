@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.630.0-passives3';
+const VERSION3D='1.640.0-cheats';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11544,6 +11544,29 @@ function cheatAllPets(){ meta.petOwned=PETIDS.slice(); persist(); SFX.achieve();
 function cheatHeal(){ const p=G.p; p.hp=effMaxHp(p); cheatBank(); hudUpdate(); SFX.achieve(); toast('❤️ Full heal'); }
 function cheatRankUp(){ const cs=classState(meta.classId); cs.rank=10; cs.sub=cs.sub||(curClass().subs&&curClass().subs[0]&&curClass().subs[0].id); persist(); skillbarUpdate(); SFX.levelup(); toast('★ '+curClass().disp+' rank 10 — all skills unlocked'); }
 function cheatOpenZones(){ meta.zoneMax=ZONES.length-1; persist(); SFX.achieve(); toast('🗺 Every Gate opened'); }
+/* RESET ALL CLASS RANKS. The counterpart to "Rank 10 ALL classes", and the one that was missing:
+   there was a way to skip the whole progression and no way back, so testing a rank-2 choice meant
+   wiping the save. Ranks go to 1 and every 1-of-2 pick is cleared, so the next level-up presents
+   its choice again. Unlocks are LEFT ALONE - this resets progression, not access, and having to
+   re-earn ten classes to retry one choice is the trap this exists to avoid. */
+function cheatResetRanks(){
+  CLASSIDS.forEach(c=>{ const cs=classState(c); cs.rank=1; cs.ch={}; cs.xp=0; cs.sub=null; });
+  persist(); skillbarUpdate(); hudUpdate(); SFX.achieve();
+  toast('↺ Every class back to Rank 1 — choices cleared, unlocks kept');
+}
+
+/* OPEN EVERYTHING, including the purple rifts. cheatOpenZones only ever set zoneMax, which opens
+   the main Gates and leaves the seven hidden side areas exactly as hidden as they were - so the
+   Thornwood, the Oubliette and the rest could not be reached from the bench at all. Their trials
+   are gated on the class being unlocked too, so this grants those alongside. */
+function cheatOpenEverything(){
+  meta.zoneMax=ZONES.length-1;
+  meta.sideFound=meta.sideFound||{}; meta.sideDone=meta.sideDone||{};
+  ZONES.forEach(Z=>{ if(Z.side){ meta.sideFound[Z.side.id]=true; } });
+  CLASSIDS.forEach(c=>{ meta.classUnlocked[c]=true; classState(c); });
+  persist(); SFX.achieve();
+  toast('🗺 Every Gate AND every purple rift opened');
+}
 function cheatEndlessBest(v){ meta.endlessBest=Math.max(meta.endlessBest||0,v); persistGlobal(); SFX.achieve(); toast('🕳️ Abyssal best set to Floor '+v); }
 function openCheatMenu(back){
   mode='menu';
@@ -11556,7 +11579,7 @@ function openCheatMenu(back){
     <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
     <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
     <div class="sect">Unlocks &amp; conveniences</div>
-    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
+    <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cAll','🔮 Open ALL + purple rifts')}${btn('cReset','↺ Reset all class ranks')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
     <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
   const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
   wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
@@ -11565,7 +11588,9 @@ function openCheatMenu(back){
   wire('cRar',()=>{ _cheatRar=RORDER[(RORDER.indexOf(_cheatRar)+1)%RORDER.length]; openCheatMenu(back); });
   wire('cWeap',()=>{cheatGiveWeapons();openCheatMenu(back);}); wire('cArmor',()=>{cheatGiveArmor();openCheatMenu(back);}); wire('cKit',()=>{cheatKitOut();openCheatMenu(back);});
   wire('cClass',()=>{cheatUnlockClasses();openCheatMenu(back);}); wire('cRank10All',()=>{cheatRank10All();openCheatMenu(back);}); wire('cPets',()=>{cheatAllPets();openCheatMenu(back);});
-  wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
+  wire('cZones',()=>{cheatOpenZones();openCheatMenu(back);});
+  wire('cAll',()=>{cheatOpenEverything();openCheatMenu(back);});
+  wire('cReset',()=>{cheatResetRanks();openCheatMenu(back);}); wire('cHeal',()=>{cheatHeal();openCheatMenu(back);}); wire('cEnd',()=>{cheatEndlessBest(15);openCheatMenu(back);});
   wire('cBack',()=>{ if(back) back(); else wsResume(); });
 }
 function updateInteractPrompt(){ const pr=document.getElementById('interactprompt'), btn=document.getElementById('bInteract');
@@ -15205,7 +15230,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,
-  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
+  openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatResetRanks, cheatOpenEverything, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
   STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, ARCHES, ARCHEIDS,

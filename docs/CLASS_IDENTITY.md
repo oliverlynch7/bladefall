@@ -358,3 +358,72 @@ Everything now sits at 3-5 except the two deliberate exclusives. No class exceed
 equipment. Every one that dropped would have been unusable by everybody. Added to RETIRED_ARCHES -
 the existing mechanism for exactly this - so it no longer drops while the archetype survives for the
 class's own pistol to be built from. Drop pool 23 -> 22, zero dead drops.
+
+---
+
+# Skill choices — the audit, for sign-off
+
+Sixty-four 1-of-2 skill choices across sixteen classes. Two systemic problems, not scattered ones.
+
+## Finding 1: the CAPSTONE choice is damage-vs-damage in nine of sixteen classes
+
+Slot 3 is the rank-8 pick - the last and most exciting choice a class offers. In nine classes both
+options are simply damage with a different spread:
+
+    Warrior       Berserk [Offense]        vs Execution [Finisher]
+    Mage          Arcane Tempest [Group]   vs Elemental Overload [Burst]
+    Berserker     Whirlwind [Group]        vs Execute [Finisher]
+    Ninja         Blade Fury [Burst]       vs Blade Storm [Group]        <- near-identical names too
+    Chronomancer  Time Storm [Group]       vs Singularity [Burst]
+    Monk          Thousand Fists [Burst]   vs Dragon Kick [Finisher]
+    Stormcaller   Thunderstorm [Group]     vs Chain Reaction [Burst]
+    Warlock       Dark Storm [Group]       vs Final Curse [Boss]
+    Bladedancer   Dance of Steel [Group]   vs Perfect Counter [Boss]
+
+"Hit many things" versus "hit one thing hard" is a real choice ONCE. As the climax of nine
+different classes it is the same choice nine times, and it arrives exactly where a class should
+feel most itself.
+
+Two are worse still - literally the same role on both sides:
+
+    Reaper    slot 2   Void Pull [Control]      vs Gravebind [Control]
+    Skylancer slot 3   Thunder Dive [Group]     vs Cyclone Volley [Group]
+
+## Finding 2: Berserker is a Warrior reskin at the SKILL level
+
+    Warrior:   Cleave, Charge, Whirlwind, Shield Bash, Berserk, Execution
+    Berserker: Cleave, Charge, Whirlwind, Reckless Bash, Berserk, Execute
+
+Five of eight are the same skill with the same name. The Berserker's new identity (damage rises as
+health falls, cannot heal, executes the gutted) is doing all the work of distinguishing two classes
+whose entire kit is shared. Same for Reaper/Ninja (Shadow Step) and Pirate/Monk (Roll).
+
+## Proposed reworks — SIGN-OFF WANTED
+
+The rule that worked for passives: make the two options answer DIFFERENT QUESTIONS, not the same
+question at different sizes.
+
+**Capstones become "a new rule for the rest of the fight" vs "one enormous moment":**
+
+- Warrior      Berserk -> **Warcry**: every enemy that can see you attacks only you for 8s.
+                Execution stays as the burst.
+- Mage         Arcane Tempest -> **Attunement**: your element changes on every cast for 10s.
+- Berserker    Whirlwind -> **No Retreat**: you cannot move backwards for 10s; all damage doubled.
+- Ninja        Blade Storm -> **Vanish**: you disappear entirely for 4s; the next Unseen is a kill.
+- Chronomancer Time Storm -> **Stopped Clock**: everything but you freezes for 3s.
+- Monk         Thousand Fists -> **Stillness**: stop moving and every hit taken is returned doubled.
+- Stormcaller  Thunderstorm -> **Conduit**: every enemy hit stays chained to every other for 8s.
+- Warlock      Dark Storm -> **Pact**: spend half your current health, deal that much to everything.
+- Bladedancer  Dance of Steel -> **Perfect Guard**: every attack is parried for 3s.
+
+**The two same-role pairs:**
+
+- Reaper    Gravebind -> **Soul Tether**: linked enemies share all damage dealt to any of them.
+- Skylancer Cyclone Volley -> **Updraft**: enemies are pulled into the air and cannot land.
+
+**Berserker's shared kit** - replace the four Warrior copies with low-health-facing skills:
+Cleave -> **Bloodletting** (wound yourself to hit far harder), Charge -> **Headlong** (a charge that
+cannot be stopped or steered), Reckless Bash -> **Headbutt** (damage both of you, stun both),
+Whirlwind -> **Deathwish** (a spin that hits harder the less health you have).
+
+NOT IMPLEMENTED - awaiting Oliver's sign-off, per his request.

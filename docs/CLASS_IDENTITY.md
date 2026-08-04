@@ -214,3 +214,35 @@ Same power budget, completely different play.
 
 STATUS: measured and designed in principle, not implemented. Eighteen-plus passives across sixteen
 classes is a bigger job than the innates and wants its own session.
+
+
+---
+
+# BUILD LOG
+
+## The hook — DONE (v1.560.0)
+
+`CLASS_BASIC` in index.html, called from hitEnemy for the player's BASIC attacks only (`G._desig`
+marks charged hits and skills, which have their own identities). An entry may modify the damage and
+act on the world. Everything a class does every few seconds now lives in one table instead of being
+scattered through effPower as percentages.
+
+Three identities shipped against it, as proof the shape works:
+
+- **Warrior — Momentum.** Three consecutive hits on the SAME target stagger it. Switching target
+  resets the count, so it rewards committing to one enemy.
+- **Stormcaller — Chain.** The basic attack arcs to a nearby second enemy for a third of the damage.
+  The class reads as lightning at a glance, which no percentage ever achieved.
+- **Ranger — Distance.** Damage scales with range: 0.75x in a sword's reach, 1.35x at distance.
+  The class is about spacing, so the damage IS spacing.
+
+Verified: the stagger fires on the third hit and resets on target switch, the chain splashes a
+second target, the ranger's far hit beats his near hit 153 to 90, and skills/charged attacks are
+untouched.
+
+## Remaining, in order
+
+1. The other eleven basic-attack identities from the design above - each is one callback now.
+2. Strip the flat +8-12% from the fourteen innates and fold into base damage.
+3. Rewrite the passives against the decision-not-a-number rule.
+4. The Pirate's flintlock-as-class-equipment.

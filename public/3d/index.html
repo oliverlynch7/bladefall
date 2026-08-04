@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.550.0-hubprops';
+const VERSION3D='1.560.0-classbasic';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7661,6 +7661,18 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     if(splash>0){ skillRing(e.x,e.z,'#ffe9a8','#ffd24a',150); for(const e2 of combatTargets()){ if(e2===e||e2.dead||e2.dummy) continue; if(dXZ(e2.x,e2.z,e.x,e.z)<150){ e2._iansSplash=1; hitEnemy(e2,splash,src,120,0,'holy'); e2._iansSplash=0; } } }
   }
   if(src===G.p) dmg=dmg*tPlayerDmg();            // difficulty + beginner-trial player damage dial
+  /* ── THE BASIC-ATTACK HOOK ─────────────────────────────────────────────────
+     The keystone of the class rewrite. Five classes share one swing and fourteen innates open with
+     the same flat damage percentage, and both problems have the same root: there was nowhere for a
+     class to say what its ORDINARY attack does. This is that place.
+     Called only for the player's BASIC attacks - `G._desig` marks charged hits and skills, which
+     have their own identities already - and it may both modify the damage and act on the world.
+     Everything a class does every few seconds now lives in one table instead of being scattered
+     through effPower as percentages. */
+  if(src===G.p && !(G&&G._desig)){
+    const _bh = CLASS_BASIC[meta.classId];
+    if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
+  }
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
@@ -7907,6 +7919,56 @@ function ninjaEvade(p,sx,sz){                               // a dodge: MISS tex
   try{ burst(p.x,p.y+16,p.z,'#9fe0ff',8); SFX.dodge&&SFX.dodge(); }catch(_){}
   G.combo=G.combo; hudUpdate();
 }
+/* ── CLASS BASIC ATTACKS ───────────────────────────────────────────────────
+   One entry per class, each doing something you can describe without a number. These replace the
+   flat "+8% damage" innates, which every class had and which therefore distinguished none of them.
+   Returning a number replaces the damage; returning nothing keeps it. */
+const CLASS_BASIC = {
+  /* MOMENTUM. Hitting the SAME target builds up; the third staggers it. Rewards committing to one
+     enemy rather than spreading damage around, which is what a warrior does. */
+  warrior(p, e, dmg){
+    if(p._momT !== e){ p._momT = e; p._mom = 0; }
+    p._mom = (p._mom || 0) + 1;
+    if(p._mom >= 3){
+      p._mom = 0;
+      e.stunT = Math.max(e.stunT || 0, 0.8);
+      addText(e.x, e.y + e.h + 18, e.z, 'STAGGER', '#ffd24a');
+      try { burst(e.x, e.y + e.h * 0.5, e.z, '#ffd24a', 8); } catch(err){}
+    }
+  },
+  /* CHAIN. The basic attack arcs to a second enemy for a third of the damage. Makes the class read
+     as lightning at a glance, which no amount of "+8% magic damage" ever could. */
+  stormcaller(p, e, dmg){
+    if(p._chaining) return;                       // the arc must not arc
+    let best = null, bd = 260;
+    /* combatTargets() is the PvP-aware list and can be narrower than the room; falling back to
+       G.enemies means the arc still finds someone in ordinary play, which is where it lives. */
+    let pool = [];
+    try { pool = combatTargets() || []; } catch(err){}
+    if(!pool.length) pool = G.enemies || [];
+    for(const o of pool){
+      if(o === e || o.dead) continue;
+      const d = dXZ(o.x, o.z, e.x, e.z);
+      if(d < bd){ bd = d; best = o; }
+    }
+    if(best){
+      p._chaining = 1;
+      try {
+        skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 90);
+        hitEnemy(best, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
+      } catch(err){}
+      p._chaining = 0;
+    }
+  },
+  /* DISTANCE. A ranger is about spacing, so the damage IS spacing: less than a sword's reach away
+     it is worse than a sword, and at full range it is what the class is for. */
+  ranger(p, e, dmg){
+    const d = dXZ(p.x, p.z, e.x, e.z);
+    const k = Math.max(0.75, Math.min(1.35, 0.75 + (d / 520) * 0.6));
+    return dmg * k;
+  },
+};
+
 function hurtPlayer(dmg,sx,sz,by){
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving

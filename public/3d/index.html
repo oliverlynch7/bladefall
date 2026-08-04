@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.501.0-select';
+const VERSION3D='1.502.0-difficons';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10380,7 +10380,13 @@ function openDiffSelect(){
   mode='menu'; showGameUI(false);
   const cards=Object.keys(DIFFS).map(id=>{ const D=DIFFS[id], open=diffOpen(id), mv=loadJSON(MKEY(diffMode(id)))||{};
     const beat=meta['beat'+id.charAt(0).toUpperCase()+id.slice(1)];
-    const art=id==='normal'?'icons/class-warrior.png':id==='hardcore'?'icons/event-boss-skull.png':'icons/difficulty-hitless.png';
+    /* A LOOKUP, not a chain. The old three-way ternary ended in "...else hitless", so adding Casual
+       silently handed it the Hitless skull-eye - the harshest icon in the game on the gentlest mode.
+       A table cannot do that: a difficulty with no entry is visibly missing rather than wearing
+       someone else's art. */
+    const DIFF_ART={casual:'icons/difficulty-casual.png',normal:'icons/difficulty-normal.png',
+                    hardcore:'icons/event-boss-skull.png',hitless:'icons/difficulty-hitless.png'};
+    const art=DIFF_ART[id]||'icons/class-warrior.png';
     const desc=(open?D.blurb:'Beat '+DIFFS[id==='hardcore'?'normal':'hardcore'].name+' to unlock')+(open?`<br><span class="navmeta">${mv.gold||0}g · zone ${(mv.zoneMax||0)+1}/${ZONES.length}</span>`:'')+(beat?' <span class="navdone">✓ BEATEN</span>':'');
     return navCard('',art,open?D.name:'Locked',desc,`diffcard diff-${id}${open?'':' lock'}`,open?`data-d="${id}"`:'disabled'); }).join('');
   showOverlayHTML(`<div class="card"><h2 class="ovh">Choose Your Difficulty</h2><p class="ovsub">Each difficulty keeps its own save.</p>
@@ -14605,6 +14611,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   abandonTrial, restoreBank, bankNow,   /* exported so the harness can test trial ABORT, which is where A2 lived */
+  openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */
   openKeybinds, keyAction, KEYACTIONS, ensureKeybinds, rebuildKeyLookup, defaultKeybinds, keyLabel, pollGamepad,
   startBossRush, loadBossRushArena, bossRushTick, bossRushWin, bossRushDie, BOSS_RUSH_SEQ, openGauntletGate, openRecords,

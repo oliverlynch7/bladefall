@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.540.0-collision';
+const VERSION3D='1.541.0-roads';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6485,6 +6485,19 @@ function normalizeCollision(){
     if(top <= 8) continue;                       // ground banding: walk over it
     const w = Math.max(8, (d.w||20) * f), dd = Math.max(8, ((d.d||d.w)||20) * f);
     if(covered(d, w/2, dd/2)) continue;          // a hand-written collider already owns this spot
+    /* NEVER WALL OFF A ROAD. Measured after shipping this: 27 of the 81 auto-colliders in The
+       Outskirts land on a path segment. Almost all are 8x8 lamp posts, which are bollards you walk
+       around and exactly right - but a WIDE box across a road is a blocked route, and a route the
+       generator intended is not something a derived rule gets to veto. Narrow props keep their
+       collision on roads; anything broad enough to matter yields to the path. */
+    if(w > 60 || dd > 60){
+      let onRoad = false;
+      for(const sg of (G.segments||[])){
+        if(!sg.path) continue;
+        if(Math.abs(d.x-sg.x) < sg.w/2 + w/2 && Math.abs(d.z-sg.z) < sg.d/2 + dd/2){ onRoad = true; break; }
+      }
+      if(onRoad) continue;
+    }
     const box = { x:d.x, z:d.z, w, d:dd, h:top, kind:'plat', autoCol:true };
     G.obstacles.push(box); solid.push(box); added++;
   }

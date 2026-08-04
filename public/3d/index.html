@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.760.0-topology';
+const VERSION3D='1.770.0-zoneshapes';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6478,11 +6478,109 @@ const ZONE_VOCAB = {
 
    Deliberately not a maze. One decision, made once, that you can see the shape of - which is what a
    level this length can carry without becoming a chore to cross. */
+/* WHICH SHAPE EACH ZONE IS. The flanking route fixed "corridor" for every zone by giving them all
+   the SAME new shape - which fixes the aspect ratio and leaves "similar to one another" exactly
+   where it was. A zone should navigate like itself.
+     outskirts  SPRAWL   - open country. You pick your order; nothing forces a line.
+     hollow     FLANK    - a canyon splits and rejoins. The original, and right for a canyon.
+     keep       SPOKES   - a holding has a courtyard you keep returning to.
+     frost      TIERS    - climb the glacier in shelves; the route doubles back above itself.
+     ember      ISLANDS  - basalt in a lava sea. The gaps ARE the level.
+     abyss      TIERS    - descend in ledges rather than walk along.
+     palace     SPOKES   - a gallery with chambers off it.
+     castle     ISLANDS  - broken battlements you cross in pieces. */
+const ZONE_TOPOLOGY = { outskirts:'sprawl', hollow:'flank', keep:'spokes', frost:'tiers',
+                        ember:'islands', abyss:'tiers', palace:'spokes', castle:'islands' };
+
 function zoneTopology(zid, rnd){
   if(!G || !G.rooms) return 0;
   const R = () => (rnd ? rnd() : Math.random());
   const rooms = (G.rooms||[]).filter(r => r && r.w).slice().sort((a,b) => b.z - a.z);   // entry first
   if(rooms.length < 4) return 0;
+  const shape = ZONE_TOPOLOGY[zid] || 'flank';
+
+  /* SPRAWL - rooms hung off BOTH sides of the route so no single line covers them. Open country
+     where you choose an order rather than a queue you advance through. */
+  if(shape === 'sprawl'){
+    let n = 0;
+    for(let i = 1; i < rooms.length - 1; i += 2){
+      const r = rooms[i], side = (i % 4 === 1) ? -1 : 1;
+      const off = 900 + R()*420;
+      const x = r.x + side*off, z = r.z + (R()-0.5)*420;
+      const w = 520 + R()*180, d = 480 + R()*160;
+      vseg(x, z, w, d, {district:'sprawl'});
+      G.rooms.push({ x, z, w, d, monsters:[], encounter:false, cleared:true, spur:true });
+      vseg((x + r.x)/2, (z + r.z)/2, Math.abs(x-r.x)+150, 150, {path:true});   // a track back to the road
+      if(R() < 0.5) G.chests.push(chestMaybeMimic({x, z, y:0, opened:false, bob:0}, rnd||Math.random));
+      n++;
+    }
+    return n;
+  }
+
+  /* SPOKES - one courtyard you keep coming back to, with chambers around it. A holding has a
+     centre; a corridor does not. */
+  if(shape === 'spokes'){
+    const mid = rooms[Math.floor(rooms.length/2)];
+    const cw = 900, cd = 820;
+    vseg(mid.x, mid.z, cw, cd, {district:'court'});
+    G.rooms.push({ x:mid.x, z:mid.z, w:cw, d:cd, monsters:[], encounter:false, cleared:true, court:true });
+    for(let k = 0; k < 3; k++){
+      const a = (k/3)*6.283 + R()*0.6, rr = 900 + R()*200;
+      const x = mid.x + Math.cos(a)*rr, z = mid.z + Math.sin(a)*rr;
+      const w = 480 + R()*140, d = 440 + R()*140;
+      vseg(x, z, w, d, {district:'wing'});
+      G.rooms.push({ x, z, w, d, monsters:[], encounter:false, cleared:true, spur:true });
+      vseg((x+mid.x)/2, (z+mid.z)/2, Math.abs(x-mid.x)+140, Math.abs(z-mid.z)+140, {path:true});
+      if(k === 1) G.chests.push(chestMaybeMimic({x, z, y:0, opened:false, bob:0}, rnd||Math.random));
+    }
+    return 4;
+  }
+
+  /* TIERS - the route stacks above itself. You climb, and later look down on where you were, which
+     is the cheapest way to make a level feel like a place with a shape. */
+  if(shape === 'tiers'){
+    let n = 0;
+    for(let k = 1; k <= 3; k++){
+      const r = rooms[Math.min(rooms.length-1, Math.floor(rooms.length*(0.25*k)))];
+      if(!r) continue;
+      const y = 150*k, side = (k%2) ? -1 : 1;
+      const x = r.x + side*520, z = r.z - 160;
+      const w = 560, d = 500;
+      vplat(x, z, y, w, d, {terrace:true, tier:true});
+      G.rooms.push({ x, z, w, d, y, monsters:[], encounter:false, cleared:true, spur:true });
+      climbRun(r.x + side*r.w*0.35, r.z, 150*(k-1), x, z + d*0.4, y, 76);
+      if(k === 2) G.chests.push(chestMaybeMimic({x, z, y, opened:false, bob:0}, rnd||Math.random));
+      n++;
+    }
+    return n;
+  }
+
+  /* ISLANDS - separated ground with gaps between. The gaps are the level: crossing is the verb,
+     and falling is the cost. */
+  if(shape === 'islands'){
+    let n = 0;
+    for(let i = 1; i < rooms.length - 1; i++){
+      const r = rooms[i], side = (i%2) ? -1 : 1;
+      const x = r.x + side*(660 + R()*180), z = r.z - 120 + R()*240;
+      const y = 60 + R()*90;
+      vplat(x, z, y, 380 + R()*140, 360 + R()*120, {terrace:true, island:true});
+      G.rooms.push({ x, z, w:380, d:360, y, monsters:[], encounter:false, cleared:true, spur:true });
+      /* Stepping stones rather than a ramp - the crossing has to be a jump or it is just a path.
+         SPACED BY THE PLAYER'S ACTUAL REACH, not by a convenient fraction. Two stones across a
+         660-unit gap is 220 per hop against a jump of ~150, which measured as a 276-unit worst case
+         and put a chest on an island nobody could reach. The count is derived from the distance so
+         it stays honest however far the island lands. */
+      const gap = Math.hypot(x - r.x, z - r.z);
+      const hops = Math.max(2, Math.ceil(gap / 135));      // <=135 per hop, comfortably inside reach
+      for(let k = 1; k < hops; k++){
+        const t = k / hops;
+        vplat(r.x + (x-r.x)*t, r.z + (z-r.z)*t, y*t + 30, 130, 130, {stone:true});
+      }
+      if(i === 2) G.chests.push(chestMaybeMimic({x, z, y, opened:false, bob:0}, rnd||Math.random));
+      n++;
+    }
+    return n;
+  }
 
   const a = rooms[Math.floor(rooms.length*0.30)];       // peel off here
   const b = rooms[Math.floor(rooms.length*0.72)];       // rejoin here

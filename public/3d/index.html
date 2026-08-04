@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.570.0-classes11';
+const VERSION3D='1.580.0-classes16';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7427,6 +7427,22 @@ SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
 function useSkill(i){
+  /* THE BEASTMASTER'S COMPANION TAKES YOUR SKILL INPUTS. Press a skill and the pet commits too -
+     it lunges at whatever you are aiming at and its own attack comes off cooldown at once. You are
+     playing two characters, which is the class: every skill is also an order.
+     Deliberately not a damage number. The pet was already "+25% HP and +15% damage", which is the
+     exact stat-reskin this rewrite exists to remove. */
+  try {
+    if(meta.classId==='beastmaster' && G && G.pet && !G.pet.dead){
+      const tgt = (typeof aimTarget==='function') ? aimTarget() : null;
+      if(tgt){
+        G.pet.orderX = tgt.x; G.pet.orderZ = tgt.z; G.pet.orderT = 3.5;
+        G.pet.atkCd = 0;
+        addText(G.pet.x, (G.pet.y||0)+34, G.pet.z, 'SIC EM', '#7ec46a');
+      }
+    }
+  } catch(err){}
+
   if(mode!=='play'||!G) return; const p=G.p; if(p.dead||p.downed) return;
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
@@ -7719,6 +7735,13 @@ function killEnemy(e,weaponKill){
   /* The Warlock's bargain settles on a KILL: every sliver of health its basic attacks spent comes
      back at once. A round going well costs nothing, a round going badly compounds - which is the
      whole point of the class and was previously just a description. */
+  /* The Pirate reloads on a KILL - the pistol is a resource you earn by finishing things. */
+  try {
+    if(meta.classId==='pirate' && G && G.p && !G.p._loaded){
+      G.p._loaded = true;
+      addText(G.p.x, G.p.y + 44, G.p.z, 'RELOADED', '#ffd24a');
+    }
+  } catch(err){}
   try {
     if(meta.classId==='warlock' && G && G.p && (G.p._bloodOwed||0) > 0){
       G.p.hp = Math.min(effMaxHp(G.p), G.p.hp + G.p._bloodOwed);
@@ -7979,6 +8002,23 @@ const CLASS_BASIC = {
     return dmg * k;
   },
 
+  /* POWDER AND STEEL. Oliver's design: the flintlock is not loot, it is the class. It is always
+     loaded and it OVERRIDES either your basic attack or your charge - your choice, in the pause
+     menu - so a Pirate is the only character carrying two weapons and the choice of which hand the
+     pistol occupies is the whole build.
+     It reloads ON A KILL rather than on a timer, which is what stops "always equipped" from meaning
+     "always available": a round going well snowballs, a round going badly leaves you on the sword.
+     Here in the basic hook it fires when the pistol is set to BASIC; the CHARGE configuration is
+     handled by chargeRelease. */
+  pirate(p, e, dmg){
+    if((meta.pirateSlot||'basic') !== 'basic') return;
+    if(!p._loaded && p._loaded !== undefined) return;      // spent: you are swinging steel
+    p._loaded = false;
+    addText(e.x, e.y + e.h + 18, e.z, 'BANG', '#ffd24a');
+    try { burst(e.x, e.y + e.h*0.5, e.z, '#ffe9a8', 12); playFx && playFx('shoot'); } catch(err){}
+    return dmg * 2.3;                                      // one heavy shot, then reload on a kill
+  },
+
   /* NO BRAKES. Damage rises as your health falls, hard. A Berserker at a sliver is terrifying and a
      Berserker at full health is ordinary, so the class is played by choosing not to retreat -
      which is the only decision that matters to it. */
@@ -8116,6 +8156,24 @@ function hurtPlayer(dmg,sx,sz,by){
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
   if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
+  /* REWIND. Once per area, a killing blow instead returns you to where you stood three seconds ago,
+     at that moment's health. Not a death save with extra steps: you come back THERE, so the ground
+     you lost is lost, and the three seconds that killed you are the three seconds you have to play
+     differently. The strongest identity on the roster, and it was previously spent on cooldown
+     percentages. */
+  if(p.hp<=0 && meta.classId==='chronomancer' && !G._rewUsed && (p._rew||[]).length){
+    const back = p._rew[0];
+    G._rewUsed = 1;
+    p.x = back.x; p.y = back.y; p.z = back.z;
+    p.hp = Math.max(1, Math.round(back.hp));
+    p.vx = 0; p.vz = 0; p.invuln = Math.max(p.invuln||0, 1.2);
+    p._rew.length = 0;
+    addText(p.x, p.y + 56, p.z, 'REWIND', '#c9a6ff', true);
+    try { burst(p.x, p.y+20, p.z, '#c9a6ff', 18); SFX.magic && SFX.magic('void'); G.slowmo = 0.5; } catch(err){}
+    toast('Three seconds back. Once per area.');
+    hudUpdate();
+    return;
+  }
   if(p.hp<=0){
     if(MP.active && !MP.pvp && MP.anyAllyUp()){ MP.goDown(); return; }   // co-op: go DOWN (revivable) instead of dying while an ally still stands
     p.hp=0; p.dead=true; die();
@@ -9247,6 +9305,18 @@ function update(dt){
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
+  /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood and how much health you had,
+     sampled a few times a second. Recorded for the Chronomancer ONLY - every other class pays
+     nothing for a mechanic it cannot use. */
+  if(meta.classId==='pirate' && G.p._loaded === undefined) G.p._loaded = true;   // you arrive loaded
+  if(meta.classId==='chronomancer' && !G.hub){
+    p._rewT = (p._rewT||0) + dt;
+    if(p._rewT >= 0.25){
+      p._rewT = 0;
+      (p._rew = p._rew || []).push({ x:p.x, y:p.y, z:p.z, hp:p.hp, t:G.time });
+      while(p._rew.length > 14) p._rew.shift();       // 14 samples at 0.25s = 3.5s of history
+    }
+  }
   if(G.time-(G._saveT||0)>8){ G._saveT=G.time; try{autosaveRun();}catch(e){} }   // continuous autosave so a reload/auto-update never loses the dive
   if(meta.secretSense && G.time-(G._ssT||0)>0.1){ G._ssT=G.time; try{secretSenseUpdate();}catch(e){} }   // Abyssal Heart proximity pulse
   if(G.stageBanner>0) G.stageBanner-=dt;

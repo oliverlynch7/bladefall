@@ -261,10 +261,21 @@ Warrior Momentum, Stormcaller Chain, Ranger Distance, plus:
 - **Skylancer — Air.** 0.8x on the ground, 1.5x airborne, and attacking slows your fall so a good
   jump is a whole engagement.
 
-## Remaining, in order
+## All sixteen — DONE (v1.580.0)
 
-1. Chronomancer (rewind), Beastmaster (pet takes skill inputs) and Pirate (flintlock as class
-   equipment) - the three that are NOT basic-attack shaped and need their own systems.
+The last three needed their own systems rather than a callback, which is why they were last:
+
+- **Chronomancer — Rewind.** A killing blow returns you to where you stood three seconds ago at that
+  moment's health, once per area. Not a death save: you come back THERE, so the ground is lost and
+  the three seconds that killed you are the three you must play differently. A 3.5s history ring is
+  sampled four times a second, for the Chronomancer only.
+- **Beastmaster — Every skill is an order.** Pressing a skill sends the companion at whatever you
+  are aiming at and clears its attack cooldown. You are playing two characters, which is the class.
+- **Pirate — Powder and steel.** Oliver's design: the flintlock is class equipment, not loot. Always
+  loaded, overrides your basic OR your charge (`meta.pirateSlot`), reloads on a KILL rather than a
+  timer. The only character carrying two weapons, and which hand holds the pistol is the build.
+
+## Remaining, in order
 2. Strip the flat +8-12% from the fourteen innates and fold into base damage.
 3. Rewrite the passives against the decision-not-a-number rule.
 4. The Pirate's flintlock-as-class-equipment.

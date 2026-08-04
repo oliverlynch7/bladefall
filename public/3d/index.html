@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.710.0-bosses';
+const VERSION3D='1.720.0-telegraph';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10063,6 +10063,10 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
     e.quakeCd=(e.quakeCd==null?4:e.quakeCd)-dt;
     if(e.quakeCd<=0 && dist<650){ e.quakeCd=(6.5+Math.random()*2)*(e.phase>=2?0.6:1);
       const axis=Math.random()<0.5, span=axis?hw:hd;
+      /* Paint the lanes BEFORE they erupt. The rings already arrive staggered, but the first one
+         arrived with no warning at all, so the mechanic taught you by killing you once. */
+      for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
+        (G.trails=G.trails||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:150, life:0.7, max:0.7, dmg:0, hit:0, col:'#ffb060'}); }
       for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
         (G.shockwaves=G.shockwaves||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:14,maxR:180,dmg:e.dmg*1.15,life:0,spd:230,delay:i*0.18,col:'#ffb060',col2:'#c05a1e'}); }
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'QUAKE!','#ffb060',true); }
@@ -10124,11 +10128,26 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     }
   }
   if(e.atkTimer>0) e.atkTimer-=dt; if(e.shootT>0) e.shootT-=dt;
-  if(e.lunge>0){ e.lunge-=dt; e.x+=dirX*eff*2.6*dt; e.z+=dirZ*eff*2.6*dt; }
+  /* BOSSES NOW WIND UP BEFORE THEY LUNGE. Oliver: "I want clear ways to dodge boss attacks, even
+     if it's just a more obvious charge animation, so I have a visual I can use to time my dodge."
+     The telegraph system already existed and bosses never touched it: the wind-up lives in the
+     CHARGER branch, and a boss routes to updateBoss instead, so `e.lunge` fired the same frame the
+     decision was made. There was nothing to react to because there was no wind-up at all - the
+     complaint was exact.
+     The boss PLANTS while winding, which matters as much as the timing: a telegraph you can see but
+     cannot outrun is just a countdown. Standing still gives you the ground to move into. */
+  if(e.windT>0){
+    e.windT-=dt; e.windMax=e.windMax||0.85; e.teleX=dirX; e.teleZ=dirZ;
+    if(e.windT<=0){ e.lunge=0.45; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
+  }
+  else if(e.lunge>0){ e.lunge-=dt; e.x+=dirX*eff*2.6*dt; e.z+=dirZ*eff*2.6*dt; }
   else {
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
-    if(!e.kite && dist<240 && e.atkTimer<=0){ e.lunge=0.45; e.atkTimer=1.8; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
+    if(!e.kite && dist<240 && e.atkTimer<=0){
+      e.windT=0.85; e.windMax=0.85; e.teleX=dirX; e.teleZ=dirZ; e.atkTimer=2.3;
+      addText(e.x,e.y+e.h+14,e.z,'!','#ff5a3a',true);
+    }
   }
   if(e.type==='brute'){                                    // ground-slam shockwave (non-projectile — jump the ring to avoid it)
     if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
@@ -15064,10 +15083,23 @@ function render(t){
     }
     if(e.windT>0){                                     // TELEGRAPH: an unmistakable wind-up you can dodge on reaction
       const prog=1-(e.windT/(e.windMax||0.55)), flash=0.5+0.5*Math.sin(t*34);   // fast flash + a bar that fills toward the strike
-      const tx=e.teleX||0, tz=e.teleZ||1, reach=90+prog*230;
+      /* A BOSS TELEGRAPHS TWICE AS LOUDLY. The same cue that reads clearly on a jackal is lost
+         against something eight times its size, so the markers, the aura and the reach all scale
+         with the thing making them. */
+      const BW=e.boss?2.1:1;
+      const tx=e.teleX||0, tz=e.teleZ||1, reach=(90+prog*230)*(e.boss?1.5:1);
       for(let s=0.15;s<1;s+=0.12){ const gx=e.x+tx*reach*s, gz=e.z+tz*reach*s;   // ground danger-line pointing where it will ram
-        bx(gx,1.5,gz, 20,3,20, '#ff2a1a','#ff5a3a', (0.2+prog*0.5)*flash); }
+        bx(gx,1.5,gz, 20*BW,3,20*BW, '#ff2a1a','#ff5a3a', (0.2+prog*0.5)*flash); }
       bx(e.x,e.y+e.h*0.55,e.z, e.r*2*(1.25+prog*0.4),e.h*(1.1+prog*0.35),e.r*2*(1.25+prog*0.4), '#ff3020','#ff6040', (0.15+prog*0.28)*flash);   // swelling red aura
+      if(e.boss){
+        /* A RING ON THE FLOOR that closes as the strike approaches - readable from any camera angle,
+           unlike a lean, and it tells you HOW LONG you have rather than merely that something is
+           coming. */
+        const rr=e.r*(5.5-prog*3.2);
+        for(let a=0;a<12;a++){ const an=a/12*6.283;
+          bx(e.x+Math.cos(an)*rr,1.6,e.z+Math.sin(an)*rr, 16,3,16, '#ff2a1a','#ff8a5a', (0.28+prog*0.55)*flash); }
+        bx(e.x,e.y+e.h+26,e.z, 10+prog*26,7,7, '#ff3020','#ffb060', 0.5+0.4*flash);   // a bar over its head, filling
+      }
     }
     if(e.markT>0){ const mf=0.7+0.3*Math.sin(t*7); bx(e.x,e.y+e.h+20+Math.sin(t*3)*3,e.z, 6,6,6,'#ffd24a','#ffb020',mf); }
     if(e.elite&&!e.dead){ const ef=0.6+0.4*Math.sin(t*3.2), ey=e.y+e.h+11;   // elite crown: read the threat before it reaches you

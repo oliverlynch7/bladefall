@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.750.0-verticality';
+const VERSION3D='1.760.0-topology';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5699,7 +5699,8 @@ function loadStageRaw(i){
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
-    zoneFlavour(curZone().id, srnd); addVerticality(srnd); highGround(srnd); snapWorldInteractables(); return;
+    zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
+    addVerticality(srnd); highGround(srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6461,6 +6462,55 @@ const ZONE_VOCAB = {
   castle:   [['fence',10,{w:30,h:32,d:12,c:'#3a3540'}], ['grave',8,{w:18,h:36,d:12,c:'#7a7480'}],
              ['pillar',6,{w:24,h:120,d:24,c:'#4a4450'}]],
 };
+/* ── TOPOLOGY ───────────────────────────────────────────────────────────────
+   tools/zoneshape.js measured what the props and verticality passes could not: Hollow, Frost and
+   Ember are within 5% of each other on BOTH axes - about 950 wide by 4300 long, a 3.5:1 hallway -
+   and none of them loops. They navigate identically because they ARE identical in shape. Decoration
+   was never going to fix that.
+
+   THE FLANKING ROUTE. Halfway along the corridor a second path peels off, runs parallel, and
+   rejoins further on. It costs three things at once, which is why it is the first structural change
+   worth making:
+     - the level gets WIDER, so the aspect drops out of hallway territory
+     - it LOOPS, so you can come back a different way and the space reads as a place
+     - it is a CHOICE, and one with a character: the flank is longer, higher and holds the reward,
+       while the main road is short and defended.
+
+   Deliberately not a maze. One decision, made once, that you can see the shape of - which is what a
+   level this length can carry without becoming a chore to cross. */
+function zoneTopology(zid, rnd){
+  if(!G || !G.rooms) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  const rooms = (G.rooms||[]).filter(r => r && r.w).slice().sort((a,b) => b.z - a.z);   // entry first
+  if(rooms.length < 4) return 0;
+
+  const a = rooms[Math.floor(rooms.length*0.30)];       // peel off here
+  const b = rooms[Math.floor(rooms.length*0.72)];       // rejoin here
+  if(!a || !b || a === b) return 0;
+
+  const side = (R() < 0.5 ? -1 : 1);
+  const off  = 760 + R()*260;                            // how far out the flank swings
+  const midZ = (a.z + b.z) / 2;
+  const fx   = ((a.x + b.x)/2) + side*off;
+
+  /* The flank's own room: raised, so taking the long way also means taking the high way. */
+  const fw = 620, fd = 560, fy = 120;
+  vplat(fx, midZ, fy, fw, fd, {terrace:true, flank:true});
+  G.rooms.push({ x:fx, z:midZ, w:fw, d:fd, y:fy, monsters:[], encounter:false, cleared:true, flank:true });
+
+  /* Ramps at both ends so it is reachable without hunting, and so it genuinely REJOINS rather than
+     being a dead-end spur wearing a loop's clothes. */
+  climbRun(a.x + side*a.w*0.4, a.z, 0, fx, midZ + fd*0.4, fy, 74);
+  climbRun(fx, midZ - fd*0.4, fy, b.x + side*b.w*0.4, b.z, 0, 74);
+
+  /* The reward for the long way. The short road stays viable - this is a choice, not a toll. */
+  G.chests.push(chestMaybeMimic({ x:fx, z:midZ, y:fy, opened:false, bob:0 }, rnd || Math.random));
+  vcol(fx, midZ + 120, 20, 20, fy + 60);
+  G.deco.push({ x:fx, z:midZ + 120, y0:fy + 60, w:32, h:13, d:32, c:'#ffb34d' });
+  G.deco.push({ x:fx, z:midZ + 120, y0:fy + 71, w:12, h:66, d:12, c:'#fff0a0' });
+  return 1;
+}
+
 /* ── VERTICALITY ────────────────────────────────────────────────────────────
    The measurement that forced this: after excluding E1's invisible colliders, THE OUTSKIRTS HAS ONE
    platform you can fight on above ground level. Twelve rooms, one. Hollow has six, Frostfell four.

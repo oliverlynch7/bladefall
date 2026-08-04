@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.580.0-classes16';
+const VERSION3D='1.585.0-weaponmatrix';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1863,7 +1863,7 @@ const CLASSES={
       {id:'stomp',n:'Shockwave Stomp',icon:skillIcon('stomp'),cd:8,rank:2,d:'Slam the ground: damage + heavy knockback all around'},
       {id:'wcharge',n:'Charge',icon:skillIcon('charge'),cd:14,rank:4,d:'Rush forward, damaging and stunning enemies in your path'},
       {id:'berserk',n:'Berserk',icon:skillIcon('berserk'),cd:24,rank:7,d:'+35% damage and attack speed for 6s'}]},
-  ranger:{disp:'Ranger',icon:classIcon('ranger'),attackStyle:'ranger',family:['bow','cross','dagger','javelin','flintlock'],
+  ranger:{disp:'Ranger',icon:classIcon('ranger'),attackStyle:'ranger',family:['bow','cross','dagger','javelin'],
     subs:[{id:'sniper',disp:'Sniper',blurb:'+15% ranged damage (rank 10: +25%). One shot, one kill.'},
           {id:'assassin',disp:'Assassin',blurb:'The blade: +10% move speed (rank 10 +18%), plus a burst kit — Shadowstrike, Smoke Bomb, Death Mark.',skills:[{id:'shadowstrike',n:'Shadowstrike',icon:skillIcon('ranger-quickshot'),cd:8,rank:2,d:'Blink to the nearest enemy and strike for 3.2x damage'},{id:'smokebomb',n:'Smoke Bomb',icon:skillIcon('ranger-camouflage'),cd:14,rank:4,d:'Vanish (briefly invulnerable) and slow everything around you'},{id:'deathmark',n:'Death Mark',icon:skillIcon('ranger-rapid-fire'),cd:24,rank:7,d:'Mark nearby enemies — they explode when they die'}]}],
     skills:[
@@ -1887,9 +1887,10 @@ const CLASSES={
       {id:'harvest',n:'Soul Harvest',icon:skillIcon('reaper-soul-siphon'),cd:8,rank:2,d:'Tear souls from everything near you and heal'},
       {id:'shadowstep',n:'Shadowstep',icon:skillIcon('reaper-shadow-step'),cd:14,rank:4,d:'Melt into shadow and reappear ahead, briefly untouchable'},
       {id:'deathsdoor',n:'Death’s Door',icon:skillIcon('reaper-gravebind'),cd:24,rank:7,d:'Mark every nearby enemy for death: heavy damage over 4s'}]},
-  /* C4 Paladin: MAGIC + WARRIOR. It had the warrior line plus spellblade only, which is a warrior
-     with one exception rather than the hybrid it is meant to be. */
-  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','spellblade','staff','wand','tome','orb'],
+  /* Paladin: sword, hammer, spellblade. Knightly arms and a blessed blade - not the greatsword or
+     the axe, which are butcher's tools, and not the full magic line, which would make him a mage in
+     plate. Three types, like every earned class. */
+  paladin:{disp:'Paladin',icon:classIcon('paladin'),attackStyle:'warrior',earned:true,family:['sword','hammer','spellblade'],
     subs:[{id:'guardian',disp:'Guardian',blurb:'The holy wall — survival, shields, and retaliation.'},
           {id:'templar',disp:'Templar',blurb:'Holy wrath — smites, radiant bursts, and burning light.'}],
     skills:[
@@ -1897,7 +1898,7 @@ const CLASSES={
       {id:'pal_taunt',n:'Taunt',icon:skillIcon('paladin-taunt'),cd:9,rank:2,d:'Pull nearby foes to you behind a shield'},
       {id:'pal_guard',n:'Guard Up',icon:skillIcon('paladin-guard-up'),cd:14,rank:4,d:'Raise a holy shield that absorbs damage'},
       {id:'pal_laststand',n:'Last Stand',icon:skillIcon('paladin-last-stand'),cd:24,rank:7,d:'Stand firm: take almost no damage and heal'}]},
-  necromancer:{disp:'Necromancer',icon:classIcon('necromancer'),attackStyle:'mage',earned:true,family:['staff','wand','spellblade'],
+  necromancer:{disp:'Necromancer',icon:classIcon('necromancer'),attackStyle:'mage',earned:true,family:['staff','wand'],
     subs:[{id:'summoner',disp:'Summoner',blurb:'Command the dead — more and stronger minions.'},
           {id:'plague',disp:'Plague',blurb:'Rot and drain — damage over time and life theft.'}],
     skills:[
@@ -1905,7 +1906,7 @@ const CLASSES={
       {id:'necro_raise',n:'Raise the Dead',icon:skillIcon('necro-raise-the-dead'),cd:12,rank:2,d:'Turn a fresh corpse into a stronger risen fighter'},
       {id:'necro_wall',n:'Bone Wall',icon:skillIcon('necro-bone-wall'),cd:14,rank:4,d:'Raise a shield of bone that absorbs damage'},
       {id:'necro_army',n:'Army of the Dead',icon:skillIcon('necro-army-of-the-dead'),cd:24,rank:7,d:'Call up a whole undead host at once'}]},
-  ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer','dagger','bow','cross','javelin','flintlock'],
+  ninja:{disp:'Ninja',icon:classIcon('ninja'),attackStyle:'warrior',earned:true,family:['dagger','sword','cross'],
     subs:[{id:'shadow',disp:'Shadow',blurb:'Evasion and stealth — strike unseen, slip away.'},
           {id:'bladefury',disp:'Blade Fury',blurb:'Speed and crits — a whirlwind of steel.'}],
     skills:[
@@ -1913,17 +1914,17 @@ const CLASSES={
       {id:'nin_step',n:'Shadow Step',icon:skillIcon('ninja-shadow-step'),cd:8,rank:2,d:'Dash through shadow, briefly untouchable'},
       {id:'nin_mark',n:'Death Mark',icon:skillIcon('ninja-death-mark'),cd:14,rank:4,d:'Mark a target to take extra damage'},
       {id:'nin_fury',n:'Blade Fury',icon:skillIcon('ninja-blade-fury'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
-  berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['sword','great','axe','hammer'],
+  berserker:{disp:'Berserker',icon:classIcon('berserker'),attackStyle:'warrior',earned:true,family:['great','axe','hammer'],
     subs:[{id:'fury',disp:'Fury',blurb:'Raw damage — hit like a landslide.'},{id:'blood',disp:'Blood',blurb:'Rage and lifesteal — the angrier, the stronger.'}],
     skills:[
       {id:'bsk_cleave',n:'Cleave',icon:skillIcon('berserker-cleave'),cd:5,rank:1,d:'A broad sweeping strike'},
       {id:'bsk_charge',n:'Charge',icon:skillIcon('berserker-charge'),cd:8,rank:2,d:'Rush forward, stunning enemies'},
       {id:'bsk_whirl',n:'Whirlwind',icon:skillIcon('berserker-whirlwind'),cd:14,rank:4,d:'Spin, hitting everything around you'},
       {id:'bsk_berserk',n:'Berserk',icon:skillIcon('berserker-berserk'),cd:24,rank:7,d:'+damage and attack speed for a few seconds'}]},
-  /* C4 Pirate: the flintlock was effectively its ONLY on-class weapon, so a pirate who had not
-     found one was playing at a permanent penalty. Warrior weapons join it - a pirate with a cutlass
-     and an axe is not a stretch. */
-  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['flintlock','cross','bow','sword','javelin','great','axe','hammer','dagger'],
+  /* Pirate: cutlass, boarding crossbow, boarding pike. NO FLINTLOCK - the pistol is class equipment
+     now, always in his off hand, so listing it as loot would mean finding something you already
+     have. This is the change that C4 was groping toward. */
+  pirate:{disp:'Pirate',icon:classIcon('pirate'),attackStyle:'ranger',earned:true,family:['sword','cross','javelin'],
     subs:[{id:'gunner',disp:'Gunner',blurb:'Powder and lead — deadly at range.'},{id:'swashbuckler',disp:'Swashbuckler',blurb:'Cutlass and swagger — fast and slippery.'}],
     skills:[
       {id:'pir_pierce',n:'Aimed Shot',icon:skillIcon('pirate-aimed-shot'),cd:5,rank:1,d:'A precise, piercing shot'},
@@ -1945,7 +1946,7 @@ const CLASSES={
       {id:'mon_deflect',n:'Deflect',icon:skillIcon('monk-deflect'),cd:9,rank:2,d:'A parry stance: brace and throw blows back'},
       {id:'mon_whirl',n:'Whirl Kick',icon:skillIcon('monk-whirl-kick'),cd:12,rank:4,d:'Spin, striking everything around you'},
       {id:'mon_thousand',n:'Thousand Fists',icon:skillIcon('monk-thousand-fists'),cd:24,rank:7,d:'Enter a blinding assault: more damage and speed'}]},
-  stormcaller:{disp:'Stormcaller',icon:classIcon('stormcaller'),attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand','spellblade'],
+  stormcaller:{disp:'Stormcaller',icon:classIcon('stormcaller'),attackStyle:'mage',earned:true,shopUnlock:true,charter:9000,family:['staff','wand'],
     subs:[{id:'tempest',disp:'Tempest',blurb:'Chain lightning and storms — spread the shock.'},
           {id:'current',disp:'Current',blurb:'Static speed — the longer you fight, the faster you strike.'}],
     skills:[
@@ -1953,7 +1954,7 @@ const CLASSES={
       {id:'st_nova',n:'Static Field',icon:skillIcon('stormcaller-static-field'),cd:8,rank:2,d:'A shock burst that slows nearby foes'},
       {id:'st_orb',n:'Ball Lightning',icon:skillIcon('stormcaller-ball-lightning'),cd:12,rank:4,d:'A crackling orb that pulls and zaps'},
       {id:'st_storm',n:'Thunderstorm',icon:skillIcon('stormcaller-thunderstorm'),cd:24,rank:7,d:'A storm of lightning rages around you'}]},
-  warlock:{disp:'Warlock',icon:classIcon('warlock'),attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','wand','spellblade','dagger'],
+  warlock:{disp:'Warlock',icon:classIcon('warlock'),attackStyle:'mage',earned:true,shopUnlock:true,charter:12500,family:['staff','dagger'],
     subs:[{id:'blood',disp:'Blood Pact',blurb:'Trade safety for brutal spell damage.'},
           {id:'curse',disp:'Curse Weaver',blurb:'Mark, drain, and control enemies from the shadows.'}],
     skills:[
@@ -1969,7 +1970,7 @@ const CLASSES={
       {id:'sky_dive',n:'Dive Strike',icon:skillIcon('skylancer-dive-strike'),cd:10,rank:4,d:'Dive forward and burst when you hit the ground'},
       {id:'sky_dash',n:'Sky Dash',icon:skillIcon('skylancer-sky-dash'),cd:11,rank:6,d:'Dash through the air and cut enemies in your path'},
       {id:'sky_crash',n:'Thunder Dive',icon:skillIcon('skylancer-thunder-dive'),cd:22,rank:8,d:'Fall like lightning and blast a wide landing zone'}]},
-  bladedancer:{disp:'Bladedancer',icon:classIcon('bladedancer'),attackStyle:'melee',earned:true,shopUnlock:true,charter:14500,family:['sword','dagger','spellblade'],
+  bladedancer:{disp:'Bladedancer',icon:classIcon('bladedancer'),attackStyle:'melee',earned:true,shopUnlock:true,charter:14500,family:['sword','dagger'],
     subs:[{id:'counter',disp:'Counter Dancer',blurb:'Read attacks, parry them, and answer with crushing ripostes.'},
           {id:'tempo',disp:'Blade Waltz',blurb:'Chain fast cuts and movement into a relentless dance.'}],
     skills:[
@@ -1977,7 +1978,7 @@ const CLASSES={
       {id:'bd_riposte',n:'Riposte',icon:skillIcon('bladedancer-riposte'),cd:9,rank:4,d:'A powerful counter slash, stronger after a parry'},
       {id:'bd_mirror',n:'Mirror Guard',icon:skillIcon('bladedancer-mirror-guard'),cd:14,rank:6,d:'Parry and send the force back around you'},
       {id:'bd_steel',n:'Dance of Steel',icon:skillIcon('bladedancer-dance-of-steel'),cd:22,rank:8,d:'A fast series of cuts through nearby enemies'}]},
-  beastmaster:{disp:'Beastmaster',icon:classIcon('beastmaster'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin','axe'],
+  beastmaster:{disp:'Beastmaster',icon:classIcon('beastmaster'),attackStyle:'ranger',earned:true,shopUnlock:true,charter:11000,family:['bow','javelin'],
     subs:[{id:'handler',disp:'Master Handler',blurb:'Fast, efficient commands and constant repositioning.'},
           {id:'alpha',disp:'Alpha Warden',blurb:'Turn your bonded companion into a devastating frontline ally.'}],
     skills:[

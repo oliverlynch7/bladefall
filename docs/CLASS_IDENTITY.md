@@ -279,3 +279,43 @@ The last three needed their own systems rather than a callback, which is why the
 2. Strip the flat +8-12% from the fourteen innates and fold into base damage.
 3. Rewrite the passives against the decision-not-a-number rule.
 4. The Pirate's flintlock-as-class-equipment.
+
+
+---
+
+# The weapon matrix, rebuilt around identity
+
+Assigned ad hoc before, and C4 made it worse: I widened the Pirate and the Paladin to fix a symptom
+and ended up with two EARNED classes holding nine weapon types each - the widest access in the game
+going to the hardest classes to unlock, which undercuts the three you start with.
+
+## The rule
+
+**Core classes are generalists. Earned classes are specialists.** You trade breadth for identity, so
+unlocking a class means committing to a way of fighting rather than collecting more options. Core
+tops out at four types; earned tops out at three.
+
+| class | types | why |
+|---|---|---|
+| Warrior | sword great axe hammer | the melee generalist; the one you learn on |
+| Ranger | bow cross dagger javelin | its identity is DISTANCE, so everything reaches |
+| Mage | staff wand spellblade | the caster generalist |
+| Berserker | great axe hammer | no sword. Heavy commitment, no finesse |
+| Paladin | sword hammer spellblade | knightly arms and a blessed blade - not butcher's tools, not a mage in plate |
+| Ninja | dagger sword cross | was NINE. A ninja with a warhammer is absurd |
+| Pirate | sword cross javelin | cutlass and boarding weapons. NO flintlock - see below |
+| Monk | fist | the class is the fists |
+| Necromancer | staff wand | not a duelist; the corpses do the fighting |
+| Stormcaller | staff wand | ranged lightning; no melee blade |
+| Warlock | staff dagger | blood magic is close work |
+| Chronomancer | staff wand spellblade | the most conventional caster, fitting for a control class |
+| Skylancer | javelin bow | airborne reach |
+| Bladedancer | sword dagger | pure blades - its trait literally reads "blade weapons" |
+| Beastmaster | bow javelin | it fights THROUGH the companion, so its own arms stay light |
+| Reaper | scythe | one weapon, and the class is built on it |
+
+## The Pirate's flintlock is gone from the list, deliberately
+
+The pistol is class equipment now - always in his off hand. Listing it as loot would mean finding
+something you already have, and it was the reason C4 existed at all. That entry has now been removed
+rather than compensated for.

@@ -59,3 +59,67 @@ Then the remaining gap is Finding 1: the shared basic attack. Options, cheapest 
 
 NOT STARTED. This is a balance change across sixteen classes and Oliver's game to direct - the
 measurement is the deliverable here, because it changes what the work is.
+
+---
+
+# The rewrite — design, 2026-08-03
+
+Oliver gave creative liberty here. The rule I am designing to: **a class's identity should be
+something you can describe without using a number.** "Deals more damage" is not an identity.
+"Kills leave corpses you can raise" is.
+
+Each class below gets ONE sentence that is true only of it, and that changes how you play rather
+than how big the numbers are. The flat +8-12% comes off all fourteen and folds into base damage, so
+difficulty does not move.
+
+## Warrior core
+
+- **Warrior** — *Momentum.* Consecutive hits on the same target build a stack; at three, your next
+  hit staggers. Rewards committing to one enemy instead of spreading damage.
+- **Berserker** — *No brakes.* You cannot heal above half HP by any means, but every point below
+  half is damage. The class plays at a health total it refuses to let you fix.
+- **Paladin** — *Oath.* Mark one enemy; while it lives you take less from everything else. Punishes
+  target-swapping, rewards picking the right threat.
+- **Ninja** — *Unseen.* Standing still for 1s makes your next attack come from behind the target.
+  A melee class with a repositioning tool built into its basic attack.
+- **Monk** — *Flow.* Every attack that connects shortens your next dodge's cooldown. The only class
+  that gets more mobile the more it fights.
+
+## Mage core
+
+- **Mage** — *Overcharge.* Holding the attack past full charge spends mana for a bigger hit. The
+  only class where the basic attack has a resource decision in it.
+- **Necromancer** — *Corpses.* Already the identity; keep it and make corpses persist across rooms.
+- **Stormcaller** — *Chain.* Basic attacks arc to a second target at reduced damage. Keep the Static
+  stacks; the chaining is what makes it read as lightning at a glance.
+- **Warlock** — *Blood price.* Already has it (skills cost HP). Sharpen: the HP is spent up front
+  and returned on kill, so a fight going well costs nothing and a fight going badly compounds.
+- **Chronomancer** — *Rewind.* Once per room, return to where you stood three seconds ago at that
+  moment's HP. The strongest identity on the roster and currently spent on cooldown percentages.
+
+## Ranger core
+
+- **Ranger** — *Distance.* Damage scales with how far the target is, not a flat bonus. Makes the
+  class about maintaining spacing, which is what a ranger IS.
+- **Pirate** — *Powder.* The flintlock reloads on kill rather than on a timer. Turns a slow gun into
+  a snowball and makes the Pirate's good rounds feel completely different from its bad ones.
+- **Skylancer** — *Air.* Damage while airborne, and attacks extend hang time. Already close; commit
+  fully - it should be unplayable on the ground and dominant off it.
+- **Beastmaster** — *The pet is the class.* Your companion takes your skill inputs. You are playing
+  two characters badly or one very well.
+
+## Standalone
+
+- **Reaper** — *Soul Hunger* is fine. Untouched.
+- **Bladedancer** — *Perfect Timing* is fine. Untouched.
+
+## Then: per-class basic attacks
+
+The remaining stat-reskin is five classes sharing one swing. The cheap version is per-class swing
+timing and reach off the existing styles; the real version is a basic-attack modifier hook, which
+is where the designs above (chain, overcharge, unseen, momentum) actually live. That hook is the
+single highest-value piece of code in this whole plan - most of the identities above are one
+callback each once it exists.
+
+STATUS: designed, not implemented. The implementation is a balance change across sixteen classes and
+wants a session with room to verify each one, not the tail end of one.

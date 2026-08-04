@@ -123,3 +123,39 @@ callback each once it exists.
 
 STATUS: designed, not implemented. The implementation is a balance change across sixteen classes and
 wants a session with room to verify each one, not the tail end of one.
+
+---
+
+## Pirate, revised — Oliver's design, 2026-08-03
+
+**The flintlock stops being an item and becomes part of the class.** It is always equipped, and it
+overrides EITHER your basic attack or your charge attack - you choose which. Better than my version,
+and it fixes three separate problems at once:
+
+1. **C4's root cause, properly.** The flintlock being the Pirate's only on-class weapon meant a
+   Pirate who had not found one played at a permanent penalty. I patched that by widening the
+   family to warrior weapons; this removes the premise instead. You are never a Pirate without a
+   pistol, because the pistol is not loot.
+2. **It makes the class's fantasy literal.** A pirate carries a cutlass AND a pistol. No other class
+   holds two weapons, so nothing else can accidentally feel like it.
+3. **The choice IS the build.** Two genuinely different characters out of one class:
+   - **Pistol on BASIC** - a gunner who swings a blade when you charge. Ranged primary, melee
+     punctuation.
+   - **Pistol on CHARGE** - a swordsman with a finisher. Melee primary, and the charge becomes a
+     decision rather than a bigger swing.
+
+**Where it meets my earlier note:** the pistol reloads ON KILL rather than on a timer. That is what
+stops "always equipped" from meaning "always available" - the pistol is a resource you earn by
+finishing enemies, so a round going well snowballs and a round going badly leaves you on the sword.
+It also gives the two configurations different textures: on BASIC the reload is your rhythm, on
+CHARGE it is a reward you spend.
+
+Consequences to handle when this is built:
+- **The flintlock item stops dropping.** It should not exist in loot tables once it is innate;
+  finding one would be finding something you already have.
+- **Its stats move onto the class** and scale with level rather than with rarity - a class feature
+  cannot be common or legendary.
+- **THERE IS NO PISTOL MODEL IN ANY KIT.** Flagged during E2 and it matters far more now: this is
+  no longer an occasional drop with no art, it is the thing a whole class does every few seconds.
+  Either Oliver sources one, or it needs a procedural/voxel render good enough to carry the class.
+  Worth deciding BEFORE the mechanic is built, not after.

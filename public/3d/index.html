@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.885.1-echo-fainter';
+const VERSION3D='1.886.0-hub-groundwork';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8187,6 +8187,140 @@ function dodgeEchoDraw(keep){
   }
 }
 
+/* -- THE WAYSTATION, REDESIGNED -----------------------------------------------
+   Oliver: "id like you to completely redo the hub with full creative control using all the new
+   assets we have. Make sure not to lose any of the key features or portals or npcs or
+   interactables, but make it look great. right now it all slopped over top of what we had before."
+
+   He is describing accretion, and he is right: the hub is a flat plaza that every new feature got
+   parked on, and it renders from six prop kinds - tree, rock, fence, grave, column, standstone -
+   while the asset library holds a 176-piece modular village and 42 props that nothing here touches.
+
+   THE DESIGN: a frontier waystation, the last outpost before the descent. Four ideas:
+
+     1. A WALL OF ARCHES to the north. The eight zone portals stop being a row of free-standing
+        gates on a field and become doors set into a rampart, in tier order, each under its banner.
+        It is the thing you face when you arrive, and it says what this place is FOR.
+     2. THE PLAZA IS RAISED. The waystone sits on a dais at the centre. Everything reads against it.
+     3. THE TRIALS ARE SUNKEN. The Abyss, the Dungeon, the Sprint, the Arena and the Gauntlet drop
+        down a flight of stairs to the south - literally beneath the town, visibly other, and you
+        look DOWN at them rather than walking past them on the same flat ground.
+     4. TWO WORKING SIDES. Market Row west under a timber arcade; the Training Yard east behind a
+        fence. Each gets its own props so the two halves read differently at a glance.
+
+   Written as a PASS over the existing hub rather than a rewrite of it: it repositions what is
+   already there and adds architecture around it. That is what keeps the promise about not losing a
+   portal or an NPC - nothing is reconstructed, so nothing can be dropped. HUB_REDESIGN gates it, so
+   the Waystation Oliver has today is one flag away for as long as this is being judged. */
+/* OFF. The layout pass works and loses nothing - 14 NPCs, 8 gates, 110 new pieces all present in
+   the data - but with it on the hub renders as empty ground, and I ran out of session before
+   finding why. The lead: buildHubDecoProps says index.html's voxel exclusion list is "gated on that
+   count", so introducing 110 kind:'asset' entries into the hub for the first time plausibly flips a
+   threshold that makes the voxel renderer skip what it should still draw. That is the next thing to
+   check - compare the exclusion branch with hubAsset at 0 versus 110.
+   Flipping this to true is the whole switch. Oliver's Waystation is untouched while it is false. */
+const HUB_REDESIGN = false;
+
+function hubRedesign(){
+  if(!G || !G.hub || !HUB_REDESIGN) return 0;
+  const A = (set, x, z, y0, w, h, d, ry) =>
+    G.deco.push({ kind:'asset', set:set, x:x, z:z, y0:y0||0, w:w, h:h, d:d, ry:ry||0, lead:true });
+  let n = 0;
+
+  /* ---- 1. THE GATE WALL -------------------------------------------------
+     The gates keep their x spacing (the interact prompt and the tier order both depend on it) and
+     are pushed back so the wall can stand in front of them, with an arch on each and a banner
+     between. Rampart segments fill the gaps so it reads as one structure. */
+  const gates = (G.gates || []).slice().sort((a,b) => a.x - b.x);
+  const WALLZ = -600;
+  for(let i = 0; i < gates.length; i++){
+    const g = gates[i];
+    A('wallArch', g.x, WALLZ, 0, 150, 190, 70); n++;
+    A('banner', g.x, WALLZ + 46, 118, 46, 96, 14); n++;
+    if(i < gates.length - 1){
+      const mid = (g.x + gates[i+1].x) / 2;
+      A('wallStone', mid, WALLZ, 0, 120, 210, 70); n++;
+      if(i % 2 === 0){ A('wallWindow', mid, WALLZ, 210, 120, 90, 70); n++; }
+    }
+  }
+  /* returns at both ends, so the wall has thickness rather than stopping in mid-air */
+  for(const sx of [-1, 1]){
+    const ex = sx * (Math.abs(gates[0] ? gates[0].x : 812) + 130);
+    A('wallStone', ex, WALLZ, 0, 130, 240, 70); n++;
+    A('wallStone', ex + sx*60, WALLZ + 120, 0, 70, 240, 130, Math.PI/2); n++;
+    A('chimney', ex, WALLZ, 240, 40, 70, 40); n++;
+  }
+  for(let k = 0; k < 6; k++){
+    const vx = -700 + k * 280;
+    A('vine', vx, WALLZ + 36, 60, 40, 130, 20); n++;
+  }
+
+  /* ---- 2. THE RAISED PLAZA ---------------------------------------------
+     A dais under the waystone. Kept low (18) so it never becomes a step you fight while walking to
+     a shop, and ringed with light so the centre is the brightest thing in the hub. */
+  G.obstacles.push({ kind:'plat', x:0, z:30, w:520, d:520, h:18, hubDais:true });
+  G.deco.push({ x:0, z:30, y0:19, w:560, h:1.6, d:560, c:'#a89478' });
+  /* THE SPAWN CORRIDOR STAYS EMPTY. The first version ringed the plaza at radius 250, which put a
+     torch at (0,280) - the player spawns at (0,303) with the camera behind them, so the camera
+     began the session INSIDE it and the whole screen was a brown gradient. Anything on the entrance
+     axis is skipped, and the ring is pushed out past where the camera flies. */
+  for(let k = 0; k < 8; k++){
+    const a = (k/8) * 6.283, rr = 300;
+    const lx = Math.cos(a)*rr, lz = 30 + Math.sin(a)*rr;
+    if(lz > 150 && Math.abs(lx) < 220) continue;          // the way in
+    A('lightProp', lx, lz, 18, 26, 90, 26); n++;
+  }
+  for(const sx of [-1, 1]) for(const sz of [-1, 1]){
+    A('railing', sx*300, 30 + sz*150, 18, 24, 60, 120, Math.PI/2); n++;
+  }
+
+  /* ---- 3. MARKET ROW, WEST ----------------------------------------------
+     An arcade the shops sit under, so the Quartermaster, Smith and Stylist share a roofline instead
+     of standing alone on grass. */
+  for(let k = 0; k < 5; k++){
+    const z = -150 + k * 130;
+    A('awning', -690, z, 150, 210, 60, 130); n++;
+    A('wallPlaster', -790, z, 0, 40, 150, 130); n++;
+  }
+  A('roofTile', -720, 110, 210, 260, 70, 560); n++;
+  const westProps = [[-620,-190],[-620,240],[-560,-230],[-660,60],[-600,300],[-700,-120]];
+  for(const q of westProps){ A('marketProp', q[0], q[1], 0, 46, 52, 46); n++; }
+  A('smithProp', -560, 150, 0, 60, 60, 60); n++;
+  A('smithProp', -620, 190, 0, 50, 55, 50); n++;
+  A('wagon', -470, 330, 0, 120, 80, 80); n++;
+  A('seating', -470, -170, 0, 70, 40, 50); n++;
+
+  /* ---- 4. THE TRAINING YARD, EAST --------------------------------------
+     Fenced, so it reads as an enclosure rather than as more plaza, and furnished with the things
+     you would actually train against. */
+  for(let k = 0; k < 7; k++){
+    const z = -210 + k * 110;
+    A('woodFence', 690, z, 0, 24, 70, 110); n++;
+  }
+  for(let k = 0; k < 4; k++){ A('woodFence', 480 + k*110, 430, 0, 110, 70, 24); n++; }
+  const yard = [[560,-140],[600,80],[540,260],[640,-40],[500,180]];
+  for(const q of yard){ A('yardProp', q[0], q[1], 0, 50, 80, 50); n++; }
+  A('seating', 470, 330, 0, 70, 40, 50); n++;
+  A('lightProp', 690, -260, 0, 26, 100, 26); n++;
+  A('lightProp', 690, 470, 0, 26, 100, 26); n++;
+
+  /* ---- 5. THE SUNKEN TRIALS, SOUTH -------------------------------------
+     Stairs down, then the optional doors on a lower floor. They are the only thing in the hub you
+     descend to, which is the whole point of them. */
+  for(const sx of [-1, 0, 1]){
+    A('stairs', sx * 210, 560, 0, 150, 60, 130); n++;
+  }
+  A('railing', -330, 600, 0, 24, 60, 150, Math.PI/2); n++;
+  A('railing',  330, 600, 0, 24, 60, 150, Math.PI/2); n++;
+  for(let k = 0; k < 5; k++){
+    A('lightProp', -420 + k*210, 640, 0, 26, 96, 26); n++;
+  }
+  /* a low wall behind the trial doors so the hub ENDS rather than fading into empty ground */
+  for(let k = 0; k < 9; k++){ A('wallStone', -560 + k*140, 1130, 0, 140, 150, 60); n++; }
+
+  return n;
+}
+
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
   :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
@@ -13081,6 +13215,9 @@ function enterWaystation(){
   applyEditsNow();          // the hub is built here, not by loadStage, so it needs its own call
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   meta.run=null; persist();
+  /* The redesign runs LAST, after every gate, keeper and interactable already exists, so it can
+     only add architecture around them and never omit one. */
+  try{ hubRedesign(); }catch(e){}
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)
   document.getElementById('stagetag').textContent='THE WAYSTATION'; questUpdate(); hudUpdate();

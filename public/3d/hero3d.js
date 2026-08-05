@@ -1335,12 +1335,38 @@ function playFor(p){
              : moving ? (Math.hypot(p.vx||0, p.vz||0) > 120 ? 'Run' : 'Walk')
              : 'Idle';
   const name = clips[want] ? want : (clips.Idle ? 'Idle' : Object.keys(clips)[0]);
-  if(!name || cur === name) return;
+
+  /* THE DODGE ROLL HAS TO FIT INSIDE THE DODGE.
+     Oliver: "i want to use the roll animaton for dodges." It was already selected here on
+     p.dodgeTimer - the reason he never saw it is that a dodge lasts 0.20-0.22s and the Roll clip
+     runs well over a second. With a 0.15s crossfade on top, you saw the first sixth of a roll
+     blended out of a stand: it reads as a crouch and then a snap back, which is not a roll.
+     So a dodge roll is time-scaled to finish exactly within the dodge window, played once, and
+     faded almost instantly. It also RESTARTS on each new dodge - without that, dodging twice in a
+     row left the second one playing the tail of the first, because `cur === name` short-circuits. */
+  const rolling = p.dodgeTimer > 0;
+  const restart = rolling && name === 'Roll' && !_wasRolling;
+  _wasRolling = rolling;
+  if(!name || (cur === name && !restart)) return;
+
   const next = mixer.clipAction(clips[name]);
-  next.reset().fadeIn(0.15).play();
-  if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.15);
+  if(name === 'Roll' && rolling){
+    const dur = (clips.Roll && clips.Roll.duration) || 1;
+    const window = Math.max(0.12, p.dodgeTimer);
+    next.reset();
+    next.timeScale = dur / window;          // the whole roll, inside the invulnerable window
+    next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
+    next.fadeIn(0.04).play();
+    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.04);
+  } else {
+    next.timeScale = 1;
+    next.setLoop(THREE.LoopRepeat, Infinity); next.clampWhenFinished = false;
+    next.reset().fadeIn(0.15).play();
+    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.15);
+  }
   cur = name;
 }
+let _wasRolling = false;
 
 /* Called from the game's drawHero3. Returns true when it has drawn, so the caller can skip
    its voxel path; returns false whenever anything is not ready, so a failure here degrades

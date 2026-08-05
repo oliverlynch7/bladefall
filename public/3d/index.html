@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.882.0-delve-scaling';
+const VERSION3D='1.883.0-terrain-perf';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4653,7 +4653,7 @@ function dashGate(o){
   const gx=(o.gx||0), gz=(o.gz||0);
   const cont=(s)=>{ const hw=(s.w||0)/2, hd=(s.d||0)/2; return gx>=s.x-hw-30 && gx<=s.x+hw+30 && gz>=s.z-hd-30 && gz<=s.z+hd+30; };
   const cands=[];
-  for(const ob of G.obstacles) if((ob.kind==='plat'||ob.h!=null) && cont(ob)) cands.push({z:ob.z,d:ob.d,h:ob.h||0,br:ob.breather?1:0,area:(ob.w||0)*(ob.d||0)});
+  for(const ob of G.obstacles) if(!ob.terrain && (ob.kind==='plat'||ob.h!=null) && cont(ob)) cands.push({z:ob.z,d:ob.d,h:ob.h||0,br:ob.breather?1:0,area:(ob.w||0)*(ob.d||0)});
   for(const sg of G.segments) if(cont(sg)) cands.push({z:sg.z,d:sg.d,h:0,br:0,area:(sg.w||0)*(sg.d||0)});
   if(!cands.length) return;                                                               // exit floats free -> nothing to gate off
   cands.sort((a,b)=> (b.br-a.br) || (b.area-a.area));                                      // breather first, then biggest pad
@@ -7148,7 +7148,7 @@ function addVerticality(rnd){
   let made = 0;
   for(const r of G.rooms){
     if(!r || !r.w || r.w < 420 || (r.d||0) < 380) continue;          // too small to give up floor
-    const already = (G.obstacles||[]).some(o => o.kind==='plat' && !o.autoCol && (o.h||0) > 120
+    const already = (G.obstacles||[]).some(o => o.kind==='plat' && !o.autoCol && !o.terrain && (o.h||0) > 120
                         && Math.abs(o.x-r.x) < r.w*0.6 && Math.abs(o.z-r.z) < (r.d||r.w)*0.6);
     if(already) continue;                                            // this room was authored with height
     if(R() < 0.28) continue;                                         // not every room, or it is a pattern
@@ -7411,7 +7411,18 @@ function highGround(rnd){
      the invisible box around a tree. Caught by inspecting what the filter actually matched instead
      of trusting the count, which also means my earlier "16-23 fightable platforms per zone" was
      inflated by them and the true verticality is lower than I reported. */
-  const high = G.obstacles.filter(o => o.kind==='plat' && !o.autoCol
+  /* TERRAIN IS GROUND, NOT A PLATFORM.
+     Oliver: "its rendering like everythign thats fatr away so the game lags pretty bad" and "there
+     was also way too many enemies in the hollow pass". One cause for both, and for a third thing he
+     had not noticed yet.
+     The terrain generator emits every ground cell as kind:'plat' - which is correct, it IS the
+     collision surface - and this pass decorates any plat it finds with a reward, an archer or a
+     beacon. So a canyon floor made of 600 cells became 117 CHESTS and 108 enemies, and those chests
+     are a four-part model that does not instance: 468 meshes and ~297k triangles, about 90% of
+     everything in the scene. The lag, the enemy count and a canyon paved with treasure were all the
+     same bug.
+     `terrain` marks a cell as landscape so these passes leave it alone. */
+  const high = G.obstacles.filter(o => o.kind==='plat' && !o.autoCol && !o.terrain
                                     && (o.h||0) > 120 && (o.w||0) >= 90 && (o.d||0) >= 90);
   if(!high.length) return 0;
   let n = 0;
@@ -7932,7 +7943,7 @@ function questMarks(rnd){
     else if(q.k === 'reach'){
       /* The high ground the verticality pass built. Tallest first, so "go up" means the real
          summit rather than a knee-high plinth. */
-      const plats = (G.obstacles||[]).filter(o => o.kind === 'plat' && !o.autoCol && (o.w||0) >= 110 && (o.h||0) > 130)
+      const plats = (G.obstacles||[]).filter(o => o.kind === 'plat' && !o.autoCol && !o.terrain && (o.w||0) >= 110 && (o.h||0) > 130)
                                      .sort((a,b) => (b.h||0) - (a.h||0));
       const want = q.n || 1;
       for(let i = 0; i < want && i < plats.length; i++){

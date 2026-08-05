@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.862.0-stakes';
+const VERSION3D='1.870.0-playtest-fixes';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1791,7 +1791,7 @@ function elemMod(wEl,eEl){
 
 /* ---------------- Weapons (identical stats; range = world units) ---------------- */
 const ARCHES={
-  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:190,range:60,art:'sword'},
+  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:260,range:72,art:'sword'},
   saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:60,art:'sword'},
   dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:46,art:'dagger'},
   axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
@@ -2457,7 +2457,17 @@ function makeWeapon(aid,rid,nameOverride){
   if(!a.ians && !nameOverride) rollAffixes(w, rid);
   return w;
 }
-function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
+/* THE FIRST TWENTY MINUTES. Oliver, playtesting a level-2 Warrior: "it's taken a lot of hits to
+   kill some of these guys with my rusty sword... I don't have enough range with my weapon, and
+   they're not taking enough knockback. So I'm getting hit pretty aggressively even as a skilled
+   player."
+   Measured: the Rusty Sword did 9, and a Thornboar has 42 HP at tier 1 where the scaling multiplier
+   is exactly 1.0. That is FIVE swings - about two solid seconds of committed attacking - against a
+   charger that rams for 15 and immediately re-rams, and the cull quest asks for twelve of them.
+   Raised to 11 (from ~62% of a rolled common to ~75%), which is three or four swings rather than
+   five, and the sword's reach and knockback are up with it so the exchange is not decided purely by
+   who is standing closer. */
+function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=11; w.blade='#bcae8a'; return w; }
 /* Every class starts with a battered weapon of ITS OWN specialty — below-common junk
    (~62% of a rolled common) that makes the first real drop feel like a real upgrade. */
 const CLASSSTART={warrior:['sword','Rusty Sword'],ranger:['bow','Cracked Shortbow'],mage:['firestaff','Splintered Staff'],reaper:['scythe','Notched Scythe'],paladin:['sword','Squire’s Sword'],necromancer:['firestaff','Cracked Bonestaff'],ninja:['sword','Rusty Tanto'],berserker:['sword','Notched Blade'],pirate:['flintlock','Old Flintlock'],chronomancer:['firestaff','Cracked Hourglass'],monk:['fist','Bare Fists'],stormcaller:['firestaff','Cracked Rod'],warlock:['firestaff','Cracked Hexstaff'],skylancer:['javelin','Bent Sky Spear'],bladedancer:['sword','Dull Dancing Blade']};
@@ -2468,7 +2478,11 @@ function classStartWeapon(cid){
   if(cid==='monk') return fistsWeapon();
   const def=CLASSSTART[cid]||CLASSSTART.warrior;
   const w=makeWeapon(def[0],'common',def[1]);
-  w.dmg=+(w.dmg*0.62).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
+  /* 0.62 was the real starter number, not the 9 in startWeapon() above - THIS is the function every
+     class actually uses, and 12*0.62 = 7.4 damage. Against a 34 HP Thornboar that is five committed
+     swings while it rams you for 11, twelve times over for the cull quest. 0.78 makes it four and
+     keeps the first real drop feeling like an upgrade, which is what the low number was protecting. */
+  w.dmg=+(w.dmg*0.78).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
   return w;
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
@@ -2964,7 +2978,7 @@ const ENEMY={
     shot:{count:1,spread:0,speed:300,size:10,color:'#b0946a',shape:'rock',gravity:540,glow:0},shootCd:2.9},
   galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'arcane',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
   // ── Outskirts plains bestiary (Phase 14) ──
-  thornboar:{hp:42,dmg:13,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
+  thornboar:{hp:34,dmg:11,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
   sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true,spec:'spores'},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
   // ── Ruined Keep bestiary (Phase 14) ──
   sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel',spec:'watch'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
@@ -4178,7 +4192,7 @@ function enterZone(zi){
   G=newG(p,{zone:zi,area:Z.areas.length?0:-1,zoneTier:Z.tier});
   if(MP.active && !MP.isHost && MP.rseed) G.runSeed=MP.rseed;   // co-op: adopt the host's run seed so we build the SAME dungeon + mobs (matching mids)
   meta.run=null; persist(); checkAchievements();
-  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast();
+  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate(); zoneCardMaybe(); hazToast(); questUpdate();
   if(MP.active) MP.onEnter(zi);                                 // co-op: host tells guests which zone to load (opt-in)
   if(!G.trial && !G.side && areaQuests().length) setTimeout(()=>{ if(mode==='play') playFx('quest'); },500);   // motivational fanfare as your quests appear
 }
@@ -6934,7 +6948,13 @@ function encounterPass(rnd){
     const guarded = (G.chests||[]).some(c => Math.abs(c.x-r.x) < r.w/2+60 && Math.abs(c.z-r.z) < (r.d||r.w)/2+60);
     const isIsland = (r.y||0) > 40 && r.w <= 420;
     const isTier   = (r.y||0) > 120 && r.w > 420;
-    let n = r.court ? 5 : (guarded ? 3 : 2);
+    /* Scaled by tier for the same reason the scatter is: between this pass and the scatter, the
+       Outskirts went from 22 enemies to 47 - more than double the tutorial zone's population, from
+       two passes that were about making SPACE feel inhabited rather than about difficulty. Late
+       zones keep the full count. */
+    const _t = (function(){ try{ return curZone().tier || 1; }catch(e){ return 1; } })();
+    const _sc = _t <= 2 ? 0.6 : (_t <= 4 ? 0.8 : 1);
+    let n = Math.max(1, Math.round((r.court ? 5 : (guarded ? 3 : 2)) * _sc));
     const wantRanged = (isIsland || isTier) && ranged.length;
 
     for(let i = 0; i < n; i++){
@@ -7075,7 +7095,14 @@ function scatterPass(rnd){
   const spanIdx = [];
   for(let i = 0; i + 1 < rooms.length; i++) if(Math.hypot(rooms[i+1].x-rooms[i].x, rooms[i+1].z-rooms[i].z) >= 420) spanIdx.push(i);
   for(let i = spanIdx.length - 1; i > 0; i--){ const j = Math.floor(R()*(i+1)); const t2 = spanIdx[i]; spanIdx[i] = spanIdx[j]; spanIdx[j] = t2; }
-  const live = new Set(spanIdx.slice(0, Math.max(1, Math.round(spanIdx.length*0.6))));
+  /* DENSITY BY TIER. The share was a flat 0.6 everywhere, and in the Outskirts that took the zone
+     from 22 enemies to 41 on top of an encounter pass, a new bleeding hazard and sporeback death
+     clouds - three difficulty increases in the tutorial zone, none of which anybody asked for.
+     Early zones now get roughly half the scatter of late ones. The pass was meant to make the space
+     between rooms feel inhabited, not to make tier 1 a gauntlet. */
+  const _tier = (function(){ try{ return curZone().tier || 1; }catch(e){ return 1; } })();
+  const _share = _tier <= 2 ? 0.32 : (_tier <= 4 ? 0.45 : 0.6);
+  const live = new Set(spanIdx.slice(0, Math.max(1, Math.round(spanIdx.length*_share))));
 
   for(let i = 0; i + 1 < rooms.length; i++){
     const a = rooms[i], b = rooms[i+1];
@@ -7411,7 +7438,7 @@ function hazUpdate(dt){
     p.thornT=inT?Math.min(1,(p.thornT||0)+dt*4):Math.max(0,(p.thornT||0)-dt*3);
     if(inT){ G.thornTick=(G.thornTick||0)+dt;
       if(G.thornTick>=1.0){ G.thornTick=0;
-        hurtPlayer(Math.max(1,Math.round(effMaxHp(p)*0.03)),p.x,p.z,{name:'the thornwild',attack:'the briars'}); } }
+        hurtPlayer(Math.max(1,Math.round(effMaxHp(p)*0.015)),p.x,p.z,{name:'the thornwild',attack:'the briars'}); } }   // halved: tier 1's hazard teaches that ground matters, it does not charge for the lesson
     else G.thornTick=0;
   } else if(G.haz==='rubble'){           // Collapse: the keep is still falling
     G.rubT=(G.rubT||0)-dt;
@@ -9014,6 +9041,13 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      the fight is "clear the court" before it is ever "hit the king". */
   if(e.courtWard) dmg=dmg*0.2;
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
+  /* ROUND ONCE, HERE, before it is applied or shown.
+     Oliver, playtesting: "I'm getting damage numbers in, like, the ten decimal places." Weapon
+     damage was always a whole number until affixes started multiplying it (1.18, 1.30, 0.9...),
+     and every downstream multiplier - power, elements, crits, difficulty - then carried the
+     fraction into the floating-point tail. Rounding at the point of application keeps the number on
+     screen and the number subtracted from HP identical, which a display-only round would not. */
+  dmg = Math.max(1, Math.round(dmg));
   e.hp-=dmg; e.hitFlash=0.12;
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
@@ -9117,7 +9151,7 @@ function killEnemy(e,weaponKill){
   }
   if(e.spec==='spores'){
     /* SPOREBACK: a lingering cloud where it fell. Denies the ground you just won. */
-    (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:78,life:5.0,max:5.0,dmg:Math.max(3,Math.round(e.dmg*0.3)),hit:0,col:'#8fd05a',cause:{name:'a burst spore sac',attack:'the spores'}});
+    (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:64,life:3.2,max:3.2,dmg:Math.max(2,Math.round(e.dmg*0.2)),hit:0,col:'#8fd05a',cause:{name:'a burst spore sac',attack:'the spores'}});   // was r78/5s/0.3x - too much for a tier-1 mob you kill dozens of
     burst(e.x,e.y+10,e.z,'#8fd05a',22);
     addText(e.x,e.y+e.h+14,e.z,'SPORES','#8fd05a',true);
   }
@@ -9494,6 +9528,7 @@ const CLASS_BASIC = {
 };
 
 function hurtPlayer(dmg,sx,sz,by){
+  dmg = Math.max(1, Math.round(dmg));   // same fix as hitEnemy: never show the player a fractional hit either
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
      hazards, traps, lava and fall damage. On Casual those were the difference between a forgiving
      run and dying to a floor. */
@@ -10793,6 +10828,16 @@ function update(dt){
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
   hazUpdate(dt); questMarkTick(dt); teachTick(dt); hubTeachTick(dt); teachQueueTick(dt);
+  /* KEEP THE TRACKER LIVE.
+     Oliver, playtesting: "I want the quest tracker to start on when I join a level... it shouldn't
+     only pop on screen once I complete the first objective." It was only ever refreshed by quest
+     EVENTS, so on entering a campaign zone nothing drew it until the first kill landed - you were
+     told what to do only after starting to do it.
+     A periodic refresh is needed regardless: the `survive` objective displays a countdown, and
+     nothing was ticking it. Twice a second is far below the DOM-thrash threshold because applyQuest
+     early-outs on an unchanged signature, and it also covers the moment a zone briefing closes. */
+  G._qT=(G._qT||0)-dt;
+  if(G._qT<=0){ G._qT=0.5; try{ questUpdate(); }catch(e){} }
   if(G.hub) hubInteract(p,dt);
   // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
   // SPAWNERS (quest-driven): while a kill quest is open, refill its mob at the dens until the count is met.
@@ -15348,7 +15393,7 @@ function drawWaystation(t){
            the Three layer draws after the voxel flush so its depth against the frame is the open
            question. If it looks wrong, __hero3dMirror(null) plus this line reverting is the undo. */
         let _m3d=false;
-        try { _m3d = !!(window.__hero3dMirror && window.__hero3dMirror({ x:mh.x, y:mh.y, z:mh.z, yaw:mh.yaw })); } catch(e){}
+        try { _m3d = !!(window.__hero3dMirror && window.__hero3dMirror({ x:mh.x, y:mh.y, z:mh.z, yaw:mh.yaw })); if(_m3d) _poseKeep.push('mirror'); } catch(e){}
         if(!_m3d) drawHero3(mh,t,true); }
       // THE GLASS — a real SILVERED pane, not a portal: a subtle cool tint + gradient + vignette + faint sheen,
       // and crucially NO emissive glow (that was the "glowing portal" look). A mirror reflects; it does not shine.
@@ -16259,7 +16304,21 @@ const SKYSUN={
   dungeon:{z:0.70,p:[0.50,0.86],c:[0.42,0.44,0.52]}, hub:{z:0.55,p:[0.55,0.82],c:[1.0,0.80,0.50]},
   _def:{z:0.60,p:[0.50,0.85],c:[0.60,0.60,0.72]}
 };
+/* Which character POSES were asked for last frame. Anything absent is hidden at the top of the
+   next one.
+   Oliver, playtesting: "there is a duplicate of my model that stands still... in the hub and in the
+   outskirts". That is the TITLE SCREEN's hero. __hero3dAt('title') clones the character into the
+   scene at the origin, and __hero3dPoseSweep - the function whose entire job is hiding poses nobody
+   asked for again - was written and then never called from anywhere. Zero call sites. So the title
+   clone was added once and simply stayed, standing at (0,0,0) for the rest of the session: beside
+   the Waystation in the hub, and at the start of every zone.
+   The mirror pose had the same fate the moment you walked away from the glass.
+   Swept at the START of the frame using the previous frame's list, which needs no cooperation from
+   the end of a 300-line render function and is one frame late, i.e. invisible. */
+let _poseKeep = [];
 function render(t){
+  try{ if(window.__hero3dPoseSweep) window.__hero3dPoseSweep(_poseKeep); }catch(e){}
+  _poseKeep = [];
   if(mode==='studio' && studio){ if(studio.design) renderDesign(studio.t); else renderStudio(studio.t); return; }
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
   const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
@@ -16596,7 +16655,7 @@ function G0BACKDROP(s0,t){
      the old character. */
   drawShadow(0,0,13);
   let _tb=false;
-  try { _tb = !!(window.__hero3dAt && window.__hero3dAt('title',{x:0,y:0,z:0,yaw:fake.yaw})); } catch(e){}
+  try { _tb = !!(window.__hero3dAt && window.__hero3dAt('title',{x:0,y:0,z:0,yaw:fake.yaw})); if(_tb) _poseKeep.push('title'); } catch(e){}
   if(!_tb) drawHero3(fake,t,true);
 }
 function drawProjectile3(pr,t){

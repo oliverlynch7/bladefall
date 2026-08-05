@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.890.0-hub-redesign';
+const VERSION3D='1.890.1-hub-off';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8219,7 +8219,7 @@ function dodgeEchoDraw(keep){
    threshold that makes the voxel renderer skip what it should still draw. That is the next thing to
    check - compare the exclusion branch with hubAsset at 0 versus 110.
    Flipping this to true is the whole switch. Oliver's Waystation is untouched while it is false. */
-const HUB_REDESIGN = true;
+const HUB_REDESIGN = false;   // OFF: iteration 1 looked worse than what it replaced. See docs/HUB_PLAN.md
 
 const HUB_PARTS = 5;   // all five sections
 function hubRedesign(){

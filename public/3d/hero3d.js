@@ -644,6 +644,21 @@ function weaponsFor(model){
    a paste-ready block for WEAPON_PRESETS so a tuning session ends in a commit rather than in a
    closed tab. Same shape as the level editor's edit list, and for the same reason: a tool whose
    output cannot reach the repository is a toy. */
+/* OLIVER'S PER-CLASS TUNING, WHICH HE DID AND I TWICE FAILED TO FIND.
+   He said: "I tuned each weapon for each class. You're wrong. Go find those values." He was right.
+   The test slice saves weapon placement to localStorage under `bf_weap`, keyed 'Model|Weapon' -
+   Warrior|Sword, Rogue|Scythe, and so on - which is exactly per-weapon-per-class. Its own comment
+   even predicted this: "tuning that lives only in localStorage is lost to a cleared browser or
+   another device." It was never lost, it was simply never READ by the game, which only ever loaded
+   the small hard-coded tables.
+   The slice and the game are served from the same origin, so the same localStorage is right there.
+   The game now reads it, with the slice's own precedence: this body's entry first, then any older
+   bare-weapon entry. */
+const SLICE_LS = 'bf_weap';
+let _sliceFits = (function(){
+  try { return JSON.parse(localStorage.getItem(SLICE_LS) || '{}') || {}; } catch(e){ return {}; }
+})();
+
 const FIT_LS = 'bf_weapfits';
 let _fitOverrides = (function(){
   try { return JSON.parse(localStorage.getItem(FIT_LS) || '{}') || {}; } catch(e){ return {}; }
@@ -654,6 +669,9 @@ function weapLoadFor(){
   const n = WEAP.name;
   Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
                 (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {},
+                /* the slice's tuning, keyed exactly as the slice keyed it */
+                _sliceFits[n] || {},
+                _sliceFits[eyeModel() + '|' + n] || {},
                 _fitOverrides[n] || {},
                 (_fitOverrides['@'+eyeModel()] || {})[n] || {},     // per-BODY, and it wins
                 { name:n, on:true });
@@ -704,6 +722,46 @@ window.__weapFit = {
     return 'reset ' + n;
   },
   all(){ return JSON.parse(JSON.stringify(_fitOverrides)); },
+  /* What the slice actually has on this browser. Run this in the game's console on the machine
+     Oliver tuned on and it lists every Model|Weapon pair he set. */
+  slice(){
+    const k = Object.keys(_sliceFits);
+    if(!k.length) return 'no slice tuning found in localStorage under "' + SLICE_LS + '" on this origin';
+    return k.length + ' entries: ' + k.sort().join(', ');
+  },
+  /* If the slice was tuned on a DIFFERENT origin (a localhost run, an older deploy), the game
+     cannot see that localStorage. Copy what the slice page prints and paste it in here. */
+  importJSON(str){
+    try{
+      const o = (typeof str === 'string') ? JSON.parse(str) : str;
+      let n = 0;
+      for(const k in o){ _sliceFits[k] = o[k]; n++; }
+      try{ localStorage.setItem(SLICE_LS, JSON.stringify(_sliceFits)); }catch(e){}
+      weapLoadFor(); try{ applyWeaponTransform(actor); }catch(e){}
+      return 'imported ' + n + ' entries · ' + this.slice();
+    }catch(e){ return 'could not parse: ' + e.message; }
+  },
+  /* Paste-ready, so the browser-only tuning can finally become a commit. */
+  exportSlice(){
+    const NL = String.fromCharCode(10);
+    const ks = Object.keys(_sliceFits).sort();
+    if(!ks.length) return '// nothing in ' + SLICE_LS + ' on this origin';
+    const perBody = {};
+    for(const k of ks){
+      const bar = k.indexOf('|');
+      const body = bar > 0 ? k.slice(0, bar) : '*', weap = bar > 0 ? k.slice(bar+1) : k;
+      (perBody[body] = perBody[body] || {})[weap] = _sliceFits[k];
+    }
+    return Object.keys(perBody).sort().map(function(b){
+      const inner = Object.keys(perBody[b]).sort().map(function(w){
+        const o = perBody[b][w];
+        const body = FIT_FIELDS.filter(function(f){ return o[f] != null; })
+                               .map(function(f){ return f + ':' + o[f]; }).join(', ');
+        return '    ' + w + ': { ' + body + ' },';
+      }).join(NL);
+      return '  ' + b + ': {' + NL + inner + NL + '  },';
+    }).join(NL);
+  },
   /* Paste-ready for WEAPON_PRESETS in this file. The whole point: the session ends in a diff. */
   export(){
     const ks = Object.keys(_fitOverrides).sort();

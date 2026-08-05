@@ -91,33 +91,6 @@ const PROP_SETS = {
      find no model, fall through to the ordinary floor, and the zone reports a road it did not
      draw. That is exactly what happened the first time - `roadPaved` came back 0 with 47 tiles
      planned, and nothing anywhere logged a complaint. */
-  /* THE WAYSTATION KIT. The hub had six prop kinds - tree, rock, fence, grave, column, standstone -
-     while the library holds a 176-piece modular village (walls, roofs, arches, stairs, balconies,
-     awnings) and 42 props. Oliver: "right now it all slopped over top of what we had before. we
-     need a whole new design." These are the sets that redesign is built from. */
-  wallStone:  ['village/Wall_UnevenBrick_Straight'],
-  wallArch:   ['village/Wall_Arch'],
-  wallWindow: ['village/Wall_UnevenBrick_Window_Wide_Round', 'village/Wall_UnevenBrick_Window_Thin_Round'],
-  wallPlaster:['village/Wall_Plaster_Straight'],
-  roofTile:   ['village/Roof_RoundTiles_6x6', 'village/Roof_RoundTiles_6x8', 'village/Roof_RoundTiles_4x6'],
-  roofFront:  ['village/Roof_Front_Brick4', 'village/Roof_Front_Brick6'],
-  awning:     ['village/Overhang_Roof_UnevenBricks', 'village/Overhang_UnevenBrick_Long'],
-  stairs:     ['village/Stairs_Exterior_Straight', 'village/Stairs_Exterior_Platform'],
-  railing:    ['village/Prop_MetalFence_Ornament', 'village/Prop_MetalFence_Simple'],
-  woodFence:  ['village/Prop_WoodenFence_Extension1', 'village/Prop_WoodenFence_Single'],
-  vine:       ['village/Prop_Vine1', 'village/Prop_Vine2', 'village/Prop_Vine5', 'village/Prop_Vine9'],
-  wagon:      ['village/Prop_Wagon'],
-  chimney:    ['village/Prop_Chimney', 'village/Prop_Chimney2'],
-  banner:     ['qprops/Banner_1', 'qprops/Banner_2'],
-  marketProp: ['qprops/Barrel', 'qprops/Crate_Wooden', 'qprops/Crate_Metal', 'qprops/Barrel_Holder',
-               'qprops/Pot_1', 'qprops/Vase_2', 'qprops/Vase_4', 'qprops/Bucket_Wooden_1'],
-  smithProp:  ['qprops/Anvil', 'qprops/Anvil_Log', 'qprops/Workbench', 'qprops/WeaponStand',
-               'qprops/Sword_Bronze', 'qprops/Axe_Bronze', 'qprops/Shield_Wooden'],
-  yardProp:   ['qprops/Dummy', 'qprops/WeaponStand', 'qprops/Cage_Small'],   // Chain_Coil removed: it is a floor coil, and fitted to a yard-fixture height it read as a gallows
-  scholarProp:['qprops/Bookcase_2', 'qprops/Book_Stack_1', 'qprops/Scroll_1', 'qprops/CandleStick_Triple',
-               'qprops/Potion_1', 'qprops/Potion_2', 'qprops/Cauldron'],
-  seating:    ['qprops/Bench', 'qprops/Stool', 'qprops/Chair_1', 'qprops/Table_Large'],
-  lightProp:  ['qprops/Torch_Metal', 'qprops/Lantern_Wall', 'qprops/Chandelier'],
   floorStone: ['village/Floor_Brick', 'village/Floor_UnevenBrick', 'village/Floor_RedBrick',
                'castle/ground'],
   /* Hub architecture. Kept to a handful of pieces on purpose: Oliver's steer is that the

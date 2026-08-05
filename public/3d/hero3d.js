@@ -627,11 +627,82 @@ function weaponsFor(model){
   const all = WEAPONS_FILE.concat(Object.keys(STOCK_WEAPONS));
   return all.filter(w => rules.some(re => re.test(w)));
 }
+/* ── SAVED WEAPON FITS ───────────────────────────────────────────────────────
+   Oliver, playtesting: "the handheld positions of the weapons are not in the exact location that I
+   set them before... that didn't get stored from the test slice that we created."
+
+   He is right that they are gone, and checking git says why they cannot be restored: the fit table
+   has no revert in its history, so the values he tuned were never committed - they lived in a
+   running page and died with it. There is nothing to put back, and inventing numbers and calling
+   them his would be worse than saying so.
+
+   What IS fixable is that this can never happen again. Fits now resolve through one more layer:
+
+       defaults  <  per-weapon preset  <  per-model preset  <  SAVED OVERRIDE
+
+   The override persists to localStorage the moment it is changed, survives reload, and exports as
+   a paste-ready block for WEAPON_PRESETS so a tuning session ends in a commit rather than in a
+   closed tab. Same shape as the level editor's edit list, and for the same reason: a tool whose
+   output cannot reach the repository is a toy. */
+const FIT_LS = 'bf_weapfits';
+let _fitOverrides = (function(){
+  try { return JSON.parse(localStorage.getItem(FIT_LS) || '{}') || {}; } catch(e){ return {}; }
+})();
+function fitSave(){ try { localStorage.setItem(FIT_LS, JSON.stringify(_fitOverrides)); } catch(e){} }
+
 function weapLoadFor(){
   const n = WEAP.name;
   Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
-                (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {}, { name:n, on:true });
+                (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {},
+                _fitOverrides[n] || {},
+                { name:n, on:true });
 }
+
+/* The live tuner. Nudge the weapon in your hand, see it move, and it is saved as you go.
+   Deliberately keyed on the MODEL name rather than the game weapon, because the model is what the
+   numbers actually describe - a Rare and a Legendary sword that share a mesh should share a grip. */
+const FIT_FIELDS = ['pitch','yaw','roll','fwd','up','side','grip','len','shaft'];
+window.__weapFit = {
+  /* current values for the weapon being held */
+  get(){ const o = {}; for(const k of FIT_FIELDS) o[k] = WEAP[k]; o.name = WEAP.name; return o; },
+  /* nudge one field and persist. step defaults are sized to be VISIBLE in one press: rotations in
+     ~3 degree taps, offsets in one-hundredths of an arm reach. */
+  nudge(field, delta){
+    if(FIT_FIELDS.indexOf(field) < 0) return null;
+    const cur = _fitOverrides[WEAP.name] || (_fitOverrides[WEAP.name] = {});
+    const base = (cur[field] != null) ? cur[field] : WEAP[field];
+    cur[field] = +( (base + delta).toFixed(3) );
+    fitSave(); weapLoadFor();
+    try { applyWeaponTransform(actor); } catch(e){}
+    return cur[field];
+  },
+  set(field, v){
+    if(FIT_FIELDS.indexOf(field) < 0) return null;
+    const cur = _fitOverrides[WEAP.name] || (_fitOverrides[WEAP.name] = {});
+    cur[field] = +(+v).toFixed(3);
+    fitSave(); weapLoadFor();
+    try { applyWeaponTransform(actor); } catch(e){}
+    return cur[field];
+  },
+  reset(name){
+    const n = name || WEAP.name;
+    delete _fitOverrides[n]; fitSave(); weapLoadFor();
+    try { applyWeaponTransform(actor); } catch(e){}
+    return 'reset ' + n;
+  },
+  all(){ return JSON.parse(JSON.stringify(_fitOverrides)); },
+  /* Paste-ready for WEAPON_PRESETS in this file. The whole point: the session ends in a diff. */
+  export(){
+    const ks = Object.keys(_fitOverrides).sort();
+    if(!ks.length) return '// no saved weapon fits';
+    return ks.map(function(n){
+      const o = _fitOverrides[n];
+      const body = FIT_FIELDS.filter(function(k){ return o[k] != null; })
+                             .map(function(k){ return k + ':' + o[k]; }).join(', ');
+      return '  ' + (/^[A-Za-z_$][\w$]*$/.test(n) ? n : JSON.stringify(n)) + ': { ' + body + ' },';
+    }).join('\n');
+  },
+};
 const WEAP_DEFAULT = JSON.parse(JSON.stringify(WEAP));
 const WEAPON_PRESETS_BY_MODEL = {
   Rogue: { Scythe: { len:1.20, pitch:3.14, yaw:0.26, roll:-2.84,

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.873.0-editor-elev';
+const VERSION3D='1.880.0-obsindex';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -6677,6 +6677,43 @@ function floorAt(x,z,r,yRef){
 /* Placement resolver for world objects. Player collision deliberately limits floorAt to
    surfaces the player is already high enough to land on; spawners need the opposite rule:
    find the HIGHEST walkable top at X/Z so an exit, chest or drop can never live under a mesa. */
+/* ── OBSTACLE SPATIAL INDEX ──────────────────────────────────────────────────
+   PHASE 0 of terrain-first level generation, and the reason it has to come first.
+
+   surfaceHeightAt is the question "what is under my feet", and it was answered by scanning EVERY
+   obstacle in the level. That is fine at the 96 obstacles a zone carries today - measured at 2.7us
+   a query. Real terrain is a grid of ground boxes: a 60x60 field is 3,600 of them, 37x more, which
+   takes each query to roughly 100us. The player, 41 enemies, every prop being grounded and every
+   hazard ask this question every frame, so terrain would have cost several milliseconds of a
+   16.7ms budget before drawing anything. The generator could not get better until this did.
+
+   A uniform bucket grid: each obstacle is registered in the cells its footprint covers, and a query
+   visits only the cells it overlaps - typically one to four, holding a handful of boxes each.
+
+   Rebuilt when the array's LENGTH changes, which covers generation, the editor adding or deleting,
+   and quest markers; `G._obsDirty` forces it for anything that MOVES an obstacle without changing
+   the count. Everything else in this function stays a linear scan on purpose: segments, walls,
+   movers and crumbles number in the tens and a second index would cost more to maintain than it
+   saves. */
+const OBS_CELL = 220;
+function obsIndexBuild(){
+  const arr = G.obstacles || [], m = new Map();
+  for(let i = 0; i < arr.length; i++){
+    const o = arr[i];
+    const hw = (o.w || 10) / 2, hd = (o.d || o.w || 10) / 2;
+    const x0 = Math.floor((o.x - hw) / OBS_CELL), x1 = Math.floor((o.x + hw) / OBS_CELL);
+    const z0 = Math.floor((o.z - hd) / OBS_CELL), z1 = Math.floor((o.z + hd) / OBS_CELL);
+    for(let cx = x0; cx <= x1; cx++) for(let cz = z0; cz <= z1; cz++){
+      const k = cx + ',' + cz; let b = m.get(k); if(!b){ b = []; m.set(k, b); } b.push(o);
+    }
+  }
+  G._obsIdx = m; G._obsIdxN = arr.length; G._obsDirty = false;
+}
+function obsIndex(){
+  if(!G._obsIdx || G._obsDirty || G._obsIdxN !== (G.obstacles || []).length) obsIndexBuild();
+  return G._obsIdx;
+}
+
 function surfaceHeightAt(x,z,r=8){
   if(!G) return -Infinity; let f=-Infinity;
   // footprint is INCLUSIVE (matches floorAt's +r reach) so a drop/portal anywhere the player could stand — including a
@@ -6686,7 +6723,16 @@ function surfaceHeightAt(x,z,r=8){
   for(const wl of (G.walls||[])){ if(wl.stand && Math.abs(x-wl.x)<wl.w/2+m && Math.abs(z-wl.z)<wl.d/2+m) f=Math.max(f,wl.h||0); }
   for(const mv of (G.movers||[])){ if(Math.abs(x-mv.x)<mv.w/2+m && Math.abs(z-mv.z)<mv.d/2+m) f=Math.max(f,mv.h||0); }
   for(const cr of (G.crumbles||[])){ if(cr.state!==2 && Math.abs(x-cr.x)<cr.w/2+m && Math.abs(z-cr.z)<cr.d/2+m) f=Math.max(f,cr.h||0); }
-  for(const ob of (G.obstacles||[])){ if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m) f=Math.max(f,ob.h||0); }
+  /* Obstacles through the index. Cells are walked inline rather than gathered into an array first:
+     this runs hundreds of times a frame and a per-query allocation is pure garbage. */
+  const idx = obsIndex();
+  const cx0 = Math.floor((x - m) / OBS_CELL), cx1 = Math.floor((x + m) / OBS_CELL);
+  const cz0 = Math.floor((z - m) / OBS_CELL), cz1 = Math.floor((z + m) / OBS_CELL);
+  for(let cx = cx0; cx <= cx1; cx++) for(let cz = cz0; cz <= cz1; cz++){
+    const b = idx.get(cx + ',' + cz); if(!b) continue;
+    for(let i = 0; i < b.length; i++){ const ob = b[i];
+      if(Math.abs(x-ob.x)<ob.w/2+m && Math.abs(z-ob.z)<ob.d/2+m){ const h = ob.h||0; if(h > f) f = h; } }
+  }
   return f;
 }
 function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e8?f:0; }

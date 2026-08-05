@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.830.0-hazards-scatter';
+const VERSION3D='1.831.0-haz-fairness';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7226,9 +7226,15 @@ function hazUpdate(dt){
     if(G.rubT<=0){ G.rubT=2.2+Math.random()*2.0;
       /* Lands NEAR you, never ON you: offset far enough that standing still is survivable and
          walking a straight line is not. A hazard you cannot dodge is just a damage tax. */
-      const a=Math.random()*6.283, rr=110+Math.random()*180;
-      const x=p.x+Math.cos(a)*rr, z=p.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
-      if(h>-1e8) G.debris.push({x,z,y:h,warn:1.15,r:64});
+      /* Not on a ledge: the hit knocks you away from the impact, and on a causeway that is a fall
+         rather than a wound. SIX candidate spots per strike, because the timer above has already
+         reset - a single rejected spot would cost the whole cycle, and in the ledge-heavy stretches
+         of the keep (where only ~40% of spots pass the footing test) the hazard would quietly stop
+         happening in exactly the places it is most atmospheric. */
+      for(let k=0;k<6;k++){
+        const a=Math.random()*6.283, rr=110+Math.random()*180;
+        const x=p.x+Math.cos(a)*rr, z=p.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
+        if(h>-1e8 && openFooting(x,z,90)){ G.debris.push({x,z,y:h,warn:1.15,r:64}); break; } }
     }
     for(const d of (G.debris||[])){
       if(d.warn>0){ d.warn-=dt;
@@ -7285,10 +7291,15 @@ function hazSetup(rnd){                                  // place whatever the z
     /* Patches sit BETWEEN rooms as often as in them, because a thorn patch inside an arena is a
        nuisance during a fight and a thorn patch on the route is a decision about your line. */
     for(const r of G.rooms){ const n=1+Math.floor(rnd()*3);
-      for(let i=0;i<n;i++){ const a=rnd()*6.283, rr=(r.w/2)*(0.4+rnd()*1.1);
-        const x=r.x+Math.cos(a)*rr, z=r.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
-        if(h<-1e8) continue;
-        G.thorns.push({x,z,y:h,r:56+rnd()*46}); } }
+      for(let i=0;i<n;i++){
+        /* Four tries per patch. The footing guard is right but expensive - one try per patch halved
+           the Outskirts from 13 patches to 6, which trades one fairness bug for a limp hazard. */
+        for(let k=0;k<4;k++){
+          const a=rnd()*6.283, rr=(r.w/2)*(0.4+rnd()*1.1);
+          const x=r.x+Math.cos(a)*rr, z=r.z+Math.sin(a)*rr, h=surfaceHeightAt(x,z,20);
+          if(h<-1e8) continue;
+          if(!openFooting(x,z,110)) continue;   // never on the run-up to a gap: the slow eats the jump
+          G.thorns.push({x,z,y:h,r:56+rnd()*46}); break; } } }
   } else if(G.haz==='rubble'){
     /* Debris falls near the PLAYER, not at fixed points - a ruin that only collapses in three
        places is a trap layout, and you learn it once and never look up again. Zones are picked
@@ -7312,6 +7323,21 @@ function hazSetup(rnd){                                  // place whatever the z
     for(const tc of (G.torches||[])) G.lights.push({x:tc.x,z:tc.z,y:tc.y||0,r:260});
   }
 }
+/* Is there ground all around this point, or is it a ledge/bridge/rim?
+   Two of the new hazards are unfair on narrow footing in ways that are invisible from the code:
+   Collapse knocks you AWAY from where the masonry lands, and on a causeway over the Abyss that is
+   a death rather than a hit; Thornwild cuts top speed by a third, and a patch on the run-up to a
+   gap silently makes that gap unclearable. Neither is a bug you would ever diagnose while playing -
+   it reads as "the game killed me unfairly" - so both now refuse to place on anything but open
+   ground. Eight compass points at the radius the hazard actually reaches. */
+function openFooting(x, z, rad){
+  for(let i = 0; i < 8; i++){
+    const a = (i/8)*6.283;
+    if(surfaceHeightAt(x + Math.cos(a)*rad, z + Math.sin(a)*rad, 16) < -1e8) return false;
+  }
+  return true;
+}
+
 /* Rooms created AFTER hazSetup ran get their hazard furniture here.
    Castle Duskmoor reported 6 lights for 10 rooms, and I first blamed a ground check at the room
    centre - a real flaw, fixed above, that changed the count not at all. The actual cause is
@@ -7333,6 +7359,27 @@ function hazTopUp(rnd){
       const h = surfaceHeightAt(r.x, r.z, 20);
       G.lights.push({x:r.x, z:r.z, y:h > -1e8 ? h : (r.y||0), r:300}); n++;
     }
+    /* LANTERNS ALONG THE ROUTE, so no dark crossing is longer than you can survive.
+       Measured before adding them: Castle Duskmoor's worst unlit run was 1560 units with 57% of the
+       route dark, while the gloom bites after 3.5s - about 770 units at run speed. The zone was not
+       offering a decision, it was charging damage twice over on the longest stretch, which is
+       exactly how a hazard reads as tedious rather than tense.
+       Lights go in at 520, a margin under 770, so a dark crossing still COSTS something to commit
+       to and never costs more than you have. */
+    const rr2 = G.rooms.filter(r => r && r.w);
+    for(let i = 0; i + 1 < rr2.length; i++){
+      const a = rr2[i], b = rr2[i+1];
+      const d = Math.hypot(b.x-a.x, b.z-a.z); if(d < 200) continue;
+      const steps = Math.max(1, Math.round(d/60));
+      let cur = 0;
+      for(let k = 0; k <= steps; k++){
+        const t = k/steps, x = a.x + (b.x-a.x)*t, z = a.z + (b.z-a.z)*t;
+        if(G.lights.some(L => dXZ(L.x, L.z, x, z) < L.r)){ cur = 0; continue; }
+        cur += 60;
+        if(cur >= 520){ const h = surfaceHeightAt(x, z, 20);
+          G.lights.push({x, z, y:h > -1e8 ? h : 0, r:300}); n++; cur = 0; }
+      }
+    }
   } else if(G.haz === 'lava'){
     for(const r of G.rooms){
       if((G.vents||[]).some(v => dXZ(v.x, v.z, r.x, r.z) < r.w/2)) continue;
@@ -7341,9 +7388,10 @@ function hazTopUp(rnd){
   } else if(G.haz === 'bramble'){
     for(const r of G.rooms){
       if((G.thorns||[]).some(t => dXZ(t.x, t.z, r.x, r.z) < r.w)) continue;
-      const a = R()*6.283, rr = (r.w/2)*(0.4 + R()*0.8);
-      const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr, h = surfaceHeightAt(x, z, 20);
-      if(h > -1e8){ G.thorns.push({x, z, y:h, r:56 + R()*46}); n++; }
+      for(let k = 0; k < 4; k++){
+        const a = R()*6.283, rr = (r.w/2)*(0.4 + R()*0.8);
+        const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr, h = surfaceHeightAt(x, z, 20);
+        if(h > -1e8 && openFooting(x, z, 110)){ G.thorns.push({x, z, y:h, r:56 + R()*46}); n++; break; } }
     }
   }
   return n;
@@ -15763,11 +15811,20 @@ function render(t){
     for(let i=1;i<=14;i++){ const rr=i*260;
       bx(o.x+Math.cos(A)*rr, 2, o.z+Math.sin(A)*rr, 70+rr*0.16,3,70+rr*0.16,
          '#6a5a20','#ffe9a0', G.glareNear?0.5:0.34); } }
-  if(G.haz==='gloom' && !G.inLight){                   // Duskmoor Gloom: the ring of safety you just left
+  if(G.haz==='gloom'){                                 // Duskmoor Gloom
+    /* The lights are drawn ALWAYS, not only once the dark is already biting. They were invisible
+       positions at first - you cannot route toward a safe place you cannot see, which turns a
+       navigation hazard into a guessing game. A standing brazier marks each one from across the
+       level; the ring on the ground only appears once you are out in the dark and need to know
+       exactly where the edge is. */
     const gl=Math.min(1,(G.gloomT||0)/3.5);
-    for(const L of (G.lights||[])){ if(dXZ(L.x,L.z,G.p.x,G.p.z)>1500) continue;
-      const n=14; for(let i=0;i<n;i++){ const a=(i/n)*6.283;
-        bx(L.x+Math.cos(a)*L.r, L.y+1.5, L.z+Math.sin(a)*L.r, 26,2,26, '#3a2f14','#ffd88a',0.2+gl*0.45); } } }
+    for(const L of (G.lights||[])){ if(dXZ(L.x,L.z,G.p.x,G.p.z)>2200) continue;
+      const fl=0.82+0.18*Math.sin(t*3.1+L.x*0.01);
+      bx(L.x, L.y+16, L.z, 13,32,13, '#2a2118','#4a3a26', 0.5);          // the post
+      bx(L.x, L.y+40, L.z, 22,16,22, '#7a5a20','#ffd88a', fl);            // the flame bowl
+      bx(L.x, L.y+54, L.z, 12,12,12, '#ffb347','#fff0c0', fl);            // the flame
+      if(!G.inLight){ const n=14; for(let i=0;i<n;i++){ const a=(i/n)*6.283;
+        bx(L.x+Math.cos(a)*L.r, L.y+1.5, L.z+Math.sin(a)*L.r, 26,2,26, '#3a2f14','#ffd88a',0.2+gl*0.45); } } } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
   if(G.secretTrigger && !G.secretTrigger.done){        // the trigger rune: a dim, easily-missed floor glyph in a dead end

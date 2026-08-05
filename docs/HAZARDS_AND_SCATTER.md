@@ -177,6 +177,37 @@ Every zone now carries at least its proportional share of enemies in the open, w
 one of them was a chain of arenas. Clumpiness stayed between 0.32 and 0.66 throughout, so the packs
 are still packs - the pass added presence without flattening the distribution, which was the risk.
 
+## Fairness audit (before the playtest, not after)
+
+A hazard can be unfair rather than merely unfun, and unfairness is measurable without playing. Three
+checks, run before Oliver touched any of it:
+
+**Castle Duskmoor forced damage.** The gloom bites after 3.5s, about 770 units at run speed. The
+longest unlit stretch on the route was 1560 - more than twice survivable - with 57% of the route
+dark. The zone was not offering a decision, it was charging damage twice over on the worst crossing,
+which is exactly how a hazard reads as tedious rather than tense. Lanterns now go in along the route
+wherever a dark run would exceed 520. Worst run 1560 -> 480, dark share 57% -> 27%: still a hazard,
+no longer a tax.
+
+**The lights were invisible.** They were positions with a radius and no model. You cannot route
+toward a safe place you cannot see, which turns a navigation hazard into a guessing game. Each is
+now a standing brazier visible from across the level; the ground ring still only appears once you
+are out in the dark and need the exact edge.
+
+**Narrow footing.** Collapse knocks you AWAY from the impact, so on a causeway it is a death rather
+than a hit; Thornwild cuts top speed by a third, so a patch on the run-up to a gap silently makes
+that gap unclearable. Neither is diagnosable while playing - both read as "the game killed me
+unfairly". `openFooting()` now refuses both on anything but open ground.
+
+That guard cost coverage the moment it went in: the Outskirts fell from 13 thorn patches to 6, and
+only ~40% of debris spots passed - and because the strike timer resets BEFORE the placement attempt,
+a rejected spot burned a whole cycle, so the keep would have quietly stopped collapsing in the
+ledge-heavy stretches where it is most atmospheric. Retries fixed both: 19 thorn patches, none on a
+ledge, and six candidate spots per collapse.
+
+Trading a fairness bug for a limp hazard is not a fix, and the second measurement is the only reason
+that did not ship.
+
 ## Still unverified
 
 Nothing here has been played. The passes are measurable and measured; what they FEEL like is not

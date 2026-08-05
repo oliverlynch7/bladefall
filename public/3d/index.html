@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.861.0-classpick';
+const VERSION3D='1.862.0-stakes';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11659,7 +11659,22 @@ function die(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ fd.style.opacity='1'; }));
   setTimeout(showDeathScreen, 2000);
 }
-function reviveAtStart(){   // TEMP (playtesting): shrug off the death and respawn at the level start — the run continues, nothing is wiped
+/* PLAYTEST REVIVE — free, unlimited, and until now shown on EVERY difficulty.
+   That included Hardcore and Hitless, whose entire premise is that you get one life. A free revive
+   button on those screens does not weaken them, it deletes them - and it removed the stake from
+   Normal too, which is the difference between a roguelite and a walk.
+   It stays, because Oliver is actively testing and needs to shrug off a death without re-running a
+   zone. But it is now:
+     - NEVER offered on Hardcore or Hitless. Those modes ARE the absence of this button.
+     - a toggle he owns (the Tinkerer's bench), so he can turn stakes on when he wants to feel the
+       game as a player rather than test it as a builder.
+     - labelled as what it is, so it can never be mistaken for an earned mechanic.
+   This is the one thing in this file I would call a release blocker if it shipped as it was. */
+function playtestReviveOn(){
+  if(isPermadeath() || isHitless()) return false;    // the mode is defined by not having this
+  return meta.ptRevive !== false;                     // default ON for now: do not break his workflow
+}
+function reviveAtStart(){   // playtesting aid: shrug off the death and respawn at the level start
   const fd=document.getElementById('deathfade'); if(fd) fd.remove();
   const p=G.p; p.dead=false; p.downed=false; p.hp=effMaxHp(p); p.invuln=2.0; G.lastHitBy=null;
   const sp=G.startPos||{x:0,z:0}; p.x=sp.x; p.z=sp.z; p.y=(sp.y||0)+30; p.vx=p.vy=p.vz=0; p.onGround=false;
@@ -11682,9 +11697,9 @@ function showDeathScreen(){
     <p class="ovsub">${Z.icon} ${G.areaName||Z.name} · Level ${G.p.level}</p>
     <p class="ovsub" style="margin:8px auto 4px;max-width:520px;font-size:16px">${cause}</p>
     <div class="statgrid" style="margin-top:10px"><div class="vsrow" style="display:block;text-align:center;line-height:1.55"><span>${next}</span></div></div>
-    <button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest</span></button>
+    ${playtestReviveOn()?`<button class="bigbtn ghost" id="reviveBtn" style="margin-top:14px;color:#8fe8a0;border-color:#2c5a3c">↻ Revive at level start <span style="opacity:.65;font-size:12px">· playtest aid, not a game mechanic</span></button>`:''}
     <button class="bigbtn" id="hubBtn" style="margin-top:8px">${hubBtnLabel()}</button></div>`);
-  document.getElementById('reviveBtn').onclick=reviveAtStart;
+  { const rb=document.getElementById('reviveBtn'); if(rb) rb.onclick=reviveAtStart; }
   document.getElementById('hubBtn').onclick=()=>{ if(perma) wipeMode(MODE); else restoreBank(); persist();   // commit the loss only when you accept it
     const fd=document.getElementById('deathfade'); if(fd) fd.remove(); openHub(); };
 }
@@ -13069,10 +13084,16 @@ function openCheatMenu(back){
     <div class="pgrid">${btn('cGold1','💰 +1,000g')}${btn('cGold10','💰 +10,000g')}${btn('cLv1','▲ +1 Level')}${btn('cLv5','▲ +5 Levels')}${btn('cLv10','▲ +10 Levels')}${btn('cRank','★ Rank 10')}</div>
     <div class="sect">Gear vault — rarity: <b style="color:${rc}">${rarityIcon(_cheatRar)} ${RARITY[_cheatRar].name}</b></div>
     <div class="pgrid">${btn('cRar',rarityIcon(_cheatRar)+' Rarity: '+RARITY[_cheatRar].name,'border-color:'+rc)}${btn('cWeap','⚔ Grant EVERY weapon')}${btn('cArmor','🛡 Grant EVERY armor type')}${btn('cKit','✦ Kit me out (full Legendary)')}</div>
+    <!-- STAKES. The free revive is a testing aid, and a testing aid that is always on quietly
+         removes the reason to play carefully. This is the switch that gives the game its teeth
+         back when Oliver wants to feel it rather than test it. -->
+    <div class="sect">Stakes · death currently <b style="color:${meta.ptRevive===false?'#ff8a82':'#8fe8a0'}">${meta.ptRevive===false?'COSTS YOU THE RUN':'free to shrug off'}</b></div>
+    <div class="pgrid">${btn('cRevive',(meta.ptRevive===false?'💀 Free revive: OFF — real stakes':'↻ Free revive: ON — playtest'),'border-color:'+(meta.ptRevive===false?'#ff8a82':'#8fe8a0'))}</div>
     <div class="sect">Unlocks &amp; conveniences</div>
     <div class="pgrid">${btn('cClass','⚔️ Unlock all classes')}${btn('cRank10All','★ Rank 10 ALL classes')}${btn('cPets','🐾 Grant all pets')}${btn('cZones','🗺 Open every Gate')}${btn('cAll','🔮 Open ALL + purple rifts')}${btn('cReset','↺ Reset all class ranks')}${btn('cHeal','❤️ Full heal')}${btn('cEnd','🕳️ Abyssal best → 15')}</div>
     <button class="bigbtn ghost" id="cBack" style="margin-top:12px">Back</button></div>`);
   const wire=(id,fn)=>{ const el=document.getElementById(id); if(el) el.onclick=fn; };
+  wire('cRevive',()=>{ meta.ptRevive=(meta.ptRevive===false); persistGlobal(); openCheatMenu(back); });
   wire('cGold1',()=>{cheatGold(1000);openCheatMenu(back);}); wire('cGold10',()=>{cheatGold(10000);openCheatMenu(back);});
   wire('cLv1',()=>{cheatLevels(1);openCheatMenu(back);}); wire('cLv5',()=>{cheatLevels(5);openCheatMenu(back);}); wire('cLv10',()=>{cheatLevels(10);openCheatMenu(back);});
   wire('cRank',()=>{cheatRankUp();openCheatMenu(back);});

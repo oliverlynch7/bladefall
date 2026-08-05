@@ -1330,7 +1330,15 @@ function playFor(p){
   const airborne = p.onGround === false;
   const want = p.dead ? 'Death'
              : (p.attackTimer > 0 || p.swingT > 0) ? 'Sword_Attack'
-             : p.dodgeTimer > 0 ? 'Roll'
+             /* THE DODGE IS NO LONGER A ROLL.
+                Oliver: "instead of the whole roll animation, becuase it happens too fast... its
+                like i phase forward and i see a trail of my previous selves dragging behind like
+                some sort of anime speed thing."
+                A 0.2s window is too short to read a tumble even time-scaled - the eye gets one
+                blurred shape. So the dodge keeps the character UPRIGHT and sells the speed with an
+                afterimage trail instead (see the echo pass in the game's draw loop). Upright also
+                keeps the weapon and silhouette legible through the dash, which a roll destroys. */
+             : p.dodgeTimer > 0 ? (moving ? 'Run' : 'Idle')
              : airborne ? 'Roll'
              : moving ? (Math.hypot(p.vx||0, p.vz||0) > 120 ? 'Run' : 'Walk')
              : 'Idle';
@@ -1563,8 +1571,37 @@ window.__hero3dAt = (key, o) => {
       node.name = '__heroPose:' + key;
       node.traverse(n => { if(n.isMesh){ n.frustumCulled = false; n.castShadow = false; } });
       scene.add(node);
-      rec = { node };
+      rec = { node, ghosted: false };
       _poses.set(key, rec);
+    }
+    /* GHOST MODE - the afterimage trail.
+       SkeletonUtils.clone SHARES materials with the source, so turning a pose translucent would
+       turn the actual hero translucent with it. The materials are cloned once, the first time a key
+       is asked to be a ghost, and only for that key. Doing it lazily matters: the mirror, the title
+       screen and the paper-doll all use this same function and none of them should pay for it. */
+    if(o.ghost != null && !rec.ghosted){
+      rec.ghosted = true; rec.mats = [];
+      rec.node.traverse(n => {
+        if(!n.isMesh || !n.material) return;
+        const src = Array.isArray(n.material) ? n.material : [n.material];
+        const cl = src.map(m => {
+          const c = m.clone();
+          c.transparent = true; c.depthWrite = false;
+          /* Emissive rather than plain alpha: a flat translucent copy reads as a rendering fault,
+             a glowing one reads as an afterimage. */
+          if(c.emissive) c.emissive.setHex(0x6aa8ff);
+          return c;
+        });
+        n.material = Array.isArray(n.material) ? cl : cl[0];
+        rec.mats.push.apply(rec.mats, cl);
+      });
+    }
+    if(rec.ghosted && rec.mats){
+      const a = Math.max(0, Math.min(1, o.ghost != null ? o.ghost : 1));
+      for(const m of rec.mats){
+        m.opacity = a;
+        if(m.emissiveIntensity != null) m.emissiveIntensity = 0.35 + a * 0.9;
+      }
     }
     rec.node.visible = true;
     const sc = HERO3D.scale * (o.scale != null ? o.scale : 1);

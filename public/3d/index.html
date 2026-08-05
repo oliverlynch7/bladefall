@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.860.0-onboarding';
+const VERSION3D='1.861.0-classpick';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1999,6 +1999,28 @@ const CLASSES={
 };
 const CLASSIDS=Object.keys(CLASSES);
 const STARTERS=CLASSIDS.filter(c=>!CLASSES[c].earned);
+/* HOW THE THREE STARTERS ACTUALLY PLAY.
+   The creation screen offered a name, an icon and a list of weapon families - "sword · great · axe"
+   - which describes what a class HOLDS, not what it is like to play. A first-time player was
+   picking between three strangers on the strength of a noun.
+
+   Each line below is about the button you will press a thousand times, because that, and not the
+   skill list, is what the next hour actually feels like. Written from the basic attack and the
+   innate, both of which already exist in CLASS_BASIC and CLASS2 and neither of which the player
+   was ever shown. */
+const STARTER_FEEL = {
+  warrior:{ tag:'Close, heavy, forgiving',
+            feel:'Stay in their face. Hits on the SAME enemy build up, and the third staggers it — so commit to one target rather than spreading damage.',
+            good:'the most durable start, and the least punishing to learn on' },
+  ranger:{  tag:'Ranged, mobile, precise',
+            feel:'Fight at range and keep moving. Standing still sharpens your aim into extra damage — so it rewards short, deliberate pauses.',
+            good:'safest against the things that hurt most, if you can keep your spacing' },
+  mage:{    tag:'Fragile, slow, devastating',
+            feel:'Huge damage, very little health. Standing still charges your power, so it becomes a series of decisions about when it is safe to stop.',
+            good:'the highest damage in the game and the smallest margin for error' },
+};
+
+
 /* ============================================================================
    CLASS SYSTEM v2 (finalized) — rank 1-10 choice progression.
    Rank 1 = innate trait only. Ranks 2/4/6/8 = pick 1-of-2 SKILLS (slots 0-3).
@@ -13149,12 +13171,32 @@ function openCharCreate(){
   const st={cls:STARTERS[0],name:meta.heroName||'',eye:meta.eyeColor||'#8fd0ff'};
   let pvYaw=0.5, pvDrag=null, pvRaf=0;
   function render(){
+    /* The card now answers "what is this like to play", not "what does it hold". The innate is
+       pulled from CLASS2 rather than retyped, so it can never drift from the one the game grants. */
     const classCards=STARTERS.map(cid=>{ const C=CLASSES[cid],on=st.cls===cid;
-      return `<button class="ccpick ${on?'on':''}" data-cls="${cid}"><b>${C.icon} ${C.disp}</b><span>${C.family.join(' · ')}</span></button>`; }).join('');
+      const F=STARTER_FEEL[cid]||{}, IN=(CLASS2[cid]&&CLASS2[cid].innate)||null;
+      return `<button class="ccpick ${on?'on':''}" data-cls="${cid}">`
+        +`<b>${C.icon} ${C.disp}</b>`
+        +`<span class="cctag">${F.tag||C.family.join(' · ')}</span>`
+        +`<span class="ccfeel">${F.feel||''}</span>`
+        +(IN?`<span class="ccinn"><i>Always:</i> ${IN.d}</span>`:'')
+        +`<span class="ccfam">${C.family.join(' · ')}</span>`
+        +`</button>`; }).join('');
     const eyeSw=EYES.map(c=>`<button class="ccsw ${st.eye===c?'on':''}" data-eye="${c}" style="background:${c}"></button>`).join('');
 
     showOverlayHTML(`<style>
       .cc .cclbl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin:12px 0 5px}
+      .cc .ccpick{display:flex;flex-direction:column;gap:4px;text-align:left;padding:11px 13px;max-width:250px}
+      .cc .ccpick .cctag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);opacity:.85}
+      .cc .ccpick .ccfeel{font-size:12.5px;line-height:1.45;opacity:.86;white-space:normal}
+      .cc .ccpick .ccinn{font-size:11.5px;line-height:1.4;opacity:.62;white-space:normal}
+      .cc .ccpick .ccinn i{color:var(--amber);opacity:.8;font-style:normal}
+      .cc .ccpick .ccfam{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.4}
+      .cc .ccreassure{font-size:12px;opacity:.62;margin:9px 0 0;line-height:1.5}
+      /* Short screens: the enriched cards are tall enough to push the confirm button past the
+         fold at 720p, so the panel scrolls instead of hiding its own primary action. */
+      .cc{max-height:88vh;overflow-y:auto}
+      .cc .ccpick .ccfeel{font-size:12px}
       .cc .ccrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
       .ccname input{width:100%;padding:11px 14px;font-size:16px;text-align:center;background:rgba(10,9,14,.7);border:1px solid #3d3123;border-radius:10px;color:#ffe6ad;letter-spacing:.06em}
       .ccname input:focus{outline:none;border-color:var(--amber)}
@@ -13173,6 +13215,11 @@ function openCharCreate(){
       <div class="ccprev" id="ccPrev"><canvas id="ccPrevC"></canvas><div class="ccprevhint">drag to turn</div></div>
       <div class="cclbl">Name</div><div class="ccname"><input id="ccName" maxlength="20" placeholder="Name your Warden" value="${htmlSafe(st.name)}"></div>
       <div class="cclbl">Class</div><div class="ccrow">${classCards}</div>
+      <!-- The single most valuable sentence on this screen. The pick was ALREADY reversible - the
+           Drillmaster in the hub swaps your class, and thirteen more are earned through trials -
+           but nothing said so, which turned a reversible choice into an anxious one. Telling the
+           player costs a line and removes the whole problem. -->
+      <p class="ccreassure">Not permanent — the Drillmaster in the Waystation swaps your class for free, and thirteen more are earned by clearing trials.</p>
       <div class="cclbl">Eye Colour</div><div class="ccrow">${eyeSw}</div>
       <button class="bigbtn" id="ccBegin" style="margin-top:15px">⚔ Begin Your Legend</button>
       <button class="bigbtn ghost" id="ccBack">Back</button></div>`);

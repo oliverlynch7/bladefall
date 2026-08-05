@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.840.0-verbs-mobs-teach';
+const VERSION3D='1.850.0-systems-pass';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2365,6 +2365,62 @@ function makeElite(e){                                    // elites: zone minibo
   e.r*=1.18; e.h*=1.12; e.xp=Math.round(e.xp*3); e.speed*=1.08; e.label='Elite';   // the budget goes to BEHAVIOR: faster, and (chargers) a tighter attack cadence via e.elite
   return e;
 }
+/* ── AFFIXES ────────────────────────────────────────────────────────────────
+   Before this, a weapon's RARITY changed exactly one number: dmg = base * rarity.mul, plus 5%
+   lifesteal if it happened to be legendary. A legendary was a common with a bigger number, which
+   is why picking one up is a menu comparison rather than an event - nothing about how you FIGHT
+   changed, so there was nothing to be excited about.
+
+   Every affix here drives a field the combat code already reads (dmg, cd, kb, lifesteal, el), so
+   none of this needs new combat machinery - it needs the weapon to be more than a stat line.
+   Rarity now buys you a COUNT of affixes, not just a multiplier, which is what makes a rare with
+   two good rolls worth keeping over an epic with one bad one. That comparison is the whole point:
+   loot is interesting exactly when the answer is not obvious from the colour. */
+const AFFIXES = [
+  {id:'keen',    n:'Keen',      w:10, d:'+18% damage',            ap:w=>{ w.dmg=+(w.dmg*1.18).toFixed(1); }},
+  {id:'swift',   n:'Swift',     w:10, d:'+15% attack speed',      ap:w=>{ w.cd=+(w.cd*0.85).toFixed(3); }},
+  {id:'heavy',   n:'Heavy',     w: 9, d:'+70% knockback, -8% speed', ap:w=>{ w.kb=Math.round((w.kb||0)*1.7); w.cd=+(w.cd*1.08).toFixed(3); }},
+  {id:'vampiric',n:'Vampiric',  w: 7, d:'+4% lifesteal',          ap:w=>{ w.lifesteal=+(((w.lifesteal||0)+0.04)).toFixed(3); }},
+  {id:'cruel',   n:'Cruel',     w: 8, d:'+30% damage, -10% speed',ap:w=>{ w.dmg=+(w.dmg*1.30).toFixed(1); w.cd=+(w.cd*1.10).toFixed(3); }},
+  {id:'balanced',n:'Balanced',  w: 8, d:'+9% damage and speed',   ap:w=>{ w.dmg=+(w.dmg*1.09).toFixed(1); w.cd=+(w.cd*0.91).toFixed(3); }},
+  /* ELEMENTAL affixes only land on weapons with no element of their own. A fire staff that rolls
+     "Frostbitten" would be lying about what comes out of it. */
+  {id:'burning', n:'Burning',   w: 6, d:'deals fire damage',      el:true, ap:w=>{ w.el='fire';   w.blade='#ff8a3a'; }},
+  {id:'frozen',  n:'Frostbitten',w:6, d:'deals ice damage',       el:true, ap:w=>{ w.el='ice';    w.blade='#9fd8ff'; }},
+  {id:'venomous',n:'Venomous',  w: 6, d:'deals poison damage',    el:true, ap:w=>{ w.el='poison'; w.blade='#9fd84a'; }},
+  {id:'profane', n:'Profane',   w: 5, d:'deals void damage',      el:true, ap:w=>{ w.el='void';   w.blade='#c07bff'; }},
+  {id:'brutal',  n:'Brutal',    w: 5, d:'+45% damage, -18% speed',ap:w=>{ w.dmg=+(w.dmg*1.45).toFixed(1); w.cd=+(w.cd*1.18).toFixed(3); }},
+  {id:'quick',   n:'Quickened', w: 5, d:'+28% attack speed, -10% damage', ap:w=>{ w.cd=+(w.cd*0.72).toFixed(3); w.dmg=+(w.dmg*0.90).toFixed(1); }},
+];
+/* How many a rarity rolls. This is the real reason to want a higher tier now - and why a Rare can
+   beat an Epic, which is the comparison that makes a loot system worth having. */
+const AFFIX_COUNT = {common:0, uncommon:1, rare:1, epic:2, legendary:3, none:0};
+
+function rollAffixes(w, rid, rnd){
+  const R = rnd || Math.random;
+  const want = AFFIX_COUNT[rid] || 0;
+  if(!want) return w;
+  const taken = [];
+  for(let k = 0; k < want; k++){
+    /* Weighted pick, excluding anything already rolled and any elemental affix on a weapon that
+       already has an element of its own. */
+    const pool = AFFIXES.filter(a => taken.indexOf(a.id) < 0 && !(a.el && w.el));
+    if(!pool.length) break;
+    let total = 0; for(const a of pool) total += a.w;
+    let r = R()*total, pickA = pool[pool.length-1];
+    for(const a of pool){ r -= a.w; if(r <= 0){ pickA = a; break; } }
+    taken.push(pickA.id);
+    pickA.ap(w);
+    /* Same shape armour already uses (`affixes` with a `label`), so the loot card and the bag
+       render these with the code that is already there rather than a second convention. */
+    (w.affixes = w.affixes || []).push({label: pickA.n + ' · ' + pickA.d, n: pickA.n});
+  }
+  /* The FIRST affix renames the weapon, so what it does is legible before you open anything -
+     "Keen Rare Sword" tells you more at a glance than a colour does. */
+  if(w.affixes && w.affixes.length) w.name = w.affixes[0].n + ' ' + w.name;
+  return w;
+}
+
 function makeWeapon(aid,rid,nameOverride){
   const a=ARCHES[aid],r=RARITY[rid];
   const w={arche:aid,art:a.art,cls:a.cls,sch:a.sch,el:a.el||null,rarity:rid,chg:a.chg||null,reaper:a.reaper||false,anyClass:!!a.anyClass,ians:!!a.ians,
@@ -2374,6 +2430,9 @@ function makeWeapon(aid,rid,nameOverride){
     color:r.color, blade:(a.sch==='mag'?(elementColor(a.el)||'#c9a6ff'):'#dfe5ec')};
   if(a.ians){ w.name=iansBladeName(); w.blade='#fff4ae'; w.color='#ffd24a'; }   // name hidden as "??? 's Blade" until reforged
   if(a.cls==='melee'){ w.range=a.range; } else { w.proj=Object.assign({},a.proj); }
+  /* Ian's Blade is authored, not rolled - it is the one weapon in the game whose identity is the
+     story rather than the dice. */
+  if(!a.ians && !nameOverride) rollAffixes(w, rid);
   return w;
 }
 function startWeapon(){ const w=makeWeapon('sword','common','Rusty Sword'); w.dmg=9; w.blade='#bcae8a'; return w; }
@@ -11400,6 +11459,7 @@ function renderLootCard(){ const d=G&&G.lootCard, el=document.getElementById('lo
   let rows='',aff='',typ='';
   if(kind==='weapon'){ const cur=p.weapon||{dmg:0,cd:.4,range:0}; typ=weapFamily(it)+' · '+weapClassName(it);
     rows=numRow('Damage',cur.dmg,it.dmg)+numRow('Speed',(+(cur.cd||0)).toFixed(2),(+(it.cd||0)).toFixed(2),true)+numRow('Range',cur.range||0,it.range||0);
+    rows+=(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join('');
     const e2=normEl(it.el); if(e2) aff=`<div class="lcaff" style="color:${elementColor(e2)}">${affIcon(e2)} ${affName(e2)} · ${affStatus(e2)}</div>`; if(it.lifesteal) aff+=`<div class="lcaff" style="color:#ff9ab0">🩸 ${Math.round(it.lifesteal*100)}% lifesteal</div>`; }
   else if(kind==='armor'){ const cur=(p.gear&&p.gear[it.slot])||{defense:0}; typ=((SLOTS&&SLOTS[it.slot]?SLOTS[it.slot].label:it.slot)||'armor');
     rows=numRow('Defense',cur.defense||0,it.defense||0)+(it.affixes||[]).map(a=>`<div class="lcrow"><span>Bonus</span><b class="up">${a.label}</b></div>`).join(''); }

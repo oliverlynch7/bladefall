@@ -113,7 +113,7 @@ const PROP_SETS = {
                'qprops/Pot_1', 'qprops/Vase_2', 'qprops/Vase_4', 'qprops/Bucket_Wooden_1'],
   smithProp:  ['qprops/Anvil', 'qprops/Anvil_Log', 'qprops/Workbench', 'qprops/WeaponStand',
                'qprops/Sword_Bronze', 'qprops/Axe_Bronze', 'qprops/Shield_Wooden'],
-  yardProp:   ['qprops/Dummy', 'qprops/WeaponStand', 'qprops/Cage_Small', 'qprops/Chain_Coil'],
+  yardProp:   ['qprops/Dummy', 'qprops/WeaponStand', 'qprops/Cage_Small'],   // Chain_Coil removed: it is a floor coil, and fitted to a yard-fixture height it read as a gallows
   scholarProp:['qprops/Bookcase_2', 'qprops/Book_Stack_1', 'qprops/Scroll_1', 'qprops/CandleStick_Triple',
                'qprops/Potion_1', 'qprops/Potion_2', 'qprops/Cauldron'],
   seating:    ['qprops/Bench', 'qprops/Stool', 'qprops/Chair_1', 'qprops/Table_Large'],

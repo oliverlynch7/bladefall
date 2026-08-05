@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.887.0-slice-fits';
+const VERSION3D='1.890.0-hub-redesign';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -8219,12 +8219,20 @@ function dodgeEchoDraw(keep){
    threshold that makes the voxel renderer skip what it should still draw. That is the next thing to
    check - compare the exclusion branch with hubAsset at 0 versus 110.
    Flipping this to true is the whole switch. Oliver's Waystation is untouched while it is false. */
-const HUB_REDESIGN = false;
+const HUB_REDESIGN = true;
 
+const HUB_PARTS = 5;   // all five sections
 function hubRedesign(){
   if(!G || !G.hub || !HUB_REDESIGN) return 0;
-  const A = (set, x, z, y0, w, h, d, ry) =>
-    G.deco.push({ kind:'asset', set:set, x:x, z:z, y0:y0||0, w:w, h:h, d:d, ry:ry||0, lead:true });
+  /* `c` IS NOT OPTIONAL. Every deco entry is eventually passed to col3(), which does
+     hex.replace('#','') - so an entry without a colour throws on undefined, and because that
+     happens inside the deco draw LOOP it takes the whole frame with it. That is why the hub
+     rendered as empty ground rather than just missing these props: one bad entry blanked
+     everything after it. The colour is also a real fallback - it is what draws if a model fails
+     to load. */
+  const A = (set, x, z, y0, w, h, d, ry, c) =>
+    G.deco.push({ kind:'asset', set:set, x:x, z:z, y0:y0||0, w:w, h:h, d:d, ry:ry||0,
+                  c:c || '#8a7a5e', lead:true });
   let n = 0;
 
   /* ---- 1. THE GATE WALL -------------------------------------------------
@@ -8255,6 +8263,7 @@ function hubRedesign(){
     A('vine', vx, WALLZ + 36, 60, 40, 130, 20); n++;
   }
 
+  if(HUB_PARTS<2) return n;
   /* ---- 2. THE RAISED PLAZA ---------------------------------------------
      A dais under the waystone. Kept low (18) so it never becomes a step you fight while walking to
      a shop, and ringed with light so the centre is the brightest thing in the hub. */
@@ -8268,12 +8277,13 @@ function hubRedesign(){
     const a = (k/8) * 6.283, rr = 300;
     const lx = Math.cos(a)*rr, lz = 30 + Math.sin(a)*rr;
     if(lz > 150 && Math.abs(lx) < 220) continue;          // the way in
-    A('lightProp', lx, lz, 18, 26, 90, 26); n++;
+    A('lightProp', lx, lz, 18, 20, 62, 20, 0, '#3a2f1c'); n++;
   }
   for(const sx of [-1, 1]) for(const sz of [-1, 1]){
     A('railing', sx*300, 30 + sz*150, 18, 24, 60, 120, Math.PI/2); n++;
   }
 
+  if(HUB_PARTS<3) return n;
   /* ---- 3. MARKET ROW, WEST ----------------------------------------------
      An arcade the shops sit under, so the Quartermaster, Smith and Stylist share a roofline instead
      of standing alone on grass. */
@@ -8284,12 +8294,13 @@ function hubRedesign(){
   }
   A('roofTile', -720, 110, 210, 260, 70, 560); n++;
   const westProps = [[-620,-190],[-620,240],[-560,-230],[-660,60],[-600,300],[-700,-120]];
-  for(const q of westProps){ A('marketProp', q[0], q[1], 0, 46, 52, 46); n++; }
-  A('smithProp', -560, 150, 0, 60, 60, 60); n++;
-  A('smithProp', -620, 190, 0, 50, 55, 50); n++;
-  A('wagon', -470, 330, 0, 120, 80, 80); n++;
-  A('seating', -470, -170, 0, 70, 40, 50); n++;
+  for(const q of westProps){ A('marketProp', q[0], q[1], 0, 40, 40, 40, 0, '#6d5535'); n++; }
+  A('smithProp', -560, 150, 0, 44, 42, 44, 0, '#4b4b52'); n++;
+  A('smithProp', -620, 190, 0, 40, 40, 40, 0, '#4b4b52'); n++;
+  A('wagon', -470, 330, 0, 96, 60, 62, 0, '#6d5535'); n++;
+  A('seating', -470, -170, 0, 56, 30, 40, 0, '#6d5535'); n++;
 
+  if(HUB_PARTS<4) return n;
   /* ---- 4. THE TRAINING YARD, EAST --------------------------------------
      Fenced, so it reads as an enclosure rather than as more plaza, and furnished with the things
      you would actually train against. */
@@ -8299,11 +8310,12 @@ function hubRedesign(){
   }
   for(let k = 0; k < 4; k++){ A('woodFence', 480 + k*110, 430, 0, 110, 70, 24); n++; }
   const yard = [[560,-140],[600,80],[540,260],[640,-40],[500,180]];
-  for(const q of yard){ A('yardProp', q[0], q[1], 0, 50, 80, 50); n++; }
-  A('seating', 470, 330, 0, 70, 40, 50); n++;
-  A('lightProp', 690, -260, 0, 26, 100, 26); n++;
-  A('lightProp', 690, 470, 0, 26, 100, 26); n++;
+  for(const q of yard){ A('yardProp', q[0], q[1], 0, 42, 52, 42, 0, '#6d5535'); n++; }
+  A('seating', 470, 330, 0, 56, 30, 40, 0, '#6d5535'); n++;
+  A('lightProp', 690, -260, 0, 20, 62, 20, 0, '#3a2f1c'); n++;
+  A('lightProp', 690, 470, 0, 20, 62, 20, 0, '#3a2f1c'); n++;
 
+  if(HUB_PARTS<5) return n;
   /* ---- 5. THE SUNKEN TRIALS, SOUTH -------------------------------------
      Stairs down, then the optional doors on a lower floor. They are the only thing in the hub you
      descend to, which is the whole point of them. */
@@ -8313,7 +8325,7 @@ function hubRedesign(){
   A('railing', -330, 600, 0, 24, 60, 150, Math.PI/2); n++;
   A('railing',  330, 600, 0, 24, 60, 150, Math.PI/2); n++;
   for(let k = 0; k < 5; k++){
-    A('lightProp', -420 + k*210, 640, 0, 26, 96, 26); n++;
+    A('lightProp', -420 + k*210, 640, 0, 20, 62, 20, 0, '#3a2f1c'); n++;
   }
   /* a low wall behind the trial doors so the hub ENDS rather than fading into empty ground */
   for(let k = 0; k < 9; k++){ A('wallStone', -560 + k*140, 1130, 0, 140, 150, 60); n++; }

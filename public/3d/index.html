@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.880.0-obsindex';
+const VERSION3D='1.881.0-terrain-hollow';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5154,6 +5154,171 @@ const SCAPES={
 };
 /* World Expansion: authored replacements ship pair-by-pair without disturbing the proven
    scapes below. Each replacement is a real journey made from named, visually distinct districts. */
+/* -- TERRAIN-FIRST GENERATION ------------------------------------------------
+   PHASE 1. Oliver: "the levels are still kind of all over the place. they do not look close to
+   beautiful, and the navigation still isnt impressive. i think we need a new strategy."
+
+   He is right, and five procedural passes that each improved a METRIC rather than a look are the
+   evidence. The structural reason is in the collision code: G.segments contribute height 0 and
+   nothing else, so the ground plane is genuinely flat and every hill in this game is a box standing
+   on it. Boxes on a plane cannot produce a skyline, however cleverly they are arranged.
+
+   So this inverts the order. Instead of placing rooms and connecting them, it builds a LANDSCAPE
+   and carves the route into it:
+
+     1. a winding centreline IS the route
+     2. height rises with distance from that line, so the walls are a CONSEQUENCE of the path
+        rather than objects placed beside it
+     3. the corridor's half-width breathes along its length, which makes squeezes and chambers
+        without either being placed by hand
+     4. rooms are registered where it opens out
+     5. ridge noise on the wall tops, so the skyline is broken rather than an extrusion of the path
+
+   Emitted as a grid of `vplat` boxes - exactly what the engine already collides against, and what
+   Phase 0's spatial index made affordable. Blocky is not a compromise: this is a voxel game and a
+   stepped canyon wall reads as intentional.
+
+   ONE ZONE ONLY. Hollow Pass is a canyon, which is what a heightfield does best, and it measured as
+   the most corridor-like zone in the game (aspect 2.76). The other seven keep their hand-authored
+   generators untouched, so if this looks worse, nothing is lost by not adopting it. */
+/* Which zones use terrain-first generation. One entry today, deliberately: the approach has to be
+   judged on a level Oliver can walk before it touches anything else. */
+const TERRAIN_ZONES = { hollow: true };
+
+function terrainCanyon(ctx, o){
+  const rnd = ctx.rnd, rnd2 = ctx.rnd2;
+  const CELL = o.cell || 100;
+  const Z0 = o.z0, Z1 = o.z1;                     // Z1 is FAR (negative), Z0 is the entrance
+  const HALF = o.halfWidth || 1250;
+  const cols = Math.round((HALF * 2) / CELL);
+  const rows = Math.round(Math.abs(Z1 - Z0) / CELL);
+  const SPAN = Math.abs(Z1 - Z0) || 1;
+
+  /* THE ROUTE. Two sines of different periods, so it wanders without repeating a shape you could
+     predict from the last bend. */
+  let A1 = o.wander || 300, A2 = (o.wander || 300) * 0.45;
+  const f1 = 2.1 / SPAN, f2 = 6.7 / SPAN;
+  const ph1 = rnd() * 6.28, ph2 = rnd() * 6.28;
+  /* THE ROUTE MAY NOT BEND FASTER THAN THE CORRIDOR IS WIDE.
+     A walkability check caught this: a jump-limited walker got 2,400 units in and stopped dead.
+     The centreline's worst lateral slope was A1*2pi*f1 + A2*2pi*f2 = 1.95 units of x per unit of z
+     - a 63 degree kink - while the corridor is only 190 wide at its narrowest. The bend closed the
+     path against its own wall. It is a canyon that pinches shut, and no amount of prettiness
+     survives being impassable.
+     The amplitudes are now scaled so the worst-case slope stays under MAX_SLOPE, which keeps every
+     bend navigable at the narrowest width the breath function can produce. */
+  const MAX_SLOPE = 0.42;
+  const slope = A1 * 6.283 * f1 + A2 * 6.283 * f2;
+  if(slope > MAX_SLOPE){ const k = MAX_SLOPE / slope; A1 *= k; A2 *= k; }
+  const centre = function(z){
+    return Math.sin((z - Z0) * f1 * 6.283 + ph1) * A1
+         + Math.sin((z - Z0) * f2 * 6.283 + ph2) * A2;
+  };
+
+  /* THE BREATH. Half-width along the route: tight for most of it, opening into chambers. The rooms
+     are placed at the widest points, rather than the width being built around rooms. */
+  const CHAMBERS = o.chambers || 5;
+  const chamberZ = [];
+  for(let i = 0; i < CHAMBERS; i++){
+    const t = (i + 0.5) / CHAMBERS;
+    chamberZ.push(Z0 + (Z1 - Z0) * (t + (rnd() - 0.5) * 0.06));
+  }
+  const NARROW = o.narrow || 190, CHR = o.chamberR || 380, CHW = o.chamberW || 460;
+  const halfWidthAt = function(z){
+    let w = NARROW;
+    for(let i = 0; i < chamberZ.length; i++){
+      const d = Math.abs(z - chamberZ[i]);
+      if(d < CHR) w = Math.max(w, NARROW + CHW * Math.pow(1 - d / CHR, 1.6));
+    }
+    w *= 0.86 + 0.3 * (0.5 + 0.5 * Math.sin((z - Z0) * f2 * 12.566 + ph2));
+    return w;
+  };
+
+  /* Cheap value noise for the wall tops, seeded off rnd2 so it is stable per area. */
+  const nseed = Math.floor(rnd2() * 1e6);
+  const vnoise = function(a, b){
+    const n = Math.sin(a * 12.9898 + b * 78.233 + nseed) * 43758.5453;
+    return n - Math.floor(n);
+  };
+  const smoothNoise = function(a, b){
+    const ia = Math.floor(a), ib = Math.floor(b), fa = a - ia, fb = b - ib;
+    const u = fa * fa * (3 - 2 * fa), v = fb * fb * (3 - 2 * fb);
+    return vnoise(ia, ib) * (1-u)*(1-v) + vnoise(ia+1, ib) * u*(1-v)
+         + vnoise(ia, ib+1) * (1-u)*v   + vnoise(ia+1, ib+1) * u*v;
+  };
+
+  const FLOOR_VAR = o.floorVar || 26, WALL_K = o.wallK || 0.62, WALL_MAX = o.wallMax || 620;
+
+  /* FLAT PADS at the entrance and the exit.
+     Measured: the terrain floor at the spawn was height 8 while the spawn code places the player
+     against a floor of 0 - so they started at y=-9, INSIDE the ground, sank to -32 and clipped the
+     p.y<-34 hazard line. The screenshot showed "22 LAVA" in a canyon.
+     Rather than fight the spawn code, the terrain is made to match its assumption: the ground under
+     the entrance and the exit portal is forced dead flat at zero. It also reads better - you step
+     out onto a level shelf and see the canyon, instead of onto a slope. */
+  const pads = o.pads || [];
+  const padFactor = function(x, z){
+    let f = 1;
+    for(let i = 0; i < pads.length; i++){
+      const pd = pads[i], dd = Math.hypot(x - pd.x, z - pd.z);
+      if(dd < pd.r) f = Math.min(f, Math.max(0, (dd - pd.r * 0.55) / (pd.r * 0.45)));
+    }
+    return f;
+  };
+
+  const heightAt = function(x, z){
+    const pf = padFactor(x, z);
+    if(pf <= 0) return 0;                          // dead flat on the pad itself
+    const c = centre(z), w = halfWidthAt(z), d = Math.abs(x - c);
+    if(d <= w){
+      /* FLOOR: gently uneven so it is not a table, but always walkable - the variation drifts
+         rather than steps, and stays well under step height. */
+      return smoothNoise(x / 520, z / 520) * FLOOR_VAR * pf;
+    }
+    const over = d - w;
+    let h = Math.pow(over, 1.18) * WALL_K;
+    h *= 0.72 + 0.55 * smoothNoise(x / 300, z / 300);
+    h += smoothNoise(x / 110, z / 110) * 46;
+    return Math.min(WALL_MAX, (h + FLOOR_VAR) * pf);
+  };
+
+  /* EMIT. One box per cell, merged along x into runs of equal height - that roughly halves the box
+     count on the open floor without changing the shape at all. */
+  let boxes = 0;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null, runH = 0;
+    const flush = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      vplat(runStart + (w - CELL) / 2, z, runH, w, CELL, { terrain: true });
+      boxes++; runStart = null;
+    };
+    for(let c = 0; c < cols; c++){
+      const x = -HALF + (c + 0.5) * CELL;
+      const h = Math.round(heightAt(x, z) / 8) * 8;     // quantised: stepped, and merges better
+      if(runStart == null){ runStart = x; runH = h; }
+      else if(Math.abs(h - runH) > 0.5){ flush(x - CELL); runStart = x; runH = h; }
+    }
+    flush(-HALF + (cols - 0.5) * CELL);
+  }
+
+  /* ROOMS at the chambers, so every later pass - encounters, scatter, objectives, verticality -
+     still finds the structure it expects. The floor there is already flat, so this registers the
+     space rather than building it. */
+  for(let i = 0; i < chamberZ.length; i++){
+    const z = chamberZ[i], x = centre(z), w = halfWidthAt(z) * 1.7;
+    G.rooms.push({ name: (o.roomNames && o.roomNames[i]) || ('Chamber ' + (i+1)),
+                   x: x, z: z, w: Math.round(w), d: 520, y: 0,
+                   monsters: [], encounter: false, cleared: true,
+                   court: i === Math.floor(chamberZ.length / 2) });
+  }
+
+  return { boxes: boxes, centre: centre, halfWidthAt: halfWidthAt, chamberZ: chamberZ,
+           start: { x: centre(Z0 - 60), z: Z0 - 60 },
+           goal:  { x: centre(Z1 + 120), z: Z1 + 120 } };
+}
+
 const EXPANDED_SCAPES={
   outskirts(ctx){ const {rnd,mkMonster}=ctx, woods=G.area===1;
     const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
@@ -5307,7 +5472,29 @@ const EXPANDED_SCAPES={
       finishScape(ctx,{sx:0,sz:220,sy:0,gx:0,gz:-4240,decoCol:'#25432e',decoTheme:'forest',decoTall:250});
     }
   },
-  hollow(ctx){ const {rnd,mkMonster}=ctx, upper=G.area===1, SAND='#9a7445', DARK='#553c25', BONE='#e1d5b7', SKY='#d4a85c';
+  hollow(ctx){
+    /* TERRAIN-FIRST, opt-in. `TERRAIN_ZONES` decides; flip the flag off and the hand-authored
+       canyon below runs exactly as it always has. Nothing is deleted while this is being judged -
+       the comparison has to stay possible, and a rewrite you cannot back out of is not a trial. */
+    if(TERRAIN_ZONES.hollow){
+      const {mkMonster}=ctx, up=G.area===1;
+      const T=terrainCanyon(ctx,{
+        z0: 240, z1: up? -5200 : -4700, cell: 100, halfWidth: 1250,
+        wander: up? 340 : 300, chambers: up? 6 : 5,
+        narrow: 190, chamberR: 380, chamberW: 470,
+        floorVar: 26, wallK: 0.62, wallMax: up? 700 : 620,
+        roomNames: up? ['The Throat','Wind Court','The Shelf','Bonefall','High Narrows','The Rim']
+                     : ['Dry Mouth','The Wash','Jackal Court','Split Rock','The Gate'],
+        pads: [{x:0, z:240, r:420}, {x:0, z:(up? -5200 : -4700)+120, r:420}] });
+      /* Mobs go in the chambers; every later pass (encounters, scatter, objectives) then works on
+         the rooms this registered, exactly as it does for a hand-built zone. */
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
+        mkMonster(ctx.pick(), r.x-70, r.z+40, r); mkMonster(ctx.pick(), r.x+80, r.z-50, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:0,gx:T.goal.x,gz:T.goal.z,
+                       decoCol:'#7a5c34',decoTheme:'canyon',decoTall:300});
+      return;
+    }
+    const {rnd,mkMonster}=ctx, upper=G.area===1, SAND='#9a7445', DARK='#553c25', BONE='#e1d5b7', SKY='#d4a85c';
     const room=(name,x,z,w,d,y=0)=>{ const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true}; if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name}); G.rooms.push(r); return r; };
     const floorRoad=(a,b,w=150)=>{ vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true}); vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true}); };
     const wallPair=(r,h=300)=>{ canyonWall(r.x-r.w/2-18,r.z,r.d+40,+1,rnd,32,h); canyonWall(r.x+r.w/2+18,r.z,r.d+40,-1,rnd,32,h); };

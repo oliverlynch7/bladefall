@@ -567,6 +567,7 @@ const PALETTE = [
   { arr: 'movers',    label: '+ Mover', group: 'Gameplay', terrain: true,
     make: (x, z) => ({ x0: x, x, px: x, z, w: 110, d: 88, h: 0, amp: 40, sp: 1.1, ph: 0 }) },
   { arr: 'enemies',   label: '+ Mob', group: 'Gameplay', terrain: true, mob: true },
+  { arr: 'dens',      label: '+ Spawner', group: 'Gameplay', terrain: true, den: true },
 
   /* ── ANY ASSET IN THE KITS ────────────────────────────────────────────────
      Oliver: "I want to be able to place any structure, and asset." These are PROP_SETS names
@@ -606,12 +607,20 @@ function zoneMobTypes(){
   return seen;
 }
 
-/* MOB SPAWNERS (dens) are deliberately NOT here yet. Every den in the game carries a `questId` binding it
-   to a quest's kill counter (they are emitted by the quest builder, not the terrain pass), and
-   what a den with no quest behind it does - spawn freely, spawn nothing, or corrupt a counter -
-   is not something this session established. Placing one would be a guess dressed as a feature.
-   Next step is to read the den consumer and either give the palette a plain non-quest spawner or
-   let it pick an existing quest. */
+/* MOB SPAWNERS (dens) - the question the earlier note left open, answered by reading the consumer
+   rather than guessing at it.
+
+   The den tick does NOT look at `questId` at all. It finds the area's active kill quest and then
+   filters `G.dens` by `d.type === kq.mob`, spawning from the den nearest the player while fewer
+   than five of that mob are alive. Kill CREDIT is counted separately, by mob type, in questKill().
+
+   So all three of the feared outcomes are wrong:
+     it cannot corrupt a counter  - the counter never reads dens, only the type of what died
+     it cannot spawn freely       - no matching kill quest means the tick does nothing at all
+     it is not undefined          - a den whose type is not the quest's mob is simply inert
+   Which makes a placed den safe, and its rule easy to state honestly in the toast: it feeds the
+   area's cull quest only while its creature IS that quest's creature. Anything else is scenery
+   until some future quest asks for that mob. */
 
 /* Everything in the palette that is not a prop places into its own array and is always available:
    the hub-model caveat is about world3d's prop pipeline, and platforms and healing pads do not go
@@ -724,6 +733,27 @@ function placeWorld(spec, gx, gz){
                      () => { if(arr.indexOf(m) < 0) arr.push(m); });
     EDITOR.sel = { arr: 'enemies', idx: arr.indexOf(m), o: m };
     toast('+ added ' + type, 'add');
+    hud();
+    return;
+  }
+  if(spec.den){
+    const types = zoneMobTypes();
+    if(!types.length){ toast('this area has no mobs to copy a type from'); return; }
+    EDITOR.denI = ((EDITOR.denI || 0) + 1) % types.length;
+    const type = types[EDITOR.denI];
+    const before = snapLayer();
+    const g = G(); g.dens = g.dens || [];
+    const den = { x: gx, z: gz, type: type, t: 2.2, questId: null };
+    g.dens.push(den);
+    commit(L => recordAdd(L, 'dens', den));
+    pushStep(before, () => { const i = g.dens.indexOf(den); if(i >= 0) g.dens.splice(i, 1); },
+                     () => { if(g.dens.indexOf(den) < 0) g.dens.push(den); });
+    EDITOR.sel = { arr: 'dens', idx: g.dens.indexOf(den), o: den };
+    /* Says the rule out loud, because a spawner that silently does nothing is the worst thing this
+       palette could hand somebody. */
+    const kqMob = (function(){ try{ const q = window.__BF3.areaQuests().find(q2 => q2.k === 'kill'); return q ? q.mob : null; }catch(e){ return null; } })();
+    toast('+ spawner (' + type + ')' + (kqMob === type ? ' - feeds this area\'s cull quest'
+                                                       : ' - inert here; this area culls ' + (kqMob || 'nothing')), 'add');
     hud();
     return;
   }

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.831.0-haz-fairness';
+const VERSION3D='1.840.0-verbs-mobs-teach';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2570,42 +2570,42 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:'bramble',mus:'outskirts',blurb:'Where the road ends and the wild begins.',
-    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'}]},
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'},{id:'ok4',k:'reach',n:1,d:'Climb to the Watchpost'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
-    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'dustjackal',n:18,d:'Cull 18 Dust Jackals'}]},
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'dustjackal',n:12,d:'Cull 12 Dust Jackals'},{id:'hp4',k:'purge',mob:'dustjackal',n:3,d:'Break 3 jackal nests'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,trial:'ninja',blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
   {id:'keep',name:'Ruined Keep',icon:'🏰',tier:3,haz:'rubble',mus:'keep',blurb:'A fortress the dead never left.',
-    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:15,d:'Put down 15 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'}]},
+    areas:[{stage:5,name:'Ruined Keep',quests:[{id:'rk1',k:'kill',mob:'revenant',n:10,d:'Put down 10 Revenants'},{id:'rk2',k:'find',d:'Find the Sealed Vault'},{id:'rk4',k:'survive',secs:35,n:1,d:'Hold the breach for 35s'}]},
            {stage:5,name:'The Undercroft',seed:2,quests:[{id:'rk3',k:'fetch',item:'Keep Sigil',n:5,d:'Recover 5 Keep Sigils'}]}],
     side:{id:'oubliette',name:'The Oubliette',icon:'⛓️',stage:5,seed:313,trial:'pirate',blurb:'A hole they threw people into and forgot.'},
     boss:{stage:6,name:'The Fallen',mus:'boss_warden'}},
   {id:'frost',name:'Frostfell',icon:'❄️',tier:4,haz:'slick',mus:'frost',blurb:'Cold deep enough to still the blood.',
-    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:12,d:'Crack 12 Frost-Shells'}]},
+    areas:[{stage:7,name:'Frostfell',quests:[{id:'ff1',k:'kill',mob:'frostshell',n:9,d:'Crack 9 Frost-Shells'},{id:'ff4',k:'kindle',n:4,d:'Kindle 4 wayfires'}]},
            {stage:7,name:'The Rime Shelf',seed:2,quests:[{id:'ff2',k:'fetch',item:'Frozen Core',n:5,d:'Gather 5 Frozen Cores'},{id:'ff3',k:'find',d:'Find the Frostwatch Cairn'}]}],
     side:{id:'glaciervault',name:'The Glacier Vault',icon:'🧊',stage:7,seed:314,trial:'chronomancer',blurb:'Frozen solid, and full of what the ice kept.'},
     boss:{stage:8,name:'Frost Sorcerer',mus:'boss_sorcerer'}},
   {id:'ember',name:'Emberdeep',icon:'🌋',tier:5,haz:'lava',mus:'ember',blurb:'The mountain’s furnace, still burning.',
-    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:16,d:'Snuff 16 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'}]},
+    areas:[{stage:9,name:'Emberdeep',quests:[{id:'ed1',k:'kill',mob:'magmaskit',n:11,d:'Snuff 11 Magma Skitters'},{id:'ed2',k:'find',d:'Find the Ash Altar'},{id:'ed4',k:'hunt',mob:'embertotem',n:1,d:'Slay the Cinder-Warden'}]},
            {stage:9,name:'The Cinder Vents',seed:2,quests:[{id:'ed3',k:'fetch',item:'Ember Shard',n:5,d:'Gather 5 Ember Shards'}]}],
     side:{id:'magmacore',name:'The Magma Core',icon:'🔥',stage:9,seed:315,trial:'paladin',blurb:'Straight down, into the heat that makes the mountain.'},
     boss:{stage:10,name:'Ember Colossus',mus:'boss_colossus'}},
   {id:'abyss',name:'The Abyss',icon:'🕳️',tier:6,haz:'phase',mus:'abyss',blurb:'Where the world thins and something looks back.',
-    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'blinkstalker',n:16,d:'Hunt down 16 Blink-Stalkers'}]},
+    areas:[{stage:11,name:'Abyss Approach',quests:[{id:'ab1',k:'kill',mob:'blinkstalker',n:10,d:'Cull 10 Blink-Stalkers'},{id:'ab4',k:'hunt',mob:'voidtether',n:1,d:'Slay the Tethered One'}]},
            {stage:11,name:'The Hollow Deep',seed:2,quests:[{id:'ab2',k:'fetch',item:'Void Splinter',n:5,d:'Gather 5 Void Splinters'},{id:'ab3',k:'find',d:'Find the Rift Anchor'}]}],
     side:{id:'reapersgate',name:'The Reaper’s Gate',icon:'💀',stage:11,seed:316,trial:'reaper',blurb:'A scythe waits here for whoever can survive its keepers.'},
     boss:{stage:12,name:'Abyss King',mus:'boss_king'}},
   {id:'palace',name:'The Sunspire Palace',icon:'🏛️',tier:7,haz:'glare',mus:'keep',blurb:'White marble the long war never reached.',
-    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:12,d:'Shatter 12 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'}]},
+    areas:[{stage:13,name:'The Grand Colonnade',quests:[{id:'pl1',k:'kill',mob:'marblestatue',n:9,d:'Shatter 9 Animated Statues'},{id:'pl2',k:'find',d:'Find the Throne Antechamber'},{id:'pl4',k:'reach',n:2,d:'Take both Spire Balconies'}]},
            {stage:13,name:'The Hanging Gardens',seed:2,quests:[{id:'pl3',k:'fetch',item:'Gilded Relic',n:5,d:'Gather 5 Gilded Relics from the terraces',placed:true}]}],
     side:{id:'reliquary',name:'The Sealed Reliquary',icon:'💎',stage:13,seed:317,trial:'necromancer',blurb:'What a palace hides, it hides deep.'},
     boss:{stage:14,name:'The Marble Colossus',mus:'boss_colossus'}},
   {id:'castle',name:'Castle Duskmoor',icon:'🏯',tier:8,haz:'gloom',mus:'apex_darkdescent',blurb:'The last gate. Ascend the towers, and end the cycle.',
-    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:16,d:'Break 16 Siege Knights'}]},
+    areas:[{stage:15,name:'The Castle Gates',quests:[{id:'ct1',k:'kill',mob:'siegeknight',n:10,d:'Break 10 Siege Knights'},{id:'ct4',k:'kindle',n:5,d:'Kindle 5 gate-fires'}]},
            {stage:15,name:'The Long Ascent',seed:2,quests:[{id:'ct2',k:'kill',mob:'royalarcanist',n:14,d:'Silence 14 Royal Arcanists'},{id:'ct3',k:'find',d:'Reach the Throne Room'}]}],
     boss:{stage:16,name:'The Abyss King, Awakened',mus:'apex_darkdescent'}}
 ];
@@ -2715,6 +2715,18 @@ function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
 function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub)) return [];    // trials and side zones run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
+/* What the tracker shows on the right of a row. The five new verbs need their own progress read:
+   a hold objective counting 0/1 tells you nothing while you are standing in it. */
+function questProgressText(q){
+  const have=(G.qs[q.id]||0), need=(q.n||1);
+  if(q.k==='survive'){
+    const m=(G.qmarks||[]).find(function(x){ return x.q===q.id; });
+    if(m && !m.done && m.active) return Math.ceil(m.left)+'s';
+    if(m && !m.done) return 'not held';
+    return have+'/'+need;
+  }
+  if(q.k==='hunt') return have>=need ? '1/1' : 'at large';
+  return have+'/'+need; }
 function areaClear(){ return G.area<0 || areaQuests().every(questDone); }
 function questBump(id,by){
   const q=areaQuests().find(x=>x.id===id); if(!q||questDone(q)) return;
@@ -2769,6 +2781,15 @@ function questKill(type){
     if(G.trialKills>=T.kills && !G.portal) openWay();
     questUpdate(); return; }
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
+/* The `hunt` verb bumps on a SPECIFIC creature dying, not on its species, so it needs the entity
+   rather than the type string questKill receives. */
+function questHuntKill(e){
+  if(!e || !e.huntQ || G.trial) return;
+  const q = areaQuests().find(function(q2){ return q2.id === e.huntQ && !questDone(q2); });
+  if(!q) return;
+  questBump(q.id, 1);
+  addText(e.x, e.y + (e.h||40) + 20, e.z, 'QUARRY SLAIN', 'var(--amber)', true);
+  if(G.qmarks) for(const m of G.qmarks) if(m.q === e.huntQ) m.done = true; }
 function fetchQuest(){ return areaQuests().find(q=>q.k==='fetch'&&!questDone(q))||null; }
 function openWay(){ if(G.portal||!G.portalPos) return;
   snapWorldInteractables(); G.portal={x:G.portalPos.x,z:G.portalPos.z,y:G.portalPos.y||0,t:0};
@@ -2843,14 +2864,14 @@ function questUpdate(){
 const ENEMY={
   grunt:{hp:22,dmg:8,speed:62,r:15,h:38,xp:13,color:'#7ec46a',kind:'walk',look:'soldier'},
   flyer:{hp:16,dmg:7,speed:52,r:15,h:26,xp:15,color:'#d07ad0',kind:'fly',look:'batwing'},
-  emberling:{hp:24,dmg:9,speed:58,r:15,h:38,xp:17,color:'#ff7a3a',kind:'walk',element:'fire',look:'emberimp'},
-  frostling:{hp:28,dmg:8,speed:50,r:15,h:38,xp:17,color:'#7fd6ff',kind:'walk',element:'ice',look:'frostbeast'},
-  toxling:{hp:24,dmg:8,speed:56,r:15,h:38,xp:17,color:'#9fd84a',kind:'walk',element:'poison',look:'toxbeast'},
-  shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void',look:'shadewraith'},
+  emberling:{hp:24,dmg:9,speed:58,r:15,h:38,xp:17,color:'#ff7a3a',kind:'walk',element:'fire',look:'emberimp',spec:'ignite'},
+  frostling:{hp:28,dmg:8,speed:50,r:15,h:38,xp:17,color:'#7fd6ff',kind:'walk',element:'ice',look:'frostbeast',spec:'chillaura'},
+  toxling:{hp:24,dmg:8,speed:56,r:15,h:38,xp:17,color:'#9fd84a',kind:'walk',element:'poison',look:'toxbeast',spec:'volatile'},
+  shadeling:{hp:27,dmg:9,speed:56,r:15,h:38,xp:19,color:'#b06bff',kind:'walk',element:'void',look:'shadewraith',spec:'fade'},
   sparkling:{hp:18,dmg:8,speed:50,r:15,h:26,xp:19,color:'#9fe0ff',kind:'fly',element:'arcane',look:'sparkstar'},
   goblin:{hp:26,dmg:0,speed:100,r:13,h:30,xp:40,color:'#ffd24a',kind:'goblin'}, // treasure goblin: flees, drops riches
   // dungeon bestiary (v1.5) — distinct silhouettes, not palette swaps
-  bones:{hp:18,dmg:9,speed:84,r:13,h:40,xp:16,color:'#e8e4d8',kind:'walk',look:'bones'},
+  bones:{hp:18,dmg:9,speed:84,r:13,h:40,xp:16,color:'#e8e4d8',kind:'walk',look:'bones',spec:'rise'},
   slime:{hp:32,dmg:7,speed:38,r:16,h:24,xp:18,color:'#6ee0a8',kind:'walk',look:'slime'},
   slimelet:{hp:8,dmg:4,speed:72,r:9,h:14,xp:5,color:'#8ef0bc',kind:'walk',look:'slime',noSplit:true},
   caster:{hp:20,dmg:10,speed:52,r:13,h:42,xp:22,color:'#8a6ab0',kind:'caster',shot:{count:1,spread:0,speed:430,size:7,color:'#c47bff',shape:'orb',el:'arcane',glow:1},shootCd:2.5},
@@ -2863,9 +2884,9 @@ const ENEMY={
   galewisp:{hp:20,dmg:9,speed:66,r:14,h:24,xp:21,color:'#cfe6ec',kind:'fly',look:'wraith',element:'arcane',dive:true},  // wind spirit: hovers high, then telegraphed DIVE-BOMB swoops
   // ── Outskirts plains bestiary (Phase 14) ──
   thornboar:{hp:42,dmg:13,speed:60,r:18,h:32,xp:22,color:'#7a5a3a',kind:'charger',look:'boar'},                       // heavy tusked charger of the meadows — the kill target
-  sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
+  sporeback:{hp:34,dmg:9,speed:40,r:16,h:34,xp:21,color:'#8fb35a',kind:'walk',element:'poison',look:'spore',deathpuff:true,spec:'spores'},  // slow poison walker; BURSTS a lingering spore cloud on death — don't melee it point-blank
   // ── Ruined Keep bestiary (Phase 14) ──
-  sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
+  sentinel:{hp:54,dmg:12,speed:34,r:17,h:44,xp:27,color:'#6a7488',kind:'walk',look:'sentinel',spec:'watch'},                       // animated armor: BLOCKS from the front (always a shielder) — flank it
   revenant:{hp:26,dmg:11,speed:80,r:14,h:40,xp:20,color:'#9aa0a8',kind:'charger',look:'revenant'},                    // fast undead: a quick telegraphed LUNGE — the kill target
   dummy:{hp:400,dmg:0,speed:0,r:14,h:54,xp:0,color:'#c9b37e',kind:'walk',look:'dummy'},   // straw-and-hay damage checker: hits land, nothing dies
   bosscrystal:{hp:100,dmg:0,speed:0,r:15,h:56,xp:6,color:'#7fd6ff',kind:'walk',look:'bosscrystal',noSplit:true},   // boss shield anchor — destroy all to break the ward
@@ -5725,7 +5746,7 @@ function loadStageRaw(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
@@ -5763,7 +5784,7 @@ function loadStageRaw(i){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
-    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); snapWorldInteractables(); return;
+    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questMarks(srnd); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -6017,7 +6038,7 @@ function loadBonus(returnIdx,forcedSeed){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
   G.bonusVisits=(G.bonusVisits||0)+1;
   const seed=(forcedSeed!=null)?(forcedSeed>>>0):((((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0);
@@ -7049,7 +7070,7 @@ function snapEnemyToSurface(e){
 // created AFTER build-time snapping — e.g. the exit portal that only opens on clear — and terrain that changed).
 function reconcileWorldHeights(){ if(!G) return;
   const lift=(o,r=16)=>{ if(o&&!o.taken&&!o.done) o.y=Math.max(o.y||0, highestSurfaceAt(o.x,o.z,r)); };
-  lift(G.portal); lift(G.bonusPortal); lift(G.waystone); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
+  lift(G.portal); lift(G.bonusPortal); lift(G.waystone); if(G.qmarks) for(const qm of G.qmarks) lift(qm); lift(G.secret); lift(G.secretTrigger);   // exits, find-objectives, secrets/vaults never sit buried under a mesa
   for(const pk of (G.pickups||[])) pk.y0=Math.max(pk.y0||0, highestSurfaceAt(pk.x,pk.z));
   for(const ch of (G.chests||[])) if(!ch.opened) seatChest(ch);
 }
@@ -7132,7 +7153,7 @@ function normalizeCollision(){
 function snapWorldInteractables(){ if(!G) return;
   try { G._autoCol = normalizeCollision(); } catch(e){}
   const snap=(o,k='y',r=8)=>{ if(o) o[k]=Math.max(Number(o[k])||0,highestSurfaceAt(o.x,o.z,r)); };
-  snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); snap(G.secret); snap(G.secretTrigger);
+  snap(G.portalPos); snap(G.portal); snap(G.bonusPortal); snap(G.waystone); if(G.qmarks) for(const qm of G.qmarks) snap(qm); snap(G.secret); snap(G.secretTrigger);
   for(const o of (G.pickups||[])) snap(o,'y0');
   for(const o of (G.chests||[])){ seatChest(o); dressHiddenChest(o); }
   for(const o of (G.keys||[])) snap(o);
@@ -7396,6 +7417,243 @@ function hazTopUp(rnd){
   }
   return n;
 }
+/* -- OBJECTIVE VERBS --------------------------------------------------------
+   Measured before writing any of this: across all eight zones and ~24 areas the game had FOUR
+   quest verbs - kill (9), find (8), fetch (7), back (5). Every zone asked the same three things
+   with different nouns. That is the same complaint Oliver made about level layouts, one layer up:
+   the zones, hazards and enemies are all distinct now, but the REASON to be in them was not.
+
+   Five more, each chosen to use a system the game already has rather than to invent one, and each
+   asking something the other verbs do not:
+     hunt    one named elite, somewhere in the area. Not "kill 12" - kill THAT one, and find it.
+     purge   destroy the spawner dens themselves. The only verb aimed at a structure, and the only
+             one that fights back for doing it: kicking a nest empties it at you first.
+     reach   stand on a named vantage. The verticality pass built high ground everywhere and then
+             never gave you a reason to be told to go up there.
+     kindle  light the dead braziers along the route. A route objective rather than a place one.
+     survive hold a spot while it comes to you. Every other verb in the game is the player moving
+             toward something; this is the one that makes you stand still.
+   Markers live in ONE array rather than five globals, because every one of them needs the same
+   four things: a position, a quest id, a done flag, and to be lifted with the terrain. */
+function questMarks(rnd){
+  if(!G || G.trial || G.side || G.hub) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  G.qmarks = [];
+  const rooms = (G.rooms||[]).filter(r => r && r.w);
+  if(!rooms.length) return 0;
+  let made = 0;
+
+  const ground = (x,z) => { const h = surfaceHeightAt(x,z,20); return h > -1e8 ? h : null; };
+  /* Objectives go in rooms you would otherwise have no reason to enter - the spurs and flanks the
+     topology pass built. A quest marker in the room you already walk through is a formality. */
+  const pool = rooms.filter(r => r.spur || r.flank || r.court || r.island || r.tier);
+  const pick = (i) => (pool.length ? pool[(i*3+1) % pool.length] : rooms[(i*3+1) % rooms.length]);
+
+  for(const q of areaQuests()){
+    if(questDone(q)) continue;
+
+    if(q.k === 'hunt'){
+      /* A single elite, far from the entrance, with a beacon so it can be FOUND rather than
+         stumbled over. Reuses makeElite, so it already reads as dangerous. */
+      const r = pool.length ? pool[pool.length-1] : rooms[rooms.length-1];
+      const h = ground(r.x, r.z); if(h == null) continue;
+      try{
+        const m = spawnEnemy(q.mob || 'grunt', r.x, r.z);
+        if(m){ m.y = h; m.sx = m.x; m.sz = m.z; m.huntQ = q.id;
+               try{ makeElite(m); }catch(e){}
+               m.maxHp = Math.round(m.maxHp*1.6); m.hp = m.maxHp;
+               G.qmarks.push({k:'hunt', x:r.x, z:r.z, y:h, q:q.id, done:false, t:0, track:m});
+               made++; }
+      }catch(e){}
+    }
+
+    else if(q.k === 'purge'){
+      /* The dens the kill-quests already build, made destructible. If the area has none of its own
+         this places them, so the verb never depends on another quest having run first. */
+      const want = q.n || 3;
+      let dens = (G.dens||[]).slice(0, want);
+      while(dens.length < want){
+        const r = pick(dens.length + 2);
+        const h = ground(r.x, r.z); if(h == null) break;
+        const d = {x:r.x, z:r.z, type:q.mob || 'grunt', t:2.4, questId:null};
+        G.dens.push(d); dens.push(d);
+      }
+      for(const d of dens){
+        const h = ground(d.x, d.z);
+        G.qmarks.push({k:'purge', x:d.x, z:d.z, y:h == null ? 0 : h, q:q.id, done:false, t:0, den:d});
+        made++;
+      }
+    }
+
+    else if(q.k === 'reach'){
+      /* The high ground the verticality pass built. Tallest first, so "go up" means the real
+         summit rather than a knee-high plinth. */
+      const plats = (G.obstacles||[]).filter(o => o.kind === 'plat' && !o.autoCol && (o.w||0) >= 110 && (o.h||0) > 130)
+                                     .sort((a,b) => (b.h||0) - (a.h||0));
+      const want = q.n || 1;
+      for(let i = 0; i < want && i < plats.length; i++){
+        const o = plats[i];
+        G.qmarks.push({k:'reach', x:o.x, z:o.z, y:o.h||0, q:q.id, done:false, t:0});
+        made++;
+      }
+    }
+
+    else if(q.k === 'kindle'){
+      const want = q.n || 4;
+      for(let i = 0; i < want; i++){
+        const r = pick(i);
+        const a = R()*6.283, rr = (r.w/2)*0.55;
+        const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr;
+        const h = ground(x,z); if(h == null) continue;
+        G.qmarks.push({k:'kindle', x:x, z:z, y:h, q:q.id, done:false, t:0, lit:false});
+        made++;
+      }
+    }
+
+    else if(q.k === 'survive'){
+      const r = pick(1);
+      const h = ground(r.x, r.z); if(h == null) continue;
+      G.qmarks.push({k:'survive', x:r.x, z:r.z, y:h, q:q.id, done:false, t:0,
+                     hold:q.secs || 30, left:q.secs || 30, wave:0, active:false});
+      made++;
+    }
+  }
+  return made;
+}
+
+/* Per-frame objective logic. Proximity verbs complete themselves; the two that need intent
+   (kindle, purge) go through the interact prompt, so you never light a brazier by walking past. */
+function questMarkTick(dt){
+  if(!G || !G.qmarks || !G.qmarks.length) return;
+  const p = G.p;
+  for(const m of G.qmarks){
+    if(m.done) continue;
+    m.t += dt;
+
+    if(m.k === 'reach'){
+      if(dXZ(m.x, m.z, p.x, p.z) < 90 && Math.abs((p.y||0) - m.y) < 80){
+        m.done = true; questBump(m.q, 1); SFX.pickup();
+        addText(p.x, p.y+90, p.z, 'VANTAGE CLAIMED', 'var(--amber)', true);
+        burst(m.x, m.y+30, m.z, '#ffd24a', 20);
+      }
+    }
+    else if(m.k === 'survive'){
+      const near = dXZ(m.x, m.z, p.x, p.z) < 260;
+      if(!m.active && near){ m.active = true;
+        addText(p.x, p.y+90, p.z, 'HOLD THE GROUND', 'var(--danger)', true); SFX.pickup(); }
+      if(m.active){
+        if(near){
+          m.left -= dt;
+          /* A wave every five seconds, from the edge of the circle, so the pressure is to STAY
+             rather than to clear. Standing still is the whole ask of this verb. */
+          m.wave -= dt;
+          if(m.wave <= 0){ m.wave = 5;
+            const pool2 = [...new Set((G.enemies||[]).filter(e => !e.boss && e.type).map(e => e.type))];
+            if(pool2.length) for(let i = 0; i < 2; i++){
+              const a = Math.random()*6.283;
+              try{ const e = spawnEnemy(pool2[Math.floor(Math.random()*pool2.length)],
+                                        m.x + Math.cos(a)*300, m.z + Math.sin(a)*300);
+                   if(e){ e.y = m.y; e.active = true; e.dropT = 0; } }catch(err){}
+            }
+          }
+          if(m.left <= 0){ m.done = true; questBump(m.q, 1); SFX.pickup();
+            addText(p.x, p.y+90, p.z, 'GROUND HELD', 'var(--amber)', true); }
+        } else {
+          /* Leaving does not fail it - it just stops the clock. A hold objective that punishes you
+             for stepping out of a circle during a fight is a fight with the circle. */
+          m.left = Math.min(m.hold, m.left + dt*0.5);
+        }
+      }
+    }
+  }
+}
+
+/* The interact-driven ones, folded into updateInteract's picker. */
+function questMarkInteract(consider){
+  if(!G || !G.qmarks) return;
+  for(const m of G.qmarks){
+    if(m.done) continue;
+    if(m.k === 'kindle') consider(m.x, m.z, 110, function(){ return {x:m.x, z:m.z, y:m.y+60,
+      label:'Kindle the brazier', act:function(){
+        m.done = true; m.lit = true; questBump(m.q, 1); SFX.pickup();
+        burst(m.x, m.y+50, m.z, '#ffb347', 22);
+        addText(m.x, m.y+90, m.z, 'LIT', 'var(--amber)', true); }}; });
+    else if(m.k === 'purge') consider(m.x, m.z, 120, function(){ return {x:m.x, z:m.z, y:m.y+50,
+      label:'Break the nest', act:function(){
+        m.done = true; questBump(m.q, 1); SFX.hurt();
+        burst(m.x, m.y+20, m.z, '#8a5a3a', 26); G.shake = Math.min(18, (G.shake||0)+9);
+        /* Kicking a nest empties it AT you. Otherwise "purge" is just "walk to three dots and press
+           E", which is a chore rather than an objective. */
+        var t2 = (m.den && m.den.type) || 'grunt';
+        for(var i = 0; i < 3; i++){ var a = (i/3)*6.283;
+          try{ var e = spawnEnemy(t2, m.x + Math.cos(a)*70, m.z + Math.sin(a)*70);
+               if(e){ e.y = m.y; e.active = true; e.dropT = 0; } }catch(err){}
+        }
+        if(m.den){ var di = (G.dens||[]).indexOf(m.den); if(di >= 0) G.dens.splice(di, 1); }
+        addText(m.x, m.y+90, m.z, 'NEST BROKEN', 'var(--amber)', true); }}; });
+  }
+}
+
+/* JUST-IN-TIME TEACHING for everything added since the tutorial was written.
+   The game gained four hazards, five objective verbs and seven enemy tricks, and explained none of
+   them beyond a one-line toast on zone entry. A system nobody explains is read as noise: the player
+   concludes the game is being unfair rather than that it is asking something.
+   Everything here fires ONCE, on first contact, in the moment the thing actually matters - the same
+   rule the movement tutorial already follows. Never on zone entry, because a warning you receive
+   before you can act on it is just text. */
+function teachTick(dt){
+  if(!G || mode!=='play' || meta.tutOff || G.hub) return;
+  const p = G.p;
+
+  // ── hazards: taught by their FIRST bite, not by their name ──
+  if(G.haz === 'bramble' && (p.thornT||0) > 0.25)
+    teachOnce('h_bramble','The thornwild drags at you and bleeds you slowly. It only holds while you are IN it — pick a line around the dark patches.',{icon:'🌿'});
+  if(G.haz === 'rubble' && (G.debris||[]).some(d => d.warn > 0 && dXZ(d.x,d.z,p.x,p.z) < 300))
+    teachOnce('h_rubble','The keep is still falling. The shadow on the ground is where it lands — you have about a second to not be there.',{icon:'🧱'});
+  if(G.haz === 'glare' && G.glareNear)
+    teachOnce('h_glare','The spire sweeps the floor with light. It turns one way, always — move WITH it and it passes you.',{icon:'🔆'});
+  if(G.haz === 'gloom' && (G.gloomT||0) > 1.2)
+    teachOnce('h_gloom','The dark drinks. Braziers are safe ground — cross between them, and the count resets the moment you reach one.',{icon:'🕯'});
+  if(G.haz === 'slick' && (p.slide||0) > 0.5)
+    teachOnce('h_slick','The ice keeps whatever speed you gave it. Brake early — you stop where you decided to, not where you let go.',{icon:'❄️'});
+  if(G.haz === 'gusts' && !p.onGround && Math.abs(G.gustX||0) > 0.55)
+    teachOnce('h_gusts','The wind only has you while you are in the air. Time the jump for the lull, or let it carry you.',{icon:'🌬'});
+  if(G.haz === 'phase' && (G.phasers||[]).some(ph => !ph.on))
+    teachOnce('h_phase','Some of this ground is only sometimes there. Watch a tile blink before you trust it with a jump.',{icon:'🌀'});
+  if(G.haz === 'lava' && G.emberWarn > 0)
+    teachOnce('h_lava','The vents flare on a rhythm and warn you first. Step off the glow, not away from it.',{icon:'🌋'});
+
+  // ── objective verbs: taught when the marker is close enough to act on ──
+  if(G.qmarks) for(const m of G.qmarks){
+    if(m.done) continue;
+    const near = dXZ(m.x,m.z,p.x,p.z) < 320;
+    if(m.k==='kindle' && near)  teachOnce('q_kindle','A dead brazier. Stand close and press interact to light it — the quest wants the route lit, not the room cleared.',{icon:'🔥'});
+    if(m.k==='purge'  && near)  teachOnce('q_purge','That is a nest, not a creature. Breaking it stops the spawns — but it empties at you first.',{icon:'💥'});
+    if(m.k==='reach'  && near)  teachOnce('q_reach','A vantage banner. Just get up there and stand on it. The way up is somewhere on the terrain, not a door.',{icon:'🚩'});
+    if(m.k==='survive'&& near)  teachOnce('q_survive','Hold this circle. Leaving does not fail it, it only stops the clock — but the waves keep coming while you are in.',{icon:'⏳'});
+    if(m.k==='hunt'   && near)  teachOnce('q_hunt','One named quarry, not a cull. The red beacon follows it, so it can be chased rather than searched for.',{icon:'🩸'});
+  }
+
+  // ── enemy tricks: taught the first time one is awake and near ──
+  for(const e of (G.enemies||[])){
+    if(!e || e.dead || !e.active || !e.spec) continue;
+    if(dXZ(e.x,e.z,p.x,p.z) > 420) continue;
+    if(e.spec==='rise')      teachOnce('m_rise','Risen bones get up once. It is not dead the first time.',{icon:'💀'});
+    else if(e.spec==='watch')teachOnce('m_watch','Sentinels raise the alarm. Kill it first or fight the whole room.',{icon:'🔔'});
+    else if(e.spec==='fade') teachOnce('m_fade','Shadelings fade out of reach for a beat. Your hits pass through — wait it out.',{icon:'👻'});
+    else if(e.spec==='spores')teachOnce('m_spores','Sporebacks burst into a cloud where they fall. Do not stand in the kill.',{icon:'🍄'});
+    else if(e.spec==='volatile')teachOnce('m_volatile','Toxlings go off the instant they die. Kill them at range if you can.',{icon:'☣️'});
+    else if(e.spec==='chillaura')teachOnce('m_chill','Frostlings slow you just by being near. Alone they are nothing; in a pack they pin you.',{icon:'🧊'});
+    else if(e.spec==='ignite')teachOnce('m_ignite','Emberlings leave burning ground behind them.',{icon:'🔥'});
+    else if(e.spec==='shell') teachOnce('m_shell','Its shell blocks hits from the front until it cracks. Go around it, or break the shell with ice.',{icon:'🛡'});
+    else if(e.spec==='blink') teachOnce('m_blink','It marks a spot, then arrives behind you. The mark is your warning.',{icon:'✨'});
+    else if(e.spec==='tether')teachOnce('m_tether','It is feeding the others. Cut the tether and the rest get easier.',{icon:'🔗'});
+    else if(e.spec==='totem') teachOnce('m_totem','It does not chase. It erupts. Close the gap or kill it from outside the ring.',{icon:'🗿'});
+    else if(e.spec==='knightslam')teachOnce('m_knight','The overhead crush is telegraphed. Step out of the circle, not backwards.',{icon:'⚔️'});
+    else break;   // one lesson per frame is plenty
+  }
+}
+
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
 function hazardCols(th){ return (th==='frost')?['#0d2836','#4ab7ff']:(th==='void'||th==='apex')?['#170a2c','#8a3aff']
   :(th==='plains'||th==='forest')?['#16240f','#3a7a2e']:(th==='marble')?['#1a1c26','#6c86b8']:['#4a1206','#ff5a1e']; }   // the field/palace have no lava
@@ -8460,6 +8718,13 @@ function resolveSwing(){
   if(MP.active&&MP.pvp) MP.pvpMelee(p,w,dmg);   // Phase 3 PvP: the same swing can strike a rival player
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
+  /* SHADELING's fade. One guard here covers melee, projectiles, skills, pets and damage-over-time,
+     because every damage path in the game funnels through this function - filtering the target
+     lists instead would have missed the melee arc, which walks G.enemies directly. */
+  if(e && e.untargetable){
+    addText(e.x,(e.y||0)+(e.h||30)+8,e.z,'faded','#b0a0e0',false);
+    return;
+  }
   if(src===G.p&&meta.classId==='beastmaster'&&!G._desig){
     const p=G.p,now=G.time||0;
     if(p.beastBasicEmpower){dmg*=1.25;p.beastBasicEmpower=0;}
@@ -8651,6 +8916,34 @@ function killEnemy(e,weaponKill){
     G.shake=Math.min((G.shake||0)+9,16); try{ playFx('wallbreak'); }catch(_){ try{SFX.enemyDie();}catch(x){} }
     toast('The cracked wall crumbles — the way opens!','#e8d8b0'); return; }
   if(MP.host_()) MP.noteKill(e);   // host records the kill so guests mirror the death + earn instanced rewards
+  /* DEATH BEHAVIOURS. Killing these is not the end of the interaction, which is the cheapest way
+     to make a common enemy memorable - you remember what a thing did to you AFTER you beat it. */
+  if(e.spec==='rise' && !e.risen && !e.mirror){
+    /* BONES: gets back up, once. The classic, and it teaches you to watch the corpse. */
+    e.risen=true; e.hp=Math.max(1,Math.round(e.maxHp*0.35)); e.dead=false;
+    e.stunT=Math.max(e.stunT||0,0.5); e.hitFlash=0.2;
+    burst(e.x,e.y+e.h*0.4,e.z,'#d8d2c0',18);
+    addText(e.x,e.y+e.h+16,e.z,'IT RISES','#d8d2c0',true);
+    try{ SFX.enemyDie(); }catch(_){}
+    return;
+  }
+  if(e.spec==='spores'){
+    /* SPOREBACK: a lingering cloud where it fell. Denies the ground you just won. */
+    (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:78,life:5.0,max:5.0,dmg:Math.max(3,Math.round(e.dmg*0.3)),hit:0,col:'#8fd05a',cause:{name:'a burst spore sac',attack:'the spores'}});
+    burst(e.x,e.y+10,e.z,'#8fd05a',22);
+    addText(e.x,e.y+e.h+14,e.z,'SPORES','#8fd05a',true);
+  }
+  else if(e.spec==='volatile'){
+    /* TOXLING: goes off immediately. Small, fast, and punishes killing it in your own face. */
+    (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:130,dmg:Math.max(4,Math.round(e.dmg*1.1)),life:0,spd:300,col:'#9fe04a',col2:'#3a5a10',hit:0});
+    burst(e.x,e.y+e.h*0.5,e.z,'#9fe04a',20);
+  }
+  else if(e.spec==='ignite'){
+    /* EMBERLING: leaves a burning patch. Lingering like the sporeback but hotter and briefer, so
+       the two read as different problems rather than the same one recoloured. */
+    (G.trails=G.trails||[]).push({x:e.x,z:e.z,r:56,life:3.0,max:3.0,dmg:Math.max(4,Math.round(e.dmg*0.45)),hit:0,col:'#ff8a3a',cause:{name:'a dying emberling',attack:'the cinders'}});
+    burst(e.x,e.y+10,e.z,'#ff8a3a',18);
+  }
   e.dead=true; G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5}); if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
@@ -8666,7 +8959,7 @@ function killEnemy(e,weaponKill){
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
   if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
     for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
-  questKill(e.type);
+  questKill(e.type); try{ questHuntKill(e); }catch(err){}
   { const fq=fetchQuest();                                   // gather quests: zone mobs carry the goods — unless the items are PLACED in the world (climb quests)
     if(fq && !fq.placed && !e.boss && Math.random()<0.62){ const x=e.x+10,z=e.z+10; G.pickups.push({x,z,y0:highestSurfaceAt(x,z),questItem:{id:fq.id,name:fq.item},bob:Math.random()*3}); } }
   burst(e.x,e.y+e.h*0.5,e.z,e.color,e.boss?36:12);
@@ -10300,14 +10593,17 @@ function update(dt){
        yours, you are simply wading. Slowing acceleration instead reads as input lag, which is the
        one thing a movement hazard must never feel like. */
     const thorn=(G.haz==='bramble')?(p.thornT||0):0;
-    moveSpd*=(1-thorn*0.34);
+    /* FROSTLING's aura. Decays on its own so leaving the pack releases you promptly - a slow you
+       cannot walk out of is a stun, and these are supposed to be the weakest thing in the zone. */
+    p.chillAura=Math.max(0,(p.chillAura||0)-dt*1.1);
+    moveSpd*=(1-thorn*0.34)*(1-Math.min(0.28,p.chillAura*0.28));
     if(mx!==0) p.vx+=mx*moveSpd*dt*acc; p.vx*=fr; if(Math.abs(p.vx)<cut) p.vx=0;
     if(mz!==0) p.vz+=mz*moveSpd*dt*acc; p.vz*=fr; if(Math.abs(p.vz)<cut) p.vz=0;
     const sp=Math.hypot(p.vx,p.vz); if(sp>moveSpd){ p.vx*=moveSpd/sp; p.vz*=moveSpd/sp; }
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
-  hazUpdate(dt);
+  hazUpdate(dt); questMarkTick(dt); teachTick(dt);
   if(G.hub) hubInteract(p,dt);
   // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
   // SPAWNERS (quest-driven): while a kill quest is open, refill its mob at the dens until the count is met.
@@ -10441,7 +10737,7 @@ function update(dt){
         if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a ground slam'}); } } }
     G.collapse=G.collapse.filter(tl=>tl.warn>0||tl.open>0); }
   if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
-      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z, {name:'the burning ground',attack:'a magma trail'}); } }
+      if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z, tr.cause||{name:'the burning ground',attack:'a magma trail'}); } }
     G.trails=G.trails.filter(tr=>tr.life>0); }
   if(G.spikefields && G.spikefields.length){ for(const sf of G.spikefields){ sf.life-=dt; sf.tick-=dt;   // Ranger Spike Trap: slow + DoT on enemies inside
       const dot=sf.tick<=0; if(dot) sf.tick=1;
@@ -10752,6 +11048,32 @@ function specBehavior(e,dt,p,dirX,dirZ,d){
     for(const o of G.enemies){ if(o===e||o.dead||!o.active||o.boss) continue;
       if(dXZ(e.x,e.z,o.x,o.z)<200){ e.tetherList.push(o); o.tethered=0.3; } } }
   // SIEGE KNIGHT (Duskmoor): shield + telegraphed overhead crush
+  /* THE FILLERS. Eight of the roster's walkers had nothing but stats and a colour - they were the
+     older generic mobs, reused across themes as "sparing filler", and they are also most of what
+     you actually fight in the early zones. A creature the player meets a hundred times is exactly
+     the wrong one to leave featureless.
+     `grunt` is deliberately still plain. A roster needs one thing that does precisely what it
+     looks like it does, otherwise "this one has a trick" stops carrying information. */
+
+  // SENTINEL: a sentry. Does not fight better, it fights LOUDER - wakes the room around it.
+  else if(e.spec==='watch'){ e.watchT=(e.watchT||0)-dt;
+    if(e.watchT<=0 && d<520){ e.watchT=3.0;
+      let woke=0;
+      for(const o of G.enemies){ if(o===e||o.dead||o.active||o.boss) continue;
+        if(dXZ(e.x,e.z,o.x,o.z)<620 && (o.dropT||0)>0.15){ o.dropT=0.15; woke++; } }
+      if(woke){ addText(e.x,e.y+e.h+8,e.z,'ALARM','#ffd24a',true); burst(e.x,e.y+e.h,e.z,'#ffd24a',10); } } }
+
+  // SHADELING: fades out of the world for a beat. You cannot burst it down, you have to time it.
+  else if(e.spec==='fade'){ e.fadeCd=(e.fadeCd==null?3.4:e.fadeCd)-dt;
+    if(e.fadeT>0){ e.fadeT-=dt; if(e.fadeT<=0){ e.untargetable=false; burst(e.x,e.y+e.h*0.5,e.z,'#6a5a9a',8); } }
+    else if(e.fadeCd<=0 && d<430){ e.fadeCd=4.2; e.fadeT=0.9; e.untargetable=true;
+      addText(e.x,e.y+e.h+8,e.z,'fades','#b0a0e0',true); burst(e.x,e.y+e.h*0.5,e.z,'#6a5a9a',10); } }
+
+  // FROSTLING: harmless alone, miserable in a pack - it slows you just by being near.
+  else if(e.spec==='chillaura'){ e.auraT=(e.auraT||0)-dt;
+    if(d<170){ p.chillAura=Math.min(1,(p.chillAura||0)+dt*1.5);
+      if(e.auraT<=0){ e.auraT=0.5; burst(e.x+(Math.random()-0.5)*40,e.y+12,e.z+(Math.random()-0.5)*40,'#bfe8ff',3); } } }
+
   else if(e.spec==='knightslam'){ e.slamCd=(e.slamCd==null?2.0:e.slamCd)-dt;
     if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
     else if(e.slamCd<=0 && d<120){ e.knightW=0.6; addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true); } }
@@ -11253,7 +11575,7 @@ function loadBossRushArena(idx){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
   const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
   const R=470;
@@ -11502,7 +11824,7 @@ function loadEndlessArena(n){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.dens=[]; G.npc=null;
+  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
@@ -12392,26 +12714,26 @@ const BESTIARY_INFO={
   grunt:{name:'Rotbound',tell:'Closes in for simple melee strikes.',lore:'A common victim of the King’s dream, with little left beyond hunger and motion.'},
   flyer:{name:'Dreamwing',tell:'Hovers over obstacles and attacks from above.',lore:'A small airborne scavenger twisted by nightmare-soaked air.'},
   thornboar:{name:'Thornboar',tell:'Lowers its tusks before a heavy charge.',lore:'Once ordinary meadow stock, now plated in bark and black thorns.'},
-  sporeback:{name:'Sporeback',tell:'Bursts into a poison cloud when slain.',lore:'The forest rot learned to walk by filling dead beasts with spores.'},
-  toxling:{name:'Toxling',tell:'Its attacks build Poison.',lore:'A knot of swamp poison held together by roots and spite.'},
+  sporeback:{name:'Sporeback',tell:'Bursts into a lingering spore cloud when killed.',lore:'The forest rot learned to walk by filling dead beasts with spores.'},
+  toxling:{name:'Toxling',tell:'Detonates the moment it dies. Do not kill it in your face.',lore:'A knot of swamp poison held together by roots and spite.'},
   slime:{name:'Slime',tell:'Slow and durable; may split into smaller slimes.',lore:'Runoff from the deep given a hungry, wobbling shape.'},
   charger:{name:'Ravager',tell:'Pauses, lines up, then rushes straight ahead.',lore:'A rust-red beast bred by the badlands to break shield lines.'},
   dustjackal:{name:'Dust Jackal',tell:'A fast pounce follows its brief crouch.',lore:'Canyon pack hunters that learned to follow the wind between ruined posts.'},
   cragspitter:{name:'Crag Spitter',tell:'Lobs slow arcing rocks from long range.',lore:'A stone-fed canyon brute that grinds cliff fragments into ammunition.'},
   galewisp:{name:'Gale Wisp',tell:'Rises before diving sharply at its target.',lore:'The last breath of travelers who never escaped Hollow Pass.'},
-  bones:{name:'Risen Bones',tell:'Fast, fragile melee attacker.',lore:'Old watchmen pulled upright when the dream rattled their graves.'},
+  bones:{name:'Risen Bones',tell:'Gets back up once. Watch the corpse.',lore:'Old watchmen pulled upright when the dream rattled their graves.'},
   revenant:{name:'Revenant',tell:'Signals a quick forward lunge.',lore:'A fallen soldier still trying to finish an order it no longer remembers.'},
-  sentinel:{name:'Sentinel',tell:'Blocks frontal attacks; strike from the side or rear.',lore:'An empty suit of keep armor animated by a duty that outlived its wearer.'},
+  sentinel:{name:'Sentinel',tell:'Raises the alarm - wakes everything nearby.',lore:'An empty suit of keep armor animated by a duty that outlived its wearer.'},
   caster:{name:'Hex Caster',tell:'Keeps distance and fires focused arcane bolts.',lore:'A ruined scholar whose final spell never stopped casting.'},
   frostshell:{name:'Frostshell',tell:'Its ice shell blocks frontal hits until cracked.',lore:'A creature sealed inside old glacial armor, preserved but never resting.'},
   frostlobber:{name:'Frost Lobber',tell:'Throws arcing shards that build Chill.',lore:'It gathers the cold that refuses to move and hurls it at anything warm.'},
-  frostling:{name:'Frostling',tell:'Its attacks build Chill.',lore:'A splinter of Frostfell’s ancient cold moving on borrowed legs.'},
+  frostling:{name:'Frostling',tell:'Harmless alone. A pack of them slows you to a crawl.',lore:'A splinter of Frostfell’s ancient cold moving on borrowed legs.'},
   magmaskit:{name:'Magma Skitter',tell:'Moves quickly and leaves burning ground behind it.',lore:'A furnace parasite that carries liquid fire in a cracked stone shell.'},
   embertotem:{name:'Ember Totem',tell:'Stays still, then releases a wide fire burst.',lore:'A buried vent taught by the nightmare to recognize living prey.'},
-  emberling:{name:'Emberling',tell:'Its attacks build Burn.',lore:'A loose coal from the mountain’s heart that refuses to cool.'},
+  emberling:{name:'Emberling',tell:'Leaves burning ground where it falls.',lore:'A loose coal from the mountain’s heart that refuses to cool.'},
   blinkstalker:{name:'Blink Stalker',tell:'Marks its destination before teleporting behind you.',lore:'An Abyss predator that hunts through gaps in space instead of corridors.'},
   voidtether:{name:'Void Tether',tell:'Links to nearby allies and makes them more dangerous.',lore:'A living knot in the King’s dream, binding lesser nightmares together.'},
-  shadeling:{name:'Shadeling',tell:'Its attacks build Corruption.',lore:'A thin scrap of the Abyss King’s shadow that learned to move alone.'},
+  shadeling:{name:'Shadeling',tell:'Fades out of reach for a beat. Time your swing.',lore:'A thin scrap of the Abyss King’s shadow that learned to move alone.'},
   sunpriest:{name:'Sun Priest',tell:'Heals nearby allies while firing radiant bolts.',lore:'A palace keeper still serving a sun that has not shone here for ages.'},
   marblestatue:{name:'Marble Statue',tell:'A slow frontal blocker with heavy strikes.',lore:'The palace carved its guards from stone; the dream supplied obedience.'},
   siegeknight:{name:'Siege Knight',tell:'Raises its shield before a crushing overhead slam.',lore:'A Duskmoor gate-breaker condemned to defend the gate it once destroyed.'},
@@ -12471,6 +12793,14 @@ function updateInteract(){
     consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
     consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
+  }
+  else if(G.qmarks && G.qmarks.some(function(m){ return !m.done && (m.k==='kindle'||m.k==='purge'); })){
+    const fy=playerAimYaw(p), fx=Math.sin(fy), fz=Math.cos(fy); let best=1e9;
+    const consider=function(cx,cz,range,make){ const dx=cx-p.x, dz=cz-p.z, d=Math.hypot(dx,dz); if(d>=range) return;
+      const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);
+      if(eff<best){ best=eff; it=make(); } };
+    questMarkInteract(consider);
+    if(!it && G.npc && !G.npc.dummy){ const n=G.npc, dd=dXZ(n.x,n.z,p.x,p.z); if(dd<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:function(){ openShade(); }}; }
   }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime
@@ -15827,6 +16157,43 @@ function render(t){
         bx(L.x+Math.cos(a)*L.r, L.y+1.5, L.z+Math.sin(a)*L.r, 26,2,26, '#3a2f14','#ffd88a',0.2+gl*0.45); } } } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
+  /* Objective markers. Every one is a LIT thing, because the whole point of these verbs is that
+     you have to locate the objective rather than be walked into it, and an unlit marker in a dark
+     zone is a hidden object hunt nobody asked for. */
+  if(G.qmarks) for(const qm of G.qmarks){
+    const gl = 0.4 + 0.3*Math.sin(t*2.4 + qm.x*0.01);
+    if(qm.k === 'kindle'){
+      bx(qm.x, qm.y+18, qm.z, 15,36,15, '#2a2118','#4a3a26', 0.55);            // the stand
+      if(qm.done) { bx(qm.x, qm.y+46, qm.z, 20,14,20, '#7a5a20','#ffd88a', 0.95);
+                    bx(qm.x, qm.y+60, qm.z, 11,11,11, '#ffb347','#fff0c0', 0.95); }
+      else        { bx(qm.x, qm.y+46, qm.z, 20,14,20, '#25201a','#4a4038', 0.5);   // cold and dead
+                    bx(qm.x, qm.y+78, qm.z, 7,7,7, '#6a5a20','#ffd88a', gl*0.7); } // a hint above it
+    }
+    else if(qm.k === 'purge' && !qm.done){
+      bx(qm.x, qm.y+10, qm.z, 62,20,62, '#241a12','#4a3320', 0.7);              // the nest mound
+      for(let i=0;i<5;i++){ const a=(i/5)*6.283+qm.t*0.4;
+        bx(qm.x+Math.cos(a)*26, qm.y+22, qm.z+Math.sin(a)*26, 8,18,8, '#3a2a1a','#6a4a28', 0.7); }
+      bx(qm.x, qm.y+52, qm.z, 9,9,9, '#7a2a1a','#ff6a3a', gl);
+    }
+    else if(qm.k === 'reach' && !qm.done){
+      bx(qm.x, qm.y+34, qm.z, 7,68,7, '#2a2118','#5a4a30', 0.8);                 // banner pole
+      bx(qm.x+13, qm.y+56, qm.z, 26,22,3, '#7a5a20','#ffd24a', 0.6+gl*0.4);
+      for(let i=0;i<3;i++) bx(qm.x, qm.y+80+i*16, qm.z, 5,5,5, '#8a6a20','#ffe9a0', gl*(1-i*0.25));
+    }
+    else if(qm.k === 'hunt' && !qm.done){
+      /* The beacon tracks the quarry, so "find it" stays findable without a map marker. */
+      const tg = qm.track && !qm.track.dead ? qm.track : null;
+      const hx = tg ? tg.x : qm.x, hz = tg ? tg.z : qm.z, hy = (tg ? tg.y : qm.y) || 0;
+      for(let i=0;i<4;i++) bx(hx, hy+90+i*30, hz, 8,10,8, '#5a1a2a','#ff4a6a', (0.7-i*0.15)*(0.6+gl*0.5));
+    }
+    else if(qm.k === 'survive' && !qm.done){
+      const n=18, R2=260, act=qm.active;
+      for(let i=0;i<n;i++){ const a=(i/n)*6.283;
+        bx(qm.x+Math.cos(a)*R2, qm.y+1.5, qm.z+Math.sin(a)*R2, 26,2,26,
+           act?'#5a1a1a':'#3a2f14', act?'#ff6a4a':'#ffd88a', act?(0.5+gl*0.4):0.3); }
+      if(act) bx(qm.x, qm.y+70, qm.z, 10,10,10, '#7a2a1a','#ff8a4a', gl);
+    }
+  }
   if(G.secretTrigger && !G.secretTrigger.done){        // the trigger rune: a dim, easily-missed floor glyph in a dead end
     const tr=G.secretTrigger, ty=tr.y||0, gl=0.28+0.14*Math.sin(t*2.3);
     bx(tr.x,ty+1.2,tr.z, 40,2.5,40, '#1a1226', '#4a2a6a', gl);
@@ -16460,7 +16827,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      non-room GROUND a level has, re-implemented the test as "is there a segment or a plat here",
      and reported the Outskirts - a grassland - as 2% ground. Every probe that reimplements one of
      these tests eventually measures something the game does not believe. */
-  surfaceHeightAt, highestSurfaceAt,
+  surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

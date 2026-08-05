@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.871.0-weapfit';
+const VERSION3D='1.872.0-reach';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1791,18 +1791,18 @@ function elemMod(wEl,eEl){
 
 /* ---------------- Weapons (identical stats; range = world units) ---------------- */
 const ARCHES={
-  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:260,range:72,art:'sword'},
-  saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:60,art:'sword'},
-  dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:46,art:'dagger'},
-  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:64,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
+  sword:{disp:'Sword',cls:'melee',sch:'phys',dmg:12,cd:.38,kb:260,range:84,art:'sword'},
+  saber:{disp:'Saber',cls:'melee',sch:'phys',dmg:12,cd:.33,kb:200,range:74,art:'sword'},
+  dagger:{disp:'Daggers',cls:'melee',sch:'phys',dmg:8,cd:.18,kb:120,range:56,art:'dagger'},
+  axe:{disp:'Battle Axe',cls:'melee',sch:'phys',dmg:18,cd:.54,kb:300,range:76,art:'axe',chg:'hurl'},       // tap = arc; hold = hurl a returning axe
   great:{disp:'Greatsword',cls:'melee',sch:'phys',dmg:20,cd:.68,kb:340,range:84,art:'great',chg:'spin'},   // hold = spinning cleave
-  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:70,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
+  hammer:{disp:'Warhammer',cls:'melee',sch:'phys',dmg:26,cd:.80,kb:460,range:80,art:'hammer',chg:'quake'}, // hold = radial shockwave slam
   scythe:{disp:'Scythe',cls:'melee',sch:'phys',dmg:17,cd:.56,kb:260,range:90,art:'scythe',chg:'scythethrow'},   // 3-hit combo (phys,phys,MAGIC burst); hold = throw the spinning scythe (ranged)
-  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:24,cd:.26,kb:110,range:48,art:'fist',fist:true},   // unarmed — fast, short reach; VERY strong for the Monk (on-class), useless for everyone else (see offclassMul). No rarity. Never drops. (base 16->24: playtest said Monk felt weak)
-  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:60,art:'spellblade',el:'fire',chg:'spellsweep'},
-  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:60,art:'spellblade',el:'ice',chg:'spellsweep'},
+  fist:{disp:'Bare Fists',cls:'melee',sch:'phys',dmg:24,cd:.26,kb:110,range:58,art:'fist',fist:true},   // unarmed — fast, short reach; VERY strong for the Monk (on-class), useless for everyone else (see offclassMul). No rarity. Never drops. (base 16->24: playtest said Monk felt weak)
+  flameblade:{disp:'Flameblade',cls:'melee',sch:'mag',dmg:15,cd:.40,kb:200,range:74,art:'spellblade',el:'fire',chg:'spellsweep'},
+  frostbrand:{disp:'Frostbrand',cls:'melee',sch:'mag',dmg:13,cd:.38,kb:200,range:74,art:'spellblade',el:'ice',chg:'spellsweep'},
   runeblade:{disp:'Runeblade',cls:'melee',sch:'mag',dmg:20,cd:.60,kb:300,range:84,art:'spellblade',el:'arcane',chg:'spellsweep'},
-  venomedge:{disp:'Venom Edge',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:60,art:'spellblade',el:'poison',chg:'spellsweep'},   // poison spellblade
+  venomedge:{disp:'Venom Edge',cls:'melee',sch:'mag',dmg:14,cd:.38,kb:200,range:74,art:'spellblade',el:'poison',chg:'spellsweep'},   // poison spellblade
   umbrablade:{disp:'Shadow Edge',cls:'melee',sch:'mag',dmg:17,cd:.46,kb:230,range:64,art:'spellblade',el:'void',chg:'spellsweep'},    // void spellblade
   sunblade:{disp:'Sunblade',cls:'melee',sch:'mag',dmg:12,cd:.32,kb:180,range:58,art:'spellblade',el:'holy',chg:'spellsweep'},        // slim/fast holy spellblade (the light end of the holy pair)
   lightbringer:{disp:'Lightbringer',cls:'melee',sch:'mag',dmg:22,cd:.50,kb:340,range:80,art:'spellblade',el:'holy',chg:'spellsweep'}, // holy magical melee: a radiant Paladin spellblade (the heavy end)
@@ -2482,7 +2482,7 @@ function classStartWeapon(cid){
      class actually uses, and 12*0.62 = 7.4 damage. Against a 34 HP Thornboar that is five committed
      swings while it rams you for 11, twelve times over for the cull quest. 0.78 makes it four and
      keeps the first real drop feeling like an upgrade, which is what the low number was protecting. */
-  w.dmg=+(w.dmg*0.78).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';
+  w.dmg=+(w.dmg*0.88).toFixed(1); w.lifesteal=0; w.blade='#bcae8a';   // 0.62 -> 0.78 -> 0.88: Oliver again, it is the SWORD that is weak, not the zone
   return w;
 }
 /* Hub shop stock: one plain weapon per class family at every rarity except legendary.
@@ -6948,13 +6948,7 @@ function encounterPass(rnd){
     const guarded = (G.chests||[]).some(c => Math.abs(c.x-r.x) < r.w/2+60 && Math.abs(c.z-r.z) < (r.d||r.w)/2+60);
     const isIsland = (r.y||0) > 40 && r.w <= 420;
     const isTier   = (r.y||0) > 120 && r.w > 420;
-    /* Scaled by tier for the same reason the scatter is: between this pass and the scatter, the
-       Outskirts went from 22 enemies to 47 - more than double the tutorial zone's population, from
-       two passes that were about making SPACE feel inhabited rather than about difficulty. Late
-       zones keep the full count. */
-    const _t = (function(){ try{ return curZone().tier || 1; }catch(e){ return 1; } })();
-    const _sc = _t <= 2 ? 0.6 : (_t <= 4 ? 0.8 : 1);
-    let n = Math.max(1, Math.round((r.court ? 5 : (guarded ? 3 : 2)) * _sc));
+    let n = r.court ? 5 : (guarded ? 3 : 2);
     const wantRanged = (isIsland || isTier) && ranged.length;
 
     for(let i = 0; i < n; i++){
@@ -7095,14 +7089,11 @@ function scatterPass(rnd){
   const spanIdx = [];
   for(let i = 0; i + 1 < rooms.length; i++) if(Math.hypot(rooms[i+1].x-rooms[i].x, rooms[i+1].z-rooms[i].z) >= 420) spanIdx.push(i);
   for(let i = spanIdx.length - 1; i > 0; i--){ const j = Math.floor(R()*(i+1)); const t2 = spanIdx[i]; spanIdx[i] = spanIdx[j]; spanIdx[j] = t2; }
-  /* DENSITY BY TIER. The share was a flat 0.6 everywhere, and in the Outskirts that took the zone
-     from 22 enemies to 41 on top of an encounter pass, a new bleeding hazard and sporeback death
-     clouds - three difficulty increases in the tutorial zone, none of which anybody asked for.
-     Early zones now get roughly half the scatter of late ones. The pass was meant to make the space
-     between rooms feel inhabited, not to make tier 1 a gauntlet. */
-  const _tier = (function(){ try{ return curZone().tier || 1; }catch(e){ return 1; } })();
-  const _share = _tier <= 2 ? 0.32 : (_tier <= 4 ? 0.45 : 0.6);
-  const live = new Set(spanIdx.slice(0, Math.max(1, Math.round(spanIdx.length*_share))));
+  /* A fixed share everywhere. It was briefly tier-scaled after Oliver said the early game was too
+     hard - but he then clarified: "i wasnt worried about number of enemies, more that my sword was
+     too weak". A weapon complaint read as a density complaint, and the correction removed work that
+     was measured and wanted. The fix belongs on the weapon, so it went there instead. */
+  const live = new Set(spanIdx.slice(0, Math.max(1, Math.round(spanIdx.length*0.6))));
 
   for(let i = 0; i + 1 < rooms.length; i++){
     const a = rooms[i], b = rooms[i+1];

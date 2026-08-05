@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.850.0-systems-pass';
+const VERSION3D='1.860.0-onboarding';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4268,27 +4268,117 @@ const HELP_ENTRIES=[
 var _pendingMenuTip=null;
 function menuTip(id, body){ meta.tutSeen=meta.tutSeen||{}; if(meta.tutOff||meta.tutSeen[id]) return; meta.tutSeen[id]=1; persistGlobal(); _pendingMenuTip=body; }
 // teachOnce(id, body[, opts]) — shows a contextual tip ONCE per concept (tracked in meta.tutSeen), then never again. Non-blocking. Honors the Tutorials toggle.
+/* TEACHING IS A QUEUE, NOT A SHOUT.
+   storyToast writes into ONE element and clears the previous timer, so two lessons firing in the
+   same frame meant the second erased the first mid-sentence - while teachOnce had ALREADY marked
+   both as seen. The lesson was not delayed, it was destroyed, permanently, and the player never
+   knew a thing had been explained to them.
+   That was survivable when there were seven lessons scattered across the whole game. It stopped
+   being survivable the moment this file grew to 32, most of which fire on proximity in the first
+   zone - walking into a room can easily satisfy three conditions at once.
+
+   So lessons queue and drain one at a time with a gap. The gap is the ANTI-OBNOXIOUS mechanism as
+   much as a legibility one: it is not possible to receive a wall of tutorial text, because the
+   pacing is enforced at the sink rather than trusted to every call site. */
+const TEACH_Q = [];
+let _teachT = 0;
+/* Long enough to read a line and get back to the fight before the next one lands. storyToast holds
+   a line for 5.2s, so this leaves a real beat of silence between lessons rather than butting them
+   end to end. */
+const TEACH_GAP = 6.5;
+
 function teachOnce(id, body, opts){
   meta.tutSeen = meta.tutSeen || {};
   if(meta.tutOff || meta.tutSeen[id]) return;
+  /* Marked seen at QUEUE time, not at show time: otherwise the same condition re-fires every frame
+     while the lesson waits its turn and the queue fills with duplicates of one message. */
   meta.tutSeen[id] = true; persistGlobal();
-  try{ storyToast(body, (opts&&opts.icon)||'📖'); }catch(e){ toast(body); }
+  TEACH_Q.push({ body: body, icon: (opts && opts.icon) || '📖', pri: (opts && opts.pri) || 5 });
+  /* Lower `pri` first. A lesson about the thing currently hurting you outranks a lesson about a
+     creature standing across the room, and without an ordering the queue would teach them in
+     whatever order the frame happened to evaluate its conditions. */
+  TEACH_Q.sort(function(a, b){ return a.pri - b.pri; });
+}
+
+/* ── THE WAYSTATION CLIFF ────────────────────────────────────────────────────
+   The tutorial trial is a corridor with five lessons and one exit, and it is well built. Then it
+   hands you the Waystation: fifteen interactables and eight gates, all live, all unexplained, and
+   five of them (the Arena, the Gauntlet, the Endless Dungeon, the Abyssal Descent, the Treasure
+   Sprint) built for a character thirty levels stronger than the one who just walked in.
+
+   A new player's actual first question is not "what is a Quartermaster" - it is "which of these
+   fifteen things is the game". Nothing on screen answered that.
+
+   The fix is deliberately NOT a tour. A tour of fifteen things is the obnoxious version, and it
+   front-loads names for systems the player has no items, gold or levels to use yet. Instead:
+
+     1. ONE line on first arrival, naming the single next action.
+     2. A quiet marker over the road out, until the first zone is cleared. A waypoint answers
+        "where do I go" without spending a word.
+     3. Everything else stays silent until the player has a REASON to care - the Smith when you
+        own gear, the Quartermaster when you have gold. Teaching a shop to somebody with no money
+        is noise; teaching it the moment they can afford something is a service.
+
+   Which means the hub teaches almost nothing, and that is the point. */
+/* Is this optional door beyond the player yet? Deliberately a SOFT gate that opens after one
+   cleared zone - the point is not to withhold content, it is that a level-1 character walking into
+   endless-survival content and being flattened reads as "this game is broken", not as "that was
+   optional". One zone is enough to know which doors are the road and which are the trials. */
+function hubGateLocked(n){
+  if(!n || !n.needZones || meta.tutOff) return false;
+  return (meta.zonesCleared || 0) < n.needZones;
+}
+
+function hubTeachTick(dt){
+  if(!G || !G.hub || mode !== 'play' || meta.tutOff) return;
+  const p = G.p;
+
+  teachOnce('hub_first',
+    'The Waystation. Everything here is optional except the road: take the first gate to begin your descent.',
+    {icon:'🏛', pri:1});
+
+  /* The road out, marked until it has been walked. Not an arrow on everything - just the one door
+     that is the game. */
+  const firstUncleared = (G.gates || []).find(function(g){
+    const Z = ZONES[g.zi];
+    return Z && !g.side && !(meta.zoneDone && meta.zoneDone[Z.id]);
+  });
+  G.hubWay = firstUncleared || null;
+
+  /* Contextual, and only once the player owns the thing the NPC is for. */
+  if((meta.gold || 0) >= 400)
+    teachOnce('hub_shop','You have coin. The Quartermaster sells gear, and the Smith upgrades what you already carry.',{icon:'🪙',pri:6});
+  const bagN = (meta.bank && meta.bank.length) || 0;
+  if(bagN >= 3)
+    teachOnce('hub_bag','Your bag is filling up. Sell what you will not wear — gold is the only thing that carries between runs.',{icon:'🎒',pri:6});
+  if((meta.zonesCleared || 0) >= 1)
+    teachOnce('hub_extras','A zone down. The side doors — the Arena, the Dungeon, the Gauntlet — are optional trials, and all of them are harder than the road.',{icon:'⚔️',pri:6});
+}
+
+function teachQueueTick(dt){
+  if(_teachT > 0) _teachT -= dt;
+  if(_teachT > 0 || !TEACH_Q.length) return;
+  /* Never during a menu or a cutscene - a lesson nobody is looking at is a lesson spent. */
+  if(mode !== 'play') return;
+  const t = TEACH_Q.shift();
+  _teachT = TEACH_GAP;
+  try{ storyToast(t.body, t.icon); }catch(e){ toast(t.body); }
 }
 // The tutorial LEVEL (first class trial) taught JUST-IN-TIME: each core verb is introduced the moment
 // it first matters, one at a time, in a safe context — instead of a wall of front-loaded text.
 function trialTeachTick(dt){ if(!G||!G.trial||mode!=='play') return; const T=TRIALS[G.trial]; if(!T||T.earned||meta.tutOff) return; const p=G.p; if(!p) return;
   G._ttT=(G._ttT||0)+dt;
   // 1) MOVE — the instant you gain control, before any threat
-  if(G._ttT>0.6) teachOnce('t_move','Move with the left stick or WASD. Jump with Space. Get a feel for your footing.',{icon:'🏃'});
+  if(G._ttT>0.6) teachOnce('t_move','Move with the left stick or WASD. Jump with Space. Get a feel for your footing.',{icon:'🏃',pri:0});
   const live=G.enemies.filter(e=>!e.dead&&!e.practice&&!e.dummy);
   // 2) ATTACK — when the first foe closes in
-  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack','A foe! Tap SLASH (J) to strike — it auto-aims at whatever you face. Hold to keep swinging.',{icon:'⚔️'});
+  if(live.some(e=>e.active&&dXZ(e.x,e.z,p.x,p.z)<230)) teachOnce('t_attack','A foe! Tap SLASH (J) to strike — it auto-aims at whatever you face. Hold to keep swinging.',{icon:'⚔️',pri:0});
   // 3) DODGE — the first time an enemy winds up a blow near you (the Barnacle principle: learn the danger safely)
-  if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge','It’s winding up! DODGE with K / Shift — the roll has invincibility frames, so roll THROUGH the blow, not just away.',{icon:'💨'});
+  if(live.some(e=>(e.windT>0||e.fuseT>0)&&dXZ(e.x,e.z,p.x,p.z)<190)) teachOnce('t_dodge','It’s winding up! DODGE with K / Shift — the roll has invincibility frames, so roll THROUGH the blow, not just away.',{icon:'💨',pri:0});
   // 4) first kill → the goal
-  if((G.trialKills||0)>=1) teachOnce('t_progress','Well struck. Clear the chamber — the way down opens once every foe has fallen.',{icon:'✨'});
+  if((G.trialKills||0)>=1) teachOnce('t_progress','Well struck. Clear the chamber — the way down opens once every foe has fallen.',{icon:'✨',pri:1});
   // 5) the portal
-  if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to claim your class and make your Bladefall.',{icon:'🌀'});
+  if(G.portal) teachOnce('t_portal','The way is open. Step into the portal to claim your class and make your Bladefall.',{icon:'🌀',pri:1});
 }
 // The mid-air DASH lesson — fires once when you approach the Outskirts' required dash chasm.
 function openDashTutorial(){ if(!G) return; meta.tut=meta.tut||{}; meta.tut.dash=1; persistGlobal();
@@ -7666,21 +7756,21 @@ function teachTick(dt){
 
   // ── hazards: taught by their FIRST bite, not by their name ──
   if(G.haz === 'bramble' && (p.thornT||0) > 0.25)
-    teachOnce('h_bramble','The thornwild drags at you and bleeds you slowly. It only holds while you are IN it — pick a line around the dark patches.',{icon:'🌿'});
+    teachOnce('h_bramble','The thornwild drags at you and bleeds you slowly. It only holds while you are IN it — pick a line around the dark patches.',{icon:'🌿',pri:2});
   if(G.haz === 'rubble' && (G.debris||[]).some(d => d.warn > 0 && dXZ(d.x,d.z,p.x,p.z) < 300))
-    teachOnce('h_rubble','The keep is still falling. The shadow on the ground is where it lands — you have about a second to not be there.',{icon:'🧱'});
+    teachOnce('h_rubble','The keep is still falling. The shadow on the ground is where it lands — you have about a second to not be there.',{icon:'🧱',pri:2});
   if(G.haz === 'glare' && G.glareNear)
-    teachOnce('h_glare','The spire sweeps the floor with light. It turns one way, always — move WITH it and it passes you.',{icon:'🔆'});
+    teachOnce('h_glare','The spire sweeps the floor with light. It turns one way, always — move WITH it and it passes you.',{icon:'🔆',pri:2});
   if(G.haz === 'gloom' && (G.gloomT||0) > 1.2)
-    teachOnce('h_gloom','The dark drinks. Braziers are safe ground — cross between them, and the count resets the moment you reach one.',{icon:'🕯'});
+    teachOnce('h_gloom','The dark drinks. Braziers are safe ground — cross between them, and the count resets the moment you reach one.',{icon:'🕯',pri:2});
   if(G.haz === 'slick' && (p.slide||0) > 0.5)
-    teachOnce('h_slick','The ice keeps whatever speed you gave it. Brake early — you stop where you decided to, not where you let go.',{icon:'❄️'});
+    teachOnce('h_slick','The ice keeps whatever speed you gave it. Brake early — you stop where you decided to, not where you let go.',{icon:'❄️',pri:2});
   if(G.haz === 'gusts' && !p.onGround && Math.abs(G.gustX||0) > 0.55)
-    teachOnce('h_gusts','The wind only has you while you are in the air. Time the jump for the lull, or let it carry you.',{icon:'🌬'});
+    teachOnce('h_gusts','The wind only has you while you are in the air. Time the jump for the lull, or let it carry you.',{icon:'🌬',pri:2});
   if(G.haz === 'phase' && (G.phasers||[]).some(ph => !ph.on))
-    teachOnce('h_phase','Some of this ground is only sometimes there. Watch a tile blink before you trust it with a jump.',{icon:'🌀'});
+    teachOnce('h_phase','Some of this ground is only sometimes there. Watch a tile blink before you trust it with a jump.',{icon:'🌀',pri:2});
   if(G.haz === 'lava' && G.emberWarn > 0)
-    teachOnce('h_lava','The vents flare on a rhythm and warn you first. Step off the glow, not away from it.',{icon:'🌋'});
+    teachOnce('h_lava','The vents flare on a rhythm and warn you first. Step off the glow, not away from it.',{icon:'🌋',pri:2});
 
   // ── objective verbs: taught when the marker is close enough to act on ──
   if(G.qmarks) for(const m of G.qmarks){
@@ -7693,24 +7783,41 @@ function teachTick(dt){
     if(m.k==='hunt'   && near)  teachOnce('q_hunt','One named quarry, not a cull. The red beacon follows it, so it can be chased rather than searched for.',{icon:'🩸'});
   }
 
-  // ── enemy tricks: taught the first time one is awake and near ──
+  // ── enemy tricks: taught at the moment the trick HAPPENS, not on proximity ──
+  /* The first version fired on distance: walk within 420 units of a shadeling and be told it fades,
+     before it had ever faded. That is noise AND bad teaching - it spends the lesson on a stranger
+     and leaves nothing to explain the surprise when it comes.
+     Every condition below is the behaviour actually occurring, so the line always lands as "ah,
+     THAT is what just happened" rather than as trivia about a creature across the room. */
   for(const e of (G.enemies||[])){
     if(!e || e.dead || !e.active || !e.spec) continue;
-    if(dXZ(e.x,e.z,p.x,p.z) > 420) continue;
-    if(e.spec==='rise')      teachOnce('m_rise','Risen bones get up once. It is not dead the first time.',{icon:'💀'});
-    else if(e.spec==='watch')teachOnce('m_watch','Sentinels raise the alarm. Kill it first or fight the whole room.',{icon:'🔔'});
-    else if(e.spec==='fade') teachOnce('m_fade','Shadelings fade out of reach for a beat. Your hits pass through — wait it out.',{icon:'👻'});
-    else if(e.spec==='spores')teachOnce('m_spores','Sporebacks burst into a cloud where they fall. Do not stand in the kill.',{icon:'🍄'});
-    else if(e.spec==='volatile')teachOnce('m_volatile','Toxlings go off the instant they die. Kill them at range if you can.',{icon:'☣️'});
-    else if(e.spec==='chillaura')teachOnce('m_chill','Frostlings slow you just by being near. Alone they are nothing; in a pack they pin you.',{icon:'🧊'});
-    else if(e.spec==='ignite')teachOnce('m_ignite','Emberlings leave burning ground behind them.',{icon:'🔥'});
-    else if(e.spec==='shell') teachOnce('m_shell','Its shell blocks hits from the front until it cracks. Go around it, or break the shell with ice.',{icon:'🛡'});
-    else if(e.spec==='blink') teachOnce('m_blink','It marks a spot, then arrives behind you. The mark is your warning.',{icon:'✨'});
-    else if(e.spec==='tether')teachOnce('m_tether','It is feeding the others. Cut the tether and the rest get easier.',{icon:'🔗'});
-    else if(e.spec==='totem') teachOnce('m_totem','It does not chase. It erupts. Close the gap or kill it from outside the ring.',{icon:'🗿'});
-    else if(e.spec==='knightslam')teachOnce('m_knight','The overhead crush is telegraphed. Step out of the circle, not backwards.',{icon:'⚔️'});
-    else break;   // one lesson per frame is plenty
+    if(dXZ(e.x,e.z,p.x,p.z) > 620) continue;
+    const sp = e.spec;
+    if(sp==='fade' && e.untargetable)
+      teachOnce('m_fade','It has faded out of reach — your hits pass straight through. Wait the beat out.',{icon:'👻',pri:4});
+    else if(sp==='watch' && (e.watchT||0) > 2.7)
+      teachOnce('m_watch','That was an alarm. Sentinels wake everything nearby — kill them first or fight the whole room.',{icon:'🔔',pri:4});
+    else if(sp==='blink' && (e.blinkFx||0) > 0)
+      teachOnce('m_blink','It marked a spot. It is about to arrive behind you.',{icon:'✨',pri:4});
+    else if(sp==='shell' && (e.shellHp||0) > 0 && (e.hitFlash||0) > 0)
+      teachOnce('m_shell','Its shell is eating your damage from the front. Get around it, or crack it with ice.',{icon:'🛡',pri:4});
+    else if(sp==='tether' && (e.tetherList||[]).length)
+      teachOnce('m_tether','It is feeding the ones around it. Cut the tether and the rest get easier.',{icon:'🔗',pri:4});
+    else if(sp==='totem' && (e.eruptW||0) > 0)
+      teachOnce('m_totem','It does not chase — it erupts. Close the gap or kill it from outside the ring.',{icon:'🗿',pri:4});
+    else if(sp==='knightslam' && (e.knightW||0) > 0)
+      teachOnce('m_knight','The crush is telegraphed. Step out of the circle, not backwards.',{icon:'⚔️',pri:4});
   }
+  /* The death behaviours explain themselves at the moment of death, so they are keyed off the
+     evidence they leave behind rather than off the creature that left it. */
+  if((p.chillAura||0) > 0.35)
+    teachOnce('m_chill','Frostlings slow you just by being close. Alone they are nothing; a pack of them pins you.',{icon:'🧊',pri:4});
+  if((G.trails||[]).some(tr => tr.col === '#8fd05a'))
+    teachOnce('m_spores','The sporeback left a cloud where it fell. Killing it does not clear the ground.',{icon:'🍄',pri:4});
+  if((G.trails||[]).some(tr => tr.col === '#ff8a3a'))
+    teachOnce('m_ignite','Emberlings leave fire behind them when they die.',{icon:'🔥',pri:4});
+  if((G.enemies||[]).some(e => e && e.risen && !e.dead))
+    teachOnce('m_rise','It got back up. Bones rise once — the first kill is never the last one.',{icon:'💀',pri:4});
 }
 
 function hazardName(th){ return (th==='frost')?'FREEZING DEEP':(th==='void'||th==='apex')?'THE VOID':(th==='plains'||th==='forest')?'THE WILDS':(th==='marble')?'THE FALL':'LAVA'; }
@@ -8995,6 +9102,7 @@ function killEnemy(e,weaponKill){
   else if(e.spec==='volatile'){
     /* TOXLING: goes off immediately. Small, fast, and punishes killing it in your own face. */
     (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,r:14,maxR:130,dmg:Math.max(4,Math.round(e.dmg*1.1)),life:0,spd:300,col:'#9fe04a',col2:'#3a5a10',hit:0});
+    try{ teachOnce('m_volatile','It detonated on death. Toxlings are safer killed at arm\'s length.',{icon:'☣️',pri:4}); }catch(_){}
     burst(e.x,e.y+e.h*0.5,e.z,'#9fe04a',20);
   }
   else if(e.spec==='ignite'){
@@ -10662,7 +10770,7 @@ function update(dt){
     if(Math.hypot(mx,mz)>0.2){ const ty=Math.atan2(p.vx,p.vz); let d=ty-p.yaw;
       while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283; p.yaw+=d*Math.min(1,dt*14); }
   }
-  hazUpdate(dt); questMarkTick(dt); teachTick(dt);
+  hazUpdate(dt); questMarkTick(dt); teachTick(dt); hubTeachTick(dt); teachQueueTick(dt);
   if(G.hub) hubInteract(p,dt);
   // dens: keep the hunt stocked while its kill quest is open (capped so it's a grind, not a swarm)
   // SPAWNERS (quest-driven): while a kill quest is open, refill its mob at the dens until the count is met.
@@ -12445,13 +12553,13 @@ function enterWaystation(){
     {id:'board',ic:'📜',name:'Postings',role:'Quests',prop:'board',x:-495,z:342,faceZ:0,open:()=>openQuestBoard(wsResume)},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
-    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate()},
+    {id:'abyss',ic:'🕳️',name:'Abyssal Descent',role:'Endless survival',prop:'abyss',verb:'Descend the Abyss',x:-235,z:660,c1:'#1a0e2a',c2:'#b06bff',open:()=>openEndlessGate(),needZones:1},
     /* The Endless Dungeon's way in. Placed beside the Abyss on purpose - they are the two endless
        modes and belonging together makes the difference between them legible: one is a descent you
        fight through, the other one you navigate. */
-    {id:'delve',ic:'🗝️',name:'The Endless Dungeon',role:'Endless exploration',prop:'abyss',verb:'Enter the Dungeon',x:-95,z:660,c1:'#0e1a2a',c2:'#7fd6ff',open:()=>openDelveGate()},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
+    {id:'delve',ic:'🗝️',name:'The Endless Dungeon',role:'Endless exploration',prop:'abyss',verb:'Enter the Dungeon',x:-95,z:660,c1:'#0e1a2a',c2:'#7fd6ff',open:()=>openDelveGate(),needZones:1},   // pulled in off the annex divider wall (was -300, clipped the x:-330 screen wall)
     {id:'sprint',ic:'🏁',name:'Treasure Sprint',role:'Time-trial parkour · just for fun',prop:'sprintgate',verb:'Run the Treasure Sprint',direct:true,x:235,z:660,c1:'#3a2f10',c2:'#ffd24a',open:()=>openLevelEntry({icon:'🏁',name:'Treasure Sprint',kicker:'Time-Trial Parkour · Just for Fun',desc:'A pure parkour race against the clock — no loot, no risk. Just you, the course, and your best time.',col:'#ffd24a',onEnter:startHubSprint})},
-    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena()},
+    {id:'arena',ic:'⚔️',name:'The Arena',role:'Custom-loadout battleground · solo or PvP',prop:'arenagate',verb:'Enter the Arena',direct:true,x:0,z:800,c1:'#3a1618',c2:'#e8453d',open:()=>enterArena(),needZones:1},
     {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:185,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}   // was x:340 (SAT ON the x:330 divider wall) → pulled inside the bay, beside the Arena
   ];
   if(meta.arcadeOwned) G.hubNpcs.push({id:'arcade',ic:'🕹️',name:"Isaac's Arcade",role:'A game within the game',prop:'arcade',verb:'Play the arcade',direct:true,x:-340,z:800,c1:'#182240',c2:'#5affc8',open:()=>openArcadeCabinet()});
@@ -12849,7 +12957,7 @@ function updateInteract(){
     const consider=(cx,cz,range,make)=>{ const dx=cx-p.x, dz=cz-p.z, d=Math.hypot(dx,dz); if(d>=range) return;
       const align=(dx*fx+dz*fz)/(d||1), eff=d-90*Math.max(0,align);   // facing an object shaves up to 90 units off its effective distance
       if(eff<best){ best=eff; it=make(); } };
-    for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(n.verb||('Talk to '+n.name)),act:n.direct?n.open:()=>openNpcTalk(n)}));
+    for(const n of G.hubNpcs) consider(n.x,n.z,110,()=>({x:n.x,z:n.z,y:(n.prop?46:66),label:(hubGateLocked(n)?(n.name+' — clear a zone first'):(n.verb||('Talk to '+n.name))),act:hubGateLocked(n)?(()=>toast('The '+n.name+' is an optional trial, and harder than the road. Clear a zone first.')):n.direct?n.open:()=>openNpcTalk(n)}));
     consider(0,30,72,()=>({x:0,z:30,y:92,label:'Use the Waystone · Heal, bank & travel',act:activateHubWaystone}));
     if(G.gates) for(const g of G.gates) consider(g.x,g.z,96,()=>{ const Z=ZONES[g.zi], nm=g.side?(Z.side?Z.side.name:Z.name):Z.name; return {x:g.x,z:g.z,y:96,label:(g.open?('Enter '+nm):('🔒 '+nm)),act:()=>openGateEntry(g)}; });
     consider(-806,644,70,()=>({x:-806,z:644,y:60,label:'???',act:()=>openCheatMenu(wsResume)}));   // the Tinkerer's cardboard-box pile in the SW glade corner — the glint on top hints at the '???' cheat bench
@@ -16217,6 +16325,16 @@ function render(t){
         bx(L.x+Math.cos(a)*L.r, L.y+1.5, L.z+Math.sin(a)*L.r, 26,2,26, '#3a2f14','#ffd88a',0.2+gl*0.45); } } } }
   if(G.haz==='phase') for(const ph of (G.phasers||[])){ const s=ph.seg; if(!s||ph.on) continue;   // ghost of the tile that isn't there
     bx(s.x, 0, s.z, s.w,2,s.d, '#2a2440', '#7a5ad0', 0.22); }
+  /* THE ROAD OUT. A single soft beacon over the next uncleared zone gate, drawn only while the
+     player has not yet cleared it. It replaces a paragraph of hub tutorial with a thing you can
+     see from anywhere in the plaza, and it removes itself the moment it stops being the answer. */
+  if(G.hub && G.hubWay){
+    const w = G.hubWay, gl = 0.45 + 0.3*Math.sin(t*1.9);
+    for(let i = 0; i < 4; i++)
+      bx(w.x, 120 + i*26, w.z, 9 - i*1.5, 12, 9 - i*1.5, '#7a5a20', '#ffd88a', gl*(1 - i*0.2));
+    for(let i = 0; i < 10; i++){ const a = (i/10)*6.283 + t*0.5;
+      bx(w.x + Math.cos(a)*46, 4, w.z + Math.sin(a)*46, 12, 2, 12, '#5a4a20', '#ffd88a', gl*0.6); }
+  }
   /* Objective markers. Every one is a LIT thing, because the whole point of these verbs is that
      you have to locate the objective rather than be walked into it, and an unlit marker in a dark
      zone is a hidden object hunt nobody asked for. */

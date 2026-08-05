@@ -655,6 +655,7 @@ function weapLoadFor(){
   Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
                 (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {},
                 _fitOverrides[n] || {},
+                (_fitOverrides['@'+eyeModel()] || {})[n] || {},     // per-BODY, and it wins
                 { name:n, on:true });
 }
 
@@ -667,9 +668,21 @@ window.__weapFit = {
   get(){ const o = {}; for(const k of FIT_FIELDS) o[k] = WEAP[k]; o.name = WEAP.name; return o; },
   /* nudge one field and persist. step defaults are sized to be VISIBLE in one press: rotations in
      ~3 degree taps, offsets in one-hundredths of an arm reach. */
+  /* Which bucket a tweak lands in. Oliver's existing numbers were tuned on the WARRIOR body and
+     every class currently wears them - but the bodies have different hands, which is why a weapon
+     that sits right on one class sits wrong on another. `.body(true)` puts subsequent tweaks in a
+     per-body bucket instead of the shared one, so tuning the Ranger's bow cannot disturb the
+     Warrior's. Off by default, because a shared fix should stay shared. */
+  body(on){ this._perBody = (on !== false); return 'tuning ' + (this._perBody ? ('the ' + eyeModel() + ' body only') : 'ALL bodies'); },
+  _bucket(){
+    if(!this._perBody) return _fitOverrides[WEAP.name] || (_fitOverrides[WEAP.name] = {});
+    const k = '@' + eyeModel();
+    const byBody = _fitOverrides[k] || (_fitOverrides[k] = {});
+    return byBody[WEAP.name] || (byBody[WEAP.name] = {});
+  },
   nudge(field, delta){
     if(FIT_FIELDS.indexOf(field) < 0) return null;
-    const cur = _fitOverrides[WEAP.name] || (_fitOverrides[WEAP.name] = {});
+    const cur = this._bucket();
     const base = (cur[field] != null) ? cur[field] : WEAP[field];
     cur[field] = +( (base + delta).toFixed(3) );
     fitSave(); weapLoadFor();
@@ -678,7 +691,7 @@ window.__weapFit = {
   },
   set(field, v){
     if(FIT_FIELDS.indexOf(field) < 0) return null;
-    const cur = _fitOverrides[WEAP.name] || (_fitOverrides[WEAP.name] = {});
+    const cur = this._bucket();
     cur[field] = +(+v).toFixed(3);
     fitSave(); weapLoadFor();
     try { applyWeaponTransform(actor); } catch(e){}

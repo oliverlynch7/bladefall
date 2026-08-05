@@ -485,10 +485,25 @@ function setGeom(o, g){ for(const k in g) o[k] = g[k]; }
    as i drag them." A full rebuild every frame would stall, so this is a floor on the interval, not
    a per-frame redraw - the object visibly tracks, a beat behind. */
 let _dragRedrawAt = 0;
+let _redrawPending = null;
 function redrawLive(){
   const now = (typeof performance !== 'undefined' ? performance.now() : 0);
-  if(now - _dragRedrawAt < 110) return;
+  /* THE THROTTLE MUST NOT SWALLOW THE LAST CALL.
+     Oliver: "when I press space and shift to change the elevation of an object in the editor, it
+     raises the selection circle but not the object itself."
+     Both were true and they had different causes. The selection ring is redrawn every frame
+     straight from o.y0, so it followed instantly. The OBJECT only moves when world3d rebuilds - and
+     this throttle dropped any call that landed inside 110ms of the previous one with no trailing
+     rebuild to follow. It was written for a continuous mouse drag, where the next frame's call
+     always arrives to finish the job; a discrete key tap has no next call, so a nudge pressed just
+     after moving the mouse changed the data, moved the ring, and never redrew the world.
+     Now the tail is always scheduled, so the last state always reaches the screen. */
+  if(now - _dragRedrawAt < 110){
+    if(!_redrawPending) _redrawPending = setTimeout(() => { _redrawPending = null; redrawLive(); }, 120);
+    return;
+  }
   _dragRedrawAt = now;
+  if(_redrawPending){ clearTimeout(_redrawPending); _redrawPending = null; }
   try { window.__world3dRebuild && window.__world3dRebuild(); } catch(e){}
 }
 

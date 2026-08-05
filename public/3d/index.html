@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.881.0-terrain-hollow';
+const VERSION3D='1.882.0-delve-scaling';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2807,7 +2807,7 @@ function zoneTier(){ return (G&&G.zoneTier)||curZone().tier; }
 function rarityCap(bonus){ return Math.min(4,(TIERBAND[zoneTier()-1]||1)+(bonus||0)); }
 function bandedRarity(bonus){ let rid=rollRarity(); const cap=rarityCap(bonus);
   while(RARITY[rid].tier>cap) rid=RORDER[RARITY[rid].tier-1]; return rid; }   // rarity is banded by zone tier: no legendaries in the shallows
-function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub)) return [];    // trials and side zones run on their own objective
+function areaQuests(ai){ if(G&&(G.trial||G.side||G.hub||G.delve)) return [];    // trials, side zones and the delve run on their own objective
   const Z=curZone(); const a=Z.areas[ai==null?G.area:ai]; return (a&&a.quests)?a.quests:[]; }
 function questDone(q){ return (G.qs[q.id]||0)>=(q.n||1); }
 /* What the tracker shows on the right of a row. The five new verbs need their own progress read:
@@ -4198,6 +4198,18 @@ function enterZone(zi){
 }
 function loadArea(){
   const Z=curZone();
+  /* THE ENDLESS DUNGEON PICKS ITS OWN FLOOR, and this function used to throw that away.
+     Oliver: "the first level of the endless dungeon was way too hard, i died within two rooms."
+     Measured: floor 1 spawned 22 siege knights, 13 royal arcanists and 7 shadelings - stage 15,
+     Castle Duskmoor, the FINAL zone of the campaign, on the first floor.
+     loadDelveFloor sets G.stageIndex from endlessStageFor(n), which for floor 1 is stage 0. Then it
+     calls loadArea, which read the zone/area pair instead - and the delve runs with `zone:11`, a
+     leftover from when it borrowed the Abyss. Only eight zones exist, so that resolves to the last
+     one and every floor loaded Duskmoor's bestiary. The difficulty MULTIPLIERS were all correct
+     (tier 1, ngHp 1.0); it was the creature list that was forty levels out.
+     The floor seed is derived here too, so floors stop sharing a layout with each other. */
+  if(G.delve){ G.areaSeed = 500 + (G.floor||1)*13; G.areaName = 'Floor ' + (G.floor||1);
+               loadStage(G.stageIndex||0); return; }
   if(G.trial){ const T=TRIALS[G.trial]; G.areaSeed=T.seed; G.areaName=T.name; loadStage(T.stage); return; }
   if(G.side){ const S=Z.side; G.areaSeed=S.seed; G.areaName=S.name; loadStage(S.stage); return; }
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
@@ -6138,7 +6150,12 @@ function loadStageRaw(i){
   const isBoss=s.type==='boss', isMini=s.type==='miniboss', diff=i;
   const _seed=(isBoss||isMini)?0:(G.runSeed||0);   // arenas: same layout every run
   const rnd=mulberry(i*7919+31+_seed+so), rnd2=mulberry(i*104729+7+_seed+so*3);
-  const eliteRate=Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
+  /* THE FIRST FLOORS OF THE DELVE HAVE NO ELITES. You enter the Endless Dungeon as a fresh level-1
+     character with a starter weapon and no gear - deliberately - so an elite in the first room is
+     not a difficulty spike, it is a coin flip on whether the run exists at all. Floors 1-2 are the
+     ramp; from floor 3 the normal curve applies. */
+  const _delveEarly = !!(G && G.delve && (G.floor||1) <= 2);
+  const eliteRate=_delveEarly ? 0 : Math.min(0.4,0.08+zoneTier()*0.025+((G&&(G.side||G.trial))?0.12:0));   // elites get denser as the chain deepens; secrets are meaner still
   const fq=(typeof G.qs==='object')?fetchQuest():null;     // this area's gather quest, if any
   // Phasing zones bias their bridges toward static stones, because those are the only tiles the hazard may take.
   const phz=!!(G && !G.side && !G.trial && curZone().haz==='phase');
@@ -7858,7 +7875,12 @@ function hazTopUp(rnd){
    Markers live in ONE array rather than five globals, because every one of them needs the same
    four things: a position, a quest id, a done flag, and to be lifted with the terrain. */
 function questMarks(rnd){
-  if(!G || G.trial || G.side || G.hub) return 0;
+  /* ...and not in the Endless Dungeon. It borrows a zone's stage for theme, so it was also
+     inheriting that zone's OBJECTIVES - which meant the `hunt` verb spawned its named elite on
+     floor 1, into a mode you enter as a fresh level-1 character with no gear. The delve's only
+     goal is the stairs down; the file already said so about quest DISPLAY and this pass had not
+     been told. */
+  if(!G || G.trial || G.side || G.hub || G.delve) return 0;
   const R = () => (rnd ? rnd() : Math.random());
   G.qmarks = [];
   const rooms = (G.rooms||[]).filter(r => r && r.w);
@@ -12174,9 +12196,23 @@ function startDelve(cid){
   storyToast('The Endless Dungeon. Nothing you find here leaves with you — only how deep you went.');
 }
 
+/* Which zone owns a stage. The delve picks a STAGE for its theme, but loadStage dispatches the
+   level generator on curZone().id - so the zone index has to agree with the stage or you get one
+   zone's terrain generator wearing another zone's palette. That is exactly what was happening:
+   `zone:11` resolved to Castle Duskmoor (only eight zones exist), so the castle's hand-authored
+   scape ran on every floor and hand-placed siege knights into floor 1. */
+function zoneIndexForStage(st){
+  for(let i = 0; i < ZONES.length; i++){
+    const Z = ZONES[i];
+    if(Z.boss && Z.boss.stage === st) return i;
+    for(const a of (Z.areas||[])) if(a.stage === st) return i;
+  }
+  return 0;
+}
 function loadDelveFloor(n){
   G.floor = n;
   G.stageIndex = endlessStageFor(n);           // reuse the Abyss's stage rotation for theme variety
+  G.zone = zoneIndexForStage(G.stageIndex);    // ...and let the matching generator build it
   G.haz = null;
   G.zoneTier = Math.min(7, 1 + Math.floor((n-1)/3));
   /* Gentler than the Abyss on purpose. Depth here is meant to be limited by navigation and

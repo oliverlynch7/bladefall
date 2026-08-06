@@ -5215,6 +5215,210 @@ const TERRAIN_ZONES = { hollow: true, frost: true };
    and capped safe hops at 135. Anything wider is a wall the player cannot see is a wall, which is
    the worst kind. Every gap on the critical path is checked against MAX_GAP and closed with a
    stepping shelf if it is too wide. */
+/* -- REACHABILITY AUDIT ------------------------------------------------------
+   Oliver, playtesting Frostfell: "there was a plateau that had one of the wayfires to be kindled,
+   and it was completely impossible to reach. So always make sure you're checking for that."
+
+   He is right that this needs to be a standing check rather than a thing I remember. An objective
+   you cannot reach is worse than a missing one - the player does not know it is broken, so they
+   spend the level hunting for a way up that does not exist.
+
+   A flood fill from the spawn over the real collision surface, with the player's actual movement
+   rules: step or climb up to JUMP_UP, and hop a gap of up to JUMP_GAP if there is ground on the far
+   side. Anything the fill cannot touch does not exist as far as the player is concerned.
+
+   Used to VET objective placement, not merely to report it - questMarks and the high-ground rewards
+   both ask this before committing to a spot. */
+const REACH_CELL = 70, REACH_UP = 95, REACH_GAP = 150;
+function reachableSet(){
+  if(!G || !G.p) return null;
+  const start = G.startPos || { x: G.p.x, z: G.p.z };
+  const key = (cx, cz) => cx + ',' + cz;
+  const hAt = (cx, cz) => surfaceHeightAt(cx * REACH_CELL, cz * REACH_CELL, 20);
+  const sx = Math.round(start.x / REACH_CELL), sz = Math.round(start.z / REACH_CELL);
+  const seen = new Map();
+  const q = [[sx, sz]];
+  seen.set(key(sx, sz), hAt(sx, sz));
+  let guard = 0;
+  while(q.length && guard++ < 60000){
+    const [cx, cz] = q.shift();
+    const h = seen.get(key(cx, cz));
+    for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){
+      /* one step, then progressively longer hops - a jump clears a couple of empty cells */
+      for(let n = 1; n <= Math.ceil(REACH_GAP / REACH_CELL); n++){
+        const nx = cx + d[0]*n, nz = cz + d[1]*n, k = key(nx, nz);
+        if(seen.has(k)) continue;
+        const nh = hAt(nx, nz);
+        if(nh < -1e8) continue;                 // void: keep looking further for a landing
+        if(nh - h > REACH_UP) break;            // too high to climb or jump onto
+        seen.set(k, nh); q.push([nx, nz]);
+        break;                                  // landed; longer hops in this direction are moot
+      }
+    }
+  }
+  return { has: (x, z) => seen.has(key(Math.round(x/REACH_CELL), Math.round(z/REACH_CELL))),
+           size: seen.size };
+}
+
+/* Drop anything the player cannot get to, and say so. Called after the objective passes so a
+   generated zone can never ship an impossible errand. */
+function auditReachable(){
+  if(!G || G.hub) return 0;
+  let R = null;
+  try { R = reachableSet(); } catch(e){ return 0; }
+  if(!R) return 0;
+  let moved = 0;
+  const rooms = (G.rooms||[]).filter(r => r && r.w && R.has(r.x, r.z));
+  for(const m of (G.qmarks || [])){
+    if(R.has(m.x, m.z)) continue;
+    /* Re-home rather than delete: the objective still has to exist, it just cannot live there. */
+    const r = rooms[0];
+    if(r){ m.x = r.x; m.z = r.z; m.y = surfaceHeightAt(r.x, r.z, 20); moved++; }
+  }
+  for(let i = (G.chests||[]).length - 1; i >= 0; i--){
+    const c = G.chests[i];
+    if(!R.has(c.x, c.z)){ const r = rooms[Math.min(rooms.length-1, i)] ;
+      if(r){ c.x = r.x; c.z = r.z; c.y = surfaceHeightAt(r.x, r.z, 20); moved++; } }
+  }
+  G._reachMoved = moved; G._reachCells = R.size;
+  return moved;
+}
+
+/* -- TERRAIN: ICE CAVE -------------------------------------------------------
+   Oliver: "I wonder how we could feel like we're going through some kind of ice cave... this big
+   complex ice cave to navigate. a lot of levels have been designed around an open landscape."
+
+   That is the real gap. Every zone so far - canyon, plates, and all six hand-authored ones - is an
+   OUTDOOR space under an open sky. An interior is a different kind of navigation entirely: you
+   cannot see the whole room from the door, the route is discovered rather than surveyed, and being
+   enclosed is itself the feeling.
+
+   SUBTRACTIVE, which is the opposite of everything built so far. Start with the zone solid, then
+   CARVE chambers and the tunnels between them. That is what produces the things additive placement
+   never can - walls that are the leftover of the space rather than objects standing beside it,
+   tunnels that genuinely enclose, and chambers that open out after a squeeze.
+
+   The ceiling is what sells it. A floor with tall walls is a canyon; a floor with tall walls AND a
+   roof is a cave, and the difference is one pass. */
+function terrainIceCave(ctx, o){
+  const rnd = ctx.rnd, rnd2 = ctx.rnd2;
+  const CELL = o.cell || 80;
+  const Z0 = o.z0, Z1 = o.z1, SPAN = Math.abs(Z1 - Z0) || 1;
+  const HALF = o.halfWidth || 1100;
+  const cols = Math.round((HALF*2) / CELL), rows = Math.round(SPAN / CELL);
+
+  /* THE DIG. Chambers strung along a wandering line, joined by tunnels. Everything not dug stays
+     solid ice, and the walls are simply what is left. */
+  const CH = o.chambers || 7;
+  const nodes = [];
+  for(let i = 0; i < CH; i++){
+    const t = (i + 0.5) / CH;
+    const z = Z0 + (Z1 - Z0) * t;
+    const x = Math.sin(t * 6.283 * 1.7 + rnd()*2) * (o.wander || 420) + (rnd()*2-1)*90;
+    nodes.push({ x: x, z: z,
+                 r: (o.chamberR || 300) * (0.6 + rnd() * 0.8),
+                 h: Math.round((rnd() < 0.5 ? 0 : 1) * (o.step || 60) * Math.floor(rnd()*3)) });
+  }
+  /* entrance and exit chambers, so the zone owns its own ends - the lesson from the canyon and the
+     plates, both of which spawned the player into a hole */
+  nodes.unshift({ x: 0, z: Z0 - 20, r: 300, h: 0, mouth: true });
+  nodes.push({ x: nodes[nodes.length-1].x, z: Z1 + 40, r: 300, h: 0, mouth: true });
+
+  const TUNNEL = o.tunnel || 105;         // half-width of a connecting passage
+  /* Is this point inside the dug-out volume, and if so at what floor height? */
+  const dug = function(x, z){
+    let best = null;
+    for(const c of nodes){
+      if(Math.hypot(x - c.x, z - c.z) <= c.r){ if(best == null || c.h > best) best = c.h; }
+    }
+    for(let i = 0; i + 1 < nodes.length; i++){
+      const a = nodes[i], b = nodes[i+1];
+      const vx = b.x - a.x, vz = b.z - a.z, L2 = vx*vx + vz*vz || 1;
+      let t = ((x - a.x)*vx + (z - a.z)*vz) / L2;
+      if(t < 0) t = 0; else if(t > 1) t = 1;
+      const px = a.x + vx*t, pz = a.z + vz*t;
+      /* the passage pinches and widens along its length, so a tunnel is not a pipe */
+      const w = TUNNEL * (0.7 + 0.5 * Math.abs(Math.sin(t*9.4 + i)));
+      if(Math.hypot(x - px, z - pz) <= w){
+        const hh = Math.round(a.h + (b.h - a.h) * t);
+        if(best == null || hh > best) best = hh;
+      }
+    }
+    return best;
+  };
+
+  /* EMIT FLOORS. Runs merge along x exactly as the other two generators do. */
+  let boxes = 0, floorCells = 0;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null, runH = 0;
+    const flush = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      vplat(runStart + (w - CELL)/2, z, runH, w, CELL, { terrain: true });
+      boxes++; runStart = null;
+    };
+    for(let c = 0; c <= cols; c++){
+      const x = -HALF + c * CELL;
+      const h = dug(x, z);
+      if(h == null){ flush(x - CELL); continue; }
+      floorCells++;
+      if(runStart == null){ runStart = x; runH = h; }
+      else if(Math.abs(h - runH) > 0.5){ flush(x - CELL); runStart = x; runH = h; }
+    }
+    flush(HALF);
+  }
+
+  /* THE WALLS ARE THE LEFTOVER. A solid cell touching a dug one becomes an ice face - so the walls
+     exist BECAUSE of the space, which is the whole idea of carving. */
+  const WALL_H = o.wallH || 330;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    for(let c = 0; c <= cols; c++){
+      const x = -HALF + c * CELL;
+      if(dug(x, z) != null) continue;
+      let touches = false;
+      for(const d of [[CELL,0],[-CELL,0],[0,CELL],[0,-CELL]]) if(dug(x+d[0], z+d[1]) != null){ touches = true; break; }
+      if(!touches) continue;
+      vplat(x, z, WALL_H + (rnd2() * 60 | 0), CELL, CELL, { terrain: true, caveWall: true });
+      boxes++;
+    }
+  }
+
+  /* THE ROOF, which is what makes it a cave rather than a canyon. Drawn as deco rather than
+     collision so it can never trap the player inside geometry, and lifted above head height. */
+  const ROOF = o.roof || 250;
+  for(let r = 0; r < rows; r += 2){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null;
+    const flushRoof = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      G.deco.push({ x: runStart + (w - CELL)/2, z: z, y0: ROOF, w: w, h: 46, d: CELL*2,
+                    c: '#8fc9e8', kind:'caveroof' });
+      runStart = null;
+    };
+    for(let c = 0; c <= cols; c++){
+      const x = -HALF + c * CELL;
+      if(dug(x, z) == null){ flushRoof(x - CELL); continue; }
+      if(runStart == null) runStart = x;
+    }
+    flushRoof(HALF);
+  }
+
+  for(let i = 1; i <= CH; i++){
+    const c = nodes[i];
+    G.rooms.push({ name: (o.roomNames && o.roomNames[i-1]) || ('Chamber ' + i),
+                   x: c.x, z: c.z, w: Math.round(c.r*1.5), d: Math.round(c.r*1.5), y: c.h,
+                   monsters: [], encounter: false, cleared: true,
+                   court: i === Math.ceil(CH/2) });
+  }
+
+  return { boxes: boxes, floorCells: floorCells,
+           start: { x: nodes[0].x, z: nodes[0].z, h: 0 },
+           goal:  { x: nodes[nodes.length-1].x, z: nodes[nodes.length-1].z, h: 0 } };
+}
+
 function terrainPlates(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
   const CELL = o.cell || 90;
@@ -5797,6 +6001,20 @@ const EXPANDED_SCAPES={
   frost(ctx){
     if(TERRAIN_ZONES.frost){
       const {mkMonster}=ctx, up=G.area===1;
+      const T=terrainIceCave(ctx,{
+        z0: 240, z1: up? -5000 : -4600, cell: 80, halfWidth: 1100,
+        chambers: up? 8 : 7, chamberR: 300, wander: 420, tunnel: 105,
+        step: 60, wallH: 330, roof: 250,
+        roomNames: up? ['The Mouth','Blue Hall','The Pinch','Meltwater','Crystal Gallery','The Drop','Glacier Heart','The Rise']
+                     : ['Ice Mouth','First Hall','The Narrows','Frozen Font','The Vault','Deep Blue','The Way Up'] });
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
+        mkMonster(ctx.pick(), r.x-60, r.z+40, r); mkMonster(ctx.pick(), r.x+70, r.z-40, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
+                       decoCol:'#9eddf2',decoTheme:'frost',decoTall:200});
+      return;
+    }
+    if(false){
+      const {mkMonster}=ctx, up=G.area===1;
       const T=terrainPlates(ctx,{
         z0: 240, z1: up? -5000 : -4600, cell: 90,
         wander: 240, stations: up? 8 : 7, plateR: 300, step: 46, maxH: up? 220 : 190,
@@ -6354,7 +6572,7 @@ function loadStageRaw(i){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
-    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questMarks(srnd); snapWorldInteractables(); return;
+    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questMarks(srnd); auditReachable(); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the

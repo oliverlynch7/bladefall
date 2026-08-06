@@ -5195,7 +5195,173 @@ const SCAPES={
    generators untouched, so if this looks worse, nothing is lost by not adopting it. */
 /* Which zones use terrain-first generation. One entry today, deliberately: the approach has to be
    judged on a level Oliver can walk before it touches anything else. */
-const TERRAIN_ZONES = { hollow: true };
+const TERRAIN_ZONES = { hollow: true, frost: true };
+
+/* -- TERRAIN: ICE PLATES ----------------------------------------------------
+   Frostfell's primitive, and deliberately the LEAST like the canyon so the framework is proved to
+   generalise rather than to repaint. The canyon is one continuous corridor whose walls are a
+   consequence of the route; this is the opposite - a broken field of shelves over crevasses, where
+   the route is a consequence of which plates happen to touch.
+
+   What that gives the player, which the canyon cannot:
+     - the gap is the obstacle, not the wall. You look for a crossing rather than following a wall.
+     - height in big flat STEPS instead of a continuous grade, so a shelf reads as a place to stand
+       and fight rather than as a slope you are always sliding along.
+     - it pairs with Rime. Low friction on a wide flat plate beside a crevasse is a real decision;
+       low friction in a corridor is just a nuisance.
+
+   THE ONE HARD CONSTRAINT: a crevasse may never be wider than a jump. Measured from the engine -
+   jump impulse 560, and the earlier stepping-stone work established ~150 units of horizontal reach
+   and capped safe hops at 135. Anything wider is a wall the player cannot see is a wall, which is
+   the worst kind. Every gap on the critical path is checked against MAX_GAP and closed with a
+   stepping shelf if it is too wide. */
+function terrainPlates(ctx, o){
+  const rnd = ctx.rnd, rnd2 = ctx.rnd2;
+  const CELL = o.cell || 90;
+  const Z0 = o.z0, Z1 = o.z1;
+  const SPAN = Math.abs(Z1 - Z0) || 1;
+  const MAX_GAP = o.maxGap || 130;          // never wider than a jump
+
+  /* A gentler wander than the canyon: the fracturing supplies the interest, so the route does not
+     also need to snake. */
+  const A1 = o.wander || 240;
+  const f1 = 1.6 / SPAN, ph1 = rnd() * 6.28;
+  const centre = function(z){ return Math.sin((z - Z0) * f1 * 6.283 + ph1) * A1; };
+
+  /* STATIONS: the big shelves you fight on, strung along the route. Their heights step rather than
+     grade, and never by more than a climbable amount between neighbours. */
+  /* ENTRANCE AND EXIT LANDINGS, placed first so everything else can be checked against them.
+     Frostfell shipped its first build with the player spawning over a crevasse and taking FREEZING
+     DEEP damage on frame one - the start was put at Z0-40 while the first shelf sat 300 units
+     further in. The canyon made the identical mistake a day earlier. A generated zone must own its
+     own entrance: the ground you arrive on is not something to infer from the layout. */
+  const STATIONS = o.stations || 7;
+  const STEP = o.step || 46;                // one height step; two is still climbable, three is not
+  const plates = [];
+  let lastH = 0;
+  for(let i = 0; i < STATIONS; i++){
+    const t = (i + 0.5) / STATIONS;
+    const z = Z0 + (Z1 - Z0) * t;
+    const x = centre(z) + (rnd() * 2 - 1) * 120;
+    const r = (o.plateR || 300) * (0.72 + rnd() * 0.62);
+    /* height drifts by at most one step per station, so the route is always climbable without a
+       jump puzzle the player did not ask for */
+    const dir = rnd() < 0.5 ? -1 : 1;
+    lastH = Math.max(0, Math.min(o.maxH || 190, lastH + dir * STEP * (rnd() < 0.45 ? 1 : 0)));
+    plates.push({ x: x, z: z, r: r, h: Math.round(lastH), station: true, i: i });
+  }
+
+  /* BRIDGING: wherever two consecutive stations are further apart than a jump, drop stepping
+     shelves between them until every hop is legal. This is what stops the zone sealing itself the
+     way the canyon did before its curvature was bounded. */
+  /* The landings themselves: wide, flat, at height 0, and pushed into the plate list so the
+     bridging pass below has to connect them like anything else. */
+  const ENT = { x: centre(Z0) , z: Z0 - 30, r: 300, h: 0, station: false, landing: true };
+  const EXT = { x: centre(Z1) , z: Z1 + 60, r: 300, h: 0, station: false, landing: true };
+  plates.unshift(ENT); plates.push(EXT);
+
+  /* BRIDGING BY MEASUREMENT, not by arithmetic.
+     The first version sized the number of stepping shelves from the EDGE distance but then placed
+     them by interpolating CENTRE distance - so they spread further apart than the count assumed and
+     left gaps of 381 and 321 units on the critical path against a 130 cap. A jump the player cannot
+     make is a wall they cannot see is a wall, which is the worst kind of level.
+     So now the line is SAMPLED for actual void runs and a shelf is dropped in the middle of any run
+     that is too wide, repeated until the route is clean. Measuring beats deriving - the derivation
+     was wrong in a way that looked completely reasonable. */
+  const covered = function(x, z){
+    for(const q of plates) if(Math.hypot(x - q.x, z - q.z) <= q.r) return q;
+    return null;
+  };
+  for(let pass = 0; pass < 6; pass++){
+    let added = 0;
+    for(let i = 0; i + 1 <= STATIONS; i++){
+      const a = plates[i], b = plates[i+1];
+      const d = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(2, Math.round(d / 15));
+      let runStart = null;
+      for(let k = 0; k <= n; k++){
+        const t = k / n, x = a.x + (b.x - a.x) * t, z = a.z + (b.z - a.z) * t;
+        if(!covered(x, z)){ if(runStart == null) runStart = t; continue; }
+        if(runStart != null){
+          const width = (t - runStart) * d;
+          if(width > MAX_GAP){
+            const mt = (runStart + t) / 2;
+            plates.push({ x: a.x + (b.x - a.x) * mt, z: a.z + (b.z - a.z) * mt,
+                          r: Math.max(95, width * 0.34),
+                          h: Math.round(a.h + (b.h - a.h) * mt), station: false, bridge: true });
+            added++;
+          }
+          runStart = null;
+        }
+      }
+      if(runStart != null){
+        const width = (1 - runStart) * d;
+        if(width > MAX_GAP){
+          const mt = (runStart + 1) / 2;
+          plates.push({ x: a.x + (b.x - a.x) * mt, z: a.z + (b.z - a.z) * mt,
+                        r: Math.max(95, width * 0.34),
+                        h: Math.round(a.h + (b.h - a.h) * mt), station: false, bridge: true });
+          added++;
+        }
+      }
+    }
+    if(!added) break;
+  }
+
+  /* OPTIONAL SHELVES off the route - somewhere to go that is not the way out. Placed within a jump
+     of an existing plate so they are reachable, and never on the route itself. */
+  const OPT = o.optional || 6;
+  for(let i = 0; i < OPT; i++){
+    const base = plates[Math.floor(rnd() * Math.min(plates.length, STATIONS))];
+    const a = rnd() * 6.283;
+    const dist = base.r + 60 + rnd() * (MAX_GAP - 70);
+    plates.push({ x: base.x + Math.cos(a) * dist, z: base.z + Math.sin(a) * dist,
+                  r: 120 + rnd() * 110, h: Math.max(0, base.h + (rnd() < 0.5 ? STEP : -STEP)),
+                  station: false, optional: true });
+  }
+
+  /* EMIT. A cell belongs to the highest plate that contains it; everything else is crevasse and
+     gets no ground at all. Runs of equal height merge along x, as the canyon does. */
+  const minX = Math.min.apply(null, plates.map(function(q){ return q.x - q.r; })) - CELL;
+  const maxX = Math.max.apply(null, plates.map(function(q){ return q.x + q.r; })) + CELL;
+  const rows = Math.round(SPAN / CELL);
+  let boxes = 0;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null, runH = 0;
+    const flush = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      vplat(runStart + (w - CELL) / 2, z, runH, w, CELL, { terrain: true });
+      boxes++; runStart = null;
+    };
+    for(let x = minX; x <= maxX; x += CELL){
+      let h = null;
+      for(const q of plates){
+        /* soft edge: the rim of a plate is rounded off rather than square, so a shelf reads as ice
+           rather than as a crate */
+        const dd = Math.hypot(x - q.x, z - q.z);
+        if(dd <= q.r){ const hh = q.h + (dd > q.r * 0.82 ? -8 : 0); if(h == null || hh > h) h = hh; }
+      }
+      if(h == null){ flush(x - CELL); continue; }
+      if(runStart == null){ runStart = x; runH = h; }
+      else if(Math.abs(h - runH) > 0.5){ flush(x - CELL); runStart = x; runH = h; }
+    }
+    flush(maxX);
+  }
+
+  /* ROOMS on the stations, so encounters, scatter and objectives find the structure they expect. */
+  for(let i = 1; i <= STATIONS; i++){
+    const q = plates[i];
+    G.rooms.push({ name: (o.roomNames && o.roomNames[i-1]) || ('Shelf ' + i),
+                   x: q.x, z: q.z, w: Math.round(q.r * 1.6), d: Math.round(q.r * 1.6), y: q.h,
+                   monsters: [], encounter: false, cleared: true,
+                   court: i === Math.floor(STATIONS / 2) });
+  }
+
+  return { boxes: boxes, plates: plates,
+           start: { x: ENT.x, z: ENT.z, h: ENT.h },
+           goal:  { x: EXT.x, z: EXT.z, h: EXT.h } };
+}
 
 function terrainCanyon(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
@@ -5628,7 +5794,22 @@ const EXPANDED_SCAPES={
       finishScape(ctx,{sx:0,sz:250,sy:0,gx:0,gz:-4580,decoCol:STONE,decoTheme:'dungeon',decoTall:430});
     }
   },
-  frost(ctx){ const {rnd,mkMonster}=ctx,upper=G.area===1,ICE='#9eddf2',SNOW='#d9eff5',DARK='#31536a',AUR='#75f0d2';
+  frost(ctx){
+    if(TERRAIN_ZONES.frost){
+      const {mkMonster}=ctx, up=G.area===1;
+      const T=terrainPlates(ctx,{
+        z0: 240, z1: up? -5000 : -4600, cell: 90,
+        wander: 240, stations: up? 8 : 7, plateR: 300, step: 46, maxH: up? 220 : 190,
+        optional: up? 7 : 6, maxGap: 130,
+        roomNames: up? ['The Shelf','Cracked Field','Blue Ice','The Rift','Windscour','Deep Shelf','The Cairn','Frozen Crown']
+                     : ['Landing Ice','First Crack','The Pans','Split Shelf','Meltwater','Blue Deep','The Gate'] });
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
+        mkMonster(ctx.pick(), r.x-60, r.z+40, r); mkMonster(ctx.pick(), r.x+70, r.z-40, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
+                       decoCol:'#9eddf2',decoTheme:'frost',decoTall:260});
+      return;
+    }
+    const {rnd,mkMonster}=ctx,upper=G.area===1,ICE='#9eddf2',SNOW='#d9eff5',DARK='#31536a',AUR='#75f0d2';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};
     const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};
     const icePine=(x,z,h)=>{const b=propGroundAt(x,z);vcol(x,z,20,20,b+h);for(let k=0;k<3;k++)G.deco.push({x,z,y0:b+h+k*28,w:90-k*22,h:34,d:90-k*22,c:k%2?DARK:'#426f79',theme:'frost'});};

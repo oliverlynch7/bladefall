@@ -13226,6 +13226,9 @@ function openHub(){
    Outskirts it borrowed. Soft plum-warm sky, honeyed lantern haze, warm cobblestone. */
 const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:1320,ad:1120};   // ground plane widened to reach the space-passed walls
 const HUB_SX=1.45, HUB_SZ=1.30;   // the Waystation's "space pass" scale — shared by enterWaystation AND per-frame hub-upgrade rendering so they stay aligned
+/* ?hub=new — the Waystation rebuild, shipped behind a flag so the hub Oliver plays is one URL away
+   until the new one actually wins. Approved layout and every coordinate: docs/hub_plan.json. */
+let HUB_NEW=false; try{ HUB_NEW=new URLSearchParams(location.search).get('hub')==='new'; }catch(e){}
 function enterWaystation(){
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
@@ -13318,6 +13321,17 @@ function enterWaystation(){
   const gSpan=1120, gStep=ZONES.length>1?gSpan/(ZONES.length-1):0;   // WIDE spacing — each portal gets its own bay (widened further by the space pass below)
   ZONES.forEach((Z,i)=>{ const gx=Math.round(-gSpan/2+i*gStep), gz=Math.round(-398-14*(1-Math.abs(gx)/(gSpan/2||1)));   // gentle arc, flush against the north rampart
     G.gates.push({zi:i,x:gx,z:gz,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name}); });
+  /* ?hub=new — THE RADIAL PORTAL RING (approved layout, docs/hub_plan.json).
+     The eight portals stop being a straight rampart line and become a ring around the middle of the
+     hub, still in tier order left to right. Applied HERE, before the portal collision posts and the
+     bay dividers are pushed and before the space pass runs, so all three follow the gates for free -
+     move them after the space pass and the collision stays behind at the old coordinates.
+     Divided by the space-pass scale on purpose: the pass multiplies x by HUB_SX and z by HUB_SZ, so
+     pre-dividing means the gates LAND on the approved ellipse (a=620, b=470) exactly rather than
+     approximately. */
+  if(HUB_NEW){ const A=620/HUB_SX, B=470/HUB_SZ, SPAN=156, n=G.gates.length;
+    G.gates.forEach((g,i)=>{ const b=(-SPAN/2 + i*(SPAN/Math.max(1,n-1)))*Math.PI/180;
+      g.x=Math.round(A*Math.sin(b)); g.z=Math.round(-B*Math.cos(b)); g.bearing=b; }); }
   // Discovered Trial Chambers now sit RIGHT BESIDE their parent zone's portal (a small purple rift in the
   // same bay, tucked forward-right), so each secret clearly belongs to its level instead of floating in a floor row.
   ZONES.forEach((Z,i)=>{ if(Z.side && meta.sideFound && meta.sideFound[Z.side.id]){ const par=G.gates[i];
@@ -13376,6 +13390,30 @@ function enterWaystation(){
     {id:'gauntlet',ic:'💀',name:'The Gauntlet',role:'Boss rush · every boss, back to back',prop:'arenagate',verb:'Face the Gauntlet',direct:true,x:185,z:800,c1:'#2a1030',c2:'#c47bff',open:()=>openGauntletGate()}   // was x:340 (SAT ON the x:330 divider wall) → pulled inside the bay, beside the Arena
   ];
   if(meta.arcadeOwned) G.hubNpcs.push({id:'arcade',ic:'🕹️',name:"Isaac's Arcade",role:'A game within the game',prop:'arcade',verb:'Play the arcade',direct:true,x:-340,z:800,c1:'#182240',c2:'#5affc8',open:()=>openArcadeCabinet()});
+  /* ?hub=new — KEEPERS INTO TWO WINGS, TRIALS ONTO THE SOUTH OF THE RING.
+     With the portals now arcing across the north, the keepers move off the side walls into two
+     facing wings at x +-820, four each, 210 apart - the spacing the Quartermaster and the Smith
+     already use. The optional trials take the SOUTH half of the same ellipse the portals ring the
+     north of, which closes the circle: the hub reads as one ring with the road on one side and
+     everything optional on the other, instead of a rampart with an annex bolted underneath.
+     The trials are NOT yet down in the shaft - that needs the raised plaza, which is the next
+     piece of work. Pairs still sit together: the two endless modes adjacent, Arena beside Gauntlet.
+     Coordinates are the approved ones from docs/hub_plan.json, pre-divided by the space-pass scale
+     so they LAND on the plan rather than near it. */
+  if(HUB_NEW){
+    const W=820/HUB_SX, Z=z=>Math.round(z/HUB_SZ), A=620/HUB_SX, B=470/HUB_SZ;
+    const ring=(deg)=>({x:Math.round(A*Math.sin(deg*Math.PI/180)), z:Math.round(-B*Math.cos(deg*Math.PI/180))});
+    const at={
+      quartermaster:{x:-Math.round(W),z:Z(-40)},  chest:{x:-Math.round(W),z:Z(170)},
+      anvil:{x:-Math.round(W),z:Z(380)},          keeper:{x:-Math.round(W),z:Z(590)},
+      drillmaster:{x:Math.round(W),z:Z(-40)},     beastkeeper:{x:Math.round(W),z:Z(170)},
+      mirror:{x:Math.round(W),z:Z(380)},          sparring:{x:Math.round(W),z:Z(590)},
+      board:{x:Math.round(-300/HUB_SX),z:Z(640)},
+      abyss:ring(230), delve:ring(205), arena:ring(180), gauntlet:ring(155), sprint:ring(130),
+      arcade:ring(255),
+    };
+    for(const n of G.hubNpcs){ const p=at[n.id]; if(p){ n.x=p.x; n.z=p.z; } }
+  }
   // ---- SOLID COLLISION on the main hub fixtures: walk INTO them, never through them. Sized to the
   // model footprint (well under each one's interact range, so the E-prompt still triggers on approach). ----
   const HUBSOLID=[
@@ -13393,6 +13431,15 @@ function enterWaystation(){
     {x:185,z:800,w:60,d:30},   // The Gauntlet gate (beside the Arena) — moved in off the divider wall
     ...(meta.arcadeOwned?[{x:-340,z:800,w:62,d:42}]:[]) // Isaac's arcade cabinet
   ];
+  /* HUBSOLID's coordinates are hand-authored per fixture and match the ORIGINAL positions, so on
+     the radial layout every one of them would be an invisible wall standing where a keeper used to
+     be, plus a walk-through keeper at the new spot. Derive from the moved list instead: the box
+     follows whoever it belongs to. Sized 54 square, which is the footprint most keepers already
+     use and is comfortably inside the 110 interact radius, so the E-prompt still lands. */
+  if(HUB_NEW){
+    for(const n of G.hubNpcs) G.walls.push({x:n.x,z:n.z,w:54,d:54,h:108,invisible:true});
+    G.walls.push({x:0,z:30,w:66,d:66,h:108,invisible:true});                                // the Waystone
+  } else
   for(const b of HUBSOLID) G.walls.push({x:b.x,z:b.z,w:b.w,d:b.d,h:108,invisible:true});   // collision only — the model itself is the visual
   // portal gates: block the two frame posts; the archway between them stays open so you can still walk in to travel
   for(const g of G.gates){ for(const s of [-1,1]) G.walls.push({x:g.x+s*26,z:g.z,w:14,d:22,h:112,invisible:true}); }
@@ -15243,7 +15290,17 @@ function drawCourse(s,t){
   const rayHits=(o,m)=>{ for(let t2=0.06;t2<0.94;t2+=0.06){ const x=CAMX+(G.p.x-CAMX)*t2, z=CAMZ+(G.p.z-CAMZ)*t2;
     if(Math.abs(x-o.x)<o.w/2+m && Math.abs(z-o.z)<(o.d||o.w)/2+m) return true; } return false; };
   // the surface you're STANDING on must never fade — the floor underfoot stays solid
-  const standingOn=(o)=>{ const oh=(o.h==null?96:o.h); return Math.abs((G.p.y||0)-oh)<12 && Math.abs(G.p.x-o.x)<o.w/2+10 && Math.abs(G.p.z-o.z)<(o.d||o.w)/2+10; };
+  /* THE GROUND BENEATH YOU NEVER FADES - standing on it OR in the air above it.
+     Oliver: "when I jumped off of a surface that's at all elevated, it makes it transparent
+     underneath me." The rule was right and its test was too narrow: it only held while the player
+     was within 12 units of the surface height, so the instant you jumped you were above that window
+     and the platform you had just left began fading out from under you.
+     A surface below the player cannot be hiding the player from the camera, which is the only thing
+     this fade exists to solve - so being over it is enough, at any height. The 12 is kept as
+     tolerance UNDER the top so standing on it still counts while the collision settles. */
+  const standingOn=(o)=>{ const oh=(o.h==null?96:o.h);
+    if(Math.abs(G.p.x-o.x)>=o.w/2+10 || Math.abs(G.p.z-o.z)>=(o.d||o.w)/2+10) return false;
+    return (G.p.y||0) >= oh-12; };
   deferOn();                                                                                           // ...and the springs, for the same reason
   for(const sp2 of G.springs){ if(cull(sp2.x,sp2.z)) continue; const sy=sp2.y||0;                       // healing springs (drawn after cull is defined)
     bx(sp2.x,sy+0.9,sp2.z, 40,1.8,40, tint(s.ground,'#000',0.3));                                       // base pad

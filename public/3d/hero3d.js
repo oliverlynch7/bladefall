@@ -1424,8 +1424,18 @@ function playFor(p){
      faded almost instantly. It also RESTARTS on each new dodge - without that, dodging twice in a
      row left the second one playing the tail of the first, because `cur === name` short-circuits. */
   const rolling = p.dodgeTimer > 0;
-  const restart = rolling && name === 'Roll' && !_wasRolling;
-  _wasRolling = rolling;
+  /* THE JUMP FLIP MUST FINISH BEFORE YOU LAND.
+     Oliver: "when I do a short jump, my character starts rotating too slow, so he doesn't complete
+     the full flip, and it looks like he lands on his head."
+     Same arithmetic as the dodge. Gravity is 1500 and the jump impulse is 560, so a standard jump
+     is airborne about 0.75s while the Roll clip runs well over a second - you see roughly half a
+     rotation and land mid-flip, head down. A short hop is worse.
+     So an airborne roll is time-scaled to complete in AIR_FLIP, comfortably inside the shortest
+     useful jump, played once and clamped - which guarantees the character is upright on landing
+     however brief the hop was. */
+  const airRoll = !rolling && airborne && name === 'Roll';
+  const restart = (rolling && name === 'Roll' && !_wasRolling) || (airRoll && !_wasAir);
+  _wasRolling = rolling; _wasAir = airborne;
   if(!name || (cur === name && !restart)) return;
 
   const next = mixer.clipAction(clips[name]);
@@ -1437,6 +1447,14 @@ function playFor(p){
     next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
     next.fadeIn(0.04).play();
     if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.04);
+  } else if(airRoll){
+    const dur = (clips.Roll && clips.Roll.duration) || 1;
+    const AIR_FLIP = 0.62;                 // finishes before a standard 0.75s jump lands
+    next.reset();
+    next.timeScale = dur / AIR_FLIP;
+    next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
+    next.fadeIn(0.06).play();
+    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.06);
   } else {
     next.timeScale = 1;
     next.setLoop(THREE.LoopRepeat, Infinity); next.clampWhenFinished = false;
@@ -1445,7 +1463,7 @@ function playFor(p){
   }
   cur = name;
 }
-let _wasRolling = false;
+let _wasRolling = false, _wasAir = false;
 
 /* Called from the game's drawHero3. Returns true when it has drawn, so the caller can skip
    its voxel path; returns false whenever anything is not ready, so a failure here degrades

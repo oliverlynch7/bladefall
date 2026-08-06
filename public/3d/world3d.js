@@ -52,9 +52,14 @@ export const WORLD3D = {
 
 /* `?world3d=0` goes back to the voxel world. Reads both ways so the two renderers can still be
    compared on a phone without a console. */
+let DEBUG_GATEHOUSE = false;
 try {
   const q = new URLSearchParams(location.search);
   if(q.has('world3d')) WORLD3D.on = (q.get('world3d') === '1' || q.get('world3d') === 'true');
+  /* Review flags for the Waystation rebuild's components. Each component is proven ALONE before
+     anything is composed, so for a while it exists without being part of the hub; this is how it
+     can be looked at on a phone instead of only through a console. Off unless asked for. */
+  DEBUG_GATEHOUSE = q.get('gatehouse') === '1';
 } catch(e){}
 
 /* ── palette ──────────────────────────────────────────────────────────────────
@@ -1704,6 +1709,18 @@ function buildHub(scene, world){
 
   Object.assign(counts, buildHubDecoProps(world));
   counts.hidden = applyHideList();          // hides are part of building, never a step after it
+
+  /* ?gatehouse=1 — LOOK AT COMPONENT 1 WITHOUT A CONSOLE.
+     The rebuild's components are proven one at a time before anything is composed, which means for
+     a while they exist but are not part of the hub. A component nobody can look at on a phone is a
+     component only I can judge, so each one gets a query flag while it is in review.
+     Stands one gatehouse in open plaza south of the waystone, clear of every keeper and of the
+     spawn->gate walk. Purely additive: no flag, no change, and the hub is byte-identical. */
+  if(DEBUG_GATEHOUSE){
+    const gh = buildBuildings([{ kind: 'gatehouse', x: 0, z: 400, y: 0,
+                                 w: 3, d: 2, storeys: 2, style: 'brick', ry: 0 }]);
+    counts.debugGatehouse = gh.pieces;
+  }
 
   return counts;
 }

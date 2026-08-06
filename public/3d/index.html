@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.893.0-gatehouse-view';
+const VERSION3D='1.894.0-gatehouse-spawn';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13080,6 +13080,17 @@ function enterWaystation(){
   try { G._autoCol = normalizeCollision(); } catch(e){}
   applyEditsNow();          // the hub is built here, not by loadStage, so it needs its own call
   G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
+  /* ?gatehouse=1 — PUT HIM IN FRONT OF THE THING, don't make him find it.
+     world3d stands the gatehouse under review at (0,400), which is BEHIND the normal spawn: you
+     load facing the portals with the component at your back, so the flag shipped and Oliver could
+     not see what it was for. A review build that needs directions is a review build nobody uses.
+     Spawn moves ~460 south of the component, facing it, so the WHOLE gate is on screen - at 300 the
+     camera sat close enough to crop its roofline off the top of the frame. */
+  try{ if(new URLSearchParams(location.search).get('gatehouse')==='1'){
+    G.p.x=0; G.p.z=860; G.p.yaw=Math.PI;
+    G.lastSafe={x:0,z:860}; G.startPos={x:0,z:860};
+    setTimeout(()=>{ try{ toast('Gatehouse under review — straight ahead. Walk through it.'); }catch(e){} }, 1200);
+  } }catch(e){}
   meta.run=null; persist();
   mode='play'; showOverlay(false); showGameUI(true); musicForScene(); skillbarUpdate();
   if(MP.active) MP.onEnter(MP.HUB);   // co-op: the Waystation is a shared space — allies appear here too (Phase 2)

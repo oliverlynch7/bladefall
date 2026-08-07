@@ -669,9 +669,22 @@ function weapLoadFor(){
   const n = WEAP.name;
   Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
                 (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {},
-                /* the slice's tuning, keyed exactly as the slice keyed it */
+                /* OLIVER'S TUNING, in the shape the slice ACTUALLY wrote it.
+                   Read out of his Chrome profile to settle it rather than guessing again: origin
+                   https://bladefall.pages.dev, key `bf_weap`, and the stored object is
+                     { Warrior:{name:'Sword_Big', len,pitch,yaw,roll,fwd,up,side,grip}, Ranger:{...} }
+                   - keyed by BODY at the top level with the weapon name INSIDE it, not by
+                   'Body|Weapon' as weapKey() implied. My first reader looked up `Sword_Big` and
+                   `Warrior|Sword_Big`; neither key exists, so it matched nothing - and I reported
+                   the fix as done anyway without ever checking. Bodies stored: Warrior, Ranger,
+                   Cleric, Wizard, Rogue. Weapons seen: Sword_Big, Spear, Shield_Heater,
+                   Bow_Wooden1, Scythe, Hammer_Double, Axe.
+                   All three shapes are accepted, because the slice has written more than one over
+                   its life and every one of them is real tuning Oliver did by hand. */
                 _sliceFits[n] || {},
                 _sliceFits[eyeModel() + '|' + n] || {},
+                (function(){ var b = _sliceFits[eyeModel()];
+                             return (b && b.name === n) ? b : {}; })(),
                 _fitOverrides[n] || {},
                 (_fitOverrides['@'+eyeModel()] || {})[n] || {},     // per-BODY, and it wins
                 { name:n, on:true });
@@ -726,8 +739,11 @@ window.__weapFit = {
      Oliver tuned on and it lists every Model|Weapon pair he set. */
   slice(){
     const k = Object.keys(_sliceFits);
-    if(!k.length) return 'no slice tuning found in localStorage under "' + SLICE_LS + '" on this origin';
-    return k.length + ' entries: ' + k.sort().join(', ');
+    if(!k.length) return 'nothing under "' + SLICE_LS + '" on this origin (' + location.origin + ')';
+    return k.length + ' entries: ' + k.sort().map(function(x){
+      var v = _sliceFits[x];
+      return x + (v && v.name ? '(' + v.name + ')' : '');
+    }).join(', ') + '  |  body: ' + eyeModel() + ', holding: ' + WEAP.name;
   },
   /* If the slice was tuned on a DIFFERENT origin (a localhost run, an older deploy), the game
      cannot see that localStorage. Copy what the slice page prints and paste it in here. */

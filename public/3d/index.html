@@ -5605,6 +5605,88 @@ function terrainLavaField(ctx, o){
            goal: { x:isles[isles.length-1].x, z:isles[isles.length-1].z, h:0 } };
 }
 
+/* -- ZONE GRAPH -------------------------------------------------------------
+   THE STRUCTURAL PROBLEM, named by Oliver after playing four rebuilt zones: "I wish rather than
+   just having one obvious path that it was like a whole maze of different corridors and pathways...
+   something you had to explore, get lost, and figure out" and "your best did not feel uniquely
+   special or interesting."
+
+   He is right, and the cause is not decoration. Every generator I have written produces the SAME
+   SKELETON: a chain of nodes from A to B. The canyon is one corridor, the cave one chain of
+   chambers, the lava field one chain of islands, the Abyss one chain of shards. They differ in
+   surface treatment and are structurally identical - so four zones read as one corridor wearing
+   four coats of paint. That is why nothing feels special, and it is also why nothing is hard: a
+   chain MUST be crossable, so every gap gets filled and no route can ever be a dead end.
+
+   This is the replacement. A GRAPH: nodes spread over an area rather than strung along a line,
+   connected by more edges than a spanning tree needs, which produces:
+     - LOOPS, so you can come back a different way and the space has a shape you can learn
+     - DEAD ENDS, which is what makes exploring a decision rather than a corridor with scenery
+     - CHOICES at junctions, so getting lost is possible and finding the way is an achievement
+     - REAL BRANCHES to hang rewards on, instead of a spur bolted onto a line
+
+   `spine` marks the guaranteed route from entrance to exit, so a zone can always be finished even
+   when the rest of the graph is a maze around it. */
+function zoneGraph(ctx, o){
+  const rnd = ctx.rnd;
+  const Z0 = o.z0, Z1 = o.z1, W = o.halfWidth || 1400;
+  const N = o.nodes || 16;
+  const nodes = [];
+
+  /* Nodes on a jittered grid across the WHOLE area, not along a line. The jitter is what stops it
+     reading as a grid; the coverage is what stops it reading as a corridor. */
+  const rowsN = Math.max(3, Math.round(Math.sqrt(N * Math.abs(Z1-Z0) / (W*2))));
+  const colsN = Math.max(2, Math.ceil(N / rowsN));
+  for(let r = 0; r < rowsN; r++){
+    for(let c = 0; c < colsN; c++){
+      if(nodes.length >= N) break;
+      const t = (r + 0.5) / rowsN;
+      const z = Z0 + (Z1 - Z0) * t + (rnd()*2-1) * (Math.abs(Z1-Z0)/rowsN) * 0.34;
+      const x = -W + (W*2) * ((c + 0.5) / colsN) + (rnd()*2-1) * (W*2/colsN) * 0.34;
+      nodes.push({ x:x, z:z, r:(o.nodeR || 260) * (0.6 + rnd()*0.9),
+                   h:Math.round((rnd()*(o.hSteps||4)|0) * (o.step||70)), i:nodes.length });
+    }
+  }
+
+  /* THE SPINE first - a guaranteed path from the entrance row to the exit row, so the zone is
+     always completable however tangled the rest becomes. Greedy nearest-forward. */
+  nodes.sort(function(a,b){ return b.z - a.z; });            // entrance side first
+  const edges = [], inSpine = new Set();
+  let cur = 0; inSpine.add(0);
+  for(;;){
+    let best = -1, bd = 1e9;
+    for(let j = 0; j < nodes.length; j++){
+      if(inSpine.has(j)) continue;
+      if(nodes[j].z >= nodes[cur].z) continue;               // must progress toward the exit
+      const d = Math.hypot(nodes[j].x-nodes[cur].x, nodes[j].z-nodes[cur].z);
+      if(d < bd){ bd = d; best = j; }
+    }
+    if(best < 0) break;
+    edges.push({ a:cur, b:best, spine:true });
+    inSpine.add(best); cur = best;
+  }
+
+  /* EXTRA EDGES - the loops and branches. Each node reaches to its nearest few neighbours, which is
+     what turns a tree into something you can get lost in. */
+  const extra = o.extraEdges == null ? 1.6 : o.extraEdges;
+  for(let i = 0; i < nodes.length; i++){
+    const near = nodes.map(function(n, j){ return { j:j, d:Math.hypot(n.x-nodes[i].x, n.z-nodes[i].z) }; })
+                      .filter(function(q){ return q.j !== i; })
+                      .sort(function(a,b){ return a.d - b.d; });
+    let made = 0;
+    for(const q of near){
+      if(made >= extra) break;
+      if(q.d > (o.maxEdge || 1500)) break;
+      if(edges.some(function(e){ return (e.a===i&&e.b===q.j)||(e.a===q.j&&e.b===i); })) continue;
+      if(rnd() > 0.62) continue;
+      edges.push({ a:i, b:q.j, spine:false }); made++;
+    }
+  }
+
+  return { nodes:nodes, edges:edges,
+           entrance:nodes[0], exit:nodes[cur] };
+}
+
 function terrainIceCave(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
   const CELL = o.cell || 80;
@@ -5614,20 +5696,25 @@ function terrainIceCave(ctx, o){
 
   /* THE DIG. Chambers strung along a wandering line, joined by tunnels. Everything not dug stays
      solid ice, and the walls are simply what is left. */
-  const CH = o.chambers || 7;
-  const nodes = [];
-  for(let i = 0; i < CH; i++){
-    const t = (i + 0.5) / CH;
-    const z = Z0 + (Z1 - Z0) * t;
-    const x = Math.sin(t * 6.283 * 1.7 + rnd()*2) * (o.wander || 420) + (rnd()*2-1)*90;
-    nodes.push({ x: x, z: z,
-                 r: (o.chamberR || 300) * (0.6 + rnd() * 0.8),
-                 h: Math.round((rnd() < 0.5 ? 0 : 1) * (o.step || 60) * Math.floor(rnd()*3)) });
-  }
-  /* entrance and exit chambers, so the zone owns its own ends - the lesson from the canyon and the
-     plates, both of which spawned the player into a hole */
-  nodes.unshift({ x: 0, z: Z0 - 20, r: 300, h: 0, mouth: true });
-  nodes.push({ x: nodes[nodes.length-1].x, z: Z1 + 40, r: 300, h: 0, mouth: true });
+  /* A MAZE, not a chain. Oliver: "I wish it was like a whole maze of different corridors and
+     pathways to figure out where to go... something you had to explore, get lost, and figure out."
+     The chambers now come from zoneGraph, which spreads them across the whole area and connects
+     them with more passages than a route needs - so there are loops to come back around, dead ends
+     that cost you time, and junctions where you have to choose. */
+  const GR = zoneGraph(ctx, { z0:Z0, z1:Z1, halfWidth:HALF*0.86,
+                              nodes:o.chambers || 16, nodeR:o.chamberR || 300,
+                              step:o.step || 60, hSteps:3,
+                              extraEdges:o.extraEdges == null ? 1.8 : o.extraEdges,
+                              maxEdge:o.maxEdge || 1400 });
+  const nodes = GR.nodes;
+  const links = GR.edges;
+  const CH = nodes.length;
+  /* the mouths, so the zone owns its ends - the lesson the canyon and the plates both taught */
+  const ENTRY = { x:GR.entrance.x, z:Z0 - 20, r:300, h:0, mouth:true };
+  const EXITN = { x:GR.exit.x,     z:Z1 + 40, r:300, h:0, mouth:true };
+  nodes.push(ENTRY, EXITN);
+  links.push({ a:nodes.indexOf(GR.entrance), b:nodes.length-2, spine:true });
+  links.push({ a:nodes.indexOf(GR.exit),     b:nodes.length-1, spine:true });
 
   const TUNNEL = o.tunnel || 105;         // half-width of a connecting passage
   /* Is this point inside the dug-out volume, and if so at what floor height? */
@@ -5636,8 +5723,10 @@ function terrainIceCave(ctx, o){
     for(const c of nodes){
       if(Math.hypot(x - c.x, z - c.z) <= c.r){ if(best == null || c.h > best) best = c.h; }
     }
-    for(let i = 0; i + 1 < nodes.length; i++){
-      const a = nodes[i], b = nodes[i+1];
+    for(const lk of links){
+      const a = nodes[lk.a], b = nodes[lk.b];
+      if(!a || !b) continue;
+      const i = lk.a;
       const vx = b.x - a.x, vz = b.z - a.z, L2 = vx*vx + vz*vz || 1;
       let t = ((x - a.x)*vx + (z - a.z)*vz) / L2;
       if(t < 0) t = 0; else if(t > 1) t = 1;
@@ -5711,17 +5800,17 @@ function terrainIceCave(ctx, o){
     flushRoof(HALF);
   }
 
-  for(let i = 1; i <= CH; i++){
+  for(let i = 0; i < CH; i++){
     const c = nodes[i];
-    G.rooms.push({ name: (o.roomNames && o.roomNames[i-1]) || ('Chamber ' + i),
+    G.rooms.push({ name: (o.roomNames && o.roomNames[i]) || ('Chamber ' + (i+1)),
                    x: c.x, z: c.z, w: Math.round(c.r*1.5), d: Math.round(c.r*1.5), y: c.h,
                    monsters: [], encounter: false, cleared: true,
                    court: i === Math.ceil(CH/2) });
   }
 
-  return { boxes: boxes, floorCells: floorCells,
-           start: { x: nodes[0].x, z: nodes[0].z, h: 0 },
-           goal:  { x: nodes[nodes.length-1].x, z: nodes[nodes.length-1].z, h: 0 } };
+  return { boxes: boxes, floorCells: floorCells, chambers: CH, links: links.length,
+           start: { x: ENTRY.x, z: ENTRY.z, h: 0 },
+           goal:  { x: EXITN.x, z: EXITN.z, h: 0 } };
 }
 
 function terrainPlates(ctx, o){
@@ -6307,8 +6396,8 @@ const EXPANDED_SCAPES={
     if(TERRAIN_ZONES.frost){
       const {mkMonster}=ctx, up=G.area===1;
       const T=terrainIceCave(ctx,{
-        z0: 240, z1: up? -5000 : -4600, cell: 80, halfWidth: 1100,
-        chambers: up? 8 : 7, chamberR: 300, wander: 420, tunnel: 105,
+        z0: 240, z1: up? -6400 : -5800, cell: 80, halfWidth: 1900,
+        chambers: up? 20 : 17, chamberR: 300, tunnel: 105, extraEdges: 1.9, maxEdge: 1500,
         step: 60, wallH: 330, roof: 250,
         roomNames: up? ['The Mouth','Blue Hall','The Pinch','Meltwater','Crystal Gallery','The Drop','Glacier Heart','The Rise']
                      : ['Ice Mouth','First Hall','The Narrows','Frozen Font','The Vault','Deep Blue','The Way Up'] });

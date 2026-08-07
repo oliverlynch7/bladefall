@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.895.0-hub-radial-wip';
+const VERSION3D='1.896.0-abyss-shards';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5196,7 +5196,7 @@ const SCAPES={
    generators untouched, so if this looks worse, nothing is lost by not adopting it. */
 /* Which zones use terrain-first generation. One entry today, deliberately: the approach has to be
    judged on a level Oliver can walk before it touches anything else. */
-const TERRAIN_ZONES = { hollow: true, frost: true, ember: true };
+const TERRAIN_ZONES = { hollow: true, frost: true, ember: true, abyss: true };
 
 /* -- TERRAIN: ICE PLATES ----------------------------------------------------
    Frostfell's primitive, and deliberately the LEAST like the canyon so the framework is proved to
@@ -5319,6 +5319,136 @@ function auditReachable(){
 
    Everything reuses machinery the game already has - crumbles, geysers, pads - so the risk here is
    layout, not new systems. Falling is already lavaHit(), which is both correct and thematic. */
+/* -- TERRAIN: VOID SHARDS ----------------------------------------------------
+   The Abyss's verb is COMMIT.
+
+   Emberdeep and this zone are both islands over nothing, and they would be the same level if the
+   difference were only the colour. It is not. In Emberdeep the timing is EXTERNAL - a geyser fires
+   on a rhythm and you wait for it. Here the timing is the GROUND'S OWN EXISTENCE: a phasing shard
+   is there and then is not, so the level punishes hesitation rather than rewarding patience. You
+   have to be moving while the platform is still under you.
+
+   Three things make it read as the Abyss rather than as a dark Emberdeep:
+
+     PHASING SHARDS. Roughly a third of the crossing stones blink, and only ever MID-crossing -
+     never the shard you are aiming to land on and rest at. A vanishing landing pad is a death you
+     could not have read; a vanishing stepping stone is a decision about when to start.
+     NO HORIZON. The shards are small and scattered, so there is no ground plane to orient by. The
+     canyon and the cave both give you walls to follow; here nothing tells you which way is on.
+     DOWNWARD DRIFT. Height falls toward the exit. You are descending into it, and the way back up
+     is never obvious - which is what "the world thins and something looks back" should feel like. */
+function terrainVoidShards(ctx, o){
+  const rnd = ctx.rnd, rnd2 = ctx.rnd2;
+  const Z0 = o.z0, Z1 = o.z1, SPAN = Math.abs(Z1 - Z0) || 1;
+  const CELL = o.cell || 76;
+  const MAX_LEAP = o.maxLeap || 125;
+
+  const N = o.shards || 9;
+  const isles = [];
+  let h = o.startH || 240;
+  for(let i = 0; i < N; i++){
+    const t = (i + 0.5) / N;
+    const z = Z0 + (Z1 - Z0) * t;
+    const x = Math.sin(t * 6.283 * 2.1 + rnd()) * (o.wander || 430);
+    /* DOWNWARD: each anchor sits at or below the last, so the whole zone descends */
+    h = Math.max(0, h - (o.drop || 30) * (rnd() < 0.7 ? 1 : 0));
+    isles.push({ x:x, z:z, r:(o.shardR || 190) * (0.65 + rnd()*0.8), h:Math.round(h) });
+  }
+  isles.unshift({ x:0, z:Z0 - 20, r:260, h:(o.startH||240), mouth:true });
+  isles.push({ x:isles[isles.length-1].x, z:Z1 + 50, r:260, h:0, mouth:true });
+
+  const covered = function(x, z){
+    let best = null;
+    for(const q of isles) if(Math.hypot(x-q.x, z-q.z) <= q.r){ if(best == null || q.h > best) best = q.h; }
+    return best;
+  };
+
+  /* CROSSINGS: stepping shards, a third of which phase. Anchors never phase. */
+  const chain = isles.slice();
+  const phaseSeg = [];
+  for(let i = 0; i + 1 < chain.length; i++){
+    const a = chain[i], b = chain[i+1];
+    const dx = b.x - a.x, dz = b.z - a.z, dist = Math.hypot(dx, dz);
+    const d = dist - a.r - b.r;
+    if(d <= 0) continue;
+    const steps = Math.max(1, Math.ceil(d / MAX_LEAP));
+    for(let k = 1; k <= steps; k++){
+      const t = k / (steps + 1);
+      const q = { x:a.x + dx*t, z:a.z + dz*t, r:92, h:Math.round(a.h + (b.h-a.h)*t), step:true };
+      isles.push(q);
+      /* only mid-crossing stones may blink, and only some of them */
+      if(steps > 1 && k < steps && rnd() < 0.45) phaseSeg.push(q);
+    }
+  }
+
+  /* GAP AUDIT - sampled, not derived. Every generator so far has got this wrong when it trusted
+     arithmetic, so the route is measured and anything unjumpable is filled. */
+  for(let pass = 0; pass < 8; pass++){
+    let added = 0;
+    for(let i = 0; i + 1 < chain.length; i++){
+      const a = chain[i], b = chain[i+1];
+      const dd = Math.hypot(b.x-a.x, b.z-a.z), n = Math.max(2, Math.round(dd/15));
+      let runStart = null;
+      for(let k = 0; k <= n; k++){
+        const t = k/n, x = a.x + (b.x-a.x)*t, z = a.z + (b.z-a.z)*t;
+        if(covered(x, z) == null){ if(runStart == null) runStart = t; continue; }
+        if(runStart != null){
+          const width = (t - runStart) * dd;
+          if(width > MAX_LEAP){ const mt = (runStart + t)/2;
+            isles.push({ x:a.x + (b.x-a.x)*mt, z:a.z + (b.z-a.z)*mt, r:Math.max(88, width*0.3),
+                         h:Math.round(a.h + (b.h-a.h)*mt), fill:true }); added++; }
+          runStart = null;
+        }
+      }
+      if(runStart != null){ const width = (1-runStart)*dd;
+        if(width > MAX_LEAP){ const mt = (runStart+1)/2;
+          isles.push({ x:a.x + (b.x-a.x)*mt, z:a.z + (b.z-a.z)*mt, r:Math.max(88, width*0.3),
+                       h:Math.round(a.h + (b.h-a.h)*mt), fill:true }); added++; } }
+    }
+    if(!added) break;
+  }
+
+  /* EMIT. Shards are SEGMENTS, not plats, so the phasing hazard can take them - hazSetup arms
+     anything flagged `phaseable`, which is the existing mechanism and needs no new code. */
+  const xs = isles.map(function(q){ return q.x; });
+  const minX = Math.min.apply(null, xs) - 380, maxX = Math.max.apply(null, xs) + 380;
+  const rows = Math.round(SPAN / CELL);
+  let boxes = 0;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null, runH = 0;
+    const flush = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      vplat(runStart + (w - CELL)/2, z, runH, w, CELL, { terrain:true });
+      boxes++; runStart = null;
+    };
+    for(let x = minX; x <= maxX; x += CELL){
+      const hh = covered(x, z);
+      if(hh == null){ flush(x - CELL); continue; }
+      if(runStart == null){ runStart = x; runH = hh; }
+      else if(Math.abs(hh - runH) > 0.5){ flush(x - CELL); runStart = x; runH = hh; }
+    }
+    flush(maxX);
+  }
+
+  /* The blinking stones, handed to the existing Phasing hazard. */
+  for(const q of phaseSeg){
+    G.segments.push({ x:q.x, z:q.z, w:150, d:150, phaseable:true, shard:true });
+  }
+
+  for(let i = 1; i <= N; i++){
+    const q = isles[i];
+    G.rooms.push({ name:(o.roomNames && o.roomNames[i-1]) || ('Shard ' + i),
+                   x:q.x, z:q.z, w:Math.round(q.r*1.5), d:Math.round(q.r*1.5), y:q.h,
+                   monsters:[], encounter:false, cleared:true, court: i === Math.ceil(N/2) });
+  }
+
+  return { boxes:boxes, phasing:phaseSeg.length,
+           start:{ x:isles[0].x, z:isles[0].z, h:(o.startH||240) },
+           goal: { x:isles[N+1] ? isles[N+1].x : 0, z:Z1 + 50, h:0 } };
+}
+
 function terrainLavaField(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
   const Z0 = o.z0, Z1 = o.z1, SPAN = Math.abs(Z1 - Z0) || 1;
@@ -6285,7 +6415,20 @@ const EXPANDED_SCAPES={
       for(let k=0;k<8;k++)vplat(450+(k%2?180:-180),-3200-k*100,220+(k%3)*32,84,76,{forge:true});climbRun(450,-3500,220,0,-4180,220,82);chest(-650,-2360);chest(680,-3100,220);
       for(const p of [[0,-160,ventsR],[420,-1560,refine],[0,-4180,altar]]){mkMonster('magmaskit',p[0]-55,p[1],p[2]);mkMonster('emberling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:420,z:-1560,y:140},{x:-420,z:-2360,y:0},{x:450,z:-3100,y:220},{x:0,z:-4180,y:220}]);finishScape(ctx,{sx:0,sz:270,sy:0,gx:0,gz:-4400,decoCol:ROCK,decoTheme:'volcano',decoTall:450});}
   },
-  abyss(ctx){const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
+  abyss(ctx){
+    if(TERRAIN_ZONES.abyss){
+      const {mkMonster}=ctx, dp=G.area===1;
+      const T=terrainVoidShards(ctx,{
+        z0: 240, z1: dp? -5200 : -4800, cell: 76,
+        shards: dp? 10 : 9, shardR: 190, wander: 430, startH: dp? 300 : 240, drop: 30, maxLeap: 125,
+        roomNames: dp? ['The Lip','First Shard','Thinning','The Watcher','Nowhere','Lower Dark','The Stair','Deeper','The Eye','The Floor']
+                     : ['The Lip','First Shard','Thinning','The Watcher','Nowhere','Lower Dark','The Stair','Deeper','The Floor'] });
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i]; mkMonster(ctx.pick(), r.x-45, r.z+30, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
+                       decoCol:'#241431',decoTheme:'void',decoTall:300});
+      return;
+    }
+    const {rnd,mkMonster}=ctx,deep=G.area===1,VOID='#241431',VIO='#8a3aff',CHAIN='#494051';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=140)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!deep){const shore=room('Last Shore',0,0,920,700),field=room('Shatter Arena',-480,-820,980,860),drift=room('Drifting Archipelago',420,-1600,720,620,120),ruin=room('Inverted Ruin',-420,-2420,1020,880,250),anchor=room('Anchor Spire',450,-3260,700,600,390),door=room('King’s Door',0,-4380,1120,900,390);
       const beacon=(x,z,y=0)=>{G.deco.push({x,z,y0:y,w:18,h:78,d:18,c:VIO});G.deco.push({x,z,y0:y+78,w:34,h:12,d:34,c:'#e7c56b'});};const rim=(r)=>{const hw=r.w/2-32,hd=r.d/2-32;for(let k=-2;k<=2;k++){G.deco.push({x:r.x+k*150,z:r.z-hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x+k*150,z:r.z+hd,y0:r.y,w:95,h:34,d:24,c:CHAIN});G.deco.push({x:r.x-hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});G.deco.push({x:r.x+hw,z:r.z+k*130,y0:r.y,w:24,h:34,d:82,c:CHAIN});}};

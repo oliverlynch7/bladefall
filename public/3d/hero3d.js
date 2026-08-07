@@ -1399,8 +1399,50 @@ function playFor(p){
      jump reads mostly from vertical motion, which the game already drives. A tucked pose from an
      existing clip beats inventing one. p.onGround and p.vy are the game's own fields. */
   const airborne = p.onGround === false;
+  /* ATTACKS ARE PER WEAPON NOW, AND CHARGING HAS ITS OWN POSE.
+     Oliver: "there's also no swing or charge attack animations applied."
+     He is right, and it was worse than missing - EVERY attack in the game played 'Sword_Attack'
+     whatever you were holding. A warhammer, a bow, a staff and a dagger all swung a sword. The rig
+     ships Dagger_Attack, Staff_Attack, Bow_Draw, Bow_Shoot, Punch, Attack/Attack2 and a second
+     sword swing, and none of them were ever selected.
+     Charging had no state here at all, so holding a heavy weapon at full charge looked identical to
+     standing still - the one moment the animation most needs to say something.
+     Alternating the two swings per swingId is what stops a combo reading as one frame repeated. */
+  const art = (p.weapon && p.weapon.art) || 'sword';
+  const alt = ((p.swingId || 0) % 2) === 1;
+  const pick = function(a, b){ return (b && alt && clips[b]) ? b : a; };
+  const ATK = {
+    sword:      pick('Sword_Attack', 'Sword_Attack2'),
+    saber:      pick('Sword_Attack', 'Sword_Attack2'),
+    spellblade: pick('Sword_Attack', 'Sword_Attack2'),
+    dagger:     pick('Dagger_Attack', 'Dagger_Attack2'),
+    great:      pick('Attack', 'Attack2'),
+    hammer:     pick('Attack', 'Attack2'),
+    axe:        pick('Attack', 'Attack2'),
+    scythe:     pick('Attack', 'Attack2'),
+    staff:      'Staff_Attack',
+    wand:       pick('Spell1', 'Spell2'),
+    bow:        'Bow_Shoot',
+    flintlock:  'Bow_Shoot',
+    fist:       'Punch',
+  };
+  /* Charging: a bow draws, everything else winds up into the attacking idle rather than snapping
+     to a neutral stand. */
+  const charging = (p.chargeAmt || 0) > 0.04 && !(p.atkTimer > 0);
+  const CHG = art === 'bow' ? 'Bow_Draw' : (clips.Attacking_Idle ? 'Attacking_Idle' : 'Idle_Attacking');
+
   const want = p.dead ? 'Death'
-             : (p.attackTimer > 0 || p.swingT > 0) ? 'Sword_Attack'
+             : charging ? CHG
+             /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
+                p.swingT > 0` since the 3D hero shipped and NEITHER FIELD EXISTS - the game has
+                always called it p.atkTimer. So the attack branch has never once been true and the
+                character has never played a swing animation at all. Oliver reported it as "no swing
+                or charge attack animations applied", which was literally correct.
+                It survived this long because a wrong field name reads as false rather than as an
+                error, so the picker silently fell through to Idle and everything looked deliberate.
+                HERO3D.clip is exported now so this class of failure is checkable instead of
+                invisible. */
+             : (p.atkTimer > 0) ? (ATK[art] || 'Sword_Attack')
              /* THE DODGE IS NO LONGER A ROLL.
                 Oliver: "instead of the whole roll animation, becuase it happens too fast... its
                 like i phase forward and i see a trail of my previous selves dragging behind like
@@ -1462,6 +1504,9 @@ function playFor(p){
     if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.15);
   }
   cur = name;
+  /* Exposed so which clip is playing can be CHECKED rather than assumed - three animation bugs in
+     a row were invisible because nothing reported this. */
+  HERO3D.clip = name; HERO3D.clipArt = art;
 }
 let _wasRolling = false, _wasAir = false;
 

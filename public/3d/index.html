@@ -6759,6 +6759,7 @@ function loadStageRaw(i){
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    G._scapeTable='EXPANDED_SCAPES';   // provenance: which of the four same-named generators ran
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
     addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questMarks(srnd); auditReachable(); snapWorldInteractables(); return;
@@ -6767,16 +6768,19 @@ function loadStageRaw(i){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
     // same hand-tuned layout every time (only the purple-secret trial rooms stay procedural).
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    G._scapeTable='SCAPES';
     SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && G.side && curZone().side && SIDE_SCAPES[curZone().side.id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    G._scapeTable='SIDE_SCAPES';
     SIDE_SCAPES[curZone().side.id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}); snapWorldInteractables(); return;
   }
   /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
      Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
   if((isBoss||isMini) && !G.trial && !G.side && G.area<0 && BOSS_ARENAS[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
+    G._scapeTable='BOSS_ARENAS';
     BOSS_ARENAS[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     scaleArena(BOSS_ARENA_SCALE); snapWorldInteractables(); return;
   }

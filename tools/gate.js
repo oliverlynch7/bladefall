@@ -80,4 +80,20 @@ const ver = html.match(/VERSION3D\s*=\s*['"]([^'"]+)['"]/);
 if (ver) console.log('     VERSION3D = ' + ver[1] + (/-autopilot$/.test(ver[1]) ? '' : '   (note: no -autopilot suffix)'));
 
 console.log(bad ? '\nGATE FAILED (' + bad + ') — do not commit' : '\nGATE OK');
+
+
+/* DUPLICATE-DEFINITION REMINDER. Not a failure - the duplicates are deliberate, four scape tables
+   define the same zone names on purpose. But an edit matched by NAME lands on the first one and
+   fails SILENTLY: the file parses, this gate passes, the game runs, and the change does nothing.
+   That has now cost four sessions, so a prose warning in a doc nobody re-reads is not enough.
+   Printed here because this is the thing you run immediately before committing. */
+try {
+  const _cp = require('child_process'), _pt = require('path');
+  const _out = _cp.execFileSync('node', [_pt.join(__dirname, 'dupes.js')], { encoding: 'utf8' });
+  const _n = (_out.match(/×[0-9]+/g) || []).length;
+  if (_n) console.log('\nnote: ' + _n + ' names are defined more than once.'
+    + '\n      Before editing one:  node tools/dupes.js <name>'
+    + '\n      After editing one:   __BF3.G._scapeTable   (says which copy actually ran)');
+} catch (e) {}
+
 process.exit(bad ? 1 : 0);

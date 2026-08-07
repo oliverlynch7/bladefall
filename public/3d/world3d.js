@@ -52,14 +52,9 @@ export const WORLD3D = {
 
 /* `?world3d=0` goes back to the voxel world. Reads both ways so the two renderers can still be
    compared on a phone without a console. */
-let DEBUG_GATEHOUSE = false;
 try {
   const q = new URLSearchParams(location.search);
   if(q.has('world3d')) WORLD3D.on = (q.get('world3d') === '1' || q.get('world3d') === 'true');
-  /* Review flags for the Waystation rebuild's components. Each component is proven ALONE before
-     anything is composed, so for a while it exists without being part of the hub; this is how it
-     can be looked at on a phone instead of only through a console. Off unless asked for. */
-  DEBUG_GATEHOUSE = q.get('gatehouse') === '1';
 } catch(e){}
 
 /* ── palette ──────────────────────────────────────────────────────────────────
@@ -415,95 +410,13 @@ function planBuilding(spec, out){
   add('Prop_Chimney', w * g * 0.25, storeys * H + 0.4, d * g * 0.5, 0);
 }
 
-/* ── THE GATEHOUSE (Waystation rebuild, phase 3 component 1) ───────────────────
-   A portal needs to read as a real ENTRANCE, not a hole in a fence, and eight of these carry the
-   whole hub - so this is the first component built and the first one judged.
-
-   It is planBuilding with three deliberate differences, and each is the difference between a gate
-   and a cottage:
-     1. A PASSAGE, not a door. The style's `door` wall is an opening with no leaf in it (the Door_*
-        leaves are separate models this never places), so putting one on the front AND the matching
-        back cell leaves a tunnel you can see - and walk - straight through. The portal stands in it.
-     2. NO WINDOWS ON THE GROUND FLOOR and no chimney anywhere. A fortified gate with a cosy
-        window beside the arch reads as a house someone cut a hole in.
-     3. NO INTERIOR FLOOR. planBuilding floors its ground storey so you cannot see through the
-        doorway into the plaza beyond; here seeing through IS the point, and the floor the player
-        walks on is the plaza's own paving.
-
-   Everything else is inherited on purpose, above all the rule that ONLY the roof is ever fitted.
-   Walls stay at their measured 68 x 106 and are never stretched - that single discipline is what
-   the 2026-08-05 attempt broke, and why 176 good pieces read as slop. */
-function planGatehouse(spec, out){
-  const w = Math.max(3, spec.w | 0), d = Math.max(1, spec.d | 0);
-  const storeys = Math.max(1, spec.storeys | 0);
-  const st = VIL_STYLE[spec.style] || VIL_STYLE.brick;
-  const g = VIL_GRID, H = VIL_STOREY;
-  const halfW = w * g / 2, halfD = d * g / 2;
-  const add = (part, x, y, z, ry, fit) =>
-    (out[part] || (out[part] = [])).push({ b: spec, x: x - halfW, y, z: z - halfD, ry, fit });
-
-  /* The passage runs through the middle cell. An even width has no middle, which is why w is
-     forced odd below rather than left to the caller to remember. */
-  const gate = (w - 1) / 2;
-
-  /* V1 USED THE STYLE'S `door` WALL FOR THE PASSAGE AND IT READ AS A COTTAGE (_shot/out/gate4.png).
-     The opening inside a door wall is only ~40 units across - the same width as the player - set in
-     a 204-wide facade, so it looked like a front door someone had built a house around, and the
-     kit's tiled gable finished the job. Two changes fix the read, both structural:
-       - THE PASSAGE IS A WHOLE EMPTY CELL. Nothing is placed in the centre of the ground storey at
-         all, so the opening is the full 68 wide and 106 tall. That is a gate you march through
-         rather than a door you knock on, and it is still exactly one module, so nothing stretches.
-       - NO ROOF. A tiled domestic gable is what made it a house. Flat-topped stone reads as a
-         rampart, which is what a fortress over a shaft actually wants; the skyline is the tall
-         broken tower's job (component 5), not this one's. */
-  for(let s = 0; s < storeys; s++){
-    const y = s * H;
-    const ground = s === 0;
-    for(let i = 0; i < w; i++){
-      const cx = i * g + g / 2;
-      if(ground && i === gate) continue;          // the passage: an empty module, front to back
-      /* Above the arch the wall is solid: that carried mass over the opening is the single thing
-         that makes a gatehouse look load-bearing rather than like a wall with a gap in it.
-         Windows only on the flanking bays, and only upstairs. */
-      /* SOLID, every storey, both faces. v2 put windows in the upper flanking bays and you could
-         see the plaza straight through them (_shot/out/gate5.png) - a fortified gate with two
-         open holes over the arch reads as scaffolding. Relief comes from the SIDE walls instead,
-         where a window is plausibly a guardroom and is never on the sightline into the portal. */
-      add(st.wall, cx, y, 0, 0);
-      add(st.wall, cx, y, d * g, Math.PI);
-    }
-    /* Flanks stay blank downstairs - a gate is meant to look shut-in. */
-    for(let j = 0; j < d; j++){
-      const cz = j * g + g / 2;
-      add(ground ? st.wall : (j % 2 === 1 ? st.win : st.wall), 0,     y, cz, -Math.PI / 2);
-      add(ground ? st.wall : (j % 2 === 0 ? st.win : st.wall), w * g, y, cz,  Math.PI / 2);
-    }
-    add(st.corner, 0,     y, 0,     0);
-    add(st.corner, w * g, y, 0,     -Math.PI / 2);
-    add(st.corner, 0,     y, d * g, Math.PI / 2);
-    add(st.corner, w * g, y, d * g, Math.PI);
-  }
-
-  /* The passage CEILING, so you do not look up through the arch at open sky and out of the model.
-     It is the style's floor tile laid at first-storey height across the gate cell only. */
-  for(let j = 0; j < d; j++)
-    add(st.floor, gate * g + g / 2, H, j * g + g / 2, 0);
-
-  /* THE RAMPART DECK. With no roof the box was open at the top and you could see down into its
-     hollow inside. Capping it with the style's own floor tile closes it and, more usefully, makes
-     the flat top read as a walkable wall-head - which is the whole point of choosing a rampart
-     over a gable. Laid across the full footprint at eaves height. */
-  for(let i = 0; i < w; i++) for(let j = 0; j < d; j++)
-    add(st.floor, i * g + g / 2, storeys * H, j * g + g / 2, 0);
-}
-
 /* Turn the planned placements into instanced geometry. One InstancedMesh per part PER PRIMITIVE:
    a plaster wall is two primitives (plaster + wood trim) with different materials, and merging
    them would paint the trim in plaster. */
 function buildBuildings(specs){
   if(!specs.length) return { buildings: 0, pieces: 0, meshes: 0, missing: 0 };
   const out = {};
-  for(const sp of specs) (sp.kind === 'gatehouse' ? planGatehouse : planBuilding)(sp, out);
+  for(const sp of specs) planBuilding(sp, out);
   const o = new THREE.Object3D();
   let pieces = 0, meshes = 0, missing = 0;
   for(const name of Object.keys(out)){
@@ -537,24 +450,6 @@ function buildBuildings(specs){
   }
   return { buildings: specs.length, pieces, meshes, missing };
 }
-
-/* PHASE 3 COMPONENT BENCH. The rebuild plan's rule is that every component is built ALONE,
-   screenshotted and fixed until it genuinely looks good BEFORE anything is composed - five earlier
-   level passes were judged once, at the end, and all five were wrong. This is the hook that makes
-   "alone" possible: it drops a spec straight into the live group so `_shot/shot.js --eval` can
-   stand one piece in an empty part of the hub and photograph it.
-   Debug only, and inert unless something calls it. It runs AFTER a world exists, because `group`
-   is created by buildWorld. */
-try {
-  window.__W3D = {
-    build: specs => {
-      if(!group) return 'no group - build a world first';
-      return buildBuildings(Array.isArray(specs) ? specs : [specs]);
-    },
-    partSize: name => { const r = _partCache.get(name); return r ? r.size : null; },
-    VIL_U, VIL_GRID, VIL_CELL, VIL_STOREY,
-  };
-} catch(e){}
 
 /* A tapered blade, cheap and readable at distance. Three crossed quads would need alpha
    testing and sorting; solid geometry avoids both and the perf budget allows it. */
@@ -1709,18 +1604,6 @@ function buildHub(scene, world){
 
   Object.assign(counts, buildHubDecoProps(world));
   counts.hidden = applyHideList();          // hides are part of building, never a step after it
-
-  /* ?gatehouse=1 — LOOK AT COMPONENT 1 WITHOUT A CONSOLE.
-     The rebuild's components are proven one at a time before anything is composed, which means for
-     a while they exist but are not part of the hub. A component nobody can look at on a phone is a
-     component only I can judge, so each one gets a query flag while it is in review.
-     Stands one gatehouse in open plaza south of the waystone, clear of every keeper and of the
-     spawn->gate walk. Purely additive: no flag, no change, and the hub is byte-identical. */
-  if(DEBUG_GATEHOUSE){
-    const gh = buildBuildings([{ kind: 'gatehouse', x: 0, z: 400, y: 0,
-                                 w: 3, d: 2, storeys: 2, style: 'brick', ry: 0 }]);
-    counts.debugGatehouse = gh.pieces;
-  }
 
   return counts;
 }

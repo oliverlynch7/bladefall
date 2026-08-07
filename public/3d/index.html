@@ -4929,7 +4929,8 @@ const SCAPES={
      and breathing fire — vs the SPIRE CLIMB east: high basalt pillar-hops, slow but safe)
      -> the BLACK BRIDGE past the Collapsed Titan -> the ASH SANCTUM (altar find, monolith
      ring) -> the Furnace Gate portal. All lava-side; falling is the lava. */
-  ember(ctx){ const {rnd,mkMonster}=ctx; const BAS='#241512', OBS2='#17100e', EMB='#ff7a3a';
+  ember(ctx){
+ const {rnd,mkMonster}=ctx; const BAS='#241512', OBS2='#17100e', EMB='#ff7a3a';
     // ── 1) THE CALDERA RIM (start) ──
     const rim=vseg(0,0,680,440); G.rooms.push({x:0,z:0,w:680,d:440,monsters:[],encounter:false,cleared:true});
     vtorch(-290,150,rnd); vtorch(290,150,rnd);
@@ -5195,7 +5196,7 @@ const SCAPES={
    generators untouched, so if this looks worse, nothing is lost by not adopting it. */
 /* Which zones use terrain-first generation. One entry today, deliberately: the approach has to be
    judged on a level Oliver can walk before it touches anything else. */
-const TERRAIN_ZONES = { hollow: true, frost: true };
+const TERRAIN_ZONES = { hollow: true, frost: true, ember: true };
 
 /* -- TERRAIN: ICE PLATES ----------------------------------------------------
    Frostfell's primitive, and deliberately the LEAST like the canyon so the framework is proved to
@@ -5300,6 +5301,180 @@ function auditReachable(){
 
    The ceiling is what sells it. A floor with tall walls is a canyon; a floor with tall walls AND a
    roof is a cave, and the difference is one pass. */
+/* -- TERRAIN: LAVA FIELD -----------------------------------------------------
+   Emberdeep's verb is TIME IT, and Oliver named the reference: "take inspiration from Mario, Bowser
+   Castle levels where you have to jump over lava, and there's big pillars of lava that come up, and
+   it's a lot of platforming."
+
+   So this is the one zone where THE FLOOR IS THE HAZARD. There is no continuous ground - a lava sea
+   with islands in it - and every crossing between islands is a different kind of problem:
+
+     BRIDGE   a run of crumbling basalt that falls in behind you, so you cannot stop halfway
+     ERUPTION a short hop past a geyser that fires on a rhythm - the Bowser pillar. Wait or die.
+     LEAP     a plain jump, which only reads as a relief because the other two exist
+     LAUNCH   a pressure pad that throws you up to a higher island
+
+   Rotating the crossing TYPE per gap is the whole design. A lava level made of nothing but jumps is
+   one idea repeated; alternating what the gap asks turns crossing into a sequence with rhythm.
+
+   Everything reuses machinery the game already has - crumbles, geysers, pads - so the risk here is
+   layout, not new systems. Falling is already lavaHit(), which is both correct and thematic. */
+function terrainLavaField(ctx, o){
+  const rnd = ctx.rnd, rnd2 = ctx.rnd2;
+  const Z0 = o.z0, Z1 = o.z1, SPAN = Math.abs(Z1 - Z0) || 1;
+  const CELL = o.cell || 80;
+  const MAX_LEAP = o.maxLeap || 130;
+
+  /* ISLANDS. The places you are safe, and the only places you fight. Deliberately smallish - the
+     footing being scarce is the level. */
+  const N = o.islands || 9;
+  const isles = [];
+  let h = 0;
+  for(let i = 0; i < N; i++){
+    const t = (i + 0.5) / N;
+    const z = Z0 + (Z1 - Z0) * t;
+    const x = Math.sin(t * 6.283 * 1.4 + rnd()) * (o.wander || 380);
+    /* height climbs in steps toward the exit, so the zone reads as a descent INTO the mountain that
+       keeps forcing you back up onto higher rock */
+    h = Math.max(0, h + (rnd() < 0.55 ? 1 : -1) * (o.step || 55) * (rnd() < 0.6 ? 1 : 0));
+    isles.push({ x: x, z: z, r: (o.isleR || 210) * (0.7 + rnd() * 0.7), h: Math.round(h) });
+  }
+  /* the ends, owned rather than inferred - the lesson from the canyon and the plates */
+  isles.unshift({ x: 0, z: Z0 - 20, r: 300, h: 0, mouth: true });
+  isles.push({ x: isles[isles.length-1].x, z: Z1 + 50, r: 300, h: 0, mouth: true });
+
+  const covered = function(x, z){
+    let best = null;
+    for(const q of isles) if(Math.hypot(x - q.x, z - q.z) <= q.r){ if(best == null || q.h > best) best = q.h; }
+    return best;
+  };
+
+  /* THE CROSSINGS. One per gap, rotating type, each guaranteed crossable. */
+  /* SNAPSHOT the chain before building crossings. The first version iterated `isles` while pushing
+     new stepping stones INTO it, so the loop wandered onto its own output and the crossing type
+     rotation drifted with it. */
+  const chain = isles.slice();
+  const crossings = [];
+  for(let i = 0; i + 1 < chain.length; i++){
+    const a = chain[i], b = chain[i+1];
+    const dx = b.x - a.x, dz = b.z - a.z;
+    const d = Math.hypot(dx, dz) - a.r - b.r;
+    if(d <= 0) continue;   // islands already touch
+    const kind = ['bridge','eruption','leap','launch'][i % 4];
+    const ux = dx / Math.hypot(dx, dz), uz = dz / Math.hypot(dx, dz);
+    const from = { x: a.x + ux * a.r, z: a.z + uz * a.r };
+
+    if(kind === 'leap' && d <= MAX_LEAP){ crossings.push({ kind:'leap', d:d }); continue; }
+
+    if(kind === 'launch' && b.h > a.h + 40){
+      /* a pad on the near island throws you up to the far one */
+      G.pads.push({ x: a.x + ux * (a.r * 0.55), z: a.z + uz * (a.r * 0.55), y: a.h, r: 46 });
+      crossings.push({ kind:'launch', d:d });
+      /* and it still needs somewhere to land short of the target, or the pad is a trap */
+      if(d > MAX_LEAP){
+        const mt = 0.55;
+        isles.push({ x: a.x + dx*mt, z: a.z + dz*mt, r: 110, h: Math.round(a.h + (b.h-a.h)*0.7), pad:true });
+      }
+      continue;
+    }
+
+    /* BRIDGE and ERUPTION both lay stepping rock; the difference is what waits on it. */
+    const steps = Math.max(1, Math.ceil(d / MAX_LEAP));
+    for(let k = 1; k <= steps; k++){
+      const t = k / (steps + 1);
+      const px = a.x + dx * t, pz = a.z + dz * t;
+      const ph = Math.round(a.h + (b.h - a.h) * t);
+      if(kind === 'bridge'){
+        G.crumbles.push({ x:px, z:pz, w:104, d:96, h:ph, state:0, timer:0, respawn:0, fallY:0, jit:0 });
+      } else {
+        isles.push({ x:px, z:pz, r:96, h:ph, step:true });
+        if(k < steps || steps === 1){
+          /* the Bowser pillar: an eruption ON the stepping stone's edge, so the stone is safe only
+             between beats */
+          G.geysers.push({ x:px + uz*54, z:pz - ux*54, r:20, period: 2.4 + rnd()*1.3, phase: rnd()*6.28 });
+        }
+      }
+    }
+    crossings.push({ kind:kind, d:d, steps:steps });
+  }
+
+  /* GAP AUDIT, because the crossings above are DERIVED and the derivation has been wrong every
+     single time it has not been checked - the plates shipped 381-unit jumps, and the first build of
+     this zone left an 1,100-unit hole where the entrance island's radius had swallowed its own
+     crossing. So the route is now SAMPLED and any run of lava wider than a jump gets a stepping
+     rock dropped into it, repeatedly, until nothing impossible remains. */
+  for(let pass = 0; pass < 8; pass++){
+    let added = 0;
+    for(let i = 0; i + 1 < chain.length; i++){
+      const a = chain[i], b = chain[i+1];
+      const dd = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(2, Math.round(dd / 15));
+      let runStart = null;
+      for(let k = 0; k <= n; k++){
+        const t = k / n, x = a.x + (b.x - a.x) * t, z = a.z + (b.z - a.z) * t;
+        const solid = covered(x, z) != null;
+        if(!solid){ if(runStart == null) runStart = t; continue; }
+        if(runStart != null){
+          const width = (t - runStart) * dd;
+          if(width > MAX_LEAP){
+            const mt = (runStart + t) / 2;
+            isles.push({ x: a.x + (b.x-a.x)*mt, z: a.z + (b.z-a.z)*mt,
+                         r: Math.max(92, width*0.3),
+                         h: Math.round(a.h + (b.h-a.h)*mt), fill:true });
+            added++;
+          }
+          runStart = null;
+        }
+      }
+      if(runStart != null){
+        const width = (1 - runStart) * dd;
+        if(width > MAX_LEAP){
+          const mt = (runStart + 1) / 2;
+          isles.push({ x: a.x + (b.x-a.x)*mt, z: a.z + (b.z-a.z)*mt,
+                       r: Math.max(92, width*0.3),
+                       h: Math.round(a.h + (b.h-a.h)*mt), fill:true });
+          added++;
+        }
+      }
+    }
+    if(!added) break;
+  }
+
+  /* EMIT the islands as ground; everything else is lava. */
+  const xs = isles.map(function(q){ return q.x; });
+  const minX = Math.min.apply(null, xs) - 420, maxX = Math.max.apply(null, xs) + 420;
+  const rows = Math.round(SPAN / CELL);
+  let boxes = 0;
+  for(let r = 0; r < rows; r++){
+    const z = Z0 + (Z1 - Z0) * ((r + 0.5) / rows);
+    let runStart = null, runH = 0;
+    const flush = function(endX){
+      if(runStart == null) return;
+      const w = (endX - runStart) + CELL;
+      vplat(runStart + (w - CELL)/2, z, runH, w, CELL, { terrain: true });
+      boxes++; runStart = null;
+    };
+    for(let x = minX; x <= maxX; x += CELL){
+      const hh = covered(x, z);
+      if(hh == null){ flush(x - CELL); continue; }
+      if(runStart == null){ runStart = x; runH = hh; }
+      else if(Math.abs(hh - runH) > 0.5){ flush(x - CELL); runStart = x; runH = hh; }
+    }
+    flush(maxX);
+  }
+
+  for(let i = 1; i <= N; i++){
+    const q = isles[i];
+    G.rooms.push({ name: (o.roomNames && o.roomNames[i-1]) || ('Rock ' + i),
+                   x:q.x, z:q.z, w:Math.round(q.r*1.5), d:Math.round(q.r*1.5), y:q.h,
+                   monsters:[], encounter:false, cleared:true,
+                   court: i === Math.ceil(N/2) });
+  }
+
+  return { boxes:boxes, crossings:crossings, isles:isles,
+           start:{ x:isles[0].x, z:isles[0].z, h:0 },
+           goal: { x:isles[isles.length-1].x, z:isles[isles.length-1].z, h:0 } };
+}
+
 function terrainIceCave(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
   const CELL = o.cell || 80;
@@ -6063,7 +6238,21 @@ const EXPANDED_SCAPES={
       scapeFetch(ctx,[{x:-500,z:-850,y:0},{x:420,z:-1600,y:120},{x:-420,z:-2350,y:250},{x:500,z:-3100,y:80},{x:0,z:-4100,y:180}]);scapeFind(ctx,0,-4140,180);finishScape(ctx,{sx:0,sz:280,sy:0,gx:0,gz:-4380,decoCol:DARK,decoTheme:'frost',decoTall:390});
     }
   },
-  ember(ctx){const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
+  ember(ctx){
+    if(TERRAIN_ZONES.ember){
+      const {mkMonster}=ctx, up=G.area===1;
+      const T=terrainLavaField(ctx,{
+        z0: 240, z1: up? -5200 : -4800, cell: 80,
+        islands: up? 10 : 9, isleR: 210, wander: 380, step: 55, maxLeap: 130,
+        roomNames: up? ['The Landing','First Rock','Ashfall','The Anvil','Cinder Reach','Magma Step','The Furnace','Black Glass','Emberfall','The Rim']
+                     : ['Scorch','First Rock','The Anvil','Cinder Reach','Magma Step','The Furnace','Black Glass','Emberfall','The Rim'] });
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
+        mkMonster(ctx.pick(), r.x-50, r.z+35, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
+                       decoCol:'#8a3a1e',decoTheme:'ember',decoTall:280});
+      return;
+    }
+    const {rnd,mkMonster}=ctx,vents=G.area===1,ROCK='#4c3028',IRON='#352b2b',LAVA='#ff5a20',GOLD='#b96d32';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=145)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));
     if(!vents){const mine=room('Ash Mine',0,0,940,720),lift=room('Chain Lift Shaft',-480,-850,700,660,120),slag=room('Slagworks Arena',420,-1580,1020,860,120),city=room('Ancient Forge City',-400,-2380,1040,880,180),rim=room('Caldera Rim',450,-3200,760,680,280),heart=room('Heart-Forge Approach',0,-4300,1100,860,280);
       road(mine,slag,160);

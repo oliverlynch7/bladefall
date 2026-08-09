@@ -35,6 +35,31 @@ function objY(o){
   return (o.y0 != null ? o.y0 : 0) + ((o.h || 0) * 0.5);
 }
 
+/* RAISE / LOWER, for every control that does it - PgUp/PgDn and space/shift both route here so they
+   cannot drift apart.
+
+   Oliver: "they have a set height or size, and I wasn't able to raise them or lower them... I was
+   also seeing a lot of assets getting hidden inside of Plateaus." Both halves were one missing idea.
+   A DECO carries `y0` as its base, so raising a deco always worked. A PLATFORM's only vertical fact
+   was `h`, its TOP, with the box implicitly welded to the ground - so the old line wrote a y0 that
+   nothing in the engine read, the platform did not move at all, and alt+PgUp (grow 'h') made it
+   TALLER instead of higher. That same "solid to the ground" is why a plateau swallows props near it.
+
+   A platform now travels as a SLAB: top and underside move together, thickness preserved. Anything
+   that is not a platform keeps the old base-height behaviour exactly. */
+const SLAB_T = 40;                                  // default thickness for a plat that has no underside yet
+function isSlab(o){ return o && (o.kind === 'plat' || (o.h != null && o.w != null && o.c == null && !o.prop)); }
+function raiseBy(o, by){
+  if(!o) return;
+  if(isSlab(o)){
+    const th = (o.y0 != null) ? Math.max(1, o.h - o.y0) : SLAB_T;
+    o.h  = Math.max(th, (o.h || 0) + by);           // the top never sinks below the ground
+    o.y0 = Math.max(0, o.h - th);
+  } else {
+    o.y0 = Math.max(0, (o.y0 || 0) + by);
+  }
+}
+
 /* World -> screen. Returns null behind the camera, so an object at your back cannot win the
    "nearest to cursor" test - that reads as clicking something you cannot see. */
 function project(x, y, z){
@@ -979,8 +1004,8 @@ function onKey(e){
     const o = EDITOR.sel.o, k = e.key.toLowerCase();
     const step = EDITOR.grid * (e.shiftKey && k !== 'shift' ? 5 : 1);
     let did = true;
-    if(k === ' ')            o.y0 = (o.y0 || 0) + step;                  // space: up
-    else if(k === 'shift')   o.y0 = Math.max(0, (o.y0 || 0) - step);     // shift: down
+    if(k === ' ')            raiseBy(o,  step);                          // space: up
+    else if(k === 'shift')   raiseBy(o, -step);                          // shift: down
     else if(k === 'r'){
       /* The RAW angle advances; `ry` is the snapped view of it. Snapping the stored angle directly
          meant every press landed inside the tolerance of the cardinal it had just left and was
@@ -1186,8 +1211,8 @@ function onKey(e){
   else if(e.key === 'ArrowRight') s.o.x += step;
   else if(e.key === 'ArrowUp')    s.o.z -= step;
   else if(e.key === 'ArrowDown')  s.o.z += step;
-  else if(e.key === 'PageUp')     s.o.y0 = (s.o.y0 || 0) + step;
-  else if(e.key === 'PageDown')   s.o.y0 = Math.max(0, (s.o.y0 || 0) - step);
+  else if(e.key === 'PageUp')     raiseBy(s.o,  step);   // see raiseBy: a platform moves, it does not thicken
+  else if(e.key === 'PageDown')   raiseBy(s.o, -step);
   else if((e.key === 'Delete' || e.key === 'Backspace') && s.built){
     /* A built piece has no array entry to splice - it is hidden instead, and the hide is recorded
        so it stays gone across rebuilds and ships with the rest of the edits. */

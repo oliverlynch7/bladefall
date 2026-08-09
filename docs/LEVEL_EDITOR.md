@@ -11,7 +11,7 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 | right drag | move it along the ground |
 | **while holding right-click** | `space` raise · `shift` lower · `R` turn · `wheel` resize |
 | arrows | nudge 10 units (`shift` = 50) |
-| `PgUp` / `PgDn` | raise / lower |
+| `PgUp` / `PgDn` | raise / lower — a **platform moves as a slab**: its top and its underside travel together, so it ends up higher rather than taller, and you can walk beneath it |
 | `alt` + those | **resize** instead of move (`[` `]` for a healing pad's radius) |
 | `R` | rotate 1/16 turn (`shift` reverses) |
 | `ctrl`+`D` | duplicate, and select the copy - so ctrl+D ctrl+D builds a row |
@@ -20,6 +20,17 @@ Press **F2** in the game. Everything below happens live, in the real game, on th
 | `Del` | delete |
 | `Ctrl+Z` / `Ctrl+Y` | undo / redo |
 | `Esc` | stop placing, or deselect |
+
+## Platforms have an underside
+
+A platform used to be a PILLAR: `h` was its top and the box was welded to the ground, with no way
+to express air beneath it. That is why raising one did nothing (the key wrote a `y0` the engine
+never read), why `alt`+`PgUp` made it taller instead of higher, and why props placed near a plateau
+vanished inside it — the plateau was solid all the way down.
+
+Platforms now carry `y0`, their underside. `PgUp`/`PgDn` and `space`/`shift` move the whole slab and
+preserve its thickness; `alt`+`PgUp`/`PgDn` still resizes. You can walk under a raised platform, and
+it renders with the gap it actually has. Objects with no `y0` behave exactly as before.
 
 ## Every binding, once
 

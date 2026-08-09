@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.901.0-underside';
+const VERSION3D='1.902.0-slab-editor';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -16127,7 +16127,11 @@ function drawCourse(s,t){
     if((ob.treeCol || ob.pillarCol) && _w3dOn) continue;   // world3d draws the real tree / the real pillar; skip the voxel shaft
     if(ob.lampCol && _hubLamp) continue;                   // ...and the real lightpost; skip the voxel lamp post
     if(!noFade && ob.h>=40 && rayHits(ob,8) && (shoulder || ob.z>G.p.z+20) && !standingOn(ob)){ LATE.push({kind:'ob',o:ob}); continue; }   // blockers fade (Phase 19: threshold 90->40 — mid-height plats/cols hid the hero too) — but never the one you stand on, never in first-person
-    if(ob.kind==='plat'){ bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#fff',0.10));
+    /* A plat was ALWAYS drawn from the ground to its top - a box of height `h` centred at h/2 - which
+       is the visual half of the pillar assumption the collision made. A slab with air beneath it has
+       to LOOK like one or a walkable underside reads as a rendering bug. y0 absent = unchanged. */
+    if(ob.kind==='plat'){ const b=(ob.y0!=null?ob.y0:0), th=Math.max(1,ob.h-b);
+      bx(ob.x,b+th/2,ob.z, ob.w,th,ob.d, tint(s.ground,'#fff',0.10));
       bx(ob.x,ob.h+0.8,ob.z, ob.w,1.6,ob.d, tint(s.ground,'#fff',0.24)); }
     else { bx(ob.x,ob.h/2,ob.z, ob.w,ob.h,ob.d, tint(s.ground,'#000',0.14));
       bx(ob.x,ob.h*0.52,ob.z, ob.w*0.5,ob.h*0.9,ob.d*1.06, tint(s.ground,'#fff',0.06));

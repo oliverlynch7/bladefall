@@ -9,18 +9,36 @@ That is what makes them unique in play; theme is paint, the verb is the experien
 | Frostfell | **discover** — carved interior you cannot survey from the door | SHIPPED `terrainIceCave` |
 | Emberdeep | **time it** — platforming over a lava sea | SHIPPED `terrainLavaField` |
 | The Abyss | **commit** — shards in blackness, ground that only sometimes exists | SHIPPED `terrainVoidShards` |
-| Castle Duskmoor | **ascend** — one continuous climb up a single tower | TODO |
+| Castle Duskmoor | **ascend** — one continuous climb up a single tower | BUILT `terrainSpireClimb`, unpushed |
 | Sunspire Palace | **be exposed** — formal symmetry, long sightlines, cover to cover | TODO |
 | Ruined Keep | **breach** — concentric fortress you attack inward | TODO |
 | The Outskirts | **orient** — open farmland, see everything, choose your line | TODO |
 
-## The remaining four, in build order
+## Two things this file did not warn about, and both cost a rebuild
 
-**Castle Duskmoor — ascend.** One continuous climb: a spiral of ramparts and stairs wrapping a
-central keep. You always see where you have been below and where you are going above. Gloom pools
-light on the inner stair and leaves the outer walk dark, so the climb is a choice between the safe
-slow way and the exposed fast way. The boss is visible from the bottom. Needs a helical route
-generator - height rises with angle rather than with z.
+Written down here because the next three zones will hit them.
+
+**The row emitter is not universal.** Canyon, ice cave, lava field and void shards all emit by
+scanning z, scanning x, and asking `covered(x,z)` for THE height. That returns ONE height per cell,
+so it cannot express any zone that passes over the same (x,z) twice — Duskmoor's helix does it once
+per turn. `terrainSpireClimb` emits along its path instead. Ruined Keep's collapsed-floor vertical
+shortcuts will have the same problem.
+
+**Hazard reach is flat.** Gloom's safety test was `dXZ(...) < L.r` with height stored and ignored,
+and the same flat assumption appeared in hazTopUp's dedupe and in the fixed 260 torch radius. Any
+zone with real stacked storeys must pass `G.spireRY` and give its lights an `ry`. Check the hazard
+before assuming a vertical zone works: Duskmoor's first build had no dark in it anywhere.
+
+## The remaining three, in build order
+
+**Castle Duskmoor — DONE except art.** Generator, lighting and framing built and measured; see the
+1.899.0 commit. Still open: enemy placement is one generic monster per landing, and the two routes
+have no different threat profile yet (the outer walk should probably be where the archers are).
+
+As built: keep radius 300, stair ring 520, outer walk 750, 5 turns of 210. The two routes are
+separated by GEOMETRY, not by a tag — the outer walk sits beyond the 646 any stair sconce reaches,
+so it is dark because of where it is. Inner stair measures 0% dark; outer walk 54%, worst dark leg
+420 against the ~770 the gloom gives you at run speed.
 
 **Sunspire Palace — be exposed.** The only ORDERED place in the game: axial approach, colonnades,
 terraces, reflecting pools, mirror symmetry. Long sightlines mean you are seen from far away -

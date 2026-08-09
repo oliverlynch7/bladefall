@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.899.0-duskmoor-light';
+const VERSION3D='1.900.0-duskmoor-guard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5383,7 +5383,7 @@ function terrainSpireClimb(ctx, o){
   /* THE KEEP. One solid column, floor to roof. It is what the ramp wraps, what blocks the outer
      walk from simply cutting straight across the middle, and what guarantees a single-surface exit. */
   vcol(CX, CZ, KEEPR*2, KEEPR*2, TOP);
-  vplat(CX, CZ, TOP, KEEPR*2 - 40, KEEPR*2 - 40, { keepRoof:true, breather:true, checkpoint:true });
+  vplat(CX, CZ, TOP, KEEPR*2 - 40, KEEPR*2 - 40, { keepRoof:true, terrain:true, breather:true, checkpoint:true });
 
   /* RELIEF, because a 600-wide 1050-tall box has no scale: with nothing on it you cannot tell a
      tower from a wall, and the first screenshot of this zone was a grey slab filling the frame.
@@ -5446,6 +5446,16 @@ function terrainSpireClimb(ctx, o){
   const TORCH_R = 170;    // tight enough that the stair's light does not reach the outer walk
   const TORCH_GAP = 240;  // < 2*sqrt(TORCH_R^2 - 44^2) = 328, so the stair has no dark gap at all
 
+  /* WHERE THE FIGHT GOES. The generator only collects POSTS; castle() decides what stands on them,
+     because the mob types are the zone's business and the geometry is this function's.
+
+     The two routes must cost different CURRENCIES or the choice is only cosmetic. The stair is wide
+     and lit, so it gets blockers you have to beat - that costs TIME, which is the stair's existing
+     weakness. The outer walk is narrow and dark with a fall on one side, so it gets shooters - that
+     costs RISK, and there is nowhere to sidestep, so the answer is to keep moving rather than to
+     fight. Same climb, two different problems. */
+  const stairPosts = [], walkPosts = [], crownPosts = [], gatePosts = [];
+
   const landings = [];
   let steps = 0, chords = 0, lamps = 0;
 
@@ -5458,7 +5468,7 @@ function terrainSpireClimb(ctx, o){
     for(let k = 0; k < SAMP; k++){
       const a0 = A0 + (t + k/SAMP)*2*Math.PI, a1 = A0 + (t + (k+1)/SAMP)*2*Math.PI;
       const p = at(a0, RING, h0 + (h1-h0)*(k/SAMP)), q = at(a1, RING, h0 + (h1-h0)*((k+1)/SAMP));
-      steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, safeRoute:true, recovery:true }).length;
+      steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, terrain:true, safeRoute:true, recovery:true }).length;
     }
 
     /* The stair's own lamps. Placed against the keep wall (inside the ramp centreline) so they read
@@ -5469,10 +5479,19 @@ function terrainSpireClimb(ctx, o){
         const p = at(a, RING - W*0.34, h0 + (h1-h0)*f);
         G.torches.push({ x:p.x, z:p.z, y:p.h, r:TORCH_R, ry:G.spireRY, spire:true }); lamps++; } }
 
+    /* BLOCKERS on the stair. The first sits at f=0.20, just past the outer walk's turnoff at 0.12,
+       so it is IN SIGHT when you make the choice - the cost of the safe route has to be visible at
+       the moment you choose it, or the fork is a guess rather than a decision. The second at 0.65
+       keeps the lap from being one fight and then a walk. */
+    for(const f of [0.20, 0.65]){
+      const p = at(A0 + (t + f)*2*Math.PI, RING, h0 + RISE*f);
+      stairPosts.push({ x:p.x, z:p.z, y:p.h, turn:t });
+    }
+
     /* LANDING at the top of each turn: a wider rampart the climb rests on, and the thing the room
        list is built from so the HUD can name where you are on the way up. */
     const L = at(A0 + (t+1)*2*Math.PI, RING, h1);
-    vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true });
+    vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true, terrain:true });
     landings.push({ x:L.x, z:L.z, h:h1 });
 
     /* OUTER WALK. The first version of this was a straight chord across the tower, and measuring it
@@ -5494,7 +5513,7 @@ function terrainSpireClimb(ctx, o){
       /* the step OUT onto it, off the inner stair - without this the fast route is unreachable and
          the whole choice silently collapses into "there is one way up". */
       const on = at(aS, RING, hS), s = at(aS, ROUT, hS);
-      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, W, { spire:true, outerWalk:true });
+      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, W, { spire:true, terrain:true, outerWalk:true });
 
       /* SEG is set so the plats OVERLAP rather than merely reach: climbRun spaces by JMPH (150) but
          each plat is only WOUT (74) wide, so the first pass left 44-unit holes down the whole ledge
@@ -5505,11 +5524,11 @@ function terrainSpireClimb(ctx, o){
       for(let k = 0; k < SEG; k++){
         const b0 = aS + (aE-aS)*(k/SEG), b1 = aS + (aE-aS)*((k+1)/SEG);
         const p = at(b0, ROUT, hS + (hE-hS)*(k/SEG)), q = at(b1, ROUT, hS + (hE-hS)*((k+1)/SEG));
-        chords += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, WOUT, { spire:true, outerWalk:true, unlit:true, fast:true }).length;
+        chords += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, WOUT, { spire:true, terrain:true, outerWalk:true, unlit:true, fast:true }).length;
       }
       /* the step back IN, onto the stair one turn higher. */
       const e = at(aE, ROUT, hE), back = at(aE, RING, hE);
-      climbRun(e.x, e.z, e.h, back.x, back.z, back.h, W, { spire:true, outerWalk:true });
+      climbRun(e.x, e.z, e.h, back.x, back.z, back.h, W, { spire:true, terrain:true, outerWalk:true });
 
       /* ONE lantern, at the middle of the arc. Not decoration and not mercy: the arc is longer than
          the ~770 units the gloom gives you, and a hazard that ALWAYS kills is a wall rather than a
@@ -5517,17 +5536,35 @@ function terrainSpireClimb(ctx, o){
          costs more than you can pay. Halving the run puts each dark leg comfortably inside budget. */
       { const m = at((aS+aE)/2, ROUT, (hS+hE)/2);
         G.torches.push({ x:m.x, z:m.z, y:m.h, r:TORCH_R, ry:G.spireRY, spire:true, outerWalk:true }); lamps++; }
+
+      /* SHOOTERS on the walk, spread down its length. Deliberately not at the entrance: the first
+         thing you meet on the fast route should be the dark, not a fight, so the route sells itself
+         before it charges you. They stand ON the ledge, which is what makes them a problem - a
+         narrow railless ramp gives you no room to circle, so the honest answer is to run past. */
+      for(const f of [0.30, 0.60, 0.88]){
+        const p = at(aS + (aE-aS)*f, ROUT, hS + (hE-hS)*f);
+        walkPosts.push({ x:p.x, z:p.z, y:p.h, turn:t });
+      }
     }
   }
 
   /* THE WAY ON at the top: from the final landing across onto the keep roof. The roof is inside the
      ring, so this is a short inward run, not a leap of faith. */
   { const last = landings[landings.length-1];
-    climbRun(last.x, last.z, last.h, CX + (last.x-CX)*0.35, CZ + (last.z-CZ)*0.35, TOP, W, { spire:true, roofRun:true }); }
+    climbRun(last.x, last.z, last.h, CX + (last.x-CX)*0.35, CZ + (last.z-CZ)*0.35, TOP, W, { spire:true, terrain:true, roofRun:true }); }
 
   /* GETTING ON at the bottom: base skirt up to the first ramp step. */
   { const first = at(A0, RING, 0);
-    climbRun(CX, baseZ, 0, first.x, first.z, 0, W, { spire:true, safeRoute:true }); }
+    climbRun(CX, baseZ, 0, first.x, first.z, 0, W, { spire:true, terrain:true, safeRoute:true }); }
+
+  /* THE GATE GUARD and THE CROWN GUARD, both there for a reason beyond flavour.
+     The gate pair teaches the blocker BEFORE the climb starts, on flat ground where a mistake costs
+     nothing, so the first one met on a narrow ramp is not also the first one ever met.
+     The crown pair means the roof is not a free landing after the last stretch.
+     They are also the completion margin: the area quests ask for exact counts, and a route enemy
+     that ends up unreachable would otherwise stall the zone with no way to tell why. */
+  gatePosts.push({ x:CX-150, z:baseZ-90, y:0 }, { x:CX+150, z:baseZ-90, y:0 });
+  for(const s of [-1,1]) crownPosts.push({ x:CX + s*140, z:CZ - 120, y:TOP });
 
   for(let i = 0; i < landings.length; i++){
     const L = landings[i];
@@ -5536,7 +5573,9 @@ function terrainSpireClimb(ctx, o){
                    monsters:[], encounter:false, cleared:true, court: i === Math.floor(TURNS/2) });
   }
 
-  return { steps:steps, chords:chords, turns:TURNS, top:TOP,
+  return { steps:steps, chords:chords, turns:TURNS, top:TOP, lamps:lamps,
+           stairPosts:stairPosts, walkPosts:walkPosts, crownPosts:crownPosts, gatePosts:gatePosts,
+           landings:landings,
            start:{ x:CX, z:baseZ, h:0 },
            goal: { x:CX, z:CZ, h:TOP } };
 }
@@ -6770,8 +6809,24 @@ const EXPANDED_SCAPES={
         riseTurn: high? 225 : 210, rampW: 130, walkW: 74,
         roomNames: high? ['Outer Rampart','The Murder Holes','Stormbridge','The Bell Stage','Raven Walk','The Crown']
                        : ['Outer Rampart','The Murder Holes','Stormbridge','The Bell Stage','The Crown'] });
-      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
-        mkMonster(ctx.pick(), r.x-45, r.z+30, r); }
+      /* ONE PER ROOM AND RANDOM was the placeholder, and it cannot work here for two separate
+         reasons. It made the routes identical - the same mob in the same place whichever way you
+         went, so the fork had no consequence. And ctx.pick() draws from THEMEMOBS.apex, which is
+         half siege knights by chance, while THIS AREA'S QUEST asks for ten of them by name; with
+         eight rooms it produced three. The zone could not be completed.
+         So placement is explicit, and the counts are derived from the geometry rather than hoped
+         for. Melee holds the lit stair (costs time), casters hold the dark ledge (costs risk). */
+      const near = (p) => { let b=null,bd=1e9;
+        for(const r of G.rooms){ const d=Math.hypot(r.x-p.x,r.z-p.z)+Math.abs((r.y||0)-p.y)*0.5;
+          if(d<bd){bd=d;b=r;} } return b; };
+      const post = (type, p) => { const m=mkMonster(type,p.x,p.z,near(p));
+        if(m){ m.y=p.y; m.sx=m.x; m.sz=m.z; } return m; };
+
+      for(const p of T.gatePosts)  post('siegeknight',   p);   // taught on flat ground first
+      for(const p of T.stairPosts) post('siegeknight',   p);   // the lit stair costs you TIME
+      for(const p of T.walkPosts)  post('royalarcanist', p);   // the dark ledge costs you RISK
+      for(const p of T.crownPosts) post('royalarcanist', p);
+
       finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
                        dashGate:false,   // the exit is a tower ROOF; dashGate would shove it 290u into the void
                        decoCol:'#353541',decoTheme:'castle',decoTall:340});
@@ -7983,6 +8038,20 @@ function surfaceHeightAt(x,z,r=8){
   return f;
 }
 function highestSurfaceAt(x,z,r=8){ const f=surfaceHeightAt(x,z,r); return f>-1e8?f:0; }
+/* THE SURFACE UNDER A ROOM, storey-aware. surfaceHeightAt returns the MAXIMUM surface at (x,z) and
+   its third argument is a RADIUS, not a reference height - which is right for every zone until one
+   stacks two floors over the same spot. Castle Duskmoor's five landings share ONE (x,z), so every
+   room-placed thing snapped to the top turn. Measured, not guessed: all five landing lights sat at
+   y=1050 while the landings run 210..1050, leaving four rooms unlit in the one hazard that punishes
+   darkness, and only the explicitly-placed stair sconces were covering for it.
+   Where a zone declares storeys, the room's own y is the truth. Everywhere else this is exactly the
+   old expression, so nothing that worked before changes. */
+function roomSurfaceY(r){
+  if(!r) return 0;
+  if(G && G.spireRY && r.y != null) return r.y;
+  const h = surfaceHeightAt(r.x, r.z, 20);
+  return h > -1e8 ? h : (r.y || 0);
+}
 // TERRAIN top at (x,z) for GROUNDING props (trees, rocks, statues): ground segments + plateaus (plats) only —
 // ignores columns/movers/other props, so a prop rests on the mesa it stands on and never floats on another prop
 // or sinks inside a raised plateau. This is THE systemic answer to "assets loading buried in the ground floor":
@@ -8846,8 +8915,7 @@ function hazSetup(rnd){                                  // place whatever the z
        above and below it and the zone has no dark left in it. G.spireRY is the generator's declared
        storey thickness; absent (every other zone) the light stays flat-reaching as it always was. */
     const RY = G.spireRY || null;
-    for(const r of G.rooms){ const h=surfaceHeightAt(r.x,r.z,20);
-      G.lights.push({x:r.x,z:r.z,y:h>-1e8?h:(r.y||0),r:300,ry:RY}); }
+    for(const r of G.rooms) G.lights.push({x:r.x,z:r.z,y:roomSurfaceY(r),r:300,ry:RY});
     /* A torch may now declare its own radius. The flat 260 is right for a corridor and wrong for a
        tower: Duskmoor's stair sconces at 260 threw light clean across the gap onto the outer walk,
        which measured 25% dark with a worst run of 132 against a 770 budget - the fast route was
@@ -8894,7 +8962,7 @@ function hazTopUp(rnd){
     const already = (x, z, y) => (G.lights||[]).some(L =>
       dXZ(L.x, L.z, x, z) < 260 && (RY2 == null || Math.abs((L.y||0) - y) < RY2));
     for(const r of G.rooms){
-      const h = surfaceHeightAt(r.x, r.z, 20), y = h > -1e8 ? h : (r.y||0);
+      const y = roomSurfaceY(r);
       if(already(r.x, r.z, y)) continue;
       G.lights.push({x:r.x, z:r.z, y:y, r:300, ry:RY2}); n++;
     }
@@ -8967,6 +9035,11 @@ function questMarks(rnd){
   let made = 0;
 
   const ground = (x,z) => { const h = surfaceHeightAt(x,z,20); return h > -1e8 ? h : null; };
+  /* Same storey problem as the lights, and it lands on OBJECTIVES, which is worse: in a stacked zone
+     ground() returns the top surface, so a brazier meant for the second rampart appears on the roof
+     five floors up with no way for the player to tell it moved. Where a room is in scope and the
+     zone declares storeys, the room's floor is the answer. */
+  const groundIn = (r,x,z) => (G.spireRY && r && r.y != null) ? r.y : ground(x,z);
   /* Objectives go in rooms you would otherwise have no reason to enter - the spurs and flanks the
      topology pass built. A quest marker in the room you already walk through is a formality. */
   const pool = rooms.filter(r => r.spur || r.flank || r.court || r.island || r.tier);
@@ -8979,7 +9052,7 @@ function questMarks(rnd){
       /* A single elite, far from the entrance, with a beacon so it can be FOUND rather than
          stumbled over. Reuses makeElite, so it already reads as dangerous. */
       const r = pool.length ? pool[pool.length-1] : rooms[rooms.length-1];
-      const h = ground(r.x, r.z); if(h == null) continue;
+      const h = groundIn(r, r.x, r.z); if(h == null) continue;
       try{
         const m = spawnEnemy(q.mob || 'grunt', r.x, r.z);
         if(m){ m.y = h; m.sx = m.x; m.sz = m.z; m.huntQ = q.id;
@@ -9027,7 +9100,7 @@ function questMarks(rnd){
         const r = pick(i);
         const a = R()*6.283, rr = (r.w/2)*0.55;
         const x = r.x + Math.cos(a)*rr, z = r.z + Math.sin(a)*rr;
-        const h = ground(x,z); if(h == null) continue;
+        const h = groundIn(r, x, z); if(h == null) continue;
         G.qmarks.push({k:'kindle', x:x, z:z, y:h, q:q.id, done:false, t:0, lit:false});
         made++;
       }

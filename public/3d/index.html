@@ -5196,7 +5196,7 @@ const SCAPES={
    generators untouched, so if this looks worse, nothing is lost by not adopting it. */
 /* Which zones use terrain-first generation. One entry today, deliberately: the approach has to be
    judged on a level Oliver can walk before it touches anything else. */
-const TERRAIN_ZONES = { hollow: true, frost: true, ember: true, abyss: true };
+const TERRAIN_ZONES = { hollow: true, frost: true, ember: true, abyss: true, castle: true };
 
 /* -- TERRAIN: ICE PLATES ----------------------------------------------------
    Frostfell's primitive, and deliberately the LEAST like the canyon so the framework is proved to
@@ -5337,6 +5337,117 @@ function auditReachable(){
      canyon and the cave both give you walls to follow; here nothing tells you which way is on.
      DOWNWARD DRIFT. Height falls toward the exit. You are descending into it, and the way back up
      is never obvious - which is what "the world thins and something looks back" should feel like. */
+/* CASTLE DUSKMOOR — the verb is ASCEND. docs/ZONE_VERBS.md.
+
+   Every other generator in this file lays a route out along z and then EMITS BY ROW: scan z, scan x,
+   ask covered(x,z) for THE height, flush a run of boxes. That emitter cannot build this zone, and it
+   is worth being explicit about why rather than discovering it halfway through. covered() returns
+   ONE height per cell. A helix passes over the same (x,z) once per turn, at a different height every
+   time - that is not an edge case, it is the entire shape. So this one emits its ramp DIRECTLY along
+   the path and never scans a row.
+
+   Stacked surfaces at one (x,z) are not new: the Palace already stands a {roof:true} plat over a
+   building deco at identical coordinates, so the collision resolves standing on the nearest surface
+   below you and has done since that zone shipped. The helix is the same trick, repeated.
+
+   THE SHAPE. A solid keep in the middle, a ramp spiralling up around it, TURNS times. You can always
+   see the ramp you already walked below you and the ramp you have yet to walk above you, because
+   they are the same ramp - that is what makes the climb legible without a map.
+
+   THE CHOICE, which is the actual play. Each turn offers two ways up:
+     - the INNER STAIR, hugging the keep wall: the full arc, gentle, wide, lantern-lit.
+     - the OUTER WALK, a straight chord across open air at a wider radius: it cuts the corner, so it
+       covers the same rise over less ground and is therefore STEEPER and faster - and it is narrow,
+       railless and unlit. Fast route, exposed route. Same rise, worse footing.
+   A chord is shorter than its arc for free, so the speed difference is geometry, not a fudged
+   number. Both routes are climbRun'd, so both respect JMPV/JMPH and neither can generate a step the
+   player cannot make.
+
+   THE EXIT is the keep's roof, at the tower's centre. Chosen deliberately: the centre column is
+   solid keep all the way up, so the roof is the ONLY walkable surface at that (x,z) and the portal
+   cannot land inside the helix. Callers must pass dashGate:false - dashGate moves the exit 290 units
+   in -z onto a landing island, which off a tower roof means dropping it into the void. */
+function terrainSpireClimb(ctx, o){
+  const rnd = ctx.rnd;
+  const CX = o.cx || 0, CZ = o.cz || 0;
+  const TURNS = o.turns || 5;
+  const RING  = o.ring  || 520;          // centreline radius of the inner stair
+  const KEEPR = o.keepR || 300;          // solid core; must stay well inside RING or the ramp is buried
+  const RISE  = o.riseTurn || 210;       // height gained per full turn
+  const TOP   = TURNS * RISE;
+  const W     = o.rampW || 130;          // inner stair width - generous, this is the safe way
+  const WOUT  = o.walkW || 74;           // outer walk width - narrow on purpose
+
+  /* THE KEEP. One solid column, floor to roof. It is what the ramp wraps, what blocks the outer
+     walk from simply cutting straight across the middle, and what guarantees a single-surface exit. */
+  vcol(CX, CZ, KEEPR*2, KEEPR*2, TOP);
+  vplat(CX, CZ, TOP, KEEPR*2 - 40, KEEPR*2 - 40, { keepRoof:true, breather:true, checkpoint:true });
+
+  /* THE BASE. A skirt of ground at the foot of the tower so the player spawns on real floor rather
+     than on the first ramp step. Both the canyon and the plates shipped with the player spawning
+     into a hole because the ends were inferred; the zone owns its entrance here, explicitly. */
+  const baseZ = CZ + RING + 260;
+  vseg(CX, baseZ, 620, 360, { district:'The Gate', base:true });
+
+  const at = function(ang, r, h){ return { x: CX + Math.cos(ang)*r, z: CZ + Math.sin(ang)*r, h:h }; };
+  const A0 = Math.PI/2;                  // start on the +z side, i.e. straight ahead of the base skirt
+
+  const landings = [];
+  let steps = 0, chords = 0;
+
+  for(let t = 0; t < TURNS; t++){
+    const h0 = t*RISE, h1 = (t+1)*RISE;
+
+    /* INNER STAIR: the arc, sampled fine enough that climbRun between samples is a short hop and the
+       curve reads as a curve rather than a polygon. */
+    const SAMP = 12;
+    for(let k = 0; k < SAMP; k++){
+      const a0 = A0 + (t + k/SAMP)*2*Math.PI, a1 = A0 + (t + (k+1)/SAMP)*2*Math.PI;
+      const p = at(a0, RING, h0 + (h1-h0)*(k/SAMP)), q = at(a1, RING, h0 + (h1-h0)*((k+1)/SAMP));
+      steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, safeRoute:true, recovery:true }).length;
+    }
+
+    /* LANDING at the top of each turn: a wider rampart the climb rests on, and the thing the room
+       list is built from so the HUD can name where you are on the way up. */
+    const L = at(A0 + (t+1)*2*Math.PI, RING, h1);
+    vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true });
+    landings.push({ x:L.x, z:L.z, h:h1 });
+
+    /* OUTER WALK: the chord. Skips the last ~70% of this turn's arc at a wider radius, so it buys
+       the same height over a shorter path. Narrow, and tagged unlit so the gloom pass leaves it dark
+       - the fast way up is the way you cannot see your feet on. */
+    if(t < TURNS){
+      const aS = A0 + (t + 0.30)*2*Math.PI, aE = A0 + (t + 1)*2*Math.PI;
+      const s = at(aS, RING + 150, h0 + RISE*0.30), e = at(aE, RING, h1);
+      chords += climbRun(s.x, s.z, s.h, e.x, e.z, e.h, WOUT, { spire:true, outerWalk:true, unlit:true, fast:true }).length;
+      /* the step ONTO the chord, off the inner stair - without it the fast route is unreachable and
+         the whole choice silently collapses into "there is one way up". */
+      const on = at(aS, RING, h0 + RISE*0.30);
+      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, WOUT, { spire:true, outerWalk:true });
+    }
+  }
+
+  /* THE WAY ON at the top: from the final landing across onto the keep roof. The roof is inside the
+     ring, so this is a short inward run, not a leap of faith. */
+  { const last = landings[landings.length-1];
+    climbRun(last.x, last.z, last.h, CX + (last.x-CX)*0.35, CZ + (last.z-CZ)*0.35, TOP, W, { spire:true, roofRun:true }); }
+
+  /* GETTING ON at the bottom: base skirt up to the first ramp step. */
+  { const first = at(A0, RING, 0);
+    climbRun(CX, baseZ, 0, first.x, first.z, 0, W, { spire:true, safeRoute:true }); }
+
+  for(let i = 0; i < landings.length; i++){
+    const L = landings[i];
+    G.rooms.push({ name:(o.roomNames && o.roomNames[i]) || ('Rampart ' + (i+1)),
+                   x:L.x, z:L.z, w:250, d:250, y:L.h,
+                   monsters:[], encounter:false, cleared:true, court: i === Math.floor(TURNS/2) });
+  }
+
+  return { steps:steps, chords:chords, turns:TURNS, top:TOP,
+           start:{ x:CX, z:baseZ, h:0 },
+           goal: { x:CX, z:CZ, h:TOP } };
+}
+
 function terrainVoidShards(ctx, o){
   const rnd = ctx.rnd, rnd2 = ctx.rnd2;
   const Z0 = o.z0, Z1 = o.z1, SPAN = Math.abs(Z1 - Z0) || 1;
@@ -6558,7 +6669,22 @@ const EXPANDED_SCAPES={
       climbRun(-160,-2780,250,450,-3260,360,80);vplat(450,-3260,360,820,720,{checkpoint:true,terrace:true});for(let k=0;k<12;k++){const x=120+(k%4)*210,z=-3500+Math.floor(k/4)*170;vplat(x,z,360+(k%3)*28,170,120,{glass:true});G.deco.push({x,z,y0:360,w:150,h:5,d:100,c:k%2?GLASS:'#e7a2c9'});}
       climbRun(450,-3260,360,0,-4340,360,84);chest(-650,-2420,300);chest(720,-3260,388);for(const p of [[-500,-820,orchard],[-420,-2420,aviary],[0,-4340,crown]]){mkMonster('marblestatue',p[0]-55,p[1],p[2]);mkMonster('sparkling',p[0]+55,p[1],p[2]);}scapeFetch(ctx,[{x:-500,z:-820,y:0},{x:430,z:-1600,y:130},{x:-420,z:-2420,y:300},{x:450,z:-3260,y:388},{x:0,z:-4340,y:360}]);finishScape(ctx,{sx:0,sz:290,sy:0,gx:0,gz:-4560,decoCol:MARBLE,decoTheme:'marble',decoTall:500});}
   },
-  castle(ctx){const {rnd,mkMonster}=ctx,ascent=G.area===1,STONE='#353541',IRON='#211f28',BLOOD='#702742',STORM='#8751b5',FIRE='#d65a2e';
+  castle(ctx){
+    if(TERRAIN_ZONES.castle){
+      const {mkMonster}=ctx, high=G.area===1;
+      const T=terrainSpireClimb(ctx,{
+        cx:0, cz:-900, turns: high? 6 : 5, ring: 520, keepR: 300,
+        riseTurn: high? 225 : 210, rampW: 130, walkW: 74,
+        roomNames: high? ['Outer Rampart','The Murder Holes','Stormbridge','The Bell Stage','Raven Walk','The Crown']
+                       : ['Outer Rampart','The Murder Holes','Stormbridge','The Bell Stage','The Crown'] });
+      for(let i=0;i<G.rooms.length;i++){ const r=G.rooms[i];
+        mkMonster(ctx.pick(), r.x-45, r.z+30, r); }
+      finishScape(ctx,{sx:T.start.x,sz:T.start.z,sy:T.start.h,gx:T.goal.x,gz:T.goal.z,
+                       dashGate:false,   // the exit is a tower ROOF; dashGate would shove it 290u into the void
+                       decoCol:'#353541',decoTheme:'castle',decoTall:340});
+      return;
+    }
+    const {rnd,mkMonster}=ctx,ascent=G.area===1,STONE='#353541',IRON='#211f28',BLOOD='#702742',STORM='#8751b5',FIRE='#d65a2e';
     const room=(name,x,z,w,d,y=0)=>{const r={name,x,z,w,d,y,monsters:[],encounter:false,cleared:true};if(y)vplat(x,z,y,w,d,{district:name,terrace:true});else vseg(x,z,w,d,{district:name});G.rooms.push(r);return r;};const road=(a,b,w=150)=>{vseg((a.x+b.x)/2,a.z,Math.abs(a.x-b.x)+w,w,{path:true});vseg(b.x,(a.z+b.z)/2,w,Math.abs(a.z-b.z)+w,{path:true});};const chest=(x,z,y=0)=>G.chests.push(chestMaybeMimic({x,z,y,opened:false,bob:0},rnd));const tower=(x,z,y,h)=>{vcol(x,z,130,130,y+h);vplat(x,z,y+h,160,160,{tower:true});for(let k=0;k<4;k++)G.deco.push({x:x+(k%2?62:-62),z:z+(k<2?62:-62),y0:y+h,w:28,h:34,d:28,c:IRON});};
     if(!ascent){const field=room('Ashen Siegefield',0,0,980,760),gate=room('Fallen Gatehouse',-500,-900,940,800),yard=room('Black Courtyard',430,-1740,1020,840,120),wall=room('Murderwall',-430,-2580,940,800,260),storm=room('Stormbridge Bastion',450,-3440,1040,860,400),keep=room('Inner Keep',0,-4580,1140,900,400);
       road(field,gate,180);for(let k=0;k<10;k++){const x=-400+(k%5)*200,z=-200-Math.floor(k/5)*260;G.deco.push({x,z,y0:0,w:150,h:65,d:90,c:k%2?STONE:IRON});G.deco.push({x,z,y0:65,w:20,h:70,d:20,c:BLOOD});}

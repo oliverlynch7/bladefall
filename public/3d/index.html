@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.900.0-duskmoor-guard';
+const VERSION3D='1.901.0-underside';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -4561,7 +4561,16 @@ function canyonWall(wx,cz,len,sgn,rnd,ww,topH){
    (G.vertical) and zonescape.js verifies them structurally. */
 const JMPV=94, JMPH=150;   // max vertical / horizontal gap a generated climb step may span (jump apex ~104; margin kept)
 function vseg(x,z,w,d,ex){ const s=Object.assign({x,z,w,d},ex||{}); G.segments.push(s); return s; }
-function vplat(x,z,y,w,d,ex){ const o=Object.assign({kind:'plat',x,z,h:Math.round(y),w,d},ex||{}); G.obstacles.push(o); return o; }
+/* `h` is the plat's TOP, and until now that was its only vertical fact - the box was implicitly
+   welded to the ground, so there was no way to express a platform with air under it. That single
+   missing field is why the Duskmoor spiral could not be walked, and it is the same reason a platform
+   in the level editor cannot be raised or lowered (editing `h` makes it TALLER, not HIGHER) and why
+   props placed near a plateau disappear inside it.
+   `slab` is the thickness of a floating platform; y0 is derived as its underside. Omit both and the
+   plat is a pillar exactly as before. */
+function vplat(x,z,y,w,d,ex){ const o=Object.assign({kind:'plat',x,z,h:Math.round(y),w,d},ex||{});
+  if(o.slab!=null && o.y0==null) o.y0=Math.round(o.h-o.slab);
+  G.obstacles.push(o); return o; }
 function vcol(x,z,w,d,h){ const o={kind:'col',x,z,w,d,h:Math.round(h)}; G.obstacles.push(o); return o; }
 // A SOLID structure: renders like a deco box AND blocks the player (a matching collision column) so you bump into
 // buildings/crates/big rocks instead of phasing through them. `colH` caps the collision height when an intended
@@ -5468,7 +5477,7 @@ function terrainSpireClimb(ctx, o){
     for(let k = 0; k < SAMP; k++){
       const a0 = A0 + (t + k/SAMP)*2*Math.PI, a1 = A0 + (t + (k+1)/SAMP)*2*Math.PI;
       const p = at(a0, RING, h0 + (h1-h0)*(k/SAMP)), q = at(a1, RING, h0 + (h1-h0)*((k+1)/SAMP));
-      steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, terrain:true, safeRoute:true, recovery:true }).length;
+      steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, terrain:true, slab:40, safeRoute:true, recovery:true }).length;
     }
 
     /* The stair's own lamps. Placed against the keep wall (inside the ramp centreline) so they read
@@ -5491,7 +5500,7 @@ function terrainSpireClimb(ctx, o){
     /* LANDING at the top of each turn: a wider rampart the climb rests on, and the thing the room
        list is built from so the HUD can name where you are on the way up. */
     const L = at(A0 + (t+1)*2*Math.PI, RING, h1);
-    vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true, terrain:true });
+    vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true, terrain:true, slab:40 });
     landings.push({ x:L.x, z:L.z, h:h1 });
 
     /* OUTER WALK. The first version of this was a straight chord across the tower, and measuring it
@@ -5513,7 +5522,7 @@ function terrainSpireClimb(ctx, o){
       /* the step OUT onto it, off the inner stair - without this the fast route is unreachable and
          the whole choice silently collapses into "there is one way up". */
       const on = at(aS, RING, hS), s = at(aS, ROUT, hS);
-      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, W, { spire:true, terrain:true, outerWalk:true });
+      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, W, { spire:true, terrain:true, slab:40, outerWalk:true });
 
       /* SEG is set so the plats OVERLAP rather than merely reach: climbRun spaces by JMPH (150) but
          each plat is only WOUT (74) wide, so the first pass left 44-unit holes down the whole ledge
@@ -5524,11 +5533,11 @@ function terrainSpireClimb(ctx, o){
       for(let k = 0; k < SEG; k++){
         const b0 = aS + (aE-aS)*(k/SEG), b1 = aS + (aE-aS)*((k+1)/SEG);
         const p = at(b0, ROUT, hS + (hE-hS)*(k/SEG)), q = at(b1, ROUT, hS + (hE-hS)*((k+1)/SEG));
-        chords += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, WOUT, { spire:true, terrain:true, outerWalk:true, unlit:true, fast:true }).length;
+        chords += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, WOUT, { spire:true, terrain:true, slab:40, outerWalk:true, unlit:true, fast:true }).length;
       }
       /* the step back IN, onto the stair one turn higher. */
       const e = at(aE, ROUT, hE), back = at(aE, RING, hE);
-      climbRun(e.x, e.z, e.h, back.x, back.z, back.h, W, { spire:true, terrain:true, outerWalk:true });
+      climbRun(e.x, e.z, e.h, back.x, back.z, back.h, W, { spire:true, terrain:true, slab:40, outerWalk:true });
 
       /* ONE lantern, at the middle of the arc. Not decoration and not mercy: the arc is longer than
          the ~770 units the gloom gives you, and a hazard that ALWAYS kills is a wall rather than a
@@ -5551,7 +5560,7 @@ function terrainSpireClimb(ctx, o){
   /* THE WAY ON at the top: from the final landing across onto the keep roof. The roof is inside the
      ring, so this is a short inward run, not a leap of faith. */
   { const last = landings[landings.length-1];
-    climbRun(last.x, last.z, last.h, CX + (last.x-CX)*0.35, CZ + (last.z-CZ)*0.35, TOP, W, { spire:true, terrain:true, roofRun:true }); }
+    climbRun(last.x, last.z, last.h, CX + (last.x-CX)*0.35, CZ + (last.z-CZ)*0.35, TOP, W, { spire:true, terrain:true, slab:40, roofRun:true }); }
 
   /* GETTING ON at the bottom: base skirt up to the first ramp step. */
   { const first = at(A0, RING, 0);
@@ -7950,6 +7959,16 @@ function resolveObstacles(ent,r,yRef,climbMax){
   const ey=(yRef==null?ent.y:yRef);
   const push=(ob)=>{
     if(ey>=ob.h-2) return;
+    /* THE UNDERSIDE. Until now every obstacle was a PILLAR: solid from the ground to its top, with
+       no way to pass beneath it. That is right for a world of one storey and it is why Castle
+       Duskmoor could not be climbed at all - the spiral passes over itself, so each turn above was
+       solid rock standing on the turn below, and the player was ejected sideways off the ramp on
+       the first frame. Proven by removing only the ten plats stacked over the ramp foot and
+       changing nothing else: ejected to the base skirt before, standing exactly on the ramp after.
+       `y0` is the OPT-IN bottom of a slab. If your head clears it, you walk under. Obstacles without
+       one are pillars exactly as they have always been, which is every obstacle in every other zone,
+       so this cannot change any of them. */
+    if(ob.y0!=null && ey + (ent.hh || 56) <= ob.y0) return;
     // A solid STRUCTURE (building) blocks phasing-through at ground level, but must never eject someone standing on an
     // intended walkway that runs up over/through it (a climb step / plat at their feet). Check that before pushing.
     if(ob.structure){ for(const p2 of G.obstacles){ if(p2.kind==='plat' && Math.abs((p2.h||0)-ent.y)<7 && Math.abs(ent.x-p2.x)<p2.w/2+r && Math.abs(ent.z-p2.z)<p2.d/2+r) return; } }

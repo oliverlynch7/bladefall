@@ -9,7 +9,7 @@ That is what makes them unique in play; theme is paint, the verb is the experien
 | Frostfell | **discover** — carved interior you cannot survey from the door | SHIPPED `terrainIceCave` |
 | Emberdeep | **time it** — platforming over a lava sea | SHIPPED `terrainLavaField` |
 | The Abyss | **commit** — shards in blackness, ground that only sometimes exists | SHIPPED `terrainVoidShards` |
-| Castle Duskmoor | **ascend** — one continuous climb up a single tower | BUILT `terrainSpireClimb`, unpushed |
+| Castle Duskmoor | **ascend** — one continuous climb up a single tower | BUILT `terrainSpireClimb`, unpushed, unplayed |
 | Sunspire Palace | **be exposed** — formal symmetry, long sightlines, cover to cover | TODO |
 | Ruined Keep | **breach** — concentric fortress you attack inward | TODO |
 | The Outskirts | **orient** — open farmland, see everything, choose your line | TODO |
@@ -31,9 +31,21 @@ before assuming a vertical zone works: Duskmoor's first build had no dark in it 
 
 ## The remaining three, in build order
 
-**Castle Duskmoor — DONE except art.** Generator, lighting and framing built and measured; see the
-1.899.0 commit. Still open: enemy placement is one generic monster per landing, and the two routes
-have no different threat profile yet (the outer walk should probably be where the archers are).
+**Castle Duskmoor — DONE, unpushed.** Generator, lighting, framing and enemy placement built and
+measured; see 1.897–1.900. Melee holds the lit stair (costs time), casters hold the dark ledge
+(costs risk). Not yet walked by a human.
+
+Two more traps it hit, both worth knowing before the next zone:
+
+- **Tag generated ground `terrain:true`.** `highGround()` drops a chest, a shooter or a beacon on
+  ~78% of every untagged plat over 120 tall and 90 wide. An untagged ramp gave Duskmoor 46 stray
+  casters and a tower paved with treasure. The comment above that function already warned about it.
+- **`surfaceHeightAt(x,z,r)`'s third arg is a RADIUS, not a reference height,** and it returns the
+  MAXIMUM surface at (x,z). Every room-placed system (lights, quest braziers, re-homing) therefore
+  snaps to the top storey when two floors share one spot. Use `roomSurfaceY(room)` / `groundIn()`.
+- **Check the quest counts.** Area quests name a mob and a number; a generator that spawns
+  `ctx.pick()` per room will not hit them. Duskmoor needed 10 siege knights and produced 3, so the
+  zone could not be finished at all.
 
 As built: keep radius 300, stair ring 520, outer walk 750, 5 turns of 210. The two routes are
 separated by GEOMETRY, not by a tag — the outer walk sits beyond the 646 any stair sconce reaches,

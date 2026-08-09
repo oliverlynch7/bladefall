@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.898.0-duskmoor-wip';
+const VERSION3D='1.899.0-duskmoor-light';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -5378,22 +5378,76 @@ function terrainSpireClimb(ctx, o){
   const W     = o.rampW || 130;          // inner stair width - generous, this is the safe way
   const WOUT  = o.walkW || 74;           // outer walk width - narrow on purpose
 
+  const KEEP='#353541', IRON='#211f28', BLOOD='#702742';
+
   /* THE KEEP. One solid column, floor to roof. It is what the ramp wraps, what blocks the outer
      walk from simply cutting straight across the middle, and what guarantees a single-surface exit. */
   vcol(CX, CZ, KEEPR*2, KEEPR*2, TOP);
   vplat(CX, CZ, TOP, KEEPR*2 - 40, KEEPR*2 - 40, { keepRoof:true, breather:true, checkpoint:true });
 
+  /* RELIEF, because a 600-wide 1050-tall box has no scale: with nothing on it you cannot tell a
+     tower from a wall, and the first screenshot of this zone was a grey slab filling the frame.
+     Corner buttresses give it a silhouette, a string course at every storey turns the height into
+     something COUNTABLE (you read your progress off the bands), and merlons cap it as a castle. */
+  for(const sx of [-1,1]) for(const sz of [-1,1]){
+    vcol(CX + sx*(KEEPR-26), CZ + sz*(KEEPR-26), 108, 108, TOP + 46);
+    G.deco.push({ x:CX + sx*(KEEPR-26), z:CZ + sz*(KEEPR-26), y0:TOP+46, w:126, h:30, d:126, c:IRON });
+  }
+  for(let t = 1; t <= TURNS; t++){
+    const y = t*RISE - 16;
+    G.deco.push({ x:CX, z:CZ, y0:y, w:KEEPR*2 + 26, h:14, d:KEEPR*2 + 26, c:IRON });
+  }
+  { const n = 7, span = (KEEPR*2 - 40)/n;
+    for(let i = 0; i <= n; i++) for(const s of [-1,1]){
+      const o = -(KEEPR-20) + i*span;
+      G.deco.push({ x:CX + o, z:CZ + s*(KEEPR-20), y0:TOP, w:44, h:38, d:26, c:KEEP });
+      G.deco.push({ x:CX + s*(KEEPR-20), z:CZ + o, y0:TOP, w:26, h:38, d:44, c:KEEP });
+    } }
+  /* One banner down the face you walk in at, so the tower has a FRONT and the climb has a side you
+     can name. It is also the only warm colour in the zone before the braziers start. */
+  G.deco.push({ x:CX, z:CZ + KEEPR + 8, y0:RISE, w:96, h:TOP - RISE*1.4, d:10, c:BLOOD });
+
+  /* THE CROWN FIRES. ZONE_VERBS asks that the top be visible from the bottom, and in a gloom zone it
+     simply is not: an unlit grey keep against a dark sky is nothing at all, which is exactly how the
+     approach screenshotted. Four big fires on the roof corners are the target you climb toward -
+     placed on the CORNERS, never the centre, because the exit portal sits at the roof centre and
+     clearPortalArea strips large props crowding a portal. They are lights too, so the crown reads as
+     the one reliably safe ground at the top. */
+  for(const sx of [-1,1]) for(const sz of [-1,1]){
+    const bx2 = CX + sx*(KEEPR-26), bz2 = CZ + sz*(KEEPR-26);
+    G.deco.push({ x:bx2, z:bz2, y0:TOP+76, w:54, h:70, d:54, c:'#ffb347' });
+    G.deco.push({ x:bx2, z:bz2, y0:TOP+146, w:30, h:44, d:30, c:'#fff0c0' });
+    G.torches.push({ x:bx2, z:bz2, y:TOP, r:300, ry:RISE, spire:true, crown:true });
+  }
+
   /* THE BASE. A skirt of ground at the foot of the tower so the player spawns on real floor rather
      than on the first ramp step. Both the canyon and the plates shipped with the player spawning
-     into a hole because the ends were inferred; the zone owns its entrance here, explicitly. */
-  const baseZ = CZ + RING + 260;
-  vseg(CX, baseZ, 620, 360, { district:'The Gate', base:true });
+     into a hole because the ends were inferred; the zone owns its entrance here, explicitly.
+     Pushed a long way back on purpose: at the original RING+260 the camera sat 480 units off a
+     600-wide, 1050-tall keep and the whole frame was blank wall. You have to be able to SEE the
+     thing you are being asked to climb, and the approach is where that happens. */
+  const baseZ = CZ + RING + 700;
+  vseg(CX, baseZ, 620, 420, { district:'The Gate', base:true });
+  vseg(CX, CZ + RING + 380, 300, 420, { district:'The Gate', causeway:true });   // approach up to the ramp foot
 
   const at = function(ang, r, h){ return { x: CX + Math.cos(ang)*r, z: CZ + Math.sin(ang)*r, h:h }; };
   const A0 = Math.PI/2;                  // start on the +z side, i.e. straight ahead of the base skirt
 
+  /* Tell the gloom hazard this zone has STOREYS. Without it every lamp reaches flat and infinitely
+     upward, one brazier lights the whole tower, and the dark stops existing. Half a turn's rise is
+     the natural thickness: it reaches your own ramp and stops well short of the one overhead. */
+  G.spire = true; G.spireRY = Math.round(RISE*0.55);
+
+  /* Braziers go on the INNER STAIR ONLY, and that asymmetry is the entire choice - hazTopUp's route
+     lanterns cannot help here (it walks straight lines between consecutive rooms, and this zone's
+     landings stack at one (x,z), so every span reads as zero length and is skipped). Spaced 430
+     apart along the arc, under the ~770 units the gloom gives you at run speed, so the lit way up is
+     genuinely survivable. The outer walk gets nothing: it is faster, and you take it blind. */
+  const TORCH_R = 170;    // tight enough that the stair's light does not reach the outer walk
+  const TORCH_GAP = 240;  // < 2*sqrt(TORCH_R^2 - 44^2) = 328, so the stair has no dark gap at all
+
   const landings = [];
-  let steps = 0, chords = 0;
+  let steps = 0, chords = 0, lamps = 0;
 
   for(let t = 0; t < TURNS; t++){
     const h0 = t*RISE, h1 = (t+1)*RISE;
@@ -5407,23 +5461,62 @@ function terrainSpireClimb(ctx, o){
       steps += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, W, { spire:true, safeRoute:true, recovery:true }).length;
     }
 
+    /* The stair's own lamps. Placed against the keep wall (inside the ramp centreline) so they read
+       as wall sconces on the tower rather than bollards in the middle of the path. */
+    { const arc = 2*Math.PI*RING, per = Math.max(2, Math.round(arc/TORCH_GAP));
+      for(let k = 0; k < per; k++){
+        const f = k/per, a = A0 + (t + f)*2*Math.PI;
+        const p = at(a, RING - W*0.34, h0 + (h1-h0)*f);
+        G.torches.push({ x:p.x, z:p.z, y:p.h, r:TORCH_R, ry:G.spireRY, spire:true }); lamps++; } }
+
     /* LANDING at the top of each turn: a wider rampart the climb rests on, and the thing the room
        list is built from so the HUD can name where you are on the way up. */
     const L = at(A0 + (t+1)*2*Math.PI, RING, h1);
     vplat(L.x, L.z, h1, 250, 250, { landing:true, terrace:true, spire:true });
     landings.push({ x:L.x, z:L.z, h:h1 });
 
-    /* OUTER WALK: the chord. Skips the last ~70% of this turn's arc at a wider radius, so it buys
-       the same height over a shorter path. Narrow, and tagged unlit so the gloom pass leaves it dark
-       - the fast way up is the way you cannot see your feet on. */
-    if(t < TURNS){
-      const aS = A0 + (t + 0.30)*2*Math.PI, aE = A0 + (t + 1)*2*Math.PI;
-      const s = at(aS, RING + 150, h0 + RISE*0.30), e = at(aE, RING, h1);
-      chords += climbRun(s.x, s.z, s.h, e.x, e.z, e.h, WOUT, { spire:true, outerWalk:true, unlit:true, fast:true }).length;
-      /* the step ONTO the chord, off the inner stair - without it the fast route is unreachable and
+    /* OUTER WALK. The first version of this was a straight chord across the tower, and measuring it
+       killed it: a chord spanning 252 degrees passes only R*cos(54deg) ~ 350 from the centre, which
+       is 50 units off a keep of radius 300. It hugged the wall the sconces are mounted on, so it
+       came out 4% dark - the "exposed" route was the best lit thing in the zone, and it was not an
+       OUTER walk at all, it was a rope across the middle.
+
+       So it is an outer ARC instead, at ROUT, always further from the centre than any sconce reaches
+       (ROUT > RING - W*0.34 + TORCH_R), which makes it dark by geometry rather than by a tag.
+       It is faster because it is STEEPER, not shorter-per-degree: it gains 1.25 turns of height in a
+       quarter turn of travel, ~22% grade against the stair's ~6%, so taking it skips most of a lap.
+       You rejoin the stair one full turn above where you left it. */
+    if(t < TURNS - 1){
+      const ROUT = RING + 230, f0 = 0.12, f1 = 0.37;
+      const aS = A0 + (t + f0)*2*Math.PI, aE = A0 + (t + f1)*2*Math.PI;
+      const hS = h0 + RISE*f0, hE = (t+1)*RISE + RISE*f1;
+
+      /* the step OUT onto it, off the inner stair - without this the fast route is unreachable and
          the whole choice silently collapses into "there is one way up". */
-      const on = at(aS, RING, h0 + RISE*0.30);
-      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, WOUT, { spire:true, outerWalk:true });
+      const on = at(aS, RING, hS), s = at(aS, ROUT, hS);
+      climbRun(on.x, on.z, on.h, s.x, s.z, s.h, W, { spire:true, outerWalk:true });
+
+      /* SEG is set so the plats OVERLAP rather than merely reach: climbRun spaces by JMPH (150) but
+         each plat is only WOUT (74) wide, so the first pass left 44-unit holes down the whole ledge
+         - measured, 176 of 1005 samples with no floor under them. Jumpable in daylight, but this is
+         a narrow ledge in the dark, and an invisible gap there is the unfair death the hazard code
+         already refuses to place elsewhere. 20 segments puts the spacing at ~59 against a 74 width. */
+      const SEG = 20;
+      for(let k = 0; k < SEG; k++){
+        const b0 = aS + (aE-aS)*(k/SEG), b1 = aS + (aE-aS)*((k+1)/SEG);
+        const p = at(b0, ROUT, hS + (hE-hS)*(k/SEG)), q = at(b1, ROUT, hS + (hE-hS)*((k+1)/SEG));
+        chords += climbRun(p.x, p.z, p.h, q.x, q.z, q.h, WOUT, { spire:true, outerWalk:true, unlit:true, fast:true }).length;
+      }
+      /* the step back IN, onto the stair one turn higher. */
+      const e = at(aE, ROUT, hE), back = at(aE, RING, hE);
+      climbRun(e.x, e.z, e.h, back.x, back.z, back.h, W, { spire:true, outerWalk:true });
+
+      /* ONE lantern, at the middle of the arc. Not decoration and not mercy: the arc is longer than
+         the ~770 units the gloom gives you, and a hazard that ALWAYS kills is a wall rather than a
+         decision. Same rule the existing route lanterns follow - the dark still costs, and never
+         costs more than you can pay. Halving the run puts each dark leg comfortably inside budget. */
+      { const m = at((aS+aE)/2, ROUT, (hS+hE)/2);
+        G.torches.push({ x:m.x, z:m.z, y:m.h, r:TORCH_R, ry:G.spireRY, spire:true, outerWalk:true }); lamps++; }
     }
   }
 
@@ -8684,8 +8777,17 @@ function hazUpdate(dt){
     /* The finale's hazard makes the LEVEL's own lights load-bearing, which is the only hazard here
        that changes how you read the map rather than how you move. It builds slowly and drains fast,
        so crossing a dark stretch is a decision with a cost, not a wall. */
+    /* A light's reach was purely FLAT - dXZ only, height stored and never read. That is correct for
+       every zone laid out on one storey, and completely wrong for a tower: on Duskmoor's helix a
+       single brazier on the first turn also lights the identical angle on turns 2..5 directly above
+       it, so the gloom would never bite and the lit/dark choice could not exist at all.
+       `ry` is the opt-in vertical reach. Lights without one behave EXACTLY as before, which is every
+       light in every other zone - this cannot regress them. */
     let lit=false;
-    for(const L of (G.lights||[])){ if(dXZ(L.x,L.z,p.x,p.z)<L.r){ lit=true; break; } }
+    for(const L of (G.lights||[])){
+      if(dXZ(L.x,L.z,p.x,p.z)>=L.r) continue;
+      if(L.ry!=null && Math.abs((L.y||0)-(p.y||0))>L.ry) continue;
+      lit=true; break; }
     G.inLight=lit?1:0;
     if(lit) G.gloomT=Math.max(0,(G.gloomT||0)-dt*1.8);
     else{
@@ -8740,8 +8842,17 @@ function hazSetup(rnd){                                  // place whatever the z
        centres are over void (the room is a ring or a ledge, not a disc). Those four rooms would
        have been unlit, in the one hazard that punishes darkness. The light is an x/z position with
        a radius and the safety test is a flat distance, so its height was never used for anything. */
-    for(const r of G.rooms){ const h=surfaceHeightAt(r.x,r.z,20); G.lights.push({x:r.x,z:r.z,y:h>-1e8?h:(r.y||0),r:300}); }
-    for(const tc of (G.torches||[])) G.lights.push({x:tc.x,z:tc.z,y:tc.y||0,r:260});
+    /* In a tower a room light must know its storey, or a landing lamp lights every turn stacked
+       above and below it and the zone has no dark left in it. G.spireRY is the generator's declared
+       storey thickness; absent (every other zone) the light stays flat-reaching as it always was. */
+    const RY = G.spireRY || null;
+    for(const r of G.rooms){ const h=surfaceHeightAt(r.x,r.z,20);
+      G.lights.push({x:r.x,z:r.z,y:h>-1e8?h:(r.y||0),r:300,ry:RY}); }
+    /* A torch may now declare its own radius. The flat 260 is right for a corridor and wrong for a
+       tower: Duskmoor's stair sconces at 260 threw light clean across the gap onto the outer walk,
+       which measured 25% dark with a worst run of 132 against a 770 budget - the fast route was
+       free, so there was no decision in it. A tighter sconce lights its own ramp and nothing else. */
+    for(const tc of (G.torches||[])) G.lights.push({x:tc.x,z:tc.z,y:tc.y||0,r:tc.r||260,ry:tc.ry!=null?tc.ry:RY});
   }
 }
 /* Is there ground all around this point, or is it a ledge/bridge/rim?
@@ -8775,10 +8886,17 @@ function hazTopUp(rnd){
   const R = () => (rnd ? rnd() : Math.random());
   let n = 0;
   if(G.haz === 'gloom'){
+    /* The "is this room already lit" test was also flat, and in a tower that is worse than the
+       reach bug it mirrors: Duskmoor's five landings sit at the SAME (x,z), one directly above the
+       next, so landing 1's lamp made the top-up skip all four landings above it - four unlit rooms
+       in the one hazard that punishes dark. Same storey rule as the reach. */
+    const RY2 = G.spireRY || null;
+    const already = (x, z, y) => (G.lights||[]).some(L =>
+      dXZ(L.x, L.z, x, z) < 260 && (RY2 == null || Math.abs((L.y||0) - y) < RY2));
     for(const r of G.rooms){
-      if((G.lights||[]).some(L => dXZ(L.x, L.z, r.x, r.z) < 260)) continue;
-      const h = surfaceHeightAt(r.x, r.z, 20);
-      G.lights.push({x:r.x, z:r.z, y:h > -1e8 ? h : (r.y||0), r:300}); n++;
+      const h = surfaceHeightAt(r.x, r.z, 20), y = h > -1e8 ? h : (r.y||0);
+      if(already(r.x, r.z, y)) continue;
+      G.lights.push({x:r.x, z:r.z, y:y, r:300, ry:RY2}); n++;
     }
     /* LANTERNS ALONG THE ROUTE, so no dark crossing is longer than you can survive.
        Measured before adding them: Castle Duskmoor's worst unlit run was 1560 units with 57% of the

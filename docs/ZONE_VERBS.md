@@ -8,19 +8,13 @@ That is what makes them unique in play; theme is paint, the verb is the experien
 | Hollow Pass | **follow** — winding enclosed corridor, walls are a consequence of the route | SHIPPED `terrainCanyon` |
 | Frostfell | **discover** — carved interior you cannot survey from the door | SHIPPED `terrainIceCave` |
 | Emberdeep | **time it** — platforming over a lava sea | SHIPPED `terrainLavaField` |
-| The Abyss | **commit** — shards in blackness, ground that only sometimes exists | TODO |
+| The Abyss | **commit** — shards in blackness, ground that only sometimes exists | SHIPPED `terrainVoidShards` |
 | Castle Duskmoor | **ascend** — one continuous climb up a single tower | TODO |
 | Sunspire Palace | **be exposed** — formal symmetry, long sightlines, cover to cover | TODO |
 | Ruined Keep | **breach** — concentric fortress you attack inward | TODO |
 | The Outskirts | **orient** — open farmland, see everything, choose your line | TODO |
 
-## The remaining five, in build order
-
-**The Abyss — commit.** Floating shards in blackness with nothing beneath. Phasing means some
-platforms exist only sometimes, and shards resolve out of the dark as you approach so the whole
-route is never visible. Emberdeep's timing is EXTERNAL (a pillar's rhythm); here it is the ground's
-existence. Punishes hesitation. Reuse the lava-field station/crossing skeleton, swap eruptions for
-`G.phasers` and remove the light.
+## The remaining four, in build order
 
 **Castle Duskmoor — ascend.** One continuous climb: a spiral of ramparts and stairs wrapping a
 central keep. You always see where you have been below and where you are going above. Gloom pools

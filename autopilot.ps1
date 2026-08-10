@@ -38,6 +38,19 @@ function AlertOncePerDay($stampName, $text) {
 $h = (Get-Date).Hour
 if ($h -lt 8 -or $h -gt 22) { Log "skipped (hour $h outside 08-22)"; exit 0 }
 
+# OVERLAP LOCK. The trigger is every 20 minutes and a full harness pass takes longer than that, so
+# without this, run N+1 starts inside run N and the two fight over one working tree - the exact
+# shape of the write collision that lost the hub rework in August. A lock file older than 90
+# minutes is treated as a corpse from a killed run rather than a live sibling.
+$lock = Join-Path $repo '_autopilot.lock'
+if (Test-Path $lock) {
+  $age = (New-TimeSpan -Start (Get-Item $lock).LastWriteTime -End (Get-Date)).TotalMinutes
+  if ($age -lt 90) { Log ("skipped: another run has been going {0:N0} min" -f $age); exit 0 }
+  Log ("stale lock ({0:N0} min) - previous run died; taking over" -f $age)
+}
+(Get-Date -Format o) | Out-File -FilePath $lock -Encoding utf8 -NoNewline
+try {
+
 # Never start a run on top of MODIFIED TRACKED files - that would sweep a supervised session's
 # in-progress edits into an autonomous commit.
 #
@@ -153,6 +166,13 @@ Non-negotiable:
 - If a change does not appear to take effect, confirm WHICH definition your edit landed in before
   changing the logic - duplicate function bodies have burned three sessions.
 - If you cannot verify it, revert it and note the item blocked. Never commit unverified work.
+
+- WORK THE PLAN: docs/superpowers/plans/2026-08-10-verification-harness.md. Take the first task
+  whose steps are not all ticked, do that ONE task, tick its steps, commit.
+- SUB-PROJECTS A-D ONLY: verification harness, skill correctness, level completability, multiplayer.
+- You may NOT author new zones (Sunspire Palace, Ruined Keep, The Outskirts). Those wait for Oliver.
+- You may not commit unless `node harness/run-all.js` exits 0.
+- harness/ is ESM (package.json says type:module). Use import/export, never require.
 - Only send the Telegram digest if you actually shipped a commit. Silence is correct otherwise.
 - If the top item needs a decision only Oliver can make (fun, tone, art direction, money, balance),
   skip it, note why, and take the next actionable item.
@@ -161,6 +181,15 @@ Non-negotiable:
 try {
   $out = & $claude -p $prompt --permission-mode acceptEdits 2>&1
   $out | Out-File -FilePath $log -Append -Encoding utf8
+
+  # LIMIT GUARD. On 2026-08-03 this task fired every 20 minutes and every run died on the session
+  # limit - roughly 200 starts that read the backlog, shipped nothing, and logged a healthy-looking
+  # run start/run end pair. A limited run is not a failed run, it is a run that must not have
+  # happened: exit clean, touch nothing, let the next window try.
+  if ($out -match "hit your session limit|usage limit reached") {
+    Log 'skipped: session limit'
+    exit 0
+  }
 
   # A failing autopilot must be LOUD. Ten runs in a row died on an expired auth token, exiting in
      #   five seconds each, and the only evidence was a log nobody was reading - Oliver reasonably
@@ -179,6 +208,16 @@ try {
     Log 'run end (AUTH FAILURE - no work done)'
     exit 0
   }
+  # GREEN GATE. A run may only leave work behind if the harness passes. Castle Duskmoor was
+  # committed four times while being impossible to climb; this is the check that would have caught
+  # it. Anything red gets reverted rather than committed, and says so.
+  & node harness/run-all.js
+  if ($LASTEXITCODE -ne 0) {
+    Log 'REVERTED: harness gate failed'
+    git checkout -- .
+    ClearMarkerIfClean
+    exit 0
+  }
   ClearMarkerIfClean
   Log 'run end'
 } catch {
@@ -189,4 +228,10 @@ try {
     AlertOncePerDay '_autopilot_trustwarn' 'BLADEFALL autopilot is DOWN - Claude will not start because this folder is not a trusted workspace. Fix: open a terminal in _automation\\bladefall, run claude once, and accept the trust dialog. It resumes on its own after that.'
   }
   exit 1
+}
+
+} finally {
+  # Release the lock on every path, including a crash. A lock that outlives its run silently stops
+  # the automation for 90 minutes and looks exactly like "nothing needed doing".
+  Remove-Item $lock -ErrorAction SilentlyContinue
 }

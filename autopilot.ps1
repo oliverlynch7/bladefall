@@ -33,10 +33,10 @@ function AlertOncePerDay($stampName, $text) {
   } catch {}
 }
 
-# Only run during waking hours. The scheduled task already bounds this, but a machine that was
-# asleep can fire a missed trigger at any hour, and a 4am Telegram ping is not welcome.
+# RUNS AROUND THE CLOCK. Oliver asked for overnight work, so the 08-22 window is gone.
+# The window existed to avoid a 4am Telegram ping. That risk is unchanged and already bounded:
+# the only thing that pings is a FAILURE alert, and AlertOncePerDay fires at most once in 24h.
 $h = (Get-Date).Hour
-if ($h -lt 8 -or $h -gt 22) { Log "skipped (hour $h outside 08-22)"; exit 0 }
 
 # OVERLAP LOCK. The trigger is every 20 minutes and a full harness pass takes longer than that, so
 # without this, run N+1 starts inside run N and the two fight over one working tree - the exact

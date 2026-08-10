@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.902.0-slab-editor';
+const VERSION3D='1.903.0-hub-citadel-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3073,7 +3073,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -13987,6 +13987,109 @@ function openHub(){
    Outskirts it borrowed. Soft plum-warm sky, honeyed lantern haze, warm cobblestone. */
 const HUB_STAGE={name:'The Waystation',theme:'hub',sky:[0.15,0.115,0.135],ground:'#8a6a4e',aw:1320,ad:1120};   // ground plane widened to reach the space-passed walls
 const HUB_SX=1.45, HUB_SZ=1.30;   // the Waystation's "space pass" scale — shared by enterWaystation AND per-frame hub-upgrade rendering so they stay aligned
+/* Preview-branch Waystation. The ordinary autopilot URL shows the Citadel; ?hub=legacy preserves
+   the shipped layout for immediate A/B comparison. Core gameplay never reads this flag. */
+let HUB_CITADEL=true; try{ HUB_CITADEL=new URLSearchParams(location.search).get('hub')!=='legacy'; }catch(e){}
+
+/* One authored source for the review hub. The old Waystation builder still runs first so the
+   legacy path remains untouched; this replaces its scene arrays before collision normalisation.
+   Functions and unlock rules are preserved by reusing the already-created hubNpc records. */
+function rebuildWaystationCitadel(){
+  const old=Object.fromEntries((G.hubNpcs||[]).map(n=>[n.id,n]));
+  const take=(id,x,z,extra)=>Object.assign(old[id],{x,z},extra||{});
+  G.hubLayout='citadel-v1';
+  G.segments=[]; G.rooms=[]; G.walls=[]; G.obstacles=[]; G.deco=[]; G.torches=[];
+  G.gates=[]; G.enemies=[];
+
+  // One continuous walkable fortress footprint. District paving, buildings and landmarks make
+  // the hierarchy; invisible seams and disconnected floor plates do not.
+  G.segments.push({x:0,z:120,w:1840,d:1540});
+  G.rooms.push({x:0,z:120,w:1840,d:1540,monsters:[],encounter:false,cleared:true,citadel:true});
+  G.bounds={minX:-920,maxX:920,minZ:-650,maxZ:890}; G.progressEnd=-560;
+
+  // Campaign Cloister: eight readable bays on a shallow arc. Side chambers remain subordinate
+  // rifts beside their parent destination, preserving every discovery and completion flag.
+  const xs=[-700,-500,-300,-100,100,300,500,700];
+  ZONES.forEach((Z,i)=>{
+    const x=xs[i], z=-520-22*(1-Math.abs(x)/700);
+    G.gates.push({zi:i,x,z,open:i<=(meta.zoneMax||0),done:!!meta.zoneDone[Z.id],tier:Z.tier,name:Z.name,citadel:true});
+    if(Z.side&&meta.sideFound&&meta.sideFound[Z.side.id]) G.gates.push({zi:i,side:true,x:x+58,z:z+74,open:true,
+      done:!!(meta.sideDone&&meta.sideDone[Z.side.id]),name:Z.side.name,citadel:true});
+  });
+
+  // Services form two purposeful streets, not a loose ring of props. The western lane is trade
+  // and crafting; the eastern court is classes, companions and character presentation.
+  G.hubNpcs=[
+    take('quartermaster',-610,-110,{district:'market'}), take('chest',-610,35,{district:'market'}),
+    take('anvil',-610,205,{district:'market'}), take('keeper',-610,375,{district:'market'}),
+    take('drillmaster',610,-110,{district:'warden'}), take('beastkeeper',610,65,{district:'warden'}),
+    take('board',610,245,{district:'warden',faceZ:120}), take('mirror',610,425,{district:'warden'}),
+    take('sparring',425,425,{district:'warden'}),
+    take('abyss',-400,710,{district:'undercroft'}), take('delve',-200,710,{district:'undercroft'}),
+    take('arena',0,710,{district:'undercroft'}), take('gauntlet',200,710,{district:'undercroft'}),
+    take('sprint',400,710,{district:'undercroft'})
+  ].filter(Boolean);
+  if(old.arcade) G.hubNpcs.push(take('arcade',-400,835,{district:'undercroft'}));
+
+  // Solid shell. The south opening is the arrival gate; the northern wall is visually rebuilt by
+  // world3d around the campaign bays. Collision is intentionally simpler than the art.
+  G.walls.push({x:0,z:-635,w:1840,d:28,h:220,invisible:true});
+  G.walls.push({x:-910,z:110,w:28,d:1460,h:220,invisible:true},{x:910,z:110,w:28,d:1460,h:220,invisible:true});
+  G.walls.push({x:-560,z:880,w:700,d:28,h:220,invisible:true},{x:560,z:880,w:700,d:28,h:220,invisible:true});
+
+  // Strong floor language: gold arrival spine, cooler portal forecourt, warm market lane,
+  // disciplined Warden court and a dark activity threshold.
+  const floor=(x,z,w,d,c)=>G.deco.push({x,z,y0:0,w,h:1.5,d,c,kind:'citadelFloor',lead:true});
+  floor(0,155,150,1180,'#b18a50'); floor(0,-445,1620,190,'#665c58');
+  floor(-615,145,360,760,'#8b6945'); floor(615,145,360,760,'#70666a');
+  floor(0,705,1050,245,'#30273b'); floor(0,30,300,300,'#8b7652');
+
+  // Measured modular buildings. Their collision boxes and render specs are generated together.
+  const CELL=68, STOREY=102;
+  const building=(x,z,bw,bd,storeys,style,ry)=>{
+    const turned=Math.abs(Math.sin(ry||0))>.5, w=(turned?bd:bw)*CELL, d=(turned?bw:bd)*CELL, h=storeys*STOREY;
+    G.walls.push({x,z,w,d,h,invisible:true});
+    G.deco.push({x,z,y0:0,w,h,d,c:style==='brick'?'#a98470':'#c8b393',kind:'building',lead:true,bw,bd,storeys,style,ry:ry||0});
+    G.deco.push({x,z,y0:h,w:w+12,h:30,d:d+12,c:'#74372f',kind:'building',lead:false});
+  };
+  /* Service identities come from their counters, stalls, racks and banners. Four modular side
+     halls were tested here, but their kit backs read as enormous flat colour slabs across the
+     campaign skyline from arrival. Keep that sightline clean instead of shipping bad geometry. */
+  building(735,500,2,3,1,'plaster',-Math.PI/2);    // Mirror pavilion
+  building(500,500,2,3,1,'brick',-Math.PI/2);      // Sparring entry
+
+  // Curated dressing. Every entry has a colour fallback because the voxel renderer requires it.
+  const asset=(set,x,z,w,h,d,ry=0,c='#8c765c')=>G.deco.push({kind:'asset',set,x,z,y0:0,w,h,d,ry,c,lead:true});
+  asset('hubCart',-500,-185,90,58,130,Math.PI/2); asset('hubStall',-500,-40,120,80,70,Math.PI/2);
+  asset('hubWorkbench',-505,205,80,42,48,Math.PI/2); asset('hubWeaponRack',-510,310,62,55,45,Math.PI/2);
+  asset('hubBookcase',505,185,58,100,28,-Math.PI/2); asset('hubBench',500,335,105,28,34,-Math.PI/2);
+  asset('hubBannerQ',-690,-310,58,90,12,0,'#9f4138'); asset('hubBannerQ',690,-310,58,90,12,0,'#415b8f');
+  for(const x of [-400,-200,0,200,400]) asset('hubActivityArch',x,752,118,112,50,0,'#443951');
+  for(const x of [-520,-260,260,520]) asset('hubBench',x,120,92,28,32,x<0?-Math.PI/2:Math.PI/2);
+
+  // The Waystone gets breathing room and a recognizable pavilion silhouette without blocking
+  // the direct spawn-to-portals route.
+  for(const p of [[-125,-95],[125,-95],[-125,155],[125,155]]) G.deco.push({x:p[0],z:p[1],y0:0,w:26,h:126,d:26,c:'#c9b78f',kind:'column',lead:true,pillarH:126});
+  for(const p of [[-150,-120],[150,-120],[-150,180],[150,180]]) asset('hubLantern',p[0],p[1],32,92,32,0,'#6b5636');
+
+  // Living edges soften the fortress without turning the central court into another forest.
+  for(const p of [[-835,600],[-735,625],[735,625],[835,600],[-845,-400],[845,-400]])
+    G.deco.push({x:p[0],z:p[1],y0:0,w:72,h:118,d:72,c:'#496744',kind:'tree',lead:true,trunkH:28});
+
+  // Fixture collision follows the actual records, never a second hard-coded coordinate table.
+  const sizes={quartermaster:[90,55],chest:[54,44],anvil:[58,58],keeper:[52,52],drillmaster:[84,58],
+    beastkeeper:[58,58],board:[72,28],mirror:[70,28],sparring:[82,30],abyss:[64,38],delve:[64,38],
+    arena:[64,38],gauntlet:[64,38],sprint:[64,38],arcade:[66,46]};
+  G.walls.push({x:0,z:30,w:76,d:76,h:108,invisible:true});
+  for(const n of G.hubNpcs){ const s=sizes[n.id]||[58,58]; G.walls.push({x:n.x,z:n.z,w:s[0],d:s[1],h:108,invisible:true}); }
+  for(const g of G.gates) for(const s of [-1,1]) G.walls.push({x:g.x+s*31,z:g.z,w:15,d:26,h:112,invisible:true});
+
+  // A single harmless dummy stays outside the isolated Sparring Room as a damage checker.
+  { const d=spawnEnemy('dummy',440,350); d.dummy=true; d.active=true; d.dropT=0; d.range=true; }
+  G.torches=[{x:-760,z:-420,ph:1},{x:760,z:-420,ph:2},{x:-500,z:600,ph:3},{x:500,z:600,ph:4}];
+  G.startPos={x:0,z:500,y:0}; G.lastSafe={x:0,z:500,y:0}; G.goalPos={x:0,z:-520};
+  G.p.x=0; G.p.z=500;
+}
 function enterWaystation(){
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
@@ -14234,6 +14337,7 @@ function enterWaystation(){
                    bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
       G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
     } }
+  if(HUB_CITADEL) rebuildWaystationCitadel();
   /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
      exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
      replay, so a collider he deleted by hand stays deleted. */
@@ -16814,6 +16918,15 @@ function drawWaystation(t){
       { const num=(g.zi||0)+1, sp=5.2, pw=3; for(let i=0;i<num;i++) bx(g.x-((num-1)*sp)/2+i*sp, 62, g.z+7.6, pw,pw,1.2, '#ffd24a','#ffd24a',0.95); }
       continue; }
     const open=g.open, fill=open?(g.done?'#2f4a40':'#2a1c08'):'#181a22';
+    /* The Citadel's imported gatehouses already provide the full doorway silhouette. A second
+       42x78 voxel panel was magnified by the deferred compositor into skyline-sized colour slabs.
+       Reduce state to a narrow rune inside the arch: readable, animated, and never architecture. */
+    if(g.citadel){
+      bx(g.x,46,g.z+4, 7,50,5, open?(g.done?'#4be08a':'#e8a33d'):'#242630', open?(g.done?'#80ffc0':'#ffd070'):null, open?0.72:1);
+      if(open) for(let i=0;i<g.tier;i++) bx(g.x-((g.tier-1)*8)/2+i*8,94,g.z+9.2,4.4,4.4,1.4,'#ffd24a','#ffd24a',0.95);
+      if(g.done) bx(g.x,104,g.z+8,10,6,4,'#4be08a','#4be08a',0.9);
+      continue;
+    }
     bx(g.x,45,g.z, 42,78,6, fill, open?(g.done?'#4be08a':'#e8a33d'):null, open?(g.done?0.55+0.25*Math.sin(t*3+g.zi):0.30+0.18*Math.sin(t*2.6+g.zi)):1);
     if(open) for(let i=0;i<g.tier;i++) bx(g.x-((g.tier-1)*8)/2+i*8, 94, g.z+9.2, 4.4,4.4,1.4, '#ffd24a','#ffd24a',0.95);   // tier pips on the FRONT face of the top frame
     if(g.done){ bx(g.x,104,g.z+8, 10,6,4, '#4be08a','#4be08a',0.9);

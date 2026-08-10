@@ -118,6 +118,12 @@ const PROP_SETS = {
   hubLantern:  ['props/lightpost-single'],
   hubHedge:    ['town/hedge-large'],
   hubBanner:   ['town/banner-red'],
+  hubWorkbench:['qprops/Workbench'],
+  hubWeaponRack:['qprops/WeaponStand'],
+  hubBookcase: ['qprops/Bookcase_2'],
+  hubBench:    ['qprops/Bench'],
+  hubBannerQ:  ['qprops/Banner_1'],
+  hubActivityArch:['dungeon/gate-door'],
   /* THE SMITH'S ANVIL — the first of drawWaystation's FURNITURE to get a model, and the least
      invented cast in the file after the mimic: the game's own source comment calls the voxel one
      "BIGGER anvil on a stump" and the Quaternius prop kit ships an anvil on a stump under exactly
@@ -1374,6 +1380,35 @@ function hubPiece(setName, cells, place, colour){
   return cells.length;
 }
 
+/* District paving for the Citadel. The layout supplies broad colour fields, but one giant scaled
+   tile would smear the cobble texture. Sample them onto the same 68-unit lattice as the modular
+   village kit and let the last field win where districts overlap. */
+function buildCitadelFloors(world){
+  if(!world || world.hubLayout!=='citadel-v1') return 0;
+  const fields=(world.deco||[]).filter(d=>d&&d.kind==='citadelFloor');
+  const rec=_propCache.get(PROP_SETS.hubPave[0]);
+  if(!rec||!fields.length) return 0;
+  const cell=68, bins={}; let total=0;
+  for(let x=-884+cell/2;x<884;x+=cell) for(let z=-612+cell/2;z<884;z+=cell){
+    let hit=null;
+    for(const f of fields) if(Math.abs(x-f.x)<=f.w/2&&Math.abs(z-f.z)<=f.d/2) hit=f;
+    if(!hit) continue;
+    (bins[hit.c]||(bins[hit.c]=[])).push({x,z}); total++;
+  }
+  for(const colour in bins){
+    const cells=bins[colour], material=rec.mat.clone();
+    material.color=new THREE.Color(colour);
+    const mesh=new THREE.InstancedMesh(rec.geo,material,cells.length), o=new THREE.Object3D();
+    for(let i=0;i<cells.length;i++){
+      const c=cells[i], s=cell/rec.width;
+      o.position.set(c.x,2.2,c.z); o.rotation.set(0,((hash(c.x,c.z)*4)|0)*Math.PI/2,0); o.scale.set(s,1,s);
+      o.updateMatrix(); mesh.setMatrixAt(i,o.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate=true; mesh.frustumCulled=false; mesh.renderOrder=-0.5; group.add(mesh);
+  }
+  return total;
+}
+
 /* Read the hub's building specs off the game's own deco. buildHub otherwise ignores deco entirely
    and derives everything from G.gates, but a building has to agree with a collision box, and the
    only place that pairing can be authored honestly is next to the box itself. */
@@ -1390,19 +1425,20 @@ function hubBuildingSpecs(world){
 function buildHub(scene, world){
   const gates = (world.gates || []).filter(g => !g.side);
   if(!gates.length) return null;
+  const citadel=world.hubLayout==='citadel-v1';
 
   const gx = gates.map(g => g.x);
-  const westX = Math.min(...gx) - 190, eastX = Math.max(...gx) + 190;
-  const northZ = Math.min(...gates.map(g => g.z)) - 40;   // the rampart line, just behind the gates
-  const southZ = northZ + 1180;                            // courtyard depth
+  const westX = citadel ? -910 : Math.min(...gx) - 190, eastX = citadel ? 910 : Math.max(...gx) + 190;
+  const northZ = Math.min(...gates.map(g => g.z)) - (citadel ? 48 : 40);
+  const southZ = citadel ? 880 : northZ + 1180;
 
-  const wallH = 150;                                       // matches the old rampart height
+  const wallH = citadel ? 122 : 150;
   const counts = {};
 
   /* NORTH RAMPART, with a gatehouse at every portal. Gate openings are skipped from the plain
      wall run so a doorway piece can sit exactly on the portal - that is what makes each
      destination read as a real entrance instead of a hole in a fence. */
-  const gateHalf = 92;
+  const gateHalf = citadel ? 68 : 92;
   const wallCells = [], gateCells = [];
   for(let x = westX; x < eastX; x += HUB_UNIT){
     const cx = x + HUB_UNIT / 2;
@@ -1410,7 +1446,7 @@ function buildHub(scene, world){
     if(onGate) continue;
     wallCells.push({ x: cx, z: northZ, rot: 0 });
   }
-  for(const g of gates) gateCells.push({ x: g.x, z: northZ, rot: 0 });
+  for(const g of gates) gateCells.push({ x: g.x, z: citadel ? g.z : northZ, rot: 0 });
 
   /* SIDE WALLS running south, closing the courtyard so it feels like a place rather than a
      clearing. Left open at the south end - that is where the player spawns and walks in. */
@@ -1441,10 +1477,10 @@ function buildHub(scene, world){
      no model of its own; it needs the voxel copy to stop drawing, which `counts.tower` licenses on
      the index.html side. Move these cells and that stops being true. */
   const towerCells = [{ x: westX, z: northZ }, { x: eastX, z: northZ }];
-  for(let i = 0; i < gates.length - 1; i++)
+  if(!citadel) for(let i = 0; i < gates.length - 1; i++)
     towerCells.push({ x: (gates[i].x + gates[i + 1].x) / 2, z: northZ });
 
-  const tw = 150;
+  const tw = citadel ? 126 : 150;
   counts.tower = hubPiece('hubTower', towerCells, (o, c, rec) => {
     const s = tw / rec.width;
     o.position.set(c.x, 0, c.z);
@@ -1534,6 +1570,7 @@ function buildHub(scene, world){
     group.add(m);
     counts.pave = paveCells.length;
   }
+  counts.citadelFloor=buildCitadelFloors(world);
 
   /* PLAZA DRESSING. Placed relative to the courtyard's own bounds rather than fixed coordinates,
      so it follows if the gates ever move.
@@ -1545,7 +1582,7 @@ function buildHub(scene, world){
   /* Lanterns down both sides of the approach - they line the route to the portals, which is the
      one piece of wayfinding a new player needs. */
   const lanterns = [];
-  for(let z = northZ + 210; z < southZ - 120; z += 210){
+  if(!citadel) for(let z = northZ + 210; z < southZ - 120; z += 210){
     lanterns.push({ x: midX - laneHalf, z });
     lanterns.push({ x: midX + laneHalf, z });
   }
@@ -1559,7 +1596,7 @@ function buildHub(scene, world){
 
   /* A market row along each side wall: carts, stalls and hedges, well clear of the lane. */
   const carts = [], stalls = [], hedges = [];
-  for(let i = 0; i < 5; i++){
+  if(!citadel) for(let i = 0; i < 5; i++){
     const z = northZ + 300 + i * 190;
     carts.push({ x: westX + 150, z, rot: 1.5708 });
     stalls.push({ x: eastX - 150, z, rot: -1.5708 });

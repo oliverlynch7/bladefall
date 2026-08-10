@@ -1,6 +1,6 @@
 # Waystation Citadel preview verification
 
-Version: `1.903.0-hub-citadel-autopilot`
+Version: `1.904.0-hub-citadel-autopilot`
 
 - Re-authored the Waystation as a 1,840 x 1,540 continuous citadel instead of preserving the cramped legacy ring.
 - Established a direct arrival-to-campaign axis, an eight-gate campaign cloister, Market Lane, Warden Court, and a separate activity undercroft.

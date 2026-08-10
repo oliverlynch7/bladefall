@@ -28,12 +28,22 @@ const RULES = [
    arc" and "+35% damage for 6s" are indistinguishable to a keyword match. */
 const DEALS = /\bdeal|\bdamaging\b|\bstrike|\bslash|\bblast|x\s*damage|\bdamage\s*(\+|in|to|around|all)/i;
 
+/* Damage the skill SOAKS is not damage it DEALS. The Necromancer's Bone Wall is "Raise a shield of
+   bone that absorbs damage" - it works perfectly, and the first version of this parser failed it
+   for not hurting anything. A defensive sense with no active verb means no damage claim. */
+const DEFENSIVE = /\babsorb|\bresist|\breduce|\bincoming|\btaken?\b|\bmitigat|\bblock/i;
+
+/* "Raise a shield" is not a summon. Only the raising of THINGS THAT FIGHT is. */
+const RAISED_OBJECT = /\brais(e|ing)\s+(a\s+|an\s+|the\s+)?(shield|wall|barrier|ward|guard)/i;
+
 export function claimsOf(d){
   const s = String(d || '');
   const isBuff = RULES[0][1].test(s);
+  const deals = DEALS.test(s);
   const out = [];
   for(const [name, re] of RULES){
-    if(name === 'damage' && isBuff && !DEALS.test(s)) continue;
+    if(name === 'damage' && !deals && (isBuff || DEFENSIVE.test(s))) continue;
+    if(name === 'summon' && RAISED_OBJECT.test(s) && !/\bsummon|\bminion|\bskeleton|\bcorpse/i.test(s)) continue;
     if(re.test(s)) out.push(name);
   }
   return out;

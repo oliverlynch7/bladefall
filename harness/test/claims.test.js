@@ -19,10 +19,11 @@ test('a buff that mentions damage is NOT a damage claim', () => {
   assert.deepStrictEqual(claimsOf('+35% damage and attack speed for 6s'), ['buff']);
 });
 
-test('heal and shield are distinguished', () => {
+test('heal and shield are distinguished, and soaked damage is not dealt damage', () => {
   assert.deepStrictEqual(claimsOf('Restore 40 health to yourself'), ['heal']);
-  assert.deepStrictEqual(claimsOf('Absorb the next 80 damage with a shield').sort(),
-                         ['damage', 'shield']);
+  /* This expectation was originally ['damage','shield'], which was me writing the bug into the
+     test: a shield that absorbs 80 damage deals none. */
+  assert.deepStrictEqual(claimsOf('Absorb the next 80 damage with a shield'), ['shield']);
 });
 
 test('a summon', () => {
@@ -33,4 +34,15 @@ test('an unparseable description claims nothing rather than guessing', () => {
   assert.deepStrictEqual(claimsOf('A mysterious technique'), []);
   assert.deepStrictEqual(claimsOf(''), []);
   assert.deepStrictEqual(claimsOf(undefined), []);
+});
+
+/* Real text from the Necromancer's Bone Wall. The first parser failed this skill twice - once for
+   'Raise' (it is a shield, not a summon) and once for 'absorbs damage' (damage soaked, not dealt)
+   - while the skill worked perfectly, shield 0 -> 187. Two false failures from one description. */
+test('a shield that absorbs damage claims neither summon nor damage', () => {
+  assert.deepStrictEqual(claimsOf('Raise a shield of bone that absorbs damage'), ['shield']);
+});
+
+test('a real summon still reads as one', () => {
+  assert.deepStrictEqual(claimsOf('Raise a skeleton to fight for you').sort(), ['summon']);
 });

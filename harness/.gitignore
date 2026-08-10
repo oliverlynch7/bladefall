@@ -2,3 +2,8 @@ node_modules/
 out/*.json
 out/REPORT.md
 !out/.gitkeep
+
+# Written by every gate run. Tracking it means run 2 starts on a dirty tree and
+# autopilot.ps1 skips forever with "tracked files modified" - a silent deadlock.
+# baseline.json IS tracked on purpose: it only changes when the known-failure set does.
+report.json

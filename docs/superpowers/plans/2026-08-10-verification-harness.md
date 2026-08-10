@@ -8,6 +8,21 @@
 
 **Tech Stack:** Node 26 (built-in test runner `node --test`, built-in `WebSocket`), headless Chrome over the DevTools Protocol via the existing `shot.js`. No npm install — this machine has no resolvable playwright/puppeteer and an unattended run cannot install one.
 
+## Status (from git, not from memory)
+
+| Task | State | Commit |
+|---|---|---|
+| 1 shared driver | done | `7725819` |
+| 2 claim parser | done | `c35333d` |
+| 3 skill tester | done | `2a86ea0`, `d7c50de` |
+| 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
+| 5 multiplayer tester | not started | — |
+| 6 aggregate gate | done | in `34262a6`; baselines instead of pass/fail, see the file |
+| 7 autopilot guards | done | `34262a6`, `a3e999c` |
+| 8 re-enable the schedule | not started | — |
+
+**Next task is 5 (the multiplayer tester).**
+
 ## Corrections from execution
 
 Tasks 1 and 2 are DONE. Two things this plan assumed and got wrong, found by running it. Later
@@ -24,6 +39,23 @@ tasks must use the corrected form.
    form is a file list: `node --test harness/test/*.test.js`. `run-all.js` must enumerate
    `harness/test/*.test.js` with `readdirSync` and pass explicit paths, since it cannot rely on
    shell globbing.
+
+3. **A PROBE BELONGS IN A FILE, NOT ON A COMMAND LINE** (found in Task 4). `shot.js` now takes
+   `--eval @path` and `--pre @path`. Two things forced it: a probe long enough to be interesting
+   is long enough for a shell to mangle, and a probe that exists both inside a harness module and
+   in the command you typed will be edited in one place only — after which two runs measure two
+   different things while both calling it "the level probe". `harness/probes/level.probe.js` is
+   the file `test-levels.js` reads, so they cannot diverge.
+
+4. **THE PLAN'S WALKER CANNOT PASS A LEVEL THIS GAME SHIPS** (found in Task 4). Steering at the
+   goal and jumping when stuck walks The Outskirts — the zone Oliver has playtested for weeks —
+   into the first void. Two reasons, both the level design working as intended: main levels
+   BRANCH (the Outskirts' centre is empty at z −1000 and the route is a corridor at |x| ≈ 500
+   that rejoins 1000 units later), and **every campaign area ends on an island you must jump AND
+   DASH to** — `dashGate()` is called from `finishScape` for all of them and moves the exit
+   across a ~195-unit void deliberately. Measured on the real body: a running jump carries **138**
+   units, a jump plus an air dash **216**. Any walker that does not dash reports all sixteen areas
+   as ending in an impassable gap.
 
 ## Global Constraints
 
@@ -432,9 +464,15 @@ git commit -m "harness: assert every skill does what its description claims"
 - Consumes: `runScenario` from `harness/drive.js`.
 - Produces: `runLevelTests() -> Promise<{ pass:number, fail:number, failures:Array<{zone,area,check,detail}> }>`
 
-- [ ] **Step 1: Write the tester**
+- [x] **Step 1: Write the tester** — shipped as `harness/test-levels.js` + `harness/probes/level.probe.js`.
 
-Create `harness/test-levels.js`:
+The code below is the PLAN's version and is kept only for the diff. What shipped differs in four
+ways, all forced by running it: it reaches area 1 with `--scene <zone>.<area>` (the game's own
+`nextArea()`) instead of the unsupported `G.area=1; loadStage()`; it indexes ZONES, not stages
+(zone 1 is stage 3 — the plan's list would have tested the last zone twice and missed three);
+it does both halves in one browser launch (16 launches, not 32); and it plans a route over the
+level's walkable surface and then dashes across the exit gate, because the straight-line walker
+below cannot finish any campaign area. See corrections 3 and 4 above.
 
 ```js
 /* Can this level actually be finished?
@@ -529,28 +567,57 @@ if(require.main === module){
 }
 ```
 
-- [ ] **Step 2: Validate against a known-bad case**
+- [x] **Step 2: Validate against a known-bad case**
 
-Temporarily revert the underside fix so Duskmoor becomes unclimbable again, then run the walker on stage 7:
-
-```bash
-git stash list   # confirm nothing is stashed you care about
-node harness/test-levels.js 2>&1 | grep Duskmoor
-```
-
-Expected: `FAIL Castle Duskmoor area0 walkable: {"ok":false,"why":"stuck",...}`. If it reports Duskmoor as walkable while the fix is reverted, the walker is wrong and must be fixed before it is trusted. Restore the fix afterwards.
-
-- [ ] **Step 3: Run the full pass**
-
-Run: `node harness/test-levels.js`
-Expected: a per-zone report. Record which zones and quests fail — that is the sub-project C backlog.
-
-- [ ] **Step 4: Commit**
+Done, but NOT by reverting the underside fix — a known-bad you have to break the repo to produce
+is a known-bad nobody re-runs. The probe carries its own, permanently:
 
 ```bash
-git add harness/test-levels.js
-git commit -m "harness: assert every level is walkable end to end and its quests are satisfiable"
+node _shot/shot.js --scene 0.0 --url "/3d/index.html?hero3d=1&world3d=1&nobloom&breakgap=240" \
+     --eval @harness/probes/level.probe.js
 ```
+
+`?breakgap=<n>` widens the exit void by n units. At +240 the walker correctly reports the level
+impassable (`the body could not follow any route`, remaining 220); unbroken it walks the same
+level end to end (2305 / 2308 / 2317 ticks over three runs, 144 jumps, 29 dashes). Both
+directions proven, and reproducible by anyone in one command.
+
+- [x] **Step 3: Run the full pass** — all 8 zones × 2 areas, and it found five uncompletable levels
+
+**Completability: 5 of 16 areas could not be finished, and every one is a `find` or
+`fetch:placed` objective in a TERRAIN_ZONES zone.** Those branches build their terrain and
+`return` before reaching the hand-authored body that calls `scapeFind()` / `scapeFetch()`, so the
+quest is shown in the tracker with nothing in the world to satisfy it — `areaClear()` never goes
+true, `openWay()` never fires, the exit never opens. Zero provisioned, every time, not a near
+miss:
+
+| Area | Objective | Had |
+|---|---|---|
+| The Dry Wash (1.1) | `hp2` Recover 5 Sun-Bleached Bones | 0 of 5 |
+| The Dry Wash (1.1) | `hp3` Find the Hollow Shrine | none |
+| The Rime Shelf (3.1) | `ff3` Find the Frostwatch Cairn | none |
+| Emberdeep (4.0) | `ed2` Find the Ash Altar | none |
+| The Hollow Deep (5.1) | `ab3` Find the Rift Anchor | none |
+| The Long Ascent (7.1) | `ct3` Find the Sunken Records | none |
+
+Zones 0, 2 and 6 are hand-authored and all of their objectives are provisioned, which is what
+makes the correlation exact rather than suggestive. **Fixed in `8dcc77f`** with a `questBackstop()`
+next to `questMarks()` — one place, every EXPANDED_SCAPES level, adds only what is missing.
+Verified fixed on all five and unchanged on all three hand-authored controls.
+
+**Traversal: recorded, never accused.** A walk that succeeds is counted; one that fails is
+`unproven`. The walker completes The Outskirts but not the Black Woods, whose exit void has two
+22-wide pillars in it and exactly one crossing — a limit of the navigator, not a fault in a level
+people play daily. `test-levels.js` states the bar for promoting these to real failures so it
+cannot drift.
+
+**Left for Oliver (balance, so not touched):** the terrain zones build no dens, so their kill
+quests are served by whoever is standing there. That population turns over as you watch — four
+probes of Emberdeep read 11, 11, 7 and 8 magmaskit and 1, 1, 10 and 5 ember totems, total pinned
+at 52 every time. A live head-count is a snapshot, not a supply. Adding dens settles it and
+changes how hard the level fights back.
+
+- [x] **Step 4: Commit** — `8a8f766` (tester + probe + `--eval @file`), `8dcc77f` (the game fix)
 
 ---
 

@@ -53,7 +53,23 @@ export function parseEval(stdout){
   return v;
 }
 
-export function runScenario(opts){
+/* ONE RETRY ON AN EMPTY RUN.
+
+   The first full pass launched sixteen browsers back to back and thirteen of them came back with
+   no output at all - not a game error, no EVAL line, nothing. That was recorded as thirteen broken
+   CLASSES, which is exactly the kind of confident wrong answer this harness exists to prevent: a
+   flaky launch must not be indistinguishable from a real finding. A run that produces no output is
+   retried once; a run that produces a real page error is not, because that is a genuine result. */
+export async function runScenario(opts){
+  try { return await runOnce(opts); }
+  catch(e){
+    if(!/no EVAL in harness output|scenario timed out/.test(e.message)) throw e;
+    await new Promise(r => setTimeout(r, 4000));
+    return runOnce(opts);
+  }
+}
+
+function runOnce(opts){
   const o = opts || {};
   const runner = ensureRunner();
   const args = [runner, '--out', join(RUNDIR, 'out', 'harness.png'),

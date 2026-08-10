@@ -1,0 +1,139 @@
+{
+  "at": "2026-08-10T20:14:08.894Z",
+  "suites": {
+    "unit": {
+      "pass": 1,
+      "fail": 0,
+      "failures": []
+    },
+    "skills": {
+      "pass": 13,
+      "fail": 15,
+      "failures": [
+        {
+          "cls": "warrior",
+          "skill": "Charge",
+          "claim": "damage",
+          "text": "Rush forward, damaging and stunning enemies in your path",
+          "detail": "{\"before\":{\"tgt\":100000,\"hp\":239,\"minions\":0,\"shield\":0},\"after\":{\"tgt\":100000,\"hp\":249,\"minions\":0,\"shield\":0},\"onCd\":true}"
+        },
+        {
+          "cls": "mage",
+          "skill": "Nova",
+          "claim": "damage",
+          "text": "A freezing burst: damage + slow all around you",
+          "detail": "{\"before\":{\"tgt\":100000,\"hp\":239,\"minions\":0,\"shield\":0},\"after\":{\"tgt\":100000,\"hp\":239,\"minions\":0,\"shield\":0},\"onCd\":true}"
+        },
+        {
+          "cls": "reaper",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "paladin",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "necromancer",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "ninja",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "berserker",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "pirate",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "chronomancer",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "monk",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "stormcaller",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "warlock",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "skylancer",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "bladedancer",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        },
+        {
+          "cls": "beastmaster",
+          "skill": "(class)",
+          "claim": "load",
+          "text": "",
+          "detail": "no EVAL in harness output:\n"
+        }
+      ],
+      "unproven": [],
+      "baseline": {
+        "ok": true,
+        "dealt": 426,
+        "ticks": 0
+      }
+    },
+    "levels": {
+      "skipped": true,
+      "pass": 0,
+      "fail": 0,
+      "failures": []
+    },
+    "mp": {
+      "skipped": true,
+      "pass": 0,
+      "fail": 0,
+      "failures": []
+    }
+  }
+}

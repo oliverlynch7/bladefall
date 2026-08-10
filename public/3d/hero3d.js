@@ -1539,9 +1539,15 @@ export function drawHero3D(p, t){
      attempt at this - clearWeapon walks actor.root, and the scene has no .root. Every other caller
      wraps it the same way; this now matches them.
      _reArming guards against re-entry: equipWeapon is async and this runs every frame. */
+  /* LOCAL PLAYER ONLY. The rig is shared - there is one actor - so once multiplayer started drawing
+     several heroes per frame, an ally holding a different weapon would swap the model, then you
+     would swap it back, every single frame, kicking off an async equipWeapon reload each time.
+     Allies therefore show YOUR weapon model rather than their own, which is a known cosmetic
+     limitation of one rig and is the right trade against a permanent reload thrash. */
+  const _isLocal = !!(window.__BF3 && window.__BF3.G && p === window.__BF3.G.p);
   try {
     const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
-    if(actor && HERO3D.ready && !_reArming && (a !== _lastArt || r !== _lastRar)){
+    if(_isLocal && actor && HERO3D.ready && !_reArming && (a !== _lastArt || r !== _lastRar)){
       _lastArt = a; _lastRar = r;
       if(modelForWeapon(w)){
         _reArming = true;

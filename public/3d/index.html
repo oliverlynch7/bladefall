@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.902.0-slab-editor';
+const VERSION3D='1.903.0-mp-visible';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3419,9 +3419,13 @@ function flushDeferred(){
    which is the correct trade. Inside the pass they were simply erased; and bloom on a lit,
    textured character tends to wash it out anyway - the effect exists for the voxel game's glowing
    gems and embers, which still get it. */
+/* Each queued hero costs a full renderer.render, so the queue is capped rather than unbounded - a
+   crowded lobby must not turn into a frame-rate cliff. Six covers you plus five allies, which is
+   past anything the lobby supports. The LOCAL hero never counts against it. */
+const HERO3D_MAX = 6;
 function flushHero3D(){
-  if(!(window.__hero3dPending && window.drawHero3D)) return;
   const q = window.__hero3dPending; window.__hero3dPending = null;
+  if(!(q && q.length && window.drawHero3D)) return;
   /* Clear DEPTH only, never colour. PostFX.end() composites a fullscreen quad, which leaves the
      depth buffer filled at the quad's depth - so the 3D layer drew correctly and was then
      rejected by the depth test, appearing to vanish entirely. Colour must survive: it holds the
@@ -3432,7 +3436,10 @@ function flushHero3D(){
      can show a character through a voxel wall. */
   gl.depthMask(true);
   gl.clear(gl.DEPTH_BUFFER_BIT);
-  window.drawHero3D(q[0], q[1]);
+  /* One depth clear for the whole group, then each body in turn. renderer.autoClear is false - the
+     game owns clearing - so successive render() calls COMPOSITE instead of wiping, and Three keeps
+     its own depth internally, so two heroes occlude each other correctly. */
+  for(let i = 0; i < q.length; i++) window.drawHero3D(q[i][0], q[i][1]);
 }
 function flushBatch(){
   /* The 3D layer is NOT drawn here any more - see flushHero3D(), called after PostFX.end().
@@ -16373,7 +16380,22 @@ function drawHero3(p,t,preview){
     /* The game QUEUES boxes and flushes them in a few instanced draws, so rendering the 3D
        hero here would be painted over by the flush that follows. Instead mark it pending and
        let flushBatch draw it once the world's batch has actually gone to the GPU. */
-    if(window.HERO3D.ready){ window.__hero3dPending = [p, t]; return; }
+    /* A QUEUE, not a slot. This was `window.__hero3dPending = [p,t]` - a single assignment - and
+       flushHero3D drew whatever was in it, so the 3D layer could render exactly ONE character per
+       frame. Single-player never noticed. Multiplayer did, immediately and symmetrically:
+       index.html draws the local hero (18112) and THEN MP.drawPeers (18114), so every ally
+       overwrote you and the only body left to draw was theirs. Oliver, on joining a PvP match:
+       "I turned invisible on my screen, but I could see him, and the same happened for him."
+
+       The local hero goes to the FRONT and is never subject to the cap, because whatever else gets
+       dropped it must never again be you - being unable to see your own character is the one
+       failure that makes the game unplayable rather than merely wrong. */
+    if(window.HERO3D.ready){
+      const Q = (window.__hero3dPending = window.__hero3dPending || []);
+      if(G && p === G.p) Q.unshift([p, t]);
+      else if(Q.length < HERO3D_MAX) Q.push([p, t]);
+      return;
+    }
     /* E4: THE VOXEL FLASH. While the 3D layer is on but still loading, this fell through and drew
        the VOXEL hero - so every level load showed the old blocky character for a moment before the
        real one appeared. Drawing NOTHING for those frames is right: the hero is at the centre of

@@ -28,6 +28,7 @@
      node _shot/shot.js --scene abyss:13                 #   abyss:<floor> — stage rotates every 2 floors
      node _shot/shot.js --scene sprint                   #   the floating parkour course
      node _shot/shot.js --scene gauntlet                 #   gauntlet:normal|brutal (boss rush)
+     node _shot/shot.js --eval @harness/probes/level.probe.js   # a long probe, from its own file
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
      node _shot/shot.js --focus "0,0,-5600" --dist 260 --side 40  # ...or at a bare x,y,z
@@ -162,7 +163,20 @@ const unmangle = (u) => {
 const URLPATH = unmangle(arg('url', '/3d/index.html?hero3d=1&world3d=1&nobloom'));
 const OUT = path.resolve(ROOT, arg('out', '_shot/out/shot.png'));
 const WAIT = parseInt(arg('wait', '9000'), 10);
-const EVAL = arg('eval', null);
+/* `--eval @path` / `--pre @path` read the expression from a FILE instead of the command line.
+   A probe long enough to be interesting is long enough to be mangled: Git Bash rewrites anything
+   that looks like a unix path, PowerShell and sh disagree about quotes and backticks, and a probe
+   pasted into a shell is a probe with no single source of record - the harness module that owns it
+   and the command you typed drift apart, and then two runs measure two different things while both
+   calling it "the level probe". A file is the same text every time.
+   Relative to the repo root, not to _shot/, because that is where the probes are committed. */
+const fromFileMaybe = (v) => {
+  if (typeof v !== 'string' || v[0] !== '@') return v;
+  const p = path.resolve(ROOT, v.slice(1));
+  if (!fs.existsSync(p)) { console.log('!! --eval/--pre @' + v.slice(1) + ' does not exist (looked at ' + p + ')'); process.exit(1); }
+  return fs.readFileSync(p, 'utf8');
+};
+const EVAL = fromFileMaybe(arg('eval', null));
 const PREWAIT = parseInt(arg('prewait', '3500'), 10);
 const [W, H] = arg('size', '1280x720').split('x').map(Number);
 
@@ -305,7 +319,7 @@ const sceneJs = (dest) => {
   }, 2500);
 })()`;
 };
-const PRE = arg('pre', SCENE == null ? null : sceneJs(SCENE));
+const PRE = fromFileMaybe(arg('pre', SCENE == null ? null : sceneJs(SCENE)));
 
 /* Poll until this expression is truthy, THEN screenshot. Defaults with --scene to "world3d has
    finished building THIS destination", which is the thing that is silently slow.

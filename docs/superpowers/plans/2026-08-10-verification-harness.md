@@ -8,6 +8,23 @@
 
 **Tech Stack:** Node 26 (built-in test runner `node --test`, built-in `WebSocket`), headless Chrome over the DevTools Protocol via the existing `shot.js`. No npm install — this machine has no resolvable playwright/puppeteer and an unattended run cannot install one.
 
+## Corrections from execution
+
+Tasks 1 and 2 are DONE. Two things this plan assumed and got wrong, found by running it. Later
+tasks must use the corrected form.
+
+1. **`harness/` is ESM.** `harness/package.json` declares `"type": "module"`, so every file here
+   uses `import`/`export`, not `require`. The plan's CommonJS snippets in Tasks 3–6 must be
+   converted. Consequently `harness/shot.js` — which is CommonJS — **cannot be run where it
+   lives**; `node harness/shot.js` dies on its own first `require`. It only runs from `_shot/`,
+   which carries `"type": "commonjs"`. `drive.js` exports `ensureRunner()` which copies it there,
+   comparing by CONTENT not mtime, because a checkout stamps every file with the same time.
+
+2. **`node --test <dir>` fails on Windows** — it treats the directory as a test file. The working
+   form is a file list: `node --test harness/test/*.test.js`. `run-all.js` must enumerate
+   `harness/test/*.test.js` with `readdirSync` and pass explicit paths, since it cannot rely on
+   shell globbing.
+
 ## Global Constraints
 
 - No new runtime dependencies. Nothing that needs `npm install`.

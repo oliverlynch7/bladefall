@@ -88,6 +88,19 @@ async function main(){
   for(const id of fixed) console.log('FIXED: ' + id);
 
   if(fresh.length){ console.log(`GATE: FAIL (${fresh.length} new)`); process.exit(1); }
+
+  /* THE BASELINE HAS TO SHRINK, or the header above is a lie and this is a ratchet with no pawl.
+     A fixed failure that stays in the file is a licence to break it again in a later run and be
+     told the gate is green. Only ids from suites that actually RAN are dropped: a suite that was
+     skipped - because its file does not exist yet, which is the normal state while the plan is
+     still being built - must not have its known failures quietly forgotten and then re-reported
+     as regressions the day it comes back. */
+  if(fixed.length){
+    const ran = new Set(Object.entries(report.suites).filter(([, s]) => !s.skipped).map(([k]) => k));
+    const kept = [...known].filter(id => !ran.has(id.slice(0, id.indexOf(':'))));
+    writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: [...new Set([...kept, ...now])] }, null, 2));
+    console.log(`baseline: ${known.size} → ${new Set([...kept, ...now]).size}`);
+  }
   console.log(`GATE: PASS (${now.size} known, ${fixed.length} newly fixed)`);
   process.exit(0);
 }

@@ -14,7 +14,7 @@
    in the arena because the arena's own reset does not create it. A probe that reads undefined and
    compares it to undefined reports every skill as passing. */
 import { runScenario } from './drive.js';
-import { claimsOf } from './claims.js';
+import { claimsOf, conditionOf } from './claims.js';
 
 /* THE RIG MUST PROVE ITSELF FIRST.
 
@@ -129,9 +129,14 @@ export async function runSkillTests(opts){
           continue;                                    // the bench cannot see damage; do not accuse
         }
         const ok = SATISFIED[c] ? SATISFIED[c](r.before, r.after, r) : true;
-        if(ok) pass++;
-        else failures.push({ cls, skill: r.n, claim: c, text: r.d,
-                             detail: JSON.stringify({ before: r.before, after: r.after, onCd: r.onCd }) });
+        if(ok){ pass++; continue; }
+        /* An effect this bench cannot produce is not a broken skill. Checked only when the claim
+           has already come out unsatisfied, so a conditional skill that works anyway still passes
+           on its own merits rather than being excused. */
+        const why = conditionOf(r.d);
+        if(why){ unproven.push({ cls, skill: r.n, claim: c, text: r.d, detail: why }); continue; }
+        failures.push({ cls, skill: r.n, claim: c, text: r.d,
+                        detail: JSON.stringify({ before: r.before, after: r.after, onCd: r.onCd }) });
       }
     }
   }

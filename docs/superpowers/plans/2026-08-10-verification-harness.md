@@ -16,12 +16,13 @@
 | 2 claim parser | done | `c35333d` |
 | 3 skill tester | done | `2a86ea0`, `d7c50de` |
 | 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
-| 5 multiplayer tester | not started | — |
+| 5 multiplayer tester | **done** | this run; the plan's probe was a tautology, see correction 5 |
 | 6 aggregate gate | done | in `34262a6`; baselines instead of pass/fail, see the file |
 | 7 autopilot guards | done | `34262a6`, `a3e999c` |
 | 8 re-enable the schedule | not started | — |
 
-**Next task is 5 (the multiplayer tester).**
+**Next task is 8 (re-enable the schedule).** It is the only one left, and step 2 sets a cadence —
+a scheduling decision on Oliver's own machine — so read its note before running it unattended.
 
 ## Corrections from execution
 
@@ -56,6 +57,16 @@ tasks must use the corrected form.
    across a ~195-unit void deliberately. Measured on the real body: a running jump carries **138**
    units, a jump plus an air dash **216**. Any walker that does not dash reports all sixteen areas
    as ending in an impassable gap.
+
+5. **THE PLAN'S MULTIPLAYER PROBE IS A TAUTOLOGY** (found in Task 5). Task 1's step 1 below writes
+   `window.__hero3dPending = [[G.p,0],[peerA,0],[peerB,0]]` and then asserts that it is an array of
+   three with the local hero at the front. It is asserting the shape of a value it just wrote, so
+   it passes **identically on the broken build** — the fault was in the code that FILLS the queue,
+   which that probe never runs. Measured: the shipped probe reports the single-slot build as
+   `drawn 1, localFirst false`; the plan's version cannot report anything but a pass.
+   The general form, worth carrying into every later suite: **a probe that supplies the state it
+   then measures has tested nothing.** Drive the game's own path and count what came out the far
+   end.
 
 ## Global Constraints
 
@@ -312,6 +323,47 @@ Expected: PASS, 6 tests.
 git add harness/claims.js harness/test/claims.test.js
 git commit -m "harness: parse what a skill's description actually promises"
 ```
+
+#### Task 2 was wrong about ELEVEN skills, and only the first full run could say so
+
+Read this before trusting any keyword parser again. The parser passed its own unit tests — the ones
+in this plan, written from descriptions the plan INVENTED — and then `run-all` measured the real
+game and reported **fifteen** failing skills. Eleven of them were the parser, not the game. Each is
+now pinned as a test carrying the exact string from `harness/report.json`:
+
+| Skill | Its own text | What the parser did | What the skill actually did |
+|---|---|---|---|
+| paladin/Guard Up | "Raise **a holy** shield that absorbs damage" | claimed `summon` | shielded 0 → 239 |
+| warlock/Shadow Bolt | "…a sliver of your heal**th**" | claimed `heal` | landed its damage |
+| ninja/Blade Fury, berserker/Berserk | "**+damage** and attack speed **for a few seconds**" | claimed `damage` | buffed |
+| monk/Stillness | "**more damage** and speed" | claimed `damage` | buffed |
+| warlock/Curse Circle | "so your spells **hit** them harder" | claimed `damage` | marked |
+| beastmaster ×4 | "your **companion**…" | claimed `summon` | commanded the pet it already has |
+| pirate/Cannonade | "Mark foes to explode **on death**" | claimed `damage` | unobservable — see 4 below |
+
+Four failure modes, and not one of them is a spelling mistake:
+
+1. **A prefix match is not a word match.** `\bheal` matches "health" — the opposite meaning, since
+   that skill SPENDS health. Endings are enumerated now (`\bheal(s|ed|ing)?\b`) rather than left
+   open.
+2. **The rule only knew the form the plan happened to write.** The buff rule recognised
+   "+35% … for 6s" because that is the string this plan invented for its own test. The game writes
+   "+damage … for a few seconds" and "more damage and speed". **A parser tested only against
+   examples written by the parser's author has been tested against nothing.**
+3. **A noun is not a verb.** `companion` names a pet the Beastmaster starts with, so four skills
+   that command it were reported as summoning nothing. Three measurably work — Sic 'Em dealt 212,
+   Mend the Pack healed 24, Apex Unleashed did both — and the report called all four broken.
+4. **Some claims this bench cannot observe at all.** `conditionOf()` is new and deliberately
+   separate from `claimsOf()`: it answers "could this rig ever SEE that?", and an unsatisfied claim
+   that has a condition goes to `unproven` instead of `failures`. Cannonade's payload fires when
+   the target dies, and the dummy is given 100000 HP precisely so that nothing dies mid-measurement.
+
+**Why this mattered more than eleven wrong lines.** The gate baselines its known failures, so the
+first run's report is the ruler every later run is measured against — noise recorded there is noise
+enforced forever. And at 11 of 15, the four candidates that may be real (warrior/Charge, mage/Nova,
+reaper/Soul Harvest, paladin/Taunt — Oliver's actual complaint) were a minority of their own report.
+
+The eight tests that existed before still pass unchanged, so nothing was loosened into silence.
 
 ---
 
@@ -632,7 +684,57 @@ changes how hard the level fights back.
 
 Scope, stated so nobody mistakes it for more than it is: this proves the RENDER path draws every queued hero, which is the bug that made Oliver invisible to himself. It does not prove connection behaviour. Two real machines remain the final check.
 
-- [ ] **Step 1: Write the tester**
+- [x] **Step 1: Write the tester** — shipped as `harness/test-mp.js` + `harness/probes/mp.probe.js`.
+
+The code below is the PLAN's version and is kept only for the diff. **Do not build it: it cannot
+fail.** See correction 5 — it writes the queue and then asserts the shape of what it wrote, so it
+passes on the broken build too. What shipped differs in four ways, all forced by running it:
+
+1. **It observes the game's frame instead of driving one.** Stand-ins go into `MP.peers`,
+   `MP.active` goes true, and then the game's own loop does all of it: `update()` → `MP.tick()`,
+   `render()` → `drawHero3(local)` → `MP.drawPeers()` → `drawPeer()` → `drawHero3(peer)`, and
+   `flushHero3D()` drains the queue into `drawHero3D`. The probe calls neither `render` nor the
+   flush — which is just as well, because `flushHero3D` is not on `__BF3` and `render` does not
+   call it (`index.html:18592` renders, `18596` flushes; they are siblings in `frame()`).
+2. **One frame's draws are separated from the next frame's with a microtask, not a timer.**
+   `flushHero3D` draws the whole queue in one synchronous loop, so a burst *is* a frame; the spy
+   opens a burst on the first call and closes it in a `queueMicrotask`, which cannot run until the
+   whole rAF callback has finished. A 500ms SwiftShader frame therefore cannot split one frame's
+   draws across two records, which any elapsed-time heuristic would have done.
+3. **The spy calls THROUGH to the real renderer.** A peer is not a player object — it is the
+   pseudo-player `drawPeer()` assembles at `index.html:11670` — and `drawPeer` wraps the call in
+   its own `try/catch` that falls back to a voxel body, so a throw there is invisible from the
+   screen. Counting alone would pass a build whose queue is perfect and whose peer bodies never
+   reach the GPU.
+4. **Three party sizes in ONE browser launch** — 0 allies (the single-player control), 3 (a co-op
+   party), 8 (past the cap). They are three states of one loop, not three levels.
+
+**The assertions deliberately do not pin `HERO3D_MAX`.** They test the invariant the cap exists to
+protect — the comment at `index.html:3422` — so raising the cap tunes a number instead of turning
+the suite red. Measured this run: `cap draws 6`, i.e. you plus five allies, exactly what that
+comment claims.
+
+**Validated in both directions, and the known-bad is permanent.** `?mpslot=1` puts the old
+single-slot behaviour back without patching the game — an accessor on `window.__hero3dPending`
+whose setter makes the array the game creates overwrite instead of accumulate, which is precisely
+what a single slot did:
+
+```bash
+node _shot/shot.js --scene 0 --url "/3d/index.html?hero3d=1&world3d=1&nobloom&mpslot=1" \
+     --eval @harness/probes/mp.probe.js
+```
+
+Reproduces Oliver's bug exactly, and reproduces why nobody caught it sooner:
+
+| allies | drawn | who | |
+|---|---|---|---|
+| 0 | 1 | the local hero (x 0) | single player is FINE on the broken build |
+| 3 | 1 | ally 3 (x 120) | you are invisible to yourself |
+| 8 | 1 | ally 8 (x 320) | still one, still not you |
+
+Unbroken, the same three cases are 1 / 4 / 6 with the local hero at the head of every one.
+
+<details><summary>The plan's original (kept for the diff — do not build)</summary>
 
 Create `harness/test-mp.js`:
 
@@ -685,17 +787,15 @@ if(require.main === module){
 }
 ```
 
-- [ ] **Step 2: Run it**
+</details>
 
-Run: `node harness/test-mp.js`
-Expected: `mp: 3 pass, 0 fail`
+- [x] **Step 2: Run it** — `node harness/test-mp.js` → **`mp: 7 pass, 0 fail — cap draws 6`**.
 
-- [ ] **Step 3: Commit**
+Seven checks, not three: a frame reached the renderer at all; single player draws exactly the local
+hero; a party of three draws all four; you are first in a party; an oversized party is capped; the
+cap never drops you; and nothing threw on the way to the renderer.
 
-```bash
-git add harness/test-mp.js
-git commit -m "harness: assert the 3D layer draws every queued hero, local one first"
-```
+- [x] **Step 3: Commit**
 
 ---
 

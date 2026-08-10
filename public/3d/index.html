@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.904.0-hub-citadel-autopilot';
+const VERSION3D='1.905.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7284,7 +7284,7 @@ function loadStageRaw(i){
     G._scapeTable='EXPANDED_SCAPES';   // provenance: which of the four same-named generators ran
     EXPANDED_SCAPES[curZone().id]({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate});
     zoneFlavour(curZone().id, srnd); zoneTopology(curZone().id, srnd);
-    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questMarks(srnd); auditReachable(); snapWorldInteractables(); return;
+    addVerticality(srnd); highGround(srnd); encounterPass(srnd); scatterPass(srnd); hazTopUp(srnd); questBackstop(srnd); questMarks(srnd); auditReachable(); snapWorldInteractables(); return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && SCAPES[curZone().id]){
     // MAIN LEVELS ARE STATIC: their terrain seed excludes the per-run seed, so each area is the
@@ -9138,6 +9138,87 @@ function questMarks(rnd){
       G.qmarks.push({k:'survive', x:r.x, z:r.z, y:h, q:q.id, done:false, t:0,
                      hold:q.secs || 30, left:q.secs || 30, wave:0, active:false});
       made++;
+    }
+  }
+  return made;
+}
+
+/* THE OBJECTIVE BACKSTOP — for the two verbs questMarks() does not own, and the reason five
+   campaign areas could not be finished.
+
+   `find` and `fetch:placed` are the only objectives whose subject is placed by the LEVEL rather
+   than by the objective system: scapeFind() sets G.waystone, scapeFetch() drops the items. Every
+   hand-authored scape calls them. The TERRAIN_ZONES branches — hollow, frost, ember, abyss, castle
+   — build their terrain and `return` before ever reaching the hand-authored body that made those
+   calls, so the quests exist, are shown in the tracker, and have nothing in the world to satisfy
+   them. `areaClear()` is then never true, `openWay()` never fires, and the exit portal never opens.
+
+   Measured on unmodified game code, one probe per area (harness/probes/level.probe.js), and it is
+   not a near miss in any of them — the count is ZERO every time:
+     The Dry Wash    hp2 'Recover 5 Sun-Bleached Bones' 0 of 5   AND  hp3 'Find the Hollow Shrine'
+     The Rime Shelf  ff3 'Find the Frostwatch Cairn'
+     Emberdeep       ed2 'Find the Ash Altar'
+     The Hollow Deep ab3 'Find the Rift Anchor'
+     The Long Ascent ct3 'Find the Sunken Records'
+   Zones 0, 2 and 6 are hand-authored and all sixteen of their objectives are provisioned, which is
+   what makes the correlation with TERRAIN_ZONES exact rather than suggestive.
+
+   This runs for every EXPANDED_SCAPES level and only ADDS what is missing, so a scape that did its
+   own placing is untouched — checked, not assumed: The Outskirts and The Grand Colonnade come out
+   byte-identical, same waystone at the same coordinates, same five relics.
+   DELIBERATELY NOT EXTENDED TO KILL QUESTS, and the reason is a measurement that cuts both ways.
+   The terrain zones build no dens, so a kill quest there is served by whatever happens to be
+   standing in the level — and that population TURNS OVER while you watch: the same probe run four
+   times on Emberdeep reported 11, 11, 7 and 8 magmaskit and 1, 1, 10 and 5 ember totems, with the
+   total pinned at 52 every single time. So a live head-count is a snapshot, not a supply, and
+   neither "this level is short of mobs" nor "this level has plenty" can be concluded from one.
+   Adding dens would settle it, and adding dens changes how hard a level fights back — that is
+   balance, and balance is Oliver's call, so it is written down rather than done. */
+function questBackstop(rnd){
+  if(!G || G.trial || G.side || G.hub || G.delve) return 0;
+  const rooms = (G.rooms||[]).filter(r => r && r.w);
+  if(!rooms.length) return 0;
+  const R = () => (rnd ? rnd() : Math.random());
+  const ground = (x,z) => { const h = surfaceHeightAt(x,z,20); return h > -1e8 ? h : null; };
+  /* THE STOREY RULE, copied from questMarks() because it lands on Castle Duskmoor and Duskmoor is
+     one of the five zones this exists for. In a stacked zone surfaceHeightAt returns the TOP
+     surface, so a waystone meant for a landing halfway up The Long Ascent is placed on the roof of
+     the tower — and an objective the player is told to find, sitting somewhere they cannot get to,
+     is the same uncompletable level in a new costume. Where the zone declares storeys, the room's
+     own floor is the answer. */
+  const groundIn = (r,x,z) => (G.spireRY && r && r.y != null) ? r.y : ground(x,z);
+  /* The same room preference questMarks() uses: objectives belong in the spurs and flanks the
+     topology pass built, not in the room you walk through on your way past. */
+  const pool = rooms.filter(r => r.spur || r.flank || r.court || r.island || r.tier);
+  const src = pool.length ? pool : rooms;
+  const pick = (i) => src[(i*3+1) % src.length];
+  let made = 0;
+
+  for(const q of areaQuests()){
+    if(questDone(q)) continue;
+
+    if(q.k === 'find'){
+      if(G.waystone && G.waystone.q === q.id) continue;      // the scape already placed it
+      /* Late, but not the LAST room: questMarks puts the hunt elite there, and a waystone sharing
+         a room with a beaconed elite reads as one objective rather than two. */
+      const r = src[Math.max(0, src.length - 2)];
+      const h = groundIn(r, r.x, r.z); if(h == null) continue;
+      G.waystone = {x:r.x, z:r.z, y:h, q:q.id, taken:false, t:0};
+      made++;
+    }
+
+    else if(q.k === 'fetch' && q.placed){
+      /* Only 'placed' gathers need anything here. The others fall off any non-boss kill, and the
+         terrain zones are full of mobs. */
+      const want = q.n || 1;
+      let have = (G.pickups||[]).filter(u => u.questItem && u.questItem.id === q.id).length;
+      for(let i = have; i < want; i++){
+        const r = pick(i + 1);
+        const h = groundIn(r, r.x, r.z); if(h == null) continue;
+        G.pickups.push({x:r.x + (i % 2 ? 34 : -34), z:r.z, y0:h,
+                        questItem:{id:q.id, name:q.item}, bob:R()*3, placed:true});
+        made++;
+      }
     }
   }
   return made;

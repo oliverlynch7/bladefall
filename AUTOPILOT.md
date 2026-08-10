@@ -31,6 +31,13 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     serves `public/` itself, because this machine has no playwright/puppeteer resolvable anywhere
     and an unattended run cannot install one. Flags: `--url --out --wait --pre --prewait --eval
     --size`, plus `--assets <kit|all>` for the offline texture audit.
+    **`--eval @path` and `--pre @path` read the expression from a FILE** (added 2026-08-10,
+    `autopilot-merged`). Use it for anything longer than a line. Two reasons, both paid for
+    already: Git Bash and PowerShell each mangle a long quoted expression differently, and a probe
+    pasted onto a command line is a SECOND COPY of the one inside the harness module that owns it —
+    which is fine until somebody edits one, after which two runs measure two different things while
+    both calling it "the level probe". Paths are relative to the repo root, not to `_shot/`, so
+    `--eval @harness/probes/level.probe.js` is the same text `harness/test-levels.js` runs.
     **Use `--scene <n|hub>` to get in-game** — the game opens on the title, then a cutscene, then
     class select, then a class trial, then the hub, and each of those will happily hand you a
     screenshot of itself. `--scene 0` lands in The Outskirts, `--scene hub` in the Waystation.

@@ -1,0 +1,19 @@
+nine skills that had no handler at all now have one
+
+SKILL_FX is built by aliasing and five alias lines sat above the definitions
+they copy, so each stored undefined; useSkill's `fx ? fx(...) : null` then spent
+the mana and the cooldown and did nothing. Re-bound the nine dead names after
+their sources exist, rather than moving the alias lines down past m_tempest's
+later redefinition (18708), which would have silently changed what chr_tempest,
+st_storm and necro_storm point at.
+
+ninja Shadow Step, chronomancer Time Warp and stormcaller Ball Lightning are in
+the rank-10 build every class defaults to; the Stormcaller and Chronomancer were
+each missing three of their eight skills.
+
+Verified with node harness/test-skills.js --classes stormcaller chronomancer
+ninja: 8 pass / 3 fail before, 11 pass / 0 fail after. A live probe of the whole
+159-entry table now reports zero non-function handlers, which covers the six
+path-B skills the default build never reaches.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>

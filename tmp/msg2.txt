@@ -1,0 +1,35 @@
+harness: audit passives for being wired at all — 46 of 124 are not
+
+test-skills.js casts a skill and watches what moves, so it is blind to passives
+by construction: a passive is never cast. Nothing has ever checked that the game
+reads one back.
+
+harness/audit-passives.js parses every kind:'passive' entry out of CLASS2 and
+reports any id that nothing outside the choice menu mentions. CLASS2 itself and
+the PASSIVE_ART icon table are blanked from the search — PASSIVE_ART names all
+124 ids, so counting it as a reader makes every passive look wired forever.
+
+Result: 124 passives, 78 wired, 46 dead, across eleven of the sixteen classes.
+The Stormcaller has seven dead of eight — with section A's three dead skills,
+almost nothing it chooses at any rank has ever affected the game. The Ranger is
+the surprise: a core class with six of eight dead, including both options at
+ranks 3, 5 and 9.
+
+Static and lives in the unit stage, so it costs 100ms and runs before the gate
+spends GPU time. It proves WIRED, not CORRECT — the stat-snapshot half of plan
+Task 3 Step 2 is deliberately left open and is much cheaper once the 46 are down.
+
+A dead verdict can be believed because there is no computed path for an id to
+reach the game by: every c2Passive call site outside the definition passes a
+quoted literal.
+
+Proven able to fail, both ways. A miniature CLASS2 + PASSIVE_ART + one line of
+game code lives in the test with one passive read and one not; six unit tests
+assert the audit separates them and that neither excluded region counts as a
+reader. The real-game assertion was watched to name all 46 with KNOWN_DEAD empty.
+The ratchet is checked in both directions, so a passive that becomes wired must
+leave the list or the test says so.
+
+Verified with node --test harness/test/passives.test.js: 9 pass, 0 fail.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>

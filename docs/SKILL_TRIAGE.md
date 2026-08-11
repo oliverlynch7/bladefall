@@ -223,9 +223,9 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 84 wired / 40 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back), `mon_flow` (Flow), `chr_potent` (Potent) and `mon_killer` (Killer Focus) were wired
-2026-08-11. See "Rows taken" at the end of this section.
+**Now 85 wired / 39 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus) and `r_ambush`
+(Ambusher) were wired 2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -250,7 +250,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
-| ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
+| ranger | 5 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer, Bounty Hunter (~~Ambusher~~ wired 2026-08-11) |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
@@ -301,6 +301,30 @@ The Ranger is the surprise. It is a CORE class, not a variant, and it is the one
 the dead column — six of eight, including both options at rank 3, both at rank 5, and both at rank 9.
 So a Ranger's rank-3 "choice" is between two passives that each do nothing, three times over.
 
+**And the six are NOT uniformly blocked — checked 2026-08-11, because "the Ranger is six of eight"
+reads like one big job and it is three small ones.** Only rank 3 is blocked, and on a unit rather
+than on a mechanic:
+
+| rank | passive | its numbers | state |
+|---|---|---|---|
+| 3 a | Longshot | "+8% damage to enemies **7m+** away" | **blocked — the game has no metre** |
+| 3 b | Close-Quarters Archer | "enemies within **4m** are knocked back" | **blocked — same** |
+| 5 a | Escape Artist | "−15% damage taken & −30% slows for 1.5s" | half implementable — see below |
+| 5 b | Ambusher | "next click within 3s +20% (once per 6s)" | **wired 2026-08-11 — see Rows taken** |
+| 9 a | Elemental Archer | "the element of the ground they fly over" | design — no ground→element map exists |
+| 9 b | Bounty Hunter | "−8% to you; killing one heals 4% HP, +10% gold" | **fully stated, nothing blocked** |
+
+**Metres appear in exactly four places in the whole game and all four are dead ranger cards** —
+`7m+`, `4m`, `~5m` and `4m` at index.html:2051, 2052, 2053 and 2057. Nothing wired uses the unit and
+nothing defines it, so converting `7m` into world units means choosing a scale, which is inventing a
+number. That is Oliver's, and it is ONE decision that unblocks both rank-3 options at once.
+
+**Escape Artist is half-blocked for the reason `bsk_tough` is fully blocked:** the "−30% slows" half
+cannot be honestly wired because **the player cannot be slowed at all** — `p.slowT` does not exist and
+every `slowT` in the file is on an enemy. The "−15% damage taken" half is a one-liner in hurtPlayer
+beside `w_unyield`. Wiring half of a card and letting the audit call it wired would be worse than
+leaving it dead, so it goes with the missing player-slow mechanic, next to Unbreakable.
+
 **This is `docs/VISION.md` priority #2 in the plainest possible terms.** A rank-3 choice between two
 passives that both do nothing is not a build decision, and a class whose entire passive tree is inert
 is a stat-reskin of its core no matter what its cards say.
@@ -325,6 +349,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **monk / Flow** (`mon_flow`, r5 a) — "Each hit shortens your dodge twice as much." | 2026-08-11 | `harness/probes/monkflow.probe.js`, A/B in one launch: ratio 1 before, exactly 2 after |
 | **chronomancer / Potent** (`chr_potent`, r3 a) — "Rewinding also restores the mana you had three seconds ago." | 2026-08-11 | `harness/probes/chrpotent.probe.js`, A/B in one launch: the ring recorded no mana at all before, the whole pool came back after |
 | **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
+| **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -502,6 +527,36 @@ the same multiplier unless it is reset**, so an equality assertion between them 
 the drift runs in exactly the direction that makes a bonus look real. It is global, not a monk
 mechanic. `test-skills.js` is immune only because its bar is EFFECT (did HP go down) rather than
 amount — anything that starts asserting on damage numbers has to reset this first.
+
+**Ambusher was the first row whose card states EVERY number it needs — +20%, a 3s window, once per
+6s — so there was nothing to decide at all.** Both mechanisms existed: `CLASS_BASIC.ranger` (11029) is
+already where a ranger's basic attack gets a multiplier, and the two skills the card names are already
+`SKILL_FX.r_tumble` / `r_shadow`. The 6s ration is checked at the SPEND rather than at the arm,
+because the card rations the *bonus*; rationing the arm instead would let a cast inside the cooldown
+quietly eat a window it could not use.
+
+| | first click after the skill | next click | click after a re-cast, 0s later |
+|---|---|---|---|
+| control `r_escape` (a-side of the same rank), before and after | 115 | 115 | 115 |
+| **`r_ambush`, before** | **115** | 115 | 115 |
+| **`r_ambush`, after** | **138 → exactly +20%** | **115** | **115** |
+
+**Three strikes per half, because the sentence has three clauses** — "+20%", "next click", "once per
+6s". A passive that armed on every cast would satisfy the first two and fail the third, and would be a
+different, worse bug than the dead one. No game time passes between the strikes (`G.time` only
+advances through `update()`, and none is run), so the third strike tests the ration exactly.
+
+**THE CONTROL IS ITSELF DEAD, which is a first for this section and is stated rather than hidden.**
+Both of the ranger's rank-5 options are in section E, so unlike Storm Ward and Bounce Back there was
+no wired sibling to use. `r_escape` is still the right control and is arguably a stricter one: it is a
+passive *proven* to do nothing on the damage axis.
+
+**The distance trap, specific to this class and worth carrying.** `CLASS_BASIC.ranger` returns
+`dmg * clamp(0.75 + d/520*0.6)` — the multiplier IS the range to the target — and Tumble is a movement
+skill that rolls the hero backwards. A strike taken after a tumble is therefore at a different range
+from one taken before, and comparing them measures the roll. The probe spawns its target AFTER the
+cast, at a fixed offset from wherever the hero ended up, and moves it again after the re-cast. The
+control's three identical 115s are what prove that worked.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

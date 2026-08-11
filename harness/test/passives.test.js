@@ -90,7 +90,11 @@ test('every passive is attributed to its class and rank', () => {
    at a time, comes out of this Set - and a passive going dead that is NOT on it fails the gate
    immediately, which is the point of recording it here rather than only in a document. */
 const KNOWN_DEAD = new Set([
-  'r_longshot', 'r_closeq', 'r_escape', 'r_ambush', 'r_elem', 'r_bounty',
+  /* r_ambush came OFF this list on 2026-08-11 (sub-project B Task 2, pass 11): "after Tumble/
+     Shadowstrike, next click within 3s +20% (once per 6s)" is now armed by those two handlers and
+     spent in CLASS_BASIC.ranger, proven by harness/probes/ambush.probe.js — all six strikes 115
+     before, 138/115/115 against a 115/115/115 control after. */
+  'r_longshot', 'r_closeq', 'r_escape', 'r_elem', 'r_bounty',
   'x_strength', 'x_crimson',
   /* pal_bounce came OFF this list on 2026-08-11 (sub-project B Task 2, pass 7): "damage you block is
      returned to whoever dealt it" now returns the 60% the brace eats, through the same hitEnemy(by,…)

@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.919.0-autopilot';
+const VERSION3D='1.920.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9852,6 +9852,7 @@ const SKILL_FX={
   tumble(p,ok,am){
     p.dodgeTimer=0.22; p.dashX=-Math.sin(p.yaw); p.dashZ=-Math.cos(p.yaw);
     p.invuln=Math.max(p.invuln,0.35); SFX.dodge();   // Tumble stays generous (14s CD skill) but no longer near-invincible
+    if(meta.classId==='ranger'&&c2Passive('r_ambush'))p._ambushT=3;   // Ambusher arms on Tumble — the card names this skill and Shadowstrike
     if(ok){ let n=0; for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)<180){ e.slowT=Math.max(e.slowT||0,2.5); n++; } }
       if(n) addText(p.x,40,p.z,'SNARED ×'+n,'#9fe0ff',false); }
     burst(p.x,8,p.z,'#9fe0ff',10); },
@@ -9939,6 +9940,7 @@ const SKILL_FX={
   // ASSASSIN (Ranger path B) — mobility & burst
   shadowstrike(p,ok,am){ const t=projectileAimTarget(p,700); if(!t){ toast('No target in sight'); return 'refund'; }
     const a=Math.atan2(t.x-p.x,t.z-p.z); p.x=t.x-Math.sin(a)*(t.r+18); p.z=t.z-Math.cos(a)*(t.r+18); p.yaw=a; p.invuln=Math.max(p.invuln,0.3);
+    if(meta.classId==='ranger'&&c2Passive('r_ambush'))p._ambushT=3;   // Ambusher arms on Shadowstrike too — the ninja and pirate share this handler and the class gate keeps it theirs
     burst(p.x,p.y+16,p.z,'#6a2fa0',14); SFX.dodge();
     const w=p.weapon; hitEnemy(t,(w?w.dmg:8)*effPower(p)*3.2*am*(ok?1:OFFCLASS_MUL),p,180,effLifesteal(p),ok?(w&&w.el):null); },
   smokebomb(p,ok,am){ p.invuln=Math.max(p.invuln,ok?1.4:0.9); burst(p.x,p.y+14,p.z,'#8a8f9a',22);
@@ -10015,6 +10017,7 @@ function class2Innate(p,dt){
   if((p.warSpeedT||0)>0)p.warSpeedT-=dt;
   if((p.bdParryT||0)>0)p.bdParryT-=dt;if((p.bdFlowT||0)>0)p.bdFlowT-=dt;if((p.bdCapT||0)>0)p.bdCapT-=dt;
   if((p.skyTailT||0)>0)p.skyTailT-=dt;
+  if((p._ambushT||0)>0)p._ambushT-=dt;   // Ambusher: the 3s window the card gives you after Tumble/Shadowstrike
   if(meta.classId==='skylancer'&&c2def('skylancer')){
     if(!p.onGround&&p.vy<0){const slow=c2Passive('sky_float')?.45:.20;p.vy+=1500*slow*dt;}
     if(p._skyWasGround===false&&p.onGround){
@@ -11029,6 +11032,18 @@ const CLASS_BASIC = {
   ranger(p, e, dmg){
     const d = dXZ(p.x, p.z, e.x, e.z);
     const k = Math.max(0.75, Math.min(1.35, 0.75 + (d / 520) * 0.6));
+    /* AMBUSHER, the rank-5 passive: "After Tumble/Shadowstrike: next click within 3s +20% (once per
+       6s)." Armed by those two skills and spent HERE, so "next click" is enforced by consuming the
+       window rather than by a second timer. Wired 2026-08-11; it was one of the 40 in
+       docs/SKILL_TRIAGE.md section E that the menu offers, describes and no code ever read. All three
+       numbers are the card's own - nothing invented.
+       The 6s gate is checked at the SPEND, not at the arm: the card rations the BONUS, and rationing
+       the arm instead would let a cast inside the cooldown quietly eat a window it could not use. */
+    if((p._ambushT || 0) > 0 && (G.time - (p._ambushAt == null ? -99 : p._ambushAt)) >= 6){
+      p._ambushT = 0; p._ambushAt = G.time;
+      addText(e.x, e.y + e.h + 26, e.z, 'AMBUSH', '#9fe0ff', true);
+      return dmg * k * 1.2;
+    }
     return dmg * k;
   },
 

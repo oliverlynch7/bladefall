@@ -222,7 +222,17 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `a724d69` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — `ranger/Longshot`, the first of the 46 dead passives** | this run | `harness/probes/longshot.probe.js`, watched to fail with the wiring commented out; the passive audit's ratchet went red naming it independently |
+
+**Pass 4 took a row from section E, and its CONTROL is the transferable lesson.** The natural bar for
+a "+8% past 7m" passive is "far hit vs near hit", and that bar is broken before it is written: the
+Ranger's basic attack already ramps with distance in `CLASS_BASIC.ranger`, so the control pair — the
+same two distances with the OTHER rank-3 option chosen — came back **1.141 against a passive nothing
+in the game read**. The fix was to hold the distance fixed and change the passive instead. Every
+remaining row in section E is a passive with a *stat* in its description, so the same trap is waiting
+under most of them: **the control must be the other option at the same rank, never the absence of the
+condition.** Full numbers in `docs/SKILL_TRIAGE.md` section E1.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

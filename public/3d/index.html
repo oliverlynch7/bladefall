@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10616,6 +10616,16 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
   if(e.markT>0) dmg*=1.4;                                 // Hunter's Mark: +40% damage taken from you
   if(meta.classId==='warlock'&&(e.warCurseT||0)>0)dmg*=c2Passive('war_deep')?1.30:1.15;
+  /* LONGSHOT (ranger r3 a) - "+8% damage to enemies 7m+ away." One of the 46 passives in
+     docs/SKILL_TRIAGE.md section E that are offered, described and then never read by any code;
+     this is the ranger's rank-3 option A, so half of a core class's first build decision.
+     7m is 280 units. The ranger tree is the only one that writes distances in metres and it sets
+     its own scale twice: Spike Trap calls its R=160 field "4m", and Tumble's roll (0.22s of dash)
+     calls ~198 units "~5m". Both give 40 units to the metre.
+     Measured from the ARCHER, not from the projectile - the card's promise is about how far the
+     shot had to travel - and applied to every damage path rather than only basic attacks, because
+     nothing in the description narrows it. */
+  if(src===G.p&&meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_longshot')&&dXZ(src.x,src.z,e.x,e.z)>=280) dmg*=1.08;
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
     if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');

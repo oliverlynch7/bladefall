@@ -246,7 +246,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
-| ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
+| ranger | ~~6~~ **5** / 8 | ~~Longshot~~ (wired, see E1), Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
 | berserker | 5 / 8 | Heavy Hands, Reckless, Thick Hide, Bloodthirst, Unbreakable |
 | chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
@@ -267,6 +267,54 @@ So a Ranger's rank-3 "choice" is between two passives that each do nothing, thre
 **This is `docs/VISION.md` priority #2 in the plainest possible terms.** A rank-3 choice between two
 passives that both do nothing is not a build decision, and a class whose entire passive tree is inert
 is a stat-reskin of its core no matter what its cards say.
+
+### E1. `ranger/Longshot` (`r_longshot`) — **WIRED 2026-08-11**, the first of the 46
+
+"+8% damage to enemies 7m+ away." Rank 3, option A: half of the Ranger's first build decision, on the
+one CORE class in this section. Now read in `hitEnemy` beside the other `src===G.p` passive
+multipliers, so it pays on every damage path rather than only on basic attacks — nothing in the
+description narrows it, and it is reported either way by the probe below.
+
+**7m is 280 units, and the tree sets its own scale twice.** The Ranger is the only class that writes
+distances in metres, so the conversion had to come from inside the same tree rather than be invented:
+Spike Trap calls its `R=160` field "4m", and Tumble's roll (0.22s of dash, ~198 units) calls itself
+"~5m". Both give 40 units to the metre.
+
+**THE OBVIOUS TEST WAS WRONG, AND ITS CONTROL IS THE ONLY REASON THAT IS KNOWN.** The first version
+of `harness/probes/longshot.probe.js` asked "is a hit past 7m 8% bigger than one inside it" — and its
+control, the identical pair with the OTHER rank-3 option chosen, came back **1.141, not 1.000**. The
+Ranger's basic attack *already* scales with distance, by design and with no passive involved:
+`CLASS_BASIC.ranger` is a ramp, `k = clamp(0.75 + d/520·0.6, 0.75, 1.35)`, whose own comment is "a
+ranger is about spacing, so the damage IS spacing". At 200 units that is 0.9808 and at 320 it is
+1.1192 — ratio 1.1412, which is what the control measured to three decimals. **A distance-vs-distance
+bar would have reported a healthy +14% bonus against a completely unwired passive and passed
+forever**, which is this document's section-A failure shape one level down.
+
+So the bar holds the DISTANCE fixed and changes the PASSIVE. Measured, one launch, `--scene
+arena:flat`, `hitEnemy` driven directly with `G.combo` zeroed so nothing but the passive can move the
+number:
+
+| | Longshot chosen | `r_closeq` chosen | gain |
+|---|---|---|---|
+| past 7m (320 units), basic | 1359 | 1259 | **1.079** (1.08 before rounding) |
+| inside 7m (200 units), basic | 1103 | 1103 | **1.000** |
+| past 7m, skill/charged hit | 1214 | 1124 | 1.080 |
+| the class's own ramp (control, far ÷ near) | — | 1259 ÷ 1103 | 1.141, unchanged |
+
+The **near** row is what makes it a test rather than a thermometer: "+8% to everything", the easiest
+wrong version to write, passes the far row and fails that one. **Watched to fail**, with the wiring
+commented out and nothing else changed: `gain past 7m 1 (want 1.08)`, every cell identical to its
+control, the class ramp still 1.141 (`_shot/out/longshot-before.png` against `longshot-after.png`).
+
+The static audit agrees independently and had to be told: `harness/test/passives.test.js` went red
+naming `r_longshot` as "wired now — take it out of KNOWN_DEAD" the moment the game started reading
+it. **124 total, 79 wired, 45 dead**; ranger 5/8.
+
+**Not done here, and deliberately:** the `e._peer` PvP branch of `hitEnemy` returns before this line,
+the same way it returns before `w_swift` and Hunter's Mark, so Longshot does not pay against another
+player. `war_deep` is the precedent for mirroring a multiplier into that branch — but there is no way
+to drive a real peer from this bench, and an unverified line is worse than a missing one. Whoever
+takes the next range passive should take that with it.
 
 **Recorded as a ratchet, not as a wall.** The 46 live in `KNOWN_DEAD` in
 `harness/test/passives.test.js`, so the gate stays green on them while a **newly** dead passive fails

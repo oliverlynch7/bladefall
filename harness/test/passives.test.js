@@ -90,7 +90,10 @@ test('every passive is attributed to its class and rank', () => {
    at a time, comes out of this Set - and a passive going dead that is NOT on it fails the gate
    immediately, which is the point of recording it here rather than only in a document. */
 const KNOWN_DEAD = new Set([
-  'r_longshot', 'r_closeq', 'r_escape', 'r_ambush', 'r_elem', 'r_bounty',
+  /* r_longshot LEFT THIS LIST 2026-08-11 - the first of the 46 to be wired. Its removal is the
+     ratchet's other direction doing its job: the audit went red naming it the moment the game
+     started reading it, which is what stops this list quietly describing a game that has moved on. */
+  'r_closeq', 'r_escape', 'r_ambush', 'r_elem', 'r_bounty',
   'x_strength', 'x_crimson',
   'pal_burn', 'pal_bounce', 'pal_blessed',
   'necro_wither', 'necro_plague', 'necro_pest',

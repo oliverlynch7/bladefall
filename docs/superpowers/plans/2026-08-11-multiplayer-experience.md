@@ -54,6 +54,17 @@ node _shot/shot.js --scene 1 --wait 12000 --eval "(function(){ return JSON.strin
 
 Expected: a single `_wrap`. That single rig is the whole bug.
 
+*(scouted 2026-08-10, `autopilot-merged`, read-only — no code written, so this task is still open.
+Recorded so the next run does not re-find it. `SkeletonUtils` is **already imported** at
+`hero3d.js:22` and already used twice for exactly this purpose — the mirror pose at 1670 and the
+character-select pose at 1726 — so Step 2 is reusing an established idiom in this file, not
+introducing one. The single rig is `HERO3D._wrap`, assigned once at 1389 and then read at 1125,
+1283, 1571, 1593 and 1627. The local-only weapon guard Step 3 removes is `_isLocal` at 1547,
+computed as `p === __BF3.G.p`, and its own comment at 1544 states the thrash reason the plan
+quotes. One thing to carry into Step 2 that is written down at 1734 and easy to miss:
+**`SkeletonUtils.clone` SHARES materials with its source**, so anything that mutates a clone's
+material — a team tint, a translucent ghost — changes every ally and the local hero too.)*
+
 - [ ] **Step 2: Clone a rig per peer**
 
 Three.js ships `SkeletonUtils.clone` for exactly this — a skinned mesh cannot be shared by reference between two transforms. Keep a small pool keyed by peer id, cap it at `HERO3D_MAX` (6, already defined in `index.html`), and dispose a clone when its peer leaves.

@@ -221,41 +221,63 @@ Then return to Step 1 with the next unfixed row.
 `test-skills.js` covers active skills. Passives are `kind:'passive'` entries in the rank tables and are never cast, so the current probe never exercises them — meaning "every passive does what it says" is currently unverified rather than verified.
 
 **Files:**
-- Modify: `harness/test-skills.js`
-- Test: `node harness/test-skills.js --classes warrior`
+- Create: `harness/audit-passives.js`, `harness/test/passives.test.js`
+- Test: `node --test harness/test/passives.test.js`
 
-- [ ] **Step 1: Find how a passive is chosen and applied**
+- [x] **Step 1: Find how a passive is chosen and applied** — done.
 
-```bash
-grep -n "kind:'passive'" public/3d/index.html | head -10
-```
+A passive is offered at ranks 3/5/7/9 by `openClassChoice`, stored in `classState(cls).ch[rank]`
+(`index.html:9944`), and reaches the game through exactly one door: `c2Passive('<id>')` at 9945,
+called with a literal id at 124 sites. Nothing else consults `ch`. So "is this passive wired" is
+answerable
+by asking whether any line outside the choice menu mentions its id — which is a STATIC question, and
+that changed what this task should build first.
 
-Then read `classState` and whichever function reads those entries, to learn how a passive is selected at runtime.
+- [x] **Step 2: Extend the probe** — done as a **wiring audit**, not the stat snapshot this step
+      describes, and the reason is the finding.
 
-- [ ] **Step 2: Extend the probe to snapshot stats with the passive off, then on**
+The plan's shape was a before/after stat snapshot per passive. That is 124 passives × two game
+states, and at the measured cost of a launch it does not fit in any run. It is also the wrong first
+question, because the answer to the cheap question turned out to be: **46 of the 124 passives are
+never read by any code at all.** A stat snapshot of a passive nothing consults measures the noise
+floor and reports "no change" — the same accusation for a dead passive, a mis-implemented one and a
+correctly-implemented one whose stat the probe guessed wrong.
 
-A passive claims a stat change, so the assertion is a before/after on the stat it names — the same shape as the buff check that already works. Reuse `claimsOf` for the claim; do not invent a second parser.
+`harness/audit-passives.js` parses `CLASS2` for every `kind:'passive'` entry, blanks out `CLASS2`
+itself and the `PASSIVE_ART` icon table (which names all 124 ids and would otherwise make every
+passive look wired forever), and reports any id nothing in the remaining source mentions. Static, no
+browser, runs in 100ms, so it joins the unit tests `run-all.js` runs before it spends GPU time.
 
-- [ ] **Step 3: Prove the new assertion can FAIL**
+**Result: 124 total, 78 wired, 46 dead**, across twelve of the sixteen classes — the Stormcaller
+missing seven of its eight passives, the Monk, Pirate and Ranger six each. Full table and the
+class-by-class breakdown in `docs/SKILL_TRIAGE.md` section E.
 
-Temporarily break one passive in the game file, run the tester, confirm it reports that passive. Restore the file with `git checkout -- public/3d/index.html`.
+The stat-snapshot half of this step is NOT done and is deliberately left open: this proves WIRED, not
+CORRECT, and a passive read once and read wrongly still passes. It is the right next piece of work
+once the 46 are down, and it is much cheaper then, because it only has to run against passives that
+have a reader to exercise.
 
-An assertion nobody has watched fail is an assertion nobody should believe — this harness has already shipped two of those (the multiplayer probe that asserted on its own assignment, and the geometric audit that passed an unwalkable tower).
+- [x] **Step 3: Prove the new assertion can FAIL** — done, twice, and neither way requires breaking
+      the repo.
 
-- [ ] **Step 4: Commit**
+A miniature `CLASS2` + `PASSIVE_ART` + one line of game code lives in the test file, with one passive
+read and one not. Six unit tests assert the audit separates them, that `PASSIVE_ART` does not count
+as a reader, and that `CLASS2` does not either — if any of those regressed the audit would go green
+and stay green regardless of the game. And the real-game assertion was watched to fail for real: with
+`KNOWN_DEAD` empty it named all 46 with their descriptions.
 
-```bash
-git add harness/test-skills.js
-git commit -m "harness: passives are checked too, and the check was proven able to fail"
-```
+The 46 are recorded as a **ratchet checked in both directions** — a newly dead passive fails the
+gate, and a passive that becomes wired must be removed from the list or the test says so, because a
+one-directional ratchet stops describing the game the moment anything is fixed.
+
+- [x] **Step 4: Commit** — `harness/audit-passives.js`, `harness/test/passives.test.js`,
+      `docs/SKILL_TRIAGE.md` section E.
 
 - [ ] **Step 5: Re-baseline and hand the new findings to the triage list**
 
-```bash
-node harness/run-all.js
-```
-
-Any newly reported passive failures get rows in `docs/SKILL_TRIAGE.md` and are then worked through Task 2.
+The 46 rows are in `docs/SKILL_TRIAGE.md` section E and are worked through Task 2, one commit at a
+time; each fix takes an id out of `KNOWN_DEAD`. Nothing else re-baselines here — the audit is a unit
+test, so it lives in `run-all.js`'s fast stage and never touches `harness/baseline.json`.
 
 ---
 

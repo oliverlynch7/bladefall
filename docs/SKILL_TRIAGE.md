@@ -54,7 +54,7 @@ only by less than the drift is reported unproven, and the drift is measured fres
 
 ---
 
-## A. Nine skills have no handler at all — ONE bug, one ordering fault
+## A. Nine skills have no handler at all — ONE bug, one ordering fault — **FIXED `5339f48`**
 
 **This is the largest thing in this document and it is the closest match to Oliver's report.**
 `SKILL_FX` is built by aliasing, and five alias lines sit *above* the definitions they copy, so each
@@ -74,15 +74,15 @@ mana, spends the cooldown, plays no effect and does nothing at all. Measured liv
 
 | class | skill | rank | its description | in the default build? | status |
 |---|---|---|---|---|---|
-| ninja | Shadow Step | r4 a | "Dash through shadow and become briefly untouchable." | **yes** | confirmed, unfixed |
-| chronomancer | Time Warp | r6 a | "Implode foes inward and deal damage." | **yes** | confirmed, unfixed |
-| stormcaller | Ball Lightning | r6 a | "A crackling orb that pulls foes in and zaps them." | **yes** | confirmed, unfixed |
-| necromancer | Death Grip | r6 b | "A skeletal grip implodes enemies inward and deals damage." | no (path B) | confirmed, unfixed |
-| stormcaller | Lightning Lance | r2 b | "A piercing bolt through every foe in a line." | no (path B) | confirmed, unfixed |
-| stormcaller | Chain Reaction | r8 b | "A massive electric explosion around your target." | no (path B) | confirmed, unfixed |
-| pirate | Powder Keg | r8 b | "Drop a trap that damages and snares." | no (path B) | confirmed, unfixed |
-| chronomancer | Time Lance | r2 b | "A piercing lance through every foe." | no (path B) | confirmed, unfixed |
-| chronomancer | Singularity | r8 b | "A massive temporal explosion." | no (path B) | confirmed, unfixed |
+| ninja | Shadow Step | r4 a | "Dash through shadow and become briefly untouchable." | **yes** | **fixed `5339f48`** |
+| chronomancer | Time Warp | r6 a | "Implode foes inward and deal damage." | **yes** | **fixed `5339f48`** |
+| stormcaller | Ball Lightning | r6 a | "A crackling orb that pulls foes in and zaps them." | **yes** | **fixed `5339f48`** |
+| necromancer | Death Grip | r6 b | "A skeletal grip implodes enemies inward and deals damage." | no (path B) | **fixed `5339f48`** |
+| stormcaller | Lightning Lance | r2 b | "A piercing bolt through every foe in a line." | no (path B) | **fixed `5339f48`** |
+| stormcaller | Chain Reaction | r8 b | "A massive electric explosion around your target." | no (path B) | **fixed `5339f48`** |
+| pirate | Powder Keg | r8 b | "Drop a trap that damages and snares." | no (path B) | **fixed `5339f48`** |
+| chronomancer | Time Lance | r2 b | "A piercing lance through every foe." | no (path B) | **fixed `5339f48`** |
+| chronomancer | Singularity | r8 b | "A massive temporal explosion." | no (path B) | **fixed `5339f48`** |
 
 Only the first three sit in the rank-10 path-A build every class defaults to, which is why the suite
 reports three and the table lists nine — the other six are one choice away and equally dead.
@@ -94,6 +94,32 @@ they are hit hardest: every skill either class has is an alias, and the alias li
 **It is one fix and it is an ordering fix, not nine handler rewrites** — the bodies all exist and
 are correct. Any fix must be verified by the `dead handler` assertion, which has been watched to
 fail nine times and is therefore believable.
+
+### How it was fixed, and the fix that was NOT taken
+
+`5339f48` re-binds the nine dead names in a late block just above `useSkill`, after every source
+definition exists (`m_beam` 10146, `m_gravity` 10148, `m_overload` 10150, `x_step` 10153, `r_spike`
+10305). Each is written `SKILL_FX.x = SKILL_FX.x || SKILL_FX.<source>`, so it can never blank a name
+a later block has already defined.
+
+**Moving the five alias lines down instead would have been the obvious fix and it is the wrong
+one.** Those five lines carry about thirty aliases that are correct today, and three of them —
+`chr_tempest` (10129), `st_storm` (10084) and `necro_storm` (10078) — deliberately capture the
+ORIGINAL `m_tempest` damage-storm, because `m_tempest` is redefined at 18708 as a pure element buff.
+Moving those lines past 18708 would silently convert three classes' storms into a buff nobody asked
+for, and nothing in this document or the harness would have reported it, because the storms would
+still have handlers. Only the nine dead names are touched.
+
+Proof, in the order it was taken:
+- `node harness/test-skills.js --classes stormcaller chronomancer ninja` — **8 pass / 3 fail before,
+  11 pass / 0 fail after**, the three FAIL lines naming exactly `st_orb`, `chr_gravity`, `nin_step`.
+- A live probe of the whole table: `Object.keys(SKILL_FX).filter(k => typeof SKILL_FX[k] !==
+  'function')` returns **`[]` out of 159 entries**. That is what covers the six path-B skills — the
+  tester's rank-10 default kit never reaches them, so a suite run alone could not have proven them.
+- **Photographed, because typeof is not a picture** (`_shot/out/b-storb-after.png`): the Stormcaller
+  casting Ball Lightning at five dummies renders `m_gravity`'s violet ring on the ground, pulls all
+  five in, lands **15 HITS** with damage numbers over each, and puts the skill on an 11.1s cooldown.
+  Before the fix that cast spent the mana and the cooldown and drew nothing at all.
 
 ---
 
@@ -162,6 +188,76 @@ missing table entry, it is a missing weapon.
 
 This is `docs/VISION.md` priority #2 territory and touches starting-gear balance, so it is
 **Oliver's call**, but the beastmaster line is plainly an omission rather than a decision.
+
+---
+
+## E. FORTY-SIX PASSIVES ARE OFFERED, DESCRIBED, AND NEVER CONSULTED
+
+Found 2026-08-10 by `harness/audit-passives.js`, the passive half of sub-project B Task 3. It is the
+largest single finding in this document — **124 passives in the game, 78 wired, 46 dead** — and it is
+the same shape of fault as section A one level up: the content exists, the menu offers it, and no
+code ever reads it back.
+
+The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
+menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
+`classState(cls).ch[rank]`, and reaches the game only through `c2Passive('<id>')` — 124 call sites
+carry a literal id, between them naming the 78 passives that are wired. An id that no call and no
+other line mentions cannot affect anything, whatever its card says.
+
+Two regions are excluded from the search and getting that wrong makes the audit useless:
+`CLASS2` itself, because a definition is not a use, and **`PASSIVE_ART`, an icon table keyed by every
+passive id in the game** — count that as a reader and all 124 look wired forever. Both are located by
+their own declarations rather than by line number so they cannot drift.
+
+Checked across every `.js` and `.html` under `public/`, not just `index.html`, in case a passive was
+read by the 3D layer. It is not: each of the 46 appears exactly twice, in `CLASS2` and in
+`PASSIVE_ART`.
+
+**Which classes are hollow — eleven of the sixteen, and the pattern is not random.** Counts printed
+by the audit itself on every gate run, so this table cannot drift from the code:
+
+| class | dead / total | the dead ones |
+|---|---|---|
+| stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
+| monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
+| pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
+| ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
+| berserker | 5 / 8 | Heavy Hands, Reckless, Thick Hide, Bloodthirst, Unbreakable |
+| chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
+| necromancer | 3 / 8 | Withering, Plague, Pestilence |
+| paladin | 3 / 7 | Burning Light, Bounce Back, Blessed Blade |
+| skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
+| reaper | 2 / 7 | Harvested Strength, Crimson Harvest |
+| bladedancer | 1 / 8 | Keep Moving |
+| warrior, mage, ninja, warlock, beastmaster | 0 | — |
+
+**The Stormcaller is the worst-hit class in the game twice over** — section A had it missing three of
+its eight *skills*, and it is also missing seven of its eight *passives*. Between the two, almost
+nothing a Stormcaller chooses at any rank has ever affected the game.
+
+The Ranger is the surprise. It is a CORE class, not a variant, and it is the one hand-written kit in
+the dead column — six of eight, including both options at rank 3, both at rank 5, and both at rank 9.
+So a Ranger's rank-3 "choice" is between two passives that each do nothing, three times over.
+
+**This is `docs/VISION.md` priority #2 in the plainest possible terms.** A rank-3 choice between two
+passives that both do nothing is not a build decision, and a class whose entire passive tree is inert
+is a stat-reskin of its core no matter what its cards say.
+
+**Recorded as a ratchet, not as a wall.** The 46 live in `KNOWN_DEAD` in
+`harness/test/passives.test.js`, so the gate stays green on them while a **newly** dead passive fails
+immediately — and the list is checked in both directions, so a passive that gets wired must be taken
+out or the test says so. Working these is sub-project B Task 2, one commit at a time, and each fix
+takes an id off that Set.
+
+**Scope, stated so nobody over-reads it:** this proves WIRED, not CORRECT. A passive read once and
+read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger
+work; this is the floor under it, and the floor is where section A's nine dead skills were found.
+
+**Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
+how a class plays, which is Oliver's territory — but every one of the 46 has an authored description
+stating its intent, so implementing it is delivering the promise already on the card rather than
+inventing a number. Where a description does not say enough to implement (`Greed` — "every 500 gold
+sharpens your blade a little further" names no amount), that one is his.
 
 ---
 

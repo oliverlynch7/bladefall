@@ -219,7 +219,8 @@ This is `docs/VISION.md` priority #2 territory and touches starting-gear balance
 ## E. FORTY-SIX PASSIVES ARE OFFERED, DESCRIBED, AND NEVER CONSULTED
 
 Found 2026-08-10 by `harness/audit-passives.js`, the passive half of sub-project B Task 3. It is the
-largest single finding in this document — **124 passives in the game, 78 wired, 46 dead** — and it is
+largest single finding in this document — **124 passives in the game, 78 wired, 46 dead** when it was
+taken; **79 wired, 45 dead** as of 2026-08-11 (`st_ward`, below) — and it is
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
@@ -243,7 +244,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 
 | class | dead / total | the dead ones |
 |---|---|---|
-| stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
+| stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ — **wired 2026-08-11**) |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
@@ -273,6 +274,57 @@ is a stat-reskin of its core no matter what its cards say.
 immediately — and the list is checked in both directions, so a passive that gets wired must be taken
 out or the test says so. Working these is sub-project B Task 2, one commit at a time, and each fix
 takes an id off that Set.
+
+### E.1 — `st_ward` (Storm Ward) is wired, 2026-08-11 — the first of the 46 to come off the list
+
+"Casting a skill grants a shield equal to 4% max HP." The mage says the same thing in the same words
+(`m_ward`, 10404) and so does the warlock (`war_shield`, 10412), and both are wired; the Stormcaller's
+was not. It is now the same grant, in the same place, gated on `c2Passive('st_ward')` — **no number
+was invented**, the card names it.
+
+Placed AFTER `useSkill`'s `if(r==='refund')` return, unlike the mage's, so a cast the game handed
+back (no target in sight) does not still pay out a shield.
+
+Measured by `harness/probes/stormward.probe.js`, which casts Chain Bolt twice in ONE launch changing
+only the rank-5 choice — the control arm picks `st_momentum`, the sibling option, which is wired and
+does something unrelated:
+
+| arm | before | after |
+|---|---|---|
+| `st_ward` chosen | fired, shield **0** of a wanted 19 | fired, shield **24** of a wanted 24 |
+| `st_momentum` chosen (control) | fired, shield 0 | fired, shield 0 |
+
+One launch, not two, because the shield is 4% of `effMaxHp` and the Arena's level and gear move it
+between runs (477 in the before launch, 593 in the after) — two launches would be comparing two
+different bodies. `node harness/test-skills.js --classes stormcaller` is 4 pass / 0 fail either side.
+
+### E.2 — SIX OF THE STORMCALLER'S EIGHT PASSIVES ARE WRITTEN ABOUT ONE FUNCTION
+
+Found while wiring E.1, and recorded so the next pass does not have to rediscover it. The class's
+chain is `CLASS_BASIC.stormcaller` (~11004): a BASIC attack arcs to **the nearest other enemy within
+260 units for 34%** of the hit, guarded by `p._chaining` so the arc cannot arc. That one arc is the
+entire mechanic, and six of the eight passives modify it:
+
+| id | rank | its card | what the arc does today |
+|---|---|---|---|
+| `st_overcharge` | r3b | "arcs to a third enemy as well as a second" | one jump, never two |
+| `st_charged` | r7a | "your chain jumps twice as far" | radius fixed at 260 |
+| `st_amped` | r7b | "each jump hits harder than the last, not weaker" | flat 34%, one jump |
+| `st_master` | r9a | "a chained enemy is briefly stunned" | no stun |
+| `st_galvanize` | r9b | "chains that find no second target strike the first one twice" | nothing happens |
+| `st_conductor` | r3a | "wet, frozen or shocked enemies chain to everything near them" | no status is read |
+
+So these are not six separate implementations to invent — they are six parameters of a function that
+already exists, each with its number written on its own card. `harness/probes/stormchain.probe.js`
+measures the arc's shape (which bodies it reached, how much each took, whether any was stunned) with
+bystanders at 120 / 200 / 400 units from the primary, so one instrument covers all six and every
+earlier arm stays as a regression check.
+
+**One thing found beside them that is NOT a passive and so is not in the audit's 124:** the
+Stormcaller's rank-10 capstone, Storm Lord, promises "+12% damage, +10% cooldown reduction, and your
+lightning arcs to more enemies." The first two are wired (3726–3728); **the arc clause is not** —
+nothing in `CLASS_BASIC.stormcaller` reads the class rank. A capstone audit would be the same shape
+of cheap static question as the passive one and nothing has asked it yet.
 
 **Scope, stated so nobody over-reads it:** this proves WIRED, not CORRECT. A passive read once and
 read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger

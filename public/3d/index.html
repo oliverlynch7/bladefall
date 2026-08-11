@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10417,6 +10417,11 @@ function useSkill(i){
       if(c2Passive('sky_guard')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.06));p.shieldT=4;}
       if(classState('skylancer').rank>=10){p.jumps=Math.max(0,p.jumps-1);p.vy=Math.max(p.vy,-20);addText(p.x,p.y+p.h+18,p.z,'SKY MASTER','#c9f3ff',true);}
     }
+    // Storm Ward (stormcaller r5b) — "Casting a skill grants a shield equal to 4% max HP". Same
+    // grant as the mage's Rune Ward (10404) and the warlock's Soul Shield (10412), because the three
+    // cards promise the same thing in the same words; no number is invented here. Sits AFTER the
+    // 'refund' return, so a cast the game gave back does not pay out a shield.
+    if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
     let cd=s.cd*(1-effCdr(p)); if(meta.classId==='beastmaster'&&(c2Passive('bst_swift')||c2Passive('bst_handler')))cd*=.88;
     if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))p.beastSpeedT=2;
     if(meta.classId==='beastmaster'&&classState('beastmaster').rank>=10)p.beastBasicEmpower=1;

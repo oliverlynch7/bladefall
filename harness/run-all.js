@@ -14,6 +14,7 @@
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { isDark, suiteLine, suiteOf, reconcile } from './gate-rules.js';
 
 const HERE = import.meta.dirname;
 const REPORT = join(HERE, 'report.json');
@@ -35,9 +36,13 @@ function unitTests(){
 }
 
 /* A suite that is not written yet is SKIPPED, not failed. The plan builds them one at a time and
-   a missing file must not wedge the automation that is meant to be building it. */
+   a missing file must not wedge the automation that is meant to be building it.
+   `missing`, NOT `skipped` — a suite sets `skipped:<reason>` itself when it ran and could not
+   measure (test-mp.js does, when the 3D layer is not live). Those are two different states and
+   collapsing them printed "not written yet" for a file that has existed since Task 5. See
+   gate-rules.js. */
 async function suite(name, file, fn){
-  if(!existsSync(join(HERE, file))) return { skipped: true, pass: 0, fail: 0, failures: [] };
+  if(!existsSync(join(HERE, file))) return { missing: true, pass: 0, fail: 0, failures: [] };
   try {
     const mod = await import('./' + file);
     return await mod[fn]();
@@ -69,11 +74,10 @@ async function main(){
   }
   writeFileSync(REPORT, JSON.stringify(report, null, 2));
 
-  for(const [k, s] of Object.entries(report.suites)){
-    if(s.skipped){ console.log(`${k}: skipped (not written yet)`); continue; }
-    console.log(`${k}: ${s.pass || 0} pass, ${s.fail || 0} fail` +
-                (s.unproven ? `, ${s.unproven.length} unproven` : ''));
-  }
+  /* Which suites produced no verdicts at all. Kept as a set because it decides both what is
+     printed and, below, what the ratchet is allowed to call fixed. */
+  const dark = new Set(Object.entries(report.suites).filter(([, s]) => isDark(s)).map(([k]) => k));
+  for(const [k, s] of Object.entries(report.suites)) console.log(suiteLine(k, s));
 
   if(!existsSync(BASELINE)){
     writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: [...now] }, null, 2));
@@ -82,10 +86,16 @@ async function main(){
   }
 
   const known = new Set(JSON.parse(readFileSync(BASELINE, 'utf8')).known || []);
-  const fresh = [...now].filter(id => !known.has(id));
-  const fixed = [...known].filter(id => !now.has(id));
+  /* A DARK suite's baselined failures are CARRIED, never counted as fixed. `fixed = known - now`
+     alone credits a suite that never looked with every bug it did not report — announcing FIXED and
+     dropping it from the file, which is docs/VISION.md's "missing data is not a negative finding"
+     inverted into a positive one, silently. The flake case the header below reasons about is
+     different and still accepted: a suite that RAN and under-reported shrinks the baseline and the
+     failure returns loudly next run. A suite that did not run leaves nothing to be loud about. */
+  const { fresh, fixed, carried, next } = reconcile(known, now, dark);
   for(const id of fresh) console.log('REGRESSION: ' + id);
   for(const id of fixed) console.log('FIXED: ' + id);
+  for(const id of carried) console.log(`CARRIED (${suiteOf(id)} did not run, so this is unmeasured rather than fixed): ` + id);
 
   if(fresh.length){ console.log(`GATE: FAIL (${fresh.length} new)`); process.exit(1); }
 
@@ -99,10 +109,11 @@ async function main(){
      baseline itself. The direction is safe: if a suite flakes and under-reports, the baseline
      shrinks and the real failure returns as a REGRESSION on the next run - loud, not silent. */
   if(fixed.length){
-    writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: [...now] }, null, 2));
-    console.log(`baseline shrunk: ${known.size} → ${now.size}`);
+    writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: next }, null, 2));
+    console.log(`baseline shrunk: ${known.size} → ${next.length}`);
   }
-  console.log(`GATE: PASS (${now.size} known, ${fixed.length} newly fixed)`);
+  console.log(`GATE: PASS (${next.length} known, ${fixed.length} newly fixed` +
+              (dark.size ? `, ${dark.size} suite(s) DARK: ${[...dark].join(', ')}` : '') + ')');
   process.exit(0);
 }
 

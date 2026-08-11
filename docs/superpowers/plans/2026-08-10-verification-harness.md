@@ -17,7 +17,7 @@
 | 3 skill tester | done | `2a86ea0`, `d7c50de` |
 | 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
 | 5 multiplayer tester | **done** | this run; the plan's probe tested itself — see Task 5 |
-| 6 aggregate gate | done | `34262a6`; baselines not pass/fail. **The ratchet was missing** — see below |
+| 6 aggregate gate | done | `34262a6`; baselines not pass/fail. **The ratchet was missing** — see below. **And a suite that did not run was being reported as an unwritten file AND credited with fixing its own baselined failures** — fixed 2026-08-11, Task 6 Step 4 |
 | 7 autopilot guards | done | `34262a6`, `a3e999c` |
 | 8 re-enable the schedule | not started | — |
 
@@ -953,12 +953,57 @@ not silent.
 Verified live rather than reasoned about: `baseline shrunk: 16 → 4`, `GATE: PASS (4 known, 12 newly
 fixed)`, exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add harness/run-all.js harness/report.json
 git commit -m "harness: one gate whose exit code decides whether autopilot may commit"
 ```
+
+- [x] **Step 4 (added 2026-08-11): THE GATE WAS MISREPORTING A SUITE THAT DID NOT RUN — two faults,
+      one field.** Found by reading a real gate run's printed output against its own `report.json`,
+      which is the only reason it was visible at all: they disagreed.
+
+The run printed `mp: skipped (not written yet)`. `harness/report.json` from the same run held
+`"skipped": "3D hero layer not live (on:false ready:false)"`, for a file that has existed since
+Task 5 and that this plan records as green at 16/0.
+
+**1. Two different states were collapsed into one field.** `run-all.js` set `skipped:true` for a
+MISSING FILE; `test-mp.js` sets `skipped:<reason>` when it RAN and could not measure. The printer
+tested one flag and reported the informative case as the uninformative one, throwing the reason away.
+It matters more than a wording bug: **the mp suite is the one that proves Oliver is not invisible to
+himself in PvP**, and a reader of that output had no way to learn its sixteen assertions had not run.
+A suite that quietly does not run is the green-light-that-cannot-go-red this harness exists to
+prevent, one level up — the same shape as the never-shrinking baseline fixed in Step 2.
+
+**2. THE WORSE HALF, which nobody had noticed: a suite that did not run could SHRINK THE BASELINE.**
+The ratchet computed `fixed = known − now`, and a dark suite contributes nothing to `now` — so every
+one of its baselined failures looked fixed, was announced as `FIXED:`, and was dropped from the file.
+Nobody fixed them; the suite never looked. That is `docs/VISION.md`'s *"missing data is not a negative
+finding"* inverted into a positive one, and silently. Not reachable on the day it was found only
+because no `mp:` failure happens to be baselined right now — which is luck, not a guard.
+
+The flake case `run-all.js`'s own header reasons about is different and is still accepted deliberately:
+a suite that RAN and under-reported shrinks the baseline and the failure returns as a loud REGRESSION
+next run. A suite that did not run leaves nothing to be loud about.
+
+**Fixed in `harness/gate-rules.js`**, a new pure module, for the same reason `parseEval` is one:
+everything else here needs forty minutes and a GPU, so the parts with reasoning in them have to be
+checkable without one. `run-all.js` imports it rather than keeping a copy. `missing` and `skipped`
+are now distinct; a dark suite's baselined ids are CARRIED and printed as such; the `GATE: PASS` line
+names any dark suite.
+
+**Proven by `harness/test/gate.test.js`, 10 tests, and the old rules are transcribed into the test
+file and asserted to DISAGREE** on both cases — `OLD_LINE` really does print "not written yet" for the
+mp reason, and `OLD_FIXED` really does return the mp id as fixed. A test that only says the new
+behaviour is the new behaviour could not tell you the bug was ever real; that is the trap
+`passives.test.js` names as "the two cases must disagree" and the one Task 5 records at length. The
+ratchet's genuine direction is tested too, so this cannot quietly become a baseline that only grows.
+
+**Left open, and stated rather than fixed:** the mp suite went dark because the 3D layer was not live
+in that launch — headless SwiftShader under load. So the suite skips exactly when the machine is
+busy, which is most autopilot runs. It is now LOUD when that happens, which is the floor; making it
+retry or wait longer is a real piece of work and belongs to whoever takes Task 5 again.
 
 ---
 

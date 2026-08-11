@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.908.0-autopilot';
+const VERSION3D='1.909.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12341,8 +12341,17 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
-  /* Headlong drives you forward and refuses to be steered - the whole point of it. */
+  /* Headlong drives you forward and refuses to be steered - the whole point of it.
+     AND IT HAS TO LET GO. _headlongT was set to 0.9 by SKILL_FX.bsk_charge and decremented by
+     nothing, so this condition was true for the rest of the run: one cast and the Berserker flew in
+     a straight line at 760 u/s forever, with vx/vz pinned to zero so no input could stop it. The
+     name appears in exactly two places in the file - set there, read here - which is why it read as
+     a finished mechanic. Measured before the fix (harness/probes/headlong.probe.js): 684 units in
+     the advertised 0.9s, still 0.9 on the clock at 3s, and the hero bouncing off the fell-out-of-
+     the-world rescue and setting off again. 0.9s matches the invuln window the same handler grants,
+     which is plainly the intent. */
   if((G.p._headlongT||0)>0){
+    G.p._headlongT=Math.max(0,G.p._headlongT-dt);
     G.p.x += (G.p._headlongX||0)*760*dt;
     G.p.z += (G.p._headlongZ||0)*760*dt;
     G.p.vx=0; G.p.vz=0;

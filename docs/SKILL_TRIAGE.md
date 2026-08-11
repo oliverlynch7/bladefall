@@ -123,26 +123,46 @@ Proof, in the order it was taken:
 
 ---
 
-## B. Berserker Charge sends you flying, permanently
+## B. Berserker Charge sent you flying, permanently — **RUNAWAY TIMER FIXED**
 
 | class | skill | claims | its description | status |
 |---|---|---|---|---|
-| berserker | Charge | damage | "Rush forward, damaging and stunning in your path." | confirmed, unfixed |
+| berserker | Charge | damage | "Rush forward, damaging and stunning in your path." | runaway dash **fixed**; the missing damage is Oliver's |
 
-Two faults, one skill. `SKILL_FX.bsk_charge` (18761) is the "HEADLONG" redesign: it sets
+Two faults, one skill. `SKILL_FX.bsk_charge` (18782) is the "HEADLONG" redesign: it sets
 `p._headlongT = 0.9` and an invuln window, and deals no damage and applies no stun.
 
-`_headlongT` appears **four times in the whole file** — set once at 18762, read three times at
-12324–12326 to drive the body forward at 760 units/second. **Nothing ever decrements it.** So the
-condition `if((G.p._headlongT||0) > 0)` is true forever after the first cast, and the Berserker
-flies in a straight line for the rest of the run with `vx`/`vz` pinned to zero. The bench saw it
-plainly: the hero's HP went 239 → 477 during the observation window because it had left the fight
-entirely.
+`_headlongT` appears in exactly **two** places in the whole file — set at 18783, read at 12345 to
+drive the body forward at 760 units/second. **Nothing ever decremented it.** So the condition
+`if((G.p._headlongT||0) > 0)` was true forever after the first cast, and the Berserker flew in a
+straight line for the rest of the run with `vx`/`vz` pinned to zero. The bench saw it plainly: the
+hero's HP went 239 → 477 during the observation window because it had left the fight entirely.
 
-The damage half is a **design call and belongs to Oliver**: the handler's own comment says Headlong
-"replac[es] a copy of the Warrior's Charge" and is deliberately a commit-you dash, so the honest
-question is whether the *description* is stale or the *contact damage* was dropped. The runaway
-timer is not a design call and should be fixed either way.
+**Fixed by decrementing the timer where it is read** — `_headlongT = Math.max(0, _headlongT - dt)`
+inside the block at 12345, so the dash lasts the 0.9s the handler advertises and matches the invuln
+window the same handler grants, which is plainly the intent.
+
+Measured, not read, before and after, by `harness/probes/headlong.probe.js` (`--scene arena:flat`):
+
+| | dash length in the first 0.9s | `_headlongT` at 0.9s | at 3s | travelled by 3s | still driven? |
+|---|---|---|---|---|---|
+| before | 684 | 0.9 | 0.9 | 1305 and climbing | **yes** |
+| after | 684 | 0 | 0 | 684 | no |
+
+The dash itself is untouched — 684 units both times, which is `760 × 0.9` exactly. The probe's
+verdict is deliberately KINEMATIC (six more frames, does the body still move) rather than a read of
+the flag, because a timer that expires while something else keeps pushing would satisfy the flag and
+not the player. Photographed either side as well: before, `Deaths 1` and the hero sliding out of
+frame after the fell-out-of-the-world rescue threw him back and the dash set off again
+(`_shot/out/headlong-before.png`); after, `Deaths 0` and the hero standing where the dash ended
+(`headlong-after.png`).
+
+The damage half is a **design call and still belongs to Oliver**: the handler's own comment says
+Headlong "replac[es] a copy of the Warrior's Charge" and is deliberately a commit-you dash, so the
+honest question is whether the *description* is stale or the *contact damage* was dropped. Per this
+plan's own rule the description was NOT edited to match the code. `berserker/Charge:damage` therefore
+stays in `harness/baseline.json` as a known failure, and that is correct — the gate should keep
+reporting it until he decides.
 
 ---
 

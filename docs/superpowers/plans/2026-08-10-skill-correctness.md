@@ -214,6 +214,23 @@ git commit -m "baseline: <class>/<skill> fixed"
 
 Then return to Step 1 with the next unfixed row.
 
+#### Passes completed
+
+One line per pass, so the next run can see what has been taken without re-reading the triage list.
+
+| pass | row | commit | how it was proven |
+|---|---|---|---|
+| 1 | **B — berserker Headlong flew forever** | this run | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+
+**Pass 1's proof did NOT come from `test-skills.js`, and that is the point worth carrying forward.**
+The harness reports `berserker/Charge:damage`, and the damage half is Oliver's design call — so the
+suite's verdict on this row cannot move whether the bug is fixed or not, and waiting for it to would
+have meant either leaving a game-breaking fault in place or editing the description to make a green
+light appear. The runaway timer needed its own measurement, and it got one: a committed probe with a
+kinematic bar (six frames after the window — did the body still move) that was watched to fail
+against the unfixed game before it was believed. **A triage row can contain more than one fault, and
+only some of them are the harness's to see.**
+
 ---
 
 ### Task 3: Passives, which nothing has checked yet

@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.920.0-autopilot';
+const VERSION3D='1.920.1-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10017,7 +10017,7 @@ function class2Innate(p,dt){
   if((p.warSpeedT||0)>0)p.warSpeedT-=dt;
   if((p.bdParryT||0)>0)p.bdParryT-=dt;if((p.bdFlowT||0)>0)p.bdFlowT-=dt;if((p.bdCapT||0)>0)p.bdCapT-=dt;
   if((p.skyTailT||0)>0)p.skyTailT-=dt;
-  if((p._ambushT||0)>0)p._ambushT-=dt;   // Ambusher: the 3s window the card gives you after Tumble/Shadowstrike
+  if((p._ambushT||0)>0)p._ambushT-=dt;if((p._ambushCd||0)>0)p._ambushCd-=dt;   // Ambusher: the 3s window after Tumble/Shadowstrike, and the 6s ration between bonuses
   if(meta.classId==='skylancer'&&c2def('skylancer')){
     if(!p.onGround&&p.vy<0){const slow=c2Passive('sky_float')?.45:.20;p.vy+=1500*slow*dt;}
     if(p._skyWasGround===false&&p.onGround){
@@ -11038,9 +11038,15 @@ const CLASS_BASIC = {
        docs/SKILL_TRIAGE.md section E that the menu offers, describes and no code ever read. All three
        numbers are the card's own - nothing invented.
        The 6s gate is checked at the SPEND, not at the arm: the card rations the BONUS, and rationing
-       the arm instead would let a cast inside the cooldown quietly eat a window it could not use. */
-    if((p._ambushT || 0) > 0 && (G.time - (p._ambushAt == null ? -99 : p._ambushAt)) >= 6){
-      p._ambushT = 0; p._ambushAt = G.time;
+       the arm instead would let a cast inside the cooldown quietly eat a window it could not use.
+       A COUNTDOWN, not a `G.time` stamp, and that is deliberate. `newG` sets `time:0` for every area
+       (3814/4189/13390) while the player object carries its own fields across, so a stamp taken at
+       G.time 300 sits in the FUTURE after the next area loads and `G.time - stamp` goes negative -
+       which would lock this bonus out for that whole area. Four existing sites in this file use the
+       stamp form and inherit that hazard; a countdown decremented beside _ambushT cannot have it, and
+       it is what tacticalT, bdFlowT and focusT already do. */
+    if((p._ambushT || 0) > 0 && (p._ambushCd || 0) <= 0){
+      p._ambushT = 0; p._ambushCd = 6;
       addText(e.x, e.y + e.h + 26, e.z, 'AMBUSH', '#9fe0ff', true);
       return dmg * k * 1.2;
     }

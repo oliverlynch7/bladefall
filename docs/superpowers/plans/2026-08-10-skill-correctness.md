@@ -140,6 +140,26 @@ produced by Task 1 is the only source of targets.**
 - Modify: `public/3d/index.html`
 - Modify: `docs/SKILL_TRIAGE.md`
 
+#### Passes taken so far (newest last). The steps below stay unticked — they are the loop body.
+
+| pass | row | what shipped | proof |
+|---|---|---|---|
+| 1 | section A — nine skills with no handler | `5339f48`, late re-bind of the nine dead aliases | suite 8/3 → 11/0 on the three affected classes; `SKILL_FX` has 0 non-functions of 159; photographed |
+| 2 | section B — berserker Charge's runaway `_headlongT` | `update()` decrements the timer it was only ever setting | `harness/probes/headlong.probe.js`: timer 0.9 → **0**, movement in the 5th second 583 → **0**, dash 684 = 760 × 0.9. Before shot has the hero dead in the void with `Deaths 1` |
+
+**A pass does not have to close a whole row, and pass 2 did not.** `berserker/Charge:damage` is still
+a FAIL line and still in the baseline, because the missing contact damage is a design question the
+plan's own rules hand to Oliver. What was fixed is the half that is not a design question in either
+direction — a 0.9-second dash that lasted the whole run. Splitting the row that way is the honest
+move: the alternative is either leaving a level-removing bug in the game because the row also
+contains a balance call, or answering the balance call unasked.
+
+**And the row's own claim check could not see the bug.** `test-skills.js` reported it as a damage
+failure, which is a different fault; the runaway timer was visible only in the number nobody was
+asserting on (the hero's HP climbing 239 → 477 as it left the fight and was rescued). A pass may
+therefore need its own probe, and `headlong.probe.js` states its bar in its header *before* taking
+any reading so the result cannot be fitted to it.
+
 - [ ] **Step 1: Take the top unfixed row and confirm it still fails**
 
 ```bash

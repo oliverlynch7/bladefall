@@ -12341,8 +12341,17 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
-  /* Headlong drives you forward and refuses to be steered - the whole point of it. */
+  /* Headlong drives you forward and refuses to be steered - the whole point of it. It also has to
+     STOP, and for its whole life it did not: bsk_charge sets _headlongT=0.9 (18783) and this was the
+     only other line in the file that mentioned the field, so the condition stayed true for the rest
+     of the run and the Berserker flew in a straight line at 760 u/s forever, unsteerable, with vx/vz
+     pinned to zero. Measured before the fix at --scene arena:flat: the timer read 0.9 five seconds
+     after the cast and the body still covered 583 units in that fifth second.
+     Decremented here, the same idiom the enemy timers three lines below use. The dash's DAMAGE is a
+     separate and still-open question (docs/SKILL_TRIAGE.md section B) - this only makes the 0.9s
+     window last 0.9 seconds. */
   if((G.p._headlongT||0)>0){
+    G.p._headlongT=Math.max(0,G.p._headlongT-dt);
     G.p.x += (G.p._headlongX||0)*760*dt;
     G.p.z += (G.p._headlongZ||0)*760*dt;
     G.p.vx=0; G.p.vz=0;

@@ -94,7 +94,11 @@ const KNOWN_DEAD = new Set([
   'x_strength', 'x_crimson',
   'pal_burn', 'pal_bounce', 'pal_blessed',
   'necro_wither', 'necro_plague', 'necro_pest',
-  'bsk_heavy', 'bsk_reckless', 'bsk_thick', 'bsk_blood', 'bsk_tough',
+  /* bsk_thick came OFF this list on 2026-08-11 (sub-project B Task 2, pass 5): "damage that would
+     drop you below 1 HP leaves you at 1 instead, once per fight" is now a death save in hurtPlayer
+     beside necro_undying and Rewind, proven by harness/probes/thickhide.probe.js — four trials in one
+     launch, watched to fail against the shipped game. */
+  'bsk_heavy', 'bsk_reckless', 'bsk_blood', 'bsk_tough',
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
   'chr_potent', 'chr_slow', 'chr_echo', 'chr_freeze',
   'mon_iron', 'mon_fire', 'mon_flow', 'mon_killer', 'mon_still', 'mon_master',

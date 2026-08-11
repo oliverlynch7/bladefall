@@ -223,8 +223,8 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 79 wired / 45 dead**: `st_ward` (Storm Ward) was wired 2026-08-11, the first row of this
-section to be worked. See "Rows taken" at the end of this section.
+**Now 80 wired / 44 dead**: `st_ward` (Storm Ward) and `bsk_thick` (Thick Hide) were wired
+2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -250,7 +250,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
-| berserker | 5 / 8 | Heavy Hands, Reckless, Thick Hide, Bloodthirst, Unbreakable |
+| berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 3 / 7 | Burning Light, Bounce Back, Blessed Blade |
@@ -299,6 +299,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | row | commit | how it was proven |
 |---|---|---|
 | **stormcaller / Storm Ward** (`st_ward`, r5 b) — "Casting a skill grants a shield equal to 4% max HP." | 2026-08-11 | `harness/probes/stward.probe.js`, A/B in ONE launch |
+| **berserker / Thick Hide** (`bsk_thick`, r5 a) — "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | 2026-08-11 | `harness/probes/thickhide.probe.js`, FOUR trials in one launch |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -317,6 +318,43 @@ casts report `onCd:true`, so a zero can never be a cast that silently never happ
 
 (Max HP differs between the two runs — the Arena rolls its own loadout — which is why the probe
 computes the expected number from the live `effMaxHp` rather than hard-coding one.)
+
+**Thick Hide was taken second for the same reason, and it is a DEATH SAVE, which the file already
+has three of.** `necro_undying` spends a minion on a killing blow (11244), the chronomancer's Rewind
+puts you back three seconds (11252), and the pet's One Pack leaves the companion at 1 HP
+(`hurtPet`, 11285). So the fourth is a known shape in a function that already branches for it, and
+`1 HP` is written on the card. **The one thing not written on the card is what a "fight" is** — and
+that number was not invented either: `pal_thick`, forty lines above in the same function, already
+defines a fight as ending after five seconds without being hit, and says so in its own comment. The
+stamp is written where damage actually LANDS, past every early return, so a dodge, a brace or a
+fully-absorbed hit cannot hold a fight open forever and quietly turn "once per fight" into once per
+run.
+
+**Four trials in one launch, because a save that fires every time is as wrong as one that never
+fires.** The A/B is between the two options at the same rank in the same game; trials 3 and 4 are
+what make it *once per fight* rather than *once*:
+
+| trial | picked | HP before | HP after | died? |
+|---|---|---|---|---|
+| 1 control | `bsk_blood` (b-side, wired, not a death save) | 119 | 477 (respawn) | **yes** |
+| 2 thick | `bsk_thick` | 119 | **1** | no |
+| 3 again — same fight, no ticks between | `bsk_thick` | 119 | 477 | **yes**, the save is spent |
+| 4 rearm — 6.3s untouched, then hit | `bsk_thick` | 119 | **1** | no |
+
+**Death is read from the game, not inferred.** In the Arena `die()` is `arenaRespawn()`, which
+increments `G.arenaScore.b`, so a trial "died" when the game's own counter moved — and every trial is
+therefore recoverable, which is why all four fit in one launch. Not read off `p.dead`: arenaRespawn
+clears it in the same synchronous call. Watched to fail first: against the shipped game all four
+trials died, `hpAfter 477` every time.
+
+Photographed as well, and the HUD carries the whole result in two numbers
+(`_shot/out/thick-after.png`): **HP 1 / 477** and **Deaths 2** — the two unsaved trials, and the two
+saved ones leaving exactly 1. Before: `thick-before.png`.
+
+*One honest limitation:* the probe leaves the Arena's off-class sword in the hero's hands, unlike
+`stward.probe.js`. `hurtPlayer` never reads `classFamilyOk`, so nothing measured here depends on it —
+but a probe of anything on the dealing-damage side must equip through `classStartWeapon()` as the
+bench does.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

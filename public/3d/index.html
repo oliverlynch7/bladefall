@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.913.0-autopilot';
+const VERSION3D='1.914.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11224,6 +11224,11 @@ function hurtPlayer(dmg,sx,sz,by){
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
+  /* THICK HIDE is "once per FIGHT", and this file already has a definition of a fight: pal_thick
+     above rearms after five seconds without being hit. Stamped HERE, past every early return, so
+     only a hit that actually landed keeps a fight alive — a dodge, a brace or an absorbed hit would
+     otherwise hold the window open forever and turn "once per fight" into once per run. */
+  if(meta.classId==='berserker'){ if((G.time-(p._thickHitT||-99))>5) p._thickUsed=false; p._thickHitT=G.time; }
   if(by) G.lastHitBy = (typeof by==='string')?{name:by,attack:''}:by;   // remember what just hit us — the death screen names the killer
   if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(meta.classId==='paladin'&&c2Passive('pal_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
@@ -11241,6 +11246,18 @@ function hurtPlayer(dmg,sx,sz,by){
   /* UNDYING, rewritten. Was "take 12% less damage" - a number. Now a killing blow consumes a
      MINION instead, if you have one, which makes the Necromancer's army its health bar and gives
      "keep summons up" a consequence you can feel. */
+  /* THICK HIDE. "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight."
+     Wired 2026-08-11 — it was one of the 45 passives in docs/SKILL_TRIAGE.md section E that the rank
+     menu offers, describes, and no code has ever read. It sits with the other death saves rather
+     than anywhere new (necro_undying just below, the chronomancer's Rewind under that, the pet's One
+     Pack in hurtPet) and needs no number invented: 1 HP is what the card says, and the hit's own
+     p.invuln=0.7 above already covers the moment after, so this grants no window of its own. */
+  if(p.hp<=0 && meta.classId==='berserker' && c2def('berserker') && c2Passive('bsk_thick') && !p._thickUsed){
+    p._thickUsed=true; p.hp=1;
+    addText(p.x,p.y+52,p.z,'THICK HIDE','#e0a05a',true);
+    try{ burst(p.x,p.y+18,p.z,'#e0a05a',12); }catch(e){}
+    hudUpdate(); return;
+  }
   if(p.hp<=0 && c2Passive('necro_undying') && G.minions && G.minions.length){
     const m=G.minions.pop();
     p.hp=Math.max(1,Math.round(effMaxHp(p)*0.22));

@@ -27,7 +27,24 @@
    paladin/Taunt - every one of them naming a skill the bench had not cast. The 62 passes were no
    better founded; both lists are full of damage skills, so a damage claim was usually satisfied by
    whatever did fire. THE FIX IS ONE LINE - read from the list that gets cast - and it is the reason
-   the baseline had to be re-taken rather than compared. */
+   the baseline had to be re-taken rather than compared.
+
+   ── AND THEN IT CAST THE RIGHT SKILL IN A STATE THE GAME DOES NOT ALLOW. ──
+   useSkill calls fx(p, classFamilyOk(p.weapon), am), and a great many SKILL_FX bodies gate their
+   defining half on that second argument - harvest's heal is `if(hit && ok)`. The bench swapped
+   meta.classId and left the weapon alone. The Arena hands you a Keen Legendary SWORD, so, measured
+   in one launch across all sixteen classes, ELEVEN of them were casting off-class: ranger, mage,
+   reaper, necromancer, berserker, chronomancer, monk, stormcaller, warlock, skylancer, beastmaster.
+   Every `if(ok)` branch in eleven kits was skipped, and the suite called the result a bug.
+   It is not even a state a player can reach: index.html:13220 HARD BLOCKS equipping off-class
+   ("C1: hard block, not a damage penalty"), so the bench was the only thing in the world that could
+   stand there. The fix equips the class's own starter through the game's own classStartWeapon().
+
+   Three classes have no in-family starter to equip, which is a GAME bug this found rather than a
+   harness one - berserker (family great/axe/hammer, starter 'sword'), pirate (family
+   sword/cross/javelin/axe, starter 'flintlock') and beastmaster (family bow/javelin, absent from
+   CLASSSTART entirely so it falls back to the warrior's sword). Each is reported in the result's
+   `weapon.note` so a reader can see which classes were measured on a borrowed or forced weapon. */
 import { runScenario } from './drive.js';
 import { claimsOf, isIndirectDamage } from './claims.js';
 
@@ -62,58 +79,214 @@ const PROBE = (classId) => `(function(){
   __BF3.cheatUnlockClasses(); __BF3.cheatRank10All();
   __BF3.meta.classId = ${JSON.stringify(classId)};
   const G = __BF3.G, p = G.p;
+
+  /* EQUIP ON-CLASS, through the game's own classStartWeapon(). See the header: with the Arena's
+     sword still in hand, eleven of sixteen classes cast with ok=false and every "if(ok)" half of
+     their kit was skipped. Preference order is deliberate - the class's OWN starter first, then any
+     other class's starter that happens to land in this family, and only then the anyClass override,
+     because each fallback is a weaker claim about what a player would actually be holding. */
+  let weaponNote = 'none';
+  (function(){
+    const tries = [${JSON.stringify(classId)}].concat(Object.keys(__BF3.CLASSES || {}));
+    for(let i = 0; i < tries.length; i++){
+      let w = null; try { w = __BF3.classStartWeapon(tries[i]); } catch(e){}
+      if(w && __BF3.classFamilyOk(w)){
+        p.weapon = w;
+        weaponNote = (i === 0) ? 'own starter' : ('in-family starter borrowed from ' + tries[i]);
+        return;
+      }
+    }
+    let w = null; try { w = __BF3.classStartWeapon(${JSON.stringify(classId)}); } catch(e){}
+    if(w){ w.anyClass = true; p.weapon = w;
+           weaponNote = 'FORCED anyClass - no starter in the game lands in this class family'; }
+  })();
+  const onClass = __BF3.classFamilyOk(p.weapon);
+
+  /* 5s, not 2s. Three skills in the game promise a four-second window in their own text - mage
+     Attunement "a 4s storm", reaper Soul Siphon "drain ... for 4s", beastmaster Guardian Bond
+     "for 4s" - and a tick loop that ends before the effect does cannot see it. */
+  const TICKS = 300;
+
+  const mkDummy = () => {
+    /* A fresh dummy per skill, at a fixed distance in front, so one skill's kill cannot mask the
+       next skill's no-op. Huge HP so nothing dies and disappears mid-measurement.
+       EXACTLY the rig the baseline proved: a grunt at 60 units, awake, drop-in timer cleared. */
+    G.enemies.length = 0;
+    let d = null;
+    try {
+      d = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+      if(d){ d.active = true; d.dropT = 0; d.maxHp = 100000; d.hp = 100000; }
+    } catch(e){}
+    return d;
+  };
+  const reset = () => {
+    p.hp = Math.round((p.maxHp || 100) * 0.5);       // damaged, so a heal has room to show
+    p.mana = p.maxMana || 999;
+    p.yaw = Math.PI; G.camYaw = Math.PI;             // face the dummy for aimed skills
+  };
+  /* PROTECTION IS THREE FIELDS AND TWO BODIES, and reading one of them was a bug of its own.
+     p.shieldHp is an absorb pool; p.guardT is the BRACE (index.html:11155, "if(p.guardT>0)
+     dmg*=0.4") and is what "brace behind your shield" compiles to; and beastmaster Guardian Bond
+     shields the COMPANION - pet.shieldHp (10111), not the player's. The old probe read
+     p.shieldHp only, so it failed paladin Shield Bash, paladin Taunt and Guardian Bond for not
+     doing something none of them ever claimed to do to that field. */
+  const petShield = () => {
+    let s = 0;
+    const pet = G.pet;
+    if(pet && !pet.dead) s = Math.max(s, pet.shieldHp || 0);
+    for(const m of (G.minions || [])) s = Math.max(s, (m && m.shieldHp) || 0);
+    return s;
+  };
+  /* guardT is clamped at 0 because it decays PAST zero (-0.0166 was read live), and a "before" of
+     -0.0166 makes a plain 0 afterwards look like protection was gained. */
+  const guardOf = () => Math.max(0, p.guardT || 0);
+  const snap = (d) => ({ tgt: d ? d.hp : null, hp: p.hp, minions: (G.minions || []).length,
+                         shield: p.shieldHp || 0, guard: guardOf(), petShield: petShield() });
+  const watch = (d, before) => {
+    const a = { tgt: before.tgt, hp: before.hp, minions: before.minions,
+                shield: before.shield, guard: before.guard, petShield: before.petShield };
+    for(let k = 0; k < TICKS; k++){
+      try { __BF3.update(1/60); } catch(e){}
+      if(p.hp > a.hp) a.hp = p.hp;
+      if((p.shieldHp || 0) > a.shield) a.shield = p.shieldHp || 0;
+      if(guardOf() > a.guard) a.guard = guardOf();
+      const ps = petShield(); if(ps > a.petShield) a.petShield = ps;
+      const mn = (G.minions || []).length; if(mn > a.minions) a.minions = mn;
+      if(d && d.hp < a.tgt) a.tgt = d.hp;
+    }
+    return a;
+  };
+
+  /* WHERE WAS THE GAME STANDING? useSkill's first guard is "if(mode!=='play'||!G) return;" and its
+     second is "if(p.dead||p.downed) return;", and NEITHER spends a cooldown - so a bench that has
+     wandered out of play reports every skill as "fired and did nothing", which is indistinguishable
+     from a real bug and is how this probe lied about the whole paladin kit once. Logged per phase,
+     so the next reader is told rather than left to reproduce it. */
+  const phases = [];
+  const mark = (tag) => phases.push({ at: tag, mode: __BF3.mode, dead: !!p.dead,
+                                      downed: !!p.downed, hp: Math.round(p.hp) });
+  /* Measured: one launch in six came up in mode 'pause' before the probe had done anything, and
+     every skill in that class then reported "fired and changed nothing". Escape is the game's own
+     resume door (index.html:7765, "else if(mode==='pause'){ resumeGameAudio(true); resumePlay(); }")
+     and resumePlay is not exported, so knock on the door rather than reach through the wall. */
+  if(__BF3.mode !== 'play'){
+    mark('arrived not in play');
+    for(const t of [window, document]){
+      try { t.dispatchEvent(new KeyboardEvent('keydown', { code:'Escape', key:'Escape', bubbles:true })); } catch(e){}
+    }
+    /* A synthetic keydown did NOT resolve it on the one run it was tried against, so also press the
+       card's own Resume button - openPause renders navCard('resBtn', ...). Both are the game's own
+       doors; neither reaches past them. */
+    if(__BF3.mode !== 'play'){
+      const b = document.querySelector('#resBtn, #restop, .pausecard #resBtn');
+      if(b){ try { b.click(); } catch(e){} }
+    }
+  }
+  mark('start');
+
+  /* DRIFT CONTROL: the identical window with no cast at all. Measured, and it matters - the player
+     regenerates about 1 HP a second, so over a 5s window a skill that heals nothing still shows
+     +5 HP. Every threshold below is "beat the drift", not "beat zero".
+     IT RUNS FIRST, BEFORE ANY SWING, and that ordering is the whole point of it being a control.
+     The first version ran the rig test above it and the numbers came back nonsense - drift.hp 238
+     (the player healed from half to FULL during a window in which nothing was cast) and drift.tgt
+     77 (the dummy lost 77 HP with no skill used). playerAttack leaves the swing chain running, so
+     the "control" was measuring a player mid-combo with lifesteal, and every real heal in the game
+     was then judged against a bar no heal could clear. */
+  let drift;
+  { const d = mkDummy(); reset();
+    const sw0 = p.swingId;
+    const b = snap(d), a = watch(d, b);
+    drift = { hp: a.hp - b.hp, shield: a.shield - b.shield, guard: a.guard - b.guard,
+              petShield: a.petShield - b.petShield, minions: a.minions - b.minions,
+              tgt: b.tgt != null ? (b.tgt - a.tgt) : 0,
+              /* WHO HURT THE DUMMY WITH NOTHING CAST? Measured: 506 HP for the paladin, 218 for
+                 the beastmaster. These three name the suspects - the player swung anyway, the pet
+                 fought on its own, or something else is in the room. */
+              swung: p.swingId !== sw0, pet: !!(G.pet && !G.pet.dead),
+              enemies: (G.enemies || []).length };
+  }
+  mark('after drift control');
+
   /* READ FROM THE LIST useSkill CASTS FROM, which is not curSkills(). See the header. */
   const skills = (__BF3.c2CurSkills ? __BF3.c2CurSkills() : null) || __BF3.curSkills() || [];
+  const FX = __BF3.SKILL_FX || {};
   const R = [];
   for(let i = 0; i < skills.length; i++){
     const s = skills[i]; if(!s) continue;
-    /* A fresh dummy per skill, at a fixed distance in front, so one skill's kill cannot mask the
-       next skill's no-op. Huge HP so nothing dies and disappears mid-measurement. */
-    G.enemies.length = 0;
-    let dummy = null;
-    try {
-      /* EXACTLY the rig the baseline proved: a grunt at 60 units, awake, drop-in timer cleared.
-         The first version used a 'dummy' at 90 units and reported skills as dealing no damage
-         while a plain attack could not hurt it either - two variables at once, and the harness
-         blamed the game for both. Never diverge this from BASELINE without re-proving BASELINE. */
-      dummy = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
-      if(dummy){ dummy.active = true; dummy.dropT = 0; dummy.maxHp = 100000; dummy.hp = 100000; }
-    } catch(e){}
-    p.hp = Math.round((p.maxHp || 100) * 0.5);      // damaged, so a heal has room to show
-    p.mana = p.maxMana || 999;
+    const dummy = mkDummy();
+    reset();
+    mark('before ' + (s.n || i));
     if(p.skillCd) p.skillCd[i] = 0;
-    p.yaw = Math.PI; G.camYaw = Math.PI;             // face the dummy for aimed skills
-    const before = { tgt: dummy ? dummy.hp : null, hp: p.hp,
-                     minions: (G.minions || []).length, shield: p.shieldHp || 0 };
+    const before = snap(dummy);
     let threw = null;
     try { __BF3.useSkill(i); } catch(e){ threw = String((e && e.message) || e); }
-    let peakHp = p.hp, peakShield = p.shieldHp || 0, peakMinions = (G.minions || []).length;
-    let minTgt = dummy ? dummy.hp : null;
-    for(let k = 0; k < 120; k++){                    // 2s: travel time, dots, buff windows
-      try { __BF3.update(1/60); } catch(e){}
-      if(p.hp > peakHp) peakHp = p.hp;
-      if((p.shieldHp || 0) > peakShield) peakShield = p.shieldHp || 0;
-      if((G.minions || []).length > peakMinions) peakMinions = (G.minions || []).length;
-      if(dummy && dummy.hp < minTgt) minTgt = dummy.hp;
-    }
-    R.push({ n: s.n, d: s.d || '', threw: threw, hadTarget: !!dummy,
-             before: before,
-             after: { tgt: minTgt, hp: peakHp, minions: peakMinions, shield: peakShield },
-             onCd: !!(p.skillCd && p.skillCd[i] > 0) });
+    /* READ THE COOLDOWN NOW, not after the window. "Did the cast take" is a question about the
+       moment of casting, and once the window grew to 5s every skill with a cooldown of 5s or less
+       had already come back off it - beastmaster Sic 'Em and chronomancer Slow Field both reported
+       onCd:false while plainly having fired, which fails every control and buff claim they make. */
+    const onCd = !!(p.skillCd && p.skillCd[i] > 0);
+    const after = watch(dummy, before);
+    R.push({ n: s.n, d: s.d || '', fx: s.fx || null,
+             live: s.fx ? (typeof FX[s.fx] === 'function') : null,
+             threw: threw, hadTarget: !!dummy, before: before, after: after, onCd: onCd });
   }
-  return JSON.stringify({ cls: ${JSON.stringify(classId)}, results: R });
+  mark('after skills');
+
+  /* CAN THIS CLASS'S WEAPON DRAW BLOOD AT ALL? The global BASELINE proves the spawn geometry with
+     the Arena's legendary sword; this asks the same question of the battered starter each class is
+     now measured with, because a damage verdict is only worth having if a plain swing lands.
+     DEAD LAST, for the reason written on the drift control: it leaves the player swinging. */
+  let canHit = false;
+  { const d = mkDummy(); reset();
+    const h0 = d ? d.hp : 0;
+    for(let k = 0; k < 240 && d; k++){
+      try { if(__BF3.playerAttack) __BF3.playerAttack(); } catch(e){}
+      try { __BF3.update(1/60); } catch(e){}
+      if(d.hp < h0){ canHit = true; break; }
+    } }
+  mark('after rig test');
+
+  return JSON.stringify({ cls: ${JSON.stringify(classId)}, onClass: onClass, canHit: canHit,
+                          weapon: { name: p.weapon && p.weapon.name, art: p.weapon && p.weapon.art,
+                                    note: weaponNote },
+                          drift: drift, phases: phases, results: R });
 })()`;
 
 /* control and buff are checked as "the cast actually happened" because their effect is not one
-   field - a stun lives on the target's state machine, a buff on a timer. A skill that never fires
-   also never goes on cooldown, which is the failure Oliver actually saw. */
-const SATISFIED = {
+   field - a stun lives on the target's state machine, a buff on a timer. That check is WEAK on its
+   own: useSkill spends the cooldown before it looks up the handler, so a skill with no handler at
+   all still comes back onCd. The separate `live` assertion below is what covers that hole.
+
+   TWO BARS, NOT ONE, AND THE DRIFT IS THE SECOND ONE - never the first.
+   MET asks "did the promised thing happen at all", which is the original bar and the one that
+   decides FAIL. CLEARS_NOISE asks "by more than the same window with nothing cast", and it decides
+   only whether a pass is believable. The drift is real and it is large: measured live, the
+   beastmaster's companion fights on its own and takes 165 HP off the dummy with no skill used, and
+   the warrior heals 238 unprompted in five seconds.
+   The first version of this subtracted the drift inside the FAIL bar, and it immediately invented
+   two bugs - reaper/Reap and paladin/Last Stand, both of which visibly heal - because it demanded
+   a heal beat a noise floor made of the class's own passive healing. Per VISION.md, missing data
+   is not a negative finding: noise makes an answer inconclusive, never wrong. */
+const MET = {
   damage:  (b, a) => a.tgt != null && a.tgt < b.tgt,
   heal:    (b, a) => a.hp > b.hp,
-  shield:  (b, a) => a.shield > b.shield,
+  /* Any of the game's three protections, on either body it can land on. See petShield() above. */
+  shield:  (b, a) => a.shield > b.shield || a.guard > b.guard || a.petShield > b.petShield,
   summon:  (b, a) => a.minions > b.minions,
   control: (b, a, r) => r.onCd,
   buff:    (b, a, r) => r.onCd,
+};
+const CLEARS_NOISE = {
+  damage:  (b, a, dr) => a.tgt < b.tgt - (dr.tgt || 0),
+  heal:    (b, a, dr) => a.hp > b.hp + (dr.hp || 0),
+  shield:  (b, a, dr) => a.shield > b.shield + (dr.shield || 0)
+                      || a.guard > b.guard + (dr.guard || 0)
+                      || a.petShield > b.petShield + (dr.petShield || 0),
+  summon:  (b, a, dr) => a.minions > b.minions + (dr.minions || 0),
+  /* onCd is a yes/no, not a magnitude, so it has no noise floor to clear. */
+  control: () => true,
+  buff:    () => true,
 };
 
 export async function runSkillTests(opts){
@@ -130,17 +303,54 @@ export async function runSkillTests(opts){
 
   const failures = [];
   const unproven = [];
+  const benches = [];      // what each class was actually measured holding - published, not implied
   let pass = 0;
+  /* 'arrived not in play' is excluded from the stray test: that mark is taken BEFORE the probe
+     knocks on the game's own resume door, and the next mark says whether it opened. */
+  const strayedIn = (got) => (got.phases || [])
+    .filter(x => x.at !== 'arrived not in play')
+    .filter(x => x.mode !== 'play' || x.dead || x.downed);
+
   for(const cls of classes){
     let got;
     try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls) }); }
     catch(e){ failures.push({ cls, skill: '(class)', claim: 'load', text: '', detail: e.message.slice(0, 200) }); continue; }
+    /* ONE RETRY, and only for a bench that is KNOWN to have measured nothing. Measured: roughly one
+       launch in six comes up in mode 'pause' before the probe has done anything, and useSkill's
+       first guard returns without spending a cooldown - so the class reports four skills that
+       "fired and changed nothing", which is indistinguishable from four real bugs. A retry here is
+       not papering over a flaky assertion; the assertion is that the game was in play, it failed,
+       and the run it guarded is void. */
+    if(strayedIn(got).length){
+      try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls) }); }
+      catch(e){ failures.push({ cls, skill: '(class)', claim: 'load', text: '', detail: e.message.slice(0, 200) }); continue; }
+    }
+    benches.push({ cls, onClass: got.onClass, canHit: got.canHit,
+                   weapon: got.weapon, drift: got.drift, phases: got.phases });
+    const strayed = strayedIn(got);
+    if(strayed.length){
+      failures.push({ cls, skill: '(class)', claim: 'bench left play', text: '',
+                      detail: JSON.stringify(strayed[0]) + ' (twice, so not a flake)' });
+      continue;
+    }
     for(const r of got.results){
       if(r.threw){ failures.push({ cls, skill: r.n, claim: 'throw', text: r.d, detail: r.threw }); continue; }
+      /* DOES THIS SKILL HAVE A HANDLER AT ALL? SKILL_FX is built by aliasing, and an alias written
+         above the definition it copies - `SKILL_FX.chr_gravity = SKILL_FX.m_gravity` at 10129 when
+         m_gravity is defined at 10148 - silently stores undefined. useSkill does
+         `const fx = SKILL_FX[s.fx], r = fx ? fx(...) : null`, so the cast spends the cooldown and
+         the mana and does nothing whatsoever. No claim check can catch it: the damage ones report
+         it as a damage bug, and the control/buff ones PASS it, because onCd is true.
+         This assertion has been watched to fail nine times, which is why it is believed. */
+      if(r.live === false){
+        failures.push({ cls, skill: r.n, claim: 'dead handler', text: r.d,
+                        detail: `SKILL_FX.${r.fx} is not a function - the cast spends its cooldown and does nothing` });
+        continue;
+      }
       const claims = claimsOf(r.d);
       if(!claims.length){ pass++; continue; }          // promises nothing, so nothing to check
       for(const c of claims){
-        if(c === 'damage' && (!r.hadTarget || !canMeasureDamage)){
+        if(c === 'damage' && (!r.hadTarget || !canMeasureDamage || got.canHit === false)){
           unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'bench cannot measure damage' });
           continue;                                    // the bench cannot see damage; do not accuse
         }
@@ -151,19 +361,32 @@ export async function runSkillTests(opts){
           unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'indirect or conditional promise' });
           continue;
         }
-        const ok = SATISFIED[c] ? SATISFIED[c](r.before, r.after, r) : true;
-        if(ok) pass++;
-        else failures.push({ cls, skill: r.n, claim: c, text: r.d,
-                             detail: JSON.stringify({ before: r.before, after: r.after, onCd: r.onCd }) });
+        const met = MET[c] ? MET[c](r.before, r.after, r) : true;
+        if(!met){
+          failures.push({ cls, skill: r.n, claim: c, text: r.d,
+                          detail: JSON.stringify({ before: r.before, after: r.after,
+                                                   drift: got.drift, onCd: r.onCd,
+                                                   weapon: got.weapon }) });
+          continue;
+        }
+        const clear = CLEARS_NOISE[c] ? CLEARS_NOISE[c](r.before, r.after, got.drift || {}) : true;
+        if(clear) pass++;
+        else unproven.push({ cls, skill: r.n, claim: c, text: r.d,
+                             why: 'happened, but inside the bench noise floor ' + JSON.stringify(got.drift) });
       }
     }
   }
-  return { pass, fail: failures.length, failures, unproven, baseline };
+  return { pass, fail: failures.length, failures, unproven, baseline, benches };
 }
 
 if(import.meta.filename === process.argv[1]){
   const only = process.argv[3] ? process.argv.slice(3) : null;
   runSkillTests(only ? { classes: only } : undefined).then(r => {
+    for(const b of r.benches){
+      const d = b.drift || {};
+      if(!b.onClass || b.canHit === false || (b.weapon && b.weapon.note !== 'own starter') || d.tgt || d.hp)
+        console.log(`BENCH ${b.cls}: ${b.weapon && b.weapon.name} (${b.weapon && b.weapon.art}) — ${b.weapon && b.weapon.note}, onClass ${b.onClass}, canHit ${b.canHit}, drift ${JSON.stringify(d)}`);
+    }
     for(const f of r.failures) console.log(`FAIL ${f.cls}/${f.skill} claims ${f.claim}: "${f.text}" ${f.detail}`);
     if(!r.baseline.ok) console.log(`BENCH: cannot measure damage (${r.baseline.why}) — ${r.unproven.length} damage claims UNPROVEN, not failed`);
     console.log(`skills: ${r.pass} pass, ${r.fail} fail, ${r.unproven.length} unproven`);

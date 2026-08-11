@@ -48,15 +48,40 @@ The current `harness/baseline.json` was recorded BEFORE the claim parser was fix
 - Delete then regenerate: `harness/baseline.json`
 - Create: `docs/SKILL_TRIAGE.md`
 
-- [ ] **Step 1: Regenerate the baseline with the current parser**
+- [x] **Step 1: Regenerate the baseline with the current parser** — done, and **the parser was not
+      the only thing that had to be fixed first.** Regenerating against the bench as it stood would
+      have recorded eight rows of which four were artefacts, so this step turned into repairing the
+      bench and only then recording. Four faults, each found by measurement:
 
-```bash
-rm -f harness/baseline.json && node harness/run-all.js
-```
+  1. **It cast off-class.** `useSkill` calls `fx(p, classFamilyOk(p.weapon), am)` and a great many
+     handlers gate their defining half on that argument (`harvest`'s heal is `if(hit && ok)`). The
+     bench swapped `meta.classId` and left the Arena's Keen Legendary **sword** in hand. Probed for
+     all sixteen classes in one launch: **eleven were casting off-class** — ranger, mage, reaper,
+     necromancer, berserker, chronomancer, monk, stormcaller, warlock, skylancer, beastmaster. The
+     game HARD BLOCKS that state (`index.html:13220`), so the bench was the only thing in the world
+     that could stand there. Fixed by equipping through the game's own `classStartWeapon()`.
+  2. **It read protection from one field on one body** — `p.shieldHp` only, missing `p.guardT` (the
+     brace, `11155`) and the companion's `pet.shieldHp` (`10111`).
+  3. **It read the cooldown five seconds after the cast**, so once the window grew to 5s every skill
+     with a cooldown of 5s or less reported `onCd:false` and failed every control and buff claim.
+  4. **It sometimes measured a PAUSED game.** ~1 launch in 6 arrives in `mode:'pause'`, and
+     `useSkill` returns on that guard *without spending a cooldown* — four skills that "fired and
+     changed nothing", indistinguishable from four real bugs. The probe now logs the mode at every
+     phase, knocks on the game's own resume door, and the suite re-runs a class whose bench is known
+     to have measured nothing.
 
-Expected: a fresh `harness/baseline.json`, and `GATE: PASS (baseline recorded — N known failures)`. N should be well below 15.
+  Two further corrections, both to changes made in this same step:
+  - **A drift control must not be subtracted inside the FAIL bar.** It was, and it immediately
+    invented two bugs — `reaper/Reap` and `paladin/Last Stand`, both of which visibly heal — because
+    the noise floor is made of the class's own passive healing (the warrior heals **238** unprompted
+    in 5s; the beastmaster's pet takes **165** off the dummy with nothing cast). Drift now only
+    downgrades a met claim to *unproven*, never to *failed*.
+  - **The rig test has to run LAST.** `playerAttack` leaves the swing chain running, so a control
+    window placed after it measured a player mid-combo with lifesteal.
 
-- [ ] **Step 2: Write the triage list**
+  Result: **67 pass / 6 fail / 2 unproven**, from 8 baselined failures of which four were artefacts.
+
+- [x] **Step 2: Write the triage list** — `docs/SKILL_TRIAGE.md`, four sections.
 
 Create `docs/SKILL_TRIAGE.md` with one row per surviving failure, taken from `harness/report.json`:
 
@@ -73,7 +98,24 @@ description, on a bench that proved it can measure the effect in question.
 
 Fill one row per entry in the regenerated baseline. `status` starts as `confirmed, unfixed`.
 
-- [ ] **Step 3: Commit**
+**What it actually contains, so Task 2 has its targets without re-reading the whole file:**
+
+- **A. NINE skills have no handler at all, and it is ONE ordering fault.** `SKILL_FX` is built by
+  aliasing and five alias lines sit above the definitions they copy, so each stores `undefined`:
+  `necro_grip`, `nin_step`, `st_lance`, `st_orb`, `st_overload`, `pir_spike`, `chr_beam`,
+  `chr_gravity`, `chr_overload`. `useSkill` does `fx ? fx(...) : null`, so the cast spends mana and
+  cooldown and does nothing. Three are in the default rank-10 build (ninja Shadow Step, chronomancer
+  Time Warp, stormcaller Ball Lightning); the Stormcaller has **three of eight skills dead**. This
+  is the closest match in the game to Oliver's report and it is the obvious first Task 2 target.
+- **B. Berserker Charge flies forever.** `_headlongT` is set to 0.9 at 18762 and appears four times
+  in the file; nothing decrements it, so the body is driven at 760 u/s in a straight line for the
+  rest of the run. The missing damage is a design call; the runaway timer is not.
+- **C. Two stale descriptions** (mage Attunement, ranger Tumble) — Oliver's, per this plan's own
+  "never fix a skill by editing its description" rule.
+- **D. Three classes cannot equip their own starting weapon** (berserker, pirate, beastmaster) —
+  starting-gear balance, so Oliver's, but the beastmaster is plainly a missing `CLASSSTART` entry.
+
+- [x] **Step 3: Commit**
 
 ```bash
 git add harness/baseline.json docs/SKILL_TRIAGE.md

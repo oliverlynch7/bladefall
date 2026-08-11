@@ -178,8 +178,13 @@ Non-negotiable:
   changing the logic - duplicate function bodies have burned three sessions.
 - If you cannot verify it, revert it and note the item blocked. Never commit unverified work.
 
-- WORK THE PLAN: docs/superpowers/plans/2026-08-10-verification-harness.md. Take the first task
-  whose steps are not all ticked, do that ONE task, tick its steps, commit.
+- WORK THE PLANS, in this order. Take the first task whose steps are not all ticked, do that ONE
+  task, tick its steps, commit. When a plan has no unticked task left, move to the next one.
+    1. docs/superpowers/plans/2026-08-10-verification-harness.md   (sub-project A - the harness)
+    2. docs/superpowers/plans/2026-08-10-skill-correctness.md      (sub-project B - skills that lie)
+  Task 8 of plan 1 is OLIVER'S and is already done on his machine; do not attempt it.
+  Plan 2 Task 4 is a LOOP - one bug per pass, one commit per pass. Finishing a single pass and
+  stopping is a complete unit of work, so never rush two fixes into one run.
 - SUB-PROJECTS A-D ONLY: verification harness, skill correctness, level completability, multiplayer.
 - You may NOT author new zones (Sunspire Palace, Ruined Keep, The Outskirts). Those wait for Oliver.
 - You may not commit unless `node harness/run-all.js` exits 0.

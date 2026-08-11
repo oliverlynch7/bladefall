@@ -88,6 +88,20 @@ async function main(){
   for(const id of fixed) console.log('FIXED: ' + id);
 
   if(fresh.length){ console.log(`GATE: FAIL (${fresh.length} new)`); process.exit(1); }
+
+  /* THE RATCHET. This header has always promised that "fixing a baselined failure shrinks the
+     baseline", and until now nothing ever wrote the file a second time - so the list only grew
+     stale. A failure fixed in one run stayed "known" forever, which means it could come back the
+     next day and the gate would wave it through as something it already knew about. Exactly the
+     failure this whole harness exists to prevent, one level up: a green light that stops meaning
+     anything.
+     Rewritten only on a GREEN run, never when `fresh` is non-empty, so a regression can never
+     baseline itself. The direction is safe: if a suite flakes and under-reports, the baseline
+     shrinks and the real failure returns as a REGRESSION on the next run - loud, not silent. */
+  if(fixed.length){
+    writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: [...now] }, null, 2));
+    console.log(`baseline shrunk: ${known.size} → ${now.size}`);
+  }
   console.log(`GATE: PASS (${now.size} known, ${fixed.length} newly fixed)`);
   process.exit(0);
 }

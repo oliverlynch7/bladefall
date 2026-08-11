@@ -17,7 +17,7 @@
 | 3 skill tester | done | `2a86ea0`, `d7c50de` |
 | 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
 | 5 multiplayer tester | **done** | this run; the plan's probe tested itself — see Task 5 |
-| 6 aggregate gate | done | in `34262a6`; baselines instead of pass/fail, see the file |
+| 6 aggregate gate | done | `34262a6`; baselines not pass/fail. **The ratchet was missing** — see below |
 | 7 autopilot guards | done | `34262a6`, `a3e999c` |
 | 8 re-enable the schedule | not started | — |
 
@@ -454,9 +454,49 @@ if(require.main === module){
 Run: `node harness/test-skills.js`
 Expected: a list of `FAIL <class>/<skill> claims <claim>` lines and a summary. Failures here are the BUG Oliver reported, not a broken test — but confirm the next step before believing any of them.
 
-- [ ] **Step 4: Validate against a known-good and a known-bad case**
+- [x] **Step 4: Validate against a known-good and a known-bad case** — done, and **the tester was
+      wrong: 11 of its 15 failures were false.**
 
 Pick one skill the tester reports as PASSING and one it reports as FAILING. Play each in the real game (`--scene arena:flat`, screenshot before/after) and confirm the verdict matches what actually happens. If a passing skill visibly does nothing, or a failing skill visibly works, the tester is wrong and must be fixed BEFORE any game code is touched.
+
+This step is the reason the first gate run's 16 "known failures" must not be read as a bug list. It
+did not need a screenshot to settle: the accusations were checked against the skills' own text and
+against the game's data, and eleven of them were the parser mis-reading English. Every description
+below is real, copied out of `harness/report.json`.
+
+| Skill | Its own text | What the parser did | Why that is wrong |
+|---|---|---|---|
+| warlock/Shadow Bolt | "…powered by a sliver of your **health**" | claimed **heal** | `\bheal` matches the first four letters of *health*. The skill SPENDS health; it was failed for not restoring any — accused of the exact opposite of what it does. |
+| paladin/Guard Up | "**Raise a holy shield** that absorbs damage" | claimed **summon** | The "raise a shield is not a summon" rule already existed and required the noun right after the article. One adjective defeated it. |
+| ninja/Blade Fury, berserker/Berserk | "+damage and attack speed for a few seconds" | claimed **damage** | The buff rule needed a digit (`+35%`, `for 6s`). The game mostly does not write them that way. |
+| monk/Stillness | "…more damage and speed" | claimed **damage** | Same: a bare comparative is as much a buff promise as a percentage. |
+| beastmaster ×4 | "**Command** your companion to lunge", "**Unleash** your companion…" | claimed **summon** | `companion` was a summon keyword. All 18 companion lines in the game were checked: every one commands, buffs or restores a pet that is already out. Not one summons anything. |
+| pirate/Cannonade, warlock/Curse Circle | "Mark foes to explode **on death**", "so **your spells** hit them harder" | claimed **damage** | Neither deals damage on cast — one waits for the target to die, the other makes a *different* source hit harder. The bench casts once at a 100000-HP dummy that never dies and is never hit by anything else, so it cannot observe either. Now UNPROVEN, per VISION.md: "Missing data is not a negative finding." |
+
+**Result: skills went 58 pass / 15 fail → 62 pass / 4 fail / 3 unproven, with no new failure and no
+game code touched.** The eight pre-existing parser tests still pass, so this is a correction rather
+than a re-fit; the eleven descriptions are now regression tests of their own.
+
+**Measured, not assumed, and it mattered once:** reclassifying the Beastmaster commands moved
+`Sic 'Em` from a summon claim to `['control','damage']`, and its damage is dealt by the COMPANION —
+another agent, with its own pathing. That looked like it would need the indirect rule widened. It
+was left alone and re-run instead, and the pet lands its hit inside the 2s window, so the claim
+passes honestly. Widening the rule would have blinded the harness to a whole class of skill for no
+reason.
+
+**THE FOUR THAT SURVIVE ARE THE REAL BUG LIST — sub-project B starts here.** All four fire
+(`onCd:true`) and then do nothing measurable:
+
+| Skill | Claim | Measured |
+|---|---|---|
+| warrior/Charge | damage | target 100000 → 100000 |
+| mage/Nova | damage | target 100000 → 100000 |
+| reaper/Soul Harvest | heal | hp 239 → 239 |
+| paladin/Taunt | shield | shield 0 → 0 |
+
+Charge is the one `run-all.js`'s own header already names as the bug Oliver hit in PvP. These are
+NOT fixed here: the tester had to be trustworthy first, which was this step's whole point, and a
+damage number is a balance call that belongs to Oliver.
 
 - [ ] **Step 5: Commit**
 
@@ -628,6 +668,24 @@ quests are served by whoever is standing there. That population turns over as yo
 probes of Emberdeep read 11, 11, 7 and 8 magmaskit and 1, 1, 10 and 5 ember totems, total pinned
 at 52 every time. A live head-count is a snapshot, not a supply. Adding dens settles it and
 changes how hard the level fights back.
+
+**AND THAT SNAPSHOT WAS BEING REPORTED AS A VERDICT, which turned the whole gate red on a run that
+had not touched a level.** Recorded here because it cost a full 40-minute gate cycle to find.
+Emberdeep's `ed1` wants 11 magmaskit; the fifth probe of that same level read **9**, so `run-all.js`
+reported `REGRESSION: levels:Emberdeep/quest:ed1` and refused the commit. Nothing had changed — the
+run's only edits were to the claim parser. The numbers above were already in this document; they
+say plainly that this measurement flaps, and it was still wired to a pass/fail.
+
+So a kill quest is a verdict only when it has a DEN behind it (a den respawns every 2s while fewer
+than 5 are alive — an infinite supply, so a shortfall means something). Without one, the probe now
+returns `denned:false` and `test-levels.js` routes the shortfall to **unproven** with its numbers
+intact, the same treatment the walker's unfinished routes get and for the same reason. Everything
+deterministic — `find`, placed `fetch`, marks, and any kill quest that does have a den — stays a
+verdict, so the five uncompletable levels this task found are still caught.
+
+Levels went **37 pass / 1 fail / 10 unproven → 37 pass / 0 fail / 11 unproven**. The one that moved
+was The Abyss's `ab1` (blink-stalkers, 6 alive against 10 wanted) — the same den-less head-count,
+and it had been sitting in the baseline as a failure since the first gate run.
 
 - [x] **Step 4: Commit** — `8a8f766` (tester + probe + `--eval @file`), `8dcc77f` (the game fix)
 
@@ -820,10 +878,24 @@ async function main(){
 main().catch(e => { console.error(e); process.exit(1); });
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Run it** — and **the baseline never shrank, so the gate could only ever get weaker.**
 
 Run: `node harness/run-all.js`
 Expected: per-suite counts, `harness/report.json` written, and a `GATE:` line. A FAIL here is expected on first run — it is the bug backlog for sub-projects B and C.
+
+`run-all.js`'s own header has always promised that "fixing a baselined failure shrinks the baseline;
+that is the whole point of the exercise". It never did: the file was written once, when it did not
+exist, and after that only ever read. So a failure fixed today stayed `known` forever, and could
+come back tomorrow to a gate that waved it through as something it already knew about — the same
+green-light-that-cannot-go-red failure this harness exists to prevent, one level up.
+
+It now rewrites the baseline on a GREEN run only, never when `fresh` is non-empty, so a regression
+can never baseline itself. The direction is deliberately the safe one: if a suite flakes and
+under-reports, the baseline shrinks and the real failure returns as a REGRESSION next run — loud,
+not silent.
+
+Verified live rather than reasoned about: `baseline shrunk: 16 → 4`, `GATE: PASS (4 known, 12 newly
+fixed)`, exit 0.
 
 - [ ] **Step 3: Commit**
 

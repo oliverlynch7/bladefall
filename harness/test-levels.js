@@ -67,9 +67,24 @@ export async function runLevelTests(opts){
       /* Completability: deterministic, so these ARE verdicts. Each verb is checked against what
          the game itself uses to satisfy it - the probe's header says which line of index.html. */
       for(const q of got.quests){
-        if(q.have >= q.need) pass++;
-        else failures.push({ zone:name, area, check:'quest:' + q.id,
-                             detail:`${q.k} needs ${q.need}, level provides ${q.have} — "${q.d}"` });
+        if(q.have >= q.need){ pass++; continue; }
+        /* A KILL QUEST WITH NO DEN IS A SNAPSHOT, NOT A SUPPLY, so a shortfall is not a verdict.
+           The den-less terrain zones are served by whoever happens to be standing there, and that
+           population turns over as you watch: Emberdeep reads 11, 11, 7, 8 and then 9 magmaskit
+           across five probes of the SAME level against a quest that wants 11. It duly turned the
+           gate red as a "regression" on a run that never touched a level - which is how a gate
+           stops being believed. Recorded with its numbers, never accused.
+           The underlying gap is real and it is OLIVER'S: adding dens settles it and changes how
+           hard the level fights back, which is balance. Everything deterministic - find, placed
+           fetch, marks, and any kill quest that HAS a den - stays a verdict, so the five
+           uncompletable levels Task 4 found are still caught. */
+        if(/^kill:/.test(q.k) && !q.denned){
+          unproven.push({ zone:name, area, check:'quest:' + q.id,
+                          detail:`${q.k} wants ${q.need}, ${q.have} alive and no den — head-count, not supply — "${q.d}"` });
+          continue;
+        }
+        failures.push({ zone:name, area, check:'quest:' + q.id,
+                        detail:`${q.k} needs ${q.need}, level provides ${q.have} — "${q.d}"` });
       }
     }
   }

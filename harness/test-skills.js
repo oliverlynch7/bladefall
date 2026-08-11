@@ -14,7 +14,7 @@
    in the arena because the arena's own reset does not create it. A probe that reads undefined and
    compares it to undefined reports every skill as passing. */
 import { runScenario } from './drive.js';
-import { claimsOf } from './claims.js';
+import { claimsOf, isIndirectDamage } from './claims.js';
 
 /* THE RIG MUST PROVE ITSELF FIRST.
 
@@ -125,8 +125,15 @@ export async function runSkillTests(opts){
       if(!claims.length){ pass++; continue; }          // promises nothing, so nothing to check
       for(const c of claims){
         if(c === 'damage' && (!r.hadTarget || !canMeasureDamage)){
-          unproven.push({ cls, skill: r.n, claim: c, text: r.d });
+          unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'bench cannot measure damage' });
           continue;                                    // the bench cannot see damage; do not accuse
+        }
+        /* Damage owed by another source ("your spells hit them harder") or owed on a condition the
+           bench never meets ("explode on death" - the dummy has 100000 HP and never dies) is not
+           damage this rig can observe. Inconclusive, not broken. See claims.js:INDIRECT. */
+        if(c === 'damage' && isIndirectDamage(r.d)){
+          unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'indirect or conditional promise' });
+          continue;
         }
         const ok = SATISFIED[c] ? SATISFIED[c](r.before, r.after, r) : true;
         if(ok) pass++;

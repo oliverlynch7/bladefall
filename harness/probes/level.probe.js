@@ -31,15 +31,22 @@
   const marksFor = (id) => (G.qmarks || []).filter(m => m.q === id).length;
   for(const q of (__BF3.areaQuests() || [])){
     const need = q.n || 1;
-    let have = 0, how = q.k;
-    if(q.k === 'kill'){ have = (dens[q.mob] ? need : 0) + (alive[q.mob] || 0); how = 'kill:' + q.mob; }
+    let have = 0, how = q.k, denned = false;
+    /* `denned` travels with the answer because it says what KIND of number `have` is. With a den it
+       is a SUPPLY and a shortfall is a real verdict. Without one it is a live head-count - who
+       happens to be standing here this second - and the terrain zones, which build no dens, churn
+       it: four probes of Emberdeep read 11, 11, 7 and 8 magmaskit against a quest that wants 11.
+       That is a coin flip, and it duly flipped the whole gate red as a "regression" on a run that
+       had not touched a level. test-levels.js routes those to unproven instead of accusing them. */
+    if(q.k === 'kill'){ have = (dens[q.mob] ? need : 0) + (alive[q.mob] || 0); how = 'kill:' + q.mob;
+                        denned = !!dens[q.mob]; }
     else if(q.k === 'fetch'){
       if(q.placed){ have = (G.pickups || []).filter(u => u.questItem && u.questItem.id === q.id).length; how = 'fetch:placed'; }
       else { have = mobs; how = 'fetch:drops'; }
     }
     else if(q.k === 'find'){ have = (G.waystone && G.waystone.q === q.id) ? 1 : 0; how = 'find'; }
     else have = marksFor(q.id);
-    quests.push({ id: q.id, k: how, need: need, have: have, d: q.d || '' });
+    quests.push({ id: q.id, k: how, need: need, have: have, denned: denned, d: q.d || '' });
   }
 
   /* ---- traversal ------------------------------------------------------------------------

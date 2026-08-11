@@ -2,7 +2,7 @@
    plausible-looking ones would test the parser against my idea of the game rather than the game. */
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { claimsOf } from '../claims.js';
+import { claimsOf, isIndirectDamage } from '../claims.js';
 
 test('a plain damage skill', () => {
   assert.deepStrictEqual(claimsOf('Sweeping strike: 2.2x damage in a wide arc'), ['damage']);
@@ -45,4 +45,46 @@ test('a shield that absorbs damage claims neither summon nor damage', () => {
 
 test('a real summon still reads as one', () => {
   assert.deepStrictEqual(claimsOf('Raise a skeleton to fight for you').sort(), ['summon']);
+});
+
+/* ── The eleven below are the false failures the first full gate run produced. Each description is
+   real, copied out of harness/report.json, and each one accused a skill that works. ── */
+
+test('a buff with no number in it is still a buff, not a damage skill', () => {
+  /* Ninja/Blade Fury and Berserker/Berserk, word for word. The old rule needed a digit. */
+  assert.deepStrictEqual(claimsOf('+damage and attack speed for a few seconds'), ['buff']);
+  /* Monk/Stillness. */
+  assert.deepStrictEqual(claimsOf('Enter a blinding assault: more damage and speed'), ['buff']);
+});
+
+test('HEALTH is not HEAL', () => {
+  /* Warlock/Shadow Bolt. It SPENDS health; it was failed for not restoring any. */
+  assert.deepStrictEqual(claimsOf('A fast void bolt powered by a sliver of your health'), ['damage']);
+});
+
+test('a raised shield is a shield however many adjectives it has', () => {
+  /* Paladin/Guard Up. "Raise a shield of bone" already passed; one adjective broke it. */
+  assert.deepStrictEqual(claimsOf('Raise a holy shield that absorbs damage'), ['shield']);
+});
+
+test('commanding a companion is not summoning one', () => {
+  /* All four Beastmaster commands. Checked against the game: nothing here creates a pet. */
+  assert.deepStrictEqual(claimsOf("Command your companion to lunge, strike, and briefly stun").sort(),
+                         ['control', 'damage']);
+  assert.deepStrictEqual(claimsOf('You and your companion pincer the target'), []);
+  assert.deepStrictEqual(claimsOf('Unleash your companion at peak strength'), []);
+  assert.deepStrictEqual(claimsOf('Restore your companion and yourself over time'), ['heal']);
+});
+
+test('a healing STAT in a buff is not a heal cast', () => {
+  assert.deepStrictEqual(claimsOf('For 8s your companion gains +35% damage/healing, +30% speed'),
+                         ['buff']);
+});
+
+test('damage owed by someone else, or owed later, is flagged as indirect', () => {
+  assert.ok(isIndirectDamage('Mark foes to explode on death'));                        // Pirate/Cannonade
+  assert.ok(isIndirectDamage('Mark nearby foes so your spells hit them harder'));      // Warlock/Curse Circle
+  /* A skill that hits NOW must not be excused by this. */
+  assert.ok(!isIndirectDamage('Sweeping strike: 2.2x damage in a wide arc'));
+  assert.ok(!isIndirectDamage('Rush forward, damaging and stunning enemies in your path'));
 });

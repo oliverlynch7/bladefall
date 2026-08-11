@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10402,6 +10402,11 @@ function useSkill(i){
     if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
     G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
+    /* STORM WARD (st_ward, r5b) is the Mage's Arcane Ward under another name — same card, same 4%,
+       and the Stormcaller is a Mage variant. It was one of the 46 passives in SKILL_TRIAGE.md
+       section E that nothing in the game ever read. Written in the mage's exact idiom (10404) so
+       the two cannot drift, and `Math.max` so a cast can never SHRINK a bigger shield already up. */
+    if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;

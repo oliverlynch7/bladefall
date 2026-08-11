@@ -243,7 +243,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 
 | class | dead / total | the dead ones |
 |---|---|---|
-| stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
+| stormcaller | ~~7 / 8~~ **6 / 8** | Conductor, Overcharge, ~~Storm Ward~~, Charged, Amped, Static Master, Galvanize |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
@@ -273,6 +273,63 @@ is a stat-reskin of its core no matter what its cards say.
 immediately — and the list is checked in both directions, so a passive that gets wired must be taken
 out or the test says so. Working these is sub-project B Task 2, one commit at a time, and each fix
 takes an id off that Set.
+
+### E1. `stormcaller/Storm Ward` — **FIXED 2026-08-11**, and it needed no number invented
+
+The first row taken off the 46. **Storm Ward is the Mage's Arcane Ward under another name**, which
+is what makes it the cheapest one in the section and the right one to open with:
+
+| | its card |
+|---|---|
+| mage r5b `m_ward` Arcane Ward | "Casting a skill grants a shield equal to 4% max HP **for 3s**." |
+| stormcaller r5b `st_ward` Storm Ward | "Casting a skill grants a shield equal to 4% max HP." |
+
+Same passive, same rank slot, same 4%, and the Stormcaller is a Mage variant. `m_ward` has been
+wired at `index.html:10404` the whole time; `st_ward` was read by nothing. So the fix is the mage's
+own line with the class id changed — **no duration and no percentage had to be chosen**, which is
+what keeps this out of Oliver's balance territory. `Math.max` so a cast can never shrink a bigger
+shield already up, the same guard the mage/warlock/skylancer wards all carry.
+
+**Proven by `harness/probes/ward.probe.js`, watched to fail first.** The static audit could not be
+the proof on its own — it only asks whether the id appears in the file, so writing `st_ward` in a
+comment would turn it green. The probe drives the game's own `useSkill()` and reads the player's
+own shield pool.
+
+**Its bar is an A/B inside ONE launch, and that is the load-bearing part.** `p.shieldHp` is written
+by Arcane Ward, Barrier, Bone Armor, Guardian Bond and Sky Guard, so a lone "shield went up"
+reading cannot tell Storm Ward from any of them, nor from a bench that arrived with a shield
+already standing. The same stormcaller casts the same Chain Bolt twice; the only difference is
+whether rank 5 is `st_momentum` (the sibling it is chosen *instead of*) or `st_ward`. A fix that
+handed every stormcaller a shield regardless of the choice would fail this probe as loudly as no
+fix at all.
+
+| | ward chosen | sibling chosen | cast fired |
+|---|---|---|---|
+| before | **0** | 0 | both `onCd:true` |
+| after | **19** (`shieldT 3`) | 0 | both `onCd:true` |
+
+19 is exactly `round(477 × 0.04)` on the bench hero, which the probe reports as `expectAbout`
+rather than asserting on — pinning the integer would make it fail on an armour roll instead of on
+the passive. Both casts put the skill on cooldown in both runs, so "nothing happened" was never an
+option the numbers left open.
+
+Corroborated by the frame the same launch wrote (`_shot/out/ward-after.png`): Stormcaller · Tempest,
+Rank 10, **HP 477/477** — the same max the probe computed — Chain Bolt landing **118** on the dummy
+and slot 1 sitting on a **1.8s** cooldown. The picture and the numbers are of the same cast.
+
+*One thing the frame shows that is deliberately not a fault here:* the bench is holding a
+**BURNING LEGENDARY SWORD ⚠ OFF-CLASS**, which is bench fault 1 at the top of this document, unfixed
+in this probe. It cannot reach this row — the new line is
+`meta.classId==='stormcaller' && fx && c2Passive('st_ward')` and takes no `ok` argument, exactly like
+the mage's — so the weapon cannot change the verdict. Said out loud rather than left to be
+rediscovered: a probe for any row whose handler gates on `ok` must equip through
+`classStartWeapon()` first, the way `test-skills.js` now does.
+
+Passives: **124 total, 46 dead → 45 dead**; stormcaller 7/8 → 6/8. Its other six all describe a
+LIGHTNING CHAIN, and there is no chain in the game to hang them on — `SKILL_FX.st_bolt` is a plain
+alias of the mage's `m_bolt` (10124), so "Chain Bolt … a bolt that leaps between foes" does not
+leap either. That is a mechanic to build, not a passive to wire, and it is much larger than one
+pass of this loop.
 
 **Scope, stated so nobody over-reads it:** this proves WIRED, not CORRECT. A passive read once and
 read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger

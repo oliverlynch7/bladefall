@@ -98,7 +98,9 @@ const KNOWN_DEAD = new Set([
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
   'chr_potent', 'chr_slow', 'chr_echo', 'chr_freeze',
   'mon_iron', 'mon_fire', 'mon_flow', 'mon_killer', 'mon_still', 'mon_master',
-  'st_conductor', 'st_overcharge', 'st_ward', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
+  /* st_ward came off this list 2026-08-11 — Storm Ward now grants its 4% shield in useSkill,
+     proven by harness/probes/ward.probe.js, which was watched to fail against the unfixed game. */
+  'st_conductor', 'st_overcharge', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
   'sky_high', 'sky_eye', 'sky_armor',
   'bd_flow',
 ]);

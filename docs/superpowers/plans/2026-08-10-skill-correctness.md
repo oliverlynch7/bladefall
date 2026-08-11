@@ -222,7 +222,26 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `a724d69` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — `stormcaller/st_ward` was dead** | this run | `harness/probes/ward.probe.js`, watched to fail first; A/B on the rank-5 choice in one launch: 0 / 0 before, 19 / 0 after |
+
+**Pass 4 opened section E, the 46 dead passives, and the row was chosen for the same reason pass 3
+was taken before any more game work: it is the one that needs nothing invented.** `st_ward` is the
+Mage's `m_ward` under another name — same card, same rank slot, same 4%, and the Stormcaller is a
+Mage variant — so the fix is an existing wired line with the class id changed. VISION.md puts
+balance numbers in Oliver's column, and the way to work section E without crossing that line is to
+take the rows whose number is already written down somewhere in the game.
+
+**The static audit could not be this pass's proof and it is worth saying why**, because it is the
+same trap as the multiplayer probe that asserted on its own assignment. `audit-passives.js` asks
+whether the id appears in `public/` outside CLASS2 and the icon table — so writing `st_ward` in a
+*comment* turns it green. It proves WIRED, never CORRECT. The behavioural probe is the verdict and
+the audit is the ratchet that stops the row coming back.
+
+**And a single "the shield went up" reading would have been worth little**: five different things
+write `p.shieldHp`. The probe's bar is therefore an A/B on the rank-5 CHOICE inside one launch, so
+a fix that shields every stormcaller regardless of what they picked fails it exactly as loudly as
+no fix at all.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

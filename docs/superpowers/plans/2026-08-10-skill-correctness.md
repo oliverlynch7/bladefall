@@ -214,6 +214,34 @@ git commit -m "baseline: <class>/<skill> fixed"
 
 Then return to Step 1 with the next unfixed row.
 
+#### TWO FINISHED PASSES WERE SITTING IN `git stash`, AND NOTHING WAS GOING TO LOOK FOR THEM
+
+Found 2026-08-11 by reading `_autopilot.log` rather than the repo. Three consecutive runs each
+verified a fix, waited for `run-all.js`, and were killed before the commit — and the next run's
+killed-run guard answered the dirty tree with `git stash push -u`. The work was never lost, never
+committed, and never mentioned in any file a later run reads. `AUTOPILOT.md` warns about exactly
+this ("it is recoverable … but nobody looks"); this is what nobody looking costs.
+
+Recorded by **stash commit sha, not by `stash@{n}`** — the index shifts every time the guard fires,
+which is the reason a note like this usually rots inside a day:
+
+| sha | run | what is in it |
+|---|---|---|
+| `1260eac` | 07:04–07:31 | **stormcaller Storm Ward (`st_ward`)** wired in `useSkill`, `KNOWN_DEAD` 46→45, `harness/probes/ward.probe.js` + a scouted `thickhide.probe.js` |
+| `7c2fab8` | 07:44–08:15 | **ranger Longshot (`r_longshot`)** wired in `hitEnemy`, `KNOWN_DEAD` 46→45, `harness/probes/longshot.probe.js` |
+
+Both are small, both carry their own probe, and both were reported verified in both directions by
+the run that wrote them. Read one with `git diff <sha>^ <sha>`; its untracked probe is the third
+parent, `git show <sha>^3`.
+
+**The mechanism is worth stating plainly, because it is not a flake and it will do this again.**
+`run-all.js` measured at ~15 minutes wall clock (report `at` 08:34:51Z, file written 08:49). The
+schedule starts a run every 20 minutes. A pass that gates on a full green therefore has ~5 minutes
+to find, fix, prove and commit a bug, or it hands its work to the next run's stash. Committing the
+moment a targeted proof is in — `tools/gate.js` plus the pass's own probe, with `run-all.js` as the
+sweep afterwards — is what `AUTOPILOT.md`'s cadence section already tells a run to do, and the three
+runs above are the cost of the other order.
+
 #### Passes completed
 
 One line per pass, so the next run can see what has been taken without re-reading the triage list.
@@ -222,7 +250,22 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `a724d69` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **G — berserker Frenzy threw on every hit taken and stopped the game loop** | this run | `harness/probes/frenzy.probe.js`, two bars against a same-class control, fail before / pass after; the harness page-error log as a second witness |
+
+**Pass 4 came from READING for the next row, not from the harness, and the harness could never have
+found it.** `test-skills.js` casts skills at a dummy; this bug fires when something hits the PLAYER,
+which no bench in this repo does. It was spotted while reading `hurtPlayer` for section E's paladin
+rows — `v*=1+(1-fr)` in a function with no `v` — and then measured before it was believed, because
+grep cannot prove a negative about scope and a global `v` anywhere would have made the whole reading
+wrong. There was none: a sweep of every `v`-assignment in the file found this the only one outside a
+function that declares its own.
+
+Worth carrying forward for the rest of this plan: **the audit in Task 3 asks whether a passive is
+READ, and a passive can be read WRONGLY.** `bsk_frenzy` has four readers, counted as wired by the
+audit, and three of the four are faults — one crash and two undocumented power spikes (section G).
+A wiring audit is a floor, exactly as Task 3 Step 2 says, and section G is the first proof that the
+ceiling is where the remaining work is.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

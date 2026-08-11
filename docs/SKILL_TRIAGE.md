@@ -369,6 +369,87 @@ because `bd_step` shows what the fix looks like in the same class.
 
 ---
 
+## G. A BERSERKER WHO PICKED FRENZY FROZE THE GAME THE FIRST TIME ANYTHING HIT HIM — **FIXED**
+
+Found 2026-08-11 while reading `hurtPlayer` for section E work, measured immediately after, fixed the
+same run. It is the only row in this document that is not a skill under-delivering; it is a **crash**,
+and it is the most severe thing the sub-project has turned up.
+
+| class | passive | rank | its description | status |
+|---|---|---|---|---|
+| berserker | Frenzy (`bsk_frenzy`) | r7 b | "Your attack speed rises as your health falls, to double at a sliver." | **fixed this run** |
+
+`hurtPlayer` (11199) carried a copy of `effPower`'s Frenzy clause:
+
+```js
+if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=…; v*=1+(1-fr); }}
+```
+
+`v` is `effPower`'s local damage accumulator (3740). In `hurtPlayer` it is a **free identifier**, and
+`v*=` reads before it writes, so it throws `ReferenceError: v is not defined`. The whole file is one
+`"use strict"` IIFE, and a sweep of every `v`-assignment in `public/3d/index.html` found this to be
+the only one outside a function that declares its own — so it is one site, not a pattern.
+
+**Two consequences, and the second is the game-breaking one.**
+
+1. The throw is at 11199, *above* the `p.hp-=dmg` at 11220, so the blow that triggers it deals no
+   damage. A Frenzy berserker is accidentally invulnerable to the first hit — and to every hit.
+2. `update()` therefore throws. `frame()` (18771) calls `update(DT)` at 18775 and re-arms with
+   `requestAnimationFrame(frame)` at 18784, **with no try/catch between them**, so the exception
+   escapes `frame` before the re-arm and the game stops rendering. Not a dropped effect: a freeze.
+
+Frenzy is the rank-7 **b** option, so this is one click on a menu every berserker reaches, and it is
+permanent once taken (choices persist in `classState('berserker').ch`).
+
+### Measured, not read — `harness/probes/frenzy.probe.js`
+
+Static reading cannot prove a negative about scope (a global `v` anywhere would make the whole
+argument wrong), so the probe drives the game. Its control is the OTHER rank-7 option, `bsk_rage`:
+same class, same bench, same blow, one field different. If both had thrown, the fault would have been
+the bench. Two bars, because the first alone under-states it:
+
+| trial | `hurtPlayer` direct | damage taken | game loop | frames before it died |
+|---|---|---|---|---|
+| **before**, Frenzy | **threw `v is not defined`** | **0** | **threw `v is not defined`** | 61 |
+| **before**, control Rage | no throw | 7 | ran | 54, took damage |
+| **after**, Frenzy | no throw | 6 | ran | 62, took damage |
+| **after**, control Rage | no throw | 6 | ran | 62, took damage |
+
+The loop bar deliberately does **not** swallow the exception the way `headlong.probe.js`'s `tick()`
+does — catching it there would measure the probe rather than the game, and the whole point is that
+nothing in the real call chain catches it either. The harness's own page-error log is a second,
+independent witness: `x1 exception: ReferenceError: v is not defined` before the fix, and no page
+errors but the harmless Pointer Lock one after.
+
+**No `?frenzycrash=1` known-bad flag was added, and the departure from this repo's idiom is
+deliberate.** `?breakgap`, `?heroslot`, `?heroonerig` and `?noparty` each disable a behaviour this
+repo *wrote*; there is no behaviour to disable here, so the flag would have to re-introduce a
+ReferenceError into the damage path — a code path added to the game for the sole purpose of stopping
+it. The same call given the OTHER rank-7 option is the honest negative control and it runs in every
+pass of the probe.
+
+**Fixed by deleting the clause.** Frenzy promises attack speed and `effAtkSpeed` (3754) already
+delivers it; `hurtPlayer` is owed nothing. No number was invented and no other class's branch moved.
+
+### Two things this turned up that are NOT fixed, because they are Oliver's
+
+`bsk_frenzy` was pasted into **four** places and only one of them matches its card:
+
+| site | what it does there | promised by "attack speed rises as your health falls"? |
+|---|---|---|
+| `effAtkSpeed` 3754 | up to **×2 attack speed** at a sliver of health | **yes — this is the passive** |
+| `effPower` 3740 | up to **×2 damage** at a sliver of health | no |
+| `effLifesteal` 3760 | up to **×2 lifesteal** at a sliver of health | no |
+| `hurtPlayer` 11199 | threw | no — **deleted** |
+
+So a low-health Frenzy berserker is quietly getting double damage and double lifesteal on top of the
+double attack speed the card sells. That is a large, undocumented power spike, and removing it is a
+straight nerf to a class Oliver has tuned by hand — **balance, so his call**, per this document's own
+rule. Recorded rather than touched. The card is the other half of the decision: if the intent is that
+Frenzy is the class's low-health payoff, the description is what is incomplete.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

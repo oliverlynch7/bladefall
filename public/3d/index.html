@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11196,7 +11196,13 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
-  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }}
+  /* The berserker takes damage like everyone else. A copy of effPower's Frenzy clause (3740) was
+     pasted in here, where its `v` - that function's local damage accumulator - is a free
+     identifier, so a Frenzy berserker threw ReferenceError on every hit taken. The throw is above
+     the p.hp-=dmg below, so it also ate the damage; and update() has no try/catch on the way out to
+     frame(), which re-arms requestAnimationFrame only AFTER update returns, so the game stopped.
+     Frenzy promises attack speed ("rises as your health falls, to double at a sliver") and
+     effAtkSpeed already delivers it. Nothing is owed here. Measured by harness/probes/frenzy.probe.js. */
   if(meta.classId==='monk'&&c2def('monk')){}
   if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;

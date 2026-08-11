@@ -281,6 +281,36 @@ sharpens your blade a little further" names no amount), that one is his.
 
 ---
 
+## F. `bladedancer/Riposte:damage` FLAPS, and it can throw away a run's work
+
+Found 2026-08-11 by hitting it. A full `run-all.js` sweep reported
+`REGRESSION: skills:bladedancer/Riposte:damage` and `GATE: FAIL (1 new)` on a run whose only game
+changes were in the 3D renderer and the MP peer fields — nothing that can reach a bladedancer skill.
+`node harness/test-skills.js --classes bladedancer` immediately afterwards: **5 pass, 0 fail, 0
+unproven.** So it is the bench, not the game.
+
+**Why it matters more than one flaky row.** This is not the harmless kind of flap the header
+describes — that one moves a claim between *pass* and *unproven*, which changes a count and nothing
+else. This one produces a hard **FAIL that is new**, which is exactly what `run-all.js` treats as a
+REGRESSION, and `autopilot.ps1`'s green gate answers a red gate with `git checkout -- .`. **An
+unstable assertion here does not just mis-report; it can delete a run's verified work.**
+
+**The likely mechanism, stated as a lead and not as a finding.** `SKILL_FX.bd_riposte` (10236) is a
+LUNGE — uncharged it moves the player `55` units along its facing and only then swings `bdArc(p, d,
+170, 1.25, …)`, a cone. The bench spawns its dummy at `p.z - 60`. So the lunge lands the player about
+**five units** from the target and the arc has to resolve a direction from a near-zero separation.
+That is the same family as the geometry note already in `test-skills.js`'s header — "the geometry of
+'in front of you' is not simply p.z-90" — and it has not been confirmed; confirming it means
+measuring `p.x/p.z` and the dummy's across repeated casts, which nothing has done yet.
+
+Not fixed here on purpose. Moving the bench's dummy changes the distance every one of the sixteen
+classes is measured at and would force a full re-baseline, which is not a thing to do in the same run
+as anything else. **Next run should take this before any new skill work**: reproduce with repeated
+casts, and if the lunge-overshoot is confirmed, the fix belongs in the probe's geometry rather than in
+the skill.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

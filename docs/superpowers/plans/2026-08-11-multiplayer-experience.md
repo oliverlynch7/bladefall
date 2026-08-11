@@ -148,7 +148,7 @@ frame for the same reason.
 
 ---
 
-### Task 2: Audit the host's advantage
+### Task 2: Audit the host's advantage — **DONE, and it does not end in "no change needed"**
 
 The documented failure is that the host sees a lag-free world while guests see a delayed one, so the host is simply better at the game. BLADEFALL already interpolates peers and simulates enemies locally, so this is an audit that may end in "no change needed" — which is a valid outcome to record, not a failure.
 
@@ -156,24 +156,50 @@ The documented failure is that the host sees a lag-free world while guests see a
 - Modify: `harness/probes/mp.probe.js`
 - Possibly modify: `public/3d/index.html`
 
-- [ ] **Step 1: Measure what a guest actually sees**
+- [x] **Step 1: Measure what a guest actually sees** — done as
+      `harness/probes/mp-drift.probe.js`, and **the premise was wrong in a way that made the
+      measurement it describes impossible to take.**
 
-Instrument `applyEnemies` to record, per reconciled enemy, the distance between the guest's locally-simulated position and the host's snapshot position at the moment the snapshot arrives. Report the median and the worst case over 30 seconds of a moving fight.
+The step asks for "the distance between the guest's locally-simulated position and the host's
+snapshot position **at the moment the snapshot arrives**", which presumes the guest reconciles
+position and asks how far off it was. It does not. `applyEnemies` reads the snapshot's `x`/`z` only
+in the branch that spawns an enemy the guest has never seen; for one it already holds it writes
+`hp` and `maxHp` and nothing else. **There is no reconciliation event to measure the error at.**
 
-- [ ] **Step 2: Judge it against the thing that matters**
+Established by doing rather than by reading, which is what makes it a measurement: a snapshot built
+from the 41 live enemies with every x and z shifted **500 units**, applied in guest mode.
+**0 of 41 moved. 41 of 41 adopted the snapshot's HP.** Same call, same enemies, same instant — so
+the packet arrived and was acted on, and position simply is not among the things it acts on.
 
-The question is not "is there drift" — there always is — but **"can a guest be hit by an enemy that is visibly somewhere else on their screen?"** Compare the worst-case drift against the enemy's own attack reach. Drift smaller than reach is invisible; drift larger than reach is the unfair death players describe.
+- [x] **Step 2: Judge it against the thing that matters** — done, and the answer is **yes**.
 
-- [ ] **Step 3: Record the finding either way**
+With nothing correcting position, the drift available is bounded only by how far a mob travels while
+the two simulations disagree — and they disagree the instant one client's mob picks the host and the
+other's picks the guest. Measured over 30s of a real engagement (enemies woken through their own
+`active`/`dropT`, the player walking a circle through the game's own input channel): **380–562 units
+travelled, 41 of 41 alive at the end.**
 
-Write the numbers into `docs/MP_AUDIT.md`. If drift is within reach, say so plainly and change nothing. If it is not, the fix is to sync position for enemies currently in combat with any player, not for all enemies — the existing design deliberately avoids per-frame position sync for bandwidth, and that reasoning stays valid for idle mobs.
+Reach is `((e.weapon&&e.weapon.range)||60) + e.r + p.r` (index.html:12168) plus a 16-unit grace at
+resolution (12218) — roughly **90–110 units, at most ~125**. Drift beats reach by three to four and a
+half times inside half a minute, and the conclusion survives any plausible value of the one term not
+directly measured.
 
-- [ ] **Step 4: Commit**
+*Two things the probe had to learn, both of which produced a confident null first:* **enemies spawn
+asleep** (`active:false` plus a `dropT` drop-in timer), so the first run watched a level in which
+nothing happened and reported every mob as having travelled 0 — which reads exactly like "there is
+nothing here to drift"; and **a stationary observer is converged on once and then stood next to**,
+which measures the distance to the level entrance rather than the distance a mob covers in a fight.
 
-```bash
-git add docs/MP_AUDIT.md harness/probes/mp.probe.js
-git commit -m "multiplayer: measure the guest's view against enemy reach, and record what it actually is"
-```
+- [x] **Step 3: Record the finding either way** — `docs/MP_AUDIT.md`, with the numbers, the code
+      locations, an explicit statement of what it is NOT (no session, no packet, no latency — two
+      real machines remain the final check), and the fix in the form Step 3 specifies.
+
+- [x] **Step 4: Commit** — `docs/MP_AUDIT.md`, `harness/probes/mp-drift.probe.js`. **No game code
+      was changed**, which is deliberate: the fix is a netcode change to how enemies move on a
+      guest's screen, and it lands as its own revertible commit with its own assertion. The probe is
+      that assertion's known-bad already — today's `movedBySnapshot: 0 of 41` is a permanent,
+      reproducible failing case, so "in-combat enemies now follow the host" can be watched to fail
+      before it is believed.
 
 ---
 

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.909.0-autopilot';
+const VERSION3D='1.910.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11491,6 +11491,10 @@ const MP={
     p.tx=raw[1];p.tz=raw[2];p.ty=raw[3]||0;p.tyaw=raw[4]||0;p.hp=raw[5]||0;p.maxHp=raw[6]||1;p.dead=!!raw[7];return p; },
   selfState(){ const p=G&&G.p; return { id:this.myId, name:(meta.heroName||'').trim()||this.name||'Warden',
     cls:(CLASSES[meta.classId]&&CLASSES[meta.classId].disp)||'', lvl:(p&&p.level)||1, ptn:(G&&G.pet)?petDisplayName(G.pet.id):undefined, zone:this.zone,
+    /* cid is the CLASS ID, and cls is only its display name. The 3D layer needs the id: CLASS_TO_MODEL
+       is keyed by it, and without it every ally wore the local player's body. Additive, so a peer on
+       an older build simply sends no cid and hero3d falls back to your model as before. */
+    cid:meta.classId||'',
     x:p?p.x:0, y:p?p.y:0, z:p?p.z:0, yaw:p?(p.yaw||0):0, skin:p?p.skin:'knight',
     hp:p?Math.round(p.hp):0, hpm:p?Math.max(1,Math.round((typeof effMaxHp==='function')?effMaxHp(p):(p.maxHp||100))):100,
     hair:(p&&p.hairStyle)||meta.hairStyle||'short', hairc:(p&&p.hairColor)||meta.hairColor||'#3a2a1c',
@@ -11498,12 +11502,12 @@ const MP={
     at:(p&&p.atkTimer>0)?+(p.atkTimer.toFixed(2)):0, sc:(p&&p.swingCombo)||0, dg:(p&&p.dodgeTimer>0)?1:0,   // swing/cast anim + dodge, so allies see your attacks
     pt:(G&&G.pet)?[G.pet.id,Math.round(G.pet.x),Math.round(G.pet.z),Math.round(G.pet.y||0),+((G.pet.yaw||0).toFixed(2)),Math.max(0,Math.round(G.pet.hp||0)),Math.max(1,Math.round(G.pet.maxHp||1)),G.pet.dead?1:0]:undefined,
     mn:(G&&G.minions&&G.minions.length)?G.minions.slice(0,24).map(m=>[Math.round(m.x),Math.round(m.z),Math.round(m.y||0),+((m.yaw||0).toFixed(2))]):undefined }; },
-  mkPeer(s){ return {id:s.id,name:s.name||'Warden',cls:s.cls||'',lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
+  mkPeer(s){ return {id:s.id,name:s.name||'Warden',cls:s.cls||'',cid:s.cid||'',lvl:s.lvl||1,petName:s.ptn||'',skin:s.skin||'knight',zone:s.zone==null?-1:s.zone,hp:s.hp||0,hpm:s.hpm||100,
     weapon:s.w||null, hair:s.hair||'short', hairc:s.hairc||'#3a2a1c', downed:!!s.dn, petRaw:s.pt||null, pet:this._petRender(s.pt,null), mnRaw:s.mn||null, minions:this._mnRender(s.mn),
     at:s.at||0, sc:s.sc||0, dodge:!!s.dg,
     x:s.x,y:s.y,z:s.z,yaw:s.yaw||0, tx:s.x,ty:s.y,tz:s.z,tyaw:s.yaw||0, last:0}; },
-  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.dodge=!!s.dg; q.last=0; },
-  snap(q){ return {id:q.id,name:q.name,cls:q.cls,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
+  applyPos(q,s){ q.tx=s.x; q.ty=s.y; q.tz=s.z; q.tyaw=s.yaw||0; if(s.zone!=null)q.zone=s.zone; q.hp=s.hp; if(s.hpm)q.hpm=s.hpm; if(s.w)q.weapon=s.w; if(s.hair)q.hair=s.hair; if(s.hairc)q.hairc=s.hairc; q.downed=!!s.dn; if(s.skin)q.skin=s.skin; if(s.name)q.name=s.name; if(s.cls!=null)q.cls=s.cls; if(s.cid)q.cid=s.cid; if(s.lvl!=null)q.lvl=s.lvl; if(s.ptn!=null)q.petName=s.ptn; q.petRaw=s.pt||null; q.pet=this._petRender(s.pt,q.pet); q.mnRaw=s.mn||null; q.minions=this._mnRender(s.mn); if(s.at&&s.at>(q.at||0))q.at=s.at; q.sc=s.sc||0; q.dodge=!!s.dg; q.last=0; },
+  snap(q){ return {id:q.id,name:q.name,cls:q.cls,cid:q.cid,lvl:q.lvl,ptn:q.petName||undefined,skin:q.skin,zone:q.zone,hp:q.hp,hpm:q.hpm,w:q.weapon,hair:q.hair,hairc:q.hairc,dn:q.downed?1:0,at:q.at||0,sc:q.sc||0,dg:q.dodge?1:0,x:q.tx,y:q.ty,z:q.tz,yaw:q.tyaw,pt:q.petRaw||undefined,mn:q.mnRaw||undefined}; },
   // ---- HOST ----
   async host(cb,pvp){ if(this.active){ cb&&cb(true,this.code); return; }
     if(!await this.loadLib()){ cb&&cb(false,'no internet'); return; }
@@ -11687,7 +11691,10 @@ const MP={
       // render allies with the SAME renderer as you — so their skin AND equipped weapon show through.
       const mv2=Math.hypot((q.tx-q.x)||0,(q.tz-q.z)||0);   // some walk anim if they're moving
       const pw=q.weapon||{art:'sword',cls:'melee',sch:'phys',blade:'#dfe5ec',color:'#c9ccd2'};
-      const pp={ x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
+      /* peerId and cid ride along so the 3D layer can give this ally a rig of their OWN - one keyed
+         to them, wearing their class's body and their weapon. Without an id every ally was an
+         anonymous plain object and the only rig available was yours. */
+      const pp={ peerId:q.id, cid:q.cid||'', x:q.x, y:q.y||0, z:q.z, yaw:q.yaw||0, vx:mv2>0.2?60:0, vz:0, onGround:true,
         skin:q.skin||'knight', weapon:pw, runAnim:t*7, atkTimer:q.at||0, dodgeTimer:q.dodge?0.2:0, invuln:0, hurtFlash:0,
         dead:false, swingCombo:q.sc||0, hairStyle:q.hair||'short', hairColor:q.hairc||'#3a2a1c' };
       try{ drawHero3(pp,t); }

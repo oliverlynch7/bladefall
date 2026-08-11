@@ -38,7 +38,7 @@ Searched 2026-08-11. Each row is a documented, recurring complaint in shipped co
 
 ---
 
-### Task 1: Allies look like themselves
+### Task 1: Allies look like themselves — **DONE**
 
 There is one 3D rig, so every ally renders with the local player's model and weapon. The weapon hot-swap is currently guarded to the local player because two heroes holding different weapons thrashed an async `equipWeapon` reload every frame.
 
@@ -46,13 +46,20 @@ There is one 3D rig, so every ally renders with the local player's model and wea
 - Modify: `public/3d/hero3d.js`
 - Modify: `harness/probes/mp.probe.js`
 
-- [ ] **Step 1: Confirm the current behaviour in a probe**
+- [x] **Step 1: Confirm the current behaviour in a probe** — done, and not with the command below.
+
+Asserting `_wrap` exists confirms nothing: it exists after the fix too. The confirmation that is worth
+having is the one that survives as a permanent regression test, so the old behaviour became a URL
+flag instead — `?heroonerig=1` sends allies back through the shared rig — and the *new* assertions
+were watched to fail against it. That is the same shape as `?breakgap` and `?heroslot`, for the
+reason those exist: an assertion nobody has seen fail is an assertion nobody should believe.
 
 ```bash
-node _shot/shot.js --scene 1 --wait 12000 --eval "(function(){ return JSON.stringify({wrap: !!(window.HERO3D && window.HERO3D._wrap), oneRig: true}); })()"
+node harness/test-mp.js --bad-rigs
 ```
 
-Expected: a single `_wrap`. That single rig is the whole bug.
+Measured: `0 rigs for 2 allies — every ally is being drawn with the local hero's body`,
+`known-bad (single-rig): correctly detected ✓`.
 
 *(scouted 2026-08-10, `autopilot-merged`, read-only — no code written, so this task is still open.
 Recorded so the next run does not re-find it. `SkeletonUtils` is **already imported** at
@@ -65,29 +72,79 @@ quotes. One thing to carry into Step 2 that is written down at 1734 and easy to 
 **`SkeletonUtils.clone` SHARES materials with its source**, so anything that mutates a clone's
 material — a team tint, a translucent ghost — changes every ally and the local hero too.)*
 
-- [ ] **Step 2: Clone a rig per peer**
+- [x] **Step 2: Clone a rig per peer** — done. `_peerRigs`, a Map keyed by peer id, in `hero3d.js`.
 
-Three.js ships `SkeletonUtils.clone` for exactly this — a skinned mesh cannot be shared by reference between two transforms. Keep a small pool keyed by peer id, cap it at `HERO3D_MAX` (6, already defined in `index.html`), and dispose a clone when its peer leaves.
+`SkeletonUtils.clone`, not `.clone()`: a plain clone binds the copy's SkinnedMesh to the ORIGINAL
+skeleton, which collapses the body while bone-parented props keep drawing — the bug `syncClass`'s own
+comment describes and the reason it re-loads rather than clones. The `__hero3dAt` pose pool already
+clones this way and renders correctly, so the pool reuses the file's own idiom rather than inventing
+one. Capped at the game's own `HERO3D_MAX` (read off `__BF3`, not restated), reaped
+least-recently-drawn, and rebuilt when an ally's class changes.
 
-- [ ] **Step 3: Restore per-peer weapons**
+Three corrections the plan did not anticipate, each forced by running it:
 
-With one rig per peer the thrash reason is gone, so remove the local-only guard on the weapon swap and equip each clone from that peer's own `weapon`.
+- **A PEER'S CLASS WAS NEVER SENT.** `CLASS_TO_MODEL` is keyed by class id and `MP.selfState` only
+  ever sent `cls`, the DISPLAY name. Without the id there is nothing to pick a body with, so a pool
+  would have given every ally the local hero's model and looked, in a screenshot, exactly like no
+  pool at all. `cid` now rides along in `selfState`/`mkPeer`/`applyPos`/`snap`, and `drawPeer` puts
+  `peerId` and `cid` on the object it hands the renderer. Additive: a peer on an older build sends no
+  `cid` and falls back to the previous behaviour rather than erroring.
+- **ANIMATION STATE WAS MODULE-LEVEL TOO.** `cur`, `_wasRolling` and `_wasAir` were file globals, so
+  even with separate bodies whichever hero was queued last would have chosen the pose for all of
+  them. `playFor(p)` is now `playFor(p, A)` against a per-rig record.
+- **THE CLONE INHERITS WHATEVER YOU ARE HOLDING.** `_loaded[m].scene` *is* the local `actor` when `m`
+  is the local class, so a same-class ally was cloned carrying your equipped weapon with its own
+  stock weapon hidden. `clearWeapon` is run on the fresh clone, which undoes both.
 
-- [ ] **Step 4: Gate and prove**
+- [x] **Step 3: Restore per-peer weapons** — done, and it needed three changes underneath it.
 
-```bash
-node tools/gate.js
-node harness/test-mp.js
-```
+`equipWeapon(actor, useSaved, opts)` takes `{model, weapon}`; every existing call passes neither and
+is unchanged. What the plan did not see is that the machinery under it was singular in three places:
 
-Expected: gate OK, and the mp suite reports every queued hero drawn. Add an assertion that two queued peers with DIFFERENT weapon art produce two different equipped models, and prove it can fail by temporarily giving both the same.
+- **`WEAP` is one global object**, mutated (name → presets → grip transform) and then read back
+  *after* an `await` on a glTF load. Two equips in flight interleave across that await and the second
+  one's presets place the first one's weapon. Every equip, local included, now goes through one
+  `queueEquip` chain. It costs nothing — an equip happens on a weapon change, not per frame.
+- **The grip presets are per BODY.** `weapLoadFor`, `weapKey` and `storedWeapFrame` took the local
+  model from `eyeModel()`; they take an explicit one now, or a Wizard ally gets the Warrior's numbers
+  and the staff goes through the wrist.
+- **`_weapSeq` was one module-level counter.** It means "a newer request has started", which was true
+  with one character and became "a newer request for SOMEBODY" with several — arming an ally
+  cancelled the local hero's in-flight load and left you empty-handed. It is per holder now.
 
-- [ ] **Step 5: Commit**
+The local-only guard the plan asks to remove is gone in the sense that mattered: allies no longer
+reach that code path at all, which is what removes the thrash it existed to prevent.
 
-```bash
-git add public/3d/hero3d.js harness/probes/mp.probe.js
-git commit -m "multiplayer: one rig per ally, so your friend stops looking like a copy of you"
-```
+- [x] **Step 4: Gate and prove** — done. `node tools/gate.js`: GATE OK. mp suite **16 → 27 pass, 0
+      fail**; full `node harness/run-all.js`: `GATE: PASS`, exit 0, no regression.
+
+The assertions the plan asks for, plus the two it did not: the bodies must differ from EACH OTHER as
+well as from yours (comparing only against the local hero passes a pool that gives every ally the
+same wrong body), each rig must have independently chosen a clip, and **exactly one body may be
+visible per render call** — the game renders the whole scene once per queued hero, so leaving every
+rig visible would draw each ally once per party member.
+
+Proving it can fail was NOT done by "temporarily giving both the same": a known-bad you have to edit
+the repo to produce is one nobody re-runs. `?heroonerig=1` is permanent — see Step 1.
+
+**And it was photographed, because a passing assertion about a renderer is not a picture.**
+`harness/probes/party.probe.js` pumps two allies through the game's own `drawHero3` every frame the
+way `MP.drawPeers` does, and the same command was run twice at the same camera:
+`_shot/out/party-3rigs.png` — the local Warrior and, beside him, a hooded **Ranger holding a bow**,
+mid-run — against `_shot/out/party-onerig.png`, where that ally is a pixel-for-pixel **Warrior with
+the same sword, the same plate and the same hair**. That is the bug and the fix in two frames.
+
+*One thing the probe had to learn, recorded so the next run does not re-find it:* `shot.js` opens the
+shutter as soon as the eval settles, so a probe that returns immediately photographs the instant the
+level loaded — the first attempt came back with the arena's welcome toast and **no 3D hero at all**,
+which reads exactly like the renderer being broken and is just the layer not having drawn yet. The
+probe resolves after ~180 real frames and never cancels its rAF, so the party is live when the frame
+is captured. `_shot/out/j8-outskirts.png`, a baseline from an earlier session, has the same empty
+frame for the same reason.
+
+- [x] **Step 5: Commit** — `public/3d/hero3d.js`, `public/3d/index.html` (the `cid` field and
+      `peerId`), `harness/probes/mp.probe.js`, `harness/probes/party.probe.js`,
+      `harness/probes/party-report.probe.js`, `harness/test-mp.js`.
 
 ---
 

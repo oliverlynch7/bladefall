@@ -665,10 +665,14 @@ let _fitOverrides = (function(){
 })();
 function fitSave(){ try { localStorage.setItem(FIT_LS, JSON.stringify(_fitOverrides)); } catch(e){} }
 
-function weapLoadFor(){
-  const n = WEAP.name;
+/* `model` is the BODY the presets are for, and it defaults to the local hero's. It exists because an
+   ally can be a different class: the grip numbers are tuned per body, so loading the Warrior's
+   presets to place a weapon in a Wizard's hand puts the staff through the wrist. Every existing
+   caller passes nothing and therefore behaves exactly as before. */
+function weapLoadFor(model){
+  const n = WEAP.name, BODY = model || eyeModel();
   Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
-                (WEAPON_PRESETS_BY_MODEL[eyeModel()] || {})[n] || {},
+                (WEAPON_PRESETS_BY_MODEL[BODY] || {})[n] || {},
                 /* OLIVER'S TUNING, in the shape the slice ACTUALLY wrote it.
                    Read out of his Chrome profile to settle it rather than guessing again: origin
                    https://bladefall.pages.dev, key `bf_weap`, and the stored object is
@@ -682,11 +686,11 @@ function weapLoadFor(){
                    All three shapes are accepted, because the slice has written more than one over
                    its life and every one of them is real tuning Oliver did by hand. */
                 _sliceFits[n] || {},
-                _sliceFits[eyeModel() + '|' + n] || {},
-                (function(){ var b = _sliceFits[eyeModel()];
+                _sliceFits[BODY + '|' + n] || {},
+                (function(){ var b = _sliceFits[BODY];
                              return (b && b.name === n) ? b : {}; })(),
                 _fitOverrides[n] || {},
-                (_fitOverrides['@'+eyeModel()] || {})[n] || {},     // per-BODY, and it wins
+                (_fitOverrides['@'+BODY] || {})[n] || {},           // per-BODY, and it wins
                 { name:n, on:true });
 }
 
@@ -797,7 +801,13 @@ const WEAPON_PRESETS_BY_MODEL = {
 };
 
 let renderer = null, scene = null, cam = null, actor = null, mixer = null;
-let clips = {}, cur = null, clock = null;
+let clips = {}, clock = null;
+/* ANIMATION STATE BELONGS TO A BODY, NOT TO THIS FILE.
+   `cur`, `_wasRolling` and `_wasAir` used to be module-level, which was correct while there was
+   exactly one character on screen. Once allies started being drawn they all shared this one record,
+   so whichever hero was queued last decided the pose for every body in the frame - your friend
+   swung when you swung and stood when you stood. Each rig now carries its own. */
+const _localAnim = { mixer: null, cur: null, wasRolling: false, wasAir: false, local: true };
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WEAPONS — ported verbatim from the slice.
@@ -836,11 +846,24 @@ const WEAPON_LEN = {
   Bow_Wooden:1.15, Bow_Wooden2:1.15, Bow_Golden:1.15, Bow_Evil:1.15,
 };
 
-let _weapSeq = 0;
 const WEAP_FRAME_VERSION = 1;
 let WEAP_FRAME_ALL = {};
-function weapKey(){ return eyeModel() + '|' + WEAP.name; }
-function storedWeapFrame(){ return WEAP_FRAME_ALL[weapKey()] || null; }
+function weapKey(model){ return (model || eyeModel()) + '|' + WEAP.name; }
+function storedWeapFrame(model){ return WEAP_FRAME_ALL[weapKey(model)] || null; }
+
+/* EVERY EQUIP GOES THROUGH ONE QUEUE, AND IT HAS TO.
+   equipWeapon mutates the single global WEAP - name, then presets, then the grip transform - and
+   then awaits a glTF load before reading those same fields back. With one character that is fine.
+   With allies it is not: two equips in flight interleave across the await and the second one's
+   presets place the first one's weapon. Serialising costs nothing (an equip happens on a weapon
+   CHANGE, not per frame) and removes the whole class of race. */
+let _equipQ = Promise.resolve();
+function queueEquip(fn){
+  const run = () => { try { return Promise.resolve(fn()).catch(() => null); }
+                      catch(e){ return null; } };
+  _equipQ = _equipQ.then(run, run);
+  return _equipQ;
+}
 const weapFrameSave = () => {};        // no persistence in the game build; presets are the source
 const weapSave = () => {};
 
@@ -941,24 +964,32 @@ async function loadStockWeapon(key){
 }
 
 
-async function equipWeapon(actor, useSaved){
+/* `opts` is how an ALLY equips their own gear on their own body: { model, weapon }. Both default to
+   the local hero's, so every pre-existing call is unchanged.
+   THE STALENESS COUNTER IS PER HOLDER, not global, and that had to change with them. It was one
+   module-level `_weapSeq`, which reads as "a newer request has started" and meant it while there was
+   one character - with several rigs it means "a newer request for SOMEBODY", so arming an ally
+   cancelled the local hero's in-flight load and left you holding nothing. */
+async function equipWeapon(actor, useSaved, opts){
   if(!actor) return null;
-  const seq = ++_weapSeq;              // anything older than this is stale
+  const BODY = (opts && opts.model) || eyeModel();
+  const seq = (actor._weapSeq = (actor._weapSeq || 0) + 1);   // anything older than this is stale
   clearWeapon(actor);
-  if(useSaved !== false) weapLoadFor(eyeModel());
+  if(useSaved !== false) weapLoadFor(BODY);
   if(!WEAP.on) return null;
   /* What the player is ACTUALLY carrying, ahead of the archetype default. Still filtered by the
      archetype rule below, so a wizard cannot end up swinging a claymore - that rule is what kept
      tuning to ~28 weapons rather than 168. */
   try {
-    const pw = window.__BF3 && window.__BF3.G && window.__BF3.G.p && window.__BF3.G.p.weapon;
+    const pw = (opts && 'weapon' in opts) ? opts.weapon
+             : (window.__BF3 && window.__BF3.G && window.__BF3.G.p && window.__BF3.G.p.weapon);
     const want = modelForWeapon(pw);
     if(want) WEAP.name = want;
   } catch(err){}
   // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
-  const allowed = weaponsFor(eyeModel());
+  const allowed = weaponsFor(BODY);
   if(allowed.length && !allowed.includes(WEAP.name)){
-    const pref = DEFAULT_WEAPON[eyeModel()];
+    const pref = DEFAULT_WEAPON[BODY];
     WEAP.name = (pref && allowed.includes(pref)) ? pref : allowed[0];
   }
   if(!allowed.length) return null;
@@ -970,7 +1001,7 @@ async function equipWeapon(actor, useSaved){
      step entirely and need no tuning. */
   if(STOCK_WEAPONS[WEAP.name]){
     const st = await loadStockWeapon(WEAP.name);
-    if(seq !== _weapSeq || !st) return null;
+    if(seq !== actor._weapSeq || !st) return null;
     const wrapS = new THREE.Group();
     wrapS.userData._weap = true;
     wrapS.add(st.holder);
@@ -985,7 +1016,7 @@ async function equipWeapon(actor, useSaved){
     const ss = sb.getSize(new THREE.Vector3());
     const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
     {
-      const wf = storedWeapFrame();
+      const wf = storedWeapFrame(BODY);
       const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
       actor._stockGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
                            axis: wf && wf.axis ? wf.axis : ax,
@@ -1009,7 +1040,7 @@ async function equipWeapon(actor, useSaved){
 
   const g = await load(`assets/weapons/${WEAP.name}.glb`).catch(()=>null);
   // a newer request started while this one was loading — drop this result on the floor
-  if(seq !== _weapSeq) return null;
+  if(seq !== actor._weapSeq) return null;
   if(!g) return null;
 
   const holder = new THREE.Group();
@@ -1058,7 +1089,7 @@ async function equipWeapon(actor, useSaved){
     wrap.quaternion.copy(rig.stock.quaternion);
     wrap.scale.copy(rig.stock.scale);
   }
-  if(seq !== _weapSeq) return null;
+  if(seq !== actor._weapSeq) return null;
   clearWeapon(actor);                  // belt and braces: nothing else may be attached
   rig.bone.add(wrap);
   actor.root.updateMatrixWorld(true);
@@ -1075,7 +1106,7 @@ async function equipWeapon(actor, useSaved){
   let reach = Math.max(sz.x, sz.y, sz.z);
   let axisUse = axis, halfUse = half;
   {   // a locked frame wins, so a future change to how reach is measured cannot move it
-    const wf = storedWeapFrame();
+    const wf = storedWeapFrame(BODY);
     if(wf){ reach = wf.reach; axisUse = wf.axis || axis; if(wf.half != null) halfUse = wf.half; }
   }
   // remember the pieces the transform helper needs so slider drags never reload anything
@@ -1286,7 +1317,7 @@ function syncClass(){
   actor.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; o.frustumCulled = false; } });
   wrap.add(actor);
   mixer = new THREE.AnimationMixer(actor);
-  cur = null;
+  _localAnim.mixer = mixer; _localAnim.cur = null;
   buildFace();
   applyClassSkin();
   equipForClass();
@@ -1389,6 +1420,7 @@ async function boot(){
     HERO3D._wrap = wrap;
 
     mixer = new THREE.AnimationMixer(actor);
+    _localAnim.mixer = mixer; _localAnim.cur = null;
     const seen = new Set();
     for(const g of gs){ if(!g) continue;
       for(const c of g.animations){ if(seen.has(c.name)) continue; seen.add(c.name); clips[c.name] = c; } }
@@ -1406,7 +1438,7 @@ async function boot(){
   }
 }
 
-function playFor(p){
+function playFor(p, A){
   // pick a clip from the game's own player state, so the 3D hero animates off real gameplay
   const moving = Math.hypot(p.vx || 0, p.vz || 0) > 20 && p.onGround;
   /* Clip selection from the game's own player state.
@@ -1492,11 +1524,11 @@ function playFor(p){
      useful jump, played once and clamped - which guarantees the character is upright on landing
      however brief the hop was. */
   const airRoll = !rolling && airborne && name === 'Roll';
-  const restart = (rolling && name === 'Roll' && !_wasRolling) || (airRoll && !_wasAir);
-  _wasRolling = rolling; _wasAir = airborne;
-  if(!name || (cur === name && !restart)) return;
+  const restart = (rolling && name === 'Roll' && !A.wasRolling) || (airRoll && !A.wasAir);
+  A.wasRolling = rolling; A.wasAir = airborne;
+  if(!name || !A.mixer || (A.cur === name && !restart)) return;
 
-  const next = mixer.clipAction(clips[name]);
+  const next = A.mixer.clipAction(clips[name]);
   if(name === 'Roll' && rolling){
     const dur = (clips.Roll && clips.Roll.duration) || 1;
     const window = Math.max(0.12, p.dodgeTimer);
@@ -1504,7 +1536,7 @@ function playFor(p){
     next.timeScale = dur / window;          // the whole roll, inside the invulnerable window
     next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
     next.fadeIn(0.04).play();
-    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.04);
+    if(A.cur && clips[A.cur]) A.mixer.clipAction(clips[A.cur]).fadeOut(0.04);
   } else if(airRoll){
     const dur = (clips.Roll && clips.Roll.duration) || 1;
     const AIR_FLIP = 0.62;                 // finishes before a standard 0.75s jump lands
@@ -1512,24 +1544,141 @@ function playFor(p){
     next.timeScale = dur / AIR_FLIP;
     next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
     next.fadeIn(0.06).play();
-    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.06);
+    if(A.cur && clips[A.cur]) A.mixer.clipAction(clips[A.cur]).fadeOut(0.06);
   } else {
     next.timeScale = 1;
     next.setLoop(THREE.LoopRepeat, Infinity); next.clampWhenFinished = false;
     next.reset().fadeIn(0.15).play();
-    if(cur && clips[cur]) mixer.clipAction(clips[cur]).fadeOut(0.15);
+    if(A.cur && clips[A.cur]) A.mixer.clipAction(clips[A.cur]).fadeOut(0.15);
   }
-  cur = name;
+  A.cur = name;
   /* Exposed so which clip is playing can be CHECKED rather than assumed - three animation bugs in
-     a row were invisible because nothing reported this. */
-  HERO3D.clip = name; HERO3D.clipArt = art;
+     a row were invisible because nothing reported this. Local only: HERO3D.clip means "what the
+     player's own character is doing", and an ally overwriting it would make that export lie. */
+  if(A.local){ HERO3D.clip = name; HERO3D.clipArt = art; }
 }
-let _wasRolling = false, _wasAir = false;
+
+/* ── ONE RIG PER ALLY ──────────────────────────────────────────────────────────────────────────
+   There used to be exactly one body in this file - HERO3D._wrap - and every hero in the frame was
+   drawn by moving it and rendering again. That works for POSITION and for nothing else: your ally
+   wore your class's body, your weapon and, because the animation state was module-level too, your
+   pose. Three players in a party were three copies of whoever was queued last.
+
+   A peer gets a SkeletonUtils.clone of its own class's model, its own AnimationMixer, its own clip
+   state and its own weapon. SkeletonUtils, not .clone(): a plain clone binds the copy's SkinnedMesh
+   to the ORIGINAL skeleton, which collapses the body while bone-parented props keep drawing - the
+   bug syncClass's comment describes and the reason it re-loads rather than clones. The pose pool at
+   __hero3dAt already clones this way and renders correctly, so this is the file's own idiom.
+
+   THE CLONE IS NORMALISED BEFORE IT IS USED, and that is not optional. `_loaded[m].scene` IS the
+   local `actor` when m is the local class, so a same-class ally would otherwise be cloned holding
+   your equipped weapon with its own stock weapon hidden. Both are undone on the copy.
+
+   Capped at HERO3D_MAX bodies and reaped by least-recently-drawn, so a busy lobby cannot grow the
+   scene without bound. */
+const _peerRigs = new Map();
+let _frameNo = 0;
+
+/* ── THE SELF-TEST HOOK ────────────────────────────────────────────────────────────────────────
+   `?heroonerig=1` sends allies back through the single shared rig, which is exactly what this file
+   did before the pool existed. It is here permanently, for the same reason level.probe.js carries
+   ?breakgap and mp.probe.js carries ?heroslot: an assertion nobody has watched FAIL is an assertion
+   nobody should believe, and "every ally has their own body" is the kind of claim a screenshot of a
+   correctly-positioned party appears to confirm whether it is true or not.
+     node harness/test-mp.js --bad-rigs
+   Nothing reads it in a normal run. */
+const ONE_RIG = (function(){ try { return /[?&]heroonerig=1/.test(location.search); } catch(e){ return false; } })();
+
+/* Read from the game rather than restated here. HERO3D_MAX is index.html's cap on how many heroes
+   may be QUEUED in a frame, so it is exactly the number of bodies that can ever need a rig; a second
+   copy of the number would drift the first time either moved. */
+function peerCap(){
+  let n = 0;
+  try { n = (window.__BF3 && window.__BF3.HERO3D_MAX) | 0; } catch(e){}
+  return n > 0 ? n : 6;
+}
+
+function peerModelFor(p){
+  const cid = p && p.cid;
+  const want = (cid && CLASS_TO_MODEL[cid]) || HERO3D.model || 'Warrior';
+  return _loaded[want] ? want : (HERO3D.model || 'Warrior');
+}
+
+function disposeRig(rec){
+  if(!rec) return;
+  if(rec.mixer) try { rec.mixer.stopAllAction(); rec.mixer.uncacheRoot(rec.node); } catch(e){}
+  if(rec.node && rec.node.parent) rec.node.parent.remove(rec.node);
+}
+
+/* Least-recently-drawn wins the argument. Never reaps a rig drawn this frame. */
+function reapRigs(cap){
+  while(_peerRigs.size > cap){
+    let oldestKey = null, oldest = Infinity;
+    for(const [k, r] of _peerRigs) if(r.seen < oldest && r.seen !== _frameNo){ oldest = r.seen; oldestKey = k; }
+    if(oldestKey == null) return;
+    disposeRig(_peerRigs.get(oldestKey));
+    _peerRigs.delete(oldestKey);
+  }
+}
+
+function peerRig(p, key){
+  const want = peerModelFor(p);
+  let rec = _peerRigs.get(key);
+  /* A respec changes an ally's class mid-session, so the body has to be replaceable, not just
+     creatable. Rebuilding is the same path as building. */
+  if(rec && rec.model !== want){ disposeRig(rec); _peerRigs.delete(key); rec = null; }
+  if(!rec){
+    const src = _loaded[want];
+    if(!src) return null;
+    const node = SkeletonUtils.clone(src.scene);
+    node.name = '__heroPeer:' + key;
+    node.traverse(o => {
+      if(!o.isMesh) return;
+      o.castShadow = false; o.receiveShadow = false;
+      o.frustumCulled = false;        // a SkinnedMesh's bounds are BIND space; see the note at boot
+    });
+    /* Undo whatever the local hero happens to be wearing right now - see the header. clearWeapon is
+       exactly this job: it sweeps the _weap strays the clone inherited AND puts the character's own
+       stock weapon back on, which is what a same-class ally should be holding until their real one
+       loads. */
+    clearWeapon({ root: node });
+    const wrap = new THREE.Group();
+    wrap.add(node);
+    scene.add(wrap);
+    rec = { node, wrap, holder: { root: node, model: wrap }, model: want,
+            anim: { mixer: new THREE.AnimationMixer(node), cur: null,
+                    wasRolling: false, wasAir: false, local: false },
+            art: undefined, rar: undefined, arming: false, seen: _frameNo };
+    _peerRigs.set(key, rec);
+  }
+  rec.seen = _frameNo;
+  return rec;
+}
+
+/* Arm an ally with THEIR weapon, on THEIR body. Queued, because equipWeapon walks through the one
+   global WEAP across an await - see queueEquip. Fired only when the art or rarity actually changes,
+   which is the same guard the local hero has always used. */
+function armPeer(rec, p){
+  const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
+  if(rec.arming || (a === rec.art && r === rec.rar)) return;
+  rec.art = a; rec.rar = r; rec.arming = true;
+  queueEquip(() => equipWeapon(rec.holder, false, { model: rec.model, weapon: w || null }))
+    .then(() => { rec.arming = false; }, () => { rec.arming = false; });
+}
+
+/* Only one body may be visible per render call. The game calls drawHero3D once per queued hero and
+   each call renders the WHOLE scene compositing onto the last, so leaving every rig visible would
+   draw each ally once per hero in the party. Deliberately touches hero rigs only - the world, the
+   mobs and the __hero3dAt poses share this scene and manage their own visibility. */
+function showOnly(node){
+  if(HERO3D._wrap) HERO3D._wrap.visible = (node === HERO3D._wrap);
+  for(const r of _peerRigs.values()) r.wrap.visible = (r.wrap === node);
+}
 
 /* Called from the game's drawHero3. Returns true when it has drawn, so the caller can skip
    its voxel path; returns false whenever anything is not ready, so a failure here degrades
    to the original renderer rather than to a missing character. */
-let _lastArt = null, _lastRar = null, _reArming = false;
+let _lastArt = null, _lastRar = null, _reArming = false, _frameDt = 1 / 60, _syncedFrame = -1;
 export function drawHero3D(p, t){
   /* Swap the model when the weapon changes. equipWeapon runs only on load and on class change, so
      without this the right model appeared only if you happened to spawn holding it - picking up a
@@ -1539,11 +1688,11 @@ export function drawHero3D(p, t){
      attempt at this - clearWeapon walks actor.root, and the scene has no .root. Every other caller
      wraps it the same way; this now matches them.
      _reArming guards against re-entry: equipWeapon is async and this runs every frame. */
-  /* LOCAL PLAYER ONLY. The rig is shared - there is one actor - so once multiplayer started drawing
-     several heroes per frame, an ally holding a different weapon would swap the model, then you
-     would swap it back, every single frame, kicking off an async equipWeapon reload each time.
-     Allies therefore show YOUR weapon model rather than their own, which is a known cosmetic
-     limitation of one rig and is the right trade against a permanent reload thrash. */
+  /* The local hero keeps the one true rig. Its weapon hot-swap is unchanged: equipWeapon runs only
+     on load and on class change, so without this the right model appeared only if you happened to
+     spawn holding it. Allies no longer come through here at all - they get their own rig below,
+     which is what removes the thrash this guard used to exist for (one shared actor, an ally
+     swapping the model and you swapping it back every single frame). */
   const _isLocal = !!(window.__BF3 && window.__BF3.G && p === window.__BF3.G.p);
   try {
     const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
@@ -1551,9 +1700,8 @@ export function drawHero3D(p, t){
       _lastArt = a; _lastRar = r;
       if(modelForWeapon(w)){
         _reArming = true;
-        Promise.resolve(equipWeapon({ root: actor, model: HERO3D._wrap }, false))
-          .catch(() => {})
-          .then(() => { _reArming = false; });
+        queueEquip(() => equipWeapon({ root: actor, model: HERO3D._wrap }, false))
+          .then(() => { _reArming = false; }, () => { _reArming = false; });
       }
     }
   } catch(err){}
@@ -1567,30 +1715,59 @@ export function drawHero3D(p, t){
       _lastW = cv.width; _lastH = cv.height;
     }
     renderer.setViewport(0, 0, cv.width, cv.height);
+
+    /* ONE getDelta per frame, AND THE PARTY IS WHY IT HAD TO BE SAID OUT LOUD. The clock resets on
+       read, so the second hero in a frame used to get ~0 - which was harmless while every body
+       shared one mixer and merely meant "already advanced", and is fatal now that each ally has a
+       mixer of its own: allies would stand frozen while you animated. A real frame boundary is the
+       only call that returns a meaningful delta; the rest of the flush reuses it. */
+    const raw = clock.getDelta();
+    const newFrame = raw > 0.0005;
+    if(newFrame){ _frameDt = Math.min(0.05, raw); _frameNo++; }
+    const dt = _frameDt;
+
+    /* Build or refresh the 3D world before drawing. Cheap when nothing changed - it compares a
+       level signature and returns. Deliberately in the SAME scene and render call as the hero,
+       so there is one Three.js context over the game canvas rather than two fighting for it.
+       ONCE PER FRAME, not once per hero: syncMobs and syncProps advance their own animations by dt,
+       so running them for every queued body would step the mobs N times in a party of N. */
+    if(_syncedFrame !== _frameNo){
+      _syncedFrame = _frameNo;
+      syncWorld(scene);
+      syncMobs(scene, dt);
+      syncProps(scene, dt);           // chests and the other objects you interact with
+      syncClass();                    // respec or a different save changes the body
+      reapRigs(peerCap());
+    }
+
+    /* WHOSE BODY IS THIS? The local hero is identity-checked against G.p, exactly as drawHero3 does
+       when it decides who goes to the front of the queue. An ally is keyed by the peer id the game
+       now sends along; without one there is nothing to key a rig to, so it falls back to the shared
+       rig and behaves as it always did rather than leaking a rig per frame. */
+    const key = (!_isLocal && p && p.peerId && !ONE_RIG) ? String(p.peerId) : null;
+    /* AN ALLY MUST NOT BE ABLE TO TAKE THE LAYER DOWN. The catch around this whole function sets
+       HERO3D.on = false and falls back to voxels for EVERYONE, which is the right response to the
+       renderer being broken and much too big a response to one peer's rig failing to build. A fault
+       here degrades that ally to the shared rig - the behaviour of every build before this one -
+       and leaves your own character alone. */
+    let rec = null;
+    if(key){ try { rec = peerRig(p, key); if(rec) armPeer(rec, p); } catch(e){ rec = null; } }
+    const wrap = rec ? rec.wrap : HERO3D._wrap;
+    const anim = rec ? rec.anim : _localAnim;
+
     const S = HERO3D.scale;
-    const wrap = HERO3D._wrap;
     wrap.scale.setScalar(S);
     wrap.position.set(p.x, (p.y || 0) + HERO3D.yOff, p.z);
     wrap.rotation.y = (p.yaw || 0) + HERO3D.yawOff;
     wrap.updateMatrixWorld(true);
+    showOnly(wrap);
 
-    /* Build or refresh the 3D world before drawing. Cheap when nothing changed - it compares a
-       level signature and returns. Deliberately in the SAME scene and render call as the hero,
-       so there is one Three.js context over the game canvas rather than two fighting for it. */
-    /* ONE getDelta per frame. Calling it again for the mobs returns ~0 because the clock resets on
-       read, which would freeze the hero's animation while the mobs animated fine. */
-    const dt = Math.min(0.05, clock.getDelta());
-    syncWorld(scene);
-    syncMobs(scene, dt);
-    syncProps(scene, dt);             // chests and the other objects you interact with
-
-    syncClass();                      // respec or a different save changes the body
-    playFor(p);
-    mixer.update(dt);
+    playFor(p, anim);
+    if(anim.mixer) anim.mixer.update(dt);
     /* Force the skeleton to recompute. Three normally does this during projectObject, but in a
        shared context its internal state cache is reset every frame, so being explicit removes a
        variable while diagnosing the missing skinned body. */
-    HERO3D._wrap.traverse(o => { if(o.isSkinnedMesh && o.skeleton){ o.skeleton.update(); } });
+    wrap.traverse(o => { if(o.isSkinnedMesh && o.skeleton){ o.skeleton.update(); } });
 
     /* Both Three.js and the game write GL state. Without bracketing the draw in resetState()
        the game's next frame renders with Three's leftover state and the world breaks. */
@@ -1614,6 +1791,24 @@ window.__hero3dWeaponsFor = () => weaponsFor(eyeModel());
 window.__hero3dWeapon = () => HERO3D.weapon || 'none';
 window.__hero3dSwapState = () => ({ lastArt:_lastArt, lastRar:_lastRar, reArming:_reArming, hasActor:!!actor, ready:!!HERO3D.ready, weapName:WEAP.name, want:(function(){try{return modelForWeapon(window.__BF3.G.p.weapon);}catch(e){return 'ERR '+e.message;}})() });
 window.__hero3dSkin = () => HERO3D.skin || 'none';
+/* WHO IS ACTUALLY STANDING IN THIS SCENE, and are they different from each other? Exported because
+   "allies look like themselves" is otherwise checkable only by eye, and one shared rig renders a
+   party perfectly well - every body in the right place, all of them you. This reports the rig
+   BEHIND each ally: which class body, which clip it is playing, and which weapon model it is
+   holding. Two allies of different classes with the same answers means the pool is not working. */
+window.__hero3dRigs = () => {
+  const wof = n => { let w = null; n && n.traverse(o => { if(!w && o.userData && o.userData._weap) w = o; }); return !!w; };
+  return {
+    frame: _frameNo, cap: peerCap(),
+    local: { model: HERO3D.model, clip: _localAnim.cur, wrap: !!HERO3D._wrap,
+             visible: !!(HERO3D._wrap && HERO3D._wrap.visible), weapon: HERO3D.weapon || null },
+    peers: [..._peerRigs.entries()].map(([id, r]) => ({
+      id, model: r.model, clip: r.anim.cur, art: r.art || null, arming: !!r.arming,
+      armed: wof(r.node), seen: r.seen, visible: !!r.wrap.visible,
+      at: { x: Math.round(r.wrap.position.x), z: Math.round(r.wrap.position.z) },
+    })),
+  };
+};
 /* Switch skin at runtime. 'base' restores the pack original; anything else is treated as an
    unlockable recolour for the current class. Returns what is now worn. */
 window.__hero3dSetSkin = id => { HERO3D.skinId = id || 'base'; return applyClassSkin(); };
@@ -1821,7 +2016,7 @@ window.__hero3dFacing = (p) => {
   const dot = +fwd.clone().setY(0).normalize().dot(vel).toFixed(3);
   return { moving:true, dot, verdict: dot > 0.5 ? 'FORWARD (correct)'
                                  : dot < -0.5 ? 'BACKWARD (180 out)' : 'sideways/unclear',
-           yawOff: HERO3D.yawOff, clip: cur };
+           yawOff: HERO3D.yawOff, clip: _localAnim.cur };
 };
 window.__hero3dSkinCaps = () => {
   const g = window.__BF_GL; if(!g || !renderer) return 'no gl';

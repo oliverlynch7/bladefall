@@ -80,20 +80,79 @@ export async function runMpTests(opts){
   check('the cap bites', r.crowd && r.crowd.drawn === cap + 1,
         `cap ${cap}, drew ${r.crowd && r.crowd.drawn}`);
 
-  return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot };
+  /* ── ALLIES LOOK LIKE THEMSELVES ─────────────────────────────────────────────────────────────
+     Everything above is about whether a body is drawn. This is about WHOSE. The pool gives each
+     peer its own SkeletonUtils clone, its own mixer and its own weapon; with one shared rig every
+     ally was a copy of the local hero, which draws a perfectly convincing party and is still wrong.
+     Its known-bad is ?heroonerig=1, which sends allies back through the shared rig. */
+  const rigs = r.rigs;
+  if(!rigs){
+    check('ally rigs: the pool reports itself', false,
+          '__hero3dRigs() is missing — the pool cannot be measured, so nothing here is proven');
+  } else {
+    const peers = rigs.peers || [];
+    const A = peers.find(x => x.id === 'probe-a'), B = peers.find(x => x.id === 'probe-b');
+    check('ally rigs: one rig per peer', peers.length === 2,
+          `${peers.length} rigs for 2 allies` +
+          (peers.length === 0 ? ' — every ally is being drawn with the local hero\'s body' : ''));
+    check('ally rigs: keyed to the right peers', !!(A && B),
+          'ids present: ' + JSON.stringify(peers.map(x => x.id)));
+    if(A && B){
+      /* The bodies must differ from EACH OTHER and from yours. Comparing only against the local
+         hero would pass a pool that gave every ally the same wrong body. */
+      check('ally rigs: each ally wears their own class body',
+            A.model !== B.model && A.model !== rigs.local.model,
+            `wizard→${A.model}, ranger→${B.model}, local ${rigs.local.model}`);
+      /* A weapon LOAD can be slow, so this asks what was requested, not what resolved. */
+      check('ally rigs: each ally is armed with their own weapon',
+            A.art === 'staff' && B.art === 'bow',
+            `wizard holding ${A.art}, ranger holding ${B.art}`);
+      /* The pose is the third thing the shared rig destroyed, and the quietest. Both allies were
+         given the local hero's state, so this asserts each rig has independently chosen a clip
+         rather than that the clips differ - identical input legitimately gives identical output. */
+      check('ally rigs: each ally animates on its own mixer',
+            !!A.clip && !!B.clip,
+            `clips: wizard ${A.clip}, ranger ${B.clip}, local ${rigs.local.clip}`);
+      /* One body per render call. Every rig visible at once means each ally is drawn once per hero
+         in the party - N² renders in a full group. */
+      check('ally rigs: exactly one body visible per render',
+            peers.filter(x => x.visible).length + (rigs.local.visible ? 1 : 0) === 1,
+            `visible: local ${rigs.local.visible}, ` + JSON.stringify(peers.map(x => [x.id, x.visible])));
+    }
+    check('ally rigs: the pool is capped', peers.length <= rigs.cap,
+          `${peers.length} rigs against a cap of ${rigs.cap}`);
+  }
+  for(const t of [r.rigTrial, r.rigTrial2]){
+    if(!t) continue;
+    check('ally rigs: the party still renders without error',
+          !t.threw && !t.flushThrew && !(t.renderErrs || []).length,
+          JSON.stringify({ queue: t.threw, flush: t.flushThrew, render: t.renderErrs }));
+    check('ally rigs: every body in the party is drawn', t.drawn === 3,
+          `drew ${t.drawn} of 3`);
+  }
+
+  return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
+           oneRig: !!r.oneRig, rigs: r.rigs };
 }
 
 if(import.meta.filename === process.argv[1]){
-  /* `node harness/test-mp.js --bad` runs the known-bad. It must FAIL; a pass means the assertions
-     cannot see the bug they exist for. */
+  /* Two known-bads, one per thing this suite claims. Each must FAIL; a pass means the assertions
+     cannot see the bug they exist for.
+       --bad       ?heroslot=1     the historical single pending SLOT: allies overwrite you
+       --bad-rigs  ?heroonerig=1   the historical single shared RIG: allies are copies of you */
   const bad = process.argv.includes('--bad');
-  const url = bad ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1' : undefined;
+  const badRigs = process.argv.includes('--bad-rigs');
+  const url = bad  ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1'
+            : badRigs ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroonerig=1'
+            : undefined;
   runMpTests({ url }).then(r => {
     for(const f of r.failures) console.log(`FAIL mp ${f.check}: ${f.detail}`);
     console.log(`mp: ${r.pass} pass, ${r.fail} fail` + (r.skipped ? ` (skipped: ${r.skipped})` : '') +
                 (r.at ? `  [at ${r.at}, cap ${r.cap}${r.slot ? ', SINGLE-SLOT self-test' : ''}]` : ''));
-    if(bad){
-      console.log(r.fail ? 'known-bad: correctly detected ✓' : 'known-bad: NOT DETECTED — assertions are blind ✗');
+    if(bad || badRigs){
+      const which = bad ? 'single-slot' : 'single-rig';
+      console.log(r.fail ? `known-bad (${which}): correctly detected ✓`
+                         : `known-bad (${which}): NOT DETECTED — assertions are blind ✗`);
       process.exit(r.fail ? 0 : 1);
     }
     process.exit(r.fail ? 1 : 0);

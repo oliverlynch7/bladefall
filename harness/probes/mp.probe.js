@@ -88,8 +88,33 @@
     send(G.p, 0);
   });
 
+  /* 4. DO ALLIES LOOK LIKE THEMSELVES? Three trials above prove every body in the party is DRAWN.
+        They say nothing about whose body it is, and for most of this file's life the answer was
+        "yours" - one rig, so an ally wore your class's model, your weapon and, because the clip
+        state was module-level too, your pose.
+
+        Driven the same way as the rest: real objects through the game's own drawHero3, then the
+        game's own flush, then the rig pool is ASKED what it built. Two allies of deliberately
+        different classes holding deliberately different weapons; a pool that is not working answers
+        the same for both, and answers with the local hero's model.
+
+        Two flushes, because arming is asynchronous - equipWeapon loads a glTF - so the first pass
+        creates the rigs and the second is what a steady-state frame looks like. `armed` is read as
+        "does this rig have a weapon mesh parented to it", never as "did the load resolve in time":
+        a slow load must not read as a broken pool. */
+  const rigsOf = () => (typeof window.__hero3dRigs === 'function') ? window.__hero3dRigs() : null;
+  const ally = (id, cid, art, x) => Object.assign({}, G.p,
+    { peerId: id, cid: cid, x: x, weapon: Object.assign({}, G.p.weapon || {}, { art: art, rarity: 'common' }) });
+  const allyA = ally('probe-a', 'mage',   'staff', G.p.x + 150);
+  const allyB = ally('probe-b', 'ranger', 'bow',   G.p.x - 150);
+  const rigTrial = trial(function(){ send(G.p, 0); send(allyA, 0); send(allyB, 0); });
+  const rigTrial2 = trial(function(){ send(G.p, 0); send(allyA, 0); send(allyB, 0); });
+  const rigs = rigsOf();
+
   window.drawHero3D = real;
   window.__hero3dPending = null;
   return JSON.stringify({ cap: CAP, at: G && G.areaName, slot: SLOT,
-                          localFirst: localFirst, localLast: localLast, crowd: crowd });
+                          oneRig: /[?&]heroonerig=1/.test(location.search),
+                          localFirst: localFirst, localLast: localLast, crowd: crowd,
+                          rigTrial: rigTrial, rigTrial2: rigTrial2, rigs: rigs });
 })()

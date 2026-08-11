@@ -281,7 +281,7 @@ sharpens your blade a little further" names no amount), that one is his.
 
 ---
 
-## F. `bladedancer/Riposte:damage` FLAPS, and it can throw away a run's work
+## F. `bladedancer/Riposte:damage` FLAPPED — **FIXED, and it was the GAME, not the bench**
 
 Found 2026-08-11 by hitting it. A full `run-all.js` sweep reported
 `REGRESSION: skills:bladedancer/Riposte:damage` and `GATE: FAIL (1 new)` on a run whose only game
@@ -308,6 +308,69 @@ classes is measured at and would force a full re-baseline, which is not a thing 
 as anything else. **Next run should take this before any new skill work**: reproduce with repeated
 casts, and if the lunge-overshoot is confirmed, the fix belongs in the probe's geometry rather than in
 the skill.
+
+### Reproduced 2026-08-11, and the lead above was RIGHT ABOUT THE SHAPE AND WRONG ABOUT THE HALF
+
+`harness/probes/riposte.probe.js` casts Riposte in both of its states against the bench's own rig and
+reports the geometry `bdArc` itself tests. The overshoot is real. It is not the uncharged lunge.
+
+| state | lunge | where the player ended | facing the target | cone needs | dealt at cast |
+|---|---|---|---|---|---|
+| uncharged | 55 | **5 in front** of a foe 60 away | +1 | 0.81 | **127** |
+| charged | 95 | **35 BEHIND** it | **−1** | 0.81 | **0** |
+
+So the five-unit separation the lead worried about is the case that *always works*, and it works for
+the reason the lead thought would break it: `bdArc`'s facing test is skipped entirely when the
+separation is inside the target's radius (`if(d>e.r && …) continue`, 10232, and a grunt's `r` is 15).
+**The charged lunge is 95 units and the bench's dummy stands at 60.** The player lands behind it,
+`bdArc` reads it at facing −1 against a cone that needs +0.81, and the arc excludes it.
+
+**The flap is which state the bench happens to be in, and the bench never chose.** `test-skills.js`
+casts `c2CurSkills()` in order and resets nothing about the player between skills. Slot 0 is Counter
+Stance, which opens a 0.85s parry window; if the dummy's attack lands inside it, `hurtPlayer` (11148)
+stores `p.bdRiposte=1`, and that charge is still on the body when slot 1 — Riposte — is cast one
+window later. Whether one grunt's attack cadence lands inside 0.85 seconds is a coin toss, and it is
+the whole of the flap: measured over four sequences per launch, **1 of 4 charged on one run and 1 of
+4 on another, at a different index each time.**
+
+**Fixed in the SKILL, not in the probe, and the measurement is what changed the verdict.** Moving the
+bench's dummy would have hidden this: a charged Riposte is stored *by being hit*, which requires the
+attacker to be in melee range of you, so the situation that charges the skill is exactly the
+situation in which it whiffed. The class's signature payoff — its `role:'Boss Damage'` skill, whose
+own card promises "greatly increases its damage **and reach**" — could not hit the enemy that charged
+it. That is section A's and section B's shape, not a balance number: no multiplier, cooldown or reach
+was touched.
+
+`SKILL_FX.bd_riposte` now clamps the step to the first body the lunge would run into
+(`along − (e.r + p.r)`, tested against the lunge's own line), so it is unchanged with nobody in the
+way and ends at contact range when there is. Measured either side **in the same build**, because
+`?ripostenoclamp=1` restores the old flat step — the permanent known-bad idiom `?breakgap`,
+`?heroslot` and `?heroonerig` exist for:
+
+| | uncharged | charged | four bench sequences |
+|---|---|---|---|
+| `?ripostenoclamp=1` | 127 (sep 5) | **0** (sep 35, behind) | PASS PASS **FAIL** PASS — `flapped: true` |
+| fixed | 108 (sep 28) | **271** (sep 28, facing +1) | PASS PASS PASS PASS — `flapped: false` |
+
+271 / 108 = 2.509 against the handler's own 4.4 / 1.75 = 2.514, so the charged path is now landing
+its full advertised multiplier rather than a fraction of it.
+
+**One number moved that should not have, and it is recorded as inconclusive rather than explained
+away.** The uncharged hit reads **127 unclamped and 108 clamped**. `G.combo` is 0 at both casts
+(published by the probe, because `hitEnemy` ends in `dmg*(1+min(0.2,combo*0.004))` and that alone can
+move a number 20%), the damage `d` is computed *before* the lunge in either case, and a four-point
+distance sweep on the fixed build — the dummy planted at 60, 40, 24 and 14 — returns **108 at every
+separation, one hit each**. So it is not a proximity falloff and it is not a double hit. The ratio is
+1.176, which is suggestively close to the bladedancer's own `v*=1.18` blade bonus in `effPower`
+(3733), but nothing in the probe's inputs differs between the two launches, so that is a coincidence
+worth checking and not a finding. **It changes no verdict** — the claim is "damage happened", and it
+happens in both. Next reader: instrument the value `bdArc` passes to `hitEnemy` rather than the HP
+delta.
+
+**And the unclamped lunge misses more than the charged case.** The same geometry says any target
+closer than the step length ends up behind the player: at 95 units of lunge that is everything inside
+~80 units, which is most of a melee fight. Only the charged half was reported because only the
+charged half is in the default rank-10 build's reach at the bench's 60-unit spacing.
 
 ---
 

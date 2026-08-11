@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.910.0-autopilot';
+const VERSION3D='1.911.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10232,8 +10232,25 @@ function bdArc(p,dmg,reach,arc,kb,stun){const fx=Math.sin(p.yaw),fz=Math.cos(p.y
   for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=e.x-p.x,dz=e.z-p.z,d=Math.hypot(dx,dz);if(d>reach+e.r||losBlocked(p.x,p.z,e.x,e.z))continue;if(d>e.r&&(dx*fx+dz*fz)/d<cos)continue;hitEnemy(e,dmg,p,kb||180,0,null);if(stun)e.stunT=Math.max(e.stunT||0,stun);n++;}return n;}
 SKILL_FX.bd_counter=function(p){p.bdParryT=c2Passive('bd_patient')?.85:.65;p.bdMirrorDmg=0;p.bdPerfectDmg=0;p.atkTimer=.34;skillRing(p.x,p.z,'#dce7f5','#ffffff',95);addText(p.x,p.y+p.h+18,p.z,'PARRY READY','#dce7f5',true);SFX.dodge();};
 SKILL_FX.bd_twin=function(p,ok,am){const d=(p.weapon?p.weapon.dmg:10)*effPower(p)*am*(ok?1:OFFCLASS_MUL);p.atkTimer=.42;bdArc(p,d*.78,150,2.8,120);bdArc(p,d,175,2.45,260);skillRing(p.x,p.z,'#d7b4ff','#ffffff',175);SFX.slash();};
+/* PERMANENT KNOWN-BAD for the lunge clamp below. Restores the flat step that ran past its target,
+   so harness/probes/riposte.probe.js can watch its own assertion FAIL in the same build, the same
+   session and the same combat state as the passing one — the idiom hero3d.js's ?heroonerig and
+   level.probe.js's ?breakgap exist for. A known-bad you have to edit the repo to produce is a
+   known-bad nobody re-runs, and here it also answers "did anything else about the hit change", which
+   two builds compared across two launches cannot. */
+const RIPOSTE_NOCLAMP=(function(){ try { return /[?&]ripostenoclamp=1/.test(location.search); } catch(e){ return false; } })();
 SKILL_FX.bd_riposte=function(p,ok,am){const charged=!!p.bdRiposte,mul=charged?(c2Passive('bd_sharp')?4.4:3.3):1.75,d=(p.weapon?p.weapon.dmg:10)*effPower(p)*mul*am*(ok?1:OFFCLASS_MUL);
-  p.bdRiposte=0;p.atkTimer=.48;p.x+=Math.sin(p.yaw)*(charged?95:55);p.z+=Math.cos(p.yaw)*(charged?95:55);bdArc(p,d,charged?235:170,1.25,charged?430:240,charged?.35:0);skillRing(p.x,p.z,charged?'#ffd36a':'#c8d2df','#ffffff',charged?220:145);addText(p.x,p.y+p.h+18,p.z,charged?'RIPOSTE!':'QUICK CUT',charged?'#ffd36a':'#dce7f5',true);SFX.slash();};
+  p.bdRiposte=0;p.atkTimer=.48;
+  // A LUNGE STOPS AT ITS TARGET; IT DOES NOT RUN PAST IT. Measured (harness/probes/riposte.probe.js):
+  // charged, the flat 95-unit step carried the player 35 units BEHIND a foe standing 60 away, and
+  // bdArc's cone (1.25 rad, so it needs facing >= 0.81) then read that foe at facing -1 and excluded
+  // it — 0 damage, from the one skill in the kit whose charge is stored by that same foe hitting you.
+  // Clamped to the first body the lunge would run into, so the step is unchanged with nobody in the
+  // way and ends at contact range when there is.
+  const _lfx=Math.sin(p.yaw),_lfz=Math.cos(p.yaw);let _step=charged?95:55;
+  if(!RIPOSTE_NOCLAMP)for(const e of combatTargets()){if(e.dead||!e.active)continue;const ex=e.x-p.x,ez=e.z-p.z,along=ex*_lfx+ez*_lfz;if(along<=0)continue;
+    const gap=(e.r||0)+p.r;if(Math.abs(ex*_lfz-ez*_lfx)>gap)continue;_step=Math.min(_step,Math.max(0,along-gap));}
+  p.x+=_lfx*_step;p.z+=_lfz*_step;bdArc(p,d,charged?235:170,1.25,charged?430:240,charged?.35:0);skillRing(p.x,p.z,charged?'#ffd36a':'#c8d2df','#ffffff',charged?220:145);addText(p.x,p.y+p.h+18,p.z,charged?'RIPOSTE!':'QUICK CUT',charged?'#ffd36a':'#dce7f5',true);SFX.slash();};
 SKILL_FX.bd_step=function(p,ok,am){const d=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.45*am*(ok?1:OFFCLASS_MUL),ox=p.x,oz=p.z,ex=ox+Math.sin(p.yaw)*235,ez=oz+Math.cos(p.yaw)*235;
   for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=ex-ox,dz=ez-oz,l2=dx*dx+dz*dz,t=Math.max(0,Math.min(1,((e.x-ox)*dx+(e.z-oz)*dz)/(l2||1))),dd=Math.hypot(e.x-(ox+dx*t),e.z-(oz+dz*t));if(dd<48+e.r)hitEnemy(e,d,p,180,0,null);}
   p.dodgeTimer=.20;p.invuln=Math.max(p.invuln,.20);p.dashX=Math.sin(p.yaw);p.dashZ=Math.cos(p.yaw);p.bdFlowT=3;skillRing(ox,oz,'#b995e8','#ffffff',70);skillRing(ex,ez,'#e5d5ff','#ffffff',70);SFX.dodge();};

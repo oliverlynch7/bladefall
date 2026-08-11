@@ -220,7 +220,22 @@ One line per pass, so the next run can see what has been taken without re-readin
 
 | pass | row | commit | how it was proven |
 |---|---|---|---|
-| 1 | **B — berserker Headlong flew forever** | this run | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 2 | **F — bladedancer Riposte lunged past its target** | this run | `harness/probes/riposte.probe.js` + `?ripostenoclamp=1`, both states measured in one build |
+
+**Pass 2 overturned its own row's recommendation, and that is why the row said to measure it.**
+Section F's lead was that the bench's dummy sits inside the *uncharged* lunge and the fix therefore
+belonged in the probe's geometry. Measured, the uncharged lunge lands every time — a separation
+inside the target's radius is exactly what makes `bdArc` skip its facing test — and it is the
+**charged** lunge, 95 units at a dummy 60 away, that ends up behind the target facing away from it
+for zero damage. Moving the bench's dummy would have hidden a skill that cannot hit the enemy that
+charged it, and would have forced a full re-baseline to do it.
+
+Carry forward: **a flap is a question about state the bench never chose, not only about geometry.**
+`test-skills.js` casts a class's skills in order and resets nothing about the player between them, so
+anything one skill leaves on the body is an input to the next one. Here slot 0 opens a parry window
+and slot 1 reads the charge it stores — a coin toss on one grunt's attack cadence, and two verdicts
+from one bench. Any other class whose kit stores state across slots can do the same thing.
 
 **Pass 1's proof did NOT come from `test-skills.js`, and that is the point worth carrying forward.**
 The harness reports `berserker/Charge:damage`, and the damage half is Oliver's design call — so the

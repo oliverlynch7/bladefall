@@ -21,7 +21,7 @@ Searched 2026-08-11. Each row is a documented, recurring complaint in shipped co
 | known pitfall | BLADEFALL today | verdict |
 |---|---|---|
 | Naive host authority gives the host a lag-free advantage | Enemies are host-authoritative for HP/death only; each client runs enemy AI locally, and peers are interpolated between packets | partly handled — audit in Task 2 |
-| Difficulty not scaled to party size | `grep` for `peers.length` in any HP/damage path returns **nothing**. Two players fight exactly the enemies one player would | **missing — Task 3** |
+| Difficulty not scaled to party size | ~~`grep` for `peers.length` in any HP/damage path returns **nothing**~~ — **fixed, Task 3**: +60% enemy HP per additional player in your zone, host-only, health only | done |
 | Shared loot causes friction; personal loot is strongly preferred | No per-player loot ownership | **missing — Task 4** |
 | No in-game communication | `grep` for chat/ping/mark messages returns **nothing** | **missing — Task 5** |
 | Public STUN/TURN, no relay | Cloudflare Realtime TURN with ephemeral credentials, verified relay candidates | already correct |
@@ -210,35 +210,73 @@ Nothing in the game reads the party size. Two players meet the enemies one playe
 **Files:**
 - Modify: `public/3d/index.html`
 
-- [ ] **Step 1: Find where enemy HP and damage are finalised**
+- [x] **Step 1: Find where enemy HP and damage are finalised** — one site, `spawnEnemy` (7627).
 
-```bash
-grep -n "ngHp\|ngDmg\|computeNgScales" public/3d/index.html | head
-```
+`hpScale` there is already the product of every run-scale term the game has — `DIFFICULTY * G.ngHp *
+stageScale() * (boss?5:1) * (_earnedTrial?1.4:1) * tEnemyHp() * (boss?dtune().boss:1)` — so a party
+multiplier joins an existing chain rather than starting a system. `G.ngDmg` sits on the line below
+it and is deliberately left alone; see Step 2.
 
-These already exist as run-scale multipliers, which is the natural place for a party multiplier to join rather than a new system.
+- [x] **Step 2: Add a party multiplier, applied on the HOST only** — `PARTY_HP_PER_ALLY = 0.60`,
+      `partySize()` and `partyHpMul()` above `spawnEnemy`, one `*partyHpMul()` on `hpScale`.
 
-- [ ] **Step 2: Add a party multiplier, applied on the HOST only**
+**Health only.** Raising enemy damage in co-op is the change other games are criticised for: it
+makes a party fragile rather than the fight longer. `G.ngDmg` is untouched.
 
-Enemy stats are host-authoritative, so the multiplier must be applied where enemies are created on the host and travel to guests through the existing snapshot. Applying it independently on both clients would double it on the guest.
+**Host only**, so it cannot square on a guest's screen: a guest builds the same level from the
+shared seed (`index.html:4200`) and then adopts the host's `hp`/`maxHp` from the snapshot, so a
+guest that also scaled locally would show 2.56× where the host sent 1.6×.
 
-Start at **+60% HP per additional player, no damage increase.** The research is explicit that raising enemy damage in co-op is what makes it "less fun" and that extra health plus stagger "slows progression significantly" — so this scales the *time to kill* only, and only once, and stays reviewable.
+Three exclusions, each a real situation rather than defensive coding, and each an assertion in
+Step 3: **PvP** (a duel's difficulty is the other player), **allies in another zone** (a friend
+idling in the Waystation must not harden the dungeon you are standing in), and **guests**. The
+party is counted with MP's own idiom for "players in the zone I am in" — the same filter the wipe
+check runs at 11775 — rather than a second definition of a party.
 
-- [ ] **Step 3: Prove it**
+- [x] **Step 3: Prove it** — and the known-bad was watched to fail BEFORE the code was written, which
+      is the strongest version of this step available.
 
-Add an mp-suite assertion: with one player the same seed produces enemy `maxHp` H; simulating a second peer produces ~1.6H. Prove it can fail by asserting the wrong multiplier first.
+`harness/probes/party-scale.probe.js` drives the game's own `spawnEnemy()` and reads the `maxHp` it
+produced; it does not reimplement the multiplier. It fakes the party in MP's own bookkeeping — the
+only place a probe can reach it — and restores every field afterwards.
 
-```bash
-node tools/gate.js
-node harness/test-mp.js
-```
+Run against the unmodified game first: **a grunt spawned at 20 HP and a brute at 684 whether the
+party was one, two or three.** That is the bug, measured rather than inferred from a grep.
 
-- [ ] **Step 4: Commit**
+| party | mob HP | boss HP | reported size |
+|---|---|---|---|
+| solo | 20 | 684 | 1 |
+| host + 1 ally | **32** (×1.60) | **1094** (×1.60) | 2 |
+| host + 2 allies | **44** (×2.20) | **1505** (×2.20) | 3 |
+| host + 1 ally, PvP | 20 | 684 | 1 |
+| host + 1 ally in another zone | 20 | 684 | 1 |
+| guest + 1 ally | 20 | 684 | 1 |
 
-```bash
-git add public/3d/index.html harness/probes/mp.probe.js
-git commit -m "multiplayer: enemies scale with the party, so a second player is help and not an easy mode"
-```
+A boss is measured beside a trash mob deliberately: the boss branch multiplies `hpScale` by four
+further terms and is where a multiplier is most likely to be dropped or applied twice. The suite
+also asserts the **solo baseline is stable** across two identical spawns, because a ratio is worth
+nothing if the thing it is a ratio of wobbles.
+
+**`?noparty=1` is the permanent known-bad**, in game code rather than in the probe for the same
+reason `?heroonerig=1` is: the multiplier lives inside `spawnEnemy` and a probe cannot undo it from
+outside. `node harness/test-mp.js --bad-party` → four FAIL lines
+(`20 → 20 is ×1.000, wanted ×1.60`) and `known-bad (unscaled-party): correctly detected ✓`.
+
+The expected multiplier is restated in `test-mp.js` rather than read off `__BF3`, so the assertion
+can disagree with the code; reading the game's own constant and then checking the game against it
+would pass whatever the game happened to do.
+
+`node tools/gate.js` → `GATE OK`, VERSION3D 1.911.0-autopilot. mp suite **27 → 37 pass, 0 fail**.
+Rendered The Outskirts solo afterwards: 41 enemies, `party 1, mul 1`, sporeback 31 / thornboar 31 —
+unchanged, which is the regression that matters, since `spawnEnemy` is on every level's path.
+
+- [x] **Step 4: Commit** — `public/3d/index.html`, `harness/probes/party-scale.probe.js`,
+      `harness/test-mp.js`. Its own commit, per this plan's constraint, so Oliver can revert this one
+      without losing Tasks 4 and 5.
+
+**Left for Oliver, and it is the whole point of the number being one constant in one place:**
+whether +60% per ally is right. The harness can prove the mechanism fires and cannot have an opinion
+on whether a two-player fight feels good. `PARTY_HP_PER_ALLY` is a single line at `index.html:7627`.
 
 ---
 

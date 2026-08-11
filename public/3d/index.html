@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.910.0-autopilot';
+const VERSION3D='1.911.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7624,9 +7624,43 @@ function spawnCrackWall(x,z,y,w,h,d,shots){
   e.hp=e.maxHp=Math.max(20,(shots||3)*22);   // "a couple shots" — ~3 weapon hits by default
   return e;
 }
+/* ===== PARTY SCALING — the fight has to notice a second player =====================
+   Until 2026-08-11 nothing in the game read the party size: two players met exactly the enemies one
+   player would, so co-op was strictly EASIER than solo and the difficulty tuned by playing alone did
+   not survive a friend joining. Measured before it was written, not assumed — a grunt spawned at 20
+   HP and a brute at 684 whether the party was one, two or three.
+
+   HEALTH ONLY, and that is the whole design. Raising enemy DAMAGE in co-op is the change other
+   games are criticised for: it makes a party fragile rather than the fight longer. This scales time
+   to kill and nothing else, so a second player is help that is also work.
+
+   HOST ONLY. Enemy stats are host-authoritative and travel to guests through the existing snapshot
+   (a guest spawns its own copy from the shared seed and then adopts the host's hp/maxHp), so
+   applying this on both clients would square it on the guest's screen.
+
+   The party is "players in the zone I am in", using MP's own idiom for that — the same filter the
+   wipe check runs (11775). A friend idling in the Waystation must not harden the dungeon you are
+   standing in. PvP is excluded: a duel arena's difficulty is the other player.
+
+   ?noparty=1 turns it off. It exists so the harness assertion can be watched to FAIL on demand,
+   the way hero3d.js carries ?heroonerig=1, and it is in game code rather than in the probe for the
+   same reason that one is: the multiplier is inside spawnEnemy and a probe cannot undo it from
+   outside. */
+const PARTY_HP_PER_ALLY = 0.60;
+const NO_PARTY_SCALE = (function(){ try { return /[?&]noparty=1/.test(location.search); } catch(e){ return false; } })();
+function partySize(){
+  try {
+    if(!MP.active || !MP.isHost || MP.pvp) return 1;
+    const ps = MP.peers || {}; let n = 1;
+    for(const id in ps){ if(ps[id] && ps[id].zone === MP.zone) n++; }
+    return n;
+  } catch(e){ return 1; }
+}
+function partyHpMul(){ return NO_PARTY_SCALE ? 1 : (1 + PARTY_HP_PER_ALLY * (partySize() - 1)); }
+
 function spawnEnemy(type,x,z,isBoss){
   const _earnedTrial=!!(G.trial&&TRIALS[G.trial]&&TRIALS[G.trial].earned);   // secret-class trials are a real skill test: tougher foes
-  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1);   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale)
+  const a=ENEMY[type], hpScale=DIFFICULTY*G.ngHp*stageScale()*(a.boss?5:1)*(_earnedTrial?1.4:1)*tEnemyHp()*(a.boss?dtune().boss:1)*partyHpMul();   // bosses carry ~5x HP (halved from 10 — still scales with zone tier via stageScale); partyHpMul is 1 solo
   const e={type,kind:a.kind,element:a.element||null,x,z,y:a.kind==='fly'?40+Math.random()*50:0,yaw:0,
     r:a.r,h:a.h,hp:Math.round(a.hp*hpScale),maxHp:Math.round(a.hp*hpScale),
     dmg:a.dmg*DIFFICULTY*G.ngDmg*1.18*(a.boss?stageScale()*2.6:1)*(_earnedTrial?1.25:1)*tEnemyDmg()*(a.boss?dtune().boss:1),speed:a.speed,color:a.color,xp:a.xp,boss:!!a.boss,label:a.label||'',   // bosses hit HARD and scale with zone tier (like their HP) so they stay threatening as you level
@@ -18892,7 +18926,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      non-room GROUND a level has, re-implemented the test as "is there a segment or a plat here",
      and reported the Outskirts - a grassland - as 2% ground. Every probe that reimplements one of
      these tests eventually measures something the game does not believe. */
-  surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy,
+  surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy, partySize, partyHpMul,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

@@ -28,6 +28,12 @@ import { join } from 'node:path';
 import { runScenario } from './drive.js';
 
 const PROBE = readFileSync(join(import.meta.dirname, 'probes', 'mp.probe.js'), 'utf8');
+const PARTY = readFileSync(join(import.meta.dirname, 'probes', 'party-scale.probe.js'), 'utf8');
+
+/* What a party of n must multiply enemy HP by. Stated here as well as in the game because the
+   assertion has to be able to disagree with the code - reading the multiplier out of __BF3 and
+   then checking the game against it would pass whatever the game happened to do. */
+const HP_PER_ALLY = 0.60;
 
 /* Zone 0, The Outskirts - a ZONE index, not a stage index, and the one destination whose readiness
    wait is documented and quick. Nothing here is zone-specific; it needs a live 3D hero layer and
@@ -131,26 +137,75 @@ export async function runMpTests(opts){
           `drew ${t.drawn} of 3`);
   }
 
+  /* ── THE PARTY CHANGES THE FIGHT ─────────────────────────────────────────────────────────────
+     Its own launch, because it needs a live zone to spawn into and it faked MP's bookkeeping to get
+     there - keeping it out of the render probe means neither can leave state behind for the other.
+     Its known-bad is ?noparty=1. */
+  let party = null;
+  try { party = await runScenario({ scene: SCENE, waitMs: 9000, js: PARTY, url }); }
+  catch(e){ failures.push({ check: 'party scaling: load', detail: e.message.slice(0, 200) }); }
+
+  if(party && party.ok === false){
+    failures.push({ check: 'party scaling: probe could not run', detail: party.why });
+  } else if(party){
+    const T = party.trials || [];
+    const at = (label) => T.find(x => x.at === label);
+    const solo = at('solo');
+    /* A ratio is only worth having if the base it is a ratio OF holds still. hpScale multiplies
+       DIFFICULTY, ngHp, stageScale, tEnemyHp and dtune together; two identical solo spawns in the
+       same run settle whether any of them wobble. */
+    check('party scaling: the solo baseline is stable', party.stable === true,
+          `two identical solo spawns gave ${party.soloHp} and ${party.soloAgain}`);
+    /* Both a trash mob and a boss, because the boss branch multiplies hpScale by four more terms
+       and is where a multiplier is most likely to be dropped or applied twice. */
+    const scales = (label, n) => {
+      const t = at(label); if(!t || !solo) { check(`party scaling: ${label}`, false, 'trial missing'); return; }
+      const want = 1 + HP_PER_ALLY * (n - 1);
+      for(const kind of ['hp', 'boss']){
+        const got = solo[kind] ? t[kind] / solo[kind] : null;
+        check(`party scaling: ${label} multiplies ${kind === 'hp' ? 'mob' : 'boss'} health`,
+              got != null && Math.abs(got - want) < 0.02,
+              `${solo[kind]} → ${t[kind]} is ×${got == null ? '?' : got.toFixed(3)}, wanted ×${want.toFixed(2)}`);
+      }
+      check(`party scaling: ${label} counts as ${n}`, t.party === n, `party reported as ${t.party}`);
+    };
+    scales('host + 1 ally', 2);
+    scales('host + 2 allies', 3);
+    /* The three ways the party must NOT count. Each is a real situation: a duel's difficulty is the
+       other player; a friend idling in the hub is not in your fight; and a guest that scaled locally
+       would square the multiplier the host already applied and sent. */
+    for(const label of ['host + 1 ally, PVP', 'host + 1 ally in another zone', 'GUEST + 1 ally']){
+      const t = at(label);
+      if(!t){ check(`party scaling: ${label}`, false, 'trial missing'); continue; }
+      check(`party scaling: ${label} does not scale`,
+            solo && t.hp === solo.hp && t.boss === solo.boss && t.party === 1,
+            `party ${t.party}, mob ${t.hp} vs ${solo && solo.hp}, boss ${t.boss} vs ${solo && solo.boss}`);
+    }
+  }
+
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs };
+           oneRig: !!r.oneRig, rigs: r.rigs, party, noparty: !!(party && party.noparty) };
 }
 
 if(import.meta.filename === process.argv[1]){
-  /* Two known-bads, one per thing this suite claims. Each must FAIL; a pass means the assertions
+  /* Three known-bads, one per thing this suite claims. Each must FAIL; a pass means the assertions
      cannot see the bug they exist for.
-       --bad       ?heroslot=1     the historical single pending SLOT: allies overwrite you
-       --bad-rigs  ?heroonerig=1   the historical single shared RIG: allies are copies of you */
+       --bad        ?heroslot=1    the historical single pending SLOT: allies overwrite you
+       --bad-rigs   ?heroonerig=1  the historical single shared RIG: allies are copies of you
+       --bad-party  ?noparty=1     the historical unscaled fight: a friend is an easy mode */
   const bad = process.argv.includes('--bad');
   const badRigs = process.argv.includes('--bad-rigs');
+  const badParty = process.argv.includes('--bad-party');
   const url = bad  ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1'
             : badRigs ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroonerig=1'
+            : badParty ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noparty=1'
             : undefined;
   runMpTests({ url }).then(r => {
     for(const f of r.failures) console.log(`FAIL mp ${f.check}: ${f.detail}`);
     console.log(`mp: ${r.pass} pass, ${r.fail} fail` + (r.skipped ? ` (skipped: ${r.skipped})` : '') +
                 (r.at ? `  [at ${r.at}, cap ${r.cap}${r.slot ? ', SINGLE-SLOT self-test' : ''}]` : ''));
-    if(bad || badRigs){
-      const which = bad ? 'single-slot' : 'single-rig';
+    if(bad || badRigs || badParty){
+      const which = bad ? 'single-slot' : badRigs ? 'single-rig' : 'unscaled-party';
       console.log(r.fail ? `known-bad (${which}): correctly detected ✓`
                          : `known-bad (${which}): NOT DETECTED — assertions are blind ✗`);
       process.exit(r.fail ? 0 : 1);

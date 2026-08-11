@@ -223,7 +223,17 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
 | 3 | **F — the bench itself flapped** | `2026-08-11` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
-| 4 | **E — stormcaller Storm Ward was never read** | this run | `harness/probes/stward.probe.js`, A/B in one launch: shield 0 before, 4% of max HP after, control 0 both times |
+| 4 | **E — stormcaller Storm Ward was never read** | `f75c81e` | `harness/probes/stward.probe.js`, A/B in one launch: shield 0 before, 4% of max HP after, control 0 both times |
+| 5 | **G — a berserker who picked Frenzy could not be hurt at all** | this run | `harness/probes/frenzy.probe.js`, A/B in one launch: the same 60-damage hit dealt 29 with Rage picked and 0 with Frenzy, throwing `v is not defined`; 37 and 37 after |
+
+**Pass 5 is the first row this plan found that NO suite could have found, and the reason generalises
+to sixty-odd untested branches.** `cheatRank10All` fills every choice rank with the **a**-side, so
+`test-skills.js`, `audit-passives.js` and every baseline this plan has taken have only ever played
+one half of every rank-3/5/7/9 choice in the game. The b-side of `bsk_frenzy` held a
+`ReferenceError` in `hurtPlayer` that made the class **invulnerable**, and the static audit called
+it wired — correctly, since three live call sites name it. Wired is not correct. The cheapest next
+piece of work this suggests is a b-side sweep: for each class, choose the b option at every choice
+rank and take one hit and one swing, which is one launch per class and would have caught this.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

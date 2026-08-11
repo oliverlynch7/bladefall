@@ -409,6 +409,58 @@ because `bd_step` shows what the fix looks like in the same class.
 
 ---
 
+## G. A BERSERKER WHO PICKED FRENZY COULD NOT BE HURT BY ANYTHING — **FIXED 2026-08-11**
+
+**The most severe thing in this document.** `hurtPlayer` (index.html:11163) carried this line among
+the per-class damage-reduction block:
+
+```js
+if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=…; v*=1+(1-fr); }}
+```
+
+`v` is not declared anywhere in `hurtPlayer` — that function's accumulator is `dmg`. `v` is the
+accumulator in `effPower` (3740), `effAtkSpeed` (3754) and the lifesteal function (3760), where the
+identical three lines are correct and wired. This is the copy that landed in the damage function.
+Reading an undeclared name throws a `ReferenceError`, and `hurtPlayer` has no `try` around it, so
+**every hit the player took aborted before `p.hp-=dmg` at 11226.** Not "reduced" — never applied.
+
+**Why nothing has ever caught it, and this is the part worth carrying forward.** `bsk_frenzy` is
+rank 7 option **b**, and `cheatRank10All` fills every choice rank with the **a**-side. So the entire
+harness — every suite, every baseline, every verdict in this document about the berserker — has only
+ever played the Rage half of that choice, and the b-side of all 60-odd choice ranks in the game is
+in the same position. Section E's audit is static and would call `bsk_frenzy` *wired*, correctly:
+three live call sites mention it. Wired is not correct, exactly as that section's own scope note
+says.
+
+**Measured, not read**, by `harness/probes/frenzy.probe.js` — A/B in ONE launch at `--scene
+arena:flat`, the control being the other option at the SAME rank in the SAME game, so the only
+difference between the two halves is which passive is chosen. Every early return in `hurtPlayer`
+that is *not* the bug is cleared first (invuln, dodgeTimer, downed, the hub sanctuary at 11191,
+shield and brace), because otherwise a zero proves nothing:
+
+| | `bsk_rage` (control) | `bsk_frenzy` | threw |
+|---|---|---|---|
+| before | 382 → 353, **dealt 29** | 382 → 382, **dealt 0** | `v is not defined` |
+| after | 382 → 345, **dealt 37** | 382 → 345, **dealt 37** | none |
+
+(The two launches disagree on the control's number because the Arena rolls its own loadout and
+therefore its own armour. The comparison that means anything is the one **inside** a launch, which
+is why the probe takes both halves in one.)
+
+Photographed either side as well (`_shot/out/frenzy-before.png`, `frenzy-after.png`): before, the
+health bar reads **353/477** after the Frenzy hit — the *Rage* trial's number, because the throw
+happened before `hudUpdate()` and the HUD was never told about the second hit; after, **345/477**,
+Frenzy's own hit on the bar.
+
+**Deleted rather than repointed at `dmg`, and that choice is the whole judgement.** Frenzy's card
+says "Your attack speed rises as your health falls, to double at a sliver" — attack speed, which
+`effAtkSpeed` already delivers, and nothing whatever about damage taken. Pointing the clause at
+`dmg` would give a low-health Berserker up to **double damage taken**, a penalty no card states.
+That is a balance call and per this document's own rule it is Oliver's. Removing a clause that
+throws restores exactly what the description promises and nothing more.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

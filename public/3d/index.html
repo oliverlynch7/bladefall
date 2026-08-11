@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.913.0-autopilot';
+const VERSION3D='1.914.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11202,7 +11202,17 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
-  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }}
+  /* FRENZY IS AN ATTACK-SPEED PASSIVE AND HAS NO BUSINESS HERE. A copy of its three-line clause
+     landed in this function, where the accumulator it multiplies (`v`) does not exist — the name is
+     local to effPower/effAtkSpeed/lifesteal, and a damage function's accumulator is `dmg`. Reading
+     an undeclared name throws, so hurtPlayer aborted before `p.hp-=dmg` below and a Berserker who
+     picked Frenzy could not be hurt by anything at all. Measured, not read
+     (harness/probes/frenzy.probe.js): a 60-damage hit dealt 29 with the a-side Rage picked and 0
+     with Frenzy, throwing `v is not defined`, in the SAME game. Frenzy's card promises attack speed
+     and nothing about damage taken, and effAtkSpeed already delivers it, so the clause is deleted
+     rather than repointed at `dmg` — repointing would invent a damage-taken penalty the card does
+     not state, which is a balance call and Oliver's. */
+  if(meta.classId==='berserker'&&c2def('berserker')){}
   if(meta.classId==='monk'&&c2def('monk')){}
   if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;

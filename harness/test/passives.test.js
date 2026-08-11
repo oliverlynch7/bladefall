@@ -103,7 +103,11 @@ const KNOWN_DEAD = new Set([
      launch, watched to fail against the shipped game. */
   'bsk_heavy', 'bsk_reckless', 'bsk_blood', 'bsk_tough',
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
-  'chr_potent', 'chr_slow', 'chr_echo', 'chr_freeze',
+  /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
+     restores the mana you had three seconds ago" now reads the mana out of the same three-second
+     sample the Rewind already restores position and health from, on the line beside its own sibling
+     chr_haste. Proven by harness/probes/potent.probe.js, A/B in one launch against ?nopotent=1. */
+  'chr_slow', 'chr_echo', 'chr_freeze',
   /* mon_flow came OFF this list on 2026-08-11 (sub-project B Task 2, pass 8): "each hit shortens your
      dodge twice as much" now doubles the monk innate's own 0.35 in CLASS_BASIC.monk, proven by
      harness/probes/monkflow.probe.js — ratio 1 before, exactly 2 after. */

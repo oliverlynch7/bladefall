@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.917.0-autopilot';
+const VERSION3D='1.918.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11166,6 +11166,13 @@ const CLASS_BASIC = {
   },
 };
 
+/* ?nopotent=1 sends the chronomancer's Rewind back to the state it shipped in - position and health
+   only, the mana you spent staying spent. It exists so the Potent assertion can be watched to FAIL on
+   demand, the same reason ?heroslot, ?breakgap, ?noparty and ?noping exist: an assertion nobody has
+   seen fail is an assertion nobody should believe, and a known-bad you have to edit the repo to
+   produce is one nobody re-runs. It disables the RESTORE and not the sampler, because the restore is
+   the half a future edit can silently drop. */
+const NO_POTENT = (function(){ try { return /[?&]nopotent=1/.test(location.search); } catch(e){ return false; } })();
 function hurtPlayer(dmg,sx,sz,by){
   dmg = Math.max(1, Math.round(dmg));   // same fix as hitEnemy: never show the player a fractional hit either
   /* The difficulty's damage-taken dial lives HERE rather than on enemy stats, so it also covers
@@ -11306,6 +11313,15 @@ function hurtPlayer(dmg,sx,sz,by){
     p.vx = 0; p.vz = 0;
     p.invuln = Math.max(p.invuln||0, c2Passive('chr_ward') ? 3 : 1.2);   // Time Ward: three seconds untouchable
     if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
+    /* POTENT. "Rewinding also restores the mana you had three seconds ago." Wired 2026-08-11 - it was
+       one of the passives in docs/SKILL_TRIAGE.md section E that the rank menu offers, describes, and
+       no code has ever read. It sits on the line beside its own sibling at the same rank (Haste,
+       above), and no number is invented: the sample this rewind is already restoring your POSITION and
+       HEALTH from now carries the mana that went with them. Math.max, not a bare assignment, because
+       "restores" cannot mean "takes away" - if you somehow had less mana then than now, a passive you
+       chose must not punish you for choosing it. */
+    if(!NO_POTENT && c2Passive('chr_potent') && back.mana != null)
+      p.mana = Math.min(p.maxMana || 100, Math.max(p.mana == null ? 0 : p.mana, back.mana));
     p._rew.length = 0;
     addText(p.x, p.y + 56, p.z, 'REWIND', '#c9a6ff', true);
     try { burst(p.x, p.y+20, p.z, '#c9a6ff', 18); SFX.magic && SFX.magic('void'); G.slowmo = 0.5; } catch(err){}
@@ -12572,15 +12588,19 @@ function update(dt){
   updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
-  /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood and how much health you had,
-     sampled a few times a second. Recorded for the Chronomancer ONLY - every other class pays
-     nothing for a mechanic it cannot use. */
+  /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood, how much health you had and
+     how much mana, sampled a few times a second. Recorded for the Chronomancer ONLY - every other
+     class pays nothing for a mechanic it cannot use.
+     Mana joined the sample on 2026-08-11 for the Potent passive (hurtPlayer). It is recorded whether
+     or not Potent is chosen, exactly as hp is: the alternative is a second sampler that starts
+     recording the moment you pick the passive, which would hand a fresh chronomancer a rewind with no
+     mana history behind it. One number every 0.25s. */
   if(meta.classId==='pirate' && G.p._loaded === undefined) G.p._loaded = true;   // you arrive loaded
   if(meta.classId==='chronomancer' && !G.hub){
     p._rewT = (p._rewT||0) + dt;
     if(p._rewT >= 0.25){
       p._rewT = 0;
-      (p._rew = p._rew || []).push({ x:p.x, y:p.y, z:p.z, hp:p.hp, t:G.time });
+      (p._rew = p._rew || []).push({ x:p.x, y:p.y, z:p.z, hp:p.hp, mana:p.mana, t:G.time });
       while(p._rew.length > 14) p._rew.shift();       // 14 samples at 0.25s = 3.5s of history
     }
   }

@@ -112,7 +112,11 @@ const KNOWN_DEAD = new Set([
   /* mon_flow came OFF this list on 2026-08-11 (sub-project B Task 2, pass 8): "each hit shortens your
      dodge twice as much" now doubles the monk innate's own 0.35 in CLASS_BASIC.monk, proven by
      harness/probes/monkflow.probe.js — ratio 1 before, exactly 2 after. */
-  'mon_iron', 'mon_fire', 'mon_killer', 'mon_still', 'mon_master',
+  /* mon_killer came OFF this list on 2026-08-11 (sub-project B Task 2, pass 10): "the first strike
+     after a dodge hits for triple" is now armed at the dodge itself beside w_tactical and spent in
+     CLASS_BASIC.monk, proven by harness/probes/monkiller.probe.js — ratio 1.009 on both strikes of
+     both halves before, exactly 3 then exactly 1 after. */
+  'mon_iron', 'mon_fire', 'mon_still', 'mon_master',
   /* st_ward came OFF this list on 2026-08-11 (sub-project B Task 2, pass 4): "casting a skill
      grants a shield equal to 4% max HP" is now read in useSkill next to its three identical twins,
      proven by harness/probes/stward.probe.js failing before and passing after. */

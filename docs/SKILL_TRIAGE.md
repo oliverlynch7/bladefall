@@ -223,9 +223,9 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 83 wired / 41 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back), `mon_flow` (Flow) and `chr_potent` (Potent) were wired 2026-08-11. See "Rows taken" at the
-end of this section.
+**Now 84 wired / 40 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow), `chr_potent` (Potent) and `mon_killer` (Killer Focus) were wired
+2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -248,7 +248,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | class | dead / total | the dead ones |
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
-| monk | 5 / 8 | Iron Body, Inner Fire, Killer Focus, Still Water, Master Striker (~~Flow~~ wired 2026-08-11) |
+| monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
@@ -324,6 +324,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **paladin / Bounce Back** (`pal_bounce`, r7 a) — "Damage you block is returned to whoever dealt it." | 2026-08-11 | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before, 57 after, player took 20 in both |
 | **monk / Flow** (`mon_flow`, r5 a) — "Each hit shortens your dodge twice as much." | 2026-08-11 | `harness/probes/monkflow.probe.js`, A/B in one launch: ratio 1 before, exactly 2 after |
 | **chronomancer / Potent** (`chr_potent`, r3 a) — "Rewinding also restores the mana you had three seconds ago." | 2026-08-11 | `harness/probes/chrpotent.probe.js`, A/B in one launch: the ring recorded no mana at all before, the whole pool came back after |
+| **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -466,6 +467,41 @@ already hold and clamped to `maxMana`, so a "restore" can never take mana away o
 *Recorded unconditionally, and that is deliberate:* the push does not check `c2Passive('chr_potent')`,
 because the choice can be re-made mid-run and a ring that only started filling after the choice would
 hand back three seconds of nothing. One number per sample, for one class, 14 samples deep.
+
+**Killer Focus was the same trade as Potent: both halves of the mechanism already existed, twenty
+lines apart.** `w_tactical` (warrior, Tactical Guard) is armed at the dodge itself — `if(meta.classId
+==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2` (12702) — and read on the TAKING side in
+hurtPlayer. Killer Focus is that shape mirrored onto the DEALING side, where `CLASS_BASIC.monk`
+already sits and where the ninja's Unseen already returns `dmg * 1.5`. "Triple" is the card's own
+word, so no number was invented.
+
+**No timer, and that is a decision the cards make rather than one taken here.** `w_tactical`'s card
+says *"for 2s"* and its code uses 2; Killer Focus's says *"the first strike after a dodge"*, which
+names a consumption condition and no duration. It is therefore a bare flag, spent by the first strike
+that lands. Where this file's cards mean a window they say so, and inventing one would be inventing a
+balance number.
+
+| | first strike after a dodge | second strike | dodged? |
+|---|---|---|---|
+| control `mon_med` (a-side of the same rank), before and after | 112 | 112 | yes |
+| **`mon_killer`, before** | **113 → ratio 1.009** | 114 → ratio 1.009 | yes |
+| **`mon_killer`, after** | **336 → ratio exactly 3** | 112 → ratio exactly 1 | yes |
+
+**Two strikes per half, because "the FIRST strike" is half the sentence.** A passive that tripled
+*every* strike would satisfy a naive one-hit bar and would be a different, worse bug. And the dodge is
+a real dodge — the probe sets `input.dodgeEdge` and runs a frame of `update()`, so the game's own
+branch decides whether a dodge happened, and both halves assert `dodged` off the game's own cooldown
+moving. The probe never assigns the flag the passive reads; doing so is the fault the harness plan's
+Task 5 records as passing forever against the very bug it existed to catch.
+
+**`G.combo` MUST BE PINNED BY ANY DAMAGE PROBE, and this is the general finding of the pass.** The
+probe's first run came back 112, 113, 113, 114 — creeping by one, in sequence, across both halves.
+That is `hitEnemy` itself: 10631 increments a global `G.combo` on every hit that passes through it and
+10632 multiplies by `1 + min(0.2, G.combo*0.004)`. **No two strikes in a sequence are measured under
+the same multiplier unless it is reset**, so an equality assertion between them can never hold, and
+the drift runs in exactly the direction that makes a bonus look real. It is global, not a monk
+mechanic. `test-skills.js` is immune only because its bar is EFFECT (did HP go down) rather than
+amount — anything that starts asserting on damage numbers has to reset this first.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

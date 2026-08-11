@@ -228,9 +228,27 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 6 | **G — picking Frenzy hard-locked the game** | `7122bd9` | `harness/probes/frenzy.probe.js`, A/B on the same rank in one launch: the game's own frame counter stops dead (`lastSecond 0`) before, keeps climbing after |
 | 7 | **E — paladin Bounce Back was never read** | `9575959` | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before and 57 after, player took 20 in BOTH — so the reflect was added, not the block weakened |
 | 8 | **E — monk Flow was never read** | `645058b` | `harness/probes/monkflow.probe.js`, A/B in one launch: the dodge cut ratio was 1 before and exactly 2 after |
-| 9 | **E — chronomancer Potent was never read** | this run | `harness/probes/chrpotent.probe.js`, A/B in one launch: the rewind ring recorded no mana at all before (`past: null` on both halves), the whole pool came back on the potent half after while the control stayed at 0 |
+| 9 | **E — chronomancer Potent was never read** | `7784f09` | `harness/probes/chrpotent.probe.js`, A/B in one launch: the rewind ring recorded no mana at all before (`past: null` on both halves), the whole pool came back on the potent half after while the control stayed at 0 |
+| 10 | **E — monk Killer Focus was never read** | this run | `harness/probes/monkiller.probe.js`, A/B in one launch with TWO strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 
-**WHAT THE NEXT RUN SHOULD DO FIRST: `node harness/run-all.js`.** Passes 5–8 shipped on 2026-08-11
+**THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
+(3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
+the three knowns are still `ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`, all three
+of them section C/B design calls that belong to Oliver. Per-suite: unit 27/27, **skills 70 pass / 3
+fail / 2 unproven** (65/8/2 at the last re-baseline, so six of the eight have gone), levels 35/0/13,
+mp skipped. The four class-gated wirings did not disturb anything outside their class, which is
+exactly the claim that was outstanding.
+
+*Two things it also reported, neither a regression and both already predicted by this document.*
+Levels moved 36/0/12 → 35/0/13: that is the den-less head-count Task 4 records as flapping — a live
+population snapshot, correctly routed to `unproven` rather than to a verdict, which is the whole point
+of that fix. And **`mp: skipped (not written yet)`**, which is worth a look next run: sub-project A's
+Task 5 records `harness/test-mp.js` as shipped and green at 16/0, so either the module is not where
+`run-all.js` looks for it or the skip is stale. A suite that silently reports "not written yet" for
+something that IS written is the same green-light-that-cannot-go-red shape this harness exists to
+prevent, one level up. Not chased in this run — it is a harness question, not a skill one.
+
+**Superseded, kept for the record — what the run before this one asked for:** Passes 5–8 shipped on 2026-08-11
 verified per pass and per class — the fast unit stage (27 tests, the same stage `run-all.js` runs
 before it spends GPU time), a committed A/B probe watched to fail against the unfixed game, and
 `test-skills.js --classes <the touched class>` either side — but **the full aggregate gate has not run

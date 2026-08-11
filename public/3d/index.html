@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.918.0-autopilot';
+const VERSION3D='1.919.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11108,6 +11108,16 @@ const CLASS_BASIC = {
        follows. */
     const base = 0.35, cut = c2Passive('mon_flow') ? base * 2 : base;
     if((p.dodgeCdT || 0) > 0) p.dodgeCdT = Math.max(0, p.dodgeCdT - cut);
+    /* KILLER FOCUS, the rank-7 passive: "the first strike after a dodge hits for triple". Armed by
+       the dodge itself (12702) and spent here, so FIRST is enforced by the flag rather than by a
+       timer. Wired 2026-08-11; it was one of the 42 in docs/SKILL_TRIAGE.md section E that the menu
+       offers, describes and no code ever read. Triple is the card's own word - nothing invented. */
+    if(p._killerHit){
+      p._killerHit = 0;
+      addText(e.x, e.y + e.h + 26, e.z, 'KILLER FOCUS', '#ffd24a', true);
+      try { burst(e.x, e.y + e.h * 0.5, e.z, '#ffd24a', 12); } catch(err){}
+      return dmg * 3;
+    }
   },
 
   /* OVERCHARGE. Basic attacks spend mana to hit harder, automatically, while you have it to spend.
@@ -12699,7 +12709,13 @@ function update(dt){
   }
   if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
-    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
+    p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; if(meta.classId==='monk'&&c2Passive('mon_killer'))p._killerHit=1; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
+  /* KILLER FOCUS arms HERE, at the dodge itself, exactly like Tactical Guard on the line above —
+     that one is the same passive shape read on the taking side (hurtPlayer, 11207), this one on the
+     dealing side (CLASS_BASIC.monk). It is a bare flag with no timer because its card does not state
+     one: "the first strike after a dodge hits for triple" names a consumption condition, and where
+     this file's cards DO mean a window they say so ("gain 20% damage reduction for 2s"). Inventing a
+     duration here would be inventing a balance number. */
   document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
   const _w=p.weapon;
   if(thrownWeaponHidden(p,_w)){ p.charging=false; p.chargeAmt=0; p.attackHeld=false; p.holdT=0; }

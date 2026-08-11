@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.920.1-autopilot';
+const VERSION3D='1.921.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10084,6 +10084,15 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
     /* x_strength's stack counter is gone with its rewrite (Harvested Strength now makes your next
        skill free); the mana on kill stays, because that is the Reaper's Soul Hunger innate. */
     gainMana(p,2,false);
+    /* HARVESTED STRENGTH (r3 a): "Souls you collect are spent on your next skill, making it free."
+       The comment above has said since that rewrite what this passive does, and until now NOTHING
+       READ ITS ID - one of the 46 dead passives in docs/SKILL_TRIAGE.md section E. A soul is a KILL
+       in this file's own words: the innate is "slain enemies restore 2 mana" and Soul Armor two
+       ranks down calls the same event "collecting a kill". Armed here, spent in useSkill.
+       A flag rather than a counter, because the card spends however many souls you have on ONE
+       skill - the same shape as the monk's Killer Focus, whose card also names a consumption
+       condition and no duration. */
+    if(c2Passive('x_strength')) p._soulFree=1;
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
     if(classState('reaper').rank>=10&&p.skillCd&&(e&&((e.markT||0)>0||(e.st&&e.st.corrupt>0))))for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.75);
   }
@@ -10402,7 +10411,16 @@ function useSkill(i){
   if(mode!=='play'||!G) return; const p=G.p; if(p.dead||p.downed) return;
   if(c2def()){ const S=c2CurSkills(), s=S[i]; const cs=classState(meta.classId);
     if(!s){ const nx=c2NextChoice(); if(nx){ queueChoiceRank=nx; toast('Pick your rank-'+nx+' option first'); } else toast('🔒 Skill '+(i+1)+' unlocks at a later rank'); return; }
-    if(p.skillCd[i]>0) return; const manaSpent=spendSkillMana(p,i,s); if(!manaSpent) return; initAudio();
+    if(p.skillCd[i]>0) return;
+    /* HARVESTED STRENGTH pays for this cast out of the soul armed in c2OnKill instead of out of the
+       pool, and the pool is not consulted at all - "free" is not "cheaper", so an empty bar still
+       casts. Deliberately NOT written as a zero cost, which is how Glass Cannon does it fifty lines
+       up (skillManaCost returns 0): the line below reads a zero as "the cast could not be paid for"
+       and returns, so zeroing the cost stops the skill firing at all. */
+    const soulFree = meta.classId==='reaper' && !!p._soulFree && c2Passive('x_strength');
+    const manaSpent = soulFree ? skillManaCost(i,s) : spendSkillMana(p,i,s); if(!manaSpent) return;
+    if(soulFree){ p._soulFree=0; addText(p.x,p.y+p.h+24,p.z,'SOUL SPENT','#c47bff',true); hudUpdate(); skillbarUpdate(); }
+    initAudio();
     G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
     // Stormcaller STORM WARD (r5 b): "Casting a skill grants a shield equal to 4% max HP." Its id was
@@ -10414,7 +10432,9 @@ function useSkill(i){
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;
-    if(r==='refund'){ gainMana(p,manaSpent,false); return; }
+    /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
+       spent on it is put back rather than paid out as mana the player never spent. */
+    if(r==='refund'){ if(soulFree) p._soulFree=1; else gainMana(p,manaSpent,false); return; }
     if(meta.classId==='warlock'&&fx){
       const cap=classState('warlock').rank>=10, safe=c2Passive('war_safe'), frac=(cap?0.015:0.03)*(safe?0.65:1);
       const blood=Math.max(1,Math.round(effMaxHp(p)*frac)); p.hp=Math.max(1,p.hp-blood);

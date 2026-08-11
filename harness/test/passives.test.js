@@ -95,7 +95,12 @@ const KNOWN_DEAD = new Set([
      spent in CLASS_BASIC.ranger, proven by harness/probes/ambush.probe.js — all six strikes 115
      before, 138/115/115 against a 115/115/115 control after. */
   'r_longshot', 'r_closeq', 'r_escape', 'r_elem', 'r_bounty',
-  'x_strength', 'x_crimson',
+  /* x_strength came OFF this list on 2026-08-11 (sub-project B Task 2, pass 12): "souls you collect
+     are spent on your next skill, making it free" is now armed on a kill in c2OnKill - which the
+     branch's own comment had already said it would be - and spent in useSkill, where the cast is
+     charged to the soul instead of to the pool. Proven by harness/probes/soulfree.probe.js: three
+     trials per half, all six identical before, 0 / full price / casts-on-an-empty-bar after. */
+  'x_crimson',
   /* pal_bounce came OFF this list on 2026-08-11 (sub-project B Task 2, pass 7): "damage you block is
      returned to whoever dealt it" now returns the 60% the brace eats, through the same hitEnemy(by,…)
      the monk's Stillness uses four lines above it. Proven by harness/probes/bounce.probe.js. */

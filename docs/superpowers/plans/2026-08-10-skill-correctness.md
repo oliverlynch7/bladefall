@@ -230,7 +230,8 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 8 | **E — monk Flow was never read** | `645058b` | `harness/probes/monkflow.probe.js`, A/B in one launch: the dodge cut ratio was 1 before and exactly 2 after |
 | 9 | **E — chronomancer Potent was never read** | `7784f09` | `harness/probes/chrpotent.probe.js`, A/B in one launch: the rewind ring recorded no mana at all before (`past: null` on both halves), the whole pool came back on the potent half after while the control stayed at 0 |
 | 10 | **E — monk Killer Focus was never read** | `2ac076e` | `harness/probes/monkiller.probe.js`, A/B in one launch with TWO strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
-| 11 | **E — ranger Ambusher was never read** | this run | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
+| 11 | **E — ranger Ambusher was never read** | `140c541` | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
+| 12 | **E — reaper Harvested Strength was never read** | this run | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —

@@ -223,9 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 85 wired / 39 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus) and `r_ambush`
-(Ambusher) were wired 2026-08-11. See "Rows taken" at the end of this section.
+**Now 86 wired / 38 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher)
+and `x_strength` (Harvested Strength) were wired 2026-08-11. See "Rows taken" at the end of this
+section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -256,7 +257,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
 | skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
-| reaper | 2 / 7 | Harvested Strength, Crimson Harvest |
+| reaper | 1 / 7 | Crimson Harvest (~~Harvested Strength~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
 | warrior, mage, ninja, warlock, beastmaster | 0 | — |
 
@@ -350,6 +351,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **chronomancer / Potent** (`chr_potent`, r3 a) — "Rewinding also restores the mana you had three seconds ago." | 2026-08-11 | `harness/probes/chrpotent.probe.js`, A/B in one launch: the ring recorded no mana at all before, the whole pool came back after |
 | **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
+| **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -557,6 +559,41 @@ skill that rolls the hero backwards. A strike taken after a tumble is therefore 
 from one taken before, and comparing them measures the roll. The probe spawns its target AFTER the
 cast, at a fixed offset from wherever the hero ended up, and moves it again after the re-cast. The
 control's three identical 115s are what prove that worked.
+
+**Harvested Strength had nothing left to decide either — the branch that arms it already said what
+it does.** `c2OnKill`'s reaper block (10083) carries the comment *"x_strength's stack counter is gone
+with its rewrite (Harvested Strength now makes your next skill free)"*, written when the passive was
+redesigned and never followed by a line that read the id. Both halves of the card are defined
+elsewhere in the file rather than invented here: a **soul is a kill** in the game's own words (the
+Reaper innate is "slain enemies restore 2 mana", and Soul Armor two ranks down calls the identical
+event "collecting a kill"), and **free already means a mana cost of nothing** — `m_glass`, Glass
+Cannon, is the same word in the same game.
+
+| | cast after a kill | the very next cast | after a kill, with an empty bar |
+|---|---|---|---|
+| control `x_doom` (b-side of the same rank, wired, works on marks), before and after | 6 of 6 | 6 | **cannot cast at all** |
+| **`x_strength`, before** | **6** | 6 | cannot cast at all |
+| **`x_strength`, after** | **0** | **6** | **casts, and takes nothing** |
+
+**Three trials per half, because the sentence has three parts.** A passive that merely discounted
+every cast would pass trial 1 and fail trial 2 — "your NEXT skill" is half the promise. Trial 3 is
+what separates *free* from *cheaper*, and it is also the trap this fix had to walk around:
+**zeroing the COST is the obvious implementation and it stops the skill firing at all.**
+`spendSkillMana` returns what it charged and `useSkill` reads a zero as *the cast could not be paid
+for* (`if(!manaSpent) return`). The payment is therefore skipped rather than priced at nothing, and
+the pool is not consulted, so an empty bar still casts.
+
+**Which means Glass Cannon is a LEAD, not a finding, and it is recorded here rather than acted on.**
+`skillManaCost` returns 0 for `m_glass` below a quarter health (10325), which is exactly the value
+`useSkill` treats as unpayable — so a Mage who picked it may find its skills stop working precisely
+when the passive is meant to be helping. **Read from the source and NOT measured**, so it is a
+question for the next pass, not a bug list entry: the passive is wired, so `audit-passives.js` cannot
+see it either way, and this whole section exists because a passive read once and read wrongly still
+passes.
+
+**A refunded cast puts the soul back.** A skill that finds no target returns `'refund'`, takes no
+cooldown and — for anyone else — costs no mana. Paying that back as *mana* would hand the player a
+pool they never spent, so the soul is re-armed instead.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

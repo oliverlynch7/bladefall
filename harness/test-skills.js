@@ -47,6 +47,7 @@
    `weapon.note` so a reader can see which classes were measured on a borrowed or forced weapon. */
 import { runScenario } from './drive.js';
 import { claimsOf, isIndirectDamage } from './claims.js';
+import { displacedPastTarget } from './geometry.js';
 
 /* THE RIG MUST PROVE ITSELF FIRST.
 
@@ -75,7 +76,14 @@ const BASELINE = `(function(){
   return JSON.stringify({ ok:false, why:'a plain attack drew no blood in 4s', foeAt:{x:Math.round(foe.x),z:Math.round(foe.z)}, playerAt:{x:Math.round(p.x),z:Math.round(p.z)} });
 })()`;
 
-const PROBE = (classId) => `(function(){
+/* `poke` is a statement run against `p` immediately before every cast, and it exists for exactly one
+   reason: the bench's own known-bad. `--bad-lunge` passes `p.bdRiposte = 1`, which forces
+   bladedancer/Riposte down its CHARGED branch - a 95-unit lunge that ends 35 units past a dummy
+   spawned at 60 - every time, instead of once in however many runs a grunt happens to land a hit
+   during Counter Stance's parry window. Without it the flap this guards against can only be
+   reproduced by waiting for a coin toss, which is how it survived long enough to turn a gate red on
+   a run that had not touched a skill. Empty in every ordinary run. */
+const PROBE = (classId, poke) => `(function(){
   __BF3.cheatUnlockClasses(); __BF3.cheatRank10All();
   __BF3.meta.classId = ${JSON.stringify(classId)};
   const G = __BF3.G, p = G.p;
@@ -142,6 +150,14 @@ const PROBE = (classId) => `(function(){
   const guardOf = () => Math.max(0, p.guardT || 0);
   const snap = (d) => ({ tgt: d ? d.hp : null, hp: p.hp, minions: (G.minions || []).length,
                          shield: p.shieldHp || 0, guard: guardOf(), petShield: petShield() });
+  /* WHERE WAS THE BENCH STANDING WHEN IT LOOKED? A lunge can carry the body past the one target in
+     the room, and bdArc (index.html:10231) skips anything behind the facing - so the skill cannot
+     hit what the bench has just run past, and the bench called that a broken skill. Measured on
+     bladedancer/Riposte: uncharged it lunges 55 and stops 5 short (dot +1, deals 200), charged it
+     lunges 95 and ends 35 PAST (dot -1, deals 0). See harness/geometry.js and SKILL_TRIAGE.md F.
+     Recorded here and judged in geometry.js, because the probe's job is to measure, not to rule. */
+  const geom = (d) => ({ px: p.x, pz: p.z, yaw: p.yaw,
+                         tx: d ? d.x : null, tz: d ? d.z : null });
   const watch = (d, before) => {
     const a = { tgt: before.tgt, hp: before.hp, minions: before.minions,
                 shield: before.shield, guard: before.guard, petShield: before.petShield };
@@ -218,9 +234,15 @@ const PROBE = (classId) => `(function(){
     reset();
     mark('before ' + (s.n || i));
     if(p.skillCd) p.skillCd[i] = 0;
+    try { ${poke || ''} } catch(e){}
     const before = snap(dummy);
+    const geoPre = geom(dummy);
     let threw = null;
     try { __BF3.useSkill(i); } catch(e){ threw = String((e && e.message) || e); }
+    /* Taken the instant useSkill returns, so it sees an INSTANT displacement (Riposte's lunge is
+       one statement in the handler) and deliberately not a dash driven by a timer over the window.
+       A deferred move reads as no move and the row stays a failure - the safe direction. */
+    const geoCast = geom(dummy);
     /* READ THE COOLDOWN NOW, not after the window. "Did the cast take" is a question about the
        moment of casting, and once the window grew to 5s every skill with a cooldown of 5s or less
        had already come back off it - beastmaster Sic 'Em and chronomancer Slow Field both reported
@@ -229,7 +251,8 @@ const PROBE = (classId) => `(function(){
     const after = watch(dummy, before);
     R.push({ n: s.n, d: s.d || '', fx: s.fx || null,
              live: s.fx ? (typeof FX[s.fx] === 'function') : null,
-             threw: threw, hadTarget: !!dummy, before: before, after: after, onCd: onCd });
+             threw: threw, hadTarget: !!dummy, before: before, after: after, onCd: onCd,
+             geoPre: geoPre, geoCast: geoCast });
   }
   mark('after skills');
 
@@ -291,6 +314,7 @@ const CLEARS_NOISE = {
 
 export async function runSkillTests(opts){
   const only = (opts && opts.classes) || null;
+  const poke = (opts && opts.poke) || '';        // the known-bad hook; see PROBE's header
   const classes = only || await runScenario({
     scene: 'arena:flat', waitMs: 12000,
     js: '(function(){ return JSON.stringify(Object.keys(__BF3.CLASSES||{})); })()',
@@ -313,7 +337,7 @@ export async function runSkillTests(opts){
 
   for(const cls of classes){
     let got;
-    try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls) }); }
+    try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls, poke) }); }
     catch(e){ failures.push({ cls, skill: '(class)', claim: 'load', text: '', detail: e.message.slice(0, 200) }); continue; }
     /* ONE RETRY, and only for a bench that is KNOWN to have measured nothing. Measured: roughly one
        launch in six comes up in mode 'pause' before the probe has done anything, and useSkill's
@@ -322,7 +346,7 @@ export async function runSkillTests(opts){
        not papering over a flaky assertion; the assertion is that the game was in play, it failed,
        and the run it guarded is void. */
     if(strayedIn(got).length){
-      try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls) }); }
+      try { got = await runScenario({ scene: 'arena:flat', waitMs: 12000, js: PROBE(cls, poke) }); }
       catch(e){ failures.push({ cls, skill: '(class)', claim: 'load', text: '', detail: e.message.slice(0, 200) }); continue; }
     }
     benches.push({ cls, onClass: got.onClass, canHit: got.canHit,
@@ -362,6 +386,22 @@ export async function runSkillTests(opts){
           continue;
         }
         const met = MET[c] ? MET[c](r.before, r.after, r) : true;
+        /* DID THE CAST CARRY THE BENCH PAST ITS ONLY TARGET? Only ever consulted for a damage claim
+           that has already failed, so it can never turn a pass into anything, and never excuses a
+           skill that simply stood still. This is what stops bladedancer/Riposte alternating between
+           PASS and a hard FAIL depending on whether a grunt happened to land a hit five seconds
+           earlier - and a new hard FAIL is a REGRESSION, which autopilot.ps1 answers by throwing
+           away the run's work. See harness/geometry.js. */
+        if(!met && c === 'damage'){
+          const g = displacedPastTarget(r.geoPre, r.geoCast);
+          if(g.displaced){
+            unproven.push({ cls, skill: r.n, claim: c, text: r.d, downgraded: 'displaced',
+                            why: `the cast moved the player ${Math.round(g.moved)} units past the only `
+                               + `target (facing dot ${g.dotBefore.toFixed(2)} -> ${g.dotAfter.toFixed(2)}), `
+                               + `so this bench cannot observe its damage` });
+            continue;
+          }
+        }
         if(!met){
           failures.push({ cls, skill: r.n, claim: c, text: r.d,
                           detail: JSON.stringify({ before: r.before, after: r.after,
@@ -380,8 +420,27 @@ export async function runSkillTests(opts){
 }
 
 if(import.meta.filename === process.argv[1]){
-  const only = process.argv[3] ? process.argv.slice(3) : null;
-  runSkillTests(only ? { classes: only } : undefined).then(r => {
+  const argv = process.argv.slice(2);
+  /* --bad-lunge: the permanent known-bad for the displacement rule (harness/geometry.js). It forces
+     bladedancer/Riposte's CHARGED 95-unit lunge on every cast, which lands the body 35 units past a
+     dummy spawned at 60 and therefore behind bdArc's cone. Before the rule existed that produced a
+     hard FAIL, at random, on runs that had touched nothing - docs/SKILL_TRIAGE.md section F. The
+     run prints what the bar said as well as what was reported, so the save is visible and not
+     merely asserted. */
+  const badLunge = argv.includes('--bad-lunge');
+  const only = argv.filter(a => a !== '--classes' && !a.startsWith('--'));
+  runSkillTests({ classes: only.length ? only : null,
+                  poke: badLunge ? 'p.bdRiposte = 1;' : '' }).then(r => {
+    if(badLunge){
+      const saved = r.unproven.filter(u => u.downgraded === 'displaced');
+      for(const u of saved)
+        console.log(`KNOWN-BAD ${u.cls}/${u.skill} claims ${u.claim}: the damage bar was NOT met — `
+                  + `without the displacement rule this is a hard FAIL. Reported UNPROVEN: ${u.why}`);
+      console.log(saved.length
+        ? 'known-bad (charged lunge): correctly downgraded ✓'
+        : 'known-bad (charged lunge): NOTHING WAS DOWNGRADED — the rule did not fire, do not trust it');
+      if(!saved.length) process.exit(1);
+    }
     for(const b of r.benches){
       const d = b.drift || {};
       if(!b.onClass || b.canHit === false || (b.weapon && b.weapon.note !== 'own starter') || d.tgt || d.hp)

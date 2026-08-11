@@ -281,7 +281,7 @@ sharpens your blade a little further" names no amount), that one is his.
 
 ---
 
-## F. `bladedancer/Riposte:damage` FLAPS, and it can throw away a run's work
+## F. `bladedancer/Riposte:damage` FLAPPED — **CAUSE FOUND AND FIXED, and the lead below was wrong**
 
 Found 2026-08-11 by hitting it. A full `run-all.js` sweep reported
 `REGRESSION: skills:bladedancer/Riposte:damage` and `GATE: FAIL (1 new)` on a run whose only game
@@ -308,6 +308,63 @@ classes is measured at and would force a full re-baseline, which is not a thing 
 as anything else. **Next run should take this before any new skill work**: reproduce with repeated
 casts, and if the lunge-overshoot is confirmed, the fix belongs in the probe's geometry rather than in
 the skill.
+
+### What it actually was — measured 2026-08-11, six casts in one launch
+
+The overshoot is real. **The "near-zero separation" half of the lead above is not**, and the
+difference is a number in the skill's own body rather than a nuance:
+
+```
+SKILL_FX.bd_riposte (index.html:10235)
+  const charged = !!p.bdRiposte
+  p.x += sin(yaw) * (charged ? 95 : 55);   p.z += cos(yaw) * (charged ? 95 : 55)
+  bdArc(p, d, charged ? 235 : 170, 1.25, ...)
+```
+
+`harness/probes/riposte.probe.js` forces both states rather than waiting for the coin toss, which is
+what turns this from another sample of the flap into a measurement:
+
+| | lunge | gap after the lunge | target vs facing | dealt |
+|---|---|---|---|---|
+| uncharged ×3 | 55 | **5 short** | dot **+1** — in front | 200, 200, 200 |
+| charged ×3 | 95 | **35 past** | dot **−1** — behind | 108, 0, 0 |
+
+So an uncharged Riposte stops five units short and lands every time; a charged one runs 35 units PAST
+the dummy, and `bdArc` (10231) skips anything behind the facing — `if(d > e.r && (dx*fx+dz*fz)/d <
+cos) continue`. Not a direction resolved from a near-zero separation: a target the body has already
+run past. (The 108 in the first charged row is not Riposte's hit — the uncharged hit is a flat 200 and
+a charged one would be ~1.9× that. It is the bench's own documented drift.)
+
+**The coin toss is Counter Stance.** `p.bdRiposte` is stored when `hurtPlayer` consumes a parry
+window, and the bladedancer's Counter Stance opens one at slot 0 — which the bench casts, with a live
+grunt in the room, five seconds before it casts Riposte. Whether that grunt connects in those five
+seconds is the whole difference between `PASS` and a hard `FAIL`.
+
+**Fixed in the bench, not in the skill, and not by moving the dummy.** `harness/geometry.js` adds one
+narrow rule: a damage claim that has *already failed* is downgraded to **unproven** when the cast
+moved the body at least 20 units, the target was in front of the facing before it and behind after.
+It cannot turn a pass into anything, it cannot excuse a skill that stood still, and a displacement
+applied over TIME (a dash timer) is not covered — the snapshot is taken the instant `useSkill`
+returns, so a deferred move reads as no move and the row stays a failure. That is the under-excusing
+direction on purpose.
+
+Proven in both directions before it was believed:
+
+- **Seven unit tests** on fixtures copied out of the live run above — the uncharged row must NOT be
+  excused, the charged row must be. A rule that answered "no" always fails the second; one that
+  answered "yes" always fails the other six. No browser, so it runs in `run-all.js`'s fast stage.
+- **A permanent known-bad through the real suite**: `node harness/test-skills.js --classes bladedancer
+  --bad-lunge` forces the charged branch on every cast, and prints what the bar said as well as what
+  was reported —
+  `KNOWN-BAD bladedancer/Riposte claims damage: the damage bar was NOT met — without the displacement
+  rule this is a hard FAIL. Reported UNPROVEN: the cast moved the player 95 units past the only target
+  (facing dot 1.00 -> -1.00)`, then `correctly downgraded ✓`. It **exits 1 if nothing is downgraded**,
+  so the hook cannot rot into a green light that never fires. The ordinary run is unchanged:
+  `skills: 5 pass, 0 fail, 0 unproven`.
+
+**Left alone deliberately:** whether a charged Riposte *should* whiff a target 60 units away is a
+question about the skill, not about the bench, and it is a design call. Nothing in `public/` was
+touched.
 
 ---
 

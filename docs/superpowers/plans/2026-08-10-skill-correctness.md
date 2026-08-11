@@ -221,6 +221,20 @@ One line per pass, so the next run can see what has been taken without re-readin
 | pass | row | commit | how it was proven |
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | this run | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 2 | **F — `bladedancer/Riposte:damage` flapped** | 2026-08-11 | `harness/probes/riposte.probe.js` forced both branches in one launch; 7 unit tests on the live fixtures; `--bad-lunge` known-bad through the real suite |
+
+**Pass 2 fixed the BENCH, and that is a legitimate pass of this loop rather than a detour.** Section F
+was the one row in the triage list that could *delete* work: an unstable hard FAIL is what
+`run-all.js` calls a REGRESSION, and `autopilot.ps1` answers a red gate with `git checkout -- .`. It
+had already turned a gate red on a run whose only changes were in the 3D renderer.
+
+**And the recorded lead was wrong, which is the part worth carrying forward.** Section F suspected
+"the arc has to resolve a direction from a near-zero separation". Measured, it is the opposite
+problem: the CHARGED lunge is 95 units against a dummy spawned at 60, so the body ends 35 units PAST
+the target and `bdArc` skips anything behind the facing. Uncharged, it stops 5 short and lands 200
+every time. A lead written from source and a measurement disagreed, and the measurement was one
+launch — `harness/probes/riposte.probe.js` forces both branches instead of waiting for the coin toss
+(whether a grunt lands a hit during Counter Stance's parry window five seconds earlier).
 
 **Pass 1's proof did NOT come from `test-skills.js`, and that is the point worth carrying forward.**
 The harness reports `berserker/Charge:damage`, and the damage half is Oliver's design call — so the

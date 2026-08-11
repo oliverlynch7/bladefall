@@ -484,19 +484,75 @@ was left alone and re-run instead, and the pet lands its hit inside the 2s windo
 passes honestly. Widening the rule would have blinded the harness to a whole class of skill for no
 reason.
 
-**THE FOUR THAT SURVIVE ARE THE REAL BUG LIST — sub-project B starts here.** All four fire
-(`onCd:true`) and then do nothing measurable:
+~~**THE FOUR THAT SURVIVE ARE THE REAL BUG LIST — sub-project B starts here.**~~ **RETRACTED, same
+day, by the next thing that was measured. Those four named skills the bench had never cast.**
+
+The four were warrior/Charge, mage/Nova, reaper/Soul Harvest and paladin/Taunt, each reported as
+firing (`onCd:true`) and then doing nothing. Every one was an artefact of the fault below, and the
+retraction is left in place rather than deleted because the wrong version was committed and pushed,
+and a plan that quietly loses its errors teaches nothing.
+
+### THE SUITE READ ONE LIST AND CAST FROM ANOTHER — the whole suite, its entire life
+
+`test-skills.js` read names and descriptions from `curSkills()`, the legacy `CLASSES` kit
+(`index.html:2353`), and then cast by that same index through `useSkill(i)`. `useSkill` branches on
+`c2def()`, and **all sixteen classes have a CLASS2 tree**, so it *always* casts `c2CurSkills()[i]`
+(`10311`, `9948`) — a different list. Probed live, both lists side by side:
+
+| Class | index | description read | what the game casts there |
+|---|---|---|---|
+| warrior | 2 | **Charge** — "Rush forward, damaging and stunning…" | rank-6 Iron Guard \| Shockwave Stomp |
+| mage | 1 | **Nova** | Blink \| Nova |
+| reaper | 1 | **Soul Harvest** | Shadow Step \| Wraith Form |
+
+Charge is rank 4, which is slot **1**, so index 2 never reaches it. Confirmed by measurement rather
+than by reading the table: casting index 2 as warrior left `p.chargeDash` at 0 and `p._chDmg` at 0,
+and the hero **stood still for all 120 ticks** while the dummy walked toward it. Charge's own first
+statement is `p.chargeDash=0.32`. It plainly never ran, so "Charge deals no damage" was never a
+statement about Charge.
+
+**The 62 passes were no better founded than the 4 failures.** Both lists are full of damage skills,
+so a damage claim was usually satisfied by whatever did fire. This suite has never measured what it
+said it measured.
+
+Fixed by reading from the list that gets cast (`__BF3.c2CurSkills`, exported next to the other
+harness exports, falling back to `curSkills()` so the suite still works for any class without a
+tree). **The baseline had to be RE-TAKEN, not compared:** every failure id it held was produced by a
+bench casting the wrong skill, so `harness/baseline.json` was deleted and recorded fresh.
+
+**Why this got through, worth keeping:** the suite was validated end-to-end — a bench self-test that
+proves a plain attack can draw blood, real descriptions in the unit tests, known-good and known-bad.
+None of that could see this, because every check was internally consistent. The one question nobody
+asked was whether the name being printed belonged to the skill being cast.
+
+### The honest bug list — 8 candidates, and they are CANDIDATES
+
+Re-taken baseline: skills **65 pass / 8 fail / 2 unproven**, levels 36/0/12, mp 16/0, `GATE: PASS`.
 
 | Skill | Claim | Measured |
 |---|---|---|
-| warrior/Charge | damage | target 100000 → 100000 |
-| mage/Nova | damage | target 100000 → 100000 |
-| reaper/Soul Harvest | heal | hp 239 → 239 |
+| reaper/Soul Siphon | heal | dealt damage (100000 → 99835) but hp 239 → 239 |
+| paladin/Shield Bash | shield | dealt damage and stunned, shield 0 → 0 |
 | paladin/Taunt | shield | shield 0 → 0 |
+| berserker/Charge | damage | target unchanged |
+| mage/Attunement | damage | target unchanged |
+| chronomancer/Time Warp | damage | target unchanged |
+| ranger/Tumble | damage | target unchanged |
+| beastmaster/Guardian Bond | shield | player shield 0 → 0 |
 
-Charge is the one `run-all.js`'s own header already names as the bug Oliver hit in PvP. These are
-NOT fixed here: the tester had to be trustworthy first, which was this step's whole point, and a
-damage number is a balance call that belongs to Oliver.
+Soul Siphon is the one that matches Oliver's report word for word — "some of them said they would
+heal you and then didn't" — and it visibly does the damage half of its own sentence.
+
+**Two reasons not to hand this list to anyone as fact yet**, both of which are the bench and not the
+game, and both cheap to settle next run:
+- **Guardian Bond promises the COMPANION a shield** ("your companion intercepts part of incoming
+  damage and gains a shield"). The probe reads `p.shieldHp` — the player's. It is measuring the
+  wrong body, which is this same misattribution bug in miniature.
+- **The observation window is 2s and several of these promise 4s** (Attunement is "a 4s storm",
+  Soul Siphon drains "for 4s"). A tick loop that ends before the effect does cannot see it.
+
+So the next task for sub-project B is to settle those two, not to start editing skills. Nothing here
+is fixed: a damage or healing number is a balance call and belongs to Oliver.
 
 - [ ] **Step 5: Commit**
 

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.906.0-autopilot';
+const VERSION3D='1.907.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -18876,6 +18876,14 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      ("I turned invisible on my screen") is the entire reason the queue exists. With these, the
      test drives the game's own queueing and its own flush. */
   drawHero3, flushHero3D, get HERO3D_MAX(){ return HERO3D_MAX; },
+  /* THE LIST useSkill ACTUALLY CASTS FROM. curSkills() is the legacy CLASSES kit; useSkill(i)
+     branches on c2def() and, since all sixteen classes now have a CLASS2 tree, ALWAYS casts
+     c2CurSkills()[i] instead. The two lists disagree - warrior index 2 reads "Charge" and casts
+     rank-6 "Iron Guard/Shockwave Stomp", because Charge is rank 4 and therefore slot 1 - so a
+     harness that reads descriptions from curSkills() and casts by the same index is checking every
+     promise against a different skill's effect. Exported so the skill tester can read and cast
+     from ONE list. */
+  c2CurSkills, c2SkillOfSlot,
   openCharCreate,   /* so character creation can be photographed - its preview IS the feature */
   openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */

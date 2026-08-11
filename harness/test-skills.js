@@ -12,7 +12,22 @@
    p.shield and p.speed; every one of them is undefined. The real names are maxHp, maxMana and
    shieldHp, there is no speed field at all (effSpeed is a function), and G.minions does not exist
    in the arena because the arena's own reset does not create it. A probe that reads undefined and
-   compares it to undefined reports every skill as passing. */
+   compares it to undefined reports every skill as passing.
+
+   ── AND THE SKILL IT READ WAS NOT THE SKILL IT CAST. Read this before trusting any verdict. ──
+   This suite spent its whole life checking each promise against a DIFFERENT skill's effect. It read
+   names and descriptions from curSkills() - the legacy CLASSES kit (index.html:2353) - and then
+   cast by the same index through useSkill(i), which branches on c2def() and, because all SIXTEEN
+   classes now have a CLASS2 tree, ALWAYS casts c2CurSkills()[i] (10311, 9948).
+   The lists disagree. Warrior index 2 reads "Charge" and casts rank-6 "Iron Guard/Shockwave Stomp",
+   because Charge is rank 4 and therefore slot 1. Measured, not inferred: casting index 2 left
+   p.chargeDash at 0, p._chDmg at 0, and the hero standing still for all 120 ticks while the dummy
+   walked to it - Charge's own first statement is `p.chargeDash=0.32`, so it plainly never ran.
+   It produced four confident accusations - warrior/Charge, mage/Nova, reaper/Soul Harvest,
+   paladin/Taunt - every one of them naming a skill the bench had not cast. The 62 passes were no
+   better founded; both lists are full of damage skills, so a damage claim was usually satisfied by
+   whatever did fire. THE FIX IS ONE LINE - read from the list that gets cast - and it is the reason
+   the baseline had to be re-taken rather than compared. */
 import { runScenario } from './drive.js';
 import { claimsOf, isIndirectDamage } from './claims.js';
 
@@ -47,7 +62,8 @@ const PROBE = (classId) => `(function(){
   __BF3.cheatUnlockClasses(); __BF3.cheatRank10All();
   __BF3.meta.classId = ${JSON.stringify(classId)};
   const G = __BF3.G, p = G.p;
-  const skills = __BF3.curSkills() || [];
+  /* READ FROM THE LIST useSkill CASTS FROM, which is not curSkills(). See the header. */
+  const skills = (__BF3.c2CurSkills ? __BF3.c2CurSkills() : null) || __BF3.curSkills() || [];
   const R = [];
   for(let i = 0; i < skills.length; i++){
     const s = skills[i]; if(!s) continue;

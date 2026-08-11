@@ -220,7 +220,19 @@ One line per pass, so the next run can see what has been taken without re-readin
 
 | pass | row | commit | how it was proven |
 |---|---|---|---|
-| 1 | **B — berserker Headlong flew forever** | this run | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
+| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+
+**Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
+was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left
+on the player, so the same code returned `5 pass, 0 fail` and `4 pass, 1 fail` from consecutive
+runs. That shape is more dangerous than a wrong verdict: a *new* hard failure is what `run-all.js`
+calls a REGRESSION, and `autopilot.ps1` answers a red gate with `git checkout -- .`, so a flapping
+assertion here can delete a run's verified work rather than merely mis-report it. **Every row taken
+after this one is measured on a bench that isolates the player as well as the target**, which no
+earlier row was — so a row that changes verdict at the next re-baseline is not necessarily a
+regression, and the re-baseline in this pass is the new reference.
 
 **Pass 1's proof did NOT come from `test-skills.js`, and that is the point worth carrying forward.**
 The harness reports `berserker/Charge:damage`, and the damage half is Oliver's design call — so the

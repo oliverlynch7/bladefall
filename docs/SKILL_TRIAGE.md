@@ -47,10 +47,15 @@ Two more things the bench now publishes rather than implies, because both change
   which visibly heal); a claim that is met but only inside the noise floor is reported **unproven**.
 - **Which weapon each class was measured holding**, in `weapon.note`. See the game bug at the bottom.
 
-Current gate: skills **66 pass / 6 fail / 3 unproven**, levels 36/0/12, mp 16/0, `GATE: PASS`.
-The six failures are stable across three full sweeps. The pass/unproven split moves by one between
-runs, which is the noise floor doing its job rather than a result changing — a claim that is met but
-only by less than the drift is reported unproven, and the drift is measured fresh each run.
+Current gate (2026-08-11, after the section F fix): skills **70 pass / 3 fail / 2 unproven**, levels
+36/0/12, mp 27/0, `GATE: PASS`. The three surviving failures are `ranger/Tumble`,
+`mage/Attunement` and `berserker/Charge` — sections C and B, all three of them Oliver's calls rather
+than bugs, and all three already in `harness/baseline.json`, which this run did not have to change.
+
+The pass/unproven split still moves by one between runs, which is the noise floor doing its job
+rather than a result changing — a claim that is met but only by less than the drift is reported
+unproven, and the drift is measured fresh each run. **What no longer moves is the FAIL list**: see
+section F for the cross-skill contamination that used to put a fourth, different row in it.
 
 ---
 
@@ -281,7 +286,7 @@ sharpens your blade a little further" names no amount), that one is his.
 
 ---
 
-## F. `bladedancer/Riposte:damage` FLAPS, and it can throw away a run's work
+## F. `bladedancer/Riposte:damage` FLAPPED — **FIXED 2026-08-11**, and the lead was only half right
 
 Found 2026-08-11 by hitting it. A full `run-all.js` sweep reported
 `REGRESSION: skills:bladedancer/Riposte:damage` and `GATE: FAIL (1 new)` on a run whose only game
@@ -303,11 +308,64 @@ That is the same family as the geometry note already in `test-skills.js`'s heade
 'in front of you' is not simply p.z-90" — and it has not been confirmed; confirming it means
 measuring `p.x/p.z` and the dummy's across repeated casts, which nothing has done yet.
 
-Not fixed here on purpose. Moving the bench's dummy changes the distance every one of the sixteen
-classes is measured at and would force a full re-baseline, which is not a thing to do in the same run
-as anything else. **Next run should take this before any new skill work**: reproduce with repeated
-casts, and if the lunge-overshoot is confirmed, the fix belongs in the probe's geometry rather than in
-the skill.
+### What it actually was — measured by `harness/probes/riposte.probe.js`
+
+The overshoot is real and the arithmetic above is right, but it is **not reachable from the state
+the lead assumed**. An UNCHARGED Riposte lunges 55 against a dummy at 60, landing 5 units away —
+*inside* the dummy's own 15-unit radius, where `bdArc` skips its cone test altogether
+(`if(d>e.r && dot<cos) continue`) and therefore always hits. Six isolated casts: **0 missed**,
+`sep 5, overlaps true, dealtAtCast 108` every time.
+
+**A CHARGED Riposte lunges 95, and 95 is past a target standing at 60.** The player lands 35 units
+*beyond* the dummy, which is now behind them: `sep 35, overlaps false, dot -1 against a needed
+0.81`, cone rejects, **0 damage**. So the flap is not the geometry being marginal — it is the skill
+being cast in two different states and only one of them being reachable at will.
+
+**What decided the state was the skill cast one slot earlier.** `bd_counter` is index 0, Riposte is
+index 1. Counter opens a 0.65s PARRY window; if the grunt's swing happens to land inside it,
+`hurtPlayer` stores a Riposte, and the next cast is the charged one. Whether a grunt lands a hit
+inside a 0.65s window is a race — so **the real bench fault was that a skill's verdict depended on
+the previous skill's side effects.** A fresh dummy per skill was only ever half the isolation; the
+player carried stances, charges, dash flags, i-frames and its own position from one cast to the next.
+
+**Fixed generally, not for the bladedancer.** `test-skills.js` now snapshots every number and
+boolean on `G.p` before the drift control and restores it before every cast, so each skill is cast
+from the same body. Only scalars are restored — the weapon and `skillCd` are objects and are left
+alone — and a key a skill invented is zeroed rather than deleted, because the game reads all of
+these as `p.foo||0`. Any class with a stance, a charge or a dash had the same exposure; a denylist
+would have had to be rediscovered once per class.
+
+*And the ordering had to move with it.* `mkDummy()` places the dummy at `p.z-60`, so it has to be
+told where the player IS. Spawning first and restoring the pose afterwards puts the target 60 units
+in front of wherever the *last* skill left the body and then teleports the body back to the start —
+a rig with the dummy hundreds of units off to one side. Watched to fail exactly that way: the first
+version of this fix took the bladedancer from 1 failure in 3 runs to **3 in 4**. `reset()` now runs
+before `mkDummy()` in all three places.
+
+Proof, A/B **in one launch** so the two halves cannot be compared across two different games — same
+sequence three times each, the only difference being whether the pose is restored:
+
+| | riposte missed | charged on each replay |
+|---|---|---|
+| isolated, nothing else cast | 0 / 6 | false, false, false, false, false, false |
+| bench order, no pose restore | **2 / 3** | false, **true**, **true** |
+| bench order, pose restored | **0 / 3** | false, false, false |
+
+And end to end through the real suite: `node harness/test-skills.js --classes bladedancer` failed
+**1 of 3** runs before, and passed **5 of 5** after.
+
+### The GAME finding this turned up, which is NOT fixed
+
+**A charged Riposte whiffs a target it is standing next to.** The lunge is 95 units and the cone
+only forgives a target whose body overlaps the swing origin, so any enemy inside ~80 units is
+dashed straight past and missed — and a parried enemy is by definition the one that just hit you in
+melee. The *stronger* half of the counter is the half that cannot connect at counter range. The
+class's own other dash already handles this: `bd_step` (10237) sweeps the whole dash SEGMENT for
+hits; `bd_riposte` teleports through everything and only swings at the far end.
+
+Left alone deliberately. Changing a lunge distance or an arc is feel, and this document's own rule
+is that balance belongs to Oliver — but unlike sections C and D this one needs no number invented,
+because `bd_step` shows what the fix looks like in the same class.
 
 ---
 

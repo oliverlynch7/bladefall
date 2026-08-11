@@ -40,6 +40,13 @@
    ("C1: hard block, not a damage penalty"), so the bench was the only thing in the world that could
    stand there. The fix equips the class's own starter through the game's own classStartWeapon().
 
+   ── AND EVERY SKILL INHERITED THE PREVIOUS SKILL'S SIDE EFFECTS. ──
+   A fresh dummy per skill was only half the isolation; the player was never reset. bladedancer
+   Riposte is cast one slot after bd_counter, which opens a parry window, and a parry that happens
+   to land turns the next Riposte from a 55-unit lunge into a 95-unit one - past a dummy standing
+   at 60, where its cone misses. Same code, `5 pass, 0 fail` and `4 pass, 1 fail` on consecutive
+   runs. See reset() below; the pose is now restored before every cast.
+
    Three classes have no in-family starter to equip, which is a GAME bug this found rather than a
    harness one - berserker (family great/axe/hammer, starter 'sword'), pirate (family
    sword/cross/javelin/axe, starter 'flintlock') and beastmaster (family bow/javelin, absent from
@@ -119,7 +126,42 @@ const PROBE = (classId) => `(function(){
     } catch(e){}
     return d;
   };
+  /* EVERY CAST STARTS FROM THE SAME BODY, and until 2026-08-11 none of them did.
+
+     A fresh dummy per skill was only half the isolation. The PLAYER carried whatever the previous
+     skill left on it - stances, charges, dash flags, i-frames, and its position - into the next
+     skill's verdict, so skill i's result was a function of skill i-1's side effects.
+
+     Measured, on bladedancer/Riposte, which is why this is here (docs/SKILL_TRIAGE.md section F):
+     the skill before it in the list is bd_counter, which opens a 0.65s PARRY window; if the grunt's
+     swing happens to land inside that window, hurtPlayer stores a Riposte, and a stored Riposte
+     lunges 95 units instead of 55. The dummy is 60 away. So the charged cast lands 35 units PAST
+     the target, bdArc's cone gets dot -1 against a needed 0.81, and the skill deals zero - while an
+     uncharged cast lands at 5 units, inside the dummy's own 15-unit radius, where bdArc skips the
+     cone test entirely and always hits. Whether a grunt lands a hit inside a 0.65s window is a
+     race, so the same code produced "5 pass, 0 fail" and "4 pass, 1 fail" from consecutive runs.
+     That is not a mis-report the way a flapping pass/unproven split is: a NEW hard failure is what
+     run-all.js calls a REGRESSION, and autopilot.ps1 answers a red gate with "git checkout -- .".
+     The flap could delete a run's verified work.
+
+     Restoring the pose is deliberately GENERAL rather than a list of bladedancer fields. Any class
+     with a stance, a charge or a dash has the same shape of contamination, and a denylist would
+     have to be rediscovered once per class. Only numbers and booleans are restored - the weapon,
+     skillCd and any other object stay as they are - and a key the skill INVENTED is zeroed rather
+     than deleted, because the game reads every one of these as "p.foo||0". */
+  let POSE = null;
+  const takePose = () => {
+    POSE = {};
+    for(const k in p){ const v = p[k]; if(typeof v === 'number' || typeof v === 'boolean') POSE[k] = v; }
+  };
   const reset = () => {
+    if(POSE){
+      for(const k in p){
+        const v = p[k];
+        if(typeof v !== 'number' && typeof v !== 'boolean') continue;
+        p[k] = (k in POSE) ? POSE[k] : (typeof v === 'number' ? 0 : false);
+      }
+    }
     p.hp = Math.round((p.maxHp || 100) * 0.5);       // damaged, so a heal has room to show
     p.mana = p.maxMana || 999;
     p.yaw = Math.PI; G.camYaw = Math.PI;             // face the dummy for aimed skills
@@ -183,6 +225,10 @@ const PROBE = (classId) => `(function(){
     }
   }
   mark('start');
+  /* Taken here, before the drift control, so the control measures the same body every skill is
+     cast from - otherwise the noise floor is a different starting state from the thing it is the
+     floor under. */
+  takePose();
 
   /* DRIFT CONTROL: the identical window with no cast at all. Measured, and it matters - the player
      regenerates about 1 HP a second, so over a 5s window a skill that heals nothing still shows
@@ -194,7 +240,11 @@ const PROBE = (classId) => `(function(){
      the "control" was measuring a player mid-combo with lifesteal, and every real heal in the game
      was then judged against a bar no heal could clear. */
   let drift;
-  { const d = mkDummy(); reset();
+  /* RESET BEFORE SPAWNING, always. mkDummy places the dummy at p.z-60, so it has to be told where
+     the player IS, and reset() now restores the pose - including position. Spawning first put the
+     dummy 60 units in front of wherever the last skill left the body and then teleported the body
+     back to the start, which is a rig with the target hundreds of units off to one side. */
+  { reset(); const d = mkDummy();
     const sw0 = p.swingId;
     const b = snap(d), a = watch(d, b);
     drift = { hp: a.hp - b.hp, shield: a.shield - b.shield, guard: a.guard - b.guard,
@@ -214,8 +264,8 @@ const PROBE = (classId) => `(function(){
   const R = [];
   for(let i = 0; i < skills.length; i++){
     const s = skills[i]; if(!s) continue;
+    reset();                                         // pose first, then place the target on it
     const dummy = mkDummy();
-    reset();
     mark('before ' + (s.n || i));
     if(p.skillCd) p.skillCd[i] = 0;
     const before = snap(dummy);
@@ -238,7 +288,7 @@ const PROBE = (classId) => `(function(){
      now measured with, because a damage verdict is only worth having if a plain swing lands.
      DEAD LAST, for the reason written on the drift control: it leaves the player swinging. */
   let canHit = false;
-  { const d = mkDummy(); reset();
+  { reset(); const d = mkDummy();
     const h0 = d ? d.hp : 0;
     for(let k = 0; k < 240 && d; k++){
       try { if(__BF3.playerAttack) __BF3.playerAttack(); } catch(e){}

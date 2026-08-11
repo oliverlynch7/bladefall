@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.907.0-autopilot';
+const VERSION3D='1.908.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10308,6 +10308,27 @@ SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160
   (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,y:sy,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(6,(w?w.dmg:10)*effPower(p)*0.5*am),hitSet:[]});
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
+/* LATE ALIASES — nine skills that had NO HANDLER AT ALL until this block existed.
+   SKILL_FX is built by aliasing, and five alias lines sit ABOVE the definitions they copy
+   (10078, 10080, 10084, 10125, 10129 against m_beam 10146 / m_gravity 10148 / m_overload 10150 /
+   x_step 10153 / r_spike, just above). An alias evaluated too early stores `undefined`, and
+   useSkill does `const fx=SKILL_FX[s.fx], r = fx ? fx(...) : null` — so the cast spent the mana,
+   spent the cooldown, played nothing and did nothing. Three of the nine are in the rank-10 build
+   every class defaults to (ninja Shadow Step, chronomancer Time Warp, stormcaller Ball Lightning),
+   and the Stormcaller and Chronomancer were each missing three of their eight skills.
+   Re-bound HERE rather than by moving the alias lines down: those lines also carry ~30 aliases
+   that are correct today, and moving them past m_tempest's redefinition (18708) would silently
+   change what chr_tempest / st_storm / necro_storm point at. Only the nine dead names are touched.
+   Guarded by `||` so this can never blank a name some later block has already defined. */
+SKILL_FX.necro_grip  = SKILL_FX.necro_grip  || SKILL_FX.m_gravity;    // necromancer Death Grip
+SKILL_FX.nin_step    = SKILL_FX.nin_step    || SKILL_FX.x_step;       // ninja Shadow Step
+SKILL_FX.st_lance    = SKILL_FX.st_lance    || SKILL_FX.m_beam;       // stormcaller Lightning Lance
+SKILL_FX.st_orb      = SKILL_FX.st_orb      || SKILL_FX.m_gravity;    // stormcaller Ball Lightning
+SKILL_FX.st_overload = SKILL_FX.st_overload || SKILL_FX.m_overload;   // stormcaller Chain Reaction
+SKILL_FX.pir_spike   = SKILL_FX.pir_spike   || SKILL_FX.r_spike;      // pirate Powder Keg
+SKILL_FX.chr_beam    = SKILL_FX.chr_beam    || SKILL_FX.m_beam;       // chronomancer Time Lance
+SKILL_FX.chr_gravity = SKILL_FX.chr_gravity || SKILL_FX.m_gravity;    // chronomancer Time Warp
+SKILL_FX.chr_overload= SKILL_FX.chr_overload|| SKILL_FX.m_overload;   // chronomancer Singularity
 function useSkill(i){
   /* Attunement: each cast advances the Mage's element, so a ten-second window walks the whole
      reaction table instead of repeating one. */

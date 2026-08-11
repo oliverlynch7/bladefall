@@ -30,6 +30,7 @@ import { runScenario } from './drive.js';
 const PROBE = readFileSync(join(import.meta.dirname, 'probes', 'mp.probe.js'), 'utf8');
 const PARTY = readFileSync(join(import.meta.dirname, 'probes', 'party-scale.probe.js'), 'utf8');
 const LOOT = readFileSync(join(import.meta.dirname, 'probes', 'loot.probe.js'), 'utf8');
+const PING = readFileSync(join(import.meta.dirname, 'probes', 'ping.probe.js'), 'utf8');
 
 /* What a party of n must multiply enemy HP by. Stated here as well as in the game because the
    assertion has to be able to disagree with the code - reading the multiplier out of __BF3 and
@@ -220,8 +221,51 @@ export async function runMpTests(opts){
           `${(lootR.notAGuest || {}).drops} drops with the guest flag off — the control is not a control`);
   }
 
+  /* ── A PARTY CAN POINT AT SOMETHING ──────────────────────────────────────────────────────────
+     Both ends, because they fail separately and the local one is the one that lies: you ping, you
+     see your own marker, and your friend sees nothing. Its known-bad is ?noping=1, which drops the
+     receive handler and is exactly that failure. */
+  let ping = null;
+  try { ping = await runScenario({ scene: SCENE, waitMs: 9000, js: PING, url }); }
+  catch(e){ failures.push({ check: 'ping: load', detail: e.message.slice(0, 200) }); }
+
+  if(ping && ping.ok === false){
+    failures.push({ check: 'ping: probe could not run', detail: ping.why });
+  } else if(ping){
+    const L = ping.local || {}, C = ping.cooldown || {}, E = ping.expiry || {}, B = ping.button || {};
+    check('ping: pressing it puts a marker in the world', L.made === true && !!L.mark,
+          JSON.stringify(L));
+    /* Ahead of you, not on top of you — a marker at your own feet says "I am here", which the peer
+       dot already says. Loose bounds: the exact cast distance is a feel number. */
+    check('ping: the marker lands out in front of the hero',
+          L.distFromHero > 60 && L.distFromHero < 1200, `${L.distFromHero} units from the hero`);
+    check('ping: it has a lifetime at all', !!(L.mark && L.mark.life > 0),
+          `life ${L.mark && L.mark.life}`);
+    check('ping: it cannot be spammed', C.blockedReturnedNull === true && C.afterBlocked === 1,
+          JSON.stringify(C));
+    check('ping: and the cooldown lets go', C.allowedReturned === true && C.afterAllowed === 2,
+          JSON.stringify(C));
+    /* THE HALF THAT MATTERS. Everything above passes with the receive handler deleted. */
+    check("ping: an ally's ping draws on my screen", !!ping.fromPeer,
+          'MP.recvMark produced nothing — this is the half your friend sees');
+    check("ping: an ally's marker is not my colour",
+          !!(ping.fromPeer && L.mark && ping.fromPeer.col !== L.mark.col),
+          `ally ${ping.fromPeer && ping.fromPeer.col} vs mine ${L.mark && L.mark.col}`);
+    check('ping: my own ping relayed back to me is not drawn twice',
+          (ping.echo || {}).before === (ping.echo || {}).after, JSON.stringify(ping.echo));
+    check('ping: the two teams get two colours',
+          (ping.teamCols || []).length === 2 && ping.teamCols[0] !== ping.teamCols[1],
+          JSON.stringify(ping.teamCols));
+    /* Expiry is driven through the game's own update(), not by calling the ager, so this also
+       asserts updateMarks is wired into the loop at all. */
+    check('ping: the marker is still up mid-life', E.before === 1 && E.at3s === 1, JSON.stringify(E));
+    check('ping: and it expires through the game loop', E.at6s === 0, JSON.stringify(E));
+    check('ping: there is a button for it, and it is co-op only',
+          B.exists === true && B.hiddenSolo === true && B.shownInParty === true, JSON.stringify(B));
+  }
+
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR,
+           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping,
            noparty: !!(party && party.noparty) };
 }
 
@@ -230,20 +274,24 @@ if(import.meta.filename === process.argv[1]){
      cannot see the bug they exist for.
        --bad        ?heroslot=1    the historical single pending SLOT: allies overwrite you
        --bad-rigs   ?heroonerig=1  the historical single shared RIG: allies are copies of you
-       --bad-party  ?noparty=1     the historical unscaled fight: a friend is an easy mode */
+       --bad-party  ?noparty=1     the historical unscaled fight: a friend is an easy mode
+       --bad-ping   ?noping=1      the receive handler dropped: your ping is invisible to the party */
   const bad = process.argv.includes('--bad');
   const badRigs = process.argv.includes('--bad-rigs');
   const badParty = process.argv.includes('--bad-party');
+  const badPing = process.argv.includes('--bad-ping');
   const url = bad  ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1'
             : badRigs ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroonerig=1'
             : badParty ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noparty=1'
+            : badPing ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noping=1'
             : undefined;
   runMpTests({ url }).then(r => {
     for(const f of r.failures) console.log(`FAIL mp ${f.check}: ${f.detail}`);
     console.log(`mp: ${r.pass} pass, ${r.fail} fail` + (r.skipped ? ` (skipped: ${r.skipped})` : '') +
                 (r.at ? `  [at ${r.at}, cap ${r.cap}${r.slot ? ', SINGLE-SLOT self-test' : ''}]` : ''));
-    if(bad || badRigs || badParty){
-      const which = bad ? 'single-slot' : badRigs ? 'single-rig' : 'unscaled-party';
+    if(bad || badRigs || badParty || badPing){
+      const which = bad ? 'single-slot' : badRigs ? 'single-rig'
+                  : badParty ? 'unscaled-party' : 'no-ping';
       console.log(r.fail ? `known-bad (${which}): correctly detected ✓`
                          : `known-bad (${which}): NOT DETECTED — assertions are blind ✗`);
       process.exit(r.fail ? 0 : 1);

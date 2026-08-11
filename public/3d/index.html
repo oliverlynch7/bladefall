@@ -188,6 +188,7 @@
   #bKeep,#bBag{width:78px;}
   #bKeep{top:calc(38% + 38px);}
   #bBag{top:calc(38% + 76px);}
+  #bPing{top:calc(38% + 114px);width:78px;}   /* co-op only — shown by syncPingBtn while a party is live */
   /* Weapon Studio control dock */
   #wstudio{position:absolute;left:0;right:0;bottom:0;z-index:22;background:linear-gradient(0deg,rgba(8,9,13,.97),rgba(8,9,13,.82));border-top:1px solid #2b3040;padding:10px 12px calc(env(safe-area-inset-bottom) + 12px);pointer-events:auto;}
   #wstudio.hide{display:none;}
@@ -955,7 +956,7 @@
     #bJump{right:calc(50% + 239px);bottom:54px;width:50px;height:50px;border-radius:50%;background:#15131a;border-color:#8d6530}
     #bAttack{right:calc(50% - 174px);bottom:50px;width:66px;height:66px;border-radius:5px;background:radial-gradient(circle,#48201e,#151014 72%);border-color:#aa7432;clip-path:polygon(16% 0,84% 0,100% 16%,100% 84%,84% 100%,16% 100%,0 84%,0 16%)}
     #bInteract{right:22px;bottom:42px;width:96px;height:44px;border-radius:3px;background:linear-gradient(#1d1816,#09090d);border:1px solid #9c6d2e;clip-path:polygon(10% 0,90% 0,100% 25%,100% 75%,90% 100%,10% 100%,0 75%,0 25%)}
-    .tog{right:15px;border-radius:3px;border-color:#6e522d;background:#0d0e12bb}.tog#bAuto{top:42%}.tog#bKeep{top:calc(42% + 38px)}.tog#bBag{top:calc(42% + 76px)}
+    .tog{right:15px;border-radius:3px;border-color:#6e522d;background:#0d0e12bb}.tog#bAuto{top:42%}.tog#bKeep{top:calc(42% + 38px)}.tog#bBag{top:calc(42% + 76px)}.tog#bPing{top:calc(42% + 114px)}
     #pethud{display:grid;left:18px;top:204px;bottom:auto;width:210px;grid-template-columns:58px 1fr;gap:9px;align-items:center;padding:8px 12px;background:linear-gradient(145deg,rgba(23,20,25,.8),rgba(7,8,12,.82));border:1px solid #845e2a;box-shadow:inset 0 0 0 2px #07080b,0 10px 24px #000a;clip-path:polygon(8% 0,92% 0,100% 20%,100% 80%,92% 100%,8% 100%,0 80%,0 20%)}
     #pethud img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 5px 5px #000)}
     #pethud .petname{font:700 11px Georgia,serif;letter-spacing:.08em;color:#e7d7b7;text-transform:uppercase}.pethplabel{font-size:8px;color:#aaa;margin:3px 0}.pethpbar{height:6px;background:#020304;border:1px solid #5e4927}.pethpbar i{display:block;height:100%;background:linear-gradient(90deg,#286d32,#74d64b);box-shadow:0 0 5px #6bd24b66}
@@ -998,6 +999,7 @@
   <button class="btn tog" id="bAuto">AUTO (L)</button>
   <button class="btn tog" id="bKeep" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>SELL</button>
   <button class="btn tog" id="bBag" title="Q: cycle loot mode"><span class="togkey">Q</span><span class="ico ico-action ico-action-auto-sell-bag"></span>BAG</button>
+  <button class="btn tog hide" id="bPing" title="Mark a spot for your party">PING</button>
   <div id="wstudio" class="hide"></div>
   <div id="wsIconCard" class="hide"><div class="lbl">Icon art</div><img id="wsIconImg" alt=""><div class="cap" id="wsIconCap"></div></div>
   <button class="btn hide" id="bInteract">TALK</button>
@@ -1025,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.911.0-autopilot';
+const VERSION3D='1.912.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7242,7 +7244,7 @@ function loadStageRaw(i){
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
-  G.fx=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
+  G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -7724,7 +7726,7 @@ for(let i=0;i<4;i++){ const b=document.getElementById('bSk'+i); if(b) b.addEvent
   zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end); zone.addEventListener('lostpointercapture',end);
   zone.addEventListener('contextmenu',e=>e.preventDefault());
 })();
-function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); updateHudKeys(); }
+function updateToggles(){ const a=document.getElementById('bAuto'),k=document.getElementById('bKeep'),bg=document.getElementById('bBag'); if(a)a.classList.toggle('on',meta.autoAttack); if(k)k.classList.toggle('on',meta.autoKeep); if(bg)bg.classList.toggle('on',meta.autoBag); updateHudKeys(); try{ syncPingBtn(); }catch(e){} }
 // Keep every on-screen key hint in sync with the player's current keybinds (auto-fight, auto-loot cycle).
 function updateHudKeys(){ if(typeof keyLabel!=='function'||!meta.keybinds) return;
   const lbl=id=>{ const c=meta.keybinds[id]&&meta.keybinds[id][0]; return keyLabel(c||''); };
@@ -7740,7 +7742,7 @@ function cycleLootMode(){
   else { meta.autoKeep=true; meta.autoBag=false; }
   persist(); updateToggles(); toast(meta.autoKeep?'Auto-sell ON':meta.autoBag?'Auto-bag ON':'Auto loot OFF');
 }
-[['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
+[['bAuto',toggleAuto],['bKeep',toggleKeep],['bBag',toggleBag],['bPing',()=>dropPing()]].forEach(([id,fn])=>{ const el=document.getElementById(id); if(!el) return; el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();fn();}); el.addEventListener('contextmenu',e=>e.preventDefault()); });
 updateToggles();
 // ── REMAPPABLE CONTROLS. Each action holds up to 2 physical keys (e.code — keyboard-layout independent, so KeyW is
 //    the W position on any layout). Defaults below; the player rebinds any of them in Settings → Controls. ──
@@ -7762,6 +7764,9 @@ const KEYACTIONS=[
   {id:'lootBag',  label:'Send Dropped Item to Bag', def:['KeyR']},
   {id:'lootSell', label:'Sell Dropped Item',  def:['KeyQ']},
   {id:'auto',    label:'Toggle Auto-Fight', def:['KeyL']},
+  /* ensureKeybinds() fills any newly-added action into an existing save, so this arrives on old
+     profiles without touching a binding anyone has customised. */
+  {id:'ping',    label:'Ping the World',    def:['KeyG']},
 ];
 const MOVE_ACTS={up:1,down:1,left:1,right:1,jump:1,attack:1,dodge:1};   // held actions routed to the input object (vs discrete taps)
 function defaultKeybinds(){ const o={}; for(const a of KEYACTIONS) o[a.id]=a.def.slice(); return o; }
@@ -7826,6 +7831,7 @@ window.addEventListener('keydown',e=>{
   if(act==='lootSell'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootSellCurrent(); } return; }
   if(act==='loot'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); cycleLootMode(); } return; }
   if(act==='auto'){ e.preventDefault(); initAudio(); toggleAuto(); return; }
+  if(act==='ping'){ e.preventDefault(); if(mode==='play'&&!e.repeat){ initAudio(); dropPing(); } return; }
   if(act==='interact'){ e.preventDefault(); initAudio(); doInteract(); return; } });
 window.addEventListener('keyup',e=>{ const act=keyAction(e.code); if(act&&MOVE_ACTS[act]) input[act]=false; });   // keyup always clears, edit mode or not - a latched axis is worse than a missed one
 // ── GAMEPAD. Standard mapping: left stick + D-pad = move, A=jump, X=attack, B=dodge, Y=interact,
@@ -11480,6 +11486,81 @@ function updatePetLabel(){
    Topology: host = star hub; guests connect to host; host relays everyone's
    position. P1.1 = presence only (see each other move); enemies/loot stay local.
    ============================================================================ */
+/* ===== PING THE WORLD =============================================================
+   There was no chat and no ping. Communication is the top co-op frustration in the games this was
+   researched against, and a browser game with no voice needs a non-typing answer: one key, or one
+   on-screen button because this is phone-first, drops a marker where you are looking and everyone in
+   the party sees it for a few seconds.
+
+   DELIBERATELY NOT FREE-TEXT CHAT. Chat needs a keyboard the phone player does not have out, and it
+   needs moderation. A ping answers "here", "this" and "look", which is most of what a party says.
+
+   WHAT YOU ARE LOOKING AT, not where you stand: it snaps to the enemy you are aiming at through the
+   game's own aimTarget() - the same function the attack code targets with, so the marker lands on
+   what your next swing would - and falls back to a point on the ground ahead of you when there is
+   nothing to call out. Using the game's own aim rather than a fresh raycast is the difference
+   between "ping that one" and "ping roughly over there".
+
+   The marker reuses the loot-drop celebration's own shape (a pillar of light plus a ring, drawn by
+   the same bx/glowFX primitives as drawLootFx) rather than inventing a marker style. */
+const PING_LIFE = 5;         // seconds a marker stays up - long enough to look, short enough to not litter
+const PING_AIM  = 900;       // how far aimTarget may reach for something to call out
+const PING_CAST = 320;       // where "here" lands on the ground when nothing is targeted
+const PING_COOL = 0.6;       // one marker per player per this many seconds
+const PING_MAX  = 12;        // a party of six leaning on the button cannot fill the screen
+/* ?noping=1 drops the RECEIVE handler, which is precisely the regression this feature can suffer:
+   you ping, you see your own marker, and your friend sees nothing — so the one screen that proves
+   it works is the one screen that cannot. Permanent, like ?heroonerig=1, so the assertion can be
+   watched to fail without editing the repo. */
+const NO_PING = (function(){ try { return /[?&]noping=1/.test(location.search); } catch(e){ return false; } })();
+let _pingT = -99;
+/* The sender's colour. In team PvP that is their TEAM, because knowing which side called it is the
+   whole content of the message; otherwise yours is the amber every prompt in this game uses and an
+   ally's is the green used for the revive and join toasts. No new palette. */
+function pingColorFor(id){
+  try {
+    if(MP.active && MP.teams) return MP.teamOf(id) ? '#ff8a5c' : '#7fd6ff';
+    return (!MP.active || id === MP.myId) ? '#ffd24a' : '#7de08a';
+  } catch(e){ return '#ffd24a'; }
+}
+function addMark(x, z, y, by, name){
+  if(!G) return null;
+  const m = { x:x, z:z, y:y||0, t:0, life:PING_LIFE, col:pingColorFor(by), by:by||null, name:name||'' };
+  (G.marks = G.marks || []).push(m);
+  while(G.marks.length > PING_MAX) G.marks.shift();
+  try { skillRing(x, z, m.col, '#ffffff', 130); } catch(e){}
+  try { addText(x, (y||0)+150, z, name || 'HERE', m.col, true); } catch(e){}
+  return m;
+}
+function dropPing(){
+  if(mode !== 'play' || !G || !G.p) return null;
+  const now = G.time || 0;
+  if(now - _pingT < PING_COOL) return null;
+  _pingT = now;
+  const p = G.p;
+  let x, z, y, tgt = null;
+  try { tgt = aimTarget(p, p.weapon, PING_AIM); } catch(e){}
+  if(tgt){ x = tgt.x; z = tgt.z; y = tgt.y || 0; }
+  else {
+    let aim = p.yaw; try { aim = playerAimYaw(p); } catch(e){}
+    x = p.x + Math.sin(aim)*PING_CAST; z = p.z + Math.cos(aim)*PING_CAST;
+    y = 0; try { y = highestSurfaceAt(x, z); } catch(e){}
+  }
+  const m = addMark(x, z, y, MP.myId, tgt ? 'TARGET' : 'HERE');
+  try { SFX.pickup(); } catch(e){}
+  try { MP.sendMark(x, z, y); } catch(e){}
+  return m;
+}
+function updateMarks(dt){
+  if(G && G.marks && G.marks.length){ for(const m of G.marks) m.t += dt; G.marks = G.marks.filter(m => m.t < m.life); }
+}
+/* The button is co-op only. A ping you are the only person who can see is a HUD button that does
+   nothing, and this is a phone screen with four already. */
+function syncPingBtn(){
+  const b = document.getElementById('bPing'); if(!b) return;
+  let on = false; try { on = !!MP.active; } catch(e){}      // MP is a const below this line at boot
+  b.classList.toggle('hide', !on);
+}
 const MP={
   active:false, isHost:false, peer:null, conns:[], hostConn:null,
   myId:null, name:'Warden', code:'', zone:-1, seed:0, rseed:0, ping:0,
@@ -11563,6 +11644,7 @@ const MP={
       else if(d.t==='petdmg'){ this.routePetPvp(d); }      // owner-authoritative companion damage
       else if(d.t==='frag'){ this.hostScore(d.by); }        // host is the PvP scorekeeper
       else if(d.t==='cfx'){ this.recvCombat(d,c); }         // a guest's projectiles/skill rings — render + relay to others
+      else if(d.t==='mark'){ this.recvMark(d,c); }          // a guest's world ping — draw + relay to the rest of the party
       else if(d.t==='specialAdvance'&&d.kind==='endless'&&G&&G.endless&&G.floorCleared){ endlessDescend(); }
       else if(d.t==='ping'){ try{c.send({t:'pong',ts:d.ts});}catch(e){} }
       else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); }
@@ -11629,6 +11711,7 @@ const MP={
     else if(d.t==='petdmg'){ if(d.id===this.myId) this.takePetPvpDamage(d); }
     else if(d.t==='score'){ this.showScore(d.id,d.n); }
     else if(d.t==='cfx'){ this.recvCombat(d); }   // the host's (or a relayed guest's) projectiles/skill rings
+    else if(d.t==='mark'){ this.recvMark(d); }    // somebody in the party pinged the world
     else if(d.t==='ping'){ if(this.hostConn&&this.hostConn.open) try{this.hostConn.send({t:'pong',ts:d.ts});}catch(e){} }   // reply so the HOST can measure ping too
     else if(d.t==='pong'){ this.ping=Math.round(performance.now()-d.ts); } },
   // ---- called from enterZone (both roles) ----
@@ -11681,6 +11764,19 @@ const MP={
     if(!proj&&!sw) return; const m={t:'cfx'}; if(proj)m.proj=proj; if(sw)m.sw=sw;
     if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
     else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
+  /* ---- world pings: same send-and-relay shape as sendCombat/recvCombat above ---- */
+  sendMark(x,z,y){ if(!this.active) return;
+    const m={t:'mark',by:this.myId,n:this.name||'Ally',x:Math.round(x),z:Math.round(z),y:Math.round(y||0)};
+    if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
+    else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
+  /* `by` is carried and checked rather than trusting the relay not to echo: the host forwards a
+     guest's message to the other guests, and a marker drawn twice at the same spot is a brighter
+     marker that expires at a different time. */
+  recvMark(d,fromConn){ if(!G||!d||NO_PING) return;
+    if(d.by&&d.by===this.myId) return;
+    addMark(d.x,d.z,d.y||0,d.by,(d.n||'Ally').slice(0,14));
+    try{ SFX.pickup(); }catch(e){}
+    if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   recvCombat(d,fromConn){ if(!G) return;
     if(d.proj) for(const a of d.proj){ G.projectiles.push({visual:true,owner:'peerfx',hitSet:[],x:a[0],y:a[1],z:a[2],vx:a[3],vy:a[4],vz:a[5],size:a[6],color:a[7],shape:a[8],el:a[9]||null,gravity:a[10]||0,life:a[11],glow:a[12]?1:0,trail:a[13]||0}); }
     if(d.sw) for(const a of d.sw){ (G.shockwaves=G.shockwaves||[]).push({visual:true,hitPlayer:true,dmg:0,life:0,x:a[0],z:a[1],r:a[2],maxR:a[3],spd:a[4],col:a[5],col2:a[6],arc:a[7]||0,dirX:a[8]||0,dirZ:a[9]||0}); }
@@ -11688,6 +11784,7 @@ const MP={
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   // ---- per-frame: interpolate peers, age out stale ones, send our state ----
   tick(dt){
+    try{ syncPingBtn(); }catch(e){}      // the ping button is co-op only; this is the only place that knows
     for(const id in this.peers){ const q=this.peers[id]; q.last+=dt;
       if(q.last>3){ delete this.peers[id]; continue; }
       const k=Math.min(1,dt*12); q.x+=(q.tx-q.x)*k; q.y+=(q.ty-q.y)*k; q.z+=(q.tz-q.z)*k;
@@ -11855,6 +11952,7 @@ const MP={
     try{ if(this.hostConn) this.hostConn.close(); }catch(e){}
     try{ if(this.peer) this.peer.destroy(); }catch(e){}
     this.active=false; this.isHost=false; this.peer=null; this.conns=[]; this.hostConn=null; this.peers={}; this.zone=-1;
+    try{ syncPingBtn(); }catch(e){}      // tick() stops running when the party ends, so hide it here
     this.kills=[]; this._killed={}; this._gotEn=false; this._wiped=false; this.pvp=false; this.scores={}; this.arenaMsg=null;
     if(G&&G.p){ G.p.downed=false; G.p._pvpDead=false; }   // never leave a lingering downed/pvp state when co-op ends
     if(msg){ try{ toast(msg); }catch(e){} } }
@@ -12416,6 +12514,7 @@ function update(dt){
   else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
   minionUpdate(dt);                                                                                                        // necromancer summons (no-op when none)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
+  updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
   /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood and how much health you had,
@@ -13463,7 +13562,7 @@ function loadBossRushArena(idx){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
   const R=470;
   G.segments.push({x:0,z:0,w:R*2,d:R*2});
@@ -13726,7 +13825,7 @@ function loadEndlessArena(n){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
   // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
@@ -18208,6 +18307,7 @@ function render(t){
   hpBars=[]; statPips=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
   if(G.fx&&G.fx.length) drawLootFx(t);
+  if(G.marks&&G.marks.length) drawPingMarks(t);
   if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
     const warn=G.emberWarn>0, burn=G.emberBurn>0;
     for(const v of (G.vents||[])){
@@ -18547,6 +18647,20 @@ function drawLootFx(t){
     if(f.tier>=2){ const rr=(28+f.tier*24)+f.t*170; for(let i=0;i<16;i++){ const a=i/16*6.283; bx(f.x+Math.cos(a)*rr, y0+4, f.z+Math.sin(a)*rr, 7,7,7, f.col,f.col,0.6*up); } }
     if(f.tier>=4){ const rr2=f.t*270; for(let i=0;i<20;i++){ const a=i/20*6.283; bx(f.x+Math.cos(a)*rr2, y0+8, f.z+Math.sin(a)*rr2, 6,6,6, '#ffffff',f.col,0.5*up); }
       for(let i=0;i<8;i++){ const a=t*2+i*0.785, ry=y0+20+((t*130+i*40)%260)*up; bx(f.x+Math.cos(a)*(18+i*4), ry, f.z+Math.sin(a)*(18+i*4), 4,4,4, f.col,f.col,0.9*up); } }
+  }
+}
+/* A world ping: the loot-drop celebration's own pillar-and-ring, in the sender's colour, with a
+   diamond hanging above it so the spot reads from across a clearing. Same bx/glowFX primitives as
+   drawLootFx directly above - the marker style is borrowed, not invented. */
+function drawPingMarks(t){
+  for(const m of G.marks){
+    const up=1-m.t/m.life, y0=m.y||0, bob=Math.sin(t*3.4+m.x*0.01)*7;
+    bx(m.x, y0+105, m.z, 6,210,6, m.col, m.col, 0.40*up);                       // pillar of light
+    glowFX(m.x, y0+26, m.z, 24, m.col, 0.55*up);
+    bx(m.x, y0+168+bob, m.z, 19,19,19, m.col, '#ffffff', 0.85*up);              // the marker itself
+    const rr=34+(m.t%1)*96;                                                     // a ring that pulses once a second
+    for(let i=0;i<14;i++){ const a=i/14*6.283;
+      bx(m.x+Math.cos(a)*rr, y0+4, m.z+Math.sin(a)*rr, 6,6,6, m.col, m.col, 0.5*up*(1-(m.t%1))); }
   }
 }
 function drawChest(ch,t){
@@ -18927,6 +19041,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and reported the Outskirts - a grassland - as 2% ground. Every probe that reimplements one of
      these tests eventually measures something the game does not believe. */
   surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy, partySize, partyHpMul,
+  dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,

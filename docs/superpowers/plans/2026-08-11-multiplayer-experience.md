@@ -23,7 +23,7 @@ Searched 2026-08-11. Each row is a documented, recurring complaint in shipped co
 | Naive host authority gives the host a lag-free advantage | Enemies are host-authoritative for HP/death only; each client runs enemy AI locally, and peers are interpolated between packets | partly handled — audit in Task 2 |
 | Difficulty not scaled to party size | ~~`grep` for `peers.length` in any HP/damage path returns **nothing**~~ — **fixed, Task 3**: +60% enemy HP per additional player in your zone, host-only, health only | done |
 | Shared loot causes friction; personal loot is strongly preferred | ~~No per-player loot ownership~~ — **this row was WRONG**, see Task 4: no pickup is ever transmitted and every client rolls its own item from the same corpse. Measured, 600 kills | already correct |
-| No in-game communication | `grep` for chat/ping/mark messages returns **nothing** | **missing — Task 5** |
+| No in-game communication | ~~`grep` for chat/ping/mark messages returns **nothing**~~ — **fixed, Task 5**: `G` or the PING button marks what you are aiming at for the whole party, five seconds, sender's colour | done |
 | Public STUN/TURN, no relay | Cloudflare Realtime TURN with ephemeral credentials, verified relay candidates | already correct |
 | Drop-in friction | 4-char room codes, guest auto-provisioned a starter class | already correct |
 
@@ -345,27 +345,72 @@ There is no chat and no ping. The research names communication the top co-op fru
 **Files:**
 - Modify: `public/3d/index.html`
 
-- [ ] **Step 1: Add a world ping**
+- [x] **Step 1: Add a world ping** — `G` key or the on-screen **PING** button, `{t:'mark',by,n,x,z,y}`,
+      five seconds, sender's colour.
 
-One key (and one on-screen button, since this is phone-first) drops a marker at what you are aiming at, broadcast to the party as a compact `{t:'mark',x,z}` and drawn for a few seconds in the sender's team colour. Reuse the existing beacon draw rather than inventing a marker style.
+**It marks what you are LOOKING AT, not where you stand**, and that is the one place this went
+beyond the step as written. It snaps to the enemy you are aiming at through the game's own
+`aimTarget(p, w, 900)` — the same function the attack code targets with, so the marker lands on
+whatever your next swing would hit — and falls back to a point 320 units along `playerAimYaw` when
+there is nothing to call out. Using the game's own aim rather than a fresh raycast is the difference
+between "ping *that* one" and "ping roughly over there", and it costs nothing because the function
+already exists.
 
-Deliberately not free-text chat: it needs a keyboard, it needs moderation, and a ping answers "here", "this", and "look" — which is most of what a co-op party needs.
+Send and relay copy `sendCombat`/`recvCombat` exactly, the file's own idiom for "a thing I did that
+everyone should see". The message carries `by`, and `recvMark` drops its own id: the host relays a
+guest's message to the *other* guests and nothing stops it coming back to the sender, and a marker
+drawn twice is a brighter one that expires at a different time.
 
-- [ ] **Step 2: Prove it**
+The marker reuses `drawLootFx`'s pillar-and-ring through the same `bx`/`glowFX` primitives rather
+than inventing a style. (The plan said "the existing beacon draw" — `beacon()` at 6536 turned out to
+be a level-BUILDING helper that pushes permanent `G.deco`, no use for a five-second marker. The loot
+celebration is the transient equivalent and is what got reused.)
 
-Assertion: a `mark` message from a peer produces a visible marker with a lifetime, and it expires. Prove it can fail by dropping the handler.
+Colours come from the palette already in the file: team PvP uses the two team colours, otherwise
+yours is the amber every prompt uses and an ally's is the green of the join and revive toasts.
 
-```bash
-node tools/gate.js
-node harness/test-mp.js
-```
+**The button is co-op only.** A ping nobody else can see is a HUD button that does nothing, and this
+is a phone screen with four already. `syncPingBtn()` is called from `MP.tick` (which only runs while
+a party is live) and from the disconnect path (because `tick` stops).
 
-- [ ] **Step 3: Commit**
+**One new keybind, `G`.** `ensureKeybinds()` already fills newly-added actions into an existing
+save, so it arrives on old profiles without disturbing a binding anyone has customised.
 
-```bash
-git add public/3d/index.html harness/probes/mp.probe.js
-git commit -m "multiplayer: ping the world, because a co-op game with no way to say 'here' is a solo game with witnesses"
-```
+- [x] **Step 2: Prove it** — `harness/probes/ping.probe.js`, driving `dropPing()` and `MP.recvMark()`
+      — the two ends of the feature — and reading `G.marks`, the list the renderer draws from.
+
+| assertion | measured |
+|---|---|
+| pressing it puts a marker in the world | `HERE`, amber, life 5, **320 units ahead** of the hero |
+| it cannot be spammed | second press 0.1s later returns null, count stays 1; after 1.0s, count 2 |
+| an ally's ping draws on my screen | `Friend`, green `#7de08a` |
+| my own ping relayed back is not drawn twice | 1 → 1 |
+| the two teams get two colours | `#ff8a5c` / `#7fd6ff` |
+| it expires **through the game loop** | 1 up, still 1 at 3s, **0 at 6s** |
+| the button exists and is co-op only | hidden solo, shown in a party |
+
+Expiry is driven through the game's own `update()` rather than by calling the ager, so that row also
+asserts `updateMarks` is wired into the loop at all.
+
+**`?noping=1` is the known-bad**, and running it makes the case for splitting the two halves better
+than any argument: with the receive handler dropped, **every local assertion still passes** and only
+the four remote ones go red. That is the exact failure this feature can suffer — you ping, you see
+your own marker, everything looks right, and your friend sees nothing.
+
+`node tools/gate.js` → `GATE OK`, VERSION3D 1.912.0-autopilot. mp suite **42 → 54 pass, 0 fail**;
+`--bad-ping` → 50 pass, 4 fail, `known-bad (no-ping): correctly detected ✓`.
+
+**Photographed, because a passing assertion about a renderer is not a picture**
+(`_shot/out/ping-drawn.png`): the amber pillar with its `HERE` label standing on the road ahead of
+the hero, an ally's green `Friend` marker off to the left, and the PING button in the HUD under BAG.
+
+- [x] **Step 3: Commit** — `public/3d/index.html`, `harness/probes/ping.probe.js`,
+      `harness/test-mp.js`. Its own commit, per this plan's constraint.
+
+**For Oliver, and it is the only part a harness cannot answer:** whether the pillar is too loud. It
+borrows the loot-drop celebration's brightness, which was tuned to say "a legendary just dropped",
+and a ping is a quieter thing to say. `PING_LIFE`, `PING_CAST` and the alpha in `drawPingMarks` are
+each one number.
 
 ---
 

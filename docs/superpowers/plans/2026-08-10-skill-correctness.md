@@ -229,6 +229,16 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 7 | **E — paladin Bounce Back was never read** | `9575959` | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before and 57 after, player took 20 in BOTH — so the reflect was added, not the block weakened |
 | 8 | **E — monk Flow was never read** | this run | `harness/probes/monkflow.probe.js`, A/B in one launch: the dodge cut ratio was 1 before and exactly 2 after |
 
+**WHAT THE NEXT RUN SHOULD DO FIRST: `node harness/run-all.js`.** Passes 5–8 shipped on 2026-08-11
+verified per pass and per class — the fast unit stage (27 tests, the same stage `run-all.js` runs
+before it spends GPU time), a committed A/B probe watched to fail against the unfixed game, and
+`test-skills.js --classes <the touched class>` either side — but **the full aggregate gate has not run
+since `f75c81e`.** At the measured cost of a launch it is a ~40-minute job against a run that is
+killed on a 20-minute clock, so four verified commits were the better use of the window than one
+commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
+class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
+would settle. Say what it reports either way.
+
 **Pass 6 came out of pass 5's probe rather than out of the triage list, and that is the exception the
 list's own rule allows for.** Task 2 Step 1 says never hunt a bug the harness cannot see — the point
 being not to act on desk research. This was not read; it was *measured*, as a free diagnostic in the

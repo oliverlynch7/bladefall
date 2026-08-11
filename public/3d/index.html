@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.905.0-autopilot';
+const VERSION3D='1.906.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -18867,6 +18867,15 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   abandonTrial, restoreBank, bankNow,   /* exported so the harness can test trial ABORT, which is where A2 lived */
   bagDollRender,    /* so the paper-doll can be verified without driving the bag UI */
+  /* THE MULTIPLAYER RENDER PATH, exported so it can be tested rather than imitated.
+     Everything from line 1019 down is inside one IIFE, so drawHero3/flushHero3D/HERO3D_MAX are
+     closure-local and a probe cannot see them - measured, not assumed. The consequence is worth
+     spelling out because it nearly shipped a test that proved nothing: the only way to check the
+     hero QUEUE without these is to assign window.__hero3dPending yourself and then assert on what
+     you just assigned, which passes just as happily against the single-SLOT version whose bug
+     ("I turned invisible on my screen") is the entire reason the queue exists. With these, the
+     test drives the game's own queueing and its own flush. */
+  drawHero3, flushHero3D, get HERO3D_MAX(){ return HERO3D_MAX; },
   openCharCreate,   /* so character creation can be photographed - its preview IS the feature */
   openDiffSelect,   /* so the difficulty menu can be PHOTOGRAPHED - its art is the thing being changed */
   SFX,   /* so the harness can COUNT sounds - A3 is a bug you can only hear, and counting calls is the only way to prove it fixed without ears */

@@ -16,17 +16,20 @@
 | 2 claim parser | done | `c35333d` |
 | 3 skill tester | done | `2a86ea0`, `d7c50de` |
 | 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
-| 5 multiplayer tester | not started | — |
+| 5 multiplayer tester | **done** | this run; the plan's probe tested itself — see Task 5 |
 | 6 aggregate gate | done | in `34262a6`; baselines instead of pass/fail, see the file |
 | 7 autopilot guards | done | `34262a6`, `a3e999c` |
 | 8 re-enable the schedule | not started | — |
 
-**Next task is 5 (the multiplayer tester).**
+**Next task is 8 (re-enable the schedule) — and it is OLIVER'S.** It edits a Windows scheduled task
+to start running this automation unattended every 6 hours on his machine. That is not a code change
+and not reversible by a `git revert`, so an autopilot run must not do it to itself. Every code task
+in this plan is now done.
 
 ## Corrections from execution
 
-Tasks 1 and 2 are DONE. Two things this plan assumed and got wrong, found by running it. Later
-tasks must use the corrected form.
+Five things this plan assumed and got wrong, each found by running it rather than by reading it.
+Later tasks must use the corrected form.
 
 1. **`harness/` is ESM.** `harness/package.json` declares `"type": "module"`, so every file here
    uses `import`/`export`, not `require`. The plan's CommonJS snippets in Tasks 3–6 must be
@@ -56,6 +59,15 @@ tasks must use the corrected form.
    across a ~195-unit void deliberately. Measured on the real body: a running jump carries **138**
    units, a jump plus an air dash **216**. Any walker that does not dash reports all sixteen areas
    as ending in an impassable gap.
+
+5. **A PROBE MUST DRIVE THE GAME, NOT STAND IN FOR IT** (found in Task 5). The plan's multiplayer
+   probe assigned `window.__hero3dPending` and then asserted on what it had just assigned, so it
+   passed against the very bug it existed to catch. The general rule, and the reason both live
+   probes now carry a permanent URL-flag known-bad: **an assertion nobody has watched FAIL is an
+   assertion nobody should believe.** The specific trap is that the game is one big IIFE
+   (`index.html:1019`), so a probe reaches only what is hung on `window` — and when the thing you
+   mean to test is closure-local, the path of least resistance is to imitate it, which is the one
+   move guaranteed to measure nothing. Export it on `__BF3` instead.
 
 ## Global Constraints
 
@@ -632,7 +644,40 @@ changes how hard the level fights back.
 
 Scope, stated so nobody mistakes it for more than it is: this proves the RENDER path draws every queued hero, which is the bug that made Oliver invisible to himself. It does not prove connection behaviour. Two real machines remain the final check.
 
-- [ ] **Step 1: Write the tester**
+- [x] **Step 1: Write the tester** — shipped as `harness/test-mp.js` + `harness/probes/mp.probe.js`.
+
+**THE PLAN'S PROBE TESTED THE PROBE, NOT THE GAME, and it would have passed forever.** It assigns
+`window.__hero3dPending` itself and then asserts that what it just assigned is an array of length 3
+whose head is `G.p`. Nothing in it ever calls the game's queueing code, so it passes exactly as
+happily against the single-SLOT version whose bug — "I turned invisible on my screen" — is the
+entire reason the queue exists. A green light that cannot go red is worse than no light.
+
+The plan reached for that shape because it had correctly noticed MP is closure-local, and stopped
+one step short of the reason. Measured, not assumed: **everything from `index.html:1019` down is
+inside one `(function(){ "use strict"; … })()`**, so `drawHero3`, `flushHero3D` and `HERO3D_MAX` are
+closure-local too and a probe sees only what is explicitly hung on `window`. A scouting probe said
+so in one launch — `drawHero3`, `flushHero3D`, `deferArmed`, `MP`, `HERO3D_MAX` all `undefined`,
+while `window.drawHero3D` and `window.__BF3` resolve. (`MP` was already exported at 18864; the scout
+tested the bare identifier.)
+
+So three names join the exported-for-the-harness cluster at `index.html:18869`, and the probe drives
+**the game's own queueing and its own flush**. Counting is separated from rendering deliberately:
+the wrapper records the dispatch and only then calls the real `drawHero3D` inside its own `try`, so
+a renderer that throws is reported as a render error instead of masquerading as a hero the queue
+failed to hold — without that, one throw aborts `flushHero3D`'s loop and under-counts every hero
+after it.
+
+Three trials, all measured live at `--scene 0`, cap 6:
+
+| Trial | queued | drawn | local at |
+|---|---|---|---|
+| local first (the game's real order: hero at 18328, then `MP.drawPeers` at 18330) | 3 | 3 | 0 |
+| local last (what the slot bug destroyed; `drawHero3` unshifts you to the front) | 3 | 3 | 0 |
+| 12 allies + you (the cap must bite, and must never drop you) | 7 | 7 | 0 |
+
+`node harness/test-mp.js` → **`mp: 16 pass, 0 fail  [at The Outskirts, cap 6]`**.
+
+The plan's code below is kept only for the diff.
 
 Create `harness/test-mp.js`:
 
@@ -685,17 +730,33 @@ if(require.main === module){
 }
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Validate against a known-bad case** — added, because the plan had no such step here
+      and this is the one suite whose subject is already FIXED, so a green run proves nothing on its
+      own.
 
-Run: `node harness/test-mp.js`
-Expected: `mp: 3 pass, 0 fail`
-
-- [ ] **Step 3: Commit**
+Not by reverting the game fix — per Task 4, a known-bad you must break the repo to produce is a
+known-bad nobody re-runs. The probe carries its own, permanently, the way `level.probe.js` carries
+`?breakgap`:
 
 ```bash
-git add harness/test-mp.js
-git commit -m "harness: assert the 3D layer draws every queued hero, local one first"
+node harness/test-mp.js --bad
 ```
+
+`?heroslot=1` queues through the historical single slot (`window.__hero3dPending = [p,t]`, each hero
+overwriting the last). It reproduces Oliver's report exactly — `drew 1 of 3`, and in the game's real
+draw order **`the local hero was never drawn — this is the invisibility bug`**. The runner reports
+`known-bad: correctly detected ✓` and exits 0 only when the assertions DO fail.
+
+Worth keeping: the bug is **asymmetric**, and the known-bad shows it. With the local hero queued
+last it survives (`localAt 0`) and only the ally count is wrong; queued first — the order the game
+actually uses — it is the one body dropped. That asymmetry is precisely why Oliver could see his
+opponent while being invisible to himself.
+
+`runScenario` gained a `url` passthrough so a suite can drive its own known-bad; both self-test
+hooks in this harness are URL flags, and without it they could only ever be run by hand.
+
+- [x] **Step 3: Commit** — `harness/test-mp.js`, `harness/probes/mp.probe.js`, the `drive.js` url
+      passthrough, and the three `__BF3` exports.
 
 ---
 

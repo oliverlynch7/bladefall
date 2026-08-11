@@ -75,6 +75,11 @@ function runOnce(opts){
   const args = [runner, '--out', join(RUNDIR, 'out', 'harness.png'),
                 '--wait', String(o.waitMs || 9000)];
   if(o.scene != null) args.push('--scene', String(o.scene));
+  /* --url so a suite can run its own KNOWN-BAD. Both self-test hooks in this harness are URL flags
+     (`?breakgap` in level.probe.js, `?heroslot` in mp.probe.js) precisely so that reproducing a
+     failure never means editing the repo; without this they could only be run by hand, and a
+     known-bad nobody re-runs is a known-bad that quietly stops working. */
+  if(o.url) args.push('--url', o.url);
   if(o.pre) args.push('--pre', o.pre);
   args.push('--eval', o.js);
 

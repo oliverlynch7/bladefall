@@ -222,7 +222,19 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `a724d69` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — stormcaller Storm Ward was never read** | this run | `harness/probes/stormward.probe.js`, three trials in one launch: shield **0 before, 21 after**, matching the Warlock's known-good 21 off the identical promise |
+
+**Pass 4 is the first row taken out of section E's forty-six, and it was chosen for a reason worth
+reusing: it has a WIRED TWIN.** Three classes already ship Storm Ward's exact sentence and exact
+implementation, so the fix invented no number and picked no site — it copied the siblings around
+the hole. Section E's caveat that wiring a dead passive changes how a class plays, and is therefore
+Oliver's, does not bite on a passive whose behaviour is already in the game three times over.
+**The other 45 are not all this cheap**, and the next run should not assume they are: `r_longshot`
+was scouted first and put back, because "+8% damage to enemies 7m+ away" needs a units-per-metre
+scale the game does not have one of — `r_spike`'s "4m field" is 160 units (40 u/m), the hero's own
+body is 44 units tall (~24 u/m), and a Tumble described as "~5m" travels ~297 (~59 u/m). Picking
+one is inventing a number, so that row is Oliver's until he says which.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

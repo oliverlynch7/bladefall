@@ -243,7 +243,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 
 | class | dead / total | the dead ones |
 |---|---|---|
-| stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
+| stormcaller | ~~7 / 8~~ **6 / 8** | Conductor, Overcharge, ~~Storm Ward~~, Charged, Amped, Static Master, Galvanize |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
@@ -273,6 +273,66 @@ is a stat-reskin of its core no matter what its cards say.
 immediately — and the list is checked in both directions, so a passive that gets wired must be taken
 out or the test says so. Working these is sub-project B Task 2, one commit at a time, and each fix
 takes an id off that Set.
+
+### Fixed from this section
+
+| passive | class | what it does now | proven by |
+|---|---|---|---|
+| **Storm Ward** (`st_ward`) | stormcaller | casting a skill grants a shield worth 4% max HP for 3s | `harness/probes/stormward.probe.js` — **0 before, 21 after**, watched to fail |
+
+**Storm Ward was the cheapest row in this section and it is worth saying why, because it is a
+shape and not a one-off.** Its card — *"Casting a skill grants a shield equal to 4% max HP"* — is
+word for word the Mage's Ward, the Warlock's Soul Shield and (at 6%) the Skylancer's Sky Armor,
+all three of which are implemented, in one place, in `useSkill`'s CLASS2 branch, as the identical
+expression. So the fix invented no number, chose no duration, and picked no site: it copied the
+three siblings sitting around the hole. **Where a dead passive has a wired twin, the twin is the
+specification** — no balance call is being made and none of section E's "wiring a passive changes
+how a class plays" caveat is in play.
+
+That twin is also what makes the probe believable. It runs three trials in ONE launch and the
+third is the WARLOCK casting the same promise, carried permanently as a known-good: measured
+before the fix, the Warlock's shield came back **19** while the Stormcaller's came back **0**, so
+the bench was demonstrably able to see the thing it was accusing the Stormcaller of not doing.
+Without that trial a probe that could not observe *any* shield would report this passive dead with
+total confidence. Trial A — the same class with the rank-5 choice left on `st_momentum` — is the
+other half: it must stay 0, or the "fix" is shielding every Stormcaller regardless of what they
+chose, which is a different passive.
+
+After: `passives: 124 total, 79 wired, 45 dead`; the Stormcaller goes 7/8 dead to 6/8.
+
+### Which of the remaining 45 are cheap, and which are Oliver's — scouted 2026-08-11
+
+Read before picking the next one. The forty-five are not interchangeable: some have a wired twin
+elsewhere in the game that supplies both the behaviour and the number, and some cannot be built at
+all without choosing a number the card does not state. Sorting them once beats each run
+rediscovering it. **This is a reading, not a measurement** — every row still has to be watched to
+fail before it is believed.
+
+**Cheap — a wired twin exists, so nothing is invented:**
+
+| passive | class | its card | the twin that specifies it |
+|---|---|---|---|
+| `bsk_thick` Thick Hide | berserker | "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | `necro_undying` (index.html:11244) already intercepts a killing blow in `hurtPlayer` |
+| `bsk_heavy` Heavy Hands | berserker | "You cannot dodge — but nothing can knock you back or stagger you." | warrior `w_unyield`, same sentence, wired |
+| `bsk_tough` Unbreakable | berserker | "While below half health you cannot be stunned, slowed or feared." | `w_unyield` again, plus the class's own `frac` low-HP test in `CLASS_BASIC.berserker` |
+| `mon_iron` Iron Body | monk | "While your dodge is ready, you cannot be stunned or knocked back." | `w_unyield`; `effDodgeCd` already answers "is the dodge ready" |
+
+**Not cheap, but still not a balance call — they need a MECHANISM built, not a number chosen:**
+`necro_wither` / `necro_plague` / `necro_pest` (a rot state on enemies, which nothing has yet),
+`mon_master` ("every fourth unbroken strike hits everything around you" — a strike counter),
+`pir_deadly` ("the pistol pierces every enemy in a line").
+
+**Oliver's, because the card does not say enough to build it:**
+
+| passive | what is missing |
+|---|---|
+| `r_longshot` "+8% damage to enemies 7m+ away" | **the game has no units-per-metre.** Three anchors, three answers: `r_spike`'s "4m field" is `R=160` (40 u/m), the hero's own body is `h:44` (~24 u/m), and a Tumble described as "~5m" travels ~297 (~59 u/m). 7m is 168, 280 or 413 units depending on which you believe, and picking one is inventing the passive's strength. |
+| `r_closeq` "Enemies within 4m are knocked back by every shot" | same scale problem, plus the knockback amount |
+| `pir_swagger` "you move noticeably faster" | no number anywhere |
+| `pir_luck` "a pistol kill sometimes drops gold" | no rate |
+| `pir_greed` "every 500 gold sharpens your blade a little further" | already recorded as his |
+| `sky_high` "the higher you are, the harder you land it" | no curve |
+| `sky_armor` "nothing can hit you in the first moment after a jump" | no duration |
 
 **Scope, stated so nobody over-reads it:** this proves WIRED, not CORRECT. A passive read once and
 read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger

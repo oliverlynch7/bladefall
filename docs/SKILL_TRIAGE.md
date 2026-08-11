@@ -281,7 +281,7 @@ sharpens your blade a little further" names no amount), that one is his.
 
 ---
 
-## F. `bladedancer/Riposte:damage` FLAPS, and it can throw away a run's work
+## F. `bladedancer/Riposte:damage` FLAPPED — **and it was the GAME, not the bench. FIXED**
 
 Found 2026-08-11 by hitting it. A full `run-all.js` sweep reported
 `REGRESSION: skills:bladedancer/Riposte:damage` and `GATE: FAIL (1 new)` on a run whose only game
@@ -308,6 +308,54 @@ classes is measured at and would force a full re-baseline, which is not a thing 
 as anything else. **Next run should take this before any new skill work**: reproduce with repeated
 casts, and if the lunge-overshoot is confirmed, the fix belongs in the probe's geometry rather than in
 the skill.
+
+### Taken 2026-08-11. Reproduced in one launch — and the last sentence above is WRONG.
+
+`harness/probes/riposte.probe.js` runs the bench's exact rig 24 times and reads the geometry back at
+the instant the arc ran. bd_riposte lunges and swings inside one synchronous handler with nothing
+ticking in between, so `p.x/p.z` immediately after `useSkill()` returns **are** the coordinates
+`bdArc` used, and on a miss the dummy has not been knocked anywhere either — so the separation, the
+reach test and the cone test can all be recomputed exactly rather than inferred.
+
+**The overshoot is real, and it is the CHARGED lunge — 95 units at a dummy 60 away.** The uncharged
+lunge, 55, was never the problem and still lands.
+
+| trial | `p.bdRiposte` | lunge | separation at the swing | facing dot | arc hit |
+|---|---|---|---|---|---|
+| t=0 | not charged | 55 | 5 | **+1.0** (dead ahead) | yes, 62 dmg |
+| t=1 | charged | **95** | **35** | **−1.0** (dead behind) | **no, 0 dmg** |
+
+**9 of 24 trials failed.** `sep` 35, `cone` −1.0, `inReach` true and `inCone` false on every one:
+the player teleports *past* the target and swings a 1.25-radian cone in the opposite direction. Reach
+was never the issue — the cone was pointing the wrong way.
+
+**Why it FLAPPED rather than simply failing, which is the part that matters.** `p.bdRiposte` is
+stored by `hurtPlayer` (11149) when a parry lands, and three bladedancer skills the sweep casts
+before Riposte are parry stances (`bd_counter` 0.65s, `bd_mirror` 0.95s, `bd_perfect` 1.45s). Whether
+the grunt happens to swing inside one of those windows is a race, nothing clears the stored charge
+between skills, and so **whether the bench measures the working 55 or the broken 95 is decided by
+enemy AI timing in the previous skill's window.** That is the whole flap, and no amount of moving the
+bench's dummy would have fixed it — it would only have hidden a real bug behind a second distance.
+
+**So it was never a bench bug.** In the game this is worse than in the harness: it means a charged
+Riposte misses any foe closer than ~95 units. That is melee range — the range you counter-attack at,
+right after parrying the enemy standing on top of you. "A powerful counter slash" whiffed on exactly
+the foe it exists to answer, and only when it was charged, which is the only time it is worth casting.
+
+**Fixed by clamping the lunge so it cannot carry you past your own target** (`index.html:10236`), in
+the idiom `bd_steel` already uses to land you in front of one. The clamp only ever SHORTENS a lunge
+that would overshoot (`along < full`), so every distance that works today is untouched: a nearer foe
+wins, the stop is measured off the target's own radius, and a foe outside the lane you are lunging
+down is ignored. **No damage number, reach or lunge distance was changed** — those are Oliver's.
+
+Verified 0 of 24 failures after, facing dot **+1.0 on every trial**, and the uncharged path identical
+to before the change (lunge 55, separation 5, 62 damage). The charged path now lunges 23 and lands
+(separation 37, dot +1.0, 63 damage).
+
+**Known-bad, permanent** — `?ripostepast=1` skips the clamp and restores the overshoot, the same
+idiom as `?breakgap`, `?heroslot` and `?heroonerig`. Measured: **12 of 24 trials fail with the flag,
+0 without**, every failure charged, every one at separation 35 with the dot at −1.0. Both directions
+in one command and nobody has to break the repo to produce the failing one.
 
 ---
 

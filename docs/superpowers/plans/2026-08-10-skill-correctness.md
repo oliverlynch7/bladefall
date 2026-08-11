@@ -220,7 +220,25 @@ One line per pass, so the next run can see what has been taken without re-readin
 
 | pass | row | commit | how it was proven |
 |---|---|---|---|
-| 1 | **B — berserker Headlong flew forever** | this run | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
+| 2 | **F — bladedancer Riposte lunged past its own target** | this run | `harness/probes/riposte.probe.js`, 9/24 fail before → 0/24 after, plus a permanent `?ripostepast=1` known-bad at 12/24 |
+
+**Pass 2 took the row section F told it to take, and section F's own conclusion was wrong.** That row
+was filed as a BENCH bug — a flaky assertion to be settled by moving the probe's dummy — because a
+full sweep reported `REGRESSION: skills:bladedancer/Riposte:damage` on a run that had not touched a
+bladedancer skill, and a re-run immediately afterwards came back clean. Reproducing it found a real
+game bug: a **charged** Riposte lunges 95 units at a target 60 away, ends 35 units *behind* it, and
+swings its cone at −1.0 facing. The flap was the charge itself being a race — `p.bdRiposte` is stored
+by a parry that may or may not land inside an earlier skill's window, so the bench measured the
+working 55-unit lunge or the broken 95-unit one depending on enemy AI timing.
+
+**The lesson is the one this plan keeps re-learning from the other end: an intermittent failure is
+not evidence that the harness is at fault.** Section F reasoned from "the game code cannot have
+changed, therefore it is the bench" to "therefore the fix is in the bench", and the second step does
+not follow — a bench can be perfectly correct and still only *sometimes* reach the state that shows a
+bug. Had the recorded plan been followed literally, the dummy would have been moved to 120 units, the
+row would have gone quiet, and a melee counter that whiffs at melee range would have shipped with a
+green light over it.
 
 **Pass 1's proof did NOT come from `test-skills.js`, and that is the point worth carrying forward.**
 The harness reports `berserker/Charge:damage`, and the damage half is Oliver's design call — so the

@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.910.0-autopilot';
+const VERSION3D='1.911.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10233,7 +10233,27 @@ function bdArc(p,dmg,reach,arc,kb,stun){const fx=Math.sin(p.yaw),fz=Math.cos(p.y
 SKILL_FX.bd_counter=function(p){p.bdParryT=c2Passive('bd_patient')?.85:.65;p.bdMirrorDmg=0;p.bdPerfectDmg=0;p.atkTimer=.34;skillRing(p.x,p.z,'#dce7f5','#ffffff',95);addText(p.x,p.y+p.h+18,p.z,'PARRY READY','#dce7f5',true);SFX.dodge();};
 SKILL_FX.bd_twin=function(p,ok,am){const d=(p.weapon?p.weapon.dmg:10)*effPower(p)*am*(ok?1:OFFCLASS_MUL);p.atkTimer=.42;bdArc(p,d*.78,150,2.8,120);bdArc(p,d,175,2.45,260);skillRing(p.x,p.z,'#d7b4ff','#ffffff',175);SFX.slash();};
 SKILL_FX.bd_riposte=function(p,ok,am){const charged=!!p.bdRiposte,mul=charged?(c2Passive('bd_sharp')?4.4:3.3):1.75,d=(p.weapon?p.weapon.dmg:10)*effPower(p)*mul*am*(ok?1:OFFCLASS_MUL);
-  p.bdRiposte=0;p.atkTimer=.48;p.x+=Math.sin(p.yaw)*(charged?95:55);p.z+=Math.cos(p.yaw)*(charged?95:55);bdArc(p,d,charged?235:170,1.25,charged?430:240,charged?.35:0);skillRing(p.x,p.z,charged?'#ffd36a':'#c8d2df','#ffffff',charged?220:145);addText(p.x,p.y+p.h+18,p.z,charged?'RIPOSTE!':'QUICK CUT',charged?'#ffd36a':'#dce7f5',true);SFX.slash();};
+  p.bdRiposte=0;p.atkTimer=.48;
+  /* DO NOT LUNGE PAST YOUR OWN TARGET. The lunge lands BEFORE the swing, and bdArc is a 1.25-radian
+     cone measured from wherever the lunge left you — so a charged Riposte, which travels 95, sailed
+     straight over anything closer than that and swung backwards. Measured, not read
+     (harness/probes/riposte.probe.js, dummy at 60 units): uncharged travels 55, ends 5 units short
+     and lands its hit; charged travels 95, ends 35 units PAST the target with the facing dot at
+     -1.0, and misses completely. That is melee range — the range you counter-attack at, right after
+     parrying the enemy standing on top of you — so "a powerful counter slash" whiffed on exactly the
+     foe it exists to answer.
+     The clamp only ever SHORTENS a lunge that would carry you past someone (`along < full`), so
+     every distance that works today is untouched; a nearer foe wins, and the stop is measured off
+     its own radius the way bd_steel already lands you in front of its target. */
+  const lfx=Math.sin(p.yaw),lfz=Math.cos(p.yaw),full=charged?95:55;let step=full;
+  /* `?ripostepast=1` restores the overshoot, permanently, so riposte.probe.js keeps a known-bad it
+     can be watched to fail against without anybody having to break the repo to produce one — the
+     same idiom as ?breakgap, ?heroslot and ?heroonerig. */
+  for(const e of (/[?&]ripostepast=1/.test(location.search)?[]:combatTargets())){if(e.dead||!e.active)continue;const ax=e.x-p.x,az=e.z-p.z,along=ax*lfx+az*lfz;
+    if(along<=0||along>=full)continue;                                   // behind you, or further off than you travel
+    if(Math.abs(ax*lfz-az*lfx)>(e.r||0)+(p.r||14)+20)continue;           // not in the lane you are lunging down
+    step=Math.min(step,Math.max(0,along-((e.r||0)+22)));}
+  p.x+=lfx*step;p.z+=lfz*step;bdArc(p,d,charged?235:170,1.25,charged?430:240,charged?.35:0);skillRing(p.x,p.z,charged?'#ffd36a':'#c8d2df','#ffffff',charged?220:145);addText(p.x,p.y+p.h+18,p.z,charged?'RIPOSTE!':'QUICK CUT',charged?'#ffd36a':'#dce7f5',true);SFX.slash();};
 SKILL_FX.bd_step=function(p,ok,am){const d=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.45*am*(ok?1:OFFCLASS_MUL),ox=p.x,oz=p.z,ex=ox+Math.sin(p.yaw)*235,ez=oz+Math.cos(p.yaw)*235;
   for(const e of combatTargets()){if(e.dead||!e.active)continue;const dx=ex-ox,dz=ez-oz,l2=dx*dx+dz*dz,t=Math.max(0,Math.min(1,((e.x-ox)*dx+(e.z-oz)*dz)/(l2||1))),dd=Math.hypot(e.x-(ox+dx*t),e.z-(oz+dz*t));if(dd<48+e.r)hitEnemy(e,d,p,180,0,null);}
   p.dodgeTimer=.20;p.invuln=Math.max(p.invuln,.20);p.dashX=Math.sin(p.yaw);p.dashZ=Math.cos(p.yaw);p.bdFlowT=3;skillRing(ox,oz,'#b995e8','#ffffff',70);skillRing(ex,ez,'#e5d5ff','#ffffff',70);SFX.dodge();};

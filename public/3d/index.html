@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9980,6 +9980,14 @@ function openSkillTutorial(s){ if(!s||!G) return; meta.tut=meta.tut||{}; meta.tu
     <button class="bigbtn" id="tutGo">Got it — try it out</button></div>`);
   document.getElementById('tutGo').onclick=()=>{ if(Date.now()-_offerT<ARM_MS) return; SFX.pickup(); showGameUI(true); skillbarUpdate(); resumePlay(); };
 }
+/* AMBUSHER's three numbers, all read straight off the passive's own card (index.html:2056,
+   "next click within 3s +20% (once per 6s)") rather than chosen here - nothing about this passive
+   is a balance decision this file gets to make. One place each so retuning is one edit.
+   ?noambush=1 keeps the arm from ever firing. It is the permanent known-bad, in game code for the
+   same reason ?noparty and ?noping are: the arm is inside useSkill and a probe cannot undo it from
+   outside, and a known-bad you have to edit the repo to produce is one nobody re-runs. */
+const AMBUSH_MUL=1.20, AMBUSH_WINDOW=3, AMBUSH_ICD=6;
+const NO_AMBUSH = (function(){ try { return /[?&]noambush=1/.test(location.search); } catch(e){ return false; } })();
 function c2def(id){ return CLASS2[id||meta.classId]; }
 function c2ch(id){ const cs=classState(id||meta.classId); if(!cs.ch||typeof cs.ch!=='object') cs.ch={}; return cs.ch; }
 function c2Passive(pid){ const ch=c2ch(); for(const r of [3,5,7,9]) if(ch[r]===pid) return true; return false; }
@@ -10047,6 +10055,7 @@ function class2Innate(p,dt){
   if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
+  if((p._ambushT||0)>0){ p._ambushT=Math.max(0,p._ambushT-dt); }   // Ambusher: the 3s window closes on its own if you never swing
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
   const need=c2Passive('r_patient')?3.5:(c2Passive('r_quick')?2.0:3.0);
   p._noHitT=(p._noHitT||0)+dt;
@@ -10403,6 +10412,14 @@ function useSkill(i){
     G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
     if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
+    /* AMBUSHER (r_ambush): "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)."
+       Armed here rather than inside SKILL_FX.tumble/shadowstrike because both handlers are SHARED -
+       tumble is also nin_tumble, mon_roll and pir_tumble - so the arm belongs where the caster's
+       class and the skill it chose are both in scope. The 6s lockout starts on the ARM, which is
+       what makes "once per 6s" true however the window is spent: a proc needs an arm, and there
+       cannot be a second arm inside 6s. G.time idiom copied from Perfect Hunt's ICD at c2OnKill. */
+    if(meta.classId==='ranger'&&(s.fx==='r_tumble'||s.fx==='r_shadow')&&c2Passive('r_ambush')&&!NO_AMBUSH
+       &&(G.time-(p._ambushCdT||-99))>=AMBUSH_ICD){ p._ambushT=AMBUSH_WINDOW; p._ambushCdT=G.time; }
     if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;
     if(r==='refund'){ gainMana(p,manaSpent,false); return; }
@@ -11023,7 +11040,19 @@ const CLASS_BASIC = {
   ranger(p, e, dmg){
     const d = dXZ(p.x, p.z, e.x, e.z);
     const k = Math.max(0.75, Math.min(1.35, 0.75 + (d / 520) * 0.6));
-    return dmg * k;
+    let v = dmg * k;
+    /* AMBUSHER cashes in HERE and nowhere else. This hook is reached only from hitEnemy's
+       `src===G.p && !G._desig` branch, which is the game's own definition of a basic attack - so
+       "next click" cannot leak onto a skill or a charged release, and it covers both of the
+       Ranger's basic attacks (the bow shot and the point-blank knife swipe) without either of
+       their damage sites having to know the passive exists. Consumed on the hit that LANDS rather
+       than on the button press: a click that whiffs should not spend the window. */
+    if((p._ambushT||0)>0){
+      p._ambushT=0; v*=AMBUSH_MUL;
+      addText(e.x,e.y+e.h+18,e.z,'AMBUSH','#f7d79a');
+      try { burst(e.x,e.y+e.h*0.5,e.z,'#f7d79a',8); } catch(err){}
+    }
+    return v;
   },
 
   /* POWDER AND STEEL. Oliver's design: the flintlock is not loot, it is the class. It is always

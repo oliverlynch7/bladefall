@@ -223,6 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
+**Now 79 wired / 45 dead.** `r_ambush` was wired 2026-08-11 (Task 2 pass 4) and is struck from the
+table below; the counts in that table are printed by the audit on every gate run, so they cannot
+drift from the code.
+
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
 `classState(cls).ch[rank]`, and reaches the game only through `c2Passive('<id>')` — 124 call sites
@@ -246,7 +250,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
-| ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
+| ranger | ~~6~~ **5** / 8 | Longshot, Close-Quarters Archer, Escape Artist, ~~Ambusher~~ (**wired**), Elemental Archer, Bounty Hunter |
 | berserker | 5 / 8 | Heavy Hands, Reckless, Thick Hide, Bloodthirst, Unbreakable |
 | chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
@@ -366,6 +370,92 @@ hits; `bd_riposte` teleports through everything and only swings at the far end.
 Left alone deliberately. Changing a lunge distance or an arc is feel, and this document's own rule
 is that balance belongs to Oliver — but unlike sections C and D this one needs no number invented,
 because `bd_step` shows what the fix looks like in the same class.
+
+---
+
+## G. `ranger/Ambusher` is wired — **FIXED 2026-08-11**, and it settled two things on the way
+
+The first of section E's 46 to come off the list. Chosen over the ids above it in `KNOWN_DEAD` for a
+reason worth recording, because it blocks the two that a Ranger actually meets first.
+
+**THE GAME HAS NO SETTLED METRE, so `r_longshot` and `r_closeq` cannot be implemented without
+inventing a distance — which is a balance call and therefore Oliver's.** Both rank-3 Ranger passives
+are denominated in metres ("+8% damage to enemies **7m+** away", "Enemies within **4m** are knocked
+back"), and the file answers the conversion four different ways:
+
+| source | says | implies |
+|---|---|---|
+| `hero3d.js:45` + `:60` | `scale: 20`, and the flag is documented as "override the **units-per-metre** guess" | **20 u/m** |
+| player body `h:44` (`index.html:3640`) against a ~1.8m human | — | ~24 u/m |
+| `r_tumble` — "Roll back **~5m**" — against its code (560 u/s × 0.22s = 123 units) | — | ~25 u/m |
+| `index.html:14549` | "3 tall, at **34 units/metre**" (the building kit) | **34 u/m** |
+
+Two of those are explicit statements in the source and they disagree by 70%. At 20 u/m Longshot's
+threshold is 140 units — inside a sword's reach; at 34 u/m it is 238. That is the difference between
+a passive that is always on and one that is conditional, so picking a number here would be setting
+the passive's power, not implementing it. **For Oliver: one number, "how many units is a metre",
+unblocks both rank-3 Ranger passives at once.** Everything else on their cards is exact.
+
+`r_ambush`'s card, by contrast, names all three of its numbers ("next click within **3s** **+20%**
+(once per **6s**)"), so nothing about the fix is a design decision. They live as `AMBUSH_MUL`,
+`AMBUSH_WINDOW` and `AMBUSH_ICD` next to `c2def`, one place each.
+
+### Where it went, and why not into the two skill handlers
+
+- **Armed in `useSkill` (10421), not in `SKILL_FX.tumble`/`shadowstrike`.** Those two handlers are
+  SHARED — `tumble` is also `nin_tumble`, `mon_roll` and `pir_tumble` — so the arm belongs where the
+  caster's class and the skill it chose are both in scope. Same shape as the reaper's
+  `x_wraithwalk` arm on the line above it.
+- **Cashed in inside `CLASS_BASIC.ranger` (11050).** That hook is reached only from `hitEnemy`'s
+  `src===G.p && !G._desig` branch, which is the game's own definition of a basic attack — so "next
+  click" cannot leak onto a skill or a charged release, and it covers **both** of the Ranger's basic
+  attacks (the bow shot and the point-blank knife swipe at `9672`) without either damage site having
+  to know the passive exists.
+- **Consumed on the hit that LANDS, not on the button press.** A click that whiffs does not spend
+  the window. It is also the only reading that is measurable at a damage site.
+- **The 6s lockout starts on the ARM.** That makes "once per 6s" true however the window is spent: a
+  proc needs an arm, and there cannot be a second arm inside 6s.
+
+### THE HIT COMBO IS +20%, THE SAME SIZE AS THE THING BEING MEASURED
+
+The finding worth carrying to every future damage measurement, and it is section F's lesson one
+level further out. `hitEnemy` runs a hit combo (`index.html:10625`): **every hit adds 0.4% damage,
+capped at +20%, reset 2s after the last one.** So three identical strikes are not identical —
+measured on the unfixed game before it was controlled: **1103, 1107, 1112**, and back to exactly
+1103 once 3.5s of game time had passed.
+
+Ambusher's bonus is +20%. An uncontrolled combo could therefore have manufactured this passive or
+hidden it entirely, and the run would have had a confident number either way. `ambush.probe.js`
+zeroes `G.combo`/`G.comboT` before every strike, which makes each one the first hit of a fresh combo,
+and then **asserts the baseline spread is exactly 0** — a ratio is worth nothing if the thing it is a
+ratio of wobbles. Any later probe that compares two damage numbers has this exposure.
+
+### Proof, in the order it was taken
+
+`harness/probes/ambush.probe.js`, driving the game's own `useSkill` and `hitEnemy` and reading what
+the dummy's HP actually lost. Distance is pinned at 200 units in every trial because
+`CLASS_BASIC.ranger` already scales damage by range (0.75x–1.35x across 520 units) and Tumble is a
+*roll* — casting it between two measurements moves the body ~123 units and changes the damage by up
+to 14% with nothing to do with the passive.
+
+| trial | before the fix | after |
+|---|---|---|
+| baseline ×3, same pose | 1103 / 1107 / 1112 (spread 9) | **1103 / 1103 / 1103 (spread 0)** |
+| armed, then strike | 1.000× | **1.199×** |
+| the strike after that | 1.000× | 1.000× — spent on one click |
+| re-cast inside the 6s lockout | 1.000× | 1.000× — no re-arm |
+| armed, 3.5s passes, then strike | 1.000× | 1.000× — the window closed |
+| past 6s, cast again | 1.000× | **1.199×** |
+
+`ambushTAfterCast` was **0** before and **3** after. **`?noambush=1` is the permanent known-bad**, in
+game code for the same reason `?noparty` and `?noping` are — the arm is inside `useSkill` and a probe
+cannot undo it from outside. Run against it, exactly two assertions go red (`armedIsStronger`,
+`icdElapsedRearms`) and the baseline stays stable, which is a known-bad that discriminates rather
+than one that simply breaks the rig.
+
+Gate: `node tools/gate.js` → `GATE OK`, VERSION3D 1.913.0-autopilot. The passive audit moved
+**78 wired / 46 dead → 79 / 45**, ranger 6/8 → 5/8, and `r_ambush` came out of `KNOWN_DEAD` (checked
+in both directions, so leaving it in would have failed the gate).
 
 ---
 

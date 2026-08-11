@@ -223,6 +223,21 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
 | 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — `ranger/Ambusher` was never read** | this run | `harness/probes/ambush.probe.js`, watched to fail on the unfixed game BEFORE any code was written; `?noambush=1` known-bad; audit 78/46 → 79/45 |
+
+**Pass 4 was the first of section E's 46, and it was not the first id in `KNOWN_DEAD`.** The two
+above it (`r_longshot`, `r_closeq`) are the Ranger's rank-3 pair and both are denominated in METRES,
+which this codebase answers four different ways — `hero3d.js:45` documents `scale: 20` as "the
+units-per-metre guess" while `index.html:14549` says "34 units/metre", a 70% disagreement that is the
+difference between a Longshot threshold inside sword reach and one well outside it. Picking a number
+there sets the passive's power rather than implementing it, so it is Oliver's, and it is recorded as
+a one-number unblock in `docs/SKILL_TRIAGE.md` section G. **Skipping a row for a stated reason and
+taking the next is this loop working, not this loop stalling** — but a row skipped silently would
+have been re-found every run, which is why it is written down.
+
+The pass also turned up a hazard for every future damage measurement: **`hitEnemy`'s hit combo is
++0.4% per hit to a cap of +20%** (`index.html:10625`), the same size as the effect under test. Three
+identical strikes measured 1103 / 1107 / 1112. Section G has the numbers.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

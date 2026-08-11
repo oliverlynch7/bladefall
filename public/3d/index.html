@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.917.0-autopilot';
+const VERSION3D='1.918.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11303,6 +11303,7 @@ function hurtPlayer(dmg,sx,sz,by){
     G._rewUsed = (G._rewUsed||0) + 1;
     p.x = back.x; p.y = back.y; p.z = back.z;
     p.hp = Math.max(1, Math.round(back.hp));
+    if(c2Passive('chr_potent') && back.mana != null) p.mana = Math.max(p.mana||0, Math.min(p.maxMana||100, back.mana));   // Potent: the mana you had three seconds ago comes back with you
     p.vx = 0; p.vz = 0;
     p.invuln = Math.max(p.invuln||0, c2Passive('chr_ward') ? 3 : 1.2);   // Time Ward: three seconds untouchable
     if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
@@ -12572,15 +12573,21 @@ function update(dt){
   updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
-  /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood and how much health you had,
-     sampled a few times a second. Recorded for the Chronomancer ONLY - every other class pays
-     nothing for a mechanic it cannot use. */
+  /* THE CHRONOMANCER'S THREE SECONDS. A short ring of where you stood, how much health you had and
+     how much mana, sampled a few times a second. Recorded for the Chronomancer ONLY - every other
+     class pays nothing for a mechanic it cannot use.
+     Mana is in the sample because the rank-3 passive Potent gives it back ("Rewinding also restores
+     the mana you had three seconds ago"), and the only reason that passive did nothing for its whole
+     life is that this push did not record the field - measured, `past: null` on both halves of
+     harness/probes/chrpotent.probe.js. It is recorded unconditionally rather than behind
+     c2Passive('chr_potent') because the choice can be re-made mid-run and a ring that started
+     filling after the choice would hand back three seconds of nothing. */
   if(meta.classId==='pirate' && G.p._loaded === undefined) G.p._loaded = true;   // you arrive loaded
   if(meta.classId==='chronomancer' && !G.hub){
     p._rewT = (p._rewT||0) + dt;
     if(p._rewT >= 0.25){
       p._rewT = 0;
-      (p._rew = p._rew || []).push({ x:p.x, y:p.y, z:p.z, hp:p.hp, t:G.time });
+      (p._rew = p._rew || []).push({ x:p.x, y:p.y, z:p.z, hp:p.hp, mana:p.mana, t:G.time });
       while(p._rew.length > 14) p._rew.shift();       // 14 samples at 0.25s = 3.5s of history
     }
   }

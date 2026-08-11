@@ -103,7 +103,12 @@ const KNOWN_DEAD = new Set([
      launch, watched to fail against the shipped game. */
   'bsk_heavy', 'bsk_reckless', 'bsk_blood', 'bsk_tough',
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
-  'chr_potent', 'chr_slow', 'chr_echo', 'chr_freeze',
+  /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
+     restores the mana you had three seconds ago" is now read in the Rewind death save beside its two
+     already-wired siblings chr_ward and chr_haste, and the ring it reads from records mana at last.
+     Proven by harness/probes/chrpotent.probe.js — `past: null` on both halves before, the whole pool
+     back on the potent half after. */
+  'chr_slow', 'chr_echo', 'chr_freeze',
   /* mon_flow came OFF this list on 2026-08-11 (sub-project B Task 2, pass 8): "each hit shortens your
      dodge twice as much" now doubles the monk innate's own 0.35 in CLASS_BASIC.monk, proven by
      harness/probes/monkflow.probe.js — ratio 1 before, exactly 2 after. */

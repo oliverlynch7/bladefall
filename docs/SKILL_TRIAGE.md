@@ -223,8 +223,9 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 82 wired / 42 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back) and `mon_flow` (Flow) were wired 2026-08-11. See "Rows taken" at the end of this section.
+**Now 83 wired / 41 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow) and `chr_potent` (Potent) were wired 2026-08-11. See "Rows taken" at the
+end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -251,7 +252,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
-| chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
+| chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
 | skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
@@ -322,6 +323,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **berserker / Thick Hide** (`bsk_thick`, r5 a) — "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | 2026-08-11 | `harness/probes/thickhide.probe.js`, FOUR trials in one launch |
 | **paladin / Bounce Back** (`pal_bounce`, r7 a) — "Damage you block is returned to whoever dealt it." | 2026-08-11 | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before, 57 after, player took 20 in both |
 | **monk / Flow** (`mon_flow`, r5 a) — "Each hit shortens your dodge twice as much." | 2026-08-11 | `harness/probes/monkflow.probe.js`, A/B in one launch: ratio 1 before, exactly 2 after |
+| **chronomancer / Potent** (`chr_potent`, r3 a) — "Rewinding also restores the mana you had three seconds ago." | 2026-08-11 | `harness/probes/chrpotent.probe.js`, A/B in one launch: the ring recorded no mana at all before, the whole pool came back after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -426,6 +428,44 @@ literals to drift.
 absolute expectation would go stale the day 0.35 is retuned. Driven through `hitEnemy`, which is where
 `CLASS_BASIC[meta.classId]` is dispatched from (10670) — a probe that called the hook itself would be
 measuring its own copy. Monk's skill suite is 4 pass / 0 fail either side.
+
+**Potent was cheap for the shape Flow named — the thing it asks for was already in the file.** The
+Chronomancer's Rewind keeps a ring of the last 3.5 seconds (`p._rew`, 14 samples at 0.25s, 12583),
+and the death save at 11301 already reads `_rew[0]` and restores position and health from it. "The
+mana you had three seconds ago" is that same sample's mana, and **the only reason the passive could
+not be read was that the push did not record the field.** No number is invented and none of it is a
+balance decision.
+
+**Which "Rewinding" it means is settled by the file, not by judgement, and that mattered because
+there are two things called Rewind.** The rank-4 skill `chr_blink` is `SKILL_FX.m_blink` — the mage's
+teleport, which restores no state and does not go back three seconds. The death save is the one that
+does, and `chr_potent`'s two siblings at the neighbouring rank are already wired **inside it**:
+`chr_ward` ("for three seconds after a Rewind you cannot be harmed") at 11307 and `chr_haste`
+("rewinding resets every skill cooldown") at 11308. So this is the third line of a block that already
+had two of the same shape.
+
+| | ring's mana 3.5s ago | mana after the rewind | rewound? |
+|---|---|---|---|
+| control `chr_haste` (b-side of the same rank), before | **null — not recorded** | 0 | yes |
+| **`chr_potent`, before** | **null** | **0** | yes |
+| control `chr_haste`, after | 75 | **0** | yes |
+| **`chr_potent`, after** | 75 | **75** | yes |
+
+**The control staying at 0 after the fix is the assertion that says the restore is the PASSIVE and
+not the rewind.** The ring now records mana for every Chronomancer, so `past` reads 75 on both halves
+— and only the half that picked Potent gets it back. Both halves assert `rewound` off the game's own
+`G._rewUsed` counter, so a mana reading of 0 can never be a rewind that silently never happened.
+
+Two things the probe had to learn, both by being wrong first: the sample count must be read BEFORE
+the killing blow, because the death save does `p._rew.length = 0` on the same array the probe holds a
+reference to (the first run printed `samples: 0` beside an `oldestAgeS` of 3.53); and the history is
+built by running `update()` until the game has recorded it, never by fabricating a `_rew` array,
+which would be asserting on something the probe wrote. The restore is `Math.max` against the mana you
+already hold and clamped to `maxMana`, so a "restore" can never take mana away or overfill the pool.
+
+*Recorded unconditionally, and that is deliberate:* the push does not check `c2Passive('chr_potent')`,
+because the choice can be re-made mid-run and a ring that only started filling after the choice would
+hand back three seconds of nothing. One number per sample, for one class, 14 samples deep.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

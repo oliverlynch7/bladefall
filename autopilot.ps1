@@ -182,6 +182,9 @@ Non-negotiable:
   task, tick its steps, commit. When a plan has no unticked task left, move to the next one.
     1. docs/superpowers/plans/2026-08-10-verification-harness.md   (sub-project A - the harness)
     2. docs/superpowers/plans/2026-08-10-skill-correctness.md      (sub-project B - skills that lie)
+    3. docs/superpowers/plans/2026-08-11-multiplayer-experience.md  (sub-project D - co-op and PvP)
+  Plan 3 tasks 3-5 CHANGE HOW THE GAME PLAYS (party scaling, personal loot, pings). Oliver approved
+  them; land each as its own commit so any one can be reverted after he plays it.
   Task 8 of plan 1 is OLIVER'S and is already done on his machine; do not attempt it.
   Plan 2 Task 4 is a LOOP - one bug per pass, one commit per pass. Finishing a single pass and
   stopping is a complete unit of work, so never rush two fixes into one run.

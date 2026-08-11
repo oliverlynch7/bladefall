@@ -222,7 +222,8 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `2026-08-11` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — stormcaller Storm Ward was never read** | this run | `harness/probes/stward.probe.js`, A/B in one launch: shield 0 before, 4% of max HP after, control 0 both times |
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

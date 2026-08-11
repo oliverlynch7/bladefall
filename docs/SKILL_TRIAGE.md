@@ -223,6 +223,9 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
+**Now 79 wired / 45 dead**: `st_ward` (Storm Ward) was wired 2026-08-11, the first row of this
+section to be worked. See "Rows taken" at the end of this section.
+
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
 `classState(cls).ch[rank]`, and reaches the game only through `c2Passive('<id>')` — 124 call sites
@@ -243,7 +246,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 
 | class | dead / total | the dead ones |
 |---|---|---|
-| stormcaller | **7 / 8** | Conductor, Overcharge, Storm Ward, Charged, Amped, Static Master, Galvanize |
+| stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
@@ -257,8 +260,21 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | warrior, mage, ninja, warlock, beastmaster | 0 | — |
 
 **The Stormcaller is the worst-hit class in the game twice over** — section A had it missing three of
-its eight *skills*, and it is also missing seven of its eight *passives*. Between the two, almost
-nothing a Stormcaller chooses at any rank has ever affected the game.
+its eight *skills*, and it was also missing seven of its eight *passives* (six, since Storm Ward).
+Between the two, almost nothing a Stormcaller chooses at any rank has ever affected the game.
+
+**And its six remaining dead passives are all one missing mechanic, which is worth knowing before
+anyone takes them one at a time.** Conductor, Overcharge, Charged, Amped, Static Master and Galvanize
+each modify a lightning CHAIN — "arcs to a third enemy", "jumps twice as far", "each jump hits
+harder", "a chained enemy is stunned", "chains that find no second target strike the first twice".
+**There is no chain in the game.** `SKILL_FX.st_bolt` is `SKILL_FX.m_bolt` (10124), the mage's single
+projectile with `pierce:1` (9860–9868), and a grep for a chain/arc mechanic in combat returns nothing
+but scenery. So Chain Bolt's own text — "Rapid bolts that leap to a nearby foe (~2s, softer each)" —
+and the capstone's "your lightning arcs to more enemies" are both unimplemented as well. That makes
+it one root cause behind six passives, a skill description and a capstone, exactly the shape of
+section A. It is bigger than a passive-wiring row and it needs a falloff number the cards do not
+state ("softer each" names no amount), so it should be taken as its own piece of work with that one
+number put to Oliver.
 
 The Ranger is the surprise. It is a CORE class, not a variant, and it is the one hand-written kit in
 the dead column — six of eight, including both options at rank 3, both at rank 5, and both at rank 9.
@@ -277,6 +293,30 @@ takes an id off that Set.
 **Scope, stated so nobody over-reads it:** this proves WIRED, not CORRECT. A passive read once and
 read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger
 work; this is the floor under it, and the floor is where section A's nine dead skills were found.
+
+### Rows taken
+
+| row | commit | how it was proven |
+|---|---|---|
+| **stormcaller / Storm Ward** (`st_ward`, r5 b) — "Casting a skill grants a shield equal to 4% max HP." | 2026-08-11 | `harness/probes/stward.probe.js`, A/B in ONE launch |
+
+**Storm Ward needed no number invented and that is why it was taken first.** Three classes already
+carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
+`war_shield` (10412), skylancer `sky_guard` at 6% (10417) — so the fix is the fourth twin of an
+existing implementation rather than a new mechanic, and 4% is written on the card.
+
+Proven by casting it, not by reading it. The probe picks between the two options at the SAME rank in
+the SAME game, so the only difference between the two halves is which passive is chosen: with the
+a-side `st_momentum` picked the pool must stay 0, with `st_ward` it must hold 4% of max HP. Both
+casts report `onCd:true`, so a zero can never be a cast that silently never happened.
+
+| | control (`st_momentum`) | ward (`st_ward`) | 4% of max HP |
+|---|---|---|---|
+| before the fix | shield 0 | **shield 0** | 19 |
+| after | shield 0 | **shield 21, shieldT 3** | 21 |
+
+(Max HP differs between the two runs — the Arena rolls its own loadout — which is why the probe
+computes the expected number from the live `effMaxHp` rather than hard-coding one.)
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

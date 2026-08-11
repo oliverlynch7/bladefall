@@ -140,6 +140,24 @@ produced by Task 1 is the only source of targets.**
 - Modify: `public/3d/index.html`
 - Modify: `docs/SKILL_TRIAGE.md`
 
+### Passes completed
+
+| # | target | commit | proof |
+|---|---|---|---|
+| 1 | section A — nine skills with no handler at all (one ordering fault) | `5339f48` | `--classes stormcaller chronomancer ninja` 8/3 → 11/0; whole `SKILL_FX` table clean; photographed |
+| 2 | section B — berserker Headlong's timer never expired | this run | `harness/probes/headlong.probe.js`, watched to fail first; `_shot/out/hl-before.png` has no hero in it |
+
+**Pass 2 could not use Step 5's before/after as written, and that is worth saying rather than
+fudging.** The harness row is `berserker/Charge:damage`; the bug fixed is the runaway `_headlongT`
+timer, and Headlong deals no damage either way — whether it should is the design call section B
+hands to Oliver. So the row is expected to survive the fix, and a plan step that demands the row
+flip would either block a real fix or invite someone to "fix" the damage number, which is exactly
+what this plan's own constraints forbid. The substitute is stronger, not weaker: a purpose-built
+probe that drives the game's own handler and the game's own `update()`, watched to fail on the
+unfixed game in the same session. **Where a triage row contains more than one fault, the bar is a
+probe that fails before and passes after for the fault being fixed** — the suite row is the trigger
+for going looking, not the only permitted evidence.
+
 - [ ] **Step 1: Take the top unfixed row and confirm it still fails**
 
 ```bash

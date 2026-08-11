@@ -123,11 +123,11 @@ Proof, in the order it was taken:
 
 ---
 
-## B. Berserker Charge sends you flying, permanently
+## B. Berserker Charge sends you flying, permanently — **THE RUNAWAY TIMER IS FIXED**
 
 | class | skill | claims | its description | status |
 |---|---|---|---|---|
-| berserker | Charge | damage | "Rush forward, damaging and stunning in your path." | confirmed, unfixed |
+| berserker | Charge | damage | "Rush forward, damaging and stunning in your path." | runaway timer **fixed**; the damage half is Oliver's |
 
 Two faults, one skill. `SKILL_FX.bsk_charge` (18761) is the "HEADLONG" redesign: it sets
 `p._headlongT = 0.9` and an invuln window, and deals no damage and applies no stun.
@@ -143,6 +143,37 @@ The damage half is a **design call and belongs to Oliver**: the handler's own co
 "replac[es] a copy of the Warrior's Charge" and is deliberately a commit-you dash, so the honest
 question is whether the *description* is stale or the *contact damage* was dropped. The runaway
 timer is not a design call and should be fixed either way.
+
+### The timer, fixed and photographed
+
+`update()` now spends the timer it reads: `G.p._headlongT=Math.max(0,G.p._headlongT-dt)` inside the
+block that was already the only reader. Nothing else changed, and the dash itself is byte-for-byte
+the same distance — measured 684 units before and 684 after, which is the authored 0.9s × 760 u/s.
+
+Proven by `harness/probes/headlong.probe.js`, which casts the game's own `SKILL_FX.bsk_charge` and
+then runs the game's own `update()`, sampling the timer and the per-tick displacement in three
+windows. Watched to FAIL first, on the unfixed game, which is why it is believable:
+
+| | timer at cast | after the 0.9s dash | at 2.0s | at 3.0s | travel in the 3rd second |
+|---|---|---|---|---|---|
+| before | 0.9 | **0.9** | **0.9** | **0.9** | **1482 units** |
+| after | 0.9 | 0 | 0 | 0 | **0** |
+
+The pictures say it more plainly than the numbers. `_shot/out/hl-before.png` is a frame **with no
+hero in it** and `Deaths 1` on the HUD — the body had flown off the Proving Ground and been caught
+by the fell-out-of-the-world rescue, repeatedly. `hl-after.png` at the identical destination has the
+hero standing in the middle of the frame, alive, `Deaths 0`.
+
+**This does not clear the `berserker/Charge:damage` row and is not meant to.** Headlong deals no
+damage and applies no stun by design-or-omission, and which of those it is remains Oliver's call.
+What is now gone is the part that was never anybody's call: a berserker who pressed Charge once
+could not play the rest of the run.
+
+**It also means every berserker verdict the bench has ever produced was taken on a departing body.**
+The bench casts the kit in slot order, Charge is rank 4 = slot 1, and `mkDummy()` spawns each fresh
+dummy at `p.x, p.z-60` — so from slot 2 onward the target was planted next to a hero leaving at 760
+u/s and left behind within a tick. Those rows are not re-listed here as bugs, because they were
+never measurements; the next full sweep re-takes them honestly for the first time.
 
 ---
 

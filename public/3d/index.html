@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.908.0-autopilot';
+const VERSION3D='1.909.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12341,8 +12341,16 @@ function update(dt){
      Returning here freezes enemies, projectiles, hazards and the player together - the render loop
      is separate and keeps drawing, so the editor camera still flies. */
   if(_edOpen()) return;
-  /* Headlong drives you forward and refuses to be steered - the whole point of it. */
+  /* Headlong drives you forward and refuses to be steered - the whole point of it.
+     AND IT HAS TO END. _headlongT appears four times in this file: set once by SKILL_FX.bsk_charge
+     (18783) and read three times right here. Nothing decremented it, so the first Headlong of a run
+     was permanent - vx/vz pinned to zero and the body driven 760 units/second in a straight line
+     until the run ended, steering ignored, the hero leaving the fight and being caught by the
+     fell-out-of-the-world rescue over and over. Measured before the fix at --scene arena:flat: the
+     timer still read 0.9 three seconds after a 0.9-second dash, and the body covered 1482 more
+     units in that third second. Proof lives in harness/probes/headlong.probe.js. */
   if((G.p._headlongT||0)>0){
+    G.p._headlongT=Math.max(0,G.p._headlongT-dt);
     G.p.x += (G.p._headlongX||0)*760*dt;
     G.p.z += (G.p._headlongZ||0)*760*dt;
     G.p.vx=0; G.p.vz=0;

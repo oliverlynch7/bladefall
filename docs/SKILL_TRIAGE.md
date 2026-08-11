@@ -223,8 +223,8 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 81 wired / 43 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide) and `pal_bounce`
-(Bounce Back) were wired 2026-08-11. See "Rows taken" at the end of this section.
+**Now 82 wired / 42 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back) and `mon_flow` (Flow) were wired 2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -247,7 +247,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | class | dead / total | the dead ones |
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
-| monk | 6 / 8 | Iron Body, Inner Fire, Flow, Killer Focus, Still Water, Master Striker |
+| monk | 5 / 8 | Iron Body, Inner Fire, Killer Focus, Still Water, Master Striker (~~Flow~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 6 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Ambusher, Elemental Archer, Bounty Hunter |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
@@ -321,6 +321,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **stormcaller / Storm Ward** (`st_ward`, r5 b) — "Casting a skill grants a shield equal to 4% max HP." | 2026-08-11 | `harness/probes/stward.probe.js`, A/B in ONE launch |
 | **berserker / Thick Hide** (`bsk_thick`, r5 a) — "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | 2026-08-11 | `harness/probes/thickhide.probe.js`, FOUR trials in one launch |
 | **paladin / Bounce Back** (`pal_bounce`, r7 a) — "Damage you block is returned to whoever dealt it." | 2026-08-11 | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before, 57 after, player took 20 in both |
+| **monk / Flow** (`mon_flow`, r5 a) — "Each hit shortens your dodge twice as much." | 2026-08-11 | `harness/probes/monkflow.probe.js`, A/B in one launch: ratio 1 before, exactly 2 after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -401,11 +402,30 @@ smoothed over:* 100 incoming computes to about 49 blocked and the attacker lost 
 returned hit goes through the game's own `hitEnemy` and is processed like any other player-dealt
 damage. Paladin's skill suite is 7 pass / 0 fail either side.
 
-**`ch[3]` has to be pinned to the b-side or this probe reports a false zero for BOTH halves**, which
-is worth keeping because it is a trap for any future paladin probe: the a-side is `pal_thick`, "the
-first hit of every fight deals no damage at all", and hurtPlayer honours it at 11179 by RETURNING
+**Bounce Back's probe has to pin `ch[3]` to the b-side or it reports a false zero for BOTH halves**,
+which is worth keeping because it is a trap for any future paladin probe: the a-side is `pal_thick`,
+"the first hit of every fight deals no damage at all", and hurtPlayer honours it at 11179 by RETURNING
 before the brace is ever reached. `cheatRank10All` takes a-sides, so the first hit of each trial would
 be swallowed whole.
+
+**Flow was the cheapest honest row in this section, and it is worth naming why so the next run can
+look for that shape first.** The thing it doubles already exists as a number in the file: the monk's
+own innate — `CLASS_BASIC.monk` (11103), whose comment is *also* headed FLOW — does
+`p.dodgeCdT -= 0.35` on every connecting hit, and the passive's whole sentence is "twice as much".
+So the fix is `base * 2` off the innate's own constant, which means nothing is invented, nothing is a
+balance decision, and a future retune of 0.35 carries the passive with it instead of leaving two
+literals to drift.
+
+| | dodge cooldown cut by one hit | ratio |
+|---|---|---|
+| control `mon_focused` (b-side of the same rank), before and after | 0.35 | — |
+| **`mon_flow`, before** | **0.35** | **1** |
+| **`mon_flow`, after** | **0.70** | **2** |
+
+**The assertion is the RATIO, not the number**, because the sentence promises a doubling and an
+absolute expectation would go stale the day 0.35 is retuned. Driven through `hitEnemy`, which is where
+`CLASS_BASIC[meta.classId]` is dispatched from (10670) — a probe that called the hook itself would be
+measuring its own copy. Monk's skill suite is 4 pass / 0 fail either side.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

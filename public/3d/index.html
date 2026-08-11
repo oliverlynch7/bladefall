@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.916.0-autopilot';
+const VERSION3D='1.917.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11101,7 +11101,13 @@ const CLASS_BASIC = {
   /* FLOW. Every connecting attack shaves your dodge cooldown. The only class that gets MORE mobile
      the more it fights, which is the opposite of how every other melee class works. */
   monk(p, e, dmg){
-    if((p.dodgeCdT || 0) > 0) p.dodgeCdT = Math.max(0, p.dodgeCdT - 0.35);
+    /* FLOW, the rank-5 passive of the same name, doubles this — "each hit shortens your dodge twice
+       as much". Wired 2026-08-11; it was one of the 43 in docs/SKILL_TRIAGE.md section E that the
+       menu offers, describes and no code ever read. The number is the innate's own 0.35, so nothing
+       is invented and nothing has to be retuned in two places: change the base and the passive
+       follows. */
+    const base = 0.35, cut = c2Passive('mon_flow') ? base * 2 : base;
+    if((p.dodgeCdT || 0) > 0) p.dodgeCdT = Math.max(0, p.dodgeCdT - cut);
   },
 
   /* OVERCHARGE. Basic attacks spend mana to hit harder, automatically, while you have it to spend.

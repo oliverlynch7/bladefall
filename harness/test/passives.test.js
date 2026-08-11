@@ -104,7 +104,10 @@ const KNOWN_DEAD = new Set([
   'bsk_heavy', 'bsk_reckless', 'bsk_blood', 'bsk_tough',
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
   'chr_potent', 'chr_slow', 'chr_echo', 'chr_freeze',
-  'mon_iron', 'mon_fire', 'mon_flow', 'mon_killer', 'mon_still', 'mon_master',
+  /* mon_flow came OFF this list on 2026-08-11 (sub-project B Task 2, pass 8): "each hit shortens your
+     dodge twice as much" now doubles the monk innate's own 0.35 in CLASS_BASIC.monk, proven by
+     harness/probes/monkflow.probe.js — ratio 1 before, exactly 2 after. */
+  'mon_iron', 'mon_fire', 'mon_killer', 'mon_still', 'mon_master',
   /* st_ward came OFF this list on 2026-08-11 (sub-project B Task 2, pass 4): "casting a skill
      grants a shield equal to 4% max HP" is now read in useSkill next to its three identical twins,
      proven by harness/probes/stward.probe.js failing before and passing after. */

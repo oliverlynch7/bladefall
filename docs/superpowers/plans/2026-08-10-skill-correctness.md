@@ -222,7 +222,28 @@ One line per pass, so the next run can see what has been taken without re-readin
 |---|---|---|---|
 | 1 | **B — berserker Headlong flew forever** | `6e37943` | `harness/probes/headlong.probe.js`, fail before / pass after, plus an A/B render |
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
-| 3 | **F — the bench itself flapped** | this run | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 3 | **F — the bench itself flapped** | `a724d69` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
+| 4 | **E — `st_ward` (Storm Ward) was never read** | this run | `harness/probes/stward.probe.js`, A/B in one launch: `sameEitherWay:true` before, `21 / 0` after; `KNOWN_DEAD` 46 → 45 |
+
+**Pass 4 opened section E, and choosing WHICH row mattered more than the fix did.** The obvious
+target was the Stormcaller — seven dead passives of eight, the worst-hit class in the game. Costing
+it first is what stopped it being started: six of those seven modify a **chain** that does not exist
+anywhere in the game (`SKILL_FX.st_bolt` is the mage's single-target bolt; nothing in `public/`
+chains, arcs or leaps between targets). So the Stormcaller is one mechanic, not seven passives, and
+it belongs to a run that can finish it. Full measurement in `docs/SKILL_TRIAGE.md` section E.
+
+`st_ward` was taken instead because it is the one row in that class that needs neither a new
+mechanic nor an invented number: mage `m_ward` and warlock `war_shield` implement the identical
+sentence at the identical 4%, eight lines apart in the same function. **A row's loudness is not its
+readiness** — the same lesson pass 1 recorded from the other direction, where the loudest row
+(berserker Charge) contained one fault the harness could see and one it never can.
+
+**And the origin of all 46 is now known**, which was an open question when section E was written:
+`81ea3fc` rewrote twenty-five passive descriptions and stripped the placeholder `+12% damage`
+multipliers that implemented the old ones, in the same commit, without landing the new mechanics.
+The orphaned comments are still in `effPower`. The rule that falls out — **a description rewrite and
+its implementation ship together, or the game ships the promise without the thing** — is the same
+fault as section A and section F wearing different clothes.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

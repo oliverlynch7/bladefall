@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.912.0-autopilot';
+const VERSION3D='1.913.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10417,6 +10417,15 @@ function useSkill(i){
       if(c2Passive('sky_guard')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.06));p.shieldT=4;}
       if(classState('skylancer').rank>=10){p.jumps=Math.max(0,p.jumps-1);p.vy=Math.max(p.vy,-20);addText(p.x,p.y+p.h+18,p.z,'SKY MASTER','#c9f3ff',true);}
     }
+    /* STORM WARD — "Casting a skill grants a shield equal to 4% max HP." (stormcaller r5 b).
+       The THIRD copy of one idiom, not a new mechanic: mage m_ward two lines above and warlock
+       war_shield seven lines above carry the identical sentence and the identical 4%, so nothing
+       here is a balance number anyone invented. It was offered by the choice menu, described on its
+       own card, and read by no code at all — one of the 46 in docs/SKILL_TRIAGE.md section E, left
+       inert when 81ea3fc stripped the placeholder "+12% damage" multipliers out of effPower and the
+       rewritten mechanics never landed. Gated on `fx` like both siblings, so a skill with no handler
+       cannot pay out a shield for doing nothing. */
+    if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
     let cd=s.cd*(1-effCdr(p)); if(meta.classId==='beastmaster'&&(c2Passive('bst_swift')||c2Passive('bst_handler')))cd*=.88;
     if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))p.beastSpeedT=2;
     if(meta.classId==='beastmaster'&&classState('beastmaster').rank>=10)p.beastBasicEmpower=1;

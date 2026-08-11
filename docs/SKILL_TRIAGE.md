@@ -223,6 +223,45 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
+**Now 45 dead: `st_ward` was wired 2026-08-11** (see the worked-rows table at the end of this
+section). The audit prints the live count on every gate run, so this paragraph is the only place in
+this document that can go stale.
+
+### WHERE THE 46 CAME FROM — one commit, and it was not a mistake, it was an unfinished job
+
+Found 2026-08-11 by `git log -L` over `effPower`, and it settles a question this section left open.
+`81ea3fc` ("Passives batch four", 2026-08-04, Oliver's own supervised session) **rewrote twenty-five
+passive descriptions** away from the reskin they had been — its own message says "Monk and
+Stormcaller were the last of the bad ones - four '+12% damage' apiece under different names" — and
+**stripped the placeholder multipliers that implemented the old text** out of `effPower`. Its regex
+took the lines with them:
+
+```
+-    if(c2Passive('mon_fire'))v*=1.12; if(c2Passive('mon_killer'))v*=1.12; if(c2Passive('mon_master'))v*=1.12;
+-    if(c2Passive('st_conductor'))v*=1.10; if(c2Passive('st_overcharge'))v*=1.12; if(c2Passive('st_amped'))v*=1.12; …
+-    if(!p.onGround){v*=1.10;if(c2Passive('sky_high'))v*=1.15;if(c2Passive('sky_eye'))v*=1.12;}
+```
+
+The new mechanics the commit message describes in full — "Overcharge arcs to a third enemy",
+"Killer Focus triples the first strike after a dodge", "Sky Armor makes the moment after a jump
+untouchable" — **were never implemented**. The blank lines and orphaned comments are still there at
+`index.html:3708-3712`, `3714`, `3727`, `3741`, `3744`, `3747`: `// Holy Power`, `// Burning Light`,
+`// Blessed Blade` with no code under them.
+
+Three things follow, and they change how the rest of this section should be read:
+
+- **These descriptions are Oliver's authored design intent, not legacy text**, and his own commit
+  message states the intent for each one. Implementing them is delivering a promise he wrote, which
+  is why this section says these are not balance calls. The four rows this document does send back
+  to him (sections B, C, D and Riposte's reach) are the ones where no such statement exists.
+- **The passives were STRONGER before the rewrite than they are now**, because a `+12%` that does
+  nothing is a downgrade from a `+12%` that does something. Eleven classes quietly lost damage on
+  2026-08-04 and nothing reported it — the audit that would have is the one built six days later.
+- **A description rewrite and its implementation must land in the same commit**, or the game ships
+  the promise without the thing. That is the same shape as section A (nine aliases written above
+  their definitions) and section F (a bench that read one list and cast from another): in all three
+  the two halves were separately correct and never checked against each other.
+
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
 `classState(cls).ch[rank]`, and reaches the game only through `c2Passive('<id>')` — 124 call sites
@@ -283,6 +322,63 @@ how a class plays, which is Oliver's territory — but every one of the 46 has a
 stating its intent, so implementing it is delivering the promise already on the card rather than
 inventing a number. Where a description does not say enough to implement (`Greed` — "every 500 gold
 sharpens your blade a little further" names no amount), that one is his.
+
+### THERE IS NO CHAIN LIGHTNING IN THE GAME — and six of the Stormcaller's seven dead passives modify it
+
+Measured 2026-08-11 while picking the first row to work, and it is the reason the obvious target —
+the worst-hit class — was NOT taken first.
+
+The Stormcaller's path is called Tempest, "Chain lightning and storms — spread the shock" (1962). Its
+rank-2 skill is **Chain Bolt**, "Rapid bolts that leap to a nearby foe (~2s, softer each)". And
+`SKILL_FX.st_bolt = SKILL_FX.m_bolt` (10124) — the mage's **single** Elemental Bolt (9860), one
+projectile with `pierce:1` that hits one target and stops. Nothing in `public/` contains a chain,
+jump, arc or leap between targets: `chainTo`, `chainN`, `chainHit`, `arcTo`, `leapTo` all return
+nothing, and the projectile update has no re-target step. The class's defining mechanic does not
+exist.
+
+That is why six of its seven dead passives cannot be wired one at a time:
+
+| passive | its card | needs |
+|---|---|---|
+| Conductor | "Wet, frozen or shocked enemies chain to everything near them." | a chain |
+| Overcharge | "Your lightning arcs to a third enemy as well as a second." | a chain, with a jump count |
+| Charged | "Your chain jumps twice as far between targets." | a chain, with a jump range |
+| Amped | "Each jump in a chain hits harder than the last, not weaker." | a chain, with per-jump falloff |
+| Static Master | "A chained enemy is briefly stunned by the jolt." | a chain |
+| Galvanize | "Chains that find no second target strike the first one twice." | a chain |
+
+**So the Stormcaller is ONE piece of work, not seven**, and the piece is a mechanic rather than a
+passive: implement the chain on `st_bolt` (which its own description already promises, so it is
+section-A shaped — a skill that lies — not a balance call), and the six passives become six small
+modifiers of it. Its seventh, `st_ward`, is unrelated and was taken first precisely because it is
+not entangled: see below.
+
+**Not started, and deliberately.** Chain lightning is a new combat mechanic in the game's hottest
+loop, it changes how a class plays, and per `docs/VISION.md` a run that cannot finish and verify a
+thing should not start it. Recorded here so the next run costs it correctly instead of rediscovering
+it. Worth Oliver's eye first for the same reason the Treasure Sprint conversion is: this is real
+work, not a bug fix.
+
+### Rows worked, one commit each
+
+| row | commit | how it was proven |
+|---|---|---|
+| **`st_ward` — Storm Ward (stormcaller r5 b)**, "Casting a skill grants a shield equal to 4% max HP" | this run | `harness/probes/stward.probe.js` — A/B in one launch, `sameEitherWay:true` before and `21 / 0` after |
+
+`st_ward` was chosen over louder rows because it needs no new mechanic and no invented number: **the
+identical sentence is implemented twice already** — mage `m_ward` (10404) and warlock `war_shield`
+(10412), both `Math.round(effMaxHp(p)*.04)` with `shieldT=3`, and skylancer `sky_guard` (10417) is
+the same shape at 6%. The fix is a third copy of a working idiom in the same function, gated on `fx`
+like both siblings so a skill with no handler cannot pay out a shield for doing nothing.
+
+**The A/B is the bar, and the absolute is not.** "Is there a shield after the cast" would pass
+against any other protection in the room — the class's rank-10 tier, a skill, a trinket. The probe
+casts the same skill twice in ONE launch and changes only which rank-5 option is chosen, Momentum
+against Storm Ward, so a fix that merely gives everyone a shield cannot satisfy it. Watched to fail
+first: against the unfixed game both trials reported `shield 0`, `onCd:true`, `sameEitherWay:true` —
+the cast plainly happened and the passive plainly changed nothing (`_shot/out/stward-before.png`).
+After: `withWard 21 (shieldT 3)`, `withoutWard 0`, on a 535 max-HP body where 4% is 21
+(`stward-after.png`).
 
 ---
 

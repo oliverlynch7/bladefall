@@ -2,7 +2,9 @@
 
 Sub-project B, Task 1. Every row below is a measurement, not a reading: taken from
 `harness/report.json` on a bench that was rebuilt this run because the old one was measuring a
-state the game does not allow. Nothing here is fixed yet.
+state the game does not allow.
+
+**Status: section A is fixed. B, C and D are open, and C and D are Oliver's.**
 
 Reproduce any single row with:
 
@@ -54,7 +56,7 @@ only by less than the drift is reported unproven, and the drift is measured fres
 
 ---
 
-## A. Nine skills have no handler at all — ONE bug, one ordering fault
+## A. Nine skills had no handler at all — ONE bug, one ordering fault — **FIXED**
 
 **This is the largest thing in this document and it is the closest match to Oliver's report.**
 `SKILL_FX` is built by aliasing, and five alias lines sit *above* the definitions they copy, so each
@@ -74,15 +76,15 @@ mana, spends the cooldown, plays no effect and does nothing at all. Measured liv
 
 | class | skill | rank | its description | in the default build? | status |
 |---|---|---|---|---|---|
-| ninja | Shadow Step | r4 a | "Dash through shadow and become briefly untouchable." | **yes** | confirmed, unfixed |
-| chronomancer | Time Warp | r6 a | "Implode foes inward and deal damage." | **yes** | confirmed, unfixed |
-| stormcaller | Ball Lightning | r6 a | "A crackling orb that pulls foes in and zaps them." | **yes** | confirmed, unfixed |
-| necromancer | Death Grip | r6 b | "A skeletal grip implodes enemies inward and deals damage." | no (path B) | confirmed, unfixed |
-| stormcaller | Lightning Lance | r2 b | "A piercing bolt through every foe in a line." | no (path B) | confirmed, unfixed |
-| stormcaller | Chain Reaction | r8 b | "A massive electric explosion around your target." | no (path B) | confirmed, unfixed |
-| pirate | Powder Keg | r8 b | "Drop a trap that damages and snares." | no (path B) | confirmed, unfixed |
-| chronomancer | Time Lance | r2 b | "A piercing lance through every foe." | no (path B) | confirmed, unfixed |
-| chronomancer | Singularity | r8 b | "A massive temporal explosion." | no (path B) | confirmed, unfixed |
+| ninja | Shadow Step | r4 a | "Dash through shadow and become briefly untouchable." | **yes** | **fixed** |
+| chronomancer | Time Warp | r6 a | "Implode foes inward and deal damage." | **yes** | **fixed** |
+| stormcaller | Ball Lightning | r6 a | "A crackling orb that pulls foes in and zaps them." | **yes** | **fixed** |
+| necromancer | Death Grip | r6 b | "A skeletal grip implodes enemies inward and deals damage." | no (path B) | **fixed** |
+| stormcaller | Lightning Lance | r2 b | "A piercing bolt through every foe in a line." | no (path B) | **fixed** |
+| stormcaller | Chain Reaction | r8 b | "A massive electric explosion around your target." | no (path B) | **fixed** |
+| pirate | Powder Keg | r8 b | "Drop a trap that damages and snares." | no (path B) | **fixed** |
+| chronomancer | Time Lance | r2 b | "A piercing lance through every foe." | no (path B) | **fixed** |
+| chronomancer | Singularity | r8 b | "A massive temporal explosion." | no (path B) | **fixed** |
 
 Only the first three sit in the rank-10 path-A build every class defaults to, which is why the suite
 reports three and the table lists nine — the other six are one choice away and equally dead.
@@ -92,8 +94,26 @@ cases one of the three is in the default kit. Both classes are wholly `m_*` resk
 they are hit hardest: every skill either class has is an alias, and the alias lines came first.
 
 **It is one fix and it is an ordering fix, not nine handler rewrites** — the bodies all exist and
-are correct. Any fix must be verified by the `dead handler` assertion, which has been watched to
-fail nine times and is therefore believable.
+are correct.
+
+**Fixed 2026-08-10 (`autopilot-merged`), as a LATE ALIASES block placed after the last of the five
+definitions and before `useSkill`.** Re-binding there rather than moving the five offending lines is
+deliberate: it is purely additive, so it cannot disturb an ordering something else depends on, and
+it is one place to look when the next alias gets written above its definition. Nothing about the
+bodies changed — each name gets exactly the function its original line asked for.
+
+Proof, all measured on the real game, not read:
+- Before: three full 16-class sweeps each reported `dead handler` for ninja/Shadow Step,
+  chronomancer/Time Warp and stormcaller/Ball Lightning.
+- After: `Object.keys(SKILL_FX).filter(k => typeof SKILL_FX[k] !== 'function')` returns **`[]`** —
+  which is the only check that covers the six path-B skills, since the suite's default rank-10
+  path-A build never reaches them.
+- `node harness/test-skills.js --classes ninja chronomancer stormcaller necromancer pirate` →
+  **18 pass, 0 fail**, where three of those classes failed before.
+- Photographed: casting Time Warp as a rank-10 Chronomancer renders the implosion, pops a **174**
+  damage number over the target and puts slot 3 on a 9.1s cooldown
+  (`_shot/out/timewarp-after.png`). Probed in the same launch, the dummy went 100000 → 99822. Before
+  the fix that cast spent the mana and the cooldown and produced nothing at all.
 
 ---
 

@@ -140,6 +140,24 @@ produced by Task 1 is the only source of targets.**
 - Modify: `public/3d/index.html`
 - Modify: `docs/SKILL_TRIAGE.md`
 
+### Pass 1 — 2026-08-10 — triage section A, the nine skills with no handler. DONE.
+
+One bug, one commit, and it is one bug rather than nine because all nine have the same cause: five
+`SKILL_FX` alias lines execute above the definitions they copy, so each stores `undefined`, and
+`useSkill`'s `fx ? fx(...) : null` then spends the mana and the cooldown and does nothing.
+
+Steps as run: (1) the row was confirmed failing in three consecutive full sweeps — ninja/Shadow
+Step, chronomancer/Time Warp, stormcaller/Ball Lightning, each reported `dead handler`. (2) The
+two-list trap cannot apply here by construction: the assertion reads `s.fx` from `c2CurSkills()`,
+the list `useSkill` casts from, and looks it up in the same `SKILL_FX` table `useSkill` uses.
+(3) Mechanism found and stated before editing; the alias/definition line numbers are in
+`docs/SKILL_TRIAGE.md` section A. (4) `node tools/gate.js` → `GATE OK`. (5) Failing before, passing
+after, on five classes; and `dead` is now `[]`, which is the only check covering the six path-B
+skills the default build never reaches. Photographed as well.
+
+**The next pass takes triage section B** (berserker Charge's `_headlongT`, which nothing
+decrements). C and D are Oliver's.
+
 - [ ] **Step 1: Take the top unfixed row and confirm it still fails**
 
 ```bash

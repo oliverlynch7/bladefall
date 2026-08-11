@@ -1025,7 +1025,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.907.0-autopilot';
+const VERSION3D='1.908.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10308,6 +10308,40 @@ SKILL_FX.r_spike=function(p,ok,am){ const w=p.weapon, ca=p.clearAim?1.2:1, R=160
   (G.spikefields=G.spikefields||[]).push({x:tx,z:tz,y:sy,r:R,life:5.0,max:5.0,tick:0,dmg:Math.max(6,(w?w.dmg:10)*effPower(p)*0.5*am),hitSet:[]});
   skillRing(tx,tz,'#cfd6df','#8b93a8',R+20); SFX.dodge();
   addText(tx,40+sy,tz,'SPIKE TRAP','#cfd6df',true); };
+/* ── LATE ALIASES: nine skills that had no handler at all ──────────────────────────────────────
+   SKILL_FX is built by aliasing, and five alias lines run ABOVE the definitions they copy, so each
+   one silently stored `undefined`:
+
+     10078  necro_grip = m_gravity                              m_gravity  defined 10148
+     10080  nin_step   = x_step                                 x_step     defined 10153
+     10084  st_lance = m_beam, st_orb = m_gravity,              m_beam     defined 10146
+            st_overload = m_overload                            m_overload defined 10150
+     10125  pir_spike  = r_spike                                r_spike    defined 10305
+     10129  chr_beam = m_beam, chr_gravity = m_gravity,
+            chr_overload = m_overload
+
+   useSkill then does `const fx=SKILL_FX[s.fx], r = fx ? fx(...) : null`, so casting one of these
+   spent the mana, spent the cooldown, played nothing and did nothing - which is Oliver's report
+   after PvP almost word for word ("some of them said they would do damage and then didn't").
+   Three sit in the rank-10 build every class defaults to: ninja Shadow Step, chronomancer Time
+   Warp, stormcaller Ball Lightning. The Stormcaller and the Chronomancer were each missing THREE
+   of their eight skills, because both classes are wholly m_* reskins - every skill either one has
+   is an alias, and the alias lines came first.
+
+   Re-bound HERE rather than by moving those five lines, deliberately: this is purely additive, so
+   it cannot disturb an ordering something else already depends on, and it is one place to look
+   when the next alias is written above its definition. Nothing about the bodies changed - each
+   name gets exactly the function its original line asked for.
+
+   Measured, not read: harness/test-skills.js asserts `typeof SKILL_FX[s.fx] === 'function'` for
+   every skill in every class, and that assertion has been watched to fail on exactly these nine. */
+SKILL_FX.necro_grip = SKILL_FX.m_gravity;
+SKILL_FX.nin_step   = SKILL_FX.x_step;
+SKILL_FX.st_lance   = SKILL_FX.m_beam;     SKILL_FX.st_orb      = SKILL_FX.m_gravity;
+SKILL_FX.st_overload= SKILL_FX.m_overload;
+SKILL_FX.pir_spike  = SKILL_FX.r_spike;
+SKILL_FX.chr_beam   = SKILL_FX.m_beam;     SKILL_FX.chr_gravity = SKILL_FX.m_gravity;
+SKILL_FX.chr_overload = SKILL_FX.m_overload;
 function useSkill(i){
   /* Attunement: each cast advances the Mage's element, so a ten-second window walks the whole
      reaction table instead of repeating one. */

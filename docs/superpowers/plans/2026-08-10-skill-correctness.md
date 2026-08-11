@@ -24,11 +24,19 @@ This is `docs/VISION.md` priority #2 — class distinctiveness — and it fails 
 - `harness/` is ESM. Use `import`/`export`.
 - The gate measures regression against `harness/baseline.json`. Fixing a baselined failure should SHRINK that file — which is the deliverable, not a side effect.
 
-## The suspect, to be tested and not assumed
+## The two-list trap, which has already burned this suite once
 
-There are two dispatchers: `useSkill` (index.html ~10230) and `useSkillLegacy` (~10284). Oliver's own notes say the class-v2 rewrite converted RANGER and left the other fifteen classes on the legacy bridge. A skill whose v2 table carries the description while the legacy path carries the behaviour would produce exactly this symptom class.
+There are two skill lists and two dispatchers. `curSkills()` reads the legacy `CLASSES` kit
+(index.html:2353); `useSkill` branches on `c2def()` and, because ALL SIXTEEN classes have a CLASS2
+tree, always casts `c2CurSkills()[i]` (10311, 9948) — a different list at the same index.
 
-That is a hypothesis with a plausible mechanism. It is **not** a finding. Task 2 tests it on a single skill before anyone edits anything.
+The first version of `test-skills.js` read names and descriptions from one and cast from the other,
+so every verdict it produced named a skill it had never cast: warrior index 2 read "Charge" and cast
+Iron Guard, mage index 1 read "Nova" and cast Blink. Four reported bugs and sixty-two reported
+passes were all equally unfounded. Fixed in `faf52c3` by reading from the list that gets cast.
+
+Task 2 Step 2 re-checks this per class rather than trusting it once, because it is the single
+cheapest way for this whole plan to be measuring nothing while looking productive.
 
 ---
 
@@ -60,7 +68,7 @@ description, on a bench that proved it can measure the effect in question.
 
 | class | skill | claims | its description | status |
 |---|---|---|---|---|
-| warrior | Charge | damage | "Rush forward, damaging and stunning enemies in your path" | confirmed, unfixed |
+| paladin | Taunt | shield | "<its real description, copied from the game>" | confirmed, unfixed |
 ```
 
 Fill one row per entry in the regenerated baseline. `status` starts as `confirmed, unfixed`.
@@ -74,142 +82,17 @@ git commit -m "triage: regenerate the baseline against the fixed parser, and lis
 
 ---
 
-### Task 2: Fix warrior/Charge, and learn the mechanism
+### Task 2: Work the triage list, one bug per commit
 
-Charge is first because it is the most independently verified failure in the game: measured on a bench that was itself proven able to draw blood, Charge fires (it goes on cooldown) and deals zero damage to a grunt 60 units directly in front.
+**This task is a LOOP.** One pass = one bug = one commit. Finishing a single pass and stopping is a
+complete, revertible unit of work, so it is always safe to stop between passes.
 
-**Files:**
-- Modify: `public/3d/index.html` (the Charge implementation)
-
-- [ ] **Step 1: Confirm it still fails**
-
-```bash
-node harness/test-skills.js --classes warrior
-```
-
-Expected: `FAIL warrior/Charge claims damage`. If it passes, the parser or the bench changed — stop, and re-run Task 1 instead of hunting a bug that is not there.
-
-- [ ] **Step 2: Find which dispatcher actually runs it**
-
-```bash
-grep -n "Charge\|war_charge" public/3d/index.html | head -20
-```
-
-Then confirm at runtime rather than by reading:
-
-```bash
-node _shot/shot.js --scene arena:flat --wait 12000 --eval "(function(){ __BF3.cheatUnlockClasses(); __BF3.cheatRank10All(); const s=__BF3.curSkills()[2]; return JSON.stringify({name:s.n, id:s.id, fx:s.fx, keys:Object.keys(s)}); })()"
-```
-
-Expected: the skill object as the game holds it. Its `id`/`fx` names the handler to read next. **There are duplicate function bodies in this file** — `AUTOPILOT.md` says so and it has burned five sessions — so after finding the handler, confirm the copy you are about to edit is the one that runs.
-
-- [ ] **Step 3: Find where its damage should be applied and why it is not**
-
-Read the handler. Compare against a skill in the SAME class that the harness reports as passing (Cleave claims damage and passes), because the difference between a working sibling and a broken one is usually the whole bug.
-
-Write the finding into the commit message you will make in Step 6. If you cannot state a mechanism in one sentence, you have not found it yet — do not proceed to Step 4.
-
-- [ ] **Step 4: Make the smallest change that addresses that mechanism**
-
-One edit. No refactoring, no "while I'm here". Then:
-
-```bash
-node tools/gate.js
-```
-
-Expected: `OK   public/3d/index.html <script>`
-
-- [ ] **Step 5: Prove it**
-
-```bash
-node harness/test-skills.js --classes warrior
-```
-
-Expected: no `FAIL warrior/Charge` line. If Charge now passes but something ELSE in warrior fails, you broke a sibling — revert and return to Step 3.
-
-- [ ] **Step 6: Commit, and record the mechanism**
-
-```bash
-git add public/3d/index.html
-git commit -m "warrior/Charge deals the damage it promises
-
-<one sentence: what was actually wrong>
-
-Was: fires, goes on cooldown, target takes nothing. Now: <what the harness reports>.
-Verified with node harness/test-skills.js --classes warrior, failing before and passing after."
-```
-
-- [ ] **Step 7: Shrink the baseline**
-
-```bash
-node harness/run-all.js
-```
-
-Expected: a `FIXED: skills:warrior/Charge:damage` line and `GATE: PASS`. If the gate reports a REGRESSION instead, the fix broke something else — revert the commit and return to Step 3.
-
-Then remove Charge's row from `docs/SKILL_TRIAGE.md`, or mark it `fixed <commit>`.
-
-```bash
-git add harness/baseline.json docs/SKILL_TRIAGE.md
-git commit -m "baseline: warrior/Charge fixed, one fewer known failure"
-```
-
----
-
-### Task 3: Fix mage/Nova
-
-Nova is the second independently confirmed one: "A freezing burst: damage + slow all around you" — it fires and deals nothing. It is an AoE where Charge is a dash, so if both share a cause, that cause is not about movement.
-
-**Files:**
-- Modify: `public/3d/index.html` (the Nova implementation)
-
-- [ ] **Step 1: Confirm it still fails**
-
-```bash
-node harness/test-skills.js --classes mage
-```
-
-Expected: `FAIL mage/Nova claims damage`.
-
-- [ ] **Step 2: Check whether Task 2's mechanism explains this one too**
-
-If Task 2 found a shared mechanism (for example the legacy bridge dropping a damage call), test that hypothesis here FIRST — one grep, before any fresh investigation. A second instance of a known cause is a much cheaper fix than a new hunt, and it also tells you the cause is systemic rather than a one-off, which changes what the rest of this plan is worth.
-
-If it does not explain Nova, investigate as in Task 2 Step 3: read the handler, compare against a passing sibling in the same class.
-
-- [ ] **Step 3: Make the smallest change, gate it**
-
-```bash
-node tools/gate.js
-```
-
-Expected: `OK   public/3d/index.html <script>`
-
-- [ ] **Step 4: Prove it**
-
-```bash
-node harness/test-skills.js --classes mage
-```
-
-Expected: no `FAIL mage/Nova` line, and nothing else in mage newly failing.
-
-- [ ] **Step 5: Commit and shrink the baseline**
-
-```bash
-git add public/3d/index.html
-git commit -m "mage/Nova deals the damage it promises
-
-<one sentence: what was actually wrong, and whether it is the same cause as Charge>"
-node harness/run-all.js
-git add harness/baseline.json docs/SKILL_TRIAGE.md
-git commit -m "baseline: mage/Nova fixed, one fewer known failure"
-```
-
----
-
-### Task 4: Work the rest of the triage list, one bug per commit
-
-Every remaining row in `docs/SKILL_TRIAGE.md`, taken in the order it appears. Each one repeats the same seven steps as Task 2, in full — they are written out there.
+There is deliberately no named first bug here. An earlier draft of this plan opened with "fix
+warrior/Charge, the most independently verified failure in the game" — and Charge was never broken.
+The bench that produced that verdict read skill names from `curSkills()` and cast from
+`c2CurSkills()`, two different lists, so it had never cast the skill it was naming (`faf52c3`).
+Naming a target in a plan gives it an authority the evidence did not have. **The triage list
+produced by Task 1 is the only source of targets.**
 
 **Files:**
 - Modify: `public/3d/index.html`
@@ -221,13 +104,31 @@ Every remaining row in `docs/SKILL_TRIAGE.md`, taken in the order it appears. Ea
 node harness/test-skills.js --classes <that row's class>
 ```
 
-Expected: the FAIL line for that skill. If it passes, mark the row `was an artifact, no longer reported` and take the next row — do not go looking for a bug the harness no longer sees.
+Expected: the FAIL line naming that skill. If it passes, mark the row `no longer reported` and take
+the next row — never go hunting a bug the harness cannot currently see.
 
-- [ ] **Step 2: Find the mechanism before editing**
+- [ ] **Step 2: Confirm the bench is casting the skill it names**
 
-Read the handler. Compare against a passing sibling in the same class. Test any mechanism already found in Tasks 2 and 3 first. State it in one sentence or keep looking.
+```bash
+node _shot/shot.js --scene arena:flat --wait 12000 --eval "(function(){ __BF3.cheatUnlockClasses(); __BF3.cheatRank10All(); __BF3.meta.classId='<class>'; const a=(__BF3.c2CurSkills?__BF3.c2CurSkills():[]).map(s=>s&&s.n); const b=(__BF3.curSkills()||[]).map(s=>s&&s.n); return JSON.stringify({casts:a, reads:b}); })()"
+```
 
-- [ ] **Step 3: Smallest change, then the syntax gate**
+Expected: `casts` and `reads` agree at the index under test. They did not before `faf52c3`, and that
+one mismatch invalidated every verdict the suite had ever produced — 62 passes as well as 4
+failures. Re-check it per class rather than trusting it once.
+
+- [ ] **Step 3: Find the mechanism before editing anything**
+
+Read the handler. Compare against a skill in the SAME class that the harness reports as passing —
+the difference between a working sibling and a broken one is usually the whole bug.
+
+`public/3d/index.html` has duplicate function bodies; `AUTOPILOT.md` says so and it has burned five
+sessions. After finding a handler, confirm the copy you are about to edit is the one that runs
+(`__BF3.G._scapeTable` for scapes; for skills, check `c2def()` / `c2CurSkills` vs the legacy table).
+
+State the mechanism in one sentence. If you cannot, you have not found it — do not edit.
+
+- [ ] **Step 4: Make the smallest change, then gate it**
 
 ```bash
 node tools/gate.js
@@ -235,31 +136,45 @@ node tools/gate.js
 
 Expected: `OK   public/3d/index.html <script>`
 
-- [ ] **Step 4: Prove it, then commit that ONE fix**
+- [ ] **Step 5: Prove it — fail before, pass after**
 
 ```bash
 node harness/test-skills.js --classes <that row's class>
+```
+
+Expected: no FAIL line for that skill, and nothing else in the class newly failing. If a sibling
+broke, revert and return to Step 3.
+
+- [ ] **Step 6: Commit that ONE fix**
+
+```bash
 git add public/3d/index.html
 git commit -m "<class>/<skill> does what it promises
 
-<one sentence: the mechanism>"
+<one sentence: the mechanism>
+
+Verified with node harness/test-skills.js --classes <class>, failing before and passing after."
 ```
 
-- [ ] **Step 5: Shrink the baseline and mark the row**
+- [ ] **Step 7: Shrink the baseline, mark the row, repeat**
 
 ```bash
 node harness/run-all.js
+```
+
+Expected: a `FIXED: skills:<class>/<skill>:<claim>` line and `GATE: PASS`. A `REGRESSION:` line means
+the fix broke something else — revert the commit and return to Step 3.
+
+```bash
 git add harness/baseline.json docs/SKILL_TRIAGE.md
 git commit -m "baseline: <class>/<skill> fixed"
 ```
 
-- [ ] **Step 6: Repeat from Step 1 until no unfixed rows remain**
-
-One run of the autopilot will not finish the list, and it does not need to. Each pass through Steps 1–5 is a complete, revertible unit of work, so stopping between them is always safe.
+Then return to Step 1 with the next unfixed row.
 
 ---
 
-### Task 5: Passives, which nothing has checked yet
+### Task 3: Passives, which nothing has checked yet
 
 `test-skills.js` covers active skills. Passives are `kind:'passive'` entries in the rank tables and are never cast, so the current probe never exercises them — meaning "every passive does what it says" is currently unverified rather than verified.
 
@@ -298,7 +213,7 @@ git commit -m "harness: passives are checked too, and the check was proven able 
 node harness/run-all.js
 ```
 
-Any newly reported passive failures get rows in `docs/SKILL_TRIAGE.md` and are then worked through Task 4.
+Any newly reported passive failures get rows in `docs/SKILL_TRIAGE.md` and are then worked through Task 2.
 
 ---
 
@@ -308,9 +223,9 @@ Any newly reported passive failures get rows in `docs/SKILL_TRIAGE.md` and are t
 
 ## Self-Review
 
-**Spec coverage.** The programme spec's sub-project B asks for every class, every skill, every passive. Tasks 1–4 cover actives via the existing tester; Task 5 adds passives, which the tester genuinely does not cover today.
+**Spec coverage.** The programme spec's sub-project B asks for every class, every skill, every passive. Tasks 1–2 cover actives via the existing tester; Task 3 adds passives, which the tester genuinely does not cover today.
 
-**Placeholder scan.** Task 4 is a loop rather than N enumerated tasks because the list is not known until Task 1 runs. Its steps are written in full rather than referring back, and the commands are exact.
+**Placeholder scan.** Task 2 is a loop rather than N enumerated tasks because the list is not known until Task 1 runs, and because naming targets in advance is exactly how this plan's first draft came to open with a bug that did not exist. Its steps are written in full and the commands are exact.
 
 **Type consistency.** `node harness/test-skills.js --classes <class>` matches the CLI in `test-skills.js`. `node harness/run-all.js` writes `harness/report.json` and `harness/baseline.json` and prints `FIXED:`/`REGRESSION:` lines, which is what Steps 7/5 read.
 

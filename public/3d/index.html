@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.914.0-autopilot';
+const VERSION3D='1.915.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11202,7 +11202,19 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
-  if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ const fr=Math.max(0,Math.min(1,p.hp/Math.max(1,effMaxHp(p)))); v*=1+(1-fr); }}
+  /* A BERSERKER CLAUSE USED TO SIT HERE AND IT HARD-LOCKED THE GAME. It read
+       if(c2Passive('bsk_frenzy')){ … v*=1+(1-fr); }
+     which is the ATTACK-SPEED line from effAtkSpeed (3754) pasted into the damage-TAKEN function.
+     There is no `v` in hurtPlayer and this file is strict, so it threw `v is not defined` on every
+     hit a Frenzy berserker took — and frame() (18794) has no try/catch and re-arms itself on its LAST
+     line, after update(), so the exception never reached requestAnimationFrame and the loop was never
+     rescheduled. Measured, not reasoned: with Frenzy picked the game's own frame counter climbed to
+     37 and stopped there for four straight seconds while the control kept counting to 54
+     (harness/probes/frenzy.probe.js). The throw also fires BEFORE p.hp-=dmg, so until it locked you
+     took no damage at all — 477 HP unmoved across 900 ticks under three grunts.
+     Deleted rather than repaired: Frenzy is attack speed, it is already correctly implemented in
+     effAtkSpeed, and there is nothing it could honestly mean to damage taken. Giving `v` a meaning
+     here would be inventing a defensive bonus the card does not promise. */
   if(meta.classId==='monk'&&c2def('monk')){}
   if(meta.classId==='pirate'&&c2def('pirate')){}
   if(meta.classId==='chronomancer'&&c2def('chronomancer')&&c2Passive('chr_ward'))dmg*=.88;

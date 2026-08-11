@@ -224,7 +224,17 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 2 | **A — nine skills had no handler at all** | `5339f48` | the `dead handler` assertion, watched to fail nine times; `SKILL_FX` typeof sweep; a render of Ball Lightning landing 15 hits |
 | 3 | **F — the bench itself flapped** | `2026-08-11` | `harness/probes/riposte.probe.js`, A/B in one launch: 2/3 missed raw, 0/3 with the pose restored |
 | 4 | **E — stormcaller Storm Ward was never read** | `f75c81e` | `harness/probes/stward.probe.js`, A/B in one launch: shield 0 before, 4% of max HP after, control 0 both times |
-| 5 | **E — berserker Thick Hide was never read** | this run | `harness/probes/thickhide.probe.js`, four trials in one launch: all four died before, 1 HP / dead / 1 HP after; HUD photographed at `HP 1/477, Deaths 2` |
+| 5 | **E — berserker Thick Hide was never read** | `3934095` | `harness/probes/thickhide.probe.js`, four trials in one launch: all four died before, 1 HP / dead / 1 HP after; HUD photographed at `HP 1/477, Deaths 2` |
+| 6 | **G — picking Frenzy hard-locked the game** | this run | `harness/probes/frenzy.probe.js`, A/B on the same rank in one launch: the game's own frame counter stops dead (`lastSecond 0`) before, keeps climbing after |
+
+**Pass 6 came out of pass 5's probe rather than out of the triage list, and that is the exception the
+list's own rule allows for.** Task 2 Step 1 says never hunt a bug the harness cannot see — the point
+being not to act on desk research. This was not read; it was *measured*, as a free diagnostic in the
+launch that was already paying for a browser, because the Thick Hide trials had to steer around
+berserker rank 7 to be trustworthy and steering around something silently is how a probe ends up
+measuring nothing. **A row can be discovered by a probe, and a passive audit cannot see this class of
+fault at all:** `bsk_frenzy` IS wired, three times over, and "is it read in a fourth place that
+crashes" is not a question "does anything read this id" can ask.
 
 **Pass 3 was a BENCH bug, and taking it before any more game work was the right order.** Section F
 was not a skill that lies; it was a skill whose verdict depended on what the *previous* skill left

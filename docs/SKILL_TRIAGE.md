@@ -447,6 +447,64 @@ because `bd_step` shows what the fix looks like in the same class.
 
 ---
 
+## G. PICKING FRENZY HARD-LOCKED THE GAME — **FIXED 2026-08-11**
+
+Found the same day, as a free diagnostic inside `harness/probes/thickhide.probe.js`: the Thick Hide
+trials had to steer around berserker rank 7 to be trustworthy, so the probe measured what it was
+steering around rather than assuming it. `hurtPlayer:11205` read
+
+```js
+if(meta.classId==='berserker'&&c2def('berserker')){ if(c2Passive('bsk_frenzy')){ … v*=1+(1-fr); }}
+```
+
+**There is no `v` in `hurtPlayer`.** The identical clause appears three more times in the file (3740,
+3754, 3760) where a local `v` is the stat being scaled — 3754 is `effAtkSpeed`, where Frenzy is
+already correctly implemented. This is that attack-speed line pasted into the damage-TAKEN function,
+and the file is strict (`index.html:1019`), so it threw `ReferenceError: v is not defined` on **every
+hit a Frenzy berserker took.**
+
+**Two consequences, both measured by `harness/probes/frenzy.probe.js`, A/B against `bsk_rage` — the
+other option at the same rank — in one launch.**
+
+| | frame counter over 12s | last second | HP under three grunts | throws in 900 ticks |
+|---|---|---|---|---|
+| control `bsk_rage`, before | 4 → 54, climbing | **4** | 477 → 469 | 0 |
+| **`bsk_frenzy`, before** | 4 → **37, then stopped** | **0** | **477 → 477** | **811**, first at tick 89 |
+| control `bsk_rage`, after | 4 → 53 | 4 | 477 → 467 | 0 |
+| `bsk_frenzy`, after | 5 → 54 | **5** | **477 → 467** | **0** |
+
+1. **THE GAME FREEZES, PERMANENTLY.** `frame()` (18794) has no try/catch and calls
+   `requestAnimationFrame(frame)` on its LAST line, after `update(DT)` — so an exception out of update
+   never reaches the reschedule and the loop is never re-armed. Read from the game's own frame counter
+   (`voxMetrics().frame`) sampled once a second through the real rAF loop: with Frenzy picked it climbs
+   to 37 and does not move again for four straight seconds. Photographed either side — before, a burst
+   of gold particles hanging motionless in mid-air (`_shot/out/frenzy-before2.png`); after, a live
+   fight with a `-5` over the grunts (`frenzy-after.png`).
+2. **Until it locks, you are invulnerable.** The throw fires before `p.hp-=dmg` (11226), so the hit is
+   swallowed whole: 477 HP unmoved across 900 ticks with three grunts on top of the player, against
+   the control's 477 → 397.
+
+**Rank 7 is one of exactly two choices, reachable by any berserker who plays that far, so this is
+half a rank rather than an edge case.** Nothing had caught it because `cheatRank10All` takes the
+a-side, so the bench has only ever played `bsk_rage`; and the audit in section E cannot see it either
+— `bsk_frenzy` IS wired, three times over, and being read in a fourth place that crashes is not a
+question "does anything read this id" can ask.
+
+**Fixed by DELETING the clause, not by giving `v` a meaning.** Frenzy is attack speed, it already
+works in `effAtkSpeed`, and there is nothing it could honestly mean to damage taken — inventing a
+defensive bonus here would be putting a number on a card that does not have one, which is the one
+thing this document forbids. The berserker skill suite is unchanged either side of the fix (4 pass /
+1 fail, the fail being Charge's missing damage, already baselined and Oliver's).
+
+*The measurement itself needed correcting once, which is worth keeping.* The freeze phase first ran
+for four seconds and reported **both** halves alive and neither taking damage — a green-looking pair
+of samples measuring a fight that had not started. Headless SwiftShader runs this scene at ~5fps and
+`frame()` clamps dt to 0.05, so four real seconds buy under ONE second of simulation, and the first
+grunt hit lands at 1.2s. The probe now runs twelve seconds and **asserts that the control took
+damage** as a precondition, so it cannot go green off a window too short to see anything.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

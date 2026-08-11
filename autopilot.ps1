@@ -38,17 +38,28 @@ function AlertOncePerDay($stampName, $text) {
 # the only thing that pings is a FAILURE alert, and AlertOncePerDay fires at most once in 24h.
 $h = (Get-Date).Hour
 
-# OVERLAP LOCK. The trigger is every 20 minutes and a full harness pass takes longer than that, so
-# without this, run N+1 starts inside run N and the two fight over one working tree - the exact
-# shape of the write collision that lost the hub rework in August. A lock file older than 90
-# minutes is treated as a corpse from a killed run rather than a live sibling.
+# OVERLAP LOCK, keyed on a LIVE PROCESS rather than on a clock.
+#
+# The first version treated any lock older than 90 minutes as a corpse, and that was wrong in both
+# directions at once. The task carried ExecutionTimeLimit PT19M, so Windows killed each run after
+# 19 minutes WITHOUT running the finally block that releases the lock; the stale lock then blocked
+# every tick for 90 minutes, and when it finally expired the next run stashed the dead run's
+# half-finished edits. Measured on 2026-08-10: one run per 100 minutes, each killed at 19, its work
+# swept into a stash nobody reads. Raising the time limit fixes the killing; keying the lock on a
+# live PID fixes the guessing, because a clock cannot tell a long run from a dead one and this
+# harness legitimately runs for over an hour.
 $lock = Join-Path $repo '_autopilot.lock'
 if (Test-Path $lock) {
-  $age = (New-TimeSpan -Start (Get-Item $lock).LastWriteTime -End (Get-Date)).TotalMinutes
-  if ($age -lt 90) { Log ("skipped: another run has been going {0:N0} min" -f $age); exit 0 }
-  Log ("stale lock ({0:N0} min) - previous run died; taking over" -f $age)
+  $age  = (New-TimeSpan -Start (Get-Item $lock).LastWriteTime -End (Get-Date)).TotalMinutes
+  $prev = (Get-Content $lock -Raw -ErrorAction SilentlyContinue) -split '\|'
+  $alive = $false
+  if ($prev.Count -ge 2 -and $prev[1] -match '^\d+$') {
+    $alive = [bool](Get-Process -Id ([int]$prev[1]) -ErrorAction SilentlyContinue)
+  } elseif ($age -lt 180) { $alive = $true }   # old-format lock: fall back to a generous clock
+  if ($alive) { Log ("skipped: run {0} still alive ({1:N0} min)" -f $prev[1], $age); exit 0 }
+  Log ("stale lock ({0:N0} min, pid {1} gone) - taking over" -f $age, $prev[1])
 }
-(Get-Date -Format o) | Out-File -FilePath $lock -Encoding utf8 -NoNewline
+("{0}|{1}" -f (Get-Date -Format o), $PID) | Out-File -FilePath $lock -Encoding utf8 -NoNewline
 try {
 
 # Never start a run on top of MODIFIED TRACKED files - that would sweep a supervised session's

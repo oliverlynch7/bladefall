@@ -29,6 +29,7 @@ import { runScenario } from './drive.js';
 
 const PROBE = readFileSync(join(import.meta.dirname, 'probes', 'mp.probe.js'), 'utf8');
 const PARTY = readFileSync(join(import.meta.dirname, 'probes', 'party-scale.probe.js'), 'utf8');
+const LOOT = readFileSync(join(import.meta.dirname, 'probes', 'loot.probe.js'), 'utf8');
 
 /* What a party of n must multiply enemy HP by. Stated here as well as in the game because the
    assertion has to be able to disagree with the code - reading the multiplier out of __BF3 and
@@ -183,8 +184,45 @@ export async function runMpTests(opts){
     }
   }
 
+  /* ── LOOT IS EACH PLAYER'S OWN ───────────────────────────────────────────────────────────────
+     This is a REGRESSION guard, not a feature test: the game already gives every client its own
+     roll from the same corpse, because nothing about a pickup is ever transmitted and a guest runs
+     its own killEnemy/creditKill. Task 4 of the multiplayer plan assumed the opposite and it was
+     measured instead — see docs/MP_AUDIT.md. What these assertions defend is that nobody later
+     makes loot host-authoritative and quietly turns co-op into a race for one drop.
+
+     Deliberately loose bounds. The drop rates are ~5.3% and ~33%, and a rate is Oliver's to tune;
+     asserting a tight interval would turn a balance change into a red gate. The claim is only
+     "a guest that never landed a hit still earns its own loot". */
+  let lootR = null;
+  try { lootR = await runScenario({ scene: SCENE, waitMs: 9000, js: LOOT, url }); }
+  catch(e){ failures.push({ check: 'personal loot: load', detail: e.message.slice(0, 200) }); }
+
+  if(lootR && lootR.ok === false){
+    failures.push({ check: 'personal loot: probe could not run', detail: lootR.why });
+  } else if(lootR){
+    const cr = lootR.creditedKills || {}, mi = lootR.mirroredKills || {};
+    check('personal loot: a guest earns drops from kills it never saw',
+          cr.drops > 0, `${cr.drops} drops from ${cr.of} credited kills — a shared pool gives 0`);
+    check('personal loot: a guest earns drops from bodies it mirrors',
+          mi.drops > 0, `${mi.drops} drops from ${mi.of} mirrored elite kills`);
+    check('personal loot: a mirrored kill actually kills',
+          mi.leftAlive === 0, `${mi.leftAlive} of ${mi.of} still alive after the host said they died`);
+    /* The other half of "personal": no item may arrive down the wire. The host's packet is an enemy
+       snapshot plus a kill list; if a pickup ever started riding along, both clients would show the
+       same item and one of them could not have it. */
+    check('personal loot: the enemy snapshot carries no items',
+          (lootR.snapshotOnly || {}).drops === 0,
+          `${(lootR.snapshotOnly || {}).drops} pickups appeared from a snapshot with no kills in it`);
+    /* The negative control. Without it, every zero above could mean the receive path never ran. */
+    check('personal loot: the counter can read zero',
+          (lootR.notAGuest || {}).drops === 0,
+          `${(lootR.notAGuest || {}).drops} drops with the guest flag off — the control is not a control`);
+  }
+
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs, party, noparty: !!(party && party.noparty) };
+           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR,
+           noparty: !!(party && party.noparty) };
 }
 
 if(import.meta.filename === process.argv[1]){

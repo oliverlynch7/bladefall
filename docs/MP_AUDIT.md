@@ -111,3 +111,69 @@ Two things to carry into it:
   already: apply a shifted snapshot as a guest and assert the in-combat enemies DID move and the idle
   ones did not. Today's behaviour — `movedBySnapshot: 0` out of 41 — is a permanent, reproducible
   failing case, so the assertion can be watched to fail before it is believed.
+
+---
+
+# Is loot shared? No — it already belongs to each player — 2026-08-11
+
+Sub-project D, Task 4. Measured by `harness/probes/loot.probe.js` against the live game at
+`--scene 0`, and it is a **correction to the plan that commissioned it**: the research table row
+said "No per-player loot ownership" and listed personal loot as missing. It is not missing. It has
+been there all along, arrived at from the other direction.
+
+```bash
+node _shot/shot.js --scene 0 --eval @harness/probes/loot.probe.js
+```
+
+## The verdict
+
+**Every client already rolls its own item from the same corpse, and no pickup is ever transmitted.**
+
+The plan expected the fix to be "on the host, roll one instance per living player and tag each with
+the peer id". The game reaches the same end without any ownership tag, because the host never
+distributes loot at all:
+
+> The host's packet is `{en, ek}` — an enemy snapshot of `[mid,type,x,z,hp,maxHp]` and a kill list of
+> `[mid,type,elite,boss,xp]` (11573, 11625). **There is no item in it.** A guest that receives a kill
+> runs its own `killEnemy` under `_authKill` (11775), or `creditKill` (11776) when it never saw the
+> body, and both reach `rollDrop` with the guest's own `Math.random()`. `G.pickups` is local, always.
+
+## What was measured
+
+Driving MP's own `applyEnemies` — the real receive path, not an imitation of it — and counting what
+lands in the guest's own pickup list. **A shared pool would give 0 in the first two rows.**
+
+| trial | kills | drops | reads as |
+|---|---|---|---|
+| credited kills — the guest never saw the body | 600 | **31** | ~5.2%, against a designed 5.3% |
+| mirrored kills — the guest holds the body and runs its own death | 60 elite | **21** | ~35%, against a designed 33% |
+| enemy snapshot with no kills in it | 30 | **0** | no item rides the wire |
+| the same call with the guest flag off — negative control | 200 | **0** | the counter can read zero |
+
+All 60 mirrored bodies were dead afterwards, so those drops came from completed kills rather than
+from a half-applied event.
+
+## Why this is BETTER than the plan's design, not merely equivalent
+
+A tagged instance is rolled once, by the host, from the host's tables. Here the guest rolls from its
+**own** `rarityCap` and its own level, so a lower-level friend is not handed drops banded for the
+host's character. It also cannot desync: there is no ownership field to disagree about, because
+there is no shared object to own.
+
+## What this does NOT say
+
+No session is held and no peer is real; this is the receive path exercised in one browser, and it
+says nothing about a packet arriving. Two real machines remain the final check. Gold, chests and
+quest pickups were not measured, though all three are local by the same mechanism — `awardGold`,
+`openChest` and the `G.pickups` placed at level build are none of them in any message.
+
+## Guarded, so it cannot quietly regress
+
+Five assertions in `harness/test-mp.js` (mp suite 37 → 42 pass). Deliberately loose: the claim is
+"a guest that never landed a hit still earns its own loot", never a drop RATE, because a rate is
+Oliver's to tune and a tight interval would turn a balance change into a red gate.
+
+**No `?sharedloot=1` flag was added**, unlike `?breakgap` / `?heroslot` / `?heroonerig` / `?noparty`.
+Each of those disables a behaviour this repo wrote. Personal loot here is a property of the packet
+never carrying an item, so faking its absence would mean adding a code path to the game that exists
+only to be wrong. The negative control in the fourth row does that job honestly instead.

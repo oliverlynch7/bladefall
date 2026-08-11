@@ -22,7 +22,7 @@ Searched 2026-08-11. Each row is a documented, recurring complaint in shipped co
 |---|---|---|
 | Naive host authority gives the host a lag-free advantage | Enemies are host-authoritative for HP/death only; each client runs enemy AI locally, and peers are interpolated between packets | partly handled — audit in Task 2 |
 | Difficulty not scaled to party size | ~~`grep` for `peers.length` in any HP/damage path returns **nothing**~~ — **fixed, Task 3**: +60% enemy HP per additional player in your zone, host-only, health only | done |
-| Shared loot causes friction; personal loot is strongly preferred | No per-player loot ownership | **missing — Task 4** |
+| Shared loot causes friction; personal loot is strongly preferred | ~~No per-player loot ownership~~ — **this row was WRONG**, see Task 4: no pickup is ever transmitted and every client rolls its own item from the same corpse. Measured, 600 kills | already correct |
 | No in-game communication | `grep` for chat/ping/mark messages returns **nothing** | **missing — Task 5** |
 | Public STUN/TURN, no relay | Cloudflare Realtime TURN with ephemeral credentials, verified relay candidates | already correct |
 | Drop-in friction | 4-char room codes, guest auto-provisioned a starter class | already correct |
@@ -287,31 +287,54 @@ Shared loot is the single most-complained-about co-op mechanic in the games surv
 **Files:**
 - Modify: `public/3d/index.html`
 
-- [ ] **Step 1: Find how a drop is created and claimed**
+- [x] **Step 1: Find how a drop is created and claimed** — and it settled the whole task.
 
-```bash
-grep -n "G.pickups.push" public/3d/index.html | head
-```
+`pushLoot` (10893) is the only thing that puts an item in `G.pickups`, and `rollDrop` (10904) is the
+only thing that calls it on a kill. Both are reached from `killEnemy`, which a **guest runs itself**:
+`applyEnemies` sets `_authKill` and calls `killEnemy(e,false)` for a body it holds (11775), or
+`creditKill` for one it never saw (11776), and that path rolls a drop too (11783). The host's packet
+is `{en, ek}` — `[mid,type,x,z,hp,maxHp]` and `[mid,type,elite,boss,xp]` (11573, 11625) — and there
+is no item anywhere in it.
 
-- [ ] **Step 2: Give each drop an owner**
+- [x] **Step 2: Give each drop an owner** — **NOT DONE, AND THAT IS THE FINDING.** The game already
+      gives every client its own roll from the same corpse. This step would have built a second,
+      weaker mechanism on top of a working one.
 
-On the host, when a drop is rolled, roll one instance per living player and tag each with the peer id it belongs to. A client renders and can collect only its own. This is additive — a solo run has one player and therefore one instance, which is exactly today's behaviour.
+The research row this task was written from — "No per-player loot ownership" — is **wrong for this
+codebase**, and it is worth being precise about why the grep behind it looked convincing: there is
+no owner field, because there is nothing to own. Loot is instanced by never being shared in the
+first place.
 
-- [ ] **Step 3: Prove it**
+It is also *better* than the design this step describes. A tagged instance is rolled once, by the
+host, from the host's tables; here the guest rolls from its own `rarityCap` and its own level, so a
+lower-level friend is not handed drops banded for the host's character — and there is no ownership
+field for two clients to disagree about.
 
-Assertion: with two peers, a single kill yields two owned drops, and a peer cannot collect the other's. Prove the ownership check can fail by removing it.
+- [x] **Step 3: Prove it** — `harness/probes/loot.probe.js`, driving MP's own `applyEnemies` rather
+      than imitating it. A shared pool gives 0 in the first two rows.
 
-```bash
-node tools/gate.js
-node harness/test-mp.js
-```
+| trial | kills | drops | reads as |
+|---|---|---|---|
+| credited kills — the guest never saw the body | 600 | **31** | ~5.2% against a designed 5.3% |
+| mirrored kills — the guest runs its own death path | 60 elite | **21** | ~35% against a designed 33% |
+| enemy snapshot with no kills in it | 30 | **0** | no item rides the wire |
+| the same call with the guest flag off — control | 200 | **0** | the counter can read zero |
 
-- [ ] **Step 4: Commit**
+Five assertions added to `harness/test-mp.js`; mp suite **37 → 42 pass, 0 fail**. They are a
+REGRESSION guard, not a feature test — what they defend is that nobody later makes loot
+host-authoritative and turns co-op into a race for one drop. Bounds are deliberately loose: the
+claim is "a guest that never landed a hit still earns its own loot", never a drop RATE, because a
+rate is Oliver's to tune and a tight interval would turn a balance change into a red gate.
 
-```bash
-git add public/3d/index.html harness/probes/mp.probe.js
-git commit -m "multiplayer: personal loot, so nobody has to race a friend for a drop"
-```
+**No `?sharedloot=1` was added**, and the departure from this plan's own known-bad idiom is
+deliberate. `?breakgap`, `?heroslot`, `?heroonerig` and `?noparty` each disable a behaviour this
+repo WROTE. Personal loot is a property of the packet never carrying an item, so faking its absence
+would mean adding a code path to the game that exists only to be wrong. The negative control does
+that job honestly instead.
+
+- [x] **Step 4: Commit** — `harness/probes/loot.probe.js`, `harness/test-mp.js`, `docs/MP_AUDIT.md`.
+      **No game code changed**, which is the outcome and not a shortfall: the correct amount of code
+      to write for a feature that is already there is none.
 
 ---
 

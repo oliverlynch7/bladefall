@@ -92,7 +92,10 @@ test('every passive is attributed to its class and rank', () => {
 const KNOWN_DEAD = new Set([
   'r_longshot', 'r_closeq', 'r_escape', 'r_ambush', 'r_elem', 'r_bounty',
   'x_strength', 'x_crimson',
-  'pal_burn', 'pal_bounce', 'pal_blessed',
+  /* pal_bounce came OFF this list on 2026-08-11 (sub-project B Task 2, pass 7): "damage you block is
+     returned to whoever dealt it" now returns the 60% the brace eats, through the same hitEnemy(by,…)
+     the monk's Stillness uses four lines above it. Proven by harness/probes/bounce.probe.js. */
+  'pal_burn', 'pal_blessed',
   'necro_wither', 'necro_plague', 'necro_pest',
   /* bsk_thick came OFF this list on 2026-08-11 (sub-project B Task 2, pass 5): "damage that would
      drop you below 1 HP leaves you at 1 instead, once per fight" is now a death save in hurtPlayer

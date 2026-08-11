@@ -223,8 +223,8 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 80 wired / 44 dead**: `st_ward` (Storm Ward) and `bsk_thick` (Thick Hide) were wired
-2026-08-11. See "Rows taken" at the end of this section.
+**Now 81 wired / 43 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide) and `pal_bounce`
+(Bounce Back) were wired 2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -253,7 +253,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 4 / 8 | Potent, Entropy, Echo, Deep Freeze |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
-| paladin | 3 / 7 | Burning Light, Bounce Back, Blessed Blade |
+| paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
 | skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
 | reaper | 2 / 7 | Harvested Strength, Crimson Harvest |
 | bladedancer | 1 / 8 | Keep Moving |
@@ -275,6 +275,26 @@ it one root cause behind six passives, a skill description and a capstone, exact
 section A. It is bigger than a passive-wiring row and it needs a falloff number the cards do not
 state ("softer each" names no amount), so it should be taken as its own piece of work with that one
 number put to Oliver.
+
+**A SECOND ROW IS BLOCKED ON A MISSING MECHANIC THE SAME WAY, and it was measured while looking for
+the next thing to take.** `bsk_tough` (Unbreakable) — "while below half health you cannot be stunned,
+slowed or feared" — **cannot be honestly wired, because the player cannot be stunned, slowed or
+feared at all.** `p.stunT` appears in exactly two places in the file: `newG` initialises it to 0
+(7672) and `SKILL_FX.bsk_bash` sets it (18999). **Nothing ever reads it.** `p.slowT` and any player
+fear do not exist in any form — every `slowT`/`fearT` in the file is on an enemy. So wiring this
+passive would be granting immunity to nothing, which is the one thing worse than a dead passive: a
+green light on a card that still does nothing.
+
+**And the same two lines are a skill lying, which is section A's shape rather than section E's.**
+Headbutt's own comment reads *"It stuns them and it stuns YOU"*, and the self-stun half is that
+unread `p.stunT`. The enemy half works. So the drawback the skill advertises — the whole reason the
+comment gives for the class having it — has never existed.
+
+**Both halves are left for Oliver deliberately.** Teaching the game to stun the PLAYER is a new
+mechanic, not a wiring fix: nothing in the file says what a stunned player cannot do (move? attack?
+dodge? all three?), and choosing is a feel decision about how punishing a self-stun should be. That is
+`docs/VISION.md`'s "ask first" column. Once it exists, `bsk_tough` becomes a one-line wiring row like
+the rest of this section.
 
 The Ranger is the surprise. It is a CORE class, not a variant, and it is the one hand-written kit in
 the dead column — six of eight, including both options at rank 3, both at rank 5, and both at rank 9.
@@ -300,6 +320,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 |---|---|---|
 | **stormcaller / Storm Ward** (`st_ward`, r5 b) — "Casting a skill grants a shield equal to 4% max HP." | 2026-08-11 | `harness/probes/stward.probe.js`, A/B in ONE launch |
 | **berserker / Thick Hide** (`bsk_thick`, r5 a) — "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | 2026-08-11 | `harness/probes/thickhide.probe.js`, FOUR trials in one launch |
+| **paladin / Bounce Back** (`pal_bounce`, r7 a) — "Damage you block is returned to whoever dealt it." | 2026-08-11 | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before, 57 after, player took 20 in both |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -355,6 +376,36 @@ saved ones leaving exactly 1. Before: `thick-before.png`.
 `stward.probe.js`. `hurtPlayer` never reads `classFamilyOk`, so nothing measured here depends on it —
 but a probe of anything on the dealing-damage side must equip through `classStartWeapon()` as the
 bench does.
+
+**Bounce Back needed no number either, because "block" already means one thing in this game.**
+`p.guardT>0` makes hurtPlayer do `dmg*=0.4` (11234), so the damage you blocked IS the 60% that
+multiply removes — the game computes it for itself. And returning damage to an attacker exists twice
+in the same function already: `p.reflectT` throws it back at 1.5x on the very next line, and the
+monk's Stillness returns it doubled at 11170 through `hitEnemy(by, …)` inside a try/catch, which is
+the shape this copies. The paladin reaches the brace through its own default kit — `pal_bash` is
+`w_bash` (guardT 1.2), `pal_taunt` is `bulwark` (guardT 3.2), both a-side and both in the rank-10
+build.
+
+| | attacker lost | player took | braced |
+|---|---|---|---|
+| control `pal_heal` (b-side of the same rank), before and after | **0** | 20 | yes |
+| **`pal_bounce`, before** | **0** | 20 | yes |
+| **`pal_bounce`, after** | **57** | 20 | yes |
+
+**"Both halves took the SAME hit" is the assertion that says the reflect was added rather than the
+brace altered** — a fix that returned damage by weakening the block would satisfy a naive
+attacker-lost-something bar. The bar is EFFECT, not amount, on purpose: the brace sits behind class
+multipliers (the rank-10 capstone alone is `dmg*=0.82`), so a hard-coded expected number would be a
+balance assertion wearing a correctness assertion's clothes. *Not chased, and stated rather than
+smoothed over:* 100 incoming computes to about 49 blocked and the attacker lost 57, because the
+returned hit goes through the game's own `hitEnemy` and is processed like any other player-dealt
+damage. Paladin's skill suite is 7 pass / 0 fail either side.
+
+**`ch[3]` has to be pinned to the b-side or this probe reports a false zero for BOTH halves**, which
+is worth keeping because it is a trap for any future paladin probe: the a-side is `pal_thick`, "the
+first hit of every fight deals no damage at all", and hurtPlayer honours it at 11179 by RETURNING
+before the brace is ever reached. `cheatRank10All` takes a-sides, so the first hit of each trial would
+be swallowed whole.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

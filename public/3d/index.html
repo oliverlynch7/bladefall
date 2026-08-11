@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.915.0-autopilot';
+const VERSION3D='1.916.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11231,7 +11231,21 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='beastmaster'&&G.pet&&(G.pet.guardBondT||0)>0){const share=dmg*.35;dmg-=share;hurtPet(share,sx,sz);}
   if(meta.classId==='mage'&&c2Passive('m_glass'))dmg*=1.08;
   if(G.endEDmgMul) dmg*=G.endEDmgMul;                       // Abyssal boon/bane: some pacts make the dead hit harder
-  if(p.guardT>0) dmg*=0.4;                                  // Bulwark / Last Stand: brace
+  if(p.guardT>0){
+    const _blocked=dmg*0.6;                                 // what the brace is about to eat
+    dmg*=0.4;                                               // Bulwark / Last Stand: brace
+    /* BOUNCE BACK. "Damage you block is returned to whoever dealt it." Wired 2026-08-11 — it was one
+       of the 44 passives in docs/SKILL_TRIAGE.md section E that the rank menu offers, describes, and
+       no code has ever read. No number is invented: "blocked" is exactly the 60% the line above
+       removes, and returning damage to an attacker is done twice already in this same function —
+       p.reflectT just below at 1.5x, and the monk's Stillness at 11170, whose hitEnemy(by,…) inside a
+       try/catch is the shape this copies. The paladin reaches the brace through its own default kit
+       (pal_bash is w_bash, pal_taunt is bulwark). */
+    if(meta.classId==='paladin'&&c2Passive('pal_bounce')&&by&&typeof by==='object'&&!by.dead&&_blocked>=1){
+      try{ hitEnemy(by,Math.round(_blocked),p,0,0,null);
+           addText(p.x,p.y+46,p.z,'BOUNCED','#ffe6ad'); }catch(e){}
+    }
+  }
   if(p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }

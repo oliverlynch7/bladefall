@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.933.0-autopilot';
+const VERSION3D='1.934.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10042,7 +10042,29 @@ function openClassChoice(rank){ const def=c2def(); if(!def) return; const R=def[
 // Clear Aim (Ranger innate) — updated each frame; +10% dmg / +10% range while active, breaks on a direct hit
 function class2Innate(p,dt){
   if(meta.classId!=='ranger'||!c2def('ranger')) p.clearAim=false;
-  if(meta.classId==='mage'){ const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ)); if(moved<1)p._stillT=(p._stillT||0)+dt;else{p._stillT=0;p._stillX=p.x;p._stillZ=p.z;} }
+  /* THE STAND-STILL CLOCK, ungated from the mage 2026-08-12. It used to sit inside
+     `if(meta.classId==='mage')` because m_temporal (effCdr, 3766) was the first thing to want it —
+     and this is the ONLY line in the file that advances `_stillT`, so for every other class the
+     clock stood at 0 forever. That silently killed the NINJA'S WHOLE BASIC-ATTACK IDENTITY:
+     CLASS_BASIC.ninja (11312) gates Unseen on `_stillT >= 1` (0.5 with Swift) and its own comment
+     promises "stand still for a moment and your next attack lands from BEHIND the target", so the
+     only two things that could ever arm it were Vanish (19233) and Combo Edge (10930) — and Combo
+     Edge needs an Unseen strike to have landed already, so it is circular. Two passive cards are
+     written ABOUT that clock (`nin_swift`, `nin_combo`), which is why the passive audit reported
+     them wired: they are, to a clock that does not run. Measured before the change rather than
+     read — harness/probes/unseen.probe.js stood the ninja still for 1.2s of the game's own ticks
+     with a drift of 0 and read `stillT 0`, while the same bench fed Vanish's sentinel repositioned
+     the body 101 units to the far side of the target. Nothing else reads `_stillT`, so nothing but
+     the Ninja changes.
+     CAPPED AT 8 SO THE ARM SENTINEL STAYS UNAMBIGUOUS. Vanish and Combo Edge arm Unseen by writing
+     `_stillT = 9`, and that arm must survive walking away — it is the whole of Vanish's own comment
+     ("the next Unseen strike is already armed"), and wiping it would be a silent nerf smuggled in
+     by a fix aimed at something else. Standing still can now never reach 9 on its own, so ">= 9"
+     means "explicitly armed" and cannot be earned by loitering. No reader is affected: the
+     thresholds in the file are 0.5, 1 and 1.5. */
+  { const moved=Math.hypot(p.x-(p._stillX==null?p.x:p._stillX),p.z-(p._stillZ==null?p.z:p._stillZ));
+    if(moved<1)p._stillT=Math.min(8,(p._stillT||0)+dt);
+    else{ if((p._stillT||0)<9)p._stillT=0; p._stillX=p.x;p._stillZ=p.z; } }
   if((p.bloodlustT||0)>0)p.bloodlustT-=dt;if((p.tacticalT||0)>0)p.tacticalT-=dt;if((p.wraithT||0)>0)p.wraithT-=dt;if((p.wraithwalkT||0)>0)p.wraithwalkT-=dt;if((p.soulStrengthT||0)>0)p.soulStrengthT-=dt;else p.soulStrength=0;
   if((p.evadeStackT||0)>0)p.evadeStackT-=dt;else p.evadeStacks=0;   // Ninja evasion snowball decays if you stop dodging
   if((p.focusT||0)>0)p.focusT-=dt;else p.focusStacks=0;   // Monk Focus snowball decays if you stop attacking

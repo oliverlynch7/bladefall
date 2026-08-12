@@ -432,9 +432,18 @@ bonus a warrior has been playing with for weeks with a different one, which is a
 `docs/VISION.md`'s "ask first" column, not a wiring fix. Two honest resolutions and both are Oliver's:
 make it do what it says (and drop the 12%), or keep the 12% and rewrite the card to say so. The one
 thing that should not survive is the current state, where the menu promises immunity and delivers a
-percentage. **`mon_iron` (monk r3 a) — "while your dodge is ready, you cannot be stunned or knocked
-back" — is now half-unblocked by the same discovery** and is a straightforward next row for whoever
-takes one.
+percentage.
+
+**And `mon_iron` (monk r3 a) is HALF-unblocked by the same discovery, which under this section's own
+rule means it is still blocked.** "While your dodge is ready, you cannot be stunned or knocked back":
+the knock-back half is now a one-line skip beside Heavy Hands', and the stun half **cannot be honestly
+wired, because the player still cannot be stunned** — `p.stunT` is written once (`SKILL_FX.bsk_bash`,
+18999) and read nowhere. Wiring one clause and letting the audit call the card wired is precisely the
+trade this section already refused for Escape Artist, and for the same reason: a green light on a card
+that only half does what it says is worse than an honest dead one. It goes on the shelf beside
+Unbreakable and Escape Artist, and **all three come off it together the day the player can be stunned
+and slowed** — which is a new mechanic and Oliver's call, since nothing in the file says what a
+stunned player cannot do.
 
 ### Blessed Blade — the row whose whole implementation is a DIFFERENT MOMENT, not a different effect
 

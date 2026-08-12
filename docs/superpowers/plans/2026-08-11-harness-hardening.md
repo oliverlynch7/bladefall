@@ -355,12 +355,163 @@ Telegram` or `nothing committed this run - no report sent`. A line reading `repo
 exit <n>)` means the module is missing or throwing — which is precisely what the log said before this
 commit, and the reason it said it.
 
+**CHECKED 2026-08-12, 15:24 run: THE EVIDENCE HAS STILL NOT ARRIVED, and the reason is not this
+module.** `_autopilot.log`'s only `report` line remains `report skipped (run-report exit 1)` at
+13:12:41 — which is the run BEFORE the fix landed (`a9b05d7`), so it is the recorded bug and not a
+recurrence. Since then no run has reached the glue at all:
+
+```
+13:24:02  run start          <- the run that committed a9b05d7; NO `run end` line was ever written
+15:16:02  FAILED: Error: ENOSPC: no space left on device, write
+15:24:02  run start
+```
+
+**The disk is full — 1.9 GB free of 931 GB, measured this run.** That is the confound, and it is
+Oliver's machine rather than anything in this repo: the 15:16 run died on it, and a log that cannot be
+appended to is why the 13:24 run has no `run end`. So this step is still not verifiable, now for a
+second and unrelated reason, and it stays unticked. **Do not tick it on the strength of the module's
+tests** — those already passed when the step was written; the whole point of the step is the glue.
+
+*Recorded so the next run does not re-derive it:* `report skipped` at 13:12 is dated BEFORE the fix.
+Reading it as a live failure would send a run hunting a bug that was fixed two commits ago.
+
 - [x] **Step 4: Commit** — done.
 
 ```bash
 git add autopilot.ps1
 git commit -m "autopilot: report what a run actually did, not only when it breaks"
 ```
+
+---
+
+### Task 4: The cross-launch flap — a fresh failure is an accusation, not a verdict
+
+This is the task Task 1 Step 4 ends by naming ("the next task of this shape… worth doing before
+anything else in this plan"). Task 1 killed the *in-page* flap; the *cross-launch* half survived it,
+and the evidence is a gate run, not a theory.
+
+**Files:**
+- Modify: `harness/gate-rules.js`, `harness/run-all.js`
+- Modify: `harness/test/gate.test.js`
+
+- [x] **Step 1: State the mechanism from the measurement already recorded** — done 2026-08-12.
+
+`REGRESSION: skills:skylancer/Dive Strike:damage`, printed by a full gate against a change that
+cannot reach that class (its one edit is behind `meta.classId==='warrior'`), with three immediate
+re-runs of skylancer reporting `4 pass, 0 fail` three times out of three. The row's damage is owed by
+its LANDING (`SKILL_FX.sky_dive`) while the dummy walks toward the player, so the payout depends on
+where the dummy has got to when the player touches down. `onCd` was true and `mode` was `play`: the
+cast happened, the geometry missed.
+
+**Why the existing instrument cannot see it, in its own words:** `determinism.probe.js` casts every
+kit three times inside ONE page, so it holds one arrival state. The instrument for a payout that
+depends on POSITION AT A MOMENT is a second launch.
+
+- [x] **Step 2: Confirm before accusing** — done 2026-08-12. `confirmPass` in `gate-rules.js`, called
+      by `run-all.js` between `reconcile` and the `REGRESSION:` lines.
+
+Three rules, and the second is the one that keeps it honest:
+
+- re-measured and failed again → **CONFIRMED**, still a red gate;
+- re-measured and did not fail → **FLAPPED** — not a regression, **and not a fix**, so it is dropped
+  from `now` before the ratchet sees it. Writing a flake into the baseline would hand the suite a
+  permanent green light for a row nobody has ever diagnosed;
+- could not be re-measured → **CONFIRMED, deliberately.** A re-run that threw, a dark re-run, and a
+  `levels:`/`mp:` id that has no per-class re-run all leave the accusation standing. Absence of a
+  second measurement must never clear one — `docs/VISION.md`'s "missing data is not a negative
+  finding" cuts this way too.
+
+**It costs nothing on a clean run.** The re-run is scoped to the accused classes through
+`runSkillTests({classes})` — the same entry point the CLI's `--classes` uses — so a flap costs one
+launch, not a second full suite, and no fresh failures costs zero.
+
+- [x] **Step 3: Prove it, including the paths that must fail loud** — done 2026-08-12.
+      `harness/test/gate.test.js`, 25 tests (was 10), all in `run-all.js`'s fast stage.
+
+**The orchestration is driven, not transcribed.** `confirmPass` takes `rerun` as a parameter, so the
+tests exercise the same function `run-all.js` calls with a fake re-run instead of a GPU — which is
+the reason `gate-rules.js` exists at all ("the parts with actual reasoning in them have to be
+checkable without one"). Covered: a clean run re-runs nothing; only the accused class is re-run
+(`['skylancer']`, not all sixteen); the flap is cleared and announced; a row failing both times stays
+a regression; a re-run that THREW clears nothing; a DARK re-run clears nothing; a levels row alone
+spends no launch.
+
+**Watched to fail, twice, both against a real alternative rule.** With `splitConfirmed` reverted to
+the old behaviour (every fresh id is a REGRESSION) four assertions failed and the two that must hold
+either way still passed — that pair is the control. With an absent measurement treated as a clean one
+— the dangerous direction, in which breaking the re-run would launder every real regression into a
+flap — exactly the two fail-loud tests failed.
+
+- [x] **Step 4: Gate it and commit** — done. Full aggregate gate green, `harness/baseline.json`
+      untouched.
+
+**What this run could NOT prove, said plainly:** the live confirm path did not execute during the
+gate, because nothing flapped — which is the correct behaviour and also means the real
+`runSkillTests({classes})` call is covered by unit tests and by its identical use in the CLI, not by
+having been watched to run inside a gate. The first genuine flap will print
+`confirming N new failure(s) with a second launch of: <class>`, and that line is the evidence to look
+for.
+
+---
+
+### Task 5: The harness was filling the disk it needs to write to
+
+Not planned. Found 2026-08-12 while Task 4's gate was running, by watching free space fall **1.9 GB →
+1.1 GB in one gate run** — and it is the most destructive fault this plan has found, because it takes
+the whole automation down rather than one verdict.
+
+**Files:**
+- Modify: `harness/shot.js`
+
+- [x] **Step 1: Name the leak** — done. `shot.js:593` mkdtemp'd a Chrome `--user-data-dir` on every
+      launch and **nothing ever deleted it.** `grep -n profile harness/shot.js` returns the create and
+      the flag and no remove.
+
+A full `run-all.js` is ~35 launches, the scheduler fires every 20 minutes all day, and each profile is
+tens of megabytes. `_autopilot.log` carries the consequence:
+
+```
+2026-08-12 15:16:02  FAILED: Error: ENOSPC: no space left on device, write
+```
+
+**A whole scheduled run killed by the harness's own leftovers**, on a 931 GB disk with 1.9 GB free. It
+also explains the missing `run end` lines around it — a log that cannot be appended to records nothing,
+which is why the 13:24 run appears to have never finished. Task 3 Step 3 has been waiting on evidence
+that this bug was eating.
+
+- [x] **Step 2: Both halves, because one is not enough** — done.
+
+`process.on('exit')` removes this run's profile, covering all four exits (the early no-debug-port
+return, the normal end, the catch, and any throw). That alone would not have helped: **half of these
+were orphaned by a HARD KILL**, and no exit handler runs then — which is precisely the state this plan
+exists around, `autopilot.ps1` having killed runs mid-render for weeks. So a startup sweep removes
+`bf-shot-*` directories older than an hour. An hour cannot be a live run's profile even with two
+workers going: a shot's own ready-wait caps at ~120s.
+
+Both are best-effort and neither may fail a shot. A cleanup that can throw would turn a full disk into
+a broken gate, which is the failure it exists to prevent.
+
+- [x] **Step 3: Prove it, on the running gate** — done, and the proof is the disk itself.
+
+`drive.js` re-copies `harness/shot.js` into `_shot/` whenever the content differs, so the gate already
+running picked the fix up on its next launch. **Free space measured across that transition: 1.9 GB →
+1.1 GB (leaking) → 12 GB (sweeping).** Roughly 11 GB of dead Chrome profiles, reclaimed by the harness
+itself, while it was working.
+
+Parse-checked before trusting it, because editing `shot.js` mid-gate would otherwise have failed every
+remaining launch and produced a red gate for a reason that was not the game:
+`node _shot/shot.js --assets __parsecheck__` reached runtime and failed only on the bogus kit name.
+
+**What is deliberately NOT done:** no bulk deletion outside the repo by hand. The harness now cleans up
+after itself and sweeps what it left; anything older still sitting in `%TEMP%` goes on the next sweep.
+
+**One honest limit, stated rather than glossed.** What was *measured* is the aggregate — free space
+climbing steadily across the gate's launches. The exit handler and the sweep were not told apart, and
+on Windows the exit handler is the one likely to lose: `rmSync` runs immediately after `chrome.kill()`
+and Chrome may not have released its file locks yet, in which case the directory survives to be swept
+an hour later instead. That is why both halves exist and why neither is allowed to throw — the design
+degrades to "the sweep gets it next time" rather than to a failure. **A run wanting to claim the exit
+half specifically should assert on the directory after a single shot**, which this run did not do.
 
 ---
 

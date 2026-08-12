@@ -47,6 +47,91 @@ export function suiteLine(name, s){
    everything before the first colon. */
 export const suiteOf = id => String(id).split(':')[0];
 
+/* THE CONFIRM PASS — a fresh failure is an ACCUSATION, not yet a verdict.
+
+   WHY THIS EXISTS. `run-all.js` calls any failure absent from the baseline a REGRESSION and exits 1,
+   and `autopilot.ps1` answers a red gate by stashing the run's tree. So a skill row that fails one
+   launch in three costs a run its work, and one of those rows is known and named: on 2026-08-12 a
+   full gate printed `REGRESSION: skills:skylancer/Dive Strike:damage` against a change that cannot
+   reach it (its one edit sits behind `meta.classId==='warrior'`), and three immediate re-runs of that
+   class reported `4 pass, 0 fail` three times out of three. The harness plan records the mechanism:
+   Dive Strike's damage is owed by its LANDING while the dummy walks toward the player, so whether the
+   burst catches it depends on where the dummy has got to. The cast happened; the geometry missed.
+
+   `harness/probes/determinism.probe.js` cannot see this class of fault and says so in its own header
+   — it casts every kit three times inside ONE page, so it holds one arrival state. The instrument
+   for a payout that depends on POSITION AT A MOMENT is a second launch, and this is it.
+
+   The cost is paid only when something actually flaps: a clean run re-runs nothing.
+
+   THREE RULES, and the second is the one that keeps this honest:
+   - re-measured and failed again  -> CONFIRMED. A real regression, still a red gate.
+   - re-measured and did not fail  -> FLAPPED. Not a regression. It is also NOT a fix, so it must be
+     kept out of the baseline: writing it in would record a flake as a known failure and hand the
+     suite a green light for a row nobody has ever diagnosed.
+   - could not be re-measured      -> CONFIRMED, deliberately. Absence of a second measurement must
+     never clear an accusation; docs/VISION.md's "missing data is not a negative finding" cuts this
+     way too. Only the skills suite is re-runnable per class today (`runSkillTests({classes})`);
+     levels are keyed by zone and mp by peer, so their ids fall through this door and stay loud. */
+
+/* The class an id names, or null when the id is not a per-class skills row. idOf() builds
+   `skills:<cls>/<skill>:<claim>`. */
+export function classOf(id){
+  const m = /^skills:([^/:]+)\//.exec(String(id));
+  return m && m[1] ? m[1] : null;
+}
+
+/* The distinct classes worth paying a second launch for. */
+export function confirmTargets(fresh){
+  return [...new Set((fresh || []).map(classOf).filter(Boolean))];
+}
+
+/* `targets` is what was actually re-measured (empty if the confirm run went dark or threw);
+   `stillFailing` is the set of ids the re-run reported. */
+export function splitConfirmed(fresh, targets, stillFailing){
+  const T = new Set(targets || []), S = new Set(stillFailing || []);
+  const confirmed = [], flapped = [];
+  for(const id of fresh || []){
+    const cls = classOf(id);
+    if(cls && T.has(cls) && !S.has(id)) flapped.push(id);
+    else confirmed.push(id);
+  }
+  return { confirmed, flapped };
+}
+
+/* The whole confirm pass, orchestration included, so it can be driven without a GPU.
+
+   `rerun(targets)` re-measures those classes and returns a suite result; it may return a dark one or
+   throw, and both must leave every accusation standing. `idOf(f)` names a failure the same way the
+   caller's ids were built — passed in rather than duplicated, because a rule that exists in two
+   places is a rule that will be edited in one. `log` collects the lines the gate prints. */
+export async function confirmPass(fresh, { rerun, idOf, log = () => {} } = {}){
+  if(!fresh || !fresh.length) return { confirmed: [], flapped: [], ran: false };
+  const targets = confirmTargets(fresh);
+  if(!targets.length) return { confirmed: [...fresh], flapped: [], ran: false };
+
+  log(`confirming ${fresh.length} new failure(s) with a second launch of: ${targets.join(', ')}`);
+  let scoped = null;
+  try { scoped = await rerun(targets); }
+  catch(e){ log(`confirm run FAILED (${String(e && e.message || e).slice(0, 120)}) — every new failure stands`); }
+
+  let measured = [];
+  const again = new Set();
+  if(scoped && !isDark(scoped)){
+    measured = targets;
+    for(const f of (scoped.failures || [])) again.add(idOf(f));
+    log(suiteLine('skills (confirm)', scoped));
+  } else if(scoped){
+    log(`confirm run DARK (${scoped.skipped || 'no verdicts'}) — every new failure stands`);
+  }
+
+  const split = splitConfirmed(fresh, measured, again);
+  for(const id of split.flapped){
+    log('FLAPPED (failed once, passed on a confirming re-run — not a regression, and not a fix): ' + id);
+  }
+  return { ...split, ran: measured.length > 0 };
+}
+
 /* THE RATCHET. `known` is the baseline, `now` is this run's failures, `dark` is the set of suite
    names that produced no verdicts.
 

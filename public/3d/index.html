@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.941.0-autopilot';
+const VERSION3D='1.942.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9550,6 +9550,43 @@ function purifyRadiance(e){ const base=e.stDmg||8, dmg=Math.round(base*(e.boss?1
 function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corrupt)) return 0;
   const base=e.stDmg||10, mastery=(meta.classId==='reaper'&&c2Passive('x_corrupt'))?1.15:1, dmg=Math.round(base*(e.boss?1.4:2.5)*mastery); e.primed=false; if(e.st) e.st.corrupt=0;
   skillRing(e.x,e.z,'#d69bff','#8f52d6',120); burst(e.x,e.y+e.h*0.5,e.z,'#8f52d6',18); addText(e.x,e.y+e.h+12,e.z,'RUPTURE','#d69bff',true);
+  /* CORRUPTION MASTERY (reaper r9 a): "Rupturing a corrupted enemy corrupts everything near it."
+     The id was READ before this — twice, for +25% buildup (applyStatus) and the +15% above — so
+     harness/audit-passives.js has always called it wired and has always been right. Neither reader
+     is the card, and nothing in the file spread corruption to anybody. That is
+     docs/SKILL_TRIAGE.md section Q's shape: the card promises a MECHANIC and the only reader
+     multiplies a STAT, which is the one thing an audit asking "does anything read this id" cannot
+     see.
+     NOTHING IS INVENTED, and that is why this row was takeable rather than Oliver's.
+     THE SPREAD IS igniteBurn's COMBUSTION SPLASH, verbatim (9540): over G.enemies, `< 120 + o.r`,
+     one whole stack of the effect's own status. igniteBurn is this reaction's structural twin —
+     both are cap reactions fired out of applyStatus, both end `e.hp-=dmg; if(e.hp<=0) killEnemy(e)`
+     — and it is the file's only existing answer to "the status spreads to everything near it".
+     THE RADIUS IS ALSO RUPTURE'S OWN: 120 is the skillRing this effect has always drawn, one line
+     up. docs/SKILL_TRIAGE.md made "does corruption own a radius of its own" the condition on this
+     row, and it does; nothing had to be chosen.
+     ONLY THE STACK, NOT THE SPLASH DAMAGE. igniteBurn also deals 40% of the ignition to the
+     neighbours; this card says "corrupts", not "damages", so that half is deliberately left out.
+     THROUGH applyElement RATHER THAN WRITING st.corrupt BY HAND — pass 15's correction (pal_burn).
+     applyStatus is what stamps stFresh, without which a stack lands already past its STWIN grace
+     window and decays immediately, and it is what carries stDmg, the per-target rate limit, boss
+     resistance and the dummy guard. igniteBurn writes the field directly and therefore has that
+     latent fault; this does not inherit it.
+     THEN TOPPED TO A WHOLE STACK, which is pass 15's other half and the difference between this
+     working and not: applyStatus's buildup is buildAmt, which scales with the WEAPON'S swing speed
+     and can hand over a fraction, and a fraction of a corrupt meter primes nothing. `had+1` rather
+     than `1` so repeated ruptures build a pack up toward the cap the way repeated hits do. */
+  if(G&&G.p&&meta.classId==='reaper'&&c2Passive('x_corrupt')){
+    let spread=0;
+    for(const o of G.enemies){ if(o===e||o.dead||o.dummy) continue;
+      if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){
+        const had=(o.st&&o.st.corrupt)||0;
+        applyElement(o,'void',e.stDmg||0);
+        const st=estat(o); st.corrupt=Math.min(STCAP.corrupt,Math.max(st.corrupt,had+1));
+        if(st.corrupt>=STCAP.corrupt) o.primed=true;    // applyStatus's own cap branch, verbatim
+        spread++; } }
+    if(spread){ skillRing(e.x,e.z,'#8f52d6','#3d175e',120); addText(e.x,e.y+e.h+30,e.z,'CORRUPTION SPREADS','#d69bff',true); }
+  }
   e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); p.hp=Math.min(effMaxHp(p),p.hp+heal); }   // predatory Reaper sustain
   if(e.hp<=0) killEnemy(e); return dmg; }
 // consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff

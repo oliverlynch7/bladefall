@@ -2077,9 +2077,9 @@ sub-project has built.
 | `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | **FIXED**, pass 33 |
 | `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
 | `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11543) | HALF wired — the DR is there, the knockback resistance is not |
-| `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — actionable |
+| `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — **Oliver's**: a reaper cannot mark anything, so which mark is a design call |
 | `x_chill` | reaper r7 b — Grave Chill | "Corrupted enemies cannot flee — they walk toward you instead." | corrupted enemies move 18% slower (13283) | confirmed, unfixed — **Oliver's**, nothing flees |
-| `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | confirmed, unfixed — actionable if a radius already exists |
+| `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | **FIXED**, pass 34 — the radius was rupture's own 120 |
 | `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | HALF wired — the upside is there, the drawback is not |
 | `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
 | `pal_heal` | paladin r7 b — Healing Light | "Every skill you cast heals the ally nearest you, or you if alone." | `effLifesteal` +5% lifesteal (3759) | confirmed, unfixed — actionable only if the amount can be taken from the file |
@@ -2216,18 +2216,53 @@ recording the reaper as a finished class** — "the class now has **no dead pass
 That was true and it was about section E. Three of its eight passives nonetheless do something other
 than what their card says, and no tool this sub-project owns could have said so.
 
-- **`x_doom` — Lingering Doom. ACTIONABLE, and the closest of the five to passes 31–33.** The card
-  says a dying marked enemy passes its mark to the nearest foe; the one reader makes the mark last 20%
-  longer on the enemy that already has it. `c2OnKill` already carries four per-passive kill riders
-  (`x_strength`, `x_armor`, `x_crimson`, `pal_burn`), a doom mark is one field, and "the nearest foe"
-  needs no number chosen. Read `pal_burn` (pass 15) first: the same shape, and its warning about a
-  wiring that fires on the right target and delivers nothing applies here too.
-- **`x_corrupt` — Corruption Mastery. ACTIONABLE ONLY IF A RADIUS ALREADY EXISTS.** The card says
-  rupturing a corrupted enemy corrupts everything near it; the two readers are +25% buildup and +15%
-  rupture damage, and nothing spreads. Burning Light is the precedent for the spread itself — through
-  `applyElement`, at the radius the effect already owns, with a WHOLE stack rather than a buildup
-  fraction. If corruption has no `igniteBurn`-equivalent splash radius of its own, a radius has to be
-  chosen and the row becomes Oliver's.
+- **`x_doom` — Lingering Doom. ~~ACTIONABLE~~ NOT TAKEABLE, AND IT IS OLIVER'S — corrected
+  2026-08-12 by the run that took `x_corrupt`.** The card says a dying marked enemy passes its mark to
+  the nearest foe; the one reader makes the mark last 20% longer on the enemy that already has it. The
+  original entry called this the cheapest of the five because `c2OnKill` already carries four
+  per-passive kill riders and "the nearest foe" needs no number. Both of those are still true and they
+  are not the problem. **The problem is that a reaper cannot mark anything.**
+  Traced, not argued. `e.doomT` has exactly ONE writer in the whole game — `SKILL_FX.deathsdoor`
+  (9944) — and Death's Door lives only in the **legacy** `CLASSES` reaper kit (1896, rank 7).
+  `useSkill` branches on `c2def()` and the reaper has a `CLASS2` tree, so it *always* casts
+  `c2CurSkills()[i]`; the reaper's eight CLASS2 skills are `x_reap`, `x_cleave`, `x_step`, `x_wraith`,
+  `x_pull`, `x_bind`, `x_siphon`, `x_vortex`, and not one of them dooms. `e.markT` is no better — its
+  only writers are the ranger's Mark and Death Mark (9893, 9984). So wiring "spread their mark" over
+  either field ships a passive that can never fire in play, which is the section H shape this document
+  exists to catch, done on purpose. The one mark-like state a reaper CAN apply is **corruption**, and
+  reading the card's "marked" as "corrupted" contradicts the class's own vocabulary one card away: the
+  rank-10 capstone says "a marked **or** corrupted enemy" and its code (10246) tests them separately.
+  Choosing between those three is a design decision, so the row is his.
+  **Two things it turned up that are worth his eye on their own**, both from the same trace:
+  the capstone's own `(e.markT||0)>0` clause is unreachable for exactly the same reason, and **Death's
+  Door is unreachable CONTENT** — a complete rank-7 skill (`SKILL_FX.deathsdoor`, its 'DOOMED'
+  floaters, its "⚰️ n marked for death" toast) plus the entire `doomT`/`doomDps`/`doomAcc`/`doomSrc`
+  damage-over-time system in the enemy update loop (13284), none of which any player can reach. That
+  is section J's shape — the kit moved and the code did not.
+- **`x_corrupt` — Corruption Mastery. FIXED, pass 34, 2026-08-12 — and the condition this entry set
+  was met by the effect itself.** The card says rupturing a corrupted enemy corrupts everything near
+  it; the two readers were +25% buildup (9527) and +15% rupture damage (9551), and nothing spread.
+  This entry said the row became Oliver's if corruption had no `igniteBurn`-equivalent splash radius
+  of its own. **It has one, and it was one line above the fix the whole time:** `ruptureCorrupt`
+  draws `skillRing(e.x,e.z,'#d69bff','#8f52d6',120)`, and 120 is also `igniteBurn`'s combustion-splash
+  radius verbatim — the same number from two independent directions, so nothing had to be chosen.
+  The spread goes through `applyElement` and is then topped to a whole stack, which is pass 15's
+  correction in both halves (the door stamps `stFresh`, without which the stack decays on arrival;
+  `buildAmt` scales with the weapon's swing speed and can hand over a fraction, and a fraction of a
+  corrupt meter primes nothing). Only the STACK is borrowed from `igniteBurn`, not its 40% splash
+  damage — the card says "corrupts", not "damages".
+  **The bar was deliberately not "the meter went up".** Corruption has no damage-over-time of its own
+  (`statusTick` DoTs burn and venom only), so its whole payoff to the player is that the body can be
+  RUPTURED — and a stack that cannot be cashed in is pass 15's 0.95 stacks in a new place. Each half
+  therefore ruptures the neighbour afterwards and reads the damage: 0 before, **74** after.
+  Measured by `harness/probes/xcorrupt.probe.js`, three halves in one launch, two trials each
+  (corrupted and uncorrupted) with a far foe in every trial so "everything **near** it" is tested as a
+  radius. Photographed at `_shot/out/xc-spread.png`.
+  **The probe was wrong once, and the FIXED game is what said so** — it read the ruptured body's meter
+  at the end of the trial, and the neighbour's own rupture 80 units away spreads corruption straight
+  back onto it, so a working chain reported as a rupture that never happened. The chain is now
+  reported as evidence (`chainedBack`) rather than asserted: it is a consequence of the radius being
+  symmetric, not a clause of the card.
 - **`x_chill` — Grave Chill. OLIVER'S, and not for the usual reason.** The card says corrupted enemies
   cannot flee and walk toward you instead; the one reader slows them 18%. **Nothing in this game
   flees.** `D.flee` belongs to the Arena bot profiles (12605–12608) and the only other fleeing body is

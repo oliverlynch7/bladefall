@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.939.0-autopilot';
+const VERSION3D='1.940.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12978,7 +12978,43 @@ function update(dt){
     if(Math.random()<0.25) G.particles.push({x:p.x+(Math.random()-0.5)*16,y:p.y+8,z:p.z+(Math.random()-0.5)*16,vx:0,vy:50,vz:0,life:0.3,color:'#cfd6df',sz:2}); }
   if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
     const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
-  if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
+  if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560;
+    /* LIGHT FEET (bladedancer r3 b, index.html:2214): "Dodging through an enemy parries their next
+       attack automatically." Wired 2026-08-12. Like Quick Hands it is NOT one of section E's dead
+       passives — `bd_feet` has always been reported WIRED, and it is: its one reader is `effSpeed`,
+       where it grants +10% move speed (3755) as a rider on the rank-10 capstone's line. That is a
+       different promise from the card's, and the card's own promise had no implementation at all.
+       docs/SKILL_TRIAGE.md section Q.
+       HERE, not at the dodge itself, because "through" is a fact about the DASH and not about the
+       button: the dash is 0.20s of 560 u/s driven by this very line, so the only place that can
+       answer "did the body pass through an enemy" is inside it, frame by frame. The overlap test is
+       the game's own contact test verbatim (13312) — the same radii and the same `vOverlap`, so
+       dashing under a flyer does not count and neither does dashing past one.
+       NOTHING IS INVENTED. The window is Counter Stance's own, including its Patient Guard branch
+       (`bd_counter`, 10454), so the class's rank-5 a-side keeps working on this parry exactly as it
+       does on the other four, and there is one number to change rather than two. The payoff is not
+       written here at all: `hurtPlayer` (11536) already turns an open window into a parry, a stored
+       Riposte, i-frames, Healing Counter and the capstone, which is the whole reason this is four
+       lines.
+       ONE DEVIATION, STATED RATHER THAN HIDDEN: this opens a WINDOW, so within it an attack from a
+       DIFFERENT enemy is parried too, where the card says "their next attack". The alternative was a
+       per-enemy mark, and it is worse on the card's own terms: `hurtPlayer` is never handed the
+       attacker (13312 passes `foeHit(e,…)`, a descriptor, and 13345 passes the PROJECTILE's
+       position), so a marked-body version could only be matched by position and would silently fail
+       to catch a marked archer's arrow — a bigger hole in "their next attack" than a shared window
+       is. Recorded in section Q.
+       Guarded on the window being shut rather than on a per-dash flag: it needs no new field, it
+       fires once per dash because 0.65s outlasts a 0.20s dash, and it can never stomp a Counter
+       Stance the player opened deliberately. */
+    if(meta.classId==='bladedancer'&&c2def('bladedancer')&&c2Passive('bd_feet')&&(p.bdParryT||0)<=0){
+      for(const e of (G.enemies||[])){
+        if(e.dead||dXZ(e.x,e.z,p.x,p.z)>=(e.r+p.r)||!vOverlap(e,p)) continue;
+        p.bdParryT=c2Passive('bd_patient')?.85:.65;
+        addText(p.x,p.y+p.h+18,p.z,'LIGHT FEET','#dce7f5',true);
+        break;
+      }
+    }
+  }
   /* SLIPPERY's shove rides the dash's own speed and NOTHING else of it. Deliberately its own timer
      rather than a second writer of dodgeTimer: that field is read as "this body is dodging" by eight
      damage tests (11446, 12255, 12672, 13056, 13061, 13064, 13233) and blocks attacking at 13003, so

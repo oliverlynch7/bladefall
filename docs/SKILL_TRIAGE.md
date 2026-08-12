@@ -1867,8 +1867,128 @@ body and **UNSEEN READY** over the hero in one frame, with the kill's XP and gol
 Ninja whose rank 3 is Swift. Regression: `node harness/test-skills.js --classes ninja` reports **3 pass
 / 0 fail / 1 unproven**, the unproven being the baselined `ninja/Death Mark`.
 
+---
+
+## O. HASTE NAMED A COOLDOWN ARRAY THIS GAME DOES NOT HAVE — **FIXED 2026-08-12**
+
+**The first row found by the READ-NEVER-WRITTEN half of `harness/audit-fields.js`**, which
+`docs/superpowers/plans/2026-08-10-skill-correctness.md` records as never having been worked. The
+whole finding is one line of sweep output:
+
+```
+=== p.* — 171 fields ===
+  READ NEVER WRITTEN  p.cds  (2 reads, first at line 11644)
+```
+
+Both reads are that one line, and it is the entire implementation of a rank-3 card:
+
+```js
+if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
+```
+
+`chr_haste` (CLASS2.chronomancer r3 b, 2154) reads *"Rewinding resets every skill cooldown."*
+**There is no `p.cds` in this game.** The player's cooldown array is `p.skillCd`, built at 3642 and
+read in twenty-three other places; `p.cds` is assigned nowhere in the file, so `p.cds &&` is a
+short-circuit onto `undefined` and the loop's body never runs. Every chronomancer who has ever taken
+Haste over Potent has been paid nothing for it.
+
+**FOURTH INSTANCE OF THE LIMIT THE PASSIVE AUDIT STATES ABOUT ITSELF**, after `w_unyield` (pass 20),
+Unseen (section H) and Combo Edge (section N) — and the first where the id has a reader that genuinely
+works, so nothing about it looks wrong from any angle the audit can see. `chr_haste` is mentioned twice
+in live code: here, and in `effCdr` (3766), where it grants +10% cooldown reduction. So the passive is
+wired, one of its two readers works, and the card is still a lie.
+
+**The +10% is visible in the probe's own numbers and it is what makes the halves trustworthy.** The
+Haste half enters every trial with cooldowns 13% shorter than the control's — `1.3 / 5.2 / 8.45 / 14.3`
+against `1.5 / 6 / 9.75 / 16.5` — so the passive is demonstrably *selected* and demonstrably *read*.
+A zero after the Rewind can therefore never be "the bench failed to pick the passive", which is the
+usual way a row like this measures nothing.
+
+### How it was measured — `harness/probes/chrhaste.probe.js`, two halves in one launch
+
+A/B between the two options at the SAME rank in the SAME game, so the only difference between the
+halves is which passive is chosen. `chr_potent` is the control: wired, delivered by the same three
+lines of the same death save (11641–11644), and nothing to do with cooldowns.
+
+**The bar is what the player is promised, not what the code sets** — this document has twice been
+burned reading the field instead of the effect (pass 15 lit exactly the right enemy and burned
+nothing; pass 23 measured distance covered rather than an `effSpeed` reading). So each half ends by
+PRESSING slot 0 after the Rewind and reading the pool. `useSkill` returns at `if(p.skillCd[i]>0)
+return;` (10580) **before** it spends anything, so mana leaving the pool is the game's own statement
+that the cast was allowed through. A reset you can see in `p.skillCd` and cannot cast off would clear
+a field-reading bar and still be the bug.
+
+| | control (`chr_potent`) | Haste, before | Haste, after |
+|---|---|---|---|
+| cooldowns armed by four real casts | 4 | 4 | 4 |
+| `skillCd` after the Rewind | `1.22 / 4.88 / 7.93 / 13.42` | `1.3 / 5.2 / 8.45 / 14.3` — unchanged | **`0 / 0 / 0 / 0`** |
+| mana spent by a press after the Rewind | **0** (refused) | **0** (refused) | **7** (cast) |
+| `rewound` | true | true | true |
+
+Everything is driven through the game's own systems: the Rewind history is built by running
+`update()` until the game has recorded it (never by fabricating `p._rew`), the cooldowns are armed by
+CASTING through `useSkill` rather than by assigning to `skillCd`, and the Rewind is reached by taking
+a real killing blow through `hurtPlayer`. Both halves assert `rewound` off the game's own `G._rewUsed`
+counter, so a surviving cooldown can never be a blow that silently did nothing.
+
+**The ticks come before the casts, not after**, and that ordering is load-bearing: `update` decays
+`skillCd` by `dt` every frame (13022), so filling the 3.5s history after the casts would hand the
+trial four cooldowns that had already run most of the way down.
+
+**THE KNOWN-BAD COULD NOT BE AN `inert` HALF.** The trick `petorder.probe.js` and `unseen.probe.js`
+use — pin the field back between ticks — is unavailable, because the reset and the press either side
+of it are one synchronous stretch with no frame in between. So the shipped statement is TRANSCRIBED
+and fed the identical bar, the shape `harness/test/gate.test.js` uses: `p.cds` is read out of the live
+game (`cdsType: "undefined"`, measured, not read off the source), and since it does not exist the
+shipped line provably cannot move a cooldown, so the bar is re-evaluated against the cooldowns as they
+stood before the blow. `okAgainstShipped` was **false while `ok` was true**, in the same launch, on the
+same measurements.
+
+### The fix
+
+`p.cds` becomes `p.skillCd`, guarded the way the file's other twenty-three readers guard it. Nothing
+is invented — the array, the four slots and the `p.skillCd[i]=0` form are the game's own, taken from
+the Bladedancer capstone eleven lines up (11520). `skillCdMax` is deliberately left alone:
+`skillCoolPaint` (10666) takes the wheel off a button itself on the frame its cooldown reaches zero,
+and the paint reads `Math.max(cd, skillCdMax[i])` only while `cd > 0`.
+
+**Photographed, and this is a row where a photograph means something** — unlike a retarget (section L)
+or a movement multiplier (pass 23), four cooldown wheels exist in a still frame.
+`harness/probes/chrhaste-shot.probe.js`, one half per run, same camera, same instant, the two frames
+differing in exactly one thing — which passive is chosen at rank 3:
+
+- `_shot/out/haste-cooling.png` (control) — the **REWIND** floater and *"Three seconds back. Once per
+  area."* over the hero, and under it four greyed skill buttons counting **1.4 / 5.9 / 9.6 / 16.4**.
+- `_shot/out/haste-ready.png` (Haste) — the same floater, the same toast, the same camera, and four
+  lit skill buttons with their icons back and no countdown on any of them.
+
+The button state is returned as well as rendered (`cooling`, and the `.sk-cd` text), so "off-frame" and
+"not drawn" cannot be the same picture.
+
+Regression: `node harness/test-skills.js --classes chronomancer` → **4 pass / 0 fail / 0 unproven**,
+unchanged either side. `node tools/gate.js` → `GATE OK`. Unit stage 53/53.
+
+### What this says about the sweep, for the next run
+
+The read-never-written half turned up **three** rows over `p.` and `e.` once the DOM-event noise
+(`e.clientX`, `e.preventDefault`, `p.catch`) is set aside. This was one. The other two are recorded
+under *"Not listed here"* below: `e.dmg2` and `e._iansSplash`, neither of which is a broken promise.
+**That half of the sweep is now worked and is close to empty** — so the next lead has to come from
+somewhere else, and the standing candidate is still the stat-snapshot half of that plan's Task 3
+Step 2, against the 98 passives that do have a reader.
+
 ## Not listed here, and why
 
+- **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: a limit of the
+  sweep**. It is written at 10845 as `e2._iansSplash=1`, and the sweep's any-receiver pass carries
+  `(?<![0-9.])` to avoid reading `1.5` as a field, which also blinds it to every receiver whose name
+  ends in a digit (`e2`, `p2`). Recorded so the next run does not spend a launch on it — and noted as
+  the one place this sweep can fail in the ACCUSING direction, since a field whose only READER is
+  `e2.foo` would be reported as written-and-never-read.
+- **`e.dmg2`** — read once, at 13445, as the damage of the eruption shockwave a boss leaves behind
+  (`dmg:e.dmg2||12`). Never assigned, so the fallback is the only value it has ever had. **Not a
+  triage row: no card and no boss line promises a number here**, and picking one is a difficulty call
+  on a boss mechanic, which `docs/VISION.md` puts in the ask-first column. Oliver's, and a small one.
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by
   another source or on a condition the bench never meets (the dummy has 100000 HP and never dies).
 - **`reaper/Soul Siphon:heal`, `paladin/Shield Bash:shield`, `paladin/Taunt:shield` and

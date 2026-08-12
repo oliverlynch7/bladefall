@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.937.0-autopilot';
+const VERSION3D='1.938.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11641,7 +11641,15 @@ function hurtPlayer(dmg,sx,sz,by){
     if(c2Passive('chr_potent') && back.mana != null) p.mana = Math.max(p.mana||0, Math.min(p.maxMana||100, back.mana));   // Potent: the mana you had three seconds ago comes back with you
     p.vx = 0; p.vz = 0;
     p.invuln = Math.max(p.invuln||0, c2Passive('chr_ward') ? 3 : 1.2);   // Time Ward: three seconds untouchable
-    if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
+    /* HASTE (chr_haste, r3 b): "Rewinding resets every skill cooldown." It named `p.cds`, which does
+       not exist in this game and never has - the player's cooldowns are `p.skillCd` (3642), read in
+       twenty-three other places - so `p.cds &&` short-circuited and the loop body never ran. Nothing
+       is invented here: the array, the four slots and the `p.skillCd[i]=0` form are the game's own,
+       taken from the Bladedancer capstone eleven lines up (11520). `skillCdMax` is deliberately left
+       to skillCoolPaint (10666), which clears the wheel itself on the frame a cooldown reaches 0.
+       The passive's OTHER reader - +10% cdr in effCdr (3766) - always worked, which is why the
+       passive audit has counted chr_haste wired throughout. */
+    if(c2Passive('chr_haste') && p.skillCd){ for(let i=0;i<4;i++) p.skillCd[i]=0; skillbarUpdate(); }   // Haste: every cooldown reset
     p._rew.length = 0;
     addText(p.x, p.y + 56, p.z, 'REWIND', '#c9a6ff', true);
     try { burst(p.x, p.y+20, p.z, '#c9a6ff', 18); SFX.magic && SFX.magic('void'); G.slowmo = 0.5; } catch(err){}

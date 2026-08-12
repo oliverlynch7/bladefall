@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.927.0-autopilot';
+const VERSION3D='1.928.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9662,6 +9662,25 @@ function playerAttack(cdMul){
   // aim for what you're LOOKING at (direction-priority + LOS), not merely the closest — then face it
   const t=w.cls==='ranged'?projectileAimTarget(p,w.proj.range*1.1):aimTarget(p,w,(w.range+40)*1.6);
   if(t){ p.yaw=Math.atan2(t.x-p.x,t.z-p.z); }
+  /* BLESSED BLADE (paladin r9 b): "Your oath can be sworn at any range — mark without closing."
+     The oath is normally sworn inside the basic-attack hook (CLASS_BASIC.paladin, 11224), which
+     hitEnemy calls only when a swing CONNECTS — so without this passive a Paladin has to walk into
+     melee to mark anything. This swears it on the SWING instead, at whatever the Paladin is looking
+     at, however far away. Wired 2026-08-11; it was one of the 32 in docs/SKILL_TRIAGE.md section E
+     that the menu offers, describes and no code ever read, and the last one this class had.
+     NOTHING IS INVENTED. The reach is Infinity because the card's own word is "any" — picking a
+     number here would be choosing a range the card does not state. The targeting is the game's own
+     aimTarget with the RANGED profile, so the foe must still be inside the 90° sight cone with an
+     unobstructed line (targetInPlayerSight): "mark without closing" is about DISTANCE, not about
+     marking through walls or behind your back. Placed after the aim snap above so the oath and the
+     swing agree about what this attack is pointed at.
+     Only when there is no live oath, and the melee path is untouched — a Paladin without this still
+     swears exactly as before, and one with it still swears by hitting. */
+  if(meta.classId==='paladin' && c2def('paladin') && c2Passive('pal_blessed')
+     && (!p._oath || p._oath.dead)){
+    const bt=aimTarget(p,{cls:'ranged'},Infinity);
+    if(bt){ p._oath=bt; addText(bt.x,bt.y+(bt.h||0)+18,bt.z,'SWORN','#ffe9a8'); }
+  }
   // weapon-specific tap identities — own-class ONLY (off-class falls through to the plain base attack)
   if(w.cls==='ranged' && classFamilyOk(w)){
     if(w.arche==='javelin'){ stabHit(p,w,82,1.25); return; }                                              // javelin tap = a short spear stab (hold = the thrown lance)

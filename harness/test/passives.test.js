@@ -126,7 +126,20 @@ const KNOWN_DEAD = new Set([
      the weapon's swing speed and the paladin's own starter yields 0.95 of a stack, which
      statusTick's Math.floor takes to zero DoT. Measured at `lit 0.95 / lost 0` before the stack was
      topped to the whole one the combustion splash hands over. */
-  'pal_blessed',
+  /* pal_blessed came OFF this list on 2026-08-11 (sub-project B Task 2, pass 19), and it was the
+     PALADIN'S LAST DEAD PASSIVE - the class joins reaper, warrior, mage, ninja, warlock and
+     beastmaster at 0/7. "Your oath can be sworn at any range - mark without closing" is now read in
+     playerAttack, right after the aim snap: the oath already existed and was already sworn by
+     CLASS_BASIC.paladin, which hitEnemy calls only when a swing CONNECTS, so the card changes
+     exactly one thing about it and states that thing itself. The reach is Infinity because the
+     card's own word is "any"; the targeting is the game's own aimTarget with the RANGED profile, so
+     the foe must still be inside the 90 degree sight cone with an unobstructed line - "without
+     closing" is about distance, not about marking through walls or behind your back.
+     Proven by harness/probes/blessed.probe.js, THREE trials per half: a foe at 600 units (against a
+     198-unit melee aim reach) sworn only in the passive half, the same foe placed BEHIND the player
+     sworn in no half, and a melee hit through hitEnemy sworn in every half so the control's zero is
+     a real zero rather than a bench that cannot see an oath at all. `hurt:false` throughout - the
+     swing never landed. */
   'necro_wither', 'necro_plague', 'necro_pest',
   /* bsk_thick came OFF this list on 2026-08-11 (sub-project B Task 2, pass 5): "damage that would
      drop you below 1 HP leaves you at 1 instead, once per fight" is now a death save in hurtPlayer

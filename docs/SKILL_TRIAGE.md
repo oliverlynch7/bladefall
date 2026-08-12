@@ -223,14 +223,14 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 92 wired / 32 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 93 wired / 31 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
-(Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest) and `chr_echo` (Echo) were
-wired 2026-08-11.
-See "Rows taken" at the end of this section. **The Reaper is the first class this sub-project has
-taken from dead passives to none** — it joins warrior, mage, ninja, warlock and beastmaster, which
-never had any.
+(Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
+`pal_blessed` (Blessed Blade) were wired 2026-08-11.
+See "Rows taken" at the end of this section. **The Reaper was the first class this sub-project took
+from dead passives to none, and the Paladin is the second** — they join warrior, mage, ninja,
+warlock and beastmaster, which never had any.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -259,7 +259,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
-| paladin | 1 / 7 | Blessed Blade (~~Bounce Back~~, ~~Burning Light~~ wired 2026-08-11) |
+| paladin | **0 / 7** | — (~~Bounce Back~~, ~~Burning Light~~, ~~Blessed Blade~~ wired 2026-08-11) |
 | skylancer | 1 / 8 | High Ground (~~Hunter's Eye~~, ~~Sky Armor~~ wired 2026-08-11) |
 | reaper | **0 / 7** | — (~~Harvested Strength~~, ~~Crimson Harvest~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
@@ -363,6 +363,61 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **reaper / Crimson Harvest** (`x_crimson`, r7 a) — "Below half health, every soul you collect heals you outright." | 2026-08-11 | `harness/probes/crimson.probe.js`, THREE halves in one launch, TWO kills per half (one below half health, one above): control 0 / 0, passive **24 then 0**, known-bad 0 / 0, on a 477 HP hero |
 
 | **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
+| **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+
+### Blessed Blade — the row whose whole implementation is a DIFFERENT MOMENT, not a different effect
+
+**The oath already existed, was already sworn, and already worked.** `CLASS_BASIC.paladin`
+(index.html:11224) sets `p._oath` the first time a basic attack lands on something, and three other
+places already read it: Holy Power doubles skill damage on it (10787), Burning Light spreads off its
+death (10134), and `hurtPlayer` gives you a third off everything else while it lives (11375). So this
+card does not ask for an effect. It asks for the same effect at a different MOMENT — on the swing
+rather than on the hit — and that is the entire wiring: six lines in `playerAttack`, immediately
+after the aim snap so the oath and the swing agree about what the attack is pointed at.
+
+**NOTHING WAS INVENTED, and this row is the cleanest case of that in the section.** Every other row
+here had to find its number somewhere in the file (Crimson Harvest took the Void Scythe's 5%, Sky
+Armor the dodge's own 0.18s window, Burning Light the combustion splash's radius). This one needed no
+number at all, because the card states its own: *"at any range"*. The reach is `Infinity`. Picking
+600, or 900, or "twice your weapon range" would have been choosing a number the card refuses to
+choose, and every such choice is a balance call that belongs to Oliver.
+
+**The one real decision was WHICH targeting, and the probe is built around it.** `aimTarget(p, w, d)`
+behaves differently for a melee weapon than for a ranged one: the melee profile takes the best-aligned
+enemy with no line-of-sight and no sight-cone test at all, so at `Infinity` it would have sworn things
+through walls and *behind the player's back*. That is a strictly better card than the menu shows —
+the kind of bug nobody reports, because it only ever helps. The wiring uses the RANGED profile, whose
+`targetInPlayerSight` requires the foe inside the 90° cone with an unobstructed line: **"without
+closing" is about distance, and only about distance.** So `harness/probes/blessed.probe.js` puts the
+SAME foe at the SAME 600 units straight BEHIND the player in every half, and it must be sworn in
+none. It is not — including in the passive half, where everything else changes.
+
+**And the third trial is what makes the control's zero mean anything.** A half also lands an ordinary
+melee hit through the game's own `hitEnemy`, which must swear in EVERY half because that path is
+untouched. Without it, "the control swore nothing at range" is indistinguishable from a bench that
+cannot observe an oath at all — the same shape as the harness's own never-red green light. All three
+halves swear the near hit; only the passive half swears the far one; `hurt:false` throughout, so
+`playerAttack` really did return without the blade touching anything (melee swings resolve later, out
+of `update()`, which the probe never ticks).
+
+Measured, one launch each side of the change, everything else identical:
+
+| half | far (600u) | behind (600u) | near melee hit |
+|---|---|---|---|
+| control `pal_will` | not sworn | not sworn | sworn |
+| **`pal_blessed`, before** | **not sworn** | not sworn | sworn |
+| **`pal_blessed`, after** | **SWORN** | not sworn | sworn |
+| known-bad `mon_iron` | not sworn | not sworn | sworn |
+
+`ok:true / okAgainstInert:false` after, `ok:false` before. Paladin suite **7 pass / 0 fail** either
+side, so nothing in the class moved but this.
+
+**Not photographed, and said plainly rather than implied.** Four renders went at it and none produced
+a legible picture: the proof is a floating `SWORN` marker over a foe far enough away to be a few
+pixels at the top of the frame, and `--focus` cannot be aimed at an enemy the `--eval` spawns
+(`--focus` is evaluated first). The arena was rendered from the changed build and is unchanged
+(`_shot/out/blessed-after.png`, `blessed-sworn.png`), so there is no visual regression — but the
+verdict on this row rests on the probe, not on an image.
 
 ### Echo — and the probe that failed itself first
 

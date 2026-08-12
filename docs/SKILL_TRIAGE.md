@@ -1664,6 +1664,138 @@ to him as a co-op question, not a bug list.**
 
 ---
 
+## L. THE BEASTMASTER'S COMPANION NEVER TOOK THE ORDER — **FIXED 2026-08-12**
+
+**The fourth `CLASS_BASIC`-shaped identity found broken, after the Ninja's Unseen (H) and the
+Necromancer's Harvest (I) — and the worst of the three, because the hook died on its FIRST
+STATEMENT and every other fault in it had therefore never had a chance to matter.**
+
+`useSkill` (index.html:10544) opens with the class's whole statement of what it is:
+
+> THE BEASTMASTER'S COMPANION TAKES YOUR SKILL INPUTS. Press a skill and the pet commits too — it
+> lunges at whatever you are aiming at and its own attack comes off cooldown at once. You are
+> playing two characters, which is the class: every skill is also an order.
+
+It then does four things, and announces a fifth to the player's face — `addText(… 'SIC EM' …)`.
+**Three separate faults, stacked, each one hiding the one underneath it:**
+
+1. **`aimTarget()` was called with no arguments.** Its first act is `playerAimYaw(p)`, so it threw on
+   `undefined.yaw` — straight into the hook's own `try{}catch(err){}`. **Nothing in the hook ran, not
+   even the SIC EM.** Measured, not read: the probe calls it the same way and reports
+   `"Cannot read properties of undefined (reading 'yaw')"`, and it keeps that call as a permanent
+   diagnostic so the fault cannot come back invisibly.
+2. **`orderX`/`orderZ`/`orderT` were read by nothing.** `petUpdate` (11651) picks its target by
+   proximity **to the pet**, leashed to foes within 460 of the hero, and has no notion of what you
+   are aiming at. So even a stored order changed nothing.
+3. **`pet.atkCd = 0` is the wrong field.** The companion's attack timer is `pet.atkT` (11672).
+   `atkCd` belongs to the player (9653) and to PvP bots (12708) — which is exactly why a
+   receiver-agnostic reader search cannot see that one dead, and it is the limit
+   `harness/audit-fields.js` states about itself up front.
+
+**Nothing had to be invented, which is why this was an autopilot row rather than Oliver's.** 3.5s is
+the hook's own duration. `PET_LEASH` is `petUpdate`'s own 460, now named and used in both places so
+an order can never name a foe the companion was not already allowed to engage. The selector change
+is a metric swap — nearest to the aim point instead of nearest to the pet — not a new rule.
+
+### How it was measured — `harness/probes/petorder.probe.js`, three halves in one launch
+
+**The bar is which foe the pet GOES FOR**, not whether the fields hold values. This document has
+twice recorded being burned measuring what the code sets instead of what the player is promised
+(pass 15, Burning Light lit exactly the right enemy and burned nothing). Each trial stands two foes:
+`near`, parked on the pet and away from the hero's aim, and `aimed`, straight down the hero's
+forward vector and further from the pet. The melee dart plants the companion on its target
+(`petAttack`, 11688), so the choice is readable as a distance *and* as HP lost.
+
+| | before | after |
+|---|---|---|
+| ordered: pet → aimed foe | **525** | **31** |
+| ordered: pet → near foe | 33 | 463 |
+| ordered: aimed foe HP lost | **0** | **55** |
+| ordered: near foe HP lost | 55 | **0** |
+| ordered: `orderX/Z/T` after the press | `null / null / 0` | `0 / 640 / 3.5` |
+| ordered: `atkT` after the press | 0.9 | **0** |
+| **no order pressed**: pet → near / aimed | 35 / 527 | 35 / 527 |
+
+**The no-order control is what makes the rest mean anything, and it holds in ALL THREE halves.** A
+fix that simply sent the companion at the reticle forever would clear a one-trial bar and would be a
+worse card than the one the class was designed around; with nothing pressed the pet still takes the
+foe beside it.
+
+**The known-bad is carried in the probe, not produced by breaking the repo** (the rule
+`level.probe.js`'s `?breakgap` and `mp.probe.js`'s `?heroslot` follow): a third half pins
+`pet.orderT` back to 0 on every tick, which is exactly what "nothing reads orderT" amounts to. It
+reads `toNear 33, toAimed 525, nearLost 111` — **identical to the before-run** — so `okAgainstInert`
+is false while `ok` is true, in one launch, on real measurements.
+
+**The skill pressed is slot 2, Mend the Pack**, and the choice is load-bearing: it is a heal that
+touches no enemy and no pet targeting. Sic 'Em, Coordinated Strike, Pack Step and Stampede all move
+or aim the companion themselves, so pressing one of those would have let the **shipped** game pass
+this bar on the skill's own effect and prove nothing. The probe asserts the slot has not drifted onto
+one (`commandsPet: false`).
+
+*Two things the probe was wrong about first, both caught by a run rather than by reading.*
+`spawnPet()` takes **no arguments** — it reads `meta.petActive` (11631) — so the first launch came
+back `no companion could be put in the field` and measured nothing. And the companion had to be the
+Beastmaster's own `spiritwolf`, which `PETIDS` does not list because it is `hidden:true` (it is
+summoned by Bonded Companion, never sold).
+
+Regression: `node harness/test-skills.js --classes beastmaster` → **6 pass / 0 fail / 0 unproven**.
+`node tools/gate.js` → `GATE OK`. Unit stage 53/53.
+
+**No picture.** A retarget is a behaviour and does not exist in a still frame, said plainly rather
+than glossed — the same honesty pass 23 (Swagger) had to state about a movement multiplier. The
+after-frame confirms only what a frame can: the class, a live Spirit Wolf at 264/264, an intact HUD.
+
+### The GAME finding this turned up, which is NOT fixed — Oliver's
+
+**The Beastmaster's innate CARD does not describe the mechanic above.**
+`CLASS2.beastmaster.innate` (2223) still reads *"Your companion gains +25% max HP and +15% damage or
+healing…"* — and the hook's own comment says that flat bonus is *"the exact stat-reskin this rewrite
+exists to remove."* So the identity this section just brought to life is one the player is never
+told about. Section J's shape exactly, and this document's rule forbids fixing a skill by editing its
+description, so which of the two is the real card is his. **Worth answering with the section J
+twelve, as a thirteenth row.**
+
+---
+
+## M. WHAT THE FIELD SWEEP FOUND AND DID NOT FIX — three rows, all Oliver's
+
+`harness/audit-fields.js` (added 2026-08-12) is the widened static sweep
+`docs/superpowers/plans/2026-08-10-skill-correctness.md` asks for by name: every field the game
+**writes and never reads**, over `p.`, `e.`, `G.`, `G.pet.` and a receiver-agnostic `*` mode. It
+independently reproduced every field sections J and K found by hand, found section L above, and
+turned up three more that are recorded rather than taken.
+
+**TWO OF THE SIX BOSS PHASE-2 MECHANICS ARE ANNOUNCED AND NEVER BUILT.** `BOSS_PHASE2` (19379) gives
+each boss a second half that changes what the fight *is*, and its header explains why. Four of the
+six are wired — `_rubble` (13619), `_volleyPin` (13477), `_endlessCourt` (13499), `_crossQuake`
+(13526). **The other two set a field nothing reads, and each floats its own line over the boss's
+head as it does so:**
+
+| boss | the game says | what it sets | read at |
+|---|---|---|---|
+| Frost Sorcerer | **"A SECOND OF HIM"** — the blink leaves a mirror that casts too | `e._mirrorCast = 1` | **nowhere** |
+| Abyss King, Awakened | **"THE EDGE FALLS AWAY"** — the arena's rim collapses and keeps collapsing | `e._rimFall = 1` | **nowhere** |
+
+**Not taken, and the reason is not "a number has to be invented" — for the King it does not.** The
+tyrant already owns a live collapsing-floor system (`G.collapse`, pushed at 13565, updated at 13102,
+drawn at 16736) with its own disc radius, warning time and cadence, so a rim variant is reachable
+from the game's own parts. What it would change is **how the final boss fight plays**: an arena that
+shrinks under you is a difficulty decision on the hardest fight in the game, and `docs/VISION.md`
+puts balance in the ask-first column. The Sorcerer's mirror is a step past that again — a second
+casting body is a mechanic that does not exist. **Both are his: the King's is a yes/no, the
+Sorcerer's is a design.**
+
+**`e.petTauntT` IS A FOURTH AGGRO ROW — section K's list was not complete.** `SKILL_FX.bst_roar`
+(10318) sets it on every foe in range and the card (r6 b) promises *"a damaging roar… turns their
+attention toward your companion."* The damage and the slow are real; the attention is not, for
+section K's reason — there is no target-selection step in the enemy AI to turn. Section K's table
+should be read as **five** fields, not four.
+
+**`p.spinT` is an inert leftover, not a promise.** `spellSweep` (9789) and `spinCleave` (9794) each
+set it to 0.4 and nothing reads it. No card in the game promises a spin, so this is `_vanish`'s shape
+rather than Unseen's — recorded only so the next sweep does not spend a launch on it.
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

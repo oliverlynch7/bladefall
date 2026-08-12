@@ -245,6 +245,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 24 | **E — pirate Slippery was never read** | this run | `harness/probes/slippery.probe.js`, THREE halves in one launch with TWO shots per half (loaded then spent, because "firing the pistol" is the condition and a passive that shoved on every swing would clear a loaded-only bar): all six shots moved 0 before; after, the loaded shot moved 139.4 and took the gap from 60 to 199.4 past the game's own reach of 88, the spent shot moved 0, and the control and known-bad stayed at 0 throughout. **The obvious one-line fix — `p.dodgeTimer=0.22` — would have shipped an i-frame**: eight damage tests read that field as "this body is dodging", so the shove runs on its own `_slipT` and the probe asserts `dodgeCdT` was never spent. The probe was wrong twice first, both ways silently: it faced the hero at `yaw 0` toward a foe the game's own forward vector puts BEHIND it, and it reset position between trials but not velocity, so the dash's friction tail drifted the spent half 18.7 units with nothing fired. Pirate suite 3 pass / 0 fail / 1 unproven either side |
 | 25 | **H — the ninja's Unseen never armed** | this run | `harness/probes/unseen.probe.js`, THREE halves in one launch with FOUR trials each: all three halves read `stillT 0` after 1.2s of the game's own ticks at a drift of 0 and repositioned nobody before; after, the live halves move the body 101 units to `distAfter 41` = `wanted 41` on the far side of the target for 8 damage against the base 6, the 0.7s trial fires ONLY in the half holding Swift, the walking trial fires in no half, and the inert half — `_stillT` pinned at 0, which is exactly the shipped state — fires nowhere. **Not a dead passive: a live mechanic gated on a clock that only ran for the mage**, so the passive audit had reported the class at 0/8 dead throughout while two of its cards were written about a clock that never advanced. The second instance of the limit Task 3 Step 2 states in advance, after `w_unyield`, and the worse of the two. Photographed at `_shot/out/unseen-strike3.png` |
 | 26 | **I — the necromancer's Harvest deleted the corpse it announced** | this run | `harness/probes/harvest.probe.js`, THREE halves in one launch with THREE trials each: five hits gave `added 1, survived 0, risen 2` before and `1 / 1 / 1` after, four hits found no corpse in any half either side, and a corpse from a KILL raised correctly in every half both ways — so the control's zeros are real zeros. **The bar is the game's own discriminator**: `necro_raise` raises ONE fighter off a corpse and falls back to TWO without one, so a plain "did a minion appear" test would have gone green against the shipped game on the fallback alone. The known-bad half reads identically to the before-run's live half. Found by a static sweep for the section H shape, not from the triage list — section E is floored and this is what the plan says to hunt instead |
+| 27 | **L — the Beastmaster's companion never took the order** | this run | `harness/probes/petorder.probe.js`, THREE halves in one launch with TWO trials each (ordered, and a no-order control that must hold in every half): the pet was 525 from the aimed foe and 33 from the one beside it, and is now 31 and 463, with the damage moving with it (aimedLost 0 → 55, nearLost 55 → 0) — while the no-order control reads 35 / 527 in all three halves, so this is a retarget and not a pet that now always charges the reticle. The known-bad half reads identically to the before-run. **Three faults stacked, and the outer one hid the other two: `aimTarget()` was called with NO ARGUMENTS**, threw on `undefined.yaw` into the hook's own catch, and killed the whole hook including the SIC EM the player is shown — so the dead `orderX/orderZ/orderT` and the wrong-field `atkCd` had never had a chance to matter. Found by the widened sweep this same run, not from the triage list. Beastmaster suite 6 pass / 0 fail / 0 unproven |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
@@ -290,6 +291,32 @@ doubler. That is a balance change and his as well, for pass 20's reason.
 **So this sub-project's honest state is: no skill row an autopilot run may take is currently known.**
 Section E is floored, section J is Oliver's by rule, and the next candidate has to be *found* — by
 widening the sweep, not by re-reading the triage list.
+
+**THE SWEEP WAS WIDENED, 2026-08-12, AND IT WORKED — so the paragraph above is answered rather than
+still open.** `harness/audit-fields.js` + `harness/test/fields.test.js` (16 tests, ratcheted in both
+directions, in `run-all.js`'s fast stage) sweep `p.`, `e.`, `G.`, `G.pet.` and a receiver-agnostic
+`*`. It reproduced independently every field sections J and K had found by hand, and found **pass 27
+(section L), the Beastmaster's dead order** — a class identity, VISION.md priority #2, announced to
+the player with floating text and dead from its first statement.
+
+Two corrections it needed first, both found by running it against the real game and both failing in
+the ACCUSING direction — a false *dead* verdict, which is the one that gets a non-bug "fixed":
+`Array.from` splits by code POINTS, so one emoji desynced the stripper and it began blanking live
+code (37 of the first run's 208 `p.*` "fields" were halves of real identifiers); and the reader
+search was receiver-restricted, while the game reaches the player under more than one name
+(`p._headlongT` is read as `G.p._headlongT`). Each now has a unit test asserting the new and old
+behaviour DISAGREE.
+
+**What it left on the table, all of it Oliver's, in `docs/SKILL_TRIAGE.md` section M:** two of the six
+`BOSS_PHASE2` mechanics are announced to the player and never built (the Frost Sorcerer's
+*"A SECOND OF HIM"* and the Awakened King's *"THE EDGE FALLS AWAY"*) — the King's is reachable from
+the game's own `G.collapse` system and is held back because an arena that shrinks under you is a
+difficulty call on the final boss, not because a number is missing; `e.petTauntT` makes section K
+**five** aggro fields rather than four; and `p.spinT` is an inert leftover.
+
+**Where the next run should look:** the sweep's `*` mode is unratcheted and only eyeballed once. Its
+read-never-written half has not been worked at all, and `CLASS_BASIC` is now 4 for 12 on identities
+that did not work — the other eight have never been checked against what they claim.
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —

@@ -259,7 +259,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
-| necromancer | 3 / 8 | Withering, Plague, Pestilence |
+| necromancer | 3 / 8 | Withering, Plague, Pestilence — **all three one missing mechanic, measured 2026-08-12** |
 | paladin | **0 / 7** | — (~~Bounce Back~~, ~~Burning Light~~, ~~Blessed Blade~~ wired 2026-08-11) |
 | skylancer | 1 / 8 | High Ground (~~Hunter's Eye~~, ~~Sky Armor~~ wired 2026-08-11) |
 | reaper | **0 / 7** | — (~~Harvested Strength~~, ~~Crimson Harvest~~ wired 2026-08-11) |
@@ -334,6 +334,69 @@ leaving it dead, so it goes with the missing player-slow mechanic, next to Unbre
 **This is `docs/VISION.md` priority #2 in the plainest possible terms.** A rank-3 choice between two
 passives that both do nothing is not a build decision, and a class whose entire passive tree is inert
 is a stat-reskin of its core no matter what its cards say.
+
+**THE NECROMANCER'S THREE ARE ALSO ONE MISSING MECHANIC, and this one was MEASURED rather than read
+— 2026-08-12, `harness/probes/necrot.probe.js`.** All three cards are written about one state:
+`necro_wither` (*"enemies standing on a corpse cannot heal and **rot** slowly"*), `necro_plague`
+(*"an enemy that dies while **rotting** infects everything near it"*) and `necro_pest` (*"your
+minions leave a **rotting** trail"*). The game has exactly one decay status — `venom` (`EL_STAT`,
+9507) — and it is only ever reached through `applyElement`, which in turn is only ever reached from a
+WEAPON'S element (hitEnemy 10875, the swing 11384, the sweep 13107) or from Burning Light's splash.
+
+The probe cast **both sides of all four skill ranks** at a fresh dummy and landed a real swing with
+the class's own starter, then read the dummy's status object back. `anyVenom: false`. Not one of the
+eight produces it:
+
+| cast | its own words | what actually landed |
+|---|---|---|
+| Plague Bolt | "rapid-fire bolts of **necrotic plague**" | `burn 1.35` — the WEAPON's fire, not the skill's |
+| Death Storm | "a storm of **decay** rages around you for 4s" | **nothing at all**, on 862 damage |
+| Death Grip | "a skeletal grip implodes enemies inward" | `burn 1.35`, same weapon element |
+| Corpse Nova, Summon Skeletons, Raise the Dead, Bone Wall, Army of the Dead | — | nothing |
+| a real swing | — | `burn 1.35` |
+
+**The only status a Necromancer can put on anything is BURN, and it comes from the Cracked Bonestaff
+— the class's own starter is a FIRE staff.** Statically the cause is one line: `SKILL_FX.necro_bolt`
+IS `SKILL_FX.m_bolt` and `necro_storm` IS `m_tempest` (10279), so "Plague Bolt" and "a storm of decay"
+are the mage's plain bolt and tempest wearing necromancer names. So the three passives are blocked on
+a MECHANIC, exactly like the Stormcaller's six, and choosing what rot IS — a new status, or venom
+adopted, with a rate and a duration nothing states — is a design decision with numbers in it. **It is
+one decision that unblocks three passives, two skill descriptions and the class's whole identity**,
+and against `docs/VISION.md` priority #2 that last part is the point: a Necromancer currently plays as
+a mage with skeletons.
+
+*Two things the probe had to be corrected on, both worth keeping.* Its first run reported "the kit
+rots nothing" **having cast only the a-side of every rank** — `cheatRank10All` picks a-sides, so
+Plague Bolt and Death Storm, the two skills whose names promise the exact thing under test, were never
+cast. That is this sub-project's two-list trap in a new costume: a bench that names the kit and casts
+a quarter of it. And "does it rot" had to be split from "does any status land", because the swing DID
+land one — a burn, off the fire staff. Answering this question with a burn stack would have been the
+wrong yes.
+
+### What is left in this section, and the ONE decision that unblocks each group
+
+Taken together with the rows above, **every one of the 27 remaining dead passives is now blocked on
+something only Oliver can decide** — a number, a unit, or a mechanic that does not exist. That is a
+floor, not a wall: none of them needs more investigation, each needs one answer.
+
+| group | rows | the one thing needed |
+|---|---|---|
+| stormcaller ×6 | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize | **a lightning chain**, plus the falloff "softer each" names no amount |
+| necromancer ×3 | Withering, Plague, Pestilence | **what "rot" is** — measured above |
+| ranger ×2 | Longshot, Close-Quarters Archer | **what a metre is in world units** (the only four `m` in the game are these cards) |
+| ranger ×1 + berserker ×1 | Escape Artist, Unbreakable | **a player slow / stun** — neither exists, so wiring them grants immunity to nothing |
+| ranger ×1 | Elemental Archer | a ground→element map |
+| chronomancer ×1 | Deep Freeze | an enemy-facing model |
+| chronomancer ×1 | Entropy | how fast a held enemy weakens |
+| monk ×2 | Inner Fire, Still Water | a mana refund per dodge; a heal rate for "quickly" (Meditation's is 1.2%/s and is the *slow* one) |
+| monk ×1 | Iron Body | half of it is the player stun above; the knockback half is a one-liner beside Heavy Hands |
+| pirate ×3 | Sea Legs, Lucky, Greed | "cannot be knocked off a ledge" is a mechanic; "sometimes" is a chance; "a little further" per 500 gold is a step |
+| skylancer ×1 | High Ground | a height→damage scale; the hook is binary today (×0.8 grounded, ×1.5 airborne) |
+| bladedancer ×1 | Keep Moving | as written it is **unbounded** — "you cannot be hit while moving between two parries" gives permanent immunity to a mobile class once it has parried once. It needs a window, and choosing one is a balance call |
+| berserker ×2 | Reckless, Bloodthirst | **Reckless has no upside clause at all** — "every swing costs you a sliver of health, hit or miss" and nothing else. The file defines "a sliver" once, as the Warlock's 3% (11411), but the Warlock's version pays ×1.4 damage and refunds on a kill. A pure cost is either the Berserker's low-HP kit being enabled on purpose or a lost clause, and that is a design read. Bloodthirst needs a heal amount |
+
+**Nothing here should be wired by an autopilot run.** Each would mean putting a number on a card that
+does not have one, which is the one thing this document forbids.
 
 **Recorded as a ratchet, not as a wall.** The 46 live in `KNOWN_DEAD` in
 `harness/test/passives.test.js`, so the gate stays green on them while a **newly** dead passive fails

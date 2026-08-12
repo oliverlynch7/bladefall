@@ -246,6 +246,22 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 25 | **H — the ninja's Unseen never armed** | this run | `harness/probes/unseen.probe.js`, THREE halves in one launch with FOUR trials each: all three halves read `stillT 0` after 1.2s of the game's own ticks at a drift of 0 and repositioned nobody before; after, the live halves move the body 101 units to `distAfter 41` = `wanted 41` on the far side of the target for 8 damage against the base 6, the 0.7s trial fires ONLY in the half holding Swift, the walking trial fires in no half, and the inert half — `_stillT` pinned at 0, which is exactly the shipped state — fires nowhere. **Not a dead passive: a live mechanic gated on a clock that only ran for the mage**, so the passive audit had reported the class at 0/8 dead throughout while two of its cards were written about a clock that never advanced. The second instance of the limit Task 3 Step 2 states in advance, after `w_unyield`, and the worse of the two. Photographed at `_shot/out/unseen-strike3.png` |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
+**SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
+All 27 remaining dead passives are now triaged, with the group-by-group table in
+`docs/SKILL_TRIAGE.md` section E under *"What is left, and the ONE decision that unblocks each
+group"*. Every one of them is blocked on a number, a unit, or a mechanic that does not exist —
+inventing any of those is the one thing this plan's own constraints forbid. The last group to be
+settled was the Necromancer's three, and it was **measured, not read**: `harness/probes/necrot.probe.js`
+cast both sides of all four skill ranks plus a real swing and reported `anyVenom: false`, so the class
+cannot produce the decay state all three of its cards are written about. "Plague Bolt" lands the
+WEAPON's burn and "a storm of decay" lands nothing at all, because both are the mage's skills under
+necromancer names (`10279`).
+
+So Task 2's remaining targets come from **section H and the wired-but-wrong shape**, not from section
+E — a mechanic that exists, is described, is read, and is gated on something that never happens. That
+is where pass 25 came from and it is the shape `w_unyield` (pass 20) also has. Neither is findable by
+the passive audit, which asks only "does anything read this id".
+
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
 the three knowns are still `ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`, all three

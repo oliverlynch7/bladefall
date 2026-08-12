@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.930.0-autopilot';
+const VERSION3D='1.931.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10879,6 +10879,41 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
   if(weaponManaHit) gainMana(G.p,4,false);
+  /* MASTER STRIKER (monk r9 b): "Every fourth unbroken strike hits everything around you."
+     Wired 2026-08-11 — one of the passives in docs/SKILL_TRIAGE.md section E that the rank menu
+     offers, describes, and no code has ever read: `mon_master` appeared exactly twice in the whole of
+     public/, in CLASS2 where it is defined and in PASSIVE_ART where its icon is named.
+     NOTHING HERE IS INVENTED, which is why this row was takeable. "Everything around you" is the
+     monk's OWN Whirl Kick verbatim — SKILL_FX.mon_whirl is SKILL_FX.w_whirl (10261), reach `<165+o.r`
+     over combatTargets() behind a losBlocked check, knockback 260, ring 185 — so the class's authored
+     answer to that phrase is fired by a chain instead of by a button, and no radius had to be chosen.
+     "Every fourth" is `w_swift`'s shape a hundred lines up (`src._swiftHits%4===0`, 10781) and the
+     splash is Soul Tether's (10824): a re-entrant-guarded loop from inside hitEnemy, with the guard
+     for the same reason — without it the splash's own hits would count as strikes and cascade.
+     "UNBROKEN" IS THE MONK'S OWN FOCUS RHYTHM, and that is the whole reason this sits ABOVE the Focus
+     line rather than below it. Focus is refreshed by the next line on every monk hit and zeroed by
+     class2Innate when `focusT` lapses (10048), so the game already owns a definition of "the monk
+     stopped attacking" — read here BEFORE the refresh, which is the only moment the pre-hit state of
+     the window still exists. Reading it after would make every strike look like a continuation and
+     turn the card's "unbroken" into a plain lifetime counter.
+     The blow the neighbours take is the one the primary took: `dmg` at this point is the final
+     rounded figure (10846), so the strike really does hit everything around you rather than a second
+     attack of its own with its own number in it. */
+  if(src===G.p && meta.classId==='monk' && c2def('monk') && c2Passive('mon_master') && !e.dead && !G._masterHit){
+    const mp=G.p;
+    if(!((mp.focusT||0)>0)) mp._masterHits=0;                       // the chain broke: start counting again
+    mp._masterHits=(mp._masterHits||0)+1;
+    if(mp._masterHits%4===0){
+      G._masterHit=1;
+      let n=0;
+      for(const o of combatTargets()){
+        if(o===e||o.dead||dXZ(o.x,o.z,mp.x,mp.z)>=165+o.r||losBlocked(mp.x,mp.z,o.x,o.z)) continue;
+        hitEnemy(o,dmg,src,260,lifesteal,el); n++;
+      }
+      G._masterHit=0;
+      if(n){ skillRing(mp.x,mp.z,'#ffd27a','#8c642f',185); addText(mp.x,mp.y+mp.h+22,mp.z,'MASTER STRIKER','#ffd27a',true); }
+    }
+  }
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
   if(e.hp<=0) killEnemy(e,weaponManaHit);

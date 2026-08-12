@@ -190,7 +190,15 @@ const KNOWN_DEAD = new Set([
      after a dodge hits for triple" is now armed at the dodge itself beside w_tactical and spent in
      CLASS_BASIC.monk, proven by harness/probes/monkiller.probe.js — ratio 1.009 on both strikes of
      both halves before, exactly 3 then exactly 1 after. */
-  'mon_iron', 'mon_fire', 'mon_still', 'mon_master',
+  /* mon_master came OFF this list on 2026-08-11 (sub-project B Task 2, pass 22): "every fourth
+     unbroken strike hits everything around you" is now read in hitEnemy, one line ABOVE the monk's
+     Focus refresh — which is where it has to be, because "unbroken" is read off the pre-hit focusT
+     that the next line overwrites. Its splash is Whirl Kick's own reach and knockback and Soul
+     Tether's own re-entrant loop, so no radius and no damage figure had to be chosen. Proven by
+     harness/probes/monkmaster.probe.js: THREE halves in one launch, four strikes then a
+     game-driven chain break then two more — neighbour 0/0/0/127 and far 0 in the passive half, all
+     zeroes in the control and the known-bad, and nothing after the break. */
+  'mon_iron', 'mon_fire', 'mon_still',
   /* st_ward came OFF this list on 2026-08-11 (sub-project B Task 2, pass 4): "casting a skill
      grants a shield equal to 4% max HP" is now read in useSkill next to its three identical twins,
      proven by harness/probes/stward.probe.js failing before and passing after. */

@@ -223,12 +223,12 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 95 wired / 29 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 96 wired / 28 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
 (Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
-`pal_blessed` (Blessed Blade), `bsk_heavy` (Heavy Hands) and `pir_deadly` (Dead Aim) were wired
-2026-08-11.
+`pal_blessed` (Blessed Blade), `bsk_heavy` (Heavy Hands), `pir_deadly` (Dead Aim) and `mon_master`
+(Master Striker) were wired 2026-08-11.
 See "Rows taken" at the end of this section. **The Reaper was the first class this sub-project took
 from dead passives to none, and the Paladin is the second** — they join warrior, mage, ninja,
 warlock and beastmaster, which never had any.
@@ -254,7 +254,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | class | dead / total | the dead ones |
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
-| monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
+| monk | 3 / 8 | Iron Body, Inner Fire, Still Water (~~Flow~~, ~~Killer Focus~~, ~~Master Striker~~ wired 2026-08-11) |
 | pirate | 5 / 8 | Sea Legs, Swagger, Slippery, Lucky, Greed (~~Dead Aim~~ wired 2026-08-11) |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
@@ -365,8 +365,78 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 
 | **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
 | **pirate / Dead Aim** (`pir_deadly`, r3 a) — "The pistol pierces every enemy in a line." | 2026-08-11 | `harness/probes/deadaim.probe.js`, FIVE bodies in a line, THREE halves in one launch: control and known-bad stop at **3 of 5** with pierce spent to 0, the passive half takes **5 of 5** with pierce 99 → 94. The probe's own first two runs said 4 of 5 and the path trace proved that was the shot SINKING, not the pierce — `pierce:96` still in hand when it stopped connecting |
+| **monk / Master Striker** (`mon_master`, r9 b) — "Every fourth unbroken strike hits everything around you." | 2026-08-11 | `harness/probes/monkmaster.probe.js`, THREE halves in one launch, each with FOUR strikes then a game-driven chain break then TWO more: a neighbour 120 units away that is never struck directly lost **0 / 0 / 0 / 127** in the passive half and nothing at all in the control or the known-bad, a far foe at 420 lost nothing in any half, and nothing splashed after the break. Photographed at `_shot/out/mm-splash2.png` — the MASTER STRIKER banner over the monk, 112 over the struck foe and 127 over each flanking grunt |
 | **berserker / Heavy Hands** (`bsk_heavy`, r3 a) — "You cannot dodge — but nothing can knock you back or stagger you." | 2026-08-11 | `harness/probes/heavyhands.probe.js`, THREE halves in one launch, THREE trials per half: control and known-bad thrown at the game's own **vz 210 / vy 160** with the dodge firing; the passive half **vz 0, vy 0, onGround true, dodge refused** — and **hpLost 6 in all three**, because an early return would have been damage immunity. Dodge button photographed unavailable at `dodgeCd 0` |
 | **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+
+### Master Striker — the first row whose card promises a CHAIN, and the one line the fix had to sit above
+
+"Every fourth unbroken strike hits everything around you" is three separate promises, and the whole
+row turned on where in `hitEnemy` the wiring goes rather than on what it does.
+
+**Nothing was invented, in any of the three.**
+- *"Everything around you"* is the monk's OWN Whirl Kick, verbatim. `SKILL_FX.mon_whirl` is
+  `SKILL_FX.w_whirl` (10261): reach `<165+o.r` over `combatTargets()` behind a `losBlocked` check,
+  knockback 260, ring `skillRing(...,185)`. The class already had an authored answer to that exact
+  phrase, so this passive fires it from a chain instead of from a button and no radius had to be
+  chosen. The blow the neighbours take is the one the primary took — `dmg` at the insertion point is
+  the final rounded figure (10846) — so the strike really does hit everything around you rather than
+  being a second attack with a number of its own.
+- *"Every fourth"* is `w_swift`'s shape a hundred lines up (`src._swiftHits%4===0`, 10781), and the
+  splash is Soul Tether's (10824): a re-entrant-guarded loop over `combatTargets()` from inside
+  `hitEnemy`. **The guard is load-bearing rather than tidy** — the splash's own hits pass back through
+  `hitEnemy` with `src===G.p`, so without it they would count as strikes and every fourth splash
+  would set off another.
+- *"Unbroken"* is the monk's own Focus rhythm. Focus is built on every monk hit and its stacks are
+  zeroed by `class2Innate` the moment `focusT` lapses (10048), so the game already owned a definition
+  of "the monk stopped attacking" and this borrows it instead of introducing a second window with a
+  second number in it.
+
+**AND THAT IS WHY THE FIX SITS ONE LINE ABOVE THE FOCUS REFRESH, NOT BELOW IT.** The next line
+(10882) sets `focusT` to 4 on every monk hit. Read after it, the window is always alive, every strike
+looks like a continuation, and the card's "unbroken" quietly degrades into a plain lifetime counter
+that never resets. The pre-hit state of that window exists for exactly the span between the damage
+being applied and the refresh, and that is where the counter is read.
+
+**The chain break needed its own phase, at a non-multiple of four, or it could not have been observed
+at all.** Breaking the chain after 4 strikes and then landing 4 more proves nothing: with a reset the
+splash comes on the 4th, and without one the counter is at 8 — which is also a multiple of four.
+Modulo arithmetic hides the reset. The probe therefore breaks the chain and lands **two** strikes: 1
+and 2 of a new chain splash nothing, while a counter that ignored the break would be at 5 and 6 and
+would splash on the second. The break itself is driven by the game — 242 ticks of `update()` until
+`focusT` lapses, never by writing the counter — because a probe that resets the state under test is
+asserting on something it wrote.
+
+| half | strikes 1–4 on the primary (neighbour lost) | far foe at 420 | after the break |
+|---|---|---|---|
+| control `mon_still` | 0 / 0 / 0 / **0** | 0 | 0, 0 |
+| **`mon_master`, before** | 0 / 0 / 0 / **0** | 0 | 0, 0 |
+| **`mon_master`, after** | 0 / 0 / 0 / **127** | 0 | 0, 0 |
+| known-bad `mon_iron` | 0 / 0 / 0 / **0** | 0 | 0, 0 |
+
+The primary lost 112 to each of its four strikes in every half, so the zeroes above are real zeroes
+rather than a bench that never swung. **The control is the a-side of this very rank and it is also
+dead** — there is no wired sibling at monk rank 9 to use, which is itself section E's point in one
+line: a rank-9 "choice" between two passives that each do nothing.
+
+*One number worth explaining before someone reads it as a bug:* the neighbours lose **127** where the
+primary loses 112. The splash passes the strike's damage back through `hitEnemy`, so the receiving
+body runs the pipeline again — element matching, the combo multiplier, its own modifiers. That is Soul
+Tether's behaviour too (`hitEnemy(o, dmg*0.4, …)`), and it is the file's existing idiom for "this hit
+also lands on someone else".
+
+*And a small correction inside the probe itself, which failed its own clean-check first:* it asserted
+`focusT === 0` after the lapse. `focusT` is decremented only while positive and left alone once it is
+not, so a lapsed window reads as **−0.02**, never as exactly 0 — every half of the first run was red
+against a game that was behaving correctly. The bar now tests `<= 0`. This is the third probe in this
+sub-project to be defeated by the exact shape of a timer it was reading rather than by the game.
+
+**Left behind, and stated rather than fixed:** `_stillT` — the standing-still timer that `mon_still`
+(Still Water) and `nin_swift` both want — is ticked for the MAGE ONLY (`class2Innate`, 10045:
+`if(meta.classId==='mage')`), while `11269` reads it for the ninja. So the next monk row in this
+section is blocked behind a one-class guard on a shared field, and the ninja has a live reader of a
+timer that never advances. Not chased here: it is one line to widen and it changes a wired ninja
+passive's behaviour, which is a different row from a dead monk one.
 
 ### Dead Aim — the row where the PROBE was wrong twice and the game was right all along
 

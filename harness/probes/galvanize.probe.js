@@ -55,6 +55,10 @@
 
   const cs = __BF3.classState('stormcaller');
   cs.ch = cs.ch || {};
+  /* RANK 9, NOT 10: Storm Lord's third clause (pass 40) adds an arc. It cannot change this bar —
+     the lone trial has nobody to arc to and the pair trial has exactly one candidate — but the
+     capstone is not what this row is about, so it is held off the bench rather than reasoned around. */
+  cs.rank = 9;
   cs.ch[3] = 'st_conductor';   // dead: one arc, so "no second target" means an empty room
   cs.ch[5] = 'st_ward';        // wired, and a shield on cast: it cannot reach an enemy
   cs.ch[7] = 'st_amped';       // dead today (per-jump damage ramp); NOT st_charged, whose doubled

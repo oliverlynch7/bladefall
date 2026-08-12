@@ -70,6 +70,12 @@
 
   const cs = __BF3.classState('stormcaller');
   cs.ch = cs.ch || {};
+  /* RANK 9, NOT 10. `cheatRank10All` leaves the bench at the capstone, and Storm Lord's third
+     clause — wired 2026-08-12, pass 40 — adds an arc of its own, so a rank-10 bench would read 2
+     arcs in the CONTROL half and this probe would fail against a correct game. Every pick below is
+     rank 9 or lower, and c2Passive does not consult the rank (index.html:10070), so nothing else
+     moves. */
+  cs.rank = 9;
   cs.ch[5] = 'st_ward';        // wired, and a shield on cast: it cannot reach an enemy
   /* Was `st_charged` until 2026-08-12, when pass 38 wired it and it began DOUBLING the jump
      distance this probe's geometry is built around. Moved to the b-side of the same rank, which is

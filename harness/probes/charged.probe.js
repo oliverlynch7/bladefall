@@ -57,6 +57,9 @@
 
   const cs = __BF3.classState('stormcaller');
   cs.ch = cs.ch || {};
+  /* RANK 9, NOT 10: Storm Lord's third clause (pass 40) adds an arc, and this probe is about a
+     DISTANCE. Holding the count at one keeps "which body did the reach reach" a single question. */
+  cs.rank = 9;
   cs.ch[3] = 'st_conductor';   // NOT Overcharge — see the header: one arc, one distance
   cs.ch[5] = 'st_ward';        // wired, and a shield on cast: it cannot reach an enemy
   cs.ch[9] = 'st_master';      // dead today (stun on a chained body)

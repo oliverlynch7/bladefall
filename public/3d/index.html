@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.947.0-autopilot';
+const VERSION3D='1.948.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11323,7 +11323,13 @@ const CLASS_BASIC = {
        So nothing is invented: the count is the card's own ("a third as well as a second" = two arcs
        rather than one) and the radius, the 34%, the shock element and the ring are all this hook's
        already. */
-    const arcs = 1 + (c2Passive('st_overcharge') ? 1 : 0);
+    /* STORM LORD, the rank-10 capstone (index.html:2176): "+12% damage, +10% cooldown reduction,
+       and your lightning arcs to more enemies." The damage is at 3728 and the cooldown reduction was
+       wired earlier today in effCdr; this was the card's last unbuilt clause, and the last unbuilt
+       clause of all sixteen capstones (docs/SKILL_TRIAGE.md section S). "More" is one more, which is
+       the step Overcharge takes on the line above and the only step this hook has. */
+    const arcs = 1 + (c2Passive('st_overcharge') ? 1 : 0)
+                   + (classState('stormcaller').rank >= 10 ? 1 : 0);
     /* CHARGED (stormcaller r7 a, index.html:2182): "Your chain jumps twice as far between targets."
        Wired 2026-08-12, the second row taken out of the group Overcharge unblocked. The jump
        distance was the bare literal 260 on the line below; "twice as far" is the card's own number

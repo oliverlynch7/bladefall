@@ -2562,6 +2562,22 @@ branch in `effPower` / `effAtkSpeed` / `effSpeed` / `effLifesteal`. No launch, n
 dropped clause is a **local variable computed and never used** in the branch — that is how both
 fossils were caught, and it is a shape neither the passive audit nor the field sweep can see.
 
+**AND THE STAT-BRANCH READ IS NOT ENOUGH ON ITS OWN — 2026-08-12, a near-miss worth the paragraph.**
+The four `CLASS_BASIC` classes the plan listed as never measured against their own words (monk,
+skylancer, berserker, mage) were read this way. Monk and skylancer came back **clean**; berserker is
+section J's shape and mage is already above, so the lead produced no takeable row. Full table in
+`docs/superpowers/plans/2026-08-10-skill-correctness.md`.
+
+The near-miss is the method's limit. Skylancer's *"While airborne, you fall 20% slower"* appears
+nowhere in `effPower`/`effSpeed` **or** in `CLASS_BASIC.skylancer`, whose only fall line is
+`p.vy *= 0.55` on an ATTACK — a different mechanic on an unstated condition, which pass 14's note even
+calls "the innate's hang". It reads exactly like a dead clause. It is not: the implementation is at
+**10127**, in the per-frame update, `slow = 0.20` — the card's own number — and it was found only by
+grepping the game's single gravity site (`13279`) for a class branch. **So the sweep must end at the
+mechanism the clause names, not at the stat branch**; a clause implemented far from the identity hook
+that names it is indistinguishable from a missing one, and "wiring" it would have shipped a second
+copy that doubled the effect while quoting the card's own number.
+
 ## S. THE SIXTEEN CAPSTONE CARDS, READ CLAUSE BY CLAUSE — a sweep nothing had ever run
 
 **Added 2026-08-12.** `harness/audit-passives.js` parses `kind:'passive'` entries out of `CLASS2`. A

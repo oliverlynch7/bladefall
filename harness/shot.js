@@ -590,7 +590,47 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const httpPort = server.address().port;
   const url = 'http://127.0.0.1:' + httpPort + URLPATH;
 
+  /* THE PROFILE IS TEMPORARY AND UNTIL 2026-08-12 NOTHING EVER DELETED IT.
+
+     Every launch mkdtemp'd a Chrome user-data-dir and left it there. A full `run-all.js` is ~35
+     launches, the scheduler fires every 20 minutes all day, and each profile is tens of megabytes —
+     so the harness filled the disk it needs to write PNGs to. Measured this run: 1.9 GB free of
+     931 GB, and `_autopilot.log` carries `2026-08-12 15:16:02  FAILED: Error: ENOSPC: no space left
+     on device, write` — a whole scheduled run killed by its own leftovers. It also explains the
+     missing `run end` lines around it: a log that cannot be appended to records nothing.
+
+     Two halves, because one is not enough:
+     1. `process.on('exit')` covers all four of this file's exits (the early no-debug-port return,
+        the normal end, the catch, and any throw). Sync only, which `rmSync` is.
+     2. A startup sweep, because half of these were orphaned by a HARD KILL — `autopilot.ps1` used to
+        kill runs mid-render and no exit handler runs then, so the leak survives fix (1) alone.
+        Only directories older than an hour are touched: a shot's own ready-wait caps at ~120s, so an
+        hour cannot be a live run's profile even with two workers going at once.
+     Both are best-effort and neither may ever fail a shot — the harness's job is the screenshot, not
+     the housekeeping, and a cleanup that can throw would turn a full disk into a broken gate. */
+  const sweepStale = () => {
+    try {
+      const dir = os.tmpdir(), cutoff = Date.now() - 3600e3;
+      let gone = 0;
+      for (const name of fs.readdirSync(dir)) {
+        if (!name.startsWith('bf-shot-')) continue;
+        const p = path.join(dir, name);
+        try {
+          if (fs.statSync(p).mtimeMs > cutoff) continue;
+          fs.rmSync(p, { recursive: true, force: true });
+          gone++;
+        } catch (e) { /* in use, or vanished under us — leave it */ }
+      }
+      if (gone) console.log('swept ' + gone + ' stale Chrome profile(s) left by killed runs');
+    } catch (e) { /* never fatal */ }
+  };
+  sweepStale();
+
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'bf-shot-'));
+  process.on('exit', () => {
+    try { chrome && chrome.kill(); } catch (e) {}
+    try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
+  });
   const dbgPort = 9200 + Math.floor(httpPort % 300);
   const chrome = spawn(CHROME, [
     '--headless=new',

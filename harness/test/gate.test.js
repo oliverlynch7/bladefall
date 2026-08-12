@@ -12,7 +12,8 @@
    it existed to catch. */
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { isDark, suiteLine, suiteOf, reconcile } from '../gate-rules.js';
+import { isDark, suiteLine, suiteOf, reconcile,
+         classOf, confirmTargets, splitConfirmed, confirmPass } from '../gate-rules.js';
 
 /* run-all.js as it stood before this fix, transcribed exactly. */
 const OLD_LINE  = (name, s) => s.skipped ? `${name}: skipped (not written yet)`
@@ -90,6 +91,138 @@ test('a failure not in the baseline is a regression, and a dark suite cannot man
   assert.deepStrictEqual(reconcile(known, now, []).fresh, ['levels:Emberdeep/quest:ed1']);
   /* mp produced nothing, so it can contribute nothing to `now` and therefore nothing to `fresh`. */
   assert.deepStrictEqual(reconcile(known, new Set(['skills:ranger/Tumble:damage']), ['mp']).fresh, []);
+});
+
+/* THE CONFIRM PASS. The old rule is transcribed here too: every fresh id was a REGRESSION, full
+   stop, with no second measurement anywhere in the gate. */
+const OLD_REGRESSIONS = fresh => [...fresh];
+
+const DIVE = 'skills:skylancer/Dive Strike:damage';
+
+test('an id says which CLASS it came from, and only a per-class row has one', () => {
+  assert.strictEqual(classOf(DIVE), 'skylancer');
+  assert.strictEqual(classOf('skills:ranger/Tumble:damage'), 'ranger');
+  assert.strictEqual(classOf('levels:Emberdeep/quest:ed1'), null);   // keyed by zone, not class
+  assert.strictEqual(classOf('mp:/holds every hero:'), null);        // keyed by peer
+});
+
+test('only the re-runnable rows are worth a second launch, and each class is paid for once', () => {
+  assert.deepStrictEqual(confirmTargets([DIVE, 'skills:skylancer/Wind Lift:damage']), ['skylancer']);
+  assert.deepStrictEqual(confirmTargets([DIVE, 'levels:Emberdeep/quest:ed1']), ['skylancer']);
+  assert.deepStrictEqual(confirmTargets([]), []);
+});
+
+test('re-measured and it failed again — that is a real REGRESSION and the gate stays red', () => {
+  const r = splitConfirmed([DIVE], ['skylancer'], [DIVE]);
+  assert.deepStrictEqual(r.confirmed, [DIVE]);
+  assert.deepStrictEqual(r.flapped, []);
+});
+
+test('THE FLAP: re-measured and it did not fail, so it is not a regression', () => {
+  /* The real 2026-08-12 case. The gate printed REGRESSION for Dive Strike against a change gated on
+     meta.classId==='warrior'; three immediate re-runs of skylancer reported 4 pass, 0 fail. */
+  const r = splitConfirmed([DIVE], ['skylancer'], []);
+  assert.deepStrictEqual(r.confirmed, []);
+  assert.deepStrictEqual(r.flapped, [DIVE]);
+});
+
+test('and the old rule got that case wrong — the two must disagree', () => {
+  const fresh = [DIVE];
+  assert.deepStrictEqual(OLD_REGRESSIONS(fresh), [DIVE]);            // what it really printed
+  assert.notDeepStrictEqual(splitConfirmed(fresh, ['skylancer'], []).confirmed, OLD_REGRESSIONS(fresh));
+});
+
+test('A FLAP IS NOT A FIX EITHER — it must never be written into the baseline', () => {
+  /* The trap in the other direction. A flapped id is absent from the baseline by definition (that is
+     what made it fresh), so recording it would hand the suite a permanent green light for a row
+     nobody has ever diagnosed. It is dropped from `now` before the ratchet runs. */
+  const known = new Set(['skills:ranger/Tumble:damage']);
+  const now   = new Set(['skills:ranger/Tumble:damage', DIVE]);
+  const { flapped } = splitConfirmed(reconcile(known, now, []).fresh, ['skylancer'], []);
+  const settled = new Set([...now].filter(id => !flapped.includes(id)));
+
+  const r = reconcile(known, settled, []);
+  assert.deepStrictEqual(r.fresh, []);                     // green
+  assert.deepStrictEqual(r.fixed, []);                     // and nothing was fixed
+  assert.ok(!r.next.includes(DIVE));                       // the flake is not now "known"
+  assert.deepStrictEqual(r.next, ['skills:ranger/Tumble:damage']);
+});
+
+test('A ROW THAT CANNOT BE RE-MEASURED STAYS LOUD', () => {
+  /* Levels and mp ids have no per-class re-run, and a confirm run that went dark passes no targets.
+     Both must leave the accusation standing: missing data is not a negative finding. */
+  assert.deepStrictEqual(splitConfirmed(['levels:Emberdeep/quest:ed1'], ['skylancer'], []).confirmed,
+                         ['levels:Emberdeep/quest:ed1']);
+  assert.deepStrictEqual(splitConfirmed([DIVE], [], []).confirmed, [DIVE]);   // confirm run gave nothing
+  assert.deepStrictEqual(splitConfirmed([DIVE], [], []).flapped, []);
+});
+
+test('a mixed run splits both ways at once', () => {
+  const fresh = [DIVE, 'skills:monk/Deflect:damage', 'levels:Emberdeep/quest:ed1'];
+  const r = splitConfirmed(fresh, ['skylancer', 'monk'], ['skills:monk/Deflect:damage']);
+  assert.deepStrictEqual(r.flapped, [DIVE]);
+  assert.deepStrictEqual(r.confirmed, ['skills:monk/Deflect:damage', 'levels:Emberdeep/quest:ed1']);
+});
+
+/* THE ORCHESTRATION ITSELF, driven with a fake re-run. These exercise the same function run-all.js
+   calls — not a transcription of it — so the launch-shaped half is covered without a launch. */
+const drive = (fresh, rerun) => {
+  const lines = [];
+  return confirmPass(fresh, { rerun, idOf: f => `skills:${f.cls}/${f.skill}:${f.claim}`,
+                              log: l => lines.push(l) }).then(r => ({ ...r, lines }));
+};
+const SKY_FAIL = { cls: 'skylancer', skill: 'Dive Strike', claim: 'damage' };
+
+test('confirm pass: a clean run re-runs NOTHING', async () => {
+  let called = 0;
+  const r = await drive([], async () => { called++; return { pass: 1, fail: 0, failures: [] }; });
+  assert.strictEqual(called, 0);                  // the cost is paid only when something is fresh
+  assert.deepStrictEqual(r.confirmed, []);
+  assert.strictEqual(r.ran, false);
+});
+
+test('confirm pass: it re-runs ONLY the accused class', async () => {
+  let got = null;
+  await drive([DIVE], async t => { got = t; return { pass: 4, fail: 0, failures: [] }; });
+  assert.deepStrictEqual(got, ['skylancer']);     // not all sixteen
+});
+
+test('confirm pass: the flap is cleared and said out loud', async () => {
+  const r = await drive([DIVE], async () => ({ pass: 4, fail: 0, failures: [] }));
+  assert.deepStrictEqual(r.flapped, [DIVE]);
+  assert.deepStrictEqual(r.confirmed, []);
+  assert.ok(r.lines.some(l => l.startsWith('FLAPPED')));
+  assert.ok(r.lines.some(l => /second launch of: skylancer/.test(l)));
+});
+
+test('confirm pass: a row that fails BOTH times is still a regression', async () => {
+  const r = await drive([DIVE], async () => ({ pass: 3, fail: 1, failures: [SKY_FAIL] }));
+  assert.deepStrictEqual(r.confirmed, [DIVE]);
+  assert.deepStrictEqual(r.flapped, []);
+});
+
+test('confirm pass: A RE-RUN THAT THREW CLEARS NOTHING', async () => {
+  /* The dangerous direction. If a crashed confirm run counted as "did not fail again", every real
+     regression would be laundered into a flap by breaking the re-run. */
+  const r = await drive([DIVE], async () => { throw new Error('chrome would not start'); });
+  assert.deepStrictEqual(r.confirmed, [DIVE]);
+  assert.deepStrictEqual(r.flapped, []);
+  assert.ok(r.lines.some(l => /confirm run FAILED/.test(l)));
+  assert.ok(r.lines.some(l => /every new failure stands/.test(l)));
+});
+
+test('confirm pass: A DARK RE-RUN CLEARS NOTHING EITHER', async () => {
+  const r = await drive([DIVE], async () => ({ skipped: '3D hero layer not live', pass: 0, fail: 0 }));
+  assert.deepStrictEqual(r.confirmed, [DIVE]);
+  assert.deepStrictEqual(r.flapped, []);
+  assert.ok(r.lines.some(l => /confirm run DARK/.test(l)));
+});
+
+test('confirm pass: a levels row alone never spends a launch', async () => {
+  let called = 0;
+  const r = await drive(['levels:Emberdeep/quest:ed1'], async () => { called++; return {}; });
+  assert.strictEqual(called, 0);                            // nothing re-runnable to pay for
+  assert.deepStrictEqual(r.confirmed, ['levels:Emberdeep/quest:ed1']);   // and it stays loud
 });
 
 test('the real 2026-08-11 gate run reconciles to exactly what it printed', () => {

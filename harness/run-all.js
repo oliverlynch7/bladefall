@@ -14,7 +14,7 @@
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { isDark, suiteLine, suiteOf, reconcile } from './gate-rules.js';
+import { isDark, suiteLine, suiteOf, reconcile, confirmPass } from './gate-rules.js';
 
 const HERE = import.meta.dirname;
 const REPORT = join(HERE, 'report.json');
@@ -92,7 +92,24 @@ async function main(){
      inverted into a positive one, silently. The flake case the header below reasons about is
      different and still accepted: a suite that RAN and under-reported shrinks the baseline and the
      failure returns loudly next run. A suite that did not run leaves nothing to be loud about. */
-  const { fresh, fixed, carried, next } = reconcile(known, now, dark);
+  const first = reconcile(known, now, dark);
+
+  /* THE CONFIRM PASS. A fresh failure is re-measured before it is called a REGRESSION, because a red
+     gate makes autopilot.ps1 stash the run's tree and at least one skills row is known to fail on
+     geometry rather than on code — see gate-rules.js for the measurement and the three rules. Only
+     the classes actually named are re-run, and only when something is fresh, so a clean run pays
+     nothing. If the re-run throws or goes dark it passes no targets, and every accusation stands.
+     The re-run is scoped to the accused classes ONLY — `runSkillTests({classes})` is the same entry
+     point the CLI's --classes uses, so a flap costs one launch, not a second full suite. */
+  const { flapped } = await confirmPass(first.fresh, {
+    rerun: async targets => (await import('./test-skills.js')).runSkillTests({ classes: targets }),
+    idOf: f => idOf('skills', f),
+    log: line => console.log(line),
+  });
+
+  /* A flapped id is neither known nor fixed, so it is dropped before the ratchet sees it. */
+  const settled = new Set([...now].filter(id => !flapped.includes(id)));
+  const { fresh, fixed, carried, next } = reconcile(known, settled, dark);
   for(const id of fresh) console.log('REGRESSION: ' + id);
   for(const id of fixed) console.log('FIXED: ' + id);
   for(const id of carried) console.log(`CARRIED (${suiteOf(id)} did not run, so this is unmeasured rather than fixed): ` + id);

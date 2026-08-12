@@ -502,6 +502,27 @@ twelve entries (`berserker`, `mage`, `monk`, `skylancer` and the two damage-shap
 cross-function state at all, so a trace of this kind cannot say anything about them and none of them
 has been measured against its own words.
 
+**THAT LEAD WAS TAKEN, 2026-08-12, AND IT IS EMPTY — a negative finding, recorded so the next run
+does not spend a launch re-deriving it.** All four named classes were read clause by clause against
+their rank-1 innate card, launch-free, the way section Q was done:
+
+| class | its innate card | verdict |
+|---|---|---|
+| monk | Focus — "+15% damage and faster strikes bare-handed… a Focus stack (up to 5), each +6%, fading if you stop attacking" | **clean, every clause.** Fist damage 3721, fist attack speed 3754, stacks built on every hit 11006, capped 5 (7 at rank 10), +6% each 3723, decay 10120 |
+| skylancer | Born to Fly — "Ranged weapons +10%. While airborne, you fall 20% slower and deal 10% more damage" | **clean, all three.** Ranged 3732, airborne damage 3733, and the fall at **10127** — `p.vy += 1500*slow*dt` with `slow = 0.20`, the card's own number, `0.45` with Soft Landing |
+| berserker | Bloodrage — "+8% damage, and +15% more while below half HP" | section J's shape, **Oliver's.** The hook is a continuous ramp (`1 + (1-frac)*0.85`, so +42% at half health and +85% at death) plus Rage's doubling. The code is the newer and better of the two; rewriting either is a balance call |
+| mage | Overcharge | already section R, **Oliver's** — the card says the basic attack RESTORES 2 mana and `CLASS_BASIC.mage` spends 6 |
+
+**The skylancer row is the one worth carrying, because it is a near-miss.** Its fall clause looks
+unimplemented from `CLASS_BASIC.skylancer`, which contains only `p.vy *= 0.55` on an ATTACK — a
+different mechanic, a different number, gated on a condition the card does not state — and pass 14's
+own note calls that line "the innate's hang". The real implementation is 500 lines away in the
+per-frame update and was found only by grepping the gravity site (`13279`, the game's single
+`p.vy -= 1500*dt`) for a skylancer branch rather than by reading the hook. **A clause implemented far
+from the identity hook that names it reads exactly like a dead clause**, and wiring a second copy of
+it would have doubled the class's float while "using the card's own number" — the shape this
+sub-project's rules are supposed to catch, arriving from the one direction they do not cover.
+
 **AND IT RAN ONCE MORE, 2026-08-12, after pass 35 and the mp-wait fix: `GATE: PASS (3 known, 0 newly
 fixed)`, exit 0, no `REGRESSION:` line, `harness/baseline.json` untouched.** Per-suite: unit 55/55,
 skills **70 pass / 3 fail / 2 unproven**, levels 36/0/12, **mp 54 pass / 0 fail**. The three knowns are

@@ -274,6 +274,21 @@ try {
   # deny list that keeps this automation off main.
   $gateOut = & node harness/run-all.js 2>&1
   $gateOut | Out-File -FilePath $log -Append -Encoding utf8
+  # EXIT 2 IS INCONCLUSIVE, NOT RED, AND IT MUST NOT STASH. A suite that THREW measured nothing, so
+  # it is evidence about the harness and not about the run's code. On 2026-08-12 a disk the harness
+  # had filled itself made the skills suite crash; the gate reported `REGRESSION: skills:/:` - an id
+  # with no class and no skill name - and this block stashed a finished, verified confirm-pass and
+  # disk-leak fix, which took a later run twenty minutes to dig back out. run-all.js now separates
+  # the two: 1 = a real regression (stash, as below), 2 = nothing was measured (leave the tree
+  # exactly as it is and say so). The work stays where the session left it, and if the session left
+  # it dirty the marker survives, so the next run's killed-run guard still picks it up.
+  if ($LASTEXITCODE -eq 2) {
+    $why = $gateOut | Where-Object { $_ -match 'INCONCLUSIVE|CRASHED' } | Select-Object -First 6
+    foreach ($line in $why) { Log ("gate INCONCLUSIVE: {0}" -f $line) }
+    Log 'harness could not measure - tree left untouched (nothing stashed, nothing reverted)'
+    ClearMarkerIfClean
+    exit 0
+  }
   if ($LASTEXITCODE -ne 0) {
     $why = $gateOut | Where-Object { $_ -match 'REGRESSION|GATE:|FAIL' } | Select-Object -First 6
     foreach ($line in $why) { Log ("gate red: {0}" -f $line) }

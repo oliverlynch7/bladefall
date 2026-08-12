@@ -47,7 +47,12 @@ async function suite(name, file, fn){
     const mod = await import('./' + file);
     return await mod[fn]();
   } catch(e){
-    return { pass: 0, fail: 1, failures: [{ id: name, detail: String(e && e.message || e).slice(0, 300) }] };
+    /* A THROWN SUITE MEASURED NOTHING, so it reports nothing. Until 2026-08-12 this line answered a
+       crash with `{pass:0, fail:1, failures:[{id:name, …}]}` — a failure row with no cls and no
+       claim, which `idOf` named `skills:/:` and the ratchet called a REGRESSION. A disk-full Chrome
+       therefore read as a game bug and cost a run its verified work; see gate-rules.js `isDark` for
+       the gate output that did it. The detail is kept and printed, it is simply not a verdict. */
+    return { crashed: String(e && e.message || e).slice(0, 300), pass: 0, fail: 0, failures: [] };
   }
 }
 
@@ -79,7 +84,22 @@ async function main(){
   const dark = new Set(Object.entries(report.suites).filter(([, s]) => isDark(s)).map(([k]) => k));
   for(const [k, s] of Object.entries(report.suites)) console.log(suiteLine(k, s));
 
+  /* A suite that THREW is a broken ruler, not a finding — see gate-rules.js `isDark`. It exits 2:
+     not 0, because nothing may be committed on the strength of a measurement that did not happen;
+     and not 1, because 1 means REGRESSION and autopilot.ps1 answers that by stashing the run's
+     tree. The distinction is the whole point — the run this was written for lost the confirm pass
+     and the disk-leak fix to a stash because a full disk was reported as a game failure. */
+  const crashed = Object.entries(report.suites).filter(([, s]) => s.crashed);
+  const inconclusive = () => {
+    for(const [k, s] of crashed) console.log(`INCONCLUSIVE: ${k} crashed — ${s.crashed}`);
+    console.log(`GATE: INCONCLUSIVE (${crashed.length} suite(s) crashed; nothing was measured, so nothing is claimed)`);
+    process.exit(2);
+  };
+
   if(!existsSync(BASELINE)){
+    /* A first baseline recorded while a suite was dark would write down "no failures here" for a
+       suite that never looked, and every later run would ratchet against that fiction. */
+    if(crashed.length) inconclusive();
     writeFileSync(BASELINE, JSON.stringify({ at: report.at, known: [...now] }, null, 2));
     console.log(`GATE: PASS (baseline recorded — ${now.size} known failures)`);
     process.exit(0);
@@ -114,7 +134,10 @@ async function main(){
   for(const id of fixed) console.log('FIXED: ' + id);
   for(const id of carried) console.log(`CARRIED (${suiteOf(id)} did not run, so this is unmeasured rather than fixed): ` + id);
 
+  /* Order matters: a REAL regression somewhere else still wins. A crash cannot launder one, it can
+     only stop the run claiming the suites that never spoke. */
   if(fresh.length){ console.log(`GATE: FAIL (${fresh.length} new)`); process.exit(1); }
+  if(crashed.length) inconclusive();
 
   /* THE RATCHET. This header has always promised that "fixing a baselined failure shrinks the
      baseline", and until now nothing ever wrote the file a second time - so the list only grew

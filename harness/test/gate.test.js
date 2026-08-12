@@ -93,6 +93,50 @@ test('a failure not in the baseline is a regression, and a dark suite cannot man
   assert.deepStrictEqual(reconcile(known, new Set(['skills:ranger/Tumble:damage']), ['mp']).fresh, []);
 });
 
+/* A SUITE THAT CRASHED. run-all.js as it stood before this fix, transcribed exactly: a thrown suite
+   became one synthetic failure row, and `idOf` had nothing to name it with. */
+const OLD_CRASH  = name => ({ pass: 0, fail: 1, failures: [{ id: name, detail: 'ENOSPC: no space left on device' }] });
+const NEW_CRASH  = () => ({ crashed: 'ENOSPC: no space left on device', pass: 0, fail: 0, failures: [] });
+const OLD_ISDARK = s => !!(s && (s.missing || s.skipped));
+const CRASH_ID   = 'skills:/:';   // idOf('skills', {id, detail}) — no cls, no skill, no claim
+const THREE = ['skills:ranger/Tumble:damage', 'skills:mage/Attunement:damage', 'skills:berserker/Charge:damage'];
+
+test('a suite that THREW measured nothing, so it is dark — and the old rule said it was not', () => {
+  assert.strictEqual(isDark(NEW_CRASH()), true);
+  assert.strictEqual(OLD_ISDARK(OLD_CRASH('skills')), false);   // the bug, in one boolean
+  assert.strictEqual(isDark({ pass: 70, fail: 3 }), false);     // a suite that RAN is still not dark
+});
+
+test('a crash is reported as a crash, not as "0 pass, 1 fail"', () => {
+  assert.match(suiteLine('skills', NEW_CRASH()), /CRASHED — ENOSPC.*not a game failure/);
+  assert.strictEqual(OLD_LINE('skills', OLD_CRASH('skills')), 'skills: 0 pass, 1 fail');
+});
+
+test('THE 2026-08-12 16:02 GATE, reconstructed: a full disk was reported as a game regression', () => {
+  /* What that run actually printed, and what it cost: REGRESSION on an id with no class and no
+     skill, the three real knowns announced FIXED by a suite that never looked, GATE: FAIL (1 new),
+     and autopilot.ps1 stashing the run's finished work. */
+  const known = new Set(THREE);
+  const old   = reconcile(known, new Set([CRASH_ID]), []);          // crash counted as a verdict
+  assert.deepStrictEqual(old.fresh, [CRASH_ID]);                     // -> red gate, tree stashed
+  assert.deepStrictEqual(old.fixed, THREE);                          // -> and the baseline credited
+
+  /* With the crash dark, the same run says nothing about the game either way. */
+  const now = reconcile(known, new Set(), ['skills']);
+  assert.deepStrictEqual(now.fresh, []);
+  assert.deepStrictEqual(now.fixed, []);                             // nobody fixed anything
+  assert.deepStrictEqual(now.carried, THREE);                        // and nothing is forgotten
+  assert.deepStrictEqual(now.next, THREE);
+});
+
+test('THE CONFIRM PASS CANNOT RESCUE A CRASH, which is why this is a separate fix', () => {
+  /* A crash row names no class, so there is nothing to re-run and the accusation would stand — the
+     confirm pass is a defence against a flapping SKILL, not against a broken ruler. */
+  assert.strictEqual(classOf(CRASH_ID), null);
+  assert.deepStrictEqual(confirmTargets([CRASH_ID]), []);
+  assert.deepStrictEqual(splitConfirmed([CRASH_ID], [], []).confirmed, [CRASH_ID]);
+});
+
 /* THE CONFIRM PASS. The old rule is transcribed here too: every fresh id was a REGRESSION, full
    stop, with no second measurement anywhere in the gate. */
 const OLD_REGRESSIONS = fresh => [...fresh];

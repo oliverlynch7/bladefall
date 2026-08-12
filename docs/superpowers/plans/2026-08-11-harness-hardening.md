@@ -525,6 +525,83 @@ both off the allowlist), re-verified rather than trusted: `node --test harness/t
 
 ---
 
+### Task 6: A CRASHED suite is a broken ruler, not a game bug
+
+Not planned, and it is the fault that actually fired. Task 4 defends against a skill that flaps;
+this is the one that ate the run Task 4 was written in, and no amount of confirm-passing could have
+stopped it.
+
+**Files:**
+- Modify: `harness/run-all.js`, `harness/gate-rules.js`, `harness/test/gate.test.js`, `autopilot.ps1`
+
+- [x] **Step 1: Read what the gate actually printed** — done 2026-08-12, from `_autopilot.log`:
+
+```
+skills: 0 pass, 1 fail
+REGRESSION: skills:/:
+FIXED: skills:ranger/Tumble:damage        (and mage/Attunement, and berserker/Charge)
+GATE: FAIL (1 new)
+STASHED (not deleted): autopilot gate-red 2026-08-12 16:02
+```
+
+`skills:/:` is an id with no class, no skill and no claim, because `suite()`'s catch answered a
+THROWN suite with `{pass:0, fail:1, failures:[{id:name, detail}]}` and `idOf` had nothing to name it
+with. The suite had not found a bug — it had crashed, on the disk Task 5 had just found the harness
+filling. **A full disk was reported as a game regression, and the run's finished work was stashed for
+it.**
+
+Two things wrong in five lines, and the second is worse:
+
+- **the REGRESSION.** `docs/VISION.md`: missing data is not a negative finding, report inconclusive,
+  never invent a failure. A synthetic failure row is an invented one.
+- **the three FIXED lines** — `gate-rules.js`'s own fault 2, arriving from a direction its header did
+  not cover. A crashed suite contributes nothing to `now`, so every id it owns looks fixed. Only luck
+  stopped the baseline being rewritten: `fresh.length` exits before the write, and `skills:/:` can
+  never be in the baseline. One row between this and a wiped ratchet.
+
+- [x] **Step 2: Make a crash dark, and give it its own exit code** — done. `suite()` returns
+      `{crashed:<detail>, pass:0, fail:0, failures:[]}`; `isDark` counts it; `suiteLine` names it.
+
+The exit code is the part that matters to the automation, and it is deliberately a third value:
+
+- **0** — measured, no new failures.
+- **1** — REGRESSION. `autopilot.ps1` stashes, as Task 2 built.
+- **2** — INCONCLUSIVE. Nothing was measured, so nothing is claimed. Not 0, because no work may be
+  committed on the strength of a measurement that did not happen; not 1, because 1 costs the run its
+  tree. `autopilot.ps1` logs the crash lines and **leaves the tree exactly as it is.**
+
+A real regression in another suite still wins: the `fresh.length` check runs first, so a crash can
+stop a claim but can never launder a finding.
+
+- [x] **Step 3: Prove it, both directions, end to end** — done 2026-08-12.
+
+Four new tests in `gate.test.js` (29 total, was 25), including the 16:02 run reconstructed as
+arithmetic: with the crash counted as a verdict, `fresh` is `['skills:/:']` and `fixed` is all three
+knowns; with it dark, `fresh` and `fixed` are empty and the three are CARRIED. One of them pins why
+Task 4 could not have helped — `classOf('skills:/:')` is `null`, so there is no class to re-run and
+the confirm pass leaves the accusation standing.
+
+**And the whole gate was driven both ways, without a launch**, by temporarily throwing at the top of
+`suite()` so all three suites crashed in half a second:
+
+```
+skills: CRASHED — …(it measured NOTHING; this is not a game failure)
+CARRIED (skills did not run, so this is unmeasured rather than fixed): skills:ranger/Tumble:damage
+GATE: INCONCLUSIVE (3 suite(s) crashed; nothing was measured, so nothing is claimed)   exit 2
+```
+
+and with only the catch reverted to its old body, the same forced crash reproduced the disaster
+verbatim — `REGRESSION: skills:/:`, the three phantom `FIXED:` lines, `GATE: FAIL (3 new)`, exit 1.
+`harness/baseline.json` was untouched by either. Both temporary edits reverted; `node tools/gate.js`
+→ `GATE OK`, `powershell … tools/psparse.ps1 autopilot.ps1` → `PARSE CLEAN`.
+
+**What is NOT proved:** that `autopilot.ps1`'s new exit-2 branch runs, for the same reason Task 3
+Step 3 is still open — an unattended run cannot start a scheduled cycle. It is parse-checked, it
+mirrors the exit-1 branch three lines below it, and the evidence to look for is a log line reading
+`harness could not measure - tree left untouched`.
+
+---
+
 ## Self-Review
 
 **Spec coverage.** Covers the flap named in `SKILL_TRIAGE.md` section F, the destructive revert it makes dangerous, and the silence Oliver has raised twice.

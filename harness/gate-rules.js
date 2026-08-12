@@ -28,16 +28,42 @@
    that never looked, because there is no measurement to be loud about. So a DARK suite's baselined
    ids are carried forward untouched. */
 
-/* A suite is DARK when it produced no verdicts at all - the file is missing, or the suite itself
-   reported it could not measure. Distinct from "ran and found nothing wrong". */
+/* A suite is DARK when it produced no verdicts at all - the file is missing, the suite itself
+   reported it could not measure, or it THREW. Distinct from "ran and found nothing wrong".
+
+   THE THIRD STATE WAS ADDED 2026-08-12, AFTER IT DESTROYED A RUN. `run-all.js`'s `suite()` answered a
+   thrown suite with `{pass:0, fail:1, failures:[{id:name, detail}]}` — a synthetic failure carrying
+   no cls, zone, skill or claim, so `idOf` named it `skills:/:`. Nothing in the gate could tell that
+   from a skill that failed. The 16:02 gate on 2026-08-12 printed exactly:
+
+     skills: 0 pass, 1 fail
+     REGRESSION: skills:/:
+     FIXED: skills:ranger/Tumble:damage   (and mage/Attunement, and berserker/Charge)
+     GATE: FAIL (1 new)
+
+   and `autopilot.ps1` stashed that run's whole tree — the confirm pass and the disk-leak fix, both
+   finished and verified, recovered by hand two runs later. The suite had not found a bug; it had
+   crashed, on a disk the harness itself had filled.
+
+   Both halves of that output are wrong, and the second is the more dangerous:
+   - a crash is not evidence against the run's code. `docs/VISION.md`: missing data is not a negative
+     finding, report inconclusive, never invent a failure. A synthetic failure row IS an invented one.
+   - the three FIXED lines are the header's own fault-2 arriving from a new direction. A crashed suite
+     contributes nothing to `now`, so every baselined id it owns looks fixed. Only the accidental
+     redness stopped the baseline being rewritten — `fresh.length` exits before the write, and
+     `skills:/:` can never be in the baseline. One row of luck between this and a wiped ratchet.
+
+   A crashed suite is now dark: its ids are CARRIED, it can invent no failure, and the gate exits
+   INCONCLUSIVE rather than red. */
 export function isDark(s){
-  return !!(s && (s.missing || s.skipped));
+  return !!(s && (s.missing || s.skipped || s.crashed));
 }
 
 /* The one line the gate prints per suite. Names the reason when there is one, because the reason is
    the whole value of a skip. */
 export function suiteLine(name, s){
   if(s && s.missing) return `${name}: skipped (not written yet)`;
+  if(s && s.crashed) return `${name}: CRASHED — ${s.crashed} (it measured NOTHING; this is not a game failure)`;
   if(s && s.skipped) return `${name}: SKIPPED — ${s.skipped} (its assertions did NOT run)`;
   return `${name}: ${(s && s.pass) || 0} pass, ${(s && s.fail) || 0} fail` +
          (s && s.unproven ? `, ${s.unproven.length} unproven` : '');

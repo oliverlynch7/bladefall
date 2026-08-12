@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.938.0-autopilot';
+const VERSION3D='1.939.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11785,11 +11785,24 @@ SKILL_FX.necro_summon=function(p,ok,am){ const legion=meta.classId==='necromance
   const n=(legion?4:3), dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*(legion?0.85:0.65)*(master?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:12, cap=necroMinCap();
   for(let i=0;i<n;i++) spawnMinion(p.x-Math.sin(p.yaw)*30,p.z-Math.cos(p.yaw)*30,{dmg,life,ranged:false,cap}); skillRing(p.x,p.z,'#8be0a0','#3f7d55',120); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+70,p.z,'RISE','#8be0a0',true); };
 SKILL_FX.necro_raise=function(p,ok,am){ let best=null,bd=320; if(G.corpses) for(const c of G.corpses){ const d=dXZ(c.x,c.z,p.x,p.z); if(d<bd){bd=d;best=c;} }
-  const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p)*(ok?1:OFFCLASS_MUL);
+  /* BONE LEGION (r3 a) says "your minions hit 20% harder", and until 2026-08-12 it was read in ONE
+     place in the file - necro_summon, 5 lines up. So a necromancer took the rank-3 minion passive and
+     then raised, at rank 4 and rank 8, minions it did not touch. The passive audit could not see it:
+     the id IS mentioned, so `necro_legion` has counted as wired throughout - section H's Unseen and
+     section N's Combo Edge sat in that same blind spot. Measured, not read
+     (harness/probes/legion.probe.js): with the pick held, Summon Skeletons went 3 minions at 11 to 4
+     at 15, while Raise the Dead stayed at 25, its corpseless fallback at 12 and Army of the Dead at
+     16 - ratio exactly 1 on all three.
+     1.2 is the card's own "20% harder", verbatim; nothing is invented. necro_summon's own 0.85/0.65
+     is +30.8% and disagrees with the same sentence - that is a number, so it is Oliver's, and it is
+     recorded in docs/SKILL_TRIAGE.md rather than retuned here. */
+  const base=(p.weapon?p.weapon.dmg:10)*effMagPower(p)*(c2Passive('necro_legion')?1.2:1)*(ok?1:OFFCLASS_MUL);
   if(best){ G.corpses=G.corpses.filter(c=>c!==best); spawnMinion(best.x,best.z,{dmg:Math.round(base*1.4),life:16,ranged:false}); skillRing(best.x,best.z,'#b28bff','#5a3f8f',110); addText(best.x,best.y+40,best.z,'RAISED','#b28bff',true); }
   else { for(let i=0;i<2;i++) spawnMinion(p.x,p.z,{dmg:Math.round(base*0.7),life:10}); addText(p.x,p.y+70,p.z,'RAISE','#b28bff',true); }
   SFX.magic&&SFX.magic('arcane'); };
-SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*0.9*(c2Passive('necro_master')?1.25:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
+/* …and the same for the host: Bone Legion covers "your minions", and this raises six of them. See
+   the note in necro_raise above for what was measured and why 1.2 is not a chosen number. */
+SKILL_FX.necro_army=function(p,ok,am){ const dmg=Math.round((p.weapon?p.weapon.dmg:10)*effMagPower(p)*0.9*(c2Passive('necro_master')?1.25:1)*(c2Passive('necro_legion')?1.2:1)*(ok?1:OFFCLASS_MUL)), life=necroCap()?null:16, cap=necroMinCap();
   for(let i=0;i<6;i++) spawnMinion(p.x,p.z,{dmg,life,ranged:i%2===0,cap}); skillRing(p.x,p.z,'#b28bff','#5a3f8f',200); SFX.magic&&SFX.magic('arcane'); addText(p.x,p.y+80,p.z,'ARMY OF THE DEAD','#b28bff',true); };
 function drawPet3(pet,t){
   const P=PETS[pet.id]; if(!P) return; const grounded=(P.arch==='attacker'&&P.style==='melee');

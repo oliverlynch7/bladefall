@@ -1986,6 +1986,72 @@ Step 2, against the 98 passives that do have a reader.
 
 ---
 
+## Q. BONE LEGION COVERED ONE OF THE NECROMANCER'S THREE MINION SKILLS — **FIXED 2026-08-12**
+
+`necro_legion` (CLASS2.necromancer r3 a, 2106) reads *"Summon one extra skeleton and your minions hit
+20% harder."* **Its id is read in exactly ONE place in the file** — `SKILL_FX.necro_summon` (11784),
+where it turns 3 skeletons into 4 and their coefficient from 0.65 into 0.85. The class's two other
+minion skills never mention it:
+
+| skill | rank | minions | scaled by |
+|---|---|---|---|
+| Summon Skeletons (`necro_summon`) | r2 a | 3 → 4 | `necro_legion`, `necro_master` |
+| Raise the Dead (`necro_raise`) | r4 a | 1 risen, or 2 on the corpseless fallback | **neither** |
+| Army of the Dead (`necro_army`) | r8 a | 6 | `necro_master` only |
+
+So a minions-build Necromancer takes the rank-3 passive that says *your minions* hit harder and then,
+at rank 4 and at rank 8, raises minions it does not touch. **Fourth instance of the limit section E
+states in advance** — after `w_unyield` (pass 20), Unseen (section H) and Combo Edge (section N): the
+passive audit calls `necro_legion` wired and always has, because the id IS mentioned, in a live branch
+that does the right thing when it runs.
+
+### How it was measured — `harness/probes/legion.probe.js`, three halves in one launch
+
+The bar is the minion's own `dmg`, the field `spawnMinion` (11743) stores and `minionUpdate` hits
+with — not a damage roll against a dummy. It has no RNG in it, so the same launch reads the same
+numbers twice. The halves differ only in the rank-3 pick (`necro_wither` against `necro_legion`), and
+every other passive rank is pinned — r9 to `necro_pest` rather than left to the game, because
+`necro_master` multiplies minion damage by 1.25 in two of the three skills under test.
+
+| trial | control | before, with Legion | after, with Legion |
+|---|---|---|---|
+| Summon Skeletons | 3 minions @ 11 | **4 @ 15** | 4 @ 15 |
+| Raise the Dead | 1 risen @ 25 | 25 | **30** |
+| …its corpseless fallback | 2 @ 12 | 12 | **15** |
+| Army of the Dead | 6 @ 16 | 16 | **19** |
+
+The Summon row is the bench-liveness check and it is why the three zeros beside it can be believed:
+Legion plainly reached the game in the before-run — an extra skeleton, and 36% more damage on it —
+while the other three skills read ratio **1.000, exactly, in both live halves**. `ok:false` before,
+`ok:true` after, `okAgainstShipped:false` both times.
+
+**The bar had to be made rounding-aware, and the first after-run failed a correct fix because it was
+not.** `dmg` is stored through `Math.round`, so the ratio of two stored integers is not the ratio the
+code applied: 25 → 30 is exactly 1.2, but 12 → 15 reads as 1.25 and 16 → 19 as 1.1875. The bar now
+asks the only question the stored integers can answer — could rounding 1.2× an unrounded control in
+`[C-0.5, C+0.5)` have produced this? — and a shipped `L === C` is outside that interval for every
+`C >= 3`, so the known-bad stays red.
+
+**Nothing was invented.** 1.2 is the card's own "20% harder", verbatim, applied to the two minion
+sources the card's own words cover.
+
+### The GAME finding this turned up, which is NOT fixed — Oliver's
+
+**`necro_summon`'s own Legion coefficient is +30.8%, not +20%** — 0.85 against a base of 0.65. That
+disagrees with the same sentence on the same card, and it is a number, so it is his: either the card
+should say 30% or the coefficient should be 0.78. It was deliberately left alone rather than quietly
+retuned, because a coefficient a Necromancer has been playing with is a balance change (pass 20's
+reason).
+
+**And `necro_master` — *"Keep more minions at once and they hit even harder"* — has the same shape,
+one skill short.** It scales `necro_summon` and `necro_army` by 1.25 and does not touch
+`necro_raise` at all. It is not fixed here for the rule this plan is built on — **one bug per
+commit** — and because its card states no number, so wiring it means choosing between the 1.25 next
+door and something else. The 1.25 is the file's own and is the obvious answer; it is a one-line
+follow-up for whoever takes the next pass.
+
+---
+
 ## P. THE PASSIVE AUDIT COULD NOT SEE FOUR OF THE GAME'S PASSIVES — **FIXED 2026-08-12**
 
 **A BENCH row, not a game one, and taken before more game work for the reason section F was.** A

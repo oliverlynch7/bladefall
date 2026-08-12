@@ -249,6 +249,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 28 | **N — the ninja's Combo Edge paid out only for the OTHER passive** | this run | `harness/probes/nincombo.probe.js`, THREE halves in one launch with THREE trials each: a Ninja holding Swift + Combo Edge left `_stillT` at 0 after an Unseen kill on a full-health foe AND on a wounded one before; 9 on both after, while the half holding Deadly Precision went 0 → 9 on the healthy foe and stayed 9 on the wounded one (the shipped game's only working path, unbroken), the no-Combo-Edge control stayed 0 everywhere, and a plain non-Unseen kill rearmed in no half either side. **The known-bad could not be an `inert` half** — the mark is written and read inside one synchronous `hitEnemy` call, so the shipped gate is TRANSCRIBED in the probe and fed the identical bar (`okAgainstShipped` false while `ok` true). Photographed at `_shot/out/nc-rearm.png`. Section H's shape hiding UNDER the section H fix: nothing downstream of Unseen had ever been exercised, because Unseen could not arm |
 | 30 | **P — the passive audit could not see four of the game's passives** | this run | A BENCH pass, like pass 3, and taken for pass 3's reason. `passivesOf`'s entry regex demanded single quotes on `n:` and `d:`, so the four passives whose names carry an apostrophe (`x_favor`, `pal_will`, `bst_rhythm`, `bst_authority`) were skipped silently — 124 parsed where CLASS2 holds 128, and those four sat outside the `KNOWN_DEAD` ratchet's reach entirely, so one going dead would have left the gate green. Found by checking every `c2Passive('<id>')` literal against the ids CLASS2 defines: four ids the game guards on that the audit had never heard of. Proven by `harness/test/passives.test.js` with the old regex transcribed and asserted to MISS the double-quoted entry, and by replacing the `>= 100` floor with the arithmetic its own comment already stated — per class as well as in total. Unit stage 53 → 55 tests, `128 total, 102 wired, 26 dead`, dead list unchanged |
 | 29 | **O — chronomancer Haste named a cooldown array that does not exist** | this run | `harness/probes/chrhaste.probe.js`, TWO halves in one launch (the two options at the same rank, so the only difference is the pick): four real casts armed four real cooldowns in both halves, the control kept all four after its Rewind and the Haste half kept all four before / cleared all four after — and each half then PRESSED a skill, spending 0 mana before and 7 after, because `useSkill` returns at its cooldown gate *before* it spends anything. **First row found by the READ-NEVER-WRITTEN half of the field sweep**, which this plan records as never having been worked: `p.cds (2 reads, first at line 11644)`, both of them that one line. Photographed as a true A/B — `_shot/out/haste-cooling.png` counting 1.4 / 5.9 / 9.6 / 16.4 under the REWIND floater against `_shot/out/haste-ready.png` with four lit buttons at the same instant. Chronomancer suite 4 pass / 0 fail either side |
+| 31 | **Q — Bone Legion covered one of the Necromancer's three minion skills** | this run | `harness/probes/legion.probe.js`, THREE halves in one launch with FOUR trials each (one per minion source the card covers, plus Summon Skeletons as the bench-liveness control): with the pick held, Summon went 3 minions @ 11 to 4 @ 15 in BOTH runs — so Legion plainly reached the game — while Raise the Dead stayed at 25, its corpseless fallback at 12 and Army of the Dead at 16, **ratio 1.000 exactly** on all three; after, 30 / 15 / 19. **The first after-run failed a correct fix**: `dmg` is stored through `Math.round`, so 12 → 15 reads as 1.25 and 16 → 19 as 1.1875, and the bar had to become rounding-aware (it now asks whether rounding 1.2× an unrounded control in `[C-0.5, C+0.5)` could produce the live value — `L === C` is outside that for every `C >= 3`, so the known-bad stays red). Fourth instance of the audit's stated limit after `w_unyield`, Unseen and Combo Edge. Necromancer suite 4 pass / 0 fail / 0 unproven |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
@@ -350,6 +351,40 @@ passive audit: it can say a field reaches a reader, not that the reader honours 
 twelve entries (`berserker`, `mage`, `monk`, `skylancer` and the two damage-shape ones) hold no
 cross-function state at all, so a trace of this kind cannot say anything about them and none of them
 has been measured against its own words.
+
+**WHERE PASS 31 CAME FROM — a THIRD static sweep, and this one asks the question the other two
+cannot: does the code near a passive's reader carry the NUMBER its own card states?** The passive
+audit asks "is this id mentioned"; the field sweep asks "is this field read". Neither can see a
+passive that is read, in the right place, and does something other than what the card sells. A card
+number is the one part of that question a machine can check, and 56 of the game's 128 passive cards
+state one.
+
+Run over the comment-and-string-stripped source, taking a window of −160/+320 characters around each
+`c2Passive('<id>')` site and accepting the card's number in any of its obvious codings (`15`, `0.15`,
+`0.85`, `1.15`), it returns **seven** rows. **Six are explained inside ten minutes of reading and one
+was pass 31**, which is a workable signal-to-noise for a lead generator:
+
+| row | verdict |
+|---|---|
+| `bd_patient` "parry windows last 0.2s longer" | **ok** — the number is a DELTA (`.85` vs `.65`, `1.15` vs `.95`, `1.65` vs `1.45`), so it is never a literal |
+| `x_wraithwalk` +18%, `war_swift` +12%, `sky_tail` +15% | **ok** — all three set a timer at the reader and the multiplier lives in `effSpeed` (3755), one line holding `1.18`, `1.12` and `1.15` |
+| `r_ambush` +20% / 6s | **ok** — both numbers are at the SPEND, in `CLASS_BASIC.ranger`, not at the arm |
+| `sky_float` "fall 25% slower" | **Oliver's** — the reader is `p.vy += 1500*slow*dt` with `slow` `.45` against a base `.20`, which is ~31% less fall acceleration, not 25%. A number, and a small one |
+| `necro_legion` "your minions hit 20% harder" | **pass 31** |
+
+Two measurements worth keeping so nobody re-derives them. **At a ±500-character window the sweep
+returns ZERO rows** — every card number is satisfied by some literal in the neighbourhood by accident,
+which is precisely how a lead generator becomes a green light that cannot go red. And **decimals
+written without a leading zero are the difference between a usable list and noise**: `\d+(\.\d+)?`
+reads `*.85` as the integer `85`, which turned 7 rows into 19.
+
+**The SKILL side of the same sweep was built and is NOT worth a pass**, said plainly so the next run
+does not rebuild it. Comparing each `CLASS2` skill card against the LAST definition of its `SKILL_FX`
+handler (following the alias chains at 10254/10283/10324) returns **30 of 128 rows, and the first
+three read were all false**: the warrior's Whirlwind is sold as "1.1x damage per sweep" and spins
+twice for a handler total of `2.2`; "~2s" in a dozen rapid-attack cards is a cadence, not a constant;
+and "absorbs 35% of max HP" is applied in a shared shield helper the handler only calls. The rows that
+ARE real on that side are already section J, found by hand, and every one of them is Oliver's.
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —

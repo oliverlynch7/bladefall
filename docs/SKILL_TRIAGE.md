@@ -223,7 +223,9 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 97 wired / 27 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 98 wired / 26 dead** — the count `harness/audit-passives.js` printed on the 2026-08-12 gate run,
+which is the only figure here that cannot drift, since it is recomputed from the game on every gate:
+`st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
 (Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
@@ -375,7 +377,7 @@ wrong yes.
 
 ### What is left in this section, and the ONE decision that unblocks each group
 
-Taken together with the rows above, **every one of the 27 remaining dead passives is now blocked on
+Taken together with the rows above, **every one of the 26 remaining dead passives is now blocked on
 something only Oliver can decide** — a number, a unit, or a mechanic that does not exist. That is a
 floor, not a wall: none of them needs more investigation, each needs one answer.
 

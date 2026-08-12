@@ -247,7 +247,9 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
-All 27 remaining dead passives are now triaged, with the group-by-group table in
+All 26 remaining dead passives are now triaged — the count the audit itself printed on the
+2026-08-12 gate run (`124 total, 98 wired, 26 dead`), not one carried forward in prose — with the
+group-by-group table in
 `docs/SKILL_TRIAGE.md` section E under *"What is left, and the ONE decision that unblocks each
 group"*. Every one of them is blocked on a number, a unit, or a mechanic that does not exist —
 inventing any of those is the one thing this plan's own constraints forbid. The last group to be

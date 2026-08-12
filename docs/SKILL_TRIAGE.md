@@ -2073,7 +2073,7 @@ sub-project has built.
 | id | class · rank | its card | its only reader | state |
 |---|---|---|---|---|
 | `pir_swift` | pirate r3 b — Quick Hands | "Opening a chest reloads your pistol." | `effAtkSpeed` +10% attack speed (3754) | **FIXED**, pass 31 |
-| `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | confirmed, unfixed — actionable |
+| `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | **FIXED**, pass 32 |
 | `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | confirmed, unfixed — actionable |
 | `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
 | `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11523) | HALF wired — the DR is there, the knockback resistance is not |
@@ -2122,15 +2122,61 @@ reason. This fix only ADDS the thing the card promises; removing an undocumented
 been playing with for weeks is a balance change, and both honest endings (delete it, or put it on the
 card) are one sentence from him rather than one number from a run.
 
-### The three rows below it that a run COULD take, and the one it could not
+### Light Feet — the row where the FAITHFUL implementation was the worse one
 
-- **`bd_feet` and `bd_fast` are the same call as Quick Hands and are the obvious next passes.** Both
-  cards are booleans about the bladedancer's parry, and the parry already exists and is already
-  complete: `p.bdParryT` is the window, `hurtPlayer` (11516) is where it catches, and `p.bdRiposte` is
-  what it stores. Light Feet needs the dodge step to open that window when the dash passes through a
-  body; Fast Hands needs the catch to zero `p.atkCd`, which `playerAttack` sets and `w_swift` already
-  zeroes three lines from where it is set. **Nothing has to be chosen in either case**, and as with
-  Quick Hands the existing stat bonus stays and is Oliver's.
+Taken as pass 32, immediately after Quick Hands and for the same reason: the card is a boolean about
+machinery the class already owns in full. `p.bdParryT` is the window, `hurtPlayer` (11536) is where it
+catches, and one open window already buys the parry, the stored Riposte, the i-frames, Healing Counter
+and the rank-10 capstone. So the fix is four lines and no new state, and the only number in it —
+`c2Passive('bd_patient') ? .85 : .65` — is Counter Stance's own, which also means Patient Guard keeps
+working on this parry exactly as it does on the class's other four.
+
+**It is wired inside the dash, not at the dodge button, and that is the card's word doing the work.**
+"Through" is a fact about where the body travelled, so the only place that can answer it is the line
+that drives the dash — 12981, 0.20s of 560 u/s, frame by frame. The overlap test is the game's own
+contact test verbatim (13348, same radii, same `vOverlap`), so dashing *under* a flyer does not count
+and neither does dashing past one.
+
+**ONE DEVIATION, AND THE FAITHFUL VERSION WAS REJECTED ON THE CARD'S OWN TERMS.** This opens a WINDOW,
+so an attack from a DIFFERENT enemy inside it is parried too, where the card says "**their** next
+attack". The alternative is a per-enemy mark — and `hurtPlayer` is never handed the attacker: the
+melee contact path passes `foeHit(e, …)`, a `{name, attack}` descriptor (13348), and the projectile
+path passes the PROJECTILE's position (13345). So a marked-body version could only be matched by
+position, and would silently fail to catch a marked archer's arrow. That is a bigger hole in "their
+next attack" than a shared window is, and it would be a silent one. Stated here rather than hidden,
+and cheap to revisit the day `hurtPlayer` learns who hit you.
+
+Measured by `harness/probes/lightfeet.probe.js`, three halves in one launch with two trials each:
+
+| half | pick | dash THROUGH a foe | identical dash, foe 400 off the line |
+|---|---|---|---|
+| control | `bd_sharp` (a-side of the same rank) | lost 5 HP | lost 5 HP |
+| passive | `bd_feet` | **0 HP, Riposte stored, window 0.67** | lost 4 HP |
+| known-bad | `mon_iron` (dead id, identical bar) | lost 4 HP | lost 4 HP |
+
+`ok true, okAgainstInert false`. The dash measured 120–122 units in every trial, so all six are
+staged. The hit is delivered the same way in both trials of a half — the foe is put on the hero and
+the game's own contact damage fires — so the only thing that differs is whether the dash passed
+through a body.
+
+**The 0.67 is checked, not glossed.** The probe reports the held picks, and rank 5 is `bd_patient`, so
+the window starts at 0.85 and 0.67 is that less the decay between the overlap and the hit. Patient
+Guard's branch is therefore exercised rather than merely written.
+
+**The probe was wrong twice before the game was, both silently and both worth keeping:**
+- It left the dash's friction tail under the hero. The movement branch hands the leftover 560 u/s to
+  the friction step, so a hero parked beside a PINNED foe walks out of contact before the contact
+  check runs and the foe cannot follow — `hitAt −1` in five of six trials.
+- It set `e.active` on a spawned enemy without clearing `e.dropT`. `dropT` is the spawn-in delay and is
+  checked FIRST (13261), so the body stayed inert for ~41 frames — which put the contact PAST the very
+  window under test. A bench fault that reads exactly like a parry that does not hold.
+
+### The two rows below it that a run COULD take, and the one it could not
+
+- **`bd_fast` is the same call again and is the obvious next pass.** "A parry refunds the time your
+  attack would have taken" needs the catch at 11536 to zero `p.atkCd`, which `playerAttack` sets and
+  which `w_swift` already zeroes three lines from where it is set. Nothing has to be chosen, and as
+  with Quick Hands and Light Feet the existing stat bonus stays and is Oliver's.
 - **`w_heavy` is NOT the same call and should not be taken as one.** "Cannot be interrupted" and
   "cannot cancel" are claims about the swing state machine, and this file has no interrupt state to
   read — pass 20's note records the same absence for stagger, where the launch IS the interruption.

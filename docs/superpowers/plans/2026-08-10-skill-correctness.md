@@ -237,6 +237,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 18 | **E — chronomancer Echo was never read** | this run | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy (the skill is a stream, so a single total cannot separate the cast from the echo): cast 80 in every half, second window 0 / 0 / 80, the echo's 80 being the cast's own unreduced power. The probe's first run failed on its OWN clean-check — it read the cooldown four seconds after a 2s-cooldown cast, this sub-project's fault 3 committed again. Chronomancer suite 4 pass / 0 fail after |
 | 17 | **E — reaper Crimson Harvest was never read** | this run | `harness/probes/crimson.probe.js`, THREE halves in one launch with TWO kills per half (one below half health, one above, because "below half health" is half the sentence): control 0/0, the passive half 24 then 0, the known-bad half 0/0, on a 477 HP hero. The amount is the Void Scythe harvest's own 5%, verbatim. Reaper suite 6 pass / 0 fail after, and the class now has **no dead passives left** |
 | 16 | **E — skylancer Sky Armor was never read** | this run | `harness/probes/skyarmor.probe.js`, THREE halves in one launch with TWO hits per half, each from its own fresh jump: control 62 early and 62 late, the passive half 0 early (invuln 0.18, the dodge's own window verbatim) and 62 late — so the window opens AND closes — and the known-bad half 62 both times. Skylancer suite 4 pass / 0 fail after |
+| 20 | **E — berserker Heavy Hands was never read** | this run | `harness/probes/heavyhands.probe.js`, THREE halves in one launch with THREE trials per half: control and known-bad thrown at the game's own vz 210 / vy 160 with the dodge firing, the passive half vz 0 / vy 0 / onGround true with the dodge refused — and **hpLost 6 in all three**, because the obvious early return out of `hurtPlayer` would have read as knockback immunity and been DAMAGE immunity. The dodge button is photographed unavailable at `dodgeCd 0`. **The first row in the section with no number on either side**, and it also turned up `w_unyield` — wired, and to a completely different card (see below). Berserker suite 4 pass / 1 fail either side, the fail being the baselined Charge |
 | 19 | **E — paladin Blessed Blade was never read** | this run | `harness/probes/blessed.probe.js`, THREE halves in one launch with THREE trials per half (a foe 600 units ahead against a 198-unit melee aim reach, the same foe 600 units BEHIND, and an ordinary melee hit): the far foe sworn only in the passive half, the behind foe sworn in no half, the melee hit sworn in every half so the control's zero is a real zero — and `hurt:false` throughout, so the swing never landed. **Paladin is now the second class with no dead passives** (0/7). Paladin suite 7 pass / 0 fail either side |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
@@ -266,6 +267,18 @@ killed on a 20-minute clock, so four verified commits were the better use of the
 commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
 class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
 would settle. Say what it reports either way.
+
+**Pass 20 found the first passive that is WIRED AND WRONG, which is a shape this plan has assumed
+did not exist yet.** `w_unyield` (warrior r5 b) promises "you cannot be staggered, knocked back, or
+moved by anything" and its only reader gives 12% less damage below half health — no overlap with its
+own card in either direction. The passive audit cannot see it, because the id IS mentioned, so the
+warrior has reported 0/8 dead throughout. That is exactly the limit Task 3 Step 2 states in advance
+("this proves WIRED, not CORRECT") and this is the first concrete instance. **Left for Oliver, and
+not for the usual reason:** nothing needs inventing — the skip Heavy Hands just added is three lines
+away and `w_unyield` could take it verbatim — but doing so would replace a defensive bonus a warrior
+has been playing with for weeks, which is a balance change. Both honest fixes (make it do what it
+says, or rewrite the card to say what it does) are his. Full write-up in `docs/SKILL_TRIAGE.md`
+section E.
 
 **Pass 15 is the first row where the FIRST wiring was genuinely wired, lit exactly the right enemy,
 and still did nothing — and only a health-lost bar could see it.** Both of Burning Light's numbers were

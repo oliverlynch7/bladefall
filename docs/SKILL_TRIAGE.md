@@ -223,11 +223,11 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 93 wired / 31 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 94 wired / 30 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
 (Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
-`pal_blessed` (Blessed Blade) were wired 2026-08-11.
+`pal_blessed` (Blessed Blade) and `bsk_heavy` (Heavy Hands) were wired 2026-08-11.
 See "Rows taken" at the end of this section. **The Reaper was the first class this sub-project took
 from dead passives to none, and the Paladin is the second** — they join warrior, mage, ninja,
 warlock and beastmaster, which never had any.
@@ -256,7 +256,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
-| berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
+| berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | **0 / 7** | — (~~Bounce Back~~, ~~Burning Light~~, ~~Blessed Blade~~ wired 2026-08-11) |
@@ -363,7 +363,78 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **reaper / Crimson Harvest** (`x_crimson`, r7 a) — "Below half health, every soul you collect heals you outright." | 2026-08-11 | `harness/probes/crimson.probe.js`, THREE halves in one launch, TWO kills per half (one below half health, one above): control 0 / 0, passive **24 then 0**, known-bad 0 / 0, on a 477 HP hero |
 
 | **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
+| **berserker / Heavy Hands** (`bsk_heavy`, r3 a) — "You cannot dodge — but nothing can knock you back or stagger you." | 2026-08-11 | `harness/probes/heavyhands.probe.js`, THREE halves in one launch, THREE trials per half: control and known-bad thrown at the game's own **vz 210 / vy 160** with the dodge firing; the passive half **vz 0, vy 0, onGround true, dodge refused** — and **hpLost 6 in all three**, because an early return would have been damage immunity. Dodge button photographed unavailable at `dodgeCd 0` |
 | **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+
+### Heavy Hands — the first row with NO NUMBER on either side, and the finding that unblocked it
+
+**This section had already concluded, twice, that "the player cannot be knocked back" and shelved two
+rows on it.** `bsk_tough` (Unbreakable) is recorded above as unwireable because `p.stunT` is written
+once and read nowhere, and Escape Artist is half-shelved because `p.slowT` does not exist. Both
+findings stand. The inference drawn alongside them — that player-side hard control does not exist at
+all — did not, and it was wrong by one line.
+
+**`hurtPlayer` 11470–11471 throws the player away from the source on EVERY hit**, at a flat 210 with
+`vy 160` and `onGround` cleared. That launch is the game's whole player-stagger: there is no separate
+stagger state, and being put in the air with your ground velocity replaced is exactly what interrupts
+you. So Heavy Hands' second clause had a real mechanism to be immune to, and being immune to it is
+one skip.
+
+**Both halves are booleans, which makes this the cleanest row in the section.** Every other one had to
+source a number from somewhere in the file (Crimson Harvest the Void Scythe's 5%, Sky Armor the
+dodge's 0.18s, Burning Light the combustion splash's radius, and Blessed Blade got out of it only
+because its card says "any"). This one had nothing to source: "you cannot dodge" is the
+`input.dodgeEdge` gate refusing, and "nothing can knock you back" is those two lines not running.
+
+**Both halves shipped together, and shipping one would have been the trap.** The card is a TRADE —
+the drawback is why the immunity is affordable — so wiring only the immunity turns a rank-3 choice
+into a free upgrade and quietly rebalances the class. The probe therefore fails a half that is not
+knocked back *and* can still dodge.
+
+**And the third trial is the one that matters most.** The obvious place to put an immunity is an
+early return at the top of `hurtPlayer`. That would read as knockback immunity to any bar that only
+watches velocity — and it would in fact be **damage** immunity, a strictly different and far better
+card than the menu shows. The skip is therefore placed low, past `p.hp-=dmg`, and every half reads
+`hpLost` off the same hit. All three lost 6.
+
+| half | knock (vz / vy / onGround) | dodge | hpLost |
+|---|---|---|---|
+| control `bsk_reckless` | 210 / 160 / false | fired | 6 |
+| **`bsk_heavy`, before** | **210 / 160 / false** | **fired** | 6 |
+| **`bsk_heavy`, after** | **0 / 0 / true** | **refused** | 6 |
+| known-bad `mon_iron` | 210 / 160 / false | fired | 6 |
+
+`ok:true / okAgainstInert:false` after, `ok:false` before. Berserker suite **4 pass / 1 fail** either
+side, the fail being the baselined `berserker/Charge:damage` (section B, Oliver's).
+
+**The refused dodge is SHOWN, not swallowed.** The edge is still consumed so a refused press cannot
+queue and fire later, and the dodge button carries the same `cooling` class it wears on cooldown —
+photographed reading unavailable while `dodgeCdT` is 0, which is the state that only this passive can
+produce (`_shot/out/heavy-hud.png`). A passive that eats an input silently is indistinguishable from
+a dropped input, and on a phone that is the difference between a build choice and a bug report.
+
+#### A NEW ROW THIS TURNED UP, and it is not the same shape as anything above: `w_unyield` is WIRED AND WRONG
+
+Warrior rank-5 option b (index.html:2040) reads: **"You cannot be staggered, knocked back, or moved
+by anything."** Its only reader, `hurtPlayer` 11405, is `if(c2Passive('w_unyield') && p.hp <
+effMaxHp(p)*.5) dmg *= .88` — **12% less damage below half health.** Not one word of that is on the
+card, and not one word of the card is in the code. It sits four lines above the knock-away it claims
+to prevent and does not touch it.
+
+**The passive audit cannot see this and never will.** `audit-passives.js` asks whether any line
+mentions the id; this id is mentioned, so the warrior reports 0/8 dead and always has. This is the
+gap Task 3 Step 2 names in one sentence — *"this proves WIRED, not CORRECT, and a passive read once
+and read wrongly still passes"* — and it is the first concrete instance anyone has found.
+
+**Not fixed here, deliberately, and not for the usual reason.** Nothing needs inventing: the skip now
+exists three lines away and `w_unyield` could take it verbatim. But that would *replace* a defensive
+bonus a warrior has been playing with for weeks with a different one, which is a balance change and
+`docs/VISION.md`'s "ask first" column, not a wiring fix. Two honest resolutions and both are Oliver's:
+make it do what it says (and drop the 12%), or keep the 12% and rewrite the card to say so. The one
+thing that should not survive is the current state, where the menu promises immunity and delivers a
+percentage. **`mon_iron` (monk r3 a) — "while your dodge is ready, you cannot be stunned or knocked
+back" — is now half-unblocked by the same discovery** and is a straightforward next row for whoever
+takes one.
 
 ### Blessed Blade — the row whose whole implementation is a DIFFERENT MOMENT, not a different effect
 

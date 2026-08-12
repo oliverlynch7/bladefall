@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.928.0-autopilot';
+const VERSION3D='1.929.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11467,8 +11467,23 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(meta.classId==='paladin'&&c2Passive('pal_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
-  const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
-  p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
+  /* HEAVY HANDS (berserker r3 a), the half you keep: "nothing can knock you back or stagger you."
+     Wired 2026-08-11; it was one of the 31 in docs/SKILL_TRIAGE.md section E that the menu offers,
+     describes and no code ever read. The other half — "you cannot dodge" — is at the dodgeEdge gate
+     in the movement step, because a card with a drawback has to be wired on BOTH sides or picking it
+     is a strict upgrade.
+     NOTHING IS INVENTED, and there was nothing to invent: both halves are booleans. The three lines
+     below ARE the knock-back, and they are also the stagger — the file has no separate stagger state,
+     the launch (vy 160, onGround cleared) is what interrupts you — so "knock you back or stagger
+     you" is exactly this skip and nothing more.
+     Deliberately here and not at the top of hurtPlayer: the berserker still TAKES the hit, its
+     i-frames, its flash and its combo reset. An early return would read as knockback immunity and
+     would in fact be damage immunity, which is a different and far better card than the menu shows —
+     harness/probes/heavyhands.probe.js reads hpLost on the same hit for that reason. */
+  if(!(meta.classId==='berserker'&&c2def('berserker')&&c2Passive('bsk_heavy'))){
+    const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
+    p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
+  }
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();
   if(G.hub){ if(p.hp<=0){ p.hp=Math.round(effMaxHp(p)*0.5); addText(p.x,p.y+60,p.z,'TRAINING — no deaths here','#7de08a'); } return; }   // Phase 12: the Waystation is stakes-free
@@ -12912,7 +12927,14 @@ function update(dt){
       p.vy=Math.min(p.vy+2400*dt,430); p.jetFuel=Math.max(0,(p.jetFuel||0)-dt*0.4); p.jets=1;   // ~2.5s of flight
       if(Math.random()<0.7) G.particles.push({x:p.x+(Math.random()-0.5)*13,y:p.y+2,z:p.z+(Math.random()-0.5)*13,vx:(Math.random()-0.5)*40,vy:-160,vz:(Math.random()-0.5)*40,life:0.3,color:Math.random()<0.5?'#9fe0ff':'#ffd24a',sz:2.6}); }
   }
-  if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0){
+  /* HEAVY HANDS (berserker r3 a), the half you pay: "You cannot dodge". The other half — the
+     knock-back immunity — is in hurtPlayer; see the note there for why both had to be wired at once.
+     The edge is still CONSUMED so a refused dodge cannot queue itself up and fire the moment the
+     passive stops applying, and the button below reads as unavailable rather than silently eating
+     the input — a passive that swallows a press without saying so is indistinguishable from a
+     dropped input. */
+  const _noDodge = meta.classId==='berserker'&&c2def('berserker')&&c2Passive('bsk_heavy');
+  if(input.dodgeEdge){ input.dodgeEdge=false; if(p.dodgeCdT<=0&&!_noDodge){
     const m=Math.hypot(mx,mz); if(m>0.3){ p.dashX=mx/m; p.dashZ=mz/m; } else { p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw); }
     p.dodgeTimer=0.20; p.invuln=Math.max(p.invuln,0.18); p.dodgeCdT=effDodgeCd(p); if(meta.classId==='warrior'&&c2Passive('w_tactical'))p.tacticalT=2; if(meta.classId==='monk'&&c2Passive('mon_killer'))p._killerHit=1; SFX.dodge(); burst(p.x,8,p.z,'#3a9dd0',8); } }   // i-frame (0.18) sits JUST inside the dash (0.20) — timing has to be right
   /* KILLER FOCUS arms HERE, at the dodge itself, exactly like Tactical Guard on the line above —
@@ -12921,7 +12943,7 @@ function update(dt){
      one: "the first strike after a dodge hits for triple" names a consumption condition, and where
      this file's cards DO mean a window they say so ("gain 20% damage reduction for 2s"). Inventing a
      duration here would be inventing a balance number. */
-  document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0);
+  document.getElementById('bDodge').classList.toggle('cooling',p.dodgeCdT>0||_noDodge);
   const _w=p.weapon;
   if(thrownWeaponHidden(p,_w)){ p.charging=false; p.chargeAmt=0; p.attackHeld=false; p.holdT=0; }
   else if(isChargeWeapon(_w) && !meta.autoAttack){                // charge-capable weapon: tap attacks, hold builds its signature release

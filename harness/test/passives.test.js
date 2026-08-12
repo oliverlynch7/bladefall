@@ -145,7 +145,19 @@ const KNOWN_DEAD = new Set([
      drop you below 1 HP leaves you at 1 instead, once per fight" is now a death save in hurtPlayer
      beside necro_undying and Rewind, proven by harness/probes/thickhide.probe.js — four trials in one
      launch, watched to fail against the shipped game. */
-  'bsk_heavy', 'bsk_reckless', 'bsk_blood', 'bsk_tough',
+  /* bsk_heavy came OFF this list on 2026-08-11 (sub-project B Task 2, pass 20), and it is the first
+     row in the section with NO NUMBER on either side. "You cannot dodge - but nothing can knock you
+     back or stagger you" is two booleans over mechanisms that already run on every player: the
+     knock-away in hurtPlayer (which is also the stagger - the file has no separate stagger state)
+     now skips for a Heavy Hands berserker, and the input.dodgeEdge gate refuses. Both halves had to
+     go in together or picking the card would be a strict upgrade.
+     Proven by harness/probes/heavyhands.probe.js, THREE halves in one launch and THREE trials per
+     half: control and known-bad thrown at the game's own vz 210 / vy 160 with the dodge firing;
+     the passive half vz 0, vy 0, onGround true, dodge refused - and hpLost 6 in ALL THREE, because
+     an early return out of hurtPlayer would have read as knockback immunity and been damage
+     immunity. The dodge button is photographed reading unavailable at dodgeCd 0
+     (_shot/out/heavy-hud.png). */
+  'bsk_reckless', 'bsk_blood', 'bsk_tough',
   'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
   /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
      restores the mana you had three seconds ago" is now read in the Rewind death save beside its two

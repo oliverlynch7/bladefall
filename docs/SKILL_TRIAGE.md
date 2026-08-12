@@ -277,7 +277,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 
 | class | dead / total | the dead ones |
 |---|---|---|
-| stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
+| stormcaller | **3 / 8** | Conductor, Amped, Static Master (~~Storm Ward~~ wired 2026-08-11; ~~Overcharge~~, ~~Charged~~, ~~Galvanize~~ wired 2026-08-12, passes 37–39 — **the blocker below was stale**, see *"The chain existed all along"*) |
 | monk | 3 / 8 | Iron Body, Inner Fire, Still Water (~~Flow~~, ~~Killer Focus~~, ~~Master Striker~~ wired 2026-08-11) |
 | pirate | 3 / 8 | Sea Legs, Lucky, Greed (~~Dead Aim~~, ~~Swagger~~, ~~Slippery~~ wired 2026-08-11) |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
@@ -306,6 +306,50 @@ it one root cause behind six passives, a skill description and a capstone, exact
 section A. It is bigger than a passive-wiring row and it needs a falloff number the cards do not
 state ("softer each" names no amount), so it should be taken as its own piece of work with that one
 number put to Oliver.
+
+### THE CHAIN EXISTED ALL ALONG — the paragraph above is WRONG, and three of its six rows are now fixed
+
+**Corrected 2026-08-12 by measurement, not by re-reading.** "There is no chain in the game" was
+established from the SKILL table — `SKILL_FX.st_bolt` really is the mage's single projectile — and
+that search never reached the place a chain would actually live. `CLASS_BASIC.stormcaller`
+(index.html:11315) **is** a lightning chain: every basic attack finds the nearest other body within
+260 units and hits it for 34% with a `_chaining` re-entry guard, its own `skillRing` and the shock
+element. It shipped in `96cd511` on **2026-08-03**, five days before the entry above says it does not
+exist.
+
+So the group was never blocked on a missing mechanic; it was blocked on a stale note. Three rows came
+out of it the same day, each its own commit, each with a probe watched to fail against the shipped
+game first:
+
+| row | its card | what shipped |
+|---|---|---|
+| **Overcharge** (`st_overcharge`, r3 b) | "Your lightning arcs to a third enemy as well as a second." | two arcs instead of one, struck nearest-first. `harness/probes/overcharge.probe.js`, four neighbours at 80/140/200/900: every half arced ONCE before; after, the passive half takes the two nearest (26 and 26) while 200 and 900 stay untouched |
+| **Charged** (`st_charged`, r7 a) | "Your chain jumps twice as far between targets." | the jump distance was the bare literal 260; it is now ×2 under the passive. `harness/probes/charged.probe.js`, a body at 400 (past the shipped reach, inside a doubled one) and another at 700 (past both): nothing at 400 in any half before, 26 after, 700 never |
+| **Galvanize** (`st_galvanize`, r9 b) | "Chains that find no second target strike the first one twice." | the else-branch of the same hook, inside the same guard. `harness/probes/galvanize.probe.js`, TWO trials per half (alone / with company): 67 both ways in every half before; after, 94 alone against a 67 base and 68 in company |
+
+**Not one number was chosen in any of the three.** Two arcs is the card's own count, "twice as far" is
+the card's own word against a distance the file already had, and Galvanize's second strike IS the arc
+that failed — same 34%, same element. That is exactly why these three were takeable and the remaining
+three are not.
+
+**The capstone's clause came with them** — Storm Lord's "your lightning arcs to more enemies" is one
+more arc at rank 10, and it was the last unbuilt clause of all sixteen capstone cards. Section S.
+
+**What is left of the group, and it is a shorter list than the one above:**
+- **Conductor** (`st_conductor`) — "Wet, frozen or shocked enemies chain to everything near them."
+  Two things missing rather than one: the game has no *wet* or *frozen* enemy state, and "everything
+  near them" is a second radius the hook does not own (its 260 is a jump distance between two bodies,
+  not a splash). Oliver's.
+- **Amped** (`st_amped`) — "Each jump in a chain hits harder than the last, not weaker." The chain now
+  makes up to three jumps, so the clause is finally *reachable*; what it needs is a ramp per jump, and
+  the card names none. A number, so Oliver's.
+- **Static Master** (`st_master`) — "A chained enemy is briefly stunned by the jolt." `e.stunT` exists
+  and the warrior's Momentum stagger sets it to 0.8, so a wiring is one line — but "briefly" on every
+  basic attack against up to three bodies is a control budget, not a transcription. Oliver's, and it
+  is the cheapest of the three to answer: one number.
+- **Chain Bolt's own text** ("Rapid bolts that leap to a nearby foe") is still unimplemented — that is
+  a SKILL, `SKILL_FX.st_bolt`, and it is still the mage's single projectile. The basic-attack chain
+  does not reach it. Unchanged, and still needing the "softer each" falloff the cards do not state.
 
 **A SECOND ROW IS BLOCKED ON A MISSING MECHANIC THE SAME WAY, and it was measured while looking for
 the next thing to take.** `bsk_tough` (Unbreakable) — "while below half health you cannot be stunned,
@@ -399,13 +443,19 @@ wrong yes.
 
 ### What is left in this section, and the ONE decision that unblocks each group
 
-Taken together with the rows above, **every one of the 26 remaining dead passives is now blocked on
+Taken together with the rows above, **every one of the 23 remaining dead passives is now blocked on
 something only Oliver can decide** — a number, a unit, or a mechanic that does not exist. That is a
 floor, not a wall: none of them needs more investigation, each needs one answer.
 
+**26 until 2026-08-12, and the three that came off should be read as a warning about this table
+rather than as progress.** The whole stormcaller group sat here for a day under "a lightning chain"
+— a blocker that had been false since 2026-08-03. **A row is only as blocked as its most recent
+check**, and nothing in this document dates its blockers. When a group is large and shares one cause,
+re-check the cause before believing the group.
+
 | group | rows | the one thing needed |
 |---|---|---|
-| stormcaller ×6 | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize | **a lightning chain**, plus the falloff "softer each" names no amount |
+| ~~stormcaller ×6~~ **×3** | ~~Overcharge, Charged, Galvanize~~ **wired 2026-08-12** (passes 37–39); Conductor, Amped, Static Master remain | ~~a lightning chain~~ — **the chain was there all along**, see *"The chain existed all along"* above. Conductor needs a wet/frozen state AND a splash radius; Amped needs a per-jump ramp; Static Master needs a stun duration |
 | necromancer ×3 | Withering, Plague, Pestilence | **what "rot" is** — measured above |
 | ranger ×2 | Longshot, Close-Quarters Archer | **what a metre is in world units** (the only four `m` in the game are these cards) |
 | ranger ×1 + berserker ×1 | Escape Artist, Unbreakable | **a player slow / stun** — neither exists, so wiring them grants immunity to nothing |
@@ -437,6 +487,9 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | row | commit | how it was proven |
 |---|---|---|
 | **stormcaller / Storm Ward** (`st_ward`, r5 b) — "Casting a skill grants a shield equal to 4% max HP." | 2026-08-11 | `harness/probes/stward.probe.js`, A/B in ONE launch |
+| **stormcaller / Overcharge** (`st_overcharge`, r3 b) — "Your lightning arcs to a third enemy as well as a second." | 2026-08-12 | `harness/probes/overcharge.probe.js`, THREE halves in one launch with four neighbours at 80/140/200/900: every half arced ONCE before; after, the passive half takes the two NEAREST (26 and 26) while 200 and 900 stay untouched and the control and known-bad still arc once |
+| **stormcaller / Charged** (`st_charged`, r7 a) — "Your chain jumps twice as far between targets." | 2026-08-12 | `harness/probes/charged.probe.js`, THREE halves in one launch with a body at 400 (past the shipped reach, inside a doubled one) and another at 700 (past both): nothing at 400 in any half before; 26 in the passive half after, 700 never, controls unmoved |
+| **stormcaller / Galvanize** (`st_galvanize`, r9 b) — "Chains that find no second target strike the first one twice." | 2026-08-12 | `harness/probes/galvanize.probe.js`, THREE halves in one launch with TWO trials each (alone / with company, because "finds no second target" is a condition): 67 both ways in every half before; after, 94 alone against a 67 base and 68 in company, mate still arced. The probe's own first bar was the hook's 34% constant and the FIXED game failed it at 27 — an arc runs through the player's multipliers on the way out, so the yardstick is now a real arc measured in the same launch |
 | **berserker / Thick Hide** (`bsk_thick`, r5 a) — "Damage that would drop you below 1 HP leaves you at 1 instead, once per fight." | 2026-08-11 | `harness/probes/thickhide.probe.js`, FOUR trials in one launch |
 | **paladin / Bounce Back** (`pal_bounce`, r7 a) — "Damage you block is returned to whoever dealt it." | 2026-08-11 | `harness/probes/bounce.probe.js`, A/B in one launch: attacker lost 0 before, 57 after, player took 20 in both |
 | **monk / Flow** (`mon_flow`, r5 a) — "Each hit shortens your dodge twice as much." | 2026-08-11 | `harness/probes/monkflow.probe.js`, A/B in one launch: ratio 1 before, exactly 2 after |
@@ -2477,6 +2530,44 @@ sentence per row, not one number.
 branch in `effPower` / `effAtkSpeed` / `effSpeed` / `effLifesteal`. No launch, no GPU. The tell for a
 dropped clause is a **local variable computed and never used** in the branch — that is how both
 fossils were caught, and it is a shape neither the passive audit nor the field sweep can see.
+
+## S. THE SIXTEEN CAPSTONE CARDS, READ CLAUSE BY CLAUSE — a sweep nothing had ever run
+
+**Added 2026-08-12.** `harness/audit-passives.js` parses `kind:'passive'` entries out of `CLASS2`. A
+capstone is a `cap:` field with a name and a description and **no id at all**, so all sixteen sit
+outside the audit, outside the `KNOWN_DEAD` ratchet, and outside every sweep this sub-project had run
+— while being the card a player reads when they finish a class. Section Q read every wired passive
+against its reader; section J read every rewritten skill against its card; section R read every
+rank-1 innate. The rank-10 card had been read by nobody.
+
+Method, and it costs no launch: take each `cap.d` clause by clause and find the line that implements
+it. `classState('<cls>').rank>=10` is the only gate a capstone has — 53 sites in the file — so the
+question is whether each clause has one of them behind it.
+
+**Result: 16 cards, ~48 clauses, and THIRTEEN of the sixteen are fully honoured.** That is a negative
+finding worth recording rather than re-deriving: the capstones are in far better shape than the
+passive layer this sub-project has spent a week on. The exceptions, in full:
+
+| class | card | the clause | verdict |
+|---|---|---|---|
+| stormcaller | Storm Lord | "+10% cooldown reduction" | `effCdr` (3766) had a mage branch and a chronomancer branch and no stormcaller branch. **FIXED `9795786`**, `harness/probes/stormlord.probe.js` |
+| stormcaller | Storm Lord | "your lightning arcs to more enemies" | `CLASS_BASIC.stormcaller` read nothing about rank. **FIXED 2026-08-12**, one more arc, `harness/probes/stormarc.probe.js` — 1 / 2 / 3 / 0 across rank 9, rank 10, rank 10 + Overcharge, and a ninja negative control |
+| warrior | Unbroken Champion | "Skill hits restore 2% max HP" | implemented at 10649 on the CAST, not on the hit: a skill that connects with nothing still heals. **Oliver's** — "skill hits" read literally is per-hit, which on a multi-hit skill is a large buff, and read loosely it is a nerf to whiffed casts. That is an English question about a card, which is `w_juggernaut`'s precedent |
+| monk | Grandmaster | "your Focus stacks hit harder and linger longer" | **neither clause exists.** What rank 10 does is raise the stack CEILING from 5 to 7 (3722, 11006) — which the card does not mention. Per-stack damage is `mon_focused?0.08:0.06` and the window is `mon_focused?5:4`, and rank appears in neither. **Oliver's**, for two reasons: both halves need numbers, and 3722's own comment records that he retuned this after a playtest that said the Monk felt weak |
+
+**The other thirteen, checked and clean** (listed so nobody re-reads them): ranger Perfect Hunt (all
+three clauses — grace 10186, +3% 10191, kill-trims-cooldowns 10194), mage Archmage, reaper Avatar of
+Death, paladin Avatar of Light, necromancer Lich (`life:null` and `necroMinCap()+6`, 11867–11878),
+ninja Phantom (including "evade even more often", `effEvade` +0.05 at 11284), berserker Undying Rage,
+pirate Dread Captain, chronomancer Timelord, warlock Dark Ascension, skylancer Sky Master,
+bladedancer Endless Dance (the parry branch at 11605 refreshes `skillCd[1]` and sets `bdCapT`, which
+buys both the speed at 3755 and the damage protection at 11639), beastmaster One Pack (all four
+clauses, including the once-per-level pet save at 11763).
+
+**Worth carrying forward: the tell that made the stormcaller rows findable is the same one section R
+names.** A clause with no `rank>=10` site behind it is invisible to every id-based audit in this
+harness, because a capstone has no id to be dead. Re-run this sweep after any kit change; it is one
+careful read of sixteen cards and it found the two rows above plus the whole chain correction.
 
 ## Not listed here, and why
 

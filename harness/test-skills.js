@@ -67,16 +67,30 @@ import { claimsOf, isIndirectDamage } from './claims.js';
    and every damage claim this run is reported UNPROVEN rather than FAILED. Reporting them as
    failures would bury the real bugs Oliver found under a hundred false ones - which is how a
    harness stops being read. */
+/* ONE DISTANCE, NAMED ONCE, USED BY BOTH RIGS. BASELINE and mkDummy must never disagree about
+   where the target stands, because BASELINE is what licenses believing mkDummy's damage numbers at
+   all — so the number lives here rather than being typed twice.
+
+   IT IS 60 ON PURPOSE AND IT MUST NOT BE SHORTENED. The harness-hardening plan proposed 30, "safely
+   inside every value seen so far". Measured instead (harness/probes/reach.probe.js, five kits over
+   15/25/30/40/60/90): bladedancer/Riposte deals 0, 0, 0, 201, 170, 201 — its lunge carries it PAST
+   a close target and bdArc's cone then fails behind it, so 30 is the one value that converts a
+   passing skill into a hard failure. 60 is also not load-bearing in the other direction: the three
+   skills that fail this bench for dealing no damage deal none at any of the six distances. */
+const DUMMY_DIST = 60;
+
 const BASELINE = `(function(){
   const G = __BF3.G, p = G.p;
   G.enemies.length = 0;
-  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - ${DUMMY_DIST});
   if(!foe) return JSON.stringify({ ok:false, why:'spawnEnemy returned nothing' });
   foe.maxHp = 100000; foe.hp = 100000; foe.active = true; foe.dropT = 0;
+  const sx = foe.x, sz = foe.z;                       // held still — see HOLD THE TARGET STILL below
   const h0 = foe.hp;
   for(let k = 0; k < 240; k++){                       // 4s of swinging, four seconds of chances
     try { if(__BF3.playerAttack) __BF3.playerAttack(); } catch(e){}
     try { __BF3.update(1/60); } catch(e){}
+    foe.x = sx; foe.z = sz;
     if(foe.hp < h0) return JSON.stringify({ ok:true, dealt:h0 - foe.hp, ticks:k });
   }
   return JSON.stringify({ ok:false, why:'a plain attack drew no blood in 4s', foeAt:{x:Math.round(foe.x),z:Math.round(foe.z)}, playerAt:{x:Math.round(p.x),z:Math.round(p.z)} });
@@ -121,11 +135,36 @@ const PROBE = (classId) => `(function(){
     G.enemies.length = 0;
     let d = null;
     try {
-      d = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
-      if(d){ d.active = true; d.dropT = 0; d.maxHp = 100000; d.hp = 100000; }
+      d = __BF3.spawnEnemy('grunt', p.x, p.z - ${DUMMY_DIST});
+      if(d){ d.active = true; d.dropT = 0; d.maxHp = 100000; d.hp = 100000;
+             d.__sx = d.x; d.__sz = d.z; }
     } catch(e){}
     return d;
   };
+  /* HOLD THE TARGET STILL. Until 2026-08-12 the bench spawned a live grunt and let it act, and the
+     grunt CHASES: measured (harness/probes/reach.probe.js), every dummy ended up its spawn distance
+     plus ~44 units from where it was put, i.e. it closed the entire gap and finished adjacent to
+     the player at every one of six spawn distances. So "the target is 60 units away" was true for
+     about a second of a five-second window, and what a skill was actually measured against was
+     wherever the AI had walked — which is a race, and races are what this bench keeps mis-reporting
+     as bugs.
+
+     Measured effect (harness/probes/benchdet.probe.js, four repeats per skill, five kits): with the
+     grunt free, 6 of 20 skills returned a different damage number run to run; held still, 3 of 20.
+     Nothing that dealt damage stopped dealing it — the closest call is bladedancer/Mirror Guard, 210
+     to 92, still comfortably non-zero.
+
+     THE HAZARD THIS HAD TO CLEAR FIRST, because it would have sunk the whole suite silently: the
+     rig test swings a PLAIN ATTACK at this dummy, and if it draws no blood every damage claim in the
+     run is reported UNPROVEN instead of FAILED. A grunt that walks to you makes that swing land
+     whether or not melee reaches 60. Measured before shipping (harness/probes/canhit.probe.js), all
+     sixteen classes on their own starter weapon PLUS the BASELINE rig on the Arena's legendary
+     sword: every one draws blood on tick 0 or 2 with the dummy pinned, at a gap of exactly 60. Reach
+     was never doing the work; the walk was cosmetic.
+
+     Pinning the position rather than zeroing a speed field is deliberate — which field a grunt
+     steers with is a guess, and a position clamp is not. */
+  const hold = (d) => { if(d && d.__sx != null){ d.x = d.__sx; d.z = d.__sz; } };
   /* EVERY CAST STARTS FROM THE SAME BODY, and until 2026-08-11 none of them did.
 
      A fresh dummy per skill was only half the isolation. The PLAYER carried whatever the previous
@@ -189,6 +228,7 @@ const PROBE = (classId) => `(function(){
                 shield: before.shield, guard: before.guard, petShield: before.petShield };
     for(let k = 0; k < TICKS; k++){
       try { __BF3.update(1/60); } catch(e){}
+      hold(d);
       if(p.hp > a.hp) a.hp = p.hp;
       if((p.shieldHp || 0) > a.shield) a.shield = p.shieldHp || 0;
       if(guardOf() > a.guard) a.guard = guardOf();
@@ -293,6 +333,7 @@ const PROBE = (classId) => `(function(){
     for(let k = 0; k < 240 && d; k++){
       try { if(__BF3.playerAttack) __BF3.playerAttack(); } catch(e){}
       try { __BF3.update(1/60); } catch(e){}
+      hold(d);
       if(d.hp < h0){ canHit = true; break; }
     } }
   mark('after rig test');

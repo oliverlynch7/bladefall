@@ -93,9 +93,49 @@ node _shot/shot.js --scene arena:flat --wait 12000 --eval "(function(){ __BF3.ch
 
 Expected: per-skill travel distances. The bench distance must be **less than the shortest lunge**, not more.
 
-- [ ] **Step 3: Make the target distance a named constant and shorten it**
+- [x] **Step 3: Make the target distance a named constant and shorten it** — **done as to the
+      constant and the freeze; the SHORTENING was measured to be wrong and was not carried out.**
 
-One constant in `test-skills.js`, used by BOTH `BASELINE` and `PROBE` — they must never diverge, which is already written into the file's comments. Set it under the shortest measured lunge (30 is safely inside every value seen so far). Freeze the dummy so it cannot walk out of range: set its speed to 0 after spawn.
+Shipped:
+
+- `DUMMY_DIST` is now one named constant used by both `BASELINE` and `mkDummy`, so the two rigs can
+  no longer drift apart. **Its value stays 60.** Step 2 measured that 30 zeroes `bladedancer/Riposte`,
+  and the comment at the constant records that, so the next reader does not re-propose it.
+- **The dummy is held still**, which was the half of this step that measurement supported. Pinned by
+  clamping its position back to its spawn point after every tick — in `watch()`, in the rig-test
+  swing loop, and in `BASELINE` — rather than by zeroing a speed field, because which field a grunt
+  steers with is a guess and a position clamp is not.
+
+The hazard this had to clear first, and it is the reason the freeze was not simply shipped on the
+plan's say-so: the rig test swings a plain attack at this dummy, and if it draws no blood **every
+damage claim in the run is reported UNPROVEN rather than FAILED**. A grunt that walks the whole 60
+units makes that swing land whether or not melee reaches 60, so freezing it could have silently
+turned the entire suite inconclusive. Measured before shipping — `harness/probes/canhit.probe.js`,
+all sixteen classes on the starter weapon each is actually benched with, plus the `BASELINE` rig on
+the Arena's legendary sword — **every one of the seventeen draws blood on tick 0 or 2 with the dummy
+pinned, at a gap of exactly 60.** Reach was never doing the work; the walk was cosmetic.
+
+- [x] **Step 4: Prove the flap is gone** — **ten identical lines, `5 pass, 0 fail, 0 unproven`.**
+
+The pass/fail line was already stable before this change (Step 1), so the honest proof of the freeze
+is the underlying damage numbers rather than the verdict. `harness/probes/benchdet.probe.js` casts
+every skill four times in the identical rig and reports the damage each time: **with the grunt free
+6 of 20 skills returned a different number run to run; held still, 3 of 20.** Nothing that dealt
+damage stopped dealing it — the closest call is `bladedancer/Mirror Guard`, 210 → 92, still
+comfortably non-zero.
+
+```bash
+for i in 1 2 3 4 5 6 7 8 9 10; do node harness/test-skills.js --classes bladedancer 2>&1 | tail -1; done
+```
+
+- [x] **Step 5: Re-baseline, alone, and commit** — **no re-baseline was needed, which is the result.**
+
+The step anticipated that a distance change would move every class. The distance did not change, so
+nothing moved: the full sixteen-class suite reports `70 pass, 3 fail, 2 unproven` both before and
+after the freeze, with the same three failures, and `harness/baseline.json` already holds exactly
+those three (`ranger/Tumble`, `mage/Attunement`, `berserker/Charge`). Deleting and regenerating it
+would have rewritten an identical file with a newer timestamp and destroyed the evidence that it was
+unchanged. `node harness/run-all.js` green, no `REGRESSION` line.
 
 - [ ] **Step 4: Prove the flap is gone**
 
@@ -114,6 +154,23 @@ git commit -m "harness: the bench put its target beyond some lunges, so verdicts
 ```
 
 Note in the message which baseline entries appeared or disappeared, since a distance change moves every class.
+
+**Handed off to the skill-correctness plan, found while doing this task and not chased here.**
+
+- **The suite's three failures are real, and they are now robust findings rather than suspicions.**
+  Each was re-measured under every rig variable this task had: six spawn distances, dummy free and
+  dummy pinned, and player HP normal and 1e6. `ranger/Tumble`, `mage/Attunement` and
+  `berserker/Charge` deal exactly zero in all of it. The useful contrast is
+  `berserker/Charge` travelling **684 units** for nothing against `warrior/Charge` travelling ~315
+  and dealing 77 every time — the mechanism works, the berserker's copy of it does not.
+- **The berserker empties the player's health bar in every window and `p.dead` is never set.**
+  Measured (`harness/probes/survive.probe.js`): `hurt` comes back 239 of 239 on Charge, Whirlwind
+  and Berserk, and at a 1e6 HP pool it comes back 500000 of 500000 — the whole bar, whatever the bar
+  is — while `deadAt` stays `-1` on every single row, and with the dummy **pinned 60 units away and
+  unable to reach the player**. No other class does this; the warrior control loses 0–17. So it is
+  self-inflicted and it is not death. This was chased far enough to rule it OUT as the cause of the
+  three zero-damage verdicts (they are unchanged at 1e6 HP) and no further, because it is a class
+  bug, not a bench bug.
 
 ---
 

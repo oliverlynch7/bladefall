@@ -1796,6 +1796,77 @@ should be read as **five** fields, not four.
 set it to 0.4 and nothing reads it. No card in the game promises a spin, so this is `_vanish`'s shape
 rather than Unseen's — recorded only so the next sweep does not spend a launch on it.
 
+---
+
+## N. COMBO EDGE PAID OUT ONLY FOR THE *OTHER* PASSIVE — **FIXED 2026-08-12**
+
+**Section H's shape a second time in the same class, and this one was hiding UNDER the section H fix.**
+Unseen could not arm at all until pass 25, so nothing downstream of it had ever been exercised. The
+moment standing still armed the strike, the next question — does killing with it rearm it — became
+answerable, and the answer was no.
+
+`nin_combo` (CLASS2.ninja r5 b, 2120) reads *"Killing with Unseen instantly rearms it — chain from
+body to body."* It is genuinely wired: `killEnemy` (10967) checks `c2Passive('nin_combo')` and writes
+`p._stillT = 9`, Vanish's own arming line. **The gate beside it was `e._ninExec !== undefined`, and
+`_ninExec` had exactly one assignment in the whole file — inside `CLASS_BASIC.ninja`'s DEADLY
+PRECISION branch (11358).** So what shipped was not the card. It was *"killing with Deadly Precision
+rearms Unseen"*, with two consequences a player experiences as the tooltip lying:
+
+- `nin_deadly` is **rank 3 b** and `nin_combo` is **rank 5 b**. A Ninja who took **Swift** at rank 3 —
+  half of all Ninjas, and the half the card at rank 3 a explicitly points at Unseen — could never fire
+  Combo Edge at all, at any HP, for the whole run.
+- Even holding both, an Unseen strike that killed a **healthy** enemy outright marked nothing. That is
+  the ordinary case, and it is precisely the one *"chain from body to body"* describes.
+
+**The passive audit calls `nin_combo` wired and always has.** Third instance of the limit section E
+states in advance — after `w_unyield` (pass 20) and Unseen itself (section H) — and the cheapest of
+the three to have missed, because the id is not merely mentioned, it is read in a live branch that
+does the right thing when it runs.
+
+### How it was measured — `harness/probes/nincombo.probe.js`, three halves in one launch
+
+The bar is the game's own arm state, `p._stillT`, read after the kill. An armed Unseen strike
+**consumes** it to 0 on its way through (11354), so 0 after the kill is a real "did not rearm" and 9
+is the rearm's own line. Every trial also reports that the foe actually died, so a zero can never mean
+the bench failed to kill anything.
+
+Halves: `live` = Swift + Combo Edge (the build the shipped game could never pay); `deadly` = Deadly
+Precision + Combo Edge (the shipped game's only working path, carried so a zero elsewhere cannot be
+"the bench cannot see a rearm"); `control` = Swift + Evasion, no Combo Edge.
+
+| trial | | live (before → after) | deadly (before → after) | control |
+|---|---|---|---|---|
+| `hearty` | full-health foe, killed outright by Unseen | **0 → 9** | **0 → 9** | 0 → 0 |
+| `wounded` | foe already below a third | **0 → 9** | 9 → 9 | 0 → 0 |
+| `notunseen` | a plain kill, Unseen not armed | 0 → 0 | 0 → 0 | 0 → 0 |
+
+`notunseen` is the trial that makes the rest mean anything: a wiring that rearmed on every kill would
+be a strictly different and strictly better card than the menu shows, and it would clear a two-trial
+bar. It fires in no half, either side.
+
+**THE KNOWN-BAD COULD NOT BE AN `inert` HALF, and the reason is worth keeping.** The mark is written
+and read inside ONE synchronous `hitEnemy` call, so nothing a bench pins between ticks can reach it —
+the trick `petorder.probe.js` and `unseen.probe.js` both use is unavailable here. The shipped gate's
+condition is **transcribed in the probe** instead (`shippedFired`) and the identical bar is evaluated
+against it, which is the shape `harness/test/gate.test.js` uses when it asserts `OLD_LINE` and the new
+line disagree. `okAgainstShipped` was **false while `ok` was true**, in the same launch, on the same
+measurements.
+
+### The fix
+
+The mark moves ABOVE the Deadly Precision branch, so it is set by every Unseen strike rather than by
+the execute alone, and it is **scoped to `p.swingId`** rather than left a bare flag — a foe merely
+*wounded* by Unseen and finished off in a later fight would otherwise still count as an Unseen kill.
+Nothing is invented: `p.swingId` is the game's own per-swing discriminator and is already used in this
+exact form two hundred lines up (`e.lastHit === p.swingId`, 10742). `_ninExec` is gone rather than left
+behind, so the sweep in `harness/audit-fields.js` does not inherit a new write-never-read field from a
+fix.
+
+Photographed at `_shot/out/nc-rearm.png` (`harness/probes/nincombo-shot.probe.js`): **UNSEEN** over the
+body and **UNSEEN READY** over the hero in one frame, with the kill's XP and gold beside them, on a
+Ninja whose rank 3 is Swift. Regression: `node harness/test-skills.js --classes ninja` reports **3 pass
+/ 0 fail / 1 unproven**, the unproven being the baselined `ninja/Death Mark`.
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

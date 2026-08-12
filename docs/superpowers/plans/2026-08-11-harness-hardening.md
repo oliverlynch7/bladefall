@@ -265,22 +265,75 @@ The only Telegram ping is a failure alert, so a healthy run is indistinguishable
 
 **Files:**
 - Modify: `autopilot.ps1`
+- Add: `harness/run-report.js`, `harness/test/run-report.test.js`
 
-- [ ] **Step 1: Build a one-line summary at the end of a green run**
+**THIS WAS BUILT ONCE ALREADY AND THE STASH CYCLE ATE IT.** `_autopilot.log` records a run reporting
+"Task 3 (run report): `harness/run-report.js` + 10 unit tests including the CLI end-to-end and a
+watched-to-fail check; `autopilot.ps1` glue parses clean" — and no commit anywhere contains that file.
+It was left uncommitted, swept by the killed-run guard into `stash@{1}` at 12:04 on 2026-08-12, and a
+later run's glue then logged `report skipped (run-report exit 1)` — the PowerShell half calling a
+module that had been stashed out from under it. **Recovered from the stash rather than rewritten**
+(`git show "stash@{1}^3:harness/run-report.js"`), reviewed rather than trusted, and committed this
+time. This is the third artefact this plan has found in a stash; the lesson of Task 2 is that the
+recovery path works and nobody looks.
 
-After the gate passes, collect: the number of commits this run made (`git rev-list --count` against the SHA captured at run start), the gate's own summary line, and the count of entries in `harness/baseline.json`.
+- [x] **Step 1: Build the report at the end of a green run** — done 2026-08-12. Not one line and not
+      in PowerShell: `harness/run-report.js`, whose pure half composes the text and body and whose
+      impure half reads `git log --format=%s <startSha>..HEAD` and `harness/baseline.json`.
 
-- [ ] **Step 2: Send it on the existing channel**
+**It lives in Node because that is the only half an unattended run can TEST.** `node --test` is on the
+allowlist; `powershell -Command` deliberately is not, so anything written as PowerShell can be
+parse-checked and never executed by the session that wrote it. Two things fall out of that which the
+plan's one-liner would not have got:
 
-Reuse the `thework.pages.dev/state` `tgPing` call already in the file. Send at most once per run, and only when the run actually committed something — a run that correctly found nothing to do should stay quiet, or the channel becomes noise and gets muted.
+- **the body is `JSON.stringify`d, not concatenated.** Every existing `tgPing` in `autopilot.ps1` is
+  built as `'{"action":…,"text":"' + $text + '"}'`, which stops being JSON the moment a commit subject
+  contains a double quote — the POST is silently dropped and the run still looks green. The test
+  asserts the two idioms DISAGREE on exactly that input, so the bug is recorded as a failing case.
+- **the body travels as a FILE.** The digest carries `•` and an emoji; PowerShell 5.1 decodes a native
+  command's stdout through `[Console]::OutputEncoding`, an OEM codepage here, so `$body = & node …`
+  would mangle them at capture. `--out` plus `[System.IO.File]::ReadAllBytes` moves the exact bytes.
 
-- [ ] **Step 3: Verify by running one cycle manually**
+**One real defect found in the recovered code, fixed, and now tested:** `baselineCount()`'s default
+path was `<repo>/baseline.json` and the file is `harness/baseline.json`. A missing baseline correctly
+returns `null`, so every report silently dropped its "N known failures still tracked" line and the
+existing assertion — a made-up path returns null — was satisfied by the bug. The new test reads the
+file a second way and demands the two agree, and keeps the old path as the failing case.
+
+- [x] **Step 2: Send it on the existing channel** — done. `Invoke-RestMethod` to the same
+      `thework.pages.dev/state` endpoint, once per run, only when `run-report.js` exits 0. **Exit 3
+      means "committed nothing", which is the quiet path** — a run that correctly found nothing to do
+      must stay silent or the channel gets muted and takes the failure alerts with it. The report file
+      is deleted after a successful post because it carries the ping password, and deliberately KEPT
+      after a failed one, where it is the only evidence of what was attempted.
+
+The same change hoists the ping password to `$tgPass`, reading `$env:BLADEFALL_TG_PASSWORD` with the
+existing literal as fallback — three call sites become one. **That is not a secret fix and is not
+claimed as one:** the value is already in this file's history and in `AUTOPILOT.md`. Rotating it is
+Oliver's call, because the same password authenticates the other PraxisBrain automations.
+
+- [ ] **Step 3: Verify by running one cycle manually — NOT POSSIBLE FROM INSIDE A RUN, and this is
+      what was verified instead.**
 
 ```powershell
 Start-ScheduledTask -TaskName 'Bladefall Autopilot'
 ```
 
-Then read the tail of `_autopilot.log` and confirm a summary line was produced.
+The task's own overlap lock is held by the very session doing this work (`_autopilot.lock`, keyed on a
+live PID), so a manually started cycle logs `skipped: run <pid> still alive` and exercises nothing.
+`Start-ScheduledTask` is also not on the allowlist. What WAS verified:
+
+- `powershell -NoProfile -ExecutionPolicy Bypass -File tools/psparse.ps1 autopilot.ps1` → `PARSE CLEAN`
+- `node --test harness/test/run-report.test.js` → **11 pass, 0 fail**, and two of those spawn the CLI
+  as a child process with the exact argument list `autopilot.ps1` uses, asserting the commit subjects
+  land in the body, that `--out` writes real UTF-8 bytes, and that an empty range exits 3.
+- the glue is wrapped in its own `try/catch` and sits AFTER `ClearMarkerIfClean`, so nothing it can do
+  is able to fail the run it is reporting on.
+
+**The evidence to look for, next run:** `_autopilot.log` should carry either `reported this run to
+Telegram` or `nothing committed this run - no report sent`. A line reading `report skipped (run-report
+exit <n>)` means the module is missing or throwing — which is precisely what the log said before this
+commit, and the reason it said it.
 
 - [x] **Step 4: Commit** — done.
 

@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.940.0-autopilot';
+const VERSION3D='1.941.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11536,6 +11536,21 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='bladedancer'&&c2def('bladedancer')&&(p.bdParryT||0)>0){
     p.bdParryT=0;p.bdRiposte=1;p.invuln=Math.max(p.invuln,.28);addText(p.x,p.y+p.h+20,p.z,'PARRY!','#ffd36a',true);skillRing(p.x,p.z,'#ffd36a','#ffffff',145);burst(p.x,p.y+25,p.z,'#ffe59b',18);
     if(c2Passive('bd_heal'))p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.05));
+    /* FAST HANDS (bladedancer r5 b, index.html:2216): "A parry refunds the time your attack would
+       have taken." Wired 2026-08-12, the third row of docs/SKILL_TRIAGE.md section Q. `bd_fast` has
+       always been reported WIRED and is: its one reader is `effAtkSpeed`, where it grants +12%
+       attack speed (3754). That is not what the card says, and what the card says was implemented
+       nowhere.
+       `p.atkCd` IS "the time your attack would have taken": `playerAttack` sets it to
+       `w.cd/effAtkSpeed(p)*cdMul` on the swing (9672) and it is the gate that same function returns
+       on. Zeroing it is Swift Steel's own refund, three lines from where the field is set
+       (`w_swift`, 9678) — so nothing is invented and there is one idiom for "this swing was free"
+       rather than two.
+       `p.atkTimer` is deliberately left alone: it is the swing ANIMATION and Counter Stance sets it
+       on purpose (10454). The card refunds time, not a pose.
+       A no-op when nothing was pending, which is correct: a parry with no swing behind it has no
+       time to give back. */
+    if(c2Passive('bd_fast'))p.atkCd=0;
     const counter=p.bdPerfectDmg||p.bdMirrorDmg||0;if(counter>0){const R=p.bdPerfectDmg?260:190;for(const e of combatTargets())if(!e.dead&&e.active&&dXZ(e.x,e.z,p.x,p.z)<R+e.r)hitEnemy(e,counter,p,420,0,null);G.shake=Math.min(18,G.shake+10);}
     p.bdPerfectDmg=0;p.bdMirrorDmg=0;if(classState('bladedancer').rank>=10){if(p.skillCd)p.skillCd[1]=0;p.bdCapT=1;}hudUpdate();SFX.dodge();return;
   }

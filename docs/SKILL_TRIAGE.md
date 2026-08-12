@@ -2053,6 +2053,89 @@ Unit stage **53 → 55 tests**, all green. `128 total, 102 wired, 26 dead`, ever
 duplicates, and the dead list is byte-for-byte what it was — so nothing in section E moves and
 `KNOWN_DEAD` needs no edit. No game code was touched.
 
+---
+
+## Q. SIXTY-EIGHT OF THE 128 SKILL CARDS RUN ANOTHER CLASS'S FUNCTION — measured 2026-08-12
+
+**The first measurement in this programme aimed at `docs/VISION.md`'s priority #2 rather than its
+skill-correctness one.** Oliver's bar, in his own words: *"The goal is not 16 classes that work, it is
+16 classes that feel genuinely different to play… A class that is a stat-reskin of another has
+failed."* Nothing in the harness could see that. `audit-passives` asks whether a passive is read;
+`audit-fields` asks whether a field is; `test-skills` asks whether a skill's effect matches its own
+sentence. **None of them can see two cards in two different classes calling the same function.**
+
+`harness/audit-kits.js` + `harness/test/kits.test.js` (11 tests, in `run-all.js`'s fast stage) now do.
+Measured on the shipped file, from the audit's own printed line rather than from prose: **128 cards,
+83 distinct handlers, 23 groups shared across classes covering 68 cards, 0 dead.** More than half the
+skill cards in the game are one of 23 functions.
+
+*A number in an earlier draft of this section said 57, and it is worth saying why it moved rather
+than quietly correcting it: that figure came from the resolver before it was right — see the two
+alias rules below. Both bugs changed group membership, so 57 was produced by a tool that was wrong
+about which cards belong together.*
+
+**A SHARED HANDLER IS NOT A BUG, and saying so first matters.** `AUTOPILOT.md`'s own class philosophy
+is that every class is a variant of one of three cores, and aliasing (`SKILL_FX.mon_whirl =
+SKILL_FX.w_whirl`) is a reasonable way to build sixteen out of three. What this reports is the SEAM —
+where the only thing distinguishing two classes' cards is the name, the icon and the numbers around
+them. Two things live in that seam and both are real: a card that promises something the shared
+function does not do, and a pair of kits quietly converging.
+
+### The 23 groups, and the six cards whose text does not match what they call
+
+The full table with every card's description is printed by the audit itself. The rows worth acting on
+are the ones where the shared handler cannot do what the card says:
+
+| card | its own text | what it runs | the gap |
+|---|---|---|---|
+| **pirate / Aimed Shot** (`pir_pierce`) | "**Rapid** piercing pistol shots (**~2s, softer each**) — a gunslinger's rhythm" | `deadeye` (9868) | `deadeye` pushes **exactly one** lance and returns. There is no repeat and no decay. The "~2s, softer each" shape does exist in this file — `bolt`, `cleave`, `flurry` — so the card describes a different skill in the same game. The strongest row of the six. |
+| **berserker / Bloodguard** (`bsk_guard`) | "heavy damage reduction **and pull foes in**" | `bulwark` (9950) | `bulwark` sets `p.guardT` (the brace, real) and `e.taunt` (section K's dead field). The pull does not happen. Makes section K **six** cards, not five. |
+| **paladin / Taunt** (`pal_taunt`) | "**Pull nearby foes to you** and brace behind a shield" | `bulwark` (9950) | Already section K. Listed again because this sweep finds it independently, from the other direction — which is worth noting on its own: two tools that share no code agreeing on a row is the closest this document gets to a second opinion. |
+| **ranger / Smoke Bomb** (`r_smoke`) | "breaks targeting, **−30% enemy accuracy**, **+20% your move speed**" | `smokebomb` (9979) | The handler sets `p.invuln`, `e.slowT` and `e.taunt=0`. **Neither the accuracy penalty nor the move-speed bonus exists**, and the one clause that is attempted — "breaks targeting" — writes `e.taunt`, which is section K's dead field. The ninja's and pirate's cards on the same function ("vanish in smoke, briefly invulnerable, and slow nearby foes") describe it exactly. One of the three is about a different skill. |
+| **ranger / Shadowstrike** (`r_shadow`) | "…**tap again within 1s to return**" | `shadowstrike` (9974) | One dash, one hit, no return and no second press anywhere in the handler. The other two cards on it (ninja, pirate) describe one press and are correct. |
+| **monk / Stunning Palm** (`mon_stun`) | "a shockwave palm that **dazes** and slows" | `nova` (9903) | `nova` deals damage and sets `slowT`; there is no `stunT`. **The weakest row of the six** and it is listed as such: "daze" may be intended as flavour for the slow, in which case only the name is misleading. Worth one sentence from Oliver, not a fix. |
+
+**EVERY ONE OF THESE IS OLIVER'S, and by this document's own rule rather than for want of a
+mechanism.** Each is either a balance change (turning one shot into a two-second stream changes a
+class's damage profile), a mechanic that does not exist (the pull, section K), or a description that
+has outlived its skill — and this document forbids fixing a skill by editing its description. They
+belong with the section J twelve, as one question: *for each of these, which is the real card — the
+text or the code?* Answering is six sentences, not six numbers.
+
+### Two things the tool had to get right, both measured rather than reasoned
+
+**1. AN ALIAS DOES NOT FOLLOW A LATER REDEFINITION.** `SKILL_FX.a = SKILL_FX.b` copies the value `b`
+holds *at that point*. The game does exactly this: `nin_fury`, `bsk_berserk` and `mon_thousand` are
+aliased to `w_berserk` at 10281–10324, and **`w_berserk` is then replaced by a new function at
+19271** — one of section J's twelve rewrites. So the Warrior's Warcry runs the new body and the other
+three still run the old `berserk`. A resolver that follows aliases by NAME groups all four and is
+wrong about every one; this one walks every assignment in file order and simulates it.
+
+**2. THE `A = A || B` REPAIR HAD TO BE FOLLOWED, AND THE FIRST VERSION OF THIS TOOL FAILED IT —
+reporting nine fixed skills as broken.** Section A's nine dead handlers were repaired at 10520–10530
+with `SKILL_FX.nin_step = SKILL_FX.nin_step || SKILL_FX.x_step;`, re-run below the definitions. Read
+only the first operand and every one of them is a self-alias to something still undefined, so all
+nine come back dead. That is a false accusation of the loudest possible kind — it would have named
+nine repaired skills as bugs — and it is the direction `harness/audit-fields.js` warns about itself.
+Caught by running the tool against the real game and disbelieving the result, then reading 10520.
+
+Both are unit tests that assert the audit DISAGREES with the naive version, the rule
+`harness/test/gate.test.js` sets.
+
+### What it also gives, free: section A is now a STATIC assertion
+
+`deadHandlers()` reports any card whose `fx` resolves to `undefined` — the exact fault that shipped
+nine skills that spent their mana and cooldown and did nothing. **That was only catchable by casting
+the skill in a browser until now.** It runs in a second, so the repair at 10520–10530 cannot silently
+come undone. Current state: **0 dead**, and that zero is now watched.
+
+### The ratchet
+
+`KNOWN_SHARED` lists the 23 groups and is checked in BOTH directions. A **new** cross-class share
+fails the gate — a new class wired by aliasing an existing kit is precisely the stat-reskin
+`docs/VISION.md` calls a failed class, and it would otherwise land with nothing to say so. A group
+that stops being shared fails it too, until the list is updated.
+
 ## Not listed here, and why
 
 - **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: a limit of the

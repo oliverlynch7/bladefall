@@ -93,27 +93,110 @@ node _shot/shot.js --scene arena:flat --wait 12000 --eval "(function(){ __BF3.ch
 
 Expected: per-skill travel distances. The bench distance must be **less than the shortest lunge**, not more.
 
-- [ ] **Step 3: Make the target distance a named constant and shorten it**
+- [x] **Step 3: Make the target distance a named constant** — done 2026-08-12. **One of its three
+      instructions was carried out; the other two were measured first and refused, and a THIRD flap
+      that nothing in this plan had suspected was found and fixed in their place.**
 
-One constant in `test-skills.js`, used by BOTH `BASELINE` and `PROBE` — they must never diverge, which is already written into the file's comments. Set it under the shortest measured lunge (30 is safely inside every value seen so far). Freeze the dummy so it cannot walk out of range: set its speed to 0 after spawn.
+`DUMMY_DIST = 60` now feeds both `BASELINE` and `PROBE`. That much was free, and it was the half worth
+having: `BASELINE` is what licenses reporting a damage claim as UNPROVEN rather than FAILED, and
+`mkDummy`'s own comment claimed to be "EXACTLY the rig the baseline proved" while being a second copy
+of the number.
 
-- [ ] **Step 4: Prove the flap is gone**
+**Shortening to 30: REFUSED, measured** (`harness/probes/reach.probe.js`, Step 2). `bladedancer/Riposte`
+deals `0, 0, 0, 201, 170, 201` across 15/25/30/40/60/90 — nothing at 30. The one value the plan named
+is the one value that converts a passing skill into a hard failure.
 
-```bash
-for i in 1 2 3 4 5 6 7 8 9 10; do node harness/test-skills.js --classes bladedancer 2>&1 | tail -1; done
+**Freezing the dummy: REFUSED, measured** (`harness/probes/freeze.probe.js`, new this run). Five kits
+at 60 units with `e.speed = 0` (index.html:12874 is the whole of an enemy's locomotion) as the only
+variable, mobile column against frozen column:
+
+- it removes the player-was-HIT condition from **15 of 20 rows** — a frozen grunt never arrives to
+  swing, so every skill that pays out on being struck loses its payout;
+- it silences two skills outright — `ranger/Hunter's Mark` 28 → 0, `monk/Deflect` 20 → 0 — and moves
+  five more (`bladedancer/Mirror Guard` 210 → 62, `warrior/Cleave` 146 → 115, `ranger/Volley`
+  240 → 192, `ranger/Spike Trap` 78 → 120 the other way);
+- and it does not do what it was for: the frozen dummy still ends **~31 units** off its spawn, because
+  knockback moves it whatever its speed is.
+
+**What was actually flapping: `G.minions`.** `harness/probes/determinism.probe.js` (new this run) casts
+all sixteen kits three times **inside one page** and compares the MET booleans rather than the damage
+numbers — one Chrome launch instead of the thirty a `run-all.js` loop would cost. 192 casts, and one
+row was the flap in this plan's title with a second head:
+
+```
+necromancer/Raise the Dead   summon TRUE, FALSE, TRUE   dmg 1611 / 1562 / 1548
 ```
 
-Expected: ten identical lines. Anything else means the cause was not geometry — revert and record.
+The same code passing, failing and passing, on a claim that FAILS the suite. `reset()` restores every
+number and boolean on the player, but `G.minions` is an array on `G`, so a summon skill's own product
+survived into the next skill's verdict — and `MET.summon` is a strictly-greater test. At
+`spawnMinion`'s cap (index.html:11869) the array `shift()`s before it pushes, so **the length does not
+change and a summon reads as a no-op**; Raise the Dead passes no cap of its own and gets the default
+14, while Summon Skeletons and Army of the Dead pass `necroMinCap()` (26 at rank 10) and at rank 10
+give their minions a null life so they never expire. So the kit parks 14+ permanent minions in the room
+and the later skill's verdict comes down to how many happened to die to the dummy. `mkDummy` now empties
+the minions with the enemies. Deliberately ONLY the minions: projectiles and hazards leak the same way
+(the 32 damage `ranger/Hunter's Mark` shows on its first repeat and never again is the previous skill's
+leftover) but nothing measured shows them changing a verdict.
 
-- [ ] **Step 5: Re-baseline, alone, and commit**
+*Kept for the next reader:* that comment lives inside the `PROBE` template literal, and the first
+version of it contained backticks, which ends the string and stops the whole module parsing —
+`SyntaxError: Unexpected identifier 'after'`, and every bench run dead until it was removed.
 
-```bash
-rm -f harness/baseline.json && node harness/run-all.js
-git add harness/test-skills.js harness/baseline.json
-git commit -m "harness: the bench put its target beyond some lunges, so verdicts depended on where the dummy wandered"
+- [x] **Step 4: Prove the flap is gone** — done 2026-08-12, at two levels.
+
+Per-launch, after the change: `node harness/test-skills.js --classes necromancer` three times →
+`4 pass, 0 fail, 0 unproven` three times; `--classes bladedancer` twice → `5 pass, 0 fail, 0 unproven`,
+matching what Step 1 recorded ten times over before the change, which is the point — the constant is a
+no-op and the minion clear cost nothing.
+
+Across the whole game, the in-page sweep re-run with the fix: **`necromancer/Raise the Dead` no longer
+appears**, and 62 of 65 rows are bit-identical over three repeats. Three rows still flap, and **not one
+of them flaps on a bit its own text claims**:
+
+```
+ranger/Hunter's Mark   damage 28, 0, 0        claims ['buff']            — damage never read
+reaper/Soul Siphon     shield true,false,false claims buff, damage, heal — damage 128 and heal 24 on all three
+paladin/Last Stand     damage 10, 0, 10       claims ['buff','heal']     — heal 72 on all three
 ```
 
-Note in the message which baseline entries appeared or disappeared, since a distance change moves every class.
+That is an argument made of three parser results, so it is pinned by three assertions in
+`harness/test/claims.test.js` (fast stage, runs before any launch). If a later edit teaches the parser
+to read `shield` out of Soul Siphon's text, the test says so instead of a REGRESSION arriving one run
+in three.
+
+The ten-launch loop the plan asked for is still the right shape for a single class, but the in-page
+sweep is what generalises: ten launches of one class costs the same as one launch of all sixteen.
+
+- [x] **Step 5: Gate it, alone, and commit** — done 2026-08-12, and **the re-baseline was refused.**
+
+The full gate, on the whole game:
+
+```
+unit:   1 pass, 0 fail
+skills: 70 pass, 3 fail, 2 unproven
+levels: 36 pass, 0 fail, 12 unproven
+mp:     54 pass, 0 fail
+GATE: PASS (3 known, 0 newly fixed)
+```
+
+The three failures are the three that were already known — `ranger/Tumble`, `mage/Attunement`,
+`berserker/Charge` — so `baseline.json` is byte-identical and is not in the commit. That is the
+expected result and the reason this step could be reduced: **nothing here moved the bench geometry**,
+which is the only thing that would have moved every class.
+
+`rm -f harness/baseline.json` is deliberately NOT run. The plan asked for it because it assumed a
+distance change; with no such change, deleting the file only throws away the recorded three and
+re-records whatever this run happened to see. Given that this whole task is about a suite that can
+report a failure it did not have last time, re-recording the baseline from one observation is strictly
+weaker than comparing against the three that are already written down — and `run-all.js` shrinks the
+baseline by itself on any green run that fixes something.
+
+```bash
+git add harness/test-skills.js harness/probes/freeze.probe.js harness/probes/determinism.probe.js \
+        harness/test/claims.test.js docs/superpowers/plans/2026-08-11-harness-hardening.md
+git commit -m "harness: a summon skill's verdict depended on the last skill's minions"
+```
 
 ---
 

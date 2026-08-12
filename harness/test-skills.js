@@ -55,6 +55,37 @@
 import { runScenario } from './drive.js';
 import { claimsOf, isIndirectDamage } from './claims.js';
 
+/* HOW FAR IN FRONT THE DUMMY STANDS — ONE NUMBER, TWO RIGS.
+   This was written twice, as a literal 60 in BASELINE and again in mkDummy, and mkDummy's own
+   comment claims to be "EXACTLY the rig the baseline proved". Two copies of a claim like that hold
+   only until somebody edits one: BASELINE is what licenses reporting a damage claim as UNPROVEN
+   rather than FAILED, so a divergence would have the bench prove its ability to land a hit at one
+   distance and then measure sixteen kits at another. It is one constant now.
+
+   60 IS MEASURED AND DELIBERATE, AND THE TWO OBVIOUS CHANGES TO IT ARE BOTH REFUSED.
+   The plan that owns this file (docs/superpowers/plans/2026-08-11-harness-hardening.md, Task 1
+   Step 3) asked to shorten it to 30 and to freeze the dummy. Both were measured first, and both
+   would have manufactured the exact REGRESSION the plan exists to make non-destructive:
+
+   - SHORTER IS WRONG. `harness/probes/reach.probe.js` swept 15/25/30/40/60/90 and
+     `bladedancer/Riposte` deals `0, 0, 0, 201, 170, 201` — nothing at all at 30, because its lunge
+     carries it PAST a close target and bdArc's cone then fails behind it. 30 is the one value in
+     the sweep that turns a passing skill into a hard failure.
+   - FREEZING IS WRONG, and it does not even do what it was for. `harness/probes/freeze.probe.js`
+     ran five kits at this distance with `e.speed = 0` as the only variable (index.html:12874 is the
+     whole of an enemy's locomotion). It removes the player-was-HIT condition from 15 of 20 rows —
+     every skill that pays out on being struck loses its payout, because a frozen grunt never
+     arrives to swing — and it silences two skills outright (`ranger/Hunter's Mark` 28 → 0,
+     `monk/Deflect` 20 → 0) while moving five more (`bladedancer/Mirror Guard` 210 → 62,
+     `warrior/Cleave` 146 → 115, `ranger/Volley` 240 → 192, `ranger/Spike Trap` 78 → 120 the other
+     way). Meanwhile the frozen dummy still ends ~31 units off its spawn — knockback moves it
+     regardless — so "the target cannot wander" is not what a speed of 0 buys.
+
+   The premise under both was that the dummy walks out of range. It does not: reach.probe.js
+   recorded every dummy ending `spawn distance + ~44` from where it was put, i.e. the grunt closes
+   the whole gap and every spawn distance collapses to the same melee range inside the window. */
+const DUMMY_DIST = 60;
+
 /* THE RIG MUST PROVE ITSELF FIRST.
 
    A damage assertion is only worth believing if the harness can land a hit AT ALL. Measured while
@@ -70,7 +101,7 @@ import { claimsOf, isIndirectDamage } from './claims.js';
 const BASELINE = `(function(){
   const G = __BF3.G, p = G.p;
   G.enemies.length = 0;
-  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - ${DUMMY_DIST});
   if(!foe) return JSON.stringify({ ok:false, why:'spawnEnemy returned nothing' });
   foe.maxHp = 100000; foe.hp = 100000; foe.active = true; foe.dropT = 0;
   const h0 = foe.hp;
@@ -117,11 +148,38 @@ const PROBE = (classId) => `(function(){
   const mkDummy = () => {
     /* A fresh dummy per skill, at a fixed distance in front, so one skill's kill cannot mask the
        next skill's no-op. Huge HP so nothing dies and disappears mid-measurement.
-       EXACTLY the rig the baseline proved: a grunt at 60 units, awake, drop-in timer cleared. */
+       EXACTLY the rig the baseline proved — the same DUMMY_DIST, from the same constant, awake and
+       with the drop-in timer cleared. See the constant for why it is 60 and why it stays 60. */
     G.enemies.length = 0;
+    /* AND THE ROOM IS EMPTIED OF THE LAST SKILL'S MINIONS, which is the pose restore's blind spot.
+       reset() restores every NUMBER and BOOLEAN on the player; G.minions is an ARRAY on G, so a
+       summon skill's own product survived into the next skill's verdict - and MET.summon is
+       after.minions > before.minions, a strictly-greater test.
+
+       That is not a tidiness argument, it is the flap in this plan's title with a second head.
+       Measured across all sixteen classes in one page (harness/probes/determinism.probe.js, 192
+       casts): necromancer/Raise the Dead returned summon TRUE, FALSE, TRUE on three identical
+       repeats while dealing 1611/1562/1548 damage - i.e. the same code passing, failing and passing.
+       The mechanism is spawnMinion's cap (index.html:11869): at the cap it shifts before it pushes,
+       so the LENGTH DOES NOT CHANGE and the summon reads as a no-op. Raise the Dead passes no cap of
+       its own, so it gets the default 14, while Summon Skeletons and Army of the Dead pass
+       necroMinCap() - 26 at rank 10 with Master of the Dead - and at rank 10 their minions are given
+       a null life and never expire. So the earlier skills in the kit park 14+ permanent minions in
+       the room, and whether the later one can still add to the count comes down to how many happened
+       to die to the dummy. A hard failure decided by an AI race, in a suite whose new hard failures
+       run-all.js reports as REGRESSIONs.
+       Deliberately ONLY the minions: projectiles, hazards and shockwaves leak the same way (the 32
+       damage ranger/Hunter's Mark shows on its first repeat and never again is a leftover of the
+       skill cast before it), but nothing measured shows them changing a VERDICT, and a bench change
+       that moves numbers nobody has watched is how a harness earns distrust. Recorded, not guessed
+       at - see the plan's Task 1.
+       NO BACKTICKS IN HERE, and no dollar-brace either. This comment lives inside the PROBE template
+       literal, so a backtick ends the string and the whole module stops parsing - which is exactly
+       how it failed once already: SyntaxError, Unexpected identifier 'after', from the line above. */
+    if(G.minions) G.minions.length = 0;
     let d = null;
     try {
-      d = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+      d = __BF3.spawnEnemy('grunt', p.x, p.z - ${DUMMY_DIST});
       if(d){ d.active = true; d.dropT = 0; d.maxHp = 100000; d.hp = 100000; }
     } catch(e){}
     return d;

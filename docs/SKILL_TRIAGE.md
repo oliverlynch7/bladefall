@@ -223,10 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 86 wired / 38 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher)
-and `x_strength` (Harvested Strength) were wired 2026-08-11. See "Rows taken" at the end of this
-section.
+**Now 87 wired / 37 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
+`x_strength` (Harvested Strength) and `r_bounty` (Bounty Hunter) were wired 2026-08-11. See "Rows
+taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -251,7 +251,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
-| ranger | 5 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer, Bounty Hunter (~~Ambusher~~ wired 2026-08-11) |
+| ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
@@ -313,7 +313,7 @@ than on a mechanic:
 | 5 a | Escape Artist | "−15% damage taken & −30% slows for 1.5s" | half implementable — see below |
 | 5 b | Ambusher | "next click within 3s +20% (once per 6s)" | **wired 2026-08-11 — see Rows taken** |
 | 9 a | Elemental Archer | "the element of the ground they fly over" | design — no ground→element map exists |
-| 9 b | Bounty Hunter | "−8% to you; killing one heals 4% HP, +10% gold" | **fully stated, nothing blocked** |
+| 9 b | Bounty Hunter | "−8% to you; killing one heals 4% HP, +10% gold" | **wired 2026-08-11 — see Rows taken** |
 
 **Metres appear in exactly four places in the whole game and all four are dead ranger cards** —
 `7m+`, `4m`, `~5m` and `4m` at index.html:2051, 2052, 2053 and 2057. Nothing wired uses the unit and
@@ -340,6 +340,67 @@ takes an id off that Set.
 read wrongly passes. That is the stat-snapshot job Task 3 Step 2 describes and it is much larger
 work; this is the floor under it, and the floor is where section A's nine dead skills were found.
 
+### Scouting the remaining 37, 2026-08-11 — sorted so the next pass does not re-derive this
+
+Read from source with `grep`, **not measured**, and labelled as such throughout. It exists because
+"37 dead passives" reads like 37 identical wiring rows and it is four different kinds of job. Every
+claim below is one command anyone can re-run.
+
+**1. `w_unyield` IS THE FIRST CONFIRMED "WIRED BUT WRONG" — the exact hole this section admits to.**
+Warrior rank-5 b (2040) reads *"You cannot be staggered, knocked back, or moved by anything."* Its
+**only** reader in the whole of `public/` is at 11266:
+`if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88` — twelve per cent less damage taken while
+below half health. That is neither of the two things on the card, and it is not even conditioned the
+same way; the card names no health threshold. `audit-passives.js` counts it wired and always will,
+because it asks whether anything reads the id and something does. **A lead, not a bug-list row** — it
+is read from source, and the same discipline this document applies to Glass Cannon applies here. But
+it is the concrete case the stat-snapshot half of Task 3 Step 2 was missing, and it says that half is
+worth doing: the 87 "wired" passives have never been checked against their own text at all.
+
+**2. A THIRD BLOCKER CLASS: the pirate's pistol has no CHARGE path, so `pir_deadly` is not a wiring
+row.** `CLASS_BASIC.pirate`'s own comment (11084) describes the flintlock as overriding *"either your
+basic attack or your charge — your choice, in the pause menu"*. **`meta.pirateSlot` appears exactly
+once in the file** (11093), and it is the guard that returns when the value is not `'basic'`. Nothing
+sets it, no menu offers it, and `chargeRelease` never mentions it. So the pistol is not a projectile
+at all — it is a ×2.3 multiplier riding a melee basic hit. Dead Aim ("the pistol pierces every enemy
+in a line") therefore cannot be the one-line `pierce:99` the file uses five times elsewhere; there is
+no projectile to raise it on, and wiring it means writing a line sweep. Bigger than a wiring row, and
+the missing charge configuration is its own question for Oliver.
+
+**3. Blocked on a missing MECHANIC, joining Unbreakable and Escape Artist's slow half.**
+- **monk / Iron Body** — "while your dodge is ready, you cannot be stunned or knocked back". The
+  player cannot be stunned at all: `p.stunT` is written in exactly two places and read in none, which
+  is the same two lines recorded above for `bsk_tough`. Immunity to nothing.
+- **chronomancer / Deep Freeze** — "a frozen enemy shatters instantly if you strike it from behind".
+  **There is no frozen state.** `grep -c froz` returns 14 hits and every one is lore text, a level
+  name, the `frozen` weapon affix or another card's prose; the ice element applies `slowT`, not a
+  freeze. Same shape as the Stormcaller's missing chain: one absent mechanic behind the card.
+
+**4. Needs a number the card does not name, so it is Oliver's** — joining Greed and the two ranger
+metre cards. Each quoted phrase is the whole of what the card says about the amount: monk **Still
+Water** ("restores health, and quickly"), monk **Inner Fire** ("refunds mana"), monk **Master
+Striker** ("hits everything around you" — no radius), skylancer **Sky Armor** ("the first moment
+after a jump"), skylancer **High Ground** ("the harder you land it"), chronomancer **Entropy** ("they
+weaken the longer they are held"), necromancer **Withering** ("rot slowly"), **Plague** ("everything
+near it"), **Pestilence** ("a rotting trail"), pirate **Swagger** ("noticeably faster"), pirate
+**Lucky** ("sometimes drops gold"), reaper **Crimson Harvest** ("heals you outright"), paladin
+**Burning Light** ("every enemy near it").
+
+**5. What is left that is genuinely takeable**, and the honest count is small. Of the 37, this pass
+could find only two whose trigger, effect and amount are all either on the card or already defined
+elsewhere in the file:
+- **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark
+  without closing." Everything it needs exists: the oath is sworn inside `CLASS_BASIC.paladin`
+  (11122) on a landed hit, and `playerAttack` already picks an aim target on every swing (9663). The
+  one judgement is what "any range" caps at, and the file has candidate answers of its own (`aimTarget`
+  is called with 900 by the ping and 800–1000 by the projectile skills) rather than needing a new one.
+- **pirate / Sea Legs** (`pir_tough`, r5 a) — "You cannot be knocked off ledges or moving platforms."
+  No amount is named because none is needed, and `floorAt` already answers "is there ground there".
+
+So the next several passes of Task 2 are mostly NOT more of the same. **The largest remaining block of
+work in this section is section 1 above — checking the 87 wired passives against their own text —
+and the largest remaining block of Oliver's is section 4.**
+
 ### Rows taken
 
 | row | commit | how it was proven |
@@ -352,6 +413,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
 | **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
+| **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, A/B in one launch with a MARKED-vs-UNMARKED pair inside each half: 179/179 damage, 165/165 gold and no heal at all before; 0.924 / 1.103 / +19 on 477 after |
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock
@@ -594,6 +656,44 @@ passes.
 **A refunded cast puts the soul back.** A skill that finds no target returns `'refund'`, takes no
 cooldown and — for anyone else — costs no mana. Paying that back as *mana* would hand the player a
 pool they never spent, so the soul is re-armed instead.
+
+**Bounty Hunter is the first row in this section whose card has THREE clauses, and its probe is
+shaped by that.** "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold" —
+8, 4 and 10 are all on the card, and **"marked" already means exactly one thing in this file**:
+`e.markT`, set by Hunter's Mark (`SKILL_FX.mark`, 9860) and Death Mark (9951) and already read for
++40% damage DEALT at 10616/10646 and by the reaper capstone at 10097. Nothing was invented; the
+first clause is simply the receiving end of a field the game has always kept.
+
+**The two halves are not the only control, and that is the point of this one's shape.** Every clause
+is ALSO measured marked-against-unmarked *inside* the same half, on two grunts spawned in the same
+launch. A fix that made every enemy hit for 8% less, or every kill heal, passes a plain two-half A/B
+and fails here — a different and worse bug than the dead one, the same guard `ambush.probe.js`
+puts on "once per 6s".
+
+| | damage taken, marked ÷ unmarked | gold, marked ÷ unmarked | HP healed by a marked kill |
+|---|---|---|---|
+| control `r_elem` (a-side of the same rank — itself dead, so provably inert), before and after | 1.000 | 1.000 | 0 |
+| **`r_bounty`, before** | **1.000** (179 / 179) | **1.000** (165 / 165) | **0** |
+| **`r_bounty`, after** | **0.924** (170 / 184) | **1.103** (182 / 165) | **19 = 4% of 477** |
+
+**The mark is put on by the game, never by the probe** — `useSkill(3)` casts the ranger's own
+Hunter's Mark and the probe asserts the target came back marked before it measures anything, because
+setting `markT` by hand would be imitating the mechanism under test. The unmarked control is spawned
+*after* the cast so the game's own aim pick cannot possibly have chosen it, and it is asserted to
+have `markT` 0 in both halves.
+
+**Three isolations, each of which invented a bug in an earlier shape of the probe.** `p.xpNext` is
+pinned enormous, because a kill grants XP and **every level-up heals 20 HP of its own** (10967) and
+raises max HP — so the heal clause would read a level-up as a bounty, and the two halves would not
+even share a max HP. `p.invuln`/`p.dodgeTimer` are cleared before every hit, because `hurtPlayer`
+returns early on either and sets `invuln=0.7` itself on the way out, so the second hit of any pair is
+free unless it is cleared. And HP is parked far above max for the damage clauses so no hit can kill.
+The same reasoning put the game-side heal **before** `gainXp` rather than after: computing 4% of a
+max HP the kill had just moved is the same confound one line lower down.
+
+Photographed as well, and the two HUDs carry the whole result in two numbers each
+(`_shot/out/bounty-before.png`, `bounty-after.png`): **+165g and HP 268/535** — exactly half of max,
+so nothing healed — against **+182g and HP 258/477**, which is half of 477 plus the 19.
 
 **Not a balance call, and worth saying so.** Wiring a passive that has never done anything changes
 how a class plays, which is Oliver's territory — but every one of the 46 has an authored description

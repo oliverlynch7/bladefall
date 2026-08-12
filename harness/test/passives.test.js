@@ -94,7 +94,7 @@ const KNOWN_DEAD = new Set([
      Shadowstrike, next click within 3s +20% (once per 6s)" is now armed by those two handlers and
      spent in CLASS_BASIC.ranger, proven by harness/probes/ambush.probe.js — all six strikes 115
      before, 138/115/115 against a 115/115/115 control after. */
-  'r_longshot', 'r_closeq', 'r_escape', 'r_elem', 'r_bounty',
+  'r_longshot', 'r_closeq', 'r_escape', 'r_elem',   /* r_bounty wired 2026-08-11 — harness/probes/bounty.probe.js */
   /* x_strength came OFF this list on 2026-08-11 (sub-project B Task 2, pass 12): "souls you collect
      are spent on your next skill, making it free" is now armed on a kill in c2OnKill - which the
      branch's own comment had already said it would be - and spent in useSkill, where the cast is

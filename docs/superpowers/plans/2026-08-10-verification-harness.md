@@ -21,6 +21,14 @@
 | 7 autopilot guards | done | `34262a6`, `a3e999c` |
 | 8 re-enable the schedule | not started | — |
 
+**READ THE TABLE, NOT THE CHECKBOXES, IN TASKS 1, 2, 6 AND 7.** Their per-step `- [ ]` boxes were
+never ticked by the runs that completed them, so a worker following "take the first task whose steps
+are not all ticked" lands on Task 1 and rebuilds `harness/drive.js`, which has existed since
+`7725819`. The boxes are left as they are rather than back-filled because ticking a box nobody
+watched being done is the same kind of unearned green light this whole plan exists to remove — the
+commits in the table are the evidence, and every file those tasks create is on disk. Tasks 3, 4 and 5
+carry ticks because the runs that did them wrote the ticks at the time, along with what they found.
+
 **Next task is 8 (re-enable the schedule) — and it is OLIVER'S.** It edits a Windows scheduled task
 to start running this automation unattended every 6 hours on his machine. That is not a code change
 and not reversible by a `git revert`, so an autopilot run must not do it to itself. Every code task

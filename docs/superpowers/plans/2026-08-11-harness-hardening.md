@@ -332,8 +332,8 @@ existing literal as fallback — three call sites become one. **That is not a se
 claimed as one:** the value is already in this file's history and in `AUTOPILOT.md`. Rotating it is
 Oliver's call, because the same password authenticates the other PraxisBrain automations.
 
-- [ ] **Step 3: Verify by running one cycle manually — NOT POSSIBLE FROM INSIDE A RUN, and this is
-      what was verified instead.**
+- [x] **Step 3: Verify by running one cycle manually — NOT POSSIBLE FROM INSIDE A RUN. Verified
+      instead by the evidence this step named, which arrived 2026-08-12 16:41.**
 
 ```powershell
 Start-ScheduledTask -TaskName 'Bladefall Autopilot'
@@ -374,6 +374,35 @@ tests** — those already passed when the step was written; the whole point of t
 
 *Recorded so the next run does not re-derive it:* `report skipped` at 13:12 is dated BEFORE the fix.
 Reading it as a live failure would send a run hunting a bug that was fixed two commits ago.
+
+**THE EVIDENCE ARRIVED. Ticked 2026-08-12 16:44 run, on the 16:04 run's log:**
+
+```
+GATE: PASS (3 known, 0 newly fixed)
+2026-08-12 16:41:51  reported this run to Telegram
+2026-08-12 16:41:51  run end
+```
+
+That is the exact line this step said to look for, and every branch that could have produced it
+instead is excluded by the glue's own shape (`autopilot.ps1:334-352`):
+
+- it is not `report skipped (run-report exit <n>)`, so `run-report.js` exited 0 and wrote the file;
+- it is not `nothing committed this run`, which is right — that run shipped five commits
+  (`c09dbd8`..`ac60bcf`);
+- **`Log 'reported this run to Telegram'` sits AFTER `Invoke-RestMethod`, inside the `try`**, so a
+  POST that threw would have logged `report failed: …` instead. The request completed;
+- `_autopilot_report.json` is absent from the repo, which is the post-success path specifically —
+  the file is deliberately KEPT after a failed post, so its absence is a second, independent witness;
+- the gate line it was handed was picked correctly out of the gate's whole output.
+
+**The confound is gone too, and that is why it worked this time.** Task 5's leak was the reason no
+run had reached the glue since 13:12: free space measures **352 GB of 931** now, against 1.9 GB when
+this step was written.
+
+**What is still NOT proved, and must not be claimed:** that the message ARRIVED on Oliver's phone.
+What is proved is that the endpoint accepted the POST without error. Delivery past
+`thework.pages.dev` is not observable from here and never will be — if Oliver says he saw no digest
+for the 16:04 run, the fault is downstream of this repo, not in this glue.
 
 - [x] **Step 4: Commit** — done.
 

@@ -2053,7 +2053,7 @@ Unit stage **53 → 55 tests**, all green. `128 total, 102 wired, 26 dead`, ever
 duplicates, and the dead list is byte-for-byte what it was — so nothing in section E moves and
 `KNOWN_DEAD` needs no edit. No game code was touched.
 
-## Q. THE READER IS A STAT MULTIPLIER AND THE CARD PROMISES A MECHANIC — five rows, one **FIXED 2026-08-12**
+## Q. THE READER IS A STAT MULTIPLIER AND THE CARD PROMISES A MECHANIC — eleven rows, four **FIXED 2026-08-12**
 
 **None of these is in section E and none of them ever will be.** `harness/audit-passives.js` reports
 every id below as WIRED, correctly: each one *is* read. It asks "does anything read this id", which is
@@ -2080,7 +2080,7 @@ sub-project has built.
 | `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — **Oliver's**: a reaper cannot mark anything, so which mark is a design call |
 | `x_chill` | reaper r7 b — Grave Chill | "Corrupted enemies cannot flee — they walk toward you instead." | corrupted enemies move 18% slower (13283) | confirmed, unfixed — **Oliver's**, nothing flees |
 | `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | **FIXED**, pass 34 — the radius was rupture's own 120 |
-| `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | HALF wired — the upside is there, the drawback is not |
+| `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | **FIXED**, pass 35 — the drawback had no door to wire it to |
 | `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
 | `pal_heal` | paladin r7 b — Healing Light | "Every skill you cast heals the ally nearest you, or you if alone." | `effLifesteal` +5% lifesteal (3759) | confirmed, unfixed — actionable only if the amount can be taken from the file |
 
@@ -2208,6 +2208,59 @@ against 0.200 in the other two — 0.200/1.12, which is the +12% attack speed th
 has always granted. So the undocumented half is demonstrably still live and untouched by this fix,
 which is exactly the state this section hands to Oliver rather than deciding.
 
+### Rage — the row whose fix had NO DOOR to be wired to, and the clamp that replaced one
+
+Taken as pass 35. It is the first row in this section where the reader is not a stat multiplier but a
+**half of the card**: `bsk_rage` is read once, in `CLASS_BASIC.berserker` (11390), where `frac < 0.25`
+doubles the damage exactly as printed. The other clause — "below a quarter health you cannot be
+healed" — had no implementation anywhere in the file, so Rage shipped as its upside with its downside
+missing, against the Frenzy it is offered at the same rank.
+
+**THE OBVIOUS FIX DOES NOT EXIST IN THIS FILE, and saying so is most of the row.** A heal lock wants a
+`healPlayer()` door. There is none: ~20 separate `p.hp=Math.min(effMaxHp(p),p.hp+X)` sites, spread
+across lifesteal, pickups, class riders, death saves and the Abyss floor breather. Routing all of them
+is a refactor across every class before it is a passive fix, it can only ever cover the sites that
+existed the day it was written, and **every site a door misses is a silent hole in a drawback** — the
+failure direction that makes a card a strict upgrade again without anybody noticing. So it ships as an
+end-of-frame comparison in `update()` (13516): one place, every heal path in the game including ones
+added later, and impossible to get wrong per site.
+
+**The test is the health you HAD, not the health you end up with.** Read the other way round, a heal
+big enough to carry you back over the quarter line lands in full and the lock only ever stops the
+small ones. Damage is never touched — hp below the mark moves the mark down with it. Nothing is
+invented: the quarter is the card's own, and it is the same quarter the damage half already tests.
+
+Two costs stated rather than hidden. A blocked heal is **undone rather than refused**, so a heal and a
+hit inside one frame net out and the heal's own floater still appears — which is why the clamp prints
+`RAGE — NO HEALING` underneath, so the player is told why the green number did not stick. And it is
+**off in the Waystation**, because `hurtPlayer` puts you back at half there rather than killing you
+(11679, "the Waystation is stakes-free") and clamping that restore would pin a Berserker at whatever
+he walked in with.
+
+Measured by `harness/probes/rage.probe.js`, three halves in one launch with two trials each, against
+**two independent heal paths** — a lock wired into one path and not the others would be a hole rather
+than a mechanic. The Arena's own heal orb is pushed onto `G.arenaPk` and collected by the game's
+`arenaPickupTick`; the lifesteal comes off a real one-frame `input.attack` press, so `playerAttack`
+computes `effLifesteal` itself and `hitEnemy` pays it. The probe assigns neither.
+
+| half | pick | MID trial, 40% HP (above the line) | LOW trial, 15% HP (below it) |
+|---|---|---|---|
+| control | `bsk_frenzy` (b-side of the same rank) | orb +191, lifesteal +32 | orb +191, lifesteal +45 |
+| passive | `bsk_rage` | orb +191, lifesteal +14 | **orb 0, lifesteal 0, 72 HP in and 72 HP out** |
+| known-bad | `mon_iron` (dead id, identical bar) | orb +191, lifesteal +14 | orb +191, lifesteal +22 |
+
+`ok true, okAgainstInert false`, on a 477 HP hero. Re-run from a clean tree on 2026-08-12 after the
+commit, and those are that run's numbers rather than the shipping run's.
+
+**The MID trial is the one that matters most**, and it is what the entry below asked for by name: a
+passive that simply stopped a Berserker healing would satisfy a low-health-only bar and would be a far
+bigger card than the one printed. Both heals land in the locked half above the quarter.
+
+**The damage half is visible in the same table for free** — the locked half's low trial dealt 736
+where the control dealt 518 and the known-bad 314 — so the clause that already worked is measured
+untouched rather than assumed so. Photographed at `_shot/out/rage-blocked.png`: the `+214` heart
+floater, `RAGE — NO HEALING` under it, and `80/535` still on the bar in one frame.
+
 ### The five rows found by widening the sweep, and which of them a run may take
 
 Swept after passes 31–33, in the same launch-free way and while the aggregate gate was running. Three
@@ -2268,13 +2321,12 @@ than what their card says, and no tool this sub-project owns could have said so.
   flees.** `D.flee` belongs to the Arena bot profiles (12605–12608) and the only other fleeing body is
   the treasure goblin, so an ordinary mob has no fleeing state to forbid and no "walk toward you" to
   switch on. That is section K's absence — there is no aggro model — reached from a different door.
-- **`bsk_rage` — Rage. HALF WIRED, and the missing half is the DRAWBACK.** "Below a quarter health you
-  cannot be healed, and your damage doubles": the doubling is in `CLASS_BASIC.berserker`, and the heal
-  lock is nowhere. There is no player-side heal cut at all — `healCut` is an ENEMY field (9532, heavy
-  Venom choking a healer's mend). Pass 20's own rule is the argument for taking it: *"a card with a
-  drawback has to be wired on BOTH sides or picking it is a strict upgrade"*, which is exactly what
-  ships today. Takeable, with the caution that it touches every path that heals the player, so the
-  probe needs a control heal that must still land above a quarter health.
+- **`bsk_rage` — Rage. FIXED, pass 35, 2026-08-12 — and the missing half was the DRAWBACK.** "Below a
+  quarter health you cannot be healed, and your damage doubles": the doubling is in
+  `CLASS_BASIC.berserker`, and the heal lock was nowhere. There was no player-side heal cut at all —
+  `healCut` is an ENEMY field (9532, heavy Venom choking a healer's mend). Pass 20's own rule was the
+  argument for taking it: *"a card with a drawback has to be wired on BOTH sides or picking it is a
+  strict upgrade"*, which is exactly what shipped. Full write-up below.
 - **`chr_temporal` — Temporal Flow. OLIVER'S.** The card says standing still *rewinds* your cooldowns
   "rather than merely pausing them"; the one reader is an **unconditional +10% cooldown reduction** —
   no stillness, no rewind. Its own twin two clauses to the left in the same function, the mage's

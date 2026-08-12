@@ -223,10 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 88 wired / 36 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 89 wired / 35 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
-`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter) and `sky_eye` (Hunter's Eye) were wired
-2026-08-11. See "Rows taken" at the end of this section.
+`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye) and
+`pal_burn` (Burning Light) were wired 2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -255,7 +255,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
-| paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
+| paladin | 1 / 7 | Blessed Blade (~~Bounce Back~~, ~~Burning Light~~ wired 2026-08-11) |
 | skylancer | 2 / 8 | High Ground, Sky Armor (~~Hunter's Eye~~ wired 2026-08-11) |
 | reaper | 1 / 7 | Crimson Harvest (~~Harvested Strength~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
@@ -354,6 +354,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
 | **skylancer / Hunter's Eye** (`sky_eye`, r7 b) — "Attacking while falling drives you down onto the target." | 2026-08-11 | `harness/probes/skyeye.probe.js`, A/B in one launch, TWO strikes per half (one falling, one rising): all three halves −100 → −55 with no heading before; −360 at aim exactly 1.0 after, control and rising strikes unmoved, all four damage readings 168 |
 | **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
+| **paladin / Burning Light** (`pal_burn`, r5 b) — "Killing your Sworn target sets every enemy near it alight." | 2026-08-11 | `harness/probes/palburn.probe.js`, THREE halves in one launch, each carrying an UNSWORN kill and an out-of-radius foe as its own controls: nothing lit anywhere in the control or the known-bad half; 1 stack, heat 1293 and **139 HP burned** off the Sworn target's neighbour in the passive half, unsworn cluster and far foe untouched |
 
 **Bounty Hunter is three clauses, so it is three readers, and the mark — not the passive — is what
 each of them is conditioned on.** The −8% is a class line in `hurtPlayer` beside the ninja's and the
@@ -380,6 +381,47 @@ the id. It came back `false` while `ok` came back `true`, in the same launch, on
 **The mark is put on by the game's own Hunter's Mark**, cast through `useSkill` at slot 3, not by
 writing `markT` from the probe; it reports `markedBy` so a fallback could never pass silently, and it
 did not need one (`cast,cast,cast`).
+
+### Burning Light — the first row where the FIRST wiring passed a wiring bar and burned nothing
+
+**Both of its numbers were already in the file, which is why this row was takeable.** "Alight" is the
+game's own Burn stack, and the spread's radius is `igniteBurn`'s combustion splash verbatim —
+`dXZ(o.x,o.z,e.x,e.z) < 120+o.r` over `G.enemies`, this file's existing answer to the exact sentence
+"the fire spreads to everything near it". The heat is the Sworn target's own `stDmg`, the
+representative hit `applyStatus` already records for every damage path in the game, so what spreads is
+the fire that was consuming your target rather than a number somebody chose. It sits in `c2OnKill`
+with the other kill riders and is conditioned on `p._oath === e`, because *"killing your **Sworn**
+target"* is the whole condition on the card — a paladin who kills anything else lights nothing.
+
+**THE FIRST VERSION WAS WIRED, RENDERED THE RIGHT STACK ON THE RIGHT ENEMY, AND DEALT ZERO DAMAGE.**
+It handed the spread to `applyElement` alone. `applyElement` → `applyStatus` → `buildAmt(w,boss)`,
+which scales buildup with **the weapon's swing speed** — and the paladin's own Squire's Sword yields
+**0.95** of a stack. `statusTick`'s DoT is `Math.floor(st.burn) * stDmg * 0.055`, so 0.95 stacks burns
+for exactly nothing. Measured in the probe's own first output: `lit.nearA 0.95`, `heat.nearA 1293`,
+`lost.nearA 0`.
+
+That is the trap this whole section exists to avoid, one step further in than usual: the audit would
+have called `pal_burn` wired, a stack-count assertion would have gone green, and the card would still
+have done nothing. A meter filled by repeated swings is simply the wrong rule for a fire spreading off
+a corpse — the weapon is not what is burning them, which is why the combustion splash hands over a
+whole stack and never consults the weapon at all. The stack is now topped to that whole one after
+`applyElement` has done the bookkeeping only it can do (the `stFresh` stamp, without which the stack
+lands already past its `STWIN` grace window and decays immediately; `stDmg`; the per-target rate
+limit; boss resistance; the ignite reaction at cap). Re-measured: `lit 1`, **`lost 139`**.
+
+**Two conditions, two controls, both inside every half** — `harness/probes/palburn.probe.js` puts two
+clusters in the world, one around the Sworn target and one around a foe deliberately not sworn, and
+kills both. A wiring that lit on any kill, or lit the whole level, would satisfy a naive "the passive
+half differs" bar and would be a worse bug than the dead passive. The oath is sworn by the game
+(`CLASS_BASIC.paladin`, on the first non-designated hit) and the probe asserts the second cluster does
+**not** take it. Known-bad carried permanently: a third half picks `pal_blessed`, the paladin's other
+still-dead passive, and is fed to the identical bar — `okAgainstInert` came back `false` while `ok`
+came back `true`, in the same launch.
+
+**The bench does not empty `G.enemies`, and that is a note worth reusing.** Two destinations in this
+game end a round when the enemy list drains — the Arena scores it, a campaign area calls
+`areaClear`/`openWay` — so a probe that clears the list can end up measuring a different mode than the
+one it started in. Existing mobs are deactivated instead, which is what `statusTick` already gates on.
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock

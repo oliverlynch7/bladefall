@@ -233,6 +233,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 11 | **E — ranger Ambusher was never read** | `140c541` | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
 | 12 | **E — reaper Harvested Strength was never read** | `8870192` | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
 | 14 | **E — skylancer Hunter's Eye was never read** | this run | `harness/probes/skyeye.probe.js`, A/B in one launch with TWO strikes per half (one falling, one rising, because "while falling" is half the sentence): all three halves went vy −100 → −55 with no heading before; the passive half −360 at aim exactly 1.0 on the foe after, while the control and both rising strikes stayed put and all four damage readings were 168. Skylancer suite 4 pass / 0 fail either side |
+| 15 | **E — paladin Burning Light was never read** | this run | `harness/probes/palburn.probe.js`, THREE halves in one launch, each carrying TWO clusters (one around the Sworn target, one around a foe deliberately not sworn) so both conditions on the card have a control inside their own half: nothing lit anywhere in the control or the known-bad half; 1 stack, heat 1293 and 139 HP burned off the Sworn target's neighbour in the passive half, with the unsworn cluster and the out-of-radius foe untouched. **The first wiring was wired, lit the right enemy, and burned nothing** — see below. Paladin suite 7 pass / 0 fail after |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
@@ -261,6 +262,18 @@ killed on a 20-minute clock, so four verified commits were the better use of the
 commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
 class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
 would settle. Say what it reports either way.
+
+**Pass 15 is the first row where the FIRST wiring was genuinely wired, lit exactly the right enemy,
+and still did nothing — and only a health-lost bar could see it.** Both of Burning Light's numbers were
+already in the file (the radius is `igniteBurn`'s combustion splash verbatim; the heat is the dying
+Sworn target's own `stDmg`), so the spread went through `applyElement`, the door every fire hit in the
+game uses. `applyElement`'s buildup is `buildAmt`, which scales with **the weapon's swing speed**, and
+the paladin's own starter sword yields **0.95** of a stack against a DoT of
+`Math.floor(st.burn) * stDmg * 0.055`. Measured: `lit 0.95`, `heat 1293`, `lost 0`. The audit would
+have called `pal_burn` wired and a stack-count assertion would have gone green. The stack is now
+topped to the whole one the combustion splash hands over — `lit 1`, `lost 139` — and the general
+lesson is the one this plan keeps re-learning in new places: **the bar has to be the thing the card
+promises the player, not the thing the code sets.** Full write-up in `docs/SKILL_TRIAGE.md` section E.
 
 **Pass 14 is the first row whose card states NO number anywhere, and that is why it was worth taking
 rather than skipping.** "Attacking while falling drives you down onto the target" names no speed, no

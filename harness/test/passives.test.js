@@ -110,7 +110,18 @@ const KNOWN_DEAD = new Set([
   /* pal_bounce came OFF this list on 2026-08-11 (sub-project B Task 2, pass 7): "damage you block is
      returned to whoever dealt it" now returns the 60% the brace eats, through the same hitEnemy(by,…)
      the monk's Stillness uses four lines above it. Proven by harness/probes/bounce.probe.js. */
-  'pal_burn', 'pal_blessed',
+  /* pal_burn came OFF this list on 2026-08-11 (sub-project B Task 2, pass 15): "killing your Sworn
+     target sets every enemy near it alight" is now a kill rider in c2OnKill, conditioned on p._oath
+     being the enemy that died, spreading through applyElement at igniteBurn's own 120+r combustion
+     radius and at the dying target's own stDmg. Proven by harness/probes/palburn.probe.js, which puts
+     an UNSWORN kill and an out-of-radius foe in every half as controls: nothing lit anywhere in the
+     control or the known-bad half; 1 stack, heat 1293 and 139 HP burned off the Sworn target's
+     neighbour in the passive half, with the unsworn cluster and the far foe untouched.
+     THE FIRST WIRING PASSED A STACK-COUNT BAR AND BURNED NOTHING: applyElement's buildup scales with
+     the weapon's swing speed and the paladin's own starter yields 0.95 of a stack, which
+     statusTick's Math.floor takes to zero DoT. Measured at `lit 0.95 / lost 0` before the stack was
+     topped to the whole one the combustion splash hands over. */
+  'pal_blessed',
   'necro_wither', 'necro_plague', 'necro_pest',
   /* bsk_thick came OFF this list on 2026-08-11 (sub-project B Task 2, pass 5): "damage that would
      drop you below 1 HP leaves you at 1 instead, once per fight" is now a death save in hurtPlayer

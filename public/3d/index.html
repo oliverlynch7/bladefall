@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.923.0-autopilot';
+const VERSION3D='1.924.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10080,6 +10080,49 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
     const h=Math.max(1,Math.round(effMaxHp(p)*.04)); const pre=p.hp;
     p.hp=Math.min(effMaxHp(p),p.hp+h);
     if(p.hp>pre){ addText(p.x,p.y+p.h+22,p.z,'BOUNTY +'+(p.hp-pre),'#ffd24a',true,'heal'); try{hudUpdate();}catch(_){} }
+  }
+  /* BURNING LIGHT (paladin r5 b): "Killing your Sworn target sets every enemy near it alight."
+     Wired 2026-08-11 — one of the passives in docs/SKILL_TRIAGE.md section E that the rank menu
+     offers, describes, and no code has ever read: `pal_burn` appeared exactly twice in the whole of
+     public/, in CLASS2 where it is defined and in PASSIVE_ART where its icon is named.
+     NOTHING HERE IS INVENTED, which is why this row was takeable at all. "Alight" is the game's own
+     Burn stack, so this goes through applyElement - the one door every fire hit in the game uses -
+     rather than writing st.burn by hand. That matters more than tidiness: applyStatus is what stamps
+     stFresh, and a stack written without it is already past its STWIN grace window the instant it
+     lands, decays at STDEC.burn, and floors to 0 before it can accumulate a single point of damage.
+     The hand-rolled version reads as wired to the audit and burns nothing - a green light on a card
+     that still does nothing, which is worse than the dead passive it replaced. Going through the
+     door also inherits the buildup rule, the per-target rate limit, boss resistance and the ignite
+     reaction at cap, none of which this passive should be inventing its own version of.
+     THE RADIUS AND THE WHOLE STACK ARE igniteBurn's, verbatim - `<120+o.r` over G.enemies and one
+     full Burn stack, the same combustion splash that is this file's existing answer to "the fire
+     spreads to everything near it". The heat is the SWORN TARGET'S OWN representative hit
+     (`e.stDmg`), so the fire that was consuming it is what spreads; applyStatus already carries that
+     field for exactly this purpose.
+     THE TOP-UP TO A WHOLE STACK IS NOT A FUDGE, IT IS THE DIFFERENCE BETWEEN THIS PASSIVE WORKING AND
+     NOT, and it was measured rather than reasoned about. applyElement's buildup is `buildAmt`, which
+     scales with the WEAPON'S swing speed - and the paladin's own Squire's Sword yields **0.95**.
+     statusTick's DoT is `Math.floor(st.burn) * stDmg * 0.055`, so 0.95 stacks burns for exactly
+     nothing: harness/probes/palburn.probe.js measured the neighbour lit at 0.95 and losing 0 HP over
+     two seconds. A meter filled by repeated swings is the wrong rule for a fire that spreads off a
+     corpse - the weapon is not what is burning them - which is why the combustion splash hands over a
+     whole stack and does not consult the weapon at all.
+     It sits here with the other kill riders because the card's trigger is a KILL, and it is
+     conditioned on `p._oath` - the Sworn target set by the paladin's own basic-attack hook - rather
+     than on any kill, because "killing your Sworn target" is the whole condition on the card. A
+     paladin who kills anything else lights nothing. */
+  if(meta.classId==='paladin'&&c2def('paladin')&&c2Passive('pal_burn')&&e&&p._oath===e){
+    let lit=0;
+    for(const o of G.enemies){ if(o===e||o.dead) continue;
+      if(dXZ(o.x,o.z,e.x,e.z)<120+o.r){
+        /* Through the door rather than writing st.burn by hand: applyStatus is what stamps stFresh -
+           without which the stack lands already past its STWIN grace window and decays immediately -
+           and what carries stDmg, the per-target rate limit, boss resistance and the ignite reaction
+           at cap. Then topped to the splash's whole stack, per the note above. */
+        applyElement(o,'fire',e.stDmg||0);
+        const st=estat(o); st.burn=Math.min(STCAP.burn,Math.max(st.burn,1));
+        lit++; } }
+    if(lit){ skillRing(e.x,e.z,'#ffd07a','#ff7a3a',120); addText(e.x,e.y+e.h+12,e.z,'BURNING LIGHT','#ff7a3a',true); }
   }
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest

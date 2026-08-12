@@ -1,0 +1,17 @@
+[autopilot] reaper/Harvested Strength: a soul really does pay for your next skill
+
+The passive's id was read by nothing at all - one of the 46 dead passives in
+docs/SKILL_TRIAGE.md section E - even though c2OnKill's reaper branch already
+carried a comment saying this is what it does. Armed on a kill there, spent in
+useSkill, where the cast is charged to the soul instead of to the pool.
+
+Charged rather than priced at zero on purpose: useSkill reads a zero back from
+spendSkillMana as "the cast could not be paid for" and returns, so zeroing the
+cost is the implementation that stops the skill firing at all.
+
+Verified with harness/probes/soulfree.probe.js, A/B in one launch, three trials
+per half - all six casts paid full price before; free / full price / casts on an
+empty bar after. Reaper suite 6 pass / 0 fail either side; passives 86 wired,
+38 dead; node tools/gate.js OK.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>

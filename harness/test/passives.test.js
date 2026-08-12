@@ -270,7 +270,13 @@ const KNOWN_DEAD = new Set([
      with four neighbours at four distances: every half arced to exactly ONE body before; after, the
      passive half takes the two NEAREST (26 and 26) while the third at 200 and the far one at 900
      stay untouched, and the control and known-bad still arc once. */
-  'st_conductor', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
+  /* st_charged came OFF this list on 2026-08-12 (sub-project B Task 2, pass 38): "your chain jumps
+     twice as far between targets" is now read in the same hook, where the jump distance had been the
+     bare literal 260. Both numbers are already the file's. Proven by harness/probes/charged.probe.js,
+     three halves in one launch with a body at 400 (past the shipped reach, inside a doubled one) and
+     another at 700 (past both): nothing at 400 in any half before; after, the passive half strikes it
+     for 26 while 700 stays untouched and the control and known-bad still reach nothing. */
+  'st_conductor', 'st_amped', 'st_master', 'st_galvanize',
   /* sky_eye came OFF this list on 2026-08-11 (sub-project B Task 2, pass 14): "attacking while
      falling drives you down onto the target" is now read in CLASS_BASIC.skylancer, where it TRADES
      the innate's hang for Dive Strike's own drive (520 along the heading, vy floored at -360), aimed

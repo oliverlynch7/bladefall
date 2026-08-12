@@ -71,7 +71,10 @@
   const cs = __BF3.classState('stormcaller');
   cs.ch = cs.ch || {};
   cs.ch[5] = 'st_ward';        // wired, and a shield on cast: it cannot reach an enemy
-  cs.ch[7] = 'st_charged';     // dead today (jump distance) - see the header
+  /* Was `st_charged` until 2026-08-12, when pass 38 wired it and it began DOUBLING the jump
+     distance this probe's geometry is built around. Moved to the b-side of the same rank, which is
+     still dead — the swap this file's header asked the wiring pass to make. */
+  cs.ch[7] = 'st_amped';       // dead today (per-jump damage ramp) - see the header
   cs.ch[9] = 'st_master';      // dead today (stun on a chained body) - see the header
 
   const tick = (n) => { for(let k = 0; k < n; k++) __BF3.update(1/60); };

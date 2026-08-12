@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.945.0-autopilot';
+const VERSION3D='1.946.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11324,6 +11324,11 @@ const CLASS_BASIC = {
        rather than one) and the radius, the 34%, the shock element and the ring are all this hook's
        already. */
     const arcs = 1 + (c2Passive('st_overcharge') ? 1 : 0);
+    /* CHARGED (stormcaller r7 a, index.html:2182): "Your chain jumps twice as far between targets."
+       Wired 2026-08-12, the second row taken out of the group Overcharge unblocked. The jump
+       distance was the bare literal 260 on the line below; "twice as far" is the card's own number
+       and 260 was already the file's, so nothing is chosen here either. */
+    const reach = 260 * (c2Passive('st_charged') ? 2 : 1);
     /* combatTargets() is the PvP-aware list and can be narrower than the room; falling back to
        G.enemies means the arc still finds someone in ordinary play, which is where it lives. */
     let pool = [];
@@ -11336,7 +11341,7 @@ const CLASS_BASIC = {
     for(const o of pool){
       if(o === e || o.dead) continue;
       const d = dXZ(o.x, o.z, e.x, e.z);
-      if(d < 260) near.push({ o: o, d: d });
+      if(d < reach) near.push({ o: o, d: d });
     }
     if(near.length){
       near.sort((a, b) => a.d - b.d);

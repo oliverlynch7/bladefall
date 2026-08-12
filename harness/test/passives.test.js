@@ -136,7 +136,14 @@ const KNOWN_DEAD = new Set([
      grants a shield equal to 4% max HP" is now read in useSkill next to its three identical twins,
      proven by harness/probes/stward.probe.js failing before and passing after. */
   'st_conductor', 'st_overcharge', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
-  'sky_high', 'sky_eye', 'sky_armor',
+  /* sky_eye came OFF this list on 2026-08-11 (sub-project B Task 2, pass 14): "attacking while
+     falling drives you down onto the target" is now read in CLASS_BASIC.skylancer, where it TRADES
+     the innate's hang for Dive Strike's own drive (520 along the heading, vy floored at -360), aimed
+     at the target rather than at the yaw. Proven by harness/probes/skyeye.probe.js — two strikes per
+     half, one falling and one rising: all three halves vy −100 → −55 with no heading before; −360 at
+     aim exactly 1.0 on the passive half after, while the control and the rising strikes stayed put
+     and all four damage readings were 168. */
+  'sky_high', 'sky_armor',
   'bd_flow',
 ]);
 

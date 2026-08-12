@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.922.0-autopilot';
+const VERSION3D='1.923.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11228,6 +11228,24 @@ const CLASS_BASIC = {
   skylancer(p, e, dmg){
     const air = !p.onGround && (p.y || 0) > 6;
     if(!air) return dmg * 0.8;
+    /* HUNTER'S EYE, the rank-7 passive: "Attacking while falling drives you down onto the target."
+       Wired 2026-08-11; it was one of the 37 in docs/SKILL_TRIAGE.md section E that the rank menu
+       offers, describes, and no code ever read.
+       It TRADES the hang below rather than adding to it, which is what makes it a choice: the innate
+       keeps you up, this one takes you down, and you pick which airborne Skylancer you are.
+       Nothing here is a new number - the drive is Dive Strike's own, verbatim from SKILL_FX.sky_dive
+       (10264): 520 along the heading and vy floored at -360. Only the heading is different, and that
+       is the card's own word: onto the TARGET, so it aims at `e` rather than at where the camera
+       happens to point. `while falling` is the guard, so a rising attack is untouched and the class
+       keeps its upward game. */
+    if(c2Passive('sky_eye') && p.vy != null && p.vy < 0){
+      const a = Math.atan2(e.x - p.x, e.z - p.z);
+      p.yaw = a; p.vx = Math.sin(a) * 520; p.vz = Math.cos(a) * 520;
+      p.vy = Math.min(p.vy, -360);
+      addText(e.x, e.y + e.h + 26, e.z, 'HUNTER’S EYE', '#bcecff', true);
+      try { burst(p.x, p.y + 16, p.z, '#bcecff', 10); } catch(err){}
+      return dmg * 1.5;
+    }
     if(p.vy != null && p.vy < 0) p.vy *= 0.55;    // attacking keeps you up
     return dmg * 1.5;
   },

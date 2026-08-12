@@ -232,7 +232,8 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 10 | **E — monk Killer Focus was never read** | `2ac076e` | `harness/probes/monkiller.probe.js`, A/B in one launch with TWO strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | 11 | **E — ranger Ambusher was never read** | `140c541` | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
 | 12 | **E — reaper Harvested Strength was never read** | `8870192` | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
-| 13 | **E — ranger Bounty Hunter was never read** | this run | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
+| 14 | **E — skylancer Hunter's Eye was never read** | this run | `harness/probes/skyeye.probe.js`, A/B in one launch with TWO strikes per half (one falling, one rising, because "while falling" is half the sentence): all three halves went vy −100 → −55 with no heading before; the passive half −360 at aim exactly 1.0 on the foe after, while the control and both rising strikes stayed put and all four damage readings were 168. Skylancer suite 4 pass / 0 fail either side |
+| 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
@@ -260,6 +261,16 @@ killed on a 20-minute clock, so four verified commits were the better use of the
 commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
 class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
 would settle. Say what it reports either way.
+
+**Pass 14 is the first row whose card states NO number anywhere, and that is why it was worth taking
+rather than skipping.** "Attacking while falling drives you down onto the target" names no speed, no
+distance and no damage — the shape this plan's own rule hands to Oliver when a number has to be
+invented. None had to be: Dive Strike (`SKILL_FX.sky_dive`, 10264) is the class's own dive and its two
+constants were taken verbatim, with only the heading changed to the card's own word (onto the TARGET,
+not along the yaw). The passive also *replaces* the innate's hang rather than adding to it, so picking
+it is a real choice about which airborne Skylancer you are. Full write-up and the negative finding it
+turned up — `chr_freeze` is blocked on a missing enemy-facing model, not on a number — in
+`docs/SKILL_TRIAGE.md` section E.
 
 **Pass 13 is the first row in this section whose card has THREE clauses, and it is the first whose
 condition is not the passive itself.** Bounty Hunter pays out on a MARKED enemy, so "the passive half

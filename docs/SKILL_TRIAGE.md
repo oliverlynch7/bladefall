@@ -223,10 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 87 wired / 37 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 88 wired / 36 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
-`x_strength` (Harvested Strength) and `r_bounty` (Bounty Hunter) were wired 2026-08-11. See "Rows
-taken" at the end of this section.
+`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter) and `sky_eye` (Hunter's Eye) were wired
+2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -256,7 +256,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
-| skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
+| skylancer | 2 / 8 | High Ground, Sky Armor (~~Hunter's Eye~~ wired 2026-08-11) |
 | reaper | 1 / 7 | Crimson Harvest (~~Harvested Strength~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
 | warrior, mage, ninja, warlock, beastmaster | 0 | — |
@@ -352,6 +352,7 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
 | **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
+| **skylancer / Hunter's Eye** (`sky_eye`, r7 b) — "Attacking while falling drives you down onto the target." | 2026-08-11 | `harness/probes/skyeye.probe.js`, A/B in one launch, TWO strikes per half (one falling, one rising): all three halves −100 → −55 with no heading before; −360 at aim exactly 1.0 after, control and rising strikes unmoved, all four damage readings 168 |
 | **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
 
 **Bounty Hunter is three clauses, so it is three readers, and the mark — not the passive — is what
@@ -627,6 +628,56 @@ how a class plays, which is Oliver's territory — but every one of the 46 has a
 stating its intent, so implementing it is delivering the promise already on the card rather than
 inventing a number. Where a description does not say enough to implement (`Greed` — "every 500 gold
 sharpens your blade a little further" names no amount), that one is his.
+
+### Hunter's Eye — the first row whose card states NO number at all
+
+Every row taken before this one had its numbers written on it, or one line away: "+20%", "triple",
+"twice as much", "4% max HP", "leaves you at 1". **Hunter's Eye says only "attacking while falling
+drives you down onto the target"** — no speed, no distance, no damage. That is exactly the shape this
+document says belongs to Oliver when a number has to be invented (`Greed`, "a little further"), so the
+question was whether one had to be.
+
+It did not. **The drive already exists in the class's own kit and was taken verbatim:**
+`SKILL_FX.sky_dive` (10264) is Dive Strike, and it sets `p.vx/p.vz` to 520 along the heading and
+`p.vy = Math.min(p.vy, -360)`. Hunter's Eye is that same dive on the ordinary airborne attack, with
+one difference the card itself dictates — it aims at the TARGET (`atan2(e.x-p.x, e.z-p.z)`) rather than
+at where the camera points. Same rule as `mon_flow` taking the monk innate's own 0.35: change Dive
+Strike and the passive follows, and there is no second number to retune.
+
+**It TRADES the innate's hang rather than adding to it, and that is the point of the choice.**
+`CLASS_BASIC.skylancer` already did `p.vy *= 0.55` on a falling attack — "attacking keeps you up". The
+passive returns before that line, so picking it makes you the Skylancer who comes DOWN on things
+instead of the one who hangs. A wiring that did both would have left the card's own verb meaningless.
+
+| | falling strike (vy −100 in) | rising strike (vy +200 in) | heading left behind | damage |
+|---|---|---|---|---|
+| control `sky_float` (a-side of the same rank, wired — it softens gravity), before and after | **−55** (the hang) | 200 | none | 168 |
+| **`sky_eye`, before** | **−55** | 200 | none | 168 |
+| **`sky_eye`, after** | **−360** | **200** | **520, aim exactly 1.0 at the foe** | 168 |
+
+**Two strikes per half, because "while FALLING" is half the sentence.** A wiring that drove you down
+whenever you were airborne would pass a one-strike bar and would be a worse bug than the dead passive —
+it would cancel the class's own rising attacks, which is most of what a Skylancer does. The rising
+strike must leave the body exactly as it found it, and does, in both halves.
+
+**The damage column is an assertion, not a decoration.** The card promises movement and says nothing
+about damage, so all four readings must be the same 168; a wiring that quietly paid a damage bonus
+would be a different promise from the one on the card and would sail through a movement-only bar.
+
+**The measurement is kinematic, which is why it can be trusted at all.** `hitEnemy` dispatches
+`CLASS_BASIC[classId]` inside a `try/catch` (10707), so a hook that throws is SILENT — the damage still
+lands and nothing is printed. A bar that only read the damage number could not tell a working hook from
+a throwing one. Reading `p.vy` and the heading the strike leaves behind cannot be satisfied by an
+exception.
+
+*A negative finding from picking this row, recorded so nobody re-derives it:* **`chr_freeze` (Deep
+Freeze) — "a frozen enemy shatters instantly if you strike it from behind" — is blocked, and not on a
+number.** The frozen half exists (`freezeChill`, 9542, sets `stunT`/`freezeCd` and prints FROZEN); the
+BEHIND half does not. Nothing in combat knows which way an enemy faces — the ninja's Unseen, the one
+mechanic in the game whose own text says "from behind", is a *stand-still* timer (`p._stillT`, 11142)
+that teleports you round the target rather than a facing test. Wiring this would mean inventing an
+enemy-facing model, which is a new mechanic and Oliver's, and it goes next to `bsk_tough` and Escape
+Artist for the same reason.
 
 ---
 

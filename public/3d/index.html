@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.929.0-autopilot';
+const VERSION3D='1.930.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9820,11 +9820,25 @@ function fireProjectile(p,w,target){
   if(target){ const d=dXZ(p.x,p.z,target.x,target.z), t=Math.max(0.12,d/pr.speed);
     vx=(target.x-p.x)/t; vz=(target.z-p.z)/t;
     vy=((target.y+target.h*0.5)-oy)/t + (pr.gravity?pr.gravity*0.5*t:0); }
+  /* DEAD AIM (pirate r3 a): "The pistol pierces every enemy in a line."
+     Wired 2026-08-11; it was one of the 30 in docs/SKILL_TRIAGE.md section E that the menu offers,
+     describes and no code ever read - and one of the SIX the Pirate had, the worst-hit class left.
+     NOTHING IS INVENTED. Pierce already exists as a projectile field and is already spent one body
+     at a time in the projectile step; the flintlock already ships with `pierce:2`, which carries a
+     shot through exactly three. The card asks for one value change and names the value itself -
+     "every" - and 99 is this file's OWN constant for that, used verbatim by the thrown scythe, the
+     hurled axe and the longbow's power arrow, each described in its own comment as piercing
+     everything.
+     Gated on the flintlock, not on the class, because the card says THE PISTOL: a Pirate who has
+     picked up a bow is not carrying the thing this passive is about. `w.arche` is the ARCHES key,
+     the same field the crossbow branch six lines up tests. */
+  const pierce = (meta.classId==='pirate' && c2def('pirate') && c2Passive('pir_deadly')
+                  && w.arche==='flintlock') ? 99 : (pr.pierce||0);
   const count=pr.count||1, spread=pr.spread||0;                 // multi-shot spread (crossbow, knives)
   for(let i=0;i<count;i++){ const a=(count>1?(i-(count-1)/2)*spread:0), ca=Math.cos(a), sa=Math.sin(a);
     G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx:vx*ca-vz*sa,vy,vz:vx*sa+vz*ca,
       gravity:pr.gravity||0,size:pr.size,color:pr.color,shape:pr.shape,glow:pr.glow||0,
-      dmg,kb:w.kb,pierce:pr.pierce||0,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,seekTarget:seek?target:null,pcrit:crit>1}); }
+      dmg,kb:w.kb,pierce,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,seekTarget:seek?target:null,pcrit:crit>1}); }
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
 function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }

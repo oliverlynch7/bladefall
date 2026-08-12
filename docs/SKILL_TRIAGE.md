@@ -223,11 +223,12 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 94 wired / 30 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 95 wired / 29 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
 (Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
-`pal_blessed` (Blessed Blade) and `bsk_heavy` (Heavy Hands) were wired 2026-08-11.
+`pal_blessed` (Blessed Blade), `bsk_heavy` (Heavy Hands) and `pir_deadly` (Dead Aim) were wired
+2026-08-11.
 See "Rows taken" at the end of this section. **The Reaper was the first class this sub-project took
 from dead passives to none, and the Paladin is the second** — they join warrior, mage, ninja,
 warlock and beastmaster, which never had any.
@@ -254,7 +255,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
-| pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
+| pirate | 5 / 8 | Sea Legs, Swagger, Slippery, Lucky, Greed (~~Dead Aim~~ wired 2026-08-11) |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
@@ -363,8 +364,58 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **reaper / Crimson Harvest** (`x_crimson`, r7 a) — "Below half health, every soul you collect heals you outright." | 2026-08-11 | `harness/probes/crimson.probe.js`, THREE halves in one launch, TWO kills per half (one below half health, one above): control 0 / 0, passive **24 then 0**, known-bad 0 / 0, on a 477 HP hero |
 
 | **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
+| **pirate / Dead Aim** (`pir_deadly`, r3 a) — "The pistol pierces every enemy in a line." | 2026-08-11 | `harness/probes/deadaim.probe.js`, FIVE bodies in a line, THREE halves in one launch: control and known-bad stop at **3 of 5** with pierce spent to 0, the passive half takes **5 of 5** with pierce 99 → 94. The probe's own first two runs said 4 of 5 and the path trace proved that was the shot SINKING, not the pierce — `pierce:96` still in hand when it stopped connecting |
 | **berserker / Heavy Hands** (`bsk_heavy`, r3 a) — "You cannot dodge — but nothing can knock you back or stagger you." | 2026-08-11 | `harness/probes/heavyhands.probe.js`, THREE halves in one launch, THREE trials per half: control and known-bad thrown at the game's own **vz 210 / vy 160** with the dodge firing; the passive half **vz 0, vy 0, onGround true, dodge refused** — and **hpLost 6 in all three**, because an early return would have been damage immunity. Dodge button photographed unavailable at `dodgeCd 0` |
 | **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+
+### Dead Aim — the row where the PROBE was wrong twice and the game was right all along
+
+The wiring is one value. Pierce is already a projectile field, already spent one body at a time
+(`13188: if(pr.pierce>0) pr.pierce--; else pr.life=0`), and the flintlock already ships with
+`pierce:2`, which carries a shot through exactly three bodies. The card asks for one change and names
+its own value — *every* — and **99 is this file's own constant for that**, used verbatim by the
+thrown scythe, the hurled axe and the longbow's power arrow, each described in its own comment as
+piercing everything. Gated on `w.arche==='flintlock'` rather than on the class, because the card says
+THE PISTOL: a Pirate carrying a bow is not carrying the thing this passive is about.
+
+**Then the probe said 4 of 5, twice, and the row nearly went down as half-working.** The wiring was
+plainly doing *something* — 3 of 5 before, 4 of 5 after, control and known-bad unmoved — but "pierces
+every enemy in a line" does not mean four. The first guess was range and the line was tightened from
+a 120-unit gap to 80. It returned 4 again.
+
+**Guessing a third time would have been the mistake. The probe was made to report the shot instead.**
+It now samples the live projectile every sixth frame — position, height and pierce remaining — and
+the answer was in one line: when the shot stopped connecting it still had **`pierce: 96`**. It had not
+run out of pierce. It had run out of ALTITUDE.
+
+`fireProjectile` solves the launch onto the aim target's mid-height, and the muzzle (`p.y+26`) sits
+seven units above a grunt's chest (19). That seven becomes a velocity by dividing by the flight time
+to the NEAREST body — and with the line starting close, that time is clamped to its 0.12s floor, so
+the shot leaves at **−58 units a second** and is under everyone's feet 380 units out. The fix was to
+the bench, not the bar and not the game: **start the line 400 units away**, where the same seven units
+divided by 0.444s is a −16 drift that costs 12 units of height over the shot's entire life against a
+26-unit hit window. Flat shot, five bodies, and the trace to show it:
+
+| half | pierce at muzzle | bodies hit | pierce left when it stopped |
+|---|---|---|---|
+| control `pir_swift` | 2 | 3 of 5 | 0 — spent |
+| **`pir_deadly`, before** | **2** | **3 of 5** | 0 — spent |
+| **`pir_deadly`, after** | **99** | **5 of 5** | 94 |
+| known-bad `mon_iron` | 2 | 3 of 5 | 0 — spent |
+
+`ok:true / okAgainstInert:false`. Pirate suite 3 pass / 0 fail / 1 unproven; the Ranger — the other
+class that lives on `fireProjectile` — is 4 pass / 1 fail, that one being the baselined
+`ranger/Tumble` stale description (section C, Oliver's).
+
+**The lesson is this document's own, in a new place:** a bar that fails tells you *that* something is
+wrong and never *what*. Two launches went on plausible theories about a probe whose subject was
+sitting in a field it was not printing. Cost of adding the trace: one launch. Cost of the two guesses
+before it: two.
+
+*Recorded in passing, and it is section D confirmed live rather than inherited:* the probe reports
+`inFamily: false` for a Pirate holding the Old Flintlock — its own starting weapon. It fires and
+pierces regardless (only the damage is docked), so nothing here depends on it, but the bug is real
+and still Oliver's.
 
 ### Heavy Hands — the first row with NO NUMBER on either side, and the finding that unblocked it
 

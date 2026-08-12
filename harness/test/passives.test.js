@@ -158,7 +158,19 @@ const KNOWN_DEAD = new Set([
      immunity. The dodge button is photographed reading unavailable at dodgeCd 0
      (_shot/out/heavy-hud.png). */
   'bsk_reckless', 'bsk_blood', 'bsk_tough',
-  'pir_deadly', 'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
+  /* pir_deadly came OFF this list on 2026-08-11 (sub-project B Task 2, pass 21), the FIRST of the
+     Pirate's six. "The pistol pierces every enemy in a line" is now one value in fireProjectile:
+     pierce is already a projectile field, already spent one body at a time in the projectile step,
+     and the flintlock already ships with pierce:2 (which carries a shot through exactly three). The
+     card names its own value - "every" - and 99 is this file's OWN constant for that, used verbatim
+     by the thrown scythe, the hurled axe and the longbow's power arrow. Gated on the flintlock
+     rather than on the class, because the card says THE PISTOL.
+     Proven by harness/probes/deadaim.probe.js, FIVE bodies in a line and three halves in one launch:
+     control and known-bad stop at 3 of 5 with pierce spent to 0, the passive half takes all 5 with
+     pierce 99 -> 94. The probe's own first two runs returned 4 of 5 and it was NOT the passive - the
+     shot was sinking below the last body, and the path trace proved it by showing pierce still at 96
+     when it stopped connecting. The line now starts 400 units out so the aim solve flies flat. */
+  'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
   /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
      restores the mana you had three seconds ago" is now read in the Rewind death save beside its two
      already-wired siblings chr_ward and chr_haste, and the ring it reads from records mana at last.

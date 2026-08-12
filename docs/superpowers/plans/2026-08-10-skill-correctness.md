@@ -490,11 +490,28 @@ one-directional ratchet stops describing the game the moment anything is fixed.
 - [x] **Step 4: Commit** — `harness/audit-passives.js`, `harness/test/passives.test.js`,
       `docs/SKILL_TRIAGE.md` section E.
 
-- [ ] **Step 5: Re-baseline and hand the new findings to the triage list**
+- [x] **Step 5: Re-baseline and hand the new findings to the triage list** — done; ticked 2026-08-12
+      against the repo rather than against memory, for the reason sub-project A's Task 1–7 boxes were:
+      *a plan that reads as unstarted is worse than one that reads as unfinished*, and while this box
+      was open the standing rule "take the first task whose steps are not all ticked" pointed every
+      run at a step whose whole content was "this happens in Task 2".
 
 The 46 rows are in `docs/SKILL_TRIAGE.md` section E and are worked through Task 2, one commit at a
 time; each fix takes an id out of `KNOWN_DEAD`. Nothing else re-baselines here — the audit is a unit
 test, so it lives in `run-all.js`'s fast stage and never touches `harness/baseline.json`.
+
+**Where it ended up, from the gate run's own printed line and not from prose: `124 total, 98 wired,
+26 dead`.** Twenty of the 46 were wired by Task 2 passes; the remaining 26 are triaged group by group
+in section E under *"What is left, and the ONE decision that unblocks each group"* and every one is
+blocked on a number, a unit or a mechanic that does not exist. `KNOWN_DEAD` is a ratchet checked in
+BOTH directions, so this step cannot silently stop describing the game: a newly dead passive fails the
+gate, and a passive that becomes wired fails it too until the list is updated.
+
+**The stat-snapshot half of Step 2 is still the open piece, and it is now the cheap one.** It was
+deferred because 124 passives × two game states does not fit in any run; against 98 wired ones with a
+reader to exercise it is a different size of job. Sections H and N are the standing argument for
+doing it: `nin_swift` and `nin_combo` were both counted wired throughout, and both were wired to a
+condition that never came true.
 
 ---
 

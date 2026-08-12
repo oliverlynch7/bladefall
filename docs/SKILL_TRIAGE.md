@@ -255,7 +255,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 3 / 8 | Iron Body, Inner Fire, Still Water (~~Flow~~, ~~Killer Focus~~, ~~Master Striker~~ wired 2026-08-11) |
-| pirate | 4 / 8 | Sea Legs, Slippery, Lucky, Greed (~~Dead Aim~~, ~~Swagger~~ wired 2026-08-11) |
+| pirate | 3 / 8 | Sea Legs, Lucky, Greed (~~Dead Aim~~, ~~Swagger~~, ~~Slippery~~ wired 2026-08-11) |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
@@ -369,6 +369,37 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **monk / Master Striker** (`mon_master`, r9 b) — "Every fourth unbroken strike hits everything around you." | 2026-08-11 | `harness/probes/monkmaster.probe.js`, THREE halves in one launch, each with FOUR strikes then a game-driven chain break then TWO more: a neighbour 120 units away that is never struck directly lost **0 / 0 / 0 / 127** in the passive half and nothing at all in the control or the known-bad, a far foe at 420 lost nothing in any half, and nothing splashed after the break. Photographed at `_shot/out/mm-splash2.png` — the MASTER STRIKER banner over the monk, 112 over the struck foe and 127 over each flanking grunt |
 | **berserker / Heavy Hands** (`bsk_heavy`, r3 a) — "You cannot dodge — but nothing can knock you back or stagger you." | 2026-08-11 | `harness/probes/heavyhands.probe.js`, THREE halves in one launch, THREE trials per half: control and known-bad thrown at the game's own **vz 210 / vy 160** with the dodge firing; the passive half **vz 0, vy 0, onGround true, dodge refused** — and **hpLost 6 in all three**, because an early return would have been damage immunity. Dodge button photographed unavailable at `dodgeCd 0` |
 | **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+| **pirate / Slippery** (`pir_evasive`, r7 a) — "Firing the pistol pushes you back out of melee range." | 2026-08-11 | `harness/probes/slippery.probe.js`, THREE halves in one launch, TWO shots per half (loaded, then spent): all six shots moved **0** before; after, the loaded shot moved **139.4** and took the gap from 60 to 199.4 past the game's own reach of **88**, while the spent shot moved 0, the control `pir_luck` and the known-bad `mon_iron` stayed at 0 in both trials, and `dodgeCdT` was never spent |
+
+### Slippery — the one-line reuse was the trap, and the probe was wrong twice before the game was
+
+**Everything the card needs already existed, which is why this row was worth taking.** The shove is
+the Pirate's own Roll: `SKILL_FX.pir_tumble` IS `SKILL_FX.tumble` (10304, 10229), whose first line
+reverses the dash off the yaw and whose 0.22s at the dash speed of 560 (12874) carries **~123 units**
+— against the game's own melee reach of `((e.weapon&&e.weapon.range)||60) + e.r + p.r` (12168), which
+the probe measured live at **88**. So the class's own roll distance lands just past its own melee
+reach and no distance had to be chosen. Roll's 0.35s of i-frames and its snare are not copied; the
+card promises a push and nothing else.
+
+**THE OBVIOUS ONE-LINE FIX IS `p.dodgeTimer=0.22`, AND IT WOULD HAVE SHIPPED AN I-FRAME.** That field
+is not just the dash's clock — eight damage tests in the file read it as *this body is dodging*
+(11446, 12255, 12672, 13056, 13061, 13064, 13233) and 13003 blocks attacking while it runs. Reusing it
+hands every pistol shot 0.22s of untouchability the card never mentions, and the probe would have gone
+green on it, because the probe measures the push. Same shape as pass 20's note, where the obvious early
+return out of `hurtPlayer` would have read as knockback immunity and been damage immunity. The shove
+runs on its own `p._slipT`, driving the identical velocity and nothing else, and the probe asserts
+`dodgeCdT` was never spent so the fix cannot quietly become "you also get a free dodge".
+
+**The probe carried two faults of its own, and both would have measured the wrong thing.**
+- **It faced the hero the wrong way.** Forward in this game is `(sin(yaw), cos(yaw))` — every
+  projectile spawn and every aim solve agrees — so a foe placed at `z−60` in front of a hero at
+  `yaw 0` is actually BEHIND it, and a backward dash drives *into* the body. It now turns the hero
+  with the game's own `atan2(dx, dz)`.
+- **It reset the hero's position between trials but not its velocity.** A dash does not stop dead when
+  its timer ends; the leftover 560 goes to the friction tail. Measured on the fixed game: the loaded
+  half pushed 139.4 and the spent half that followed it drifted **18.7 with nothing fired** — which
+  reads exactly like a passive shoving on every swing, the very bug the spent trial exists to exclude.
+  With the velocity zeroed the spent half is 0.
 
 ### Swagger — the row that cannot be photographed, and the tolerance that had to be measured
 

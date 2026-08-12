@@ -177,7 +177,18 @@ const KNOWN_DEAD = new Set([
      effSpeed - the card promises movement - with the pistol emptied and reloaded by the game's own
      paths: six walks of 245.4-245.8 before, 270.21 loaded against 245.85 spent after (ratio 1.099)
      while the control and the known-bad stayed at 0.998 and 0.999. */
-  'pir_tough', 'pir_evasive', 'pir_luck', 'pir_greed',
+  /* pir_evasive came OFF this list on 2026-08-11 (sub-project B Task 2, pass 24): "firing the pistol
+     pushes you back out of melee range" is now armed in CLASS_BASIC.pirate, on the shot itself, past
+     the Cutthroat guard so a pierced line still shoves you once. The shove is the pirate's own Roll
+     verbatim (0.22s at the dash speed of 560 = ~123 units, against the game's own melee reach of 88)
+     on its OWN timer rather than on dodgeTimer, which eight damage tests read as "this body is
+     dodging" — reusing that field would have been an i-frame the card never promised.
+     Proven by harness/probes/slippery.probe.js, THREE halves in one launch with TWO shots per half
+     (loaded then spent, because "firing the pistol" is the condition and a passive that shoved on
+     every swing would clear a loaded-only bar): all six shots moved 0 before; after, the loaded shot
+     moved 139.4 and cleared the reach while the spent one moved 0, the control and the known-bad
+     staying at 0 throughout, and dodgeCdT never spent. */
+  'pir_tough', 'pir_luck', 'pir_greed',
   /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
      restores the mana you had three seconds ago" is now read in the Rewind death save beside its two
      already-wired siblings chr_ward and chr_haste, and the ring it reads from records mana at last.

@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.932.0-autopilot';
+const VERSION3D='1.933.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11265,6 +11265,16 @@ const CLASS_BASIC = {
       return c2Passive('pir_brutal') ? dmg * 1.45 : undefined;   // Cutthroat: steel bites while reloading
     }
     p._loaded = false;
+    /* SLIPPERY (r7 a): "Firing the pistol pushes you back out of melee range" — wired 2026-08-11, one
+       of docs/SKILL_TRIAGE.md section E's dead passives (`pir_evasive` appeared only in CLASS2 and in
+       the icon table). Nothing invented: the shove IS the pirate's own Roll, whose first line reverses
+       the dash off the yaw (SKILL_FX.tumble, 9886) and whose 0.22s at the dash speed of 560 (12874)
+       carries ~123 units — just past the game's own melee reach of ~90-110 (12168). So the card
+       describes a distance the class already owns and none had to be chosen.
+       Roll's i-frames and snare are NOT copied, and neither is dodgeTimer itself; see the movement
+       branch for why that field would have smuggled in damage immunity. Fires once per shot: the
+       Cutthroat guard above returns for every later body in a pierced line. */
+    if(c2Passive('pir_evasive')){ p._slipT=0.22; p._slipX=-Math.sin(p.yaw); p._slipZ=-Math.cos(p.yaw); }
     addText(e.x, e.y + e.h + 18, e.z, 'BANG', '#ffd24a');
     try { burst(e.x, e.y + e.h*0.5, e.z, '#ffe9a8', 12); playFx && playFx('shoot'); } catch(err){}
     return dmg * 2.3;                                      // one heavy shot, then reload on a kill
@@ -12863,7 +12873,7 @@ function update(dt){
   if(G.shake>0) G.shake=Math.max(0,G.shake-dt*40);
   if(p.atkTimer>0) p.atkTimer-=dt; if(p.atkCd>0) p.atkCd-=dt;
   if(p.invuln>0) p.invuln-=dt; if(p.hurtFlash>0) p.hurtFlash-=dt;
-  if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt;
+  if(p.dodgeTimer>0) p.dodgeTimer-=dt; if(p.dodgeCdT>0) p.dodgeCdT-=dt; if(p._slipT>0) p._slipT-=dt;   // _slipT: Slippery's shove — see CLASS_BASIC.pirate
   let moveSpd=220*effSpeed(p); let mx=moveX(), mz=moveZ();   // `let`: the Thornwild hazard scales it below
   if(p.downed){ mx=0; mz=0; input.jumpEdge=false; input.dodgeEdge=false; input.attack=false; p.charging=false; p.attackHeld=false;   // co-op: a downed player is locked out until revived
     if(Math.floor(G.time*1.5)%2===0) addText(p.x,p.y+70,p.z,'DOWNED','#ff5e54'); }
@@ -12872,6 +12882,11 @@ function update(dt){
   if(meta.camMode!=='far' && (mx||mz)){ // movement is relative to where the camera points (shoulder + first-person)
     const cy=(G.camYaw==null?Math.PI:G.camYaw), f=-mz, r=mx; mx=f*Math.sin(cy)-r*Math.cos(cy); mz=f*Math.cos(cy)+r*Math.sin(cy); }
   if(p.dodgeTimer>0){ p.vx=p.dashX*560; p.vz=p.dashZ*560; }
+  /* SLIPPERY's shove rides the dash's own speed and NOTHING else of it. Deliberately its own timer
+     rather than a second writer of dodgeTimer: that field is read as "this body is dodging" by eight
+     damage tests (11446, 12255, 12672, 13056, 13061, 13064, 13233) and blocks attacking at 13003, so
+     reusing it would hand every pistol shot 0.22s of untouchability its card never mentions. */
+  else if((p._slipT||0)>0){ p.vx=p._slipX*560; p.vz=p._slipZ*560; }
   else {
     // Rime (Frostfell): the ice takes your grip — slower to build speed, much slower to shed it
     // A permanent TINY bit of momentum: base friction retains a little speed so you ease to a stop

@@ -88,9 +88,22 @@ export function passivesOf(src){
     let cls = '?';
     for(const c of classAt){ if(c.at < m.index) cls = c.cls; else break; }
     const rank = (body.slice(Math.max(0, groupStart - 8), groupStart).match(/r(\d+):\s*$/) || [])[1] || '?';
-    const entRe = /id:\s*'([A-Za-z0-9_]+)'[^}]*?n:\s*'([^']*)'[^}]*?d:\s*'([^']*)'/g;
+    /* `n:` AND `d:` MAY BE DOUBLE-QUOTED, and four of them are. This regex required single quotes on
+       both, so every passive whose NAME contains an apostrophe was skipped silently: "Death's
+       Favor", "Guardian's Will", "Predator's Rhythm" and "Alpha's Authority" - x_favor, pal_will,
+       bst_rhythm and bst_authority. The audit reported 124 total where CLASS2 holds 128, that
+       number was quoted through this plan and docs/SKILL_TRIAGE.md as the population, and the
+       KNOWN_DEAD ratchet next door could not see those four AT ALL - so any of them going dead was
+       a gate that would stay green. The four happen to be wired today, which is luck, not a guard.
+       The id itself stays single-quoted-only on purpose: an id is an identifier and can never need
+       the other quote, so widening it would only add ways to match something that is not an id. */
+    const Q = String.raw`(?:'([^']*)'|"([^"]*)")`;
+    const entRe = new RegExp(String.raw`id:\s*'([A-Za-z0-9_]+)'[^}]*?n:\s*${Q}[^}]*?d:\s*${Q}`, 'g');
     let e;
-    while((e = entRe.exec(group))) out.push({ cls, rank: 'r' + rank, id: e[1], name: e[2], desc: e[3] });
+    while((e = entRe.exec(group)))
+      out.push({ cls, rank: 'r' + rank, id: e[1],
+                 name: e[2] !== undefined ? e[2] : e[3],
+                 desc: e[4] !== undefined ? e[4] : e[5] });
   }
   return out;
 }

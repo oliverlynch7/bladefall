@@ -238,8 +238,15 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 98 wired / 26 dead** — the count `harness/audit-passives.js` printed on the 2026-08-12 gate run,
-which is the only figure here that cannot drift, since it is recomputed from the game on every gate:
+**CORRECTION, 2026-08-12: THE POPULATION IS 128, NOT 124** — and the four the audit could not see are
+in section P below. Every count in this section that says 124 is four short for that reason; the
+number of DEAD is unaffected, because all four are wired. **Read this section as `128 total, 102
+wired, 26 dead`.** It is also the reason the phrase *"the only figure here that cannot drift"* below
+was too strong: a number recomputed from the game every run is still only as good as the parse that
+produces it.
+
+**Now 102 wired / 26 dead** — the count `harness/audit-passives.js` prints on every gate run, which is
+recomputed from the game rather than carried forward in prose:
 `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
@@ -1976,6 +1983,75 @@ under *"Not listed here"* below: `e.dmg2` and `e._iansSplash`, neither of which 
 **That half of the sweep is now worked and is close to empty** — so the next lead has to come from
 somewhere else, and the standing candidate is still the stat-snapshot half of that plan's Task 3
 Step 2, against the 98 passives that do have a reader.
+
+---
+
+## P. THE PASSIVE AUDIT COULD NOT SEE FOUR OF THE GAME'S PASSIVES — **FIXED 2026-08-12**
+
+**A BENCH row, not a game one, and taken before more game work for the reason section F was.** A
+harness that mis-measures is worse than one that does not run: this one has been quoted as the
+population of the whole passive programme — "124 passives in the game" — in this document and in
+`docs/superpowers/plans/2026-08-10-skill-correctness.md`, and it was wrong by four.
+
+`CLASS2` holds **128** passives: sixteen classes × four passive ranks (3/5/7/9) × two options.
+`harness/test/passives.test.js` had that arithmetic written into a comment —
+
+> *Sixteen classes carry four passive ranks of two options, so the floor is well above any plausible
+> partial parse.*
+
+— directly above `assert.ok(r.total >= 100)`. So the test stated 128 and accepted 124.
+
+**The mechanism is one quote character.** `passivesOf`'s entry regex was
+`id:'…'[^}]*?n:'([^']*)'[^}]*?d:'([^']*)'` — single quotes required on both `n:` and `d:`. **A name
+containing an apostrophe cannot be written in single quotes**, and four are not:
+
+| id | class / rank | name, as the file writes it | its card |
+|---|---|---|---|
+| `x_favor` | reaper r9 b | `n:"Death's Favor"` | Elite and boss hits restore 1 mana; elite kills restore 8% HP. |
+| `pal_will` | paladin r9 a | `n:"Guardian's Will"` | Take 15% less damage while below half HP. |
+| `bst_rhythm` | beastmaster r5 b | `n:"Predator's Rhythm"` | Basic attacks reduce all Beastmaster command cooldowns by 0.25s. |
+| `bst_authority` | beastmaster r9 a | `n:"Alpha's Authority"` | Companion attacks gain occasional splash damage and commands are 15% stronger. |
+
+**UNDER-COUNTING IS THE SMALL HALF.** A skipped entry is not merely missing from a total — it is
+outside the `KNOWN_DEAD` ratchet's reach entirely, so **any of those four going dead would have left
+the gate green with nothing to say.** That is the green-light-that-cannot-go-red shape this whole
+programme exists to remove, sitting inside the tool that removes it. All four are wired today —
+`x_favor` in the elite-hit rider (10822) and the elite-kill rider (11050), `pal_will` in `hurtPlayer`
+(11524), `bst_rhythm` on the basic attack (10782), `bst_authority` in `beastCommandPower` (10299) and
+the companion's splash (11738) — but that is luck, not a guard, and the audit could not have said
+otherwise either way.
+
+### How it was found — a static check, no launch, no GPU
+
+**Every `c2Passive('<id>')` literal in the game, checked against the ids `CLASS2` actually defines.**
+148 literal call sites, 102 distinct ids, and four of them were ids the game guards on that the audit
+had never heard of. An audit whose parse is complete cannot produce that result, so the four names
+*are* the diagnosis. The reverse direction is worth stating because it came back empty and would be a
+worse fault: an id guarded that `CLASS2` does NOT define would be a permanently-false guard — section
+H's shape with no card behind it — and there are none. Nor is any passive guarded under the wrong
+class's `meta.classId` check.
+
+Worth re-running after any kit change. It is cheaper than every other check in this document.
+
+### The fix, and why both halves had to change
+
+`n:` and `d:` now accept either quote style. The **id** stays single-quoted-only on purpose: an id is
+an identifier and can never need the other quote, so widening it would only add ways to match
+something that is not an id.
+
+And the real-game floor is no longer `>= 100`. It is the arithmetic the comment already stated —
+**per class as well as in total**, because an aggregate floor cannot tell a parser that lost four
+entries from one that never had them, while *every class has exactly eight* fails the moment any
+single tree stops parsing.
+
+Both halves are asserted to DISAGREE with what they replace, the rule `harness/test/gate.test.js`
+sets: the old single-quote-only regex is transcribed into the test file and asserted to MISS the
+double-quoted entry, and a second test moves the reader so the double-quoted passive is the DEAD one
+and must be accused — proving the fix restores the accusation, not just the count.
+
+Unit stage **53 → 55 tests**, all green. `128 total, 102 wired, 26 dead`, every class at 8/8, no
+duplicates, and the dead list is byte-for-byte what it was — so nothing in section E moves and
+`KNOWN_DEAD` needs no edit. No game code was touched.
 
 ## Not listed here, and why
 

@@ -74,6 +74,46 @@ test('every passive is attributed to its class and rank', () => {
   assert.strictEqual(p.rank, 'r3');
 });
 
+/* A NAME WITH AN APOSTROPHE IN IT HAS TO BE WRITTEN IN DOUBLE QUOTES, and four of the game's
+   passives are: "Death's Favor", "Guardian's Will", "Predator's Rhythm", "Alpha's Authority". The
+   entry regex required single quotes on both `n:` and `d:`, so it skipped all four in silence -
+   the audit reported 124 where CLASS2 holds 128, and the KNOWN_DEAD ratchet below could not see
+   them at all. */
+const FAKE_APOS = `
+const CLASS2={
+  reaper:{disp:'Reaper',
+    r9:{kind:'passive',a:{id:'t_plain',n:'Plain Name',role:'X',d:'Single quoted.'},b:{id:'t_apos',n:"Death's Favor",role:'X',d:'Also single quoted.'}}
+  }
+};
+const PASSIVE_ART={ t_plain:'a', t_apos:'b' };
+function f(p){ if(c2Passive('t_apos')) return 1; }
+`;
+
+test('A PASSIVE WHOSE NAME NEEDS DOUBLE QUOTES IS STILL PARSED — and the single-quote-only version disagrees', () => {
+  const ids = passivesOf(FAKE_APOS).map(p => p.id).sort();
+  assert.deepStrictEqual(ids, ['t_apos', 't_plain']);
+  const apos = passivesOf(FAKE_APOS).find(p => p.id === 't_apos');
+  assert.strictEqual(apos.name, "Death's Favor");
+  assert.strictEqual(apos.desc, 'Also single quoted.');
+
+  /* The version this replaced, transcribed. If it still found t_apos this test would prove nothing
+     — the bug has to be reproducible here or the fix is unfalsifiable. */
+  const OLD = /id:\s*'([A-Za-z0-9_]+)'[^}]*?n:\s*'([^']*)'[^}]*?d:\s*'([^']*)'/g;
+  const oldIds = [...FAKE_APOS.matchAll(OLD)].map(m => m[1]);
+  assert.deepStrictEqual(oldIds, ['t_plain'],
+    'the old regex must miss t_apos — else this test cannot show the bug was real');
+});
+
+test('a double-quoted passive that nothing reads is still ACCUSED, not silently skipped', () => {
+  /* The direction that matters. Skipping an entry does not merely under-count: it removes a passive
+     from the audit's reach entirely, so one going dead would leave the gate green. */
+  const src = FAKE_APOS.replace("c2Passive('t_apos')", "c2Passive('t_plain')");   // move the reader
+  const r = auditPassives(src);
+  assert.deepStrictEqual(r.dead.map(d => d.id), ['t_apos']);
+  /* And the base fixture accuses the other one, so the two cases discriminate. */
+  assert.deepStrictEqual(auditPassives(FAKE_APOS).dead.map(d => d.id), ['t_plain']);
+});
+
 /* ---- the real game ---- */
 
 /* THE 46 PASSIVES THAT ARE OFFERED, DESCRIBED, AND THEN NEVER CONSULTED, measured 2026-08-10 on
@@ -259,8 +299,19 @@ test('the real game still has passives to audit at all', () => {
   console.log('  by class: ' + Object.keys(per).map(c => `${c} ${per[c].dead}/${per[c].n}`).join(', '));
   /* A parser that quietly stops matching would report zero dead and look like success. Sixteen
      classes carry four passive ranks of two options, so the floor is well above any plausible
-     partial parse. */
-  assert.ok(r.total >= 100, `expected 100+ passives in CLASS2, parsed ${r.total}`);
+     partial parse.
+
+     THE FLOOR WAS `>= 100` AND THAT IS HOW FOUR PASSIVES WENT MISSING FOR THE WHOLE LIFE OF THIS
+     AUDIT. The comment above already states the arithmetic - 16 x 4 x 2 = 128 - and the assertion
+     under it accepted 124. So it is the arithmetic that is asserted now, and PER CLASS as well as
+     in total: an aggregate floor cannot tell a parser that lost four entries from one that never
+     had them, while `every class has exactly eight` fails the moment any single tree stops
+     parsing. If a class is ever given a fifth passive rank, this is meant to fail and be updated
+     deliberately. */
+  const wrong = Object.keys(per).filter(c => per[c].n !== 8).map(c => `${c}:${per[c].n}`);
+  assert.deepStrictEqual(wrong, [], 'every class carries four passive ranks of two options');
+  assert.strictEqual(Object.keys(per).length, 16, 'sixteen classes must be parsed');
+  assert.strictEqual(r.total, 128, `16 classes x 4 ranks x 2 options = 128, parsed ${r.total}`);
 });
 
 test('no passive is dead that was not already known to be', () => {

@@ -247,6 +247,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 26 | **I — the necromancer's Harvest deleted the corpse it announced** | this run | `harness/probes/harvest.probe.js`, THREE halves in one launch with THREE trials each: five hits gave `added 1, survived 0, risen 2` before and `1 / 1 / 1` after, four hits found no corpse in any half either side, and a corpse from a KILL raised correctly in every half both ways — so the control's zeros are real zeros. **The bar is the game's own discriminator**: `necro_raise` raises ONE fighter off a corpse and falls back to TWO without one, so a plain "did a minion appear" test would have gone green against the shipped game on the fallback alone. The known-bad half reads identically to the before-run's live half. Found by a static sweep for the section H shape, not from the triage list — section E is floored and this is what the plan says to hunt instead |
 | 27 | **L — the Beastmaster's companion never took the order** | this run | `harness/probes/petorder.probe.js`, THREE halves in one launch with TWO trials each (ordered, and a no-order control that must hold in every half): the pet was 525 from the aimed foe and 33 from the one beside it, and is now 31 and 463, with the damage moving with it (aimedLost 0 → 55, nearLost 55 → 0) — while the no-order control reads 35 / 527 in all three halves, so this is a retarget and not a pet that now always charges the reticle. The known-bad half reads identically to the before-run. **Three faults stacked, and the outer one hid the other two: `aimTarget()` was called with NO ARGUMENTS**, threw on `undefined.yaw` into the hook's own catch, and killed the whole hook including the SIC EM the player is shown — so the dead `orderX/orderZ/orderT` and the wrong-field `atkCd` had never had a chance to matter. Found by the widened sweep this same run, not from the triage list. Beastmaster suite 6 pass / 0 fail / 0 unproven |
 | 28 | **N — the ninja's Combo Edge paid out only for the OTHER passive** | this run | `harness/probes/nincombo.probe.js`, THREE halves in one launch with THREE trials each: a Ninja holding Swift + Combo Edge left `_stillT` at 0 after an Unseen kill on a full-health foe AND on a wounded one before; 9 on both after, while the half holding Deadly Precision went 0 → 9 on the healthy foe and stayed 9 on the wounded one (the shipped game's only working path, unbroken), the no-Combo-Edge control stayed 0 everywhere, and a plain non-Unseen kill rearmed in no half either side. **The known-bad could not be an `inert` half** — the mark is written and read inside one synchronous `hitEnemy` call, so the shipped gate is TRANSCRIBED in the probe and fed the identical bar (`okAgainstShipped` false while `ok` true). Photographed at `_shot/out/nc-rearm.png`. Section H's shape hiding UNDER the section H fix: nothing downstream of Unseen had ever been exercised, because Unseen could not arm |
+| 30 | **P — the passive audit could not see four of the game's passives** | this run | A BENCH pass, like pass 3, and taken for pass 3's reason. `passivesOf`'s entry regex demanded single quotes on `n:` and `d:`, so the four passives whose names carry an apostrophe (`x_favor`, `pal_will`, `bst_rhythm`, `bst_authority`) were skipped silently — 124 parsed where CLASS2 holds 128, and those four sat outside the `KNOWN_DEAD` ratchet's reach entirely, so one going dead would have left the gate green. Found by checking every `c2Passive('<id>')` literal against the ids CLASS2 defines: four ids the game guards on that the audit had never heard of. Proven by `harness/test/passives.test.js` with the old regex transcribed and asserted to MISS the double-quoted entry, and by replacing the `>= 100` floor with the arithmetic its own comment already stated — per class as well as in total. Unit stage 53 → 55 tests, `128 total, 102 wired, 26 dead`, dead list unchanged |
 | 29 | **O — chronomancer Haste named a cooldown array that does not exist** | this run | `harness/probes/chrhaste.probe.js`, TWO halves in one launch (the two options at the same rank, so the only difference is the pick): four real casts armed four real cooldowns in both halves, the control kept all four after its Rewind and the Haste half kept all four before / cleared all four after — and each half then PRESSED a skill, spending 0 mana before and 7 after, because `useSkill` returns at its cooldown gate *before* it spends anything. **First row found by the READ-NEVER-WRITTEN half of the field sweep**, which this plan records as never having been worked: `p.cds (2 reads, first at line 11644)`, both of them that one line. Photographed as a true A/B — `_shot/out/haste-cooling.png` counting 1.4 / 5.9 / 9.6 / 16.4 under the REWIND floater against `_shot/out/haste-ready.png` with four lit buttons at the same instant. Chronomancer suite 4 pass / 0 fail either side |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
@@ -525,11 +526,39 @@ blocked on a number, a unit or a mechanic that does not exist. `KNOWN_DEAD` is a
 BOTH directions, so this step cannot silently stop describing the game: a newly dead passive fails the
 gate, and a passive that becomes wired fails it too until the list is updated.
 
+**EVERY COUNT ABOVE IS FOUR SHORT, AND THE AUDIT NEVER SAW THOSE FOUR AT ALL — found and fixed
+2026-08-12 (pass 30).** `CLASS2` holds **128** passives, not 124: sixteen classes × four passive ranks
+× two options, which is the arithmetic this step's own test comment had already written down beside an
+assertion that accepted 124. `passivesOf`'s entry regex required SINGLE quotes on both `n:` and `d:`,
+and four passive names contain an apostrophe and are therefore written in double quotes — **Death's
+Favor** (`x_favor`), **Guardian's Will** (`pal_will`), **Predator's Rhythm** (`bst_rhythm`) and
+**Alpha's Authority** (`bst_authority`). Skipped in silence, every run since the audit was written.
+
+**Under-counting is the small half.** A skipped entry is not merely absent from a total — it is
+outside the `KNOWN_DEAD` ratchet's reach entirely, so any of those four going dead would have left the
+gate green with nothing to say. All four happen to be wired today (`x_favor` in the elite-hit and
+elite-kill riders, `pal_will` in `hurtPlayer`, `bst_rhythm` on the basic attack, `bst_authority` in
+`beastCommandPower` and the companion's splash), which is luck rather than a guard: the audit could not
+have told anyone otherwise. Corrected state, from the run's own printed line: **`128 total, 102 wired,
+26 dead`** — the dead list is unchanged, so nothing about section E moves.
+
+Found by a static sweep this plan had not asked for and should: **every `c2Passive('<id>')` literal in
+the game checked against the ids `CLASS2` actually defines.** Those four came back as ids the game
+guards on and the audit had never heard of, which is only possible if the audit's parse is incomplete.
+The check costs no launch and is worth re-running after any kit change; the reverse direction (an id
+guarded that CLASS2 does *not* define) would be a permanently-false guard, and there are none today.
+
+Both halves of the fix are asserted to DISAGREE with the version they replace, the rule
+`harness/test/gate.test.js` sets: the old single-quote-only regex is transcribed into
+`harness/test/passives.test.js` and asserted to miss the double-quoted entry, and the real-game floor
+is no longer `>= 100` — it is the arithmetic itself, per class as well as in total, because an
+aggregate floor cannot tell a parser that lost four entries from one that never had them.
+
 **The stat-snapshot half of Step 2 is still the open piece, and it is now the cheap one.** It was
-deferred because 124 passives × two game states does not fit in any run; against 98 wired ones with a
-reader to exercise it is a different size of job. Sections H and N are the standing argument for
-doing it: `nin_swift` and `nin_combo` were both counted wired throughout, and both were wired to a
-condition that never came true.
+deferred because 128 passives × two game states does not fit in any run; against 102 wired ones with a
+reader to exercise it is a different size of job. Sections H, N and O are the standing argument for
+doing it: `nin_swift`, `nin_combo` and `chr_haste` were all counted wired throughout, and all three
+were wired to a condition that never came true.
 
 ---
 

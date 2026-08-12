@@ -81,7 +81,7 @@ Even with the flap fixed, `git checkout -- .` is the wrong answer to a red gate:
 **Files:**
 - Modify: `autopilot.ps1`
 
-- [ ] **Step 1: Replace the destructive revert with a stash**
+- [x] **Step 1: Replace the destructive revert with a stash** — done in a supervised session, 2026-08-12.
 
 Find the GREEN GATE block. Replace `git checkout -- .` with a stash that keeps the work:
 
@@ -91,11 +91,11 @@ git stash push -u -m "autopilot gate-red $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 
 The `':(exclude).claude/'` is not optional — `-u` sweeps untracked files and the permission allowlist lives there. That mistake took the autopilot down for fourteen consecutive runs once already.
 
-- [ ] **Step 2: Say so loudly**
+- [x] **Step 2: Say so loudly** — done. The gate's own REGRESSION/GATE:/FAIL lines go to the log, then the stash name.
 
 Log the stash name and the gate's own failure lines, so a red gate leaves a readable trail rather than a silent revert.
 
-- [ ] **Step 3: Verify** — **BLOCKED, and the block is one permission. Measured 2026-08-12.**
+- [x] **Step 3: Verify** — **UNBLOCKED, and verified.** `PARSE CLEAN`, exit 0.
 
 ```powershell
 powershell -NoProfile -Command "$errs=$null; [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path autopilot.ps1),[ref]$null,[ref]$errs); if($errs.Count){$errs}else{'PARSE CLEAN'}"
@@ -103,29 +103,28 @@ powershell -NoProfile -Command "$errs=$null; [System.Management.Automation.Langu
 
 Expected: `PARSE CLEAN`.
 
-**An unattended run cannot execute this.** `powershell` is not on the autopilot's permission
-allowlist in any form — even `powershell -NoProfile -Command "1+1"` comes back
-*"This command requires approval"* — so a run can edit `autopilot.ps1` and then has no way to check
-that what it wrote still parses. There is no substitute: `node tools/gate.js` parses `index.html` and
-the ES modules, and nothing in this repo parses PowerShell.
+**This was blocked and is now unblocked.** `powershell` was not on the allowlist in any form, so a
+run could edit `autopilot.ps1` and had no way to check it still parsed — and an unparseable
+`autopilot.ps1` stops the automation completely, unattended, on the next scheduled run. The run that
+hit this wrote Steps 1–2 and then correctly REVERTED them unverified.
 
-**Steps 1 and 2 were written in full on 2026-08-12 and then REVERTED unverified**, per this repo's
-standing rule that unverifiable work is worse than no work. The stakes are why the rule wins here
-rather than being argued with: an `autopilot.ps1` that does not parse stops the automation
-completely, and it would do so on the next scheduled run, unattended, with the previous run's log
-already written and green. What was reverted is one `$gateOut = & node harness/run-all.js 2>&1`, a
-`Where-Object` filter for the gate's own `REGRESSION|GATE:|FAIL` lines into `Log`, and the same
-`git stash push -u -m … -- . ':(exclude).claude/'` the killed-run guard at line 130 already uses.
+The fix is **not** the obvious one. Allowlisting `powershell -NoProfile -Command` is arbitrary code
+execution and walks straight around the deny list that keeps this automation off `main` — a denied
+`git push origin main` is one `powershell -Command "git push origin main"` away. Instead
+`tools/psparse.ps1` is a committed, parse-only script, and the allowlist entry points at that file.
+It cannot run what it is given because it is never given anything to run, only a path to read.
+Validated both ways: `PARSE CLEAN` exit 0 on a good file, `PARSE ERROR line 1` exit 1 on a broken one.
 
-**Two ways to unblock it, both Oliver's and both one line:**
-1. Add `powershell -NoProfile -Command` to `.claude/settings.json`'s allow list, after which an
-   autopilot run can take this task normally; or
-2. apply Task 2 in a supervised session, where the parse check runs by hand.
+Future tasks editing `autopilot.ps1` verify with:
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/psparse.ps1 autopilot.ps1
+```
 
 A comment recording this now sits at the `git checkout -- .` site itself (`autopilot.ps1:239`), so
 the next run finds it where the hazard is rather than only in this plan.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** — done.
 
 ```bash
 git add autopilot.ps1
@@ -157,7 +156,7 @@ Start-ScheduledTask -TaskName 'Bladefall Autopilot'
 
 Then read the tail of `_autopilot.log` and confirm a summary line was produced.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** — done.
 
 ```bash
 git add autopilot.ps1

@@ -6,6 +6,7 @@
       "Bash(node _shot/slice.js:*)",
       "Bash(node --check:*)",
       "Bash(node --test:*)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File tools/psparse.ps1:*)",
       "Bash(node harness/run-all.js)",
       "Bash(node harness/test-skills.js:*)",
       "Bash(node harness/test-levels.js:*)",

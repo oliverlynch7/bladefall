@@ -326,6 +326,35 @@ difficulty call on the final boss, not because a number is missing; `e.petTauntT
 read-never-written half has not been worked at all, and `CLASS_BASIC` is now 4 for 12 on identities
 that did not work — the other eight have never been checked against what they claim.
 
+**AND A SWEEP NOBODY HAD RUN AT ALL GAVE SECTION R, 2026-08-12: the RANK-1 INNATE CARD of every
+class, read against `effPower`.** Section Q read every passive card against its reader; section J read
+every rewritten skill against its card. The innate — the first thing a player reads about a class, and
+the only card they cannot decline — had been read by nobody, and it holds five rows.
+
+`INNATE_FOLD` (3691) stripped "a flat +8-12% damage" from fourteen classes and applied the average to
+everyone, and its own note says net damage is unchanged. **That is true of a FLAT bonus and false of a
+CONDITIONAL one**, and five of the cards are conditional: "magic weapons deal +8%", "while wielding a
+holy weapon, +12%". Folding a weapon INCENTIVE into a flat bonus for everybody pays a Paladin the same
+whether he carries a holy weapon or not, while the card still advertises it.
+
+**Two of the five left a fossil, which is what makes it measured rather than argued:** `const holy`
+(3708) and `const blade` (3716) are each computed and used by NOTHING — the condition survived, the
+clause it gated did not. **Neither is reachable from `harness/audit-fields.js`**, which sweeps object
+properties and not local variables, so nothing this sub-project owns could have found them. Five other
+classes KEPT theirs (warlock, chronomancer, skylancer, monk, bladedancer, and the reaper's in
+`effLifesteal`), which is the control: the fold was applied by hand and unevenly, not by a rule.
+
+Two further findings in the same read. **The mage's card says the opposite of what the mage does** —
+"restore 2 mana whenever a basic attack hits" against `CLASS_BASIC.mage`, which SPENDS 6 (12 with
+Potent Weave); the only `gainMana(p,2)` in the file is the reaper's kill rider. And **not one of the
+twelve `CLASS_BASIC` identities is named on any rank-1 card**, so the warrior's Momentum is first
+mentioned at RANK 7, by a passive that promises to keep stacks the player has never been told exist.
+
+All of it is Oliver's, and it is section J's shape and size — a sentence per row, not a number.
+**The method is worth more than the rows: the tell for a dropped clause is a local variable computed
+and never used inside a class branch**, which is a shape neither the passive audit nor the field sweep
+can see. Re-run it after any balance pass; `docs/SKILL_TRIAGE.md` section R says how.
+
 **THE READ-NEVER-WRITTEN HALF IS NOW WORKED, 2026-08-12, and it gave pass 29 (section O) — the
 chronomancer's Haste, whose whole implementation named `p.cds`, an array this game does not have.**
 Over `p.` and `e.`, once the DOM-event noise is set aside (`e.clientX`, `e.preventDefault`, `p.catch`

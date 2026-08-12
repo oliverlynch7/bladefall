@@ -2394,6 +2394,90 @@ were swept this way (warrior, mage, warlock, bladedancer — the four least work
 plus a targeted read of the pirate. **The other eleven classes have NOT been swept**, so this table is
 a floor and not a total. Mage and warlock came back clean, which is why they are not in it.
 
+## R. THE INNATE FOLD KEPT THE FLAT BONUSES AND DROPPED THE CONDITIONAL ONES — five classes, Oliver's
+
+**Found 2026-08-12 by reading each class's RANK-1 INNATE CARD against `effPower`, which is a sweep
+this document had never run.** Section Q read every *passive* card against its reader and section J
+read every *rewritten skill* against its card. The innate — the first thing a player reads about a
+class, and the only card they cannot decline — had been read by nobody.
+
+`index.html:3691` states the refactor in its own words: *"Fourteen of sixteen innate traits opened
+with a flat +8-12% damage — a bonus every class had, which therefore distinguished none of them…
+The percentages are stripped from the class blocks below and their average lives here instead,
+applied to everyone. Net damage is unchanged."* `INNATE_FOLD = 1.09`, and it is applied to every
+class in `effPower`.
+
+**The premise is true of a FLAT bonus and false of a CONDITIONAL one, and five cards are conditional.**
+"Magic weapons deal +8%" and "While wielding a holy weapon, deal +12%" are not bonuses every class
+had — they are weapon INCENTIVES, and folding them into a flat 1.09 for everybody pays a Paladin the
+same whether he carries a holy weapon or not. The card still advertises the incentive. Net damage is
+unchanged only while you happen to hold the right weapon; off-weapon you now get *more* than the card
+promises, on-weapon you get *less*.
+
+**Two of the five left a fossil, and that is what makes this measured rather than argued.**
+
+```
+3708  if(meta.classId==='paladin'&&…){ const holy=!!(p.weapon&&p.weapon.el==='holy');
+                       // Holy Power
+                                // Burning Light
+                      // Blessed Blade
+        if(classState('paladin').rank>=10)v*=1.10; }
+3716  if(meta.classId==='ninja'&&…){ const blade=p.weapon&&(p.weapon.art==='dagger'||p.weapon.art==='sword');
+```
+
+`holy` and `blade` are each computed and then **used by nothing** — the condition survived, the clause
+it gated did not. Neither is reachable from `harness/audit-fields.js`, which sweeps object properties
+and not local variables, so nothing this sub-project owns could have found them.
+
+| class | its rank-1 card | what `effPower` does | verdict |
+|---|---|---|---|
+| paladin | "While wielding a **holy weapon**, deal +12% damage and heal for 2% of the damage you deal." | `const holy` computed, never used (3708). **The heal half IS implemented** — 2% on holy-weapon hits at 10858, 3% at rank 10 | HALF gone, and the fossil says which half |
+| ninja | "**Daggers and swords** deal +8% damage and you move 8% faster." | `const blade` computed, never used (3716). The move speed IS there (`effSpeed`, unconditional) | the weapon clause gone |
+| mage | "**Magic weapons** deal +8% damage and restore 2 mana whenever a basic attack hits." | the branch is still GATED on `sch==='mag'` and contains only rank-10 and `m_potent` (3707) — the gate outlived its clause | gone, **and see the mana row below** |
+| necromancer | "**Magic weapons** deal +8% damage…" | branch holds rank-10 and nothing else, and no weapon gate at all (3713) | gone |
+| stormcaller | "**Magic weapons** deal +8% damage…" | branch holds rank-10 and nothing else (3726) | gone |
+
+**FIVE CLASSES KEPT THEIRS, AND THEY ARE THE CONTROL THAT MAKES THIS A FINDING RATHER THAN A THEORY.**
+warlock `sch==='mag'` ×1.12 (3729), chronomancer ×1.08 (3746), skylancer ranged ×1.10 (3732), monk
+fist ×1.15 (3721), bladedancer blade ×1.18 (3735), and the reaper's scythe clause lives in
+`effLifesteal` (3758). So the fold was applied by hand and unevenly, not by a rule that could be
+re-run. The berserker is the model of it done right: its branch carries
+`// Bloodrage's flat 8% folded; the LOW-HP half stays, because that half is the class` and the
+`p.hp < effMaxHp(p)*.5 → ×1.15` beside it, so the flat half went and the conditional half stayed.
+
+### THE MAGE'S CARD SAYS THE OPPOSITE OF WHAT THE MAGE DOES
+
+Separate from the fold and worse than it. The card: *"…and restore **2 mana** whenever a basic attack
+hits."* `CLASS_BASIC.mage` is **Overcharge**, and it **SPENDS** 6 mana on every basic hit — 12 with
+Potent Weave — for ×1.35 damage. Traced rather than assumed: the only `gainMana(p,2)` in the file is
+the **reaper's** kill rider (10254), and the mage's own comment two lines away calls Overcharge *"the
+only class whose ordinary attack has a resource decision inside it — a Mage holding mana for a skill
+is choosing to punch softer."* A player reading the rank-1 card is told the resource moves the other
+way.
+
+### AND CLASS_BASIC'S IDENTITIES ARE ON NO CARD AT ALL
+
+The wider half, and it is `docs/VISION.md`'s priority #2 directly. The fold's own note says the
+identities that replace the stripped percentages *"ship in `CLASS_BASIC`"* — Momentum, Chain, Blood
+Price, Overcharge, Oath, Unseen, Harvest, No Brakes, Flow, Distance, Powder and Steel, Air. **Not one
+of them is named on the rank-1 card the player picks the class from.** The clearest case: the
+warrior's Momentum is never mentioned until **rank 7**, where Bloodlust promises *"A kill keeps your
+Momentum stacks instead of resetting them"* — to a player who has never been told what a Momentum
+stack is.
+
+**Every row here is Oliver's, and for this document's usual reason turned up one rank earlier.** No
+number needs inventing to restore the five dropped clauses — each card states its own — but doing so
+gives five classes a damage bonus they have not had for weeks, which is a balance change. Editing the
+cards to match instead is the move this document forbids everywhere else. And writing the twelve
+`CLASS_BASIC` identities onto their own cards is the best of the three and is a WRITING job: sixteen
+sentences, in his voice, about what each class is. Same shape and same size as section J — one
+sentence per row, not one number.
+
+**How to re-run it:** read every `innate:{…d:'…'}` in `CLASS2` against its `meta.classId==='<cls>'`
+branch in `effPower` / `effAtkSpeed` / `effSpeed` / `effLifesteal`. No launch, no GPU. The tell for a
+dropped clause is a **local variable computed and never used** in the branch — that is how both
+fossils were caught, and it is a shape neither the passive audit nor the field sweep can see.
+
 ## Not listed here, and why
 
 - **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: a limit of the

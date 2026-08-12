@@ -246,6 +246,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 25 | **H — the ninja's Unseen never armed** | this run | `harness/probes/unseen.probe.js`, THREE halves in one launch with FOUR trials each: all three halves read `stillT 0` after 1.2s of the game's own ticks at a drift of 0 and repositioned nobody before; after, the live halves move the body 101 units to `distAfter 41` = `wanted 41` on the far side of the target for 8 damage against the base 6, the 0.7s trial fires ONLY in the half holding Swift, the walking trial fires in no half, and the inert half — `_stillT` pinned at 0, which is exactly the shipped state — fires nowhere. **Not a dead passive: a live mechanic gated on a clock that only ran for the mage**, so the passive audit had reported the class at 0/8 dead throughout while two of its cards were written about a clock that never advanced. The second instance of the limit Task 3 Step 2 states in advance, after `w_unyield`, and the worse of the two. Photographed at `_shot/out/unseen-strike3.png` |
 | 26 | **I — the necromancer's Harvest deleted the corpse it announced** | this run | `harness/probes/harvest.probe.js`, THREE halves in one launch with THREE trials each: five hits gave `added 1, survived 0, risen 2` before and `1 / 1 / 1` after, four hits found no corpse in any half either side, and a corpse from a KILL raised correctly in every half both ways — so the control's zeros are real zeros. **The bar is the game's own discriminator**: `necro_raise` raises ONE fighter off a corpse and falls back to TWO without one, so a plain "did a minion appear" test would have gone green against the shipped game on the fallback alone. The known-bad half reads identically to the before-run's live half. Found by a static sweep for the section H shape, not from the triage list — section E is floored and this is what the plan says to hunt instead |
 | 27 | **L — the Beastmaster's companion never took the order** | this run | `harness/probes/petorder.probe.js`, THREE halves in one launch with TWO trials each (ordered, and a no-order control that must hold in every half): the pet was 525 from the aimed foe and 33 from the one beside it, and is now 31 and 463, with the damage moving with it (aimedLost 0 → 55, nearLost 55 → 0) — while the no-order control reads 35 / 527 in all three halves, so this is a retarget and not a pet that now always charges the reticle. The known-bad half reads identically to the before-run. **Three faults stacked, and the outer one hid the other two: `aimTarget()` was called with NO ARGUMENTS**, threw on `undefined.yaw` into the hook's own catch, and killed the whole hook including the SIC EM the player is shown — so the dead `orderX/orderZ/orderT` and the wrong-field `atkCd` had never had a chance to matter. Found by the widened sweep this same run, not from the triage list. Beastmaster suite 6 pass / 0 fail / 0 unproven |
+| 28 | **N — the chronomancer's Haste reset an array that does not exist** | this run | `harness/probes/chrhaste.probe.js`, THREE halves in one launch, each loading all four cooldowns by CASTING through the game's own `useSkill` and then taking a real killing blow: control 1.5/6/9.75/16.5 unchanged, the passive half 1.3/5.2/8.45/14.3 → **0/0/0/0**, the known-bad half (the shipped line run verbatim) unchanged — with `rewound` true in all three off the game's own `G._rewUsed`. `p.cds` has never existed; the array is `p.skillCd`. **The passive audit has called `chr_haste` wired all along**, because `effCdr` (3766) also reads it for a flat +10% CDR the card does not mention — so this is section H's shape and it was found the way the plan says to hunt it, by the field sweep's **read-never-written half**, which nothing had worked before. That half is two rows long for `p.` and the other is a `catch` binding. Photographed at `_shot/out/chrhaste-bar.png` (four lit slots, no wheels) against `chrhaste-after.png` (1.4/5.9/9.7/16.4 still counting). Chronomancer suite 4 pass / 0 fail after, which is where pass 18 left it — and it is stated rather than claimed as an A/B, because the death save is not a code path `test-skills.js` can reach: its bench never dies |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
@@ -317,6 +318,29 @@ difficulty call on the final boss, not because a number is missing; `e.petTauntT
 **Where the next run should look:** the sweep's `*` mode is unratcheted and only eyeballed once. Its
 read-never-written half has not been worked at all, and `CLASS_BASIC` is now 4 for 12 on identities
 that did not work — the other eight have never been checked against what they claim.
+
+**THE READ-NEVER-WRITTEN HALF WAS WORKED, 2026-08-12, and it held exactly one bug — pass 28, the
+Chronomancer's Haste** (`docs/SKILL_TRIAGE.md` section N). Worth recording how SHORT that half is,
+because it is the opposite of the written-never-read half's size and it is the reason this was cheap:
+`p.` returns **two** rows and the other one is `p.catch` — the audio code's `const p = a.play()`, a
+Promise borrowing the player's letter, which is the receiver ambiguity the sweep's header warns of;
+`G.` and `G.pet.` return **none
+at all**; `e.` returns sixteen of which fourteen are DOM event properties (`e.clientX`,
+`e.preventDefault`) because the file's event handlers also name their parameter `e`. So the whole
+half is three real candidates, and the sweep is not going to hand over another one.
+
+Two things it left behind, and neither is a skill row:
+- **`e.dmg2`** (13432) — the Ember Totem's eruption shockwave reads `e.dmg2||12` and nothing in the
+  file ever sets `dmg2`, so every eruption in the game does the fallback 12. No card promises a
+  number here, so this is `p.soulStrengthT`'s shape rather than Haste's: the honest fix is either
+  a stat on the archetype or deleting the field, and both are **Oliver's**.
+- **`e._iansSplash` was a FALSE row, and the false one is the finding** — it is written twice, as
+  `e2._iansSplash`, and `audit-fields.js` could not see any property access on an identifier ending
+  in a digit. Fixed the same run with the two cases asserted to disagree; see section N's last
+  paragraph for why that direction is the dangerous one.
+
+So the remaining named leads are `CLASS_BASIC`'s eight unchecked identities and the unratcheted `*`
+mode, and the sweep is now spent as a source of new `p.`/`G.` rows.
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —

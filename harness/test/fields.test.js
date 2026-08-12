@@ -10,7 +10,7 @@ import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { auditFields, stripNonCode, literalKeys, lineOf } from '../audit-fields.js';
+import { auditFields, stripNonCode, literalKeys, lineOf, numericDot } from '../audit-fields.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GAME = path.join(ROOT, 'public', '3d', 'index.html');
@@ -105,6 +105,32 @@ test('A READER UNDER A DIFFERENT RECEIVER STILL COUNTS — and the receiver-rest
      _headlongT in the source above — the write. So it saw zero readers and called it dead. */
   const restricted = (src.match(/(?<![A-Za-z0-9_$.])p\._headlongT/g) || []).length;
   assert.strictEqual(restricted, 1, 'the restricted form must see only the write — else this proves nothing');
+});
+
+/* The third real-game correction, and the third one to fail in the ACCUSING direction. The game
+   reaches a SECOND body of the same kind by adding a digit — `e2` beside `e` — and the lookbehind
+   that stopped `1.5` reading as a property called `5` made every one of those accesses invisible. */
+test('A RECEIVER ENDING IN A DIGIT IS STILL A RECEIVER — and the old lookbehind disagrees', () => {
+  const src = `
+    function splash(e){ if(!e._iansSplash) for(const e2 of all()){ e2._iansSplash = 1; hit(e2); e2._iansSplash = 0; } }
+  `;
+  const r = auditFields(src, 'e');
+  assert.deepStrictEqual(names(r.readNeverWritten), [],
+    '_iansSplash is written twice as e2._iansSplash and must not be accused');
+  /* The version this replaced: `(?<![0-9.])` in front of the dot. There are three uses of the field
+     in the source above and it can only see the one whose receiver has no digit in it — the read. */
+  const old = src.match(/(?<![0-9.])\.\s*_iansSplash/g) || [];
+  assert.strictEqual(old.length, 1, 'the old form must see only the read — else this proves nothing');
+});
+
+test('a number is still not an object — 1.5 and 1.5.toFixed are rejected', () => {
+  assert.strictEqual(numericDot('a = 1.5.toFixed(2)', 'a = 1.5'.length), true);
+  assert.strictEqual(numericDot('for(const e2 of x) e2.hp = 1', 'for(const e2 of x) e2'.length), false);
+  assert.strictEqual(numericDot('foo().bar', 'foo()'.length), false);   // no token at all
+  /* And the widened `*` mode must still not invent a field out of a decimal: `2.5` contributes
+     nothing, while the method call on a named value is seen. */
+  const rows = names(auditFields(`const q = 2.5; const s = hp.toFixed(1);`, '*').rows);
+  assert.deepStrictEqual(rows, ['toFixed']);
 });
 
 test('a field built in an object literal is separated out, not accused', () => {

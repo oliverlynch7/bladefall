@@ -1796,6 +1796,88 @@ should be read as **five** fields, not four.
 set it to 0.4 and nothing reads it. No card in the game promises a spin, so this is `_vanish`'s shape
 rather than Unseen's — recorded only so the next sweep does not spend a launch on it.
 
+## N. THE CHRONOMANCER'S HASTE RESET A COOLDOWN ARRAY THAT DOES NOT EXIST — **FIXED 2026-08-12**
+
+Chronomancer rank-3 option b (`index.html:2154`): *"Rewinding resets every skill cooldown."*
+The death save answered it in one line, and the line asked the wrong object for the wrong field:
+
+```js
+if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
+```
+
+**`p.cds` has never existed.** The player's cooldowns are `p.skillCd`, built in `newG` (3642) as
+`skillCd:[0,0,0,0]` and used by every other line in the file that touches one — the Warlock capstone
+(10207), the Reaper capstone (10246), Rhythm (10782), the Bladedancer capstone (11507), the guard in
+`useSkill` (10580), the load at 10631 and the per-frame decrement at 13001. So `p.cds &&`
+short-circuited, the loop body never ran once, and a Chronomancer who took Haste rewound with every
+cooldown exactly where it was. Measured live: `hasCds: false`.
+
+### Why nothing found it, which is the part worth keeping
+
+`harness/audit-passives.js` asks *"does anything outside the choice menu mention this id"*, and
+`chr_haste` is mentioned **twice**: here, and in `effCdr` (3766), where it also grants a flat +10%
+cooldown reduction. So the passive audit has called this passive wired for its whole life while the
+half its CARD is about did nothing — the same shape as section H (the ninja's Unseen, mentioned
+everywhere and gated on a clock that only ran for the mage), and the reason
+`docs/superpowers/plans/2026-08-10-skill-correctness.md` says to stop hunting section E and hunt this.
+
+**It was found by the field sweep's READ-NEVER-WRITTEN half**, which until this run had never been
+worked at all. `p.cds`: two reads, zero writes, in a receiver whose other ~170 fields all have both.
+That half of `harness/audit-fields.js` output is two rows long for `p.`, and the other row is
+`p.catch` — the audio code's `const p = a.play()`, a Promise borrowing the player's letter. So this
+was a two-line list containing exactly one bug.
+
+*The +10% CDR in `effCdr` is left exactly as it is.* The card does not mention it, so it is either a
+second undocumented clause or a stale one, and both readings are section J's shape — a card and its
+code that disagree about which is newer. **Answering that is Oliver's**, and it is a sentence rather
+than a number.
+
+### How it was measured — `harness/probes/chrhaste.probe.js`, three halves in one launch
+
+Two halves would not have separated the fix from the rewind, because the rewind is a big loud event
+that restores position, health and (with Potent) mana on the same frame. So each half loads all four
+cooldowns **by casting through the game's own `useSkill`**, never by assignment, and then takes a real
+killing blow through `hurtPlayer`; every half asserts `rewound` off the game's own `G._rewUsed`
+counter, so a cooldown reading can never be a rewind that silently did not happen.
+
+| half | rank-3 pick | cooldowns loaded | after the rewind |
+|---|---|---|---|
+| control | `chr_potent` (a-side, same rank, same event, nothing to do with cooldowns) | 1.5 / 6 / 9.75 / 16.5 | **unchanged** |
+| **haste** | `chr_haste` | 1.3 / 5.2 / 8.45 / 14.3 | **0 / 0 / 0 / 0** |
+| inert | `chr_potent`, then the SHIPPED line run verbatim on the live player | 1.5 / 6 / 9.75 / 16.5 | **unchanged** |
+
+`ok:false` before the fix with all three halves reading identically; `ok:true` and
+`okAgainstInert:false` after. The `inert` half is the permanent known-bad — the dead line transcribed
+character for character and fed to the identical bar as if it were the fix — so nobody has to break
+the repo to watch this assertion fail, which is the idiom `bounty.probe.js` established.
+
+**The haste half's cooldowns load LOWER than the other two halves (1.3 against 1.5), and that is a
+corroboration rather than noise:** it is `effCdr`'s +10%, which is the *other* half of `chr_haste`,
+and it proves the pick took effect in the half that claims it.
+
+**Photographed**, and this is a row where a still frame can settle it: `_shot/out/chrhaste-bar.png`
+shows all four skill slots lit and ready with no cooldown wheels, against `chrhaste-after.png` taken
+at the same camera in the same run with the `inert` half last — `1.4 / 5.9 / 9.7 / 16.4` still
+counting down.
+
+Chronomancer suite **4 pass / 0 fail** after, which is where pass 18 left it. Said plainly rather
+than presented as an A/B: `test-skills.js` cannot reach this code path at all, because its bench
+never dies, so its verdict could not have moved whether this was fixed or broken. That is pass 1's
+lesson in a new place — a triage row can contain a fault the suite has no way to see, and waiting for
+a green light that cannot change is how a real bug gets left alone.
+
+### The HARNESS finding this turned up, which is NOT about the game
+
+`e._iansSplash` was reported in the same sweep as read-never-written, and it is not: it is written
+twice on `index.html:10845`, as `e2._iansSplash`. **`audit-fields.js`'s usage regex carries
+`(?<![0-9.])` to avoid matching the `.5` of a number literal, and that lookbehind also makes every
+property access on an identifier ENDING IN A DIGIT invisible to it** — `e2.`, `p2.`, `w1.`. It fails
+in the accusing direction, which is the one direction the sweep's own header says it must never fail
+in: a field written only as `e2.foo` and read as `e.foo` reads as never-written, and the mirror case
+(written `e.foo`, read only `e2.foo`) would be announced as a **dead field that is not dead**. See
+`harness/audit-fields.js` for the fix and `harness/test/fields.test.js` for the two cases asserted to
+disagree.
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

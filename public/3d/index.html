@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.936.0-autopilot';
+const VERSION3D='1.937.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11628,7 +11628,17 @@ function hurtPlayer(dmg,sx,sz,by){
     if(c2Passive('chr_potent') && back.mana != null) p.mana = Math.max(p.mana||0, Math.min(p.maxMana||100, back.mana));   // Potent: the mana you had three seconds ago comes back with you
     p.vx = 0; p.vz = 0;
     p.invuln = Math.max(p.invuln||0, c2Passive('chr_ward') ? 3 : 1.2);   // Time Ward: three seconds untouchable
-    if(c2Passive('chr_haste')){ for(let i=0;i<4;i++) p.cds && (p.cds[i]=0); }   // Haste: every cooldown reset
+    /* HASTE (chronomancer r3 b): "Rewinding resets every skill cooldown." The array is `p.skillCd`
+       (newG, 3642) and this line asked for `p.cds`, which no line in the file has ever created - so
+       `p.cds &&` short-circuited and the loop body never ran once. Fixed 2026-08-12; nothing is
+       invented, the card says every cooldown and the only edit is the name of the array, which is
+       the one every other cooldown-touching line already uses (10207, 10246, 10782, 11507, 13001).
+       Found by the field sweep's read-never-written half (`p.cds`, two reads, zero writes) and NOT
+       by audit-passives.js, which has called `chr_haste` wired all along because effCdr (3766) also
+       reads it for a flat +10% CDR the card does not mention. Measured either way in one launch,
+       harness/probes/chrhaste.probe.js. No skillbarUpdate() here on purpose: skillCoolPaint runs
+       every frame off this same array (13002), the way the other four reset sites rely on. */
+    if(c2Passive('chr_haste') && p.skillCd){ for(let i=0;i<4;i++) p.skillCd[i]=0; }
     p._rew.length = 0;
     addText(p.x, p.y + 56, p.z, 'REWIND', '#c9a6ff', true);
     try { burst(p.x, p.y+20, p.z, '#c9a6ff', 18); SFX.magic && SFX.magic('void'); G.slowmo = 0.5; } catch(err){}

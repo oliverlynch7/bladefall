@@ -130,6 +130,26 @@ function isWrite(code, start, end){
   return false;
 }
 
+/* Is the dot at `i` the decimal point of a NUMBER rather than a property access?
+
+   This replaces a `(?<![0-9.])` lookbehind, and the lookbehind was wrong in the one direction this
+   sweep must never be wrong in. It was there to stop `1.5` reading as a property called `5` - which
+   the capture group already prevents, since a property must start with a letter, `_` or `$` - and its
+   side effect was that EVERY property access on an identifier ending in a digit was invisible:
+   `e2.`, `p2.`, `w1.`. The game does that (`index.html:10845` writes `e2._iansSplash` twice), so
+   `e._iansSplash` was reported as read and never written when it is both. The mirror case is the
+   dangerous one: a field written as `e.foo` and read only as `e2.foo` would be announced as DEAD.
+
+   `1.5.toFixed(2)` still has to be rejected, so the rule is the token itself and not the one
+   character before it: scan back over the identifier characters and reject only when what is there
+   is all digits. `e2` has a letter in it; `5` does not; `).foo` and `].foo` have no token at all. */
+export function numericDot(code, i){
+  let k = i - 1;
+  while(k >= 0 && /[A-Za-z0-9_$]/.test(code[k])) k--;
+  const tok = code.slice(k + 1, i);
+  return tok.length > 0 && !/[A-Za-z_$]/.test(tok);
+}
+
 /* Property names that appear as object-literal keys anywhere. A field created by `{taunt:1}` has no
    `x.taunt =` to find, so without this every literal-built field reads as never-written - which for
    `G.` is most of them, since newG builds the whole run state as one literal. */
@@ -161,7 +181,7 @@ export function auditFields(src, receiver){
      DOM is full of legitimately write-only properties (`el.textContent`, `canvas.width`,
      `style.opacity`), which the browser reads and this file never does. */
   const mine = receiver === '*'
-    ? /(?<![0-9.])\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g
+    ? /(?<!\.)\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g
     /* A dotted receiver is allowed and is not a nicety: `G.pet.orderX` is reached under NEITHER `G`
        nor `pet` — the first stops at `pet`, and the second is rejected by the lookbehind because a
        dot precedes it. The Beastmaster's dead order fields live exactly there. */
@@ -169,13 +189,15 @@ export function auditFields(src, receiver){
   const fields = new Map();
   let m;
   while((m = mine.exec(code))){
+    if(receiver === '*' && numericDot(code, m.index)) continue;
     if(!fields.has(m[1])) fields.set(m[1], { field: m[1], writes: [], reads: [] });
   }
   /* Second pass over the whole file, receiver-agnostic, for exactly the fields found above. */
-  const any = /(?<![0-9.])\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g;   // any receiver; not `1.5`, not `a..b`
+  const any = /(?<!\.)\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g;   // any receiver; not `1.5`, not `a..b`
   while((m = any.exec(code))){
     const rec = fields.get(m[1]);
     if(!rec) continue;
+    if(numericDot(code, m.index)) continue;
     (isWrite(code, m.index, m.index + m[0].length) ? rec.writes : rec.reads).push(m.index);
   }
   const rows = [...fields.values()].map(r => ({

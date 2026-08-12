@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.934.0-autopilot';
+const VERSION3D='1.935.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11394,7 +11394,14 @@ const CLASS_BASIC = {
     p._harv = (p._harv || 0) + 1;
     if(p._harv >= 5){
       p._harv = 0;
-      try { (G.corpses = G.corpses || []).push({ x:e.x, z:e.z, y:e.y||0, t:0, raised:false }); } catch(err){}
+      /* t: 3.5, NOT 0. It was 0, and minionUpdate (11694) does `c.t -= dt` and keeps only `c.t > 0`,
+         so the body this hook announces was filtered out of G.corpses on the very next frame - the
+         'CORPSE' text below floated over nothing and Raise the Dead fell through to its corpseless
+         fallback every time. Measured, not read (harness/probes/harvest.probe.js): five hits gave
+         `added 1, survived 0, risen 2` before and `1 / 1 / 1` after, against a corpse from a KILL
+         that raised correctly in both. Nothing is invented - 3.5 is this same feature's own corpse
+         lifetime, from the kill path at 11024. */
+      try { (G.corpses = G.corpses || []).push({ x:e.x, z:e.z, y:e.y||0, t:3.5, raised:false }); } catch(err){}
       addText(e.x, e.y + e.h + 18, e.z, 'CORPSE', '#b06bff');
     }
   },

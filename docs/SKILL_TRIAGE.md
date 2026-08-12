@@ -401,6 +401,20 @@ runs on its own `p._slipT`, driving the identical velocity and nothing else, and
   reads exactly like a passive shoving on every swing, the very bug the spent trial exists to exclude.
   With the velocity zeroed the spent half is 0.
 
+**PHOTOGRAPHED at `_shot/out/slip-shove4.png`** — the pirate standing clear on the right, the grunt it
+shot on the left with its health bar down, and a second grunt as a RULER marking the spot it fired
+from. It took three renders to get one, and the two failures are worth recording because they are the
+harness's geometry rather than anything about the fix. Staged the way the measuring probe stages it —
+foe in front, along −z — the shove drives the hero directly AWAY from the camera, and `G.cam` is
+already hundreds of units behind (measured on that frame: hero z 493, cam z 65), so the foe ends up
+between camera and hero, low in frame, behind the ability bar. Both renders showed a healthy pirate
+alone in a healthy arena, which is a photograph of nothing. **`G.cam` does not catch up inside a probe,
+either, and that is the useful half:** 65 `update()` ticks moved it zero units, so the lerp lives in
+`render()`, which barely runs headless. So the fix is `--focus`, whose whole job is to snap `G.cam`,
+and which runs BEFORE `--eval` — the camera stays exactly where focus put it while the hero slides
+across the frame. `harness/probes/slippery-shot.probe.js` stages the foe SIDEWAYS for the same reason,
+so both bodies share a screen height.
+
 ### Swagger — the row that cannot be photographed, and the tolerance that had to be measured
 
 One clause in `effSpeed`, and both halves of it were already in the file. The multiplier is the Dread

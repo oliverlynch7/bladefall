@@ -223,10 +223,11 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 89 wired / 35 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 90 wired / 34 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
-`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye) and
-`pal_burn` (Burning Light) were wired 2026-08-11. See "Rows taken" at the end of this section.
+`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
+(Burning Light) and `sky_armor` (Sky Armor) were wired 2026-08-11. See "Rows taken" at the end of
+this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -256,7 +257,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 1 / 7 | Blessed Blade (~~Bounce Back~~, ~~Burning Light~~ wired 2026-08-11) |
-| skylancer | 2 / 8 | High Ground, Sky Armor (~~Hunter's Eye~~ wired 2026-08-11) |
+| skylancer | 1 / 8 | High Ground (~~Hunter's Eye~~, ~~Sky Armor~~ wired 2026-08-11) |
 | reaper | 1 / 7 | Crimson Harvest (~~Harvested Strength~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
 | warrior, mage, ninja, warlock, beastmaster | 0 | — |
@@ -355,6 +356,42 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **skylancer / Hunter's Eye** (`sky_eye`, r7 b) — "Attacking while falling drives you down onto the target." | 2026-08-11 | `harness/probes/skyeye.probe.js`, A/B in one launch, TWO strikes per half (one falling, one rising): all three halves −100 → −55 with no heading before; −360 at aim exactly 1.0 after, control and rising strikes unmoved, all four damage readings 168 |
 | **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
 | **paladin / Burning Light** (`pal_burn`, r5 b) — "Killing your Sworn target sets every enemy near it alight." | 2026-08-11 | `harness/probes/palburn.probe.js`, THREE halves in one launch, each carrying an UNSWORN kill and an out-of-radius foe as its own controls: nothing lit anywhere in the control or the known-bad half; 1 stack, heat 1293 and **139 HP burned** off the Sworn target's neighbour in the passive half, unsworn cluster and far foe untouched |
+| **skylancer / Sky Armor** (`sky_armor`, r9 b) — "Nothing can hit you in the first moment after a jump." | 2026-08-11 | `harness/probes/skyarmor.probe.js`, THREE halves in one launch, TWO hits per half from two fresh jumps: control 62 early / 62 late, passive **0 early** (invuln 0.18) / 62 late, known-bad 62 / 62 |
+
+### Sky Armor — the first row whose whole implementation is one field the game already returns on
+
+**No number was invented and no new kind of protection was added.** "Nothing can hit you" has exactly
+one meaning in this file: `hurtPlayer` does `if(p.invuln>0||p.dodgeTimer>0) return;` (11327) *before*
+any class clause, any brace, any shield. So the passive sets `p.invuln` and nothing else — it cannot
+interact strangely with `sky_soft`'s −15% or the rank-10 capstone, because it returns before either.
+"The first moment" is the player's own i-frame window, **0.18**, taken verbatim from the dodge
+fourteen lines below the jump handler, whose comment already explains why it is that length ("i-frame
+(0.18) sits JUST inside the dash (0.20) — timing has to be right"). Sky Armor is therefore a dodge you
+get by jumping, and the two windows can never drift apart.
+
+**It sits INSIDE the jump guard, which is the part worth keeping.** `input.jumpEdge` fires on every
+press; the block that consumes it only jumps when `p.onGround||p.jumps<p.maxJumps`. Granting the
+window on the edge rather than on the jump would turn the card into "press jump to be untouchable",
+which a Skylancer out of air jumps could hold down for the whole fight — a far worse bug than the
+dead passive, and one no single-hit bar would ever see.
+
+**THE WINDOW HAS TO CLOSE, and that is the assertion this probe is built around.** Each half jumps
+TWICE from a clean stance and takes one hit each time — once in the frame after lift-off, once 20
+frames (~0.33s) later. A wiring that made the class permanently untouchable after its first jump
+passes a naive one-hit bar. Measured: the passive half took 0 then **62**, the same 62 the control
+took, so a window was added rather than the damage being changed. The two hits are separate trials on
+purpose — `hurtPlayer` sets `p.invuln=0.7` on every hit that lands (11390), so measured in sequence
+the control's early hit would have swallowed its own late hit and the halves would not be comparable.
+
+**The jump is the game's own.** The probe sets `input.jumpEdge` and steps `update()`; it never writes
+`p.vy` or `p.invuln`. Sub-project A Task 5's rule — a probe that imitates the thing it measures passes
+against the bug it exists to catch — is the reason, and here it also happens to be what proves the
+guard above: `jumped` is read back off `p.onGround`/`p.vy` after the frame, in all six trials.
+
+*One thing this row changed outside itself:* `harness/probes/skyeye.probe.js` used `sky_armor` as its
+permanent known-bad because it was dead. Its bar is kinematic so it still came back false, but a
+known-bad naming a passive that now does something is a comment that has started lying. Swapped for
+`sky_high`, which is still dead.
 
 **Bounty Hunter is three clauses, so it is three readers, and the mark — not the passive — is what
 each of them is conditioned on.** The −8% is a class line in `hurtPlayer` beside the ninja's and the

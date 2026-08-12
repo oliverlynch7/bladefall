@@ -30,9 +30,13 @@
    must leave the body exactly as it found it, in both halves.
 
    PERMANENT KNOWN-BAD, carried in the probe rather than produced by breaking the repo: a third half
-   feeds `sky_armor` - another passive from docs/SKILL_TRIAGE.md section E, still dead - to the
+   feeds `sky_high` - another passive from docs/SKILL_TRIAGE.md section E, still dead - to the
    identical bar. `okAgainstInert` is therefore what this probe would report against the shipped game,
    and it must be false while `ok` is true.
+   IT USED TO FEED `sky_armor`, AND THAT ID STOPPED BEING INERT ON 2026-08-11 (sub-project B Task 2,
+   pass 16 wired it). The bar here is kinematic, so the known-bad still came out false - but a
+   known-bad that names a passive which now does something is a comment that has started lying, and
+   this whole section exists because nobody re-read one. Swapped for a passive that is still dead.
 
    G.combo IS PINNED BEFORE EVERY STRIKE. hitEnemy (10668) does
    `dmg = round(dmg * mod * (1 + min(0.2, G.combo*0.004)))` and increments the counter on every hit,
@@ -123,7 +127,7 @@
 
   const control = half('sky_float');     // a-side of the same rank: wired, softens the fall, never dives
   const eye     = half('sky_eye');
-  const inert   = half('sky_armor');     // still dead - the permanent known-bad
+  const inert   = half('sky_high');      // still dead - the permanent known-bad
 
   /* The bar, one clause per clause of the card.
      - falling + the passive: driven down at Dive Strike's own -360 or harder, and aimed at the foe

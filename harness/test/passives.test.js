@@ -154,7 +154,14 @@ const KNOWN_DEAD = new Set([
      half, one falling and one rising: all three halves vy −100 → −55 with no heading before; −360 at
      aim exactly 1.0 on the passive half after, while the control and the rising strikes stayed put
      and all four damage readings were 168. */
-  'sky_high', 'sky_armor',
+  /* sky_armor came OFF this list on 2026-08-11 (sub-project B Task 2, pass 16): "nothing can hit you
+     in the first moment after a jump" is now read in the jump handler itself (12820), where it grants
+     the player's own i-frame window — 0.18, the dodge's own, taken verbatim from fourteen lines below
+     — through `p.invuln`, the single field hurtPlayer already returns on. Proven by
+     harness/probes/skyarmor.probe.js, which measures TWO hits per half from two fresh jumps: the
+     control took 62 early and 62 late, the passive half 0 early (invuln 0.18) and 62 late, so the
+     window opens AND closes. */
+  'sky_high',
   'bd_flow',
 ]);
 

@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.924.0-autopilot';
+const VERSION3D='1.925.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12817,7 +12817,20 @@ function update(dt){
     G.meteors=G.meteors.filter(m=>!m.done); }
   if((G.time*4|0)!==G._skTick){ G._skTick=(G.time*4|0); skillbarUpdate(); }
   if(G.lootCard) lootTick();
-  if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true; SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
+  if(input.jumpEdge){ input.jumpEdge=false; if(p.onGround||p.jumps<p.maxJumps){ p.vy=p.onGround?560:400; /* second jump is a small hop */ p.onGround=false; p.jumps++; p.varJump=true;
+    /* SKY ARMOR, the Skylancer's rank-9 option b: "Nothing can hit you in the first moment after a
+       jump." Wired 2026-08-11 — it was one of the 35 in docs/SKILL_TRIAGE.md section E that the rank
+       menu offers, describes, and no code has ever read.
+       NOTHING IS INVENTED. "Nothing can hit you" already has exactly one meaning in this file:
+       hurtPlayer returns on `p.invuln>0` (11327) before any class clause is reached, so this grants
+       that and not a new kind of immunity. And "the first moment" is the player's own i-frame window
+       — 0.18, the dodge's, set fourteen lines below with a comment explaining why it is that long.
+       Taking it verbatim makes Sky Armor a dodge you get by jumping, which is what the card promises,
+       and means the two windows can never drift apart.
+       It sits INSIDE the jump guard on purpose: a jumpEdge that finds no jump left (airborne, out of
+       air jumps) must grant nothing, or the passive becomes "press jump to be untouchable". */
+    if(meta.classId==='skylancer'&&c2def('skylancer')&&c2Passive('sky_armor')) p.invuln=Math.max(p.invuln,0.18);
+    SFX.jump(); burst(p.x,p.y+2,p.z,'#cfd6df',5); } }
   // variable jump: release early to cut the rise (tap = short hop, hold = full height). 340 keeps a sane minimum (~39 vs ~104 max).
   if(p.varJump && !input.jump && p.vy>340) p.vy=340;
   if(p.onGround || p.vy<=0) p.varJump=false;

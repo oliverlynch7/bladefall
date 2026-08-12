@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.943.0-autopilot';
+const VERSION3D='1.944.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3763,7 +3763,20 @@ function effLifesteal(p){ let v=p.stats.lifesteal+(p.armorMods?p.armorMods.lifes
 function effDodgeCd(p){ let v=p.stats.dodgeCd*(p.armorMods?p.armorMods.dodgeMul:1); const sp=skinP(p); if(sp&&sp.dodge) v*=sp.dodge;if(meta.classId==='bladedancer'&&c2def('bladedancer')){if(c2Passive('bd_last')&&p.hp<effMaxHp(p)*.35)v*=.80;} if(isGod(p)) return v*0.5; return Math.max(0.45,v); }   // hard floor: CD-reduction can't buy near-permanent i-frames
 function effCrit(p){ return Math.min(0.85,(p.armorMods?p.armorMods.crit:0)+(p.stats.crit||0)+(isGod(p)?0.5:0)); }   // crit from trinkets + perks
 function effGoldFind(p){ return 1+(p.armorMods?p.armorMods.goldFind:0)+(p.stats.goldFind||0)+(isGod(p)?1:0); }       // gold multiplier
-function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} if(meta.classId==='chronomancer'&&c2def('chronomancer')){v+=.05;if(c2Passive('chr_haste'))v+=.10;if(c2Passive('chr_temporal'))v+=.10;if(classState('chronomancer').rank>=10)v+=.10;} return Math.min(0.5,v); }
+function effCdr(p){ let v=(p.armorMods?p.armorMods.cdr:0)+(p.stats.cdr||0); if(p.weapon&&p.weapon.ians) v+=0.12; if(meta.classId==='mage'&&c2def('mage')){if(classState('mage').rank>=10)v+=.10;if(c2Passive('m_temporal')&&(p._stillT||0)>=1.5)v+=.15;} if(meta.classId==='chronomancer'&&c2def('chronomancer')){v+=.05;if(c2Passive('chr_haste'))v+=.10;if(c2Passive('chr_temporal'))v+=.10;if(classState('chronomancer').rank>=10)v+=.10;}
+  /* STORM LORD (stormcaller rank-10 capstone, 2176): "+12% damage, +10% cooldown reduction, and your
+     lightning arcs to more enemies." The +12% is at 3728 and the arcs clause is unbuilt, but the
+     cooldown clause had no implementation ANYWHERE — this function is the only thing that shortens a
+     cooldown (read at 10665, the sole place a c2 skill's cooldown is armed) and its body was two
+     branches, mage and chronomancer. Nothing invented: .10 is the card's own number and the line is
+     the mage's Archmage clause four statements to the left, verbatim.
+     What the class DOES get at rank 10 is `effAtkSpeed` ×1.10 (3754), which no stormcaller card
+     mentions — it sits under the identical rank-10 lines for the warrior, ninja and monk and reads
+     as the melee pattern copied into a caster branch while the caster clause was never added here.
+     That rider is LEFT ALONE on purpose: taking a bonus off a class people have played for weeks is
+     a balance change, so it is Oliver's. See docs/SKILL_TRIAGE.md section S. */
+  if(meta.classId==='stormcaller'&&c2def('stormcaller')){if(classState('stormcaller').rank>=10)v+=.10;}
+  return Math.min(0.5,v); }
 function defenseR(p){ if(isGod(p)) return 0.85; return Math.min(0.5,(p.armorMods?p.armorMods.defense:0)+(p.stats.defense||0)); }
 function totalDefense(p){ let t=0; if(p.gear) for(const s of SLOTIDS){ if(p.gear[s]) t+=p.gear[s].defense; } return t; }
 function bestGearRarity(p){ let best=-1,bc='#333'; if(p.gear) for(const s of SLOTIDS){ const a=p.gear[s]; if(a&&RARITY[a.rarity].tier>best){ best=RARITY[a.rarity].tier; bc=a.color; } } return bc; }

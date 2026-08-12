@@ -205,6 +205,16 @@ than burning an hourly session — but if you are reading this from inside such 
 is already handled and the correct move is to stop.
 
 ## Workflow — every run
+0. **`git stash list` FIRST, before picking anything.** The automation's own guards stash work — the
+   killed-run guard on a dirty tree, and the red-gate guard in `autopilot.ps1`. A stash dated after
+   the newest commit is **a previous run's finished work that no commit contains**, and recovering it
+   beats starting something new. This has now happened four times; three of the four were found by a
+   later run reading the log rather than by anyone looking at the stash.
+   `git stash apply` and `git checkout "stash@{0}" -- <path>` are BOTH off the allowlist, so recover
+   with read-only git: `git stash show --stat "stash@{0}"`, then
+   `git diff "stash@{0}^" "stash@{0}" -- <file>` per file, and re-apply the hunks by hand. Untracked
+   files live in the third parent (`git show "stash@{N}^3"`). Re-verify what you recover; do not
+   trust it because a previous run said it was verified.
 1. `cd` to your checkout. `git fetch origin`, `git checkout <your branch>`, then `git merge origin/main --no-edit` to stay current with supervised/Codex work (if it conflicts, resolve simply or skip the merge and note it).
 2. Pick your end of the Backlog below — **A: top unchecked item. B: last unchecked item, working upward.**
 3. Build it in `index.html`. Keep changes **small and focused**. A whole class is too big for one run — make **one meaningful chunk** of progress (e.g. "Paladin: class def + family + innate", then next run "Paladin: rank 2-4 skills", etc.), leave the item `- [ ]` with a `(progress: …)` note, and only mark it `- [x]` when fully done + verified. A small item (a rename, one weapon) can be finished in a run.
@@ -217,6 +227,15 @@ is already handled and the correct move is to stop.
      I like". A denied gate is not the same thing as a blocked workspace — on 2026-08-01 a run drew
      exactly that conclusion and twelve runs shipped nothing. If `node tools/gate.js` and
      `node _shot/shot.js …` work, you are fine; those two paths are what the allowlist grants.
+   - The aggregate gate has **THREE exit codes since 2026-08-12**, and the difference decides what
+     happens to your tree:
+     - **0** — measured, no new failures. The only state you may leave work behind in.
+     - **1** — REGRESSION. `autopilot.ps1` stashes the tree (it no longer deletes it).
+     - **2** — INCONCLUSIVE: a suite THREW, so nothing was measured and nothing is claimed. The tree
+       is left exactly as it is. Read the `CRASHED —` line: it is a fault in the harness or the
+       machine (a full disk, a Chrome that would not start), **not evidence about your change**.
+     A crashed suite used to report `skills: 0 pass, 1 fail` / `REGRESSION: skills:/:` — an id with
+     no class and no skill name. If you ever see an id shaped like that, it is a crash, not a bug.
    - Render it and LOOK: `node _shot/shot.js --scene 0` / `--scene hub`. Reading source is not proof.
    - Smoke test via `--eval` over `__BF3` / `__world3d()` / `__mob3d()` / `__prop3d()`.
    - If verification fails and you can't fix it quickly, **revert your change, mark the item blocked with a note, and move on.** Never commit broken code.

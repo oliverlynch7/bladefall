@@ -1309,6 +1309,91 @@ damage** as a precondition, so it cannot go green off a window too short to see 
 
 ---
 
+## H. THE NINJA'S UNSEEN NEVER ARMED — **FIXED 2026-08-12**, and the passive audit called it wired
+
+**The largest thing found since section A, and it is the same shape one level down: a mechanic that
+exists, is described, is read in four places — and is gated on a clock that does not run.**
+
+`CLASS_BASIC.ninja` (index.html:11312) is the Ninja's entire basic-attack identity, and its own
+comment states the promise: *"Stand still for a moment and your next attack lands from BEHIND the
+target — a melee class with repositioning built into its ordinary attack rather than into a
+cooldown."* That is what makes the class not a Warrior with daggers.
+
+The gate is `p._stillT >= 1` (0.5 with Swift). **`_stillT` is advanced in exactly one place in the
+whole file** — `class2Innate`, index.html:10045 — and that line sat inside
+`if(meta.classId==='mage')`, because `m_temporal` (effCdr, 3766) was the first thing to want it.
+So for every class but the mage the clock stood at 0 forever, and the only two lines that could ever
+set it were the Vanish skill (19233) and Combo Edge (10930) — and Combo Edge fires off an Unseen
+strike, so it is circular. **Standing still had never armed anything.**
+
+**AND THE PASSIVE AUDIT REPORTED THE CLASS AT 0 DEAD, CORRECTLY, THROUGHOUT.** Two of the Ninja's
+cards are written about this clock — `nin_swift` (r3 a, *"Unseen rearms in half the time — strike
+from behind twice as often"*) and `nin_combo` (r5 b, *"Killing with Unseen instantly rearms it"*) —
+and both ids ARE read by game code, so `harness/audit-passives.js` counts them wired. They are. They
+are wired to a clock that does not run. This is the second concrete instance of the limit section E
+states in advance (*"this proves WIRED, not CORRECT"*), after `w_unyield` in pass 20, and it is the
+worse of the two: `w_unyield` does the wrong thing, this one does nothing at all.
+
+### How it was measured — `harness/probes/unseen.probe.js`, three halves in one launch
+
+Four trials per half, one per clause of the card and two that must NOT fire:
+
+| trial | what it does | must fire |
+|---|---|---|
+| `still` | 1.2s of the game's own ticks, no input, then a hit | in both live halves |
+| `short` | 0.7s — past Swift's 0.5 and short of the base 1 | ONLY in the Swift half |
+| `moving` | 1.2s spent walking, then a hit | in NO half |
+| `armed` | `p._stillT = 9`, Vanish's own arming line verbatim | in EVERY half — bench liveness |
+
+The bar is **where the body ended up**, not a flag: Unseen mirrors the hero through the target to
+`e.r + 26` on the far side (11322), so "it fired" is measured as the hero moving AND the vector from
+foe to hero reversing (a negative dot product against where it started). A flag would have gone green
+for a wiring that set the field and moved nobody — the shape pass 15 was caught by.
+
+**Before**, all three halves: `stillT 0` after 1.2s at a drift of **0**, `moved 0`, `behind false`,
+`hpLost 6`. **After**: the live halves `stillT 1.2`, `moved 101`, `behind true`,
+`distAfter 41` = `wanted 41`, `hpLost 8` — the innate's own ×1.5 on a base of 6. The 0.7s trial fires
+in the Swift half and not in the one without it, so **Swift is proven as well, and its threshold is
+proven, not just its existence**. The walking trial fires in no half. `ok true, okAgainstInert false`.
+
+The permanent known-bad is carried in the probe rather than produced by breaking the repo: a third
+half pins `_stillT` to 0 after every tick, which is exactly the state the mage-gated accumulator left
+a Ninja in. `okAgainstInert` is therefore what this probe would report against the shipped game.
+
+Photographed at `_shot/out/unseen-strike3.png` — the cyan **UNSEEN** banner over the struck foe with
+the **8** under it, the strike burst, and a marker grunt standing on the spot the ninja fired from,
+101 units back on the other side of the target. *The staging needed two goes and both failures are
+worth keeping:* `G.cam` is advanced by the RENDER loop, not by `update(dt)`, so forty-five ticks
+"waiting for the camera" moved it nothing and handed back an empty floor with both bodies off-frame
+(hero z 340, `cam z 34`) — it has to be snapped, the way `harness/shot.js:497` snaps it for `--focus`.
+And those same forty-five ticks outlived the floater, so the second frame was correct and showed no
+evidence. Six ticks and a snap.
+
+### The fix, and the one thing it had to protect
+
+The accumulator is ungated, and **capped at 8**. Vanish and Combo Edge arm Unseen by writing
+`_stillT = 9`, and that arm has to survive walking away — it is the whole of Vanish's own comment
+(*"the next Unseen strike is already armed"*), and wiping it would be a silent nerf smuggled in by a
+fix aimed at something else. With the cap, standing still can never reach 9 on its own, so `>= 9`
+means "explicitly armed" and cannot be earned by loitering. No reader is affected: the thresholds in
+the file are 0.5, 1 and 1.5.
+
+Nothing else in `public/` reads `_stillT`, so nothing but the Ninja changes. Regression: the skill
+suite for ninja and mage — the only two classes that touch this field — reports **6 pass / 1 fail /
+1 unproven**, the fail being the baselined `mage/Attunement` stale description and the unproven the
+baselined `ninja/Death Mark`. Identical to the last gate report.
+
+### The GAME finding this turned up, which is NOT fixed — Oliver's
+
+**`nin_storm` (r8 b) is named "Vanish" and described as "A spinning storm of steel that cuts
+everything around you."** The code implements the NAME: `SKILL_FX.nin_storm` (19232) grants four
+seconds of invulnerability, breaks every enemy's target lock, and arms Unseen. There is no storm and
+nothing is cut. That is section C's shape — a description that outlived its skill's redesign — and
+this document's own rule forbids fixing a skill by editing its description, so which of the two is
+the real card is Oliver's call. Worth putting to him with the rest of section C.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

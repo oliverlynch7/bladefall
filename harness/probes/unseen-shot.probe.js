@@ -80,7 +80,19 @@
   const dot = (bx - e.x) * (p.x - e.x) + (bz - e.z) * (p.z - e.z);
   const moved = Math.round(Math.hypot(p.x - bx, p.z - bz) * 10) / 10;
 
-  tick(45, false);                                  // the camera, catching up
+  /* SIX TICKS, NOT FORTY-FIVE, and the count is the difference between a photograph of the strike
+     and a photograph of the arena. The evidence in the frame is the 'UNSEEN' floater and the burst
+     the hook throws (11325-11326), and both are on a timer — the first staging spent 0.75s waiting
+     for a camera that ticking cannot move anyway, and by the shutter they were gone. */
+  tick(6, false);
+
+  /* SNAP THE CAMERA, because ticking cannot move it. G.cam is the smoothed follow-point the
+     shoulder camera is built off, and it is advanced by the RENDER loop, not by update(dt) — so the
+     45 ticks above move nothing. The first render of this probe proved it: hero at z 340, `cam z
+     34`, and a photograph of an empty arena floor with both bodies off-frame. This is the same
+     snap harness/shot.js:497 does for --focus, and for the same reason. */
+  try { G.cam.x = p.x; G.cam.z = p.z; G.cam.y = p.y || 0; } catch(err){}
+  try { __BF3.hudUpdate(); } catch(err){}            // the HUD still reads the class it booted as
 
   return JSON.stringify({
     ok: stillT >= 1 && moved > 0 && dot < 0,

@@ -2082,6 +2082,7 @@ sub-project has built.
 | `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | confirmed, unfixed — actionable if a radius already exists |
 | `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | HALF wired — the upside is there, the drawback is not |
 | `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
+| `pal_heal` | paladin r7 b — Healing Light | "Every skill you cast heals the ally nearest you, or you if alone." | `effLifesteal` +5% lifesteal (3759) | confirmed, unfixed — actionable only if the amount can be taken from the file |
 
 ### Quick Hands — the row that was taken, and why it was takeable
 
@@ -2248,12 +2249,43 @@ than what their card says, and no tool this sub-project owns could have said so.
   stages would have to be invented. Reading the card down to "recovers faster while still" is a
   description edit, which this document forbids.
 
-**What has and has not been swept, so the next run does not re-read what is done.** Full card-vs-reader
-reads: warrior, mage, warlock, bladedancer, reaper, skylancer. Targeted reads: pirate, ranger,
-berserker, chronomancer. **Not swept at all: paladin, necromancer, ninja, monk, stormcaller,
-beastmaster.** Those six were heavily worked by passes 5–30 — but every one of those passes was about a
-DEAD passive, and this section is about live ones, so being worked is not being swept. Mage, warlock
-and skylancer came back clean, which is why they carry no row.
+### THE SWEEP IS COMPLETE — all sixteen classes, 2026-08-12
+
+The last six went the same way in the same run: paladin, necromancer, ninja, monk, stormcaller,
+beastmaster. **Every wired passive in the game has now been read against its own card.** That closes
+the open half of Task 3 Step 2, and it closed for a cheaper reason than the plan expected — it never
+needed a launch.
+
+They yielded one more section Q row and one finding of a different shape:
+
+- **`pal_heal` — Healing Light. The eleventh row, and a CO-OP one.** The card says "Every skill you
+  cast heals the ally nearest you, or you if alone"; the one reader adds +5% **lifesteal** (3759).
+  Lifesteal is paid on damage dealt, fires on basic attacks rather than on casts, and can never reach
+  an ally — so all three clauses of the card are missed by a single line, and the clause that matters
+  most is the one `docs/VISION.md` puts at priority #1. **The paladin is the second class this sweep
+  has caught while this document was calling it finished** ("Paladin is now the second class with no
+  dead passives", pass 19) — true, and about section E.
+  *Actionable only if the amount can be taken from the file rather than chosen.* The card states no
+  number. The nearest candidate is the 4% of max HP that `m_ward`, `war_shield` and `st_ward` all
+  grant per cast — but every one of those is a SHIELD, and a shield unit is not a heal unit, so this
+  is weaker than pass 14's Dive Strike borrowing and should be argued before it is used.
+- **`necro_undying` — NOT a section Q row: the opposite one.** Its card, "a killing blow instead
+  consumes a minion", is properly implemented (11663). It *also* carries a flat `dmg*=.88` (11560),
+  which is the passive's OLD version — this file's own note records it as *"rewritten. Was 'take 12%
+  less damage' — a number… Now a killing blow consumes a MINION"* — and the old line was never
+  removed. So the passive quietly does both. Same shape as `w_swift`'s surviving +10% attack speed,
+  and it belongs with section J's twelve for the same reason: the code is newer than the card, and
+  which of the two is right is one sentence from Oliver rather than one number from a run.
+
+**Clean, and listed so nobody re-reads them:** mage, warlock, skylancer, ninja, monk, stormcaller,
+beastmaster, necromancer (apart from the leftover above). Every card's promise is implemented and the
+reader honours it.
+
+**One caveat on "clean" that is worth carrying.** This sweep asked whether the card's promise is
+implemented, not whether the reader carries anything EXTRA. Several passives grant undocumented riders
+on top of a correct implementation — `necro_undying`'s 12% and `w_swift`'s 10% are the two found, and
+`m_potent`'s +12% skill power (3707) is a third — and a sweep aimed at that question would be a
+different pass with a different table.
 
 ### The one row below that a run could take, and the one it could not
 - **`w_heavy` is NOT the same call and should not be taken as one.** "Cannot be interrupted" and

@@ -372,6 +372,23 @@ E; three of its eight passives still do something other than what their card say
 | `bsk_rage` | you cannot be healed below a quarter, and your damage doubles | the doubling only | half wired, and the missing half is the DRAWBACK — pass 20's own rule says take it |
 | `chr_temporal` | standing still REWINDS your cooldowns rather than pausing them | an unconditional +10% CDR | **Oliver's** — cooldowns never pause, so both stages would be invented |
 
+**AND THEN IT WAS FINISHED — ALL SIXTEEN CLASSES, same run.** Paladin, necromancer, ninja, monk,
+stormcaller and beastmaster went the same way while the gate ran. **Every wired passive in the game
+has now been read against its own card**, which closes the open half of Task 3 Step 2 — and it closed
+for a cheaper reason than this plan ever expected: it never needed a launch at all.
+
+The last six gave one more row and one finding of the opposite shape. `pal_heal` — "every skill you
+cast heals the ally nearest you, or you if alone" — reads as **+5% lifesteal**, which is paid on
+damage dealt, fires on basic attacks rather than casts, and can never reach an ally: all three clauses
+missed by one line, and the clause that matters most is `docs/VISION.md`'s priority #1. **That is the
+second class this sweep caught while this plan was calling it finished**, after the reaper. And
+`necro_undying` is the reverse: its card's mechanic works, and it *also* carries the flat 12% damage
+reduction it was rewritten AWAY from, never removed — `w_swift`'s shape, so it joins section J rather
+than section Q.
+
+**Section Q's final state: eleven rows, three fixed.** Clean classes, listed so nobody re-reads them:
+mage, warlock, skylancer, ninja, monk, stormcaller, beastmaster, necromancer.
+
 **Where the next run should look, in order.** `bd_feet` and `bd_fast` were both taken this run, as
 passes 32 and 33 — **the bladedancer now has no section Q row left**, and it is the first class whose
 stat-multiplier stand-ins have both been replaced by the mechanics their cards describe. The next
@@ -395,6 +412,24 @@ passive audit: it can say a field reaches a reader, not that the reader honours 
 twelve entries (`berserker`, `mage`, `monk`, `skylancer` and the two damage-shape ones) hold no
 cross-function state at all, so a trace of this kind cannot say anything about them and none of them
 has been measured against its own words.
+
+**THE AGGREGATE GATE RAN AGAIN, 2026-08-12, after passes 31–33: `GATE: PASS (3 known, 0 newly fixed)`,
+exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved — the three knowns are still
+`ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`, all sections B/C/J and all Oliver's.
+Per-suite: unit 55/55, **skills 69 pass / 3 fail / 3 unproven**, levels 36/0/12, **mp 54 pass / 0 fail**.
+Three game changes across two classes disturbed nothing outside them, which is the claim that was
+outstanding.
+
+**And it answers the question the last gate run left open, in the good direction.** That run printed
+`mp: skipped`, and this document said so and said why it mattered: the mp suite is the one that proves
+Oliver is not invisible to himself in PvP, and sub-project A Task 5 records it as shipped and green.
+It ran this time, at **54 pass / 0 fail**. So the skip really was the load-dependent one Task 5 Step 4
+predicted — headless SwiftShader failing to bring the 3D layer up under contention — and not a missing
+or misplaced module. Worth keeping because it means the loud-skip fix is doing its job: the suite is
+flaky in its *availability*, never in its verdicts.
+
+Levels moved 35/0/13 → 36/0/12, which is the den-less head-count flapping back the other way — a live
+population snapshot correctly routed to `unproven` rather than to a verdict, exactly as Task 4 records.
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —

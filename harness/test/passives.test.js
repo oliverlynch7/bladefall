@@ -276,7 +276,17 @@ const KNOWN_DEAD = new Set([
      three halves in one launch with a body at 400 (past the shipped reach, inside a doubled one) and
      another at 700 (past both): nothing at 400 in any half before; after, the passive half strikes it
      for 26 while 700 stays untouched and the control and known-bad still reach nothing. */
-  'st_conductor', 'st_amped', 'st_master', 'st_galvanize',
+  /* st_galvanize came OFF this list on 2026-08-12 (sub-project B Task 2, pass 39): "chains that find
+     no second target strike the first one twice" is now the else-branch of the same hook, inside the
+     same _chaining guard — sharper reason than the arc's, since this strike lands on the body that
+     triggered the hook. Nothing was chosen: the second strike IS the arc that failed. Proven by
+     harness/probes/galvanize.probe.js, three halves in one launch with TWO trials each (alone, and
+     with company 80 units away, because "finds no second target" is a condition): 67 both ways in
+     every half before; after, the passive half takes 94 alone against a 67 base and 68 in company
+     while its mate still gets its arc, and the control and known-bad stay flat. The extra 27 is
+     measured against a real arc in the same launch, not against the hook's 34% constant — see the
+     probe for why that distinction cost a run. */
+  'st_conductor', 'st_amped', 'st_master',
   /* sky_eye came OFF this list on 2026-08-11 (sub-project B Task 2, pass 14): "attacking while
      falling drives you down onto the target" is now read in CLASS_BASIC.skylancer, where it TRADES
      the innate's hang for Dive Strike's own drive (520 along the heading, vy floored at -360), aimed

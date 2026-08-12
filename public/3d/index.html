@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.946.0-autopilot';
+const VERSION3D='1.947.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11350,6 +11350,20 @@ const CLASS_BASIC = {
         skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 90);
         for(let i = 0; i < arcs && i < near.length; i++)
           hitEnemy(near[i].o, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
+      } catch(err){}
+      p._chaining = 0;
+    }
+    /* GALVANIZE (stormcaller r9 b, index.html:2184): "Chains that find no second target strike the
+       first one twice." Wired 2026-08-12, the third row out of the group Overcharge unblocked, and
+       the one where nothing at all had to be chosen: the second strike IS the arc that failed, so it
+       carries the arc's own 34% and its own shock element. The card says twice, not harder.
+       Inside the same `_chaining` guard as the arc, and for a sharper reason: this strike lands on
+       the body that just triggered the hook, so without the guard it would call itself. */
+    else if(c2Passive('st_galvanize')){
+      p._chaining = 1;
+      try {
+        skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 70);
+        hitEnemy(e, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
       } catch(err){}
       p._chaining = 0;
     }

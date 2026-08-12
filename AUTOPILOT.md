@@ -225,8 +225,39 @@ is already handled and the correct move is to stop.
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
-## Cadence — A RUN IS KILLED AFTER ~20 MINUTES, AND THAT IS ~3 RENDERS (measured 2026-08-03)
-**Read this before picking an item.** The section below says "hourly"; `_autopilot.log` says
+## Cadence — THE 20-MINUTE KILL IS OVER. A run now gets ~50 minutes (re-measured 2026-08-12)
+**Read this before picking an item, and read it INSTEAD of the 2026-08-03 note below it.** The old
+measurement was true and is now false, and believing it costs real work: it tells a run to take a
+small item, and the reason it is here at all is that runs were shipping scouting reports instead of
+fixes.
+
+Same instrument as before — `_autopilot.log`, which is what the scheduler actually produced:
+
+```
+2026-08-12 10:04:02  run start
+2026-08-12 10:53:50  run end        <- 49m 48s, six commits, none of them stashed
+2026-08-12 11:04:02  run start
+```
+
+**Nothing has logged *"previous run was killed mid-edit"* since 08:44.** The cause was named in
+`autopilot.ps1` and fixed there: the task carried `ExecutionTimeLimit PT19M`, so Windows killed each
+run at 19 minutes *without* running the `finally` that releases the lock, and the stale lock then
+blocked every tick for the next 90. Raising the limit ended both halves.
+
+What that changes, in the unit that matters: **a run gets roughly 15–20 renders, not three.** An
+item needing a before shot, a fix, an after shot and two regression checks now fits. So does the
+full aggregate gate, which is ~32 launches and 35–45 minutes on its own — budget for it if the item
+touches game code, and start it as a background command so the wait is not dead time.
+
+The rules underneath still hold, for reasons that have nothing to do with the clock: commit by
+pathspec as soon as something is verified (a crash or a session limit can still end a run early),
+never `git add -A`, and doc-only commits are real output.
+
+<details>
+<summary>The 2026-08-03 measurement, kept because the rules it produced are still right</summary>
+
+**A RUN IS KILLED AFTER ~20 MINUTES, AND THAT IS ~3 RENDERS (measured 2026-08-03)**
+The section below says "hourly"; `_autopilot.log` says
 otherwise and the log is the measurement. Runs start every **20 minutes**, and **every run since
 08:04 on 2026-08-03 was killed at its boundary** — 08:24, 08:44, 09:04, 09:24, 09:44 each logged
 *"previous run was killed mid-edit; stashing its leftovers"*, naming modified files under `public/`.
@@ -251,6 +282,8 @@ Rules that follow, in priority order:
 - **Never `git add -A`.** A second worker edits this same checkout; two of this run's `git status`
   polls came back holding another process's half-finished `prop3d.js`.
 - Do not start one more render past the ~15-minute mark. It will not come back.
+
+</details>
 
 ## Cadence (hourly)
 This runs **every hour, 8am–11pm** — not once a day. So each run does **one** backlog chunk and stays lightweight. **Only make noise when you ship something:**

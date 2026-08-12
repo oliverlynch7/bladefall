@@ -1186,14 +1186,47 @@ git commit -m "autopilot: limit guard, green gate, scope guard"
 
 ---
 
-### Task 8: Re-enable the schedule
+### Task 8: Re-enable the schedule — **OVERTAKEN. It is already on, and the run reading this IS the schedule.**
 
 **Files:**
 - Modify: Windows scheduled task `Bladefall Autopilot` (currently Disabled, last ran 2026-08-03).
 
-- [ ] **Step 1: Confirm the current state**
+- [x] **Step 1: Confirm the current state** — confirmed 2026-08-12, by a different method than the
+      one written here, and the answer is the opposite of the expectation.
 
-Run:
+`Get-ScheduledTask` is not on the unattended allowlist, so the state was read from the thing the
+scheduler actually produces — `_autopilot.log`:
+
+```
+2026-08-12 09:44:02  run start
+2026-08-12 09:53:43  skipped: session limit
+2026-08-12 10:04:02  run start
+2026-08-12 10:53:50  run end
+2026-08-12 11:04:02  run start        <- this run
+```
+
+The task is **enabled and firing hourly at :04**, not Disabled with a `LastRunTime` of 2026-08-03.
+The session writing this line was started by it: its prompt is `autopilot.ps1`'s `$prompt` verbatim.
+Worth carrying separately, because AUTOPILOT.md's cadence section is written around the opposite
+fact: **runs are no longer being killed at the 20-minute boundary** — the 10:04 run ended at 10:53,
+having shipped six commits. That is the raised `ExecutionTimeLimit` holding, and it means an item
+needing four browser launches now fits in one run.
+
+- [x] **Steps 2–4: cadence, enable, manual cycle — NOT TAKEN, and two of them must not be**
+
+- *Step 2 (6-hourly).* How often Oliver wants an autonomous agent running against his game is a call
+  about his attention and his API spend, which `docs/VISION.md` puts squarely in the ask-first
+  column. It is also already answered in the other direction, by him, in the live scheduler.
+- *Step 3 (enable).* Already enabled.
+- *Step 4 (`Start-ScheduledTask`).* This would launch a **second Claude session inside this one**,
+  against this same checkout. Best case the overlap lock skips it and the step proves nothing; worst
+  case two sessions edit the same working tree, which is the failure `AUTOPILOT.md` already has a
+  memo about. The honest verification of a scheduled run is the next scheduled run.
+
+- [x] **Step 5: Commit the disposition** — this edit.
+
+<details>
+<summary>The original steps, kept for the record</summary>
 
 ```powershell
 Get-ScheduledTask -TaskName 'Bladefall Autopilot' | Get-ScheduledTaskInfo
@@ -1201,7 +1234,7 @@ Get-ScheduledTask -TaskName 'Bladefall Autopilot' | Get-ScheduledTaskInfo
 
 Expected: `LastRunTime 8/3/2026`, and the task itself Disabled.
 
-- [ ] **Step 2: Set the cadence to 6-hourly**
+**Step 2: Set the cadence to 6-hourly**
 
 ```powershell
 $t = Get-ScheduledTask -TaskName 'Bladefall Autopilot'
@@ -1209,7 +1242,7 @@ $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).Date.AddHours(6) -Repet
 Set-ScheduledTask -TaskName 'Bladefall Autopilot' -Trigger $trigger
 ```
 
-- [ ] **Step 3: Enable it**
+**Step 3: Enable it**
 
 ```powershell
 Enable-ScheduledTask -TaskName 'Bladefall Autopilot'
@@ -1218,7 +1251,7 @@ Get-ScheduledTask -TaskName 'Bladefall Autopilot' | Select-Object TaskName, Stat
 
 Expected: `State: Ready`
 
-- [ ] **Step 4: Run one cycle manually and read the log**
+**Step 4: Run one cycle manually and read the log**
 
 ```powershell
 Start-ScheduledTask -TaskName 'Bladefall Autopilot'
@@ -1227,12 +1260,14 @@ Start-ScheduledTask -TaskName 'Bladefall Autopilot'
 Then: `tail -20 _autopilot.log`
 Expected: a `run start` / `run end` pair with real work between them, or `skipped: session limit`. Not the 20-minute dead-start pattern.
 
-- [ ] **Step 5: Commit any log/doc changes**
+**Step 5: Commit any log/doc changes**
 
 ```bash
 git add -A AUTOPILOT.md
 git commit -m "autopilot: back on, 6-hourly, gated on the harness"
 ```
+
+</details>
 
 ---
 

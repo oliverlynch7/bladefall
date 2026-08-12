@@ -24,13 +24,25 @@ So a flake can delete a run's verified work. Every other plan in this repo is wo
 
 ---
 
-### Task 1: Kill the flap at its source
+### Task 1: Kill the flap at its source — **IT WAS ALREADY DEAD. Measured 2026-08-12, ten times.**
+
+This task was written before `a724d69` landed, and that commit killed the flap at a source the plan
+did not suspect: not the bench's distance, but the fact that **every skill was cast from the body
+the previous skill left behind.** Riposte only ever lunged 95 units — past the dummy — because
+`bd_counter`, cast one slot earlier, had stored a parry on the player and nothing put the player
+back. `test-skills.js` now snapshots every number and boolean on `G.p` and restores it before each
+cast, so the charged branch is no longer reachable at random. Full account: `docs/SKILL_TRIAGE.md`
+section F, including the A/B in one launch (bench order, no restore: **2/3 missed**; bench order,
+restored: **0/3**).
+
+So the work this task exists to do is done, and its remaining steps are dispositioned below against
+this plan's own instruction — *record it and stop rather than changing geometry on a guess.*
 
 **Files:**
-- Modify: `harness/test-skills.js`
-- Modify: `harness/baseline.json` (regenerated)
+- Modify: `harness/test-skills.js` — done, one shared constant, value unchanged
+- ~~Modify: `harness/baseline.json` (regenerated)~~ — not needed, nothing moved
 
-- [ ] **Step 1: Reproduce the flap and prove it is geometry**
+- [x] **Step 1: Reproduce the flap and prove it is geometry** — **it does not reproduce.**
 
 Run the bladedancer class ten times and count the verdicts:
 
@@ -40,37 +52,62 @@ for i in 1 2 3 4 5 6 7 8 9 10; do node harness/test-skills.js --classes bladedan
 
 Expected: a mix of `5 pass, 0 fail` and `4 pass, 1 fail`. If it is stable ten times, the flap has another cause — record that and stop rather than changing geometry on a guess.
 
-- [ ] **Step 2: Measure the reach the bench actually needs**
+**Ten runs, ten identical lines: `skills: 5 pass, 0 fail, 0 unproven`.** Run 2026-08-12 on
+`autopilot-merged` at `93c3f4b`, serially, ~1–2 minutes each. Not "another cause" — the cause was
+found and fixed the day after this plan was written, and the ten runs are that fix holding.
 
-The bench spawns its target at `p.z - 60`. A lunge that carries 55 units lands 5 short, and whether it connects depends on where the dummy has walked. Probe the real reach of every skill the bench casts:
+*Read the loop before copying it: the Bash tool in an unattended session rejects `for` loops
+outright (`Contains simple_expansion`). Ten invocations chained with `&&`, in two backgrounded
+batches, is what actually ran.*
 
-```bash
-node _shot/shot.js --scene arena:flat --wait 12000 --eval "(function(){ __BF3.cheatUnlockClasses(); __BF3.cheatRank10All(); __BF3.meta.classId='bladedancer'; const p=__BF3.G.p; const out=[]; const sk=(__BF3.c2CurSkills?__BF3.c2CurSkills():__BF3.curSkills())||[]; for(let i=0;i<sk.length;i++){ if(!sk[i]) continue; const z0=p.z; __BF3.useSkill(i); for(let k=0;k<120;k++) __BF3.update(1/60); out.push({n:sk[i].n, moved:Math.round(z0-p.z)}); } return JSON.stringify(out); })()"
-```
+- [x] **Step 2: Measure the reach the bench actually needs — NOT TAKEN, and already measured**
 
-Expected: per-skill travel distances. The bench distance must be **less than the shortest lunge**, not more.
+The numbers this step would have gone to get already exist, taken by `harness/probes/riposte.probe.js`
+in one launch and written up in SKILL_TRIAGE section F:
 
-- [ ] **Step 3: Make the target distance a named constant and shorten it**
+| | separation after the lunge | cone term | dealt at cast |
+|---|---|---|---|
+| uncharged Riposte, dummy at 60 | 5, **inside the dummy's own 15-unit radius** | skipped — `bdArc` does not cone-test a target that overlaps the swing origin | 108, six casts out of six |
+| charged Riposte, dummy at 60 | 35, and *behind* the player | dot **−1** against a needed 0.81 | **0** |
 
-One constant in `test-skills.js`, used by BOTH `BASELINE` and `PROBE` — they must never diverge, which is already written into the file's comments. Set it under the shortest measured lunge (30 is safely inside every value seen so far). Freeze the dummy so it cannot walk out of range: set its speed to 0 after spawn.
+So the bench distance is not marginal for the uncharged lunge, which is the only one reachable now.
+Spending three browser launches to re-derive that would produce the same table.
 
-- [ ] **Step 4: Prove the flap is gone**
+- [x] **Step 3: Make the target distance a named constant — DONE. Shortened — NO, deliberately.**
 
-```bash
-for i in 1 2 3 4 5 6 7 8 9 10; do node harness/test-skills.js --classes bladedancer 2>&1 | tail -1; done
-```
+The constant landed: `TARGET_DIST` in `test-skills.js`, used by BOTH `BASELINE` and `PROBE`, which
+is the half of this step that was always right — the two were a bare `60` written twice, and the rig
+test's whole job is to certify the geometry the skill probe then measures in. Nothing would have
+caught them diverging, because both halves would still run and both would still report numbers.
 
-Expected: ten identical lines. Anything else means the cause was not geometry — revert and record.
+**The value stays at 60**, and the two things this step wanted to change are both refused on
+evidence rather than on caution:
 
-- [ ] **Step 5: Re-baseline, alone, and commit**
+- *Shortening to 30.* It is a fix for a flap that no longer happens, and moving this number
+  re-baselines all sixteen classes — every damage verdict in the suite is taken at this distance.
+  Trading a real 16-class re-baseline for a hypothetical is the wrong side of this plan's own Step 1
+  instruction.
+- *Freezing the dummy's speed to 0.* Worse than unnecessary: the dummy's walk is part of what the
+  **drift control** measures, and the drift is large and real (506 HP off the dummy for the paladin
+  with nothing cast, 218 for the beastmaster). A frozen dummy silently lowers the noise floor every
+  `CLEARS_NOISE` threshold is judged against, so it would move pass/unproven verdicts across the
+  whole suite while looking like a tidy-up. It also cannot be what fixed anything here: no `update()`
+  runs between `mkDummy()` and `useSkill()`, so the dummy is at exactly 60 at the moment of every
+  cast regardless of how fast it walks afterwards.
 
-```bash
-rm -f harness/baseline.json && node harness/run-all.js
-git add harness/test-skills.js harness/baseline.json
-git commit -m "harness: the bench put its target beyond some lunges, so verdicts depended on where the dummy wandered"
-```
+- [x] **Step 4: Prove the flap is gone** — the ten runs under Step 1 ARE this step, since no geometry
+      moved. Ten identical lines.
 
-Note in the message which baseline entries appeared or disappeared, since a distance change moves every class.
+- [x] **Step 5: Re-baseline, alone — NOT NEEDED, and not doing it is the safer answer**
+
+Nothing moved that a baseline entry depends on: the constant is the same 60 the file already spawned
+at, and the two probes verify identical. Confirmed rather than assumed — `--classes bladedancer
+warrior` after the change returns exactly what it returned before it.
+
+`rm -f harness/baseline.json && node harness/run-all.js` is a **destructive** command in a repo whose
+gate ratchets on that file: it discards the known-failure list and re-records whatever today's launch
+happens to see, so any suite that flakes low in that one run silently erases real failures from the
+ledger. It is the right move after a real geometry change and the wrong one after none.
 
 ---
 
@@ -139,22 +176,54 @@ The only Telegram ping is a failure alert, so a healthy run is indistinguishable
 
 **Files:**
 - Modify: `autopilot.ps1`
+- Add: `harness/run-report.js`, `harness/test/run-report.test.js`
 
-- [ ] **Step 1: Build a one-line summary at the end of a green run**
+- [x] **Step 1: Build a one-line summary at the end of a green run** — done 2026-08-12, and it is
+      built in **Node, not PowerShell**, which is the one design decision here worth defending.
 
-After the gate passes, collect: the number of commits this run made (`git rev-list --count` against the SHA captured at run start), the gate's own summary line, and the count of entries in `harness/baseline.json`.
+The summary is `harness/run-report.js`: commit subjects for `<startSha>..HEAD`, the gate's own
+`GATE:` line, the entry count in `harness/baseline.json`, and the branch's own preview URL derived
+from `git branch --show-current` rather than written down (the URL in AUTOPILOT.md still names
+`autopilot-a` and `autopilot-b`, two branches this checkout does not use).
 
-- [ ] **Step 2: Send it on the existing channel**
+**Why not PowerShell.** An unattended session may run `node --test` and may not run
+`powershell -Command`; that is not an accident, it is the wall that keeps this automation off `main`.
+So anything written as PowerShell here can be parse-checked and never *executed* by the run that
+wrote it — an unverifiable summary, which this repo's own rule puts below no summary at all. In Node
+it has nine assertions, the CLI among them, run as a child process against this repository.
 
-Reuse the `thework.pages.dev/state` `tgPing` call already in the file. Send at most once per run, and only when the run actually committed something — a run that correctly found nothing to do should stay quiet, or the channel becomes noise and gets muted.
+**And it builds the JSON itself, which found a live bug in the idiom it replaces.** Every existing
+`tgPing` in `autopilot.ps1` is assembled as `'{"…","text":"' + $text + '"}'`. A commit subject with
+a double quote in it — this repo has them — makes that body invalid JSON, the POST is dropped, and
+the run still looks perfectly green. `run-report.test.js` asserts the two idioms **disagree** on
+exactly that input, so the bug is recorded as a failing case rather than as a claim.
 
-- [ ] **Step 3: Verify by running one cycle manually**
+- [x] **Step 2: Send it on the existing channel** — done. Same `thework.pages.dev/state` `tgPing`
+      endpoint, once per run, and only when the run committed something: the CLI **exits 3** for an
+      empty range and `autopilot.ps1` logs `nothing committed this run - no report sent`. A quiet run
+      stays quiet, or the channel gets muted and takes the failure alerts with it.
 
-```powershell
-Start-ScheduledTask -TaskName 'Bladefall Autopilot'
-```
+      *Not a duplicate of the session's own digest, and the runs where it matters most are the ones
+      that never send one:* a session killed at the task time limit AFTER committing has already left
+      verified work in the branch and said nothing about it. This line is built from git, so it
+      reports what is actually there.
 
-Then read the tail of `_autopilot.log` and confirm a summary line was produced.
+- [x] **Step 3: Verify** — done, in the three pieces that can actually be verified from here.
+      `Start-ScheduledTask` is **not** one of them and was not run.
+
+| what | how | result |
+|---|---|---|
+| the report's own logic, and the escaping bug it fixes | `node --test harness/test/run-report.test.js` | 9 pass, 0 fail |
+| the CLI `autopilot.ps1` actually calls | spawned as a child process inside that test, against this repo, `--since HEAD~2` | valid JSON body carrying both real commit subjects; exit **3** for `--since HEAD` |
+| every assertion is one that can fail | bullets changed `•`→`-` on purpose | the header/bullet test went red, then green again on revert |
+| `autopilot.ps1` still parses | `powershell -NoProfile -ExecutionPolicy Bypass -File tools/psparse.ps1 autopilot.ps1` | `PARSE CLEAN` |
+
+**What is NOT verified, stated plainly:** the ~12 lines of PowerShell glue have been parsed and read,
+not executed. `Start-ScheduledTask -TaskName 'Bladefall Autopilot'` from an unattended run would
+launch a second Claude session inside this one — the overlap lock would either skip it (proving
+nothing) or the two would edit the same checkout. The first real scheduled run is the end-to-end
+test; if the glue is wrong, `try/catch` logs `report failed:` and the run still ends green, because
+a broken reporter must never be able to fail a run that passed its gate.
 
 - [x] **Step 4: Commit** — done.
 

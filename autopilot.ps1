@@ -17,6 +17,21 @@ $claude = 'C:\Users\Oliver\.local\bin\claude.exe'
 
 function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -FilePath $log -Append -Encoding utf8 }
 
+# THE PING PASSWORD, IN ONE PLACE. It was written literally at each call site, and a third site was
+# about to be added for the run report - so it is hoisted here and every caller reads it.
+#
+# Honest about what this is and is not: the value is already in this file's git history and in
+# AUTOPILOT.md, so hoisting it is NOT a fix for that. It is two things that are worth having anyway
+# - one place to change instead of three, and an override that lets the literal be deleted without
+# touching any call site. Set BLADEFALL_TG_PASSWORD in the scheduled task's environment and the
+# fallback below can go.
+#
+# ROTATING IT IS OLIVER'S CALL and is deliberately not done here: the same password authenticates
+# the other PraxisBrain automations against thework.pages.dev, so an unattended run changing it
+# would silently break things it cannot see or test.
+$tgPass = $env:BLADEFALL_TG_PASSWORD
+if ([string]::IsNullOrWhiteSpace($tgPass)) { $tgPass = 'oliverNCA2026' }
+
 # One Telegram alert per day about a BROKEN TOOLCHAIN, so a dead autopilot announces itself.
 # Same shape as the auth warning below, with its own stamp file so neither can silence the other.
 function AlertOncePerDay($stampName, $text) {
@@ -28,7 +43,7 @@ function AlertOncePerDay($stampName, $text) {
     $last  = if (Test-Path $stamp) { Get-Content $stamp -Raw } else { '' }
     if ("$last".Trim() -eq $today) { return }
     $today | Out-File -FilePath $stamp -Encoding utf8 -NoNewline
-    $body = '{"action":"tgPing","password":"oliverNCA2026","text":"' + $text + '"}'
+    $body = '{"action":"tgPing","password":"' + $tgPass + '","text":"' + $text + '"}'
     Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json' -Body $body | Out-Null
   } catch {}
 }
@@ -155,6 +170,12 @@ function ClearMarkerIfClean {
 
 Log 'run start'
 
+# WHERE THIS RUN STARTED. Captured before Claude is launched, so the end-of-run report can say what
+# the session actually committed rather than what it claimed to. Fails open: no SHA means no report,
+# never a crashed run.
+$startSha = ''
+try { $startSha = (git rev-parse HEAD) } catch { $startSha = '' }
+
 $prompt = @'
 You are the BLADEFALL autopilot running unattended. Oliver is not watching this run.
 
@@ -226,7 +247,7 @@ try {
     $last  = if (Test-Path $stamp) { Get-Content $stamp -Raw } else { '' }
     if ($last.Trim() -ne $today) {
       $today | Out-File -FilePath $stamp -Encoding utf8 -NoNewline
-      $body = '{"action":"tgPing","password":"oliverNCA2026","text":"BLADEFALL autopilot is DOWN - Claude could not authenticate, so no work is happening. Fix: open a terminal and run claude, then log in. It will resume on its own after that."}'
+      $body = '{"action":"tgPing","password":"' + $tgPass + '","text":"BLADEFALL autopilot is DOWN - Claude could not authenticate, so no work is happening. Fix: open a terminal and run claude, then log in. It will resume on its own after that."}'
       try { Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json' -Body $body | Out-Null } catch {}
     }
     ClearMarkerIfClean
@@ -266,6 +287,55 @@ try {
     exit 0
   }
   ClearMarkerIfClean
+
+  # SAY WHAT THE RUN DID, not only when it breaks. Until this went in the ONLY thing that ever
+  # pinged Telegram was a failure alert, so a healthy run and no run at all looked identical from
+  # the outside - and Oliver has asked twice what the automation has been up to.
+  #
+  # It is not a duplicate of the session's own digest, and the runs where it matters most are the
+  # ones that never send that digest: a session killed at the task time limit AFTER committing has
+  # already left verified work behind and said nothing about it. This line is built from git and
+  # from the gate's own output, so it reports what is actually in the branch.
+  #
+  # The body is built by harness/run-report.js rather than by concatenating a string into a JSON
+  # literal the way the alerts above do. A commit subject with a double quote in it turns that idiom
+  # into invalid JSON, the POST is silently dropped and the run still looks green - see
+  # harness/test/run-report.test.js, which asserts the two idioms disagree on exactly that input.
+  # Building it in Node is also the only way an unattended session can TEST this at all: `node
+  # --test` is on the allowlist and `powershell -Command` deliberately is not.
+  #
+  # EXIT 3 means "this run committed nothing", which is the quiet path, not an error. A run that
+  # correctly found nothing to do must stay silent or the channel gets muted - taking the failure
+  # alerts with it.
+  #
+  # THE BODY TRAVELS AS A FILE, NOT AS A STRING, and that is an encoding decision rather than a
+  # style one. The digest carries bullet characters and an emoji - the format AUTOPILOT.md records
+  # Oliver asking for - and PowerShell 5.1 decodes a native command's stdout with
+  # [Console]::OutputEncoding, which is an OEM codepage here and not UTF-8. `$body = & node ...`
+  # would therefore mangle them at CAPTURE, before Invoke-RestMethod ever sees the string, and no
+  # -ContentType charset can restore bytes that are already gone. ReadAllBytes moves exactly what
+  # Node wrote. Same reason AUTOPILOT.md's own memo says to write digest JSON to a file and hand
+  # curl a --data-binary @file.
+  try {
+    $gateLine = ($gateOut | Where-Object { "$_" -match '^GATE:' } | Select-Object -Last 1)
+    $reportFile = Join-Path $repo '_autopilot_report.json'
+    Remove-Item $reportFile -ErrorAction SilentlyContinue
+    & node harness/run-report.js --since "$startSha" --gate "$gateLine" --password "$tgPass" --out $reportFile | Out-Null
+    $code = $LASTEXITCODE
+    if ($code -eq 0 -and (Test-Path $reportFile)) {
+      $bytes = [System.IO.File]::ReadAllBytes($reportFile)
+      Invoke-RestMethod -Uri 'https://thework.pages.dev/state' -Method Post -ContentType 'application/json; charset=utf-8' -Body $bytes | Out-Null
+      # The body carries the ping password, so it does not linger once it has been sent. On a FAILED
+      # post it deliberately survives, because then it is the only evidence of what was attempted.
+      Remove-Item $reportFile -ErrorAction SilentlyContinue
+      Log 'reported this run to Telegram'
+    } elseif ($code -eq 3) {
+      Log 'nothing committed this run - no report sent'
+    } else {
+      Log ("report skipped (run-report exit {0})" -f $code)
+    }
+  } catch { Log "report failed: $_" }
+
   Log 'run end'
 } catch {
   Log "FAILED: $_"

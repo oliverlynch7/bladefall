@@ -67,10 +67,30 @@ import { claimsOf, isIndirectDamage } from './claims.js';
    and every damage claim this run is reported UNPROVEN rather than FAILED. Reporting them as
    failures would bury the real bugs Oliver found under a hundred false ones - which is how a
    harness stops being read. */
+/* HOW FAR IN FRONT THE TARGET STANDS — ONE number, for the rig test and for every skill probe.
+
+   It was written twice, as a bare `60` in each of the two page expressions below, and the pair is
+   load-bearing: the rig test's whole job is to prove the geometry the skill probe then measures in,
+   so a run that changed one and not the other would be certifying a bench it is not using. Nothing
+   caught that, because both halves would still run and both would still report numbers.
+
+   THE VALUE IS DELIBERATELY UNCHANGED AT 60, and that is a measurement, not caution. The harness-
+   hardening plan (docs/superpowers/plans/2026-08-11-harness-hardening.md, Task 1) proposed
+   shortening this to sit under the shortest lunge in the game, because bladedancer/Riposte flapped
+   at 60. That flap was fixed at its real source on 2026-08-11 (`a724d69`) — the pose restore in
+   reset() below — and it does not reproduce: ten consecutive `--classes bladedancer` runs on
+   2026-08-12 returned `5 pass, 0 fail, 0 unproven`, ten times. The plan's own Step 1 says to stop
+   rather than change geometry on a guess if it comes back stable, and moving this number re-
+   baselines all sixteen classes. So it moves when a measurement asks for it and not before.
+
+   `harness/probes/riposte.probe.js` carries its own copy of 60 on purpose: a probe is a frozen
+   record of one measurement, run through `--eval`, and it cannot import from here. */
+const TARGET_DIST = 60;
+
 const BASELINE = `(function(){
   const G = __BF3.G, p = G.p;
   G.enemies.length = 0;
-  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+  const foe = __BF3.spawnEnemy('grunt', p.x, p.z - ${TARGET_DIST});
   if(!foe) return JSON.stringify({ ok:false, why:'spawnEnemy returned nothing' });
   foe.maxHp = 100000; foe.hp = 100000; foe.active = true; foe.dropT = 0;
   const h0 = foe.hp;
@@ -117,11 +137,12 @@ const PROBE = (classId) => `(function(){
   const mkDummy = () => {
     /* A fresh dummy per skill, at a fixed distance in front, so one skill's kill cannot mask the
        next skill's no-op. Huge HP so nothing dies and disappears mid-measurement.
-       EXACTLY the rig the baseline proved: a grunt at 60 units, awake, drop-in timer cleared. */
+       EXACTLY the rig the baseline proved: a grunt at TARGET_DIST units, awake, drop-in timer
+       cleared - the same constant the baseline spawns at, so the two can never drift apart. */
     G.enemies.length = 0;
     let d = null;
     try {
-      d = __BF3.spawnEnemy('grunt', p.x, p.z - 60);
+      d = __BF3.spawnEnemy('grunt', p.x, p.z - ${TARGET_DIST});
       if(d){ d.active = true; d.dropT = 0; d.maxHp = 100000; d.hp = 100000; }
     } catch(e){}
     return d;

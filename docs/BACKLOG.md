@@ -57,28 +57,40 @@ Known specifics to fold in:
   `frostlobber`, 4 `cragspitter` and 4 `sunpriest` alongside its natives. Deliberate, but the ratio
   works against zone identity.
 
-### 3. Characters render through walls
+### 3. A stray push nearly reached the live game — hardened, but the class of hazard stands
+On 2026-08-12 something in this repo attempted `main -> main` twice during an ordinary commit. It was
+rejected, and `origin/main` is untouched — but only because local `main` is stale. Had it been
+current, the live game would have deployed unreviewed.
+
+Mitigated by `remote.origin.push = refs/heads/autopilot-merged:refs/heads/autopilot-merged`, so a
+bare `git push` can now only ever move the working branch (proved with `--dry-run`). Still open, and
+worth a run: **find what issued it.** No hook exists in `.git/hooks`, no `core.hooksPath` is set
+globally or locally, and no autopilot run held the lock at the time. Something ran a push with a
+refspec that included `main` and it has not been identified. Until it is, the config is a seatbelt
+over an unknown driver.
+
+### 4. Characters render through walls
 `flushHero3D` clears the depth buffer before drawing the 3D layer, so by the code's own admission the
 layer "always draws OVER the voxel world and cannot be occluded by it… it is the reason a
 half-converted scene can show a character through a voxel wall." Visible in every zone in normal
 play.
 
-### 4. A save-compatibility test
+### 5. A save-compatibility test
 "Never break saves" is a standing rule enforced only by care. A runner that loads a corpus of old
 saves and asserts nothing is lost would protect every change in every other plan. Cheap, and it only
 gets more valuable.
 
-### 5. Frame-budget assertions
+### 6. Frame-budget assertions
 One missing `terrain:true` tag put 64 enemies and a tower of chests into Castle Duskmoor via
 `highGround()`. Per-zone assertions on obstacle, enemy and chest counts catch that class of
 regression anywhere it recurs.
 
-### 6. The three stale skill cards — needs Oliver first
+### 7. The three stale skill cards — needs Oliver first
 `mage/Attunement`, `ranger/Tumble` and `berserker/Charge` describe skills the redesign replaced. The
 code change is small; **which way it goes is a design call and belongs to Oliver.** Do not guess.
 Same for the three classes that promise aggro control in a game with no aggro model.
 
-### 7. Endless Dungeon — planned
+### 8. Endless Dungeon — planned
 See `docs/superpowers/plans/2026-08-11-endless-dungeon.md`.
 
 ## When the list runs out

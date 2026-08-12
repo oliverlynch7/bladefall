@@ -92,14 +92,16 @@
 
   /* A MELEE ATTACKER COMPANION, because the melee dart is what makes "which foe did it go for"
      readable as a position. A ranged pet shoots from where it stands and the bar would be HP alone. */
+  /* spawnPet() takes NO arguments - it reads meta.petActive (11631). Measured, after a launch spent
+     calling it with an id and getting no companion at all. `spiritwolf` is the Beastmaster's own
+     Bonded Companion: hidden from the shop pickers, which is why PETIDS does not list it. */
   let petNote = 'already out';
   if(!G.pet || G.pet.dead){
-    const ids = (__BF3.PETIDS || []).filter(id => {
+    for(const id of ['spiritwolf', 'emberpup', 'stonewhelp']){
       const P = (__BF3.PETS || {})[id];
-      return P && P.arch === 'attacker' && P.style === 'melee';
-    });
-    for(const id of ids){
-      try { __BF3.spawnPet(id); } catch(e){}
+      if(!(P && P.arch === 'attacker' && P.style === 'melee')) continue;
+      __BF3.meta.petActive = id;
+      try { __BF3.spawnPet(); } catch(e){}
       if(G.pet && !G.pet.dead){ petNote = 'spawned ' + id; break; }
     }
   }

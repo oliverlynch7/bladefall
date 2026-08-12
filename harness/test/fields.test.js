@@ -180,11 +180,11 @@ const KNOWN_DEAD = {
     // ^ level-generator scratch: written while a scape is built, never read back.
     'sideTaskDone',   // set true when the Thornheart falls; openWay() on the same line does the work.
   ],
-  /* THE ROW THIS SWEEP WAS BUILT TO FIND, listed so the tool lands green and the fix is proved by
-     this list SHRINKING. useSkill (10544) stamps all three on the companion, floats SIC EM over it,
-     and petUpdate picks its target by proximity to the pet — so "every skill is also an order", the
-     class's own statement of what it is, is not implemented. See harness/probes/petorder.probe.js. */
-  'G.pet': ['orderT', 'orderX', 'orderZ'],
+  /* EMPTY, AND IT IS THE PROOF. orderX/orderZ/orderT were listed here for exactly one commit: this
+     sweep was built to find them, they were the row it found, and petUpdate now reads all three.
+     The ratchet's second direction is what closes it — leave them listed and this test fails with
+     "no longer dead, so take these out of KNOWN_DEAD". See harness/probes/petorder.probe.js. */
+  'G.pet': [],
 };
 
 test('no field is written and never read except the ones already triaged', () => {

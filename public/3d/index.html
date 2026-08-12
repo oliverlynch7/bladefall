@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.935.0-autopilot';
+const VERSION3D='1.936.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10530,6 +10530,11 @@ SKILL_FX.pir_spike   = SKILL_FX.pir_spike   || SKILL_FX.r_spike;      // pirate 
 SKILL_FX.chr_beam    = SKILL_FX.chr_beam    || SKILL_FX.m_beam;       // chronomancer Time Lance
 SKILL_FX.chr_gravity = SKILL_FX.chr_gravity || SKILL_FX.m_gravity;    // chronomancer Time Warp
 SKILL_FX.chr_overload= SKILL_FX.chr_overload|| SKILL_FX.m_overload;   // chronomancer Singularity
+/* How far from the HERO a companion is allowed to be sent or to break off. petUpdate has leashed on
+   this since it was written ("only foes near the hero, so it never wanders off across the map"); it
+   is named here because the Beastmaster's order now has to pick a target out of the same set, and
+   two copies of a leash is how a pet ends up ordered somewhere it is not allowed to go. */
+const PET_LEASH=460;
 function useSkill(i){
   /* Attunement: each cast advances the Mage's element, so a ten-second window walks the whole
      reaction table instead of repeating one. */
@@ -10547,11 +10552,23 @@ function useSkill(i){
      Deliberately not a damage number. The pet was already "+25% HP and +15% damage", which is the
      exact stat-reskin this rewrite exists to remove. */
   try {
+    /* THIS WHOLE HOOK USED TO DIE ON ITS FIRST STATEMENT. `aimTarget()` was called with no
+       arguments and its first act is `playerAimYaw(p)`, so it threw on `undefined.yaw` straight
+       into the catch below — measured, not read (harness/probes/petorder.probe.js). Nothing in it
+       ran, not even the SIC EM the player is shown, and the two faults underneath it had therefore
+       never had a chance to matter:
+         - orderX/orderZ/orderT were read by NOTHING, so petUpdate carried on picking whatever was
+           nearest the pet. It reads them now.
+         - `atkCd` is not the companion's attack timer. `pet.atkT` is (petUpdate, 11672); atkCd
+           belongs to the player and to PvP bots, which is why a reader search cannot see that one
+           dead. So "its own attack comes off cooldown at once" reset a field nobody decrements.
+       PET_LEASH is petUpdate's own limit, so an order can only ever name a foe the companion was
+       already allowed to engage. */
     if(meta.classId==='beastmaster' && G && G.pet && !G.pet.dead){
-      const tgt = (typeof aimTarget==='function') ? aimTarget() : null;
+      const tgt = (typeof aimTarget==='function') ? aimTarget(G.p, G.p.weapon, PET_LEASH) : null;
       if(tgt){
         G.pet.orderX = tgt.x; G.pet.orderZ = tgt.z; G.pet.orderT = 3.5;
-        G.pet.atkCd = 0;
+        G.pet.atkT = 0;
         addText(G.pet.x, (G.pet.y||0)+34, G.pet.z, 'SIC EM', '#7ec46a');
       }
     }
@@ -11643,16 +11660,26 @@ function hurtPet(dmg,sx,sz){ const pet=G&&G.pet; if(!pet||pet.dead||(pet.invuln|
 function petUpdate(dt){
   const pet=G.pet,p=G.p; if(!pet) return; const P=PETS[pet.id]; if(!P){ G.pet=null; return; }
   pet.t+=dt; pet.hurtT=Math.max(0,(pet.hurtT||0)-dt);
+  if((pet.orderT||0)>0) pet.orderT=Math.max(0,pet.orderT-dt);   // the Beastmaster's standing order (useSkill)
   const grounded=(P.arch==='attacker'&&P.style==='melee');
   pet.bob=grounded?Math.abs(Math.sin(pet.t*7))*2 : Math.sin(pet.t*3)*3;       // grounded: a little gait hop; ethereal: gentle hover bob
   const floatY=p.y+(grounded?0:15), playing=(mode==='play'&&!isHitless());
   // ---- pick a target: break off to engage a nearby enemy on its own, else follow the hero LOOSELY ----
   let tx=pet.x, tz=pet.z, engaging=false, tgt=null;
   if(playing && P.arch==='attacker'){
-    let bd=(P.range||240)+140;
+    /* AN ORDER OUTRANKS PROXIMITY, and until 2026-08-12 there was no such thing. useSkill stamps
+       orderX/orderZ/orderT on the companion whenever the Beastmaster casts — "every skill is also an
+       order", which that hook calls the class — and nothing here read them, so the pet kept chewing
+       whatever was already nearest while the game floated SIC EM over its head.
+       While an order stands, the pet picks the foe nearest THE POINT YOU AIMED AT rather than the
+       one nearest itself. The proximity cutoff goes with it (an ordered target is by definition
+       further than the thing under the pet's nose, or the order would change nothing) and the leash
+       does not, so it still cannot be sent across the map. */
+    const ordered=(pet.orderT||0)>0 && pet.orderX!=null;
+    let bd=ordered?1e18:(P.range||240)+140;
     for(const e of combatTargets()){ if(e.dead||!e.active||e.dummy) continue;
-      if(dXZ(e.x,e.z,p.x,p.z)>460) continue;                                  // leash: only foes near the hero, so it never wanders off across the map
-      const d=dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){ bd=d; tgt=e; } }
+      if(dXZ(e.x,e.z,p.x,p.z)>PET_LEASH) continue;                            // leash: only foes near the hero, so it never wanders off across the map
+      const d=ordered?dXZ(e.x,e.z,pet.orderX,pet.orderZ):dXZ(e.x,e.z,pet.x,pet.z); if(d<bd){ bd=d; tgt=e; } }
     if(tgt){ engaging=true; const want=P.style==='ranged'?Math.max(120,(P.range||240)*0.6):34;
       const d=Math.max(1,dXZ(tgt.x,tgt.z,pet.x,pet.z));
       tx=tgt.x-(tgt.x-pet.x)/d*want; tz=tgt.z-(tgt.z-pet.z)/d*want; }

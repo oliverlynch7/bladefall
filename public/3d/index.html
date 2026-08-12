@@ -13535,13 +13535,24 @@ function update(dt){
      the quarter line, and the lock would only ever stop the small heals. Damage is never touched -
      hp below the mark simply moves the mark down with it.
 
-     Not in the Waystation: `hurtPlayer` puts you back at half there rather than killing you (11679,
-     "the Waystation is stakes-free"), and clamping that restore would pin a Berserker at whatever he
-     walked in with. */
+     A RESTORE IS NOT A HEAL, AND `prev > 0` IS THE WHOLE RULE THAT SEPARATES THEM. Every way this
+     game puts health back into a body that has run out of it passes through zero first, and each of
+     them then assigns UPWARD from a low number, which is indistinguishable from a heal by shape
+     alone: `MP.goDown` sets hp 0 and `reviveSelf` fills it (12364/12367), `pvpRespawn` fills it after
+     `_pvpDead` (12427), `arenaRespawn` fills it the instant the lava takes you under (12594), and the
+     three death saves — Thick Hide, Undying, Rewind — all lift a body off 0. Clamped, every one of
+     those would hand the Berserker back to the game at the health he died on, which for the two
+     respawns is an immediate loop. A living hero is never at 0, so testing that the PREVIOUS frame
+     ended above it exempts all of them and exempts nothing that is actually a heal. It also folds in
+     the "no mark yet" case for free, since `null > 0` is false.
+
+     Not in the Waystation either: `hurtPlayer` puts you back at half there rather than killing you
+     (11679, "the Waystation is stakes-free"), and clamping that restore would pin a Berserker at
+     whatever he walked in with. */
   { const P=G.p;
     if(P && !P.dead && !G.hub && meta.classId==='berserker' && c2def('berserker') && c2Passive('bsk_rage')){
       const prev=P._rageHp;
-      if(prev!=null && prev<effMaxHp(P)*0.25 && P.hp>prev){
+      if(prev>0 && prev<effMaxHp(P)*0.25 && P.hp>prev){
         P.hp=prev;
         if((G.time-(P._rageSayT||-99))>=1.2){ P._rageSayT=G.time; addText(P.x,P.y+(P.h||0)+24,P.z,'RAGE — NO HEALING','#ff5a6a',true); }
         hudUpdate();
@@ -13878,7 +13889,8 @@ function nextStage(){ warpTo(nextArea); }    // the portal now advances the ZONE
 function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.assign(p.stats,snap.stats)});
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=startWeapon(); else normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
-  p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
+  p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false;
+  p._rageHp=null; }   // putting a saved body back is not a heal — see Rage's lock at the end of update(). It is the ONE restore that does not pass through zero, so `prev > 0` cannot exempt it and this says so instead.
 function continueRun(){
   if(!meta.run) return; initAudio(); queueLevelUp=0;
   G={p:freshPlayer(),stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],

@@ -225,8 +225,48 @@ is already handled and the correct move is to stop.
 7. **Send a Telegram digest** (see below) summarizing what you did this run + the playtest URL.
 8. **Never** commit to `main`, never force-push, never delete content, never invent icon art (use placeholder icons — real art is a supervised ChatGPT pass with Oliver).
 
-## Cadence — A RUN IS KILLED AFTER ~20 MINUTES, AND THAT IS ~3 RENDERS (measured 2026-08-03)
-**Read this before picking an item.** The section below says "hourly"; `_autopilot.log` says
+## Cadence — THE 20-MINUTE KILL IS OVER. A run gets 30–68 minutes (re-measured 2026-08-12)
+**Read this before picking an item, and read it INSTEAD of the 2026-08-03 note below it.** The old
+measurement was true and is now false, and believing it costs real work: it tells a run to take a
+small item, and the reason it is here at all is that runs were shipping scouting reports instead of
+fixes.
+
+Same instrument as before — `_autopilot.log`, which is what the scheduler actually produced. Every
+completed run on 2026-08-12, start to end:
+
+```
+04:44 → 05:15  31m      08:04 → 08:42  39m      11:04 → 11:44  41m
+05:24 → 06:26  62m      08:44 → 09:31  48m      12:04 → 13:12  68m
+06:44 → 07:14  31m      10:04 → 10:53  50m
+07:24 → 07:59  35m
+```
+
+The cause of the old 19-minute wall was named in `autopilot.ps1` and fixed there: the task carried
+`ExecutionTimeLimit PT19M`, so Windows killed each run at 19 minutes *without* running the `finally`
+that releases the lock, and the stale lock then blocked every tick for the next 90.
+
+What that changes, in the unit that matters: **a run gets roughly 15–20 renders, not three.** An item
+needing a before shot, a fix, an after shot and two regression checks now fits. So does the full
+aggregate gate, which is ~32 launches and 20–45 minutes on its own — budget for it if the item touches
+game code, and start it as a background command so the wait is not dead time.
+
+**AND THE RULE THAT MATTERS MOST IS NOW THE OTHER ONE: COMMIT BEFORE YOUR RUN ENDS.** The stashes did
+not stop when the kills did. `_autopilot.log` still logs *"previous run was killed mid-edit; stashing
+its leftovers"* at 12:04 and 13:24 on 2026-08-12 — **and neither of those runs was killed.** Both ENDED
+CLEANLY, having left work uncommitted: the line above each is *"run left the tree dirty; keeping the
+marker so the next run recovers it"*. The guard fires on marker + dirty tree and cannot tell the two
+apart, so its message names the wrong cause. What it costs is real: the 12:04 stash was holding
+`harness/run-report.js` and its ten tests — a finished Task 3 — which no commit anywhere contained, and
+the run after it then logged `report skipped (run-report exit 1)` because its own PowerShell glue was
+calling a module that had been stashed out from under it. Recovering that took a later run twenty
+minutes of archaeology (`git show "stash@{1}^3:<path>"`). **An uncommitted file at the end of a run is
+not saved work, it is a stash nobody reads.**
+
+<details>
+<summary>The 2026-08-03 measurement, kept because the rules it produced are still right</summary>
+
+**A RUN IS KILLED AFTER ~20 MINUTES, AND THAT IS ~3 RENDERS (measured 2026-08-03)**
+The section below says "hourly"; `_autopilot.log` says
 otherwise and the log is the measurement. Runs start every **20 minutes**, and **every run since
 08:04 on 2026-08-03 was killed at its boundary** — 08:24, 08:44, 09:04, 09:24, 09:44 each logged
 *"previous run was killed mid-edit; stashing its leftovers"*, naming modified files under `public/`.
@@ -251,6 +291,8 @@ Rules that follow, in priority order:
 - **Never `git add -A`.** A second worker edits this same checkout; two of this run's `git status`
   polls came back holding another process's half-finished `prop3d.js`.
 - Do not start one more render past the ~15-minute mark. It will not come back.
+
+</details>
 
 ## Cadence (hourly)
 This runs **every hour, 8am–11pm** — not once a day. So each run does **one** backlog chunk and stays lightweight. **Only make noise when you ship something:**

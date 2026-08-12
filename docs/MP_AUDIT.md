@@ -177,3 +177,29 @@ Oliver's to tune and a tight interval would turn a balance change into a red gat
 Each of those disables a behaviour this repo wrote. Personal loot here is a property of the packet
 never carrying an item, so faking its absence would mean adding a code path to the game that exists
 only to be wrong. The negative control in the fourth row does that job honestly instead.
+
+---
+
+# Nobody can take a hit for anybody — there is no aggro model
+
+**Recorded 2026-08-12 from a static sweep in the skill-correctness pass, not from a co-op session.**
+It belongs here rather than only in `docs/SKILL_TRIAGE.md` (section K, with the full table) because
+its consequence is a party one: **a Paladin cannot pull a monster off a friend, and neither can a
+Warrior, because an enemy in this game never chooses whom to attack.**
+
+Melee contact damage goes straight to the local player — `index.html:13244` guards only on
+`dXZ(e.x, e.z, p.x, p.z)` and `p` is `G.p`. There is no target-selection step, so there is nothing a
+taunt could change. The four fields that carry the idea are all written and read by nothing:
+`e.taunt` (set by the Paladin's Taunt, whose own comment says `// pull aggro`), `e._taunt` and
+`p.warcryT` (the Warrior's Warcry), and `e.target` (set by Warcry, cleared by the Ninja's Vanish —
+and a grep for `.target` in the whole file returns twelve hits of which **ten are DOM events**).
+
+So three classes advertise control over aggro and one of them, Warcry, is a rank-8 climax pick whose
+entire shipped effect is a floating text and a ring.
+
+**Not fixed, and deliberately not by an autopilot run:** giving enemies a target to choose is a new
+mechanic that changes how every fight in the game behaves, which is far past the bar this repo holds
+unattended work to. Put to Oliver as a co-op design question — *should a party have a tank?* — rather
+than as a bug list. If the answer is yes it is the largest single thing that would make co-op play
+differently from two people soloing in the same room, which is what `docs/VISION.md`'s first priority
+asks for.

@@ -1608,6 +1608,62 @@ warns about, caught here by the same sweep.
 
 ---
 
+## K. THREE CLASSES PROMISE TO CONTROL WHO THE ENEMIES ATTACK. THERE IS NO AGGRO MODEL AT ALL
+
+**Found 2026-08-12 by the same sweep as sections I and J, and it is the one finding here that is
+about `docs/VISION.md`'s FIRST priority rather than its second: in co-op, no one can take a hit for
+anyone.** It is recorded and not fixed, because unlike I and J the missing piece is a mechanic.
+
+Four fields carry the idea of aggro in this file. **Every one of them is written and read by nothing.**
+
+| field | written at | read at | what it is supposed to do |
+|---|---|---|---|
+| `e.taunt` | 9951 (`bulwark`, which IS `pal_taunt`), zeroed 9980 | **nowhere** | the source comment says `// pull aggro` |
+| `e._taunt` | 19228 (`w_berserk`, Warcry) | **nowhere** | hold the taunt for 6s |
+| `p.warcryT` | 19230 | **nowhere** | the 6s duration |
+| `e.target` | 19228 (set), 19263 (cleared by Vanish) | **nowhere** | who this enemy is attacking |
+
+`e.target` deserves its own line: a grep for `\.target\b` in the whole file returns twelve hits and
+**ten of them are DOM events** (`e.target.value`, `e.target.closest`). The enemy-facing field exists
+in exactly two lines of game code, one of which sets it and the other of which clears it. Nothing
+between them ever asks what it holds.
+
+**And that is not an oversight in three skills, it is the architecture.** The enemy AI has no
+target-selection step to taunt: melee contact damage is applied straight against the local player
+(`13244`, `hurtPlayer(…)` guarded only by `dXZ(e.x,e.z,p.x,p.z)`), and `p` is `G.p`. An enemy does not
+choose whom to attack, so there is nothing for a taunt to change.
+
+**What each of the three skills actually ships:**
+
+- **warrior / Warcry** (`w_berserk`, r8 a — one of the two climax picks the whole class builds
+  toward). Its three effects are `e._taunt`, `e.target` and `p.warcryT`, all write-only. **What ships
+  is a floating `WARCRY xN` and a ring.** This is section A's shape — a cast that spends its cooldown
+  and does nothing — on a rank-8 pick, and section A is the closest thing in this document to Oliver's
+  original report.
+- **paladin / Taunt** (`pal_taunt`, which aliases `bulwark`). The brace half is real and works
+  (`p.guardT=3.2`, read in `hurtPlayer`). **"Pull nearby foes to you" does nothing** — there is no
+  pull and no aggro. This document already records `paladin/Taunt:shield` as passing; it passes on the
+  half that works.
+- **ninja / Vanish** (`nin_storm`). The four seconds of invulnerability are real. **"breaks every
+  enemy's target lock" is the `e.target=null` line above**, which clears a field the AI does not read.
+
+**AND THE HARNESS CANNOT SEE ANY OF IT, which is worth fixing before the skills are.** `claims.js`
+has no rule that turns *"Pull nearby foes to you"* into a claim — its control pattern is
+`stun|slow|root|knockback|fear|freez|immobil|silenc`, with no `pull` and no `taunt`. So the bench has
+never had an assertion to fail. **Do not simply add the word:** a new rule here creates failures that
+are not in `harness/baseline.json`, `run-all.js` calls those REGRESSIONs, and `autopilot.ps1` answers
+a red gate with `git checkout -- .` — so the right order is a rule and a re-baseline in one deliberate
+pass, sub-project A's work rather than a side effect of this one.
+
+**Why an autopilot run must not take this.** Wiring a taunt means giving enemies a target to choose,
+which is a mechanic that does not exist and would change how every fight in the game behaves — the
+same bar section E's remaining rows are held at, and a much larger piece of work than any of them. It
+is also the piece that would make a Paladin or a Warrior mean something in a party, so it belongs with
+`docs/MP_AUDIT.md` and the multiplayer plan rather than in a skill pass. **Oliver's, and worth putting
+to him as a co-op question, not a bug list.**
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

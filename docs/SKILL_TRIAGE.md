@@ -1459,6 +1459,77 @@ the real card is Oliver's call. Worth putting to him with the rest of section C.
 
 ---
 
+## I. THE NECROMANCER'S HARVEST ANNOUNCED A CORPSE AND DELETED IT — **FIXED 2026-08-12**
+
+**The third `CLASS_BASIC` identity found broken, after the Ninja's Unseen (section H), and this one
+lies to the player's face: the game floats the word `CORPSE` over the target and there is no corpse.**
+
+`CLASS_BASIC.necromancer` (index.html:11393) is the class's whole basic-attack identity and its own
+comment states the promise: *"Every basic hit builds toward a corpse: at five, the target drops one
+whether it dies or not. A Necromancer should never be short of bodies, and waiting for kills made the
+class worst exactly when it was losing."*
+
+It counts to five correctly. It pushes a corpse. It calls `addText(… 'CORPSE' …)` on the next line.
+And it pushed that corpse with **`t: 0`**, while `minionUpdate` (11694) does
+`for(const c of G.corpses) c.t -= dt; G.corpses = G.corpses.filter(c => c.t > 0)` — so the body was
+filtered out on the very next frame. **The kill path three hundred lines up (11024) pushes the same
+object with `t: 3.5`.** One field, in the one place the same feature omitted it.
+
+**Nothing had to be invented, which is why this was an autopilot row rather than Oliver's.** 3.5s is
+this feature's own corpse lifetime, taken verbatim from the kill path, and the threshold of five is
+the hook's own. No number on a card that does not have one.
+
+### How it was measured — `harness/probes/harvest.probe.js`, three halves in one launch
+
+**The bar is the GAME'S OWN discriminator, not a number the probe chose.** `SKILL_FX.necro_raise`
+(11732) raises **one** risen fighter off the nearest corpse and, finding none, falls back to **two**
+weaker ones (11735). So `risen 1` means a real corpse was consumed and `risen 2` means the cast ran
+and found nothing. **A plain "did any minion appear" bar would have gone green against the shipped
+game on the fallback alone** — the same shape as pass 15, where Burning Light lit exactly the right
+enemy and burned nothing.
+
+| trial | what it does | before | after |
+|---|---|---|---|
+| `harvest` | five basic hits on a dummy that never dies, then 0.25s of the game's own ticks, then Raise the Dead | added 1, **survived 0, risen 2** | added 1, **survived 1, risen 1** |
+| `four` | four hits, not five — "at five" is half the sentence | added 0, risen 2 | added 0, risen 2 |
+| `kill` | a corpse from the game's own death path (11024) | added 1, survived 1, **risen 1** | unchanged |
+
+The `kill` trial is the bench-liveness check and it is what makes the control's zeros mean anything:
+without it, `risen 2` in the harvest trial could equally have been a bench that cannot observe a raise
+at all. It raises correctly in **every** half, before and after.
+
+**The known-bad is carried in the probe, not produced by breaking the repo** (the rule
+`level.probe.js`'s `?breakgap` and `mp.probe.js`'s `?heroslot` follow): a third half sets `t = 0` on
+every corpse the harvest hook adds, which is the shipped line verbatim. It reads
+`added 1, survived 0, risen 2` — **identical to the before-run's live half** — so `okAgainstInert` is
+false while `ok` is true, in one launch, on real measurements.
+
+*The probe was wrong once and the before-run caught it.* Its first version pinned **every** corpse in
+`G.corpses`, which in the kill trial is the DEATH path's corpse — so the inert half zeroed its own
+liveness control and reported `kill.risen 2`. The known-bad has to reproduce the shipped bug and
+nothing else; the pin now skips a lethal swing.
+
+The two-list trap is checked inside the probe rather than in a command nobody re-runs: it asserts
+`c2CurSkills()[1]` really is Raise the Dead before believing anything (`casts:
+["Summon Skeletons","Raise the Dead","Bone Wall","Army of the Dead"]`).
+
+Regression: `node harness/test-skills.js --classes necromancer` → **4 pass / 0 fail / 0 unproven**,
+either side. `node tools/gate.js` → `GATE OK`.
+
+### The GAME finding this turned up, which is NOT fixed — Oliver's
+
+**The Necromancer's innate CARD does not describe its basic attack.** `CLASS2.necromancer.innate`
+(2103) still reads *"Magic weapons deal +8% damage, and every kill restores 3 mana and leaves a corpse
+you can raise"* — the flat percentage the `CLASS_BASIC` header (11209) says these hooks **replaced**,
+and no mention of Harvest at all. So the mechanic this section just fixed is one the player is never
+told about. That is section C's shape (a description that outlived its skill's redesign) and this
+document's own rule forbids fixing a skill by editing its description, so which of the two is the real
+card is his. Worth putting to him with the rest of section C — and worth checking the other eleven
+`CLASS_BASIC` entries against their innate cards at the same time, because this is unlikely to be the
+only one.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by
@@ -1469,6 +1540,22 @@ the real card is Oliver's call. Worth putting to him with the rest of section C.
   `chronomancer/Time Warp:damage`, survives under a different and much more specific name
   (`dead handler`, section A). The remaining three — `ranger/Tumble`, `mage/Attunement`,
   `berserker/Charge` — are sections B and C.
+- **`p.soulStrengthT` / `p.soulStrength`** — the mirror image of `p.siphonT` below, found the same way
+  and recorded for the same reason. `effDamage` (3751) carries a live reaper clause,
+  `if((p.soulStrengthT||0)>0) v *= 1 + Math.min(5, p.soulStrength||0) * .02`, and `minionUpdate`
+  (10068) decays the timer and zeroes the stacks — the exact structural twin of the Stormcaller's
+  `staticT`/`staticStacks` two lines away, which works. **Neither field is assigned anywhere in the
+  file**, so the clause can never fire: up to +10% damage that no reaper has ever had. It is NOT a
+  triage row, because **no reaper card promises it** — the tree offers Harvested Strength, Crimson
+  Harvest and the rest, and none of them says souls make you hit harder. Wiring it would mean
+  inventing a buff, which is the one thing this document forbids; deciding whether the stacking
+  damage or the silence is the real design is Oliver's. Found by a static sweep for player fields
+  that are read and never written, which is the cheapest form of the section H/I shape and is worth
+  re-running after any kit change.
+- **`p._vanish` and `p._perfectGuard`** — set once each (19255, 19266) and read nowhere. Both sit
+  beside the field that actually does the work (`p.invuln` and `p.bdParryT` respectively, set on the
+  same or the previous line), so neither is a broken promise — they are inert leftovers. Recorded
+  only so the next static sweep does not spend a launch on them.
 - **`p.siphonT`** — `SKILL_FX.x_siphon` (10175) sets it and **nothing in the file ever reads it**, so
   the "for 4s" half of Soul Siphon's drain is not implemented. The heal and the damage both land, so
   the claim passes and this is not a failure; recorded because it is a real dead field and the next

@@ -57,6 +57,10 @@ export async function runMpTests(opts){
      game, and reporting it as three failures would be inventing them. */
   if(r.skip) return { pass: 0, fail: 0, failures: [], skipped: r.skip };
 
+  /* The wait is proven by the run reporting it, not by the probe claiming it. `wouldHaveSkipped` is
+     what the old one-line guard would have returned from this same launch. */
+  const waited = { ms: r.waitedMs || 0, rescued: !!r.wouldHaveSkipped };
+
   const cap = r.cap;
   const check = (name, ok, detail) => { if(ok) pass++; else failures.push({ check: name, detail }); };
 
@@ -265,7 +269,7 @@ export async function runMpTests(opts){
   }
 
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping,
+           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping, waited,
            noparty: !!(party && party.noparty) };
 }
 
@@ -275,20 +279,40 @@ if(import.meta.filename === process.argv[1]){
        --bad        ?heroslot=1    the historical single pending SLOT: allies overwrite you
        --bad-rigs   ?heroonerig=1  the historical single shared RIG: allies are copies of you
        --bad-party  ?noparty=1     the historical unscaled fight: a friend is an easy mode
-       --bad-ping   ?noping=1      the receive handler dropped: your ping is invisible to the party */
+       --bad-ping   ?noping=1      the receive handler dropped: your ping is invisible to the party
+
+     And ONE self-test of the opposite shape, which must PASS rather than fail:
+       --slow-hero  ?heroslow=4000 the hero layer not ready when the shutter opens — the state that
+                                   made this whole suite go dark on the 2026-08-11 gate run. The bar
+                                   is that it comes back with its measurements anyway. The run prints
+                                   `waited Nms (rescued a run that would have skipped)`, and
+                                   `rescued` is the probe reporting what the old guard would have
+                                   said from the same launch. */
   const bad = process.argv.includes('--bad');
   const badRigs = process.argv.includes('--bad-rigs');
   const badParty = process.argv.includes('--bad-party');
   const badPing = process.argv.includes('--bad-ping');
+  const slowHero = process.argv.includes('--slow-hero');
   const url = bad  ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1'
             : badRigs ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroonerig=1'
             : badParty ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noparty=1'
             : badPing ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noping=1'
+            : slowHero ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslow=4000'
             : undefined;
   runMpTests({ url }).then(r => {
     for(const f of r.failures) console.log(`FAIL mp ${f.check}: ${f.detail}`);
     console.log(`mp: ${r.pass} pass, ${r.fail} fail` + (r.skipped ? ` (skipped: ${r.skipped})` : '') +
                 (r.at ? `  [at ${r.at}, cap ${r.cap}${r.slot ? ', SINGLE-SLOT self-test' : ''}]` : ''));
+    if(r.waited) console.log(`waited ${r.waited.ms}ms for the hero layer` +
+                             (r.waited.rescued ? '  (rescued a run that would have skipped)' : ''));
+    if(slowHero){
+      const ok = r.fail === 0 && !r.skipped && r.waited && r.waited.rescued;
+      console.log(ok ? 'slow-hero self-test: the wait engaged and the suite still measured ✓'
+                     : 'slow-hero self-test: FAILED — ' + (r.skipped ? 'still went dark: ' + r.skipped
+                                                         : !r.waited || !r.waited.rescued ? 'the wait never engaged'
+                                                         : r.fail + ' assertions failed'));
+      process.exit(ok ? 0 : 1);
+    }
     if(bad || badRigs || badParty || badPing){
       const which = bad ? 'single-slot' : badRigs ? 'single-rig'
                   : badParty ? 'unscaled-party' : 'no-ping';

@@ -16,14 +16,67 @@
    calls the real drawHero3D, inside its own try - so a renderer that throws is reported as a
    render error and cannot masquerade as a hero the queue failed to hold. Without that, one throw
    aborts flushHero3D's loop and under-counts every hero after it. */
-(function(){
+(async function(){
   const B = __BF3, G = B.G;
   const H = window.HERO3D;
-  if(!(H && H.on && H.ready && window.drawHero3D))
-    return JSON.stringify({ skip: '3D hero layer not live (on:' + !!(H && H.on) +
-                                  ' ready:' + !!(H && H.ready) + ')' });
+
+  /* ---- WHY THIS FUNCTION IS ASYNC, AND WHAT THE OLD ONE-LINE GUARD COST -------------------------
+     It used to be one test — `H.on && H.ready` — and one message, "3D hero layer not live
+     (on:false ready:false)". That is THREE different states wearing one name, and the aggregate gate
+     printed it for a whole run:
+
+       - `on:false` with no error   the layer is OFF BY FLAG (?hero3d=0). Supported, not a fault, and
+                                    nothing to wait for. Skipping is right.
+       - `on:false` with an error   the renderer THREW and hero3d.js caught it, set HERO3D.err and
+                                    fell back to voxels for everyone (hero3d.js:1781). That is the
+                                    single most interesting thing this suite could ever learn, and
+                                    the old message threw the text away.
+       - `on:true, ready:false`     the glTF is still LOADING. Nothing is wrong; the shutter is
+                                    early. `--scene 0` waits on world3d's build, which is a different
+                                    async, so under headless SwiftShader contention the world can be
+                                    up while the hero rig is not.
+
+     The third is why the suite went dark on the 2026-08-11 gate run, and the sub-project A plan
+     records the consequence exactly: "the suite skips exactly when the machine is busy, which is
+     most autopilot runs". A dark mp suite is the one that cannot tell Oliver whether he is invisible
+     to himself in PvP.
+
+     SO IT WAITS, and only for the state worth waiting for. Not a fixed sleep: it polls, so a warm
+     machine pays nothing (measured at 0 ms) and a cold one pays what it needs. It gives up at 30s
+     and says how long it waited, because a wait that silently became infinite would trade a dark
+     suite for a hung gate.
+
+     A CRASH IS STILL REPORTED AS A SKIP, deliberately, and this is a judgement rather than an
+     oversight. `autopilot.ps1` answers a red gate with `git checkout -- .`, so an assertion that can
+     fail for environmental reasons can DELETE a run's verified work — the hazard the plan's pass 3
+     records. Headless SwiftShader falling over is environmental. It is now loud and it carries the
+     error text; making it fail the gate is a separate decision with a real cost behind it. */
+  const SLOW = (/[?&]heroslow=(\d+)/.exec(location.search) || [])[1];
+  /* THE SELF-TEST HOOK FOR THE WAIT, carried permanently beside ?heroslot and ?breakgap for the
+     same reason: an assertion nobody has watched engage is an assertion nobody should believe. It
+     puts the layer back into the exact state that made the suite dark — on, not ready — and the bar
+     is that the suite still comes back with its measurements instead of a skip. `wouldHaveSkipped`
+     below is what this probe would have returned without the wait, from the same launch. */
+  if(SLOW && H){ H.ready = false; setTimeout(function(){ H.ready = true; }, +SLOW); }
+
+  const entry = { on: !!(H && H.on), ready: !!(H && H.ready), err: (H && H.err) || null };
+  let waitedMs = 0;
+  if(H && H.on && !H.ready && !H.err){
+    const t0 = Date.now();
+    while(!H.ready && !H.err && H.on && (Date.now() - t0) < 30000)
+      await new Promise(function(r){ setTimeout(r, 200); });
+    waitedMs = Date.now() - t0;
+  }
+
+  const why = !H                          ? 'hero3d.js never loaded at all'
+            : H.err                       ? '3D hero layer CRASHED and fell back to voxels: ' + H.err
+            : !H.on                       ? '3D hero layer off by flag (?hero3d=0)'
+            : !H.ready                    ? '3D hero layer still loading after ' + waitedMs + 'ms'
+            : !window.drawHero3D          ? 'drawHero3D is not on window'
+            : null;
+  if(why) return JSON.stringify({ skip: why, entry: entry, waitedMs: waitedMs });
   if(typeof B.drawHero3 !== 'function' || typeof B.flushHero3D !== 'function')
-    return JSON.stringify({ skip: 'render path not exported on __BF3' });
+    return JSON.stringify({ skip: 'render path not exported on __BF3', entry: entry, waitedMs: waitedMs });
 
   const CAP = B.HERO3D_MAX;
   const real = window.drawHero3D;
@@ -114,6 +167,9 @@
   window.drawHero3D = real;
   window.__hero3dPending = null;
   return JSON.stringify({ cap: CAP, at: G && G.areaName, slot: SLOT,
+                          /* What this probe would have said WITHOUT the wait, measured in the same
+                             launch rather than argued: the layer's state the first time it looked. */
+                          waitedMs: waitedMs, wouldHaveSkipped: !entry.ready,
                           oneRig: /[?&]heroonerig=1/.test(location.search),
                           localFirst: localFirst, localLast: localLast, crowd: crowd,
                           rigTrial: rigTrial, rigTrial2: rigTrial2, rigs: rigs });

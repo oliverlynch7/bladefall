@@ -894,6 +894,52 @@ hooks in this harness are URL flags, and without it they could only ever be run 
 - [x] **Step 3: Commit** — `harness/test-mp.js`, `harness/probes/mp.probe.js`, the `drive.js` url
       passthrough, and the three `__BF3` exports.
 
+- [x] **Step 4 (added 2026-08-12): THE SUITE NO LONGER GOES DARK BECAUSE THE MACHINE IS BUSY.**
+      Taken from Task 6 Step 4's closing paragraph, which is the only place in either plan that named
+      this as open work.
+
+`mp.probe.js` opened with `H.on && H.ready` and, failing it, returned `3D hero layer not live
+(on:false ready:false)`. Read at its site, that one message covers three unrelated situations, and
+the right answer differs in each:
+
+| state | what it means | right answer |
+|---|---|---|
+| `on:false`, no error | **off by flag** (`?hero3d=0`), a supported way to run the game | skip — already correct |
+| `on:false`, `HERO3D.err` set | the renderer **THREW**; hero3d.js caught it and fell back to voxels for everyone (`hero3d.js:1781`) | skip, but say WHAT threw — the old message discarded the text |
+| `on:true, ready:false` | the glTF is still **LOADING**. `--scene 0` waits on world3d's build, which is a different async | **WAIT** — nothing is wrong, the shutter is early |
+
+The third is the one that made the 2026-08-11 gate run dark, and it is the one the plan predicted:
+world3d can be up while the hero rig is not. The probe is now `async` and polls for readiness, so a
+warm machine pays nothing and a cold one pays what it needs. It gives up at 30s and reports how long
+it waited, because a wait that could become unbounded trades a dark suite for a hung gate.
+
+**A CRASH IS STILL REPORTED AS A SKIP AND NOT A FAILURE, deliberately.** `autopilot.ps1` answers a red
+gate with `git checkout -- .`, so an assertion that can fail for environmental reasons can DELETE a
+run's verified work — sub-project B's pass 3 records exactly that hazard, in those words. Headless
+SwiftShader falling over is environmental. It is now loud and it carries the error text; promoting it
+to a failure is a separate decision with a real cost behind it, and it should be made deliberately
+rather than as a side effect of this.
+
+**Proven by a self-test carried permanently in the probe, beside `?heroslot` and `?breakgap` — and it
+is the opposite shape to the other three, because it must PASS.** `?heroslow=<ms>` puts the layer back
+into the exact state that made the suite dark (on, not ready), and the bar is that the suite comes
+back with its measurements anyway. `wouldHaveSkipped` is what the old guard would have returned *from
+the same launch*, so the two versions are watched to disagree rather than argued about — the rule
+`harness/test/gate.test.js` sets.
+
+Three runs, all measured:
+
+| run | result |
+|---|---|
+| `node harness/test-mp.js --slow-hero` | **`waited 4172ms  (rescued a run that would have skipped)`**, `mp: 54 pass, 0 fail` |
+| `node harness/test-mp.js` | `mp: 54 pass, 0 fail`, **`waited 0ms`** — a warm machine pays nothing |
+| `node harness/test-mp.js --bad` | `41 pass, 9 fail`, `known-bad (single-slot): correctly detected ✓` — the assertions can still go red |
+
+**What it does NOT fix, said plainly.** If the layer genuinely never comes up in 30s the suite is
+still dark, and it is still gate-neutral. What changes is that the run now says which of the three
+states it was and, for a crash, what the renderer said — so the next person is not reading
+`on:false ready:false` and guessing, which is what this run had to do before writing any of it.
+
 ---
 
 ### Task 6: The aggregate gate
@@ -1029,6 +1075,9 @@ ratchet's genuine direction is tested too, so this cannot quietly become a basel
 in that launch — headless SwiftShader under load. So the suite skips exactly when the machine is
 busy, which is most autopilot runs. It is now LOUD when that happens, which is the floor; making it
 retry or wait longer is a real piece of work and belongs to whoever takes Task 5 again.
+
+**THAT WORK WAS TAKEN, 2026-08-12 — see Task 5 Step 4 below. The one-line guard was hiding THREE
+different states under one name, and only one of them was worth skipping for.**
 
 ---
 

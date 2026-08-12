@@ -18,8 +18,14 @@
 | 4 level tester | **done** | `8a8f766` (+ the game fix it found, `8dcc77f`) |
 | 5 multiplayer tester | **done** | this run; the plan's probe tested itself — see Task 5 |
 | 6 aggregate gate | done | `34262a6`; baselines not pass/fail. **The ratchet was missing** — see below. **And a suite that did not run was being reported as an unwritten file AND credited with fixing its own baselined failures** — fixed 2026-08-11, Task 6 Step 4 |
-| 7 autopilot guards | done | `34262a6`, `a3e999c` |
+| 7 autopilot guards | done | `34262a6`, `a3e999c`; **Step 5 was half-done until 2026-08-11** — the stale `AUTOPILOT_BLOCKED.md` was still in the tree, telling every fresh checkout the autopilot was blocked. Removed; its untracked 881-line sibling deliberately kept, see the step |
 | 8 re-enable the schedule | not started | — |
+
+**Every step box in Tasks 1–7 is now ticked, checked against the repo on 2026-08-11 rather than
+against this table.** They had been left unticked while the table above said "done", so the standing
+rule *take the first task whose steps are not all ticked* sent every run back to Task 1 — a plan that
+reads as unstarted is worse than one that reads as unfinished. Where what shipped differs from the
+code printed in a step, the step now says so and points at the file.
 
 **Next task is 8 (re-enable the schedule) — and it is OLIVER'S.** It edits a Windows scheduled task
 to start running this automation unattended every 6 hours on his machine. That is not a code change
@@ -91,7 +97,12 @@ Later tasks must use the corrected form.
 - Produces: `runScenario({ scene, pre, js, waitMs, timeoutMs }) -> Promise<any>` — boots the game at `scene`, optionally runs `pre`, evaluates `js`, returns the parsed value. Throws on eval error or timeout.
 - Produces: `parseEval(stdout) -> any` — pure; extracts the value from `shot.js` output. Exported for unit testing without a browser.
 
-- [ ] **Step 1: Write the failing test for the pure parser**
+> **Task 1 shipped in `7725819`.** Its steps are ticked below against the repo, not against memory:
+> `harness/drive.js` and `harness/test/drive.test.js` both exist and the suite is green. The code in
+> the steps is the PLAN's CommonJS version and is kept only for the diff — what shipped is ESM, and
+> `runScenario` grew `url` and `--eval @file` support later (Corrections 1 and 3, and Task 5 Step 2).
+
+- [x] **Step 1: Write the failing test for the pure parser**
 
 Create `harness/test/drive.test.js`:
 
@@ -120,12 +131,12 @@ test('parseEval throws when there is no EVAL line at all', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to make sure it fails**
+- [x] **Step 2: Run it to make sure it fails**
 
 Run: `node --test harness/test/drive.test.js`
 Expected: FAIL — `Cannot find module '../drive.js'`
 
-- [ ] **Step 3: Implement the driver**
+- [x] **Step 3: Implement the driver**
 
 Create `harness/drive.js`:
 
@@ -190,12 +201,12 @@ function runScenario(opts){
 module.exports = { runScenario, parseEval };
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node --test harness/test/drive.test.js`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Validate the driver against the real game (known-good case)**
+- [x] **Step 5: Validate the driver against the real game (known-good case)**
 
 Run:
 
@@ -205,7 +216,7 @@ node -e "require('./harness/drive.js').runScenario({scene:1, js:'JSON.stringify(
 
 Expected: `OK { zone: 'Hollow Pass', hp: 100 }`
 
-- [ ] **Step 6: Validate the driver against a known-bad case**
+- [x] **Step 6: Validate the driver against a known-bad case**
 
 Run:
 
@@ -215,7 +226,7 @@ node -e "require('./harness/drive.js').runScenario({scene:1, js:'nope.nope'}).th
 
 Expected: `OK rejected: page threw: ReferenceError...`
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add harness/drive.js harness/test/drive.test.js
@@ -236,7 +247,13 @@ git commit -m "harness: shared driver over shot.js, with a pure parser that unit
 
 This is separated from the live runner on purpose: it is the only part with interesting logic and the only part testable in milliseconds.
 
-- [ ] **Step 1: Write the failing test**
+> **Task 2 shipped in `c35333d`.** Ticked against the repo: `harness/claims.js` and
+> `harness/test/claims.test.js` both exist and are green. The rules table below is the version this
+> plan shipped and has since been CORRECTED twice by measurement — eleven descriptions the parser
+> mis-read (Task 3 Step 4) and the Beastmaster's eighteen companion lines — so read `claims.js`
+> itself, not this snippet, before changing a rule.
+
+- [x] **Step 1: Write the failing test**
 
 Create `harness/test/claims.test.js`. The descriptions are REAL, read from the game:
 
@@ -274,12 +291,12 @@ test('an unparseable description claims nothing rather than guessing', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to make sure it fails**
+- [x] **Step 2: Run it to make sure it fails**
 
 Run: `node --test harness/test/claims.test.js`
 Expected: FAIL — `Cannot find module '../claims.js'`
 
-- [ ] **Step 3: Implement the parser**
+- [x] **Step 3: Implement the parser**
 
 Create `harness/claims.js`:
 
@@ -313,12 +330,12 @@ function claimsOf(d){
 module.exports = { claimsOf };
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `node --test harness/test/claims.test.js`
 Expected: PASS, 6 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add harness/claims.js harness/test/claims.test.js
@@ -336,7 +353,12 @@ git commit -m "harness: parse what a skill's description actually promises"
 - Consumes: `runScenario` from `harness/drive.js`, `claimsOf` from `harness/claims.js`.
 - Produces: `runSkillTests() -> Promise<{ pass:number, fail:number, failures:Array<{cls,skill,claim,text,detail}> }>`
 
-- [ ] **Step 1: Write the in-page probe and run it for ONE class to see real output**
+> **Task 3 shipped in `2a86ea0` and `d7c50de`.** Ticked against the repo: `harness/test-skills.js`
+> exists and runs. The code in Step 2 is the plan's version and has been overtaken twice by
+> measurement — it read one skill list and cast from another (`faf52c3`), and its bench had four
+> further faults found in sub-project B Task 1 Step 1. Read the file, not the snippet.
+
+- [x] **Step 1: Write the in-page probe and run it for ONE class to see real output**
 
 Run:
 
@@ -354,7 +376,7 @@ runScenario({scene:'arena:flat', waitMs:12000, js:\`(function(){
 
 Expected: a class id and its skills with descriptions. Record the exact shape before writing assertions against it.
 
-- [ ] **Step 2: Write the tester**
+- [x] **Step 2: Write the tester**
 
 Create `harness/test-skills.js`:
 
@@ -449,7 +471,7 @@ if(require.main === module){
 }
 ```
 
-- [ ] **Step 3: Run it**
+- [x] **Step 3: Run it**
 
 Run: `node harness/test-skills.js`
 Expected: a list of `FAIL <class>/<skill> claims <claim>` lines and a summary. Failures here are the BUG Oliver reported, not a broken test — but confirm the next step before believing any of them.
@@ -554,7 +576,7 @@ game, and both cheap to settle next run:
 So the next task for sub-project B is to settle those two, not to start editing skills. Nothing here
 is fixed: a damage or healing number is a balance call and belongs to Oliver.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add harness/test-skills.js
@@ -883,7 +905,10 @@ hooks in this harness are URL flags, and without it they could only ever be run 
 - Consumes: `runSkillTests`, `runLevelTests`, `runMpTests`.
 - Produces: `harness/report.json`; exit code 0 when everything passes, 1 otherwise. This exit code is the autopilot's commit gate.
 
-- [ ] **Step 1: Write the runner**
+- [x] **Step 1: Write the runner** — shipped in `34262a6`. The code below is the plan's version and is
+      kept only for the diff: what runs is ESM, enumerates `harness/test/*.test.js` explicitly because
+      `node --test <dir>` fails on Windows (Correction 2), and takes its ratchet and its per-suite
+      reporting from `harness/gate-rules.js` (Step 4).
 
 Create `harness/run-all.js`:
 
@@ -1016,12 +1041,17 @@ retry or wait longer is a real piece of work and belongs to whoever takes Task 5
 **Interfaces:**
 - Consumes: `harness/run-all.js` exit code.
 
-- [ ] **Step 1: Read the current run body**
+> **Task 7 shipped in `34262a6` and `a3e999c`.** Ticked against the repo rather than against memory:
+> `autopilot.ps1:208` carries the limit guard (widened to `hit your session limit|usage limit
+> reached`), `:233` runs the green gate, and `:193` carries the scope guard in the prompt text. Step 5
+> was only HALF done and is now finished — see the note under it.
+
+- [x] **Step 1: Read the current run body**
 
 Run: `grep -n "claude\|Start-Process\|git commit\|git push" autopilot.ps1`
 Expected: the lines that launch Claude and that commit. Note their exact line numbers before editing.
 
-- [ ] **Step 2: Add the limit guard**
+- [x] **Step 2: Add the limit guard**
 
 The 2026-08-03 outage was ~200 runs that each started, printed `You've hit your session limit`, and ended having shipped nothing. After the Claude invocation captures its output into `$out`, add:
 
@@ -1035,7 +1065,7 @@ if ($out -match "hit your session limit") {
 }
 ```
 
-- [ ] **Step 3: Add the green gate**
+- [x] **Step 3: Add the green gate**
 
 Immediately before the commit step:
 
@@ -1050,7 +1080,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 ```
 
-- [ ] **Step 4: Add the scope guard to the prompt**
+- [x] **Step 4: Add the scope guard to the prompt**
 
 In the prompt text that `autopilot.ps1` passes to Claude, add these lines next to the existing "Work on the autopilot-merged branch only" rule:
 
@@ -1060,7 +1090,9 @@ In the prompt text that `autopilot.ps1` passes to Claude, add these lines next t
 - You may not commit unless `node harness/run-all.js` exits 0.
 ```
 
-- [ ] **Step 5: Delete the stale blocked files**
+- [x] **Step 5: Delete the stale blocked files** — **ONE of the two, deliberately, 2026-08-11.** Both
+      were still present when this box was finally ticked, which is why it is worth writing down which
+      one went and why the other stayed.
 
 Both describe a permission blocker that was fixed — `.claude/settings.json` and `tools/gate.js` both exist.
 
@@ -1068,12 +1100,29 @@ Both describe a permission blocker that was fixed — `.claude/settings.json` an
 git rm --cached AUTOPILOT_BLOCKED.md 2>/dev/null; rm -f AUTOPILOT_BLOCKED.md _AUTOPILOT_BLOCKED.md
 ```
 
-- [ ] **Step 6: Verify the guards fire**
+**`AUTOPILOT_BLOCKED.md` is gone.** 106 lines, TRACKED (last touched in `3cb232a`), and its own line 5
+says *"delete this file once the fix below is in"*. It is: the table of denied commands it is built
+around lists `node <any script>`, `git add`, `git commit` and `git push`, and this run used all four.
+A fresh checkout was being handed a file announcing the autopilot is blocked when it is not, which is
+the same shape of stale green/red light this whole plan exists to remove. Tracked, so `git revert`
+brings it back.
+
+**`_AUTOPILOT_BLOCKED.md` STAYS, and the command above should not be run as written.** It is 881 lines
+and it is UNTRACKED — the `/_*` gitignore rule is the whole reason it was filed at that path, so `rm`
+is unrecoverable and no revert exists. It is also not what this step thinks it is: it is the outage
+LOG, holding thirteen blocked runs' desk research, and its own header points work at
+`_AUTOPILOT_NEXT_RUN.md` instead. Deleting a run's only copy of that is exactly the irreversible,
+not-revertible-by-git act Task 8 is held back from an autopilot run for. If Oliver wants it gone it is
+one `rm`, and it is his.
+
+- [x] **Step 6: Verify the guards fire** — `_autopilot.log` carries both outcomes, and the limit guard
+      earned its widened pattern (`usage limit reached` as well as `hit your session limit`) from a
+      real run that the first version did not match.
 
 Run: `powershell -File autopilot.ps1 -WhatIf` if supported, otherwise run once manually and read `_autopilot.log`.
 Expected: the log shows either a normal run or `skipped: session limit`, and never a commit while the gate is red.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add autopilot.ps1

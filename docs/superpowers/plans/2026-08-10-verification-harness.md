@@ -1186,53 +1186,46 @@ git commit -m "autopilot: limit guard, green gate, scope guard"
 
 ---
 
-### Task 8: Re-enable the schedule
+### Task 8: Re-enable the schedule — **OBSOLETE. Closed 2026-08-12 without being carried out.**
 
-**Files:**
-- Modify: Windows scheduled task `Bladefall Autopilot` (currently Disabled, last ran 2026-08-03).
+**Its premise is false and was false before it was written down.** The task says the scheduled task is
+"currently Disabled, last ran 2026-08-03". `_autopilot.log` says it is enabled and firing every twenty
+minutes, and has been all day: nine completed runs on 2026-08-12 alone (04:44, 05:24, 06:44, 07:24,
+08:04, 08:44, 10:04, 11:04, 12:04), each 31–68 minutes long. **The run reading this sentence was itself
+started by that schedule.** There is nothing to enable.
 
-- [ ] **Step 1: Confirm the current state**
+That leaves this task as a trap rather than as work: it is the first unticked task in the plan that the
+autopilot prompt puts SECOND in priority, so every run that gets past harness-hardening lands here,
+finds four PowerShell commands it cannot run, and has to decide what to do about a task whose goal is
+already true. It is closed instead.
 
-Run:
+- [x] **Steps 1–3 (confirm state / set 6-hourly / enable): NOT DONE, and must not be.** Two independent
+      reasons, either of which is enough.
 
-```powershell
-Get-ScheduledTask -TaskName 'Bladefall Autopilot' | Get-ScheduledTaskInfo
-```
+**The cadence is Oliver's call, not an autopilot's.** Moving from 20-minutely to 6-hourly cuts the
+automation's throughput by roughly 18×, and the run prompt he wrote asks for "real throughput, not a
+token trickle". A run silently rescheduling its own successor against that is exactly the kind of
+decision `docs/VISION.md` reserves for him.
 
-Expected: `LastRunTime 8/3/2026`, and the task itself Disabled.
+**And the commands are not available to an unattended run anyway.** `Get-ScheduledTask`,
+`Set-ScheduledTask` and `Enable-ScheduledTask` need `powershell -Command`, which is deliberately NOT on
+the allowlist — see harness-hardening Task 2 Step 3 for why: allowing it is arbitrary code execution
+and walks straight around the deny list that keeps this automation off `main`. The only PowerShell entry
+that exists points at `tools/psparse.ps1`, which reads a file and parses it.
 
-- [ ] **Step 2: Set the cadence to 6-hourly**
+- [x] **Step 4: Run one cycle manually — IMPOSSIBLE FROM INSIDE A RUN, and the evidence it wanted
+      already exists.** `Start-ScheduledTask` would hit the overlap lock held by the very session
+      running it (`_autopilot.lock`, keyed on a live PID) and log `skipped: run <pid> still alive`. What
+      the step asked to see — "a `run start` / `run end` pair with real work between them, not the
+      20-minute dead-start pattern" — is in the log nine times over for 2026-08-12, and the pattern it
+      was worried about is gone: the 19-minute `ExecutionTimeLimit` that caused it was fixed in
+      `autopilot.ps1`, as recorded in `AUTOPILOT.md`'s cadence section.
 
-```powershell
-$t = Get-ScheduledTask -TaskName 'Bladefall Autopilot'
-$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).Date.AddHours(6) -RepetitionInterval (New-TimeSpan -Hours 6)
-Set-ScheduledTask -TaskName 'Bladefall Autopilot' -Trigger $trigger
-```
+- [x] **Step 5: Commit the doc change** — this closure, plus the re-measured cadence in `AUTOPILOT.md`.
 
-- [ ] **Step 3: Enable it**
-
-```powershell
-Enable-ScheduledTask -TaskName 'Bladefall Autopilot'
-Get-ScheduledTask -TaskName 'Bladefall Autopilot' | Select-Object TaskName, State
-```
-
-Expected: `State: Ready`
-
-- [ ] **Step 4: Run one cycle manually and read the log**
-
-```powershell
-Start-ScheduledTask -TaskName 'Bladefall Autopilot'
-```
-
-Then: `tail -20 _autopilot.log`
-Expected: a `run start` / `run end` pair with real work between them, or `skipped: session limit`. Not the 20-minute dead-start pattern.
-
-- [ ] **Step 5: Commit any log/doc changes**
-
-```bash
-git add -A AUTOPILOT.md
-git commit -m "autopilot: back on, 6-hourly, gated on the harness"
-```
+*If the cadence ever should change, it is one line for Oliver in Task Scheduler, and the number to
+argue about is in `AUTOPILOT.md`: a run lasts 31–68 minutes, so a 20-minute trigger means the lock is
+usually already held and roughly two thirds of the ticks are no-ops that cost nothing.*
 
 ---
 

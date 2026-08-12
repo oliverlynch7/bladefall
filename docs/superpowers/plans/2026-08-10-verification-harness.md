@@ -935,6 +935,12 @@ Three runs, all measured:
 | `node harness/test-mp.js` | `mp: 54 pass, 0 fail`, **`waited 0ms`** — a warm machine pays nothing |
 | `node harness/test-mp.js --bad` | `41 pass, 9 fail`, `known-bad (single-slot): correctly detected ✓` — the assertions can still go red |
 
+**And it was then put through the thing it was built for, the same day.** A full `node harness/run-all.js`
+ran after this landed — sixteen skill launches and sixteen level launches ahead of the mp suite on the
+same machine, which is exactly the contention that used to make it dark. Result: `GATE: PASS (3 known,
+0 newly fixed)`, exit 0, and **`mp: 54 pass, 0 fail`**. One green gate does not prove a race is gone;
+it does prove the suite ran under load, which is more than the last two gate runs could say.
+
 **What it does NOT fix, said plainly.** If the layer genuinely never comes up in 30s the suite is
 still dark, and it is still gate-neutral. What changes is that the run now says which of the three
 states it was and, for a crash, what the renderer said — so the next person is not reading

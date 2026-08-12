@@ -483,6 +483,17 @@ twelve entries (`berserker`, `mage`, `monk`, `skylancer` and the two damage-shap
 cross-function state at all, so a trace of this kind cannot say anything about them and none of them
 has been measured against its own words.
 
+**AND IT RAN ONCE MORE, 2026-08-12, after pass 35 and the mp-wait fix: `GATE: PASS (3 known, 0 newly
+fixed)`, exit 0, no `REGRESSION:` line, `harness/baseline.json` untouched.** Per-suite: unit 55/55,
+skills **70 pass / 3 fail / 2 unproven**, levels 36/0/12, **mp 54 pass / 0 fail**. The three knowns are
+still `ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`.
+
+**The mp line is the one worth reading.** This is the first full gate since sub-project A Task 5 Step 4
+taught the suite to wait for the hero layer, and a full gate is precisely the contention that used to
+make it go dark — sixteen skill launches and sixteen level launches ahead of it on the same machine. It
+ran. Skills moved 69→70 pass and 3→2 unproven, which is the den-less/observation-window flap this plan
+already records in both directions, not a fix and not a regression.
+
 **THE AGGREGATE GATE RAN AGAIN, 2026-08-12, after passes 31–33: `GATE: PASS (3 known, 0 newly fixed)`,
 exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved — the three knowns are still
 `ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`, all sections B/C/J and all Oliver's.

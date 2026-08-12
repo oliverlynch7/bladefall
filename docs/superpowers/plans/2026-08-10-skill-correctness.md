@@ -274,6 +274,23 @@ here"*), and two inert leftovers worth naming so nobody spends a launch on them.
 should widen past `p.` — enemy state (`e.<field>`) and `G.<field>` have never been checked this way**,
 and `CLASS_BASIC` is now 3 for 12 on identities that did not work.
 
+**AND THE SAME SWEEP SETTLED TWO OF THE THREE REMAINING BASELINED FAILURES WITHOUT TOUCHING THE GAME
+— they are not bugs.** `SKILL_FX` is a plain object assigned to in three places, so the last
+definition of an id wins; twelve rank-8 and Berserker handlers were deliberately rewritten at the end
+of the file (19223–19352, the block's own header says why) and **their `CLASS2` cards were never
+rewritten with them.** `mage/Attunement` and `berserker/Charge:damage` are two of those twelve: the
+harness is right that the skill does not do what the card says, and it is the *card* that moved.
+Full table, all twelve rows, in `docs/SKILL_TRIAGE.md` section J. **Every one of them is Oliver's** —
+this plan's rule against editing a description to match behaviour exists precisely for the case where
+the behaviour is the newer and better of the two, and answering them is twelve sentences rather than
+twelve numbers. One row, `bsk_whirl`, carries a second and separate fault: its card's cost clause
+("you cannot move backwards for 10s") is not implemented anywhere, so what ships is a plain damage
+doubler. That is a balance change and his as well, for pass 20's reason.
+
+**So this sub-project's honest state is: no skill row an autopilot run may take is currently known.**
+Section E is floored, section J is Oliver's by rule, and the next candidate has to be *found* — by
+widening the sweep, not by re-reading the triage list.
+
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
 the three knowns are still `ranger/Tumble`, `mage/Attunement` and `berserker/Charge:damage`, all three

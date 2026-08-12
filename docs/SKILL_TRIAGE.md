@@ -173,6 +173,10 @@ reporting it until he decides.
 
 ## C. Two descriptions that outlived their skill's redesign — Oliver's call
 
+> **SUPERSEDED IN SCOPE, 2026-08-12 — it is TWELVE, not two, and they share one cause. See section J.**
+> Attunement is row 8 of that table. Only `ranger/Tumble` below is outside it. Read J before acting on
+> anything here; the closing note in this section is corrected there.
+
 Per this plan's own constraint, a skill is never "fixed" by rewriting its description to match
 broken behaviour. Both of these look like the description was left behind by a deliberate redesign
 whose intent is written in the code's own comment, which makes them content decisions, not bugs.
@@ -182,11 +186,22 @@ whose intent is written in the code's own comment, which makes them content deci
 | mage | Attunement | damage | "A 4s storm repeatedly damages enemies around you." | `SKILL_FX.m_tempest` is **redefined at 18708** as a pure buff: "Your element changes on every cast for 10s." No damage at all. | needs Oliver |
 | ranger | Tumble | damage | "Roll back ~5m with brief i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim." | `SKILL_FX.tumble` (9812) dodges, grants invuln and SNARES. There is no parting shot. | needs Oliver |
 
-Worth noting on Attunement: the redefinition at 18708 only rebinds `m_tempest`. The aliases
-`chr_tempest`, `st_storm` and `necro_storm` were assigned from `m_tempest` *earlier* (10129, 10084,
-10078) and therefore still hold the ORIGINAL damage-storm function. That is not a bug — those three
-classes' descriptions still say "storm" and they still get one — but it does mean one name now maps
-to two different skills depending on where you read it.
+Worth noting on Attunement: the redefinition (now at **19291**, not 18708) only rebinds `m_tempest`.
+The aliases `chr_tempest`, `st_storm` and `necro_storm` were assigned from `m_tempest` *earlier*
+(10279 and neighbours) and therefore still held the ORIGINAL damage-storm function.
+
+**TWO THIRDS OF THAT PARAGRAPH IS NO LONGER TRUE, and it is corrected here rather than deleted
+because the reasoning was right and the file moved under it.** `chr_tempest` and `st_storm` are BOTH
+redefined again, later still, at 19253 and 19299 — as Stopped Clock and Conduit, neither of which is
+a storm and neither of which deals damage. So they no longer get the storm their cards promise, and
+they are rows 1 and 3 of section J. **Only `necro_storm` still holds the original damage storm**, and
+its card ("A storm of decay rages around you for 4s") is the one of the three that is still honest
+about the damage — though `harness/probes/necrot.probe.js` has separately measured that it lands no
+decay at all, which is section E's necromancer group.
+
+The general lesson is the one this file keeps paying for: `SKILL_FX` is a plain object written to in
+three places, so **a note about what a name points at is true only on the day it is written.** Section
+J's sweep — list every `SKILL_FX.<id>=function` and take the LAST one — is the form that stays true.
 
 Tumble's legacy `CLASSES` entry (1877) says "Roll backward and snare nearby enemies", which matches
 the code exactly. It is the CLASS2 rewrite (2051) that added the parting shot.
@@ -1527,6 +1542,69 @@ document's own rule forbids fixing a skill by editing its description, so which 
 card is his. Worth putting to him with the rest of section C — and worth checking the other eleven
 `CLASS_BASIC` entries against their innate cards at the same time, because this is unlikely to be the
 only one.
+
+---
+
+## J. SECTION C IS NOT TWO STALE DESCRIPTIONS. IT IS TWELVE, AND THEY HAVE ONE CAUSE — Oliver's
+
+**Found 2026-08-12 by the same static sweep as section I, and it is the most useful thing in this
+document for the amount of work it takes to settle: twelve rows, one decision.**
+
+`index.html:19210` carries the refactor's own statement of intent: *"Slot 3 is the rank-8 pick, the
+last and most exciting choice a class offers — and in nine classes both options were damage with a
+different spread… Each replaces the group-damage half with A NEW RULE FOR THE REST OF THE FIGHT."*
+Twelve `SKILL_FX` handlers were rewritten at the end of the file (19223–19352) to do exactly that,
+deliberately and well. **The `CLASS2` cards the player reads were not rewritten with them.**
+
+So a Chronomancer's rank-8 pick is offered as *"A storm of decaying time around you"* and casts a
+three-second freeze that deals no damage at all. A Warlock is offered *"A moving void storm"* and
+casts a bargain that spends half his health. Every one of these is the *code* being the interesting
+version and the *card* still selling the thing it replaced.
+
+| id | the card the player picks from | what the code actually does | mismatch |
+|---|---|---|---|
+| `chr_tempest` | **Time Storm** — "A storm of decaying time around you." | **Stopped Clock** — freezes everything but you for 3s. No damage anywhere. | name + text |
+| `war_storm` | **Dark Storm** — "A moving void storm tears at nearby foes for 5 seconds." | **Pact** — spend half your current HP, deal exactly that to everything within 380, once. | name + text |
+| `st_storm` | **Thunderstorm** — "A storm of lightning rages around you for 4s." | **Conduit** — tethers everything within 340 for 8s so they share damage. | name + text |
+| `mon_thousand` | **Thousand Fists** — "A blinding assault: +35% damage and attack speed for 6s." | **Stillness** — for 6s, standing still returns what hits you, doubled. | name + text |
+| `bd_steel` | **Dance of Steel** — "Flash between nearby enemies with a rapid series of six cuts." | **Perfect Guard** — a 3s parry state. | name + text |
+| `w_berserk` | **Warcry** — "+35% damage and +30% attack speed for 6s." | taunts everything within 620 for 6s. The name is right; the sentence is the old buff. | text |
+| `nin_storm` | **Vanish** — "A spinning storm of steel that cuts everything around you." | 4s invulnerable, breaks every target lock, arms Unseen. | text — already recorded in section H |
+| `m_tempest` | **Attunement** — "A 4s storm repeatedly damages enemies around you." | your element cycles on every cast for 10s. | text — **this is section C's `mage/Attunement`** |
+| `bsk_whirl` | **Whirlwind** — "Spin, cutting everything around you for 2.2x." | **No Retreat** — `_noRetreatT = 10`; all your damage doubles for 10s. | name + text, **and see below** |
+| `bsk_cleave` | **Cleave** — "A broad 2.2x blade sweep." | **Bloodletting** — costs 10% max HP, hits for 2.6x within 210. | name + text; the cost is undocumented |
+| `bsk_charge` | **Charge** — "Rush forward, damaging and stunning in your path." | **Headlong** — an unsteerable 0.9s dash with i-frames. **No damage and no stun anywhere in the path** (the movement branch at 12853 only moves the body). | name + text — **this is section B's `berserker/Charge:damage`** |
+| `bsk_bash` | **Headbutt** — "Drive forward for 1.7x damage and stun." | 2.2x within 150, stuns them 2.2s — **and costs you 6% max HP and stuns YOU for 0.5s.** | text; the self-cost is undocumented |
+
+**TWO OF THE THREE REMAINING BASELINED SKILL FAILURES ARE ON THIS LIST, and that reframes both.**
+`harness/baseline.json` holds `mage/Attunement`, `berserker/Charge:damage` and `ranger/Tumble`. The
+first two are not bugs at all — they are this refactor's paperwork. The harness is correctly reporting
+that a skill does not do what its card says; the card is what moved. Nothing should be fixed in code
+for either.
+
+**`bsk_whirl` is the one row here with a SECOND fault, and it is not a description problem.** Its own
+code comment (19319) states the design in full: *"You cannot move backwards for 10s, and all your
+damage doubles. The class is played by choosing not to retreat; this removes the choice and pays you
+for it."* `p._noRetreatT` appears exactly **twice** in the file — set here (19322) and read at 10830
+to double outgoing damage. **The movement restriction is not implemented anywhere.** So the cost half
+of a deliberately two-sided card does nothing and what ships is a plain ten-second damage doubler.
+Left for Oliver rather than wired, for pass 20's reason and not for the usual one: nothing needs
+inventing — "backwards" is `p.yaw` and the file already owns per-frame movement overrides three lines
+away in `_headlongT` (12853) and `_slipT` — but adding a restriction takes freedom away from a skill
+berserkers have been playing with, which is a balance change and his call.
+
+**What is being asked of Oliver, stated so it can be answered in one pass:** for each row, is the CARD
+right or is the CODE right? Twelve answers, and every one of them is a sentence rather than a number.
+This document's own rule — *never fix a skill by editing its description to match broken behaviour* —
+is why no autopilot run may take these: here the behaviour is not broken, it is the newer of the two,
+which is precisely the judgement call the rule reserves for him.
+
+*Where this came from, so it can be re-run:* `SKILL_FX` is a plain object and the file assigns to it
+in three separate places, so the LAST assignment wins — the block's own header (19216) says it was
+appended for exactly that reason. Listing every `SKILL_FX.<id>=function` and comparing the last
+definition of each id against its `CLASS2` card is a grep, not a launch. `bd_steel` is defined twice
+(10445 and 19271) and only the second one runs, which is the duplicate-body hazard `AUTOPILOT.md`
+warns about, caught here by the same sweep.
 
 ---
 

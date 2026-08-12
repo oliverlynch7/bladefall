@@ -170,7 +170,14 @@ const KNOWN_DEAD = new Set([
      pierce 99 -> 94. The probe's own first two runs returned 4 of 5 and it was NOT the passive - the
      shot was sinking below the last body, and the path trace proved it by showing pierce still at 96
      when it stopped connecting. The line now starts 400 units out so the aim solve flies flat. */
-  'pir_tough', 'pir_swagger', 'pir_evasive', 'pir_luck', 'pir_greed',
+  /* pir_swagger came OFF this list on 2026-08-11 (sub-project B Task 2, pass 23): "while your pistol
+     is loaded you move noticeably faster" is now one clause in effSpeed beside the Dread Captain step
+     it borrows its 1.10 from, conditioned on the `_loaded` flag the class already keeps and Cutthroat
+     already reads. Proven by harness/probes/swagger.probe.js on DISTANCE WALKED rather than on
+     effSpeed - the card promises movement - with the pistol emptied and reloaded by the game's own
+     paths: six walks of 245.4-245.8 before, 270.21 loaded against 245.85 spent after (ratio 1.099)
+     while the control and the known-bad stayed at 0.998 and 0.999. */
+  'pir_tough', 'pir_evasive', 'pir_luck', 'pir_greed',
   /* chr_potent came OFF this list on 2026-08-11 (sub-project B Task 2, pass 9): "rewinding also
      restores the mana you had three seconds ago" is now read in the Rewind death save beside its two
      already-wired siblings chr_ward and chr_haste, and the ring it reads from records mana at last.

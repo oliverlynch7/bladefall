@@ -223,12 +223,12 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 96 wired / 28 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 97 wired / 27 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
 (Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest), `chr_echo` (Echo) and
-`pal_blessed` (Blessed Blade), `bsk_heavy` (Heavy Hands), `pir_deadly` (Dead Aim) and `mon_master`
-(Master Striker) were wired 2026-08-11.
+`pal_blessed` (Blessed Blade), `bsk_heavy` (Heavy Hands), `pir_deadly` (Dead Aim), `mon_master`
+(Master Striker) and `pir_swagger` (Swagger) were wired 2026-08-11.
 See "Rows taken" at the end of this section. **The Reaper was the first class this sub-project took
 from dead passives to none, and the Paladin is the second** — they join warrior, mage, ninja,
 warlock and beastmaster, which never had any.
@@ -255,7 +255,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 |---|---|---|
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 3 / 8 | Iron Body, Inner Fire, Still Water (~~Flow~~, ~~Killer Focus~~, ~~Master Striker~~ wired 2026-08-11) |
-| pirate | 5 / 8 | Sea Legs, Swagger, Slippery, Lucky, Greed (~~Dead Aim~~ wired 2026-08-11) |
+| pirate | 4 / 8 | Sea Legs, Slippery, Lucky, Greed (~~Dead Aim~~, ~~Swagger~~ wired 2026-08-11) |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 3 / 8 | Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~, ~~Heavy Hands~~ wired 2026-08-11) |
 | chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
@@ -365,9 +365,56 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 
 | **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
 | **pirate / Dead Aim** (`pir_deadly`, r3 a) — "The pistol pierces every enemy in a line." | 2026-08-11 | `harness/probes/deadaim.probe.js`, FIVE bodies in a line, THREE halves in one launch: control and known-bad stop at **3 of 5** with pierce spent to 0, the passive half takes **5 of 5** with pierce 99 → 94. The probe's own first two runs said 4 of 5 and the path trace proved that was the shot SINKING, not the pierce — `pierce:96` still in hand when it stopped connecting |
+| **pirate / Swagger** (`pir_swagger`, r5 b) — "While your pistol is loaded you move noticeably faster." | 2026-08-11 | `harness/probes/swagger.probe.js`, THREE halves in one launch, TWO walks per half (loaded, then spent) measured as **distance covered at terminal speed** rather than as an effSpeed reading: six walks of 245.4–245.8 before, and after, **270.21 loaded against 245.85 spent** (ratio 1.099) while the control `pir_swift` stayed at 0.998 and the known-bad at 0.999. The pistol is emptied and reloaded through the game's own paths, never by assignment |
 | **monk / Master Striker** (`mon_master`, r9 b) — "Every fourth unbroken strike hits everything around you." | 2026-08-11 | `harness/probes/monkmaster.probe.js`, THREE halves in one launch, each with FOUR strikes then a game-driven chain break then TWO more: a neighbour 120 units away that is never struck directly lost **0 / 0 / 0 / 127** in the passive half and nothing at all in the control or the known-bad, a far foe at 420 lost nothing in any half, and nothing splashed after the break. Photographed at `_shot/out/mm-splash2.png` — the MASTER STRIKER banner over the monk, 112 over the struck foe and 127 over each flanking grunt |
 | **berserker / Heavy Hands** (`bsk_heavy`, r3 a) — "You cannot dodge — but nothing can knock you back or stagger you." | 2026-08-11 | `harness/probes/heavyhands.probe.js`, THREE halves in one launch, THREE trials per half: control and known-bad thrown at the game's own **vz 210 / vy 160** with the dodge firing; the passive half **vz 0, vy 0, onGround true, dodge refused** — and **hpLost 6 in all three**, because an early return would have been damage immunity. Dodge button photographed unavailable at `dodgeCd 0` |
 | **paladin / Blessed Blade** (`pal_blessed`, r9 b) — "Your oath can be sworn at any range — mark without closing." | 2026-08-11 | `harness/probes/blessed.probe.js`, THREE halves in one launch, THREE trials per half (far / behind / a melee hit): a foe at **600 units against a 198-unit melee aim reach** sworn only in the passive half, the same foe placed BEHIND sworn in no half, the melee hit sworn in every half — and `hurt:false` throughout, so the swing never landed |
+
+### Swagger — the row that cannot be photographed, and the tolerance that had to be measured
+
+One clause in `effSpeed`, and both halves of it were already in the file. The multiplier is the Dread
+Captain capstone's own **1.10**, sitting in the same function one clause to the left, so "noticeably
+faster" is the step this class already moves by rather than a number chosen to sound right. The
+condition is `p._loaded` — the pistol state the Pirate already keeps, spent in `CLASS_BASIC.pirate`
+(11267), reloaded on a kill in `killEnemy` (10939), and already read by its SIBLING at rank 9, where
+Cutthroat takes the spent half of the same flag (11265). So a passive that had never been read was
+sitting next to a passive reading the exact state it needed.
+
+**`!==false`, not truthiness**, and that is the one subtlety: a Pirate *arrives* loaded with the flag
+still `undefined` (12851), so a truthiness test would have left the passive silent until the first
+shot — a bonus that only starts working after you stop qualifying for it. `CLASS_BASIC.pirate`'s own
+guard reads the flag the same way, which is what settled it.
+
+**THE BAR IS DISTANCE WALKED, NOT `effSpeed()`.** The card promises the player MOVES faster, and this
+sub-project has now been burned twice by measuring the thing the code sets instead of the thing the
+card promises — Burning Light passed a stack-count bar while burning nobody. A multiplier that landed
+in the function and never reached the body would satisfy an `effSpeed` reading and fail this one.
+Terminal speed only: 30 warm-up ticks run before the stopwatch starts, because a body accelerating
+from a standstill dilutes the ratio toward 1, which is the direction that hides a real bonus.
+
+| half | loaded (units walked) | spent | ratio |
+|---|---|---|---|
+| control `pir_swift` | 245.42 | 245.83 | 0.998 |
+| **`pir_swagger`, before** | **245.67** | **245.83** | **0.999** |
+| **`pir_swagger`, after** | **270.21** | **245.85** | **1.099** |
+| known-bad `mon_iron` | 245.67 | 245.83 | 0.999 |
+
+Two walks per half, because "while your pistol is loaded" is half the sentence: a passive that simply
+made the Pirate faster would satisfy a loaded-only reading, and the spent walk has to come back to the
+control's number. It does, to within 0.02 of a unit.
+
+**The probe's own tolerance had to be measured rather than assumed, and its first run was red against a
+correct game for that reason.** An exact-equality bar fails on 0.998: a tick-quantised walk cannot land
+on the same tenth of a unit twice. The floor measured across six walks is ~0.2%, so the bar admits 1%
+— which still leaves the 10% the card promises ten times clear of the noise. Same lesson as the monk
+row's `focusT === 0`: read the shape of the quantity before writing the assertion.
+
+**This is the first row in this section with NO PICTURE, and that is stated rather than glossed.** A
+movement multiplier does not exist in a still frame; there is nothing to point a camera at. The render
+taken alongside (`_shot/out/sw-after.png`) proves only what it can — the Pirate stands in the Arena at
+rank 10 with its own bar and its own kit, the kill the probe drove having dropped loot, nothing
+broken. The kinematic measurement is the proof, and it is a stronger one than a photograph of a number
+would have been.
 
 ### Master Striker — the first row whose card promises a CHAIN, and the one line the fix had to sit above
 

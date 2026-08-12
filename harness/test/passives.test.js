@@ -123,7 +123,13 @@ const KNOWN_DEAD = new Set([
      already-wired siblings chr_ward and chr_haste, and the ring it reads from records mana at last.
      Proven by harness/probes/chrpotent.probe.js — `past: null` on both halves before, the whole pool
      back on the potent half after. */
-  'chr_slow', 'chr_echo', 'chr_freeze',
+  /* chr_echo came OFF this list on 2026-08-11 (sub-project B Task 2, pass 14): "your last skill fires
+     again, by itself, three seconds later" is now armed in useSkill past the refund check and fired
+     from class2Innate three seconds later, at the skill's own power because — unlike the mage's Spell
+     Echo — this card names no reduction. Proven by harness/probes/chrecho.probe.js: Singularity dealt
+     388 on the cast and 388 again with no input, ratio exactly 1, and nothing in the tail window, while
+     the same trial run on the inert control repeated nothing at all. */
+  'chr_slow', 'chr_freeze',
   /* mon_flow came OFF this list on 2026-08-11 (sub-project B Task 2, pass 8): "each hit shortens your
      dodge twice as much" now doubles the monk innate's own 0.35 in CLASS_BASIC.monk, proven by
      harness/probes/monkflow.probe.js — ratio 1 before, exactly 2 after. */

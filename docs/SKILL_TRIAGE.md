@@ -223,10 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 87 wired / 37 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 88 wired / 36 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
-`x_strength` (Harvested Strength) and `r_bounty` (Bounty Hunter) were wired 2026-08-11. See "Rows
-taken" at the end of this section.
+`x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter) and `chr_echo` (Echo) were wired
+2026-08-11. See "Rows taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -253,7 +253,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
-| chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
+| chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 2 / 7 | Burning Light, Blessed Blade (~~Bounce Back~~ wired 2026-08-11) |
 | skylancer | 3 / 8 | High Ground, Hunter's Eye, Sky Armor |
@@ -353,6 +353,32 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
 | **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
 | **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
+| **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/chrecho.probe.js`, THREE halves in one launch, three timed windows each: Singularity dealt 388 on the cast, 0 in the echo window and 0 in the tail on the control; 388 / **388** / 0 on the passive, ratio exactly 1 |
+
+**Echo needed no new mechanism, only a clock, and the mechanism it borrows is twenty lines from where
+it is armed.** The mage's Spell Echo — "every fourth skill repeats at 35% power" (`m_echo`, 10438) —
+already repeats a cast by calling the same `SKILL_FX` handler a second time. The chronomancer's card
+asks for the same repeat on a timer instead of on a counter, so the arm sits in `useSkill` and the
+firing in `class2Innate`, beside the other per-frame class timers. The two numbers are the card's own:
+three seconds is printed on it, and the power is the skill's own **because this card, unlike Spell
+Echo's, names no reduction** — writing 35% here would have been a balance call rather than delivering
+the promise.
+
+**It is armed PAST the refund check, and that is the one placement decision in the row.** A cast that
+finds no target returns `'refund'`, never goes on cooldown and has its mana handed back — the game's
+own position is that it did not happen — so arming at the top of the cast would echo a skill that
+never fired. The echo also does not re-arm: "fires again" is one repeat, and arming from the echo's
+own firing is a loop with no end. Both are assertions rather than intentions — the probe's third
+window (t=3.5s → 7.5s) exists to catch exactly that loop and reads 0.
+
+**The control is the b-side of the same rank and it is itself dead**, which reads like a weak control
+and is the right one here: rank 9 is the one cluster where BOTH chronomancer options are unread, and
+what a control has to do in this row is not repeat a skill. **Singularity is the skill under test on
+purpose** — one instantaneous burst, no lingering field — because the a-side at rank 8 is "a 4s
+storm" and would have had the cast still resolving inside the echo's own window. For the same reason
+the starter's element is stripped before the trials: a burn lit in window 1 still ticking in window 2
+is indistinguishable from a second firing, and the control proves the stripping worked (0 damage in
+both later windows, in all three halves).
 
 **Bounty Hunter is three clauses, so it is three readers, and the mark — not the passive — is what
 each of them is conditioned on.** The −8% is a class line in `hurtPlayer` beside the ninja's and the

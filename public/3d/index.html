@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.922.0-autopilot';
+const VERSION3D='1.923.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10018,6 +10018,16 @@ function class2Innate(p,dt){
   if((p.bdParryT||0)>0)p.bdParryT-=dt;if((p.bdFlowT||0)>0)p.bdFlowT-=dt;if((p.bdCapT||0)>0)p.bdCapT-=dt;
   if((p.skyTailT||0)>0)p.skyTailT-=dt;
   if((p._ambushT||0)>0)p._ambushT-=dt;if((p._ambushCd||0)>0)p._ambushCd-=dt;   // Ambusher: the 3s window after Tumble/Shadowstrike, and the 6s ration between bonuses
+  /* ECHO fires here, three seconds after the cast that armed it in useSkill (10462). The handler is
+     cleared BEFORE it runs, so a skill whose own fx somehow reached useSkill again cannot chain, and
+     it is fired inside G._desig the way an ordinary cast is so it spends Rune Marks and ruptures
+     Corruption exactly as the first firing did. */
+  if((p._chrEchoT||0)>0){ p._chrEchoT-=dt;
+    if(p._chrEchoT<=0){ const efx=SKILL_FX[p._chrEchoFx], eam=(p._chrEchoAm==null?1:p._chrEchoAm);
+      p._chrEchoT=0; p._chrEchoFx=null;
+      if(efx&&mode==='play'&&!p.dead&&!p.downed){
+        G._desig=true; try{ efx(p,classFamilyOk(p.weapon),eam); }catch(err){} G._desig=false;
+        addText(p.x,p.y+p.h+24,p.z,'ECHO','#c9a6ff',true); } } }
   if(meta.classId==='skylancer'&&c2def('skylancer')){
     if(!p.onGround&&p.vy<0){const slow=c2Passive('sky_float')?.45:.20;p.vy+=1500*slow*dt;}
     if(p._skyWasGround===false&&p.onGround){
@@ -10459,6 +10469,16 @@ function useSkill(i){
       if(c2Passive('sky_guard')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.06));p.shieldT=4;}
       if(classState('skylancer').rank>=10){p.jumps=Math.max(0,p.jumps-1);p.vy=Math.max(p.vy,-20);addText(p.x,p.y+p.h+18,p.z,'SKY MASTER','#c9f3ff',true);}
     }
+    /* ECHO (chronomancer r9 a): "Your last skill fires again, by itself, three seconds later." Its id
+       was read by nothing at all until now — one of the 46 in docs/SKILL_TRIAGE.md section E. The
+       repeat is the mage's Spell Echo mechanism twenty lines up (10438) — the same SKILL_FX handler
+       called a second time — put on a timer instead of on a counter, and at the card's own power,
+       because unlike Spell Echo's "at 35% power" this card names no reduction. Nothing is invented:
+       three seconds is printed on the card and the amount is the skill's own.
+       Armed HERE, past the refund check, so a cast that found no target and never went on cooldown
+       cannot arm an echo of a skill that never happened. The echo fires from class2Innate and does
+       NOT re-arm — "fires again" is one repeat, and arming from the echo would be a loop. */
+    if(meta.classId==='chronomancer'&&fx&&c2Passive('chr_echo')){ p._chrEchoFx=s.fx; p._chrEchoAm=(s.am!=null?s.am:1); p._chrEchoT=3; }
     let cd=s.cd*(1-effCdr(p)); if(meta.classId==='beastmaster'&&(c2Passive('bst_swift')||c2Passive('bst_handler')))cd*=.88;
     if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))p.beastSpeedT=2;
     if(meta.classId==='beastmaster'&&classState('beastmaster').rank>=10)p.beastBasicEmpower=1;

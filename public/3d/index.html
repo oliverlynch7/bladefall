@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.936.0-autopilot';
+const VERSION3D='1.937.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10965,7 +10965,7 @@ function killEnemy(e,weaponKill){
      whole point of the class and was previously just a description. */
   /* Combo Edge: killing with Unseen rearms it at once, so you chain from body to body. */
   try {
-    if(meta.classId==='ninja' && c2Passive('nin_combo') && e && e._ninExec !== undefined){
+    if(meta.classId==='ninja' && c2Passive('nin_combo') && e && e._ninUnseen === G.p.swingId){
       G.p._stillT = 9; addText(G.p.x, G.p.y+44, G.p.z, 'UNSEEN READY', '#9fe0ff');
     }
   } catch(err){}
@@ -11352,10 +11352,23 @@ const CLASS_BASIC = {
     /* Swift: Unseen rearms in half the time. */
     if((p._stillT || 0) < (c2Passive('nin_swift') ? 0.5 : 1)) return;
     p._stillT = 0;
+    /* THE MARK COMBO EDGE READS, and it sits HERE - above the Deadly Precision branch - because
+       that is the whole of the fix. It used to be set inside that branch (as `_ninExec`), so the
+       card at rank 5 b, "Killing with Unseen instantly rearms it", was really "killing with Deadly
+       Precision rearms it": a Ninja who took SWIFT at rank 3 could never fire Combo Edge at all,
+       and even holding both, an Unseen strike that killed a HEALTHY enemy outright - the case the
+       card's "chain from body to body" describes - marked nothing. Measured, not read
+       (harness/probes/nincombo.probe.js): with Swift held, an armed Unseen kill left `_stillT` at 0
+       on a full-health foe AND on a wounded one; with Deadly Precision held it rearmed on the
+       wounded foe only.
+       SCOPED TO THE SWING rather than left as a bare flag, because a foe merely WOUNDED by an
+       Unseen strike and finished a fight later would otherwise still count as an Unseen kill.
+       `p.swingId` is the game's own per-swing discriminator and is already used this exact way two
+       hundred lines up (`e.lastHit===p.swingId`, 10742) - nothing is invented. */
+    e._ninUnseen = p.swingId;
     /* Deadly Precision: an Unseen strike finishes anything already badly hurt. */
     if(c2Passive('nin_deadly') && e.hp <= e.maxHp/3){
       addText(e.x, e.y + e.h + 26, e.z, 'EXECUTE', '#ff5a6a', true);
-      e._ninExec = 1;
       return e.hp + 9999;
     }
     const a = Math.atan2(p.x - e.x, p.z - e.z);

@@ -2076,7 +2076,12 @@ sub-project has built.
 | `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | **FIXED**, pass 32 |
 | `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | **FIXED**, pass 33 |
 | `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
-| `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11523) | HALF wired — the DR is there, the knockback resistance is not |
+| `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11543) | HALF wired — the DR is there, the knockback resistance is not |
+| `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — actionable |
+| `x_chill` | reaper r7 b — Grave Chill | "Corrupted enemies cannot flee — they walk toward you instead." | corrupted enemies move 18% slower (13283) | confirmed, unfixed — **Oliver's**, nothing flees |
+| `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | confirmed, unfixed — actionable if a radius already exists |
+| `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | HALF wired — the upside is there, the drawback is not |
+| `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
 
 ### Quick Hands — the row that was taken, and why it was takeable
 
@@ -2201,6 +2206,54 @@ output of the claim.
 against 0.200 in the other two — 0.200/1.12, which is the +12% attack speed the `effAtkSpeed` reader
 has always granted. So the undocumented half is demonstrably still live and untouched by this fix,
 which is exactly the state this section hands to Oliver rather than deciding.
+
+### The five rows found by widening the sweep, and which of them a run may take
+
+Swept after passes 31–33, in the same launch-free way and while the aggregate gate was running. Three
+of the five are the reaper's, which is worth stating plainly because **this document has been
+recording the reaper as a finished class** — "the class now has **no dead passives left**" (pass 17).
+That was true and it was about section E. Three of its eight passives nonetheless do something other
+than what their card says, and no tool this sub-project owns could have said so.
+
+- **`x_doom` — Lingering Doom. ACTIONABLE, and the closest of the five to passes 31–33.** The card
+  says a dying marked enemy passes its mark to the nearest foe; the one reader makes the mark last 20%
+  longer on the enemy that already has it. `c2OnKill` already carries four per-passive kill riders
+  (`x_strength`, `x_armor`, `x_crimson`, `pal_burn`), a doom mark is one field, and "the nearest foe"
+  needs no number chosen. Read `pal_burn` (pass 15) first: the same shape, and its warning about a
+  wiring that fires on the right target and delivers nothing applies here too.
+- **`x_corrupt` — Corruption Mastery. ACTIONABLE ONLY IF A RADIUS ALREADY EXISTS.** The card says
+  rupturing a corrupted enemy corrupts everything near it; the two readers are +25% buildup and +15%
+  rupture damage, and nothing spreads. Burning Light is the precedent for the spread itself — through
+  `applyElement`, at the radius the effect already owns, with a WHOLE stack rather than a buildup
+  fraction. If corruption has no `igniteBurn`-equivalent splash radius of its own, a radius has to be
+  chosen and the row becomes Oliver's.
+- **`x_chill` — Grave Chill. OLIVER'S, and not for the usual reason.** The card says corrupted enemies
+  cannot flee and walk toward you instead; the one reader slows them 18%. **Nothing in this game
+  flees.** `D.flee` belongs to the Arena bot profiles (12605–12608) and the only other fleeing body is
+  the treasure goblin, so an ordinary mob has no fleeing state to forbid and no "walk toward you" to
+  switch on. That is section K's absence — there is no aggro model — reached from a different door.
+- **`bsk_rage` — Rage. HALF WIRED, and the missing half is the DRAWBACK.** "Below a quarter health you
+  cannot be healed, and your damage doubles": the doubling is in `CLASS_BASIC.berserker`, and the heal
+  lock is nowhere. There is no player-side heal cut at all — `healCut` is an ENEMY field (9532, heavy
+  Venom choking a healer's mend). Pass 20's own rule is the argument for taking it: *"a card with a
+  drawback has to be wired on BOTH sides or picking it is a strict upgrade"*, which is exactly what
+  ships today. Takeable, with the caution that it touches every path that heals the player, so the
+  probe needs a control heal that must still land above a quarter health.
+- **`chr_temporal` — Temporal Flow. OLIVER'S.** The card says standing still *rewinds* your cooldowns
+  "rather than merely pausing them"; the one reader is an **unconditional +10% cooldown reduction** —
+  no stillness, no rewind. Its own twin two clauses to the left in the same function, the mage's
+  `m_temporal`, gates correctly on `p._stillT >= 1.5`, and since section H ungated that clock it runs
+  for every class, so the stillness half is available for free. The rest is not: the card describes
+  rewinding as an *upgrade over pausing*, and cooldowns do not pause when you stand still, so both
+  stages would have to be invented. Reading the card down to "recovers faster while still" is a
+  description edit, which this document forbids.
+
+**What has and has not been swept, so the next run does not re-read what is done.** Full card-vs-reader
+reads: warrior, mage, warlock, bladedancer, reaper, skylancer. Targeted reads: pirate, ranger,
+berserker, chronomancer. **Not swept at all: paladin, necromancer, ninja, monk, stormcaller,
+beastmaster.** Those six were heavily worked by passes 5–30 — but every one of those passes was about a
+DEAD passive, and this section is about live ones, so being worked is not being swept. Mage, warlock
+and skylancer came back clean, which is why they carry no row.
 
 ### The one row below that a run could take, and the one it could not
 - **`w_heavy` is NOT the same call and should not be taken as one.** "Cannot be interrupted" and

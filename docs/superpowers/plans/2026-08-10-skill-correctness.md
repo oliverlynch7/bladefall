@@ -358,10 +358,25 @@ pistol" and grants +10% attack speed; `bd_feet` says a dodge through an enemy pa
 Every one of them is reported WIRED by `harness/audit-passives.js`, correctly — the audit asks whether
 anything reads the id, and cannot ask whether the reader honours the card.
 
-**Where the next run should look, in order.** `bd_feet` and `bd_fast` were both taken the same run, as
-passes 32 and 33 — **the bladedancer now has no section Q row left**, and the class is the first whose
-two stat-multiplier stand-ins have both been replaced by the mechanics their cards describe.
-`w_juggernaut`
+**THE SWEEP WAS WIDENED AGAIN IN THE SAME RUN, WHILE THE AGGREGATE GATE WAS RUNNING, AND SECTION Q IS
+NOW TEN ROWS.** Reaper, skylancer, berserker, chronomancer and ranger were read the same launch-free
+way, and five more came back — three of them the REAPER'S, a class this plan has been recording as
+finished ("the class now has no dead passives left", pass 17). That was true and it was about section
+E; three of its eight passives still do something other than what their card says.
+
+| id | its card | its reader | verdict |
+|---|---|---|---|
+| `x_doom` | a dying marked enemy passes its mark to the nearest foe | the mark lasts 20% longer | actionable — `c2OnKill` already carries four kill riders, and "the nearest foe" needs no number |
+| `x_corrupt` | rupturing a corrupted enemy corrupts everything near it | +25% buildup, +15% rupture damage | actionable ONLY if corruption owns a splash radius already; otherwise Oliver's |
+| `x_chill` | corrupted enemies cannot flee and walk toward you | they move 18% slower | **Oliver's** — nothing in this game flees except Arena bots and the treasure goblin |
+| `bsk_rage` | you cannot be healed below a quarter, and your damage doubles | the doubling only | half wired, and the missing half is the DRAWBACK — pass 20's own rule says take it |
+| `chr_temporal` | standing still REWINDS your cooldowns rather than pausing them | an unconditional +10% CDR | **Oliver's** — cooldowns never pause, so both stages would be invented |
+
+**Where the next run should look, in order.** `bd_feet` and `bd_fast` were both taken this run, as
+passes 32 and 33 — **the bladedancer now has no section Q row left**, and it is the first class whose
+stat-multiplier stand-ins have both been replaced by the mechanics their cards describe. The next
+three, cheapest first: **`x_doom`** (a kill rider beside four that already exist), then
+**`w_juggernaut`**, then **`bsk_rage`**. `w_juggernaut`
 is takeable too — pass 20 put the knockback in one place so Heavy Hands could skip it, and 15% is the
 card's own number — but its "while moving" clause is ambiguous about which half it governs, which is an
 English question about a card and not a measurement. `w_heavy` is NOT takeable: this file has no

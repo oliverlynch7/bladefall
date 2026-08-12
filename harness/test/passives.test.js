@@ -260,7 +260,17 @@ const KNOWN_DEAD = new Set([
   /* st_ward came OFF this list on 2026-08-11 (sub-project B Task 2, pass 4): "casting a skill
      grants a shield equal to 4% max HP" is now read in useSkill next to its three identical twins,
      proven by harness/probes/stward.probe.js failing before and passing after. */
-  'st_conductor', 'st_overcharge', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
+  /* st_overcharge came OFF this list on 2026-08-12 (sub-project B Task 2, pass 37): "your lightning
+     arcs to a third enemy as well as a second" is now read in CLASS_BASIC.stormcaller, the basic
+     hook that has BEEN the chain since 96cd511 (2026-08-03). docs/SKILL_TRIAGE.md section E filed
+     this passive and its five siblings as blocked on a mechanic that does not exist — that was read
+     off the SKILL table and missed the hook, so the blocker was stale rather than real. Nothing was
+     invented: two arcs is the card's own count, and the 260 radius, the 34% and the shock element
+     are the hook's own. Proven by harness/probes/overcharge.probe.js, three halves in one launch
+     with four neighbours at four distances: every half arced to exactly ONE body before; after, the
+     passive half takes the two NEAREST (26 and 26) while the third at 200 and the far one at 900
+     stay untouched, and the control and known-bad still arc once. */
+  'st_conductor', 'st_charged', 'st_amped', 'st_master', 'st_galvanize',
   /* sky_eye came OFF this list on 2026-08-11 (sub-project B Task 2, pass 14): "attacking while
      falling drives you down onto the target" is now read in CLASS_BASIC.skylancer, where it TRADES
      the innate's hang for Dive Strike's own drive (520 along the heading, vy floored at -360), aimed

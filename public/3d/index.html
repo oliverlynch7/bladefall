@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.944.0-autopilot';
+const VERSION3D='1.945.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11314,22 +11314,37 @@ const CLASS_BASIC = {
      as lightning at a glance, which no amount of "+8% magic damage" ever could. */
   stormcaller(p, e, dmg){
     if(p._chaining) return;                       // the arc must not arc
-    let best = null, bd = 260;
+    /* OVERCHARGE (stormcaller r3 b, index.html:2178): "Your lightning arcs to a third enemy as well
+       as a second." Wired 2026-08-12; it was one of docs/SKILL_TRIAGE.md section E's dead passives.
+       Section E filed it, and five of its siblings, as blocked on a mechanic that does not exist —
+       "There is no chain in the game." That was established from the SKILL table (`SKILL_FX.st_bolt`
+       is the mage's single projectile) and it missed THIS function, which has been the chain since
+       96cd511 on 2026-08-03 — days before the entry saying it does not exist.
+       So nothing is invented: the count is the card's own ("a third as well as a second" = two arcs
+       rather than one) and the radius, the 34%, the shock element and the ring are all this hook's
+       already. */
+    const arcs = 1 + (c2Passive('st_overcharge') ? 1 : 0);
     /* combatTargets() is the PvP-aware list and can be narrower than the room; falling back to
        G.enemies means the arc still finds someone in ordinary play, which is where it lives. */
     let pool = [];
     try { pool = combatTargets() || []; } catch(err){}
     if(!pool.length) pool = G.enemies || [];
+    /* Collect and sort rather than tracking one running best: the arcs must be the NEAREST bodies,
+       and a single-best scan cannot answer "the two nearest" without being run twice. Sorting a
+       handful of candidates costs nothing beside the hitEnemy calls underneath it. */
+    const near = [];
     for(const o of pool){
       if(o === e || o.dead) continue;
       const d = dXZ(o.x, o.z, e.x, e.z);
-      if(d < bd){ bd = d; best = o; }
+      if(d < 260) near.push({ o: o, d: d });
     }
-    if(best){
+    if(near.length){
+      near.sort((a, b) => a.d - b.d);
       p._chaining = 1;
       try {
         skillRing(e.x, e.z, '#9fe0ff', '#7fd6ff', 90);
-        hitEnemy(best, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
+        for(let i = 0; i < arcs && i < near.length; i++)
+          hitEnemy(near[i].o, Math.max(1, Math.round(dmg * 0.34)), p, 0, 0, 'shock');
       } catch(err){}
       p._chaining = 0;
     }

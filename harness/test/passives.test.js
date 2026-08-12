@@ -94,7 +94,13 @@ const KNOWN_DEAD = new Set([
      Shadowstrike, next click within 3s +20% (once per 6s)" is now armed by those two handlers and
      spent in CLASS_BASIC.ranger, proven by harness/probes/ambush.probe.js — all six strikes 115
      before, 138/115/115 against a 115/115/115 control after. */
-  'r_longshot', 'r_closeq', 'r_escape', 'r_elem', 'r_bounty',
+  /* r_bounty came OFF this list on 2026-08-11 (sub-project B Task 2, pass 13): "marked enemies deal
+     −8% to you; killing one heals 4% HP and gives +10% gold" is now read in three places, one per
+     clause — hurtPlayer for the −8%, c2OnKill for the heal, and the kill's own purse in killEnemy
+     for the +10%. Proven by harness/probes/bounty.probe.js, which measures all three against an
+     UNMARKED foe inside the same half and carries its own known-bad: 623/623 damage, 0/0 heal and
+     550/550 gold on the control, against 573/623, 19/0 and 605/550 on the passive. */
+  'r_longshot', 'r_closeq', 'r_escape', 'r_elem',
   /* x_strength came OFF this list on 2026-08-11 (sub-project B Task 2, pass 12): "souls you collect
      are spent on your next skill, making it free" is now armed on a kill in c2OnKill - which the
      branch's own comment had already said it would be - and spent in useSkill, where the cast is

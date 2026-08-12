@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.921.0-autopilot';
+const VERSION3D='1.922.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10068,6 +10068,19 @@ function rangerDmgMul(p){ // Clear Aim damage bonus (Perfect Hunt +3%, Patient H
 function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims skill cooldowns
   if(meta.classId==='ranger' && classState('ranger').rank>=10 && p&&p.clearAim && (G.time-(p._caCdT||-9))>=1){
     p._caCdT=G.time; if(p.skillCd) for(let i=0;i<4;i++) p.skillCd[i]=Math.max(0,p.skillCd[i]-0.5); }
+  /* BOUNTY HUNTER (ranger r9 b): "Marked enemies deal -8% to you; killing one heals 4% HP and gives
+     +10% gold." Wired 2026-08-11 — it was one of the 38 passives in docs/SKILL_TRIAGE.md section E
+     that the rank menu offers, describes, and no code has ever read. Three clauses, three readers,
+     and every number is on the card: the -8% is a class line in hurtPlayer beside w_unyield's -12%,
+     the +10% rides the kill's own gold in killEnemy so the formula stays in one place, and the heal
+     is here with the other kill riders (war_feast's 5% two lines down is the same shape).
+     A mark is `e.markT`, which BOTH of the ranger's rank-8 options set to 8 (SKILL_FX.mark 9860,
+     SKILL_FX.deathmark 9951), so this rank-9 passive always has a source in its own kit. */
+  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&e&&(e.markT||0)>0){
+    const h=Math.max(1,Math.round(effMaxHp(p)*.04)); const pre=p.hp;
+    p.hp=Math.min(effMaxHp(p),p.hp+h);
+    if(p.hp>pre){ addText(p.x,p.y+p.h+22,p.z,'BOUNTY +'+(p.hp-pre),'#ffd24a',true,'heal'); try{hudUpdate();}catch(_){} }
+  }
   if(meta.classId==='warrior'&&c2Passive('w_bloodlust'))p.bloodlustT=4;
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
   if(meta.classId==='chronomancer'&&c2def('chronomancer')) gainMana(p,4,false);   // Time Attunement: kills loop a little mana back
@@ -10851,7 +10864,10 @@ function killEnemy(e,weaponKill){
   const _erw=G.endless?(G.endReward||1):1;                    // Endless: XP + gold scale with floor depth so it's the best grind at any level
   if(G.endless) G.endKillsTotal=(G.endKillsTotal||0)+1;
   const _xp=Math.round(e.xp*_erw); addText(e.x,e.y+e.h+14,e.z,'+'+_xp+' XP','var(--xp)'); gainXp(_xp);
-  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
+  /* BOUNTY HUNTER's gold clause. A multiplier on the kill's own purse rather than a second
+     awardGold call, so the payout formula stays in exactly one place and cannot drift from it. */
+  const _bounty=(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&(e.markT||0)>0)?1.1:1;
+  const gg=awardGold(Math.max(1,Math.round(e.xp*(e.boss?3.5:0.55)*_erw))*_bounty); if(gg>0){ addText(e.x+12,e.y+e.h-2,e.z,'+'+gg+'g','#ffd24a'); hudUpdate(); }
   G.shake=Math.min(G.shake+(e.boss?14:2),16);
   if(e.boss){
     if(e._crystals) for(const c of e._crystals){ if(c&&!c.dead){ c.dead=true; burst(c.x,c.y+c.h*0.5,c.z,'#7fd6ff',8); } }   // the ward's crystals fall with their master
@@ -11258,6 +11274,10 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='warrior'&&c2def('warrior')){if(classState('warrior').rank>=10)dmg*=.85;if(c2Passive('w_unyield')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(c2Passive('w_tactical')&&(p.tacticalT||0)>0)dmg*=.80;if(c2Passive('w_juggernaut')&&Math.hypot(p.vx||0,p.vz||0)>20)dmg*=.92;}
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
+  /* BOUNTY HUNTER's defensive clause: a foe you have MARKED hits you for 8% less. Conditioned on
+     the attacker, not on you, which is why it reads `by` the way the paladin's Oath does above
+     rather than sitting with the flat class reductions. See c2OnKill for the other two clauses. */
+  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&by&&typeof by==='object'&&(by.markT||0)>0)dmg*=.92;
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   /* A BERSERKER CLAUSE USED TO SIT HERE AND IT HARD-LOCKED THE GAME. It read
        if(c2Passive('bsk_frenzy')){ … v*=1+(1-fr); }

@@ -223,10 +223,10 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 86 wired / 38 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
-Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher)
-and `x_strength` (Harvested Strength) were wired 2026-08-11. See "Rows taken" at the end of this
-section.
+**Now 87 wired / 37 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
+`x_strength` (Harvested Strength) and `r_bounty` (Bounty Hunter) were wired 2026-08-11. See "Rows
+taken" at the end of this section.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -251,7 +251,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | stormcaller | **6 / 8** | Conductor, Overcharge, Charged, Amped, Static Master, Galvanize (~~Storm Ward~~ wired 2026-08-11) |
 | monk | 4 / 8 | Iron Body, Inner Fire, Still Water, Master Striker (~~Flow~~, ~~Killer Focus~~ wired 2026-08-11) |
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
-| ranger | 5 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer, Bounty Hunter (~~Ambusher~~ wired 2026-08-11) |
+| ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
 | chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
@@ -313,7 +313,7 @@ than on a mechanic:
 | 5 a | Escape Artist | "−15% damage taken & −30% slows for 1.5s" | half implementable — see below |
 | 5 b | Ambusher | "next click within 3s +20% (once per 6s)" | **wired 2026-08-11 — see Rows taken** |
 | 9 a | Elemental Archer | "the element of the ground they fly over" | design — no ground→element map exists |
-| 9 b | Bounty Hunter | "−8% to you; killing one heals 4% HP, +10% gold" | **fully stated, nothing blocked** |
+| 9 b | Bounty Hunter | "−8% to you; killing one heals 4% HP, +10% gold" | **wired 2026-08-11 — see Rows taken** |
 
 **Metres appear in exactly four places in the whole game and all four are dead ranger cards** —
 `7m+`, `4m`, `~5m` and `4m` at index.html:2051, 2052, 2053 and 2057. Nothing wired uses the unit and
@@ -352,6 +352,33 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **monk / Killer Focus** (`mon_killer`, r7 b) — "The first strike after a dodge hits for triple." | 2026-08-11 | `harness/probes/monkiller.probe.js`, A/B in one launch, two strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | **ranger / Ambusher** (`r_ambush`, r5 b) — "After Tumble/Shadowstrike: next click within 3s +20% (once per 6s)." | 2026-08-11 | `harness/probes/ambush.probe.js`, A/B in one launch, THREE strikes per half: all six 115 before; 138/115/115 against a 115/115/115 control after |
 | **reaper / Harvested Strength** (`x_strength`, r3 a) — "Souls you collect are spent on your next skill, making it free." | 2026-08-11 | `harness/probes/soulfree.probe.js`, A/B in one launch, THREE trials per half: all six casts paid full price before; 0 / full price / casts-on-an-empty-bar after |
+| **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
+
+**Bounty Hunter is three clauses, so it is three readers, and the mark — not the passive — is what
+each of them is conditioned on.** The −8% is a class line in `hurtPlayer` beside the ninja's and the
+warrior's, reading `by` the way the paladin's Oath does two screens up, because this is the only
+defensive passive in the game conditioned on WHO is hitting you. The heal sits in `c2OnKill` with the
+other kill riders (`war_feast`'s 5% is the same shape). The +10% is a multiplier on the kill's own
+purse at the single `awardGold` call in `killEnemy` rather than a second award, so the payout formula
+stays in one place and cannot drift from it. Nothing is invented: −8%, 4% and +10% are all printed on
+the card, and a mark is `e.markT`, which BOTH of the ranger's rank-8 options already set to 8
+(`SKILL_FX.mark` 9860, `SKILL_FX.deathmark` 9951) — so the rank-9 passive always has a source inside
+its own kit.
+
+**Every clause has its control INSIDE its own half, and that is the assertion that matters here.** A
+wiring that paid the bounty on every enemy rather than on a marked one would satisfy a naive "the
+passive half differs" bar and would be a worse bug than the dead passive. So each half hits, and
+kills, a marked foe AND an unmarked one: the unmarked numbers must be identical to the control's in
+both halves, and they are (623 damage, 0 heal, 550 gold, in all three halves).
+
+**The known-bad is carried in the probe rather than produced by breaking the repo.** A THIRD half
+runs with the dead `r_elem` picked again and is fed to the identical bar as if it were the fix —
+`okAgainstInert`, which is exactly what this probe would report against a game where nothing reads
+the id. It came back `false` while `ok` came back `true`, in the same launch, on real measurements.
+
+**The mark is put on by the game's own Hunter's Mark**, cast through `useSkill` at slot 3, not by
+writing `markT` from the probe; it reports `markedBy` so a fallback could never pass silently, and it
+did not need one (`cast,cast,cast`).
 
 **Storm Ward needed no number invented and that is why it was taken first.** Three classes already
 carry the identical sentence and the identical three lines — mage `m_ward` (10404), warlock

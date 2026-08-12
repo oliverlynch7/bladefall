@@ -231,7 +231,8 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 9 | **E — chronomancer Potent was never read** | `7784f09` | `harness/probes/chrpotent.probe.js`, A/B in one launch: the rewind ring recorded no mana at all before (`past: null` on both halves), the whole pool came back on the potent half after while the control stayed at 0 |
 | 10 | **E — monk Killer Focus was never read** | `2ac076e` | `harness/probes/monkiller.probe.js`, A/B in one launch with TWO strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | 11 | **E — ranger Ambusher was never read** | `140c541` | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
-| 12 | **E — reaper Harvested Strength was never read** | this run | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
+| 12 | **E — reaper Harvested Strength was never read** | `8870192` | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
+| 13 | **E — ranger Bounty Hunter was never read** | this run | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
@@ -259,6 +260,16 @@ killed on a 20-minute clock, so four verified commits were the better use of the
 commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
 class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
 would settle. Say what it reports either way.
+
+**Pass 13 is the first row in this section whose card has THREE clauses, and it is the first whose
+condition is not the passive itself.** Bounty Hunter pays out on a MARKED enemy, so "the passive half
+differs from the control" is not enough of a bar — a wiring that paid on every enemy would clear it
+and would be a worse bug than the dead passive. Each half therefore carries its own unmarked control
+(a second foe, hit and killed in the same half), and the unmarked numbers must match the control's
+exactly. They did, in all three halves. The known-bad is carried in the probe rather than produced by
+breaking the repo: a third half runs the dead `r_elem` again and is fed to the identical bar as if it
+were the fix, so `okAgainstInert` is what this probe would say against the shipped game. `false`
+while `ok` was `true`, in one launch, on real measurements.
 
 **Pass 6 came out of pass 5's probe rather than out of the triage list, and that is the exception the
 list's own rule allows for.** Task 2 Step 1 says never hunt a bug the harness cannot see — the point

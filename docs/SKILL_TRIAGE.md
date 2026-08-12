@@ -223,10 +223,11 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 91 wired / 33 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 92 wired / 32 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
-(Burning Light), `sky_armor` (Sky Armor) and `x_crimson` (Crimson Harvest) were wired 2026-08-11.
+(Burning Light), `sky_armor` (Sky Armor), `x_crimson` (Crimson Harvest) and `chr_echo` (Echo) were
+wired 2026-08-11.
 See "Rows taken" at the end of this section. **The Reaper is the first class this sub-project has
 taken from dead passives to none** — it joins warrior, mage, ninja, warlock and beastmaster, which
 never had any.
@@ -256,7 +257,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | pirate | 6 / 8 | Dead Aim, Sea Legs, Swagger, Slippery, Lucky, Greed |
 | ranger | 4 / 8 | Longshot, Close-Quarters Archer, Escape Artist, Elemental Archer (~~Ambusher~~, ~~Bounty Hunter~~ wired 2026-08-11) |
 | berserker | 4 / 8 | Heavy Hands, Reckless, Bloodthirst, Unbreakable (~~Thick Hide~~ wired 2026-08-11) |
-| chronomancer | 3 / 8 | Entropy, Echo, Deep Freeze (~~Potent~~ wired 2026-08-11) |
+| chronomancer | 2 / 8 | Entropy, Deep Freeze (~~Potent~~, ~~Echo~~ wired 2026-08-11) |
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 1 / 7 | Blessed Blade (~~Bounce Back~~, ~~Burning Light~~ wired 2026-08-11) |
 | skylancer | 1 / 8 | High Ground (~~Hunter's Eye~~, ~~Sky Armor~~ wired 2026-08-11) |
@@ -360,6 +361,38 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **paladin / Burning Light** (`pal_burn`, r5 b) — "Killing your Sworn target sets every enemy near it alight." | 2026-08-11 | `harness/probes/palburn.probe.js`, THREE halves in one launch, each carrying an UNSWORN kill and an out-of-radius foe as its own controls: nothing lit anywhere in the control or the known-bad half; 1 stack, heat 1293 and **139 HP burned** off the Sworn target's neighbour in the passive half, unsworn cluster and far foe untouched |
 | **skylancer / Sky Armor** (`sky_armor`, r9 b) — "Nothing can hit you in the first moment after a jump." | 2026-08-11 | `harness/probes/skyarmor.probe.js`, THREE halves in one launch, TWO hits per half from two fresh jumps: control 62 early / 62 late, passive **0 early** (invuln 0.18) / 62 late, known-bad 62 / 62 |
 | **reaper / Crimson Harvest** (`x_crimson`, r7 a) — "Below half health, every soul you collect heals you outright." | 2026-08-11 | `harness/probes/crimson.probe.js`, THREE halves in one launch, TWO kills per half (one below half health, one above): control 0 / 0, passive **24 then 0**, known-bad 0 / 0, on a 477 HP hero |
+
+| **chronomancer / Echo** (`chr_echo`, r9 a) — "Your last skill fires again, by itself, three seconds later." | 2026-08-11 | `harness/probes/echo.probe.js`, THREE halves in one launch, TWO damage windows per half on one dummy: cast **80 in every half**, second window **0 / 0 / 80**, and the echo's 80 is the cast's own |
+
+### Echo — and the probe that failed itself first
+
+**Both halves of the card were already in the file.** The mechanism is the MAGE's Echo of the Weave
+(`useSkill` 10499), which re-calls the same `fx` for a repeat cast; the delay is the card's own three
+seconds; the power is the skill's own `s.am`, unreduced, **because unlike the mage's card this one
+does not say "weaker"** — the mage echoes at 0.35 and says so, this one just says it fires again.
+Measured: 80 damage from the cast, 80 from the echo.
+
+**It is armed AFTER the refund check and nulled BEFORE it fires**, which is the whole of its safety.
+A cast that found no target never happened — it does not go on cooldown — so it must not leave an
+echo behind; and taking the pending echo out of `p._echo` before invoking the handler means an echo
+can never arm another, since `useSkill` is the only thing that arms one. It also OVERWRITES rather
+than queues: "your LAST skill" is one pending echo.
+
+**It is cleared for every other class**, in the `else` of its own tick, so a chronomancer's unfired
+echo cannot go off in somebody else's hands after a class swap.
+
+**THE PROBE'S OWN CLEAN-CHECK WAS WRONG ON THE FIRST RUN, and the numbers under it were already
+right.** It asserted the skill was on cooldown, and read that four seconds after casting a skill
+whose cooldown is two — so `onCd` came back false in all three halves and `ok` was false while the
+damage windows read 98 / 0 / 98 / 0, exactly the result being looked for. That is fault 3 from
+Task 1 Step 1 of this sub-project ("it read the cooldown five seconds after the cast") committed
+again in a new probe by a different route. A cooldown is evidence that a cast happened and it is only
+evidence while it is still running; it is now read in the same statement as the cast.
+
+**Two windows, not one total, and that is the design.** Time Bolt is a stream, so "did more damage
+happen" cannot be answered by a single number — the original cast is still landing at 2s. Each trial
+records 0–2.5s (the cast) and 2.5–5.0s (where an echo due at 3.0s lands) separately, so the first
+window must agree across all three halves and only the second may move. It did: 80, 80, 80.
 
 ### Crimson Harvest — the row that finished a class
 

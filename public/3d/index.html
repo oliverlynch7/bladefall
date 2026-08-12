@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.926.0-autopilot';
+const VERSION3D='1.927.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10030,6 +10030,26 @@ function class2Innate(p,dt){
     p._skyWasGround=p.onGround;
     if((p.skyGuardT||0)>0)p.skyGuardT-=dt;
   }else p._skyWasGround=p.onGround;
+  /* ECHO's other half: the pending re-cast armed in useSkill. Cleared outright for any other class
+     so a chronomancer's unfired echo cannot go off in somebody else's hands after a class swap.
+     IT CANNOT RECURSE: the pending echo is taken and nulled BEFORE the handler runs, and nothing but
+     useSkill ever arms one - so the echo of an echo would need a second real cast to exist. */
+  if(meta.classId==='chronomancer'&&c2def('chronomancer')){
+    if(p._echo){
+      p._echo.t-=dt;
+      if(p._echo.t<=0){
+        const ec=p._echo; p._echo=null; const f=SKILL_FX[ec.fx];
+        if(f&&mode==='play'&&!p.dead&&!p.downed){
+          /* G._desig marks a cast as a designated attack (rune marks, corruption rupture), which is
+             what the original cast ran under - an echo that skipped it would be a quietly different
+             spell from the one it is repeating. */
+          try{ G._desig=true; f(p,classFamilyOk(p.weapon),ec.am); }catch(err){}
+          G._desig=false;
+          addText(p.x,p.y+p.h+30,p.z,'ECHO','#9fd8ff',true);
+        }
+      }
+    }
+  }else p._echo=null;
   if((p.beastSpeedT||0)>0)p.beastSpeedT-=dt;
   if(meta.classId==='beastmaster'&&c2def('beastmaster')){
     const pet=beastCompanion();
@@ -10509,6 +10529,19 @@ function useSkill(i){
     /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
        spent on it is put back rather than paid out as mana the player never spent. */
     if(r==='refund'){ if(soulFree) p._soulFree=1; else gainMana(p,manaSpent,false); return; }
+    /* ECHO (chronomancer r9 a): "Your last skill fires again, by itself, three seconds later."
+       Wired 2026-08-11; it was one of the 33 in docs/SKILL_TRIAGE.md section E that the rank menu
+       offers, describes, and no code has ever read.
+       NOTHING IS INVENTED, and both halves already exist in this function. The MECHANISM is the
+       mage's Echo of the Weave twelve lines up, which re-calls the same `fx` for a repeat cast; the
+       DELAY is the card's own three seconds; and the POWER is the skill's own `s.am`, unreduced,
+       because unlike the mage's card ("a weaker echo", 0.35) this one just says it fires again.
+       Armed AFTER the refund check on purpose: a cast that found no target never happened, does not
+       go on cooldown, and must not leave an echo behind. It stores the fx ID rather than the
+       function so a stale echo cannot outlive a reload, and it OVERWRITES - "your LAST skill" is one
+       pending echo, not a queue. Fired from class2Innate; see the tick there for why it cannot
+       recurse. */
+    if(meta.classId==='chronomancer'&&fx&&c2Passive('chr_echo')) p._echo={fx:s.fx,am:(s.am!=null?s.am:1),t:3};
     if(meta.classId==='warlock'&&fx){
       const cap=classState('warlock').rank>=10, safe=c2Passive('war_safe'), frac=(cap?0.015:0.03)*(safe?0.65:1);
       const blood=Math.max(1,Math.round(effMaxHp(p)*frac)); p.hp=Math.max(1,p.hp-blood);

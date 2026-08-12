@@ -236,6 +236,17 @@ try {
   # GREEN GATE. A run may only leave work behind if the harness passes. Castle Duskmoor was
   # committed four times while being impossible to climb; this is the check that would have caught
   # it. Anything red gets reverted rather than committed, and says so.
+  #
+  # THE REVERT BELOW IS A KNOWN HAZARD AND THE FIX IS BLOCKED ON ONE PERMISSION, recorded here
+  # 2026-08-12 so the next run does not re-derive it. `git checkout -- .` DELETES the working tree,
+  # and the gate flaps (bladedancer/Riposte returned `5 pass, 0 fail` and `4 pass, 1 fail` from
+  # identical code on consecutive runs), so an unlucky measurement can throw away a run's verified
+  # work with no trace. docs/superpowers/plans/2026-08-11-harness-hardening.md Task 2 replaces it
+  # with the stash idiom the killed-run guard above already uses. That change was WRITTEN and then
+  # REVERTED unverified in this session: its own Step 3 verification is a PowerShell parse check, and
+  # `powershell` is not on the autopilot's permission allowlist, so an unattended run cannot parse the
+  # file it just edited - and an unparseable autopilot.ps1 stops the automation completely.
+  # Oliver: add `powershell -NoProfile -Command` to .claude/settings.json, or apply Task 2 yourself.
   & node harness/run-all.js
   if ($LASTEXITCODE -ne 0) {
     Log 'REVERTED: harness gate failed'

@@ -95,13 +95,35 @@ The `':(exclude).claude/'` is not optional — `-u` sweeps untracked files and t
 
 Log the stash name and the gate's own failure lines, so a red gate leaves a readable trail rather than a silent revert.
 
-- [ ] **Step 3: Verify**
+- [ ] **Step 3: Verify** — **BLOCKED, and the block is one permission. Measured 2026-08-12.**
 
 ```powershell
 powershell -NoProfile -Command "$errs=$null; [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path autopilot.ps1),[ref]$null,[ref]$errs); if($errs.Count){$errs}else{'PARSE CLEAN'}"
 ```
 
 Expected: `PARSE CLEAN`.
+
+**An unattended run cannot execute this.** `powershell` is not on the autopilot's permission
+allowlist in any form — even `powershell -NoProfile -Command "1+1"` comes back
+*"This command requires approval"* — so a run can edit `autopilot.ps1` and then has no way to check
+that what it wrote still parses. There is no substitute: `node tools/gate.js` parses `index.html` and
+the ES modules, and nothing in this repo parses PowerShell.
+
+**Steps 1 and 2 were written in full on 2026-08-12 and then REVERTED unverified**, per this repo's
+standing rule that unverifiable work is worse than no work. The stakes are why the rule wins here
+rather than being argued with: an `autopilot.ps1` that does not parse stops the automation
+completely, and it would do so on the next scheduled run, unattended, with the previous run's log
+already written and green. What was reverted is one `$gateOut = & node harness/run-all.js 2>&1`, a
+`Where-Object` filter for the gate's own `REGRESSION|GATE:|FAIL` lines into `Log`, and the same
+`git stash push -u -m … -- . ':(exclude).claude/'` the killed-run guard at line 130 already uses.
+
+**Two ways to unblock it, both Oliver's and both one line:**
+1. Add `powershell -NoProfile -Command` to `.claude/settings.json`'s allow list, after which an
+   autopilot run can take this task normally; or
+2. apply Task 2 in a supervised session, where the parse check runs by hand.
+
+A comment recording this now sits at the `git checkout -- .` site itself (`autopilot.ps1:239`), so
+the next run finds it where the hazard is rather than only in this plan.
 
 - [ ] **Step 4: Commit**
 

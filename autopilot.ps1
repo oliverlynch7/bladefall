@@ -178,18 +178,24 @@ Non-negotiable:
   changing the logic - duplicate function bodies have burned three sessions.
 - If you cannot verify it, revert it and note the item blocked. Never commit unverified work.
 
-- WORK THE PLANS, in this order. Take the first task whose steps are not all ticked, do that ONE
-  task, tick its steps, commit. When a plan has no unticked task left, move to the next one.
-    1. docs/superpowers/plans/2026-08-10-verification-harness.md   (sub-project A - the harness)
-    2. docs/superpowers/plans/2026-08-10-skill-correctness.md      (sub-project B - skills that lie)
-    3. docs/superpowers/plans/2026-08-11-multiplayer-experience.md  (sub-project D - co-op and PvP)
-  Plan 3 tasks 3-5 CHANGE HOW THE GAME PLAYS (party scaling, personal loot, pings). Oliver approved
-  them; land each as its own commit so any one can be reverted after he plays it.
-  Task 8 of plan 1 is OLIVER'S and is already done on his machine; do not attempt it.
-  Plan 2 Task 4 is a LOOP - one bug per pass, one commit per pass. Finishing a single pass and
-  stopping is a complete unit of work, so never rush two fixes into one run.
-- SUB-PROJECTS A-D ONLY: verification harness, skill correctness, level completability, multiplayer.
-- You may NOT author new zones (Sunspire Palace, Ruined Keep, The Outskirts). Those wait for Oliver.
+- WORK THE PLANS in docs/superpowers/plans/. Take the first task whose steps are not all ticked, do
+  that ONE task, tick its steps, commit. Order, highest priority first:
+    1. 2026-08-11-harness-hardening.md      (the gate flap can DELETE work - take this before new work)
+    2. 2026-08-10-verification-harness.md   (sub-project A)
+    3. 2026-08-10-skill-correctness.md      (sub-project B)
+    4. 2026-08-11-multiplayer-experience.md (sub-project D)
+    5. 2026-08-11-endless-dungeon.md        (the Endless Dungeon)
+- NEVER IDLE. If EVERY plan has all its steps ticked, do not stop and do not invent work: open
+  docs/BACKLOG.md, take the top item that is not marked DONE, and spend the whole run WRITING a plan
+  for it into docs/superpowers/plans/YYYY-MM-DD-<slug>.md, then commit that plan and stop. The next
+  run executes it. Writing one plan properly beats writing it and half a task badly. BACKLOG.md's
+  own rules apply, especially: measure before you plan.
+- IN SCOPE: the verification harness, skill and passive correctness, level completability,
+  multiplayer, the Endless Dungeon, and IMPROVING THE EIGHT LEVELS THAT ALREADY EXIST.
+- Anything that changes how the game PLAYS is allowed and must land as its OWN commit, so Oliver can
+  revert exactly one thing after playing it.
+- You may NOT AUTHOR the three unbuilt zones (Sunspire Palace, Ruined Keep, The Outskirts) - those
+  wait for Oliver. Improving a zone that already exists is in scope.
 - You may not commit unless `node harness/run-all.js` exits 0.
 - harness/ is ESM (package.json says type:module). Use import/export, never require.
 - Only send the Telegram digest if you actually shipped a commit. Silence is correct otherwise.

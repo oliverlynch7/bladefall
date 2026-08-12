@@ -223,11 +223,13 @@ largest single finding in this document — **124 passives in the game, 78 wired
 the same shape of fault as section A one level up: the content exists, the menu offers it, and no
 code ever reads it back.
 
-**Now 90 wired / 34 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
+**Now 91 wired / 33 dead**: `st_ward` (Storm Ward), `bsk_thick` (Thick Hide), `pal_bounce` (Bounce
 Back), `mon_flow` (Flow), `chr_potent` (Potent), `mon_killer` (Killer Focus), `r_ambush` (Ambusher),
 `x_strength` (Harvested Strength), `r_bounty` (Bounty Hunter), `sky_eye` (Hunter's Eye), `pal_burn`
-(Burning Light) and `sky_armor` (Sky Armor) were wired 2026-08-11. See "Rows taken" at the end of
-this section.
+(Burning Light), `sky_armor` (Sky Armor) and `x_crimson` (Crimson Harvest) were wired 2026-08-11.
+See "Rows taken" at the end of this section. **The Reaper is the first class this sub-project has
+taken from dead passives to none** — it joins warrior, mage, ninja, warlock and beastmaster, which
+never had any.
 
 The question the audit asks is deliberately narrow: **does any line in `public/` outside the choice
 menu ever mention this passive's id?** A passive is chosen at ranks 3/5/7/9, stored in
@@ -258,7 +260,7 @@ by the audit itself on every gate run, so this table cannot drift from the code:
 | necromancer | 3 / 8 | Withering, Plague, Pestilence |
 | paladin | 1 / 7 | Blessed Blade (~~Bounce Back~~, ~~Burning Light~~ wired 2026-08-11) |
 | skylancer | 1 / 8 | High Ground (~~Hunter's Eye~~, ~~Sky Armor~~ wired 2026-08-11) |
-| reaper | 1 / 7 | Crimson Harvest (~~Harvested Strength~~ wired 2026-08-11) |
+| reaper | **0 / 7** | — (~~Harvested Strength~~, ~~Crimson Harvest~~ wired 2026-08-11) |
 | bladedancer | 1 / 8 | Keep Moving |
 | warrior, mage, ninja, warlock, beastmaster | 0 | — |
 
@@ -357,6 +359,31 @@ work; this is the floor under it, and the floor is where section A's nine dead s
 | **ranger / Bounty Hunter** (`r_bounty`, r9 b) — "Marked enemies deal −8% to you; killing one heals 4% HP and gives +10% gold." | 2026-08-11 | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a marked foe against an unmarked one: 623/623 damage, 0/0 heal, 550/550 gold on the control; 573/623, 19/0, 605/550 on the passive |
 | **paladin / Burning Light** (`pal_burn`, r5 b) — "Killing your Sworn target sets every enemy near it alight." | 2026-08-11 | `harness/probes/palburn.probe.js`, THREE halves in one launch, each carrying an UNSWORN kill and an out-of-radius foe as its own controls: nothing lit anywhere in the control or the known-bad half; 1 stack, heat 1293 and **139 HP burned** off the Sworn target's neighbour in the passive half, unsworn cluster and far foe untouched |
 | **skylancer / Sky Armor** (`sky_armor`, r9 b) — "Nothing can hit you in the first moment after a jump." | 2026-08-11 | `harness/probes/skyarmor.probe.js`, THREE halves in one launch, TWO hits per half from two fresh jumps: control 62 early / 62 late, passive **0 early** (invuln 0.18) / 62 late, known-bad 62 / 62 |
+| **reaper / Crimson Harvest** (`x_crimson`, r7 a) — "Below half health, every soul you collect heals you outright." | 2026-08-11 | `harness/probes/crimson.probe.js`, THREE halves in one launch, TWO kills per half (one below half health, one above): control 0 / 0, passive **24 then 0**, known-bad 0 / 0, on a 477 HP hero |
+
+### Crimson Harvest — the row that finished a class
+
+**Neither half of the card needed a new idea.** A "soul" is a KILL, which is what the Reaper's own
+`c2OnKill` block already means by the word: the innate is "slain enemies restore 2 mana" and Soul
+Armor on the very next line calls the same event "collecting a kill". And the amount is the Void
+Scythe harvest's, verbatim — `Math.max(3, round(effMaxHp*0.05))` at `killEnemy` 10893, under a comment
+reading *"every soul reaped restores HP"*, which is this card's sentence written by somebody else
+years earlier. So a Reaper's soul is worth 5% of them whoever is holding the scythe.
+
+**"Below half health" is half the sentence, so the probe kills twice per half.** A wiring that healed
+on every kill would satisfy a one-kill bar and would be a strictly BETTER card than the menu shows —
+the kind of bug nobody reports. Measured: 24 HP below half, **0 above it**, in the passive half; 0 and
+0 in both the control and the known-bad.
+
+**The starter scythe is not the Void Scythe, and the probe would have been worthless if it were.** The
+harvest at 10893 is gated on `w.reaper`, a flag the legendary carries and CLASSSTART's `Notched Scythe`
+does not, so the control's zero is a real zero rather than two equal heals cancelling. `weaponHarvests:
+false` is reported on every run so that can never quietly stop being true.
+
+**The known-bad borrows a dead id from another class**, because after this row the Reaper has none of
+its own left. `c2Passive` (9987) is a plain id lookup over ranks 3/5/7/9, so putting `mon_iron` in the
+Reaper's rank-7 slot reproduces exactly the state the shipped game was in here — which is the point of
+a known-bad, and it came back false in the same launch that returned true for the fix.
 
 ### Sky Armor — the first row whose whole implementation is one field the game already returns on
 

@@ -106,7 +106,12 @@ const KNOWN_DEAD = new Set([
      branch's own comment had already said it would be - and spent in useSkill, where the cast is
      charged to the soul instead of to the pool. Proven by harness/probes/soulfree.probe.js: three
      trials per half, all six identical before, 0 / full price / casts-on-an-empty-bar after. */
-  'x_crimson',
+  /* x_crimson came OFF this list on 2026-08-11 (sub-project B Task 2, pass 17): "below half health,
+     every soul you collect heals you outright" is now a kill rider in c2OnKill beside x_strength and
+     x_armor, gated on the card's own `p.hp < effMaxHp(p)*.5`, healing the Void Scythe harvest's own
+     Math.max(3, round(effMaxHp*0.05)) - the only other line in the file that answers this card's
+     sentence. Proven by harness/probes/crimson.probe.js, TWO kills per half (one below half health,
+     one above): control 0/0, passive 24 then 0, known-bad 0/0, on a 477 HP hero. */
   /* pal_bounce came OFF this list on 2026-08-11 (sub-project B Task 2, pass 7): "damage you block is
      returned to whoever dealt it" now returns the 60% the brace eats, through the same hitEnemy(by,…)
      the monk's Stillness uses four lines above it. Proven by harness/probes/bounce.probe.js. */

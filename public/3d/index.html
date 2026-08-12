@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.925.0-autopilot';
+const VERSION3D='1.926.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10149,6 +10149,24 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
        skill - the same shape as the monk's Killer Focus, whose card also names a consumption
        condition and no duration. */
     if(c2Passive('x_strength')) p._soulFree=1;
+    /* CRIMSON HARVEST (r7 a): "Below half health, every soul you collect heals you outright."
+       Wired 2026-08-11; it was one of the 34 in docs/SKILL_TRIAGE.md section E that the rank menu
+       offers, describes, and no code has ever read.
+       A soul is a KILL, which is what this whole block already means by the word - the innate is
+       "slain enemies restore 2 mana" and Soul Armor on the line below calls the same event
+       "collecting a kill". So the trigger needed nothing new.
+       THE AMOUNT IS THE VOID SCYTHE HARVEST'S OWN, verbatim: `Math.max(3, round(effMaxHp*0.05))` at
+       killEnemy 10893, whose comment reads "every soul reaped restores HP" - the only other line in
+       the file that answers this card's sentence, and it belongs to the Reaper's own signature
+       weapon. Nothing is invented; a Reaper's soul is worth 5% of them whoever is holding it.
+       Below HALF is the card's own condition and this file's own idiom for it (pal_will, w_unyield,
+       nin_shadowform all read `p.hp < effMaxHp(p)*.5`), so the passive is dead weight while you are
+       winning and carries you while you are not - which is what a sustain card at rank 7 is for. */
+    if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5){
+      const h=Math.max(3,Math.round(effMaxHp(p)*.05)), pre=p.hp;
+      p.hp=Math.min(effMaxHp(p),p.hp+h);
+      if(p.hp>pre) addText(p.x,p.y+72,p.z,'CRIMSON HARVEST +'+(p.hp-pre),'#ff5a6a',true,'heal');
+    }
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
     if(classState('reaper').rank>=10&&p.skillCd&&(e&&((e.markT||0)>0||(e.st&&e.st.corrupt>0))))for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-.75);
   }

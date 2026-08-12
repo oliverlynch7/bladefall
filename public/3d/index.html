@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.948.0-autopilot';
+const VERSION3D='1.949.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11725,7 +11725,25 @@ function hurtPlayer(dmg,sx,sz,by){
      harness/probes/heavyhands.probe.js reads hpLost on the same hit for that reason. */
   if(!(meta.classId==='berserker'&&c2def('berserker')&&c2Passive('bsk_heavy'))){
     const d=Math.max(1,dXZ(p.x,p.z,sx,sz));
-    p.vx=(p.x-sx)/d*210; p.vz=(p.z-sz)/d*210; p.vy=160; p.onGround=false;
+    /* JUGGERNAUT'S FIRST CLAUSE, and it is the only half of that card that was missing.
+       Warrior rank-9 option b (2044) reads "+15% knockback resistance and +8% damage reduction while
+       moving." The damage half is wired below (dmg*=.92 while moving); the knockback half had no
+       reader at all, so `audit-passives.js` reported the id WIRED — correctly, it asks whether
+       anything mentions the id — and the warrior has always reported 0/8 dead. docs/SKILL_TRIAGE.md
+       section Q carries it as "HALF wired".
+       NOTHING IS INVENTED: 15% is the card's own number, and these three lines are the knock-back
+       the card names — the same lines the berserker's Heavy Hands skips outright one condition up.
+       THE VERTICAL POP IS DELIBERATELY NOT SCALED. The comment above records that the launch (vy 160,
+       onGround cleared) is this file's STAGGER, there being no separate stagger state — and stagger
+       is a word on Heavy Hands' card and on Unyielding's, not on this one. So resistance applies to
+       the throw and the interrupt is untouched; a Juggernaut is still staggered, just moved less.
+       ADDITIVE, NOT A SWAP. The 8% is left exactly as it is: `w_unyield` sits four lines below in the
+       same block promising immunity and delivering a percentage, and section Q refuses that row
+       precisely because fixing it would REPLACE a bonus a warrior has been playing with. This adds
+       the clause its card already promises at the number its card already names, and takes nothing
+       away, so it is a wiring fix rather than a balance call. */
+    const kbR=(meta.classId==='warrior'&&c2def('warrior')&&c2Passive('w_juggernaut'))?0.85:1;
+    p.vx=(p.x-sx)/d*210*kbR; p.vz=(p.z-sz)/d*210*kbR; p.vy=160; p.onGround=false;
   }
   G.tookDamage=true; G.combo=0; G.comboT=0;
   addText(p.x,p.y+p.h+10,p.z,'-'+dmg,'var(--danger)'); G.shake=Math.min(G.shake+10,18); SFX.hurt(); hudUpdate();

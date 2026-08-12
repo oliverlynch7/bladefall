@@ -2106,7 +2106,7 @@ Unit stage **53 → 55 tests**, all green. `128 total, 102 wired, 26 dead`, ever
 duplicates, and the dead list is byte-for-byte what it was — so nothing in section E moves and
 `KNOWN_DEAD` needs no edit. No game code was touched.
 
-## Q. THE READER IS A STAT MULTIPLIER AND THE CARD PROMISES A MECHANIC — eleven rows, four **FIXED 2026-08-12**
+## Q. THE READER IS A STAT MULTIPLIER AND THE CARD PROMISES A MECHANIC — eleven rows, five **FIXED 2026-08-12**
 
 **None of these is in section E and none of them ever will be.** `harness/audit-passives.js` reports
 every id below as WIRED, correctly: each one *is* read. It asks "does anything read this id", which is
@@ -2129,13 +2129,44 @@ sub-project has built.
 | `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | **FIXED**, pass 32 |
 | `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | **FIXED**, pass 33 |
 | `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
-| `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11543) | HALF wired — the DR is there, the knockback resistance is not |
+| `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11543) | **FIXED 2026-08-12**, `harness/probes/juggernaut.probe.js` — the knock-away is scaled 0.85 at hurtPlayer's own three lines |
 | `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — **Oliver's**: a reaper cannot mark anything, so which mark is a design call |
 | `x_chill` | reaper r7 b — Grave Chill | "Corrupted enemies cannot flee — they walk toward you instead." | corrupted enemies move 18% slower (13283) | confirmed, unfixed — **Oliver's**, nothing flees |
 | `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | **FIXED**, pass 34 — the radius was rupture's own 120 |
 | `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | **FIXED**, pass 35 — the drawback had no door to wire it to |
 | `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
 | `pal_heal` | paladin r7 b — Healing Light | "Every skill you cast heals the ally nearest you, or you if alone." | `effLifesteal` +5% lifesteal (3759) | confirmed, unfixed — actionable only if the amount can be taken from the file |
+
+### Juggernaut — the half-wired row, and why the OTHER warrior knockback row still is not takeable
+
+The card's second clause was already honoured (`dmg*=.92` while moving, 11648); the first had no
+reader anywhere in `public/`. The knock-away it names is `hurtPlayer`'s own three lines — the same ones
+the berserker's Heavy Hands skips outright one condition above — so the fix is one factor on the
+horizontal impulse and **15% is the card's own number**. Nothing was invented, which is why this row
+was takeable while `w_unyield`, four lines below it in the same block, is not: fixing that one would
+*replace* a defensive bonus a warrior has been playing with, and this one *adds* the clause its card
+already promises without taking anything away.
+
+**The vertical pop is deliberately not scaled.** `hurtPlayer`'s own comment records that the launch
+(`vy 160`, `onGround` cleared) IS this file's stagger, there being no separate stagger state — and
+"stagger" is a word on Heavy Hands' card and on Unyielding's, not on this one. So a Juggernaut is
+still staggered and still airborne, just moved less far. That distinction is asserted, not assumed:
+`vy` and `onGround` are read in every half.
+
+Measured by `harness/probes/juggernaut.probe.js`, three halves in one launch, two trials each. The
+yardstick is the CONTROL's own throw measured in the same game, so 210 is never written into the bar:
+
+| half | pick | standing: throw / pop / HP lost | moving: HP lost |
+|---|---|---|---|
+| control | `w_master` (a-side of the same rank) | **210** / 160 / 49 | 49 |
+| passive | `w_juggernaut` | **179** (= 210 × 0.85) / 160 / 49 | **45** (= 49 × 0.92) |
+| known-bad | `mon_iron` (a dead id, another class) | **210** / 160 / 49 | 49 |
+
+`ok true, okAgainstInert false` — the bar fails against the shipped state, which is what makes the
+pass mean anything. **The `moving` column is the regression check**: 49 → 45 in the passive half is
+the +8% clause still working, and 49 in the standing column of every half is this fix not touching
+damage. A wiring that reduced damage, or that suppressed the launch entirely, would have been a
+better card than the menu shows — the second of those is Unyielding's card and is Oliver's.
 
 ### Quick Hands — the row that was taken, and why it was takeable
 

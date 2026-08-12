@@ -168,6 +168,26 @@ in three.
 The ten-launch loop the plan asked for is still the right shape for a single class, but the in-page
 sweep is what generalises: ten launches of one class costs the same as one launch of all sixteen.
 
+**AND THE CROSS-LAUNCH HALF IS NOT FIXED — caught the same day, by a gate run, on a row this sweep
+calls stable.** A full `run-all.js` later in the run reported
+`REGRESSION: skills:skylancer/Dive Strike:damage` — a red gate on a change that cannot reach it
+(`hurtPlayer`'s new factor is behind `meta.classId==='warrior'`). Measured immediately after, with that
+change still in the tree: `node harness/test-skills.js --classes skylancer` → **`4 pass, 0 fail` three
+times out of three.** So the failure is a cross-launch race, not a regression, and the safety net Task 2
+built is what stopped it mattering — under the old `git checkout -- .` that gate would have deleted the
+run's verified work.
+
+The row and the mechanism, from `harness/report.json`: *"Dive forward. Your next landing damages nearby
+enemies."* The damage is owed by the LANDING (`SKILL_FX.sky_dive`, index.html:10450, throws the body
+forward at 520 u/s and slams `vy` to −360), and the dummy is walking toward the player the whole time,
+so whether the burst catches it depends on where it has got to when the player touches down. `onCd` was
+true and `mode` was `play` — the cast happened, the geometry missed.
+
+**That is the next task of this shape, and it is a different fix from anything above:** the in-page
+sweep explicitly cannot see this (its own header says so — one page, one arrival state), so the
+instrument for it is a repeated-launch harness for the rows whose payout depends on POSITION at a
+moment. Worth doing before anything else in this plan, for the same reason Task 1 was first.
+
 - [x] **Step 5: Gate it, alone, and commit** — done 2026-08-12, and **the re-baseline was refused.**
 
 The full gate, on the whole game:

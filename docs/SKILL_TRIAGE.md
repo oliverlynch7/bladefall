@@ -744,6 +744,72 @@ damage** as a precondition, so it cannot go green off a window too short to see 
 
 ---
 
+## H. GLASS CANNON TURNED THE MAGE'S SKILLS OFF — **FIXED 2026-08-11**
+
+Mage rank-5 option a (`m_glass`, index.html:2072): *"Below a quarter health your skills cost no mana
+at all."* Below a quarter health the Mage could not cast **anything**. Not cheaper, not weaker — the
+button did nothing, spent no cooldown and gave no message.
+
+**This is the first row in this document that neither of the two audits could ever have found**, and
+that is the part worth carrying forward:
+
+- `harness/audit-passives.js` asks *"does any line mention this id"*. `m_glass` is mentioned twice —
+  the cost at 10334 and the +8% damage taken at 11289 — so it is WIRED, and the audit is right to say
+  so. Section E's 46 dead passives are a different fault entirely.
+- `harness/test-skills.js` never picks a rank-5 b-side and never drops the player below a quarter
+  health, so its bench stands in the one state where this passive does nothing at all.
+
+So a passive can be wired, described, chosen, and still be the worst thing in its class. The floor
+under section E — *"this proves WIRED, not CORRECT"* — has a hole in it exactly this size.
+
+### The mechanism, in one sentence
+
+`skillManaCost` returned **0**, `spendSkillMana` handed that 0 straight back, and `useSkill`'s
+`if(!manaSpent) return` reads a zero as *"the cast could not be paid for"* — so the cheaper the
+passive made the skill, the more certainly it refused to cast it.
+
+**The trap was already written down and it still caught the game.** The comment above the reaper's
+Harvested Strength (`8870192`, the previous pass) names this exact hazard and says the soul is
+deliberately *not* priced at zero because of it — while the passive fifty lines up had been priced at
+zero all along. Reading the warning is not the same as checking whether anything already stepped in it.
+
+### Measured, both directions, one launch each
+
+`harness/probes/glasscannon.probe.js`. The control is the OTHER option at the SAME rank in the same
+game — `m_ward` (Arcane Ward), wired, nowhere near the mana pool — so the only difference between the
+halves is which passive is chosen. `fired` is read off the game's own cooldown, never off the mana
+delta, because a spend of zero is the exact thing under test.
+
+| | control `m_ward` @ 10% HP | **glass `m_glass` @ 10% HP** | glass @ full HP |
+|---|---|---|---|
+| before | cost 8, **fired**, spent 8 | cost 0, **NEVER FIRED**, spent 0 | cost 8, fired, spent 8 |
+| after | cost 8, **fired**, spent 8 | cost 0, **fired**, spent 0 | cost 8, fired, spent 8 |
+
+The full-health column is not decoration: a fix that made every cast free would be a worse bug than
+the one it replaced, so the probe asserts full price above the threshold in both halves.
+
+### Two side doors closed in the same change, neither of them the reported bug
+
+Paying through `soulFree`'s door means `manaSpent` is now a price nobody paid, and two lines below
+treat it as money that changed hands:
+
+- **Archmage** (rank 10) refunds half the mana of every third skill. Unguarded, a free cast pays mana
+  **out** — the pool would rise by casting.
+- **A refunded cast** (one that found no target) hands `manaSpent` back the same way.
+
+Both are gated on `!glassFree`. `skillManaCost(i,s,raw)` gained a `raw` argument for the same reason:
+the spend site needs the price the cast *would* have had, while every display caller still wants the
+zero the card promises — the skill bar and the build screen still read **0 mana** below a quarter
+health, which is the only feedback the player gets that the passive is live.
+
+### The +8% damage taken half was checked and is fine
+
+`m_glass`'s second reader (11289) applies the drawback. Untouched, and it was the half that always
+worked — which is why the passive read as "a gamble that never pays": you took the extra damage at
+low health and lost your kit at the same moment.
+
+---
+
 ## Not listed here, and why
 
 - **`ninja/Death Mark` and `pirate/Cannonade`** — unproven, not failed. Both promise damage owed by

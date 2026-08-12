@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.921.0-autopilot';
+const VERSION3D='1.922.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -10327,11 +10327,14 @@ const SKILL_MANA={
 /* GLASS CANNON, rewritten: below a quarter health your skills cost nothing. Was "+15% magic damage,
    take 8% more" - two numbers that cancelled into a wash you could not feel. This is a real gamble:
    the class is strongest exactly where it is closest to dying. */
-function skillManaCost(i,s){
+/* `raw` asks what the cast WOULD cost with Glass Cannon set aside. useSkill needs it because a zero
+   here is the value that means both "this is free" and "you cannot afford it" — see the note at the
+   spend site. Every display caller wants the discounted number and passes nothing. */
+function skillManaCost(i,s,raw){
   s=s||((c2def()&&c2CurSkills()[i])||curSkills()[i]);
   let v=(s&&SKILL_MANA[s.id])||12;
   /* Glass Cannon: below a quarter health your skills are free. */
-  if(c2Passive('m_glass') && G && G.p && G.p.hp < effMaxHp(G.p)*0.25) return 0;
+  if(!raw && c2Passive('m_glass') && G && G.p && G.p.hp < effMaxHp(G.p)*0.25) return 0;
   if(meta.classId==='warrior'&&c2Passive('w_master'))v*=.9;
   if(meta.classId==='mage'){if(c2Passive('m_efficient'))v*=.85;if(c2Passive('m_potent'))v*=1.08;}
   if(meta.classId==='beastmaster'&&c2Passive('bst_handler'))v*=.85;
@@ -10418,11 +10421,21 @@ function useSkill(i){
        up (skillManaCost returns 0): the line below reads a zero as "the cast could not be paid for"
        and returns, so zeroing the cost stops the skill firing at all. */
     const soulFree = meta.classId==='reaper' && !!p._soulFree && c2Passive('x_strength');
-    const manaSpent = soulFree ? skillManaCost(i,s) : spendSkillMana(p,i,s); if(!manaSpent) return;
+    /* GLASS CANNON was the trap the note above describes, actually sprung, and it was MEASURED
+       rather than read: skillManaCost returned 0 below a quarter health, spendSkillMana handed that
+       0 straight back, and the line below read it as "the cast could not be paid for". So the
+       Mage's skills went DEAD exactly where the card promises they carry you — probe
+       harness/probes/glasscannon.probe.js, `fired:false` at 10% HP against a control at the same
+       health that fired. Paid through the same door as the soul above: the pool is not consulted,
+       so a free cast works on an empty bar, and `raw` recovers the price the cast WOULD have had so
+       the refund and capstone arithmetic below is never handed a zero. */
+    const glassFree = meta.classId==='mage' && c2Passive('m_glass') && p.hp < effMaxHp(p)*0.25;
+    const manaSpent = soulFree ? skillManaCost(i,s) : glassFree ? skillManaCost(i,s,true) : spendSkillMana(p,i,s);
+    if(!manaSpent) return;
     if(soulFree){ p._soulFree=0; addText(p.x,p.y+p.h+24,p.z,'SOUL SPENT','#c47bff',true); hudUpdate(); skillbarUpdate(); }
     initAudio();
     G._desig=true; const fx=SKILL_FX[s.fx], r=fx?fx(p,classFamilyOk(p.weapon),(s.am!=null?s.am:1)):null;   // s.am scales a skill's damage (low-CD 'spam' skills hit softer)
-    if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0)gainMana(p,Math.round(manaSpent*.5),false); }
+    if(meta.classId==='mage'&&fx){ p._mageCasts=(p._mageCasts||0)+1; if(c2Passive('m_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;} if(c2Passive('m_echo')&&p._mageCasts%4===0)fx(p,classFamilyOk(p.weapon),.35); if(classState('mage').rank>=10&&p._mageCasts%3===0&&!glassFree)gainMana(p,Math.round(manaSpent*.5),false); }   /* a free cast has no half to refund; without this guard Archmage pays mana OUT for a cast nobody paid for */
     // Stormcaller STORM WARD (r5 b): "Casting a skill grants a shield equal to 4% max HP." Its id was
     // read by nothing at all until now — one of the 46 in docs/SKILL_TRIAGE.md section E. Deliberately
     // the same sentence, the same number and the same three lines as mage m_ward above and warlock
@@ -10434,7 +10447,7 @@ function useSkill(i){
     G._desig=false;
     /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
        spent on it is put back rather than paid out as mana the player never spent. */
-    if(r==='refund'){ if(soulFree) p._soulFree=1; else gainMana(p,manaSpent,false); return; }
+    if(r==='refund'){ if(soulFree) p._soulFree=1; else if(!glassFree) gainMana(p,manaSpent,false); return; }   /* same reason: refunding a free cast would print mana out of nothing */
     if(meta.classId==='warlock'&&fx){
       const cap=classState('warlock').rank>=10, safe=c2Passive('war_safe'), frac=(cap?0.015:0.03)*(safe?0.65:1);
       const blood=Math.max(1,Math.round(effMaxHp(p)*frac)); p.hp=Math.max(1,p.hp-blood);

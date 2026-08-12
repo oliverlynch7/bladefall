@@ -231,7 +231,8 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 9 | **E — chronomancer Potent was never read** | `7784f09` | `harness/probes/chrpotent.probe.js`, A/B in one launch: the rewind ring recorded no mana at all before (`past: null` on both halves), the whole pool came back on the potent half after while the control stayed at 0 |
 | 10 | **E — monk Killer Focus was never read** | `2ac076e` | `harness/probes/monkiller.probe.js`, A/B in one launch with TWO strikes per half: ratio 1.009 on all four before, exactly 3 then exactly 1 after |
 | 11 | **E — ranger Ambusher was never read** | `140c541` | `harness/probes/ambush.probe.js`, A/B in one launch with THREE strikes per half (one per clause of the card): all six 115 before; 138/115/115 against a 115/115/115 control after |
-| 12 | **E — reaper Harvested Strength was never read** | this run | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
+| 12 | **E — reaper Harvested Strength was never read** | `8870192` | `harness/probes/soulfree.probe.js`, A/B in one launch with THREE trials per half (one per clause of the card): all six casts paid full price before; 0, then full price, then a cast on an empty bar after. Reaper suite 6 pass / 0 fail either side |
+| 13 | **H — mage Glass Cannon turned the Mage's skills OFF** | this run | `harness/probes/glasscannon.probe.js`, A/B in one launch, two trials per half: below a quarter health the cast **never fired** before and fires for free after, against a control that fired at the same health both times; full price above the threshold in every reading |
 
 **THE AGGREGATE GATE RAN, 2026-08-11, and it says what passes 5–8 claimed it would: `GATE: PASS
 (3 known, 0 newly fixed)`, exit 0, no `REGRESSION:` line.** Nothing in `harness/baseline.json` moved —
@@ -259,6 +260,17 @@ killed on a 20-minute clock, so four verified commits were the better use of the
 commit plus a gate. Nothing in `harness/baseline.json` should have moved (all four changes are
 class-gated and the three baselined failures are untouched), which is exactly the claim a gate run
 would settle. Say what it reports either way.
+
+**Pass 13 is the first row NEITHER audit could have produced, and it changes what "the triage list is
+the only source of targets" can be read to mean.** `m_glass` is WIRED — `audit-passives.js` is right
+to call it so — and `test-skills.js` never picks a rank-5 b-side nor drops the player below a quarter
+health, so its bench stands in the one state where the passive does anything at all. Between them the
+two audits cover *is it read* and *does a cast change something*, and a passive that is read, and
+read wrongly, in a state neither bench enters, is invisible to both. It was still not desk research:
+the lead was a source reading, and nothing was edited until a probe had watched the skill fail to
+fire. **A source lead is allowed to choose the target; only a measurement is allowed to convict it.**
+Section H of the triage doc says which states each bench does not reach, so the next hole is picked
+rather than stumbled into.
 
 **Pass 6 came out of pass 5's probe rather than out of the triage list, and that is the exception the
 list's own rule allows for.** Task 2 Step 1 says never hunt a bug the harness cannot see — the point

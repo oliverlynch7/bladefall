@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.942.0-autopilot';
+const VERSION3D='1.943.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3688,6 +3688,36 @@ function effMagPower(p){ return (p.stats.magPower||1)*(p.armorMods?p.armorMods.m
 function isGod(p){ return p.skin==='god'; }
 function effMaxHp(p){ if(isHitless()&&!isGod(p)) return 1;      // Hitless: one hit, one fall, one mistake
   let v=(p.maxHp+(p.armorMods?p.armorMods.hp:0)); const sp=skinP(p); if(sp&&sp.hpMul) v*=sp.hpMul; if(meta.classId==='warlock'&&c2Passive('war_frail'))v*=.90; if(G&&G.endHpMul) v*=G.endHpMul; return isGod(p)?v+9000:v; }
+/* THE ONE DOOR EVERY PLAYER HEAL GOES THROUGH.
+
+   Added 2026-08-12 for RAGE (berserker r7 a): "Below a quarter health you cannot be healed, and your
+   damage doubles." Only the doubling was implemented (11390); the drawback was not, so picking Rage
+   was a strict upgrade over the card it is offered against. docs/superpowers/plans/2026-08-10-skill-
+   correctness.md's pass-20 rule says a card with a drawback has to be wired on BOTH sides.
+
+   There was nowhere to put "cannot be healed", and that is the whole reason this function exists:
+   the file had THIRTY separate `p.hp = Math.min(effMaxHp(p), p.hp + x)` sites and no central door.
+   Every one of them now calls this, so the answer is given once instead of thirty times, and the next
+   card that needs to speak about healing (pal_heal is the standing one) has somewhere to speak.
+
+   WHAT IS AND IS NOT A HEAL, stated because the distinction decides whether the game is playable.
+   This routes INCREMENTAL heals - a number added to your health while you are playing. It does NOT
+   route a full restore (`p.hp = effMaxHp(p)`), which is a RESET: respawn, revive, entering an area,
+   building a character in the menus, the cheat panel. Blocking those would not be a drawback, it
+   would be a berserker who can never leave a quarter health for the rest of the run.
+
+   The threshold is the doubling's own expression, not a second number of its own - the card names one
+   quarter and means it once. p.hp>0 so a death save (which assigns, and does not add) is untouched. */
+function healBlocked(p){
+  return !!(p && G && p===G.p && p.hp>0
+            && meta.classId==='berserker' && c2def('berserker') && c2Passive('bsk_rage')
+            && (p.hp/Math.max(1,effMaxHp(p))) < 0.25);
+}
+function healPlayer(p, amt){
+  if(!p || !(amt>0)) return 0;
+  if(healBlocked(p)) return 0;
+  const before=p.hp; p.hp=Math.min(effMaxHp(p), p.hp+amt); return p.hp-before;
+}
 /* THE INNATE FOLD. Fourteen of sixteen innate traits opened with a flat +8-12% damage - a bonus
    every class had, which therefore distinguished none of them, while burying each class's actual
    mechanic behind an identical opening clause. The percentages are stripped from the class blocks
@@ -9587,7 +9617,7 @@ function ruptureCorrupt(e,src){ if(!e.primed && (!e.st||e.st.corrupt<STCAP.corru
         spread++; } }
     if(spread){ skillRing(e.x,e.z,'#8f52d6','#3d175e',120); addText(e.x,e.y+e.h+30,e.z,'CORRUPTION SPREADS','#d69bff',true); }
   }
-  e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); p.hp=Math.min(effMaxHp(p),p.hp+heal); }   // predatory Reaper sustain
+  e.hp-=dmg; const p=G.p; if(p){ const heal=Math.max(3,Math.round(effMaxHp(p)*0.04)); healPlayer(p,heal); }   // predatory Reaper sustain
   if(e.hp<=0) killEnemy(e); return dmg; }
 // consume Rune Marks on a designated attack (charged/skill) for a burst — more marks, bigger payoff
 function consumeRunes(e){ if(!e.st||e.st.rune<1) return 0; const marks=Math.floor(e.st.rune), base=e.stDmg||8, dmg=Math.round(marks*base*0.5*c2ReactionMul());
@@ -9969,7 +9999,7 @@ const SKILL_FX={
     for(const e of combatTargets()){ if(e.dead) continue; if(dXZ(e.x,e.z,p.x,p.z)>160+e.r) continue; if(losBlocked(p.x,p.z,e.x,e.z)) continue;
       hitEnemy(e,dmg,p,180,0,null); hit++;
       for(let i=0;i<3;i++) G.particles.push({x:e.x,y:e.y+e.h*0.5,z:e.z,vx:(p.x-e.x)*1.6,vy:60,vz:(p.z-e.z)*1.6,life:0.4,color:'#b06bff',sz:3}); }
-    if(hit&&ok){ const heal=Math.round(effMaxHp(p)*0.05*hit); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+    if(hit&&ok){ const heal=Math.round(effMaxHp(p)*0.05*hit); healPlayer(p,heal);
       addText(p.x,p.y+70,p.z,'+'+heal,'var(--good)'); hudUpdate(); } },
   shadowstep(p,ok,am){ const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     burst(p.x,p.y+20,p.z,'#6a2fa0',12);
@@ -10152,14 +10182,14 @@ function class2Innate(p,dt){
         const prevP=p._beastPrevHp==null?p.hp:p._beastPrevHp,prevPet=pet._beastPrevHp==null?pet.hp:pet._beastPrevHp;
         const playerHeal=Math.max(0,p.hp-prevP),petHeal=Math.max(0,pet.hp-prevPet);
         if(playerHeal>0)pet.hp=Math.min(pet.maxHp,pet.hp+playerHeal*.30);
-        if(petHeal>0)p.hp=Math.min(effMaxHp(p),p.hp+petHeal*.30);
+        if(petHeal>0)healPlayer(p,petHeal*.30);
         p._beastPrevHp=p.hp;pet._beastPrevHp=pet.hp;
       }else{p._beastPrevHp=p.hp;pet._beastPrevHp=pet.hp;}
     }
-    if((p.beastMendT||0)>0){const step=Math.min(dt,p.beastMendT);p.beastMendT-=step;p.hp=Math.min(effMaxHp(p),p.hp+(p.beastMendHp||0)*step/5);}
+    if((p.beastMendT||0)>0){const step=Math.min(dt,p.beastMendT);p.beastMendT-=step;healPlayer(p,(p.beastMendHp||0)*step/5);}
     for(const e of combatTargets())if((e.beastMarkT||0)>0)e.beastMarkT=Math.max(0,e.beastMarkT-dt);
   }
-  if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ p.hp=Math.min(effMaxHp(p),p.hp+effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
+  if(meta.classId==='monk'&&c2def('monk')&&c2Passive('mon_med')&&p.hp>0&&p.hp<effMaxHp(p)){ healPlayer(p,effMaxHp(p)*0.012*dt); }   // Meditation: steady self-heal
   if((p.goldRushT||0)>0)p.goldRushT-=dt;else if(p.goldRushStacks)p.goldRushStacks=0;   // Pirate Gold Rush window
   if(meta.classId!=='ranger'||!c2def('ranger')) return;
   if(p._caGrace>0){ p._caGrace-=dt; if(p._caGrace<=0){ p.clearAim=false; p._noHitT=0; p._caAnn=0; } }   // Perfect Aim grace expiring drops it
@@ -10190,7 +10220,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
      SKILL_FX.deathmark 9951), so this rank-9 passive always has a source in its own kit. */
   if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&e&&(e.markT||0)>0){
     const h=Math.max(1,Math.round(effMaxHp(p)*.04)); const pre=p.hp;
-    p.hp=Math.min(effMaxHp(p),p.hp+h);
+    healPlayer(p,h);
     if(p.hp>pre){ addText(p.x,p.y+p.h+22,p.z,'BOUNTY +'+(p.hp-pre),'#ffd24a',true,'heal'); try{hudUpdate();}catch(_){} }
   }
   /* BURNING LIGHT (paladin r5 b): "Killing your Sworn target sets every enemy near it alight."
@@ -10240,7 +10270,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
   if(meta.classId==='necromancer'&&c2def('necromancer')){ gainMana(p,3,false); if(c2Passive('necro_harvest'))gainMana(p,Math.round((p.maxMana||100)*.08),false); }   // Death's Embrace + Soul Harvest
   if(meta.classId==='chronomancer'&&c2def('chronomancer')) gainMana(p,4,false);   // Time Attunement: kills loop a little mana back
   if(meta.classId==='warlock'&&c2def('warlock')&&e&&(e.warCurseT||0)>0){
-    if(c2Passive('war_feast')){ p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.05)); gainMana(p,6,false); }
+    if(c2Passive('war_feast')){ healPlayer(p,Math.round(effMaxHp(p)*.05)); gainMana(p,6,false); }
     if(classState('warlock').rank>=10&&p.skillCd) for(let i=0;i<4;i++)p.skillCd[i]=Math.max(0,p.skillCd[i]-1);
   }
   if(meta.classId==='skylancer'&&c2def('skylancer')&&!p.onGround&&c2Passive('sky_reset')){
@@ -10276,7 +10306,7 @@ function c2OnKill(p,e){ // Perfect Hunt: a kill while Clear Aim active trims ski
        winning and carries you while you are not - which is what a sustain card at rank 7 is for. */
     if(c2Passive('x_crimson')&&p.hp<effMaxHp(p)*.5){
       const h=Math.max(3,Math.round(effMaxHp(p)*.05)), pre=p.hp;
-      p.hp=Math.min(effMaxHp(p),p.hp+h);
+      healPlayer(p,h);
       if(p.hp>pre) addText(p.x,p.y+72,p.z,'CRIMSON HARVEST +'+(p.hp-pre),'#ff5a6a',true,'heal');
     }
     if(c2Passive('x_armor')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.03));p.shieldT=5;}
@@ -10311,7 +10341,7 @@ SKILL_FX.pal_smite=function(p,ok,am){ const w=p.weapon, R=560;
   for(const e of combatTargets()){ if(e===tgt||e.dead||!e.active||e.dummy) continue; if(dXZ(e.x,e.z,tx,tz)<130) hitEnemy(e,dmg*0.4,p,150,0,ok?(w&&w.el):null); }   // holy splash
   addText(tx,ty+72,tz,'SMITE','#fff0a6',true); SFX.magic&&SFX.magic('arcane'); };
 SKILL_FX.pal_guard=SKILL_FX.barrier; SKILL_FX.pal_burst=SKILL_FX.nova; SKILL_FX.pal_sky=SKILL_FX.stomp;
-SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); p.hp=Math.min(effMaxHp(p),p.hp+h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
+SKILL_FX.pal_laststand=function(p,ok,am){ SKILL_FX.laststand(p,ok,am); const h=Math.round(effMaxHp(p)*0.15); healPlayer(p,h); addText(p.x,p.y+70,p.z,'LAST STAND','#f0d89a',true,'heal'); };
 // Necromancer non-summon skills reuse mage FX (necro-flavored icons via C2_ICON)
 SKILL_FX.necro_bolt=SKILL_FX.m_bolt; SKILL_FX.necro_nova=SKILL_FX.m_nova; SKILL_FX.necro_wall=SKILL_FX.m_barrier; SKILL_FX.necro_grip=SKILL_FX.m_gravity; SKILL_FX.necro_storm=SKILL_FX.m_tempest;
 // Ninja skills reuse ranger/warrior FX (ninja-flavored icons via C2_ICON)
@@ -10420,7 +10450,7 @@ SKILL_FX.war_lance=function(p,ok,am){const w=p.weapon,t=projectileAimTarget(p,90
   G.projectiles.push({owner:'player',x:p.x,y:p.y+27,z:p.z,vx:Math.sin(p.yaw)*sp,vy:0,vz:Math.cos(p.yaw)*sp,gravity:0,size:9,color:'#ff5475',shape:'lance',glow:1,trail:'#7a1835',dmg:(w?w.dmg:10)*effPower(p)*3.0*am*(ok?1:OFFCLASS_MUL),kb:260,pierce:5,el:'void',life:1.25,hitSet:[]});skillRing(p.x,p.z,'#9a1f48','#2b0a18',70);SFX.magic('void');};
 SKILL_FX.war_curse=function(p,ok,am){let hit=0;skillRing(p.x,p.z,'#a458e8','#36104f',245);for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>225+e.r)continue;e.warCurseT=7;e.slowT=Math.max(e.slowT||0,1.2);hit++;addText(e.x,e.y+e.h+12,e.z,'CURSED','#d78cff');}if(!hit)return 'refund';SFX.magic('void');};
 SKILL_FX.war_drain=function(p,ok,am){let t=null,b=-1;for(const e of combatTargets()){if(e.dead||!e.active||e.dummy||dXZ(e.x,e.z,p.x,p.z)>620)continue;if(e.hp>b){b=e.hp;t=e;}}if(!t)return 'refund';
-  const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.0*am*(ok?1:OFFCLASS_MUL);hitEnemy(t,dmg,p,80,0,'void');const h=Math.max(1,Math.round(dmg*.22));p.hp=Math.min(effMaxHp(p),p.hp+h);skillRing(t.x,t.z,'#b055d8','#4c123d',95);addText(p.x,p.y+70,p.z,'+'+h+' HP','#7de08a',true);SFX.magic('void');};
+  const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.0*am*(ok?1:OFFCLASS_MUL);hitEnemy(t,dmg,p,80,0,'void');const h=Math.max(1,Math.round(dmg*.22));healPlayer(p,h);skillRing(t.x,t.z,'#b055d8','#4c123d',95);addText(p.x,p.y+70,p.z,'+'+h+' HP','#7de08a',true);SFX.magic('void');};
 SKILL_FX.war_step=function(p,ok,am){const ox=p.x,oz=p.z;SKILL_FX.blink(p,ok,am);const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.15*am*(ok?1:OFFCLASS_MUL);
   for(const e of combatTargets()){if(e.dead||!e.active||e.dummy)continue;if(dXZ(e.x,e.z,ox,oz)<115+e.r||dXZ(e.x,e.z,p.x,p.z)<115+e.r)hitEnemy(e,dmg,p,180,0,'void');}skillRing(ox,oz,'#7c3fc2','#1b0829',130);skillRing(p.x,p.z,'#d05cff','#35104b',130);SFX.magic('void');};
 SKILL_FX.war_orb=function(p,ok,am){const t=projectileAimTarget(p,720);if(!t)return 'refund';const dmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*2.3*am*(ok?1:OFFCLASS_MUL),tx=t.x,tz=t.z;skillRing(tx,tz,'#8b43c7','#22082e',205);
@@ -10633,7 +10663,7 @@ function useSkill(i){
     // here would be a balance call rather than delivering the promise on it.
     if(meta.classId==='stormcaller'&&fx&&c2Passive('st_ward')){p.shieldHp=Math.max(p.shieldHp||0,Math.round(effMaxHp(p)*.04));p.shieldT=3;}
     if(meta.classId==='reaper'&&(s.fx==='x_step'||s.fx==='x_wraith')&&c2Passive('x_wraithwalk'))p.wraithwalkT=2.5;
-    if(meta.classId==='warrior'&&classState('warrior').rank>=10){p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.02));hudUpdate();}
+    if(meta.classId==='warrior'&&classState('warrior').rank>=10){healPlayer(p,Math.round(effMaxHp(p)*.02));hudUpdate();}
     G._desig=false;
     /* A refunded cast never happened - it found no target and did not go on cooldown - so a soul
        spent on it is put back rather than paid out as mana the player never spent. */
@@ -10836,7 +10866,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     MP.sendPvp(e._peerId||e.id,dmg,sx,sz);
     e.hitFlash=.12;addText(e.x,(e.y||0)+(e.h||44)+10,e.z,dmg,G._crit?'#ffd24a':'#fff',false,G._crit?'crit':'dmg');
     burst(e.x,(e.y||0)+(e.h||44)*.5,e.z,e.color||'#9cc8ff',4);SFX.hit();
-    if(lifesteal>0){const lsMul=meta.classId==='reaper'?.25:.15,heal=Math.round(dmg*lifesteal*lsMul);if(heal>0)G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);}
+    if(lifesteal>0){const lsMul=meta.classId==='reaper'?.25:.15,heal=Math.round(dmg*lifesteal*lsMul);if(heal>0)healPlayer(G.p,heal);}
     return;
   }
   // CO-OP GUEST: the host owns enemy HP. Relay our hit, show a local number + our own lifesteal,
@@ -10848,14 +10878,14 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
     MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
-    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3, heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+    if(lifesteal>0){ const lsMul=meta.classId==='reaper'?0.5:0.3, heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) healPlayer(G.p,heal); }
     return;
   }
   if(e.shielded && e.boss){ e.hitFlash=0.1; if(Math.random()<0.5) addText(e.x,e.y+e.h+12,e.z,'WARDED','#7fd6ff'); return; }   // the boss ward absorbs everything until its crystals fall
   if(e.type==='frostling' && Math.random()<0.45) playFx('frostclink');   // brittle-ice clink (selective)
   let mod=elemMod(el,e.element);
   if(src===G.p&&!(G&&G._desig)){if(meta.classId==='warrior'&&c2Passive('w_swift')){src._swiftHits=(src._swiftHits||0)+1;if(src._swiftHits%4===0)dmg*=1.25;}if(meta.classId==='mage'&&c2def('mage')&&src.weapon&&src.weapon.sch==='mag')gainMana(src,2,false);}
-  if(src===G.p&&meta.classId==='paladin'&&c2def('paladin')&&src.weapon&&src.weapon.el==='holy'){ const frac=0.02+(classState('paladin').rank>=10?0.01:0); const h=Math.max(1,Math.round(dmg*frac)); src.hp=Math.min(effMaxHp(src),src.hp+h); }   // Holy Warrior: heal on holy-weapon hits
+  if(src===G.p&&meta.classId==='paladin'&&c2def('paladin')&&src.weapon&&src.weapon.el==='holy'){ const frac=0.02+(classState('paladin').rank>=10?0.01:0); const h=Math.max(1,Math.round(dmg*frac)); healPlayer(src,h); }   // Holy Warrior: heal on holy-weapon hits
   if(src===G.p&&meta.classId==='reaper'&&c2Passive('x_favor')&&(e.elite||e.boss)&&(G.time-(src._favorHitT||-9))>=.75){src._favorHitT=G.time;gainMana(src,1,false);}
   if(e.staggerT>0){ dmg*=1.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WEAK!','#ffd24a'); }   // shattered-ward stagger = a real damage window
   if(e.exposed>0 && normEl(el)==='holy') mod*=1.25;          // Radiance payoff leaves the target Exposed to Holy
@@ -10952,7 +10982,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p && G._desig && !e.dead && e.hp>0){ consumeRunes(e); ruptureCorrupt(e,G.p); }   // designated (charged/skill/Reaper) attacks spend Rune Marks + rupture Corruption
   if(lifesteal>0 && src===G.p){                                    // lifesteal heavily nerfed globally; the Reaper keeps a clear edge but is no longer a free full-heal
     const lsMul = meta.classId==='reaper'?0.5:0.3;
-    const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal); }
+    const heal=Math.round(dmg*lifesteal*lsMul); if(heal>0) healPlayer(G.p,heal); }
   const weaponManaHit=src===G.p&&!G._desig&&!e.dummy&&!e.practice;
   if(weaponManaHit) gainMana(G.p,4,false);
   /* MASTER STRIKER (monk r9 b): "Every fourth unbroken strike hits everything around you."
@@ -11019,7 +11049,7 @@ function killEnemy(e,weaponKill){
   } catch(err){}
   try {
     if(meta.classId==='warlock' && G && G.p && (G.p._bloodOwed||0) > 0){
-      G.p.hp = Math.min(effMaxHp(G.p), G.p.hp + G.p._bloodOwed);
+      healPlayer(G.p, G.p._bloodOwed);
       addText(G.p.x, G.p.y + 40, G.p.z, '+' + G.p._bloodOwed, '#b06bff');
       G.p._bloodOwed = 0; hudUpdate();
     }
@@ -11081,11 +11111,11 @@ function killEnemy(e,weaponKill){
   if(typeof c2OnKill==='function' && G.p) c2OnKill(G.p,e);   // class kill riders receive the defeated target for conditional capstones
   // Holy Radiance payoff: felling a purified/Exposed foe drops a small restorative mote (global 1s cooldown = no infinite-heal loop)
   if((e.exposed>0 || (e.st&&e.st.radiance>=STCAP.radiance-1)) && G.p && (G.time-(G._radHeal||-9))>1.0 && G.p.hp<effMaxHp(G.p)){
-    G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h);
+    G._radHeal=G.time; const h=Math.max(3,Math.round(effMaxHp(G.p)*0.04)); healPlayer(G.p,h);
     addText(G.p.x,G.p.y+80,G.p.z,'+'+h+' ♥','#ffe9a8',true,'heal'); burst(e.x,e.y+e.h*0.5,e.z,'#fff8d6',10); }
   if(e.elite) meta.elitesKilled=(meta.elitesKilled||0)+1;
-  if(e.elite&&meta.classId==='reaper'&&c2Passive('x_favor')){ const h=Math.max(1,Math.round(effMaxHp(G.p)*.08)); G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+h); addText(G.p.x,G.p.y+72,G.p.z,'DEATH’S FAVOR +'+h,'#c47bff',true,'heal'); }
-  { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+heal);   // Void Scythe harvest: every soul reaped restores HP
+  if(e.elite&&meta.classId==='reaper'&&c2Passive('x_favor')){ const h=Math.max(1,Math.round(effMaxHp(G.p)*.08)); healPlayer(G.p,h); addText(G.p.x,G.p.y+72,G.p.z,'DEATH’S FAVOR +'+h,'#c47bff',true,'heal'); }
+  { const w=G.p.weapon; if(w&&w.reaper&&classFamilyOk(w)&&!e.dummy){ const heal=Math.max(3,Math.round(effMaxHp(G.p)*0.05)); const pre=G.p.hp; healPlayer(G.p,heal);   // Void Scythe harvest: every soul reaped restores HP
     if(G.p.hp>pre) addText(G.p.x,G.p.y+72,G.p.z,'+'+(G.p.hp-pre),'#b06bff'); } }
   if(e.markExplode>0){ skillRing(e.x,e.z,'#ff5a3a','#c33',150); G.shake=Math.min(G.shake+4,10);   // Death Mark: burst on death
     for(const o of combatTargets()){ if(o.dead||o===e) continue; if(dXZ(o.x,o.z,e.x,e.z)<150+o.r) hitEnemy(o,e.markExplode,G.p,180,0,'fire'); } }
@@ -11238,7 +11268,7 @@ function gainXp(n){
   gainClassXp(G.trial?Math.round(classAward*2.5):classAward); // trials still reach Rank 2; normal class progression is 2.5x longer
   while(p.xp>=p.xpNext){ p.xp-=p.xpNext; p.level++; p.xpNext=CHARACTER_XP(p.level);
     autoLevelGrow(p); recomputeArmor(p);
-    p.hp=Math.min(effMaxHp(p),p.hp+20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
+    healPlayer(p,20);                  // instant flourish: growth + heal + SFX + toast, no menu, no delay
     SFX.levelup(); playFx('levelcheer'); meta.maxLevel=Math.max(meta.maxLevel||1,p.level);
     addText(p.x,p.y+98,p.z,'LEVEL '+p.level,'var(--amber)',true); burst(p.x,p.y+30,p.z,'#ffd24a',16); G.slowmo=Math.max(G.slowmo||0,0.12);
     const unlocked=rarityUnlockedAt(p.level);
@@ -11572,7 +11602,7 @@ function hurtPlayer(dmg,sx,sz,by){
   const p=G.p; if(p.invuln>0||p.dodgeTimer>0) return;
   if(meta.classId==='bladedancer'&&c2def('bladedancer')&&(p.bdParryT||0)>0){
     p.bdParryT=0;p.bdRiposte=1;p.invuln=Math.max(p.invuln,.28);addText(p.x,p.y+p.h+20,p.z,'PARRY!','#ffd36a',true);skillRing(p.x,p.z,'#ffd36a','#ffffff',145);burst(p.x,p.y+25,p.z,'#ffe59b',18);
-    if(c2Passive('bd_heal'))p.hp=Math.min(effMaxHp(p),p.hp+Math.round(effMaxHp(p)*.05));
+    if(c2Passive('bd_heal'))healPlayer(p,Math.round(effMaxHp(p)*.05));
     /* FAST HANDS (bladedancer r5 b, index.html:2216): "A parry refunds the time your attack would
        have taken." Wired 2026-08-12, the third row of docs/SKILL_TRIAGE.md section Q. `bd_fast` has
        always been reported WIRED and is: its one reader is `effAtkSpeed`, where it grants +12%
@@ -11654,8 +11684,8 @@ function hurtPlayer(dmg,sx,sz,by){
      otherwise hold the window open forever and turn "once per fight" into once per run. */
   if(meta.classId==='berserker'){ if((G.time-(p._thickHitT||-99))>5) p._thickUsed=false; p._thickHitT=G.time; }
   if(by) G.lastHitBy = (typeof by==='string')?{name:by,attack:''}:by;   // remember what just hit us — the death screen names the killer
-  if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
-  if(meta.classId==='paladin'&&c2Passive('pal_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);p.hp=Math.min(effMaxHp(p),p.hp+h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
+  if(meta.classId==='warrior'&&c2Passive('w_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);healPlayer(p,h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
+  if(meta.classId==='paladin'&&c2Passive('pal_second')&&p.hp>0&&p.hp<effMaxHp(p)*.35&&(G.time-(p._secondWindT||-99))>=30){p._secondWindT=G.time;const h=Math.round(effMaxHp(p)*.12);healPlayer(p,h);addText(p.x,p.y+p.h+28,p.z,'SECOND WIND +'+h,'#7de08a',true);}
   if(typeof class2OnHit==='function') class2OnHit(p);   // a direct hit breaks Clear Aim (Perfect Aim grants a grace)
   /* HEAVY HANDS (berserker r3 a), the half you keep: "nothing can knock you back or stagger you."
      Wired 2026-08-11; it was one of the 31 in docs/SKILL_TRIAGE.md section E that the menu offers,
@@ -11793,9 +11823,9 @@ function petUpdate(dt){
     if(pet.atkT<=0){ if(tgt && dXZ(tgt.x,tgt.z,pet.x,pet.z)<(P.range||240)){ let cd=P.cd;if(meta.classId==='beastmaster'&&c2Passive('bst_heavy'))cd*=1.10;if(meta.classId==='beastmaster'&&c2Passive('bst_swift'))cd*=.82;if((pet.apexT||0)>0)cd*=.77;pet.atkT=cd; petAttack(pet,P,tgt); } else pet.atkT=0.25; } }
   else if(P.arch==='healer'){ pet.healT-=dt;
     if(pet.healT<=0){ pet.healT=P.cd; const mx=effMaxHp(p);
-      if(p.hp>0 && p.hp<mx){ const h=Math.min(petHealAmt(pet.id),mx-p.hp); p.hp+=h;
-        addText(p.x,p.y+80,p.z,'+'+h+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
-        burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } }
+      if(p.hp>0 && p.hp<mx){ const h=healPlayer(p,Math.min(petHealAmt(pet.id),mx-p.hp)); if(h>0){
+        addText(p.x,p.y+80,p.z,'+'+Math.round(h)+' ♥','#7de08a',true,'heal'); skillRing(p.x,p.z,'#7de08a','#4be08a',64);   // Phase 19: the heal READS now — big green number + a soft ring
+        burst(pet.x,pet.y,pet.z,'#7de08a',8); hudUpdate(); } } } }
   else if(P.arch==='utility'){ const R=P.pull||220;         // loot vacuum: draw nearby drops toward the hero
     for(const pk of G.pickups){ if(pk.questItem||pk.localItem) continue; const d=dXZ(pk.x,pk.z,p.x,p.z); if(d<R && d>6){ pk.x+=(p.x-pk.x)/d*Math.min(d,170)*dt; pk.z+=(p.z-pk.z)/d*Math.min(d,170)*dt; } } }
 }
@@ -11846,7 +11876,7 @@ function minionUpdate(dt){
         try{ burst(tgt.x,(tgt.y||0)+18,tgt.z,'#8be0a0',5); addText(tgt.x,(tgt.y||0)+52,tgt.z,'HIT','#8be0a0'); }catch(_){} }
       else if(m.ranged){ const oy=m.y+16,sp=520,d=Math.max(1,dXZ(m.x,m.z,tgt.x,tgt.z)); G.projectiles.push({owner:'player',x:m.x,y:oy,z:m.z,vx:(tgt.x-m.x)/d*sp,vy:((tgt.y+tgt.h*0.5)-oy)/d*sp,vz:(tgt.z-m.z)/d*sp,gravity:0,size:6,color:'#8be0a0',shape:'orb',glow:1,dmg:m.dmg,kb:40,pierce:0,el:null,life:1.6,hitSet:[],seek:true,petSeek:true}); }
       else { m.x=tgt.x-Math.sin(m.yaw)*22; m.z=tgt.z-Math.cos(m.yaw)*22; hitEnemy(tgt,m.dmg,{x:m.x,z:m.z,pet:true},80,0,null); burst(tgt.x,tgt.y+tgt.h*0.4,tgt.z,'#8be0a0',5); }
-      if(bond&&p.hp>0){ const h=Math.max(1,Math.round(effMaxHp(p)*0.006)); p.hp=Math.min(effMaxHp(p),p.hp+h); } } }
+      if(bond&&p.hp>0){ const h=Math.max(1,Math.round(effMaxHp(p)*0.006)); healPlayer(p,h); } } }
   }
   G.minions=G.minions.filter(m=>!m.dead);
 }
@@ -12604,7 +12634,7 @@ function arenaPickupTick(dt){ if(!G||!G.arena||!ARENA_LOADOUT.powerups) return;
     if(Math.hypot(pk.x-p.x,pk.z-p.z)<28 && Math.abs((pk.y||0)-(p.y||0))<56){ applyArenaPickup(pk.kind,p); G.arenaPk.splice(i,1); } }
 }
 function applyArenaPickup(kind,p){
-  if(kind==='heal'){ const h=Math.round(effMaxHp(p)*0.4); p.hp=Math.min(effMaxHp(p),p.hp+h); try{ addText(p.x,p.y+60,p.z,'+'+h+' ♥','#7de08a',true,'heal'); burst(p.x,p.y+30,p.z,'#7de08a',12); SFX.pickup&&SFX.pickup(); }catch(e){} }
+  if(kind==='heal'){ const h=Math.round(effMaxHp(p)*0.4); healPlayer(p,h); try{ addText(p.x,p.y+60,p.z,'+'+h+' ♥','#7de08a',true,'heal'); burst(p.x,p.y+30,p.z,'#7de08a',12); SFX.pickup&&SFX.pickup(); }catch(e){} }
   else if(kind==='dmg'){ p.stats.power*=1.5; try{ addText(p.x,p.y+60,p.z,'⚔ DAMAGE UP','#ff9a3a',true); burst(p.x,p.y+30,p.z,'#ff9a3a',12); SFX.levelup&&SFX.levelup(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.power/=1.5; },9000); }
   else if(kind==='speed'){ p.stats.speed*=1.5; try{ addText(p.x,p.y+60,p.z,'💨 SPEED UP','#7fd6ff',true); burst(p.x,p.y+30,p.z,'#7fd6ff',12); SFX.dodge&&SFX.dodge(); }catch(e){} setTimeout(()=>{ if(G&&G.p===p&&G.arena) p.stats.speed/=1.5; },9000); }
 }
@@ -13235,7 +13265,8 @@ function update(dt){
   if(G.healpads) for(const hp of G.healpads){ if(hp.charge<=0) continue;
     if(Math.abs(p.y-(hp.y||0))<30 && dXZ(p.x,p.z,hp.x,hp.z)<hp.r+p.r*0.6){ const mx=effMaxHp(p);
       if(p.hp<mx){ const budget=mx*0.40, heal=Math.min((budget/1.2)*dt, hp.charge*budget, mx-p.hp);
-        if(heal>0.02){ p.hp+=heal; hp.charge=Math.max(0,hp.charge-heal/budget); hp._acc=(hp._acc||0)+heal;
+        if(heal>0.02){ if(healPlayer(p,heal)<=0) continue;   // Rage: a locked-out heal must not drain the pad either
+          hp.charge=Math.max(0,hp.charge-heal/budget); hp._acc=(hp._acc||0)+heal;
           if(hp._acc>=8){ addText(hp.x,(hp.y||0)+36,hp.z,'+'+Math.round(hp._acc),'#8fe8a0'); hp._acc=0; }
           if(Math.random()<0.5) G.particles.push({x:hp.x+(Math.random()-0.5)*46,y:(hp.y||0)+4,z:hp.z+(Math.random()-0.5)*46,vx:0,vy:56+Math.random()*40,vz:0,life:0.6,color:'#8fe8a0',sz:2.6});
           if(!hp._sfxT||(G.time-hp._sfxT)>0.45){ hp._sfxT=G.time; try{SFX.pickup&&SFX.pickup();}catch(e){} }
@@ -13272,7 +13303,8 @@ function update(dt){
     G.spikefields=G.spikefields.filter(sf=>sf.life>0); }
   // healing spring (once per stage)
   for(const sp2 of G.springs){ if(!sp2.used && Math.abs(p.y-(sp2.y||0))<18 && dXZ(p.x,p.z,sp2.x,sp2.z)<30 && p.hp<effMaxHp(p)){
-    sp2.used=true; const heal=Math.round(effMaxHp(p)*0.25); p.hp=Math.min(effMaxHp(p),p.hp+heal);
+    const heal=Math.round(effMaxHp(p)*0.25); if(healPlayer(p,heal)<=0) continue;   // Rage: a locked-out heal must not spend the spring either
+    sp2.used=true;
     addText(p.x,p.y+60,p.z,'+'+heal,'var(--good)',true); burst(p.x,10,p.z,'#7fe8c0',14); SFX.levelup(); hudUpdate(); } }
   // dungeon logic: encounter rooms seal their doors; plates & keys open the locked ones
   for(const r of G.rooms){
@@ -13857,7 +13889,7 @@ function continueRun(){
    UPGRADES / OFFERS / MENUS (ported from 2D)
    ============================================================ */
 const UPGRADE_POOL=[
-  {n:'Vitality',d:'+25 Max HP and heal 25',icon:'❤',apply:p=>{p.maxHp+=25;p.hp+=25;}},
+  {n:'Vitality',d:'+25 Max HP and heal 25',icon:'❤',apply:p=>{p.maxHp+=25;healPlayer(p,25);}},
   {n:'Power',d:'+18% weapon damage',icon:'⚔',apply:p=>{p.stats.power*=1.18;}},
   {n:'Swiftness',d:'+12% move speed',icon:'»',apply:p=>{p.stats.speed*=1.12;}},
   {n:'Frenzy',d:'+15% attack speed',icon:'⚡',apply:p=>{p.stats.atkSpeed*=1.15;}},
@@ -14394,7 +14426,7 @@ function loadEndlessArena(n){
   G.startPos={x:0,z:R-140}; G.goalPos={x:0,z:-R+110}; G.lastSafe={x:0,z:R-140,y:0};
   G.p.x=0; G.p.z=R-140; G.p.y=0; G.p.vx=0; G.p.vy=0; G.p.vz=0; G.p.yaw=Math.PI; G.p.onGround=true;
   if(G.cam) G.cam.y=0; G.camYaw=Math.PI; G.camPitch=0.14;
-  G.p.hp=Math.min(effMaxHp(G.p),G.p.hp+Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
+  healPlayer(G.p,Math.round(effMaxHp(G.p)*0.2));   // a small breather between floors
   // reward beat: a loot cache every third floor (rarity still gated by character level via bandedRarity)
   if(n>1 && n%3===0) G.chests.push(chestMaybeMimic({x:0,z:-40,y:0,opened:false,bob:0}));   // even the Abyss's gifts can lie
   // MIMIC FLOORS: every 6th floor is a vault — three caches, each with the standard mimic rate (the bonus-vault exemption stays)

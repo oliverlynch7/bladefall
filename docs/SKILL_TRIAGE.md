@@ -2080,7 +2080,7 @@ sub-project has built.
 | `x_doom` | reaper r3 b — Lingering Doom | "Marked enemies that die spread their mark to the nearest foe." | the doom timer burns 20% slower (13284) | confirmed, unfixed — **Oliver's**: a reaper cannot mark anything, so which mark is a design call |
 | `x_chill` | reaper r7 b — Grave Chill | "Corrupted enemies cannot flee — they walk toward you instead." | corrupted enemies move 18% slower (13283) | confirmed, unfixed — **Oliver's**, nothing flees |
 | `x_corrupt` | reaper r9 a — Corruption Mastery | "Rupturing a corrupted enemy corrupts everything near it." | +25% corrupt buildup (9527) and +15% rupture damage (9551) | **FIXED**, pass 34 — the radius was rupture's own 120 |
-| `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | HALF wired — the upside is there, the drawback is not |
+| `bsk_rage` | berserker r7 a — Rage | "Below a quarter health you cannot be healed, and your damage doubles." | the doubling only (11353) | **FIXED**, pass 35 — the game now has one heal door |
 | `chr_temporal` | chronomancer r7 a — Temporal Flow | "Standing still rewinds your cooldowns rather than merely pausing them." | an UNCONDITIONAL +10% cooldown reduction (3766) | confirmed, unfixed — **Oliver's**, both stages would be invented |
 | `pal_heal` | paladin r7 b — Healing Light | "Every skill you cast heals the ally nearest you, or you if alone." | `effLifesteal` +5% lifesteal (3759) | confirmed, unfixed — actionable only if the amount can be taken from the file |
 
@@ -2268,13 +2268,12 @@ than what their card says, and no tool this sub-project owns could have said so.
   flees.** `D.flee` belongs to the Arena bot profiles (12605–12608) and the only other fleeing body is
   the treasure goblin, so an ordinary mob has no fleeing state to forbid and no "walk toward you" to
   switch on. That is section K's absence — there is no aggro model — reached from a different door.
-- **`bsk_rage` — Rage. HALF WIRED, and the missing half is the DRAWBACK.** "Below a quarter health you
-  cannot be healed, and your damage doubles": the doubling is in `CLASS_BASIC.berserker`, and the heal
-  lock is nowhere. There is no player-side heal cut at all — `healCut` is an ENEMY field (9532, heavy
-  Venom choking a healer's mend). Pass 20's own rule is the argument for taking it: *"a card with a
-  drawback has to be wired on BOTH sides or picking it is a strict upgrade"*, which is exactly what
-  ships today. Takeable, with the caution that it touches every path that heals the player, so the
-  probe needs a control heal that must still land above a quarter health.
+- **`bsk_rage` — Rage. FIXED, pass 35, 2026-08-12 — see the write-up below.** "Below a quarter health
+  you cannot be healed, and your damage doubles": the doubling was in `CLASS_BASIC.berserker`, and the
+  heal lock was nowhere. There was no player-side heal cut at all — `healCut` is an ENEMY field (9532,
+  heavy Venom choking a healer's mend). Pass 20's own rule was the argument for taking it: *"a card
+  with a drawback has to be wired on BOTH sides or picking it is a strict upgrade"*, which is exactly
+  what shipped.
 - **`chr_temporal` — Temporal Flow. OLIVER'S.** The card says standing still *rewinds* your cooldowns
   "rather than merely pausing them"; the one reader is an **unconditional +10% cooldown reduction** —
   no stillness, no rewind. Its own twin two clauses to the left in the same function, the mage's
@@ -2283,6 +2282,84 @@ than what their card says, and no tool this sub-project owns could have said so.
   rewinding as an *upgrade over pausing*, and cooldowns do not pause when you stand still, so both
   stages would have to be invented. Reading the card down to "recovers faster while still" is a
   description edit, which this document forbids.
+
+### Rage — the row that had to build the door before it could shut it
+
+Taken as pass 35, 2026-08-12. It is the second row in this section whose card is HALF implemented
+(after `w_juggernaut`) and the first where the half that shipped is the **upside**, so until this run
+picking Rage over Frenzy — the b-side of its own rank — bought a damage doubling with its printed cost
+missing. Pass 20's rule decides it: a card with a drawback has to be wired on both sides or it is a
+different and better card than the menu shows.
+
+**THE FIX IS MOSTLY NOT A PASSIVE. It is `healPlayer()`, and this file had never had one.** "You
+cannot be healed" has to be answered somewhere, and there was nowhere: **thirty** separate
+`p.hp = Math.min(effMaxHp(p), p.hp + x)` sites, across sixteen classes, lifesteal, pickups, springs,
+pads, level-ups and pet mends, each answering the question for itself. All thirty now call one
+function (`index.html:3691`), which is the whole change; `healBlocked()` beside it is four lines and
+holds the card. The plan said this in advance — *"taking it means introducing one, which is a refactor
+across every class before it is a passive fix"* — and that is the honest description of the diff.
+
+**NO NUMBER WAS INVENTED, in either half.** Both clauses are booleans, and the threshold is the
+doubling's OWN expression: `p.hp / effMaxHp(p) < 0.25`, the same line `CLASS_BASIC.berserker` has
+always read. The card names one quarter and means it once.
+
+**WHAT COUNTS AS A HEAL, stated because the distinction is what keeps the game playable.** The door
+routes INCREMENTAL heals — a number added to your health while you are playing. It does NOT route a
+full restore (`p.hp = effMaxHp(p)`): respawn, revive, entering an area, building a character in the
+menus, the cheat panel. Those are RESETS, and blocking them would not be a drawback, it would be a
+berserker who can never leave a quarter health again for the rest of a run.
+
+**Two world fixtures decline to be SPENT when the heal is refused** — the healing spring (13305) and
+the healing pads (13238), both of which are limited-charge things you stand near. A raging berserker
+walking over a spring does not consume it for nothing, and does not drain 40% of a pad's budget per
+1.2 seconds for nothing. The arena health pickup is deliberately NOT given the same treatment: a
+pickup is collected by walking onto it and is gone, which is the pickup's own business rather than the
+heal's.
+
+Measured by `harness/probes/rage.probe.js`, three halves in one launch with two trials and a drift
+window each. **The heal is delivered by the GAME**: a plain `{x,z,y,used:false}` spring is pushed into
+`G.springs` and the game's own update step decides. The probe never calls `healPlayer`, `healBlocked`
+or `applyArenaPickup` — calling the door would prove the door swings, which is sub-project A Task 5's
+fault in a new costume.
+
+| half | pick | at 60% health | at 10% health | drift (10%, no spring) |
+|---|---|---|---|---|
+| control | `bsk_frenzy` (b-side of the same rank) | +134, spring spent | **+134, spring spent** | 0 |
+| passive | `bsk_rage` | +134, spring spent | **0, spring NOT spent** | 0 |
+| known-bad | `mon_iron` (dead id, identical bar) | +134, spring spent | **+134, spring spent** | 0 |
+
+`ok true, okAgainstInert false`. The 60% trial is the one that matters most: a lock that fired at any
+health would clear a low-only bar and would be a far stranger card than the one printed. The drift
+window is the identical ticks with nothing in the world to heal you, so the zero in the middle column
+is a real zero and not a bench that healed nobody anyway.
+
+**AND THE UPSIDE IS MEASURED IN THE SAME LAUNCH**, because a fix to one half of a sentence that
+quietly broke the other half would still read green here. Each half also lands one 20-damage hit at
+each health, through `hitEnemy` with `G._desig` false — the door `CLASS_BASIC` is applied behind
+(10938):
+
+| half | dealt at 10% health | dealt at 60% health |
+|---|---|---|
+| control | 40 | 30 |
+| passive | **79** | **30** |
+| known-bad | 40 | 30 |
+
+So the doubling is still present and still conditional. **79 rather than 80 is the game rounding a hit
+once (10946), and the probe's first run failed its own bar on it** — a ratio tolerance of 0.02 against
+a measured 1.975. The bar is now stated as one point of tolerance with the reason written beside it,
+because a bar tight enough to be meaningful must not fail a working fix on arithmetic the fix does not
+touch.
+
+Photographed as a true A/B at `_shot/out/rage-locked.png` against `_shot/out/rage-healed.png`
+(`harness/probes/rage-shot.probe.js`, `?ragecontrol` swapping rank 7 to Frenzy and nothing else): the
+same berserker on the same spring reads **HP 48 / 477** in one frame and **167 / 477** in the other.
+**Say what the frames do not show:** the hero's body is not in them. Switching `meta.classId` at
+runtime asks hero3d for a class model that has not finished loading under headless SwiftShader, and
+the log says so (`model Warrior`). The health bar is the claim and it is legible; the body is not part
+of it. The first attempt at the picture was worse and is worth keeping: it photographed a stale
+**477 / 477** in the locked half, because the HUD is only repainted when something the game did moved
+it — and the locked half deliberately does nothing. A frame of the correct game saying the opposite of
+the finding.
 
 ### THE SWEEP IS COMPLETE — all sixteen classes, 2026-08-12
 

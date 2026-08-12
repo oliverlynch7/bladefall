@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.942.0-autopilot';
+const VERSION3D='1.943.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -13513,6 +13513,42 @@ function update(dt){
   else if(queueChoiceRank && mode==='play'){ const r=queueChoiceRank; queueChoiceRank=0; openClassChoice(r); }   // v2: a rank-up opens the 1-of-2 choice
   else if(queueSubclass && mode==='play'){ queueSubclass=false; openSubclass(); }   // legacy path-fork
   class2Innate(G.p,dt);
+  /* RAGE'S OTHER HALF. bsk_rage (r7 a, 2134) reads "Below a quarter health you cannot be healed, and
+     your damage doubles." The doubling is CLASS_BASIC.berserker's (11390); the heal lock was nowhere
+     in the file, so what shipped was a card with its DRAWBACK missing - i.e. a strict upgrade over
+     the Frenzy it is offered against. docs/SKILL_TRIAGE.md section Q.
+
+     WHY THIS IS A CLAMP AND NOT A DOOR. The obvious fix is a healPlayer() every heal goes through,
+     and this file has no such door: ~20 separate `p.hp=Math.min(effMaxHp(p),p.hp+X)` sites, spread
+     over lifesteal, pickups, class riders, death saves and the Abyss floor breather. Routing all of
+     them is a refactor across every class before it is a passive fix, it can only ever cover the
+     sites that existed on the day it was written, and every site it MISSES is a silent hole in a
+     drawback. Comparing the health at the end of the frame against the health at the start needs one
+     place, covers every heal path in the game including ones added later, and cannot be got wrong per
+     site. What it costs is stated rather than hidden: a blocked heal is UNDONE rather than refused,
+     so a heal and a hit inside one frame net out, and the heal's own floater still appears - which is
+     why this prints its own floater underneath, so the player is told why the green number did not
+     stick.
+
+     THE TEST IS THE HEALTH YOU HAD, not the health you end up with, and that is the whole mechanic:
+     read the other way, a big enough heal lands in full precisely because it carries you back over
+     the quarter line, and the lock would only ever stop the small heals. Damage is never touched -
+     hp below the mark simply moves the mark down with it.
+
+     Not in the Waystation: `hurtPlayer` puts you back at half there rather than killing you (11679,
+     "the Waystation is stakes-free"), and clamping that restore would pin a Berserker at whatever he
+     walked in with. */
+  { const P=G.p;
+    if(P && !P.dead && !G.hub && meta.classId==='berserker' && c2def('berserker') && c2Passive('bsk_rage')){
+      const prev=P._rageHp;
+      if(prev!=null && prev<effMaxHp(P)*0.25 && P.hp>prev){
+        P.hp=prev;
+        if((G.time-(P._rageSayT||-99))>=1.2){ P._rageSayT=G.time; addText(P.x,P.y+(P.h||0)+24,P.z,'RAGE — NO HEALING','#ff5a6a',true); }
+        hudUpdate();
+      }
+      P._rageHp=P.hp;
+    } else if(P) P._rageHp=null;
+  }
 }
 const AMBIENT={
   frost:{c:'#e6f7ff',vy:-40,n:2.4,g:1},           // snow drifting down

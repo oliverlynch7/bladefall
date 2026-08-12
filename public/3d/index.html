@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.938.0-autopilot';
+const VERSION3D='1.939.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11129,6 +11129,26 @@ function mimicReveal(ch){
 }
 function openChest(ch){
   ch.opened=true; SFX.pickup(); SFX.achieve(); playFx('chestopen');
+  /* QUICK HANDS (pirate r3 b, index.html:2142): "Opening a chest reloads your pistol." Wired
+     2026-08-12. It was NOT one of docs/SKILL_TRIAGE.md section E's dead passives — the audit has
+     always called `pir_swift` WIRED, and it is: its one reader is `effAtkSpeed`, where it grants
+     +10% attack speed (3754). That is a different promise from the one on the card, and the card's
+     own promise was implemented nowhere. `_loaded` has exactly three writers — spent on a shot
+     (11306), reloaded on a KILL (10979), and arrive-loaded (12938) — and a chest is not among them.
+     NOTHING IS INVENTED, because there was nothing to invent: the card is a boolean, and the four
+     lines that answer it are the kill rider's own, verbatim down to the RELOADED floater and its
+     colour. The `!G.p._loaded` guard is that rider's too, so a chest opened with a loaded pistol is
+     silent rather than announcing a reload that did not happen.
+     ABOVE the hub-sprint early return on purpose: the card says "a chest", and the finale chest of a
+     Treasure Sprint is one. Mimics are correctly untouched — `mimicReveal` never reaches here, and a
+     mimic is a fight, not a chest.
+     THE +10% ATTACK SPEED IS LEFT ALONE and is Oliver's, the same call as `w_unyield` (section E):
+     removing a bonus a Pirate has been playing with is a balance change, and this fix only adds the
+     thing the card actually promises. Recorded in docs/SKILL_TRIAGE.md section Q. */
+  if(meta.classId==='pirate'&&c2def('pirate')&&c2Passive('pir_swift')&&G&&G.p&&!G.p._loaded){
+    G.p._loaded=true;
+    addText(G.p.x,G.p.y+44,G.p.z,'RELOADED','#ffd24a');
+  }
   burst(ch.x,ch.y+16,ch.z,'#f0a93a',16); G.shake=Math.min(G.shake+4,10);
   if(ch.bonus && G.sprintFun && G.bonusActive){ finishHubSprint(); return; }   // for-fun hub sprint: the finale chest is just the finish line — no gold, no loot
   const cg=awardGold(ch.bonus?150:70); addText(ch.x,ch.y+34,ch.z,'+'+cg+'g','#ffd24a'); hudUpdate();

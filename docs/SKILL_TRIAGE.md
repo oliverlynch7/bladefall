@@ -2053,6 +2053,103 @@ Unit stage **53 → 55 tests**, all green. `128 total, 102 wired, 26 dead`, ever
 duplicates, and the dead list is byte-for-byte what it was — so nothing in section E moves and
 `KNOWN_DEAD` needs no edit. No game code was touched.
 
+## Q. THE READER IS A STAT MULTIPLIER AND THE CARD PROMISES A MECHANIC — five rows, one **FIXED 2026-08-12**
+
+**None of these is in section E and none of them ever will be.** `harness/audit-passives.js` reports
+every id below as WIRED, correctly: each one *is* read. It asks "does anything read this id", which is
+the only question a static sweep can answer, and it cannot ask whether the reader honours the card.
+That limit is written into the audit's own header and into Task 3 Step 2 of the plan, and this section
+is the first systematic result of taking it seriously — the stat-snapshot half of that step, done by
+reading each of the 102 wired cards against its own reader rather than by launching a browser 102
+times.
+
+**The shape is one shape, and it is worth naming because it recurs across four classes.** The card
+describes a MECHANIC — a parry, a reload, an interrupt, a resistance — and the only code that mentions
+the id multiplies a stat in `effAtkSpeed` / `effSpeed` / `effDamage`. The passive does something. It
+does not do what the player was told. This is the same family as sections H, N and O (counted wired
+for its whole life, doing something other than the card), and it is invisible to every tool this
+sub-project has built.
+
+| id | class · rank | its card | its only reader | state |
+|---|---|---|---|---|
+| `pir_swift` | pirate r3 b — Quick Hands | "Opening a chest reloads your pistol." | `effAtkSpeed` +10% attack speed (3754) | **FIXED**, pass 31 |
+| `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | confirmed, unfixed — actionable |
+| `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | confirmed, unfixed — actionable |
+| `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
+| `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11523) | HALF wired — the DR is there, the knockback resistance is not |
+
+### Quick Hands — the row that was taken, and why it was takeable
+
+`_loaded` is the Pirate's whole identity: the flintlock overrides a basic attack or a charge, is spent
+on a shot (11306), and comes back **only on a kill** (10979), which is what stops "always equipped"
+from meaning "always available". Its three writers are that, the spend, and arrive-loaded (12938).
+**No chest is among them, anywhere in the file.**
+
+Nothing had to be invented, and that is the whole reason this row was takeable rather than Oliver's:
+the card is a BOOLEAN, and the four lines that answer it are the kill rider's own — the same guard
+(`!G.p._loaded`, so a chest opened with a loaded pistol is silent), the same floater, the same colour.
+It sits above the hub-sprint early return because a Treasure Sprint's finale chest is a chest. Mimics
+are untouched by construction: `mimicReveal` never reaches `openChest`, and a mimic is a fight.
+
+Measured by `harness/probes/quickhands.probe.js`, three halves in one launch with two windows each:
+
+| half | pick | chest window | idle window (same ticks, no chest) |
+|---|---|---|---|
+| control | `pir_deadly` (a-side of the same rank) | spent → **spent** | spent → spent |
+| passive | `pir_swift` | spent → **LOADED** | spent → spent |
+| known-bad | `mon_iron` (a dead id, identical bar) | spent → **spent** | spent → spent |
+
+`ok true, okAgainstInert false`. Gold +70 on every chest window and 0 on every idle window, so the
+payout is unchanged in all three halves.
+
+Two things the probe does deliberately, both of them rules this sub-project has paid for:
+- **The GAME opens the chest.** `__BF3.openChest` is exported and calling it would prove the door
+  swings, not that anything opens it — sub-project A Task 5's fault in a new costume. The probe pushes
+  an ordinary `{x,z,y,opened:false,bob:0}` into `G.chests` and ticks, so the interact step decides.
+- **The GAME spends the pistol.** `CLASS_BASIC.pirate` fires it from inside `hitEnemy`. The probe never
+  assigns `_loaded`, because that flag is both the input and the output of the thing under test.
+
+**And one thing it reports honestly rather than counting:** the drops. They land at `ch.x ± 28,
+ch.z + 20` and the pickup step collects anything within 40 units **in the same frame the chest loop
+created it**, so a hero standing on the chest it just opened reads `G.pickups.length` unchanged whether
+two items dropped or none — measured, 0 in all three halves on this probe's first run, which failed the
+probe's own bar before the bar was corrected. Offsetting the chest does not rescue it (one of the two
+drop positions stays inside the 40, and the drop count is `1 + (rand < 0.4)`, so it would flap). The
+purse reading proves `openChest` ran its body past the inserted lines; the loot is not claimed.
+
+**THE +10% ATTACK SPEED IS LEFT ALONE AND IS OLIVER'S** — `w_unyield`'s call, made for `w_unyield`'s
+reason. This fix only ADDS the thing the card promises; removing an undocumented bonus a Pirate has
+been playing with for weeks is a balance change, and both honest endings (delete it, or put it on the
+card) are one sentence from him rather than one number from a run.
+
+### The three rows below it that a run COULD take, and the one it could not
+
+- **`bd_feet` and `bd_fast` are the same call as Quick Hands and are the obvious next passes.** Both
+  cards are booleans about the bladedancer's parry, and the parry already exists and is already
+  complete: `p.bdParryT` is the window, `hurtPlayer` (11516) is where it catches, and `p.bdRiposte` is
+  what it stores. Light Feet needs the dodge step to open that window when the dash passes through a
+  body; Fast Hands needs the catch to zero `p.atkCd`, which `playerAttack` sets and `w_swift` already
+  zeroes three lines from where it is set. **Nothing has to be chosen in either case**, and as with
+  Quick Hands the existing stat bonus stays and is Oliver's.
+- **`w_heavy` is NOT the same call and should not be taken as one.** "Cannot be interrupted" and
+  "cannot cancel" are claims about the swing state machine, and this file has no interrupt state to
+  read — pass 20's note records the same absence for stagger, where the launch IS the interruption.
+  Answering it means designing what interrupting a swing means, which is a mechanic, not a wiring.
+- **`w_juggernaut` is the odd one: half of it is already right.** The +8% damage reduction while
+  moving is implemented exactly as written (11523). The +15% knockback resistance is not implemented
+  anywhere — and unlike `w_heavy` the mechanism now exists, because pass 20 put the knockback in one
+  place (11601, three lines of velocity) so that Heavy Hands could skip it. A 15% resistance is
+  `* 0.85` on those three lines, and 15% is the card's own number. Worth taking, with one thing settled
+  first that a run should not settle alone: the card reads "+15% knockback resistance **and** +8%
+  damage reduction while moving", and whether "while moving" governs both clauses or only the second
+  is an English question about a card, not a measurement.
+
+**How these were found, so the method can be re-run.** No launch and no GPU: every `kind:'passive'`
+card in `CLASS2` read against every `c2Passive('<id>')` site in the file, class by class. Four classes
+were swept this way (warrior, mage, warlock, bladedancer — the four least worked by Task 2's passes)
+plus a targeted read of the pirate. **The other eleven classes have NOT been swept**, so this table is
+a floor and not a total. Mage and warlock came back clean, which is why they are not in it.
+
 ## Not listed here, and why
 
 - **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: a limit of the

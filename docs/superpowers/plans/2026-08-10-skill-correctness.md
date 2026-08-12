@@ -249,6 +249,7 @@ One line per pass, so the next run can see what has been taken without re-readin
 | 28 | **N — the ninja's Combo Edge paid out only for the OTHER passive** | this run | `harness/probes/nincombo.probe.js`, THREE halves in one launch with THREE trials each: a Ninja holding Swift + Combo Edge left `_stillT` at 0 after an Unseen kill on a full-health foe AND on a wounded one before; 9 on both after, while the half holding Deadly Precision went 0 → 9 on the healthy foe and stayed 9 on the wounded one (the shipped game's only working path, unbroken), the no-Combo-Edge control stayed 0 everywhere, and a plain non-Unseen kill rearmed in no half either side. **The known-bad could not be an `inert` half** — the mark is written and read inside one synchronous `hitEnemy` call, so the shipped gate is TRANSCRIBED in the probe and fed the identical bar (`okAgainstShipped` false while `ok` true). Photographed at `_shot/out/nc-rearm.png`. Section H's shape hiding UNDER the section H fix: nothing downstream of Unseen had ever been exercised, because Unseen could not arm |
 | 30 | **P — the passive audit could not see four of the game's passives** | this run | A BENCH pass, like pass 3, and taken for pass 3's reason. `passivesOf`'s entry regex demanded single quotes on `n:` and `d:`, so the four passives whose names carry an apostrophe (`x_favor`, `pal_will`, `bst_rhythm`, `bst_authority`) were skipped silently — 124 parsed where CLASS2 holds 128, and those four sat outside the `KNOWN_DEAD` ratchet's reach entirely, so one going dead would have left the gate green. Found by checking every `c2Passive('<id>')` literal against the ids CLASS2 defines: four ids the game guards on that the audit had never heard of. Proven by `harness/test/passives.test.js` with the old regex transcribed and asserted to MISS the double-quoted entry, and by replacing the `>= 100` floor with the arithmetic its own comment already stated — per class as well as in total. Unit stage 53 → 55 tests, `128 total, 102 wired, 26 dead`, dead list unchanged |
 | 29 | **O — chronomancer Haste named a cooldown array that does not exist** | this run | `harness/probes/chrhaste.probe.js`, TWO halves in one launch (the two options at the same rank, so the only difference is the pick): four real casts armed four real cooldowns in both halves, the control kept all four after its Rewind and the Haste half kept all four before / cleared all four after — and each half then PRESSED a skill, spending 0 mana before and 7 after, because `useSkill` returns at its cooldown gate *before* it spends anything. **First row found by the READ-NEVER-WRITTEN half of the field sweep**, which this plan records as never having been worked: `p.cds (2 reads, first at line 11644)`, both of them that one line. Photographed as a true A/B — `_shot/out/haste-cooling.png` counting 1.4 / 5.9 / 9.6 / 16.4 under the REWIND floater against `_shot/out/haste-ready.png` with four lit buttons at the same instant. Chronomancer suite 4 pass / 0 fail either side |
+| 31 | **Q — pirate Quick Hands reloaded nothing; its one reader was an attack-speed line** | this run | `harness/probes/quickhands.probe.js`, THREE halves in one launch with TWO windows each (a chest, and the same ticks with no chest, because a passive that reloaded on a timer would clear a chest-only bar): the passive half went spent → LOADED on the chest and stayed spent on the idle window, while the control (`pir_deadly`, the a-side of the same rank) and the known-bad (`mon_iron`) stayed spent in all four of their windows; gold +70 on every chest window and 0 on every idle one, so the payout is unchanged. **THE FIRST ROW OF A NEW SECTION AND A NEW SHAPE: the card promises a MECHANIC and the only reader multiplies a STAT.** The passive audit has always called `pir_swift` wired and is right — it is read, in `effAtkSpeed`, for +10% attack speed the card never mentions, while the card's own sentence had no implementation at all (`_loaded` has three writers and no chest is among them). Nothing invented: the card is a boolean and the four lines are the kill rider's own, floater and colour included. The probe's first run failed on its OWN loot clause — the pickup step collects the drops in the same frame the chest creates them, so a hero standing on the chest reads 0 either way — and the bar now says what it can prove. Pirate suite 3 pass / 0 fail / 1 unproven either side |
 | 13 | **E — ranger Bounty Hunter was never read** | `f693c69` | `harness/probes/bounty.probe.js`, THREE halves in one launch, each measuring a MARKED foe against an UNMARKED one so the mark is what is under test: control 623/623 damage, 0/0 heal, 550/550 gold; passive 573/623, 19/0, 605/550. Ranger suite 4 pass / 1 fail either side, the fail being the baselined `ranger/Tumble` stale description (section C, Oliver's) |
 
 **SECTION E HAS HIT ITS FLOOR — 2026-08-12, and the next run should not go looking for a row there.**
@@ -337,6 +338,32 @@ the one that gets a non-bug "fixed". `G.` and `G.pet.` report nothing at all in 
 candidate is the stat-snapshot half of Task 3 Step 2, now cheap: against 98 passives that DO have a
 reader, "is the reader honouring the card" is the question sections H, N and O all turned out to be,
 and it is the only one of the three remaining leads that a sweep cannot answer statically.
+
+**THAT CANDIDATE WAS TAKEN, 2026-08-12, AND IT DID NOT NEED A LAUNCH AT ALL — which is the finding as
+much as the bug is.** Step 2 deferred the stat snapshot because 128 passives × two game states does
+not fit in any run. It never had to be a snapshot: reading each wired card against its own
+`c2Passive('<id>')` site, class by class, answers the same question statically and costs nothing.
+Four of the sixteen classes were swept this way — warrior, mage, warlock and bladedancer, the four
+least worked by this task's passes — plus a targeted read of the pirate, and it produced **five rows in
+one sitting**, now `docs/SKILL_TRIAGE.md` section Q. Mage and warlock came back clean.
+
+They share one shape, and it is the shape sections H, N and O each hit separately: **the card promises
+a MECHANIC and the only reader multiplies a STAT.** `pir_swift` says "opening a chest reloads your
+pistol" and grants +10% attack speed; `bd_feet` says a dodge through an enemy parries them and grants
++10% move speed; `bd_fast` says a parry refunds your attack time and grants +12% attack speed;
+`w_heavy` says your swings cannot be interrupted and grants +12% damage and −5% attack speed;
+`w_juggernaut` promises knockback resistance AND damage reduction and implements only the second.
+Every one of them is reported WIRED by `harness/audit-passives.js`, correctly — the audit asks whether
+anything reads the id, and cannot ask whether the reader honours the card.
+
+**Where the next run should look, in order.** `bd_feet` and `bd_fast` are the same call as pass 31 and
+are the next two passes: both cards are booleans about a parry that already exists and is already
+complete (`p.bdParryT`, `hurtPlayer` 11516, `p.bdRiposte`), so nothing has to be chosen. `w_juggernaut`
+is takeable too — pass 20 put the knockback in one place so Heavy Hands could skip it, and 15% is the
+card's own number — but its "while moving" clause is ambiguous about which half it governs, which is an
+English question about a card and not a measurement. `w_heavy` is NOT takeable: this file has no
+interrupt state, so answering it means designing one. **And eleven classes have not been swept at all**,
+so section Q's five rows are a floor, not a total.
 
 **THE OTHER EIGHT WERE READ, 2026-08-12, AND THE ONE THING THAT CAME OUT OF IT WAS PASS 28 — but say
 what that sweep was and was not.** Every one of the twelve `CLASS_BASIC` entries was traced from the

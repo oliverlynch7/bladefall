@@ -2074,7 +2074,7 @@ sub-project has built.
 |---|---|---|---|---|
 | `pir_swift` | pirate r3 b — Quick Hands | "Opening a chest reloads your pistol." | `effAtkSpeed` +10% attack speed (3754) | **FIXED**, pass 31 |
 | `bd_feet` | bladedancer r3 b — Light Feet | "Dodging through an enemy parries their next attack automatically." | `effSpeed` +10% move speed (3755) | **FIXED**, pass 32 |
-| `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | confirmed, unfixed — actionable |
+| `bd_fast` | bladedancer r5 b — Fast Hands | "A parry refunds the time your attack would have taken." | `effAtkSpeed` +12% attack speed (3754) | **FIXED**, pass 33 |
 | `w_heavy` | warrior r3 a — Heavy Hand | "Your basic attacks cannot be interrupted — and you cannot cancel them either." | `effDamage` +12% (3706) **and** `effAtkSpeed` −5% (3754) | confirmed, unfixed — needs a mechanic that may not exist |
 | `w_juggernaut` | warrior r9 b — Juggernaut | "+15% knockback resistance and +8% damage reduction while moving." | `hurtPlayer` `dmg*=.92` while moving (11523) | HALF wired — the DR is there, the knockback resistance is not |
 
@@ -2171,12 +2171,38 @@ Guard's branch is therefore exercised rather than merely written.
   checked FIRST (13261), so the body stayed inert for ~41 frames — which put the contact PAST the very
   window under test. A bench fault that reads exactly like a parry that does not hold.
 
-### The two rows below it that a run COULD take, and the one it could not
+### Fast Hands — the row whose own before/after numbers also proved the undocumented half is live
 
-- **`bd_fast` is the same call again and is the obvious next pass.** "A parry refunds the time your
-  attack would have taken" needs the catch at 11536 to zero `p.atkCd`, which `playerAttack` sets and
-  which `w_swift` already zeroes three lines from where it is set. Nothing has to be chosen, and as
-  with Quick Hands and Light Feet the existing stat bonus stays and is Oliver's.
+Taken as pass 33, same call a third time. `p.atkCd` IS "the time your attack would have taken":
+`playerAttack` sets it to `w.cd/effAtkSpeed(p)*cdMul` and returns on it, so it is both the cost and
+the gate, and zeroing it is Swift Steel's own refund three lines from where the field is set.
+`p.atkTimer` is deliberately not touched — that is the swing ANIMATION, which Counter Stance sets on
+purpose; the card refunds time, not a pose.
+
+Measured by `harness/probes/fasthands.probe.js`, three halves in one launch with two trials each:
+
+| half | pick | parried hit | unparried hit |
+|---|---|---|---|
+| control | `bd_patient` (a-side of the same rank) | 0.200 → 0.184 | 0.200 → 0.184 |
+| passive | `bd_fast` | **0.179 → 0** | 0.179 → 0.162 |
+| known-bad | `mon_iron` (dead id, identical bar) | 0.200 → 0.184 | 0.200 → 0.184 |
+
+`ok true, okAgainstInert false`. A parry fired in all three parried trials and the hit landed in all
+three unparried ones, so the zero is a real zero and not a trial that failed to stage. The unparried
+trial is the one that matters most: a passive that refunded on ANY hit taken would have cleared a
+parry-only bar and would be a far stranger card than the one printed.
+
+Everything the probe touches is driven rather than assigned: the window is opened by CASTING Counter
+Stance through `useSkill`, the swing is a real one-frame `input.attack` press, and the hit is the
+game's own contact damage. It assigns neither `bdParryT` nor `atkCd`, which are the input and the
+output of the claim.
+
+**And the numbers settled a second question for free.** `atkCdBefore` reads 0.179 in the passive half
+against 0.200 in the other two — 0.200/1.12, which is the +12% attack speed the `effAtkSpeed` reader
+has always granted. So the undocumented half is demonstrably still live and untouched by this fix,
+which is exactly the state this section hands to Oliver rather than deciding.
+
+### The one row below that a run could take, and the one it could not
 - **`w_heavy` is NOT the same call and should not be taken as one.** "Cannot be interrupted" and
   "cannot cancel" are claims about the swing state machine, and this file has no interrupt state to
   read — pass 20's note records the same absence for stagger, where the launch IS the interruption.

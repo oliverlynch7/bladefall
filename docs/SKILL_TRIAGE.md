@@ -3007,3 +3007,66 @@ rather than shipped silently.
 **What is still Oliver's, unchanged by the prototype:** the patch is correct and it plays nine
 classes' authored economies for the first time. One sentence unblocks it, and the run that gets that
 sentence can apply five edits and re-run two committed probes.
+
+---
+
+## W. BOUNCE BACK RETURNS DAMAGE TO A `{name, attack}` PAIR — measured 2026-08-12, and it tells the player it worked
+
+The second door found by the sweep section U's write-up asked the next run to run: **a wiring proven
+through a call the game itself never makes.** Found the same day, in a different subsystem, which is
+what makes it a shape rather than an incident.
+
+`hurtPlayer(dmg, sx, sz, by)` takes an attacker. **`foeHit` (11275) is
+`return {name:foeName(e), attack:atk||'a strike'};`** — a descriptor, never the enemy — and every
+named damage source in the game either goes through it (a melee blow 13500, a boss sweep 13349, a
+beam 13835) or hands `hurtPlayer` a literal of the same shape (a ranged attack 13533, geysers, lava
+vents, falling masonry). Nothing in this game ever passes a combatant.
+
+Bounce Back (paladin r7 a, *"Damage you block is returned to whoever dealt it"*, shipped as pass 7)
+reads it at 11695: `by && typeof by==='object' && !by.dead` — **which a descriptor satisfies
+completely** — and then calls `hitEnemy(by, …)` on it inside a `try`.
+
+**Measured** (`harness/probes/bounceby.probe.js`, three trials in one launch, a paladin with the
+brace up and a pinned grunt):
+
+| trial | hero lost | attacker lost | **BOUNCED** shown |
+|---|---|---|---|
+| `foeHit`'s shape, transcribed | 50 | **0** | **yes** |
+| the enemy object — pass 7's own door (positive control) | 50 | **139** | yes |
+| **real contact**, the game ticked and 13500 firing on its own | 9 | **0** | **yes** |
+
+The hero lost health in all three, so every zero is a real zero. The control returns 139, so the
+passive works — through a call no code in the game makes.
+
+**And the floater is the part that makes this worse than a dead passive.** A paladin who picks Bounce
+Back sees **BOUNCED** over his head on every blocked hit and nothing happens to the attacker.
+
+**`p._stillnessT` (11602) has the identical bug**, four lines above: *"what hits you is returned
+doubled to whoever threw it"*, same `by && !by.dead` guard, same `hitEnemy(by,…)`. One fix covers
+both readers.
+
+### The patch, written out rather than shipped
+
+Not taken in the run that measured it, for one reason only: it is game code, so it needs the full
+aggregate gate (~20–45 minutes) and the run had spent its window measuring. **Nothing about it is a
+decision** — unlike section U, this returns two passives to what their cards already say and moves
+no numbers.
+
+1. `foeHit(e, atk)` (11275) carries the body it names: `return {name:foeName(e), attack:atk||'a strike', src:e};`
+   Additive — every existing reader takes `.name` and `.attack` and is untouched.
+2. Enemy projectiles carry theirs the same way. They already carry `srcName` (12776, 12797, 12802,
+   13690); add `src:e` beside it, and pass it through at 13533.
+3. Both readers resolve the attacker before using it, and **must not fall back to `by`**:
+   `const _atk = (by && by.src) || null; if(_atk && !_atk.dead && _atk.hp != null) hitEnemy(_atk, …)`.
+   The `hp != null` test is what stops a descriptor from ever being hit again, and it is the check
+   whose absence is this whole row.
+4. The floater moves inside that guard, so the player is told BOUNCED only when something was.
+
+**Re-measure with the committed probe**: `reflectReachesGameShape` and `reflectReachesRealContact`
+both flip true, `probeDoor` stays at 139, and `ok` stays true.
+
+*The probe was wrong once first, and its own clean-check caught it — which is why the clean-check is
+there.* The first run reported the game-shape trial at `heroLost 0`, a zero that says nothing about
+reflecting because nothing was blocked. The cause was **Thick Armor**: `cheatRank10All` picks the
+A-side at rank 3, *"the first hit of every fight deals no damage at all"* (11611), so it ate the
+whole 200. The bench now takes the b-side at that rank and stamps `_tarmT` fresh before every trial.

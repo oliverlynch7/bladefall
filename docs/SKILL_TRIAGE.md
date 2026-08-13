@@ -3673,3 +3673,126 @@ presses a button somewhere and takes the bar through `hitEnemy` is indistinguish
 at this instrument's resolution — the tool can say a player door is used, not that the MEASUREMENT
 rides on it. Reading those 21 needs no launch and no game change, and it is the same shape of question
 this section just answered for the easy sixteen.
+
+**THE 21 WERE READ — 2026-08-13, section AA below.** One row, fixed as pass 55, and a second of the
+same shape that is Oliver's.
+
+---
+
+## AA. THE 21 `mixed` PROBES, AND THE FOUR PLACES THE GAME ASKS *WHO HIT ME* — swept 2026-08-13
+
+Section Z's own closing lead, taken. **One takeable row (pass 55, shipped) and one for Oliver**, out of
+a population that section Z could only mark as unreadable at its resolution.
+
+### How each of the 21 was settled, and what the read is actually asking
+
+The question is not "does this probe touch a synthetic door" — every one of them does, that is what
+`mixed` means. It is **does the BAR ride on that door.** A probe that opens `hitEnemy` to build its rig
+and then measures something else is sound; a probe whose measured number IS the synthetic call's
+outcome is only as reachable as that call.
+
+Two rules settle nineteen of the twenty-one without a launch, and both are section Z's, re-applied:
+
+- **`hitEnemy(…, p, …)` on a MELEE class is the player's own door** — `resolveSwing` (9807) calls that
+  exact line. `blessed` (paladin), `soulfree` (reaper), `monkiller`, `monkmaster` (monk), `unseen`,
+  `unseen-shot`, `nincombo-shot` (ninja): **sound.**
+- **`hitEnemy(…, p, …)` on a RANGED class is section U**, and each is already in section U's per-class
+  table rather than being a new finding: `ambush` (ranger, pass 11), `harvest` (necromancer, pass 26),
+  `slippery` and `slippery-shot` (pirate, pass 24), and `quickhands` (pirate, pass 31 — the chest
+  reload is reachable, but the pistol it loads is the BANG section U records as dead for the shot).
+
+The remaining nine are settled individually, and the reasons are worth keeping because each is a way a
+`mixed` probe can be sound:
+
+| probe | why the bar does not ride on the synthetic door |
+|---|---|
+| `legion` (necro) | the bar is a dummy's HP through the game's own `minionUpdate` → `hitEnemy` path. The two direct calls are lethal swings that MAKE the corpse; minion damage is not the player's basic attack and section U cannot reach it |
+| `swagger` (pirate) | the bar is DISTANCE COVERED. The `hitEnemy` calls spend and reload the pistol, i.e. set-up, and the reload rides `killEnemy`, which every kill in the game passes through |
+| `chrhaste`, `chrhaste-shot` | `hurtPlayer(99999, …, null)`. The game really does pass no `by` — 12997 omits the argument entirely — and the rewind is about DEATH, not about who dealt it |
+| `heavyhands` (berserker) | `hurtPlayer(…, {name, attack})`, the hazard literals' own shape; and the bar is knockback and the dodge's refusal, neither of which reads `by` |
+| `skyarmor` (skylancer) | passes the enemy BODY as `by`, which the game never does — but the bar is damage taken inside the dodge's invulnerability window, and nothing on that path reads `by`. Sound, with the door noted |
+| `basichook`, `projsrc` | section U's and U2's own diagnostics: three doors deliberately compared against each other. Sound by construction — this is the shape everything else is measured against |
+| `desig` | read in section Z |
+
+**The limit, stated because it is the same one section Z had:** this is a reading of each probe's bar
+against the door under it, not a re-measurement of nineteen passes. It can say a bar does not depend on
+a synthetic call; it cannot say the number that bar produced is still true today. What it is good for
+is exactly what it found — the two probes whose bar DOES ride on `by`.
+
+### The row: `hurtPlayer`'s `by` is never a body, and TWO clauses in the game are conditioned on it
+
+`bounty.probe.js` is the one whose bar rides on `by` (its clause 1 is *"marked enemies deal −8% to
+you"*), and following it up produced a **complete census of this bug class** rather than one row.
+`by` is read in exactly four places in `public/3d/index.html`:
+
+| site | reader | shape |
+|---|---|---|
+| 11625 | Stillness's reflect | `attackerOf(by)` — **fixed, section W / pass 47** |
+| 11724 | Bounce Back's reflect | `attackerOf(by)` — **fixed, section W / pass 47** |
+| 11679 | ranger Bounty Hunter, `by.markT` | **dead in play — FIXED as pass 55, below** |
+| 11647 | paladin Oath, `by !== G.p._oath` | **always true in play — Oliver's, below** |
+
+The premise all four share is measured, not read: **all fourteen `hurtPlayer` call sites hand it a
+descriptor**, `foeHit(e,atk)` = `{name, attack, src:e}` (11290) or a literal of that shape (the geysers,
+the lava vent, the thornwild, the falling keep, the Sunspire, the gloom, the boss sweep and slam, the
+magma trail, the enemy projectile), and one site (12997, a duel/bot melee blow) passes **no `by` at
+all**. The body rides in `.src` and nowhere else. Section W found this for the reflect pair and added
+`attackerOf`; the other two readers were never revisited.
+
+### FIXED 2026-08-13 — ranger Bounty Hunter, pass 55, and the probe reported both doors at once
+
+`harness/probes/bounty.probe.js` already carried the instrument for this (its header names this section
+by letter): every hit is taken **twice**, once with the enemy body as `by` — the original door, kept as
+the positive control, which is what says the wiring exists at all — and once through `__BF3.foeHit(foe,
+…)`, the game's own function rather than a transcription of it. `ok` and `reachableInPlay` are reported
+side by side and never folded together, because **`ok:true, reachableInPlay:false` IS the row.**
+
+One launch each side, unmodified probe, `--scene arena:flat`:
+
+| | body door (`ok`) | game's descriptor door (`reachableInPlay`) |
+|---|---|---|
+| **before** | true — marked 569 against plain 619, **0.919** | **false** — marked 619 against plain 619, **1.000** |
+| **after** | true — 556 against 604, **0.921** | **true** — 556 against 604, **0.921** |
+
+The control half (`r_elem`, the a-side of the same rank, itself dead) reads **604/604 on both doors in
+both runs**, so the after-run's difference is the passive and not the door. `okAgainstInert` and
+`reachableAgainstInert` — the same bars fed a half where nothing reads the id — are **false in both
+runs**, which is the green light watched to go red. `gameDoorIsReal` is true throughout: the descriptor
+branch really ran, it is not the body, and it carries no `markT` of its own.
+
+The fix is one line and nothing is invented: `attackerOf(by)`, the helper section W added for this exact
+shape, in place of `by`. The other two clauses of the card are untouched and were never exposed — both
+hang off `killEnemy(e)`, which takes the body (heal 19→21 = 4% of max HP, gold ratio 1.100, identical
+either side). Regression: `node harness/test-skills.js --classes ranger` → 7 pass, 1 fail, 1 unproven,
+the fail being the baselined `ranger/Tumble`.
+
+*Photographed at `_shot/out/aa-bounty-after.png`* — MARKED over one of the two grunts, both kills paid
+at +1000 XP / +550g, the Ranger at rank 10 with its own Cracked Shortbow.
+
+### OLIVER'S — the paladin's Oath, the same bug pointing the other way
+
+`index.html:11647`:
+
+```js
+if(meta.classId==='paladin' && G.p._oath && !G.p._oath.dead && by && by!==G.p._oath) dmg*=0.67;
+```
+
+`G.p._oath` is a BODY (`CLASS_BASIC.paladin` sets it to the enemy it just struck, 11475). `by` is a
+descriptor. **`by !== G.p._oath` is therefore true at every damage site in the game**, including blows
+from the Sworn target itself — so a paladin with an oath standing takes a third less from *everything*,
+and the drawback the mechanic is built around ("swapping off it early costs you that", 11469) does not
+exist. Bounty Hunter's bug failed OFF; this one fails ON.
+
+**Why it is not taken here.** The Oath appears on no card — section R already records that not one of
+the twelve `CLASS_BASIC` identities is named on any rank-1 card, and the paladin's innate card is *Holy
+Warrior*, a different mechanic. So the only statement of intent is the code's own comment, and making
+the clause work is a straight **nerf to a class's damage taken with no card number behind it**. That is
+section X's standing rule and pass 20's, and `docs/VISION.md` puts balance on the ask-first side. **It
+is one sentence from Oliver**: should a Sworn target's own blows be exempt from the Oath's third, as the
+comment says, or is the flat third what the class should have? Either answer is `attackerOf(by)` plus a
+comparison, in a minute.
+
+*Not separately measured, and said plainly rather than implied:* the premise (a descriptor is never the
+body) is measured — it is the same fact `reachableInPlay:false` demonstrated for the ranger in the same
+launch — but no probe has watched a paladin take a hit from its own Sworn target. The instrument for it
+is `bounty.probe.js`'s two-door shape, pointed at `_oath`.

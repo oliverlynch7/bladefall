@@ -535,34 +535,68 @@ and 0 of 41 when the snapshot says asleep."
 - Modify: `harness/test-mp.js`
 - Modify: `public/3d/index.html` — the known-bad flag
 
-- [ ] **Step 1: Add a permanent known-bad flag**
+- [x] **Step 1: Add a permanent known-bad flag** — done 2026-08-12. `NO_POS_SYNC` at
+      index.html:12078, read once at 12443, exported on `__BF3` so a probe can report *why* it saw no
+      correction rather than only that it saw none.
+      **It gates the STORE, not the pull**, and that is the whole behaviour rather than half of it:
+      `e.mx` is the only thing `applyEnemies` writes for a body the guest already holds, and the
+      correction in the enemy update reads nothing else — so one gate fails to exactly the pre-flag
+      code path instead of to a third state that never shipped.
 
 `?nopossync=1`, in the shape of the existing `?breakgap` / `?heroslot` / `?heroonerig` / `?noparty`.
 `MP_AUDIT.md` sets the rule these follow and it applies here: a flag is justified when it disables
 **a behaviour this repo wrote**, which position sync now is. It makes the assertion in Step 2
 falsifiable forever, rather than only on the day it was written.
 
-- [ ] **Step 2: Assert both directions in the suite**
+- [x] **Step 2: Assert both directions in the suite** — done 2026-08-12,
+      `harness/probes/possync.probe.js` + three checks in `harness/test-mp.js`. Two trials in one
+      launch, asleep first (running awake first would scatter the bodies and hand the asleep trial
+      movement its own AI had caused).
 
-Three assertions, no more: an awake snapshot moves the guest's enemies; an asleep one does not; and
-with `?nopossync=1` neither does. Deliberately loose on the residual — assert the gap closed by most
-of the way, never an exact position, because a lerp is tick-quantised and an exact bar would flap.
-`harness/test/passives.test.js`'s tolerance note and the Swagger row both record what that costs.
+**THE BAR IS THE AI, NOT ZERO, AND THAT IS THE ONE DESIGN DECISION IN THIS TASK.** The probe's target
+is 90 units toward the PLAYER, so the mobs that are chasing close part of that distance by
+themselves — a suite asking only "did the enemies move" would pass against a build with the
+correction deleted. The asleep trial computes the identical target, sends it with the wake flag
+clear, and reports how much the AI closed alone; the awake trial has to beat it. Measured in the
+aggregate gate:
 
-- [ ] **Step 3: Run the aggregate gate**
+| | targets stored | gap closed |
+|---|---|---|
+| asleep (AI only) | **0** of 41 | 0.19 |
+| awake | **41** of 41 | **0.90** |
+| awake under `?nopossync=1` | **0** of 41 | **0.19** |
+
+The known-bad row is the one worth keeping: with the flag on, the awake trial closes *exactly* the
+control's 0.19 — not "less", the same number — so nothing but the AI moved, and one assertion fails
+while the other 56 in the suite pass.
+
+**Why the target is 90 units toward the player rather than mp-drift's +500 diagonal.** The correction
+is applied one line before the game's own edge guard, which refuses any pull whose first 20% step
+lands over void; on a +500 diagonal that is 28 of 41 bodies. A short step toward the player is floored
+at both ends by construction (the player is standing there), and every body is still checked with
+`floorAt` and reported as `skippedOverVoid` rather than silently averaged in — 4 and 5 of 41 here.
+The residual bar is a *fraction of the gap*, never a position, because a lerp is tick-quantised and an
+exact bar would flap the way the Riposte row did.
+
+- [x] **Step 3: Run the aggregate gate** — done 2026-08-12. `GATE: PASS`, exit 0, twice: once with
+      the probe and the three checks but before the flag existed, and once with the flag in the game.
+      `unit 90, skills 70 pass / 3 known, levels 36 / 0, mp 57 pass / 0 fail`, and the mp suite is up
+      by three.
+      **The known-bad was run as its own launch and correctly detected:** `node harness/test-mp.js
+      --bad-pos` fails exactly ONE assertion — `stored 0/41, gap closed 0.19 against the AI-only
+      control's 0.19` — while the other 56 pass, which is the shape a known-bad should have. Any more
+      than one failing means the flag disables something it should not.
+      One thing to know for the next run that does this: **the aggregate gate imports each suite
+      lazily** (`await import('./test-mp.js')` at `run-all.js:74`), so a suite file edited while the
+      gate is running is picked up when its turn comes. That is how the first of the two gate runs
+      came to exercise these checks at all. It cuts both ways — an edit to `public/` mid-gate would
+      have some suites measuring one build and some another.
+
+- [x] **Step 4: Commit** — done, its own commit, with the flag and the assertions together because
+      neither is verifiable without the other.
 
 ```bash
-node harness/run-all.js
-```
-
-Expected: `GATE: PASS`, exit 0, and the mp suite up by three. Exit 1 is a regression — revert. Exit 2
-is a crashed suite and is a fault in the harness or the machine, **not evidence about this change**;
-read the `CRASHED —` line.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add harness/test-mp.js public/3d/index.html
+git add harness/test-mp.js harness/probes/possync.probe.js public/3d/index.html
 git commit -m "co-op: guard guest position sync in the mp suite"
 ```
 

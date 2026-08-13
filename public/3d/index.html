@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.950.0-autopilot';
+const VERSION3D='1.951.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12065,6 +12065,17 @@ const PING_MAX  = 12;        // a party of six leaning on the button cannot fill
    it works is the one screen that cannot. Permanent, like ?heroonerig=1, so the assertion can be
    watched to fail without editing the repo. */
 const NO_PING = (function(){ try { return /[?&]noping=1/.test(location.search); } catch(e){ return false; } })();
+/* ?nopossync=1 stops a guest adopting the host's enemy POSITIONS — the state co-op was in before
+   2026-08-12, where the two clients ran independent AI simulations and their pictures drifted
+   roughly 1000-1700 units apart in thirty seconds against a melee reach of ~90-125
+   (docs/MP_AUDIT.md section 2). Permanent, like ?noping=1 and ?heroonerig=1, and justified by the
+   same rule: a flag earns its keep when it disables a behaviour THIS REPO WROTE, so the assertion
+   defending it can be watched to fail without editing the game.
+   It gates the STORE rather than the pull. e.mx is the only thing applyEnemies writes for a body it
+   already holds, and the correction at the enemy update reads nothing else — so one gate here is the
+   whole behaviour, and it fails to exactly the pre-flag code path rather than to a third state that
+   never shipped. */
+const NO_POS_SYNC = (function(){ try { return /[?&]nopossync=1/.test(location.search); } catch(e){ return false; } })();
 let _pingT = -99;
 /* The sender's colour. In team PvP that is their TEAM, because knowing which side called it is the
    whole content of the message; otherwise yours is the amber every prompt in this game uses and an
@@ -12429,7 +12440,7 @@ const MP={
            point, and adopting it would drag back every monster a guest engages alone. a[6] undefined
            (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
            safe to exactly the pre-flag behaviour. */
-        if(a[6]){ e.mx=a[2]; e.mz=a[3]; } } }
+        if(a[6] && !NO_POS_SYNC){ e.mx=a[2]; e.mz=a[3]; } } }
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -19781,6 +19792,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   botInfo:()=>G?{bots:G.enemies.filter(e=>e.bot).length, score:G.arenaScore, sample:(()=>{const b=G.enemies.find(e=>e.bot);return b?{x:Math.round(b.x),z:Math.round(b.z),hp:b.hp,diff:b.botDiff}:null;})()}:null,
   hubInfo:()=>(G&&G.hub)?{bounds:G.bounds, spawn:{x:G.p.x,z:G.p.z}, mainGates:G.gates.filter(g=>!g.side).map(g=>({x:g.x,z:g.z})), sideGates:G.gates.filter(g=>g.side).length, arena:(()=>{const a=G.hubNpcs.find(n=>n.id==='arena');return a?{prop:a.prop,x:a.x,z:a.z}:null;})(), annex:['abyss','sprint','arena'].map(id=>{const n=G.hubNpcs.find(x=>x.id===id);return n?{id,x:n.x,z:n.z}:null;}), maxNpcX:Math.max(...G.hubNpcs.map(n=>Math.abs(n.x)))}:null,
   floorAt:(x,z)=>G?floorAt(x,z,13,0):null,   // debug: walkable floor height at x/z (-Infinity = void/no ground)
+  get NO_POS_SYNC(){ return NO_POS_SYNC; },  // so a probe can say WHY it measured no correction, not just that it did not
   // PLAYTEST CAMERA: teleport the hero to a vantage point + aim the overhead camera + force a render, so an
   // automated harness (or a person) can screenshot any spot in the world for visual verification.
   look:(x,z,yaw,pitch)=>{ if(!G||!G.p) return null; const p=G.p; p.x=x; p.z=z; p.y=0; p.vx=p.vy=p.vz=0;

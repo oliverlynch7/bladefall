@@ -37,12 +37,14 @@ game out of play mode, and `update()` then returned at its third line for the re
 The bench now knocks on the card's own button and reports `playTicks 1800 of 1800`. The error
 understated the problem by about 3×. Full correction in `docs/MP_AUDIT.md` section 2.)*
 
-**Tasks 1 and 2 of the plan are shipped** (`a12b178`, `cb47393`): the snapshot carries the host's
-wake flag as slot 6 and a guest lerps its enemies toward the host's position for any enemy the host
-has awake. Verified `targetsStored 0 / 0 / 41 / 41` across sleeping / pre-flag / awake trials on a
-live world, and a corrected body converges `141.8 → 2.0` units per frame over twenty frames. What is
-left is the plan's Task 3 (guard it in the mp suite) and Task 4 (the world ping), plus Step 6's
-two-simulation lap.
+**Tasks 1, 2 and 3 of the plan are shipped** (`a12b178`, `cb47393`, and the guard): the snapshot
+carries the host's wake flag as slot 6, a guest lerps its enemies toward the host's position for any
+enemy the host has awake, and three assertions in the mp suite hold it there behind the known-bad
+`?nopossync=1`. Verified `targetsStored 0 / 0 / 41 / 41` across sleeping / pre-flag / awake trials on
+a live world; a corrected body converges `141.8 → 2.0` units per frame over twenty frames; and in the
+aggregate gate the awake trial closes **0.90** of the gap against an AI-only control of **0.19**,
+falling to exactly that 0.19 under the known-bad flag. What is left is the plan's Task 4 (the world
+ping, which may need no code at all) and Step 6's two-simulation lap.
 
 **This item's original title and both its stated premises were wrong, and all three were disproved
 by measurement before the plan was written. Kept here rather than rewritten away, because the

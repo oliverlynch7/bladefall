@@ -31,6 +31,7 @@ const PROBE = readFileSync(join(import.meta.dirname, 'probes', 'mp.probe.js'), '
 const PARTY = readFileSync(join(import.meta.dirname, 'probes', 'party-scale.probe.js'), 'utf8');
 const LOOT = readFileSync(join(import.meta.dirname, 'probes', 'loot.probe.js'), 'utf8');
 const PING = readFileSync(join(import.meta.dirname, 'probes', 'ping.probe.js'), 'utf8');
+const POSSYNC = readFileSync(join(import.meta.dirname, 'probes', 'possync.probe.js'), 'utf8');
 
 /* What a party of n must multiply enemy HP by. Stated here as well as in the game because the
    assertion has to be able to disagree with the code - reading the multiplier out of __BF3 and
@@ -268,8 +269,57 @@ export async function runMpTests(opts){
           B.exists === true && B.hiddenSolo === true && B.shownInParty === true, JSON.stringify(B));
   }
 
+  /* ── A GUEST LOOKS AT THE SAME MONSTERS THE HOST DOES ────────────────────────────────────────
+     The guest-position plan's Tasks 1–2 (`a12b178`, `cb47393`). Before them a guest ran a completely
+     independent AI simulation and the two pictures drifted roughly 1000–1700 units apart in thirty
+     seconds, against a melee reach of ~90–125 (`docs/MP_AUDIT.md` section 2). A snapshot now carries
+     the host's wake flag as slot 6, and a guest lerps each enemy the host has AWAKE toward where the
+     host says it is.
+
+     BOTH DIRECTIONS, because they fail separately and the wrong one is the quiet one: a build that
+     ignored slot 6 and adopted every position it was sent would pass the awake assertion alone while
+     dragging back every monster a guest is fighting on its own. Its known-bad is ?nopossync=1.
+
+     The bar on the awake case is deliberately loose — a fraction of the gap closed, never a position.
+     The correction is a lerp at k=0.2 a frame, so it approaches and never arrives; an exact bar would
+     flap the way the Riposte row did (see docs/SKILL_TRIAGE.md section F). */
+  let pos = null;
+  try { pos = await runScenario({ scene: SCENE, waitMs: 9000, js: POSSYNC, url }); }
+  catch(e){ failures.push({ check: 'position sync: load', detail: e.message.slice(0, 200) }); }
+
+  if(pos && pos.ok === false){
+    failures.push({ check: 'position sync: probe could not run', detail: pos.why });
+  } else if(pos){
+    const A = pos.awake || {}, S = pos.asleep || {};
+    /* AGAINST THE AI, not against zero. The probe's target points at the player, so the mobs that
+       are chasing close some of that distance on their own — the asleep trial measures exactly how
+       much, on the same level with the same bodies. Requiring the awake trial only to MOVE would be
+       a bar that a build with the correction deleted still clears.
+       `scored` is asserted on as well as reported: a trial that scored almost nothing because the
+       edge guard refused everything would otherwise be a clean pass on an empty set. */
+    check('position sync: the host being awake to an enemy pulls the guest\'s copy toward it',
+          A.targetsStored > 0 && A.scored >= 3 && A.gapClosed >= 0.7 &&
+          A.gapClosed - S.gapClosed >= 0.3,
+          `stored ${A.targetsStored}/${A.of}, scored ${A.scored} (${A.skippedOverVoid} over void), ` +
+          `gap closed ${A.gapClosed} against the AI-only control's ${S.gapClosed}`);
+    /* The other half. Sleeping mobs are still SENT — a guest that has never seen an enemy needs
+       slots 2/3 to spawn it — so "nothing arrived" is not what this checks; hpAdopted proves the
+       snapshot landed, and targetsStored proves nothing was taken from it as a correction. */
+    check('position sync: an enemy the host has not woken is left where the guest has it',
+          S.targetsStored === 0 && S.hpAdopted > 0,
+          `stored ${S.targetsStored}/${S.of} with the wake flag clear, hp adopted ${S.hpAdopted}`);
+    /* Neither assertion above means anything if the trials ticked a stopped game: update() returns
+       at its third line unless mode === 'play', and `mode` has no setter, so a probe can keep
+       calling update() into a world that has halted and get a run's worth of plausible zeroes. */
+    check('position sync: the bench measured a running game',
+          A.playTicks === A.framesTicked && S.playTicks === S.framesTicked &&
+          !A.threw && !A.tickThrew && !S.threw && !S.tickThrew,
+          `awake ${A.playTicks}/${A.framesTicked}, asleep ${S.playTicks}/${S.framesTicked}, ` +
+          `threw ${A.threw || S.threw || A.tickThrew || S.tickThrew || 'no'}`);
+  }
+
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping, waited,
+           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping, pos, waited,
            noparty: !!(party && party.noparty) };
 }
 
@@ -280,6 +330,7 @@ if(import.meta.filename === process.argv[1]){
        --bad-rigs   ?heroonerig=1  the historical single shared RIG: allies are copies of you
        --bad-party  ?noparty=1     the historical unscaled fight: a friend is an easy mode
        --bad-ping   ?noping=1      the receive handler dropped: your ping is invisible to the party
+       --bad-pos    ?nopossync=1   the historical unreconciled guest: two independent simulations
 
      And ONE self-test of the opposite shape, which must PASS rather than fail:
        --slow-hero  ?heroslow=4000 the hero layer not ready when the shutter opens — the state that
@@ -292,11 +343,13 @@ if(import.meta.filename === process.argv[1]){
   const badRigs = process.argv.includes('--bad-rigs');
   const badParty = process.argv.includes('--bad-party');
   const badPing = process.argv.includes('--bad-ping');
+  const badPos = process.argv.includes('--bad-pos');
   const slowHero = process.argv.includes('--slow-hero');
   const url = bad  ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslot=1'
             : badRigs ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroonerig=1'
             : badParty ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noparty=1'
             : badPing ? '/3d/index.html?hero3d=1&world3d=1&nobloom&noping=1'
+            : badPos ? '/3d/index.html?hero3d=1&world3d=1&nobloom&nopossync=1'
             : slowHero ? '/3d/index.html?hero3d=1&world3d=1&nobloom&heroslow=4000'
             : undefined;
   runMpTests({ url }).then(r => {
@@ -313,9 +366,9 @@ if(import.meta.filename === process.argv[1]){
                                                          : r.fail + ' assertions failed'));
       process.exit(ok ? 0 : 1);
     }
-    if(bad || badRigs || badParty || badPing){
+    if(bad || badRigs || badParty || badPing || badPos){
       const which = bad ? 'single-slot' : badRigs ? 'single-rig'
-                  : badParty ? 'unscaled-party' : 'no-ping';
+                  : badParty ? 'unscaled-party' : badPing ? 'no-ping' : 'no-position-sync';
       console.log(r.fail ? `known-bad (${which}): correctly detected ✓`
                          : `known-bad (${which}): NOT DETECTED — assertions are blind ✗`);
       process.exit(r.fail ? 0 : 1);

@@ -208,6 +208,40 @@ Two things to carry into it:
   ones did not. Today's behaviour — `movedBySnapshot: 0` out of 41 — is a permanent, reproducible
   failing case, so the assertion can be watched to fail before it is believed.
 
+## Shipped, and guarded so it cannot quietly regress
+
+**The fix landed 2026-08-12** in two commits kept separate so either can be reverted alone: the
+snapshot carries the host's wake flag as slot 6 (`a12b178`, +82 bytes over 41 rows), and a guest
+lerps each enemy the host has AWAKE toward where the host says it is, at `MP.tick`'s own `k = 0.2`
+(`cb47393`). A corrected body converges `141.8 → 2.0` units per frame over twenty frames — settling
+well under the AI's own 8.45-unit best step, so it is not fighting its own movement.
+
+**Three assertions in `harness/test-mp.js`, and its known-bad is `?nopossync=1`** — added under the
+same rule the `?sharedloot=1` note above declines: a flag is justified when it disables a behaviour
+this repo wrote, and position sync now is one. It gates the STORE (`e.mx`), which is the whole
+behaviour, so it fails to exactly the pre-flag code path.
+
+**The bar is the AI, not zero, and that is the part worth copying.** `harness/probes/possync.probe.js`
+puts the target 90 units toward the PLAYER, so the mobs that are chasing close some of it themselves;
+the asleep trial computes the identical target, sends it with the wake flag clear, and reports how
+much the AI closed alone. Measured in the aggregate gate:
+
+| | targets stored | fraction of the gap closed |
+|---|---|---|
+| asleep — the AI-only control | 0 of 41 | 0.19 |
+| awake | **41 of 41** | **0.90** |
+| awake under `?nopossync=1` | 0 of 41 | **0.19** |
+
+With the flag on the awake trial closes *exactly* the control's 0.19 — the same number, not merely a
+smaller one — so nothing but the AI moved. A suite that asked only "did the enemies move" would have
+passed against a build with the correction deleted.
+
+Two things the probe does on purpose. The target is short and toward the player because it is then
+floored at both ends, and the game's edge guard refuses any pull whose first 20% step lands over void
+— on the +500 diagonal `mp-drift` uses, that is 28 of 41 bodies. And bodies that fail the floor check
+are *reported* as `skippedOverVoid` (4 and 5 of 41 here) rather than averaged in, so a trial that
+scored almost nothing cannot look like a clean pass.
+
 ---
 
 # Is loot shared? No — it already belongs to each player — 2026-08-11

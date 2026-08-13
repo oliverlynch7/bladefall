@@ -45,8 +45,20 @@ const DEALS = /\bdeal|\bdamaging\b|\bstrike|\bslash|\bblast|x\s*damage|\bdamage\
 
 /* Damage the skill SOAKS is not damage it DEALS. The Necromancer's Bone Wall is "Raise a shield of
    bone that absorbs damage" - it works perfectly, and the first version of this parser failed it
-   for not hurting anything. A defensive sense with no active verb means no damage claim. */
-const DEFENSIVE = /\babsorb|\bresist|\breduce|\bincoming|\btaken?\b|\bmitigat|\bblock/i;
+   for not hurting anything. A defensive sense with no active verb means no damage claim.
+
+   `reduc`, NOT `reduce` - the same one-letter miss as `\bdamag` above, and it produced a real false
+   accusation the day the bench started casting the B side of every choice (2026-08-12). The
+   Berserker's Bloodguard is "Raise a guard: heavy damage reduction and pull foes in": `\breduce`
+   cannot match "reduction", nothing else in DEFENSIVE matches either, the buff rule needs a number
+   or a signed word and this card has neither - so the parser read "damage" and the bench failed a
+   pure defensive skill for not hurting the dummy. Measured: guard 0 -> 3.18, i.e. the one thing the
+   card promises had plainly landed.
+   It cannot suppress a real claim: the exemption is only reachable when DEALS is false, so any card
+   that says deal / strike / slash / blast / Nx damage keeps its damage claim whatever else it says.
+   Checked against the game rather than argued - thirteen card texts in index.html contain "reduc"
+   and this is the only one the buff rule does not already take. */
+const DEFENSIVE = /\babsorb|\bresist|\breduc|\bincoming|\btaken?\b|\bmitigat|\bblock/i;
 
 /* "Raise a shield" is not a summon. Only the raising of THINGS THAT FIGHT is.
    THE ADJECTIVE SLOT IS THE WHOLE POINT. This read `raise (a|an|the)? (shield|…)` with the noun

@@ -534,6 +534,20 @@ which points straight at Task 2 and then at whatever this paragraph names.
 | pass | row | commit | how it was proven |
 |---|---|---|---|
 | 41 | **Q — warrior Juggernaut resisted no knockback** | `c09dbd8` | `harness/probes/juggernaut.probe.js`, three halves in one launch with two trials each: the passive half took **179** knock-away (= 210 × 0.85) against the control's 210, with damage 45 (= 49 × 0.92) confirming the already-wired half was untouched. The card's own 15%, so nothing was invented. The VERTICAL pop is deliberately not scaled — `hurtPlayer`'s own comment records the launch as this file's stagger, and "stagger" is a word on Heavy Hands' card and Unyielding's, not on this one |
+| 42 | **T — the bench had cast HALF the game's skills, 64 of 128, for its whole life** | this run | A BENCH pass, like passes 3 and 30, and taken for the reason the paragraph above this table gives: no skill row was known, and the two previous times that happened it was answered by WIDENING A SWEEP. `cheatRank10All` fills every build with `def['r'+r].a.id`, so the A side is all `c2CurSkills()` has ever returned. Measured before anything was built (`harness/probes/bside.probe.js`, one launch): **128 options, 64 a / 64 b, `defaultsAllA: true` for all sixteen classes** — the game's own answer, not an inference off the cheat's source — plus `deadCount 0`, which is section A's fault asked of all 128 and finding no survivors on either side, and `switchable: ok`, which is what made it takeable. The bench now casts both sides in one launch (only the skill ranks flipped; the passives at 3/5/7/9 stay on their A pick, so the pick is the only variable): **70 pass / 3 fail / 2 unproven → 139 pass / 5 fail / 4 unproven at `64 A-side + 64 B-side casts`**, and the split is printed from now on. **The other 64 gave exactly two rows.** `berserker/Bloodguard` was a FALSE ACCUSATION and the parser's fault — *"heavy damage reduction"* read as a damage promise because `DEFENSIVE` carried `\breduce`, which cannot match "reduction" any more than `\bdamage` can match "damaging"; fixed to `\breduc`, pinned by `harness/test/claims.test.js` with the old regex transcribed and asserted to DISAGREE, watched to fail, and re-run against the live game where the row is gone. `monk/Roll` is real, confirmed on two separate launches, and **Oliver's**: `mon_roll` and `r_tumble` are ONE handler (10333 / 10301 → 9935) which dodges, i-frames and snares and strikes nothing, so it is `ranger/Tumble`'s own section C/J row arriving on a card nobody had ever cast — now in `harness/baseline.json` as a newly-VISIBLE pre-existing failure, not a regression. Answering it settles three cards at once; the third, `pirate/Roll`, is in the same state and PASSES, because *"parting shot"* contains none of the parser's damage keywords |
+
+**AND THE SWEEP WAS WIDENED AGAIN, 2026-08-12, IN THE ONE DIRECTION NOTHING HAD EVER LOOKED: the
+bench had cast half the game's skills.** That is pass 42, and the number worth carrying is not the
+two rows it found but the **64** it made visible — every B-side pick at ranks 2/4/6/8, one per class
+per rank, each of them a build a player can be playing. Every sweep this document records had been
+run over the A-side kit; the phrase "no skill row an autopilot run may take is currently known" was
+true of 64 skills and was written as though it were true of 128.
+**The general rule, and it is the same one section E's stormcaller group produced in a different
+costume: check what the instrument is pointed at before believing a clean result.** `harness/audit-
+passives.js` has always read both sides out of `CLASS2` — that is why sixteen classes × four passive
+ranks × two options came to 128 — so the passive half of this plan never had the blind spot the
+skill half did, and nothing about section E moves. What moved is that `skills: 70 pass` was a
+coverage figure and read like a completeness one.
 
 **So the remaining order is now `pal_heal` alone, and it is blocked on the number above.** Section E
 is floored, section J is Oliver's by rule, and section Q's other open rows (`x_doom`, `x_chill`,

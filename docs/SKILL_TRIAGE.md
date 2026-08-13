@@ -2616,6 +2616,97 @@ names.** A clause with no `rank>=10` site behind it is invisible to every id-bas
 harness, because a capstone has no id to be dead. Re-run this sweep after any kit change; it is one
 careful read of sixteen cards and it found the two rows above plus the whole chain correction.
 
+## T. THE BENCH HAD CAST HALF THE GAME'S SKILLS — 64 of 128, for its whole life
+
+Found 2026-08-12, `autopilot-merged`. Not a skill bug: a **coverage** bug, in the instrument every
+other section in this document is measured with.
+
+Every class presents a 1-of-2 choice at ranks 2/4/6/8, so `CLASS2` holds **16 × 4 × 2 = 128** active
+skills. `cheatRank10All` (index.html:15646) fills a valid build with
+`cs.ch[r] = cs.ch[r] || def['r'+r].a.id` — **the A side, every time** — and `c2SkillOfSlot` returns
+whatever `ch` holds. `test-skills.js` casts `c2CurSkills()`. So `skills: 70 pass, 3 fail` was a
+verdict about 64 skills that read like a verdict about the game, and **Shield Bash, Whirlwind,
+Piercing Shot, Execution and sixty more had never been cast by the bench, by a probe, or by anything
+else that reports.** Each of them is a build a player can be playing right now.
+
+**Measured before anything was built** (`harness/probes/bside.probe.js`, one launch), because "the
+cheat picks A" is exactly the kind of premise this document exists to stop being inherited:
+
+```
+total 128, aSide 64, bSide 64, deadCount 0
+defaultsAllA true      (all sixteen classes, read out of c2CurSkills(), not off the cheat's source)
+switchable   warrior -> w_bash / w_whirl / w_stomp / w_execute   ok
+```
+
+Two of those four lines are findings in their own right. **`deadCount 0`** is the section A fault
+asked of all 128 — `typeof SKILL_FX[fx]` is `'function'` on both sides, so the ordering bug that
+killed nine skills until `5339f48` has no survivors anywhere. And **`switchable`** is why this was
+takeable at all: flipping `classState(cls).ch[r]` moves the cast list, so the other half is reachable
+without touching the game.
+
+`test-skills.js` now casts both sides in the same launch — no extra Chrome, same pose restore, same
+drift control, same dummy rig. **Only the skill ranks are flipped**; the passives at 3/5/7/9 stay on
+their A pick in both halves, so the pick is the only variable. The suite went **70 pass / 3 fail /
+2 unproven → 139 pass / 5 fail / 4 unproven, at `64 A-side + 64 B-side casts`**, and the count is
+printed on the summary line from now on, because a coverage number that can silently halve is the
+same hole in a new place.
+
+**The other 64 produced exactly two rows, and only one of them is the game's.**
+
+### T1. `berserker/Bloodguard` — a false accusation, and the parser's fault — **FIXED**
+
+*"Raise a guard: heavy damage reduction and pull foes in."* Failed for dealing no damage, on the word
+"damage" inside **"damage reduction"** — while the same measurement showed `guard 0 → 3.18`, i.e. the
+half of the card the bench can see had plainly landed.
+
+*Its OTHER half is a real unbuilt clause and it is already filed.* `SKILL_FX.bsk_guard = w_guard =
+bulwark`, and "pull foes in" compiles to `e.taunt = 3.2` on everything within 260 units (10001) —
+**written there and at 10030 and read nowhere in the file**, which is section K's first table row
+verbatim. So Bloodguard is a fourth card resting on a field with no reader, and section K says in as
+many words why an autopilot run must not take it: there is no target-selection step for a taunt to
+change, and building one is a combat-model decision. Oliver's, on section K's terms, not a new row.
+
+The cause is the one-letter miss `claims.js` already documents twice in the other direction
+(`\bdamag` not `\bdamage`, because "damaging" has no `e`). `DEFENSIVE` carried **`\breduce`**, which
+cannot match *"reduction"*; nothing else in it matched; and the buff rule needs a number or a signed
+word, which this card has neither of. So a pure defensive skill was accused of not hurting a dummy.
+Now `\breduc`. It cannot suppress a real claim — the exemption is only reachable when `DEALS` is
+false, so any card saying deal / strike / slash / blast / `Nx damage` keeps its damage claim. Checked
+against the game rather than argued: **thirteen card texts contain "reduc" and this is the only one
+the buff rule did not already take.** Pinned by `harness/test/claims.test.js` with the old regex
+transcribed and asserted to DISAGREE, watched to fail, plus two controls that DO hit.
+
+### T2. `monk/Roll` — the same stale card as `ranger/Tumble`, on a skill nobody had ever cast — **Oliver's**
+
+*"Roll aside with brief i-frames and a parting strike."* Target lost **0 HP**, twice, on two separate
+launches, so it is confirmed rather than a flap. Now in `harness/baseline.json`.
+
+This is **section J's shape and section J's exact cause**, arriving on the half of the game nothing
+had measured. `SKILL_FX.mon_roll = SKILL_FX.tumble` (10333) and `SKILL_FX.r_tumble = SKILL_FX.tumble`
+(10301) are **one handler**, and that handler (9935) sets a dodge, i-frames and a snare and **strikes
+nothing at all**. `ranger/Tumble` is already section C/J for exactly this — the handler was rewritten
+and the cards were not. Monk Roll is the second card on it, and it was invisible because it is a
+B-side pick.
+
+**Oliver's by this plan's own rule**: never fix a skill by editing its description to match broken
+behaviour, and here the behaviour is the newer and better of the two. Answering it is one sentence —
+does a dodge carry a parting hit, or do the cards drop the clause — and it settles **three** cards at
+once, not one.
+
+**The third card on that handler is `pirate/Roll`** — *"Roll back with a parting shot and snare."* —
+and it **passes**, which is a limit of the parser rather than a difference in the game.
+`claims.js`'s damage keywords are `damag|strike|slash|hit|blast|burn|explo|bolt`, and *"parting
+shot"* contains none of them; the ranger's card is only caught because of the unrelated word "hit" in
+*"A dodged hit keeps Clear Aim"*. So the pirate is in the same state and the harness cannot see it.
+Recorded rather than fixed: widening the parser to read "shot" would make every projectile line a
+damage promise, and this document's rule is that a bench change which moves numbers nobody has
+watched is how a harness earns distrust.
+
+**And 62 of the 64 kept their promises**, which is the larger and less quotable half of the result.
+The B side is not a neglected wing of the game; it is one bad card and one bad regex.
+
+---
+
 ## Not listed here, and why
 
 - **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: it was a limit of

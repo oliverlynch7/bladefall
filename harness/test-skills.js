@@ -47,6 +47,17 @@
    at 60, where its cone misses. Same code, `5 pass, 0 fail` and `4 pass, 1 fail` on consecutive
    runs. See reset() below; the pose is now restored before every cast.
 
+   ── AND IT CAST ONLY HALF THE GAME'S SKILLS, FOR ITS WHOLE LIFE, UNTIL 2026-08-12. ──
+   Every class offers a 1-of-2 choice at ranks 2/4/6/8, so CLASS2 holds 16 x 4 x 2 = 128 active
+   skills. cheatRank10All fills the build with `def['r'+r].a.id` - the A side, every time - and
+   c2CurSkills() returns whatever that build holds. So "skills: 70 pass, 3 fail" was a verdict about
+   64 skills that read like a verdict about the game. The other 64 - Shield Bash, Whirlwind, Piercing
+   Shot, Execution and sixty more, every one of them a build a player can actually be playing - had
+   never been cast by this bench, by a probe, or by anything else that reports.
+   Both sides are now cast in the same launch, with only the skill ranks flipped (the passives at
+   3/5/7/9 stay on their A pick in both halves, so the pick is the only variable). See the setSide /
+   castSide pair below for what was measured before it was built.
+
    Three classes have no in-family starter to equip, which is a GAME bug this found rather than a
    harness one - berserker (family great/axe/hammer, starter 'sword'), pirate (family
    sword/cross/javelin/axe, starter 'flintlock') and beastmaster (family bow/javelin, absent from
@@ -317,28 +328,80 @@ const PROBE = (classId) => `(function(){
   mark('after drift control');
 
   /* READ FROM THE LIST useSkill CASTS FROM, which is not curSkills(). See the header. */
-  const skills = (__BF3.c2CurSkills ? __BF3.c2CurSkills() : null) || __BF3.curSkills() || [];
   const FX = __BF3.SKILL_FX || {};
   const R = [];
-  for(let i = 0; i < skills.length; i++){
-    const s = skills[i]; if(!s) continue;
-    reset();                                         // pose first, then place the target on it
-    const dummy = mkDummy();
-    mark('before ' + (s.n || i));
-    if(p.skillCd) p.skillCd[i] = 0;
-    const before = snap(dummy);
-    let threw = null;
-    try { __BF3.useSkill(i); } catch(e){ threw = String((e && e.message) || e); }
-    /* READ THE COOLDOWN NOW, not after the window. "Did the cast take" is a question about the
-       moment of casting, and once the window grew to 5s every skill with a cooldown of 5s or less
-       had already come back off it - beastmaster Sic 'Em and chronomancer Slow Field both reported
-       onCd:false while plainly having fired, which fails every control and buff claim they make. */
-    const onCd = !!(p.skillCd && p.skillCd[i] > 0);
-    const after = watch(dummy, before);
-    R.push({ n: s.n, d: s.d || '', fx: s.fx || null,
-             live: s.fx ? (typeof FX[s.fx] === 'function') : null,
-             threw: threw, hadTarget: !!dummy, before: before, after: after, onCd: onCd });
-  }
+
+  /* BOTH SIDES OF EVERY CHOICE, AND UNTIL 2026-08-12 THIS BENCH ONLY EVER CAST ONE OF THEM.
+
+     Every class presents a 1-of-2 choice at ranks 2/4/6/8, so CLASS2 holds 16 x 4 x 2 = 128 active
+     skills. cheatRank10All (index.html:15646) fills a valid build with
+     cs.ch[r] = cs.ch[r] || def['r'+r].a.id - the A SIDE, every time - and c2SkillOfSlot returns
+     whatever ch holds. So this suite has cast 64 of the game's 128 skills for its whole life, and
+     the other 64 had never been cast by the bench, by a probe, or by anything else that reports.
+     A player who takes Shield Bash over Cleave at rank 2 was playing an entirely unmeasured game.
+
+     MEASURED BEFORE IT WAS BUILT, not read off the cheat's source (harness/probes/bside.probe.js,
+     one launch): 128 options, 64 a and 64 b, defaultsAllA true for all sixteen classes - so the
+     premise is the game's own answer and not an inference - and flipping classState(cls).ch[r] to
+     the b ids does move c2CurSkills(), so the other half is reachable. That probe also asked the
+     cheap half of the question and got a clean answer: typeof SKILL_FX[fx] is 'function' for all
+     128, so the dead-handler fault that took nine skills in 5339f48 has no survivors on either
+     side. What is left is the expensive half, which is this.
+
+     ONLY THE SKILL RANKS ARE FLIPPED. Ranks 3/5/7/9 are passives and stay on their A pick in both
+     halves, so the only variable between the two runs is which skill was chosen. Flipping the
+     passives too would double the matrix and confound every row in it - a B-side skill failing
+     beside a B-side passive cannot say which one owed the effect.
+
+     It costs no extra launch: same page, same pose, same drift control, same dummy rig.
+     NO BACKTICKS IN HERE - this comment lives inside the PROBE template literal, and the first
+     draft of it had five. SyntaxError, Unexpected identifier 'cheatRank10All', module dead. The
+     mkDummy comment above says the same thing and it still happened. */
+  const CHOICE_RANKS = [2, 4, 6, 8];
+  const C2 = __BF3.CLASS2 || {};
+  const setSide = (side) => {
+    const def = C2[${JSON.stringify(classId)}];
+    if(!def) return side === 'a';                    // no CLASS2 tree: the legacy kit is all there is
+    let cs = null; try { cs = __BF3.classState(${JSON.stringify(classId)}); } catch(e){}
+    if(!cs) return false;
+    if(!cs.ch || typeof cs.ch !== 'object') cs.ch = {};
+    let n = 0;
+    for(const r of CHOICE_RANKS){
+      const R2 = def['r' + r];
+      if(!R2 || R2.kind !== 'skill' || !R2[side]) continue;
+      cs.ch[r] = R2[side].id; n++;
+    }
+    return n > 0;
+  };
+
+  const castSide = (side) => {
+    const skills = (__BF3.c2CurSkills ? __BF3.c2CurSkills() : null) || __BF3.curSkills() || [];
+    for(let i = 0; i < skills.length; i++){
+      const s = skills[i]; if(!s) continue;
+      reset();                                       // pose first, then place the target on it
+      const dummy = mkDummy();
+      mark('before ' + side + ':' + (s.n || i));
+      if(p.skillCd) p.skillCd[i] = 0;
+      const before = snap(dummy);
+      let threw = null;
+      try { __BF3.useSkill(i); } catch(e){ threw = String((e && e.message) || e); }
+      /* READ THE COOLDOWN NOW, not after the window. "Did the cast take" is a question about the
+         moment of casting, and once the window grew to 5s every skill with a cooldown of 5s or less
+         had already come back off it - beastmaster Sic 'Em and chronomancer Slow Field both reported
+         onCd:false while plainly having fired, which fails every control and buff claim they make. */
+      const onCd = !!(p.skillCd && p.skillCd[i] > 0);
+      const after = watch(dummy, before);
+      R.push({ side: side, id: s.id || null, n: s.n, d: s.d || '', fx: s.fx || null,
+               live: s.fx ? (typeof FX[s.fx] === 'function') : null,
+               threw: threw, hadTarget: !!dummy, before: before, after: after, onCd: onCd });
+    }
+  };
+
+  /* A first, so every id this suite has ever reported keeps its meaning and the baseline it is
+     ratcheted against still refers to the same measurements. */
+  if(setSide('a')) castSide('a');
+  mark('after A-side skills');
+  if(setSide('b')) castSide('b');
   mark('after skills');
 
   /* CAN THIS CLASS'S WEAPON DRAW BLOOD AT ALL? The global BASELINE proves the spawn geometry with
@@ -412,6 +475,10 @@ export async function runSkillTests(opts){
   const failures = [];
   const unproven = [];
   const benches = [];      // what each class was actually measured holding - published, not implied
+  /* HOW MANY SKILLS WERE ACTUALLY CAST, split by which side of the choice they sit on. Published
+     because "70 pass" said nothing about coverage while half the game's skills were never reached,
+     and a count that can silently halve again is the same hole in a new place. */
+  const cast = { a: 0, b: 0 };
   let pass = 0;
   /* 'arrived not in play' is excluded from the stray test: that mark is taken BEFORE the probe
      knocks on the game's own resume door, and the next mark says whether it opened. */
@@ -442,7 +509,12 @@ export async function runSkillTests(opts){
       continue;
     }
     for(const r of got.results){
-      if(r.threw){ failures.push({ cls, skill: r.n, claim: 'throw', text: r.d, detail: r.threw }); continue; }
+      /* Which of the two picks this row was measured on. Carried on every verdict rather than only
+         on the failures, because "Cleave passes" and "Shield Bash passes" are two different claims
+         and the reader cannot tell them apart from a class name and a skill name alone. */
+      const side = r.side || 'a';
+      cast[side] = (cast[side] || 0) + 1;
+      if(r.threw){ failures.push({ cls, side, skill: r.n, claim: 'throw', text: r.d, detail: r.threw }); continue; }
       /* DOES THIS SKILL HAVE A HANDLER AT ALL? SKILL_FX is built by aliasing, and an alias written
          above the definition it copies - `SKILL_FX.chr_gravity = SKILL_FX.m_gravity` at 10129 when
          m_gravity is defined at 10148 - silently stores undefined. useSkill does
@@ -451,7 +523,7 @@ export async function runSkillTests(opts){
          it as a damage bug, and the control/buff ones PASS it, because onCd is true.
          This assertion has been watched to fail nine times, which is why it is believed. */
       if(r.live === false){
-        failures.push({ cls, skill: r.n, claim: 'dead handler', text: r.d,
+        failures.push({ cls, side, skill: r.n, claim: 'dead handler', text: r.d,
                         detail: `SKILL_FX.${r.fx} is not a function - the cast spends its cooldown and does nothing` });
         continue;
       }
@@ -459,19 +531,19 @@ export async function runSkillTests(opts){
       if(!claims.length){ pass++; continue; }          // promises nothing, so nothing to check
       for(const c of claims){
         if(c === 'damage' && (!r.hadTarget || !canMeasureDamage || got.canHit === false)){
-          unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'bench cannot measure damage' });
+          unproven.push({ cls, side, skill: r.n, claim: c, text: r.d, why: 'bench cannot measure damage' });
           continue;                                    // the bench cannot see damage; do not accuse
         }
         /* Damage owed by another source ("your spells hit them harder") or owed on a condition the
            bench never meets ("explode on death" - the dummy has 100000 HP and never dies) is not
            damage this rig can observe. Inconclusive, not broken. See claims.js:INDIRECT. */
         if(c === 'damage' && isIndirectDamage(r.d)){
-          unproven.push({ cls, skill: r.n, claim: c, text: r.d, why: 'indirect or conditional promise' });
+          unproven.push({ cls, side, skill: r.n, claim: c, text: r.d, why: 'indirect or conditional promise' });
           continue;
         }
         const met = MET[c] ? MET[c](r.before, r.after, r) : true;
         if(!met){
-          failures.push({ cls, skill: r.n, claim: c, text: r.d,
+          failures.push({ cls, side, skill: r.n, claim: c, text: r.d,
                           detail: JSON.stringify({ before: r.before, after: r.after,
                                                    drift: got.drift, onCd: r.onCd,
                                                    weapon: got.weapon }) });
@@ -479,12 +551,12 @@ export async function runSkillTests(opts){
         }
         const clear = CLEARS_NOISE[c] ? CLEARS_NOISE[c](r.before, r.after, got.drift || {}) : true;
         if(clear) pass++;
-        else unproven.push({ cls, skill: r.n, claim: c, text: r.d,
+        else unproven.push({ cls, side, skill: r.n, claim: c, text: r.d,
                              why: 'happened, but inside the bench noise floor ' + JSON.stringify(got.drift) });
       }
     }
   }
-  return { pass, fail: failures.length, failures, unproven, baseline, benches };
+  return { pass, fail: failures.length, failures, unproven, baseline, benches, cast };
 }
 
 if(import.meta.filename === process.argv[1]){
@@ -495,9 +567,10 @@ if(import.meta.filename === process.argv[1]){
       if(!b.onClass || b.canHit === false || (b.weapon && b.weapon.note !== 'own starter') || d.tgt || d.hp)
         console.log(`BENCH ${b.cls}: ${b.weapon && b.weapon.name} (${b.weapon && b.weapon.art}) — ${b.weapon && b.weapon.note}, onClass ${b.onClass}, canHit ${b.canHit}, drift ${JSON.stringify(d)}`);
     }
-    for(const f of r.failures) console.log(`FAIL ${f.cls}/${f.skill} claims ${f.claim}: "${f.text}" ${f.detail}`);
+    for(const f of r.failures) console.log(`FAIL ${f.cls}/${f.skill} [${f.side || 'a'}-side] claims ${f.claim}: "${f.text}" ${f.detail}`);
     if(!r.baseline.ok) console.log(`BENCH: cannot measure damage (${r.baseline.why}) — ${r.unproven.length} damage claims UNPROVEN, not failed`);
-    console.log(`skills: ${r.pass} pass, ${r.fail} fail, ${r.unproven.length} unproven`);
+    console.log(`skills: ${r.pass} pass, ${r.fail} fail, ${r.unproven.length} unproven` +
+                ` (${r.cast.a} A-side + ${r.cast.b} B-side casts)`);
     process.exit(r.fail ? 1 : 0);
   }).catch(e => { console.error(e); process.exit(1); });
 }

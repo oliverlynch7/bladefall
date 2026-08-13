@@ -121,3 +121,35 @@ test('damage owed by someone else, or owed later, is flagged as indirect', () =>
   assert.ok(!isIndirectDamage('Sweeping strike: 2.2x damage in a wide arc'));
   assert.ok(!isIndirectDamage('Rush forward, damaging and stunning enemies in your path'));
 });
+
+/* ── "heavy damage reduction" IS NOT A DAMAGE PROMISE — the first false accusation the B-side sweep
+   produced, 2026-08-12. ──
+
+   test-skills.js had cast only the A side of every 1-of-2 choice for its whole life, so the
+   Berserker's Bloodguard (r6 b) had never been cast by anything. The first run that cast it failed
+   it for dealing no damage, on the word "damage" inside "heavy damage reduction" — while the same
+   measurement showed guard 0 -> 3.18, i.e. the one thing the card promises had landed.
+
+   The cause is the one-letter miss this file already documents twice in the other direction:
+   DEFENSIVE carried `\breduce`, which cannot match "reduction" any more than `\bdamage` can match
+   "damaging". The old regex is transcribed here and asserted to DISAGREE, because a fix nothing can
+   tell apart from the bug is not a fix. */
+test('a defensive card that says "damage reduction" claims no damage', () => {
+  const bloodguard = 'Raise a guard: heavy damage reduction and pull foes in.';
+  assert.ok(!claimsOf(bloodguard).includes('damage'));
+
+  /* THE OLD RULE, transcribed, and it must still call this a damage skill - otherwise this test
+     would pass against the version it was written to catch. */
+  const OLD_DEFENSIVE = /\babsorb|\bresist|\breduce|\bincoming|\btaken?\b|\bmitigat|\bblock/i;
+  assert.ok(!OLD_DEFENSIVE.test(bloodguard), 'the old regex missed "reduction" — that was the bug');
+  assert.ok(/\breduc/i.test(bloodguard), 'the new one catches it');
+
+  /* AND IT MUST NOT EXCUSE A SKILL THAT ACTUALLY HITS. The exemption is only reachable when the
+     card names no active verb, so these keep their damage claim with "reduce" in the text. */
+  assert.ok(claimsOf('Slam down for 2.4x damage and reduce their armor').includes('damage'));
+  assert.ok(claimsOf('Strike all around you, reducing their attack speed').includes('damage'));
+
+  /* The card the old regex DID catch, kept as the control: it is defensive for a second reason
+     ("incoming") and by the buff rule ("for 3s"), so it never depended on this fix. */
+  assert.ok(!claimsOf('Brace for 3s, reducing incoming damage by 60%.').includes('damage'));
+});

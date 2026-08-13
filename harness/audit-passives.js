@@ -40,8 +40,10 @@ import path from 'node:path';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GAME = path.join(ROOT, 'public', '3d', 'index.html');
 
-/* Span of `<decl>` through the brace that closes it. Returns [start, end) over the raw source. */
-function blockOf(src, decl){
+/* Span of `<decl>` through the brace that closes it. Returns [start, end) over the raw source.
+   Exported because audit-skills.js needs the same CLASS2 span, and a second copy of this is a copy
+   that will be edited in one place — the rule gate-rules.js exists to follow. */
+export function blockOf(src, decl){
   const i = src.indexOf(decl);
   if(i === -1) throw new Error(`cannot find ${JSON.stringify(decl)} in index.html`);
   const open = src.indexOf('{', i);

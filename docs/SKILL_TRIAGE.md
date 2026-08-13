@@ -3243,6 +3243,39 @@ the control and the known-bad cell was the control. Rank 3 is now set explicitly
 now two for two — **`cheatRank10All` silently arms an A-side passive that eats the thing being
 measured, and any new probe should assume it until it has proved otherwise.**
 
+### FIXED 2026-08-13 — the clause is one line, and the probe's own two bars are what say it works
+
+The fix is where the probe's header said it would be: inside the warrior's own `effPower` block
+(3706), `if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10;`, beside the `w_heavy` and
+`bloodlustT` multipliers that were already there. Nothing was invented — the 10% is the card's, and
+`classFamilyOk` is the predicate the probe measured against, so the shipped gate and the measured
+gate are the same function rather than two readings of one idea.
+
+Re-run, same probe, same command, same launch shape:
+
+```
+before   ratios   inFamily 1.000   offFamily 1.000   knownBad 1.120   inFamilyGetsTheCardsTenPercent false
+after    ratios   inFamily 1.100   offFamily 1.000   knownBad 1.120   inFamilyGetsTheCardsTenPercent true
+```
+
+**The off-family cell is the half that matters and it did not move.** A warrior carrying the Cracked
+Shortbow reads 1.000 after the fix exactly as before it, so the +10% is scoped to the weapons the card
+scopes it to — which a one-cell probe would have passed while handing a warrior with a staff the
+bonus.
+
+*Read the RATIOS and not the absolute numbers.* `effPower` came back 4.2973 in the before launch and
+5.0278 in the after one for the identical control cell: the starting stats a launch arrives with are
+not fixed, which is precisely why every cell in this probe is divided by its own control from the same
+launch. A run comparing `masterIn` across two launches would have read the +10% as +29%.
+
+Regression, the same bar pass 41 used: `node harness/test-skills.js --classes warrior` →
+**`11 pass, 0 fail, 0 unproven` (4 A-side + 4 B-side casts)**. The passive is armed in that bench (its
+rank-9 A-side is `w_master`), so every warrior damage number in it moved up 10% and no claim broke.
+
+**The 11319 rider is NOT part of this and stays Oliver's** — the Momentum stagger firing at 2 hits
+instead of 3 is on no card, and deleting it is a balance change with no number behind it. This pass
+implemented a promise; it removed nothing.
+
 **Not yet fixed.** The measurement is the run's output; the one-line change belongs with its own
 aggregate gate and its own commit, so Oliver can revert exactly the +10% after playing it.
 

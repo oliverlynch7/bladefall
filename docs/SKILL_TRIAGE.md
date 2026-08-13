@@ -3010,7 +3010,7 @@ sentence can apply five edits and re-run two committed probes.
 
 ---
 
-## W. BOUNCE BACK RETURNS DAMAGE TO A `{name, attack}` PAIR — measured 2026-08-12, and it tells the player it worked
+## W. BOUNCE BACK RETURNS DAMAGE TO A `{name, attack}` PAIR — measured 2026-08-12, **FIXED 2026-08-13**
 
 The second door found by the sweep section U's write-up asked the next run to run: **a wiring proven
 through a call the game itself never makes.** Found the same day, in a different subsystem, which is
@@ -3064,6 +3064,67 @@ no numbers.
 
 **Re-measure with the committed probe**: `reflectReachesGameShape` and `reflectReachesRealContact`
 both flip true, `probeDoor` stays at 139, and `ok` stays true.
+
+### SHIPPED 2026-08-13 — and the patch above was right about the fix and wrong about two of its own bars
+
+Applied, gated (`GATE OK`) and re-measured. `harness/probes/bounceby.probe.js`, same command both
+sides (`node _shot/shot.js --scene arena:flat --wait 12000 --eval @harness/probes/bounceby.probe.js`):
+
+| trial | attacker lost — before | after | BOUNCED shown |
+|---|---|---|---|
+| a BODILESS `{name, attack}` literal | **0** | **0** | yes → **no** |
+| the game's own `foeHit(e,…)`, called | *(trial did not exist)* | **139** | yes |
+| the enemy object (pass 7's own door) | 139 | 139 | yes |
+| **real contact**, the game ticking on its own | **0** | **33** | — |
+
+The hero lost health in every trial on both sides (50 / 50 / 50 / 9), so every zero is a real zero.
+**The bar that carries the row is the last one**, measured on the probe exactly as it was committed
+the day before, untouched: 0 → 33 through the game's own melee path with nothing driven by hand.
+Photographed at `_shot/out/w5-bounced-aimed.png` — **BOUNCED** and `-38` over the hero, **139** over
+the grunt's health bar, one frame.
+
+**Two corrections to the patch as written above, both found by running it.**
+
+1. **The predicted `reflectReachesGameShape` flip did not happen, and that was the fix working.**
+   Trial 1 was a *transcription* of `foeHit`'s two-field return, and the fix gives `foeHit` a third
+   field — so the literal stopped being what the game produces the moment the fix landed, and a
+   bodiless descriptor must reflect nothing. It is kept verbatim as the **known-bad control** rather
+   than updated to match, and a new trial 1b calls `__BF3.foeHit(e,…)` for the real thing. `foeHit`
+   is now exported for that: a probe that copies a shape is a second copy of it, and this is the
+   copy going stale the same day it was written. Generalises past this row — **any probe that
+   transcribes a game structure is measuring the day it was written.**
+2. **`probeDoor` did NOT stay at 139 under step 3 as specified, and the specification was the
+   problem.** `(by && by.src) || null` refuses a caller who hands a combatant DIRECTLY, which is
+   what pass 7's positive control does, so the probe's own clean-check (`ok`) went false and the
+   bench lost the trial that proves it can see a reflect at all. The shipped helper applies the
+   `hp != null` test to whatever it is handed — `.src` first, then `by` itself:
+
+   ```js
+   function canBeHitBack(o){ return (o && typeof o==='object' && !o.dead && o.hp != null) ? o : null; }
+   function attackerOf(by){ return canBeHitBack(by && by.src) || canBeHitBack(by); }
+   ```
+
+   **This is not the fall-back step 3 forbids** and the distinction is the whole row: the forbidden
+   one is `|| by` *unconditionally*, which is what let a descriptor through. A descriptor has no
+   `hp`, so it can never satisfy this one — proven by trial 1, which still reflects 0 and now stays
+   silent as well.
+
+**Two sites the patch did not name, both additive and both with the body already in hand.** The boss
+sweep and the boss ground-slam (13368 / 13373) build their own `{name:foeName(G.boss), …}` literal
+rather than going through `foeHit`, so they gained `src:G.boss||null`. Without it a paladin bracing
+against the only fights in the game that are *about* bracing would still reflect nothing.
+
+**And the second reader is a rank-10 CAPSTONE, which the finding wrote down as a line number and not
+as what it is.** `p._stillnessT` is the **Monk's Stillness** (`SKILL_FX.mon_thousand`, 19636) —
+*"stop moving and every hit you take is returned doubled"*, the discipline the class is named for.
+Section S read all sixteen capstones clause by clause and passed this one, correctly: the clause was
+built. It was built onto a descriptor. **A capstone whose only effect is the word RETURNED is a
+worse read of a class than a dead passive is**, and neither the passive audit nor the capstone sweep
+could see it, because both ask what the code says and this needed to know what it was handed.
+
+**One site left deliberately.** A bot's MELEE blow (12943) passes `hurtPlayer` no `by` at all, so
+nothing reflects an arena bot's sword. Giving it `foeHit(e,…)` would also change the death message
+the player is shown, which is words rather than a wiring, so it is recorded here rather than taken.
 
 *The probe was wrong once first, and its own clean-check caught it — which is why the clean-check is
 there.* The first run reported the game-shape trial at `heroLost 0`, a zero that says nothing about

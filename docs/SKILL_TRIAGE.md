@@ -2957,3 +2957,53 @@ Three of the ones it drops are not class identity at all:
 **That is what makes this one line worth a decision rather than a shrug.** The nine identities are
 authored economies nobody has played; these three are systems the player is already paying for —
 an affix he bought, a difficulty he chose, an innate he was promised on the class-select screen.
+
+### U3. THE FIX WAS BUILT, GATED AND MEASURED — then reverted, so the decision is one sentence and not a leap
+
+Prototyped on the same run, on top of the two probes above, and **deliberately not committed**. The
+point of building it was to hand Oliver a measured patch instead of a proposal: the tree it was
+measured on is `31bc8f4` plus the five edits below, `node tools/gate.js` was green on it, and
+`git status` is clean again.
+
+**Before → after, same two committed probes, same geometry, same launch conditions:**
+
+| reading | shipped game | with the patch |
+|---|---|---|
+| `basichook`: real swing arcs | **0** (target lost 81) | **2**, at 35 and 35, the body at 900 untouched |
+| `basichook`: melee-door arcs (control) | 2 | 2 — unchanged |
+| `projsrc`: lifesteal on a real shot | **0** healed | healed, net of a separately measured regen baseline of 0 |
+| `projsrc`: Static stack on a real shot | **0** | **1** |
+| `projsrc`: synthetic-src control | 0 / 0 / 0 | 0 / 0 / 0 — unchanged, correctly: that call sets no owner |
+
+*One number in that table is not an instrument and is marked so rather than quietly used: the real
+swing's damage moved 84 → 116, and `fireProjectile` rolls its own crit (`0.16+effCrit`, 9866), so a
+single shot's damage carries a coin-flip the difficulty dial cannot be read out of. The arcs, the
+heal and the stack are booleans and they are what this table rests on.*
+
+**The five edits.**
+
+1. `hitEnemy` (10820), one line at the top — the question every gate below it is really asking:
+   `const _isP=(src===G.p)||!!(G&&G._projSrc&&G._projSrc===G.p);`
+2. Replace all **seventeen** `src===G.p` comparisons inside `hitEnemy` with `_isP`.
+3. **Three of those seventeen also use `src` as the ACTOR** and must switch to `G.p` with it —
+   `src._swiftHits` and `gainMana(src,…)` (10870), `src.hp` / `src.weapon.el` (10871),
+   `src._favorHitT` (10872). Left as `src`, a ranged hit would write Swift Steel's counter and the
+   Paladin's heal onto the throwaway `{x,z}` object — the fix would look like it worked and quietly
+   do nothing, which is worse than the bug.
+4. `fireProjectile`'s push (9889) gains `basic:1`. It has exactly ONE caller — `playerAttack`
+   (9748) — so that flag means "basic attack" precisely, and nothing else has to be tagged.
+5. The projectile step (13519 / 13524): `G._projSrc=G.p` beside the existing `G._desig` / `G._crit`,
+   cleared with them. **This is the file's own idiom at the very same call site**, which is why no
+   new mechanism was invented for it.
+
+**Edit 5 carries the half that is easy to miss.** `G._desig=!!pr.desig` is false for SKILL
+projectiles — only the charged releases set it (9799, 9814) — so once ranged hits count as the
+player's, a Fireball's own hit would be treated as a BASIC attack and would run `CLASS_BASIC`. The
+prototype answers it in the same line, `G._desig=!!(pr.desig||!pr.basic)`, which also switches on two
+things that have never worked for skill projectiles: Rune Mark spending and Corruption rupture
+(10965), and the Paladin's Holy Power (10909). Both are additional behaviour and both are named here
+rather than shipped silently.
+
+**What is still Oliver's, unchanged by the prototype:** the patch is correct and it plays nine
+classes' authored economies for the first time. One sentence unblocks it, and the run that gets that
+sentence can apply five edits and re-run two committed probes.

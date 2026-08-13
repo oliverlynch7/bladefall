@@ -464,3 +464,134 @@ more than a few seconds can have the game stop under it and report a run's worth
 No session is held and no packet crosses a wire; this is the receive path exercised in one browser.
 Two real machines remain the final check. The extra field is one integer per ping — a message sent at
 most once per 0.6s per player — so no bandwidth measurement was thought necessary, and none was made.
+
+---
+
+# A guest's PROJECTILE damage never reaches the host — 2026-08-13
+
+**STATUS: found and read statically, watched to fail as a test, NOT YET MEASURED IN A RUNNING GAME.**
+Said first and plainly, because everything below reads like a shipped finding and is not one: the
+instrument is written and committed (`harness/probes/guesthit.probe.js`) and **has never returned a
+reading**. Two attempts were made and both died on Chrome contention with a full aggregate gate
+running beside them — `PRE → ReferenceError: __BF3 is not defined`, then `READY NEVER CAME after
+122s`. Nothing here may be quoted as measured until that probe runs, and the fix is deliberately NOT
+in the tree for the same reason.
+
+## What the code says
+
+Found by the argument sweep `docs/superpowers/plans/2026-08-10-skill-correctness.md` names after pass
+55: `hurtPlayer`'s `by` was swept because a probe's bar rode on it, and **every other argument the
+game passes between subsystems has the same failure mode.** `hitEnemy`'s `src` is the biggest of
+them, and `docs/SKILL_TRIAGE.md` section U is only one of its readers. This is another, and it is not
+a class identity — it is damage.
+
+The host owns enemy HP in co-op, so a guest must RELAY its hits and never apply them
+(`index.html`, the `MP.sendHit(e.mid, …)` guard):
+
+```js
+if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice
+   && (src===G.p || (src && src.pet))){
+  MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z); … return; }
+```
+
+`src===G.p` is what a melee swing satisfies (`resolveSwing` passes the player). `src.pet` was added
+later, and **the game's own comment beside it is this finding written out in the past tense**: pets
+otherwise *"appear to attack locally, then the host snapshot restores the mob's HP and makes
+Necromancer summons (and pets) effectively deal zero shared damage."*
+
+**A player projectile passes neither.** Its hit is
+
+```js
+hitEnemy(e, pr.dmg, {x:pr.x-pr.vx*0.01, z:pr.z-pr.vz*0.01}, pr.kb, effLifesteal(G.p), pr.el);
+```
+
+a bare position — the SHOT's own, because knockback is thrown from the bolt rather than from the
+caster. Not `G.p`, no `.pet`. So on a guest the relay does not fire, execution falls through to
+`e.hp-=dmg`, and `applyEnemies` overwrites that HP with the host's value on the next snapshot
+(`e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4]))`). **Nothing about a projectile is networked at
+all** — grepped: no `t:'shot'`, no `sendShot`, no peer projectile list — so the host cannot be
+simulating the bolt either.
+
+If that reads the way the source says, then in co-op:
+
+- **nine of the sixteen classes deal nothing with their basic attack** — every `attackStyle:'mage'`
+  or `'ranger'` class: ranger, mage, necromancer, pirate, chronomancer, stormcaller, warlock,
+  skylancer, beastmaster;
+- **every projectile SKILL, on all sixteen classes, is in the same state**;
+- and it is worse than a dropped packet, because the guest sees its own damage numbers and the mob's
+  bar drop before the next snapshot takes it back. A player reads that as lag, not as a bug.
+
+`docs/VISION.md`'s priority #1 is that multiplayer is the point.
+
+## What HAS been done, and it is the static half only
+
+`harness/live/relay.test.js` — four assertions, no launch. It does not re-implement the guard: it
+reads which `src.<marker>` fields the guard accepts and which fields each damage source actually puts
+on its `src`, and asserts the two agree. Today, against the shipped game:
+
+```
+✔ the guest relay still exists and still accepts a plain melee swing
+✖ every damage source whose src is NOT the player carries a marker the relay accepts
+    AssertionError: the relay should accept at least the pet marker and the projectile marker;
+    it accepts [pet]
+✔ the shipped bug, transcribed, fails the assertion above
+✔ the host's snapshot really does overwrite a guest's local enemy HP
+```
+
+**That is the assertion watched to fail, and the three that pass are what make its failure mean
+something** — the pet sites are the control (the same bug, found once and fixed, so the marker
+mechanism demonstrably works), the transcription is the negative control, and the snapshot assertion
+is what makes this worse than an unsent packet rather than equal to one.
+
+**The file is parked in `harness/live/` and belongs in `harness/test/`.** It is static and fast;
+`harness/live/` is simply the one directory `run-all.js` does not sweep into its fast stage, and a
+deliberately-failing test there would turn every scheduled run's gate red and stash that run's work.
+Move it in the same commit as the fix.
+
+## The patch, written out rather than shipped
+
+Two edits, and the marker name is the only choice in either — it copies the pet clause's idiom
+verbatim, and nothing else in the file reads a `.shot` field.
+
+1. the projectile hit — add the marker to the src literal:
+   `hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,shot:true},pr.kb,effLifesteal(G.p),pr.el);`
+2. the relay guard — accept it:
+   `… && (src===G.p||(src&&(src.pet||src.shot))){`
+
+**It must widen the RELAY guard only.** `src===G.p` is also what dispatches `CLASS_BASIC` (section
+U), and turning THAT on for projectiles is the largest balance change available in this game and is
+explicitly Oliver's. A separate marker field keeps the two apart; a `src===G.p`-shaped fix would ship
+section U by accident. Adding a key to the literal is inert everywhere else — `src` is otherwise read
+for `.x`, `.z`, `.weapon`, `.hp`, `._swiftHits`, `._favorHitT`, none of which a new field disturbs.
+
+## What the next run does, in order — it is all pre-paid
+
+```bash
+node _shot/shot.js --scene arena:flat --wait 12000 \
+  --ready "!!(window.__BF3 && __BF3.G && __BF3.G.arena===true && !__BF3.G.hub && !__BF3.G.trial)" \
+  --eval @harness/probes/guesthit.probe.js
+```
+
+**Run it on an idle machine — not beside an aggregate gate.** Expected BEFORE: `instrumentOk true`
+(the melee and pet doors each relay once and take no local HP, the host relays nothing and takes HP,
+and the relay names the host's own mid), `shotIsLostInCoop true`, `itIsTheSrcShape true`. Then the two
+edits, `node tools/gate.js`, the same probe again — both row fields must go false, with
+`guestReal.relayed` 1 and `hpLost` 0 — then `node --test harness/live/relay.test.js` → 4 pass, move it
+to `harness/test/`, `node harness/test-mp.js`, a VERSION3D bump, `node harness/run-all.js`.
+
+A single launch is enough because the probe reports both halves of every trial — what was relayed and
+what was taken off the local body — so a working door reads `relayed 1, hpLost 0` and a broken one
+`relayed 0, hpLost > 0`, on the same line.
+
+## A harness note this cost two launches, worth more than it looks
+
+**`--scene`'s run-up script has no wait for `__BF3` to exist.** Under contention the PRE is evaluated
+as soon as the load event fires, before the game's script has finished parsing, and comes back
+`ReferenceError: __BF3 is not defined`; the destination is then never reached and the shot ends
+`READY NEVER CAME after 122s`. That reads exactly like a broken destination or a bad probe and is
+neither — the page loads fine (`[hero3d] ready` is logged), it is simply not ready when it is asked.
+**`--prewait` cannot fix it**: it sleeps AFTER the PRE runs (`shot.js`, `if (PRE) { … await
+sleep(PREWAIT) }`), measured by trying 25s and getting the identical failure. The fix is a poll for
+`__BF3` before the PRE, in `harness/shot.js` — **not while a gate is running**, because `drive.js`
+re-copies that file into `_shot/` whenever the content differs, so an edit mid-gate changes the
+instrument under every remaining launch.

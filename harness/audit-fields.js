@@ -141,6 +141,34 @@ export function literalKeys(code){
   return out;
 }
 
+/* IS THE DOT AT `i` A PROPERTY ACCESS, OR THE POINT IN A NUMBER?
+
+   This replaces a `(?<![0-9.])` lookbehind that could not tell the two apart, and the difference is
+   not academic — the lookbehind rejected EVERY receiver whose name ends in a digit. `e2`, `p2`,
+   `m2`, `sp2`, `gy2`, `d2`, `s1`, `ter1`: ~120 property accesses in the game file (raw grep, so a
+   handful may sit in prose) were invisible to this sweep, and they are not obscure ones.
+   `e2.dead`, `m2.dropT` and `sp2.used` are live gameplay state, and `p2.shieldHp` / `p2.guardT` at
+   19096 are the PEER player's shield and guard in the multiplayer render — so co-op state was in the
+   blind spot too. The AoE and peer loops are precisely where a field gets its second reader.
+
+   It failed in BOTH directions and the accusing one is why this is a bug rather than a limitation:
+     - a field whose only WRITER is `e2.field = …` came back "read, never written";
+     - a field whose only READER is `e2.field` comes back "WRITTEN, NEVER READ" — a fabricated dead
+       field, the exact failure this module's header says it must never produce.
+   Found by chasing `e._iansSplash`, which the sweep called read-never-written. It is written twice,
+   on one line, through `e2` (index.html:10895) — Ian's Blade re-entrancy guard, entirely alive.
+
+   The rule: walk back over any digits. If an identifier character sits before them the dot belongs
+   to an identifier (`e2.x`); if not, the digits are a numeric literal (`1.5`) and it does not. A dot
+   immediately before is `a..b` or a `...spread`, and is not an access either. */
+export function isPropertyDot(code, i){
+  if(i > 0 && code[i - 1] === '.') return false;
+  let j = i - 1;
+  while(j >= 0 && code[j] >= '0' && code[j] <= '9') j--;
+  if(j === i - 1) return true;                       // no digits before the dot at all
+  return j >= 0 && /[A-Za-z_$]/.test(code[j]);       // digits, but part of a name
+}
+
 /* One receiver's fields: where each is written, where each is read.
 
    THE RECEIVER SCOPES WHICH FIELDS ARE LOOKED AT, AND NOTHING ELSE. Reads and writes are then
@@ -161,7 +189,7 @@ export function auditFields(src, receiver){
      DOM is full of legitimately write-only properties (`el.textContent`, `canvas.width`,
      `style.opacity`), which the browser reads and this file never does. */
   const mine = receiver === '*'
-    ? /(?<![0-9.])\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g
+    ? /\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g
     /* A dotted receiver is allowed and is not a nicety: `G.pet.orderX` is reached under NEITHER `G`
        nor `pet` — the first stops at `pet`, and the second is rejected by the lookbehind because a
        dot precedes it. The Beastmaster's dead order fields live exactly there. */
@@ -169,13 +197,19 @@ export function auditFields(src, receiver){
   const fields = new Map();
   let m;
   while((m = mine.exec(code))){
+    /* `*` ONLY, and the reason is that `m.index` means two different things here: for `*` the match
+       starts at the dot, for a named receiver it starts at the RECEIVER, so the same call would test
+       a position several characters early and answer a question nobody asked. A named receiver needs
+       no test anyway — its own lookbehind already refuses to start inside a number. */
+    if(receiver === '*' && !isPropertyDot(code, m.index)) continue;
     if(!fields.has(m[1])) fields.set(m[1], { field: m[1], writes: [], reads: [] });
   }
   /* Second pass over the whole file, receiver-agnostic, for exactly the fields found above. */
-  const any = /(?<![0-9.])\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g;   // any receiver; not `1.5`, not `a..b`
+  const any = /\.\s*([A-Za-z_$][A-Za-z0-9_$]*)/g;   // any receiver, including one ending in a digit
   while((m = any.exec(code))){
     const rec = fields.get(m[1]);
     if(!rec) continue;
+    if(!isPropertyDot(code, m.index)) continue;     // `1.5`, `a..b`, `...spread`
     (isWrite(code, m.index, m.index + m[0].length) ? rec.writes : rec.reads).push(m.index);
   }
   const rows = [...fields.values()].map(r => ({

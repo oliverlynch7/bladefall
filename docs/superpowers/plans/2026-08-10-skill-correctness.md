@@ -345,6 +345,40 @@ difficulty call on the final boss, not because a number is missing; `e.petTauntT
 read-never-written half has not been worked at all, and `CLASS_BASIC` is now 4 for 12 on identities
 that did not work — the other eight have never been checked against what they claim.
 
+**THE READ-NEVER-WRITTEN HALF WAS WORKED, 2026-08-12, AND WHAT IT FOUND WAS A HOLE IN THE SWEEP
+ITSELF.** Both halves of that paragraph are now answered, and the answer to the first is that the
+instrument was under-powered rather than the game being clean.
+
+- **`*` is not worth ratcheting on this half and that is a finding, not a shrug.** Its
+  read-never-written output is ~800 rows and effectively all of it is the `<style>` block's CSS
+  class names (`.hudpanel`, `.progbox`, `.skl`) plus DOM Event properties (`e.preventDefault`,
+  `e.clientX`, `e.pointerId`). The stripper removes JS strings and comments; it does not know CSS is
+  not JS, and it cannot tell an enemy `e` from an event `e` — which the module header already says.
+  A ratchet over that list would be 800 entries of noise guarding nothing. **The `p`/`e`/`G`/`G.pet`
+  half is the tractable one**: seventeen rows, of which fifteen are DOM event properties on `e` and
+  one is `p.catch` (a Promise `.catch`, not a field).
+- **Its only two game rows were already triaged, and re-deriving them cost this run half an hour.**
+  `e._iansSplash` and `e.dmg2` are both sitting in `docs/SKILL_TRIAGE.md` under *"Not listed here,
+  and why"* — the first as a known limit of the sweep, the second as Oliver's (`dmg:e.dmg2||12`, the
+  eruption shockwave, never assigned, and picking a number is a difficulty call). **Read that
+  section before running this sweep; it is the sweep's own results cache.** The line numbers there
+  have drifted — `_iansSplash` is 10887/10895 now, `dmg2` is 13668 — which is what made them look
+  unfamiliar.
+- **WHAT IS NEW IS THAT THE LIMIT IS NOW FIXED RATHER THAN RECORDED.** The triage entry named the
+  cause exactly — the any-receiver pass carried `(?<![0-9.])\.`, a lookbehind meant to keep `1.5`
+  from parsing as a field, which also blinds it to every receiver whose name ends in a digit — and it
+  named the danger: *"a field whose only READER is `e2.foo` would be reported as written-and-never-
+  read."* That is the ACCUSING direction, the one outcome this module's header says it must never
+  produce, and it was left as a live landmine in the harness that guards every other plan.
+  Measured before touching it: **~120 accesses in the game file were invisible**, and they are live
+  gameplay state, not curiosities — `p2.guardT`, `p2.shieldHp`, `e2.dead`, `m2.dropT`, `sp2.used`,
+  `gy2.state`. Fixed by `isPropertyDot()` — walk back over digits; an identifier character before
+  them means it is a name, otherwise it is a numeric literal — with tests written so the OLD
+  lookbehind fails each one, and a float guard so `1.5` still cannot invent a field.
+  **The current `KNOWN_DEAD` list survived the fix unchanged in both directions**, so the blind spot
+  had not yet cost a false accusation. That is a negative finding worth keeping: the fix is
+  prospective, and nothing already in the ratchet needs re-reading because of it.
+
 **AND A SWEEP NOBODY HAD RUN AT ALL GAVE SECTION R, 2026-08-12: the RANK-1 INNATE CARD of every
 class, read against `effPower`.** Section Q read every passive card against its reader; section J read
 every rewritten skill against its card. The innate — the first thing a player reads about a class, and

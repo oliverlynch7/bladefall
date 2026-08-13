@@ -2618,12 +2618,20 @@ careful read of sixteen cards and it found the two rows above plus the whole cha
 
 ## Not listed here, and why
 
-- **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: a limit of the
-  sweep**. It is written at 10845 as `e2._iansSplash=1`, and the sweep's any-receiver pass carries
-  `(?<![0-9.])` to avoid reading `1.5` as a field, which also blinds it to every receiver whose name
-  ends in a digit (`e2`, `p2`). Recorded so the next run does not spend a launch on it — and noted as
-  the one place this sweep can fail in the ACCUSING direction, since a field whose only READER is
-  `e2.foo` would be reported as written-and-never-read.
+- **`e._iansSplash`** — reported by the read-never-written sweep and **not a bug: it was a limit of
+  the sweep, and that limit is FIXED as of 2026-08-12.** It is written twice on index.html:10895 as
+  `e2._iansSplash=1` / `=0` and read at 10887, so it is entirely alive. The sweep's any-receiver pass
+  used to carry `(?<![0-9.])` to avoid reading `1.5` as a field, which also blinded it to every
+  receiver whose name ends in a digit (`e2`, `p2`) — **~120 accesses in this file, including
+  `p2.guardT`, `p2.shieldHp`, `e2.dead`, `m2.dropT`, `sp2.used` and `gy2.state`.** This entry
+  correctly called it the one place the sweep could fail in the ACCUSING direction, a field whose
+  only READER is `e2.foo` coming back written-and-never-read; that is what got it fixed rather than
+  re-recorded. `audit-fields.js` now decides with `isPropertyDot()` (walk back over digits — an
+  identifier character before them means it is a name, not a number), and `harness/test/fields.test.js`
+  asserts both directions with controls that the old lookbehind fails.
+  **`KNOWN_DEAD` was unchanged by the fix in both directions**, so no row in this document was ever a
+  false accusation from this cause. Kept here because the ROW is still not a bug and the next sweep
+  will still surface nothing for it.
 - **`e.dmg2`** — read once, at 13445, as the damage of the eruption shockwave a boss leaves behind
   (`dmg:e.dmg2||12`). Never assigned, so the fallback is the only value it has ever had. **Not a
   triage row: no card and no boss line promises a number here**, and picking one is a difficulty call

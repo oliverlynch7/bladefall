@@ -10,7 +10,7 @@ import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { auditFields, stripNonCode, literalKeys, lineOf } from '../audit-fields.js';
+import { auditFields, stripNonCode, literalKeys, lineOf, isPropertyDot } from '../audit-fields.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GAME = path.join(ROOT, 'public', '3d', 'index.html');
@@ -199,6 +199,60 @@ test('no field is written and never read except the ones already triaged', () =>
     assert.deepStrictEqual(revived, [],
       `${recv}.*: no longer dead, so take these out of KNOWN_DEAD:\n  ` + revived.join('\n  '));
   }
+});
+
+/* A RECEIVER WHOSE NAME ENDS IN A DIGIT — the sweep could not see one at all.
+
+   Every assertion here is written so the OLD `(?<![0-9.])` lookbehind fails it. That is the whole
+   point: a test that only says "the sweep returns what the sweep returns" would have passed against
+   the bug for as long as it existed. */
+test('A READER THROUGH `e2` COUNTS — the digit-suffixed receiver was invisible, and it accused', () => {
+  const src = `
+    function hit(e){ e.splashGuard = 1; }
+    function splash(e2){ if(e2.splashGuard) return 0; return 5; }
+  `;
+  /* The only reader is `e2.splashGuard`. Before the fix this returned ['splashGuard'] — a
+     fabricated dead field, which is the direction this module must never fail in. */
+  assert.deepStrictEqual(names(auditFields(src, 'e').writtenNeverRead), []);
+  /* The control has to be aimed at the `e2.` occurrence specifically — the `e.splashGuard` write on
+     the line above matches the old lookbehind perfectly well, so testing the whole source proves
+     nothing. This is the reader, isolated. */
+  assert.ok(!/(?<![0-9.])\.\s*splashGuard/.test('e2.splashGuard'),
+    'the old lookbehind must miss `e2.splashGuard` — else this test proves nothing');
+  assert.ok(/(?<![0-9.])\.\s*splashGuard/.test('e.splashGuard'),
+    'and must still see `e.splashGuard` — else the control is testing the wrong thing');
+});
+
+test('a WRITER through `e2` counts too — this is how `e._iansSplash` was mis-scored', () => {
+  const src = `
+    function hit(e){ const on = !e._iansSplash; return on; }
+    function splash(list){ for(const e2 of list){ e2._iansSplash = 1; e2._iansSplash = 0; } }
+  `;
+  assert.deepStrictEqual(names(auditFields(src, 'e').readNeverWritten), []);
+});
+
+test('a number is still not a property access, and neither is `..` or a spread', () => {
+  assert.strictEqual(isPropertyDot('1.5', 1), false);
+  assert.strictEqual(isPropertyDot('x = 0.25', 5), false);
+  assert.strictEqual(isPropertyDot('e2.x', 2), true);
+  assert.strictEqual(isPropertyDot('ter1.x', 4), true);
+  assert.strictEqual(isPropertyDot('f(...a)', 4), false);   // third dot of a spread
+  assert.strictEqual(isPropertyDot('a?.b', 2), true);       // optional chaining is an access
+  /* The regression guard for the fix itself: a float must not invent a field named after whatever
+     follows it. `2.toFixed` is not legal JS, but `(2).toFixed` and `1.5.toFixed` are, and a sweep
+     that counted the decimal point would file `toFixed` under every numeric literal in the file. */
+  const r = auditFields('function f(){ const a = 1.5; return a; }', '*');
+  assert.deepStrictEqual(names(r.rows), []);
+});
+
+test('the real game file: `e2.` and `p2.` accesses are now seen', () => {
+  const src = readFileSync(GAME, 'utf8');
+  const byName = new Map(auditFields(src, '*').rows.map(r => [r.field, r]));
+  /* index.html:10895 writes `_iansSplash` twice through `e2`, and 10887 reads it through `e`. */
+  const ian = byName.get('_iansSplash');
+  assert.ok(ian, '_iansSplash not seen at all');
+  assert.ok(ian.writes > 0 && ian.reads > 0,
+    `_iansSplash should be both written and read, got ${JSON.stringify(ian)}`);
 });
 
 test('the sweep survives the real game file and still sees its live fields', () => {

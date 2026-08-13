@@ -3527,3 +3527,144 @@ generous than the card — so making each honest is a nerf to something a player
 stay Oliver's. **Hunter's Mark is still the row to put to him first**: +18% on the card against
 `dmg*=1.4` at both read sites, and the +10% crit clause has no implementation anywhere, so whichever
 number he picks, half that card is still unbuilt.
+
+---
+
+## Z. THE HARNESS'S OWN PROBES, READ AGAINST THE DOOR A PLAYER PRESSES — swept 2026-08-13
+
+**The sweep `docs/superpowers/plans/2026-08-10-skill-correctness.md` has asked for by name since pass
+43, run here for the first time.** Its rule, in that plan's words:
+
+> A probe that deliberately takes a simpler door to measure an effect cannot say the effect is
+> REACHABLE. `overcharge.probe.js` states in its own comment that it rejected a real swing because a
+> swing "measures aim and flight time as much as it measures the chain". That was correct for
+> measuring the arc and it is exactly why five passes' worth of verified wirings turned out to be
+> unreachable in play. Every probe in `harness/probes/` that drives an effect through `hitEnemy`,
+> `hurtPlayer` or a direct field assignment rather than through the button a player presses is open
+> to this, and **none of them has been re-read with that question in mind.**
+
+Section U is what that costs when nobody asks: nine classes' basic attacks never reach their own
+identity hook, and five passes in this project's log had verified those identities through a door
+those classes never open.
+
+### The instrument: `harness/audit-probes.js`, ratcheted by `harness/test/probes.test.js`
+
+Static, no launch, in `run-all.js`'s fast stage. It sorts every probe by the doors it opens:
+
+- **player doors** — `__BF3.input` (the real button state), `playerAttack`, `useSkill`;
+- **synthetic doors** — `hitEnemy`, `foeHit`, `hurtPlayer`, `spawnMinion`: resolvers the game reaches
+  only from inside a swing, a shot or an enemy's attack, so calling one directly skips whatever the
+  real caller had to satisfy first.
+
+**78 probes — 16 synthetic-only, 21 mixed, 21 player-door, 20 neither.** `stripNonCode` is IMPORTED
+from `audit-fields.js` rather than copied, and it is load-bearing for the usual reason: probe headers
+are prose that name these doors constantly (`overcharge.probe.js` explains at length that it rejected
+a real swing, in a file that never calls one), so counting a comment as a door would make a probe look
+reachable precisely when someone has documented why it is not. Asserted, not assumed — the miniature
+"all talk" probe and its code twin must disagree, or every `neither` in the directory is meaningless.
+
+Two faults were found by running it rather than by reading it, and both failed silently:
+
+- **the door lookbehind must allow a leading dot.** Measured over this directory the doors are reached
+  under `__BF3` five times out of six — 39 `__BF3.hitEnemy(` against 8 bare — so `audit-fields.js`'s
+  receiver-style `(?<![A-Za-z0-9_$.])` would have reported nearly every probe as driving nothing.
+- **the class scan has to read the RAW source.** The class name is a string literal and the stripper
+  blanks string CONTENTS by design, so run over the stripped copy it reported every probe in the
+  directory as naming no class at all. It now uses the stripped copy only for the half it is right
+  about — the `classId` token itself must survive stripping, so a class named in a comment is
+  rejected. Both are pinned by tests that transcribe the version they replace and assert it disagrees.
+
+`KNOWN_SYNTHETIC` is a ratchet checked in **both** directions: a new synthetic-only probe fails until
+it has been read and given a row here, and a probe that gains a player door fails until it is taken
+off the list. That second direction is not decoration — **it fired immediately**, on a list this run
+had filled in by eye before measuring, and named the seven probes that were on it wrongly.
+
+### THE CLAIM EVERY VERDICT BELOW RESTS ON, AND IT WAS READ WRONG BEFORE IT WAS MEASURED
+
+All sixteen synthetic-only probes drive their effect with `hitEnemy(tgt, 60, p, 0, 0, null)` and
+`G._desig` held false, or with a direct `hurtPlayer`. Sorting them needs one fact: **is that call the
+BASIC ATTACK's door, or every hit the player lands?**
+
+Reading `hitEnemy` alone gives the wrong answer. The dispatch (index.html:10930) is
+`src===G.p && !(G&&G._desig)` — nothing in it says "basic attack" — and skill handlers call
+`hitEnemy(e, dmg, p, …)` in exactly that shape at 10318, 10333, 10411 and thirty more sites. On that
+reading every direct-hit SKILL would run the hook too, and since `CLASS_BASIC.mage` spends 6 mana and
+returns ×1.35 **per body**, a Nova into four enemies would quietly cost 24 mana beyond its own price
+and pay 35% more damage than its card admits. That is a large unadvertised economy and it is what this
+run concluded from the source.
+
+**It is false, and `useSkill` is where the answer lives:** it sets `G._desig = true` at 10649, calls
+the handler, and clears it at 10659, so for the whole synchronous life of a cast the dispatch's guard
+is false. Measured rather than argued — `harness/probes/desig.probe.js`, one launch, the bar being
+**per-hit scaling** (a skill's own cost is charged once per CAST, so anything scaling with the number
+of bodies struck is the hook):
+
+```
+basic door   1 body  →  6 mana        4 bodies → 24 mana      scales, exactly x4
+skill door   1 body  → 22 mana        4 bodies → 22 mana      flat
+perHitBasicCost 6 (= CLASS_BASIC.mage's own literal)   playTicks 2416 of 2416   ok true
+okIfSkillsFiredTheHookToo false
+```
+
+`okIfSkillsFiredTheHookToo` is the rejected hypothesis stated as a field that must be false while `ok`
+is true, so the two readings are told apart rather than one being assumed. Every body took real damage
+in all four cells, so the flat reading is not a cast that missed. Two things it had to get right, both
+of which produced plausible numbers first: `p.mana = 100000` does not survive a frame (the pool is
+clamped, and every trial reported ~99933 "spent"), and the mage's rank-10 rider refunds half the cost
+on every third cast (10650), so `_mageCasts` is pinned to 0 before each measured cast.
+
+**So the hook is correctly basic-attack-only, and this is a NEGATIVE finding worth the launch it
+cost** — it is the licence for every verdict in the table below, and without it half of them would be
+guesses. One hazard survives it and is section U3's, from the other side: `_desig` is a frame flag on
+`G` rather than a property of the hit, so the guarantee is about ORDER. A skill that resolves LATER —
+a projectile — lands with `_desig` already false.
+
+### The sixteen, and what each one's door proves
+
+`hitEnemy(…, p, …)` with `_desig` false IS what a melee swing calls (`resolveSwing`, 9807). So for a
+melee class the probe's door and the player's door are the same line, and the reading stands. For a
+ranged class it is section U: the class's real basic attack is a projectile whose hit carries a
+synthetic src, and the hook never runs.
+
+| probe | class | door | verdict |
+|---|---|---|---|
+| `overcharge` | stormcaller (**ranged**) | `hitEnemy(…,p,…)` | **section U** — pass 37's arc is real and a player cannot reach it with a staff |
+| `charged` | stormcaller (**ranged**) | `hitEnemy(…,p,…)` | **section U** — pass 38, same |
+| `galvanize` | stormcaller (**ranged**) | `hitEnemy(…,p,…)` | **section U** — pass 39, same |
+| `stormarc` | stormcaller (**ranged**) † | `hitEnemy(…,p,…)` | **section U** — pass 40, Storm Lord's third clause, same |
+| `skyeye` | skylancer (**ranged**) | `hitEnemy(…,p,…)` | **section U** — pass 14; alive on the javelin tap, dead for a bow, per section U's own table |
+| `bounce` | paladin | `hurtPlayer(dmg,x,z,foe)` | **section W** — it passes the ENEMY OBJECT, and nothing in the game ever does; pass 46 measured that and pass 47 fixed the game |
+| `bounceby` | paladin | `foeHit` + `hurtPlayer` | **sound, and it is the diagnostic that FOUND section W** — its whole design is three doors compared against each other |
+| `palburn` | paladin (melee) | `hitEnemy(…,p,…)` | sound — a paladin's sword calls this line |
+| `monkflow` | monk (melee) | `hitEnemy(…,p,…)` | sound |
+| `monkmaster-shot` | monk (melee) | `hitEnemy(…,p,…)` | sound — and it is the screenshot twin of `monkmaster`, which presses the button |
+| `nincombo` | ninja (melee) | `hitEnemy(…,p,…)` | sound |
+| `xcorrupt` | reaper (melee) | `hitEnemy(…,p,…)` | sound |
+| `xcorrupt-shot` | reaper (melee) | `hitEnemy(…,p,…)` | sound — screenshot twin |
+| `juggernaut` | warrior (melee) | `hurtPlayer(…,{name,attack})` | sound — a **bodiless descriptor**, which is precisely the shape `foeHit` produces (section W) |
+| `thickhide` | berserker | `hurtPlayer(…, null)` | sound — a survive-at-1HP passive cannot read the attacker, and the game passes `null` for environmental damage |
+| `chrpotent` | chronomancer (ranged) | `hurtPlayer(…, null)` | sound — the rewind is about DEATH, not about who dealt it; the class's ranged-ness is irrelevant to this door |
+
+† **The class column is a report, not part of any verdict, and it has one measured limit:** a probe
+that sets the class from a VARIABLE is invisible to the scan. `stormarc.probe.js` does exactly that
+(`meta.classId = cls` inside its `trial()` helper), so the tool prints no class for it while it is in
+fact benching a stormcaller against a ninja control. It fails in the safe direction — a missing class,
+never a wrong one — but an empty column must not be read as "no class".
+
+### What the sweep found, stated plainly
+
+**No new row.** Every synthetic-only probe is either already owned by section U (five), already owned
+by section W (one), or is on a melee class where the door it opens is the same line the player's own
+swing opens (ten). That is the honest result and it is recorded so the next run does not re-derive it:
+**this lead is now spent.**
+
+Two things it is worth having anyway. The mapping from probe to section is now MECHANICAL and
+ratcheted, so the next probe written this way is stopped at the gate instead of joining the list in
+silence — which is exactly how the five section U passes came to exist. And the `_desig` measurement
+above closes a question that had never been asked in either direction.
+
+**What is NOT swept, and is where a next run should look:** the **21 `mixed`** probes. A probe that
+presses a button somewhere and takes the bar through `hitEnemy` is indistinguishable from a sound one
+at this instrument's resolution — the tool can say a player door is used, not that the MEASUREMENT
+rides on it. Reading those 21 needs no launch and no game change, and it is the same shape of question
+this section just answered for the easy sixteen.

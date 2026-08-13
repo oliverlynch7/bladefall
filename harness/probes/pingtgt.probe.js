@@ -243,15 +243,94 @@
        game to obtain one. Both are ticked through the same five seconds, so the only difference
        between them is the field under test.
        The subject is a body chosen for MOVING: a control that stands still and a test that stands
-       still are the same reading twice. Chosen from trial D's OWN record of who walked furthest over
-       the five seconds it just measured, rather than by proximity and hope. */
+       still are the same reading twice.
+
+       HOW THE SUBJECT IS PICKED IS ITSELF A MEASUREMENT, and the first version of it flapped the gate
+       — 2026-08-13 08:27, where `walked 51, died false` failed two rows, `run-all.js` exited 1 and
+       autopilot.ps1 stashed a run's verified work. Nothing about the game had changed. The old pick
+       was "whoever walked FURTHEST over trial D's five seconds", and past displacement is the wrong
+       predictor for exactly one reason: **the body that walked furthest is usually the one that was
+       running at the player, and a body that has ARRIVED stops.** D's total therefore scores highest
+       the candidate most likely to stand still for the next 4.5 seconds. Two of D's own five seconds
+       plus both of trial B's arms have already gone by, and B's awake arm shoves every body 90 units
+       nearer the player, so by the time E/F picks, the level's keenest chaser is in contact.
+
+       Two changes, and each answers a different half of that:
+
+         1. The rank is a PREDICTION of the next 4.5 seconds, not a record of the last five, and it is
+            capped by the room the body has left to run:
+                score = min(speedOverTheLastSecond * 4.5, distanceToThePlayer - CONTACT)
+            The first term is measured fresh, one second of the game's own clock, immediately before
+            each attempt — so it cannot go stale across attempts. The second is what the old rank had
+            no term for at all: a body 150 units out cannot walk 125 no matter how fast it is moving,
+            because it stops when it gets there.
+         2. IT RETRIES. A prediction is a prediction, so up to MOVER_TRIES bodies are tried in rank
+            order and the first one that clears the bar is the reading. Every attempt is reported, so
+            "it took three goes" stays visible rather than being laundered into a clean pass; and if
+            none of them walks, the bar still fails — honestly, and with the reason attached.
+
+       CONTACT is 100, the middle of MP_AUDIT's own 90–125 melee reach, and it is a floor on the
+       score rather than a filter on the pool: a body with nothing else to recommend it is still
+       allowed to be tried last. */
     clearMarks();
-    const cand = start.filter(b => b.e && !b.e.dead && b.e.mid != null)
-                      .sort((a, b) => Math.hypot(b.e.x - b.x, b.e.z - b.z) - Math.hypot(a.e.x - a.x, a.e.z - a.z));
-    let mover = cand.length ? cand[0].e : null, moverFrom = null;
+    const CONTACT = 100, MOVER_TRIES = 3;
+    /* THE OLD RULE, still computed and still reported, because the argument for replacing it is a
+       measurement and not an opinion. This is exactly what the pre-2026-08-13 probe would have
+       handed to E/F: trial D's furthest walker over its five seconds. Its `roomToRun` is the whole
+       finding — a head with nothing left to run is a subject that cannot clear the bar. */
+    const oldRank = start.filter(b => b.e && !b.e.dead && b.e.mid != null)
+                         .sort((a, b) => Math.hypot(b.e.x - b.x, b.e.z - b.z) -
+                                         Math.hypot(a.e.x - a.x, a.e.z - a.z));
+    const oldHead = oldRank.length ? oldRank[0] : null;
+    const oldRulePick = oldHead ? {
+      subject: oldHead.e.type || 'enemy',
+      walkedInTrialD: Math.round(Math.hypot(oldHead.e.x - oldHead.x, oldHead.e.z - oldHead.z)),
+      roomToRun: Math.round(Math.max(0, dist(oldHead.e, G.p) - CONTACT)),
+      mid: oldHead.e.mid,
+    } : null;
+    /* One second of the game's own clock, then rank on what that second showed. Returns the pool
+       sorted best-first, so a caller that rejects the head can take the next without re-ticking. */
+    const rankMovers = tried => {
+      const pool = live().filter(e => e.mid != null && !tried.has(e.mid));
+      if(!pool.length) return [];
+      const was = pool.map(e => ({ e:e, x:e.x, z:e.z }));
+      tick(60);
+      const ranked = was.filter(b => !b.e.dead)
+                .map(b => {
+                  const v = Math.hypot(b.e.x - b.x, b.e.z - b.z);          // units per second
+                  const room = Math.max(0, dist(b.e, G.p) - CONTACT);
+                  return { e:b.e, v:Math.round(v), room:Math.round(room), score:Math.min(v * 4.5, room) };
+                })
+                .sort((a, b) => b.score - a.score);
+      /* THE RETRY'S OWN KNOWN-BAD, and it is a URL FLAG for the same reason every other known-bad in
+         this suite is one:
+             node _shot/shot.js --scene 0 --url "/3d/index.html?hero3d=1&world3d=1&nobloom&badpick=1"
+         It hands attempt 1 the WORST body on the board — the level's most thoroughly stopped one — so
+         the retry has to carry the reading. Without it the retry is only exercised on the unlucky
+         draw that made it necessary, which is a path nobody can summon on demand and therefore a path
+         nobody has ever watched work. It moves the tail to the head and nothing else; every later
+         attempt ranks normally, so the run shows the recovery and not just the failure.
+         **NOT `--pre`, and that cost two launches to learn:** `shot.js:361` reads
+         `arg('pre', SCENE == null ? null : sceneJs(SCENE))`, so passing `--pre` REPLACES the whole
+         `--scene` run-up rather than adding to it. The game then sits on the title screen and the
+         probe reports `{ok:false, why:'no game'}` under a `READY NEVER CAME` — reproduced twice,
+         identically, before the cause was read out of the harness rather than guessed at. */
+      if(ranked.length > 1 && !tried.size &&
+         typeof location !== 'undefined' && /[?&]badpick=1/.test(location.search)){
+        ranked.unshift(ranked.pop());
+      }
+      return ranked;
+    };
+
+    const tried = new Set(), attempts = [];
     let remote = { ok:false, why:'no body with a mid to name' };
-    if(mover){
-      moverFrom = { x:mover.x, z:mover.z };
+    for(let a = 0; a < MOVER_TRIES; a++){
+      const ranked = rankMovers(tried);
+      if(!ranked.length) break;
+      const pick = ranked[0], mover = pick.e;
+      tried.add(mover.mid);
+      clearMarks();
+      const moverFrom = { x:mover.x, z:mover.z };
       const aWas = MP.active, iWas = MP.isHost;
       MP.active = true; MP.isHost = false; MP.myId = 'me';
       MP.recvMark({ t:'mark', by:'friend', n:'Friend', x:mover.x, z:mover.z, y:mover.y || 0, mid:mover.mid });
@@ -266,6 +345,10 @@
       remote = {
         subject: mover.type || 'enemy', bodyWalkedIn4p5s: bodyWalked, bodyDied: !!mover.dead,
         pinnedAlive: true,
+        /* What the pick was betting on, kept beside what it got: a run can see whether the predictor
+           was wrong or the body was simply killed out from under a bar it would have cleared. */
+        pickedOn: { speedPerSec:pick.v, roomToRun:pick.room, predictedWalk:Math.round(pick.score),
+                    ofCandidates:ranked.length },
         withMid: withMid ? { gapToBody:Math.round(dist(withMid, mover)), mid:withMid.mid } : null,
         noMid:   noMid   ? { gapToBody:Math.round(dist(noMid,   mover)), mid:noMid.mid   } : null,
         /* THE THREE BARS. The named mark must be ON the body; the unnamed one must have been LEFT by
@@ -275,7 +358,14 @@
         namedMarkFollowed: !!(withMid && dist(withMid, mover) <= 40),
         unnamedMarkStayedBehind: !!(noMid && dist(noMid, mover) > 125),
       };
+      attempts.push({ try:a + 1, subject:remote.subject, predictedWalk:Math.round(pick.score),
+                      walked:bodyWalked, cleared:remote.theBodyActuallyLeft });
+      if(remote.theBodyActuallyLeft) break;
     }
+    remote.attempts = attempts;
+    remote.triesSpent = attempts.length;
+    remote.oldRulePick = oldRulePick;
+    remote.pickChanged = !!(oldRulePick && attempts.length && oldRulePick.mid !== [...tried][0]);
 
     out = {
       ok: true, at: G.areaName, enemies: all.length, stampedMids: stamped,

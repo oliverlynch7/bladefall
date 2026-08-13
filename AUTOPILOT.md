@@ -159,6 +159,17 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     Verified: two consecutive runs now both report the room's build at 4.2s and 4.5s (never the
     sub-second false positive), and `?world3d=0` still resolves at 4.1s through the `!w.on`
     short-circuit (`on:false, built:null, spar:true`).
+    **`--pre` REPLACES the `--scene` run-up. It does not add to it** (found 2026-08-13,
+    `autopilot-merged`, at a cost of two launches). `shot.js:361` is
+    `const PRE = fromFileMaybe(arg('pre', SCENE == null ? null : sceneJs(SCENE)))` — the scene's own
+    navigation script is only the DEFAULT value of `--pre`, so passing both silently drops the
+    destination. `--scene 0 --pre "window.__FLAG=1"` leaves the game sitting on the title screen and
+    the probe comes back `{ok:false, why:'no game'}` under a `READY NEVER CAME after 120s`, which
+    reads exactly like Chrome contention or a broken harness and is neither. Reproduced twice,
+    identically, before the cause was read out of `shot.js` rather than guessed at.
+    **To set a page flag alongside a destination, put it in the URL** — `--scene 0 --url
+    "/3d/index.html?hero3d=1&world3d=1&nobloom&myflag=1"` — which is what every known-bad in
+    `test-mp.js` already does (`?heroslot=1`, `?noping=1`, `?nopossync=1`, and now `?badpick=1`).
     Running it from Git Bash: a `--url` with no `?query` gets rewritten by MSYS into a Windows
     path — the harness now detects that and says what it substituted.
     **`--focus` points the shot AT something** (added 2026-08-01 worker B, after a run burned eight

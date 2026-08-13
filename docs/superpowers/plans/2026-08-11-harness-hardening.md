@@ -869,6 +869,101 @@ mirrors the exit-1 branch three lines below it, and the evidence to look for is 
 
 ---
 
+### Task 7: The SECOND flap, in the suite nobody had hardened — and it ate a verified fix
+
+Task 4 taught the gate to re-measure a fresh failure before calling it a REGRESSION. It re-measures
+**skills only**: `run-all.js:141` hands `confirmPass` a `rerun` that calls `runSkillTests({classes})`,
+and `mergeFlaps` filters on `classOf(id)`, so an id with no class is settled by the absence of
+evidence. That is the right shape and the wrong scope, and 2026-08-13 08:27 is the invoice:
+
+```
+mp: 61 pass, 2 fail
+REGRESSION: mp:/ping target: the subject actually walked away from where it was called out
+REGRESSION: mp:/ping target: and one that names no body is left behind — the known-bad
+GATE: FAIL (2 new)
+STASHED (not deleted): autopilot gate-red 2026-08-13 08:27
+```
+
+The tree it stashed held pass 53 of the skill-correctness plan — a one-character fix, measured either
+side, written up, and not in any commit. **The two red rows cannot be reached by a warrior damage
+literal.** They are one root cause: `report.json` recorded the detail as `walked 51, died false`.
+
+- [x] **Step 1: Decide whether it is a flap at all, before touching anything** — done. The same
+      `node harness/test-mp.js` on the same tree, twice more: **63 pass, 0 fail** both times, exit 0.
+      61 + 2 = 63, so it is the same suite measuring the same things and disagreeing about two of them.
+      A flap, measured rather than assumed.
+
+- [x] **Step 2: Name the mechanism from the probe's own code, not from the failure text** — done, and
+      it is Task 1's shape in a new place. `pingtgt.probe.js`'s trial E/F needs a subject that WALKS —
+      *"a control that stands still and a test that stands still are the same reading twice"* — and
+      chose it as trial D's furthest walker over the five seconds just measured. **Past displacement is
+      the wrong predictor, for one reason: the body that walked furthest is the one that was running at
+      the player, and a body that has ARRIVED stops.** By the time E/F picks, two of D's five seconds
+      and both of trial B's arms have gone by, and B's awake arm shoves every body 90 units nearer the
+      player. So the old rank scored highest exactly the candidate most likely to stand still for the
+      next 4.5 seconds. `walked 51` is a body in contact, not a broken feature.
+
+- [x] **Step 3: Rank on what the body can still do, and RETRY** — done. Two changes, one per half of
+      the mechanism:
+      1. The rank is a prediction of the next 4.5s rather than a record of the last five —
+         `score = min(speedOverTheLastSecond * 4.5, distanceToPlayer - CONTACT)`, `CONTACT = 100`, the
+         middle of MP_AUDIT's own 90–125 melee reach. The speed term is re-measured fresh, one second
+         of the game's own clock, immediately before each attempt, so it cannot go stale. The room term
+         is what the old rank had no term for at all: **a body 150 units out cannot walk 125 however
+         fast it is moving, because it stops when it gets there.**
+      2. It RETRIES. Up to `MOVER_TRIES = 3` bodies in rank order; the first that clears the bar is the
+         reading. Every attempt is reported, so "it took three goes" stays visible rather than being
+         laundered into a clean pass — and if none of them walks, the bar still fails, honestly, with
+         the reason attached.
+
+- [x] **Step 4: Watch the retry work, on demand rather than on an unlucky draw** — done, and this is
+      the step that makes the fix more than an argument. A retry exercised only by the rare draw that
+      made it necessary is a path nobody has ever watched run. So the probe takes a **known-bad URL
+      flag**, this suite's own idiom, which hands attempt 1 the worst body on the board:
+
+      ```
+      node _shot/shot.js --scene 0 --url "/3d/index.html?hero3d=1&world3d=1&nobloom&badpick=1" \
+        --wait 9000 --eval @harness/probes/pingtgt.probe.js
+
+      attempts [ {try:1, subject:"sporeback", predictedWalk:0,   walked:0,   cleared:false},
+                 {try:2, subject:"flyer",     predictedWalk:234, walked:234, cleared:true } ]
+      theBodyActuallyLeft true   namedMarkFollowed true   unnamedMarkStayedBehind true
+      withMid gapToBody 1        noMid gapToBody 234
+      playTicks 1390 of 1390     mode play
+      ```
+
+      **Attempt 1 is the 08:27 gate, reproduced deliberately: a subject that walked 0.** Attempt 2
+      carries the reading and all three bars pass. Without the retry this launch is a red gate and a
+      stashed tree; with it, it is a clean pass whose log says it took two goes. On the ordinary draw
+      the two rules agree — a plain run picked `thornboar` under both, `pickChanged false`, cleared on
+      try 1, walked 220 — which is the honest version of the claim: the new rank is not better on every
+      draw, it is better on the draw that was costing work.
+
+- [x] **Step 5: Make a future red row diagnosable from the gate output alone** — done. The 08:27 detail
+      was `walked 51, died false` and nothing else, so the diagnosis had to be reconstructed a run
+      later from the probe's source. `test-mp.js` now prints the attempts and what the OLD rule would
+      have taken, and `runMpTests` returns a compact `ptgtPick` **on green runs too** — a flap is only
+      visible as a distribution, and a receipt that appears solely on failure can never show one.
+
+- [x] **Step 6: Gate it and commit** — done, alongside the pass-53 recovery, as its own commit.
+
+**One harness gotcha this cost two launches to learn, recorded at the edit site as well as here:**
+`--pre` REPLACES the `--scene` run-up rather than adding to it (`shot.js:361`,
+`arg('pre', SCENE == null ? null : sceneJs(SCENE))`). A `--scene 0 --pre "window.__FLAG=1"` leaves the
+game on the title screen; the probe reports `{ok:false, why:'no game'}` under a `READY NEVER CAME`,
+which reads like a harness or contention failure and is neither. Reproduced twice, identically, before
+the cause was read out of `shot.js` rather than guessed at. **Set a page flag through the URL**, which
+is what every other known-bad in this suite already does.
+
+**What is NOT done, and is the obvious next step for a later run:** the general fix. `confirmPass`
+still re-measures skills only, so the next flap in `levels` or `mp` — from a probe nobody has audited
+for this shape — will stash a tree exactly the same way. This task killed one flap at its source, in
+Task 1's tradition; it did not widen the confirm pass. Doing that means giving `run-all.js` a per-suite
+re-run entry point (`runMpTests` and `runLevelTests` both already take an options object) and teaching
+`mergeFlaps`/`classOf` an id shape that is not `skills:<class>/<skill>:<claim>`.
+
+---
+
 ## Self-Review
 
 **Spec coverage.** Covers the flap named in `SKILL_TRIAGE.md` section F, the destructive revert it makes dangerous, and the silence Oliver has raised twice.

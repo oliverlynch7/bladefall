@@ -296,9 +296,18 @@ export async function runMpTests(opts){
     const R = ptgt.EF_receiver || {}, A = ptgt.A_aim || {}, Bo = ptgt.B_otherScreen || {};
     check('ping target: the ping lands on the body it was aimed at',
           A.onABody === true && A.gapToSubject != null && A.gapToSubject <= 10, JSON.stringify(A));
-    /* Without this the two arms below prove nothing, so it is a bar rather than a note. */
+    /* Without this the two arms below prove nothing, so it is a bar rather than a note.
+       THE DETAIL CARRIES THE ATTEMPTS, and that is not decoration: when this row went red on the
+       2026-08-13 08:27 gate it said `walked 51, died false` and nothing else, so the next run could
+       not tell a game regression from a subject that had simply arrived at the player and stopped —
+       and the gate had already stashed the tree. The probe now tries up to three bodies, ranked on
+       what they can still walk rather than on what they already walked; if all three fall short the
+       reading is honest, and this line says which three and what each was predicted to do. */
     check('ping target: the subject actually walked away from where it was called out',
-          R.theBodyActuallyLeft === true, `walked ${R.bodyWalkedIn4p5s}, died ${R.bodyDied}`);
+          R.theBodyActuallyLeft === true,
+          `walked ${R.bodyWalkedIn4p5s}, died ${R.bodyDied}, ` +
+          `tries ${JSON.stringify(R.attempts || null)}, old rule would have taken ` +
+          JSON.stringify(R.oldRulePick || null));
     check('ping target: a mark that names a body follows it',
           R.namedMarkFollowed === true, JSON.stringify(R.withMid));
     check('ping target: and one that names no body is left behind — the known-bad',
@@ -363,8 +372,17 @@ export async function runMpTests(opts){
           `threw ${A.threw || S.threw || A.tickThrew || S.tickThrew || 'no'}`);
   }
 
+  /* Carried into report.json on GREEN runs too. A flap is only visible as a distribution, and a
+     receipt that appears solely when the row fails can never show one — the 08:27 red gate had no
+     green counterpart to compare against, so the whole diagnosis had to be reconstructed from a
+     seven-word detail string. This is small on purpose: three attempts and the old rule's head. */
+  const ptgtPick = (ptgt && ptgt.EF_receiver)
+    ? { attempts: ptgt.EF_receiver.attempts, triesSpent: ptgt.EF_receiver.triesSpent,
+        pickChanged: ptgt.EF_receiver.pickChanged, oldRulePick: ptgt.EF_receiver.oldRulePick }
+    : null;
+
   return { pass, fail: failures.length, failures, cap, at: r.at, slot: !!r.slot,
-           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping, pos, waited,
+           oneRig: !!r.oneRig, rigs: r.rigs, party, loot: lootR, ping, pos, waited, ptgtPick,
            noparty: !!(party && party.noparty) };
 }
 
@@ -403,6 +421,7 @@ if(import.meta.filename === process.argv[1]){
                 (r.at ? `  [at ${r.at}, cap ${r.cap}${r.slot ? ', SINGLE-SLOT self-test' : ''}]` : ''));
     if(r.waited) console.log(`waited ${r.waited.ms}ms for the hero layer` +
                              (r.waited.rescued ? '  (rescued a run that would have skipped)' : ''));
+    if(r.ptgtPick) console.log(`ping-target subject: ${JSON.stringify(r.ptgtPick)}`);
     if(slowHero){
       const ok = r.fail === 0 && !r.skipped && r.waited && r.waited.rescued;
       console.log(ok ? 'slow-hero self-test: the wait engaged and the suite still measured ✓'

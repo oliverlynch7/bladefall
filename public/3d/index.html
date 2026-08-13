@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.949.1-autopilot';
+const VERSION3D='1.950.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12401,10 +12401,14 @@ const MP={
   typeIdx(t){ if(!this._ek) this._ek=Object.keys(ENEMY); const i=this._ek.indexOf(t); return i<0?0:i; },
   ekey(i){ if(!this._ek) this._ek=Object.keys(ENEMY); return this._ek[i]; },
   byMid(mid){ if(!G) return null; const es=G.enemies; for(let i=0;i<es.length;i++){ if(es[i].mid===mid && !es[i].dead) return es[i]; } return null; },
-  // host: compact snapshot of live enemies [mid,typeId,x,z,hp,maxHp] (capped) + recent kills
+  // host: compact snapshot of live enemies [mid,typeId,x,z,hp,maxHp,awake] (capped) + recent kills
+  /* Slot 6 is e.active — whether the HOST is simulating this enemy. Sleeping mobs are still sent, x
+     and z included, because a guest that has never seen an enemy needs slots 2/3 to spawn it; but a
+     sleeping mob's x,z is its untouched spawn point, not a position the host is moving, so it is not
+     a correction. Without this bit a guest cannot tell the two apart. */
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
-      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp)]); }
+      out.push([e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0]); }
     return out; },
   noteKill(e){ if(!this.host_()||e==null||e.mid==null) return;   // host records a kill so guests can mirror death + get instanced rewards
     this.kills.push({m:e.mid,t:this.typeIdx(e.type),el:e.elite?1:0,bo:e.boss?1:0,xp:Math.round(e.xp||0),ts:(G?G.time:0)}); },

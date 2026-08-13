@@ -82,6 +82,26 @@
      Guest mode, every mob woken through the game's own two fields, and NOT ONE SNAPSHOT APPLIED.
      Anything that moves, moved because the guest's own AI moved it. */
   for(const e of all){ e.active = true; e.dropT = 0; }
+
+  /* ---- 1b. is the wake flag a CONSTANT? --------------------------------------------------------
+     Slot 6 is e.active. At the entrance every mob is asleep, so an all-zero column is CORRECT there
+     and proves nothing — a flag hard-wired to 0 would read identically and would let the guest-side
+     correction pass its own tests while never correcting anything. The same snapshot is therefore
+     taken again now that the loop above has woken all of them, in the one launch. */
+  const flagsOf = s => s.reduce((n, a) => n + (a[6] === 1 ? 1 : 0), 0);
+  MP.active = true; MP.isHost = true;
+  const snapAwake = MP.enemySnap();
+  MP.active = wasActive; MP.isHost = wasHost;
+  const wakeFlag = {
+    slot: 6,
+    asleep: { activeEnemies: pop.active, rows: snap.length, flagsSet: flagsOf(snap) },
+    awake:  { activeEnemies: live().filter(e => e.active).length, rows: snapAwake.length, flagsSet: flagsOf(snapAwake) },
+    rowFormatAwake: snapAwake[0] || null,
+    // slot 6 absent entirely (an older peer, or a pre-flag build) must read as undefined, not as 0
+    slotPresent: snap.length ? snap[0].length === 7 : null,
+    enemyBytesAwake: JSON.stringify(snapAwake).length,
+  };
+
   MP.active = true; MP.isHost = false; MP._gotEn = false; MP._killed = {};
   const mark = all.map(e => ({ mid:e.mid, type:e.type, x:e.x, z:e.z, r:e.r, hp:e.hp }));
   const TICKS = 60;                                   // one second at the game's own step
@@ -128,6 +148,7 @@
     packet: { rowFormat: row0, rowsSent: snap.length, positionsCarried: posCarried,
               enemyBytes: enBytes, wholeMessageBytes: msgBytes, playersInMessage: players,
               sendHz: HZ, enemyBytesPerSecond: enBytes * HZ },
+    wakeFlag: wakeFlag,
     population: pop,
     guestSimulatesItsOwnMobs: { ticked: TICKS, moved: movedAsGuest, of: mark.length,
                                 meanMove: movedAsGuest ? Math.round(totalMove / movedAsGuest) : 0 },

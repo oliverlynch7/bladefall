@@ -149,7 +149,21 @@ correction from a stale spawn point.
 - Modify: `public/3d/index.html` — `MP.enemySnap()` (12405)
 - Modify: `harness/probes/mp-pos.probe.js` — report slot 6 and the new byte cost
 
-- [ ] **Step 1: Watch the probe report a 6-slot row**
+**TASK 1 IS DONE, 2026-08-12.** Every number below is from two launches of the same probe, before and
+after, at the same destination (`--scene 0`, The Outskirts, 41 enemies):
+
+| | rowFormat | enemy bytes | at 14 Hz | whole message | flags set, asleep → awake |
+|---|---|---|---|---|---|
+| before | `[1,18,1300,-1840,31,31]` | 988 | 13.8 kB/s | 1369 | — (no slot) |
+| after | `[1,18,1300,-1840,31,31,0]` | 1070 | 15.0 kB/s | 1451 | **0 of 41 → 41 of 41** |
+
+**+82 bytes over 41 rows is exactly 2 bytes per row**, which is what Step 4 predicted, so nothing has
+to be rounded away or explained. The awake reading is the one that matters: Step 5 exists because at
+the entrance *every* mob is asleep, so an all-zero column is correct there and a flag hard-wired to 0
+would read identically — and would let Task 2 pass its own tests while correcting nothing.
+
+- [x] **Step 1: Watch the probe report a 6-slot row** — done. `rowFormat` six long, `enemyBytes` 988,
+      `positionsCarried` 41 of 41, `population.active` 0 of 41. The known-bad reproduces.
 
 ```bash
 node _shot/shot.js --scene 0 --eval @harness/probes/mp-pos.probe.js
@@ -157,29 +171,31 @@ node _shot/shot.js --scene 0 --eval @harness/probes/mp-pos.probe.js
 
 Expected, and this is the known-bad: `rowFormat` is six long and `enemyBytes` is ~989.
 
-- [ ] **Step 2: Add the wake flag as slot 6**
+- [x] **Step 2: Add the wake flag as slot 6** — done at index.html:12409, with the format comment
+      above it rewritten to say why sleeping mobs keep being sent whole. `enemySnap` has exactly one
+      definition in the file (grep), so the duplicate-body hazard does not apply here.
 
 In `enemySnap()`, append `e.active?1:0` to the pushed row. Nothing else in that function changes,
 and no enemy is filtered out — a guest that has never seen an enemy still needs the spawn branch to
 be able to create it, which is what slots 2 and 3 are for and why they must keep being sent for
 sleeping mobs too.
 
-- [ ] **Step 3: Gate it**
+- [x] **Step 3: Gate it** — `GATE OK`, VERSION3D bumped 1.949.1 → 1.950.0-autopilot.
 
-```bash
-node tools/gate.js
-```
-
-Expected: `GATE OK`.
-
-- [ ] **Step 4: Measure what it cost, do not estimate it**
+- [x] **Step 4: Measure what it cost, do not estimate it** — 988 → **1070** bytes, +82 over 41 rows,
+      exactly 2 bytes per row; 13832 → **14980** bytes/s at the file's own 14 Hz. Whole state message
+      1369 → 1451. Nothing rounded away: the prediction and the measurement agree to the byte.
 
 Re-run the probe. Expected: `rowFormat` seven long with a 0 or 1 in slot 6, and `enemyBytes` up by
 roughly two bytes per row (~82 on 41 enemies, ~1.1 kB/s at 14 Hz against the existing 13.8). Record
 the real figure in the commit message. If it is materially larger than that, say so rather than
 rounding it away.
 
-- [ ] **Step 5: Prove the flag is not a constant**
+- [x] **Step 5: Prove the flag is not a constant** — done in ONE launch, which is the only way the
+      two readings are comparable: `wakeFlag.asleep {activeEnemies:0, rows:41, flagsSet:0}` then
+      `wakeFlag.awake {activeEnemies:41, rows:41, flagsSet:41}`, row `[…,0]` becoming `[…,1]` on the
+      same enemy. All 41 rows keep being sent in both states, so no guest loses the ability to spawn
+      a mob it has never seen. The probe carries this as its own section 1b.
 
 The probe already reports `population.active`. At the entrance every enemy is asleep, so a snapshot
 of all-zeroes is *correct there* and proves nothing. Take the reading in both states in one launch:
@@ -187,7 +203,8 @@ report the row set before waking and again after `e.active = true; e.dropT = 0`.
 set, then 41. **A flag that is always 0 would let Task 2 pass its own tests while never correcting
 anything.**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit** — shipped as its own commit, ahead of Task 2, so Oliver can revert either
+      half alone after a match.
 
 ```bash
 git add public/3d/index.html harness/probes/mp-pos.probe.js

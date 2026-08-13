@@ -609,22 +609,61 @@ Only worth doing after Tasks 1–2, and cheap once they are in. Sub-project D Ta
 a monster marked bare ground on the other screen. **This task is here to be CHECKED, not assumed**
 — it may well need no code at all.
 
-- [ ] **Step 1: Ask whether it is already fixed**
+- [x] **Step 1: Ask whether it is already fixed** — **done 2026-08-13, and the answer split in two.**
 
-With positions shared, a mark placed on a monster now lands on that monster. Measure it with
-`harness/probes/ping.probe.js` rather than reasoning about it: place a mark on an enemy, apply a
-host snapshot, and compare the mark's position with that enemy's.
+Measured with a new `harness/probes/pingtgt.probe.js` rather than `ping.probe.js`, which asks a
+different question (does a ping draw at all, on both screens) and would have had to be rewritten to
+ask this one — leaving the suite without its original.
 
-- [ ] **Step 2: If it is, record the negative finding and stop**
+**The other-screen half IS already fixed, by Tasks 1–2, which were never about pings.** Both arms in
+one launch, differing only in the host's wake flag: marker-to-body **90 → 9.8** awake against the
+control's **90 → 71.2**. So the fix Step 3 describes would have solved a problem two earlier commits
+had already removed.
 
-A task that ends in "no change needed" is a real outcome here — sub-project D Task 4 ended that way
-and the finding was worth more than the code would have been. Write it into `docs/MP_AUDIT.md` with
-the numbers and commit the doc.
+**The half that was real is TIME, and it is not a multiplayer bug at all.** `updateMarks` advanced
+`m.t` and filtered expired marks and never touched `m.x`/`m.z`, so a mark stood still for its whole
+5s life while the monster walked off it — on the sender's own screen exactly as much as on anybody
+else's. Of the 25 moving bodies in The Outskirts, **20 were past the 90–125 melee reach of their own
+marker by the time it expired**, movers' median displacement 260 units.
 
-- [ ] **Step 3: If it is not, mark the enemy rather than the ground**
+*Read the movers row, not the population median:* over all 41 bodies the median came back 0 on one
+launch and 98 on the next, because most of a level never takes a step. And **one subject nearly
+produced the opposite answer** — trial C's first draw was a `caster`, which walks to its preferred
+range and stops at 95, inside reach, reading as "the marker stays on the body". The probe now
+measures the whole population beside the one body `aimTarget` picks.
 
-Send the mid alongside the position and let the receiver track the body. Do not invent a leash
-distance; if one is needed, that is Oliver's.
+- [x] **Step 2: If it is, record the negative finding and stop** — **done for the half that was
+      already fixed.** `docs/MP_AUDIT.md`, with the two-arm table. It did not stop there, because
+      Step 1 also found something the task did not anticipate.
+
+- [x] **Step 3: If it is not, mark the enemy rather than the ground** — **done 2026-08-13, in the
+      shape this step specifies and for a different reason than it gives.**
+
+`addMark` and the `mark` message carry `mid` — the same stable id `applyEnemies` is already keyed on,
+so nothing new has to agree between two clients — and `updateMarks` moves a mark that names a body to
+wherever that body is. A `HERE` ground ping carries no mid and does not move. **No leash distance was
+invented**, as this step instructs: `MP.byMid` returns nothing for a dead body, so a marker whose
+monster dies stays where it was and ages out on the same clock.
+
+Proven both ways in one launch through MP's own `recvMark`, differing in exactly one field — and
+**the no-mid arm IS the behaviour that shipped before**, which is why this needed no new `?flag`:
+the negative control is a message the game still has to handle.
+
+| arm | gap to the body after 4.5s |
+|---|---|
+| names the body (`mid: 7`) | **0** |
+| names no body — the known-bad | **171** |
+
+The body walked 171 units under its own AI, and that is asserted *before* either arm is read: a
+control that stands still and a test that stands still are the same reading twice. The probe's first
+attempt hit exactly that — the player killed the subject inside the 4.5 seconds and both arms read 0
+against a corpse — and it reported itself inconclusive rather than passing.
+
+Photographed at `_shot/out/yb-pingpic.png`: two markers on one thornboar 132 units apart, the tracked
+one on the animal and the untracked one back on the grass it was called out from.
+
+Guarded by six assertions in `harness/test-mp.js` (mp **57 → 63 pass**), including the body's own walk
+as a precondition and a `playTicks == ticksAsked` receipt.
 
 ---
 

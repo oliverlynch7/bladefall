@@ -31,6 +31,7 @@ const PROBE = readFileSync(join(import.meta.dirname, 'probes', 'mp.probe.js'), '
 const PARTY = readFileSync(join(import.meta.dirname, 'probes', 'party-scale.probe.js'), 'utf8');
 const LOOT = readFileSync(join(import.meta.dirname, 'probes', 'loot.probe.js'), 'utf8');
 const PING = readFileSync(join(import.meta.dirname, 'probes', 'ping.probe.js'), 'utf8');
+const PINGTGT = readFileSync(join(import.meta.dirname, 'probes', 'pingtgt.probe.js'), 'utf8');
 const POSSYNC = readFileSync(join(import.meta.dirname, 'probes', 'possync.probe.js'), 'utf8');
 
 /* What a party of n must multiply enemy HP by. Stated here as well as in the game because the
@@ -267,6 +268,50 @@ export async function runMpTests(opts){
     check('ping: and it expires through the game loop', E.at6s === 0, JSON.stringify(E));
     check('ping: there is a button for it, and it is co-op only',
           B.exists === true && B.hiddenSolo === true && B.shownInParty === true, JSON.stringify(B));
+  }
+
+  /* ── A PING NAMES A BODY, AND THE MARKER FOLLOWS IT ──────────────────────────────────────────
+     The guest-position plan's Task 4. The task asked whether marking a monster still marked bare
+     ground on the other screen, and the answer split in two: the OTHER-SCREEN half was already fixed
+     by Tasks 1–2 (the probe measures the marker-to-body gap closing 90 → ~10 with the wake flag,
+     against the control's 90 → ~72), and the half left was TIME. A mark was its coordinates and
+     nothing else, so of the 25 bodies actually moving in The Outskirts, 20 walked past the 90–125
+     melee reach of their own marker inside its 5s life — median 260 units. That is not a multiplayer
+     bug; both screens agreed, correctly, about a body no longer under the mark.
+
+     BOTH ARMS, in one launch and through MP's own recvMark, differing in exactly one field. The
+     no-mid arm IS the behaviour that shipped before, which is why this needed no new flag: the
+     negative control is a message the game still has to handle (a HERE ground ping carries no mid).
+
+     THE BODY'S OWN WALK IS ASSERTED FIRST and it is not decoration — a control that stands still and
+     a test that stands still are the same reading twice, and the probe's first run picked a body the
+     player then killed, so both arms read a gap of 0 against a corpse. */
+  let ptgt = null;
+  try { ptgt = await runScenario({ scene: SCENE, waitMs: 9000, js: PINGTGT, url }); }
+  catch(e){ failures.push({ check: 'ping target: load', detail: e.message.slice(0, 200) }); }
+
+  if(ptgt && ptgt.ok === false){
+    failures.push({ check: 'ping target: probe could not run', detail: ptgt.why });
+  } else if(ptgt){
+    const R = ptgt.EF_receiver || {}, A = ptgt.A_aim || {}, Bo = ptgt.B_otherScreen || {};
+    check('ping target: the ping lands on the body it was aimed at',
+          A.onABody === true && A.gapToSubject != null && A.gapToSubject <= 10, JSON.stringify(A));
+    /* Without this the two arms below prove nothing, so it is a bar rather than a note. */
+    check('ping target: the subject actually walked away from where it was called out',
+          R.theBodyActuallyLeft === true, `walked ${R.bodyWalkedIn4p5s}, died ${R.bodyDied}`);
+    check('ping target: a mark that names a body follows it',
+          R.namedMarkFollowed === true, JSON.stringify(R.withMid));
+    check('ping target: and one that names no body is left behind — the known-bad',
+          R.unnamedMarkStayedBehind === true, JSON.stringify(R.noMid));
+    /* Carried here so a regression in the position sync shows up in the ping row too: the two
+       features are now load-bearing for each other on the receiver's screen. */
+    check('ping target: the guest still adopts the host position under the mark',
+          Bo.posSyncPutsTheBodyUnderTheMark === true,
+          JSON.stringify({ awake: Bo.awake && Bo.awake.markToBodyAfter,
+                           asleep: Bo.asleep && Bo.asleep.markToBodyAfter }));
+    check('ping target: the probe never ticked a stopped world',
+          ptgt.playTicks === ptgt.ticksAsked && ptgt.mode === 'play',
+          `playTicks ${ptgt.playTicks} of ${ptgt.ticksAsked}, left at ${ptgt.leftPlayAtTick}`);
   }
 
   /* ── A GUEST LOOKS AT THE SAME MONSTERS THE HOST DOES ────────────────────────────────────────

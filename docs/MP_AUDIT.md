@@ -333,3 +333,102 @@ unattended work to. Put to Oliver as a co-op design question — *should a party
 than as a bug list. If the answer is yes it is the largest single thing that would make co-op play
 differently from two people soloing in the same room, which is what `docs/VISION.md`'s first priority
 asks for.
+
+---
+
+# The world ping named a patch of ground, not the monster — 2026-08-13
+
+Sub-project D's guest-position plan, Task 4. The task was written to be **checked rather than
+assumed**, with "no change needed" listed as a real outcome. Half of it was exactly that. The other
+half was a defect nobody had looked for, in a different place from where the task expected it.
+
+```bash
+node _shot/shot.js --scene 0 --eval @harness/probes/pingtgt.probe.js     # the numbers
+node _shot/shot.js --scene 0 --eval @harness/probes/pingpic.probe.js     # the picture
+```
+
+## The half that was already fixed — and it is a negative finding worth keeping
+
+The task's premise was that a mark travels as `{x,z,y}` with nothing identifying a body, so **marking
+a monster marked bare ground on the other screen**. That was true before Tasks 1–2, and those tasks
+retired it without ever being about pings: a guest now adopts the host's enemy positions, so the
+sender's coordinates and the receiver's copy of that body are the same place.
+
+Measured rather than reasoned about, both arms in one launch, differing only in the host's wake flag:
+
+| arm | marker-to-body, before the snapshot | after |
+|---|---|---|
+| host says AWAKE | 90 | **9.8** |
+| host says ASLEEP — the control | 90 | 71.2 |
+
+The control is what the guest's own AI closes on its own. **So the multiplayer half of Task 4 needed
+no code**, and Step 3's proposed fix — send the mid so the receiver can find the body — would have
+been solving a problem two earlier commits had already removed.
+
+## The half that was real, and it was never a multiplayer bug
+
+A mark is its coordinates and **nothing ages them**. `updateMarks` advanced `m.t` and filtered
+expired marks; it never touched `m.x`/`m.z`. So the marker stood still for its whole `PING_LIFE` of 5
+seconds while the monster it named walked away — **on the sender's own screen exactly as much as on
+anybody else's.** Both clients agreed, correctly, about a body no longer under the mark.
+
+The population, over one marker's life in The Outskirts (41 bodies, of which 25 were moving):
+
+| t | movers' median walk | bodies past the 90–125 melee reach |
+|---|---|---|
+| 1s | 52 | 0 of 25 |
+| 2s | 104 | 4 |
+| 3s | 156 | 15 |
+| 5s | **260** | **20** |
+
+**Read the movers row, not the population median.** Most of a level's bodies are nowhere near anyone
+and never take a step, so a median over all 41 measures how much of the level is idle — it came back
+0 on one launch and 98 on the next while the movers' number barely moved. The only body anyone pings
+is one that is coming for somebody.
+
+**One subject nearly produced the opposite answer.** The first run of trial C drew a `caster`, which
+walks to its preferred range and stops: its gap rose to 95 and went flat for three seconds, inside
+melee reach, reading as "the marker stays on the body". That is why the probe measures the whole
+population as well as the one body the game's own `aimTarget` picked.
+
+## The fix
+
+`addMark` and the `mark` message carry `mid` — the same stable id `applyEnemies` is already keyed
+on, so nothing new has to agree between two clients — and `updateMarks` moves a mark that names a
+body to wherever that body is. A ground ping (`HERE`) carries no mid and does not move.
+
+**No leash distance was invented**, per the task's own instruction. `MP.byMid` returns nothing for a
+dead body, so a marker whose monster dies simply stays where it was and ages out on the same clock.
+
+## Proven both ways in one launch, through MP's own `recvMark`
+
+Two marks dropped on the same body, differing in exactly one field. **The no-mid arm is the behaviour
+that shipped before**, which is why this needed no new `?flag`: the negative control is a message the
+game still has to handle.
+
+| arm | gap to the body after 4.5s |
+|---|---|
+| names the body (`mid: 7`) | **0** |
+| names no body — the known-bad | **171** |
+
+The body walked **171** units under its own AI in that time, and that number is asserted before
+either arm is read: a control that stands still and a test that stands still are the same reading
+twice. The probe's first attempt hit exactly that — the player killed the subject inside the 4.5
+seconds and both arms read 0 against a corpse — and the trial reported itself inconclusive rather
+than passing. The subject is now pinned alive and the intervention is reported.
+
+**And it is a picture as well as a number** (`_shot/out/yb-pingpic.png`): two markers on one
+thornboar, 132 units apart — the tracked one standing on the animal, the untracked one back on the
+empty grass it was called out from.
+
+## Guarded
+
+Six assertions in `harness/test-mp.js` (mp suite **57 → 63 pass**), including the body's own walk as
+a precondition and a `playTicks == ticksAsked` receipt, because a probe that drives the player for
+more than a few seconds can have the game stop under it and report a run's worth of plausible zeroes.
+
+## What this does NOT say
+
+No session is held and no packet crosses a wire; this is the receive path exercised in one browser.
+Two real machines remain the final check. The extra field is one integer per ping — a message sent at
+most once per 0.6s per player — so no bandwidth measurement was thought necessary, and none was made.

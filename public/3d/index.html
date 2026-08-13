@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.953.0-autopilot';
+const VERSION3D='1.954.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -12106,9 +12106,12 @@ function pingColorFor(id){
     return (!MP.active || id === MP.myId) ? '#ffd24a' : '#7de08a';
   } catch(e){ return '#ffd24a'; }
 }
-function addMark(x, z, y, by, name){
+/* `mid` is the BODY this mark names, or null for a patch of ground. It is what makes "point at that
+   monster" survive the monster moving — see updateMarks below for the measurement that put it here. */
+function addMark(x, z, y, by, name, mid){
   if(!G) return null;
-  const m = { x:x, z:z, y:y||0, t:0, life:PING_LIFE, col:pingColorFor(by), by:by||null, name:name||'' };
+  const m = { x:x, z:z, y:y||0, t:0, life:PING_LIFE, col:pingColorFor(by), by:by||null, name:name||'',
+              mid:(mid == null ? null : mid) };
   (G.marks = G.marks || []).push(m);
   while(G.marks.length > PING_MAX) G.marks.shift();
   try { skillRing(x, z, m.col, '#ffffff', 130); } catch(e){}
@@ -12129,13 +12132,31 @@ function dropPing(){
     x = p.x + Math.sin(aim)*PING_CAST; z = p.z + Math.cos(aim)*PING_CAST;
     y = 0; try { y = highestSurfaceAt(x, z); } catch(e){}
   }
-  const m = addMark(x, z, y, MP.myId, tgt ? 'TARGET' : 'HERE');
+  const m = addMark(x, z, y, MP.myId, tgt ? 'TARGET' : 'HERE', tgt ? tgt.mid : null);
   try { SFX.pickup(); } catch(e){}
-  try { MP.sendMark(x, z, y); } catch(e){}
+  try { MP.sendMark(x, z, y, tgt ? tgt.mid : null); } catch(e){}
   return m;
 }
+/* A ping that named a BODY follows that body, on the caller's screen and on everybody else's.
+   Before this, a mark was its coordinates and nothing else, so calling out a monster called out the
+   patch of ground the monster was standing on when you pressed the button. Measured rather than
+   assumed (harness/probes/pingtgt.probe.js, The Outskirts): of the 25 bodies actually moving, **20
+   walked past the 90-125 melee reach of their own marker inside its 5s life**, median displacement
+   260 units and max 345. It is NOT a multiplayer bug — the guest already adopts the host's positions
+   (the same probe measures the marker-to-body gap closing 90 → 9.5 with the wake flag against the
+   control's 90 → 74), so both screens agreed, correctly, about a body no longer under the mark.
+   NO LEASH DISTANCE IS INVENTED. `MP.byMid` returns nothing for a dead body, so a marker whose
+   monster dies simply stays where it was and ages out on the same clock — which is also what makes
+   this safe for the `HERE` ground ping, whose mid is null and which never moves. */
 function updateMarks(dt){
-  if(G && G.marks && G.marks.length){ for(const m of G.marks) m.t += dt; G.marks = G.marks.filter(m => m.t < m.life); }
+  if(!(G && G.marks && G.marks.length)) return;
+  for(const m of G.marks){
+    m.t += dt;
+    if(m.mid == null) continue;
+    let e = null; try { e = MP.byMid(m.mid); } catch(err){}      // MP is a const below this line at boot
+    if(e){ m.x = e.x; m.z = e.z; m.y = e.y || 0; }
+  }
+  G.marks = G.marks.filter(m => m.t < m.life);
 }
 /* The button is co-op only. A ping you are the only person who can see is a HUD button that does
    nothing, and this is a phone screen with four already. */
@@ -12348,8 +12369,11 @@ const MP={
     if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
     else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
   /* ---- world pings: same send-and-relay shape as sendCombat/recvCombat above ---- */
-  sendMark(x,z,y){ if(!this.active) return;
-    const m={t:'mark',by:this.myId,n:this.name||'Ally',x:Math.round(x),z:Math.round(z),y:Math.round(y||0)};
+  /* `mid` rides along so the receiver can track the BODY rather than the spot — the same stable id
+     applyEnemies is already keyed on, so nothing new has to agree between the two clients. Absent
+     for a ground ping, and an unknown mid on the far side degrades to exactly the old behaviour. */
+  sendMark(x,z,y,mid){ if(!this.active) return;
+    const m={t:'mark',by:this.myId,n:this.name||'Ally',x:Math.round(x),z:Math.round(z),y:Math.round(y||0),mid:(mid==null?null:mid)};
     if(this.isHost){ this.conns.forEach(c=>{ if(c.open) try{c.send(m);}catch(e){} }); }
     else if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(m);}catch(e){} } },
   /* `by` is carried and checked rather than trusting the relay not to echo: the host forwards a
@@ -12357,7 +12381,7 @@ const MP={
      marker that expires at a different time. */
   recvMark(d,fromConn){ if(!G||!d||NO_PING) return;
     if(d.by&&d.by===this.myId) return;
-    addMark(d.x,d.z,d.y||0,d.by,(d.n||'Ally').slice(0,14));
+    addMark(d.x,d.z,d.y||0,d.by,(d.n||'Ally').slice(0,14),(d.mid==null?null:d.mid));
     try{ SFX.pickup(); }catch(e){}
     if(this.isHost) this.conns.forEach(c=>{ if(c!==fromConn && c.open) try{c.send(d);}catch(e){} }); },
   recvCombat(d,fromConn){ if(!G) return;

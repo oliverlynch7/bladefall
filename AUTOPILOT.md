@@ -276,6 +276,23 @@ is already handled and the correct move is to stop.
        machine (a full disk, a Chrome that would not start), **not evidence about your change**.
      A crashed suite used to report `skills: 0 pass, 1 fail` / `REGRESSION: skills:/:` — an id with
      no class and no skill name. If you ever see an id shaped like that, it is a crash, not a bug.
+   - **A FRESH SKILLS FAILURE IS RE-MEASURED UP TO THREE MORE TIMES BEFORE THE GATE BELIEVES IT**
+     (best-of-N since 2026-08-13; one re-run since 2026-08-12). Read the tally, not just the verdict:
+     `CONFIRMED (3 of 4 launches failed)` is a real regression, `FLAPPED (2 of 4 …)` is not — and a
+     flap is deliberately **not a fix either**, so it never enters `baseline.json`. The loop settles
+     after two launches whenever the two agree (`every accused row is settled after 2 launch(es)`),
+     so it costs ~2 minutes per accused class and **nothing at all on a clean run**. One re-run was
+     not enough because a row that fails three launches in four is upheld by a single re-run three
+     times in four — that is `skills:warlock/Final Curse:damage`, which cost a verified fix a whole
+     run on 2026-08-13.
+     **`harness/report.json` now carries a `flaps` ledger** — per row, how many times it has been
+     accused and how many times it stood, carried across runs. `confirmPass` prints it as a
+     `ledger:` line before spending a launch. **Read it before diagnosing a "new" failure**; twice
+     now two runs days apart have each met the same delayed-payout row for the "first" time. It is
+     gitignored, so it is per-machine and a fresh checkout starts empty.
+     The live seam (real Chrome, real `runSkillTests({classes})`) is checked by
+     `node --test harness/live/confirm-live.test.js` — ~4 minutes, deliberately NOT in
+     `harness/test/`, which `run-all.js` runs in its fast stage.
    - Render it and LOOK: `node _shot/shot.js --scene 0` / `--scene hub`. Reading source is not proof.
    - Smoke test via `--eval` over `__BF3` / `__world3d()` / `__mob3d()` / `__prop3d()`.
    - If verification fails and you can't fix it quickly, **revert your change, mark the item blocked with a note, and move on.** Never commit broken code.

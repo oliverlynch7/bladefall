@@ -261,13 +261,6 @@ async function main() {
     pair.log('at     → A ' + whA + '\n         B ' + whB);
     if (!wA.ok || !wB.ok) throw new Error('readiness gate failed — nothing below would be the state under test');
 
-    if (noCid) {
-      const patched = await pair.evalA(`(function(){ var M=__BF3.MP, o=M.selfState.bind(M);
-        M.selfState=function(){ var s=o(); delete s.cid; return s; };
-        return M.selfState().cid===undefined; })()`);
-      pair.log('patch  → host selfState now omits cid: ' + patched);
-    }
-
     /* GROUND TRUTH FIRST, and before anyone connects. What each client IS, taken from the packet it
        would send. Every later assertion is against these, not against the class ids typed above —
        if skipTrial handed a client something other than what was asked for, that shows up here as a
@@ -294,10 +287,45 @@ async function main() {
         + ' err=' + j(selfA.err) + ', B on=' + selfB.on + ' ready=' + selfB.ready + ' err=' + j(selfB.err)
         + '), so there are no rigs to count and the voxel path drew the allies');
 
+    /* AFTER GROUND TRUTH, NOT BEFORE IT — and the ordering is the whole difference between a
+       known-bad and a wasted run. SELF_JS reads `MP.selfState()`, so while this patch sat ABOVE the
+       snapshot it degraded the MEASUREMENT of what A is, not just the PACKET A sends: A came up
+       cid=undefined → classModel 'Warrior' → identical to B's, and the run voided itself on "both
+       clients map to the SAME body" every single time. Watched, 2026-08-13: `--no-cid` reported
+       VOID with 6/36 failed, including A's own "local rig is still MY body" (ground truth said
+       Warrior, HERO3D genuinely had Wizard) — a failure invented entirely by the patch's position.
+       Below the snapshot, ground truth still says mage/Wizard and only the wire is degraded, which
+       is what this mode's header has always claimed it does. */
+    if (noCid) {
+      const patched = await pair.evalA(`(function(){ var M=__BF3.MP, o=M.selfState.bind(M);
+        M.selfState=function(){ var s=o(); delete s.cid; return s; };
+        return M.selfState().cid===undefined; })()`);
+      pair.log('patch  → host selfState now omits cid: ' + patched
+        + '   (ground truth above was taken BEFORE this, and still reads ' + j(selfA.cid) + ')');
+    }
+
     // ── connect. Every gate in connect.js, unchanged. ──────────────────────
     console.log('');
     const conn = await hostAndJoin(pair, { log: pair.log });
     const guestId = conn.guestId;
+
+    /* THE SESSION IDS DO NOT EXIST YET WHEN GROUND TRUTH IS TAKEN, and everything below is keyed on
+       them. MP.myId is `null` (index.html:12207) until host() assigns 'h' (:12271) or join() rolls
+       one (:12301) — and the snapshot above is deliberately taken BEFORE either, so selfA.id and
+       selfB.id are both null there. Left that way, every rig lookup below (`r.id === subject.id`)
+       asks the renderer for a rig keyed to null, finds none, and reports "no rig for that id" on a
+       run where the rig was built correctly — the first run of this file did exactly that, printing
+       `the rig is keyed to host ('null')` with rig `h` sitting in the dump two lines above.
+       Stamped from MP.myId, which IS the id on the wire: selfState() sends it as `id` (:12248), the
+       host files the guest under it (peers[d.p.id], :12279) and copies it to conns[0]._pid. So the
+       two must agree — and that is CHECKED here rather than assumed, because if they ever diverge
+       the rig lookups are wrong again and silently. */
+    const [idA, idB] = await Promise.all([pair.evalA('__BF3.MP.myId'), pair.evalB('__BF3.MP.myId')]);
+    selfA.id = idA; selfB.id = idB;
+    pair.log('ids    → A ' + j(idA) + '   B ' + j(idB)
+      + (idB === guestId ? '   (guest id === host conns[0]._pid)'
+        : '   !! GUEST ID MISMATCH: B.myId ' + j(idB) + ' vs host conns[0]._pid ' + j(guestId)
+          + ' — the rig lookups below are keyed on the wrong id and must not be read'));
 
     /* The rig is built on the frame the ally is first drawn and armed asynchronously after that.
        Polled, and the time is printed, because "we slept 3s and it was fine" is not a measurement. */

@@ -125,12 +125,139 @@ git commit -m "delve: floors keep their theme's hazard from floor 3, so depth ch
 
 ---
 
-### Task 2: Floors sized for a roguelite
+### Task 2: Floors sized for a roguelite — **CLOSED 2026-08-12 WITHOUT BEING CARRIED OUT. THE FLOORS ARE ALREADY A THIRD OF A CAMPAIGN AREA.**
 
-A ten-minute floor makes a twenty-floor run impossible to sit through, which caps depth by patience rather than by skill.
+Step 1 exists to decide this task and it decided it, in the direction its own skip branch names.
+The premise is false twice over, and the second half is false in exactly the way Task 1's was.
 
-**Files:**
-- Modify: `public/3d/index.html` (`loadDelveFloor`)
+**The numbers, measured rather than read** — `harness/probes/delve-size.probe.js`, route distance
+over the level's own walkable surface with the maze walls subtracted, converted to seconds with a
+top speed measured on the real body in the same launch:
+
+```
+                        route (units)   walk (s)   rooms   mobs
+The Outskirts, area 0        6958           37       17     41     <- the campaign control
+delve floor 1                2175           22       10     21
+delve floor 3                1200           12        7     13
+delve floor 5                1888           19       11     25
+delve floor 10               1891           20       12     32
+delve floor 15               2037           21       11     41
+delve floor 20               2942           30       13     41
+```
+
+**A delve floor is 12 to 30 seconds of walking against a campaign area's 37.** The plan's stated
+target — "roughly a third of campaign length" — is where the mode already is.
+
+**THE RULER WAS CROSS-CHECKED BEFORE IT WAS BELIEVED, and this is the reason to trust the table.**
+The probe is its own control: pointed at anything that is not a delve floor it measures that level
+once, in the same units, so the comparison is not made across two instruments. Pointed at The
+Outskirts it says **37 seconds**. `harness/test-levels.js` has independently recorded that same
+level at **2305, 2308 and 2317 ticks** with a completely different method — a planner plus the real
+body, driven tick by tick — which is **38.4 seconds**. Two instruments that share no code agree
+within 4%.
+
+**Why the plan read it the other way, and it is Task 1's fault line again.** The table at the top of
+this file says *"Floors are campaign levels — `loadArea()` at 14311 runs the zone's own generator"*
+and prices one at *"~4,500 units built for a ten-minute traversal"*. Three things wrong:
+
+1. **A delve floor is not a campaign level.** The two scape dispatches are both guarded on
+   `!G.delve` (index.html:7297 and 7304), so the delve deliberately falls through to the shared
+   grid-graph maze — the same one the class trials use. It borrows a zone's *stage* for the palette
+   and its *hazard*, and nothing else. This is the identical misreading that sent Task 1 after a
+   `G.haz = null` that was never the assignment that decided anything.
+2. **A campaign area is 6958 units, not ~4,500.**
+3. **It is 37 seconds, not ten minutes.** Nothing in this repo has ever measured ten.
+
+**And shortening the floors would UNDO a deliberate decision that is already in the source.**
+index.html:7346 has carried this since `3ab7556` on 2026-08-03, eight days before this plan was
+written:
+
+> THE ENDLESS DUNGEON is WIDE and BRANCHING, which is what separates it from the Abyssal Descent.
+> That mode is about combat endurance in one arena after another; this one is about exploration,
+> routing and map-reading, and neither of those exists in a corridor.
+
+The grid grows with depth on purpose (GX 6→9, GZ 5→8, plus `TSCALE` 1.2). **An autopilot run
+that shortened these floors would be reverting a stated design intent on a falsified argument**,
+which is what Task 1 refused to do and for the same reason.
+
+**RE-MEASURED ON RECOVERY, 2026-08-12, AND ONE LINE OF THE ABOVE DID NOT SURVIVE IT.** This work was
+recovered from a stash no commit contained (see the commit message), so it was re-run rather than
+trusted. The conclusion holds and is now measured twice on two different maze seeds; one supporting
+sub-claim does not, and it was this paragraph's:
+
+| | floor 1 | 3 | 5 | 10 | 15 | 20 | control |
+|---|---|---|---|---|---|---|---|
+| first run, sec | 22 | 12 | 19 | 20 | 21 | 30 | 37 |
+| recovery run, sec | 18 | 15 | 28 | 20 | 22 | **16** | 37 |
+
+**The delve mazes are generated per run, so a per-floor route length is a SAMPLE, not a property of
+the depth.** The original text read "floor 20 is 13 rooms and 2942 units against floor 1's 10 and
+2175" as the grid growth showing up in the route; on the second seed floor 20 came back **10 rooms
+and 1557 units against floor 1's 10 and 1740** — shorter than floor 1, and the ordering reversed.
+The grid dimensions do grow (that is in the source and not in doubt); the WALKED ROUTE is dominated
+by maze randomness and does not grow monotonically with depth. Do not quote a single floor's
+distance as evidence of anything.
+
+**What reproduced exactly is the control, and that is what makes the ruler trustworthy.** The
+Outskirts is a hand-authored scape, so it is deterministic, and the recovery run returned the same
+numbers to the digit: **route 6958, line 6725, 17 rooms, 41 mobs, 3150 cells, speed 3.13, 37s.** The
+delve body's measured speed also reproduced exactly at **1.62**. So the instrument is stable and the
+spread in the table above is the levels changing, not the ruler drifting.
+
+**The task's verdict is unchanged and is now better supported than when it was written:** across
+twelve floor measurements on two seeds, every single one falls between 12 and 30 seconds against the
+campaign area's 37. Nothing measured is anywhere near the "ten-minute floor" the task was written to
+fix.
+
+**What is honestly left here is Oliver's, and it is one question:** the numbers above are TRAVERSAL
+only — no combat, no dead ends taken and backed out of, no locked door. A floor also holds 13 to 41
+mobs. Whether a floor *plays* long is a pacing judgement about fighting, not a distance this or any
+probe can settle, and `docs/VISION.md` puts "whether something is FUN" on the list a run may not
+answer for itself. Put to him as: *the floors are a third of a campaign area to cross and hold up to
+41 enemies — does a run of twenty of them drag?*
+
+- [x] **Step 1: Measure what a floor currently costs** — done 2026-08-12, and it triggers this
+      task's own skip branch. Committed as `harness/probes/delve-size.probe.js` so the next run
+      reads numbers rather than re-deriving them, and it doubles as the campaign control.
+
+**THE LEVEL WALKER CANNOT BE POINTED AT A DELVE FLOOR, and that is a limit of the navigator rather
+than a fact about the mode — worth recording because the step as written asks for it by name.**
+`harness/probes/level.probe.js` plans over `surfaceHeightAt()`, which does not report a maze wall
+at all — index.html:8104 only considers a wall carrying `stand`, and the maze's `h:96` walls have
+no such flag — while the body collides with every one of them (8749 concats `G.walls` into the
+solid list). So the planner routes straight through the walls, the body is stopped by the first,
+the takeoff cell is struck off, and after fourteen re-plans the floor comes back as one the body
+could not follow. That is a false negative about a level a player finishes, which is exactly what
+`test-levels.js` routes to `unproven` rather than to a verdict.
+
+*Two things the probe got wrong first, both silently, and both fixed by measurement:*
+- **its first version reported NO ROUTE AT ALL on floors 10, 15 and 20.** It stepped one 60-unit
+  cell at a time, and about 60% of this maze's corridors are built as parkour bridges
+  (index.html:7426) — stepping stones with real gaps. A measure that cannot jump cannot leave the
+  entry room of a floor whose corridors all rolled parkour. It now takes edges up to the walker's
+  own 260-unit reach, charges each its true length, and refuses any edge whose straight line passes
+  through a wall — without that last test a 260-unit hop clears a 14-thick wall and measures a route
+  no player can take, which is the geometric-answer-to-a-kinematic-question that shipped Castle
+  Duskmoor unclimbable.
+- **it reported a top speed of exactly 0**, twice. The delve's entry room is walled, so a body
+  driven in one direction for two seconds is pinned against a wall long before the window closes and
+  an average over it is an average of zeroes. The bar is now the fastest single tick, driven both
+  ways. The speed it finds is worth its own line: **1.62 units/tick in the delve against 3.13 in The
+  Outskirts** — the delve hands out a fresh level-1 body with a starter weapon, so it walks at half
+  the campaign hero's pace. Any comparison made in UNITS rather than seconds would have been wrong
+  by a factor of two in the direction that makes the delve look short.
+
+- [x] **Step 2: Shorten the floor** — **REFUSED, measured.** The floors are already a third of a
+      campaign area, and the width is a stated design decision from `3ab7556`. See above.
+- [x] **Step 3: Prove every floor still completes** — nothing was changed, so there is nothing to
+      re-prove. The floors' own completability is unmeasured for a different reason (the walker
+      cannot route a maze), which is recorded above rather than glossed and is the real next piece
+      of work in this area.
+- [x] **Step 4: Commit** — the probe, the `--scene delve:<floor>` destination it needed, and this
+      closure. No behaviour change.
+
+<details>
+<summary>The task as originally written</summary>
 
 - [ ] **Step 1: Measure what a floor currently costs**
 
@@ -158,6 +285,38 @@ git commit -m "delve: floors are a roguelite floor long, not a campaign area lon
 
 Before: <n>s to the stairs on floor 5. After: <n>s."
 ```
+
+</details>
+
+---
+
+### The Endless Dungeon has been photographed, and that is new
+
+`--scene delve:<floor>` (`harness/shot.js`, 2026-08-12) is the mode's first camera. Until it went in
+the delve had never been in front of one, and it is the place in the game where that cost the most:
+every other destination lands on a hand-authored scape, so **nothing any zone render has ever shown
+says anything about a delve floor**. The maze underneath was reachable only through `--scene trial`,
+which is one hand-sized arena.
+
+The floor argument is not cosmetic — the grid grows with depth and the stage rotation re-themes
+every two floors, so `delve:1` and `delve:20` are two different levels, and this follows `abyss` and
+`arena` in taking the thing that changes the level as its argument.
+
+**It had to learn to dismiss a card, and the first render is why.** Every floor load raises the area
+briefing over the level (`shadeGo`, index.html:1299), and the run-up's own dismiss whitelist cannot
+reach it — that interval is cleared in the same `setTimeout` that enters the destination, so it has
+already stopped by the time the floor exists. The first delve render came back a perfectly composed,
+correctly-lit **photograph of a page of text**, with `ready ✓`, `at → The Endless Dungeon · floor 1`
+and world3d built: the exact "complete, plausible, WRONG picture" this harness's own header warns
+about, arriving from a direction it had not covered. The destination now clicks it on a short
+interval and the ready test requires the card to be gone.
+
+**What the first clean picture shows** (`_shot/out/delve5.png`, floor 5, zone 2/8): the maze reads as
+a place — 3D cobbled floor, torchlight, the Shade standing by. **And its walls are untextured flat
+boxes.** The floor is converted and the walls are not, which is a 3D-conversion gap nobody could have
+found before there was a way to look at it. Not chased here — it is a conversion item, not an
+Endless Dungeon one — but it is now a thing that has been seen rather than a thing nobody had
+checked.
 
 ---
 

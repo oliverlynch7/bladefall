@@ -489,6 +489,28 @@ place where the outcome can be OBSERVED over N places where the cause can be int
 per-cast candidates in the game (`m_ward`, `war_shield`, `st_ward`, all 4% of max HP) are SHIELDS, and
 a shield unit is not a heal unit.
 
+**`w_juggernaut` WAS TAKEN, as pass 41 (`c09dbd8`, 2026-08-12), and this document did not hear about
+it — which is the note worth keeping as much as the row is.** `docs/SKILL_TRIAGE.md` section Q was
+updated in that commit and this plan was not, so for a day the two files disagreed and **the one a
+run is told to read first still named a finished row as the next target.** Same shape as pass 36,
+whose row had to be written a run later. The pass table below is the log; a row missing from it is
+invisible, and the standing instruction is to take the first task whose steps are not all ticked —
+which points straight at Task 2 and then at whatever this paragraph names.
+
+| pass | row | commit | how it was proven |
+|---|---|---|---|
+| 41 | **Q — warrior Juggernaut resisted no knockback** | `c09dbd8` | `harness/probes/juggernaut.probe.js`, three halves in one launch with two trials each: the passive half took **179** knock-away (= 210 × 0.85) against the control's 210, with damage 45 (= 49 × 0.92) confirming the already-wired half was untouched. The card's own 15%, so nothing was invented. The VERTICAL pop is deliberately not scaled — `hurtPlayer`'s own comment records the launch as this file's stagger, and "stagger" is a word on Heavy Hands' card and Unyielding's, not on this one |
+
+**So the remaining order is now `pal_heal` alone, and it is blocked on the number above.** Section E
+is floored, section J is Oliver's by rule, and section Q's other open rows (`x_doom`, `x_chill`,
+`chr_temporal`, `w_heavy`, `w_unyield`, `bsk_whirl`) are each recorded above as Oliver's or as
+needing a mechanic that does not exist. **No skill row an autopilot run may take is currently
+known**, for the third time in this document's life — and the two previous times it was answered by
+WIDENING A SWEEP rather than by re-reading the triage list. The unworked ones named above are: the
+field sweep's `*` (any-receiver) mode, which is unratcheted and has been eyeballed once; and the six
+`CLASS_BASIC` entries that hold no cross-function state, which a wiring trace cannot speak to and
+which have never been measured against their own words.
+
 **THE OTHER EIGHT WERE READ, 2026-08-12, AND THE ONE THING THAT CAME OUT OF IT WAS PASS 28 — but say
 what that sweep was and was not.** Every one of the twelve `CLASS_BASIC` entries was traced from the
 state field it writes to whoever reads it: the warrior's `_momKeep` (killEnemy 10974), the warlock's

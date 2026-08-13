@@ -109,6 +109,26 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     control chest renders correctly composited over the 3D floor — jambs, lintel and lock stripe
     (`b5-door-3d.png`) — and `?world3d=0` is unchanged (`b5-door-voxel.png`). **The door path is now
     photographed rather than inferred.**
+    **`--scene delve:<floor>` photographs THE ENDLESS DUNGEON** (added 2026-08-12,
+    `autopilot-merged`) — the last whole MODE nobody had rendered, and the one where that cost the
+    most. Every other destination lands on a hand-authored scape; the delve is deliberately routed
+    to the shared grid-graph maze (`EXPANDED_SCAPES` and `SCAPES` at index.html:7297/7304 are both
+    guarded on `!G.delve`), so **nothing any zone render has ever shown says anything about a delve
+    floor.** The maze was reachable only through `--scene trial`, which is one hand-sized arena.
+    The floor is an argument for the same reason `abyss`'s and `arena`'s are: the grid GROWS with
+    depth (7351, GX 6→9 and GZ 5→8, `TSCALE` 1.2) and the stage rotation re-themes every two floors,
+    so `delve:1` and `delve:20` are two different levels. It needs no unlock — `startDelve` escrows
+    through `bankNow()` and hands out a fresh level-1 body — but it DOES have to dismiss a card, and
+    the first render is why: every floor load raises the area briefing over the level (`shadeGo`,
+    1299) and the run-up's dismiss whitelist is cleared in the same `setTimeout` that enters the
+    destination, so it has already stopped by the time the floor exists. **The first delve render
+    came back a correctly-lit photograph of a PAGE OF TEXT** with `ready ✓`, the right `at →` line
+    and world3d built — the same complete-plausible-wrong picture as ever, from a new direction.
+    The ready test now also requires the card to be gone. Used immediately to settle the delve
+    plan's Task 2 (a floor is 12–30s of walking against a campaign area's 37, measured by
+    `harness/probes/delve-size.probe.js`), and the first clean frame shows a conversion gap nobody
+    could have found before there was a way to look: the maze FLOOR is 3D cobble and its WALLS are
+    untextured flat boxes.
     **`--scene spar` photographs the hub's SPARRING ROOM** (added 2026-08-02, worker B) — the last
     hub sub-area nobody had rendered. It needs a destination because `enterSparringRoom` is a plain
     top-level function and is NOT on `window.__BF3`, so a `--pre` cannot call it; this opens the

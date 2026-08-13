@@ -28,6 +28,8 @@
      node _shot/shot.js --scene abyss:13                 #   abyss:<floor> — stage rotates every 2 floors
      node _shot/shot.js --scene sprint                   #   the floating parkour course
      node _shot/shot.js --scene gauntlet                 #   gauntlet:normal|brutal (boss rush)
+     node _shot/shot.js --scene delve:5                  # THE ENDLESS DUNGEON. The floor IS the level:
+                                                         #   the maze grid grows with depth (6x5 → 9x8)
      node _shot/shot.js --eval @harness/probes/level.probe.js   # a long probe, from its own file
      node _shot/shot.js --ready "__mob3d().live>0"       # hold the shutter until this is true
      node _shot/shot.js --scene 0 --focus "__BF3.G.waystone"      # POINT THE CAMERA AT A THING
@@ -274,9 +276,46 @@ const ACTIVITIES = {
               + ' if(!__BF3.meta.hero && __BF3.G && __BF3.G.p) __BF3.meta.hero = __BF3.snapOf(__BF3.G.p);'
               + ' __BF3.startBossRush(' + JSON.stringify(v || 'normal') + ');',
               at: '!!__BF3.G.bossRush && __BF3.G.brIdx != null' },
+  /* THE ENDLESS DUNGEON, and it is the fifth destination of this shape rather than a fourth
+     activity: it is its own mode off the Waystation portal, not one of Oliver's four annex pads.
+     Until this went in the delve had NEVER BEEN IN FRONT OF A CAMERA, and it is the one place in
+     the game where that costs the most, because it is the only mode whose levels no zone render
+     says anything about — every campaign destination lands on a hand-authored scape, while the
+     delve is deliberately routed to the shared grid-graph maze (the EXPANDED_SCAPES and SCAPES
+     dispatches at index.html:7297/7304 are both guarded on `!G.delve`). Before this, the maze was
+     reachable only through `--scene trial`, which is one hand-sized arena.
+     `<floor>` IS THE LEVEL, not a difficulty dial, and that is why this takes an argument for the
+     same reason `abyss` and `arena` do. The maze grid GROWS with depth — index.html:7351, GX from
+     6 to 9 and GZ from 5 to 8 — and the stage rotation re-themes every two floors, so floor 1 and
+     floor 20 are two different levels and a single `--scene delve` says nothing about the other.
+     startDelve needs no unlock and no hero snapshot, unlike the Gauntlet: it escrows through
+     bankNow() and hands out a fresh level-1 body, so there is nothing to grant first.
+     `at` is a FUNCTION here, and that is not decoration. startDelve() always loads floor 1 itself
+     (index.html:14345) and this then jumps to the one asked for, so a ready test reading
+     `G.floor > 0` — which is exactly the shape `abyss` uses — is satisfied by floor 1 on the way
+     to floor 10. Both statements run in one synchronous block today, so the race is not currently
+     live; it is one `await` in startDelve away from being live, and this file has now fixed the
+     same shape of race four times. Name the destination. */
+  delve:    { arg: 'floor', go: (v) => '__BF3.startDelve("warrior");'
+              + ((parseInt(v, 10) || 1) > 1 ? ' __BF3.loadDelveFloor(' + (parseInt(v, 10) || 1) + ');' : '')
+              /* AND THE CARD HAS TO GO, or this destination photographs a PAGE OF TEXT. Every floor
+                 load raises the area briefing ("Warden's Shade", button `shadeGo`, index.html:1299)
+                 over the level, and the run-up's own dismiss whitelist cannot reach it: that
+                 interval is cleared in the same setTimeout that runs this string, so it has already
+                 stopped by the time the floor exists. Measured — the first delve render came back a
+                 perfectly composed screenshot of the briefing card, world3d built and the ready test
+                 satisfied, which is precisely the "complete, plausible, WRONG picture" this file
+                 keeps warning about. Retried on a short interval rather than clicked once, because
+                 the card is raised by the floor load and a future floor load that defers it by a
+                 frame would silently put the text back. */
+              + ' (function(){ var k = setInterval(function(){'
+              + '   var b = document.getElementById("shadeGo"); if(b && b.offsetParent) b.click();'
+              + ' }, 200); setTimeout(function(){ clearInterval(k); }, 4000); })();',
+              at: (v) => '!!__BF3.G.delve && __BF3.G.floor === ' + (parseInt(v, 10) || 1)
+                       + ' && !(document.getElementById("shadeGo")||{}).offsetParent' },
 };
 const activityOf = (dest) => {
-  const m = /^(arena|abyss|sprint|gauntlet)(?::([a-z0-9]+))?$/i.exec(String(dest || ''));
+  const m = /^(arena|abyss|sprint|gauntlet|delve)(?::([a-z0-9]+))?$/i.exec(String(dest || ''));
   if (!m) return null;
   const key = m[1].toLowerCase();
   return { key, spec: ACTIVITIES[key], val: m[2] || null };
@@ -375,7 +414,10 @@ const sceneReady = (dest) => {
        reuse an existing zone number (the Arena builds newG with zone:0, i.e. The Outskirts', and
        the trial on the way there is zone 0 as well), so `inZone` would resolve in the wrong place
        exactly the way it did before `!G.trial` was added. */
-    : ac ? '!__BF3.G.hub && ' + ac.spec.at
+    /* An activity's `at` may be a FUNCTION of its argument. Three of the five are the same level
+       whatever you pass, so a fixed string is right for them; the delve's floor IS the level, and
+       its run-up passes through floor 1 on the way to floor 10. */
+    : ac ? '!__BF3.G.hub && ' + (typeof ac.spec.at === 'function' ? ac.spec.at(ac.val) : ac.spec.at)
     : tr
       /* ...and the arena is actually ON SCREEN. showTutorial() sets mode='menu' and covers the
          level with a full-page card, so `G.trial` alone resolved in 0.5s and handed back a
@@ -723,7 +765,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       + ' var act = G.arena ? ("The Arena" + (window.__BF3.ARENA_LOADOUT ? " · " + __BF3.ARENA_LOADOUT.map : ""))'
       + '   : G.endless ? ("Abyssal Descent · floor " + G.floor)'
       + '   : G.bossRush ? ("The Gauntlet · " + (G.brTier||"normal") + " #" + G.brIdx)'
-      + '   : G.sprintFun ? "Treasure Sprint" : null;'
+      + '   : G.sprintFun ? "Treasure Sprint"'
+      /* The delve is the one destination here that DOES set areaName ("Floor 7", index.html:4233),
+         so without this it would still print a name — and the name would be a floor number with
+         nothing saying which mode it belongs to. The Abyssal Descent also counts floors. */
+      + '   : G.delve ? ("The Endless Dungeon · floor " + G.floor) : null;'
       + ' return (act||G.areaName||(G.sparringRoom?"Sparring Room":"?"))'
       + ' + (act?" [ACTIVITY]":G.sparringRoom?" [SPAR]":G.hub?" [hub]":G.trial?" [TRIAL]":G.side?" [side]":"")'
       + ' + "  zone " + G.zone + " stage " + G.stageIndex; })()');

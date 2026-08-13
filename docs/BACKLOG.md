@@ -43,8 +43,25 @@ enemy the host has awake, and three assertions in the mp suite hold it there beh
 `?nopossync=1`. Verified `targetsStored 0 / 0 / 41 / 41` across sleeping / pre-flag / awake trials on
 a live world; a corrected body converges `141.8 → 2.0` units per frame over twenty frames; and in the
 aggregate gate the awake trial closes **0.90** of the gap against an AI-only control of **0.19**,
-falling to exactly that 0.19 under the known-bad flag. What is left is the plan's Task 4 (the world
-ping, which may need no code at all) and Step 6's two-simulation lap.
+falling to exactly that 0.19 under the known-bad flag.
+
+**ALL FOUR TASKS ARE NOW CLOSED. 2026-08-13.** Task 4 (the world ping) was closed by `d79b45a` and
+this line said otherwise until today. Task 2 Step 6 — the two-simulation lap — is measured:
+`harness/probes/mp-twoworlds.probe.js` rebuilds the level a second time at the same `runSeed` through
+the game's own guest path (`enterZone` adopts `MP.rseed`, 4215) and replays the host's recorded
+packets into it.
+
+> **Over a 30-second lap the two pictures now end 2 units apart on average, worst body 10. With the
+> one array slot stripped and nothing else changed: 82 average, worst 1017.** The uncorrected
+> separation climbs all lap (`1 → 65 → 102 → 134 → 175 → 227 → 234` at five-second marks); the
+> corrected one is flat at 1–4 and never trends. Watched to fail under the shipped `?nopossync=1`:
+> worst corrected body **401**.
+
+*Two numbers above this paragraph are wrong and the corrections make the case stronger.* The rate is
+**12 Hz, not 14** — `_sendT>=0.07` resets to zero rather than subtracting (12439), so at a locked
+1/60 it fires every fifth frame; measured 360 packets in 30.0 s. And the reach a campaign mob damages
+you at is the radius sum at 13573, **26–34 units**, not the ~90–125 quoted here — that formula lives
+at 12947 **inside `botAI`**, which campaign mobs `continue` past (13476). See `MP_AUDIT.md` section 3.
 
 **This item's original title and both its stated premises were wrong, and all three were disproved
 by measurement before the plan was written. Kept here rather than rewritten away, because the
@@ -69,6 +86,31 @@ other about one, and the world ping added in sub-project D points at empty groun
 Planned in `docs/superpowers/plans/2026-08-12-guest-enemy-positions.md`.
 `harness/probes/mp-drift.probe.js` is the known-bad: today's `movedBySnapshot: 0 of 41` is a
 permanent reproducible failing case, so the fix can be watched to fail before it is believed.
+*(2026-08-13: that particular reading is retired as a detector. Part 1 of that probe sends a
+**six-slot** row and measures without ticking, while the shipped correction lives in the enemy update
+and is gated on slot 6 — so its 0 is the fail-safe path working, and it reads the same on a build
+with the feature deleted. The live known-bad is `?nopossync=1`.)*
+
+### 1b. Two clients build the same map and disagree about what is standing on it — MEASURED, NOT FIXED
+Found by `harness/probes/mp-twoworlds.probe.js` on 2026-08-13 while proving item 1, and it is a
+separate defect with a separate cause.
+
+Two clients handed the same `runSeed` build the same level: **41 of 41 mids matched and 41 of 41
+spawn points matched within 1 unit**, three builds in a row. They then disagree about what **5 to 12
+of the 41 creatures** ARE — measured `sameType` 29, 32, 33, 36 of 41 across four runs. The cause is
+read off the file rather than guessed: `saltMob` (index.html:4716) picks the minority mob with
+unseeded `Math.random`, and the role roll at 7690 does the same for shielder/healer/exploder/flanker.
+`G.runSeed` never reaches either.
+
+Why it matters beyond looking wrong: the mismatch is usually a **flyer against a walker**, and a
+flyer goes places a walker cannot. Those bodies are the only ones the position correction from item 1
+does not hold together — worst run, mean **358** apart and worst **1294**, against 2 and 10 for the
+bodies both clients agree on. **Why they fail to converge is not established**, and the obvious answer
+was measured wrong: the edge guard's target-floor test read `targetFloored: true` on the two worst.
+That is the thing to measure first, not the thing to assume.
+
+The fix shape is probably to draw both from the level's own seeded `rnd`, the way positions and types
+already are — but that changes generation for every mode, so it is a plan, not a patch.
 
 ### 2. Level design — make the existing zones better to play
 Oliver: *"we should also have it look to improve the level designs too."*

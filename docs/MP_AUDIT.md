@@ -166,6 +166,38 @@ That is precisely the "unfair death" shape the research names: on the guest's sc
 across the clearing; on the host's it is on top of them, and the host's is the copy that decides
 whether they were hit.
 
+### ⚠ THAT REACH FORMULA IS THE ARENA BOT'S, AND CAMPAIGN MOBS NEVER RUN IT — corrected 2026-08-13
+
+`((e.weapon && e.weapon.range) || 60) + e.r + p.r` now lives at **12947**, and `reach + 16` at
+**12997**. Both are inside **`botAI`** — the player-like combat AI used by Arena bots and duel bots.
+The campaign enemy loop `continue`s past it on its second line (13476, `if(e.bot){ botAI(e,dt);
+continue; }`), so **no campaign monster has ever used this number.**
+
+What a campaign mob actually damages you on is the radius sum in the enemy update, **13573**:
+`dXZ(e.x,e.z,p.x,p.z) < (e.r + p.r)`. Measured on the 41 bodies of The Outskirts by
+`harness/probes/mp-twoworlds.probe.js`: **26 minimum, 34 maximum, 29 mean** — roughly a quarter of
+the 90–125 this section claimed.
+
+**The conclusion does not change; it gets sharper.** Drift available ~1000–1700 against a contact
+reach of 26–34 is thirty to sixty times over, not eight to thirteen. The 90–125 figure is left above
+rather than deleted because it is the number every other document in this repo was written against,
+and a reader who finds only one of the two will not know which they have.
+
+### The separation is now measured against a real second picture, not inferred
+
+Everything above infers the separation between two clients from how far a single mob *travels*, which
+is an upper bound. `harness/probes/mp-twoworlds.probe.js` (2026-08-13) builds the level twice at the
+same `runSeed` through the game's own guest path and replays one build's packets into the other:
+
+| over a 30s lap | mean separation | worst body |
+|---|---|---|
+| slot 6 stripped — the pre-flag packet | **82** | **1017** |
+| slot 6 sent — shipped | **2** | **10** |
+
+It also corrects the send rate this document quotes. `_sendT >= 0.07` **resets to zero rather than
+subtracting** (12439), so at a locked `dt` of 1/60 the gate fires on every fifth frame: **360 packets
+in 30.0 seconds — 12 Hz, not 14**, in every lap of every run.
+
 ## What this is NOT
 
 No session was held and no packet crossed a wire. This measures **what the guest's own code does with

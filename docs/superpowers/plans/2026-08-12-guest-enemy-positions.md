@@ -136,6 +136,12 @@ whether the host is simulating that enemy at all.
 - Every assertion must be watched to FAIL before it is believed. Today's
   `reconcile.movedBySnapshot: 0 of 41` in `mp-drift.probe.js` is a permanent, reproducible known-bad
   and is the first thing each task's proof turns green.
+  > **This one never turned green and now never can — corrected 2026-08-13.** Part 1 of that probe
+  > builds a **six-slot** row and measures without ticking, while Task 2 deliberately moved the
+  > correction out of `applyEnemies` and into the update. So the 0 is the fail-safe path behaving
+  > correctly: it reads identically on a working build and on a build with the feature deleted, and
+  > is dead as a regression detector. The known-bad that IS live is the shipped `?nopossync=1` flag,
+  > and it is watched to fail in Task 2 Step 6 and Task 3.
 - **Two real machines remain the final check.** Nothing here holds a session or crosses a wire; it
   measures what a guest's own code does with a host snapshot, which is the half that lives in this
   repo.
@@ -334,10 +340,13 @@ trial C first, so its gaps are ~1400 rather than 707 and its subject stops dead 
 reproduces the refusal law exactly (11 refused, 11 void-step, 0 floored-step) and nothing more is
 claimed from it.
 
-**What is still NOT proven, and Step 6 stays open for it:** the two-simulation lap the step actually
-asks for. Everything above is a single applied snapshot on one client. The honest weaker claim the
-step allows as a fallback is now fully measured and stated above; the lap-based number is not, and
-would need a second simulation of the same level in one page.
+**The two-simulation lap this note said was missing is now measured — see Step 6, done 2026-08-13.**
+Everything in this section is a single applied snapshot on one client, which is the right question
+for the apply and the wrong one for the feature. `harness/probes/mp-twoworlds.probe.js` rebuilds the
+level a second time at the same runSeed through the game's own guest path and replays the host's
+recorded packets into it: **worst body 10 units apart after 30 seconds against 1017 for the same lap
+with slot 6 stripped.** A second simulation did not need two worlds in one page; it needed the
+`MP.rseed` branch of `enterZone` that co-op already uses for exactly this.
 
 ---
 
@@ -456,17 +465,70 @@ now lives in the update — a probe that applies a snapshot and measures immedia
 `moved: 0` against a working fix. Tick at least 5 frames (four halve the gap; the probe should
 report the residual rather than assert a hard equality, since a lerp never exactly arrives).
 
-- [ ] **Step 6: Prove the drift it exists to remove is gone** — **STILL OPEN, but for a much smaller
-      reason than before, and the bench it was blocked on is fixed.** The fallback claim this step
-      allows is now fully measured and written above: a single applied snapshot converges a corrected
-      body to **2 units/frame residual over 20 frames, 700.6 of a 707-unit gap**, and where it does
-      not converge the cause is measured rather than guessed (the edge guard, refusing 28 of 28
-      void-first-step pulls and 0 of 0 floored ones). What is NOT done is the thing the step names:
-      a lap driven by a SECOND simulation of the same level at 14 Hz. That needs two worlds in one
-      page and nothing here has stood one up.
-      **The drift the step wants to compare against is also now a different number** — an actual 30
-      seconds is roughly 1000–1700 units, not the 380–562 this file was written with. See the
-      correction above.
+- [x] **Step 6: Prove the drift it exists to remove is gone** — **DONE 2026-08-13, as the thing the
+      step names and not as its fallback. The second simulation exists.** New bench:
+      `harness/probes/mp-twoworlds.probe.js`.
+
+```bash
+node _shot/shot.js --scene 0 --eval @harness/probes/mp-twoworlds.probe.js
+```
+
+**THE NUMBER.** Over a 30-second lap, per body, between the two pictures — corrected against a
+control that differs by one array slot and nothing else:
+
+| | mean separation | worst body | vs contact reach 26 |
+|---|---|---|---|
+| slot 6 stripped (the pre-flag packet) | **82** | **1017** | 39× outside |
+| slot 6 sent (shipped) | **2** | **10** | inside |
+
+`closedBy 98%`. Four runs of the working build put the worst corrected body at **6, 7, 8, 10** units
+and the control's worst at **1017–1403**. The separation over the lap is the stronger half of this:
+uncorrected it climbs monotonically — `1 → 65 → 102 → 134 → 175 → 227 → 234` at five-second marks —
+while corrected it is **flat at 1–4 for the whole thirty seconds** and never trends.
+
+**How a second simulation was stood up, after the previous session recorded that nothing could.** Not
+two worlds in one page: the game already owns this. `enterZone` adopts `MP.rseed` when it is a guest
+(4215) *precisely so two clients build the same dungeon*, and `spawnEnemy` hands out mids in spawn
+order (7703) *precisely so their bodies line up*. Rebuilding at the recorded runSeed is what the
+second machine does. Measured, not assumed, and reported by the probe before anything else:
+**41 of 41 mids matched and 41 of 41 spawn points matched within 1 unit**, three builds in a row.
+Cost: `2.2 ms/tick`, so three 30-second laps run in about twelve seconds inside one `--eval`.
+
+**THE VERDICT LINE WENT GREEN ON THE KNOWN-BAD, AND THAT IS THE MOST USEFUL THING THIS BENCH DID.**
+The first version asserted `corrected mean < control mean`. Run under the shipped `?nopossync=1`,
+where the store is disabled and both guest laps are the same unsynced simulation twice, it **passed**
+— all-bodies means 242 vs 244 (identical, correctly), while the narrower cut's means happened to land
+6 vs 68 because separation is heavy-tailed and two unsynced laps roll different tails. A bar clearable
+by luck is not a bar. The bar is now the **tail**: a corrected body's error is bounded by the lerp's
+own lag and lands in single digits, an uncorrected one is bounded by nothing. Re-run under the flag:
+**worst corrected body 401 against a contact reach of 26 — red, as it must be.**
+
+```bash
+node _shot/shot.js --scene 0 --url "/3d/index.html?hero3d=1&world3d=1&nobloom&nopossync=1" \
+  --eval @harness/probes/mp-twoworlds.probe.js
+```
+
+**Two numbers this file carries are wrong, and the corrections make the result stronger, not weaker:**
+
+- **The rate is 12 Hz, not 14.** `_sendT >= 0.07` **resets to zero rather than subtracting** (12439),
+  so at a locked `dt` of 1/60 it fires on every fifth frame. Measured: **360 packets in 30.0 s**, in
+  every lap of every run. The correction is fed less often than this plan has been claiming.
+- **The reach to compare against is 26–34, not 90–125.** The 90–125 in `MP_AUDIT.md` section 3 comes
+  from `((e.weapon&&e.weapon.range)||60)+e.r+p.r`, which is at **12947, inside `botAI`** — the arena
+  bot AI that campaign mobs `continue` past (13476). A campaign mob damages you on the radius sum at
+  **13573**, `dXZ(e.x,e.z,p.x,p.z) < e.r + p.r`, measured here as **26 min / 34 max**. The bench uses
+  the stricter number, so the bar it clears is harsher than the one the plan set.
+
+**A SECOND DEFECT, FOUND HERE, NOT FIXED HERE, AND NOT THIS PLAN'S.** Two clients handed the same
+runSeed build the same map and the same spawn points and then **disagree about what 5–12 of the 41
+creatures standing on them ARE** — `saltMob` (4716) and the role roll (7690) draw from unseeded
+`Math.random`. The mismatch is usually a FLYER on one side. Those bodies do not track (worst run:
+mean 358, worst 1294) because a guest walker is being handed a host flyer's coordinates. **Why they
+then fail to converge is NOT established**, and the obvious explanation was measured wrong: the edge
+guard's target-floor test read `targetFloored: true` on the two worst at 1294 and 1079 units out.
+Logged to `docs/BACKLOG.md`. The headline above is scoped to bodies both builds agree are the same
+creature, which is the only cut where a difference can be this correction — and that scoping does not
+let the known-bad through, which is the check that makes it honest rather than convenient.
 
 Part 2 of the same probe already walks the player a 30s lap and reports each mob's net
 displacement — 380–562 units today. Re-run it with a host snapshot applied at the real 14 Hz from a
@@ -679,6 +741,8 @@ the next reader does not re-derive them.
 commands and expected output. Task 4 may legitimately end in "no change needed"; that is written in
 as a valid outcome rather than left ambiguous. Task 2 Step 6 names its own fallback if the two-
 simulation measurement proves impractical, so it cannot quietly degrade into an unmeasured claim.
+*(2026-08-13: the fallback was not needed. The second simulation was stood up through the game's own
+`MP.rseed` path and the lap number is measured — see Step 6.)*
 
 **Type consistency.** `enemySnap` rows are plain integer arrays and slot 6 follows the existing
 `e.elite?1:0` idiom already used in the kill list (12410). `e.mx`/`e.mz` are new fields on the enemy

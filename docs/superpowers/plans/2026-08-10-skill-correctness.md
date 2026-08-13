@@ -573,6 +573,32 @@ known" paragraph starts from there.
   anyone came to take it, because passes 41–49 each wired a card and every wiring adds a site. The
   bound a sweep records is a measurement with a date on it, not a constant.
 
+**PASS 53 IS SET UP AND NOT YET TAKEN — everything it needs is committed, so the next run does one
+edit and two launches.** The row is `w_charge`, section Y's only takeable one. The change is a single
+character in a single literal: `public/3d/index.html:9914`, `wcharge`'s `*1.5*` → `*1.6*`, which is
+the number on the card at 2039. The alias hazard is already settled in section Y — `wcharge` has one
+definition, and `bsk_charge` is redefined at 19711 as Headlong, so the berserker is NOT affected.
+The instrument is committed as `harness/probes/charge.probe.js` and its BEFORE reading was taken on
+unmodified game code this run:
+
+```
+node _shot/shot.js --scene arena:flat --wait 12000 \
+  --ready "!!(window.__BF3 && __BF3.G && __BF3.G.arena===true && !__BF3.G.hub && !__BF3.G.trial)" \
+  --eval @harness/probes/charge.probe.js
+
+ratios.chargeOverStomp   0.933   must become 1.000
+ratios.whirlOverStomp    1.378   must NOT move
+A.stomp.dealt / B.stomp.dealt   90 / 90   the yardstick, measured twice; sameRig true
+clean true, playTicks 160 of 160, ok false
+```
+
+**Use `--ready` rather than the default world3d wait.** The first attempt used the default and printed
+`READY NEVER CAME after 126.4s` — the destination was reached (`at → The Arena · flat`) but the glTF
+build never finished, because the aggregate gate was launching Chrome at the same time. This probe
+measures combat and not rendering, so waiting on the world is waiting for something it does not use.
+Then: `node harness/test-skills.js --classes warrior` (pass 49's bar: 11 pass, 0 fail, 0 unproven),
+`node tools/gate.js`, a VERSION3D bump, and `node harness/run-all.js`.
+
 | pass | row | commit | how it was proven |
 |---|---|---|---|
 | 52 | **Y — the NUMBERS on the skill cards, a dimension no instrument here has ever measured** | this run | Pass 51 took the last row section X had, so this is a SWEEP and not a row, which is what the two previous "no takeable row is known" paragraphs were both answered by. The gap is stated by the harness itself: `harness/claims.js` reads which KIND of promise a card makes and `test-skills.js`'s own header says *"the bar is EFFECT, not number"* — so **a skill claiming 2.2x and dealing 0.2x passes every suite this project owns.** Every `kind:'skill'` card in `CLASS2` that states a figure, read against the handler that actually runs, aliases chased to the last assignment. Static, no launch; **section V's map is what makes it cheap**, since 45 of 128 skills are another class's function and thirteen shared handlers cover most of the cards. **Thirteen disagreements**, and they cluster rather than scatter — the two oldest kits (warrior, ranger) and the one `barrier` handler four classes share, where `ok?0.5:0.35` pays 50% to four cards that say 35% and matches only the Paladin's, which is plainly the card it was written for. The clean rows are named rather than counted (Beam 2x, Nova 1.4x, Gravity Well 1.3x, Overload 3.4x, Soul Cleave 2.1x, Holy Ground 2.2x, both Shield Bashes 1.7x, Sic 'Em 1.6x, Mend 30%/10%). **Exactly one row is takeable** — `w_charge`, whose card says 1.6x against one literal `1.5` at one site — and it ships as pass 53. Every other disagreement is the code being MORE generous than the card, so making it honest is a nerf to something a player already has: Oliver's, by this plan's standing rule. **The row to put to him first is Hunter's Mark**, which is not only a rider: +18% on the card, `dmg*=1.4` at both read sites, **and the +10% crit clause has no implementation anywhere** — whichever number he picks, half that card is still unbuilt. `x_wraith`'s missing 5 points looks takeable and is not: 65% against a 60% brace that four other skills also set, so reaching it means composing a reaper-only factor onto a shared line, which is designing. `docs/SKILL_TRIAGE.md` section Y |

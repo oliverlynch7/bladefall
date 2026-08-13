@@ -12422,7 +12422,14 @@ const MP={
     for(const a of en){ const mid=a[0]; seen[mid]=1; if(this._killed[mid]) continue; let e=this.byMid(mid);
       if(!e){ const type=this.ekey(a[1]); if(!type) continue; let ne=null; try{ ne=spawnEnemy(type,a[2],a[3]); }catch(err){ continue; }
         if(ne){ ne.mid=mid; ne.active=true; ne.dropT=0; ne.mirror=true; ne.hp=a[4]; if(a[5])ne.maxHp=a[5]; if(ne.boss)G.boss=ne; } }
-      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e; } }
+      else { if(a[5]) e.maxHp=a[5]; e.hp=Math.max(0,Math.min(e.maxHp||a[5]||a[4],a[4])); if(e.boss)G.boss=e;
+        /* The host's position becomes a TARGET the update lerps toward, never a teleport — a snapshot
+           lands between frames and a 14 Hz jump of a charging body is visible. Only when slot 6 says
+           the host has this enemy AWAKE: for a mob the host has not woken, x,z is an untouched spawn
+           point, and adopting it would drag back every monster a guest engages alone. a[6] undefined
+           (an older peer, or a packet from before the flag existed) leaves e.mx alone, so this fails
+           safe to exactly the pre-flag behaviour. */
+        if(a[6]){ e.mx=a[2]; e.mz=a[3]; } } }
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -13460,6 +13467,13 @@ function update(dt){
         if(d<300 && e.atkTimer<=0){ e.windT=e.elite?0.42:0.55; e.windMax=e.windT; e.atkTimer=e.elite?1.8:2.8; playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
+    /* CO-OP: pull this body toward where the host says it is. Placed after every movement branch and
+       BEFORE the obstacle/edge guard below, so the game's own rules validate the correction — a pull
+       into a wall is resolved and a pull onto a hazard is caught by enemySupport, exactly as the
+       enemy's own movement is. k is MP.tick's own peer constant, so nothing here is a new number.
+       MP.guest(), not MP.active: a host must never correct itself against its own snapshot. Arena
+       bots continue out of this loop above, so they are excluded by construction. */
+    if(MP.guest() && e.mx != null){ const mk = Math.min(1, dt*12); e.x += (e.mx-e.x)*mk; e.z += (e.mz-e.z)*mk; }
     if(e.kind!=='fly'&&e.kind!=='goblin'){
       resolveObstacles(e,e.r,null,ECLIMB);            // columns/walls block them; platforms are climbable
       const sup=enemySupport(e);                      // ground/mover/platform under them

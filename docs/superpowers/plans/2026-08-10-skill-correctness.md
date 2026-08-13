@@ -533,6 +533,7 @@ which points straight at Task 2 and then at whatever this paragraph names.
 
 | pass | row | commit | how it was proven |
 |---|---|---|---|
+| 43 | **U — nine classes' basic attacks never reach their own identity hook** | this run | `harness/probes/basichook.probe.js`, THREE trials in one launch on one geometry: a stormcaller's REAL basic attack landed (81 damage, `projectilesFired 1`, `landedAtTick 25`) and arced to **nobody**; the melee door `hitEnemy(tgt,60,p,…)` arced to **two** at 26 each; and the projectile step's own call shape `hitEnemy(tgt,60,{x,z},…)`, transcribed, arced to nobody. So the difference is the **src identity** and not aim, flight time or the weapon. `CLASS_BASIC` is dispatched from one line (10921, `src===G.p && !G._desig`) and the projectile step passes a synthetic src carrying the SHOT's position (13522) because knockback is thrown from the bolt, not the caster. **The fix is one line and the switch-on is Oliver's**: it would turn on nine classes' authored-but-never-played economies at once (a mage paying 6 mana per basic hit for ×1.35, a warlock 3% of his health for ×1.4, a pirate's ×2.3 pistol, a ranger's 0.75–1.35 spacing), which is the largest balance change available in this game. `docs/SKILL_TRIAGE.md` section U. **Found by section V's sweep**, not from the triage list |
 | 41 | **Q — warrior Juggernaut resisted no knockback** | `c09dbd8` | `harness/probes/juggernaut.probe.js`, three halves in one launch with two trials each: the passive half took **179** knock-away (= 210 × 0.85) against the control's 210, with damage 45 (= 49 × 0.92) confirming the already-wired half was untouched. The card's own 15%, so nothing was invented. The VERTICAL pop is deliberately not scaled — `hurtPlayer`'s own comment records the launch as this file's stagger, and "stagger" is a word on Heavy Hands' card and Unyielding's, not on this one |
 | 42 | **T — the bench had cast HALF the game's skills, 64 of 128, for its whole life** | this run | A BENCH pass, like passes 3 and 30, and taken for the reason the paragraph above this table gives: no skill row was known, and the two previous times that happened it was answered by WIDENING A SWEEP. `cheatRank10All` fills every build with `def['r'+r].a.id`, so the A side is all `c2CurSkills()` has ever returned. Measured before anything was built (`harness/probes/bside.probe.js`, one launch): **128 options, 64 a / 64 b, `defaultsAllA: true` for all sixteen classes** — the game's own answer, not an inference off the cheat's source — plus `deadCount 0`, which is section A's fault asked of all 128 and finding no survivors on either side, and `switchable: ok`, which is what made it takeable. The bench now casts both sides in one launch (only the skill ranks flipped; the passives at 3/5/7/9 stay on their A pick, so the pick is the only variable): **70 pass / 3 fail / 2 unproven → 139 pass / 5 fail / 4 unproven at `64 A-side + 64 B-side casts`**, and the split is printed from now on. **The other 64 gave exactly two rows.** `berserker/Bloodguard` was a FALSE ACCUSATION and the parser's fault — *"heavy damage reduction"* read as a damage promise because `DEFENSIVE` carried `\breduce`, which cannot match "reduction" any more than `\bdamage` can match "damaging"; fixed to `\breduc`, pinned by `harness/test/claims.test.js` with the old regex transcribed and asserted to DISAGREE, watched to fail, and re-run against the live game where the row is gone. `monk/Roll` is real, confirmed on two separate launches, and **Oliver's**: `mon_roll` and `r_tumble` are ONE handler (10333 / 10301 → 9935) which dodges, i-frames and snares and strikes nothing, so it is `ranger/Tumble`'s own section C/J row arriving on a card nobody had ever cast — now in `harness/baseline.json` as a newly-VISIBLE pre-existing failure, not a regression. Answering it settles three cards at once; the third, `pirate/Roll`, is in the same state and PASSES, because *"parting shot"* contains none of the parser's damage keywords |
 
@@ -744,6 +745,43 @@ light appear. The runaway timer needed its own measurement, and it got one: a co
 kinematic bar (six frames after the window — did the body still move) that was watched to fail
 against the unfixed game before it was believed. **A triage row can contain more than one fault, and
 only some of them are the harness's to see.**
+
+**AND THE SWEEP WAS WIDENED ONCE MORE, 2026-08-12 — this time over SKILL HANDLER IDENTITY — and it
+found the largest single fault this sub-project has produced (pass 43, section U).** The paragraph
+above the pass table said, for the third time, that no takeable skill row was known and that the
+answer both previous times was to widen a sweep. This is the third.
+
+**The sweep is `harness/probes/samefx.probe.js` and its question is one nothing had asked: which of
+the 128 skills are LITERALLY THE SAME FUNCTION?** `SKILL_FX` is assembled by aliasing across three
+regions plus a fallback block plus the rewrite block where the last definition wins, so identity is a
+runtime fact — the probe groups all 128 by `SKILL_FX[fx]` object identity rather than parsing the
+alias lines. **128 skills, 83 distinct bodies, 23 shared groups**, full map in `docs/SKILL_TRIAGE.md`
+section V. Its two fault shapes came back EMPTY and that is worth keeping: no 1-of-2 choice offers the
+same body on both sides (`sameRank 0`) and no class's kit holds one body twice (`sameClass 0`). A
+same-rank collision would pass every test in this harness — both options have a live handler, and the
+bench now casts both and would get the same effect twice without noticing.
+
+**What it did produce is a lead, and the lead is where the fault was.** `stormcaller/Chain Bolt` —
+*"Rapid bolts that leap to a nearby foe"*, the rank-2 skill the class is named after — sits on
+`SKILL_FX.m_bolt`, the mage's single `pierce:1` projectile. Asking where a chain COULD come from led
+to `CLASS_BASIC.stormcaller`, the hook passes 37–40 wired, and from there to the line that dispatches
+it: **`src===G.p`, which a projectile hit can never satisfy.** Nine of sixteen classes attack at
+range. Measured three ways in one launch (the row above); the mechanism is pinned to the src identity
+and not to aim, flight time or the weapon.
+
+**Two things follow for the next run, and the second is the more useful.**
+- **Section U's fix is Oliver's**, not because a number has to be invented — nothing does, and the
+  file already carries per-projectile state into `hitEnemy` through `G` at that exact call site — but
+  because switching it on plays nine classes' authored-and-never-played economies for the first time.
+  One sentence from him unblocks a one-line commit and a re-measure with the committed probe.
+- **The general rule this makes explicit: a probe that deliberately takes a simpler door to measure an
+  effect cannot say the effect is REACHABLE.** `overcharge.probe.js` states in its own comment that it
+  rejected a real swing because a swing "measures aim and flight time as much as it measures the
+  chain". That was correct for measuring the arc and it is exactly why five passes' worth of verified
+  wirings turned out to be unreachable in play. Every probe in `harness/probes/` that drives an effect
+  through `hitEnemy`, `c2Passive` or a direct field assignment rather than through the button a player
+  presses is open to this, and **none of them has been re-read with that question in mind.** That is
+  the next sweep, and it needs no game change to run.
 
 ---
 

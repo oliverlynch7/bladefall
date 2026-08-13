@@ -2755,3 +2755,167 @@ The B side is not a neglected wing of the game; it is one bad card and one bad r
   the "for 4s" half of Soul Siphon's drain is not implemented. The heal and the damage both land, so
   the claim passes and this is not a failure; recorded because it is a real dead field and the next
   person to read that line should not have to grep for it twice.
+
+---
+
+## U. NINE CLASSES' BASIC ATTACKS NEVER REACH THEIR OWN IDENTITY HOOK — measured 2026-08-12, and the switch-on is Oliver's
+
+Found on `autopilot-merged`. It is not a skill, a passive or a card: it is **one comparison in
+`hitEnemy`**, and every wiring this document records under `CLASS_BASIC` is downstream of it.
+
+`CLASS_BASIC` (index.html:11300) is dispatched from exactly one line, **index.html:10921**:
+
+```js
+if(src===G.p && !(G&&G._desig)){
+  const _bh = CLASS_BASIC[meta.classId];
+  if(_bh){ try { const r = _bh(G.p, e, dmg); if(typeof r === 'number') dmg = r; } catch(err){} }
+}
+```
+
+A melee swing calls `hitEnemy(e,dmg,p,…)` (10801, `resolveSwing`) and satisfies it. **A projectile
+hit does not.** The projectile step calls (index.html:13522):
+
+```js
+hitEnemy(e, pr.dmg, {x:pr.x-pr.vx*0.01, z:pr.z-pr.vz*0.01}, pr.kb, effLifesteal(G.p), pr.el);
+```
+
+a **synthetic src carrying the SHOT's position**, because knockback is thrown away from where the
+bolt was rather than from where the caster stands (`e.hurtKbX=(e.x-src.x)/d*kf`, 10938). It is not
+`G.p`, so `src===G.p` is false, and the hook is skipped. **Nine of the sixteen classes attack at
+range** (`attackStyle:'mage'` or `'ranger'`), and their ordinary attack is a projectile.
+
+### It is measured, and the mechanism is pinned rather than inferred
+
+`harness/probes/basichook.probe.js`, **three trials in one launch on one geometry** — the same
+geometry `overcharge.probe.js` uses, a stormcaller at rank 9 holding Overcharge, its own Cracked Rod,
+a target 240 ahead and neighbours 80 / 140 / 900 units from it:
+
+| trial | the call | target lost | n1 | n2 | far | arcs |
+|---|---|---|---|---|---|---|
+| **real swing** | `playerAttack()`, ticked until the bolt landed (tick 25) | **81** | 0 | 0 | 0 | **0** |
+| **melee door** | `hitEnemy(tgt, 60, p, …)` — what a sword calls | 67 | 26 | 26 | 0 | **2** |
+| **synthetic src** | `hitEnemy(tgt, 60, {x,z}, …)` — 13522's own shape, transcribed | 61 | 0 | 0 | 0 | **0** |
+
+The real swing **landed** — 81 damage on the target, `projectilesFired 1`, `landedAtTick 25` — which
+is what makes its zero a real zero rather than a probe missing. Trial 3 agreeing with trial 1 and
+disagreeing with trial 2 is the point: the difference is the **src identity**, not aim, not flight
+time, not the weapon.
+
+### Why nothing caught it, which is the part worth carrying
+
+**Every probe that has ever exercised this hook took the melee door on purpose.**
+`harness/probes/overcharge.probe.js` says so in its own comment: *"A real swing was rejected for this
+bar: the stormcaller's starter is a magic weapon whose basic attack is a travelling projectile, so a
+swing measures aim and flight time as much as it measures the chain."* That was the right call for
+measuring an arc — and it is exactly why nobody ever asked whether a real shot reaches the hook at
+all. `harness/audit-fields.js` cannot see it either: the fields are written and read, by code that
+never runs.
+
+The hook **is** reachable for a ranged class in one case, and it is the wrong way round:
+`stabHit` (9803) and the ranger's point-blank knife (9744) both pass `p`. So a Skylancer's javelin
+tap, a Ranger's knife swipe and a thrown-knives point-blank stab all fire their identity —
+**a ranged class gets its identity only while standing in melee.**
+
+### What is dead right now, per class, read off the hook bodies
+
+| class | its `CLASS_BASIC` body | state in real play |
+|---|---|---|
+| stormcaller | the lightning chain, plus Overcharge / Charged / Galvanize / Storm Lord's arc (passes 37–40) | **dead** — staff |
+| mage | spends 6 mana (12 with Potent Weave), returns ×1.35 damage, Elemental Savant's element | **dead** — staff |
+| warlock | Blood Price: 3% max HP per hit, ×1.4 damage, `_bloodOwed` refunded on a kill | **dead** — staff |
+| necromancer | Harvest: five hits drop a corpse (pass 26) | **dead** — staff |
+| ranger | distance scaling 0.75–1.35, and Ambusher's spend (pass 11) | **dead at range**, alive on the knife |
+| pirate | the loaded pistol: BANG, ×2.3, Slippery's shove (pass 24), Cutthroat | **dead** for the shot |
+| skylancer | airborne ×1.5, Hunter's Eye (pass 14) | alive on the javelin tap, dead for a bow |
+| beastmaster | its aggro rider (10828, gated the same way) | **dead** — bow |
+| chronomancer | no `CLASS_BASIC` entry | n/a |
+
+Five separate passes in this sub-project's own log — 11, 14, 24, 26, 37–40 — were verified through
+the melee door and are, for the classes above, still not reachable by a player.
+
+### THE FIX IS ONE LINE AND THE DECISION IS NOT — this is Oliver's, by this plan's own rule
+
+The mechanism fix is small and needs nothing invented. The file already carries per-projectile state
+into `hitEnemy` through `G` at that very call site (`G._desig=!!pr.desig; G._crit=!!pr.pcrit`,
+13519), so the same idiom answers it: mark the projectiles `fireProjectile` pushes for a **basic**
+attack, carry that marker beside `_desig`, and let 10921 accept it. Knockback keeps the shot's
+position, so nothing about the existing feel of a projectile moves.
+
+**What moves is nine classes' damage and resource economy, all at once.** A mage would start paying
+6 mana per basic hit for ×1.35; a warlock 3% of his health per hit for ×1.4; a pirate's pistol shot
+would go to ×2.3 and start consuming `_loaded`; a ranger's arrows would scale 0.75–1.35 with
+spacing. Every one of those numbers is already authored in the file and **none of them has ever been
+played**, because none of them has ever run. Switching them on is not a bug fix a run can verify —
+it is the largest balance change available in this game, and `docs/VISION.md` puts balance numbers
+and class identity on the ask-first side. It is the same disposition `w_unyield` got (section E) and
+for a stronger reason.
+
+**What Oliver has to answer is one question**, and it is not per class: *turn the hook on for ranged
+basic attacks and play what the file already says, or leave it off and let the ranged classes'
+identities be rewritten to live somewhere a projectile reaches?* Either answer is one sentence, and
+the run that gets it can ship the line in a minute and re-measure with the probe above.
+
+---
+
+## V. FORTY-FIVE OF THE GAME'S 128 SKILLS ARE ANOTHER CLASS'S FUNCTION UNDER A NEW NAME — the map, measured
+
+Measured 2026-08-12 by `harness/probes/samefx.probe.js`, one launch, no game change. It is the sweep
+that produced section U, and the map is kept here so nobody has to pay for the launch twice.
+
+**`SKILL_FX` identity is a RUNTIME fact and this is measured as one.** The table is assembled by
+aliasing across three regions of index.html (10300–10404), a block of `x = x || y` fallbacks
+(10574–10582) and the rewrite block at 19223 where the last definition of an id wins.
+`audit-skills.js` says in its own header that a static reading of it would be a weaker second copy;
+this probe groups the 128 skills by `SKILL_FX[fx]` **object identity**, which cannot drift.
+
+```
+total 128, withBody 128, distinctBodies 83, sharedGroups 23
+sameRankCount 0        sameClassCount 0
+```
+
+**The two fault shapes came back empty, and that is a real negative finding.** No 1-of-2 choice
+offers the same function on both sides (`sameRank 0`) — a choice that is not a choice would pass
+every test in this harness, because both options have a live handler and the bench now casts both
+and would get the same effect twice without noticing. And no class's kit holds one body under two
+cards (`sameClass 0`).
+
+**What is left is cross-class sharing, and it is not automatically a bug** — sixteen classes over
+three cores are built on shared handlers by design, and `docs/VISION.md` priority #2 is about how a
+class FEELS, which is a judgement and Oliver's. The number is here so it is a number rather than an
+impression: **45 of 128 skills (128 − 83) are a body some other class also casts.** The biggest
+groups:
+
+| n | one body, these cards |
+|---|---|
+| 6 | mage/Nova · paladin/Light Burst · necromancer/Corpse Nova · chronomancer/Slow Field · monk/Stunning Palm · stormcaller/Static Field |
+| 5 | mage/Rune Barrier · paladin/Guard Up · necromancer/Bone Wall · chronomancer/Aegis · stormcaller/Storm Barrier |
+| 4 | warrior/Shockwave Stomp · paladin/Sky Hammer · berserker/Shockwave · monk/Dragon Kick |
+| 4 | mage/Elemental Bolt · necromancer/Plague Bolt · chronomancer/Time Bolt · **stormcaller/Chain Bolt** |
+| 4 | mage/Gravity Well · necromancer/Death Grip · chronomancer/Time Warp · stormcaller/Ball Lightning |
+| 3 | warrior/Shield Bash · paladin/Shield Bash · monk/Palm Strike |
+| 3 | warrior/Whirlwind · paladin/Holy Ground · monk/Whirl Kick |
+| 3 | warrior/Iron Guard · paladin/Taunt · berserker/Bloodguard |
+| 3 | ranger/Tumble · pirate/Roll · **monk/Roll** |
+| 3 | ranger/Shadowstrike · ninja/Shadow Strike · pirate/Boarding Strike |
+| 3 | ranger/Smoke Bomb · ninja/Smoke Bomb · pirate/Powder Smoke |
+| 3 | mage/Elemental Beam · chronomancer/Time Lance · stormcaller/Lightning Lance |
+| 3 | mage/Blink · chronomancer/Rewind · stormcaller/Thunder Step |
+| 3 | mage/Elemental Overload · chronomancer/Singularity · stormcaller/Chain Reaction |
+
+and nine pairs: warrior/Cleave–monk/Flurry, warrior/Execution–berserker/Execute,
+ranger/Volley–pirate/Broadside, ranger/Piercing Shot–pirate/Aimed Shot,
+ranger/Spike Trap–pirate/Powder Keg, ranger/Hunter's Mark–ninja/Death Mark,
+ranger/Death Mark–pirate/Cannonade, reaper/Shadow Step–ninja/Shadow Step,
+ninja/Blade Fury–berserker/Berserk.
+
+**Two rows in that table are already known faults, which is the map's own validation.** `monk/Roll`
+is section T2, found by hand when the B-side bench first cast it. And **`stormcaller/Chain Bolt`** —
+*"Rapid bolts that leap to a nearby foe (~2s, softer each)"*, the rank-2 skill the class is named
+after — is `SKILL_FX.m_bolt`, the mage's single projectile: `pierce:1`, one body, no leap. Chasing
+where a chain COULD come from is what turned up section U.
+
+**Cards worth reading against the body they share, for whoever takes this next** (a promise its body
+demonstrably cannot keep is a bug, not a design call): chronomancer/Slow Field and stormcaller/Static
+Field both ride `nova`, which does slow (`e.slowT=2.5`) — clean; paladin/Taunt says *"Pull nearby
+foes to you"* on `bulwark`; necromancer/Plague Bolt is already recorded in section E as landing the
+weapon's burn and nothing of its own.

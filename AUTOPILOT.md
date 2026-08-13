@@ -192,6 +192,26 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     answers "is this standing on the ground" in numbers. It exists because that exact question
     was argued twice from source and twice from screenshots and got a different answer each time;
     the InstancedMeshes are now named `w3d:<model>` so they can be read back.
+  - **ANY PROBE THAT DRIVES THE PLAYER FOR MORE THAN A FEW SECONDS WILL HAVE THE GAME STOP UNDER IT,
+    AND IT LOOKS LIKE DATA** (found 2026-08-12, `autopilot-merged`). `update()` returns at its third
+    line unless `mode === 'play'` (index.html:13038), and `__BF3` exports `mode` as a **getter with no
+    setter** (19722) — so nothing a probe can assign puts the game back, and a probe that keeps
+    calling `B.update(1/60)` into a stopped world gets a full run's worth of plausible zeroes.
+    Measured on `harness/probes/mp-drift.probe.js`, whose 1800-tick lap of The Outskirts **stopped at
+    tick 438**: the player reaches x −17, z 489 and the **Warden's Shade** raises its card, `mode`
+    goes to `'menu'`, and the remaining 22.7 seconds measured nothing. The number it produced was
+    published in three documents as a thirty-second reading. **It is not only death** — two earlier
+    runs fixed the observer dying and the freeze survived both, because the observer was alive
+    (`hp:100, dead:false`) the whole time.
+    Every zone has these: a story NPC, a level-up card, an area briefing. The fix is to knock on the
+    game's own door — `#shadeGo`, `#hubTutGo` and `#resBtn` are all wired directly to `resumePlay`
+    (1300 / 4315 / 16732) — and **never to blind-click the first button in the overlay**, which is
+    how `tutSkip` once took a whole class trial with it (see `--scene trial` above).
+    **Report the receipt or the failure stays silent:** count the ticks that actually ran in play mode
+    and print them beside the ticks asked for. `mp-drift` now says `playTicks 1800 of 1800` and
+    `doorsUsed {shadeGo:1}`. A probe that cannot say this cannot tell a quiet world from a stopped
+    one, and `harness/probes/mp-mode.probe.js` is the committed diagnostic that names WHEN the game
+    left and WHICH card did it, so the next run reads it rather than bisecting fifty assignment sites.
   - `public/stress/` — device capability test. Oliver's phone: 60fps at 64 animated characters.
   - `_balance/`, `_duel/` — class DPS profiles and bot-vs-bot win matrices. **Gitignored like
     `_shot/` (the `/_*` rule), and unlike `_shot/` there is NO committed source of record**, so a

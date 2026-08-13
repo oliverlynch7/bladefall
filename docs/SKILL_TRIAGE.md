@@ -3478,3 +3478,52 @@ followed by `x` or `%`, then each `fx:` id chased through the alias chain to its
 and the literal read off. No launch. **Re-run it after any kit change** — this is a static sweep of a
 file two other sweeps have already been shown to outgrow (section X's census moved from 137 sites to
 161 in a day), so the bound is a measurement with a date on it and not a constant.
+
+### FIXED 2026-08-13 — `warrior/Charge` is on its card, and the probe is a BAR rather than a delta
+
+Pass 53. The one takeable row section Y had, shipped as its own commit. The edit is a single character
+at `public/3d/index.html`: `wcharge`'s `*1.5*` → `*1.6*`, which is the number the card at 2039 already
+sells (*"Rush through enemies for 1.6x damage and stun them"*). `wcharge` has exactly one damage
+literal, so nothing was chosen.
+
+**This work was written and verified by the 08:04 run, and then STASHED by a red gate that had nothing
+to do with it** — `stash@{0}`, *autopilot gate-red 2026-08-13 08:27*, red on two `mp:/ping target:`
+rows. It was recovered here and, per this document's standing rule, **re-measured rather than
+trusted.** The gate that ate it is itself fixed in the same run; see the harness-hardening plan,
+Task 7.
+
+`harness/probes/charge.probe.js`, unmodified, on the recovered tree:
+
+```
+chargeIsOnItsCard          true      <- the bar
+chargeIsStillTheOldNumber  false     <- and the probe can still see 1.5, so true/true is impossible
+ratios.chargeOverStomp     1.000     (A: Charge 105, Shockwave Stomp 105)
+ratios.whirlOverStomp      1.371     (B: Whirlwind 144, Shockwave Stomp 105)
+clean                      true      playTicks 160 of 160, sameRig true, threwAnywhere false
+weapon                     Rusty Sword ("own starter")
+```
+
+**Read this as a BAR, not as a before/after, and the distinction is the honest part.** No before
+reading was taken on an unmodified tree in this run — the recovered edit was already in place when the
+run picked it up. It does not need one: the probe's claim is an ABSOLUTE relation between two skills
+cast at the same body with the same weapon in the same launch, so `chargeOverStomp == 1.000` is the
+whole finding and `chargeIsStillTheOldNumber == false` is the probe reporting, in its own words, that
+the number it is looking at is not 1.5. The 08:04 run's before/after pair (0.933 → 1.000, Charge's
+dealt 84 → 90) is recorded above it in the plan and is that run's evidence, not this one's.
+
+**Absolutes are exactly what is not compared here.** This launch's control cell reads 105 where the
+08:04 run's read 90 — a different starter roll, the same reason two launches of this probe once read
+the identical control at 4.2973 and 5.0278 (pass 49). A run comparing dealt damage across launches
+would have called this fix a +17% one. Within the launch, `whirlOverStomp` is the half that must not
+move: Whirlwind is the b-side of Charge's own rank and the closest thing in the game this edit could
+splash onto, and it sits at 1.371 against Charge's 1.000 rather than moving with it.
+
+**The berserker is untouched, and it was checked rather than assumed:** `bsk_charge` aliases this body
+at 10374 and is then REDEFINED as Headlong at 19711, and the last assignment wins. That note is in the
+game file at the edit site as well as here.
+
+**Section Y is now spent.** Its other twelve disagreements all run the other way — the code is MORE
+generous than the card — so making each honest is a nerf to something a player already has, and those
+stay Oliver's. **Hunter's Mark is still the row to put to him first**: +18% on the card against
+`dmg*=1.4` at both read sites, and the +10% crit clause has no implementation anywhere, so whichever
+number he picks, half that card is still unbuilt.

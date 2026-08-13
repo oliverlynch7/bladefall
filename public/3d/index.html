@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.955.0-autopilot';
+const VERSION3D='1.956.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -9911,7 +9911,16 @@ const SKILL_FX={
       hitEnemy(e,dmg,p,ok?520:200,effLifesteal(p),null); }
     for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:p.x+Math.cos(a)*26,y:3,z:p.z+Math.sin(a)*26,vx:Math.cos(a)*160,vy:60,vz:Math.sin(a)*160,life:0.4,color:'#e8c27a',sz:3}); } },
   wcharge(p,ok,am){ p.chargeDash=0.32; p.dashX=Math.sin(p.yaw); p.dashZ=Math.cos(p.yaw);
-    p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.5*am*(ok?1:OFFCLASS_MUL);
+    /* 1.6, not 1.5: the card at 2039 says "Rush through enemies for 1.6x damage and stun them" and
+       this is the skill's one and only damage literal. Nothing is chosen - the number is the card's.
+       Found by the skill-card NUMBER sweep (docs/SKILL_TRIAGE.md section Y), which exists because
+       harness/claims.js reads which KIND of promise a card makes and test-skills.js's own header says
+       "the bar is EFFECT, not number" - so a magnitude had never been checked by anything here.
+       Section Y's other twelve disagreements all run the other way (the code is MORE generous than
+       the card), so making those honest is a nerf and stays Oliver's; this one adds what is already
+       sold. THE BERSERKER IS NOT AFFECTED: bsk_charge aliases this body at 10374 and is then
+       REDEFINED as Headlong at 19711, and the last assignment wins. */
+    p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
     for(const e of combatTargets()) e._chHit=false; p.invuln=Math.max(p.invuln,0.2); SFX.dodge(); },
   berserk(p,ok,am){ p.berserkT=6; SFX.growl(1); toast('🔺 BERSERK!'); G.shake=Math.min(G.shake+5,10);
     burst(p.x,p.y+30,p.z,'#ff5a3a',18); },

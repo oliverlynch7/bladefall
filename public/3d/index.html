@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.951.0-autopilot';
+const VERSION3D='1.952.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11272,7 +11272,20 @@ function checkStageClear(){
 function foeName(e){ if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
-function foeHit(e,atk){ return {name:foeName(e), attack:atk||'a strike'}; }
+/* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
+   `.attack`, so the extra field disturbs nothing — but until it existed, the two passives that
+   return damage to "whoever dealt it" had nobody to return it to: `hurtPlayer`'s `by` is this
+   descriptor at every real damage site in the game, it satisfies a `by && !by.dead` guard
+   completely, and `hitEnemy` wrote the reflected damage onto a throwaway object.
+   docs/SKILL_TRIAGE.md section W. */
+function foeHit(e,atk){ return {name:foeName(e), attack:atk||'a strike', src:e}; }
+/* Who can be hit BACK. `hp != null` is the whole check and it is applied to whatever it is handed:
+   a body carried in `.src`, or `by` itself if a caller ever passes a combatant. It is NOT a
+   fall-back to `by` — a `{name, attack}` descriptor has no `hp` and can never pass it, which is
+   the entire bug this exists to close. Hazards (lava, geysers, falling masonry) and a dying mob's
+   lingering trail carry no body and correctly return null: there is nothing there to hit. */
+function canBeHitBack(o){ return (o && typeof o === 'object' && !o.dead && o.hp != null) ? o : null; }
+function attackerOf(by){ return canBeHitBack(by && by.src) || canBeHitBack(by); }
 // ===== NINJA EVASION — the ninja's signature: enemy attacks can simply MISS, and every dodge
 // stacks a boost that makes the ninja hit harder (evasion snowball, see effPower). =====
 const NIN_EVADE_CAP=5;
@@ -11599,9 +11612,12 @@ function hurtPlayer(dmg,sx,sz,by){
      run and dying to a floor. */
   /* Stillness: while it runs and you are not moving, what hits you is returned doubled to whoever
      threw it. Movement cancels the benefit rather than the state, so it stays a discipline. */
-  if((G.p._stillnessT||0)>0 && Math.abs(G.p.vx||0)+Math.abs(G.p.vz||0) < 6 && by && !by.dead){
-    try{ hitEnemy(by, Math.round(dmg*2), G.p, 120, 0, null);
-         addText(G.p.x,G.p.y+40,G.p.z,'RETURNED','#ffe6ad'); }catch(e){}
+  if((G.p._stillnessT||0)>0 && Math.abs(G.p.vx||0)+Math.abs(G.p.vz||0) < 6){
+    const _atk = attackerOf(by);
+    /* The floater lives INSIDE the guard: telling the player RETURNED while returning nothing to
+       nobody is worse than saying nothing at all. */
+    if(_atk){ try{ hitEnemy(_atk, Math.round(dmg*2), G.p, 120, 0, null);
+                   addText(G.p.x,G.p.y+40,G.p.z,'RETURNED','#ffe6ad'); }catch(e){} }
   }
   dmg=dmg*tPlayerTake();
   /* THICK ARMOR, rewritten. Was "take 12% less damage from every source" - a number you could not
@@ -11692,9 +11708,13 @@ function hurtPlayer(dmg,sx,sz,by){
        p.reflectT just below at 1.5x, and the monk's Stillness at 11170, whose hitEnemy(by,…) inside a
        try/catch is the shape this copies. The paladin reaches the brace through its own default kit
        (pal_bash is w_bash, pal_taunt is bulwark). */
-    if(meta.classId==='paladin'&&c2Passive('pal_bounce')&&by&&typeof by==='object'&&!by.dead&&_blocked>=1){
-      try{ hitEnemy(by,Math.round(_blocked),p,0,0,null);
-           addText(p.x,p.y+46,p.z,'BOUNCED','#ffe6ad'); }catch(e){}
+    if(meta.classId==='paladin'&&c2Passive('pal_bounce')&&_blocked>=1){
+      /* `by` used to be tested directly here and it passed on a `{name, attack}` pair, so this
+         reflected onto a throwaway and still printed BOUNCED. The floater is inside the guard now
+         for the same reason as Stillness's above. */
+      const _atk = attackerOf(by);
+      if(_atk){ try{ hitEnemy(_atk,Math.round(_blocked),p,0,0,null);
+                     addText(p.x,p.y+46,p.z,'BOUNCED','#ffe6ad'); }catch(e){} }
     }
   }
   if(p.reflectT>0){ for(const e of combatTargets()){ if(!e.dead&&dXZ(e.x,e.z,p.x,p.z)<200) hitEnemy(e,dmg*1.5,p,120,0,null); } }   // Last Stand throws it back
@@ -12773,7 +12793,7 @@ function fireBotShot(e,p,D){ if(!G) return; const w=e.weapon||{}, pr=w.proj||{};
   const el=w.el||(e.style==='mage'?'arcane':null), col=w.blade||e.color||'#ffd28a';
   const baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
   for(let i=0;i<count;i++){ const a=baseYaw+(i-(count-1)/2)*spread;
-    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' bot',foeBot:(G&&G.duel?e.foe:null),
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:'the '+((BOT_DIFF[e.botDiff]||{}).label||'')+' bot',src:e,foeBot:(G&&G.duel?e.foe:null),
       x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
       gravity:0,size:pr.size||6,color:col,shape:pr.shape||(e.style==='mage'?'orb':'arrow'),glow:el?1:0,dmg,kb:120,pierce:0,el,life:1.5,hitSet:[]}); }
   try{ e.style==='mage'?(SFX.magic&&SFX.magic(el||'arcane')):(SFX.shoot&&SFX.shoot()); }catch(_){}
@@ -12794,12 +12814,12 @@ function botSlam(e,p,D,o){ o=o||{}; const dmg=Math.max(4,Math.round(e.dmg*(o.dm|
 function botVolley(e,p,D,o){ o=o||{}; const n=o.count||5, spread=o.spread||0.16, sp=o.speed||620, oy=(e.y||0)+26;
   const dmg=Math.max(3,Math.round(e.dmg*(o.dm||0.7))), baseYaw=Math.atan2(p.x-e.x,p.z-e.z);
   for(let i=0;i<n;i++){ const a=baseYaw+(i-(n-1)/2)*spread;
-    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),foeBot:(G&&G.duel?e.foe:null),x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
+    (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),src:e,foeBot:(G&&G.duel?e.foe:null),x:e.x+Math.sin(a)*20,y:oy,z:e.z+Math.cos(a)*20,vx:Math.sin(a)*sp,vy:0,vz:Math.cos(a)*sp,
       gravity:0,size:o.size||6,color:o.col||e.color,shape:o.shape||'arrow',glow:o.el?1:0,dmg,kb:120,pierce:0,el:o.el||null,life:1.5,hitSet:[]}); }
   try{ (o.el?(SFX.magic&&SFX.magic(o.el)):(SFX.shoot&&SFX.shoot())); }catch(_){} }
 function botBolt(e,p,D,o){ o=o||{}; const sp=o.speed||640, oy=(e.y||0)+26, d=Math.max(1,Math.hypot(p.x-e.x,p.z-e.z)), tt=d/sp;
   const dmg=Math.max(4,Math.round(e.dmg*(o.dm||1.4))), vx=(p.x-e.x)/tt, vz=(p.z-e.z)/tt, vy=((p.y+22)-oy)/tt, col=o.col||'#c9a6ff';
-  (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),foeBot:(G&&G.duel?e.foe:null),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:0,
+  (G.projectiles=G.projectiles||[]).push({owner:'enemy',srcName:botName(e),src:e,foeBot:(G&&G.duel?e.foe:null),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:0,
     size:o.size||16,color:col,shape:o.shape||'runeorb',glow:1,trail:col,dmg,kb:220,pierce:o.pierce||0,el:o.el||null,life:1.7,hitSet:[]});
   try{ skillRing(e.x,e.z,col,col,70); burst(e.x+Math.sin(e.yaw)*18,oy,e.z+Math.cos(e.yaw)*18,col,12); SFX.magic&&SFX.magic(o.el||'arcane'); }catch(_){} }
 function botDashStrike(e,p,D,o){ o=o||{}; const dx=p.x-e.x,dz=p.z-e.z,d=Math.max(1,Math.hypot(dx,dz));
@@ -13346,12 +13366,12 @@ function update(dt){
         if(!t.dead && (t.invuln||0)<=0 && (t.dodgeTimer||0)<=0 && Math.abs(dXZ(t.x,t.z,sw.x,sw.z)-sw.r)<28 && !sw.hitFoe){ sw.hitFoe=true; if(t.foe) botHurtFoe(t.foe,sw.dmg); }
         continue; }
       let inArc=true; if(sw.arc){ const ax=p.x-sw.x, az=p.z-sw.z, dl=Math.hypot(ax,az)||1; inArc=(ax/dl*sw.dirX+az/dl*sw.dirZ)>Math.cos(sw.arc); }
-      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow'}); } }
+      if(p.invuln<=0 && p.dodgeTimer<=0 && p.y<42 && inArc && Math.abs(dXZ(p.x,p.z,sw.x,sw.z)-sw.r)<28 && !sw.hitPlayer){ sw.hitPlayer=true; hurtPlayer(sw.dmg,sw.x,sw.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a sweeping blow',src:G.boss||null}); } }
     G.shockwaves=G.shockwaves.filter(sw=>(sw.delay>0)||sw.r<sw.maxR); }
   if(G.collapse && G.collapse.length){ for(const tl of G.collapse){   // Void Tyrant: telegraphed floor tiles drop away, then re-form
       if(tl.warn>0){ tl.warn-=dt; if(tl.warn<=0) tl.open=1.4; }
       else { tl.open-=dt; tl.hit=Math.max(0,(tl.hit||0)-dt);
-        if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a ground slam'}); } } }
+        if(tl.open>0.2 && tl.hit<=0 && p.y<24 && p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,tl.x,tl.z)<tl.r){ tl.hit=0.6; hurtPlayer(Math.max(6,(G.boss?G.boss.dmg:14)*0.7),tl.x,tl.z, {name:(G.boss?foeName(G.boss):'the boss'),attack:'a ground slam',src:G.boss||null}); } } }
     G.collapse=G.collapse.filter(tl=>tl.warn>0||tl.open>0); }
   if(G.trails && G.trails.length){ for(const tr of G.trails){ tr.life-=dt; tr.hit=Math.max(0,(tr.hit||0)-dt);   // magma-trail patches: linger, burn on contact
       if(tr.life>0 && tr.hit<=0 && p.invuln<=0 && p.dodgeTimer<=0 && p.y<28 && dXZ(p.x,p.z,tr.x,tr.z)<tr.r+p.r){ tr.hit=0.5; hurtPlayer(tr.dmg,tr.x,tr.z, tr.cause||{name:'the burning ground',attack:'a magma trail'}); } }
@@ -13530,7 +13550,7 @@ function update(dt){
     } else {
       const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
       if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
-      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01, {name:pr.srcName||'a ranged foe', attack:'a ranged attack'}); pr.life=0; }
+      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01, {name:pr.srcName||'a ranged foe', attack:'a ranged attack', src:pr.src}); pr.life=0; }
     }
     if(pr.y<-4 && !pr.axe) pr.life=0;
     // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
@@ -13687,7 +13707,7 @@ function bossShoot(e,p){
     const ang=baseAng+(cfg.count>1?(i-(cfg.count-1)/2)*cfg.spread*2.2:0);
     const vx=Math.sin(ang)*cfg.speed, vz=Math.cos(ang)*cfg.speed;
     let vy=((p.y+p.h*0.5)-oy)/t; if(cfg.gravity) vy+=cfg.gravity*0.5*t;
-    G.projectiles.push({owner:'enemy',srcName:foeName(e),x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
+    G.projectiles.push({owner:'enemy',srcName:foeName(e),src:e,x:e.x,y:oy,z:e.z,vx,vy,vz,gravity:cfg.gravity||0,size:cfg.size,color:cfg.color,shape:cfg.shape,glow:cfg.glow||1,dmg:e.dmg*0.8,kb:120,pierce:0,el:cfg.el||null,life:2.6,hitSet:[]});
   }
   if(cfg.el) SFX.magic(cfg.el); else SFX.shoot(); // arrows thwip, spells cast by element
 }
@@ -19750,6 +19770,12 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
+  /* foeHit is exported for the same reason surfaceHeightAt is: harness/probes/bounceby.probe.js
+     TRANSCRIBED its `{name, attack}` return to test who `hurtPlayer` is handed, and the day the
+     shape gained `src` the transcription became a copy of a shape the game no longer produces —
+     still passing, still measuring nothing. A probe that wants the game's descriptor should get
+     the game's descriptor. */
+  foeHit, attackerOf,
   grantIansShard, completeIansBlade, claimIansBlade, iansShardCount, iansHasAllShards, iansBladeName, IANS_SHARDS, IANS_FORGE_LEVEL, IANS_FORGE_GOLD, get STORY(){ return STORY; },
   masteredStarters, SEAL_COST, openTrainer, openClasses, trainerEquipClass, STARTERS,
   abandonTrial, restoreBank, bankNow,   /* exported so the harness can test trial ABORT, which is where A2 lived */

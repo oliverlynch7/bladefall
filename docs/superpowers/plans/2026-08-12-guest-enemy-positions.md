@@ -50,7 +50,10 @@ puts first.** What the desync actually costs is that co-op is two solo games in 
 2. **The two players cannot fight the same monster, or warn each other about one.** A guest runs a
    complete independent AI simulation: in guest mode with **not one snapshot applied**, 39 of 41
    mobs moved, a mean of **52 units in a single second** (`mp-pos.probe.js`). Over 30s the two
-   pictures separate **380–562 units** (`mp-drift.probe.js`).
+   pictures separate **roughly 1000–1700 units** (`mp-drift.probe.js`; two independent launches gave
+   987–1641 and 990–1730). *(Written here as 380–562; that was a 7.3-second lap mislabelled as
+   thirty — corrected 2026-08-12, see Task 2 below. The error was in the direction of understating
+   the problem.)*
 3. **The ping added in sub-project D Task 5 points at nothing.** A world mark is sent as `{x,z}`.
    Marking the monster about to hit you puts the marker on empty ground on your friend's screen.
 
@@ -225,8 +228,121 @@ Measured: <n> bytes/packet before, <n> after, at 14 Hz. Flag reads 0 of 41 aslee
 - Modify: `public/3d/index.html` — `MP.applyEnemies` (12416) and the enemy update loop (13381)
 - Modify: `harness/probes/mp-drift.probe.js` — assert the correction, and assert the sleeping case
 
-**TASK 2'S CODE IS SHIPPED (`cb47393`) AND BOTH HALVES ARE MEASURED. STEPS 6 AND 7 ARE NOT DONE, AND
-THE REASON IS WORTH MORE THAN THE STEPS.** What is proven, on the live game:
+**THE FROZEN BENCH IS FIXED, 2026-08-12, AND IT WAS NEVER THE OBSERVER'S DEATH. STEPS 6 AND 7 ARE
+NOW ANSWERED — one of them in the direction the plan expected and one of them not.**
+
+`harness/probes/mp-mode.probe.js` (new) asked the game when it left play mode rather than guessing
+among the ~50 sites that assign it. One launch, one answer: **at tick 438 — 7.3s into an 1800-tick
+lap — the player reaches x −17, z 489 and the Warden's Shade raises its card.** `mode` goes to
+`'menu'` with the overlay up and exactly one button, `#shadeGo`, whose onclick *is* `resumePlay`
+(index.html:1300). The observer was alive the whole time (`hp:100, dead:false`); two previous runs
+fixed a death that was never the cause.
+
+The bench now knocks on that door, the idiom `harness/test-skills.js` already uses for the pause
+card, and only on doors whose handler is `resumePlay` — never a blind "click the first button in the
+overlay", which `AUTOPILOT.md` records taking `tutSkip` and skipping a whole class trial. It reports
+`playTicks` and `doorPresses`, so an interrupted lap says so in its own numbers: **`playTicks
+1800 of 1800`, `doorsUsed {shadeGo: 1}`, `mode: "play"` in every trial.**
+
+**FIRST CONSEQUENCE, AND IT IS A CORRECTION TO A NUMBER THIS WHOLE SUB-PROJECT QUOTES.** The lap was
+only ever live for 7.3 of its 30 seconds, so the drift figure recorded in `docs/MP_AUDIT.md`,
+`docs/BACKLOG.md` and this file's own "Why this exists" — *"over 30s the two pictures separate
+380–562 units"* — **is a 7.3-second number wearing a 30-second label.** Measured on a lap that
+actually runs for 30 seconds, on the same level with the same 41 enemies:
+
+| | net displacement, top of the table |
+|---|---|
+| recorded as 30s (really 7.3s) | 380–562 |
+| **an actual 30s** | **987, 1517, 1641, 1547** (path travelled up to 2018) |
+
+Against a melee reach of ~90–125. **The desync is roughly three times worse than the number this
+work was justified with**, which strengthens the case rather than weakening it.
+
+**SECOND CONSEQUENCE: `moved` STOPPED BEING A VALID BAR THE MOMENT THE WORLD STARTED RUNNING.** While
+the trials ticked a stopped game, `moved` was clean — nothing but the correction could move a body.
+On a live world the mobs are awake and chasing, so trials A and B now read `moved: 7` of 41 **from
+their own AI**, and a bar demanding 0 there would fail against a *correct* build. The verdict is now
+keyed on `targetsStored`, which is exactly what the wake flag gates (`applyEnemies` writes
+`e.mx/e.mz` only when slot 6 says awake) and which no amount of walking can reach:
+**0 / 0 / 41 / 41**, verdict `corrected only when the host is awake to it`.
+
+**Step 7's per-frame correction magnitude, on the traced subject** — the number that step asks for,
+and which is both cheaper and more honest than a still photograph of six distant mobs:
+
+```
+141.8  128.3  87.8  70.2  56.1  44.9  35.9  28.7  23.0  18.4
+ 14.7   11.7   9.4   7.5   6.0   4.8   3.8   3.1   2.5   2.0
+```
+
+Geometric at ratio ~0.8 = `1 − k` with `MP.tick`'s own `k = 0.2`; first frame 141.8 against
+707 × 0.2 = 141.4; the twenty steps sum to **700.6 of the 707-unit gap.** So a corrected body
+converges cleanly and **is not fighting its own AI** — the thing Step 7 exists to rule out. It settles
+to 2 units/frame against the AI's own 8.45-unit best step, well under it.
+
+**STEP 6'S ANSWER IS NOT "CONVERGED", AND THE PLAN'S LEADING EXPLANATION FOR WHY WAS WRONG.** Across
+all 41 bodies the residual after 20 frames is **535 of 707**, and `mp-look`'s 2-of-6 reproduces at
+population scale. The hypothesis on record was *"an arc slot over the river — the target is a
+position the edge guard is supposed to refuse"*, and the reading it named was the floor under the
+TARGET. That reading was taken and **it does not predict anything**: 20 targets floored against 21 in
+void, residual **462** versus **604**.
+
+**The floor under the target is the wrong number because the guard does not test the target.** It
+tests where the body lands after ONE 20% step (index.html:13480, `enemySupport` → `e.x=e.sx;
+e.z=e.sz`). Measured with that as the bar, on the same launch:
+
+| | trial C | trial D |
+|---|---|---|
+| refused entirely (net move ≤ 1 unit on a frame it was pulled 141) | **28** of 41 | **11** of 41 |
+| …whose first step lands in **void** | **28** | **11** |
+| …whose first step lands on **floor** | **0** | **0** |
+| guard-exempt kinds present (`fly`/`goblin` skip the guard, 13481) | 3 | 3 |
+| …of those, refused | **0** | **0** |
+
+**Every refused body, in both trials, was refused with its first step in void, and not one body with
+a floored first step was ever refused.** The guard-exempt kinds are the built-in control and they
+converge every time. That is a two-sided confirmation rather than a correlation: the edge guard is
+what holds the correction short, and it does so exactly and only when the intermediate landing spot
+has no floor.
+
+**THIS WHOLE SECTION WAS RE-RUN ON AN INDEPENDENT LAUNCH BEFORE IT WAS COMMITTED** (2026-08-12, the
+recovery run — the work above was stashed rather than committed and had to be read back out of
+`stash@{0}`, so none of it was taken on trust). **The refusal law reproduced exactly**: C `28 / 28 /
+0`, D `11 / 11 / 0`, `guardExemptButRefused 0` in both. So did the per-frame trace, digit for digit,
+`141.8 → 2.0`, and the verdict `targetsStored 0 / 0 / 41 / 41`.
+Two numbers in the table above did **not** come back the same and are corrected here rather than
+quietly left: the **guard-exempt population is 5, not 3** (the count of `fly`/`goblin` bodies holding
+a target varies with which mobs are alive and awake at the end of the lap — it is a control group
+size, and nothing above depends on it being 3), and trial C's mean residual came back **504 against
+535**. Both move with the same thing the drift table moves with — the mobs that engage the observer
+branch on where it is standing when they wake. **The load-bearing claims are the ones that held: a
+refusal count that is exactly the void-first-step count, and zero floored-first-step refusals.**
+
+**What that means for real play, stated carefully because the probe is synthetic.** A real host
+snapshot arrives at 14 Hz and moves a body a few units, so its first step is a few units from ground
+the body is already standing on — floored, and the correction lands. The 707-unit diagonal teleport
+this probe asks for is what manufactures void intermediate steps, so **most of the 28 is the probe's
+own doing and must not be reported as a live defect.** But it is not *only* the probe: it is a
+measured mechanism for the exact case this plan's Self-Review named as "the one to watch" — the host
+waking a mob the guest has already dragged hundreds of units away. There the first correction *is* a
+long step, and this says it can be silently refused rather than merely visible. **Two real machines
+remain the check, and this narrows what to look for: not rubber-banding, but a monster that does not
+come back at all.**
+
+Trial D (target = another live body's position, so the destination is standable by construction) was
+added to test the floored case end to end and **does not settle it** — its bodies are scattered by
+trial C first, so its gaps are ~1400 rather than 707 and its subject stops dead at frame 6. It
+reproduces the refusal law exactly (11 refused, 11 void-step, 0 floored-step) and nothing more is
+claimed from it.
+
+**What is still NOT proven, and Step 6 stays open for it:** the two-simulation lap the step actually
+asks for. Everything above is a single applied snapshot on one client. The honest weaker claim the
+step allows as a fallback is now fully measured and stated above; the lap-based number is not, and
+would need a second simulation of the same level in one page.
+
+---
+
+**Superseded, kept because the reasoning is what led here — what the run before this one recorded:**
+What is proven, on the live game:
 
 | | measured |
 |---|---|
@@ -340,12 +456,17 @@ now lives in the update — a probe that applies a snapshot and measures immedia
 `moved: 0` against a working fix. Tick at least 5 frames (four halve the gap; the probe should
 report the residual rather than assert a hard equality, since a lerp never exactly arrives).
 
-- [ ] **Step 6: Prove the drift it exists to remove is gone** — **OPEN.** The weaker claim this step
-      allows as a fallback is half-measured and is written above rather than here: a single applied
-      snapshot brought two of six mobs to 3 and 6 units of the host's position in 25 frames, and the
-      other four did not converge for a reason that has a leading explanation and no measurement.
-      Fix the frozen bench first; a lap-based drift number taken from it today would be a number that
-      was not measured.
+- [ ] **Step 6: Prove the drift it exists to remove is gone** — **STILL OPEN, but for a much smaller
+      reason than before, and the bench it was blocked on is fixed.** The fallback claim this step
+      allows is now fully measured and written above: a single applied snapshot converges a corrected
+      body to **2 units/frame residual over 20 frames, 700.6 of a 707-unit gap**, and where it does
+      not converge the cause is measured rather than guessed (the edge guard, refusing 28 of 28
+      void-first-step pulls and 0 of 0 floored ones). What is NOT done is the thing the step names:
+      a lap driven by a SECOND simulation of the same level at 14 Hz. That needs two worlds in one
+      page and nothing here has stood one up.
+      **The drift the step wants to compare against is also now a different number** — an actual 30
+      seconds is roughly 1000–1700 units, not the 380–562 this file was written with. See the
+      correction above.
 
 Part 2 of the same probe already walks the player a 30s lap and reports each mob's net
 displacement — 380–562 units today. Re-run it with a host snapshot applied at the real 14 Hz from a
@@ -357,8 +478,22 @@ If standing up a second simulation in one page proves impractical, say so in the
 to the honest weaker claim — a single applied snapshot converges the gap to under X units in Y
 frames — rather than reporting a number that was not measured.
 
-- [ ] **Step 7: LOOK at it, because rubber-banding is a picture, not a number** — **OPEN, and the
-      first attempt is kept because of what it says about how to do it.** `harness/probes/mp-look.probe.js`
+- [x] **Step 7: LOOK at it, because rubber-banding is a picture, not a number** — **DONE 2026-08-12,
+      as the number rather than the picture, which is what this step's own text asks for as the
+      cheaper half.** The per-frame correction magnitude on a corrected body is
+      `141.8 → 2.0` over twenty frames, geometric at `1 − k` for `MP.tick`'s own `k = 0.2`, summing
+      to 700.6 of a 707-unit gap. The bar this step sets is *"if a settled mob is being moved more
+      than its own AI step (8.45 units at the top end) every frame, it is fighting the correction"* —
+      it settles at **2.0**, comfortably under, so it is not. The trace lives in
+      `mp-drift.probe.js`'s trial rows as `perFrameStep`, so every future run of the bench reports it.
+
+      **The photograph is deliberately NOT claimed, and the reason is recorded rather than glossed:**
+      a still frame cannot show rubber-banding, which is what the first attempt below discovered the
+      expensive way. A trace of the correction magnitude is the honest instrument for a motion
+      artefact, and it is what this step asked for in its own second paragraph.
+
+      The first attempt is kept because of what it says about how to do it.
+      `harness/probes/mp-look.probe.js`
       puts an awake host snapshot in front of the camera and renders the result
       (`_shot/out/t2-look.png`). The frame is a clean, correctly-lit shot of the Outskirts road — and
       it does **not** show the arc legibly enough to be evidence either way, because a mob 220 units

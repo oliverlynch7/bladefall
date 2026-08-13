@@ -83,12 +83,53 @@ emits `[mid, typeId, x, z, hp, maxHp]`, and `MP.applyEnemies` (11733) reads `a[2
 the branch that spawns an enemy the guest has never seen**. For an enemy it already holds it writes
 `maxHp` and `hp` and nothing else. The data has been on the wire the whole time.
 
-## 2. How far apart can the two pictures get? 380–562 units in thirty seconds
+## 2. How far apart can the two pictures get? Roughly 1000–1700 units in thirty seconds
+
+> ### ⚠ THE ORIGINAL FIGURE IN THIS SECTION WAS 380–562, AND IT WAS SEVEN SECONDS CALLED THIRTY
+>
+> Corrected 2026-08-12. **The lap that produced the table below stopped after 7.3 of its 30
+> seconds and nobody could tell**, because a stopped game and a quiet one produce the same
+> table. `harness/probes/mp-mode.probe.js`: at tick 438 the player reaches x −17, z 489 and the
+> Warden's Shade raises its card, `mode` goes to `'menu'`, and `update()` returns at its third
+> line for the remaining 1362 ticks (index.html:13038). The observer was alive throughout —
+> two earlier runs fixed a death that was never the cause.
+>
+> `mp-drift.probe.js` now knocks on that card's own `#shadeGo` button (whose onclick *is*
+> `resumePlay`, 1300) and reports `playTicks` so the failure can never be silent again:
+> **1800 of 1800, one door press.** Re-measured on a lap that actually runs for 30 seconds, same
+> level, same 41 enemies:
+>
+> | enemy | radius | travelled | net displacement |
+> |---|---|---|---|
+> | thornboar | 18 | **2018** | 987 |
+> | grunt | 15 | 1711 | 1517 |
+> | thornboar | 18 | 1690 | **1641** |
+> | thornboar | 18 | 1591 | 1547 |
+> | flyer | 15 | 1560 | 1558 |
+> | caster | 13 | 1036 | 1034 |
+> | thornboar | 21 | 888 | 887 |
+>
+> **The disagreement is about three times larger than this document has been claiming**, so every
+> conclusion below holds a fortiori. Section 3's ratio becomes roughly **8 to 13 times reach**, not
+> three to four and a half.
+>
+> **RE-RUN INDEPENDENTLY on a second launch (2026-08-12, the recovery run), and the split between
+> what reproduced and what did not is itself the finding.** Reproduced to the unit: `playTicks 1800
+> of 1800`, `doorsUsed {shadeGo:1}`, `doorFailed 0` — the lap really does run for its full thirty
+> seconds now — and most of the travel table (`1591/1547`, `1560/1558`, `1036/1034`, `888/887` all
+> came back identical). **What did NOT reproduce is the top of the table**: the second launch's
+> longest net displacement was **1730** over 1778 travelled, against 1641 over 1690 here, and the
+> largest travelled row was 1778 rather than 2018. The level is deterministic; the handful of mobs
+> actually engaging the player are not, because their AI branches on where the observer happens to
+> be when they wake. **So quote this as "roughly 1000–1700 units", not as a reproducible 987–1641** —
+> a later run that reads 1730 has not found a regression. The order-of-magnitude conclusion (an
+> order over reach, not a fraction of it) is unaffected, which is the only thing section 3 leans on.
 
 With nothing correcting position, the size of the disagreement is bounded only by how far a mob can
 travel while the two simulations disagree. Measured over 30 simulated seconds of a real engagement —
 enemies woken through their own `active`/`dropT` fields, the player walking a wide circle through the
-game's own input channel so the mobs are led rather than parked on:
+game's own input channel so the mobs are led rather than parked on (**the table immediately below is
+the superseded 7.3-second reading, kept so the correction above can be checked**):
 
 | enemy | radius | travelled | net displacement |
 |---|---|---|---|
@@ -114,9 +155,12 @@ the hit lands if the player is inside `reach + 16` when the telegraph resolves (
 radii measured above, that is roughly **90–110 units**, and it is **at most ~125** for any plausible
 player radius.
 
-> **Drift available: 380–562 units. Reach: at most ~125.** Three to four and a half times over,
-> inside half a minute, and the conclusion does not depend on the one term that was not measured
+> **Drift available: ~1000–1700 units. Reach: at most ~125.** Eight to thirteen times over, inside
+> half a minute, and the conclusion does not depend on the one term that was not measured
 > (`p.r`) — even a generous value for it leaves the gap decisive.
+> *(Originally written as 380–562 and "three to four and a half times over", from a lap that ran
+> for 7.3 seconds rather than 30 — see the correction in section 2. The direction of the error is
+> toward understating the problem.)*
 
 That is precisely the "unfair death" shape the research names: on the guest's screen the thornboar is
 across the clearing; on the host's it is on top of them, and the host's is the copy that decides

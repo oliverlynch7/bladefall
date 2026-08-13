@@ -25,10 +25,24 @@ Writing a plan is a whole run's work. Doing it properly beats doing it and one t
 
 ## The list, highest value first
 
-### 1. Guests and hosts are not looking at the same monsters — PLANNED 2026-08-12
-Measured: enemy positions are never reconciled on a guest. A snapshot with every enemy moved 500
+### 1. Guests and hosts are not looking at the same monsters — PLANNED 2026-08-12, CODE SHIPPED
+Measured: enemy positions were never reconciled on a guest. A snapshot with every enemy moved 500
 units changed **0 of 41** positions while updating **41 of 41** HP bars. Over 30s of real combat the
-two simulations drift **380–562 units** apart; attack reach is **~90–125**.
+two simulations drift **roughly 1000–1700 units** apart; attack reach is **~90–125**. (Two
+independent launches gave 987–1641 and 990–1730 — the range is a size, not a fixture.)
+
+*(That drift figure read **380–562** here until 2026-08-12. It was a **7.3-second** measurement
+labelled as thirty: the probe's lap walked into the Warden's Shade card at tick 438, which takes the
+game out of play mode, and `update()` then returned at its third line for the remaining 1362 ticks.
+The bench now knocks on the card's own button and reports `playTicks 1800 of 1800`. The error
+understated the problem by about 3×. Full correction in `docs/MP_AUDIT.md` section 2.)*
+
+**Tasks 1 and 2 of the plan are shipped** (`a12b178`, `cb47393`): the snapshot carries the host's
+wake flag as slot 6 and a guest lerps its enemies toward the host's position for any enemy the host
+has awake. Verified `targetsStored 0 / 0 / 41 / 41` across sleeping / pre-flag / awake trials on a
+live world, and a corrected body converges `141.8 → 2.0` units per frame over twenty frames. What is
+left is the plan's Task 3 (guard it in the mp suite) and Task 4 (the world ping), plus Step 6's
+two-simulation lap.
 
 **This item's original title and both its stated premises were wrong, and all three were disproved
 by measurement before the plan was written. Kept here rather than rewritten away, because the

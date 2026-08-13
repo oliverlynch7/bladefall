@@ -25,19 +25,34 @@ Writing a plan is a whole run's work. Doing it properly beats doing it and one t
 
 ## The list, highest value first
 
-### 1. Guests are hit by enemies that are somewhere else — `MP_AUDIT.md`
+### 1. Guests and hosts are not looking at the same monsters — PLANNED 2026-08-12
 Measured: enemy positions are never reconciled on a guest. A snapshot with every enemy moved 500
 units changed **0 of 41** positions while updating **41 of 41** HP bars. Over 30s of real combat the
-two simulations drift **380–562 units** apart; attack reach is **~90–125**. So in co-op a guest can
-be hit by an enemy visibly elsewhere on their screen.
+two simulations drift **380–562 units** apart; attack reach is **~90–125**.
 
-The fix is to sync position for enemies **currently in combat with any player** — not for all
-enemies, because the existing design deliberately avoids per-frame position sync for bandwidth and
-that reasoning still holds for idle mobs. `harness/probes/mp-drift.probe.js` is already the
-known-bad: today's `movedBySnapshot: 0 of 41` is a permanent reproducible failing case, so the fix
-can be watched to fail before it is believed.
+**This item's original title and both its stated premises were wrong, and all three were disproved
+by measurement before the plan was written. Kept here rather than rewritten away, because the
+corrections are the useful part:**
 
-VISION.md priority #1. Take this first.
+- *"So a guest can be hit by an enemy visibly elsewhere on their screen"* — **false.**
+  `harness/probes/mp-whohits.probe.js`: local copy on top / host says far = **261 HP**; local far /
+  host says on top = **0**; both far = **0**. Verdict `LOCAL copy hits the guest`. Nobody is dying
+  unfairly. It was the one sentence in `MP_AUDIT.md` that was an inference rather than a reading.
+- *"the existing design deliberately avoids per-frame position sync for bandwidth"* — **retired.**
+  `harness/probes/mp-pos.probe.js`: 41 of 41 rows already carry x and z, 989 bytes at 14 Hz. Using
+  them costs **zero additional bytes**.
+- *"sync only enemies in combat with any player"* — right instinct, wrong gate. The real hazard is
+  that `enemySnap()` does not filter on `active` (**0 of 41 awake at the entrance, all 41 sent**), so
+  adopting the host's position for a mob it has not woken would drag back every monster a guest
+  fights alone. The gate is the host's own wake flag, not a distance.
+
+**What it actually costs is `VISION.md` priority #1:** co-op is two solo games in one room. Health
+bars belong to bodies somewhere else, the two players cannot fight the same monster or warn each
+other about one, and the world ping added in sub-project D points at empty ground.
+
+Planned in `docs/superpowers/plans/2026-08-12-guest-enemy-positions.md`.
+`harness/probes/mp-drift.probe.js` is the known-bad: today's `movedBySnapshot: 0 of 41` is a
+permanent reproducible failing case, so the fix can be watched to fail before it is believed.
 
 ### 2. Level design — make the existing zones better to play
 Oliver: *"we should also have it look to improve the level designs too."*

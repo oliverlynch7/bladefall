@@ -13,6 +13,46 @@ node _shot/shot.js --scene 0 --eval @harness/probes/mp-drift.probe.js
 **Yes — a guest can be hit by an enemy that is visibly somewhere else on their screen.** The plan
 that commissioned this audit allowed for it to end in "no change needed". It does not.
 
+> ## ⚠ THAT SENTENCE IS FALSE, AND IT WAS MEASURED FALSE ON 2026-08-12
+>
+> **`harness/probes/mp-whohits.probe.js`. Verdict: `LOCAL copy hits the guest`.** A guest is hit by
+> exactly the enemy it can see, where it can see it. Everything else in this section is a
+> measurement and stands; this one line was an *inference* from "position is never reconciled", and
+> it only follows if a host's copy decides a guest's damage. It does not — which is why it read like
+> a measurement and survived a day at the top of `docs/BACKLOG.md`.
+>
+> | trial | the guest's own copy | every host snapshot says | HP lost in 3s |
+> |---|---|---|---|
+> | A | on top of the guest | 500 units away | **261** |
+> | B | 500 units away | on top of the guest | **0** |
+> | C — control | 500 units away | 500 units away | **0** |
+>
+> Snapshots go through `MP.applyEnemies` — the real receive path — once per frame, four times a real
+> host's 14 Hz, so the host's picture cannot be called stale. The control reading zero is what makes
+> A and B mean anything.
+>
+> Enumerated afterwards, and it agrees: `hurtPlayer` has thirteen call sites (hazards 8841–8945, the
+> arena bot 12902, boss telegraphs 13327/13332/13335, melee contact 13471, a projectile 13504, a beam
+> 13806) and every one tests the LOCAL `G.p` against a LOCAL body. The host→guest message set
+> (`onGuestData`, 12232–12268) is hello/place/arena/teams/state/revive/wipe/pdmg/petdmg/score/cfx/
+> mark/ping/pong, and the only one that damages the receiver is `pdmg`, which is PvP.
+>
+> **The desync is still real and still worth fixing — for a different and larger reason.** What it
+> costs is that co-op is two solo games in one room: health bars belong to bodies somewhere else,
+> the two players cannot fight the same monster or warn each other about one, and the world ping
+> points at empty ground. See `docs/superpowers/plans/2026-08-12-guest-enemy-positions.md`, which is
+> built on this correction.
+>
+> *The probe was wrong twice before the game was, and both faults are worth keeping.* Its first two
+> runs came back with the subject on top of the player in **all three trials, including the both-far
+> control** — every trial "conclusive" and the verdict meaningless. The cause is the edge guard at
+> 13463: an enemy standing where `highestSurfaceAt` returns nothing is put back at `e.sx/e.sz`, its
+> last safe spot, so a subject teleported diagonally onto a hazard silently RETURNED to where trial A
+> had left it. The far spot is now chosen by scanning sixteen bearings for one with a floor, and
+> `e.sx/e.sz` is restaged with it. The fix came from making the probe **print the subject's position
+> every 45 frames** rather than from a third guess about it — the Dead Aim lesson in a new place: a
+> bar that fails tells you *that* something is wrong and never *what*.
+
 The reason is simpler and larger than the drift-versus-latency question it expected to weigh:
 
 > **Enemy position is never reconciled at all.** The host puts `x` and `z` in every snapshot and the
@@ -101,6 +141,18 @@ Task 2 Step 3 already states the shape and the measurement above supports it unc
 > sync position for enemies currently **in combat with any player**, not for all enemies — the
 > existing design deliberately avoids per-frame position sync for bandwidth, and that reasoning stays
 > valid for idle mobs.
+
+**AND THE "FOR BANDWIDTH" HALF OF THAT IS ALSO RETIRED, measured 2026-08-12** by
+`harness/probes/mp-pos.probe.js`: `enemySnap()` sends **41 of 41** live enemies and **41 of 41** rows
+carry the enemy's real x and z, in **989 bytes** at **14 Hz** — 13.8 kB/s that is already being paid.
+Using the position the host already sends costs **zero additional bytes**, so bandwidth is not a
+reason to be selective about which enemies are corrected.
+
+There is a real reason to be selective and it is a different one. `enemySnap()` does not filter on
+`active`, and at the entrance **0 of 41 enemies are awake while all 41 are sent anyway**, each at its
+untouched spawn point. So for a mob the host has not woken, the host's position is not a correction —
+it is a stale spawn point, and adopting it would drag every monster a guest engages alone back to
+where it started. The gate belongs on the host's own wake flag, not on a distance somebody chose.
 
 Two things to carry into it:
 

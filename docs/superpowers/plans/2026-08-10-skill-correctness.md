@@ -612,6 +612,11 @@ launch. **`berserker/Bloodguard` is absent from the gate's fail list**, which is
 proven a third time: watched to fail as a unit test, re-run against the live game, and now a full
 gate that does not accuse it.
 
+*And once more on the final tree, after the population guard: `GATE: PASS (4 known, 0 newly fixed)`,
+exit 0 — unit **95** (91 before, so the four new static assertions really are in the fast stage that
+runs before any GPU time, which is the only part of that commit a gate could disprove), skills
+140/4/4, levels 37/0/11, mp 57/0. `harness/baseline.json` untouched by either run.*
+
 **AND IT RAN ONCE MORE, 2026-08-12, after pass 35 and the mp-wait fix: `GATE: PASS (3 known, 0 newly
 fixed)`, exit 0, no `REGRESSION:` line, `harness/baseline.json` untouched.** Per-suite: unit 55/55,
 skills **70 pass / 3 fail / 2 unproven**, levels 36/0/12, **mp 54 pass / 0 fail**. The three knowns are

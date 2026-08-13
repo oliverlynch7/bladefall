@@ -3243,6 +3243,42 @@ the control and the known-bad cell was the control. Rank 3 is now set explicitly
 now two for two — **`cheatRank10All` silently arms an A-side passive that eats the thing being
 measured, and any new probe should assume it until it has proved otherwise.**
 
-**Not yet fixed.** The measurement is the run's output; the one-line change belongs with its own
-aggregate gate and its own commit, so Oliver can revert exactly the +10% after playing it.
+### FIXED 2026-08-13 — the clause is one line, and the probe's own two bars are what say it works
+
+The fix is where the probe's header said it would be: inside the warrior's own `effPower` block
+(3706), `if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10;`, beside the `w_heavy` and
+`bloodlustT` multipliers that were already there. Nothing was invented — the 10% is the card's, and
+`classFamilyOk` is the predicate the probe measured against, so the shipped gate and the measured
+gate are the same function rather than two readings of one idea.
+
+Re-run this run, same probe, same command, same launch shape (`--scene 0 --eval
+@harness/probes/wmaster.probe.js`), before against after:
+
+```
+before   effPower  ctrlIn 1.199  masterIn 1.199    ratios  inFamily 1.000  offFamily 1.000  knownBad 1.120
+after    effPower  ctrlIn 1.199  masterIn 1.3189   ratios  inFamily 1.100  offFamily 1.000  knownBad 1.120
+```
+
+**The off-family cell is the half that matters and it did not move.** A warrior carrying the Cracked
+Shortbow reads 1.000 after the fix exactly as before it, so the +10% is scoped to the weapons the card
+scopes it to — which a one-cell probe would have passed while handing a warrior with a staff the
+bonus. The known-bad cell reads 1.120 on BOTH sides, so the instrument that saw nothing before is the
+same instrument that sees the fix now.
+
+*Read the RATIOS and not the absolute numbers, even though this run's two launches happened to agree.*
+The launch pair that first measured this fix came back `effPower` 4.2973 and 5.0278 for the identical
+control cell — the starting stats a launch arrives with are not fixed, which is precisely why every
+cell in this probe is divided by its own control from the same launch. A run comparing `masterIn`
+across two launches would have read the +10% as +29%. This run's controls matching at 1.199 is luck,
+not a guarantee.
+
+Regression, the same bar pass 41 used: `node harness/test-skills.js --classes warrior` →
+**11 pass, 0 fail, 0 unproven** (4 A-side + 4 B-side casts). The passive is armed in that bench (its
+rank-9 A-side is `w_master`), so every warrior damage number in it moved up 10% and no claim broke.
+
+**The 11319 rider is NOT part of this and stays Oliver's** — the Momentum stagger firing at 2 hits
+instead of 3 is on no card, and deleting it is a balance change with no number behind it. This pass
+implemented a promise; it removed nothing.
+
+**Shipped as its own commit**, so Oliver can revert exactly the +10% after playing it.
 

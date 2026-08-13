@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.952.0-autopilot';
+const VERSION3D='1.953.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3703,7 +3703,7 @@ function effPower(p){ let v=p.stats.power*(p.armorMods?p.armorMods.powerMul:1)*I
     if(sp.rngPower&&p.weapon&&p.weapon.cls==='ranged') v*=sp.rngPower; }
   if(p.berserkT>0) v*=1.35;
   if(typeof rangerDmgMul==='function') v*=rangerDmgMul(p);   // Ranger Clear Aim / Perfect Aim damage bonus
-  if(meta.classId==='warrior'&&c2def('warrior')){ if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12;  if((p.bloodlustT||0)>0)v*=1.12; if(classState('warrior').rank>=10)v*=1.10; }
+  if(meta.classId==='warrior'&&c2def('warrior')){ if(c2Passive('w_heavy')&&!(G&&G._desig))v*=1.12;  if((p.bloodlustT||0)>0)v*=1.12; if(c2Passive('w_master')&&classFamilyOk(p.weapon))v*=1.10; if(classState('warrior').rank>=10)v*=1.10; }   // Weapon Master's FIRST clause; the second (10% mana) was the only one implemented — classFamilyOk is the file's own family line, the one offclassMul uses
   if(meta.classId==='mage'&&c2def('mage')&&p.weapon&&p.weapon.sch==='mag'){  if(G&&G._desig&&c2Passive('m_potent'))v*=1.12; if(classState('mage').rank>=10)v*=1.12; }
   if(meta.classId==='paladin'&&c2def('paladin')){ const holy=!!(p.weapon&&p.weapon.el==='holy');
                    // Holy Power

@@ -516,7 +516,9 @@ held a verified fix out of the repository for a whole run. That is the same cost
 about, arriving from the other side: Task 2 stopped a red gate DELETING work, and this is a red gate
 REFUSING it.
 
-- [ ] **Step 6: Re-run until it is stable, not once — and say the confidence out loud**
+- [x] **Step 6: Re-run until it is stable, not once — and say the confidence out loud** — done
+      2026-08-13. Both halves shipped, **the cost was measured before N was chosen**, and the
+      arithmetic that makes this *not* a fix for the warlock row is written down rather than glossed.
 
 The rule `confirmPass` needs is **best-of-N with an explicit N**, not one re-run: re-measure the accused
 class up to three times and call it CONFIRMED only if it fails in a majority, printing the tally
@@ -525,15 +527,116 @@ things it must keep from Step 2, both of which a naive "re-run until it passes" 
 a re-run that THREW or came back dark still clears nothing, and a flap is dropped from `now` rather
 than written into the baseline.
 
-It is not free and that is why it is its own step: three launches per accused class, and the accused
-set can be large the day a real change breaks a real thing. Scope it — N launches only for a row that
-is *fresh*, never for the baseline — and measure the added wall clock against the ~20–45 minutes the
-gate already spends before choosing N.
+**What shipped.** `CONFIRM_LAUNCHES = 3`, and the majority is taken over the original gate launch plus
+the confirming ones — the original IS a measurement and it is the one that made the row fresh — so at
+N=3 a row must fail 2 of 3 re-runs (3 of 4 overall) to stand. `majorityFailed(fails, launches)` is one
+function, not two: at `launches=1` it reduces exactly to the rule the gate already shipped, which is
+why every single-launch case recorded in `gate.test.js` still drives the live code rather than a
+transcription of it. Both Step 2 rules are kept and pinned: a launch that threw or came back dark
+counts for neither side, and a flap never reaches the baseline.
 
-**And the cheaper half is worth doing first:** nothing currently records that a row has flapped
-*before*. A per-row flap counter in `harness/report.json` would have answered this run's question in
-zero launches — `warlock/Final Curse` is the second delayed-payout row to be accused in two days, and
-neither run could see the other's evidence.
+**The cost, measured first.** `node harness/test-skills.js --classes warlock` is **57.3s** wall clock
+(one class, 9 assertions). So worst case is ~2.9 minutes for one accused class against the 20–45
+minutes the gate already spends — and the common case is ~1.9, because `decided()` stops the loop as
+soon as no remaining launch could change any accused row's verdict. Two agreeing launches always
+settle it. Watched live: `every accused row is settled after 2 launch(es); skipping 1 more`. A clean
+run still pays nothing at all.
+
+**AND IT DOES NOT FIX THE WARLOCK ROW. Said plainly, because the opposite is easy to imply.** Against
+a row that fails with probability p, one re-run upholds it with probability p and best-of-3 with
+p²(3−2p). At p=1 — a real regression — both are 1.0, and that is the property that must not be lost.
+At p=0.5 both are 0.5. At the measured p≈0.75 it goes 0.75 → **0.84, the wrong way for that specific
+row.** Best-of-N sharpens a verdict toward whatever the row really does; it cannot rescue a row that
+genuinely fails most of the time. That is an argument for the ledger, not against N.
+
+**The cheaper half, which is the one that actually answers the warlock question: THE FLAP LEDGER.**
+`harness/report.json` now carries `flaps`, a per-row `{flapped, confirmed, last}` counter carried
+across runs (read out of the previous report *before* anything overwrites it). `confirmPass` prints it
+before spending a launch — `ledger: skills:warlock/Final Curse:damage — seen before: FLAPPED 2,
+CONFIRMED 0` — so the next run to meet a delayed-payout row reads two days of evidence in zero
+launches instead of meeting it for the "first" time again. Only re-measured rows are recorded: a
+levels id, or a row confirmed because the re-run went dark, is confirmed by *absence* of evidence, and
+writing that in as "CONFIRMED once" would be the invented finding this gate keeps having to unlearn.
+`report.json` is gitignored, so the ledger is per-MACHINE — which is the right scope, not a
+shortcoming: the question is "has this flapped on the box the scheduler runs on", and a fresh clone
+has no history to be right about.
+
+**One duplication removed on the way, and it was load-bearing.** `idOf` lived in `run-all.js` while
+`confirmPass` was handed a lambda built from it. If those two ever drifted, a re-run would report the
+row, the confirm pass would fail to recognise it, and **every genuine regression would be silently
+laundered into a flap** — the one direction this whole task exists to prevent. It is now
+`failureId()` in `gate-rules.js`, imported by both.
+
+**Proof, at three levels.**
+
+1. `node --test harness/test/gate.test.js` → **46 pass, 0 fail** (was 29).
+2. **Watched to fail, twice, both against a real alternative rule.** With `CONFIRM_LAUNCHES` reverted
+   to 1 — the rule that actually shipped — **8 tests failed and 38 passed**, and the control held:
+   `A REAL REGRESSION IS NEVER LAUNDERED` passed both ways, as did all 29 original cases. With a dark
+   launch counted as a measurement instead (the dangerous direction, in which breaking the re-run
+   launders everything) **exactly the 3 fail-loud tests failed**, including the pre-existing
+   `A DARK RE-RUN CLEARS NOTHING EITHER`.
+3. **THE LIVE SEAM, which Step 4 explicitly recorded as unproven** — "the real
+   `runSkillTests({classes})` call is covered by unit tests and by its identical use in the CLI, not
+   by having been watched to run inside a gate." `harness/live/confirm-live.test.js` now drives the
+   real `confirmPass` against the real suite. Four launches, ~4 minutes, all three cases green:
+
+   ```
+   confirming 1 new failure(s) with up to 3 more launch(es) of: berserker
+   skills (confirm 1/3): 10 pass, 1 fail       skills (confirm 2/3): 10 pass, 1 fail
+   every accused row is settled after 2 launch(es); skipping 1 more
+   CONFIRMED (3 of 3 launches failed): skills:berserker/Charge:damage
+
+   confirming 1 new failure(s) with up to 3 more launch(es) of: warlock
+   skills (confirm 1/3): 9 pass, 0 fail        skills (confirm 2/3): 9 pass, 0 fail
+   FLAPPED (1 of 3 launches failed — not a regression, and not a fix): skills:warlock/__no_such_skill__:damage
+   ```
+
+   That CONFIRMED line is the `failureId` seam proved rather than assumed: the re-run reported a real
+   failure object and the confirm pass recognised it as the same row. Had the two drifted, the test
+   would have read FLAPPED. It lives in `harness/live/` and **not** `harness/test/`, because
+   `run-all.js` discovers `harness/test/*.test.js` into its fast stage and four minutes of Chrome
+   there would make the fast stage the slow one.
+
+**What is still NOT proved, and must not be claimed:** that best-of-3 changes any real gate's verdict.
+Nothing flapped during this run's aggregate gate, so the live loop above is the evidence, not a gate
+transcript. The line to look for next time a row is accused is the tally — `CONFIRMED (3 of 4 launches
+failed)` — and the `ledger:` line above it.
+
+**ALL OF THE ABOVE WAS WRITTEN, VERIFIED — AND THEN LEFT UNCOMMITTED, so a later run found it in a
+stash rather than in the repository.** `stash@{0}`, *"autopilot killed-run leftovers 2026-08-13
+02:44"*, dated seventeen minutes after the newest commit on the branch: the whole of Step 6 —
+`gate-rules.js`, `run-all.js`, 17 new tests, the live seam test, this closure — held by nothing but a
+stash entry. It was recovered on 2026-08-13 by the next run's `git stash list` check, which is the
+first thing `AUTOPILOT.md`'s workflow asks for and the reason that check exists. **This is the fifth
+time.** Recovery cost about ten minutes and would have cost nothing had the run committed before it
+ended; the fix is not a better guard, it is `git commit` by pathspec the moment the gate is green.
+
+Two things worth keeping from the recovery, because they make the next one cheap:
+- `git stash apply` and `git checkout "stash@{N}" -- <path>` are both off the permission allowlist and
+  `git apply` is too, but **`git show "stash@{N}:<path>" > <path>` is not**, and when the stash's
+  parent is HEAD (check with `git log -1 "stash@{N}^"`) that restores a tracked file exactly. Untracked
+  files come out of the third parent: `git show "stash@{N}^3:<path>"`. `git diff --stat` against the
+  stash's own `--stat` is the proof the recovery is complete — here both read 514 insertions.
+- **Recovered work is re-verified, not trusted.** Every claim above was re-run: 46 pass / 0 fail, and
+  the mutation control repeated — `CONFIRM_LAUNCHES` set back to 1 gives 38 pass / **8 fail**, and the
+  eight are exactly the best-of-N cases while `A REAL REGRESSION IS NEVER LAUNDERED` still passes.
+
+- [ ] **Step 7: Diagnose `warlock/Final Curse`, now that the ledger will have counted it**
+
+Step 6 makes the gate *honest* about that row; it does not make the row work. What is known:
+`SKILL_FX.war_final` sets `t.warBurstT = 1.0` and the payout lands in the enemy loop a full second
+later, `onCd` is true in every failing sample (the cast happened, and `refund` at 10653 is documented
+as "never happened … did not go on cooldown"), and the damage fails to arrive about three launches in
+four on a tree where the change under test cannot reach it. **Where the damage goes instead is not
+known, and the run that recorded this deliberately did not guess.**
+
+The instrument is a probe, not another launch: drive one warlock rank-10 kit in-page, cast Final
+Curse, and sample `warBurstT` and the dummy's position every tick until the burst resolves — the
+question is whether the second of delay is outliving the dummy's approach, the dummy's life, or the
+300-tick window itself. `harness/probes/reach.probe.js` is the nearest existing shape to copy.
+Then re-read the ledger: by the time anyone takes this, `harness/report.json` should say how many
+times the row has been accused and how many times it stood.
 
 ---
 

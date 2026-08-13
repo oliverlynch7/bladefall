@@ -3397,3 +3397,73 @@ it, and the rider that would make it a nerf is still his.
 **Recovered from `stash@{0}`** — a previous run's finished-but-uncommitted work, the fifth time this
 has happened — and **re-measured from scratch** rather than trusted: the before run above is this
 run's own, taken against the unmodified tree before the hunks were re-applied by hand.
+
+---
+
+## Y. THE NUMBERS ON THE SKILL CARDS — thirteen disagree with the code, and the harness cannot see one of them
+
+**Swept 2026-08-13, and this is a dimension no instrument in this repo has ever measured.**
+`harness/claims.js` reads a card and answers *which KIND of promise it makes* — damage, heal, shield,
+control, summon, buff — and `test-skills.js` then asks whether the game keeps that kind of promise at
+all. Its own header says so: *"The bar is EFFECT, not number."* That was the right bar to build first
+and it is the reason a skill claiming 2.2x and dealing 0.2x passes every suite this project owns.
+
+So the question this sweep asks is the other one: **the card names a number; does the code use that
+number?** Static, no launch, no GPU — every `kind:'skill'` card in `CLASS2` that states a figure, read
+against the handler that actually runs. **Section V's map is what makes it cheap**: 45 of the 128
+skills are another class's function under a new name, so thirteen shared handlers cover most of the
+cards below, and the aliases are followed to the last assignment (section J's `SKILL_FX` is a plain
+object assigned in three places; the LAST one wins).
+
+| skill | the card the player reads | what the code does | direction |
+|---|---|---|---|
+| **warrior / Charge** (`w_charge` → `wcharge`, 9914) | "Rush through enemies for **1.6x** damage and stun them." | `*1.5*`, stun 0.8s in-class | **code is LOWER — the only row here that is takeable** |
+| **reaper / Wraith Form** (`x_wraith`, 10424) | "for 3s: faster movement and **65%** damage reduction" | sets `guardT=3`, which is the shared brace: **60%** (11703). Movement +18% is real (`effSpeed`, reaper `wraithT`) | code is LOWER, but see below |
+| **ranger / Hunter's Mark** (`r_mark` → `mark`, 9942) | "you deal **+18%** and **+10% crit** to it for 8s" | `markT=8` ✓, and `dmg*=1.4` at **both** read sites (10845, 10875) — **+40%**. There is no crit term anywhere that reads `markT` | rider, **and half the card is not implemented at all** |
+| **ranger / Spike Trap** (`r_spike`, 10556) | "a 4m field for 5s: **−35%** slow, **0.25x/s** (max 1.25x)" | R 160 ✓, life 5.0 ✓, ticks every **1s** for **0.5x** (max 2.5x over the field's life) and the slow is `slowT`, which is **×0.5 — −50%** (13477) | rider ×2, and the cap is double |
+| **mage / Rune Barrier** (`m_barrier` → `barrier`, 10018) | "absorbs **35%** of max HP" | `effMaxHp(p)*(ok?0.5:0.35)` — **50% to the class that owns the card**, 35% only off-class | rider |
+| **necromancer / Bone Wall** | "absorbs up to **35%** of your max HP" | same handler | rider |
+| **chronomancer / Aegis** | "absorbs up to **35%** of your max HP" | same handler | rider |
+| **stormcaller / Storm Barrier** | "absorbs up to **35%** of your max HP" | same handler | rider |
+| **paladin / Guard Up** | "absorbs up to **50%** of your max HP" | same handler | ✓ **the one card the 0.5 was written for** |
+| **warrior / Shockwave Stomp** (`w_stomp` → `stomp`, 9907) | "Slam the ground for **1.5x** damage" | `*1.6*` | rider |
+| **warrior / Execution** (`w_execute` → `execute`, 10037) | "a crushing 4x strike that executes normal enemies below **20% HP**" | 4x ✓; the threshold is `t.hp < t.maxHp*0.25` — **25%** | rider |
+| **ranger / Volley** (`r_volley` → `volley`, 9928) | "up to **5** enemies, **1.4x** each" | `N=7` arrows at `*1.1*` each | **both halves wrong, in opposite directions** |
+| **warrior / Iron Guard** (`w_guard` → `bulwark`, 10000) | "Brace for **3s**, reducing incoming damage by **60%**" | 60% ✓; `guardT=3.2` | near-miss, recorded so it is not re-derived |
+| **warrior / Whirlwind** (`w_whirl`, 10308) | "Spin through a full circle **twice**, dealing **1.1x** per sweep" | ONE application of **2.2x** to everything within 165 | the TOTAL is right; the two sweeps are one hit |
+
+**The clean rows are worth as much as the table, so they are named rather than counted:** Elemental
+Beam 2x, Nova 1.4x, Gravity Well 1.3x, Elemental Overload 3.4x, Soul Cleave 2.1x, Holy Ground 2.2x
+(it is `w_whirl`), both Shield Bashes 1.7x, Sic 'Em 1.6x, and Mend the Pack's 30% / 10% all match
+their cards exactly. **The disagreements are not sloppiness spread evenly** — they cluster on the two
+oldest kits in the file, warrior and ranger, and on the one handler four classes share.
+
+### Which of these a run may take, and why only one
+
+The standing rule from pass 49 and pass 51: **implement a promise, invent nothing, remove nothing.**
+
+- **`w_charge` is takeable and is the only one.** 1.6 is on the card, `wcharge` has exactly ONE site
+  and ONE literal, and raising 1.5 to 1.6 adds the clause the card already sells without taking
+  anything away from anyone. Same shape as Weapon Master (pass 49) and Bone Legion (pass 51).
+- **Every "rider" row is Oliver's, and the reason is the same each time**: the code is *more*
+  generous than the card, so making the code honest is a **nerf to something a player has been
+  playing with** — a balance change with no card number behind it. Stomp, Execution's 25%, the
+  barrier's 50%, Spike Trap's doubled DoT and slow, and Hunter's Mark's +40% are all that shape.
+- **Hunter's Mark is the one to put to him first**, because it is not only a rider: **+18% is on the
+  card, +40% is in the code, and the +10% crit clause has no implementation at all.** Whichever
+  number he picks, one half of that card is still unbuilt. The mark itself is live and already read
+  by the ranger's own Bounty passive (10204, 11120), so there is a hook to hang crit on — but the
+  number to hang is his, because 18 and 40 cannot both be right.
+- **`x_wraith`'s missing 5 points looks takeable and is not.** The card says 65% and the only
+  reduction the skill grants is the shared 60% brace — but the brace is `guardT`, which Bulwark,
+  Last Stand, Shield Bash and the Paladin's whole kit also set. Reaching 65% means a reaper-only
+  factor composed on top of a shared line, and how two reductions compose is a choice this file does
+  not make anywhere else. That is designing, not wiring.
+- **`w_whirl` and `w_guard` are recorded and not rows.** 2.2x total is 1.1x twice, and 3.2s is 3s
+  plus the frame budget; neither is a player-visible lie worth a commit.
+
+*How to re-run it:* `grep -n "kind:'skill'" public/3d/index.html` filtered to lines carrying a digit
+followed by `x` or `%`, then each `fx:` id chased through the alias chain to its last `SKILL_FX.<id>=`
+and the literal read off. No launch. **Re-run it after any kit change** — this is a static sweep of a
+file two other sweeps have already been shown to outgrow (section X's census moved from 137 sites to
+161 in a day), so the bound is a measurement with a date on it and not a constant.

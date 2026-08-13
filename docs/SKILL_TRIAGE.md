@@ -3010,7 +3010,7 @@ sentence can apply five edits and re-run two committed probes.
 
 ---
 
-## W. BOUNCE BACK RETURNS DAMAGE TO A `{name, attack}` PAIR — measured 2026-08-12, and it tells the player it worked
+## W. BOUNCE BACK RETURNS DAMAGE TO A `{name, attack}` PAIR — measured 2026-08-12, **FIXED 2026-08-13**
 
 The second door found by the sweep section U's write-up asked the next run to run: **a wiring proven
 through a call the game itself never makes.** Found the same day, in a different subsystem, which is
@@ -3065,8 +3065,184 @@ no numbers.
 **Re-measure with the committed probe**: `reflectReachesGameShape` and `reflectReachesRealContact`
 both flip true, `probeDoor` stays at 139, and `ok` stays true.
 
+### SHIPPED 2026-08-13 — and the patch above was right about the fix and wrong about two of its own bars
+
+Applied, gated (`GATE OK`) and re-measured. `harness/probes/bounceby.probe.js`, same command both
+sides (`node _shot/shot.js --scene arena:flat --wait 12000 --eval @harness/probes/bounceby.probe.js`):
+
+| trial | attacker lost — before | after | BOUNCED shown |
+|---|---|---|---|
+| a BODILESS `{name, attack}` literal | **0** | **0** | yes → **no** |
+| the game's own `foeHit(e,…)`, called | *(trial did not exist)* | **139** | yes |
+| the enemy object (pass 7's own door) | 139 | 139 | yes |
+| **real contact**, the game ticking on its own | **0** | **33** | — |
+
+The hero lost health in every trial on both sides (50 / 50 / 50 / 9), so every zero is a real zero.
+**The bar that carries the row is the last one**, measured on the probe exactly as it was committed
+the day before, untouched: 0 → 33 through the game's own melee path with nothing driven by hand.
+Photographed at `_shot/out/w5-bounced-aimed.png` — **BOUNCED** and `-38` over the hero, **139** over
+the grunt's health bar, one frame.
+
+*Re-measured on a SECOND, independent launch before the commit landed* (the run that shipped this
+left it uncommitted and a later run recovered the work from `stash@{0}` rather than trusting the
+paragraph above): same command, `realContact.attackerLost` **41**, `gameShape` 139, `probeDoor` 139,
+the bodiless literal 0 and silent, `ok:true`. **41 rather than 33 is not a discrepancy** — real
+contact is 240 ticks of a live grunt swinging on its own schedule, so the total is however many
+blows it landed; what the row asserts is the zero becoming a non-zero, and it did on both launches.
+
+*And the gate said no first.* The first full `node harness/run-all.js` over this tree printed
+`REGRESSION: skills:warlock/Final Curse:damage` and `GATE: FAIL (1 new)` — a class this change cannot
+reach, whose damage lands a second after the cast. Four launches of `--classes warlock` on the same
+tree came back **1 pass / 3 fail**, the same command against `HEAD` came back **2 pass / 0 fail**, and
+a second full gate over the unchanged tree came back **`GATE: PASS (4 known, 0 newly fixed)`**. So the
+row flaps and the gate's single confirming re-run upheld it anyway; the measurement and the rule it
+needs instead are `docs/superpowers/plans/2026-08-11-harness-hardening.md` Task 4 Steps 5–6
+(`e719136`). **Nothing here was committed on the strength of the green run alone** — the fix's own
+evidence is the probe above, and the green gate is only the absence of a reason not to.
+
+**Two corrections to the patch as written above, both found by running it.**
+
+1. **The predicted `reflectReachesGameShape` flip did not happen, and that was the fix working.**
+   Trial 1 was a *transcription* of `foeHit`'s two-field return, and the fix gives `foeHit` a third
+   field — so the literal stopped being what the game produces the moment the fix landed, and a
+   bodiless descriptor must reflect nothing. It is kept verbatim as the **known-bad control** rather
+   than updated to match, and a new trial 1b calls `__BF3.foeHit(e,…)` for the real thing. `foeHit`
+   is now exported for that: a probe that copies a shape is a second copy of it, and this is the
+   copy going stale the same day it was written. Generalises past this row — **any probe that
+   transcribes a game structure is measuring the day it was written.**
+2. **`probeDoor` did NOT stay at 139 under step 3 as specified, and the specification was the
+   problem.** `(by && by.src) || null` refuses a caller who hands a combatant DIRECTLY, which is
+   what pass 7's positive control does, so the probe's own clean-check (`ok`) went false and the
+   bench lost the trial that proves it can see a reflect at all. The shipped helper applies the
+   `hp != null` test to whatever it is handed — `.src` first, then `by` itself:
+
+   ```js
+   function canBeHitBack(o){ return (o && typeof o==='object' && !o.dead && o.hp != null) ? o : null; }
+   function attackerOf(by){ return canBeHitBack(by && by.src) || canBeHitBack(by); }
+   ```
+
+   **This is not the fall-back step 3 forbids** and the distinction is the whole row: the forbidden
+   one is `|| by` *unconditionally*, which is what let a descriptor through. A descriptor has no
+   `hp`, so it can never satisfy this one — proven by trial 1, which still reflects 0 and now stays
+   silent as well.
+
+**Two sites the patch did not name, both additive and both with the body already in hand.** The boss
+sweep and the boss ground-slam (13368 / 13373) build their own `{name:foeName(G.boss), …}` literal
+rather than going through `foeHit`, so they gained `src:G.boss||null`. Without it a paladin bracing
+against the only fights in the game that are *about* bracing would still reflect nothing.
+
+**And the second reader is a rank-10 CAPSTONE, which the finding wrote down as a line number and not
+as what it is.** `p._stillnessT` is the **Monk's Stillness** (`SKILL_FX.mon_thousand`, 19636) —
+*"stop moving and every hit you take is returned doubled"*, the discipline the class is named for.
+Section S read all sixteen capstones clause by clause and passed this one, correctly: the clause was
+built. It was built onto a descriptor. **A capstone whose only effect is the word RETURNED is a
+worse read of a class than a dead passive is**, and neither the passive audit nor the capstone sweep
+could see it, because both ask what the code says and this needed to know what it was handed.
+
+**One site left deliberately.** A bot's MELEE blow (12943) passes `hurtPlayer` no `by` at all, so
+nothing reflects an arena bot's sword. Giving it `foeHit(e,…)` would also change the death message
+the player is shown, which is words rather than a wiring, so it is recorded here rather than taken.
+
 *The probe was wrong once first, and its own clean-check caught it — which is why the clean-check is
 there.* The first run reported the game-shape trial at `heroLost 0`, a zero that says nothing about
 reflecting because nothing was blocked. The cause was **Thick Armor**: `cheatRank10All` picks the
 A-side at rank 3, *"the first hit of every fight deals no damage at all"* (11611), so it ate the
 whole 200. The bench now takes the b-side at that rank and stamps `_tarmT` fresh before every trial.
+
+---
+
+## X. THE UNDOCUMENTED RIDERS — the sweep section Q's own caveat named and nobody had run
+
+Section Q's sweep read every wired passive's card against its reader and asked *"is the card's promise
+implemented?"*. Its closing note recorded what it had **not** asked:
+
+> This sweep asked whether the card's promise is implemented, not whether the reader carries anything
+> EXTRA. […] a sweep aimed at that question would be a different pass with a different table.
+
+This is that table. Same method — no launch, no GPU: every `c2Passive('<id>')` site in
+`public/3d/index.html` read against the `CLASS2` card that names the id.
+
+**Bounded on purpose, and the bound is evidence rather than convenience.** All three riders section Q
+happened to notice — `necro_undying`'s 12%, `w_swift`'s 10%, `m_potent`'s 12% — are on passives with
+**more than one reader site**, which is the shape of the fault: a card gets one honest implementation
+and an older or looser line survives somewhere else. So this pass swept the **41 ids that have two or
+more `c2Passive` sites** (of 137 sites over 92 distinct ids). Single-site passives are NOT swept and
+this table is a floor, not a total.
+
+### What it found — nine riders on eight cards, and one clause with no implementation at all
+
+| id | card | the reader that matches the card | the rider nothing documents |
+|---|---|---|---|
+| `bsk_frenzy` (berserker r7 b) | *"Your attack speed rises as your health falls, to double at a sliver."* | 3754 — `effAtkSpeed`, `v*=1+(1-fr)`, which is the card exactly | **THE BIGGEST ONE IN THIS TABLE. The same curve is applied twice more: to `effPower` (3740) and to `effLifesteal` (3760).** A berserker at a sliver of health does not get double attack speed, he gets double attack speed **and** double damage **and** double lifesteal — a ~4× DPS swing off a card that names one of the three. (A fourth copy of the line once sat in `hurtPlayer` and hard-locked the game; that one is section G and is now a comment at 11672.) |
+| `w_swift` (warrior r3 b) | *"Every fourth basic attack is free and instant, ignoring your attack timer."* | 9708 — every fourth swing sets `p.atkCd=0` and floats **FREE** | **10870: every fourth LANDED hit deals `dmg*=1.25`.** Nothing on the card mentions damage — and it runs off `src._swiftHits`, a **different counter** from the card's `p._swiftN`, so the free swing and the +25% drift apart the moment a swing misses. (3754's `v*=1.10` attack speed is the already-recorded section J leftover, and is a third reader.) |
+| `w_bloodlust` (warrior r7 a) | *"A kill keeps your Momentum stacks instead of resetting them."* | 11024 — `_momKeep = 1` on a kill | **10252: the same kill sets `p.bloodlustT = 4`**, and `bloodlustT` is read in two places the card never mentions — `effPower` (3706, `v*=1.12`) and `effAtkSpeed` (3754, `v*=1.12`). So a kill also grants four seconds of +12% damage and +12% attack speed. |
+| `pir_swift` (pirate r3 b) | *"Opening a chest reloads your pistol."* | 11198 — the chest reload | **3754: `v*=1.10` attack speed.** Section Q records Quick Hands being rewritten *away* from a stat multiplier and into the chest reload; the multiplier was never removed. `w_swift`'s shape, on a different class. |
+| `r_patient` (ranger r7 a) | *"Clear Aim 10%→14% damage, but needs 3.5s without a hit."* | 10179 (`need` 3.5s) and 10191 (`b` 0.14 vs 0.10) — both clauses, correctly | **3738: `v*=1.04` in `effPower`, on top.** 10% → 14% *is* ×1.036, so this looks like an older encoding of the very same clause that survived the newer one — which means the ranger is paid the upgrade **twice**. |
+| `m_glass` (mage r5 a) | *"Below a quarter health your skills cost no mana at all."* | 10533 — `return 0` under 25% HP | **11699: `dmg*=1.08` in `hurtPlayer`, unconditionally.** The mage takes 8% more damage at FULL health, from a card that names no drawback. The passive is called Glass Cannon, so the rider is thematically defensible and textually invisible — which is exactly why it is here and not fixed. |
+| `m_potent` (mage r3 a) | *"Overcharge costs double mana and hits twice as hard."* | 11531 — the Overcharge branch, which is the card | **10535: `v*=1.08` on EVERY skill's mana cost**, not just Overcharge — the card scopes the cost to one skill and the code charges all of them. Plus **3707's `v*=1.12`** skill power on charged releases (already recorded). |
+| `chr_ward` (chronomancer r5 a) | *"For three seconds after a Rewind you cannot be harmed."* | 11806 — `p.invuln = 3` on Rewind | **11687: `dmg*=.88` at all times.** A permanent 12% damage reduction on a card whose whole text is about three seconds. |
+| `w_master` (warrior r9 a) | *"Warrior-family weapons deal +10% damage and skills cost 10% less mana."* | 10534 — `v*=.9` on skill mana | **11319: the Momentum stagger fires at 2 hits instead of 3**, undocumented — *and the card's FIRST clause, the +10% damage, has no implementation anywhere.* `w_master` has exactly four mentions in the file: the card, the icon table, 10534 and 11319. |
+
+**Swept and clean** — card and readers agree, listed so nobody re-reads them: `nin_evasive`,
+`nin_ghost`, `w_tactical`, `w_juggernaut`, `w_heavy`, `sky_soft`, `war_frail`, `war_deep`,
+`m_manafont`, `m_savant`, `bst_scent`, `bst_wildkeeper`, `bst_heavy`, `bst_swift`, `bst_handler`,
+`x_strength`, `x_favor`, `x_corrupt`, `bd_feet`, `bd_fast`, `bd_patient`, `st_momentum`,
+`chr_potent`, `chr_haste`, `bsk_rage`, `bsk_heavy`, `necro_master`, `r_bounty`, `necro_undying`
+(whose 12% is already recorded, in section J).
+`mon_focused` is a near miss rather than a rider: its card promises stacks that *"build faster"* and
+the reader (11006) instead makes them **last** longer (`focusT` 5 vs 4), which is a wording question
+about one word and not an extra effect.
+
+**What the shape is, since five of the nine share it.** `w_swift`, `pir_swift`, `r_patient` and
+`necro_undying` are all passives this project *rewrote away from a stat multiplier* — section Q's own
+programme — where the new mechanic shipped and the old multiplier was never deleted. The class then
+quietly gets both. That is a search anyone can re-run in one grep and it is worth re-running after
+every section Q pass: **a rewrite is not done until the line it replaces is gone.**
+
+### Which of these a run may take, and which are Oliver's
+
+**Every one of the nine riders is Oliver's, for one reason each and the same reason overall: removing
+a rider is a balance change with no number on any card to justify it.** A mage who has played with
+`m_glass`'s +8% damage taken has been playing that passive; deleting it silently buffs the class.
+`bsk_frenzy` is the one to put to him first — it is the largest single number in this document, and
+the berserker's whole DPS profile in `_balance/` is measured with it on.
+Section J's rule applies unchanged — *the code is newer than the card, and which of the two is right
+is one sentence from Oliver*.
+
+**`w_master`'s missing clause is the exception and is takeable**, by this document's own standing
+test: the number is **on the card** (+10%), the mechanism already exists (`classFamilyOk`, 2348, is
+the file's own definition of "in family" and is what `offclassMul` uses), and nothing has to be
+invented. That is pass 41's criterion verbatim, which took Juggernaut's 15% the same way.
+
+### The missing clause is MEASURED, not read — `harness/probes/wmaster.probe.js`
+
+Everything above this line is a static sweep, and a static sweep is the weakest evidence this document
+accepts. So the one row it proposes to act on was put in front of the running game before anyone edits
+anything. Four cells in one launch, `{w_master, control} × {in-family weapon, off-family weapon}`, read
+straight off `__BF3.effPower(p)` — the multiplier every warrior damage number in the game is built from
+— with `w_juggernaut`, the b-side of the same rank, as the control so exactly one thing differs.
+
+```
+weapons     Rusty Sword (sword) / Cracked Shortbow (bow)
+effPower    ctrlIn 4.2973  ctrlOut 4.2973  masterIn 4.2973  masterOut 4.2973  knownBadIn 4.8129
+ratios      inFamily 1.000   offFamily 1.000   knownBad 1.120
+ok:true     inFamilyGetsTheCardsTenPercent: false    offFamilyIsUntouched: true
+```
+
+**`ratioKnownBad` is the whole reason to believe the two 1.000s.** `w_heavy` — the same class, a
+passive whose `v*=1.12` IS wired at 3706 — reads exactly 1.12 in the same launch, so the instrument
+can see a multiplier of this size on this axis. A run where every cell read 1.000 would have proved
+nothing.
+
+*The probe was wrong once first and its own clean-check caught it, which is why the clean-check is
+there.* The first launch reported `knownBad 1.000` and refused itself. `cheatRank10All` fills every
+rank with its A-side and **the warrior's rank-3 A-side is `w_heavy`** — so the +12% was already on in
+the control and the known-bad cell was the control. Rank 3 is now set explicitly in all five cells
+(`w_swift` for the four that must not have it, which is inert here: its readers are `effAtkSpeed` and
+`hitEnemy`, never `effPower`). This is bounceby.probe.js's Thick Armor trap, one class over, and it is
+now two for two — **`cheatRank10All` silently arms an A-side passive that eats the thing being
+measured, and any new probe should assume it until it has proved otherwise.**
+
+**Not yet fixed.** The measurement is the run's output; the one-line change belongs with its own
+aggregate gate and its own commit, so Oliver can revert exactly the +10% after playing it.
+

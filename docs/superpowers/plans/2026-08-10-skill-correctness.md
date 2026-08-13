@@ -595,6 +595,17 @@ And the standing rule this document keeps having to re-learn, now four for four:
 blocked as its most recent check, and nothing here dates its blockers.** Re-check a scope claim
 against the section it names before spending a run on it.
 
+**WHAT PASS 55 DID NOT GET, SAID PLAINLY: THE AGGREGATE GATE DID NOT RETURN.** `node harness/run-all.js`
+was started against the fixed tree and was still running when the run ended — its **fast stage came back
+131 pass, 0 fail**, and the GPU suites never reported. So pass 55 rests on `node tools/gate.js` → `GATE
+OK`, the probe A/B with its controls, and `--classes ranger` → 7 pass / 1 fail (the baselined
+`ranger/Tumble`) — **not on a full gate.** The change is two clauses deep inside
+`meta.classId==='ranger' && c2Passive('r_bounty')`, so `levels:` and `mp:` cannot plausibly move, but
+that is an argument and not a measurement. **The next run's gate is the check**, and if it prints
+`REGRESSION: skills:ranger/…` that is where to look first. (Three of the run's own probe launches were
+competing with that gate for Chrome, which is most of why it ran long — see AUTOPILOT.md's new
+`__BF3 is not defined` note.)
+
 **THE FIRST OF THOSE THREE WAS TAKEN — 2026-08-13, pass 55, and it gave a row and a census.** Reading
 the 21 `mixed` probes cost no launch to sort and one launch each side to prove, and what it found was
 not a bad probe: it was `hurtPlayer`'s `by`, which is a DESCRIPTOR at all fourteen call sites and is

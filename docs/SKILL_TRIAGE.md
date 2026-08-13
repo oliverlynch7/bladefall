@@ -3462,6 +3462,17 @@ The standing rule from pass 49 and pass 51: **implement a promise, invent nothin
 - **`w_whirl` and `w_guard` are recorded and not rows.** 2.2x total is 1.1x twice, and 3.2s is 3s
   plus the frame budget; neither is a player-visible lie worth a commit.
 
+**THE LAST-ASSIGNMENT HAZARD WAS CHECKED, NOT ASSUMED, AND ONE ROW TURNS ON IT.** Section J's warning
+is that `SKILL_FX` is a plain object assigned in three places and the LAST assignment wins, so an
+alias read at 10300 can be a lie by 19700. Every id in the table above was re-grepped for a second
+`SKILL_FX.<id>=`: none of `m_barrier`, `necro_wall`, `chr_barrier`, `st_barrier`, `pal_guard`,
+`w_stomp`, `r_mark`, `r_volley` or `w_execute` has one, so each really does reach the handler named.
+**And the check earned its keep on the one row that is takeable:** `SKILL_FX.bsk_charge` IS assigned
+twice — the alias to `w_charge` at 10374 and a full redefinition at **19711**, which is section J's
+Headlong (`_headlongT=0.9`, i-frames, no damage). So `wcharge`'s literal reaches the *warrior's*
+Charge and nothing else, and a run that had trusted the alias line would have believed it was
+changing the berserker too.
+
 *How to re-run it:* `grep -n "kind:'skill'" public/3d/index.html` filtered to lines carrying a digit
 followed by `x` or `%`, then each `fx:` id chased through the alias chain to its last `SKILL_FX.<id>=`
 and the literal read off. No launch. **Re-run it after any kit change** — this is a static sweep of a

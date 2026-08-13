@@ -481,6 +481,60 @@ having been watched to run inside a gate. The first genuine flap will print
 `confirming N new failure(s) with a second launch of: <class>`, and that line is the evidence to look
 for.
 
+- [x] **Step 5: THE LINE FIRED FOR REAL — 2026-08-13 — and the run that watched it happen measured
+      the rule falling short.** Recorded rather than fixed; the fix is Step 6 and it is not free.
+
+The line Step 4 asked the next run to look for printed itself, unprompted, on a full gate:
+
+```
+confirming 1 new failure(s) with a second launch of: warlock
+skills (confirm): 8 pass, 1 fail, 0 unproven
+REGRESSION: skills:warlock/Final Curse:damage
+GATE: FAIL (1 new)
+```
+
+Everything about that is the design working: one class re-run and not sixteen, one launch spent, the
+accusation upheld rather than laundered. **And the verdict was wrong.** Four launches of the *identical*
+command on the *identical* tree — `node harness/test-skills.js --classes warlock` — came back
+**1 pass, 3 fail**, and the same command against `HEAD` (the same tree with the change under test
+reverted, and nothing else) came back **2 pass, 0 fail**. A row that fails about three times in four
+will be upheld by a single confirming re-run about three times in four, so **`confirmPass` as built
+clears a coin-flip flapper and upholds a loaded-dice one.**
+
+The row is `warlock/Final Curse`, and it is the same *shape* as the skylancer row this task was built
+from rather than the same row: its damage is owed a **full second after the cast** (`SKILL_FX.war_final`
+sets `t.warBurstT = 1.0` and the payout lands in the enemy loop a second later), so what is being
+sampled is again a state at a moment and not a computation. `onCd` was true in every failing sample —
+the cast happened, and `refund` is documented at 10653 as *"never happened … did not go on cooldown"* —
+so the skill found its target and the damage did not arrive. **Where it goes instead is not yet known
+and this run does not guess.**
+
+**What it cost, so the priority is arguable rather than asserted:** the change under test was a
+recovered pass 47 from `docs/superpowers/plans/2026-08-10-skill-correctness.md` — a real fix, gated
+green, re-measured live — and a red gate is a wall it may not be committed through. One flapping row
+held a verified fix out of the repository for a whole run. That is the same cost Task 2 was written
+about, arriving from the other side: Task 2 stopped a red gate DELETING work, and this is a red gate
+REFUSING it.
+
+- [ ] **Step 6: Re-run until it is stable, not once — and say the confidence out loud**
+
+The rule `confirmPass` needs is **best-of-N with an explicit N**, not one re-run: re-measure the accused
+class up to three times and call it CONFIRMED only if it fails in a majority, printing the tally
+(`warlock/Final Curse: 3 of 4 launches`) so the number is in the log rather than in a run's head. Two
+things it must keep from Step 2, both of which a naive "re-run until it passes" loop would throw away:
+a re-run that THREW or came back dark still clears nothing, and a flap is dropped from `now` rather
+than written into the baseline.
+
+It is not free and that is why it is its own step: three launches per accused class, and the accused
+set can be large the day a real change breaks a real thing. Scope it — N launches only for a row that
+is *fresh*, never for the baseline — and measure the added wall clock against the ~20–45 minutes the
+gate already spends before choosing N.
+
+**And the cheaper half is worth doing first:** nothing currently records that a row has flapped
+*before*. A per-row flap counter in `harness/report.json` would have answered this run's question in
+zero launches — `warlock/Final Curse` is the second delayed-payout row to be accused in two days, and
+neither run could see the other's evidence.
+
 ---
 
 ### Task 5: The harness was filling the disk it needs to write to

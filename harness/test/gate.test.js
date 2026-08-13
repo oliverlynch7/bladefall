@@ -13,7 +13,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { isDark, suiteLine, suiteOf, reconcile,
-         classOf, confirmTargets, splitConfirmed, confirmPass } from '../gate-rules.js';
+         classOf, confirmTargets, splitConfirmed, confirmPass,
+         CONFIRM_LAUNCHES, majorityFailed, decided, mergeFlaps, flapNote } from '../gate-rules.js';
 
 /* run-all.js as it stood before this fix, transcribed exactly. */
 const OLD_LINE  = (name, s) => s.skipped ? `${name}: skipped (not written yet)`
@@ -210,10 +211,10 @@ test('a mixed run splits both ways at once', () => {
 
 /* THE ORCHESTRATION ITSELF, driven with a fake re-run. These exercise the same function run-all.js
    calls — not a transcription of it — so the launch-shaped half is covered without a launch. */
-const drive = (fresh, rerun) => {
+const drive = (fresh, rerun, opts = {}) => {
   const lines = [];
   return confirmPass(fresh, { rerun, idOf: f => `skills:${f.cls}/${f.skill}:${f.claim}`,
-                              log: l => lines.push(l) }).then(r => ({ ...r, lines }));
+                              log: l => lines.push(l), ...opts }).then(r => ({ ...r, lines }));
 };
 const SKY_FAIL = { cls: 'skylancer', skill: 'Dive Strike', claim: 'damage' };
 
@@ -236,7 +237,7 @@ test('confirm pass: the flap is cleared and said out loud', async () => {
   assert.deepStrictEqual(r.flapped, [DIVE]);
   assert.deepStrictEqual(r.confirmed, []);
   assert.ok(r.lines.some(l => l.startsWith('FLAPPED')));
-  assert.ok(r.lines.some(l => /second launch of: skylancer/.test(l)));
+  assert.ok(r.lines.some(l => /launch\(es\) of: skylancer/.test(l)));
 });
 
 test('confirm pass: a row that fails BOTH times is still a regression', async () => {
@@ -251,7 +252,7 @@ test('confirm pass: A RE-RUN THAT THREW CLEARS NOTHING', async () => {
   const r = await drive([DIVE], async () => { throw new Error('chrome would not start'); });
   assert.deepStrictEqual(r.confirmed, [DIVE]);
   assert.deepStrictEqual(r.flapped, []);
-  assert.ok(r.lines.some(l => /confirm run FAILED/.test(l)));
+  assert.ok(r.lines.some(l => /confirm launch \d+\/\d+ FAILED/.test(l)));
   assert.ok(r.lines.some(l => /every new failure stands/.test(l)));
 });
 
@@ -259,7 +260,7 @@ test('confirm pass: A DARK RE-RUN CLEARS NOTHING EITHER', async () => {
   const r = await drive([DIVE], async () => ({ skipped: '3D hero layer not live', pass: 0, fail: 0 }));
   assert.deepStrictEqual(r.confirmed, [DIVE]);
   assert.deepStrictEqual(r.flapped, []);
-  assert.ok(r.lines.some(l => /confirm run DARK/.test(l)));
+  assert.ok(r.lines.some(l => /confirm launch \d+\/\d+ DARK/.test(l)));
 });
 
 test('confirm pass: a levels row alone never spends a launch', async () => {
@@ -267,6 +268,198 @@ test('confirm pass: a levels row alone never spends a launch', async () => {
   const r = await drive(['levels:Emberdeep/quest:ed1'], async () => { called++; return {}; });
   assert.strictEqual(called, 0);                            // nothing re-runnable to pay for
   assert.deepStrictEqual(r.confirmed, ['levels:Emberdeep/quest:ed1']);   // and it stays loud
+});
+
+/* ── BEST-OF-N. One confirming re-run was not enough, and a real gate on 2026-08-13 is the evidence:
+   it printed `confirming 1 new failure(s) with a second launch of: warlock`, upheld
+   `skills:warlock/Final Curse:damage`, and cost a verified fix a whole run. Four launches of the
+   identical command on the identical tree then came back three fail / one pass, and two launches of
+   the same command with the change reverted both passed. The row fails ~3 in 4 whatever the tree
+   says, so a single re-run is a coin toss weighted by the flakiness it is measuring.
+
+   THE OLD SINGLE-LAUNCH RULE IS TRANSCRIBED BELOW AND ASSERTED TO DISAGREE, same as every other
+   section in this file — a test that only says the new rule is the new rule cannot tell you the old
+   one was ever wrong. */
+const OLD_ONE_LAUNCH = (fresh, targets, firstLaunchFailed) =>
+  splitConfirmed(fresh, targets, firstLaunchFailed ? fresh : []);
+const CURSE = 'skills:warlock/Final Curse:damage';
+const CURSE_FAIL = { cls: 'warlock', skill: 'Final Curse', claim: 'damage' };
+const PASSES = { pass: 4, fail: 0, failures: [] };
+const FAILS  = { pass: 3, fail: 1, failures: [SKY_FAIL] };
+/* A rerun that returns a scripted sequence and counts how many launches were actually spent. */
+const script = (...results) => {
+  const f = async () => results[Math.min(f.calls++, results.length - 1)];
+  f.calls = 0;
+  return f;
+};
+
+test('the majority rule reduces EXACTLY to the old rule at one launch', () => {
+  /* This is why there is one function and not two. Every single-launch case above still drives it. */
+  assert.strictEqual(majorityFailed(1, 1), true);    // failed the re-run  -> CONFIRMED
+  assert.strictEqual(majorityFailed(0, 1), false);   // passed the re-run  -> FLAPPED
+  assert.strictEqual(majorityFailed(0, 0), true);    // nothing measured   -> stands
+});
+
+test('at N=3 a row must fail 2 of the 3 confirming launches — 3 of 4 overall', () => {
+  assert.strictEqual(majorityFailed(3, 3), true);    // 4 of 4
+  assert.strictEqual(majorityFailed(2, 3), true);    // 3 of 4
+  assert.strictEqual(majorityFailed(1, 3), false);   // 2 of 4 is not a majority
+  assert.strictEqual(majorityFailed(0, 3), false);   // 1 of 4
+});
+
+test('A REAL REGRESSION IS NEVER LAUNDERED — the property that must not be lost', async () => {
+  /* Best-of-N sharpens a verdict; it must not soften one. A row that fails every launch stands, and
+     it stands at every N. */
+  for(const n of [1, 2, 3, 5]) assert.strictEqual(majorityFailed(n, n), true);
+  const r = await drive([DIVE], script(FAILS, FAILS, FAILS));
+  assert.deepStrictEqual(r.confirmed, [DIVE]);
+  assert.deepStrictEqual(r.flapped, []);
+});
+
+test('THE DISAGREEMENT: fail once then pass twice is a FLAP, and the old rule called it a regression', async () => {
+  /* The exact shape the warlock run could not tell apart. Under the old rule the whole verdict was
+     whichever answer the FIRST re-run happened to give. */
+  assert.deepStrictEqual(OLD_ONE_LAUNCH([DIVE], ['skylancer'], true).confirmed, [DIVE]);   // the bug, stated
+
+  const r = await drive([DIVE], script(FAILS, PASSES, PASSES));
+  assert.deepStrictEqual(r.flapped, [DIVE]);                       // 2 of 4 — not a majority
+  assert.deepStrictEqual(r.confirmed, []);
+  assert.notDeepStrictEqual(r.confirmed, OLD_ONE_LAUNCH([DIVE], ['skylancer'], true).confirmed);
+});
+
+test('and pass once then fail twice is a REGRESSION, where the old rule would have cleared it', async () => {
+  /* The same coin, other face: the old rule threw away everything after launch one in this
+     direction too, and this is the direction where doing so hides a real break. */
+  assert.deepStrictEqual(OLD_ONE_LAUNCH([DIVE], ['skylancer'], false).flapped, [DIVE]);
+
+  const r = await drive([DIVE], script(PASSES, FAILS, FAILS));
+  assert.deepStrictEqual(r.confirmed, [DIVE]);                     // 3 of 4
+  assert.deepStrictEqual(r.flapped, []);
+});
+
+test('THE TALLY IS PRINTED, so the number is in the log and not in a run\'s head', async () => {
+  /* The denominator is the launches actually SPENT, not the N that was budgeted — two agreeing
+     launches settle it, so a plainly-broken row reads `3 of 3` rather than a `4 of 4` that never
+     happened. Reporting the budget would be a number nobody measured. */
+  const r = await drive([DIVE], script(FAILS, FAILS, FAILS));
+  assert.ok(r.lines.some(l => /CONFIRMED \(3 of 3 launches failed\).*Dive Strike/.test(l)), r.lines.join('\n'));
+  assert.strictEqual(r.tally[DIVE], 2);
+  assert.strictEqual(r.launches, 2);
+
+  const f = await drive([DIVE], script(FAILS, PASSES, PASSES));
+  assert.ok(f.lines.some(l => /FLAPPED \(2 of 4 launches failed/.test(l)), f.lines.join('\n'));
+  assert.strictEqual(f.launches, 3);                      // this one really did cost three
+});
+
+test('decided(): a verdict no remaining launch could change, and one that is still open', () => {
+  assert.strictEqual(decided(2, 2, 1), true);    // 3 of 3 already; a third launch cannot undo it
+  assert.strictEqual(decided(0, 2, 1), false);   // at best 2 of 4 — never a majority
+  assert.strictEqual(decided(1, 2, 1), null);    // 2 of 4 or 3 of 4 — the third launch decides
+  assert.strictEqual(decided(1, 1, 2), null);    // nothing is ever settled after ONE launch
+  assert.strictEqual(decided(0, 1, 2), null);
+});
+
+test('and it SAVES a launch: two launches that agree end the loop', async () => {
+  const clean = script(PASSES, PASSES, PASSES);
+  await drive([DIVE], clean);
+  assert.strictEqual(clean.calls, 2);                     // not 3 — the verdict was settled
+
+  const broken = script(FAILS, FAILS, FAILS);
+  await drive([DIVE], broken);
+  assert.strictEqual(broken.calls, 2);
+
+  const split = script(FAILS, PASSES, PASSES);
+  await drive([DIVE], split);
+  assert.strictEqual(split.calls, 3);                     // disagreement is what costs the third
+});
+
+test('N is explicit, and one launch is still available for anything that wants it', async () => {
+  assert.strictEqual(CONFIRM_LAUNCHES, 3);
+  const one = script(PASSES, FAILS, FAILS);
+  const r = await drive([DIVE], one, { launches: 1 });
+  assert.strictEqual(one.calls, 1);
+  assert.deepStrictEqual(r.flapped, [DIVE]);              // the old behaviour, on demand
+});
+
+const DARK = { skipped: '3D hero layer not live', pass: 0, fail: 0 };
+
+test('A DARK LAUNCH IN THE MIDDLE COUNTS FOR NEITHER SIDE', async () => {
+  /* It must not be read as a pass — that is the direction that laundered every real regression, the
+     trap Step 2 named — and it must not inflate the denominator either: a launch that measured
+     nothing is not a launch. Here the row passes, goes dark, then fails, and the verdict is decided
+     on the TWO real measurements. */
+  const r = await drive([DIVE], script(PASSES, DARK, FAILS));
+  assert.strictEqual(r.launches, 2);                      // two MEASURED, of three spent
+  assert.strictEqual(r.tally[DIVE], 1);
+  assert.deepStrictEqual(r.confirmed, [DIVE]);            // 2 of 3 is a majority
+  assert.ok(r.lines.some(l => /DARK.*measured nothing/.test(l)));
+  assert.ok(r.lines.some(l => /CONFIRMED \(2 of 3 launches failed\)/.test(l)), r.lines.join('\n'));
+});
+
+test('a dark launch SPENDS its slot, and that leans the verdict toward standing', async () => {
+  /* Deliberate, and stated so the next reader does not "fix" it into a retry loop: a re-run that
+     keeps going dark because Chrome will not start would then never terminate. Losing a slot makes
+     the remaining evidence carry more weight, which points at CONFIRMED — the safe direction, and
+     the same one every other missing-measurement rule in this file takes. */
+  const s = script(FAILS, DARK, FAILS);
+  const r = await drive([DIVE], s);
+  assert.strictEqual(s.calls, 2);                         // the dark launch settled it, at m=1 f=1
+  assert.strictEqual(r.launches, 1);
+  assert.deepStrictEqual(r.confirmed, [DIVE]);            // 2 of 2
+  assert.strictEqual(decided(1, 1, 1), true);             // no future could have cleared it
+});
+
+test('two rows in one class settle independently on the same launches', async () => {
+  const LIFT = 'skills:skylancer/Wind Lift:damage';
+  const LIFT_FAIL = { cls: 'skylancer', skill: 'Wind Lift', claim: 'damage' };
+  const both = { pass: 2, fail: 2, failures: [SKY_FAIL, LIFT_FAIL] };
+  const lift = { pass: 3, fail: 1, failures: [LIFT_FAIL] };
+  const r = await drive([DIVE, LIFT], script(both, lift, lift));
+  assert.deepStrictEqual(r.confirmed, [LIFT]);            // 4 of 4
+  assert.deepStrictEqual(r.flapped, [DIVE]);              // 2 of 4
+});
+
+/* ── THE FLAP LEDGER. The cheap half, and the one that would have answered the warlock question in
+   zero launches: nothing in the gate recorded that a row had been accused before, so two runs two
+   days apart each met a delayed-payout row for the "first" time. */
+
+test('the ledger accumulates across runs and keeps the two verdicts apart', () => {
+  let led = mergeFlaps({}, { flapped: [CURSE], at: '2026-08-13T01:00:00Z' });
+  led = mergeFlaps(led, { flapped: [CURSE], confirmed: [DIVE], at: '2026-08-13T02:00:00Z' });
+  led = mergeFlaps(led, { confirmed: [CURSE], at: '2026-08-13T03:00:00Z' });
+
+  assert.deepStrictEqual(led[CURSE], { flapped: 2, confirmed: 1, last: '2026-08-13T03:00:00Z' });
+  assert.deepStrictEqual(led[DIVE],  { flapped: 0, confirmed: 1, last: '2026-08-13T02:00:00Z' });
+});
+
+test('the ledger does not mutate what it was given', () => {
+  const prev = { [CURSE]: { flapped: 1, confirmed: 0 } };
+  mergeFlaps(prev, { flapped: [CURSE] });
+  assert.strictEqual(prev[CURSE].flapped, 1);
+});
+
+test('a row nobody has ever seen gets NO note, and a seen one names both counts', () => {
+  assert.strictEqual(flapNote({}, CURSE), '');
+  assert.strictEqual(flapNote({ [CURSE]: { flapped: 0, confirmed: 0 } }, CURSE), '');
+  const note = flapNote({ [CURSE]: { flapped: 3, confirmed: 1, last: '2026-08-13T03:00:00Z' } }, CURSE);
+  assert.match(note, /FLAPPED 3/);
+  assert.match(note, /CONFIRMED 1/);
+  assert.match(note, /Final Curse/);
+});
+
+test('and the confirm pass reads it out before spending a single launch', async () => {
+  const history = { [CURSE]: { flapped: 2, confirmed: 0, last: '2026-08-12T16:02:00Z' } };
+  const r = await drive([CURSE], script(FAILS, FAILS), { history });
+  const idx = r.lines.findIndex(l => /ledger: .*FLAPPED 2/.test(l));
+  assert.ok(idx >= 0, r.lines.join('\n'));
+  assert.ok(idx < r.lines.findIndex(l => /confirm launch/.test(l)) ||
+            !r.lines.some(l => /confirm launch/.test(l)));
+});
+
+test('a clean run writes nothing to the ledger, because nothing was accused', async () => {
+  const r = await drive([], script(PASSES));
+  assert.strictEqual(r.ran, false);
+  assert.deepStrictEqual(mergeFlaps({}, { flapped: r.flapped, confirmed: r.confirmed }), {});
 });
 
 test('the real 2026-08-11 gate run reconciles to exactly what it printed', () => {

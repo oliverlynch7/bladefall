@@ -14,7 +14,8 @@
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { isDark, suiteLine, suiteOf, reconcile, confirmPass } from './gate-rules.js';
+import { isDark, suiteLine, suiteOf, reconcile, confirmPass,
+         classOf, mergeFlaps, failureId } from './gate-rules.js';
 
 const HERE = import.meta.dirname;
 const REPORT = join(HERE, 'report.json');
@@ -56,11 +57,22 @@ async function suite(name, file, fn){
   }
 }
 
-/* A stable identity for one failure, so today's report can be compared with the baseline. */
-const idOf = (s, f) => `${s}:${f.cls || f.zone || ''}/${f.skill || f.check || ''}:${f.claim || ''}`;
+/* A stable identity for one failure, so today's report can be compared with the baseline. Defined in
+   gate-rules.js so the confirm pass names a re-run's failures with the very same function — see
+   `failureId` there for why a second copy would silently launder every regression into a flap. */
+const idOf = failureId;
+
+/* THE FLAP LEDGER, carried across runs. `report.json` is overwritten every run, so the previous
+   run's ledger has to be read out of it BEFORE anything writes — otherwise the counter resets every
+   time and answers nothing. Best-effort: a missing or corrupt report must never stop a gate. */
+function priorFlaps(){
+  try { return (JSON.parse(readFileSync(REPORT, 'utf8')) || {}).flaps || {}; }
+  catch { return {}; }
+}
 
 async function main(){
-  const report = { at: new Date().toISOString(), suites: {} };
+  const history = priorFlaps();
+  const report = { at: new Date().toISOString(), suites: {}, flaps: history };
 
   report.suites.unit = unitTests();
   if(report.suites.unit.fail){
@@ -120,12 +132,30 @@ async function main(){
      the classes actually named are re-run, and only when something is fresh, so a clean run pays
      nothing. If the re-run throws or goes dark it passes no targets, and every accusation stands.
      The re-run is scoped to the accused classes ONLY — `runSkillTests({classes})` is the same entry
-     point the CLI's --classes uses, so a flap costs one launch, not a second full suite. */
-  const { flapped } = await confirmPass(first.fresh, {
+     point the CLI's --classes uses, so a flap costs one launch, not a second full suite.
+
+     BEST-OF-N, not one launch: a single re-run of a row that fails three times in four upholds it
+     three times in four, which is how `skills:warlock/Final Curse:damage` produced a red gate on
+     2026-08-13 and held a verified fix out of the repository for a run. The tally is printed and
+     the ledger remembers it across runs. */
+  const { flapped, confirmed, ran } = await confirmPass(first.fresh, {
     rerun: async targets => (await import('./test-skills.js')).runSkillTests({ classes: targets }),
     idOf: f => idOf('skills', f),
     log: line => console.log(line),
+    history,
   });
+
+  /* Record only what was actually re-measured. A row nobody could re-run (a levels id, or a confirm
+     launch that went dark) is confirmed by the absence of evidence, and writing that into the
+     ledger as "CONFIRMED once" would be the same invented finding this gate keeps having to unlearn. */
+  if(ran){
+    report.flaps = mergeFlaps(history, {
+      flapped,
+      confirmed: confirmed.filter(id => classOf(id)),
+      at: report.at,
+    });
+    writeFileSync(REPORT, JSON.stringify(report, null, 2));
+  }
 
   /* A flapped id is neither known nor fixed, so it is dropped before the ratchet sees it. */
   const settled = new Set([...now].filter(id => !flapped.includes(id)));

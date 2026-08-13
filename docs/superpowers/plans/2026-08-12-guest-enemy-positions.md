@@ -225,16 +225,43 @@ Measured: <n> bytes/packet before, <n> after, at 14 Hz. Flag reads 0 of 41 aslee
 - Modify: `public/3d/index.html` — `MP.applyEnemies` (12416) and the enemy update loop (13381)
 - Modify: `harness/probes/mp-drift.probe.js` — assert the correction, and assert the sleeping case
 
-- [ ] **Step 1: Watch the known-bad fail**
+**TASK 2'S CODE IS SHIPPED (`cb47393`) AND BOTH HALVES ARE MEASURED. STEPS 6 AND 7 ARE NOT DONE, AND
+THE REASON IS WORTH MORE THAN THE STEPS.** What is proven, on the live game:
 
-```bash
-node _shot/shot.js --scene 0 --eval @harness/probes/mp-drift.probe.js
-```
+| | measured |
+|---|---|
+| the guard, at the apply layer | awake snapshot stores **41 of 41** targets; the same snapshot marked asleep stores **0**; a 6-slot pre-flag packet stores **0**. HP adopted 41 of 41 in all three, so every snapshot demonstrably arrived |
+| the pull, in the update | **141.57** units of a 707-unit gap closed in ONE frame — 707 × 0.2, `MP.tick`'s own constant, exactly |
 
-Expected: `reconcile: { enemies: 41, movedBySnapshot: 0, hpAdoptedFromSnapshot: 41 }`. The HP column
-is what makes it conclusive rather than a null result — the snapshot arrived and was acted on.
+**The three-trial section of `mp-drift.probe.js` still reads every trial as frozen, and that is the
+probe, not the game.** It runs after the probe's own 30-second lap, and after that lap `B.update()`
+steps nothing — not the correction and not the enemies' own AI, which is the tell: trials A and B do
+not involve the new code at all and they froze too. Two causes have been ruled out by measurement
+rather than by reading: the update does not throw (`tickThrew: null` on all three) and the observer is
+not dead (`player: {dead:false, hp:100}` — the first suspect, and the probe now carries the revive and
+reports the receipt so that answer cannot be assumed again). **A frozen bench that reports
+`moved: 0` is the shape this whole sub-project exists to catch: it reads exactly like a working
+guard.** The next run should find what the lap leaves behind before trusting any number from that
+section.
 
-- [ ] **Step 2: Store the host's position as a TARGET, never as a teleport**
+**What `harness/probes/mp-look.probe.js` found, and it is a real question rather than a nuisance.**
+Six mobs were told, as an awake host would, that they stand in a 220-unit arc in front of the hero.
+Two arrived — `toTarget` **3** and **6** units after 25 frames, from 218 and 222 out — and four did
+not (358, 635, 1142, 1393). The leading explanation is the one the plan predicted in Step 3 and it
+favours the design: **the correction is applied one line before the game's own edge guard, and the
+Outskirts road has water either side** (see `_shot/out/t2-look.png`), so an arc slot over the river is
+a position the guard is *supposed* to refuse. That is a hypothesis with evidence, not a finding: the
+probe reports the floor under each mob's final position and not under its TARGET, which is the one
+number that would settle it. Do that first next run. Nothing here licenses calling the correction
+converged in the general case, and this document does not.
+
+- [x] **Step 1: Watch the known-bad fail** — done, before the change: `reconcile: {enemies: 41,
+      movedBySnapshot: 0, hpAdoptedFromSnapshot: 41}`, net drift 304–562 units over the 30s lap
+      against a melee reach of ~90–125. The known-bad reproduces exactly as recorded.
+
+- [x] **Step 2: Store the host's position as a TARGET, never as a teleport** — done at index.html:12421,
+      `if(a[6]){ e.mx=a[2]; e.mz=a[3]; }`, with the fail-safe property stated in the comment as the step
+      asks.
 
 In `applyEnemies`, the existing-enemy branch (12421) currently writes `maxHp` and `hp` and nothing
 else. Add, only when slot 6 says the host has it awake:
@@ -250,7 +277,11 @@ makes this survivable in a mixed party.
 Do not write `e.x`/`e.z` here. A snapshot lands between frames and a 14 Hz teleport of a charging
 body is visible; the interpolation belongs in the update, where `dt` exists.
 
-- [ ] **Step 3: Consume the target in the enemy update**
+- [x] **Step 3: Consume the target in the enemy update** — done at index.html:13463, immediately before
+      `if(e.kind!=='fly'&&e.kind!=='goblin'){`. All three of the step's "confirm this still holds"
+      claims were re-checked against the file rather than taken on trust: the obstacle/edge guard is
+      at 13464–13472 (after), the melee contact test at 13473–13475 (after that), and the arena bots
+      still `continue` at 13383 (before).
 
 **The line goes immediately before 13459**, `if(e.kind!=='fly'&&e.kind!=='goblin'){` — that is,
 after every movement branch (walk 13441, ranged 13446, charge 13452, fly 13438, boss 13458) and
@@ -283,15 +314,14 @@ Two more, both cheap to get wrong:
   they are excluded by construction. Verify that is still true at the line you pick.
 - **`MP.guest()` and not `MP.active`.** A host must never correct itself against its own snapshot.
 
-- [ ] **Step 4: Gate it**
+- [x] **Step 4: Gate it** — `GATE OK`.
 
-```bash
-node tools/gate.js
-```
-
-Expected: `GATE OK`.
-
-- [ ] **Step 5: Prove BOTH directions, in one launch**
+- [x] **Step 5: Prove BOTH directions, in one launch** — done at the apply layer, which is where the
+      wake flag is read: 41 targets stored awake, 0 asleep, 0 for a 6-slot packet, all in one launch
+      on the same 41 bodies. The step's "write it against a build with the guard forced open" is
+      satisfied by trial C rather than by a second build: C *is* that build's behaviour, on the same
+      frame and the same bodies, so if C had also stored 0 the other two zeros would be worthless.
+      **The end-to-end `moved` half of this step is NOT satisfied** — see the frozen-bench note above.
 
 Extend `mp-drift.probe.js` so part 1 applies two snapshots rather than one, because the awake case
 alone would pass with the flag ignored entirely:
@@ -310,7 +340,12 @@ now lives in the update — a probe that applies a snapshot and measures immedia
 `moved: 0` against a working fix. Tick at least 5 frames (four halve the gap; the probe should
 report the residual rather than assert a hard equality, since a lerp never exactly arrives).
 
-- [ ] **Step 6: Prove the drift it exists to remove is gone**
+- [ ] **Step 6: Prove the drift it exists to remove is gone** — **OPEN.** The weaker claim this step
+      allows as a fallback is half-measured and is written above rather than here: a single applied
+      snapshot brought two of six mobs to 3 and 6 units of the host's position in 25 frames, and the
+      other four did not converge for a reason that has a leading explanation and no measurement.
+      Fix the frozen bench first; a lap-based drift number taken from it today would be a number that
+      was not measured.
 
 Part 2 of the same probe already walks the player a 30s lap and reports each mob's net
 displacement — 380–562 units today. Re-run it with a host snapshot applied at the real 14 Hz from a
@@ -322,10 +357,17 @@ If standing up a second simulation in one page proves impractical, say so in the
 to the honest weaker claim — a single applied snapshot converges the gap to under X units in Y
 frames — rather than reporting a number that was not measured.
 
-- [ ] **Step 7: LOOK at it, because rubber-banding is a picture, not a number**
-
-A correction arriving at 14 Hz against an AI that pushes the other way every frame can converge
-perfectly and still read as jitter. Numbers cannot answer that.
+- [ ] **Step 7: LOOK at it, because rubber-banding is a picture, not a number** — **OPEN, and the
+      first attempt is kept because of what it says about how to do it.** `harness/probes/mp-look.probe.js`
+      puts an awake host snapshot in front of the camera and renders the result
+      (`_shot/out/t2-look.png`). The frame is a clean, correctly-lit shot of the Outskirts road — and
+      it does **not** show the arc legibly enough to be evidence either way, because a mob 220 units
+      ahead of a hero on a fixed look-down camera is small and the two that arrived are hard to
+      distinguish from the four that did not. **A still frame of six mobs is not a picture of
+      rubber-banding anyway**, which is the honest version of this step: what it needs is either a
+      close camera on ONE corrected mob (`--focus` on the subject, working range 200–400) or a
+      per-frame trace of the correction magnitude, which is the number this step already asks for and
+      which is cheaper than the photograph.
 
 ```bash
 node _shot/shot.js --scene 0 --pre @harness/probes/guestsync.pre.js --out _shot/out/guestsync.png
@@ -335,7 +377,8 @@ Also report, from the probe, the **per-frame correction magnitude** once converg
 is being moved more than its own AI step (8.45 units at the top end) every frame, it is fighting the
 correction and the reader is entitled to know before Oliver plays it.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit** — `cb47393`, its own commit so Oliver can revert the correction alone after a
+      match, with the commit message stating in full which half is measured and which is not.
 
 ```bash
 git add public/3d/index.html harness/probes/mp-drift.probe.js

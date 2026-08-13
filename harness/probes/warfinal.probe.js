@@ -36,6 +36,24 @@
   const DUMMY_DIST = 60;           // the bench's own DUMMY_DIST
   const TRACE = 120;               // ticks of per-tick detail kept for one pass and one failure
 
+  /* THE RECEIPT, and without it a quiet world is indistinguishable from a stopped one.
+     `update()` returns at its third line unless `mode === 'play'` (index.html:13038) and `__BF3.mode`
+     is a getter with no setter, so a probe cannot put the game back and gets a full run of plausible
+     zeroes instead. AUTOPILOT.md's rule for this is to count the ticks that actually RAN in play mode
+     and print them beside the ticks asked for; `mp-drift` says `playTicks 1800 of 1800`.
+     It matters more here than anywhere: this probe exists to explain a row whose damage arrives a
+     second after the cast, and "the second never elapsed" is the one explanation that would look
+     exactly like "the damage went somewhere else". Counted over EVERY tick the probe spends,
+     the plain casts included, because a card raised during the fourth A-side skill is still up
+     during the eighth B-side one. */
+  let asked = 0, ranInPlay = 0, leftPlayAt = null;
+  const tick = () => {
+    asked++;
+    if(__BF3.mode === 'play') ranInPlay++;
+    else if(leftPlayAt == null) leftPlayAt = { tick: asked, mode: __BF3.mode };
+    try { __BF3.update(1/60); } catch(e){}
+  };
+
   /* Lifted from test-skills.js: an off-class weapon skips every `if(ok)` half of a kit. */
   (function(){
     const tries = ['warlock'].concat(Object.keys(__BF3.CLASSES || {}));
@@ -95,7 +113,7 @@
     reset(); mkDummy();
     if(p.skillCd) p.skillCd[i] = 0;
     try { __BF3.useSkill(i); } catch(e){}
-    for(let k = 0; k < TICKS; k++){ try { __BF3.update(1/60); } catch(e){} }
+    for(let k = 0; k < TICKS; k++) tick();
   };
 
   /* THE INSTRUMENTED CAST. Samples the four guards the payout has to survive, on the object that was
@@ -136,8 +154,9 @@
     const trace = [];
     let minHp = watched ? watched.hp : null;
     let prevT = watched ? (watched.warBurstT || 0) : 0;
+    const play0 = ranInPlay;
     for(let k = 0; k < TICKS; k++){
-      try { __BF3.update(1/60); } catch(e){}
+      tick();
       if(!watched) continue;
       const t = watched.warBurstT || 0;
       if(watched.hp < minHp) minHp = watched.hp;
@@ -158,6 +177,9 @@
       prevT = t;
     }
     rec.mode = __BF3.mode;
+    /* Per-cast receipt: this window is where the burst had to land, so a shortfall here is the whole
+       answer and a full count rules the explanation out rather than leaving it open. */
+    rec.playTicks = (ranInPlay - play0) + ' of ' + TICKS;
     rec.dealt = (hp0 == null || minHp == null) ? null : Math.round(hp0 - minHp);
     rec.pass = !!(rec.dealt > 0);
     rec.end = watched ? { dead: !!watched.dead, active: !!watched.active,
@@ -195,6 +217,11 @@
   return JSON.stringify({
     onClass, reps: reps.length,
     passed: reps.filter(r => r.pass).length,
+    /* Whole-probe receipt. `playTicks` short of `asked` means the game stopped under the probe and
+       NOTHING below is evidence about Final Curse; `leftPlayAt` names the tick and the mode it went
+       to, so the next reader is told rather than left to bisect. */
+    playTicks: ranInPlay + ' of ' + asked,
+    leftPlayAt,
     traceLegend: 'tick, warBurstT, hp, dead, active, dist, indexInEnemies',
     rows: reps,
   });

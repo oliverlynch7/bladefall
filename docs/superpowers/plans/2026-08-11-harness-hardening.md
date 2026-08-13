@@ -635,7 +635,73 @@ slower, which is the only part of this that was new. The lesson has not changed 
 about guards: **a verified file that is not in a commit is not work, and the next run cannot tell it
 from wreckage.** Verify, commit by pathspec, then continue — in that order, not the reverse.
 
-- [ ] **Step 7: Diagnose `warlock/Final Curse`, now that the ledger will have counted it**
+- [x] **Step 7: Diagnose `warlock/Final Curse`, now that the ledger will have counted it** — done
+      2026-08-13, and **the answer is that there is nothing wrong with the row.** The payout chain is
+      sound and the premise this step was written on does not hold on today's tree. Measured, twenty
+      casts and four whole-suite launches, not read.
+
+**The row passes, and it passes the same way every time.** `harness/probes/warfinal.probe.js` casts
+the bench's own warlock B-side sequence eight times in one page, on the bench's rig — same
+`arena:flat`, same `DUMMY_DIST = 60`, same pose restore, same 300-tick window, Final Curse
+instrumented **in place** as the r8 B-side rather than pulled out of the sequence:
+
+```
+reps 8, passed 8      burstTick 59 in all eight      dealt 1014 / 304 (crit, not a guard)
+armedIsDummy true, armedDmg 496, g0 {dead:false, active:true, dropT:0, bot:false, inList:0}
+end {burstT:0, burstDmg:0}      playTicks 19200 of 19200      leftPlayAt null
+```
+
+Repeated as a second launch: **8 of 8 again, burst on tick 59 again.** And the real suite, four
+separate launches of `node harness/test-skills.js --classes warlock`: **`9 pass, 0 fail, 0 unproven`
+four times out of four.** Twenty instrumented casts and four suite launches, no failure in any of
+them.
+
+**Every candidate this step named is excluded by name, which is the part worth keeping:**
+
+- *the second of delay outliving the dummy's approach* — no. The burst lands on tick **59** of 300,
+  i.e. exactly the 1.0s `war_final` arms, with 241 ticks to spare, and the trace shows the dummy
+  closing from 59 units to 21 and then knocked back to 50 — never once out of the payout's way,
+  because the payout is not a range check.
+- *outliving the dummy's life or the window* — no. `dead:0` and `active:1` on every traced tick,
+  `hp` 100000 → 98986 on tick 59, `inList` 0 throughout: all four guards at index.html:13431
+  (`!dead`, `!bot`, `dropT<=0`, `active`) hold from arming to payout.
+- *arming something other than the dummy* — no. `armedIsDummy true` in all sixteen instrumented
+  casts, which was worth asking separately because `war_final` skips `e.dummy` and the bench's grunt
+  is deliberately not flagged, so "armed nothing" and "armed something else" are different answers.
+- *the game stopping under the probe* — no, and this is the receipt AUTOPILOT.md demands rather than
+  an assumption. `playTicks 19200 of 19200` over the whole probe, `300 of 300` per cast,
+  `leftPlayAt null`. A shortfall here would have meant nothing else in the run was evidence.
+- *the cast being refunded* — no. `onCd true`, `ret null`, `threw null`, `armedT 1` on every rep.
+
+**So the failure is not in the row's arithmetic, and that is a load-bearing negative.** The burst
+lands on the *identical tick* in sixteen consecutive casts — this payout is deterministic, so no
+patch to `war_final` or to the enemies loop could have been justified, and a run that had gone
+looking for one would have changed working code on a guess. `docs/VISION.md`: missing data is not a
+negative finding.
+
+**What that leaves, stated as the open question rather than a conclusion.** The tree measured here is
+the same GAME CODE as the tree that failed 3-of-4 on 2026-08-13 — the newest commit, `c250184`,
+touches `docs/` and one probe and **not one line of `index.html`** (checked, not assumed) — so the
+change of behaviour cannot be attributed to a game fix, and the earlier reading cannot be dismissed
+as a misattribution either. Two samples of the same code, 3 fail of 4 then 0 fail of 16, are not
+compatible with a fixed per-launch failure rate; something OUTSIDE the cast differed. The strongest
+remaining candidate is the state of the machine during that run — it was the disk-full era and the
+earlier samples were taken alongside a full aggregate gate — but **nothing measured here demonstrates
+that, and it must not be written down as though it were.**
+
+**The instrument for it is now in place and needs no run to spend a launch on it.** Step 6's ledger
+counts the row every time it is accused and every time it stands, and the probe now prints the
+play-mode receipt that would separate a stopped world from a quiet one. The next accusation of this
+row arrives with both. What should NOT happen is another probe of the payout chain: this step already
+photographed it working twenty times.
+
+*Kept because it cost the earlier run four launches:* the same evidence retires the phrase "a row
+that fails three launches in four" for this row. Best-of-N (Step 6) is still right for the reason
+Step 5 gives — a single re-run of ANY flapper is a coin toss weighted by the flapper — but the row it
+was named after is not, on this tree, a flapper at all.
+
+<details>
+<summary>The premise this step was written on, kept for the record</summary>
 
 Step 6 makes the gate *honest* about that row; it does not make the row work. What is known:
 `SKILL_FX.war_final` sets `t.warBurstT = 1.0` and the payout lands in the enemy loop a full second
@@ -650,6 +716,8 @@ question is whether the second of delay is outliving the dummy's approach, the d
 300-tick window itself. `harness/probes/reach.probe.js` is the nearest existing shape to copy.
 Then re-read the ledger: by the time anyone takes this, `harness/report.json` should say how many
 times the row has been accused and how many times it stood.
+
+</details>
 
 ---
 

@@ -84,7 +84,11 @@
     const a = (k / 60) * 0.5;            // one slow lap, so the mobs are led rather than parked on
     IN.jx = Math.cos(a); IN.jz = Math.sin(a);
     try { B.update(1 / 60); } catch(e){}
-    G.p.hp = G.p.maxHp || 100;           // the fight must not end early by killing the observer
+    /* The observer must not die, and topping HP up AFTER the update does not achieve that: a hit
+       that takes it from full to zero inside one frame kills it before this line runs, and death
+       leaves play mode permanently (see the trial reset below). invuln is the game's own field and
+       does not stop the mobs chasing, which is the thing being measured. */
+    G.p.hp = G.p.maxHp || 100; G.p.invuln = 999;
     for(const e of live()){
       const s = track[e.mid]; if(!s) continue;
       s.path += Math.hypot(e.x - s.px, e.z - s.pz);
@@ -130,6 +134,11 @@
        not. That reads exactly like a working guard and is a frozen game. The revive below is the
        fix; `player` in each row is the receipt, so a future freeze says so instead of passing. */
     G.p.dead = false; G.p.downed = false; G.p.hp = G.p.maxHp || 100; G.p.invuln = 999;
+    /* AND CLEARING p.dead IS NOT ENOUGH, WHICH IS WHY `mode` IS REPORTED BELOW. update() returns at
+       its third line unless mode === 'play' (13038), `mode` has no setter on __BF3 (19722 exports a
+       getter only), and dying during part 2's lap takes the game out of play mode for good. A probe
+       can revive the body it can reach and still be ticking a game that has stopped. The revive
+       above keeps the lap from getting there; `mode` is the receipt that it worked. */
     for(const e of live()){ e.active = true; e.dropT = 0; e.mx = null; e.mz = null; }
     const pre = live().map(e => ({ mid:e.mid, x:e.x, z:e.z }));
     const rowsIn = pre.map(b => { const e = byMid2(b.mid);
@@ -155,7 +164,7 @@
              moved:mv, hpAdopted:hp9, targetsStored:targeted,
              residualToTarget: n ? Math.round(resid / n) : null, gapAsked: Math.round(SHIFT * Math.SQRT2),
              framesTicked:FR, threw:threw, tickThrew:tickThrew,
-             player: { dead:!!G.p.dead, hp:Math.round(G.p.hp) } };
+             player: { dead:!!G.p.dead, hp:Math.round(G.p.hp) }, mode: B.mode };
   };
   function byMid2(mid){ for(const e of live()) if(e.mid === mid) return e; return null; }
   const correction = [ trial('A_sleeping', 0, 7), trial('B_oldPeer', null, 6), trial('C_awake', 1, 7) ];

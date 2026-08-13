@@ -301,6 +301,57 @@ try {
     ClearMarkerIfClean
     exit 0
   }
+
+  # SALVAGE: THE GATE JUST MEASURED THIS TREE AND IT PASSED. Anything still uncommitted below is
+  # verified by the strongest instrument in the repo, and until this block existed it was thrown
+  # into a stash nobody reads.
+  #
+  # WHY THERE IS EVER ANYTHING LEFT. `node harness/run-all.js` takes 20-45 minutes, past the ceiling
+  # on a single foreground tool call, so the session cannot run it and wait inside one. It does the
+  # sensible thing instead - backgrounds the gate and ends its turn to wait for the result - but
+  # `claude -p` is one-shot: when the model stops emitting, the process exits. The re-invocation it
+  # is waiting for never arrives, so the `git commit` it was holding never happens. 25 runs announced
+  # that hand-off in _autopilot.log ("I'll be re-invoked the moment it lands"); the continuation
+  # appears zero times.
+  #
+  # The runner then ran the same gate itself, immediately above, and it passed. Every run that ended
+  # "run left the tree dirty" has GATE: PASS on the line before it - 39 of them. The work was
+  # measured, proved shippable, and walked away from anyway, because nothing here said "the gate is
+  # green, so commit what is in front of you". Next tick the killed-run guard stashed it (51 stashes
+  # and counting) and the following session spent its entire budget digging it back out instead of
+  # doing new work. That is the churn.
+  #
+  # So commit it. This is the runner doing what the session was waiting to do, and it does not care
+  # WHY the session stopped: yield, context exhaustion, session limit or a future kill all land here
+  # the same way. ClearMarkerIfClean then finds a clean tree and drops the marker, run-report.js
+  # finds a commit instead of exiting 3, and the next tick starts on nothing to recover.
+  $left = (git status --porcelain) | Where-Object { $_ -notmatch '^\?\?' }
+  if ($left) {
+    # 'Continue' is mandatory, for the reason documented at the killed-run guard above: git writes
+    # "LF will be replaced by CRLF" to stderr, and under 'Stop' PowerShell turns a native command's
+    # stderr into a TERMINATING error. That is precisely what once killed the guard mid-stash.
+    # Deliberately not redirecting stderr either, which causes the same class of problem.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $beforeSha = (git rev-parse HEAD)
+    # ':(exclude).claude/' mirrors both stash calls above. .claude/settings.json is the permission
+    # allowlist this automation runs on and it IS tracked, so it must never ride along in an
+    # unattended commit. AUTOPILOT.md's "never git add -A" is aimed at a live session racing a second
+    # worker; this runs after the gate returned and replaces `git stash push -u` over the identical
+    # pathspec, so it is strictly less destructive than what this tree gets today.
+    git add -A -- . ':(exclude).claude/' | Out-Null
+    git commit -m "[autopilot] salvage: verified work the run left uncommitted on a green gate" | Out-Null
+    $afterSha = (git rev-parse HEAD)
+    $ErrorActionPreference = $prevEAP
+    # SAY WHAT HAPPENED, NOT WHAT WAS ATTEMPTED. If the only dirty file is .claude/settings.json the
+    # pathspec stages nothing and the commit is a silent no-op, so the claim is checked against HEAD
+    # rather than assumed. An assertion nobody has watched is an assertion nobody should believe.
+    if ($afterSha -ne $beforeSha) {
+      Log ("salvaged on a green gate: {0}" -f ($left -join '; '))
+    } else {
+      Log ("green gate left the tree dirty and nothing could be committed: {0}" -f ($left -join '; '))
+    }
+  }
   ClearMarkerIfClean
 
   # SAY WHAT THE RUN DID, not only when it breaks. Until this went in the ONLY thing that ever

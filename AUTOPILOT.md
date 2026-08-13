@@ -167,6 +167,20 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     the probe comes back `{ok:false, why:'no game'}` under a `READY NEVER CAME after 120s`, which
     reads exactly like Chrome contention or a broken harness and is neither. Reproduced twice,
     identically, before the cause was read out of `shot.js` rather than guessed at.
+    **AND THE RUN-UP DOES NOT WAIT FOR `__BF3` TO EXIST, which only shows up under contention**
+    (found 2026-08-13, `autopilot-merged`, at a cost of two launches). The PRE is evaluated as soon
+    as the load event fires; with a full aggregate gate launching Chrome beside it the game's script
+    has not finished parsing, so the run-up comes back
+    **`PRE → {"error":"ReferenceError: __BF3 is not defined"}`**, the destination is never entered,
+    and the shot ends `READY NEVER CAME after 122s` with the probe reporting `no game`. **That reads
+    exactly like a broken destination or a bad probe and is neither** — the page loads fine
+    (`[hero3d] ready` is in the console log), it is simply not ready when it is asked. Reproduced
+    twice, identically. **`--prewait` does NOT fix it**: it sleeps AFTER the PRE runs (`shot.js`,
+    `if (PRE) { … await sleep(PREWAIT) }`), measured by trying 25s and getting the identical failure.
+    Two rules until the poll is added to `shot.js`: **do not run a probe launch beside a gate**, and
+    **do not edit `harness/shot.js` while a gate is running** — `drive.js` re-copies it into `_shot/`
+    whenever the content differs, so the edit changes the instrument under every remaining launch.
+    `docs/MP_AUDIT.md` carries the full note.
     **To set a page flag alongside a destination, put it in the URL** — `--scene 0 --url
     "/3d/index.html?hero3d=1&world3d=1&nobloom&myflag=1"` — which is what every known-bad in
     `test-mp.js` already does (`?heroslot=1`, `?noping=1`, `?nopossync=1`, and now `?badpick=1`).

@@ -3282,3 +3282,71 @@ implemented a promise; it removed nothing.
 
 **Shipped as its own commit**, so Oliver can revert exactly the +10% after playing it.
 
+### THE FLOOR THIS SECTION NAMED WAS TAKEN — the other 64 ids, swept 2026-08-13
+
+Section X above swept the ids with **two or more** `c2Passive` sites and said so in its own words:
+*"Single-site passives are NOT swept and this table is a floor, not a total."* This is the rest of it.
+Same method, same question — *does the reader do anything the card does NOT say?* — no launch, no GPU.
+
+**The census first, because the numbers moved and a stale count is how a sweep re-runs itself.**
+`c2Passive('<id>')` now has **161 sites over 105 distinct ids**, against the *137 over 92* section X
+recorded on 2026-08-12. The file grew by passes 41–49, which each wired a card. The split is **41
+multi-site ids (97 sites)** — exactly the set section X swept, unchanged — and **64 single-site ids**,
+which is this pass. CLASS2 holds 128 passives, so the 23 with no site at all are section E's dead
+list and are not in scope here.
+
+**Verdict: 56 clean, 5 already recorded, 3 new.** The clean rate is the finding as much as the rows
+are — a single-site passive is usually a card that was wired ONCE, deliberately, by one of this
+document's own passes, and those passes wrote the card's number into the line. The multi-site
+population is where the riders live because a second site is what a rider *is*.
+
+**Swept and clean (56)**, listed so nobody re-reads them: `nin_bleed`, `nin_assassin`, `war_pact`,
+`pir_swagger`, `bd_last`, `m_temporal`, `pal_blessed`, `pir_deadly`, `sky_tail`, `bst_vitality`,
+`mon_med`, `r_quick`, `pal_burn`, `necro_harvest`, `war_feast`, `sky_reset`, `x_crimson`, `x_armor`,
+`m_efficient`, `m_ward`, `m_echo`, `st_ward`, `x_wraithwalk`, `chr_echo`, `war_safe`, `war_shield`,
+`war_swift`, `sky_guard`, `bst_rhythm`, `pal_holypow`, `mon_master`, `nin_combo`, `st_overcharge`,
+`st_charged`, `st_galvanize`, `pir_brutal`, `pir_evasive`, `bsk_brutal`, `nin_swift`, `nin_deadly`,
+`mon_flow`, `sky_eye`, `pal_thick`, `bd_heal`, `pal_will`, `nin_shadowform`, `war_last`, `bd_guard`,
+`pal_bounce`, `w_second`, `pal_second`, `bsk_thick`, `chr_glass`, `necro_bond`, `sky_armor`,
+`mon_killer`.
+
+**Already recorded, re-confirmed rather than re-found (5):** `pal_heal`, `chr_temporal`, `x_chill`,
+`x_doom` and `w_unyield` are all section Q rows — a card promising a mechanic whose only reader
+multiplies a stat — and all five are Oliver's for the reasons recorded there. Worth stating that this
+sweep meets them from the other direction and agrees: each one's single reader is *also* a rider,
+because the thing it does is not on the card at all.
+
+#### The three new rows
+
+| id | card | its one reader | the gap |
+|---|---|---|---|
+| `necro_legion` (necromancer r3 a) | *"Summon one extra skeleton and your minions hit 20% harder."* | 11947–11948, inside `SKILL_FX.necro_summon` only | **Both halves are off, in opposite directions.** The extra skeleton is exact (`legion?4:3`). The damage is `legion?0.85:0.65` — **×1.308, not the card's ×1.20** — and it reaches **one of the three minion skills**. `necro_raise` and `necro_army` never mention Legion, so *"your minions"* means *"the skeletons from one of your three summons"*. |
+| `necro_master` (r9 a, multi-site — found here, out of this pass's scope) | *"Keep more minions at once and they hit even harder."* | `necroMinCap()` 11946, and `×1.25` in `necro_summon` and `necro_army` | **`necro_raise` gets neither clause**, and it is the one skill whose own card says *"a **stronger** risen fighter"*. It also calls `spawnMinion` with **no `cap`**, so the default 14 applies (11907) and a raise made while holding more than 14 minions **evicts one** — against a capstone whose text is *"you may keep more of them at once"*. |
+| `sky_float` (skylancer r7 a) | *"Fall 25% slower and gain more control in the air."* | 10127 — `slow` .20 → .45 | The fall clause is exact (a 25-point step, and 20 was already the file's). **The control clause has no implementation anywhere** — checked, not assumed: there is no air-control term in the movement step for any class, so horizontal input in the air is already unrestricted and there is nothing for the passive to widen. |
+
+**One near-miss, recorded so it is not re-derived as a row.** `bd_sharp` promises a stored Riposte
+*"deals 35% more damage"* and multiplies **4.4 against a base 3.3** (10486) — ×1.333, where the card's
+own arithmetic wants 4.455. A 1.7-point rounding on one skill, in the player's disfavour; it is not a
+rider and changing it is a balance nudge with no bug behind it.
+
+#### Which of these a run may take
+
+**`sky_float`'s second clause is Oliver's**, and for a stronger reason than usual: there is no air
+control in this game to give *more* of, so wiring it means designing the mechanic and then choosing
+its number. That is two inventions, not one.
+
+**`necro_legion`'s ×1.308 is Oliver's**, by section X's standing rule — removing a rider is a balance
+change with no card number behind it, and a necromancer has been playing that number.
+
+**The MISSING half is takeable, and it is the largest single-class gap this sweep found.** Bone
+Legion's *"your minions hit 20% harder"* and Master of Death's *"they hit even harder"* are promises
+this file simply does not keep on two of three skills, and neither number has to be chosen: **20% is
+on the card and ×1.25 is already the file's own encoding of Master of Death**, sitting in
+`necro_summon` and `necro_army` today. Same for the cap — `necroMinCap()` is the function the other
+two summons already pass. That is pass 49's criterion verbatim: implement the promise, remove
+nothing, and leave the rider for Oliver.
+
+*Why it matters past bookkeeping:* the Necromancer's whole identity is the minion count and what the
+minions hit for (VISION.md priority #2), and Raise the Dead — the skill whose card advertises a
+*stronger* fighter — is the one the class's two minion-damage passives cannot reach.
+

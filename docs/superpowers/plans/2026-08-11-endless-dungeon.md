@@ -320,14 +320,80 @@ checked.
 
 ---
 
-### Task 3: A reason to run it twice
+### Task 3: A reason to run it twice — **BLOCKED ON OLIVER 2026-08-12. THE REWARD IT SPECIFIES DOES NOT EXIST, AND SKINS ARE NOT COSMETIC.**
 
 `meta.delveBest` is a number on a death screen. The mode needs something that changes the NEXT run.
+That framing still stands. **Step 2 as written cannot be carried out**, for two reasons, both read
+off the source rather than guessed, and the second one falsifies the task's own justification.
+
+**1. The mechanism already exists — for the OTHER mode — so this is a missing reward, not missing
+wiring.** `ACHIEVEMENTS` (index.html:2610–2619) ends with exactly the shape Step 2 describes:
+
+```js
+{id:'ascended',name:'Ascended',desc:'Reach Floor 12 of the Abyssal Descent — the deeper you fall,
+ the higher you rise',icon:'⬢',skin:'celestial',check:m=>(m.endlessBest||0)>=12}
+```
+
+A depth-gated permanent skin unlock, keyed on `m.endlessBest`. The delve's twin of that field is
+`meta.delveBest`, and the grant path (2628) is one line. **The engineering here is a single table
+row.** Nothing needs inventing except the reward itself.
+
+**2. And there is no reward left to hand out.** `SKINS` (2577) holds **twelve** entries. Ten are
+already claimed by an achievement — `ranger`, `emerald`, `frost`, `gold`, `arcane`, `shadow`,
+`crimson`, `abyss`, `void`, `celestial`. The other two are `knight`, the starting default, and
+`god`, the cheat. **Every non-default skin in the game is spoken for.** Step 2 says to "reuse the
+existing skin unlock path rather than inventing a reward system"; that path has an empty hand. A new
+skin is new ART, which `AUTOPILOT.md` forbids an autopilot run from authoring.
+
+**3. THE PLAN'S REASONING IS FALSE ANYWAY, AND THIS IS THE PART THAT MATTERS.** Step 2's whole
+argument is *"Cosmetic on purpose… Power would break both the promise and the campaign's ownership
+of progression."* **Skins in this game are not cosmetic.** `SKINPASS` (2593) attaches a stat line to
+ten of the twelve:
+
+| skin | what wearing it does |
+|---|---|
+| ranger | +5% move speed |
+| frost | −8% dodge cooldown |
+| emerald | +5% attack speed |
+| gold | +4% damage |
+| arcane | +7% magic weapon damage |
+| shadow | +7% ranged weapon damage |
+| abyss | +4% lifesteal |
+| void | **+8% damage** |
+| celestial | **+6% damage & +6% speed** |
+| crimson | a challenge skin: −12% HP, −10% damage, −8% speed, +12% dodge CD |
+
+Only `knight` and `god` carry none. So "unlock a skin at floor 5/10/15/20" **is** carrying power out
+of the delve — the exact thing the task forbids in the sentence that justifies it, and the exact
+thing the mode's own opening line forbids (*"Nothing you find here leaves with you — only how deep
+you went"*). An autopilot run that implemented Step 2 literally would have shipped a progression
+reward while quoting a comment saying it must not.
+
+**What is left is one question, and it is Oliver's**, because every answer is art, tone or balance:
+
+- a **new skin** for the delve — art, his by rule; and it would need a `SKINPASS` line, which is a
+  balance number, or be the first skin since `knight` deliberately carrying none;
+- a **title / nameplate** — no such system exists, so this is a new feature, not a reward hookup;
+- accept that the reward carries **power**, which is a balance call and contradicts the mode's
+  stated promise;
+- or give the delve **`knight`-style flat cosmetics** by adding a no-passive skin tier.
+
+Put to him as: *the Endless Dungeon has no reward for going deeper because every skin is already
+claimed by an achievement and skins carry stat bonuses anyway — do you want a new delve skin, a
+title system, or should depth stay a number on the death screen?*
+
+**Steps 1, 3 and 4 are left unticked deliberately.** Step 1 (read how the delve grants a class) was
+done and is folded into the note above; Steps 2–4 depend on a decision that has not been made, and
+ticking them would say this task was finished when it was declined.
 
 **Files:**
 - Modify: `public/3d/index.html`
 
-- [ ] **Step 1: Read how the delve already grants a class**
+- [x] **Step 1: Read how the delve already grants a class** — done 2026-08-12. `delveMaybeDropClass`
+      (13556) restricts class drops to classes already unlocked in the campaign, and that restriction
+      is deliberate and stated. Left alone, as the step asks. The finding that matters came from
+      reading one table further: `ACHIEVEMENTS` already does depth-gated skin unlocking for the
+      Abyssal Descent, and `SKINPASS` means skins are not cosmetic. See the closure above.
 
 `delveMaybeDropClass` (13556) drops a class as loot, restricted to classes already unlocked in the campaign, with guaranteed floors plus a small roll elsewhere. That restriction is deliberate and stated: finding an unearned class would give the delve a progression the campaign owns.
 

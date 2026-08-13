@@ -593,6 +593,25 @@ from the identity hook that names it reads exactly like a dead clause**, and wir
 it would have doubled the class's float while "using the card's own number" — the shape this
 sub-project's rules are supposed to catch, arriving from the one direction they do not cover.
 
+**THE AGGREGATE GATE RAN AFTER PASS 42, 2026-08-12: `GATE: PASS (4 known, 0 newly fixed)`, exit 0,
+no `REGRESSION:` line.** Per-suite: unit 91/91, **skills 139 pass / 4 fail / 5 unproven**, levels
+36/0/12, **mp 57 pass / 0 fail**.
+
+**The skills line is the one to read, and the two numbers move for two different reasons.** `pass`
+roughly doubled — 70 → 139 — because the bench now casts all 128 skills instead of 64; that is
+coverage, not fixes, and it must not be read as the latter. `fail` is 3 → 4, and the fourth is
+`monk/Roll`, which is **newly VISIBLE rather than new**: it is `ranger/Tumble`'s own row on a second
+card riding the same handler, and it was baselined in the same commit for exactly that reason. A
+regression would have printed a `REGRESSION:` line and exited 1; nothing did, and
+`harness/baseline.json` was not rewritten by the ratchet.
+
+The fifth `unproven` against the four this run's standalone `test-skills.js` reported is the noise
+floor doing its job under a full gate's contention, which this document already records in both
+directions — a met claim inside the drift is reported unproven, and the drift is measured fresh each
+launch. **`berserker/Bloodguard` is absent from the gate's fail list**, which is the parser fix
+proven a third time: watched to fail as a unit test, re-run against the live game, and now a full
+gate that does not accuse it.
+
 **AND IT RAN ONCE MORE, 2026-08-12, after pass 35 and the mp-wait fix: `GATE: PASS (3 known, 0 newly
 fixed)`, exit 0, no `REGRESSION:` line, `harness/baseline.json` untouched.** Per-suite: unit 55/55,
 skills **70 pass / 3 fail / 2 unproven**, levels 36/0/12, **mp 54 pass / 0 fail**. The three knowns are

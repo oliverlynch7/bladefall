@@ -356,10 +356,20 @@ export async function duel(pair, opts = {}) {
     if (!dA.ok || !dB.ok) log('   !! someone is still _pvpDead going into staging (A ' + dA.ok + ', B ' + dB.ok + ')');
     await pair.evalA(place(0, 0, (Math.PI / 2).toFixed(4)));      // host at origin, facing +x
     await pair.evalB(place(40, 0, (-Math.PI / 2).toFixed(4)));    // guest 40 east, facing -x
-    /* Both sides have to SEE the new positions before anyone swings — pvpMelee reads MP.peers,
-       which only updates when a packet lands. */
-    const okA = await pair.waitA('(function(){var q=__BF3.MP.peers[' + JSON.stringify(guestId) + ']; return q && Math.abs(q.tx-40)<70 && Math.abs(q.tz)<70;})()', { timeoutMs: 15000 });
-    const okB = await pair.waitB('(function(){var q=__BF3.MP.peers["h"]; return q && Math.abs(q.tx)<70 && Math.abs(q.tz)<70;})()', { timeoutMs: 15000 });
+    /* Both sides have to SEE the new positions before anyone swings — and "see" means the field
+       pvpMelee READS, which is q.x/q.z (:12569), NOT the q.tx/q.tz the packet carries. tick()
+       only lerps one toward the other, `q.x += (q.tx-q.x)*k` (:12434), so tx snaps on arrival
+       while x is still travelling. Polling tx here was measured to pass 45 units early: run 1
+       staged 40 apart dead-on and phase 1 swung at dist 57, facingDot 0.60 — solve it and the
+       host's copy of the guest was at (34,46), mid-lerp from the arena spawn (0,340). That swing
+       landed on luck (57 < reach+16 = 98, 0.60 > the 0.35 facing cut); a hair further and phase 1
+       reports MISS for a STAGING reason and this file blames hit detection, which is the one
+       confusion it exists to prevent. Tolerance is 10, not 70, for the same reason: 70 is wider
+       than the 40 being staged, so the old gate could not tell the staged spot from the spawn. */
+    const seen = (x) => '(function(){var q=__BF3.MP.peers[' + JSON.stringify(x.id) + '];'
+      + ' return q && Math.abs(q.x-(' + x.x + '))<10 && Math.abs(q.z)<10;})()';
+    const okA = await pair.waitA(seen({ id: guestId, x: 40 }), { timeoutMs: 30000 });
+    const okB = await pair.waitB(seen({ id: 'h', x: 0 }), { timeoutMs: 30000 });
     return { hostSeesGuest: okA.ok, guestSeesHost: okB.ok, ms: Math.max(okA.ms, okB.ms) };
   };
 

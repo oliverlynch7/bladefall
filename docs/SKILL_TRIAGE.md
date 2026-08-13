@@ -3350,3 +3350,47 @@ nothing, and leave the rider for Oliver.
 minions hit for (VISION.md priority #2), and Raise the Dead — the skill whose card advertises a
 *stronger* fighter — is the one the class's two minion-damage passives cannot reach.
 
+### FIXED 2026-08-13 — and the control half is bit-identical across the A/B, which is the proof
+
+`harness/probes/legion.probe.js`, three halves and four trials in one launch, run unchanged before
+and after. The bar is a dummy's HP before minus after, produced by the game's own
+`minionUpdate` → `hitEnemy` path — never the `dmg` field the handler writes, which this document has
+been burned by twice (pass 15, pass 23).
+
+```
+                              before          after
+ratios.raise                  1.000           1.480      <- the row
+ratios.army                   1.250           1.500      <- Master of Death alone -> both cards
+pass.cap.after                20              21         <- the evicted minion
+ratios.summonPerMinion        1.727           1.727      <- must NOT move, and did not
+knownBad {raise, army, summon} 1, 1, 1        1, 1, 1
+ok                            false           true       playTicks 960 of 960 both runs
+```
+
+**The strongest line in that table is not a ratio, it is that four numbers did not change at all.**
+The control half (`necro_wither` / `necro_pest`) and the known-bad half dealt **264, 200, 768** and
+capped at **20** in both runs, byte for byte. A fix that had reached further than the two cards —
+into `spawnMinion`, into `minionUpdate`, into the summon that already worked — could not have left
+those untouched. `necro_summon`'s own per-minion figure is the same 1.727 either side, so the rider
+this pass refused to touch is measurably still there.
+
+**`raise` reads 1.48 and not 1.50, and that is rounding rather than a shortfall.** Each handler
+rounds its minion's `dmg` to a whole number before anything multiplies it: 25 → 37, and 37/25 is
+1.48. The bar it has to separate is 1.000 against 1.500.
+
+**The probe was wrong once and the half that must not move is what said so.** Its first run reported
+the known-bad at **1.159** — two halves with identical picks, identical minion counts and identical
+`dmg` fields dealing 352 and 408. The cause is `G.combo` (10884): `hitEnemy` multiplies every blow by
+`1 + min(0.2, G.combo * 0.004)`, a run-wide counter that climbs as blows land, so it is a per-trial
+constant that **drifts upward through a launch** — the control ran first and the known-bad ran ninth.
+Pinned to 0 every frame rather than averaged away: a confound that rises monotonically through a run
+does not cancel between halves, it just favours whichever half is measured last. Worth carrying
+forward, because every dealt-damage probe in this harness is exposed to it.
+
+**Regression:** `node harness/test-skills.js --classes necromancer` → **8 pass, 0 fail, 0 unproven**
+(4 A-side + 4 B-side casts).
+
+**Shipped as its own commit**, so Oliver can revert exactly this after playing it. What he is being
+asked to judge is a buff to two of the necromancer's three summons; the two cards already promise it,
+and the rider that would make it a nerf is still his.
+

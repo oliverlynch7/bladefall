@@ -44,7 +44,26 @@
    Driven through the game's own systems throughout: the hit goes through `hurtPlayer` with a real
    enemy as `by` (its knockback and lastHitBy branches both read it, so a plain object would be a
    second thing that could explain a difference), and the kill goes through `killEnemy`, which is the
-   one door every kill in the game passes through. */
+   one door every kill in the game passes through.
+
+   AND THAT PARAGRAPH IS THE BUG THIS PROBE COULD NOT SEE — added 2026-08-13, section AA.
+   `by` being "a real enemy" is exactly what the game NEVER hands `hurtPlayer`. Every named damage
+   source in it goes through `foeHit(e,atk)` (11290), which returns a DESCRIPTOR — `{name, attack,
+   src:e}` — or hands over a literal of the same shape. Section W found that for Bounce Back and
+   fixed the two reflect readers with `attackerOf(by)`; the defensive clause under test here reads
+   `by.markT` DIRECTLY (11679), and a descriptor has no `markT`. So the probe's own door was the only
+   door where clause 1 has ever worked.
+
+   THE FIX FOR THE PROBE IS NOT TO SWAP THE DOOR, IT IS TO MEASURE BOTH. The direct-body call stays
+   as it is — it is the positive control, and it is what says the wiring exists at all — and a second
+   pair of hits goes through `__BF3.foeHit(foe,…)`, the game's own function rather than a
+   transcription of its shape (section W paid for that distinction: a copied shape stopped matching
+   the game on the day `src` was added, and kept passing). `reachableInPlay` is the new bar and it is
+   reported BESIDE `ok`, never folded into it: the two fields answer different questions and a row
+   where they disagree is precisely the finding.
+
+   The other two clauses are not exposed to this — both hang off `killEnemy(e)`, which takes the
+   body, and `c2OnKill(p,e)` passes it straight through. Only the −8% reads `by`. */
 (function(){
   const G = __BF3.G, p = G.p;
 
@@ -103,15 +122,27 @@
     return foe;
   };
 
-  /* One hit from `foe`, measured on the player's own health. */
-  const take = (foe) => {
+  /* One hit from `foe`, measured on the player's own health.
+
+     `shape` picks WHICH DOOR the blow arrives through, and that is the whole of section AA:
+       'body' — the enemy itself as `by`. Pass 30's original door, kept as the positive control.
+       'game' — `foeHit(foe,…)`, the descriptor the game's own melee path builds (13500). Not a
+                transcription of it: the function is called, so this cannot go stale the way
+                bounceby's copied literal did.
+     A probe that cannot say which door it used cannot tell a live clause from a dead one. */
+  const take = (foe, shape) => {
     p.dead = false; p.downed = false;
     p.invuln = 0; p.dodgeTimer = 0;                     // every landed hit sets invuln 0.7 and the next call returns early
     p.shieldHp = 0; p.shieldT = 0; p.reflectT = 0; p._stillnessT = 0; p.guardT = 0;
     p.hp = 100000;                                      // far above max so a 1000 hit can never reach a death branch
     const hp0 = p.hp;
-    try { __BF3.hurtPlayer(HIT, foe.x, foe.z, foe); } catch(e){ return { took:null, threw:String(e && e.message || e) }; }
-    return { took: hp0 - p.hp };
+    let by = foe;
+    if(shape === 'game'){
+      try { by = __BF3.foeHit(foe, 'a strike'); }
+      catch(e){ return { took:null, threw:'foeHit is not exported: ' + String(e && e.message || e) }; }
+    }
+    try { __BF3.hurtPlayer(HIT, foe.x, foe.z, by); } catch(e){ return { took:null, threw:String(e && e.message || e) }; }
+    return { took: hp0 - p.hp, byHadMark: (by && by.markT || 0) > 0, byIsBody: by === foe };
   };
 
   /* One kill, measured on the player's health and on the purse. */
@@ -132,18 +163,27 @@
     const pFoe = foeAt(false, -520);
     if(!mFoe || !pFoe) return { pick:pick, label:label, why:'no target could be spawned' };
 
-    const tookMarked = take(mFoe);
-    const tookPlain  = take(pFoe);
+    /* The four hits run BEFORE either kill, and the two doors are interleaved marked/plain rather
+       than grouped, so nothing that drifts across a trial can land on one door and not the other. */
+    const tookMarked     = take(mFoe, 'body');
+    const tookPlain      = take(pFoe, 'body');
+    const tookMarkedGame = take(mFoe, 'game');
+    const tookPlainGame  = take(pFoe, 'game');
     const killMarked = kill(mFoe);
     const killPlain  = kill(pFoe);
 
     return { pick:pick, label:label,
              marked:(mFoe.markT || 0) > 0, plainMarked:(pFoe.markT || 0) > 0,
              tookMarked:tookMarked.took, tookPlain:tookPlain.took,
+             tookMarkedGame:tookMarkedGame.took, tookPlainGame:tookPlainGame.took,
+             /* The receipt for the door itself: the game's descriptor must NOT be the body and must
+                NOT carry a mark, or 'game' has quietly become a second copy of 'body'. */
+             gameByIsBody: tookMarkedGame.byIsBody, gameByHadMark: tookMarkedGame.byHadMark,
              healMarked:killMarked.healed, healPlain:killPlain.healed,
              goldMarked:killMarked.gold,  goldPlain:killPlain.gold,
              killedMarked:killMarked.dead, killedPlain:killPlain.dead,
-             threw: tookMarked.threw || tookPlain.threw || killMarked.threw || killPlain.threw || null };
+             threw: tookMarked.threw || tookPlain.threw || tookMarkedGame.threw || tookPlainGame.threw
+                    || killMarked.threw || killPlain.threw || null };
   };
 
   const near = (v, want, tol) => v != null && Math.abs(v - want) <= tol;
@@ -165,12 +205,37 @@
         && near(b.goldMarked / b.goldPlain, 1.1, 0.005);                         // +10% on the marked one
   };
 
+  /* THE SECOND BAR — the same −8%, asked of the door a player's attacker actually uses. It is
+     deliberately narrow: only clause 1 reads `by`, so only clause 1 is re-asked here. Its own
+     control is the same control half, which must show no difference on this door either.
+     `gameDoorIsReal` is the clean-check that stops this from silently becoming the first bar. */
+  const barGame = (c, b) => {
+    if(!c || !b || c.why || b.why || c.threw || b.threw) return false;
+    return c.marked && b.marked && !c.plainMarked && !b.plainMarked
+        && b.gameByIsBody === false && b.gameByHadMark === false
+        && c.gameByIsBody === false && c.gameByHadMark === false
+        && c.tookMarkedGame > 0 && c.tookPlainGame > 0
+        && c.tookMarkedGame === c.tookPlainGame                                  // control: the mark changes nothing
+        && b.tookPlainGame === c.tookPlainGame                                   // an UNMARKED foe still hits just as hard
+        && near(b.tookMarkedGame / b.tookPlainGame, 0.92, 0.005);                // -8%, through the game's own shape
+  };
+
   const control = trial('r_elem',   'control (the a-side of the same rank, itself dead)');
   const bounty  = trial('r_bounty', 'bounty hunter');
   const inert   = trial('r_elem',   'the same dead passive again, fed to the bar as if it were the fix');
 
   return JSON.stringify({
     ok: bar(control, bounty),
+    /* SECTION AA. `ok` says the wiring exists; this says a player can reach it. They are reported
+       side by side on purpose — `ok:true, reachableInPlay:false` IS the row, and folding the two
+       into one verdict is how the row hid for a pass. */
+    reachableInPlay: barGame(control, bounty),
+    reachableAgainstInert: barGame(control, inert),
+    /* The door's own receipt. If `gameByIsBody` is ever true the descriptor branch did not run and
+       every number under `Game` is a duplicate of the control door's. */
+    gameDoorIsReal: bounty.gameByIsBody === false && bounty.gameByHadMark === false,
+    dmgRatioGame: bounty.tookPlainGame
+      ? Math.round((bounty.tookMarkedGame / bounty.tookPlainGame) * 1000) / 1000 : null,
     /* This is the known-bad, measured rather than argued: against a game where nothing reads
        `r_bounty` the second half would look exactly like this one, and the bar must go red. */
     okAgainstInert: bar(control, inert),

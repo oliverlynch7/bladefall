@@ -573,13 +573,29 @@ known" paragraph starts from there.
   anyone came to take it, because passes 41–49 each wired a card and every wiring adds a site. The
   bound a sweep records is a measurement with a date on it, not a constant.
 
-**PASS 53 IS SET UP AND NOT YET TAKEN — everything it needs is committed, so the next run does one
-edit and two launches.** The row is `w_charge`, section Y's only takeable one. The change is a single
-character in a single literal: `public/3d/index.html:9914`, `wcharge`'s `*1.5*` → `*1.6*`, which is
-the number on the card at 2039. The alias hazard is already settled in section Y — `wcharge` has one
-definition, and `bsk_charge` is redefined at 19711 as Headlong, so the berserker is NOT affected.
+**PASS 53 WAS TAKEN — 2026-08-13, in the run after the one that set it up, and it cost exactly what
+that run said it would: one edit and two launches.** The BEFORE reading below was RE-TAKEN on the
+unmodified tree by the run that shipped it rather than inherited from the paragraph, per this
+document's own standing rule that recovered or handed-over evidence is re-measured and not trusted —
+and it reproduced to the thousandth: `chargeOverStomp 0.933`, `whirlOverStomp 1.378`, `clean true`,
+`ok false`, `playTicks 160 of 160`. After: **1.000 / 1.378**, `ok true`, Charge's dealt damage 84 → 90
+against a stomp that read 90 in all four halves. Full write-up in `docs/SKILL_TRIAGE.md` section Y
+under *FIXED 2026-08-13*.
+
+**The set-up itself is the transferable part.** A run that finds a takeable row and is out of time
+should leave it in this shape: the instrument committed, the before-reading printed, the exact edit
+named by file and line, the alias hazard already settled, and the follow-up commands listed. The run
+that took it spent no time deciding anything — it re-measured, edited one character, gated, re-measured
+and committed. That is the cheapest hand-off this plan has recorded, and it is much cheaper than the
+alternative it replaced (five runs recovering the same work out of five stashes).
+
+The original set-up note, kept because the numbers in it are the before-reading this run reproduced.
+The row is `w_charge`, section Y's only takeable one. The change is a single character in a single
+literal: `public/3d/index.html:9914`, `wcharge`'s `*1.5*` → `*1.6*`, which is the number on the card at
+2039. The alias hazard is already settled in section Y — `wcharge` has one definition, and `bsk_charge`
+is redefined at 19711 as Headlong, so the berserker is NOT affected.
 The instrument is committed as `harness/probes/charge.probe.js` and its BEFORE reading was taken on
-unmodified game code this run:
+unmodified game code:
 
 ```
 node _shot/shot.js --scene arena:flat --wait 12000 \
@@ -599,8 +615,29 @@ measures combat and not rendering, so waiting on the world is waiting for someth
 Then: `node harness/test-skills.js --classes warrior` (pass 49's bar: 11 pass, 0 fail, 0 unproven),
 `node tools/gate.js`, a VERSION3D bump, and `node harness/run-all.js`.
 
+*That `--ready` advice held, and the reason to keep it is that the second half of it was tested too:*
+both of pass 53's launches resolved in **5.0s and 4.3s** with `--ready` on the arena's own flag, and
+neither was run alongside a gate. The run that took the pass deliberately did **not** start any render
+while `run-all.js` was going, for exactly the contention the paragraph above records — a red gate
+caused by two Chromes is indistinguishable from a red gate caused by the change, and it is a wall the
+commit may not pass.
+
+**WITH SECTION Y SPENT, NO TAKEABLE SKILL ROW IS KNOWN AGAIN — and this document's own history says
+what that means: the next pass is a SWEEP.** That has now happened four times (passes 30, 42, 50, 52)
+and each time widening an instrument produced rows. **The candidate is already named and needs no
+game change to run**, in the bullet under pass 46: *a probe that deliberately takes a simpler door to
+measure an effect cannot say the effect is REACHABLE.* Every probe in `harness/probes/` that drives
+its effect through `hitEnemy`, `hurtPlayer`, `c2Passive` or a direct field assignment instead of
+through the button a player presses is open to sections U and W's shape — five passes' worth of
+verified wirings turned out to be unreachable in play — and **none of them has been re-read with that
+question in mind.** It is a read, not a launch, so it is the cheapest instrument left.
+Two scope claims to re-check before spending the run, because this document has now carried a stale
+one past the run that invalidated it three times: section Q is COMPLETE (not five classes of sixteen),
+and section E's floor moved once already.
+
 | pass | row | commit | how it was proven |
 |---|---|---|---|
+| 53 | **Y — warrior Charge dealt 1.5x off a card that says 1.6x** | this run | The row pass 52's sweep set up and left committed, taken in one edit and two launches. `harness/probes/charge.probe.js` re-run **unchanged** either side of a single character: **`chargeOverStomp` 0.933 → 1.000** (Charge's dealt 84 → 90), with **`whirlOverStomp` 1.378 both times** and **stomp reading 90 in all four halves** — Whirlwind is the b-side of Charge's own rank, so the half that must not move is the closest thing in the game the edit could have splashed onto, and it did not move at all. **No absolute is in any bar**: the yardstick is Shockwave Stomp cast at the same body with the same weapon in the same launch, so Weapon Master's +10% (pass 49), armour, skin and the innate all divide out — two launches of this probe once read the identical control cell at 4.2973 and 5.0278, which is how an absolute turns a +7% fix into a +29% one. Nothing was chosen: 1.6 is the card's own number at 2039 and `wcharge` has exactly one damage literal. **The berserker is untouched and it was checked rather than assumed** — `bsk_charge` aliases this body at 10374 and is redefined at 19711 as Headlong, and the last assignment wins. The BEFORE reading was re-taken on the unmodified tree rather than inherited from the set-up note, and reproduced to the thousandth. Regression `--classes warrior` → **11 pass, 0 fail, 0 unproven**, pass 49's bar unchanged. **Section Y is now spent**: its other twelve rows are all the code being MORE generous than the card, so each is a nerf and stays Oliver's |
 | 52 | **Y — the NUMBERS on the skill cards, a dimension no instrument here has ever measured** | this run | Pass 51 took the last row section X had, so this is a SWEEP and not a row, which is what the two previous "no takeable row is known" paragraphs were both answered by. The gap is stated by the harness itself: `harness/claims.js` reads which KIND of promise a card makes and `test-skills.js`'s own header says *"the bar is EFFECT, not number"* — so **a skill claiming 2.2x and dealing 0.2x passes every suite this project owns.** Every `kind:'skill'` card in `CLASS2` that states a figure, read against the handler that actually runs, aliases chased to the last assignment. Static, no launch; **section V's map is what makes it cheap**, since 45 of 128 skills are another class's function and thirteen shared handlers cover most of the cards. **Thirteen disagreements**, and they cluster rather than scatter — the two oldest kits (warrior, ranger) and the one `barrier` handler four classes share, where `ok?0.5:0.35` pays 50% to four cards that say 35% and matches only the Paladin's, which is plainly the card it was written for. The clean rows are named rather than counted (Beam 2x, Nova 1.4x, Gravity Well 1.3x, Overload 3.4x, Soul Cleave 2.1x, Holy Ground 2.2x, both Shield Bashes 1.7x, Sic 'Em 1.6x, Mend 30%/10%). **Exactly one row is takeable** — `w_charge`, whose card says 1.6x against one literal `1.5` at one site — and it ships as pass 53. Every other disagreement is the code being MORE generous than the card, so making it honest is a nerf to something a player already has: Oliver's, by this plan's standing rule. **The row to put to him first is Hunter's Mark**, which is not only a rider: +18% on the card, `dmg*=1.4` at both read sites, **and the +10% crit clause has no implementation anywhere** — whichever number he picks, half that card is still unbuilt. `x_wraith`'s missing 5 points looks takeable and is not: 65% against a 60% brace that four other skills also set, so reaching it means composing a reaper-only factor onto a shared line, which is designing. `docs/SKILL_TRIAGE.md` section Y |
 | 51 | **X — "your minions hit 20% harder" reached one of the necromancer's three minion skills** | this run | The takeable row pass 50's sweep produced, shipped in its own commit because it changes how the game plays. `harness/probes/legion.probe.js`, three halves and four trials in one launch, run unchanged before and after: **`raise` 1.000 → 1.480**, **`army` 1.250 → 1.500** (Master of Death alone, to both cards), **the cap 20 → 21**. The bar is a dummy's HP before minus after through the game's own `minionUpdate` → `hitEnemy` path, never the `dmg` field the handler writes — the mistake passes 15 and 23 were both burned by. **The strongest evidence is the four numbers that did NOT move:** the control half and the known-bad half dealt 264 / 200 / 768 and capped at 20 in both runs, byte for byte, and `necro_summon`'s own per-minion figure is 1.727 either side — so the fix reached the two cards and nothing else, and the rider it refused to touch is measurably still there. Nothing was chosen: 1.20 is Bone Legion's own +20%, 1.25 is the literal Master of Death already carries in the two summons that DO read it, and `necroMinCap()` is the cap those two already pass — passing none meant the default 14 evicted a minion the Lich capstone says you may keep. **The Lich's `life:null` is deliberately NOT copied**, and that is the argument for the rest: that capstone names Summon Skeletons and Army of the Dead *by name* while the two cards fixed here name no skill at all, so the file's own text is what scopes each one. **The probe was wrong once and the half that must not move is what said so** — a known-bad reading 1.159 where two identical halves dealt 352 and 408, which is `G.combo` (10884) multiplying every blow by up to 1.20 off a run-wide counter that climbs monotonically through a launch; pinned rather than averaged, because a confound that only rises does not cancel, it favours whichever half runs last. Every dealt-damage probe in this harness is exposed to it. Regression: `--classes necromancer`. **Recovered from `stash@{0}`**, a previous run's finished-but-uncommitted work, and re-measured from scratch — the before run is this run's own, taken against the unmodified tree |
 | 50 | **X — the other 64: the mirror sweep's own floor, taken** | this run | The sweep this document named as the next pass ("prefer the one whose instrument already exists") and the one section X bounded itself with in writing. Every `c2Passive` id with exactly ONE site read against its CLASS2 card — **64 ids, the complement of the 41 section X swept**. Census re-taken rather than inherited: **161 sites over 105 ids** today against the *137 over 92* recorded a day earlier, the growth being passes 41–49 each wiring a card. **56 clean, 5 already recorded, 3 new**, and the clean rate is itself the finding — a single-site passive is usually a card this document's own passes wired once, from the card, so the riders live in the multi-site population because a second site is what a rider IS. The three new rows: `necro_legion` (×1.308 where the card says ×1.20, **and scoped to one of the necromancer's three minion skills**), `necro_master` (its ×1.25 and its cap both miss `necro_raise`, the one skill whose card promises a *stronger* fighter — and the uncapped `spawnMinion` call **evicts a minion** the Lich capstone says you may keep), and `sky_float` (*"gain more control in the air"* has no implementation, and there is no air-control term in the movement step for ANY class, so wiring it means inventing the mechanic before the number). Plus one near-miss recorded so it is not re-derived: `bd_sharp` multiplies 4.4/3.3 = ×1.333 where its card says 35%. The riders are Oliver's by section X's standing rule; **the missing halves are takeable and ship as pass 51** |

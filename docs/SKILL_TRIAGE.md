@@ -3478,3 +3478,45 @@ followed by `x` or `%`, then each `fx:` id chased through the alias chain to its
 and the literal read off. No launch. **Re-run it after any kit change** — this is a static sweep of a
 file two other sweeps have already been shown to outgrow (section X's census moved from 137 sites to
 161 in a day), so the bound is a measurement with a date on it and not a constant.
+
+### FIXED 2026-08-13 — `warrior/Charge` is on its card, and the yardstick is what proves it
+
+Pass 53. The one takeable row above, shipped as its own commit. `harness/probes/charge.probe.js` — the
+instrument the previous run committed — re-run **unchanged** either side of a single-character edit,
+`wcharge`'s `*1.5*` → `*1.6*` at index.html:9914 (now 9922, the comment sits above it):
+
+```
+                          before      after
+ratios.chargeOverStomp     0.933      1.000    <- the row: 1.5/1.6 -> 1.6/1.6
+ratios.whirlOverStomp      1.378      1.378    <- the half that must NOT move
+A.other.dealt (Charge)     84         90
+A.stomp.dealt / B.stomp    90 / 90    90 / 90  <- the yardstick, measured twice; sameRig true
+B.other.dealt (Whirlwind)  124        124
+clean                      true       true     playTicks 160 of 160 both runs
+ok                         false      true
+```
+
+**No absolute is in any bar, and that is the point.** Charge is read against SHOCKWAVE STOMP cast at
+the same body with the same weapon in the same launch, so everything `effPower` folds in — Weapon
+Master's +10% from pass 49, armour, skin, the innate — divides out. Two launches of this probe have
+been recorded reading the same control cell at 4.2973 and 5.0278 (pass 49), so a run comparing
+absolutes across launches would call a +7% fix a +29% one.
+
+**The strongest lines are the ones that did not move.** Whirlwind is the b-side of Charge's own rank —
+the closest thing in the game this edit could have splashed onto — and it reads 124 and 1.378 in both
+runs, byte for byte. Stomp reads 90 in all four halves, so the two halves are the same rig and every
+ratio in the run means something. A change that had reached `effPower`, `hitEnemy` or the dash instead
+of the one literal could not have left those alone.
+
+**Regression:** `node harness/test-skills.js --classes warrior` → **11 pass, 0 fail, 0 unproven**
+(4 A-side + 4 B-side casts), which is pass 49's own bar unchanged.
+
+**What this does NOT touch, restated because the alias check is what made the row takeable:** the
+berserker. `SKILL_FX.bsk_charge` aliases `w_charge` at 10374 and is then redefined at 19711 as
+Headlong, and the last assignment wins — so the berserker's Charge card, which names no number, is on
+a different body entirely. That is recorded in the game file at the edit site as well as here.
+
+**Section Y's remaining twelve rows are unchanged and every one is still Oliver's**, for the reason
+the table gives: the code is more generous than the card, so making it honest is a nerf to something a
+player already has. Hunter's Mark is still the row to put to him first — half of that card (+10% crit)
+has no implementation at all, whichever number he picks for the other half.

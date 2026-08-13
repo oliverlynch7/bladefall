@@ -2919,3 +2919,41 @@ demonstrably cannot keep is a bug, not a design call): chronomancer/Slow Field a
 Field both ride `nova`, which does slow (`e.slowT=2.5`) — clean; paladin/Taunt says *"Pull nearby
 foes to you"* on `bulwark`; necromancer/Plague Bolt is already recorded in section E as landing the
 weapon's burn and nothing of its own.
+
+### U2. IT IS NOT ONLY THE HOOK — the same comparison also drops lifesteal, the difficulty dial and the Stormcaller's innate
+
+Measured the same day by `harness/probes/projsrc.probe.js`, three trials plus a regen baseline in one
+launch, a stormcaller with its own Cracked Rod given 25% weapon lifesteal, one pinned target, 2000
+damage passed into both control doors:
+
+| trial | target lost | hero healed | Static stacks |
+|---|---|---|---|
+| **real swing** (`playerAttack()`, landed at tick 25) | 84 | **0** | **0** |
+| regen baseline (same ticks, no attack) | 0 | 0 | 0 |
+| **melee door** `hitEnemy(tgt,2000,p,0,0.25,null)` | **2258** | **169** | **1** |
+| **synthetic src** `hitEnemy(tgt,2000,{x,z},0,0.25,null)` | 2024 | **0** | **0** |
+
+`hitEnemy` carries **nineteen** `src===G.p` comparisons and a projectile satisfies none of them.
+Three of the ones it drops are not class identity at all:
+
+- **Lifesteal never heals a ranged hit.** 10966 is `if(lifesteal>0 && src===G.p)`, and the projectile
+  step passes `effLifesteal(G.p)` into it as the parameter — so the value is computed, handed over
+  and thrown away. 169 HP through the melee door, 0 through both ranged paths, against a hero
+  deliberately at 40% health with the regen over those same ticks measured separately at 0. Every
+  lifesteal affix, on every bow, staff, wand and flintlock in the game, is inert.
+- **The difficulty dial does not apply to ranged damage.** 10898 is
+  `if(src===G.p) dmg=dmg*tPlayerDmg()`. The two control doors take the identical 2000 into the
+  identical body one tick apart and come back **2258 against 2024 — a ratio of 1.116**, against
+  `DIFFTUNE.normal.pdmg = 1.12` (2787). The hero carries no Ian's blade and no No Retreat window,
+  which are the only other `src===G.p` multipliers on that path. So a player who picks Casual
+  (`pdmg 1.45`) buys a 45% damage increase that his bow does not receive, and the difficulty setting
+  quietly means something different depending on which class he plays.
+- **The Stormcaller's rank-1 innate never builds.** 11007 grants the Static stack, and the card is
+  *"Every hit you land builds a Static stack (up to 5) — each one makes you strike and move faster"*
+  — the first thing the class says about itself, and the thing `effSpeed` (3755) and `effAtkSpeed`
+  read. One stack through the melee door, none from a real shot. A Stormcaller playing his own staff
+  never has Static at all.
+
+**That is what makes this one line worth a decision rather than a shrug.** The nine identities are
+authored economies nobody has played; these three are systems the player is already paying for —
+an affix he bought, a difficulty he chose, an innate he was promised on the class-select screen.

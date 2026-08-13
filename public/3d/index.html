@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.956.0-autopilot';
+const VERSION3D='1.957.0-autopilot';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -11674,9 +11674,17 @@ function hurtPlayer(dmg,sx,sz,by){
   if(meta.classId==='paladin'&&c2def('paladin')){/* pal_thick's flat 12% is gone - it is the free first hit now, applied above. */ if(c2Passive('pal_will')&&p.hp<effMaxHp(p)*.5)dmg*=.85;if(classState('paladin').rank>=10)dmg*=.82;}
   if(meta.classId==='necromancer'&&c2def('necromancer')&&c2Passive('necro_undying'))dmg*=.88;
   /* BOUNTY HUNTER's defensive clause: a foe you have MARKED hits you for 8% less. Conditioned on
-     the attacker, not on you, which is why it reads `by` the way the paladin's Oath does above
-     rather than sitting with the flat class reductions. See c2OnKill for the other two clauses. */
-  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')&&by&&typeof by==='object'&&(by.markT||0)>0)dmg*=.92;
+     the attacker, not on you, which is why it reads `by` rather than sitting with the flat class
+     reductions. See c2OnKill for the other two clauses.
+     IT READ `by.markT` DIRECTLY UNTIL 2026-08-13 AND THEREFORE NEVER FIRED IN PLAY — section W's
+     bug in a second place, and section AA. `by` is a DESCRIPTOR at all fourteen hurtPlayer call
+     sites (`foeHit` at 11290, or a literal of the same shape); the body rides in `.src`, and a
+     descriptor has no `markT`. So the clause worked only through the door a probe opens.
+     `attackerOf` is the helper section W added for exactly this and is already what the two
+     reflect readers use (11625, 11724). Measured either side by harness/probes/bounty.probe.js:
+     `reachableInPlay` false → true, ratio 1.000 → 0.92 on the game's own door. */
+  if(meta.classId==='ranger'&&c2def('ranger')&&c2Passive('r_bounty')){
+    const _mk=attackerOf(by); if(_mk&&(_mk.markT||0)>0)dmg*=.92; }
   if(meta.classId==='ninja'&&c2def('ninja')){if(c2Passive('nin_evasive'))dmg*=.90;if(c2Passive('nin_ghost'))dmg*=.90;if(c2Passive('nin_shadowform')&&p.hp<effMaxHp(p)*.5)dmg*=.88;if(classState('ninja').rank>=10)dmg*=.88;}
   /* A BERSERKER CLAUSE USED TO SIT HERE AND IT HARD-LOCKED THE GAME. It read
        if(c2Passive('bsk_frenzy')){ … v*=1+(1-fr); }

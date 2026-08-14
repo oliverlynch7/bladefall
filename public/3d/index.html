@@ -10866,7 +10866,15 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   // Player-owned companions/summons use {pet:true} as their damage source. Guests must relay
   // those hits too; otherwise they appear to attack locally, then the host snapshot restores
   // the mob's HP and makes Necromancer summons (and pets) effectively deal zero shared damage.
-  if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&src.pet))){
+  /* `projSrc` joins `pet` here for the same reason `pet` was added: a damage source that is not
+     literally G.p still belongs to this player and must be relayed, or it is applied locally and
+     then undone by the host's next snapshot. A projectile passes a bare position literal (the
+     bolt's own, since knockback is thrown from it), so it satisfied neither clause - meaning every
+     projectile basic attack and every projectile skill dealt nothing durable on a guest.
+     WIDENED ON THE RELAY SIDE ONLY, deliberately. `src===G.p` is also what dispatches CLASS_BASIC;
+     making projectiles satisfy THAT would ship the largest balance change in the game as a side
+     effect of a netcode fix. A separate marker keeps the two apart. */
+  if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
     MP.sendHit(e.mid, dmg, kb||0, el||null, src.x, src.z);
     e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
@@ -13600,7 +13608,13 @@ function update(dt){
       G._desig=!!pr.desig; G._crit=!!pr.pcrit;             // charged bolts / thrown scythe spend Rune Marks + rupture Corruption; crit shots shout their number
       for(const e of combatTargets()){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
         if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){
-          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01},pr.kb,effLifesteal(G.p),pr.el);
+          /* `projSrc` marks this src as the PLAYER'S SHOT so the co-op relay can recognise it. The
+             src is deliberately the bolt's own position, not the player's, because knockback is
+             thrown from the projectile - which is exactly why the relay guard could not see it and
+             why a guest's projectiles dealt nothing that survived the next host snapshot.
+             NOT named `shot`: enemies already carry `.shot` as their ranged-attack config, so that
+             name would be true on any enemy-shaped src and relay hits that must not be relayed. */
+          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true},pr.kb,effLifesteal(G.p),pr.el);
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
     } else if(G.duel && pr.foeBot){                          // DUEL: a bot's shot hits only its opponent, never the parked player

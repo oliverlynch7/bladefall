@@ -90,39 +90,46 @@ Nothing expires. This decision keeps.
 
 ## 7. What is known-broken, with evidence, and not fixed
 
-Ranked. Each has a measurement behind it, not a suspicion.
+**Six of the seven items that were here on 2026-08-13 are now FIXED.** Kept as a record of what was
+wrong and how each was proven, because the proofs are reusable and the pattern is the lesson.
 
-1. **A co-op guest's projectiles may deal no damage at all.** The relay guard
-   (`index.html:10890`) accepts `src===G.p` or `src.pet`; a projectile passes a bare position literal
-   (`13624`), so the relay never fires, damage applies locally, and the host's next snapshot undoes
-   it. If it reads as the source says: **nine of sixteen classes deal nothing with their basic attack
-   in co-op**, and every projectile skill on all sixteen is the same. Patch written out in
-   `docs/MP_AUDIT.md`; the static test is parked in `harness/live/relay.test.js` with one assertion
-   **watched to fail**. NOT measured live — two launches died on Chrome contention.
-   **Caution the patch does not carry:** it proposes the marker `shot:true`, justified as "nothing
-   else reads a `.shot` field". That is false — `.shot` is the ranged config on enemy definitions.
-   No enemy is currently passed as a damage `src`, so it is safe by luck rather than by that reason.
-   **Use a distinct marker name.** And widen the RELAY guard only: `src===G.p` also dispatches
-   `CLASS_BASIC`, and turning that on for projectiles is the largest balance change in the game.
-2. **Two clients disagree about what 5–12 of 41 monsters ARE.** Same seed, same level, same mids and
-   spawn points — but `saltMob` (`index.html:4716`) and the role roll (`7690`) use unseeded
-   `Math.random`. Usually a flyer against a walker, and those are the only bodies the position
-   correction cannot hold together (mean 358 apart, worst 1294, against 2 and 10 for the rest).
-3. **`MP.host()` has no timeout** while `join()` has 22s. Watched: the callback never fired,
-   `MP.active` stayed false, nothing surfaced. A player gets one button and no retry, forever.
-4. **Host-before-enter is a silent dead session.** Both clients report active with populated peer
-   lists in both directions and an open socket, while `MP.zone` is `-1`. Every health signal green
-   and the guest is nowhere.
-5. **`shot.js` guesses its debug port** (`9200 + httpPort % 300`). On collision the second Chrome
-   binds nothing and the harness drives the *first* browser's page — a plausible screenshot of the
-   wrong game. `harness/mp2/two.js` already solves it (`--remote-debugging-port=0` +
-   `DevToolsActivePort`); the fix just needs porting to `harness/shot.js`.
-6. **Three skill cards describe skills the redesign replaced** — `mage/Attunement`, `ranger/Tumble`,
-   `berserker/Charge`. Small code change; **which way it goes is a design call and is Oliver's.**
-   Same for three classes that promise aggro control in a game with no aggro model.
+| was broken | fixed by | proven how |
+|---|---|---|
+| A co-op guest's projectiles dealt nothing durable | `aea693c` | `relay.test.js` 3 pass/1 fail → 4 pass; the failing assertion was watched to fail first, and its negative control still passes |
+| Two clients disagreed about 5–12 of 41 monsters | `b11184b` | sameType 29/34/40/35 → 41×5 with the game file the only variable; roles 27,32 → 41,41; terrain hashes bit-identical, so static levels undisturbed |
+| **A guest never followed the host into zone 0** | `c7205ca` | `followed into zone 0: NO` twice → `YES`; both clients in The Outskirts, same runSeed, 41 enemies each |
+| `MP.host()` had no timeout | `6cf1db0` | given `join()`'s exact shape, 22s; the lobby already printed the retry message it had never been given |
+| A guest whose host has no zone waited on a green line forever | `cfebce2` | the lobby's success line was one-shot, so "waiting correctly" and "waiting forever" printed identical pixels |
+| `shot.js` guessed its debug port and could drive another run's browser | `17f13b5` | collision reproduced at ports 50000/50300 — both runs got the identical browser UUID |
 
-`docs/BACKLOG.md` is the ranked queue and carries the evidence. `docs/SKILL_TRIAGE.md` is the
-per-skill record.
+The zone-0 one is the one to understand if you read only one: the Waystation is built as
+`{hub:true, zone:0}` at `mode==='play'`, so a guest in the hub already satisfied every term of the
+entry guard. `startRun()` is `enterZone(0)`. It is the first door every co-op party walks through,
+and both clients reported a healthy agreeing session throughout.
+
+**PvP was tested and is not broken.** 8/8 pass, twice — real swings and raw sends, both directions,
+three independent channels, with a no-attack control.
+
+### Still open
+
+1. **Three skill cards describe skills the redesign replaced** — `mage/Attunement`, `ranger/Tumble`,
+   `berserker/Charge`. The code change is small; **which way it goes is a design call and is
+   Oliver's.** Do not guess. Same for three classes that promise aggro control in a game with no
+   aggro model. `berserker/Charge` in particular travels 684 units and deals zero at every distance,
+   against `warrior/Charge` which travels ~315 and deals 77 — so the mechanism works and that kit's
+   use of it does not.
+2. **A stray `main` push was attempted once and never explained.** Rejected, and `remote.origin.push`
+   now pins a bare push to the working branch — but no hook, no `core.hooksPath` and no autopilot run
+   accounted for it. A seatbelt over an unknown driver.
+3. Whatever the last workflow was still measuring when the plan lapsed: characters rendering through
+   walls, delve floor length, and a save-compatibility test. Check `git log` — if a commit exists it
+   was finished and verified; if not, the scouts' findings are in the workflow transcripts only.
+
+### Limits that apply to everything above
+
+Every multiplayer measurement was two Chrome instances on one machine. `/turn` 404s locally, so
+**every run was STUN-only and nothing here exercises the Cloudflare TURN relay.** Nothing has been
+played by two people on two networks. That remains the only test that closes multiplayer out.
 
 ## 8. If you pick this up again
 

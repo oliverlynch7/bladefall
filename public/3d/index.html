@@ -19822,6 +19822,100 @@ SKILL_FX.mon_thousand=function(p,ok,am){
   try{ skillRing(p.x,p.z,'#ffe6ad','#3a3018',200); }catch(err){}
 };
 
+/* RANGER - TUMBLE, AND THE PARTING SHOT IT SELLS. The card at 2053 reads "Roll back ~5m with brief
+   i-frames + a 0.75x parting shot. A dodged hit keeps Clear Aim." It rolled 197 units, it i-framed,
+   it kept Clear Aim, and it fired nothing: measured `node harness/test-skills.js --classes ranger`
+   -> FAIL ranger/Tumble [a-side] claims damage, dummy 100000 -> 100000 with a Cracked Shortbow in
+   hand. Oliver's call, docs/DESIGN_CALLS.md 2026-08-13: the card is right, the skill deals its hit,
+   copy a working pattern rather than author a new one.
+
+   THE CLAUSE THAT ALREADY WORKED WAS MEASURED BEFORE THIS WAS WRITTEN, because it is the half of
+   this card that had something to lose. "A dodged hit keeps Clear Aim" holds, and holds for free:
+   Clear Aim is only ever disabled by class2OnHit (10239), whose ONLY caller is hurtPlayer (11804),
+   and every path that hurts the player gates on `p.invuln>0 || p.dodgeTimer>0` before it gets there
+   (melee 13100, boss sweep 13537, slam 13542, magma 13545, enemy shots 13727, beam 14029). An
+   i-framed hit never becomes a hit at all. harness/probes/tumble-clearaim.probe.js watches that in
+   both directions - exposed, Clear Aim breaks (5 hits, 25 HP); i-framed, it survives (0 hits), and
+   then the pin is RELEASED and the same grunt breaks it (6 hits, 30 HP), which is what stops the
+   surviving arm passing vacuously. It reports the same verdict after this change as before it.
+   So nothing below touches dodgeTimer, invuln, the dash, or any part of that chain.
+
+   THE SHOT IS A SEPARATE DEFINITION, NOT AN EDIT TO SKILL_FX.tumble, and that is the whole shape of
+   this commit. `SKILL_FX.r_tumble=SKILL_FX.tumble` (10357) makes them one function object, and
+   ninja/Tumble (10387) and pirate/Roll (10432) then alias r_tumble - so adding damage to the shared
+   body would have shipped two other classes' balance changes inside this one, and Oliver asked for
+   these landed separately so any single one can be reverted after he plays it. Redefining here, past
+   every alias line in the file, is exactly the move bsk_charge -> Headlong (20034) and mon_roll ->
+   the parting strike (19968) already make: last assignment wins, and this reverts alone.
+   PIRATE/ROLL'S CARD ALSO SAYS "a parting shot" (2143) and it deliberately does NOT get one here.
+   That is a second class's damage change, it is not in the design call, and it is not in
+   harness/baseline.json; it is named so the next reader knows it was seen and left, not missed.
+   ninja/Tumble is offered by no card at all any more (the ninja's r4 is Shadow Step / Smoke Bomb),
+   so its alias is legacy and gains nothing either way.
+
+   THE ROLL IS RUN FIRST AND IS NOT REIMPLEMENTED. This body CALLS SKILL_FX.tumble, so the dash, the
+   0.35s invuln, the 2.5s snare and the Ambusher arm are the same code they have always been - not a
+   copy that can drift out of step with the original. "It must keep its i-frames" is then not a claim
+   needing a test; it is the same function.
+
+   WHAT THE SHOT IS AIMED AT, which is the one thing this skill's geometry had to answer for itself.
+   Tumble travels AWAY - tumble negates the yaw (9992) - so the hit cannot be a path loop the way
+   Headlong's is, and it cannot be the melee sweep monk/Roll got either, because a Ranger's parting
+   shot is a SHOT and the class holds a bow. It fires along p.yaw, forward, at what you were parting
+   FROM. p.yaw is NOT written here: the dash vector is taken off it a line earlier, so touching it
+   would steer the roll, and the roll is not this commit's to change.
+
+   THE SIBLING COPIED IS THE RANGER'S OWN VOLLEY (9984) - same class, same weapon, same G.projectiles
+   push, same `(w&&w.proj)?w.proj:{...}` fallback for a hand holding something with no shot in it,
+   same el/`ok` gate - with deadeye's lead-the-target block (9974) so a moving foe is actually hit,
+   and fireProjectile's own gravity term (9917) inside it so a Ranger holding JAVELINS (family
+   bow/cross/dagger/javelin, 1873; javelin proj carries gravity 300) lobs instead of firing flat into
+   the floor. Nothing is authored: every field is read off the weapon the game handed the player.
+
+   NOT ONE NUMBER IN IT IS CHOSEN:
+     - 0.75 is THE CARD'S OWN NUMBER - "a 0.75x parting shot" - which is what makes this literal the
+       one thing here that is not a judgement call. It is also where monk/Roll's 0.75 was inherited
+       from, so the two are now the same number in two places by intent; changing one does not change
+       the other.
+     - The reach and the flight are the weapon's: R = proj.range (Cracked Shortbow 1150, 1813) with
+       autoAtkTarget's own `||760` floor (9740), used BOTH as how far a target may be and as the
+       arrow's life (R/speed), so the shot cannot expire short of a foe it was allowed to aim at.
+     - Speed, size, colour, shape, glow and knockback are proj.speed / proj.size / proj.color /
+       proj.shape / proj.glow / w.kb. A parting shot from a Crossbow is a crossbow bolt.
+     - pierce is 0 and el is `ok?(w&&w.el):null`, both verbatim from volley. The card says "a" shot,
+       singular, so it stops in the first body.
+   No Clear Aim range bonus is applied. The innate grants "+10% ability range" (2047) and r_spike
+   (10612) is the only skill in the game that reads it - as 1.2, not 1.1. Wiring a second, differently
+   scaled copy of a bonus the Tumble card never mentions would be inventing balance inside a commit
+   that is meant to add exactly what is already sold.
+
+   AMBUSHER IS NOT EATEN BY THIS, asked because it would have been a silent nerf to the passive this
+   very skill arms. CLASS_BASIC is dispatched only when `src===G.p` (10985), and the projectile step
+   hands hitEnemy the BOLT'S position with `projSrc:true` (13716), never the player - so a parting
+   shot cannot spend the +20% window tumble just opened for the next click. Measured-adjacent rather
+   than assumed: it is the same reason volley and deadeye do not spend it. */
+SKILL_FX.r_tumble=function(p,ok,am){
+  SKILL_FX.tumble(p,ok,am);
+  const w=p.weapon, base=(w&&w.proj)?w.proj:{speed:660,size:4,color:'#9fe6c8',shape:'arrow'};
+  const R=base.range||760, sp=base.speed, oy=p.y+26;
+  /* aimTarget, not projectileAimTarget: the latter SNAPS p.yaw to the reticle (9734), and p.yaw is
+     what the roll's direction was just taken off. The ranged profile keeps the game's own rules for
+     what a shot may be aimed at - inside the 90 degree sight cone, with an unobstructed line
+     (targetInPlayerSight, 9713) - so this parts with something you can see rather than through a
+     wall. No target is not a refund: Tumble is an escape first, and every other ranged body in this
+     file fires straight ahead when it finds nothing. */
+  const t=aimTarget(p,{cls:'ranged'},R);
+  let vx=Math.sin(p.yaw)*sp, vz=Math.cos(p.yaw)*sp, vy=0;
+  if(t){ const d=dXZ(p.x,p.z,t.x,t.z), tt=Math.max(0.12,d/sp);
+    vx=(t.x-p.x)/tt; vz=(t.z-p.z)/tt;
+    vy=((t.y+t.h*0.5)-oy)/tt + (base.gravity?base.gravity*0.5*tt:0); }
+  G.projectiles.push({owner:'player',x:p.x+Math.sin(p.yaw)*16,y:oy,z:p.z+Math.cos(p.yaw)*16,vx,vy,vz,
+    gravity:base.gravity||0,size:base.size,color:base.color,shape:base.shape||'arrow',glow:base.glow||0,
+    dmg:(w?w.dmg:8)*effPower(p)*0.75*am*(ok?1:OFFCLASS_MUL),
+    kb:(w&&w.kb)||120,pierce:0,el:ok?(w&&w.el):null,life:R/sp,hitSet:[]});
+  p.atkTimer=0.18; SFX.shoot();
+};
+
 /* MONK - ROLL, AND THE PARTING STRIKE IT SELLS. The card at 2167 reads "Roll aside with brief
    i-frames and a parting strike." It rolled and it i-framed and it dealt nothing: measured
    `node harness/test-skills.js --classes monk` -> FAIL monk/Roll [b-side] claims damage, dummy
@@ -19833,10 +19927,12 @@ SKILL_FX.mon_thousand=function(p,ok,am){
    Ambusher arm and the burst are the same code they have always been - not a copy that can drift
    out of step with the original.
    That is not tidiness, it is the whole reason this is a redefinition and not an edit to tumble.
-   SKILL_FX.tumble is ALSO ranger/Tumble (10357), ninja/Tumble and pirate/Roll. Ranger's is its own
-   entry in Oliver's design call with its own multiplier (its card says 0.75x) and its own Clear Aim
-   clause, and he asked for these landed as separate commits so any one can be reverted after he
-   plays it. Adding damage to the shared body would have quietly shipped three other classes'
+   SKILL_FX.tumble is ALSO ranger/Tumble (10357), ninja/Tumble and pirate/Roll. (Ranger's no longer
+   is, as of 2026-08-13: it is redefined just above this block for its own parting SHOT, so editing
+   SKILL_FX.tumble now moves the ninja and the pirate only. The reasoning below is what it was.)
+   Ranger's is its own entry in Oliver's design call with its own multiplier (its card says 0.75x)
+   and its own Clear Aim clause, and he asked for these landed as separate commits so any one can be
+   reverted after he plays it. Adding damage to the shared body would have quietly shipped three other classes'
    balance changes inside this one. Redefining the alias is exactly the move bsk_charge -> Headlong
    makes at 19940 - the last assignment wins - and it is what keeps this revertable alone.
 

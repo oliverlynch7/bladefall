@@ -19792,9 +19792,42 @@ SKILL_FX.bd_steel=function(p,ok,am){
    now faces the thing that defines him: damage rises as health falls, so every skill asks how much
    health you will spend to swing harder. */
 
-/* MAGE - ATTUNEMENT. Your element changes on every cast for 10s. The Mage's whole kit is elemental
-   reactions; this hands you all of them in sequence instead of a second area attack. */
+/* MAGE - ATTUNEMENT, AND THE STORM ITS CARD SELLS (docs/DESIGN_CALLS.md, Oliver 2026-08-13).
+   The card at 2075 reads "A 4s storm repeatedly damages enemies around you." This body was a pure
+   buff - your element changes on every cast, nothing is damaged - measured `node harness/test-skills.js
+   --classes mage` -> FAIL mage/Attunement [a-side] claims damage, dummy 100000 -> 100000 with its own
+   Splintered Staff in hand. Oliver's call: the card is right, BUILD THE STORM.
+
+   THE STORM IS NOT AUTHORED HERE, IT IS THE ONE THE GAME ALREADY RUNS. `SKILL_FX.tempest` (10026)
+   arms tempestT/tempAcc/_tmpDmg and the upkeep tick at 13416 does the rest: a hit on everything
+   within 180+r every 0.3s until the window closes, with the same losBlocked the rest of the kit
+   uses. That window is 4s, which is the card's own number, and the 0.55x is the game's own figure
+   for this exact mechanic - `SKILL_FX.m_tempest=SKILL_FX.tempest` (10367) is what this line
+   overwrote, so the storm being restored here is literally the one this skill name used to point
+   at. CALLING it rather than copying its body is deliberate: a copy would duplicate three numbers
+   that could then drift from the storm every other class's version still runs. Same move mon_roll
+   (19970) makes with SKILL_FX.tumble.
+   The shared body toasts "Arcane Tempest" - this skill's own legacy name (1888), and what the
+   necromancer's Death Storm already prints today. Inherited, not chosen; a rename is cosmetic and
+   would mean copying the body to get it.
+
+   THE ELEMENT CYCLING IS KEPT, BECAUSE NOTHING ELSE IN THE GAME GRANTS IT. `_attuneT` is written in
+   exactly one place - the line below - and read in exactly one, useSkill (10648). Deleting it here
+   would have removed element cycling from BLADEFALL entirely rather than moved it, which is what
+   DESIGN_CALLS asked be checked before it vanished quietly. It costs one line to keep, so it is
+   kept: the storm is the damage the card promises, the cycling is what the name Attunement means.
+
+   ONE THING FOR OLIVER'S EYE, LEFT ALONE ON PURPOSE: `_attuneT=10` is never decremented anywhere in
+   the file, so the "10s" is not enforced - once cast, the cycling runs for the rest of the run. That
+   is today's live behaviour, it is not the assertion that was failing, and capping it would be a
+   nerf no design call covers. Reported, not fixed.
+
+   REDEFINED HERE rather than edited at 10367, past every alias line, for the reason the three
+   commits before this one give: necro_storm (10385) captured the function object at 10367 and still
+   holds the storm, so touching the shared body would ship the Necromancer's balance inside the
+   Mage's commit. Last assignment wins, and this reverts alone. */
 SKILL_FX.m_tempest=function(p,ok,am){
+  SKILL_FX.tempest(p,ok,am);
   p._attuneT=10; p._attuneI=0;
   addText(p.x,p.y+56,p.z,'ATTUNED','#c9a6ff',true);
   try{ skillRing(p.x,p.z,'#c9a6ff','#241a3a',240); }catch(err){}

@@ -207,11 +207,48 @@ globally or locally, and no autopilot run held the lock at the time. Something r
 refspec that included `main` and it has not been identified. Until it is, the config is a seatbelt
 over an unknown driver.
 
-### 4. Characters render through walls
-`flushHero3D` clears the depth buffer before drawing the 3D layer, so by the code's own admission the
-layer "always draws OVER the voxel world and cannot be occluded by it… it is the reason a
-half-converted scene can show a character through a voxel wall." Visible in every zone in normal
-play.
+### 4. Characters render through walls — MOSTLY FALSE, and the remainder FIXED 2026-08-13
+This item was written off a stale comment, not off a picture. "Visible in every zone in normal play"
+was **wrong when it was written**: the DEFERRED ENTITY PASS had already superseded the sentence it
+quotes, and a zone's walls have been on that path (`_wallDefer`) ever since. Measured with
+`_shot/occl.probe.js`, which pins the shoulder cam at the game's own pitch floor and injects one wall
+of height **exactly 50** — the LATE ghost pass fades anything over 50 between camera and hero, so 50
+is the only height that stays solid:
+
+| shot | walls drawn | result |
+|---|---|---|
+| `_shot/out/occl-zone-control.png` — Outskirts, no wall | — | control: hero centre-frame |
+| `_shot/out/occl-zone-wall.png` — Outskirts + wall | deferred | **hero 100% gone.** Not dimmed, absent |
+| `_shot/out/v2-spar-BEFORE-wall.png` — Sparring Room + wall | inline | **hero drawn head to boots over it** |
+| `_shot/out/occl-hub-wall.png` — Waystation + wall | inline | world3d's courtyard paints the wall out |
+
+So one real case survived, and it was not "every zone" — it was the **Sparring Room**. `_wallDefer`
+was `!G.hub`, and the exception's own justification is *"world3d's hub build stands a real castle wall
+on every one of them"*. True of the Waystation (`counts.wall: 36`), false of the Sparring Room, which
+sets `hub:true` but declares no gates, so `buildHub` returns null and its counts are exactly
+`{hub:true, drawCalls:0}`. It took the exception without the replacement.
+
+**FIXED** by gating on the count instead of the flag — the fifth flag in that function to learn it,
+alongside `_hubLamp`, `_hubPillar`, `_hubAsset` and `_hubKind`:
+
+```js
+const _wallDefer = !G.hub || !(_w3d && _w3d.counts && _w3d.counts.wall > 0);
+```
+
+Watched fail first, then re-shot with the same command: `v2-spar-BEFORE-wall.png` (hero through the
+wall) → `v2-spar-AFTER-wall.png` (hero gone). Nothing else moved — against the unfixed build, the
+Sparring Room with no wall injected differs by **0.146% of pixels** (drifting dust motes and one idle
+frame), the Waystation by **0.067%**, The Outskirts by **0.041%** — counted by `harness/pngdiff.js`,
+added here because "the byte size changed" cannot tell a moved wall from a moved dust mote. `node
+tools/gate.js` OK. The probe is `harness/probes/occl.probe.js`.
+
+**Not done, deliberately: `flushHero3D`'s depth clear is untouched.** Its comment claimed
+`PostFX.end()`'s composite quad "leaves the depth buffer filled at the quad's depth". It does not —
+`end()` disables DEPTH_TEST before the composite, so the quad writes no depth. Suppressing the clear
+at runtime leaves the hero rendering, just **eaten from the shins down** by the 1.45-vs-0 floor/slab
+disagreement (`v2-zone-noclear-nobloom.png`, `v2-zone-noclear-bloom.png`). The clear is cheap and is
+the only thing keeping the layer off a depth buffer that disagrees with it; occlusion is the deferred
+pass's job, not its. The comment has been rewritten to say so.
 
 ### 5. A save-compatibility test
 "Never break saves" is a standing rule enforced only by care. A runner that loads a corpus of old

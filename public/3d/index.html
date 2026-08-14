@@ -3428,14 +3428,32 @@ const HERO3D_MAX = 6;
 function flushHero3D(){
   const q = window.__hero3dPending; window.__hero3dPending = null;
   if(!(q && q.length && window.drawHero3D)) return;
-  /* Clear DEPTH only, never colour. PostFX.end() composites a fullscreen quad, which leaves the
-     depth buffer filled at the quad's depth - so the 3D layer drew correctly and was then
-     rejected by the depth test, appearing to vanish entirely. Colour must survive: it holds the
-     finished, bloomed frame we are drawing on top of.
-     Consequence to be aware of: the 3D layer now always draws OVER the voxel world and cannot be
-     occluded by it. Acceptable while the world itself is becoming 3D (Three keeps its own depth
-     internally, so 3D-vs-3D occlusion is correct), but it is the reason a half-converted scene
-     can show a character through a voxel wall. */
+  /* Clear DEPTH only, never colour. Colour must survive: it holds the finished, bloomed frame we
+     are drawing on top of.
+     THE REASON IS NOT THE COMPOSITE QUAD, which is what this comment used to say. PostFX.end()
+     calls gl.disable(DEPTH_TEST) before its drawTri(A_comp), and GL writes no depth with the test
+     disabled - the quad leaves the buffer exactly as it found it. So suppressing this clear does
+     NOT make the layer vanish: with bloom on and gl.clear(DEPTH_BUFFER_BIT) neutralised at runtime
+     (`_shot/out/v2-zone-noclear-bloom.png`, 3 clears suppressed) the hero still renders. He is just
+     eaten from the chest down.
+     What the default framebuffer's depth really holds is wrong either way round:
+       bloom OFF - every medium/low device and every harness run, since qBloomOn() is HIGH only -
+         begin/end no-op, so the VOXEL scene rendered straight into this buffer and its depth is live;
+       bloom ON  - the scene went to sFBO, so this buffer's depth is whatever LAST frame's
+         flushHero3D/flushDeferred left, and GL_OPTS sets preserveDrawingBuffer so nothing wipes it.
+     Both disagree with the layer about to be drawn, and the damage has one shape: the ground eats
+     the bottom of every 3D character and prop, over the same 1.45-vs-0 floor-tile / voxel-slab
+     disagreement the crumble note further down describes (`v2-zone-noclear-nobloom.png` - hero cut
+     off at the shins, signpost cut at its base). Narrowing the clear to a hero-shaped region is not
+     an option either: one flushHero3D renders world3d + mob3d + prop3d together, not a character.
+     THE OLD CONSEQUENCE CLAUSE IS DEAD, and BACKLOG #4 was written off it. It said this layer
+     "always draws OVER the voxel world and cannot be occluded by it". The DEFERRED ENTITY PASS
+     replaced that: voxel geometry world3d does not stand a replacement for replays AFTER Three,
+     depth-tested against what Three just wrote, so it occludes the 3D layer correctly. Measured in
+     a zone (`occl-zone-wall.png` - a solid wall hides the hero completely) and, since the wall gate
+     stopped trusting G.hub, in the Sparring Room too (`v2-spar-AFTER-wall.png`). What survives is
+     the narrow version: geometry drawn INLINE cannot occlude this layer and is not meant to - the
+     LATE ghost pass, and the Waystation's ramparts, which world3d rebuilds in 3D itself. */
   gl.depthMask(true);
   gl.clear(gl.DEPTH_BUFFER_BIT);
   /* One depth clear for the whole group, then each body in turn. renderer.autoClear is false - the
@@ -17243,12 +17261,22 @@ function drawCourse(s,t){
      a control chest pushed into the same frame in front of the hero, the chest renders and the
      wall does not (`_shot/out/b3-harness-check.png`), while `?world3d=0` draws the wall plainly
      (`b3-harness-check-voxel.png`). The control matters — see the harness note about --eval.
-     The HUB is the exception and deferring there would be the plaza-tower mistake again: its 8
-     visible walls ARE the perimeter rampart, and world3d's hub build stands a real castle wall on
-     every one of them. Deferred, each would put a 300-tall voxel slab in front of its own
-     replacement. So the hub keeps them inline, exactly as the eight gate frames do.
+     The WAYSTATION is the exception and deferring there would be the plaza-tower mistake again:
+     its 8 visible walls ARE the perimeter rampart, and world3d's hub build stands a real castle
+     wall on every one of them. Deferred, each would put a 300-tall voxel slab in front of its own
+     replacement. So it keeps them inline, exactly as the eight gate frames do.
+     GATED ON THE COUNT, not on G.hub, and this is the fifth flag in this function to learn it:
+     `counts.wall` is what buildHub returns for the ramparts it actually laid, and buildHub returns
+     null outright in a hub sub-area that declares no gates — the Sparring Room, whose counts are
+     exactly {hub:true, drawCalls:0}. `!G.hub` therefore handed the room the Waystation's exception
+     without the Waystation's replacement: its four perimeter walls drew inline, before Three, so
+     every 3D character composited straight over them. Measured with the injection probe
+     (`_shot/out/v2-spar-BEFORE-wall.png` — hero drawn head to boots through a solid wall 58 units
+     from the eye; `v2-spar-AFTER-wall.png`, same command, hero gone). Fails safe the same way
+     _hubPillar does: if the wall models never load, the count is 0 and the voxel walls defer.
      The LATE ghost pass is unaffected: a camera-blocking wall never reaches the solid pass. */
-  const _wallDefer = !G.hub;
+  const _w3d = window.__world3d && window.__world3d();
+  const _wallDefer = !G.hub || !(_w3d && _w3d.counts && _w3d.counts.wall > 0);
   const stone=tint(s.ground,'#fff',0.13), stoneTop=tint(s.ground,'#fff',0.22), stoneDk=tint(s.ground,'#000',0.25);
   if(_wallDefer) deferOn();
   const wallBox=(wl)=>{ bx(wl.x,wl.h/2,wl.z, wl.w,wl.h,wl.d, stone);
@@ -17328,8 +17356,7 @@ function drawCourse(s,t){
      a 3D replacement for THIS? It does not, so it defers. The columns go with them - a cover column
      is the same kind of object, and the tree-trunk ones are still skipped outright above because
      world3d really does stand a tree there. */
-  const _w3d = window.__world3d && window.__world3d();
-  const _w3dOn = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);
+  const _w3dOn = !!(three3DLive() && _w3d && _w3d.on && _w3d.ready);   // _w3d is read once, above the wall pass, which needs it too
   /* The hub's plaza lamp posts. Gated on the COUNT rather than on `_w3dOn`, because "world3d is
      on" is not "world3d stood a lightpost here" - buildHub lays nothing at all in a hub sub-area
      that declares no gates (the Sparring Room), and the count is the only honest test. Fails safe:

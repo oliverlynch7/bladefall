@@ -19822,6 +19822,71 @@ SKILL_FX.mon_thousand=function(p,ok,am){
   try{ skillRing(p.x,p.z,'#ffe6ad','#3a3018',200); }catch(err){}
 };
 
+/* MONK - ROLL, AND THE PARTING STRIKE IT SELLS. The card at 2167 reads "Roll aside with brief
+   i-frames and a parting strike." It rolled and it i-framed and it dealt nothing: measured
+   `node harness/test-skills.js --classes monk` -> FAIL monk/Roll [b-side] claims damage, dummy
+   100000 -> 100000. Oliver's call, docs/DESIGN_CALLS.md 2026-08-13: the card is right, the skill
+   deals its hit, copy a working pattern rather than author a new one.
+
+   THE I-FRAMES ARE NOT REIMPLEMENTED HERE, THEY ARE DELEGATED. mon_roll aliased SKILL_FX.tumble
+   (10389) and this body still CALLS it first, so the dodge dash, the 0.35s invuln, the snare, the
+   Ambusher arm and the burst are the same code they have always been - not a copy that can drift
+   out of step with the original.
+   That is not tidiness, it is the whole reason this is a redefinition and not an edit to tumble.
+   SKILL_FX.tumble is ALSO ranger/Tumble (10357), ninja/Tumble and pirate/Roll. Ranger's is its own
+   entry in Oliver's design call with its own multiplier (its card says 0.75x) and its own Clear Aim
+   clause, and he asked for these landed as separate commits so any one can be reverted after he
+   plays it. Adding damage to the shared body would have quietly shipped three other classes'
+   balance changes inside this one. Redefining the alias is exactly the move bsk_charge -> Headlong
+   makes at 19940 - the last assignment wins - and it is what keeps this revertable alone.
+
+   WHY THIS IS NOT HEADLONG'S HIT LOOP, ASKED AND ANSWERED RATHER THAN ASSUMED. Headlong's card says
+   "damaging and stunning in your path", so it got a loop inside its own movement tick. Two things
+   stop that shape transferring to Roll:
+     - Roll drives p.dodgeTimer, and that tick (13314) is the GENERIC dodge. The dodge button
+       (13469), sky_dash (10511) and bd_step (10546) all ride the same field. A hit loop there would
+       arm every dodge in the game, which is a change to sixteen classes, not to this skill.
+     - Roll travels AWAY - tumble negates the yaw (9992) - so a path loop lands on whatever is
+       BEHIND you. "A parting strike" is the hit you leave on what you are parting FROM.
+   What IS copied from Headlong is the method, which is the part that generalises: find the sibling
+   that already works, take its hit code, invent no number, touch no movement. The sibling for "one
+   melee sweep around the caster" is every other melee body in this file - bsk_cleave (19900), stomp
+   (9952), sky_lift (10508) - and the guard clause is w_cleave's, which is the monk's OWN Flurry
+   (10389), including its losBlocked so a strike does not travel through a wall, plus wcharge's
+   vOverlap (13415) so it does not reach something standing on a ledge above you.
+
+   NOT ONE NUMBER IN HERE IS CHOSEN:
+     - The reach is the FIST'S OWN reach, read off the weapon as w.range (ARCHES.fist, 1803: 58),
+       not written here. A Monk cannot hold anything else (monkBlocksWeapons, 2346), so the strike
+       lands exactly as far as the hand that throws it. The ||58 is only a floor for a weapon with
+       no melee range at all, and it is the same fist number.
+     - The knockback is the fist's own kb (110), read the same way.
+     - The multiplier is 0.75, and it is the CARD'S number for a parting hit off this exact roll:
+       ranger/Tumble (2053) says "a 0.75x parting shot" for the same handler, at the same rank 4, on
+       the same 8s cooldown. The monk card names no number of its own, so - exactly as Headlong
+       inherited warrior's 1.6 - this inherits the one the game already prints for the mechanic.
+       THAT IS THE ONE NUMBER FOR OLIVER'S EYE. It is the most defensible default available, but it
+       is inherited rather than this card's own word, and a Monk's fist (base 24, the heaviest melee
+       base in the game outside hammer/greatsword) is not a Ranger's bow. If Roll reads weak in his
+       hands the literal below is a one-line change.
+   No element is passed because Bare Fists carry none (fistsWeapon, 2477: el null), so the
+   `ok?(w&&w.el):null` the other melee bodies end on could only ever evaluate to null here. */
+SKILL_FX.mon_roll=function(p,ok,am){
+  /* Taken BEFORE the roll is armed, because this is a strike thrown from the spot being left. The
+     body has not actually moved yet - tumble only sets dodgeTimer/dashX/dashZ and the dodge tick
+     does the travelling - so these are p.x/p.z either way today; holding them makes the intent
+     explicit and survives tumble ever moving the body itself. */
+  const ox=p.x,oz=p.z;
+  SKILL_FX.tumble(p,ok,am);
+  const w=p.weapon,R=(w&&w.range)||58,dmg=(w?w.dmg:10)*effPower(p)*0.75*am*(ok?1:OFFCLASS_MUL);
+  let n=0;
+  for(const e of combatTargets()){
+    if(e.dead||dXZ(e.x,e.z,ox,oz)>R+e.r||!vOverlap(e,p)||losBlocked(ox,oz,e.x,e.z)) continue;
+    hitEnemy(e,dmg,p,(w&&w.kb)||110,effLifesteal(p),null); n++;
+  }
+  if(n) addText(ox,p.y+44,oz,'PARTING STRIKE','#ffe6ad',true);
+};
+
 /* BERSERKER - NO RETREAT. You cannot move backwards for 10s, and all your damage doubles. The class
    is played by choosing not to retreat; this removes the choice and pays you for it. */
 SKILL_FX.bsk_whirl=function(p,ok,am){

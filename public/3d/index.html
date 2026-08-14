@@ -12678,6 +12678,30 @@ function openMPLobby(){
   let _ctick=null; const stopTick=()=>{ if(_ctick){ clearInterval(_ctick); _ctick=null; } };
   const connCountdown=()=>{ stopTick(); let s=0; st('Connecting… 0s'); _ctick=setInterval(()=>{ s++; st('Connecting… '+s+'s'); if(s>=24) stopTick(); }, 1000); };
   document.getElementById('mpBack').onclick=()=>{ stopTick(); titleScreen(); };
+  /* THE GUEST'S HALF OF HOST-BEFORE-ENTER. A join can succeed completely against a host that has no
+     zone — and that is the NORMAL state at join time, not an exotic one: this lobby is reachable
+     only from the title screen (index.html:15014), so a host that has just pressed Host is standing
+     nowhere and MP.hasZone() is false. placeMsg() (:12441) then returns null, no 'zone' packet is
+     ever sent, and onGuestData never fires.
+     MEASURED on two real clients (harness/mp2/lobbywait.js, 2026-08-13): every other signal is
+     green — socket open, `hello` landed, peer lists populated in BOTH directions, host broadcasting
+     — while the guest's MP.zone is -1 and rseed 0. The old one-shot line sat there in the SUCCESS
+     colour, byte-identical across 44 samples in 22s. That is the bug: a lobby that is waiting
+     correctly and a lobby that will wait forever printed the same pixels.
+     So the line is LIVE. A counter first, because a moving number is the cheapest proof the page is
+     not hung; then, past 8s, the success colour goes and it says plainly what the HOST has to do,
+     since there is nothing the guest can do about it.
+     It stops itself on every exit, and the card being GONE is one of them: openMPLobby() builds a
+     fresh closure per visit, so an interval left over from a previous visit would be writing into
+     the NEXT card's status line. */
+  const waitHost=()=>{ stopTick(); const t0=Date.now();
+    const over=()=>!document.getElementById('mpStatus')||!MP.active||MP.hasZone();
+    const paint=()=>{ if(over()){ stopTick(); if(!MP.active) st('The host left — the party ended.'); return; }
+      const s=((Date.now()-t0)/1000)|0;
+      if(s<8) st('Connected! Waiting for the host to enter a zone… '+s+'s',true);
+      else st('Connected to '+MP.code+', but the host has not entered a zone yet ('+s+'s). Your connection is '
+        +'fine — they still have to start or continue a game. You drop in the moment they do.'); };
+    if(over()) return; paint(); _ctick=setInterval(paint,1000); };
   const doHost=(pvp)=>{ connCountdown(); try{SFX.pickup();}catch(e){}
     MP.host((ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':'Could not host ('+info+'). Try again.'); return; }
       const hi=document.getElementById('mpHostInfo'); if(hi) hi.style.display='block';
@@ -12692,7 +12716,7 @@ function openMPLobby(){
   document.getElementById('mpJoin').onclick=()=>{ const c=(document.getElementById('mpJoinCode').value||'').trim().toUpperCase();
     if(!c){ st('Enter a room code.'); return; } connCountdown(); try{SFX.pickup();}catch(e){}
     MP.join(c,(ok,info)=>{ stopTick(); if(!ok){ st(info==='no internet'?'Multiplayer needs an internet connection.':info==='timeout'?'Could not reach the host (timed out). Check the code, make sure they hosted, and retry.':'Could not join ('+info+'). Check the code.'); return; }
-      st('Connected! Waiting for the host to enter a zone…',true); }); };
+      waitHost(); }); };
 }
 /* ============================================================================
    THE ARENA — a fully save-protected sandbox + PvP battleground (solo or co-op).

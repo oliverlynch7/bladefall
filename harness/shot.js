@@ -673,10 +673,33 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     try { chrome && chrome.kill(); } catch (e) {}
     try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
   });
-  const dbgPort = 9200 + Math.floor(httpPort % 300);
+  /* THE DEBUG PORT IS CHROME'S ANSWER, NOT OUR ARITHMETIC.
+
+     Until 2026-08-13 this line read `const dbgPort = 9200 + Math.floor(httpPort % 300);` — a guess
+     derived from an ephemeral port, so any two runs whose httpPorts differ by a multiple of 300
+     asked for the SAME debug port. Two workers collide there roughly 1 in 300 per pair, and the
+     collision is silent in every direction:
+
+       - the second Chrome's bind fails, but stdio is 'ignore' so nothing is printed;
+       - it does not exit — the process stays alive doing nothing, so a liveness check passes;
+       - `/json/version` on that port is answered by the FIRST browser, and hands back the first
+         browser's webSocketDebuggerUrl. The second run then attaches to, and creates its page
+         inside, a browser it does not own.
+
+     Measured, both runs of a two-Chrome repro (httpPort 50000 and 50300 → dbgPort 9400 for both):
+     identical `devtools/browser/<uuid>` for both runs; the second profile never got a
+     DevToolsActivePort file at all; `Target.getTargets` from run A listed run B's page. What that
+     costs is not a clean failure — it is a `Page.captureScreenshot` on run A that never returns
+     (a 180s CDP timeout inside a 300s scenario budget), and a run B whose browser is killed out
+     from under it the moment run A's exit handler fires. Neither says "port collision" anywhere.
+
+     `--remote-debugging-port=0` lets Chrome pick, and Chrome writes what it actually bound into
+     <profile>/DevToolsActivePort — line 1 the port, line 2 the browser ws path. The profile is a
+     fresh mkdtemp above, so the file can only be this Chrome's. Same fix, same reasoning, as
+     harness/mp2/two.js:233. */
   const chrome = spawn(CHROME, [
     '--headless=new',
-    '--remote-debugging-port=' + dbgPort,
+    '--remote-debugging-port=0',
     '--user-data-dir=' + profile,
     '--window-size=' + W + ',' + H,
     '--hide-scrollbars', '--mute-audio',
@@ -686,15 +709,22 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     'about:blank',
   ], { stdio: 'ignore' });
 
-  // Wait for the debugging endpoint.
-  let wsUrl = null;
-  for (let i = 0; i < 100 && !wsUrl; i++) {
+  /* Wait for the debugging endpoint — by reading the port Chrome bound, never by polling a port
+     we hope it bound. A fetch of /json/version cannot tell "my Chrome" from "somebody's Chrome";
+     this file can only be written by the process that owns this profile. */
+  const portFile = path.join(profile, 'DevToolsActivePort');
+  let wsUrl = null, dbgPort = null;
+  for (let i = 0; i < 150 && !wsUrl; i++) {
     try {
-      const r = await fetch('http://127.0.0.1:' + dbgPort + '/json/version');
-      wsUrl = (await r.json()).webSocketDebuggerUrl;
-    } catch (e) { await sleep(200); }
+      const raw = fs.readFileSync(portFile, 'utf8').split('\n');
+      if (raw.length >= 2 && raw[0].trim()) {
+        dbgPort = parseInt(raw[0].trim(), 10);
+        wsUrl = 'ws://127.0.0.1:' + dbgPort + raw[1].trim();
+      }
+    } catch (e) { /* not written yet */ }
+    if (!wsUrl) await sleep(200);
   }
-  if (!wsUrl) { chrome.kill(); server.close(); console.error('Chrome never opened its debug port.'); process.exit(1); }
+  if (!wsUrl) { chrome.kill(); server.close(); console.error('Chrome never wrote DevToolsActivePort (profile ' + profile + ').'); process.exit(1); }
 
   const cdp = await CDP.attach(wsUrl);
   const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });

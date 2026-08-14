@@ -9963,8 +9963,10 @@ const SKILL_FX={
        "the bar is EFFECT, not number" - so a magnitude had never been checked by anything here.
        Section Y's other twelve disagreements all run the other way (the code is MORE generous than
        the card), so making those honest is a nerf and stays Oliver's; this one adds what is already
-       sold. THE BERSERKER IS NOT AFFECTED: bsk_charge aliases this body at 10374 and is then
-       REDEFINED as Headlong at 19711, and the last assignment wins. */
+       sold. THE BERSERKER IS NOT AFFECTED BY THIS BODY: bsk_charge aliases it at 10428 and is then
+       REDEFINED as Headlong at 19873, and the last assignment wins. Headlong now carries its own
+       copy of this 1.6 (2026-08-13) - so the two are the same number in two places by intent, not
+       by aliasing. Changing the multiplier here does NOT change the Berserker's; change both. */
     p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
     for(const e of combatTargets()) e._chHit=false; p.invuln=Math.max(p.invuln,0.2); SFX.dodge(); },
   berserk(p,ok,am){ p.berserkT=6; SFX.growl(1); toast('🔺 BERSERK!'); G.shake=Math.min(G.shake+5,10);
@@ -13237,11 +13239,23 @@ function update(dt){
      the advertised 0.9s, still 0.9 on the clock at 3s, and the hero bouncing off the fell-out-of-
      the-world rescue and setting off again. 0.9s matches the invuln window the same handler grants,
      which is plainly the intent. */
+  /* AND IT DAMAGES WHAT IT RUNS THROUGH. This loop is warrior's, copied from the chargeDash tick at
+     13400 with only the owner changed - same radius test (e.r+26 plus vOverlap so you cannot charge
+     something standing on a ledge above you), same _chHit dedupe so one enemy is hit once per cast
+     rather than once per frame, same _chDmg, same _chOk-gated 0.8s stun, same warcharge fx.
+     Splitting movement from damage across two ticks is exactly how bsk_charge shipped a card that
+     promised a hit and a body that could not land one; keeping the two loops textually identical is
+     what stops that happening again to the next skill that borrows this channel. */
   if((G.p._headlongT||0)>0){
     G.p._headlongT=Math.max(0,G.p._headlongT-dt);
     G.p.x += (G.p._headlongX||0)*760*dt;
     G.p.z += (G.p._headlongZ||0)*760*dt;
     G.p.vx=0; G.p.vz=0;
+    const _hp=G.p;
+    for(const e of combatTargets()){ if(e.dead||e._chHit) continue;
+      if(dXZ(e.x,e.z,_hp.x,_hp.z)<e.r+26&&vOverlap(e,_hp)){
+        e._chHit=true; hitEnemy(e,_hp._chDmg||20,_hp,380,effLifesteal(_hp),null); playFx('warcharge');
+        if(_hp._chOk) e.stunT=Math.max(e.stunT||0,0.8); } }
   }
   for(const e of (G.enemies||[])){
     if((e._tetherT||0)>0) e._tetherT-=dt;
@@ -19832,10 +19846,37 @@ SKILL_FX.bsk_cleave=function(p,ok,am){
 };
 
 /* BERSERKER - HEADLONG, replacing a copy of the Warrior's Charge. A charge that cannot be stopped
-   OR STEERED - it commits you, which is the difference between a Warrior's tool and a Berserker's. */
+   OR STEERED - it commits you, which is the difference between a Warrior's tool and a Berserker's.
+
+   AND IT NOW DEALS THE HIT ITS CARD SELLS (docs/DESIGN_CALLS.md, Oliver 2026-08-13). The card at
+   2131 reads "Rush forward, damaging and stunning in your path" and this body did neither: measured
+   at 684 units travelled and 0 damage at every bench distance. The cause was not a missing damage
+   line here - it is that HEADLONG DRIVES A DIFFERENT MOVEMENT CHANNEL THAN THE ONE THAT DAMAGES.
+   Warrior's wcharge (9958) sets p.chargeDash, and the chargeDash tick at 13400 both moves you AND
+   runs a hit loop. Headlong sets p._headlongT, whose tick at 13240 only ever moved you. So the
+   skill was never wired to the damage half of the mechanic; it was a pure gap-closer.
+
+   The fix copies wcharge's shape rather than authoring a new one, per the design call: the same
+   three fields (_chDmg, _chOk, and the per-enemy _chHit dedupe reset), read by the same hit loop,
+   which is now mirrored into the headlong tick. The fields are shared with warrior's Charge on
+   purpose - a hero is one class, so the two channels can never be live at once, and a parallel set
+   of berserker-only fields would be a second thing to keep in sync.
+
+   THE 1.6 MULTIPLIER IS INHERITED, NOT CHOSEN, AND IS THE ONE NUMBER HERE OLIVER SHOULD LOOK AT.
+   Warrior's Charge takes its 1.6 from its own card ("for 1.6x damage"), which is what makes that
+   literal not-a-guess. The Berserker card names NO number, so copying the working pattern copies
+   its magnitude too. That is the most defensible default available, but it is not the card's word
+   the way warrior's is. The other two Berserker skills that were rewritten from Warrior copies run
+   hotter and charge health for it (bsk_cleave 2.6x at 10% max HP, bsk_bash 2.2x at 6%); pricing
+   this one the same way would be inventing a cost the card does not mention, so it is left alone.
+
+   HEADLONG KEEPS ITS IDENTITY: still un-steerable, still 0.9s of invuln, still 760 u/s. Nothing
+   about the commit-yourself feel changed - it just connects now. */
 SKILL_FX.bsk_charge=function(p,ok,am){
   p._headlongT=0.9; p._headlongX=Math.sin(p.yaw); p._headlongZ=Math.cos(p.yaw);
   p.invuln=Math.max(p.invuln||0,0.9);
+  p._chOk=ok; p._chDmg=(p.weapon?p.weapon.dmg:10)*effPower(p)*1.6*am*(ok?1:OFFCLASS_MUL);
+  for(const e of combatTargets()) e._chHit=false;
   addText(p.x,p.y+50,p.z,'HEADLONG','#ff8a62',true);
 };
 

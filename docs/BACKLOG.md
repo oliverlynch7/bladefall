@@ -91,7 +91,7 @@ permanent reproducible failing case, so the fix can be watched to fail before it
 and is gated on slot 6 — so its 0 is the fail-safe path working, and it reads the same on a build
 with the feature deleted. The live known-bad is `?nopossync=1`.)*
 
-### 1b. Two clients build the same map and disagree about what is standing on it — MEASURED, NOT FIXED
+### 1b. Two clients build the same map and disagree about what is standing on it — FIXED 2026-08-13
 Found by `harness/probes/mp-twoworlds.probe.js` on 2026-08-13 while proving item 1, and it is a
 separate defect with a separate cause.
 
@@ -109,8 +109,73 @@ bodies both clients agree on. **Why they fail to converge is not established**, 
 was measured wrong: the edge guard's target-floor test read `targetFloored: true` on the two worst.
 That is the thing to measure first, not the thing to assume.
 
-The fix shape is probably to draw both from the level's own seeded `rnd`, the way positions and types
-already are — but that changes generation for every mode, so it is a plan, not a patch.
+**FIXED.** Both rolls now come off `G.runSeed`, through the file's own `mulberry` idiom. Measured on
+the instrument that found it, `harness/probes/mp-twoworlds.probe.js`, same command as above:
+
+| `sameType`, of 41 | | | | | | | |
+|---|---|---|---|---|---|---|---|
+| before, 3 runs | 35 | 33 | 35 | | | | |
+| after, 7 runs | **41** | **41** | **41** | **41** | **41** | **41** | **41** |
+
+`bodiesTheBuildsDisagreedAbout` went 6 / 8 / 6 → **0**, seven times. `separationMoversSaltedApart` —
+the cut this entry exists for, mean 358 and worst 1294 at its worst — is now `null`, because there
+are no bodies left in it.
+
+**The size of it was not the seven-to-twelve bodies. It was what those bodies were doing to
+everything else.** The probe's control lap — two clients simulating one level with the position
+correction stripped, which is the thing the whole of item 1 exists to fix — used to separate by an
+all-bodies mean of **142 / 338 / 141**, worst body **1188 / 1367 / 1553**. On the fixed build, across
+seven runs: **77 / 33 / 14 / 5 / 0 / 0 / 7**, worst **1188 / 1287 / 203 / 187 / 0 / 0 / 280**. Twice
+it was exactly zero — two unsynced simulations of one level, thirty seconds apart, agreeing to the
+unit on every body. The bestiary mismatch was not a defect sitting beside co-op enemy drift; it was
+most of it.
+
+**That has a cost, and it lands on the bench rather than on the game.** `mp-twoworlds.probe.js`
+stands its second simulation up by rebuilding in the same page, so its control could only diverge on
+whatever the rebuild got wrong — which was, mostly, this. With that gone, item 1's verdict line
+(`control worst > 10 × corrected worst`) reads **red on 3 of 7 runs**, including both runs where the
+control was 0 and there was nothing left to beat. Item 1's result stands as measured on 2026-08-13;
+what no longer works is this probe's way of producing a diverging second picture. Two real clients
+still diverge — they run on different machines with different frame timing, which a same-page rebuild
+does not model at all — so the honest next step is to re-measure item 1 on `harness/mp2/coop.js`,
+which has two actual Chrome processes, rather than to relax this bar.
+
+The residual: the runs that still diverge do it through the last unseeded rolls in `spawnEnemy`,
+`y:a.kind==='fly'?40+Math.random()*50:0` and `bob` / `dropT` on the two lines above the role roll. A
+flyer starts at a different height on each client. Not fixed here — this commit is the two rolls the
+entry names — but it is now the whole of what is left, and it is why the control is 0 on some runs
+and 280 on others.
+
+Three things worth keeping, because each of them was a guess that had to be measured:
+
+- **The fix shape guessed above was the wrong one.** Drawing from the level's own `rnd` would have
+  worked for co-op and re-shaped every level: `rnd`/`srnd` are shared with `zoneFlavour`,
+  `encounterPass`, `scatterPass` and the rest, so one extra draw shifts every later one — including
+  in the areas the comment at "MAIN LEVELS ARE STATIC" promises are the same hand-tuned layout every
+  time, and that the level editor pins saved edits to. Both rolls are keyed on the spawn counter
+  (`G._midSeq` / the body's own `mid`) instead and consume nothing. Watched, not asserted: the
+  terrain hash of The Outskirts and Black Woods — rooms, segments, walls, obstacles, deco, geysers,
+  chests, torches — is **bit-identical before and after** (`3004761347` and `2613452314`).
+- **Three draws, nine wrong bodies.** Wrapping `Math.random` for one Outskirts build recorded only
+  three `saltMob` draws in the entire level. `encounterPass` and `scatterPass` pick from a pool built
+  out of the types already standing on the ground, so a salted pick changes what everything after it
+  can be. That cascade, not the salt count, is the size of the defect.
+- **The role roll is invisible to `sameType` and was broken worse.** It does not change what a
+  creature is, so the probe above never saw it; a rebuild comparison that reads `e.role` measured
+  `sameRole` **29 and 27 of 41** before, **41 and 41** after. It is not cosmetic — `exploder` and
+  `flanker` multiply `e.speed`, so the two clients walked the same body at different speeds.
+
+The maze generator's `saltMob` call site (the one campaign zones never reach, because they dispatch
+to a scape table and return) was checked separately through `loadArea()` rebuilds, which keep
+`G.delve` / `G.trial` set: delve floor 5 **21, 22 of 24 → 24, 24**; Trial of the Blade **18, 17 of 21
+→ 17, 17 of 17**. The known-bad `?nopossync=1` still fails item 1's bar on the fixed build (worst
+corrected body 581 against a contact reach of 26), so agreeing about the bestiary did not turn that
+bench into a rubber stamp.
+
+`harness/probes/mp-twoworlds.probe.js` was deliberately left untouched, so the before and after runs
+are the same instrument byte for byte. Three prose blocks inside it (around its `sameType` field, its
+`rebuilt` comparison and `separateDefect_bestiaryMismatch`) still describe this defect as live, and
+are now stale.
 
 ### 2. Level design — make the existing zones better to play
 Oliver: *"we should also have it look to improve the level designs too."*

@@ -4713,9 +4713,26 @@ function scapeSecretTriggered(ctx, sx,sz,sy, tx,tz,ty){ const Zc=curZone(); if(!
   G.secret={x:sx,z:sz,y:sy||0,t:0,id:Zc.side.id,hidden:true};
   G.secretTrigger={x:tx,z:tz,y:ty||0,r:34,done:false}; }
 // a complementary enemy of a DIFFERENT kind than the majority (a caster/flyer among melee, etc.) so a fight forces you to prioritise
+/* THE SALT IS ROLLED FROM THE RUN SEED, not from Math.random, because two clients have to salt the
+   same pack with the same creature. Unseeded they did not, and it was measured: two builds of one
+   runSeed matched 41 of 41 mids and 41 of 41 spawn points and then disagreed about what 5 to 12 of
+   the 41 bodies WERE — usually a flyer against a walker, which is the one disagreement the guest
+   position correction cannot hold together (docs/BACKLOG.md item 1b). It also cascades far past the
+   bodies it picks, which is why so few draws could move so many: wrapping Math.random for the
+   length of one Outskirts build recorded only THREE salt draws in the whole level, and yet two
+   builds of it disagreed about nine bodies. encounterPass and scatterPass choose from a pool built
+   out of the types already standing on the level, so a salted pick changes what everything after
+   it can be.
+   Keyed on the spawn counter (`G._midSeq`, handed to each body as its `mid` in spawnEnemy) instead
+   of drawing from the generator's own `rnd`, deliberately. `rnd`/`srnd` are shared with
+   zoneFlavour, zoneTopology, addVerticality, encounterPass, scatterPass and the rest of the passes,
+   so consuming a draw here would shift every later draw and re-shape the levels the comment at
+   "MAIN LEVELS ARE STATIC" promises are the same hand-tuned layout every time — and that the level
+   editor attaches saved edits to. This consumes nothing from any generator stream. */
+function saltRoll(){ return mulberry(((((G&&G.runSeed)||0)>>>0) ^ Math.imul(((G&&G._midSeq)||0)+1,0x9E3779B1) ^ 0x5a17b0)|0)(); }
 function saltMob(theme,majority){ const pool=(THEMEMOBS[theme]||['grunt']).filter(m=>m!==majority&&ENEMY[m]);
   const mk=(ENEMY[majority]||{}).kind, diff=pool.filter(m=>ENEMY[m].kind!==mk);
-  const arr=diff.length?diff:pool; return arr.length?arr[Math.floor(Math.random()*arr.length)]:majority; }
+  const arr=diff.length?diff:pool; return arr.length?arr[Math.floor(saltRoll()*arr.length)]:majority; }
 const SCAPES={
   /* HOLLOW PASS (Phase 14 deep-dive) — a real canyon JOURNEY, several minutes end to end:
      entry gorge (arch landmark) -> north corridor -> a FORK (low slot-canyon road OR a high
@@ -7686,10 +7703,21 @@ function spawnEnemy(type,x,z,isBoss){
     markT:0,doomT:0,doomDps:0,doomAcc:0,doomSrc:null,elite:false};
   if(type==='dummy') e.hp=e.maxHp=trainingDummyHp(G&&G.p?G.p.level:1);
   if(e.boss) G.boss=e;
+  e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)
+  /* THE ROLE IS ROLLED FROM THE RUN SEED AND THE BODY'S OWN mid, not from Math.random. The mid on
+     the line above exists so two clients' bodies line up; an unseeded role broke that for about a
+     fifth of them, and it is not cosmetic — exploder and flanker multiply e.speed below, so the two
+     sims then walk the SAME body to different places. Measured before the change (three rebuilds of
+     one runSeed through the guest path): sameRole 29 and 27 of 41.
+     Keyed on mid rather than drawn from a level-generation stream because spawnEnemy also runs at
+     play time (dens, splits, summons), where no such stream is in scope — and because mid is the
+     identity the two clients already agree on, so this roll does not have to be reached in the same
+     order as any other to land on the same answer. Hoisted above the roll for exactly that. */
+  const roleRnd=mulberry((((G&&G.runSeed||0)>>>0) ^ Math.imul(e.mid,0x9E3779B1) ^ 0x726f1e)|0);
   // Phase 11: enemy ROLES — a behavior archetype forcing a response (no extra HP). A minority of ground mobs.
-  if(!e.boss && e.kind!=='goblin' && !isBoss && Math.random()<0.22){
+  if(!e.boss && e.kind!=='goblin' && !isBoss && roleRnd()<0.22){
     const opts = e.kind==='caster' ? ['healer'] : e.kind==='charger' ? ['exploder','flanker'] : ['shielder','exploder','flanker'];
-    e.role = opts[Math.floor(Math.random()*opts.length)];
+    e.role = opts[Math.floor(roleRnd()*opts.length)];
     e.roleCol = {shielder:'#8fb7ff',healer:'#7de08a',exploder:'#ff7a3a',flanker:'#c98cff'}[e.role];
     if(e.role==='exploder') e.speed*=1.28;                       // rushes you
     if(e.role==='flanker')  e.speed*=1.15;
@@ -7700,7 +7728,6 @@ function spawnEnemy(type,x,z,isBoss){
   if(e.spec==='shell'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; e.shellHp=Math.round(e.maxHp*0.55); }   // frontal block until the shell cracks
   if(e.type==='siegeknight'){ e.role='shielder'; e.roleCol='#8fb7ff'; e.shieldYaw=0; }
   if(e.spec==='sunpriest'){ e.role='healer'; e.roleCol='#7de08a'; }
-  e.mid=(G._midSeq=(G._midSeq||0)+1);   // stable multiplayer id (host & guest spawn in the same seeded order, so ids align)
   snapEnemyToSurface(e); G.enemies.push(e); return e;
 }
 

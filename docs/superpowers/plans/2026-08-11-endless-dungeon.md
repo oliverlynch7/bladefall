@@ -125,7 +125,7 @@ git commit -m "delve: floors keep their theme's hazard from floor 3, so depth ch
 
 ---
 
-### Task 2: Floors sized for a roguelite — **CLOSED 2026-08-12 WITHOUT BEING CARRIED OUT. THE FLOORS ARE ALREADY A THIRD OF A CAMPAIGN AREA.**
+### Task 2: Floors sized for a roguelite — **CLOSED 2026-08-12 WITHOUT BEING CARRIED OUT. THE FLOORS ARE ALREADY A THIRD OF A CAMPAIGN AREA.** *(Re-derived 2026-08-13 by a run sent to check it: skip confirmed, floors measured shorter still, and one number in the closure corrected.)*
 
 Step 1 exists to decide this task and it decided it, in the direction its own skip branch names.
 The premise is false twice over, and the second half is false in exactly the way Task 1's was.
@@ -147,6 +147,12 @@ delve floor 20               2942           30       13     41
 
 **A delve floor is 12 to 30 seconds of walking against a campaign area's 37.** The plan's stated
 target — "roughly a third of campaign length" — is where the mode already is.
+
+> **RE-MEASURED 2026-08-13 AND THE SECONDS COLUMN ABOVE IS ~1.9x TOO LONG. The verdict is unchanged
+> and the floors are SHORTER than it says: 7 to 17 seconds, not 12 to 30.** The route distances
+> stand; the ruler that turned them into seconds did not. See "The seconds were divided by a wall"
+> below. Read the corrected table there in preference to this one, which is kept only so the
+> correction has something to point at.
 
 **THE RULER WAS CROSS-CHECKED BEFORE IT WAS BELIEVED, and this is the reason to trust the table.**
 The probe is its own control: pointed at anything that is not a delve floor it measures that level
@@ -203,11 +209,18 @@ Outskirts is a hand-authored scape, so it is deterministic, and the recovery run
 numbers to the digit: **route 6958, line 6725, 17 rooms, 41 mobs, 3150 cells, speed 3.13, 37s.** The
 delve body's measured speed also reproduced exactly at **1.62**. So the instrument is stable and the
 spread in the table above is the levels changing, not the ruler drifting.
+> **And a reproducible number is not a correct one — 2026-08-13.** The 1.62 reproduced a third time,
+> then turned out to be the entry nook's wall rather than the body: the nook is walled on both z
+> faces and the probe drove only ±z, so what reproduced was a fixed piece of geometry. Stability was
+> evidence the ruler was not drifting, and it was read as evidence the ruler was right. The control
+> is the half of this paragraph that held.
 
 **The task's verdict is unchanged and is now better supported than when it was written:** across
 twelve floor measurements on two seeds, every single one falls between 12 and 30 seconds against the
 campaign area's 37. Nothing measured is anywhere near the "ten-minute floor" the task was written to
-fix.
+fix. *(2026-08-13: eighteen measurements on three seeds, and the corrected range is 7 to 17
+seconds. The verdict held through the ruler being wrong, because the error was ~1.9x and the margin
+was a factor of ten.)*
 
 **What is honestly left here is Oliver's, and it is one question:** the numbers above are TRAVERSAL
 only — no combat, no dead ends taken and backed out of, no locked door. A floor also holds 13 to 41
@@ -216,9 +229,108 @@ probe can settle, and `docs/VISION.md` puts "whether something is FUN" on the li
 answer for itself. Put to him as: *the floors are a third of a campaign area to cross and hold up to
 41 enemies — does a run of twenty of them drag?*
 
+---
+
+#### The seconds were divided by a wall — re-measured 2026-08-13, verdict unchanged, floors shorter
+
+**A third run came back to re-derive rather than trust this closure, and it broke one of the two
+numbers the closure is built from.** The route distances survive. The speed constant that turned
+them into seconds does not, and neither does the sentence drawn from it.
+
+**The claim that failed:** *"the delve hands out a fresh level-1 body, so it walks at half the
+campaign hero's pace"* (**1.62** units/tick against the campaign's **3.13**). It is an artifact of
+how the speed was measured, in two compounding ways:
+
+1. **`delve-size.probe.js` drove the body along ±z only, and the delve's entry nook is walled on
+   both z faces.** Driven from a freshly loaded floor, `+z` and `-z` each move the body **0 units**;
+   `+x` moves it 187. The direction was doing the measuring.
+2. **"Fastest single tick" is not a speed.** A collision ejection moves the body a long way in one
+   tick and a one-tick metric cannot tell it from running. Two measurements make that concrete:
+   driven `-x` on delve:1 the body records a fastest tick of **1.11 while its net displacement over
+   the whole 90 ticks is 2 units**, and on The Outskirts driving `+z` returns a fastest tick of
+   **40.12** against a real running speed of 3.13. Forty units in a tick is a fall.
+
+**Scored instead on the best sustained rate — the largest displacement across any 30-tick window,
+which an ejection spike cannot carry — the two bodies are the same body:**
+
+| | delve floor 1 | The Outskirts |
+|---|---|---|
+| best sustained (units/tick) | **3.12** | **3.13** |
+| fastest single tick | 4.34 | 40.12 |
+| ±z only, the old method | 0 | 3.13 |
+
+The campaign control never moves off 3.13 because it is measured in the open, which is why the old
+ruler looked sound: **it was correct on the one level it was checked against and wrong only where it
+was used.**
+
+**The corrected table**, same probe, same route distances, three fresh seeds:
+
+```
+                      walk (s), 3 seeds     rooms     mobs
+The Outskirts, area 0    37 / 37 / 37        17        41    <- campaign control, identical each run
+delve floor 1            10 / 12 / 17       7-10      16-23
+delve floor 3             7 /  9 /  8       9-10      18-21
+delve floor 5             8 / 13 /  8         10      24-25
+delve floor 10           13 / 16 / 11         12      31-33
+delve floor 15           13 /  9 / 13      11-13      35-37
+delve floor 20           13 / 11 / 12      12-13      28-40
+```
+
+**A delve floor is 7 to 17 seconds against a campaign area's 37 — under a third at the median, and
+never above a half.** The task's own skip threshold was two minutes. Eighteen floor measurements
+across three seeds, and the longest is a seventh of it. **The skip stands and is now harder to argue
+with than when it was written.**
+
+*The spread within a row is the maze rerolling, not the depth* — floor 1 alone came back 10, 12 and
+17 seconds, and floor 20 came back shorter than floor 1 on two of three seeds. That is the same
+warning the recovery run recorded above, holding under the corrected ruler: **do not quote a single
+floor's number as evidence of anything.** The range is the finding.
+
+*The delve reading is a lower bound and therefore `sec` is an upper bound* — a 30-tick window only
+fills if that seed's nook gave a long enough clear run, so launches read 3.13, 2.83 and 2.79. The
+ceiling is the campaign's own 3.13 and the shortfalls are corridors, not legs. Left erring toward
+"slower, therefore longer" rather than tuned to the answer.
+
+**Also fixed in passing, and it was mine:** emptying `G.enemies` for the speed run and pushing them
+back afterwards returned the control's mob count as **50 instead of 41** — the dens keep spawning
+into the emptied array while the body drives (index.html:12330), so the originals came back on top
+of nine arrivals. The restore is now exact. The control row reproduces digit for digit against the
+committed one: `route 6958, line 6725, spanX 4282, spanZ 7105, 17 rooms, 41 mobs, 3150 cells, 37s`.
+
+#### And the walker still cannot be pointed at a delve floor — the obvious fix was built and fails its control
+
+The closure below records this as an open limit. It was attempted this run, and the attempt is
+recorded **as a rejection, not as a result**, so the next run does not spend a session rediscovering
+it. Teaching `level.probe.js` about walls (strike non-`stand` walls out of the height field, forbid
+an edge whose line crosses one, treat non-`plat` obstacles as solid — `resolveObstacles` at
+index.html:13471 passes no `climbMax`, so for the player every obstacle above their feet is an eject
+rather than a step) does get a body through a maze. But only together with a nearest-cost search,
+and that search fails the campaign control:
+
+| planner | The Outskirts (control) | delve floor 1 |
+|---|---|---|
+| stock scan-order BFS | **ok — 2046 ticks / 34.1s**, 118 jumps, 29 dashes, 0 replans | **fails**, 899 units short |
+| nearest-cost (Dijkstra) | **fails** — stuck at y=240 on a prop, 544 units short | walks |
+
+**There is currently no single configuration that both walks a delve floor and still walks the level
+the walker was proven on.** The cost-search failure is the identical one `level.probe.js`'s own
+`OFF` comment already records from when the same idea was tried there — *"stuck-on-a-rock failure
+552 units short"* against this run's 544, two independent runs eight units apart on the same bug.
+
+So a delve tick-count taken from the cost search, compared against a control taken from BFS, is a
+comparison across two instruments — the exact thing this file's ruler was praised above for
+avoiding. **Walked ticks for delve floors remain unavailable**, the distance probe remains the only
+instrument that measures both sides with one ruler, and `test-levels.js`'s rule applies: recorded
+`unproven`, never as a failure. The stock walker's own failure was watched first, as the rule here
+requires — delve:1, 15 re-plans, stalled at (294,156), 1186 units short.
+
+---
+
 - [x] **Step 1: Measure what a floor currently costs** — done 2026-08-12, and it triggers this
       task's own skip branch. Committed as `harness/probes/delve-size.probe.js` so the next run
       reads numbers rather than re-deriving them, and it doubles as the campaign control.
+      **Re-measured 2026-08-13: the distances hold, the seconds were ~1.9x too long, and the floors
+      are 7-17s rather than 12-30s. The skip is unchanged. See the two sections above.**
 
 **THE LEVEL WALKER CANNOT BE POINTED AT A DELVE FLOOR, and that is a limit of the navigator rather
 than a fact about the mode — worth recording because the step as written asks for it by name.**
@@ -246,15 +358,27 @@ could not follow. That is a false negative about a level a player finishes, whic
   Outskirts** — the delve hands out a fresh level-1 body with a starter weapon, so it walks at half
   the campaign hero's pace. Any comparison made in UNITS rather than seconds would have been wrong
   by a factor of two in the direction that makes the delve look short.
+  > **THIS PARAGRAPH IS WRONG AND WAS CORRECTED 2026-08-13 — see "The seconds were divided by a
+  > wall" above.** The diagnosis (a walled nook defeats an average) was right; the cure was not.
+  > A fastest single tick is not a speed either — it counts collision ejections, which is how The
+  > Outskirts returns a "top speed" of 40.12 on `+z` — and driving ±z in a nook walled on ±z
+  > measures the wall in both directions. The delve body sustains **3.12** against the campaign's
+  > **3.13**: the same speed, not half of it. The factor-of-two warning is real but points the
+  > other way — the SECONDS were inflated ~1.9x, and the floors are shorter than this closure says.
 
 - [x] **Step 2: Shorten the floor** — **REFUSED, measured.** The floors are already a third of a
       campaign area, and the width is a stated design decision from `3ab7556`. See above.
 - [x] **Step 3: Prove every floor still completes** — nothing was changed, so there is nothing to
       re-prove. The floors' own completability is unmeasured for a different reason (the walker
       cannot route a maze), which is recorded above rather than glossed and is the real next piece
-      of work in this area.
+      of work in this area. **Attempted 2026-08-13 and it does not yet exist:** a wall-aware walker
+      walks delve floors but fails the campaign control, and the variant that passes the control
+      fails the delve. Numbers and the rejected design are above, so the next run inherits the
+      dead end rather than re-walking it. Still `unproven`, still not a failure.
 - [x] **Step 4: Commit** — the probe, the `--scene delve:<floor>` destination it needed, and this
-      closure. No behaviour change.
+      closure. No behaviour change. **2026-08-13: a second commit fixes the probe's speed
+      measurement and the mob-restore bug it exposed, and records the walker dead end. Still no
+      behaviour change — `public/3d/index.html` is untouched by both.**
 
 <details>
 <summary>The task as originally written</summary>

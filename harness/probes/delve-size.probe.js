@@ -11,6 +11,20 @@
    one, the takeoff cell is struck off, and after fourteen re-plans the floor is reported as one
    the body could not follow. That is a limit of the navigator and not a fact about the level —
    the same distinction test-levels.js makes when it routes a failed walk to `unproven`.
+   Reproduced 2026-08-13: stock probe on delve:1 stalls at (294,156), 15 re-plans, 1186 short.
+
+   AND THE OBVIOUS FIX HAS BEEN TRIED AND DOES NOT HOLD ITS CONTROL — recorded here so the next
+   run does not spend a session rediscovering it. Teaching the planner about walls (strike non-
+   `stand` walls out of the height field, forbid an edge whose line crosses one, treat non-`plat`
+   obstacles as solid since index.html:13471 calls resolveObstacles with no climbMax) does get a
+   body through a maze, but only together with a nearest-cost search; and that search FAILS THE
+   CAMPAIGN CONTROL, stopping on The Outskirts 544 units short, stuck at y=240 on top of a prop.
+   That is the identical failure level.probe.js's own OFF comment already records from when the
+   same idea was tried there ("552 units short"). Keep the stock scan-order BFS and the delve floor
+   fails instead (899 short). So there is currently NO single configuration that both walks a delve
+   floor and still walks the level the walker was proven on, and a delve tick-count taken from the
+   cost search while the control is taken from BFS is a comparison across two instruments — which
+   is exactly the thing the note at the bottom of this file exists to forbid.
 
    So this measures DISTANCE rather than time, over the same walkable surface the walker plans on,
    with the walls subtracted. Two things follow, and both are stated rather than glossed:
@@ -22,8 +36,11 @@
        94-unit step-up limit the level walker uses, so a route may cross a low platform a player
        would walk around. That errs short too.
      - it converts to seconds with a speed MEASURED IN THE SAME LAUNCH rather than a constant read
-       off the source, because the delve hands you a fresh level-1 body with a starter weapon and
-       the speed that body actually reaches is the only one that matters here.
+       off the source. That was originally justified by the delve handing out a fresh level-1 body
+       with a starter weapon, on the assumption such a body is slower. Measured, it is not: the
+       delve body sustains 3.12 units/tick against the campaign hero's 3.13. The measurement is
+       kept anyway — a measured constant that agrees with the campaign is worth more than an
+       assumed one that does not, and it is what caught the error. See the speed block below.
 
    Reported per floor so the plan's question can be answered at the depth a player reaches rather
    than only at floor 1: the maze grid GROWS with depth on purpose (index.html:7346-7352, GX 6->9,
@@ -39,22 +56,78 @@
   /* `far` is the one camera mode whose steering is world-space — level.probe.js sets it for the
      same reason. */
   B.meta.camMode = 'far';
-  /* THE BAR IS THE FASTEST TICK, NOT THE AVERAGE ONE, and the first two versions of this probe
-     both reported a speed of exactly 0 for the same reason: the delve's entry room is WALLED, so
-     a body driven in one direction for two seconds is pinned against a wall long before the
-     window closes, and an average over the second half of it is an average of zeroes. A maximum
-     cannot be dragged down by the ticks after the crash, and the acceleration ramp only means the
-     early ticks do not win it. Driven both ways so a body that starts against the north wall gets
-     a clear run south. */
-  let best = 0, px = P.x, pz = P.z;
-  for(let t = 0; t < 90; t++){
-    IN.jx = 0; IN.jz = t < 45 ? -1 : 1;
-    B.update(1/60);
-    const d = Math.hypot(P.x-px, P.z-pz); if(d > best) best = d;
-    px = P.x; pz = P.z;
-  }
-  IN.jx = 0; IN.jz = 0;
-  const speed = best;                                 // world units per tick, at the top of the ramp
+
+  /* THE BAR IS THE BEST SUSTAINED RATE, AND THE TWO METRICS THIS REPLACES WERE BOTH WRONG.
+     Watched failing, 2026-08-13, before this was rewritten:
+
+       - AN AVERAGE OVER THE WINDOW reads 0. The delve's entry nook is walled, so a body driven in
+         one direction for two seconds is pinned long before the window closes. That is why this
+         probe originally moved to a maximum.
+       - THE FASTEST SINGLE TICK IS NOT LOCOMOTION EITHER, which is what the maximum missed. A
+         collision ejection moves the body a long way in one tick and cannot be told from running
+         by a one-tick metric. Two measurements make that concrete: driven -x on delve:1 the body
+         records a fastest tick of 1.11 while its NET displacement over the whole 90 ticks is 2
+         UNITS — it never travelled, it was pushed out of a box and pushed back — and on The
+         Outskirts, driving +z returns a fastest tick of 40.12 against a real running speed of
+         3.13. A "top speed" of forty units a tick is a fall, not a stride.
+       - AND ±z ALONE DECIDES THE ANSWER IN THE DELVE. The entry nook is walled on both z faces:
+         +z and -z each move the body 0 units, while +x moves it 187. The direction was doing the
+         measuring.
+
+     So: drive all FOUR directions, and score each on the largest displacement across any 30-tick
+     window. An ejection spike cannot carry thirty ticks; running can. The delve floor is reloaded
+     between directions rather than the body teleported — writing P.x/P.z can wedge it inside a
+     wall box and pin every later run at zero, which is how an earlier version of this diagnostic
+     lied to itself.
+
+     THE NUMBER THIS CHANGES, AND IT IS THE ONE THE PLAN QUOTED: the delve read 1.62 against the
+     campaign's 3.13, and Task 2's closure drew a conclusion from it ("the delve hands out a fresh
+     level-1 body, so it walks at half the campaign hero's pace"). Measured this way the delve
+     body sustains 3.12 and the campaign hero 3.13. They are the SAME BODY SPEED, the halving was
+     the walled nook, and every delve `sec` below was inflated ~1.9x by it. The campaign control is
+     unmoved (all four directions agree there at 3.13), which is what makes this a fix to the ruler
+     rather than a new ruler.
+
+     IN THE DELVE THIS IS A LOWER BOUND ON SPEED, HENCE AN UPPER BOUND ON `sec`, and the bound is
+     the maze rather than the body: a 30-tick window only fills if the seed gave the nook a long
+     enough clear run to hold top speed for half a second. Three launches read 3.13, 2.83 and (with
+     the mobs left in) 2.79 — the ceiling is the campaign's own 3.13 and the shortfalls are
+     corridors, not legs. The campaign control never moves off 3.13 because it is measured in the
+     open. Erring toward "slower, therefore longer" is the safe direction for the question this
+     probe exists to answer, so it is left alone rather than tuned to the answer. */
+  const isDelve0 = !!G0.delve, floor0 = G0.floor;
+  const DIRS = [[1,0], [-1,0], [0,1], [0,-1]];
+  let speed = 0;
+  for(const [ax, az] of DIRS){
+    if(isDelve0) B.loadDelveFloor(floor0);            // fresh floor, never a teleport
+    const Gs = B.G, P2 = Gs.p;
+    /* THE MOBS COME OUT FOR THE SPEED RUN, because the route this converts is traversal-only and a
+       speed measured while something is body-blocking you is not the same quantity. Measured on
+       delve:1: with the floor's own 16-44 enemies alive the best sustained rate read 2.79; with
+       them out, 3.13 and 2.83 on two seeds, and a standalone diagnostic that also empties them
+       read 3.12. How much a live mob costs you depends on where that launch happened to spawn it,
+       which is a property of the seed and not of the floor's size. The campaign branch puts them
+       back immediately, because the row it reports counts them. */
+    const held = (Gs.enemies || []).splice(0);
+    const xs = [P2.x], zs = [P2.z];
+    for(let t = 0; t < 90; t++){
+      IN.jx = ax; IN.jz = az;
+      B.update(1/60);
+      xs.push(P2.x); zs.push(P2.z);
+    }
+    IN.jx = 0; IN.jz = 0;
+    for(let k = 0; k + 30 < xs.length; k++){
+      const r = Math.hypot(xs[k+30]-xs[k], zs[k+30]-zs[k]) / 30;
+      if(r > speed) speed = r;
+    }
+    /* The delve rebuilds its population on the next loadDelveFloor, so only the campaign row needs
+       its level handed back — and it is handed back EXACTLY, not appended to. The dens keep
+       spawning into the emptied array while the body drives (index.html:12330 tops a den's mob up
+       every 2s), so a plain push-back returns the originals PLUS everything that arrived while
+       they were gone: the control's mob count read 41 before this block existed and 50 after, a
+       fake +9 on the one row that exists to be compared against. */
+    if(!isDelve0){ Gs.enemies.length = 0; Array.prototype.push.apply(Gs.enemies, held); }
+  }                                                   // world units per tick, sustained
 
   /* ---- the walkable surface, with the walls taken out --------------------------------------
      STEP 60 is the level walker's own grid pitch, so the two agree about what a step is. A maze

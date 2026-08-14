@@ -125,8 +125,10 @@ Keep improving BLADEFALL by working through the backlog below — **on the revie
     came back a correctly-lit photograph of a PAGE OF TEXT** with `ready ✓`, the right `at →` line
     and world3d built — the same complete-plausible-wrong picture as ever, from a new direction.
     The ready test now also requires the card to be gone. Used immediately to settle the delve
-    plan's Task 2 (a floor is 12–30s of walking against a campaign area's 37, measured by
-    `harness/probes/delve-size.probe.js`), and the first clean frame shows a conversion gap nobody
+    plan's Task 2 (a floor is 7–17s of walking against a campaign area's 37, measured by
+    `harness/probes/delve-size.probe.js` — read 12–30s until 2026-08-13, when the probe's speed
+    constant turned out to be measuring the entry nook's wall rather than the body; the skip
+    verdict was never in doubt either way), and the first clean frame shows a conversion gap nobody
     could have found before there was a way to look: the maze FLOOR is 3D cobble and its WALLS are
     untextured flat boxes.
     **`--scene spar` photographs the hub's SPARRING ROOM** (added 2026-08-02, worker B) — the last

@@ -12305,9 +12305,17 @@ const MP={
     this.pvp=!!pvp;
     this.code=this.rndCode(); this.isHost=true; this.myId='h';
     this.peer=new Peer(this.ROOMPFX+this.code,{debug:0,config:await this.ensureIce()});
-    this.peer.on('open',()=>{ this.active=true; cb&&cb(true,this.code); });
+    /* The same deadline join() carries, for the same reason. WATCHED to fail: when the broker takes
+       the socket and never fires 'open', host() had no way to say so — the callback never ran,
+       active stayed false, and the lobby sat on "Connecting… 24s" forever with no error and no
+       retry. One press of Host and the game is over for that player. The lobby already knows what
+       to do with a failure (it prints "Could not host (timeout). Try again."), so all that was
+       missing was something to tell it. */
+    let settled=false; const fail=info=>{ if(settled||this.active)return; settled=true; try{this.peer.destroy();}catch(e){} cb&&cb(false,info); };
+    const giveUp=setTimeout(()=>fail('timeout'),22000);   // host-side giveUp — same 22s as join()
+    this.peer.on('open',()=>{ if(settled)return; settled=true; clearTimeout(giveUp); this.active=true; cb&&cb(true,this.code); });
     this.peer.on('connection',c=>this.wireGuest(c));
-    this.peer.on('error',e=>{ if(!this.active) cb&&cb(false,e.type); }); },
+    this.peer.on('error',e=>{ clearTimeout(giveUp); fail((e&&e.type)||'error'); }); },
   wireGuest(c){ c.on('open',()=>{ this.conns.push(c);
     { const pm=this.placeMsg(); if(pm) try{c.send(pm);}catch(e){} }
     c.on('data',d=>{

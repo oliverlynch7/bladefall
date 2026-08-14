@@ -71,9 +71,14 @@ const MP_STATE = `(function(){ var M=window.__BF3&&__BF3.MP; if(!M) return {noMP
     mode:__BF3.mode, hub:!!(G&&G.hub), runSeed:(G&&G.runSeed)||null,
     hp:(G&&G.p)?Math.round(G.p.hp):null }; })()`;
 
-/* MP.host() takes a CALLBACK and — unlike join(), which carries a 22s giveUp at :12296 — it has NO
-   TIMEOUT OF ITS OWN. If the broker accepts the socket but never fires 'open', the callback is
-   never called, MP.active never flips, and nothing anywhere says so. The deadline has to live here.
+/* MP.host() takes a CALLBACK. It used to have NO timeout of its own — if the broker accepted the
+   socket and never fired 'open', the callback was never called, MP.active never flipped, and
+   nothing anywhere said so; this wrapper's deadline was the only thing that noticed. It now
+   carries the same 22s giveUp join() has (index.html:12315), watched against a broker that
+   completes the WS handshake and then sends nothing: pre-fix = no callback in 32s, fixed =
+   cb(false,'timeout') at 22006ms. Keep this deadline anyway, and keep it LONGER than 22s: it is
+   what catches a stall in front of the game's own timer (the awaited ensureIce, which has been
+   measured at 75s under this harness's load, is armed before it).
    Resolves with a failure object, never rejects: a Promise that never settles hangs the CDP call
    until its 180s timeout, which reads as "the harness broke" rather than "hosting failed". */
 const hostJs = (pvp, ms) => `new Promise(function(res){
@@ -167,14 +172,20 @@ export async function hostAndJoin(pair, opts = {}) {
         + 'nothing here says the multiplayer code is broken.'
       : host.info === 'host-timeout'
         ? 'MP.host() never called its callback within ' + hostMs + 'ms, on ' + attempts.length
-          + ' attempts. MP.host has no timeout of its own (index.html:12260-12267 — only join() has '
-          + 'one, at :12296), so this is the only place that can notice. Check peerObj/peerId in the '
-          + 'state below: peerObj false = ensureIce hung; peerObj true with peerId null = the PeerJS '
-          + 'broker socket never opened and never errored.'
+          + ' attempts. host() carries its own 22s giveUp (index.html:12315), so a plain unanswered '
+          + 'broker reports as info:"timeout" — outrunning THAT means the stall is in front of the '
+          + 'timer, i.e. in the awaited loadLib()/ensureIce(). Check peerObj in the state below: '
+          + 'peerObj false = it never got as far as constructing the Peer, so ensureIce hung. '
+          + '(peerId is NOT a broker signal for a host: PeerJS fills it in from the id host() '
+          + 'supplies — measured populated against a broker that had answered nothing at all.)'
         : 'MP.host() reported failure: ' + host.info;
     throw new Fail('1-host', why, { host, attempts, ice, state: await snap(), network: host.info === 'no internet' });
   }
-  /* NOT `MP.code` — set at :12263, before the broker is contacted. peer.id is the broker's answer. */
+  /* MP.active is the load-bearing clause here, and it is the ONLY one that means the broker spoke:
+     it is now set only inside peer.on('open') (index.html:12316). The peer.id comparison is a
+     consistency check, NOT proof of a live room — measured 2026-08-13 against a silent broker, a
+     host's peer.id already read `bladefall-mp-6ATC` while nothing had answered, because PeerJS
+     echoes back the id host() passed it. Do not weaken this gate to peer.id alone. */
   const hostUp = await pair.waitA(
     '!!(__BF3.MP.active && __BF3.MP.isHost && __BF3.MP.peer && __BF3.MP.peer.id === __BF3.MP.ROOMPFX + __BF3.MP.code)',
     { timeoutMs: gateMs });

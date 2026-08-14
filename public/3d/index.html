@@ -12368,7 +12368,15 @@ const MP={
     else if(d.t==='zone'){ this.seed=d.seed; if(d.rseed!=null) this.rseed=d.rseed; this.pvp=!!d.pvp;
       if(d.zone===this.HUB){ this.zone=this.HUB; if(!(G&&G.hub)){ try{ openHub(); }catch(e){} } }   // follow the host into the shared Waystation
       else { this.zone=d.zone;
-        const entering=!(mode==='play'&&G&&G.zone===d.zone);
+        /* `!G.hub` is not defensive - without it a guest NEVER follows the host into zone 0, which
+           is the zone every party walks through first (startRun is enterZone(0)).
+           The Waystation is built as newG(p,{hub:true,zone:0,...}) and runs at mode==='play', so a
+           guest standing in the hub already satisfies `play && G.zone===0`. Host enters zone 0,
+           broadcasts {zone:0}, guest computes entering=false and does nothing - while MP.zone is set
+           to 0, so both clients report a healthy agreeing session with the guest in a different
+           level. The area-rebuild branch below cannot save it either, since area 0 === area 0.
+           The line directly above already distinguishes the hub this exact way. */
+        const entering=!(mode==='play'&&G&&!G.hub&&G.zone===d.zone);
         if(entering){ try{ enterZone(d.zone); }catch(e){} }
         // A zone contains several authored districts plus area -1 (its boss arena). Older
         // packets carried only the zone, so a guest already inside that zone never rebuilt

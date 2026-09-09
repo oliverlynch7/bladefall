@@ -1,3 +1,4 @@
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -1757,6 +1758,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsOutskirts(world) && outskirtsReady()){ clearWorld(scene); const art=buildOutskirts(scene,world); group=art.group; scene.add(group); WORLD3D.counts=art.counts; WORLD3D.ready=true; return art.counts; }
   /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
 
      The Waystation is hand-authored: a 228-line drawWaystation() plus 157 deco boxes, and its
@@ -1952,6 +1954,8 @@ export function clearWorld(scene){
   if(scene) scene.traverse(o => {
     if(o.isLight && o.userData._w3dOrig != null){ o.intensity = o.userData._w3dOrig; }
   });
+  if(group?.userData.dispose) group.userData.dispose();
+  window.__OUTSKIRTS_ACTIVE=false;
   if(group && group.parent) group.parent.remove(group);
   if(group){
     group.traverse(o => { if(o.isInstancedMesh){ o.dispose && o.dispose(); } });
@@ -1979,11 +1983,13 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built) return true;
+  if(sig === WORLD3D.built){ updateOutskirts(world); return true; }
+  const custom=wantsOutskirts(world);
+  if(custom && !outskirtsReady()){loadOutskirts();return false;}
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!_propsReady){
+  if(!custom && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -1992,6 +1998,7 @@ export function syncWorld(scene){
     clearMobs();          // a new level must not inherit the previous zone's pooled creatures
     clearProps();         // ...nor its chests
     WORLD3D.built = sig;
+    updateOutskirts(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

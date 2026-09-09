@@ -1,5 +1,12 @@
 # BLADEFALL — Master Update Roadmap
 
+## [Codex | 2026-09-08] Outskirts authored-art pass (SHIPPED v1.958.0)
+
+- [x] Applied the approved Waystation-icon visual direction throughout the Outskirts campaign, Black Woods, Thornwood, and the Brute arena using an original 85 KB Blender mesh kit for ochre paving, weathered masonry, timber structures, crops, bare trees, lanterns, and rubble.
+- [x] Preserved the authored routes and collision data, including the required dash chasm; seeded comparison hashes match the original renderer in all four areas.
+- [x] Kept the browser build practical with instanced spatial chunks, camera-distance culling, cached shadows, an automatic lower-cost quality path, and a voxel fallback when the kit cannot load.
+- [x] Verified all eleven named Outskirts districts plus Black Woods, Thornwood, and the Brute arena in a muted real-browser build; the Waystation restores its original lighting and renderer state after returning from the zone.
+
 ## [Codex | 2026-07-18] Waystation destination art + prominent navigation cards (SHIPPED v1.122.0)
 
 - [x] Integrated all 15 approved Waystation destination designs: eight main-route gates and seven side zones, with the corrected two-icon sheet used exclusively for The Outskirts and Hollow Pass.

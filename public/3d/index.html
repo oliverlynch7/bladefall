@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.959.0-waystation-lantern-court';
+const VERSION3D='1.960.0-hollow-wind-carved';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17157,8 +17157,10 @@ function drawShadow(x,z,r,alpha){ shadowEps=(shadowEps+1)%16; const y=1.45+shado
   popM(); }
 function drawCourse(s,t){
   const outskirtsArt=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
+  const hollowArt=!!window.__HOLLOW_ART_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   if(outskirtsArt)s={...s,ground:G.area===1||G.side?'#454638':'#675a43'};
-  const hz=outskirtsArt?(G.area===1||G.side?['#18261d','#425333']:['#252721','#4c5137']):hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
+  if(hollowArt)s={...s,ground:'#4e5b51'};
+  const hz=hollowArt?['#182f2e','#44746e']:outskirtsArt?(G.area===1||G.side?['#18261d','#425333']:['#252721','#4c5137']):hazardCols(s.theme), L=Math.abs(G.progressEnd||1600)+520;
   /* Is world3d laying real ground tiles this frame? Checked once, not per segment. */
   const _w3dGround = (() => { const w = window.__world3d && window.__world3d();
     return !!(three3DLive() && w && w.on && w.ready && w.counts && w.counts.floorTiles > 0); })();
@@ -17427,6 +17429,7 @@ function drawCourse(s,t){
        should have followed when adding these. */
     if(ob.autoCol) continue;
     if(_w3dOn && window.__outskirtsObstacleDrawn?.(ob)) continue;
+    if(_w3dOn && window.__hollowObstacleDrawn?.(ob)) continue;
     /* DERIVED COLLIDERS ARE INVISIBLE. E1 gives every solid prop a collision box sized to it - and
        obstacles are DRAWN, so every tree, rock and tuft of grass sprouted a beige box around it.
        The collision was the point; the box was never meant to be seen. This is the same skip the
@@ -19189,11 +19192,12 @@ function render(t){
   const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
   const artSky=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
   const hubArtSky=G?.hubArt&&window.__HUB_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
-  const sky=hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const hollowArtSky=window.__HOLLOW_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
+  const sky=hollowArtSky?[.149,.243,.235]:hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=hollowArtSky?{z:.48,p:[.72,.22],c:[.025,.075,.065]}:(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -20350,10 +20354,10 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1959"></script>
+<script type="module" src="./hero3d.js?v=1960"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->
 <script type="module" src="./editor_mode.js"></script>
-<script src="./visual-qa.js?v=1959"></script></body>
+<script src="./visual-qa.js?v=1960"></script></body>
 </html>

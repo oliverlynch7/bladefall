@@ -21,7 +21,7 @@
 import * as THREE from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=1959';
+import { WORLD3D, syncWorld } from './world3d.js?v=1960';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js';
 import { PROP3D, syncProps } from './prop3d.js';
 
@@ -1773,10 +1773,11 @@ export function drawHero3D(p, t){
        the game's next frame renders with Three's leftover state and the world breaks. */
     renderer.resetState();
     clearDivisors(window.__BF_GL);
-    renderer.shadowMap.enabled=!!(window.__OUTSKIRTS_ACTIVE||window.__HUB_ART_ACTIVE) && WORLD3D.on && window.__BF_META?.().quality!=='low';
+    renderer.shadowMap.enabled=!!(window.__OUTSKIRTS_ACTIVE||window.__HUB_ART_ACTIVE||window.__HOLLOW_ART_ACTIVE) && WORLD3D.on && window.__BF_META?.().quality!=='low';
     renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     renderer.shadowMap.autoUpdate=false;
     if(window.__OUTSKIRTS_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__OUTSKIRTS_SHADOW_DIRTY=false;}
+    if(window.__HOLLOW_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HOLLOW_SHADOW_DIRTY=false;}
     if(window.__HUB_SHADOW_DIRTY){renderer.shadowMap.needsUpdate=true;window.__HUB_SHADOW_DIRTY=false;}
     renderer.render(scene, cam);
     window.__BF_RENDER_STATS={shadows:renderer.shadowMap.enabled,triangles:renderer.info.render.triangles,calls:renderer.info.render.calls,geometries:renderer.info.memory.geometries};

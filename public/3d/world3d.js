@@ -1,4 +1,5 @@
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -1758,6 +1759,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsHubArt(world) && hubArtReady()){clearWorld(scene);const art=buildHubArt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsOutskirts(world) && outskirtsReady()){ clearWorld(scene); const art=buildOutskirts(scene,world); group=art.group; scene.add(group); WORLD3D.counts=art.counts; WORLD3D.ready=true; return art.counts; }
   /* THE HUB KEEPS ITS VOXEL ART, for now, and this is a deliberate call rather than a gap.
 
@@ -1968,6 +1970,7 @@ export function clearWorld(scene){
    array by reference is not enough — the generators mutate G.deco in place (there is a filter
    that strips deco near the player), so the same array object can hold a different level. */
 function signature(world){
+  if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
   if(!d.length) return 'empty';
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];
@@ -1983,13 +1986,15 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateOutskirts(world); return true; }
+  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000); return true; }
+  const customHub=wantsHubArt(world);
+  if(customHub&&!hubArtReady()){loadHubArt();return false;}
   const custom=wantsOutskirts(world);
   if(custom && !outskirtsReady()){loadOutskirts();return false;}
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!custom && !_propsReady){
+  if(!custom && !customHub && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -1999,6 +2004,7 @@ export function syncWorld(scene){
     clearProps();         // ...nor its chests
     WORLD3D.built = sig;
     updateOutskirts(world);
+    updateHubArt(world,performance.now()/1000);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

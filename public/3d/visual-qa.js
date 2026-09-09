@@ -9,7 +9,24 @@ function visit(area,side=false){const api=b();api.meta.classId='warrior';api.ent
 for(const [name,area,side] of [['Outskirts',0,false],['Black Woods',1,false],['Brute',-1,false],['Thornwood',1,true]]){const bt=document.createElement('button');bt.textContent=name;bt.onclick=()=>visit(area,side);document.querySelector('#qa-buttons').append(bt)}
 document.querySelector('#qa-look').onclick=()=>{const r=b().G.rooms[+document.querySelector('#qa-room').value];b().look(r.x,r.z+(r.d||400)*.25,Math.PI,.16);const g=b().G;g.cam.x=g.p.x;g.cam.z=g.p.z;g.cam.y=g.p.y;g.camYaw=Math.PI;g.camPitch=.16;report()};
 document.querySelector('#qa-report').onclick=report;
-document.querySelector('#qa-hub').onclick=()=>{b().enterHub();report();};
+document.querySelector('#qa-hub').onclick=()=>{const api=b();api.loadMode('rl');if(!Object.keys(api.meta.classUnlocked||{}).length){api.startTrial('warrior');api.skipTrial();}else api.enterHub();if(api.G)report();};
 document.querySelector('#qa-quality').onclick=()=>{b().meta.quality=b().meta.quality==='low'?'high':'low';window.dispatchEvent(new Event('resize'));report();};
 document.querySelector('#qa-overhead').onclick=()=>{b().meta.camMode=b().meta.camMode==='far'?'shoulder':'far';report()};
+const hubControls=document.createElement('div');hubControls.innerHTML='<button id="qa-hub-check">Check hub paths</button><select id="qa-station"></select><button id="qa-approach">Approach station</button><button id="qa-use">Use station</button>';panel.append(hubControls);
+function hubAudit(){
+  const g=b().G;if(!g.hubArt)return {error:'Enter the new Waystation first'};
+  const bounds=g.bounds,step=20,radius=14;
+  const blocked=(x,z)=>(g.walls||[]).some(o=>Math.abs(x-o.x)<o.w/2+radius&&Math.abs(z-o.z)<o.d/2+radius);
+  const key=(x,z)=>Math.round(x/step)+','+Math.round(z/step),queue=[[g.startPos.x,g.startPos.z]],seen=new Set([key(...queue[0])]);
+  for(let i=0;i<queue.length;i++)for(const [dx,dz] of [[step,0],[-step,0],[0,step],[0,-step]]){const x=queue[i][0]+dx,z=queue[i][1]+dz,k=key(x,z);
+    if(x<bounds.minX+radius||x>bounds.maxX-radius||z<bounds.minZ+radius||z>bounds.maxZ-radius||seen.has(k)||blocked(x,z))continue;
+    seen.add(k);queue.push([x,z]);
+  }
+  return {version:b().snap().version,reachableFloorCells:seen.size,world:window.__world3d?.(),render:window.__BF_RENDER_STATS,
+    approaches:g.hubArt.approaches.map(a=>({...a,clear:!blocked(a.x,a.z),withinInteractionRadius:Math.hypot(a.x-a.tx,a.z-a.tz)<(a.id==='waystone'?72:a.id==='tinkerer'?70:a.id.startsWith('gate-')||a.id.startsWith('side-')?96:110),reachable:seen.has(key(a.x,a.z))})),
+    services:g.hubNpcs.map(n=>({id:n.id,x:n.x,z:n.z})),gates:g.gates.map(g=>({zi:g.zi,side:g.side,x:g.x,z:g.z,open:g.open}))};
+}
+document.querySelector('#qa-hub-check').onclick=()=>{const g=b().G;document.querySelector('#qa-station').innerHTML=(g.hubArt?.approaches||[]).map((a,i)=>`<option value="${i}">${a.id}</option>`).join('');document.querySelector('#qa-data').textContent=JSON.stringify(hubAudit(),null,2)};
+document.querySelector('#qa-approach').onclick=()=>{const api=b(),g=api.G,a=g.hubArt.approaches[+document.querySelector('#qa-station').value];const yaw=Math.atan2(a.tx-a.x,a.tz-a.z);api.look(a.x,a.z,yaw,.16);g.cam.x=g.p.x;g.cam.z=g.p.z;g.cam.y=g.p.y;g.camYaw=yaw;g.camPitch=.16;document.querySelector('#qa-data').textContent=JSON.stringify({approach:a,position:{x:g.p.x,y:g.p.y,z:g.p.z},interaction:g.interact?.label,world:window.__world3d?.(),render:window.__BF_RENDER_STATS},null,2)};
+document.querySelector('#qa-use').onclick=()=>{b().G.interact?.act?.();};
 }

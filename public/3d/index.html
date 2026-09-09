@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.958.0-outskirts-art';
+const VERSION3D='1.959.0-waystation-lantern-court';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -3075,7 +3075,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {hubArt:G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -15243,6 +15243,46 @@ function rebuildWaystationCitadel(){
   G.startPos={x:0,z:500,y:0}; G.lastSafe={x:0,z:500,y:0}; G.goalPos={x:0,z:-520};
   G.p.x=0; G.p.z=500;
 }
+function rebuildWaystationSanctum(){
+  if(new URLSearchParams(location.search).get('hubart')==='0')return;
+  G.hubLayout='lantern-court-v1';
+  // Only the old perimeter survives. Kit buildings, pavilion columns and free-pack props go.
+  G.walls=G.walls.filter(o=>o.h===220);G.obstacles=[];
+  G.deco=[{x:0,z:120,w:1840,d:1540,h:1,y0:-4,c:'#82765e',kind:'hubArt'}];
+  G.hubArt={version:1,lamps:[],sideIcons:ZONES.map(Z=>Z.side?.id||'thornwood')};
+  const solid=(x,z,w,d,h,id)=>G.walls.push({x,z,w,d,h,invisible:true,hubFixture:id});
+  solid(0,30,76,76,75,'waystone');
+  for(const g of G.gates){const scale=g.side?10:34,z=g.z-(g.side?12:34);
+    for(const s of [-1,1])solid(g.x+s*1.5*scale,z,.7*scale,.8*scale,5*scale,'gate-'+g.zi);
+  }
+  for(const n of G.hubNpcs){
+    const ry=n.district==='undercroft'?Math.PI:n.id==='sparring'?0:-(n.x<0?-1:1)*Math.PI/2;
+    const box=(x,z,w,d,h)=>{const a=Math.cos(ry),b=Math.sin(ry);solid(n.x+a*x+b*z,n.z-b*x+a*z,Math.abs(a)*w+Math.abs(b)*d,Math.abs(b)*w+Math.abs(a)*d,h,n.id)};
+    if(n.id==='arcade'){box(0,0,45,36,86);continue;}
+    if(n.district==='undercroft'||n.id==='sparring'){
+      const sc=n.id==='sparring'?22:25;for(const s of [-1,1])box(s*1.5*sc,n.id==='sparring'?-17:-20,.7*sc,.8*sc,5*sc);
+      continue;
+    }
+    box(0,-59,108,11,96);for(const s of [-1,1])box(s*53,-40,7,7,125);
+    if(n.id==='quartermaster'||n.id==='drillmaster')box(0,16,84,24,35);
+    else if(n.id==='mirror')box(0,-6,46,12,88);
+    else if(n.id==='chest')box(0,0,44,26,26);
+    else if(n.id==='anvil'){box(0,6,51,24,39);box(-29,-28,35,28,39);}
+    else if(n.id==='board')box(0,-8,32,8,65);
+    else if(n.id==='keeper')box(28,0,28,28,49);
+    else if(n.id==='beastkeeper')for(const s of [-1,1])box(s*36,0,27,30,27);
+  }
+  for(const x of [-230,230])for(const z of [-300,260,560])G.hubArt.lamps.push({x,z});
+  for(const x of [-765,765])for(const z of [-440,140,480])G.hubArt.lamps.push({x,z});
+  for(const p of G.hubArt.lamps)solid(p.x,p.z,12,12,100,'lamp');
+  for(const side of [-1,1])for(const z of [-310,590])solid(side*800,z,126,118,18,'garden');
+  solid(-806,670,40,24,32,'tinkerer');
+  // Captured before any renderer runs: these are testable approach points inside E's radius.
+  G.hubArt.approaches=[{id:'waystone',x:0,z:100,tx:0,tz:30},
+    ...G.gates.map(g=>({id:(g.side?'side-':'gate-')+g.zi,x:g.x,z:g.z+64,tx:g.x,tz:g.z})),
+    ...G.hubNpcs.map(n=>({id:n.id,x:n.x+(n.district==='undercroft'||n.id==='sparring'?0:n.x<0?70:-70),z:n.z+(n.district==='undercroft'?-70:n.id==='sparring'?65:0),tx:n.x,tz:n.z})),
+    {id:'tinkerer',x:-806,z:706,tx:-806,tz:644}];
+}
 function enterWaystation(){
   // SAFETY NET: if we ever reach the hub while still flagged in the Arena (any unexpected exit path),
   // restore the campaign snapshot FIRST so an arena loadout can never leak into the hub/campaign.
@@ -15490,7 +15530,7 @@ function enterWaystation(){
                    bw:b.w,bd:b.d,storeys:b.storeys,style:b.style,ry:b.ry||0});
       G.deco.push({x:b.x,z:b.z,y0:bh,w:fw+12,h:30,d:fd+12,c:b.rc,kind:'building',lead:false});
     } }
-  if(HUB_CITADEL) rebuildWaystationCitadel();
+  if(HUB_CITADEL){rebuildWaystationCitadel();rebuildWaystationSanctum();}
   /* The hub builds outside loadStage, so it never reaches snapWorldInteractables - and the hub is
      exactly where Oliver counted 105 walk-through props. Normalise here too, BEFORE the edits
      replay, so a collider he deleted by hand stays deleted. */
@@ -17998,7 +18038,31 @@ function drawShadeModel(t,zoneId){
     }
   popM();
 }
+function drawLanternCourtEntities(t){
+  deferOn();
+  for(const n of G.hubNpcs){
+    if(['quartermaster','drillmaster','keeper','beastkeeper','anvil'].includes(n.id)){
+      const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0);
+      drawShadow(x,z,12,.24);pushM();mv(x,0,z);rotY(hubNpcFacing(n,x,z));
+      hubNpcModel(n.id==='anvil'?{...n,id:'smith'}:n,t);popM();
+    }
+    if(n.id==='mirror'&&window.__hero3dMirror){
+      try{if(window.__hero3dMirror({x:n.x+4,y:12,z:n.z,yaw:Math.PI-(G.p.yaw||0)}))_poseKeep.push('mirror');}catch(e){}
+    }
+    if(n.id==='beastkeeper')for(const s of [-1,1]){
+      bx(n.x+2,31+Math.sin(t*2+s)*2,n.z+s*35,9,10,12,s<0?'#a1ae76':'#b2a077');
+    }
+    if(n.id==='anvil'){
+      bx(n.x-13,31,n.z-29,3,15,14,'#e6a14d','#ffd584',.75+.12*Math.sin(t*6));
+    }
+  }
+  for(const g of G.gates){
+    if(g.open){const y=g.side?24:52;bx(g.x,y,g.z-9,3,g.side?28:54,2,g.done?'#a0c995':'#dbbe7f',g.done?'#a0c995':'#e2b96b',.55+.15*Math.sin(t*2+g.zi));}
+  }
+  for(let i=0;i<7;i++){const a=t*.18+i*.898;bx(Math.cos(a)*43,50+Math.sin(t+i)*12,30+Math.sin(a)*43,1.4,1.4,1.4,'#f4d59c','#eac17c',.6);}
+}
 function drawWaystation(t){
+  if(G.hubArt&&window.__HUB_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on){drawLanternCourtEntities(t);return;}
   /* THE WAYSTATION'S FURNITURE IS ENTITIES, NOT ARCHITECTURE — and calling the whole function
      "world" was the same wrong test that hid the torches and the stepping stones. The only
      question that ever matters is *does world3d draw a 3D replacement for this*.
@@ -19124,11 +19188,12 @@ function render(t){
   if(mode==='mirror' && mirror){ renderMirror(mirror.t); return; }
   const s=(G&&G.arena&&ARENA_STAGE)?ARENA_STAGE:(G&&G.hub)?HUB_STAGE:STAGES[G?G.stageIndex:0];   // Phase 20: hub wears its own warm palette; the Arena its own map palette
   const artSky=!!window.__OUTSKIRTS_ACTIVE && three3DLive() && !!window.__world3d?.().on;
-  const sky=artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
+  const hubArtSky=G?.hubArt&&window.__HUB_ART_ACTIVE&&three3DLive()&&window.__world3d?.().on;
+  const sky=hubArtSky?[.224,.251,.216]:artSky?(G.area===1||G.side?[.125,.157,.153]:[.188,.176,.161]):s.sky;
   gl.clearColor(sky[0],sky[1],sky[2],1);
   gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   // gradient skybox + sun: horizon = fog/clear colour (seamless), zenith darker, a themed sun glow with faint god-rays
-  if(G){ const sc=artSky?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
+  if(G){ const sc=(artSky||hubArtSky)?{z:.46,p:[.72,.22],c:[.12,.085,.045]}:(SKYSUN[s.theme]||SKYSUN._def);
     const bot=[sky[0],sky[1],sky[2]], top=[sky[0]*sc.z,sky[1]*sc.z,sky[2]*sc.z];
     // STATIC skybox sun: the sun holds one fixed spot in the sky no matter how the camera turns, so the
     // scene's key light and ambience stay consistent (the world-space light direction uL is already fixed).
@@ -20285,10 +20350,10 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=outskirts9"></script>
+<script type="module" src="./hero3d.js?v=1959"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->
 <script type="module" src="./editor_mode.js"></script>
-<script src="./visual-qa.js?v=9"></script></body>
+<script src="./visual-qa.js?v=1959"></script></body>
 </html>

@@ -1,5 +1,6 @@
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1962';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1961';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1960';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1761,6 +1762,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsFrost(world)&&frostReady()){clearWorld(scene);const art=buildFrost(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsKeep(world)&&keepReady()){clearWorld(scene);const art=buildKeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsHollow(world)&&hollowReady()){clearWorld(scene);const art=buildHollow(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsHubArt(world) && hubArtReady()){clearWorld(scene);const art=buildHubArt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1990,7 +1992,9 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world); return true; }
+  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world); return true; }
+  const customFrost=wantsFrost(world);
+  if(customFrost&&!frostReady()){loadFrost();return false;}
   const customKeep=wantsKeep(world);
   if(customKeep&&!keepReady()){loadKeep();return false;}
   const customHollow=wantsHollow(world);
@@ -2002,7 +2006,7 @@ export function syncWorld(scene){
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!custom && !customHub && !customHollow && !customKeep && !_propsReady){
+  if(!custom && !customHub && !customHollow && !customKeep && !customFrost && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -2015,6 +2019,7 @@ export function syncWorld(scene){
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);
     updateKeep(world);
+    updateFrost(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);
@@ -2047,6 +2052,6 @@ window.__world3dArtSnapshot=()=>{
   const result={name:group?.name,meshes:[]};if(!group)return result;group.updateMatrixWorld(true);
   group.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,m=o.material;if(Array.isArray(m))return;
     let texture=null;if(m.map?.image){try{const im=m.map.image,c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);texture=c.toDataURL('image/png')}catch(e){}}
-    result.meshes.push({name:o.name,positions:Array.from(g.attributes.position.array),indices:g.index?Array.from(g.index.array):null,colors:g.attributes.color?Array.from(g.attributes.color.array):null,colorSize:g.attributes.color?.itemSize,uv:g.attributes.uv?Array.from(g.attributes.uv.array):null,texture,opacity:m.opacity,color:m.color?.toArray(),matrix:o.matrixWorld.toArray(),instances:o.isInstancedMesh?Array.from(o.instanceMatrix.array):null,tints:o.instanceColor?Array.from(o.instanceColor.array):null});
+    result.meshes.push({name:o.name,positions:Array.from(g.attributes.position.array),indices:g.index?Array.from(g.index.array):null,colors:g.attributes.color?Array.from(g.attributes.color.array):null,colorSize:g.attributes.color?.itemSize,uv:g.attributes.uv?Array.from(g.attributes.uv.array):null,texture,opacity:m.opacity,color:m.color?.toArray(),matrix:o.matrixWorld.toArray(),instances:o.isInstancedMesh?Array.from(o.userData.artMatrices||o.instanceMatrix.array):null,tints:o.instanceColor?Array.from(o.instanceColor.array):null});
   });return result;
 };

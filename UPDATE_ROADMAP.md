@@ -1574,3 +1574,6 @@ Authored a 55,808-byte Blender basalt kit and spatially instanced renderer for H
 
 ## [Codex | 2026-09-10] Ruined Keep art — 1.961.0
 Original Blender fortress kit: ashlar, ruined towers, an open curtain-wall arch, torn red banners, grilles, braziers and siege crates. Applies to Keep, Undercroft, Oubliette and Fallen boss court; four seeded collision hashes unchanged. Main static scene 160,972 triangles, kit 216,656 bytes; spatial instancing and cached shadows. Local low-quality browser check 60 FPS, shadows disabled; physical mobile performance unmeasured. Actual-scene Blender detail and overview added to /3d/art-previews/.
+
+## [Codex | 2026-09-10]
+Frostfell visual overhaul — v1.962.0-frost-crystal-labyrinth. Icon-inspired faceted ice, snow caps, crystal formations and icicle roofs across Frostfell, Rime Shelf, Frost Sorcerer and Glacier Vault. Instanced 50,300-byte Blender kit; main level 87,744 static triangles with spatial culling and camera cutaways. Existing collision hashes match across all four deterministic layouts. Browser high/low scenes and hub return checked, no runtime errors; local rAF measured 60 Hz (physical phone performance unmeasured). Added actual Blender scene previews and full-maze cutaway to /3d/art-previews/. Preview navigation now clears the death fade it bypasses when teleporting; normal gameplay death handling unchanged.

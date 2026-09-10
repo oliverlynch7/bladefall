@@ -1,5 +1,6 @@
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1961';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1960';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
@@ -1760,6 +1761,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsKeep(world)&&keepReady()){clearWorld(scene);const art=buildKeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsHollow(world)&&hollowReady()){clearWorld(scene);const art=buildHollow(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsHubArt(world) && hubArtReady()){clearWorld(scene);const art=buildHubArt(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsOutskirts(world) && outskirtsReady()){ clearWorld(scene); const art=buildOutskirts(scene,world); group=art.group; scene.add(group); WORLD3D.counts=art.counts; WORLD3D.ready=true; return art.counts; }
@@ -1988,7 +1990,9 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world); return true; }
+  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world); return true; }
+  const customKeep=wantsKeep(world);
+  if(customKeep&&!keepReady()){loadKeep();return false;}
   const customHollow=wantsHollow(world);
   if(customHollow&&!hollowReady()){loadHollow();return false;}
   const customHub=wantsHubArt(world);
@@ -1998,7 +2002,7 @@ export function syncWorld(scene){
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!custom && !customHub && !customHollow && !_propsReady){
+  if(!custom && !customHub && !customHollow && !customKeep && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -2010,6 +2014,7 @@ export function syncWorld(scene){
     updateOutskirts(world);
     updateHubArt(world,performance.now()/1000);
     updateHollow(world);
+    updateKeep(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

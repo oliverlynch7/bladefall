@@ -1571,3 +1571,6 @@ Replaced the hub environment with an authored, instanced Blender kit: warm stone
 
 ## [Codex | 2026-09-09] Hollow Pass art — 1.960.0
 Authored a 55,808-byte Blender basalt kit and spatially instanced renderer for Hollow Pass, Dry Wash, Sunken Wash and Marksman arena. Dark stone, worn caps, cliff seams, sparse thorns and teal wind follow the destination icon. Terrain heights and all four seeded collision hashes match the previous build. Full first-area static geometry: 314,420 triangles, with distance culling; low-quality local browser check 60 FPS, shadows off. All four renderers checked without errors and return to hub verified. No physical-phone performance measurement. Blender scene exports and a responsive full-size screenshot gallery are available at /3d/art-previews/.
+
+## [Codex | 2026-09-10] Ruined Keep art — 1.961.0
+Original Blender fortress kit: ashlar, ruined towers, an open curtain-wall arch, torn red banners, grilles, braziers and siege crates. Applies to Keep, Undercroft, Oubliette and Fallen boss court; four seeded collision hashes unchanged. Main static scene 160,972 triangles, kit 216,656 bytes; spatial instancing and cached shadows. Local low-quality browser check 60 FPS, shadows disabled; physical mobile performance unmeasured. Actual-scene Blender detail and overview added to /3d/art-previews/.

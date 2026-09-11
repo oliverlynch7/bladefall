@@ -1,5 +1,6 @@
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1964';
 import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1962';
 import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1961';
 import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1960';
@@ -1762,6 +1763,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsFrost(world)&&frostReady()){clearWorld(scene);const art=buildFrost(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsKeep(world)&&keepReady()){clearWorld(scene);const art=buildKeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsHollow(world)&&hollowReady()){clearWorld(scene);const art=buildHollow(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1992,7 +1994,9 @@ export function syncWorld(scene){
   try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
   if(!world || !world.deco) return false;
   const sig = signature(world);
-  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world); return true; }
+  if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
+  const customDeep=wantsDeep(world);
+  if(customDeep&&!deepReady(world)){loadDeep(world);return false;}
   const customFrost=wantsFrost(world);
   if(customFrost&&!frostReady()){loadFrost();return false;}
   const customKeep=wantsKeep(world);
@@ -2006,7 +2010,7 @@ export function syncWorld(scene){
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!custom && !customHub && !customHollow && !customKeep && !customFrost && !_propsReady){
+  if(!custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }
@@ -2020,6 +2024,7 @@ export function syncWorld(scene){
     updateHollow(world);
     updateKeep(world);
     updateFrost(world);
+    updateDeep(world);
     WORLD3D.err = null;
   } catch(e){
     WORLD3D.err = String(e && e.message || e);

@@ -28,4 +28,3 @@ for(const m of manifest){const src=art.kitModel('enemy-assets/'+m.type);let mesh
 }
 art.clearMobs();assert.equal(scene.getObjectByName('mob3d').children.length,0);assert.equal(window.__mob3d().err,null);
 await writeFile(new URL('../../docs/art-validation/enemy-unit.json',import.meta.url),JSON.stringify({report,checks:['41 mappings','six clips each','single skinned mesh','10 bones each','independent skeletons/shared geometry','read-only gameplay state','stable identity','move/wind/attack/death','marble variant','finite skinned vertices','clear lifecycle'],fetches},null,2));console.log(JSON.stringify({appearances:report.length,minH:Math.min(...report.map(r=>r.h)),maxH:Math.max(...report.map(r=>r.h)),checks:'passed'}));
-

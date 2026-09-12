@@ -35,5 +35,3 @@ for rec in manifest:
  scene.render.filepath=str(OUT/f'{name}.png');bpy.ops.render.render(write_still=True)
  for o in added:bpy.data.objects.remove(o,do_unlink=True)
 print('RENDERED',len(manifest))
-
-

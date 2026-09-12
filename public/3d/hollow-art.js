@@ -17,8 +17,8 @@ export function loadHollow(){
 const material=new THREE.MeshLambertMaterial({vertexColors:true});
 export function buildHollow(scene,w){
   const root=new THREE.Group();root.name='Hollow Pass · The Wind-carved Canyon';
-  const bins=new Map(),obstacles=new WeakSet(),ribbons=[],owned=[];let floors=0;
-  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot});}
+  const bins=new Map(),obstacles=new WeakSet(),ribbons=[],owned=[],occluders=new Map();let floors=0,source=null;
+  function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,source});}
   const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=2?'timber':'stone',x,y,z,ww,h,d,c);
   const tops=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
   // Each heightfield slab retains its exact extent. Broad caps split into worn flagstones.
@@ -46,12 +46,13 @@ export function buildHollow(scene,w){
     for(const old of laid)pieces=pieces.flatMap(p=>{const a=Math.max(p.a,old.a),b=Math.min(p.b,old.b),c=Math.max(p.c,old.c),d=Math.min(p.d,old.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.01&&q.d-q.c>.01)});
     for(const p of pieces){surface({x:(p.a+p.b)/2,z:(p.c+p.d)/2,w:p.b-p.a,d:p.d-p.c},-25,0,!!s.bridge);laid.push(p);}
   }
-  for(const o of tops){const top=o.h||1,base=o.y0??(o.kind==='plat'?Math.min(0,top-18):0);surface(o,base,top,!!(o.bridge||o.root));obstacles.add(o);
+  for(const o of tops){source=o;const top=o.h||1,base=o.y0??(o.kind==='plat'?Math.min(0,top-18):0);surface(o,base,top,!!(o.bridge||o.root));obstacles.add(o);
     if(o.bridge){const alongX=o.w>o.d,length=alongX?o.w:o.d,width=alongX?o.d:o.w;
       for(const side of [-1,1])for(let i=0;i<=Math.floor(length/65);i++){const u=-length/2+i*length/Math.max(1,Math.floor(length/65));add('timber',o.x+(alongX?u:side*(width/2-3)),top+17,o.z+(alongX?side*(width/2-3):u),3,34,3,'#6e5436');}
       for(const side of [-1,1])add('timber',o.x+(alongX?0:side*(width/2-3)),top+28,o.z+(alongX?side*(width/2-3):0),alongX?length:2.2,2.2,alongX?2.2:length,'#ad9060');
     }
   }
+  source=null;
   // Replace the old decorative canyon scatter, preserving every supplied anchor and height.
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(d.theme==='canyon'||d.theme==='plains'||d.kind==='rock'||d.kind==='standstone'){
@@ -76,19 +77,28 @@ export function buildHollow(scene,w){
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){
     if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,material,list.length),col=new THREE.Color();
-    for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);}
-    m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='tuft';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
+    for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
+    m.userData.artMatrices=m.instanceMatrix.array.slice();m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='tuft';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.58:.14)}});
   const oldFog=scene.fog;scene.fog=new THREE.Fog('#263e3c',600,2200);
   const sun=new THREE.DirectionalLight('#ffe0b0',2.1);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-780,right:780,top:780,bottom:-780,near:1,far:2800});sun.shadow.camera.updateProjectionMatrix();sun.shadow.normalBias=1.4;root.add(sun,sun.target);
   const counts={hollowArt:true,artObstacles:true,floorTiles:floors,totalTriangles:triangles,instances,chunks:groups.size,visibleTriangles:0,visibleDrawCalls:0};
-  active={root,groups,obstacles,ribbons,sun,counts};window.__HOLLOW_ART_ACTIVE=true;
+  active={root,groups,obstacles,ribbons,sun,counts,occluders,zero:new THREE.Matrix4().makeScale(0,0,0)};window.__HOLLOW_ART_ACTIVE=true;
   root.userData.dispose=()=>{scene.fog=oldFog;sun.shadow.map?.dispose();for(const o of owned)o.dispose();if(active?.root===root)active=null;window.__HOLLOW_ART_ACTIVE=false;};return {group:root,counts};
 }
 export function updateHollow(w){
   if(!active||!w.p)return;const a=active,p=w.p,low=window.__BF_META?.().quality==='low',range=low?750:1200;let tris=0,calls=0;
   for(const [cell,g] of a.groups){const [x,z]=cell.split(',').map(Number);g.visible=Math.hypot((x+.5)*CHUNK-p.x,(z+.5)*CHUNK-p.z)<range+CHUNK*.72;if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}}
+  // Cut away only the cliff pieces between the camera and hero. The collider never changes.
+  for(const f of a.occluders.values()){
+    const o=f.o,top=o.h||0,base=o.y0??Math.min(0,top-18);let hidden=false;
+    if(w.eye&&window.__BF_META?.().camMode!=='fps'&&p.y<top-8&&Math.hypot(o.x-p.x,o.z-p.z)<600){
+      for(let t=.04;t<.96;t+=.06){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t,y=w.eye.y+(p.y+30-w.eye.y)*t;
+        if(y>base-2&&y<top+4&&Math.abs(x-o.x)<o.w/2+6&&Math.abs(z-o.z)<o.d/2+6){hidden=true;break;}}
+    }
+    if(hidden!==f.hidden){for(const q of f.parts){q.mesh.setMatrixAt(q.index,hidden?a.zero:q.matrix);q.mesh.instanceMatrix.needsUpdate=true;}f.hidden=hidden;window.__HOLLOW_SHADOW_DIRTY=true;}
+  }
   a.counts.visibleTriangles=tris;a.counts.visibleDrawCalls=calls;
   for(const r of a.ribbons){r.m.visible=!low&&Math.hypot(r.x-p.x,r.z-p.z)<range;r.m.material.opacity=.18+.07*Math.sin(performance.now()*.0006+r.phase);}
   const x=Math.round(p.x/250)*250,z=Math.round(p.z/250)*250,key=x+','+z+','+low;if(a.shadow!==key){a.sun.position.set(x-500,1250,z+400);a.sun.target.position.set(x,0,z);a.sun.target.updateMatrixWorld();a.shadow=key;window.__HOLLOW_SHADOW_DIRTY=true;}

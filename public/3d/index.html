@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.965.0-campaign-camera-polish';
+const VERSION3D='1.966.0-enemy-art';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -18407,6 +18407,14 @@ function drawSpawner(dn,t){
   drawShadow(dn.x,dn.z,26,0.25);
   S.draw(dn.x,dn.z,t,g);
 }
+function drawEnemyRole3(e,t){
+  if(!e.role)return;
+  const rc=e.roleCol||'#fff',H=e.h,W=e.r*2;
+  pushM();mv(e.x,e.y,e.z);rotY(e.yaw);
+  bx(0,H+13+Math.sin(t*3)*1.5,0,5,5,5,rc,rc,0.9);
+  if(e.role==='shielder'&&e.shieldYaw!=null){const rel=e.shieldYaw-e.yaw;bx(Math.sin(rel)*(W*0.5+5),H*0.5,Math.cos(rel)*(W*0.5+5),3,H*0.66,11,rc,rc,0.85);}
+  popM();
+}
 function drawEnemy3(e,t){
   const col=e.hitFlash>0?'#ffffff':(e.slowT>0?tint(e.color,'#9fe0ff',0.35):e.color);
   const en=e.lunge>0||e.phase>=2;
@@ -19438,7 +19446,7 @@ function render(t){
     if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters
     if(e.dropT>0){ // spawn-in: the enemy is VISIBLE from the instant it spawns, rising up into place (was invisible before — only a shadow)
       const oy=e.y; e.y=oy - e.dropT*e.h*0.22;
-      drawShadow(e.x,e.z,e.r,0.28+0.25*(1-e.dropT)); drawEnemy3(e,t); e.y=oy; drawHpBar3(e); continue; }
+      drawShadow(e.x,e.z,e.r,0.28+0.25*(1-e.dropT)); if(!(_mob3dLive && window.__mob3dDrawn?.(e))) drawEnemy3(e,t); e.y=oy; drawHpBar3(e); continue; }
     /* mob3d draws this creature in 3D, so skip the voxel body - but keep the shadow and HP bar,
        which are gameplay readability, not art. mobDrawn() is false for anything unmapped or still
        loading, so those keep their voxel body and nothing ever vanishes.
@@ -19446,7 +19454,7 @@ function render(t){
        the MODEL is loaded, and in first-person mob3d never runs at all. Measured in the Waystation
        - the practice dummy left a shadow on the cobbles with nothing standing in it. */
     drawShadow(e.x,e.z,e.r);
-    if(!(_mob3dLive && window.__mob3dDrawn && window.__mob3dDrawn(e.type))) drawEnemy3(e,t);
+    if(!(_mob3dLive && window.__mob3dDrawn && window.__mob3dDrawn(e))) drawEnemy3(e,t); else drawEnemyRole3(e,t);
     drawHpBar3(e);
     if(e.shielded){                                    // boss ward: a ring of shimmering barrier pillars (no screen-filling dome)
       const pu=0.5+0.3*Math.sin(t*3), R2=e.r+14;
@@ -20370,7 +20378,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1965"></script>
+<script type="module" src="./hero3d.js?v=1966"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

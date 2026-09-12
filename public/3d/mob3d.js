@@ -1,95 +1,18 @@
 import * as THREE from './three.module.js';
-import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js';
 
-const _mobLoader = new GLTFLoader();
-const _loadGLB = url => new Promise((res, rej) => _mobLoader.load(url, res, undefined, rej));
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   MOB3D — the game's live enemies as 3D creatures.
-
-   The world and the hero are 3D while the things fighting you are still voxel, which is the
-   loudest remaining inconsistency. This pools one animated model per live enemy, keyed off the
-   game's own G.enemies, so it follows the real fight rather than re-simulating anything.
-
-   Affordable because the device test came back at 60fps with 64 animated skinned characters and
-   a room holds roughly ten. Clones use SkeletonUtils.clone, verified to give each copy its OWN
-   skeleton (32 sampled, 32 distinct poses) - a plain .clone() rebinds every copy to the original
-   and the whole room then animates as one creature.
-
-   Cast table generated FROM the slice's MONSTERS table rather than retyped, so a transcription
-   slip cannot silently miscast a mob.
-   ───────────────────────────────────────────────────────────────────────────── */
-const MOB_CAST = {
-  blinkstalker:  { file:'Ninja', rig:'blob', h:1.2 },
-  bones:         { file:'Ghost_Skull', rig:'fly', h:1.05 },
-  caster:        { file:'Wizard', rig:'blob', h:1.2 },
-  charger:       { file:'Dino', rig:'ground', h:1.25 },
-  cragspitter:   { file:'Goleling', rig:'fly', h:1.05 },
-  dustjackal:    { file:'Dino', rig:'ground', h:0.93, skin:'dust' },
-  emberling:     { file:'Goleling', rig:'fly', h:1.2, skin:'magma' },
-  embertotem:    { file:'Cactoro', rig:'blob', h:1.7, skin:'totem' },
-  flyer:         { file:'Dragon', rig:'fly', h:0.95 },
-  frostling:     { file:'Green_Blob', rig:'blob', h:1.36, skin:'frost' },
-  frostlobber:   { file:'Glub_Evolved', rig:'fly', h:1.43, skin:'frost' },
-  frostshell:    { file:'Yeti', rig:'blob', h:1.34 },
-  galewisp:      { file:'Armabee_Evolved', rig:'fly', h:0.75 },
-  /* goblin / slimelet / sparkling were dropped by the original port even though the slice casts
-     all three. Same files, rigs and heights as the slice's MONSTERS rows, so they match what
-     Oliver tuned there. Without them these mobs fell back to the voxel renderer and stood out as
-     the only flat-shaded creatures in an otherwise 3D fight. */
-  goblin:        { file:'Orc_Enemy', rig:'blob', h:0.95 },
-  grunt:         { file:'Orc', rig:'ground', h:1.35 },
-  magmaskit:     { file:'Green_Spiky_Blob', rig:'blob', h:0.79, skin:'magma' },
-  marblestatue:  { file:'Goleling_Evolved', rig:'fly', h:1.5 },
-  revenant:      { file:'Tribal', rig:'fly', h:1.25 },
-  royalarcanist: { file:'Wizard', rig:'blob', h:1.64, skin:'arcane' },
-  sentinel:      { file:'Goleling', rig:'fly', h:1.22, skin:'rust' },
-  shadeling:     { file:'Demon', rig:'ground', h:1.45 },
-  siegeknight:   { file:'Orc', rig:'ground', h:1.64, skin:'steel' },
-  slime:         { file:'Pink_Slime', rig:'blob', h:0.7 },
-  slimelet:      { file:'Green_Blob', rig:'blob', h:0.55 },
-  sparkling:     { file:'Hywirl', rig:'fly', h:0.72 },
-  sporeback:     { file:'Mushnub_Evolved', rig:'blob', h:1.05 },
-  sunpriest:     { file:'Wizard', rig:'blob', h:1.57, skin:'holy' },
-  thornboar:     { file:'Cactoro', rig:'blob', h:1.0 },
-  toxling:       { file:'Green_Spiky_Blob', rig:'blob', h:0.85 },
-  voidtether:    { file:'Blue_Demon', rig:'ground', h:1.55 },
-  /* The two enemies that are OBJECTS rather than creatures. They were left out of the port as
-     "needs an art call", but neither is a call: a mimic IS a chest and a training dummy IS a
-     dummy, and the Quaternius prop kit ships exactly those two models under exactly those names.
-
-     Leaving them out had stopped being cosmetic. The 3D layer draws onto the FINISHED frame with
-     its own depth buffer (see flushHero3D in index.html), so 3D geometry paints over anything the
-     voxel pass drew - and the Waystation's floor is 3D. Measured, not assumed: with ?world3d=0
-     the straw dummy stands in front of the hero; with the 3D world on, the same frame has bare
-     cobbles where it should be. The hub's one practice target was INVISIBLE. Casting it puts it
-     in the layer that wins.
-
-     These two live outside monsters/, so the file carries its kit folder and the loader resolves
-     the extension. */
-  dummy:         { file:'qprops/Dummy',      rig:'still', h:1.86 },
-  mimic:         { file:'qprops/Chest_Wood', rig:'chest', h:0.72, fit:'width' },
-};
-
-/* Clip names differ per rig. Quaternius exports them as "CharacterArmature|Idle", so the pipe
-   prefix is stripped on load exactly as the slice does. */
-const MOB_CLIPS = {
-  ground: { idle:['Idle'], move:['Run','Walk'] },
-  blob:   { idle:['Idle'], move:['Jump','Run','Walk'] },
-  fly:    { idle:['Flying_Idle','Idle'], move:['Fly','Flying','Run'] },
-  /* A prop has no animation at all. Naming clips that cannot exist would fall through to
-     animations[0], which for a prop is undefined - harmless, but 'still' says so on purpose. */
-  still:  { idle:[], move:[] },
-  /* The chest rig is the mimic. Its four clips are two poses and two transitions; held OPEN is
-     the menacing idle, and looping the CLOSE transition while it charges reads as biting. */
-  chest:  { idle:['Chest_Opened'], move:['Chest_Close'] },
-};
+// Original Blender roster: one vertex-colored skinned mesh and ten bones per appearance.
+// The renderer mirrors gameplay objects and never changes combat state. Props still use
+// the shared kit loader below; unknown enemies retain the legacy rendering fallback.
+const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+type}]));
 const ASSETS_DIR = '../slice3d/assets/';
 const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();
 const _mobPool = [];
+const _pending = new Map();
+const _actors = new Map();
+let _drawn = new WeakSet();
 let _mobGroup = null;
 
 export const MOB3D = { on:true, live:0, pooled:0, missing:[], err:null };
@@ -139,7 +62,7 @@ export async function loadKitModel(file){
        Extension is resolved rather than assumed - monsters/ ships .glb, the prop kits ship .gltf
        with a sidecar .bin, and hardcoding .glb is exactly how world3d's Floor_Brick silently
        failed and reported a successful build with no floor in it. */
-    const base = file.indexOf('/') >= 0 ? ASSETS_DIR + file : MOBS_DIR + file;
+    const base = file.startsWith('enemy-assets/') ? './'+file : file.indexOf('/') >= 0 ? ASSETS_DIR + file : MOBS_DIR + file;
     let g = null;
     g = await loadModelAnyExt(base);
     for(const c of g.animations) c.name = c.name.split('|').pop();
@@ -173,148 +96,112 @@ export async function loadKitModel(file){
    otherwise the parsed glTF with its measurements attached. */
 export function kitModel(file){ return _mobModels.get(file); }
 
-/* Take a pooled actor of this type, or build one. Pooling matters because enemies die and spawn
-   constantly - cloning a skinned mesh per spawn would allocate through the whole fight. */
-function acquireMob(type){
-  for(const m of _mobPool){ if(!m.inUse && m.type === type){ m.inUse = true; m.root.visible = true; return m; } }
-  const cast = MOB_CAST[type];
-  if(!cast) return null;
-  const src = _mobModels.get(cast.file);
-  if(!src) return null;                  // not loaded yet; the voxel mob keeps drawing this frame
-  const root = SkeletonUtils.clone(src.scene);
-  root.traverse(o => { if(o.isMesh){ o.frustumCulled = false; o.castShadow = false; } });
-  const mixer = new THREE.AnimationMixer(root);
-  const clips = {};
-  for(const c of src.animations) clips[c.name] = c;
-  const pick = names => { for(const n of (names||[])) if(clips[n]) return clips[n]; return src.animations[0] || null; };
-  const rig = MOB_CLIPS[cast.rig] || MOB_CLIPS.ground;
-  const actions = {
-    idle: pick(rig.idle) && mixer.clipAction(pick(rig.idle)),
-    move: pick(rig.move) && mixer.clipAction(pick(rig.move)),
-  };
-  const rec = { root, mixer, actions, type, inUse:true, cur:null, cast };
-  _mobGroup.add(root);
-  _mobPool.push(rec);
-  return rec;
-}
-
-function playMob(rec, moving){
-  const want = moving ? (rec.actions.move || rec.actions.idle) : (rec.actions.idle || rec.actions.move);
-  if(!want || rec.cur === want) return;
-  if(rec.cur) rec.cur.fadeOut(0.18);
-  want.reset().fadeIn(0.18).play();
-  rec.cur = want;
-}
-
-/* Called every frame from the hero draw. Reads the game's live enemy list and mirrors it. */
-/* Same switch world3d has, and for the same reason: the bag paper-doll blits the main canvas, so
-   anything left visible in the scene ends up standing behind the portrait. */
-window.__mob3dEnabled = (v) => { try { if(_mobGroup) _mobGroup.visible = !!v; } catch(e){} };
-
-export function syncMobs(scene, dt){
-  if(!MOB3D.on) return false;
-  /* Contain mob faults HERE. Without this the throw propagates to drawHero3D's catch, which sets
-     HERO3D.on = false - so one bad creature would take down the hero and the whole world with it.
-     Each layer should be able to fail alone; world3d already does this. */
-  try { return syncMobsInner(scene, dt); }
-  catch(e){
-    MOB3D.err = String(e && e.message || e);
-    MOB3D.on = false;
-    console.warn('[mob3d] disabled after fault, voxel mobs resume:', MOB3D.err);
-    return false;
+// Actor identity survives list reordering; skinned clones share immutable geometry/materials.
+function appearance(e, w){return e.type==='colossus' && w.theme==='marble' ? 'marblecolossus' : e.type;}
+function requestModel(file){
+  if(!_mobModels.has(file) && !_pending.has(file)){
+    const p=loadKitModel(file);_pending.set(file,p);p.finally(()=>_pending.delete(file));
   }
 }
-function syncMobsInner(scene, dt){
-  let world = null;
-  try { world = window.__BF_WORLD && window.__BF_WORLD(); } catch(e){}
-  const foes = (world && world.enemies) || null;
-  if(!foes) return false;
-  if(!_mobGroup){ _mobGroup = new THREE.Group(); _mobGroup.name = 'mob3d'; scene.add(_mobGroup); }
-
-  for(const m of _mobPool) m.inUse = false;
-
-  let live = 0, want = new Set();
+function acquireMob(type,e){
+  const cast=MOB_CAST[type],src=cast&&kitModel(cast.file);if(!src)return null;
+  let rec=_mobPool.find(r=>!r.enemy && r.type===type);
+  if(!rec){
+    const root=SkeletonUtils.clone(src.scene);root.name='enemy:'+type;
+    const materials=[];
+    root.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=false;
+      o.material=o.material.clone();o.material.transparent=true;o.material.forceSinglePass=true;materials.push(o.material);
+    }});
+    const mixer=new THREE.AnimationMixer(root),actions={};
+    for(const c of src.animations){const a=mixer.clipAction(c);if(['Attack','Hit','Death','Windup'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
+  }
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0});
+  rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
+}
+function play(rec,name){
+  const a=rec.actions[name]||rec.actions.Idle;if(!a)return;
+  if(rec.cur===name)return;
+  const old=rec.actions[rec.cur];if(old)old.fadeOut(.08);
+  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(.08).play();rec.cur=name;
+}
+function release(rec){
+  _actors.delete(rec.enemy);rec.enemy=null;rec.root.visible=false;rec.mixer.stopAllAction();
+}
+function disposeActor(rec){
+  rec.mixer.stopAllAction();rec.mixer.uncacheRoot(rec.root);rec.root.removeFromParent();
+  // Geometry and materials belong to the source cache; bone textures belong to this clone.
+  rec.root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.dispose();});
+  for(const m of rec.materials)m.dispose();
+}
+window.__mob3dEnabled=v=>{if(_mobGroup)_mobGroup.visible=!!v;};
+export function syncMobs(scene,dt){
+  if(!MOB3D.on)return false;
+  try{return syncMobsInner(scene,Math.min(.1,Math.max(0,dt||0)));}
+  catch(e){MOB3D.err=String(e?.stack||e);MOB3D.on=false;if(_mobGroup)_mobGroup.visible=false;_drawn=new WeakSet();console.warn('[mob3d]',e);return false;}
+}
+function syncMobsInner(scene,dt){
+  const w=window.__BF_WORLD?.();if(!w?.enemies)return false;
+  if(!_mobGroup){_mobGroup=new THREE.Group();_mobGroup.name='mob3d';scene.add(_mobGroup);}
+  _drawn=new WeakSet();const present=new Set(w.enemies);let live=0,corpses=0;
+  // Ordinary corpses are removed by gameplay in the same tick as the kill. Keep only
+  // their presentation record long enough to finish the death, without restoring an enemy.
+  const foes=w.enemies.concat([..._actors.keys()].filter(e=>e.dead&&!present.has(e)));
   for(const e of foes){
-    if(!e || e.dead) continue;
-    const cast = MOB_CAST[e.type];
-    if(!cast) continue;                                  // unknown type: voxel keeps drawing it
-    want.add(cast.file);
-    const rec = acquireMob(e.type);
-    if(!rec) continue;
-    /* Scale so the model stands exactly as tall as the game says the enemy is.
-       e.h is in GAME UNITS, cast.h is the model's own height in METRES, so the factor is simply
-       e.h / cast.h. The first version divided by (cast.h / 0.0355) instead, which came out at
-       ~1.0 and rendered every mob about 30x too small - they were damaging the player from
-       off-screen while being far too tiny to see. */
-    const src = _mobModels.get(cast.file);
-    /* Creatures are fitted by HEIGHT: e.h is the number the game reasons about and a creature is
-       taller than it is wide, so height carries the silhouette.
-       A WIDE object is the opposite. The mimic's e.h of 30 includes the voxel model's spider legs
-       and lolling tongue, while a real chest is 1.8x wider than it is tall - fitted by height it
-       came out 54 units across against a 32-unit hitbox, so its front edge sat well outside the
-       box you can actually hit. fit:'width' matches the FOOTPRINT to the hitbox instead
-       (e.r*2), which is what makes a squat object read honestly. Measured against the game's own
-       voxel mimic, which is a 30x13x22 box - i.e. footprint-sized, not height-sized. */
-    const s = cast.fit === 'width'
-      ? ((e.r || 16) * 2) / ((src && src._nativeW) || 1)
-      : (e.h || 38) / ((src && src._nativeH) || cast.h);
+    if(!e||e.bot)continue;
+    const type=appearance(e,w),cast=MOB_CAST[type];if(!cast)continue;
+    if(!e.dead)requestModel(cast.file);
+    let rec=_actors.get(e);
+    if(rec&&rec.type!==type){release(rec);rec=null;}
+    if(!rec&&!e.dead)rec=acquireMob(type,e);
+    if(!rec)continue;
+    if(e.dead){
+      if(!rec.wasDead){rec.wasDead=true;rec.death=.78;play(rec,'Death');}
+      rec.death-=dt;if(rec.death<=0||corpses>=12){release(rec);continue;}
+      for(const m of rec.materials){m.opacity=Math.min(1,rec.death/.18);m.depthWrite=m.opacity>.95;m.emissiveIntensity=0;}
+      rec.mixer.update(dt);corpses++;continue;
+    }
+    // Training targets and resurrected skeletons can reuse the same gameplay object.
+    if(rec.wasDead){rec.wasDead=false;rec.cur=null;rec.mixer.stopAllAction();}
+    const s=(e.h||38)/rec.src._nativeH;
     rec.root.scale.setScalar(s);
-    /* flyY is a hover height in metres; convert to game units. It is NOT multiplied by s - s
-       already carries the model-to-world conversion, and applying both would square it. */
-    const hover = cast.flyY ? cast.flyY / 0.0355 : 0;
-    /* Lift by the model's own base offset so it stands ON the ground rather than half-sunk when
-       its origin is not at its feet. */
-    const foot = -((src && src._baseY) || 0) * s;
-    rec.root.position.set(e.x, (e.y || 0) + hover + foot, e.z);
-    rec.root.rotation.y = (e.yaw || 0);
-    playMob(rec, Math.abs(e.vx || 0) + Math.abs(e.vz || 0) > 2);
-    rec.mixer.update(dt);
-    live++;
+    rec.root.position.set(e.x,(e.y||0)-rec.src._baseY*s-(e.dropT||0)*(e.h||38)*.22,e.z);
+    rec.root.rotation.y=e.yaw||0;rec.root.visible=true;
+    for(const m of rec.materials){
+      m.opacity=e.untargetable ? .28 : 1;m.depthWrite=!e.untargetable;
+      m.color.set(e.slowT>0?0xb6ddff:0xffffff);
+      m.emissive.set(0xffffff);m.emissiveIntensity=e.hitFlash>0 ? .65 : 0;
+    }
+    const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;
+    const wind=Math.max(0,e.windT||0,e.slamW||0,e.cleaveW||0,e.novaW||0,e.poundW||0,e.eruptW||0,e.knightW||0,e.pinT||0,e.blinkFx||0);
+    const shot=(e.shootT||0)>rec.shoot+.15;
+    const contact=e.dmg>0&&w.p&&Math.hypot(e.x-w.p.x,e.z-w.p.z)<(e.r+w.p.r+4)&&Math.abs((e.y||0)-(w.p.y||0))<(e.h||38);
+    rec.contact=Math.max(0,rec.contact-dt);rec.attack=Math.max(0,rec.attack-dt);
+    if((rec.wind>0&&wind<=0)||shot||(contact&&rec.contact<=0)){rec.attack=.42;rec.contact=.65;rec.cur=null;}
+    if((e.hitFlash||0)>rec.hit+.025 && !wind){rec.cur=null;play(rec,'Hit');}
+    else if(wind>0)play(rec,'Windup');
+    else if(rec.attack>0||e.chargeT>0||e.lunge>0||e.diving>0)play(rec,'Attack');
+    else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');
+    // Pose holds through the entire telegraph; rendering never changes its timer or damage.
+    if(rec.cur==='Windup')rec.actions.Windup.setEffectiveTimeScale(1.7);
+    if(rec.cur==='Move')rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));
+    rec.mixer.update((e.stunT>0)?0:dt);
+    rec.wind=wind;rec.shoot=e.shootT||0;rec.hit=e.hitFlash||0;
+    _drawn.add(e);live++;
   }
-  /* Release, don't just hide. The pool used to only ever GROW - unused actors were hidden and
-     kept forever, so every creature spawned across every zone stayed resident in GPU memory and
-     in the per-frame loop. Keep a small reserve per type for instant reuse mid-fight, and drop
-     the rest. */
-  const keep = {};
-  for(let i = _mobPool.length - 1; i >= 0; i--){
-    const m = _mobPool[i];
-    if(m.inUse) continue;
-    keep[m.type] = (keep[m.type] || 0) + 1;
-    if(keep[m.type] <= 2){ m.root.visible = false; continue; }   // reserve two per type
-    m.mixer.stopAllAction();
-    if(m.root.parent) m.root.parent.remove(m.root);
-    m.root.traverse(o => { if(o.isMesh && o.geometry && o.geometry.dispose) o.geometry.dispose(); });
-    _mobPool.splice(i, 1);
+  const reserve={};
+  for(let i=_mobPool.length-1;i>=0;i--){const r=_mobPool[i];
+    if(r.enemy&&!r.enemy.dead&&!present.has(r.enemy))release(r);
+    if(r.enemy)continue;
+    reserve[r.type]=(reserve[r.type]||0)+1;
+    if(reserve[r.type]>2){disposeActor(r);_mobPool.splice(i,1);}
   }
-
-  /* Load any model this room needs but has not got yet. Fire and forget - the voxel mob draws
-     until it arrives, so nothing pops out of existence while waiting. */
-  for(const f of want) if(!_mobModels.has(f)) loadKitModel(f);
-
-  MOB3D.live = live;
-  MOB3D.pooled = _mobPool.length;
-  return true;
+  Object.assign(MOB3D,{live,corpses,pooled:_mobPool.length});return true;
 }
-
-/* Called when the level changes. Without this a new zone inherits every actor the previous zone
-   built, hidden but resident. */
 export function clearMobs(){
-  for(const m of _mobPool){
-    m.mixer.stopAllAction();
-    if(m.root.parent) m.root.parent.remove(m.root);
-  }
-  _mobPool.length = 0;
-  MOB3D.pooled = 0;
+  for(const r of _mobPool)disposeActor(r);
+  _mobPool.length=0;_actors.clear();_drawn=new WeakSet();MOB3D.pooled=0;MOB3D.live=0;
 }
-
-/* True only for enemies mob3d is actually drawing, so the voxel path can skip exactly those and
-   keep drawing anything unmapped, still loading, or out of pool. */
-export function mobDrawn(type){
-  if(!MOB3D.on || !MOB_CAST[type]) return false;
-  const f = MOB_CAST[type].file;
-  return !!_mobModels.get(f);
-}
-
-window.__mob3dDrawn = mobDrawn;
-window.__mob3d = () => ({ on:MOB3D.on, live:MOB3D.live, pooled:MOB3D.pooled,
-                          models:[..._mobModels.keys()], missing:MOB3D.missing, err:MOB3D.err });
+export function mobDrawn(e){return MOB3D.on&&!!e&&typeof e==='object'&&_drawn.has(e);}
+window.__mob3dDrawn=mobDrawn;
+window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,dead:r.wasDead}))});

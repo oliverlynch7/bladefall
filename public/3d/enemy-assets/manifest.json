@@ -1,0 +1,658 @@
+[
+  {
+    "type": "grunt",
+    "theme": "wood",
+    "triangles": 462,
+    "bytes": 113904,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Grunt"
+  },
+  {
+    "type": "flyer",
+    "theme": "void",
+    "triangles": 188,
+    "bytes": 72004,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Flyer"
+  },
+  {
+    "type": "emberling",
+    "theme": "fire",
+    "triangles": 496,
+    "bytes": 120272,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Emberling"
+  },
+  {
+    "type": "frostling",
+    "theme": "ice",
+    "triangles": 512,
+    "bytes": 122928,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Frost Ling"
+  },
+  {
+    "type": "toxling",
+    "theme": "wood",
+    "triangles": 556,
+    "bytes": 132184,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Toxling"
+  },
+  {
+    "type": "shadeling",
+    "theme": "void",
+    "triangles": 182,
+    "bytes": 67432,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Shadeling"
+  },
+  {
+    "type": "sparkling",
+    "theme": "void",
+    "triangles": 172,
+    "bytes": 67372,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sparkling"
+  },
+  {
+    "type": "goblin",
+    "theme": "wood",
+    "triangles": 618,
+    "bytes": 144356,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Goblin"
+  },
+  {
+    "type": "bones",
+    "theme": "ruin",
+    "triangles": 526,
+    "bytes": 112736,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Bones"
+  },
+  {
+    "type": "slime",
+    "theme": "wood",
+    "triangles": 224,
+    "bytes": 80284,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Slime"
+  },
+  {
+    "type": "slimelet",
+    "theme": "wood",
+    "triangles": 244,
+    "bytes": 84256,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Slimelet"
+  },
+  {
+    "type": "caster",
+    "theme": "ruin",
+    "triangles": 712,
+    "bytes": 149016,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Caster"
+  },
+  {
+    "type": "charger",
+    "theme": "sand",
+    "triangles": 448,
+    "bytes": 116840,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Charger"
+  },
+  {
+    "type": "mimic",
+    "theme": "ruin",
+    "triangles": 176,
+    "bytes": 60912,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Mimic"
+  },
+  {
+    "type": "dustjackal",
+    "theme": "sand",
+    "triangles": 412,
+    "bytes": 107676,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Dustjackal"
+  },
+  {
+    "type": "cragspitter",
+    "theme": "sand",
+    "triangles": 560,
+    "bytes": 133688,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Cragspitter"
+  },
+  {
+    "type": "galewisp",
+    "theme": "sand",
+    "triangles": 278,
+    "bytes": 80292,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Galewisp"
+  },
+  {
+    "type": "thornboar",
+    "theme": "wood",
+    "triangles": 420,
+    "bytes": 110280,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Thornboar"
+  },
+  {
+    "type": "sporeback",
+    "theme": "wood",
+    "triangles": 604,
+    "bytes": 139352,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sporeback"
+  },
+  {
+    "type": "sentinel",
+    "theme": "ruin",
+    "triangles": 514,
+    "bytes": 122424,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sentinel"
+  },
+  {
+    "type": "revenant",
+    "theme": "ruin",
+    "triangles": 506,
+    "bytes": 120072,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Revenant"
+  },
+  {
+    "type": "dummy",
+    "theme": "wood",
+    "triangles": 408,
+    "bytes": 101796,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Dummy"
+  },
+  {
+    "type": "bosscrystal",
+    "theme": "void",
+    "triangles": 176,
+    "bytes": 63560,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Bosscrystal"
+  },
+  {
+    "type": "frostshell",
+    "theme": "ice",
+    "triangles": 476,
+    "bytes": 122140,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Frost Shell"
+  },
+  {
+    "type": "frostlobber",
+    "theme": "ice",
+    "triangles": 620,
+    "bytes": 137732,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Frost Lobber"
+  },
+  {
+    "type": "magmaskit",
+    "theme": "fire",
+    "triangles": 548,
+    "bytes": 130772,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Magmaskit"
+  },
+  {
+    "type": "embertotem",
+    "theme": "fire",
+    "triangles": 132,
+    "bytes": 55096,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Embertotem"
+  },
+  {
+    "type": "blinkstalker",
+    "theme": "void",
+    "triangles": 628,
+    "bytes": 138040,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Blinkstalker"
+  },
+  {
+    "type": "voidtether",
+    "theme": "void",
+    "triangles": 374,
+    "bytes": 93172,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Voidtether"
+  },
+  {
+    "type": "sunpriest",
+    "theme": "sun",
+    "triangles": 848,
+    "bytes": 168532,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Sunpriest"
+  },
+  {
+    "type": "marblestatue",
+    "theme": "sun",
+    "triangles": 538,
+    "bytes": 125400,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Marblestatue"
+  },
+  {
+    "type": "siegeknight",
+    "theme": "royal",
+    "triangles": 514,
+    "bytes": 122436,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Siegeknight"
+  },
+  {
+    "type": "royalarcanist",
+    "theme": "royal",
+    "triangles": 752,
+    "bytes": 155684,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "Royalarcanist"
+  },
+  {
+    "type": "brute",
+    "theme": "wood",
+    "triangles": 604,
+    "bytes": 138120,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "THE BRUTE"
+  },
+  {
+    "type": "warden",
+    "theme": "ruin",
+    "triangles": 518,
+    "bytes": 121672,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "THE FALLEN"
+  },
+  {
+    "type": "archer",
+    "theme": "sand",
+    "triangles": 560,
+    "bytes": 126112,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "HOLLOW MARKSMAN"
+  },
+  {
+    "type": "sorcerer",
+    "theme": "ice",
+    "triangles": 768,
+    "bytes": 158320,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "FROST SORCERER"
+  },
+  {
+    "type": "colossus",
+    "theme": "fire",
+    "triangles": 664,
+    "bytes": 147964,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "EMBER COLOSSUS"
+  },
+  {
+    "type": "king",
+    "theme": "void",
+    "triangles": 626,
+    "bytes": 136716,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "ABYSS KING"
+  },
+  {
+    "type": "tyrant",
+    "theme": "royal",
+    "triangles": 770,
+    "bytes": 157556,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "THE ABYSS KING, AWAKENED"
+  },
+  {
+    "type": "marblecolossus",
+    "theme": "sun",
+    "triangles": 720,
+    "bytes": 154728,
+    "bones": 10,
+    "clips": [
+      "Idle",
+      "Move",
+      "Windup",
+      "Attack",
+      "Hit",
+      "Death"
+    ],
+    "label": "MARBLE COLOSSUS"
+  }
+]

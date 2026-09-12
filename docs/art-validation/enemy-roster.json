@@ -1,0 +1,334 @@
+{
+  "rows": [
+    {
+      "type": "grunt",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "flyer",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "emberling",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "frostling",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "toxling",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "shadeling",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "sparkling",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "goblin",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "bones",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "slime",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "slimelet",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "caster",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "charger",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "mimic",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "dustjackal",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "cragspitter",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "galewisp",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "thornboar",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "sporeback",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "sentinel",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "revenant",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "dummy",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "bosscrystal",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "frostshell",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "frostlobber",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "magmaskit",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "embertotem",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "blinkstalker",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "voidtether",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "sunpriest",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "marblestatue",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "siegeknight",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "royalarcanist",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "brute",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "warden",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "archer",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "sorcerer",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "colossus",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "king",
+      "mapped": true,
+      "clip": "Idle"
+    },
+    {
+      "type": "tyrant",
+      "mapped": true,
+      "clip": "Idle"
+    }
+  ],
+  "marble": {
+    "on": true,
+    "live": 3,
+    "corpses": 0,
+    "pooled": 3,
+    "models": [
+      "enemy-assets/sporeback",
+      "enemy-assets/thornboar",
+      "enemy-assets/flyer",
+      "enemy-assets/grunt",
+      "enemy-assets/caster",
+      "props/pillar-obelisk",
+      "qprops/Chest_Wood",
+      "enemy-assets/emberling",
+      "enemy-assets/frostling",
+      "enemy-assets/toxling",
+      "enemy-assets/shadeling",
+      "enemy-assets/sparkling",
+      "enemy-assets/goblin",
+      "enemy-assets/bones",
+      "enemy-assets/slime",
+      "enemy-assets/slimelet",
+      "enemy-assets/charger",
+      "enemy-assets/mimic",
+      "enemy-assets/dustjackal",
+      "enemy-assets/cragspitter",
+      "enemy-assets/galewisp",
+      "enemy-assets/sentinel",
+      "enemy-assets/revenant",
+      "enemy-assets/dummy",
+      "enemy-assets/bosscrystal",
+      "enemy-assets/frostshell",
+      "enemy-assets/frostlobber",
+      "enemy-assets/magmaskit",
+      "enemy-assets/embertotem",
+      "enemy-assets/blinkstalker",
+      "enemy-assets/voidtether",
+      "enemy-assets/sunpriest",
+      "enemy-assets/marblestatue",
+      "enemy-assets/siegeknight",
+      "enemy-assets/royalarcanist",
+      "enemy-assets/brute",
+      "enemy-assets/warden",
+      "enemy-assets/archer",
+      "enemy-assets/sorcerer",
+      "enemy-assets/colossus",
+      "enemy-assets/king",
+      "enemy-assets/tyrant",
+      "enemy-assets/marblecolossus"
+    ],
+    "pending": [],
+    "missing": [],
+    "err": null,
+    "actors": [
+      {
+        "type": "marblecolossus",
+        "clip": "Idle",
+        "dead": false
+      },
+      {
+        "type": "marblestatue",
+        "clip": "Move",
+        "dead": false
+      },
+      {
+        "type": "bones",
+        "clip": "Move",
+        "dead": false
+      }
+    ]
+  },
+  "report": {
+    "fps": 50,
+    "quality": "high",
+    "version": "1.966.0-enemy-art",
+    "area": -1,
+    "side": false,
+    "stage": 14,
+    "player": [
+      0,
+      0,
+      580
+    ],
+    "collisionHash": "a09064e1",
+    "segments": 2,
+    "obstacles": 35,
+    "rooms": [
+      {
+        "x": 0,
+        "z": -29,
+        "w": 957,
+        "d": 957
+      }
+    ],
+    "deco": {
+      "box": 44,
+      "marble": 40
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "84|palace|435,-29;0,855;536,-78",
+      "counts": {
+        "deepArt": "palace",
+        "artObstacles": true,
+        "floorTiles": 95,
+        "totalTriangles": 19084,
+        "instances": 191,
+        "chunks": 25,
+        "visibleTriangles": 18484,
+        "visibleDrawCalls": 46
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 24970,
+      "calls": 69,
+      "geometries": 80
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 3,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  }
+}

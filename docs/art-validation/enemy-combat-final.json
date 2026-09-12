@@ -1,0 +1,452 @@
+[
+  {
+    "name": "Outskirts",
+    "target": {
+      "type": "sporeback",
+      "hp": 31
+    },
+    "fps": 30,
+    "render": {
+      "shadows": true,
+      "triangles": 118436,
+      "calls": 210,
+      "geometries": 41
+    },
+    "mob": {
+      "live": 41,
+      "pooled": 41,
+      "clips": [
+        "Idle"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 106096,
+      "calls": 192,
+      "geometries": 41
+    }
+  },
+  {
+    "name": "Hollow Pass",
+    "target": {
+      "type": "cragspitter",
+      "hp": 51
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 136842,
+      "calls": 163,
+      "geometries": 52
+    },
+    "mob": {
+      "live": 30,
+      "pooled": 30,
+      "clips": [
+        "Attack",
+        "Windup",
+        "Idle"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 98514,
+      "calls": 134,
+      "geometries": 52
+    }
+  },
+  {
+    "name": "Ruined Keep",
+    "target": {
+      "type": "revenant",
+      "hp": 34
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 106656,
+      "calls": 196,
+      "geometries": 59
+    },
+    "mob": {
+      "live": 41,
+      "pooled": 41,
+      "clips": [
+        "Move",
+        "Idle",
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 101900,
+      "calls": 186,
+      "geometries": 59
+    }
+  },
+  {
+    "name": "Frostfell",
+    "target": {
+      "type": "frostlobber",
+      "hp": 45
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 115892,
+      "calls": 267,
+      "geometries": 70
+    },
+    "mob": {
+      "live": 70,
+      "pooled": 70,
+      "clips": [
+        "Idle",
+        "Attack",
+        "Move"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 110244,
+      "calls": 237,
+      "geometries": 70
+    }
+  },
+  {
+    "name": "Emberdeep",
+    "target": {
+      "type": "embertotem",
+      "hp": 125
+    },
+    "fps": 45,
+    "render": {
+      "shadows": true,
+      "triangles": 93008,
+      "calls": 187,
+      "geometries": 80
+    },
+    "mob": {
+      "live": 52,
+      "pooled": 52,
+      "clips": [
+        "Windup",
+        "Idle"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 86196,
+      "calls": 171,
+      "geometries": 80
+    }
+  },
+  {
+    "name": "Abyss Approach",
+    "target": {
+      "type": "shadeling",
+      "hp": 51
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 78224,
+      "calls": 138,
+      "geometries": 91
+    },
+    "mob": {
+      "live": 36,
+      "pooled": 36,
+      "clips": [
+        "Attack",
+        "Idle",
+        "Move"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 73452,
+      "calls": 130,
+      "geometries": 91
+    }
+  },
+  {
+    "name": "Grand Colonnade",
+    "target": {
+      "type": "marblestatue",
+      "hp": 200
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 86820,
+      "calls": 161,
+      "geometries": 98
+    },
+    "mob": {
+      "live": 35,
+      "pooled": 35,
+      "clips": [
+        "Move",
+        "Attack",
+        "Idle"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 81944,
+      "calls": 147,
+      "geometries": 98
+    }
+  },
+  {
+    "name": "Castle Gates",
+    "target": {
+      "type": "siegeknight",
+      "hp": 192
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 159148,
+      "calls": 148,
+      "geometries": 103
+    },
+    "mob": {
+      "live": 42,
+      "pooled": 42,
+      "clips": [
+        "Move",
+        "Idle"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 125652,
+      "calls": 135,
+      "geometries": 103
+    }
+  },
+  {
+    "name": "Brute",
+    "target": {
+      "type": "brute",
+      "hp": 684
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 19670,
+      "calls": 55,
+      "geometries": 104
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Move",
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 19670,
+      "calls": 55,
+      "geometries": 104
+    }
+  },
+  {
+    "name": "Marksman",
+    "target": {
+      "type": "archer",
+      "hp": 1318
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 16990,
+      "calls": 53,
+      "geometries": 106
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Windup",
+        "Move",
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 16822,
+      "calls": 52,
+      "geometries": 106
+    }
+  },
+  {
+    "name": "The Fallen",
+    "target": {
+      "type": "warden",
+      "hp": 1400
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 27046,
+      "calls": 56,
+      "geometries": 107
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Attack",
+        "Move"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 27046,
+      "calls": 56,
+      "geometries": 107
+    }
+  },
+  {
+    "name": "Frost Sorcerer",
+    "target": {
+      "type": "sorcerer",
+      "hp": 1972
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 12166,
+      "calls": 51,
+      "geometries": 108
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Move",
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 11686,
+      "calls": 49,
+      "geometries": 108
+    }
+  },
+  {
+    "name": "Ember Colossus",
+    "target": {
+      "type": "colossus",
+      "hp": 3790
+    },
+    "fps": 59,
+    "render": {
+      "shadows": true,
+      "triangles": 15378,
+      "calls": 54,
+      "geometries": 109
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Windup",
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 15378,
+      "calls": 54,
+      "geometries": 109
+    }
+  },
+  {
+    "name": "Abyss King",
+    "target": {
+      "type": "king",
+      "hp": 5141
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 14766,
+      "calls": 55,
+      "geometries": 110
+    },
+    "mob": {
+      "live": 1,
+      "pooled": 1,
+      "clips": [
+        "Move"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 14766,
+      "calls": 55,
+      "geometries": 110
+    }
+  },
+  {
+    "name": "Marble Colossus",
+    "target": {
+      "type": "colossus",
+      "hp": 4677
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 18262,
+      "calls": 51,
+      "geometries": 112
+    },
+    "mob": {
+      "live": 3,
+      "pooled": 3,
+      "clips": [
+        "Move"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 18262,
+      "calls": 51,
+      "geometries": 112
+    }
+  },
+  {
+    "name": "Awakened King",
+    "target": {
+      "type": "tyrant",
+      "hp": 8230
+    },
+    "fps": 60,
+    "render": {
+      "shadows": true,
+      "triangles": 15602,
+      "calls": 49,
+      "geometries": 113
+    },
+    "mob": {
+      "live": 1,
+      "pooled": 1,
+      "clips": [
+        "Attack"
+      ]
+    },
+    "low": {
+      "shadows": false,
+      "triangles": 15602,
+      "calls": 49,
+      "geometries": 113
+    }
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "hit": {
+    "before": 500,
+    "after": 497,
+    "hit": 0.12
+  },
+  "hitPose": {
+    "type": "sentinel",
+    "clip": "Hit",
+    "dead": false
+  },
+  "death": {
+    "corpses": 1,
+    "clips": [
+      {
+        "type": "sentinel",
+        "clip": "Death",
+        "dead": true
+      }
+    ]
+  },
+  "pool": {
+    "on": true,
+    "live": 0,
+    "corpses": 0,
+    "pooled": 4,
+    "models": [
+      "enemy-assets/revenant",
+      "enemy-assets/bones",
+      "enemy-assets/caster",
+      "enemy-assets/sentinel",
+      "props/pillar-obelisk",
+      "qprops/Chest_Wood"
+    ],
+    "pending": [],
+    "missing": [],
+    "err": null,
+    "actors": []
+  },
+  "errors": []
+}

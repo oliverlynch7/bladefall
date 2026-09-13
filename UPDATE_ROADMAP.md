@@ -1609,3 +1609,7 @@ Abyssal Descent, Gauntlet, all three Arena maps and Treasure Sprint now use cust
 Replaced the sixteen main exploration layouts with authored district graphs and rebuilt all eight boss arenas. Distinct world routes, connected branches, reward overlooks, separated encounter/rest spaces and conservative stairs replace the old layered topology/scatter passes. Recent scenery and enemy kits are retained; trials and secondary layouts remain unchanged. Added 24 phone-viewable Blender overviews and route maps at /3d/art-previews/layouts/.
 
 Fixed campaign resume identity: exact world/area/quest state is now saved, legacy stage-only saves infer the campaign world, and completed-area exits reopen. Gear/gold compatibility verified. Actual movement traversed 284 directed routes; all 130 placed targets were reachable; all 24 areas passed browser rendering checks. Ten class-trial fixtures and 34 secondary-mode fixtures match before/after. Eight boss phase-two checks passed. See docs/CAMPAIGN_LAYOUTS_2026-09-13.md and docs/art-validation/campaign-*.json. Preview branch only; ready for Oliver's route and pacing playtest.
+
+
+## [Codex | 2026-09-13]
+Shipped 1.969.0-weapon-fits: equipped weapon models now bypass studio class filters; body/mesh fits and saved frames restore on every swap; live fitting and full slice imports preserve placement. Existing hero meshes, clips and weapon assets retained. Chrome: 42 equip cases across six bodies, saved-fit fixtures, pre-change save resume, multiplayer render probe. See docs/WEAPON_INTEGRATION_2026-09-13.md.

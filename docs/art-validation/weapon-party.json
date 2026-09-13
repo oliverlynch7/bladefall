@@ -1,0 +1,99 @@
+{
+  "cap": 6,
+  "at": "The Outskirts",
+  "slot": false,
+  "waitedMs": 0,
+  "wouldHaveSkipped": false,
+  "oneRig": false,
+  "localFirst": {
+    "queued": 3,
+    "drawn": 3,
+    "localAt": 0,
+    "cleared": true,
+    "threw": null,
+    "flushThrew": null,
+    "renderErrs": []
+  },
+  "localLast": {
+    "queued": 3,
+    "drawn": 3,
+    "localAt": 0,
+    "cleared": true,
+    "threw": null,
+    "flushThrew": null,
+    "renderErrs": []
+  },
+  "crowd": {
+    "queued": 7,
+    "drawn": 7,
+    "localAt": 0,
+    "cleared": true,
+    "threw": null,
+    "flushThrew": null,
+    "renderErrs": []
+  },
+  "rigTrial": {
+    "queued": 3,
+    "drawn": 3,
+    "localAt": 0,
+    "cleared": true,
+    "threw": null,
+    "flushThrew": null,
+    "renderErrs": []
+  },
+  "rigTrial2": {
+    "queued": 3,
+    "drawn": 3,
+    "localAt": 0,
+    "cleared": true,
+    "threw": null,
+    "flushThrew": null,
+    "renderErrs": []
+  },
+  "rigs": {
+    "frame": 18,
+    "cap": 6,
+    "local": {
+      "model": "Warrior",
+      "clip": "Idle",
+      "wrap": true,
+      "visible": false,
+      "weapon": {
+        "name": "Sword",
+        "stock": true,
+        "want": 2.012,
+        "got": 3.407
+      }
+    },
+    "peers": [
+      {
+        "id": "probe-a",
+        "model": "Wizard",
+        "clip": "Idle",
+        "art": "staff",
+        "arming": true,
+        "armed": false,
+        "seen": 18,
+        "visible": false,
+        "at": {
+          "x": 150,
+          "z": 330
+        }
+      },
+      {
+        "id": "probe-b",
+        "model": "Ranger",
+        "clip": "Idle",
+        "art": "bow",
+        "arming": true,
+        "armed": false,
+        "seen": 18,
+        "visible": true,
+        "at": {
+          "x": -150,
+          "z": 330
+        }
+      }
+    ]
+  }
+}

@@ -669,9 +669,8 @@ function fitSave(){ try { localStorage.setItem(FIT_LS, JSON.stringify(_fitOverri
    ally can be a different class: the grip numbers are tuned per body, so loading the Warrior's
    presets to place a weapon in a Wizard's hand puts the staff through the wrist. Every existing
    caller passes nothing and therefore behaves exactly as before. */
-function weapLoadFor(model){
-  const n = WEAP.name, BODY = model || eyeModel();
-  Object.assign(WEAP, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
+function weaponFit(BODY, n){
+  return Object.assign({}, WEAP_DEFAULT, WEAPON_PRESETS[n] || {},
                 (WEAPON_PRESETS_BY_MODEL[BODY] || {})[n] || {},
                 /* OLIVER'S TUNING, in the shape the slice ACTUALLY wrote it.
                    Read out of his Chrome profile to settle it rather than guessing again: origin
@@ -693,6 +692,7 @@ function weapLoadFor(model){
                 (_fitOverrides['@'+BODY] || {})[n] || {},           // per-BODY, and it wins
                 { name:n, on:true });
 }
+function weapLoadFor(model){ Object.assign(WEAP, weaponFit(model || eyeModel(), WEAP.name)); }
 
 /* The live tuner. Nudge the weapon in your hand, see it move, and it is saved as you go.
    Deliberately keyed on the MODEL name rather than the game weapon, because the model is what the
@@ -755,9 +755,12 @@ window.__weapFit = {
     try{
       const o = (typeof str === 'string') ? JSON.parse(str) : str;
       let n = 0;
-      for(const k in o){ _sliceFits[k] = o[k]; n++; }
+      const fits = o.weapon || o;
+      for(const k in fits){ _sliceFits[k] = fits[k]; n++; }
+      if(o.weaponFrame){ Object.assign(WEAP_FRAME_ALL, o.weaponFrame);
+        localStorage.setItem('bf_weapframe', JSON.stringify(WEAP_FRAME_ALL)); }
       try{ localStorage.setItem(SLICE_LS, JSON.stringify(_sliceFits)); }catch(e){}
-      weapLoadFor(); try{ applyWeaponTransform(actor); }catch(e){}
+      weapLoadFor(); equipForClass();
       return 'imported ' + n + ' entries · ' + this.slice();
     }catch(e){ return 'could not parse: ' + e.message; }
   },
@@ -848,15 +851,15 @@ const WEAPON_LEN = {
 
 const WEAP_FRAME_VERSION = 1;
 let WEAP_FRAME_ALL = {};
+try { WEAP_FRAME_ALL = JSON.parse(localStorage.getItem('bf_weapframe') || '{}') || {}; } catch(e){}
 function weapKey(model){ return (model || eyeModel()) + '|' + WEAP.name; }
-function storedWeapFrame(model){ return WEAP_FRAME_ALL[weapKey(model)] || null; }
+function storedWeapFrame(model, name){
+  const f = WEAP_FRAME_ALL[(model || eyeModel()) + '|' + (name || WEAP.name)];
+  return f && Number.isFinite(f.reach) && f.reach > 0 && ['x','y','z'].includes(f.axis) && (f.half == null || Number.isFinite(f.half)) ? f : null;
+}
 
-/* EVERY EQUIP GOES THROUGH ONE QUEUE, AND IT HAS TO.
-   equipWeapon mutates the single global WEAP - name, then presets, then the grip transform - and
-   then awaits a glTF load before reading those same fields back. With one character that is fine.
-   With allies it is not: two equips in flight interleave across the await and the second one's
-   presets place the first one's weapon. Serialising costs nothing (an equip happens on a weapon
-   CHANGE, not per frame) and removes the whole class of race. */
+/* Serialize mesh attachment. Each request owns its body/weapon fit snapshot, so an ally
+   or live tuning change cannot alter another request while its asset is loading. */
 let _equipQ = Promise.resolve();
 function queueEquip(fn){
   const run = () => { try { return Promise.resolve(fn()).catch(() => null); }
@@ -914,9 +917,12 @@ function clearWeapon(actor){
 
 
 
-function applyWeaponTransform(actor){
+function applyWeaponTransform(actor, fit){
+  if(actor && !actor.root) actor = actor._weaponHolder;
+  const WEAP = fit || Object.assign({hideStock:true}, window.__weapFit.get());
   const g = actor && actor._weapGrip;
   if(!g || !g.holder) return false;
+  actor.fit = {...WEAP};
   const holder = g.holder, reach = g.reach || 1, axis = g.axis || 'y';
 
   holder.rotation.set(WEAP.pitch, WEAP.yaw, WEAP.roll);
@@ -970,29 +976,23 @@ async function loadStockWeapon(key){
    module-level `_weapSeq`, which reads as "a newer request has started" and meant it while there was
    one character - with several rigs it means "a newer request for SOMEBODY", so arming an ally
    cancelled the local hero's in-flight load and left you holding nothing. */
-async function equipWeapon(actor, useSaved, opts){
+async function equipWeapon(actor, opts){
   if(!actor) return null;
   const BODY = (opts && opts.model) || eyeModel();
   const seq = (actor._weapSeq = (actor._weapSeq || 0) + 1);   // anything older than this is stale
   clearWeapon(actor);
-  if(useSaved !== false) weapLoadFor(BODY);
-  if(!WEAP.on) return null;
-  /* What the player is ACTUALLY carrying, ahead of the archetype default. Still filtered by the
-     archetype rule below, so a wizard cannot end up swinging a claymore - that rule is what kept
-     tuning to ~28 weapons rather than 168. */
-  try {
-    const pw = (opts && 'weapon' in opts) ? opts.weapon
-             : (window.__BF3 && window.__BF3.G && window.__BF3.G.p && window.__BF3.G.p.weapon);
-    const want = modelForWeapon(pw);
-    if(want) WEAP.name = want;
-  } catch(err){}
-  // archetype rule — the Monk is unarmed, and a wizard does not swing a claymore
-  const allowed = weaponsFor(BODY);
-  if(allowed.length && !allowed.includes(WEAP.name)){
-    const pref = DEFAULT_WEAPON[BODY];
-    WEAP.name = (pref && allowed.includes(pref)) ? pref : allowed[0];
+  const pw = (opts && 'weapon' in opts) ? opts.weapon
+    : window.__BF3?.G?.p?.weapon;
+  const name = opts?.name || modelForWeapon(pw) || (pw?.art === 'fist' ? null : DEFAULT_WEAPON[BODY]);
+  if(!name){
+    const rig = weaponRig(actor);
+    if(rig?.stock) rig.stock.visible = false;
+    actor.fit = null;
+    return {name:null, unarmed:true};
   }
-  if(!allowed.length) return null;
+  // Runtime gear follows inventory. The studio's archetype list only filters its picker.
+  const WEAP = weaponFit(BODY, name);
+  actor.fit = WEAP;
   const rig = weaponRig(actor);
   if(!rig) return null;
 
@@ -1016,7 +1016,7 @@ async function equipWeapon(actor, useSaved, opts){
     const ss = sb.getSize(new THREE.Vector3());
     const sreach = Math.max(ss.x, ss.y, ss.z) || 1;
     {
-      const wf = storedWeapFrame(BODY);
+      const wf = storedWeapFrame(BODY, WEAP.name);
       const ax = (ss.y >= ss.x && ss.y >= ss.z) ? 'y' : (ss.x >= ss.z ? 'x' : 'z');
       actor._stockGrip = { holder: st.holder, reach: wf ? wf.reach : sreach,
                            axis: wf && wf.axis ? wf.axis : ax,
@@ -1035,6 +1035,7 @@ async function equipWeapon(actor, useSaved, opts){
     actor._weap = wrapS;
     actor._weapGrip = actor._stockGrip;
     actor._stockGrip = null;
+    applyWeaponTransform(actor, WEAP);
     return { name: WEAP.name, stockModel: true };
   }
 
@@ -1106,7 +1107,7 @@ async function equipWeapon(actor, useSaved, opts){
   let reach = Math.max(sz.x, sz.y, sz.z);
   let axisUse = axis, halfUse = half;
   {   // a locked frame wins, so a future change to how reach is measured cannot move it
-    const wf = storedWeapFrame(BODY);
+    const wf = storedWeapFrame(BODY, WEAP.name);
     if(wf){ reach = wf.reach; axisUse = wf.axis || axis; if(wf.half != null) halfUse = wf.half; }
   }
   // remember the pieces the transform helper needs so slider drags never reload anything
@@ -1136,6 +1137,7 @@ async function equipWeapon(actor, useSaved, opts){
   }
   if(rig.stock && WEAP.hideStock) rig.stock.visible = false;
   actor._weap = wrap;
+  applyWeaponTransform(actor, WEAP);
   return { name: WEAP.name, stock: !!rig.stock, want:+want.toFixed(3), got:+got.toFixed(3) };
 }
 
@@ -1143,23 +1145,22 @@ async function equipWeapon(actor, useSaved, opts){
 
 /* Choose the weapon for the current class. Uses the archetype default where one exists, so a
    ranger draws a bow rather than whatever sorts first alphabetically. */
-function weaponForClass(){
-  const model = eyeModel();
-  const allowed = weaponsFor(model);
-  if(!allowed.length) return null;                  // Monk is unarmed by design
-  const pref = DEFAULT_WEAPON[model];
-  return (pref && allowed.includes(pref)) ? pref : allowed[0];
-}
-async function equipForClass(){
+function localWeaponHolder(){
   if(!actor) return null;
-  const name = weaponForClass();
-  const holder = { root: actor, model: HERO3D._wrap };
-  if(!name){ clearWeapon(holder); HERO3D.weapon = null; return null; }
-  WEAP.name = name;
-  weapLoadFor();
-  const r = await equipWeapon(holder, false);
-  HERO3D.weapon = r ? { name, stock: !!r.stockModel } : { name, failed: true };
-  return HERO3D.weapon;
+  return actor._weaponHolder || (actor._weaponHolder = {root:actor, model:HERO3D._wrap});
+}
+function equipForClass(opts){
+  const holder = localWeaponHolder(), body = eyeModel();
+  if(!holder) return Promise.resolve(null);
+  const weapon = window.__BF3?.G?.p?.weapon;
+  return queueEquip(async () => {
+    if(holder.root !== actor) return null;
+    const r = await equipWeapon(holder, {model:body, weapon, ...opts});
+    if(holder.root !== actor) return null;
+    if(holder.fit) Object.assign(WEAP, holder.fit);
+    HERO3D.weapon = r || {name:opts?.name || modelForWeapon(weapon), failed:true};
+    return HERO3D.weapon;
+  });
 }
 
 let _lastW = 0, _lastH = 0;
@@ -1662,7 +1663,7 @@ function armPeer(rec, p){
   const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
   if(rec.arming || (a === rec.art && r === rec.rar)) return;
   rec.art = a; rec.rar = r; rec.arming = true;
-  queueEquip(() => equipWeapon(rec.holder, false, { model: rec.model, weapon: w || null }))
+  queueEquip(() => equipWeapon(rec.holder, { model: rec.model, weapon: w || null }))
     .then(() => { rec.arming = false; }, () => { rec.arming = false; });
 }
 
@@ -1698,11 +1699,8 @@ export function drawHero3D(p, t){
     const w = p && p.weapon, a = w ? w.art : null, r = w ? w.rarity : null;
     if(_isLocal && actor && HERO3D.ready && !_reArming && (a !== _lastArt || r !== _lastRar)){
       _lastArt = a; _lastRar = r;
-      if(modelForWeapon(w)){
-        _reArming = true;
-        queueEquip(() => equipWeapon({ root: actor, model: HERO3D._wrap }, false))
-          .then(() => { _reArming = false; }, () => { _reArming = false; });
-      }
+      _reArming = true;
+      equipForClass().finally(() => { _reArming = false; });
     }
   } catch(err){}
   if(!HERO3D.on || !HERO3D.ready || !renderer || !p) return false;
@@ -1828,10 +1826,11 @@ window.__hero3dSkins = () => {
   return { classId: cls, worn: HERO3D.skinId || 'base',
            available: ['base'].concat(CLASS_SKINS[cls] ? [CLASS_SKINS[cls].id] : []) };
 };
-window.__hero3dSetWeapon = async n => { WEAP.name = n; weapLoadFor();
-  const r = await equipWeapon({ root: actor, model: HERO3D._wrap }, false);
-  HERO3D.weapon = r ? { name:n, stock:!!r.stockModel } : { name:n, failed:true };
-  return HERO3D.weapon; };
+window.__hero3dSetWeapon = n => equipForClass({name:n});
+window.__hero3dWeaponFit = () => {
+  const h = localWeaponHolder(), g = h?._weapGrip;
+  return {fit:h?.fit, frame:g && {reach:g.reach,axis:g.axis,half:g.half}, position:g?.holder.position.toArray(), rotation:g?.holder.rotation.toArray(), attached:!!h?._weap?.parent};
+};
 
 /* Diagnostic: where does the character actually land? Reports its world position, its
    projected normalised device coords (|x|,|y| < 1 means on screen, z < -1 or > 1 means

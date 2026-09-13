@@ -4,7 +4,7 @@ import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
 const kit=new Map(),dummy=new THREE.Object3D(),zero=new THREE.Matrix4().makeScale(0,0,0),CHUNK=360;
 let pending,failed=false,active=null;
 const hash=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v)};
-export const wantsFrost=w=>!failed&&w.zone==='frost'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&!w.delve&&new URLSearchParams(location.search).get('frostart')!=='0';
+export const wantsFrost=w=>!failed&&w.zone==='frost'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&new URLSearchParams(location.search).get('frostart')!=='0';
 export const frostReady=()=>kit.size===7;
 export function loadFrost(){
   if(pending)return pending;

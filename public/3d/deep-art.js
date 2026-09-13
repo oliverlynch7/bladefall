@@ -10,7 +10,7 @@ const profiles={
   castle:{name:'Castle Duskmoor · The Violet Crown',emissive:'#090810',palette:['#565460','#66616d','#454653','#766c77'],body:'#30323e',fog:'#211f32',sun:'#c5c5e5',lamp:'#c184ff',hazard:['#12141f','#34304c'],sky:[.13,.12,.19],sunGlow:[.025,.018,.055]}
 };
 const hash=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v)};
-export const wantsDeep=w=>!!profiles[w.zone]&&!failed.has(w.zone)&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&!w.delve&&new URLSearchParams(location.search).get('deepart')!=='0';
+export const wantsDeep=w=>!!profiles[w.zone]&&!failed.has(w.zone)&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&new URLSearchParams(location.search).get('deepart')!=='0';
 export const deepReady=w=>kits.get(w.zone)?.size===10;
 export function loadDeep(w){
   const zone=w.zone;if(pending.has(zone))return pending.get(zone);
@@ -21,28 +21,34 @@ export function loadDeep(w){
 }
 function subtract(p,o){const a=Math.max(p.a,o.a),b=Math.min(p.b,o.b),c=Math.max(p.c,o.c),d=Math.min(p.d,o.d);if(a>=b||c>=d)return[p];return[{a:p.a,b:a,c:p.c,d:p.d},{a:b,b:p.b,c:p.c,d:p.d},{a,b,c:p.c,d:c},{a,b,c:d,d:p.d}].filter(q=>q.b-q.a>.05&&q.d-q.c>.05)}
 export function buildDeep(scene,w){
-  const abyss=w.zone==='abyss',regal=['palace','castle'].includes(w.zone),cfg=profiles[w.zone],kit=kits.get(w.zone),root=new THREE.Group();root.name=cfg.name;
+  const abyss=w.zone==='abyss',regal=['palace','castle'].includes(w.zone),cfg={...profiles[w.zone],...w.portalProfile},kit=kits.get(w.zone),root=new THREE.Group();root.name=cfg.name;
   const bins=new Map(),obstacles=new WeakSet(),walls=new WeakSet(),caps=new Map(),fade=[],glows=[],bodies=new Set();let floors=0;
   const material=new THREE.MeshLambertMaterial({vertexColors:true,emissive:cfg.emissive}),glowMaterial=new THREE.MeshBasicMaterial({vertexColors:true});
   const palette=cfg.palette;
   function add(name,x,y,z,sx=1,sy=sx,sz=sx,color=null,rot=0,obstacle=null){const cell=Math.floor(x/CHUNK)+','+Math.floor(z/CHUNK),key=cell+'|'+name;if(!bins.has(key))bins.set(key,{cell,name,list:[]});bins.get(key).list.push({x,y,z,sx,sy,sz,color,rot,obstacle});}
   function cap(o,top,source=null){
     const key=Math.round(top*10),laid=caps.get(key)||[];caps.set(key,laid);let pieces=[{a:o.x-o.w/2,b:o.x+o.w/2,c:o.z-o.d/2,d:o.z+o.d/2}];for(const old of laid)pieces=pieces.flatMap(p=>subtract(p,old));
-    for(const p of pieces){const nx=Math.max(1,Math.ceil((p.b-p.a)/115)),nz=Math.max(1,Math.ceil((p.d-p.c)/115)),tw=(p.b-p.a)/nx,td=(p.d-p.c)/nz;
-      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*tw,z=p.c+(iz+.5)*td;add('cap',x,top+.55,z,Math.max(.1,tw-.7),1.1,Math.max(.1,td-.7),palette[Math.floor(hash(x,z)*4)],0,source);floors++;}laid.push(p);
+    for(const p of pieces){const step=w.portalMode&&w.portalMode!=='sprint'&&top===0?65:115,nx=Math.max(1,Math.ceil((p.b-p.a)/step)),nz=Math.max(1,Math.ceil((p.d-p.c)/step)),tw=(p.b-p.a)/nx,td=(p.d-p.c)/nz;
+      for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*tw,z=p.c+(iz+.5)*td;let color=palette[Math.floor(hash(x,z)*4)];
+        if(w.portalMode&&w.portalMode!=='sprint'&&top===0){const r=Math.hypot(x,z),spoke=Math.abs(Math.sin(Math.atan2(z,x)*4));if(Math.abs(r-285)<28||r<55||(r>70&&r<260&&spoke<.13))color=cfg.body;}
+        add('cap',x,top+.55,z,Math.max(.1,tw-.7),1.1,Math.max(.1,td-.7),color,0,source);floors++;}laid.push(p);
     }
   }
   function surface(o,base,top,source=null){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     add('stone',o.x,base+h/2,o.z,ww,h,dd,cfg.body,0,source&&h>65?source:null);cap({...o,w:ww,d:dd},top,source&&h>65?source:null);
+    if(w.portalMode&&h>80&&Math.max(ww,dd)>250&&Math.min(ww,dd)<50){const alongX=ww>dd,span=alongX?ww:dd,n=Math.ceil(span/100),bw=span/n;
+      for(let row=0;row<3;row++)for(let i=0;i<n;i++)for(const sign of [-1,1]){const t=-span/2+(i+.5)*bw;
+        add('stone',o.x+(alongX?t:sign*ww/2),base+(row+.5)*h/3,o.z+(alongX?sign*dd/2:t),alongX?bw-2:1,h/3-2,alongX?1:bw-2,palette[(i+row)%4],0,source);}
+    }
     // Below-floor fissures cannot be mistaken for safe stepping stones.
     if(!regal&&h>16&&ww>60&&hash(o.x,o.z)<.28)add('glow',o.x,base+h*.28,o.z+dd/2+.15,Math.min(ww*.55,65),2.5,.3);
     if(regal&&h>170&&ww>50&&dd>50){for(let y=base+100;y<top-55;y+=180){add('furnace',o.x,y,o.z+dd/2+.3,Math.min(ww*.45,38),55,2,null,0,source);}}
   }
   // Phaseable segments are removed/reinserted by gameplay without a scene rebuild.
   // Their original renderer must remain the sole owner of their visible surface.
-  for(const s of w.segments||[])if(!s.nofloor&&!s.phaseable)surface(s,abyss?-45:-24,0);
-  const solids=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
+  for(const s of w.segments||[])if(!s.nofloor&&!s.phaseable&&!s.phase)surface(s,abyss?-45:-24,0);
+  const solids=(w.obstacles||[]).filter(o=>!o.phase&&!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
     for(const o of solids){const top=o.h??1,base=o.y0??(o.kind==='plat'?Math.min(0,top-16):0);surface(o,base,top,o);obstacles.add(o);}
   for(const o of w.walls||[]){if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1),o);walls.add(o);}
   // Exposed island edges get masonry courses; shared interior edges are left untouched.
@@ -57,6 +63,7 @@ export function buildDeep(scene,w){
     }
   }
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
+    if(d.portalPart){add(d.portalPart,d.x,y,d.z,ww,hh,dd,d.c||null,0,d.portalObstacle||null);if(d.portalPart==='glow')glows.push(new THREE.Vector3(d.x,y,d.z));continue;}
     if(solids.some(o=>o.x===d.x&&o.z===d.z&&o.w===ww&&o.d===dd&&Math.abs(o.h-y-hh)<3))continue;
     if(regal&&d.kind==='column'){if(d.lead===false)continue;add('pillar',d.x,y-(d.pillarH||0),d.z,ww,hh+(d.pillarH||0),dd);continue;}
     if(regal&&['marble','castle','apex'].includes(d.theme)){add('crag',d.x,y,d.z,ww,hh,dd);continue;}

@@ -5,7 +5,7 @@ const kit=new Map(),dummy=new THREE.Object3D(),CHUNK=400;
 let pending,failed=false,active=null;
 const hash=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v)};
 const palette=['#65665c','#6b6b5f','#62665d','#716e60','#60645b'];
-export const wantsKeep=w=>!failed&&w.zone==='keep'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&!w.delve&&new URLSearchParams(location.search).get('keepart')!=='0';
+export const wantsKeep=w=>!failed&&w.zone==='keep'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&new URLSearchParams(location.search).get('keepart')!=='0';
 export const keepReady=()=>kit.size===9;
 export function loadKeep(){
   if(pending)return pending;
@@ -53,7 +53,7 @@ export function buildKeep(scene,w){
     // Existing column silhouettes receive inset arrow slits without occupying extra floor.
     if(o.kind==='col'&&o.w>=70&&o.d>=60&&top>100){for(const side of [-1,1]){block(o.x,base+(top-base)*.61,o.z+side*(o.d/2+.35),12,28,1.2,'#151f1d');block(o.x,base+(top-base)*.58,o.z+side*(o.d/2+1),3,16,.5,'#bb7939');}}
   }
-  for(const o of w.walls||[]){if(o.invisible)continue;surface(o,o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);}
+  for(const o of w.walls||[]){if(o.invisible)continue;if(w.delve){target='s'+structures.length;structures.push({cell:target,o});}surface(o,o.y0||0,(o.y0||0)+(o.h||1));walls.add(o);target=null;}
   for(const d of w.deco||[]){const ww=d.w||20,dd=d.d||ww,hh=d.h||20,y=d.y0||0,r=hash(d.x,d.z);
     if(solids.some(o=>Math.abs(o.x-d.x)<.01&&Math.abs(o.z-d.z)<.01&&o.w===ww&&o.d===dd&&Math.abs(o.h-y-hh)<2))continue;
     if(d.theme==='ruins'||d.theme==='dungeon'){
@@ -74,7 +74,15 @@ export function buildKeep(scene,w){
     add('arch',x,198,z,(b.x-a.x)/2,170,42);for(const wall of [a,b]){add('banner',wall.x+(wall.x<x?35:-35),94,z+20,50,110,10);brazier(wall.x+(wall.x<x?0:0),220,z,18);}
   }}
   // Existing room corners are good light landmarks; fixture bases stay inside platform edges.
-  for(const r of w.rooms||[]){if(!r.name)continue;const y=r.y||0;for(const side of [-1,1]){const x=r.x+side*(r.w/2-18),z=r.z-r.d/2+20;brazier(x,y,z,under?17:20);}}
+  for(const r of w.rooms||[]){if(!r.name&&!w.delve)continue;const y=r.y||0;for(const side of [-1,1]){const x=r.x+side*(r.w/2-18),z=r.z-r.d/2+20;
+    if(w.delve){
+      // Mount the dungeon lanterns on existing masonry, above the walkable floor.
+      const wall=(w.walls||[]).find(o=>!o.invisible&&Math.abs(x-o.x)<o.w/2+22&&Math.abs(z-o.z)<o.d/2+22);if(!wall)continue;
+      target=structures.find(s=>s.o===wall)?.cell||null;const top=(wall.y0||0)+wall.h;
+      brazier(Math.max(wall.x-wall.w/2,Math.min(x,wall.x+wall.w/2)),top,Math.max(wall.z-wall.d/2,Math.min(z,wall.z+wall.d/2)),12);
+      add('banner',x,top-58,z,24,48,3,null,side*.04);target=null;
+    }else brazier(x,y,z,under?17:20);
+  }}
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,list} of bins.values()){
     if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,name==='banner'?bannerMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;

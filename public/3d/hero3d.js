@@ -21,7 +21,7 @@
 import * as THREE from './three.module.js';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=1966';
+import { WORLD3D, syncWorld } from './world3d.js?v=1967';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=1966';
 import { PROP3D, syncProps } from './prop3d.js?v=1966';
 

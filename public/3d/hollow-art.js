@@ -5,7 +5,7 @@ const kit=new Map(),dummy=new THREE.Object3D(),CHUNK=400;
 let pending,failed=false,active=null;
 const hash=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v)};
 const palette=['#676b61','#6c6e62','#62685f','#717265','#666b60'];
-export const wantsHollow=w=>!failed&&w.zone==='hollow'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&!w.delve&&new URLSearchParams(location.search).get('hollowart')!=='0';
+export const wantsHollow=w=>!failed&&w.zone==='hollow'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&new URLSearchParams(location.search).get('hollowart')!=='0';
 export const hollowReady=()=>kit.size===7;
 export function loadHollow(){
   if(pending)return pending;

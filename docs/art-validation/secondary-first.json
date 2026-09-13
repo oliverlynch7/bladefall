@@ -1,0 +1,337 @@
+[
+  {
+    "name": "Abyssal Descent",
+    "fps": 60,
+    "quality": "high",
+    "version": "1.967.0-secondary-worlds-art",
+    "floor": 1,
+    "endless": true,
+    "delve": false,
+    "bossRush": false,
+    "arena": false,
+    "bonus": false,
+    "area": 0,
+    "side": false,
+    "stage": 0,
+    "player": [
+      0,
+      0,
+      330
+    ],
+    "collisionHash": "187141e2",
+    "segments": 1,
+    "obstacles": 0,
+    "rooms": [],
+    "deco": {
+      "plains": 20
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "descent|1|0|plains|0|false|20|castle|400,0;-399,0;380,-123",
+      "counts": {
+        "deepArt": "abyss",
+        "artObstacles": true,
+        "floorTiles": 119,
+        "totalTriangles": 10460,
+        "instances": 173,
+        "chunks": 16,
+        "visibleTriangles": 10460,
+        "visibleDrawCalls": 51,
+        "portalArt": "descent"
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 16442,
+      "calls": 68,
+      "geometries": 33
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 4,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  },
+  {
+    "name": "Gauntlet",
+    "fps": 60,
+    "quality": "high",
+    "version": "1.967.0-secondary-worlds-art",
+    "endless": false,
+    "delve": false,
+    "bossRush": true,
+    "arena": false,
+    "bonus": false,
+    "area": 0,
+    "side": false,
+    "stage": 2,
+    "player": [
+      0,
+      0,
+      330
+    ],
+    "collisionHash": "187141e2",
+    "segments": 1,
+    "obstacles": 0,
+    "rooms": [],
+    "deco": {
+      "badlands": 20
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "gauntlet||2|badlands|0|false|20|castle|400,0;-399,0;380,-123",
+      "counts": {
+        "deepArt": "castle",
+        "artObstacles": true,
+        "floorTiles": 119,
+        "totalTriangles": 10640,
+        "instances": 168,
+        "chunks": 16,
+        "visibleTriangles": 10640,
+        "visibleDrawCalls": 49,
+        "portalArt": "gauntlet"
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 16478,
+      "calls": 66,
+      "geometries": 41
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 1,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  },
+  {
+    "name": "Treasure Sprint",
+    "fps": 60,
+    "quality": "high",
+    "version": "1.967.0-secondary-worlds-art",
+    "endless": false,
+    "delve": false,
+    "bossRush": false,
+    "arena": false,
+    "bonus": true,
+    "area": 0,
+    "side": false,
+    "stage": 0,
+    "player": [
+      0,
+      0,
+      0
+    ],
+    "collisionHash": "c14ff6c6",
+    "segments": 2,
+    "obstacles": 35,
+    "rooms": [],
+    "deco": {},
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "sprint||0|plains|0|false|empty|2|35",
+      "counts": {
+        "deepArt": "palace",
+        "artObstacles": true,
+        "floorTiles": 83,
+        "totalTriangles": 12652,
+        "instances": 174,
+        "chunks": 16,
+        "visibleTriangles": 4196,
+        "visibleDrawCalls": 26,
+        "portalArt": "sprint"
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 13464,
+      "calls": 55,
+      "geometries": 50
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 0,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  },
+  {
+    "name": "Arena",
+    "fps": 60,
+    "quality": "high",
+    "version": "1.967.0-secondary-worlds-art",
+    "endless": false,
+    "delve": false,
+    "bossRush": false,
+    "arena": true,
+    "bonus": false,
+    "area": 0,
+    "side": false,
+    "stage": 0,
+    "player": [
+      0,
+      0,
+      340
+    ],
+    "collisionHash": "a994c1ce",
+    "segments": 1,
+    "obstacles": 1,
+    "rooms": [],
+    "deco": {
+      "box": 1
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "arena||0|arena|0|false|1|outskirts|0,340;0,340;0,340",
+      "counts": {
+        "deepArt": "castle",
+        "artObstacles": true,
+        "floorTiles": 196,
+        "totalTriangles": 13848,
+        "instances": 238,
+        "chunks": 22,
+        "visibleTriangles": 13848,
+        "visibleDrawCalls": 51,
+        "portalArt": "arena"
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 16858,
+      "calls": 51,
+      "geometries": 55
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 535,
+    "enemies": 0,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  },
+  {
+    "name": "Endless Dungeon",
+    "fps": 59,
+    "quality": "high",
+    "version": "1.967.0-secondary-worlds-art",
+    "floor": 1,
+    "endless": false,
+    "delve": true,
+    "bossRush": false,
+    "arena": false,
+    "bonus": false,
+    "area": 0,
+    "side": false,
+    "stage": 0,
+    "player": [
+      294,
+      0,
+      139.66505102217198
+    ],
+    "collisionHash": "2165666",
+    "segments": 13,
+    "obstacles": 33,
+    "rooms": [
+      {
+        "x": 294,
+        "z": 0,
+        "w": 365.45486123207957,
+        "d": 359.33010204434396
+      },
+      {
+        "x": 882,
+        "z": 0,
+        "w": 453.6166632737964,
+        "d": 420
+      },
+      {
+        "x": 1470,
+        "z": 0,
+        "w": 404.2164264986291,
+        "d": 395.1679889604449
+      },
+      {
+        "x": 294,
+        "z": -540,
+        "w": 433.46639606058596,
+        "d": 373.6932287111878
+      },
+      {
+        "x": -294,
+        "z": 0,
+        "w": 403.44740540441126,
+        "d": 350.95725358575584
+      },
+      {
+        "x": -882,
+        "z": 0,
+        "w": 447.0604409739375,
+        "d": 420
+      },
+      {
+        "x": -294,
+        "z": -540,
+        "w": 468,
+        "d": 420
+      }
+    ],
+    "deco": {
+      "plains": 34
+    },
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "dungeon|1|0|plains|0|false|34|outskirts|1914,-220;1779,-368;-1280,-713",
+      "counts": {
+        "outskirtsArt": true,
+        "floorTiles": 1072,
+        "roadTiles": 0,
+        "tree": 0,
+        "totalTriangles": 21416,
+        "instances": 1266,
+        "chunks": 27,
+        "drawCalls": 58,
+        "visibleTriangles": 18488,
+        "visibleDrawCalls": 47,
+        "artObstacles": true
+      },
+      "err": null
+    },
+    "render": {
+      "shadows": true,
+      "triangles": 27444,
+      "calls": 72,
+      "geometries": 67
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 16,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  }
+]

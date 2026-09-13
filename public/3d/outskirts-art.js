@@ -6,7 +6,7 @@ const kit=new Map();let pending=null,failed=false;
 const CHUNK=400,white=new THREE.Color('white'),dummy=new THREE.Object3D();
 const hash=(x,z)=>{const n=Math.sin(x*12.9898+z*78.233)*43758.5453;return n-Math.floor(n)};
 let active=null;
-export function wantsOutskirts(w){return !failed && new URLSearchParams(location.search).get('outskirtsart')!=='0' && w.zone==='outskirts'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus&&!w.delve;}
+export function wantsOutskirts(w){return !failed && new URLSearchParams(location.search).get('outskirtsart')!=='0' && w.zone==='outskirts'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus;}
 export function outskirtsReady(){return kit.size===10;}
 export function loadOutskirts(){
   if(pending)return pending;
@@ -66,7 +66,7 @@ function builder(root){
 const covers=(s,x,z,margin=0)=>Math.abs(x-s.x)<=s.w/2+margin&&Math.abs(z-s.z)<=s.d/2+margin;
 export function buildOutskirts(scene,w){
   const root=new THREE.Group();root.name='Outskirts authored art';const B=builder(root),add=B.add;
-  const woods=w.area===1||w.side,boss=w.area<0,segs=(w.segments||[]).filter(s=>!s.nofloor&&s.w>8&&s.d>8),paths=segs.filter(s=>s.path);
+  const woods=w.area===1||w.side||(w.delve&&w.theme==='forest'),boss=w.area<0,segs=(w.segments||[]).filter(s=>!s.nofloor&&s.w>8&&s.d>8),paths=segs.filter(s=>s.path);
   const soil=woods?'#494637':boss?'#635039':'#695b43';let floors=0,roads=0;
   const done=[];
   for(const s of segs){

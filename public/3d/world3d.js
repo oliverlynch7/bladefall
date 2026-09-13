@@ -1,9 +1,10 @@
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=9';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=1967';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=1967';
 import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=1959';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1964';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1962';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1961';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1965';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=1967';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=1967';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=1967';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=1967';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 
@@ -1763,6 +1764,7 @@ function buildHubDecoProps(world){
 }
 
 export function buildWorld(scene, world){
+  if(wantsPortal(world)&&portalReady(world)){clearWorld(scene);const art=buildPortal(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsDeep(world)&&deepReady(world)){clearWorld(scene);const art=buildDeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsFrost(world)&&frostReady()){clearWorld(scene);const art=buildFrost(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
   if(wantsKeep(world)&&keepReady()){clearWorld(scene);const art=buildKeep(scene,world);group=art.group;scene.add(group);WORLD3D.counts=art.counts;WORLD3D.ready=true;return art.counts;}
@@ -1980,9 +1982,12 @@ export function clearWorld(scene){
 function signature(world){
   if(world.hubArt)return 'hub-art|'+world.hubLayout+'|'+JSON.stringify([world.gates.map(g=>[g.zi,g.side,g.open,g.done]),world.hubNpcs.map(n=>n.id),world.hubArt.upgrades,world.hubArt.zoneDone]);
   const d = world.deco || [];
-  if(!d.length) return 'empty';
+  const mode=portalMode(world)||(world.delve?'dungeon':'campaign');
+  const prefix=[mode,world.floor,world.stage,world.theme,world.area,world.arenaLava].join('|')+'|';
+  if(world.bonus&&world.sprintFun)return prefix+JSON.stringify(world.course||[]);
+  if(!d.length) return prefix+'empty|'+world.segments.length+'|'+world.obstacles.length;
   const a = d[0], b = d[(d.length / 2) | 0], c = d[d.length - 1];
-  return d.length + '|' + (world.zone || '?') + '|' +
+  return prefix+d.length + '|' + (world.zone || '?') + '|' +
          [a, b, c].map(o => o ? (o.x | 0) + ',' + (o.z | 0) : '-').join(';');
 }
 
@@ -1995,22 +2000,24 @@ export function syncWorld(scene){
   if(!world || !world.deco) return false;
   const sig = signature(world);
   if(sig === WORLD3D.built){ updateOutskirts(world);updateHubArt(world,performance.now()/1000);updateHollow(world);updateKeep(world);updateFrost(world);updateDeep(world); return true; }
-  const customDeep=wantsDeep(world);
+  const customPortal=wantsPortal(world);
+  if(customPortal&&!portalReady(world)){loadPortal(world);return false;}
+  const customDeep=!customPortal&&wantsDeep(world);
   if(customDeep&&!deepReady(world)){loadDeep(world);return false;}
-  const customFrost=wantsFrost(world);
+  const customFrost=!customPortal&&wantsFrost(world);
   if(customFrost&&!frostReady()){loadFrost();return false;}
-  const customKeep=wantsKeep(world);
+  const customKeep=!customPortal&&wantsKeep(world);
   if(customKeep&&!keepReady()){loadKeep();return false;}
-  const customHollow=wantsHollow(world);
+  const customHollow=!customPortal&&wantsHollow(world);
   if(customHollow&&!hollowReady()){loadHollow();return false;}
-  const customHub=wantsHubArt(world);
+  const customHub=!customPortal&&wantsHubArt(world);
   if(customHub&&!hubArtReady()){loadHubArt();return false;}
-  const custom=wantsOutskirts(world);
+  const custom=!customPortal&&wantsOutskirts(world);
   if(custom && !outskirtsReady()){loadOutskirts();return false;}
   /* Prop models load once, asynchronously. Until they arrive the build is deferred rather than
      run with an empty cache, which would fall back to boxes and then never rebuild because the
      signature would already be marked as built. */
-  if(!custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
+  if(!customPortal && !custom && !customHub && !customHollow && !customKeep && !customFrost && !customDeep && !_propsReady){
     if(!_propsPending){ _propsPending = true; ensureProps().finally(() => { _propsPending = false; }); }
     return false;
   }

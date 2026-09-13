@@ -1,0 +1,1054 @@
+[
+  {
+    "zone": 0,
+    "area": 0,
+    "name": "The Outskirts",
+    "rooms": 8,
+    "enemies": 18,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "ok4",
+        "k": "reach",
+        "x": 0,
+        "z": -1610,
+        "y": 160
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 0
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 0
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 18
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 14
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 14
+      },
+      {
+        "a": 4,
+        "b": 7,
+        "maxRise": 13
+      }
+    ],
+    "bad": [],
+    "geometry": 164
+  },
+  {
+    "zone": 0,
+    "area": 1,
+    "name": "Black Woods",
+    "rooms": 8,
+    "enemies": 10,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 10
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 0
+      },
+      {
+        "a": 2,
+        "b": 3,
+        "maxRise": 8
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "maxRise": 18
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 17
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 12
+      },
+      {
+        "a": 3,
+        "b": 6,
+        "maxRise": 8
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 146
+  },
+  {
+    "zone": 1,
+    "area": 0,
+    "name": "Hollow Pass",
+    "rooms": 8,
+    "enemies": 22,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "hp4",
+        "k": "purge",
+        "x": -70,
+        "z": -355,
+        "y": 0
+      },
+      {
+        "q": "hp4",
+        "k": "purge",
+        "x": 620,
+        "z": -615,
+        "y": 0
+      },
+      {
+        "q": "hp4",
+        "k": "purge",
+        "x": 360,
+        "z": -1385,
+        "y": 40
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 17
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 0
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 0
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 8
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 9
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 8
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 17
+      },
+      {
+        "a": 5,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 255
+  },
+  {
+    "zone": 1,
+    "area": 1,
+    "name": "The Dry Wash",
+    "rooms": 7,
+    "enemies": 12,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 0
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 7
+      }
+    ],
+    "bad": [],
+    "geometry": 209
+  },
+  {
+    "zone": 2,
+    "area": 0,
+    "name": "Ruined Keep",
+    "rooms": 8,
+    "enemies": 22,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "rk4",
+        "k": "survive",
+        "x": 720,
+        "z": -520,
+        "y": 100
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 17
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 0
+      },
+      {
+        "a": 3,
+        "b": 6,
+        "maxRise": 0
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 0
+      },
+      {
+        "a": 6,
+        "b": 5,
+        "maxRise": 17
+      },
+      {
+        "a": 1,
+        "b": 5,
+        "maxRise": 0
+      },
+      {
+        "a": 5,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 163
+  },
+  {
+    "zone": 2,
+    "area": 1,
+    "name": "The Undercroft",
+    "rooms": 7,
+    "enemies": 14,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 18
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 18
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 149
+  },
+  {
+    "zone": 3,
+    "area": 0,
+    "name": "Frostfell",
+    "rooms": 7,
+    "enemies": 12,
+    "dens": 2,
+    "questMarks": [
+      {
+        "q": "ff4",
+        "k": "kindle",
+        "x": 115.468311499264,
+        "z": -565.4484716507496,
+        "y": 0
+      },
+      {
+        "q": "ff4",
+        "k": "kindle",
+        "x": -639.3707253903057,
+        "z": -1596.77248001498,
+        "y": 100
+      },
+      {
+        "q": "ff4",
+        "k": "kindle",
+        "x": 133.81993130479893,
+        "z": 271.5986706299315,
+        "y": 0
+      },
+      {
+        "q": "ff4",
+        "k": "kindle",
+        "x": 865.4804202621552,
+        "z": -580.2057502133938,
+        "y": 40
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 8
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 10
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 15
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 8
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 10
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 15
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 18
+      }
+    ],
+    "bad": [],
+    "geometry": 262
+  },
+  {
+    "zone": 3,
+    "area": 1,
+    "name": "The Rime Shelf",
+    "rooms": 7,
+    "enemies": 10,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 7
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "maxRise": 8
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 4,
+        "maxRise": 7
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 6,
+        "maxRise": 10
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 14
+      }
+    ],
+    "bad": [],
+    "geometry": 133
+  },
+  {
+    "zone": 4,
+    "area": 0,
+    "name": "Emberdeep",
+    "rooms": 7,
+    "enemies": 19,
+    "dens": 2,
+    "questMarks": [
+      {
+        "q": "ed4",
+        "k": "hunt",
+        "x": 710,
+        "z": -1260,
+        "y": 120
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 8
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 8
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "maxRise": 7
+      },
+      {
+        "a": 2,
+        "b": 5,
+        "maxRise": 18
+      },
+      {
+        "a": 3,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 18
+      },
+      {
+        "a": 3,
+        "b": 6,
+        "maxRise": 9
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 5
+      }
+    ],
+    "bad": [],
+    "geometry": 146
+  },
+  {
+    "zone": 4,
+    "area": 1,
+    "name": "The Cinder Vents",
+    "rooms": 7,
+    "enemies": 14,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 8
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 8
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 10
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 18
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 5
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 7
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 10
+      }
+    ],
+    "bad": [],
+    "geometry": 130
+  },
+  {
+    "zone": 5,
+    "area": 0,
+    "name": "Abyss Approach",
+    "rooms": 8,
+    "enemies": 19,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "ab4",
+        "k": "hunt",
+        "x": -720,
+        "z": -1570,
+        "y": 160
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 8
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 14
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 7
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 10
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 10
+      },
+      {
+        "a": 1,
+        "b": 6,
+        "maxRise": 8
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 170
+  },
+  {
+    "zone": 5,
+    "area": 1,
+    "name": "The Hollow Deep",
+    "rooms": 7,
+    "enemies": 10,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 0
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 0
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 12
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 12
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 14
+      }
+    ],
+    "bad": [],
+    "geometry": 148
+  },
+  {
+    "zone": 6,
+    "area": 0,
+    "name": "The Grand Colonnade",
+    "rooms": 8,
+    "enemies": 22,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "pl4",
+        "k": "reach",
+        "x": -820,
+        "z": -550,
+        "y": 160
+      },
+      {
+        "q": "pl4",
+        "k": "reach",
+        "x": 820,
+        "z": -550,
+        "y": 180
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 18
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 18
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 17
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 0
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 6,
+        "maxRise": 7
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 176
+  },
+  {
+    "zone": 6,
+    "area": 1,
+    "name": "The Hanging Gardens",
+    "rooms": 8,
+    "enemies": 14,
+    "dens": 0,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 8
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "maxRise": 12
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "maxRise": 18
+      },
+      {
+        "a": 2,
+        "b": 5,
+        "maxRise": 18
+      },
+      {
+        "a": 3,
+        "b": 4,
+        "maxRise": 6
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 7
+      },
+      {
+        "a": 3,
+        "b": 6,
+        "maxRise": 12
+      },
+      {
+        "a": 5,
+        "b": 7,
+        "maxRise": 4
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 14
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 172
+  },
+  {
+    "zone": 7,
+    "area": 0,
+    "name": "The Castle Gates",
+    "rooms": 8,
+    "enemies": 24,
+    "dens": 3,
+    "questMarks": [
+      {
+        "q": "ct4",
+        "k": "kindle",
+        "x": -953.9499870881244,
+        "z": -709.520170537842,
+        "y": 100
+      },
+      {
+        "q": "ct4",
+        "k": "kindle",
+        "x": -957.6035628095821,
+        "z": -701.2209015764176,
+        "y": 100
+      },
+      {
+        "q": "ct4",
+        "k": "kindle",
+        "x": -952.4559324222305,
+        "z": -587.4636536516394,
+        "y": 100
+      },
+      {
+        "q": "ct4",
+        "k": "kindle",
+        "x": -779.1836132154783,
+        "z": -522.2348058579103,
+        "y": 100
+      },
+      {
+        "q": "ct4",
+        "k": "kindle",
+        "x": -967.3551713881354,
+        "z": -656.3092703964836,
+        "y": 100
+      }
+    ],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 0
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 17
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 0
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "maxRise": 12
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "maxRise": 16
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 7
+      },
+      {
+        "a": 4,
+        "b": 6,
+        "maxRise": 0
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 16
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 0
+      }
+    ],
+    "bad": [],
+    "geometry": 161
+  },
+  {
+    "zone": 7,
+    "area": 1,
+    "name": "The Long Ascent",
+    "rooms": 8,
+    "enemies": 24,
+    "dens": 3,
+    "questMarks": [],
+    "edges": [
+      {
+        "a": 0,
+        "b": 1,
+        "maxRise": 14
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "maxRise": 14
+      },
+      {
+        "a": 2,
+        "b": 3,
+        "maxRise": 16
+      },
+      {
+        "a": 3,
+        "b": 4,
+        "maxRise": 14
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "maxRise": 14
+      },
+      {
+        "a": 5,
+        "b": 6,
+        "maxRise": 12
+      },
+      {
+        "a": 6,
+        "b": 7,
+        "maxRise": 16
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "maxRise": 12
+      }
+    ],
+    "bad": [],
+    "geometry": 146
+  }
+]

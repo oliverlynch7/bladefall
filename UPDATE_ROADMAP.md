@@ -1602,3 +1602,10 @@ Validated all models, all campaign biomes/bosses in real Chrome/WebGL at high/lo
 ## [Codex | 2026-09-12] Secondary portal scenery — v1.967.0-secondary-worlds-art
 
 Abyssal Descent, Gauntlet, all three Arena maps and Treasure Sprint now use custom instanced architecture aligned with the campaign icons; Endless Dungeon inherits every biome's authored scenery and dungeon camera cutaways. Added mode/floor/theme rebuild signatures, isolated Sprint from stale hub metadata, preserved phasing/moving platforms and kept the Cinder Pit molten. No gameplay geometry or balance changes: 34 seeded before/after fixtures match. Real WebGL theme/map rotations, high/low quality, prior-save load and hazard checks passed. Five Blender overviews added to /3d/art-previews/#secondary. Campaign layout redesign is next.
+
+
+## [Codex | 2026-09-13] Campaign layout preview — 1.968.0-campaign-routes
+
+Replaced the sixteen main exploration layouts with authored district graphs and rebuilt all eight boss arenas. Distinct world routes, connected branches, reward overlooks, separated encounter/rest spaces and conservative stairs replace the old layered topology/scatter passes. Recent scenery and enemy kits are retained; trials and secondary layouts remain unchanged. Added 24 phone-viewable Blender overviews and route maps at /3d/art-previews/layouts/.
+
+Fixed campaign resume identity: exact world/area/quest state is now saved, legacy stage-only saves infer the campaign world, and completed-area exits reopen. Gear/gold compatibility verified. Actual movement traversed 284 directed routes; all 130 placed targets were reachable; all 24 areas passed browser rendering checks. Ten class-trial fixtures and 34 secondary-mode fixtures match before/after. Eight boss phase-two checks passed. See docs/CAMPAIGN_LAYOUTS_2026-09-13.md and docs/art-validation/campaign-*.json. Preview branch only; ready for Oliver's route and pacing playtest.

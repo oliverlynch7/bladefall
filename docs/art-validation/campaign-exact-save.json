@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Black Woods",
+    "old": {
+      "campaign": {
+        "zone": 0,
+        "area": 1,
+        "qs": {
+          "ok3": 2
+        }
+      },
+      "weapon": "Rusty Sword",
+      "gold": 45
+    },
+    "loaded": {
+      "zone": 0,
+      "area": 1,
+      "qs": {
+        "ok3": 2
+      },
+      "portal": false,
+      "boss": false,
+      "weapon": "Rusty Sword",
+      "gold": 45,
+      "layout": "CAMPAIGN_ROUTES"
+    }
+  },
+  {
+    "name": "Hanging Gardens",
+    "old": {
+      "campaign": {
+        "zone": 6,
+        "area": 1,
+        "qs": {
+          "pl3": 5
+        }
+      },
+      "weapon": "Rusty Sword",
+      "gold": 45
+    },
+    "loaded": {
+      "zone": 6,
+      "area": 1,
+      "qs": {
+        "pl3": 5
+      },
+      "portal": true,
+      "boss": false,
+      "weapon": "Rusty Sword",
+      "gold": 45,
+      "layout": "CAMPAIGN_ROUTES"
+    }
+  },
+  {
+    "name": "Awakened King",
+    "old": {
+      "campaign": {
+        "zone": 7,
+        "area": -1,
+        "qs": {}
+      },
+      "weapon": "Rusty Sword",
+      "gold": 45
+    },
+    "loaded": {
+      "zone": 7,
+      "area": -1,
+      "qs": {},
+      "portal": false,
+      "boss": true,
+      "weapon": "Rusty Sword",
+      "gold": 45,
+      "layout": "CAMPAIGN_ARENAS"
+    }
+  }
+]

@@ -1,0 +1,232 @@
+[
+  {
+    "name": "Brute",
+    "type": "brute",
+    "hp": 307,
+    "maxHp": 684,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 3,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": false,
+      "built": null,
+      "counts": {},
+      "err": null
+    }
+  },
+  {
+    "name": "Marksman",
+    "type": "archer",
+    "hp": 593,
+    "maxHp": 1318,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 3,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": false,
+      "built": null,
+      "counts": {},
+      "err": null
+    }
+  },
+  {
+    "name": "The Fallen",
+    "type": "warden",
+    "hp": 800,
+    "maxHp": 1400,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 6,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||6|dungeon|-1|false|68|keep|-300,-220;-684,-294;599,-60",
+      "counts": {
+        "keepArt": true,
+        "artObstacles": true,
+        "floorTiles": 615,
+        "totalTriangles": 58152,
+        "instances": 1124,
+        "chunks": 26,
+        "visibleTriangles": 58152,
+        "visibleDrawCalls": 72
+      },
+      "err": null
+    }
+  },
+  {
+    "name": "Frost Sorcerer",
+    "type": "sorcerer",
+    "hp": 1127,
+    "maxHp": 1972,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 6,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||8|frost|-1|false|68|frost|-380,130;-710,-309;627,-68",
+      "counts": {
+        "frostArt": true,
+        "artObstacles": true,
+        "floorTiles": 21,
+        "totalTriangles": 5684,
+        "instances": 116,
+        "chunks": 25,
+        "visibleTriangles": 5684,
+        "visibleDrawCalls": 56
+      },
+      "err": null
+    }
+  },
+  {
+    "name": "Ember Colossus",
+    "type": "colossus",
+    "hp": 2200,
+    "maxHp": 3790,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 6,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||10|volcano|-1|false|68|ember|-380,-240;-779,-349;702,-88",
+      "counts": {
+        "deepArt": "ember",
+        "artObstacles": true,
+        "floorTiles": 110,
+        "totalTriangles": 13236,
+        "instances": 198,
+        "chunks": 26,
+        "visibleTriangles": 13236,
+        "visibleDrawCalls": 68
+      },
+      "err": null
+    }
+  },
+  {
+    "name": "Abyss King",
+    "type": "king",
+    "hp": 2933,
+    "maxHp": 5141,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 9,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||12|void|-1|false|68|abyss|-320,-220;-736,-324;655,-75",
+      "counts": {
+        "deepArt": "abyss",
+        "artObstacles": true,
+        "floorTiles": 124,
+        "totalTriangles": 15560,
+        "instances": 228,
+        "chunks": 25,
+        "visibleTriangles": 15560,
+        "visibleDrawCalls": 74
+      },
+      "err": null
+    }
+  },
+  {
+    "name": "Marble Colossus",
+    "type": "colossus",
+    "hp": 2720,
+    "maxHp": 4677,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 6,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||14|marble|-1|false|70|palace|-380,-190;-779,100;590,-58",
+      "counts": {
+        "deepArt": "palace",
+        "artObstacles": true,
+        "floorTiles": 120,
+        "totalTriangles": 20380,
+        "instances": 203,
+        "chunks": 24,
+        "visibleTriangles": 20380,
+        "visibleDrawCalls": 54
+      },
+      "err": null
+    }
+  },
+  {
+    "name": "Awakened King",
+    "type": "tyrant",
+    "hp": 4693,
+    "maxHp": 8230,
+    "mode": "play",
+    "position": [
+      150,
+      0,
+      150
+    ],
+    "enemyCount": 7,
+    "phase": 2,
+    "portal": false,
+    "world": {
+      "on": true,
+      "ready": true,
+      "built": "campaign||16|apex|-1|false|68|castle|-310,-210;-714,-387;632,-144",
+      "counts": {
+        "deepArt": "castle",
+        "artObstacles": true,
+        "floorTiles": 131,
+        "totalTriangles": 20316,
+        "instances": 209,
+        "chunks": 24,
+        "visibleTriangles": 20316,
+        "visibleDrawCalls": 50
+      },
+      "err": null
+    }
+  }
+]

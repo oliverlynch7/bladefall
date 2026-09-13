@@ -1,0 +1,507 @@
+{
+  "old": {
+    "version": "1.967.0-secondary-worlds-art",
+    "gold": 137,
+    "stage": 13,
+    "weapon": "Rusty Sword"
+  },
+  "loaded": {
+    "version": "1.968.0-campaign-routes",
+    "gold": 137,
+    "stage": 13,
+    "weapon": "Rusty Sword",
+    "mode": "play",
+    "zone": 6,
+    "area": 0,
+    "generator": "CAMPAIGN_ROUTES"
+  },
+  "report": {
+    "fps": 48,
+    "quality": "high",
+    "version": "1.968.0-campaign-routes",
+    "endless": false,
+    "delve": false,
+    "bossRush": false,
+    "arena": false,
+    "bonus": false,
+    "area": 0,
+    "side": false,
+    "stage": 13,
+    "player": [
+      0,
+      0,
+      320
+    ],
+    "collisionHash": "43d13cd",
+    "segments": 11,
+    "obstacles": 165,
+    "rooms": [
+      {
+        "name": "Pilgrim Stair",
+        "x": 0,
+        "z": 250,
+        "w": 520,
+        "d": 400
+      },
+      {
+        "name": "Sun Court",
+        "x": 0,
+        "z": -460,
+        "w": 740,
+        "d": 620
+      },
+      {
+        "name": "West Spire Balcony",
+        "x": -820,
+        "z": -550,
+        "w": 480,
+        "d": 540
+      },
+      {
+        "name": "East Spire Balcony",
+        "x": 820,
+        "z": -550,
+        "w": 480,
+        "d": 540
+      },
+      {
+        "name": "Archive Court",
+        "x": -780,
+        "z": -1350,
+        "w": 560,
+        "d": 580
+      },
+      {
+        "name": "Reflecting Court",
+        "x": 780,
+        "z": -1370,
+        "w": 560,
+        "d": 580
+      },
+      {
+        "name": "Throne Antechamber",
+        "x": 0,
+        "z": -1790,
+        "w": 700,
+        "d": 560
+      },
+      {
+        "name": "Rotunda Door",
+        "x": 0,
+        "z": -2540,
+        "w": 580,
+        "d": 440
+      }
+    ],
+    "deco": {
+      "lantern": 18,
+      "column": 58,
+      "box": 1,
+      "marble": 37
+    },
+    "world": {
+      "on": true,
+      "ready": false,
+      "built": null,
+      "counts": {},
+      "err": null
+    },
+    "render": {
+      "shadows": false,
+      "triangles": 6562,
+      "calls": 21,
+      "geometries": 19
+    },
+    "hero": {
+      "ready": true,
+      "err": null
+    },
+    "hp": 100,
+    "enemies": 22,
+    "questIds": [],
+    "mode": "play",
+    "runtimeErrors": []
+  },
+  "previewCursorUnlocked": true,
+  "hub": {
+    "version": "1.968.0-campaign-routes",
+    "reachableFloorCells": 5849,
+    "world": {
+      "on": true,
+      "ready": false,
+      "built": null,
+      "counts": {},
+      "err": null
+    },
+    "render": {
+      "shadows": false,
+      "triangles": 13124,
+      "calls": 42,
+      "geometries": 19
+    },
+    "approaches": [
+      {
+        "id": "waystone",
+        "x": 0,
+        "z": 100,
+        "tx": 0,
+        "tz": 30,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-0",
+        "x": -700,
+        "z": -456,
+        "tx": -700,
+        "tz": -520,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-1",
+        "x": -500,
+        "z": -462.28571428571433,
+        "tx": -500,
+        "tz": -526.2857142857143,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-2",
+        "x": -300,
+        "z": -468.57142857142856,
+        "tx": -300,
+        "tz": -532.5714285714286,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-3",
+        "x": -100,
+        "z": -474.8571428571429,
+        "tx": -100,
+        "tz": -538.8571428571429,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-4",
+        "x": 100,
+        "z": -474.8571428571429,
+        "tx": 100,
+        "tz": -538.8571428571429,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-5",
+        "x": 300,
+        "z": -468.57142857142856,
+        "tx": 300,
+        "tz": -532.5714285714286,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-6",
+        "x": 500,
+        "z": -462.28571428571433,
+        "tx": 500,
+        "tz": -526.2857142857143,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gate-7",
+        "x": 700,
+        "z": -456,
+        "tx": 700,
+        "tz": -520,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "quartermaster",
+        "x": -540,
+        "z": -110,
+        "tx": -610,
+        "tz": -110,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "chest",
+        "x": -540,
+        "z": 35,
+        "tx": -610,
+        "tz": 35,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "anvil",
+        "x": -540,
+        "z": 205,
+        "tx": -610,
+        "tz": 205,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "keeper",
+        "x": -540,
+        "z": 375,
+        "tx": -610,
+        "tz": 375,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "drillmaster",
+        "x": 540,
+        "z": -110,
+        "tx": 610,
+        "tz": -110,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "beastkeeper",
+        "x": 540,
+        "z": 65,
+        "tx": 610,
+        "tz": 65,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "board",
+        "x": 540,
+        "z": 245,
+        "tx": 610,
+        "tz": 245,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "mirror",
+        "x": 540,
+        "z": 425,
+        "tx": 610,
+        "tz": 425,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "sparring",
+        "x": 425,
+        "z": 490,
+        "tx": 425,
+        "tz": 425,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "abyss",
+        "x": -400,
+        "z": 640,
+        "tx": -400,
+        "tz": 710,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "delve",
+        "x": -200,
+        "z": 640,
+        "tx": -200,
+        "tz": 710,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "arena",
+        "x": 0,
+        "z": 640,
+        "tx": 0,
+        "tz": 710,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "gauntlet",
+        "x": 200,
+        "z": 640,
+        "tx": 200,
+        "tz": 710,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "sprint",
+        "x": 400,
+        "z": 640,
+        "tx": 400,
+        "tz": 710,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      },
+      {
+        "id": "tinkerer",
+        "x": -806,
+        "z": 706,
+        "tx": -806,
+        "tz": 644,
+        "clear": true,
+        "withinInteractionRadius": true,
+        "reachable": true
+      }
+    ],
+    "services": [
+      {
+        "id": "quartermaster",
+        "x": -610,
+        "z": -110
+      },
+      {
+        "id": "chest",
+        "x": -610,
+        "z": 35
+      },
+      {
+        "id": "anvil",
+        "x": -610,
+        "z": 205
+      },
+      {
+        "id": "keeper",
+        "x": -610,
+        "z": 375
+      },
+      {
+        "id": "drillmaster",
+        "x": 610,
+        "z": -110
+      },
+      {
+        "id": "beastkeeper",
+        "x": 610,
+        "z": 65
+      },
+      {
+        "id": "board",
+        "x": 610,
+        "z": 245
+      },
+      {
+        "id": "mirror",
+        "x": 610,
+        "z": 425
+      },
+      {
+        "id": "sparring",
+        "x": 425,
+        "z": 425
+      },
+      {
+        "id": "abyss",
+        "x": -400,
+        "z": 710
+      },
+      {
+        "id": "delve",
+        "x": -200,
+        "z": 710
+      },
+      {
+        "id": "arena",
+        "x": 0,
+        "z": 710
+      },
+      {
+        "id": "gauntlet",
+        "x": 200,
+        "z": 710
+      },
+      {
+        "id": "sprint",
+        "x": 400,
+        "z": 710
+      }
+    ],
+    "gates": [
+      {
+        "zi": 0,
+        "x": -700,
+        "z": -520,
+        "open": true
+      },
+      {
+        "zi": 1,
+        "x": -500,
+        "z": -526.2857142857143,
+        "open": false
+      },
+      {
+        "zi": 2,
+        "x": -300,
+        "z": -532.5714285714286,
+        "open": false
+      },
+      {
+        "zi": 3,
+        "x": -100,
+        "z": -538.8571428571429,
+        "open": false
+      },
+      {
+        "zi": 4,
+        "x": 100,
+        "z": -538.8571428571429,
+        "open": false
+      },
+      {
+        "zi": 5,
+        "x": 300,
+        "z": -532.5714285714286,
+        "open": false
+      },
+      {
+        "zi": 6,
+        "x": 500,
+        "z": -526.2857142857143,
+        "open": false
+      },
+      {
+        "zi": 7,
+        "x": 700,
+        "z": -520,
+        "open": false
+      }
+    ]
+  }
+}

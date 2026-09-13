@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.967.0-secondary-worlds-art';
+const VERSION3D='1.968.0-campaign-routes';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1108,6 +1108,7 @@ function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected 
 function autosaveRun(){ try{
     if(typeof mode!=='undefined' && mode==='play' && G && G.p && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
       meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
+      if(G.campaignLayout&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive)meta.run.campaign={zone:G.zone,area:G.area,qs:{...G.qs}};
     }
     persist();
   }catch(e){} }
@@ -6404,6 +6405,203 @@ function terrainCanyon(ctx, o){
            goal:  { x: centre(Z1 + 120), z: Z1 + 120 } };
 }
 
+/* Campaign routes: authored district graphs, with no procedural topology post-pass.
+   Node: name,x,z,height,width,depth,role. Edge: from,to,width,optional challenge.
+   Heights never overlap another storey: the existing objective/camera surface queries
+   can therefore use the real top surface consistently. */
+const CAMPAIGN_ROUTES={
+ outskirts:[
+ {nodes:[['South Road',0,260,0,540,420,'rest'],['Mill Commons',0,-430,0,680,620,'mill'],['West Cornlands',-720,-470,0,560,600,'crop'],['Eastwood Orchard',740,-560,0,580,620,'orchard'],['Riverside Hamlet',-660,-1230,0,620,540,'hamlet'],['Windmill Rise',660,-1300,80,500,500,'reward'],['Watchpost',0,-1610,160,340,340,'watch'],['Old Waystone',0,-2330,80,640,500,'goal']],edges:[[0,1,240],[1,2,210],[1,3,210],[2,4,200],[3,5,220],[4,6,220],[5,6,210],[6,7,230],[4,7,180]],find:7,secret:4},
+ {nodes:[['Forest Verge',0,220,0,480,400,'rest'],['Tangleroot Creek',-580,-340,0,540,540,'creek'],['Woodcutters Camp',570,-350,40,540,500,'rest'],['Lantern Grove',0,-1020,0,640,560,'grove'],['Hollow Oak',-700,-1200,120,440,460,'reward'],['Rootbridge Ravine',670,-1170,100,420,500,'roots'],['Moonwell Shrine',0,-1830,40,620,560,'well'],['Thornwood Boundary',540,-2340,40,480,400,'goal']],edges:[[0,1,200],[0,2,200],[1,3,210],[2,3,210],[1,4,180],[4,6,180],[3,5,180],[5,6,180],[3,6,230],[6,7,220]],find:6}
+ ],
+ hollow:[
+ {nodes:[['Caravan Mouth',0,240,0,520,420,'rest'],['Windbreak Basin',0,-420,0,650,580,'court'],['Smuggler Shelf',-740,-650,100,450,550,'reward'],['Jackal Wash',690,-680,0,600,580,'den'],['Needle Court',-510,-1370,100,540,520,'needles'],['Split Arch',430,-1450,40,620,520,'arch'],['Survey Crown',-250,-2070,140,420,420,'reward'],['Pass Beacon',510,-2190,40,520,440,'goal']],edges:[[0,1,230],[1,2,200],[1,3,230],[2,4,180],[3,5,220],[4,5,220],[4,6,180],[6,7,200],[5,7,240]],secret:2},
+ {nodes:[['Dry River Entry',0,200,0,500,400,'rest'],['Bone Basin',-400,-460,0,600,550,'court'],['Old Sluice',480,-470,0,510,520,'arch'],['Fossil Shelf',-930,-1010,80,460,480,'reward'],['Gale Arch',240,-1120,80,580,520,'arch'],['Shrine Steps',-420,-1660,160,500,500,'reward'],['Hollow Shrine',-180,-2280,160,600,480,'goal']],edges:[[0,1,230],[0,2,220],[1,3,190],[1,4,220],[2,4,210],[3,5,200],[4,5,210],[5,6,240],[4,6,180]],find:6}
+ ],
+ keep:[
+ {nodes:[['Broken Drawbridge',0,260,0,440,380,'rest'],['Breach Court',0,-420,0,680,580,'court'],['Prison Yard',-760,-460,0,560,600,'cells'],['East Battlement',720,-520,100,460,560,'reward'],['Chapel Ruins',-760,-1220,0,560,500,'chapel'],['Great Hall',0,-1340,0,620,620,'hall'],['Sealed Vault',720,-1330,100,480,480,'vault'],['Warden Door',0,-2140,0,560,420,'goal']],edges:[[0,1,240],[1,2,210],[1,3,220],[2,4,180],[3,6,200],[4,5,220],[6,5,220],[1,5,200],[5,7,250]],find:6,secret:4},
+ {nodes:[['Undercroft Intake',0,220,0,460,380,'rest'],['Cell Galleries',-580,-420,0,520,560,'cells'],['Punishment Court',580,-420,0,580,560,'court'],['Records Vault',-660,-1160,80,540,500,'vault'],['Warden Walk',610,-1170,160,460,520,'reward'],['Escape Shaft',0,-1830,240,560,560,'hall'],['Fallen Warden Door',0,-2540,240,500,400,'goal']],edges:[[0,1,190],[0,2,220],[1,3,190],[2,4,210],[1,2,180],[3,5,210],[4,5,200],[5,6,230]],find:3}
+ ],
+ frost:[
+ {nodes:[['Sheltered Mouth',0,240,0,500,400,'rest'],['Blue Ice Nave',0,-440,0,620,640,'cave'],['Echo Gallery',-750,-680,40,480,620,'cave'],['Frozen Camp',720,-610,40,540,520,'rest'],['Crystal Choir',-610,-1440,100,580,620,'crystal'],['Meltwater Hall',510,-1390,0,560,580,'cave'],['Aurora Window',-50,-2110,160,600,520,'goal']],edges:[[0,1,220],[1,2,200],[1,3,210],[2,4,180],[3,5,230],[4,5,200],[4,6,210],[5,6,230]],secret:4},
+ {nodes:[['Rime Landing',0,260,0,480,400,'rest'],['Split Floe',-440,-430,40,620,540,'crystal'],['Leeward Camp',490,-510,0,480,520,'rest'],['Western Shelf',-970,-1120,120,520,560,'reward'],['Ice Bridge Court',-170,-1190,80,550,520,'court'],['Frostwatch Rise',540,-1460,160,500,520,'crystal'],['Frostwatch Cairn',0,-2190,240,580,460,'goal']],edges:[[0,1,230],[0,2,220],[1,3,210],[1,4,220],[2,4,230],[3,4,200],[4,5,210],[3,6,190],[5,6,220]],find:6}
+ ],
+ ember:[
+ {nodes:[['Mine Threshold',0,240,0,480,400,'rest'],['Furnace Mouth',-400,-440,40,620,570,'furnace'],['Maintenance Yard',560,-470,0,520,540,'rest'],['Slag Foundry',-920,-1200,80,580,580,'furnace'],['Quench Court',-100,-1280,0,580,580,'court'],['Caldera Rim',710,-1260,120,500,560,'reward'],['Ash Altar',-100,-2140,160,680,540,'goal']],edges:[[0,1,220],[0,2,200],[1,3,200],[1,4,180],[2,5,210],[3,4,180],[4,5,180],[3,6,210],[5,6,220]],find:6,secret:5},
+ {nodes:[['Vent Intake',0,230,0,480,400,'rest'],['Pressure Court',0,-470,40,660,580,'furnace'],['West Refinery',-780,-800,80,520,600,'furnace'],['Cooling Tanks',760,-760,0,560,560,'rest'],['Cinder Crucible',-510,-1560,160,600,580,'furnace'],['Miner Overlook',510,-1520,120,500,480,'reward'],['Core Door',0,-2330,200,620,440,'goal']],edges:[[0,1,220],[1,2,200],[1,3,210],[2,4,200],[3,5,220],[4,5,180],[4,6,210],[5,6,220]],find:6}
+ ],
+ abyss:[
+ {nodes:[['Last Shore',0,250,0,500,400,'rest'],['Tether Court',0,-450,0,620,560,'ring'],['Western Shard',-790,-720,80,520,580,'crystal'],['Hollow Refuge',790,-710,40,500,560,'rest'],['Fallen Observatory',-720,-1570,160,540,560,'reward'],['Broken Meridian',720,-1580,80,550,580,'ring'],['Tethered Crown',0,-2040,120,620,580,'court'],['King Threshold',0,-2810,120,560,420,'goal']],edges:[[0,1,230],[1,2,200],[1,3,210],[2,4,190],[3,5,200],[4,6,210],[5,6,210],[1,6,160],[6,7,230]],secret:4},
+ {nodes:[['Hollow Descent',0,220,80,480,400,'rest'],['Rift Junction',0,-450,80,600,580,'ring'],['Forgotten Library',-750,-650,0,500,560,'vault'],['Anchor Shelf',760,-690,160,500,560,'crystal'],['Sunken Records',-680,-1410,0,540,560,'reward'],['Starless Cloister',680,-1420,160,560,560,'ring'],['Rift Anchor',0,-2180,80,620,500,'goal']],edges:[[0,1,220],[1,2,210],[1,3,210],[2,4,200],[3,5,200],[4,5,160],[4,6,220],[5,6,220]],find:6}
+ ],
+ palace:[
+ {nodes:[['Pilgrim Stair',0,250,0,520,400,'rest'],['Sun Court',0,-460,0,740,620,'court'],['West Spire Balcony',-820,-550,160,480,540,'watch'],['East Spire Balcony',820,-550,180,480,540,'watch'],['Archive Court',-780,-1350,80,560,580,'vault'],['Reflecting Court',780,-1370,80,560,580,'well'],['Throne Antechamber',0,-1790,80,700,560,'hall'],['Rotunda Door',0,-2540,80,580,440,'goal']],edges:[[0,1,270],[1,2,230],[1,3,230],[2,4,220],[3,5,220],[4,6,240],[5,6,240],[1,6,240],[6,7,280]],find:6,secret:4},
+ {nodes:[['Garden Landing',0,240,0,520,400,'rest'],['Lower Parterre',-400,-460,40,640,580,'garden'],['Lily Court',500,-540,80,560,550,'well'],['West Orchard',-1050,-1140,120,500,540,'garden'],['Sun Dial Terrace',-190,-1320,160,580,540,'court'],['Orchid Balcony',640,-1410,200,520,520,'reward'],['Upper Conservatory',-250,-2110,240,640,540,'garden'],['Crown Gate',430,-2570,240,500,440,'goal']],edges:[[0,1,250],[0,2,230],[1,3,210],[1,4,230],[2,5,210],[3,4,200],[4,5,220],[3,6,210],[5,7,210],[4,6,220],[6,7,240]],find:6}
+ ],
+ castle:[
+ {nodes:[['Siege Road',0,250,0,520,420,'rest'],['Outer Gate Court',0,-470,0,720,640,'court'],['West Bastion',-830,-650,100,500,580,'reward'],['East Guard Court',830,-660,0,580,580,'cells'],['Banner Hall',-650,-1440,160,580,580,'hall'],['Gloom Cloister',670,-1460,80,560,580,'chapel'],['Inner Gate Court',0,-2170,160,740,600,'court'],['Ascent Door',0,-2960,160,600,440,'goal']],edges:[[0,1,260],[1,2,220],[1,3,240],[2,4,220],[3,5,220],[4,5,190],[4,6,230],[5,6,240],[6,7,260]],find:6},
+ {nodes:[['Tower Foot',0,280,0,520,420,'rest'],['West Stair Hall',-680,-350,80,520,540,'hall'],['Lower Watch',-1250,-1120,160,480,540,'reward'],['Records Landing',-560,-1690,240,560,500,'vault'],['Royal Gallery',250,-2200,320,620,520,'hall'],['East Crown',1030,-1630,400,520,540,'reward'],['Crown Bridge',1090,-760,480,520,540,'court'],['Throne Room',340,-620,560,600,540,'goal']],edges:[[0,1,240],[1,2,220],[2,3,220],[3,4,240],[4,5,220],[5,6,230],[6,7,240],[1,3,180]],find:7}
+ ]
+};
+
+function buildCampaignRoute(ctx){
+  const zone=curZone().id,plan=CAMPAIGN_ROUTES[zone]?.[G.area];if(!plan)return false;
+  const {rnd,mkMonster}=ctx,wood=zone==='outskirts',forest=wood&&G.area===1,regal=['keep','palace','castle'].includes(zone);
+  const color={outskirts:'#756342',hollow:'#a57845',keep:'#596270',frost:'#497b91',ember:'#483c42',abyss:'#443959',palace:'#c5bfa4',castle:'#4b435a'}[zone];
+  G._scapeTable='CAMPAIGN_ROUTES';G.campaignLayout={revision:1,zone,area:G.area,edges:[],nodes:[]};
+  // Clear old terrain-specific state when continuing between areas in the same run.
+  G.spireRY=null;G.iceCave=null;G.dashTut=null;G.dashSign=null;
+  const rooms=plan.nodes.map(([name,x,z,y,w,d,role])=>{
+    const r={name,x,z,y,w,d,role,monsters:[],encounter:false,cleared:true,flank:role==='reward'||role==='watch'||role==='vault'};
+    if(y===0)vseg(x,z,w,d,{district:name});else vplat(x,z,y,w,d,{district:name,checkpoint:true,terrace:true});
+    G.rooms.push(r);return r;
+  });
+  const routeTiles=[];
+  for(const [ai,bi,width=220] of plan.edges){
+    const a=rooms[ai],b=rooms[bi],L=Math.hypot(b.x-a.x,b.z-a.z),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;
+    const rim=r=>Math.max(0,Math.min(Math.abs(ux)>.001?r.w/2/Math.abs(ux):Infinity,Math.abs(uz)>.001?r.d/2/Math.abs(uz):Infinity)-50);
+    const ra=rim(a),rb=rim(b),ax=a.x+ux*ra,az=a.z+uz*ra,bx2=b.x-ux*rb,bz2=b.z-uz*rb;
+    const length=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(length/70),Math.ceil(Math.abs(b.y-a.y)/18));
+    const points=[];
+    for(let k=0;k<=n;k++){
+      const t=k/n,x=ax+(bx2-ax)*t,z=az+(bz2-az)*t,y=Math.round(a.y+(b.y-a.y)*t),meta2={path:true,pdx:ux,pdz:uz,pstep:length/n,stairs:true,checkpoint:true};
+      const o=y===0?vseg(x,z,width,width,meta2):vplat(x,z,y,width,width,meta2);routeTiles.push(o);points.push({x,z,y});
+    }
+    G.campaignLayout.edges.push({a:ai,b:bi,width,points});
+    // Route lights sit outside the walking ribbon. Duskmoor reuses them for its real gloom mechanic.
+    const mid=points[Math.floor(points.length/2)];
+    for(const sign of [-1,1]){const x=mid.x-uz*(width/2+22)*sign,z=mid.z+ux*(width/2+22)*sign;
+      G.deco.push({x,z,y0:mid.y,w:12,h:62,d:12,c:wood?'#73532d':color,kind:'lantern',lead:true,lampH:62});vtorch(x,z,rnd);}
+  }
+  if(zone==='abyss'&&G.area===0){
+    const a=rooms[1],b=rooms[G.area===0?3:2],ux=(b.x-a.x)/Math.hypot(b.x-a.x,b.z-a.z),uz=(b.z-a.z)/Math.hypot(b.x-a.x,b.z-a.z);
+    // A low side perch reached by two blinking stones; the normal loop still reaches every quest.
+    const x=a.x-uz*420,z=a.z+ux*420;
+    vseg(x,z,160,160,{district:'Fading Cache'});
+    for(const t of [.38,.70])vseg(a.x+(x-a.x)*t,a.z+(z-a.z)*t,90,90,{phaseable:true});
+    G.chests.push(chestMaybeMimic({x,z,y:0,opened:false,bob:0},rnd));
+  }
+  const clearRoute=(x,z,r=70)=>!routeTiles.some(s=>Math.abs(x-s.x)<s.w/2+r&&Math.abs(z-s.z)<s.d/2+r);
+  const tree=(x,z,y,h=125)=>{const o=vcol(x,z,20,20,y+h);o.treeCol=true;G.deco.push({x,z,y0:y+h,w:76,h:44,d:76,c:forest?'#294835':'#597447',kind:'tree',lead:true,trunkH:h,theme:'plains'});};
+  const chest=(r,dx=0,dz=0)=>G.chests.push(chestMaybeMimic({x:r.x+dx,z:r.z+dz,y:r.y,opened:false,bob:0},rnd));
+  for(const [i,r] of rooms.entries()){
+    G.campaignLayout.nodes.push({name:r.name,x:r.x,z:r.z,y:r.y,w:r.w,d:r.d,role:r.role});
+    // Dress the perimeter, leaving all approach corridors and the entire central fight disc clear.
+    for(const side of [-1,1])for(let k=0;k<5;k++){
+      const x=r.x+side*(r.w/2-30),z=r.z-r.d/2+45+k*(r.d-90)/4;if(!clearRoute(x,z,65))continue;
+      if(wood)tree(x,z,r.y,forest?160+(k%3)*28:100+(k%3)*20);
+      else if(regal){const h=zone==='palace'?180:150;vcol(x,z,28,28,r.y+h);G.deco.push({x,z,y0:r.y,w:32,h,d:32,c:color,kind:'column',lead:true});}
+      else {vplat(x,z,r.y+180+(k%3)*35,62,94,{terrain:true});}
+    }
+    if(['reward','watch','vault'].includes(r.role))chest(r,80,60);
+    if(r.role==='goal'){
+      // Twin framing columns leave the portal and final approach unobstructed.
+      for(const sign of [-1,1]){const x=r.x+sign*160,z=r.z-100;vcol(x,z,32,32,r.y+220);G.deco.push({x,z,y0:r.y,w:34,h:220,d:34,c:color,kind:wood?'standstone':'column',lead:true});}
+    }
+    if(wood&&['crop','orchard','grove','well'].includes(r.role)){
+      for(const side of [-1,1])for(let row=0;row<6;row++)for(let col=0;col<5;col++){
+        const x=r.x+side*(145+col*24),z=r.z-80+row*30;if(!clearRoute(x,z,18))continue;
+        G.deco.push({x,z,y0:r.y,w:5,h:r.role==='crop'?32:14,d:5,c:'#c7a24d',kind:r.role==='crop'?'corn':'flower',lead:true,cropH:32,theme:'plains'});
+      }
+    }
+    if(['well','creek'].includes(r.role))G.deco.push({x:r.x+110,z:r.z-100,y0:r.y+.2,w:140,h:1.5,d:110,c:'#426f80'});
+    if(r.role==='mill'){
+      // The mill stands off the central route, visible from the entry and both farm branches.
+      const x=r.x+180,z=r.z-165;vsolid(x,z,r.y,110,135,90,'#795735');G.deco.push({x,z,y0:r.y+135,w:140,h:26,d:116,c:'#613e29'});
+      for(let k=0;k<16;k++){const a=k/16*Math.PI*2;G.deco.push({x:x+Math.cos(a)*67,z:z+55,y0:r.y+75+Math.sin(a)*67,w:14,h:14,d:14,c:'#c29b52'});}
+      G.deco.push({x,z:z+55,y0:r.y+70,w:130,h:9,d:16,c:'#b59151'});G.deco.push({x,z:z+55,y0:r.y+10,w:9,h:130,d:16,c:'#b59151'});
+      G.deco.push({x,z:z+68,y0:r.y+.2,w:180,h:2,d:60,c:'#416d77'});
+    }
+    if(r.role==='hamlet')for(const sign of [-1,1]){const x=r.x+sign*185,z=r.z-150;if(clearRoute(x,z,80)){vsolid(x,z,r.y,110,75,90,'#795735');G.deco.push({x,z,y0:r.y+75,w:138,h:26,d:112,c:'#613e29'});}}
+    if(regal&&['hall','chapel','cells','vault'].includes(r.role)){
+      // Wall wings leave a generous central doorway and open side approaches.
+      for(const side of [-1,1]){const x=r.x+side*(r.w/2-65),z=r.z-r.d/2+20;if(clearRoute(x,z,80))G.walls.push({x,z,w:120,d:26,h:r.y+160});}
+    }
+    if(zone==='hollow'||(zone==='frost'&&G.area===0)){
+      // Continuous cliff/cave wings, cut away at every authored route entrance.
+      for(const axis of ['x','z'])for(const sign of [-1,1]){
+        const span=axis==='x'?r.d:r.w,n=Math.ceil(span/90);
+        for(let k=0;k<n;k++){
+          const t=-span/2+(k+.5)*span/n,x=r.x+(axis==='x'?sign*(r.w/2+24):t),z=r.z+(axis==='z'?sign*(r.d/2+24):t);
+          if(!clearRoute(x,z,70))continue;
+          vplat(x,z,r.y+210+(k%3)*27,axis==='x'?88:span/n+2,axis==='z'?88:span/n+2,{terrain:true,caveWall:zone==='frost'});
+        }
+      }
+      if(zone==='frost'&&r.role!=='goal')G.deco.push({x:r.x,z:r.z,y0:r.y+280,w:r.w+100,h:70,d:r.d+100,kind:'caveroof',c:color,nocol:true});
+    }
+    if(zone==='frost'&&G.area===0){
+      // Ice ribs form chambers, with a high open clerestory for the gameplay camera.
+      for(const side of [-1,1]){const x=r.x+side*(r.w/2+30);for(const dz of [-170,170])if(clearRoute(x,r.z+dz,65))vplat(x,r.z+dz,r.y+250,110,170,{terrain:true});}
+    }
+    if(['furnace','crystal','ring','needles'].includes(r.role))for(const side of [-1,1]){
+      const x=r.x+side*(r.w/2+65),z=r.z-40;G.deco.push({x,z,y0:r.y,w:70,h:230,d:70,c:color,theme:ctx.s.theme,kind:'rock',nocol:true});
+    }
+    // Deliberate encounter beats: shelters and final doors offer breathing space.
+    if(i>0&&r.role!=='rest'&&r.role!=='goal'){
+      const mobs=THEMEMOBS[ctx.s.theme]||['grunt'],count=['court','hall','furnace','den'].includes(r.role)?4:2;
+      for(let j=0;j<count;j++){const type=mobs[(i+j)%mobs.length],a=j/count*Math.PI*2;const m=mkMonster(type,r.x+Math.cos(a)*105,r.z+Math.sin(a)*95,r);m.y=r.y;m.sx=m.x;m.sz=m.z;}
+    }
+  }
+  const questRooms=rooms.filter((r,i)=>i>0&&r.role!=='rest'&&r.role!=='goal');
+  scapeKill(ctx,questRooms.filter((r,i)=>i%2===0).slice(0,3).map(r=>({x:r.x-70,z:r.z+65,y:r.y,room:r})));
+  scapeFetch(ctx,questRooms.map(r=>({x:r.x+80,z:r.z-60,y:r.y})));
+  const find=rooms[plan.find??rooms.length-1];scapeFind(ctx,find.x,find.z,find.y);
+  if(plan.secret!=null){const r=rooms[plan.secret];scapeSecret(ctx,r.x-100,r.z-100,r.y);}
+  if(zone==='outskirts'&&G.area===0){
+    for(const [id,title,type,reward,indices,item] of [['outCaravan','Answer the scattered caravan signals','rescue','caravanCompass',[2,3,4],"Survivor's Signal"],['outMill','Recover the watermill gearworks','collect','millwrightSignet',[1,4,5],'Mill Gear']]){
+      if(optionalMission(id,title,type,3,reward,{hint:'Search '+indices.map(i=>rooms[i].name).join(', ')+'.'}))for(const i of indices){const r=rooms[i];G.pickups.push({x:r.x-90,z:r.z+100,y0:r.y,localItem:{id,name:item},bob:rnd()*3,placed:true});}
+    }
+  }
+  if(zone==='keep'){
+    const upper=G.area===1,id=upper?'keepSeals':'keepStandards',indices=upper?[1,3,5]:[1,3,5];
+    if(optionalMission(id,upper?'Recover the three discarded warden seals':'Recover the three fallen siege standards','collect',3,upper?'wardenKey':'siegebreakerBadge',{hint:'Search '+indices.map(i=>rooms[i].name).join(', ')+'.'}))for(const i of indices){const r=rooms[i];G.pickups.push({x:r.x-90,z:r.z+100,y0:r.y,localItem:{id,name:upper?'Warden Seal':'Siege Standard'},bob:rnd()*3,placed:true});}
+  }
+  const start=rooms[0],goal=rooms[rooms.length-1];
+  finishScape(ctx,{sx:start.x,sz:start.z+70,sy:start.y,gx:goal.x,gz:goal.z,dashGate:false,decoCol:color,decoTheme:ctx.s.theme,decoTall:230});
+  questMarks(rnd);
+  // Place authored reach goals on distinct balconies, rather than two adjacent stair treads.
+  const watches=rooms.filter(r=>r.role==='watch');let wi=0;
+  for(const mark of G.qmarks)if(mark.k==='reach'&&watches.length){const r=watches[wi++%watches.length];Object.assign(mark,{x:r.x,z:r.z,y:r.y});}
+  // Fixed objective positions belong to the named districts. No late scatter/topology pass.
+  snapWorldInteractables();return true;
+}
+
+/* Boss layouts preserve the boss implementation and keep a generous, flat fighting
+   floor. Their perimeter shapes and cover positions are authored for each fight. */
+function buildCampaignArena(ctx){
+  const zone=curZone().id;
+  const specs={
+    outskirts:{name:'Trampled Orchard',rows:[[0,0,1080,600],[0,-360,840,180],[0,360,840,180]],cover:[[-330,-200,32,32,120],[370,180,32,32,110]],color:'#725a38'},
+    hollow:{name:'The Crossfire Bowl',rows:[[0,0,1180,620],[0,-400,900,220],[0,400,900,220]],cover:[[-240,100,62,100,125],[240,-110,62,100,125],[-360,-300,58,80,110],[360,310,58,80,110]],color:'#987749'},
+    keep:{name:'Warden Cross Court',rows:[[0,0,860,1040],[-520,0,240,520],[520,0,240,520]],cover:[[-300,-220,54,54,150],[300,220,54,54,150]],color:'#68675e'},
+    frost:{name:'The Fractured Lens',rows:[[0,0,1100,600],[0,-365,840,150],[0,365,840,150],[0,-470,560,100],[0,470,560,100]],cover:[[-380,130,66,66,130],[370,-150,66,66,130]],color:'#6597ab'},
+    ember:{name:'The Crucible',rows:[[0,0,1100,860],[-650,0,200,360],[650,0,200,360]],cover:[[-380,-240,64,64,110],[380,240,64,64,110]],color:'#51424a'},
+    abyss:{name:'The Broken Orrery',rows:[[0,0,1040,700],[0,-420,780,170],[0,420,780,170],[-610,0,180,300],[610,0,180,300]],cover:[[-320,-220,46,46,140],[320,220,46,46,140]],color:'#463650'},
+    palace:{name:'The Sun Rotunda',rows:[[0,0,1120,620],[0,-385,900,180],[0,385,900,180],[0,-490,620,80],[0,490,620,80]],cover:[[-380,-190,56,56,170],[380,-190,56,56,170],[-380,190,56,56,170],[380,190,56,56,170]],color:'#c2b899'},
+    castle:{name:'Crown of Duskmoor',rows:[[0,0,940,1000],[-565,-100,210,600],[565,-100,210,600],[0,-570,600,160]],cover:[[-310,-210,46,46,180],[310,210,46,46,180]],color:'#53485a'}
+  };
+  const spec=specs[zone];if(!spec)return false;
+  G._scapeTable='CAMPAIGN_ARENAS';G.spireRY=null;
+  for(const [x,z,w,d] of spec.rows)vseg(x,z,w,d,{district:spec.name});
+  const front=Math.max(...spec.rows.map(r=>r[1]+r[3]/2)),back=Math.min(...spec.rows.map(r=>r[1]-r[3]/2));
+  vseg(0,front+90,260,220,{path:true});
+  G.rooms.push({name:spec.name,x:0,z:0,y:0,w:spec.rows[0][2],d:spec.rows[0][3],monsters:[],encounter:false,cleared:true});
+  for(const [x,z,w,d,h] of spec.cover){
+    const ob=vcol(x,z,w,d,h);
+    if(zone==='outskirts'){ob.treeCol=true;G.deco.push({x,z,y0:h,w:90,h:44,d:90,kind:'tree',lead:true,trunkH:h,c:'#44643a',theme:'plains'});}
+    else G.deco.push({x,z,y0:h,w:w+10,h:12,d:d+10,c:spec.color,kind:'column',lead:true});
+  }
+  if(zone==='keep')for(const sign of [-1,1])G.walls.push({x:sign*665,z:0,w:24,d:520,h:190});
+  if(zone==='hollow'||zone==='frost')for(const sign of [-1,1])for(let i=0;i<6;i++)vplat(sign*630,-340+i*135,220+(i%3)*35,80,120,{terrain:true,caveWall:zone==='frost'});
+  // A low rear dais signals the reward exit without obscuring the boss or forcing a jump mid-fight.
+  vplat(0,back+100,18,240,140,{checkpoint:true});
+  for(const sign of [-1,1]){vtorch(sign*165,front+40,ctx.rnd);G.deco.push({x:sign*165,z:back+45,y0:0,w:32,h:210,d:32,c:spec.color,kind:'column',lead:true});}
+  arenaBoss(ctx,0,-60,Math.min(440,spec.rows[0][2]/2-60),Math.min(340,spec.rows[0][3]/2-60));
+  bossFinish(ctx,{sx:0,sz:front+100,sy:0,gx:0,gz:back+100,decoCol:spec.color,decoTheme:ctx.s.theme,decoTall:260});
+  G.campaignLayout={revision:1,zone,area:-1,nodes:[{name:spec.name,x:0,z:0,y:0,w:spec.rows[0][2],d:spec.rows[0][3],role:'boss'}],edges:[]};
+  snapWorldInteractables();return true;
+}
+
 const EXPANDED_SCAPES={
   outskirts(ctx){ const {rnd,mkMonster}=ctx, woods=G.area===1;
     const CORN='#d9ad42', LEAF=woods?'#24452d':'#47733c', WOOD='#5a3f25';
@@ -7291,7 +7489,7 @@ function loadStageRaw(i){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
+  G.campaignLayout=null; G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
@@ -7329,6 +7527,10 @@ function loadStageRaw(i){
     return m; };
   /* ---- PER-ZONE TERRAIN GRAMMAR dispatch (Hollow/Outskirts/Keep/Frost/Ember/Abyss). 
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
+  if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && !G.endless && !G.bossRush && CAMPAIGN_ROUTES[curZone().id]){
+    const srnd=mulberry(i*7919+31+so),srnd2=mulberry(i*104729+7+so*3);
+    if(buildCampaignRoute({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}))return;
+  }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     G._scapeTable='EXPANDED_SCAPES';   // provenance: which of the four same-named generators ran
@@ -7350,6 +7552,10 @@ function loadStageRaw(i){
   }
   /* ---- BOSS ARENAS (Phase 17): a zone's boss room is a hand-built themed set-piece.
      Trials and side zones keep the maze; only the real boss chamber (G.area<0) dispatches. ---- */
+  if((isBoss||isMini) && !G.trial && !G.side && !G.delve && !G.endless && !G.bossRush && G.area<0){
+    const srnd=mulberry(i*7919+31+so),srnd2=mulberry(i*104729+7+so*3);
+    if(buildCampaignArena({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}))return;
+  }
   if((isBoss||isMini) && !G.trial && !G.side && G.area<0 && BOSS_ARENAS[curZone().id]){
     const srnd=mulberry(i*7919+31+so), srnd2=mulberry(i*104729+7+so*3);
     G._scapeTable='BOSS_ARENAS';
@@ -14176,6 +14382,16 @@ function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.as
   p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
 function continueRun(){
   if(!meta.run) return; initAudio(); queueLevelUp=0;
+  // Stage-only legacy saves could resume a palace enemy set in the Outskirts map.
+  // New saves carry exact campaign identity; old shared-stage areas restart at the
+  // first matching area, because the older format never stored that distinction.
+  const saved=meta.run;let route=saved.campaign;
+  if(!route){for(let zi=0;zi<ZONES.length;zi++){const z=ZONES[zi];if(z.boss.stage===saved.stageIndex){route={zone:zi,area:-1};break;}const ai=z.areas.findIndex(a=>a.stage===saved.stageIndex);if(ai>=0){route={zone:zi,area:ai};break;}}}
+  if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
+    G=newG(freshPlayer(),{zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
+    restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
+    mode='play';showOverlay(false);showGameUI(true);hudUpdate();return;
+  }
   G={p:freshPlayer(),stageIndex:0,enemies:[],particles:[],texts:[],pickups:[],projectiles:[],ambient:[],deco:[],
      shake:0,ngPlus:meta.run.ngPlus,ngHp:meta.run.ngHp||1,ngDmg:meta.run.ngDmg||1,baseLoadout:meta.run.base||null,
      runSeed:meta.run.runSeed||0,
@@ -20383,5 +20599,5 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->
 <script type="module" src="./editor_mode.js"></script>
-<script src="./visual-qa.js?v=1967"></script></body>
+<script src="./visual-qa.js?v=1968"></script></body>
 </html>

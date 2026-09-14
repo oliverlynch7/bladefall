@@ -11,6 +11,7 @@
 <p>Sixteen exploration areas and eight boss arenas. Choose a level for its full Blender overview and route map.</p>
 <nav aria-label="Preview selection"><select id="level" aria-label="Campaign level"></select><button id="prev" aria-label="Previous level">← Previous</button><button id="next" aria-label="Next level">Next →</button></nav>
 <h2 id="title">Loading previews…</h2>
+<p id="description"></p>
 <figure><a id="full"><img id="preview" width="1600" height="1400" alt=""></a><figcaption>Blender render of the game’s static scenery. Cave roofs are cut away to show the route. Lighting differs from gameplay; enemies, pickups and active hazards appear in the game. Tap the image to open it at full size.</figcaption></figure>
 <details><summary>Explore the route map</summary><div class="legend"><span>● Entry</span><span>● Final district</span></div><svg id="map" role="img" aria-label="District route map"></svg><ol id="districts"></ol></details>
 <p id="status" aria-live="polite"></p>
@@ -18,10 +19,10 @@
 const $=id=>document.getElementById(id),ns='http://www.w3.org/2000/svg';let levels=[];
 function shape(tag,attrs,text){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);if(text)e.textContent=text;return e;}
 function show(){
- const n=+$('level').value,r=levels[n];if(!r)return;history.replaceState(null,'','#'+r.id);$('title').textContent=r.name;$('preview').src=r.id+'.png';$('preview').alt='Blender overview of '+r.name;$('full').href=r.id+'.png';$('status').textContent=(n+1)+' / '+levels.length+' · Campaign layout preview';
+ const n=+$('level').value,r=levels[n];if(!r)return;history.replaceState(null,'','#'+r.id);$('title').textContent=r.name;$('preview').src=r.id+'.png?v='+(r.layout.revision||1);$('description').textContent=r.layout.experience?'Outskirts: The Sleeping Valley. Survey the Watchpost, break the two farm nests in either order, then reawaken the Old Waystone. Explore the caravan trail, millrace and secluded grove along the way.':'';$('preview').alt='Blender overview of '+r.name;$('full').href=$('preview').src;$('status').textContent=(n+1)+' / '+levels.length+' · Campaign layout preview';
  document.querySelector('details').hidden=!r.layout.edges.length;const map=$('map'),nodes=r.layout.nodes;map.replaceChildren();$('districts').replaceChildren();
  const minX=Math.min(...nodes.map(p=>p.x-p.w/2))-160,maxX=Math.max(...nodes.map(p=>p.x+p.w/2))+160,minZ=Math.min(...nodes.map(p=>p.z-p.d/2))-160,maxZ=Math.max(...nodes.map(p=>p.z+p.d/2))+160;map.setAttribute('viewBox',[minX,minZ,maxX-minX,maxZ-minZ].join(' '));
- for(const edge of r.layout.edges){const a=nodes[edge.a],b=nodes[edge.b];map.append(shape('line',{x1:a.x,y1:a.z,x2:b.x,y2:b.z,stroke:'#a59472','stroke-width':35,'stroke-linecap':'round'}));}
+ for(const edge of r.layout.edges){const a=nodes[edge.a],b=nodes[edge.b];map.append(shape('polyline',{points:[a,...(edge.points||[]),b].map(p=>p.x+','+p.z).join(' '),fill:'none',stroke:'#a59472','stroke-width':35,'stroke-linecap':'round'}));}
  nodes.forEach((p,i)=>{const c=i===0?'#86cbb0':i===nodes.length-1?'#e2bc76':'#7c929d';map.append(shape('rect',{x:p.x-p.w/2,y:p.z-p.d/2,width:p.w,height:p.d,rx:35,fill:'#334047',stroke:c,'stroke-width':12}));map.append(shape('text',{x:p.x,y:p.z+26,fill:c,'font-size':88,'text-anchor':'middle'},String(i+1)));const li=document.createElement('li');li.textContent=p.name+(p.y?' · raised '+p.y+' units':'');$('districts').append(li);});
 }
 $('level').onchange=show;$('prev').onclick=()=>{$('level').value=(+$('level').value+levels.length-1)%levels.length;show();};$('next').onclick=()=>{$('level').value=(+$('level').value+1)%levels.length;show();};

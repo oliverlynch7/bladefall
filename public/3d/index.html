@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.969.0-weapon-fits';
+const VERSION3D='1.970.0-outskirts-adventure';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -1108,7 +1108,7 @@ function persist(){ if(IN_ARENA) return;   // the Arena is fully save-protected 
 function autosaveRun(){ try{
     if(typeof mode!=='undefined' && mode==='play' && G && G.p && !G.hub && !G.arena && !G.trial && !G.side && !IN_ARENA && typeof snapOf==='function'){
       meta.run={ngPlus:G.ngPlus,ngHp:G.ngHp,ngDmg:G.ngDmg,stageIndex:G.stageIndex,p:snapOf(G.p),base:G.baseLoadout,runSeed:G.runSeed};
-      if(G.campaignLayout&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive)meta.run.campaign={zone:G.zone,area:G.area,qs:{...G.qs}};
+      if(G.campaignLayout&&!G.endless&&!G.delve&&!G.bossRush&&!G.bonusActive)meta.run.campaign={zone:G.zone,area:G.area,qs:{...G.qs},revision:G.campaignLayout.revision,outskirtsNests:G.outskirtsNests||[]};
     }
     persist();
   }catch(e){} }
@@ -2668,7 +2668,7 @@ STAGES.forEach(s=>{ s.aw=Math.round(s.aw*1.25); s.ad=Math.round(s.ad*1.25); }); 
    zone and unlocks the next. Tier drives enemy scaling AND the loot rarity band. */
 const ZONES=[
   {id:'outskirts',name:'The Outskirts',icon:'🌾',tier:1,haz:'bramble',mus:'outskirts',blurb:'Where the road ends and the wild begins.',
-    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok1',k:'kill',mob:'thornboar',n:12,d:'Cull 12 Thornboars'},{id:'ok2',k:'find',d:'Find the Old Waystone'},{id:'ok4',k:'reach',n:1,d:'Climb to the Watchpost'}]},
+    areas:[{stage:0,name:'The Outskirts',quests:[{id:'ok4',k:'reach',n:1,d:'Survey the valley from the Watchpost'},{id:'ok1',k:'purge',mob:'thornboar',n:2,d:'Break the thorn nests in the cornlands and orchard'},{id:'ok2',k:'find',requires:['ok4','ok1'],d:'Reawaken the Old Waystone'}]},
            {stage:1,name:'Black Woods',seed:2,quests:[{id:'ok3',k:'fetch',item:'Tangleroot',n:5,d:'Gather 5 Tangleroot'}]}],
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
@@ -4684,7 +4684,7 @@ function finishScape(ctx,o){
   if(!areaQuests().length && !G.trial) G.portal={x:o.gx,z:o.gz,t:0};
   placeShade(o.sx-70,o.sz+50);
   const dc=o.decoCol||'#4a4a55', dth=o.decoTheme||ctx.s.theme, dt=o.decoTall||200;
-  for(let k=0;k<28;k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
+  for(let k=0;k<(o.backdrop===false?0:28);k++){ const zz=mnZ+ctx.rnd()*(mxZ-mnZ);
     G.deco.push({x:ctx.rnd()<0.5?mnX-150-ctx.rnd()*360:mxX+150+ctx.rnd()*360, z:zz, w:56+ctx.rnd()*140, h:dt*(0.55+ctx.rnd()*0.85), c:tint(dc,'#000',0.18+ctx.rnd()*0.3), theme:dth}); }
   hazSetup(ctx.rnd2);
   placeHealPads(o);   // two rest pads per campaign area — a lifeline for builds with no lifesteal/regen (skips boss/trial/side)
@@ -6411,7 +6411,7 @@ function terrainCanyon(ctx, o){
    can therefore use the real top surface consistently. */
 const CAMPAIGN_ROUTES={
  outskirts:[
- {nodes:[['South Road',0,260,0,540,420,'rest'],['Mill Commons',0,-430,0,680,620,'mill'],['West Cornlands',-720,-470,0,560,600,'crop'],['Eastwood Orchard',740,-560,0,580,620,'orchard'],['Riverside Hamlet',-660,-1230,0,620,540,'hamlet'],['Windmill Rise',660,-1300,80,500,500,'reward'],['Watchpost',0,-1610,160,340,340,'watch'],['Old Waystone',0,-2330,80,640,500,'goal']],edges:[[0,1,240],[1,2,210],[1,3,210],[2,4,200],[3,5,220],[4,6,220],[5,6,210],[6,7,230],[4,7,180]],find:7,secret:4},
+ {adventure:true,nodes:[['South Road',0,400,0,520,500,'rest'],['Broken Caravan',140,-220,0,600,560,'court'],['Watchpost Approach',-180,-860,0,640,620,'rest'],['Watchpost',-700,-1060,140,480,460,'watch'],['Mill Commons',120,-1660,0,820,760,'mill'],['West Cornlands',-900,-1710,0,780,780,'crop'],['Eastwood Orchard',1110,-1840,40,740,760,'orchard'],['Flooded Hamlet',-1030,-2710,0,720,660,'hamlet'],['Millrace Ford',50,-2620,0,780,640,'creek'],['Windmill Rise',1080,-2800,80,620,580,'reward'],['Old Stone Bridge',230,-3490,80,720,600,'court'],['Secluded Grove',-1700,-2400,0,440,440,'reward'],['Old Waystone',-210,-4350,160,760,620,'goal']],edges:[[0,1,240,70],[1,2,260,-70],[2,3,240,0],[2,4,280,-60],[3,5,240,-60],[4,5,270,50],[4,6,260,-90],[5,7,260,-80],[5,11,210,-40],[11,7,220,40],[6,9,260,70],[7,8,280,0],[4,8,260,100],[8,9,260,-40],[7,10,260,60],[8,10,300,-70],[9,10,260,-80],[10,12,280,100]],find:12,secret:11},
  {nodes:[['Forest Verge',0,220,0,480,400,'rest'],['Tangleroot Creek',-580,-340,0,540,540,'creek'],['Woodcutters Camp',570,-350,40,540,500,'rest'],['Lantern Grove',0,-1020,0,640,560,'grove'],['Hollow Oak',-700,-1200,120,440,460,'reward'],['Rootbridge Ravine',670,-1170,100,420,500,'roots'],['Moonwell Shrine',0,-1830,40,620,560,'well'],['Thornwood Boundary',540,-2340,40,480,400,'goal']],edges:[[0,1,200],[0,2,200],[1,3,210],[2,3,210],[1,4,180],[4,6,180],[3,5,180],[5,6,180],[3,6,230],[6,7,220]],find:6}
  ],
  hollow:[
@@ -6448,23 +6448,23 @@ function buildCampaignRoute(ctx){
   const zone=curZone().id,plan=CAMPAIGN_ROUTES[zone]?.[G.area];if(!plan)return false;
   const {rnd,mkMonster}=ctx,wood=zone==='outskirts',forest=wood&&G.area===1,regal=['keep','palace','castle'].includes(zone);
   const color={outskirts:'#756342',hollow:'#a57845',keep:'#596270',frost:'#497b91',ember:'#483c42',abyss:'#443959',palace:'#c5bfa4',castle:'#4b435a'}[zone];
-  G._scapeTable='CAMPAIGN_ROUTES';G.campaignLayout={revision:1,zone,area:G.area,edges:[],nodes:[]};
+  G._scapeTable='CAMPAIGN_ROUTES';G.campaignLayout={revision:plan.adventure?2:1,zone,area:G.area,edges:[],nodes:[]};
   // Clear old terrain-specific state when continuing between areas in the same run.
   G.spireRY=null;G.iceCave=null;G.dashTut=null;G.dashSign=null;
   const rooms=plan.nodes.map(([name,x,z,y,w,d,role])=>{
     const r={name,x,z,y,w,d,role,monsters:[],encounter:false,cleared:true,flank:role==='reward'||role==='watch'||role==='vault'};
-    if(y===0)vseg(x,z,w,d,{district:name});else vplat(x,z,y,w,d,{district:name,checkpoint:true,terrace:true});
+    if(y===0)vseg(x,z,w,d,{district:name,meadow:!!plan.adventure});else vplat(x,z,y,w,d,{district:name,checkpoint:true,terrace:true,earth:!!plan.adventure});
     G.rooms.push(r);return r;
   });
   const routeTiles=[];
-  for(const [ai,bi,width=220] of plan.edges){
+  for(const [ai,bi,width=220,bend=0] of plan.edges){
     const a=rooms[ai],b=rooms[bi],L=Math.hypot(b.x-a.x,b.z-a.z),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;
     const rim=r=>Math.max(0,Math.min(Math.abs(ux)>.001?r.w/2/Math.abs(ux):Infinity,Math.abs(uz)>.001?r.d/2/Math.abs(uz):Infinity)-50);
     const ra=rim(a),rb=rim(b),ax=a.x+ux*ra,az=a.z+uz*ra,bx2=b.x-ux*rb,bz2=b.z-uz*rb;
     const length=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(length/70),Math.ceil(Math.abs(b.y-a.y)/18));
     const points=[];
     for(let k=0;k<=n;k++){
-      const t=k/n,x=ax+(bx2-ax)*t,z=az+(bz2-az)*t,y=Math.round(a.y+(b.y-a.y)*t),meta2={path:true,pdx:ux,pdz:uz,pstep:length/n,stairs:true,checkpoint:true};
+      const t=k/n,x=ax+(bx2-ax)*t-uz*bend*4*t*(1-t),z=az+(bz2-az)*t+ux*bend*4*t*(1-t),y=Math.round(a.y+(b.y-a.y)*t),meta2={path:true,pdx:ux,pdz:uz,pstep:length/n,stairs:true,checkpoint:true,earth:!!plan.adventure,meadow:!!plan.adventure};
       const o=y===0?vseg(x,z,width,width,meta2):vplat(x,z,y,width,width,meta2);routeTiles.push(o);points.push({x,z,y});
     }
     G.campaignLayout.edges.push({a:ai,b:bi,width,points});
@@ -6489,7 +6489,7 @@ function buildCampaignRoute(ctx){
     // Dress the perimeter, leaving all approach corridors and the entire central fight disc clear.
     for(const side of [-1,1])for(let k=0;k<5;k++){
       const x=r.x+side*(r.w/2-30),z=r.z-r.d/2+45+k*(r.d-90)/4;if(!clearRoute(x,z,65))continue;
-      if(wood)tree(x,z,r.y,forest?160+(k%3)*28:100+(k%3)*20);
+      if(wood){if(!plan.adventure||k%2===0)tree(x,z,r.y,forest?160+(k%3)*28:100+(k%3)*20);}
       else if(regal){const h=zone==='palace'?180:150;vcol(x,z,28,28,r.y+h);G.deco.push({x,z,y0:r.y,w:32,h,d:32,c:color,kind:'column',lead:true});}
       else {vplat(x,z,r.y+180+(k%3)*35,62,94,{terrain:true});}
     }
@@ -6537,7 +6537,7 @@ function buildCampaignRoute(ctx){
       const x=r.x+side*(r.w/2+65),z=r.z-40;G.deco.push({x,z,y0:r.y,w:70,h:230,d:70,c:color,theme:ctx.s.theme,kind:'rock',nocol:true});
     }
     // Deliberate encounter beats: shelters and final doors offer breathing space.
-    if(i>0&&r.role!=='rest'&&r.role!=='goal'){
+    if(!plan.adventure&&i>0&&r.role!=='rest'&&r.role!=='goal'){
       const mobs=THEMEMOBS[ctx.s.theme]||['grunt'],count=['court','hall','furnace','den'].includes(r.role)?4:2;
       for(let j=0;j<count;j++){const type=mobs[(i+j)%mobs.length],a=j/count*Math.PI*2;const m=mkMonster(type,r.x+Math.cos(a)*105,r.z+Math.sin(a)*95,r);m.y=r.y;m.sx=m.x;m.sz=m.z;}
     }
@@ -6547,7 +6547,7 @@ function buildCampaignRoute(ctx){
   scapeFetch(ctx,questRooms.map(r=>({x:r.x+80,z:r.z-60,y:r.y})));
   const find=rooms[plan.find??rooms.length-1];scapeFind(ctx,find.x,find.z,find.y);
   if(plan.secret!=null){const r=rooms[plan.secret];scapeSecret(ctx,r.x-100,r.z-100,r.y);}
-  if(zone==='outskirts'&&G.area===0){
+  if(zone==='outskirts'&&G.area===0&&!plan.adventure){
     for(const [id,title,type,reward,indices,item] of [['outCaravan','Answer the scattered caravan signals','rescue','caravanCompass',[2,3,4],"Survivor's Signal"],['outMill','Recover the watermill gearworks','collect','millwrightSignet',[1,4,5],'Mill Gear']]){
       if(optionalMission(id,title,type,3,reward,{hint:'Search '+indices.map(i=>rooms[i].name).join(', ')+'.'}))for(const i of indices){const r=rooms[i];G.pickups.push({x:r.x-90,z:r.z+100,y0:r.y,localItem:{id,name:item},bob:rnd()*3,placed:true});}
     }
@@ -6556,15 +6556,120 @@ function buildCampaignRoute(ctx){
     const upper=G.area===1,id=upper?'keepSeals':'keepStandards',indices=upper?[1,3,5]:[1,3,5];
     if(optionalMission(id,upper?'Recover the three discarded warden seals':'Recover the three fallen siege standards','collect',3,upper?'wardenKey':'siegebreakerBadge',{hint:'Search '+indices.map(i=>rooms[i].name).join(', ')+'.'}))for(const i of indices){const r=rooms[i];G.pickups.push({x:r.x-90,z:r.z+100,y0:r.y,localItem:{id,name:upper?'Warden Seal':'Siege Standard'},bob:rnd()*3,placed:true});}
   }
+  if(plan.adventure) dressOutskirtsAdventure(ctx,rooms,routeTiles);
   const start=rooms[0],goal=rooms[rooms.length-1];
-  finishScape(ctx,{sx:start.x,sz:start.z+70,sy:start.y,gx:goal.x,gz:goal.z,dashGate:false,decoCol:color,decoTheme:ctx.s.theme,decoTall:230});
+  finishScape(ctx,{sx:start.x,sz:start.z+70,sy:start.y,gx:goal.x,gz:goal.z,dashGate:false,backdrop:!plan.adventure,decoCol:color,decoTheme:ctx.s.theme,decoTall:230});
   questMarks(rnd);
   // Place authored reach goals on distinct balconies, rather than two adjacent stair treads.
   const watches=rooms.filter(r=>r.role==='watch');let wi=0;
   for(const mark of G.qmarks)if(mark.k==='reach'&&watches.length){const r=watches[wi++%watches.length];Object.assign(mark,{x:r.x,z:r.z,y:r.y});}
+  if(plan.adventure) placeOutskirtsObjectives(ctx,rooms);
   // Fixed objective positions belong to the named districts. No late scatter/topology pass.
   snapWorldInteractables();return true;
 }
+
+function dressOutskirtsAdventure(ctx,rooms,paths){
+  const {rnd,mkMonster}=ctx;
+  const clear=(x,z,r=80)=>!paths.some(p=>Math.abs(x-p.x)<p.w/2+r&&Math.abs(z-p.z)<p.d/2+r);
+  // Continuous low country beneath the routes, with an irregular wooded boundary.
+  // Exploring off the road should reveal farmland, not drop the player into a void.
+  for(let k=0;k<21;k++){
+    const z=610-k*260,t=k/20,width=1300+Math.sin(t*Math.PI)*2350,x=-150+Math.sin(t*5)*120;
+    vseg(x,z,width,280,{meadow:true});
+    for(const side of [-1,1])G.deco.push({x:x+side*(width/2+95),z,y0:0,w:280,h:85+(k%3)*35,d:300,kind:'bank',c:'#636e42',nocol:true});
+  }
+
+  // Broad meadow shoulders join the farm clearings into a valley; paths are choices,
+  // not narrow strips suspended over a void. Hills retain explicit walkable stairs.
+  for(const r of rooms){
+    if(r.y)continue;
+    for(let k=-3;k<=3;k++){
+      const d=110,w=Math.sqrt(1-(k/4)**2)*(r.w+200);
+      vseg(r.x,r.z+k*100,w,d,{meadow:true});
+    }
+  }
+  for(const p of paths)if(!p.h)vseg(p.x,p.z,p.w+100,p.d+100,{meadow:true});
+  const tree=(x,z,y=0,h=155)=>{const o=vcol(x,z,20,20,y+h);o.treeCol=true;G.deco.push({x,z,y0:y+h,w:85,h:48,d:85,kind:'tree',lead:true,trunkH:h,c:'#567247',theme:'plains'});};
+  const fence=(x,z,w=100)=>{G.deco.push({x,z,y0:0,w,h:38,d:9,kind:'fence',lead:true,nocol:true,c:'#73552e'});};
+  const house=(x,z,w=150,d=130,h=105)=>{
+    if(!clear(x,z,110))return;
+    vsolid(x,z,0,w,h,d,'#886440');
+    G.deco.push({x,z,y0:h,w:w+34,h:28,d:d+34,c:'#69462d'});
+    G.deco.push({x:x+w*.3,z:z-d*.25,y0:h+20,w:24,h:52,d:25,c:'#746950'});
+    G.deco.push({x,z:z+d/2+.5,y0:23,w:30,h:54,d:2,c:'#342c28',nocol:true});
+    G.deco.push({x:x-w*.28,z:z+d/2+1,y0:52,w:18,h:22,d:2,c:'#e9bb61',nocol:true});
+  };
+  // The first fight is legible and small. Threats build through farm and river spaces;
+  // the entry, watchpost, mill commons and final shrine are breathing spaces.
+  for(const [i,types] of [[1,['thornboar','thornboar']],[5,['thornboar','thornboar','sporeback']],[6,['sporeback','thornboar','flyer']],[7,['grunt','thornboar','sporeback']],[9,['sporeback','flyer']],[10,['thornboar','sporeback','grunt']],[11,['thornboar','sporeback']]]){
+    const r=rooms[i];for(const [j,type]of types.entries()){
+      const a=j/types.length*Math.PI*2,m=mkMonster(type,r.x+Math.cos(a)*130,r.z+Math.sin(a)*110,r);
+      m.y=r.y;m.sx=m.x;m.sz=m.z;
+    }
+  }
+  // Crops form several readable fields with open tramlines between them.
+  for(const i of [5,7]){const r=rooms[i];for(const side of [-1,1])for(let row=0;row<7;row++)for(let col=0;col<5;col++){
+    const x=r.x+side*(180+col*27),z=r.z-180+row*52;
+    if(clear(x,z,18))G.deco.push({x,z,y0:0,w:5,h:37,d:5,kind:'corn',lead:true,cropH:37,c:'#c6a251',nocol:true});
+  }}
+  for(const i of [1,4,5,7]){const r=rooms[i];for(const dx of [-1,1])for(const dz of [-1,1])house(r.x+dx*r.w*.53,r.z+dz*r.d*.48,125,105,90);}
+  for(const [x,z]of [[-1260,-1880],[-620,-1970],[-1280,-2840],[-770,-2890],[380,-1940],[-190,-1870]])house(x,z);
+  for(const [x,z]of [[-1040,-1400],[-760,-1400],[-1200,-3010],[-910,-3010],[100,-2060]])if(clear(x,z,65))fence(x,z,145);
+  for(const [cx,cz]of [[-420,-2220],[-1500,-1810],[-1100,-3220]]){
+    for(let row=0;row<9;row++)for(let col=0;col<10;col++){
+      const x=cx+(col-4.5)*29,z=cz+(row-4)*37;
+      if(clear(x,z,35))G.deco.push({x,z,y0:0,w:5,h:40,d:5,kind:'corn',lead:true,cropH:40,c:'#c6a251',nocol:true});
+    }
+  }
+  // A roofed lookout makes the watchpost recognizable from the road below.
+  {const r=rooms[3],x=r.x-100,z=r.z-90;
+    for(const dx of [-85,85])for(const dz of [-60,60])G.deco.push({x:x+dx,z:z+dz,y0:r.y,w:9,h:130,d:9,c:'#765330',nocol:true});
+    G.deco.push({x,z,y0:r.y+130,w:210,h:24,d:166,c:'#68472c',nocol:true});
+  }
+  // A shallow millrace winds along the valley floor. Wide crossings remain walkable.
+  for(let k=0;k<23;k++){
+    const z=-810-k*110,x=435+Math.sin(k*.39)*95;
+    vseg(x,z,140,135,{meadow:true});
+    G.deco.push({x,z,y0:2.3,w:108,h:1,d:133,c:'#496f71',nocol:true});
+    for(const side of [-1,1])G.deco.push({x:x+side*60,z,y0:2,w:13,h:6,d:115,c:'#8a8062',nocol:true});
+  }
+  // Windmill silhouette and watch rails provide landmarks rather than more generic trees.
+  for(const [i,dx,dz]of [[9,150,-150],[3,-140,-100]]){
+    const r=rooms[i],x=r.x+dx,z=r.z+dz;
+    if(i===9){vsolid(x,z,r.y,70,165,70,'#8b704a');
+      G.deco.push({x,z:z+40,y0:r.y+105,w:190,h:12,d:10,c:'#dac391',nocol:true});
+      G.deco.push({x,z:z+40,y0:r.y+45,w:12,h:130,d:10,c:'#dac391',nocol:true});
+    }else for(const sign of [-1,1])G.deco.push({x:r.x+sign*180,z:r.z-130,y0:r.y,w:10,h:95,d:10,c:'#a27b43',nocol:true});
+  }
+  // Sparse banks and tree groups frame the valley. None cross the authored walking ribbon.
+  for(const i of [0,2,5,7,8,11]){const r=rooms[i];for(const side of [-1,1]){
+    const x=r.x+side*(r.w/2+40),z=r.z-90;if(clear(x,z,85))tree(x,z,0,i===11?205:140);
+  }}
+  for(const [id,title,type,reward,indices,item]of [
+    ['outCaravan','Trace the lost caravan through the valley','rescue','caravanCompass',[1,7,11],"Survivor's Signal"],
+    ['outMill','Recover the millwright\'s missing gearworks','collect','millwrightSignet',[4,8,9],'Mill Gear']]){
+    if(optionalMission(id,title,type,3,reward,{hint:'Search '+indices.map(i=>rooms[i].name).join(', ')+'.'}))for(const i of indices){
+      const r=rooms[i],x=r.x-95,z=r.z+105;
+      G.pickups.push({x,z,y0:r.y,localItem:{id,name:item},bob:rnd()*3,placed:true});
+      if(id==='outCaravan'){G.deco.push({x:x-24,z,y0:r.y,w:9,h:48,d:9,c:'#73552e',nocol:true});G.deco.push({x:x-24,z,y0:r.y+48,w:17,h:13,d:17,c:'#83ced4',nocol:true});}
+    }
+  }
+}
+
+function placeOutskirtsObjectives(ctx,rooms){
+  // Save the identity of broken nests, so reloading cannot credit the same site twice.
+  const cleared=G.outskirtsNests=G.outskirtsNests||[];
+  G.qmarks=G.qmarks.filter(m=>m.q!=='ok1');G.dens=[];
+  if(!questDone(areaQuests().find(q=>q.id==='ok1')))for(const [site,i]of [['cornlands',5],['orchard',6]]){
+    if(cleared.includes(site))continue;
+    const r=rooms[i],d={x:r.x-100,z:r.z-80,type:'thornboar',t:6,questId:'ok1'};
+    G.dens.push(d);G.qmarks.push({k:'purge',x:d.x,z:d.z,y:r.y,q:'ok1',site,done:false,t:0,den:d});
+  }
+  // Recovery points sit in the quiet mill court and before the final ascent.
+  if(G.healpads?.length){for(const [i,pad]of G.healpads.entries()){const r=rooms[i%2?10:4];Object.assign(pad,{x:r.x-150,z:r.z+135,y:r.y});}}
+  G.campaignLayout.experience={title:'The Sleeping Valley',objectives:['Survey the Watchpost','Break two farm nests, in either order','Reawaken the Old Waystone'],nestSites:[5,6],restSites:[0,3,4,8],optionalSites:[7,9,11]};
+}
+
 
 /* Boss layouts preserve the boss implementation and keep a generous, flat fighting
    floor. Their perimeter shapes and cover positions are authored for each fight. */
@@ -9588,7 +9693,7 @@ function questMarkInteract(consider){
         addText(m.x, m.y+90, m.z, 'LIT', 'var(--amber)', true); }}; });
     else if(m.k === 'purge') consider(m.x, m.z, 120, function(){ return {x:m.x, z:m.z, y:m.y+50,
       label:'Break the nest', act:function(){
-        m.done = true; questBump(m.q, 1); SFX.hurt();
+        m.done = true; if(m.site){(G.outskirtsNests=G.outskirtsNests||[]).push(m.site);} questBump(m.q, 1); SFX.hurt();
         burst(m.x, m.y+20, m.z, '#8a5a3a', 26); G.shake = Math.min(18, (G.shake||0)+9);
         /* Kicking a nest empties it AT you. Otherwise "purge" is just "walk to three dots and press
            E", which is a chore rather than an objective. */
@@ -13976,7 +14081,7 @@ function update(dt){
   G.pickups=G.pickups.filter(pk=>!pk.taken);
   // quest waystone: touch it to complete a "find" objective
   if(G.waystone && !G.waystone.taken){ const w=G.waystone; w.t+=dt;
-    if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } }
+    if(dXZ(w.x,w.z,p.x,p.z)<52 && Math.abs(p.y-w.y)<70){ const q=areaQuests().find(q=>q.id===w.q);const waiting=(q?.requires||[]).some(id=>!questDone(areaQuests().find(q=>q.id===id)));if(waiting){if(!w.warned){w.warned=true;toast('The Waystone sleeps. Survey the Watchpost and break both thorn nests first.');}}else {w.taken=true; SFX.achieve(); burst(w.x,w.y+40,w.z,'#ffd24a',22); questBump(w.q,1); } } }
   // the Warden's Shade: auto-greets you once per zone per save; after that, step close to hear him again
   if(G.npc && !G.npc.talked){ G.npc.t+=dt;
     const d2=dXZ(G.npc.x,G.npc.z,p.x,p.z), seen=meta.shadeSeen&&meta.shadeSeen[curZone().id];
@@ -14388,7 +14493,8 @@ function continueRun(){
   const saved=meta.run;let route=saved.campaign;
   if(!route){for(let zi=0;zi<ZONES.length;zi++){const z=ZONES[zi];if(z.boss.stage===saved.stageIndex){route={zone:zi,area:-1};break;}const ai=z.areas.findIndex(a=>a.stage===saved.stageIndex);if(ai>=0){route={zone:zi,area:ai};break;}}}
   if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
-    G=newG(freshPlayer(),{zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
+    if(route.zone===0&&route.area===0&&route.revision!==2){route={...route,qs:{...(route.qs||{}),ok1:(route.qs?.ok1||0)>=12?2:0}};}
+    G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
     restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
     mode='play';showOverlay(false);showGameUI(true);hudUpdate();return;
   }
@@ -19382,7 +19488,14 @@ function drawThreatArrows(c){
 // points the player to the nearest uncollected PLACED quest item (climb-fetch bones/relics) + shows how many remain
 function drawQuestPointer(c){
   if(!G||G.hub||!G.pickups) return;
-  const placed=G.pickups.filter(pk=>pk.placed&&(pk.questItem||pk.localItem)); if(!placed.length) return;
+  let placed=G.pickups.filter(pk=>pk.placed&&(pk.questItem||pk.localItem));
+  if(G.campaignLayout?.experience){
+    const qs=areaQuests(),watch=qs.find(q=>q.id==='ok4'),nests=qs.find(q=>q.id==='ok1');
+    if(watch&&!questDone(watch))placed=G.qmarks.filter(m=>m.q==='ok4'&&!m.done).map(m=>({...m,y0:m.y,navigationLabel:'Survey the Watchpost'}));
+    else if(nests&&!questDone(nests))placed=G.qmarks.filter(m=>m.q==='ok1'&&!m.done).map(m=>({...m,y0:m.y,navigationLabel:m.site==='cornlands'?'Break the cornlands thorn nest':'Break the orchard thorn nest'}));
+    else if(G.waystone&&!G.waystone.taken)placed=[{...G.waystone,y0:G.waystone.y,navigationLabel:'Reawaken the Old Waystone'}];
+  }
+  if(!placed.length) return;
   let best=null,bd=1e9; for(const pk of placed){ const d=dXZ(pk.x,pk.z,G.p.x,G.p.z); if(d<bd){bd=d;best=pk;} }
   const cxp=VW/2,cyp=VH/2,mgx=VW/2-40,mgy=VH/2-40,cy=(G.camYaw!=null?G.camYaw:Math.PI),col='#ffe07a';
   const sp=project(best.x,(best.y0||0)+16,best.z), onScreen=sp&&sp[0]>=0&&sp[0]<=VW&&sp[1]>=0&&sp[1]<=VH;
@@ -19392,7 +19505,8 @@ function drawQuestPointer(c){
     c.beginPath(); c.moveTo(14,0); c.lineTo(-9,-9); c.lineTo(-9,9); c.closePath(); c.fill();
     c.restore(); c.globalAlpha=1; }
   // "N left" pill, top-centre under the quest card
-  const label=(best.questItem||best.localItem).name+' · '+placed.length+' left'; c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+  const item=best.questItem||best.localItem;
+  const label=best.navigationLabel||((best.localItem?'Optional · ':'')+item.name+' · '+placed.filter(p=>(p.questItem||p.localItem)?.id===item.id).length+' left'); c.font='600 13px system-ui,sans-serif'; c.textAlign='center'; c.textBaseline='middle';
   const w=c.measureText(label).width+26, x=VW/2, y=86;
   c.fillStyle='rgba(12,10,16,0.72)'; c.beginPath(); if(c.roundRect) c.roundRect(x-w/2,y-13,w,26,13); else c.rect(x-w/2,y-13,w,26); c.fill();
   c.fillStyle=col; c.beginPath(); c.arc(x-w/2+13,y,4,0,6.283); c.fill();
@@ -20594,7 +20708,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1969"></script>
+<script type="module" src="./hero3d.js?v=1970"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

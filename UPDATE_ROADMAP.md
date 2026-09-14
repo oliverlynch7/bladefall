@@ -1613,3 +1613,7 @@ Fixed campaign resume identity: exact world/area/quest state is now saved, legac
 
 ## [Codex | 2026-09-13]
 Shipped 1.969.0-weapon-fits: equipped weapon models now bypass studio class filters; body/mesh fits and saved frames restore on every swap; live fitting and full slice imports preserve placement. Existing hero meshes, clips and weapon assets retained. Chrome: 42 equip cases across six bodies, saved-fit fixtures, pre-change save resume, multiplayer render probe. See docs/WEAPON_INTEGRATION_2026-09-13.md.
+
+
+## [Codex | 2026-09-14]
+Shipped 1.970.0-outskirts-adventure: rebuilt the Outskirts as a thirteen-district farming valley with an early lookout, two farm-nest objectives, optional caravan/mill loops and a gated Waystone finale. Curved routes, continuous meadows, farm clusters and instanced banks. Nest/save migration and real interactions verified; 36 directed Outskirts walks and all 15 targets pass. Other 23 campaign geometries/quests unchanged. Updated Blender overview in the campaign gallery.

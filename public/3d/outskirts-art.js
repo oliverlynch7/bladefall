@@ -7,12 +7,18 @@ const CHUNK=400,white=new THREE.Color('white'),dummy=new THREE.Object3D();
 const hash=(x,z)=>{const n=Math.sin(x*12.9898+z*78.233)*43758.5453;return n-Math.floor(n)};
 let active=null;
 export function wantsOutskirts(w){return !failed && new URLSearchParams(location.search).get('outskirtsart')!=='0' && w.zone==='outskirts'&&!w.hub&&!w.trial&&!w.arena&&!w.bonus;}
-export function outskirtsReady(){return kit.size===10;}
+export function outskirtsReady(){return kit.size===11;}
 export function loadOutskirts(){
   if(pending)return pending;
   pending=new Promise((resolve,reject)=>new GLTFLoader().load('./outskirts-assets/outskirts-kit.glb',g=>{
     g.scene.updateMatrixWorld(true);g.scene.traverse(o=>{if(!o.isMesh)return;const geo=o.geometry.clone();geo.applyMatrix4(o.matrixWorld);geo.computeBoundingBox();let mean=new THREE.Color(0,0,0);const co=geo.attributes.color;for(let i=0;i<co.count;i++){mean.r+=co.getX(i);mean.g+=co.getY(i);mean.b+=co.getZ(i)}mean.multiplyScalar(1/co.count);kit.set(o.name,{geo,mean,tri:(geo.index?.count||geo.attributes.position.count)/3});});
-    if(kit.size!==10){failed=true;resolve();return;}resolve();
+    if(kit.size!==10){failed=true;resolve();return;}
+    // Seven-sided grassy banks: 14 triangles each, shared and instanced at the valley edge.
+    const geo=new THREE.ConeGeometry(.5,1,7,1,false).toNonIndexed();geo.translate(0,.5,0);
+    const colors=[],mean=new THREE.Color(0,0,0),p=geo.attributes.position;
+    for(let i=0;i<p.count;i++){const c=new THREE.Color(p.getY(i)>.1?'#7c8651':'#676f43');colors.push(c.r,c.g,c.b);mean.add(c);}
+    mean.multiplyScalar(1/p.count);geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geo.computeBoundingBox();
+    kit.set('bank',{geo,mean,tri:p.count/3});resolve();
   },undefined,e=>{failed=true;console.warn('[outskirts-art] asset unavailable; using original scenery',e);resolve();}));return pending;
 }
 function makeGrain(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),im=ctx.createImageData(128,128);for(let i=0;i<128*128;i++){const v=205+Math.floor(hash(i,55)*50);im.data.set([v,v,v,255],i*4)}ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t;}
@@ -70,20 +76,21 @@ export function buildOutskirts(scene,w){
   const soil=woods?'#494637':boss?'#635039':'#695b43';let floors=0,roads=0;
   const done=[];
   for(const s of segs){
-    const nx=Math.ceil(s.w/36),nz=Math.ceil(s.d/36),dx=s.w/nx,dz=s.d/nz;
+    const tile=s.meadow&&!s.path?72:36;
+    const nx=Math.ceil(s.w/tile),nz=Math.ceil(s.d/tile),dx=s.w/nx,dz=s.d/nz;
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
       const x=s.x-s.w/2+(ix+.5)*dx,z=s.z-s.d/2+(iz+.5)*dz;
       if(done.some(r=>x-dx/2>=r.x-r.w/2&&x+dx/2<=r.x+r.w/2&&z-dz/2>=r.z-r.d/2&&z+dz/2<=r.z+r.d/2))continue;
       const road=s.path||paths.some(p=>covers(p,x,z)),r=hash(x,z);
-      const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:soil;
-      add(road?'brick':'tile',x,.45,z,road?dx-.5:dx+.05,2,road?dz-.5:dz+.05,c,0);floors++;if(road)roads++;
+      const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:(s.meadow?['#707345','#76784a','#7d7b4b','#696e43'][Math.floor(r*4)]:soil);
+      add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx+.05,2,road&&!s.meadow?dz-.5:dz+.05,c,0);floors++;if(road)roads++;
       if(!road&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
       if(!road&&r>.982)add('rubble',x,1.8,z,18,10,18,null,r*6.28);
     }
     done.push(s);
   }
   // Chunked edging follows actual segment bounds; crossings and bridges stay open.
-  for(const s of segs.filter(s=>s.district)){
+  for(const s of segs.filter(s=>s.district&&!s.meadow)){
     for(const side of [-1,1])for(let z=s.z-s.d/2+18;z<s.z+s.d/2;z+=38){
       const x=s.x+side*(s.w/2-7);if(segs.some(o=>o!==s&&covers(o,x+side*16,z,12)))continue;
       add('brick',x,5,z,13,10,35,'#625b4b');
@@ -95,7 +102,11 @@ export function buildOutskirts(scene,w){
     if(o.autoCol||o.treeCol||o.pillarCol||o.invisible||o.h<=0)continue;
     // A structure deco is the visible owner of this matching collider.
     if(o.structure){obstacles.add(o);continue;}
-    B.structure(o,()=>B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior)));
+    B.structure(o,()=>{if(o.earth){
+      const base=o.y0||0,h=o.h-base;
+      add('tile',o.x,base+h/2,o.z,o.w,h,o.d,'#665b40');
+      add('tile',o.x,o.h+.4,o.z,o.w,1.5,o.d,o.path?'#a3916c':'#777747');
+    }else B.solid(o,woods?'#67694f':'#756950',!!(o.root||o.canopy||o.interior));});
     obstacles.add(o);
   }
   for(const d of deco){
@@ -113,6 +124,7 @@ export function buildOutskirts(scene,w){
       const sc=(d.lampH||47)/3.8,base=y-(d.postH||0);add('lantern',d.x,base,d.z,sc,sc,sc);B.lamps.push(new THREE.Vector3(d.x,base+sc*3.1,d.z));continue;
     }
     if(kind==='standstone'||kind==='pillar'||kind==='column'){B.solid({...d,y0:y,kind:'col'},'#676656');continue;}
+    if(kind==='bank'){add('bank',d.x,y,d.z,ww*1.6,hh,dd*1.5,d.c,r*6.28);continue;}
     if(kind==='rock'||kind==='grave'){add('rubble',d.x,y,d.z,ww,Math.max(14,hh)*2,dd);continue;}
     if(kind==='fence'){add('palisade',d.x,y,d.z,ww/1.9,hh/3,dd/.5);continue;}
     if(kind==='skipflower')continue;

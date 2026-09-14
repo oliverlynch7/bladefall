@@ -1,0 +1,67 @@
+{
+  "early": {
+    "qs": {}
+  },
+  "watch": {
+    "qs": {
+      "ok4": 1
+    }
+  },
+  "saved": {
+    "zone": 0,
+    "area": 0,
+    "qs": {
+      "ok4": 1,
+      "ok1": 1
+    },
+    "revision": 2,
+    "outskirtsNests": [
+      "cornlands"
+    ]
+  },
+  "resumed": {
+    "qs": {
+      "ok4": 1,
+      "ok1": 1
+    },
+    "sites": [
+      "orchard"
+    ]
+  },
+  "done": {
+    "qs": {
+      "ok4": 1,
+      "ok1": 2,
+      "ok2": 1
+    },
+    "portal": {
+      "x": -210,
+      "z": -4350,
+      "y": 160,
+      "t": 0.03333333333333333
+    },
+    "remainingDens": 0
+  },
+  "migration": [
+    {
+      "count": 5,
+      "qs": {
+        "ok1": 0,
+        "ok4": 1,
+        "ok2": 1
+      },
+      "portal": false,
+      "nests": 2
+    },
+    {
+      "count": 12,
+      "qs": {
+        "ok1": 2,
+        "ok4": 1,
+        "ok2": 1
+      },
+      "portal": true,
+      "nests": 0
+    }
+  ]
+}

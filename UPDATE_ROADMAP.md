@@ -1617,3 +1617,8 @@ Shipped 1.969.0-weapon-fits: equipped weapon models now bypass studio class filt
 
 ## [Codex | 2026-09-14]
 Shipped 1.970.0-outskirts-adventure: rebuilt the Outskirts as a thirteen-district farming valley with an early lookout, two farm-nest objectives, optional caravan/mill loops and a gated Waystone finale. Curved routes, continuous meadows, farm clusters and instanced banks. Nest/save migration and real interactions verified; 36 directed Outskirts walks and all 15 targets pass. Other 23 campaign geometries/quests unchanged. Updated Blender overview in the campaign gallery.
+
+
+## [Codex | 2026-09-14] Canyon identity — v1.971.0
+
+Hollow Pass and Dry Wash now have bespoke canyon/rim and fossil-aqueduct layouts, warm sandstone scenery, repeatable local windbreaks and sheltered paths. Hollow Pass progresses through a hidden caravan charter and final beacon; completed legacy objectives migrate. Both maps pass real-browser objective/save checks, active-wind route walking, high/low rendering and new Blender gallery previews. Broader world identities are documented in docs/CAMPAIGN_IDENTITIES_2026-09-14.md; those remaining mechanics are planned, not shipped.

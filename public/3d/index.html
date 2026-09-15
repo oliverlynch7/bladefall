@@ -1027,7 +1027,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.970.0-outskirts-adventure';
+const VERSION3D='1.971.0-canyon-identity';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -2673,7 +2673,7 @@ const ZONES=[
     side:{id:'thornwood',name:'The Thornwood',icon:'🌲',stage:1,seed:311,trial:'berserker',blurb:'Something older than the road grows in here.'},
     boss:{stage:2,name:'The Brute',mus:'boss_brute'}},
   {id:'hollow',name:'Hollow Pass',icon:'🏜️',tier:2,haz:'gusts',mus:'hollow',blurb:'Dry canyons that swallow the careless.',
-    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'kill',mob:'dustjackal',n:12,d:'Cull 12 Dust Jackals'},{id:'hp4',k:'purge',mob:'dustjackal',n:3,d:'Break 3 jackal nests'}]},
+    areas:[{stage:3,name:'Hollow Pass',quests:[{id:'hp1',k:'find',d:'Recover the caravan charter from the hidden rim alcove'},{id:'hp4',k:'kindle',n:1,d:'Light the Pass Beacon'}]},
            {stage:3,name:'The Dry Wash',seed:2,quests:[{id:'hp2',k:'fetch',item:'Sun-Bleached Bone',n:5,d:'Recover 5 Sun-Bleached Bones from the rims',placed:true},{id:'hp3',k:'find',d:'Find the Hollow Shrine'}]}],
     side:{id:'sunkenwash',name:'The Sunken Wash',icon:'🦴',stage:3,seed:312,trial:'ninja',blurb:'The canyon floor gave way a long time ago.'},
     boss:{stage:4,name:'Hollow Marksman',mus:'boss_marksman'}},
@@ -3076,7 +3076,7 @@ const HUB_STONE={x:0,y:0,z:30};
    ARENA_STAGE is `var` (declared with an explicit comment saying so) precisely so this line can
    reference it ahead of its assignment without a TDZ throw. */
 window.__BF_WORLD=()=>{const st=(G.arena&&ARENA_STAGE)||STAGES[G.stageIndex]||{};
-  return {course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
+  return {canyonWind:G.canyonWind,course:G.bonusActive?G.bonusPath:null,endless:!!G.endless,bossRush:!!G.bossRush,sprintFun:!!G.sprintFun,arenaLava:!!G.arenaLava,floor:G.floor,stage:G.stageIndex,bounds:G.bounds,portalPos:G.portalPos,walls:G.walls,hubArt:G.hub&&G.hubArt?{...G.hubArt,upgrades:meta.hubUpgrades||{},zoneDone:meta.zoneDone||{}}:null,area:G.area,side:!!G.side,delve:!!G.delve,obstacles:G.obstacles,eye:G.eye,deco:G.deco,rooms:G.rooms,segments:G.segments,enemies:G.enemies,gates:G.gates,chests:G.chests,keys:G.keys,waystone:G.waystone,hubStone:(G.hub&&!G.sparringRoom&&!window.__HUB_ART_ACTIVE)?HUB_STONE:null,hubNpcs:(G.hub&&!G.sparringRoom)?G.hubNpcs:null,hubLayout:G.hubLayout||null,p:G.p,zone:(curZone&&curZone().id)||'hub',hub:!!G.hub,trial:!!G.trial,arena:!!G.arena,bonus:!!G.bonusActive,theme:(G.hub?'hub':st.theme)||'',ground:st.ground||'#8a8445'};};   // live player meta (classId, skin) for the 3D hero layer
 let VW=0,VH=0,DPR=1;
 function targetRenderDpr(){
   const raw=window.devicePixelRatio||1, q=(typeof meta!=='undefined'&&meta.quality)||'high';
@@ -6409,6 +6409,102 @@ function terrainCanyon(ctx, o){
    Node: name,x,z,height,width,depth,role. Edge: from,to,width,optional challenge.
    Heights never overlap another storey: the existing objective/camera surface queries
    can therefore use the real top surface consistently. */
+const HOLLOW_JOURNEYS=[
+ {name:'The Wind-carved Pass',nodes:[
+ ['Caravan Mouth',0,350,0,560,500],['Sandglass Bend',-420,-300,0,430,580],['Jackal Narrows',180,-1000,0,400,600],['Sheltered Cistern',780,-1420,0,600,540],['Needle Basin',220,-2100,0,640,620],['Windcut Chasm',-540,-3260,0,480,540],['Survey Rim',-960,-630,140,320,380],['Smuggler Ledge',-800,-1590,140,380,460],['Arch Crown',-400,-2040,200,380,420],['Hidden Caravan Alcove',-1470,-1700,140,340,340],['Pass Beacon',-980,-4170,120,540,500]],
+ edges:[[0,1,260,100],[1,2,220,-110],[2,3,220,80],[3,4,240,-100],[4,5,220,70],[5,10,240,-100],[1,6,190,40],[6,7,180,-60],[7,8,165,30,true],[8,5,200,30],[7,9,170,40]],secret:9,vanes:[{node:1,edge:1},{node:7,edge:8}],rests:[0,3,6]},
+ {name:'The Fossil Aqueduct',nodes:[
+ ['Dry River Mouth',0,250,0,500,400],['Fossil Basin',0,-500,0,1050,1000],['Aqueduct Foot',900,-850,0,450,500],['Aqueduct Bend',1140,-1700,100,400,460],['Brass Sluice',420,-2040,180,440,440],['High Bone Shelf',-400,-1500,180,360,460],['Buried Survey Tomb',-1000,-1620,0,440,420],['Gale Arch',-720,-2400,240,430,470],['Hollow Shrine',-100,-3000,320,650,520]],
+ edges:[[0,1,260,0],[1,2,280,100],[2,3,220,100],[3,4,180,-60,true],[4,5,170,80,true],[5,7,200,-70],[7,8,240,-50],[1,6,220,-100],[6,7,220,-90]],relics:[1,2,4,5,6],vanes:[{node:3,edge:3},{node:4,edge:4}],rests:[0,2,6]}
+];
+
+function buildHollowJourney(ctx){
+  const plan=HOLLOW_JOURNEYS[G.area];if(!plan)return false;
+  const {rnd,mkMonster}=ctx;
+  G._scapeTable='HOLLOW_JOURNEYS';G.spireRY=null;G.iceCave=null;G.dashTut=null;G.dashSign=null;
+  G.campaignLayout={revision:3,zone:'hollow',area:G.area,edges:[],nodes:[],experience:{title:plan.name}};
+  G.canyonWind={vanes:[],zones:[],time:0};
+  const rooms=plan.nodes.map(([name,x,z,y,w,d],i)=>{
+    const r={name,x,z,y,w,d,role:i===0?'rest':i===plan.nodes.length-1?'goal':'canyon',monsters:[],encounter:false,cleared:true,flank:y>0};
+    if(y)vplat(x,z,y,w,d,{canyonShelf:true,checkpoint:true});else vseg(x,z,w,d,{district:name,sand:true});
+    G.rooms.push(r);G.campaignLayout.nodes.push({...r,monsters:undefined});return r;
+  });
+  const paths=[];
+  for(const [ai,bi,width,bend=0,bridge=false]of plan.edges){
+    const a=rooms[ai],b=rooms[bi],L=Math.hypot(b.x-a.x,b.z-a.z),ux=(b.x-a.x)/L,uz=(b.z-a.z)/L;
+    const rim=r=>Math.min(r.w/2/Math.max(.001,Math.abs(ux)),r.d/2/Math.max(.001,Math.abs(uz)))-45;
+    const ra=rim(a),rb=rim(b),ax=a.x+ux*ra,az=a.z+uz*ra,bx=b.x-ux*rb,bz=b.z-uz*rb;
+    const n=Math.max(1,Math.ceil(Math.hypot(bx-ax,bz-az)/65),Math.ceil(Math.abs(a.y-b.y)/16)),points=[];
+    for(let k=0;k<=n;k++){const t=k/n,x=ax+(bx-ax)*t-uz*bend*4*t*(1-t),z=az+(bz-az)*t+ux*bend*4*t*(1-t),y=Math.round(a.y+(b.y-a.y)*t);
+      const meta={path:true,checkpoint:true,bridge,canyonShelf:true,sand:true};
+      if(y)vplat(x,z,y,width,width,meta);else vseg(x,z,width,width,meta);
+      const point={x,z,y,w:width,d:width,ux,uz,bridge};paths.push(point);points.push({x,z,y});
+    }
+    G.campaignLayout.edges.push({a:ai,b:bi,width,points,bridge});
+  }
+  const free=(x,z,r=45)=>!paths.some(p=>Math.abs(x-p.x)<p.w/2+r&&Math.abs(z-p.z)<p.d/2+r)&&!rooms.some(p=>Math.abs(x-p.x)<p.w/2+15&&Math.abs(z-p.z)<p.d/2+15);
+  // Walls follow the winding wash; their silhouette is the level, rather than props
+  // placed around a repeated clearing. Elevated rope walks remain exposed to wind.
+  for(const [i,p]of paths.entries())if(!p.bridge&&i%2===0)for(const side of [-1,1]){
+    const x=p.x-p.uz*(p.w/2+65)*side,z=p.z+p.ux*(p.w/2+65)*side;
+    if(free(x,z,25))vplat(x,z,p.y+210+(i%4)*45,100,130,{terrain:true,canyonCliff:true});
+  }
+  for(const [i,r]of rooms.entries()){
+    for(const axis of ['x','z'])for(const side of [-1,1]){
+      const span=axis==='x'?r.d:r.w;for(let k=0;k<Math.ceil(span/120);k++){
+        const t=-span/2+(k+.5)*120,x=r.x+(axis==='x'?side*(r.w/2+65):t),z=r.z+(axis==='z'?side*(r.d/2+65):t);
+        if(free(x,z,30))vplat(x,z,r.y+210+(k%3)*55,90,110,{terrain:true,canyonCliff:true});
+      }
+    }
+    if(i>0&&i<rooms.length-1&&!plan.rests.includes(i)){
+      const count=(G.area===1&&i===1)?5:2;
+      for(let j=0;j<count;j++){const type=['dustjackal','galewisp','dustjackal'][j%3],a=j/count*6.28,m=mkMonster(type,r.x+Math.cos(a)*90,r.z+Math.sin(a)*90,r);m.y=r.y;m.sx=m.x;m.sz=m.z;}
+    }
+    // Sparse pale ribs distinguish the fossil basin from the first area's stone needles.
+    if(G.area===1&&[1,5,6].includes(i))for(let k=0;k<4;k++)G.deco.push({kind:'fossil',c:'#e3d5b0',x:r.x-100+k*65,z:r.z-130,y0:r.y,w:220,h:130,d:100,nocol:true});
+    else for(const side of [-1,1])G.deco.push({kind:'rock',theme:'canyon',c:'#bf955e',x:r.x+side*(r.w/2-40),z:r.z-70,y0:r.y,w:35,h:130+(i%3)*40,d:35,nocol:true});
+    if(i>0&&(plan.rests.includes(i)||i===plan.secret))G.chests.push(chestMaybeMimic({x:r.x+60,z:r.z+75,y:r.y,opened:false,bob:0},rnd));
+  }
+  const end=rooms[rooms.length-1];
+  if(G.area===0){
+    const r=rooms[plan.secret];scapeSecret(ctx,r.x-85,r.z-65,r.y);
+    scapeFind(ctx,r.x+45,r.z-50,r.y);if(G.waystone)G.waystone.kind='charter';
+    G.qmarks.push({k:'kindle',x:end.x,z:end.z-90,y:end.y,q:'hp4',done:!!G.qs.hp4,t:0,lit:!!G.qs.hp4,label:'Light the Pass Beacon',requires:'hp1'});
+  }else {scapeFetch(ctx,plan.relics.map(i=>({x:rooms[i].x+70,z:rooms[i].z-65,y:rooms[i].y})));scapeFind(ctx,end.x,end.z,end.y);}
+  for(const [i,v]of plan.vanes.entries()){
+    const r=rooms[v.node],edge=G.campaignLayout.edges[v.edge],mid=edge.points[Math.floor(edge.points.length/2)];
+    const vane={id:i,x:r.x-70,z:r.z+40,y:r.y,until:0};
+    G.canyonWind.vanes.push(vane);G.canyonWind.zones.push({x:mid.x,z:mid.z,y:mid.y,r:Math.max(240,Math.hypot(rooms[edge.a].x-rooms[edge.b].x,rooms[edge.a].z-rooms[edge.b].z)*.55),vane:i});
+    G.deco.push({kind:'windbreak',c:'#c79a54',x:vane.x,z:vane.z,y0:vane.y,w:40,h:80,d:40,nocol:true});
+  }
+  const start=rooms[0];finishScape(ctx,{sx:start.x,sz:start.z+70,sy:start.y,gx:end.x,gz:end.z,dashGate:false,backdrop:false,decoCol:'#be8950',decoTheme:'canyon'});
+  if(G.healpads)for(const [i,p]of G.healpads.entries()){const r=rooms[plan.rests[(i+1)%plan.rests.length]];Object.assign(p,{x:r.x+75,z:r.z+80,y:r.y});}
+  snapWorldInteractables();return true;
+}
+
+function canyonWindState(){
+  if(!G?.canyonWind)return null;const p=G.p,w=G.canyonWind;w.time=G.time;
+  const z=w.zones.find(z=>Math.hypot(p.x-z.x,p.z-z.z)<z.r&&Math.abs(p.y-z.y)<160);
+  if(!z)return {sheltered:true,push:0};
+  const left=Math.max(0,w.vanes[z.vane].until-G.time),cycle=Math.sin(G.time*.6);
+  return {sheltered:false,left,push:left>0?0:cycle,vane:z.vane};
+}
+function canyonWindInteract(){
+  if(!G?.canyonWind)return null;const p=G.p;
+  const v=G.canyonWind.vanes.find(v=>Math.hypot(v.x-p.x,v.z-p.z)<95&&Math.abs(p.y-v.y)<55);
+  if(!v)return null;
+  return {x:v.x,z:v.z,y:v.y+75,label:'Brace the windbreak · calm this crossing for 12s',act:()=>{
+    v.until=G.time+12;burst(v.x,v.y+65,v.z,'#88e0cb',18);toast('Windbreak braced. This crossing is calm for 12 seconds; brace it again whenever you need.');
+  }};
+}
+function drawCanyonWind(c){
+  const w=canyonWindState();if(!w)return;
+  const label=w.sheltered?'Canyon shelter · protected from gusts':w.left>0?'Windbreak steady · '+Math.ceil(w.left)+'s':Math.abs(w.push)>.55?'Crosswind · brace a windbreak or wait for the lull':'Wind easing · a good time to cross';
+  c.save();c.font='600 12px system-ui';c.textAlign='center';c.textBaseline='middle';const width=c.measureText(label).width+24;
+  c.fillStyle='rgba(22,27,27,.85)';c.fillRect(VW/2-width/2,VH-205,width,25);c.fillStyle=w.left>0?'#8ee4d0':'#f2c882';c.fillText(label,VW/2,VH-192);c.restore();
+}
+
+
 const CAMPAIGN_ROUTES={
  outskirts:[
  {adventure:true,nodes:[['South Road',0,400,0,520,500,'rest'],['Broken Caravan',140,-220,0,600,560,'court'],['Watchpost Approach',-180,-860,0,640,620,'rest'],['Watchpost',-700,-1060,140,480,460,'watch'],['Mill Commons',120,-1660,0,820,760,'mill'],['West Cornlands',-900,-1710,0,780,780,'crop'],['Eastwood Orchard',1110,-1840,40,740,760,'orchard'],['Flooded Hamlet',-1030,-2710,0,720,660,'hamlet'],['Millrace Ford',50,-2620,0,780,640,'creek'],['Windmill Rise',1080,-2800,80,620,580,'reward'],['Old Stone Bridge',230,-3490,80,720,600,'court'],['Secluded Grove',-1700,-2400,0,440,440,'reward'],['Old Waystone',-210,-4350,160,760,620,'goal']],edges:[[0,1,240,70],[1,2,260,-70],[2,3,240,0],[2,4,280,-60],[3,5,240,-60],[4,5,270,50],[4,6,260,-90],[5,7,260,-80],[5,11,210,-40],[11,7,220,40],[6,9,260,70],[7,8,280,0],[4,8,260,100],[8,9,260,-40],[7,10,260,60],[8,10,300,-70],[9,10,260,-80],[10,12,280,100]],find:12,secret:11},
@@ -7593,7 +7689,7 @@ function loadStageRaw(i){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
+  G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.campaignLayout=null; G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
   G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
@@ -7634,6 +7730,7 @@ function loadStageRaw(i){
      Boss + mini arenas, trials and side zones keep the shared maze below. ---- */
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && !G.endless && !G.bossRush && CAMPAIGN_ROUTES[curZone().id]){
     const srnd=mulberry(i*7919+31+so),srnd2=mulberry(i*104729+7+so*3);
+    if(curZone().id==='hollow'&&buildHollowJourney({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}))return;
     if(buildCampaignRoute({rnd:srnd,rnd2:srnd2,s,diff,mkMonster,pick,eliteRate}))return;
   }
   if(!isBoss && !isMini && !G.trial && !G.side && !G.delve && EXPANDED_SCAPES[curZone().id]){
@@ -7902,7 +7999,7 @@ function loadBonus(returnIdx,forcedSeed){
   const s=STAGES[G.stageIndex];
   G.enemies=[]; G.pickups=[]; G.projectiles=[]; G.particles=[]; G.ambient=[]; G.portal=null; G.portalPos=null; G.boss=null; G.minions=[]; G.corpses=[];
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[]; G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null;
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
+  G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.bonusActive=true; G.bonusReturn=returnIdx; G.bonusSecured=false; G.combo=0; G.comboT=0; G.bonusPhasers=[];
   G.bonusVisits=(G.bonusVisits||0)+1;
   const seed=(forcedSeed!=null)?(forcedSeed>>>0):((((G.runSeed||0)>>>0)^(((G.stageIndex+1)*2654435761)>>>0)^((G.bonusVisits*40503)>>>0))>>>0);
@@ -9211,7 +9308,8 @@ function hazUpdate(dt){
     if(p.onGround){ p.slide=Math.min(1,(p.slide||0)+dt*3); } else p.slide=Math.max(0,(p.slide||0)-dt*2);
   } else if(G.haz==='gusts'){                            // Gales: the wind shoves you mid-air
     G.gustT=(G.gustT||0)+dt;
-    const ph=Math.sin(G.time*0.45), strong=Math.abs(ph)>0.55;
+    const local=canyonWindState(),ph=local?local.push:Math.sin(G.time*0.45), strong=Math.abs(ph)>0.55;
+    if(local&&!local.sheltered&&p.onGround&&strong)p.vx+=ph*520*dt;
     G.gustX=ph*1.0;
     if(!p.onGround&&strong){ const onClimb=highestSurfaceAt(p.x,p.z,16)>40; p.vx+=G.gustX*(onClimb?95:260)*dt; }  // over an elevated climb the wind only nudges — it can't fling you off a narrow ledge into the pit
     if(strong&&Math.random()<0.25*60*dt) G.particles.push({x:p.x-G.gustX*180+(Math.random()-0.5)*160,y:20+Math.random()*80,z:p.z+(Math.random()-0.5)*220,vx:G.gustX*420,vy:0,vz:0,life:0.5,color:'#cfe6ff',sz:2});
@@ -9687,7 +9785,8 @@ function questMarkInteract(consider){
   for(const m of G.qmarks){
     if(m.done) continue;
     if(m.k === 'kindle') consider(m.x, m.z, 110, function(){ return {x:m.x, z:m.z, y:m.y+60,
-      label:'Kindle the brazier', act:function(){
+      label:m.requires&&!G.qs[m.requires]?'Recover the caravan charter before signalling':(m.label||'Kindle the brazier'), act:function(){
+        if(m.requires&&!G.qs[m.requires]){toast('The missing charter is in the hidden rim alcove. Recover it before signalling the pass.');return;}
         m.done = true; m.lit = true; questBump(m.q, 1); SFX.pickup();
         burst(m.x, m.y+50, m.z, '#ffb347', 22);
         addText(m.x, m.y+90, m.z, 'LIT', 'var(--amber)', true); }}; });
@@ -14494,6 +14593,7 @@ function continueRun(){
   if(!route){for(let zi=0;zi<ZONES.length;zi++){const z=ZONES[zi];if(z.boss.stage===saved.stageIndex){route={zone:zi,area:-1};break;}const ai=z.areas.findIndex(a=>a.stage===saved.stageIndex);if(ai>=0){route={zone:zi,area:ai};break;}}}
   if(route&&ZONES[route.zone]&&(route.area===-1||ZONES[route.zone].areas[route.area])){
     if(route.zone===0&&route.area===0&&route.revision!==2){route={...route,qs:{...(route.qs||{}),ok1:(route.qs?.ok1||0)>=12?2:0}};}
+    if(route.zone===1&&route.area===0&&route.revision!==3){route={...route,qs:{...(route.qs||{}),hp1:(route.qs?.hp1||0)>=12?1:0,hp4:(route.qs?.hp4||0)>=3?1:0}};}
     G=newG(freshPlayer(),{outskirtsNests:route.outskirtsNests||[],zone:route.zone,area:route.area,zoneTier:ZONES[route.zone].tier,qs:{...(route.qs||{})},ngPlus:saved.ngPlus,ngHp:saved.ngHp||1,ngDmg:saved.ngDmg||1,baseLoadout:saved.base||null,runSeed:saved.runSeed||0});
     restorePlayer(saved.p);loadArea();restorePlayer(saved.p);if(G.area>=0&&areaClear())openWay();if(!G.baseLoadout)G.baseLoadout=snapOf(G.p);
     mode='play';showOverlay(false);showGameUI(true);hudUpdate();return;
@@ -14768,7 +14868,7 @@ function loadBossRushArena(idx){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
+  G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
   const R=470;
@@ -15042,7 +15142,7 @@ function loadEndlessArena(n){
   G.kills=0; G.killGoal=0; G.tookDamage=false; G.combo=0; G.comboT=0;
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
-  G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
+  G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
@@ -15474,7 +15574,7 @@ function rebuildWaystationCitadel(){
   const old=Object.fromEntries((G.hubNpcs||[]).map(n=>[n.id,n]));
   const take=(id,x,z,extra)=>Object.assign(old[id],{x,z},extra||{});
   G.hubLayout='citadel-v1';
-  G.segments=[]; G.rooms=[]; G.walls=[]; G.obstacles=[]; G.deco=[]; G.torches=[];
+  G.segments=[]; G.canyonWind=null; G.rooms=[]; G.walls=[]; G.obstacles=[]; G.deco=[]; G.torches=[];
   G.gates=[]; G.enemies=[];
 
   // One continuous walkable fortress footprint. District paving, buildings and landmarks make
@@ -16166,6 +16266,7 @@ function updateInteract(){
   }
   else if(G.npc && !G.npc.dummy){ const n=G.npc, d=dXZ(n.x,n.z,p.x,p.z); if(d<96) it={x:n.x,z:n.z,y:(n.y||0)+40,label:"Talk to the Shade",act:()=>openShade()}; }
   if(!it && G.dashSign){ const s=G.dashSign, d=dXZ(s.x,s.z,p.x,p.z); if(d<100) it={x:s.x,z:s.z,y:74,label:'📖 Read the sign · How to cross the gap',act:()=>openDashTutorial()}; }   // re-read the mid-air-dash lesson anytime
+  const windbreak=canyonWindInteract();if(windbreak)it=windbreak;
   G.interact=it; updateInteractPrompt();
 }
 function doInteract(){ if(mode!=='play'||!G||!G.interact) return; SFX.pickup(); G.interact.act(); }
@@ -19487,9 +19588,10 @@ function drawThreatArrows(c){
 }
 // points the player to the nearest uncollected PLACED quest item (climb-fetch bones/relics) + shows how many remain
 function drawQuestPointer(c){
+  drawCanyonWind(c);
   if(!G||G.hub||!G.pickups) return;
   let placed=G.pickups.filter(pk=>pk.placed&&(pk.questItem||pk.localItem));
-  if(G.campaignLayout?.experience){
+  if(G.campaignLayout?.experience&&G.campaignLayout.zone==='outskirts'){
     const qs=areaQuests(),watch=qs.find(q=>q.id==='ok4'),nests=qs.find(q=>q.id==='ok1');
     if(watch&&!questDone(watch))placed=G.qmarks.filter(m=>m.q==='ok4'&&!m.done).map(m=>({...m,y0:m.y,navigationLabel:'Survey the Watchpost'}));
     else if(nests&&!questDone(nests))placed=G.qmarks.filter(m=>m.q==='ok1'&&!m.done).map(m=>({...m,y0:m.y,navigationLabel:m.site==='cornlands'?'Break the cornlands thorn nest':'Break the orchard thorn nest'}));
@@ -19757,6 +19859,11 @@ function render(t){
     if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4), wy=w.y||0;   // sit on its real surface (raised vault court etc.), never buried under the platform
+    if(w.kind==='charter'){
+      bx(w.x,wy+10,w.z,40,20,30,'#785737');bx(w.x,wy+23,w.z,36,3,24,'#eddbac');
+      for(const sign of [-1,1])bx(w.x+sign*18,wy+25,w.z,5,7,29,'#c19b5c');
+      bx(w.x,wy+51,w.z,5,5,5,'#d4aa5d','#ffe2a0',pu);
+    }else{
     /* prop3d stands a real obelisk here. Only the STONE is skipped — the capstone, the light
        column and the orbiting motes are what make this findable across a room, they pulse every
        frame, and they are the whole reason the object exists. They are placed against the model's
@@ -19770,7 +19877,7 @@ function render(t){
               bx(w.x,wy+34,w.z, 26,60,26, '#6b7183', null, 1); }
     bx(w.x,wy+top+4,w.z, 18,18,18, '#ffd24a', '#ffb020', pu);
     bx(w.x,wy+top+86,w.z, 8,150,8, '#ffd24a', '#ffd24a', 0.16);
-    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+top-4+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } }
+    for(let i=0;i<4;i++){ const a=t*1.1+i*1.571; bx(w.x+Math.cos(a)*30, wy+top-4+Math.sin(t*2+i)*8, w.z+Math.sin(a)*30, 5,5,5, '#ffd24a','#ffd24a',0.8); } } }
   const _mob3dLive=three3DLive();     // once per frame, not once per creature
   for(const e of G.enemies){ if(e.dead) continue;
     if(e.bot){ drawShadow(e.x,e.z,e.r); drawBotHero(e,t); drawHpBar3(e); continue; }   // Arena bots render as humanoid fighters
@@ -20596,7 +20703,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
   surfaceHeightAt, highestSurfaceAt, areaQuests, spawnEnemy, partySize, partyHpMul,
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
-  pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
+  canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
   ZONES, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
   startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
@@ -20708,7 +20815,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1970"></script>
+<script type="module" src="./hero3d.js?v=1971"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

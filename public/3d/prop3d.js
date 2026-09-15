@@ -298,7 +298,7 @@ function syncKeys(keys){
 function syncWaystone(w){
   /* No waystone in this level, or it has already been touched: hide the actor and stop. Hidden,
      not disposed - the next level very likely has one, and rebuilding is the expensive half. */
-  if(!w || w.taken){ if(_wayRec) _wayRec.root.visible = false; PROP3D.waystone = 0; return false; }
+  if(!w || w.taken || w.kind==='charter'){ if(_wayRec) _wayRec.root.visible = false; PROP3D.waystone = 0; return false; }
   if(!kitModel(WAY_FILE)){
     if(!_wayPending && kitModel(WAY_FILE) === undefined){
       _wayPending = true;

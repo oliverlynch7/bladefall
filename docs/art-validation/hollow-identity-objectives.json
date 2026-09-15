@@ -1,0 +1,89 @@
+{
+  "first": {
+    "early": "Recover the caravan charter before signalling",
+    "qs": {
+      "hp1": 1
+    },
+    "save": {
+      "zone": 1,
+      "area": 0,
+      "qs": {
+        "hp1": 1
+      },
+      "revision": 3,
+      "outskirtsNests": []
+    }
+  },
+  "resumed": {
+    "qs": {
+      "hp1": 1,
+      "hp4": 1
+    },
+    "label": "Light the Pass Beacon",
+    "portal": true
+  },
+  "migrations": [
+    {
+      "full": false,
+      "qs": {
+        "hp1": 0,
+        "hp4": 0
+      },
+      "portal": false
+    },
+    {
+      "full": true,
+      "qs": {
+        "hp1": 1,
+        "hp4": 1
+      },
+      "portal": true
+    }
+  ],
+  "dry": {
+    "qs": {},
+    "pickups": [
+      [
+        "x",
+        "z",
+        "y0",
+        "questItem",
+        "bob",
+        "placed"
+      ],
+      [
+        "x",
+        "z",
+        "y0",
+        "questItem",
+        "bob",
+        "placed"
+      ],
+      [
+        "x",
+        "z",
+        "y0",
+        "questItem",
+        "bob",
+        "placed"
+      ],
+      [
+        "x",
+        "z",
+        "y0",
+        "questItem",
+        "bob",
+        "placed"
+      ],
+      [
+        "x",
+        "z",
+        "y0",
+        "questItem",
+        "bob",
+        "placed"
+      ]
+    ],
+    "mode": "play"
+  }
+}

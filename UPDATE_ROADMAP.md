@@ -1622,3 +1622,8 @@ Shipped 1.970.0-outskirts-adventure: rebuilt the Outskirts as a thirteen-distric
 ## [Codex | 2026-09-14] Canyon identity — v1.971.0
 
 Hollow Pass and Dry Wash now have bespoke canyon/rim and fossil-aqueduct layouts, warm sandstone scenery, repeatable local windbreaks and sheltered paths. Hollow Pass progresses through a hidden caravan charter and final beacon; completed legacy objectives migrate. Both maps pass real-browser objective/save checks, active-wind route walking, high/low rendering and new Blender gallery previews. Broader world identities are documented in docs/CAMPAIGN_IDENTITIES_2026-09-14.md; those remaining mechanics are planned, not shipped.
+
+
+## [Codex | 2026-09-15] Combat fairness and floor stability — v1.972.0
+
+Removed the duplicate instant spore death burst and added harmless warning periods to death/residue hazards. Added enemy contact and projectile preparations, committed charge/cleave aim, visible signature boundaries and the missing Colossus quake delay. Thorn patches are sparse and ecological; thorn and healing-pad square fills are replaced. Shared scenery builders clip overlapping coplanar floor/body regions. Real-browser damage timing, all eight boss preparations, 24 scene loads, old-save continuation, campaign walking and reachability passed. Details and scope limits: docs/COMBAT_FAIRNESS_2026-09-15.md.

@@ -1,0 +1,59 @@
+{
+  "out": [
+    {
+      "type": "sporeback",
+      "start": 100,
+      "safe": 100,
+      "after": 98
+    },
+    {
+      "type": "emberling",
+      "start": 100,
+      "safe": 100,
+      "after": 96
+    },
+    {
+      "type": "toxling",
+      "start": 100,
+      "safe": 100,
+      "after": 92
+    },
+    {
+      "type": "grunt",
+      "after": 93,
+      "wind": 0,
+      "cooldown": 0.7333333333333328
+    },
+    {
+      "type": "dustjackal",
+      "after": 84
+    },
+    {
+      "type": "revenant",
+      "after": 84
+    },
+    {
+      "type": "frostling",
+      "after": 93,
+      "wind": 0,
+      "cooldown": 0.7333333333333328
+    },
+    {
+      "type": "caster",
+      "after": 90,
+      "wind": 0,
+      "cooldown": 0.7333333333333328
+    },
+    {
+      "projectileWindup": true,
+      "aim": {
+        "x": 0,
+        "y": 0,
+        "z": 400,
+        "h": 44
+      },
+      "projectiles": 1
+    }
+  ],
+  "mode": "play"
+}

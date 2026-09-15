@@ -1,0 +1,102 @@
+{
+  "out": [
+    {
+      "name": "Abyssal Descent",
+      "world": {
+        "on": true,
+        "ready": true,
+        "counts": {
+          "deepArt": "abyss",
+          "artObstacles": true,
+          "floorTiles": 263,
+          "totalTriangles": 27532,
+          "instances": 561,
+          "chunks": 16,
+          "visibleTriangles": 26652,
+          "visibleDrawCalls": 55,
+          "portalArt": "descent"
+        },
+        "err": null
+      }
+    },
+    {
+      "name": "Endless Dungeon",
+      "world": {
+        "on": true,
+        "ready": true,
+        "counts": {
+          "outskirtsArt": true,
+          "floorTiles": 1066,
+          "roadTiles": 0,
+          "tree": 0,
+          "totalTriangles": 21432,
+          "instances": 1261,
+          "chunks": 27,
+          "drawCalls": 59,
+          "visibleTriangles": 14456,
+          "visibleDrawCalls": 37,
+          "artObstacles": true
+        },
+        "err": null
+      }
+    },
+    {
+      "name": "Gauntlet",
+      "world": {
+        "on": true,
+        "ready": true,
+        "counts": {
+          "deepArt": "castle",
+          "artObstacles": true,
+          "floorTiles": 263,
+          "totalTriangles": 27712,
+          "instances": 556,
+          "chunks": 16,
+          "visibleTriangles": 26832,
+          "visibleDrawCalls": 53,
+          "portalArt": "gauntlet"
+        },
+        "err": null
+      }
+    },
+    {
+      "name": "Treasure Sprint",
+      "world": {
+        "on": true,
+        "ready": true,
+        "counts": {
+          "deepArt": "palace",
+          "artObstacles": true,
+          "floorTiles": 81,
+          "totalTriangles": 12508,
+          "instances": 182,
+          "chunks": 15,
+          "visibleTriangles": 3332,
+          "visibleDrawCalls": 22,
+          "portalArt": "sprint"
+        },
+        "err": null
+      }
+    },
+    {
+      "name": "Arena",
+      "world": {
+        "on": true,
+        "ready": true,
+        "counts": {
+          "deepArt": "castle",
+          "artObstacles": true,
+          "floorTiles": 576,
+          "totalTriangles": 30568,
+          "instances": 618,
+          "chunks": 22,
+          "visibleTriangles": 25184,
+          "visibleDrawCalls": 38,
+          "portalArt": "arena"
+        },
+        "err": null
+      }
+    }
+  ],
+  "errors": []
+}

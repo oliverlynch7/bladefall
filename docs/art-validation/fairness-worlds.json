@@ -1,0 +1,494 @@
+{
+  "out": [
+    {
+      "name": "Outskirts",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||0|plains|0|false|704|outskirts|-4,56;-910,-3010;-1819,-2295",
+        "counts": {
+          "outskirtsArt": true,
+          "floorTiles": 4645,
+          "roadTiles": 1080,
+          "tree": 48,
+          "totalTriangles": 149158,
+          "instances": 6514,
+          "chunks": 214,
+          "drawCalls": 490,
+          "visibleTriangles": 45302,
+          "visibleDrawCalls": 155,
+          "artObstacles": true
+        },
+        "err": null
+      },
+      "thorns": 2
+    },
+    {
+      "name": "Black Woods",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||1|forest|1|false|195|outskirts|-343,58;-145,-1910;1170,-476",
+        "counts": {
+          "outskirtsArt": true,
+          "floorTiles": 905,
+          "roadTiles": 418,
+          "tree": 43,
+          "totalTriangles": 274356,
+          "instances": 6583,
+          "chunks": 113,
+          "drawCalls": 228,
+          "visibleTriangles": 115404,
+          "visibleDrawCalls": 115,
+          "artObstacles": true
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Brute",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||2|badlands|-1|false|68|outskirts|-330,-200;-606,-249;515,-38",
+        "counts": {
+          "outskirtsArt": true,
+          "floorTiles": 798,
+          "roadTiles": 56,
+          "tree": 2,
+          "totalTriangles": 26104,
+          "instances": 1225,
+          "chunks": 33,
+          "drawCalls": 81,
+          "visibleTriangles": 26104,
+          "visibleDrawCalls": 81,
+          "artObstacles": true
+        },
+        "err": null
+      },
+      "thorns": 1
+    },
+    {
+      "name": "Hollow Pass",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||3|canyon|0|false|33|hollow|-240,280;-550,-2110;-1447,-1624",
+        "counts": {
+          "hollowArt": true,
+          "artObstacles": true,
+          "floorTiles": 1487,
+          "totalTriangles": 70016,
+          "instances": 3148,
+          "chunks": 91,
+          "visibleTriangles": 40816,
+          "visibleDrawCalls": 90
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Dry Wash",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||3|canyon|1|false|32|hollow|-210,180;-1100,-1750;-922,-1578",
+        "counts": {
+          "hollowArt": true,
+          "artObstacles": true,
+          "floorTiles": 1687,
+          "totalTriangles": 63744,
+          "instances": 3504,
+          "chunks": 74,
+          "visibleTriangles": 22656,
+          "visibleDrawCalls": 58
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Marksman",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||4|canyon|-1|false|70|hollow|-240,100;-819,100;627,-68",
+        "counts": {
+          "hollowArt": true,
+          "artObstacles": true,
+          "floorTiles": 111,
+          "totalTriangles": 12632,
+          "instances": 604,
+          "chunks": 26,
+          "visibleTriangles": 12632,
+          "visibleDrawCalls": 60
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Ruined Keep",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||5|ruins|0|false|109|keep|-142,-60;280,-1605;763,-1260",
+        "counts": {
+          "keepArt": true,
+          "artObstacles": true,
+          "floorTiles": 1938,
+          "totalTriangles": 133188,
+          "instances": 6175,
+          "chunks": 102,
+          "visibleTriangles": 73968,
+          "visibleDrawCalls": 144
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Undercroft",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||5|ruins|1|false|100|keep|-358,0;-250,-1830;657,-1129",
+        "counts": {
+          "keepArt": true,
+          "artObstacles": true,
+          "floorTiles": 2035,
+          "totalTriangles": 167956,
+          "instances": 9075,
+          "chunks": 95,
+          "visibleTriangles": 88984,
+          "visibleDrawCalls": 120
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "The Fallen",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||6|dungeon|-1|false|68|keep|-300,-220;-684,-294;599,-60",
+        "counts": {
+          "keepArt": true,
+          "artObstacles": true,
+          "floorTiles": 615,
+          "totalTriangles": 58152,
+          "instances": 1124,
+          "chunks": 26,
+          "visibleTriangles": 58152,
+          "visibleDrawCalls": 72
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Frostfell",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||7|frost|0|false|54|frost|-132,-40;1434,-1458;-1427,-1569",
+        "counts": {
+          "frostArt": true,
+          "artObstacles": true,
+          "floorTiles": 245,
+          "totalTriangles": 17364,
+          "instances": 591,
+          "chunks": 66,
+          "visibleTriangles": 10704,
+          "visibleDrawCalls": 88
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Rime Shelf",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||7|frost|1|false|55|frost|-313,23;1282,90;-927,-1067",
+        "counts": {
+          "frostArt": true,
+          "artObstacles": true,
+          "floorTiles": 139,
+          "totalTriangles": 12360,
+          "instances": 364,
+          "chunks": 51,
+          "visibleTriangles": 7720,
+          "visibleDrawCalls": 53
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Frost Sorcerer",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||8|frost|-1|false|68|frost|-380,130;-710,-309;627,-68",
+        "counts": {
+          "frostArt": true,
+          "artObstacles": true,
+          "floorTiles": 21,
+          "totalTriangles": 5684,
+          "instances": 116,
+          "chunks": 25,
+          "visibleTriangles": 5684,
+          "visibleDrawCalls": 56
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Emberdeep",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||9|volcano|0|false|55|ember|-305,-18;-1380,-1284;786,-1237",
+        "counts": {
+          "deepArt": "ember",
+          "artObstacles": true,
+          "floorTiles": 483,
+          "totalTriangles": 79608,
+          "instances": 1699,
+          "chunks": 44,
+          "visibleTriangles": 53288,
+          "visibleDrawCalls": 74
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Cinder Vents",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||9|volcano|1|false|55|ember|-132,-106;-1475,-1775;611,-1428",
+        "counts": {
+          "deepArt": "ember",
+          "artObstacles": true,
+          "floorTiles": 433,
+          "totalTriangles": 82952,
+          "instances": 1768,
+          "chunks": 42,
+          "visibleTriangles": 56820,
+          "visibleDrawCalls": 68
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Ember Colossus",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||10|volcano|-1|false|68|ember|-380,-240;-779,-349;702,-88",
+        "counts": {
+          "deepArt": "ember",
+          "artObstacles": true,
+          "floorTiles": 110,
+          "totalTriangles": 13236,
+          "instances": 198,
+          "chunks": 26,
+          "visibleTriangles": 13236,
+          "visibleDrawCalls": 68
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Abyss Approach",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||11|void|0|false|60|abyss|-137,-92;1420,271;-602,-1515",
+        "counts": {
+          "deepArt": "abyss",
+          "artObstacles": true,
+          "floorTiles": 480,
+          "totalTriangles": 112412,
+          "instances": 2433,
+          "chunks": 49,
+          "visibleTriangles": 62360,
+          "visibleDrawCalls": 76
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Hollow Deep",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||11|void|1|false|58|abyss|-132,-70;1198,157;-562,-1350",
+        "counts": {
+          "deepArt": "abyss",
+          "artObstacles": true,
+          "floorTiles": 424,
+          "totalTriangles": 93804,
+          "instances": 2005,
+          "chunks": 50,
+          "visibleTriangles": 62280,
+          "visibleDrawCalls": 81
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Abyss King",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||12|void|-1|false|68|abyss|-320,-220;-736,-324;655,-75",
+        "counts": {
+          "deepArt": "abyss",
+          "artObstacles": true,
+          "floorTiles": 124,
+          "totalTriangles": 15572,
+          "instances": 229,
+          "chunks": 25,
+          "visibleTriangles": 15572,
+          "visibleDrawCalls": 75
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Grand Colonnade",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||13|marble|0|false|114|palace|-157,-80;1030,-1370;-701,-1327",
+        "counts": {
+          "deepArt": "palace",
+          "artObstacles": true,
+          "floorTiles": 585,
+          "totalTriangles": 58024,
+          "instances": 877,
+          "chunks": 49,
+          "visibleTriangles": 36160,
+          "visibleDrawCalls": 86
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Hanging Gardens",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||13|marble|1|false|98|palace|-318,-21;870,-1517;721,-1312",
+        "counts": {
+          "deepArt": "palace",
+          "artObstacles": true,
+          "floorTiles": 594,
+          "totalTriangles": 60448,
+          "instances": 906,
+          "chunks": 53,
+          "visibleTriangles": 39220,
+          "visibleDrawCalls": 91
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Marble Colossus",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||14|marble|-1|false|70|palace|-380,-190;-779,100;590,-58",
+        "counts": {
+          "deepArt": "palace",
+          "artObstacles": true,
+          "floorTiles": 120,
+          "totalTriangles": 20380,
+          "instances": 203,
+          "chunks": 24,
+          "visibleTriangles": 20380,
+          "visibleDrawCalls": 54
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Castle Gates",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||15|apex|0|false|104|castle|-152,-84;920,-1460;-786,-599",
+        "counts": {
+          "deepArt": "castle",
+          "artObstacles": true,
+          "floorTiles": 547,
+          "totalTriangles": 52888,
+          "instances": 814,
+          "chunks": 51,
+          "visibleTriangles": 29548,
+          "visibleDrawCalls": 73
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Long Ascent",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||15|apex|1|false|102|castle|-419,84;860,-985;1090,-1602",
+        "counts": {
+          "deepArt": "castle",
+          "artObstacles": true,
+          "floorTiles": 576,
+          "totalTriangles": 66052,
+          "instances": 900,
+          "chunks": 51,
+          "visibleTriangles": 29328,
+          "visibleDrawCalls": 66
+        },
+        "err": null
+      },
+      "thorns": 0
+    },
+    {
+      "name": "Awakened King",
+      "world": {
+        "on": true,
+        "ready": true,
+        "built": "campaign||16|apex|-1|false|68|castle|-310,-210;-714,-387;632,-144",
+        "counts": {
+          "deepArt": "castle",
+          "artObstacles": true,
+          "floorTiles": 131,
+          "totalTriangles": 20316,
+          "instances": 209,
+          "chunks": 24,
+          "visibleTriangles": 20316,
+          "visibleDrawCalls": 50
+        },
+        "err": null
+      },
+      "thorns": 0
+    }
+  ],
+  "errors": []
+}

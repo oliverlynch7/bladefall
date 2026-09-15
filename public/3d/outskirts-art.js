@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 /* Outskirts: original Blender kit, fitted to the game's existing geometry.
    No gameplay mutation. Static scenery is instanced in spatial chunks. */
 import * as THREE from './three.module.js';
@@ -74,8 +75,8 @@ export function buildOutskirts(scene,w){
   const root=new THREE.Group();root.name='Outskirts authored art';const B=builder(root),add=B.add;
   const woods=w.area===1||w.side||(w.delve&&w.theme==='forest'),boss=w.area<0,segs=(w.segments||[]).filter(s=>!s.nofloor&&s.w>8&&s.d>8),paths=segs.filter(s=>s.path);
   const soil=woods?'#494637':boss?'#635039':'#695b43';let floors=0,roads=0;
-  const done=[];
-  for(const s of segs){
+  const done=[],surfaces=new Map();
+  for(const s of segs.flatMap(s=>claimSurface(surfaces,s))){
     const tile=s.meadow&&!s.path?72:36;
     const nx=Math.ceil(s.w/tile),nz=Math.ceil(s.d/tile),dx=s.w/nx,dz=s.d/nz;
     for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){
@@ -83,7 +84,7 @@ export function buildOutskirts(scene,w){
       if(done.some(r=>x-dx/2>=r.x-r.w/2&&x+dx/2<=r.x+r.w/2&&z-dz/2>=r.z-r.d/2&&z+dz/2<=r.z+r.d/2))continue;
       const road=s.path||paths.some(p=>covers(p,x,z)),r=hash(x,z);
       const c=road?['#a79470','#ac9975','#9d8b69','#b29e79'][Math.floor(r*4)]:(s.meadow?['#707345','#76784a','#7d7b4b','#696e43'][Math.floor(r*4)]:soil);
-      add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx+.05,2,road&&!s.meadow?dz-.5:dz+.05,c,0);floors++;if(road)roads++;
+      add(road&&!s.meadow?'brick':'tile',x,.45,z,road&&!s.meadow?dx-.5:dx,2,road&&!s.meadow?dz-.5:dz,c,0);floors++;if(road)roads++;
       if(!road&&r<.055){add('grass',x,2,z,25,25+hash(z,x)*12,25,woods?'#777344':null,r*6.28)}
       if(!road&&r>.982)add('rubble',x,1.8,z,18,10,18,null,r*6.28);
     }

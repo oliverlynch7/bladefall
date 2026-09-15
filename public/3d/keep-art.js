@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 /* Ruined Keep: authored fortress scenery fitted to the existing game geometry. */
 import * as THREE from './three.module.js';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
@@ -30,7 +31,12 @@ export function buildKeep(scene,w){
       for(let ix=0;ix<nx;ix++)for(let iz=0;iz<nz;iz++){const x=p.a+(ix+.5)*dx,z=p.c+(iz+.5)*dz;add('timber',x,top+.6,z,Math.max(.1,dx-.65),1.4,Math.max(.1,dz-.65),wood?'#846c48':palette[Math.floor(hash(x,z)*5)]);floors++;}laid.push(p);
     }
   }
+  const surfaces=new Map();
   function surface(o,base,top,wood=false,facade=true){
+    if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood,facade);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top,wood,facade);
+  }
+  function rawSurface(o,base,top,wood=false,facade=true){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     add(wood?'timber':'stone',o.x,base+h/2,o.z,ww,h,dd,wood?'#493a28':'#444b45');cap({...o,w:ww,d:dd},top,wood);
     if(h<35||!facade)return;const rows=Math.min(10,Math.ceil(h/30)),rh=h/rows;

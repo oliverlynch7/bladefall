@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 /* Hollow Pass: warm sandstone canyon scenery over the authored collision surfaces. */
 import * as THREE from './three.module.js';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
@@ -23,7 +24,12 @@ export function buildHollow(scene,w){
   const block=(x,y,z,ww,h,d,c)=>add(Math.min(ww,h,d)<=2?'timber':'stone',x,y,z,ww,h,d,c);
   const tops=(w.obstacles||[]).filter(o=>!o.autoCol&&!o.invisible&&!o.treeCol&&!o.pillarCol);
   // Each heightfield slab retains its exact extent. Broad caps split into worn flagstones.
+  const surfaces=new Map();
   function surface(o,base,top,wood=false){
+    if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,wood);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top,wood);
+  }
+  function rawSurface(o,base,top,wood=false){
     const ww=o.w||20,dd=o.d||ww,height=Math.max(1,top-base),r=hash(o.x,o.z),c=palette[Math.floor(r*5)];
     if(o.canyonCliff){add('column',o.x,base,o.z,ww,height,dd,'#b78954',r*.22);return;}
     if(top===0&&!wood){

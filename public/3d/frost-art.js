@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 /* Frostfell: faceted opaque ice keeps the cave maze affordable in a browser. */
 import * as THREE from './three.module.js';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
@@ -27,7 +28,12 @@ export function buildFrost(scene,w){
       if(!isWall&&ww>65&&dd>65&&hash(x,z)<.22)add('snow',x,top+1.3,z,Math.min(ww,dd)*.68,.3,1.1,'#6c9bb4',hash(z,x)*1.5);
     }
   }
+  const surfaces=new Map();
   function surface(o,base,top){
+    if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top);
+  }
+  function rawSurface(o,base,top){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     add(o.caveWall?'wall':'slab',o.x,base+h/2,o.z,ww,h,dd,o.caveWall?null:'#52849f',0,o.caveWall?o:null);cap({...o,w:ww,d:dd},top,!!o.caveWall);
     // Crystals grow on inaccessible wall crowns, not on the floor of the maze.

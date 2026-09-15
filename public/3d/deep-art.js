@@ -1,3 +1,4 @@
+import {claimSurface} from './surface-regions.js?v=1972';
 /* Final campaign worlds: opaque, instanced architecture; animated hazards retain their renderer. */
 import * as THREE from './three.module.js';
 import {GLTFLoader} from './jsm/loaders/GLTFLoader.js';
@@ -34,7 +35,12 @@ export function buildDeep(scene,w){
         add('cap',x,top+.55,z,Math.max(.1,tw-.7),1.1,Math.max(.1,td-.7),color,0,source);floors++;}laid.push(p);
     }
   }
+  const surfaces=new Map();
   function surface(o,base,top,source=null){
+    if(o.terrain||o.caveWall||o.kind==='col')return rawSurface(o,base,top,source);
+    for(const part of claimSurface(surfaces,{...o,w:o.w||20,d:o.d||o.w||20},base+':'+top))rawSurface(part,base,top,source);
+  }
+  function rawSurface(o,base,top,source=null){
     const ww=o.w||20,dd=o.d||ww,h=Math.max(1,top-base),key=[o.x,o.z,ww,dd,base,top].join(',');if(bodies.has(key))return;bodies.add(key);
     add('stone',o.x,base+h/2,o.z,ww,h,dd,cfg.body,0,source&&h>65?source:null);cap({...o,w:ww,d:dd},top,source&&h>65?source:null);
     if(w.portalMode&&h>80&&Math.max(ww,dd)>250&&Math.min(ww,dd)<50){const alongX=ww>dd,span=alongX?ww:dd,n=Math.ceil(span/100),bw=span/n;

@@ -1,5 +1,5 @@
 // Secondary modes share the authored architecture, but have their own art identity.
-import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=1967';
+import {wantsDeep,deepReady,loadDeep,buildDeep} from './deep-art.js?v=1972';
 const accents={plains:'#abc77c',forest:'#91bd8a',badlands:'#e1a96c',canyon:'#dbbc83',ruins:'#d88169',dungeon:'#b98a79',frost:'#9adfee',volcano:'#ff994d',void:'#c397f1',marble:'#edce86',apex:'#bca0e1'};
 export function portalMode(w){return w.endless?'descent':w.bossRush?'gauntlet':w.arena?'arena':w.bonus&&w.sprintFun?'sprint':null;}
 function adapt(w){

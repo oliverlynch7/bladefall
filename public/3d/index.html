@@ -1017,6 +1017,7 @@
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
+<script src="./combat-art.js?v=1973"></script>
 <script>
 (function(){
 "use strict";
@@ -1027,7 +1028,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.972.0-combat-fairness';
+const VERSION3D='1.973.0-player-combat-art';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7691,7 +7692,7 @@ function loadStageRaw(i){
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.campaignLayout=null; G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
-  G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
+  G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -10335,7 +10336,7 @@ function fireProjectile(p,w,target){
       dmg,kb:w.kb,pierce,el:w.el,life:(pr.range||760)/pr.speed,hitSet:[],seek,seekTarget:seek?target:null,pcrit:crit>1}); }
 }
 /* ---------------- Class skills: execution (Phase 1) ---------------- */
-function skillRing(x,z,col,col2,maxR){ (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
+function skillRing(x,z,col,col2,maxR){ if(G._artCast){ G._artCast.rings.push({x,z,r:maxR||150}); return; } (G.shockwaves=G.shockwaves||[]).push({x,z,r:18,maxR:maxR||150,dmg:0,life:0,spd:420,hitPlayer:true,col,col2}); }
 const SKILL_FX={
   cleave(p,ok,am){ const w=p.weapon, fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
     p.atkTimer=0.26; p.swingId++; SFX.slash(); playFx('warskill1'); G.shake=Math.min(G.shake+4,10);
@@ -11397,6 +11398,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      screen and the number subtracted from HP identical, which a display-only round would not. */
   dmg = Math.max(1, Math.round(dmg));
   e.hp-=dmg; e.hitFlash=0.12;
+  if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
   const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.practice||e.immobile)?0:kb)*(e.boss?0.25:1);   // Phase 19: dummies + training foes are BOLTED DOWN — no knockback, ever
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
@@ -13676,6 +13678,7 @@ function update(dt){
   else if(G.pet){ G.pet=null; }   // pet: lazy-spawn to match selection, then follow/attack/heal
   minionUpdate(dt);                                                                                                        // necromancer summons (no-op when none)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
+  window.BF_COMBAT_ART?.tick(G,dt);
   updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
@@ -14889,7 +14892,7 @@ function loadBossRushArena(idx){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
   const R=470;
   G.segments.push({x:0,z:0,w:R*2,d:R*2});
@@ -15163,7 +15166,7 @@ function loadEndlessArena(n){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.marks=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
   // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
@@ -19877,9 +19880,7 @@ function render(t){
     const f=0.4+0.5*Math.sin(t*22), close=mt.t<0.6;
     for(let i=0;i<16;i++){ const a=i/16*6.283; bx(mt.x+Math.cos(a)*mt.r,2,mt.z+Math.sin(a)*mt.r, 12,3,12,'#ff5a1e','#ff8a3a',(close?0.7:0.3)*f); }
     if(mt.t>0.15) bx(mt.x, 400-(1.3-mt.t)/1.3*380, mt.z, 22,30,22,'#ff7a3a','#ffd24a',0.9); }   // the falling rock
-  { const p2=G.p;
-    if(p2.shieldHp>0){ const s=0.4+0.2*Math.sin(t*4); bx(p2.x,p2.y+22,p2.z, 40,52,40,'#c9a6ff','#c9a6ff',0.14+0.08*Math.sin(t*3)); }
-    if(p2.guardT>0){ const s=0.5+0.3*Math.sin(t*8); bx(p2.x,p2.y+20,p2.z, 44,8,44,'#9fd0ff','#9fd0ff',0.3*s); bx(p2.x,p2.y+2,p2.z-14, 30,44,4,'#9fd0ff','#4a7da0',0.4*s); } }
+  if(!three3DLive() || !window.BF_COMBAT_ART?.threeReady)window.BF_COMBAT_ART?.render(G,{pushM,popM,mv,rotY,rotX,box,classId:meta.classId});
   if(G.waystone && !G.waystone.taken){                 // the "find" objective — a lit obelisk you can spot across a room
     const w=G.waystone, pu=0.75+0.25*Math.sin(t*2.4), wy=w.y||0;   // sit on its real surface (raised vault court etc.), never buried under the platform
     if(w.kind==='charter'){
@@ -20713,6 +20714,35 @@ const BOSS_PHASE2 = {
   },
 };
 
+// Root skill dispatch stays cosmetic: original return values and gameplay state are preserved.
+if(window.BF_COMBAT_ART){
+  const art=window.BF_COMBAT_ART; art.configure(CLASS2); let depth=0;
+  for(const id of Object.keys(art.profiles)){
+    const original=SKILL_FX[id]; if(!original) continue;
+    SKILL_FX[id]=function(p,...args){
+      const root=depth===0, origin={x:p.x,y:p.y||0,z:p.z}; let result;
+      const marks=root?combatTargets().map(e=>[e,e.markT,e.warBurstT]):[];
+      const capture=root?{rings:[],hits:[]}:G._artCast;
+      if(root)G._artCast=capture;
+      depth++;
+      try{ result=original.call(this,p,...args); }finally{depth--;if(root)delete G._artCast;}
+      if(root&&result!=='refund'){
+        let targets=marks.filter(([e,m,w])=>e.markT!==m||e.warBurstT!==w).map(([e])=>e);
+        if(!targets.length&&['claw','execute','siphon','tether'].includes(art.profiles[id].form))targets=capture.hits;
+        if(targets.length)for(const e of targets.slice(0,8))art.emit(G,id,{x:e.x,y:e.y||0,z:e.z,yaw:p.yaw},origin);
+        else if(capture.rings.length)for(const ring of capture.rings.slice(0,6))art.emit(G,id,{x:ring.x,y:Number.isFinite(surfaceHeightAt(ring.x,ring.z))?surfaceHeightAt(ring.x,ring.z):p.y||0,z:ring.z,yaw:p.yaw},origin,ring.r);
+        else art.emit(G,id,p,origin);
+        art.pose(p,id);
+      }
+      return result;
+    };
+  }
+  const attack=playerAttack;
+  playerAttack=function(...args){ const p=G.p,serial=p.swingId; const result=attack(...args);if(p.swingId!==serial)art.weapon(G,p,meta.classId,false);return result; };
+  const charge=chargeRelease;
+  chargeRelease=function(p,w,amt){const ok=classFamilyOk(w),result=charge(p,w,amt);if(ok)art.weapon(G,p,meta.classId,true);return result;};
+}
+
 window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>loadStage(i),stageCount:STAGES.length,openGear,die,
   giveWeapon:(a,r,n)=>{ if(G&&G.p){ G.p.weapon=makeWeapon(a,r,n); hudUpdate(); return G.p.weapon.name; } },
   giveArmor:(r,slot)=>{ if(G&&G.p){ const a=makeArmor(r,slot||'chest'); G.p.gear[a.slot]=a; recomputeArmor(G.p); hudUpdate(); return {name:a.name,slot:a.slot,reduction:Math.round(defenseR(G.p)*100)}; } },
@@ -20839,7 +20869,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1972"></script>
+<script type="module" src="./hero3d.js?v=1973"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

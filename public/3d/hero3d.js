@@ -19,6 +19,7 @@
    around every draw — without it the game's own rendering corrupts.
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
+import { syncCombatArt } from './combat-art-three.js?v=1973';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { WORLD3D, syncWorld } from './world3d.js?v=1972';
@@ -1473,6 +1474,8 @@ function playFor(p, A){
     wand:       pick('Spell1', 'Spell2'),
     bow:        'Bow_Shoot',
     flintlock:  'Bow_Shoot',
+    cross:      'Bow_Shoot',
+    javelin:    'Staff_Attack',
     fist:       'Punch',
   };
   /* Charging: a bow draws, everything else winds up into the attacking idle rather than snapping
@@ -1480,7 +1483,9 @@ function playFor(p, A){
   const charging = (p.chargeAmt || 0) > 0.04 && !(p.atkTimer > 0);
   const CHG = art === 'bow' ? 'Bow_Draw' : (clips.Attacking_Idle ? 'Attacking_Idle' : 'Idle_Attacking');
 
+  const cast = p.combatPose?.remaining > 0 && !(p.dodgeTimer > 0) && !airborne;
   const want = p.dead ? 'Death'
+             : cast ? p.combatPose.clip
              : charging ? CHG
              /* p.atkTimer, NOT p.attackTimer. The picker has tested `p.attackTimer > 0 ||
                 p.swingT > 0` since the 3D hero shipped and NEITHER FIELD EXISTS - the game has
@@ -1525,7 +1530,13 @@ function playFor(p, A){
      useful jump, played once and clamped - which guarantees the character is upright on landing
      however brief the hop was. */
   const airRoll = !rolling && airborne && name === 'Roll';
-  const restart = (rolling && name === 'Roll' && !A.wasRolling) || (airRoll && !A.wasAir);
+  const attacking = !p.dead && !charging && p.atkTimer > 0 && name === (ATK[art] || 'Sword_Attack');
+  const casting = cast && name === p.combatPose.clip && !p.dead;
+  const castRestart = casting && A.castSerial !== p.combatPose.serial;
+  if(casting)A.castSerial=p.combatPose.serial;
+  const attackRestart = attacking && (!A.wasAttacking || A.swingId !== p.swingId);
+  A.wasAttacking = attacking; A.swingId = p.swingId;
+  const restart = castRestart || attackRestart || (rolling && name === 'Roll' && !A.wasRolling) || (airRoll && !A.wasAir);
   A.wasRolling = rolling; A.wasAir = airborne;
   if(!name || !A.mixer || (A.cur === name && !restart)) return;
 
@@ -1546,6 +1557,12 @@ function playFor(p, A){
     next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
     next.fadeIn(0.06).play();
     if(A.cur && clips[A.cur]) A.mixer.clipAction(clips[A.cur]).fadeOut(0.06);
+  } else if(attacking || casting){
+    next.reset();
+    next.timeScale = clips[name].duration / Math.max(0.08, casting ? p.combatPose.remaining : p.atkTimer);
+    next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true;
+    next.fadeIn(0.025).play();
+    if(A.cur && A.cur !== name && clips[A.cur]) A.mixer.clipAction(clips[A.cur]).fadeOut(0.035);
   } else {
     next.timeScale = 1;
     next.setLoop(THREE.LoopRepeat, Infinity); next.clampWhenFinished = false;
@@ -1556,7 +1573,7 @@ function playFor(p, A){
   /* Exposed so which clip is playing can be CHECKED rather than assumed - three animation bugs in
      a row were invisible because nothing reported this. Local only: HERO3D.clip means "what the
      player's own character is doing", and an ally overwriting it would make that export lie. */
-  if(A.local){ HERO3D.clip = name; HERO3D.clipArt = art; }
+  if(A.local){ HERO3D.clip = name; HERO3D.clipArt = art; HERO3D.playback={clip:name,swingId:p.swingId,castSerial:casting?p.combatPose.serial:null,timeScale:next.timeScale,oneShot:attacking||casting,window:casting?p.combatPose.remaining:p.atkTimer}; }
 }
 
 /* ── ONE RIG PER ALLY ──────────────────────────────────────────────────────────────────────────
@@ -1732,6 +1749,7 @@ export function drawHero3D(p, t){
     if(_syncedFrame !== _frameNo){
       _syncedFrame = _frameNo;
       syncWorld(scene);
+      syncCombatArt(scene,cam);
       syncMobs(scene, dt);
       syncProps(scene, dt);           // chests and the other objects you interact with
       syncClass();                    // respec or a different save changes the body

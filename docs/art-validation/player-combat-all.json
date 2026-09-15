@@ -1,0 +1,911 @@
+{
+  "results": [
+    {
+      "id": "w_cleave",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 2,
+      "finite": true
+    },
+    {
+      "id": "w_bash",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "w_charge",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "w_whirl",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "w_guard",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 13,
+      "finite": true
+    },
+    {
+      "id": "w_stomp",
+      "events": 1,
+      "pose": "Attack",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "w_berserk",
+      "events": 1,
+      "pose": "Attacking_Idle",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "w_execute",
+      "events": 1,
+      "pose": "Attack",
+      "cd": 20,
+      "finite": true
+    },
+    {
+      "id": "r_volley",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "r_pierce",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "r_tumble",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "r_shadow",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "r_spike",
+      "events": 1,
+      "pose": "PickUp",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "r_smoke",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 11,
+      "finite": true
+    },
+    {
+      "id": "r_mark",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "r_deathmark",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "m_bolt",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 1.8,
+      "finite": true
+    },
+    {
+      "id": "m_beam",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 5.4,
+      "finite": true
+    },
+    {
+      "id": "m_blink",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 7.2,
+      "finite": true
+    },
+    {
+      "id": "m_nova",
+      "events": 2,
+      "pose": "Spell1",
+      "cd": 8.1,
+      "finite": true
+    },
+    {
+      "id": "m_gravity",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 11.700000000000001,
+      "finite": true
+    },
+    {
+      "id": "m_barrier",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 12.6,
+      "finite": true
+    },
+    {
+      "id": "m_tempest",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 19.8,
+      "finite": true
+    },
+    {
+      "id": "m_overload",
+      "events": 2,
+      "pose": "Spell1",
+      "cd": 21.6,
+      "finite": true
+    },
+    {
+      "id": "x_reap",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 2,
+      "finite": true
+    },
+    {
+      "id": "x_cleave",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "x_step",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "x_wraith",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "x_pull",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "x_bind",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "x_siphon",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 18,
+      "finite": true
+    },
+    {
+      "id": "x_vortex",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "pal_bash",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "pal_smite",
+      "events": 3,
+      "pose": "Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "pal_taunt",
+      "events": 1,
+      "pose": "Attacking_Idle",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "pal_ground",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "pal_guard",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "pal_burst",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "pal_laststand",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "pal_sky",
+      "events": 3,
+      "pose": "Attack",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "necro_summon",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "necro_bolt",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 2,
+      "finite": true
+    },
+    {
+      "id": "necro_raise",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "necro_nova",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "necro_wall",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "necro_grip",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 13,
+      "finite": true
+    },
+    {
+      "id": "necro_army",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "necro_storm",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "nin_strike",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "nin_barrage",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "nin_step",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "nin_smoke",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "nin_mark",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "nin_pierce",
+      "events": 1,
+      "pose": "Staff_Attack",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "nin_fury",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "nin_storm",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "bsk_cleave",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "bsk_bash",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "bsk_charge",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "bsk_stomp",
+      "events": 1,
+      "pose": "Attack",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "bsk_whirl",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "bsk_execute",
+      "events": 1,
+      "pose": "Attack",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "bsk_berserk",
+      "events": 1,
+      "pose": "Attacking_Idle",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "bsk_guard",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "pir_pierce",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 2,
+      "finite": true
+    },
+    {
+      "id": "pir_volley",
+      "events": 1,
+      "pose": "Bow_Shoot",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "pir_shadow",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "pir_tumble",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "pir_smoke",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "pir_goldrush",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 20,
+      "finite": true
+    },
+    {
+      "id": "pir_deathmark",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "pir_spike",
+      "events": 1,
+      "pose": "PickUp",
+      "cd": 18,
+      "finite": true
+    },
+    {
+      "id": "chr_bolt",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 1.5,
+      "finite": true
+    },
+    {
+      "id": "chr_beam",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 4.5,
+      "finite": true
+    },
+    {
+      "id": "chr_nova",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "chr_blink",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "chr_gravity",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 9.75,
+      "finite": true
+    },
+    {
+      "id": "chr_barrier",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 10.5,
+      "finite": true
+    },
+    {
+      "id": "chr_tempest",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 16.5,
+      "finite": true
+    },
+    {
+      "id": "chr_overload",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 18,
+      "finite": true
+    },
+    {
+      "id": "mon_flurry",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 2,
+      "finite": true
+    },
+    {
+      "id": "mon_palm",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "mon_deflect",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "mon_roll",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "mon_whirl",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "mon_stun",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "mon_thousand",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "mon_dragon",
+      "events": 1,
+      "pose": "Punch",
+      "cd": 20,
+      "finite": true
+    },
+    {
+      "id": "st_bolt",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 1.8,
+      "finite": true
+    },
+    {
+      "id": "st_lance",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 5.4,
+      "finite": true
+    },
+    {
+      "id": "st_step",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 7.2,
+      "finite": true
+    },
+    {
+      "id": "st_nova",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 7.2,
+      "finite": true
+    },
+    {
+      "id": "st_orb",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 11.700000000000001,
+      "finite": true
+    },
+    {
+      "id": "st_barrier",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 12.6,
+      "finite": true
+    },
+    {
+      "id": "st_storm",
+      "events": 3,
+      "pose": "Spell1",
+      "cd": 19.8,
+      "finite": true
+    },
+    {
+      "id": "st_overload",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 21.6,
+      "finite": true
+    },
+    {
+      "id": "war_bolt",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 2.5,
+      "finite": true
+    },
+    {
+      "id": "war_lance",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "war_curse",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "war_drain",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "war_step",
+      "events": 2,
+      "pose": "Spell1",
+      "cd": 11,
+      "finite": true
+    },
+    {
+      "id": "war_orb",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "war_storm",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 23,
+      "finite": true
+    },
+    {
+      "id": "war_final",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "sky_rise",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 7,
+      "finite": true
+    },
+    {
+      "id": "sky_gale",
+      "events": 1,
+      "pose": "Staff_Attack",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "sky_dive",
+      "events": 1,
+      "pose": "Staff_Attack",
+      "cd": 10,
+      "finite": true
+    },
+    {
+      "id": "sky_lift",
+      "events": 1,
+      "pose": "Staff_Attack",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "sky_dash",
+      "events": 2,
+      "pose": "Staff_Attack",
+      "cd": 11,
+      "finite": true
+    },
+    {
+      "id": "sky_rain",
+      "events": 5,
+      "pose": "Spell1",
+      "cd": 15,
+      "finite": true
+    },
+    {
+      "id": "sky_crash",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "sky_cyclone",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 21,
+      "finite": true
+    },
+    {
+      "id": "bd_counter",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "bd_twin",
+      "events": 1,
+      "pose": "Sword_Attack2",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "bd_riposte",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "bd_step",
+      "events": 2,
+      "pose": "Sword_Attack",
+      "cd": 8,
+      "finite": true
+    },
+    {
+      "id": "bd_mirror",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "bd_cross",
+      "events": 1,
+      "pose": "Sword_Attack2",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "bd_steel",
+      "events": 1,
+      "pose": "Attack2",
+      "cd": 22,
+      "finite": true
+    },
+    {
+      "id": "bd_perfect",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "bst_sic",
+      "events": 1,
+      "pose": "Sword_Attack",
+      "cd": 5,
+      "finite": true
+    },
+    {
+      "id": "bst_coordinated",
+      "events": 1,
+      "pose": "Sword_Attack2",
+      "cd": 6,
+      "finite": true
+    },
+    {
+      "id": "bst_guardian",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 12,
+      "finite": true
+    },
+    {
+      "id": "bst_step",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 9,
+      "finite": true
+    },
+    {
+      "id": "bst_mend",
+      "events": 1,
+      "pose": "Spell2",
+      "cd": 14,
+      "finite": true
+    },
+    {
+      "id": "bst_roar",
+      "events": 1,
+      "pose": "Attacking_Idle",
+      "cd": 13,
+      "finite": true
+    },
+    {
+      "id": "bst_stampede",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 24,
+      "finite": true
+    },
+    {
+      "id": "bst_apex",
+      "events": 1,
+      "pose": "Spell1",
+      "cd": 22,
+      "finite": true
+    }
+  ],
+  "errors": [],
+  "renderer": {
+    "world": null,
+    "hero": null,
+    "art": {
+      "vertices": 8118,
+      "triangles": 2706,
+      "drawCalls": 1,
+      "events": 1
+    }
+  }
+}

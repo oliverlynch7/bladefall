@@ -1627,3 +1627,8 @@ Hollow Pass and Dry Wash now have bespoke canyon/rim and fossil-aqueduct layouts
 ## [Codex | 2026-09-15] Combat fairness and floor stability — v1.972.0
 
 Removed the duplicate instant spore death burst and added harmless warning periods to death/residue hazards. Added enemy contact and projectile preparations, committed charge/cleave aim, visible signature boundaries and the missing Colossus quake delay. Thorn patches are sparse and ecological; thorn and healing-pad square fills are replaced. Shared scenery builders clip overlapping coplanar floor/body regions. Real-browser damage timing, all eight boss preparations, 24 scene loads, old-save continuation, campaign walking and reachability passed. Details and scope limits: docs/COMBAT_FAIRNESS_2026-09-15.md.
+
+
+## [Codex | 2026-09-15] Player combat art v1.973
+
+Player effect pass: 128 skill profiles, 28 weapon attack archetypes and supported charge releases. Class motifs, native batched ribbons, projectile trails, open defensive wards, and corrected one-shot/repeated clip playback. Existing weapon fits and gameplay values preserved. Browser skill/weapon/refund/expiry/save checks passed; skill-4 phone gallery at /3d/art-previews/combat/. Existing rig clips retained; enemy/boss animation overhaul remains separate.

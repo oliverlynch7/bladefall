@@ -1,0 +1,711 @@
+{
+  "results": [
+    {
+      "id": "sword",
+      "art": "sword",
+      "swing": 1,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 1,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 2,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": null
+    },
+    {
+      "id": "saber",
+      "art": "sword",
+      "swing": 3,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 3,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 4,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": null
+    },
+    {
+      "id": "dagger",
+      "art": "dagger",
+      "swing": 5,
+      "events": 1,
+      "first": {
+        "clip": "Dagger_Attack2",
+        "swingId": 5,
+        "castSerial": null,
+        "timeScale": 5.136986301369863,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Dagger_Attack",
+        "swingId": 6,
+        "castSerial": null,
+        "timeScale": 3.0821917808219177,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": null
+    },
+    {
+      "id": "axe",
+      "art": "axe",
+      "swing": 7,
+      "events": 1,
+      "first": {
+        "clip": "Attack2",
+        "swingId": 7,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Attack",
+        "swingId": 8,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "execute"
+      }
+    },
+    {
+      "id": "great",
+      "art": "great",
+      "swing": 9,
+      "events": 1,
+      "first": {
+        "clip": "Attack2",
+        "swingId": 9,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Attack",
+        "swingId": 10,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "spiral"
+      }
+    },
+    {
+      "id": "hammer",
+      "art": "hammer",
+      "swing": 11,
+      "events": 1,
+      "first": {
+        "clip": "Attack2",
+        "swingId": 11,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Attack",
+        "swingId": 12,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "quake"
+      }
+    },
+    {
+      "id": "scythe",
+      "art": "scythe",
+      "swing": 13,
+      "events": 1,
+      "first": {
+        "clip": "Attack2",
+        "swingId": 13,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Attack",
+        "swingId": 14,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "spiral"
+      }
+    },
+    {
+      "id": "fist",
+      "art": "fist",
+      "swing": 15,
+      "events": 1,
+      "first": {
+        "clip": "Punch",
+        "swingId": 15,
+        "castSerial": null,
+        "timeScale": 3.0821917808219177,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Punch",
+        "swingId": 16,
+        "castSerial": null,
+        "timeScale": 3.0821917808219177,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": null
+    },
+    {
+      "id": "flameblade",
+      "art": "spellblade",
+      "swing": 17,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 17,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 18,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "frostbrand",
+      "art": "spellblade",
+      "swing": 19,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 19,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 20,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "runeblade",
+      "art": "spellblade",
+      "swing": 21,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 21,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 22,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "venomedge",
+      "art": "spellblade",
+      "swing": 23,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 23,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 24,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "umbrablade",
+      "art": "spellblade",
+      "swing": 25,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 25,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 26,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "sunblade",
+      "art": "spellblade",
+      "swing": 27,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 27,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 28,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "lightbringer",
+      "art": "spellblade",
+      "swing": 29,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 29,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 30,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": {
+        "events": 1,
+        "form": "slash"
+      }
+    },
+    {
+      "id": "voidscythe",
+      "art": "scythe",
+      "swing": 31,
+      "events": 1,
+      "first": {
+        "clip": "Attack2",
+        "swingId": 31,
+        "castSerial": null,
+        "timeScale": 2.577319526180778,
+        "oneShot": true,
+        "window": 0.32333333333333336
+      },
+      "second": {
+        "clip": "Attack",
+        "swingId": 32,
+        "castSerial": null,
+        "timeScale": 3.6764705005814045,
+        "oneShot": true,
+        "window": 0.22666666666666668
+      },
+      "charged": {
+        "events": 1,
+        "form": "spiral"
+      }
+    },
+    {
+      "id": "iansblade",
+      "art": "sword",
+      "swing": 33,
+      "events": 1,
+      "first": {
+        "clip": "Sword_Attack2",
+        "swingId": 33,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "second": {
+        "clip": "Sword_Attack",
+        "swingId": 34,
+        "castSerial": null,
+        "timeScale": 3.4246574525963767,
+        "oneShot": true,
+        "window": 0.24333333333333335
+      },
+      "charged": null
+    },
+    {
+      "id": "bow",
+      "art": "bow",
+      "swing": 35,
+      "events": 1,
+      "first": {
+        "clip": "Bow_Shoot",
+        "swingId": 35,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Bow_Shoot",
+        "swingId": 36,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": {
+        "events": 1,
+        "form": "lance"
+      }
+    },
+    {
+      "id": "crossbow",
+      "art": "cross",
+      "swing": 37,
+      "events": 1,
+      "first": {
+        "clip": "Bow_Shoot",
+        "swingId": 37,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Bow_Shoot",
+        "swingId": 38,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "knives",
+      "art": "dagger",
+      "swing": 39,
+      "events": 1,
+      "first": {
+        "clip": "Dagger_Attack2",
+        "swingId": 39,
+        "castSerial": null,
+        "timeScale": 7.653061224489796,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Dagger_Attack",
+        "swingId": 40,
+        "castSerial": null,
+        "timeScale": 4.591836734693878,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "javelin",
+      "art": "javelin",
+      "swing": 42,
+      "events": 1,
+      "first": {
+        "clip": "Staff_Attack",
+        "swingId": 42,
+        "castSerial": null,
+        "timeScale": 3.6885245901639343,
+        "oneShot": true,
+        "window": 0.20333333333333334
+      },
+      "second": {
+        "clip": "Staff_Attack",
+        "swingId": 44,
+        "castSerial": null,
+        "timeScale": 3.6885245901639343,
+        "oneShot": true,
+        "window": 0.20333333333333334
+      },
+      "charged": {
+        "events": 1,
+        "form": "lance"
+      }
+    },
+    {
+      "id": "flintlock",
+      "art": "flintlock",
+      "swing": 45,
+      "events": 1,
+      "first": {
+        "clip": "Bow_Shoot",
+        "swingId": 45,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Bow_Shoot",
+        "swingId": 46,
+        "castSerial": null,
+        "timeScale": 3.826530612244898,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "firestaff",
+      "art": "staff",
+      "swing": 47,
+      "events": 1,
+      "first": {
+        "clip": "Staff_Attack",
+        "swingId": 47,
+        "castSerial": null,
+        "timeScale": 5.113636363636363,
+        "oneShot": true,
+        "window": 0.14666666666666667
+      },
+      "second": {
+        "clip": "Staff_Attack",
+        "swingId": 48,
+        "castSerial": null,
+        "timeScale": 4.591836734693878,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": {
+        "events": 1,
+        "form": "bolt"
+      }
+    },
+    {
+      "id": "frostwand",
+      "art": "wand",
+      "swing": 49,
+      "events": 1,
+      "first": {
+        "clip": "Spell2",
+        "swingId": 49,
+        "castSerial": null,
+        "timeScale": 8.928571671855693,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Spell1",
+        "swingId": 50,
+        "castSerial": null,
+        "timeScale": 7.397959426957734,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "arcaneorb",
+      "art": "wand",
+      "swing": 51,
+      "events": 1,
+      "first": {
+        "clip": "Spell2",
+        "swingId": 51,
+        "castSerial": null,
+        "timeScale": 8.928571671855693,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Spell1",
+        "swingId": 52,
+        "castSerial": null,
+        "timeScale": 7.397959426957734,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "stormrod",
+      "art": "wand",
+      "swing": 53,
+      "events": 1,
+      "first": {
+        "clip": "Spell2",
+        "swingId": 53,
+        "castSerial": null,
+        "timeScale": 8.928571671855693,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Spell1",
+        "swingId": 54,
+        "castSerial": null,
+        "timeScale": 7.397959426957734,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    },
+    {
+      "id": "plaguestaff",
+      "art": "staff",
+      "swing": 55,
+      "events": 1,
+      "first": {
+        "clip": "Staff_Attack",
+        "swingId": 55,
+        "castSerial": null,
+        "timeScale": 4.591836734693878,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Staff_Attack",
+        "swingId": 56,
+        "castSerial": null,
+        "timeScale": 4.591836734693878,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": {
+        "events": 1,
+        "form": "bolt"
+      }
+    },
+    {
+      "id": "holyscepter",
+      "art": "wand",
+      "swing": 57,
+      "events": 1,
+      "first": {
+        "clip": "Spell2",
+        "swingId": 57,
+        "castSerial": null,
+        "timeScale": 8.928571671855693,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "second": {
+        "clip": "Spell1",
+        "swingId": 58,
+        "castSerial": null,
+        "timeScale": 7.397959426957734,
+        "oneShot": true,
+        "window": 0.16333333333333333
+      },
+      "charged": null
+    }
+  ],
+  "lifecycle": {
+    "refundNoArt": true,
+    "cap": 18,
+    "expired": 0
+  },
+  "world": {
+    "world": null,
+    "hero": null,
+    "art": {
+      "vertices": 3438,
+      "triangles": 1146,
+      "drawCalls": 1,
+      "events": 2
+    }
+  }
+}

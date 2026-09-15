@@ -15,7 +15,3 @@ async(page)=>{
  return {out,mode:a.mode};
  });
 }
-
-
-
-

@@ -29,6 +29,7 @@ export function syncCombatArt(scene,camera){
  if(!api||!g){mesh.visible=false;return;}
  if(mesh.parent!==scene)scene.add(mesh);
  api.threeReady=true;n=0;m.identity();stack.length=0;level=0;eye.setFromMatrixPosition(camera.matrixWorld);draw.classId=window.__BF3.meta.classId;draw.quality=window.__BF3.meta.quality;
+ draw.particles=window.__BF3.meta.particles!==false;
  draw.theme=window.__BF_WORLD?.().theme;
  const totalBudget=draw.quality==='low'?300:900;
  const fieldStrokes=window.BF_FIELD_ART?.render(g,draw)||0;

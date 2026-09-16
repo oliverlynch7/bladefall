@@ -20,7 +20,7 @@ function render(g,d){
  function crown(r,y,c,broken){for(let j=0;j<5;j++){const x=(j-2)*r*.35,h=j%2?7:18;line([x-r*.17,y,0],[x,y+h,broken?j*3:0],2,c,.8);line([x,y+h,broken?j*3:0],[x+r*.17,y,0],2,c,.8);}}
  const t=g.time||0;
  // Collision blooms are short, directional shards; no expanding damage-like boundary.
- for(const e of (g.hostileArt||[]).slice(-4)){
+ for(const e of (d.particles===false?[]:g.hostileArt||[]).slice(-4)){
   const q=e.t/e.life,c=colors[e.style];pushM();mv(e.x,e.y,e.z);
   for(let j=0;j<6;j++){const a=j*Math.PI/3,r=4+q*22;line([Math.cos(a)*r*.4,Math.sin(a)*r*.4,0],[Math.cos(a)*r,Math.sin(a)*r,Math.sin(j)*8*q],e.style==='fire'?3:1.5,c,1-q);}
   popM();
@@ -69,7 +69,7 @@ function render(g,d){
  for(const tile of (g.collapse||[]).slice(0,4)){if(root.BF_FIELD_ART?.replaces(g,tile,d.quality)||!Number.isFinite(tile.x)||!Number.isFinite(tile.z))continue;pushM();mv(tile.x,6,tile.z);const r=(tile.r||54)*.8;for(const sign of [-1,1]){line([-r,0,sign*r],[0,3,sign*9],2,'#c785ed',.75);line([0,3,sign*9],[r,0,-sign*r],1.5,'#c785ed',.7);}if(tile.open>0)crown(22,8,'#c785ed',true);popM();}
  // Species-shaped shells surround the existing collision core. Never hide a projectile if capped.
  let shots=0;
- for(const pr of g.projectiles||[]){
+ for(const pr of (d.particles===false?[]:g.projectiles)||[]){
   if(pr.owner!=='enemy'||++shots>(d.quality==='low'?8:16))continue;
   const st=style(pr.src?.type,pr.el),c=colors[st],s=Math.max(3,Math.min(12,pr.size||5));
   pushM();mv(pr.x,pr.y,pr.z);rotY(Math.atan2(pr.vx,pr.vz));rotX(-Math.atan2(pr.vy||0,Math.hypot(pr.vx,pr.vz)));

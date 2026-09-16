@@ -1017,8 +1017,8 @@
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./combat-art.js?v=1975"></script>
-<script src="./hostile-art.js?v=1976"></script>
+<script src="./combat-art.js?v=1978"></script>
+<script src="./hostile-art.js?v=1978"></script>
 <script src="./field-art.js?v=1976"></script>
 <script>
 (function(){
@@ -1030,7 +1030,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.977.0-body-motion';
+const VERSION3D='1.978.0-death-particles';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -14277,7 +14277,7 @@ const AMBIENT={
 };
 function updateAmbient(dt,s){
   const cfg=AMBIENT[s.theme]; if(!cfg) return;
-  if(G.ambient.length<80 && Math.random()<cfg.n*0.6){
+  if(meta.particles!==false && G.ambient.length<80 && Math.random()<cfg.n*0.6){
     G.ambient.push({x:G.p.x+(Math.random()-0.5)*760, y:cfg.vy<0?260:Math.random()*30, z:G.p.z+(Math.random()-0.5)*760,
       vy:cfg.vy*(0.6+Math.random()*0.8), ph:Math.random()*6.28, sw:(cfg.g?7:14)+Math.random()*8, life:6+Math.random()*4,
       c:cfg.c, e:cfg.e?cfg.c:null, sz:1.4+Math.random()*(cfg.e?2.4:1.8), tw:cfg.e?Math.random()*6.28:0});
@@ -19771,7 +19771,7 @@ function render(t){
   if(G.portal){ drawPortal3(G.portal,t); }
   hpBars=[]; statPips=[];
   for(const pk of G.pickups) drawPickup3(pk,t);
-  if(G.fx&&G.fx.length) drawLootFx(t);
+  if(meta.particles!==false&&G.fx&&G.fx.length) drawLootFx(t);
   if(G.marks&&G.marks.length) drawPingMarks(t);
   if(G.haz==='lava'){                                  // Emberfall vents: they tell you before they blow
     const warn=G.emberWarn>0, burn=G.emberBurn>0;
@@ -19978,7 +19978,7 @@ function render(t){
   drawSwing3(p,t);
   for(const pr of G.projectiles) drawProjectile3(pr,t);
   if(meta.particles!==false) for(const pt of G.particles) bx(pt.x,pt.y,pt.z, pt.sz,pt.sz,pt.sz, pt.color, pt.color, Math.min(1,pt.life*2.5));
-  for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
+  if(meta.particles!==false) for(const a of G.ambient){ const tw=a.tw?(0.7+0.3*Math.sin(a.tw)):1; bx(a.x,a.y,a.z, a.sz*tw,a.sz*tw,a.sz*tw, a.c, a.e, Math.min(0.8,a.life*0.4)*tw); }
   /* The LATE ghost-wall pass stays with the voxel world. Those are the WALLS of the level faded
      out so the hero shows through; replayed over the 3D layer they would read as a second,
      translucent copy of a wall world3d has already drawn solid. */
@@ -20874,7 +20874,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1977"></script>
+<script type="module" src="./hero3d.js?v=1978"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

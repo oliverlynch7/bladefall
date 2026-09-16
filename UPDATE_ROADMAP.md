@@ -1652,3 +1652,8 @@ Replaced selected persistent trap, trail, collapse and beam effects with bounded
 ## [Codex | 2026-09-16] v1.977.0-body-motion
 
 Added five enemy body-motion families for wind-up, strike/recovery and hit reactions on existing ten-bone rigs. Shared animation QA viewer supports all 41 appearances, original/revised clips, scrub, step, speed, skeleton overlay and mobile orbit controls. Roster binding, gameplay phase and pre-change save checks passed. No player clip or combat timing changes. Next: user QA of motion, then articulated rig upgrades.
+
+
+## [Codex | 2026-09-16] v1.978.0-death-particles
+
+Immediate red death flash and full-duration corpse fade, also visible in animation QA. Particles Off now gates ambient motes, loot bursts and native cosmetic projectile/impact accents. Essential attacks and danger warnings stay visible. Live death progression, cosmetic on/off and pre-change save checks passed.

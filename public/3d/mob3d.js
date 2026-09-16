@@ -1,4 +1,5 @@
 import * as THREE from './three.module.js';
+import { deathPresentation } from './death-presentation.js?v=1978';
 import { revisedClips } from './enemy-motion.js?v=1977';
 import { enemyActionState } from './enemy-action-state.js?v=1974';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
@@ -160,7 +161,8 @@ function syncMobsInner(scene,dt){
     if(e.dead){
       if(!rec.wasDead){rec.wasDead=true;rec.death=.78;play(rec,'Death');}
       rec.death-=dt;if(rec.death<=0||corpses>=12){release(rec);continue;}
-      for(const m of rec.materials){m.opacity=Math.min(1,rec.death/.18);m.depthWrite=m.opacity>.95;m.emissiveIntensity=0;}
+      const cue=deathPresentation(rec.death);
+      for(const m of rec.materials){m.opacity=cue.opacity;m.depthWrite=false;m.color.set(0xffffff);m.emissive.set(0xff2020);m.emissiveIntensity=cue.flash*1.5;}
       rec.mixer.update(dt);corpses++;continue;
     }
     // Training targets and resurrected skeletons can reuse the same gameplay object.
@@ -207,4 +209,4 @@ export function clearMobs(){
 }
 export function mobDrawn(e){return MOB3D.on&&!!e&&typeof e==='object'&&_drawn.has(e);}
 window.__mob3dDrawn=mobDrawn;
-window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead}))});
+window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead,opacity:r.materials[0]?.opacity,flash:r.materials[0]?.emissiveIntensity}))});

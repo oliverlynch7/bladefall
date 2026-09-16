@@ -19,12 +19,12 @@
    around every draw — without it the game's own rendering corrupts.
    ───────────────────────────────────────────────────────────────────────────── */
 import * as THREE from './three.module.js';
-import { syncCombatArt } from './combat-art-three.js?v=1976';
+import { syncCombatArt } from './combat-art-three.js?v=1978';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=1977';
-import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=1977';
-import { PROP3D, syncProps } from './prop3d.js?v=1977';
+import { WORLD3D, syncWorld } from './world3d.js?v=1978';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=1978';
+import { PROP3D, syncProps } from './prop3d.js?v=1978';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated
 

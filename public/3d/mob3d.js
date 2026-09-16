@@ -1,4 +1,5 @@
 import * as THREE from './three.module.js';
+import { revisedClips } from './enemy-motion.js?v=1977';
 import { enemyActionState } from './enemy-action-state.js?v=1974';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js';
@@ -114,7 +115,7 @@ function acquireMob(type,e){
       o.material=o.material.clone();o.material.transparent=true;o.material.forceSinglePass=true;materials.push(o.material);
     }});
     const mixer=new THREE.AnimationMixer(root),actions={};
-    for(const c of src.animations){const a=mixer.clipAction(c);if(['Attack','Hit','Death','Windup'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
+    for(const c of revisedClips(root,type,src.animations)){const a=mixer.clipAction(c);if(['Attack','Hit','Death','Windup'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
   Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});

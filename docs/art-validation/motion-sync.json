@@ -1,0 +1,41 @@
+{
+  "out": [
+    {
+      "field": "idle",
+      "type": "grunt",
+      "clip": "Idle",
+      "phase": null,
+      "phaseKey": null,
+      "timeScale": 1,
+      "dead": false
+    },
+    {
+      "field": "meleeW",
+      "type": "grunt",
+      "clip": "Windup",
+      "phase": "Windup",
+      "phaseKey": "meleeW",
+      "timeScale": 1.5384615384615383,
+      "dead": false
+    },
+    {
+      "field": "meleeActive",
+      "type": "grunt",
+      "clip": "Attack",
+      "phase": "Attack",
+      "phaseKey": "meleeActive",
+      "timeScale": 2.7777777777777777,
+      "dead": false
+    },
+    {
+      "field": "shotW",
+      "type": "grunt",
+      "clip": "Windup",
+      "phase": "Windup",
+      "phaseKey": "shotW",
+      "timeScale": 1.4285714285714286,
+      "dead": false
+    }
+  ],
+  "err": null
+}

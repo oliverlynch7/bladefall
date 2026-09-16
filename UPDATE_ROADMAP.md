@@ -1647,3 +1647,8 @@ Shipped eight boss effect directions and elemental enemy projectile/impact accen
 ## [Codex | 2026-09-16] v1.976.0-ground-effects
 
 Replaced selected persistent trap, trail, collapse and beam effects with bounded native ribbons; beam edges now show the damaging cone. Fixed elevated fallback spike tips. Shared total rendering budget unchanged; overflow retains legacy warning visibility. Real-browser high/low, geometry, boss fairness and previous-version save checks passed. Next: body reactions and attack poses.
+
+
+## [Codex | 2026-09-16] v1.977.0-body-motion
+
+Added five enemy body-motion families for wind-up, strike/recovery and hit reactions on existing ten-bone rigs. Shared animation QA viewer supports all 41 appearances, original/revised clips, scrub, step, speed, skeleton overlay and mobile orbit controls. Roster binding, gameplay phase and pre-change save checks passed. No player clip or combat timing changes. Next: user QA of motion, then articulated rig upgrades.

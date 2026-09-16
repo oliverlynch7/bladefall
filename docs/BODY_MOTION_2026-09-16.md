@@ -1,0 +1,5 @@
+# Body motion — 2026-09-16
+
+Use existing ten-bone enemy rigs. Add shared keyed quaternion clips for Windup, Attack and Hit with heavy, blade, cast, ranged and beast motion families. Preserve original idle/move/death, timing windows and gameplay. No new joints or skin weights in this milestone. A standalone mobile-friendly viewer must load the same clips as gameplay, offer original/revised comparison, scrub, speed, pause, orbit and skeleton overlay. Validate binding, finite bone transforms and gameplay synchronization before publishing.
+
+Implemented shared runtime-authored quaternion clips for five motion families, replacing Windup/Attack/Hit. Viewer: /3d/animation-preview.html, all 41 appearances, original/revised comparison, skeleton overlay, orbit/pinch, pause/step/scrub/speed. All 41 appearances passed finite-transform checks for three revised clips. Gameplay phase synchronization and previous-version save checks passed. Desktop/mobile previews inspected. Existing ten-bone topology and skin weights unchanged; player clips unchanged. Next: review user QA, then elbow/knee rig articulation and more individualized boss attack clips.

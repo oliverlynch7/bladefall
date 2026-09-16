@@ -1642,3 +1642,8 @@ First enemy animation milestone: native models follow melee/projectile wind-up a
 ## [Codex | 2026-09-15] v1.975.0-hostile-effects
 
 Shipped eight boss effect directions and elemental enemy projectile/impact accents. Native shockwave fronts track actual radius and committed direction; all existing preparation timing remains intact. Shared ribbon limits remain 1,800/5,400 triangles (low/high), one draw. Collision, expiry, budget, boss fairness and previous-version save checks passed. Phone previews: /3d/art-previews/hostile/. Next: persistent ground fields and traps, followed by body reactions and attack poses.
+
+
+## [Codex | 2026-09-16] v1.976.0-ground-effects
+
+Replaced selected persistent trap, trail, collapse and beam effects with bounded native ribbons; beam edges now show the damaging cone. Fixed elevated fallback spike tips. Shared total rendering budget unchanged; overflow retains legacy warning visibility. Real-browser high/low, geometry, boss fairness and previous-version save checks passed. Next: body reactions and attack poses.

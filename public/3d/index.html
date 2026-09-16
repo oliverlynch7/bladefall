@@ -1018,7 +1018,8 @@
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./combat-art.js?v=1975"></script>
-<script src="./hostile-art.js?v=1975"></script>
+<script src="./hostile-art.js?v=1976"></script>
+<script src="./field-art.js?v=1976"></script>
 <script>
 (function(){
 "use strict";
@@ -1029,7 +1030,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.975.0-hostile-effects';
+const VERSION3D='1.976.0-ground-effects';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -17715,13 +17716,13 @@ function drawCourse(s,t){
     const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
     for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, (sw.y||0)+4, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
   // Telegraphs and active residue share the same radius and storey as their damage.
-  if(G.trails)for(const tr of G.trails){const warn=tr.warn>0,c=tr.col||'#ff8a3a',y=tr.y||0;
+  if(G.trails)for(const tr of G.trails){if(three3DLive()&&window.BF_COMBAT_ART?.threeReady&&window.BF_FIELD_ART?.replaces(G,tr,meta.quality))continue;const warn=tr.warn>0,c=tr.col||'#ff8a3a',y=tr.y||0;
     dangerRing(tr.x,y,tr.z,tr.r,c,warn?.5:.8);
     if(warn)dangerRing(tr.x,y+1,tr.z,tr.r*(1-tr.warn/(tr.warnMax||1)),c,.75);
     else if(tr.dmg>0)for(let k=0;k<7;k++){const an=k*2.4,rr=tr.r*Math.sqrt((k+.5)/7)*.7;
       bx(tr.x+Math.cos(an)*rr,y+8+Math.sin(t*2+k)*3,tr.z+Math.sin(an)*rr,8,9,8,c,c,.25*Math.min(1,tr.life));}
   }
-  if(G.spikefields) for(const sf of G.spikefields){ const a=Math.max(0,sf.life/sf.max), R=sf.r, Y=sf.y||0;   // Ranger Spike Trap: a dense field of jagged steel spikes that erupt from the ground (or plateau surface it was cast on)
+  if(G.spikefields) for(const sf of G.spikefields){ if(three3DLive()&&window.BF_COMBAT_ART?.threeReady&&window.BF_FIELD_ART?.replaces(G,sf,meta.quality))continue;const a=Math.max(0,sf.life/sf.max), R=sf.r, Y=sf.y||0;   // Ranger Spike Trap: a dense field of jagged steel spikes that erupt from the ground (or plateau surface it was cast on)
     const rise=Math.min(1,(sf.max-sf.life)/0.32);                                                 // erupt upward over the first ~0.3s
     bx(sf.x,Y+1,sf.z, R*1.9,1.6,R*1.9, '#3a4048','#8b93a8', 0.14*a);                               // faint danger disc on the floor
     for(let i=0;i<30;i++){ const an=i/30*6.283; bx(sf.x+Math.cos(an)*R, Y+3, sf.z+Math.sin(an)*R, 8,3.5,8, '#9aa2ad','#e8edf3',0.55*a); }   // hazard ring outline
@@ -17729,12 +17730,12 @@ function drawCourse(s,t){
       const an=gr*6.283, rr=Math.sqrt(gr2)*R*0.9, sx=sf.x+Math.cos(an)*rr, sz=sf.z+Math.sin(an)*rr;
       const bob=Math.sin(t*6+i*1.3)*1.6, h=(14+gr2*20)*rise;
       bx(sx, Y+2+h*0.5+bob, sz, 5,h,5, '#aeb6c2','#dfe6ef',0.92*a);                                // spike shaft
-      bx(sx, 2+h+bob, sz, 2.6,6,2.6, '#eef3f8','#ffffff',0.98*a); } }                              // bright honed tip
+      bx(sx, Y+2+h+bob, sz, 2.6,6,2.6, '#eef3f8','#ffffff',0.98*a); } }                              // bright honed tip
   // Marble Colossus: the radiant sweep beam
-  if(G.beam){ const b=G.beam, warn=b.warn>0, c=warn?'#fff2b0':'#fffbe6', op=warn?(0.14+0.14*Math.sin(t*20)):0.55;
+  if(G.beam&&!(three3DLive()&&window.BF_COMBAT_ART?.threeReady&&window.BF_FIELD_ART?.replaces(G,G.beam,meta.quality))){ const b=G.beam, warn=b.warn>0, c=warn?'#fff2b0':'#fffbe6', op=warn?(0.14+0.14*Math.sin(t*20)):0.55;
     for(let r=40;r<640;r+=34){ bx(b.ex+Math.cos(b.ang)*r, 8, b.ez+Math.sin(b.ang)*r, 15,warn?4:12,15, c, '#ffe27a', op); } }
   // Void Tyrant: collapsing floor tiles
-  if(G.collapse) for(const tl of G.collapse){
+  if(G.collapse) for(const tl of G.collapse){if(three3DLive()&&window.BF_COMBAT_ART?.threeReady&&window.BF_FIELD_ART?.replaces(G,tl,meta.quality))continue;
     if(tl.warn>0){ const pl=0.3+0.5*Math.abs(Math.sin(t*16)); bx(tl.x,3,tl.z, tl.r*1.8,3,tl.r*1.8, '#c47bff','#8a4fd0', 0.2+0.3*pl); }
     else { bx(tl.x,-14,tl.z, tl.r*1.8,26,tl.r*1.8, '#120820','#000', 0.9); } }   // a dark hole where the floor dropped
   // golden bonus portal
@@ -20873,7 +20874,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1975"></script>
+<script type="module" src="./hero3d.js?v=1976"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

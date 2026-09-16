@@ -65,8 +65,8 @@ function render(g,d){
   if(type==='archer'&&e.pinT>0){for(const point of [{x:e.pinX,z:e.pinZ},...(e._pin2||[])]){if(!Number.isFinite(point.x))continue;line([e.x,(e.y||0)+h*.65,e.z],[point.x,8,point.z],1,c,.3);pushM();mv(point.x,8,point.z);for(let j=0;j<4;j++){rotY(Math.PI/2);line([0,0,18],[0,0,38],2,c,.9);}popM();}}
  }
  // Light and collapse accents mirror the live beam/tile fields, including their preparation.
- const b=g.beam;if(b){const c='#fff0c8',dx=Math.cos(b.ang),dz=Math.sin(b.ang);line([b.ex+dx*40,9,b.ez+dz*40],[b.ex+dx*640,9,b.ez+dz*640],b.warn>0?1:4,c,b.warn>0?.3:.7);}
- for(const tile of (g.collapse||[]).slice(0,4)){if(!Number.isFinite(tile.x)||!Number.isFinite(tile.z))continue;pushM();mv(tile.x,6,tile.z);const r=(tile.r||54)*.8;for(const sign of [-1,1]){line([-r,0,sign*r],[0,3,sign*9],2,'#c785ed',.75);line([0,3,sign*9],[r,0,-sign*r],1.5,'#c785ed',.7);}if(tile.open>0)crown(22,8,'#c785ed',true);popM();}
+ const b=g.beam;if(b&&!root.BF_FIELD_ART?.replaces(g,b,d.quality)){const c='#fff0c8',dx=Math.cos(b.ang),dz=Math.sin(b.ang);line([b.ex+dx*40,9,b.ez+dz*40],[b.ex+dx*640,9,b.ez+dz*640],b.warn>0?1:4,c,b.warn>0?.3:.7);}
+ for(const tile of (g.collapse||[]).slice(0,4)){if(root.BF_FIELD_ART?.replaces(g,tile,d.quality)||!Number.isFinite(tile.x)||!Number.isFinite(tile.z))continue;pushM();mv(tile.x,6,tile.z);const r=(tile.r||54)*.8;for(const sign of [-1,1]){line([-r,0,sign*r],[0,3,sign*9],2,'#c785ed',.75);line([0,3,sign*9],[r,0,-sign*r],1.5,'#c785ed',.7);}if(tile.open>0)crown(22,8,'#c785ed',true);popM();}
  // Species-shaped shells surround the existing collision core. Never hide a projectile if capped.
  let shots=0;
  for(const pr of g.projectiles||[]){

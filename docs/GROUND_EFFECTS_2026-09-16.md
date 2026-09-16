@@ -1,0 +1,5 @@
+# Ground effects pass — 2026-09-16
+
+Inspected drawCourse and damage checks. Replace spike trap square overlays, block beam cores, collapse squares and damaging trail cubes with native ribbons. Use actual radius, height and beam cone angle (.13 radians); preserve simulation and timing. Select complete effects within a fixed budget so fallback geometry is hidden only for selected effects. Share the existing 300/900 stroke total. Validate finite read-only geometry, bounded selection, browser scenes and pre-change save.
+
+Implemented native steel trap crowns, circular collapse fractures, ground residue and a continuous beam with its actual cone boundaries. Fixed elevated trap tip height in fallback renderer. Native fields reserve at most 80/240 strokes from the existing total; extra fields retain fallback visibility. Verified finite read-only geometry, high/low browser rendering (714/294 triangles in the combined showcase), all eight boss fairness cases, and v1.975 save loading. Screenshot: /3d/art-previews/hostile/ground-effects.jpg. Existing body clips and hazard placement unchanged. Next: body reactions and attack poses.

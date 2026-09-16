@@ -1,4 +1,5 @@
 import * as THREE from './three.module.js';
+import { enemyActionState } from './enemy-action-state.js?v=1974';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js';
 
@@ -116,14 +117,14 @@ function acquireMob(type,e){
     for(const c of src.animations){const a=mixer.clipAction(c);if(['Attack','Hit','Death','Windup'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
-  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0});
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,attack:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null});
   rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
 }
-function play(rec,name){
+function play(rec,name,duration){
   const a=rec.actions[name]||rec.actions.Idle;if(!a)return;
   if(rec.cur===name)return;
   const old=rec.actions[rec.cur];if(old)old.fadeOut(.08);
-  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(.08).play();rec.cur=name;
+  a.reset().setEffectiveTimeScale(duration ? a.getClip().duration/Math.max(.08,duration) : 1).setEffectiveWeight(1).fadeIn(.08).play();rec.cur=name;
 }
 function release(rec){
   _actors.delete(rec.enemy);rec.enemy=null;rec.root.visible=false;rec.mixer.stopAllAction();
@@ -173,18 +174,19 @@ function syncMobsInner(scene,dt){
       m.emissive.set(0xffffff);m.emissiveIntensity=e.hitFlash>0 ? .65 : 0;
     }
     const speed=dt>0?Math.hypot(e.x-rec.x,e.z-rec.z)/dt:0;rec.x=e.x;rec.z=e.z;
-    const wind=Math.max(0,e.windT||0,e.slamW||0,e.cleaveW||0,e.novaW||0,e.poundW||0,e.eruptW||0,e.knightW||0,e.pinT||0,e.blinkFx||0);
-    const shot=(e.shootT||0)>rec.shoot+.15;
-    const contact=e.dmg>0&&w.p&&Math.hypot(e.x-w.p.x,e.z-w.p.z)<(e.r+w.p.r+4)&&Math.abs((e.y||0)-(w.p.y||0))<(e.h||38);
-    rec.contact=Math.max(0,rec.contact-dt);rec.attack=Math.max(0,rec.attack-dt);
-    if((rec.wind>0&&wind<=0)||shot||(contact&&rec.contact<=0)){rec.attack=.42;rec.contact=.65;rec.cur=null;}
-    if((e.hitFlash||0)>rec.hit+.025 && !wind){rec.cur=null;play(rec,'Hit');}
-    else if(wind>0)play(rec,'Windup');
-    else if(rec.attack>0||e.chargeT>0||e.lunge>0||e.diving>0)play(rec,'Attack');
+    const state=enemyActionState(e),wind=state.phase==='Windup'?state.remaining:0;
+    rec.attack=Math.max(0,rec.attack-dt);
+    // A release follows the actual wind-up, never mere proximity or cooldown reset.
+    const released=rec.wind>0&&wind<=0;
+    const started=state.phase==='Attack'&&rec.phase!=='Attack';
+    if(released||started){rec.attack=state.phase==='Attack'?state.remaining:.42;rec.cur=null;}
+    if(state.phase==='Windup'&&(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05))rec.cur=null;
+    if(wind>0)play(rec,'Windup',wind);
+    else if(rec.attack>0||state.phase==='Attack')play(rec,'Attack',state.phase==='Attack'?state.remaining:rec.attack);
+    else if((e.hitFlash||0)>rec.hit+.025){rec.cur=null;play(rec,'Hit');}
     else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');
-    // Pose holds through the entire telegraph; rendering never changes its timer or damage.
-    if(rec.cur==='Windup')rec.actions.Windup.setEffectiveTimeScale(1.7);
-    if(rec.cur==='Move')rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));
+    if(rec.cur==='Move'&&rec.actions.Move)rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));
+    rec.phase=state.phase;rec.phaseKey=state.key;
     rec.mixer.update((e.stunT>0)?0:dt);
     rec.wind=wind;rec.shoot=e.shootT||0;rec.hit=e.hitFlash||0;
     _drawn.add(e);live++;
@@ -204,4 +206,4 @@ export function clearMobs(){
 }
 export function mobDrawn(e){return MOB3D.on&&!!e&&typeof e==='object'&&_drawn.has(e);}
 window.__mob3dDrawn=mobDrawn;
-window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,dead:r.wasDead}))});
+window.__mob3d=()=>({on:MOB3D.on,live:MOB3D.live,corpses:MOB3D.corpses||0,pooled:MOB3D.pooled,models:[..._mobModels.keys()],pending:[..._pending.keys()],missing:MOB3D.missing,err:MOB3D.err,actors:_mobPool.filter(r=>r.enemy).map(r=>({type:r.type,clip:r.cur,phase:r.phase,phaseKey:r.phaseKey,timeScale:r.actions[r.cur]?.getEffectiveTimeScale(),dead:r.wasDead}))});

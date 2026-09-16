@@ -1632,3 +1632,8 @@ Removed the duplicate instant spore death burst and added harmless warning perio
 ## [Codex | 2026-09-15] Player combat art v1.973
 
 Player effect pass: 128 skill profiles, 28 weapon attack archetypes and supported charge releases. Class motifs, native batched ribbons, projectile trails, open defensive wards, and corrected one-shot/repeated clip playback. Existing weapon fits and gameplay values preserved. Browser skill/weapon/refund/expiry/save checks passed; skill-4 phone gallery at /3d/art-previews/combat/. Existing rig clips retained; enemy/boss animation overhaul remains separate.
+
+
+## [Codex | 2026-09-15] Enemy action synchronization v1.974
+
+First enemy animation milestone: native models follow melee/projectile wind-up and active strike timers, replacing proximity/cooldown guesses. One-shot clips fit the action window; stuns pause playback. Existing damage, telegraphs and AI unchanged. Browser pose checks, 17 phase cases and combat fairness regression passed. Bespoke hostile effect compositions remain next.

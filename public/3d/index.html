@@ -1017,7 +1017,8 @@
 <div id="fadeveil"></div>
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
-<script src="./combat-art.js?v=1973"></script>
+<script src="./combat-art.js?v=1975"></script>
+<script src="./hostile-art.js?v=1975"></script>
 <script>
 (function(){
 "use strict";
@@ -1028,7 +1029,7 @@
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='1.974.0-enemy-action-sync';
+const VERSION3D='1.975.0-hostile-effects';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
    Global (skins/achievements/prefs/counters) is SHARED across modes. Each play MODE
@@ -7692,7 +7693,7 @@ function loadStageRaw(i){
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
   G.campaignLayout=null; G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null;   // reset per-area so a vertical scape never leaks into the next area/boss
-  G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
+  G.fx=[]; G.combatArt=[]; G.hostileArt=[]; G.marks=[]; G.slowmo=0; G.interact=null; G.optionalMissions=[];
   document.getElementById('bonustimer').style.display='none';
   G.stageBanner=2.6; document.getElementById('bosshpwrap').classList.remove('on');
   const so=(G.areaSeed||0)*1013;   // same stage, different layout per area (and per zone attempt)
@@ -12195,6 +12196,7 @@ function hurtPlayer(dmg,sx,sz,by){
   if(p.shieldHp>0){ const a=Math.min(p.shieldHp,dmg); p.shieldHp-=a; dmg-=a;   // Barrier soaks it
     burst(p.x,p.y+30,p.z,'#c9a6ff',6); if(p.shieldHp<=0) p.shieldT=0; if(dmg<=0){ p.invuln=0.5; hudUpdate(); return; } }
   dmg=Math.max(1,Math.round(dmg*(1-defenseR(p)))); p.hp-=dmg; p.invuln=0.7; p.hurtFlash=0.3;
+  if(by?.src&&by.attack!=='a ranged attack')window.BF_HOSTILE_ART?.impact(G,{owner:'enemy',src:by.src,x:p.x,y:p.y+p.h*.5,z:p.z});
   /* THICK HIDE is "once per FIGHT", and this file already has a definition of a fight: pal_thick
      above rearms after five seconds without being hit. Stamped HERE, past every early return, so
      only a hit that actually landed keeps a fight alive — a dodge, a brace or an absorbed hit would
@@ -13679,6 +13681,7 @@ function update(dt){
   minionUpdate(dt);                                                                                                        // necromancer summons (no-op when none)
   if(G.fx&&G.fx.length){ for(const f of G.fx) f.t+=dt; G.fx=G.fx.filter(f=>f.t<f.life); }   // loot celebration beams
   window.BF_COMBAT_ART?.tick(G,dt);
+  window.BF_HOSTILE_ART?.tick(G,dt);
   updateMarks(dt);                                                                          // world pings age out on the same clock
   updateInteract();
   const p=G.p,s=STAGES[G.stageIndex]; G.time+=dt;
@@ -14136,20 +14139,20 @@ function update(dt){
         if(pr.pierce>0) pr.pierce--; else pr.life=0; }
     } else {
       const pet=G.pet, hitPet=pet&&!pet.dead&&dXZ(pet.x,pet.z,pr.x,pr.z)<(15+pr.size)&&Math.abs(pr.y-(pet.y+12))<(24+pr.size);
-      if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); pr.life=0; }
-      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01, {name:pr.srcName||'a ranged foe', attack:'a ranged attack', src:pr.src}); pr.life=0; }
+      if(hitPet){ hurtPet(pr.dmg,pr.x-pr.vx*.01,pr.z-pr.vz*.01); window.BF_HOSTILE_ART?.impact(G,pr); pr.life=0; }
+      else if(p.invuln<=0 && p.dodgeTimer<=0 && dXZ(p.x,p.z,pr.x,pr.z)<(p.r+pr.size) && Math.abs(pr.y-(p.y+p.h/2))<(p.h/2+pr.size)){ hurtPlayer(pr.dmg,pr.x-pr.vx*0.01,pr.z-pr.vz*0.01, {name:pr.srcName||'a ranged foe', attack:'a ranged attack', src:pr.src}); window.BF_HOSTILE_ART?.impact(G,pr); pr.life=0; }
     }
     if(pr.y<-4 && !pr.axe) pr.life=0;
     // columns, platforms, walls & closed doors block shots — use them as cover (the hurled axe flies over/through and returns)
     if(pr.life>0 && !pr.axe) for(const ob of G.obstacles){
       if(pr.y<ob.h && Math.abs(pr.x-ob.x)<ob.w/2+pr.size*0.4 && Math.abs(pr.z-ob.z)<ob.d/2+pr.size*0.4){
-        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+        pr.life=0; window.BF_HOSTILE_ART?.impact(G,pr); burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
     if(pr.life>0 && !pr.axe && G.walls) for(const wl of G.walls){
       if(pr.y<wl.h && Math.abs(pr.x-wl.x)<wl.w/2+pr.size*0.4 && Math.abs(pr.z-wl.z)<wl.d/2+pr.size*0.4){
-        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+        pr.life=0; window.BF_HOSTILE_ART?.impact(G,pr); burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
     if(pr.life>0 && !pr.axe && G.doors) for(const dr of G.doors){ if(dr.open) continue;
       if(pr.y<dr.h && Math.abs(pr.x-dr.x)<dr.w/2+pr.size*0.4 && Math.abs(pr.z-dr.z)<dr.d/2+pr.size*0.4){
-        pr.life=0; burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
+        pr.life=0; window.BF_HOSTILE_ART?.impact(G,pr); burst(pr.x,pr.y,pr.z,pr.color,3); break; } }
   }
   G.projectiles=G.projectiles.filter(pr=>pr.life>0);
   if(p.throwHideT>0){
@@ -14321,7 +14324,7 @@ function releaseEnemyShot(e,p){
 function specBehavior(e,dt,p,dirX,dirZ,d){
   // ERUPTION TOTEM (Emberdeep): stationary vent, periodic fire ring — kill it first
   if(e.spec==='totem'){ e.shootT=(e.shootT==null?1.8:e.shootT)-dt;
-    if(e.eruptW>0){ e.eruptW-=dt; if(e.eruptW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:16,maxR:210,dmg:e.dmg2||12,life:0,spd:250,col:'#ff8a3a',col2:'#c0331a'}); playFx('firewhoosh'); e.shootT=2.6; } }
+    if(e.eruptW>0){ e.eruptW-=dt; if(e.eruptW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:16,maxR:210,dmg:e.dmg2||12,life:0,spd:250,col:'#ff8a3a',col2:'#c0331a'}); playFx('firewhoosh'); e.shootT=2.6; } }
     else if(e.shootT<=0 && d<560){ e.eruptW=0.7; addText(e.x,e.y+e.h+8,e.z,'!','#ff8a3a',true); } }
   // MAGMA-TRAIL SKITTER (Emberdeep): its path burns briefly
   else if(e.spec==='trail'){ e.trailT=(e.trailT||0)-dt;
@@ -14362,7 +14365,7 @@ function specBehavior(e,dt,p,dirX,dirZ,d){
       if(e.auraT<=0){ e.auraT=0.5; burst(e.x+(Math.random()-0.5)*40,e.y+12,e.z+(Math.random()-0.5)*40,'#bfe8ff',3); } } }
 
   else if(e.spec==='knightslam'){ e.slamCd=(e.slamCd==null?2.0:e.slamCd)-dt;
-    if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
+    if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
     else if(e.slamCd<=0 && d<120){ e.knightW=0.6; addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true); } }
 }
 function beamBlocked(e,p){ for(const o of G.obstacles){ if(o.h<40) continue;   // a pillar tall enough to hide behind
@@ -14382,8 +14385,8 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
     if(e.pinT>0){
       e.pinT-=dt;
       if(e.pinT<=0 && e.pinX!=null){
-        (G.shockwaves=G.shockwaves||[]).push({x:e.pinX,z:e.pinZ,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
-        for(const q of (e._pin2||[])) (G.shockwaves=G.shockwaves||[]).push({x:q.x,z:q.z,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
+        (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.pinX,z:e.pinZ,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
+        for(const q of (e._pin2||[])) (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:q.x,z:q.z,r:12,maxR:150,dmg:e.dmg*1.5,life:0,spd:900,col:'#ffd9a0',col2:'#8a5a20'});
         e._pin2=null;
         SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,12);
       }
@@ -14449,7 +14452,7 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
       for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
         (G.trails=G.trails||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:150, life:0.7, max:0.7, dmg:0, hit:0, col:'#ffb060'}); }
       for(let i=0;i<4;i++){ const off=-0.7*span+i*(1.4*span/3);
-        (G.shockwaves=G.shockwaves||[]).push({x:axis?hx+off:hx, z:axis?hz:hz+off, r:14,maxR:180,dmg:e.dmg*1.15,life:0,spd:230,delay:0.7+i*0.18,warnMax:0.7+i*0.18,col:'#ffb060',col2:'#c05a1e'}); }
+        (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:axis?hx+off:hx, z:axis?hz:hz+off, r:14,maxR:180,dmg:e.dmg*1.15,life:0,spd:230,delay:0.7+i*0.18,warnMax:0.7+i*0.18,col:'#ffb060',col2:'#c05a1e'}); }
       }
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'QUAKE!','#ffb060',true); }
   }
@@ -14533,7 +14536,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     }
   }
   if(e.type==='brute'){                                    // ground-slam shockwave (non-projectile — jump the ring to avoid it)
-    if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
+    if(e.slamW>0){ e.slamW-=dt; if(e.slamW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:22,maxR:230,dmg:e.dmg*1.25,life:0});
       /* Phase 2: the floor stays broken. Each slam leaves standing rubble, so the arena you kite
          around shrinks as the fight runs and your space becomes something you spend. */
       if(e._rubble){ for(let q=0;q<3;q++){ const a=Math.random()*6.283, rr=70+Math.random()*120;
@@ -14545,21 +14548,21 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   }
   if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
     if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){ const dl=Math.hypot(dirX,dirZ)||1;
-      (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.4,life:0,spd:340,arc:0.95,dirX:e.cleaveX,dirZ:e.cleaveZ,col:'#e2e8f0',col2:'#95a2b4'});
+      (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.4,life:0,spd:340,arc:0.95,dirX:e.cleaveX,dirZ:e.cleaveZ,col:'#e2e8f0',col2:'#95a2b4'});
       G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
       for(let i=0;i<12;i++){ const a=Math.atan2(dirZ,dirX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
     else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
       if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.75;e.cleaveX=dirX;e.cleaveZ=dirZ; e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
-    if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
+    if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'FROST NOVA!','#7fd6ff',true);
       for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*20,y:6,z:e.z+Math.sin(a)*20,vx:Math.cos(a)*120,vy:40,vz:Math.sin(a)*120,life:0.5,color:'#bff0ff',sz:3}); } } }
     else { if(e.novaCd==null) e.novaCd=5; e.novaCd-=dt;
       if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=(6+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+2,7); } }
   }
   if(e.type==='colossus'){                                 // seismic pound — a shockwave ring you jump (arena mechanic)
-    if(e.poundW>0){ e.poundW-=dt; if(e.poundW<=0){ (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.2,life:0,spd:300,col:'#ffb060',col2:'#c05a1e'});
+    if(e.poundW>0){ e.poundW-=dt; if(e.poundW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.2,life:0,spd:300,col:'#ffb060',col2:'#c05a1e'});
       G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SEISMIC POUND!','#ffb060',true);
       for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*22,y:2,z:e.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:60,vz:Math.sin(a)*130,life:0.45,color:'#ffb060',sz:3}); } } }
     else { if(e.poundCd==null) e.poundCd=3.5; e.poundCd-=dt;
@@ -14588,7 +14591,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   // PHASE 3 — the final stand: at 25% it enrages again, specials on a hair-trigger, a burst nova (never mid-shield)
   if(e.hp/e.maxHp<0.25 && e.phase<3 && !e.shielded){ e.phase=3; e.speed*=1.14; e.dmg*=1.12;
     for(const k of ['slamCd','cleaveCd','novaCd','poundCd','quakeCd','beamCd','tpCd','tileCd','summonT']) if(e[k]!=null) e[k]=Math.min(e[k],0.8);
-    (G.shockwaves=G.shockwaves||[]).push({x:e.x,z:e.z,y:e.y,r:20,maxR:340,dmg:e.dmg*1.15,life:0,spd:320,col:'#ff5a3a',col2:'#c33'});
+    (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:20,maxR:340,dmg:e.dmg*1.15,life:0,spd:320,col:'#ff5a3a',col2:'#c33'});
     G.shake=Math.min(G.shake+14,18); SFX.boss(); addText(e.x,e.h+24,e.z,'FINAL STAND!','#ff5a3a',true);
     if(G&&!G.trial) storyToast('Now it fights with nothing held back.'); }
   if(e.home){ // bosses never leave their arena (and never fall in the lava)
@@ -14892,7 +14895,7 @@ function loadBossRushArena(idx){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.hostileArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   const bt=document.getElementById('bonustimer'); if(bt) bt.style.display='none';
   const R=470;
   G.segments.push({x:0,z:0,w:R*2,d:R*2});
@@ -15166,7 +15169,7 @@ function loadEndlessArena(n){
   G.segments=[]; G.obstacles=[]; G.movers=[]; G.pads=[]; G.healpads=[]; G.chests=[]; G.deco=[];
   G.crumbles=[]; G.geysers=[]; G.springs=[]; G.bonusPortal=null; G.bonusActive=false; G.shockwaves=[]; G.trails=[]; G.spikefields=[]; G.beam=null; G.collapse=[];
   G.canyonWind=null; G.rooms=[]; G.walls=[]; G.doors=[]; G.plates=[]; G.keys=[]; G.torches=[]; G.hasKey=false; G.waystone=null; G.qmarks=[]; G.dens=[]; G.npc=null;
-  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
+  G.secret=null; G.secretTrigger=null; G.vertical=false; G.terraces=null; G.climbs=null; G.fx=[]; G.combatArt=[]; G.hostileArt=[]; G.marks=[]; G.slowmo=0; G.interact=null;
   document.getElementById('bonustimer').style.display='none';
   document.getElementById('bosshpwrap').classList.remove('on');
   // ---- a boxed arena: one broad platform ringed by walls, themed torches + deco ----
@@ -17708,6 +17711,7 @@ function drawCourse(s,t){
   // boss slam shockwave — expanding warning ring on the ground (jump it to avoid)
   if(G.shockwaves) for(const sw of G.shockwaves){ const a=Math.max(0,1-sw.r/sw.maxR), c1=sw.col||'#ff8a4a', c2=sw.col2||'#ff5a1e';
     if(sw.delay>0){dangerRing(sw.x,sw.y||0,sw.z,sw.maxR,c1,.65);continue;}
+    if(three3DLive()&&window.BF_COMBAT_ART?.threeReady&&window.BF_HOSTILE_ART?.replacesWave(G,sw,meta.quality))continue;
     const base=sw.arc?Math.atan2(sw.dirZ,sw.dirX):0, span=sw.arc?sw.arc*2:6.283, N=sw.arc?Math.max(6,Math.round(20*sw.arc/3.14159)):20;
     for(let i=0;i<=N;i++){ const an=base-span/2+span*i/N; bx(sw.x+Math.cos(an)*sw.r, (sw.y||0)+4, sw.z+Math.sin(an)*sw.r, 13,9,13, c1,c2, 0.65*a); } }
   // Telegraphs and active residue share the same radius and storey as their damage.
@@ -20869,7 +20873,7 @@ window.__BF3={ resize,update,input,startRun,beginRun,continueRun,loadStage:i=>lo
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=1974"></script>
+<script type="module" src="./hero3d.js?v=1975"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be
      able to stop a level from applying them. Loaded last, and inert until F2. -->

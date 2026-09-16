@@ -1,0 +1,81 @@
+[
+  {
+    "name": "Brute",
+    "cues": {
+      "windT": 0.85,
+      "slamW": 0.7
+    },
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "Marksman",
+    "cues": {
+      "shotW": 0.7,
+      "pinT": 0.85
+    },
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "The Fallen",
+    "cues": {
+      "windT": 0.85,
+      "cleaveW": 0.75
+    },
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "Frost Sorcerer",
+    "cues": {
+      "shotW": 0.7,
+      "novaW": 0.7
+    },
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "Ember Colossus",
+    "cues": {
+      "windT": 0.85,
+      "shotW": 0.7,
+      "poundW": 0.7
+    },
+    "delayedWaves": [
+      0.28333333333333277,
+      0.4633333333333321,
+      0.6433333333333324,
+      0.8233333333333336
+    ],
+    "hp": 100
+  },
+  {
+    "name": "Abyss King",
+    "cues": {
+      "windT": 0.85
+    },
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "Marble Colossus",
+    "cues": {
+      "windT": 0.85,
+      "shotW": 0.7,
+      "poundW": 0.7
+    },
+    "beam": 0.3833333333333325,
+    "delayedWaves": [],
+    "hp": 100
+  },
+  {
+    "name": "Awakened King",
+    "cues": {
+      "windT": 0.85,
+      "shotW": 0.7
+    },
+    "delayedWaves": [],
+    "hp": 100
+  }
+]

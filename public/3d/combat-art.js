@@ -45,7 +45,7 @@ function weapon(g,p,cls,charged){
 function tick(g,dt){if(g.p?.combatPose)g.p.combatPose.remaining=Math.max(0,g.p.combatPose.remaining-dt);if(g.combatArt)g.combatArt=g.combatArt.filter(e=>(e.t+=dt)<e.life);}
 function render(g,d){
  const {pushM,popM,mv,rotY,rotX,box}=d;
- let budget=d.quality==='low'?300:900;
+ let budget=d.strokeBudget??(d.quality==='low'?300:900);
  function line(a,b,width,col,alpha){
   if(--budget<0)return;
   if(d.ribbon){d.ribbon(a,b,width,col,alpha);return;}

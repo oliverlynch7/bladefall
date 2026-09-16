@@ -1637,3 +1637,8 @@ Player effect pass: 128 skill profiles, 28 weapon attack archetypes and supporte
 ## [Codex | 2026-09-15] Enemy action synchronization v1.974
 
 First enemy animation milestone: native models follow melee/projectile wind-up and active strike timers, replacing proximity/cooldown guesses. One-shot clips fit the action window; stuns pause playback. Existing damage, telegraphs and AI unchanged. Browser pose checks, 17 phase cases and combat fairness regression passed. Bespoke hostile effect compositions remain next.
+
+
+## [Codex | 2026-09-15] v1.975.0-hostile-effects
+
+Shipped eight boss effect directions and elemental enemy projectile/impact accents. Native shockwave fronts track actual radius and committed direction; all existing preparation timing remains intact. Shared ribbon limits remain 1,800/5,400 triangles (low/high), one draw. Collision, expiry, budget, boss fairness and previous-version save checks passed. Phone previews: /3d/art-previews/hostile/. Next: persistent ground fields and traps, followed by body reactions and attack poses.

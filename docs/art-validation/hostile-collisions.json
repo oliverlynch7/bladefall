@@ -1,0 +1,33 @@
+{
+  "checks": {
+    "player": {
+      "before": 100,
+      "after": 92,
+      "style": "frost"
+    },
+    "cover": true,
+    "expiry": true,
+    "cap": 12
+  },
+  "budgets": [
+    {
+      "quality": "low",
+      "vertices": 5400,
+      "triangles": 1800,
+      "drawCalls": 1,
+      "events": 18,
+      "hostileStrokes": 72,
+      "hostileEvents": 12
+    },
+    {
+      "quality": "high",
+      "vertices": 16200,
+      "triangles": 5400,
+      "drawCalls": 1,
+      "events": 18,
+      "hostileStrokes": 168,
+      "hostileEvents": 12
+    }
+  ],
+  "world": null
+}

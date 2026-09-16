@@ -29,9 +29,13 @@ export function syncCombatArt(scene,camera){
  if(!api||!g){mesh.visible=false;return;}
  if(mesh.parent!==scene)scene.add(mesh);
  api.threeReady=true;n=0;m.identity();stack.length=0;level=0;eye.setFromMatrixPosition(camera.matrixWorld);draw.classId=window.__BF3.meta.classId;draw.quality=window.__BF3.meta.quality;
+ draw.theme=window.__BF_WORLD?.().theme;
+ const totalBudget=draw.quality==='low'?300:900;
+ const hostileStrokes=window.BF_HOSTILE_ART?.render(g,draw)||0;
+ draw.strokeBudget=Math.max(0,totalBudget-hostileStrokes);
  api.render(g,draw);
  geometry.setDrawRange(0,n);
  if(n){for(const key of ["position","tint"]){const attribute=geometry.attributes[key];attribute.clearUpdateRanges();attribute.addUpdateRange(0,n*attribute.itemSize);attribute.needsUpdate=true;}}
  mesh.visible=n>0;
- window.__combatArtStats={vertices:n,triangles:n/3,drawCalls:n?1:0,events:g.combatArt?.length||0};
+ window.__combatArtStats={vertices:n,triangles:n/3,drawCalls:n?1:0,events:g.combatArt?.length||0,hostileStrokes,hostileEvents:g.hostileArt?.length||0};
 }

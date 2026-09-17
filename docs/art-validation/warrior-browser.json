@@ -1,0 +1,121 @@
+{
+  "initial": {
+    "ready": true,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Guard",
+      "Slash"
+    ],
+    "bones": 20,
+    "slots": {
+      "helmet": true,
+      "head": false,
+      "hair": false,
+      "cape": true,
+      "shield": true,
+      "sword": true,
+      "shoulders_heavy": true,
+      "shoulders_light": false
+    },
+    "materials": [
+      {
+        "name": "Leather",
+        "color": "3f342c"
+      },
+      {
+        "name": "Skin",
+        "color": "bd8c70"
+      },
+      {
+        "name": "Armor",
+        "color": "52687b"
+      },
+      {
+        "name": "Trim",
+        "color": "bd9454"
+      },
+      {
+        "name": "Cloth",
+        "color": "28767b"
+      },
+      {
+        "name": "Steel",
+        "color": "bccdd7"
+      },
+      {
+        "name": "Hair",
+        "color": "422d22"
+      },
+      {
+        "name": "Eyes",
+        "color": "73e1dd"
+      }
+    ],
+    "finite": true,
+    "triangles": 768,
+    "drawCalls": 2,
+    "frames": 3
+  },
+  "custom": {
+    "ready": true,
+    "clips": [
+      "Idle",
+      "Walk",
+      "Guard",
+      "Slash"
+    ],
+    "bones": 20,
+    "slots": {
+      "helmet": false,
+      "head": true,
+      "hair": true,
+      "cape": false,
+      "shield": false,
+      "sword": true,
+      "shoulders_heavy": false,
+      "shoulders_light": true
+    },
+    "materials": [
+      {
+        "name": "Leather",
+        "color": "3f342c"
+      },
+      {
+        "name": "Skin",
+        "color": "98634f"
+      },
+      {
+        "name": "Armor",
+        "color": "c0c9c5"
+      },
+      {
+        "name": "Trim",
+        "color": "b59450"
+      },
+      {
+        "name": "Cloth",
+        "color": "304c6f"
+      },
+      {
+        "name": "Steel",
+        "color": "bccdd7"
+      },
+      {
+        "name": "Hair",
+        "color": "422d22"
+      },
+      {
+        "name": "Eyes",
+        "color": "73e1dd"
+      }
+    ],
+    "finite": true,
+    "triangles": 3590,
+    "drawCalls": 19,
+    "frames": 11
+  },
+  "clips": 5,
+  "mobileOverflow": false,
+  "errors": []
+}

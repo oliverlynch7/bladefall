@@ -1667,3 +1667,8 @@ Immediate red death flash and full-duration corpse fade, also visible in animati
 ## [Codex | 2026-09-17] v1.980.0-weapon-choreography
 
 Marksman bow draw now uses bow/nock attachments and a deforming string. Brute and Fallen have separate weapon orientation with supporting hands constrained to handles during strike poses. Clips are baked once per source and shared with animation QA. Contact/alignment, rig deformation, roster browser, live asset routes and previous-save checks pass. Next: QA and remaining enemy-specific choreography.
+
+
+## [Codex | 2026-09-17] Preview-only modular warrior study
+
+Added /3d/warrior-preview.html to autopilot-merged only. Original Blender-built Wayfarer Knight: modular helmet/shoulders/cape/shield/sword, palette editing, 20-bone rig and four clips. 3,810 triangles with all variants; approximately 550 KB GLB. Desktop/mobile customization and sampled skin deformation verified. Downloadable Blender source. Production main and all gameplay avatars remain unchanged. Next: user art-direction comparison against existing avatars before any integration.

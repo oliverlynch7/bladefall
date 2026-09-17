@@ -1,0 +1,15 @@
+{
+  "clips": [
+    "Idle",
+    "Walk",
+    "Guard",
+    "Slash"
+  ],
+  "meshPrimitives": 25,
+  "bones": 20,
+  "checks": [
+    "normalized weights",
+    "five poses per clip",
+    "finite bounded deformed vertices"
+  ]
+}

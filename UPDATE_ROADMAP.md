@@ -1657,3 +1657,8 @@ Added five enemy body-motion families for wind-up, strike/recovery and hit react
 ## [Codex | 2026-09-16] v1.978.0-death-particles
 
 Immediate red death flash and full-duration corpse fade, also visible in animation QA. Particles Off now gates ambient motes, loot bursts and native cosmetic projectile/impact accents. Essential attacks and danger warnings stay visible. Live death progression, cosmetic on/off and pre-change save checks passed.
+
+
+## [Codex | 2026-09-16] v1.979.0-articulated-rigs
+
+22 humanoid enemies now have elbow/knee joints, segmented limbs and forearm-bound equipment. 14 bones and +160 triangles per appearance. Added knee lift during movement and joint bends for attack phases, plus boss posture adjustments. Original assets remain available in animation QA via rig selector. Weights, sampled deformation, browser roster, gameplay phase and pre-change save tests pass. Death cues preserved. Next: user QA and attack choreography refinement.

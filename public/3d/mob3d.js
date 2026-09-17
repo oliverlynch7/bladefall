@@ -1,6 +1,6 @@
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips } from './enemy-motion.js?v=1977';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=1979';
 import { enemyActionState } from './enemy-action-state.js?v=1974';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js';
@@ -8,7 +8,7 @@ import { loadModelAnyExt } from './loadmodel.js';
 // Original Blender roster: one vertex-colored skinned mesh and ten bones per appearance.
 // The renderer mirrors gameplay objects and never changes combat state. Props still use
 // the shared kit loader below; unknown enemies retain the legacy rendering fallback.
-const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+type}]));
+const MOB_CAST = Object.fromEntries(["grunt", "flyer", "emberling", "frostling", "toxling", "shadeling", "sparkling", "goblin", "bones", "slime", "slimelet", "caster", "charger", "mimic", "dustjackal", "cragspitter", "galewisp", "thornboar", "sporeback", "sentinel", "revenant", "dummy", "bosscrystal", "frostshell", "frostlobber", "magmaskit", "embertotem", "blinkstalker", "voidtether", "sunpriest", "marblestatue", "siegeknight", "royalarcanist", "brute", "warden", "archer", "sorcerer", "colossus", "king", "tyrant", "marblecolossus"].map(type => [type, {file:'enemy-assets/'+(articulatedTypes.has(type)?'articulated/':'')+type}]));
 const ASSETS_DIR = '../slice3d/assets/';
 const MOBS_DIR = ASSETS_DIR + 'monsters/';
 const _mobModels = new Map();
